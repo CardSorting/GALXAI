@@ -136,7 +136,7 @@ export class GalxCredentialPool {
    * Atomically acquires an exclusive execution lease on the optimal shard account
    * using adaptive hydraulic headroom cycling with 2-Phase Token Reservation.
    */
-  acquireLease(req: ShardAcquisitionRequest, nowMs = Date.now()): ShardAcquisitionResult {
+  acquireLease(req: ShardAcquisitionRequest, nowMs = req.nowMs || Date.now()): ShardAcquisitionResult {
     // 1. Scavenge expired leases
     this.scavengeExpiredLeases(nowMs);
 

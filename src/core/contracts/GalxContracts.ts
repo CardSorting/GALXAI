@@ -107,6 +107,7 @@ export interface ShardAcquisitionRequest {
   readonly leaseTtlMs?: number;
   readonly maxInFlightPerShard?: number;
   readonly targetModel?: string;
+  readonly nowMs?: number;
 }
 
 export interface ShardAcquisitionResult {
