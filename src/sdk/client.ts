@@ -329,6 +329,10 @@ import { TokenOptimizer } from './tokens';
 /**
  * Official GALXAI Universal Developer SDK Client.
  */
+import { PrivacyResource, PrivacyProfiles } from './resources/privacy';
+import { ComplianceResource } from './resources/compliance';
+import { DatabaseResource } from './resources/database';
+
 export class GalxAI {
   readonly chat: ChatResource;
   readonly images: ImagesResource;
@@ -336,6 +340,9 @@ export class GalxAI {
   readonly queues: QueuesResource;
   readonly workflows: WorkflowsResource;
   readonly webhooks: WebhooksResource;
+  readonly privacy: PrivacyResource;
+  readonly compliance: ComplianceResource;
+  readonly db: DatabaseResource;
   readonly adapters: StreamAdapters;
   readonly batch: BatchEvaluator;
   readonly multimodal: typeof MultiModalHelper;
@@ -351,6 +358,9 @@ export class GalxAI {
     this.queues = new QueuesResource(this.core);
     this.workflows = new WorkflowsResource(this.core);
     this.webhooks = new WebhooksResource();
+    this.privacy = new PrivacyResource();
+    this.compliance = new ComplianceResource();
+    this.db = new DatabaseResource();
     this.adapters = new StreamAdapters();
     this.batch = new BatchEvaluator();
     this.multimodal = MultiModalHelper;

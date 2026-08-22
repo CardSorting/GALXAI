@@ -1,6 +1,10 @@
 import type { ProviderType } from '../contracts/GalxContracts';
+import { BroccoliDbTable } from '../broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../broccolidb/broccolidb-natural-query';
+import type { DbQueryOptions, DbAggregateQuery, DbAggregateResult } from '../broccolidb/broccolidb.contracts';
 
 export interface MetricSample {
+  readonly id?: string;
   readonly timestampMs: number;
   readonly latencyMs: number;
   readonly tokensConsumed: number;
@@ -42,13 +46,14 @@ export interface AggregatedMetrics {
 }
 
 /**
- * Enterprise In-Memory Telemetry & Latency Histogram Engine.
- * Implements a high-throughput circular ring buffer for real-time percentile calculus (P50, P90, P99).
+ * Enterprise In-Memory Telemetry & Latency Histogram Engine + BroccoliDB Hot Table.
+ * Implements a high-throughput circular ring buffer + reactive BroccoliDbTable for real-time percentile calculus & natural querying.
  */
 export class GalxMetricsEngine {
   private static instance: GalxMetricsEngine;
   private readonly bufferSize: number;
   private readonly buffer: MetricSample[];
+  public readonly metricsTable: BroccoliDbTable<MetricSample>;
   private head = 0;
   private count = 0;
 
@@ -60,6 +65,13 @@ export class GalxMetricsEngine {
   constructor(bufferSize = 2000) {
     this.bufferSize = bufferSize;
     this.buffer = new Array<MetricSample>(bufferSize);
+    this.metricsTable = new BroccoliDbTable<MetricSample>('metrics_stream');
+    this.metricsTable.createIndex('provider');
+    this.metricsTable.createIndex('model');
+    this.metricsTable.createIndex('statusCode');
+    this.metricsTable.createIndex('success');
+    this.metricsTable.createSortedIndex('timestampMs');
+    this.metricsTable.createSortedIndex('latencyMs');
   }
 
   static getInstance(): GalxMetricsEngine {
@@ -70,20 +82,40 @@ export class GalxMetricsEngine {
   }
 
   /**
-   * Records a request sample into the circular ring buffer.
+   * Records a request sample into the circular ring buffer and reactive BroccoliDB table.
    */
   recordSample(sample: MetricSample): void {
-    this.buffer[this.head] = sample;
+    const id = sample.id || `met_${sample.timestampMs}_${Math.random().toString(36).substring(2, 6)}`;
+    const fullSample = { ...sample, id };
+
+    this.buffer[this.head] = fullSample;
     this.head = (this.head + 1) % this.bufferSize;
     if (this.count < this.bufferSize) {
       this.count++;
     }
+
+    this.metricsTable.put(id, fullSample);
 
     this.lifetimeRequests++;
     this.lifetimeTokens += sample.tokensConsumed;
     if (!sample.success) {
       this.lifetimeErrors++;
     }
+  }
+
+  /**
+   * Executes deterministic offline natural language queries over metrics (<0.1ms).
+   */
+  queryNatural(naturalQuery: string): MetricSample[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'metrics_stream');
+    return this.metricsTable.query(parsed.queryOptions) as MetricSample[];
+  }
+
+  /**
+   * Calculates fast statistical aggregations directly using BroccoliDB accumulator engine.
+   */
+  aggregate(query: DbAggregateQuery): DbAggregateResult {
+    return this.metricsTable.aggregate(query);
   }
 
   /**

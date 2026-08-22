@@ -1,10 +1,14 @@
 /**
- * GALXAI: Supabase Workspace & Multi-Tenancy Repository
+ * GALXAI: Supabase Workspace & Multi-Tenancy Repository + BroccoliDB Hot Tables
  * Governs workspace creation, spend caps, tiers, and member RBAC roles.
+ * Backed by BroccoliDB L1 reactive tables with secondary indexing and natural query AST parsing.
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
 import type { Database, GalxWorkspaceRole } from '../types';
+import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-natural-query';
+import type { DbQueryOptions, DbAggregateQuery, DbAggregateResult } from '../../../core/broccolidb/broccolidb.contracts';
 
 export interface WorkspaceRecord {
   id: string;
@@ -30,8 +34,22 @@ export interface WorkspaceMemberRecord {
 
 export class WorkspaceRepository {
   private static instance: WorkspaceRepository;
-  private readonly inMemoryWorkspaces = new Map<string, WorkspaceRecord>();
-  private readonly inMemoryMembers = new Map<string, WorkspaceMemberRecord[]>();
+  public readonly workspaceTable: BroccoliDbTable<WorkspaceRecord>;
+  public readonly memberTable: BroccoliDbTable<WorkspaceMemberRecord>;
+
+  private constructor() {
+    this.workspaceTable = new BroccoliDbTable<WorkspaceRecord>('workspaces');
+    this.workspaceTable.createIndex('slug');
+    this.workspaceTable.createIndex('tier');
+    this.workspaceTable.createIndex('isActive');
+    this.workspaceTable.createSortedIndex('monthlySpendCapUsd');
+    this.workspaceTable.createSortedIndex('currentMonthSpendUsd');
+
+    this.memberTable = new BroccoliDbTable<WorkspaceMemberRecord>('workspace_members');
+    this.memberTable.createIndex('workspaceId');
+    this.memberTable.createIndex('userId');
+    this.memberTable.createIndex('role');
+  }
 
   static getInstance(): WorkspaceRepository {
     if (!WorkspaceRepository.instance) {
@@ -52,7 +70,7 @@ export class WorkspaceRepository {
 
         if (!error && data) {
           const mapped = this.mapWorkspaceRow(data);
-          this.inMemoryWorkspaces.set(mapped.id, mapped);
+          this.workspaceTable.put(mapped.id, mapped);
           return mapped;
         }
       } catch {
@@ -60,7 +78,7 @@ export class WorkspaceRepository {
       }
     }
 
-    return this.inMemoryWorkspaces.get(id) || null;
+    return this.workspaceTable.get(id) || null;
   }
 
   async getWorkspaceBySlug(slug: string): Promise<WorkspaceRecord | null> {
@@ -75,7 +93,7 @@ export class WorkspaceRepository {
 
         if (!error && data) {
           const mapped = this.mapWorkspaceRow(data);
-          this.inMemoryWorkspaces.set(mapped.id, mapped);
+          this.workspaceTable.put(mapped.id, mapped);
           return mapped;
         }
       } catch {
@@ -83,10 +101,11 @@ export class WorkspaceRepository {
       }
     }
 
-    for (const ws of this.inMemoryWorkspaces.values()) {
-      if (ws.slug === slug) return ws;
-    }
-    return null;
+    const matches = this.workspaceTable.query({
+      where: { slug: { $eq: slug } }
+    }) as WorkspaceRecord[];
+
+    return matches[0] || null;
   }
 
   async createWorkspace(params: {
@@ -110,7 +129,7 @@ export class WorkspaceRepository {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    this.inMemoryWorkspaces.set(wsId, wsRecord);
+    this.workspaceTable.put(wsId, wsRecord);
 
     const member: WorkspaceMemberRecord = {
       id: `mem_${Date.now()}`,
@@ -120,7 +139,7 @@ export class WorkspaceRepository {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    this.inMemoryMembers.set(wsId, [member]);
+    this.memberTable.put(member.id, member);
 
     if (isSupabaseConfigured()) {
       try {
@@ -144,7 +163,7 @@ export class WorkspaceRepository {
             role: 'owner'
           });
           const mapped = this.mapWorkspaceRow(wsData);
-          this.inMemoryWorkspaces.set(mapped.id, mapped);
+          this.workspaceTable.put(mapped.id, mapped);
           return mapped;
         }
       } catch {
@@ -156,10 +175,13 @@ export class WorkspaceRepository {
   }
 
   async updateSpendCap(workspaceId: string, monthlySpendCapUsd: number): Promise<void> {
-    const ws = this.inMemoryWorkspaces.get(workspaceId);
+    const ws = this.workspaceTable.get(workspaceId);
     if (ws) {
-      ws.monthlySpendCapUsd = monthlySpendCapUsd;
-      ws.updatedAt = new Date().toISOString();
+      this.workspaceTable.put(workspaceId, {
+        ...ws,
+        monthlySpendCapUsd,
+        updatedAt: new Date().toISOString()
+      });
     }
 
     if (isSupabaseConfigured()) {
@@ -185,7 +207,7 @@ export class WorkspaceRepository {
           .eq('workspace_id', workspaceId);
 
         if (!error && data && data.length > 0) {
-          return data.map(d => ({
+          const members: WorkspaceMemberRecord[] = data.map(d => ({
             id: d.id,
             workspaceId: d.workspace_id,
             userId: d.user_id,
@@ -193,13 +215,26 @@ export class WorkspaceRepository {
             createdAt: d.created_at,
             updatedAt: d.updated_at
           }));
+          for (const m of members) this.memberTable.put(m.id, m);
+          return members;
         }
       } catch {
         // Fallback
       }
     }
 
-    return this.inMemoryMembers.get(workspaceId) || [];
+    return this.memberTable.query({
+      where: { workspaceId: { $eq: workspaceId } }
+    }) as WorkspaceMemberRecord[];
+  }
+
+  public queryNatural(naturalQuery: string): WorkspaceRecord[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'workspaces');
+    return this.workspaceTable.query(parsed.queryOptions) as WorkspaceRecord[];
+  }
+
+  public aggregate(query: DbAggregateQuery): DbAggregateResult {
+    return this.workspaceTable.aggregate(query);
   }
 
   private mapWorkspaceRow(data: Database['public']['Tables']['galx_workspaces']['Row']): WorkspaceRecord {

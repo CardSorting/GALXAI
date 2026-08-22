@@ -1,7 +1,8 @@
 /**
- * GALXAI: Supabase Task & DAG Workflow Repository
+ * GALXAI: Supabase Task & DAG Workflow Repository + BroccoliDB Hot Tables
  * Atomic worker task leasing with FOR UPDATE SKIP LOCKED, DAG fan-in dependency aggregation,
  * strict FIFO group locks, and execution history.
+ * Backed by BroccoliDB L1 reactive tables with secondary indexing, natural query AST translation, and aggregation.
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
@@ -15,11 +16,32 @@ import type {
   CronScheduleConfig,
   TaskPipelineStep
 } from '../../../core/contracts/GalxContracts';
+import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-natural-query';
+import type { DbQueryOptions, DbAggregateQuery, DbAggregateResult } from '../../../core/broccolidb/broccolidb.contracts';
 
 export class TaskRepository {
   private static instance: TaskRepository;
-  private readonly inMemoryTasks = new Map<string, GalxTask>();
-  private readonly inMemoryAttempts = new Map<string, TaskAttemptRecord[]>();
+  public readonly taskTable: BroccoliDbTable<GalxTask>;
+  public readonly attemptTable: BroccoliDbTable<TaskAttemptRecord & { id: string; taskId: string }>;
+
+  private constructor() {
+    this.taskTable = new BroccoliDbTable<GalxTask>('tasks');
+    this.taskTable.createIndex('queueId');
+    this.taskTable.createIndex('status');
+    this.taskTable.createIndex('userId');
+    this.taskTable.createIndex('idempotencyKey');
+    this.taskTable.createIndex('groupId');
+    this.taskTable.createIndex('activeWorkerId');
+    this.taskTable.createSortedIndex('priority');
+    this.taskTable.createSortedIndex('scheduleTimeMs');
+    this.taskTable.createSortedIndex('createdAtMs');
+
+    this.attemptTable = new BroccoliDbTable<TaskAttemptRecord & { id: string; taskId: string }>('task_attempts');
+    this.attemptTable.createIndex('taskId');
+    this.attemptTable.createIndex('workerId');
+    this.attemptTable.createSortedIndex('startedAtMs');
+  }
 
   static getInstance(): TaskRepository {
     if (!TaskRepository.instance) {
@@ -49,7 +71,7 @@ export class TaskRepository {
         const { data, error } = await query;
         if (!error && data && data.length > 0) {
           const mapped = data.map(this.mapRowToTask);
-          for (const t of mapped) this.inMemoryTasks.set(t.id, t);
+          for (const t of mapped) this.taskTable.put(t.id, t);
           return mapped;
         }
       } catch {
@@ -57,13 +79,18 @@ export class TaskRepository {
       }
     }
 
-    let all = Array.from(this.inMemoryTasks.values());
-    if (params?.queueId) all = all.filter(t => t.queueId === params.queueId);
-    if (params?.status) all = all.filter(t => t.status === params.status);
-    if (params?.userId) all = all.filter(t => t.userId === params.userId);
-    if (params?.offset) all = all.slice(params.offset);
-    if (params?.limit) all = all.slice(0, params.limit);
-    return all;
+    const whereClause: Record<string, any> = {};
+    if (params?.queueId) whereClause.queueId = { $eq: params.queueId };
+    if (params?.status) whereClause.status = { $eq: params.status };
+    if (params?.userId) whereClause.userId = { $eq: params.userId };
+
+    return this.taskTable.query({
+      where: Object.keys(whereClause).length > 0 ? whereClause : undefined,
+      sortBy: 'createdAtMs',
+      sortOrder: 'desc',
+      limit: params?.limit || 50,
+      offset: params?.offset || 0
+    }) as GalxTask[];
   }
 
   async getTaskById(taskId: string): Promise<GalxTask | null> {
@@ -78,7 +105,7 @@ export class TaskRepository {
 
         if (!error && data) {
           const mapped = this.mapRowToTask(data);
-          this.inMemoryTasks.set(mapped.id, mapped);
+          this.taskTable.put(mapped.id, mapped);
           return mapped;
         }
       } catch {
@@ -86,7 +113,7 @@ export class TaskRepository {
       }
     }
 
-    return this.inMemoryTasks.get(taskId) || null;
+    return this.taskTable.get(taskId) || null;
   }
 
   async findTaskByIdempotency(queueId: string, idempotencyKey: string): Promise<GalxTask | null> {
@@ -102,7 +129,7 @@ export class TaskRepository {
 
         if (!error && data) {
           const mapped = this.mapRowToTask(data);
-          this.inMemoryTasks.set(mapped.id, mapped);
+          this.taskTable.put(mapped.id, mapped);
           return mapped;
         }
       } catch {
@@ -110,12 +137,14 @@ export class TaskRepository {
       }
     }
 
-    for (const task of this.inMemoryTasks.values()) {
-      if (task.queueId === queueId && task.idempotencyKey === idempotencyKey) {
-        return task;
+    const matches = this.taskTable.query({
+      where: {
+        queueId: { $eq: queueId },
+        idempotencyKey: { $eq: idempotencyKey }
       }
-    }
-    return null;
+    }) as GalxTask[];
+
+    return matches[0] || null;
   }
 
   async findTaskByContentHash(
@@ -139,7 +168,7 @@ export class TaskRepository {
 
         if (!error && data) {
           const mapped = this.mapRowToTask(data);
-          this.inMemoryTasks.set(mapped.id, mapped);
+          this.taskTable.put(mapped.id, mapped);
           return mapped;
         }
       } catch {
@@ -147,16 +176,23 @@ export class TaskRepository {
       }
     }
 
-    for (const task of this.inMemoryTasks.values()) {
-      if (task.queueId === queueId && (task as any).contentHash === contentHash && task.createdAtMs >= cutoffMs) {
-        return task;
+    const matches = this.taskTable.query({
+      where: {
+        queueId: { $eq: queueId },
+        createdAtMs: { $gte: cutoffMs }
+      }
+    }) as GalxTask[];
+
+    for (const t of matches) {
+      if ((t as any).contentHash === contentHash) {
+        return t;
       }
     }
     return null;
   }
 
   async saveTask(task: GalxTask): Promise<void> {
-    this.inMemoryTasks.set(task.id, task);
+    this.taskTable.put(task.id, task);
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -170,7 +206,7 @@ export class TaskRepository {
 
   async saveTasksBatch(tasks: GalxTask[]): Promise<void> {
     if (tasks.length === 0) return;
-    for (const t of tasks) this.inMemoryTasks.set(t.id, t);
+    for (const t of tasks) this.taskTable.put(t.id, t);
 
     if (isSupabaseConfigured()) {
       try {
@@ -184,7 +220,7 @@ export class TaskRepository {
   }
 
   async deleteTask(taskId: string): Promise<void> {
-    this.inMemoryTasks.delete(taskId);
+    this.taskTable.delete(taskId);
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -196,12 +232,12 @@ export class TaskRepository {
   }
 
   async purgeTasks(queueId: string, statusFilter?: string): Promise<number> {
-    let count = 0;
-    for (const [id, task] of this.inMemoryTasks.entries()) {
-      if (task.queueId === queueId && (!statusFilter || task.status === statusFilter)) {
-        this.inMemoryTasks.delete(id);
-        count++;
-      }
+    const whereClause: Record<string, any> = { queueId: { $eq: queueId } };
+    if (statusFilter) whereClause.status = { $eq: statusFilter };
+
+    const matches = this.taskTable.query({ where: whereClause }) as GalxTask[];
+    for (const m of matches) {
+      this.taskTable.delete(m.id);
     }
 
     if (isSupabaseConfigured()) {
@@ -215,12 +251,9 @@ export class TaskRepository {
       }
     }
 
-    return count;
+    return matches.length;
   }
 
-  /**
-   * High-Concurrency Worker Leasing with FOR UPDATE SKIP LOCKED
-   */
   async leaseTasksForWorker(params: {
     queueId: string;
     workerId: string;
@@ -243,7 +276,9 @@ export class TaskRepository {
         });
 
         if (!error && data && Array.isArray(data) && data.length > 0) {
-          return (data as Database['public']['Tables']['galx_tasks']['Row'][]).map(this.mapRowToTask);
+          const mapped = (data as Database['public']['Tables']['galx_tasks']['Row'][]).map(this.mapRowToTask);
+          for (const t of mapped) this.taskTable.put(t.id, t);
+          return mapped;
         }
       } catch {
         // Fallback
@@ -254,9 +289,8 @@ export class TaskRepository {
   }
 
   async recordAttempt(taskId: string, attempt: TaskAttemptRecord): Promise<void> {
-    const list = this.inMemoryAttempts.get(taskId) || [];
-    list.push(attempt);
-    this.inMemoryAttempts.set(taskId, list);
+    const attemptId = `att_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    this.attemptTable.put(attemptId, { ...attempt, id: attemptId, taskId });
 
     if (isSupabaseConfigured()) {
       try {
@@ -296,8 +330,10 @@ export class TaskRepository {
     if (attempts.length === 0) return 0;
 
     for (const a of attempts) {
-      const list = this.inMemoryAttempts.get(a.taskId) || [];
-      list.push({
+      const attemptId = `att_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+      this.attemptTable.put(attemptId, {
+        id: attemptId,
+        taskId: a.taskId,
         attemptNumber: a.attemptNumber || 1,
         startedAtMs: a.startedAtMs,
         completedAtMs: a.completedAtMs,
@@ -306,15 +342,17 @@ export class TaskRepository {
         errorMessage: a.errorMessage,
         workerId: a.workerId
       });
-      this.inMemoryAttempts.set(a.taskId, list);
 
       if (a.status) {
-        const task = this.inMemoryTasks.get(a.taskId);
+        const task = this.taskTable.get(a.taskId);
         if (task) {
-          task.status = a.status as any;
-          if (a.result) task.result = a.result;
-          if (a.lastError) task.lastError = a.lastError;
-          task.updatedAtMs = Date.now();
+          this.taskTable.put(a.taskId, {
+            ...task,
+            status: a.status as any,
+            result: a.result || task.result,
+            lastError: a.lastError || task.lastError,
+            updatedAtMs: Date.now()
+          });
         }
       }
     }
@@ -338,10 +376,13 @@ export class TaskRepository {
   }
 
   async updateProgress(taskId: string, progress: TaskProgressInfo): Promise<void> {
-    const task = this.inMemoryTasks.get(taskId);
+    const task = this.taskTable.get(taskId);
     if (task) {
-      task.progress = progress;
-      task.updatedAtMs = Date.now();
+      this.taskTable.put(taskId, {
+        ...task,
+        progress,
+        updatedAtMs: Date.now()
+      });
     }
 
     if (isSupabaseConfigured()) {
@@ -360,135 +401,63 @@ export class TaskRepository {
     }
   }
 
-  async bulkRedrive(
-    queueId: string,
-    maxTasks: number = 100,
-    tag?: string,
-    userId?: string
-  ): Promise<string[]> {
-    const now = Date.now();
-    const taskIds: string[] = [];
-
-    for (const task of this.inMemoryTasks.values()) {
-      if (
-        task.queueId === queueId &&
-        task.status === 'DEAD_LETTERED' &&
-        (!tag || task.tag === tag) &&
-        (!userId || task.userId === userId)
-      ) {
-        task.status = 'QUEUED';
-        task.dispatchCount = 0;
-        task.responseCount = 0;
-        task.lastError = undefined;
-        task.scheduleTimeMs = now;
-        task.updatedAtMs = now;
-        taskIds.push(task.id);
-        if (taskIds.length >= maxTasks) break;
-      }
-    }
-
-    if (isSupabaseConfigured() && taskIds.length > 0) {
-      try {
-        const supabase = getSupabaseAdmin();
-        await supabase
-          .from('galx_tasks')
-          .update({
-            status: 'QUEUED',
-            dispatch_count: 0,
-            response_count: 0,
-            last_error: null,
-            schedule_time_ms: now,
-            updated_at_ms: now
-          })
-          .in('id', taskIds);
-      } catch {
-        // Fallback
-      }
-    }
-
-    return taskIds;
+  public queryTasksNatural(naturalQuery: string): GalxTask[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'tasks');
+    return this.taskTable.query(parsed.queryOptions) as GalxTask[];
   }
 
-  async bulkCancel(
-    queueId: string,
-    tag?: string,
-    userId?: string,
-    groupId?: string,
-    statusFilter?: TaskStatus
-  ): Promise<string[]> {
-    const now = Date.now();
-    const taskIds: string[] = [];
-
-    for (const task of this.inMemoryTasks.values()) {
-      const matchesStatus = statusFilter
-        ? task.status === statusFilter
-        : ['QUEUED', 'SCHEDULED', 'WAITING_DEPENDENCIES', 'RETRYING'].includes(task.status);
-
-      if (
-        task.queueId === queueId &&
-        matchesStatus &&
-        (!tag || task.tag === tag) &&
-        (!userId || task.userId === userId) &&
-        (!groupId || task.groupId === groupId)
-      ) {
-        task.status = 'CANCELLED';
-        task.updatedAtMs = now;
-        taskIds.push(task.id);
-      }
-    }
-
-    if (isSupabaseConfigured() && taskIds.length > 0) {
-      try {
-        const supabase = getSupabaseAdmin();
-        await supabase
-          .from('galx_tasks')
-          .update({
-            status: 'CANCELLED',
-            updated_at_ms: now
-          })
-          .in('id', taskIds);
-      } catch {
-        // Fallback
-      }
-    }
-
-    return taskIds;
+  public aggregateTasks(query: DbAggregateQuery): DbAggregateResult {
+    return this.taskTable.aggregate(query);
   }
 
-  private async leaseTasksFallback(params: {
+  private leaseTasksFallback(params: {
     queueId: string;
     workerId: string;
     maxTasks?: number;
     leaseDurationMs?: number;
     tagFilter?: string;
     groupIdFilter?: string;
-  }): Promise<GalxTask[]> {
+  }): GalxTask[] {
     const now = Date.now();
-    const available: GalxTask[] = [];
+    const max = params.maxTasks || 10;
+    const leaseDuration = params.leaseDurationMs || 60000;
 
-    for (const task of this.inMemoryTasks.values()) {
-      if (task.queueId !== params.queueId) continue;
-      if (!['QUEUED', 'SCHEDULED', 'RETRYING'].includes(task.status)) continue;
-      if (task.scheduleTimeMs > now) continue;
-      if (params.tagFilter && task.tag !== params.tagFilter) continue;
-      if (params.groupIdFilter && task.groupId !== params.groupIdFilter) continue;
-
-      available.push(task);
-      if (available.length >= (params.maxTasks || 10)) break;
-    }
+    const available = this.taskTable.query({
+      where: {
+        queueId: { $eq: params.queueId }
+      },
+      sortBy: 'priority',
+      sortOrder: 'desc'
+    }) as GalxTask[];
 
     const leased: GalxTask[] = [];
     for (const t of available) {
-      t.status = 'RUNNING';
-      t.dispatchCount = (t.dispatchCount || 0) + 1;
-      t.lastAttemptMs = now;
-      t.firstAttemptMs = t.firstAttemptMs || now;
-      t.leaseExpiresAtMs = now + (params.leaseDurationMs || 60000);
-      t.activeWorkerId = params.workerId;
-      t.activeFencingToken = (t.activeFencingToken || 0) + 1;
-      t.updatedAtMs = now;
-      leased.push(t);
+      if (leased.length >= max) break;
+      const canLease =
+        (t.status === 'QUEUED' || t.status === 'RETRYING') &&
+        t.scheduleTimeMs <= now &&
+        (!t.leaseExpiresAtMs || t.leaseExpiresAtMs < now);
+
+      if (canLease) {
+        if (params.tagFilter && t.tag !== params.tagFilter) continue;
+        if (params.groupIdFilter && t.groupId !== params.groupIdFilter) continue;
+
+        const updated: GalxTask = {
+          ...t,
+          status: 'RUNNING',
+          activeWorkerId: params.workerId,
+          activeFencingToken: (t.activeFencingToken || 0) + 1,
+          leaseExpiresAtMs: now + leaseDuration,
+          dispatchCount: (t.dispatchCount || 0) + 1,
+          firstAttemptMs: t.firstAttemptMs || now,
+          lastAttemptMs: now,
+          updatedAtMs: now
+        };
+        this.taskTable.put(t.id, updated);
+        leased.push(updated);
+      }
     }
+
     return leased;
   }
 

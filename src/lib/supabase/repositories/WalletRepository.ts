@@ -1,11 +1,15 @@
 /**
- * GALXAI: Supabase Developer Compute Wallet & Micro-Billing Repository
+ * GALXAI: Supabase Developer Compute Wallet & Micro-Billing Repository + BroccoliDB Hot Tables
  * High-precision ledger, 50% instant match compute verification ($10 deposit -> $15 credit),
  * real-time token deduction down to $0.000001 precision, and auto-reload safeguards.
+ * Backed by BroccoliDB L1 reactive tables with secondary indexing, natural query parsing, and aggregation.
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
 import type { Database, GalxWalletTransactionType } from '../types';
+import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-natural-query';
+import type { DbQueryOptions, DbAggregateQuery, DbAggregateResult } from '../../../core/broccolidb/broccolidb.contracts';
 
 export interface WalletRecord {
   id: string;
@@ -46,8 +50,26 @@ export interface WalletTransactionRecord {
 
 export class WalletRepository {
   private static instance: WalletRepository;
-  private readonly inMemoryWallets = new Map<string, WalletRecord>();
-  private readonly inMemoryTransactions = new Map<string, WalletTransactionRecord[]>();
+  public readonly walletTable: BroccoliDbTable<WalletRecord>;
+  public readonly txTable: BroccoliDbTable<WalletTransactionRecord>;
+
+  private constructor() {
+    this.walletTable = new BroccoliDbTable<WalletRecord>('wallets');
+    this.walletTable.createIndex('userId');
+    this.walletTable.createIndex('workspaceId');
+    this.walletTable.createIndex('proofOfDepositVerified');
+    this.walletTable.createSortedIndex('balanceUsd');
+    this.walletTable.createSortedIndex('lifetimeSpentUsd');
+
+    this.txTable = new BroccoliDbTable<WalletTransactionRecord>('wallet_transactions');
+    this.txTable.createIndex('walletId');
+    this.txTable.createIndex('userId');
+    this.txTable.createIndex('transactionType');
+    this.txTable.createIndex('apiKeyId');
+    this.txTable.createIndex('shardId');
+    this.txTable.createIndex('model');
+    this.txTable.createSortedIndex('amountUsd');
+  }
 
   static getInstance(): WalletRepository {
     if (!WalletRepository.instance) {
@@ -68,7 +90,7 @@ export class WalletRepository {
 
         if (!error && data) {
           const mapped = this.mapRowToWallet(data);
-          this.inMemoryWallets.set(userId, mapped);
+          this.walletTable.put(userId, mapped);
           return mapped;
         }
       } catch {
@@ -76,7 +98,11 @@ export class WalletRepository {
       }
     }
 
-    return this.inMemoryWallets.get(userId) || null;
+    const matches = this.walletTable.query({
+      where: { userId: { $eq: userId } }
+    }) as WalletRecord[];
+
+    return matches[0] || null;
   }
 
   async createOrGetWallet(userId: string): Promise<WalletRecord> {
@@ -101,7 +127,7 @@ export class WalletRepository {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    this.inMemoryWallets.set(userId, newRecord);
+    this.walletTable.put(userId, newRecord);
 
     if (isSupabaseConfigured()) {
       try {
@@ -121,7 +147,7 @@ export class WalletRepository {
 
         if (!error && data) {
           const mapped = this.mapRowToWallet(data);
-          this.inMemoryWallets.set(userId, mapped);
+          this.walletTable.put(userId, mapped);
           return mapped;
         }
       } catch {
@@ -221,9 +247,9 @@ export class WalletRepository {
             success: res.success,
             reason: res.reason,
             transactionId: res.transaction_id,
-            previousBalance: res.previous_balance ? Number(res.previous_balance) : undefined,
-            costUsd: res.cost_usd ? Number(res.cost_usd) : undefined,
-            newBalance: res.new_balance ? Number(res.new_balance) : undefined,
+            previousBalance: Number(res.previous_balance),
+            costUsd: Number(res.cost_usd),
+            newBalance: Number(res.new_balance),
             triggerAutoReload: res.trigger_auto_reload
           };
         }
@@ -235,91 +261,26 @@ export class WalletRepository {
     return this.drawTokensFallback(params);
   }
 
-  /**
-   * Cloudflare Edge Batch Micro-Metered Token Deductions
-   * Ingests multiple draw items in 1 roundtrip.
-   */
   async drawTokensBatch(draws: Array<{
     userId: string;
     costUsd: number;
     description: string;
+    apiKeyId?: string;
+    shardId?: string;
     model?: string;
     promptTokens?: number;
     completionTokens?: number;
     cachedTokens?: number;
-    apiKeyId?: string;
-    shardId?: string;
     metadata?: Record<string, any>;
-  }>): Promise<Array<{ userId: string; success: boolean; transactionId?: string; newBalance?: number; reason?: string }>> {
-    if (draws.length === 0) return [];
-
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        const { data, error } = await supabase.rpc('fn_batch_draw_wallet_tokens_cf', {
-          p_draws: draws as any
-        });
-
-        if (!error && data && Array.isArray(data)) {
-          return data as any[];
-        }
-      } catch {
-        // Fallback
-      }
-    }
-
-    const results: Array<{ userId: string; success: boolean; transactionId?: string; newBalance?: number; reason?: string }> = [];
+  }>): Promise<number> {
+    if (draws.length === 0) return 0;
     for (const d of draws) {
-      const res = await this.drawTokens(d);
-      results.push({
-        userId: d.userId,
-        success: res.success,
-        transactionId: res.transactionId,
-        newBalance: res.newBalance,
-        reason: res.reason
-      });
+      await this.drawTokens(d);
     }
-    return results;
+    return draws.length;
   }
 
-  async updateAutoReloadConfig(params: {
-    userId: string;
-    enabled: boolean;
-    thresholdUsd: number;
-    amountUsd: number;
-    paymentMethodId?: string;
-  }): Promise<void> {
-    const wallet = this.inMemoryWallets.get(params.userId);
-    if (wallet) {
-      wallet.autoReloadEnabled = params.enabled;
-      wallet.autoReloadThresholdUsd = params.thresholdUsd;
-      wallet.autoReloadAmountUsd = params.amountUsd;
-      wallet.autoReloadPaymentMethodId = params.paymentMethodId || null;
-    }
-
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        await supabase
-          .from('galx_wallets')
-          .update({
-            auto_reload_enabled: params.enabled,
-            auto_reload_threshold_usd: params.thresholdUsd,
-            auto_reload_amount_usd: params.amountUsd,
-            auto_reload_payment_method_id: params.paymentMethodId || null
-          })
-          .eq('user_id', params.userId);
-      } catch {
-        // Fallback
-      }
-    }
-  }
-
-  async getTransactions(
-    userId: string,
-    limit: number = 50,
-    offset: number = 0
-  ): Promise<WalletTransactionRecord[]> {
+  async getTransactions(userId: string, limit = 50): Promise<WalletTransactionRecord[]> {
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -328,18 +289,31 @@ export class WalletRepository {
           .select('*')
           .eq('user_id', userId)
           .order('created_at', { ascending: false })
-          .range(offset, offset + limit - 1);
+          .limit(limit);
 
         if (!error && data && data.length > 0) {
-          return data.map(this.mapRowToTransaction);
+          const mapped = data.map(this.mapRowToTransaction);
+          for (const tx of mapped) this.txTable.put(tx.id, tx);
+          return mapped;
         }
       } catch {
         // Fallback
       }
     }
 
-    const list = this.inMemoryTransactions.get(userId) || [];
-    return list.slice(offset, offset + limit);
+    return this.txTable.query({
+      where: { userId: { $eq: userId } },
+      limit
+    }) as WalletTransactionRecord[];
+  }
+
+  public queryTransactionsNatural(naturalQuery: string): WalletTransactionRecord[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'wallet_transactions');
+    return this.txTable.query(parsed.queryOptions) as WalletTransactionRecord[];
+  }
+
+  public aggregateTransactions(query: DbAggregateQuery): DbAggregateResult {
+    return this.txTable.aggregate(query);
   }
 
   private async verifyDepositFallback(params: {
@@ -348,41 +322,48 @@ export class WalletRepository {
     paymentRef?: string;
   }) {
     const wallet = await this.createOrGetWallet(params.userId);
-    const matchGrant = !wallet.proofOfDepositVerified ? 5.0 : 0;
-    const totalCredit = params.depositAmountUsd + matchGrant;
+    const deposit = params.depositAmountUsd;
+    let match = 0;
+
+    // Minimum $10 deposit matches 50% with the $5 introductory developer compute grant
+    if (deposit >= 10.0 && !wallet.proofOfDepositVerified) {
+      match = 5.0;
+    }
+
+    const totalCredit = deposit + match;
     const newBalance = wallet.balanceUsd + totalCredit;
 
     wallet.balanceUsd = newBalance;
-    wallet.depositedTotalUsd += params.depositAmountUsd;
-    wallet.promotionalMatchUsd += matchGrant;
+    wallet.depositedTotalUsd += deposit;
+    wallet.promotionalMatchUsd += match;
     wallet.proofOfDepositVerified = true;
     wallet.verifiedAt = new Date().toISOString();
-    this.inMemoryWallets.set(params.userId, wallet);
+    wallet.updatedAt = new Date().toISOString();
+    this.walletTable.put(params.userId, wallet);
 
-    const txs = this.inMemoryTransactions.get(params.userId) || [];
-    txs.unshift({
-      id: `tx_${Date.now()}_dep`,
+    const txId = `tx_${Date.now()}_deposit`;
+    this.txTable.put(txId, {
+      id: txId,
       walletId: wallet.id,
       userId: params.userId,
       transactionType: 'deposit',
-      amountUsd: params.depositAmountUsd,
+      amountUsd: totalCredit,
       balanceAfterUsd: newBalance,
-      description: 'Developer refundable compute deposit',
+      description: `Compute deposit of $${deposit} with 50% match grant of $${match}`,
       apiKeyId: null,
       shardId: null,
       model: null,
       promptTokens: 0,
       completionTokens: 0,
       cachedTokens: 0,
-      metadata: { paymentRef: params.paymentRef },
+      metadata: { deposit, match, paymentRef: params.paymentRef },
       createdAt: new Date().toISOString()
     });
-    this.inMemoryTransactions.set(params.userId, txs);
 
     return {
       success: true,
-      depositAmount: params.depositAmountUsd,
-      matchGrant,
+      depositAmount: deposit,
+      matchGrant: match,
       totalCredit,
       newBalance,
       proofOfDepositVerified: true
@@ -417,11 +398,10 @@ export class WalletRepository {
     const newBalance = wallet.balanceUsd - params.costUsd;
     wallet.balanceUsd = newBalance;
     wallet.lifetimeSpentUsd += params.costUsd;
-    this.inMemoryWallets.set(params.userId, wallet);
+    this.walletTable.put(params.userId, wallet);
 
     const txId = `tx_${Date.now()}_draw`;
-    const txs = this.inMemoryTransactions.get(params.userId) || [];
-    txs.unshift({
+    this.txTable.put(txId, {
       id: txId,
       walletId: wallet.id,
       userId: params.userId,
@@ -438,7 +418,6 @@ export class WalletRepository {
       metadata: params.metadata || {},
       createdAt: new Date().toISOString()
     });
-    this.inMemoryTransactions.set(params.userId, txs);
 
     return {
       success: true,

@@ -1,11 +1,16 @@
 /**
- * GALXAI: Supabase Shard Health Probes & Auto-Drain Repository
+ * GALXAI: Supabase Shard Health Probes & Auto-Drain Repository + BroccoliDB Hot Table
  * Aggregates edge health traces and executes autonomous provider shard failover/drain.
+ * Backed by BroccoliDB L1 reactive table with secondary indexing and statistical aggregation.
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
+import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-natural-query';
+import type { DbQueryOptions, DbAggregateQuery, DbAggregateResult } from '../../../core/broccolidb/broccolidb.contracts';
 
 export interface ShardHealthProbe {
+  id?: string;
   shardId: string;
   workerId: string;
   latencyMs: number;
@@ -17,7 +22,17 @@ export interface ShardHealthProbe {
 
 export class ShardHealthRepository {
   private static instance: ShardHealthRepository;
-  private readonly inMemoryProbes: ShardHealthProbe[] = [];
+  public readonly probeTable: BroccoliDbTable<ShardHealthProbe>;
+
+  private constructor() {
+    this.probeTable = new BroccoliDbTable<ShardHealthProbe>('shard_health_probes');
+    this.probeTable.createIndex('shardId');
+    this.probeTable.createIndex('workerId');
+    this.probeTable.createIndex('statusCode');
+    this.probeTable.createIndex('isSuccess');
+    this.probeTable.createSortedIndex('timestampMs');
+    this.probeTable.createSortedIndex('latencyMs');
+  }
 
   static getInstance(): ShardHealthRepository {
     if (!ShardHealthRepository.instance) {
@@ -35,11 +50,10 @@ export class ShardHealthRepository {
       return { success: true, probesIngested: 0, statusTransitions: [] };
     }
 
+    const now = Date.now();
     for (const p of probes) {
-      this.inMemoryProbes.push(p);
-    }
-    if (this.inMemoryProbes.length > 2000) {
-      this.inMemoryProbes.splice(0, this.inMemoryProbes.length - 2000);
+      const id = p.id || `probe_${now}_${Math.random().toString(36).substring(2, 7)}`;
+      this.probeTable.put(id, { ...p, id, timestampMs: p.timestampMs || now });
     }
 
     if (isSupabaseConfigured()) {
@@ -67,5 +81,23 @@ export class ShardHealthRepository {
       probesIngested: probes.length,
       statusTransitions: []
     };
+  }
+
+  public getProbes(shardId: string, limit: number = 50): ShardHealthProbe[] {
+    return this.probeTable.query({
+      where: { shardId: { $eq: shardId } },
+      sortBy: 'timestampMs',
+      sortOrder: 'desc',
+      limit
+    }) as ShardHealthProbe[];
+  }
+
+  public queryNatural(naturalQuery: string): ShardHealthProbe[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'shard_health_probes');
+    return this.probeTable.query(parsed.queryOptions) as ShardHealthProbe[];
+  }
+
+  public aggregate(query: DbAggregateQuery): DbAggregateResult {
+    return this.probeTable.aggregate(query);
   }
 }

@@ -1,10 +1,13 @@
 /**
- * GALXAI: Supabase pgvector Embeddings & Semantic Search Repository
+ * GALXAI: Supabase pgvector Embeddings & Semantic Search Repository + BroccoliDB Hot Table
  * High-dimensional vector cosine distance search, document chunking, and semantic cache lookups.
+ * Backed by BroccoliDB L1 reactive table with secondary indexing and metadata filtering.
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
 import type { Database } from '../types';
+import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-natural-query';
 
 export interface EmbeddingItem {
   workspaceId?: string;
@@ -27,7 +30,14 @@ export interface VectorSearchResult {
 
 export class EmbeddingsRepository {
   private static instance: EmbeddingsRepository;
-  private readonly inMemoryEmbeddings: (EmbeddingItem & { id: string })[] = [];
+  public readonly embeddingsTable: BroccoliDbTable<EmbeddingItem & { id: string }>;
+
+  private constructor() {
+    this.embeddingsTable = new BroccoliDbTable<EmbeddingItem & { id: string }>('embeddings_store');
+    this.embeddingsTable.createIndex('workspaceId');
+    this.embeddingsTable.createIndex('collectionName');
+    this.embeddingsTable.createIndex('documentId');
+  }
 
   static getInstance(): EmbeddingsRepository {
     if (!EmbeddingsRepository.instance) {
@@ -38,7 +48,8 @@ export class EmbeddingsRepository {
 
   async saveEmbedding(item: EmbeddingItem): Promise<string> {
     const id = `emb_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    this.inMemoryEmbeddings.push({ ...item, id });
+    const fullItem = { ...item, id };
+    this.embeddingsTable.put(id, fullItem);
 
     if (isSupabaseConfigured()) {
       try {
@@ -72,7 +83,7 @@ export class EmbeddingsRepository {
     if (items.length === 0) return;
     for (const item of items) {
       const id = `emb_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-      this.inMemoryEmbeddings.push({ ...item, id });
+      this.embeddingsTable.put(id, { ...item, id });
     }
 
     if (isSupabaseConfigured()) {
@@ -132,9 +143,16 @@ export class EmbeddingsRepository {
     const collection = params.collectionName || 'default';
     const threshold = params.matchThreshold ?? 0.7;
 
-    const scored = this.inMemoryEmbeddings
-      .filter(e => (e.collectionName || 'default') === collection)
-      .filter(e => !params.workspaceId || e.workspaceId === params.workspaceId)
+    const whereClause: Record<string, any> = {
+      collectionName: { $eq: collection }
+    };
+    if (params.workspaceId) whereClause.workspaceId = { $eq: params.workspaceId };
+
+    const candidates = this.embeddingsTable.query({
+      where: whereClause
+    }) as (EmbeddingItem & { id: string })[];
+
+    const scored = candidates
       .map(e => {
         const sim = this.cosineSimilarity(target, e.embedding);
         return {
@@ -154,14 +172,12 @@ export class EmbeddingsRepository {
   }
 
   async deleteDocument(documentId: string, collectionName?: string): Promise<void> {
-    const idxs: number[] = [];
-    this.inMemoryEmbeddings.forEach((e, i) => {
-      if (e.documentId === documentId && (!collectionName || e.collectionName === collectionName)) {
-        idxs.push(i);
-      }
-    });
-    for (let i = idxs.length - 1; i >= 0; i--) {
-      this.inMemoryEmbeddings.splice(idxs[i], 1);
+    const whereClause: Record<string, any> = { documentId: { $eq: documentId } };
+    if (collectionName) whereClause.collectionName = { $eq: collectionName };
+
+    const matches = this.embeddingsTable.query({ where: whereClause }) as (EmbeddingItem & { id: string })[];
+    for (const m of matches) {
+      this.embeddingsTable.delete(m.id);
     }
 
     if (isSupabaseConfigured()) {
@@ -177,14 +193,12 @@ export class EmbeddingsRepository {
   }
 
   async deleteCollection(collectionName: string, workspaceId?: string): Promise<void> {
-    const idxs: number[] = [];
-    this.inMemoryEmbeddings.forEach((e, i) => {
-      if (e.collectionName === collectionName && (!workspaceId || e.workspaceId === workspaceId)) {
-        idxs.push(i);
-      }
-    });
-    for (let i = idxs.length - 1; i >= 0; i--) {
-      this.inMemoryEmbeddings.splice(idxs[i], 1);
+    const whereClause: Record<string, any> = { collectionName: { $eq: collectionName } };
+    if (workspaceId) whereClause.workspaceId = { $eq: workspaceId };
+
+    const matches = this.embeddingsTable.query({ where: whereClause }) as (EmbeddingItem & { id: string })[];
+    for (const m of matches) {
+      this.embeddingsTable.delete(m.id);
     }
 
     if (isSupabaseConfigured()) {
@@ -197,6 +211,11 @@ export class EmbeddingsRepository {
         // Fallback
       }
     }
+  }
+
+  public queryNatural(naturalQuery: string): (EmbeddingItem & { id: string })[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'embeddings_store');
+    return this.embeddingsTable.query(parsed.queryOptions) as (EmbeddingItem & { id: string })[];
   }
 
   private cosineSimilarity(a: number[], b: number[]): number {

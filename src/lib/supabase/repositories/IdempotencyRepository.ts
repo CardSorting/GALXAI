@@ -1,10 +1,13 @@
 /**
- * GALXAI: Supabase Stripe-Grade Idempotency Engine Repository
+ * GALXAI: Supabase Stripe-Grade Idempotency Engine Repository + BroccoliDB Hot Table
  * Manages request deduplication, in-flight status locks, response caching, and payload hashing.
+ * Backed by BroccoliDB L1 reactive table with secondary indexing and automatic state transitions.
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
 import type { Database, GalxIdempotencyState } from '../types';
+import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-natural-query';
 
 export interface IdempotencyRecord {
   id: string;
@@ -28,7 +31,17 @@ export type IdempotencyBeginResult =
 
 export class IdempotencyRepository {
   private static instance: IdempotencyRepository;
-  private readonly inMemoryStore = new Map<string, IdempotencyRecord>();
+  public readonly storeTable: BroccoliDbTable<IdempotencyRecord>;
+
+  private constructor() {
+    this.storeTable = new BroccoliDbTable<IdempotencyRecord>('idempotency_records');
+    this.storeTable.createIndex('userId');
+    this.storeTable.createIndex('endpoint');
+    this.storeTable.createIndex('requestHash');
+    this.storeTable.createIndex('state');
+    this.storeTable.createSortedIndex('expiresAtMs');
+    this.storeTable.createSortedIndex('createdAtMs');
+  }
 
   static getInstance(): IdempotencyRepository {
     if (!IdempotencyRepository.instance) {
@@ -83,12 +96,15 @@ export class IdempotencyRepository {
     responseHeaders?: Record<string, any>;
     responseBody: any;
   }): Promise<void> {
-    const existing = this.inMemoryStore.get(params.idempotencyKey);
+    const existing = this.storeTable.get(params.idempotencyKey);
     if (existing) {
-      existing.state = 'COMMITTED';
-      existing.statusCode = params.statusCode;
-      existing.responseHeaders = params.responseHeaders || null;
-      existing.responseBody = params.responseBody;
+      this.storeTable.put(params.idempotencyKey, {
+        ...existing,
+        state: 'COMMITTED',
+        statusCode: params.statusCode,
+        responseHeaders: params.responseHeaders || null,
+        responseBody: params.responseBody
+      });
     }
 
     if (isSupabaseConfigured()) {
@@ -106,6 +122,15 @@ export class IdempotencyRepository {
     }
   }
 
+  public get(idempotencyKey: string): IdempotencyRecord | null {
+    return this.storeTable.get(idempotencyKey) || null;
+  }
+
+  public queryNatural(naturalQuery: string): IdempotencyRecord[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'idempotency_records');
+    return this.storeTable.query(parsed.queryOptions) as IdempotencyRecord[];
+  }
+
   private beginFallback(params: {
     idempotencyKey: string;
     userId: string;
@@ -114,7 +139,7 @@ export class IdempotencyRepository {
     ttlMs?: number;
   }): IdempotencyBeginResult {
     const now = Date.now();
-    const existing = this.inMemoryStore.get(params.idempotencyKey);
+    const existing = this.storeTable.get(params.idempotencyKey);
 
     if (existing) {
       if (existing.requestHash !== params.requestHash) {
@@ -141,7 +166,7 @@ export class IdempotencyRepository {
       }
     }
 
-    this.inMemoryStore.set(params.idempotencyKey, {
+    this.storeTable.put(params.idempotencyKey, {
       id: params.idempotencyKey,
       userId: params.userId,
       endpoint: params.endpoint,

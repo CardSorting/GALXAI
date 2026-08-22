@@ -13,6 +13,7 @@ import type {
   GalxQueueEvent
 } from '../../core/contracts/GalxContracts';
 import type { GalxAIClientCore } from '../client';
+import { GalxPersistence } from '../../lib/storage/GalxPersistence';
 
 export class QueuesResource {
   private readonly client: GalxAIClientCore;
@@ -140,5 +141,12 @@ export class QueuesResource {
     for await (const evt of stream) {
       yield evt;
     }
+  }
+
+  /**
+   * Queries tasks using conversational natural language syntax.
+   */
+  public queryTasksNatural(naturalQuery: string) {
+    return GalxPersistence.getInstance().queryTasksNatural(naturalQuery);
   }
 }

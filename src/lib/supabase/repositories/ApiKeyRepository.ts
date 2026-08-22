@@ -1,15 +1,24 @@
 /**
- * GALXAI: Supabase Developer Gateway API Key Repository
+ * GALXAI: Supabase Developer Gateway API Key Repository + BroccoliDB L1 Hot Cache
  * High-performance key resolution, SHA-256 hash lookup, rate limit tracking, and instant revocation.
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
 import type { Database } from '../types';
 import type { DeveloperGatewayKey } from '../../../core/contracts/GalxContracts';
+import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
 
 export class ApiKeyRepository {
   private static instance: ApiKeyRepository;
-  private readonly inMemoryCache = new Map<string, DeveloperGatewayKey>();
+  private readonly keyTable: BroccoliDbTable<DeveloperGatewayKey>;
+
+  private constructor() {
+    this.keyTable = new BroccoliDbTable<DeveloperGatewayKey>('gateway_keys');
+    this.keyTable.createIndex('keyHash');
+    this.keyTable.createIndex('prefix');
+    this.keyTable.createIndex('userId');
+    this.keyTable.createIndex('revoked');
+  }
 
   static getInstance(): ApiKeyRepository {
     if (!ApiKeyRepository.instance) {
@@ -31,7 +40,7 @@ export class ApiKeyRepository {
         const { data, error } = await query;
         if (!error && data && data.length > 0) {
           const mapped = data.map(this.mapRowToGatewayKey);
-          for (const k of mapped) this.inMemoryCache.set(k.id, k);
+          for (const k of mapped) this.keyTable.put(k.id, k);
           return mapped;
         }
       } catch {
@@ -39,8 +48,10 @@ export class ApiKeyRepository {
       }
     }
 
-    const all = Array.from(this.inMemoryCache.values());
-    return userId ? all.filter(k => k.userId === userId) : all;
+    if (userId) {
+      return this.keyTable.query({ where: { userId: { $eq: userId } } }) as DeveloperGatewayKey[];
+    }
+    return this.keyTable.getAll() as DeveloperGatewayKey[];
   }
 
   async getGatewayKeyById(id: string): Promise<DeveloperGatewayKey | null> {
@@ -55,7 +66,7 @@ export class ApiKeyRepository {
 
         if (!error && data) {
           const mapped = this.mapRowToGatewayKey(data);
-          this.inMemoryCache.set(mapped.id, mapped);
+          this.keyTable.put(mapped.id, mapped);
           return mapped;
         }
       } catch {
@@ -63,10 +74,10 @@ export class ApiKeyRepository {
       }
     }
 
-    return this.inMemoryCache.get(id) || null;
+    return this.keyTable.get(id) || null;
   }
 
-  async findKeyByHash(keyHash: string): Promise<DeveloperGatewayKey | null> {
+  async findGatewayKeyByHash(keyHash: string): Promise<DeveloperGatewayKey | null> {
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -79,7 +90,7 @@ export class ApiKeyRepository {
 
         if (!error && data) {
           const mapped = this.mapRowToGatewayKey(data);
-          this.inMemoryCache.set(mapped.id, mapped);
+          this.keyTable.put(mapped.id, mapped);
           return mapped;
         }
       } catch {
@@ -87,12 +98,18 @@ export class ApiKeyRepository {
       }
     }
 
-    for (const key of this.inMemoryCache.values()) {
-      if (key.keyHash === keyHash && !key.revoked) {
-        return key;
+    const matches = this.keyTable.query({
+      where: {
+        keyHash: { $eq: keyHash },
+        revoked: { $eq: false }
       }
-    }
-    return null;
+    }) as DeveloperGatewayKey[];
+
+    return matches[0] || null;
+  }
+
+  async findKeyByHash(keyHash: string): Promise<DeveloperGatewayKey | null> {
+    return this.findGatewayKeyByHash(keyHash);
   }
 
   async findKeyByPrefix(prefix: string): Promise<DeveloperGatewayKey | null> {
@@ -108,7 +125,7 @@ export class ApiKeyRepository {
 
         if (!error && data) {
           const mapped = this.mapRowToGatewayKey(data);
-          this.inMemoryCache.set(mapped.id, mapped);
+          this.keyTable.put(mapped.id, mapped);
           return mapped;
         }
       } catch {
@@ -116,16 +133,18 @@ export class ApiKeyRepository {
       }
     }
 
-    for (const key of this.inMemoryCache.values()) {
-      if (key.prefix === prefix && !key.revoked) {
-        return key;
+    const matches = this.keyTable.query({
+      where: {
+        prefix: { $eq: prefix },
+        revoked: { $eq: false }
       }
-    }
-    return null;
+    }) as DeveloperGatewayKey[];
+
+    return matches[0] || null;
   }
 
   async saveGatewayKey(key: DeveloperGatewayKey): Promise<void> {
-    this.inMemoryCache.set(key.id, key);
+    this.keyTable.put(key.id, key);
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -152,7 +171,7 @@ export class ApiKeyRepository {
       totalTokens: (existing.totalTokens || 0) + tokens,
       lastUsedAtMs: Date.now()
     };
-    this.inMemoryCache.set(keyId, updated);
+    this.keyTable.put(keyId, updated);
 
     if (isSupabaseConfigured()) {
       try {
@@ -172,9 +191,9 @@ export class ApiKeyRepository {
   }
 
   async revokeKey(keyId: string, reason: string = 'User requested revocation'): Promise<void> {
-    const existing = this.inMemoryCache.get(keyId);
+    const existing = this.keyTable.get(keyId);
     if (existing) {
-      this.inMemoryCache.set(keyId, { ...existing, revoked: true });
+      this.keyTable.put(keyId, { ...existing, revoked: true });
     }
 
     if (isSupabaseConfigured()) {
@@ -195,7 +214,7 @@ export class ApiKeyRepository {
   }
 
   async deleteKey(keyId: string): Promise<void> {
-    this.inMemoryCache.delete(keyId);
+    this.keyTable.delete(keyId);
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();

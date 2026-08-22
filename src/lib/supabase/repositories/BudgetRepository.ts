@@ -1,11 +1,14 @@
 /**
- * GALXAI: Supabase Multi-Tenant Budget & Alert Policy Repository
+ * GALXAI: Supabase Multi-Tenant Budget & Alert Policy Repository + BroccoliDB Hot Table
  * Tracks workspace spend limits, triggers webhook notifications on threshold crossing (50%/80%/100%),
  * and enforces soft/hard budget caps.
+ * Backed by BroccoliDB L1 reactive table with secondary indexing and natural query parsing.
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
 import type { Database } from '../types';
+import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-natural-query';
 
 export interface BudgetAlertRecord {
   id: string;
@@ -20,7 +23,14 @@ export interface BudgetAlertRecord {
 
 export class BudgetRepository {
   private static instance: BudgetRepository;
-  private readonly inMemoryAlerts = new Map<string, BudgetAlertRecord[]>();
+  public readonly alertTable: BroccoliDbTable<BudgetAlertRecord>;
+
+  private constructor() {
+    this.alertTable = new BroccoliDbTable<BudgetAlertRecord>('budget_alerts');
+    this.alertTable.createIndex('workspaceId');
+    this.alertTable.createIndex('isTriggered');
+    this.alertTable.createSortedIndex('thresholdPercentage');
+  }
 
   static getInstance(): BudgetRepository {
     if (!BudgetRepository.instance) {
@@ -47,9 +57,7 @@ export class BudgetRepository {
       createdAt: new Date().toISOString()
     };
 
-    const list = this.inMemoryAlerts.get(params.workspaceId) || [];
-    list.push(record);
-    this.inMemoryAlerts.set(params.workspaceId, list);
+    this.alertTable.put(id, record);
 
     if (isSupabaseConfigured()) {
       try {
@@ -76,6 +84,7 @@ export class BudgetRepository {
             triggeredAt: data.triggered_at,
             createdAt: data.created_at
           };
+          this.alertTable.put(mapped.id, mapped);
           return mapped;
         }
       } catch {
@@ -86,45 +95,70 @@ export class BudgetRepository {
     return record;
   }
 
-  async checkBudgetThresholds(workspaceId: string, additionalSpendUsd: number = 0): Promise<{
-    success: boolean;
-    currentSpendUsd: number;
-    spendCapUsd: number;
-    percentageUsed: number;
-    isCapped: boolean;
-    triggeredAlerts: any[];
-  }> {
+  async getBudgetAlerts(workspaceId: string): Promise<BudgetAlertRecord[]> {
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
-        const { data, error } = await supabase.rpc('fn_check_budget_thresholds', {
-          p_workspace_id: workspaceId,
-          p_additional_spend_usd: additionalSpendUsd
-        });
+        const { data, error } = await supabase
+          .from('galx_budget_alerts')
+          .select('*')
+          .eq('workspace_id', workspaceId)
+          .order('threshold_percentage', { ascending: true });
 
-        if (!error && data) {
-          const res = data as any;
-          return {
-            success: res.success,
-            currentSpendUsd: Number(res.currentSpendUsd),
-            spendCapUsd: Number(res.spendCapUsd),
-            percentageUsed: Number(res.percentageUsed),
-            isCapped: Boolean(res.isCapped),
-            triggeredAlerts: res.triggeredAlerts || []
-          };
+        if (!error && data && data.length > 0) {
+          const mapped: BudgetAlertRecord[] = data.map(d => ({
+            id: d.id,
+            workspaceId: d.workspace_id,
+            environmentId: d.environment_id,
+            thresholdPercentage: d.threshold_percentage,
+            notificationWebhookUrl: d.notification_webhook_url,
+            isTriggered: d.is_triggered,
+            triggeredAt: d.triggered_at,
+            createdAt: d.created_at
+          }));
+          for (const a of mapped) this.alertTable.put(a.id, a);
+          return mapped;
         }
       } catch {
         // Fallback
       }
     }
 
-    return {
-      success: true,
-      currentSpendUsd: additionalSpendUsd,
-      spendCapUsd: 1000.0,
-      percentageUsed: (additionalSpendUsd / 1000.0) * 100,
-      isCapped: additionalSpendUsd >= 1000.0,
-      triggeredAlerts: []
-    };
+    return this.alertTable.query({
+      where: { workspaceId: { $eq: workspaceId } },
+      sortBy: 'thresholdPercentage',
+      sortOrder: 'asc'
+    }) as BudgetAlertRecord[];
+  }
+
+  async markAlertTriggered(alertId: string): Promise<void> {
+    const existing = this.alertTable.get(alertId);
+    if (existing) {
+      this.alertTable.put(alertId, {
+        ...existing,
+        isTriggered: true,
+        triggeredAt: new Date().toISOString()
+      });
+    }
+
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseAdmin();
+        await supabase
+          .from('galx_budget_alerts')
+          .update({
+            is_triggered: true,
+            triggered_at: new Date().toISOString()
+          })
+          .eq('id', alertId);
+      } catch {
+        // Fallback
+      }
+    }
+  }
+
+  public queryNatural(naturalQuery: string): BudgetAlertRecord[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'budget_alerts');
+    return this.alertTable.query(parsed.queryOptions) as BudgetAlertRecord[];
   }
 }

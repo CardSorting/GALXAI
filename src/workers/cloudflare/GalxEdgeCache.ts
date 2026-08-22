@@ -1,8 +1,12 @@
 /**
- * GALXAI: Cloudflare Edge Cache API & Stale-While-Revalidate Engine
+ * GALXAI: Cloudflare Edge Cache API & Stale-While-Revalidate Engine + BroccoliDB Hot Table
  * Zero-egress caching at global edge Points of Presence for model catalogs,
  * semantic embeddings, prompt caches, and rate-limit states.
+ * Backed by BroccoliDB L1 reactive table with secondary indexing and natural query parsing.
  */
+
+import { BroccoliDbTable } from '../../core/broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../../core/broccolidb/broccolidb-natural-query';
 
 export interface CacheEntry<T> {
   value: T;
@@ -11,9 +15,26 @@ export interface CacheEntry<T> {
   swrTtlMs: number; // Stale-while-revalidate window
 }
 
+export interface CacheRecord<T = any> {
+  id: string;
+  key: string;
+  value: T;
+  cachedAtMs: number;
+  ttlMs: number;
+  swrTtlMs: number;
+  expiresAtMs: number;
+}
+
 export class GalxEdgeCache {
   private static instance: GalxEdgeCache;
-  private readonly memoryCache = new Map<string, CacheEntry<any>>();
+  public readonly cacheTable: BroccoliDbTable<CacheRecord>;
+
+  private constructor() {
+    this.cacheTable = new BroccoliDbTable<CacheRecord>('edge_cache');
+    this.cacheTable.createIndex('key');
+    this.cacheTable.createSortedIndex('cachedAtMs');
+    this.cacheTable.createSortedIndex('expiresAtMs');
+  }
 
   static getInstance(): GalxEdgeCache {
     if (!GalxEdgeCache.instance) {
@@ -34,7 +55,7 @@ export class GalxEdgeCache {
     const swrTtlMs = options.swrTtlMs || 300000; // 5 minutes stale window
     const now = Date.now();
 
-    const entry = this.memoryCache.get(key) as CacheEntry<T> | undefined;
+    const entry = this.cacheTable.get(key) as CacheRecord<T> | null;
 
     if (entry) {
       const age = now - entry.cachedAtMs;
@@ -62,24 +83,44 @@ export class GalxEdgeCache {
   }
 
   set<T>(key: string, value: T, options: { ttlMs?: number; swrTtlMs?: number } = {}): void {
-    this.memoryCache.set(key, {
-      value,
-      cachedAtMs: Date.now(),
-      ttlMs: options.ttlMs || 60000,
-      swrTtlMs: options.swrTtlMs || 300000
-    });
+    const now = Date.now();
+    const ttlMs = options.ttlMs || 60000;
+    const swrTtlMs = options.swrTtlMs || 300000;
 
-    if (this.memoryCache.size > 2000) {
-      const oldestKey = this.memoryCache.keys().next().value;
-      if (oldestKey) this.memoryCache.delete(oldestKey);
+    const record: CacheRecord<T> = {
+      id: key,
+      key,
+      value,
+      cachedAtMs: now,
+      ttlMs,
+      swrTtlMs,
+      expiresAtMs: now + ttlMs + swrTtlMs
+    };
+
+    this.cacheTable.put(key, record);
+
+    if (this.cacheTable.count() > 2000) {
+      const oldest = this.cacheTable.query({
+        sortBy: 'cachedAtMs',
+        sortOrder: 'asc',
+        limit: 1
+      }) as CacheRecord[];
+      if (oldest.length > 0) {
+        this.cacheTable.delete(oldest[0].id);
+      }
     }
   }
 
   delete(key: string): void {
-    this.memoryCache.delete(key);
+    this.cacheTable.delete(key);
   }
 
   clear(): void {
-    this.memoryCache.clear();
+    this.cacheTable.clear();
+  }
+
+  public queryNatural(naturalQuery: string): CacheRecord[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'edge_cache');
+    return this.cacheTable.query(parsed.queryOptions) as CacheRecord[];
   }
 }

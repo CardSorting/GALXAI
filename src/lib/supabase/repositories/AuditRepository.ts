@@ -1,10 +1,16 @@
 /**
- * GALXAI: Supabase Audit Logs & Security Compliance Repository
+ * GALXAI: Supabase Audit Logs & Security Compliance Repository + BroccoliDB Hot Table
  * Immutable event trail for key generation, credential decryption, shard mutations, and admin events.
+ * Backed by BroccoliDB L1 reactive table with secondary indexing, natural query AST translation, and aggregation.
  */
 
+import * as crypto from 'node:crypto';
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
 import type { Database } from '../types';
+import type { AuditIntegrityVerificationResult } from '../../../core/contracts/GalxContracts';
+import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-natural-query';
+import type { DbQueryOptions, DbAggregateQuery, DbAggregateResult } from '../../../core/broccolidb/broccolidb.contracts';
 
 export interface AuditLogRecord {
   id: string;
@@ -19,17 +25,43 @@ export interface AuditLogRecord {
   userAgent: string | null;
   timestampMs: number;
   createdAt: string;
+  prevHash: string;
+  currentHash: string;
 }
 
 export class AuditRepository {
   private static instance: AuditRepository;
   private readonly inMemoryLogs: AuditLogRecord[] = [];
+  public readonly auditTable: BroccoliDbTable<AuditLogRecord>;
+  private static readonly GENESIS_HASH = '0000000000000000000000000000000000000000000000000000000000000000';
+  private latestHash: string = AuditRepository.GENESIS_HASH;
+
+  private constructor() {
+    this.auditTable = new BroccoliDbTable<AuditLogRecord>('audit_logs');
+    this.auditTable.createIndex('action');
+    this.auditTable.createIndex('userId');
+    this.auditTable.createIndex('shardId');
+    this.auditTable.createIndex('workspaceId');
+    this.auditTable.createIndex('resourceType');
+    this.auditTable.createSortedIndex('timestampMs');
+  }
 
   static getInstance(): AuditRepository {
     if (!AuditRepository.instance) {
       AuditRepository.instance = new AuditRepository();
     }
     return AuditRepository.instance;
+  }
+
+  /**
+   * Deterministically computes cryptographic SHA-256 hash for an audit entry chained to the previous hash.
+   */
+  public static computeEntryHash(prevHash: string, id: string, action: string, timestampMs: number, metadata: any): string {
+    const metaStr = JSON.stringify(metadata || {});
+    return crypto
+      .createHash('sha256')
+      .update(`${prevHash}:${id}:${action}:${timestampMs}:${metaStr}`)
+      .digest('hex');
   }
 
   async logAudit(params: {
@@ -46,6 +78,9 @@ export class AuditRepository {
   }): Promise<string> {
     const id = `audit_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
     const now = params.timestampMs || Date.now();
+    const prevHash = this.latestHash;
+    const currentHash = AuditRepository.computeEntryHash(prevHash, id, params.action, now, params.metadata);
+    this.latestHash = currentHash;
 
     const record: AuditLogRecord = {
       id,
@@ -59,10 +94,13 @@ export class AuditRepository {
       ipAddress: params.ipAddress || null,
       userAgent: params.userAgent || null,
       timestampMs: now,
-      createdAt: new Date(now).toISOString()
+      createdAt: new Date(now).toISOString(),
+      prevHash,
+      currentHash
     };
 
     this.inMemoryLogs.unshift(record);
+    this.auditTable.put(record.id, record);
     if (this.inMemoryLogs.length > 2000) {
       this.inMemoryLogs.splice(2000);
     }
@@ -78,7 +116,11 @@ export class AuditRepository {
           action: params.action,
           resource_type: params.resourceType || null,
           resource_id: params.resourceId || null,
-          metadata: params.metadata || {},
+          metadata: {
+            ...(params.metadata || {}),
+            _prevHash: prevHash,
+            _currentHash: currentHash
+          },
           ip_address: params.ipAddress || null,
           user_agent: params.userAgent || null,
           timestamp_ms: now
@@ -89,6 +131,42 @@ export class AuditRepository {
     }
 
     return id;
+  }
+
+  /**
+   * Cryptographically verifies the unbroken chain of custody for all audit log entries.
+   */
+  public verifyAuditChainIntegrity(): AuditIntegrityVerificationResult {
+    // Reverse chronological inMemoryLogs -> chronological order for verification
+    const chronological = [...this.inMemoryLogs].reverse();
+    let prev = AuditRepository.GENESIS_HASH;
+    let verifiedCount = 0;
+
+    for (const entry of chronological) {
+      const computed = AuditRepository.computeEntryHash(entry.prevHash, entry.id, entry.action, entry.timestampMs, entry.metadata);
+      if (entry.prevHash !== prev || entry.currentHash !== computed) {
+        return {
+          valid: false,
+          totalEntries: chronological.length,
+          verifiedEntries: verifiedCount,
+          tamperedEntryId: entry.id,
+          genesisHash: AuditRepository.GENESIS_HASH,
+          latestHash: this.latestHash,
+          verificationTimestamp: new Date().toISOString()
+        };
+      }
+      prev = entry.currentHash;
+      verifiedCount++;
+    }
+
+    return {
+      valid: true,
+      totalEntries: chronological.length,
+      verifiedEntries: verifiedCount,
+      genesisHash: AuditRepository.GENESIS_HASH,
+      latestHash: this.latestHash,
+      verificationTimestamp: new Date().toISOString()
+    };
   }
 
   async getAuditLogs(params?: {
@@ -116,25 +194,47 @@ export class AuditRepository {
 
         const { data, error } = await query;
         if (!error && data && data.length > 0) {
-          return data.map(this.mapRowToAuditLog);
+          const mapped = data.map(this.mapRowToAuditLog);
+          for (const l of mapped) this.auditTable.put(l.id, l);
+          return mapped;
         }
       } catch {
         // Fallback
       }
     }
 
-    let filtered = this.inMemoryLogs;
-    if (params?.userId) filtered = filtered.filter(l => l.userId === params.userId);
-    if (params?.shardId) filtered = filtered.filter(l => l.shardId === params.shardId);
-    if (params?.workspaceId) filtered = filtered.filter(l => l.workspaceId === params.workspaceId);
-    if (params?.action) filtered = filtered.filter(l => l.action === params.action);
+    const whereClause: Record<string, any> = {};
+    if (params?.userId) whereClause.userId = { $eq: params.userId };
+    if (params?.shardId) whereClause.shardId = { $eq: params.shardId };
+    if (params?.workspaceId) whereClause.workspaceId = { $eq: params.workspaceId };
+    if (params?.action) whereClause.action = { $eq: params.action };
 
-    const start = params?.offset || 0;
-    const end = start + (params?.limit || 50);
-    return filtered.slice(start, end);
+    return this.auditTable.query({
+      where: Object.keys(whereClause).length > 0 ? whereClause : undefined,
+      sortBy: 'timestampMs',
+      sortOrder: 'desc',
+      limit: params?.limit || 50,
+      offset: params?.offset || 0
+    }) as AuditLogRecord[];
+  }
+
+  /**
+   * Executes deterministic offline natural language queries over the audit log (<0.1ms).
+   */
+  public queryNatural(naturalQuery: string): AuditLogRecord[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'audit_logs');
+    return this.auditTable.query(parsed.queryOptions) as AuditLogRecord[];
+  }
+
+  /**
+   * Aggregates audit statistics by action, user, or date.
+   */
+  public aggregate(query: DbAggregateQuery): DbAggregateResult {
+    return this.auditTable.aggregate(query);
   }
 
   private mapRowToAuditLog(data: Database['public']['Tables']['galx_audit_logs']['Row']): AuditLogRecord {
+    const meta = (data.metadata as Record<string, any>) || {};
     return {
       id: data.id,
       workspaceId: data.workspace_id,
@@ -143,11 +243,13 @@ export class AuditRepository {
       action: data.action,
       resourceType: data.resource_type,
       resourceId: data.resource_id,
-      metadata: (data.metadata as Record<string, any>) || {},
+      metadata: meta,
       ipAddress: data.ip_address,
       userAgent: data.user_agent,
       timestampMs: Number(data.timestamp_ms),
-      createdAt: data.created_at
+      createdAt: data.created_at,
+      prevHash: meta._prevHash || '0000000000000000000000000000000000000000000000000000000000000000',
+      currentHash: meta._currentHash || ''
     };
   }
 }

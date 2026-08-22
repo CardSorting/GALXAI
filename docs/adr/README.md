@@ -32,18 +32,21 @@ This directory contains the formal Architectural Decision Records (ADRs) that go
 | **[ADR 0022](0022-oauth-token-rotation-with-reuse-attack-detection-cascades.md)** | OAuth 2.0 Token Rotation with Reuse Attack Detection Cascades | **Anti-Replay** | `Accepted` | Single-use rotation with 30s grace window and automatic session family lineage killswitch. |
 | **[ADR 0023](0023-step-up-sudo-elevation-and-fine-grained-token-scoping.md)** | Step-Up SUDO Session Elevation & Fine-Grained Token Scoping | **Authorization** | `Accepted` | 15-minute privileged SUDO window, wildcard token scopes (`chat:*`), and multi-device remote logout. |
 | **[ADR 0024](0024-adaptive-behavioral-risk-scoring-and-zero-downtime-kms-rewrapping.md)** | Adaptive Behavioral Risk Scoring & Zero-Downtime KMS Re-Wrapping | **KMS & Risk** | `Accepted` | Dynamic 0-100 risk scoring, security posture grades (`A+`), and zero-downtime key re-wrapping. |
-
-
-
-
-
+| **[ADR 0025](0025-broccolidb-l1-reactive-in-memory-table-and-secondary-indexing.md)** | BroccoliDB L1 Reactive Table & Multi-Dimensional Secondary Indexing | **In-Memory DB** | `Accepted` | Sub-microsecond query tables with rich operator DSL and zero-allocation statistical aggregations. |
+| **[ADR 0026](0026-broccolidb-natural-language-query-ast-parser-and-wal-persistence.md)** | BroccoliDB Natural Query AST Parser & Cryptographic WAL Persistence | **Natural Query** | `Accepted` | Offline deterministic AST translation ($< 0.1\text{ms}$) and tamper-evident crash recovery WAL. |
+| **[ADR 0027](0027-enterprise-privacy-safe-harbor-18-gdpr-and-zdr-v10-memory-zeroization.md)** | Enterprise Privacy Substrate (Safe Harbor 18, GDPR, & ZDR v10.0) | **Privacy & ZDR** | `Accepted` | Complete HIPAA/GDPR/Global privacy coverage, streaming PII windowing, and 2-pass memory zeroization. |
+| **[ADR 0028](0028-soc2-type-ii-compliance-engine-drift-detector-and-merkle-audit-ledger.md)** | SOC 2 Type II Compliance Engine, Drift Detector & Merkle Audit Ledger | **SOC 2 & GRC** | `Accepted` | 28 AICPA Trust Services controls, automated drift remediation, and Merkle Tree audit chaining. |
+| **[ADR 0029](0029-sliding-window-streaming-transformer-and-cross-chunk-split-pii.md)** | Sliding-Window Streaming Transformer & Boundary Split PII | **Streaming PII** | `Accepted` | Zero-delay online token stream windowing for fragmented PII/PHI de-identification. |
+| **[ADR 0030](0030-ephemeral-session-enclave-and-zero-knowledge-attestation-tickets.md)** | Ephemeral Session Enclaves & Zero-Knowledge Attestation Tickets | **Audit Proofs** | `Accepted` | Request-isolated Session KEK, 2-pass memory wiping, and mathematical ZKAT auditor receipts. |
+| **[ADR 0031](0031-dynamic-security-probe-and-automated-drift-healing.md)** | Dynamic Security Pen-Test Probe & Autonomous Drift Remediation | **Self-Healing** | `Accepted` | Sandboxed synthetic attack simulation and automatic drift remediation loops. |
 
 ---
-
 
 ## 🧭 Architectural Principles
 
 1. **Zero Client Refactoring**: Standard OpenAI API compatibility (`/v1/chat/completions`, `/v1/images/generations`, `/v1/models`).
-2. **Sub-15ms Gateway Overhead**: Zero-allocation ring buffers, in-memory continuous calculus, and non-blocking candidate selection.
+2. **Sub-15ms Gateway Overhead**: Zero-allocation ring buffers, BroccoliDB L1 indexed tables, and non-blocking candidate selection.
 3. **Anti-Sybil Integrity**: $10 minimum deposit proof with 50% instant match grant ($15 total usable credit) and 100% unspent balance refundability.
 4. **Transparent Capacity Leveling**: Adaptive Hydraulic Headroom Cycling (P-AHT) with dynamic reliability weights and tenant affinity dispersion.
+5. **Zero Data Retention**: Cryptographically provable memory zeroization, sliding-window streaming redaction, and SHA-256 Merkle tamper-evident custody chains.
+6. **Continuous Autonomous Self-Healing**: Real-time SOC 2 drift evaluation with automated configuration remediation.

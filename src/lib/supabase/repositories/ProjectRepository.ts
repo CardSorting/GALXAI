@@ -1,10 +1,13 @@
 /**
- * GALXAI: Supabase Project & Environment Isolation Repository
+ * GALXAI: Supabase Project & Environment Isolation Repository + BroccoliDB Hot Tables
  * Manages Projects and Environments (production, staging, dev) with spend budgets.
+ * Backed by BroccoliDB L1 reactive tables with secondary indexing and natural query parsing.
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
 import type { Database, GalxEnvironmentType } from '../types';
+import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-natural-query';
 
 export interface ProjectRecord {
   id: string;
@@ -29,8 +32,19 @@ export interface EnvironmentRecord {
 
 export class ProjectRepository {
   private static instance: ProjectRepository;
-  private readonly inMemoryProjects = new Map<string, ProjectRecord>();
-  private readonly inMemoryEnvironments = new Map<string, EnvironmentRecord[]>();
+  public readonly projectTable: BroccoliDbTable<ProjectRecord>;
+  public readonly envTable: BroccoliDbTable<EnvironmentRecord>;
+
+  private constructor() {
+    this.projectTable = new BroccoliDbTable<ProjectRecord>('projects');
+    this.projectTable.createIndex('workspaceId');
+    this.projectTable.createIndex('slug');
+
+    this.envTable = new BroccoliDbTable<EnvironmentRecord>('environments');
+    this.envTable.createIndex('projectId');
+    this.envTable.createIndex('environmentType');
+    this.envTable.createIndex('isActive');
+  }
 
   static getInstance(): ProjectRepository {
     if (!ProjectRepository.instance) {
@@ -55,7 +69,7 @@ export class ProjectRepository {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    this.inMemoryProjects.set(id, record);
+    this.projectTable.put(id, record);
 
     // Auto-create default development and production environments
     const envProd: EnvironmentRecord = {
@@ -78,7 +92,8 @@ export class ProjectRepository {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    this.inMemoryEnvironments.set(id, [envProd, envDev]);
+    this.envTable.put(envProd.id, envProd);
+    this.envTable.put(envDev.id, envDev);
 
     if (isSupabaseConfigured()) {
       try {
@@ -104,7 +119,7 @@ export class ProjectRepository {
             createdAt: data.created_at,
             updatedAt: data.updated_at
           };
-          this.inMemoryProjects.set(mapped.id, mapped);
+          this.projectTable.put(mapped.id, mapped);
           return mapped;
         }
       } catch {
@@ -115,7 +130,7 @@ export class ProjectRepository {
     return record;
   }
 
-  async getProjectsByWorkspace(workspaceId: string): Promise<ProjectRecord[]> {
+  async getProjects(workspaceId: string): Promise<ProjectRecord[]> {
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -123,10 +138,10 @@ export class ProjectRepository {
           .from('galx_projects')
           .select('*')
           .eq('workspace_id', workspaceId)
-          .order('created_at', { ascending: true });
+          .order('created_at', { ascending: false });
 
         if (!error && data && data.length > 0) {
-          return data.map(d => ({
+          const mapped: ProjectRecord[] = data.map(d => ({
             id: d.id,
             workspaceId: d.workspace_id,
             name: d.name,
@@ -135,13 +150,17 @@ export class ProjectRepository {
             createdAt: d.created_at,
             updatedAt: d.updated_at
           }));
+          for (const p of mapped) this.projectTable.put(p.id, p);
+          return mapped;
         }
       } catch {
         // Fallback
       }
     }
 
-    return Array.from(this.inMemoryProjects.values()).filter(p => p.workspaceId === workspaceId);
+    return this.projectTable.query({
+      where: { workspaceId: { $eq: workspaceId } }
+    }) as ProjectRecord[];
   }
 
   async getEnvironments(projectId: string): Promise<EnvironmentRecord[]> {
@@ -154,22 +173,31 @@ export class ProjectRepository {
           .eq('project_id', projectId);
 
         if (!error && data && data.length > 0) {
-          return data.map(d => ({
+          const mapped: EnvironmentRecord[] = data.map(d => ({
             id: d.id,
             projectId: d.project_id,
             name: d.name,
-            environmentType: d.environment_type as GalxEnvironmentType,
+            environmentType: d.environment_type,
             monthlyBudgetUsd: d.monthly_budget_usd ? Number(d.monthly_budget_usd) : null,
             isActive: d.is_active,
             createdAt: d.created_at,
             updatedAt: d.updated_at
           }));
+          for (const e of mapped) this.envTable.put(e.id, e);
+          return mapped;
         }
       } catch {
         // Fallback
       }
     }
 
-    return this.inMemoryEnvironments.get(projectId) || [];
+    return this.envTable.query({
+      where: { projectId: { $eq: projectId } }
+    }) as EnvironmentRecord[];
+  }
+
+  public queryProjectsNatural(naturalQuery: string): ProjectRecord[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'projects');
+    return this.projectTable.query(parsed.queryOptions) as ProjectRecord[];
   }
 }

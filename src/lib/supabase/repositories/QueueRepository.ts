@@ -1,15 +1,25 @@
 /**
- * GALXAI: Supabase Task Queue Repository
+ * GALXAI: Supabase Task Queue Repository + BroccoliDB Hot Table
  * Governs asynchronous queue configurations, rate limit governors, retry backoff policies, and DLQ.
+ * Backed by BroccoliDB L1 reactive table with secondary indexing and natural query parsing.
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
 import type { Database } from '../types';
 import type { GalxTaskQueueConfig, QueueState } from '../../../core/contracts/GalxContracts';
+import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-natural-query';
 
 export class QueueRepository {
   private static instance: QueueRepository;
-  private readonly inMemoryQueues = new Map<string, GalxTaskQueueConfig>();
+  public readonly queueTable: BroccoliDbTable<GalxTaskQueueConfig>;
+
+  private constructor() {
+    this.queueTable = new BroccoliDbTable<GalxTaskQueueConfig>('task_queues');
+    this.queueTable.createIndex('name');
+    this.queueTable.createIndex('state');
+    this.queueTable.createSortedIndex('createdAtMs');
+  }
 
   static getInstance(): QueueRepository {
     if (!QueueRepository.instance) {
@@ -29,7 +39,7 @@ export class QueueRepository {
 
         if (!error && data && data.length > 0) {
           const mapped = data.map(this.mapRowToQueue);
-          for (const q of mapped) this.inMemoryQueues.set(q.id, q);
+          for (const q of mapped) this.queueTable.put(q.id, q);
           return mapped;
         }
       } catch {
@@ -37,7 +47,10 @@ export class QueueRepository {
       }
     }
 
-    return Array.from(this.inMemoryQueues.values());
+    return this.queueTable.query({
+      sortBy: 'createdAtMs',
+      sortOrder: 'asc'
+    }) as GalxTaskQueueConfig[];
   }
 
   async getQueueById(id: string): Promise<GalxTaskQueueConfig | null> {
@@ -52,7 +65,7 @@ export class QueueRepository {
 
         if (!error && data) {
           const mapped = this.mapRowToQueue(data);
-          this.inMemoryQueues.set(mapped.id, mapped);
+          this.queueTable.put(mapped.id, mapped);
           return mapped;
         }
       } catch {
@@ -60,11 +73,11 @@ export class QueueRepository {
       }
     }
 
-    return this.inMemoryQueues.get(id) || null;
+    return this.queueTable.get(id) || null;
   }
 
   async saveQueue(queue: GalxTaskQueueConfig): Promise<void> {
-    this.inMemoryQueues.set(queue.id, queue);
+    this.queueTable.put(queue.id, queue);
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -77,7 +90,7 @@ export class QueueRepository {
   }
 
   async deleteQueue(queueId: string): Promise<void> {
-    this.inMemoryQueues.delete(queueId);
+    this.queueTable.delete(queueId);
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -89,9 +102,9 @@ export class QueueRepository {
   }
 
   async updateQueueState(queueId: string, state: QueueState): Promise<void> {
-    const queue = this.inMemoryQueues.get(queueId);
+    const queue = this.queueTable.get(queueId);
     if (queue) {
-      this.inMemoryQueues.set(queueId, { ...queue, state, updatedAtMs: Date.now() });
+      this.queueTable.put(queueId, { ...queue, state, updatedAtMs: Date.now() });
     }
 
     if (isSupabaseConfigured()) {
@@ -108,6 +121,11 @@ export class QueueRepository {
         // Fallback
       }
     }
+  }
+
+  public queryNatural(naturalQuery: string): GalxTaskQueueConfig[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'task_queues');
+    return this.queueTable.query(parsed.queryOptions) as GalxTaskQueueConfig[];
   }
 
   private mapRowToQueue(data: Database['public']['Tables']['galx_task_queues']['Row']): GalxTaskQueueConfig {

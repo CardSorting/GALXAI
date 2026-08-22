@@ -14,6 +14,9 @@ export { ModelsResource } from './resources/models';
 export { QueuesResource } from './resources/queues';
 export { WorkflowsResource } from './resources/workflows';
 export { WebhooksResource } from './resources/webhooks';
+export { PrivacyResource, PrivacyProfiles } from './resources/privacy';
+export { ComplianceResource } from './resources/compliance';
+export { DatabaseResource } from './resources/database';
 
 // DX & Ergonomic Extensions
 export { ChatCompletionBuilder } from './builder';
@@ -31,7 +34,8 @@ export {
   type MiddlewareResponseContext,
   type MiddlewareErrorContext,
   createCostTrackerPlugin,
-  createLRUCachePlugin
+  createLRUCachePlugin,
+  createPrivacyShieldPlugin
 } from './middleware';
 export { ModelResilience } from './resilience';
 export { TokenOptimizer } from './tokens';

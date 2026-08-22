@@ -1,12 +1,17 @@
 /**
- * GALXAI: Supabase Telemetry & Metrics Repository
+ * GALXAI: Supabase Telemetry & Metrics Repository + BroccoliDB Hot Table
  * Ingests request metrics, latency percentiles (P50/P90/P99), error rates, and token throughput.
+ * Backed by BroccoliDB L1 reactive table with secondary indexing, natural query AST translation, and aggregation.
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
 import type { Database, GalxProviderType } from '../types';
+import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-natural-query';
+import type { DbQueryOptions, DbAggregateQuery, DbAggregateResult } from '../../../core/broccolidb/broccolidb.contracts';
 
 export interface TelemetrySample {
+  id?: string;
   workspaceId?: string;
   userId?: string;
   provider: GalxProviderType;
@@ -31,7 +36,18 @@ export interface LatencyPercentiles {
 
 export class TelemetryRepository {
   private static instance: TelemetryRepository;
-  private readonly inMemorySamples: TelemetrySample[] = [];
+  public readonly telemetryTable: BroccoliDbTable<TelemetrySample>;
+
+  private constructor() {
+    this.telemetryTable = new BroccoliDbTable<TelemetrySample>('telemetry_samples');
+    this.telemetryTable.createIndex('provider');
+    this.telemetryTable.createIndex('modelId');
+    this.telemetryTable.createIndex('shardId');
+    this.telemetryTable.createIndex('statusCode');
+    this.telemetryTable.createIndex('isError');
+    this.telemetryTable.createSortedIndex('timestampMs');
+    this.telemetryTable.createSortedIndex('latencyMs');
+  }
 
   static getInstance(): TelemetryRepository {
     if (!TelemetryRepository.instance) {
@@ -45,18 +61,17 @@ export class TelemetryRepository {
     const promptTokens = sample.promptTokens || 0;
     const completionTokens = sample.completionTokens || 0;
     const totalTokens = sample.totalTokens || (promptTokens + completionTokens);
+    const id = sample.id || `tel_${now}_${Math.random().toString(36).substring(2, 7)}`;
 
     const s: TelemetrySample = {
       ...sample,
+      id,
       promptTokens,
       completionTokens,
       totalTokens,
       timestampMs: now
     };
-    this.inMemorySamples.push(s);
-    if (this.inMemorySamples.length > 5000) {
-      this.inMemorySamples.splice(0, this.inMemorySamples.length - 5000);
-    }
+    this.telemetryTable.put(id, s);
 
     if (isSupabaseConfigured()) {
       try {
@@ -83,11 +98,10 @@ export class TelemetryRepository {
 
   async recordTelemetryBatch(samples: TelemetrySample[]): Promise<number> {
     if (samples.length === 0) return 0;
-    for (const s of samples) {
-      this.inMemorySamples.push(s);
-    }
-    if (this.inMemorySamples.length > 5000) {
-      this.inMemorySamples.splice(0, this.inMemorySamples.length - 5000);
+    for (const sample of samples) {
+      const now = sample.timestampMs || Date.now();
+      const id = sample.id || `tel_${now}_${Math.random().toString(36).substring(2, 7)}`;
+      this.telemetryTable.put(id, { ...sample, id, timestampMs: now });
     }
 
     if (isSupabaseConfigured()) {
@@ -137,14 +151,20 @@ export class TelemetryRepository {
       }
     }
 
-    const filtered = this.inMemorySamples
-      .filter(s => (s.timestampMs || 0) >= cutoffMs)
-      .filter(s => !params?.provider || s.provider === params.provider)
-      .filter(s => !params?.modelId || s.modelId === params.modelId)
-      .map(s => s.latencyMs)
-      .sort((a, b) => a - b);
+    const whereClause: Record<string, any> = {
+      timestampMs: { $gte: cutoffMs }
+    };
+    if (params?.provider) whereClause.provider = { $eq: params.provider };
+    if (params?.modelId) whereClause.modelId = { $eq: params.modelId };
 
-    return this.computePercentiles(filtered);
+    const samples = this.telemetryTable.query({
+      where: whereClause,
+      sortBy: 'latencyMs',
+      sortOrder: 'asc'
+    }) as TelemetrySample[];
+
+    const latencies = samples.map(s => s.latencyMs);
+    return this.computePercentiles(latencies);
   }
 
   async getThroughput(windowMs: number = 60000): Promise<{
@@ -178,16 +198,30 @@ export class TelemetryRepository {
       }
     }
 
-    const recent = this.inMemorySamples.filter(s => (s.timestampMs || 0) >= cutoffMs);
-    const totalRequests = recent.length;
-    const totalTokens = recent.reduce((acc, row) => acc + (row.totalTokens || 0), 0);
-    const errors = recent.filter(row => row.isError).length;
+    const samples = this.telemetryTable.query({
+      where: {
+        timestampMs: { $gte: cutoffMs }
+      }
+    }) as TelemetrySample[];
+
+    const totalRequests = samples.length;
+    const totalTokens = samples.reduce((acc, row) => acc + (row.totalTokens || 0), 0);
+    const errors = samples.filter(row => row.isError).length;
 
     return {
       requestsPerMinute: totalRequests,
       tokensPerMinute: totalTokens,
       errorRatePercentage: totalRequests > 0 ? (errors / totalRequests) * 100 : 0
     };
+  }
+
+  public queryNatural(naturalQuery: string): TelemetrySample[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'telemetry_samples');
+    return this.telemetryTable.query(parsed.queryOptions) as TelemetrySample[];
+  }
+
+  public aggregate(query: DbAggregateQuery): DbAggregateResult {
+    return this.telemetryTable.aggregate(query);
   }
 
   private computePercentiles(latencies: number[]): LatencyPercentiles {

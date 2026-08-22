@@ -24,6 +24,9 @@
 14. [Webhooks & Cryptographic Security (`galx.webhooks`)](#14-webhooks--cryptographic-security-galxwebhooks)
 15. [Typed Error Hierarchy](#15-typed-error-hierarchy)
 16. [Interactive Developer CLI (`npx galxai`)](#16-interactive-developer-cli-npx-galxai)
+17. [BroccoliDB In-Memory Natural Querying (`galx.models`, `galx.queues`, `galx.privacy`, `galx.db`)](#17-broccolidb-in-memory-natural-querying-galxmodels-galxqueues-galxprivacy-galxdb)
+18. [Privacy Shield Plugin & Zero Data Retention Middleware (`createPrivacyShieldPlugin`)](#18-privacy-shield-plugin--zero-data-retention-middleware-createprivacyshieldplugin)
+19. [SOC 2 Type II Compliance & GRC Auditor SDK (`galx.compliance`)](#19-soc-2-type-ii-compliance--grc-auditor-sdk-galxcompliance)
 
 ---
 
@@ -399,3 +402,89 @@ npx galxai models
 # Fast ping
 npx galxai ping
 ```
+
+---
+
+## 17. BroccoliDB In-Memory Natural Querying (`galx.models`, `galx.queues`, `galx.privacy`, `galx.db`)
+
+Perform zero-dependency, offline deterministic natural language queries with $< 0.1\text{ms}$ latency:
+
+```typescript
+// 1. Natural Language Model Querying
+const models = galx.models.queryNatural(
+  'where provider = "openai" and supportsVision = true and inputPricePer1M <= 1.0 sort by price asc'
+);
+
+// 2. Natural Language Task Queue Inspection
+const pendingJobs = galx.queues.queryNatural(
+  'where state = "pending" and priority > 5 sort by createdAt desc limit 10'
+);
+
+// 3. Natural Language Shard Compliance Search
+const euShards = galx.privacy.queryShardsNatural(
+  'where hipaaCompliant = true and dataResidency = "eu"'
+);
+
+// 4. Single-Pass Statistical Aggregations
+const priceStats = galx.db.aggregate({
+  table: 'models',
+  groupBy: ['provider'],
+  metrics: {
+    avgPrice: { metric: 'avg', field: 'inputPricePer1M' },
+    minPrice: { metric: 'min', field: 'inputPricePer1M' },
+    count: { metric: 'count' }
+  }
+});
+```
+
+---
+
+## 18. Privacy Shield Plugin & Zero Data Retention Middleware (`createPrivacyShieldPlugin`)
+
+Automatically de-identify sensitive PHI/PII entities before upstream transit and rehydrate them upon completion:
+
+```typescript
+import { GalxAI, createPrivacyShieldPlugin, PrivacyProfiles } from '@/sdk';
+
+const galx = new GalxAI({ apiKey: process.env.GALX_API_KEY });
+
+// Install Privacy Shield Middleware
+galx.use(createPrivacyShieldPlugin({
+  profile: PrivacyProfiles.MAXIMUM_PRIVACY,
+  hipaaEnabled: true,
+  gdprEnabled: true,
+  zdrEnabled: true,
+  onPIIDetected: (detectedTypes) => {
+    console.log(`[PrivacyShield] Redacted sensitive entities: ${detectedTypes.join(', ')}`);
+  }
+}));
+
+// Prompts with SSNs, MRNs, Credit Cards are seamlessly redacted upstream and rehydrated locally
+const response = await galx.chat.completions.create({
+  model: 'gpt-5.6-sol',
+  messages: [{ role: 'user', content: 'Patient John Doe (SSN: 000-12-3456) diagnosed with hypertension.' }]
+});
+console.log(response.choices[0].message.content);
+```
+
+---
+
+## 19. SOC 2 Type II Compliance & GRC Auditor SDK (`galx.compliance`)
+
+Retrieve real-time posture reports, evaluate configuration drifts, and generate signed evidence packages for auditors:
+
+```typescript
+// 1. Retrieve 5-Pillar Real-Time Posture Grade
+const posture = galx.compliance.getPostureReport();
+console.log(`Compliance Score: ${posture.overallPostureScore}% (${posture.grade})`);
+
+// 2. Generate Cryptographically Signed Evidence Dossier
+const dossier = galx.compliance.getEvidenceDossier();
+console.log(`Auditor Attestation: ${dossier.attestationSummary.status}`);
+console.log(`Signature: ${dossier.cryptographicSignatureSha256}`);
+
+// 3. Inspect 28 SOC 2 / HIPAA Technical Control Mappings
+const controls = galx.compliance.getControls();
+console.log(`Active Controls: ${controls.length}/28`);
+```
+

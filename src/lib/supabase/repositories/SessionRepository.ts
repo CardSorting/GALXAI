@@ -16,10 +16,22 @@ import type {
   UserSecurityPosture
 } from '../../../core/contracts/GalxContracts';
 
+import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
+
 export class SessionRepository {
   private static instance: SessionRepository;
   private readonly inMemoryCache = new Map<string, GalxUserSession>();
+  private readonly sessionTable: BroccoliDbTable<GalxUserSession>;
   private readonly inMemoryRiskEvents: any[] = [];
+
+  constructor() {
+    this.sessionTable = new BroccoliDbTable<GalxUserSession>('user_sessions');
+    this.sessionTable.createIndex('tokenHash');
+    this.sessionTable.createIndex('previousTokenHash');
+    this.sessionTable.createIndex('userId');
+    this.sessionTable.createIndex('isRevoked');
+    this.sessionTable.createSortedIndex('expiresAtMs');
+  }
 
   static getInstance(): SessionRepository {
     if (!SessionRepository.instance) {
@@ -28,8 +40,18 @@ export class SessionRepository {
     return SessionRepository.instance;
   }
 
-  async createSession(session: GalxUserSession): Promise<void> {
+  private saveSessionInMemory(session: GalxUserSession): void {
     this.inMemoryCache.set(session.id, session);
+    this.sessionTable.put(session.id, session);
+  }
+
+  private deleteSessionInMemory(sessionId: string): void {
+    this.inMemoryCache.delete(sessionId);
+    this.sessionTable.delete(sessionId);
+  }
+
+  async createSession(session: GalxUserSession): Promise<void> {
+    this.saveSessionInMemory(session);
 
     if (isSupabaseConfigured()) {
       try {
@@ -60,6 +82,7 @@ export class SessionRepository {
         if (!error && data) {
           const mapped = this.mapRowToSession(data);
           this.inMemoryCache.set(mapped.id, mapped);
+          this.sessionTable.put(mapped.id, mapped);
           return mapped;
         }
       } catch {
@@ -68,17 +91,26 @@ export class SessionRepository {
     }
 
     const now = Date.now();
-    for (const session of this.inMemoryCache.values()) {
-      if (session.tokenHash === tokenHash) {
-        if (!includeRevoked && session.isRevoked) continue;
-        if (session.expiresAtMs <= now) continue;
-        return session;
+    const primaryMatches = this.sessionTable.query({
+      where: {
+        tokenHash: { $eq: tokenHash },
+        ...(includeRevoked ? {} : { isRevoked: { $eq: false } }),
+        expiresAtMs: { $gt: now }
       }
-      if (session.previousTokenHash === tokenHash) {
-        if (!includeRevoked && session.isRevoked) continue;
-        if (now <= (session.gracePeriodUntilMs || 0)) {
-          return session;
-        }
+    }) as GalxUserSession[];
+    if (primaryMatches.length > 0) {
+      return primaryMatches[0];
+    }
+
+    const prevMatches = this.sessionTable.query({
+      where: {
+        previousTokenHash: { $eq: tokenHash },
+        ...(includeRevoked ? {} : { isRevoked: { $eq: false } })
+      }
+    }) as GalxUserSession[];
+    for (const session of prevMatches) {
+      if (now <= (session.gracePeriodUntilMs || 0)) {
+        return session;
       }
     }
     return null;
@@ -136,7 +168,7 @@ export class SessionRepository {
           if (res.success) {
             for (const session of this.inMemoryCache.values()) {
               if (session.id === res.session_id) {
-                this.inMemoryCache.set(session.id, {
+                this.saveSessionInMemory({
                   ...session,
                   previousTokenHash: oldTokenHash,
                   tokenHash: newTokenHash,
@@ -159,7 +191,7 @@ export class SessionRepository {
             if (res.family_id) {
               for (const [id, s] of this.inMemoryCache.entries()) {
                 if (s.sessionFamilyId === res.family_id || s.id === res.session_id) {
-                  this.inMemoryCache.set(id, { ...s, isRevoked: true, revokedReason: 'TOKEN_REUSE_ATTACK_DETECTED' });
+                  this.saveSessionInMemory({ ...s, isRevoked: true, revokedReason: 'TOKEN_REUSE_ATTACK_DETECTED' });
                 }
               }
             }
@@ -198,7 +230,7 @@ export class SessionRepository {
           lastActiveAtMs: now,
           updatedAt: new Date(now).toISOString()
         };
-        this.inMemoryCache.set(session.id, updated);
+        this.saveSessionInMemory(updated);
         return { success: true, expiresAtMs: newExpiresAtMs, reuseDetected: false };
       }
     }
@@ -212,7 +244,7 @@ export class SessionRepository {
         const familyId = session.sessionFamilyId;
         for (const [id, s] of this.inMemoryCache.entries()) {
           if ((familyId && s.sessionFamilyId === familyId) || s.id === session.id) {
-            this.inMemoryCache.set(id, { ...s, isRevoked: true, revokedReason: 'TOKEN_REUSE_ATTACK_DETECTED' });
+            this.saveSessionInMemory({ ...s, isRevoked: true, revokedReason: 'TOKEN_REUSE_ATTACK_DETECTED' });
           }
         }
         return { success: false, reuseDetected: true, error: 'TOKEN_REUSE_ATTACK_DETECTED' };
@@ -238,7 +270,7 @@ export class SessionRepository {
       if (existing.userId !== userId || existing.isRevoked) {
         return { success: false, sudoActive: false, sudoElevatedUntilMs: 0, expiresInMs: 0, error: 'SESSION_NOT_FOUND_OR_REVOKED' };
       }
-      this.inMemoryCache.set(sessionId, {
+      this.saveSessionInMemory({
         ...existing,
         sudoElevatedUntilMs: elevatedUntil,
         updatedAt: new Date(now).toISOString()
@@ -302,7 +334,7 @@ export class SessionRepository {
     // Update risk score on session
     const existing = this.inMemoryCache.get(sessionId);
     if (existing) {
-      this.inMemoryCache.set(sessionId, {
+      this.saveSessionInMemory({
         ...existing,
         riskScore: Math.max(existing.riskScore || 0, riskScore)
       });
@@ -328,7 +360,7 @@ export class SessionRepository {
   async touchSession(sessionId: string, nowMs: number = Date.now()): Promise<void> {
     const existing = this.inMemoryCache.get(sessionId);
     if (existing) {
-      this.inMemoryCache.set(sessionId, {
+      this.saveSessionInMemory({
         ...existing,
         lastActiveAtMs: nowMs,
         updatedAt: new Date(nowMs).toISOString()
@@ -364,7 +396,7 @@ export class SessionRepository {
 
         if (!error && data && data.length > 0) {
           const mapped = data.map(this.mapRowToSession);
-          for (const s of mapped) this.inMemoryCache.set(s.id, s);
+          for (const s of mapped) this.saveSessionInMemory(s);
           return mapped;
         }
       } catch {
@@ -476,7 +508,7 @@ export class SessionRepository {
     const existing = this.inMemoryCache.get(sessionId);
     const nowIso = new Date().toISOString();
     if (existing) {
-      this.inMemoryCache.set(sessionId, {
+      this.saveSessionInMemory({
         ...existing,
         isRevoked: true,
         revokedAt: nowIso,
@@ -508,7 +540,7 @@ export class SessionRepository {
     const nowIso = new Date().toISOString();
     for (const [id, session] of this.inMemoryCache.entries()) {
       if (session.userId === userId && id !== currentSessionId && !session.isRevoked) {
-        this.inMemoryCache.set(id, {
+        this.saveSessionInMemory({
           ...session,
           isRevoked: true,
           revokedAt: nowIso,
@@ -544,7 +576,7 @@ export class SessionRepository {
     const nowIso = new Date().toISOString();
     for (const [id, session] of this.inMemoryCache.entries()) {
       if (session.sessionFamilyId === familyId && !session.isRevoked) {
-        this.inMemoryCache.set(id, {
+        this.saveSessionInMemory({
           ...session,
           isRevoked: true,
           revokedAt: nowIso,
@@ -579,7 +611,7 @@ export class SessionRepository {
     const nowIso = new Date().toISOString();
     for (const [id, session] of this.inMemoryCache.entries()) {
       if (session.userId === userId && !session.isRevoked) {
-        this.inMemoryCache.set(id, {
+        this.saveSessionInMemory({
           ...session,
           isRevoked: true,
           revokedAt: nowIso,
@@ -628,7 +660,7 @@ export class SessionRepository {
     let reclaimed = 0;
     for (const [id, session] of this.inMemoryCache.entries()) {
       if (session.expiresAtMs < now || (session.isRevoked && now - session.lastActiveAtMs > 7 * 24 * 3600 * 1000)) {
-        this.inMemoryCache.delete(id);
+        this.deleteSessionInMemory(id);
         reclaimed++;
       }
     }

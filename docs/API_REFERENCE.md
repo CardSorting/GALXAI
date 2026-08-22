@@ -351,6 +351,70 @@ curl -X POST https://gateway.galx.ai/api/queues/agent-swarms/tasks \
 
 ---
 
+## 🛡️ Privacy & Zero Data Retention Compliance Headers
+
+Clients can specify granular privacy policies directly through HTTP request headers:
+
+| Header | Values | Description |
+| :--- | :--- | :--- |
+| `X-Galx-Privacy-Profile` | `standard`, `maximum_privacy`, `hipaa`, `eu_strict` | Applies pre-configured privacy and redaction rulesets. |
+| `X-Galx-HIPAA-Deidentify` | `true`, `false` | Enables Safe Harbor 18 de-identification on prompt messages. |
+| `X-Galx-ZDR-Zeroize` | `true`, `false` | Mandates 2-pass memory zeroization and ephemeral session KEK protection. |
+| `X-Galx-Data-Residency` | `global`, `eu`, `us-east` | Restricts shard routing strictly to sovereign geographic regions. |
+| `Sec-GPC` | `1` | Global Privacy Control header automatically enforces zero tracking and no-store directives. |
+
+---
+
+## 📋 Compliance & GRC Auditor Endpoints
+
+### 12. SOC 2 Type II Posture Report (`GET /api/compliance/posture`)
+Retrieves the real-time posture grade and status across all 5 Trust Services Criteria (28 controls).
+
+```bash
+curl -X GET https://gateway.galx.ai/api/compliance/posture \
+  -H "Authorization: Bearer galx_live_..."
+```
+
+### 13. Signed SOC 2 Type II Evidence Dossier (`GET /api/compliance/evidence`)
+Generates a cryptographically signed evidence package with Merkle audit roots and digital signatures for SOC 2 Type II and HIPAA auditors.
+
+```bash
+curl -X GET https://gateway.galx.ai/api/compliance/evidence \
+  -H "Authorization: Bearer galx_live_..."
+```
+
+### 14. GDPR Article 30 Records of Processing Activities (RoPA) (`GET /api/compliance/ropa`)
+Returns the complete GDPR Article 30 controller and processor processing registers sealed with SHA-256 digital seals.
+
+```bash
+curl -X GET https://gateway.galx.ai/api/compliance/ropa \
+  -H "Authorization: Bearer galx_live_..."
+```
+
+### 15. GDPR Article 17 Right to Erasure / Purge (`POST /api/compliance/dsar/purge`)
+Executes an immediate cryptographic purge of user data, session records, and keys, returning signed proof of erasure.
+
+```bash
+curl -X POST https://gateway.galx.ai/api/compliance/dsar/purge \
+  -H "Authorization: Bearer galx_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{ "userId": "usr_dev_123" }'
+```
+
+---
+
+## 🥦 BroccoliDB Natural Query & Analytics APIs
+
+### 16. Natural Language Model Query (`GET /v1/models/query`)
+Executes offline deterministic natural queries against the model catalog:
+
+```bash
+curl -X GET "https://gateway.galx.ai/v1/models/query?q=where+supportsVision+=+true+and+inputPricePer1M+<=+1.0+sort+by+price+asc" \
+  -H "Authorization: Bearer galx_live_..."
+```
+
+---
+
 ## 📦 Official Universal Developer SDK Reference
 
 For zero-boilerplate client integration without raw HTTP calls, use `@galxai/sdk`:
@@ -360,8 +424,12 @@ import { GalxAI } from '@/sdk';
 
 const galx = new GalxAI({ apiKey: process.env.GALX_API_KEY });
 
-// Chat & Streaming
+// Chat & Streaming with Auto Quota Cycling
 const stream = await galx.chat.completions.create({ model: 'gpt-5.6-sol', messages: [...], stream: true });
+
+// Offline Natural Query Searching
+const models = galx.models.queryNatural('where category = "reasoning" sort by contextWindow desc');
+const tasks = galx.queues.queryNatural('where state = "pending" and priority > 5');
 
 // Autonomous Multi-Step Agent Tool Loop
 const agent = galx.agent({ model: 'gpt-5.6-sol', tools: { ... } });
@@ -373,7 +441,12 @@ const data = await galx.chat.structured({ model: 'gpt-5.6-sol', messages: [...],
 // Background Tasks & SSE Progress
 const task = await galx.chat.completions.createAsync({ model: 'gpt-5.6-sol', messages: [...], queue: 'llm-batch' });
 for await (const progress of task.streamProgress()) console.log(progress.percentage);
+
+// Real-Time SOC 2 & HIPAA Posture
+const posture = galx.compliance.getPostureReport();
+console.log(`Compliance Grade: ${posture.grade}`);
 ```
+
 
 
 

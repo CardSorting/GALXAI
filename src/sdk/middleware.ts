@@ -1,7 +1,11 @@
 /**
  * GALXAI Developer SDK: Middleware Pipeline & Plugin Substrate
- * Interceptors for request/response tracing, live cost budgeting, and semantic LRU caching.
+ * Interceptors for request/response tracing, live cost budgeting, semantic LRU caching,
+ * and client-side zero-code Privacy Shield (HIPAA / GDPR / ZDR).
  */
+
+import { GalxPIIRedactor } from '../core/privacy/GalxPIIRedactor';
+import type { PrivacyProfileType } from '../core/contracts/GalxContracts';
 
 export interface MiddlewareRequestContext {
   path: string;
@@ -13,7 +17,6 @@ export interface MiddlewareRequestContext {
 
 export interface MiddlewareResponseContext {
   path: string;
-
   method: string;
   statusCode: number;
   durationMs: number;
@@ -161,3 +164,74 @@ export function createLRUCachePlugin(options: {
   };
 }
 
+/**
+ * Built-in Plugin: Client-Side Zero-Code Privacy Shield (Apex Tier)
+ * Transparently de-identifies prompt messages locally before dispatching upstream,
+ * and seamlessly rehydrates synthetic tokens in responses for authorized developers.
+ */
+export function createPrivacyShieldPlugin(options: {
+  profile?: PrivacyProfileType;
+  autoRedact?: boolean;
+  autoRehydrate?: boolean;
+  deidentifyPhi?: boolean;
+  piiMasking?: boolean;
+  onRedaction?: (summary: { originalLength: number; sanitizedLength: number; entitiesCount: number }) => void;
+} = {}): GalxPlugin {
+  const profile = options.profile || 'hipaa_strict';
+  const autoRedact = options.autoRedact ?? true;
+  const autoRehydrate = options.autoRehydrate ?? true;
+  const redactor = GalxPIIRedactor.getInstance();
+  const tokenMapRegistry = new Map<string, Record<string, string>>();
+
+  return {
+    name: 'PrivacyShieldPlugin',
+    onRequest: (ctx) => {
+      ctx.headers['X-Galx-Privacy-Profile'] = profile;
+      ctx.headers['Sec-GPC'] = '1';
+      ctx.headers['X-Galx-ZDR-Required'] = 'true';
+
+      if (autoRedact && ctx.body?.messages && Array.isArray(ctx.body.messages)) {
+        const conv = redactor.redactConversationMessages(ctx.body.messages, {
+          hipaa: options.deidentifyPhi ?? true,
+          gdpr: options.piiMasking ?? true,
+          financial: true,
+          international: true,
+          reversible: autoRehydrate
+        });
+
+        if (conv.tokenMap && Object.keys(conv.tokenMap).length > 0) {
+          const reqKey = `${ctx.path}:${ctx.timestampMs}`;
+          tokenMapRegistry.set(reqKey, conv.tokenMap);
+        }
+
+        options.onRedaction?.({
+          originalLength: JSON.stringify(ctx.body.messages).length,
+          sanitizedLength: JSON.stringify(conv.sanitizedMessages).length,
+          entitiesCount: conv.entitiesDetected.length
+        });
+
+        ctx.body.messages = conv.sanitizedMessages;
+      }
+    },
+    onResponse: (ctx) => {
+      if (!autoRehydrate || !ctx.data) return;
+      let mapToUse: Record<string, string> | undefined;
+      for (const [key, map] of tokenMapRegistry.entries()) {
+        if (key.startsWith(ctx.path)) {
+          mapToUse = map;
+          tokenMapRegistry.delete(key);
+          break;
+        }
+      }
+
+      if (mapToUse && ctx.data.choices && Array.isArray(ctx.data.choices)) {
+        for (const choice of ctx.data.choices) {
+          if (choice.message?.content && typeof choice.message.content === 'string') {
+            choice.message.content = redactor.rehydrateText(choice.message.content, mapToUse);
+          }
+        }
+        redactor.zeroizeTokenMap(mapToUse);
+      }
+    }
+  };
+}

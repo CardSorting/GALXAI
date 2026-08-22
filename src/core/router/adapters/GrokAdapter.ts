@@ -24,7 +24,9 @@ export class GrokAdapter {
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
+      'X-Zero-Data-Retention': 'true',
+      'X-No-Storage': 'true'
     };
 
     const body: Record<string, any> = {
@@ -32,6 +34,7 @@ export class GrokAdapter {
       messages: req.messages,
       stream: !!req.stream,
       temperature: req.temperature ?? 0.7,
+      store: false // Zero Data Retention: Prevents xAI Grok from storing completions for training
     };
 
     if (req.max_tokens !== undefined) body.max_tokens = req.max_tokens;

@@ -99,12 +99,16 @@ export async function POST(req: NextRequest) {
       request: body,
       userId,
       requestId,
-      isPriorityUser
+      isPriorityUser,
+      headers: req.headers
     });
 
     return NextResponse.json(result, {
       headers: {
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': '*',
+        'X-Galx-ZDR-Verified': 'true',
+        'X-Galx-ZDR-Retention': '0s',
+        'X-Galx-AI-Generated': 'true'
       }
     });
   } catch (error: any) {

@@ -10,6 +10,8 @@ import type {
 import { GalxCredentialSubstrate } from '../substrate/GalxCredentialSubstrate';
 import { ContinuousTokenBucketRateGovernor } from '../governor/ContinuousTokenBucketRateGovernor';
 import { GalxCircuitBreaker } from '../circuit/GalxCircuitBreaker';
+import { BroccoliDbTable } from '../broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../broccolidb/broccolidb-natural-query';
 
 /**
  * Enterprise Adaptive Quota Cycling & Shard Governor for GALXAI.
@@ -31,6 +33,7 @@ export class GalxCredentialPool {
   private readonly circuitBreaker: GalxCircuitBreaker;
   private strategy: GalxRotationStrategy;
   private readonly activeLeases = new Map<string, ShardLease>();
+  public readonly leaseTable: BroccoliDbTable<ShardLease & { id: string }>;
   private readonly inFlightCounts = new Map<string, number>();
   private readonly tenantInFlightCounts = new Map<string, number>();
 
@@ -47,6 +50,12 @@ export class GalxCredentialPool {
     this.rateGovernor = rateGovernor;
     this.circuitBreaker = circuitBreaker;
     this.strategy = strategy;
+
+    this.leaseTable = new BroccoliDbTable<ShardLease & { id: string }>('pool_leases');
+    this.leaseTable.createIndex('shardId');
+    this.leaseTable.createIndex('userId');
+    this.leaseTable.createSortedIndex('expiresAtMs');
+    this.leaseTable.createSortedIndex('acquiredAtMs');
 
     // Invalidate active leases when credentials are deleted or retracted
     this.substrate.onRetract((shardId) => {
@@ -105,6 +114,7 @@ export class GalxCredentialPool {
     for (const [leaseId, lease] of this.activeLeases.entries()) {
       if (nowMs >= lease.expiresAtMs) {
         this.activeLeases.delete(leaseId);
+        this.leaseTable.delete(leaseId);
         const current = this.inFlightCounts.get(lease.shardId) || 0;
         if (current <= 1) {
           this.inFlightCounts.delete(lease.shardId);
@@ -154,8 +164,35 @@ export class GalxCredentialPool {
       };
     }
 
+    // 2b. Privacy & Compliance Capability Filtering (HIPAA BAA, EU Data Residency, ZDR Certification)
+    const isHipaaReq = !!req.hipaaRequired || req.privacyProfile === 'hipaa' || req.privacyProfile === 'confidential' || req.privacyProfile === 'strict';
+    const isEuReq = req.dataResidency === 'eu' || req.privacyProfile === 'gdpr';
+    const isZdrReq = !!req.zdrRequired || req.privacyProfile === 'zdr' || isHipaaReq;
+
+    const complianceEligibleAccounts = availableAccounts.filter((acc) => {
+      const caps = acc.privacyCapabilities || {
+        hipaaCompliant: true,
+        zdrCertified: true,
+        dataResidency: 'global',
+        baaSigned: true,
+        piiFiltering: true
+      };
+
+      if (isHipaaReq && (!caps.hipaaCompliant || !caps.baaSigned)) return false;
+      if (isEuReq && caps.dataResidency !== 'eu' && caps.dataResidency !== 'global') return false;
+      if (isZdrReq && !caps.zdrCertified) return false;
+      return true;
+    });
+
+    if (complianceEligibleAccounts.length === 0) {
+      return {
+        reason: `No active ${req.provider} shards meet the required privacy compliance criteria (HIPAA BAA: ${isHipaaReq}, EU Residency: ${isEuReq}, ZDR: ${isZdrReq})`,
+        status: 'no_compliant_shards'
+      };
+    }
+
     // 3. Filter accounts through 4-State Circuit Breaker & Concurrency Saturation
-    const candidateAccounts = availableAccounts.filter((acc) => {
+    const candidateAccounts = complianceEligibleAccounts.filter((acc) => {
       const circuitEval = this.circuitBreaker.evaluateAccountStatus(acc, nowMs);
       const inFlight = this.inFlightCounts.get(acc.id) || 0;
       return circuitEval.canAttempt && inFlight < maxInFlightPerShard;
@@ -163,7 +200,7 @@ export class GalxCredentialPool {
 
     if (candidateAccounts.length === 0) {
       return {
-        reason: `All active shards for provider '${req.provider}' are in cooldown or saturated at maximum capacity (${maxInFlightPerShard} concurrent)`,
+        reason: `All compliant shards for provider '${req.provider}' are in cooldown or saturated at maximum capacity (${maxInFlightPerShard} concurrent)`,
         status: 'all_shards_cooldown'
       };
     }
@@ -224,6 +261,7 @@ export class GalxCredentialPool {
     };
 
     this.activeLeases.set(leaseId, lease);
+    this.leaseTable.put(leaseId, { ...lease, id: leaseId });
     this.inFlightCounts.set(updatedAccount.id, (this.inFlightCounts.get(updatedAccount.id) || 0) + 1);
     this.substrate.updateAccount(updatedAccount);
 
@@ -430,6 +468,7 @@ export class GalxCredentialPool {
     for (const [leaseId, lease] of this.activeLeases.entries()) {
       if (lease.shardId === shardId) {
         this.activeLeases.delete(leaseId);
+        this.leaseTable.delete(leaseId);
         count++;
       }
     }
@@ -456,6 +495,7 @@ export class GalxCredentialPool {
     for (const [leaseId, lease] of this.activeLeases.entries()) {
       if (nowMs >= lease.expiresAtMs) {
         this.activeLeases.delete(leaseId);
+        this.leaseTable.delete(leaseId);
         scavenged++;
 
         // Decrement in-flight counters
@@ -512,6 +552,7 @@ export class GalxCredentialPool {
 
     // Always release active lease and in-flight counters
     this.activeLeases.delete(leaseId);
+    this.leaseTable.delete(leaseId);
     const inFlight = this.inFlightCounts.get(lease.shardId) || 0;
     if (inFlight <= 1) {
       this.inFlightCounts.delete(lease.shardId);
@@ -664,5 +705,10 @@ export class GalxCredentialPool {
       },
       rotationStrategy: this.strategy
     };
+  }
+
+  public queryActiveLeasesNatural(naturalQuery: string): (ShardLease & { id: string })[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'pool_leases');
+    return this.leaseTable.query(parsed.queryOptions) as (ShardLease & { id: string })[];
   }
 }

@@ -24,7 +24,9 @@ export class OpenAIAdapter {
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
+      'X-Zero-Data-Retention': 'true',
+      'X-No-Storage': 'true'
     };
 
     if (secret.accountId) {
@@ -36,6 +38,7 @@ export class OpenAIAdapter {
       messages: req.messages,
       stream: !!req.stream,
       temperature: req.temperature ?? 0.7,
+      store: false // Zero Data Retention: Prevents OpenAI from persisting or training on completions
     };
 
     if (req.max_tokens !== undefined) body.max_tokens = req.max_tokens;

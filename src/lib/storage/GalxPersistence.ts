@@ -1,7 +1,8 @@
 /**
- * GALXAI: Supabase PostgreSQL Unified Persistence Substrate
- * Pure PostgreSQL-backed persistence using Supabase Repositories.
- * Zero local JSON files.
+ * GALXAI: Supabase PostgreSQL Unified Persistence Substrate + BroccoliDB Hot Cache
+ * Pure PostgreSQL-backed persistence using Supabase Repositories with
+ * L1 BroccoliDB Reactive In-Memory Tables, Multi-Modal Secondary Indexing,
+ * Deterministic Natural Query Parsing, and Statistical Aggregation Pipelines.
  */
 
 import type {
@@ -24,6 +25,14 @@ import {
   SessionRepository
 } from '../supabase';
 
+import { BroccoliDbTable } from '../../core/broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../../core/broccolidb/broccolidb-natural-query';
+import type {
+  DbQueryOptions,
+  DbAggregateQuery,
+  DbAggregateResult
+} from '../../core/broccolidb/broccolidb.contracts';
+
 export interface GalxPersistedState {
   shards: GalxShardAccount[];
   gatewayKeys: DeveloperGatewayKey[];
@@ -42,6 +51,7 @@ export interface GalxPersistedState {
 /**
  * Enterprise Supabase PostgreSQL Persistence Substrate for GALXAI.
  * Completely backed by Supabase PostgreSQL tables, stored procedures, and typed repositories.
+ * Coupled with BroccoliDB L1 reactive in-memory tables for sub-microsecond gateway routing loops.
  */
 export class GalxPersistence {
   private static instance: GalxPersistence;
@@ -58,14 +68,12 @@ export class GalxPersistence {
   public readonly workspaceRepo: WorkspaceRepository;
   public readonly sessionRepo: SessionRepository;
 
-  // In-memory hot cache for sub-millisecond synchronous gateway routing loops
-  private cache: GalxPersistedState = {
-    shards: [],
-    gatewayKeys: [],
-    queues: [],
-    tasks: [],
-    auditLogs: []
-  };
+  // BroccoliDB L1 Hot Tables
+  public readonly shardTable: BroccoliDbTable<GalxShardAccount>;
+  public readonly apiKeyTable: BroccoliDbTable<DeveloperGatewayKey>;
+  public readonly queueTable: BroccoliDbTable<GalxTaskQueueConfig>;
+  public readonly taskTable: BroccoliDbTable<GalxTask>;
+  public readonly auditTable: BroccoliDbTable<any>;
 
   private constructor() {
     this.shardRepo = ShardRepository.getInstance();
@@ -78,6 +86,36 @@ export class GalxPersistence {
     this.embeddingsRepo = EmbeddingsRepository.getInstance();
     this.workspaceRepo = WorkspaceRepository.getInstance();
     this.sessionRepo = SessionRepository.getInstance();
+
+    // Initialize BroccoliDB L1 Tables with Secondary Indices
+    this.shardTable = new BroccoliDbTable<GalxShardAccount>('shards');
+    this.shardTable.createIndex('provider');
+    this.shardTable.createIndex('status');
+    this.shardTable.createIndex('userId');
+    this.shardTable.createIndex('shardMode');
+    this.shardTable.createSortedIndex('priority');
+
+    this.apiKeyTable = new BroccoliDbTable<DeveloperGatewayKey>('gateway_keys');
+    this.apiKeyTable.createIndex('keyHash');
+    this.apiKeyTable.createIndex('prefix');
+    this.apiKeyTable.createIndex('userId');
+    this.apiKeyTable.createIndex('revoked');
+
+    this.queueTable = new BroccoliDbTable<GalxTaskQueueConfig>('queues');
+    this.queueTable.createIndex('state');
+
+    this.taskTable = new BroccoliDbTable<GalxTask>('tasks');
+    this.taskTable.createIndex('queueId');
+    this.taskTable.createIndex('status');
+    this.taskTable.createIndex('userId');
+    this.taskTable.createSortedIndex('priority');
+    this.taskTable.createSortedIndex('createdAtMs');
+
+    this.auditTable = new BroccoliDbTable<any>('audit_logs');
+    this.auditTable.createIndex('userId');
+    this.auditTable.createIndex('shardId');
+    this.auditTable.createIndex('action');
+    this.auditTable.createSortedIndex('timestampMs');
   }
 
   static getInstance(): GalxPersistence {
@@ -87,52 +125,51 @@ export class GalxPersistence {
     return GalxPersistence.instance;
   }
 
-
   // ==========================================
   // Shard Accounts
   // ==========================================
 
   public getShards(): GalxShardAccount[] {
-    return this.cache.shards;
+    return this.shardTable.getAll() as GalxShardAccount[];
   }
 
   public async getShardsAsync(userId?: string): Promise<GalxShardAccount[]> {
     const shards = await this.shardRepo.getShards(userId);
     if (!userId) {
-      this.cache.shards = shards;
+      for (const s of shards) {
+        this.shardTable.put(s.id, s);
+      }
     }
     return shards;
   }
 
   public saveShard(shard: GalxShardAccount): void {
-    const idx = this.cache.shards.findIndex(s => s.id === shard.id);
-    if (idx >= 0) {
-      this.cache.shards[idx] = shard;
-    } else {
-      this.cache.shards.push(shard);
-    }
-    // Asynchronously commit to Supabase PostgreSQL in background
+    this.shardTable.put(shard.id, shard);
     this.shardRepo.saveShard(shard).catch(() => {});
   }
 
   public async saveShardAsync(shard: GalxShardAccount): Promise<void> {
-    const idx = this.cache.shards.findIndex(s => s.id === shard.id);
-    if (idx >= 0) {
-      this.cache.shards[idx] = shard;
-    } else {
-      this.cache.shards.push(shard);
-    }
+    this.shardTable.put(shard.id, shard);
     await this.shardRepo.saveShard(shard);
   }
 
   public deleteShard(shardId: string): void {
-    this.cache.shards = this.cache.shards.filter(s => s.id !== shardId);
+    this.shardTable.delete(shardId);
     this.shardRepo.deleteShard(shardId).catch(() => {});
   }
 
   public async deleteShardAsync(shardId: string): Promise<void> {
-    this.cache.shards = this.cache.shards.filter(s => s.id !== shardId);
+    this.shardTable.delete(shardId);
     await this.shardRepo.deleteShard(shardId);
+  }
+
+  public queryShardsNatural(naturalQuery: string): GalxShardAccount[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'shards');
+    return this.shardTable.query(parsed.queryOptions) as GalxShardAccount[];
+  }
+
+  public aggregateShards(query: DbAggregateQuery): DbAggregateResult {
+    return this.shardTable.aggregate(query);
   }
 
   // ==========================================
@@ -140,34 +177,26 @@ export class GalxPersistence {
   // ==========================================
 
   public getGatewayKeys(): DeveloperGatewayKey[] {
-    return this.cache.gatewayKeys;
+    return this.apiKeyTable.getAll() as DeveloperGatewayKey[];
   }
 
   public async getGatewayKeysAsync(userId?: string): Promise<DeveloperGatewayKey[]> {
     const keys = await this.apiKeyRepo.getGatewayKeys(userId);
     if (!userId) {
-      this.cache.gatewayKeys = keys;
+      for (const k of keys) {
+        this.apiKeyTable.put(k.id, k);
+      }
     }
     return keys;
   }
 
   public saveGatewayKey(key: DeveloperGatewayKey): void {
-    const idx = this.cache.gatewayKeys.findIndex(k => k.id === key.id);
-    if (idx >= 0) {
-      this.cache.gatewayKeys[idx] = key;
-    } else {
-      this.cache.gatewayKeys.push(key);
-    }
+    this.apiKeyTable.put(key.id, key);
     this.apiKeyRepo.saveGatewayKey(key).catch(() => {});
   }
 
   public async saveGatewayKeyAsync(key: DeveloperGatewayKey): Promise<void> {
-    const idx = this.cache.gatewayKeys.findIndex(k => k.id === key.id);
-    if (idx >= 0) {
-      this.cache.gatewayKeys[idx] = key;
-    } else {
-      this.cache.gatewayKeys.push(key);
-    }
+    this.apiKeyTable.put(key.id, key);
     await this.apiKeyRepo.saveGatewayKey(key);
   }
 
@@ -176,44 +205,42 @@ export class GalxPersistence {
   // ==========================================
 
   public getQueues(): GalxTaskQueueConfig[] {
-    return this.cache.queues;
+    return this.queueTable.getAll() as GalxTaskQueueConfig[];
   }
 
   public async getQueuesAsync(): Promise<GalxTaskQueueConfig[]> {
     const queues = await this.queueRepo.getQueues();
-    this.cache.queues = queues;
+    for (const q of queues) {
+      this.queueTable.put(q.id, q);
+    }
     return queues;
   }
 
   public saveQueue(queue: GalxTaskQueueConfig): void {
-    const idx = this.cache.queues.findIndex(q => q.id === queue.id);
-    if (idx >= 0) {
-      this.cache.queues[idx] = queue;
-    } else {
-      this.cache.queues.push(queue);
-    }
+    this.queueTable.put(queue.id, queue);
     this.queueRepo.saveQueue(queue).catch(() => {});
   }
 
   public async saveQueueAsync(queue: GalxTaskQueueConfig): Promise<void> {
-    const idx = this.cache.queues.findIndex(q => q.id === queue.id);
-    if (idx >= 0) {
-      this.cache.queues[idx] = queue;
-    } else {
-      this.cache.queues.push(queue);
-    }
+    this.queueTable.put(queue.id, queue);
     await this.queueRepo.saveQueue(queue);
   }
 
   public deleteQueue(queueId: string): void {
-    this.cache.queues = this.cache.queues.filter(q => q.id !== queueId);
-    this.cache.tasks = this.cache.tasks.filter(t => t.queueId !== queueId);
+    this.queueTable.delete(queueId);
+    const queueTasks = this.taskTable.query({ where: { queueId: { $eq: queueId } } });
+    for (const t of queueTasks) {
+      this.taskTable.delete(t.id);
+    }
     this.queueRepo.deleteQueue(queueId).catch(() => {});
   }
 
   public async deleteQueueAsync(queueId: string): Promise<void> {
-    this.cache.queues = this.cache.queues.filter(q => q.id !== queueId);
-    this.cache.tasks = this.cache.tasks.filter(t => t.queueId !== queueId);
+    this.queueTable.delete(queueId);
+    const queueTasks = this.taskTable.query({ where: { queueId: { $eq: queueId } } });
+    for (const t of queueTasks) {
+      this.taskTable.delete(t.id);
+    }
     await this.queueRepo.deleteQueue(queueId);
   }
 
@@ -222,7 +249,7 @@ export class GalxPersistence {
   // ==========================================
 
   public getTasks(): GalxTask[] {
-    return this.cache.tasks;
+    return this.taskTable.getAll() as GalxTask[];
   }
 
   public async getTasksAsync(params?: {
@@ -235,59 +262,53 @@ export class GalxPersistence {
   }
 
   public saveTask(task: GalxTask): void {
-    const idx = this.cache.tasks.findIndex(t => t.id === task.id);
-    if (idx >= 0) {
-      this.cache.tasks[idx] = task;
-    } else {
-      this.cache.tasks.push(task);
-    }
-    if (this.cache.tasks.length > 5000) {
-      this.cache.tasks = this.cache.tasks.slice(-5000);
-    }
+    this.taskTable.put(task.id, task);
     this.taskRepo.saveTask(task).catch(() => {});
   }
 
   public async saveTaskAsync(task: GalxTask): Promise<void> {
-    const idx = this.cache.tasks.findIndex(t => t.id === task.id);
-    if (idx >= 0) {
-      this.cache.tasks[idx] = task;
-    } else {
-      this.cache.tasks.push(task);
-    }
-    if (this.cache.tasks.length > 5000) {
-      this.cache.tasks = this.cache.tasks.slice(-5000);
-    }
+    this.taskTable.put(task.id, task);
     await this.taskRepo.saveTask(task);
   }
 
   public deleteTask(taskId: string): void {
-    this.cache.tasks = this.cache.tasks.filter(t => t.id !== taskId);
+    this.taskTable.delete(taskId);
     this.taskRepo.deleteTask(taskId).catch(() => {});
   }
 
   public async deleteTaskAsync(taskId: string): Promise<void> {
-    this.cache.tasks = this.cache.tasks.filter(t => t.id !== taskId);
+    this.taskTable.delete(taskId);
     await this.taskRepo.deleteTask(taskId);
   }
 
   public purgeQueueTasks(queueId: string, statusFilter?: string): number {
-    const prevCount = this.cache.tasks.length;
+    const whereClause: Record<string, any> = { queueId: { $eq: queueId } };
     if (statusFilter) {
-      this.cache.tasks = this.cache.tasks.filter(t => !(t.queueId === queueId && t.status === statusFilter));
-    } else {
-      this.cache.tasks = this.cache.tasks.filter(t => t.queueId !== queueId);
+      whereClause.status = { $eq: statusFilter };
     }
-    const purged = prevCount - this.cache.tasks.length;
+    const matching = this.taskTable.query({ where: whereClause });
+    for (const task of matching) {
+      this.taskTable.delete(task.id);
+    }
     this.taskRepo.purgeTasks(queueId, statusFilter).catch(() => {});
-    return purged;
+    return matching.length;
+  }
+
+  public queryTasksNatural(naturalQuery: string): GalxTask[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'tasks');
+    return this.taskTable.query(parsed.queryOptions) as GalxTask[];
   }
 
   // ==========================================
   // Audit Logs
   // ==========================================
 
-  public getAuditLogs(): GalxPersistedState['auditLogs'] {
-    return this.cache.auditLogs;
+  public getAuditLogs(): any[] {
+    return this.auditTable.query({
+      sortBy: 'timestampMs',
+      sortOrder: 'desc',
+      limit: 500
+    }) as any[];
   }
 
   public async getAuditLogsAsync(params?: {
@@ -307,15 +328,21 @@ export class GalxPersistence {
       metadata,
       timestampMs: Date.now()
     };
-    this.cache.auditLogs.unshift(logItem);
-    if (this.cache.auditLogs.length > 500) {
-      this.cache.auditLogs = this.cache.auditLogs.slice(0, 500);
-    }
+    this.auditTable.put(logItem.id, logItem);
     this.auditRepo.logAudit({
       action,
       metadata,
       shardId,
       userId
     }).catch(() => {});
+  }
+
+  public queryAuditsNatural(naturalQuery: string): any[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'audit_logs');
+    return this.auditTable.query(parsed.queryOptions) as any[];
+  }
+
+  public aggregateAudits(query: DbAggregateQuery): DbAggregateResult {
+    return this.auditTable.aggregate(query);
   }
 }

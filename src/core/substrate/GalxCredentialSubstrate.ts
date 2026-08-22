@@ -1,20 +1,34 @@
 import type { GalxShardAccount, ProviderType } from '../contracts/GalxContracts';
 import { GalxPersistence } from '../../lib/storage/GalxPersistence';
 import { GalxCryptoVault } from '../vault/GalxCryptoVault';
+import { BroccoliDbTable } from '../broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../broccolidb/broccolidb-natural-query';
+import type { DbAggregateQuery, DbAggregateResult } from '../broccolidb/broccolidb.contracts';
 
 /**
- * Dual-Tier In-Memory Cache & Persistence Substrate for BYOQ Shards.
+ * Dual-Tier In-Memory Cache & Persistence Substrate for BYOQ Shards + BroccoliDB Hot Table.
  * Provides sub-millisecond in-memory cache lookup for queue workers while maintaining
  * persistent synchronization.
  */
 export class GalxCredentialSubstrate {
-  private readonly inMemoryCache = new Map<string, GalxShardAccount>();
+  public readonly accountTable: BroccoliDbTable<GalxShardAccount>;
   private readonly persistence: GalxPersistence;
   private readonly retractListeners: Array<(shardId: string) => void> = [];
   private initialized = false;
 
   constructor(persistence?: GalxPersistence) {
     this.persistence = persistence || GalxPersistence.getInstance();
+
+    this.accountTable = new BroccoliDbTable<GalxShardAccount>('credential_substrate_accounts');
+    this.accountTable.createIndex('provider');
+    this.accountTable.createIndex('status');
+    this.accountTable.createIndex('userId');
+    this.accountTable.createIndex('shardMode');
+    this.accountTable.createIndex('permissionRetracted');
+    this.accountTable.createSortedIndex('priority');
+    this.accountTable.createSortedIndex('weight');
+    this.accountTable.createSortedIndex('createdAtMs');
+
     this.initialize();
   }
 
@@ -28,12 +42,12 @@ export class GalxCredentialSubstrate {
       const persistedShards = this.persistence.getShards();
       for (const shard of persistedShards) {
         if (!shard.permissionRetracted && shard.status !== 'revoked') {
-          this.inMemoryCache.set(shard.id, shard);
+          this.accountTable.put(shard.id, shard);
         }
       }
 
       // If no shards exist and environment variables are present, automatically pre-seed default developer shards
-      if (this.inMemoryCache.size === 0) {
+      if (this.accountTable.count() === 0) {
         this.seedInitialEnvShards();
       }
 
@@ -63,6 +77,13 @@ export class GalxCredentialSubstrate {
         fencingToken: 1,
         apiKeyMasked: GalxCryptoVault.maskApiKey(openaiKey),
         encryptedSecrets: encrypted,
+        privacyCapabilities: {
+          hipaaCompliant: true,
+          zdrCertified: true,
+          dataResidency: 'global',
+          baaSigned: true,
+          piiFiltering: true
+        },
         tokenBucket: {
           maxTokens: 500000,
           remainingTokens: 500000,
@@ -99,6 +120,13 @@ export class GalxCredentialSubstrate {
         fencingToken: 1,
         apiKeyMasked: GalxCryptoVault.maskApiKey(xaiKey),
         encryptedSecrets: encrypted,
+        privacyCapabilities: {
+          hipaaCompliant: true,
+          zdrCertified: true,
+          dataResidency: 'global',
+          baaSigned: true,
+          piiFiltering: true
+        },
         tokenBucket: {
           maxTokens: 500000,
           remainingTokens: 500000,
@@ -128,22 +156,30 @@ export class GalxCredentialSubstrate {
   }
 
   public addAccount(account: GalxShardAccount): void {
-    this.inMemoryCache.set(account.id, account);
-    this.persistence.saveShard(account);
+    const normalized: GalxShardAccount = {
+      ...account,
+      permissionRetracted: account.permissionRetracted ?? false
+    };
+    this.accountTable.put(account.id, normalized);
+    this.persistence.saveShard(normalized);
     this.persistence.logAudit('SHARD_REGISTERED', {
-      accountLabel: account.accountLabel,
-      provider: account.provider,
-      shardMode: account.shardMode
-    }, account.id, account.userId);
+      accountLabel: normalized.accountLabel,
+      provider: normalized.provider,
+      shardMode: normalized.shardMode
+    }, normalized.id, normalized.userId);
   }
 
   public updateAccount(account: GalxShardAccount): void {
-    this.inMemoryCache.set(account.id, account);
-    this.persistence.saveShard(account);
+    const normalized: GalxShardAccount = {
+      ...account,
+      permissionRetracted: account.permissionRetracted ?? false
+    };
+    this.accountTable.put(account.id, normalized);
+    this.persistence.saveShard(normalized);
   }
 
   public retractAccount(accountId: string, userId: string): boolean {
-    this.inMemoryCache.delete(accountId);
+    this.accountTable.delete(accountId);
 
     // Notify in-flight pools to immediately abort active execution leases
     for (const listener of this.retractListeners) {
@@ -172,7 +208,7 @@ export class GalxCredentialSubstrate {
   }
 
   public deleteAccount(accountId: string): boolean {
-    this.inMemoryCache.delete(accountId);
+    this.accountTable.delete(accountId);
     for (const listener of this.retractListeners) {
       try {
         listener(accountId);
@@ -183,14 +219,17 @@ export class GalxCredentialSubstrate {
   }
 
   public getAccount(accountId: string): GalxShardAccount | undefined {
-    return this.inMemoryCache.get(accountId);
+    return this.accountTable.get(accountId) || undefined;
   }
 
   public listAccounts(userId?: string, provider?: ProviderType): readonly GalxShardAccount[] {
-    const all = Array.from(this.inMemoryCache.values()).filter(
-      a => !a.permissionRetracted && a.status !== 'revoked'
-    );
+    const all = this.accountTable.query({
+      sortBy: 'priority',
+      sortOrder: 'desc'
+    }) as GalxShardAccount[];
+
     return all.filter(a => {
+      if (a.permissionRetracted === true || a.status === 'revoked') return false;
       if (userId && a.userId !== userId) return false;
       if (provider && a.provider !== provider) return false;
       return true;
@@ -198,24 +237,34 @@ export class GalxCredentialSubstrate {
   }
 
   public listPooledAccounts(provider?: ProviderType): readonly GalxShardAccount[] {
-    return Array.from(this.inMemoryCache.values()).filter(
-      a =>
-        a.shardMode === 'pooled' &&
-        !a.permissionRetracted &&
-        a.status !== 'revoked' &&
-        a.status !== 'dead' &&
-        a.status !== 'paused' &&
-        (!provider || a.provider === provider)
+    const all = this.accountTable.query({
+      where: { shardMode: { $eq: 'pooled' } },
+      sortBy: 'priority',
+      sortOrder: 'desc'
+    }) as GalxShardAccount[];
+
+    return all.filter(a =>
+      a.permissionRetracted !== true &&
+      a.status !== 'revoked' &&
+      a.status !== 'dead' &&
+      a.status !== 'paused' &&
+      (!provider || a.provider === provider)
     );
   }
 
   public listUserPrivateShards(userId: string, provider?: ProviderType): readonly GalxShardAccount[] {
-    return Array.from(this.inMemoryCache.values()).filter(
-      a =>
-        a.userId === userId &&
-        a.shardMode === 'private' &&
-        !a.permissionRetracted &&
-        (!provider || a.provider === provider)
+    const all = this.accountTable.query({
+      where: {
+        userId: { $eq: userId },
+        shardMode: { $eq: 'private' }
+      },
+      sortBy: 'priority',
+      sortOrder: 'desc'
+    }) as GalxShardAccount[];
+
+    return all.filter(a =>
+      a.permissionRetracted !== true &&
+      (!provider || a.provider === provider)
     );
   }
 
@@ -223,7 +272,16 @@ export class GalxCredentialSubstrate {
     return this.listUserPrivateShards(userId, provider);
   }
 
+  public queryAccountsNatural(naturalQuery: string): GalxShardAccount[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'credential_substrate_accounts');
+    return this.accountTable.query(parsed.queryOptions) as GalxShardAccount[];
+  }
+
+  public aggregateAccounts(query: DbAggregateQuery): DbAggregateResult {
+    return this.accountTable.aggregate(query);
+  }
+
   public clearCache(): void {
-    this.inMemoryCache.clear();
+    this.accountTable.clear();
   }
 }

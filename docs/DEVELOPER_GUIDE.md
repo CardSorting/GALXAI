@@ -321,6 +321,37 @@ await galxDb.budgets.createBudgetAlert({
 await galxDb.health.reportHealthProbesBatch([
   { shardId: 'shard_oai_1', workerId: 'cf_worker_1', latencyMs: 180, statusCode: 200, isSuccess: true }
 ]);
+
+// 11. BroccoliDB Offline Natural Language Querying & Sub-Microsecond Tables
+const cheapVisionModels = galx.models.queryNatural(
+  'where supportsVision = true and inputPricePer1M <= 1.0 sort by price asc'
+);
+
+const pendingTasks = galx.queues.queryNatural(
+  'where state = "pending" and priority > 5 sort by createdAt desc'
+);
+
+const hipaaShards = galx.privacy.queryShardsNatural(
+  'where hipaaCompliant = true and dataResidency = "eu"'
+);
+
+// 12. Privacy Shield Plugin & Zero Data Retention v10.0
+import { createPrivacyShieldPlugin } from '@/sdk';
+
+galx.use(createPrivacyShieldPlugin({
+  profile: 'maximum_privacy',
+  hipaaEnabled: true,
+  gdprEnabled: true,
+  zdrEnabled: true,
+  onPIIDetected: (detectedTypes) => {
+    console.log(`[PrivacyShield] Redacted sensitive entities: ${detectedTypes.join(', ')}`);
+  }
+}));
+
+// 13. SOC 2 Type II Posture & Auditor Evidence Dossier
+const posture = galx.compliance.getPostureReport();
+const evidenceDossier = galx.compliance.getEvidenceDossier();
+console.log(`SOC2 Posture Score: ${posture.overallPostureScore}% (Signed: ${evidenceDossier.cryptographicSignatureSha256})`);
 ```
 
 ---
@@ -347,20 +378,26 @@ npx galxai chat gpt-5.6-sol "Explain the Raft consensus algorithm concisely."
 
 ## 🧪 Testing & Verification Standards
 
-GALXAI maintains two dedicated forensic test runners:
+GALXAI maintains dedicated forensic test runners:
 
 ```bash
-# 1. Universal Router & SDK Verification Suite (66 tests)
-npx tsx scripts/validate-galxai-router.ts
+# 1. Universal Router, Privacy, SOC2 & BroccoliDB Verification Suite (162 tests)
+npm run test:router
+# (or: npx tsx scripts/validate-galxai-router.ts)
 
-# 2. Supabase PostgreSQL & Cloudflare Edge Substrate Test Suite (39 tests)
-npx tsx scripts/test-supabase-integration.ts
+# 2. Supabase PostgreSQL & Cloudflare Edge Substrate Test Suite
+npm run test:supabase
+# (or: npx tsx scripts/test-supabase-integration.ts)
 
 # 3. TypeScript Type-Check
 npx tsc --noEmit
+
+# 4. Production Build Validation
+npm run build
 ```
 
 When contributing code changes, ensure all test suites pass with 0 errors.
+
 
 
 

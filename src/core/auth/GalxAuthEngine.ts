@@ -11,6 +11,9 @@ import { GalxCryptoVault, PRIMARY_KEY_VERSION } from '../vault/GalxCryptoVault';
 import { galxRouter } from '../router/GalxModelRouter';
 import { GalxPersistence } from '../../lib/storage/GalxPersistence';
 import { SessionRepository } from '../../lib/supabase/repositories/SessionRepository';
+import { BroccoliDbTable } from '../broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../broccolidb/broccolidb-natural-query';
+import type { DbAggregateQuery, DbAggregateResult } from '../broccolidb/broccolidb.contracts';
 import type {
   ProviderType,
   ShardIsolationMode,
@@ -31,12 +34,21 @@ import type {
 
 export class GalxAuthEngine {
   private static instance: GalxAuthEngine;
+  public readonly riskEvaluationTable: BroccoliDbTable<SessionRiskEvaluation & { id: string; userId?: string; sessionId?: string; timestampMs: number }>;
   private readonly sessionRepo: SessionRepository;
   private readonly persistence: GalxPersistence;
 
   private constructor() {
     this.sessionRepo = SessionRepository.getInstance();
     this.persistence = GalxPersistence.getInstance();
+
+    this.riskEvaluationTable = new BroccoliDbTable<SessionRiskEvaluation & { id: string; userId?: string; sessionId?: string; timestampMs: number }>('session_risk_evaluations');
+    this.riskEvaluationTable.createIndex('userId');
+    this.riskEvaluationTable.createIndex('sessionId');
+    this.riskEvaluationTable.createIndex('riskLevel');
+    this.riskEvaluationTable.createIndex('isHighRisk');
+    this.riskEvaluationTable.createSortedIndex('riskScore');
+    this.riskEvaluationTable.createSortedIndex('timestampMs');
   }
 
   static getInstance(): GalxAuthEngine {
@@ -422,6 +434,18 @@ export class GalxAuthEngine {
     const riskLevel = riskScore >= 75 ? 'critical' : riskScore >= 50 ? 'high' : riskScore >= 25 ? 'medium' : 'low';
     const isHighRisk = riskScore >= 50;
 
+    const evalRecord: SessionRiskEvaluation & { id: string; userId?: string; sessionId?: string; timestampMs: number } = {
+      id: `risk_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      sessionId: session.id,
+      userId: session.userId,
+      riskScore,
+      riskLevel,
+      isHighRisk,
+      riskFactors,
+      timestampMs: Date.now()
+    };
+    this.riskEvaluationTable.put(evalRecord.id, evalRecord);
+
     if (riskScore > 0) {
       this.sessionRepo.recordRiskEvent(
         session.id,
@@ -733,6 +757,15 @@ export class GalxAuthEngine {
       isPriorityUser: false,
       error: 'UNRECOGNIZED_AUTH_SCHEME'
     };
+  }
+
+  public queryRiskEvaluationsNatural(naturalQuery: string): (SessionRiskEvaluation & { id: string; userId?: string; sessionId?: string; timestampMs: number })[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'session_risk_evaluations');
+    return this.riskEvaluationTable.query(parsed.queryOptions) as (SessionRiskEvaluation & { id: string; userId?: string; sessionId?: string; timestampMs: number })[];
+  }
+
+  public aggregateRiskEvaluations(query: DbAggregateQuery): DbAggregateResult {
+    return this.riskEvaluationTable.aggregate(query);
   }
 }
 

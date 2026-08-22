@@ -67,8 +67,28 @@ Sorts candidates primarily by active in-flight worker count, breaking ties by li
 Designed for mission-critical enterprise workloads requiring hierarchical cascade routing:
 
 1. Highest priority tier shards ($\text{priority} \ge 90$) receive 100% of traffic.
-2. If all tier-1 shards enter cooldown or exceed concurrency limits, traffic automatically spills over to tier-2 shards ($\text{priority} \ge 50$), and subsequently to base pool shards.
-3. Automatically falls back to tier-1 the instant healthy capacity is restored.
+## 5. BroccoliDB Sub-Microsecond Candidate Pre-Filtering
+
+Before scoring algorithms evaluate candidate shards, **BroccoliDB reactive secondary indices** pre-filter candidate pools in $< 2\mu\text{s}$:
+
+```text
+Full Shard Fleet (N Shards in accountTable)
+                 │
+                 ▼
+  [Index Lookup: provider == 'openai' & status != 'revoked']  -> O(1) Candidate Set
+                 │
+                 ▼
+  [Index Lookup: shardMode == 'pooled' & permissionRetracted == false] -> O(1) Filter
+                 │
+                 ▼
+  [Circuit Breaker Filter: status != 'dead' & status != 'exhausted']
+                 │
+                 ▼
+  [P-AHT Mathematical Scoring Matrix: S_i]
+                 │
+                 ▼
+       Selected Execution Shard
+```
 
 ---
 
@@ -80,3 +100,5 @@ Designed for mission-critical enterprise workloads requiring hierarchical cascad
 | **Homogeneous High-Volume Queues** | `smooth_weighted_round_robin` | Perfectly smooth interleave, zero burst clumping |
 | **Long-Running Batch Inference** | `least_utilized` | Prevents token debt skew across credentials |
 | **Tiered Failover Deployments** | `priority_failover` | Strict hierarchical failover guarantees |
+| **Micro-Subsecond Substrate Queries** | `broccolidb_natural` | Offline deterministic AST matching with zero GC overhead |
+

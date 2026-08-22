@@ -4,6 +4,8 @@
 
 import type { ModelInfo, CostEstimateRequest, CostEstimateResult } from '../types';
 import type { GalxAIClientCore } from '../client';
+import { ModelCatalog } from '../../core/router/ModelCatalog';
+import type { DbQueryOptions, DbAggregateQuery } from '../../core/broccolidb/broccolidb.contracts';
 
 export class ModelsResource {
   private readonly client: GalxAIClientCore;
@@ -64,5 +66,26 @@ export class ModelsResource {
       retailComparisonCost: Number(retailCost.toFixed(6)),
       estimatedSavingsPercentage
     };
+  }
+
+  /**
+   * Executes deterministic offline natural language queries over the model catalog (<0.1ms).
+   */
+  public queryNatural(naturalQuery: string) {
+    return ModelCatalog.queryNatural(naturalQuery);
+  }
+
+  /**
+   * Evaluates structured query filters over the model catalog.
+   */
+  public queryDSL(options: DbQueryOptions) {
+    return ModelCatalog.queryDSL(options);
+  }
+
+  /**
+   * Calculates pricing and statistical aggregations across the catalog.
+   */
+  public aggregate(query: DbAggregateQuery) {
+    return ModelCatalog.aggregate(query);
   }
 }

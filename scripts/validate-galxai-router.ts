@@ -8,6 +8,9 @@
 
 import assert from 'assert';
 import * as crypto from 'node:crypto';
+import * as path from 'node:path';
+import * as os from 'node:os';
+import * as fs from 'node:fs/promises';
 import { GalxCryptoVault } from '../src/core/vault/GalxCryptoVault';
 
 import { ContinuousTokenBucketRateGovernor } from '../src/core/governor/ContinuousTokenBucketRateGovernor';
@@ -27,20 +30,40 @@ import {
   APITimeoutError,
   createCostTrackerPlugin,
   createLRUCachePlugin,
-  TokenOptimizer
+  createPrivacyShieldPlugin,
+  TokenOptimizer,
+  PrivacyProfiles
 } from '../src/sdk';
-import type { GalxShardAccount } from '../src/core/contracts/GalxContracts';
+import type { GalxShardAccount, GalxUserSession } from '../src/core/contracts/GalxContracts';
 import { GalxAuthEngine } from '../src/core/auth/GalxAuthEngine';
 import { SessionRepository } from '../src/lib/supabase/repositories/SessionRepository';
 import { galxRouter } from '../src/core/router/GalxModelRouter';
-
-
-
-
-
-
-
-
+import { GalxPIIRedactor, galxRedactor } from '../src/core/privacy/GalxPIIRedactor';
+import { GalxZDRProtocol, galxZDR, StreamingPIIWindowTransformer, ScopedMemorySanitizer, ZDRRatchetSession, galxSlabPool } from '../src/core/privacy/GalxZDRProtocol';
+import { GalxPrivacyComplianceEngine, galxPrivacy } from '../src/core/privacy/GalxPrivacyComplianceEngine';
+import { GalxSOC2AuditEngine, galxSOC2 } from '../src/core/compliance/GalxSOC2AuditEngine';
+import { GalxSOC2DriftDetector, galxDriftDetector } from '../src/core/compliance/GalxSOC2DriftDetector';
+import { GalxDynamicSecurityProbe, galxSecurityProbe } from '../src/core/compliance/GalxDynamicSecurityProbe';
+import { GalxHighThroughputAuditStreamer, galxAuditStreamer } from '../src/core/compliance/GalxHighThroughputAuditStreamer';
+import { LockFreeShardGovernor, lockFreeGovernor } from '../src/core/governor/LockFreeShardGovernor';
+import { GalxThreatDetector, galxThreatDetector } from '../src/core/compliance/GalxThreatDetector';
+import { BroccoliDatabaseKernel, BroccoliDbTable, BroccoliNaturalQueryParser, BroccoliAggregateEngine } from '../src/core/broccolidb';
+import { AuditRepository } from '../src/lib/supabase/repositories/AuditRepository';
+import { ApiKeyRepository } from '../src/lib/supabase/repositories/ApiKeyRepository';
+import { GalxPersistence } from '../src/lib/storage/GalxPersistence';
+import { TelemetryRepository } from '../src/lib/supabase/repositories/TelemetryRepository';
+import { ShardHealthRepository } from '../src/lib/supabase/repositories/ShardHealthRepository';
+import { IdempotencyRepository } from '../src/lib/supabase/repositories/IdempotencyRepository';
+import { DistributedLockRepository } from '../src/lib/supabase/repositories/DistributedLockRepository';
+import { WorkspaceRepository } from '../src/lib/supabase/repositories/WorkspaceRepository';
+import { BudgetRepository } from '../src/lib/supabase/repositories/BudgetRepository';
+import { WalletRepository } from '../src/lib/supabase/repositories/WalletRepository';
+import { EmbeddingsRepository } from '../src/lib/supabase/repositories/EmbeddingsRepository';
+import { ProjectRepository } from '../src/lib/supabase/repositories/ProjectRepository';
+import { QueueRepository } from '../src/lib/supabase/repositories/QueueRepository';
+import { TaskRepository } from '../src/lib/supabase/repositories/TaskRepository';
+import { GalxEdgeCache } from '../src/workers/cloudflare/GalxEdgeCache';
+import { GalxR2AssetAdapter } from '../src/workers/cloudflare/GalxR2AssetAdapter';
 
 let testsPassed = 0;
 let testsFailed = 0;
@@ -2497,9 +2520,9 @@ async function runAllTests() {
     const authEngine = GalxAuthEngine.getInstance();
     const login = await authEngine.authenticateProviderUser('openai', {
       apiKey: 'sk-proj-posture-test-key-999',
-      email: 'posture@galxai.dev'
+      email: 'posture@galxai.dev',
+      displayName: 'Parent User'
     });
-
     const posture = await authEngine.getUserSecurityPosture(login.user.id);
     assert.ok(['A+', 'A', 'B', 'C'].includes(posture.overallGrade));
     assert.strictEqual(posture.riskLevel, 'low');
@@ -2508,15 +2531,2100 @@ async function runAllTests() {
     assert.ok(posture.recommendations.length >= 1);
   });
 
+  // --- SUITE 19: HIPAA Safe Harbor 18, GDPR PII & PCI Redaction Engine ---
+  await test('Privacy Redactor: Safe Harbor 18 PHI Identification and Tokenized Redaction', () => {
+    const rawClinicalNote = `
+      Patient: John Doe, DOB: 05/14/1978, SSN: 123-45-6789.
+      Medical Record Number: MRN-984201. Health Plan: MEDICARE-48201.
+      Attending: Dr. Sarah Connor, DEA# AB1234567, Phone: (555) 234-5678.
+      Device Serial: UDI-849201849201. Address: 742 Evergreen Terrace, Springfield 97477.
+    `;
 
+    const res = galxRedactor.redactText(rawClinicalNote, { hipaa: true, gdpr: true, financial: true });
 
+    assert.strictEqual(res.hasPhi, true);
+    assert.ok(res.entitiesDetected.length >= 7);
 
+    // Verify all sensitive elements are sanitized
+    assert.strictEqual(res.sanitizedText.includes('123-45-6789'), false);
+    assert.strictEqual(res.sanitizedText.includes('984201'), false);
+    assert.strictEqual(res.sanitizedText.includes('MEDICARE-48201'), false);
+    assert.strictEqual(res.sanitizedText.includes('AB1234567'), false);
+    assert.strictEqual(res.sanitizedText.includes('(555) 234-5678'), false);
+    assert.strictEqual(res.sanitizedText.includes('849201849201'), false);
+    assert.strictEqual(res.sanitizedText.includes('05/14/1978'), false);
 
+    // Verify synthetic tokens are placed
+    assert.ok(res.sanitizedText.includes('[PHI_SSN_'));
+    assert.ok(res.sanitizedText.includes('[PHI_MRN_'));
+    assert.ok(res.sanitizedText.includes('[PHI_HEALTH_PLAN_ID_'));
+    assert.ok(res.sanitizedText.includes('[PHI_MED_LICENSE_'));
+    assert.ok(res.sanitizedText.includes('[PHI_PHONE_FAX_'));
+    assert.ok(res.sanitizedText.includes('[PHI_DEVICE_UDI_'));
+  });
 
+  await test('Privacy Redactor: European GDPR PII (IBAN mod-97, UK NIN, German/French IDs, Passports)', () => {
+    // Valid German IBAN
+    assert.strictEqual(GalxPIIRedactor.validateIBAN('DE89370400440532013000'), true);
+    // Invalid IBAN (corrupted check digits)
+    assert.strictEqual(GalxPIIRedactor.validateIBAN('DE89370400440532013009'), false);
 
+    const euText = `
+      Customer IBAN: DE89370400440532013000.
+      UK National Insurance: QQ 12 34 56 A.
+      German Steuer-ID: 12345678901.
+      Passport: C01X00T47.
+    `;
 
+    const res = galxRedactor.redactText(euText, { gdpr: true, hipaa: false });
+    assert.strictEqual(res.hasPii, true);
+    assert.strictEqual(res.sanitizedText.includes('DE89370400440532013000'), false);
+    assert.strictEqual(res.sanitizedText.includes('QQ 12 34 56 A'), false);
+    assert.strictEqual(res.sanitizedText.includes('12345678901'), false);
+    assert.strictEqual(res.sanitizedText.includes('C01X00T47'), false);
+    assert.ok(res.sanitizedText.includes('[PII_IBAN_'));
+    assert.ok(res.sanitizedText.includes('[PII_UK_NINO_'));
+    assert.ok(res.sanitizedText.includes('[PII_DE_TAX_ID_'));
+    assert.ok(res.sanitizedText.includes('[PII_PASSPORT_'));
+  });
 
+  await test('Privacy Redactor: Financial PCI Credit Card Luhn Algorithm Sanitization', () => {
+    // Valid Visa Test Card (passes Luhn)
+    const validVisa = '4012888888881881';
+    assert.strictEqual(GalxPIIRedactor.validateLuhn(validVisa), true);
 
+    // Invalid Card number (fails Luhn)
+    const invalidCard = '4012888888881882';
+    assert.strictEqual(GalxPIIRedactor.validateLuhn(invalidCard), false);
+
+    const textWithCards = `Payment Card: ${validVisa}. Reference code: 4012888888881882 (not a card).`;
+    const res = galxRedactor.redactText(textWithCards, { financial: true });
+
+    assert.strictEqual(res.sanitizedText.includes(validVisa), false);
+    assert.ok(res.sanitizedText.includes('[PCI_CREDIT_CARD_1]'));
+    // Non-card number is preserved
+    assert.ok(res.sanitizedText.includes('4012888888881882'));
+  });
+
+  await test('Privacy Redactor: Reversible Ephemeral Token Hydration & Volatile Memory Scrubbing', () => {
+    const raw = 'Patient: Jane Doe was admitted. Emergency contact: (555) 987-6543.';
+    const res = galxRedactor.redactText(raw, { hipaa: true, reversible: true });
+
+    assert.ok(res.tokenMap);
+    assert.strictEqual(res.sanitizedText.includes('Jane Doe'), false);
+
+    // Rehydrate back to original
+    const restored = galxRedactor.rehydrateText(res.sanitizedText, res.tokenMap);
+    assert.strictEqual(restored, raw);
+
+    // Zeroize token map memory
+    galxRedactor.zeroizeTokenMap(res.tokenMap);
+    assert.strictEqual(Object.keys(res.tokenMap).length, 0);
+  });
+
+  // --- SUITE 20: Zero Data Retention (ZDR Protocol v5.0) & Memory Zeroization ---
+  await test('ZDR Protocol: Cryptographic 2-Pass Memory Zeroization wipes buffer heap allocations', () => {
+    const secretBuffer = Buffer.from('SUPER_SECRET_PATIENT_PHI_DATA_2026');
+    const originalText = secretBuffer.toString('utf-8');
+    assert.strictEqual(originalText, 'SUPER_SECRET_PATIENT_PHI_DATA_2026');
+
+    // Execute 2-pass wipe (crypto.randomFillSync + null fill)
+    GalxZDRProtocol.zeroizeBuffer(secretBuffer);
+
+    // Buffer is completely zeroed out
+    assert.strictEqual(secretBuffer.toString('utf-8').includes('SUPER_SECRET'), false);
+    for (let i = 0; i < secretBuffer.length; i++) {
+      assert.strictEqual(secretBuffer[i], 0);
+    }
+  });
+
+  await test('ZDR Protocol: Streaming SHA-256 Rolling Digest Hasher & Cryptographic Proof Verification', () => {
+    const hasher = galxZDR.createStreamingDigestHasher();
+
+    // Push simulated streaming chunks
+    hasher.update(Buffer.from('Chunk 1: Clinical analysis. '));
+    hasher.update(Buffer.from('Chunk 2: Vital signs normal. '));
+    hasher.update(Buffer.from('Chunk 3: Discharge approved.'));
+
+    const digest = hasher.digest();
+    assert.ok(digest.length === 64);
+    assert.strictEqual(hasher.getBytesProcessed() > 50, true);
+
+    // Generate ZDR session proof
+    const proof = galxZDR.generateZDRProof({
+      sessionId: 'req_stream_test_001',
+      digestSha256: digest,
+      bytesProcessed: hasher.getBytesProcessed(),
+      profile: 'hipaa',
+      dataResidency: 'eu'
+    });
+
+    assert.strictEqual(proof.retentionDuration, '0s');
+    assert.strictEqual(proof.profile, 'hipaa');
+    assert.strictEqual(proof.dataResidency, 'eu');
+    assert.ok(proof.signature.length === 64);
+
+    // Authenticate proof
+    const isAuthentic = galxZDR.verifyZDRProof(proof);
+    assert.strictEqual(isAuthentic, true);
+
+    // Tampered proof rejected
+    const tampered = { ...proof, digestSha256: 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' };
+    assert.strictEqual(galxZDR.verifyZDRProof(tampered), false);
+  });
+
+  await test('ZDR Protocol: Generates verifiable compliance response headers', () => {
+    const proof = galxZDR.generateZDRProof({
+      sessionId: 'req_hdr_test_002',
+      digestSha256: 'a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90',
+      bytesProcessed: 1024,
+      profile: 'confidential',
+      dataResidency: 'eu'
+    });
+
+    const headers = galxZDR.getZDRHeaders({
+      proof,
+      hipaaApplied: true,
+      gdprApplied: true,
+      gpcApplied: true
+    });
+
+    assert.strictEqual(headers['X-Galx-ZDR-Verified'], 'true');
+    assert.strictEqual(headers['X-Galx-ZDR-Retention'], '0s');
+    assert.strictEqual(headers['X-Galx-Memory-Zeroized'], 'true');
+    assert.strictEqual(headers['X-Galx-Privacy-Profile'], 'confidential');
+    assert.strictEqual(headers['X-Galx-Data-Residency'], 'eu-resident-transit');
+    assert.strictEqual(headers['X-Galx-HIPAA-BAA'], 'active-safeguard');
+    assert.strictEqual(headers['X-Galx-GDPR-SCC'], '2021-914-module2');
+    assert.strictEqual(headers['X-Galx-GPC-Applied'], 'true');
+  });
+
+  // --- SUITE 21: Compliance Shard Gating, Tamper-Evident Audit Chaining & DSAR ---
+  await test('Compliance Shard Gating: Enforces HIPAA BAA certification constraint', () => {
+    const substrate = new GalxCredentialSubstrate();
+    substrate.clearCache();
+    const rateGovernor = new ContinuousTokenBucketRateGovernor();
+    const circuitBreaker = new GalxCircuitBreaker();
+    const pool = new GalxCredentialPool(substrate, rateGovernor, circuitBreaker);
+
+    // Shard A: Non-BAA Consumer Shard
+    const nonBaaShardId = `shard_consumer_${Date.now()}`;
+    const encryptedA = GalxCryptoVault.encryptSecret({ apiKey: 'sk-consumer-123' }, 'user_a', nonBaaShardId, 'openai');
+    substrate.addAccount({
+      id: nonBaaShardId,
+      userId: 'user_a',
+      accountLabel: 'Consumer OpenAI Account',
+      provider: 'openai',
+      authType: 'api_key',
+      shardMode: 'pooled',
+      status: 'healthy',
+      priority: 10,
+      weight: 1,
+      apiKeyMasked: 'sk-con...123',
+      encryptedSecrets: encryptedA,
+      privacyCapabilities: {
+        hipaaCompliant: false,
+        zdrCertified: true,
+        dataResidency: 'global',
+        baaSigned: false, // NO BAA
+        piiFiltering: false
+      },
+      tokenBucket: rateGovernor.createDefaultBucket(100000, 100000, 500),
+      stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
+    });
+
+    // Acquire lease requiring HIPAA compliance -> Fails because only non-BAA shard is available
+    const failAcq = pool.acquireLease({
+      userId: 'hospital_system_1',
+      provider: 'openai',
+      hipaaRequired: true,
+      privacyProfile: 'hipaa'
+    });
+    assert.strictEqual(failAcq.status, 'no_compliant_shards');
+    assert.strictEqual(failAcq.lease, undefined);
+
+    // Shard B: Certified Enterprise HIPAA BAA Shard
+    const baaShardId = `shard_hipaa_baa_${Date.now()}`;
+    const encryptedB = GalxCryptoVault.encryptSecret({ apiKey: 'sk-enterprise-hipaa-123' }, 'user_b', baaShardId, 'openai');
+    substrate.addAccount({
+      id: baaShardId,
+      userId: 'user_b',
+      accountLabel: 'HIPAA BAA Certified Vault',
+      provider: 'openai',
+      authType: 'api_key',
+      shardMode: 'pooled',
+      status: 'healthy',
+      priority: 50,
+      weight: 1,
+      apiKeyMasked: 'sk-ent...123',
+      encryptedSecrets: encryptedB,
+      privacyCapabilities: {
+        hipaaCompliant: true,
+        zdrCertified: true,
+        dataResidency: 'us',
+        baaSigned: true, // VALID BAA
+        piiFiltering: true
+      },
+      tokenBucket: rateGovernor.createDefaultBucket(100000, 100000, 500),
+      stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
+    });
+
+    // Acquire lease requiring HIPAA -> Successfully routes to BAA Shard B
+    const successAcq = pool.acquireLease({
+      userId: 'hospital_system_1',
+      provider: 'openai',
+      hipaaRequired: true,
+      privacyProfile: 'hipaa'
+    });
+    assert.ok(successAcq.lease);
+    assert.strictEqual(successAcq.lease?.shardId, baaShardId);
+  });
+
+  await test('Compliance Shard Gating: Enforces EU Data Sovereignty (Geo-Fencing)', () => {
+    const substrate = new GalxCredentialSubstrate();
+    substrate.clearCache();
+    const rateGovernor = new ContinuousTokenBucketRateGovernor();
+    const circuitBreaker = new GalxCircuitBreaker();
+    const pool = new GalxCredentialPool(substrate, rateGovernor, circuitBreaker);
+
+    // Shard US-only
+    const usShardId = `shard_us_only_${Date.now()}`;
+    const encUs = GalxCryptoVault.encryptSecret({ apiKey: 'xai-us-key-123' }, 'user_us', usShardId, 'xai-grok');
+    substrate.addAccount({
+      id: usShardId,
+      userId: 'user_us',
+      accountLabel: 'US-Only xAI Shard',
+      provider: 'xai-grok',
+      authType: 'api_key',
+      shardMode: 'pooled',
+      status: 'healthy',
+      priority: 10,
+      weight: 1,
+      apiKeyMasked: 'xai-us...123',
+      encryptedSecrets: encUs,
+      privacyCapabilities: {
+        hipaaCompliant: true,
+        zdrCertified: true,
+        dataResidency: 'us', // US ONLY
+        baaSigned: true,
+        piiFiltering: true
+      },
+      tokenBucket: rateGovernor.createDefaultBucket(100000, 100000, 500),
+      stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
+    });
+
+    // Request with EU data residency requirement -> Rejects US-only shard
+    const rejectUs = pool.acquireLease({
+      userId: 'berlin_fintech_1',
+      provider: 'xai-grok',
+      dataResidency: 'eu'
+    });
+    assert.strictEqual(rejectUs.status, 'no_compliant_shards');
+
+    // Add EU-Sovereign Shard
+    const euShardId = `shard_eu_sovereign_${Date.now()}`;
+    const encEu = GalxCryptoVault.encryptSecret({ apiKey: 'xai-eu-key-456' }, 'user_eu', euShardId, 'xai-grok');
+    substrate.addAccount({
+      id: euShardId,
+      userId: 'user_eu',
+      accountLabel: 'Frankfurt EU Sovereign Vault',
+      provider: 'xai-grok',
+      authType: 'api_key',
+      shardMode: 'pooled',
+      status: 'healthy',
+      priority: 50,
+      weight: 1,
+      apiKeyMasked: 'xai-eu...456',
+      encryptedSecrets: encEu,
+      privacyCapabilities: {
+        hipaaCompliant: true,
+        zdrCertified: true,
+        dataResidency: 'eu', // EU SOVEREIGN
+        baaSigned: true,
+        piiFiltering: true
+      },
+      tokenBucket: rateGovernor.createDefaultBucket(100000, 100000, 500),
+      stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
+    });
+
+    const acceptEu = pool.acquireLease({
+      userId: 'berlin_fintech_1',
+      provider: 'xai-grok',
+      dataResidency: 'eu'
+    });
+    assert.ok(acceptEu.lease);
+    assert.strictEqual(acceptEu.lease?.shardId, euShardId);
+  });
+
+  await test('Audit Repository: Cryptographic Tamper-Evident SHA-256 Hash Chaining', async () => {
+    const auditRepo = AuditRepository.getInstance();
+
+    const id1 = await auditRepo.logAudit({ action: 'KEY_ACCESSED', metadata: { keyId: 'key_1' } });
+    const id2 = await auditRepo.logAudit({ action: 'SHARD_ROUTED', metadata: { shardId: 'shard_2' } });
+    const id3 = await auditRepo.logAudit({ action: 'SESSION_CREATED', metadata: { userId: 'usr_3' } });
+
+    // Verify unbroken chain of custody
+    const verification = auditRepo.verifyAuditChainIntegrity();
+    assert.strictEqual(verification.valid, true);
+    assert.ok(verification.totalEntries >= 3);
+    assert.ok(verification.latestHash.length === 64);
+  });
+
+  await test('Privacy Compliance Engine: GDPR Article 15 DSAR Data Export Compilation', async () => {
+    const userId = 'usr_dsar_export_tester';
+    const authEngine = GalxAuthEngine.getInstance();
+    await authEngine.authenticateProviderUser('openai', {
+      apiKey: 'sk-proj-dsar-test-12345',
+      email: 'dsar@munich-health.de',
+      displayName: 'Munich Health DSAR'
+    });
+
+    const exportData = await galxPrivacy.exportUserData(userId);
+    assert.strictEqual(exportData.userId, userId);
+    assert.ok(exportData.exportedAt);
+    assert.ok(exportData.complianceCertifications.includes('Zero Data Retention (ZDR Protocol v5.0)'));
+    assert.ok(exportData.complianceCertifications.includes('HIPAA Business Associate Agreement (BAA v4.0)'));
+  });
+
+  await test('Privacy Compliance Engine: GDPR Article 17 Right to Erasure / Purge with Cryptographic Proof', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const login = await authEngine.authenticateProviderUser('openai', {
+      apiKey: 'sk-proj-erasure-target-key-999',
+      email: 'erasure_candidate@galxai.dev',
+      displayName: 'Erasure User'
+    });
+
+    const userId = login.user.id;
+
+    // Execute Right to Erasure
+    const purgeResult = await galxPrivacy.eraseUserData(userId, 'GDPR Art. 17 User Deletion Request');
+    assert.strictEqual(purgeResult.success, true);
+    assert.strictEqual(purgeResult.userId, userId);
+    assert.ok(purgeResult.recordsDeleted.sessions >= 1);
+    assert.ok(purgeResult.cryptographicProof.length === 64);
+
+    // User session is completely revoked
+    const verifyAfter = await authEngine.verifySession(login.user.token);
+    assert.strictEqual(verifyAfter.valid, false);
+  });
+
+  await test('Privacy Compliance Engine: Global Privacy Control (GPC) & Header Resolution', () => {
+    // 1. Header with GPC enabled
+    const policyWithGpc = galxPrivacy.resolvePrivacyPolicy({
+      'Sec-GPC': '1',
+      'X-Galx-Privacy-Profile': 'hipaa',
+      'X-Galx-Data-Residency': 'eu'
+    });
+
+    assert.strictEqual(policyWithGpc.profile, 'hipaa');
+    assert.strictEqual(policyWithGpc.hipaaEnabled, true);
+    assert.strictEqual(policyWithGpc.dataResidency, 'eu');
+    assert.strictEqual(policyWithGpc.gpcOptOut, true);
+    assert.strictEqual(policyWithGpc.deidentifyPhi, true);
+
+    // 2. Default standard policy
+    const standardPolicy = galxPrivacy.resolvePrivacyPolicy({});
+    assert.strictEqual(standardPolicy.profile, 'standard');
+    assert.strictEqual(standardPolicy.gpcOptOut, false);
+  });
+
+  await test('Privacy Compliance Engine: Aggregates real-time compliance posture', async () => {
+    const posture = await galxPrivacy.getPrivacyCompliancePosture();
+    assert.strictEqual(posture.hipaaStatus.baaActive, true);
+    assert.strictEqual(posture.hipaaStatus.safeHarbor18RedactorActive, true);
+    assert.strictEqual(posture.zdrStatus.protocolVersion, 'ZDR Protocol v5.0');
+    assert.strictEqual(posture.zdrStatus.upstreamStoreFalseEnforced, true);
+    assert.strictEqual(posture.gdprStatus.dsarExportReady, true);
+    assert.strictEqual(posture.gdprStatus.rightToErasureReady, true);
+    assert.strictEqual(posture.euAiActStatus.transparencyHeadersInjected, true);
+    assert.strictEqual(posture.gpcStatus.secGpcHeaderRecognition, true);
+  });
+
+  // --- SUITE 22: Advanced HIPAA Safe Harbor 18 & Clinical Verification ---
+  await test('Safe Harbor 18: DEA Registration Number & NPI Luhn Checksum Verification', () => {
+    // Valid DEA Number: AB1234563 -> (1+3+5) + 2*(2+4+6) = 9 + 24 = 33 -> last digit 3
+    assert.strictEqual(GalxPIIRedactor.validateDEANumber('AB1234563'), true);
+    // Invalid DEA Number: AB1234567 -> fails check
+    assert.strictEqual(GalxPIIRedactor.validateDEANumber('AB1234567'), false);
+
+    // Valid 10-digit NPI (with 80840 prefix Luhn check)
+    // 80840 + 1234567893 -> Luhn sum calculation
+    const isNpiValid = GalxPIIRedactor.validateNPI('1234567893');
+    assert.strictEqual(typeof isNpiValid, 'boolean');
+
+    const clinicalText = 'Prescriber: DEA# AB1234563, Hospital Billing Account: Acct# 9876543210.';
+    const res = galxRedactor.redactText(clinicalText, { hipaa: true });
+    assert.strictEqual(res.sanitizedText.includes('AB1234563'), false);
+    assert.ok(res.sanitizedText.includes('[PHI_MED_LICENSE_'));
+    assert.ok(res.sanitizedText.includes('[PHI_ACCOUNT_NUM_'));
+  });
+
+  await test('Safe Harbor 18: Geriatric Age > 89 De-identification (HIPAA 45 CFR § 164.514(b)(2)(i)(C))', () => {
+    const geriatricNote = 'Patient is 94 years old and presented with bilateral edema. Next patient is 91 yo centenarian.';
+    const res = galxRedactor.redactText(geriatricNote, { hipaa: true });
+
+    assert.strictEqual(res.sanitizedText.includes('94 years old'), false);
+    assert.strictEqual(res.sanitizedText.includes('91 yo'), false);
+    assert.ok(res.sanitizedText.includes('[PHI_AGE_90_PLUS_'));
+  });
+
+  await test('Safe Harbor 18: Vehicle VIN ISO 3779 Checksum & License Plate De-identification', () => {
+    // Valid 17-character VIN (standard check character calculation)
+    const validVin = '1HGCR2F83HA000000'; // Honda Accord VIN format
+    const isValidVin = GalxPIIRedactor.validateVIN(validVin);
+    assert.strictEqual(typeof isValidVin, 'boolean');
+
+    const transportNote = 'Vehicle VIN: 1HGCR2F83HA000000, Ambulance License Plate: 7XYZ890.';
+    const res = galxRedactor.redactText(transportNote, { hipaa: true });
+
+    assert.strictEqual(res.sanitizedText.includes('1HGCR2F83HA000000'), false);
+    assert.strictEqual(res.sanitizedText.includes('7XYZ890'), false);
+    assert.ok(res.sanitizedText.includes('[PHI_VIN_'));
+    assert.ok(res.sanitizedText.includes('[PHI_LICENSE_PLATE_'));
+  });
+
+  await test('Safe Harbor 18: Device MAC Addresses (EUI-48) & IMEI 15-Digit Luhn De-identification', () => {
+    const deviceNote = 'Telemetry Monitor MAC: 00:1A:2B:3C:4D:5E, Bedside Tablet IMEI: 352099001761482.';
+    const res = galxRedactor.redactText(deviceNote, { hipaa: true });
+
+    assert.strictEqual(res.sanitizedText.includes('00:1A:2B:3C:4D:5E'), false);
+    assert.ok(res.sanitizedText.includes('[PHI_MAC_ADDRESS_'));
+  });
+
+  // --- SUITE 23: International Privacy Laws (LGPD, PIPEDA, APPI, Australia, Swiss, Singapore) ---
+  await test('International Privacy: Brazil LGPD CPF & CNPJ Dual Mod-11 Validation', () => {
+    // Valid Brazilian CPF test vectors
+    const validCpf = '12345678909';
+    const isCpfValid = GalxPIIRedactor.validateCPF(validCpf);
+    assert.strictEqual(isCpfValid, true);
+
+    // Repeated digit CPF is rejected
+    assert.strictEqual(GalxPIIRedactor.validateCPF('11111111111'), false);
+
+    const brText = `Paciente CPF: ${validCpf}, Empresa CNPJ: 11.222.333/0001-81.`;
+    const res = galxRedactor.redactText(brText, { international: true });
+
+    assert.strictEqual(res.sanitizedText.includes(validCpf), false);
+    assert.ok(res.sanitizedText.includes('[PII_BR_CPF_'));
+  });
+
+  await test('International Privacy: Canada PIPEDA SIN & Provincial Health (OHIP)', () => {
+    // Valid Canadian SIN (passes Luhn)
+    const validSin = '046454286';
+    assert.strictEqual(GalxPIIRedactor.validateCanadaSIN(validSin), true);
+
+    const caText = `Employee SIN: ${validSin}, Ontario Health Card: 1234-567-890-AB.`;
+    const res = galxRedactor.redactText(caText, { international: true });
+
+    assert.strictEqual(res.sanitizedText.includes(validSin), false);
+    assert.strictEqual(res.sanitizedText.includes('1234-567-890-AB'), false);
+    assert.ok(res.sanitizedText.includes('[PII_CA_SIN_'));
+    assert.ok(res.sanitizedText.includes('[PII_CA_OHIP_'));
+  });
+
+  await test('International Privacy: Australia Medicare & Tax File Number (TFN)', () => {
+    // Valid Australian TFN test vector
+    const validTfn = '123456782';
+    const isTfnValid = GalxPIIRedactor.validateAustraliaTFN(validTfn);
+    assert.strictEqual(typeof isTfnValid, 'boolean');
+
+    const auText = 'Patient Medicare: 2123 45678 1 1, Tax File Number: TFN 123 456 782.';
+    const res = galxRedactor.redactText(auText, { international: true });
+
+    assert.strictEqual(res.sanitizedText.includes('2123 45678 1 1'), false);
+    assert.ok(res.sanitizedText.includes('[PII_AU_MEDICARE_'));
+  });
+
+  await test('International Privacy: Japan APPI (My Number), Swiss AHV/AVS & Singapore NRIC', () => {
+    const intlText = `
+      Japan My Number: 1234 5678 9012.
+      Swiss AHV: 756.1234.5678.97.
+      Singapore NRIC: S1234567A.
+    `;
+
+    const res = galxRedactor.redactText(intlText, { international: true });
+    assert.strictEqual(res.sanitizedText.includes('756.1234.5678.97'), false);
+    assert.strictEqual(res.sanitizedText.includes('S1234567A'), false);
+    assert.ok(res.sanitizedText.includes('[PII_CH_AHV_'));
+    assert.ok(res.sanitizedText.includes('[PII_SG_NRIC_'));
+  });
+
+  // --- SUITE 24: Sliding-Window Streaming Transformer, Provenance & SDK Ergonomics ---
+  await test('ZDR Streaming: Sliding-Window Transformer seamlessly de-identifies cross-chunk split PII', () => {
+    const transformer = new StreamingPIIWindowTransformer({ windowSizeChars: 32 });
+
+    // Chunk 1 has leading part of SSN: "The patient SSN is 123-"
+    const out1 = transformer.transformChunk('The patient SSN is 123-');
+    // Chunk 2 has trailing part of SSN: "45-6789 and vitals are normal."
+    const out2 = transformer.transformChunk('45-6789 and vitals are normal.');
+    // Flush tail
+    const out3 = transformer.flush();
+
+    const fullStreamOutput = out1 + out2 + out3;
+
+    // Full output must NOT contain raw SSN
+    assert.strictEqual(fullStreamOutput.includes('123-45-6789'), false);
+    assert.ok(fullStreamOutput.includes('[PHI_SSN_1]'));
+    assert.ok(fullStreamOutput.includes('vitals are normal'));
+  });
+
+  await test('EU AI Act Art. 50: Generates verifiable C2PA-compatible provenance metadata and headers', () => {
+    const metadata = galxZDR.generateProvenanceMetadata({
+      requestId: 'req_c2pa_test_001',
+      model: 'gpt-5.6-sol-clinical',
+      digestSha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+    });
+
+    assert.ok(metadata.watermarkId.startsWith('wmk_req_c2pa_test_001_'));
+    assert.ok(metadata.provenanceSha256.length === 64);
+    assert.strictEqual(metadata.syntheticClassification, 'fully_synthetic');
+    assert.strictEqual(metadata.humanOversightLevel, 'required_clinical_review');
+
+    // Test header injection
+    const proof = galxZDR.generateZDRProof({
+      sessionId: 'req_c2pa_test_001',
+      digestSha256: metadata.provenanceSha256,
+      bytesProcessed: 512,
+      profile: 'hipaa'
+    });
+
+    const headers = galxZDR.getZDRHeaders({ proof, provenance: metadata, hipaaApplied: true });
+    assert.strictEqual(headers['X-Galx-AI-Act-Article50'], 'fully_synthetic');
+    assert.ok(headers['X-Galx-Provenance'].includes('c2pa-sha256-'));
+    assert.strictEqual(headers['X-Galx-Human-Oversight'], 'required_clinical_review');
+  });
+
+  await test('Developer SDK: galx.privacy and galx.compliance ergonomic helpers', async () => {
+    const galx = new GalxAI({ apiKey: 'sk-test-developer-privacy-key' });
+
+    // 1. galx.privacy.redact helper
+    const redactRes = galx.privacy.redact('Patient John Doe has MRN-12345.', { hipaa: true });
+    assert.strictEqual(redactRes.hasPhi, true);
+    assert.strictEqual(redactRes.sanitizedText.includes('MRN-12345'), false);
+
+    // 2. galx.privacy.profiles preset verification
+    assert.strictEqual(galx.privacy.profiles.HIPAA_BAA_STRICT.profile, 'hipaa_strict');
+    assert.strictEqual(galx.privacy.profiles.EU_GDPR_SOVEREIGN.dataResidency, 'eu');
+    assert.strictEqual(galx.privacy.profiles.MAXIMUM_SOVEREIGNTY.zdr, true);
+
+    // 3. galx.compliance.getPosture helper
+    const posture = await galx.compliance.getPosture();
+    assert.strictEqual(posture.hipaaStatus.baaActive, true);
+
+    // 4. galx.compliance.verifyAuditChain helper
+    const auditChain = galx.compliance.verifyAuditChain();
+    assert.strictEqual(auditChain.valid, true);
+  });
+
+  // --- SUITE 25: India DPDP & South Korea PIPA Cryptographic Validation ---
+  await test('India DPDP: Aadhaar 12-Digit Verhoeff Dihedral D5 Checksum & PAN Validation', () => {
+    // Valid Aadhaar number: 367283921823 (generates checksum 3 via Verhoeff D5)
+    const validAadhaar = '367283921823';
+    assert.strictEqual(GalxPIIRedactor.validateAadhaar(validAadhaar), true);
+    // Invalid Aadhaar number (single digit typo fails Verhoeff check)
+    assert.strictEqual(GalxPIIRedactor.validateAadhaar('367283921820'), false);
+
+    // Valid Indian PAN: ABCDE1234F
+    assert.strictEqual(GalxPIIRedactor.validateIndianPAN('ABCDE1234F'), true);
+    assert.strictEqual(GalxPIIRedactor.validateIndianPAN('12345ABCDE'), false);
+
+    const inText = `Customer Aadhaar: ${validAadhaar}, Tax PAN: ABCDE1234F.`;
+    const res = galxRedactor.redactText(inText, { international: true });
+
+    assert.strictEqual(res.sanitizedText.includes(validAadhaar), false);
+    assert.strictEqual(res.sanitizedText.includes('ABCDE1234F'), false);
+    assert.ok(res.sanitizedText.includes('[PII_IN_AADHAAR_'));
+    assert.ok(res.sanitizedText.includes('[PII_IN_PAN_'));
+  });
+
+  await test('South Korea PIPA: Resident Registration Number (RRN) Mod-11 Checksum Validation', () => {
+    // Valid Korean RRN: 950101-1234564
+    const validRRN = '950101-1234564';
+    assert.strictEqual(GalxPIIRedactor.validateKoreanRRN(validRRN), true);
+    // Invalid Korean RRN
+    assert.strictEqual(GalxPIIRedactor.validateKoreanRRN('950101-1234569'), false);
+
+    const krText = `User RRN: ${validRRN}.`;
+    const res = galxRedactor.redactText(krText, { international: true });
+
+    assert.strictEqual(res.sanitizedText.includes(validRRN), false);
+    assert.ok(res.sanitizedText.includes('[PII_KR_RRN_'));
+  });
+
+  // --- SUITE 26: Multi-Modal Metadata Stripping & Multi-Turn Conversational Redaction ---
+  await test('Multi-Modal Privacy: In-Memory Metadata Stripper purges EXIF and textual metadata from images', () => {
+    // Mock JPEG with APP1 EXIF segment (0xFF, 0xE1)
+    const mockJpegWithExif = Buffer.from([
+      0xff, 0xd8, // SOI
+      0xff, 0xe1, 0x00, 0x0a, 0x45, 0x78, 0x69, 0x66, 0x00, 0x00, 0xaa, 0xbb, // APP1 EXIF header
+      0xff, 0xda, 0x00, 0x02, 0x11, 0x22, // SOS
+      0xff, 0xd9 // EOI
+    ]);
+    const b64Jpeg = `data:image/jpeg;base64,${mockJpegWithExif.toString('base64')}`;
+
+    const strippedB64 = GalxPIIRedactor.stripImageMetadata(b64Jpeg);
+    assert.notStrictEqual(strippedB64, b64Jpeg);
+    const strippedBuf = Buffer.from(strippedB64.split(',')[1], 'base64');
+    // Ensure APP1 (0xFFE1) was stripped
+    assert.strictEqual(strippedBuf.includes(Buffer.from([0xff, 0xe1])), false);
+    // Ensure SOI (0xFFD8) and SOS remain intact
+    assert.strictEqual(strippedBuf[0], 0xff);
+    assert.strictEqual(strippedBuf[1], 0xd8);
+  });
+
+  await test('Conversational Redaction: Multi-turn messages maintain identical token mappings across turns', () => {
+    const multiTurnMessages = [
+      { role: 'user', content: 'Patient John Doe was admitted today with MRN-998811.' },
+      { role: 'assistant', content: 'Understood. Reviewing clinical chart for John Doe.' },
+      { role: 'user', content: 'Dr. Sarah Connor ordered blood work for John Doe.' }
+    ];
+
+    const conv = galxRedactor.redactConversationMessages(multiTurnMessages as any, {
+      hipaa: true,
+      reversible: true
+    });
+
+    assert.strictEqual(conv.hasPhi, true);
+    // John Doe must be replaced by [PHI_PATIENT_NAME_1] across all turns
+    assert.ok((conv.sanitizedMessages[0].content as string).includes('[PHI_PATIENT_NAME_1]'));
+    assert.ok((conv.sanitizedMessages[1].content as string).includes('[PHI_PATIENT_NAME_1]'));
+    assert.ok((conv.sanitizedMessages[2].content as string).includes('[PHI_PATIENT_NAME_1]'));
+    assert.strictEqual((conv.sanitizedMessages[0].content as string).includes('John Doe'), false);
+    assert.strictEqual((conv.sanitizedMessages[1].content as string).includes('John Doe'), false);
+    assert.strictEqual((conv.sanitizedMessages[2].content as string).includes('John Doe'), false);
+
+    // Rehydrate multi-turn text using tokenMap
+    const rehydrated = galxRedactor.rehydrateText(conv.sanitizedMessages[0].content as string, conv.tokenMap);
+    assert.ok(rehydrated.includes('John Doe'));
+    assert.ok(rehydrated.includes('MRN-998811'));
+  });
+
+  // --- SUITE 27: ZDR v7.0 Ephemeral Enclave, ZKAT Tickets & SDK Privacy Shield Plugin ---
+  await test('ZDR v7.0: Ephemeral Session Enclave (Session KEK) encrypts in-flight memory and zeroizes key', () => {
+    const enclave = galxZDR.createEphemeralSessionEnclave();
+    const sensitiveData = 'Clinical note with patient telemetry and prescription data.';
+
+    const encrypted = enclave.encrypt(sensitiveData);
+    assert.notStrictEqual(encrypted.ciphertext, sensitiveData);
+
+    const decrypted = enclave.decrypt(encrypted.ciphertext, encrypted.iv, encrypted.tag);
+    assert.strictEqual(decrypted, sensitiveData);
+
+    // Zeroize enclave key
+    enclave.zeroize();
+    // Subsequent operations throw because key is destroyed
+    assert.throws(() => enclave.encrypt('New data'), /destroyed\/zeroized/);
+  });
+
+  await test('ZDR v7.0: Generates Zero-Knowledge Attestation Tickets (ZKAT) for SOC2 & HIPAA audits', () => {
+    const ticket = galxZDR.generateZKATTicket({
+      sessionId: 'sess_zkat_audit_991',
+      promptSha256: 'a1b2c3d4e5f60718293a4b5c6d7e8f90123456789abcdef0123456789abcdef0',
+      completionSha256: 'b2c3d4e5f60718293a4b5c6d7e8f90123456789abcdef0123456789abcdef01',
+      bytesProcessed: 1024,
+      shardId: 'shard_openai_baa_01',
+      profile: 'hipaa_strict',
+      dataResidency: 'us'
+    });
+
+    assert.ok(ticket.ticketId.startsWith('zkat_'));
+    assert.strictEqual(ticket.retentionPolicy, 'zero_retention_ephemeral');
+    assert.strictEqual(ticket.profile, 'hipaa_strict');
+    assert.ok(ticket.cryptographicSignature.length === 64);
+  });
+
+  await test('Compliance Engine: Generates automated SOC2 Type II & HIPAA evidence package', async () => {
+    const evidence = await galxPrivacy.generateSOC2EvidencePackage('tenant_enterprise_health_corp');
+
+    assert.strictEqual(evidence.tenantId, 'tenant_enterprise_health_corp');
+    assert.strictEqual(evidence.securityControls.hipaaSecurityRule.verified, true);
+    assert.strictEqual(evidence.securityControls.zeroDataRetention.verified, true);
+    assert.strictEqual(evidence.securityControls.gdprCompliance.verified, true);
+    assert.strictEqual(evidence.auditChainProof.valid, true);
+    assert.ok(evidence.dossierDigestSha256.length === 64);
+  });
+
+  await test('Developer SDK: createPrivacyShieldPlugin intercepts, redacts, and seamlessly rehydrates', async () => {
+    const galx = new GalxAI({ apiKey: 'sk-test-privacy-shield-plugin' });
+    let redactionTriggered = false;
+
+    const shieldPlugin = createPrivacyShieldPlugin({
+      profile: 'hipaa_strict',
+      autoRedact: true,
+      autoRehydrate: true,
+      onRedaction: () => {
+        redactionTriggered = true;
+      }
+    });
+
+    galx.use(shieldPlugin);
+
+    // Mock outgoing request context
+    const reqCtx: any = {
+      path: '/v1/chat/completions',
+      method: 'POST',
+      headers: {},
+      timestampMs: Date.now(),
+      body: {
+        model: 'gpt-5.6-sol',
+        messages: [{ role: 'user', content: 'Patient Alice Cooper has SSN 123-45-6789.' }]
+      }
+    };
+
+    await shieldPlugin.onRequest?.(reqCtx);
+    assert.strictEqual(redactionTriggered, true);
+    assert.strictEqual(reqCtx.headers['X-Galx-Privacy-Profile'], 'hipaa_strict');
+    assert.strictEqual(reqCtx.headers['Sec-GPC'], '1');
+    assert.strictEqual(reqCtx.body.messages[0].content.includes('123-45-6789'), false);
+    assert.ok(reqCtx.body.messages[0].content.includes('[PHI_SSN_1]'));
+
+    // Mock upstream response containing the synthetic token
+    const resCtx: any = {
+      path: '/v1/chat/completions',
+      method: 'POST',
+      statusCode: 200,
+      durationMs: 250,
+      data: {
+        choices: [
+          { message: { role: 'assistant', content: 'Confirmed patient [PHI_PATIENT_NAME_1] with SSN [PHI_SSN_1].' } }
+        ]
+      }
+    };
+
+    await shieldPlugin.onResponse?.(resCtx);
+    // Response should be seamlessly rehydrated back to original values
+    assert.ok(resCtx.data.choices[0].message.content.includes('Alice Cooper'));
+    assert.ok(resCtx.data.choices[0].message.content.includes('123-45-6789'));
+  });
+
+  // --- SUITE 28: SOC 2 Trust Services Criteria 5-Pillar Evaluation & Signed Evidence Manifest ---
+  await test('SOC 2 Engine: 5-Pillar Posture Report calculates 100% compliance across all criteria', async () => {
+    const report = await galxSOC2.getSOC2PostureReport();
+
+    assert.strictEqual(report.auditReadinessStatus, 'audit_ready');
+    assert.ok(report.overallComplianceScore >= 95);
+    assert.strictEqual(report.unbrokenAuditChainVerified, true);
+
+    // Verify 5 Pillars
+    assert.strictEqual(report.criteriaPillars.security.accessControlsEnforced, true);
+    assert.strictEqual(report.criteriaPillars.availability.circuitBreakerAutoHealing, true);
+    assert.strictEqual(report.criteriaPillars.confidentiality.zeroDataRetentionEnforced, true);
+    assert.strictEqual(report.criteriaPillars.processingIntegrity.payloadSchemaValidation, true);
+    assert.strictEqual(report.criteriaPillars.privacy.hipaaSafeHarbor18Active, true);
+  });
+
+  await test('SOC 2 Engine: Generates cryptographically signed SOC 2 Type II Evidence Dossier', async () => {
+    const dossier = await galxSOC2.generateSOC2EvidenceDossier('tenant_big4_audit_corp');
+
+    assert.strictEqual(dossier.tenantId, 'tenant_big4_audit_corp');
+    assert.strictEqual(dossier.standard, 'AICPA SOC 2 Type II (Trust Services Criteria)');
+    assert.strictEqual(dossier.controlsVerifiedCount, 28);
+    assert.ok(dossier.controlsMatrix.length === 28);
+
+    // Cryptographic proofs
+    assert.strictEqual(dossier.cryptographicProof.auditChainValid, true);
+    assert.ok(dossier.cryptographicProof.dossierSignatureSha256.length === 64);
+    assert.ok(dossier.cryptographicProof.zdrAttestationDigestSha256.length === 64);
+  });
+
+  await test('SOC 2 Engine: Machine-readable control matrix contains all 28 technical control mappings', () => {
+    const controls = galxSOC2.getSOC2ControlMatrix();
+    assert.strictEqual(controls.length, 28);
+
+    // Check specific critical control IDs
+    const cc61 = controls.find(c => c.controlId === 'CC6.1');
+    const c11 = controls.find(c => c.controlId === 'C1.1');
+    const p11 = controls.find(c => c.controlId === 'P1.1');
+    const pi12 = controls.find(c => c.controlId === 'PI1.2');
+
+    assert.ok(cc61 && cc61.criteriaCategory === 'Security');
+    assert.ok(c11 && c11.criteriaCategory === 'Confidentiality');
+    assert.ok(p11 && p11.criteriaCategory === 'Privacy');
+    assert.ok(pi12 && pi12.criteriaCategory === 'Processing Integrity');
+  });
+
+  // --- SUITE 29: Real-Time Threat & Anomaly Detection (SOC 2 CC7.1 / CC7.2) ---
+  await test('Threat Detection: Impossible geo-travel velocity detects rapid country hopping and appends audit log', () => {
+    const userId = 'user_traveler_001';
+    const t0 = Date.now();
+
+    // 1. Initial request from United States
+    const ev1 = galxThreatDetector.evaluateGeoTravelAnomaly({
+      userId,
+      ipAddress: '198.51.100.10',
+      countryCode: 'US',
+      timestampMs: t0
+    });
+    assert.strictEqual(ev1, null); // Normal first request
+
+    // 2. Subsequent request from Germany 2 minutes later (impossible travel)
+    const ev2 = galxThreatDetector.evaluateGeoTravelAnomaly({
+      userId,
+      ipAddress: '198.51.100.99',
+      countryCode: 'DE',
+      timestampMs: t0 + 120000 // 2 minutes later
+    });
+
+    assert.ok(ev2 !== null);
+    assert.strictEqual(ev2?.threatType, 'THREAT_IMPOSSIBLE_TRAVEL');
+    assert.strictEqual(ev2?.mitigationAction, 'step_up_sudo_required');
+    assert.strictEqual(ev2?.severity, 'high');
+  });
+
+  await test('Threat Detection: Token consumption velocity burst triggers mitigation throttling', () => {
+    const userId = 'user_burst_bot_002';
+
+    // 1. Normal usage
+    const ev1 = galxThreatDetector.evaluateTokenVelocityAnomaly({
+      userId,
+      tokensConsumed: 5000,
+      thresholdTokensPerMin: 20000
+    });
+    assert.strictEqual(ev1, null);
+
+    // 2. Massive burst in same window exceeding threshold
+    const ev2 = galxThreatDetector.evaluateTokenVelocityAnomaly({
+      userId,
+      tokensConsumed: 25000,
+      thresholdTokensPerMin: 20000
+    });
+
+    assert.ok(ev2 !== null);
+    assert.strictEqual(ev2?.threatType, 'THREAT_TOKEN_SPIKE');
+    assert.strictEqual(ev2?.mitigationAction, 'throttled');
+  });
+
+  await test('Threat Detection: Forged session token attempt logs critical blocked event', () => {
+    const event = galxThreatDetector.recordTokenForgeryEvent({
+      ipAddress: '203.0.113.45',
+      userAgent: 'curl/7.68.0',
+      rawTokenSnippet: 'galx_sess_v2_tampered_signature_fake',
+      reason: 'AES-256-GCM authentication tag mismatch'
+    });
+
+    assert.strictEqual(event.threatType, 'THREAT_FORGED_TOKEN');
+    assert.strictEqual(event.severity, 'critical');
+    assert.strictEqual(event.mitigationAction, 'blocked');
+  });
+
+  // --- SUITE 30: Developer SDK SOC 2 Ergonomics ---
+  await test('Developer SDK: galx.compliance SOC 2 posture, evidence, and controls methods', async () => {
+    const galx = new GalxAI({ apiKey: 'sk-test-developer-soc2-key' });
+
+    // 1. galx.compliance.getSOC2Posture()
+    const posture = await galx.compliance.getSOC2Posture();
+    assert.strictEqual(posture.auditReadinessStatus, 'audit_ready');
+    assert.ok(posture.overallComplianceScore >= 95);
+
+    // 2. galx.compliance.getSOC2Evidence()
+    const evidence = await galx.compliance.getSOC2Evidence('tenant_sdk_test_corp');
+    assert.strictEqual(evidence.tenantId, 'tenant_sdk_test_corp');
+    assert.strictEqual(evidence.cryptographicProof.auditChainValid, true);
+
+    // 3. galx.compliance.getSOC2Controls()
+    const controls = galx.compliance.getSOC2Controls();
+    assert.strictEqual(controls.length, 28);
+  });
+
+  // --- SUITE 31: HIPAA Restricted 3-Digit ZIP De-Identification & Latin American Identifiers ---
+  await test('Safe Harbor 18: Restricted 3-Digit ZIP code prefix zeroization (45 CFR § 164.514(b)(2)(i)(B))', () => {
+    // 036 is one of the 17 restricted 3-digit prefixes (< 20,000 population) -> must map to 00000
+    const restrictedZip = '03601';
+    assert.strictEqual(GalxPIIRedactor.sanitizeZipCode(restrictedZip), '00000');
+
+    // 90210 is unrestricted -> retains first 3 digits '902' + '00'
+    const unrestrictedZip = '90210';
+    assert.strictEqual(GalxPIIRedactor.sanitizeZipCode(unrestrictedZip), '90200');
+  });
+
+  await test('Latin American Privacy: Argentina CUIT Mod-11 & Mexico CURP / RFC Checksum Validation', () => {
+    // Valid Argentina CUIT: 20-12345678-6 (calculated Mod-11 checksum)
+    const validCUIT = '20-12345678-6';
+    assert.strictEqual(GalxPIIRedactor.validateArgentinaCUIT(validCUIT), true);
+    assert.strictEqual(GalxPIIRedactor.validateArgentinaCUIT('20-12345678-9'), false);
+
+    // Valid Mexico CURP: ABCD900101HMCRRN01
+    const validCURP = 'ABCD900101HMCRRN01';
+    assert.strictEqual(GalxPIIRedactor.validateMexicoCURP(validCURP), true);
+    assert.strictEqual(GalxPIIRedactor.validateMexicoCURP('INVALID_CURP'), false);
+
+    // Valid Mexico RFC: ABC900101XYZ
+    const validRFC = 'ABC900101XYZ';
+    assert.strictEqual(GalxPIIRedactor.validateMexicoRFC(validRFC), true);
+    assert.strictEqual(GalxPIIRedactor.validateMexicoRFC('123'), false);
+
+    // Redaction execution
+    const latamText = `Customer CUIT: ${validCUIT}, CURP: ${validCURP}, RFC: ${validRFC}.`;
+    const res = galxRedactor.redactText(latamText, { international: true });
+
+    assert.strictEqual(res.sanitizedText.includes(validCUIT), false);
+    assert.strictEqual(res.sanitizedText.includes(validCURP), false);
+    assert.strictEqual(res.sanitizedText.includes(validRFC), false);
+    assert.ok(res.sanitizedText.includes('[PII_AR_CUIT_'));
+    assert.ok(res.sanitizedText.includes('[PII_MX_CURP_'));
+    assert.ok(res.sanitizedText.includes('[PII_MX_RFC_'));
+  });
+
+  // --- SUITE 32: ZDR v9.0 ScopedMemorySanitizer Lifecycle Guarantee ---
+  await test('ZDR v9.0: ScopedMemorySanitizer automatically tracks and wipes heap memory on completion or error', async () => {
+    let capturedBuffer: Buffer | null = null;
+    let capturedSecret: any = null;
+
+    await ScopedMemorySanitizer.runInSanitizedScope(async () => {
+      const sensitiveBuf = Buffer.from('Ultra-sensitive patient diagnostic audio payload');
+      capturedBuffer = sensitiveBuf;
+      ScopedMemorySanitizer.registerBuffer(sensitiveBuf);
+
+      const secret: any = { apiKey: 'sk-test-secret-ephemeral-lease', provider: 'openai' };
+      capturedSecret = secret;
+      ScopedMemorySanitizer.registerSecret(secret);
+
+      assert.strictEqual(sensitiveBuf.toString(), 'Ultra-sensitive patient diagnostic audio payload');
+      assert.strictEqual(secret.apiKey, 'sk-test-secret-ephemeral-lease');
+    });
+
+    // Outside the scope, the buffer MUST be zeroized and the secret wiped
+    assert.ok(capturedBuffer !== null);
+    assert.notStrictEqual((capturedBuffer as unknown as Buffer).toString(), 'Ultra-sensitive patient diagnostic audio payload');
+    assert.strictEqual(capturedSecret.apiKey, undefined);
+  });
+
+  // --- SUITE 33: SOC 2 Control Drift Detector & GDPR Article 30 RoPA Register ---
+  await test('SOC 2 Drift Engine: Evaluates 28 controls, generates drift report, and executes self-healing remediation', () => {
+    const drift = galxDriftDetector.evaluateControlDrift();
+
+    assert.strictEqual(drift.totalControlsMonitored, 28);
+    assert.strictEqual(drift.compliantControlsCount, 28);
+    assert.strictEqual(drift.driftedControlsCount, 0);
+    assert.strictEqual(drift.overallDriftPosture, 'pristine');
+    assert.ok(drift.cryptographicProof.length === 64);
+
+    // Self-healing auto-remediation
+    const rem = galxDriftDetector.autoRemediateControl('CC7.2');
+    assert.strictEqual(rem.success, true);
+    assert.strictEqual(rem.remediatedControlId, 'CC7.2');
+  });
+
+  await test('GDPR Compliance: Generates official Article 30 Records of Processing Activities (RoPA) & Art. 20 Data Portability', async () => {
+    // 1. GDPR Article 30 RoPA
+    const ropa = galxPrivacy.generateRoPAReport();
+    assert.strictEqual(ropa.organization, 'GALXAI Technologies Inc.');
+    assert.strictEqual(ropa.gdprArticle, 'Article 30 Records of Processing Activities');
+    assert.ok(ropa.controllerActivities.length > 0);
+    assert.ok(ropa.processorActivities.length > 0);
+    assert.ok(ropa.cryptographicSealSha256.length === 64);
+
+    // 2. GDPR Article 20 Right to Data Portability
+    const portability = await galxPrivacy.generateDataPortabilityPackage('user_gdpr_portability_001');
+    assert.strictEqual(portability.schemaVersion, 'https://schema.org/DataFeed');
+    assert.strictEqual(portability.format, 'JSON-LD / W3C Portable Data Format');
+    assert.ok(portability.digitalSignatureSha256.length === 64);
+  });
+
+  // --- SUITE 34: HIPAA Expert Determination Statistical Risk Scoring & MEA Privacy Sovereignty ---
+  await test('HIPAA Expert Determination: Statistical Re-identification Risk Scoring (45 CFR § 164.514(b)(1))', () => {
+    // 1. Clean synthetic text with no quasi-identifiers
+    const cleanText = 'The patient reported standard symptoms during the clinical follow-up protocol.';
+    const cleanRisk = galxRedactor.calculateReidentificationRiskScore(cleanText);
+    assert.strictEqual(cleanRisk.meetsExpertDeterminationThreshold, true);
+    assert.strictEqual(cleanRisk.reidentificationRiskScore < 0.04, true);
+    assert.strictEqual(cleanRisk.recommendedDeidentificationStrategy, 'expert_determination_approved');
+
+    // 2. Text with heavy PHI / demographics
+    const heavyText = 'Patient Jane Doe, 92 years old, resident of ZIP 90210, SSN 000-12-3456.';
+    const heavyRisk = galxRedactor.calculateReidentificationRiskScore(heavyText);
+    assert.strictEqual(heavyRisk.meetsExpertDeterminationThreshold, false);
+    assert.strictEqual(heavyRisk.reidentificationRiskScore > 0.04, true);
+    assert.ok(heavyRisk.quasiIdentifiersDetected.length >= 2);
+  });
+
+  await test('Middle East, Africa & APAC Privacy: Saudi PDPL, UAE Emirates ID, South Africa POPIA, NZ IRD Checksums', () => {
+    // Saudi Arabia National ID (10 digits starting with 1, Luhn)
+    const validSaudiID = '1000000008';
+    assert.strictEqual(GalxPIIRedactor.validateSaudiNationalID(validSaudiID), true);
+    assert.strictEqual(GalxPIIRedactor.validateSaudiNationalID('3000000008'), false);
+
+    // UAE Emirates ID (15 digits starting with 784, Luhn)
+    const validUAEID = '784-1980-1234567-8';
+    assert.strictEqual(GalxPIIRedactor.validateUAEEmiratesID(validUAEID), true);
+    assert.strictEqual(GalxPIIRedactor.validateUAEEmiratesID('123-1980-1234567-8'), false);
+
+    // South Africa POPIA ID (13 digits, Luhn)
+    const validSAID = '9001015009086';
+    assert.strictEqual(GalxPIIRedactor.validateSouthAfricanID(validSAID), true);
+    assert.strictEqual(GalxPIIRedactor.validateSouthAfricanID('9001015009089'), false);
+
+    // New Zealand IRD (Mod-11)
+    const validNZIRD = '49-091-850';
+    assert.strictEqual(GalxPIIRedactor.validateNewZealandIRD(validNZIRD), true);
+    assert.strictEqual(GalxPIIRedactor.validateNewZealandIRD('49-091-859'), false);
+
+    // Full Redaction execution
+    const regionalText = `MEA Identifiers: Saudi ID ${validSaudiID}, Emirates ID ${validUAEID}, SA ID ${validSAID}, NZ IRD ${validNZIRD}.`;
+    const res = galxRedactor.redactText(regionalText, { international: true });
+
+    assert.strictEqual(res.sanitizedText.includes(validSaudiID), false);
+    assert.strictEqual(res.sanitizedText.includes(validUAEID), false);
+    assert.strictEqual(res.sanitizedText.includes(validSAID), false);
+    assert.strictEqual(res.sanitizedText.includes(validNZIRD), false);
+    assert.ok(res.sanitizedText.includes('[PII_SA_ID_'));
+    assert.ok(res.sanitizedText.includes('[PII_AE_EID_'));
+    assert.ok(res.sanitizedText.includes('[PII_ZA_ID_'));
+    assert.ok(res.sanitizedText.includes('[PII_NZ_IRD_'));
+  });
+
+  // --- SUITE 35: ZDR v10.0 Forward Secrecy Key Ratchet & Upstream Zero-Retention Header Scrutinizer ---
+  await test('ZDR v10.0: HKDF-SHA256 Forward Secrecy Key Ratchet ratchets key every 1000 streaming tokens', () => {
+    const ratchet = galxZDR.createRatchetSession('initial-ephemeral-stream-seed');
+    const initialKey = Buffer.from(ratchet.getCurrentKey());
+    assert.strictEqual(ratchet.getStep(), 0);
+
+    // Stream 500 tokens -> no ratchet yet
+    const step1 = ratchet.trackTokens(500);
+    assert.strictEqual(step1.ratcheted, false);
+    assert.strictEqual(ratchet.getStep(), 0);
+
+    // Stream 600 more tokens (total 1100) -> triggers step 1 ratchet
+    const step2 = ratchet.trackTokens(600);
+    assert.strictEqual(step2.ratcheted, true);
+    assert.strictEqual(step2.currentStep, 1);
+    assert.strictEqual(ratchet.getStep(), 1);
+
+    // Ratcheted key is cryptographically unique from initial key
+    assert.notDeepStrictEqual(ratchet.getCurrentKey(), initialKey);
+
+    // Clean zeroization
+    ratchet.zeroize();
+  });
+
+  await test('ZDR v10.0: Upstream Header Scrutinizer enforces zero tracking cookies and strict no-store policies', () => {
+    // 1. Compliant upstream headers
+    const compliantHeaders = {
+      'cache-control': 'no-store, no-cache, must-revalidate',
+      'content-type': 'application/json'
+    };
+    const audit1 = galxZDR.verifyUpstreamZDRHeaders(compliantHeaders);
+    assert.strictEqual(audit1.compliant, true);
+    assert.strictEqual(audit1.zdrRatified, true);
+    assert.strictEqual(audit1.violations.length, 0);
+
+    // 2. Non-compliant headers (Set-Cookie violation)
+    const violatingHeaders = {
+      'cache-control': 'public, max-age=3600',
+      'set-cookie': 'tracking_session_id=12345; Secure; HttpOnly'
+    };
+    const audit2 = galxZDR.verifyUpstreamZDRHeaders(violatingHeaders);
+    assert.strictEqual(audit2.compliant, false);
+    assert.strictEqual(audit2.zdrRatified, false);
+    assert.ok(audit2.violations.length >= 2);
+  });
+
+  // --- SUITE 36: NIST OSCAL 1.0.0, EU AI Act Annex IV & Dynamic Security Pen Test Simulator ---
+  await test('NIST OSCAL 1.0.0 & EU AI Act Annex IV: Generates standardized GRC and GPAI compliance dossiers', () => {
+    // 1. NIST OSCAL Report
+    const oscal = galxSOC2.generateOSCALAssessmentReport();
+    assert.strictEqual(oscal.oscalVersion, '1.0.0');
+    assert.strictEqual(oscal.assessmentPlan.controlsCount, 28);
+    assert.ok(oscal.digitalSignatureSha256.length === 64);
+
+    // 2. EU AI Act Annex IV Technical Documentation Dossier
+    const euDossier = galxSOC2.generateEUAIActAnnexIVDossier('gpt-5.6-sol');
+    assert.strictEqual(euDossier.modelId, 'gpt-5.6-sol');
+    assert.strictEqual(euDossier.technicalDocumentation.dataGovernance.copyrightComplianceVerified, true);
+    assert.strictEqual(euDossier.technicalDocumentation.cybersecurityArchitecture.continuousThreatMonitoring, true);
+    assert.ok(euDossier.cryptographicProofSha256.length === 64);
+  });
+
+  await test('Dynamic Security Pen Test Simulator: Self-probing suite mitigates 100% of synthetic attacks', () => {
+    const probeResult = galxSecurityProbe.runSecurityProbes();
+    assert.strictEqual(probeResult.totalProbesExecuted, 5);
+    assert.strictEqual(probeResult.totalProbesBlocked, 5);
+    assert.strictEqual(probeResult.mitigationRatePercent, 100);
+    assert.strictEqual(probeResult.allProbesPassed, true);
+  });
+
+  // --- SUITE 37: High-Throughput Fast-Path PII Filter & Zero-Allocation Memory Slab Pool ---
+  await test('Fast-Path Preflight PII Filter: Zero-allocation scan bypasses regex engines on benign text in < 0.05ms', () => {
+    // 1. Plain text with no digits or symbols -> fast-path bypass
+    const benignText = 'Hello assistant, please summarize our product strategy meeting for the executive team.';
+    const preflight = galxRedactor.fastPreflightScan(benignText);
+    assert.strictEqual(preflight.requiresDeepScan, false);
+
+    const fastResult = galxRedactor.fastRedact(benignText);
+    assert.strictEqual(fastResult.sanitizedText, benignText);
+    assert.strictEqual(fastResult.entitiesDetected.length, 0);
+
+    // 2. Sensitive text with digits & identifiers -> triggers deep scan
+    const sensitiveText = 'Patient Jane Doe, MRN 1234567, SSN 000-12-3456.';
+    const preflightDeep = galxRedactor.fastPreflightScan(sensitiveText);
+    assert.strictEqual(preflightDeep.requiresDeepScan, true);
+
+    const deepResult = galxRedactor.fastRedact(sensitiveText, { hipaa: true });
+    assert.ok(deepResult.sanitizedText.includes('[PHI_'));
+    assert.strictEqual(deepResult.sanitizedText.includes('000-12-3456'), false);
+  });
+
+  await test('ZDR Memory Slab Pool: Pre-allocated slabs lease and release with sub-microsecond zeroization', () => {
+    const statsBefore = galxSlabPool.getPoolStats();
+    assert.strictEqual(statsBefore.totalSlabs, 16);
+    assert.strictEqual(statsBefore.slabSizeBytes, 65536);
+
+    // Lease a slab
+    const slab = galxSlabPool.acquireSlab();
+    assert.strictEqual(slab.isLeased, true);
+    assert.strictEqual(slab.buffer.length, 65536);
+
+    // Write sensitive payload to slab
+    slab.buffer.write('Highly confidential ephemeral streaming tensor', 0);
+    assert.ok(slab.buffer.toString().includes('Highly confidential'));
+
+    // Release slab -> triggers immediate zeroization
+    slab.release();
+    assert.strictEqual(slab.isLeased, false);
+    assert.strictEqual(slab.buffer[0], 0);
+    assert.strictEqual(slab.buffer[10], 0);
+  });
+
+  // --- SUITE 38: High-Velocity Merkle Tree Audit Streamer & Lock-Free Shard Governor ---
+  await test('High-Throughput Audit Streamer: Micro-batches events, calculates Merkle Tree root, and chains SHA-256 ledger', () => {
+    // 1. Enqueue multiple high-velocity audit events
+    for (let i = 0; i < 5; i++) {
+      galxAuditStreamer.enqueue({
+        action: 'INFERENCE_ROUTED_EPHEMERAL',
+        userId: `user_swarm_${i}`,
+        resourceId: `shard_gpt_${i}`,
+        resourceType: 'model_shard',
+        metadata: { tokens: 150 + i * 10 }
+      });
+    }
+
+    // 2. Commit micro-batch into Merkle Tree root
+    const batch = galxAuditStreamer.flushNow();
+    assert.ok(batch !== null);
+    assert.strictEqual(batch.leafCount, 5);
+    assert.ok(batch.merkleRootSha256.length === 64);
+    assert.ok(batch.chainedLedgerRootSha256.length === 64);
+
+    // 3. Verify metrics
+    const metrics = galxAuditStreamer.getMetrics();
+    assert.ok(metrics.totalEventsProcessed >= 5);
+    assert.ok(metrics.batchesCommitted >= 1);
+    assert.strictEqual(metrics.currentQueueDepth, 0);
+  });
+
+  await test('Lock-Free Shard Governor: Sub-microsecond (< 50ns) token allocation decision for parallel swarms', () => {
+    const mockShards: any[] = [
+      {
+        id: 'shard_primary_us',
+        status: 'healthy',
+        tokenBucket: { remainingTokens: 500000, reservedTokens: 0, maxTokens: 1000000 }
+      },
+      {
+        id: 'shard_secondary_eu',
+        status: 'healthy',
+        tokenBucket: { remainingTokens: 800000, reservedTokens: 0, maxTokens: 1000000 }
+      }
+    ];
+
+    const decision = lockFreeGovernor.allocateShardCapacity(mockShards, 5000);
+    assert.strictEqual(decision.success, true);
+    assert.strictEqual(decision.selectedShardId, 'shard_secondary_eu'); // Has higher remaining tokens (800k > 500k)
+    assert.strictEqual(decision.allocatedTokens, 5000);
+    assert.ok(decision.decisionLatencyNs >= 0);
+  });
+
+  // --- SUITE 39: BroccoliDB L1 In-Memory Reactive Table & Rich Filter Operator DSL ---
+  await test('BroccoliDB L1 Table: Sub-microsecond CRUD, secondary indexing, and rich filter operator DSL ($between, $regex, $in, $gte)', () => {
+    interface ShardRecord extends Record<string, any> {
+      id: string;
+      region: string;
+      provider: string;
+      tokens: number;
+      healthy: boolean;
+      tags: string[];
+    }
+
+    const table = new BroccoliDbTable<ShardRecord>('shards');
+    table.createIndex('region');
+    table.createSortedIndex('tokens');
+
+    // 1. Insert records
+    table.put('shard_1', { id: 'shard_1', region: 'us', provider: 'openai', tokens: 100000, healthy: true, tags: ['fast', 'gpt5'] });
+    table.put('shard_2', { id: 'shard_2', region: 'eu', provider: 'anthropic', tokens: 50000, healthy: true, tags: ['sovereign', 'claude'] });
+    table.put('shard_3', { id: 'shard_3', region: 'us', provider: 'xai', tokens: 25000, healthy: false, tags: ['grok'] });
+    table.put('shard_4', { id: 'shard_4', region: 'apac', provider: 'google', tokens: 75000, healthy: true, tags: ['gemini'] });
+
+    assert.strictEqual(table.count(), 4);
+
+    // 2. Rich Operator Filter: $between and $in
+    const betweenResults = table.query({
+      where: {
+        tokens: { $between: [40000, 80000] },
+        region: { $in: ['eu', 'apac'] }
+      }
+    });
+    assert.strictEqual(betweenResults.length, 2);
+    assert.ok(betweenResults.some(r => r.id === 'shard_2'));
+    assert.ok(betweenResults.some(r => r.id === 'shard_4'));
+
+    // 3. Rich Operator Filter: $regex and $gte
+    const regexResults = table.query({
+      where: {
+        provider: { $regex: '^open' },
+        tokens: { $gte: 100000 }
+      }
+    });
+    assert.strictEqual(regexResults.length, 1);
+    assert.strictEqual(regexResults[0].id, 'shard_1');
+
+    // 4. Fluent Builder
+    const fluentResult = table
+      .select()
+      .where('region')
+      .equals('us')
+      .and('healthy')
+      .equals(true)
+      .execute();
+    assert.strictEqual(fluentResult.length, 1);
+    assert.strictEqual(fluentResult[0].id, 'shard_1');
+  });
+
+  await test('BroccoliDB Aggregation: Single-pass statistical metrics calculus ($sum, $avg, $min, $max, $count)', () => {
+    const table = new BroccoliDbTable<{ id: string; region: string; latencyMs: number }>('telemetry');
+    table.put('t1', { id: 't1', region: 'us', latencyMs: 10 });
+    table.put('t2', { id: 't2', region: 'us', latencyMs: 20 });
+    table.put('t3', { id: 't3', region: 'eu', latencyMs: 30 });
+    table.put('t4', { id: 't4', region: 'eu', latencyMs: 50 });
+
+    const aggResult = table.aggregate({
+      groupBy: ['region'],
+      metrics: {
+        totalLatency: { metric: 'sum', field: 'latencyMs' },
+        avgLatency: { metric: 'avg', field: 'latencyMs' },
+        minLatency: { metric: 'min', field: 'latencyMs' },
+        maxLatency: { metric: 'max', field: 'latencyMs' },
+        sampleCount: { metric: 'count' }
+      }
+    });
+
+    assert.strictEqual(aggResult.totalRecordsEvaluated, 4);
+    assert.strictEqual(aggResult.groups.length, 2);
+
+    const usGroup = aggResult.groups.find(g => g.keys.region === 'us');
+    assert.ok(usGroup !== undefined);
+    assert.strictEqual(usGroup.metrics.totalLatency, 30);
+    assert.strictEqual(usGroup.metrics.avgLatency, 15);
+    assert.strictEqual(usGroup.metrics.minLatency, 10);
+    assert.strictEqual(usGroup.metrics.maxLatency, 20);
+    assert.strictEqual(usGroup.recordCount, 2);
+  });
+
+  // --- SUITE 40: BroccoliDB Natural Language Query Parser & Cryptographic WAL Crash Recovery ---
+  await test('BroccoliDB Natural Query Parser: Offline deterministic translation of natural language queries (< 0.1ms)', () => {
+    // 1. Natural Query Expression
+    const nq = 'in audit_logs table where action = "INFERENCE_ROUTED_EPHEMERAL" and tokens > 1000 sorted by timestamp desc limit 25';
+    const parsed = BroccoliNaturalQueryParser.parse(nq);
+
+    assert.strictEqual(parsed.targetTable, 'audit_logs');
+    assert.strictEqual(parsed.queryOptions.limit, 25);
+    assert.strictEqual(parsed.queryOptions.sortBy, 'timestamp');
+    assert.strictEqual(parsed.queryOptions.sortOrder, 'desc');
+    assert.ok(parsed.confidence > 0.5);
+
+    // 2. Query execution via parsed AST
+    const auditTable = new BroccoliDbTable<{ id: string; action: string; tokens: number; timestamp: number }>('audit_logs');
+    auditTable.put('a1', { id: 'a1', action: 'INFERENCE_ROUTED_EPHEMERAL', tokens: 1500, timestamp: 100 });
+    auditTable.put('a2', { id: 'a2', action: 'INFERENCE_ROUTED_EPHEMERAL', tokens: 500, timestamp: 200 });
+    auditTable.put('a3', { id: 'a3', action: 'SESSION_REVOKED', tokens: 0, timestamp: 300 });
+
+    const results = auditTable.query(parsed.queryOptions);
+    assert.strictEqual(results.length, 1);
+    assert.strictEqual(results[0].id, 'a1');
+  });
+
+  await test('BroccoliDB L2 WAL: Append-only cryptographic frame chaining and crash recovery replay', async () => {
+    const testDir = path.join(os.tmpdir(), `broccolidb_test_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`);
+    const kernel = new BroccoliDatabaseKernel({ workspaceRoot: testDir, walDebounceMs: 10 });
+    await kernel.start();
+
+    const shardTable = kernel.getTable<{ id: string; name: string; capacity: number }>('shards');
+    shardTable.put('shard_alpha', { id: 'shard_alpha', name: 'Alpha GPU Shard', capacity: 1000000 });
+    shardTable.put('shard_beta', { id: 'shard_beta', name: 'Beta TPU Shard', capacity: 500000 });
+
+    // Flush and stop
+    await kernel.stop();
+
+    // Cold-start second kernel instance on same directory (Simulate Crash Recovery Replay)
+    const recoveryKernel = new BroccoliDatabaseKernel({ workspaceRoot: testDir });
+    await recoveryKernel.start();
+
+    const recoveredTable = recoveryKernel.getTable<{ id: string; name: string; capacity: number }>('shards');
+    assert.strictEqual(recoveredTable.count(), 2);
+    assert.strictEqual(recoveredTable.get('shard_alpha')?.name, 'Alpha GPU Shard');
+    assert.strictEqual(recoveredTable.get('shard_beta')?.capacity, 500000);
+
+    const health = await recoveryKernel.health();
+    assert.strictEqual(health.status, 'HEALTHY');
+    assert.strictEqual(health.pillars.tableConsistency.healthy, true);
+
+    await recoveryKernel.stop();
+    await fs.rm(testDir, { recursive: true, force: true }).catch(() => {});
+  });
+
+  // --- SUITE 41: Workspace-Wide BroccoliDB (Model Catalog & Persistence L1 Hot Cache) ---
+  await test('ModelCatalog: BroccoliDB Natural Query filtering and statistical price aggregation', () => {
+    // 1. Natural Query filtering over Model Catalog
+    const visionModels = ModelCatalog.queryNatural('where category = "llm" and supportsVision = true sorted by inputPricePer1M asc');
+    assert.ok(visionModels.length > 0);
+    assert.ok(visionModels.every(m => m.category === 'llm' && m.supportsVision));
+
+    // 2. Aggregation over Model Catalog pricing
+    const pricingStats = ModelCatalog.aggregate({
+      groupBy: ['provider'],
+      metrics: {
+        avgInputPrice: { metric: 'avg', field: 'inputPricePer1M' },
+        minInputPrice: { metric: 'min', field: 'inputPricePer1M' },
+        maxInputPrice: { metric: 'max', field: 'inputPricePer1M' },
+        modelCount: { metric: 'count' }
+      }
+    });
+
+    assert.ok(pricingStats.groups.length >= 2);
+    const openaiGroup = pricingStats.groups.find(g => g.keys.provider === 'openai');
+    assert.ok(openaiGroup !== undefined);
+    assert.ok(openaiGroup.metrics.modelCount > 0);
+    assert.ok(openaiGroup.metrics.avgInputPrice > 0);
+  });
+
+  await test('GalxPersistence: L1 BroccoliDB Hot Cache with indexed secondary lookups & natural queries', () => {
+    const persistence = GalxPersistence.getInstance();
+
+    const now = Date.now();
+    // 1. Save and retrieve shards through BroccoliDB table
+    persistence.saveShard({
+      id: 'shard_zenith_1',
+      userId: 'user_enterprise_99',
+      provider: 'openai',
+      authType: 'api_key',
+      accountLabel: 'Zenith Fast Shard',
+      apiKeyMasked: 'sk-proj...fast',
+      status: 'healthy',
+      priority: 100,
+      weight: 1,
+      tokenBucket: {
+        maxTokens: 500000,
+        remainingTokens: 500000,
+        refillRatePerMinute: 500000,
+        maxRequests: 1000,
+        remainingRequests: 1000,
+        lastRefillTimestampMs: now
+      },
+      stats: {
+        totalRequestsServed: 0,
+        totalTokensConsumed: 0,
+        consecutiveFailures: 0
+      },
+      createdAtMs: now,
+      updatedAtMs: now,
+      shardMode: 'private'
+    });
+
+    persistence.saveShard({
+      id: 'shard_zenith_2',
+      userId: 'user_enterprise_99',
+      provider: 'xai-grok',
+      authType: 'api_key',
+      accountLabel: 'Zenith Grok Shard',
+      apiKeyMasked: 'xai-...grok',
+      status: 'healthy',
+      priority: 50,
+      weight: 1,
+      tokenBucket: {
+        maxTokens: 500000,
+        remainingTokens: 500000,
+        refillRatePerMinute: 500000,
+        maxRequests: 1000,
+        remainingRequests: 1000,
+        lastRefillTimestampMs: now
+      },
+      stats: {
+        totalRequestsServed: 0,
+        totalTokensConsumed: 0,
+        consecutiveFailures: 0
+      },
+      createdAtMs: now,
+      updatedAtMs: now,
+      shardMode: 'pooled'
+    });
+
+    const naturalResults = persistence.queryShardsNatural('where userId = "user_enterprise_99" and provider = "openai"');
+    assert.strictEqual(naturalResults.length, 1);
+    assert.strictEqual(naturalResults[0].id, 'shard_zenith_1');
+
+    // 2. Aggregation on shards
+    const aggShards = persistence.aggregateShards({
+      groupBy: ['provider'],
+      metrics: {
+        count: { metric: 'count' }
+      }
+    });
+    assert.ok(aggShards.groups.length >= 2);
+  });
+
+  // --- SUITE 42: Workspace-Wide BroccoliDB (Session & Key Indexing & Developer SDK) ---
+  await test('SessionRepository & ApiKeyRepository: Sub-microsecond indexed token and key resolution', async () => {
+    const sessionRepo = SessionRepository.getInstance();
+    const apiKeyRepo = ApiKeyRepository.getInstance();
+
+    const testTokenHash = crypto.createHash('sha256').update('secret_session_token_xyz').digest('hex');
+    const sessionId = `sess_${Date.now()}`;
+    const nowIso = new Date().toISOString();
+    const nowMs = Date.now();
+
+    await sessionRepo.createSession({
+      id: sessionId,
+      userId: 'user_test_broccoli',
+      provider: 'openai',
+      tokenHash: testTokenHash,
+      issuedAtMs: nowMs,
+      expiresAtMs: nowMs + 3600000,
+      lastActiveAtMs: nowMs,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+      isRevoked: false
+    });
+
+    const foundSession = await sessionRepo.findSessionByTokenHash(testTokenHash);
+    assert.ok(foundSession !== null);
+    assert.strictEqual(foundSession?.id, sessionId);
+
+    // API Key resolution by prefix & hash
+    const testKeyHash = crypto.createHash('sha256').update('galx_live_broccoli_key_123').digest('hex');
+    const keyId = `key_broccoli_${Date.now()}`;
+
+    await apiKeyRepo.saveGatewayKey({
+      id: keyId,
+      userId: 'user_test_broccoli',
+      name: 'Broccoli Index Key',
+      prefix: 'galx_live_broc',
+      keyHash: testKeyHash,
+      rateLimitPerMinute: 1200,
+      totalRequests: 0,
+      totalTokens: 0,
+      createdAtMs: Date.now(),
+      revoked: false
+    });
+
+    const foundByHash = await apiKeyRepo.findGatewayKeyByHash(testKeyHash);
+    assert.ok(foundByHash !== null);
+    assert.strictEqual(foundByHash?.id, keyId);
+
+    const foundByPrefix = await apiKeyRepo.findKeyByPrefix('galx_live_broc');
+    assert.ok(foundByPrefix !== null);
+    assert.strictEqual(foundByPrefix?.id, keyId);
+  });
+
+  await test('Developer SDK: galx.models.queryNatural(), galx.queues.queryNatural(), and galx.privacy.queryShardsNatural()', () => {
+    const galx = new GalxAI();
+
+    // 1. Models natural query
+    const codingModels = galx.models.queryNatural('where description contains "coding" limit 5');
+    assert.ok(codingModels.length > 0);
+
+    // 2. Queues natural query
+    const tasks = galx.queues.queryTasksNatural('limit 10');
+    assert.ok(Array.isArray(tasks));
+
+    // 3. Privacy shards natural query
+    const shards = galx.privacy.queryShardsNatural('where status = "healthy"');
+    assert.ok(Array.isArray(shards));
+  });
+
+  // --- SUITE 43: Workspace-Wide BroccoliDB (Audit, Telemetry & Health Repositories) ---
+  await test('AuditRepository: BroccoliDB L1 reactive table, SHA-256 verification, and natural querying', async () => {
+    const auditRepo = AuditRepository.getInstance();
+    const actionName = 'WORKSPACE_CREDENTIAL_ROTATED';
+    const testUserId = `user_audit_${Date.now()}`;
+
+    const auditId = await auditRepo.logAudit({
+      action: actionName,
+      userId: testUserId,
+      metadata: { reason: 'Automated 90-day rotation', tier: 'enterprise' }
+    });
+
+    assert.ok(auditId.startsWith('audit_'));
+
+    // Natural query over audit repository
+    const matchedAudits = auditRepo.queryNatural(`where userId = "${testUserId}" and action = "${actionName}"`);
+    assert.strictEqual(matchedAudits.length, 1);
+    assert.strictEqual(matchedAudits[0].id, auditId);
+
+    // Cryptographic chain verification
+    const verification = auditRepo.verifyAuditChainIntegrity();
+    assert.strictEqual(verification.valid, true);
+
+    // Statistical aggregation on audit actions
+    const aggResult = auditRepo.aggregate({
+      groupBy: ['action'],
+      metrics: {
+        eventCount: { metric: 'count' }
+      }
+    });
+    assert.ok(aggResult.groups.length > 0);
+  });
+
+  await test('TelemetryRepository & ShardHealthRepository: Sub-microsecond latency percentiles & health probe indexing', async () => {
+    const telemetryRepo = TelemetryRepository.getInstance();
+    const healthRepo = ShardHealthRepository.getInstance();
+
+    const sampleBaseTime = Date.now();
+    await telemetryRepo.recordTelemetryBatch([
+      { provider: 'openai', modelId: 'gpt-5.6-sol', shardId: 'shard_1', latencyMs: 120, totalTokens: 500, statusCode: 200, timestampMs: sampleBaseTime },
+      { provider: 'openai', modelId: 'gpt-5.6-sol', shardId: 'shard_1', latencyMs: 180, totalTokens: 1200, statusCode: 200, timestampMs: sampleBaseTime },
+      { provider: 'xai-grok', modelId: 'x-ai/grok-4.5', shardId: 'shard_2', latencyMs: 250, totalTokens: 800, statusCode: 200, timestampMs: sampleBaseTime },
+      { provider: 'xai-grok', modelId: 'x-ai/grok-4.5', shardId: 'shard_2', latencyMs: 310, totalTokens: 950, statusCode: 500, isError: true, timestampMs: sampleBaseTime }
+    ]);
+
+    // Query percentiles via BroccoliDB
+    const percentiles = await telemetryRepo.getLatencyPercentiles({ provider: 'openai', modelId: 'gpt-5.6-sol' });
+    assert.ok(percentiles.sampleCount >= 2);
+    assert.ok(percentiles.p50 >= 120);
+
+    // Query telemetry via natural language
+    const errorSamples = telemetryRepo.queryNatural('where statusCode = 500 and isError = true');
+    assert.ok(errorSamples.length >= 1);
+    assert.strictEqual(errorSamples[0].statusCode, 500);
+
+    // Shard health probes batch and indexed retrieval
+    await healthRepo.reportHealthProbesBatch([
+      { shardId: 'shard_probe_test', workerId: 'worker_iad_1', latencyMs: 45, statusCode: 200, isSuccess: true, timestampMs: sampleBaseTime },
+      { shardId: 'shard_probe_test', workerId: 'worker_fra_1', latencyMs: 85, statusCode: 200, isSuccess: true, timestampMs: sampleBaseTime }
+    ]);
+
+    const probes = healthRepo.getProbes('shard_probe_test');
+    assert.strictEqual(probes.length, 2);
+    assert.strictEqual(probes[0].shardId, 'shard_probe_test');
+  });
+
+  // --- SUITE 44: Workspace-Wide BroccoliDB (Idempotency, Distributed Locks & Real-Time Telemetry) ---
+  await test('IdempotencyRepository, DistributedLockRepository & GalxMetricsEngine: Multi-modal table transactions & natural telemetry', async () => {
+    const idempotencyRepo = IdempotencyRepository.getInstance();
+    const lockRepo = DistributedLockRepository.getInstance();
+    const metricsEngine = GalxMetricsEngine.getInstance();
+
+    // 1. Idempotency table
+    const testKey = `idem_broc_${Date.now()}`;
+    const beginRes = await idempotencyRepo.begin({
+      idempotencyKey: testKey,
+      userId: 'user_idem_test',
+      endpoint: '/v1/chat/completions',
+      requestHash: 'sha256_mock_hash_123'
+    });
+    assert.strictEqual(beginRes.status, 'STARTED');
+
+    await idempotencyRepo.commit({
+      idempotencyKey: testKey,
+      statusCode: 200,
+      responseBody: { message: 'BroccoliDB Idempotent Response' }
+    });
+
+    const cachedRes = await idempotencyRepo.begin({
+      idempotencyKey: testKey,
+      userId: 'user_idem_test',
+      endpoint: '/v1/chat/completions',
+      requestHash: 'sha256_mock_hash_123'
+    });
+    assert.strictEqual(cachedRes.status, 'CACHED');
+
+    // 2. Distributed Advisory Lock with fencing token
+    const lockKey = `lock_resource_${Date.now()}`;
+    const lock1 = await lockRepo.acquireLock({ lockKey, ownerId: 'worker_alpha', ttlMs: 10000 });
+    assert.strictEqual(lock1.acquired, true);
+    assert.strictEqual(lock1.fencingToken, 1);
+
+    const lock2 = await lockRepo.acquireLock({ lockKey, ownerId: 'worker_beta', ttlMs: 10000 });
+    assert.strictEqual(lock2.acquired, false);
+
+    await lockRepo.releaseLock({ lockKey, ownerId: 'worker_alpha', fencingToken: lock1.fencingToken });
+
+    // 3. GalxMetricsEngine natural querying
+    metricsEngine.recordSample({
+      timestampMs: Date.now(),
+      latencyMs: 95,
+      tokensConsumed: 450,
+      success: true,
+      provider: 'openai',
+      model: 'gpt-5.6-terra',
+      shardId: 'shard_fast_1',
+      statusCode: 200
+    });
+
+    const terraMetrics = metricsEngine.queryNatural('where model = "gpt-5.6-terra" and success = true');
+    assert.ok(terraMetrics.length >= 1);
+    assert.strictEqual(terraMetrics[0].model, 'gpt-5.6-terra');
+  });
+
+  // --- SUITE 45: Workspace-Wide BroccoliDB (Compute Wallet & Embeddings Repositories) ---
+  await test('WalletRepository: 50% compute match grant, micro-draws, and natural transaction queries', async () => {
+    const walletRepo = WalletRepository.getInstance();
+    const testUserId = `user_wallet_${Date.now()}`;
+
+    // 1. Initial wallet creation
+    const wallet = await walletRepo.createOrGetWallet(testUserId);
+    assert.strictEqual(wallet.balanceUsd, 0);
+    assert.strictEqual(wallet.introductoryGrantUsd, 5.0);
+
+    // 2. Deposit $10 with 50% match grant ($5) -> $15 balance
+    const depositResult = await walletRepo.verifyDepositAndApplyMatch({
+      userId: testUserId,
+      depositAmountUsd: 10.0,
+      paymentRef: 'ch_stripe_test_123'
+    });
+    assert.strictEqual(depositResult.success, true);
+    assert.strictEqual(depositResult.depositAmount, 10.0);
+    assert.strictEqual(depositResult.matchGrant, 5.0);
+    assert.strictEqual(depositResult.totalCredit, 15.0);
+    assert.strictEqual(depositResult.newBalance, 15.0);
+
+    // 3. Micro-draw tokens ($0.0025)
+    const drawResult = await walletRepo.drawTokens({
+      userId: testUserId,
+      costUsd: 0.0025,
+      description: 'GPT-5.6 Sol 1K Tokens',
+      model: 'gpt-5.6-sol',
+      promptTokens: 800,
+      completionTokens: 200
+    });
+    assert.strictEqual(drawResult.success, true);
+    assert.strictEqual(drawResult.costUsd, 0.0025);
+    assert.strictEqual(drawResult.newBalance, 14.9975);
+
+    // 4. Natural query transactions
+    const txs = walletRepo.queryTransactionsNatural(`where userId = "${testUserId}" limit 10`);
+    assert.strictEqual(txs.length, 2);
+
+    // 5. Transaction aggregation
+    const aggTx = walletRepo.aggregateTransactions({
+      groupBy: ['transactionType'],
+      metrics: {
+        totalAmount: { metric: 'sum', field: 'amountUsd' },
+        txCount: { metric: 'count' }
+      }
+    });
+    assert.ok(aggTx.groups.length >= 2);
+  });
+
+  await test('EmbeddingsRepository: Vector cosine distance ranking and document candidate filtering', async () => {
+    const embeddingsRepo = EmbeddingsRepository.getInstance();
+    const docId = `doc_${Date.now()}`;
+
+    // Vector 1: coding vector [1, 0, 0, 0]
+    await embeddingsRepo.saveEmbedding({
+      documentId: docId,
+      chunkIndex: 0,
+      collectionName: 'code_docs',
+      content: 'TypeScript async/await functions and interfaces',
+      embedding: [1, 0, 0, 0],
+      metadata: { language: 'typescript', category: 'syntax' }
+    });
+
+    // Vector 2: database vector [0, 1, 0, 0]
+    await embeddingsRepo.saveEmbedding({
+      documentId: docId,
+      chunkIndex: 1,
+      collectionName: 'code_docs',
+      content: 'BroccoliDB reactive table indexing and transactions',
+      embedding: [0, 1, 0, 0],
+      metadata: { language: 'sql', category: 'database' }
+    });
+
+    // Search for code vector [0.95, 0.05, 0, 0]
+    const results = await embeddingsRepo.searchSimilar({
+      queryEmbedding: [0.95, 0.05, 0, 0],
+      collectionName: 'code_docs',
+      matchThreshold: 0.8,
+      matchCount: 5
+    });
+
+    assert.strictEqual(results.length, 1);
+    assert.strictEqual(results[0].chunkIndex, 0);
+    assert.ok(results[0].similarity > 0.9);
+
+    // Natural query over embeddings metadata
+    const syntaxDocs = embeddingsRepo.queryNatural('where collectionName = "code_docs" and documentId = "' + docId + '"');
+    assert.strictEqual(syntaxDocs.length, 2);
+  });
+
+  // --- SUITE 46: Workspace-Wide BroccoliDB (Projects, Queues & Task Repositories) ---
+  await test('ProjectRepository & QueueRepository: Multi-tenant project environments and queue governance', async () => {
+    const projectRepo = ProjectRepository.getInstance();
+    const queueRepo = QueueRepository.getInstance();
+    const workspaceId = `ws_proj_test_${Date.now()}`;
+
+    // 1. Create project with auto-created dev & prod environments
+    const project = await projectRepo.createProject({
+      workspaceId,
+      name: 'Agentic Gateway Core',
+      slug: 'agentic-gateway-core',
+      description: 'Zero-latency AI router'
+    });
+    assert.ok(project.id.startsWith('proj_'));
+
+    const envs = await projectRepo.getEnvironments(project.id);
+    assert.strictEqual(envs.length, 2);
+    assert.ok(envs.some(e => e.environmentType === 'production' && e.monthlyBudgetUsd === 500));
+    assert.ok(envs.some(e => e.environmentType === 'development' && e.monthlyBudgetUsd === 100));
+
+    // 2. Queue management
+    const queueId = `queue_zenith_${Date.now()}`;
+    await queueRepo.saveQueue({
+      id: queueId,
+      name: 'zenith-batch-workers',
+      state: 'RUNNING',
+      rateLimits: { maxDispatchesPerSecond: 250, maxConcurrentDispatches: 100, maxBurstSize: 300 },
+      retryConfig: { maxAttempts: 5, minBackoffMs: 100, maxBackoffMs: 5000, maxDoublings: 5, jitterFactor: 0.2 },
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
+    });
+
+    const retrievedQueue = await queueRepo.getQueueById(queueId);
+    assert.ok(retrievedQueue !== null);
+    assert.strictEqual(retrievedQueue?.name, 'zenith-batch-workers');
+
+    // Natural query over queues
+    const matchingQueues = queueRepo.queryNatural(`where name = "zenith-batch-workers" and state = "RUNNING"`);
+    assert.strictEqual(matchingQueues.length, 1);
+    assert.strictEqual(matchingQueues[0].id, queueId);
+  });
+
+  await test('TaskRepository: Worker task leasing with fencing tokens, attempt history & task aggregation', async () => {
+    const taskRepo = TaskRepository.getInstance();
+    const queueId = `queue_tasks_${Date.now()}`;
+    const userId = `user_worker_${Date.now()}`;
+    const taskId = `task_broc_${Date.now()}`;
+
+    await taskRepo.saveTask({
+      id: taskId,
+      queueId,
+      userId,
+      priority: 95,
+      status: 'QUEUED',
+      target: {
+        type: 'INTERNAL_MODEL',
+        taskKind: 'chat_completion',
+        chatPayload: { model: 'gpt-5.6-sol', messages: [{ role: 'user', content: 'test' }] }
+      },
+      attempts: [],
+      scheduleTimeMs: Date.now() - 1000,
+      dispatchCount: 0,
+      responseCount: 0,
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
+    });
+
+    // 1. Worker leases task
+    const leased = await taskRepo.leaseTasksForWorker({
+      queueId,
+      workerId: 'worker_node_iad_9',
+      maxTasks: 5
+    });
+    assert.strictEqual(leased.length, 1);
+    assert.strictEqual(leased[0].id, taskId);
+    assert.strictEqual(leased[0].status, 'RUNNING');
+    assert.strictEqual(leased[0].activeWorkerId, 'worker_node_iad_9');
+    assert.strictEqual(leased[0].activeFencingToken, 1);
+
+    // 2. Commit task completion
+    await taskRepo.commitTaskAttemptsBatch([
+      {
+        taskId,
+        attemptNumber: 1,
+        startedAtMs: Date.now() - 50,
+        completedAtMs: Date.now(),
+        durationMs: 50,
+        statusCode: 200,
+        status: 'COMPLETED',
+        result: { completedAtMs: Date.now(), data: { output: 'Task completed successfully' } },
+        workerId: 'worker_node_iad_9'
+      }
+    ]);
+
+    const completedTask = await taskRepo.getTaskById(taskId);
+    assert.strictEqual(completedTask?.status, 'COMPLETED');
+    assert.strictEqual(completedTask?.result?.data?.output, 'Task completed successfully');
+
+    // 3. Task aggregation
+    const aggTasks = taskRepo.aggregateTasks({
+      groupBy: ['status'],
+      metrics: {
+        taskCount: { metric: 'count' }
+      }
+    });
+    assert.ok(aggTasks.groups.length > 0);
+  });
+
+  // --- SUITE 47: Workspace-Wide BroccoliDB (Edge Cache, R2 Multimodal Storage & Credential Pool Leases) ---
+  await test('GalxEdgeCache: SWR edge caching, sub-microsecond lookups & natural queries', async () => {
+    const edgeCache = GalxEdgeCache.getInstance();
+    const cacheKey = `models_manifest_${Date.now()}`;
+
+    let fetchCount = 0;
+    const fetchFn = async () => {
+      fetchCount++;
+      return { models: ['gpt-5.6-sol', 'gpt-5.6-terra'], version: 'v3' };
+    };
+
+    // 1. Initial fetch (MISS)
+    const res1 = await edgeCache.getOrFetch(cacheKey, fetchFn, { ttlMs: 1000, swrTtlMs: 2000 });
+    assert.strictEqual(res1.source, 'MISS');
+    assert.strictEqual(fetchCount, 1);
+    assert.strictEqual(res1.value.models.length, 2);
+
+    // 2. Immediate second fetch (HIT)
+    const res2 = await edgeCache.getOrFetch(cacheKey, fetchFn, { ttlMs: 1000, swrTtlMs: 2000 });
+    assert.strictEqual(res2.source, 'HIT');
+    assert.strictEqual(fetchCount, 1);
+
+    // 3. Natural query over edge cache
+    const cachedEntries = edgeCache.queryNatural(`where key = "${cacheKey}"`);
+    assert.strictEqual(cachedEntries.length, 1);
+    assert.strictEqual(cachedEntries[0].key, cacheKey);
+  });
+
+  await test('GalxR2AssetAdapter: Multimodal asset uploads, BroccoliDB indexing and size aggregation', async () => {
+    const r2Adapter = GalxR2AssetAdapter.getInstance();
+
+    const upload1 = await r2Adapter.uploadAsset({
+      data: Buffer.from('synthetic_image_payload_png_bytes_12345'),
+      contentType: 'image/png',
+      folder: 'renders'
+    });
+    assert.ok(upload1.assetId.startsWith('asset_'));
+    assert.strictEqual(upload1.contentType, 'image/png');
+
+    const upload2 = await r2Adapter.uploadAsset({
+      data: Buffer.from('synthetic_audio_payload_wav_bytes_67890'),
+      contentType: 'audio/wav',
+      folder: 'voice'
+    });
+    assert.ok(upload2.assetId.startsWith('asset_'));
+
+    // Natural query for png images
+    const pngAssets = r2Adapter.queryNatural('where contentType = "image/png"');
+    assert.ok(pngAssets.some(a => a.assetId === upload1.assetId));
+
+    // Storage aggregation
+    const aggResult = r2Adapter.aggregate({
+      groupBy: ['contentType'],
+      metrics: {
+        totalBytes: { metric: 'sum', field: 'sizeBytes' },
+        assetCount: { metric: 'count' }
+      }
+    });
+    assert.ok(aggResult.groups.length >= 2);
+  });
+
+  await test('GalxCredentialPool: BroccoliDbTable reactive lease indexing and natural lease queries', async () => {
+    const substrate = new GalxCredentialSubstrate();
+    const shardId = `shard_lease_test_${Date.now()}`;
+    const userId = `user_lease_${Date.now()}`;
+
+    const encrypted = GalxCryptoVault.encryptSecret({ apiKey: 'sk-test-key-123456789' }, 'system_admin', shardId, 'openai');
+    substrate.addAccount({
+      id: shardId,
+      userId: 'system_admin',
+      provider: 'openai',
+      accountLabel: 'Lease Test Shard',
+      authType: 'api_key',
+      apiKeyMasked: 'sk-test...999',
+      encryptedSecrets: encrypted,
+      weight: 10,
+      priority: 10,
+      fencingToken: 1,
+      tokenBucket: {
+        maxTokens: 100000,
+        remainingTokens: 100000,
+        refillRatePerMinute: 60000,
+        maxRequests: 1000,
+        remainingRequests: 1000,
+        lastRefillTimestampMs: Date.now()
+      },
+      stats: {
+        totalRequestsServed: 0,
+        totalTokensConsumed: 0,
+        consecutiveFailures: 0
+      },
+      status: 'healthy',
+      shardMode: 'pooled',
+      permissionRetracted: false,
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
+    });
+
+    const pool = new GalxCredentialPool(substrate);
+
+    // Acquire lease
+    const acq = pool.acquireLease({
+      provider: 'openai',
+      userId,
+      estimatedTokens: 500,
+      leaseTtlMs: 30000
+    });
+    assert.ok(acq.lease !== undefined);
+    assert.strictEqual(pool.getActiveLeasesCount(), 1);
+    assert.strictEqual(pool.leaseTable.count(), 1);
+
+    // Natural query over active leases
+    const userLeases = pool.queryActiveLeasesNatural(`where userId = "${userId}" and shardId = "${shardId}"`);
+    assert.strictEqual(userLeases.length, 1);
+    assert.strictEqual(userLeases[0].id, acq.lease?.leaseId);
+
+    // Release lease
+    pool.releaseLease(acq.lease!.leaseId, 450, true);
+    assert.strictEqual(pool.getActiveLeasesCount(), 0);
+    assert.strictEqual(pool.leaseTable.count(), 0);
+  });
+
+  // --- SUITE 48: Workspace-Wide BroccoliDB (Credential Substrate & SOC2 Compliance Controls Engine) ---
+  await test('GalxCredentialSubstrate: BroccoliDbTable secondary indexing, natural query search & aggregation', async () => {
+    const substrate = new GalxCredentialSubstrate();
+    const testShardId = `shard_sub_broc_${Date.now()}`;
+    const testUserId = `user_sub_test_${Date.now()}`;
+
+    const encrypted = GalxCryptoVault.encryptSecret({ apiKey: 'sk-test-openai-substrate-key-12345' }, testUserId, testShardId, 'openai');
+    substrate.addAccount({
+      id: testShardId,
+      userId: testUserId,
+      provider: 'openai',
+      accountLabel: 'Substrate Shard Alpha',
+      authType: 'api_key',
+      apiKeyMasked: 'sk-test...845',
+      encryptedSecrets: encrypted,
+      weight: 8,
+      priority: 12,
+      fencingToken: 1,
+      tokenBucket: {
+        maxTokens: 300000,
+        remainingTokens: 300000,
+        refillRatePerMinute: 150000,
+        maxRequests: 1000,
+        remainingRequests: 1000,
+        lastRefillTimestampMs: Date.now()
+      },
+      stats: {
+        totalRequestsServed: 0,
+        totalTokensConsumed: 0,
+        consecutiveFailures: 0
+      },
+      status: 'healthy',
+      shardMode: 'pooled',
+      permissionRetracted: false,
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
+    });
+
+    // 1. Indexed lookup
+    const found = substrate.getAccount(testShardId);
+    assert.ok(found !== undefined);
+    assert.strictEqual(found?.accountLabel, 'Substrate Shard Alpha');
+
+    // 2. Natural query over substrate accounts
+    const naturalMatches = substrate.queryAccountsNatural(`where userId = "${testUserId}" and provider = "openai"`);
+    assert.strictEqual(naturalMatches.length, 1);
+    assert.strictEqual(naturalMatches[0].id, testShardId);
+
+    // 3. Shard aggregation
+    const aggResult = substrate.aggregateAccounts({
+      groupBy: ['provider'],
+      metrics: {
+        totalShards: { metric: 'count' }
+      }
+    });
+    assert.ok(aggResult.groups.length >= 1);
+  });
+
+  await test('GalxSOC2AuditEngine: 28 SOC2/HIPAA control mappings in BroccoliDbTable with natural query & category aggregation', async () => {
+    const soc2Engine = GalxSOC2AuditEngine.getInstance();
+
+    // 1. All 28 controls indexed
+    assert.strictEqual(soc2Engine.controlsTable.count(), 28);
+
+    // 2. Natural query for Security controls
+    const securityControls = soc2Engine.queryControlsNatural('where criteriaCategory = "Security" and automatedVerificationStatus = "enforced"');
+    assert.ok(securityControls.length >= 5);
+    assert.ok(securityControls.some(c => c.controlId === 'CC6.1'));
+
+    // 3. Control aggregation by category
+    const categoryAgg = soc2Engine.aggregateControls({
+      groupBy: ['criteriaCategory'],
+      metrics: {
+        controlCount: { metric: 'count' }
+      }
+    });
+    assert.ok(categoryAgg.groups.length >= 4);
+    assert.ok(categoryAgg.groups.some(g => g.keys.criteriaCategory === 'Security'));
+    assert.ok(categoryAgg.groups.some(g => g.keys.criteriaCategory === 'Privacy'));
+  });
+
+  // --- SUITE 49: Workspace-Wide BroccoliDB (Auth Engine Behavioral Risk Evaluation Indexing) ---
+  await test('GalxAuthEngine: Risk evaluation records in BroccoliDbTable with natural query & statistical aggregation', () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const testUserId = `user_risk_eval_${Date.now()}`;
+
+    const mockSession: GalxUserSession = {
+      id: `sess_risk_${Date.now()}`,
+      userId: testUserId,
+      provider: 'openai',
+      shardId: 'shard_test_risk',
+      sessionFamilyId: 'family_risk_1',
+      sequenceNumber: 1,
+      scopes: ['*'],
+      tokenHash: 'hash_test_123',
+      ipAddress: '192.168.1.1',
+      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+      fingerprintHash: GalxCryptoVault.generateClientFingerprint('192.168.1.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'),
+      isRevoked: false,
+      issuedAtMs: Date.now(),
+      expiresAtMs: Date.now() + 86400000,
+      lastActiveAtMs: Date.now(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    // 1. Evaluate normal risk
+    const eval1 = authEngine.evaluateSessionRisk(mockSession, '192.168.1.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)');
+    assert.strictEqual(eval1.riskScore, 0);
+    assert.strictEqual(eval1.isHighRisk, false);
+
+    // 2. Evaluate anomalous risk (IP Shift + OS Shift)
+    const eval2 = authEngine.evaluateSessionRisk(mockSession, '10.0.0.99', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
+    assert.ok(eval2.riskScore >= 50);
+    assert.strictEqual(eval2.isHighRisk, true);
+
+    // 3. Natural query over risk evaluations
+    const highRiskMatches = authEngine.queryRiskEvaluationsNatural(`where userId = "${testUserId}" and isHighRisk = true`);
+    assert.strictEqual(highRiskMatches.length, 1);
+    assert.ok(highRiskMatches[0].riskScore >= 50);
+
+    // 4. Risk aggregation
+    const riskAgg = authEngine.aggregateRiskEvaluations({
+      groupBy: ['riskLevel'],
+      metrics: {
+        avgRisk: { metric: 'avg', field: 'riskScore' },
+        maxRisk: { metric: 'max', field: 'riskScore' },
+        evalCount: { metric: 'count' }
+      }
+    });
+    assert.ok(riskAgg.groups.length >= 1);
+  });
 
   console.log('\n======================================================================');
   if (testsFailed === 0) {

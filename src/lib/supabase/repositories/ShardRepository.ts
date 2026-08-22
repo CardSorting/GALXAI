@@ -8,10 +8,22 @@ import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
 import type { Database } from '../types';
 import type { GalxShardAccount, CredentialStatus, ProviderType, AuthType, ShardIsolationMode } from '../../../core/contracts/GalxContracts';
 
+import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
+
 export class ShardRepository {
   private static instance: ShardRepository;
   private readonly inMemoryShards = new Map<string, GalxShardAccount>();
+  private readonly shardTable: BroccoliDbTable<GalxShardAccount>;
   private readonly inMemoryLeases = new Map<string, any>();
+
+  constructor() {
+    this.shardTable = new BroccoliDbTable<GalxShardAccount>('shards');
+    this.shardTable.createIndex('provider');
+    this.shardTable.createIndex('status');
+    this.shardTable.createIndex('userId');
+    this.shardTable.createIndex('shardMode');
+    this.shardTable.createSortedIndex('priority');
+  }
 
   static getInstance(): ShardRepository {
     if (!ShardRepository.instance) {
@@ -33,7 +45,10 @@ export class ShardRepository {
         const { data, error } = await query;
         if (!error && data && data.length > 0) {
           const mapped = data.map(this.mapRowToShard);
-          for (const s of mapped) this.inMemoryShards.set(s.id, s);
+          for (const s of mapped) {
+            this.inMemoryShards.set(s.id, s);
+            this.shardTable.put(s.id, s);
+          }
           return mapped;
         }
       } catch {
@@ -41,8 +56,17 @@ export class ShardRepository {
       }
     }
 
-    const all = Array.from(this.inMemoryShards.values());
-    return userId ? all.filter(s => s.userId === userId) : all;
+    if (userId) {
+      return this.shardTable.query({
+        where: { userId: { $eq: userId } },
+        sortBy: 'priority',
+        sortOrder: 'desc'
+      }) as GalxShardAccount[];
+    }
+    return this.shardTable.query({
+      sortBy: 'priority',
+      sortOrder: 'desc'
+    }) as GalxShardAccount[];
   }
 
   async getShardById(id: string): Promise<GalxShardAccount | null> {

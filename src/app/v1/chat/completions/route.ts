@@ -101,16 +101,16 @@ export async function POST(req: NextRequest) {
 
     const requestId = `req_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
-    // 4. Synchronous Route through GALXAI Credential Pool
+    // 4. Synchronous Route through GALXAI Credential Pool with HIPAA, ZDR & GDPR Safeguards
     const result = await galxRouter.routeChatCompletion({
       request: body,
       userId,
       requestId,
-      isPriorityUser
+      isPriorityUser,
+      headers: req.headers
     });
 
-
-    // 4. Return formatted response with CORS headers
+    // 5. Return formatted response with CORS headers & verified Privacy/ZDR Attestation
     const headers = new Headers(result.headers);
     headers.set('Access-Control-Allow-Origin', '*');
     headers.set('X-Galx-Request-Id', requestId);

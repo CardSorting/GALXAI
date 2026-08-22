@@ -1,6 +1,6 @@
 # 🏛️ GALXAI Architecture Specification
 
-This document provides a comprehensive technical breakdown of the GALXAI universal AI routing gateway, high-concurrency quota cycling substrate, cryptographic vault, and resilience topologies.
+This document provides a comprehensive technical breakdown of the GALXAI universal AI routing gateway, high-concurrency quota cycling substrate, BroccoliDB reactive in-memory indexing layer, Zero Data Retention (ZDR v10.0) privacy substrate, cryptographic vault, and resilience topologies.
 
 ---
 
@@ -10,23 +10,30 @@ GALXAI sits between downstream client applications (chat interfaces, agentic swa
 
 ```mermaid
 flowchart TD
-    Client[Client Application / SDK / Agent Swarm] -->|Bearer galx_live_...| Gateway[GALXAI Universal Gateway]
+    Client[Client Application / SDK / Agent Swarm] -->|Bearer galx_live_... / galx_sess_...| Gateway[GALXAI Universal Gateway]
     
-    subgraph Gateway Core
-        Auth[API Key Authenticator] --> RateGov[Continuous Token-Bucket Rate Governor (ADR 0002)]
-        RateGov --> Router[GalxModelRouter (ADR 0001)]
+    subgraph Gateway Ingress & Privacy
+        Auth[API Key & Session Authenticator] --> Risk[Behavioral Risk Evaluator]
+        Risk --> Redactor[Safe Harbor 18 & GDPR PII Redactor]
+        Redactor --> Preflight[PII Preflight Zero-Alloc Filter]
+    end
+    
+    subgraph Gateway Core & In-Memory Substrate
+        Preflight --> Router[GalxModelRouter]
+        Router --> BDB[BroccoliDB Reactive L1 Tables & Natural Query AST Parser]
+        BDB --> Pool[GalxCredentialPool & TASD Leveling]
+        Pool --> Breaker[4-State Circuit Breaker & Canary Prober]
+        Pool --> Vault[GalxCryptoVault AES-256-GCM + AAD Binding]
+        Pool --> Substrate[GalxCredentialSubstrate Shard Accounts]
         
-        Router --> Pool[GalxCredentialPool & TASD (ADR 0008)]
-        Pool --> Breaker[4-State Circuit Breaker (ADR 0004 & 0009)]
-        Pool --> Vault[GalxCryptoVault AES-256-GCM + AAD (ADR 0003)]
-        Pool --> Substrate[GalxCredentialSubstrate]
-        
-        Router --> Metrics[GalxMetricsEngine Ring Buffer (ADR 0005)]
+        Router --> ZDR[ZDR v10.0 Ephemeral Memory Slab Pool & Key Ratchet]
+        Router --> Merkle[Merkle Tree Tamper-Evident SHA-256 Ledger]
+        Router --> Metrics[GalxMetricsEngine Ring Buffer]
     end
     
     subgraph Upstream Fleet
-        Router -->|Decrypted Shard Lease| OA[OpenAI Fleet: gpt-5.6-*, dalle-*]
-        Router -->|Decrypted Shard Lease| Grok[xAI Grok Fleet: grok-4.5, grok-image]
+        ZDR -->|Zero Data Retention Stream| OA[OpenAI Fleet: gpt-5.6-*, dalle-*]
+        ZDR -->|Zero Data Retention Stream| Grok[xAI Grok Fleet: grok-4.5, grok-image]
     end
 ```
 
@@ -57,66 +64,63 @@ All architectural components in GALXAI are governed by formal Architectural Deci
 | **Binary Wire & RPC Micro-Batching**| [ADR 0017](adr/0017-high-throughput-binary-wire-and-rpc-micro-batching.md) | Binary wire codecs and 100-item micro-batches (fn_batch_draw_wallet_tokens_cf) cutting database IOPS by 98%. |
 | **Edge Speculative & Socket Pools** | [ADR 0018](adr/0018-edge-speculative-streaming-and-keepalive-connection-pools.md) | Speculative draft + target streaming and pre-warmed HTTP/2 keep-alive sockets cutting TTFT by 65%. |
 | **Autonomous Shard Health & Budgets**| [ADR 0019](adr/0019-autonomous-shard-health-probes-and-budget-governance.md) | Continuous health probes, auto-drain stored procedures, and multi-tenant budget threshold webhooks (50%/80%/100%). |
-
-
-
-
+| **Provider-as-Auth Substrate** | [ADR 0020](adr/0020-provider-as-auth-zero-friction-session-substrate.md) | 1-Click zero-friction onboarding using upstream OpenAI/xAI credentials as primary identity. |
+| **JWE Session Encryption & DPoP** | [ADR 0021](adr/0021-jwe-compact-session-encryption-and-dpop-fingerprinting.md) | Compact AES-256-GCM encrypted tokens (`galx_sess_v2...`) bound to IP subnet / UA fingerprints. |
+| **OAuth 2.0 Rotation & Anti-Replay** | [ADR 0022](adr/0022-oauth-token-rotation-with-reuse-attack-detection-cascades.md) | Single-use rotation with 30s grace window and automatic session family lineage killswitch. |
+| **SUDO Elevation & Token Scoping** | [ADR 0023](adr/0023-step-up-sudo-elevation-and-fine-grained-token-scoping.md) | 15-minute privileged SUDO window, wildcard token scopes (`chat:*`), and multi-device remote logout. |
+| **Behavioral Risk & KMS Re-Wrapping** | [ADR 0024](adr/0024-adaptive-behavioral-risk-scoring-and-zero-downtime-kms-rewrapping.md) | Dynamic 0-100 risk scoring, security posture grades (`A+`), and zero-downtime key re-wrapping. |
+| **BroccoliDB Reactive Table Layer** | [ADR 0025](adr/0025-broccolidb-l1-reactive-in-memory-table-and-secondary-indexing.md) | Sub-microsecond query tables with rich operator DSL and zero-allocation statistical aggregations. |
+| **BroccoliDB Natural Query & WAL** | [ADR 0026](adr/0026-broccolidb-natural-language-query-ast-parser-and-wal-persistence.md) | Offline deterministic AST translation ($< 0.1\text{ms}$) and tamper-evident crash recovery WAL. |
+| **Enterprise Privacy & ZDR v10.0** | [ADR 0027](adr/0027-enterprise-privacy-safe-harbor-18-gdpr-and-zdr-v10-memory-zeroization.md) | Complete HIPAA/GDPR/Global privacy coverage, streaming PII windowing, and 2-pass memory zeroization. |
+| **SOC 2 Type II Engine & Merkle** | [ADR 0028](adr/0028-soc2-type-ii-compliance-engine-drift-detector-and-merkle-audit-ledger.md) | 28 AICPA Trust Services controls, automated drift remediation, and Merkle Tree audit chaining. |
 
 ---
-
 
 ## 🔄 Request Lifecycle & Routing Workflow
 
 1. **Ingress & Authentication**:
-   - The client issues an HTTP request to `/v1/chat/completions` or `/v1/images/generations` with `Authorization: Bearer galx_live_...`.
-   - The key hash is verified against stored developer keys with SHA-256 prefix matching.
-   - Proof-of-deposit verification confirms active wallet balance (ADR 0007).
+   - The client issues an HTTP request to `/v1/chat/completions` or `/v1/images/generations` with `Authorization: Bearer galx_live_...` or `galx_sess_...`.
+   - The key or token hash is verified against stored developer keys with SHA-256 prefix matching in the BroccoliDB `keyTable` / `sessionTable`.
+   - Adaptive behavioral risk scoring assesses IP subnet shift, device fingerprinting, and high-risk anomalies.
 
-2. **Model Resolution & Canonical Normalization**:
-   - `ModelCatalog.resolveModel(modelId)` normalizes aliases (e.g. `"sol"` $\to$ `"gpt-5.6-sol"`, `"grok"` $\to$ `"x-ai/grok-4.5"`) and verifies feature support (streaming, reasoning, vision).
+2. **Privacy Preflight & Streaming De-Identification**:
+   - Fast-path preflight filter verifies benign text in $< 0.05\text{ms}$.
+   - HIPAA Safe Harbor 18 & European GDPR PII entities are redacted and substituted with reversible tokens before upstream transit.
+   - For SSE token streams, the `StreamingPIIWindowTransformer` handles cross-chunk boundary tokens on-the-fly.
 
-3. **Atomic Execution Lease Acquisition (2-Phase Commit, P-AHT & TASD Leveling)**:
+3. **Model Resolution & Canonical Normalization**:
+   - `ModelCatalog.resolveModel(modelId)` normalizes aliases (e.g. `"sol"` $\to$ `"gpt-5.6-sol"`, `"grok"` $\to$ `"x-ai/grok-4.5"`) via indexed `modelTable` lookups.
+
+4. **Atomic Execution Lease Acquisition (2-Phase Commit, P-AHT & TASD Leveling)**:
    - The router requests a lease from `GalxCredentialPool.acquireLease`.
    - **Filter**: 4-State Circuit Breaker filters out `cooldown`, `exhausted`, `dead`, and saturated shards.
    - **Score**: Shards are ranked via **Predictive Adaptive Hydraulic Headroom (P-AHT)** with Tenant-Affinity Shard Dispersion:
      $$S_i = \left( R_i \right)^{1.2} \times C_i \times H_i \times D_i \times L_i \times W_i \times P_i \times M_i \times T_i + \epsilon_i$$
-     Where $R_i$ is post-allocation headroom, $C_i$ is power-law concurrency damping, $M_i$ is predictive drain avoidance (`MDA-Floor`), $T_i$ is Tenant-Affinity Shard Dispersion (`TASD`), and $\epsilon_i$ is micro-jitter.
-   - **Phase 1 (Reservation)**: The estimated token capacity is soft-reserved in the selected shard's token bucket.
+   - **Phase 1 (Reservation)**: The estimated token capacity is soft-reserved in the selected shard's token bucket, and indexed in `leaseTable`.
    - Monotonic fencing token is generated to protect against stale worker execution.
-   - Background lease scavenger continuously sweeps expired leases and reclaims orphaned soft token reservations.
 
-4. **Cryptographic Vault Decryption & AAD Verification**:
+5. **Cryptographic Vault Decryption & AAD Verification**:
    - Ciphertext is decrypted via `GalxCryptoVault.decryptSecret` using the bound AAD tuple `tenantUid:shardId:provider`.
-   - The plaintext API key is kept in ephemeral RAM only.
-
-5. **Upstream Dispatch & Header Ingestion**:
-   - Request is dispatched to the upstream provider adapter (`OpenAIAdapter` or `GrokAdapter`).
-   - If upstream returns HTTP 429 or 503, the circuit breaker enters `cooldown`, the lease is released, and the router transparently retries with the next candidate shard in $< 15\text{ms}$.
+   - The plaintext API key is kept in ephemeral RAM slabs leased from `galxSlabPool`.
 
 6. **Streaming & Completion (Phase 2 Commit)**:
    - For SSE streams, chunks pass through `wrapStreamingResponse`, decoding token count and monitoring client disconnects.
-   - Upon completion or stream cancelation, `pool.releaseLease` commits actual token consumption, recalculates EWMA latency, and reconciles upstream `x-ratelimit-*` headers.
+   - HKDF-SHA256 Forward Secrecy Key Ratchet updates session keys every 1000 tokens.
+   - Upon completion, `pool.releaseLease` commits actual token consumption, recalculates EWMA latency, and micro-batches audit Merkle blocks.
 
-7. **Ephemeral Scrubbing**:
-   - Plaintext secret memory buffers in RAM are zeroized (`zeroizeBuffer`) in the `finally` block.
+7. **Zero Data Retention Memory Zeroization**:
+   - Scoped memory sanitizer executes a deterministic 2-pass overwrite (`0xAA` -> `0x00`) over all memory slabs in the `finally` block.
 
 ---
 
-## 🔒 Security Architecture
+## 🔒 Security & Compliance Architecture
 
 | Security Domain | Implementation | Guarantee |
 | :--- | :--- | :--- |
 | **Credential Encryption** | AES-256-GCM with 96-bit random IV | Confidentiality and integrity of upstream API keys |
 | **AAD Envelope Binding** | `tenantId:shardId:provider` bound to tag | Prevents cross-tenant ciphertext transplantation |
-| **RAM Scrubbing** | `buf.fill(0)` via `zeroizeBuffer` | Zero plaintext leakage in heap dumps |
+| **ZDR v10.0 Memory Zeroization** | 2-Pass cryptographic overwrite (`0xAA` -> `0x00`) | Zero residual plaintext tokens in memory |
+| **Forward Secrecy Key Ratchet** | HKDF-SHA256 streaming ratchet | Prevents past session compromise |
 | **Monotonic Fencing** | Incremental `fencingToken` per lease | Eliminates split-brain races on worker timeouts |
-| **Instant Retraction** | Synchronous memory purge & lease invalidation | Purges revoked credentials in $< 40\text{ms}$ |
-| **Anti-Sybil Proof-of-Deposit** | $10 deposit proof gate | 100% protection against key harvesting bot swarms |
-
----
-
-## 📊 Telemetry & Health Engine
-
-- **Ring Buffer Size**: Fixed 2,000-sample array ring buffer (`GalxMetricsEngine`).
-- **Percentiles**: Calculates $P_{50}, P_{90}, P_{99}$ latency over sliding 5-minute windows.
-- **Throughput Telemetry**: Requests Per Minute (RPM), Tokens Per Minute (TPM), and Error Rates broken down by provider (`openai` vs `xai-grok`) and model.
+| **SOC 2 Type II Controls** | 28 AICPA Trust Services Criteria | Continuous automated evidence collection & drift self-healing |
+| **Merkle Audit Ledger** | Cryptographic SHA-256 Merkle block chaining | 100% tamper-evident audit custody proofs |

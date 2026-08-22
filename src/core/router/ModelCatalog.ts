@@ -1,4 +1,7 @@
 import type { ModelSpecItem, ProviderType } from '../contracts/GalxContracts';
+import { BroccoliDbTable } from '../broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../broccolidb/broccolidb-natural-query';
+import type { DbQueryOptions, DbAggregateQuery } from '../broccolidb/broccolidb.contracts';
 
 /**
  * Exclusive Model Catalog for GALXAI.
@@ -302,14 +305,57 @@ export class ModelCatalog {
   }
 
   public static listByProvider(provider: ProviderType): ModelSpecItem[] {
-    return EXCLUSIVE_MODEL_CATALOG.filter(m => m.provider === provider);
+    return this.getTable().query({ where: { provider: { $eq: provider } } }) as ModelSpecItem[];
   }
 
   public static listByCategory(category: 'llm' | 'image' | 'embedding'): ModelSpecItem[] {
-    return EXCLUSIVE_MODEL_CATALOG.filter(m => m.category === category);
+    return this.getTable().query({ where: { category: { $eq: category } } }) as ModelSpecItem[];
   }
 
   public static getSpec(id: string): ModelSpecItem | null {
     return this.resolveModel(id);
+  }
+
+  // --- BroccoliDB Zenith Integration ---
+  private static dbTableInstance: BroccoliDbTable<ModelSpecItem> | null = null;
+
+  public static getTable(): BroccoliDbTable<ModelSpecItem> {
+    if (!this.dbTableInstance) {
+      const table = new BroccoliDbTable<ModelSpecItem>('models');
+      table.createIndex('provider');
+      table.createIndex('category');
+      table.createIndex('supportsVision');
+      table.createIndex('supportsReasoning');
+      table.createSortedIndex('inputPricePer1M');
+      table.createSortedIndex('contextWindowTokens');
+
+      for (const model of EXCLUSIVE_MODEL_CATALOG) {
+        table.put(model.id, model);
+      }
+      this.dbTableInstance = table;
+    }
+    return this.dbTableInstance;
+  }
+
+  /**
+   * Executes deterministic offline natural language queries over the model catalog (<0.1ms).
+   */
+  public static queryNatural(naturalQuery: string): ModelSpecItem[] {
+    const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'models');
+    return this.getTable().query(parsed.queryOptions) as ModelSpecItem[];
+  }
+
+  /**
+   * Evaluates rich operator filters ($gt, $between, $in, $regex) over the catalog.
+   */
+  public static queryDSL(options: DbQueryOptions): ModelSpecItem[] {
+    return this.getTable().query(options) as ModelSpecItem[];
+  }
+
+  /**
+   * Performs statistical calculus over the model catalog (e.g. min/max/avg pricing by provider).
+   */
+  public static aggregate(query: DbAggregateQuery) {
+    return this.getTable().aggregate(query);
   }
 }
