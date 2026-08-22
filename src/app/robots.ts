@@ -15,7 +15,6 @@ export default function robots(): MetadataRoute.Robots {
           '/models/resolver',
           '/vault',
           '/vault/*',
-          '/vault/simulator',
           '/architecture',
           '/how-it-works',
           '/playground',
@@ -24,15 +23,30 @@ export default function robots(): MetadataRoute.Robots {
           '/faq',
           '/docs',
           '/docs/*',
+          '/billing',
+          '/billing/*',
+          '/compliance',
+          '/compliance/*',
           '/keys',
           '/keys/*',
           '/status',
           '/telemetry',
-          '/auth/connect'
+          '/auth/connect',
+          '/favicon.svg',
+          '/favicon.ico',
+          '/icon.png',
+          '/apple-icon.png',
+          '/opengraph-image.png',
+          '/twitter-image.png'
         ],
         disallow: ['/api/'],
       },
+      {
+        userAgent: ['Twitterbot', 'facebookexternalhit', 'LinkedInBot', 'Slackbot', 'Discordbot', 'TelegramBot', 'WhatsApp'],
+        allow: ['/', '/*'],
+      }
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
   };
 }
+

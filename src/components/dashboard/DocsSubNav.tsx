@@ -25,6 +25,7 @@ import {
   Bot,
   Smile
 } from 'lucide-react';
+import { ShareButton } from '@/components/common/ShareButton';
 
 interface DocsNavItem {
   name: string;
@@ -115,8 +116,15 @@ export function DocsSubNav() {
           })}
         </div>
 
-        <div className="hidden md:flex items-center gap-2 text-[11px] text-zinc-500 font-sans">
-          <span>Drop-in OpenAI SDK Replacement</span>
+        <div className="flex items-center gap-3 shrink-0">
+          <ShareButton
+            variant="pill"
+            label="Share Doc"
+            className="text-[11px] py-1"
+          />
+          <div className="hidden md:flex items-center gap-2 text-[11px] text-zinc-500 font-sans">
+            <span>Drop-in OpenAI SDK Replacement</span>
+          </div>
         </div>
       </div>
 

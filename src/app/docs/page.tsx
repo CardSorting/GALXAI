@@ -34,9 +34,11 @@ import {
   Copy,
   Check,
   Laptop,
-  MessageSquare,
-  Share2
+  MessageSquare
 } from 'lucide-react';
+import { ShareButton } from '@/components/common/ShareButton';
+import { ReadingProgressBar } from '@/components/common/ReadingProgressBar';
+import { NoCodeSandboxWidget } from '@/components/dashboard/NoCodeSandboxWidget';
 
 export default function DocsPage() {
   // Default to Plain English Strategy for immediate clarity
@@ -101,6 +103,7 @@ export default function DocsPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <ReadingProgressBar />
       <Navigation />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
@@ -108,11 +111,19 @@ export default function DocsPage() {
 
         {/* Hero Header */}
         <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-4 relative overflow-hidden border border-white/10">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
-              <Smile className="w-3.5 h-3.5" />
-              <span>SIMPLE & APPROACHABLE DEVELOPER GUIDE</span>
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
+                <Smile className="w-3.5 h-3.5" />
+                <span>SIMPLE & APPROACHABLE DEVELOPER GUIDE</span>
+              </span>
+            </div>
+            <ShareButton
+              variant="pill"
+              label="Share Documentation"
+              title="GALXAI Documentation & Quickstart Center"
+              description="Learn how to save 25%–40% on GPT-5.6 and Grok 4.5 with 0-code drop-in integrations."
+            />
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-black text-white">Documentation & Quick Start Center</h1>
@@ -131,7 +142,7 @@ export default function DocsPage() {
               }`}
             >
               <Smile className="w-4 h-4" />
-              <span>💡 Plain English (For Beginners & Simple Setup)</span>
+              <span>🔰 Plain English & 0-Code Guide</span>
             </button>
 
             <button
@@ -165,6 +176,9 @@ export default function DocsPage() {
         {/* TAB 1: PLAIN ENGLISH STRATEGY (DEFAULT VIEW) */}
         {activeTab === 'plain_english' && (
           <div className="space-y-8">
+            {/* Interactive Layman Simulator Widget */}
+            <NoCodeSandboxWidget />
+
             {/* 1-Minute Plain English Hero Card */}
             <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-amber-500/30 bg-amber-500/5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -262,10 +276,22 @@ export default function DocsPage() {
                     <div className="text-base font-bold text-emerald-300">${calculatedWholesale} / mo</div>
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-0.5 col-span-2 sm:col-span-1">
-                    <span className="text-zinc-500 text-[10px] uppercase font-sans">Discount Pass-Through</span>
-                    <div className="text-base font-bold text-amber-300">~38% Off</div>
+                  <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-0.5 col-span-2 sm:col-span-1 flex flex-col justify-between">
+                    <div>
+                      <span className="text-zinc-500 text-[10px] uppercase font-sans">Discount Pass-Through</span>
+                      <div className="text-base font-bold text-amber-300">~38% Off</div>
+                    </div>
                   </div>
+                </div>
+
+                <div className="pt-2 flex items-center justify-between text-xs font-mono text-zinc-400">
+                  <span>Calculated based on pooled token volume rates</span>
+                  <ShareButton
+                    variant="pill"
+                    label="Share This Estimate"
+                    title={`I could save $${annualSavings.toLocaleString()} / year on AI with GALXAI!`}
+                    description={`Calculating $${monthlySpend}/mo spend -> saves $${annualSavings.toLocaleString()}/yr using GALXAI universal AI model router.`}
+                  />
                 </div>
               </div>
             </div>

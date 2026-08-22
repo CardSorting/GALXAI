@@ -35,6 +35,7 @@ import {
   DollarSign,
   Star
 } from 'lucide-react';
+import { ShareButton } from '@/components/common/ShareButton';
 
 export default function HomePage() {
   const [stats, setStats] = useState<any>(null);
@@ -160,6 +161,12 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
               <Terminal className="w-4 h-4 text-cyan-400" />
               <span>Try in Sandbox (No Auth Needed)</span>
             </Link>
+
+            <ShareButton
+              variant="pill"
+              label="Share GALXAI"
+              className="py-3.5 px-5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold"
+            />
           </div>
 
           {/* Social Proof & Metrics Bar */}

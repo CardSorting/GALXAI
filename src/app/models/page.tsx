@@ -21,6 +21,9 @@ import {
   Flame,
   Award
 } from 'lucide-react';
+import { ModelMatchmaker } from '@/components/dashboard/ModelMatchmaker';
+import { ReadingProgressBar } from '@/components/common/ReadingProgressBar';
+import { ShareButton } from '@/components/common/ShareButton';
 
 export default function ModelsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,6 +52,7 @@ export default function ModelsPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <ReadingProgressBar />
       <Navigation />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
@@ -57,19 +61,33 @@ export default function ModelsPage() {
         {/* Page Hero */}
         <div className="glass-panel rounded-3xl p-6 sm:p-10 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none" />
-          <div className="max-w-3xl space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
-              <Flame className="w-3.5 h-3.5" />
-              <span>WHOLESALE RATES • 25%–40% BELOW DIRECT LIST</span>
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="max-w-3xl space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
+                <Flame className="w-3.5 h-3.5" />
+                <span>WHOLESALE RATES • 25%–40% BELOW DIRECT LIST</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+                Supported Frontier Models &amp; Architecture Specs
+              </h1>
+              <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
+                GALXAI exclusively routes to the latest generation OpenAI Codex coding models, xAI Grok 4.5 500K multimodal reasoning, and high-fidelity visual synthesis engines with 75% prompt caching pass-through.
+              </p>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-              Supported Frontier Models & Architecture Specs
-            </h1>
-            <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
-              GALXAI exclusively routes to the latest generation OpenAI Codex coding models, xAI Grok 4.5 500K multimodal reasoning, and high-fidelity visual synthesis engines with 75% prompt caching pass-through.
-            </p>
+
+            <div className="shrink-0">
+              <ShareButton
+                variant="pill"
+                label="Share Models"
+                title="GALXAI Model Catalog & Wholesale Pricing"
+                description="Explore 12 frontier models including GPT-5.6 Sol and Grok 4.5 with 25%–40% wholesale savings."
+              />
+            </div>
           </div>
         </div>
+
+        {/* Plain English Intent Matchmaker for Non-Technical Users */}
+        <ModelMatchmaker />
 
         {/* Search, Category Filter & Live Volume Tier Selector */}
         <div className="glass-panel rounded-2xl p-4 flex flex-col lg:flex-row items-center justify-between gap-4">

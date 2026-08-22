@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   Database
 } from 'lucide-react';
+import { ShareButton } from '@/components/common/ShareButton';
 
 interface FAQItem {
   id: string;
@@ -119,9 +120,17 @@ export default function FaqPage() {
         <div className="glass-panel rounded-3xl p-6 sm:p-12 space-y-4 text-center relative overflow-hidden border border-amber-500/20 shadow-2xl">
           <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-amber-500/15 via-orange-500/10 to-indigo-600/15 rounded-full blur-[140px] pointer-events-none" />
 
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
-            <HelpCircle className="w-3.5 h-3.5" />
-            <span>KNOWLEDGE BASE & DEVELOPER FAQ</span>
+          <div className="flex items-center justify-center gap-3">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
+              <HelpCircle className="w-3.5 h-3.5" />
+              <span>KNOWLEDGE BASE & DEVELOPER FAQ</span>
+            </div>
+            <ShareButton
+              variant="pill"
+              label="Share FAQ"
+              title="GALXAI Knowledge Base & FAQ"
+              description="Learn how GALXAI delivers wholesale AI token rates, 75% prompt caching, and zero code changes."
+            />
           </div>
 
           <div className="space-y-2 max-w-2xl mx-auto">

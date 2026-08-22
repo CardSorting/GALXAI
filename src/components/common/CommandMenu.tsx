@@ -193,16 +193,21 @@ export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
 
   const quickPages = [
     { label: 'Models & Pricing Matrix', href: '/models', icon: Cpu, category: 'Navigation' },
+    { label: 'Plain English Beginner Guide', href: '/docs/simple', icon: Sparkles, category: 'Getting Started' },
+    { label: 'AI Agents & Swarms Infrastructure', href: '/docs/agents', icon: Rocket, category: 'Solutions' },
+    { label: 'Cursor & Windsurf IDE Setup', href: '/docs/ide-setup', icon: Terminal, category: 'Solutions' },
     { label: 'Universal Model Playground', href: '/playground', icon: Terminal, category: 'Navigation' },
     { label: 'Side-by-Side Model Arena', href: '/playground/battle', icon: Swords, category: 'Playground' },
     { label: 'Developer API Keys', href: '/keys', icon: Key, category: 'Navigation' },
     { label: 'Create New Gateway API Key', href: '/keys/new', icon: Key, category: 'Actions' },
     { label: 'Model Comparison Matrix', href: '/models/compare', icon: GitCompare, category: 'Tools' },
     { label: '0ms Model Alias Resolver', href: '/models/resolver', icon: Cpu, category: 'Tools' },
-    { label: 'Models & Pricing Table', href: '/pricing', icon: CreditCard, category: 'Navigation' },
-    { label: 'SDK Quickstart & Setup', href: '/docs', icon: Code2, category: 'Docs' },
+    { label: 'Wholesale Pricing & Calculator', href: '/pricing', icon: CreditCard, category: 'Pricing' },
+    { label: '1-Click Migration Guide', href: '/docs/migration', icon: Sparkles, category: 'Docs' },
+    { label: 'Production Cookbooks & Recipes', href: '/docs/cookbook', icon: BookOpen, category: 'Docs' },
+    { label: '75% Prompt Caching Architecture', href: '/docs/prompt-caching', icon: Sparkles, category: 'Docs' },
     { label: 'REST & SSE API Reference', href: '/docs/api-reference', icon: Code2, category: 'Docs' },
-    { label: 'System Status & Uptime', href: '/status', icon: CheckCircle2, category: 'Navigation' },
+    { label: 'System Status & Uptime (99.99%)', href: '/status', icon: CheckCircle2, category: 'Trust' },
     { label: 'Knowledge Base & FAQ', href: '/faq', icon: HelpCircle, category: 'Support' },
   ].filter(p => p.label.toLowerCase().includes(query.toLowerCase()));
 

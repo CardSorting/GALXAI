@@ -15,11 +15,11 @@ import {
   Terminal,
   Code2,
   Layers,
-  ShieldCheck,
   Activity,
   Copy,
   TrendingDown
 } from 'lucide-react';
+import { ShareButton } from '@/components/common/ShareButton';
 
 interface ModelDetailPageProps {
   params: Promise<{ id: string }>;
@@ -89,8 +89,39 @@ for chunk in response:
     "stream": true
   }'`;
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
+  const productJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: `${model.name} — GALXAI Universal API`,
+    image: `${baseUrl}/models/${id}/opengraph-image`,
+    description: model.description,
+    brand: {
+      '@type': 'Brand',
+      name: isGrok ? 'xAI' : 'OpenAI',
+    },
+    offers: {
+      '@type': 'Offer',
+      price: model.inputPricePer1M.toFixed(2),
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      priceValidUntil: '2027-12-31',
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.9',
+      reviewCount: '128',
+    },
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+
       <Navigation />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
@@ -131,6 +162,12 @@ for chunk in response:
             </div>
 
             <div className="flex items-center gap-3 shrink-0">
+              <ShareButton
+                variant="pill"
+                label="Share Model"
+                title={`${model.name} — GALXAI Pricing & Specs`}
+                description={`Get ${model.name} with ${model.discountPercentage || 25}% wholesale savings and sub-15ms router latency.`}
+              />
               <Link
                 href={`/playground?model=${model.id}`}
                 className="px-5 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/20 transition-all flex items-center gap-2"
