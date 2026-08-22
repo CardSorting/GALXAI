@@ -23,7 +23,8 @@ import {
   Swords,
   GitCompare,
   HelpCircle,
-  MoreHorizontal
+  MoreHorizontal,
+  Wallet
 } from 'lucide-react';
 import { CommandMenu } from '@/components/common/CommandMenu';
 import { useAuth } from '@/contexts/AuthContext';
@@ -185,6 +186,19 @@ export function Navigation() {
               <kbd className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-white/10 text-[10px] text-zinc-400 font-mono">⌘K</kbd>
             </button>
 
+            {/* Quick Wallet Balance Button */}
+            <Link
+              href="/billing"
+              className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-bold flex items-center gap-1.5 transition-all ${
+                pathname === '/billing'
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-sm'
+                  : 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300'
+              }`}
+            >
+              <Wallet className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="hidden sm:inline">$114.59</span>
+            </Link>
+
             {/* API Keys Link */}
             <Link
               href="/keys"
@@ -220,6 +234,15 @@ export function Navigation() {
                       <div className="text-xs font-bold text-white truncate">{user.name}</div>
                       <div className="text-[10px] text-zinc-400 font-mono truncate">{user.email}</div>
                     </div>
+
+                    <Link
+                      href="/billing"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-emerald-300 hover:text-white hover:bg-emerald-500/10 transition-all font-mono font-bold"
+                    >
+                      <Wallet className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Wallet ($114.59)</span>
+                    </Link>
 
                     <Link
                       href="/keys"
