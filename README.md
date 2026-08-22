@@ -132,9 +132,12 @@ npm run dev
 
 - 🏛️ **[System Architecture Specification](docs/ARCHITECTURE.md)**: Deep dive into the request lifecycle, Mermaid sequence flow, streaming safety, and security model.
 - 🌊 **[Routing Algorithms & Calculus](docs/ROUTING_ALGORITHMS.md)**: Mathematical derivations of Adaptive Hydraulic Headroom (P-AHT), Smooth Weighted Round-Robin (SWRR), and Least-Utilized.
+- 🔬 **[Performance Benchmarks & Stress Analysis](docs/BENCHMARKS.md)**: Concurrency scaling, RPS throughput, P99 latency, and burst resilience.
+- 🧠 **[Model Catalog & Modality Specification](docs/MODEL_CATALOG.md)**: Complete profiles and pricing for all 12 reasoning and visual models.
 - 🔒 **[Security & Cryptographic Threat Model](docs/SECURITY.md)**: AAD envelope encryption, memory zeroization, and zero-prompt logging.
 - 📖 **[API Reference](docs/API_REFERENCE.md)**: REST endpoints for chat completions, visual synthesis, model catalog, and pool telemetry.
 - 🚀 **[Quickstart & IDE Setup](docs/QUICKSTART.md)**: Drop-in setup for Python, Node.js, LangChain, Cursor IDE, and Continue.
+- 🐳 **[Production Deployment & Infrastructure Guide](docs/DEPLOYMENT.md)**: Docker, Docker Compose, Kubernetes manifests, and security checklist.
 - 🛠️ **[Developer & Contributing Guide](docs/DEVELOPER_GUIDE.md)**: Architecture layers, adding model adapters, and testing standards.
 - 🔧 **[Operational Playbook & Troubleshooting](docs/TROUBLESHOOTING.md)**: Error classifications, rate limit mitigations, and health monitoring.
 

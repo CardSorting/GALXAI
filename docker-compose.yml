@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  galxai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: galxai-gateway
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - GALX_MASTER_SECRET_KEY=${GALX_MASTER_SECRET_KEY:-galxai_dev_master_secret_key_32bytes!}
+    volumes:
+      - galx_data:/app/.data
+
+volumes:
+  galx_data:
