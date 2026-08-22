@@ -27,6 +27,12 @@ This directory contains the formal Architectural Decision Records (ADRs) that go
 | **[ADR 0017](0017-high-throughput-binary-wire-and-rpc-micro-batching.md)** | High-Throughput Binary Wire Protocol & RPC Micro-Batching | **Wire & Batch** | `Accepted` | Binary codecs and 100-item micro-batches (fn_batch_draw_wallet_tokens_cf) cutting database IOPS by 98%. |
 | **[ADR 0018](0018-edge-speculative-streaming-and-keepalive-connection-pools.md)** | Edge Speculative Streaming & Pre-Warmed Connection Pools | **Inference DX** | `Accepted` | Speculative draft + target streaming and pre-warmed HTTP/2 keep-alive sockets cutting TTFT by 65%. |
 | **[ADR 0019](0019-autonomous-shard-health-probes-and-budget-governance.md)** | Autonomous Shard Health Probes & Multi-Tenant Budget Governance | **Governance** | `Accepted` | Autonomous shard auto-drain heartbeats and multi-tenant budget threshold webhooks (50%/80%/100%). |
+| **[ADR 0020](0020-provider-as-auth-zero-friction-session-substrate.md)** | Provider-as-Auth Paradigm & Zero-Friction Shard Vaulting | **Auth & Vault** | `Accepted` | 1-Click zero-friction onboarding using upstream OpenAI/xAI credentials as primary identity. |
+| **[ADR 0021](0021-jwe-compact-session-encryption-and-dpop-fingerprinting.md)** | JWE Compact Session Encryption & DPoP Client Fingerprinting | **Session Security** | `Accepted` | Compact AES-256-GCM encrypted tokens (`galx_sess_v2...`) bound to IP subnet / UA fingerprints. |
+| **[ADR 0022](0022-oauth-token-rotation-with-reuse-attack-detection-cascades.md)** | OAuth 2.0 Token Rotation with Reuse Attack Detection Cascades | **Anti-Replay** | `Accepted` | Single-use rotation with 30s grace window and automatic session family lineage killswitch. |
+| **[ADR 0023](0023-step-up-sudo-elevation-and-fine-grained-token-scoping.md)** | Step-Up SUDO Session Elevation & Fine-Grained Token Scoping | **Authorization** | `Accepted` | 15-minute privileged SUDO window, wildcard token scopes (`chat:*`), and multi-device remote logout. |
+| **[ADR 0024](0024-adaptive-behavioral-risk-scoring-and-zero-downtime-kms-rewrapping.md)** | Adaptive Behavioral Risk Scoring & Zero-Downtime KMS Re-Wrapping | **KMS & Risk** | `Accepted` | Dynamic 0-100 risk scoring, security posture grades (`A+`), and zero-downtime key re-wrapping. |
+
 
 
 

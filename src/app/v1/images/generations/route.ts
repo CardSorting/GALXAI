@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter } from '@/core/router/GalxModelRouter';
-import { GalxPersistence } from '@/lib/storage/GalxPersistence';
-import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
+import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import type { ImageGenerationRequest } from '@/core/contracts/GalxContracts';
 
@@ -23,23 +22,19 @@ export async function OPTIONS() {
  */
 export async function POST(req: NextRequest) {
   try {
-    const authHeader = req.headers.get('authorization') || '';
-    let userId = 'anonymous_developer';
-    let isPriorityUser = false;
+    const authEngine = GalxAuthEngine.getInstance();
+    const authResult = await authEngine.resolveAuthIdentity(req);
 
-    if (authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7).trim();
-      if (token.startsWith('galx_live_')) {
-        const hash = GalxCryptoVault.hashApiKey(token);
-        const foundKey = GalxPersistence.getInstance().getGatewayKeys().find(k => k.keyHash === hash && !k.revoked);
-        if (foundKey) {
-          userId = foundKey.userId;
-          isPriorityUser = true;
-        }
-      } else if (token.startsWith('session_') || token.startsWith('user_')) {
-        userId = token;
-      }
+    if (!authResult.authenticated && req.headers.get('authorization')) {
+      return NextResponse.json(
+        { error: { message: authResult.error || 'Invalid or expired authorization credentials', type: 'invalid_request_error', code: 'invalid_api_key' } },
+        { status: 401 }
+      );
     }
+
+    const userId = authResult.userId;
+    const isPriorityUser = authResult.isPriorityUser;
+
 
     const body = (await req.json()) as ImageGenerationRequest;
     if (!body.prompt || typeof body.prompt !== 'string' || body.prompt.trim().length === 0) {

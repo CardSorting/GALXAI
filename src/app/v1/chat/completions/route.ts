@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter } from '@/core/router/GalxModelRouter';
-import { GalxPersistence } from '@/lib/storage/GalxPersistence';
-import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
+import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import type { ChatCompletionRequest } from '@/core/contracts/GalxContracts';
 
@@ -26,37 +25,20 @@ export async function OPTIONS() {
  */
 export async function POST(req: NextRequest) {
   try {
-    // 1. Authenticate Request
-    const authHeader = req.headers.get('authorization') || '';
-    let userId = 'anonymous_developer';
-    let isPriorityUser = false;
+    // 1. Authenticate Request with Hardened Auth Engine (Developer Keys & Signed Session Tokens)
+    const authEngine = GalxAuthEngine.getInstance();
+    const authResult = await authEngine.resolveAuthIdentity(req);
 
-    if (authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7).trim();
-      if (token.startsWith('galx_live_')) {
-        const hash = GalxCryptoVault.hashApiKey(token);
-        const persistence = GalxPersistence.getInstance();
-        const foundKey = persistence.getGatewayKeys().find(k => k.keyHash === hash && !k.revoked);
-        if (foundKey) {
-          userId = foundKey.userId;
-          isPriorityUser = true;
-          // Update usage asynchronously
-          const updatedKey = {
-            ...foundKey,
-            totalRequests: foundKey.totalRequests + 1,
-            lastUsedAtMs: Date.now()
-          };
-          persistence.saveGatewayKey(updatedKey);
-        } else {
-          return NextResponse.json(
-            { error: { message: 'Invalid or revoked GALXAI Gateway API Key', type: 'invalid_request_error', code: 'invalid_api_key' } },
-            { status: 401 }
-          );
-        }
-      } else if (token.startsWith('session_') || token.startsWith('user_')) {
-        userId = token;
-      }
+    if (!authResult.authenticated && req.headers.get('authorization')) {
+      return NextResponse.json(
+        { error: { message: authResult.error || 'Invalid or expired authorization credentials', type: 'invalid_request_error', code: 'invalid_api_key' } },
+        { status: 401 }
+      );
     }
+
+    const userId = authResult.userId;
+    const isPriorityUser = authResult.isPriorityUser;
+
 
     // 2. Parse & Validate Body
     const body = (await req.json()) as ChatCompletionRequest;

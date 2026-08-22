@@ -1,14 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter } from '@/core/router/GalxModelRouter';
 import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
+import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import type { GalxShardAccount, ProviderType } from '@/core/contracts/GalxContracts';
 
 export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const userId = searchParams.get('userId') || undefined;
+  let userId = searchParams.get('userId') || undefined;
   const provider = (searchParams.get('provider') as ProviderType) || undefined;
+
+  if (!userId) {
+    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
+    if (auth.authenticated) {
+      userId = auth.userId;
+    }
+  }
 
   const shards = galxRouter.substrate.listAccounts(userId, provider).map(s => ({
     id: s.id,
@@ -40,7 +48,13 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { apiKey, accountLabel, provider, shardMode = 'pooled', userId = 'user_demo', priority = 10 } = body;
+    let { apiKey, accountLabel, provider, shardMode = 'pooled', userId = 'user_demo', priority = 10 } = body;
+
+    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
+    if (auth.authenticated && (!userId || userId === 'user_demo')) {
+      userId = auth.userId;
+    }
+
 
     if (!apiKey || typeof apiKey !== 'string' || apiKey.length < 8) {
       return NextResponse.json({ error: 'Valid API Key is required' }, { status: 400 });

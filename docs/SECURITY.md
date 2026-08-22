@@ -86,3 +86,23 @@ galx_live_a1b2c3d4e5f6... (48 characters total)
 GALXAI enforces strict privacy standards:
 - **No Prompt Retention**: User prompts, system messages, and model completions are streamed directly between the client and upstream provider without being written to persistent storage or disk.
 - **Zero Content Telemetry**: Only numeric metrics (latency in ms, token usage counts, status codes) are stored in the in-memory circular ring buffer.
+
+---
+
+## 6. Provider-as-Auth & JWE Token Hardening
+
+For in-depth architectural specifications of the Provider-as-Auth identity model, consult:
+- **[Provider-as-Auth Technical Specification](PROVIDER_AS_AUTH_SPECIFICATION.md)**
+- **[ADR 0020: Provider-as-Auth Paradigm](adr/0020-provider-as-auth-zero-friction-session-substrate.md)**
+- **[ADR 0021: JWE Compact Session Encryption & DPoP Fingerprinting](adr/0021-jwe-compact-session-encryption-and-dpop-fingerprinting.md)**
+- **[ADR 0022: OAuth 2.0 Token Rotation with Reuse Attack Detection](adr/0022-oauth-token-rotation-with-reuse-attack-detection-cascades.md)**
+
+---
+
+## 7. Step-Up SUDO Mode & Threat Modeling
+
+For complete threat vector analysis and session anomaly evaluation:
+- **[Security Posture & Threat Model](SECURITY_POSTURE_AND_THREAT_MODEL.md)**
+- **[ADR 0023: Step-Up SUDO Elevation & Fine-Grained Token Scoping](adr/0023-step-up-sudo-elevation-and-fine-grained-token-scoping.md)**
+- **[ADR 0024: Adaptive Behavioral Risk Scoring & Zero-Downtime KMS Re-Wrapping](adr/0024-adaptive-behavioral-risk-scoring-and-zero-downtime-kms-rewrapping.md)**
+

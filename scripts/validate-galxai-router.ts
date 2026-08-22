@@ -30,6 +30,12 @@ import {
   TokenOptimizer
 } from '../src/sdk';
 import type { GalxShardAccount } from '../src/core/contracts/GalxContracts';
+import { GalxAuthEngine } from '../src/core/auth/GalxAuthEngine';
+import { SessionRepository } from '../src/lib/supabase/repositories/SessionRepository';
+import { galxRouter } from '../src/core/router/GalxModelRouter';
+
+
+
 
 
 
@@ -1982,6 +1988,528 @@ async function runAllTests() {
     // Total count reduced
     assert.ok(pruned.length < messages.length);
   });
+
+  // --- SUITE 16: Hardened Provider-as-Auth & Bearer Token Security ---
+  await test('Vault: Generates HMAC-SHA256 signed bearer session tokens with claims', () => {
+    const tokenResult = GalxCryptoVault.generateSessionToken({
+      userId: 'usr_creator_999',
+      provider: 'openai',
+      shardId: 'codex_shard_01',
+      shardMode: 'pooled',
+      email: 'creator@openai.user',
+      displayName: 'OpenAI Pro Creator',
+      version: 'v1'
+    });
+
+    assert.ok(tokenResult.token.startsWith('galx_sess_'));
+    assert.ok(tokenResult.tokenHash.length === 64);
+    assert.strictEqual(tokenResult.claims.sub, 'usr_creator_999');
+    assert.strictEqual(tokenResult.claims.provider, 'openai');
+    assert.strictEqual(tokenResult.claims.shardId, 'codex_shard_01');
+    assert.ok(tokenResult.expiresAtMs > Date.now());
+  });
+
+  await test('Vault: Verifies valid HMAC-SHA256 session token', () => {
+    const tokenResult = GalxCryptoVault.generateSessionToken({
+      userId: 'usr_valid_123',
+      provider: 'xai-grok',
+      shardId: 'grok_shard_456',
+      email: 'dev@x.ai',
+      version: 'v1'
+    });
+
+    const verify = GalxCryptoVault.verifySessionToken(tokenResult.token);
+    assert.strictEqual(verify.valid, true);
+    assert.ok(verify.claims);
+    assert.strictEqual(verify.claims?.sub, 'usr_valid_123');
+    assert.strictEqual(verify.claims?.provider, 'xai-grok');
+  });
+
+  await test('Vault: Rejects tampered session token (corrupted signature or payload)', () => {
+    const tokenResult = GalxCryptoVault.generateSessionToken({
+      userId: 'usr_legit_123',
+      provider: 'openai',
+      version: 'v1'
+    });
+
+    // 1. Corrupt signature
+    const corruptedSigToken = tokenResult.token.slice(0, -4) + 'ffff';
+    const verifyCorruptedSig = GalxCryptoVault.verifySessionToken(corruptedSigToken);
+    assert.strictEqual(verifyCorruptedSig.valid, false);
+    assert.strictEqual(verifyCorruptedSig.error, 'INVALID_SIGNATURE_TAMPER_DETECTED');
+
+    // 2. Corrupt payload
+    const parts = tokenResult.token.split('.');
+    const fakePayload = Buffer.from(JSON.stringify({ sub: 'usr_attacker', provider: 'openai', exp: Date.now() + 100000 })).toString('base64url');
+    const forgedToken = `galx_sess_${fakePayload}.${parts[1]}`;
+    const verifyForged = GalxCryptoVault.verifySessionToken(forgedToken);
+    assert.strictEqual(verifyForged.valid, false);
+    assert.strictEqual(verifyForged.error, 'INVALID_SIGNATURE_TAMPER_DETECTED');
+  });
+
+  await test('Vault: Rejects expired session token', () => {
+    const expiredToken = GalxCryptoVault.generateSessionToken({
+      userId: 'usr_expired_123',
+      provider: 'openai',
+      ttlMs: -5000, // Already expired 5s ago
+      version: 'v1'
+    });
+
+    const verifyExpired = GalxCryptoVault.verifySessionToken(expiredToken.token);
+    assert.strictEqual(verifyExpired.valid, false);
+    assert.strictEqual(verifyExpired.error, 'TOKEN_EXPIRED');
+  });
+
+
+  await test('Provider-as-Auth: Orchestrates OpenAI 1-Click login and provisions vaulted shard + signed session', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const result = await authEngine.authenticateProviderUser('openai', {
+      apiKey: 'sk-proj-testkey1234567890abcdef',
+      email: 'alex@enterprise.ai',
+      displayName: 'Alex Enterprise',
+      mode: 'private'
+    });
+
+    assert.strictEqual(result.success, true);
+    assert.ok(result.user.id.startsWith('openai_'));
+    assert.strictEqual(result.user.email, 'alex@enterprise.ai');
+    assert.strictEqual(result.user.provider, 'openai');
+    assert.strictEqual(result.user.shardMode, 'private');
+    assert.ok(result.user.token.startsWith('galx_sess_'));
+
+    // Verify session in auth engine
+    const sessionCheck = await authEngine.verifySession(result.user.token);
+    assert.strictEqual(sessionCheck.valid, true);
+    assert.strictEqual(sessionCheck.claims?.sub, result.user.id);
+  });
+
+  await test('Provider-as-Auth: Orchestrates xAI Grok 1-Click login and provisions vaulted shard + signed session', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const result = await authEngine.authenticateProviderUser('xai-grok', {
+      apiKey: 'xai-testkey9876543210fedcba',
+      email: 'elon@x.ai',
+      displayName: 'Elon Creator',
+      mode: 'pooled'
+    });
+
+    assert.strictEqual(result.success, true);
+    assert.ok(result.user.id.startsWith('grok_'));
+    assert.strictEqual(result.user.provider, 'xai-grok');
+    assert.strictEqual(result.user.shardMode, 'pooled');
+    assert.ok(result.user.token.startsWith('galx_sess_'));
+  });
+
+  await test('Auth Engine: Refreshes active session token and rotates token hash', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const login = await authEngine.authenticateProviderUser('openai', {
+      apiKey: 'sk-proj-refresh-test-key-123456',
+      email: 'refresh@galxai.dev'
+    });
+
+    const refreshResult = await authEngine.refreshSession(login.user.token);
+    assert.strictEqual(refreshResult.success, true);
+    assert.ok(refreshResult.token);
+    assert.ok(refreshResult.token?.startsWith('galx_sess_'));
+    assert.notStrictEqual(refreshResult.token, login.user.token);
+
+    // New token is valid
+    const checkNew = await authEngine.verifySession(refreshResult.token!);
+    assert.strictEqual(checkNew.valid, true);
+  });
+
+  await test('Auth Engine: Instant session revocation killswitch invalidates active token', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const login = await authEngine.authenticateProviderUser('openai', {
+      apiKey: 'sk-proj-revoke-test-key-123456',
+      email: 'revoked@galxai.dev'
+    });
+
+    // Before revocation: valid
+    const beforeCheck = await authEngine.verifySession(login.user.token);
+    assert.strictEqual(beforeCheck.valid, true);
+
+    // Revoke
+    const revoked = await authEngine.revokeSession(login.user.token, 'User logout');
+    assert.strictEqual(revoked, true);
+
+    // After revocation: invalid
+    const afterCheck = await authEngine.verifySession(login.user.token);
+    assert.strictEqual(afterCheck.valid, false);
+    assert.strictEqual(afterCheck.error, 'SESSION_REVOKED');
+  });
+
+  await test('Gateway Identity Resolver: Authenticates valid developer keys and signed session tokens while rejecting forged tokens', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+
+    // 1. Valid Session Token
+    const sessionAuth = await authEngine.authenticateProviderUser('openai', {
+      apiKey: 'sk-proj-gateway-resolver-test-key',
+      email: 'gateway@galxai.dev'
+    });
+    const sessionResolve = await authEngine.resolveAuthIdentity({
+      headers: { authorization: `Bearer ${sessionAuth.user.token}` }
+    });
+    assert.strictEqual(sessionResolve.authenticated, true);
+    assert.strictEqual(sessionResolve.authType, 'session_token');
+    assert.strictEqual(sessionResolve.userId, sessionAuth.user.id);
+
+    // 2. Forged Session Token (modified signature)
+    const forgedToken = sessionAuth.user.token.slice(0, -6) + '000000';
+    const forgedResolve = await authEngine.resolveAuthIdentity({
+      headers: { authorization: `Bearer ${forgedToken}` }
+    });
+    assert.strictEqual(forgedResolve.authenticated, false);
+    assert.strictEqual(forgedResolve.authType, 'session_token');
+    assert.strictEqual(forgedResolve.error, 'INVALID_SIGNATURE_TAMPER_DETECTED');
+
+    // 3. Unauthenticated / missing header
+    const anonResolve = await authEngine.resolveAuthIdentity({
+      headers: {}
+    });
+    assert.strictEqual(anonResolve.authenticated, false);
+    assert.strictEqual(anonResolve.authType, 'anonymous');
+  });
+
+  // --- SUITE 17: V2 JWE Encrypted Tokens, Replay Protection, & Multi-Device Governance ---
+  await test('Vault V2: Generates and decrypts JWE-grade AES-256-GCM encrypted session tokens (galx_sess_v2...) without leaking plaintext claims', () => {
+    const encrypted = GalxCryptoVault.generateEncryptedSessionToken({
+      userId: 'usr_jwe_007',
+      provider: 'openai',
+      shardId: 'codex_shard_jwe',
+      email: 'secret_agent@enterprise.ai',
+      displayName: 'Secret Agent',
+      familyId: 'fam_jwe_root',
+      sequenceNumber: 1
+    });
+
+    assert.ok(encrypted.token.startsWith('galx_sess_v2.'));
+    // Ensure raw email is not readable in token plaintext
+    assert.strictEqual(encrypted.token.includes('secret_agent@enterprise.ai'), false);
+
+    // Verify and decrypt
+    const verify = GalxCryptoVault.verifySessionToken(encrypted.token);
+    assert.strictEqual(verify.valid, true);
+    assert.ok(verify.claims);
+    assert.strictEqual(verify.claims?.sub, 'usr_jwe_007');
+    assert.strictEqual(verify.claims?.email, 'secret_agent@enterprise.ai');
+    assert.strictEqual(verify.claims?.familyId, 'fam_jwe_root');
+    assert.strictEqual(verify.claims?.seq, 1);
+  });
+
+  await test('Vault V2: Client Fingerprint Generation & User-Agent Parsing (DPoP)', () => {
+    const fpt1 = GalxCryptoVault.generateClientFingerprint('192.168.1.55, 10.0.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36');
+    const fpt2 = GalxCryptoVault.generateClientFingerprint('192.168.1.99', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36');
+    // Same /24 subnet and user agent should yield identical subnet-tolerant fingerprint
+    assert.strictEqual(fpt1, fpt2);
+
+    const uaParsed = GalxCryptoVault.parseUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    assert.strictEqual(uaParsed.browser, 'Google Chrome');
+    assert.strictEqual(uaParsed.os, 'macOS');
+  });
+
+  await test('Auth Engine V2: OAuth 2.0 Token Rotation with 30s Grace Period and Monotonic Sequence Counter', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const login = await authEngine.authenticateProviderUser('openai', {
+      apiKey: 'sk-proj-rotation-test-key-999',
+      email: 'rotate@galxai.dev',
+      ipAddress: '198.51.100.1',
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0'
+    });
+
+    const token1 = login.user.token;
+    assert.ok(token1.startsWith('galx_sess_v2.'));
+
+    // First rotation -> token2
+    const rotate1 = await authEngine.refreshSession(token1, '198.51.100.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0');
+    assert.strictEqual(rotate1.success, true);
+    assert.ok(rotate1.token);
+    assert.strictEqual(rotate1.claims?.seq, 2);
+
+    // Concurrent in-flight replay of token1 within grace window succeeds
+    const graceReplay = await authEngine.refreshSession(token1, '198.51.100.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0');
+    assert.strictEqual(graceReplay.success, true);
+  });
+
+  await test('Auth Engine V2: Token Reuse Attack Detection triggers Automatic Session Family Killswitch', async () => {
+    const sessionRepo = SessionRepository.getInstance();
+    const mockOldHash = 'hash_attack_source_old_token_1234567890abcdef1234567890abcdef1234';
+    const mockNewHash = 'hash_attack_source_new_token_1234567890abcdef1234567890abcdef1234';
+    const familyId = 'fam_reuse_target_999';
+    const sessionId = 'sess_reuse_test_1';
+    const now = Date.now();
+
+    // Setup active session that was already rotated 2 minutes ago (grace period expired)
+    await sessionRepo.createSession({
+      id: sessionId,
+      userId: 'usr_victim_123',
+      provider: 'openai',
+      sessionFamilyId: familyId,
+      sequenceNumber: 2,
+      tokenHash: mockNewHash,
+      previousTokenHash: mockOldHash,
+      gracePeriodUntilMs: now - 60000, // Expired 1 min ago
+      isRevoked: false,
+      issuedAtMs: now - 120000,
+      expiresAtMs: now + 86400000,
+      lastActiveAtMs: now,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    // Attacker tries to rotate using already-rotated, expired-grace token (mockOldHash)
+    const attackResult = await sessionRepo.rotateSessionTokenAtomic(
+      mockOldHash,
+      'hash_attacker_forged_new_token_77777777777777777777777777777777',
+      now + 86400000
+    );
+
+    assert.strictEqual(attackResult.success, false);
+    assert.strictEqual(attackResult.reuseDetected, true);
+    assert.strictEqual(attackResult.error, 'TOKEN_REUSE_ATTACK_DETECTED');
+
+    // The session family must be instantly revoked
+    const victimSession = await sessionRepo.findSessionById(sessionId);
+    assert.strictEqual(victimSession?.isRevoked, true);
+    assert.strictEqual(victimSession?.revokedReason, 'TOKEN_REUSE_ATTACK_DETECTED');
+  });
+
+  await test('Auth Engine V2: Multi-Device Session Governance & Remote Logout', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const sessionRepo = SessionRepository.getInstance();
+    const userId = 'usr_multidevice_tester';
+    const now = Date.now();
+
+    // Create Device A (MacBook Chrome - Current)
+    const sessA = 'sess_device_macbook';
+    await sessionRepo.createSession({
+      id: sessA,
+      userId,
+      provider: 'openai',
+      tokenHash: 'hash_macbook_token_1234567890abcdef1234567890abcdef12345678',
+      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0 Safari/537.36',
+      ipAddress: '72.14.201.1',
+      isRevoked: false,
+      issuedAtMs: now,
+      expiresAtMs: now + 86400000 * 7,
+      lastActiveAtMs: now,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    // Create Device B (iPhone Safari - Remote)
+    const sessB = 'sess_device_iphone';
+    await sessionRepo.createSession({
+      id: sessB,
+      userId,
+      provider: 'openai',
+      tokenHash: 'hash_iphone_token_1234567890abcdef1234567890abcdef12345678',
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1',
+      ipAddress: '172.56.21.9',
+      isRevoked: false,
+      issuedAtMs: now - 3600000,
+      expiresAtMs: now + 86400000 * 7,
+      lastActiveAtMs: now - 3600000,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    // 1. List active devices
+    const activeDevices = await authEngine.getUserActiveSessions(userId, sessA);
+    assert.strictEqual(activeDevices.length, 2);
+    const macDevice = activeDevices.find(d => d.id === sessA);
+    const phoneDevice = activeDevices.find(d => d.id === sessB);
+    assert.strictEqual(macDevice?.isCurrent, true);
+    assert.strictEqual(macDevice?.browser, 'Google Chrome');
+    assert.strictEqual(macDevice?.os, 'macOS');
+    assert.strictEqual(phoneDevice?.isCurrent, false);
+    assert.strictEqual(phoneDevice?.browser, 'Apple Safari');
+    assert.strictEqual(phoneDevice?.os, 'iOS');
+
+    // 2. Remote Logout of all other devices (keep Mac, terminate iPhone)
+    const revokedCount = await authEngine.revokeOtherSessions(userId, sessA, 'User remote logout');
+    assert.strictEqual(revokedCount, 1);
+
+    // Verify phone is revoked, Mac is still active
+    const postLogoutMac = await sessionRepo.findSessionById(sessA);
+    const postLogoutPhone = await sessionRepo.findSessionById(sessB);
+    assert.strictEqual(postLogoutMac?.isRevoked, false);
+    assert.strictEqual(postLogoutPhone?.isRevoked, true);
+  });
+
+  // --- SUITE 18: V3 Step-Up SUDO Mode, Token Scoping, Risk Scoring, & KMS Re-Wrapping ---
+  await test('Vault V3: Wildcard Token Scope matching calculus', () => {
+    // 1. Full superuser wildcard
+    assert.strictEqual(GalxCryptoVault.validateTokenScope(['*'], 'chat:completions'), true);
+    assert.strictEqual(GalxCryptoVault.validateTokenScope(['*'], 'admin:sudo'), true);
+
+    // 2. Prefix wildcard
+    assert.strictEqual(GalxCryptoVault.validateTokenScope(['chat:*', 'images:*'], 'chat:completions'), true);
+    assert.strictEqual(GalxCryptoVault.validateTokenScope(['chat:*', 'images:*'], 'chat:stream'), true);
+    assert.strictEqual(GalxCryptoVault.validateTokenScope(['chat:*', 'images:*'], 'images:generations'), true);
+    assert.strictEqual(GalxCryptoVault.validateTokenScope(['chat:*', 'images:*'], 'admin:sudo'), false);
+    assert.strictEqual(GalxCryptoVault.validateTokenScope(['chat:*', 'images:*'], 'billing:read'), false);
+
+    // 3. Exact matching
+    assert.strictEqual(GalxCryptoVault.validateTokenScope(['billing:read'], 'billing:read'), true);
+    assert.strictEqual(GalxCryptoVault.validateTokenScope(['billing:read'], 'billing:write'), false);
+  });
+
+  await test('Auth Engine V3: Ephemeral Restricted Sub-Token minting and scope enforcement', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const login = await authEngine.authenticateProviderUser('openai', {
+      apiKey: 'sk-proj-restricted-mint-test',
+      email: 'parent_user@enterprise.ai',
+      displayName: 'Parent User'
+    });
+
+    // Parent token has full access ('*')
+    const parentToken = login.user.token;
+
+    // 1. Mint downstream restricted token for a subagent (`chat:*` only)
+    const mintRes = await authEngine.createRestrictedToken(parentToken, {
+      scopes: ['chat:*'],
+      ttlMs: 3600000,
+      name: 'Chat Subagent Worker'
+    });
+
+    assert.strictEqual(mintRes.success, true);
+    assert.ok(mintRes.token);
+    assert.deepStrictEqual(mintRes.scopes, ['chat:*']);
+
+    // 2. Resolve identity with restricted token on chat endpoint -> Authorized
+    const chatResolve = await authEngine.resolveAuthIdentity(
+      { headers: { authorization: `Bearer ${mintRes.token}` } },
+      'chat:completions'
+    );
+    assert.strictEqual(chatResolve.authenticated, true);
+    assert.strictEqual(chatResolve.userId, login.user.id);
+
+    // 3. Resolve identity with restricted token on admin endpoint -> Forbidden (Scope Exceeded)
+    const adminResolve = await authEngine.resolveAuthIdentity(
+      { headers: { authorization: `Bearer ${mintRes.token}` } },
+      'admin:sudo'
+    );
+    assert.strictEqual(adminResolve.authenticated, false);
+    assert.ok(adminResolve.error?.includes('FORBIDDEN_INSUFFICIENT_SCOPE'));
+  });
+
+  await test('Auth Engine V3: Step-Up SUDO Mode elevation and high-risk gatekeeper check', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const sessionRepo = SessionRepository.getInstance();
+    const userId = 'usr_sudo_tester_888';
+    const sessionId = `sess_sudo_test_${Date.now()}`;
+    const now = Date.now();
+
+    // Create an un-elevated session (SUDO mode expired 10 minutes ago)
+    const tokenResult = GalxCryptoVault.generateEncryptedSessionToken({
+      userId,
+      provider: 'openai',
+      sudoUntilMs: now - 600000 // Expired
+    });
+
+    await sessionRepo.createSession({
+      id: sessionId,
+      userId,
+      provider: 'openai',
+      tokenHash: tokenResult.tokenHash,
+      sudoElevatedUntilMs: now - 600000,
+      isRevoked: false,
+      issuedAtMs: now - 3600000,
+      expiresAtMs: now + 86400000,
+      lastActiveAtMs: now,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    const authCheck = await authEngine.resolveAuthIdentity({
+      headers: { authorization: `Bearer ${tokenResult.token}` }
+    });
+    assert.strictEqual(authCheck.authenticated, true);
+    assert.strictEqual(authCheck.isSudoElevated, false);
+
+    // High-risk action rejected
+    const sudoCheck = authEngine.requireSudoElevation(authCheck);
+    assert.strictEqual(sudoCheck.elevated, false);
+    assert.ok(sudoCheck.error?.includes('SUDO_MODE_REQUIRED'));
+
+    // Elevate SUDO mode for 15 minutes
+    const elevateRes = await authEngine.elevateSessionSudo(sessionId, userId, 15 * 60 * 1000);
+    assert.strictEqual(elevateRes.success, true);
+    assert.strictEqual(elevateRes.sudoActive, true);
+    assert.ok(elevateRes.sudoElevatedUntilMs > now);
+
+    // Re-check elevation
+    const elevatedSession = await sessionRepo.findSessionById(sessionId);
+    assert.ok(elevatedSession?.sudoElevatedUntilMs && elevatedSession.sudoElevatedUntilMs > Date.now());
+  });
+
+  await test('Auth Engine V3: Adaptive Behavioral Risk Scoring evaluates subnet and OS anomalies', () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const session: any = {
+      id: 'sess_risk_eval_1',
+      userId: 'usr_risk_target',
+      ipAddress: '198.51.100.22',
+      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0 Safari/537.36',
+      fingerprintHash: GalxCryptoVault.generateClientFingerprint('198.51.100.22', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0 Safari/537.36'),
+      riskScore: 0
+    };
+
+    // 1. Normal traffic (same IP subnet and browser) -> Low Risk (0)
+    const lowRisk = authEngine.evaluateSessionRisk(session, '198.51.100.88', session.userAgent);
+    assert.strictEqual(lowRisk.riskScore, 0);
+    assert.strictEqual(lowRisk.riskLevel, 'low');
+    assert.strictEqual(lowRisk.isHighRisk, false);
+
+    // 2. Anomalous traffic (drastic IP subnet shift + OS shift: macOS -> Linux curl) -> High Risk
+    const highRisk = authEngine.evaluateSessionRisk(
+      session,
+      '203.0.113.50',
+      'curl/8.4.0 (x86_64-pc-linux-gnu)'
+    );
+    assert.ok(highRisk.riskScore >= 50);
+    assert.strictEqual(highRisk.isHighRisk, true);
+    assert.ok(highRisk.riskFactors.includes('IP_SUBNET_SHIFT_DETECTED'));
+  });
+
+  await test('Vault V3: Zero-Downtime KMS Key Re-Wrapping Pipeline', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const login = await authEngine.authenticateProviderUser('openai', {
+      apiKey: 'sk-proj-kms-rewrap-test-key-12345',
+      email: 'rewrap@galxai.dev'
+    });
+
+    const shardId = login.user.shardId;
+    const shard = galxRouter.substrate.getAccount(shardId);
+    assert.ok(shard);
+    assert.ok(shard.encryptedSecrets);
+
+    // Re-wrap all shards to primary key version
+    const rewrapResult = await authEngine.reencryptVaultShards('v1');
+    assert.ok(rewrapResult.total >= 1);
+    assert.ok(rewrapResult.reencrypted >= 1);
+
+    // Decrypting the re-wrapped shard credentials produces exact original secret
+    const decrypted = GalxCryptoVault.decryptSecret(shard.encryptedSecrets, login.user.id, shardId, 'openai');
+    assert.strictEqual(decrypted.apiKey, 'sk-proj-kms-rewrap-test-key-12345');
+  });
+
+  await test('Auth Engine V3: User Security Posture aggregation and composite health grading', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const login = await authEngine.authenticateProviderUser('openai', {
+      apiKey: 'sk-proj-posture-test-key-999',
+      email: 'posture@galxai.dev'
+    });
+
+    const posture = await authEngine.getUserSecurityPosture(login.user.id);
+    assert.ok(['A+', 'A', 'B', 'C'].includes(posture.overallGrade));
+    assert.strictEqual(posture.riskLevel, 'low');
+    assert.ok(posture.activeSessionsCount >= 1);
+    assert.strictEqual(posture.sudoActive, true); // Fresh login has active SUDO window
+    assert.ok(posture.recommendations.length >= 1);
+  });
+
+
+
 
 
 

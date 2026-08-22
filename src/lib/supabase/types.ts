@@ -1066,6 +1066,157 @@ export interface Database {
         };
         Relationships: [];
       };
+      galx_user_sessions: {
+        Row: {
+          id: string;
+          workspace_id: string | null;
+          user_id: string;
+          provider: string;
+          shard_id: string | null;
+          session_family_id: string | null;
+          sequence_number: number;
+          scopes: string[];
+          sudo_elevated_until_ms: number | null;
+          risk_score: number;
+          token_hash: string;
+          previous_token_hash: string | null;
+          grace_period_until_ms: number | null;
+          refresh_token_hash: string | null;
+          fingerprint_hash: string | null;
+          ip_address: string | null;
+          user_agent: string | null;
+          is_revoked: boolean;
+          revoked_at: string | null;
+          revoked_reason: string | null;
+          issued_at_ms: number;
+          expires_at_ms: number;
+          last_active_at_ms: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          workspace_id?: string | null;
+          user_id: string;
+          provider: string;
+          shard_id?: string | null;
+          session_family_id?: string | null;
+          sequence_number?: number;
+          scopes?: string[];
+          sudo_elevated_until_ms?: number | null;
+          risk_score?: number;
+          token_hash: string;
+          previous_token_hash?: string | null;
+          grace_period_until_ms?: number | null;
+          refresh_token_hash?: string | null;
+          fingerprint_hash?: string | null;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          is_revoked?: boolean;
+          revoked_at?: string | null;
+          revoked_reason?: string | null;
+          issued_at_ms: number;
+          expires_at_ms: number;
+          last_active_at_ms: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          workspace_id?: string | null;
+          user_id?: string;
+          provider?: string;
+          shard_id?: string | null;
+          session_family_id?: string | null;
+          sequence_number?: number;
+          scopes?: string[];
+          sudo_elevated_until_ms?: number | null;
+          risk_score?: number;
+          token_hash?: string;
+          previous_token_hash?: string | null;
+          grace_period_until_ms?: number | null;
+          refresh_token_hash?: string | null;
+          fingerprint_hash?: string | null;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          is_revoked?: boolean;
+          revoked_at?: string | null;
+          revoked_reason?: string | null;
+          issued_at_ms?: number;
+          expires_at_ms?: number;
+          last_active_at_ms?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      galx_token_revocation_log: {
+        Row: {
+          id: string;
+          session_id: string;
+          user_id: string;
+          token_hash: string;
+          revocation_reason: string;
+          is_threat_event: boolean;
+          metadata: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          user_id: string;
+          token_hash: string;
+          revocation_reason: string;
+          is_threat_event?: boolean;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          session_id?: string;
+          user_id?: string;
+          token_hash?: string;
+          revocation_reason?: string;
+          is_threat_event?: boolean;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      galx_session_risk_events: {
+        Row: {
+          id: string;
+          session_id: string;
+          user_id: string;
+          risk_score: number;
+          risk_factors: Json;
+          ip_address: string | null;
+          user_agent: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          user_id: string;
+          risk_score: number;
+          risk_factors?: Json;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          session_id?: string;
+          user_id?: string;
+          risk_score?: number;
+          risk_factors?: Json;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+
     };
     Views: {
       [_ in never]: never;
@@ -1252,6 +1403,97 @@ export interface Database {
       fn_report_shard_health_cf: {
         Args: {
           p_probes: Json;
+        };
+        Returns: Json;
+      };
+      fn_create_user_session: {
+        Args: {
+          p_id: string;
+          p_user_id: string;
+          p_provider: string;
+          p_shard_id: string;
+          p_token_hash: string;
+          p_refresh_token_hash?: string;
+          p_ip_address?: string;
+          p_user_agent?: string;
+          p_issued_at_ms?: number;
+          p_expires_at_ms?: number;
+          p_workspace_id?: string;
+        };
+        Returns: Json;
+      };
+      fn_verify_user_session: {
+        Args: {
+          p_token_hash: string;
+          p_now_ms?: number;
+        };
+        Returns: Json;
+      };
+      fn_revoke_user_session: {
+        Args: {
+          p_session_id: string;
+          p_reason?: string;
+          p_now_ms?: number;
+        };
+        Returns: Json;
+      };
+      fn_revoke_all_user_sessions: {
+        Args: {
+          p_user_id: string;
+          p_reason?: string;
+          p_now_ms?: number;
+        };
+        Returns: Json;
+      };
+      fn_cleanup_expired_sessions: {
+        Args: {
+          p_now_ms?: number;
+        };
+        Returns: number;
+      };
+      fn_rotate_session_token_atomic: {
+        Args: {
+          p_old_token_hash: string;
+          p_new_token_hash: string;
+          p_new_expires_at_ms: number;
+          p_new_fingerprint?: string;
+          p_grace_window_ms?: number;
+          p_now_ms?: number;
+        };
+        Returns: Json;
+      };
+      fn_revoke_other_user_sessions: {
+        Args: {
+          p_user_id: string;
+          p_current_session_id: string;
+          p_reason?: string;
+          p_now_ms?: number;
+        };
+        Returns: Json;
+      };
+      fn_revoke_session_family: {
+        Args: {
+          p_family_id: string;
+          p_reason?: string;
+          p_now_ms?: number;
+        };
+        Returns: Json;
+      };
+      fn_elevate_session_sudo: {
+        Args: {
+          p_session_id: string;
+          p_user_id: string;
+          p_duration_ms?: number;
+          p_now_ms?: number;
+        };
+        Returns: Json;
+      };
+      fn_reencrypt_vault_shard_record: {
+        Args: {
+          p_shard_id: string;
+          p_new_encrypted_payload: Json;
+          p_new_version?: string;
+          p_now_ms?: number;
         };
         Returns: Json;
       };

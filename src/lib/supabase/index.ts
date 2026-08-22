@@ -21,3 +21,5 @@ export * from './repositories/IdempotencyRepository';
 export * from './repositories/AuditRepository';
 export * from './repositories/BudgetRepository';
 export * from './repositories/ShardHealthRepository';
+export * from './repositories/SessionRepository';
+

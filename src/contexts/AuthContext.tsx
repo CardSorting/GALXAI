@@ -36,7 +36,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const stored = localStorage.getItem(AUTH_STORAGE_KEY);
       if (stored) {
-        setUser(JSON.parse(stored));
+        const parsed: AuthUser = JSON.parse(stored);
+        setUser(parsed);
+
+        // Background session verification against Supabase PostgreSQL
+        if (parsed.token && parsed.token.startsWith('galx_sess_')) {
+          fetch('/api/auth/session', {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${parsed.token}` }
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (!data.valid) {
+                // Session expired or revoked in database - log out
+                setUser(null);
+                localStorage.removeItem(AUTH_STORAGE_KEY);
+              }
+            })
+            .catch(() => {
+              // Ignore network offline errors for offline-first resilience
+            });
+        }
       }
     } catch {} finally {
       setIsLoading(false);
@@ -132,20 +152,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    if (user?.shardId) {
+    const activeToken = user?.token;
+    const activeShardId = user?.shardId;
+    const activeUserId = user?.id;
+
+    setUser(null);
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+
+    // Asynchronously revoke session in Supabase PostgreSQL
+    if (activeToken) {
+      fetch('/api/auth/session', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${activeToken}` }
+      }).catch(() => {});
+    }
+
+    if (activeShardId) {
       try {
-        await fetch(`/api/shards/${user.shardId}/retract`, {
+        await fetch(`/api/shards/${activeShardId}/retract`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user.id })
+          body: JSON.stringify({ userId: activeUserId })
         });
       } catch {}
     }
 
-    setUser(null);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
     router.push('/auth/connect');
   };
+
 
   return (
     <AuthContext.Provider

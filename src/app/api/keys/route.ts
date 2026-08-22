@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
+import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import type { DeveloperGatewayKey } from '@/core/contracts/GalxContracts';
 
 export const runtime = 'nodejs';
@@ -9,7 +10,14 @@ const MINIMUM_INITIAL_DEPOSIT_USD = 10.00;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const userId = searchParams.get('userId') || undefined;
+  let userId = searchParams.get('userId') || undefined;
+
+  if (!userId) {
+    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
+    if (auth.authenticated) {
+      userId = auth.userId;
+    }
+  }
 
   const persistence = GalxPersistence.getInstance();
   const keys = persistence.getGatewayKeys()
@@ -33,13 +41,19 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const {
+    let {
       name = 'Default Gateway Key',
       userId = 'user_demo',
       rateLimitPerMinute = 120,
       depositedAmount = 0,
       hasVerifiedDeposit = false
     } = body;
+
+    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
+    if (auth.authenticated && (!userId || userId === 'user_demo')) {
+      userId = auth.userId;
+    }
+
 
     const persistence = GalxPersistence.getInstance();
     const existingKeys = persistence.getGatewayKeys().filter(k => k.userId === userId && !k.revoked);

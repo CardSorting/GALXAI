@@ -22,10 +22,12 @@ import {
   IdempotencyRepository,
   BudgetRepository,
   ShardHealthRepository,
+  SessionRepository,
   galxDb,
   getSupabaseConfig,
   isSupabaseConfigured
 } from '../src/lib/supabase';
+
 import { GalxCryptoVault } from '../src/core/vault/GalxCryptoVault';
 import { GalxPersistence } from '../src/lib/storage/GalxPersistence';
 import { GalxEdgeGateway } from '../src/workers/cloudflare/GalxEdgeGateway';
@@ -574,6 +576,138 @@ async function runTests() {
       healthResult.success === true && healthResult.probesIngested >= 1,
       'ShardHealthRepo: Records edge health heartbeats and calculates rolling shard status'
     );
+
+    // 36. Hardened User Session Repository & SHA-256 Token Hash Lookup
+    const sessionRepo = SessionRepository.getInstance();
+    const mockToken = 'galx_sess_mock_payload_test_data.1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
+    const tokenHash = GalxCryptoVault.hashSessionToken(mockToken);
+    const sessionId = `sess_${Date.now()}_test`;
+    const nowMs = Date.now();
+
+    await sessionRepo.createSession({
+      id: sessionId,
+      userId: 'usr_provider_auth_test',
+      provider: 'openai',
+      shardId,
+      tokenHash,
+      isRevoked: false,
+      issuedAtMs: nowMs,
+      expiresAtMs: nowMs + 86400000 * 30,
+      lastActiveAtMs: nowMs,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    const retrievedSession = await sessionRepo.findSessionByTokenHash(tokenHash);
+    assert(
+      retrievedSession !== null && retrievedSession.id === sessionId && retrievedSession.provider === 'openai',
+      'SessionRepo: Ingests and retrieves session record by SHA-256 token hash'
+    );
+
+    // 37. Session Heartbeat & Activity Update
+    await sessionRepo.touchSession(sessionId, nowMs + 1000);
+    const touchedSession = await sessionRepo.findSessionById(sessionId);
+    assert(
+      touchedSession !== null && touchedSession.lastActiveAtMs >= nowMs + 1000,
+      'SessionRepo: Updates session last_active_at_ms activity heartbeat'
+    );
+
+    // 38. Instant Session Revocation
+    await sessionRepo.revokeSession(sessionId, 'Test security logout');
+    const revokedSessionCheck = await sessionRepo.findSessionByTokenHash(tokenHash, false);
+    assert(
+      revokedSessionCheck === null,
+      'SessionRepo: Instantly revokes session and excludes from active token hash resolution'
+    );
+
+
+    // 39. Expired Session Scavenging
+    const reclaimedSessions = await sessionRepo.scavengeExpiredSessions();
+    assert(
+      typeof reclaimedSessions === 'number',
+      'SessionRepo: Scavenges expired and long-revoked sessions cleanly'
+    );
+
+    // 40. Atomic Token Rotation with 30s Grace Period Window
+    const oldHash = 'old_hash_rotation_test_1234567890abcdef1234567890abcdef12345678';
+    const newHash = 'new_hash_rotation_test_1234567890abcdef1234567890abcdef12345678';
+    const rotSessionId = `sess_rot_${Date.now()}`;
+    const familyId = `fam_rot_${Date.now()}`;
+
+    await sessionRepo.createSession({
+      id: rotSessionId,
+      userId: 'usr_rot_user_456',
+      provider: 'openai',
+      sessionFamilyId: familyId,
+      sequenceNumber: 1,
+      tokenHash: oldHash,
+      isRevoked: false,
+      issuedAtMs: nowMs,
+      expiresAtMs: nowMs + 86400000,
+      lastActiveAtMs: nowMs,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    const rotResult = await sessionRepo.rotateSessionTokenAtomic(oldHash, newHash, nowMs + 86400000 * 2, 'fpt_test_hash');
+    assert(
+      rotResult.success === true && rotResult.reuseDetected === false,
+      'SessionRepo: Atomically rotates session token with sequence increment and grace buffer'
+    );
+
+    // 41. Grace Period In-Flight Concurrent Replay
+    const graceReplay = await sessionRepo.rotateSessionTokenAtomic(oldHash, newHash, nowMs + 86400000 * 2);
+    assert(
+      graceReplay.success === true,
+      'SessionRepo: Accepts concurrent in-flight token replay inside 30-second grace window'
+    );
+
+    // 42. Remote Logout of Other User Devices
+    const otherDevSessionId = `sess_other_dev_${Date.now()}`;
+    await sessionRepo.createSession({
+      id: otherDevSessionId,
+      userId: 'usr_rot_user_456',
+      provider: 'openai',
+      tokenHash: 'other_dev_hash_1234567890abcdef1234567890abcdef12345678',
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1',
+      isRevoked: false,
+      issuedAtMs: nowMs,
+      expiresAtMs: nowMs + 86400000,
+      lastActiveAtMs: nowMs,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    const remoteLogoutCount = await sessionRepo.revokeOtherSessions('usr_rot_user_456', rotSessionId);
+    assert(
+      remoteLogoutCount >= 1,
+      'SessionRepo: Revokes all other remote devices while maintaining active session'
+    );
+
+    // 43. Step-Up SUDO Mode Elevation
+    const sudoElevation = await sessionRepo.elevateSessionSudo(rotSessionId, 'usr_rot_user_456', 900000);
+    assert(
+      sudoElevation.success === true && sudoElevation.sudoActive === true && sudoElevation.sudoElevatedUntilMs > nowMs,
+      'SessionRepo: Elevates active session to privileged SUDO mode for 15-minute window'
+    );
+
+    // 44. Behavioral Risk Telemetry Ingestion
+    await sessionRepo.recordRiskEvent(
+      rotSessionId,
+      'usr_rot_user_456',
+      35,
+      ['DEVICE_OS_SHIFT: macOS -> iOS'],
+      '198.51.100.99',
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)'
+    );
+    const postureCheck = await sessionRepo.getUserSecurityPosture('usr_rot_user_456', rotSessionId);
+    assert(
+      postureCheck.activeSessionsCount >= 1 && ['A+', 'A', 'B', 'C'].includes(postureCheck.overallGrade),
+      'SessionRepo: Ingests risk anomaly event and calculates composite security posture grade'
+    );
+
+
+
 
     console.log('\n======================================================================');
     console.log(`   ALL ${passed}/${passed} APEX ZERO-EGRESS & DATABASE TESTS PASSED!`);

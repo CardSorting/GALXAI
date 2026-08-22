@@ -20,7 +20,8 @@ import {
   WalletRepository,
   TelemetryRepository,
   EmbeddingsRepository,
-  WorkspaceRepository
+  WorkspaceRepository,
+  SessionRepository
 } from '../supabase';
 
 export interface GalxPersistedState {
@@ -55,6 +56,7 @@ export class GalxPersistence {
   public readonly telemetryRepo: TelemetryRepository;
   public readonly embeddingsRepo: EmbeddingsRepository;
   public readonly workspaceRepo: WorkspaceRepository;
+  public readonly sessionRepo: SessionRepository;
 
   // In-memory hot cache for sub-millisecond synchronous gateway routing loops
   private cache: GalxPersistedState = {
@@ -75,6 +77,7 @@ export class GalxPersistence {
     this.telemetryRepo = TelemetryRepository.getInstance();
     this.embeddingsRepo = EmbeddingsRepository.getInstance();
     this.workspaceRepo = WorkspaceRepository.getInstance();
+    this.sessionRepo = SessionRepository.getInstance();
   }
 
   static getInstance(): GalxPersistence {
@@ -83,6 +86,7 @@ export class GalxPersistence {
     }
     return GalxPersistence.instance;
   }
+
 
   // ==========================================
   // Shard Accounts

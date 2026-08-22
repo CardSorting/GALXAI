@@ -17,6 +17,7 @@ import { IdempotencyRepository } from './repositories/IdempotencyRepository';
 import { AuditRepository } from './repositories/AuditRepository';
 import { BudgetRepository } from './repositories/BudgetRepository';
 import { ShardHealthRepository } from './repositories/ShardHealthRepository';
+import { SessionRepository } from './repositories/SessionRepository';
 import { GalxEdgeGateway } from '../../workers/cloudflare/GalxEdgeGateway';
 import { GalxEdgeQueueWorker } from '../../workers/cloudflare/GalxEdgeQueueWorker';
 import { GalxEdgeCache } from '../../workers/cloudflare/GalxEdgeCache';
@@ -46,6 +47,8 @@ export class GalxSupabaseClient {
   public readonly audit = AuditRepository.getInstance();
   public readonly budgets = BudgetRepository.getInstance();
   public readonly health = ShardHealthRepository.getInstance();
+  public readonly sessions = SessionRepository.getInstance();
+
 
   // Edge Mesh Subsystems
   public readonly cache = GalxEdgeCache.getInstance();

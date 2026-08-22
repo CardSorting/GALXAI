@@ -1430,4 +1430,513 @@ CREATE POLICY "service_role_all_galx_shard_health" ON galx_shard_health_probes F
 ALTER TABLE galx_webhook_deliveries ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "service_role_all_galx_webhook_deliveries" ON galx_webhook_deliveries FOR ALL USING (auth.role() = 'service_role');
 
+-- ============================================================================
+-- 23. HARDENED USER SESSIONS & PROVIDER-AS-AUTH SUBSTRATE
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS galx_user_sessions (
+    id VARCHAR(64) PRIMARY KEY,
+    workspace_id UUID REFERENCES galx_workspaces(id) ON DELETE SET NULL,
+    user_id VARCHAR(255) NOT NULL,
+    provider VARCHAR(32) NOT NULL,
+    shard_id VARCHAR(64) REFERENCES galx_shard_accounts(id) ON DELETE SET NULL,
+    token_hash VARCHAR(64) NOT NULL UNIQUE,
+    refresh_token_hash VARCHAR(64) UNIQUE,
+    ip_address VARCHAR(45) DEFAULT NULL,
+    user_agent TEXT DEFAULT NULL,
+    is_revoked BOOLEAN NOT NULL DEFAULT false,
+    revoked_at TIMESTAMPTZ DEFAULT NULL,
+    revoked_reason TEXT DEFAULT NULL,
+    issued_at_ms BIGINT NOT NULL,
+    expires_at_ms BIGINT NOT NULL,
+    last_active_at_ms BIGINT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_galx_sessions_token_hash ON galx_user_sessions(token_hash);
+CREATE INDEX IF NOT EXISTS idx_galx_sessions_user_id ON galx_user_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_galx_sessions_shard_id ON galx_user_sessions(shard_id);
+CREATE INDEX IF NOT EXISTS idx_galx_sessions_expires_at ON galx_user_sessions(expires_at_ms);
+CREATE INDEX IF NOT EXISTS idx_galx_sessions_active ON galx_user_sessions(user_id, is_revoked, expires_at_ms);
+
+CREATE OR REPLACE FUNCTION fn_create_user_session(
+    p_id VARCHAR(64),
+    p_user_id VARCHAR(255),
+    p_provider VARCHAR(32),
+    p_shard_id VARCHAR(64),
+    p_token_hash VARCHAR(64),
+    p_refresh_token_hash VARCHAR(64) DEFAULT NULL,
+    p_ip_address VARCHAR(45) DEFAULT NULL,
+    p_user_agent TEXT DEFAULT NULL,
+    p_issued_at_ms BIGINT DEFAULT NULL,
+    p_expires_at_ms BIGINT DEFAULT NULL,
+    p_workspace_id UUID DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+    v_now_ms BIGINT;
+    v_issued_ms BIGINT;
+    v_expires_ms BIGINT;
+    v_session RECORD;
+BEGIN
+    v_now_ms := CAST(EXTRACT(EPOCH FROM NOW()) * 1000 AS BIGINT);
+    v_issued_ms := COALESCE(p_issued_at_ms, v_now_ms);
+    v_expires_ms := COALESCE(p_expires_at_ms, v_now_ms + 2592000000);
+
+    INSERT INTO galx_user_sessions (
+        id,
+        workspace_id,
+        user_id,
+        provider,
+        shard_id,
+        token_hash,
+        refresh_token_hash,
+        ip_address,
+        user_agent,
+        is_revoked,
+        issued_at_ms,
+        expires_at_ms,
+        last_active_at_ms,
+        created_at,
+        updated_at
+    ) VALUES (
+        p_id,
+        p_workspace_id,
+        p_user_id,
+        p_provider,
+        p_shard_id,
+        p_token_hash,
+        p_refresh_token_hash,
+        p_ip_address,
+        p_user_agent,
+        false,
+        v_issued_ms,
+        v_expires_ms,
+        v_now_ms,
+        NOW(),
+        NOW()
+    )
+    ON CONFLICT (id) DO UPDATE SET
+        token_hash = EXCLUDED.token_hash,
+        refresh_token_hash = COALESCE(EXCLUDED.refresh_token_hash, galx_user_sessions.refresh_token_hash),
+        shard_id = COALESCE(EXCLUDED.shard_id, galx_user_sessions.shard_id),
+        last_active_at_ms = v_now_ms,
+        is_revoked = false,
+        revoked_at = NULL,
+        revoked_reason = NULL,
+        updated_at = NOW()
+    RETURNING * INTO v_session;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'session_id', v_session.id,
+        'user_id', v_session.user_id,
+        'provider', v_session.provider,
+        'shard_id', v_session.shard_id,
+        'expires_at_ms', v_session.expires_at_ms
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION fn_verify_user_session(
+    p_token_hash VARCHAR(64),
+    p_now_ms BIGINT DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+    v_now_ms BIGINT;
+    v_session RECORD;
+BEGIN
+    v_now_ms := COALESCE(p_now_ms, CAST(EXTRACT(EPOCH FROM NOW()) * 1000 AS BIGINT));
+
+    SELECT * INTO v_session
+    FROM galx_user_sessions
+    WHERE token_hash = p_token_hash;
+
+    IF NOT FOUND THEN
+        RETURN jsonb_build_object('success', false, 'reason', 'SESSION_NOT_FOUND');
+    END IF;
+
+    IF v_session.is_revoked THEN
+        RETURN jsonb_build_object('success', false, 'reason', 'SESSION_REVOKED', 'revoked_reason', v_session.revoked_reason);
+    END IF;
+
+    IF v_session.expires_at_ms <= v_now_ms THEN
+        RETURN jsonb_build_object('success', false, 'reason', 'SESSION_EXPIRED');
+    END IF;
+
+    UPDATE galx_user_sessions
+    SET last_active_at_ms = v_now_ms,
+        updated_at = NOW()
+    WHERE id = v_session.id;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'session_id', v_session.id,
+        'user_id', v_session.user_id,
+        'provider', v_session.provider,
+        'shard_id', v_session.shard_id,
+        'workspace_id', v_session.workspace_id,
+        'expires_at_ms', v_session.expires_at_ms,
+        'issued_at_ms', v_session.issued_at_ms,
+        'last_active_at_ms', v_now_ms
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION fn_revoke_user_session(
+    p_session_id VARCHAR(64),
+    p_reason TEXT DEFAULT 'User requested logout',
+    p_now_ms BIGINT DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+    v_now_ms BIGINT;
+BEGIN
+    v_now_ms := COALESCE(p_now_ms, CAST(EXTRACT(EPOCH FROM NOW()) * 1000 AS BIGINT));
+
+    UPDATE galx_user_sessions
+    SET is_revoked = true,
+        revoked_at = NOW(),
+        revoked_reason = p_reason,
+        updated_at = NOW()
+    WHERE id = p_session_id;
+
+    RETURN jsonb_build_object('success', true, 'session_id', p_session_id, 'revoked_at_ms', v_now_ms);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION fn_revoke_all_user_sessions(
+    p_user_id VARCHAR(255),
+    p_reason TEXT DEFAULT 'Global logout from all devices',
+    p_now_ms BIGINT DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+    v_revoked_count INTEGER;
+BEGIN
+    UPDATE galx_user_sessions
+    SET is_revoked = true,
+        revoked_at = NOW(),
+        revoked_reason = p_reason,
+        updated_at = NOW()
+    WHERE user_id = p_user_id
+      AND is_revoked = false;
+
+    GET DIAGNOSTICS v_revoked_count = ROW_COUNT;
+
+    RETURN jsonb_build_object('success', true, 'user_id', p_user_id, 'revoked_count', v_revoked_count);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION fn_cleanup_expired_sessions(
+    p_now_ms BIGINT DEFAULT NULL
+)
+RETURNS INTEGER AS $$
+DECLARE
+    v_now_ms BIGINT;
+    v_deleted_count INTEGER := 0;
+BEGIN
+    v_now_ms := COALESCE(p_now_ms, CAST(EXTRACT(EPOCH FROM NOW()) * 1000 AS BIGINT));
+
+    DELETE FROM galx_user_sessions
+    WHERE expires_at_ms < v_now_ms
+       OR (is_revoked = true AND updated_at < NOW() - INTERVAL '7 days');
+
+    GET DIAGNOSTICS v_deleted_count = ROW_COUNT;
+    RETURN v_deleted_count;
+END;
+$$ LANGUAGE plpgsql;
+
+ALTER TABLE galx_user_sessions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "service_role_all_galx_user_sessions" ON galx_user_sessions FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "user_view_own_sessions" ON galx_user_sessions FOR SELECT USING (auth.uid()::text = user_id);
+CREATE POLICY "user_delete_own_sessions" ON galx_user_sessions FOR DELETE USING (auth.uid()::text = user_id);
+
+-- ============================================================================
+-- 24. ADVANCED TOKEN ROTATION, REUSE ATTACK DETECTION, & MULTI-DEVICE SUBSTRATE
+-- ============================================================================
+
+ALTER TABLE galx_user_sessions ADD COLUMN IF NOT EXISTS session_family_id VARCHAR(64);
+ALTER TABLE galx_user_sessions ADD COLUMN IF NOT EXISTS sequence_number INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE galx_user_sessions ADD COLUMN IF NOT EXISTS fingerprint_hash VARCHAR(64) DEFAULT NULL;
+ALTER TABLE galx_user_sessions ADD COLUMN IF NOT EXISTS previous_token_hash VARCHAR(64) DEFAULT NULL;
+ALTER TABLE galx_user_sessions ADD COLUMN IF NOT EXISTS grace_period_until_ms BIGINT DEFAULT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_galx_sessions_family_id ON galx_user_sessions(session_family_id);
+CREATE INDEX IF NOT EXISTS idx_galx_sessions_prev_hash ON galx_user_sessions(previous_token_hash);
+CREATE INDEX IF NOT EXISTS idx_galx_sessions_fpt ON galx_user_sessions(fingerprint_hash);
+
+CREATE TABLE IF NOT EXISTS galx_token_revocation_log (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id VARCHAR(64) NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
+    token_hash VARCHAR(64) NOT NULL,
+    revocation_reason VARCHAR(128) NOT NULL,
+    is_threat_event BOOLEAN NOT NULL DEFAULT false,
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_galx_revocation_user_id ON galx_token_revocation_log(user_id);
+CREATE INDEX IF NOT EXISTS idx_galx_revocation_threat ON galx_token_revocation_log(is_threat_event);
+
+CREATE OR REPLACE FUNCTION fn_rotate_session_token_atomic(
+    p_old_token_hash VARCHAR(64),
+    p_new_token_hash VARCHAR(64),
+    p_new_expires_at_ms BIGINT,
+    p_new_fingerprint VARCHAR(64) DEFAULT NULL,
+    p_grace_window_ms BIGINT DEFAULT 30000,
+    p_now_ms BIGINT DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+    v_now_ms BIGINT;
+    v_session RECORD;
+    v_grace_session RECORD;
+BEGIN
+    v_now_ms := COALESCE(p_now_ms, CAST(EXTRACT(EPOCH FROM NOW()) * 1000 AS BIGINT));
+
+    SELECT * INTO v_session
+    FROM galx_user_sessions
+    WHERE token_hash = p_old_token_hash;
+
+    IF FOUND THEN
+        IF v_session.is_revoked THEN
+            RETURN jsonb_build_object('success', false, 'reason', 'SESSION_REVOKED', 'reuse_detected', false);
+        END IF;
+
+        IF v_session.expires_at_ms <= v_now_ms THEN
+            RETURN jsonb_build_object('success', false, 'reason', 'SESSION_EXPIRED', 'reuse_detected', false);
+        END IF;
+
+        UPDATE galx_user_sessions
+        SET previous_token_hash = p_old_token_hash,
+            token_hash = p_new_token_hash,
+            sequence_number = sequence_number + 1,
+            fingerprint_hash = COALESCE(p_new_fingerprint, fingerprint_hash),
+            expires_at_ms = p_new_expires_at_ms,
+            grace_period_until_ms = v_now_ms + p_grace_window_ms,
+            last_active_at_ms = v_now_ms,
+            updated_at = NOW()
+        WHERE id = v_session.id;
+
+        RETURN jsonb_build_object(
+            'success', true,
+            'session_id', v_session.id,
+            'sequence_number', v_session.sequence_number + 1,
+            'expires_at_ms', p_new_expires_at_ms,
+            'reuse_detected', false
+        );
+    END IF;
+
+    SELECT * INTO v_grace_session
+    FROM galx_user_sessions
+    WHERE previous_token_hash = p_old_token_hash;
+
+    IF FOUND THEN
+        IF v_now_ms <= COALESCE(v_grace_session.grace_period_until_ms, 0) THEN
+            RETURN jsonb_build_object(
+                'success', true,
+                'session_id', v_grace_session.id,
+                'sequence_number', v_grace_session.sequence_number,
+                'expires_at_ms', v_grace_session.expires_at_ms,
+                'is_grace_replay', true,
+                'reuse_detected', false
+            );
+        END IF;
+
+        UPDATE galx_user_sessions
+        SET is_revoked = true,
+            revoked_at = NOW(),
+            revoked_reason = 'TOKEN_REUSE_ATTACK_DETECTED: Automatic session family termination',
+            updated_at = NOW()
+        WHERE session_family_id = v_grace_session.session_family_id
+           OR id = v_grace_session.id;
+
+        INSERT INTO galx_token_revocation_log (
+            session_id, user_id, token_hash, revocation_reason, is_threat_event, metadata
+        ) VALUES (
+            v_grace_session.id,
+            v_grace_session.user_id,
+            p_old_token_hash,
+            'TOKEN_REUSE_ATTACK_DETECTED',
+            true,
+            jsonb_build_object('timestamp_ms', v_now_ms, 'family_id', v_grace_session.session_family_id)
+        );
+
+        RETURN jsonb_build_object(
+            'success', false,
+            'reason', 'TOKEN_REUSE_ATTACK_DETECTED',
+            'reuse_detected', true,
+            'session_id', v_grace_session.id,
+            'family_id', v_grace_session.session_family_id
+        );
+    END IF;
+
+    RETURN jsonb_build_object('success', false, 'reason', 'SESSION_NOT_FOUND', 'reuse_detected', false);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION fn_revoke_other_user_sessions(
+    p_user_id VARCHAR(255),
+    p_current_session_id VARCHAR(64),
+    p_reason TEXT DEFAULT 'User requested remote device logout',
+    p_now_ms BIGINT DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+    v_revoked_count INTEGER;
+BEGIN
+    UPDATE galx_user_sessions
+    SET is_revoked = true,
+        revoked_at = NOW(),
+        revoked_reason = p_reason,
+        updated_at = NOW()
+    WHERE user_id = p_user_id
+      AND id != p_current_session_id
+      AND is_revoked = false;
+
+    GET DIAGNOSTICS v_revoked_count = ROW_COUNT;
+
+    RETURN jsonb_build_object('success', true, 'user_id', p_user_id, 'revoked_count', v_revoked_count);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION fn_revoke_session_family(
+    p_family_id VARCHAR(64),
+    p_reason TEXT DEFAULT 'Session lineage family revocation',
+    p_now_ms BIGINT DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+    v_revoked_count INTEGER;
+BEGIN
+    UPDATE galx_user_sessions
+    SET is_revoked = true,
+        revoked_at = NOW(),
+        revoked_reason = p_reason,
+        updated_at = NOW()
+    WHERE session_family_id = p_family_id
+      AND is_revoked = false;
+
+    GET DIAGNOSTICS v_revoked_count = ROW_COUNT;
+
+    RETURN jsonb_build_object('success', true, 'family_id', p_family_id, 'revoked_count', v_revoked_count);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+ALTER TABLE galx_token_revocation_log ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "service_role_all_galx_token_revocation" ON galx_token_revocation_log FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "user_view_own_revocation_logs" ON galx_token_revocation_log FOR SELECT USING (auth.uid()::text = user_id);
+
+-- ============================================================================
+-- 25. STEP-UP SUDO MODE, RISK SCORING TELEMETRY, & KMS RE-WRAPPING SUBSTRATE
+-- ============================================================================
+
+ALTER TABLE galx_user_sessions ADD COLUMN IF NOT EXISTS sudo_elevated_until_ms BIGINT DEFAULT NULL;
+ALTER TABLE galx_user_sessions ADD COLUMN IF NOT EXISTS risk_score INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE galx_user_sessions ADD COLUMN IF NOT EXISTS scopes TEXT[] NOT NULL DEFAULT ARRAY['*']::text[];
+
+CREATE INDEX IF NOT EXISTS idx_galx_sessions_sudo ON galx_user_sessions(sudo_elevated_until_ms);
+CREATE INDEX IF NOT EXISTS idx_galx_sessions_risk ON galx_user_sessions(risk_score);
+
+CREATE TABLE IF NOT EXISTS galx_session_risk_events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id VARCHAR(64) NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
+    risk_score INTEGER NOT NULL,
+    risk_factors JSONB DEFAULT '[]'::jsonb,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_galx_risk_user_id ON galx_session_risk_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_galx_risk_score ON galx_session_risk_events(risk_score);
+
+CREATE OR REPLACE FUNCTION fn_elevate_session_sudo(
+    p_session_id VARCHAR(64),
+    p_user_id VARCHAR(255),
+    p_duration_ms BIGINT DEFAULT 900000,
+    p_now_ms BIGINT DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+    v_now_ms BIGINT;
+    v_elevated_until BIGINT;
+    v_session RECORD;
+BEGIN
+    v_now_ms := COALESCE(p_now_ms, CAST(EXTRACT(EPOCH FROM NOW()) * 1000 AS BIGINT));
+    v_elevated_until := v_now_ms + p_duration_ms;
+
+    SELECT * INTO v_session
+    FROM galx_user_sessions
+    WHERE id = p_session_id
+      AND user_id = p_user_id
+      AND is_revoked = false;
+
+    IF NOT FOUND THEN
+        RETURN jsonb_build_object('success', false, 'error', 'SESSION_NOT_FOUND_OR_REVOKED');
+    END IF;
+
+    UPDATE galx_user_sessions
+    SET sudo_elevated_until_ms = v_elevated_until,
+        updated_at = NOW()
+    WHERE id = p_session_id;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'session_id', p_session_id,
+        'sudo_active', true,
+        'sudo_elevated_until_ms', v_elevated_until,
+        'expires_in_ms', p_duration_ms
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION fn_reencrypt_vault_shard_record(
+    p_shard_id VARCHAR(128),
+    p_new_encrypted_payload JSONB,
+    p_new_version VARCHAR(32) DEFAULT 'v2',
+    p_now_ms BIGINT DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+    v_now_ms BIGINT;
+    v_shard RECORD;
+BEGIN
+    v_now_ms := COALESCE(p_now_ms, CAST(EXTRACT(EPOCH FROM NOW()) * 1000 AS BIGINT));
+
+    SELECT * INTO v_shard
+    FROM galx_shard_accounts
+    WHERE id = p_shard_id;
+
+    IF NOT FOUND THEN
+        RETURN jsonb_build_object('success', false, 'error', 'SHARD_NOT_FOUND');
+    END IF;
+
+    UPDATE galx_shard_accounts
+    SET encrypted_secrets = p_new_encrypted_payload,
+        encrypted_payload = p_new_encrypted_payload,
+        updated_at_ms = v_now_ms
+    WHERE id = p_shard_id;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'shard_id', p_shard_id,
+        'key_version', p_new_version,
+        'reencrypted_at_ms', v_now_ms
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+ALTER TABLE galx_session_risk_events ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "service_role_all_galx_session_risk_events" ON galx_session_risk_events FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "user_view_own_risk_events" ON galx_session_risk_events FOR SELECT USING (auth.uid()::text = user_id);
+
+
+
+
 
