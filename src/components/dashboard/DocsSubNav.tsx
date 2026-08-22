@@ -19,7 +19,9 @@ import {
   Flame,
   FileCode2,
   ArrowLeftRight,
-  BookMarked
+  BookMarked,
+  Wrench,
+  Database
 } from 'lucide-react';
 
 interface DocsNavItem {
@@ -56,6 +58,8 @@ const DOCS_NAV_GROUPS: DocsNavGroup[] = [
     items: [
       { name: 'REST API Reference', href: '/docs/api-reference', icon: Cpu, badge: 'OpenAPI' },
       { name: 'Production Cookbooks', href: '/docs/cookbook', icon: BookMarked, badge: 'Recipes' },
+      { name: 'Function Calling', href: '/docs/function-calling', icon: Wrench },
+      { name: 'Vector Embeddings', href: '/docs/embeddings', icon: Database },
       { name: 'Structured Outputs', href: '/docs/structured-outputs', icon: Sparkles, badge: 'JSON' },
       { name: 'Model Capabilities', href: '/docs/models-guide', icon: Flame },
       { name: '75% Prompt Caching', href: '/docs/prompt-caching', icon: Sparkles, badge: '-75%' },
