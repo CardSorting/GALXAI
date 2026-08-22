@@ -33,6 +33,8 @@ import { FloatingConversionDock } from '@/components/dashboard/FloatingConversio
 import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
 import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
+import { WorkloadEstimator } from '@/components/dashboard/WorkloadEstimator';
+import { TrustSeals } from '@/components/common/TrustSeals';
 
 interface VolumeTier {
   id: string;
@@ -272,6 +274,9 @@ export default function PricingPage() {
 
         {/* Founding Cohort Rate Lock & Capacity Ribbon */}
         <RateLockRibbon />
+
+        {/* Non-Technical Real-World Business Workload Spend Translator */}
+        <WorkloadEstimator />
 
         {/* Interactive Compound Savings Simulator */}
         <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-8 border border-white/10">
@@ -533,6 +538,9 @@ export default function PricingPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Consumer-Grade Trust Seals & Confidence Badges */}
+        <TrustSeals />
       </main>
 
       {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}

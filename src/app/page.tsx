@@ -43,11 +43,12 @@ import { FloatingConversionDock } from '@/components/dashboard/FloatingConversio
 import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
 import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
+import { WorkloadEstimator } from '@/components/dashboard/WorkloadEstimator';
+import { GuidedSetupWizard } from '@/components/dashboard/GuidedSetupWizard';
+import { TrustSeals } from '@/components/common/TrustSeals';
 
 export default function HomePage() {
   const [stats, setStats] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'python' | 'node' | 'cursor' | 'continue' | 'curl'>('python');
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     fetch('/api/pool/stats')
@@ -58,69 +59,6 @@ export default function HomePage() {
 
   const featuredModels = EXCLUSIVE_MODEL_CATALOG.filter(m => m.category === 'llm');
   const imageModels = EXCLUSIVE_MODEL_CATALOG.filter(m => m.category === 'image');
-
-  const codeSnippets: Record<string, string> = {
-    python: `from openai import OpenAI
-
-# 1-Line Drop-in Switch (Saves 25%-40% on every token)
-client = OpenAI(
-    base_url="https://api.galx.ai/v1",
-    api_key="galx_live_..."  # Claim your $5 free key
-)
-
-response = client.chat.completions.create(
-    model="gpt-5.6-sol",
-    messages=[{"role": "user", "content": "Explain quantum computing."}]
-)
-print(response.choices[0].message.content)`,
-    node: `import OpenAI from 'openai';
-
-// 100% Drop-in replacement for standard OpenAI SDK
-const client = new OpenAI({
-  baseURL: 'https://api.galx.ai/v1',
-  apiKey: process.env.GALXAI_API_KEY
-});
-
-const completion = await client.chat.completions.create({
-  model: 'gpt-5.6-sol',
-  messages: [{ role: 'user', content: 'Write a concurrent worker in TypeScript.' }],
-  stream: true
-});`,
-    cursor: `// In Cursor IDE / Windsurf Settings -> Models -> OpenAI API Key:
-// 1. Set Override Base URL:
-https://api.galx.ai/v1
-
-// 2. Set API Key:
-galx_live_your_key_here
-
-// 3. Add Custom Models:
-gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
-    continue: `{
-  "models": [
-    {
-      "title": "GALXAI GPT-5.6 Sol",
-      "provider": "openai",
-      "model": "gpt-5.6-sol",
-      "apiBase": "https://api.galx.ai/v1",
-      "apiKey": "galx_live_..."
-    }
-  ]
-}`,
-    curl: `curl https://api.galx.ai/v1/chat/completions \\
-  -H "Authorization: Bearer galx_live_..." \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "model": "gpt-5.6-sol",
-    "messages": [{"role": "user", "content": "Hello GALXAI!"}],
-    "stream": true
-  }'`
-  };
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(codeSnippets[activeTab]);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -236,53 +174,14 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
           </div>
         </section>
 
-        {/* 1-Line Drop-in Interactive Migration Widget */}
-        <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[10px] font-mono font-bold">
-                <Code2 className="w-3 h-3" />
-                <span>100% OPENAI & ANTHROPIC SDK COMPATIBLE</span>
-              </div>
-              <h2 className="text-xl font-bold text-white">Switch in 30 Seconds with Zero Code Changes</h2>
-              <p className="text-xs text-zinc-400">Simply update your `baseURL` and API key to start capturing 25%–40% net savings immediately.</p>
-            </div>
-
-            {/* Language / IDE Tabs */}
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-black/50 border border-white/10 text-xs font-mono">
-              {(['python', 'node', 'cursor', 'continue', 'curl'] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-3 py-1.5 rounded-lg capitalize transition-all cursor-pointer ${
-                    activeTab === tab
-                      ? 'bg-amber-400 text-black font-bold shadow-sm'
-                      : 'text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  {tab === 'cursor' ? 'Cursor / Windsurf' : tab === 'continue' ? 'Continue.dev' : tab}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Code Viewer Box */}
-          <div className="relative rounded-2xl bg-black/80 border border-white/10 p-5 font-mono text-xs overflow-hidden">
-            <button
-              onClick={handleCopy}
-              className="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white flex items-center gap-1.5 transition-all text-[11px] cursor-pointer"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copied ? 'Copied to Clipboard!' : 'Copy Code'}</span>
-            </button>
-            <pre className="text-zinc-300 overflow-x-auto pr-24 leading-relaxed font-mono">
-              {codeSnippets[activeTab]}
-            </pre>
-          </div>
-        </section>
+        {/* Universal 30-Second Guided Setup Wizard for Non-Technical & Technical Users */}
+        <GuidedSetupWizard />
 
         {/* Founding Cohort Rate Lock & Capacity Scarcity Ribbon */}
         <RateLockRibbon />
+
+        {/* Non-Technical Real-World Business Workload Spend Translator */}
+        <WorkloadEstimator />
 
         {/* Interactive Dynamic ROI & Wholesale Arbitrage Calculator */}
         <RoiCalculator />
@@ -306,18 +205,18 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full sm:w-auto">
-              <Link
-                href="/keys/new"
-                className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 font-mono cursor-pointer"
-              >
-                <Zap className="w-4 h-4 fill-black" />
-                <span>Claim Risk-Free Key</span>
-                <ArrowRight className="w-4 h-4 text-black" />
-              </Link>
-            </div>
+            <Link
+              href="/keys/new"
+              className="px-6 py-3.5 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/25 shrink-0 whitespace-nowrap font-mono cursor-pointer"
+            >
+              <span>Get Risk-Free Key ($5 Credit)</span>
+              <ArrowRight className="w-4 h-4 text-black" />
+            </Link>
           </div>
         </section>
+
+        {/* Consumer-Grade Trust Seals & Confidence Badges */}
+        <TrustSeals />
 
         {/* 4 Enterprise Value Pillars */}
         <section className="space-y-6">
