@@ -60,7 +60,7 @@ export default function ModelsPage() {
           <div className="max-w-3xl space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
               <Flame className="w-3.5 h-3.5" />
-              <span>WHOLESALE POOLED RATES • 25%–40% BELOW DIRECT LIST</span>
+              <span>WHOLESALE RATES • 25%–40% BELOW DIRECT LIST</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
               Supported Frontier Models & Architecture Specs

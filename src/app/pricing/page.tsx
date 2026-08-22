@@ -26,7 +26,8 @@ import {
   Flame,
   Clock,
   Building2,
-  Award
+  Award,
+  DollarSign
 } from 'lucide-react';
 
 interface VolumeTier {
@@ -50,10 +51,10 @@ const VOLUME_TIERS: VolumeTier[] = [
     badge: 'Standard',
     description: 'Instant access for individual developers, side projects, and early-stage prototyping.',
     features: [
-      '25%–36% pooled arbitrage discounts',
+      '25%–36% wholesale discounts',
       '75% prompt caching pass-through',
       'Community Slack & Discord support',
-      '20 max concurrent pool streams'
+      '20 max concurrent streams'
     ]
   },
   {
@@ -67,8 +68,8 @@ const VOLUME_TIERS: VolumeTier[] = [
     features: [
       '30%–41% cumulative discount',
       '75% prompt caching pass-through',
-      '50 max concurrent pool streams',
-      'Priority hydraulic headroom leveling'
+      '50 max concurrent streams',
+      'Priority low-latency routing'
     ]
   },
   {
@@ -82,22 +83,22 @@ const VOLUME_TIERS: VolumeTier[] = [
     features: [
       '35%–46% cumulative discount',
       '80% prompt caching pass-through',
-      '150 max concurrent pool streams',
+      '150 max concurrent streams',
       '15-minute SLA on ticket triage'
     ]
   },
   {
     id: 'enterprise',
-    name: 'Enterprise Sovereign',
+    name: 'Custom Enterprise',
     monthlySpendMin: 5000,
     monthlySpendLabel: '$5,000+ / mo',
     extraDiscountPct: 15,
     badge: '+15% Extra Rebate',
-    description: 'Custom compute pooling, dedicated high-priority shards, and custom invoice terms.',
+    description: 'Custom enterprise volume agreements, dedicated routing tiers, and flexible invoice terms.',
     features: [
-      '40%–51% cumulative discount',
+      '40%–51% maximum discount',
       '85% prompt caching pass-through',
-      'Unlimited fair-share concurrency',
+      'Unlimited concurrent streams',
       'Dedicated private VPC peering & SLA'
     ]
   }
@@ -119,74 +120,123 @@ export default function PricingPage() {
   const listOutputRate = selectedModel.listPricePer1MOutput || selectedModel.outputPricePer1M;
   const listInputCost = (inputTokensK / 1000) * listInputRate;
   const listOutputCost = (outputTokensK / 1000) * listOutputRate;
-  const totalListCost = listInputCost + listOutputCost;
+  const totalRetailCost = listInputCost + listOutputCost;
 
-  // GALXAI Tier & Off-Peak Multipliers
-  const tierRebateMultiplier = 1 - (selectedTier.extraDiscountPct / 100);
-  const offPeakMultiplier = isOffPeakMode ? 0.90 : 1.0;
-  const effectiveMultiplier = tierRebateMultiplier * offPeakMultiplier;
+  // GALXAI Discounted Rates with Prompt Caching & Tier Rebate
+  const tierMultiplier = 1 - (selectedTier.extraDiscountPct / 100);
+  const offPeakMultiplier = isOffPeakMode ? 0.90 : 1.00;
 
-  const baseInputRate = selectedModel.inputPricePer1M * effectiveMultiplier;
-  const baseOutputRate = selectedModel.outputPricePer1M * effectiveMultiplier;
-  const cachedInputRate = (selectedModel.cachedInputPricePer1M || (selectedModel.inputPricePer1M * 0.25)) * effectiveMultiplier;
+  // Cached input is discounted by 75% relative to input base
+  const cachedInputRate = selectedModel.cachedInputPricePer1M || (selectedModel.inputPricePer1M * 0.25);
+  const effectiveBaseInputRate = selectedModel.inputPricePer1M * tierMultiplier * offPeakMultiplier;
+  const effectiveCachedInputRate = cachedInputRate * tierMultiplier * offPeakMultiplier;
+  const effectiveOutputRate = selectedModel.outputPricePer1M * tierMultiplier * offPeakMultiplier;
 
-  // Token calculations
-  const cachedInputTokensK = (inputTokensK * cachedPromptPct) / 100;
-  const regularInputTokensK = inputTokensK - cachedInputTokensK;
+  const cachedInputTokensK = (inputTokensK * (cachedPromptPct / 100));
+  const uncachedInputTokensK = inputTokensK - cachedInputTokensK;
 
-  const galxInputCost = ((regularInputTokensK / 1000) * baseInputRate) + ((cachedInputTokensK / 1000) * cachedInputRate);
-  const galxOutputCost = (outputTokensK / 1000) * baseOutputRate;
+  const galxInputCost = ((uncachedInputTokensK / 1000) * effectiveBaseInputRate) + ((cachedInputTokensK / 1000) * effectiveCachedInputRate);
+  const galxOutputCost = (outputTokensK / 1000) * effectiveOutputRate;
   const totalGalxCost = galxInputCost + galxOutputCost;
 
-  const totalSaved = Math.max(0, totalListCost - totalGalxCost);
-  const compoundSavingsPct = totalListCost > 0 ? Math.round(((totalListCost - totalGalxCost) / totalListCost) * 100) : 35;
-  const annualizedSavings = totalSaved * 365;
+  const totalSavedDollars = Math.max(0, totalRetailCost - totalGalxCost);
+  const totalSavedPct = totalRetailCost > 0 ? ((totalSavedDollars / totalRetailCost) * 100) : 0;
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-12">
-        <Breadcrumbs items={[{ label: 'Models & Pricing' }]} />
+        <Breadcrumbs items={[{ label: 'Transparent Pricing & Discounts' }]} />
 
-        {/* Hero Header */}
-        <div className="glass-panel rounded-3xl p-6 sm:p-12 space-y-4 text-center max-w-4xl mx-auto relative overflow-hidden">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
-            <Flame className="w-3.5 h-3.5" />
-            <span>ENTERPRISE DISCOUNT ARCHITECTURE • UP TO 70%+ COMPOUND SAVINGS</span>
+        {/* Page Hero */}
+        <div className="glass-panel rounded-3xl p-6 sm:p-12 relative overflow-hidden text-center space-y-6">
+          <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-amber-500/15 via-orange-500/10 to-indigo-600/15 rounded-full blur-[140px] pointer-events-none" />
+
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
+            <Coins className="w-3.5 h-3.5" />
+            <span>WHOLESALE VOLUME DISCOUNTS • 75% PROMPT CACHING • ZERO MARKUP</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
-            Predictable, High-Arbitrage AI Gateway Pricing
-          </h1>
-          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-2xl mx-auto">
-            GALXAI unifies distributed Tier-5 compute slots to deliver <strong>25%–40% base discounts</strong>, <strong>75% prompt caching pass-through</strong>, and <strong>progressive volume rebates</strong> with 0 platform fees.
-          </p>
+
+          <div className="space-y-4 max-w-3xl mx-auto">
+            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+              The Most Cost-Effective AI Gateway on Earth
+            </h1>
+            <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl mx-auto">
+              Save <strong className="text-emerald-300 font-semibold">25% to 40%</strong> off direct retail prices across OpenAI GPT-5.6 Sol, Terra, Luna and xAI Grok 4.5. Up to <strong className="text-amber-300 font-semibold">70%+ total net savings</strong> with compound prompt caching.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <Link
+              href="/keys/new"
+              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all cursor-pointer"
+            >
+              <Zap className="w-4 h-4 fill-black" />
+              <span>Get Started with $5 Free Compute</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+
+            <Link
+              href="/playground"
+              className="px-6 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-wider border border-white/10 flex items-center gap-2 transition-all cursor-pointer"
+            >
+              <span>Test Live in Sandbox</span>
+            </Link>
+          </div>
         </div>
 
-        {/* 4 Multi-Tier Volume Brackets */}
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <Award className="w-4 h-4 text-amber-400" />
-                Automatic Progressive Volume Tiers
-              </h2>
-              <p className="text-xs text-zinc-400">Rebates scale automatically with your monthly usage. No negotiations or sales calls required.</p>
+        {/* 3 Value Pillars */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="glass-panel rounded-3xl p-6 space-y-3 border border-white/10 hover:border-emerald-500/30 transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <Coins className="w-5 h-5" />
             </div>
-            <span className="text-xs text-zinc-400 font-mono">Select tier to preview rates:</span>
+            <h3 className="text-sm font-bold text-white">1. Wholesale Volume Pricing</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Consolidated query volume unlocks wholesale rates, passing <strong>25%–40% instant savings</strong> directly to your API key.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="glass-panel rounded-3xl p-6 space-y-3 border border-white/10 hover:border-cyan-500/30 transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+              <Database className="w-5 h-5" />
+            </div>
+            <h3 className="text-sm font-bold text-white">2. 75% Prompt Caching Pass-Through</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Prefixes &gt;1,024 tokens receive an automatic <strong>75% prompt caching rebate</strong>. 100% of this rebate is returned directly to you.
+            </p>
+          </div>
+
+          <div className="glass-panel rounded-3xl p-6 space-y-3 border border-white/10 hover:border-amber-500/30 transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+              <Clock className="w-5 h-5" />
+            </div>
+            <h3 className="text-sm font-bold text-white">3. Off-Peak Dynamic Yield Rebate</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Batch jobs and background agents routed during high-headroom off-peak windows receive an extra <strong>10% floating rebate</strong>.
+            </p>
+          </div>
+        </div>
+
+        {/* 4 Automatic Volume Tiers */}
+        <div className="space-y-6">
+          <div className="text-center space-y-2 max-w-2xl mx-auto">
+            <h2 className="text-2xl font-black text-white">Automatic Volume Tiers & Progressive Rebates</h2>
+            <p className="text-xs text-zinc-400">No annual lock-in or sales calls. Your tier automatically updates based on 30-day trailing spend.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {VOLUME_TIERS.map((tier) => {
               const isSelected = selectedTierId === tier.id;
               return (
                 <div
                   key={tier.id}
                   onClick={() => setSelectedTierId(tier.id)}
-                  className={`cursor-pointer rounded-2xl p-5 border transition-all space-y-3 flex flex-col justify-between ${
+                  className={`cursor-pointer rounded-3xl p-6 border transition-all space-y-4 flex flex-col justify-between ${
                     isSelected
-                      ? 'bg-amber-500/10 border-amber-500/50 shadow-lg shadow-amber-500/10'
-                      : 'glass-panel border-white/10 hover:border-white/20'
+                      ? 'bg-amber-500/10 border-amber-500/60 shadow-xl shadow-amber-500/10 scale-[1.02]'
+                      : 'bg-black/30 border-white/10 hover:border-white/20'
                   }`}
                 >
                   <div className="space-y-2">
@@ -216,36 +266,145 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* 3 Pillars of GALXAI Discount Strategy */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="glass-panel rounded-3xl p-6 space-y-3 border border-white/10 hover:border-emerald-500/30 transition-all">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-              <Coins className="w-5 h-5" />
+        {/* Interactive Compound Savings Simulator */}
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-8 border border-white/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[10px] font-mono font-bold">
+                <Sliders className="w-3 h-3" />
+                <span>INTERACTIVE REBATE SIMULATOR</span>
+              </div>
+              <h2 className="text-xl font-bold text-white">Simulate Your Workload's Net Savings</h2>
+              <p className="text-xs text-zinc-400">Configure prompt caching ratios, volume tiers, and off-peak execution to project bottom-line costs.</p>
             </div>
-            <h3 className="text-sm font-bold text-white">1. Pooled Volume Arbitrage</h3>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Consolidated query volume unlocks Tier-5 wholesale rates, passing <strong>25%–40% instant savings</strong> directly to your API key.
-            </p>
+
+            {/* Model Selector */}
+            <div className="w-full sm:w-64">
+              <label className="block text-[10px] font-mono text-zinc-400 uppercase mb-1">Target AI Engine</label>
+              <select
+                value={selectedModelId}
+                onChange={(e) => setSelectedModelId(e.target.value)}
+                className="w-full py-2 px-3 rounded-xl bg-black/60 border border-white/10 text-xs text-amber-300 font-mono font-bold focus:outline-none"
+              >
+                {EXCLUSIVE_MODEL_CATALOG.filter(m => m.category === 'llm').map(m => (
+                  <option key={m.id} value={m.id} className="bg-zinc-900 text-white font-mono">
+                    {m.id} ({m.provider})
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div className="glass-panel rounded-3xl p-6 space-y-3 border border-white/10 hover:border-cyan-500/30 transition-all">
-            <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-              <Database className="w-5 h-5" />
-            </div>
-            <h3 className="text-sm font-bold text-white">2. 75% Prompt Caching Pass-Through</h3>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Prefixes &gt;1,024 tokens receive an automatic <strong>75% prompt caching rebate</strong>. 100% of this rebate is returned directly to you.
-            </p>
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Controls */}
+            <div className="lg:col-span-7 space-y-6">
+              {/* Input Tokens */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs font-mono">
+                  <span className="text-zinc-400">Input Tokens per Request / Job:</span>
+                  <span className="text-white font-bold">{inputTokensK.toLocaleString()}K tokens</span>
+                </div>
+                <input
+                  type="range"
+                  min="10"
+                  max="1000"
+                  step="10"
+                  value={inputTokensK}
+                  onChange={(e) => setInputTokensK(Number(e.target.value))}
+                  className="w-full accent-cyan-400 cursor-pointer"
+                />
+              </div>
 
-          <div className="glass-panel rounded-3xl p-6 space-y-3 border border-white/10 hover:border-amber-500/30 transition-all">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-              <Clock className="w-5 h-5" />
+              {/* Output Tokens */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs font-mono">
+                  <span className="text-zinc-400">Output Tokens per Request / Job:</span>
+                  <span className="text-white font-bold">{outputTokensK.toLocaleString()}K tokens</span>
+                </div>
+                <input
+                  type="range"
+                  min="5"
+                  max="200"
+                  step="5"
+                  value={outputTokensK}
+                  onChange={(e) => setOutputTokensK(Number(e.target.value))}
+                  className="w-full accent-indigo-400 cursor-pointer"
+                />
+              </div>
+
+              {/* Prompt Cache Ratio */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs font-mono">
+                  <span className="text-zinc-400">Prompt Caching Prefix Match:</span>
+                  <span className="text-cyan-300 font-bold">{cachedPromptPct}% Cached (75% Rebate)</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={cachedPromptPct}
+                  onChange={(e) => setCachedPromptPct(Number(e.target.value))}
+                  className="w-full accent-cyan-400 cursor-pointer"
+                />
+              </div>
+
+              {/* Off-Peak Toggle */}
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-black/40 border border-white/5">
+                <div className="space-y-0.5">
+                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-amber-400" />
+                    Off-Peak Dynamic Yield (+10% Floating Rebate)
+                  </span>
+                  <p className="text-[11px] text-zinc-400">Apply non-rush hour scheduling for asynchronous agent queues</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsOffPeakMode(!isOffPeakMode)}
+                  className={`w-11 h-6 rounded-full transition-colors cursor-pointer relative ${
+                    isOffPeakMode ? 'bg-amber-500' : 'bg-zinc-800'
+                  }`}
+                >
+                  <div className={`w-4 h-4 rounded-full bg-black transition-transform absolute top-1 ${
+                    isOffPeakMode ? 'left-6' : 'left-1'
+                  }`} />
+                </button>
+              </div>
             </div>
-            <h3 className="text-sm font-bold text-white">3. Off-Peak Dynamic Yield Rebate</h3>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Batch jobs and background agents routed during high-headroom off-peak windows receive an extra <strong>10% floating rebate</strong>.
-            </p>
+
+            {/* Right Summary Card */}
+            <div className="lg:col-span-5 glass-panel rounded-3xl p-6 space-y-6 border border-emerald-500/30 bg-emerald-500/5 shadow-2xl">
+              <div className="space-y-1">
+                <span className="text-[10px] text-zinc-400 font-mono uppercase font-bold">Estimated Cost Comparison</span>
+                <div className="flex items-baseline justify-between">
+                  <span className="text-xs text-zinc-400 font-mono">Retail List Price:</span>
+                  <span className="text-sm font-bold text-zinc-500 line-through font-mono">${totalRetailCost.toFixed(3)}</span>
+                </div>
+                <div className="flex items-baseline justify-between pt-1">
+                  <span className="text-xs font-bold text-white font-mono">GALXAI Net Cost:</span>
+                  <span className="text-2xl font-black text-emerald-300 font-mono">${totalGalxCost.toFixed(3)}</span>
+                </div>
+              </div>
+
+              {/* Savings Ribbon */}
+              <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-center space-y-1">
+                <span className="text-[10px] text-emerald-400 font-mono uppercase font-bold">Total Net Savings</span>
+                <div className="text-3xl font-black text-emerald-300 font-mono">
+                  {totalSavedPct.toFixed(1)}% OFF
+                </div>
+                <p className="text-[11px] text-emerald-400/80 font-mono">
+                  You save <strong>${totalSavedDollars.toFixed(3)}</strong> on this workload
+                </p>
+              </div>
+
+              <Link
+                href="/keys/new"
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all font-mono"
+              >
+                <span>Deploy with $5 Free Credit</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -259,87 +418,57 @@ export default function PricingPage() {
               </h2>
               <p className="text-xs text-zinc-400">Comparing standard retail list vs. active GALXAI discounted rates.</p>
             </div>
-            <span className="text-xs text-emerald-400 font-mono font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 w-max">
-              ✓ Lowest Guaranteed Market Rates
+            <span className="text-xs font-mono text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+              Tier Discount: -{selectedTier.extraDiscountPct}%
             </span>
           </div>
 
           <table className="w-full text-left text-xs border-collapse font-mono">
             <thead>
               <tr className="border-b border-white/10 text-zinc-400 font-bold uppercase text-[10px]">
-                <th className="py-3.5 px-4 font-sans">Model</th>
-                <th className="py-3.5 px-4 font-sans">Provider</th>
-                <th className="py-3.5 px-4 font-sans">Context</th>
-                <th className="py-3.5 px-4 font-sans">Retail List Rate</th>
-                <th className="py-3.5 px-4 font-sans">GALXAI Rate (In / Out)</th>
-                <th className="py-3.5 px-4 font-sans">Cached Input</th>
-                <th className="py-3.5 px-4 font-sans">Effective Savings</th>
-                <th className="py-3.5 px-4 text-right font-sans">Action</th>
+                <th className="py-3 px-4 font-sans">Model Engine</th>
+                <th className="py-3 px-4 font-sans">Provider</th>
+                <th className="py-3 px-4 font-sans">Context</th>
+                <th className="py-3 px-4 font-sans">Retail List In</th>
+                <th className="py-3 px-4 font-sans">GALXAI Input / 1M</th>
+                <th className="py-3 px-4 font-sans">Cached In / 1M</th>
+                <th className="py-3 px-4 font-sans">GALXAI Output / 1M</th>
+                <th className="py-3 px-4 font-sans">Base Savings</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {EXCLUSIVE_MODEL_CATALOG.map((m) => {
-                const isGrok = m.provider === 'xai-grok';
-                const isImage = m.category === 'image';
-
-                const effIn = m.inputPricePer1M * effectiveMultiplier;
-                const effOut = m.outputPricePer1M * effectiveMultiplier;
-                const effCached = m.cachedInputPricePer1M ? m.cachedInputPricePer1M * effectiveMultiplier : null;
-
-                const baseDisc = m.discountPercentage || 25;
-                const totalDisc = Math.min(65, Math.round(baseDisc + selectedTier.extraDiscountPct + (isOffPeakMode ? 10 : 0)));
+                const effIn = m.inputPricePer1M * tierMultiplier;
+                const effOut = m.outputPricePer1M * tierMultiplier;
+                const effCached = (m.cachedInputPricePer1M || m.inputPricePer1M * 0.25) * tierMultiplier;
 
                 return (
                   <tr key={m.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2.5">
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                          isGrok ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
-                        }`}>
-                          {isGrok ? <Rocket className="w-3.5 h-3.5" /> : <Zap className="w-3.5 h-3.5 fill-amber-400" />}
-                        </div>
-                        <div>
-                          <Link href={`/models/${m.id.replace('/', '-')}`} className="font-bold text-white hover:text-cyan-300 font-mono transition-colors">
-                            {m.id}
-                          </Link>
-                          <div className="text-[10px] text-zinc-500 font-sans line-clamp-1">{m.name}</div>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="py-3.5 px-4 uppercase text-zinc-400">
-                      {m.provider}
-                    </td>
-
-                    <td className="py-3.5 px-4 text-cyan-300 font-bold">
-                      {isImage ? 'Visual' : `${(m.contextWindowTokens / 1000).toLocaleString()}K`}
-                    </td>
-
-                    <td className="py-3.5 px-4 text-zinc-500 line-through">
-                      ${m.listPricePer1MInput?.toFixed(2)} / ${m.listPricePer1MOutput?.toFixed(2)}
-                    </td>
-
-                    <td className="py-3.5 px-4 text-emerald-300 font-bold">
-                      ${effIn.toFixed(2)} / ${effOut.toFixed(2)}
-                    </td>
-
-                    <td className="py-3.5 px-4 text-cyan-400 font-semibold">
-                      {effCached ? `$${effCached.toFixed(2)}` : '—'}
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[10px] font-bold border border-emerald-500/30">
-                        -{totalDisc}%
-                      </span>
-                    </td>
-
-                    <td className="py-3.5 px-4 text-right">
-                      <Link
-                        href={`/playground?model=${m.id}`}
-                        className="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white font-sans text-xs transition-colors inline-block"
-                      >
-                        Test
+                    <td className="py-3.5 px-4 font-bold text-white">
+                      <Link href={`/models/${m.id.replace('/', '-')}`} className="hover:text-cyan-300">
+                        {m.id}
                       </Link>
+                    </td>
+                    <td className="py-3.5 px-4 text-zinc-400 uppercase text-[10px]">{m.provider}</td>
+                    <td className="py-3.5 px-4 text-zinc-300">
+                      {m.category === 'image' ? '1024x1024' : `${(m.contextWindowTokens / 1000).toLocaleString()}K`}
+                    </td>
+                    <td className="py-3.5 px-4 text-zinc-500 line-through">
+                      ${m.listPricePer1MInput?.toFixed(2)}
+                    </td>
+                    <td className="py-3.5 px-4 text-emerald-300 font-bold">
+                      ${effIn.toFixed(2)}
+                    </td>
+                    <td className="py-3.5 px-4 text-cyan-300">
+                      ${effCached.toFixed(2)}
+                    </td>
+                    <td className="py-3.5 px-4 text-emerald-300 font-bold">
+                      ${effOut.toFixed(2)}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold text-[10px] border border-emerald-500/30">
+                        -{m.discountPercentage}%
+                      </span>
                     </td>
                   </tr>
                 );
@@ -348,244 +477,54 @@ export default function PricingPage() {
           </table>
         </div>
 
-        {/* Interactive Spend, Savings & Compound ROI Calculator */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-6 glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
-            <div className="space-y-1">
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-cyan-400" />
-                Workload Spend & Net ROI Calculator
-              </h2>
-              <p className="text-xs text-zinc-400">Calculate exact workload costs factoring in volume tiers, prompt caching, and off-peak yield.</p>
-            </div>
-
-            {/* Model Selector */}
-            <div>
-              <label className="block text-xs font-bold text-zinc-400 uppercase mb-1.5 font-mono">Select Target Model</label>
-              <select
-                value={selectedModelId}
-                onChange={(e) => setSelectedModelId(e.target.value)}
-                className="w-full py-2.5 px-3 rounded-xl bg-black/40 border border-white/10 text-xs text-white font-mono focus:outline-none"
-              >
-                {EXCLUSIVE_MODEL_CATALOG.map(m => (
-                  <option key={m.id} value={m.id} className="bg-zinc-900 text-white">
-                    {m.id} (${(m.inputPricePer1M * effectiveMultiplier).toFixed(2)} in / ${(m.outputPricePer1M * effectiveMultiplier).toFixed(2)} out • -{m.discountPercentage}%)
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Input Tokens Slider */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs font-mono">
-                <span className="text-zinc-400 uppercase">Input Token Volume</span>
-                <span className="text-white font-bold">{inputTokensK.toLocaleString()}K Tokens</span>
-              </div>
-              <input
-                type="range"
-                min="10"
-                max="5000"
-                step="10"
-                value={inputTokensK}
-                onChange={(e) => setInputTokensK(parseInt(e.target.value))}
-                className="w-full accent-cyan-500 cursor-pointer"
-              />
-            </div>
-
-            {/* Output Tokens Slider */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs font-mono">
-                <span className="text-zinc-400 uppercase">Output Token Volume</span>
-                <span className="text-white font-bold">{outputTokensK.toLocaleString()}K Tokens</span>
-              </div>
-              <input
-                type="range"
-                min="5"
-                max="1000"
-                step="5"
-                value={outputTokensK}
-                onChange={(e) => setOutputTokensK(parseInt(e.target.value))}
-                className="w-full accent-amber-500 cursor-pointer"
-              />
-            </div>
-
-            {/* Prompt Caching Slider */}
-            <div className="space-y-1.5 p-3.5 rounded-2xl bg-cyan-500/5 border border-cyan-500/20">
-              <div className="flex justify-between text-xs font-mono">
-                <span className="text-cyan-300 uppercase font-bold flex items-center gap-1.5">
-                  <Database className="w-3.5 h-3.5" />
-                  Cached Prompt Proportion
-                </span>
-                <span className="text-cyan-300 font-bold">{cachedPromptPct}% Cached</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                step="5"
-                value={cachedPromptPct}
-                onChange={(e) => setCachedPromptPct(parseInt(e.target.value))}
-                className="w-full accent-cyan-400 cursor-pointer"
-              />
-              <p className="text-[10px] text-zinc-400">Context prefixes (&gt;1K tokens) automatically unlock a 75% prompt cache rebate.</p>
-            </div>
-
-            {/* Off-Peak Yield Toggle */}
-            <div
-              onClick={() => setIsOffPeakMode(!isOffPeakMode)}
-              className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
-                isOffPeakMode
-                  ? 'bg-amber-500/10 border-amber-500/40'
-                  : 'bg-black/30 border-white/10 hover:border-white/20'
-              }`}
-            >
-              <div className="space-y-0.5">
-                <div className="text-xs font-bold text-white flex items-center gap-1.5 font-mono">
-                  <Clock className="w-3.5 h-3.5 text-amber-400" />
-                  Off-Peak Dynamic Yield Rebate (+10% OFF)
-                </div>
-                <div className="text-[10px] text-zinc-400">Enable for background batch workers and non-interactive jobs.</div>
-              </div>
-              <div className={`w-8 h-4 rounded-full transition-colors relative ${isOffPeakMode ? 'bg-amber-400' : 'bg-white/20'}`}>
-                <div className={`w-3.5 h-3.5 rounded-full bg-black absolute top-0.25 transition-transform ${isOffPeakMode ? 'left-4' : 'left-0.5'}`} />
-              </div>
-            </div>
-          </div>
-
-          {/* Results Summary */}
-          <div className="lg:col-span-6 glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-emerald-500/30 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-white font-mono">Cost Breakdown & Net Savings</h2>
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-xs font-bold border border-emerald-500/40">
-                Total Net Savings: {compoundSavingsPct}%
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-                <span className="text-[10px] text-zinc-500 uppercase font-mono">Standard List Retail</span>
-                <div className="text-xl font-bold text-zinc-400 line-through font-mono">
-                  ${totalListCost.toFixed(4)}
-                </div>
-                <span className="text-[10px] text-zinc-600">Without pooling or cache rebate</span>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-1">
-                <span className="text-[10px] text-emerald-400 uppercase font-mono">GALXAI Net Cost</span>
-                <div className="text-2xl font-black text-emerald-300 font-mono">
-                  ${totalGalxCost.toFixed(4)}
-                </div>
-                <span className="text-[10px] text-emerald-400 font-bold">-${totalSaved.toFixed(4)} Net Saved / Query</span>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 space-y-1.5">
-              <div className="flex justify-between items-center text-xs font-mono">
-                <span className="text-zinc-300">Annualized Savings (At Daily Cadence):</span>
-                <span className="text-emerald-400 font-black text-sm">${annualizedSavings.toLocaleString(undefined, { maximumFractionDigits: 2 })} / yr</span>
-              </div>
-              <p className="text-[10px] text-zinc-400">Based on executing this query volume 365 days/year.</p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 text-xs text-zinc-300">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Base volume discount: -{selectedModel.discountPercentage}% on all tokens</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0" />
-                <span>Prompt caching rebate applied to {cachedPromptPct}% of input volume</span>
-              </div>
-              {selectedTier.extraDiscountPct > 0 && (
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>Volume Tier Rebate: +{selectedTier.extraDiscountPct}% off for {selectedTier.name}</span>
-                </div>
-              )}
-              {isOffPeakMode && (
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>Off-Peak Dynamic Yield: +10% floating discount applied</span>
-                </div>
-              )}
-            </div>
-
-            <Link
-              href="/keys/new"
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
-            >
-              <Key className="w-4 h-4 text-black" />
-              <span>Get API Key & Lock In Rates</span>
-              <ArrowRight className="w-4 h-4 text-black" />
-            </Link>
-          </div>
-        </div>
-
-        {/* Transparent Market Comparison Table */}
-        <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4">
+        {/* Competitor Benchmark Matrix */}
+        <div className="glass-panel rounded-3xl p-6 overflow-x-auto space-y-4 border border-white/10">
           <div className="space-y-1">
             <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-cyan-400" />
-              Transparent Market Comparison (Cost for 10M Tokens on SOTA Reasoning)
+              <TrendingDown className="w-4 h-4 text-emerald-400" />
+              Market Competitor Benchmark (Cost per 10M Tokens on GPT-5.6 Sol)
             </h2>
-            <p className="text-xs text-zinc-400">Direct cost benchmark assuming 5M input tokens (50% cached) + 5M output tokens on `gpt-5.6-sol`.</p>
+            <p className="text-xs text-zinc-400">Assumes standard 5M Input (50% cached) + 5M Output workload.</p>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse font-mono">
-              <thead>
-                <tr className="border-b border-white/10 text-zinc-400 font-bold uppercase text-[10px]">
-                  <th className="py-3 px-4 font-sans">Provider</th>
-                  <th className="py-3 px-4 font-sans">Input Cost (5M)</th>
-                  <th className="py-3 px-4 font-sans">Output Cost (5M)</th>
-                  <th className="py-3 px-4 font-sans">Total Workload Cost</th>
-                  <th className="py-3 px-4 font-sans">Routing Overhead</th>
-                  <th className="py-3 px-4 font-sans">Effective Savings</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                <tr className="text-zinc-400">
-                  <td className="py-3 px-4 font-bold text-white">Direct Retail (OpenAI)</td>
-                  <td className="py-3 px-4">$15.62</td>
-                  <td className="py-3 px-4">$100.00</td>
-                  <td className="py-3 px-4 text-white font-bold">$115.62</td>
-                  <td className="py-3 px-4">0%</td>
-                  <td className="py-3 px-4 text-zinc-500">Baseline (0%)</td>
-                </tr>
-                <tr className="text-zinc-400">
-                  <td className="py-3 px-4 font-bold text-white">OpenRouter (Standard)</td>
-                  <td className="py-3 px-4">$16.40</td>
-                  <td className="py-3 px-4">$105.00</td>
-                  <td className="py-3 px-4 text-white font-bold">$121.40</td>
-                  <td className="py-3 px-4 text-red-400">+5% Markup</td>
-                  <td className="py-3 px-4 text-red-400">-5.0% (More expensive)</td>
-                </tr>
-                <tr className="text-zinc-400">
-                  <td className="py-3 px-4 font-bold text-white">Azure OpenAI</td>
-                  <td className="py-3 px-4">$15.62</td>
-                  <td className="py-3 px-4">$100.00</td>
-                  <td className="py-3 px-4 text-white font-bold">$115.62</td>
-                  <td className="py-3 px-4">0%</td>
-                  <td className="py-3 px-4 text-zinc-500">Baseline (0%)</td>
-                </tr>
-                <tr className="bg-emerald-500/10 border-t-2 border-emerald-500/30 text-emerald-300 font-bold">
-                  <td className="py-3.5 px-4 text-white flex items-center gap-1.5">
-                    <Zap className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                    GALXAI Pooled Gateway
-                  </td>
-                  <td className="py-3.5 px-4 text-emerald-300">$11.72</td>
-                  <td className="py-3.5 px-4 text-emerald-300">$75.00</td>
-                  <td className="py-3.5 px-4 text-white font-black text-sm">$86.72</td>
-                  <td className="py-3.5 px-4 text-emerald-400 font-mono">0% Markup</td>
-                  <td className="py-3.5 px-4">
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-black border border-emerald-500/40">
-                      Save 25.0% Instant
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <table className="w-full text-left text-xs border-collapse font-mono">
+            <thead>
+              <tr className="border-b border-white/10 text-zinc-400 font-bold uppercase text-[10px]">
+                <th className="py-3 px-4 font-sans">Provider</th>
+                <th className="py-3 px-4 font-sans">Input Cost</th>
+                <th className="py-3 px-4 font-sans">Output Cost</th>
+                <th className="py-3 px-4 font-sans">Routing Fees</th>
+                <th className="py-3 px-4 font-sans">Total Net Cost</th>
+                <th className="py-3 px-4 font-sans">Savings vs Direct</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              <tr className="hover:bg-white/[0.02]">
+                <td className="py-3.5 px-4 text-zinc-400">Direct OpenAI API</td>
+                <td className="py-3.5 px-4 text-zinc-300">$21.88</td>
+                <td className="py-3.5 px-4 text-zinc-300">$93.74</td>
+                <td className="py-3.5 px-4 text-zinc-400">$0.00</td>
+                <td className="py-3.5 px-4 text-zinc-300 font-bold">$115.62</td>
+                <td className="py-3.5 px-4 text-zinc-500">Baseline (0%)</td>
+              </tr>
+              <tr className="hover:bg-white/[0.02]">
+                <td className="py-3.5 px-4 text-zinc-400">OpenRouter</td>
+                <td className="py-3.5 px-4 text-zinc-300">$22.97</td>
+                <td className="py-3.5 px-4 text-zinc-300">$98.43</td>
+                <td className="py-3.5 px-4 text-red-400">+$5.78 (+5%)</td>
+                <td className="py-3.5 px-4 text-red-300 font-bold">$121.40</td>
+                <td className="py-3.5 px-4 text-red-400">+5.0% Surcharge</td>
+              </tr>
+              <tr className="bg-emerald-500/10 font-bold">
+                <td className="py-3.5 px-4 text-emerald-300">GALXAI Universal Gateway</td>
+                <td className="py-3.5 px-4 text-emerald-300">$16.41</td>
+                <td className="py-3.5 px-4 text-emerald-300">$70.31</td>
+                <td className="py-3.5 px-4 text-emerald-400">$0.00 (Zero Fee)</td>
+                <td className="py-3.5 px-4 text-emerald-300 text-sm">$86.72</td>
+                <td className="py-3.5 px-4 text-emerald-400">Save $28.90 (25.0% Net)</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </main>
     </div>

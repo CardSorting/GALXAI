@@ -138,7 +138,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
               Cut Your AI Token Bills by <span className="bg-gradient-to-r from-amber-300 via-orange-400 to-amber-500 bg-clip-text text-transparent">25% to 40%</span>. Guaranteed.
             </h1>
             <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl mx-auto">
-              Stop paying retail prices or aggregator markup fees. GALXAI routes your completions across pooled Tier-5 compute slots with <strong className="text-amber-300 font-bold">sub-15ms multi-account failover</strong>, <strong className="text-cyan-300 font-bold">75% prompt caching</strong>, and zero code changes.
+              Stop paying retail prices or aggregator markup fees. GALXAI delivers enterprise-grade inference with <strong className="text-amber-300 font-bold">sub-15ms automated failover</strong>, <strong className="text-cyan-300 font-bold">75% prompt caching</strong>, and zero code changes.
             </p>
           </div>
 
@@ -166,11 +166,11 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 max-w-3xl mx-auto border-t border-white/10 font-mono text-xs">
             <div className="space-y-0.5">
               <span className="text-zinc-400 text-[10px] uppercase">Routing Latency</span>
-              <div className="text-white font-bold text-sm">&lt; 1ms Overhead</div>
+              <div className="text-white font-bold text-sm">&lt; 1ms Gateway Overhead</div>
             </div>
             <div className="space-y-0.5">
               <span className="text-zinc-400 text-[10px] uppercase">Service Uptime</span>
-              <div className="text-emerald-400 font-bold text-sm">99.99% Multi-Account SLA</div>
+              <div className="text-emerald-400 font-bold text-sm">99.99% Enterprise SLA</div>
             </div>
             <div className="space-y-0.5">
               <span className="text-zinc-400 text-[10px] uppercase">Prompt Caching</span>
@@ -216,7 +216,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
             </div>
 
             <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 space-y-1">
-              <span className="text-[10px] text-emerald-400 uppercase font-bold">GALXAI Pooled Gateway</span>
+              <span className="text-[10px] text-emerald-400 uppercase font-bold">GALXAI Universal Gateway</span>
               <div className="text-lg font-black text-emerald-300">$3.75 / 1M tokens</div>
               <span className="text-[10px] text-emerald-400 font-bold">Save 25% Instant • 0% Markup</span>
             </div>
@@ -360,7 +360,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
               </div>
               <h3 className="text-base font-bold text-white">Enjoy Sub-15ms Failover & Savings</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Your requests are automatically balanced across high-capacity enterprise slots, saving 25%–40% on every token with 99.99% uptime.
+                Your requests are automatically routed with enterprise-grade reliability, saving 25%–40% on every token with 99.99% uptime.
               </p>
             </div>
           </div>
@@ -374,7 +374,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
                 <Cpu className="w-5 h-5 text-indigo-400" />
                 Flagship Reasoning & LLM Fleet
               </h2>
-              <p className="text-xs text-zinc-400">Direct wholesale arbitrage rates across OpenAI and xAI Grok flagship engines.</p>
+              <p className="text-xs text-zinc-400">Direct wholesale rates across OpenAI and xAI Grok flagship engines.</p>
             </div>
             <Link href="/models" className="text-xs text-cyan-400 hover:text-cyan-300 font-mono font-semibold flex items-center gap-1">
               <span>View All 12 Models</span>
