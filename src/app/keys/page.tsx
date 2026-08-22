@@ -21,9 +21,12 @@ import {
   TrendingDown,
   ExternalLink,
   Sliders,
-  DollarSign
+  DollarSign,
+  Gift
 } from 'lucide-react';
 import { formatTimeAgo } from '@/lib/utils';
+import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
+import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
 
 export default function GatewayKeysPage() {
   const [keys, setKeys] = useState<any[]>([]);
@@ -31,6 +34,9 @@ export default function GatewayKeysPage() {
   const [createdSecretKey, setCreatedSecretKey] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPaywallOpen, setIsPaywallOpen] = useState(false);
+
+  const { hasVerifiedDeposit, walletBalance, depositAndUnlock } = useDepositVerification();
 
   const fetchKeys = async () => {
     try {
@@ -44,16 +50,17 @@ export default function GatewayKeysPage() {
     fetchKeys();
   }, []);
 
-  const handleCreateKey = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newKeyName.trim()) return;
-
+  const createKeyDirectly = async (keyName: string, balanceAmount: number) => {
     setIsLoading(true);
     try {
       const res = await fetch('/api/keys', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newKeyName.trim() })
+        body: JSON.stringify({
+          name: keyName.trim() || 'Developer API Key',
+          hasVerifiedDeposit: true,
+          depositedAmount: balanceAmount
+        })
       });
       const data = await res.json();
       if (data.success && data.key?.apiKey) {
@@ -64,6 +71,24 @@ export default function GatewayKeysPage() {
     } catch {} finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCreateKey = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newKeyName.trim()) return;
+
+    if (!hasVerifiedDeposit) {
+      setIsPaywallOpen(true);
+      return;
+    }
+
+    await createKeyDirectly(newKeyName, walletBalance);
+  };
+
+  const handlePaywallSuccess = async (depositAmt: number, totalCredit: number) => {
+    const { totalCredited } = depositAndUnlock(depositAmt);
+    setIsPaywallOpen(false);
+    await createKeyDirectly(newKeyName || 'Developer API Key (Activated)', walletBalance + totalCredited);
   };
 
   const handleRevokeKey = async (keyId: string) => {
@@ -133,7 +158,7 @@ export default function GatewayKeysPage() {
                   Autopay Active
                 </span>
               </div>
-              <div className="text-3xl font-black text-white font-mono">$114.59 <span className="text-xs text-zinc-400 font-sans">USD</span></div>
+              <div className="text-3xl font-black text-white font-mono">${walletBalance.toFixed(2)} <span className="text-xs text-zinc-400 font-sans">USD</span></div>
               <p className="text-[11px] text-zinc-400">All active keys draw from this shared compute balance with microsecond metering.</p>
             </div>
 
@@ -146,6 +171,38 @@ export default function GatewayKeysPage() {
             </Link>
           </div>
         </div>
+
+        {/* Unverified Deposit Match Banner */}
+        {!hasVerifiedDeposit && (
+          <div className="glass-panel rounded-3xl p-6 border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-black/40 space-y-3 relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                  <Gift className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[10px] font-bold">
+                    <Sparkles className="w-3 h-3 text-amber-400" />
+                    <span>50% INSTANT DEPOSIT MATCH • $5 FREE COMPUTE</span>
+                  </div>
+                  <h2 className="text-base font-bold text-white">Deposit $10 to Mint Your Key & Claim $5 Free Compute</h2>
+                  <p className="text-xs text-zinc-300 max-w-xl">
+                    Make your first refundable compute deposit of <strong>$10.00 USD</strong> to unlock live gateway routing and receive <strong className="text-emerald-300">$15.00 Total Usable Balance</strong> with 0 platform fees.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsPaywallOpen(true)}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs font-mono uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+              >
+                <Key className="w-3.5 h-3.5" />
+                <span>Deposit $10 & Unlock</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Quick Inline Key Generator */}
         <div className="glass-panel rounded-3xl p-6 space-y-4">
@@ -254,6 +311,14 @@ export default function GatewayKeysPage() {
           )}
         </div>
       </main>
+
+      {/* Paywall Blocker Modal */}
+      <KeyActivationPaywallModal
+        isOpen={isPaywallOpen}
+        onClose={() => setIsPaywallOpen(false)}
+        onSuccess={handlePaywallSuccess}
+        keyLabel={newKeyName || 'Developer API Key'}
+      />
     </div>
   );
 }

@@ -1,16 +1,21 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Key, Plus, Trash2, Copy, Check, ShieldAlert, Sparkles, X } from 'lucide-react';
+import { Key, Plus, Trash2, Copy, Check, ShieldAlert, Sparkles, X, Gift } from 'lucide-react';
 import { formatTimeAgo } from '@/lib/utils';
+import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
+import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
 
 export function DeveloperGatewayKeys() {
   const [keys, setKeys] = useState<any[]>([]);
   const [isOpenModal, setIsOpenModal] = useState(false);
+  const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
   const [createdSecretKey, setCreatedSecretKey] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { hasVerifiedDeposit, walletBalance, depositAndUnlock } = useDepositVerification();
 
   const fetchKeys = async () => {
     try {
@@ -26,14 +31,17 @@ export function DeveloperGatewayKeys() {
     fetchKeys();
   }, []);
 
-  const handleCreateKey = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const createKeyDirectly = async (keyName: string, balance: number) => {
     setIsLoading(true);
     try {
       const res = await fetch('/api/keys', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newKeyName.trim() || 'Developer API Key' })
+        body: JSON.stringify({
+          name: keyName.trim() || 'Developer API Key',
+          hasVerifiedDeposit: true,
+          depositedAmount: balance
+        })
       });
       const data = await res.json();
       if (data.success && data.key?.apiKey) {
@@ -46,6 +54,23 @@ export function DeveloperGatewayKeys() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCreateKey = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!hasVerifiedDeposit) {
+      setIsOpenModal(false);
+      setIsPaywallOpen(true);
+      return;
+    }
+    await createKeyDirectly(newKeyName, walletBalance);
+  };
+
+  const handlePaywallSuccess = async (depositAmt: number, totalCredit: number) => {
+    const { totalCredited } = depositAndUnlock(depositAmt);
+    setIsPaywallOpen(false);
+    setIsOpenModal(true);
+    await createKeyDirectly(newKeyName || 'Developer Gateway Key', walletBalance + totalCredited);
   };
 
   const handleRevokeKey = async (keyId: string) => {
@@ -218,6 +243,14 @@ export function DeveloperGatewayKeys() {
           </div>
         </div>
       )}
+
+      {/* Key Activation Paywall Modal */}
+      <KeyActivationPaywallModal
+        isOpen={isPaywallOpen}
+        onClose={() => setIsPaywallOpen(false)}
+        onSuccess={handlePaywallSuccess}
+        keyLabel={newKeyName || 'Developer API Key'}
+      />
     </div>
   );
 }

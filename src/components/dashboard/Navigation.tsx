@@ -16,11 +16,13 @@ import { CommandMenu } from '@/components/common/CommandMenu';
 import { ShareButton } from '@/components/common/ShareButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 
 export function Navigation() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { t } = useLanguage();
+  const { walletBalance, hasVerifiedDeposit } = useDepositVerification();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [commandMenuOpen, setCommandMenuOpen] = useState(false);
@@ -157,14 +159,17 @@ export function Navigation() {
             <Link
               href="/billing"
               role="link"
-              aria-label={`Developer Prepaid Wallet. Current balance: $114.59`}
-              className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all ${
+              aria-label={`Developer Prepaid Wallet. Current balance: $${walletBalance.toFixed(2)}`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
                 pathname === '/billing'
                   ? 'text-emerald-200 bg-emerald-500/20 border border-emerald-500/50 shadow-sm'
-                  : 'text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 active:scale-[0.98]'
+                  : hasVerifiedDeposit
+                    ? 'text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 active:scale-[0.98]'
+                    : 'text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 active:scale-[0.98]'
               } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080d]`}
             >
-              $114.59
+              <span className={`w-1.5 h-1.5 rounded-full ${hasVerifiedDeposit ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
+              <span>${walletBalance.toFixed(2)}</span>
             </Link>
 
             {/* Accessible API Keys Link */}
@@ -226,7 +231,7 @@ export function Navigation() {
                       className="flex items-center justify-between px-3 py-2 rounded-xl text-xs text-emerald-300 hover:text-white hover:bg-emerald-500/10 transition-all font-mono font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                     >
                       <span>{t('nav.wallet', 'Wallet')}</span>
-                      <span>$114.59</span>
+                      <span>${walletBalance.toFixed(2)}</span>
                     </Link>
 
                     <Link

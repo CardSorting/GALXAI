@@ -157,13 +157,16 @@ npm run dev
 
 ## 📂 Architecture Decision Records (ADRs)
 
-Detailed architectural justifications and technical specifications:
+Detailed architectural justifications and technical specifications (see [ADR Master Index](docs/adr/README.md)):
 - [ADR 0001: Unified Pooled Quota Cycling Substrate](docs/adr/0001-unified-pooled-quota-cycling-substrate.md)
 - [ADR 0002: 2-Phase Token Reservation & Continuous Calculus Rate Governance](docs/adr/0002-two-phase-token-reservation-and-rate-governance.md)
 - [ADR 0003: AES-256-GCM Envelope Encryption with AAD Binding & Heap Scrubbing](docs/adr/0003-aes-256-gcm-envelope-encryption-with-aad-binding.md)
 - [ADR 0004: 4-State Circuit Breaker & Half-Open Canary Traffic Warming](docs/adr/0004-four-state-circuit-breaker-and-failover-topology.md)
 - [ADR 0005: Zero-Allocation Circular Ring Buffer Histogram Telemetry & EWMA Latency](docs/adr/0005-circular-buffer-telemetry-and-ewma-latency-scoring.md)
 - [ADR 0006: Intelligent Multi-Tiered Discount & Prompt-Caching Strategy](docs/adr/0006-intelligent-multi-tiered-discount-strategy.md)
+- [ADR 0007: Proof-of-Deposit Security Gate & 50% Match Paywall Architecture](docs/adr/0007-proof-of-deposit-and-50pct-match-paywall-gate.md)
+- [ADR 0008: Tenant-Affinity Shard Dispersion (TASD) & Post-Allocation Headroom Leveling](docs/adr/0008-tenant-affinity-shard-dispersion-and-post-allocation-leveling.md)
+- [ADR 0009: 4-Phase Half-Open Canary Traffic Warming & Background Scavenger](docs/adr/0009-half-open-canary-traffic-warming-and-lease-scavenger.md)
 
 ---
 

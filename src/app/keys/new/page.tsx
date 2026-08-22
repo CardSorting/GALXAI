@@ -29,8 +29,12 @@ import {
   Sliders,
   Server,
   Bot,
-  Layers
+  Layers,
+  Gift
 } from 'lucide-react';
+import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
+import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
+import { KeyActivationPaywallBlocker } from '@/components/keys/KeyActivationPaywallBlocker';
 
 interface Preset {
   id: string;
@@ -91,9 +95,10 @@ export default function CreateKeyPage() {
   const [isTestingKey, setIsTestingKey] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; latencyMs: number; message: string } | null>(null);
 
-  // Account Verification State ($10 Minimum Initial Deposit)
-  const [hasVerifiedDeposit, setHasVerifiedDeposit] = useState(true);
-  const [walletBalance, setWalletBalance] = useState(114.59);
+  // Account Verification & Paywall State ($10 Minimum Initial Deposit to Unlock $5 Bonus)
+  const { hasVerifiedDeposit, walletBalance, depositAndUnlock } = useDepositVerification();
+  const [isPaywallOpen, setIsPaywallOpen] = useState(false);
+  const [paywallSelectedAmt, setPaywallSelectedAmt] = useState<number>(10);
   const [isDepositing, setIsDepositing] = useState(false);
   const [depositSuccessMsg, setDepositSuccessMsg] = useState<string | null>(null);
 
@@ -103,31 +108,17 @@ export default function CreateKeyPage() {
     setRateLimitPerMinute(preset.rpm);
   };
 
-  const handleDepositAndVerify = (amt: number) => {
-    setIsDepositing(true);
-    setTimeout(() => {
-      setWalletBalance(prev => prev + amt);
-      setHasVerifiedDeposit(true);
-      setIsDepositing(false);
-      setDepositSuccessMsg(`Successfully deposited $${amt.toFixed(2)} USD! Developer verification complete.`);
-      setTimeout(() => setDepositSuccessMsg(null), 4000);
-    }, 600);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-
+  const mintKeyRequest = async (currentBalance: number) => {
     setIsLoading(true);
     try {
       const res = await fetch('/api/keys', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: name.trim(),
+          name: name.trim() || 'Default Developer Key',
           rateLimitPerMinute: Number(rateLimitPerMinute),
           hasVerifiedDeposit: true,
-          depositedAmount: walletBalance
+          depositedAmount: currentBalance
         })
       });
       const data = await res.json();
@@ -137,6 +128,37 @@ export default function CreateKeyPage() {
     } catch {} finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDepositAndVerify = (amt: number) => {
+    setIsDepositing(true);
+    setTimeout(() => {
+      const { totalCredited } = depositAndUnlock(amt);
+      setIsDepositing(false);
+      setDepositSuccessMsg(`Successfully deposited $${amt.toFixed(2)} USD! Credited +$${totalCredited.toFixed(2)} ($${amt.toFixed(2)} + $5.00 Welcome Grant) to your compute wallet.`);
+      setTimeout(() => setDepositSuccessMsg(null), 5000);
+      mintKeyRequest(walletBalance + totalCredited);
+    }, 800);
+  };
+
+  const handlePaywallSuccess = (depositAmt: number, totalCredit: number) => {
+    const { totalCredited } = depositAndUnlock(depositAmt);
+    setIsPaywallOpen(false);
+    setDepositSuccessMsg(`Payment verified! Credited +$${totalCredited.toFixed(2)} to wallet. Minting live key...`);
+    mintKeyRequest(walletBalance + totalCredited);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+
+    if (!hasVerifiedDeposit) {
+      // Trigger Paywall Modal Blocker
+      setIsPaywallOpen(true);
+      return;
+    }
+
+    await mintKeyRequest(walletBalance);
   };
 
   const handleCopyKey = () => {
@@ -295,52 +317,18 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
             </p>
           </div>
 
-          {/* Account Verification & Starter Deposit Banner */}
+          {/* Account Verification & Starter Deposit Paywall Banner */}
+          {/* Account Verification & Starter Deposit Paywall Blocker */}
           {!hasVerifiedDeposit ? (
-            <div className="p-6 rounded-3xl bg-amber-500/10 border border-amber-500/30 space-y-4 shadow-xl">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
-                  <CreditCard className="w-5 h-5" />
-                </div>
-                <div className="space-y-1">
-                  <h3 className="text-base font-bold text-white">Account Activation & Compute Deposit ($10.00 Minimum)</h3>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
-                    To activate your high-throughput gateway key and provision dedicated routing capacity, an initial compute deposit of at least <strong>$10.00 USD</strong> is required.
-                  </p>
-                  <p className="text-[11px] text-amber-300 font-mono pt-1">
-                    ✓ 100% of your deposit is credited directly to your usable compute balance with $0 platform fees.
-                  </p>
-                </div>
-              </div>
-
-              {depositSuccessMsg && (
-                <div className="p-3 rounded-xl bg-emerald-500/20 text-emerald-300 text-xs font-mono flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>{depositSuccessMsg}</span>
-                </div>
-              )}
-
-              {/* Deposit Quick-Buttons */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                {[
-                  { amt: 10, label: '$10.00 Starter' },
-                  { amt: 25, label: '$25.00 Standard' },
-                  { amt: 50, label: '$50.00 (+5% Bonus)' },
-                  { amt: 100, label: '$100.00 (+10% Bonus)' }
-                ].map((item) => (
-                  <button
-                    key={item.amt}
-                    type="button"
-                    onClick={() => handleDepositAndVerify(item.amt)}
-                    disabled={isDepositing}
-                    className="p-3 rounded-2xl bg-black/50 hover:bg-black/80 border border-amber-500/30 text-white font-mono text-xs font-bold text-center hover:border-amber-400 transition-all cursor-pointer disabled:opacity-50"
-                  >
-                    <div className="text-sm font-black text-amber-300">${item.amt}</div>
-                    <span className="text-[10px] text-zinc-400 block font-sans">{item.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+            <KeyActivationPaywallBlocker
+              onOpenPaywallModal={(amt) => {
+                if (amt) setPaywallSelectedAmt(amt);
+                setIsPaywallOpen(true);
+              }}
+              onInstantDeposit={handleDepositAndVerify}
+              isDepositing={isDepositing}
+              depositSuccessMsg={depositSuccessMsg}
+            />
           ) : (
             <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-4 font-mono text-xs text-emerald-300">
               <div className="flex items-center gap-2">
@@ -600,11 +588,17 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
                 </Link>
                 <button
                   type="submit"
-                  disabled={isLoading || !name.trim() || !hasVerifiedDeposit}
+                  disabled={isLoading || !name.trim()}
                   className="px-8 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer font-mono"
                 >
                   {isLoading ? (
                     <span>Minting Key...</span>
+                  ) : !hasVerifiedDeposit ? (
+                    <>
+                      <Gift className="w-4 h-4 text-black" />
+                      <span>Unlock with $10 Deposit ($15 Credit)</span>
+                      <ArrowRight className="w-4 h-4 text-black" />
+                    </>
                   ) : (
                     <>
                       <Key className="w-4 h-4 text-black" />
@@ -618,6 +612,15 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
           )}
         </div>
       </main>
+
+      {/* Paywall Blocker Modal */}
+      <KeyActivationPaywallModal
+        isOpen={isPaywallOpen}
+        onClose={() => setIsPaywallOpen(false)}
+        onSuccess={handlePaywallSuccess}
+        keyLabel={name}
+        initialAmount={paywallSelectedAmt}
+      />
     </div>
   );
 }

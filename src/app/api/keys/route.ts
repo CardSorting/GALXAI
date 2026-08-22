@@ -38,19 +38,24 @@ export async function POST(req: NextRequest) {
       userId = 'user_demo',
       rateLimitPerMinute = 120,
       depositedAmount = 0,
-      hasVerifiedDeposit = true
+      hasVerifiedDeposit = false
     } = body;
 
+    const persistence = GalxPersistence.getInstance();
+    const existingKeys = persistence.getGatewayKeys().filter(k => k.userId === userId && !k.revoked);
+
     // Anti-Bot Proof-of-Deposit Security Gate
-    // Require at least $10.00 USD initial deposit to prevent automated botnets, scraper swarms, and Sybil attacks
-    if (!hasVerifiedDeposit && Number(depositedAmount) < MINIMUM_INITIAL_DEPOSIT_USD) {
+    // Require at least $10.00 USD initial deposit to activate key and unlock $5 free compute grant
+    if (!hasVerifiedDeposit && existingKeys.length === 0 && Number(depositedAmount) < MINIMUM_INITIAL_DEPOSIT_USD) {
       return NextResponse.json(
         {
           success: false,
           error: 'MINIMUM_INITIAL_DEPOSIT_REQUIRED',
-          message: `To protect the gateway against automated botnets and Sybil key harvesting, an initial deposit of at least $${MINIMUM_INITIAL_DEPOSIT_USD.toFixed(2)} USD is required. 100% of your deposit is credited directly to your compute wallet for token generation.`,
+          message: `To activate your high-throughput gateway key and claim your $5.00 free compute grant, an initial deposit of at least $${MINIMUM_INITIAL_DEPOSIT_USD.toFixed(2)} USD is required. 100% of your deposit is credited directly to your compute wallet ($15.00 total compute credit).`,
           requiredDepositUsd: MINIMUM_INITIAL_DEPOSIT_USD,
-          depositUrl: '/billing'
+          depositUrl: '/billing',
+          welcomeBonusUsd: 5.00,
+          totalComputeOnDepositUsd: 15.00
         },
         { status: 402 }
       );
@@ -73,7 +78,6 @@ export async function POST(req: NextRequest) {
       revoked: false
     };
 
-    const persistence = GalxPersistence.getInstance();
     persistence.saveGatewayKey(newKey);
     persistence.logAudit('GATEWAY_KEY_CREATED', { keyId, keyPrefix, name, antiBotVerified: true }, keyId, userId);
 

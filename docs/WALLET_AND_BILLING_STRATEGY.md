@@ -9,7 +9,7 @@ GALXAI implements a high-precision, low-friction prepaid and auto-reload compute
 Unlike traditional SaaS subscriptions that charge static seat fees or rigid tier gates, GALXAI operates a **pure consumption-based compute ledger**:
 - Every API key generated under a tenant workspace draws from the tenant's **Unified Compute Wallet**.
 - Deductions occur in real-time down to $\$0.000001$ precision upon completion of each streaming chunk or HTTP response.
-- **Zero Inactivity Penalties**: Deposited funds and welcome credits never expire.
+- **Zero Inactivity Penalties**: Deposited funds and promotional match grants never expire.
 
 ```mermaid
 flowchart TD
@@ -32,32 +32,52 @@ flowchart TD
 
 ---
 
-## 2. GTM Bonus Incentive Matrix & Starter Account Activation
+## 2. 50% Instant Match Compute Model & Proof-of-Deposit Security (ADR 0007)
 
-To ensure dedicated infrastructure allocation and prevent unverified automated abuse, **GALXAI requires an initial compute deposit of at least $10.00 USD** to activate developer API keys (`galx_live_...`). 
+To prevent automated Sybil scraper swarms and key-harvesting botnets from exhausting dedicated reasoning capacity, **GALXAI requires an initial refundable compute deposit of at least $10.00 USD** to activate developer API keys (`galx_live_...`).
 
-> **Important**: 100% of the $10.00 deposit is credited directly to the developer's usable compute wallet balance with **$0 platform or registration fees**.
+### 50% Instant Match Value Equation
+Upon making their first $10.00 deposit, developers immediately receive a **$5.00 Free Introductory Compute Grant** from the platform developer fund:
+$$\text{StartingBalance} = \text{Deposit}_{\$10.00} + \text{IntroductoryGrant}_{\$5.00} = \$15.00\text{ USD Total Compute (50\% Match)}$$
 
-| Deposit Amount | Bonus Multiplier | Net Credit Added | Effective Additional Discount | Best For |
-| :--- | :--- | :--- | :--- | :--- |
-| **$10.00** | $1.00\times$ | **$10.00 USD** | Starter Tier | Account activation & rapid prototyping |
-| **$25.00** | $1.00\times$ | **$25.00 USD** | Base ($0\%$) | Side projects & lightweight testing |
-| **$50.00** | $1.05\times$ | **$52.50 USD** | **+5% Bonus** | Individual developers & Cursor IDE power users |
-| **$100.00** | $1.10\times$ | **$110.00 USD** | **+10% Bonus** | Startups & agent prototyping (*Most Popular*) |
-| **$500.00** | $1.20\times$ | **$600.00 USD** | **+20% Bonus** | Production fleets & multi-agent backends |
+> **Zero Hidden Fees**: 100% of deposited funds and bonus compute go directly toward usable tokens with **$0 platform or monthly maintenance fees**.
+
+| Starter Pack | Your Deposit | Match / Tier Bonus | Total Credit Credited | Effective Match % | Best For |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **$10 Starter Key** | **$10.00** | **+$5.00 Free Grant** | **$15.00 USD** | **+50% Match** | Prototyping & Cursor IDE activation |
+| **$25 Standard Dev**| **$25.00** | **+$5.00 Free Grant** | **$30.00 USD** | **+20% Match** | Side projects & lightweight agents |
+| **$50 Growth Pro**  | **$50.00** | **+$5.00 Grant + 5% Bonus** | **$57.50 USD** | **+15% Bonus** | Power users & full-time coding IDEs |
+| **$100 Scale Fleet**| **$100.00**| **+$5.00 Grant + 10% Bonus**| **$115.00 USD**| **+15% Bonus** | Multi-agent swarms (*Most Popular*) |
+| **$500 Enterprise** | **$500.00**| **+$5.00 Grant + 20% Bonus**| **$605.00 USD**| **+21% Bonus** | High-throughput enterprise production |
 
 ---
 
-## 3. Auto-Reload & Zero-Downtime Protection
+## 3. Real-Time Cross-App Event Synchronization
 
-Production AI agents and mission-critical developer IDEs cannot tolerate unexpected `402 Payment Required` errors during reasoning generations:
+Client-side wallet balances and deposit verification status synchronize instantly across all open browser tabs without requiring manual page reloads:
+- `useDepositVerification` listens for storage changes and dispatches custom `galx_wallet_update` events.
+- Header navigation badges, API key generators, and billing meters reflect live balances instantaneously.
+
+---
+
+## 4. Automated 1-Click Refundability Protocol
+
+Developers evaluate GALXAI with complete peace of mind:
+- Any unspent balance from the initial deposit can be refunded with 1 click directly from the Billing dashboard.
+- Zero lock-in and zero cancellation hurdles.
+
+---
+
+## 5. Auto-Reload & Zero-Downtime Protection
+
+Production AI agents and mission-critical developer IDEs cannot tolerate unexpected `402 Payment Required` interruptions:
 - **Configurable Low-Balance Thresholds**: Set trigger thresholds ($5, $10, $25, $50).
 - **Automated Reload Amounts**: Top up $25, $50, $100, or $250 automatically via saved payment method.
 - **Circuit Breaker Immunity**: Keys continue streaming without interruption while the reload transaction settles asynchronously.
 
 ---
 
-## 4. Multi-Tenant Budget & Spend Governance
+## 6. Multi-Tenant Budget & Spend Governance
 
 Organizations can enforce granular spending limits across individual projects and keys:
 - **Per-Key Spend Caps**: Set daily or monthly limits per key (`galx_live_...`).

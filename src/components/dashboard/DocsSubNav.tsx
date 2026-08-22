@@ -9,6 +9,7 @@ import {
   Terminal,
   Cpu,
   Layers,
+  Shield,
   ShieldCheck,
   Radio,
   Sparkles,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
@@ -42,6 +42,7 @@ import {
   X,
   FileSpreadsheet
 } from 'lucide-react';
+import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 
 interface TopUpPack {
   amount: number;
@@ -166,7 +167,15 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
 ];
 
 export default function BillingPage() {
+  const { walletBalance, depositAndUnlock, hasVerifiedDeposit } = useDepositVerification();
   const [balance, setBalance] = useState(114.59);
+
+  useEffect(() => {
+    if (walletBalance > 0 || hasVerifiedDeposit) {
+      setBalance(walletBalance);
+    }
+  }, [walletBalance, hasVerifiedDeposit]);
+
   const [welcomeCreditRemaining] = useState(4.65);
   const [lifetimeSaved] = useState(38.40);
   const [monthlySpend] = useState(38.40);
@@ -210,6 +219,7 @@ export default function BillingPage() {
     setIsProcessing(true);
 
     setTimeout(() => {
+      depositAndUnlock(depositAmount);
       setBalance(prev => prev + totalCreditReceived);
       const newTx: Transaction = {
         id: `tx_${Date.now()}`,
