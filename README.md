@@ -134,12 +134,16 @@ npm run dev
 - 🌊 **[Routing Algorithms & Calculus](docs/ROUTING_ALGORITHMS.md)**: Mathematical derivations of Adaptive Hydraulic Headroom (P-AHT), Smooth Weighted Round-Robin (SWRR), and Least-Utilized.
 - 🔬 **[Performance Benchmarks & Stress Analysis](docs/BENCHMARKS.md)**: Concurrency scaling, RPS throughput, P99 latency, and burst resilience.
 - 🧠 **[Model Catalog & Modality Specification](docs/MODEL_CATALOG.md)**: Complete profiles and pricing for all 12 reasoning and visual models.
+- 💻 **[Multi-Ecosystem SDK Cheatsheet](docs/SDK_CHEATSHEET.md)**: Python, TypeScript, LangChain, LlamaIndex, Instructor, Rust, and Go.
+- ⚙️ **[Structured Outputs & Tools Guide](docs/STRUCTURED_OUTPUTS_AND_TOOLS.md)**: Strict JSON Schema and parallel tool calling across reasoning models.
 - 🔒 **[Security & Cryptographic Threat Model](docs/SECURITY.md)**: AAD envelope encryption, memory zeroization, and zero-prompt logging.
+- 📊 **[Telemetry, Metrics & Observability](docs/TELEMETRY_AND_OBSERVABILITY.md)**: Prometheus scraping, Datadog integration, and Grafana latency dashboards.
 - 📖 **[API Reference](docs/API_REFERENCE.md)**: REST endpoints for chat completions, visual synthesis, model catalog, and pool telemetry.
 - 🚀 **[Quickstart & IDE Setup](docs/QUICKSTART.md)**: Drop-in setup for Python, Node.js, LangChain, Cursor IDE, and Continue.
 - 🐳 **[Production Deployment & Infrastructure Guide](docs/DEPLOYMENT.md)**: Docker, Docker Compose, Kubernetes manifests, and security checklist.
 - 🛠️ **[Developer & Contributing Guide](docs/DEVELOPER_GUIDE.md)**: Architecture layers, adding model adapters, and testing standards.
 - 🔧 **[Operational Playbook & Troubleshooting](docs/TROUBLESHOOTING.md)**: Error classifications, rate limit mitigations, and health monitoring.
+- ❓ **[Frequently Asked Questions (FAQs)](docs/FAQS.md)**: Common technical, billing, architectural, and security questions.
 
 ---
 
