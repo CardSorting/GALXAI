@@ -98,6 +98,13 @@ export class GalxModelRouter {
     let lastError: any = null;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      // Intelligent model-tailored token reservation baseline
+      const estimatedTokens = request.max_tokens
+        ? request.max_tokens
+        : modelSpec.supportsReasoning
+        ? 4000
+        : 2000;
+
       // 1. Acquire atomic execution lease via Adaptive Hydraulic Headroom cycling
       const acqResult = this.pool.acquireLease({
         userId,
@@ -105,7 +112,7 @@ export class GalxModelRouter {
         provider,
         targetModel: modelSpec.id,
         isPriorityUser,
-        estimatedTokens: request.max_tokens || 1000
+        estimatedTokens
       });
 
       if (!acqResult.lease) {
@@ -180,6 +187,12 @@ export class GalxModelRouter {
             responseHeaders.set(key, val);
           }
         });
+
+        // Gateway Diagnostic Headers
+        responseHeaders.set('x-galx-shard-id', lease.shardId);
+        responseHeaders.set('x-galx-strategy', this.pool.getStrategy());
+        responseHeaders.set('x-galx-routing-latency-ms', String(latencyMs));
+        responseHeaders.set('x-galx-model', modelSpec.id);
 
         // 5. Handle Streaming Response
         if (isStream && response.body) {
