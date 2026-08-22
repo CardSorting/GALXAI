@@ -186,6 +186,32 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
     return clonedReturn;
   }
 
+  putMany(entries: ReadonlyArray<{ id: string; record: T; options?: DbPutOptions }>): readonly T[] {
+    const results: T[] = [];
+    for (const entry of entries) {
+      results.push(this.put(entry.id, entry.record, entry.options));
+    }
+    return results;
+  }
+
+  compareAndSwap(
+    id: string,
+    predicate: (current: T | undefined) => boolean,
+    updater: (current: T) => T,
+    options?: DbPutOptions
+  ): { success: boolean; record?: T } {
+    const current = this.get(id);
+    if (!predicate(current)) {
+      return { success: false, record: current };
+    }
+    if (!current) {
+      return { success: false };
+    }
+    const updated = updater({ ...current });
+    const saved = this.put(id, updated, options);
+    return { success: true, record: saved };
+  }
+
   delete(id: string): boolean {
     const existing = this.records.get(id);
     if (!existing) return false;
@@ -206,6 +232,32 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
     }
 
     return true;
+  }
+
+  deleteWhere(where: Record<string, DbWhereValue>): number {
+    const matching = this.query({ where });
+    let deletedCount = 0;
+    for (const record of matching) {
+      const id = (record as any).id;
+      if (id && this.delete(id)) {
+        deletedCount++;
+      }
+    }
+    return deletedCount;
+  }
+
+  updateWhere(where: Record<string, DbWhereValue>, updater: (record: T) => T): number {
+    const matching = this.query({ where });
+    let updatedCount = 0;
+    for (const record of matching) {
+      const id = (record as any).id;
+      if (id) {
+        const updated = updater({ ...record });
+        this.put(id, updated);
+        updatedCount++;
+      }
+    }
+    return updatedCount;
   }
 
   count(): number {
@@ -507,9 +559,37 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
     candidates: T[];
     indexName?: string;
     indexType?: IndexType;
-    scanStrategy: "INDEX_LOOKUP" | "INDEX_RANGE_SCAN" | "PREFIX_SCAN" | "FULL_TABLE_SCAN";
+    scanStrategy: "INDEX_LOOKUP" | "INDEX_RANGE_SCAN" | "COMPOSITE_INDEX_LOOKUP" | "PREFIX_SCAN" | "MULTI_INDEX_INTERSECTION" | "FULL_TABLE_SCAN";
   } {
     if (!options.where) {
+      // Check if sortBy matches a sorted index for zero-cost pre-sorted candidates
+      if (options.sortBy && typeof options.sortBy === "string" && this.sortedIndices.has(options.sortBy)) {
+        const sortedList = this.sortedIndices.get(options.sortBy)!;
+        const candidates: T[] = [];
+        const isDesc = options.sortOrder === "desc";
+        if (isDesc) {
+          for (let i = sortedList.length - 1; i >= 0; i--) {
+            for (const id of sortedList[i].ids) {
+              const r = this.records.get(id);
+              if (r) candidates.push(r);
+            }
+          }
+        } else {
+          for (let i = 0; i < sortedList.length; i++) {
+            for (const id of sortedList[i].ids) {
+              const r = this.records.get(id);
+              if (r) candidates.push(r);
+            }
+          }
+        }
+        return {
+          candidates,
+          indexName: options.sortBy,
+          indexType: "sorted",
+          scanStrategy: "INDEX_RANGE_SCAN",
+        };
+      }
+
       return {
         candidates: Array.from(this.records.values()),
         scanStrategy: "FULL_TABLE_SCAN",
@@ -518,11 +598,153 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
 
     const whereKeys = Object.keys(options.where);
 
+    // 1. Check Composite Indices (Multi-Field Exact Match)
+    for (const [compName, compIndex] of this.compositeIndices.entries()) {
+      const allFieldsPresent = compIndex.fields.every((f) => {
+        const val = options.where![f];
+        return val !== undefined && (typeof val !== "object" || val === null || (val as any).$eq !== undefined);
+      });
+
+      if (allFieldsPresent) {
+        const keyParts = compIndex.fields.map((f) => {
+          const val = options.where![f];
+          if (typeof val === "object" && val !== null && (val as any).$eq !== undefined) {
+            return String((val as any).$eq);
+          }
+          return String(val ?? "");
+        });
+        const compKey = keyParts.join("::");
+        const idSet = compIndex.map.get(compKey);
+        const candidates: T[] = [];
+        if (idSet) {
+          for (const id of idSet) {
+            const r = this.records.get(id);
+            if (r) candidates.push(r);
+          }
+        }
+        return {
+          candidates,
+          indexName: compName,
+          indexType: "composite",
+          scanStrategy: "COMPOSITE_INDEX_LOOKUP",
+        };
+      }
+    }
+
+    // 2. Check Equality Indices & Multi-Index Intersection
+    const matchingEqualitySets: Array<{ field: string; set: Set<string> }> = [];
+
     for (const field of whereKeys) {
       if (this.equalityIndices.has(field)) {
-        const val = options.where[field];
-        if (typeof val !== "object" || val === null) {
-          const idSet = this.equalityIndices.get(field)?.get(val);
+        const rawVal = options.where[field];
+        let targetVal: unknown = rawVal;
+        let isEquality = false;
+
+        if (typeof rawVal !== "object" || rawVal === null) {
+          targetVal = rawVal;
+          isEquality = true;
+        } else if ((rawVal as any).$eq !== undefined) {
+          targetVal = (rawVal as any).$eq;
+          isEquality = true;
+        }
+
+        if (isEquality) {
+          const idSet = this.equalityIndices.get(field)?.get(targetVal);
+          matchingEqualitySets.push({ field, set: idSet || new Set() });
+        }
+      }
+    }
+
+    if (matchingEqualitySets.length > 1) {
+      // Sort sets by size ascending for fastest intersection
+      matchingEqualitySets.sort((a, b) => a.set.size - b.set.size);
+      const primarySet = matchingEqualitySets[0].set;
+      const candidates: T[] = [];
+
+      for (const id of primarySet) {
+        let inAll = true;
+        for (let i = 1; i < matchingEqualitySets.length; i++) {
+          if (!matchingEqualitySets[i].set.has(id)) {
+            inAll = false;
+            break;
+          }
+        }
+        if (inAll) {
+          const r = this.records.get(id);
+          if (r) candidates.push(r);
+        }
+      }
+
+      return {
+        candidates,
+        indexName: matchingEqualitySets.map((m) => m.field).join("+"),
+        indexType: "equality",
+        scanStrategy: "MULTI_INDEX_INTERSECTION",
+      };
+    }
+
+    if (matchingEqualitySets.length === 1) {
+      const match = matchingEqualitySets[0];
+      const candidates: T[] = [];
+      for (const id of match.set) {
+        const r = this.records.get(id);
+        if (r) candidates.push(r);
+      }
+      return {
+        candidates,
+        indexName: match.field,
+        indexType: "equality",
+        scanStrategy: "INDEX_LOOKUP",
+      };
+    }
+
+    // 3. Check Sorted Indices for Range Queries ($gt, $gte, $lt, $lte, $between)
+    for (const field of whereKeys) {
+      if (this.sortedIndices.has(field)) {
+        const filter = options.where[field];
+        if (typeof filter === "object" && filter !== null) {
+          const f = filter as DbFieldFilter;
+          if (f.$between || f.$gt !== undefined || f.$gte !== undefined || f.$lt !== undefined || f.$lte !== undefined) {
+            const sortedList = this.sortedIndices.get(field)!;
+            const candidates: T[] = [];
+
+            for (const entry of sortedList) {
+              const val = entry.value;
+              let match = true;
+
+              if (f.$between && (val < f.$between[0] || val > f.$between[1])) match = false;
+              if (f.$gt !== undefined && val <= (f.$gt as any)) match = false;
+              if (f.$gte !== undefined && val < (f.$gte as any)) match = false;
+              if (f.$lt !== undefined && val >= (f.$lt as any)) match = false;
+              if (f.$lte !== undefined && val > (f.$lte as any)) match = false;
+
+              if (match) {
+                for (const id of entry.ids) {
+                  const r = this.records.get(id);
+                  if (r) candidates.push(r);
+                }
+              }
+            }
+
+            return {
+              candidates,
+              indexName: field,
+              indexType: "sorted",
+              scanStrategy: "INDEX_RANGE_SCAN",
+            };
+          }
+        }
+      }
+    }
+
+    // 4. Check Prefix Indices ($startsWith)
+    for (const field of whereKeys) {
+      if (this.prefixIndices.has(field)) {
+        const filter = options.where[field];
+        if (typeof filter === "object" && filter !== null && (filter as DbFieldFilter).$startsWith) {
+          const prefix = (filter as DbFieldFilter).$startsWith!.toLowerCase();
+          const prefixMap = this.prefixIndices.get(field)!;
+          const idSet = prefixMap.get(prefix);
           const candidates: T[] = [];
           if (idSet) {
             for (const id of idSet) {
@@ -533,8 +755,8 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
           return {
             candidates,
             indexName: field,
-            indexType: "equality",
-            scanStrategy: "INDEX_LOOKUP",
+            indexType: "prefix",
+            scanStrategy: "PREFIX_SCAN",
           };
         }
       }
@@ -665,6 +887,14 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
       }
     }
 
+    for (const [field, sortedList] of this.sortedIndices.entries()) {
+      const rawVal = this.resolveFieldValue(record, field);
+      const val = this.normalizeSortableValue(rawVal);
+      if (val !== undefined) {
+        this.insertSortedIndexEntry(sortedList, val, id);
+      }
+    }
+
     for (const [compName, compIndex] of this.compositeIndices.entries()) {
       const key = this.buildCompositeKey(compIndex.fields, record);
       let idSet = compIndex.map.get(key);
@@ -673,6 +903,13 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
         compIndex.map.set(key, idSet);
       }
       idSet.add(id);
+    }
+
+    for (const [field, prefixMap] of this.prefixIndices.entries()) {
+      const val = this.resolveFieldValue(record, field);
+      if (typeof val === "string") {
+        this.insertPrefixIndex(prefixMap, val, id);
+      }
     }
   }
 
@@ -688,12 +925,43 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
       }
     }
 
+    for (const [field, sortedList] of this.sortedIndices.entries()) {
+      const rawVal = this.resolveFieldValue(record, field);
+      const val = this.normalizeSortableValue(rawVal);
+      if (val !== undefined) {
+        for (let i = 0; i < sortedList.length; i++) {
+          if (sortedList[i].value === val) {
+            sortedList[i].ids.delete(id);
+            if (sortedList[i].ids.size === 0) {
+              sortedList.splice(i, 1);
+            }
+            break;
+          }
+        }
+      }
+    }
+
     for (const [compName, compIndex] of this.compositeIndices.entries()) {
       const key = this.buildCompositeKey(compIndex.fields, record);
       const idSet = compIndex.map.get(key);
       if (idSet) {
         idSet.delete(id);
         if (idSet.size === 0) compIndex.map.delete(key);
+      }
+    }
+
+    for (const [field, prefixMap] of this.prefixIndices.entries()) {
+      const val = this.resolveFieldValue(record, field);
+      if (typeof val === "string") {
+        const normalized = val.toLowerCase();
+        for (let len = 1; len <= Math.min(20, normalized.length); len++) {
+          const prefix = normalized.slice(0, len);
+          const set = prefixMap.get(prefix);
+          if (set) {
+            set.delete(id);
+            if (set.size === 0) prefixMap.delete(prefix);
+          }
+        }
       }
     }
   }

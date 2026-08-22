@@ -46,12 +46,12 @@ export function Footer() {
       { name: 'OpenAI DALL-E 3', href: '/models/openai-dalle-3', note: 'High Definition' },
     ],
     developers: [
+      { name: 'Async Requests & Results', href: '/queues' },
       { name: '30-Second Quickstart', href: '/docs/quickstart' },
       { name: 'REST & SSE API Reference', href: '/docs/api-reference' },
       { name: 'Cursor & Windsurf IDE Setup', href: '/docs/ide-setup' },
       { name: 'Python & Node.js SDKs', href: '/docs/sdks' },
       { name: 'Gateway Architecture', href: '/docs/architecture' },
-      { name: 'Continue.dev Extension', href: '/docs/ide-setup' },
     ],
     enterpriseFinance: [
       { name: 'Business Tax Invoices', href: '/billing/invoices', badge: 'PDF' },

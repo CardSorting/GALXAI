@@ -108,8 +108,15 @@ export class GalxPersistence {
     this.taskTable.createIndex('queueId');
     this.taskTable.createIndex('status');
     this.taskTable.createIndex('userId');
+    this.taskTable.createIndex('groupId');
+    this.taskTable.createIndex('tag');
     this.taskTable.createSortedIndex('priority');
     this.taskTable.createSortedIndex('createdAtMs');
+    this.taskTable.createSortedIndex('scheduleTimeMs');
+    this.taskTable.createSortedIndex('leaseExpiresAtMs');
+    this.taskTable.createCompositeIndex(['queueId', 'status']);
+    this.taskTable.createCompositeIndex(['queueId', 'groupId']);
+    this.taskTable.createCompositeIndex(['queueId', 'userId']);
 
     this.auditTable = new BroccoliDbTable<any>('audit_logs');
     this.auditTable.createIndex('userId');

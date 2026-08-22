@@ -415,37 +415,108 @@ curl -X GET "https://gateway.galx.ai/v1/models/query?q=where+supportsVision+=+tr
 
 ---
 
+---
+
+## ⚡ Rapid 1-Line Execution (`POST /api/run`)
+
+Direct ultra-flat prompt execution endpoint for lightweight scripts, cron jobs, and webhooks:
+
+```bash
+curl -X POST https://gateway.galx.ai/api/run \
+  -H "Authorization: Bearer $GALX_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Summarize today security alerts"}'
+```
+
+---
+
+## 🎭 Anthropic Claude Messages (`POST /v1/messages`)
+
+Drop-in native compatibility endpoint for Anthropic Claude SDK, Claude Code, and Windsurf:
+
+```bash
+curl -X POST https://gateway.galx.ai/v1/messages \
+  -H "x-api-key: $GALX_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-3-7-sonnet",
+    "max_tokens": 1024,
+    "messages": [{"role": "user", "content": "Explain zero knowledge proofs"}]
+  }'
+```
+
+---
+
+## 🧭 Vector Embeddings (`POST /v1/embeddings`)
+
+OpenAI-compatible vector embedding generations backed by BroccoliDB L1 in-memory cosine indexing:
+
+```bash
+curl -X POST https://gateway.galx.ai/v1/embeddings \
+  -H "Authorization: Bearer $GALX_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "text-embedding-3-small",
+    "input": "Quantum computing and topological qubits"
+  }'
+```
+
+---
+
+## 🏥 Platform Discovery & Health (`GET /api/health`)
+
+Real-time capability negotiation and telemetry status:
+
+```bash
+curl -X GET https://gateway.galx.ai/api/health
+```
+
+Response:
+```json
+{
+  "status": "healthy",
+  "version": "2.0.0-zenith",
+  "capabilities": {
+    "openai_compatible": true,
+    "anthropic_compatible": true,
+    "streaming_sse": true,
+    "dag_workflows": true,
+    "async_queues": true,
+    "zdr_privacy_shield": true
+  },
+  "models": {
+    "total": 12,
+    "reasoningCount": 4,
+    "defaultModel": "gpt-5.6-sol"
+  }
+}
+```
+
+---
+
 ## 📦 Official Universal Developer SDK Reference
 
-For zero-boilerplate client integration without raw HTTP calls, use `@galxai/sdk`:
+For zero-boilerplate client integration, use `@galxai/sdk`:
 
 ```typescript
-import { GalxAI } from '@/sdk';
+import galx, { run, stream, extract, tool, generateImage } from 'galxai';
 
-const galx = new GalxAI({ apiKey: process.env.GALX_API_KEY });
+// 1. Tagged template literal
+const summary = await galx`Summarize key facts on ${topic}`;
 
-// Chat & Streaming with Auto Quota Cycling
-const stream = await galx.chat.completions.create({ model: 'gpt-5.6-sol', messages: [...], stream: true });
+// 2. Direct 1-line execution
+const answer = await run('Explain quantum mechanics');
 
-// Offline Natural Query Searching
-const models = galx.models.queryNatural('where category = "reasoning" sort by contextWindow desc');
-const tasks = galx.queues.queryNatural('where state = "pending" and priority > 5');
+// 3. Streaming async generator
+for await (const chunk of stream('Write a poem')) {
+  process.stdout.write(chunk);
+}
 
-// Autonomous Multi-Step Agent Tool Loop
-const agent = galx.agent({ model: 'gpt-5.6-sol', tools: { ... } });
-const agentOutput = await agent.run('Investigate stock anomalies.');
-
-// Strongly-Typed Structured Outputs
-const data = await galx.chat.structured({ model: 'gpt-5.6-sol', messages: [...], schema: { ... } });
-
-// Background Tasks & SSE Progress
-const task = await galx.chat.completions.createAsync({ model: 'gpt-5.6-sol', messages: [...], queue: 'llm-batch' });
-for await (const progress of task.streamProgress()) console.log(progress.percentage);
-
-// Real-Time SOC 2 & HIPAA Posture
-const posture = galx.compliance.getPostureReport();
-console.log(`Compliance Grade: ${posture.grade}`);
+// 4. Structured extraction
+const user = await extract('Jane, 29, SF', { name: 'string', age: 'number', city: 'string' });
 ```
+
 
 
 

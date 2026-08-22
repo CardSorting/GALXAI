@@ -218,7 +218,28 @@ export class EmbeddingsRepository {
     return this.embeddingsTable.query(parsed.queryOptions) as (EmbeddingItem & { id: string })[];
   }
 
-  private cosineSimilarity(a: number[], b: number[]): number {
+  public generateDeterministicVector(text: string, dimensions = 1536): number[] {
+    const vector = new Array(dimensions).fill(0);
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+      hash = ((hash << 5) - hash) + text.charCodeAt(i);
+      hash |= 0;
+      const idx = Math.abs(hash) % dimensions;
+      vector[idx] += ((i % 7) + 1) * 0.1;
+    }
+    // L2 Normalize
+    let norm = 0;
+    for (let i = 0; i < dimensions; i++) {
+      norm += vector[i] * vector[i];
+    }
+    const mag = Math.sqrt(norm) || 1;
+    for (let i = 0; i < dimensions; i++) {
+      vector[i] = Number((vector[i] / mag).toFixed(6));
+    }
+    return vector;
+  }
+
+  public cosineSimilarity(a: number[], b: number[]): number {
     if (!a || !b || a.length !== b.length || a.length === 0) return 0;
     let dot = 0;
     let normA = 0;

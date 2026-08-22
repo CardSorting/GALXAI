@@ -39,6 +39,9 @@ This directory contains the formal Architectural Decision Records (ADRs) that go
 | **[ADR 0029](0029-sliding-window-streaming-transformer-and-cross-chunk-split-pii.md)** | Sliding-Window Streaming Transformer & Boundary Split PII | **Streaming PII** | `Accepted` | Zero-delay online token stream windowing for fragmented PII/PHI de-identification. |
 | **[ADR 0030](0030-ephemeral-session-enclave-and-zero-knowledge-attestation-tickets.md)** | Ephemeral Session Enclaves & Zero-Knowledge Attestation Tickets | **Audit Proofs** | `Accepted` | Request-isolated Session KEK, 2-pass memory wiping, and mathematical ZKAT auditor receipts. |
 | **[ADR 0031](0031-dynamic-security-probe-and-automated-drift-healing.md)** | Dynamic Security Pen-Test Probe & Autonomous Drift Remediation | **Self-Healing** | `Accepted` | Sandboxed synthetic attack simulation and automatic drift remediation loops. |
+| **[ADR 0032](0032-ultra-flat-effortless-sdk-strategy-and-callable-tagged-templates.md)** | Ultra-Flat Effortless Developer SDK Strategy & Tagged Templates | **Developer SDK** | `Accepted` | Callable `galx` export, tagged template literals, top-level `run`/`stream`/`extract`, and tool wrappers. |
+| **[ADR 0033](0033-universal-api-strategy-anthropic-messages-embeddings-and-health.md)** | Universal API Strategy: Anthropic Messages, Embeddings & Discovery | **API Strategy** | `Accepted` | Native Anthropic `/v1/messages`, OpenAI `/v1/embeddings`, `/api/health`, and rapid `/api/run`. |
+| **[ADR 0034](0034-autonomous-agent-1-click-context-and-auto-copy-substrate.md)** | Autonomous Agent 1-Click Context & Zero-Friction Event Pipeline | **Agent UX** | `Accepted` | Structured Markdown agent context, direct 1-click format chips, and zero-click Auto-Copy on completion. |
 
 ---
 

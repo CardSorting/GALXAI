@@ -9,30 +9,33 @@ This guide covers the internal codebase structure, architectural layers, how to 
 ```text
 GALXAI/
 ├── docs/                             # Comprehensive Architecture & API Documentation
-│   ├── adr/                          # Architecture Decision Records (0001-0005)
+│   ├── adr/                          # Architecture Decision Records (0001-0034)
 │   ├── ARCHITECTURE.md               # System overview, lifecycle, and security model
-│   ├── API_REFERENCE.md              # REST API endpoint specifications
+│   ├── API_REFERENCE.md              # REST API endpoint specifications (/v1 & /api)
+│   ├── SDK_SPECIFICATION.md          # Universal Developer SDK & Ultra-Flat Ergonomics
 │   ├── QUICKSTART.md                 # Python, Node.js, Cursor, Continue setup
 │   ├── ROUTING_ALGORITHMS.md         # Mathematical derivations of P-AHT, SWRR, WLC
 │   ├── SECURITY.md                   # Envelope cryptography and threat model
 │   ├── DEVELOPER_GUIDE.md            # Contributing guide and adapter development
 │   └── TROUBLESHOOTING.md            # Error classification and operational playbooks
 ├── scripts/
-│   └── validate-galxai-router.ts     # 27-suite forensic verification test runner
+│   └── validate-galxai-router.ts     # 50-suite forensic verification test runner (177 tests)
 ├── src/
-│   ├── app/                          # Next.js App Router (49 routes)
-│   │   ├── api/                      # Gateway admin & pool management API routes
-│   │   ├── v1/                       # OpenAI-compatible public API routes
-│   │   │   ├── chat/completions/
-│   │   │   ├── images/generations/
-│   │   │   └── models/
+│   ├── app/                          # Next.js App Router
+│   │   ├── api/                      # Gateway admin, queues, health, run, & pool API routes
+│   │   ├── v1/                       # OpenAI & Anthropic-compatible public API routes
+│   │   │   ├── chat/completions/     # OpenAI chat completions
+│   │   │   ├── messages/             # Anthropic Claude messages
+│   │   │   ├── embeddings/           # OpenAI vector embeddings
+│   │   │   ├── images/generations/   # Multi-modal image generation
+│   │   │   └── models/               # Model discovery
+│   │   ├── queues/                   # Requests & Results canvas (1-click agent copy)
 │   │   ├── docs/                     # In-app interactive documentation pages
 │   │   ├── keys/                     # Developer Gateway Key management
 │   │   ├── models/                   # Model explorer and comparator
 │   │   ├── playground/               # Interactive real-time test environment
-│   │   ├── pricing/                  # Live pricing matrix & calculator
-│   │   ├── telemetry/                # Live histogram latency feed
 │   │   └── vault/                    # Credential deposit and simulator
+│   ├── sdk/                          # Zero-dependency Universal SDK (TypeScript / Python)
 │   ├── components/                   # React UI Components
 │   ├── core/                         # Pure TypeScript Gateway Engine (zero React dependencies)
 │   │   ├── circuit/                  # 4-State Circuit Breaker with Canary Warming

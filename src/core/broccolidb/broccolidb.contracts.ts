@@ -200,7 +200,7 @@ export interface QueryExecutionPlan {
   readonly table: string;
   readonly matchedIndex?: string;
   readonly indexType?: IndexType;
-  readonly scanStrategy: "INDEX_LOOKUP" | "INDEX_RANGE_SCAN" | "PREFIX_SCAN" | "FULL_TABLE_SCAN";
+  readonly scanStrategy: "INDEX_LOOKUP" | "INDEX_RANGE_SCAN" | "COMPOSITE_INDEX_LOOKUP" | "PREFIX_SCAN" | "MULTI_INDEX_INTERSECTION" | "FULL_TABLE_SCAN";
   readonly candidatesScanned: number;
   readonly recordsMatched: number;
   readonly executionTimeMicros: number;
@@ -216,7 +216,16 @@ export interface IDbTable<T extends Record<string, any> = Record<string, any>> {
   get(id: string): T | undefined;
   getAll(): readonly T[];
   put(id: string, record: T, options?: DbPutOptions): T;
+  putMany(entries: ReadonlyArray<{ id: string; record: T; options?: DbPutOptions }>): readonly T[];
+  compareAndSwap(
+    id: string,
+    predicate: (current: T | undefined) => boolean,
+    updater: (current: T) => T,
+    options?: DbPutOptions
+  ): { success: boolean; record?: T };
   delete(id: string): boolean;
+  deleteWhere(where: Record<string, DbWhereValue>): number;
+  updateWhere(where: Record<string, DbWhereValue>, updater: (record: T) => T): number;
   query(options?: DbQueryOptions): readonly T[];
   createIndex(field: keyof T & string): void;
   createSortedIndex(field: keyof T & string): void;

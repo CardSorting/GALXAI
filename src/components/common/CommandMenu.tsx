@@ -89,6 +89,9 @@ export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
         } else if (e.key === 'k') {
           e.preventDefault();
           router.push('/keys');
+        } else if (e.key === 'q') {
+          e.preventDefault();
+          router.push('/queues');
         } else if (e.key === 's') {
           e.preventDefault();
           router.push('/status');
@@ -145,6 +148,13 @@ export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
               </span>
             </div>
             <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5">
+              <span className="text-zinc-300">Go to Requests & Results</span>
+              <span className="space-x-1">
+                <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">g</kbd>
+                <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">q</kbd>
+              </span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5">
               <span className="text-zinc-300">Go to Playground</span>
               <span className="space-x-1">
                 <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">g</kbd>
@@ -192,6 +202,7 @@ export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
   );
 
   const quickPages = [
+    { label: 'Requests & Results (Async AI)', href: '/queues', icon: Activity, category: 'Navigation' },
     { label: 'Models & Pricing Matrix', href: '/models', icon: Cpu, category: 'Navigation' },
     { label: 'Plain English Beginner Guide', href: '/docs/simple', icon: Sparkles, category: 'Getting Started' },
     { label: 'AI Agents & Swarms Infrastructure', href: '/docs/agents', icon: Rocket, category: 'Solutions' },

@@ -55,6 +55,11 @@ export function Navigation() {
       ariaLabel: 'Frontier AI Models & Battle Arena - Compare 12 Models',
     },
     {
+      label: t('nav.requests', 'Requests & Results'),
+      href: '/queues',
+      ariaLabel: 'Submit Async AI Requests & View Live Results',
+    },
+    {
       label: t('nav.apps', 'Apps & Solutions'),
       href: '/docs/simple',
       ariaLabel: 'Zero-Code Apps & Solutions Setup',

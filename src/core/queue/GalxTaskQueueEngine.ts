@@ -12,7 +12,6 @@ import type {
   QueueRetryConfig,
   TaskAttemptRecord,
   TaskProgressUpdate,
-  TaskProgressInfo,
   CronScheduleConfig,
   BulkRedriveRequest,
   BulkRedriveResponse,
@@ -31,28 +30,13 @@ interface DestinationCircuitBreakerState {
 
 /**
  * Enterprise CloudTasks & CloudRun-Inspired Asynchronous Queue & Push/Pull Worker Substrate.
- *
- * Implements:
- * 1. Named Dynamic Task Queues with token-bucket dispatch pacing & concurrency semaphores.
- * 2. Strict FIFO Partition Grouping (sequential order per groupId with cross-group parallel dispatching).
- * 3. Directed Acyclic Graph (DAG) Task Dependencies (Fan-In/Fan-Out dependsOn orchestration).
- * 4. Destination Circuit Breakers for HTTP Push Webhooks with automated host cooling.
- * 5. Dynamic Anti-Starvation Priority Aging (prevents starvation of waiting lower-priority tasks).
- * 6. Content-Based Deduplication & Configurable Sliding Windows (SHA-256 canonical hashing).
- * 7. Wall-Clock Deadlines & Task Expiration SLAs (deadlineMs / ttlMs).
- * 8. Real-Time Server-Sent Events (SSE) Event Bus integration.
- * 9. Multi-Step Pipeline Workflows (DAGs): Step execution with automatic payload piping and interim progress.
- * 10. Native Cron & Recurring Scheduling Engine with automatic next-run calculus.
- * 11. Pull Worker Leases with monotonic fencing tokens and heartbeat renewal.
- * 12. Exponential Backoff with full randomized jitter and Dead-Letter Queue (DLQ) topology.
- * 13. Bulk Dead-Letter Queue (DLQ) Redrive and Bulk Multi-Criteria Cancellation.
+ * Fully backed by BroccoliDB L1 In-Memory Reactive Tables, Multi-Modal Secondary & Composite Indexing,
+ * Atomic Compare-And-Swap (CAS) Leasing, Dynamic Priority Aging, and Real-Time Event Streams.
  */
 export class GalxTaskQueueEngine {
   private static instance: GalxTaskQueueEngine;
   private readonly persistence: GalxPersistence;
   private readonly eventBus: GalxQueueEventBus;
-  private readonly queues = new Map<string, GalxTaskQueueConfig>();
-  private readonly tasks = new Map<string, GalxTask>();
   private readonly idempotencyMap = new Map<string, { taskId: string; expiresAtMs: number }>();
   private readonly inFlightPerQueue = new Map<string, number>();
   private readonly inFlightPerTenant = new Map<string, number>();
@@ -73,6 +57,7 @@ export class GalxTaskQueueEngine {
     this.eventBus = eventBus;
     this.initializeDefaultQueues();
     this.loadStateFromPersistence();
+    this.setupReactiveBroccoliSubscription();
     this.startDispatcher();
   }
 
@@ -84,7 +69,7 @@ export class GalxTaskQueueEngine {
   }
 
   /**
-   * Initializes standard high-throughput default queues.
+   * Initializes standard high-throughput default queues if not already existing.
    */
   private initializeDefaultQueues(): void {
     const now = Date.now();
@@ -239,32 +224,48 @@ export class GalxTaskQueueEngine {
     ];
 
     for (const q of defaults) {
-      this.queues.set(q.id, q);
+      if (!this.persistence.queueTable.get(q.id)) {
+        this.persistence.queueTable.put(q.id, q);
+      }
     }
   }
 
   private loadStateFromPersistence(): void {
-    const savedQueues = this.persistence.getQueues();
-    for (const q of savedQueues) {
-      this.queues.set(q.id, q);
-    }
+    const savedTasks = this.persistence.taskTable.getAll();
+    const now = Date.now();
 
-    const savedTasks = this.persistence.getTasks();
     for (const t of savedTasks) {
-      this.tasks.set(t.id, t);
       if (t.idempotencyKey) {
         this.idempotencyMap.set(`${t.queueId}:${t.userId}:${t.idempotencyKey}`, {
           taskId: t.id,
           expiresAtMs: t.createdAtMs + (t.deduplicationWindowMs || 86400000)
         });
       }
-      // If task was in DISPATCHING or RUNNING when restarted, reset to RETRYING or QUEUED
+      // If task was in DISPATCHING or RUNNING when restarted, reset to RETRYING
       if (t.status === 'DISPATCHING' || t.status === 'RUNNING') {
-        t.status = 'RETRYING';
-        t.scheduleTimeMs = Date.now() + 1000;
-        this.tasks.set(t.id, t);
+        const updated: GalxTask = {
+          ...t,
+          status: 'RETRYING',
+          scheduleTimeMs: now + 1000,
+          updatedAtMs: now
+        };
+        this.persistence.taskTable.put(t.id, updated);
       }
     }
+  }
+
+  /**
+   * Sets up reactive event-driven wakeups directly from BroccoliDB changefeeds.
+   */
+  private setupReactiveBroccoliSubscription(): void {
+    this.persistence.taskTable.subscribe((evt) => {
+      if (evt.operation === 'INSERT' || evt.operation === 'UPDATE') {
+        const status = evt.after?.status;
+        if (status === 'QUEUED' || status === 'RETRYING' || status === 'SCHEDULED') {
+          this.pulseDispatcher();
+        }
+      }
+    });
   }
 
   // =========================================================================
@@ -272,7 +273,7 @@ export class GalxTaskQueueEngine {
   // =========================================================================
 
   public createOrUpdateQueue(config: Partial<GalxTaskQueueConfig> & { id: string; name: string }): GalxTaskQueueConfig {
-    const existing = this.queues.get(config.id);
+    const existing = this.persistence.queueTable.get(config.id);
     const now = Date.now();
 
     const fullConfig: GalxTaskQueueConfig = {
@@ -302,7 +303,6 @@ export class GalxTaskQueueEngine {
       updatedAtMs: now
     };
 
-    this.queues.set(fullConfig.id, fullConfig);
     this.persistence.saveQueue(fullConfig);
     this.eventBus.emitEvent('QUEUE_STATE_CHANGED', fullConfig.id, undefined, { state: fullConfig.state });
     this.pulseDispatcher();
@@ -310,28 +310,26 @@ export class GalxTaskQueueEngine {
   }
 
   public getQueue(queueId: string): GalxTaskQueueConfig | undefined {
-    return this.queues.get(queueId);
+    return this.persistence.queueTable.get(queueId);
   }
 
   public listQueues(): GalxTaskQueueConfig[] {
-    return Array.from(this.queues.values());
+    return this.persistence.queueTable.getAll() as GalxTaskQueueConfig[];
   }
 
   public pauseQueue(queueId: string): boolean {
-    const q = this.queues.get(queueId);
+    const q = this.persistence.queueTable.get(queueId);
     if (!q) return false;
     const updated: GalxTaskQueueConfig = { ...q, state: 'PAUSED', updatedAtMs: Date.now() };
-    this.queues.set(queueId, updated);
     this.persistence.saveQueue(updated);
     this.eventBus.emitEvent('QUEUE_STATE_CHANGED', queueId, undefined, { state: 'PAUSED' });
     return true;
   }
 
   public resumeQueue(queueId: string): boolean {
-    const q = this.queues.get(queueId);
+    const q = this.persistence.queueTable.get(queueId);
     if (!q) return false;
     const updated: GalxTaskQueueConfig = { ...q, state: 'RUNNING', updatedAtMs: Date.now() };
-    this.queues.set(queueId, updated);
     this.persistence.saveQueue(updated);
     this.eventBus.emitEvent('QUEUE_STATE_CHANGED', queueId, undefined, { state: 'RUNNING' });
     this.pulseDispatcher();
@@ -339,10 +337,9 @@ export class GalxTaskQueueEngine {
   }
 
   public drainQueue(queueId: string): boolean {
-    const q = this.queues.get(queueId);
+    const q = this.persistence.queueTable.get(queueId);
     if (!q) return false;
     const updated: GalxTaskQueueConfig = { ...q, state: 'DRAINING', updatedAtMs: Date.now() };
-    this.queues.set(queueId, updated);
     this.persistence.saveQueue(updated);
     this.eventBus.emitEvent('QUEUE_STATE_CHANGED', queueId, undefined, { state: 'DRAINING' });
     return true;
@@ -352,33 +349,17 @@ export class GalxTaskQueueEngine {
     if (queueId === 'default' || queueId === 'dead-letter') {
       throw new Error(`Cannot delete system queue: '${queueId}'`);
     }
-    const existed = this.queues.delete(queueId);
+    const existed = !!this.persistence.queueTable.get(queueId);
     if (existed) {
       this.persistence.deleteQueue(queueId);
-      for (const [taskId, task] of this.tasks.entries()) {
-        if (task.queueId === queueId) {
-          this.tasks.delete(taskId);
-        }
-      }
     }
     return existed;
   }
 
   public purgeQueue(queueId: string, statusFilter?: string): number {
-    const q = this.queues.get(queueId);
+    const q = this.persistence.queueTable.get(queueId);
     if (!q) throw new Error(`Queue '${queueId}' does not exist.`);
-    let purged = 0;
-    for (const [taskId, task] of this.tasks.entries()) {
-      if (task.queueId === queueId) {
-        if (!statusFilter || task.status === statusFilter) {
-          if (task.groupId) this.inFlightGroups.delete(task.groupId);
-          this.tasks.delete(taskId);
-          purged++;
-        }
-      }
-    }
-    this.persistence.purgeQueueTasks(queueId, statusFilter);
-    return purged;
+    return this.persistence.purgeQueueTasks(queueId, statusFilter);
   }
 
   // =========================================================================
@@ -387,7 +368,7 @@ export class GalxTaskQueueEngine {
 
   public createTask(options: CreateTaskOptions): { task: GalxTask; deduplicated: boolean } {
     const queueId = options.queueId || 'default';
-    const queue = this.queues.get(queueId);
+    const queue = this.persistence.queueTable.get(queueId);
     if (!queue) {
       throw new Error(`Target queue '${queueId}' does not exist.`);
     }
@@ -415,7 +396,7 @@ export class GalxTaskQueueEngine {
       const fullDedupKey = `${queueId}:${userId}:${dedupKey}`;
       const existingRecord = this.idempotencyMap.get(fullDedupKey);
       if (existingRecord && existingRecord.expiresAtMs > now) {
-        const existingTask = this.tasks.get(existingRecord.taskId);
+        const existingTask = this.persistence.taskTable.get(existingRecord.taskId);
         if (existingTask) {
           return { task: existingTask, deduplicated: true };
         }
@@ -441,7 +422,7 @@ export class GalxTaskQueueEngine {
     let initialStatus: TaskStatus = scheduleTimeMs > now + 50 ? 'SCHEDULED' : 'QUEUED';
     if (options.dependsOn && options.dependsOn.length > 0) {
       const allParentsCompleted = options.dependsOn.every(pId => {
-        const p = this.tasks.get(pId);
+        const p = this.persistence.taskTable.get(pId);
         return p && p.status === 'COMPLETED';
       });
       if (!allParentsCompleted) {
@@ -489,8 +470,7 @@ export class GalxTaskQueueEngine {
       }
     };
 
-    this.tasks.set(task.id, task);
-    this.persistence.saveTask(task);
+    this.persistence.taskTable.put(task.id, task);
 
     if (dedupKey) {
       const fullDedupKey = `${queueId}:${userId}:${dedupKey}`;
@@ -541,46 +521,39 @@ export class GalxTaskQueueEngine {
   }
 
   public getTask(taskId: string): GalxTask | undefined {
-    return this.tasks.get(taskId);
+    return this.persistence.taskTable.get(taskId);
   }
 
   public listTasks(
     queueId?: string,
     filter?: { status?: TaskStatus; tag?: string; groupId?: string; userId?: string; limit?: number; offset?: number }
   ): { tasks: GalxTask[]; totalCount: number } {
-    let all = Array.from(this.tasks.values());
+    const whereClause: Record<string, any> = {};
+    if (queueId) whereClause.queueId = { $eq: queueId };
+    if (filter?.status) whereClause.status = { $eq: filter.status };
+    if (filter?.tag) whereClause.tag = { $eq: filter.tag };
+    if (filter?.groupId) whereClause.groupId = { $eq: filter.groupId };
+    if (filter?.userId) whereClause.userId = { $eq: filter.userId };
 
-    if (queueId) {
-      all = all.filter(t => t.queueId === queueId);
-    }
-    if (filter?.status) {
-      all = all.filter(t => t.status === filter.status);
-    }
-    if (filter?.tag) {
-      all = all.filter(t => t.tag === filter.tag);
-    }
-    if (filter?.groupId) {
-      all = all.filter(t => t.groupId === filter.groupId);
-    }
-    if (filter?.userId) {
-      all = all.filter(t => t.userId === filter.userId);
-    }
+    let results = this.persistence.taskTable.query({
+      where: Object.keys(whereClause).length > 0 ? whereClause : undefined
+    }) as GalxTask[];
 
-    all.sort((a, b) => {
+    results.sort((a, b) => {
       if (b.priority !== a.priority) return b.priority - a.priority;
       return b.createdAtMs - a.createdAtMs;
     });
 
-    const totalCount = all.length;
+    const totalCount = results.length;
     const offset = filter?.offset || 0;
     const limit = filter?.limit || 100;
-    const paged = all.slice(offset, offset + limit);
+    const paged = results.slice(offset, offset + limit);
 
     return { tasks: paged, totalCount };
   }
 
   public cancelTask(taskId: string): boolean {
-    const task = this.tasks.get(taskId);
+    const task = this.persistence.taskTable.get(taskId);
     if (!task) return false;
     if (task.status === 'COMPLETED' || task.status === 'CANCELLED' || task.status === 'EXPIRED') {
       return false;
@@ -588,33 +561,38 @@ export class GalxTaskQueueEngine {
     if (task.groupId) {
       this.inFlightGroups.delete(task.groupId);
     }
-    task.status = 'CANCELLED';
-    task.updatedAtMs = Date.now();
+    const updated: GalxTask = {
+      ...task,
+      status: 'CANCELLED',
+      updatedAtMs: Date.now()
+    };
+    this.persistence.taskTable.put(taskId, updated);
     this.updateTaskProgress(taskId, {
       percentage: 100,
       message: 'Task cancelled by user/administrator',
       logLine: 'Task cancelled.'
     });
-    this.tasks.set(taskId, task);
-    this.persistence.saveTask(task);
     this.eventBus.emitEvent('TASK_CANCELLED', task.queueId, taskId);
     return true;
   }
 
   public retryTask(taskId: string): boolean {
-    const task = this.tasks.get(taskId);
+    const task = this.persistence.taskTable.get(taskId);
     if (!task) return false;
-    task.status = 'QUEUED';
-    task.scheduleTimeMs = Date.now();
-    task.updatedAtMs = Date.now();
-    task.lastError = undefined;
+    const now = Date.now();
+    const updated: GalxTask = {
+      ...task,
+      status: 'QUEUED',
+      scheduleTimeMs: now,
+      updatedAtMs: now,
+      lastError: undefined
+    };
+    this.persistence.taskTable.put(taskId, updated);
     this.updateTaskProgress(taskId, {
       percentage: 0,
       message: 'Task re-queued for execution',
       logLine: 'Task manually re-driven into queue.'
     });
-    this.tasks.set(taskId, task);
-    this.persistence.saveTask(task);
     this.eventBus.emitEvent('TASK_QUEUED', task.queueId, taskId);
     this.pulseDispatcher();
     return true;
@@ -625,13 +603,16 @@ export class GalxTaskQueueEngine {
   // =========================================================================
 
   public bulkRedrive(queueId: string, req: BulkRedriveRequest): BulkRedriveResponse {
-    const queue = this.queues.get(queueId);
+    const queue = this.persistence.queueTable.get(queueId);
     if (!queue) throw new Error(`Queue '${queueId}' not found.`);
 
     const maxTasks = req.maxTasks ?? 100;
-    const candidates = Array.from(this.tasks.values()).filter(t => {
-      if (t.queueId !== queueId) return false;
-      if (t.status !== 'DEAD_LETTERED' && t.status !== 'EXPIRED') return false;
+    const candidates = (this.persistence.taskTable.query({
+      where: {
+        queueId: { $eq: queueId },
+        status: { $in: ['DEAD_LETTERED', 'EXPIRED'] }
+      }
+    }) as GalxTask[]).filter(t => {
       if (req.tag && t.tag !== req.tag) return false;
       if (req.userId && t.userId !== req.userId) return false;
       return true;
@@ -641,13 +622,15 @@ export class GalxTaskQueueEngine {
     const now = Date.now();
 
     for (const t of candidates) {
-      t.status = 'QUEUED';
-      t.scheduleTimeMs = now;
-      t.updatedAtMs = now;
-      t.dispatchCount = 0; // reset dispatch count for fresh retry lifecycle
-      t.lastError = undefined;
-      this.tasks.set(t.id, t);
-      this.persistence.saveTask(t);
+      const updated: GalxTask = {
+        ...t,
+        status: 'QUEUED',
+        scheduleTimeMs: now,
+        updatedAtMs: now,
+        dispatchCount: 0,
+        lastError: undefined
+      };
+      this.persistence.taskTable.put(t.id, updated);
       this.eventBus.emitEvent('TASK_QUEUED', queueId, t.id);
       redrivenIds.push(t.id);
     }
@@ -660,16 +643,19 @@ export class GalxTaskQueueEngine {
   }
 
   public bulkCancel(queueId: string, req: BulkCancelRequest): BulkCancelResponse {
-    const queue = this.queues.get(queueId);
+    const queue = this.persistence.queueTable.get(queueId);
     if (!queue) throw new Error(`Queue '${queueId}' not found.`);
 
     const cancelableStatuses: TaskStatus[] = req.statusFilter
       ? [req.statusFilter]
       : ['QUEUED', 'SCHEDULED', 'WAITING_DEPENDENCIES', 'RETRYING'];
 
-    const candidates = Array.from(this.tasks.values()).filter(t => {
-      if (t.queueId !== queueId) return false;
-      if (!cancelableStatuses.includes(t.status)) return false;
+    const candidates = (this.persistence.taskTable.query({
+      where: {
+        queueId: { $eq: queueId },
+        status: { $in: cancelableStatuses }
+      }
+    }) as GalxTask[]).filter(t => {
       if (req.tag && t.tag !== req.tag) return false;
       if (req.userId && t.userId !== req.userId) return false;
       if (req.groupId && t.groupId !== req.groupId) return false;
@@ -681,10 +667,12 @@ export class GalxTaskQueueEngine {
 
     for (const t of candidates) {
       if (t.groupId) this.inFlightGroups.delete(t.groupId);
-      t.status = 'CANCELLED';
-      t.updatedAtMs = now;
-      this.tasks.set(t.id, t);
-      this.persistence.saveTask(t);
+      const updated: GalxTask = {
+        ...t,
+        status: 'CANCELLED',
+        updatedAtMs: now
+      };
+      this.persistence.taskTable.put(t.id, updated);
       this.eventBus.emitEvent('TASK_CANCELLED', queueId, t.id);
       cancelledIds.push(t.id);
     }
@@ -700,7 +688,7 @@ export class GalxTaskQueueEngine {
   // =========================================================================
 
   public updateTaskProgress(taskId: string, update: TaskProgressUpdate): boolean {
-    const task = this.tasks.get(taskId);
+    const task = this.persistence.taskTable.get(taskId);
     if (!task) return false;
 
     const now = Date.now();
@@ -709,21 +697,22 @@ export class GalxTaskQueueEngine {
       ? [...existingLogs, `[${new Date(now).toISOString()}] ${update.logLine}`]
       : existingLogs;
 
-    task.progress = {
-      percentage: Math.min(100, Math.max(0, update.percentage)),
-      message: update.message ?? task.progress?.message,
-      currentStep: update.currentStep ?? task.progress?.currentStep,
-      stepIndex: update.stepIndex ?? task.progress?.stepIndex,
-      totalSteps: update.totalSteps ?? task.progress?.totalSteps,
+    const updated: GalxTask = {
+      ...task,
       updatedAtMs: now,
-      logs: updatedLogs.slice(-100) // keep last 100 log entries
+      progress: {
+        percentage: Math.min(100, Math.max(0, update.percentage)),
+        message: update.message ?? task.progress?.message,
+        currentStep: update.currentStep ?? task.progress?.currentStep,
+        stepIndex: update.stepIndex ?? task.progress?.stepIndex,
+        totalSteps: update.totalSteps ?? task.progress?.totalSteps,
+        updatedAtMs: now,
+        logs: updatedLogs.slice(-100)
+      }
     };
 
-    task.updatedAtMs = now;
-    this.tasks.set(taskId, task);
-    this.persistence.saveTask(task);
-
-    this.eventBus.emitEvent('TASK_PROGRESS', task.queueId, taskId, task.progress);
+    this.persistence.taskTable.put(taskId, updated);
+    this.eventBus.emitEvent('TASK_PROGRESS', task.queueId, taskId, updated.progress);
     return true;
   }
 
@@ -740,11 +729,11 @@ export class GalxTaskQueueEngine {
   }
 
   // =========================================================================
-  // DISTRIBUTED PULL WORKER LEASING API (With FIFO & Dynamic Priority Aging)
+  // DISTRIBUTED PULL WORKER LEASING API (With Atomic CAS, FIFO & Priority Aging)
   // =========================================================================
 
   public leaseTasks(queueId: string, req: TaskLeaseRequest): TaskLeaseResult {
-    const queue = this.queues.get(queueId);
+    const queue = this.persistence.queueTable.get(queueId);
     if (!queue || (queue.state !== 'RUNNING' && queue.state !== 'DRAINING')) {
       return { tasks: [], leasedCount: 0, leaseExpiresAtMs: Date.now() };
     }
@@ -754,9 +743,13 @@ export class GalxTaskQueueEngine {
     const leaseDurationMs = Math.min(600000, Math.max(5000, req.leaseDurationMs || 60000));
     const leaseExpiresAtMs = now + leaseDurationMs;
 
-    const eligible = Array.from(this.tasks.values())
+    const eligible = (this.persistence.taskTable.query({
+      where: {
+        queueId: { $eq: queueId },
+        status: { $in: ['QUEUED', 'SCHEDULED', 'RETRYING', 'RUNNING'] }
+      }
+    }) as GalxTask[])
       .filter(t => {
-        if (t.queueId !== queueId) return false;
         if (t.target.type !== 'PULL_WORKER') return false;
         if (req.tagFilter && t.tag !== req.tagFilter) return false;
         if (req.groupIdFilter && t.groupId !== req.groupIdFilter) return false;
@@ -766,9 +759,14 @@ export class GalxTaskQueueEngine {
           if (this.inFlightGroups.has(t.groupId) && this.inFlightGroups.get(t.groupId) !== t.id) {
             return false;
           }
-          const hasPriorInGroup = Array.from(this.tasks.values()).some(other =>
-            other.queueId === queueId &&
-            other.groupId === t.groupId &&
+          const priorTasks = this.persistence.taskTable.query({
+            where: {
+              queueId: { $eq: queueId },
+              groupId: { $eq: t.groupId }
+            }
+          }) as GalxTask[];
+
+          const hasPriorInGroup = priorTasks.some(other =>
             other.id !== t.id &&
             (other.createdAtMs < t.createdAtMs || (other.createdAtMs === t.createdAtMs && other.id < t.id)) &&
             ['QUEUED', 'SCHEDULED', 'RETRYING', 'DISPATCHING', 'RUNNING'].includes(other.status)
@@ -804,25 +802,35 @@ export class GalxTaskQueueEngine {
       }
 
       this.fencingTokenCounter++;
-      t.status = 'RUNNING';
-      t.activeWorkerId = req.workerId;
-      t.activeFencingToken = this.fencingTokenCounter;
-      t.leaseExpiresAtMs = leaseExpiresAtMs;
-      t.dispatchCount += 1;
-      t.lastAttemptMs = now;
-      if (!t.firstAttemptMs) t.firstAttemptMs = now;
-      t.updatedAtMs = now;
+      const currentToken = this.fencingTokenCounter;
 
-      this.updateTaskProgress(t.id, {
-        percentage: 10,
-        message: `Leased by worker ${req.workerId}`,
-        logLine: `Worker lease acquired with fencingToken #${t.activeFencingToken}`
-      });
+      // Atomic Compare-And-Swap to guarantee single lease
+      const casRes = this.persistence.taskTable.compareAndSwap(
+        t.id,
+        (curr) => curr !== undefined && (['QUEUED', 'SCHEDULED', 'RETRYING'].includes(curr.status) || (curr.status === 'RUNNING' && !!curr.leaseExpiresAtMs && curr.leaseExpiresAtMs <= now)),
+        (curr) => ({
+          ...curr,
+          status: 'RUNNING',
+          activeWorkerId: req.workerId,
+          activeFencingToken: currentToken,
+          leaseExpiresAtMs,
+          dispatchCount: curr.dispatchCount + 1,
+          lastAttemptMs: now,
+          firstAttemptMs: curr.firstAttemptMs || now,
+          updatedAtMs: now,
+          progress: {
+            percentage: 10,
+            message: `Leased by worker ${req.workerId}`,
+            updatedAtMs: now,
+            logs: [...(curr.progress?.logs || []), `[${new Date(now).toISOString()}] Worker lease acquired with fencingToken #${currentToken}`]
+          }
+        })
+      );
 
-      this.tasks.set(t.id, t);
-      this.persistence.saveTask(t);
-      this.eventBus.emitEvent('TASK_RUNNING', queueId, t.id, { workerId: req.workerId });
-      leasedTasks.push(t);
+      if (casRes.success && casRes.record) {
+        this.eventBus.emitEvent('TASK_RUNNING', queueId, t.id, { workerId: req.workerId });
+        leasedTasks.push(casRes.record);
+      }
     }
 
     return {
@@ -833,60 +841,69 @@ export class GalxTaskQueueEngine {
   }
 
   public extendLease(taskId: string, workerId: string, extensionMs = 30000): { extended: boolean; newExpiresAtMs?: number } {
-    const task = this.tasks.get(taskId);
-    if (!task || task.status !== 'RUNNING' || task.activeWorkerId !== workerId) {
-      return { extended: false };
-    }
     const newExpiresAtMs = Date.now() + Math.min(600000, extensionMs);
-    task.leaseExpiresAtMs = newExpiresAtMs;
-    task.updatedAtMs = Date.now();
-    this.tasks.set(taskId, task);
-    this.persistence.saveTask(task);
-    return { extended: true, newExpiresAtMs };
+    const casRes = this.persistence.taskTable.compareAndSwap(
+      taskId,
+      (curr) => curr !== undefined && curr.status === 'RUNNING' && curr.activeWorkerId === workerId,
+      (curr) => ({
+        ...curr,
+        leaseExpiresAtMs: newExpiresAtMs,
+        updatedAtMs: Date.now()
+      })
+    );
+    return { extended: casRes.success, newExpiresAtMs: casRes.success ? newExpiresAtMs : undefined };
   }
 
   public acknowledgeTask(taskId: string, workerId: string, resultData?: any): boolean {
-    const task = this.tasks.get(taskId);
+    const now = Date.now();
+    const task = this.persistence.taskTable.get(taskId);
     if (!task || task.status !== 'RUNNING' || task.activeWorkerId !== workerId) {
       return false;
     }
-    const now = Date.now();
+
     if (task.groupId) {
       this.inFlightGroups.delete(task.groupId);
     }
-    task.status = 'COMPLETED';
-    task.updatedAtMs = now;
-    task.result = {
-      statusCode: 200,
-      data: resultData,
-      completedAtMs: now
-    };
-    task.activeWorkerId = undefined;
-    task.leaseExpiresAtMs = undefined;
 
-    this.updateTaskProgress(taskId, {
-      percentage: 100,
-      message: 'Completed and acknowledged by worker',
-      logLine: `Task execution finalized.`
-    });
+    const casRes = this.persistence.taskTable.compareAndSwap(
+      taskId,
+      (curr) => curr !== undefined && curr.status === 'RUNNING' && curr.activeWorkerId === workerId,
+      (curr) => ({
+        ...curr,
+        status: 'COMPLETED',
+        updatedAtMs: now,
+        activeWorkerId: undefined,
+        leaseExpiresAtMs: undefined,
+        result: {
+          statusCode: 200,
+          data: resultData,
+          completedAtMs: now
+        },
+        progress: {
+          percentage: 100,
+          message: 'Completed and acknowledged by worker',
+          updatedAtMs: now,
+          logs: [...(curr.progress?.logs || []), `[${new Date(now).toISOString()}] Task execution finalized.`]
+        }
+      })
+    );
 
-    this.tasks.set(taskId, task);
-    this.persistence.saveTask(task);
-    this.eventBus.emitEvent('TASK_COMPLETED', task.queueId, taskId, { result: task.result });
+    if (casRes.success && casRes.record) {
+      this.eventBus.emitEvent('TASK_COMPLETED', task.queueId, taskId, { result: casRes.record.result });
+      this.resolveDagDependencies(taskId, casRes.record.result?.data);
+      this.pulseDispatcher();
+      return true;
+    }
 
-    // Resolve any downstream DAG dependencies waiting for this task
-    this.resolveDagDependencies(taskId, task.result?.data);
-
-    this.pulseDispatcher();
-    return true;
+    return false;
   }
 
   public failTask(taskId: string, workerId: string, errorMessage: string, retryImmediately = false): boolean {
-    const task = this.tasks.get(taskId);
+    const task = this.persistence.taskTable.get(taskId);
     if (!task || task.status !== 'RUNNING' || task.activeWorkerId !== workerId) {
       return false;
     }
-    const queue = this.queues.get(task.queueId);
+    const queue = this.persistence.queueTable.get(task.queueId);
     const retryConfig = queue?.retryConfig || {
       maxAttempts: 5,
       minBackoffMs: 500,
@@ -907,28 +924,34 @@ export class GalxTaskQueueEngine {
       errorMessage,
       workerId
     };
-    task.attempts.push(attemptRecord);
-    task.lastError = {
+
+    const updatedAttempts = [...task.attempts, attemptRecord];
+    const lastError = {
       message: errorMessage,
       timestampMs: Date.now()
     };
-    task.activeWorkerId = undefined;
-    task.leaseExpiresAtMs = undefined;
 
     if (task.dispatchCount >= retryConfig.maxAttempts) {
       this.routeToDeadLetter(task, queue, errorMessage);
     } else {
-      task.status = 'RETRYING';
       const backoffMs = retryImmediately ? 0 : this.calculateBackoff(retryConfig, task.dispatchCount);
-      task.scheduleTimeMs = Date.now() + backoffMs;
-      task.updatedAtMs = Date.now();
-      this.updateTaskProgress(taskId, {
-        percentage: 0,
-        message: `Execution failed: ${errorMessage} (Retrying in ${backoffMs}ms)`,
-        logLine: `Attempt #${task.dispatchCount} failed: ${errorMessage}`
-      });
-      this.tasks.set(taskId, task);
-      this.persistence.saveTask(task);
+      const updated: GalxTask = {
+        ...task,
+        status: 'RETRYING',
+        scheduleTimeMs: Date.now() + backoffMs,
+        updatedAtMs: Date.now(),
+        attempts: updatedAttempts,
+        lastError,
+        activeWorkerId: undefined,
+        leaseExpiresAtMs: undefined,
+        progress: {
+          percentage: 0,
+          message: `Execution failed: ${errorMessage} (Retrying in ${backoffMs}ms)`,
+          updatedAtMs: Date.now(),
+          logs: [...(task.progress?.logs || []), `[${new Date().toISOString()}] Attempt #${task.dispatchCount} failed: ${errorMessage}`]
+        }
+      };
+      this.persistence.taskTable.put(taskId, updated);
       this.eventBus.emitEvent('TASK_RETRYING', task.queueId, taskId, { backoffMs });
     }
     this.pulseDispatcher();
@@ -936,7 +959,7 @@ export class GalxTaskQueueEngine {
   }
 
   // =========================================================================
-  // SCHEDULER & DISPATCH ENGINE (Continuous Token Bucket, DAGs & Deadlines)
+  // SCHEDULER & DISPATCH ENGINE (Continuous Token Bucket, Reactive Fast-Path, DAGs & Deadlines)
   // =========================================================================
 
   private startDispatcher(): void {
@@ -992,38 +1015,49 @@ export class GalxTaskQueueEngine {
 
   private async dispatchTick(): Promise<void> {
     const now = Date.now();
+    const activeQueues = this.persistence.queueTable.getAll() as GalxTaskQueueConfig[];
 
-    for (const [queueId, queue] of this.queues.entries()) {
+    for (const queue of activeQueues) {
       if (queue.state !== 'RUNNING' && queue.state !== 'DRAINING') continue;
 
       const availableTokens = this.refillDispatchTokens(queue, now);
       if (availableTokens < 1) continue;
 
-      const activeInFlight = this.inFlightPerQueue.get(queueId) || 0;
+      const activeInFlight = this.inFlightPerQueue.get(queue.id) || 0;
       const concurrencyHeadroom = queue.rateLimits.maxConcurrentDispatches - activeInFlight;
       if (concurrencyHeadroom <= 0) continue;
 
       const maxToDispatch = Math.min(Math.floor(availableTokens), concurrencyHeadroom, 20);
       if (maxToDispatch <= 0) continue;
 
-      const candidates = Array.from(this.tasks.values())
+      // Indexed query via BroccoliDB composite & status indices
+      const runnableTasks = (this.persistence.taskTable.query({
+        where: {
+          queueId: { $eq: queue.id },
+          status: { $in: ['QUEUED', 'SCHEDULED', 'RETRYING'] }
+        }
+      }) as GalxTask[])
         .filter(t => {
-          if (t.queueId !== queueId) return false;
-          if (t.target.type === 'PULL_WORKER') return false; // Handled via pull worker lease
+          if (t.target.type === 'PULL_WORKER') return false; // Leased via worker pull
 
           // FIFO Partition Group Check
           if (t.groupId) {
             if (this.inFlightGroups.has(t.groupId) && this.inFlightGroups.get(t.groupId) !== t.id) {
               return false;
             }
-            const hasPriorInGroup = Array.from(this.tasks.values()).some(other =>
-              other.queueId === queueId &&
-              other.groupId === t.groupId &&
+            const priorGroupTasks = this.persistence.taskTable.query({
+              where: {
+                queueId: { $eq: queue.id },
+                groupId: { $eq: t.groupId }
+              }
+            }) as GalxTask[];
+
+            const hasPrior = priorGroupTasks.some(other =>
               other.id !== t.id &&
               (other.createdAtMs < t.createdAtMs || (other.createdAtMs === t.createdAtMs && other.id < t.id)) &&
               ['QUEUED', 'SCHEDULED', 'RETRYING', 'DISPATCHING', 'RUNNING'].includes(other.status)
             );
-            if (hasPriorInGroup) return false;
+            if (hasPrior) return false;
           }
 
           if (t.status === 'QUEUED') return true;
@@ -1037,12 +1071,32 @@ export class GalxTaskQueueEngine {
           if (effB !== effA) return effB - effA;
           if (a.createdAtMs !== b.createdAtMs) return a.createdAtMs - b.createdAtMs;
           return a.scheduleTimeMs - b.scheduleTimeMs;
-        })
-        .slice(0, maxToDispatch);
+        });
+
+      // Fair-Share Multi-Tenant Interleaving: Prevent single tenant head-of-line blocking
+      const tenantBuckets = new Map<string, GalxTask[]>();
+      for (const t of runnableTasks) {
+        const list = tenantBuckets.get(t.userId) || [];
+        list.push(t);
+        tenantBuckets.set(t.userId, list);
+      }
+
+      const fairShareCandidates: GalxTask[] = [];
+      let roundRobinActive = true;
+      while (roundRobinActive && fairShareCandidates.length < maxToDispatch) {
+        roundRobinActive = false;
+        for (const list of tenantBuckets.values()) {
+          if (list.length > 0) {
+            fairShareCandidates.push(list.shift()!);
+            roundRobinActive = true;
+            if (fairShareCandidates.length >= maxToDispatch) break;
+          }
+        }
+      }
 
       const seenGroupsInDispatch = new Set<string>();
 
-      for (const task of candidates) {
+      for (const task of fairShareCandidates) {
         if (task.groupId) {
           if (seenGroupsInDispatch.has(task.groupId) || this.inFlightGroups.has(task.groupId)) {
             continue;
@@ -1060,23 +1114,26 @@ export class GalxTaskQueueEngine {
           continue;
         }
 
-        const tokenState = this.dispatchTokensPerQueue.get(queueId);
+        const tokenState = this.dispatchTokensPerQueue.get(queue.id);
         if (tokenState && tokenState.tokens >= 1) {
           tokenState.tokens -= 1;
         }
-        this.inFlightPerQueue.set(queueId, (this.inFlightPerQueue.get(queueId) || 0) + 1);
+        this.inFlightPerQueue.set(queue.id, (this.inFlightPerQueue.get(queue.id) || 0) + 1);
         this.inFlightPerTenant.set(task.userId, tenantInFlight + 1);
 
-        task.status = 'DISPATCHING';
-        task.dispatchCount += 1;
-        task.lastAttemptMs = now;
-        if (!task.firstAttemptMs) task.firstAttemptMs = now;
-        task.updatedAtMs = now;
-        this.tasks.set(task.id, task);
-        this.eventBus.emitEvent('TASK_DISPATCHING', queueId, task.id);
+        const updatedTask: GalxTask = {
+          ...task,
+          status: 'DISPATCHING',
+          dispatchCount: task.dispatchCount + 1,
+          lastAttemptMs: now,
+          firstAttemptMs: task.firstAttemptMs || now,
+          updatedAtMs: now
+        };
+        this.persistence.taskTable.put(task.id, updatedTask);
+        this.eventBus.emitEvent('TASK_DISPATCHING', queue.id, task.id);
 
-        this.executeTaskOrPipeline(task, queue).finally(() => {
-          this.inFlightPerQueue.set(queueId, Math.max(0, (this.inFlightPerQueue.get(queueId) || 1) - 1));
+        this.executeTaskOrPipeline(updatedTask, queue).finally(() => {
+          this.inFlightPerQueue.set(queue.id, Math.max(0, (this.inFlightPerQueue.get(queue.id) || 1) - 1));
           this.inFlightPerTenant.set(task.userId, Math.max(0, (this.inFlightPerTenant.get(task.userId) || 1) - 1));
           if (task.groupId) {
             this.inFlightGroups.delete(task.groupId);
@@ -1092,39 +1149,44 @@ export class GalxTaskQueueEngine {
    */
   private async executeTaskOrPipeline(task: GalxTask, queue: GalxTaskQueueConfig): Promise<void> {
     const startTime = Date.now();
-    task.status = 'RUNNING';
-    task.updatedAtMs = startTime;
-    this.tasks.set(task.id, task);
+    const runningTask: GalxTask = {
+      ...task,
+      status: 'RUNNING',
+      updatedAtMs: startTime
+    };
+    this.persistence.taskTable.put(task.id, runningTask);
     this.eventBus.emitEvent('TASK_RUNNING', queue.id, task.id);
 
     try {
-      if (task.pipelineSteps && task.pipelineSteps.length > 0) {
-        await this.executePipelineSteps(task, queue);
+      if (runningTask.pipelineSteps && runningTask.pipelineSteps.length > 0) {
+        await this.executePipelineSteps(runningTask, queue);
       } else {
-        if (task.target.type === 'INTERNAL_MODEL') {
-          await this.executeInternalModelTask(task, startTime, task.target);
-        } else if (task.target.type === 'HTTP_PUSH') {
-          await this.executeHttpPushTask(task, startTime, task.target);
+        if (runningTask.target.type === 'INTERNAL_MODEL') {
+          await this.executeInternalModelTask(runningTask, startTime, runningTask.target);
+        } else if (runningTask.target.type === 'HTTP_PUSH') {
+          await this.executeHttpPushTask(runningTask, startTime, runningTask.target);
         }
       }
 
-      task.status = 'COMPLETED';
-      task.updatedAtMs = Date.now();
+      const completedTask: GalxTask = {
+        ...runningTask,
+        status: 'COMPLETED',
+        updatedAtMs: Date.now()
+      };
+      this.persistence.taskTable.put(task.id, completedTask);
       this.updateTaskProgress(task.id, {
         percentage: 100,
         message: 'Task completed successfully',
         logLine: 'Task execution completed successfully.'
       });
-      this.tasks.set(task.id, task);
-      this.persistence.saveTask(task);
-      this.eventBus.emitEvent('TASK_COMPLETED', queue.id, task.id, { result: task.result });
+      this.eventBus.emitEvent('TASK_COMPLETED', queue.id, task.id, { result: completedTask.result });
 
       // Resolve downstream DAG tasks
-      this.resolveDagDependencies(task.id, task.result?.data);
+      this.resolveDagDependencies(task.id, completedTask.result?.data);
 
       // Handle Cron Schedule auto re-scheduling
-      if (task.cronConfig) {
-        this.rescheduleCronTask(task, queue);
+      if (completedTask.cronConfig) {
+        this.rescheduleCronTask(completedTask, queue);
       }
     } catch (err: any) {
       const durationMs = Date.now() - startTime;
@@ -1133,7 +1195,7 @@ export class GalxTaskQueueEngine {
       const isPermanent = err.isPermanent ?? (statusCode >= 400 && statusCode < 429);
 
       const attemptRecord: TaskAttemptRecord = {
-        attemptNumber: task.dispatchCount,
+        attemptNumber: runningTask.dispatchCount,
         startedAtMs: startTime,
         completedAtMs: Date.now(),
         durationMs,
@@ -1141,28 +1203,33 @@ export class GalxTaskQueueEngine {
         errorMessage,
         errorDetails: err.details
       };
-      task.attempts.push(attemptRecord);
-      task.lastError = {
+
+      const updatedAttempts = [...runningTask.attempts, attemptRecord];
+      const lastError = {
         message: errorMessage,
         statusCode,
         isPermanent,
         timestampMs: Date.now()
       };
 
-      if (isPermanent || task.dispatchCount >= queue.retryConfig.maxAttempts) {
-        this.routeToDeadLetter(task, queue, errorMessage);
+      if (isPermanent || runningTask.dispatchCount >= queue.retryConfig.maxAttempts) {
+        this.routeToDeadLetter(runningTask, queue, errorMessage);
       } else {
-        task.status = 'RETRYING';
-        const backoffMs = this.calculateBackoff(queue.retryConfig, task.dispatchCount);
-        task.scheduleTimeMs = Date.now() + backoffMs;
-        task.updatedAtMs = Date.now();
+        const backoffMs = this.calculateBackoff(queue.retryConfig, runningTask.dispatchCount);
+        const retryingTask: GalxTask = {
+          ...runningTask,
+          status: 'RETRYING',
+          scheduleTimeMs: Date.now() + backoffMs,
+          updatedAtMs: Date.now(),
+          attempts: updatedAttempts,
+          lastError
+        };
+        this.persistence.taskTable.put(task.id, retryingTask);
         this.updateTaskProgress(task.id, {
           percentage: 0,
           message: `Transient error: ${errorMessage}. Retrying in ${backoffMs}ms.`,
-          logLine: `Attempt #${task.dispatchCount} encountered error: ${errorMessage}`
+          logLine: `Attempt #${runningTask.dispatchCount} encountered error: ${errorMessage}`
         });
-        this.tasks.set(task.id, task);
-        this.persistence.saveTask(task);
         this.eventBus.emitEvent('TASK_RETRYING', queue.id, task.id, { backoffMs });
       }
     }
@@ -1172,29 +1239,40 @@ export class GalxTaskQueueEngine {
    * Resolves dependent DAG child tasks when a parent completes.
    */
   private resolveDagDependencies(parentTaskId: string, parentResultData: any): void {
-    for (const child of this.tasks.values()) {
-      if (child.status === 'WAITING_DEPENDENCIES' && child.dependsOn?.includes(parentTaskId)) {
-        child.parentTaskResults = child.parentTaskResults || {};
-        child.parentTaskResults[parentTaskId] = parentResultData;
+    const waitingChildren = this.persistence.taskTable.query({
+      where: { status: { $eq: 'WAITING_DEPENDENCIES' } }
+    }) as GalxTask[];
 
-        // Check if all parent dependencies are now complete
+    for (const child of waitingChildren) {
+      if (child.dependsOn?.includes(parentTaskId)) {
+        const parentResults = { ...(child.parentTaskResults || {}), [parentTaskId]: parentResultData };
+
         const allDone = child.dependsOn.every(pId => {
-          const p = this.tasks.get(pId);
+          const p = this.persistence.taskTable.get(pId);
           return p && p.status === 'COMPLETED';
         });
 
         if (allDone) {
-          child.status = 'QUEUED';
-          child.scheduleTimeMs = Date.now();
-          child.updatedAtMs = Date.now();
+          const readyChild: GalxTask = {
+            ...child,
+            status: 'QUEUED',
+            scheduleTimeMs: Date.now(),
+            updatedAtMs: Date.now(),
+            parentTaskResults: parentResults
+          };
+          this.persistence.taskTable.put(child.id, readyChild);
           this.updateTaskProgress(child.id, {
             percentage: 5,
             message: 'All parent DAG dependencies resolved. Queued for execution.',
             logLine: `Dependencies resolved: [${child.dependsOn.join(', ')}]`
           });
-          this.tasks.set(child.id, child);
-          this.persistence.saveTask(child);
           this.eventBus.emitEvent('TASK_QUEUED', child.queueId, child.id);
+        } else {
+          this.persistence.taskTable.put(child.id, {
+            ...child,
+            parentTaskResults: parentResults,
+            updatedAtMs: Date.now()
+          });
         }
       }
     }
@@ -1482,7 +1560,6 @@ export class GalxTaskQueueEngine {
       });
 
       if (!res.ok) {
-        // Record failure against host circuit breaker
         const currentFailures = (cb?.consecutiveFailures || 0) + 1;
         const shouldTrip = currentFailures >= 3;
         this.destinationCircuitBreakers.set(hostKey, {
@@ -1556,22 +1633,24 @@ export class GalxTaskQueueEngine {
       this.inFlightGroups.delete(task.groupId);
     }
     const dlqTargetId = queue?.deadLetterConfig?.targetQueueId || 'dead-letter';
-    task.status = 'DEAD_LETTERED';
-    task.updatedAtMs = Date.now();
-    task.lastError = {
-      message: `Dead-Lettered: ${reason}`,
-      isPermanent: true,
-      timestampMs: Date.now()
+    const deadLetteredTask: GalxTask = {
+      ...task,
+      status: 'DEAD_LETTERED',
+      updatedAtMs: Date.now(),
+      lastError: {
+        message: `Dead-Lettered: ${reason}`,
+        isPermanent: true,
+        timestampMs: Date.now()
+      }
     };
 
+    this.persistence.taskTable.put(task.id, deadLetteredTask);
     this.updateTaskProgress(task.id, {
       percentage: 0,
       message: `Dead-Lettered: ${reason}`,
       logLine: `Task moved to Dead-Letter Queue: ${reason}`
     });
 
-    this.tasks.set(task.id, task);
-    this.persistence.saveTask(task);
     this.eventBus.emitEvent('TASK_DEAD_LETTERED', queue?.id || 'default', task.id, { reason });
 
     if (queue?.deadLetterConfig?.notificationWebhookUrl) {
@@ -1587,18 +1666,22 @@ export class GalxTaskQueueEngine {
 
   private scavengeExpiredLeasesAndDeadlines(): void {
     const now = Date.now();
-    for (const [taskId, task] of this.tasks.entries()) {
+    const tasks = this.persistence.taskTable.getAll() as GalxTask[];
+
+    for (const task of tasks) {
       // Lease scavenger for pull workers
       if (task.status === 'RUNNING' && task.leaseExpiresAtMs && task.leaseExpiresAtMs < now) {
         if (task.groupId) this.inFlightGroups.delete(task.groupId);
-        task.status = 'RETRYING';
-        task.scheduleTimeMs = now + 1000;
-        task.activeWorkerId = undefined;
-        task.leaseExpiresAtMs = undefined;
-        task.updatedAtMs = now;
-        this.tasks.set(taskId, task);
-        this.persistence.saveTask(task);
-        this.eventBus.emitEvent('TASK_RETRYING', task.queueId, taskId);
+        const expiredLeaseTask: GalxTask = {
+          ...task,
+          status: 'RETRYING',
+          scheduleTimeMs: now + 1000,
+          activeWorkerId: undefined,
+          leaseExpiresAtMs: undefined,
+          updatedAtMs: now
+        };
+        this.persistence.taskTable.put(task.id, expiredLeaseTask);
+        this.eventBus.emitEvent('TASK_RETRYING', task.queueId, task.id);
       }
 
       // Wall-Clock Deadline & TTL Expiration
@@ -1609,21 +1692,23 @@ export class GalxTaskQueueEngine {
 
         if (isExpired) {
           if (task.groupId) this.inFlightGroups.delete(task.groupId);
-          task.status = 'EXPIRED';
-          task.updatedAtMs = now;
-          task.lastError = {
-            message: `Task SLA deadline expired after ${now - task.createdAtMs}ms`,
-            isPermanent: true,
-            timestampMs: now
+          const expiredTask: GalxTask = {
+            ...task,
+            status: 'EXPIRED',
+            updatedAtMs: now,
+            lastError: {
+              message: `Task SLA deadline expired after ${now - task.createdAtMs}ms`,
+              isPermanent: true,
+              timestampMs: now
+            }
           };
-          this.updateTaskProgress(taskId, {
+          this.persistence.taskTable.put(task.id, expiredTask);
+          this.updateTaskProgress(task.id, {
             percentage: 0,
             message: 'Task expired due to wall-clock SLA deadline',
             logLine: 'Task expired.'
           });
-          this.tasks.set(taskId, task);
-          this.persistence.saveTask(task);
-          this.eventBus.emitEvent('TASK_EXPIRED', task.queueId, taskId);
+          this.eventBus.emitEvent('TASK_EXPIRED', task.queueId, task.id);
         }
       }
     }
@@ -1634,8 +1719,12 @@ export class GalxTaskQueueEngine {
   // =========================================================================
 
   public getQueueStats(queueId: string): QueueTelemetryStats | undefined {
-    const q = this.queues.get(queueId);
+    const q = this.persistence.queueTable.get(queueId);
     if (!q) return undefined;
+
+    const queueTasks = this.persistence.taskTable.query({
+      where: { queueId: { $eq: queueId } }
+    }) as GalxTask[];
 
     let pending = 0;
     let scheduled = 0;
@@ -1649,8 +1738,7 @@ export class GalxTaskQueueEngine {
     let totalDurationMs = 0;
     let totalDurationsSampled = 0;
 
-    for (const task of this.tasks.values()) {
-      if (task.queueId !== queueId) continue;
+    for (const task of queueTasks) {
       if (task.status === 'QUEUED') pending++;
       else if (task.status === 'SCHEDULED') scheduled++;
       else if (task.status === 'WAITING_DEPENDENCIES') waitingDeps++;
@@ -1696,8 +1784,9 @@ export class GalxTaskQueueEngine {
   }
 
   public getAllQueueStats(): QueueTelemetryStats[] {
-    return Array.from(this.queues.keys())
-      .map(id => this.getQueueStats(id))
+    const queues = this.persistence.queueTable.getAll() as GalxTaskQueueConfig[];
+    return queues
+      .map(q => this.getQueueStats(q.id))
       .filter((s): s is QueueTelemetryStats => !!s);
   }
 }

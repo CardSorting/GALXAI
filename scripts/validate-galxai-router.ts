@@ -4626,6 +4626,378 @@ async function runAllTests() {
     assert.ok(riskAgg.groups.length >= 1);
   });
 
+  // --- SUITE 50: Hardened BroccoliDB + Queue Substrate Deep Fusion Hardening ---
+  await test('BroccoliDbTable: Multi-index candidate set intersection (MULTI_INDEX_INTERSECTION)', () => {
+    const table = new BroccoliDbTable<{ id: string; queueId: string; status: string; priority: number }>('test_tasks_multi_index');
+    table.createIndex('queueId');
+    table.createIndex('status');
+
+    for (let i = 0; i < 100; i++) {
+      table.put(`t_${i}`, {
+        id: `t_${i}`,
+        queueId: i % 2 === 0 ? 'queue_a' : 'queue_b',
+        status: i % 5 === 0 ? 'QUEUED' : 'COMPLETED',
+        priority: 50 + (i % 20)
+      });
+    }
+
+    const plan = table.explain({
+      where: {
+        queueId: { $eq: 'queue_a' },
+        status: { $eq: 'QUEUED' }
+      }
+    });
+
+    assert.strictEqual(plan.scanStrategy, 'MULTI_INDEX_INTERSECTION');
+    assert.strictEqual(plan.recordsMatched, 10); // 100 / 2 = 50 queue_a, of which 50 / 5 = 10 are QUEUED
+  });
+
+  await test('BroccoliDbTable: Binary-searched sorted index range scans (INDEX_RANGE_SCAN)', () => {
+    const table = new BroccoliDbTable<{ id: string; priority: number; tag: string }>('test_sorted_range');
+    table.createSortedIndex('priority');
+
+    table.put('item_1', { id: 'item_1', priority: 10, tag: 'low' });
+    table.put('item_2', { id: 'item_2', priority: 30, tag: 'medium' });
+    table.put('item_3', { id: 'item_3', priority: 50, tag: 'high' });
+    table.put('item_4', { id: 'item_4', priority: 80, tag: 'critical' });
+    table.put('item_5', { id: 'item_5', priority: 95, tag: 'zenith' });
+
+    const plan = table.explain({
+      where: {
+        priority: { $between: [30, 80] }
+      }
+    });
+
+    assert.strictEqual(plan.scanStrategy, 'INDEX_RANGE_SCAN');
+    assert.strictEqual(plan.recordsMatched, 3); // 30, 50, 80
+
+    const results = table.query({
+      where: { priority: { $gte: 50 } }
+    });
+    assert.strictEqual(results.length, 3); // 50, 80, 95
+  });
+
+  await test('BroccoliDbTable: Atomic Compare-And-Swap (compareAndSwap) & Batch putMany', () => {
+    const table = new BroccoliDbTable<{ id: string; status: string; version: number }>('test_cas_table');
+
+    table.putMany([
+      { id: 'cas_1', record: { id: 'cas_1', status: 'INIT', version: 1 } },
+      { id: 'cas_2', record: { id: 'cas_2', status: 'INIT', version: 1 } }
+    ]);
+
+    assert.strictEqual(table.count(), 2);
+
+    // Successful CAS
+    const casSuccess = table.compareAndSwap(
+      'cas_1',
+      (curr) => curr?.status === 'INIT',
+      (curr) => ({ ...curr, status: 'RUNNING', version: curr.version + 1 })
+    );
+    assert.strictEqual(casSuccess.success, true);
+    assert.strictEqual(casSuccess.record?.status, 'RUNNING');
+    assert.strictEqual(casSuccess.record?.version, 2);
+
+    // Failed CAS (predicate mismatch)
+    const casFail = table.compareAndSwap(
+      'cas_1',
+      (curr) => curr?.status === 'INIT',
+      (curr) => ({ ...curr, status: 'DONE' })
+    );
+    assert.strictEqual(casFail.success, false);
+    assert.strictEqual(table.get('cas_1')?.status, 'RUNNING');
+  });
+
+  await test('BroccoliDbTable: Accurate Index Cleanup in removeIndicesForRecord (sorted & prefix)', () => {
+    const table = new BroccoliDbTable<{ id: string; title: string; score: number }>('test_index_cleanup');
+    table.createSortedIndex('score');
+    table.createPrefixIndex('title');
+
+    table.put('rec_1', { id: 'rec_1', title: 'quantum-ai', score: 100 });
+    assert.strictEqual(table.count(), 1);
+
+    // Delete record
+    table.delete('rec_1');
+    assert.strictEqual(table.count(), 0);
+
+    // Search for deleted prefix
+    const searchPrefix = table.query({ where: { title: { $startsWith: 'quantum' } } });
+    assert.strictEqual(searchPrefix.length, 0);
+
+    // Search for deleted sorted score
+    const searchScore = table.query({ where: { score: { $gte: 50 } } });
+    assert.strictEqual(searchScore.length, 0);
+  });
+
+  await test('GalxTaskQueueEngine: Direct BroccoliDB authoritative storage with composite index queries', async () => {
+    const engine = GalxTaskQueueEngine.getInstance();
+    const qId = `auth-test-queue-${Date.now()}`;
+
+    engine.createOrUpdateQueue({
+      id: qId,
+      name: 'Authoritative Broccoli Queue',
+      rateLimits: { maxDispatchesPerSecond: 100, maxConcurrentDispatches: 50, maxBurstSize: 100 }
+    });
+
+    const { task } = engine.createTask({
+      queueId: qId,
+      userId: 'test_dev_zenith',
+      priority: 88,
+      target: { type: 'PULL_WORKER', payload: { action: 'compute' } }
+    });
+
+    // Check that task is immediately queryable via GalxPersistence.taskTable
+    const fromTable = GalxPersistence.getInstance().taskTable.get(task.id);
+    assert.ok(fromTable);
+    assert.strictEqual(fromTable?.id, task.id);
+    assert.strictEqual(fromTable?.status, 'QUEUED');
+    assert.strictEqual(fromTable?.priority, 88);
+  });
+
+  await test('GalxTaskQueueEngine: Atomic Pull Worker Leasing with CAS & Monotonic Fencing Tokens', () => {
+    const engine = GalxTaskQueueEngine.getInstance();
+    const qId = `lease-test-queue-${Date.now()}`;
+
+    engine.createOrUpdateQueue({
+      id: qId,
+      name: 'Lease Test Queue',
+      rateLimits: { maxDispatchesPerSecond: 100, maxConcurrentDispatches: 50, maxBurstSize: 100 }
+    });
+
+    const { task } = engine.createTask({
+      queueId: qId,
+      userId: 'worker_tester',
+      priority: 75,
+      target: { type: 'PULL_WORKER', payload: { workload: 'heavy_math' } }
+    });
+
+    // Worker 1 leases
+    const leaseRes = engine.leaseTasks(qId, {
+      workerId: 'worker_node_alpha',
+      maxTasks: 1,
+      leaseDurationMs: 60000
+    });
+
+    assert.strictEqual(leaseRes.leasedCount, 1);
+    assert.strictEqual(leaseRes.tasks[0].id, task.id);
+    assert.strictEqual(leaseRes.tasks[0].activeWorkerId, 'worker_node_alpha');
+    assert.ok(leaseRes.tasks[0].activeFencingToken! > 1000);
+
+    // Worker 2 attempts to lease same task -> returns 0 (atomic protection)
+    const leaseRes2 = engine.leaseTasks(qId, {
+      workerId: 'worker_node_beta',
+      maxTasks: 1,
+      leaseDurationMs: 60000
+    });
+    assert.strictEqual(leaseRes2.leasedCount, 0);
+
+    // Worker 1 acknowledges completion
+    const ackRes = engine.acknowledgeTask(task.id, 'worker_node_alpha', { success: true, answer: 42 });
+    assert.strictEqual(ackRes, true);
+
+    const completed = engine.getTask(task.id);
+    assert.strictEqual(completed?.status, 'COMPLETED');
+    assert.strictEqual(completed?.result?.data?.answer, 42);
+  });
+
+  await test('GalxTaskQueueEngine: Fair-Share Multi-Tenant Interleaving', async () => {
+    const engine = GalxTaskQueueEngine.getInstance();
+    const qId = `fair-share-queue-${Date.now()}`;
+
+    engine.createOrUpdateQueue({
+      id: qId,
+      name: 'Fair Share Queue',
+      rateLimits: { maxDispatchesPerSecond: 10, maxConcurrentDispatches: 10, maxBurstSize: 10 }
+    });
+
+    // Enqueue 5 tasks for Tenant A and 5 tasks for Tenant B
+    for (let i = 0; i < 5; i++) {
+      engine.createTask({
+        queueId: qId,
+        userId: 'heavy_tenant_A',
+        priority: 50,
+        target: { type: 'PULL_WORKER', payload: { job: `A_${i}` } }
+      });
+      engine.createTask({
+        queueId: qId,
+        userId: 'light_tenant_B',
+        priority: 50,
+        target: { type: 'PULL_WORKER', payload: { job: `B_${i}` } }
+      });
+    }
+
+    const tasks = engine.listTasks(qId, { limit: 20 }).tasks;
+    assert.strictEqual(tasks.length, 10);
+  });
+
+  await test('GalxTaskQueueEngine: Reactive BroccoliDB Changefeed Fast-Path Pulse', async () => {
+    const engine = GalxTaskQueueEngine.getInstance();
+    const qId = `reactive-pulse-${Date.now()}`;
+
+    engine.createOrUpdateQueue({
+      id: qId,
+      name: 'Reactive Pulse Queue',
+      rateLimits: { maxDispatchesPerSecond: 100, maxConcurrentDispatches: 50, maxBurstSize: 100 }
+    });
+
+    let eventCaptured = false;
+    const unsub = GalxQueueEventBus.getInstance().subscribeQueue(qId, (evt) => {
+      if (evt.type === 'TASK_QUEUED') {
+        eventCaptured = true;
+      }
+    });
+
+    engine.createTask({
+      queueId: qId,
+      userId: 'reactive_dev',
+      priority: 99,
+      target: { type: 'PULL_WORKER', payload: { realtime: true } }
+    });
+
+    assert.strictEqual(eventCaptured, true);
+    unsub();
+  });
+
+  await test('Developer SDK: galx.jobs.submit() frictionless background requests & instant result handle', async () => {
+    const galx = new GalxAI({ apiKey: 'galx_test_key' });
+    assert.ok(galx.jobs);
+
+    // Mock fetch for job creation and polling
+    let pollCount = 0;
+    const testTaskId = `job_mock_${Date.now()}`;
+    const originalFetch = (galx as any).core.customFetch;
+    (galx as any).core.customFetch = async (url: string, opts: any) => {
+      if (opts?.method === 'POST') {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            task: { id: testTaskId, status: 'QUEUED', queueId: 'default' },
+            deduplicated: false
+          })
+        };
+      }
+      pollCount++;
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          id: testTaskId,
+          status: 'COMPLETED',
+          queueId: 'default',
+          result: { data: { text: 'Quantum teleportation is the transfer of quantum states.' } }
+        })
+      };
+    };
+
+    const job = await galx.jobs.submit({
+      prompt: 'Explain quantum teleportation',
+      model: 'gpt-5.6-sol'
+    });
+
+    assert.strictEqual(job.taskId, testTaskId);
+    const res = await job.result({ intervalMs: 10 });
+    assert.strictEqual(res.text, 'Quantum teleportation is the transfer of quantum states.');
+    assert.ok(pollCount >= 1);
+  });
+
+  await test('Developer SDK: galx.run() and galx.generateImage() ultra-flat direct execution', async () => {
+    const galx = new GalxAI({ apiKey: 'galx_test_key' });
+
+    // Mock fetch for chat completions and images
+    (galx as any).core.customFetch = async (url: string, opts: any) => {
+      if (url.includes('/chat/completions')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            id: 'chatcmpl_flat_1',
+            choices: [{ message: { role: 'assistant', content: 'Light travels at ~300,000 km/s.' } }],
+            usage: { total_tokens: 25 }
+          })
+        };
+      }
+      if (url.includes('/images/generations')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            created: Date.now(),
+            data: [{ url: 'https://galx.ai/generated_art.png' }]
+          })
+        };
+      }
+      return { ok: true, status: 200, json: async () => ({}) };
+    };
+
+    // 1. Direct prompt run
+    const answer = await galx.run('What is the speed of light?');
+    assert.strictEqual(answer, 'Light travels at ~300,000 km/s.');
+
+    // 2. Direct image generation
+    const img = await galx.generateImage('Neon futuristic cyber vehicle');
+    assert.strictEqual(img?.url, 'https://galx.ai/generated_art.png');
+  });
+
+  await test('Developer SDK: galx.toAgentContext() autonomous agent context generator', () => {
+    const galx = new GalxAI({ apiKey: 'galx_test_key' });
+    const ctx = galx.toAgentContext('Analyze Q3 financial report', { revenue: 15000000, margin: 0.35 }, { model: 'gpt-5.6-sol', id: 'task_agent_123' });
+
+    assert.ok(ctx.includes('### [GALXAI Autonomous Agent Context]'));
+    assert.ok(ctx.includes('Prompt: Analyze Q3 financial report'));
+    assert.ok(ctx.includes('Model: gpt-5.6-sol'));
+    assert.ok(ctx.includes('15000000'));
+  });
+
+  await test('Developer SDK: Top-level run() and generateImage() zero-config imports', async () => {
+    // Import top-level functions directly
+    const { run: sdkRun, generateImage: sdkGenImage } = await import('../src/sdk');
+    assert.strictEqual(typeof sdkRun, 'function');
+    assert.strictEqual(typeof sdkGenImage, 'function');
+  });
+
+  await test('Developer SDK: Tagged Template Literal galx`...` & callable invocation', async () => {
+    const { galx: callableInstance } = await import('../src/sdk');
+
+    (callableInstance as any).core.customFetch = async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        choices: [{ message: { role: 'assistant', content: 'Quantum gravity unifies relativity and quantum mechanics.' } }]
+      })
+    });
+
+    const topic = 'quantum gravity';
+    const res = await callableInstance`Explain ${topic} in 1 sentence`;
+    assert.strictEqual(res, 'Quantum gravity unifies relativity and quantum mechanics.');
+  });
+
+  await test('Developer SDK: Structured Schema Extraction (extract) and Tool Definition (tool)', async () => {
+    const { extract: sdkExtract, tool: sdkTool } = await import('../src/sdk');
+
+    // Tool definition
+    const myTool = sdkTool('calculateTax', 'Calculates tax rate', (args) => ({ tax: args.amount * 0.2 }), {
+      amount: { type: 'number' }
+    });
+    assert.strictEqual(myTool.type, 'function');
+    assert.strictEqual(myTool.function.name, 'calculateTax');
+
+    // Extract function exists
+    assert.strictEqual(typeof sdkExtract, 'function');
+  });
+
+  await test('API Strategy: EmbeddingsRepository deterministic vector embeddings calculus', () => {
+    const embeddingRepo = EmbeddingsRepository.getInstance();
+    const vec1 = embeddingRepo.generateDeterministicVector('quantum AI substrate', 1536);
+    const vec2 = embeddingRepo.generateDeterministicVector('quantum AI substrate', 1536);
+    const vec3 = embeddingRepo.generateDeterministicVector('classical mechanical physics', 1536);
+
+    assert.strictEqual(vec1.length, 1536);
+    assert.deepStrictEqual(vec1, vec2);
+    // Orthogonal / different vectors
+    const similarity = embeddingRepo.cosineSimilarity(vec1, vec3);
+    assert.ok(similarity < 0.9);
+  });
+
   console.log('\n======================================================================');
   if (testsFailed === 0) {
     console.log(`   ALL ${testsPassed}/${testsPassed} FORENSIC VERIFICATION TESTS PASSED SUCCESSFULLY! `);

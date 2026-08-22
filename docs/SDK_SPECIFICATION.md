@@ -72,12 +72,71 @@ flowchart TD
 
 ---
 
-## 2. Initialization & Configuration
+## 2. Ultra-Flat Zero-Config Ergonomics & Tagged Templates
+
+GALXAI offers the industry's most frictionless developer interface, allowing zero-boilerplate invocation, tagged template literal prompts, direct async token streaming, and schema extraction without initializing a class.
+
+### Tagged Template Literal Invocation
+```typescript
+import galx from 'galxai';
+
+const topic = 'superconductors';
+const summary = await galx`Summarize key principles of ${topic} in 3 bullet points`;
+console.log(summary);
+```
+
+### Direct 1-Line Execution (`run` & `generateImage`)
+```typescript
+import { run, generateImage } from 'galxai';
+
+// Direct 1-line execution
+const answer = await run('Explain quantum entanglement in 10 words');
+
+// Background execution handle
+const job = await run('Long-running benchmark', { background: true });
+const result = await job.result();
+
+// 1-line image generation
+const image = await generateImage('Futuristic skyline at dusk');
+```
+
+### Zero-Buffer Token Streaming (`stream`)
+```typescript
+import { stream } from 'galxai';
+
+for await (const chunk of stream('Write a poem about space')) {
+  process.stdout.write(chunk);
+}
+```
+
+### Schema Extraction & Tool Definitions (`extract` & `tool`)
+```typescript
+import { extract, tool } from 'galxai';
+
+// 1-line structured JSON extraction
+const user = await extract('Jane Doe is a 29 year old ML engineer in SF', {
+  name: 'string',
+  age: 'number',
+  role: 'string',
+  city: 'string'
+});
+
+// Autonomous agent tool definition
+const searchTool = tool('searchDocs', 'Searches technical documentation', async (args) => {
+  return { docs: ['API Guide', 'Architecture Spec'] };
+}, { query: { type: 'string' } });
+```
+
+---
+
+## 3. Standard Initialization & Configuration
+
+For multi-tenant applications or custom configuration:
 
 ```typescript
-import { GalxAI } from '@/sdk';
+import { GalxAI } from 'galxai';
 
-const galx = new GalxAI({
+const client = new GalxAI({
   apiKey: process.env.GALX_API_KEY,      // Defaults to process.env.GALX_API_KEY
   baseURL: 'https://gateway.galx.ai',     // Custom gateway URL or local proxy
   timeoutMs: 60000,                       // Request timeout (default: 60s)

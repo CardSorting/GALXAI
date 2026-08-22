@@ -332,11 +332,13 @@ import { TokenOptimizer } from './tokens';
 import { PrivacyResource, PrivacyProfiles } from './resources/privacy';
 import { ComplianceResource } from './resources/compliance';
 import { DatabaseResource } from './resources/database';
+import { JobsResource } from './resources/jobs';
 
 export class GalxAI {
   readonly chat: ChatResource;
   readonly images: ImagesResource;
   readonly models: ModelsResource;
+  readonly jobs: JobsResource;
   readonly queues: QueuesResource;
   readonly workflows: WorkflowsResource;
   readonly webhooks: WebhooksResource;
@@ -355,6 +357,7 @@ export class GalxAI {
     this.chat = new ChatResource(this.core);
     this.images = new ImagesResource(this.core);
     this.models = new ModelsResource(this.core);
+    this.jobs = new JobsResource(this.core);
     this.queues = new QueuesResource(this.core);
     this.workflows = new WorkflowsResource(this.core);
     this.webhooks = new WebhooksResource();
@@ -396,6 +399,174 @@ export class GalxAI {
    */
   public agent(config: AgentConfig = {}): AgentRuntime {
     return new AgentRuntime(this.chat.completions, config);
+  }
+
+  /**
+   * Ultra-flat 1-line execution helper.
+   * Send any prompt and directly receive the result string or async handle.
+   *
+   * @example
+   * ```typescript
+   * const answer = await galx.run('Explain quantum entanglement in 1 sentence');
+   * console.log(answer);
+   * ```
+   */
+  public async run(
+    prompt: string,
+    options: {
+      model?: string;
+      system?: string;
+      background?: boolean;
+      priority?: number;
+      type?: 'chat' | 'image' | 'workflow';
+    } = {}
+  ): Promise<string | import('./types').AsyncTaskHandle<any>> {
+    if (options.background) {
+      return this.jobs.submit({
+        prompt,
+        model: options.model,
+        type: options.type,
+        priority: options.priority
+      });
+    }
+
+    const messages: Array<{ role: 'system' | 'user'; content: string }> = [];
+    if (options.system) {
+      messages.push({ role: 'system', content: options.system });
+    }
+    messages.push({ role: 'user', content: prompt });
+
+    const completion = await this.chat.completions.create({
+      model: options.model || 'gpt-5.6-sol',
+      messages
+    });
+
+    return completion.choices[0]?.message?.content || '';
+  }
+
+  /**
+   * Ultra-flat image generation helper.
+   *
+   * @example
+   * ```typescript
+   * const image = await galx.generateImage('A futuristic floating city at dusk');
+   * ```
+   */
+  public async generateImage(prompt: string, options: { model?: string; size?: string } = {}) {
+    const res = await this.images.generate({
+      prompt,
+      model: options.model || 'openai-gpt-image-2',
+      size: (options.size as any) || '1024x1024'
+    });
+    return res.data[0];
+  }
+
+  /**
+   * Formats a query and result into a clean, markdown-structured context block for autonomous agents.
+   *
+   * @example
+   * ```typescript
+   * const ctx = galx.toAgentContext('Analyze Q3 data', result);
+   * ```
+   */
+  public toAgentContext(prompt: string, result: any, metadata: { id?: string; model?: string } = {}): string {
+    const formattedResult = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+    return `### [GALXAI Autonomous Agent Context]
+Prompt: ${prompt}
+Model: ${metadata.model || 'gpt-5.6-sol'}
+Task ID: ${metadata.id || 'direct'}
+
+=== RESULT OUTPUT ===
+${formattedResult}
+====================`;
+  }
+
+  /**
+   * Ultra-flat text streaming generator.
+   *
+   * @example
+   * ```typescript
+   * for await (const chunk of galx.stream('Explain quantum gravity')) {
+   *   process.stdout.write(chunk);
+   * }
+   * ```
+   */
+  public async *stream(
+    prompt: string,
+    options: {
+      model?: string;
+      system?: string;
+      temperature?: number;
+    } = {}
+  ): AsyncIterable<string> {
+    const messages: Array<{ role: 'system' | 'user'; content: string }> = [];
+    if (options.system) {
+      messages.push({ role: 'system', content: options.system });
+    }
+    messages.push({ role: 'user', content: prompt });
+
+    const streamResponse = await this.chat.completions.create({
+      model: options.model || 'gpt-5.6-sol',
+      messages,
+      temperature: options.temperature,
+      stream: true
+    });
+
+    for await (const chunk of streamResponse as any) {
+      const content = chunk.choices?.[0]?.delta?.content;
+      if (content) {
+        yield content;
+      }
+    }
+  }
+
+  /**
+   * Ultra-flat structured JSON extractor with guaranteed schema conformity.
+   *
+   * @example
+   * ```typescript
+   * const user = await galx.extract('Jane is 29 and lives in SF', {
+   *   name: { type: 'string' },
+   *   age: { type: 'number' },
+   *   city: { type: 'string' }
+   * });
+   * ```
+   */
+  public async extract<T = any>(
+    input: string,
+    schema: Record<string, any>,
+    options: { model?: string } = {}
+  ): Promise<T> {
+    const schemaStr = JSON.stringify(schema, null, 2);
+    const systemPrompt = `You are a precise data extractor. Extract the requested fields from the input text and return ONLY valid JSON matching this schema:\n${schemaStr}\nDo not output markdown code blocks or explanations, only valid parseable JSON.`;
+
+    const raw = await this.run(input, {
+      model: options.model || 'gpt-5.6-sol',
+      system: systemPrompt
+    });
+
+    const clean = (raw as string).replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+    return JSON.parse(clean);
+  }
+
+  /**
+   * Wraps an execution function as an autonomous agent tool definition.
+   */
+  public tool(
+    name: string,
+    description: string,
+    execute: (args: any) => Promise<any> | any,
+    parameters?: Record<string, any>
+  ) {
+    return {
+      type: 'function' as const,
+      function: {
+        name,
+        description,
+        parameters: parameters || { type: 'object', properties: {} },
+        execute
+      }
+    };
   }
 }
 

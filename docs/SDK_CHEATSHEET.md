@@ -1,18 +1,45 @@
 # 💻 GALXAI Multi-Ecosystem SDK Cheatsheet
 
-Complete drop-in code snippets for connecting any major AI framework or programming language to GALXAI.
+Complete drop-in code snippets for connecting any major AI framework, SDK, or programming language to GALXAI.
+
+---
+
+## ⚡ 1-Line Ultra-Flat Execution & Tagged Templates
+
+```typescript
+import galx, { run, stream, extract, tool, generateImage } from 'galxai';
+
+// 1. Tagged Template Literal
+const summary = await galx`Summarize the key takeaways for ${topic}`;
+
+// 2. Direct 1-Line Run
+const answer = await run('Explain quantum mechanics in simple terms');
+
+// 3. 1-Line Streaming
+for await (const chunk of stream('Write a haiku about code')) {
+  process.stdout.write(chunk);
+}
+
+// 4. 1-Line Schema Extraction
+const user = await extract('Jane Doe, 29, Engineer in SF', {
+  name: 'string', age: 'number', role: 'string', city: 'string'
+});
+
+// 5. 1-Line Image Generation
+const image = await generateImage('Futuristic cyber vehicle');
+```
 
 ---
 
 ## 🌌 Official GALXAI Universal SDK (`@galxai/sdk`)
 
 ```typescript
-import { GalxAI, createCostTrackerPlugin, createLRUCachePlugin } from '@/sdk';
+import { GalxAI, createCostTrackerPlugin, createLRUCachePlugin } from 'galxai';
 
-const galx = new GalxAI({ apiKey: process.env.GALX_API_KEY });
+const client = new GalxAI({ apiKey: process.env.GALX_API_KEY });
 
 // 1. Fluent Builder with Streaming
-const stream = await galx.chat
+const stream = await client.chat
   .builder('gpt-5.6-sol')
   .system('You are an expert systems architect.')
   .user('Explain Raft consensus.')
@@ -21,7 +48,7 @@ const stream = await galx.chat
   .execute();
 
 // 2. Autonomous Multi-Step Agent Tool Loop
-const agent = galx.agent({
+const agent = client.agent({
   model: 'gpt-5.6-sol',
   tools: {
     getQuote: {
