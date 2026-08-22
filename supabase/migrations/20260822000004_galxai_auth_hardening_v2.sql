@@ -43,7 +43,11 @@ CREATE OR REPLACE FUNCTION fn_rotate_session_token_atomic(
     p_grace_window_ms BIGINT DEFAULT 30000,
     p_now_ms BIGINT DEFAULT NULL
 )
-RETURNS JSONB AS $$
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 DECLARE
     v_now_ms BIGINT;
     v_session RECORD;
@@ -137,7 +141,7 @@ BEGIN
 
     RETURN jsonb_build_object('success', false, 'reason', 'SESSION_NOT_FOUND', 'reuse_detected', false);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
+$$;
 
 -- B. ATOMIC REVOKE ALL SESSIONS EXCEPT CURRENT (REMOTE DEVICE LOGOUT)
 CREATE OR REPLACE FUNCTION fn_revoke_other_user_sessions(
@@ -146,7 +150,11 @@ CREATE OR REPLACE FUNCTION fn_revoke_other_user_sessions(
     p_reason TEXT DEFAULT 'User requested remote device logout',
     p_now_ms BIGINT DEFAULT NULL
 )
-RETURNS JSONB AS $$
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 DECLARE
     v_revoked_count INTEGER;
 BEGIN
@@ -163,7 +171,7 @@ BEGIN
 
     RETURN jsonb_build_object('success', true, 'user_id', p_user_id, 'revoked_count', v_revoked_count);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
+$$;
 
 -- C. ATOMIC REVOKE ENTIRE SESSION FAMILY
 CREATE OR REPLACE FUNCTION fn_revoke_session_family(
@@ -171,7 +179,11 @@ CREATE OR REPLACE FUNCTION fn_revoke_session_family(
     p_reason TEXT DEFAULT 'Session lineage family revocation',
     p_now_ms BIGINT DEFAULT NULL
 )
-RETURNS JSONB AS $$
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 DECLARE
     v_revoked_count INTEGER;
 BEGIN
@@ -187,7 +199,7 @@ BEGIN
 
     RETURN jsonb_build_object('success', true, 'family_id', p_family_id, 'revoked_count', v_revoked_count);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
+$$;
 
 -- ============================================================================
 -- 4. ROW-LEVEL SECURITY POLICIES
@@ -195,5 +207,9 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 ALTER TABLE galx_token_revocation_log ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "service_role_all_galx_token_revocation" ON galx_token_revocation_log;
 CREATE POLICY "service_role_all_galx_token_revocation" ON galx_token_revocation_log FOR ALL USING (auth.role() = 'service_role');
+
+DROP POLICY IF EXISTS "user_view_own_revocation_logs" ON galx_token_revocation_log;
 CREATE POLICY "user_view_own_revocation_logs" ON galx_token_revocation_log FOR SELECT USING (auth.uid()::text = user_id);
+

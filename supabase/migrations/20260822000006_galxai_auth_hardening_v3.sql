@@ -38,7 +38,11 @@ CREATE OR REPLACE FUNCTION fn_elevate_session_sudo(
     p_duration_ms BIGINT DEFAULT 900000, -- 15 minutes default
     p_now_ms BIGINT DEFAULT NULL
 )
-RETURNS JSONB AS $$
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 DECLARE
     v_now_ms BIGINT;
     v_elevated_until BIGINT;
@@ -70,7 +74,7 @@ BEGIN
         'expires_in_ms', p_duration_ms
     );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
+$$;
 
 -- B. ZERO-DOWNTIME VAULT SHARD KMS RE-WRAPPING
 CREATE OR REPLACE FUNCTION fn_reencrypt_vault_shard_record(
@@ -79,7 +83,11 @@ CREATE OR REPLACE FUNCTION fn_reencrypt_vault_shard_record(
     p_new_version VARCHAR(32) DEFAULT 'v2',
     p_now_ms BIGINT DEFAULT NULL
 )
-RETURNS JSONB AS $$
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 DECLARE
     v_now_ms BIGINT;
     v_shard RECORD;
@@ -107,7 +115,7 @@ BEGIN
         'reencrypted_at_ms', v_now_ms
     );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
+$$;
 
 -- ============================================================================
 -- 4. ROW-LEVEL SECURITY POLICIES
@@ -115,5 +123,8 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 ALTER TABLE galx_session_risk_events ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "service_role_all_galx_session_risk_events" ON galx_session_risk_events;
 CREATE POLICY "service_role_all_galx_session_risk_events" ON galx_session_risk_events FOR ALL USING (auth.role() = 'service_role');
+
+DROP POLICY IF EXISTS "user_view_own_risk_events" ON galx_session_risk_events;
 CREATE POLICY "user_view_own_risk_events" ON galx_session_risk_events FOR SELECT USING (auth.uid()::text = user_id);

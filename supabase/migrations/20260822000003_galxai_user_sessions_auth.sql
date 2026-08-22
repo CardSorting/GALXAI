@@ -50,7 +50,11 @@ CREATE OR REPLACE FUNCTION fn_create_user_session(
     p_expires_at_ms BIGINT DEFAULT NULL,
     p_workspace_id UUID DEFAULT NULL
 )
-RETURNS JSONB AS $$
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 DECLARE
     v_now_ms BIGINT;
     v_issued_ms BIGINT;
@@ -114,14 +118,18 @@ BEGIN
         'expires_at_ms', v_session.expires_at_ms
     );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
+$$;
 
 -- B. ATOMIC VERIFY USER SESSION
 CREATE OR REPLACE FUNCTION fn_verify_user_session(
     p_token_hash VARCHAR(64),
     p_now_ms BIGINT DEFAULT NULL
 )
-RETURNS JSONB AS $$
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 DECLARE
     v_now_ms BIGINT;
     v_session RECORD;
@@ -162,7 +170,7 @@ BEGIN
         'last_active_at_ms', v_now_ms
     );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
+$$;
 
 -- C. ATOMIC REVOKE USER SESSION
 CREATE OR REPLACE FUNCTION fn_revoke_user_session(
@@ -170,7 +178,11 @@ CREATE OR REPLACE FUNCTION fn_revoke_user_session(
     p_reason TEXT DEFAULT 'User requested logout',
     p_now_ms BIGINT DEFAULT NULL
 )
-RETURNS JSONB AS $$
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 DECLARE
     v_now_ms BIGINT;
 BEGIN
@@ -185,7 +197,7 @@ BEGIN
 
     RETURN jsonb_build_object('success', true, 'session_id', p_session_id, 'revoked_at_ms', v_now_ms);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
+$$;
 
 -- D. ATOMIC GLOBAL REVOKE ALL SESSIONS FOR USER
 CREATE OR REPLACE FUNCTION fn_revoke_all_user_sessions(
@@ -193,7 +205,11 @@ CREATE OR REPLACE FUNCTION fn_revoke_all_user_sessions(
     p_reason TEXT DEFAULT 'Global logout from all devices',
     p_now_ms BIGINT DEFAULT NULL
 )
-RETURNS JSONB AS $$
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 DECLARE
     v_revoked_count INTEGER;
 BEGIN
@@ -209,7 +225,7 @@ BEGIN
 
     RETURN jsonb_build_object('success', true, 'user_id', p_user_id, 'revoked_count', v_revoked_count);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
+$$;
 
 -- E. SCAVENGE EXPIRED SESSIONS
 CREATE OR REPLACE FUNCTION fn_cleanup_expired_sessions(
@@ -237,6 +253,11 @@ $$ LANGUAGE plpgsql;
 
 ALTER TABLE galx_user_sessions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "service_role_all_galx_user_sessions" ON galx_user_sessions;
 CREATE POLICY "service_role_all_galx_user_sessions" ON galx_user_sessions FOR ALL USING (auth.role() = 'service_role');
+
+DROP POLICY IF EXISTS "user_view_own_sessions" ON galx_user_sessions;
 CREATE POLICY "user_view_own_sessions" ON galx_user_sessions FOR SELECT USING (auth.uid()::text = user_id);
+
+DROP POLICY IF EXISTS "user_delete_own_sessions" ON galx_user_sessions;
 CREATE POLICY "user_delete_own_sessions" ON galx_user_sessions FOR DELETE USING (auth.uid()::text = user_id);

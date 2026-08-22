@@ -157,4 +157,5 @@ END;
 $$ LANGUAGE plpgsql;
 
 ALTER TABLE galx_budget_alerts ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "service_role_all_galx_budget_alerts" ON galx_budget_alerts;
 CREATE POLICY "service_role_all_galx_budget_alerts" ON galx_budget_alerts FOR ALL USING (auth.role() = 'service_role');

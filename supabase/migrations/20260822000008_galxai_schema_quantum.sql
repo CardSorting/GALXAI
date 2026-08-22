@@ -120,7 +120,9 @@ END;
 $$ LANGUAGE plpgsql;
 
 ALTER TABLE galx_shard_health_probes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "service_role_all_galx_shard_health" ON galx_shard_health_probes;
 CREATE POLICY "service_role_all_galx_shard_health" ON galx_shard_health_probes FOR ALL USING (auth.role() = 'service_role');
 
 ALTER TABLE galx_webhook_deliveries ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "service_role_all_galx_webhook_deliveries" ON galx_webhook_deliveries;
 CREATE POLICY "service_role_all_galx_webhook_deliveries" ON galx_webhook_deliveries FOR ALL USING (auth.role() = 'service_role');

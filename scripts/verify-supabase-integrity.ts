@@ -36,7 +36,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, '..');
 const MIGRATIONS_DIR = path.resolve(ROOT_DIR, 'supabase/migrations');
-const ROLLBACKS_DIR = path.resolve(MIGRATIONS_DIR, 'rollbacks');
+const ROLLBACKS_DIR = path.resolve(ROOT_DIR, 'supabase/rollbacks');
 const TYPES_FILE = path.resolve(ROOT_DIR, 'src/lib/supabase/types.ts');
 const SCHEMA_SETUP_FILE = path.resolve(ROOT_DIR, 'scripts/setup-supabase-schema.sql');
 
