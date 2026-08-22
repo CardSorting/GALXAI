@@ -16,7 +16,10 @@ import {
   Gauge,
   Lock,
   AlertTriangle,
-  Flame
+  Flame,
+  FileCode2,
+  ArrowLeftRight,
+  BookMarked
 } from 'lucide-react';
 
 interface DocsNavItem {
@@ -38,21 +41,25 @@ const DOCS_NAV_GROUPS: DocsNavGroup[] = [
     id: 'start',
     title: 'Getting Started',
     items: [
-      { name: 'Docs Overview', href: '/docs', icon: BookOpen, exact: true },
-      { name: '30s Quickstart', href: '/docs/quickstart', icon: Zap, badge: '2 min' },
-      { name: 'Python & Node SDKs', href: '/docs/sdks', icon: Code2 },
-      { name: 'IDE & Cursor Setup', href: '/docs/ide-setup', icon: Terminal, badge: 'IDE' },
+      { name: 'Overview', href: '/docs', icon: BookOpen, exact: true },
+      { name: '30s Quickstart', href: '/docs/quickstart', icon: Zap, badge: '30s' },
+      { name: '1-Click Migration', href: '/docs/migration', icon: ArrowLeftRight, badge: '0-Code' },
+      { name: 'Python SDK', href: '/docs/sdks/python', icon: Code2 },
+      { name: 'TypeScript SDK', href: '/docs/sdks/typescript', icon: FileCode2 },
+      { name: 'IDE & Cursor', href: '/docs/ide-setup', icon: Terminal, badge: 'IDE' },
       { name: 'SSE Streaming', href: '/docs/streaming', icon: Radio }
     ]
   },
   {
     id: 'api',
-    title: 'API & Model Reference',
+    title: 'API & Cookbooks',
     items: [
       { name: 'REST API Reference', href: '/docs/api-reference', icon: Cpu, badge: 'OpenAPI' },
+      { name: 'Production Cookbooks', href: '/docs/cookbook', icon: BookMarked, badge: 'Recipes' },
+      { name: 'Structured Outputs', href: '/docs/structured-outputs', icon: Sparkles, badge: 'JSON' },
       { name: 'Model Capabilities', href: '/docs/models-guide', icon: Flame },
       { name: '75% Prompt Caching', href: '/docs/prompt-caching', icon: Sparkles, badge: '-75%' },
-      { name: 'Errors & Retry Backoff', href: '/docs/error-handling', icon: AlertTriangle }
+      { name: 'Errors & Retries', href: '/docs/error-handling', icon: AlertTriangle }
     ]
   },
   {
@@ -60,8 +67,8 @@ const DOCS_NAV_GROUPS: DocsNavGroup[] = [
     title: 'Architecture & Trust',
     items: [
       { name: 'Router Architecture', href: '/docs/architecture', icon: Layers },
-      { name: 'Security & Zero-Retention', href: '/docs/security-spec', icon: Lock, badge: 'TLS 1.3' },
-      { name: 'Rate Limits & Concurrency', href: '/docs/rate-limits', icon: Gauge }
+      { name: 'Security & Privacy', href: '/docs/security-spec', icon: Lock, badge: 'TLS 1.3' },
+      { name: 'Rate Limits & Quotas', href: '/docs/rate-limits', icon: Gauge }
     ]
   }
 ];
