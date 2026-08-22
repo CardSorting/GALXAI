@@ -19,29 +19,88 @@ import {
   Laptop,
   ArrowRight,
   Zap,
-  ShieldAlert,
   CreditCard,
   Lock,
   Coins,
-  AlertCircle
+  AlertCircle,
+  Play,
+  FileCode,
+  Sliders,
+  Server,
+  Bot,
+  Layers
 } from 'lucide-react';
+
+interface Preset {
+  id: string;
+  name: string;
+  defaultLabel: string;
+  rpm: number;
+  icon: React.ComponentType<{ className?: string }>;
+  description: string;
+}
+
+const PRESETS: Preset[] = [
+  {
+    id: 'cursor',
+    name: 'Cursor & Windsurf',
+    defaultLabel: 'Cursor IDE / AI Editor',
+    rpm: 120,
+    icon: Laptop,
+    description: 'Optimized for inline completions, multi-file edits, and agent loops.'
+  },
+  {
+    id: 'backend',
+    name: 'Production Backend',
+    defaultLabel: 'Production API Backend',
+    rpm: 300,
+    icon: Server,
+    description: 'High-concurrency server workloads with automated failover.'
+  },
+  {
+    id: 'agent',
+    name: 'Autonomous Agent Fleet',
+    defaultLabel: 'Agent Swarm / LangChain',
+    rpm: 600,
+    icon: Bot,
+    description: 'Maximum throughput for multi-step reasoning and tool-calling swarms.'
+  },
+  {
+    id: 'proto',
+    name: 'Local Testing & CLI',
+    defaultLabel: 'Local Prototyping Key',
+    rpm: 60,
+    icon: Terminal,
+    description: 'Standard rate limits for local scripts, notebooks, and quick testing.'
+  }
+];
 
 export default function CreateKeyPage() {
   const router = useRouter();
-  const [name, setName] = useState('Production Gateway Key');
+  const [selectedPresetId, setSelectedPresetId] = useState<string>('cursor');
+  const [name, setName] = useState('Cursor IDE / AI Editor');
   const [rateLimitPerMinute, setRateLimitPerMinute] = useState(120);
   const [createdSecretKey, setCreatedSecretKey] = useState<string | null>(null);
-  const [activeSnippetTab, setActiveSnippetTab] = useState<'python' | 'node' | 'cursor' | 'continue' | 'curl'>('python');
+  const [activeSnippetTab, setActiveSnippetTab] = useState<'python' | 'node' | 'env' | 'cursor' | 'continue' | 'curl'>('python');
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedSnippet, setCopiedSnippet] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Anti-Bot Verification State ($10 Minimum Initial Deposit)
-  const [hasVerifiedDeposit, setHasVerifiedDeposit] = useState(true); // Default verified for demo, toggleable
+  // Instant Live Smoke Test State
+  const [isTestingKey, setIsTestingKey] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; latencyMs: number; message: string } | null>(null);
+
+  // Account Verification State ($10 Minimum Initial Deposit)
+  const [hasVerifiedDeposit, setHasVerifiedDeposit] = useState(true);
   const [walletBalance, setWalletBalance] = useState(114.59);
-  const [depositAmount, setDepositAmount] = useState(10);
   const [isDepositing, setIsDepositing] = useState(false);
   const [depositSuccessMsg, setDepositSuccessMsg] = useState<string | null>(null);
+
+  const applyPreset = (preset: Preset) => {
+    setSelectedPresetId(preset.id);
+    setName(preset.defaultLabel);
+    setRateLimitPerMinute(preset.rpm);
+  };
 
   const handleDepositAndVerify = (amt: number) => {
     setIsDepositing(true);
@@ -49,7 +108,7 @@ export default function CreateKeyPage() {
       setWalletBalance(prev => prev + amt);
       setHasVerifiedDeposit(true);
       setIsDepositing(false);
-      setDepositSuccessMsg(`Successfully deposited $${amt.toFixed(2)} USD! Anti-Bot Verification complete.`);
+      setDepositSuccessMsg(`Successfully deposited $${amt.toFixed(2)} USD! Developer verification complete.`);
       setTimeout(() => setDepositSuccessMsg(null), 4000);
     }, 600);
   };
@@ -86,10 +145,58 @@ export default function CreateKeyPage() {
     setTimeout(() => setCopiedKey(false), 2000);
   };
 
+  // Instant Live Smoke Test Function
+  const handleRunSmokeTest = async () => {
+    if (!createdSecretKey) return;
+    setIsTestingKey(true);
+    setTestResult(null);
+
+    const start = Date.now();
+    try {
+      const res = await fetch('/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${createdSecretKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-5.6-sol',
+          messages: [{ role: 'user', content: 'Say "GALXAI Gateway Connected Successfully!" in 5 words.' }],
+          stream: false
+        })
+      });
+
+      const latencyMs = Date.now() - start;
+      if (res.ok) {
+        const json = await res.json();
+        const reply = json.choices?.[0]?.message?.content || 'GALXAI Gateway Connected Successfully!';
+        setTestResult({
+          success: true,
+          latencyMs,
+          message: reply
+        });
+      } else {
+        setTestResult({
+          success: false,
+          latencyMs,
+          message: `Verification returned HTTP ${res.status}`
+        });
+      }
+    } catch (err: any) {
+      setTestResult({
+        success: false,
+        latencyMs: Date.now() - start,
+        message: err.message || 'Connection test failed'
+      });
+    } finally {
+      setIsTestingKey(false);
+    }
+  };
+
   const getSnippets = (k: string) => ({
     python: `from openai import OpenAI
 
-# Drop-in replacement for OpenAI SDK (25%-40% discount)
+# 1-Line Drop-in replacement for OpenAI SDK (25%-40% discount)
 client = OpenAI(
     base_url="https://api.galxai.com/v1",
     api_key="${k}"
@@ -112,6 +219,11 @@ const response = await client.chat.completions.create({
   messages: [{ role: 'user', content: 'Write a LRU cache in Rust.' }],
   stream: true
 });`,
+    env: `# .env file for your backend or agent app
+OPENAI_BASE_URL="https://api.galxai.com/v1"
+OPENAI_API_KEY="${k}"
+GALXAI_API_KEY="${k}"
+DEFAULT_MODEL="gpt-5.6-sol"`,
     cursor: `// In Cursor IDE / Windsurf Settings -> Models -> OpenAI API Key:
 // 1. Set Override Base URL:
 https://api.galxai.com/v1
@@ -171,7 +283,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
               </div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                <span>VERIFIED DEVELOPER ACTIVATION ($10 DEPOSIT)</span>
+                <span>VERIFIED DEVELOPER ACTIVATION</span>
               </div>
             </div>
             <h1 className="text-2xl font-black text-white">Create Developer Gateway Key</h1>
@@ -272,6 +384,53 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
                 </div>
               </div>
 
+              {/* Instant In-Browser Smoke Test Card */}
+              <div className="glass-panel rounded-3xl p-6 space-y-4 border border-cyan-500/30 bg-cyan-500/5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-0.5">
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-cyan-400" />
+                      Live In-Browser Key Verification
+                    </h3>
+                    <p className="text-xs text-zinc-400">Send an instant test ping through the router to verify this key end-to-end.</p>
+                  </div>
+
+                  <button
+                    onClick={handleRunSmokeTest}
+                    disabled={isTestingKey}
+                    className="px-5 py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                  >
+                    {isTestingKey ? (
+                      <span>Testing Endpoint...</span>
+                    ) : (
+                      <>
+                        <Play className="w-3.5 h-3.5 fill-cyan-400" />
+                        <span>Run Live Key Test</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {testResult && (
+                  <div className={`p-4 rounded-2xl border font-mono text-xs animate-in fade-in duration-200 flex items-start gap-3 ${
+                    testResult.success
+                      ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
+                      : 'bg-rose-500/10 border-rose-500/40 text-rose-300'
+                  }`}>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <div className="font-bold flex items-center gap-2">
+                        <span>✓ Response received in {testResult.latencyMs}ms</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30">
+                          25% Discount Active
+                        </span>
+                      </div>
+                      <p className="text-zinc-300 text-[11px] italic">"{testResult.message}"</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Pre-Populated 1-Click Code Snippet Generator */}
               <div className="glass-panel rounded-3xl p-6 space-y-4 border border-white/10">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -284,7 +443,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
                   </div>
 
                   <div className="flex items-center gap-1 p-1 rounded-xl bg-black/50 border border-white/10 text-xs font-mono">
-                    {(['python', 'node', 'cursor', 'continue', 'curl'] as const).map((tab) => (
+                    {(['python', 'node', 'env', 'cursor', 'continue', 'curl'] as const).map((tab) => (
                       <button
                         key={tab}
                         onClick={() => setActiveSnippetTab(tab)}
@@ -294,7 +453,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
                             : 'text-zinc-400 hover:text-white'
                         }`}
                       >
-                        {tab === 'cursor' ? 'Cursor IDE' : tab === 'continue' ? 'Continue.dev' : tab}
+                        {tab === 'env' ? '.env' : tab === 'cursor' ? 'Cursor IDE' : tab === 'continue' ? 'Continue.dev' : tab}
                       </button>
                     ))}
                   </div>
@@ -344,9 +503,46 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Preset Selector Grid */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider font-mono">
+                  1. Select Workload Preset
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {PRESETS.map((preset) => {
+                    const isSelected = selectedPresetId === preset.id;
+                    const Icon = preset.icon;
+
+                    return (
+                      <div
+                        key={preset.id}
+                        onClick={() => applyPreset(preset)}
+                        className={`cursor-pointer rounded-2xl p-4 border transition-all space-y-2 flex flex-col justify-between ${
+                          isSelected
+                            ? 'bg-amber-500/10 border-amber-500/60 shadow-lg shadow-amber-500/10 scale-[1.02]'
+                            : 'bg-black/30 border-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <Icon className={`w-4 h-4 ${isSelected ? 'text-amber-400' : 'text-zinc-400'}`} />
+                            <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/5 text-zinc-400">
+                              {preset.rpm} RPM
+                            </span>
+                          </div>
+                          <div className="text-xs font-bold text-white">{preset.name}</div>
+                          <p className="text-[10px] text-zinc-400 line-clamp-2 leading-relaxed">{preset.description}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Key Name / Label */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider font-mono">
-                  Key Label / Name
+                  2. Key Label / Identifier
                 </label>
                 <input
                   type="text"
@@ -358,9 +554,10 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
                 />
               </div>
 
+              {/* Rate Limit Selection */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider font-mono">
-                  Rate Limit (Requests per Minute)
+                  3. Rate Limit (Requests per Minute)
                 </label>
                 <select
                   value={rateLimitPerMinute}
@@ -374,6 +571,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
                 </select>
               </div>
 
+              {/* Value / Trust Points */}
               <div className="p-4 rounded-2xl bg-black/30 border border-white/5 space-y-2 text-xs text-zinc-400">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -389,6 +587,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
                 </div>
               </div>
 
+              {/* Submit Buttons */}
               <div className="flex justify-end gap-3 pt-2">
                 <Link
                   href="/keys"
@@ -399,7 +598,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
                 <button
                   type="submit"
                   disabled={isLoading || !name.trim() || !hasVerifiedDeposit}
-                  className="px-8 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
+                  className="px-8 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer font-mono"
                 >
                   {isLoading ? (
                     <span>Minting Key...</span>
