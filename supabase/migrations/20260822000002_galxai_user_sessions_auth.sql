@@ -114,7 +114,7 @@ BEGIN
         'expires_at_ms', v_session.expires_at_ms
     );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- B. ATOMIC VERIFY USER SESSION
 CREATE OR REPLACE FUNCTION fn_verify_user_session(
@@ -162,7 +162,7 @@ BEGIN
         'last_active_at_ms', v_now_ms
     );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- C. ATOMIC REVOKE USER SESSION
 CREATE OR REPLACE FUNCTION fn_revoke_user_session(
@@ -185,7 +185,7 @@ BEGIN
 
     RETURN jsonb_build_object('success', true, 'session_id', p_session_id, 'revoked_at_ms', v_now_ms);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- D. ATOMIC GLOBAL REVOKE ALL SESSIONS FOR USER
 CREATE OR REPLACE FUNCTION fn_revoke_all_user_sessions(
@@ -209,7 +209,7 @@ BEGIN
 
     RETURN jsonb_build_object('success', true, 'user_id', p_user_id, 'revoked_count', v_revoked_count);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- E. SCAVENGE EXPIRED SESSIONS
 CREATE OR REPLACE FUNCTION fn_cleanup_expired_sessions(

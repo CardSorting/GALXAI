@@ -1216,7 +1216,78 @@ export interface Database {
         };
         Relationships: [];
       };
-
+      galx_shard_health_probes: {
+        Row: {
+          id: string;
+          shard_id: string;
+          worker_id: string;
+          latency_ms: number;
+          status_code: number;
+          is_success: boolean;
+          error_message: string | null;
+          recorded_at: string;
+        };
+        Insert: {
+          id?: string;
+          shard_id: string;
+          worker_id: string;
+          latency_ms: number;
+          status_code: number;
+          is_success: boolean;
+          error_message?: string | null;
+          recorded_at?: string;
+        };
+        Update: {
+          id?: string;
+          shard_id?: string;
+          worker_id?: string;
+          latency_ms?: number;
+          status_code?: number;
+          is_success?: boolean;
+          error_message?: string | null;
+          recorded_at?: string;
+        };
+        Relationships: [];
+      };
+      galx_webhook_dispatches: {
+        Row: {
+          id: string;
+          target_url: string;
+          event_type: string;
+          event_id: string;
+          payload: Json;
+          signature: string;
+          status_code: number | null;
+          is_success: boolean;
+          error_message: string | null;
+          dispatched_at: string;
+        };
+        Insert: {
+          id?: string;
+          target_url: string;
+          event_type: string;
+          event_id: string;
+          payload: Json;
+          signature: string;
+          status_code?: number | null;
+          is_success: boolean;
+          error_message?: string | null;
+          dispatched_at?: string;
+        };
+        Update: {
+          id?: string;
+          target_url?: string;
+          event_type?: string;
+          event_id?: string;
+          payload?: Json;
+          signature?: string;
+          status_code?: number | null;
+          is_success?: boolean;
+          error_message?: string | null;
+          dispatched_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;

@@ -81,6 +81,10 @@ export class WorkspaceRepository {
     return this.workspaceTable.get(id) || null;
   }
 
+  async getWorkspace(id: string): Promise<WorkspaceRecord | null> {
+    return this.getWorkspaceById(id);
+  }
+
   async getWorkspaceBySlug(slug: string): Promise<WorkspaceRecord | null> {
     if (isSupabaseConfigured()) {
       try {

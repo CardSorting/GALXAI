@@ -157,8 +157,110 @@ export class BudgetRepository {
     }
   }
 
+  async checkBudgetThresholds(
+    workspaceId: string,
+    additionalSpendUsd = 0
+  ): Promise<{
+    success: boolean;
+    reason?: string;
+    currentSpendUsd: number;
+    spendCapUsd: number;
+    percentageUsed: number;
+    isCapped: boolean;
+    triggeredAlerts: Array<{
+      alertId: string;
+      thresholdPercentage: number;
+      webhookUrl: string;
+      currentSpendUsd: number;
+      spendCapUsd: number;
+    }>;
+  }> {
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseAdmin();
+        const { data, error } = await supabase.rpc('fn_check_budget_thresholds', {
+          p_workspace_id: workspaceId,
+          p_additional_spend_usd: additionalSpendUsd
+        });
+
+        if (!error && data) {
+          const res = data as any;
+          return {
+            success: res.success,
+            reason: res.reason,
+            currentSpendUsd: Number(res.currentSpendUsd || 0),
+            spendCapUsd: Number(res.spendCapUsd || 0),
+            percentageUsed: Number(res.percentageUsed || 0),
+            isCapped: Boolean(res.isCapped),
+            triggeredAlerts: res.triggeredAlerts || []
+          };
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    // Fallback in-memory evaluation
+    const wsRepo = (await import('./WorkspaceRepository')).WorkspaceRepository.getInstance();
+    const ws = await wsRepo.getWorkspace(workspaceId);
+    if (!ws) {
+      return {
+        success: false,
+        reason: 'WORKSPACE_NOT_FOUND',
+        currentSpendUsd: 0,
+        spendCapUsd: 0,
+        percentageUsed: 0,
+        isCapped: false,
+        triggeredAlerts: []
+      };
+    }
+
+    const newSpend = ws.currentMonthSpendUsd + additionalSpendUsd;
+    ws.currentMonthSpendUsd = newSpend;
+    ws.updatedAt = new Date().toISOString();
+    wsRepo.workspaceTable.put(ws.id, ws);
+
+    const spendCap = ws.monthlySpendCapUsd;
+    const pct = spendCap > 0 ? (newSpend / spendCap) * 100 : 0;
+    const isCapped = spendCap > 0 && newSpend >= spendCap;
+
+    const alerts = await this.getBudgetAlerts(workspaceId);
+    const triggered: Array<{
+      alertId: string;
+      thresholdPercentage: number;
+      webhookUrl: string;
+      currentSpendUsd: number;
+      spendCapUsd: number;
+    }> = [];
+
+    for (const alert of alerts) {
+      if (!alert.isTriggered && alert.thresholdPercentage <= pct) {
+        alert.isTriggered = true;
+        alert.triggeredAt = new Date().toISOString();
+        this.alertTable.put(alert.id, alert);
+        triggered.push({
+          alertId: alert.id,
+          thresholdPercentage: alert.thresholdPercentage,
+          webhookUrl: alert.notificationWebhookUrl,
+          currentSpendUsd: newSpend,
+          spendCapUsd: spendCap
+        });
+      }
+    }
+
+    return {
+      success: true,
+      currentSpendUsd: newSpend,
+      spendCapUsd: spendCap,
+      percentageUsed: pct,
+      isCapped,
+      triggeredAlerts: triggered
+    };
+  }
+
   public queryNatural(naturalQuery: string): BudgetAlertRecord[] {
     const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'budget_alerts');
     return this.alertTable.query(parsed.queryOptions) as BudgetAlertRecord[];
   }
 }
+

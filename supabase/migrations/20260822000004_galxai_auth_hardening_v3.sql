@@ -70,7 +70,7 @@ BEGIN
         'expires_in_ms', p_duration_ms
     );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- B. ZERO-DOWNTIME VAULT SHARD KMS RE-WRAPPING
 CREATE OR REPLACE FUNCTION fn_reencrypt_vault_shard_record(
@@ -107,7 +107,7 @@ BEGIN
         'reencrypted_at_ms', v_now_ms
     );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- ============================================================================
 -- 4. ROW-LEVEL SECURITY POLICIES

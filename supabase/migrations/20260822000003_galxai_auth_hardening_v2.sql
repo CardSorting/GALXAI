@@ -137,7 +137,7 @@ BEGIN
 
     RETURN jsonb_build_object('success', false, 'reason', 'SESSION_NOT_FOUND', 'reuse_detected', false);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- B. ATOMIC REVOKE ALL SESSIONS EXCEPT CURRENT (REMOTE DEVICE LOGOUT)
 CREATE OR REPLACE FUNCTION fn_revoke_other_user_sessions(
@@ -163,7 +163,7 @@ BEGIN
 
     RETURN jsonb_build_object('success', true, 'user_id', p_user_id, 'revoked_count', v_revoked_count);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- C. ATOMIC REVOKE ENTIRE SESSION FAMILY
 CREATE OR REPLACE FUNCTION fn_revoke_session_family(
@@ -187,7 +187,7 @@ BEGIN
 
     RETURN jsonb_build_object('success', true, 'family_id', p_family_id, 'revoked_count', v_revoked_count);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- ============================================================================
 -- 4. ROW-LEVEL SECURITY POLICIES

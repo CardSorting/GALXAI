@@ -272,12 +272,50 @@ export class WalletRepository {
     completionTokens?: number;
     cachedTokens?: number;
     metadata?: Record<string, any>;
-  }>): Promise<number> {
-    if (draws.length === 0) return 0;
-    for (const d of draws) {
-      await this.drawTokens(d);
+  }>): Promise<Array<{
+    userId: string;
+    success: boolean;
+    reason?: string;
+    transactionId?: string;
+    newBalance?: number;
+    costUsd?: number;
+  }>> {
+    if (draws.length === 0) return [];
+
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseAdmin();
+        const { data, error } = await supabase.rpc('fn_batch_draw_wallet_tokens_cf', {
+          p_draws: draws
+        });
+        if (!error && data && Array.isArray(data)) {
+          return (data as any[]).map(item => ({
+            userId: String(item.userId || ''),
+            success: Boolean(item.success),
+            reason: item.reason ? String(item.reason) : undefined,
+            transactionId: item.transactionId ? String(item.transactionId) : undefined,
+            newBalance: item.newBalance !== undefined ? Number(item.newBalance) : undefined,
+            costUsd: item.costUsd !== undefined ? Number(item.costUsd) : undefined
+          }));
+        }
+      } catch {
+        // Fallback
+      }
     }
-    return draws.length;
+
+    const results = [];
+    for (const d of draws) {
+      const res = await this.drawTokens(d);
+      results.push({
+        userId: d.userId,
+        success: res.success,
+        reason: res.reason,
+        transactionId: res.transactionId,
+        newBalance: res.newBalance,
+        costUsd: res.costUsd
+      });
+    }
+    return results;
   }
 
   async getTransactions(userId: string, limit = 50): Promise<WalletTransactionRecord[]> {

@@ -42,6 +42,7 @@ This directory contains the formal Architectural Decision Records (ADRs) that go
 | **[ADR 0032](0032-ultra-flat-effortless-sdk-strategy-and-callable-tagged-templates.md)** | Ultra-Flat Effortless Developer SDK Strategy & Tagged Templates | **Developer SDK** | `Accepted` | Callable `galx` export, tagged template literals, top-level `run`/`stream`/`extract`, and tool wrappers. |
 | **[ADR 0033](0033-universal-api-strategy-anthropic-messages-embeddings-and-health.md)** | Universal API Strategy: Anthropic Messages, Embeddings & Discovery | **API Strategy** | `Accepted` | Native Anthropic `/v1/messages`, OpenAI `/v1/embeddings`, `/api/health`, and rapid `/api/run`. |
 | **[ADR 0034](0034-autonomous-agent-1-click-context-and-auto-copy-substrate.md)** | Autonomous Agent 1-Click Context & Zero-Friction Event Pipeline | **Agent UX** | `Accepted` | Structured Markdown agent context, direct 1-click format chips, and zero-click Auto-Copy on completion. |
+| **[ADR 0035](0035-paranoid-supabase-postgresql-and-ai-agent-governance.md)** | Paranoid Supabase PostgreSQL Architecture & AI Agent Long-Term Governance | **Database Security** | `Accepted` | 10 Commandments, AOP-DB protocol, mechanical SQL linter, and bi-directional rollbacks for non-SQL architects. |
 
 ---
 
