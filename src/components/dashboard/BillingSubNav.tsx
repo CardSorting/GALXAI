@@ -15,7 +15,8 @@ import {
   BellRing,
   ShieldCheck,
   Users2,
-  Landmark
+  Landmark,
+  FileCheck
 } from 'lucide-react';
 
 export function BillingSubNav() {
@@ -60,6 +61,12 @@ export function BillingSubNav() {
       name: 'Budget Alerts',
       href: '/billing/budget-alerts',
       icon: BellRing
+    },
+    {
+      name: 'Audit Trail',
+      href: '/billing/audit-logs',
+      icon: FileCheck,
+      badge: 'SOC2'
     },
     {
       name: 'Enterprise Contracts',
