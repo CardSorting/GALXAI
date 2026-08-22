@@ -768,6 +768,66 @@ async function runAllTests() {
     assert.strictEqual(accAfter?.tokenBucket.reservedTokens, 0);
   });
 
+  await test('Tenant-Affinity Shard Dispersion (TASD): Naturally distributes multi-request burst across distinct pool shards', () => {
+    const substrateDisp = new GalxCredentialSubstrate();
+    substrateDisp.clearCache();
+    const poolDisp = new GalxCredentialPool(substrateDisp, governor, breaker, 'adaptive_headroom');
+
+    const shardD1: GalxShardAccount = {
+      id: 'shard_disp_1',
+      userId: 'user_d1',
+      accountLabel: 'Dispersion Shard 1',
+      provider: 'openai',
+      authType: 'api_key',
+      shardMode: 'pooled',
+      status: 'healthy',
+      priority: 10,
+      weight: 1,
+      fencingToken: 1,
+      apiKeyMasked: 'sk-proj...d1',
+      encryptedPayload: GalxCryptoVault.encryptSecret({ apiKey: 'sk-proj-d1' }, 'user_d1', 'shard_disp_1', 'openai'),
+      tokenBucket: governor.createDefaultBucket(500_000, 500_000, 100),
+      stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
+    };
+
+    const shardD2: GalxShardAccount = {
+      id: 'shard_disp_2',
+      userId: 'user_d2',
+      accountLabel: 'Dispersion Shard 2',
+      provider: 'openai',
+      authType: 'api_key',
+      shardMode: 'pooled',
+      status: 'healthy',
+      priority: 10,
+      weight: 1,
+      fencingToken: 1,
+      apiKeyMasked: 'sk-proj...d2',
+      encryptedPayload: GalxCryptoVault.encryptSecret({ apiKey: 'sk-proj-d2' }, 'user_d2', 'shard_disp_2', 'openai'),
+      tokenBucket: governor.createDefaultBucket(500_000, 500_000, 100),
+      stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
+    };
+
+    substrateDisp.addAccount(shardD1);
+    substrateDisp.addAccount(shardD2);
+
+    // Tenant A acquires 2 parallel leases
+    const leaseA1 = poolDisp.acquireLease({ userId: 'tenant_heavy', provider: 'openai', estimatedTokens: 1000 });
+    assert.ok(leaseA1.lease);
+
+    const leaseA2 = poolDisp.acquireLease({ userId: 'tenant_heavy', provider: 'openai', estimatedTokens: 1000 });
+    assert.ok(leaseA2.lease);
+
+    // Assert that TASD and post-allocation leveling routed the 2 requests to separate shards
+    assert.notStrictEqual(leaseA1.lease.shardId, leaseA2.lease.shardId);
+
+    poolDisp.releaseLease(leaseA1.lease.leaseId, 1000, true);
+    poolDisp.releaseLease(leaseA2.lease.leaseId, 1000, true);
+  });
+
   console.log('\n======================================================================');
   if (testsFailed === 0) {
     console.log(`   ALL ${testsPassed}/${testsPassed} FORENSIC VERIFICATION TESTS PASSED SUCCESSFULLY! `);

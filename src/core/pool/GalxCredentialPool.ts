@@ -185,13 +185,14 @@ export class GalxCredentialPool {
       };
     }
 
-    // 6. Select the optimal candidate using the chosen quota cycling strategy with post-allocation headroom
+    // 6. Select the optimal candidate using the chosen quota cycling strategy with post-allocation headroom & tenant dispersion
     const selectedAccount = this.selectOptimalShard(
       finalCandidates,
       maxInFlightPerShard,
       nowMs,
       isPriorityUser,
-      estimatedTokens
+      estimatedTokens,
+      req.userId
     );
 
     this.tenantInFlightCounts.set(req.userId, currentTenantInFlight + 1);
@@ -237,7 +238,8 @@ export class GalxCredentialPool {
     maxInFlightPerShard: number,
     nowMs: number,
     isPriorityUser: boolean,
-    estimatedTokens = 1000
+    estimatedTokens = 1000,
+    userId?: string
   ): GalxShardAccount {
     if (candidates.length === 1) return candidates[0];
 
@@ -258,21 +260,23 @@ export class GalxCredentialPool {
           maxInFlightPerShard,
           nowMs,
           isPriorityUser,
-          estimatedTokens
+          estimatedTokens,
+          userId
         );
     }
   }
 
   /**
-   * Strategy 1: Adaptive Hydraulic Headroom Cycling (AHT) with Post-Allocation Leveling.
-   * Calculates continuous token bucket post-allocation headroom, EWMA latency score, dynamic reliability weight, and canary multipliers.
+   * Strategy 1: Adaptive Hydraulic Headroom Cycling (AHT) with Post-Allocation Leveling and Tenant Dispersion.
+   * Calculates continuous token bucket post-allocation headroom, EWMA latency score, dynamic reliability weight, canary multipliers, and tenant dispersion.
    */
   private selectAdaptiveHydraulicHeadroom(
     candidates: GalxShardAccount[],
     maxInFlightPerShard: number,
     nowMs: number,
     isPriorityUser: boolean,
-    estimatedTokens = 1000
+    estimatedTokens = 1000,
+    userId?: string
   ): GalxShardAccount {
     let bestScore = -Infinity;
     let bestCandidate = candidates[0];
@@ -310,7 +314,18 @@ export class GalxCredentialPool {
       const drainRatio = postAllocationTokens / Math.max(1, refilledBucket.maxTokens);
       const drainPenalty = drainRatio < 0.10 ? 0.35 : drainRatio < 0.20 ? 0.75 : 1.0;
 
-      // Hydraulic score: higher unreserved headroom + lower in-flight + faster latency + higher reliability = higher score
+      // 8. Tenant-Affinity Shard Dispersion (TASD)
+      let tenantLeasesOnShard = 0;
+      if (userId) {
+        for (const lease of this.activeLeases.values()) {
+          if (lease.userId === userId && lease.shardId === acc.id) {
+            tenantLeasesOnShard++;
+          }
+        }
+      }
+      const tenantDispersionFactor = Math.pow(0.88, tenantLeasesOnShard);
+
+      // Hydraulic score: higher unreserved headroom + lower in-flight + faster latency + higher reliability + tenant dispersion = higher score
       const score =
         (Math.pow(tokenHeadroomRatio, 1.2) *
           concurrencyHeadroom *
@@ -319,7 +334,8 @@ export class GalxCredentialPool {
           latencyMultiplier *
           dynamicWeight *
           priorityBoost *
-          drainPenalty) +
+          drainPenalty *
+          tenantDispersionFactor) +
         microJitter;
 
       if (score > bestScore) {
