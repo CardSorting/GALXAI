@@ -33,7 +33,13 @@ import {
   Layers,
   FileText,
   Key,
-  Check
+  Check,
+  Printer,
+  Building,
+  ExternalLink,
+  Eye,
+  X,
+  FileSpreadsheet
 } from 'lucide-react';
 
 interface TopUpPack {
@@ -61,6 +67,55 @@ interface Transaction {
   amount: number;
   timestamp: string;
 }
+
+interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  period: string;
+  issuedDate: string;
+  amount: number;
+  wholesaleSaved: number;
+  tokensCount: number;
+  status: 'paid' | 'open';
+  paymentMethod: string;
+  pdfUrl?: string;
+}
+
+const INITIAL_INVOICES: Invoice[] = [
+  {
+    id: 'inv_2026_08',
+    invoiceNumber: 'INV-2026-0801',
+    period: 'Aug 1, 2026 – Aug 31, 2026',
+    issuedDate: 'Aug 22, 2026',
+    amount: 110.00,
+    wholesaleSaved: 38.40,
+    tokensCount: 44200000,
+    status: 'paid',
+    paymentMethod: 'Visa •••• 4242'
+  },
+  {
+    id: 'inv_2026_07',
+    invoiceNumber: 'INV-2026-0701',
+    period: 'Jul 1, 2026 – Jul 31, 2026',
+    issuedDate: 'Jul 31, 2026',
+    amount: 250.00,
+    wholesaleSaved: 83.33,
+    tokensCount: 96000000,
+    status: 'paid',
+    paymentMethod: 'Visa •••• 4242'
+  },
+  {
+    id: 'inv_2026_06',
+    invoiceNumber: 'INV-2026-0601',
+    period: 'Jun 1, 2026 – Jun 30, 2026',
+    issuedDate: 'Jun 30, 2026',
+    amount: 100.00,
+    wholesaleSaved: 31.60,
+    tokensCount: 44000000,
+    status: 'paid',
+    paymentMethod: 'Visa •••• 4242'
+  }
+];
 
 const INITIAL_TRANSACTIONS: Transaction[] = [
   {
@@ -117,6 +172,18 @@ export default function BillingPage() {
   const [selectedPackAmount, setSelectedPackAmount] = useState(100);
   const [customAmount, setCustomAmount] = useState('');
 
+  // Business Invoicing Details State
+  const [companyName, setCompanyName] = useState('Acme AI Corporation');
+  const [billingEmail, setBillingEmail] = useState('billing@acme.ai');
+  const [taxId, setTaxId] = useState('US-EIN 94-8271034');
+  const [billingAddress, setBillingAddress] = useState('100 Montgomery St, Suite 400, San Francisco, CA 94104');
+  const [poNumber, setPoNumber] = useState('PO-2026-ENG-08');
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileSavedMsg, setProfileSavedMsg] = useState(false);
+
+  // Selected Invoice Modal State
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+
   // Auto-Top Up State
   const [autoReloadEnabled, setAutoReloadEnabled] = useState(true);
   const [autoReloadThreshold, setAutoReloadThreshold] = useState(10);
@@ -129,6 +196,7 @@ export default function BillingPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [topUpSuccess, setTopUpSuccess] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
+  const [invoices, setInvoices] = useState<Invoice[]>(INITIAL_INVOICES);
   const [filterType, setFilterType] = useState<'all' | 'deposit' | 'usage'>('all');
   const [copiedCsv, setCopiedCsv] = useState(false);
 
@@ -205,16 +273,26 @@ export default function BillingPage() {
     setTimeout(() => setCopiedCsv(false), 2000);
   };
 
-  const filteredTransactions = transactions.filter(t => filterType === 'all' || t.type === filterType);
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsEditingProfile(false);
+    setProfileSavedMsg(true);
+    setTimeout(() => setProfileSavedMsg(false), 3000);
+  };
 
+  const filteredTransactions = transactions.filter(t => filterType === 'all' || t.type === filterType);
   const spendPct = Math.min(100, (monthlySpend / monthlyReloadCap) * 100);
+
+  const totalYtdInvoiced = invoices.reduce((acc, inv) => acc + inv.amount, 0);
+  const totalYtdSaved = invoices.reduce((acc, inv) => acc + inv.wholesaleSaved, 0);
+  const totalYtdTokens = invoices.reduce((acc, inv) => acc + inv.tokensCount, 0);
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-10">
-        <Breadcrumbs items={[{ label: 'Wallet & Compute Billing' }]} />
+        <Breadcrumbs items={[{ label: 'Wallet & Business Invoicing' }]} />
 
         {/* Hero Header & Wallet Overview */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
@@ -311,6 +389,33 @@ export default function BillingPage() {
                 <span>Immediate 100% refund on unspent deposited funds</span>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Business Expense & Financial Summary KPIs */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono">
+          <div className="p-5 rounded-3xl glass-panel border border-white/10 space-y-1">
+            <span className="text-[11px] text-zinc-400 uppercase font-sans font-semibold">2026 YTD Invoiced</span>
+            <div className="text-2xl font-black text-white">${totalYtdInvoiced.toFixed(2)} USD</div>
+            <div className="text-[11px] text-zinc-500 font-sans">3 tax receipts issued</div>
+          </div>
+
+          <div className="p-5 rounded-3xl glass-panel border border-emerald-500/30 bg-emerald-500/5 space-y-1">
+            <span className="text-[11px] text-emerald-400 uppercase font-sans font-semibold">Wholesale Savings Delivered</span>
+            <div className="text-2xl font-black text-emerald-300">-${totalYtdSaved.toFixed(2)} USD</div>
+            <div className="text-[11px] text-emerald-400/80 font-sans">33.3% net business savings vs retail</div>
+          </div>
+
+          <div className="p-5 rounded-3xl glass-panel border border-cyan-500/30 bg-cyan-500/5 space-y-1">
+            <span className="text-[11px] text-cyan-400 uppercase font-sans font-semibold">Total Invoiced Tokens</span>
+            <div className="text-2xl font-black text-cyan-300">{(totalYtdTokens / 1000000).toFixed(1)}M Tokens</div>
+            <div className="text-[11px] text-zinc-400 font-sans">Avg: $2.49 / 1M tokens</div>
+          </div>
+
+          <div className="p-5 rounded-3xl glass-panel border border-white/10 space-y-1">
+            <span className="text-[11px] text-zinc-400 uppercase font-sans font-semibold">Invoicing Entity</span>
+            <div className="text-sm font-bold text-white truncate font-sans">{companyName}</div>
+            <div className="text-[11px] text-zinc-500 font-mono truncate">{taxId}</div>
           </div>
         </div>
 
@@ -508,6 +613,163 @@ export default function BillingPage() {
           )}
         </div>
 
+        {/* Business Tax Invoices & Official Receipts Section */}
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-white/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <FileSpreadsheet className="w-5 h-5 text-amber-400" />
+                Business Tax Invoices & Statements
+              </h2>
+              <p className="text-xs text-zinc-400">
+                Official PDF invoices with company details, VAT/Tax identification, and wholesale discount reporting.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsEditingProfile(!isEditingProfile)}
+                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition-all border border-white/10 cursor-pointer"
+              >
+                <Building className="w-3.5 h-3.5 text-cyan-400" />
+                <span>{isEditingProfile ? 'Close Invoicing Profile' : 'Edit Company Billing Profile'}</span>
+              </button>
+            </div>
+          </div>
+
+          {profileSavedMsg && (
+            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 font-mono flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>Company billing profile updated successfully!</span>
+            </div>
+          )}
+
+          {/* Invoicing Profile Editor Drawer */}
+          {isEditingProfile && (
+            <form onSubmit={handleSaveProfile} className="p-6 rounded-3xl bg-black/40 border border-white/10 space-y-4 animate-in fade-in duration-200">
+              <h3 className="text-sm font-bold text-white">Company Tax & Invoicing Profile</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-mono text-zinc-400 uppercase">Legal Entity Name</label>
+                  <input
+                    type="text"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    className="w-full py-2.5 px-3 rounded-xl bg-black/60 border border-white/10 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-mono text-zinc-400 uppercase">Billing Contact Email</label>
+                  <input
+                    type="email"
+                    value={billingEmail}
+                    onChange={(e) => setBillingEmail(e.target.value)}
+                    className="w-full py-2.5 px-3 rounded-xl bg-black/60 border border-white/10 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-mono text-zinc-400 uppercase">Tax ID / VAT Number</label>
+                  <input
+                    type="text"
+                    value={taxId}
+                    onChange={(e) => setTaxId(e.target.value)}
+                    className="w-full py-2.5 px-3 rounded-xl bg-black/60 border border-white/10 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-mono text-zinc-400 uppercase">Purchase Order / Cost Center</label>
+                  <input
+                    type="text"
+                    value={poNumber}
+                    onChange={(e) => setPoNumber(e.target.value)}
+                    className="w-full py-2.5 px-3 rounded-xl bg-black/60 border border-white/10 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+                  />
+                </div>
+
+                <div className="sm:col-span-2 space-y-1">
+                  <label className="block text-[11px] font-mono text-zinc-400 uppercase">Billing Address</label>
+                  <input
+                    type="text"
+                    value={billingAddress}
+                    onChange={(e) => setBillingAddress(e.target.value)}
+                    className="w-full py-2.5 px-3 rounded-xl bg-black/60 border border-white/10 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl bg-amber-400 text-black text-xs font-bold font-mono hover:bg-amber-300 transition-all cursor-pointer"
+                >
+                  Save Invoicing Profile
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Invoices Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse font-mono">
+              <thead>
+                <tr className="border-b border-white/10 text-zinc-400 font-bold uppercase text-[10px]">
+                  <th className="py-3 px-4 font-sans">Invoice #</th>
+                  <th className="py-3 px-4 font-sans">Billing Period</th>
+                  <th className="py-3 px-4 font-sans">Tokens Invoiced</th>
+                  <th className="py-3 px-4 font-sans">Wholesale Saved</th>
+                  <th className="py-3 px-4 font-sans">Amount (USD)</th>
+                  <th className="py-3 px-4 font-sans">Status</th>
+                  <th className="py-3 px-4 text-right font-sans">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {invoices.map((inv) => (
+                  <tr key={inv.id} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="py-3.5 px-4 font-bold text-white">
+                      {inv.invoiceNumber}
+                    </td>
+
+                    <td className="py-3.5 px-4 text-zinc-300 font-sans">
+                      {inv.period}
+                    </td>
+
+                    <td className="py-3.5 px-4 text-cyan-300">
+                      {(inv.tokensCount / 1000000).toFixed(1)}M tokens
+                    </td>
+
+                    <td className="py-3.5 px-4 text-emerald-400 font-bold">
+                      -${inv.wholesaleSaved.toFixed(2)}
+                    </td>
+
+                    <td className="py-3.5 px-4 font-bold text-white">
+                      ${inv.amount.toFixed(2)}
+                    </td>
+
+                    <td className="py-3.5 px-4">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[10px] font-bold border border-emerald-500/30">
+                        Paid
+                      </span>
+                    </td>
+
+                    <td className="py-3.5 px-4 text-right">
+                      <button
+                        onClick={() => setSelectedInvoice(inv)}
+                        className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-cyan-300 hover:text-white transition-all border border-white/10 text-[11px] font-sans font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>View Invoice</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         {/* Per-Key Spend Governance & Saved Payment Method Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Per-Key Breakdown */}
@@ -567,12 +829,12 @@ export default function BillingPage() {
 
             <div className="space-y-2 pt-4 border-t border-white/5 text-xs text-zinc-400">
               <div className="flex items-center justify-between">
-                <span>Invoicing Contact:</span>
-                <span className="text-zinc-200 font-mono">billing@team.internal</span>
+                <span>Invoicing Entity:</span>
+                <span className="text-zinc-200 font-semibold">{companyName}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span>Tax ID / VAT:</span>
-                <span className="text-zinc-200 font-mono">US-94827103</span>
+                <span className="text-zinc-200 font-mono">{taxId}</span>
               </div>
             </div>
           </div>
@@ -668,6 +930,105 @@ export default function BillingPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Printable Business Tax Invoice Modal */}
+        {selectedInvoice && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+            <div className="bg-[#0e111a] border border-white/20 rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 text-white shadow-2xl relative">
+              {/* Modal Close Button */}
+              <button
+                onClick={() => setSelectedInvoice(null)}
+                className="absolute top-6 right-6 p-2 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Invoice Header */}
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-6 border-b border-white/10">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-xl tracking-wider text-white">
+                      GALX<span className="text-cyan-400">AI</span>
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono text-[10px] font-bold border border-emerald-500/30">
+                      PAID INVOICE
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-400 font-mono">GALXAI Infrastructure, Inc. • US-EIN 88-2910341</p>
+                  <p className="text-xs text-zinc-500">548 Market St, Suite 39201, San Francisco, CA 94104</p>
+                </div>
+
+                <div className="text-right font-mono text-xs space-y-0.5">
+                  <div className="text-sm font-bold text-white">{selectedInvoice.invoiceNumber}</div>
+                  <div className="text-zinc-400">Date: {selectedInvoice.issuedDate}</div>
+                  <div className="text-zinc-400">Status: <span className="text-emerald-400 font-bold">Paid</span></div>
+                </div>
+              </div>
+
+              {/* Bill To Info */}
+              <div className="grid grid-cols-2 gap-4 text-xs font-mono bg-black/40 p-4 rounded-2xl border border-white/5">
+                <div className="space-y-1">
+                  <div className="text-zinc-500 uppercase text-[10px]">Billed To (Customer):</div>
+                  <div className="font-bold text-white font-sans text-sm">{companyName}</div>
+                  <div className="text-zinc-400">{billingEmail}</div>
+                  <div className="text-zinc-400">{billingAddress}</div>
+                </div>
+
+                <div className="space-y-1 text-right">
+                  <div className="text-zinc-500 uppercase text-[10px]">Tax & Order Info:</div>
+                  <div className="text-zinc-300">Tax ID: <strong>{taxId}</strong></div>
+                  <div className="text-zinc-300">PO Number: <strong>{poNumber}</strong></div>
+                  <div className="text-zinc-300">Payment: <strong>{selectedInvoice.paymentMethod}</strong></div>
+                </div>
+              </div>
+
+              {/* Line Items */}
+              <div className="space-y-2 font-mono text-xs">
+                <div className="p-3 bg-black/30 rounded-xl border border-white/5 flex items-center justify-between font-bold text-zinc-400 text-[11px] uppercase">
+                  <span>Description</span>
+                  <span>Amount</span>
+                </div>
+
+                <div className="p-3 rounded-xl border border-white/5 flex items-center justify-between">
+                  <div className="space-y-0.5 font-sans">
+                    <div className="font-semibold text-white">Prepaid Wholesale Compute Allocation ({selectedInvoice.period})</div>
+                    <div className="text-[11px] text-zinc-400 font-mono">{(selectedInvoice.tokensCount / 1000000).toFixed(1)}M frontier inference tokens</div>
+                  </div>
+                  <div className="font-bold text-white font-mono">${selectedInvoice.amount.toFixed(2)} USD</div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-emerald-300">
+                  <span className="font-sans font-semibold">Direct Wholesale Discount Rebate Applied (-25% to -40%)</span>
+                  <span className="font-bold font-mono">-${selectedInvoice.wholesaleSaved.toFixed(2)} USD</span>
+                </div>
+              </div>
+
+              {/* Total & Action Buttons */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10 font-mono text-xs">
+                <div>
+                  <span className="text-zinc-400">Total Paid: </span>
+                  <strong className="text-lg font-black text-emerald-400">${selectedInvoice.amount.toFixed(2)} USD</strong>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => window.print()}
+                    className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-sans font-semibold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>Print / Save PDF</span>
+                  </button>
+                  <button
+                    onClick={() => setSelectedInvoice(null)}
+                    className="px-4 py-2 rounded-xl bg-amber-400 text-black font-sans font-bold text-xs hover:bg-amber-300 transition-all cursor-pointer"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
