@@ -12,20 +12,22 @@ The primary and recommended quota cycling algorithm is **Predictive Adaptive Hyd
 
 For each candidate shard $i$, the dynamic hydraulic score $S_i$ is computed continuously in real-time:
 
-$$S_i = \left( R_i \right)^{1.2} \times C_i \times H_i \times D_i \times L_i \times W_i \times P_i + \epsilon_i$$
+$$S_i = \left( R_i \right)^{1.2} \times C_i \times H_i \times D_i \times L_i \times W_i \times P_i \times M_i \times T_i + \epsilon_i$$
 
 Where:
 
 | Factor | Symbol | Formula | Description |
 | :--- | :--- | :--- | :--- |
-| **Token Headroom Ratio** | $R_i$ | $\max\left(0.01, \frac{T_{\text{remaining}} - T_{\text{reserved}}}{T_{\text{max}}}\right)$ | Measures unreserved token capacity. The power exponent ($1.2$) creates non-linear attraction toward fuller buckets. |
-| **Concurrency Headroom** | $C_i$ | $\max\left(0.05, 1 - \frac{\text{inFlight}_i}{\text{maxInFlight}}\right)$ | Dampens selection probability as in-flight saturation approaches the ceiling ($10$ concurrent). |
+| **Post-Allocation Headroom Ratio** | $R_i$ | $\max\left(0.01, \frac{T_{\text{remaining}} - T_{\text{reserved}} - T_{\text{estimated}}}{T_{\text{max}}}\right)$ | Measures token capacity after deducting estimated request cost. Power exponent ($1.2$) naturally levels load across homogeneous shards. |
+| **Power-Law Concurrency Headroom** | $C_i$ | $\max\left(0.01, 1 - \left(\frac{\text{inFlight}_i}{\text{maxInFlight}}\right)^{1.5}\right)$ | Non-linear saturation curve that aggressively deflects new traffic as a shard approaches 80–90% in-flight capacity. |
 | **Circuit Health Multiplier** | $H_i$ | Canary Multiplier ($0.25 \to 0.75 \to 1.0$) | Traffic throttle applied as a shard emerges from cooldown back into full health. |
 | **Failure Dampening** | $D_i$ | $0.85^{\text{consecutiveFailures}_i}$ | Exponential penalty for recent intermittent errors. |
 | **EWMA Latency Multiplier** | $L_i$ | $\min\left(1.5, \max\left(0.7, \left(\frac{600}{\max(100, \text{avgLatencyMs}_i)}\right)^{0.25}\right)\right)$ | Rewards shards responding faster than the $600\text{ms}$ fleet baseline. |
 | **Dynamic Reliability Weight** | $W_i$ | $\text{baseWeight}_i \times \left(\frac{\text{successes} + 10}{\text{total} + 10}\right) \times \left(\frac{600}{\max(100, \text{avgLatencyMs}_i)}\right)^{0.2}$ | Laplace-smoothed historical uptime auto-tuning. |
 | **Priority Tier Boost** | $P_i$ | $\text{isPriorityUser} \mathbin{?} \frac{\text{priority}_i}{10} : 1.0$ | Tier multiplier for premium gateway plans. |
-| **Micro-Jitter Entropy** | $\epsilon_i$ | $\text{Uniform}(-0.02, +0.02)$ | Prevents simultaneous parallel worker threads from picking identical shards during burst spikes. |
+| **Predictive Drain Avoidance (`MDA-Floor`)** | $M_i$ | $\begin{cases} 0.35 & \text{if } \text{DrainRatio} < 0.10 \\ 0.75 & \text{if } \text{DrainRatio} < 0.20 \\ 1.0 & \text{otherwise} \end{cases}$ | Pre-emptively protects nearly-exhausted buckets from total drain, giving continuous replenishment calculus time to refill capacity. |
+| **Tenant-Affinity Dispersion (`TASD`)** | $T_i$ | $0.88^{\text{tenantLeasesOnShard}_i}$ | Fans multi-request tenant bursts evenly across distinct shards, preventing single-shard monopolization. |
+| **Adaptive Micro-Jitter Entropy** | $\epsilon_i$ | $\text{Uniform}(-\Delta, +\Delta)$ ($\Delta = 0.05$ if fleet in-flight $> 10$, else $0.02$) | Prevents simultaneous parallel worker threads from picking identical shards during burst spikes. |
 
 ---
 

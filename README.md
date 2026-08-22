@@ -1,7 +1,7 @@
 # 🌌 GALXAI: High-Throughput Universal AI Gateway & Quota Cycling Substrate
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/CardSorting/GALXAI)
-[![Forensic Tests](https://img.shields.io/badge/forensic%20tests-27%2F27%20passing-success.svg)](https://github.com/CardSorting/GALXAI)
+[![Forensic Tests](https://img.shields.io/badge/forensic%20tests-31%2F31%20passing-success.svg)](https://github.com/CardSorting/GALXAI)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5-black.svg)](https://nextjs.org/)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
@@ -12,9 +12,10 @@
 
 ## ⚡ Key Architectural Capabilities
 
-- **🌊 Adaptive Hydraulic Headroom Cycling (P-AHT)**: Continuously evaluates live token capacity, concurrency load ratios, circuit breaker canary multipliers, and EWMA latency to cycle requests smoothly across pooled upstream credentials.
+- **🌊 Predictive Adaptive Hydraulic Headroom Cycling (P-AHT)**: Evaluates post-allocation token capacity, power-law concurrency saturation, dynamic reliability weights, and predictive drain avoidance (`MDA-Floor`) to level allocations across pooled credentials.
+- **🌐 Tenant-Affinity Shard Dispersion (TASD)**: Fans multi-request tenant bursts evenly across distinct shards, preventing hot-spotting on single high-capacity accounts.
 - **🔄 Smooth Weighted Round-Robin (SWRR)**: Implements Envoy/Nginx-grade smooth interleaving with dynamic reliability weights to eliminate burst clumping.
-- **🛡️ 2-Phase Atomic Token Reservation**: Soft-locks estimated quota upon lease acquisition and commits actual consumption upon request completion, eliminating concurrent over-allocation stampedes.
+- **🛡️ 2-Phase Atomic Token Reservation & Scavenger Recovery**: Soft-locks estimated quota upon lease acquisition and commits actual consumption upon request completion. Expired leases automatically recover orphaned soft reservations.
 - **⚡ 4-State Resilient Circuit Breaker**: Distinguishes between permanent credential revocations (401/403 $\to$ instant death) and transient rate limits (429/503 $\to$ exponential backoff with decorrelated jitter and `Retry-After` header parsing).
 - **🔒 AES-256-GCM Envelope Encryption with AAD Binding**: Keys and OAuth credentials are cryptographically bound to specific `tenantId` and `shardId` via Additional Authenticated Data (AAD), preventing cross-tenant ciphertext transplantation.
 - **🧹 Heap Memory Scrubbing**: Plaintext secrets in RAM are immediately overwritten with zeros (`GalxCryptoVault.zeroizeBuffer`) upon request completion or error.

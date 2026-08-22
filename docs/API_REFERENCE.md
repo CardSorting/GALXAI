@@ -43,10 +43,25 @@ Standard OpenAI-compatible chat completion endpoint with automatic quota cycling
 HTTP/1.1 200 OK
 Content-Type: text/event-stream
 Cache-Control: no-cache
+X-Galx-Request-Id: req_1700000000_abc12
+X-Galx-Shard-Id: shard_openai_01
+X-Galx-Model: gpt-5.6-sol
+X-Galx-Provider: openai
+X-Galx-Strategy: adaptive_headroom
+X-Galx-Routing-Latency-Ms: 1
 
 data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1700000000,"model":"gpt-5.6-sol","choices":[{"index":0,"delta":{"content":"pub struct LRUCache"},"finish_reason":null}]}
 data: [DONE]
 ```
+
+### Diagnostic Response Headers
+Every completion and image response includes standard gateway diagnostic headers:
+- `X-Galx-Request-Id`: Unique idempotent request identifier.
+- `X-Galx-Shard-Id`: Masked identifier of the upstream shard executing the query.
+- `X-Galx-Model`: Canonical resolved model identifier.
+- `X-Galx-Provider`: Foundation model provider (`openai` or `xai-grok`).
+- `X-Galx-Strategy`: Active cycling algorithm (`adaptive_headroom`).
+- `X-Galx-Routing-Latency-Ms`: Sub-millisecond internal routing & lease decision overhead.
 
 ---
 
