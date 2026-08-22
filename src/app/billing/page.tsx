@@ -43,6 +43,7 @@ import {
   FileSpreadsheet
 } from 'lucide-react';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
+import { TierUnlockProgressBar } from '@/components/dashboard/TierUnlockProgressBar';
 
 interface TopUpPack {
   amount: number;
@@ -448,6 +449,15 @@ export default function BillingPage() {
               <span>{topUpSuccess}</span>
             </div>
           )}
+
+          {/* E-Commerce Gamified Reward Milestone Bar */}
+          <TierUnlockProgressBar
+            currentAmount={customAmount ? (parseFloat(customAmount) || 0) : selectedPackAmount}
+            onSelectTierAmount={(amt) => {
+              setSelectedPackAmount(amt);
+              setCustomAmount('');
+            }}
+          />
 
           {/* Preset Packs Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">

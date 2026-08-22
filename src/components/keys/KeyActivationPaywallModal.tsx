@@ -25,6 +25,7 @@ import {
   Layers,
   Bot
 } from 'lucide-react';
+import { TierUnlockProgressBar } from '@/components/dashboard/TierUnlockProgressBar';
 
 interface PaywallPack {
   amount: number;
@@ -35,10 +36,10 @@ interface PaywallPack {
 }
 
 const PAYWALL_PACKS: PaywallPack[] = [
-  { amount: 10, label: 'Starter Key', tierBonusPct: 0, badge: '50% Match Bonus', popular: true },
-  { amount: 25, label: 'Standard Dev', tierBonusPct: 0, badge: '+$5.00 Free Match' },
-  { amount: 50, label: 'Growth Pro', tierBonusPct: 5, badge: '+5% Extra Bonus' },
-  { amount: 100, label: 'Scale Fleet', tierBonusPct: 10, badge: '+10% Extra Bonus' }
+  { amount: 25, label: 'Starter Key', tierBonusPct: 50, badge: '50% Match Bonus', popular: true },
+  { amount: 50, label: 'Growth VIP', tierBonusPct: 50, badge: 'VIP Shards 🔓' },
+  { amount: 100, label: 'Scale Fleet', tierBonusPct: 50, badge: '600 RPM Fleet 🔓' },
+  { amount: 250, label: 'Enterprise Burst', tierBonusPct: 50, badge: 'Unlimited VPC 🔓' }
 ];
 
 interface KeyActivationPaywallModalProps {
@@ -226,6 +227,15 @@ export function KeyActivationPaywallModal({
                 </div>
               </div>
             </div>
+
+            {/* E-Commerce Reward Tier Progress Bar */}
+            <TierUnlockProgressBar
+              currentAmount={currentAmt}
+              onSelectTierAmount={(amt) => {
+                setSelectedAmount(amt);
+                setCustomAmount('');
+              }}
+            />
 
             {/* Deposit Packs Selection Grid */}
             <div className="space-y-2 relative z-10">

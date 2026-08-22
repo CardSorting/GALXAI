@@ -42,6 +42,7 @@ import { LiveArbitrageTicker } from '@/components/dashboard/LiveArbitrageTicker'
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
+import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export default function HomePage() {
   const [stats, setStats] = useState<any>(null);
@@ -476,9 +477,10 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
         </section>
       </main>
 
-      {/* Floating Conversion Dock & Live Activity Toast */}
+      {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
       <FloatingConversionDock />
       <LiveActivityToast />
+      <ExitIntentModal />
     </div>
   );
 }
