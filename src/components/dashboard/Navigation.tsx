@@ -5,14 +5,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Zap,
-  Key,
   Menu,
   X,
   Search,
   LogOut,
   ChevronDown,
-  Rocket,
-  Wallet
+  Rocket
 } from 'lucide-react';
 import { CommandMenu } from '@/components/common/CommandMenu';
 import { ShareButton } from '@/components/common/ShareButton';
@@ -48,31 +46,23 @@ export function Navigation() {
     };
   }, [pathname]);
 
-  // Flattened Minimalist Primary Nav Links with Native Translations
+  // Pure Flat Minimalist Nav Links (No Chips / Badges)
   const navLinks = [
     {
       label: t('nav.models', 'Models & Arena'),
       href: '/models',
-      badge: t('nav.badge.models', '12 Models'),
-      badgeColor: 'text-cyan-400 border-cyan-500/30 bg-cyan-500/10',
     },
     {
       label: t('nav.apps', 'Apps & Solutions'),
       href: '/docs/simple',
-      badge: t('nav.badge.apps', 'Zero-Code'),
-      badgeColor: 'text-amber-300 border-amber-500/30 bg-amber-500/10',
     },
     {
       label: t('nav.docs', 'Docs & SDKs'),
       href: '/docs',
-      badge: null,
-      badgeColor: '',
     },
     {
       label: t('nav.pricing', 'Pricing & Trust'),
       href: '/pricing',
-      badge: t('nav.badge.pricing', 'Save 35%'),
-      badgeColor: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
     },
   ];
 
@@ -83,27 +73,26 @@ export function Navigation() {
         onClose={() => setCommandMenuOpen(false)}
       />
 
-      <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#07080d]/90 border-b border-white/10 px-3 sm:px-5 py-2 transition-all">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+      <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#07080d]/90 border-b border-white/10 px-3 sm:px-6 py-2.5 transition-all">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-6">
           {/* Left Brand & Direct Flat Navigation */}
-          <div className="flex items-center gap-3 sm:gap-6">
+          <div className="flex items-center gap-4 sm:gap-8">
             <Link
               href="/"
-              className="flex items-center gap-1.5 group cursor-pointer shrink-0"
+              className="flex items-center gap-2 group cursor-pointer shrink-0"
               aria-label="GALXAI Home"
             >
               <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-cyan-500 via-indigo-500 to-indigo-600 flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
                 <Zap className="w-3.5 h-3.5 text-white fill-white" />
               </div>
-              <div className="flex items-baseline font-black tracking-tight text-sm sm:text-base">
+              <div className="flex items-baseline font-black tracking-tight text-base">
                 <span className="text-white">GALX</span>
                 <span className="text-cyan-400">AI</span>
-                <span className="ml-1 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse hidden sm:inline-block" />
               </div>
             </Link>
 
-            {/* Direct Flat Links */}
-            <nav className="hidden lg:flex items-center gap-0.5">
+            {/* Flat Text Nav Links (No Chips) */}
+            <nav className="hidden lg:flex items-center gap-1">
               {navLinks.map((link) => {
                 const isActive = link.href === '/docs'
                   ? pathname === '/docs'
@@ -113,30 +102,25 @@ export function Navigation() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                       isActive
-                        ? 'bg-white/10 text-white font-bold shadow-sm'
+                        ? 'text-white bg-white/10 font-bold'
                         : 'text-zinc-400 hover:text-white hover:bg-white/5'
                     }`}
                   >
-                    <span>{link.label}</span>
-                    {link.badge && (
-                      <span className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded-full border ${link.badgeColor}`}>
-                        {link.badge}
-                      </span>
-                    )}
+                    {link.label}
                   </Link>
                 );
               })}
             </nav>
           </div>
 
-          {/* Right Action Cluster */}
-          <div className="flex items-center gap-1 sm:gap-1.5">
-            {/* 1-Click Persona Pill Switcher */}
+          {/* Right Action Cluster (Flat, Minimal, No Bulky CTAs) */}
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* Persona Switcher (Creator / Developer / Agent) */}
             <PersonaSwitcher />
 
-            {/* Quick Share Pill */}
+            {/* Share Trigger */}
             <ShareButton
               variant="pill"
               label={t('nav.share', 'Share')}
@@ -146,7 +130,7 @@ export function Navigation() {
             {/* ⌘K Search */}
             <button
               onClick={() => setCommandMenuOpen(true)}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-black/40 hover:bg-black/60 border border-white/10 text-zinc-400 hover:text-white text-xs transition-all cursor-pointer"
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 text-xs transition-colors cursor-pointer"
               title={t('nav.search', 'Search (⌘K)')}
               aria-label={t('a11y.search_aria', 'Search')}
             >
@@ -156,39 +140,37 @@ export function Navigation() {
               </kbd>
             </button>
 
-            {/* Wallet Link */}
+            {/* Flat Wallet Balance Link */}
             <Link
               href="/billing"
-              className={`px-2 py-1 rounded-lg border text-xs font-mono font-bold flex items-center gap-1 transition-all ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold transition-colors ${
                 pathname === '/billing'
-                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50'
-                  : 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300'
+                  ? 'text-emerald-300 bg-emerald-500/10 font-bold'
+                  : 'text-zinc-400 hover:text-emerald-300 hover:bg-white/5'
               }`}
               title={t('nav.wallet', 'Developer Wallet')}
             >
-              <Wallet className="w-3 h-3 text-emerald-400 shrink-0" />
-              <span>$114.59</span>
+              $114.59
             </Link>
 
-            {/* API Keys Link */}
+            {/* Flat API Keys Link */}
             <Link
               href="/keys"
-              className={`hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all ${
+              className={`hidden sm:inline-block px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
                 pathname.startsWith('/keys')
-                  ? 'bg-indigo-600/30 text-indigo-300 border-indigo-500/50 font-bold'
-                  : 'bg-zinc-900/80 hover:bg-zinc-800 border-white/10 text-zinc-300 hover:text-white'
+                  ? 'text-indigo-300 bg-indigo-500/10 font-bold'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/5'
               }`}
             >
-              <Key className="w-3 h-3 text-indigo-400 shrink-0" />
-              <span>{t('nav.keys', 'API Keys')}</span>
+              {t('nav.keys', 'API Keys')}
             </Link>
 
-            {/* User Session / Sign In */}
+            {/* Flat Sign In / User Session Link */}
             {user ? (
               <div className="relative" ref={userRef}>
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-black/50 border border-indigo-500/40 text-xs font-semibold text-white hover:border-indigo-400 transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-zinc-300 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
                 >
                   <div
                     className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 ${
@@ -203,7 +185,7 @@ export function Navigation() {
                       <Zap className="w-2.5 h-2.5 fill-amber-400" />
                     )}
                   </div>
-                  <span className="max-w-[70px] truncate hidden sm:inline">{user.name}</span>
+                  <span className="max-w-[80px] truncate hidden sm:inline">{user.name}</span>
                   <ChevronDown className="w-2.5 h-2.5 text-zinc-400" />
                 </button>
 
@@ -217,18 +199,17 @@ export function Navigation() {
                     <Link
                       href="/billing"
                       onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-emerald-300 hover:text-white hover:bg-emerald-500/10 transition-all font-mono font-bold"
+                      className="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-emerald-300 hover:text-white hover:bg-emerald-500/10 transition-all font-mono font-bold"
                     >
-                      <Wallet className="w-3 h-3 text-emerald-400" />
-                      <span>{t('nav.wallet', 'Wallet')} ($114.59)</span>
+                      <span>{t('nav.wallet', 'Wallet')}</span>
+                      <span>$114.59</span>
                     </Link>
 
                     <Link
                       href="/keys"
                       onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-white hover:bg-white/5 transition-all"
+                      className="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-white hover:bg-white/5 transition-all"
                     >
-                      <Key className="w-3 h-3 text-cyan-400" />
                       <span>{t('nav.keys', 'API Keys')}</span>
                     </Link>
 
@@ -248,17 +229,16 @@ export function Navigation() {
             ) : (
               <Link
                 href="/auth/connect"
-                className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-sm flex items-center gap-1 cursor-pointer shrink-0"
+                className="px-2.5 py-1 rounded-lg text-xs font-semibold text-zinc-300 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
               >
-                <Zap className="w-3 h-3 fill-black shrink-0" />
-                <span>{t('nav.signin', 'Sign In')}</span>
+                {t('nav.signin', 'Sign In')}
               </Link>
             )}
 
             {/* Mobile Drawer Trigger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer"
+              className="lg:hidden p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -268,30 +248,25 @@ export function Navigation() {
 
         {/* Mobile Menu Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden mt-2 pt-2 border-t border-white/10 space-y-2 max-w-7xl mx-auto pb-2 animate-in fade-in duration-150">
-            <div className="grid grid-cols-2 gap-1.5">
-              {navLinks.map((item) => {
-                const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+          <div className="lg:hidden mt-2 pt-2 border-t border-white/10 space-y-1 max-w-7xl mx-auto pb-2 animate-in fade-in duration-150">
+            {navLinks.map((item) => {
+              const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
 
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`p-2 rounded-xl border transition-all text-xs font-semibold flex items-center justify-between ${
-                      isActive
-                        ? 'bg-indigo-600/30 border-indigo-400 text-white font-bold'
-                        : 'bg-white/5 border-white/5 text-zinc-300 hover:text-white'
-                    }`}
-                  >
-                    <span>{item.label}</span>
-                    {item.badge && (
-                      <span className="text-[9px] text-cyan-400 font-mono">{item.badge}</span>
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                    isActive
+                      ? 'text-white bg-white/10 font-bold'
+                      : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
         )}
       </header>

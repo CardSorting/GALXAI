@@ -1,12 +1,10 @@
 'use client';
 
 import React from 'react';
-import { usePersona, PERSONA_CONFIGS, UserPersona } from '@/contexts/PersonaContext';
-import { Smile, Terminal, Bot } from 'lucide-react';
+import { usePersona, UserPersona } from '@/contexts/PersonaContext';
 
 export function PersonaSwitcher() {
   const { persona, setPersona, details } = usePersona();
-  const Icon = details.icon;
 
   const personasList: UserPersona[] = ['creator', 'developer', 'agent_builder'];
 
@@ -19,12 +17,11 @@ export function PersonaSwitcher() {
   return (
     <button
       onClick={cyclePersona}
-      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-[11px] font-semibold transition-all cursor-pointer ${details.bgColor} ${details.borderColor} ${details.color} hover:brightness-125 shadow-sm active:scale-95`}
-      title={`Current: ${details.title}. Click to switch workflow mode.`}
-      aria-label="Toggle user experience mode"
+      className="px-2.5 py-1 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer"
+      title={`Mode: ${details.title}. Click to toggle.`}
+      aria-label="Toggle user mode"
     >
-      <Icon className="w-3.5 h-3.5 shrink-0" />
-      <span className="font-mono font-bold tracking-tight">{details.shortLabel}</span>
+      <span>{details.shortLabel}</span>
     </button>
   );
 }
