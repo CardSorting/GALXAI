@@ -26,7 +26,14 @@ import {
   Gift,
   Bell,
   Lock,
-  Play
+  Play,
+  Download,
+  Filter,
+  PieChart,
+  Layers,
+  FileText,
+  Key,
+  Check
 } from 'lucide-react';
 
 interface TopUpPack {
@@ -106,6 +113,7 @@ export default function BillingPage() {
   const [balance, setBalance] = useState(114.59);
   const [welcomeCreditRemaining] = useState(4.65);
   const [lifetimeSaved] = useState(38.40);
+  const [monthlySpend] = useState(38.40);
   const [selectedPackAmount, setSelectedPackAmount] = useState(100);
   const [customAmount, setCustomAmount] = useState('');
 
@@ -121,8 +129,9 @@ export default function BillingPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [topUpSuccess, setTopUpSuccess] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
+  const [filterType, setFilterType] = useState<'all' | 'deposit' | 'usage'>('all');
+  const [copiedCsv, setCopiedCsv] = useState(false);
 
-  const selectedPack = TOPUP_PACKS.find(p => p.amount === selectedPackAmount);
   const depositAmount = customAmount ? Number(customAmount) || 0 : selectedPackAmount;
   const depositBonusMultiplier = depositAmount >= 500 ? 1.20 : depositAmount >= 100 ? 1.10 : depositAmount >= 50 ? 1.05 : 1.0;
   const totalCreditReceived = depositAmount * depositBonusMultiplier;
@@ -171,12 +180,41 @@ export default function BillingPage() {
     }, 800);
   };
 
+  const handleExportCsv = () => {
+    const csvRows = [
+      ['Transaction ID', 'Type', 'Description', 'Model', 'Tokens', 'Discount %', 'Amount USD', 'Timestamp'].join(','),
+      ...transactions.map(t => [
+        t.id,
+        t.type,
+        `"${t.description}"`,
+        t.model || '',
+        t.tokens || 0,
+        t.discountPct || 0,
+        t.amount,
+        `"${t.timestamp}"`
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvRows], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `galxai_ledger_${Date.now()}.csv`;
+    a.click();
+    setCopiedCsv(true);
+    setTimeout(() => setCopiedCsv(false), 2000);
+  };
+
+  const filteredTransactions = transactions.filter(t => filterType === 'all' || t.type === filterType);
+
+  const spendPct = Math.min(100, (monthlySpend / monthlyReloadCap) * 100);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-10">
-        <Breadcrumbs items={[{ label: 'Wallet & Compute Balance' }]} />
+        <Breadcrumbs items={[{ label: 'Wallet & Compute Billing' }]} />
 
         {/* Hero Header & Wallet Overview */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
@@ -206,6 +244,24 @@ export default function BillingPage() {
                 <p className="text-xs text-zinc-400 pt-1">
                   Estimated runway: <strong className="text-white">~45 days</strong> at current request volume. Micro-billed per token with 0 markups.
                 </p>
+              </div>
+
+              {/* Monthly Spend vs Budget Cap Meter */}
+              <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-zinc-400">Monthly Usage: <strong className="text-white">${monthlySpend.toFixed(2)}</strong></span>
+                  <span className="text-zinc-500">Safety Cap: ${monthlyReloadCap.toFixed(2)}</span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full transition-all duration-500"
+                    style={{ width: `${spendPct}%` }}
+                  />
+                </div>
+                <div className="text-[10px] text-zinc-500 font-mono flex items-center justify-between">
+                  <span>{spendPct.toFixed(1)}% of monthly budget utilized</span>
+                  <span className="text-emerald-400 font-bold">Auto-Reload Protected</span>
+                </div>
               </div>
             </div>
 
@@ -452,14 +508,112 @@ export default function BillingPage() {
           )}
         </div>
 
+        {/* Per-Key Spend Governance & Saved Payment Method Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Per-Key Breakdown */}
+          <div className="lg:col-span-7 glass-panel rounded-3xl p-6 space-y-4 border border-white/10">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <PieChart className="w-4 h-4 text-indigo-400" />
+                Active Key Spend Allocation
+              </h3>
+              <Link href="/keys" className="text-xs text-cyan-300 hover:underline">
+                Manage Keys →
+              </Link>
+            </div>
+
+            <div className="space-y-3 font-mono text-xs">
+              {[
+                { name: 'Cursor IDE / AI Editor', spend: 14.20, pct: 37, color: 'bg-amber-400' },
+                { name: 'Production API Backend', spend: 18.50, pct: 48, color: 'bg-cyan-400' },
+                { name: 'Agent Swarm / LangChain', spend: 5.70, pct: 15, color: 'bg-indigo-400' }
+              ].map((k) => (
+                <div key={k.name} className="p-3 rounded-2xl bg-black/40 border border-white/5 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-300 font-sans font-semibold">{k.name}</span>
+                    <span className="text-white font-bold">${k.spend.toFixed(2)} ({k.pct}%)</span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                    <div className={`h-full ${k.color} rounded-full`} style={{ width: `${k.pct}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Payment Method & Invoicing Details */}
+          <div className="lg:col-span-5 glass-panel rounded-3xl p-6 space-y-4 border border-white/10 flex flex-col justify-between">
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-emerald-400" />
+                Default Payment Instrument
+              </h3>
+
+              <div className="p-4 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-7 rounded-lg bg-indigo-600/30 border border-indigo-500/40 text-white font-bold text-xs flex items-center justify-center font-mono">
+                    VISA
+                  </div>
+                  <div className="font-mono text-xs">
+                    <div className="text-white font-bold">•••• 4242</div>
+                    <div className="text-zinc-500 text-[10px]">Expires 12/28 • Default</div>
+                  </div>
+                </div>
+                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  Verified
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-4 border-t border-white/5 text-xs text-zinc-400">
+              <div className="flex items-center justify-between">
+                <span>Invoicing Contact:</span>
+                <span className="text-zinc-200 font-mono">billing@team.internal</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Tax ID / VAT:</span>
+                <span className="text-zinc-200 font-mono">US-94827103</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Real-Time Micro-Billing Ledger & Spend History */}
-        <div className="glass-panel rounded-3xl p-6 overflow-x-auto space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Receipt className="w-4 h-4 text-amber-400" />
-              Real-Time Micro-Billing Ledger
-            </h2>
-            <span className="text-[11px] text-zinc-400 font-mono">Microsecond precision deductions</span>
+        <div className="glass-panel rounded-3xl p-6 overflow-x-auto space-y-4 border border-white/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-0.5">
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <Receipt className="w-4 h-4 text-amber-400" />
+                Micro-Billing Ledger & Real-Time Invoices
+              </h2>
+              <span className="text-xs text-zinc-400">Instant microsecond precision token deductions and top-up receipts.</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="flex items-center p-1 rounded-xl bg-black/50 border border-white/10 text-xs font-mono">
+                {(['all', 'deposit', 'usage'] as const).map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setFilterType(f)}
+                    className={`px-3 py-1 rounded-lg capitalize transition-all cursor-pointer ${
+                      filterType === f
+                        ? 'bg-amber-400 text-black font-bold'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    {f === 'all' ? 'All Events' : f === 'deposit' ? 'Deposits / Top-Ups' : 'Token Usage'}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={handleExportCsv}
+                className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-xs font-mono flex items-center gap-1.5 transition-all border border-white/10 cursor-pointer"
+              >
+                {copiedCsv ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Download className="w-3.5 h-3.5" />}
+                <span>{copiedCsv ? 'Exported!' : 'Export CSV'}</span>
+              </button>
+            </div>
           </div>
 
           <table className="w-full text-left text-xs border-collapse font-mono">
@@ -474,7 +628,7 @@ export default function BillingPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {transactions.map((tx) => {
+              {filteredTransactions.map((tx) => {
                 const isDeposit = tx.type === 'deposit';
                 return (
                   <tr key={tx.id} className="hover:bg-white/[0.02] transition-colors">
