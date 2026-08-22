@@ -35,102 +35,34 @@ interface DocsNavItem {
   exact?: boolean;
 }
 
-interface DocsNavGroup {
-  id: 'start' | 'api' | 'security';
-  title: string;
-  items: DocsNavItem[];
-}
-
-const DOCS_NAV_GROUPS: DocsNavGroup[] = [
-  {
-    id: 'start',
-    title: 'Getting Started',
-    items: [
-      { name: 'Agents Hub', href: '/docs/agents', icon: Bot, badge: 'Agents' },
-      { name: 'Plain English', href: '/docs/simple', icon: Smile, badge: 'Simple' },
-      { name: 'Overview', href: '/docs', icon: BookOpen, exact: true },
-      { name: '30s Quickstart', href: '/docs/quickstart', icon: Zap, badge: '30s' },
-      { name: '1-Click Migration', href: '/docs/migration', icon: ArrowLeftRight, badge: '0-Code' },
-      { name: 'Python SDK', href: '/docs/sdks/python', icon: Code2 },
-      { name: 'TypeScript SDK', href: '/docs/sdks/typescript', icon: FileCode2 },
-      { name: 'IDE & Cursor', href: '/docs/ide-setup', icon: Terminal, badge: 'IDE' },
-      { name: 'SSE Streaming', href: '/docs/streaming', icon: Radio }
-    ]
-  },
-  {
-    id: 'api',
-    title: 'API & Cookbooks',
-    items: [
-      { name: 'REST API Reference', href: '/docs/api-reference', icon: Cpu, badge: 'OpenAPI' },
-      { name: 'Production Cookbooks', href: '/docs/cookbook', icon: BookMarked, badge: 'Recipes' },
-      { name: 'Function Calling', href: '/docs/function-calling', icon: Wrench },
-      { name: 'Vector Embeddings', href: '/docs/embeddings', icon: Database },
-      { name: 'Structured Outputs', href: '/docs/structured-outputs', icon: Sparkles, badge: 'JSON' },
-      { name: 'Model Capabilities', href: '/docs/models-guide', icon: Flame },
-      { name: '75% Prompt Caching', href: '/docs/prompt-caching', icon: Sparkles, badge: '-75%' },
-      { name: 'Errors & Retries', href: '/docs/error-handling', icon: AlertTriangle }
-    ]
-  },
-  {
-    id: 'security',
-    title: 'Architecture & Trust',
-    items: [
-      { name: 'Router Architecture', href: '/docs/architecture', icon: Layers },
-      { name: 'Security & Privacy', href: '/docs/security-spec', icon: Lock, badge: 'TLS 1.3' },
-      { name: 'Rate Limits & Quotas', href: '/docs/rate-limits', icon: Gauge }
-    ]
-  }
+const ALL_DOCS_ITEMS: DocsNavItem[] = [
+  { name: 'Agents Hub', href: '/docs/agents', icon: Bot, badge: 'Agents' },
+  { name: 'Plain English', href: '/docs/simple', icon: Smile, badge: 'Simple' },
+  { name: 'Overview', href: '/docs', icon: BookOpen, exact: true },
+  { name: '30s Quickstart', href: '/docs/quickstart', icon: Zap, badge: '30s' },
+  { name: '1-Click Migration', href: '/docs/migration', icon: ArrowLeftRight, badge: '0-Code' },
+  { name: 'Python SDK', href: '/docs/sdks/python', icon: Code2 },
+  { name: 'TypeScript SDK', href: '/docs/sdks/typescript', icon: FileCode2 },
+  { name: 'Cursor & IDE', href: '/docs/ide-setup', icon: Terminal, badge: 'IDE' },
+  { name: 'SSE Streaming', href: '/docs/streaming', icon: Radio },
+  { name: 'Cookbooks', href: '/docs/cookbook', icon: BookMarked, badge: 'Recipes' },
+  { name: 'Function Calling', href: '/docs/function-calling', icon: Wrench },
+  { name: 'Structured Outputs', href: '/docs/structured-outputs', icon: Sparkles, badge: 'JSON' },
+  { name: 'Model Guide', href: '/docs/models-guide', icon: Flame },
+  { name: '75% Prompt Caching', href: '/docs/prompt-caching', icon: Sparkles, badge: '-75%' },
+  { name: 'REST API Ref', href: '/docs/api-reference', icon: Cpu },
+  { name: 'Security Spec', href: '/docs/security-spec', icon: Lock },
+  { name: 'Rate Limits', href: '/docs/rate-limits', icon: Gauge },
+  { name: 'Architecture', href: '/docs/architecture', icon: Layers }
 ];
 
 export function DocsSubNav() {
   const pathname = usePathname();
 
-  // Find active group
-  const activeGroup = DOCS_NAV_GROUPS.find(group =>
-    group.items.some(item => (item.exact ? pathname === item.href : pathname.startsWith(item.href)))
-  ) || DOCS_NAV_GROUPS[0];
-
   return (
-    <div className="space-y-3 font-mono">
-      {/* Category Pillars (Top Bar) */}
-      <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3 overflow-x-auto">
-        <div className="flex items-center gap-1 sm:gap-2">
-          {DOCS_NAV_GROUPS.map((group) => {
-            const isGroupActive = group.id === activeGroup.id;
-            const defaultHref = group.items[0].href;
-
-            return (
-              <Link
-                key={group.id}
-                href={defaultHref}
-                className={`px-3.5 py-1.5 rounded-xl text-xs uppercase tracking-wider font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                  isGroupActive
-                    ? 'bg-white/10 text-white border border-white/20 shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
-                }`}
-              >
-                <span>{group.title}</span>
-                {isGroupActive && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
-              </Link>
-            );
-          })}
-        </div>
-
-        <div className="flex items-center gap-3 shrink-0">
-          <ShareButton
-            variant="pill"
-            label="Share Doc"
-            className="text-[11px] py-1"
-          />
-          <div className="hidden md:flex items-center gap-2 text-[11px] text-zinc-500 font-sans">
-            <span>Drop-in OpenAI SDK Replacement</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Active Category Sub-Navigation Pills */}
-      <div className="flex items-center gap-1.5 sm:gap-2 p-1 rounded-2xl bg-black/40 border border-white/5 overflow-x-auto text-xs">
-        {activeGroup.items.map((tab) => {
+    <div className="flex items-center justify-between gap-3 p-1.5 rounded-2xl bg-black/40 border border-white/5 font-mono text-xs overflow-x-auto">
+      <div className="flex items-center gap-1 overflow-x-auto py-0.5">
+        {ALL_DOCS_ITEMS.map((tab) => {
           const isActive = tab.exact ? pathname === tab.href : pathname.startsWith(tab.href);
           const Icon = tab.icon;
 
@@ -138,9 +70,9 @@ export function DocsSubNav() {
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl whitespace-nowrap transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl whitespace-nowrap text-xs transition-all ${
                 isActive
-                  ? 'bg-amber-400 text-black font-bold shadow-lg shadow-amber-500/10'
+                  ? 'bg-amber-400 text-black font-bold shadow-md shadow-amber-500/10'
                   : 'text-zinc-400 hover:text-white hover:bg-white/5'
               }`}
             >
@@ -148,10 +80,10 @@ export function DocsSubNav() {
               <span>{tab.name}</span>
               {tab.badge && (
                 <span
-                  className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
+                  className={`text-[9px] px-1.5 py-0.2 rounded-full font-bold ${
                     isActive
                       ? 'bg-black/20 text-black'
-                      : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                      : 'bg-white/10 text-zinc-300'
                   }`}
                 >
                   {tab.badge}
@@ -160,6 +92,10 @@ export function DocsSubNav() {
             </Link>
           );
         })}
+      </div>
+
+      <div className="shrink-0 hidden sm:block pl-2 border-l border-white/10">
+        <ShareButton variant="pill" label="Share" className="text-[11px] py-1" />
       </div>
     </div>
   );
