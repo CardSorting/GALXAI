@@ -83,3 +83,22 @@ Organizations can enforce granular spending limits across individual projects an
 - **Per-Key Spend Caps**: Set daily or monthly limits per key (`galx_live_...`).
 - **Real-Time Revocation**: 1-click immediate token invalidation purges active worker leases in $< 40\text{ms}$.
 - **Detailed Exportable Ledger**: Download CSV / JSON audit trails with model breakdown, token metrics, wholesale discount applied, and net cost.
+
+---
+
+## 7. Cloudflare Edge Batch Micro-Metering (`fn_batch_draw_wallet_tokens_cf`)
+
+To eliminate database connection thrashing during multi-agent swarm bursts, Cloudflare Workers buffer token deductions into 100-item micro-batches before executing atomic PostgreSQL ledger commits:
+- **Zero-Egress Processing**: The Cloudflare Edge Mesh aggregates micro-draws across hundreds of concurrent SSE streams.
+- **Single SQL Transaction**: `fn_batch_draw_wallet_tokens_cf` settles up to 100 token draw operations in one atomic database roundtrip.
+- **Double-Entry Ledger Invariance**: Each draw creates an immutable row in `galx_wallet_transactions` with exact prompt, completion, and cached token quantities.
+
+---
+
+## 8. Multi-Tenant Budget Alerts & Automated Webhooks (ADR 0019)
+
+Organizations configure real-time spend thresholds across workspaces and environments:
+- **Threshold Policies**: Set triggers at 50%, 80%, and 100% of the monthly spend cap in `galx_budget_alerts`.
+- **Automated Webhooks**: `fn_check_budget_thresholds` dispatches HMAC-SHA256 signed webhooks directly from Cloudflare Edge Workers upon crossing spend milestones.
+- **Graceful Quota Soft/Hard Enforcement**: Non-critical background queues pause automatically while high-priority production endpoints remain operational.
+

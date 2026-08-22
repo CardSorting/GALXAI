@@ -1,0 +1,21 @@
+name = "galxai-edge-gateway"
+main = "src/workers/cloudflare/index.ts"
+compatibility_date = "2026-08-22"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+SUPABASE_URL = "https://your-project.supabase.co"
+
+# Hyperdrive Connection Accelerator to Supabase PostgreSQL (0 connection overhead)
+# [[hyperdrive]]
+# binding = "HYPERDRIVE"
+# id = "galxai_hyperdrive_pool"
+
+# Cloudflare KV for edge rate limiting cache
+# [[kv_namespaces]]
+# binding = "RATE_LIMIT_KV"
+# id = "galxai_edge_rate_kv"
+
+# Automated Cron Triggers for background worker queue polling (every minute)
+[triggers]
+crons = ["* * * * *"]

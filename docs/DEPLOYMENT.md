@@ -132,3 +132,33 @@ spec:
 - [x] **Ephemeral RAM**: Zero plaintext secrets stored on disk; buffers cleared immediately via `zeroizeBuffer`.
 - [x] **HTTPS/TLS**: Reverse proxy (Nginx, Cloudflare, Traefik, AWS ALB) terminates TLS 1.3 in front of container instances.
 - [x] **Health Check Routing**: Ingress probes target `/api/pool/stats` with $< 5\text{ms}$ readiness latency.
+
+---
+
+## 6. Cloudflare Workers & Supabase PostgreSQL Hybrid Deployment (ADR 0015 & 0016)
+
+For high-throughput, zero-egress production deployments:
+
+### Step 1: Bootstrap Authoritative Supabase Database
+Run the consolidated SQL setup script in your Supabase SQL Editor:
+```bash
+# Apply migrations / setup script
+psql "$SUPABASE_DB_URL" -f scripts/setup-supabase-schema.sql
+```
+
+### Step 2: Configure Cloudflare Worker Secrets
+Bind environment secrets to Cloudflare Workers:
+```bash
+# Configure Supabase credentials for Edge Workers
+npx wrangler secret put SUPABASE_URL
+npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+npx wrangler secret put GALX_VAULT_MASTER_SECRET
+```
+
+### Step 3: Deploy Cloudflare Edge Gateway & Workers
+Deploy the edge mesh across 300+ global Points of Presence with $0 egress bandwidth costs:
+```bash
+# Deploy edge gateway and queue workers
+npx wrangler deploy
+```
+

@@ -63,6 +63,7 @@ export class GalxTaskQueueEngine {
   private dispatcherTimer: NodeJS.Timeout | null = null;
   private leaseWatchdogTimer: NodeJS.Timeout | null = null;
   private fencingTokenCounter = 1000;
+  private lastCreatedAtMs = 0;
 
   private constructor(
     persistence = GalxPersistence.getInstance(),
@@ -454,6 +455,9 @@ export class GalxTaskQueueEngine {
       ? now + options.ttlMs
       : undefined;
 
+    const taskCreatedAtMs = Math.max(now, this.lastCreatedAtMs + 1);
+    this.lastCreatedAtMs = taskCreatedAtMs;
+
     const task: GalxTask = {
       id: taskId,
       queueId,
@@ -472,8 +476,8 @@ export class GalxTaskQueueEngine {
       deduplicationWindowMs: dedupWindowMs,
       status: initialStatus,
       scheduleTimeMs,
-      createdAtMs: now,
-      updatedAtMs: now,
+      createdAtMs: taskCreatedAtMs,
+      updatedAtMs: taskCreatedAtMs,
       dispatchCount: 0,
       responseCount: 0,
       attempts: [],

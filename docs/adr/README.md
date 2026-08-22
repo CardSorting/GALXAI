@@ -22,6 +22,11 @@ This directory contains the formal Architectural Decision Records (ADRs) that go
 | **[ADR 0012](0012-universal-developer-sdk-and-ergonomics-substrate.md)** | Universal Developer SDK & Developer Experience (DX) Substrate | **Developer SDK** | `Accepted` | Universal zero-dependency client with OpenAI parity, async queues, and typed error hierarchy. |
 | **[ADR 0013](0013-fluent-builders-structured-outputs-and-dx-ergonomics.md)** | Fluent Builders, Structured Outputs & DX Ergonomics Substrate | **DX Ergonomics** | `Accepted` | Fluent prompt builders, Zod/JSON schema extraction, Vercel AI SDK adapters, and batch swarm runners. |
 | **[ADR 0014](0014-apex-agent-runtime-middleware-and-resilience-substrate.md)** | Apex Agent Runtime, Middleware & Resilience Substrate | **Agent Runtime** | `Accepted` | Autonomous multi-step tool loops, pluggable middleware pipeline, LRU caching, and model fallback cascades. |
+| **[ADR 0015](0015-zero-egress-cloudflare-workers-edge-compute-mesh.md)** | Zero-Egress Cloudflare Workers Edge Compute Mesh | **Edge Mesh** | `Accepted` | Offloads token streaming and queue execution to Cloudflare Workers for $0 egress bandwidth costs. |
+| **[ADR 0016](0016-authoritative-supabase-postgresql-substrate.md)** | Authoritative Supabase PostgreSQL Substrate | **Data Layer** | `Accepted` | Authoritative PostgreSQL single source of truth for ACID ledgers, AES-256-GCM shards, and pgvector. |
+| **[ADR 0017](0017-high-throughput-binary-wire-and-rpc-micro-batching.md)** | High-Throughput Binary Wire Protocol & RPC Micro-Batching | **Wire & Batch** | `Accepted` | Binary codecs and 100-item micro-batches (fn_batch_draw_wallet_tokens_cf) cutting database IOPS by 98%. |
+| **[ADR 0018](0018-edge-speculative-streaming-and-keepalive-connection-pools.md)** | Edge Speculative Streaming & Pre-Warmed Connection Pools | **Inference DX** | `Accepted` | Speculative draft + target streaming and pre-warmed HTTP/2 keep-alive sockets cutting TTFT by 65%. |
+| **[ADR 0019](0019-autonomous-shard-health-probes-and-budget-governance.md)** | Autonomous Shard Health Probes & Multi-Tenant Budget Governance | **Governance** | `Accepted` | Autonomous shard auto-drain heartbeats and multi-tenant budget threshold webhooks (50%/80%/100%). |
 
 
 

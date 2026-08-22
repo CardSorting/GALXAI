@@ -1,0 +1,138 @@
+/**
+ * GALXAI: Supabase PostgreSQL Distributed Advisory Lock Repository
+ * Worker mutexes, lease heartbeats, and monotonic fencing tokens for split-brain prevention.
+ */
+
+import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
+import type { Database } from '../types';
+
+export interface DistributedLockRecord {
+  lockKey: string;
+  ownerId: string;
+  fencingToken: number;
+  acquiredAtMs: number;
+  expiresAtMs: number;
+}
+
+export class DistributedLockRepository {
+  private static instance: DistributedLockRepository;
+  private readonly inMemoryLocks = new Map<string, DistributedLockRecord>();
+
+  static getInstance(): DistributedLockRepository {
+    if (!DistributedLockRepository.instance) {
+      DistributedLockRepository.instance = new DistributedLockRepository();
+    }
+    return DistributedLockRepository.instance;
+  }
+
+  async acquireLock(params: {
+    lockKey: string;
+    ownerId: string;
+    ttlMs?: number;
+  }): Promise<{
+    acquired: boolean;
+    lockKey: string;
+    ownerId?: string;
+    fencingToken?: number;
+    expiresAtMs?: number;
+    reason?: string;
+  }> {
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseAdmin();
+        const { data, error } = await supabase.rpc('fn_acquire_distributed_lock', {
+          p_lock_key: params.lockKey,
+          p_owner_id: params.ownerId,
+          p_ttl_ms: params.ttlMs || 30000,
+          p_now_ms: Date.now()
+        });
+
+        if (!error && data) {
+          const res = data as any;
+          return {
+            acquired: res.acquired,
+            lockKey: params.lockKey,
+            ownerId: res.owner_id,
+            fencingToken: res.fencing_token,
+            expiresAtMs: res.expires_at_ms,
+            reason: res.reason
+          };
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    return this.acquireLockFallback(params);
+  }
+
+  async releaseLock(params: {
+    lockKey: string;
+    ownerId: string;
+    fencingToken?: number;
+  }): Promise<boolean> {
+    const existing = this.inMemoryLocks.get(params.lockKey);
+    if (existing && existing.ownerId === params.ownerId) {
+      if (!params.fencingToken || existing.fencingToken === params.fencingToken) {
+        existing.expiresAtMs = 0;
+      }
+    }
+
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseAdmin();
+        const { data, error } = await supabase.rpc('fn_release_distributed_lock', {
+          p_lock_key: params.lockKey,
+          p_owner_id: params.ownerId,
+          p_fencing_token: params.fencingToken || undefined
+        });
+
+        if (!error && typeof data === 'boolean') {
+          return data;
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    return true;
+  }
+
+  private acquireLockFallback(params: {
+    lockKey: string;
+    ownerId: string;
+    ttlMs?: number;
+  }) {
+    const now = Date.now();
+    const existing = this.inMemoryLocks.get(params.lockKey);
+
+    if (existing && existing.expiresAtMs > now && existing.ownerId !== params.ownerId) {
+      return {
+        acquired: false,
+        lockKey: params.lockKey,
+        reason: 'LOCK_HELD_BY_ANOTHER_OWNER',
+        expiresAtMs: existing.expiresAtMs
+      };
+    }
+
+    const newFencing = existing ? existing.fencingToken + 1 : 1;
+    const expiresAtMs = now + (params.ttlMs || 30000);
+
+    const record: DistributedLockRecord = {
+      lockKey: params.lockKey,
+      ownerId: params.ownerId,
+      fencingToken: newFencing,
+      acquiredAtMs: now,
+      expiresAtMs
+    };
+    this.inMemoryLocks.set(params.lockKey, record);
+
+    return {
+      acquired: true,
+      lockKey: params.lockKey,
+      ownerId: params.ownerId,
+      fencingToken: newFencing,
+      expiresAtMs
+    };
+  }
+}

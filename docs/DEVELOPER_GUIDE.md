@@ -284,6 +284,43 @@ const fallbackRes = await galx.chat.fallbackCascade(
   ['gpt-5.6-sol', 'x-ai/grok-4.5', 'gpt-5.6-luna'],
   { messages: [{ role: 'user', content: 'Mission critical prompt' }] }
 );
+// 10. Supabase PostgreSQL & Cloudflare Zero-Egress Edge Substrate SDK
+import { galxDb } from '@/lib/supabase';
+
+// Multi-tenant Wallets & Micro-Metering
+const wallet = await galxDb.wallets.getWallet('usr_dev_123');
+await galxDb.wallets.drawTokensBatch([
+  { userId: 'usr_dev_123', costUsd: 0.00005, description: 'gpt-5.6-sol inference' }
+]);
+
+// Edge Cache API (Stale-While-Revalidate)
+const models = await galxDb.cache.getOrFetch('models:catalog', async () => {
+  return ['gpt-5.6-sol', 'x-ai/grok-4.5'];
+}, { ttlMs: 60000 });
+
+// Zero-Egress Cloudflare R2 Multimodal Asset Ingestion
+const asset = await galxDb.assets.uploadAsset({
+  data: Buffer.from('...image_bytes...'),
+  contentType: 'image/png',
+  folder: 'dalle_generations'
+});
+
+// Cloudflare Durable Object Multi-Agent Swarm Coordinator
+const swarm = galxDb.createSwarmCoordinator('swarm_777', 'Market Research');
+swarm.registerAgent('agent_1', 'Researcher');
+swarm.setSharedContext('topic', 'Autonomous Agents');
+
+// Multi-Tenant Budget Alerts & Hard Caps
+await galxDb.budgets.createBudgetAlert({
+  workspaceId: 'ws_uuid',
+  thresholdPercentage: 80,
+  notificationWebhookUrl: 'https://api.domain.com/alerts'
+});
+
+// Autonomous Shard Health Probes & Auto-Drain
+await galxDb.health.reportHealthProbesBatch([
+  { shardId: 'shard_oai_1', workerId: 'cf_worker_1', latencyMs: 180, statusCode: 200, isSuccess: true }
+]);
 ```
 
 ---
@@ -310,14 +347,17 @@ npx galxai chat gpt-5.6-sol "Explain the Raft consensus algorithm concisely."
 
 ## 🧪 Testing & Verification Standards
 
-GALXAI maintains a **66-suite forensic verification test suite** that exercises every layer of the core substrate:
+GALXAI maintains two dedicated forensic test runners:
 
 ```bash
-# Run all 66 automated tests
+# 1. Universal Router & SDK Verification Suite (66 tests)
 npx tsx scripts/validate-galxai-router.ts
 
-# Run Next.js production build verification
-npm run build
+# 2. Supabase PostgreSQL & Cloudflare Edge Substrate Test Suite (39 tests)
+npx tsx scripts/test-supabase-integration.ts
+
+# 3. TypeScript Type-Check
+npx tsc --noEmit
 ```
 
 When contributing code changes, ensure all test suites pass with 0 errors.
