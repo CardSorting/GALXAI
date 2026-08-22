@@ -269,9 +269,9 @@ export class GalxCredentialPool {
       const availableTokens = Math.max(0, refilledBucket.remainingTokens - (refilledBucket.reservedTokens || 0));
       const tokenHeadroomRatio = Math.max(0.01, availableTokens / Math.max(1, refilledBucket.maxTokens));
 
-      // 2. Concurrency headroom
+      // 2. Concurrency headroom with Power-Law saturation curve
       const inFlight = this.inFlightCounts.get(acc.id) || 0;
-      const concurrencyHeadroom = Math.max(0.05, 1 - inFlight / maxInFlightPerShard);
+      const concurrencyHeadroom = Math.max(0.01, 1 - Math.pow(inFlight / maxInFlightPerShard, 1.5));
 
       // 3. Health & Canary multiplier
       const circuit = this.circuitBreaker.evaluateAccountStatus(acc, nowMs);
@@ -286,8 +286,10 @@ export class GalxCredentialPool {
       const dynamicWeight = this.calculateDynamicReliabilityWeight(acc);
       const priorityBoost = isPriorityUser ? (acc.priority || 10) / 10 : 1.0;
 
-      // 6. Micro-jitter to eliminate simultaneous worker collision
-      const microJitter = (Math.random() * 0.04) - 0.02;
+      // 6. Dynamic micro-jitter scaling with active fleet concurrency
+      const fleetConcurrency = this.activeLeases.size;
+      const jitterMagnitude = fleetConcurrency > 10 ? 0.05 : 0.02;
+      const microJitter = (Math.random() * (jitterMagnitude * 2)) - jitterMagnitude;
 
       // Hydraulic score: higher unreserved headroom + lower in-flight + faster latency + higher reliability = higher score
       const score =
