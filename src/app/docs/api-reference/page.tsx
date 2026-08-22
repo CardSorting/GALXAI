@@ -2,7 +2,8 @@ import React from 'react';
 import type { Metadata } from 'next';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
-import { Code2, Layers, Zap, Terminal } from 'lucide-react';
+import { DocsSubNav } from '@/components/dashboard/DocsSubNav';
+import { Code2, Layers, Zap, Terminal, Cpu } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'OpenAPI REST & SSE Endpoint Reference | GALXAI Docs',
@@ -14,37 +15,30 @@ export default function ApiReferenceDocPage() {
     {
       method: 'POST',
       path: '/v1/chat/completions',
-      desc: 'Creates a model response for the given chat conversation (supports SSE streaming).',
+      desc: 'Creates a model response for the given chat conversation with sub-15ms TTFT (supports SSE streaming).',
       headers: ['Authorization: Bearer galx_live_...', 'Content-Type: application/json'],
       body: '{"model": "gpt-5.6-sol", "messages": [{"role": "user", "content": "Hello!"}], "stream": true}'
     },
     {
       method: 'GET',
       path: '/v1/models',
-      desc: 'Lists the currently available models in the pool.',
+      desc: 'Lists all available frontier AI models, max token context windows, and wholesale pricing tiers.',
       headers: ['Authorization: Bearer galx_live_...'],
       body: 'N/A'
     },
     {
       method: 'POST',
       path: '/v1/images/generations',
-      desc: 'Generates visual images given a prompt using GPT-Image-2 or Grok Imagine.',
+      desc: 'Generates high-definition visual assets given a text prompt using GPT-Image-2.',
       headers: ['Authorization: Bearer galx_live_...', 'Content-Type: application/json'],
-      body: '{"model": "openai-gpt-image-2", "prompt": "Cyberpunk cityscape", "size": "1024x1024"}'
+      body: '{"model": "openai-gpt-image-2", "prompt": "Architectural schematic of futuristic AI datacenter", "size": "1024x1024"}'
     },
     {
       method: 'GET',
       path: '/api/pool/stats',
-      desc: 'Returns live pool telemetry, active shards count, and token velocity throughput.',
+      desc: 'Returns live gateway router telemetry, active model throughput, and global latency percentiles.',
       headers: ['Content-Type: application/json'],
       body: 'N/A'
-    },
-    {
-      method: 'POST',
-      path: '/api/shards',
-      desc: 'Vaults and registers an API key into the BYOQ shard pool with live preflight validation.',
-      headers: ['Content-Type: application/json'],
-      body: '{"apiKey": "sk-...", "accountLabel": "My Shard", "provider": "openai", "shardMode": "pooled"}'
     }
   ];
 
@@ -52,46 +46,61 @@ export default function ApiReferenceDocPage() {
     <div className="min-h-screen flex flex-col">
       <Navigation />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
         <Breadcrumbs
           items={[
             { label: 'Docs', href: '/docs' },
-            { label: 'API Reference' }
+            { label: 'REST API & SSE Reference' }
           ]}
         />
 
-        <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
-            <Code2 className="w-3.5 h-3.5" />
-            <span>REST API & SSE REFERENCE</span>
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-4 border border-white/10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-mono font-bold">
+            <Cpu className="w-3.5 h-3.5" />
+            <span>REST API SPECIFICATION</span>
           </div>
-          <h1 className="text-3xl font-black text-white">OpenAPI REST Endpoint Reference</h1>
-          <p className="text-sm text-zinc-400 leading-relaxed">
-            All endpoints are served from <code className="text-cyan-300 font-mono">http://localhost:3000</code>.
+          <h1 className="text-3xl font-black text-white">OpenAPI REST & SSE Endpoint Reference</h1>
+          <p className="text-sm text-zinc-400 leading-relaxed font-sans">
+            GALXAI exposes standard OpenAI-compatible endpoints with support for JSON request bodies, Server-Sent Events (SSE), and Bearer authentication.
           </p>
         </div>
 
+        <DocsSubNav />
+
         <div className="space-y-6">
           {endpoints.map((ep) => (
-            <div key={ep.path} className="glass-card rounded-3xl p-6 sm:p-8 border border-white/5 space-y-4">
-              <div className="flex items-center gap-3">
-                <span className={`px-2.5 py-1 rounded-lg text-xs font-bold font-mono ${
-                  ep.method === 'POST' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                }`}>
+            <section key={ep.path} className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className={`px-3 py-1 rounded-xl text-xs font-mono font-black ${ep.method === 'POST' ? 'bg-amber-400 text-black' : 'bg-cyan-500 text-black'}`}>
                   {ep.method}
                 </span>
-                <code className="text-base font-bold text-white font-mono">{ep.path}</code>
+                <code className="text-base font-mono font-bold text-white">{ep.path}</code>
               </div>
 
-              <p className="text-xs text-zinc-300 leading-relaxed">{ep.desc}</p>
+              <p className="text-xs text-zinc-300 font-sans leading-relaxed">
+                {ep.desc}
+              </p>
 
-              <div className="space-y-2 pt-2">
-                <div className="text-[10px] font-bold uppercase text-zinc-500 font-mono">Example Payload</div>
-                <pre className="p-3.5 rounded-2xl bg-black/60 font-mono text-xs text-zinc-300 border border-white/5 overflow-x-auto selection:bg-indigo-500 selection:text-white">
-                  <code>{ep.body}</code>
-                </pre>
+              <div className="space-y-2">
+                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Required Headers:</span>
+                <div className="flex flex-wrap gap-2">
+                  {ep.headers.map((h, i) => (
+                    <code key={i} className="text-xs font-mono bg-black/60 px-3 py-1.5 rounded-xl border border-white/5 text-zinc-300">
+                      {h}
+                    </code>
+                  ))}
+                </div>
               </div>
-            </div>
+
+              {ep.body !== 'N/A' && (
+                <div className="space-y-2">
+                  <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Example Request Body:</span>
+                  <pre className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-cyan-300 border border-white/5 overflow-x-auto">
+                    <code>{ep.body}</code>
+                  </pre>
+                </div>
+              )}
+            </section>
           ))}
         </div>
       </main>
