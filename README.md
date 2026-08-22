@@ -58,7 +58,7 @@ GALXAI exposes a 100% OpenAI-compatible `/v1` endpoint. Simply switch your `base
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="http://localhost:3000/v1",  # Or https://api.galx.ai/v1
+    base_url="https://galx.ai/v1",  # Or https://api.galx.ai/v1
     api_key="galx_live_your_gateway_key_here"
 )
 
@@ -82,7 +82,7 @@ for chunk in stream:
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
-  baseURL: 'http://localhost:3000/v1',
+  baseURL: 'https://galx.ai/v1',
   apiKey: process.env.GALXAI_API_KEY || 'galx_live_your_gateway_key_here',
 });
 
@@ -100,7 +100,7 @@ main();
 
 ### cURL
 ```bash
-curl http://localhost:3000/v1/chat/completions \
+curl https://galx.ai/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer galx_live_your_key_here" \
   -d '{

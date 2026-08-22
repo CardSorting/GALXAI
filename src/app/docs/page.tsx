@@ -54,22 +54,22 @@ export default function DocsPage() {
     cursor: {
       title: 'Cursor IDE / Windsurf Setup',
       desc: 'In Cursor Settings > Models > OpenAI API Key, toggle "Override OpenAI Base URL":',
-      code: `Base URL: https://api.galxai.com/v1\nAPI Key: galx_live_your_key_here\nModels: gpt-5.6-sol, gpt-5.6-terra, x-ai/grok-4.5`
+      code: `Base URL: https://api.galx.ai/v1\nAPI Key: galx_live_your_key_here\nModels: gpt-5.6-sol, gpt-5.6-terra, x-ai/grok-4.5`
     },
     chat_app: {
       title: 'ChatGPT-Style Web UIs (LibreChat / TypingMind / OpenWebUI)',
       desc: 'In App Settings > OpenAI API Configuration:',
-      code: `Custom Endpoint: https://api.galxai.com/v1\nAPI Key: galx_live_your_key_here`
+      code: `Custom Endpoint: https://api.galx.ai/v1\nAPI Key: galx_live_your_key_here`
     },
     python: {
       title: 'Python / Node.js Script (1-Line Drop-in)',
       desc: 'Use the official OpenAI SDK with 1 changed line:',
-      code: `from openai import OpenAI\n\n# 1-Line Drop-in wholesale discount replacement\nclient = OpenAI(\n    base_url="https://api.galxai.com/v1",\n    api_key="galx_live_your_key_here"\n)`
+      code: `from openai import OpenAI\n\n# 1-Line Drop-in wholesale discount replacement\nclient = OpenAI(\n    base_url="https://api.galx.ai/v1",\n    api_key="galx_live_your_key_here"\n)`
     },
     nocode: {
       title: 'No-Code Workflow (Make.com / Zapier / Dify)',
       desc: 'In your HTTP Request or OpenAI module:',
-      code: `URL: https://api.galxai.com/v1/chat/completions\nHeader: Authorization: Bearer galx_live_your_key_here\nHeader: Content-Type: application/json`
+      code: `URL: https://api.galx.ai/v1/chat/completions\nHeader: Authorization: Bearer galx_live_your_key_here\nHeader: Content-Type: application/json`
     }
   };
 
@@ -221,7 +221,7 @@ export default function DocsPage() {
                     <span className="font-bold text-white text-sm">Paste into Your App</span>
                   </div>
                   <p className="text-zinc-400">
-                    Point your app's base URL to <code className="text-cyan-300 font-mono">https://api.galxai.com/v1</code>.
+                    Point your app's base URL to <code className="text-cyan-300 font-mono">https://api.galx.ai/v1</code>.
                   </p>
                 </div>
 
@@ -419,7 +419,7 @@ export default function DocsPage() {
 
 # 1-Line Drop-in for any AI Agent Framework
 client = OpenAI(
-    base_url="https://api.galxai.com/v1",
+    base_url="https://api.galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 

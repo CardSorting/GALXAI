@@ -41,29 +41,29 @@ export function NoCodeSandboxWidget() {
 • **Real-time Routing**: Sub-1ms gateway proxy overhead.
 • **High Concurrency**: Automatically distributed across active enterprise shards.
 • **Zero-Retention**: Memory zeroization ensures data never touches disk.
-• **1-Line Switch**: Point baseURL to api.galxai.com/v1 with your live key.`
+• **1-Line Switch**: Point baseURL to api.galx.ai/v1 with your live key.`
   };
 
   const toolConfigs = {
     cursor: {
       name: 'Cursor & Windsurf IDE',
       desc: 'In Cursor Settings > Models > Override Base URL:',
-      code: `Base URL: https://api.galxai.com/v1\nAPI Key: galx_live_your_key_here\nModel: ${selectedModel}`
+      code: `Base URL: https://api.galx.ai/v1\nAPI Key: galx_live_your_key_here\nModel: ${selectedModel}`
     },
     chat_app: {
       name: 'LibreChat / TypingMind / OpenWebUI',
       desc: 'In App Settings > OpenAI API Configuration:',
-      code: `API Base URL: https://api.galxai.com/v1\nAPI Key: galx_live_your_key_here`
+      code: `API Base URL: https://api.galx.ai/v1\nAPI Key: galx_live_your_key_here`
     },
     make: {
       name: 'Make.com & Zapier No-Code',
       desc: 'In HTTP / Webhook module headers:',
-      code: `URL: https://api.galxai.com/v1/chat/completions\nAuthorization: Bearer galx_live_your_key_here\nContent-Type: application/json`
+      code: `URL: https://api.galx.ai/v1/chat/completions\nAuthorization: Bearer galx_live_your_key_here\nContent-Type: application/json`
     },
     python: {
       name: 'Python / Node.js 1-Line Drop-in',
       desc: 'Standard OpenAI client with 1 changed line:',
-      code: `from openai import OpenAI\n\nclient = OpenAI(\n    base_url="https://api.galxai.com/v1",\n    api_key="galx_live_your_key_here"\n)\nresponse = client.chat.completions.create(model="${selectedModel}", messages=[...])`
+      code: `from openai import OpenAI\n\nclient = OpenAI(\n    base_url="https://api.galx.ai/v1",\n    api_key="galx_live_your_key_here"\n)\nresponse = client.chat.completions.create(model="${selectedModel}", messages=[...])`
     }
   };
 

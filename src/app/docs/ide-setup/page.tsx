@@ -43,7 +43,7 @@ export default function IdeSetupDocPage() {
             In Cursor Settings &gt; Models &gt; OpenAI API Key, toggle "Override OpenAI Base URL":
           </p>
           <pre className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-amber-300 border border-white/10 overflow-x-auto">
-            <code>{`Base URL: https://api.galxai.com/v1
+            <code>{`Base URL: https://api.galx.ai/v1
 API Key: galx_live_your_gateway_key
 Models to enable: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`}</code>
           </pre>
@@ -59,14 +59,14 @@ Models to enable: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`}</cod
       "title": "GALXAI GPT-5.6 Sol",
       "provider": "openai",
       "model": "gpt-5.6-sol",
-      "apiBase": "https://api.galxai.com/v1",
+      "apiBase": "https://api.galx.ai/v1",
       "apiKey": "galx_live_your_gateway_key"
     },
     {
       "title": "GALXAI Grok 4.5",
       "provider": "openai",
       "model": "x-ai/grok-4.5",
-      "apiBase": "https://api.galxai.com/v1",
+      "apiBase": "https://api.galx.ai/v1",
       "apiKey": "galx_live_your_gateway_key"
     }
   ]
@@ -79,7 +79,7 @@ Models to enable: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`}</cod
           <h2 className="text-lg font-bold text-white font-mono">3. Cline & Roo-Code VS Code Extension</h2>
           <pre className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-emerald-300 border border-white/10 overflow-x-auto">
             <code>{`API Provider: OpenAI-Compatible
-Base URL: https://api.galxai.com/v1
+Base URL: https://api.galx.ai/v1
 API Key: galx_live_your_gateway_key
 Model ID: gpt-5.6-sol`}</code>
           </pre>

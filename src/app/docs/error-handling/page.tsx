@@ -128,7 +128,7 @@ import time
 import random
 
 client = OpenAI(
-    base_url="https://api.galxai.com/v1",
+    base_url="https://api.galx.ai/v1",
     api_key="galx_live_your_key_here",
     max_retries=3,  # Built-in automatic exponential backoff
     timeout=30.0

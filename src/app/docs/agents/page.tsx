@@ -115,7 +115,7 @@ export default function AgentsDocsPage() {
             <code>{`from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galxai.com/v1",
+    base_url="https://api.galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 

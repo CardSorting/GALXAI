@@ -77,7 +77,7 @@ export function DeveloperGatewayKeys() {
             </span>
           </div>
           <p className="text-xs text-zinc-400 mt-0.5">
-            Use these keys as standard Bearer tokens in any OpenAI SDK or agent runtime pointing to <code className="text-cyan-300">http://localhost:3000/v1</code>.
+            Use these keys as standard Bearer tokens in any OpenAI SDK or agent runtime pointing to <code className="text-cyan-300">https://galx.ai/v1</code>.
           </p>
         </div>
 

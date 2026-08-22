@@ -8,7 +8,7 @@ export function QuickstartDocs() {
   const [copied, setCopied] = useState(false);
 
   const snippets = {
-    curl: `curl http://localhost:3000/v1/chat/completions \\
+    curl: `curl https://galx.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer galx_live_your_gateway_key" \\
   -d '{
@@ -24,7 +24,7 @@ export function QuickstartDocs() {
 
 # Initialize client pointing to GALXAI Universal Gateway
 client = OpenAI(
-    base_url="http://localhost:3000/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -46,7 +46,7 @@ for chunk in response:
 
 // Initialize OpenAI SDK directed to local GALXAI Gateway
 const openai = new OpenAI({
-  baseURL: "http://localhost:3000/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: "galx_live_your_gateway_key",
 });
 
@@ -66,7 +66,7 @@ main();`,
 
     cursor: `// Cursor / Cline / Roo-Code Custom OpenAI Provider Settings
 {
-  "openai.baseUrl": "http://localhost:3000/v1",
+  "openai.baseUrl": "https://galx.ai/v1",
   "openai.apiKey": "galx_live_your_gateway_key",
   "openai.model": "gpt-5.6-sol",
   "openai.customModels": [

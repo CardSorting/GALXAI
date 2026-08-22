@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://galx.ai';
   const currentDate = new Date();
 
   const coreRoutes: MetadataRoute.Sitemap = [

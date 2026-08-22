@@ -11,7 +11,7 @@ GALXAI is an enterprise-grade Universal AI Gateway providing high-throughput, lo
 No. You only need a single GALXAI Developer Gateway Key (`galx_live_...`). GALXAI provides unified access to all 12 reasoning and visual models across OpenAI and xAI without needing separate accounts or disparate billing systems.
 
 #### 3. Is GALXAI 100% compatible with OpenAI SDKs?
-Yes, completely. GALXAI natively implements standard OpenAI REST APIs (`/v1/chat/completions`, `/v1/images/generations`, `/v1/models`) and Server-Sent Events (SSE) streaming. Simply update `baseURL="https://api.galxai.com/v1"`.
+Yes, completely. GALXAI natively implements standard OpenAI REST APIs (`/v1/chat/completions`, `/v1/images/generations`, `/v1/models`) and Server-Sent Events (SSE) streaming. Simply update `baseURL="https://api.galx.ai/v1"`.
 
 ---
 

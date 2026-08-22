@@ -115,7 +115,7 @@ export default function PlainEnglishDocsPage() {
               <div className="space-y-1">
                 <div className="font-bold text-white text-sm">Paste it into your favorite tool (Cursor, Windsurf, or Code)</div>
                 <p className="text-zinc-400">
-                  In Cursor or your app settings, change the OpenAI URL to <code className="text-amber-300">https://api.galxai.com/v1</code> and paste your key.
+                  In Cursor or your app settings, change the OpenAI URL to <code className="text-amber-300">https://api.galx.ai/v1</code> and paste your key.
                 </p>
               </div>
             </div>

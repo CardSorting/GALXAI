@@ -59,7 +59,7 @@ export default function PromoCreditsPage() {
   const [copiedReferral, setCopiedReferral] = useState(false);
 
   const referralCode = 'GALX-ENG-9821';
-  const referralUrl = `https://galxai.com/join?ref=${referralCode}`;
+  const referralUrl = `https://galx.ai/join?ref=${referralCode}`;
 
   const handleRedeem = (e: React.FormEvent) => {
     e.preventDefault();

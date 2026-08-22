@@ -34,10 +34,10 @@ client = OpenAI(
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galxai.com/v1",  # <- ONLY CHANGE NEEDED!
+    base_url="https://api.galx.ai/v1",  # <- ONLY CHANGE NEEDED!
     api_key="galx_live_your_gateway_key"
 )`,
-      env: `OPENAI_BASE_URL="https://api.galxai.com/v1"
+      env: `OPENAI_BASE_URL="https://api.galx.ai/v1"
 OPENAI_API_KEY="galx_live_your_gateway_key"`
     },
     openrouter: {
@@ -53,10 +53,10 @@ client = OpenAI(
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galxai.com/v1",
+    base_url="https://api.galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )`,
-      env: `OPENAI_BASE_URL="https://api.galxai.com/v1"
+      env: `OPENAI_BASE_URL="https://api.galx.ai/v1"
 OPENAI_API_KEY="galx_live_your_gateway_key"`
     },
     litellm: {
@@ -73,11 +73,11 @@ import litellm
 
 response = litellm.completion(
     model="openai/gpt-5.6-sol",
-    api_base="https://api.galxai.com/v1",
+    api_base="https://api.galx.ai/v1",
     api_key="galx_live_your_gateway_key",
     messages=[{"role": "user", "content": "Hello!"}]
 )`,
-      env: `LITELLM_API_BASE="https://api.galxai.com/v1"
+      env: `LITELLM_API_BASE="https://api.galx.ai/v1"
 LITELLM_API_KEY="galx_live_your_gateway_key"`
     },
     bedrock: {
@@ -91,10 +91,10 @@ bedrock = boto3.client('bedrock-runtime', region_name='us-east-1')
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galxai.com/v1",
+    base_url="https://api.galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )`,
-      env: `OPENAI_BASE_URL="https://api.galxai.com/v1"
+      env: `OPENAI_BASE_URL="https://api.galx.ai/v1"
 OPENAI_API_KEY="galx_live_your_gateway_key"`
     }
   };

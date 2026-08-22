@@ -79,7 +79,7 @@ export default function KeyDetailPage() {
 
 # Drop-in replacement for OpenAI SDK (25%-40% discount)
 client = OpenAI(
-    base_url="https://api.galxai.com/v1",
+    base_url="https://api.galx.ai/v1",
     api_key="${prefix}..."  # Replace with your full secret key
 )
 
@@ -91,7 +91,7 @@ print(response.choices[0].message.content)`,
     node: `import OpenAI from 'openai';
 
 const client = new OpenAI({
-  baseURL: 'https://api.galxai.com/v1',
+  baseURL: 'https://api.galx.ai/v1',
   apiKey: '${prefix}...'
 });
 
@@ -101,13 +101,13 @@ const response = await client.chat.completions.create({
   stream: true
 });`,
     env: `# .env file
-OPENAI_BASE_URL="https://api.galxai.com/v1"
+OPENAI_BASE_URL="https://api.galx.ai/v1"
 OPENAI_API_KEY="${prefix}..."
 GALXAI_API_KEY="${prefix}..."
 DEFAULT_MODEL="gpt-5.6-sol"`,
     cursor: `// In Cursor IDE / Windsurf Settings -> Models -> OpenAI API Key:
 // 1. Set Override Base URL:
-https://api.galxai.com/v1
+https://api.galx.ai/v1
 
 // 2. Set API Key:
 ${prefix}...
@@ -120,12 +120,12 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
       "title": "GALXAI GPT-5.6 Sol",
       "provider": "openai",
       "model": "gpt-5.6-sol",
-      "apiBase": "https://api.galxai.com/v1",
+      "apiBase": "https://api.galx.ai/v1",
       "apiKey": "${prefix}..."
     }
   ]
 }`,
-    curl: `curl https://api.galxai.com/v1/chat/completions \\
+    curl: `curl https://api.galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer ${prefix}..." \\
   -H "Content-Type: application/json" \\
   -d '{

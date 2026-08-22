@@ -7,7 +7,7 @@ import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
 import { FloatingActionDock } from "@/components/common/FloatingActionDock";
 import { KeyboardShortcutsModal } from "@/components/common/KeyboardShortcutsModal";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://galx.ai";
 
 export const viewport: Viewport = {
   themeColor: "#07080d",

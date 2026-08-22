@@ -30,7 +30,7 @@ export default function QuickstartDocPage() {
         '@type': 'HowToStep',
         position: 2,
         name: 'Set Your Base URL',
-        text: 'Set the OpenAI SDK or Cursor IDE Base URL to https://api.galxai.com/v1.'
+        text: 'Set the OpenAI SDK or Cursor IDE Base URL to https://api.galx.ai/v1.'
       },
       {
         '@type': 'HowToStep',
@@ -105,11 +105,11 @@ export default function QuickstartDocPage() {
           </div>
           <h2 className="text-lg font-bold text-white">2. Point Your Client Base URL</h2>
           <p className="text-xs text-zinc-400 font-sans">
-            Change your client's base URL to <code className="text-cyan-300 font-mono">https://api.galxai.com/v1</code>. No code refactoring is required.
+            Change your client's base URL to <code className="text-cyan-300 font-mono">https://api.galx.ai/v1</code>. No code refactoring is required.
           </p>
           <div className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-zinc-300 border border-white/5 space-y-1">
             <div className="text-zinc-500"># In your .env or environment configuration:</div>
-            <div className="text-cyan-300">OPENAI_BASE_URL="https://api.galxai.com/v1"</div>
+            <div className="text-cyan-300">OPENAI_BASE_URL="https://api.galx.ai/v1"</div>
             <div className="text-amber-300">OPENAI_API_KEY="galx_live_your_key_here"</div>
           </div>
         </section>
@@ -126,7 +126,7 @@ export default function QuickstartDocPage() {
           <pre className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-cyan-300 border border-white/5 overflow-x-auto">
             <code>{`from openai import OpenAI
 
-client = OpenAI(base_url="https://api.galxai.com/v1", api_key="galx_live_...")
+client = OpenAI(base_url="https://api.galx.ai/v1", api_key="galx_live_...")
 res = client.chat.completions.create(
     model="gpt-5.6-sol",
     messages=[{"role": "user", "content": "Hello!"}]

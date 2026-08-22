@@ -53,7 +53,7 @@ const FAQS: FAQItem[] = [
     id: 'dropin-integration',
     category: 'developer',
     q: 'How do I integrate GALXAI into Python, Node.js, or Cursor IDE?',
-    a: 'Integration takes under 30 seconds. In your OpenAI client code or Cursor/Windsurf IDE settings, set the Base URL to "https://api.galxai.com/v1" and supply your GALXAI developer key ("galx_live_..."). All standard parameters (stream, temperature, tools, structured JSON) work identically without changing your code.'
+    a: 'Integration takes under 30 seconds. In your OpenAI client code or Cursor/Windsurf IDE settings, set the Base URL to "https://api.galx.ai/v1" and supply your GALXAI developer key ("galx_live_..."). All standard parameters (stream, temperature, tools, structured JSON) work identically without changing your code.'
   },
   {
     id: 'wallet-billing-flow',

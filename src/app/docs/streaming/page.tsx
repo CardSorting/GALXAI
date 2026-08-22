@@ -25,7 +25,7 @@ export default function StreamingDocsPage() {
 
 # 1-Line Drop-in with stream=True
 client = OpenAI(
-    base_url="https://api.galxai.com/v1",
+    base_url="https://api.galx.ai/v1",
     api_key="galx_live_your_key_here"
 )
 
@@ -41,7 +41,7 @@ for chunk in stream:
     node: `import OpenAI from 'openai';
 
 const client = new OpenAI({
-  baseURL: 'https://api.galxai.com/v1',
+  baseURL: 'https://api.galx.ai/v1',
   apiKey: process.env.GALXAI_API_KEY
 });
 
@@ -54,7 +54,7 @@ const stream = await client.chat.completions.create({
 for await (const chunk of stream) {
   process.stdout.write(chunk.choices[0]?.delta?.content || '');
 }`,
-    curl: `curl https://api.galxai.com/v1/chat/completions \\
+    curl: `curl https://api.galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer galx_live_your_key_here" \\
   -H "Content-Type: application/json" \\
   -N --no-buffer \\

@@ -34,7 +34,7 @@ const BugReportSchema = z.object({
 });
 
 const client = new OpenAI({
-  baseURL: 'https://api.galxai.com/v1',
+  baseURL: 'https://api.galx.ai/v1',
   apiKey: process.env.GALXAI_API_KEY
 });
 
@@ -52,7 +52,7 @@ import { streamText } from 'ai';
 
 // Vercel AI SDK Provider instance pointed at GALXAI
 const galxai = createOpenAI({
-  baseURL: 'https://api.galxai.com/v1',
+  baseURL: 'https://api.galx.ai/v1',
   apiKey: process.env.GALXAI_API_KEY
 });
 
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
 
 // 100% Native support in Node.js, Bun, Deno, and Cloudflare Workers
 const client = new OpenAI({
-  baseURL: 'https://api.galxai.com/v1',
+  baseURL: 'https://api.galx.ai/v1',
   apiKey: Bun.env.GALXAI_API_KEY
 });
 

@@ -20,7 +20,7 @@ import {
 export default function StructuredOutputsDocsPage() {
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
 
-  const rawJsonSnippet = `curl https://api.galxai.com/v1/chat/completions \\
+  const rawJsonSnippet = `curl https://api.galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer galx_live_your_gateway_key" \\
   -H "Content-Type: application/json" \\
   -d '{

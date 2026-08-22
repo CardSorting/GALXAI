@@ -66,7 +66,7 @@ export default async function ModelDetailPage({ params }: ModelDetailPageProps) 
   const pythonSnippet = `from openai import OpenAI
 
 client = OpenAI(
-    base_url="http://localhost:3000/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -80,7 +80,7 @@ for chunk in response:
     if chunk.choices and chunk.choices[0].delta.content:
         print(chunk.choices[0].delta.content, end="", flush=True)`;
 
-  const curlSnippet = `curl http://localhost:3000/v1/chat/completions \\
+  const curlSnippet = `curl https://galx.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer galx_live_your_gateway_key" \\
   -d '{
@@ -89,7 +89,7 @@ for chunk in response:
     "stream": true
   }'`;
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://galx.ai';
 
   const productJsonLd = {
     '@context': 'https://schema.org',

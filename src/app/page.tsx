@@ -61,7 +61,7 @@ export default function HomePage() {
 
 # 1-Line Drop-in Switch (Saves 25%-40% on every token)
 client = OpenAI(
-    base_url="https://api.galxai.com/v1",
+    base_url="https://api.galx.ai/v1",
     api_key="galx_live_..."  # Claim your $5 free key
 )
 
@@ -74,7 +74,7 @@ print(response.choices[0].message.content)`,
 
 // 100% Drop-in replacement for standard OpenAI SDK
 const client = new OpenAI({
-  baseURL: 'https://api.galxai.com/v1',
+  baseURL: 'https://api.galx.ai/v1',
   apiKey: process.env.GALXAI_API_KEY
 });
 
@@ -85,7 +85,7 @@ const completion = await client.chat.completions.create({
 });`,
     cursor: `// In Cursor IDE / Windsurf Settings -> Models -> OpenAI API Key:
 // 1. Set Override Base URL:
-https://api.galxai.com/v1
+https://api.galx.ai/v1
 
 // 2. Set API Key:
 galx_live_your_key_here
@@ -98,12 +98,12 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
       "title": "GALXAI GPT-5.6 Sol",
       "provider": "openai",
       "model": "gpt-5.6-sol",
-      "apiBase": "https://api.galxai.com/v1",
+      "apiBase": "https://api.galx.ai/v1",
       "apiKey": "galx_live_..."
     }
   ]
 }`,
-    curl: `curl https://api.galxai.com/v1/chat/completions \\
+    curl: `curl https://api.galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer galx_live_..." \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -357,7 +357,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
               </div>
               <h3 className="text-base font-bold text-white">Paste into Your App or IDE</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Point your existing OpenAI Python/Node client or Cursor IDE to `https://api.galxai.com/v1`. Zero syntax refactoring required.
+                Point your existing OpenAI Python/Node client or Cursor IDE to `https://api.galx.ai/v1`. Zero syntax refactoring required.
               </p>
             </div>
 

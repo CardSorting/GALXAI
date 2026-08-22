@@ -110,7 +110,7 @@ export default async function TwitterImage() {
             ★ Save 25%–40% on Every AI Token
           </div>
           <div style={{ fontSize: '18px', color: '#94a3b8', fontWeight: 600 }}>
-            galxai.com
+            galx.ai
           </div>
         </div>
       </div>

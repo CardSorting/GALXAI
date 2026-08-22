@@ -37,7 +37,7 @@ mindmap
 ### Persona 1: AI Agent & Autonomous Workflow Builders
 - **Profile**: Founders and lead engineers at startups building coding assistants, customer support agents, and document RAG pipelines.
 - **Pain Points**: Frequent `429 Too Many Requests` upstream stalls, high reasoning model bills (`gpt-5.6-sol`, `grok-4.5`), and volatile latency.
-- **Hook**: Drop-in OpenAI SDK compatibility (`baseURL: 'https://api.galxai.com/v1'`) that immediately eliminates 429 stalls and cuts monthly LLM bills by **30%–50%**.
+- **Hook**: Drop-in OpenAI SDK compatibility (`baseURL: 'https://api.galx.ai/v1'`) that immediately eliminates 429 stalls and cuts monthly LLM bills by **30%–50%**.
 
 ### Persona 2: Enterprise Engineering Leadership (VP Eng / Head of AI)
 - **Profile**: Engineering leaders managing multiple internal teams building generative AI features.
@@ -94,7 +94,7 @@ flowchart TD
 
   # 1-Line GALXAI Switch
   llm = ChatOpenAI(
-      base_url="https://api.galxai.com/v1",
+      base_url="https://api.galx.ai/v1",
       api_key="galx_live_...",
       model="gpt-5.6-sol"
   )
@@ -147,7 +147,7 @@ GALXAI achieves strong unit economics through **wholesale tier arbitrage**:
 ## 7. Viral Growth Loops & Retention Mechanics
 
 1. **Viral Developer Referral Loop**:
-   - Every developer receives a personal referral link (`galxai.com/r/developer`).
+   - Every developer receives a personal referral link (`galx.ai/r/developer`).
    - When a referred developer generates their first $10 in token volume, both parties receive a **$10 compute credit** + **5% additional rebate for 90 days**.
 
 2. **Automated Monthly Volume Tier Progression**:
