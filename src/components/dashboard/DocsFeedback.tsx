@@ -95,11 +95,11 @@ export function DocsFeedback({ docTitle }: { docTitle: string }) {
           <span>•</span>
 
           <Link
-            href="/playground"
+            href="/docs/api-reference"
             className="flex items-center gap-1.5 text-cyan-300 hover:underline"
           >
             <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Try in Interactive Playground</span>
+            <span>Explore API Reference</span>
           </Link>
         </div>
 

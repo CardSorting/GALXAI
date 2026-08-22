@@ -14,7 +14,8 @@ import {
   FileCode2,
   Link2,
   Download,
-  Smartphone
+  Smartphone,
+  Flame
 } from 'lucide-react';
 
 interface ShareModalProps {
@@ -274,6 +275,22 @@ export function ShareModal({
           >
             <X className="w-4 h-4" />
           </button>
+        </div>
+
+        {/* Viral Referral Incentive Banner */}
+        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-indigo-600/15 border border-amber-500/30 flex items-center justify-between gap-3 text-xs font-mono">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center shrink-0">
+              <Flame className="w-4 h-4 text-amber-400 fill-amber-400" />
+            </div>
+            <div>
+              <span className="text-white font-bold block text-xs">Give $10, Get $25 Compute Credit</span>
+              <span className="text-[10px] text-zinc-400">When your referral connects, credits deposit automatically</span>
+            </div>
+          </div>
+          <span className="px-2 py-0.5 rounded-full bg-amber-400 text-black text-[10px] font-black uppercase shrink-0">
+            Referral
+          </span>
         </div>
 
         {/* View Switcher Tabs (Social / QR Code / Markdown) */}

@@ -5,11 +5,12 @@ import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { DocsSubNav } from '@/components/dashboard/DocsSubNav';
 import { ShareButton } from '@/components/common/ShareButton';
-import { Zap, Sparkles, Terminal, Code2, ArrowRight, CheckCircle2, Copy } from 'lucide-react';
+import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
+import { Zap, Sparkles, Terminal, Code2, ArrowRight, CheckCircle2, Copy, Flame, Coins, ShieldCheck } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: '30-Second Quickstart Guide | GALXAI Docs',
-  description: 'Learn how to connect to the GALXAI API Gateway in under 30 seconds using Python, TypeScript, or cURL.',
+  description: 'Learn how to connect to the GALXAI API Gateway in under 30 seconds using Python, TypeScript, or cURL with 25%-40% wholesale savings.',
 };
 
 export default function QuickstartDocPage() {
@@ -76,6 +77,26 @@ export default function QuickstartDocPage() {
           </p>
         </div>
 
+        {/* Founding Builder Grant Highlight Banner */}
+        <div className="glass-panel rounded-2xl p-5 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-indigo-600/15 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-amber-400 text-black flex items-center justify-center font-black shrink-0">
+              <Flame className="w-4 h-4 text-black fill-black" />
+            </div>
+            <div>
+              <span className="text-white font-bold block">50% Instant Compute Match Bonus Active</span>
+              <span className="text-zinc-300 text-[11px]">Deposit $50+ to receive 50% matched inference credits. Includes instant $5 free credit token.</span>
+            </div>
+          </div>
+          <Link
+            href="/keys/new"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-md shadow-amber-500/20 whitespace-nowrap cursor-pointer"
+          >
+            <span>Claim $5 Key</span>
+            <ArrowRight className="w-3.5 h-3.5 text-black" />
+          </Link>
+        </div>
+
         <DocsSubNav />
 
         {/* Step 1 */}
@@ -90,9 +111,10 @@ export default function QuickstartDocPage() {
           <div className="pt-2">
             <Link
               href="/keys/new"
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black text-xs font-mono font-black uppercase tracking-wider shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-5 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black text-xs font-mono font-black uppercase tracking-wider shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
             >
-              <span>Mint Live API Key</span>
+              <Zap className="w-3.5 h-3.5 fill-black" />
+              <span>Mint Live API Key ($5 Free Credit)</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -105,12 +127,12 @@ export default function QuickstartDocPage() {
           </div>
           <h2 className="text-lg font-bold text-white">2. Point Your Client Base URL</h2>
           <p className="text-xs text-zinc-400 font-sans">
-            Change your client's base URL to <code className="text-cyan-300 font-mono">https://api.galx.ai/v1</code>. No code refactoring is required.
+            Change your client&apos;s base URL to <code className="text-cyan-300 font-mono">https://api.galx.ai/v1</code>. No code refactoring is required.
           </p>
           <div className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-zinc-300 border border-white/5 space-y-1">
             <div className="text-zinc-500"># In your .env or environment configuration:</div>
-            <div className="text-cyan-300">OPENAI_BASE_URL="https://api.galx.ai/v1"</div>
-            <div className="text-amber-300">OPENAI_API_KEY="galx_live_your_key_here"</div>
+            <div className="text-cyan-300">OPENAI_BASE_URL=&quot;https://api.galx.ai/v1&quot;</div>
+            <div className="text-amber-300">OPENAI_API_KEY=&quot;galx_live_your_key_here&quot;</div>
           </div>
         </section>
 
@@ -135,6 +157,9 @@ print(res.choices[0].message.content)`}</code>
           </pre>
         </section>
       </main>
+
+      {/* Floating Conversion Dock */}
+      <FloatingConversionDock />
     </div>
   );
 }

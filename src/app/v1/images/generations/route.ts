@@ -25,9 +25,9 @@ export async function POST(req: NextRequest) {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
 
-    if (!authResult.authenticated && req.headers.get('authorization')) {
+    if (!authResult.authenticated) {
       return NextResponse.json(
-        { error: { message: authResult.error || 'Invalid or expired authorization credentials', type: 'invalid_request_error', code: 'invalid_api_key' } },
+        { error: { message: authResult.error || 'Authentication required. Please provide a valid Authorization header with Bearer token or API key.', type: 'invalid_request_error', code: 'invalid_api_key' } },
         { status: 401 }
       );
     }

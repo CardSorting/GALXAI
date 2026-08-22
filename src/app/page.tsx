@@ -20,7 +20,6 @@ import {
   CreditCard,
   Lock,
   GitCompare,
-  Swords,
   Server,
   Globe,
   Coins,
@@ -29,19 +28,23 @@ import {
   Flame,
   Award,
   Clock,
-  Laptop,
   TrendingDown,
   Building2,
   DollarSign,
-  Star
+  ShieldCheck,
+  Percent,
+  CheckCheck,
+  Gift
 } from 'lucide-react';
 import { ShareButton } from '@/components/common/ShareButton';
+import { RoiCalculator } from '@/components/dashboard/RoiCalculator';
+import { LiveArbitrageTicker } from '@/components/dashboard/LiveArbitrageTicker';
+import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 
 export default function HomePage() {
   const [stats, setStats] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'python' | 'node' | 'cursor' | 'continue' | 'curl'>('python');
   const [copied, setCopied] = useState(false);
-  const [monthlySpendInput, setMonthlySpendInput] = useState(1500);
 
   useEffect(() => {
     fetch('/api/pool/stats')
@@ -52,9 +55,6 @@ export default function HomePage() {
 
   const featuredModels = EXCLUSIVE_MODEL_CATALOG.filter(m => m.category === 'llm');
   const imageModels = EXCLUSIVE_MODEL_CATALOG.filter(m => m.category === 'image');
-
-  const estimatedSavings = Math.round(monthlySpendInput * 0.32);
-  const annualizedSavings = estimatedSavings * 12;
 
   const codeSnippets: Record<string, string> = {
     python: `from openai import OpenAI
@@ -80,7 +80,7 @@ const client = new OpenAI({
 
 const completion = await client.chat.completions.create({
   model: 'gpt-5.6-sol',
-  messages: [{ role: 'user', content: 'Write a quicksort in Rust.' }],
+  messages: [{ role: 'user', content: 'Write a concurrent worker in TypeScript.' }],
   stream: true
 });`,
     cursor: `// In Cursor IDE / Windsurf Settings -> Models -> OpenAI API Key:
@@ -123,7 +123,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
     <div className="min-h-screen flex flex-col">
       <Navigation />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-16">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-12">
         {/* Hero Section with Aggressive GTM Value Hook */}
         <section className="glass-panel rounded-3xl p-6 sm:p-14 relative overflow-hidden text-center space-y-6 border border-amber-500/20 shadow-2xl">
           <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-gradient-to-tr from-amber-500/15 via-orange-500/10 to-indigo-600/15 rounded-full blur-[140px] pointer-events-none" />
@@ -131,7 +131,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
           {/* Live GTM Free Credit Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-xs font-mono font-bold text-emerald-300 shadow-lg shadow-emerald-500/10">
             <Flame className="w-4 h-4 text-emerald-400 fill-emerald-400" />
-            <span>CLAIM $5 FREE COMPUTE CREDIT • NO CREDIT CARD REQUIRED • 25%–40% INSTANT SAVINGS</span>
+            <span>CLAIM $5 FREE INSTANT KEY • 50% COMPUTE MATCH ON DEPOSITS • 0% ROUTER MARKUP</span>
           </div>
 
           <div className="space-y-4 max-w-3xl mx-auto">
@@ -139,15 +139,15 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
               Cut Your AI Token Bills by <span className="bg-gradient-to-r from-amber-300 via-orange-400 to-amber-500 bg-clip-text text-transparent">25% to 40%</span>. Guaranteed.
             </h1>
             <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl mx-auto">
-              Stop paying retail prices or aggregator markup fees. GALXAI delivers enterprise-grade inference with <strong className="text-amber-300 font-bold">sub-15ms automated failover</strong>, <strong className="text-cyan-300 font-bold">75% prompt caching</strong>, and zero code changes.
+              Stop paying retail prices or aggregator surcharge markups. GALXAI delivers direct wholesale pricing with <strong className="text-amber-300 font-bold">sub-15ms automated failover</strong>, <strong className="text-cyan-300 font-bold">75% prompt caching</strong>, and 100% drop-in SDK compatibility.
             </p>
           </div>
 
-          {/* Aggressive High-Converting CTA Buttons */}
+          {/* High-Converting CTA Buttons */}
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Link
               href="/keys/new"
-              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-xl shadow-amber-500/25 flex items-center gap-2 hover:scale-[1.03] active:scale-98 transition-all cursor-pointer"
+              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-xl shadow-amber-500/25 flex items-center gap-2 hover:scale-[1.03] active:scale-98 transition-all cursor-pointer font-mono"
             >
               <Key className="w-4 h-4 text-black" />
               <span>Claim Your $5 Free API Key Now</span>
@@ -155,11 +155,11 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
             </Link>
 
             <Link
-              href="/playground"
+              href="/docs/quickstart"
               className="px-6 py-4 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/15 text-white font-bold text-xs uppercase tracking-wider shadow-md flex items-center gap-2 transition-all hover:border-white/30 cursor-pointer"
             >
               <Terminal className="w-4 h-4 text-cyan-400" />
-              <span>Try in Sandbox (No Auth Needed)</span>
+              <span>30-Second API Quickstart</span>
             </Link>
 
             <ShareButton
@@ -173,7 +173,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 max-w-3xl mx-auto border-t border-white/10 font-mono text-xs">
             <div className="space-y-0.5">
               <span className="text-zinc-400 text-[10px] uppercase">Routing Latency</span>
-              <div className="text-white font-bold text-sm">&lt; 1ms Gateway Overhead</div>
+              <div className="text-white font-bold text-sm">&lt; 1ms Overhead</div>
             </div>
             <div className="space-y-0.5">
               <span className="text-zinc-400 text-[10px] uppercase">Service Uptime</span>
@@ -184,11 +184,14 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
               <div className="text-cyan-400 font-bold text-sm">75% Automatic Rebate</div>
             </div>
             <div className="space-y-0.5">
-              <span className="text-zinc-400 text-[10px] uppercase">Guaranteed Savings</span>
+              <span className="text-zinc-400 text-[10px] uppercase">Wholesale Savings</span>
               <div className="text-amber-400 font-bold text-sm">25% to 40% OFF Retail</div>
             </div>
           </div>
         </section>
+
+        {/* Real-Time Live Network Arbitrage Ticker */}
+        <LiveArbitrageTicker />
 
         {/* Aggressive Competitor Comparison Ribbon */}
         <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-emerald-500/30">
@@ -217,13 +220,13 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
             </div>
 
             <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-              <span className="text-[10px] text-red-400 uppercase">Standard Gateways (OpenRouter)</span>
+              <span className="text-[10px] text-rose-400 uppercase">Standard Gateways (OpenRouter)</span>
               <div className="text-base font-bold text-zinc-400 line-through">$5.25 / 1M tokens</div>
-              <span className="text-[10px] text-red-400">+5% Extra routing fee markup</span>
+              <span className="text-[10px] text-rose-400">+5% Extra routing fee markup</span>
             </div>
 
             <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 space-y-1">
-              <span className="text-[10px] text-emerald-400 uppercase font-bold">GALXAI Universal Gateway</span>
+              <span className="text-[10px] text-emerald-400 uppercase font-bold">GALXAI Wholesale Gateway</span>
               <div className="text-lg font-black text-emerald-300">$3.75 / 1M tokens</div>
               <span className="text-[10px] text-emerald-400 font-bold">Save 25% Instant • 0% Markup</span>
             </div>
@@ -236,10 +239,10 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
             <div className="space-y-1">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[10px] font-mono font-bold">
                 <Code2 className="w-3 h-3" />
-                <span>100% OPENAI SDK COMPATIBLE</span>
+                <span>100% OPENAI & ANTHROPIC SDK COMPATIBLE</span>
               </div>
               <h2 className="text-xl font-bold text-white">Switch in 30 Seconds with Zero Code Changes</h2>
-              <p className="text-xs text-zinc-400">Simply update your `baseURL` and API key to start saving 25%–40% on every completion.</p>
+              <p className="text-xs text-zinc-400">Simply update your `baseURL` and API key to start capturing 25%–40% net savings immediately.</p>
             </div>
 
             {/* Language / IDE Tabs */}
@@ -275,69 +278,96 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
           </div>
         </section>
 
-        {/* Interactive Monthly Savings Estimator */}
-        <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-amber-500/20">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Coins className="w-5 h-5 text-amber-400" />
-                Estimate Your Team's Monthly Savings
-              </h2>
-              <p className="text-xs text-zinc-400">See how many thousands of dollars you keep by routing traffic through GALXAI.</p>
-            </div>
-            <div className="text-right font-mono">
-              <span className="text-[10px] text-zinc-500 uppercase">Estimated Annualized ROI</span>
-              <div className="text-xl font-black text-emerald-400">+${annualizedSavings.toLocaleString()} / yr Saved</div>
-            </div>
-          </div>
+        {/* Interactive Dynamic ROI & Wholesale Arbitrage Calculator */}
+        <RoiCalculator />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-            <div className="lg:col-span-7 space-y-3">
-              <div className="flex justify-between text-xs font-mono">
-                <span className="text-zinc-400">Your Current Monthly OpenAI / LLM Spend:</span>
-                <span className="text-amber-300 font-bold text-sm">${monthlySpendInput.toLocaleString()} / month</span>
+        {/* 100% Risk-Free Guarantee & Enterprise Assurance Banner */}
+        <section className="glass-panel rounded-3xl p-6 sm:p-10 border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 via-black/40 to-indigo-600/10 shadow-xl space-y-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0 shadow-lg shadow-emerald-500/20">
+                <ShieldCheck className="w-7 h-7" />
               </div>
-              <input
-                type="range"
-                min="100"
-                max="25000"
-                step="100"
-                value={monthlySpendInput}
-                onChange={(e) => setMonthlySpendInput(Number(e.target.value))}
-                className="w-full accent-amber-400 cursor-pointer"
-              />
-              <div className="flex justify-between text-[10px] text-zinc-500 font-mono">
-                <span>$100 / mo</span>
-                <span>$5,000 / mo</span>
-                <span>$10,000 / mo</span>
-                <span>$25,000+ / mo</span>
-              </div>
-            </div>
-
-            <div className="lg:col-span-5 p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-4">
-              <div>
-                <span className="text-[10px] text-emerald-400 uppercase font-mono font-bold">You Keep in Pocket</span>
-                <div className="text-2xl font-black text-emerald-300 font-mono">
-                  ${estimatedSavings.toLocaleString()} <span className="text-xs text-emerald-400">/ mo</span>
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold uppercase border border-emerald-500/30">
+                  <CheckCheck className="w-3.5 h-3.5" />
+                  <span>100% Risk-Free Guarantee</span>
                 </div>
-                <p className="text-[10px] text-zinc-400">Based on 32% blended wholesale arbitrage + prompt cache rebate.</p>
+                <h3 className="text-lg sm:text-xl font-black text-white">Save at Least 25% on In-Flight AI or Get Refunded</h3>
+                <p className="text-xs text-zinc-300 max-w-xl leading-relaxed">
+                  Route your production or testing traffic through GALXAI. If you don&apos;t achieve at least 25% net cost reductions compared to direct retail rates within your first 30 days, we will credit 100% of the difference directly back to your compute wallet.
+                </p>
               </div>
+            </div>
 
+            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full sm:w-auto">
               <Link
                 href="/keys/new"
-                className="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase tracking-wider shrink-0 transition-all font-mono"
+                className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 font-mono cursor-pointer"
               >
-                Claim Key →
+                <Zap className="w-4 h-4 fill-black" />
+                <span>Claim Risk-Free Key</span>
+                <ArrowRight className="w-4 h-4 text-black" />
               </Link>
             </div>
           </div>
         </section>
 
-        {/* 3 Simple Visual Steps for Non-Technical & Technical Users */}
+        {/* 4 Enterprise Value Pillars */}
         <section className="space-y-6">
           <div className="text-center space-y-2 max-w-2xl mx-auto">
-            <h2 className="text-2xl font-black text-white">How GALXAI Works in 3 Simple Steps</h2>
-            <p className="text-xs text-zinc-400">No complex cloud architecture to manage. Get started in under 1 minute.</p>
+            <h2 className="text-2xl font-black text-white">Why Developers &amp; Enterprises Choose GALXAI</h2>
+            <p className="text-xs text-zinc-400">Zero vendor lock-in. Zero markup. Maximum throughput.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="glass-panel rounded-3xl p-6 space-y-3 border border-white/10 hover:border-amber-500/30 transition-all">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                <Coins className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-bold text-white">1. True Wholesale Rates</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Direct volume wholesaling saves 25% to 40% on every token. Zero gateway surcharge markup.
+              </p>
+            </div>
+
+            <div className="glass-panel rounded-3xl p-6 space-y-3 border border-white/10 hover:border-cyan-500/30 transition-all">
+              <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+                <Zap className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-bold text-white">2. 75% Prompt Caching</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Repeated system prompts, system instructions, and RAG contexts automatically receive a 75% discount.
+              </p>
+            </div>
+
+            <div className="glass-panel rounded-3xl p-6 space-y-3 border border-white/10 hover:border-emerald-500/30 transition-all">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                <Activity className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-bold text-white">3. Sub-15ms Anycast Failover</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Multi-region upstream redundancy routing. If an upstream shard hiccups, your call seamlessly completes in &lt;15ms.
+              </p>
+            </div>
+
+            <div className="glass-panel rounded-3xl p-6 space-y-3 border border-white/10 hover:border-indigo-500/30 transition-all">
+              <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-bold text-white">4. Zero Data Retention</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                100% ephemeral in-flight stream processing. Prompts are never trained on or stored. SOC 2 &amp; HIPAA compliance ready.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* 3 Simple Visual Steps */}
+        <section className="space-y-6">
+          <div className="text-center space-y-2 max-w-2xl mx-auto">
+            <h2 className="text-2xl font-black text-white">Get Started in 3 Simple Steps</h2>
+            <p className="text-xs text-zinc-400">No complex cloud architecture to manage. Zero credit card needed to begin.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -365,51 +395,56 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
               <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-mono font-bold text-sm">
                 03
               </div>
-              <h3 className="text-base font-bold text-white">Enjoy Sub-15ms Failover & Savings</h3>
+              <h3 className="text-base font-bold text-white">Keep 25%–40% of Your Budget</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Your requests are automatically routed with enterprise-grade reliability, saving 25%–40% on every token with 99.99% uptime.
+                Enjoy wholesale token rates, automatic 75% prompt caching rebates, and high-throughput enterprise execution.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Featured Flagship Reasoning Suite */}
+        {/* Featured Frontier Models Grid */}
         <section className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-black text-white flex items-center gap-2">
-                <Cpu className="w-5 h-5 text-indigo-400" />
-                Flagship Reasoning & LLM Fleet
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <Cpu className="w-5 h-5 text-amber-400" />
+                Featured Frontier Model Catalog
               </h2>
-              <p className="text-xs text-zinc-400">Direct wholesale rates across OpenAI and xAI Grok flagship engines.</p>
+              <p className="text-xs text-zinc-400">Direct access to the fastest reasoning, coding, and multimodal engines.</p>
             </div>
-            <Link href="/models" className="text-xs text-cyan-400 hover:text-cyan-300 font-mono font-semibold flex items-center gap-1">
-              <span>View All 12 Models</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+            <Link
+              href="/models"
+              className="text-xs font-mono text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-bold"
+            >
+              <span>View All 12 Models &amp; Specs →</span>
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {featuredModels.map((m) => {
-              const isGrok = m.provider === 'xai-grok';
+              const listIn = m.listPricePer1MInput || m.inputPricePer1M;
+              const listOut = m.listPricePer1MOutput || m.outputPricePer1M;
+              const effIn = m.inputPricePer1M;
+              const effOut = m.outputPricePer1M;
+              const discPct = Math.round((1 - (effIn + effOut) / (listIn + listOut)) * 100);
+
               return (
-                <div key={m.id} className="glass-panel rounded-3xl p-6 flex flex-col justify-between space-y-4 border border-white/10 hover:border-indigo-500/30 transition-all group">
-                  <div className="space-y-3">
+                <div
+                  key={m.id}
+                  className="glass-panel rounded-3xl p-5 space-y-4 border border-white/10 hover:border-amber-500/40 transition-all flex flex-col justify-between"
+                >
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                        isGrok ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
-                      }`}>
-                        {isGrok ? <Rocket className="w-4 h-4" /> : <Zap className="w-4 h-4 fill-amber-400" />}
-                      </div>
-                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold">
-                        -{m.discountPercentage}% OFF
+                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-white/5 text-zinc-400">
+                        {m.provider}
+                      </span>
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        Save {discPct}%
                       </span>
                     </div>
-
-                    <div>
-                      <h3 className="text-sm font-bold text-white font-mono group-hover:text-cyan-300 transition-colors">{m.id}</h3>
-                      <p className="text-[11px] text-zinc-400 mt-1 line-clamp-2">{m.description}</p>
-                    </div>
+                    <h3 className="text-sm font-bold text-white font-mono truncate">{m.id}</h3>
+                    <p className="text-xs text-zinc-400 line-clamp-2">{m.description}</p>
                   </div>
 
                   <div className="space-y-2 pt-2 border-t border-white/5 font-mono text-xs">
@@ -422,10 +457,10 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
                       <span className="text-emerald-300 font-bold">${m.inputPricePer1M.toFixed(2)} in / ${m.outputPricePer1M.toFixed(2)} out</span>
                     </div>
                     <Link
-                      href={`/playground?model=${m.id}`}
+                      href={`/models/${m.id}`}
                       className="w-full mt-2 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white font-sans text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
                     >
-                      <span>Test in Playground</span>
+                      <span>View Model Specs</span>
                       <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
@@ -434,38 +469,10 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
             })}
           </div>
         </section>
-
-        {/* Visual Synthesis Suite Preview */}
-        <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-cyan-400" />
-                Visual Synthesis & Diffusion Fleet
-              </h2>
-              <p className="text-xs text-zinc-400">High-resolution image generation powered by OpenAI GPT-Image-2, DALL-E 3, and xAI Grok Imagine.</p>
-            </div>
-            <Link href="/models" className="text-xs text-cyan-400 hover:text-cyan-300 font-mono font-semibold flex items-center gap-1">
-              <span>View All 8 Image Engines</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {imageModels.slice(0, 4).map((m) => (
-              <div key={m.id} className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 hover:border-white/15 transition-all">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-white font-mono line-clamp-1">{m.id}</span>
-                  <span className="text-[10px] text-emerald-400 font-mono font-bold">-{m.discountPercentage}%</span>
-                </div>
-                <div className="text-xs text-zinc-400 font-mono">
-                  ${m.inputPricePer1M.toFixed(3)} <span className="text-[10px] text-zinc-500">/ image</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
       </main>
+
+      {/* Floating Conversion Dock */}
+      <FloatingConversionDock />
     </div>
   );
 }

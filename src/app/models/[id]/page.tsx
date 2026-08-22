@@ -17,9 +17,13 @@ import {
   Layers,
   Activity,
   Copy,
-  TrendingDown
+  TrendingDown,
+  Flame,
+  Coins,
+  ShieldCheck
 } from 'lucide-react';
 import { ShareButton } from '@/components/common/ShareButton';
+import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 
 interface ModelDetailPageProps {
   params: Promise<{ id: string }>;
@@ -169,11 +173,11 @@ for chunk in response:
                 description={`Get ${model.name} with ${model.discountPercentage || 25}% wholesale savings and sub-15ms router latency.`}
               />
               <Link
-                href={`/playground?model=${model.id}`}
-                className="px-5 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/20 transition-all flex items-center gap-2"
+                href="/keys/new"
+                className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2"
               >
-                <Terminal className="w-4 h-4" />
-                <span>Test in Playground</span>
+                <Zap className="w-4 h-4 fill-black" />
+                <span>Claim API Key</span>
               </Link>
             </div>
           </div>
@@ -214,6 +218,34 @@ for chunk in response:
           </div>
         </div>
 
+        {/* Wholesale Arbitrage & Grant Value Banner */}
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-indigo-600/15 border border-amber-500/30 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-400 text-black flex items-center justify-center font-black text-xl shrink-0 shadow-lg shadow-amber-500/30 font-mono">
+              -{model.discountPercentage}%
+            </div>
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-mono font-bold uppercase">
+                <Flame className="w-3 h-3 text-amber-400 fill-amber-400" />
+                <span>Founding Builder Offer</span>
+              </div>
+              <h3 className="text-base sm:text-lg font-black text-white">Deploy {model.name} with 50% Matching Compute Credits</h3>
+              <p className="text-xs text-zinc-300 max-w-xl">
+                Get instant sub-15ms anycast failover, automated 75% prompt caching, and zero data retention with a $5 free starter key.
+              </p>
+            </div>
+          </div>
+
+          <Link
+            href="/keys/new"
+            className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-lg shadow-amber-500/25 shrink-0 whitespace-nowrap font-mono cursor-pointer"
+          >
+            <Zap className="w-4 h-4 fill-black" />
+            <span>Deploy {model.name} Key</span>
+            <ArrowRight className="w-4 h-4 text-black" />
+          </Link>
+        </div>
+
         {/* Integration Code Snippets for this Model */}
         <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4">
           <h2 className="text-lg font-black text-white flex items-center gap-2">
@@ -247,6 +279,9 @@ for chunk in response:
           </div>
         </section>
       </main>
+
+      {/* Floating Conversion Dock */}
+      <FloatingConversionDock />
     </div>
   );
 }

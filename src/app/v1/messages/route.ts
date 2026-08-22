@@ -27,10 +27,9 @@ export async function POST(req: NextRequest) {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
 
-    const apiKeyHeader = req.headers.get('x-api-key') || req.headers.get('authorization');
-    if (!authResult.authenticated && apiKeyHeader) {
+    if (!authResult.authenticated) {
       return NextResponse.json(
-        { type: 'error', error: { type: 'authentication_error', message: authResult.error || 'Invalid API credentials' } },
+        { type: 'error', error: { type: 'authentication_error', message: authResult.error || 'Authentication required. Please provide a valid API key via x-api-key or Authorization header.' } },
         { status: 401 }
       );
     }

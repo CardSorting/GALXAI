@@ -17,8 +17,6 @@ export default function robots(): MetadataRoute.Robots {
           '/vault/*',
           '/architecture',
           '/how-it-works',
-          '/playground',
-          '/playground/battle',
           '/pricing',
           '/faq',
           '/docs',

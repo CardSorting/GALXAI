@@ -48,7 +48,7 @@ export default function ConnectProviderPage() {
 
       setConnectingStep('ready');
       setTimeout(() => {
-        router.push('/playground');
+        router.push('/keys');
       }, 400);
     } catch (err: any) {
       setError(err.message || 'Failed to authenticate with OpenAI');
@@ -73,7 +73,7 @@ export default function ConnectProviderPage() {
 
       setConnectingStep('ready');
       setTimeout(() => {
-        router.push('/playground');
+        router.push('/keys');
       }, 400);
     } catch (err: any) {
       setError(err.message || 'Failed to authenticate with xAI Grok');
@@ -90,7 +90,7 @@ export default function ConnectProviderPage() {
       await loginAsGuest();
       setConnectingStep('ready');
       setTimeout(() => {
-        router.push('/playground');
+        router.push('/keys');
       }, 300);
     } catch (err: any) {
       setError(err.message || 'Failed to initialize guest pass');
@@ -128,10 +128,10 @@ export default function ConnectProviderPage() {
 
               <div className="flex items-center gap-3">
                 <Link
-                  href="/playground"
+                  href="/keys"
                   className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/30"
                 >
-                  Open Playground
+                  Manage API Keys
                 </Link>
                 <button
                   onClick={logout}

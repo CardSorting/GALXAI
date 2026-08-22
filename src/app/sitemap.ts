@@ -37,22 +37,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/playground`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/playground/battle`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.85,
-    },
-    {
       url: `${baseUrl}/pricing`,
       lastModified: currentDate,
       changeFrequency: 'weekly',
       priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/grants`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.92,
     },
     {
       url: `${baseUrl}/docs`,

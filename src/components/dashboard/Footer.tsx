@@ -31,7 +31,7 @@ export function Footer() {
   const footerNavigation = {
     product: [
       { name: 'Frontier AI Models', href: '/models', badge: '12 SOTA' },
-      { name: 'Interactive Playground', href: '/playground', badge: 'Streaming' },
+      { name: 'API Quickstart Guide', href: '/docs/quickstart', badge: '30s' },
       { name: 'Model Comparison Matrix', href: '/models/compare' },
       { name: 'Developer API Keys', href: '/keys' },
       { name: 'Compute Wallet & Billing', href: '/billing', badge: 'Autopay' },
@@ -63,6 +63,7 @@ export function Footer() {
       { name: 'Enterprise Volume Contracts', href: '/billing/enterprise', badge: '40% OFF' },
     ],
     pricingAndTrust: [
+      { name: 'Builder Grants ($2,500 Match)', href: '/grants', badge: 'Fund' },
       { name: 'Wholesale Pricing & Tiers', href: '/pricing', badge: '25%-40% OFF' },
       { name: '75% Prompt Caching Pass', href: '/pricing#caching' },
       { name: 'Enterprise Compliance & DPA', href: '/compliance', badge: 'HIPAA/GDPR' },
@@ -78,20 +79,20 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 border-b border-white/5">
         <div className="glass-panel rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-emerald-500/20 bg-emerald-500/5">
           <div className="space-y-1 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
-              <Flame className="w-3.5 h-3.5 text-emerald-400" />
-              <span>START WITH $10 STARTER COMPUTE ACTIVATION</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
+              <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+              <span>FOUNDING BUILDER GRANT • 50% COMPUTE MATCH ON DEPOSITS</span>
             </div>
-            <h3 className="text-lg sm:text-xl font-bold text-white">Cut your OpenAI & Grok API costs by 25%–40% today</h3>
-            <p className="text-xs text-zinc-400">100% drop-in replacement for OpenAI SDK. Zero code refactoring. 99.99% uptime SLA.</p>
+            <h3 className="text-lg sm:text-xl font-bold text-white">Cut your OpenAI &amp; Grok inference bills by 25%–40% today</h3>
+            <p className="text-xs text-zinc-400">100% drop-in OpenAI SDK compatibility. Zero code refactoring. 99.99% enterprise uptime SLA.</p>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
             <Link
               href="/keys/new"
-              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all cursor-pointer font-mono"
+              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all cursor-pointer font-mono"
             >
-              <span>Get API Key</span>
+              <span>Claim $5 Key + 50% Match</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link

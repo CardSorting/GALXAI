@@ -231,10 +231,10 @@ export default function FaqPage() {
             </Link>
 
             <Link
-              href="/playground"
+              href="/docs/quickstart"
               className="px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-xs transition-all border border-white/10"
             >
-              <span>Test in Playground</span>
+              <span>View Documentation</span>
             </Link>
           </div>
         </div>

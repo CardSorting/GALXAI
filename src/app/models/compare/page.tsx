@@ -199,18 +199,26 @@ export default function CompareModelsPage() {
                 ))}
               </tr>
 
-              {/* Playground Launch */}
+              {/* Model Details Action */}
               <tr>
                 <td className="py-4 px-4 font-sans font-bold text-zinc-400">Action</td>
                 {comparedModels.map((m) => (
                   <td key={m.id} className="py-4 px-4">
-                    <Link
-                      href={`/playground?model=${m.id}`}
-                      className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-sans font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-indigo-500/20"
-                    >
-                      <Terminal className="w-3.5 h-3.5" />
-                      <span>Test in Sandbox</span>
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/models/${m.id}`}
+                        className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white font-sans font-semibold text-xs flex items-center justify-center gap-1 border border-white/10"
+                      >
+                        <span>Specs</span>
+                      </Link>
+                      <Link
+                        href="/keys/new"
+                        className="flex-1 px-3 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-sans font-bold text-xs flex items-center justify-center gap-1 shadow-md shadow-amber-500/20"
+                      >
+                        <Zap className="w-3.5 h-3.5 fill-black" />
+                        <span>Deploy Key</span>
+                      </Link>
+                    </div>
                   </td>
                 ))}
               </tr>

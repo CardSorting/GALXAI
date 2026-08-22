@@ -61,7 +61,7 @@ export function KeyboardShortcutsModal() {
         if (e.key === 'h') router.push('/');
         if (e.key === 'm') router.push('/models');
         if (e.key === 'd') router.push('/docs');
-        if (e.key === 'p') router.push('/playground');
+        if (e.key === 'k') router.push('/keys');
         if (e.key === 'b') router.push('/billing');
         lastKey = '';
       }
@@ -96,7 +96,7 @@ export function KeyboardShortcutsModal() {
         { label: 'Go to Home', keys: ['G', 'H'] },
         { label: 'Go to Models Catalog', keys: ['G', 'M'] },
         { label: 'Go to Documentation', keys: ['G', 'D'] },
-        { label: 'Go to Playground', keys: ['G', 'P'] },
+        { label: 'Go to API Keys', keys: ['G', 'K'] },
         { label: 'Go to Developer Wallet', keys: ['G', 'B'] },
       ],
     },

@@ -52,11 +52,11 @@ interface TopUpPack {
 }
 
 const TOPUP_PACKS: TopUpPack[] = [
-  { amount: 10, bonusPct: 0, bonusLabel: 'Starter Activation ($10.00)' },
-  { amount: 25, bonusPct: 0, bonusLabel: 'Standard Prototyping ($25.00)' },
-  { amount: 50, bonusPct: 5, bonusLabel: '+5% Bonus ($52.50 Credit)' },
-  { amount: 100, bonusPct: 10, bonusLabel: '+10% Bonus ($110.00 Credit)', isPopular: true },
-  { amount: 500, bonusPct: 20, bonusLabel: '+20% Bonus ($600.00 Credit)' }
+  { amount: 25, bonusPct: 10, bonusLabel: '+10% Bonus ($27.50 Credit)' },
+  { amount: 50, bonusPct: 25, bonusLabel: '+25% Grant ($62.50 Credit)' },
+  { amount: 100, bonusPct: 50, bonusLabel: '50% Match Grant ($150.00 Credit)', isPopular: true },
+  { amount: 250, bonusPct: 50, bonusLabel: '50% Match Grant ($375.00 Credit)' },
+  { amount: 500, bonusPct: 50, bonusLabel: '50% Scale Match ($750.00 Credit)' }
 ];
 
 interface Transaction {

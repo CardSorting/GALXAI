@@ -20,6 +20,7 @@ import {
   Laptop,
   ArrowRight,
   Zap,
+  Cpu,
   CreditCard,
   Lock,
   Coins,
@@ -475,11 +476,11 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
 
                 <div className="flex items-center gap-3">
                   <Link
-                    href="/playground"
+                    href="/models"
                     className="px-5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-semibold flex items-center gap-1.5"
                   >
-                    <Terminal className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>Test in Playground</span>
+                    <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Browse Models</span>
                   </Link>
 
                   <Link

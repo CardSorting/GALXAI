@@ -5,8 +5,8 @@ import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { ApiPlayground } from '@/components/dashboard/ApiPlayground';
 
 export const metadata: Metadata = {
-  title: 'Universal Model Playground & Streaming Sandbox',
-  description: 'Test live token streaming, lease allocation, and failover across OpenAI Codex (GPT-5.6 Sol, Terra, Luna) and xAI Grok 4.5.',
+  title: 'Model Playground & Gateway Sandbox — GALXAI',
+  description: 'GALXAI Universal Gateway API access, authentication status, and integration quickstart.',
 };
 
 export default function PlaygroundPage() {
@@ -15,10 +15,10 @@ export default function PlaygroundPage() {
       <Navigation />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-        <Breadcrumbs items={[{ label: 'Universal Model Playground' }]} />
+        <Breadcrumbs items={[{ label: 'Gateway Sandbox' }]} />
         <Suspense fallback={
           <div className="glass-panel rounded-3xl p-8 text-center text-xs text-zinc-400 animate-pulse">
-            Loading Playground Sandbox...
+            Loading Gateway Status...
           </div>
         }>
           <ApiPlayground />

@@ -86,11 +86,11 @@ export default function ModelResolverPage() {
               </div>
 
               <Link
-                href={`/playground?model=${resolved.id}`}
+                href={`/models/${resolved.id}`}
                 className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md"
               >
-                <Terminal className="w-3.5 h-3.5" />
-                <span>Test in Playground</span>
+                <Cpu className="w-3.5 h-3.5" />
+                <span>View Model Specs</span>
               </Link>
             </div>
 

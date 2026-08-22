@@ -77,12 +77,6 @@ export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
         if (e.key === 'm') {
           e.preventDefault();
           router.push('/models');
-        } else if (e.key === 'p') {
-          e.preventDefault();
-          router.push('/playground');
-        } else if (e.key === 'b') {
-          e.preventDefault();
-          router.push('/playground/battle');
         } else if (e.key === 'd') {
           e.preventDefault();
           router.push('/docs');
@@ -155,10 +149,10 @@ export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
               </span>
             </div>
             <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5">
-              <span className="text-zinc-300">Go to Playground</span>
+              <span className="text-zinc-300">Go to Documentation</span>
               <span className="space-x-1">
                 <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">g</kbd>
-                <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">p</kbd>
+                <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">d</kbd>
               </span>
             </div>
             <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5">
@@ -207,8 +201,6 @@ export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
     { label: 'Plain English Beginner Guide', href: '/docs/simple', icon: Sparkles, category: 'Getting Started' },
     { label: 'AI Agents & Swarms Infrastructure', href: '/docs/agents', icon: Rocket, category: 'Solutions' },
     { label: 'Cursor & Windsurf IDE Setup', href: '/docs/ide-setup', icon: Terminal, category: 'Solutions' },
-    { label: 'Universal Model Playground', href: '/playground', icon: Terminal, category: 'Navigation' },
-    { label: 'Side-by-Side Model Arena', href: '/playground/battle', icon: Swords, category: 'Playground' },
     { label: 'Developer API Keys', href: '/keys', icon: Key, category: 'Navigation' },
     { label: 'Create New Gateway API Key', href: '/keys/new', icon: Key, category: 'Actions' },
     { label: 'Model Comparison Matrix', href: '/models/compare', icon: GitCompare, category: 'Tools' },

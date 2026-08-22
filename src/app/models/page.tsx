@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { ModelMatchmaker } from '@/components/dashboard/ModelMatchmaker';
 import { ReadingProgressBar } from '@/components/common/ReadingProgressBar';
+import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import { ShareButton } from '@/components/common/ShareButton';
 
 export default function ModelsPage() {
@@ -236,18 +237,27 @@ export default function ModelsPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center justify-between pt-1 gap-2">
                     <span className="text-[11px] text-zinc-400 font-mono">
                       {isImage ? 'Resolution: 1024x1024' : `Context: ${(model.contextWindowTokens / 1000).toLocaleString()}K`}
                     </span>
 
-                    <Link
-                      href={`/playground?model=${model.id}`}
-                      className="px-3.5 py-1.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-indigo-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer font-sans"
-                    >
-                      <span>Test in Sandbox</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </Link>
+                    <div className="flex items-center gap-1.5">
+                      <Link
+                        href={`/models/${model.id}`}
+                        className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer font-sans"
+                      >
+                        <span>Specs</span>
+                      </Link>
+
+                      <Link
+                        href="/keys/new"
+                        className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black text-xs font-bold flex items-center gap-1 transition-all cursor-pointer font-sans shadow-sm"
+                      >
+                        <Zap className="w-3 h-3 fill-black" />
+                        <span>Deploy</span>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -255,6 +265,9 @@ export default function ModelsPage() {
           })}
         </div>
       </main>
+
+      {/* Floating Conversion Dock */}
+      <FloatingConversionDock />
     </div>
   );
 }
