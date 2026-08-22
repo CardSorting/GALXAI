@@ -13,7 +13,9 @@ import {
   FileSpreadsheet,
   Building2,
   BellRing,
-  ShieldCheck
+  ShieldCheck,
+  Users2,
+  Landmark
 } from 'lucide-react';
 
 export function BillingSubNav() {
@@ -30,12 +32,23 @@ export function BillingSubNav() {
       name: 'Business Invoices',
       href: '/billing/invoices',
       icon: FileSpreadsheet,
-      badge: '3 Tax Statements'
+      badge: '3 Statements'
     },
     {
-      name: 'Expense Reporting',
+      name: 'Expense Reports',
       href: '/billing/expenses',
       icon: PieChart
+    },
+    {
+      name: 'Team Cost Centers',
+      href: '/billing/teams',
+      icon: Users2,
+      badge: '4 Teams'
+    },
+    {
+      name: 'Payment Methods',
+      href: '/billing/payment-methods',
+      icon: Landmark
     },
     {
       name: 'Auto-Top Up',
@@ -49,7 +62,7 @@ export function BillingSubNav() {
       icon: BellRing
     },
     {
-      name: 'Enterprise Tier',
+      name: 'Enterprise Contracts',
       href: '/billing/enterprise',
       icon: Building2,
       badge: '40% Wholesale'
