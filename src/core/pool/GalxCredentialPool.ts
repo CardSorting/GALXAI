@@ -306,6 +306,10 @@ export class GalxCredentialPool {
       const jitterMagnitude = fleetConcurrency > 10 ? 0.05 : 0.02;
       const microJitter = (Math.random() * (jitterMagnitude * 2)) - jitterMagnitude;
 
+      // 7. Predictive Drain Avoidance & Floor Reserve Penalty (MDA-Floor)
+      const drainRatio = postAllocationTokens / Math.max(1, refilledBucket.maxTokens);
+      const drainPenalty = drainRatio < 0.10 ? 0.35 : drainRatio < 0.20 ? 0.75 : 1.0;
+
       // Hydraulic score: higher unreserved headroom + lower in-flight + faster latency + higher reliability = higher score
       const score =
         (Math.pow(tokenHeadroomRatio, 1.2) *
@@ -314,7 +318,8 @@ export class GalxCredentialPool {
           failureDampening *
           latencyMultiplier *
           dynamicWeight *
-          priorityBoost) +
+          priorityBoost *
+          drainPenalty) +
         microJitter;
 
       if (score > bestScore) {
@@ -415,6 +420,16 @@ export class GalxCredentialPool {
     this.inFlightCounts.delete(shardId);
     this.swrrCurrentWeights.delete(shardId);
     return count;
+  }
+
+  /**
+   * Extends the TTL of an active execution lease during long-running streaming completions.
+   */
+  extendLeaseTtl(leaseId: string, additionalMs = 60_000): boolean {
+    const lease = this.activeLeases.get(leaseId);
+    if (!lease) return false;
+    lease.expiresAtMs += additionalMs;
+    return true;
   }
 
   /**

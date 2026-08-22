@@ -83,7 +83,7 @@ export interface ShardLease {
   readonly jobId?: string;
   readonly fencingToken: number;
   readonly acquiredAtMs: number;
-  readonly expiresAtMs: number;
+  expiresAtMs: number;
   readonly estimatedTokens: number;
   readonly account: GalxShardAccount;
 }

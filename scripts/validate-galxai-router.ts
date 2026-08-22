@@ -682,6 +682,43 @@ async function runAllTests() {
     poolLevel.releaseLease(lease2.lease.leaseId, 45_000, true);
   });
 
+  await test('Lease Management: Extends TTL during long streaming generation', () => {
+    const substrateExt = new GalxCredentialSubstrate();
+    substrateExt.clearCache();
+    const poolExt = new GalxCredentialPool(substrateExt, governor, breaker, 'adaptive_headroom');
+
+    const enc = GalxCryptoVault.encryptSecret({ apiKey: 'sk-proj-ttl' }, 'user_ttl', 'shard_ttl', 'openai');
+    const shard: GalxShardAccount = {
+      id: 'shard_ttl',
+      userId: 'user_ttl',
+      accountLabel: 'TTL Shard',
+      provider: 'openai',
+      authType: 'api_key',
+      shardMode: 'pooled',
+      status: 'healthy',
+      priority: 10,
+      weight: 1,
+      fencingToken: 1,
+      apiKeyMasked: 'sk-proj...ttl',
+      encryptedPayload: enc,
+      tokenBucket: governor.createDefaultBucket(),
+      stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
+    };
+    substrateExt.addAccount(shard);
+
+    const { lease } = poolExt.acquireLease({ userId: 'u_ttl', provider: 'openai', leaseTtlMs: 50_000 });
+    assert.ok(lease);
+    const initialExpiry = lease.expiresAtMs;
+
+    const extended = poolExt.extendLeaseTtl(lease.leaseId, 60_000);
+    assert.strictEqual(extended, true);
+    assert.strictEqual(lease.expiresAtMs, initialExpiry + 60_000);
+
+    poolExt.releaseLease(lease.leaseId, 1000, true);
+  });
+
   console.log('\n======================================================================');
   if (testsFailed === 0) {
     console.log(`   ALL ${testsPassed}/${testsPassed} FORENSIC VERIFICATION TESTS PASSED SUCCESSFULLY! `);
