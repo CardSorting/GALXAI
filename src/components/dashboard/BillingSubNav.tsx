@@ -10,7 +10,10 @@ import {
   RefreshCw,
   CreditCard,
   Flame,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Building2,
+  BellRing,
+  ShieldCheck
 } from 'lucide-react';
 
 export function BillingSubNav() {
@@ -27,7 +30,7 @@ export function BillingSubNav() {
       name: 'Business Invoices',
       href: '/billing/invoices',
       icon: FileSpreadsheet,
-      badge: '3 Tax Receipts'
+      badge: '3 Tax Statements'
     },
     {
       name: 'Expense Reporting',
@@ -35,10 +38,21 @@ export function BillingSubNav() {
       icon: PieChart
     },
     {
-      name: 'Auto-Top Up Safeguards',
+      name: 'Auto-Top Up',
       href: '/billing/auto-reload',
       icon: RefreshCw,
       badge: 'Protected'
+    },
+    {
+      name: 'Budget Alerts',
+      href: '/billing/budget-alerts',
+      icon: BellRing
+    },
+    {
+      name: 'Enterprise Tier',
+      href: '/billing/enterprise',
+      icon: Building2,
+      badge: '40% Wholesale'
     }
   ];
 
