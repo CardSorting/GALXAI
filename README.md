@@ -132,10 +132,14 @@ npm run dev
 
 - 🏛️ **[System Architecture Specification](docs/ARCHITECTURE.md)**: Deep dive into the request lifecycle, Mermaid sequence flow, streaming safety, and security model.
 - 🌊 **[Routing Algorithms & Calculus](docs/ROUTING_ALGORITHMS.md)**: Mathematical derivations of Adaptive Hydraulic Headroom (P-AHT), Smooth Weighted Round-Robin (SWRR), and Least-Utilized.
+- 🧠 **[Next-Gen Reasoning Models Guide](docs/REASONING_MODELS_GUIDE.md)**: Developing with `gpt-5.6-sol`, `gpt-5.6-terra`, `x-ai/grok-4.5`, Chain of Thought (CoT), and token budgets.
+- ⚡ **[Streaming & SSE Protocol](docs/STREAMING_AND_SSE_PROTOCOL.md)**: Server-Sent Events specification, pure JS stream parser, client disconnects, and zero-leak cancellations.
 - 🔬 **[Performance Benchmarks & Stress Analysis](docs/BENCHMARKS.md)**: Concurrency scaling, RPS throughput, P99 latency, and burst resilience.
 - 🧠 **[Model Catalog & Modality Specification](docs/MODEL_CATALOG.md)**: Complete profiles and pricing for all 12 reasoning and visual models.
 - 💻 **[Multi-Ecosystem SDK Cheatsheet](docs/SDK_CHEATSHEET.md)**: Python, TypeScript, LangChain, LlamaIndex, Instructor, Rust, and Go.
 - ⚙️ **[Structured Outputs & Tools Guide](docs/STRUCTURED_OUTPUTS_AND_TOOLS.md)**: Strict JSON Schema and parallel tool calling across reasoning models.
+- ⏱️ **[Rate Limits, Concurrency & Quotas](docs/RATE_LIMITS_AND_QUOTAS.md)**: Gateway key tiers, continuous replenishment calculus, and fair-share concurrency limits.
+- 🔄 **[Migration Guide](docs/MIGRATION_GUIDE.md)**: Moving from direct OpenAI, xAI, Azure, or OpenRouter with zero code changes.
 - 🔒 **[Security & Cryptographic Threat Model](docs/SECURITY.md)**: AAD envelope encryption, memory zeroization, and zero-prompt logging.
 - 📊 **[Telemetry, Metrics & Observability](docs/TELEMETRY_AND_OBSERVABILITY.md)**: Prometheus scraping, Datadog integration, and Grafana latency dashboards.
 - 📖 **[API Reference](docs/API_REFERENCE.md)**: REST endpoints for chat completions, visual synthesis, model catalog, and pool telemetry.
