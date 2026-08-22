@@ -1,0 +1,85 @@
+# 🏛️ GALXAI Architecture Specification
+
+This document provides a comprehensive technical breakdown of the GALXAI universal AI routing gateway and high-concurrency quota cycling substrate.
+
+---
+
+## 🏗️ System Overview
+
+GALXAI sits between downstream client applications (chat interfaces, agentic pipelines, SDKs) and upstream foundation model providers (OpenAI, xAI Grok). It abstracts distributed, sharded API credentials into a unified compute layer with continuous capacity management and transparent failover.
+
+```mermaid
+flowchart TD
+    Client[Client Application / SDK] -->|Bearer galx_live_...| Gateway[GALXAI Universal Gateway]
+    
+    subgraph Gateway Core
+        Auth[API Key Authenticator] --> RateGov[Continuous Token-Bucket Rate Governor]
+        RateGov --> Router[GalxModelRouter]
+        
+        Router --> Pool[GalxCredentialPool]
+        Pool --> Breaker[4-State Circuit Breaker]
+        Pool --> Vault[GalxCryptoVault (AES-256-GCM + AAD)]
+        Pool --> Substrate[GalxCredentialSubstrate]
+        
+        Router --> Metrics[GalxMetricsEngine (Ring Buffer)]
+    end
+    
+    subgraph Upstream Fleet
+        Router -->|AES Decrypted Shard Lease| OA[OpenAI Fleet: gpt-5.6-*, dalle-*]
+        Router -->|AES Decrypted Shard Lease| Grok[xAI Grok Fleet: grok-4.5, grok-image]
+    end
+```
+
+---
+
+## 🔄 Request Lifecycle & Routing Workflow
+
+1. **Ingress & Authentication**:
+   - The client issues an HTTP request to `/v1/chat/completions` or `/v1/images/generations` with `Authorization: Bearer galx_live_...`.
+   - The key hash is verified against stored developer keys with SHA-256 prefix matching.
+
+2. **Model Resolution & Canonical Normalization**:
+   - `ModelCatalog.resolveModel(modelId)` normalizes aliases (e.g. `"sol"` $\to$ `"gpt-5.6-sol"`, `"grok"` $\to$ `"x-ai/grok-4.5"`) and verifies feature support (streaming, reasoning, vision).
+
+3. **Atomic Execution Lease Acquisition (2-Phase Commit)**:
+   - The router requests a lease from `GalxCredentialPool.acquireLease`.
+   - **Filter**: 4-State Circuit Breaker filters out `cooldown`, `exhausted`, `dead`, and saturated shards.
+   - **Score**: Shards are ranked via **Adaptive Hydraulic Headroom (P-AHT)**:
+     $$\text{Score} = \left(\frac{\text{unreservedTokens}}{\text{maxTokens}}\right)^{1.2} \times \left(1 - \frac{\text{inFlight}}{\text{maxInFlight}}\right) \times \text{HealthMult} \times \text{LatencyMult} \times \text{DynamicWeight} + \text{jitter}$$
+   - **Phase 1 (Reservation)**: The estimated token capacity is soft-reserved in the selected shard's token bucket.
+   - A monotonic fencing token is generated to protect against stale worker execution.
+
+4. **Cryptographic Vault Decryption & AAD Verification**:
+   - Ciphertext is decrypted via `GalxCryptoVault.decryptSecret` using the bound AAD tuple `tenantUid:shardId:provider`.
+   - The plaintext API key is kept in ephemeral RAM only.
+
+5. **Upstream Dispatch & Header Ingestion**:
+   - Request is dispatched to the upstream provider adapter (`OpenAIAdapter` or `GrokAdapter`).
+   - If upstream returns HTTP 429 or 503, the circuit breaker enters `cooldown`, the lease is released, and the router transparently retries with the next candidate shard in $< 15\text{ms}$.
+
+6. **Streaming & Completion (Phase 2 Commit)**:
+   - For SSE streams, chunks pass through `wrapStreamingResponse`, decoding token count and monitoring client disconnects.
+   - Upon completion or stream cancelation, `pool.releaseLease` commits actual token consumption, recalculates EWMA latency, and reconciles upstream `x-ratelimit-*` headers.
+
+7. **Ephemeral Scrubbing**:
+   - Plaintext secret memory buffers in RAM are zeroized (`zeroizeBuffer`) in the `finally` block.
+
+---
+
+## 🔒 Security Architecture
+
+| Security Domain | Implementation | Guarantee |
+| :--- | :--- | :--- |
+| **Credential Encryption** | AES-256-GCM with 96-bit random IV | Confidentiality and integrity of upstream API keys |
+| **AAD Envelope Binding** | `tenantId:shardId:provider` bound to tag | Prevents cross-tenant ciphertext transplantation |
+| **RAM Scrubbing** | `buf.fill(0)` via `zeroizeBuffer` | Zero plaintext leakage in heap dumps |
+| **Monotonic Fencing** | Incremental `fencingToken` per lease | Eliminates split-brain races on worker timeouts |
+| **Instant Retraction** | Synchronous memory purge & lease invalidation | Purges revoked credentials in $< 40\text{ms}$ |
+
+---
+
+## 📊 Telemetry & Health Engine
+
+- **Ring Buffer Size**: Fixed 2,000-sample array ring buffer (`GalxMetricsEngine`).
+- **Percentiles**: Calculates $P_{50}, P_{90}, P_{99}$ latency over sliding 5-minute windows.
+- **Throughput Telemetry**: Requests Per Minute (RPM), Tokens Per Minute (TPM), and Error Rates broken down by provider (`openai` vs `xai-grok`) and model.
