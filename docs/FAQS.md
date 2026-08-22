@@ -5,37 +5,33 @@
 ### General & Architecture
 
 #### 1. What is GALXAI?
-GALXAI is a high-throughput universal AI model routing gateway. It unifies distributed API credentials into a pooled compute substrate, delivering continuous capacity, zero rate-limit drops, and substantial pricing discounts across 12 flagship reasoning and visual models.
+GALXAI is an enterprise-grade Universal AI Gateway providing high-throughput, low-latency access to frontier models (OpenAI GPT-5.6 Sol, Terra, Luna and xAI Grok 4.5) at **25% to 40% below direct retail prices**. It acts as a 1-line drop-in replacement for the official OpenAI SDK.
 
-#### 2. Do I need to manage multiple API keys for OpenAI and xAI?
-No. You only need a single GALXAI Developer Gateway Key (`galx_live_...`). GALXAI handles all upstream credential sharding, rate limits, circuit governance, and failover transparently.
+#### 2. Do I need to manage multiple provider accounts or SDKs?
+No. You only need a single GALXAI Developer Gateway Key (`galx_live_...`). GALXAI provides unified access to all 12 reasoning and visual models across OpenAI and xAI without needing separate accounts or disparate billing systems.
 
-#### 3. Is GALXAI fully compatible with OpenAI SDKs?
-Yes, 100%. GALXAI implements standard OpenAI REST APIs (`/v1/chat/completions`, `/v1/images/generations`, `/v1/models`). You simply change `baseURL` to point to GALXAI.
-
----
-
-### Quota Cycling & Performance
-
-#### 4. How does GALXAI prevent HTTP 429 rate limits?
-GALXAI uses **2-Phase Atomic Token Reservation** combined with **Adaptive Hydraulic Headroom (P-AHT)**. When requests arrive, capacity is soft-locked across candidate shards with the highest continuous unreserved token capacity, preventing concurrent workers from overwhelming any single upstream credential.
-
-#### 5. What happens if an upstream provider experiences an outage?
-GALXAI's **4-State Circuit Breaker** immediately moves degraded credentials into `cooldown` with exponential jitter backoff, transparently retrying candidate shards in $< 15\text{ms}$.
+#### 3. Is GALXAI 100% compatible with OpenAI SDKs?
+Yes, completely. GALXAI natively implements standard OpenAI REST APIs (`/v1/chat/completions`, `/v1/images/generations`, `/v1/models`) and Server-Sent Events (SSE) streaming. Simply update `baseURL="https://api.galxai.com/v1"`.
 
 ---
 
-### Security & Privacy
+### Pricing & Compute Wallet
 
-#### 6. Does GALXAI store or log my prompts?
-No. GALXAI enforces a strict **Zero Content Retention Policy**. Prompts and streaming chunks pass through in-memory streams without ever touching persistent disk storage.
+#### 4. How does GALXAI offer 25%–40% discounts compared to direct retail?
+Through large-scale enterprise compute commitments and intelligent low-latency routing, GALXAI secures wholesale capacity and passes direct wholesale rates to developers with **0% markup**.
 
-#### 7. How are credentials secured?
-Credentials are encrypted using **AES-256-GCM** with **Additional Authenticated Data (AAD)** binding to prevent ciphertext transplantation attacks. Furthermore, plaintext memory buffers are zeroized (`zeroizeBuffer`) immediately upon request completion.
+#### 5. How does the 75% Prompt Caching Rebate work?
+For prompts containing system instructions or context prefixes exceeding 1,024 tokens, cached input tokens automatically receive a **75% discount**. GALXAI passes 100% of this rebate directly to your wallet.
+
+#### 6. How does developer billing work?
+GALXAI operates a pay-as-you-go developer compute wallet. Every new account receives a **$5.00 free compute credit**. Deductions are micro-metered in real-time per token. Developers can also enable automated reload protection to guarantee zero downtime for production workloads.
 
 ---
 
-### Billing & Pricing
+### Security, Privacy & Reliability
 
-#### 8. How are discounts calculated?
-GALXAI offers up to **28% discount** below standard list prices due to pooled volume efficiencies. Pricing is billed purely on actual tokens consumed without minimum monthly commits.
+#### 7. Does GALXAI store or log prompts?
+No. GALXAI enforces a strict **Zero Content Retention Policy**. Prompts and streaming chunks are processed purely in ephemeral memory buffers and are never logged to disk, retained in databases, or used for model training.
+
+#### 8. What is GALXAI's uptime SLA?
+GALXAI provides a **99.99% Enterprise Uptime SLA** backed by sub-15ms automated failover, protecting agent fleets and production applications from upstream vendor hiccups and unexpected rate limits.
