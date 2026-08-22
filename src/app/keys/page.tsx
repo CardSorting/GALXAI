@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
+import { KeysSubNav } from '@/components/dashboard/KeysSubNav';
 import {
   Key,
   Plus,
@@ -84,6 +85,8 @@ export default function GatewayKeysPage() {
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
         <Breadcrumbs items={[{ label: 'Developer Gateway API Keys' }]} />
+
+        <KeysSubNav />
 
         {/* Page Hero with Wallet Summary */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">

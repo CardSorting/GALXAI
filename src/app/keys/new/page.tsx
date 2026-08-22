@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
+import { KeysSubNav } from '@/components/dashboard/KeysSubNav';
 import {
   Key,
   Sparkles,
@@ -272,6 +273,8 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
             { label: 'Create Gateway Key' }
           ]}
         />
+
+        <KeysSubNav />
 
         <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-6">
           {/* Header */}
