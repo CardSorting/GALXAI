@@ -17,7 +17,10 @@ import {
   Users2,
   Landmark,
   FileCheck,
-  ChevronRight
+  Webhook,
+  Gift,
+  FileCheck2,
+  Download
 } from 'lucide-react';
 
 interface NavItem {
@@ -42,6 +45,9 @@ const NAV_GROUPS: NavGroup[] = [
       { name: 'Wallet & Top-Up', href: '/billing', icon: Wallet, exact: true },
       { name: 'Invoices', href: '/billing/invoices', icon: FileSpreadsheet, badge: '3' },
       { name: 'Expenses', href: '/billing/expenses', icon: PieChart },
+      { name: 'Custom Reports', href: '/billing/reports', icon: Download },
+      { name: 'Promo Grants', href: '/billing/promo', icon: Gift, badge: '$320' },
+      { name: 'Tax & W-9', href: '/billing/tax', icon: FileCheck2 },
       { name: 'Payment Methods', href: '/billing/payment-methods', icon: Landmark }
     ]
   },
@@ -51,6 +57,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { name: 'Auto-Reload', href: '/billing/auto-reload', icon: RefreshCw, badge: 'Active' },
       { name: 'Budget Alerts', href: '/billing/budget-alerts', icon: BellRing },
+      { name: 'Webhooks & SIEM', href: '/billing/webhooks', icon: Webhook },
       { name: 'Cost Centers', href: '/billing/teams', icon: Users2, badge: '4 Squads' }
     ]
   },
@@ -59,7 +66,8 @@ const NAV_GROUPS: NavGroup[] = [
     title: 'Enterprise & Trust',
     items: [
       { name: 'Audit Trail', href: '/billing/audit-logs', icon: FileCheck, badge: 'SOC2' },
-      { name: 'Volume Contracts', href: '/billing/enterprise', icon: Building2, badge: '40% OFF' }
+      { name: 'Volume Contracts', href: '/billing/enterprise', icon: Building2, badge: '40% OFF' },
+      { name: 'Legal & BAA', href: '/compliance', icon: ShieldCheck }
     ]
   }
 ];
@@ -113,7 +121,7 @@ export function BillingSubNav() {
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl whitespace-nowrap transition-all ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl whitespace-nowrap transition-all ${
                 isActive
                   ? 'bg-amber-400 text-black font-bold shadow-lg shadow-amber-500/10'
                   : 'text-zinc-400 hover:text-white hover:bg-white/5'
