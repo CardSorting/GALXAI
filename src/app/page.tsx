@@ -22,11 +22,20 @@ import {
   GitCompare,
   Swords,
   Server,
-  Globe
+  Globe,
+  Coins,
+  Copy,
+  Check,
+  Flame,
+  Award,
+  Clock,
+  Laptop
 } from 'lucide-react';
 
 export default function HomePage() {
   const [stats, setStats] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'python' | 'node' | 'cursor' | 'continue' | 'curl'>('python');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     fetch('/api/pool/stats')
@@ -38,6 +47,69 @@ export default function HomePage() {
   const featuredModels = EXCLUSIVE_MODEL_CATALOG.filter(m => m.category === 'llm');
   const imageModels = EXCLUSIVE_MODEL_CATALOG.filter(m => m.category === 'image');
 
+  const codeSnippets: Record<string, string> = {
+    python: `from openai import OpenAI
+
+# 1-Line Drop-in Switch (Saves 25%-40% instantly)
+client = OpenAI(
+    base_url="https://api.galxai.com/v1",
+    api_key="galx_live_..."
+)
+
+response = client.chat.completions.create(
+    model="gpt-5.6-sol",
+    messages=[{"role": "user", "content": "Explain quantum computing."}]
+)
+print(response.choices[0].message.content)`,
+    node: `import OpenAI from 'openai';
+
+// 100% Drop-in replacement for OpenAI SDK
+const client = new OpenAI({
+  baseURL: 'https://api.galxai.com/v1',
+  apiKey: process.env.GALXAI_API_KEY
+});
+
+const completion = await client.chat.completions.create({
+  model: 'gpt-5.6-sol',
+  messages: [{ role: 'user', content: 'Write a quicksort in Rust.' }],
+  stream: true
+});`,
+    cursor: `// In Cursor IDE / Windsurf Settings -> Models -> OpenAI API Key:
+// 1. Override Base URL:
+https://api.galxai.com/v1
+
+// 2. Set API Key:
+galx_live_your_key_here
+
+// 3. Add Custom Models:
+gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
+    continue: `{
+  "models": [
+    {
+      "title": "GALXAI GPT-5.6 Sol",
+      "provider": "openai",
+      "model": "gpt-5.6-sol",
+      "apiBase": "https://api.galxai.com/v1",
+      "apiKey": "galx_live_..."
+    }
+  ]
+}`,
+    curl: `curl https://api.galxai.com/v1/chat/completions \\
+  -H "Authorization: Bearer galx_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "gpt-5.6-sol",
+    "messages": [{"role": "user", "content": "Hello GALXAI!"}],
+    "stream": true
+  }'`
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(codeSnippets[activeTab]);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
@@ -47,18 +119,18 @@ export default function HomePage() {
         <section className="glass-panel rounded-3xl p-6 sm:p-14 relative overflow-hidden text-center space-y-6">
           <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-indigo-600/20 via-cyan-500/15 to-emerald-500/20 rounded-full blur-[140px] pointer-events-none" />
 
-          {/* Live Status Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/60 border border-white/10 text-xs font-mono font-semibold text-zinc-300">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span>UNIVERSAL AI GATEWAY • 99.99% UPTIME • SUB-SECOND LATENCY</span>
+          {/* Live GTM Free Credit Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs font-mono font-semibold text-emerald-300">
+            <Flame className="w-3.5 h-3.5" />
+            <span>GET $5 FREE COMPUTE CREDIT • NO CREDIT CARD REQUIRED • 25%–40% INSTANT DISCOUNTS</span>
           </div>
 
           <div className="space-y-4 max-w-3xl mx-auto">
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight">
-              One Unified API for the World's Best AI Models
+              The High-Throughput Universal AI Gateway
             </h1>
             <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-2xl mx-auto">
-              Access flagship <strong className="text-amber-300 font-semibold">OpenAI Codex</strong> (GPT-5.6 Sol, Terra, Luna) and <strong className="text-emerald-300 font-semibold">xAI Grok 4.5</strong> through a single standard endpoint. High concurrency, automated failover, and transparent per-token billing.
+              Drop-in OpenAI SDK replacement routing across <strong className="text-amber-300 font-semibold">GPT-5.6 Sol, Terra, Luna</strong> and <strong className="text-emerald-300 font-semibold">xAI Grok 4.5</strong>. Continuous multi-account failover, 75% prompt caching pass-through, and zero markups.
             </p>
           </div>
 
@@ -66,26 +138,27 @@ export default function HomePage() {
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Link
               href="/keys/new"
-              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-2 hover:scale-[1.02] active:scale-98 transition-all"
+              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-2 hover:scale-[1.02] active:scale-98 transition-all cursor-pointer"
             >
               <Key className="w-4 h-4 text-black" />
-              <span>Get API Key</span>
+              <span>Claim $5 Free Key</span>
+              <ArrowRight className="w-3.5 h-3.5 text-black" />
             </Link>
 
             <Link
               href="/playground"
-              className="px-6 py-3.5 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 text-white font-bold text-xs uppercase tracking-wider shadow-md flex items-center gap-2 transition-all hover:border-white/20"
+              className="px-6 py-3.5 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 text-white font-bold text-xs uppercase tracking-wider shadow-md flex items-center gap-2 transition-all hover:border-white/20 cursor-pointer"
             >
               <Terminal className="w-4 h-4 text-cyan-400" />
-              <span>Try in Playground</span>
+              <span>Interactive Playground</span>
             </Link>
 
             <Link
-              href="/models"
-              className="px-5 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-semibold flex items-center gap-1.5 transition-all"
+              href="/pricing"
+              className="px-5 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
             >
-              <span>Explore Models & Pricing</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <Coins className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Explore Pricing & Tiers</span>
             </Link>
           </div>
 
@@ -93,152 +166,161 @@ export default function HomePage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 max-w-3xl mx-auto border-t border-white/10 font-mono text-xs">
             <div className="space-y-0.5">
               <span className="text-zinc-500 text-[10px] uppercase">Routing Latency</span>
-              <div className="text-white font-bold text-sm">&lt; 20ms Overhead</div>
+              <div className="text-white font-bold text-sm">&lt; 1ms Gateway Overhead</div>
             </div>
             <div className="space-y-0.5">
               <span className="text-zinc-500 text-[10px] uppercase">Service Uptime</span>
-              <div className="text-emerald-400 font-bold text-sm">99.99% SLA</div>
+              <div className="text-emerald-400 font-bold text-sm">99.99% Multi-Account SLA</div>
             </div>
             <div className="space-y-0.5">
-              <span className="text-zinc-500 text-[10px] uppercase">Max Context</span>
-              <div className="text-cyan-300 font-bold text-sm">500K Tokens</div>
+              <span className="text-zinc-500 text-[10px] uppercase">Prompt Caching</span>
+              <div className="text-cyan-400 font-bold text-sm">75% Automatic Rebate</div>
             </div>
             <div className="space-y-0.5">
-              <span className="text-zinc-500 text-[10px] uppercase">API Standard</span>
-              <div className="text-amber-300 font-bold text-sm">OpenAI Drop-in</div>
+              <span className="text-zinc-500 text-[10px] uppercase">Direct Savings</span>
+              <div className="text-amber-400 font-bold text-sm">25% to 40% OFF Retail</div>
             </div>
           </div>
         </section>
 
-        {/* 3-Step Quickstart */}
+        {/* 1-Line Drop-in Interactive Migration Widget */}
+        <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[10px] font-mono font-bold">
+                <Code2 className="w-3 h-3" />
+                <span>100% OPENAI SDK COMPATIBLE</span>
+              </div>
+              <h2 className="text-xl font-bold text-white">Switch in 30 Seconds with Zero Code Changes</h2>
+              <p className="text-xs text-zinc-400">Simply update your `baseURL` and API key to start saving 25%–40% on every completion.</p>
+            </div>
+
+            {/* Language / IDE Tabs */}
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-black/50 border border-white/10 text-xs font-mono">
+              {(['python', 'node', 'cursor', 'continue', 'curl'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-3 py-1.5 rounded-lg capitalize transition-all cursor-pointer ${
+                    activeTab === tab
+                      ? 'bg-amber-400 text-black font-bold shadow-sm'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  {tab === 'cursor' ? 'Cursor / Windsurf' : tab === 'continue' ? 'Continue.dev' : tab}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Code Viewer Box */}
+          <div className="relative rounded-2xl bg-black/80 border border-white/10 p-5 font-mono text-xs overflow-hidden">
+            <button
+              onClick={handleCopy}
+              className="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white flex items-center gap-1.5 transition-all text-[11px] cursor-pointer"
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copied ? 'Copied to Clipboard!' : 'Copy Code'}</span>
+            </button>
+            <pre className="text-zinc-300 overflow-x-auto pr-24 leading-relaxed font-mono">
+              {codeSnippets[activeTab]}
+            </pre>
+          </div>
+        </section>
+
+        {/* 3 Simple Visual Steps for Non-Technical & Technical Users */}
         <section className="space-y-6">
-          <div className="text-center space-y-1">
-            <h2 className="text-2xl font-black text-white">Start Building in 60 Seconds</h2>
-            <p className="text-xs text-zinc-400">Zero custom SDKs needed. Drop in as a 1-line base URL replacement.</p>
+          <div className="text-center space-y-2 max-w-2xl mx-auto">
+            <h2 className="text-2xl font-black text-white">How GALXAI Works in 3 Simple Steps</h2>
+            <p className="text-xs text-zinc-400">No complex cloud architecture to manage. Get started in under 1 minute.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Step 1 */}
-            <div className="glass-card rounded-3xl p-6 border border-white/5 space-y-3 relative overflow-hidden group">
-              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-black text-sm">
+            <div className="glass-panel rounded-3xl p-6 space-y-4 border border-white/10 relative overflow-hidden">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 font-mono font-bold text-sm">
                 01
               </div>
-              <h3 className="text-base font-bold text-white">1. Generate API Key</h3>
+              <h3 className="text-base font-bold text-white">Generate Your Gateway Key</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Create a universal <code className="text-cyan-300 font-mono">galx_live_...</code> bearer token with configurable rate limits.
+                Sign up in 1 click and receive an instant live developer key (`galx_live_...`) pre-loaded with $5 in free compute credits.
               </p>
-              <Link
-                href="/keys/new"
-                className="text-xs text-amber-400 font-semibold flex items-center gap-1 group-hover:translate-x-1 transition-transform"
-              >
-                <span>Create Key</span>
-                <ArrowRight className="w-3 h-3" />
-              </Link>
             </div>
 
-            {/* Step 2 */}
-            <div className="glass-card rounded-3xl p-6 border border-white/5 space-y-3 relative overflow-hidden group">
-              <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 flex items-center justify-center font-black text-sm">
+            <div className="glass-panel rounded-3xl p-6 space-y-4 border border-white/10 relative overflow-hidden">
+              <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-mono font-bold text-sm">
                 02
               </div>
-              <h3 className="text-base font-bold text-white">2. Select Your Model</h3>
+              <h3 className="text-base font-bold text-white">Paste into Your App or IDE</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Choose from state-of-the-art coding engines, massive 500K context reasoning, or high-fidelity image models.
+                Point your existing OpenAI Python/Node client or Cursor IDE to `https://api.galxai.com/v1`. Zero syntax refactoring required.
               </p>
-              <Link
-                href="/models"
-                className="text-xs text-cyan-400 font-semibold flex items-center gap-1 group-hover:translate-x-1 transition-transform"
-              >
-                <span>View Models</span>
-                <ArrowRight className="w-3 h-3" />
-              </Link>
             </div>
 
-            {/* Step 3 */}
-            <div className="glass-card rounded-3xl p-6 border border-white/5 space-y-3 relative overflow-hidden group">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-black text-sm">
+            <div className="glass-panel rounded-3xl p-6 space-y-4 border border-white/10 relative overflow-hidden">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-mono font-bold text-sm">
                 03
               </div>
-              <h3 className="text-base font-bold text-white">3. Send Requests</h3>
+              <h3 className="text-base font-bold text-white">Enjoy Sub-15ms Failover & Savings</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Point your standard OpenAI Python / TypeScript client to <code className="text-emerald-300 font-mono">http://localhost:3000/v1</code>.
+                Your requests are automatically balanced across high-capacity enterprise slots, saving 25%–40% on every token with 99.99% uptime.
               </p>
-              <Link
-                href="/docs"
-                className="text-xs text-emerald-400 font-semibold flex items-center gap-1 group-hover:translate-x-1 transition-transform"
-              >
-                <span>Read Docs</span>
-                <ArrowRight className="w-3 h-3" />
-              </Link>
             </div>
           </div>
         </section>
 
-        {/* Featured Models Grid */}
+        {/* Featured Flagship Reasoning Suite */}
         <section className="space-y-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h2 className="text-xl font-black text-white flex items-center gap-2">
                 <Cpu className="w-5 h-5 text-indigo-400" />
-                Featured Models & Pricing
+                Flagship Reasoning & LLM Fleet
               </h2>
-              <p className="text-xs text-zinc-400">Exact per-token pricing with zero hidden fees.</p>
+              <p className="text-xs text-zinc-400">Direct wholesale arbitrage rates across OpenAI and xAI Grok flagship engines.</p>
             </div>
-            <Link
-              href="/models"
-              className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-semibold"
-            >
+            <Link href="/models" className="text-xs text-cyan-400 hover:text-cyan-300 font-mono font-semibold flex items-center gap-1">
               <span>View All 12 Models</span>
-              <ArrowRight className="w-3 h-3" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {featuredModels.map((model) => {
-              const isGrok = model.provider === 'xai-grok';
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredModels.map((m) => {
+              const isGrok = m.provider === 'xai-grok';
               return (
-                <div
-                  key={model.id}
-                  className="glass-card rounded-3xl p-6 border border-white/5 space-y-4 flex flex-col justify-between group"
-                >
+                <div key={m.id} className="glass-panel rounded-3xl p-6 flex flex-col justify-between space-y-4 border border-white/10 hover:border-indigo-500/30 transition-all group">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                          isGrok ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
-                        }`}>
-                          {isGrok ? <Rocket className="w-4 h-4" /> : <Zap className="w-4 h-4 fill-amber-400" />}
-                        </div>
-                        <div>
-                          <Link href={`/models/${model.id.replace('/', '-')}`} className="font-bold text-white text-base group-hover:text-cyan-300 transition-colors">
-                            {model.id}
-                          </Link>
-                          <p className="text-[10px] text-zinc-500 font-mono uppercase">{model.name}</p>
-                        </div>
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                        isGrok ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
+                      }`}>
+                        {isGrok ? <Rocket className="w-4 h-4" /> : <Zap className="w-4 h-4 fill-amber-400" />}
                       </div>
-
-                      <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-mono font-bold border border-indigo-500/30">
-                        {model.contextWindowTokens / 1000}K Context
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold">
+                        -{m.discountPercentage}% OFF
                       </span>
                     </div>
 
-                    <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
-                      {model.description}
-                    </p>
+                    <div>
+                      <h3 className="text-sm font-bold text-white font-mono group-hover:text-cyan-300 transition-colors">{m.id}</h3>
+                      <p className="text-[11px] text-zinc-400 mt-1 line-clamp-2">{m.description}</p>
+                    </div>
                   </div>
 
-                  <div className="pt-3 border-t border-white/5 flex items-center justify-between font-mono text-xs">
-                    <div className="space-x-2">
-                      <span className="text-zinc-400">${model.inputPricePer1M.toFixed(2)}/1M in</span>
-                      <span className="text-zinc-600">•</span>
-                      <span className="text-zinc-400">${model.outputPricePer1M.toFixed(2)}/1M out</span>
+                  <div className="space-y-2 pt-2 border-t border-white/5 font-mono text-xs">
+                    <div className="flex justify-between text-zinc-400">
+                      <span>Context:</span>
+                      <span className="text-white font-bold">{(m.contextWindowTokens / 1000).toLocaleString()}K tokens</span>
                     </div>
-
+                    <div className="flex justify-between text-zinc-400">
+                      <span>GALXAI Rate:</span>
+                      <span className="text-emerald-300 font-bold">${m.inputPricePer1M.toFixed(2)} in / ${m.outputPricePer1M.toFixed(2)} out</span>
+                    </div>
                     <Link
-                      href={`/playground?model=${model.id}`}
-                      className="text-xs text-indigo-400 hover:text-indigo-300 font-sans font-semibold flex items-center gap-1"
+                      href={`/playground?model=${m.id}`}
+                      className="w-full mt-2 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white font-sans text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
                     >
-                      <span>Try</span>
+                      <span>Test in Playground</span>
                       <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
@@ -248,55 +330,37 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 1-Line Code Preview */}
-        <section className="glass-panel rounded-3xl p-6 sm:p-10 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Code2 className="w-5 h-5 text-amber-400" />
-              Standard Client Integration
-            </h2>
-            <Link href="/docs" className="text-xs text-zinc-400 hover:text-white font-mono">
-              View Full SDK Docs →
+        {/* Visual Synthesis Suite Preview */}
+        <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-cyan-400" />
+                Visual Synthesis & Diffusion Fleet
+              </h2>
+              <p className="text-xs text-zinc-400">High-resolution image generation powered by OpenAI GPT-Image-2, DALL-E 3, and xAI Grok Imagine.</p>
+            </div>
+            <Link href="/models" className="text-xs text-cyan-400 hover:text-cyan-300 font-mono font-semibold flex items-center gap-1">
+              <span>View All 8 Image Engines</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          <pre className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-zinc-200 border border-white/10 overflow-x-auto selection:bg-amber-500 selection:text-black">
-            <code>{`from openai import OpenAI
-
-# Initialize client with GALXAI universal endpoint
-client = OpenAI(
-    base_url="http://localhost:3000/v1",
-    api_key="galx_live_your_gateway_key"
-)
-
-# Route instantly across Sol, Terra, Luna, or Grok
-response = client.chat.completions.create(
-    model="gpt-5.6-sol", # or "x-ai/grok-4.5"
-    messages=[{"role": "user", "content": "Explain distributed caching."}],
-    stream=True
-)
-
-for chunk in response:
-    print(chunk.choices[0].delta.content or "", end="", flush=True)`}</code>
-          </pre>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {imageModels.slice(0, 4).map((m) => (
+              <div key={m.id} className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 hover:border-white/15 transition-all">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-white font-mono line-clamp-1">{m.id}</span>
+                  <span className="text-[10px] text-emerald-400 font-mono font-bold">-{m.discountPercentage}%</span>
+                </div>
+                <div className="text-xs text-zinc-400 font-mono">
+                  ${m.inputPricePer1M.toFixed(3)} <span className="text-[10px] text-zinc-500">/ image</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
       </main>
-
-      {/* Footer */}
-      <footer className="mt-16 border-t border-white/5 py-8 text-center text-xs text-zinc-400 space-y-2">
-        <div className="flex items-center justify-center gap-4">
-          <Link href="/models" className="hover:text-white">Models</Link>
-          <Link href="/playground" className="hover:text-white">Playground</Link>
-          <Link href="/pricing" className="hover:text-white">Pricing</Link>
-          <Link href="/docs" className="hover:text-white">Docs</Link>
-          <Link href="/keys" className="hover:text-white">API Keys</Link>
-          <Link href="/faq" className="hover:text-white">FAQ</Link>
-          <Link href="/status" className="hover:text-white">Status</Link>
-        </div>
-        <p className="text-[11px] text-zinc-400 font-mono">
-          GALXAI — Universal AI Model Router & API Gateway
-        </p>
-      </footer>
     </div>
   );
 }
