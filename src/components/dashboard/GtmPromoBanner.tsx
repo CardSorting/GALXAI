@@ -30,7 +30,7 @@ export function GtmPromoBanner() {
         <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-400 text-black text-[10px] font-black uppercase tracking-wider shrink-0 shadow-sm font-mono">
             <Flame className="w-3 h-3 fill-black text-black" />
-            <span>FOUNDER GRANT</span>
+            <span>BUILDER PROMO</span>
           </span>
 
           <p className="text-zinc-200 text-[11px] sm:text-xs leading-tight">
@@ -39,7 +39,7 @@ export function GtmPromoBanner() {
 
           <span className="hidden xl:inline-flex items-center gap-1 text-[10px] font-mono text-zinc-400 bg-black/40 px-2 py-0.5 rounded-md border border-white/10">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Grant Pool: $84.2K / $100K Claimed</span>
+            <span>Bonus Pool: $84.2K / $100K Claimed</span>
           </span>
         </div>
 

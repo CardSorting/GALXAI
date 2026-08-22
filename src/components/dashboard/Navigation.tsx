@@ -75,12 +75,6 @@ export function Navigation() {
       href: '/pricing',
       ariaLabel: 'Wholesale Pricing, Prompt Caching & Security Standards',
     },
-    {
-      label: 'Grants ($2.5K)',
-      href: '/grants',
-      ariaLabel: 'Builder & Scale Acceleration Grants — Apply for up to $2,500 Match',
-      isGrant: true
-    },
   ];
 
   return (
@@ -132,11 +126,7 @@ export function Navigation() {
                     aria-current={isActive ? 'page' : undefined}
                     aria-label={link.ariaLabel}
                     className={`relative px-3.5 py-1.5 rounded-xl text-xs font-semibold tracking-normal transition-all duration-150 select-none ${
-                      (link as any).isGrant
-                        ? isActive
-                          ? 'text-amber-300 bg-amber-500/20 font-bold shadow-sm ring-1 ring-amber-500/40'
-                          : 'text-amber-300 hover:text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30'
-                        : isActive
+                      isActive
                         ? 'text-white bg-white/10 font-bold shadow-sm ring-1 ring-white/20'
                         : 'text-zinc-300 hover:text-white hover:bg-white/10 active:scale-[0.98]'
                     } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080d] focus-visible:bg-white/15 focus-visible:text-white`}
@@ -317,11 +307,7 @@ export function Navigation() {
                   aria-label={item.ariaLabel}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`block px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                    (item as any).isGrant
-                      ? isActive
-                        ? 'text-amber-300 bg-amber-500/20 font-bold border border-amber-500/40'
-                        : 'text-amber-300 bg-amber-500/10 border border-amber-500/20'
-                      : isActive
+                    isActive
                       ? 'text-white bg-white/15 font-bold shadow-sm'
                       : 'text-zinc-300 hover:text-white hover:bg-white/10'
                   } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400`}

@@ -63,7 +63,6 @@ export function Footer() {
       { name: 'Enterprise Volume Contracts', href: '/billing/enterprise', badge: '40% OFF' },
     ],
     pricingAndTrust: [
-      { name: 'Builder Grants ($2,500 Match)', href: '/grants', badge: 'Fund' },
       { name: 'Wholesale Pricing & Tiers', href: '/pricing', badge: '25%-40% OFF' },
       { name: '75% Prompt Caching Pass', href: '/pricing#caching' },
       { name: 'Enterprise Compliance & DPA', href: '/compliance', badge: 'HIPAA/GDPR' },
@@ -81,7 +80,7 @@ export function Footer() {
           <div className="space-y-1 text-center md:text-left">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
               <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-              <span>FOUNDING BUILDER GRANT • 50% COMPUTE MATCH ON DEPOSITS</span>
+              <span>50% INSTANT COMPUTE MATCH ON DEPOSITS</span>
             </div>
             <h3 className="text-lg sm:text-xl font-bold text-white">Cut your OpenAI &amp; Grok inference bills by 25%–40% today</h3>
             <p className="text-xs text-zinc-400">100% drop-in OpenAI SDK compatibility. Zero code refactoring. 99.99% enterprise uptime SLA.</p>
