@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter } from '@/core/router/GalxModelRouter';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
+import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import type { ImageGenerationRequest } from '@/core/contracts/GalxContracts';
 
 export const runtime = 'nodejs';
@@ -12,7 +13,7 @@ export async function OPTIONS() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Galx-Async, X-Galx-Queue, X-Galx-Webhook-Url, X-Galx-Priority, X-Galx-Delay-Ms, Idempotency-Key, Prefer'
     }
   });
 }
@@ -45,6 +46,55 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: { message: 'Missing required parameter: prompt', type: 'invalid_request_error' } },
         { status: 400 }
+      );
+    }
+
+    // Asynchronous Queue Processing
+    const isAsync = req.headers.get('x-galx-async') === 'true' || req.headers.get('prefer') === 'respond-async';
+    if (isAsync) {
+      const targetQueue = req.headers.get('x-galx-queue') || 'image-gen';
+      const webhookUrl = req.headers.get('x-galx-webhook-url') || undefined;
+      const idempotencyKey = req.headers.get('idempotency-key') || undefined;
+      const priorityHeader = req.headers.get('x-galx-priority');
+      const priority = priorityHeader ? parseInt(priorityHeader, 10) : 50;
+      const delayHeader = req.headers.get('x-galx-delay-ms');
+      const delayMs = delayHeader ? parseInt(delayHeader, 10) : undefined;
+
+      const queueEngine = GalxTaskQueueEngine.getInstance();
+      const { task, deduplicated } = queueEngine.createTask({
+        queueId: targetQueue,
+        userId,
+        idempotencyKey,
+        priority,
+        delayMs,
+        target: {
+          type: 'INTERNAL_MODEL',
+          taskKind: 'image_generation',
+          imagePayload: body,
+          isPriorityUser,
+          webhookCompletionUrl: webhookUrl
+        }
+      });
+
+      return NextResponse.json(
+        {
+          id: task.id,
+          object: 'image.generation.async',
+          status: task.status,
+          queue: task.queueId,
+          created: Math.floor(task.createdAtMs / 1000),
+          task_url: `/api/queues/${task.queueId}/tasks/${task.id}`,
+          deduplicated
+        },
+        {
+          status: 202,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Location': `/api/queues/${task.queueId}/tasks/${task.id}`,
+            'X-Galx-Task-Id': task.id,
+            'X-Galx-Queue-Id': task.queueId
+          }
+        }
       );
     }
 

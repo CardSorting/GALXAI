@@ -1,0 +1,74 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
+import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
+import { GalxPersistence } from '@/lib/storage/GalxPersistence';
+import type { BulkCancelRequest } from '@/core/contracts/GalxContracts';
+
+export const runtime = 'nodejs';
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    }
+  });
+}
+
+function authenticateRequest(req: NextRequest): { userId: string; isAuthorized: boolean } {
+  const authHeader = req.headers.get('authorization') || '';
+  if (!authHeader.startsWith('Bearer ')) {
+    return { userId: 'anonymous_developer', isAuthorized: true };
+  }
+  const token = authHeader.substring(7).trim();
+  if (token.startsWith('galx_live_')) {
+    const hash = GalxCryptoVault.hashApiKey(token);
+    const persistence = GalxPersistence.getInstance();
+    const foundKey = persistence.getGatewayKeys().find(k => k.keyHash === hash && !k.revoked);
+    if (foundKey) {
+      return { userId: foundKey.userId, isAuthorized: true };
+    }
+    return { userId: '', isAuthorized: false };
+  }
+  return { userId: token, isAuthorized: true };
+}
+
+/**
+ * POST /api/queues/[queueId]/tasks/bulk-cancel
+ * Bulk cancels pending/scheduled tasks matching filters.
+ */
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ queueId: string }> }
+) {
+  const { queueId } = await params;
+  const auth = authenticateRequest(req);
+  if (!auth.isAuthorized) {
+    return NextResponse.json({ error: { message: 'Unauthorized Gateway API Key' } }, { status: 401 });
+  }
+
+  try {
+    const body = (await req.json()) as BulkCancelRequest;
+    const engine = GalxTaskQueueEngine.getInstance();
+    const result = engine.bulkCancel(queueId, {
+      tag: body.tag,
+      groupId: body.groupId,
+      userId: auth.userId !== 'anonymous_developer' ? auth.userId : body.userId,
+      statusFilter: body.statusFilter
+    });
+
+    return NextResponse.json(result, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'X-Galx-Cancelled-Count': String(result.cancelledCount)
+      }
+    });
+  } catch (err: any) {
+    return NextResponse.json(
+      { error: { message: err.message || 'Bulk cancellation failed' } },
+      { status: 500 }
+    );
+  }
+}

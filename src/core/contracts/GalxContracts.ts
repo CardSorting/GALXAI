@@ -215,7 +215,60 @@ export interface ChatCompletionRequest {
   presence_penalty?: number;
   frequency_penalty?: number;
   user?: string;
+  response_format?: any;
+  tools?: any[];
+  tool_choice?: any;
 }
+
+export interface ChatCompletionResponse {
+  id: string;
+  object: string;
+  created: number;
+  model: string;
+  choices: Array<{
+    index: number;
+    message: {
+      role: string;
+      content: string | null;
+      refusal?: string | null;
+      tool_calls?: any[];
+    };
+    finish_reason: string | null;
+  }>;
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+    prompt_tokens_details?: {
+      cached_tokens?: number;
+    };
+  };
+  shardId?: string;
+  modelUsed?: string;
+  provider?: ProviderType;
+}
+
+export interface ChatCompletionChunk {
+  id: string;
+  object: string;
+  created: number;
+  model: string;
+  choices: Array<{
+    index: number;
+    delta: {
+      role?: string;
+      content?: string | null;
+      tool_calls?: any[];
+    };
+    finish_reason: string | null;
+  }>;
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+}
+
 
 export interface ImageGenerationRequest {
   prompt: string;
@@ -247,3 +300,6 @@ export interface UpstreamRateLimitHeaders {
   readonly resetRequestsMs?: number;
   readonly resetTokensMs?: number;
 }
+
+export * from './GalxQueueContracts';
+

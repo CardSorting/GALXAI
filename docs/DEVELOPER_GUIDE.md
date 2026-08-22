@@ -100,16 +100,230 @@ To add support for a new provider (e.g. Anthropic or Mistral):
 
 ---
 
-## 🧪 Testing & Verification Standards
+## ⚡ Asynchronous Task Queues & Cloud Run Webhooks
 
-GALXAI maintains a **31-suite forensic verification test suite** that exercises every layer of the core substrate without network mocks:
+GALXAI includes an asynchronous task queue engine (`GalxTaskQueueEngine`) inspired by Google Cloud Tasks and Cloud Run for non-blocking agent swarm workflows.
+
+### Python SDK Async Queue Workflow
+```python
+import httpx
+
+# 1. Enqueue Async Chat Task with Webhook Callback
+resp = httpx.post(
+    "https://gateway.galx.ai/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer galx_live_...",
+        "X-Galx-Async": "true",
+        "X-Galx-Queue": "llm-batch",
+        "X-Galx-Webhook-Url": "https://my-service.run.app/ai-webhook",
+        "Idempotency-Key": "eval-run-batch-001"
+    },
+    json={
+        "model": "gpt-5.6-sol",
+        "messages": [{"role": "user", "content": "Analyze system logs"}]
+    }
+)
+task_info = resp.json()
+print("Enqueued Task:", task_info["id"], "Status:", task_info["status"])
+
+# 2. Poll Task Status
+task_url = task_info["task_url"]
+status_resp = httpx.get(f"https://gateway.galx.ai{task_url}", headers={"Authorization": "Bearer galx_live_..."})
+print("Current Task Result:", status_resp.json()["task"]["result"])
+```
+
+### TypeScript SDK Queue Client Workflow
+```typescript
+import { GalxQueueClient, GalxTaskQueueEngine } from '@/core/queue';
+
+const client = new GalxQueueClient();
+
+// 1. Enqueue Async Chat Task with FIFO Group Partitioning
+const { task } = client.enqueueChat({
+  queueId: 'llm-batch',
+  userId: 'user_123',
+  groupId: 'conversation_session_99', // Enforces sequential FIFO turn ordering
+  model: 'gpt-5.6-sol',
+  messages: [{ role: 'user', content: 'Design an event-driven architecture.' }],
+  priority: 80
+});
+
+// 2. Poll or Stream via Real-Time SSE
+const unsubscribe = client.subscribeTaskEvents(task.id, (evt) => {
+  console.log(`[SSE Event] ${evt.type}:`, evt.data);
+});
+```
+
+### Complex DAG Workflows (Fan-In Orchestration)
+```typescript
+// 1. Launch Parallel Parent Tasks
+const taskA = client.enqueueChat({ model: 'gpt-5.6-sol', messages: [{ role: 'user', content: 'Generate outline' }] });
+const taskB = client.enqueueImage({ prompt: 'Cybernetic datacenter illustration' });
+
+// 2. Launch Fan-In Aggregation Child Task (only runs after A & B complete)
+const childTask = client.createFanInTask({
+  queueId: 'agent-swarms',
+  dependsOn: [taskA.task.id, taskB.task.id],
+  target: {
+    type: 'INTERNAL_MODEL',
+    taskKind: 'chat_completion',
+    chatPayload: {
+      model: 'gpt-5.6-sol',
+      messages: [{ role: 'user', content: 'Compile article with illustration reference' }]
+    }
+  }
+});
+```
+
+### Webhook Signature Verification (HMAC-SHA256)
+When tasks complete or fail with a webhook URL, GALXAI transmits `X-Galx-Signature: t=<timestamp>,v1=<hmac>` computed over `<timestamp>.<payload>`:
+
+```python
+import hmac, hashlib
+
+def verify_galx_webhook(signature_header: str, raw_body: bytes, secret: str) -> bool:
+    parts = dict(kv.split("=") for kv in signature_header.split(","))
+    timestamp = parts.get("t")
+    signature = parts.get("v1")
+    expected = hmac.new(secret.encode(), f"{timestamp}.{raw_body.decode()}".encode(), hashlib.sha256).hexdigest()
+    return hmac.compare_digest(signature, expected)
+```
+
+---
+
+## 📦 Official Universal Developer SDK (`@galxai/sdk`)
+
+GALXAI provides a zero-dependency universal SDK compatible with Node.js 18+, Edge Runtimes, Cloudflare Workers, Bun, Deno, and modern Browsers.
+
+```typescript
+import { GalxAI, RateLimitError, AuthenticationError } from '@/sdk';
+
+const galx = new GalxAI({ apiKey: process.env.GALX_API_KEY });
+
+// 1. Synchronous Chat Completion
+const completion = await galx.chat.completions.create({
+  model: 'gpt-5.6-sol',
+  messages: [{ role: 'user', content: 'Explain distributed consensus algorithms' }]
+});
+
+// 2. Background Queue Execution with Strict FIFO Grouping & SSE Progress
+const task = await galx.chat.completions.createAsync({
+  model: 'gpt-5.6-sol',
+  messages: [{ role: 'user', content: 'Batch evaluation task' }],
+  queue: 'llm-batch',
+  groupId: 'conversation_99'
+});
+
+for await (const progress of task.streamProgress()) {
+  console.log(`[Progress ${progress.percentage}%]: ${progress.message}`);
+}
+// 3. Fluent Method-Chaining Builder
+const response = await galx.chat
+  .builder('gpt-5.6-sol')
+  .system('You are an expert system architect.')
+  .user('Explain Raft consensus.')
+  .temperature(0.2)
+  .execute();
+
+// 4. Strongly-Typed Structured Outputs (Zod / JSON Schema)
+const invoice = await galx.chat.structured({
+  model: 'gpt-5.6-sol',
+  messages: [{ role: 'user', content: 'Invoice #1024 total $450.50' }],
+  schema: {
+    type: 'object',
+    properties: {
+      invoiceId: { type: 'string' },
+      totalUsd: { type: 'number' }
+    },
+    required: ['invoiceId', 'totalUsd']
+  }
+});
+
+// 5. Vercel AI SDK Protocol Adapter for Next.js App Router
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+  const stream = await galx.chat.completions.create({
+    model: 'gpt-5.6-sol',
+    messages,
+    stream: true
+  });
+  return galx.adapters.toDataStreamResponse(stream);
+}
+
+// 6. High-Throughput Batch Swarm Concurrency Evaluator
+const batchResults = await galx.batch.mapConcurrent(prompts, async (p) => {
+  return galx.chat.completions.create({ model: 'gpt-5.6-sol', messages: [{ role: 'user', content: p }] });
+}, { concurrency: 20 });
+
+// 7. Autonomous Agent with Multi-Step Function Calling Loop
+const agent = galx.agent({
+  model: 'gpt-5.6-sol',
+  systemPrompt: 'You are a market analyst.',
+  tools: {
+    getStockQuote: {
+      description: 'Get real-time stock quote',
+      parameters: { ticker: { type: 'string', required: true } },
+      execute: async ({ ticker }) => ({ ticker, price: 135.50, change: '+2.4%' })
+    }
+  }
+});
+const agentResult = await agent.run('What is Nvidia stock price?');
+console.log(agentResult.text);
+
+// 8. Pluggable Middleware: Live Dollar Budgeting & In-Memory LRU Caching
+import { createCostTrackerPlugin, createLRUCachePlugin } from '@/sdk';
+
+galx.use(createLRUCachePlugin({ maxEntries: 500, ttlMs: 60000 }));
+galx.use(createCostTrackerPlugin({
+  maxBudgetUsd: 10.00,
+  onBudgetExceeded: (usd) => console.warn(`Budget ceiling of $${usd} exceeded!`)
+}));
+
+// 9. Multi-Model Fallback Cascade (Auto-Failover on 429/5xx)
+const fallbackRes = await galx.chat.fallbackCascade(
+  ['gpt-5.6-sol', 'x-ai/grok-4.5', 'gpt-5.6-luna'],
+  { messages: [{ role: 'user', content: 'Mission critical prompt' }] }
+);
+```
+
+---
+
+## 🛠️ Interactive Developer CLI
+
+Run instant zero-install diagnostics directly against the gateway:
 
 ```bash
-# Run all 31 automated tests
-npm run test:router
+# Run full substrate health audit & latency benchmarks
+npx galxai doctor
 
-# Run Next.js production build verification across all 49 routes
+# Fast ping test
+npx galxai ping
+
+# List supported models and context windows
+npx galxai models
+
+# Stream real-time terminal completions with token velocity (tokens/sec)
+npx galxai chat gpt-5.6-sol "Explain the Raft consensus algorithm concisely."
+```
+
+---
+
+## 🧪 Testing & Verification Standards
+
+GALXAI maintains a **66-suite forensic verification test suite** that exercises every layer of the core substrate:
+
+```bash
+# Run all 66 automated tests
+npx tsx scripts/validate-galxai-router.ts
+
+# Run Next.js production build verification
 npm run build
 ```
 
 When contributing code changes, ensure all test suites pass with 0 errors.
+
+
+
+
+
+

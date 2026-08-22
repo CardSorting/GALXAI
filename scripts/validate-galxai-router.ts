@@ -7,7 +7,9 @@
  */
 
 import assert from 'assert';
+import * as crypto from 'node:crypto';
 import { GalxCryptoVault } from '../src/core/vault/GalxCryptoVault';
+
 import { ContinuousTokenBucketRateGovernor } from '../src/core/governor/ContinuousTokenBucketRateGovernor';
 import { GalxCircuitBreaker } from '../src/core/circuit/GalxCircuitBreaker';
 import { GalxCredentialSubstrate } from '../src/core/substrate/GalxCredentialSubstrate';
@@ -15,7 +17,24 @@ import { GalxCredentialPool } from '../src/core/pool/GalxCredentialPool';
 import { ModelCatalog } from '../src/core/router/ModelCatalog';
 import { GalxPreflightValidator } from '../src/core/validator/GalxPreflightValidator';
 import { GalxMetricsEngine } from '../src/core/telemetry/GalxMetricsEngine';
+import { GalxTaskQueueEngine } from '../src/core/queue/GalxTaskQueueEngine';
+import { GalxQueueClient } from '../src/core/queue/GalxQueueClient';
+import { GalxQueueEventBus } from '../src/core/queue/GalxQueueEventBus';
+import {
+  GalxAI,
+  RateLimitError,
+  AuthenticationError,
+  APITimeoutError,
+  createCostTrackerPlugin,
+  createLRUCachePlugin,
+  TokenOptimizer
+} from '../src/sdk';
 import type { GalxShardAccount } from '../src/core/contracts/GalxContracts';
+
+
+
+
+
 
 let testsPassed = 0;
 let testsFailed = 0;
@@ -827,6 +846,1149 @@ async function runAllTests() {
     poolDisp.releaseLease(leaseA1.lease.leaseId, 1000, true);
     poolDisp.releaseLease(leaseA2.lease.leaseId, 1000, true);
   });
+
+  // --- SUITE 6: Asynchronous Task Queue & Push/Pull Worker Substrate (CloudTasks & CloudRun Pattern) ---
+  const queueEngine = GalxTaskQueueEngine.getInstance();
+
+  await test('Queue Engine: Initializes default queues and retrieves queue configurations', () => {
+    const queues = queueEngine.listQueues();
+    assert.ok(queues.length >= 5);
+    const defaultQueue = queueEngine.getQueue('default');
+    assert.ok(defaultQueue);
+    assert.strictEqual(defaultQueue.state, 'RUNNING');
+    assert.strictEqual(defaultQueue.rateLimits.maxDispatchesPerSecond, 100);
+    assert.strictEqual(defaultQueue.rateLimits.maxConcurrentDispatches, 50);
+
+    const batchQueue = queueEngine.getQueue('llm-batch');
+    assert.ok(batchQueue);
+    assert.strictEqual(batchQueue.rateLimits.maxDispatchesPerSecond, 50);
+  });
+
+  await test('Queue Engine: Strict Idempotency Deduplication Window prevents duplicate tasks', () => {
+    const dedupKey = `test-idemp-${Date.now()}`;
+    const res1 = queueEngine.createTask({
+      queueId: 'default',
+      userId: 'test_user_idemp',
+      idempotencyKey: dedupKey,
+      target: {
+        type: 'HTTP_PUSH',
+        url: 'https://example.com/webhook',
+        body: { hello: 'world' }
+      }
+    });
+
+    assert.strictEqual(res1.deduplicated, false);
+    assert.ok(res1.task.id);
+
+    const res2 = queueEngine.createTask({
+      queueId: 'default',
+      userId: 'test_user_idemp',
+      idempotencyKey: dedupKey,
+      target: {
+        type: 'HTTP_PUSH',
+        url: 'https://example.com/webhook',
+        body: { hello: 'world-duplicate' }
+      }
+    });
+
+    assert.strictEqual(res2.deduplicated, true);
+    assert.strictEqual(res2.task.id, res1.task.id);
+  });
+
+  await test('Queue Engine: Delayed task scheduling places future tasks into SCHEDULED state', () => {
+    const futureTime = Date.now() + 60000;
+    const res = queueEngine.createTask({
+      queueId: 'default',
+      userId: 'test_user_sched',
+      scheduleTimeMs: futureTime,
+      target: {
+        type: 'PULL_WORKER',
+        payload: { job: 'cleanup' }
+      }
+    });
+
+    assert.strictEqual(res.task.status, 'SCHEDULED');
+    assert.strictEqual(res.task.scheduleTimeMs, futureTime);
+  });
+
+  await test('Queue Engine: Exponential backoff calculus computes bounded jittered backoff intervals', () => {
+    const retryConfig = {
+      maxAttempts: 5,
+      minBackoffMs: 200,
+      maxBackoffMs: 10000,
+      maxDoublings: 5,
+      jitterFactor: 0.2
+    };
+
+    const b1 = queueEngine.calculateBackoff(retryConfig, 1);
+    assert.ok(b1 >= 200 && b1 <= 250);
+
+    const b2 = queueEngine.calculateBackoff(retryConfig, 2);
+    assert.ok(b2 >= 400 && b2 <= 500);
+
+    const b3 = queueEngine.calculateBackoff(retryConfig, 3);
+    assert.ok(b3 >= 800 && b3 <= 1000);
+
+    const bMax = queueEngine.calculateBackoff(retryConfig, 10);
+    assert.ok(bMax <= 12000);
+  });
+
+  await test('Queue Engine: Pull worker leases tasks atomically with monotonic fencing token', () => {
+    const customQueueId = `pull-test-queue-${Date.now()}`;
+    queueEngine.createOrUpdateQueue({
+      id: customQueueId,
+      name: 'Pull Test Queue',
+      rateLimits: { maxDispatchesPerSecond: 10, maxConcurrentDispatches: 5, maxBurstSize: 10 },
+      retryConfig: { maxAttempts: 3, minBackoffMs: 100, maxBackoffMs: 1000 }
+    });
+
+    const { task } = queueEngine.createTask({
+      queueId: customQueueId,
+      userId: 'worker_tester',
+      priority: 90,
+      target: {
+        type: 'PULL_WORKER',
+        payload: { chunkIndex: 1, dataset: 'eval-set-v1' },
+        tag: 'eval-v1'
+      }
+    });
+
+    const leaseRes = queueEngine.leaseTasks(customQueueId, {
+      workerId: 'worker_node_alpha',
+      maxTasks: 5,
+      leaseDurationMs: 30000,
+      tagFilter: 'eval-v1'
+    });
+
+    assert.strictEqual(leaseRes.leasedCount, 1);
+    assert.strictEqual(leaseRes.tasks[0].id, task.id);
+    assert.strictEqual(leaseRes.tasks[0].status, 'RUNNING');
+    assert.strictEqual(leaseRes.tasks[0].activeWorkerId, 'worker_node_alpha');
+    assert.ok(leaseRes.tasks[0].activeFencingToken);
+
+    // Heartbeat extension
+    const extRes = queueEngine.extendLease(task.id, 'worker_node_alpha', 60000);
+    assert.strictEqual(extRes.extended, true);
+
+    // Acknowledge completion
+    const ackRes = queueEngine.acknowledgeTask(task.id, 'worker_node_alpha', { processedRows: 500 });
+    assert.strictEqual(ackRes, true);
+
+    const completedTask = queueEngine.getTask(task.id);
+    assert.strictEqual(completedTask?.status, 'COMPLETED');
+    assert.strictEqual(completedTask?.result?.data?.processedRows, 500);
+  });
+
+  await test('Queue Engine: Worker failure reporting triggers retry backoff and routes to DLQ on max attempts', () => {
+    const customQueueId = `fail-test-queue-${Date.now()}`;
+    queueEngine.createOrUpdateQueue({
+      id: customQueueId,
+      name: 'Fail Test Queue',
+      rateLimits: { maxDispatchesPerSecond: 10, maxConcurrentDispatches: 5, maxBurstSize: 10 },
+      retryConfig: { maxAttempts: 2, minBackoffMs: 100, maxBackoffMs: 1000 }
+    });
+
+    const { task } = queueEngine.createTask({
+      queueId: customQueueId,
+      userId: 'worker_tester_fail',
+      target: {
+        type: 'PULL_WORKER',
+        payload: { test: 'fail' }
+      }
+    });
+
+    // Attempt 1: Lease and Fail
+    const lease1 = queueEngine.leaseTasks(customQueueId, { workerId: 'worker_beta', maxTasks: 1 });
+    assert.strictEqual(lease1.leasedCount, 1);
+    const fail1Res = queueEngine.failTask(task.id, 'worker_beta', 'Out of memory', true);
+    assert.strictEqual(fail1Res, true);
+
+    const retryingTask = queueEngine.getTask(task.id);
+    assert.strictEqual(retryingTask?.status, 'RETRYING');
+    assert.strictEqual(retryingTask?.dispatchCount, 1);
+
+    // Attempt 2: Lease and Fail (should transition to DEAD_LETTERED)
+    const lease2 = queueEngine.leaseTasks(customQueueId, { workerId: 'worker_gamma', maxTasks: 1 });
+    assert.strictEqual(lease2.leasedCount, 1);
+    const fail2Res = queueEngine.failTask(task.id, 'worker_gamma', 'Out of memory permanent', true);
+    assert.strictEqual(fail2Res, true);
+
+    const dlqTask = queueEngine.getTask(task.id);
+    assert.strictEqual(dlqTask?.status, 'DEAD_LETTERED');
+    assert.strictEqual(dlqTask?.dispatchCount, 2);
+
+    // Manual Re-drive from DLQ
+    const redriveRes = queueEngine.retryTask(task.id);
+    assert.strictEqual(redriveRes, true);
+    assert.strictEqual(queueEngine.getTask(task.id)?.status, 'QUEUED');
+  });
+
+  await test('Queue Engine: Batch Ingestion creates multiple tasks atomically', () => {
+    const batchTasks = Array.from({ length: 25 }, (_, i) => ({
+      queueId: 'agent-swarms',
+      userId: 'swarm_coordinator',
+      priority: 60,
+      target: {
+        type: 'PULL_WORKER' as const,
+        payload: { agentId: `agent_${i}`, instruction: `Execute turn #${i}` }
+      }
+    }));
+
+    const batchRes = queueEngine.createTasksBatch({ tasks: batchTasks });
+    assert.strictEqual(batchRes.totalSubmitted, 25);
+    assert.strictEqual(batchRes.createdCount, 25);
+    assert.strictEqual(batchRes.tasks.length, 25);
+  });
+
+  await test('Queue Engine: Pause, resume, and purge queue operations', () => {
+    const queueId = `control-test-queue-${Date.now()}`;
+    queueEngine.createOrUpdateQueue({
+      id: queueId,
+      name: 'Control Test Queue',
+      rateLimits: { maxDispatchesPerSecond: 10, maxConcurrentDispatches: 5, maxBurstSize: 10 },
+      retryConfig: { maxAttempts: 3, minBackoffMs: 100, maxBackoffMs: 1000 }
+    });
+
+    queueEngine.pauseQueue(queueId);
+    assert.strictEqual(queueEngine.getQueue(queueId)?.state, 'PAUSED');
+
+    queueEngine.resumeQueue(queueId);
+    assert.strictEqual(queueEngine.getQueue(queueId)?.state, 'RUNNING');
+
+    queueEngine.createTask({
+      queueId,
+      userId: 'purge_user',
+      target: { type: 'PULL_WORKER', payload: { a: 1 } }
+    });
+
+    const statsBefore = queueEngine.getQueueStats(queueId);
+    assert.ok((statsBefore?.pendingTasks || 0) >= 1);
+
+    const purged = queueEngine.purgeQueue(queueId);
+    assert.ok(purged >= 1);
+
+    const statsAfter = queueEngine.getQueueStats(queueId);
+    assert.strictEqual(statsAfter?.pendingTasks, 0);
+  });
+
+  await test('Queue Engine: Strict FIFO Partition Grouping enforces sequential execution per groupId', () => {
+    const queueId = `fifo-test-queue-${Date.now()}`;
+    queueEngine.createOrUpdateQueue({
+      id: queueId,
+      name: 'FIFO Test Queue',
+      rateLimits: { maxDispatchesPerSecond: 50, maxConcurrentDispatches: 20, maxBurstSize: 50 },
+      retryConfig: { maxAttempts: 3, minBackoffMs: 100, maxBackoffMs: 1000 }
+    });
+
+    const groupId = `conv_thread_${Date.now()}`;
+
+    // Enqueue 2 tasks in the SAME groupId
+    const res1 = queueEngine.createTask({
+      queueId,
+      userId: 'fifo_user',
+      groupId,
+      target: { type: 'PULL_WORKER', payload: { turn: 1 } }
+    });
+
+    const res2 = queueEngine.createTask({
+      queueId,
+      userId: 'fifo_user',
+      groupId,
+      target: { type: 'PULL_WORKER', payload: { turn: 2 } }
+    });
+
+    // Lease 1: Should lease Task 1
+    const lease1 = queueEngine.leaseTasks(queueId, { workerId: 'worker_fifo_1', maxTasks: 5 });
+    assert.strictEqual(lease1.leasedCount, 1);
+    assert.strictEqual(lease1.tasks[0].id, res1.task.id);
+
+    // Lease 2: While Task 1 is RUNNING, Task 2 in the same group CANNOT be leased
+    const lease2 = queueEngine.leaseTasks(queueId, { workerId: 'worker_fifo_2', maxTasks: 5 });
+    assert.strictEqual(lease2.leasedCount, 0);
+
+    // Acknowledge Task 1
+    queueEngine.acknowledgeTask(res1.task.id, 'worker_fifo_1', { success: true });
+
+    // Lease 3: Now Task 2 can be leased!
+    const lease3 = queueEngine.leaseTasks(queueId, { workerId: 'worker_fifo_2', maxTasks: 5 });
+    assert.strictEqual(lease3.leasedCount, 1);
+    assert.strictEqual(lease3.tasks[0].id, res2.task.id);
+
+    queueEngine.acknowledgeTask(res2.task.id, 'worker_fifo_2', { success: true });
+  });
+
+  await test('Queue Engine: Cron & Recurring Schedule next timestamp calculus', () => {
+    const now = Date.now();
+    const next1 = queueEngine.calculateNextCronTimestampMs({ repeatEveryMs: 30000 }, now);
+    assert.strictEqual(next1, now + 30000);
+
+    const next2 = queueEngine.calculateNextCronTimestampMs({ cronExpression: '*/10 * * * *' }, now);
+    assert.strictEqual(next2, now + 600000);
+  });
+
+  await test('Queue Engine: Worker interim progress and execution log streaming', () => {
+    const queueId = `progress-test-queue-${Date.now()}`;
+    queueEngine.createOrUpdateQueue({
+      id: queueId,
+      name: 'Progress Test Queue',
+      rateLimits: { maxDispatchesPerSecond: 10, maxConcurrentDispatches: 5, maxBurstSize: 10 },
+      retryConfig: { maxAttempts: 3, minBackoffMs: 100, maxBackoffMs: 1000 }
+    });
+
+    const { task } = queueEngine.createTask({
+      queueId,
+      userId: 'progress_tester',
+      target: { type: 'PULL_WORKER', payload: { data: 123 } }
+    });
+
+    queueEngine.updateTaskProgress(task.id, {
+      percentage: 45,
+      message: 'Processing batch items 450/1000',
+      currentStep: 'data_transformation',
+      stepIndex: 2,
+      totalSteps: 4,
+      logLine: 'Chunk 45 parsed without error'
+    });
+
+    const updated = queueEngine.getTask(task.id);
+    assert.strictEqual(updated?.progress?.percentage, 45);
+    assert.strictEqual(updated?.progress?.currentStep, 'data_transformation');
+    assert.ok(updated?.progress?.logs?.some(l => l.includes('Chunk 45 parsed')));
+  });
+
+  await test('Queue Engine: Bulk DLQ Redrive and Bulk Cancellation', () => {
+    const queueId = `bulk-test-queue-${Date.now()}`;
+    queueEngine.createOrUpdateQueue({
+      id: queueId,
+      name: 'Bulk Test Queue',
+      rateLimits: { maxDispatchesPerSecond: 10, maxConcurrentDispatches: 5, maxBurstSize: 10 },
+      retryConfig: { maxAttempts: 1, minBackoffMs: 100, maxBackoffMs: 1000 }
+    });
+
+    // Create 3 tasks with specific tag
+    const tag = `bulk-tag-${Date.now()}`;
+    for (let i = 0; i < 3; i++) {
+      queueEngine.createTask({
+        queueId,
+        userId: 'bulk_user',
+        tag,
+        target: { type: 'PULL_WORKER', payload: { i } }
+      });
+    }
+
+    // Lease and fail all 3 tasks -> moves to DEAD_LETTERED
+    const lease = queueEngine.leaseTasks(queueId, { workerId: 'bulk_worker', maxTasks: 3 });
+    assert.strictEqual(lease.leasedCount, 3);
+    for (const t of lease.tasks) {
+      queueEngine.failTask(t.id, 'bulk_worker', 'Fatal failure', false);
+    }
+
+    const statsBefore = queueEngine.getQueueStats(queueId);
+    assert.strictEqual(statsBefore?.deadLetteredTasks, 3);
+
+    // Bulk Redrive
+    const redriveRes = queueEngine.bulkRedrive(queueId, { tag });
+    assert.strictEqual(redriveRes.redrivenCount, 3);
+
+    const statsAfter = queueEngine.getQueueStats(queueId);
+    assert.strictEqual(statsAfter?.deadLetteredTasks, 0);
+    assert.strictEqual(statsAfter?.pendingTasks, 3);
+
+    // Bulk Cancel
+    const cancelRes = queueEngine.bulkCancel(queueId, { tag });
+    assert.strictEqual(cancelRes.cancelledCount, 3);
+  });
+
+  await test('GalxQueueClient SDK: Fluent helper and HMAC signature verification', () => {
+    const client = new GalxQueueClient(queueEngine);
+    const queueId = `client-test-queue-${Date.now()}`;
+
+    queueEngine.createOrUpdateQueue({
+      id: queueId,
+      name: 'Client Test Queue',
+      rateLimits: { maxDispatchesPerSecond: 50, maxConcurrentDispatches: 20, maxBurstSize: 50 },
+      retryConfig: { maxAttempts: 3, minBackoffMs: 100, maxBackoffMs: 1000 }
+    });
+
+    // Enqueue Chat helper
+    const chatRes = client.enqueueChat({
+      queueId,
+      userId: 'sdk_user',
+      model: 'gpt-5.6-sol',
+      messages: [{ role: 'user', content: 'SDK test message' }],
+      priority: 85
+    });
+
+    assert.ok(chatRes.task.id);
+    assert.strictEqual(chatRes.task.priority, 85);
+    assert.strictEqual(chatRes.task.target.type, 'INTERNAL_MODEL');
+
+    // Webhook Signature verification
+    const secret = 'whsec_test_secret_key_12345';
+    const payload = JSON.stringify({ event: 'task_completed', id: chatRes.task.id });
+    const timestamp = Date.now();
+    const signature = crypto.createHmac('sha256', secret).update(`${timestamp}.${payload}`).digest('hex');
+    const header = `t=${timestamp},v1=${signature}`;
+
+    const isValid = GalxQueueClient.verifyWebhookSignature(header, payload, secret);
+    assert.strictEqual(isValid, true);
+
+    const isTampered = GalxQueueClient.verifyWebhookSignature(header, payload + 'tampered', secret);
+    assert.strictEqual(isTampered, false);
+  });
+
+  await test('Queue Engine: Directed Acyclic Graph (DAG) Task Dependencies (Fan-In with dependsOn)', () => {
+    const queueId = `dag-test-queue-${Date.now()}`;
+    queueEngine.createOrUpdateQueue({
+      id: queueId,
+      name: 'DAG Test Queue',
+      rateLimits: { maxDispatchesPerSecond: 50, maxConcurrentDispatches: 20, maxBurstSize: 50 },
+      retryConfig: { maxAttempts: 3, minBackoffMs: 100, maxBackoffMs: 1000 }
+    });
+
+    // Parent Task 1
+    const p1 = queueEngine.createTask({
+      queueId,
+      userId: 'dag_user',
+      target: { type: 'PULL_WORKER', payload: { step: 'A' } }
+    });
+
+    // Parent Task 2
+    const p2 = queueEngine.createTask({
+      queueId,
+      userId: 'dag_user',
+      target: { type: 'PULL_WORKER', payload: { step: 'B' } }
+    });
+
+    // Child Task waiting on Parent 1 and Parent 2
+    const child = queueEngine.createTask({
+      queueId,
+      userId: 'dag_user',
+      dependsOn: [p1.task.id, p2.task.id],
+      target: { type: 'PULL_WORKER', payload: { step: 'C_Aggregation' } }
+    });
+
+    // Assert Child starts in WAITING_DEPENDENCIES
+    assert.strictEqual(child.task.status, 'WAITING_DEPENDENCIES');
+
+    // Lease and complete Parent 1 with maxTasks: 1
+    const leaseP1 = queueEngine.leaseTasks(queueId, { workerId: 'w1', maxTasks: 1 });
+    assert.strictEqual(leaseP1.leasedCount, 1);
+    assert.strictEqual(leaseP1.tasks[0].id, p1.task.id);
+    queueEngine.acknowledgeTask(p1.task.id, 'w1', { resultA: 100 });
+
+    // Child should STILL be in WAITING_DEPENDENCIES
+    assert.strictEqual(queueEngine.getTask(child.task.id)?.status, 'WAITING_DEPENDENCIES');
+
+    // Lease and complete Parent 2
+    const leaseP2 = queueEngine.leaseTasks(queueId, { workerId: 'w2', maxTasks: 1 });
+    assert.strictEqual(leaseP2.leasedCount, 1);
+    assert.strictEqual(leaseP2.tasks[0].id, p2.task.id);
+    queueEngine.acknowledgeTask(p2.task.id, 'w2', { resultB: 200 });
+
+    // Now Child should automatically transition to QUEUED with parent outputs aggregated!
+    const childAfter = queueEngine.getTask(child.task.id);
+    assert.strictEqual(childAfter?.status, 'QUEUED');
+    assert.strictEqual(childAfter?.parentTaskResults?.[p1.task.id]?.resultA, 100);
+    assert.strictEqual(childAfter?.parentTaskResults?.[p2.task.id]?.resultB, 200);
+
+    // Child can now be leased and completed
+    const leaseChild = queueEngine.leaseTasks(queueId, { workerId: 'w3', maxTasks: 1 });
+    assert.strictEqual(leaseChild.leasedCount, 1);
+    assert.strictEqual(leaseChild.tasks[0].id, child.task.id);
+    queueEngine.acknowledgeTask(child.task.id, 'w3', { final: 300 });
+    assert.strictEqual(queueEngine.getTask(child.task.id)?.status, 'COMPLETED');
+  });
+
+  await test('Queue Engine: Real-Time EventBus Subscriptions (Task and Queue Level)', () => {
+    const bus = GalxQueueEventBus.getInstance();
+    const queueId = `bus-test-queue-${Date.now()}`;
+    queueEngine.createOrUpdateQueue({
+      id: queueId,
+      name: 'Bus Test Queue',
+      rateLimits: { maxDispatchesPerSecond: 10, maxConcurrentDispatches: 5, maxBurstSize: 10 },
+      retryConfig: { maxAttempts: 3, minBackoffMs: 100, maxBackoffMs: 1000 }
+    });
+
+    const eventsReceived: string[] = [];
+
+    const unsubscribeQueue = bus.subscribeQueue(queueId, (evt) => {
+      eventsReceived.push(`QUEUE:${evt.type}`);
+    });
+
+    const { task } = queueEngine.createTask({
+      queueId,
+      userId: 'bus_user',
+      target: { type: 'PULL_WORKER', payload: { x: 1 } }
+    });
+
+    const taskEvents: string[] = [];
+    const unsubscribeTask = bus.subscribeTask(task.id, (evt) => {
+      taskEvents.push(evt.type);
+    });
+
+    queueEngine.updateTaskProgress(task.id, { percentage: 50, message: 'Halfway' });
+    queueEngine.cancelTask(task.id);
+
+    unsubscribeQueue();
+    unsubscribeTask();
+
+    assert.ok(eventsReceived.includes('QUEUE:TASK_QUEUED') || eventsReceived.includes('QUEUE:TASK_PROGRESS'));
+    assert.ok(taskEvents.includes('TASK_PROGRESS'));
+    assert.ok(taskEvents.includes('TASK_CANCELLED'));
+  });
+
+  await test('Queue Engine: Content-Based SHA-256 Deduplication', () => {
+    const queueId = `content-dedup-queue-${Date.now()}`;
+    queueEngine.createOrUpdateQueue({
+      id: queueId,
+      name: 'Content Dedup Queue',
+      contentBasedDeduplication: true,
+      defaultDeduplicationWindowMs: 60000,
+      rateLimits: { maxDispatchesPerSecond: 10, maxConcurrentDispatches: 5, maxBurstSize: 10 },
+      retryConfig: { maxAttempts: 3, minBackoffMs: 100, maxBackoffMs: 1000 }
+    });
+
+    // Enqueue identical payload without explicit idempotencyKey
+    const target = { type: 'PULL_WORKER' as const, payload: { query: 'same_unique_query', id: 42 } };
+
+    const res1 = queueEngine.createTask({
+      queueId,
+      userId: 'dedup_user',
+      contentBasedDeduplication: true,
+      target
+    });
+    assert.strictEqual(res1.deduplicated, false);
+
+    const res2 = queueEngine.createTask({
+      queueId,
+      userId: 'dedup_user',
+      contentBasedDeduplication: true,
+      target
+    });
+    assert.strictEqual(res2.deduplicated, true);
+    assert.strictEqual(res2.task.id, res1.task.id);
+  });
+
+  await test('Queue Engine: Dynamic Priority Anti-Starvation Aging', () => {
+    const queue = queueEngine.getQueue('default')!;
+    const now = Date.now();
+
+    const task = {
+      id: 'aging_task_1',
+      queueId: 'default',
+      userId: 'aging_user',
+      priority: 20,
+      createdAtMs: now - 30000, // waiting for 30s
+      target: { type: 'PULL_WORKER' as const, payload: {} },
+      status: 'QUEUED' as const,
+      scheduleTimeMs: now,
+      updatedAtMs: now,
+      dispatchCount: 0,
+      responseCount: 0,
+      attempts: []
+    };
+
+    // With 10s aging interval (5 boost per 10s): 30s wait = +15 boost -> effective priority 35
+    const effPriority = queueEngine.getEffectivePriority(task, queue, now);
+    assert.strictEqual(effPriority, 35);
+  });
+
+  await test('Queue Engine: Wall-Clock Deadlines and Task SLA Expiration', async () => {
+    const queueId = `deadline-queue-${Date.now()}`;
+    queueEngine.createOrUpdateQueue({
+      id: queueId,
+      name: 'Deadline Queue',
+      rateLimits: { maxDispatchesPerSecond: 10, maxConcurrentDispatches: 5, maxBurstSize: 10 },
+      retryConfig: { maxAttempts: 3, minBackoffMs: 100, maxBackoffMs: 1000 }
+    });
+
+    // Task with 1ms TTL
+    const { task } = queueEngine.createTask({
+      queueId,
+      userId: 'sla_user',
+      ttlMs: 1,
+      target: { type: 'PULL_WORKER', payload: { urgent: true } }
+    });
+
+    // Wait 10ms so deadline is guaranteed elapsed
+    await new Promise(r => setTimeout(r, 10));
+
+    // Trigger watchdog sweep
+    (queueEngine as any).scavengeExpiredLeasesAndDeadlines();
+
+    const expiredTask = queueEngine.getTask(task.id);
+    assert.strictEqual(expiredTask?.status, 'EXPIRED');
+  });
+
+
+  await test('Queue Engine: Queue Draining and Graceful Maintenance Mode', () => {
+    const queueId = `draining-queue-${Date.now()}`;
+    queueEngine.createOrUpdateQueue({
+      id: queueId,
+      name: 'Draining Queue',
+      rateLimits: { maxDispatchesPerSecond: 10, maxConcurrentDispatches: 5, maxBurstSize: 10 },
+      retryConfig: { maxAttempts: 3, minBackoffMs: 100, maxBackoffMs: 1000 }
+    });
+
+    queueEngine.drainQueue(queueId);
+    const qState = queueEngine.getQueue(queueId)?.state;
+    assert.strictEqual(qState, 'DRAINING');
+
+    // Standard task (priority 50) should be rejected
+    assert.throws(() => {
+      queueEngine.createTask({
+        queueId,
+        priority: 50,
+        target: { type: 'PULL_WORKER', payload: {} }
+      });
+    }, /DRAINING/);
+
+    // High-priority emergency task (priority 95) should be allowed
+    const highPri = queueEngine.createTask({
+      queueId,
+      priority: 95,
+      target: { type: 'PULL_WORKER', payload: {} }
+    });
+    assert.ok(highPri.task.id);
+
+    queueEngine.resumeQueue(queueId);
+    assert.strictEqual(queueEngine.getQueue(queueId)?.state, 'RUNNING');
+  });
+
+  await test('GalxAI Developer SDK: Client Initialization & Config', () => {
+    const sdk = new GalxAI({
+      apiKey: 'galx_live_test_client_key_123',
+      baseURL: 'https://gateway.galx.ai',
+      timeoutMs: 45000,
+      maxRetries: 3
+    });
+
+    assert.ok(sdk.chat);
+    assert.ok(sdk.images);
+    assert.ok(sdk.models);
+    assert.ok(sdk.queues);
+    assert.ok(sdk.workflows);
+    assert.ok(sdk.webhooks);
+  });
+
+  await test('GalxAI Developer SDK: Models & Cost Calculator', () => {
+    const sdk = new GalxAI({ apiKey: 'galx_live_test' });
+
+    const estimate = sdk.models.calculateCost({
+      model: 'gpt-5.6-sol',
+      inputTokens: 10000,
+      outputTokens: 2000,
+      cachedTokens: 5000
+    });
+
+    assert.strictEqual(estimate.model, 'gpt-5.6-sol');
+    assert.ok(estimate.totalCost > 0);
+    assert.ok(estimate.cachedSavings > 0);
+    assert.ok(estimate.estimatedSavingsPercentage > 0);
+    assert.ok(estimate.retailComparisonCost > estimate.totalCost);
+  });
+
+  await test('GalxAI Developer SDK: Webhooks Signature Generation & Verification', () => {
+    const sdk = new GalxAI();
+    const secret = 'whsec_enterprise_webhook_secret_999';
+    const payload = JSON.stringify({ event: 'agent_turn_completed', tokens: 1450 });
+
+    const signatureHeader = sdk.webhooks.generateSignature(payload, secret);
+    assert.ok(signatureHeader.startsWith('t='));
+    assert.ok(signatureHeader.includes('v1='));
+
+    const isValid = sdk.webhooks.verifySignature(payload, signatureHeader, secret);
+    assert.strictEqual(isValid, true);
+
+    const isTampered = sdk.webhooks.verifySignature(payload + 'corrupt', signatureHeader, secret);
+    assert.strictEqual(isTampered, false);
+  });
+
+  await test('GalxAI Developer SDK: Typed Error Hierarchy Classes', () => {
+    const authErr = new AuthenticationError('Invalid key');
+    assert.strictEqual(authErr.name, 'AuthenticationError');
+    assert.strictEqual(authErr.statusCode, 401);
+
+    const rateErr = new RateLimitError('Quota exhausted', 30);
+    assert.strictEqual(rateErr.name, 'RateLimitError');
+    assert.strictEqual(rateErr.statusCode, 429);
+    assert.strictEqual(rateErr.retryAfterSeconds, 30);
+
+    const timeoutErr = new APITimeoutError(15000);
+    assert.strictEqual(timeoutErr.name, 'APITimeoutError');
+    assert.strictEqual(timeoutErr.timeoutMs, 15000);
+  });
+
+  await test('GalxAI Developer SDK: Queue Client & In-Memory Polling Handle Mock', async () => {
+    const queueId = `sdk-queue-${Date.now()}`;
+    queueEngine.createOrUpdateQueue({
+      id: queueId,
+      name: 'SDK Queue',
+      rateLimits: { maxDispatchesPerSecond: 20, maxConcurrentDispatches: 10, maxBurstSize: 20 },
+      retryConfig: { maxAttempts: 2, minBackoffMs: 100, maxBackoffMs: 1000 }
+    });
+
+    const sdk = new GalxAI({
+      apiKey: 'galx_live_test_sdk',
+      baseURL: 'http://localhost:3000',
+      fetch: async (url, opts) => {
+        // Mock gateway response for SDK async enqueue
+        return new Response(JSON.stringify({
+          id: `task_sdk_${Date.now()}`,
+          queue: queueId,
+          status: 'QUEUED',
+          task_url: `/api/queues/${queueId}/tasks/task_sdk_123`
+        }), { status: 202, headers: { 'Content-Type': 'application/json' } });
+      }
+    });
+
+    const handle = await sdk.chat.completions.createAsync({
+      model: 'gpt-5.6-sol',
+      messages: [{ role: 'user', content: 'SDK async task test' }],
+      queue: queueId
+    });
+
+    assert.ok(handle.taskId.startsWith('task_sdk_'));
+    assert.strictEqual(handle.queueId, queueId);
+    assert.strictEqual(typeof handle.result, 'function');
+    assert.strictEqual(typeof handle.streamProgress, 'function');
+    assert.strictEqual(typeof handle.cancel, 'function');
+  });
+
+  await test('GalxAI Developer SDK: Fluent Builder Method Chaining & Async Execution', async () => {
+    let capturedBody: any;
+    let capturedHeaders: any;
+
+    const sdk = new GalxAI({
+      apiKey: 'galx_live_test_builder',
+      baseURL: 'http://localhost:3000',
+      fetch: async (url, opts: any) => {
+        capturedBody = JSON.parse(opts.body);
+        capturedHeaders = opts.headers;
+        return new Response(JSON.stringify({
+          id: 'chatcmpl_builder_123',
+          object: 'chat.completion',
+          created: Date.now(),
+          model: 'gpt-5.6-sol',
+          choices: [{ index: 0, message: { role: 'assistant', content: 'Builder response OK' }, finish_reason: 'stop' }]
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+    });
+
+    const res = await sdk.chat
+      .builder('gpt-5.6-sol')
+      .system('You are an expert system engineer.')
+      .user('Explain Raft consensus.')
+      .temperature(0.2)
+      .maxTokens(2048)
+      .execute();
+
+    assert.ok(capturedBody);
+    assert.strictEqual(capturedBody.model, 'gpt-5.6-sol');
+    assert.strictEqual(capturedBody.temperature, 0.2);
+    assert.strictEqual(capturedBody.max_tokens, 2048);
+    assert.strictEqual(capturedBody.messages.length, 2);
+    assert.strictEqual(capturedBody.messages[0].role, 'system');
+    assert.strictEqual(capturedBody.messages[1].role, 'user');
+    assert.strictEqual((res as any).choices[0].message.content, 'Builder response OK');
+  });
+
+  await test('GalxAI Developer SDK: Structured JSON Outputs & Schema Extraction', async () => {
+    const sdk = new GalxAI({
+      apiKey: 'galx_live_test_structured',
+      baseURL: 'http://localhost:3000',
+      fetch: async (url, opts: any) => {
+        const body = JSON.parse(opts.body);
+        assert.strictEqual(body.response_format?.type, 'json_schema');
+        assert.ok(body.response_format?.json_schema?.schema?.properties?.invoiceId);
+
+        return new Response(JSON.stringify({
+          id: 'chatcmpl_struct_123',
+          object: 'chat.completion',
+          created: Date.now(),
+          model: 'gpt-5.6-sol',
+          choices: [{
+            index: 0,
+            message: {
+              role: 'assistant',
+              content: JSON.stringify({ invoiceId: 'INV-2026-001', amount: 450.50, currency: 'USD' })
+            },
+            finish_reason: 'stop'
+          }]
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+    });
+
+    interface InvoiceData {
+      invoiceId: string;
+      amount: number;
+      currency: string;
+    }
+
+    const structured = await sdk.chat.structured<InvoiceData>({
+      model: 'gpt-5.6-sol',
+      messages: [{ role: 'user', content: 'Extract invoice metadata' }],
+      schema: {
+        type: 'object',
+        properties: {
+          invoiceId: { type: 'string' },
+          amount: { type: 'number' },
+          currency: { type: 'string' }
+        },
+        required: ['invoiceId', 'amount', 'currency']
+      },
+      validator: (data): data is InvoiceData => typeof data.invoiceId === 'string' && typeof data.amount === 'number'
+    });
+
+    assert.strictEqual(structured.invoiceId, 'INV-2026-001');
+    assert.strictEqual(structured.amount, 450.50);
+    assert.strictEqual(structured.currency, 'USD');
+  });
+
+  await test('GalxAI Developer SDK: Multi-Modal Content Ingestion Helpers', () => {
+    const sdk = new GalxAI();
+
+    // 1. Encode URL
+    const urlPart = sdk.multimodal.encodeImage('https://images.galx.ai/diagram.png');
+    assert.strictEqual(urlPart.type, 'image_url');
+    assert.strictEqual(urlPart.image_url.url, 'https://images.galx.ai/diagram.png');
+
+    // 2. Encode Buffer
+    const buf = Buffer.from('mock_image_bytes');
+    const bufPart = sdk.multimodal.encodeImage(buf);
+    assert.strictEqual(bufPart.type, 'image_url');
+    assert.ok(bufPart.image_url.url.startsWith('data:image/png;base64,'));
+
+    // 3. Create Multi-Modal User Message
+    const msg = sdk.multimodal.createUserMessage('Inspect this architecture:', [
+      'https://images.galx.ai/arch.png',
+      buf
+    ]);
+    assert.strictEqual(msg.role, 'user');
+    assert.ok(Array.isArray(msg.content));
+    assert.strictEqual(msg.content.length, 3); // 1 text + 2 images
+  });
+
+  await test('GalxAI Developer SDK: Stream Protocol Adapters (toTextStream & toDataStreamResponse)', async () => {
+    const sdk = new GalxAI();
+
+    async function* mockChunks() {
+      yield { id: '1', object: 'chunk', created: 1, model: 'm', choices: [{ index: 0, delta: { content: 'Hello' }, finish_reason: null }] };
+      yield { id: '2', object: 'chunk', created: 2, model: 'm', choices: [{ index: 0, delta: { content: ' World' }, finish_reason: 'stop' }] };
+    }
+
+    // 1. Plain Text Stream
+    const textStream = sdk.adapters.toTextStream(mockChunks());
+    const reader = textStream.getReader();
+    const decoder = new TextDecoder();
+    let accumulated = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      accumulated += decoder.decode(value);
+    }
+    assert.strictEqual(accumulated, 'Hello World');
+
+    // 2. Vercel AI SDK Data Stream Response
+    const dataResponse = sdk.adapters.toDataStreamResponse(mockChunks());
+    assert.strictEqual(dataResponse.headers.get('x-vercel-ai-data-stream'), 'v1');
+    const dataText = await dataResponse.text();
+    assert.ok(dataText.includes('0:"Hello"'));
+    assert.ok(dataText.includes('0:" World"'));
+    assert.ok(dataText.includes('d:{"finishReason":"stop"}'));
+  });
+
+  await test('GalxAI Developer SDK: Batch Swarm Concurrency Evaluator (mapConcurrent)', async () => {
+    const sdk = new GalxAI();
+    const items = [1, 2, 3, 4, 5, 6, 7, 8];
+    const processedProgress: number[] = [];
+
+    const results = await sdk.batch.mapConcurrent(
+      items,
+      async (item) => {
+        await new Promise(r => setTimeout(r, 10));
+        return item * 10;
+      },
+      {
+        concurrency: 4,
+        onProgress: (completed, total) => {
+          processedProgress.push(completed);
+        }
+      }
+    );
+
+    assert.strictEqual(results.length, 8);
+    assert.strictEqual(results.every(r => r.status === 'fulfilled'), true);
+    assert.strictEqual(results[0].result, 10);
+    assert.strictEqual(results[7].result, 80);
+    assert.ok(processedProgress.includes(8));
+  });
+
+  await test('GalxAI Autonomous Agent: Multi-Step Tool Calling Loop Execution', async () => {
+    let callCount = 0;
+    const sdk = new GalxAI({
+      apiKey: 'galx_live_test_agent',
+      baseURL: 'http://localhost:3000',
+      fetch: async (url, opts: any) => {
+        callCount++;
+        const body = JSON.parse(opts.body);
+
+        // Step 1: Model requests tool call
+        if (callCount === 1) {
+          return new Response(JSON.stringify({
+            id: 'chatcmpl_agent_step1',
+            object: 'chat.completion',
+            created: Date.now(),
+            model: 'gpt-5.6-sol',
+            choices: [{
+              index: 0,
+              message: {
+                role: 'assistant',
+                content: 'Checking stock quote...',
+                tool_calls: [{
+                  id: 'call_123',
+                  type: 'function',
+                  function: {
+                    name: 'getQuote',
+                    arguments: JSON.stringify({ ticker: 'NVDA' })
+                  }
+                }]
+              },
+              finish_reason: 'tool_calls'
+            }]
+          }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        }
+
+        // Step 2: Model synthesizes final answer with tool output
+        return new Response(JSON.stringify({
+          id: 'chatcmpl_agent_step2',
+          object: 'chat.completion',
+          created: Date.now(),
+          model: 'gpt-5.6-sol',
+          choices: [{
+            index: 0,
+            message: {
+              role: 'assistant',
+              content: 'Nvidia is currently trading at $135.50.'
+            },
+            finish_reason: 'stop'
+          }],
+          usage: { prompt_tokens: 150, completion_tokens: 25, total_tokens: 175 }
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+    });
+
+    let toolExecuted = false;
+    const agent = sdk.agent({
+      model: 'gpt-5.6-sol',
+      systemPrompt: 'You are a market analyst.',
+      tools: {
+        getQuote: {
+          description: 'Get stock quote',
+          parameters: { ticker: { type: 'string' } },
+          execute: async ({ ticker }) => {
+            toolExecuted = true;
+            return { ticker, price: 135.50, currency: 'USD' };
+          }
+        }
+      }
+    });
+
+    const res = await agent.run('What is Nvidia stock price?');
+
+    assert.strictEqual(toolExecuted, true);
+    assert.strictEqual(res.stepsCount, 2);
+    assert.strictEqual(res.text, 'Nvidia is currently trading at $135.50.');
+    assert.strictEqual(res.toolCallsExecuted.length, 1);
+    assert.strictEqual(res.toolCallsExecuted[0].toolName, 'getQuote');
+    assert.strictEqual(res.toolCallsExecuted[0].result.price, 135.50);
+  });
+
+  await test('GalxAI Middleware Pipeline: Lifecycle Hooks & Request Context Tracing', async () => {
+    let beforeHookFired = false;
+    let afterHookFired = false;
+
+    const sdk = new GalxAI({
+      apiKey: 'galx_live_test_middleware',
+      baseURL: 'http://localhost:3000',
+      fetch: async () => {
+        return new Response(JSON.stringify({
+          id: 'chatcmpl_mid_123',
+          object: 'chat.completion',
+          created: Date.now(),
+          model: 'gpt-5.6-sol',
+          choices: [{ index: 0, message: { role: 'assistant', content: 'OK' }, finish_reason: 'stop' }]
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+    });
+
+    sdk.use({
+      onRequest: (ctx) => {
+        beforeHookFired = true;
+        assert.strictEqual(ctx.method, 'POST');
+        assert.strictEqual(ctx.path, '/v1/chat/completions');
+      },
+      onResponse: (ctx) => {
+        afterHookFired = true;
+        assert.strictEqual(ctx.statusCode, 200);
+        assert.ok(ctx.durationMs >= 0);
+      }
+    });
+
+    await sdk.chat.completions.create({
+      model: 'gpt-5.6-sol',
+      messages: [{ role: 'user', content: 'Test middleware' }]
+    });
+
+    assert.strictEqual(beforeHookFired, true);
+    assert.strictEqual(afterHookFired, true);
+  });
+
+  await test('GalxAI Middleware: Semantic In-Memory LRU Response Caching Plugin', async () => {
+    let networkFetches = 0;
+
+    const sdk = new GalxAI({
+      apiKey: 'galx_live_test_cache',
+      baseURL: 'http://localhost:3000',
+      fetch: async () => {
+        networkFetches++;
+        return new Response(JSON.stringify({
+          id: `chatcmpl_cache_${networkFetches}`,
+          object: 'chat.completion',
+          created: Date.now(),
+          model: 'gpt-5.6-sol',
+          choices: [{ index: 0, message: { role: 'assistant', content: 'Cached data' }, finish_reason: 'stop' }]
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+    });
+
+    sdk.use(createLRUCachePlugin({ maxEntries: 10, ttlMs: 5000 }));
+
+    // Request 1: cache miss -> network call
+    const res1 = await sdk.chat.completions.create({
+      model: 'gpt-5.6-sol',
+      messages: [{ role: 'user', content: 'Same unique prompt' }]
+    });
+    assert.strictEqual(networkFetches, 1);
+    assert.strictEqual(res1.choices[0].message.content, 'Cached data');
+
+    // Request 2: cache hit -> 0 additional network calls!
+    const res2 = await sdk.chat.completions.create({
+      model: 'gpt-5.6-sol',
+      messages: [{ role: 'user', content: 'Same unique prompt' }]
+    });
+    assert.strictEqual(networkFetches, 1);
+    assert.strictEqual(res2.choices[0].message.content, 'Cached data');
+  });
+
+  await test('GalxAI Middleware: Real-Time Token Cost & Dollar Budget Tracker Plugin', async () => {
+    let capturedStats: any = null;
+    let budgetExceeded = false;
+
+    const sdk = new GalxAI({
+      apiKey: 'galx_live_test_cost',
+      baseURL: 'http://localhost:3000',
+      fetch: async () => {
+        return new Response(JSON.stringify({
+          id: 'chatcmpl_cost_123',
+          object: 'chat.completion',
+          created: Date.now(),
+          model: 'gpt-5.6-sol',
+          choices: [{ index: 0, message: { role: 'assistant', content: 'Token response' }, finish_reason: 'stop' }],
+          usage: { prompt_tokens: 1000, completion_tokens: 500, total_tokens: 1500 }
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+    });
+
+    sdk.use(createCostTrackerPlugin({
+      maxBudgetUsd: 0.005,
+      onUsageUpdate: (stats) => { capturedStats = stats; },
+      onBudgetExceeded: () => { budgetExceeded = true; }
+    }));
+
+    await sdk.chat.completions.create({
+      model: 'gpt-5.6-sol',
+      messages: [{ role: 'user', content: 'Track cost' }]
+    });
+
+    assert.ok(capturedStats);
+    assert.strictEqual(capturedStats.totalRequests, 1);
+    assert.strictEqual(capturedStats.totalTokens, 1500);
+    assert.ok(capturedStats.totalCostUsd > 0);
+    assert.strictEqual(budgetExceeded, true);
+  });
+
+  await test('GalxAI Resilience: Multi-Model Fallback Cascade on 429/5xx Failover', async () => {
+    let triedModels: string[] = [];
+
+    const sdk = new GalxAI({
+      apiKey: 'galx_live_test_cascade',
+      baseURL: 'http://localhost:3000',
+      fetch: async (url, opts: any) => {
+        const body = JSON.parse(opts.body);
+        triedModels.push(body.model);
+
+        // Fail primary model with 429
+        if (body.model === 'gpt-5.6-sol') {
+          return new Response(JSON.stringify({ error: { message: 'Primary quota exhausted' } }), { status: 429 });
+        }
+
+        // Succeed on secondary model
+        return new Response(JSON.stringify({
+          id: 'chatcmpl_cascade_success',
+          object: 'chat.completion',
+          created: Date.now(),
+          model: body.model,
+          choices: [{ index: 0, message: { role: 'assistant', content: 'Cascade success' }, finish_reason: 'stop' }]
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+    });
+
+    const res = await sdk.chat.fallbackCascade(
+      ['gpt-5.6-sol', 'x-ai/grok-4.5', 'gpt-5.6-luna'],
+      { messages: [{ role: 'user', content: 'Failover test' }] }
+    );
+
+    assert.strictEqual(res.successfulModel, 'x-ai/grok-4.5');
+    assert.strictEqual(res.attemptsMade, 2);
+    assert.ok(triedModels.includes('gpt-5.6-sol'));
+    assert.ok(triedModels.includes('x-ai/grok-4.5'));
+    assert.strictEqual(res.choices[0].message.content, 'Cascade success');
+  });
+
+  await test('GalxAI Context Optimizer: Token Estimation & Conversation Pruning', () => {
+    // 1. Estimate Tokens
+    const text = 'Distributed consensus protocols require quorum agreement across physical shards.';
+    const tokens = TokenOptimizer.estimateTokens(text);
+    assert.ok(tokens > 5 && tokens < 30);
+
+    // 2. Message History Pruning
+    const messages = [
+      { role: 'system' as const, content: 'You are an AI assistant.' },
+      { role: 'user' as const, content: 'Old message 1' },
+      { role: 'assistant' as const, content: 'Old reply 1' },
+      { role: 'user' as const, content: 'Old message 2' },
+      { role: 'assistant' as const, content: 'Old reply 2' },
+      { role: 'user' as const, content: 'Recent question' }
+    ];
+
+    const pruned = TokenOptimizer.truncateToFit(messages, 30, 'preserve_system_and_recent');
+
+    // System instruction is strictly preserved
+    assert.strictEqual(pruned[0].role, 'system');
+    // Most recent user question is preserved
+    assert.strictEqual(pruned[pruned.length - 1].content, 'Recent question');
+    // Total count reduced
+    assert.ok(pruned.length < messages.length);
+  });
+
+
+
+
+
+
+
 
   console.log('\n======================================================================');
   if (testsFailed === 0) {

@@ -59,43 +59,73 @@ print(response.choices[0].message.content)
 
 ---
 
-## 2. Tool & Function Calling
+## 2. Type-Safe Structured Extraction with `@galxai/sdk`
 
-Provide models with external tools for live execution loops.
+The official SDK automatically handles JSON Schema serialization and runtime extraction:
 
-### TypeScript Example
 ```typescript
-import OpenAI from 'openai';
+import { GalxAI } from '@/sdk';
 
-const client = new OpenAI({
-  baseURL: 'http://localhost:3000/v1',
-  apiKey: process.env.GALXAI_API_KEY!,
+const galx = new GalxAI();
+
+interface UserProfile {
+  name: string;
+  role: string;
+  skills: string[];
+}
+
+const profile = await galx.chat.structured<UserProfile>({
+  model: 'gpt-5.6-sol',
+  messages: [{ role: 'user', content: 'Alice Smith is a Principal Distributed Systems Engineer specialized in Raft and Rust.' }],
+  schema: {
+    type: 'object',
+    properties: {
+      name: { type: 'string' },
+      role: { type: 'string' },
+      skills: { type: 'array', items: { type: 'string' } }
+    },
+    required: ['name', 'role', 'skills']
+  }
 });
 
-const tools: OpenAI.ChatCompletionTool[] = [
-  {
-    type: 'function',
-    function: {
-      name: 'get_system_metrics',
-      description: 'Fetches real-time server telemetry and latency percentiles.',
+console.log(profile.name);   // "Alice Smith"
+console.log(profile.skills); // ["Raft", "Rust"]
+```
+
+---
+
+## 3. Autonomous Multi-Step Tool Calling Runtime (`galx.agent`)
+
+Eliminate manual while loops, argument parsers, and tool message appending with `galx.agent`:
+
+```typescript
+import { GalxAI } from '@/sdk';
+
+const galx = new GalxAI();
+
+const agent = galx.agent({
+  model: 'gpt-5.6-sol',
+  systemPrompt: 'You are an autonomous cloud infrastructure engineer.',
+  tools: {
+    getClusterHealth: {
+      description: 'Get real-time health stats for a compute cluster',
       parameters: {
         type: 'object',
-        properties: {
-          metric_type: { type: 'string', enum: ['latency', 'throughput', 'circuit_status'] },
-          window_minutes: { type: 'number', description: 'Window in minutes' },
-        },
-        required: ['metric_type'],
+        properties: { clusterId: { type: 'string' } },
+        required: ['clusterId']
       },
-    },
+      execute: async ({ clusterId }) => {
+        return { clusterId, status: 'HEALTHY', activeNodes: 48, p99LatencyMs: 12.4 };
+      }
+    }
   },
-];
-
-const response = await client.chat.completions.create({
-  model: 'x-ai/grok-4.5',
-  messages: [{ role: 'user', content: 'What has been our P99 latency over the last 15 minutes?' }],
-  tools,
-  tool_choice: 'auto',
+  maxSteps: 5
 });
 
-console.log(JSON.stringify(response.choices[0].message.tool_calls, null, 2));
+const result = await agent.run('Check the health of cluster us-east-prod-1 and summarize findings.');
+
+console.log(result.text);                // Final synthesized answer
+console.log(result.toolCallsExecuted);   // Full execution history
+console.log(result.stepsCount);          // Number of execution steps taken
 ```
+

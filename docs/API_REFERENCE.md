@@ -184,3 +184,197 @@ Returns real-time sliding-window latency percentiles ($P_{50}, P_{90}, P_{99}$),
 }
 ```
 Supported strategies: `adaptive_headroom`, `smooth_weighted_round_robin`, `least_utilized`, `priority_failover`.
+
+---
+
+## ⚡ Asynchronous Task Queues & Cloud Run Webhooks (`/api/queues/*`)
+
+GALXAI provides a CloudTasks & CloudRun-inspired asynchronous task queue and worker execution substrate.
+
+### 1. List Queues (`GET /api/queues`)
+Returns all active queues with live telemetry, dispatch rates, and concurrency semaphores.
+
+```bash
+curl -X GET https://gateway.galx.ai/api/queues \
+  -H "Authorization: Bearer galx_live_..."
+```
+
+### 2. Enqueue Task (`POST /api/queues/:queueId/tasks`)
+Creates and schedules an asynchronous task with strict idempotency deduplication and priority.
+
+```bash
+curl -X POST https://gateway.galx.ai/api/queues/llm-batch/tasks \
+  -H "Authorization: Bearer galx_live_..." \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: job-eval-2026-08-22-001" \
+  -d '{
+    "priority": 80,
+    "delayMs": 5000,
+    "target": {
+      "type": "INTERNAL_MODEL",
+      "taskKind": "chat_completion",
+      "chatPayload": {
+        "model": "gpt-5.6-sol",
+        "messages": [{ "role": "user", "content": "Evaluate code quality" }]
+      },
+      "webhookCompletionUrl": "https://my-server.run.app/callbacks/ai",
+      "webhookHmacSecret": "whsec_supersecretkey"
+    }
+  }'
+```
+
+**Response (`202 Accepted`)**:
+```json
+{
+  "task": {
+    "id": "task_1700000000_abc1234",
+    "queueId": "llm-batch",
+    "status": "SCHEDULED",
+    "scheduleTimeMs": 1700000005000,
+    "priority": 80
+  },
+  "deduplicated": false,
+  "taskUrl": "/api/queues/llm-batch/tasks/task_1700000000_abc1234"
+}
+```
+
+### 3. Asynchronous Chat Completion Ingress (`POST /v1/chat/completions`)
+Passing `X-Galx-Async: true` automatically enqueues the request into the asynchronous queue:
+
+```bash
+curl -X POST https://gateway.galx.ai/v1/chat/completions \
+  -H "Authorization: Bearer galx_live_..." \
+  -H "X-Galx-Async: true" \
+  -H "X-Galx-Queue: llm-batch" \
+  -H "X-Galx-Webhook-Url: https://my-service.run.app/ai-hook" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-5.6-sol",
+    "messages": [{ "role": "user", "content": "Long reasoning task" }]
+  }'
+```
+
+### 4. Distributed Pull Worker Lease (`POST /api/queues/:queueId/lease`)
+Enables external worker fleets to lease tasks atomically with fencing tokens:
+
+```bash
+curl -X POST https://gateway.galx.ai/api/queues/default/lease \
+  -H "Authorization: Bearer galx_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "workerId": "worker-us-central1-a-01",
+    "maxTasks": 10,
+    "leaseDurationMs": 60000
+  }'
+```
+
+### 5. Acknowledge Pull Task (`POST /api/queues/:queueId/tasks/:taskId/acknowledge`)
+```bash
+curl -X POST https://gateway.galx.ai/api/queues/default/tasks/task_123/acknowledge \
+  -H "Authorization: Bearer galx_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "workerId": "worker-us-central1-a-01",
+    "result": { "computedValue": 42 }
+  }'
+```
+
+### 6. Bulk DLQ Redrive (`POST /api/queues/:queueId/redrive`)
+Re-enqueues up to 100 dead-lettered tasks in bulk for immediate re-execution.
+
+```bash
+curl -X POST https://gateway.galx.ai/api/queues/llm-batch/redrive \
+  -H "Authorization: Bearer galx_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{ "maxTasks": 50 }'
+```
+
+### 7. Bulk Task Cancellation (`POST /api/queues/:queueId/tasks/bulk-cancel`)
+Bulk cancels pending/scheduled tasks matching specific tags, group IDs, or user IDs.
+
+```bash
+curl -X POST https://gateway.galx.ai/api/queues/agent-swarms/tasks/bulk-cancel \
+  -H "Authorization: Bearer galx_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{ "tag": "obsolete-run-v1" }'
+```
+
+### 8. Worker Progress Update (`POST /api/queues/:queueId/tasks/:taskId/progress`)
+Updates execution progress percentage and appends execution logs.
+
+```bash
+curl -X POST https://gateway.galx.ai/api/queues/default/tasks/task_123/progress \
+  -H "Authorization: Bearer galx_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "percentage": 65,
+    "message": "Processed 650/1000 items in batch",
+    "logLine": "Chunk #65 committed."
+  }'
+```
+
+### 9. Task Real-Time Server-Sent Events Stream (`GET /api/queues/:queueId/tasks/:taskId/stream`)
+Subscribes to real-time execution state transitions, progress updates, and logs via standard SSE:
+
+```bash
+curl -N https://gateway.galx.ai/api/queues/default/tasks/task_123/stream \
+  -H "Authorization: Bearer galx_live_..."
+```
+
+### 10. Queue-Wide Real-Time SSE Stream (`GET /api/queues/:queueId/stream`)
+Subscribes to live dispatches, completions, and telemetry events across an entire named queue:
+
+```bash
+curl -N https://gateway.galx.ai/api/queues/agent-swarms/stream \
+  -H "Authorization: Bearer galx_live_..."
+```
+
+### 11. Task Creation with DAG Dependencies (`POST /api/queues/:queueId/tasks`)
+Creates a Fan-In child task that waits until parent tasks `task_A` and `task_B` complete:
+
+```bash
+curl -X POST https://gateway.galx.ai/api/queues/agent-swarms/tasks \
+  -H "Authorization: Bearer galx_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "dependsOn": ["task_A", "task_B"],
+    "target": {
+      "type": "INTERNAL_MODEL",
+      "taskKind": "chat_completion",
+      "chatPayload": {
+        "model": "gpt-5.6-sol",
+        "messages": [{ "role": "user", "content": "Synthesize summary from parent tasks" }]
+      }
+    }
+  }'
+```
+
+---
+
+## 📦 Official Universal Developer SDK Reference
+
+For zero-boilerplate client integration without raw HTTP calls, use `@galxai/sdk`:
+
+```typescript
+import { GalxAI } from '@/sdk';
+
+const galx = new GalxAI({ apiKey: process.env.GALX_API_KEY });
+
+// Chat & Streaming
+const stream = await galx.chat.completions.create({ model: 'gpt-5.6-sol', messages: [...], stream: true });
+
+// Autonomous Multi-Step Agent Tool Loop
+const agent = galx.agent({ model: 'gpt-5.6-sol', tools: { ... } });
+const agentOutput = await agent.run('Investigate stock anomalies.');
+
+// Strongly-Typed Structured Outputs
+const data = await galx.chat.structured({ model: 'gpt-5.6-sol', messages: [...], schema: { ... } });
+
+// Background Tasks & SSE Progress
+const task = await galx.chat.completions.createAsync({ model: 'gpt-5.6-sol', messages: [...], queue: 'llm-batch' });
+for await (const progress of task.streamProgress()) console.log(progress.percentage);
+```
+
+
+
+

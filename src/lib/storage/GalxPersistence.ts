@@ -1,10 +1,12 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import type { GalxShardAccount, DeveloperGatewayKey } from '../../core/contracts/GalxContracts';
+import type { GalxShardAccount, DeveloperGatewayKey, GalxTaskQueueConfig, GalxTask } from '../../core/contracts/GalxContracts';
 
 export interface GalxPersistedState {
   shards: GalxShardAccount[];
   gatewayKeys: DeveloperGatewayKey[];
+  queues: GalxTaskQueueConfig[];
+  tasks: GalxTask[];
   auditLogs: Array<{
     id: string;
     shardId?: string;
@@ -26,6 +28,8 @@ export class GalxPersistence {
   private state: GalxPersistedState = {
     shards: [],
     gatewayKeys: [],
+    queues: [],
+    tasks: [],
     auditLogs: []
   };
   private isLoaded = false;
@@ -54,6 +58,8 @@ export class GalxPersistence {
         this.state = {
           shards: parsed.shards || [],
           gatewayKeys: parsed.gatewayKeys || [],
+          queues: parsed.queues || [],
+          tasks: parsed.tasks || [],
           auditLogs: parsed.auditLogs || []
         };
       } else {
@@ -129,4 +135,60 @@ export class GalxPersistence {
     }
     this.save();
   }
+
+  public getQueues(): GalxTaskQueueConfig[] {
+    return this.state.queues;
+  }
+
+  public saveQueue(queue: GalxTaskQueueConfig): void {
+    const idx = this.state.queues.findIndex(q => q.id === queue.id);
+    if (idx >= 0) {
+      this.state.queues[idx] = queue;
+    } else {
+      this.state.queues.push(queue);
+    }
+    this.save();
+  }
+
+  public deleteQueue(queueId: string): void {
+    this.state.queues = this.state.queues.filter(q => q.id !== queueId);
+    this.state.tasks = this.state.tasks.filter(t => t.queueId !== queueId);
+    this.save();
+  }
+
+  public getTasks(): GalxTask[] {
+    return this.state.tasks;
+  }
+
+  public saveTask(task: GalxTask): void {
+    const idx = this.state.tasks.findIndex(t => t.id === task.id);
+    if (idx >= 0) {
+      this.state.tasks[idx] = task;
+    } else {
+      this.state.tasks.push(task);
+    }
+    if (this.state.tasks.length > 5000) {
+      // Retain most recent 5000 tasks
+      this.state.tasks = this.state.tasks.slice(-5000);
+    }
+    this.save();
+  }
+
+  public deleteTask(taskId: string): void {
+    this.state.tasks = this.state.tasks.filter(t => t.id !== taskId);
+    this.save();
+  }
+
+  public purgeQueueTasks(queueId: string, statusFilter?: string): number {
+    const prevCount = this.state.tasks.length;
+    if (statusFilter) {
+      this.state.tasks = this.state.tasks.filter(t => !(t.queueId === queueId && t.status === statusFilter));
+    } else {
+      this.state.tasks = this.state.tasks.filter(t => t.queueId !== queueId);
+    }
+    const purged = prevCount - this.state.tasks.length;
+    this.save();
+    return purged;
+  }
 }
+

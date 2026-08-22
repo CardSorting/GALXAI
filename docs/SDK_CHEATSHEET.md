@@ -4,6 +4,57 @@ Complete drop-in code snippets for connecting any major AI framework or programm
 
 ---
 
+## 🌌 Official GALXAI Universal SDK (`@galxai/sdk`)
+
+```typescript
+import { GalxAI, createCostTrackerPlugin, createLRUCachePlugin } from '@/sdk';
+
+const galx = new GalxAI({ apiKey: process.env.GALX_API_KEY });
+
+// 1. Fluent Builder with Streaming
+const stream = await galx.chat
+  .builder('gpt-5.6-sol')
+  .system('You are an expert systems architect.')
+  .user('Explain Raft consensus.')
+  .temperature(0.2)
+  .stream(true)
+  .execute();
+
+// 2. Autonomous Multi-Step Agent Tool Loop
+const agent = galx.agent({
+  model: 'gpt-5.6-sol',
+  tools: {
+    getQuote: {
+      description: 'Get stock quote',
+      parameters: { ticker: { type: 'string' } },
+      execute: async ({ ticker }) => ({ price: 135.50 })
+    }
+  }
+});
+const result = await agent.run('What is Nvidia trading at?');
+
+// 3. Strongly-Typed Structured Outputs
+const invoice = await galx.chat.structured({
+  model: 'gpt-5.6-sol',
+  messages: [{ role: 'user', content: 'Invoice #1024 total $450' }],
+  schema: {
+    type: 'object',
+    properties: { invoiceId: { type: 'string' }, total: { type: 'number' } },
+    required: ['invoiceId', 'total']
+  }
+});
+
+// 4. Background Queue with Real-Time SSE Progress
+const task = await galx.chat.completions.createAsync({
+  model: 'gpt-5.6-sol',
+  messages: [{ role: 'user', content: 'Mass evaluation' }],
+  queue: 'llm-batch',
+  groupId: 'session_1'
+});
+```
+
+---
+
 ## 🐍 Python Ecosystem
 
 ### 1. Official OpenAI Python SDK
@@ -21,6 +72,7 @@ response = client.chat.completions.create(
     messages=[{"role": "user", "content": "Explain quantum teleportation in 3 sentences."}],
     temperature=0.7
 )
+
 
 print(response.choices[0].message.content)
 ```

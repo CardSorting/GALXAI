@@ -71,46 +71,49 @@ sequenceDiagram
 
 ---
 
-## 3. Pure JavaScript SSE Parser (Zero Dependencies)
+## 4. Vercel AI SDK & Next.js App Router Integration
 
-```javascript
-async function streamCompletion(prompt) {
-  const response = await fetch('http://localhost:3000/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer galx_live_your_key_here'
-    },
-    body: JSON.stringify({
-      model: 'gpt-5.6-sol',
-      messages: [{ role: 'user', content: prompt }],
-      stream: true
-    })
+`@galxai/sdk` includes zero-boilerplate stream adapters for the Vercel AI SDK Data Stream protocol:
+
+```typescript
+// app/api/chat/route.ts in Next.js
+import { GalxAI } from '@/sdk';
+
+const galx = new GalxAI();
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const stream = await galx.chat.completions.create({
+    model: 'gpt-5.6-sol',
+    messages,
+    stream: true
   });
 
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder('utf-8');
-  let buffer = '';
-
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop(); // Keep incomplete chunk in buffer
-
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith(':')) continue;
-      if (trimmed === 'data: [DONE]') return;
-
-      if (trimmed.startsWith('data: ')) {
-        const json = JSON.parse(trimmed.substring(6));
-        const token = json.choices[0]?.delta?.content || '';
-        process.stdout.write(token);
-      }
-    }
-  }
+  // Emits 0:"token"\n with x-vercel-ai-data-stream: v1 headers
+  return galx.adapters.toDataStreamResponse(stream);
 }
 ```
+
+---
+
+## 5. Asynchronous Queue SSE Lifecycle Stream
+
+In addition to token streaming, GALXAI exposes native SSE event streams for asynchronous tasks:
+
+```http
+GET /api/queues/llm-batch/tasks/task_123/stream HTTP/1.1
+Accept: text/event-stream
+```
+
+### Event Payload Frames
+```text
+data: {"type":"snapshot","data":{"id":"task_123","status":"RUNNING","progress":{"percentage":50,"message":"Evaluating dataset batch 2/4"}}}
+
+data: {"type":"TASK_PROGRESS","data":{"percentage":75,"message":"Evaluating dataset batch 3/4"}}
+
+data: {"type":"TASK_COMPLETED","data":{"result":{"modelUsed":"gpt-5.6-sol","tokens":1450}}}
+
+data: {"type":"done"}
+```
+

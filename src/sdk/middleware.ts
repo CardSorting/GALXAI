@@ -1,0 +1,163 @@
+/**
+ * GALXAI Developer SDK: Middleware Pipeline & Plugin Substrate
+ * Interceptors for request/response tracing, live cost budgeting, and semantic LRU caching.
+ */
+
+export interface MiddlewareRequestContext {
+  path: string;
+  method: string;
+  headers: Record<string, string>;
+  body?: any;
+  timestampMs: number;
+}
+
+export interface MiddlewareResponseContext {
+  path: string;
+
+  method: string;
+  statusCode: number;
+  durationMs: number;
+  data?: any;
+  headers?: Headers | Record<string, string>;
+  requestBody?: any;
+}
+
+export interface MiddlewareErrorContext {
+  path: string;
+  method: string;
+  error: Error;
+  durationMs: number;
+}
+
+export interface GalxPlugin {
+  name?: string;
+  onRequest?: (ctx: MiddlewareRequestContext) => Promise<void | { shortCircuitResponse?: any }> | void | { shortCircuitResponse?: any };
+  onResponse?: (ctx: MiddlewareResponseContext) => Promise<void> | void;
+  onError?: (ctx: MiddlewareErrorContext) => Promise<void> | void;
+}
+
+export class MiddlewarePipeline {
+  private readonly plugins: GalxPlugin[] = [];
+
+  public use(plugin: GalxPlugin): this {
+    this.plugins.push(plugin);
+    return this;
+  }
+
+  public async executeOnRequest(ctx: MiddlewareRequestContext): Promise<{ shortCircuitResponse?: any } | undefined> {
+    for (const plugin of this.plugins) {
+      if (plugin.onRequest) {
+        const res = await plugin.onRequest(ctx);
+        if (res && res.shortCircuitResponse !== undefined) {
+          return res;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  public async executeOnResponse(ctx: MiddlewareResponseContext): Promise<void> {
+    for (const plugin of this.plugins) {
+      if (plugin.onResponse) {
+        await plugin.onResponse(ctx);
+      }
+    }
+  }
+
+  public async executeOnError(ctx: MiddlewareErrorContext): Promise<void> {
+    for (const plugin of this.plugins) {
+      if (plugin.onError) {
+        await plugin.onError(ctx);
+      }
+    }
+  }
+}
+
+/**
+ * Built-in Plugin: Real-Time Token & Dollar Budget Tracker
+ */
+export function createCostTrackerPlugin(options: {
+  maxBudgetUsd?: number;
+  onBudgetExceeded?: (totalUsd: number) => void;
+  onUsageUpdate?: (stats: { totalRequests: number; totalTokens: number; totalCostUsd: number }) => void;
+} = {}): GalxPlugin {
+  let totalRequests = 0;
+  let totalTokens = 0;
+  let totalCostUsd = 0;
+
+  return {
+    name: 'CostTrackerPlugin',
+    onResponse: (ctx) => {
+      totalRequests++;
+      const usage = ctx.data?.usage;
+      if (usage) {
+        const promptTokens = usage.prompt_tokens || 0;
+        const completionTokens = usage.completion_tokens || 0;
+        const reqTokens = promptTokens + completionTokens;
+        totalTokens += reqTokens;
+
+        // Blended wholesale pricing ($0.0025/1k input, $0.01/1k output)
+        const cost = (promptTokens * 0.0025 + completionTokens * 0.01) / 1000;
+        totalCostUsd += cost;
+
+        options.onUsageUpdate?.({
+          totalRequests,
+          totalTokens,
+          totalCostUsd: Number(totalCostUsd.toFixed(6))
+        });
+
+        if (options.maxBudgetUsd && totalCostUsd >= options.maxBudgetUsd) {
+          options.onBudgetExceeded?.(totalCostUsd);
+        }
+      }
+    }
+  };
+}
+
+/**
+ * Built-in Plugin: In-Memory Client-Side LRU Response Caching
+ */
+export function createLRUCachePlugin(options: {
+  maxEntries?: number;
+  ttlMs?: number;
+} = {}): GalxPlugin {
+  const maxEntries = options.maxEntries ?? 200;
+  const ttlMs = options.ttlMs ?? 60000; // 1 minute default
+  const cache = new Map<string, { data: any; expiresAt: number }>();
+
+  const getCacheKey = (method: string, path: string, body: any) => {
+    if (method !== 'POST' && method !== 'GET') return null;
+    return `${method}:${path}:${JSON.stringify(body || {})}`;
+  };
+
+  return {
+    name: 'LRUCachePlugin',
+    onRequest: (ctx) => {
+      const key = getCacheKey(ctx.method, ctx.path, ctx.body);
+      if (!key) return;
+
+      const cached = cache.get(key);
+      if (cached && cached.expiresAt > Date.now()) {
+        return { shortCircuitResponse: cached.data };
+      }
+      if (cached && cached.expiresAt <= Date.now()) {
+        cache.delete(key);
+      }
+    },
+    onResponse: (ctx) => {
+      if (ctx.statusCode !== 200) return;
+      const key = getCacheKey(ctx.method, ctx.path, ctx.requestBody);
+      if (!key) return;
+
+      if (cache.size >= maxEntries) {
+        const oldestKey = cache.keys().next().value;
+        if (oldestKey) cache.delete(oldestKey);
+      }
+      cache.set(key, {
+        data: ctx.data,
+        expiresAt: Date.now() + ttlMs
+      });
+    }
+  };
+}
+
