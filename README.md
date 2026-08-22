@@ -142,6 +142,7 @@ npm run dev
 - ⏱️ **[Rate Limits, Concurrency & Quotas](docs/RATE_LIMITS_AND_QUOTAS.md)**: Gateway key tiers, continuous replenishment calculus, and fair-share concurrency limits.
 - 🔄 **[Migration Guide](docs/MIGRATION_GUIDE.md)**: Moving from direct OpenAI, xAI, Azure, or OpenRouter with zero code changes.
 - 💰 **[Pricing & Multi-Tiered Discount Strategy](docs/PRICING_AND_DISCOUNT_STRATEGY.md)**: 25%–40% base arbitrage discounts, 75% prompt caching pass-through, and zero markups.
+- 🚀 **[Go-To-Market (GTM) & Growth Strategy](docs/GTM_STRATEGY.md)**: ICP personas, distribution channels, unit economics, viral loops, and 2026 execution roadmap.
 - 🔒 **[Security & Cryptographic Threat Model](docs/SECURITY.md)**: AAD envelope encryption, memory zeroization, and zero-prompt logging.
 - 📊 **[Telemetry, Metrics & Observability](docs/TELEMETRY_AND_OBSERVABILITY.md)**: Prometheus scraping, Datadog integration, and Grafana latency dashboards.
 - 📖 **[API Reference](docs/API_REFERENCE.md)**: REST endpoints for chat completions, visual synthesis, model catalog, and pool telemetry.
