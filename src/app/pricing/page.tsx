@@ -30,6 +30,8 @@ import {
   DollarSign
 } from 'lucide-react';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
+import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
+import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
 
 interface VolumeTier {
   id: string;
@@ -267,33 +269,8 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* Founding Builder 50% Compute Match Grant Ribbon */}
-        <div className="glass-panel rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-indigo-600/15 border border-amber-500/40 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-amber-400 text-black flex items-center justify-center font-black text-2xl shrink-0 shadow-lg shadow-amber-500/30">
-              50%
-            </div>
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-mono font-bold uppercase">
-                <Flame className="w-3 h-3 text-amber-400 fill-amber-400" />
-                <span>Founding Builder Grant</span>
-              </div>
-              <h3 className="text-lg sm:text-xl font-black text-white">50% Instant Compute Match on Top-Ups</h3>
-              <p className="text-xs text-zinc-300 max-w-xl">
-                Deposit $50 or more and GALXAI instantly matches 50% of your deposit in free inference credits (e.g. deposit $100, receive $150 in compute balance).
-              </p>
-            </div>
-          </div>
-
-          <Link
-            href="/billing"
-            className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-lg shadow-amber-500/25 shrink-0 whitespace-nowrap font-mono cursor-pointer"
-          >
-            <Coins className="w-4 h-4 text-black" />
-            <span>Claim 50% Match Bonus</span>
-            <ArrowRight className="w-4 h-4 text-black" />
-          </Link>
-        </div>
+        {/* Founding Cohort Rate Lock & Capacity Ribbon */}
+        <RateLockRibbon />
 
         {/* Interactive Compound Savings Simulator */}
         <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-8 border border-white/10">
@@ -557,8 +534,9 @@ export default function PricingPage() {
         </div>
       </main>
 
-      {/* Floating Conversion Dock */}
+      {/* Floating Conversion Dock & Live Activity Toast */}
       <FloatingConversionDock />
+      <LiveActivityToast />
     </div>
   );
 }

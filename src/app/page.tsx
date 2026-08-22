@@ -40,6 +40,8 @@ import { ShareButton } from '@/components/common/ShareButton';
 import { RoiCalculator } from '@/components/dashboard/RoiCalculator';
 import { LiveArbitrageTicker } from '@/components/dashboard/LiveArbitrageTicker';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
+import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
+import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
 
 export default function HomePage() {
   const [stats, setStats] = useState<any>(null);
@@ -278,6 +280,9 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
           </div>
         </section>
 
+        {/* Founding Cohort Rate Lock & Capacity Scarcity Ribbon */}
+        <RateLockRibbon />
+
         {/* Interactive Dynamic ROI & Wholesale Arbitrage Calculator */}
         <RoiCalculator />
 
@@ -471,8 +476,9 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
         </section>
       </main>
 
-      {/* Floating Conversion Dock */}
+      {/* Floating Conversion Dock & Live Activity Toast */}
       <FloatingConversionDock />
+      <LiveActivityToast />
     </div>
   );
 }

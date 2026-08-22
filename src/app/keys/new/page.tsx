@@ -374,6 +374,22 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
                     <span>{copiedKey ? 'Copied!' : 'Copy Key'}</span>
                   </button>
                 </div>
+
+                {/* Founding Cohort Lifetime Rate Lock Certificate */}
+                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs text-amber-300">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-amber-400 text-black flex items-center justify-center font-bold shrink-0">
+                      <Lock className="w-4 h-4 text-black" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-white block text-xs">Founding Cohort Rate Lock: Active</span>
+                      <span className="text-zinc-300 text-[11px]">Lifetime 0% routing markup • 25%–40% wholesale margin • 75% prompt cache pass-through</span>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full bg-amber-400/20 text-amber-300 font-bold text-[10px] uppercase border border-amber-500/40 shrink-0 self-start sm:self-auto">
+                    Grandfathered
+                  </span>
+                </div>
               </div>
 
               {/* Instant In-Browser Smoke Test Card */}
