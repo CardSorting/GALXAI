@@ -2,6 +2,9 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { PersonaProvider } from "@/contexts/PersonaContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import { SkipToContent } from "@/components/common/SkipToContent";
+import { AccessibilityAnnouncer } from "@/components/common/AccessibilityAnnouncer";
 import { Footer } from "@/components/dashboard/Footer";
 import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
 import { FloatingActionDock } from "@/components/common/FloatingActionDock";
@@ -155,17 +158,21 @@ export default function RootLayout({
           <div className="absolute inset-0 bg-cyber-grid bg-[size:40px_40px] opacity-20" />
         </div>
 
-        <AuthProvider>
-          <PersonaProvider>
-            <div className="relative z-10 flex-1 flex flex-col pb-16 lg:pb-0">
-              {children}
-              <Footer />
-            </div>
-            <FloatingActionDock />
-            <MobileBottomNav />
-            <KeyboardShortcutsModal />
-          </PersonaProvider>
-        </AuthProvider>
+        <LanguageProvider>
+          <SkipToContent />
+          <AccessibilityAnnouncer />
+          <AuthProvider>
+            <PersonaProvider>
+              <div id="main-content" tabIndex={-1} className="relative z-10 flex-1 flex flex-col pb-16 lg:pb-0 outline-none">
+                {children}
+                <Footer />
+              </div>
+              <FloatingActionDock />
+              <MobileBottomNav />
+              <KeyboardShortcutsModal />
+            </PersonaProvider>
+          </AuthProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

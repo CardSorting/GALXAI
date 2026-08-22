@@ -21,11 +21,11 @@ import {
   Lock,
   GitCompare,
   Building2,
-  FileSpreadsheet,
   PieChart,
   Users2,
   FileCheck
 } from 'lucide-react';
+import { LanguageBadge } from '@/components/common/LanguageBadge';
 
 export function Footer() {
   const footerNavigation = {
@@ -235,7 +235,8 @@ export function Footer() {
             </span>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 flex-wrap justify-center sm:justify-end">
+            <LanguageBadge />
             <Link href="/pricing" className="hover:text-zinc-300 transition-colors">Pricing</Link>
             <Link href="/billing/enterprise" className="hover:text-zinc-300 transition-colors">Enterprise</Link>
             <Link href="/docs/api-reference" className="hover:text-zinc-300 transition-colors">API Docs</Link>

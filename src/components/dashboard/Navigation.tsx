@@ -18,10 +18,12 @@ import { CommandMenu } from '@/components/common/CommandMenu';
 import { ShareButton } from '@/components/common/ShareButton';
 import { PersonaSwitcher } from '@/components/dashboard/PersonaSwitcher';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function Navigation() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [commandMenuOpen, setCommandMenuOpen] = useState(false);
@@ -46,30 +48,30 @@ export function Navigation() {
     };
   }, [pathname]);
 
-  // Flattened Minimalist Primary Nav Links
+  // Flattened Minimalist Primary Nav Links with Native Translations
   const navLinks = [
     {
-      label: 'Models & Arena',
+      label: t('nav.models', 'Models & Arena'),
       href: '/models',
-      badge: '12 Models',
+      badge: t('nav.badge.models', '12 Models'),
       badgeColor: 'text-cyan-400 border-cyan-500/30 bg-cyan-500/10',
     },
     {
-      label: 'Apps & Solutions',
+      label: t('nav.apps', 'Apps & Solutions'),
       href: '/docs/simple',
-      badge: 'Zero-Code',
+      badge: t('nav.badge.apps', 'Zero-Code'),
       badgeColor: 'text-amber-300 border-amber-500/30 bg-amber-500/10',
     },
     {
-      label: 'Docs & SDKs',
+      label: t('nav.docs', 'Docs & SDKs'),
       href: '/docs',
       badge: null,
       badgeColor: '',
     },
     {
-      label: 'Pricing & Trust',
+      label: t('nav.pricing', 'Pricing & Trust'),
       href: '/pricing',
-      badge: 'Save 35%',
+      badge: t('nav.badge.pricing', 'Save 35%'),
       badgeColor: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
     },
   ];
@@ -137,7 +139,7 @@ export function Navigation() {
             {/* Quick Share Pill */}
             <ShareButton
               variant="pill"
-              label="Share"
+              label={t('nav.share', 'Share')}
               className="hidden sm:flex"
             />
 
@@ -145,8 +147,8 @@ export function Navigation() {
             <button
               onClick={() => setCommandMenuOpen(true)}
               className="flex items-center gap-1 px-2 py-1 rounded-lg bg-black/40 hover:bg-black/60 border border-white/10 text-zinc-400 hover:text-white text-xs transition-all cursor-pointer"
-              title="Search (⌘K)"
-              aria-label="Search"
+              title={t('nav.search', 'Search (⌘K)')}
+              aria-label={t('a11y.search_aria', 'Search')}
             >
               <Search className="w-3 h-3 text-zinc-400" />
               <kbd className="hidden md:inline-block px-1 py-0.2 rounded bg-white/10 text-[9px] text-zinc-400 font-mono">
@@ -162,7 +164,7 @@ export function Navigation() {
                   ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50'
                   : 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300'
               }`}
-              title="Developer Wallet"
+              title={t('nav.wallet', 'Developer Wallet')}
             >
               <Wallet className="w-3 h-3 text-emerald-400 shrink-0" />
               <span>$114.59</span>
@@ -178,7 +180,7 @@ export function Navigation() {
               }`}
             >
               <Key className="w-3 h-3 text-indigo-400 shrink-0" />
-              <span>API Keys</span>
+              <span>{t('nav.keys', 'API Keys')}</span>
             </Link>
 
             {/* User Session / Sign In */}
@@ -218,7 +220,7 @@ export function Navigation() {
                       className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-emerald-300 hover:text-white hover:bg-emerald-500/10 transition-all font-mono font-bold"
                     >
                       <Wallet className="w-3 h-3 text-emerald-400" />
-                      <span>Wallet ($114.59)</span>
+                      <span>{t('nav.wallet', 'Wallet')} ($114.59)</span>
                     </Link>
 
                     <Link
@@ -227,7 +229,7 @@ export function Navigation() {
                       className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-white hover:bg-white/5 transition-all"
                     >
                       <Key className="w-3 h-3 text-cyan-400" />
-                      <span>API Keys</span>
+                      <span>{t('nav.keys', 'API Keys')}</span>
                     </Link>
 
                     <button
@@ -249,7 +251,7 @@ export function Navigation() {
                 className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-sm flex items-center gap-1 cursor-pointer shrink-0"
               >
                 <Zap className="w-3 h-3 fill-black shrink-0" />
-                <span>Sign In</span>
+                <span>{t('nav.signin', 'Sign In')}</span>
               </Link>
             )}
 
