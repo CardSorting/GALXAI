@@ -719,6 +719,55 @@ async function runAllTests() {
     poolExt.releaseLease(lease.leaseId, 1000, true);
   });
 
+  await test('Lease Scavenger: Reclaims orphaned soft token reservations upon lease expiry', () => {
+    const substrateScav = new GalxCredentialSubstrate();
+    substrateScav.clearCache();
+    const poolScav = new GalxCredentialPool(substrateScav, governor, breaker, 'adaptive_headroom');
+
+    const enc = GalxCryptoVault.encryptSecret({ apiKey: 'sk-proj-scav' }, 'user_scav', 'shard_scav', 'openai');
+    const shard: GalxShardAccount = {
+      id: 'shard_scav',
+      userId: 'user_scav',
+      accountLabel: 'Scavenger Shard',
+      provider: 'openai',
+      authType: 'api_key',
+      shardMode: 'pooled',
+      status: 'healthy',
+      priority: 10,
+      weight: 1,
+      fencingToken: 1,
+      apiKeyMasked: 'sk-proj...scav',
+      encryptedPayload: enc,
+      tokenBucket: governor.createDefaultBucket(100_000, 100_000, 100),
+      stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
+    };
+    substrateScav.addAccount(shard);
+
+    const now = Date.now();
+    const { lease } = poolScav.acquireLease({
+      userId: 'u_scav',
+      provider: 'openai',
+      leaseTtlMs: 1000,
+      estimatedTokens: 25_000,
+      nowMs: now
+    });
+    assert.ok(lease);
+
+    // Verify reservation was placed
+    const accBefore = substrateScav.getAccount('shard_scav');
+    assert.strictEqual(accBefore?.tokenBucket.reservedTokens, 25_000);
+
+    // Trigger scavenger at t = now + 5000ms (after TTL expired)
+    const scavengedCount = poolScav.scavengeStaleLeases(now + 5000);
+    assert.strictEqual(scavengedCount, 1);
+
+    // Verify soft reservation was cleanly reclaimed
+    const accAfter = substrateScav.getAccount('shard_scav');
+    assert.strictEqual(accAfter?.tokenBucket.reservedTokens, 0);
+  });
+
   console.log('\n======================================================================');
   if (testsFailed === 0) {
     console.log(`   ALL ${testsPassed}/${testsPassed} FORENSIC VERIFICATION TESTS PASSED SUCCESSFULLY! `);

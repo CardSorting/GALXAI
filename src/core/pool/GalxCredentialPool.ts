@@ -433,6 +433,50 @@ export class GalxCredentialPool {
   }
 
   /**
+   * Scavenges and garbage collects expired stale leases, automatically releasing orphaned soft reservations.
+   */
+  scavengeStaleLeases(nowMs = Date.now()): number {
+    let scavenged = 0;
+    for (const [leaseId, lease] of this.activeLeases.entries()) {
+      if (nowMs >= lease.expiresAtMs) {
+        this.activeLeases.delete(leaseId);
+        scavenged++;
+
+        // Decrement in-flight counters
+        const inFlight = this.inFlightCounts.get(lease.shardId) || 0;
+        if (inFlight <= 1) {
+          this.inFlightCounts.delete(lease.shardId);
+        } else {
+          this.inFlightCounts.set(lease.shardId, inFlight - 1);
+        }
+
+        const curTenantInFlight = this.tenantInFlightCounts.get(lease.userId) || 0;
+        if (curTenantInFlight <= 1) {
+          this.tenantInFlightCounts.delete(lease.userId);
+        } else {
+          this.tenantInFlightCounts.set(lease.userId, curTenantInFlight - 1);
+        }
+
+        // Reclaim orphaned soft token reservation
+        if (lease.estimatedTokens > 0) {
+          const account = this.substrate.getAccount(lease.shardId);
+          if (account && account.tokenBucket.reservedTokens) {
+            const remainingReserved = Math.max(0, account.tokenBucket.reservedTokens - lease.estimatedTokens);
+            this.substrate.updateAccount({
+              ...account,
+              tokenBucket: {
+                ...account.tokenBucket,
+                reservedTokens: remainingReserved
+              }
+            });
+          }
+        }
+      }
+    }
+    return scavenged;
+  }
+
+  /**
    * Releases an execution lease upon request completion, committing actual tokens,
    * releasing soft reservations, reconciling upstream headers, updating EWMA latency, and notifying circuit breaker.
    */
