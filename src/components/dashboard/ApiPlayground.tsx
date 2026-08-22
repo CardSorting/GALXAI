@@ -395,6 +395,29 @@ export function ApiPlayground() {
               </span>
             )}
           </div>
+
+          {/* GTM Real-Time Cost & Net Savings Telemetry Ticker */}
+          {telemetry && (
+            <div className="mt-3 p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 font-mono text-xs text-emerald-300 flex flex-wrap items-center justify-between gap-2 animate-in fade-in duration-200">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="font-bold">
+                  Routed in {telemetry.latencyMs}ms
+                </span>
+                <span className="text-zinc-400">•</span>
+                <span className="text-zinc-300">
+                  ~{telemetry.tokensEstimated || 100} tokens
+                </span>
+                <span className="text-zinc-400">•</span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/40">
+                  25%–40% Saved vs Retail
+                </span>
+              </div>
+              <div className="text-[11px] text-zinc-400">
+                Shard: <span className="text-cyan-300 font-bold">{telemetry.shardId}</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
