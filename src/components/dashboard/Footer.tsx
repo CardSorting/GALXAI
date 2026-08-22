@@ -1,0 +1,229 @@
+'use client';
+
+import React from 'react';
+import Link from 'next/link';
+import {
+  Zap,
+  Key,
+  Terminal,
+  Cpu,
+  Coins,
+  ShieldCheck,
+  Activity,
+  Code2,
+  HelpCircle,
+  ArrowRight,
+  Flame,
+  Globe,
+  ExternalLink,
+  Laptop,
+  CheckCircle2,
+  Lock,
+  GitCompare
+} from 'lucide-react';
+
+export function Footer() {
+  const footerNavigation = {
+    product: [
+      { name: 'Frontier AI Models', href: '/models', badge: '12 SOTA' },
+      { name: 'Interactive Playground', href: '/playground', badge: 'Streaming' },
+      { name: 'Model Comparison Matrix', href: '/models/compare' },
+      { name: 'Developer API Keys', href: '/keys' },
+      { name: 'Compute Wallet & Billing', href: '/billing', badge: 'Autopay' },
+      { name: 'Real-Time Status & SLA', href: '/status' },
+    ],
+    models: [
+      { name: 'OpenAI GPT-5.6 Sol', href: '/models/gpt-5.6-sol', note: 'Reasoning & Coding' },
+      { name: 'OpenAI GPT-5.6 Terra', href: '/models/gpt-5.6-terra', note: 'Balanced Frontier' },
+      { name: 'OpenAI GPT-5.6 Luna', href: '/models/gpt-5.6-luna', note: 'Sub-second Speed' },
+      { name: 'xAI Grok 4.5 (500K)', href: '/models/x-ai-grok-4.5', note: 'Multimodal' },
+      { name: 'OpenAI GPT-Image-2', href: '/models/openai-gpt-image-2', note: 'Visual Engine' },
+      { name: 'OpenAI DALL-E 3', href: '/models/openai-dalle-3', note: 'High Definition' },
+    ],
+    developers: [
+      { name: '30-Second Quickstart', href: '/docs/quickstart' },
+      { name: 'REST & SSE API Reference', href: '/docs/api-reference' },
+      { name: 'Cursor & Windsurf IDE Setup', href: '/docs/ide-setup' },
+      { name: 'Python & Node.js SDKs', href: '/docs/sdks' },
+      { name: 'Gateway Architecture', href: '/docs/architecture' },
+      { name: 'Continue.dev Extension', href: '/docs/ide-setup' },
+    ],
+    pricingAndTrust: [
+      { name: 'Wholesale Pricing & Tiers', href: '/pricing', badge: '25%-40% OFF' },
+      { name: '75% Prompt Caching Pass', href: '/pricing#caching' },
+      { name: 'Developer Wallet Top-Ups', href: '/billing' },
+      { name: 'Frequently Asked Questions', href: '/faq' },
+      { name: 'Zero-Retention Privacy Policy', href: '/faq' },
+      { name: 'Security & Encryption Specs', href: '/faq' },
+    ]
+  };
+
+  return (
+    <footer className="w-full border-t border-white/10 bg-[#07080d]/90 backdrop-blur-xl relative z-20 mt-20">
+      {/* Top Value / Conversion Strip */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 border-b border-white/5">
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-emerald-500/20 bg-emerald-500/5">
+          <div className="space-y-1 text-center md:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
+              <Flame className="w-3.5 h-3.5 text-emerald-400" />
+              <span>START WITH $5 FREE COMPUTE CREDIT</span>
+            </div>
+            <h3 className="text-lg sm:text-xl font-bold text-white">Cut your OpenAI & Grok API costs by 25%–40% today</h3>
+            <p className="text-xs text-zinc-400">100% drop-in replacement for OpenAI SDK. Zero code refactoring. 99.99% uptime SLA.</p>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <Link
+              href="/keys/new"
+              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all cursor-pointer font-mono"
+            >
+              <span>Get Free API Key</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/playground"
+              className="px-4 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-xs font-semibold border border-white/10 transition-all"
+            >
+              <span>Live Playground</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Main 4-Column Navigation Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 lg:gap-12">
+          {/* Brand & Global Status Column */}
+          <div className="col-span-2 lg:col-span-1 space-y-4">
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 p-[1px] shadow-lg shadow-indigo-500/25 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <div className="w-full h-full bg-[#0d101c] rounded-[10px] flex items-center justify-center">
+                  <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400 animate-pulse" />
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-black text-base tracking-wider text-white">
+                  GALX<span className="text-cyan-400">AI</span>
+                </span>
+              </div>
+            </Link>
+
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              The high-throughput universal AI model gateway delivering wholesale pricing, sub-15ms failover, and 75% prompt caching.
+            </p>
+
+            <div className="pt-2">
+              <Link
+                href="/status"
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-[11px] font-mono text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>All Systems 100% Operational</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Product Column */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">Product & Gateway</h4>
+            <ul className="space-y-2 text-xs">
+              {footerNavigation.product.map((item) => (
+                <li key={item.name}>
+                  <Link
+                    href={item.href}
+                    className="text-zinc-400 hover:text-white transition-colors flex items-center justify-between group"
+                  >
+                    <span>{item.name}</span>
+                    {item.badge && (
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-zinc-400 group-hover:text-cyan-300 border border-white/5">
+                        {item.badge}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Frontier Models Column */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">Frontier AI Engines</h4>
+            <ul className="space-y-2 text-xs font-mono">
+              {footerNavigation.models.map((item) => (
+                <li key={item.name}>
+                  <Link
+                    href={item.href}
+                    className="text-zinc-400 hover:text-cyan-300 transition-colors block group"
+                  >
+                    <div className="font-semibold text-zinc-300 group-hover:text-cyan-300">{item.name}</div>
+                    <span className="text-[10px] text-zinc-500 block font-sans">{item.note}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Developers & Docs Column */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">Developer & SDKs</h4>
+            <ul className="space-y-2 text-xs">
+              {footerNavigation.developers.map((item) => (
+                <li key={item.name}>
+                  <Link
+                    href={item.href}
+                    className="text-zinc-400 hover:text-white transition-colors block"
+                  >
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Pricing & Trust Column */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">Pricing & Trust</h4>
+            <ul className="space-y-2 text-xs">
+              {footerNavigation.pricingAndTrust.map((item) => (
+                <li key={item.name}>
+                  <Link
+                    href={item.href}
+                    className="text-zinc-400 hover:text-white transition-colors flex items-center justify-between group"
+                  >
+                    <span>{item.name}</span>
+                    {item.badge && (
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        {item.badge}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Legal & Security Bar */}
+      <div className="border-t border-white/5 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-zinc-500 font-mono">
+          <div className="flex items-center gap-4">
+            <span>© 2026 GALXAI, Inc. All rights reserved.</span>
+            <span>•</span>
+            <span className="flex items-center gap-1 text-zinc-400">
+              <Lock className="w-3 h-3 text-emerald-400" />
+              <span>Zero Content Retention</span>
+            </span>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <Link href="/pricing" className="hover:text-zinc-300 transition-colors">Pricing</Link>
+            <Link href="/docs/api-reference" className="hover:text-zinc-300 transition-colors">API Docs</Link>
+            <Link href="/status" className="hover:text-zinc-300 transition-colors">System Status</Link>
+            <Link href="/faq" className="hover:text-zinc-300 transition-colors">FAQs</Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}

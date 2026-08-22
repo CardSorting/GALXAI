@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { Footer } from "@/components/dashboard/Footer";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
@@ -107,6 +108,7 @@ export default function RootLayout({
         <AuthProvider>
           <div className="relative z-10 flex-1 flex flex-col">
             {children}
+            <Footer />
           </div>
         </AuthProvider>
       </body>
