@@ -141,6 +141,7 @@ npm run dev
 - ⚙️ **[Structured Outputs & Tools Guide](docs/STRUCTURED_OUTPUTS_AND_TOOLS.md)**: Strict JSON Schema and parallel tool calling across reasoning models.
 - ⏱️ **[Rate Limits, Concurrency & Quotas](docs/RATE_LIMITS_AND_QUOTAS.md)**: Gateway key tiers, continuous replenishment calculus, and fair-share concurrency limits.
 - 🔄 **[Migration Guide](docs/MIGRATION_GUIDE.md)**: Moving from direct OpenAI, xAI, Azure, or OpenRouter with zero code changes.
+- 💰 **[Pricing & Multi-Tiered Discount Strategy](docs/PRICING_AND_DISCOUNT_STRATEGY.md)**: 25%–40% base arbitrage discounts, 75% prompt caching pass-through, and zero markups.
 - 🔒 **[Security & Cryptographic Threat Model](docs/SECURITY.md)**: AAD envelope encryption, memory zeroization, and zero-prompt logging.
 - 📊 **[Telemetry, Metrics & Observability](docs/TELEMETRY_AND_OBSERVABILITY.md)**: Prometheus scraping, Datadog integration, and Grafana latency dashboards.
 - 📖 **[API Reference](docs/API_REFERENCE.md)**: REST endpoints for chat completions, visual synthesis, model catalog, and pool telemetry.
@@ -160,6 +161,7 @@ Detailed architectural justifications and technical specifications:
 - [ADR 0003: AES-256-GCM Envelope Encryption with AAD Binding & Heap Scrubbing](docs/adr/0003-aes-256-gcm-envelope-encryption-with-aad-binding.md)
 - [ADR 0004: 4-State Circuit Breaker & Half-Open Canary Traffic Warming](docs/adr/0004-four-state-circuit-breaker-and-failover-topology.md)
 - [ADR 0005: Zero-Allocation Circular Ring Buffer Histogram Telemetry & EWMA Latency](docs/adr/0005-circular-buffer-telemetry-and-ewma-latency-scoring.md)
+- [ADR 0006: Intelligent Multi-Tiered Discount & Prompt-Caching Strategy](docs/adr/0006-intelligent-multi-tiered-discount-strategy.md)
 
 ---
 
