@@ -620,6 +620,68 @@ async function runAllTests() {
     assert.ok(weightFast > weightSlow * 2, 'Fast healthy shard weight should be > 2x degraded shard');
   });
 
+  await test('Post-Allocation Headroom Leveling: Alternates concurrent shard acquisition', () => {
+    pool.setStrategy('adaptive_headroom');
+    const substrateLevel = new GalxCredentialSubstrate();
+    substrateLevel.clearCache();
+    const poolLevel = new GalxCredentialPool(substrateLevel, governor, breaker, 'adaptive_headroom');
+
+    const encL1 = GalxCryptoVault.encryptSecret({ apiKey: 'sk-proj-level1' }, 'user_l1', 'shard_level_1', 'openai');
+    const shardL1: GalxShardAccount = {
+      id: 'shard_level_1',
+      userId: 'user_l1',
+      accountLabel: 'Level Shard 1',
+      provider: 'openai',
+      authType: 'api_key',
+      shardMode: 'pooled',
+      status: 'healthy',
+      priority: 10,
+      weight: 1,
+      fencingToken: 1,
+      apiKeyMasked: 'sk-proj...lvl1',
+      encryptedPayload: encL1,
+      tokenBucket: governor.createDefaultBucket(200_000, 200_000, 100),
+      stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
+    };
+
+    const encL2 = GalxCryptoVault.encryptSecret({ apiKey: 'sk-proj-level2' }, 'user_l2', 'shard_level_2', 'openai');
+    const shardL2: GalxShardAccount = {
+      id: 'shard_level_2',
+      userId: 'user_l2',
+      accountLabel: 'Level Shard 2',
+      provider: 'openai',
+      authType: 'api_key',
+      shardMode: 'pooled',
+      status: 'healthy',
+      priority: 10,
+      weight: 1,
+      fencingToken: 1,
+      apiKeyMasked: 'sk-proj...lvl2',
+      encryptedPayload: encL2,
+      tokenBucket: governor.createDefaultBucket(200_000, 200_000, 100),
+      stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
+    };
+
+    substrateLevel.addAccount(shardL1);
+    substrateLevel.addAccount(shardL2);
+
+    // Pick 1: Should pick shard_level_1 or shard_level_2
+    const lease1 = poolLevel.acquireLease({ userId: 'u_l1', provider: 'openai', estimatedTokens: 50_000 });
+    assert.ok(lease1.lease);
+
+    // Pick 2: Because lease 1 reserved 50K tokens on the first shard, post-allocation headroom MUST pick the other shard
+    const lease2 = poolLevel.acquireLease({ userId: 'u_l2', provider: 'openai', estimatedTokens: 50_000 });
+    assert.ok(lease2.lease);
+    assert.notStrictEqual(lease1.lease.shardId, lease2.lease.shardId);
+
+    poolLevel.releaseLease(lease1.lease.leaseId, 45_000, true);
+    poolLevel.releaseLease(lease2.lease.leaseId, 45_000, true);
+  });
+
   console.log('\n======================================================================');
   if (testsFailed === 0) {
     console.log(`   ALL ${testsPassed}/${testsPassed} FORENSIC VERIFICATION TESTS PASSED SUCCESSFULLY! `);

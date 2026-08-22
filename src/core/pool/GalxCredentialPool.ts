@@ -185,8 +185,14 @@ export class GalxCredentialPool {
       };
     }
 
-    // 6. Select the optimal candidate using the chosen quota cycling strategy
-    const selectedAccount = this.selectOptimalShard(finalCandidates, maxInFlightPerShard, nowMs, isPriorityUser);
+    // 6. Select the optimal candidate using the chosen quota cycling strategy with post-allocation headroom
+    const selectedAccount = this.selectOptimalShard(
+      finalCandidates,
+      maxInFlightPerShard,
+      nowMs,
+      isPriorityUser,
+      estimatedTokens
+    );
 
     this.tenantInFlightCounts.set(req.userId, currentTenantInFlight + 1);
 
@@ -230,7 +236,8 @@ export class GalxCredentialPool {
     candidates: GalxShardAccount[],
     maxInFlightPerShard: number,
     nowMs: number,
-    isPriorityUser: boolean
+    isPriorityUser: boolean,
+    estimatedTokens = 1000
   ): GalxShardAccount {
     if (candidates.length === 1) return candidates[0];
 
@@ -246,28 +253,36 @@ export class GalxCredentialPool {
 
       case 'adaptive_headroom':
       default:
-        return this.selectAdaptiveHydraulicHeadroom(candidates, maxInFlightPerShard, nowMs, isPriorityUser);
+        return this.selectAdaptiveHydraulicHeadroom(
+          candidates,
+          maxInFlightPerShard,
+          nowMs,
+          isPriorityUser,
+          estimatedTokens
+        );
     }
   }
 
   /**
-   * Strategy 1: Adaptive Hydraulic Headroom Cycling (AHT).
-   * Calculates continuous token bucket headroom, EWMA latency score, dynamic reliability weight, and canary multipliers.
+   * Strategy 1: Adaptive Hydraulic Headroom Cycling (AHT) with Post-Allocation Leveling.
+   * Calculates continuous token bucket post-allocation headroom, EWMA latency score, dynamic reliability weight, and canary multipliers.
    */
   private selectAdaptiveHydraulicHeadroom(
     candidates: GalxShardAccount[],
     maxInFlightPerShard: number,
     nowMs: number,
-    isPriorityUser: boolean
+    isPriorityUser: boolean,
+    estimatedTokens = 1000
   ): GalxShardAccount {
     let bestScore = -Infinity;
     let bestCandidate = candidates[0];
 
     for (const acc of candidates) {
-      // 1. Refill bucket to current timestamp
+      // 1. Refill bucket to current timestamp & calculate post-allocation headroom
       const refilledBucket = this.rateGovernor.refillBucket(acc.tokenBucket, nowMs);
       const availableTokens = Math.max(0, refilledBucket.remainingTokens - (refilledBucket.reservedTokens || 0));
-      const tokenHeadroomRatio = Math.max(0.01, availableTokens / Math.max(1, refilledBucket.maxTokens));
+      const postAllocationTokens = Math.max(0, availableTokens - estimatedTokens);
+      const tokenHeadroomRatio = Math.max(0.01, postAllocationTokens / Math.max(1, refilledBucket.maxTokens));
 
       // 2. Concurrency headroom with Power-Law saturation curve
       const inFlight = this.inFlightCounts.get(acc.id) || 0;
