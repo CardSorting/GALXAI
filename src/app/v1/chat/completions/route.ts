@@ -89,18 +89,33 @@ export async function POST(req: NextRequest) {
       headers
     });
   } catch (error: any) {
+    const message = error.message || 'Internal Router Error';
+    const isRateLimited = message.includes('reached maximum simultaneous concurrent gateway allocation');
+    const isUnavailable = message.includes('No healthy') || message.includes('in cooldown') || message.includes('saturated');
+    const isBadRequest = message.includes('Unsupported model') || message.includes('Missing required');
+
+    const status = isRateLimited ? 429 : isUnavailable ? 503 : isBadRequest ? 400 : 500;
+    const errorType = isRateLimited
+      ? 'rate_limit_error'
+      : isUnavailable
+      ? 'service_unavailable_error'
+      : isBadRequest
+      ? 'invalid_request_error'
+      : 'api_error';
+
     return NextResponse.json(
       {
         error: {
-          message: error.message || 'Internal Router Error',
-          type: 'api_error',
-          code: 'router_dispatch_failed'
+          message,
+          type: errorType,
+          code: isRateLimited ? 'rate_limit_exceeded' : isUnavailable ? 'all_shards_cooldown' : 'router_dispatch_failed'
         }
       },
       {
-        status: 500,
+        status,
         headers: {
-          'Access-Control-Allow-Origin': '*'
+          'Access-Control-Allow-Origin': '*',
+          ...(isRateLimited ? { 'Retry-After': '1' } : {})
         }
       }
     );
