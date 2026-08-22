@@ -189,14 +189,22 @@ export default function CompliancePage() {
 
                 <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs font-mono">
                   <span className="text-zinc-500">{doc.format} • {doc.size}</span>
-                  <button
-                    onClick={() => handleDownloadDoc(doc)}
-                    disabled={downloadingId === doc.id}
-                    className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-cyan-300 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer font-sans font-semibold border border-white/5 disabled:opacity-50"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>{downloadingId === doc.id ? 'Downloading...' : 'Download Document'}</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/compliance/${doc.id}`}
+                      className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-all text-xs font-sans font-semibold border border-white/5"
+                    >
+                      View Online
+                    </Link>
+                    <button
+                      onClick={() => handleDownloadDoc(doc)}
+                      disabled={downloadingId === doc.id}
+                      className="px-3.5 py-1.5 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 hover:text-amber-200 transition-all flex items-center gap-1.5 cursor-pointer font-sans font-semibold border border-amber-400/20 disabled:opacity-50"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>{downloadingId === doc.id ? 'Downloading...' : 'PDF'}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
