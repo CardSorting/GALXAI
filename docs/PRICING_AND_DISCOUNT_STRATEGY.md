@@ -1,6 +1,6 @@
 # 💰 GALXAI Pricing & Multi-Tiered Discount Strategy
 
-GALXAI delivers market-leading pricing by combining **pooled infrastructure arbitrage**, **75% prompt caching pass-through**, and **power-law hydraulic quota utilization**.
+GALXAI delivers market-leading pricing by combining **pooled infrastructure arbitrage**, **75% prompt caching pass-through**, **progressive volume rebates**, and **off-peak dynamic yield balancing**.
 
 ---
 
@@ -23,7 +23,7 @@ flowchart LR
 
 ---
 
-## 2. Three Pillars of the Discount Strategy
+## 2. Four Pillars of the Discount Strategy
 
 ### Pillar 1: Pooled Infrastructure Arbitrage (25% to 40% Base Discount)
 - High-volume pooled compute slots reduce per-token infrastructure costs by 25% to 40% below direct single-key list prices.
@@ -32,47 +32,52 @@ flowchart LR
 ### Pillar 2: 75% Prompt-Caching Automatic Pass-Through
 - For requests with prefix contexts $> 1,024$ tokens (e.g. system prompts, few-shot examples, codebase ASTs, RAG embeddings), OpenAI and xAI provide upstream cache discounts.
 - GALXAI passes **100% of the 75% prompt caching rebate** directly to client accounts without retaining a margin.
-- **Compound Net Savings**: When combined with base discounts, workloads with 50% cached context achieve **50%–70% net savings** compared to retail list prices.
+- **Compound Net Savings**: When combined with base discounts, workloads with 60% cached context achieve **50%–70% net savings** compared to retail list prices.
 
-### Pillar 3: Zero Platform Markups & No Seat Surcharges
-- No monthly platform seat taxes or minimum spend commits.
-- Token consumption is billed strictly at raw net discounted rates with microsecond meter precision.
+### Pillar 3: Progressive Monthly Volume Tiers (Up to +15% Extra Rebate)
+Rebates scale automatically with monthly token volume without requiring sales calls or custom commitments:
+- **Starter Developer ($0 - $250/mo)**: Base **25%–36%** pooled discount.
+- **Scale & Growth ($250 - $1,500/mo)**: **+5% Extra Rebate** (Total: **30%–41% OFF**).
+- **Production Fleet ($1,500 - $5,000/mo)**: **+10% Extra Rebate** (Total: **35%–46% OFF**).
+- **Enterprise Sovereign ($5,000+/mo)**: **+15% Extra Rebate** (Total: **40%–51% OFF**) + Dedicated VPC peering.
+
+### Pillar 4: Off-Peak Dynamic Yield Rebates (+10% Floating Discount)
+- When fleet-wide hydraulic headroom exceeds $75\%$ (night hours / weekends), batch jobs passing `x-galx-off-peak: true` receive an instant **additional 10% floating rebate**.
 
 ---
 
 ## 3. Flagship Model Rates & Discount Matrix
 
 ### Flagship Reasoning & LLM Fleet
-| Model ID | Provider | Context Window | Retail List Rate (In / Out) | GALXAI Discounted Rate | Cached Prompt Rate | Direct Savings |
+| Model ID | Provider | Context Window | Retail List Rate (In / Out) | GALXAI Base Rate | Cached Prompt Rate | Max Savings (Enterprise) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `gpt-5.6-sol` | OpenAI | $372,000$ | $5.00 / $20.00 | **$3.75 / $15.00** | **$0.93 / 1M** | **25% OFF** |
-| `gpt-5.6-terra` | OpenAI | $372,000$ | $3.00 / $12.00 | **$2.25 / $9.00** | **$0.56 / 1M** | **25% OFF** |
-| `gpt-5.6-luna` | OpenAI | $372,000$ | $1.50 / $6.00 | **$0.95 / $3.80** | **$0.24 / 1M** | **36% OFF** |
-| `x-ai/grok-4.5` | xAI Grok | $500,000$ | $2.50 / $10.00 | **$1.80 / $7.20** | **$0.45 / 1M** | **28% OFF** |
+| `gpt-5.6-sol` | OpenAI | $372,000$ | $5.00 / $20.00 | **$3.75 / $15.00** | **$0.93 / 1M** | **Up to 40% OFF** |
+| `gpt-5.6-terra` | OpenAI | $372,000$ | $3.00 / $12.00 | **$2.25 / $9.00** | **$0.56 / 1M** | **Up to 40% OFF** |
+| `gpt-5.6-luna` | OpenAI | $372,000$ | $1.50 / $6.00 | **$0.95 / $3.80** | **$0.24 / 1M** | **Up to 51% OFF** |
+| `x-ai/grok-4.5` | xAI Grok | $500,000$ | $2.50 / $10.00 | **$1.80 / $7.20** | **$0.45 / 1M** | **Up to 43% OFF** |
 
 ### Visual Synthesis & Image Generation Fleet
-| Model ID | Provider | Resolution | Retail List / Image | GALXAI Discounted / Image | Direct Savings |
+| Model ID | Provider | Resolution | Retail List / Image | GALXAI Base / Image | Max Savings (Enterprise) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `openai-gpt-image-2` | OpenAI | $1024 \times 1024$ | $0.080 | **$0.060** | **25% OFF** |
-| `openai-gpt-image-1.5` | OpenAI | $1024 \times 1024$ | $0.060 | **$0.045** | **25% OFF** |
-| `openai-gpt-image-1` | OpenAI | $1024 \times 1024$ | $0.040 | **$0.028** | **30% OFF** |
-| `openai-gpt4o-image` | OpenAI | $1024 \times 1024$ | $0.050 | **$0.038** | **24% OFF** |
-| `openai-dalle-3` | OpenAI | $1024 \times 1024$ | $0.040 | **$0.030** | **25% OFF** |
-| `openai-dalle-2` | OpenAI | $512 \times 512$ | $0.020 | **$0.014** | **30% OFF** |
-| `xai-grok-image` | xAI Grok | $1024 \times 1024$ | $0.050 | **$0.036** | **28% OFF** |
-| `xai-grok-2-image` | xAI Grok | $1024 \times 1024$ | $0.040 | **$0.030** | **25% OFF** |
+| `openai-gpt-image-2` | OpenAI | $1024 \times 1024$ | $0.080 | **$0.060** | **Up to 40% OFF** |
+| `openai-gpt-image-1.5` | OpenAI | $1024 \times 1024$ | $0.060 | **$0.045** | **Up to 40% OFF** |
+| `openai-gpt-image-1` | OpenAI | $1024 \times 1024$ | $0.040 | **$0.028** | **Up to 45% OFF** |
+| `openai-gpt4o-image` | OpenAI | $1024 \times 1024$ | $0.050 | **$0.038** | **Up to 39% OFF** |
+| `openai-dalle-3` | OpenAI | $1024 \times 1024$ | $0.040 | **$0.030** | **Up to 40% OFF** |
+| `openai-dalle-2` | OpenAI | $512 \times 512$ | $0.020 | **$0.014** | **Up to 45% OFF** |
+| `xai-grok-image` | xAI Grok | $1024 \times 1024$ | $0.050 | **$0.036** | **Up to 43% OFF** |
+| `xai-grok-2-image` | xAI Grok | $1024 \times 1024$ | $0.040 | **$0.030** | **Up to 40% OFF** |
 
 ---
 
-## 4. Compound Savings Scenario Analysis
+## 4. Market Competitor Benchmark Analysis
 
-### Scenario: Enterprise Code Assistant with Large Codebase Context
-- **Workload**: 1,000,000 input tokens per day, 100,000 output tokens per day on `gpt-5.6-sol`.
-- **Context Profile**: 70% of input tokens are cached system prompt and codebase AST.
+### Benchmark Workload: 10 Million Tokens on Flagship Reasoning (`gpt-5.6-sol`)
+*Assumes 5M input tokens (50% cached) + 5M output tokens.*
 
-| Rate Component | Standard Retail Cost | GALXAI Cost | Net Daily Savings |
-| :--- | :--- | :--- | :--- |
-| **Uncached Input (300K)** | $1.50 | $1.125 | $0.375 |
-| **Cached Input (700K)** | $3.50 | $0.651 | $2.849 |
-| **Output Tokens (100K)** | $2.00 | $1.500 | $0.500 |
-| **Total Daily Cost** | **$7.00 / day** | **$3.276 / day** | **$3.724 / day (53.2% Net Savings)** |
+| Provider | Input Cost (5M) | Output Cost (5M) | Total Workload Cost | Gateway Markup | Net Savings vs. Retail |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Direct OpenAI Retail** | $15.62 | $100.00 | **$115.62** | 0% | Baseline ($0.00) |
+| **OpenRouter (Standard)** | $16.40 | $105.00 | **$121.40** | +5% | $-5.0\%$ (More expensive) |
+| **Azure OpenAI** | $15.62 | $100.00 | **$115.62** | 0% | Baseline ($0.00) |
+| **GALXAI Pooled Gateway** | **$11.72** | **$75.00** | **$86.72** | **0%** | **Save $28.90 (25.0% Net)** |
