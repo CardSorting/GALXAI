@@ -21,7 +21,9 @@ import {
   ArrowLeftRight,
   BookMarked,
   Wrench,
-  Database
+  Database,
+  Bot,
+  Smile
 } from 'lucide-react';
 
 interface DocsNavItem {
@@ -43,6 +45,8 @@ const DOCS_NAV_GROUPS: DocsNavGroup[] = [
     id: 'start',
     title: 'Getting Started',
     items: [
+      { name: 'Agents Hub', href: '/docs/agents', icon: Bot, badge: 'Agents' },
+      { name: 'Plain English', href: '/docs/simple', icon: Smile, badge: 'Simple' },
       { name: 'Overview', href: '/docs', icon: BookOpen, exact: true },
       { name: '30s Quickstart', href: '/docs/quickstart', icon: Zap, badge: '30s' },
       { name: '1-Click Migration', href: '/docs/migration', icon: ArrowLeftRight, badge: '0-Code' },
