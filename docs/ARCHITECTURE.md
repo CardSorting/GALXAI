@@ -41,13 +41,15 @@ flowchart TD
 2. **Model Resolution & Canonical Normalization**:
    - `ModelCatalog.resolveModel(modelId)` normalizes aliases (e.g. `"sol"` $\to$ `"gpt-5.6-sol"`, `"grok"` $\to$ `"x-ai/grok-4.5"`) and verifies feature support (streaming, reasoning, vision).
 
-3. **Atomic Execution Lease Acquisition (2-Phase Commit)**:
+3. **Atomic Execution Lease Acquisition (2-Phase Commit & P-AHT Leveling)**:
    - The router requests a lease from `GalxCredentialPool.acquireLease`.
    - **Filter**: 4-State Circuit Breaker filters out `cooldown`, `exhausted`, `dead`, and saturated shards.
-   - **Score**: Shards are ranked via **Adaptive Hydraulic Headroom (P-AHT)**:
-     $$\text{Score} = \left(\frac{\text{unreservedTokens}}{\text{maxTokens}}\right)^{1.2} \times \left(1 - \frac{\text{inFlight}}{\text{maxInFlight}}\right) \times \text{HealthMult} \times \text{LatencyMult} \times \text{DynamicWeight} + \text{jitter}$$
+   - **Score**: Shards are ranked via **Predictive Adaptive Hydraulic Headroom (P-AHT)**:
+     $$S_i = \left( R_i \right)^{1.2} \times C_i \times H_i \times D_i \times L_i \times W_i \times P_i \times M_i \times T_i + \epsilon_i$$
+     Where $R_i$ is post-allocation headroom, $C_i$ is power-law concurrency damping, $M_i$ is predictive drain avoidance (`MDA-Floor`), $T_i$ is Tenant-Affinity Shard Dispersion (`TASD`), and $\epsilon_i$ is concurrency-scaled micro-jitter.
    - **Phase 1 (Reservation)**: The estimated token capacity is soft-reserved in the selected shard's token bucket.
    - A monotonic fencing token is generated to protect against stale worker execution.
+   - Automatic lease scavenger continuously sweeps expired leases and reclaims orphaned soft token reservations.
 
 4. **Cryptographic Vault Decryption & AAD Verification**:
    - Ciphertext is decrypted via `GalxCryptoVault.decryptSecret` using the bound AAD tuple `tenantUid:shardId:provider`.

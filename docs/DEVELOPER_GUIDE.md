@@ -102,13 +102,13 @@ To add support for a new provider (e.g. Anthropic or Mistral):
 
 ## 🧪 Testing & Verification Standards
 
-GALXAI maintains a **27-suite forensic verification test suite** that exercises every layer of the core substrate without network mocks:
+GALXAI maintains a **31-suite forensic verification test suite** that exercises every layer of the core substrate without network mocks:
 
 ```bash
-# Run all tests
+# Run all 31 automated tests
 npm run test:router
 
-# Run Next.js production build verification
+# Run Next.js production build verification across all 49 routes
 npm run build
 ```
 
