@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { CommandMenu } from '@/components/common/CommandMenu';
 import { ShareButton } from '@/components/common/ShareButton';
-import { PersonaSwitcher } from '@/components/dashboard/PersonaSwitcher';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -117,9 +116,6 @@ export function Navigation() {
 
           {/* Right Action Cluster (Flat, Minimal, No Bulky CTAs) */}
           <div className="flex items-center gap-1 sm:gap-2">
-            {/* Persona Switcher (Creator / Developer / Agent) */}
-            <PersonaSwitcher />
-
             {/* Share Trigger */}
             <ShareButton
               variant="pill"
