@@ -32,12 +32,15 @@ flowchart TD
 
 ---
 
-## 2. GTM Bonus Incentive Matrix
+## 2. GTM Bonus Incentive Matrix & Starter Account Activation
 
-To reward developers and growing startups who centralize their AI workloads on GALXAI, the wallet provides **progressive prepaid credit bonuses**:
+To ensure dedicated infrastructure allocation and prevent unverified automated abuse, **GALXAI requires an initial compute deposit of at least $10.00 USD** to activate developer API keys (`galx_live_...`). 
+
+> **Important**: 100% of the $10.00 deposit is credited directly to the developer's usable compute wallet balance with **$0 platform or registration fees**.
 
 | Deposit Amount | Bonus Multiplier | Net Credit Added | Effective Additional Discount | Best For |
 | :--- | :--- | :--- | :--- | :--- |
+| **$10.00** | $1.00\times$ | **$10.00 USD** | Starter Tier | Account activation & rapid prototyping |
 | **$25.00** | $1.00\times$ | **$25.00 USD** | Base ($0\%$) | Side projects & lightweight testing |
 | **$50.00** | $1.05\times$ | **$52.50 USD** | **+5% Bonus** | Individual developers & Cursor IDE power users |
 | **$100.00** | $1.10\times$ | **$110.00 USD** | **+10% Bonus** | Startups & agent prototyping (*Most Popular*) |

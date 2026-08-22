@@ -34,7 +34,8 @@ interface TopUpPack {
 }
 
 const TOPUP_PACKS: TopUpPack[] = [
-  { amount: 25, bonusPct: 0, bonusLabel: 'Standard' },
+  { amount: 10, bonusPct: 0, bonusLabel: 'Starter Activation ($10.00)' },
+  { amount: 25, bonusPct: 0, bonusLabel: 'Standard Prototyping ($25.00)' },
   { amount: 50, bonusPct: 5, bonusLabel: '+5% Bonus ($52.50 Credit)' },
   { amount: 100, bonusPct: 10, bonusLabel: '+10% Bonus ($110.00 Credit)', isPopular: true },
   { amount: 500, bonusPct: 20, bonusLabel: '+20% Bonus ($600.00 Credit)' }
