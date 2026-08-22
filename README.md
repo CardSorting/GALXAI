@@ -128,6 +128,18 @@ npm run dev
 
 ---
 
+## 📚 Complete Technical Documentation
+
+- 🏛️ **[System Architecture Specification](docs/ARCHITECTURE.md)**: Deep dive into the request lifecycle, Mermaid sequence flow, streaming safety, and security model.
+- 🌊 **[Routing Algorithms & Calculus](docs/ROUTING_ALGORITHMS.md)**: Mathematical derivations of Adaptive Hydraulic Headroom (P-AHT), Smooth Weighted Round-Robin (SWRR), and Least-Utilized.
+- 🔒 **[Security & Cryptographic Threat Model](docs/SECURITY.md)**: AAD envelope encryption, memory zeroization, and zero-prompt logging.
+- 📖 **[API Reference](docs/API_REFERENCE.md)**: REST endpoints for chat completions, visual synthesis, model catalog, and pool telemetry.
+- 🚀 **[Quickstart & IDE Setup](docs/QUICKSTART.md)**: Drop-in setup for Python, Node.js, LangChain, Cursor IDE, and Continue.
+- 🛠️ **[Developer & Contributing Guide](docs/DEVELOPER_GUIDE.md)**: Architecture layers, adding model adapters, and testing standards.
+- 🔧 **[Operational Playbook & Troubleshooting](docs/TROUBLESHOOTING.md)**: Error classifications, rate limit mitigations, and health monitoring.
+
+---
+
 ## 📂 Architecture Decision Records (ADRs)
 
 Detailed architectural justifications and technical specifications:
