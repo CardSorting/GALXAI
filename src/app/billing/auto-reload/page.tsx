@@ -20,6 +20,7 @@ import {
   Flame,
   AlertCircle
 } from 'lucide-react';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 export default function AutoReloadPage() {
   const [autoReloadEnabled, setAutoReloadEnabled] = useState(true);
@@ -57,7 +58,12 @@ export default function AutoReloadPage() {
           ]}
         />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <AuthRequiredGate
+          title="Sign In to Manage Auto-Reload Safeguards"
+          description="Automatic compute top-up rules, low balance thresholds, and monthly spend caps are private to your authenticated workspace."
+          checkoutAmount={50}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-white">Auto-Top Up & Zero-Downtime Safeguards</h1>
             <p className="text-xs text-zinc-400">
@@ -228,6 +234,7 @@ export default function AutoReloadPage() {
             </div>
           </div>
         </div>
+        </AuthRequiredGate>
       </main>
     </div>
   );

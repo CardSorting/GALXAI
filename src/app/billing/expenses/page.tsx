@@ -20,6 +20,7 @@ import {
   Cpu,
   Receipt
 } from 'lucide-react';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 export default function ExpensesPage() {
   const [selectedTimeframe, setSelectedTimeframe] = useState<'30d' | '90d' | 'ytd'>('30d');
@@ -67,7 +68,12 @@ export default function ExpensesPage() {
           ]}
         />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <AuthRequiredGate
+          title="Sign In to Access Expense Reports"
+          description="Detailed model cost distributions, token volume analytics, and wholesale discount audits are private to your authenticated workspace."
+          checkoutAmount={50}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-white">Expense & Cost Center Analytics</h1>
             <p className="text-xs text-zinc-400">
@@ -193,6 +199,7 @@ export default function ExpensesPage() {
             </div>
           </div>
         </div>
+        </AuthRequiredGate>
       </main>
     </div>
   );

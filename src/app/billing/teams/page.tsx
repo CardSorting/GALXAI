@@ -22,6 +22,7 @@ import {
   Lock,
   ArrowRight
 } from 'lucide-react';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 interface CostCenterTeam {
   id: string;
@@ -147,7 +148,12 @@ export default function TeamCostCentersPage() {
           ]}
         />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <AuthRequiredGate
+          title="Sign In to Manage Team Cost Centers"
+          description="Cost center GL allocations, team sub-budgets, and squad spend limits are private to your workspace."
+          checkoutAmount={100}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-white">Enterprise Cost Centers & Team Budgets</h1>
             <p className="text-xs text-zinc-400">
@@ -334,6 +340,7 @@ export default function TeamCostCentersPage() {
             );
           })}
         </div>
+        </AuthRequiredGate>
       </main>
     </div>
   );

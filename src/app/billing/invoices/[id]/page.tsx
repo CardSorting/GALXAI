@@ -16,6 +16,7 @@ import {
   Receipt,
   FileText
 } from 'lucide-react';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 interface InvoiceData {
   id: string;
@@ -87,7 +88,12 @@ export default function SingleInvoicePage({ params }: { params: Promise<{ id: st
           ]}
         />
 
-        <div className="flex items-center justify-between">
+        <AuthRequiredGate
+          title="Sign In to Access Corporate Tax Invoice"
+          description="Official tax invoices, VAT receipt data, and transaction payment details are private to your workspace."
+          checkoutAmount={50}
+        >
+          <div className="flex items-center justify-between">
           <Link
             href="/billing/invoices"
             className="text-xs font-semibold text-zinc-400 hover:text-white flex items-center gap-1.5 transition-colors"
@@ -185,6 +191,7 @@ export default function SingleInvoicePage({ params }: { params: Promise<{ id: st
             </div>
           </div>
         </div>
+        </AuthRequiredGate>
       </main>
     </div>
   );

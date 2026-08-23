@@ -20,6 +20,7 @@ import {
   ExternalLink,
   ShieldCheck
 } from 'lucide-react';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 interface Invoice {
   id: string;
@@ -153,8 +154,13 @@ export default function InvoicesPage() {
 
         <BillingSubNav />
 
-        {/* Financial KPI Summary */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono">
+        <AuthRequiredGate
+          title="Sign In to View Corporate Invoices"
+          description="Official tax receipts, monthly statements, and payment methods are private to your authenticated workspace."
+          checkoutAmount={50}
+        >
+          {/* Financial KPI Summary */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono">
           <div className="glass-panel p-5 rounded-3xl space-y-1 border border-white/10">
             <span className="text-[11px] text-zinc-400 uppercase font-sans font-semibold">2026 YTD Invoiced</span>
             <div className="text-2xl font-black text-white">${totalInvoiced.toFixed(2)} USD</div>
@@ -365,6 +371,7 @@ export default function InvoicesPage() {
             </tbody>
           </table>
         </div>
+        </AuthRequiredGate>
       </main>
     </div>
   );

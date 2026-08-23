@@ -19,6 +19,7 @@ import {
   Cpu,
   Key
 } from 'lucide-react';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 export default function ScheduledReportsPage() {
   const [dateRange, setDateRange] = useState('aug_2026');
@@ -70,7 +71,12 @@ export default function ScheduledReportsPage() {
           ]}
         />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <AuthRequiredGate
+          title="Sign In to Generate Custom ERP Reports"
+          description="Custom report exports, accounting statements, and automated delivery schedules are private to your workspace."
+          checkoutAmount={50}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-white">Custom Financial Reports & ERP Exports</h1>
             <p className="text-xs text-zinc-400">
@@ -211,6 +217,7 @@ export default function ScheduledReportsPage() {
             </button>
           </div>
         </form>
+        </AuthRequiredGate>
       </main>
     </div>
   );

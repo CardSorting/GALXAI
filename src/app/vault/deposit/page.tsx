@@ -19,6 +19,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import type { ProviderType, ShardIsolationMode } from '@/core/contracts/GalxContracts';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 export default function DepositShardPage() {
   const router = useRouter();
@@ -94,7 +95,12 @@ export default function DepositShardPage() {
           ]}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <AuthRequiredGate
+          title="Sign In to Connect Provider Accounts"
+          description="Connecting provider credentials, hardware encryption, and isolated pooling require an authenticated developer workspace."
+          checkoutAmount={50}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Form */}
           <div className="lg:col-span-7 glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
             <div className="space-y-1">
@@ -276,6 +282,7 @@ export default function DepositShardPage() {
             </div>
           </div>
         </div>
+        </AuthRequiredGate>
       </main>
     </div>
   );

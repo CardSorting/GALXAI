@@ -28,6 +28,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { formatTimeAgo } from '@/lib/utils';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 export default function KeyDetailPage() {
   const params = useParams();
@@ -210,8 +211,13 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
           ]}
         />
 
-        {/* Key Hero Header */}
-        <div className="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden space-y-6 border border-white/10">
+        <AuthRequiredGate
+          title="Sign In to Inspect API Key Telemetry"
+          description="Detailed telemetry, token consumption metrics, and secret prefix verification are private to your workspace."
+          checkoutAmount={25}
+        >
+          {/* Key Hero Header */}
+          <div className="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden space-y-6 border border-white/10">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shrink-0">
@@ -366,6 +372,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
             </pre>
           </div>
         </div>
+        </AuthRequiredGate>
       </main>
     </div>
   );

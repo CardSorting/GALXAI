@@ -20,6 +20,7 @@ import {
   Lock,
   Cpu
 } from 'lucide-react';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 interface TeamDetail {
   id: string;
@@ -139,7 +140,12 @@ export default function SingleTeamCostCenterPage({ params }: { params: Promise<{
           ]}
         />
 
-        <div className="flex items-center justify-between">
+        <AuthRequiredGate
+          title="Sign In to Manage Team Cost Center"
+          description="Squad budget allocations, associated API key lists, and spend velocity data are private to your workspace."
+          checkoutAmount={100}
+        >
+          <div className="flex items-center justify-between">
           <Link
             href="/billing/teams"
             className="text-xs font-semibold text-zinc-400 hover:text-white flex items-center gap-1.5 transition-colors"
@@ -263,6 +269,7 @@ export default function SingleTeamCostCenterPage({ params }: { params: Promise<{
             </button>
           </form>
         </div>
+        </AuthRequiredGate>
       </main>
     </div>
   );

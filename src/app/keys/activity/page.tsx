@@ -19,6 +19,7 @@ import {
   Zap,
   Code2
 } from 'lucide-react';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 interface RequestLog {
   id: string;
@@ -147,7 +148,12 @@ export default function KeyActivityPage() {
           ]}
         />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <AuthRequiredGate
+          title="Sign In to Inspect Live Request Telemetry"
+          description="Live request logs, prompt tokens, completion latency, and cost telemetry are private to your authenticated workspace."
+          checkoutAmount={25}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-white">Live Request Telemetry & Activity Stream</h1>
             <p className="text-xs text-zinc-400">
@@ -282,6 +288,7 @@ export default function KeyActivityPage() {
             </table>
           </div>
         </div>
+        </AuthRequiredGate>
       </main>
     </div>
   );

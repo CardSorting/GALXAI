@@ -18,6 +18,7 @@ import {
   Lock,
   Building2
 } from 'lucide-react';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 interface PaymentMethodItem {
   id: string;
@@ -105,7 +106,12 @@ export default function PaymentMethodsPage() {
           ]}
         />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <AuthRequiredGate
+          title="Sign In to Manage Payment Instruments"
+          description="Stored cards, ACH bank accounts, and invoice billing contacts are private to your authenticated workspace."
+          checkoutAmount={50}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-white">Payment Instruments & Invoicing Methods</h1>
             <p className="text-xs text-zinc-400">
@@ -249,6 +255,7 @@ export default function PaymentMethodsPage() {
             ))}
           </div>
         </div>
+        </AuthRequiredGate>
       </main>
     </div>
   );

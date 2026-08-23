@@ -20,6 +20,7 @@ import {
   Flame,
   Check
 } from 'lucide-react';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 export default function BudgetAlertsPage() {
   const [budgetCap, setBudgetCap] = useState(500);
@@ -66,7 +67,12 @@ export default function BudgetAlertsPage() {
           ]}
         />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <AuthRequiredGate
+          title="Sign In to Configure Budget Alerts"
+          description="Spending thresholds, Slack and email alert webhooks, and emergency circuit breakers are private to your workspace."
+          checkoutAmount={50}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-white">Real-Time Budget Alerts & Spend Governance</h1>
             <p className="text-xs text-zinc-400">
@@ -257,6 +263,7 @@ export default function BudgetAlertsPage() {
             </div>
           </div>
         </form>
+        </AuthRequiredGate>
       </main>
     </div>
   );

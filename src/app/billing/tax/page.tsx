@@ -18,6 +18,7 @@ import {
   Mail,
   FileCheck2
 } from 'lucide-react';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 export default function CorporateTaxPage() {
   const [taxId, setTaxId] = useState('US-EIN 94-8271034');
@@ -63,7 +64,12 @@ export default function CorporateTaxPage() {
 
         <BillingSubNav />
 
-        {savedSuccess && (
+        <AuthRequiredGate
+          title="Sign In to Manage Corporate Tax & VAT Exemption"
+          description="Corporate Tax ID numbers, W-9 forms, and VAT reverse charge certifications are private to your workspace."
+          checkoutAmount={50}
+        >
+          {savedSuccess && (
           <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-xs text-emerald-300 font-mono flex items-center gap-2 animate-in fade-in duration-200">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>Tax profile and invoicing preferences saved successfully!</span>
@@ -173,6 +179,7 @@ export default function CorporateTaxPage() {
             </div>
           </div>
         </form>
+        </AuthRequiredGate>
       </main>
     </div>
   );

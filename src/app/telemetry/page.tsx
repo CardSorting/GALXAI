@@ -4,6 +4,8 @@ import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { TelemetryFeed } from '@/components/dashboard/TelemetryFeed';
 
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
+
 export const metadata: Metadata = {
   title: 'Live Pool Telemetry & Immutable Audit Trail',
   description: 'Real-time telemetry, execution lease allocations, token replenishment events, and circuit breaker state changes in the GALXAI pool.',
@@ -16,7 +18,13 @@ export default function TelemetryPage() {
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         <Breadcrumbs items={[{ label: 'Live Telemetry & Audit' }]} />
-        <TelemetryFeed />
+        <AuthRequiredGate
+          title="Sign In to Inspect Real-Time Telemetry"
+          description="Live shard leases, token allocation velocity, and cryptographic Merkle audit records are private to authenticated developers."
+          checkoutAmount={50}
+        >
+          <TelemetryFeed />
+        </AuthRequiredGate>
       </main>
     </div>
   );

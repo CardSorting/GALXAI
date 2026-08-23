@@ -8,6 +8,7 @@ import { PoolMetricsOverview } from '@/components/dashboard/PoolMetricsOverview'
 import { ShardVaultManager } from '@/components/dashboard/ShardVaultManager';
 import { Plus, Shield, Sparkles, Activity } from 'lucide-react';
 import type { GalxShardAccount, PoolStats, GalxRotationStrategy } from '@/core/contracts/GalxContracts';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 export default function VaultPage() {
   const [shards, setShards] = useState<GalxShardAccount[]>([]);
@@ -158,23 +159,29 @@ export default function VaultPage() {
           </div>
         </div>
 
-        {/* Live Pool Metrics Overview */}
-        <PoolMetricsOverview
-          stats={stats}
-          onStrategyChange={handleStrategyChange}
-          onRefresh={refreshAll}
-          isLoading={isLoading}
-        />
+        <AuthRequiredGate
+          title="Sign In to Manage Connected Providers & Shards"
+          description="Your connected provider credentials, cooperative pooling shards, and token leases are private to your workspace."
+          checkoutAmount={50}
+        >
+          {/* Live Pool Metrics Overview */}
+          <PoolMetricsOverview
+            stats={stats}
+            onStrategyChange={handleStrategyChange}
+            onRefresh={refreshAll}
+            isLoading={isLoading}
+          />
 
-        {/* Accounts Table */}
-        <ShardVaultManager
-          shards={shards}
-          onToggleMode={handleToggleMode}
-          onToggleStatus={handleToggleStatus}
-          onRetract={handleRetract}
-          onDelete={handleDelete}
-          onOpenAddModal={() => window.location.href = '/auth/connect'}
-        />
+          {/* Accounts Table */}
+          <ShardVaultManager
+            shards={shards}
+            onToggleMode={handleToggleMode}
+            onToggleStatus={handleToggleStatus}
+            onRetract={handleRetract}
+            onDelete={handleDelete}
+            onOpenAddModal={() => window.location.href = '/auth/connect'}
+          />
+        </AuthRequiredGate>
       </main>
     </div>
   );

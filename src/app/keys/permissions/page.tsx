@@ -17,6 +17,7 @@ import {
   Radio,
   Cpu
 } from 'lucide-react';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 export default function KeyPermissionsPage() {
   const [selectedKey, setSelectedKey] = useState('galx_live_d819');
@@ -76,7 +77,12 @@ export default function KeyPermissionsPage() {
 
         <KeysSubNav />
 
-        {savedSuccess && (
+        <AuthRequiredGate
+          title="Sign In to Configure Key Permissions"
+          description="IP CIDR allowlists, restricted model access policies, and max token guardrails are private to your workspace."
+          checkoutAmount={25}
+        >
+          {savedSuccess && (
           <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-xs text-emerald-300 font-mono flex items-center gap-2 animate-in fade-in duration-200">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>Security policies and CIDR allowlists updated successfully!</span>
@@ -217,6 +223,7 @@ export default function KeyPermissionsPage() {
             </div>
           </div>
         </form>
+        </AuthRequiredGate>
       </main>
     </div>
   );

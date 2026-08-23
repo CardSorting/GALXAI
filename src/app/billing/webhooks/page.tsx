@@ -20,6 +20,7 @@ import {
   ExternalLink,
   Code
 } from 'lucide-react';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 interface WebhookEndpoint {
   id: string;
@@ -137,7 +138,12 @@ export default function WebhooksPage() {
 
         <BillingSubNav />
 
-        {testResult && (
+        <AuthRequiredGate
+          title="Sign In to Manage Webhook Subscriptions"
+          description="Webhook endpoint URLs, HMAC signing secrets, and event delivery pipelines are private to your workspace."
+          checkoutAmount={50}
+        >
+          {testResult && (
           <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-xs text-emerald-300 font-mono flex items-center gap-2 animate-in fade-in duration-200">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>{testResult}</span>
@@ -278,6 +284,7 @@ export default function WebhooksPage() {
             ))}
           </div>
         </div>
+        </AuthRequiredGate>
       </main>
     </div>
   );

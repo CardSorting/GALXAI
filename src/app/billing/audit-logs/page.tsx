@@ -19,6 +19,7 @@ import {
   Terminal,
   Fingerprint
 } from 'lucide-react';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 interface AuditLogEntry {
   id: string;
@@ -130,7 +131,12 @@ export default function AuditLogsPage() {
           ]}
         />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <AuthRequiredGate
+          title="Sign In to Inspect Financial Audit Logs"
+          description="Cryptographically signed financial transaction records, permission mutations, and actor audit logs are private to your workspace."
+          checkoutAmount={50}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-white">Tamper-Evident Financial Audit Trail</h1>
             <p className="text-xs text-zinc-400">
@@ -233,6 +239,7 @@ export default function AuditLogsPage() {
             </tbody>
           </table>
         </div>
+        </AuthRequiredGate>
       </main>
     </div>
   );

@@ -17,6 +17,7 @@ import {
   ArrowRight,
   Server
 } from 'lucide-react';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 interface SimulatedShard {
   id: string;
@@ -138,8 +139,13 @@ export default function VaultSimulatorPage() {
           ]}
         />
 
-        {/* Hero Header */}
-        <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-3 relative overflow-hidden">
+        <AuthRequiredGate
+          title="Sign In to Run Traffic & Circuit Simulator"
+          description="Interactive shard simulation, failover execution, and continuous token-bucket telemetry are private to your workspace."
+          checkoutAmount={50}
+        >
+          {/* Hero Header */}
+          <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-3 relative overflow-hidden">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold">
             <Activity className="w-3.5 h-3.5" />
             <span>REAL-TIME RATE GOVERNOR & FAILOVER SIMULATOR</span>
@@ -249,6 +255,7 @@ export default function VaultSimulatorPage() {
             ))}
           </div>
         </div>
+        </AuthRequiredGate>
       </main>
     </div>
   );

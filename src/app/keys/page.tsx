@@ -27,6 +27,7 @@ import {
 import { formatTimeAgo } from '@/lib/utils';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 export default function GatewayKeysPage() {
   const [keys, setKeys] = useState<any[]>([]);
@@ -113,8 +114,13 @@ export default function GatewayKeysPage() {
 
         <KeysSubNav />
 
-        {/* Page Hero with Wallet Summary */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <AuthRequiredGate
+          title="Sign In to Access API Keys"
+          description="Your dedicated API keys, per-key rate limit configurations, and live consumption metrics are private to your workspace."
+          checkoutAmount={25}
+        >
+          {/* Page Hero with Wallet Summary */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
           <div className="lg:col-span-8 glass-panel rounded-3xl p-6 sm:p-8 flex flex-col justify-between space-y-4 border border-white/10">
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold">
@@ -310,6 +316,7 @@ export default function GatewayKeysPage() {
             </div>
           )}
         </div>
+        </AuthRequiredGate>
       </main>
 
       {/* Paywall Blocker Modal */}

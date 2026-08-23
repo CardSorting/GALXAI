@@ -17,6 +17,7 @@ import {
   Activity,
   Flame
 } from 'lucide-react';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 export default function RateLimitsPage() {
   const [selectedKey, setSelectedKey] = useState('galx_live_d819');
@@ -62,7 +63,12 @@ export default function RateLimitsPage() {
 
         <KeysSubNav />
 
-        {savedSuccess && (
+        <AuthRequiredGate
+          title="Sign In to Configure Rate Limits & Quotas"
+          description="RPM and TPM limit governors, burst allowance allocations, and retry backoff policies are private to your workspace."
+          checkoutAmount={25}
+        >
+          {savedSuccess && (
           <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-xs text-emerald-300 font-mono flex items-center gap-2 animate-in fade-in duration-200">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>Rate limit quotas and burst parameters updated successfully!</span>
@@ -182,6 +188,7 @@ export default function RateLimitsPage() {
             </div>
           </div>
         </form>
+        </AuthRequiredGate>
       </main>
     </div>
   );

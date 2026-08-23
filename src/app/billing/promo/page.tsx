@@ -19,6 +19,7 @@ import {
   Clock,
   Share2
 } from 'lucide-react';
+import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
 interface PromoCredit {
   id: string;
@@ -108,7 +109,12 @@ export default function PromoCreditsPage() {
           ]}
         />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <AuthRequiredGate
+          title="Sign In to Access Promotional Grants & Vouchers"
+          description="Promotional compute grants, startup accelerator vouchers, and referral balances are private to your authenticated workspace."
+          checkoutAmount={25}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-white">Promotional Credits & Startup Grants</h1>
             <p className="text-xs text-zinc-400">
@@ -241,6 +247,7 @@ export default function PromoCreditsPage() {
             ))}
           </div>
         </div>
+        </AuthRequiredGate>
       </main>
     </div>
   );
