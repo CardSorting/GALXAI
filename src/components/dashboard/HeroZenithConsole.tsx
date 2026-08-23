@@ -140,14 +140,27 @@ export function HeroZenithConsole() {
   const [clashStatsB, setClashStatsB] = useState<{ ttft: number; speed: number; cost: number } | null>(null);
 
   const [copiedSnippet, setCopiedSnippet] = useState(false);
-  const outputEndRef = useRef<HTMLDivElement>(null);
+  const streamContainerRef = useRef<HTMLDivElement>(null);
+  const clashContainerARef = useRef<HTMLDivElement>(null);
+  const clashContainerBRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll inside output preview when streaming
+  // Auto-scroll ONLY inside the inner output containers without moving the window/main page
   useEffect(() => {
-    if (outputEndRef.current && (isStreaming || isClashStreaming)) {
-      outputEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (isStreaming && streamContainerRef.current) {
+      streamContainerRef.current.scrollTop = streamContainerRef.current.scrollHeight;
     }
-  }, [streamOutput, clashOutputA, clashOutputB, isStreaming, isClashStreaming]);
+  }, [streamOutput, isStreaming]);
+
+  useEffect(() => {
+    if (isClashStreaming) {
+      if (clashContainerARef.current) {
+        clashContainerARef.current.scrollTop = clashContainerARef.current.scrollHeight;
+      }
+      if (clashContainerBRef.current) {
+        clashContainerBRef.current.scrollTop = clashContainerBRef.current.scrollHeight;
+      }
+    }
+  }, [clashOutputA, clashOutputB, isClashStreaming]);
 
   const generateRealisticResponse = (prompt: string, model: ModelPreset): string => {
     const lower = prompt.toLowerCase();
@@ -654,10 +667,12 @@ const res = await client.chat.completions.create({
                 </div>
 
                 {/* Formatted Stream Text Output Container */}
-                <div className="text-zinc-200 leading-relaxed max-h-64 sm:max-h-80 overflow-y-auto whitespace-pre-wrap pr-2 text-xs font-mono">
+                <div
+                  ref={streamContainerRef}
+                  className="text-zinc-200 leading-relaxed max-h-64 sm:max-h-80 overflow-y-auto overscroll-contain whitespace-pre-wrap pr-2 text-xs font-mono"
+                >
                   {streamOutput}
                   {isStreaming && <span className="inline-block w-2 h-4 bg-cyan-400 ml-1 animate-pulse" />}
-                  <div ref={outputEndRef} />
                 </div>
 
                 {/* Live Real-Time Telemetry Counters */}
@@ -711,7 +726,10 @@ const res = await client.chat.completions.create({
                   <span className="text-amber-300 font-bold">{selectedModel.name}</span>
                   <span className="text-emerald-400 font-bold">-${selectedModel.discountPct}% Wholesale</span>
                 </div>
-                <div className="text-zinc-300 text-xs min-h-[140px] max-h-[220px] overflow-y-auto whitespace-pre-wrap">
+                <div
+                  ref={clashContainerARef}
+                  className="text-zinc-300 text-xs min-h-[140px] max-h-[220px] overflow-y-auto overscroll-contain whitespace-pre-wrap"
+                >
                   {clashOutputA || <span className="text-zinc-600 italic">Ready to stream concurrent prompt...</span>}
                 </div>
                 {clashStatsA && (
@@ -728,7 +746,10 @@ const res = await client.chat.completions.create({
                   <span className="text-cyan-300 font-bold">{modelB.name}</span>
                   <span className="text-emerald-400 font-bold">-${modelB.discountPct}% Wholesale</span>
                 </div>
-                <div className="text-zinc-300 text-xs min-h-[140px] max-h-[220px] overflow-y-auto whitespace-pre-wrap">
+                <div
+                  ref={clashContainerBRef}
+                  className="text-zinc-300 text-xs min-h-[140px] max-h-[220px] overflow-y-auto overscroll-contain whitespace-pre-wrap"
+                >
                   {clashOutputB || <span className="text-zinc-600 italic">Ready to stream concurrent prompt...</span>}
                 </div>
                 {clashStatsB && (
