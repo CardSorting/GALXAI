@@ -11,7 +11,13 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - GALX_MASTER_SECRET_KEY=${GALX_MASTER_SECRET_KEY:-galxai_dev_master_secret_key_32bytes!}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - GALX_VAULT_MASTER_SECRET=${GALX_VAULT_MASTER_SECRET:-galxai-apex-vault-master-secret-key-32b}
+      - GALX_VAULT_KEY=${GALX_VAULT_KEY:-galxai-apex-vault-master-secret-key-32b}
+      - GALX_VAULT_ACTIVE_KEY_VERSION=v1
     volumes:
       - galx_data:/app/.data
 

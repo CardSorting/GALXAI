@@ -120,17 +120,20 @@ curl https://api.galx.ai/v1/chat/completions \
 # Install dependencies
 npm install
 
+# Run the unified Vercel Pre-Deployment Audit & Next.js Build Gate
+npm run deploy:check
+
 # Run the 50-suite forensic verification test runner (177 tests)
 npm run test:router
 
 # Run the 46-point Cloudflare Edge verification test runner
 npm run worker:test
 
-# Run live SDK-to-Edge smoke tests
-npx tsx scripts/test-sdk-edge.ts
+# Run live post-deployment smoke test suite
+npm run vercel:smoke -- --url=https://galx.ai
 
-# Build the Next.js production bundle
-npm run build
+# Generate / rotate cryptographic vault master secrets
+npm run vault:populate
 
 # Start local high-concurrency dev server
 npm run dev
@@ -140,6 +143,7 @@ npm run dev
 
 ## 📚 Complete Technical Documentation
 
+- 🚀 **[Vercel Production Deployment Guide](docs/VERCEL_DEPLOYMENT.md)**: 8-phase pre-flight verification gate, Next.js 15 optimization, environment synchronizer, and live smoke test.
 - 🏛️ **[System Architecture Specification](docs/ARCHITECTURE.md)**: Deep dive into the request lifecycle, Mermaid sequence flow, streaming safety, and security model.
 - 🌐 **[Cloudflare Strategy & Edge Substrate](docs/CLOUDFLARE_STRATEGY.md)**: Edge compute mesh, R2 CDN, and custom domain routing.
 - ⚡ **[Universal Developer SDK Specification](docs/SDK_SPECIFICATION.md)**: Complete guide to `@galxai/sdk`, agents, builders, and vector embeddings.
@@ -159,7 +163,7 @@ npm run dev
 - 📊 **[Telemetry, Metrics & Observability](docs/TELEMETRY_AND_OBSERVABILITY.md)**: Prometheus scraping, Datadog integration, and Grafana latency dashboards.
 - 📖 **[API Reference](docs/API_REFERENCE.md)**: REST endpoints for chat completions, vector embeddings, visual synthesis, model catalog, and pool telemetry.
 - 🚀 **[Quickstart & IDE Setup](docs/QUICKSTART.md)**: Drop-in setup for Python, Node.js, LangChain, Cursor IDE, and Continue.
-- 🐳 **[Production Deployment & Infrastructure Guide](docs/DEPLOYMENT.md)**: Docker, Docker Compose, Kubernetes manifests, and Cloudflare Worker runbooks.
+- 🐳 **[Production Deployment & Infrastructure Guide](docs/DEPLOYMENT.md)**: Multi-target deployment runbooks for Vercel, Cloudflare Workers, and Docker.
 - 🛠️ **[Developer & Contributing Guide](docs/DEVELOPER_GUIDE.md)**: Architecture layers, adding model adapters, and testing standards.
 - 🔧 **[Operational Playbook & Troubleshooting](docs/TROUBLESHOOTING.md)**: Error classifications, rate limit mitigations, and health monitoring.
 - ❓ **[Frequently Asked Questions (FAQs)](docs/FAQS.md)**: Common technical, billing, architectural, and security questions.
@@ -182,6 +186,8 @@ Detailed architectural justifications and technical specifications (see [ADR Mas
 - [ADR 0037: Zero-Egress Cloudflare Edge Gateway, R2 CDN & Custom Domain Substrate](docs/adr/0037-zero-egress-cloudflare-edge-gateway-and-r2-cdn-substrate.md)
 - [ADR 0038: Distributed Edge KV Rate Governance & Stale-While-Revalidate Model Catalog Caching](docs/adr/0038-distributed-edge-kv-rate-governance-and-swr-catalog-caching.md)
 - [ADR 0039: Edge-Native Vector Embeddings & Durable Object Swarm State Synchronization](docs/adr/0039-edge-native-vector-embeddings-and-durable-object-swarm-sync.md)
+- [ADR 0040: Enterprise Vercel Pre-Deployment Gate, Next.js 15 Optimization & Multi-Region Topology](docs/adr/0040-enterprise-vercel-pre-deployment-gate-and-multi-region-topology.md)
+- [ADR 0041: Zero-Collision TypeScript Ambient Isolation & Dual-Engine Runtime Mesh](docs/adr/0041-zero-collision-typescript-ambient-isolation-and-dual-runtime-mesh.md)
 
 ---
 

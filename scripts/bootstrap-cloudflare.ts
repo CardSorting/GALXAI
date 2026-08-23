@@ -98,7 +98,7 @@ async function main() {
   console.log('──────────────────────────────────────────────────────────────────────');
   console.log('  1. Storage Bucket (R2):');
   console.log('     npx wrangler r2 bucket create galxai-assets');
-  console.log('     # Custom Domain -> assets.galxai.com in Cloudflare Dashboard');
+  console.log('     # Custom Domain -> assets.galx.ai in Cloudflare Dashboard');
   console.log('\n  2. KV Namespaces:');
   console.log('     npx wrangler kv:namespace create RATE_LIMIT_KV');
   console.log('     npx wrangler kv:namespace create EDGE_CACHE');

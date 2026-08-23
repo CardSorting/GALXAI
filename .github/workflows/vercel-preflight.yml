@@ -1,0 +1,53 @@
+name: Vercel Pre-Deployment & Integrity Check
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  pull_request:
+    branches:
+      - main
+      - staging
+
+jobs:
+  preflight-audit:
+    name: Vercel Pre-Flight Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run 8-Phase Vercel Pre-Flight Audit Engine
+        run: npm run vercel:verify
+        env:
+          NEXT_PUBLIC_APP_URL: https://galx.ai
+          NEXT_PUBLIC_SUPABASE_URL: https://mazhcjisettrzbqhorvp.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_9eyEPgM-hF00Va7TLE90yA_LV4iGcoE
+          GALX_VAULT_MASTER_SECRET: galxai-apex-vault-master-secret-key-32b
+          GALX_VAULT_ACTIVE_KEY_VERSION: v1
+
+      - name: ESLint & Style Checks
+        run: npm run lint
+
+      - name: TypeScript Type Safety Check
+        run: npx tsc --noEmit
+
+      - name: Next.js Production Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_APP_URL: https://galx.ai
+          NEXT_PUBLIC_SUPABASE_URL: https://mazhcjisettrzbqhorvp.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_9eyEPgM-hF00Va7TLE90yA_LV4iGcoE
+          GALX_VAULT_MASTER_SECRET: galxai-apex-vault-master-secret-key-32b
+          GALX_VAULT_ACTIVE_KEY_VERSION: v1

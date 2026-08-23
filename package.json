@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "kill $(lsof -ti:3000) 2>/dev/null || true",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -21,7 +22,14 @@
     "db:push": "tsx scripts/push-migrations-direct.ts",
     "db:status": "tsx scripts/manage-migrations.ts --status",
     "db:migrate": "tsx scripts/manage-migrations.ts --apply",
-    "db:dry-run": "tsx scripts/manage-migrations.ts --dry-run"
+    "db:dry-run": "tsx scripts/manage-migrations.ts --dry-run",
+    "vercel:verify": "tsx scripts/verify-vercel-readiness.ts",
+    "vault:populate": "tsx scripts/populate-vault-secrets.ts",
+    "prebuild": "tsx scripts/verify-vercel-readiness.ts",
+    "deploy:check": "npm run vercel:verify && npm run lint && npm run build",
+    "vercel:smoke": "tsx scripts/verify-deployment-smoke.ts",
+    "vercel:env:sync": "tsx scripts/sync-vercel-env.ts",
+    "vercel:env:print": "tsx scripts/sync-vercel-env.ts --print-cli"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

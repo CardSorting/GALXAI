@@ -1,56 +1,141 @@
 # 🚀 GALXAI Production Deployment & Infrastructure Guide
 
-This guide covers production containerization, environment configuration, Kubernetes manifests, and high-availability deployment patterns.
+GALXAI employs an enterprise multi-tier deployment architecture designed for high availability, zero egress costs, and cryptographic isolation:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                              Global Ingress (DNS)                              │
+└───────────────────────┬────────────────────────────────┬───────────────────────┘
+                        │                                │
+                 (galx.ai / Web)                 (api.galx.ai / API)
+                        │                                │
+                        ▼                                ▼
+       ┌─────────────────────────────────┐     ┌─────────────────────────────────┐
+       │        Vercel Deployment        │     │    Cloudflare Workers Edge      │
+       │   - Next.js 15 App Router       │     │   - Global Edge Mesh Gateway    │
+       │   - Serverless APIs & OG Edge   │     │   - Zero-Egress Token Streaming │
+       │   - Multi-Region (sfo1, iad1)   │     │   - R2 CDN (assets.galx.ai)     │
+       └────────────────┬────────────────┘     └────────────────┬────────────────┘
+                        │                                       │
+                        └───────────────────┬───────────────────┘
+                                            ▼
+                       ┌─────────────────────────────────────────┐
+                       │           Supabase PostgreSQL           │
+                       │   - Transaction Pooler (Port 6543)      │
+                       │   - AES-256-GCM Credential Vault        │
+                       │   - Task Queues & Merkle Ledgers        │
+                       └─────────────────────────────────────────┘
+```
 
 ---
 
-## 1. Environment Variables Configuration
+## 1. Multi-Target Deployment Matrix
 
-| Variable | Required | Default | Description |
+| Target | Components Deployed | Deployment Guide | Primary Commands |
 | :--- | :--- | :--- | :--- |
-| `GALX_MASTER_SECRET_KEY` | **Yes** | — | 32+ character master cryptographic key for AES-256-GCM vault envelope derivation. |
-| `NODE_ENV` | Optional | `production` | Node.js execution environment (`production` or `development`). |
-| `PORT` | Optional | `3000` | HTTP port on which the gateway listens. |
-| `OPENAI_API_KEY` | Optional | — | Initial fallback root seed credential for OpenAI pool shards. |
-| `XAI_API_KEY` | Optional | — | Initial fallback root seed credential for xAI Grok pool shards. |
+| **Vercel** | Next.js 15 Web, Serverless APIs, OG Images | **[Vercel Guide](VERCEL_DEPLOYMENT.md)** | `npm run deploy:check`<br>`npx vercel --prod` |
+| **Cloudflare** | Edge Gateway, Model Router, R2 CDN (`assets.galx.ai`) | **[Cloudflare Guide](CLOUDFLARE_STRATEGY.md)** | `npm run worker:deploy`<br>`npm run worker:test` |
+| **Docker / K8s** | Self-Hosted Gateway Container, Standalone Node runner | *(Detailed below)* | `docker build -t galxai .`<br>`docker compose up -d` |
 
 ---
 
-## 2. Docker Deployment
+## 2. Environment Secrets Matrix
 
-### Minimal Multi-Stage `Dockerfile`
-A production `Dockerfile` is provided in the repository root:
+| Variable | Target | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `NEXT_PUBLIC_APP_URL` | Vercel, Docker | **Yes** | Web platform canonical URL (`https://galx.ai`). |
+| `NEXT_PUBLIC_SUPABASE_URL` | All | **Yes** | Supabase project HTTPS endpoint (`https://mazhcjisettrzbqhorvp.supabase.co`). |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | All | **Yes** | Client-safe anonymous publishable key. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Vercel, Workers | **Yes** | Privileged service key for serverless endpoints. *(Keep Secret)* |
+| `DATABASE_URL` | Vercel, Docker | **Yes** | Transaction Pooler URI (`aws-0-us-east-1.pooler.supabase.com:6543`). |
+| `GALX_VAULT_MASTER_SECRET` | All | **Yes** | 32-byte master cryptographic key for HKDF-SHA256 & AES-256-GCM. |
+| `GALX_VAULT_ACTIVE_KEY_VERSION` | All | **Yes** | Active cryptographic key version (`v1`). |
+| `NEXT_PUBLIC_GALX_EDGE_URL` | All | Optional | Cloudflare edge gateway URL (`https://api.galx.ai`). |
+| `PUBLIC_ASSETS_URL` | All | Optional | Multimodal R2 CDN URL (`https://assets.galx.ai`). |
+
+---
+
+## 3. Vercel Pre-Deployment & Production Workflow
+
+### Automated Verification Gate
+```bash
+# 1. Run the unified 8-Phase Pre-Flight Audit & Next.js 15 build gate
+npm run deploy:check
+
+# 2. Inspect / generate formatted Vercel CLI sync commands
+npm run vercel:env:print
+
+# 3. Deploy to Vercel production
+npx vercel --prod
+
+# 4. Run automated live post-deployment smoke test suite
+npm run vercel:smoke -- --url=https://galx.ai
+```
+
+See **[`docs/VERCEL_DEPLOYMENT.md`](VERCEL_DEPLOYMENT.md)** for full DNS, header, and multi-region details.
+
+---
+
+## 4. Cloudflare Edge Mesh Deployment
 
 ```bash
-# Build Docker image
+# 1. Run the 46-point edge verification test suite
+npm run worker:test
+
+# 2. Deploy to Cloudflare staging environment
+npm run worker:deploy:staging
+
+# 3. Deploy to Cloudflare production edge mesh
+npm run worker:deploy
+```
+
+See **[`docs/CLOUDFLARE_STRATEGY.md`](CLOUDFLARE_STRATEGY.md)** for Custom Domain and R2 CDN bindings.
+
+---
+
+## 5. Docker & Containerized Self-Hosting
+
+### Multi-Stage Production Build
+```bash
+# Build optimized Docker runner image
 docker build -t galxai:latest .
 
-# Run container with persistent .data volume
+# Run container with environment configuration
 docker run -d \
   -p 3000:3000 \
-  -e GALX_MASTER_SECRET_KEY="your-secure-32-byte-master-key-here" \
+  -e NODE_ENV=production \
+  -e NEXT_PUBLIC_APP_URL="https://galx.ai" \
+  -e NEXT_PUBLIC_SUPABASE_URL="https://mazhcjisettrzbqhorvp.supabase.co" \
+  -e NEXT_PUBLIC_SUPABASE_ANON_KEY="sb_publishable_..." \
+  -e DATABASE_URL="postgres://..." \
+  -e GALX_VAULT_MASTER_SECRET="your-32-byte-secret" \
   -v galx_data:/app/.data \
   --name galxai-gateway \
   galxai:latest
 ```
 
----
-
-## 3. Docker Compose (`docker-compose.yml`)
-
+### Docker Compose
 ```yaml
 version: '3.8'
 
 services:
   galxai:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: galxai-gateway
     restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - GALX_MASTER_SECRET_KEY=${GALX_MASTER_SECRET_KEY}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - GALX_VAULT_MASTER_SECRET=${GALX_VAULT_MASTER_SECRET}
+      - GALX_VAULT_KEY=${GALX_VAULT_KEY}
+      - GALX_VAULT_ACTIVE_KEY_VERSION=v1
     volumes:
       - galx_data:/app/.data
 
@@ -60,13 +145,14 @@ volumes:
 
 ---
 
-## 4. Kubernetes Deployment Manifest
+## 6. Kubernetes Deployment Manifest
 
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: galxai-gateway
+  namespace: default
   labels:
     app: galxai
 spec:
@@ -85,11 +171,16 @@ spec:
           ports:
             - containerPort: 3000
           env:
-            - name: GALX_MASTER_SECRET_KEY
+            - name: GALX_VAULT_MASTER_SECRET
               valueFrom:
                 secretKeyRef:
                   name: galxai-secrets
-                  key: master-key
+                  key: vault-master-secret
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: galxai-secrets
+                  key: database-url
           resources:
             requests:
               cpu: "500m"
@@ -99,84 +190,14 @@ spec:
               memory: "2048Mi"
           readinessProbe:
             httpGet:
-              path: /api/pool/stats
+              path: /api/health
               port: 3000
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /api/pool/stats
+              path: /api/health
               port: 3000
-            initialDelaySeconds: 10
-            periodSeconds: 15
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: galxai-service
-spec:
-  type: LoadBalancer
-  selector:
-    app: galxai
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
 ```
-
----
-
-## 5. Security & Hardening Checklist
-
-- [x] **Master Key Entropy**: `GALX_MASTER_SECRET_KEY` generated using `openssl rand -hex 32`.
-- [x] **Ephemeral RAM**: Zero plaintext secrets stored on disk; buffers cleared immediately via `zeroizeBuffer`.
-- [x] **HTTPS/TLS**: Reverse proxy (Nginx, Cloudflare, Traefik, AWS ALB) terminates TLS 1.3 in front of container instances.
-- [x] **Health Check Routing**: Ingress probes target `/api/pool/stats` with $< 5\text{ms}$ readiness latency.
-
----
-
-## 6. Cloudflare Workers & Supabase PostgreSQL Hybrid Deployment (ADR 0015, 0037–0039)
-
-For high-throughput, zero-egress production deployments:
-
-### Step 1: Bootstrap Authoritative Supabase Database
-Run the consolidated SQL setup script in your Supabase SQL Editor:
-```bash
-# Apply migrations / setup script
-psql "$SUPABASE_DB_URL" -f scripts/setup-supabase-schema.sql
-```
-
-### Step 2: Provision Cloudflare KV & R2 Storage
-```bash
-# Automated provisioning & binding verification
-npm run cf:bootstrap
-```
-
-### Step 3: Configure Cloudflare Worker Secrets
-Bind environment secrets to Cloudflare Workers:
-```bash
-# Configure Supabase credentials for Edge Workers
-npx wrangler secret put SUPABASE_URL
-npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
-npx wrangler secret put GALX_VAULT_MASTER_SECRET
-```
-
-### Step 4: Deploy Cloudflare Edge Gateway & Workers
-Deploy the edge mesh across 300+ global Points of Presence with $0 egress bandwidth costs:
-```bash
-# Production deployment (api.galx.ai)
-npm run worker:deploy
-
-# Staging deployment (api-staging.galx.ai)
-npx wrangler deploy --env staging
-```
-
-### Step 5: Verification & Smoke Testing
-```bash
-# Run 46-point edge verification suite
-npm run worker:test
-
-# Run live SDK-to-Edge smoke tests
-npx tsx scripts/test-sdk-edge.ts
-```
-

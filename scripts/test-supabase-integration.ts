@@ -402,7 +402,7 @@ async function runTests() {
       SUPABASE_SERVICE_ROLE_KEY: config.supabaseServiceRoleKey
     });
 
-    const streamReq = new Request('https://edge.galxai.com/v1/chat/completions', {
+    const streamReq = new Request('https://api.galx.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         Authorization: 'Bearer galx_live_master_key_12345',
@@ -463,7 +463,7 @@ async function runTests() {
       folder: 'dalle_outputs'
     });
     assert(
-      r2Asset.publicUrl.includes('assets.galxai.com') && r2Asset.sizeBytes > 0,
+      r2Asset.publicUrl.includes('assets.galx.ai') && r2Asset.sizeBytes > 0,
       'Cloudflare R2 Adapter: Ingests multimodal binary asset with 0 database egress'
     );
 

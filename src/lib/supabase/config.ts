@@ -17,13 +17,13 @@ export function getSupabaseConfig(): SupabaseConfig {
   const supabaseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL ||
     process.env.SUPABASE_URL ||
-    'https://galxai-gateway.supabase.co';
+    'https://mazhcjisettrzbqhorvp.supabase.co';
 
   const supabaseAnonKey =
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.SUPABASE_ANON_KEY ||
-    '';
+    'sb_publishable_9eyEPgM-hF00Va7TLE90yA_LV4iGcoE';
 
   const supabaseServiceRoleKey =
     process.env.SUPABASE_SERVICE_ROLE_KEY ||

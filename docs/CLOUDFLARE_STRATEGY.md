@@ -86,7 +86,7 @@ flowchart TD
 ## 2. The 7 Strategic Pillars of Cloudflare for GALXAI
 
 ### Pillar 1: Zero-Egress Universal Gateway (`GalxEdgeGateway`)
-- **Domain**: `api.galxai.com`
+- **Domain**: `api.galx.ai`
 - **Mechanism**: Utilizes the native Web Streams API (`TransformStream`) in Cloudflare Workers to proxy upstream SSE chunks from OpenAI/xAI directly to clients without buffering full responses in RAM.
 - **Economic Advantage**: Eliminates standard cloud egress fees ($0.09–$0.12/GB), allowing GALXAI to offer wholesale pricing with up to 36% discount margins sustainably.
 
@@ -95,9 +95,9 @@ flowchart TD
 - **Solution**: Cloudflare Hyperdrive maintains a persistent, pre-authenticated connection pool to Supabase PostgreSQL at the edge PoP, cutting database roundtrip latency to $<15\text{ms}$.
 
 ### Pillar 3: Zero-Egress Multimodal Storage (Cloudflare R2 + CDN)
-- **Domain**: `assets.galxai.com`
+- **Domain**: `assets.galx.ai`
 - **Mechanism**: Large visual generation outputs (`openai-gpt-image-2`, `openai-dalle-3`) and synthesized audio buffers are streamed straight to Cloudflare R2 via `GalxR2AssetAdapter`.
-- **Database Optimization**: Supabase PostgreSQL only stores compact metadata URIs (e.g. `https://assets.galxai.com/generations/asset_123.webp`), keeping database size minimal.
+- **Database Optimization**: Supabase PostgreSQL only stores compact metadata URIs (e.g. `https://assets.galx.ai/generations/asset_123.webp`), keeping database size minimal.
 
 ### Pillar 4: Edge Caching & Distributed Rate Limiting (Cloudflare KV + Cache API)
 - **Components**: `RATE_LIMIT_KV` & `EDGE_CACHE`
@@ -127,10 +127,10 @@ flowchart TD
 
 | Hostname | Purpose | Target | Cloudflare Proxy (Orange Cloud) |
 | :--- | :--- | :--- | :--- |
-| `galxai.com` | Web UI & Documentation Dashboard | Vercel / Cloudflare Pages | **Proxied (ON)** |
-| `api.galxai.com` | Edge API Gateway (`/v1/*`) | Cloudflare Worker (`galxai-edge-gateway`) | **Proxied (ON)** |
-| `assets.galxai.com` | Multimodal Media CDN | Cloudflare R2 Bucket (`galxai-assets`) | **Proxied (ON)** |
-| `db.galxai.com` | Database Routing (Optional CNAME) | Supabase Connection Pooler | **DNS Only (OFF)** |
+| `galx.ai` | Web UI & Documentation Dashboard | Vercel / Cloudflare Pages | **Proxied (ON)** |
+| `api.galx.ai` | Edge API Gateway (`/v1/*`) | Cloudflare Worker (`galxai-edge-gateway`) | **Proxied (ON)** |
+| `assets.galx.ai` | Multimodal Media CDN | Cloudflare R2 Bucket (`galxai-assets`) | **Proxied (ON)** |
+| `db.galx.ai` | Database Routing (Optional CNAME) | Supabase Connection Pooler | **DNS Only (OFF)** |
 
 ---
 
@@ -153,7 +153,7 @@ npx wrangler r2 bucket create galxai-assets
 # (Optional) Create staging asset bucket
 npx wrangler r2 bucket create galxai-assets-staging
 ```
-*In the Cloudflare Dashboard*: Go to **R2 > galxai-assets > Settings > Custom Domains** and connect `assets.galxai.com`.
+*In the Cloudflare Dashboard*: Go to **R2 > galxai-assets > Settings > Custom Domains** and connect `assets.galx.ai`.
 
 ### Step 3: Create Cloudflare KV Namespaces
 ```bash
@@ -212,7 +212,7 @@ compatibility_flags = ["nodejs_compat"]
 [vars]
 ENVIRONMENT = "production"
 SUPABASE_URL = "https://your-project.supabase.co"
-PUBLIC_ASSETS_URL = "https://assets.galxai.com"
+PUBLIC_ASSETS_URL = "https://assets.galx.ai"
 
 # Hyperdrive Connection Accelerator to Supabase PostgreSQL (0 connection overhead)
 [[hyperdrive]]
@@ -311,8 +311,8 @@ jobs:
 
 | Component | Verification Command / URL | Expected Result |
 | :--- | :--- | :--- |
-| **Edge Gateway Health** | `curl -i https://api.galxai.com/health` | `HTTP 200 { status: 'healthy', edgePoP: '...' }` |
-| **Model Catalog (Cached)** | `curl -i https://api.galxai.com/v1/models -H "Authorization: Bearer galx_test_..."` | `HTTP 200 { object: 'list', data: [...] }` |
-| **Zero-Egress SSE Stream** | `curl -N -X POST https://api.galxai.com/v1/chat/completions -H "Authorization: Bearer galx_live_..." -H "Content-Type: application/json" -d '{"model":"gpt-5.6-sol","messages":[{"role":"user","content":"Ping"}],"stream":true}'` | Immediate chunked SSE streaming (`data: {...}`) with $<25\text{ms}$ TTFT |
-| **R2 Asset CDN** | `curl -i https://assets.galxai.com/generations/test.webp` | `HTTP 200` with `CF-Cache-Status: HIT` |
+| **Edge Gateway Health** | `curl -i https://api.galx.ai/health` | `HTTP 200 { status: 'healthy', edgePoP: '...' }` |
+| **Model Catalog (Cached)** | `curl -i https://api.galx.ai/v1/models -H "Authorization: Bearer galx_test_..."` | `HTTP 200 { object: 'list', data: [...] }` |
+| **Zero-Egress SSE Stream** | `curl -N -X POST https://api.galx.ai/v1/chat/completions -H "Authorization: Bearer galx_live_..." -H "Content-Type: application/json" -d '{"model":"gpt-5.6-sol","messages":[{"role":"user","content":"Ping"}],"stream":true}'` | Immediate chunked SSE streaming (`data: {...}`) with $<25\text{ms}$ TTFT |
+| **R2 Asset CDN** | `curl -i https://assets.galx.ai/generations/test.webp` | `HTTP 200` with `CF-Cache-Status: HIT` |
 | **Scheduled Worker Queue** | `npx wrangler tail` | Scheduled cron event executing `processBatch('default', 25)` without uncaught exceptions |

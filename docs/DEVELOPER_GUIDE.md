@@ -9,9 +9,10 @@ This guide covers the internal codebase structure, architectural layers, how to 
 ```text
 GALXAI/
 ├── docs/                             # Comprehensive Architecture & API Documentation
-│   ├── adr/                          # Architecture Decision Records (0001-0039)
+│   ├── adr/                          # Architecture Decision Records (0001-0041)
 │   ├── ARCHITECTURE.md               # System overview, lifecycle, and security model
 │   ├── API_REFERENCE.md              # REST API endpoint specifications (/v1 & /api)
+│   ├── VERCEL_DEPLOYMENT.md          # 8-Phase Pre-Flight Audit & Next.js 15 Deployment
 │   ├── CLOUDFLARE_STRATEGY.md        # Edge Mesh, R2 CDN & Custom Domain Substrate
 │   ├── SDK_SPECIFICATION.md          # Universal Developer SDK & Ultra-Flat Ergonomics
 │   ├── QUICKSTART.md                 # Python, Node.js, Cursor, Continue setup
@@ -20,6 +21,10 @@ GALXAI/
 │   ├── DEVELOPER_GUIDE.md            # Contributing guide and adapter development
 │   └── TROUBLESHOOTING.md            # Error classification and operational playbooks
 ├── scripts/
+│   ├── verify-vercel-readiness.ts    # 8-Phase Pre-Flight Audit Engine
+│   ├── sync-vercel-env.ts            # Automated Vercel Secret Synchronizer
+│   ├── verify-deployment-smoke.ts    # Post-Deployment Live Smoke Test Suite
+│   ├── populate-vault-secrets.ts     # Cryptographic Vault Secret Generator & Sync
 │   ├── bootstrap-cloudflare.ts       # Automated Cloudflare resource provisioner
 │   ├── test-cloudflare-workers.ts    # 46-suite Cloudflare edge verification runner
 │   ├── test-sdk-edge.ts              # SDK to Edge Gateway live smoke test
@@ -117,7 +122,7 @@ import httpx
 
 # 1. Enqueue Async Chat Task with Webhook Callback
 resp = httpx.post(
-    "https://gateway.galx.ai/v1/chat/completions",
+    "https://api.galx.ai/v1/chat/completions",
     headers={
         "Authorization": "Bearer galx_live_...",
         "X-Galx-Async": "true",
@@ -135,7 +140,7 @@ print("Enqueued Task:", task_info["id"], "Status:", task_info["status"])
 
 # 2. Poll Task Status
 task_url = task_info["task_url"]
-status_resp = httpx.get(f"https://gateway.galx.ai{task_url}", headers={"Authorization": "Bearer galx_live_..."})
+status_resp = httpx.get(f"https://api.galx.ai{task_url}", headers={"Authorization": "Bearer galx_live_..."})
 print("Current Task Result:", status_resp.json()["task"]["result"])
 ```
 

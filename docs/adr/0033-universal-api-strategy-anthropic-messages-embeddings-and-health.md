@@ -22,7 +22,7 @@ We implement the **Universal API Strategy**, standardizing the following native 
 - Supports both JSON responses and Server-Sent Event (SSE) streaming (`message_start`, `content_block_delta`, `message_delta`, `message_stop`).
 - Enables drop-in replacement for the Anthropic SDK:
   ```bash
-  export ANTHROPIC_BASE_URL="https://gateway.galx.ai"
+  export ANTHROPIC_BASE_URL="https://api.galx.ai"
   export ANTHROPIC_API_KEY="galx_live_..."
   ```
 
@@ -33,7 +33,7 @@ We implement the **Universal API Strategy**, standardizing the following native 
 ### 3. Rapid Prompt Direct Execution (`POST /api/run`)
 - Ultra-flat direct endpoint for lightweight automation, webhooks, and CLI scripts:
   ```bash
-  curl -X POST https://gateway.galx.ai/api/run \
+  curl -X POST https://api.galx.ai/api/run \
     -H "Authorization: Bearer $GALX_API_KEY" \
     -H "Content-Type: application/json" \
     -d '{"prompt": "Analyze server telemetry"}'

@@ -1,6 +1,6 @@
 # 🔧 GALXAI Operational Playbook & Troubleshooting Guide
 
-This guide details common status codes, error classifications, and operational remedies when running or integrating with GALXAI.
+This guide details common status codes, error classifications, deployment diagnostic playbooks, and operational remedies when running or integrating with GALXAI.
 
 ---
 
@@ -44,9 +44,10 @@ This guide details common status codes, error classifications, and operational r
 }
 ```
 
-- **Root Cause**: Cryptographic envelope authentication failed. This occurs if ciphertext has been transplanted across tenants, or if `GALX_MASTER_SECRET_KEY` was rotated without re-encrypting existing database records.
+- **Root Cause**: Cryptographic envelope authentication failed. This occurs if ciphertext has been transplanted across tenants, or if `GALX_VAULT_MASTER_SECRET` was rotated without re-encrypting existing database records.
 - **Remedy**:
-  - Verify that `GALX_MASTER_SECRET_KEY` in your environment matches the key used during credential registration.
+  - Verify that `GALX_VAULT_MASTER_SECRET` in your `.env.local` or Vercel environment matches the key used during credential registration.
+  - Run `npm run vault:populate` to test and re-verify your vault keys.
   - Re-deposit the affected shard credentials via `/vault/deposit`.
 
 ---
@@ -74,13 +75,53 @@ This guide details common status codes, error classifications, and operational r
 
 ---
 
+## 🚀 Vercel Deployment & Build Troubleshooting
+
+### 1. Pre-Flight Audit Gate Failures (`npm run deploy:check`)
+
+#### Problem: `Cryptographic vault self-test failed`
+- **Remedy**: Run `npm run vault:populate -- --fresh` to generate a valid 256-bit cryptographic secret and test the HKDF derivation roundtrip.
+
+#### Problem: `Live HTTPS Ping to Supabase timed out`
+- **Remedy**: Check that `NEXT_PUBLIC_SUPABASE_URL` in `.env.local` is set to `https://mazhcjisettrzbqhorvp.supabase.co`. Verify outgoing HTTPS port 443 connectivity.
+
+#### Problem: `DATABASE_URL is not set to a pooler endpoint`
+- **Remedy**: Ensure `DATABASE_URL` connects via Supabase Transaction Pooler (Port 6543):
+  `postgresql://postgres.mazhcjisettrzbqhorvp:[PASSWORD]@aws-0-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true`
+
+---
+
+### 2. TypeScript Identifier Conflict in `worker-configuration.d.ts`
+
+#### Problem: `Cannot find name 'KVNamespace'` or DOM global redefinition conflicts
+- **Root Cause**: Running uncurated `wrangler types` dumped 15,000+ global lines colliding with TypeScript's standard DOM library.
+- **Remedy**: Ensure `worker-configuration.d.ts` uses scoped dynamic import types:
+  ```typescript
+  type CloudflareKVNamespace = import('@cloudflare/workers-types').KVNamespace;
+  type CloudflareR2Bucket = import('@cloudflare/workers-types').R2Bucket;
+  type CloudflareDurableObjectNamespace = import('@cloudflare/workers-types').DurableObjectNamespace;
+  ```
+  Run `npx tsc --noEmit` to verify clean resolution with 0 errors.
+
+---
+
+### 3. Post-Deployment Smoke Test Failures (`npm run vercel:smoke`)
+
+#### Problem: Smoke test fails on `/opengraph-image`
+- **Remedy**: Verify that `export const runtime = 'edge'` is declared in OpenGraph route handlers and that Edge-compatible fonts are loaded via `fetch()`.
+
+#### Problem: Live response security headers missing
+- **Remedy**: Check that `next.config.ts` includes `securityHeaders` in `headers()` and that `vercel.json` is deployed.
+
+---
+
 ## 📈 Monitoring & Health Checks
 
 | Endpoint | Method | Purpose |
 | :--- | :--- | :--- |
-| `https://api.galx.ai/health` | `GET` | Instant edge PoP health probe & latency tracker. |
+| `https://api.galx.ai/api/health` | `GET` | Edge PoP health probe & latency tracker. |
+| `https://galx.ai/api/health` | `GET` | Next.js Vercel serverless diagnostic health & commit telemetry. |
 | `/api/pool/stats` | `GET` | Snapshot of healthy, cooldown, and active shard counts. |
 | `/api/pool/telemetry` | `GET` | Real-time sliding window latency percentiles ($P_{50}, P_{90}, P_{99}$), RPM, TPM, and error rates. |
 | `https://api.galx.ai/v1/models` | `GET` | Live catalog of all 12 available models with active status and edge caching. |
 | `/status` | `GET` | Interactive web dashboard of global fleet availability and response times. |
-

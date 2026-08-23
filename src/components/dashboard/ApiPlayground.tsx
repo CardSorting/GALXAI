@@ -114,7 +114,7 @@ export function ApiPlayground() {
           cURL Example (Authenticated)
         </span>
         <pre className="p-4 rounded-2xl bg-black/60 border border-white/10 text-xs font-mono text-cyan-300 overflow-x-auto">
-{`curl -X POST https://api.galxai.com/v1/chat/completions \\
+{`curl -X POST https://api.galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer YOUR_GALXAI_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{

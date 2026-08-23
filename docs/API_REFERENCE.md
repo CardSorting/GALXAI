@@ -18,9 +18,9 @@ Authorization: Bearer galx_live_abcdef1234567890
 
 | Environment | Edge Ingress Base URL | Regional Coverage |
 | :--- | :--- | :--- |
-| **Production Edge Gateway** | `https://galxai-edge-gateway.notsosuper688651.workers.dev` (or `https://api.galxai.com`) | 300+ Global Edge PoPs ($0 Egress) |
+| **Production Edge Gateway** | `https://galxai-edge-gateway.notsosuper688651.workers.dev` (or `https://api.galx.ai`) | 300+ Global Edge PoPs ($0 Egress) |
 | **Staging Edge Gateway** | `https://galxai-edge-gateway-staging.notsosuper688651.workers.dev` | Staging Edge Mesh |
-| **Multimodal R2 Media CDN** | `https://pub-9aab2b19ca7947c59240e3869c544e20.r2.dev` (or `https://assets.galxai.com`) | Global Anycast Storage CDN |
+| **Multimodal R2 Media CDN** | `https://pub-9aab2b19ca7947c59240e3869c544e20.r2.dev` (or `https://assets.galx.ai`) | Global Anycast Storage CDN |
 
 ---
 
@@ -239,7 +239,7 @@ GALXAI provides a CloudTasks & CloudRun-inspired asynchronous task queue and wor
 Returns all active queues with live telemetry, dispatch rates, and concurrency semaphores.
 
 ```bash
-curl -X GET https://gateway.galx.ai/api/queues \
+curl -X GET https://api.galx.ai/api/queues \
   -H "Authorization: Bearer galx_live_..."
 ```
 
@@ -247,7 +247,7 @@ curl -X GET https://gateway.galx.ai/api/queues \
 Creates and schedules an asynchronous task with strict idempotency deduplication and priority.
 
 ```bash
-curl -X POST https://gateway.galx.ai/api/queues/llm-batch/tasks \
+curl -X POST https://api.galx.ai/api/queues/llm-batch/tasks \
   -H "Authorization: Bearer galx_live_..." \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: job-eval-2026-08-22-001" \
@@ -286,7 +286,7 @@ curl -X POST https://gateway.galx.ai/api/queues/llm-batch/tasks \
 Passing `X-Galx-Async: true` automatically enqueues the request into the asynchronous queue:
 
 ```bash
-curl -X POST https://gateway.galx.ai/v1/chat/completions \
+curl -X POST https://api.galx.ai/v1/chat/completions \
   -H "Authorization: Bearer galx_live_..." \
   -H "X-Galx-Async: true" \
   -H "X-Galx-Queue: llm-batch" \
@@ -302,7 +302,7 @@ curl -X POST https://gateway.galx.ai/v1/chat/completions \
 Enables external worker fleets to lease tasks atomically with fencing tokens:
 
 ```bash
-curl -X POST https://gateway.galx.ai/api/queues/default/lease \
+curl -X POST https://api.galx.ai/api/queues/default/lease \
   -H "Authorization: Bearer galx_live_..." \
   -H "Content-Type: application/json" \
   -d '{
@@ -314,7 +314,7 @@ curl -X POST https://gateway.galx.ai/api/queues/default/lease \
 
 ### 5. Acknowledge Pull Task (`POST /api/queues/:queueId/tasks/:taskId/acknowledge`)
 ```bash
-curl -X POST https://gateway.galx.ai/api/queues/default/tasks/task_123/acknowledge \
+curl -X POST https://api.galx.ai/api/queues/default/tasks/task_123/acknowledge \
   -H "Authorization: Bearer galx_live_..." \
   -H "Content-Type: application/json" \
   -d '{
@@ -327,7 +327,7 @@ curl -X POST https://gateway.galx.ai/api/queues/default/tasks/task_123/acknowled
 Re-enqueues up to 100 dead-lettered tasks in bulk for immediate re-execution.
 
 ```bash
-curl -X POST https://gateway.galx.ai/api/queues/llm-batch/redrive \
+curl -X POST https://api.galx.ai/api/queues/llm-batch/redrive \
   -H "Authorization: Bearer galx_live_..." \
   -H "Content-Type: application/json" \
   -d '{ "maxTasks": 50 }'
@@ -337,7 +337,7 @@ curl -X POST https://gateway.galx.ai/api/queues/llm-batch/redrive \
 Bulk cancels pending/scheduled tasks matching specific tags, group IDs, or user IDs.
 
 ```bash
-curl -X POST https://gateway.galx.ai/api/queues/agent-swarms/tasks/bulk-cancel \
+curl -X POST https://api.galx.ai/api/queues/agent-swarms/tasks/bulk-cancel \
   -H "Authorization: Bearer galx_live_..." \
   -H "Content-Type: application/json" \
   -d '{ "tag": "obsolete-run-v1" }'
@@ -347,7 +347,7 @@ curl -X POST https://gateway.galx.ai/api/queues/agent-swarms/tasks/bulk-cancel \
 Updates execution progress percentage and appends execution logs.
 
 ```bash
-curl -X POST https://gateway.galx.ai/api/queues/default/tasks/task_123/progress \
+curl -X POST https://api.galx.ai/api/queues/default/tasks/task_123/progress \
   -H "Authorization: Bearer galx_live_..." \
   -H "Content-Type: application/json" \
   -d '{
@@ -361,7 +361,7 @@ curl -X POST https://gateway.galx.ai/api/queues/default/tasks/task_123/progress 
 Subscribes to real-time execution state transitions, progress updates, and logs via standard SSE:
 
 ```bash
-curl -N https://gateway.galx.ai/api/queues/default/tasks/task_123/stream \
+curl -N https://api.galx.ai/api/queues/default/tasks/task_123/stream \
   -H "Authorization: Bearer galx_live_..."
 ```
 
@@ -369,7 +369,7 @@ curl -N https://gateway.galx.ai/api/queues/default/tasks/task_123/stream \
 Subscribes to live dispatches, completions, and telemetry events across an entire named queue:
 
 ```bash
-curl -N https://gateway.galx.ai/api/queues/agent-swarms/stream \
+curl -N https://api.galx.ai/api/queues/agent-swarms/stream \
   -H "Authorization: Bearer galx_live_..."
 ```
 
@@ -377,7 +377,7 @@ curl -N https://gateway.galx.ai/api/queues/agent-swarms/stream \
 Creates a Fan-In child task that waits until parent tasks `task_A` and `task_B` complete:
 
 ```bash
-curl -X POST https://gateway.galx.ai/api/queues/agent-swarms/tasks \
+curl -X POST https://api.galx.ai/api/queues/agent-swarms/tasks \
   -H "Authorization: Bearer galx_live_..." \
   -H "Content-Type: application/json" \
   -d '{
@@ -415,7 +415,7 @@ Clients can specify granular privacy policies directly through HTTP request head
 Retrieves the real-time posture grade and status across all 5 Trust Services Criteria (28 controls).
 
 ```bash
-curl -X GET https://gateway.galx.ai/api/compliance/posture \
+curl -X GET https://api.galx.ai/api/compliance/posture \
   -H "Authorization: Bearer galx_live_..."
 ```
 
@@ -423,7 +423,7 @@ curl -X GET https://gateway.galx.ai/api/compliance/posture \
 Generates a cryptographically signed evidence package with Merkle audit roots and digital signatures for SOC 2 Type II and HIPAA auditors.
 
 ```bash
-curl -X GET https://gateway.galx.ai/api/compliance/evidence \
+curl -X GET https://api.galx.ai/api/compliance/evidence \
   -H "Authorization: Bearer galx_live_..."
 ```
 
@@ -431,7 +431,7 @@ curl -X GET https://gateway.galx.ai/api/compliance/evidence \
 Returns the complete GDPR Article 30 controller and processor processing registers sealed with SHA-256 digital seals.
 
 ```bash
-curl -X GET https://gateway.galx.ai/api/compliance/ropa \
+curl -X GET https://api.galx.ai/api/compliance/ropa \
   -H "Authorization: Bearer galx_live_..."
 ```
 
@@ -439,7 +439,7 @@ curl -X GET https://gateway.galx.ai/api/compliance/ropa \
 Executes an immediate cryptographic purge of user data, session records, and keys, returning signed proof of erasure.
 
 ```bash
-curl -X POST https://gateway.galx.ai/api/compliance/dsar/purge \
+curl -X POST https://api.galx.ai/api/compliance/dsar/purge \
   -H "Authorization: Bearer galx_live_..." \
   -H "Content-Type: application/json" \
   -d '{ "userId": "usr_dev_123" }'
@@ -453,7 +453,7 @@ curl -X POST https://gateway.galx.ai/api/compliance/dsar/purge \
 Executes offline deterministic natural queries against the model catalog:
 
 ```bash
-curl -X GET "https://gateway.galx.ai/v1/models/query?q=where+supportsVision+=+true+and+inputPricePer1M+<=+1.0+sort+by+price+asc" \
+curl -X GET "https://api.galx.ai/v1/models/query?q=where+supportsVision+=+true+and+inputPricePer1M+<=+1.0+sort+by+price+asc" \
   -H "Authorization: Bearer galx_live_..."
 ```
 
@@ -466,7 +466,7 @@ curl -X GET "https://gateway.galx.ai/v1/models/query?q=where+supportsVision+=+tr
 Direct ultra-flat prompt execution endpoint for lightweight scripts, cron jobs, and webhooks:
 
 ```bash
-curl -X POST https://gateway.galx.ai/api/run \
+curl -X POST https://api.galx.ai/api/run \
   -H "Authorization: Bearer $GALX_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"prompt": "Summarize today security alerts"}'
@@ -479,7 +479,7 @@ curl -X POST https://gateway.galx.ai/api/run \
 Drop-in native compatibility endpoint for Anthropic Claude SDK, Claude Code, and Windsurf:
 
 ```bash
-curl -X POST https://gateway.galx.ai/v1/messages \
+curl -X POST https://api.galx.ai/v1/messages \
   -H "x-api-key: $GALX_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -H "Content-Type: application/json" \
@@ -497,7 +497,7 @@ curl -X POST https://gateway.galx.ai/v1/messages \
 OpenAI-compatible vector embedding generations backed by BroccoliDB L1 in-memory cosine indexing:
 
 ```bash
-curl -X POST https://gateway.galx.ai/v1/embeddings \
+curl -X POST https://api.galx.ai/v1/embeddings \
   -H "Authorization: Bearer $GALX_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -513,7 +513,7 @@ curl -X POST https://gateway.galx.ai/v1/embeddings \
 Real-time capability negotiation and telemetry status:
 
 ```bash
-curl -X GET https://gateway.galx.ai/api/health
+curl -X GET https://api.galx.ai/api/health
 ```
 
 Response:

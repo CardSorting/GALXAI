@@ -53,7 +53,7 @@ async function runAllTests() {
   const gateway = new GalxEdgeGateway(mockEnv);
 
   // 1.1 Health endpoint
-  const healthReq = new Request('https://api.galxai.com/health', {
+  const healthReq = new Request('https://api.galx.ai/health', {
     method: 'GET',
     headers: { 'cf-ray': '8f123456789-IAD' }
   });
@@ -64,7 +64,7 @@ async function runAllTests() {
   assert(healthJson.edgePoP === '8f123456789-IAD', 'Health payload reflects CF-Ray edge PoP header');
 
   // 1.2 Auth Guard: Rejection of invalid / missing keys
-  const unauthReq = new Request('https://api.galxai.com/v1/models', {
+  const unauthReq = new Request('https://api.galx.ai/v1/models', {
     method: 'GET',
     headers: { Authorization: 'Bearer sk-invalid-key-format' }
   });
@@ -72,7 +72,7 @@ async function runAllTests() {
   assert(unauthResp.status === 401, 'Invalid API key format rejected with HTTP 401');
 
   // 1.3 List Models Endpoint
-  const modelsReq = new Request('https://api.galxai.com/v1/models', {
+  const modelsReq = new Request('https://api.galx.ai/v1/models', {
     method: 'GET',
     headers: { Authorization: 'Bearer galx_live_test_key_123' }
   });
@@ -83,7 +83,7 @@ async function runAllTests() {
   assert(modelsJson.data.some((m: any) => m.id === 'gpt-5.6-sol'), 'Model catalog contains "gpt-5.6-sol"');
 
   // 1.4 Non-Streaming Chat Completion
-  const nonStreamReq = new Request('https://api.galxai.com/v1/chat/completions', {
+  const nonStreamReq = new Request('https://api.galx.ai/v1/chat/completions', {
     method: 'POST',
     headers: {
       Authorization: 'Bearer galx_live_test_key_123',
@@ -102,7 +102,7 @@ async function runAllTests() {
   assert(nonStreamJson.usage.total_tokens > 0, 'Response includes token usage statistics');
 
   // 1.5 SSE Streaming Chat Completion
-  const streamReq = new Request('https://api.galxai.com/v1/chat/completions', {
+  const streamReq = new Request('https://api.galx.ai/v1/chat/completions', {
     method: 'POST',
     headers: {
       Authorization: 'Bearer galx_live_test_key_123',
@@ -132,7 +132,7 @@ async function runAllTests() {
   assert(accumulatedText.includes('[DONE]'), 'SSE stream terminates with "[DONE]" marker');
 
   // 1.6 OpenAI-Compatible Vector Embeddings
-  const embReq = new Request('https://api.galxai.com/v1/embeddings', {
+  const embReq = new Request('https://api.galx.ai/v1/embeddings', {
     method: 'POST',
     headers: {
       Authorization: 'Bearer galx_live_test_key_123',
@@ -150,7 +150,7 @@ async function runAllTests() {
   assert(embJson.data[0].embedding.length === 1536, 'Embedding vector has 1536 dimensions');
 
   // 1.7 OpenAI-Compatible Image Generations
-  const imgReq = new Request('https://api.galxai.com/v1/images/generations', {
+  const imgReq = new Request('https://api.galx.ai/v1/images/generations', {
     method: 'POST',
     headers: {
       Authorization: 'Bearer galx_live_test_key_123',
@@ -230,7 +230,7 @@ async function runAllTests() {
     contentType: 'image/webp',
     folder: 'dalle'
   });
-  assert(upload.publicUrl.startsWith('https://assets.galxai.com/dalle/'), 'R2 Asset URL uses assets.galxai.com CDN host');
+  assert(upload.publicUrl.startsWith('https://assets.galx.ai/dalle/'), 'R2 Asset URL uses assets.galx.ai CDN host');
   assert(upload.sizeBytes > 0, 'R2 Asset size accurately recorded');
   
   const retrieved = r2Adapter.getAsset(upload.assetId);

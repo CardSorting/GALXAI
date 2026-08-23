@@ -48,7 +48,7 @@ export class GalxR2AssetAdapter {
     const assetId = `asset_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     const folder = params.folder || 'generations';
     const filename = `${folder}/${assetId}.${params.contentType.split('/')[1] || 'bin'}`;
-    const publicBase = (typeof process !== 'undefined' && process.env?.PUBLIC_ASSETS_URL) || 'https://assets.galxai.com';
+    const publicBase = (typeof process !== 'undefined' && process.env?.PUBLIC_ASSETS_URL) || 'https://assets.galx.ai';
     const publicUrl = `${publicBase}/${filename}`;
     const sizeBytes = typeof params.data === 'string' ? Buffer.byteLength(params.data) : params.data.length;
 

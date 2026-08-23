@@ -21,7 +21,7 @@ export class GalxVaultDecryptionError extends Error {
 
 // Master Keyring with HKDF-SHA256 Derivation
 export const PRIMARY_KEY_VERSION = 'v1';
-export const RAW_MASTER_SEED = process.env.GALX_VAULT_MASTER_SECRET || 'galx-super-secure-master-secret-key-32b-min!';
+export const RAW_MASTER_SEED = process.env.GALX_VAULT_MASTER_SECRET || process.env.GALX_VAULT_KEY || 'galx-super-secure-master-secret-key-32b-min!';
 
 
 function deriveVersionedKey(seed: string, version: string): Buffer {

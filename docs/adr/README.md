@@ -47,6 +47,8 @@ This directory contains the formal Architectural Decision Records (ADRs) that go
 | **[ADR 0037](0037-zero-egress-cloudflare-edge-gateway-and-r2-cdn-substrate.md)** | Zero-Egress Cloudflare Edge Gateway, R2 CDN & Custom Domain Substrate | **Edge & CDN** | `Accepted` | `api.galx.ai` Worker ingress, `assets.galx.ai` R2 media CDN, and $0 egress bandwidth across 300+ PoPs. |
 | **[ADR 0038](0038-distributed-edge-kv-rate-governance-and-swr-catalog-caching.md)** | Distributed Edge KV Rate Governance & Stale-While-Revalidate Model Catalog Caching | **Edge State & Cache** | `Accepted` | Sliding-window token bucket KV rate limiting and sub-10ms SWR model catalog caching at edge PoPs. |
 | **[ADR 0039](0039-edge-native-vector-embeddings-and-durable-object-swarm-sync.md)** | Edge-Native Vector Embeddings & Durable Object Swarm State Synchronization | **Embeddings & Swarms** | `Accepted` | Edge 1536-dim vector embeddings (`/v1/embeddings`) and in-memory Durable Object swarm synchronization. |
+| **[ADR 0040](0040-enterprise-vercel-pre-deployment-gate-and-multi-region-topology.md)** | Enterprise Vercel Pre-Deployment Gate, Next.js 15 Optimization & Multi-Region Topology | **Deployment & CI/CD** | `Accepted` | 8-Phase pre-flight audit engine, package import optimizations, HSTS headers, and multi-region serverless placement. |
+| **[ADR 0041](0041-zero-collision-typescript-ambient-isolation-and-dual-runtime-mesh.md)** | Zero-Collision TypeScript Ambient Isolation & Dual-Engine Runtime Mesh | **Typing & Runtime** | `Accepted` | Scoped dynamic import typing for Cloudflare bindings preventing global DOM / Web API identifier collisions. |
 
 ---
 
