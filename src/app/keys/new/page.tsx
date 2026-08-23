@@ -96,7 +96,7 @@ function BaseCreateKeyPage() {
   const [name, setName] = useState('Cursor IDE / AI Editor');
   const [rateLimitPerMinute, setRateLimitPerMinute] = useState(120);
   const [createdSecretKey, setCreatedSecretKey] = useState<string | null>(null);
-  const [activeSnippetTab, setActiveSnippetTab] = useState<'python' | 'node' | 'env' | 'cursor' | 'continue' | 'curl'>('python');
+  const [activeSnippetTab, setActiveSnippetTab] = useState<'cli' | 'cursor' | 'python' | 'node' | 'env' | 'continue' | 'curl'>('cli');
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedSnippet, setCopiedSnippet] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -227,6 +227,21 @@ function BaseCreateKeyPage() {
   };
 
   const getSnippets = (k: string) => ({
+    cli: `# Zero-Install Instant CLI Prompt:
+export GALX_API_KEY="${k}"
+npx galxai "Explain continuous token caching in 10 words"
+
+# Or launch interactive chat:
+npx galxai chat`,
+    cursor: `// In Cursor IDE / Windsurf Settings -> Models -> OpenAI API Key:
+// 1. Set Override Base URL:
+https://api.galx.ai/v1
+
+// 2. Set API Key:
+${k}
+
+// 3. Available Models:
+gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.6, x-ai/grok-4.5`,
     python: `from openai import OpenAI
 
 # 1-Line Drop-in replacement for OpenAI SDK (25%-40% discount)
@@ -257,15 +272,6 @@ OPENAI_BASE_URL="https://api.galx.ai/v1"
 OPENAI_API_KEY="${k}"
 GALXAI_API_KEY="${k}"
 DEFAULT_MODEL="gpt-5.6-sol"`,
-    cursor: `// In Cursor IDE / Windsurf Settings -> Models -> OpenAI API Key:
-// 1. Set Override Base URL:
-https://api.galx.ai/v1
-
-// 2. Set API Key:
-${k}
-
-// 3. Available Models:
-gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.6, x-ai/grok-4.5`,
     continue: `{
   "models": [
     {
@@ -527,7 +533,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.6, x-ai/grok-4.5`,
                   </div>
 
                   <div className="flex items-center gap-1 p-1 rounded-xl bg-black/50 border border-white/10 text-xs font-mono">
-                    {(['python', 'node', 'env', 'cursor', 'continue', 'curl'] as const).map((tab) => (
+                    {(['cli', 'cursor', 'python', 'node', 'env', 'continue', 'curl'] as const).map((tab) => (
                       <button
                         key={tab}
                         onClick={() => setActiveSnippetTab(tab)}
@@ -537,7 +543,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.6, x-ai/grok-4.5`,
                             : 'text-zinc-400 hover:text-white'
                         }`}
                       >
-                        {tab === 'env' ? '.env' : tab === 'cursor' ? 'Cursor IDE' : tab === 'continue' ? 'Continue.dev' : tab}
+                        {tab === 'cli' ? 'npx CLI' : tab === 'env' ? '.env' : tab === 'cursor' ? 'Cursor IDE' : tab === 'continue' ? 'Continue.dev' : tab}
                       </button>
                     ))}
                   </div>

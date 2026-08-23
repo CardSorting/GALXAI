@@ -56,8 +56,8 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
 
   // Code recipe tab
   const [activeRecipe, setActiveRecipe] = useState<
-    'curl' | 'python' | 'node' | 'vercel' | 'langchain' | 'go' | 'rust' | 'cursor'
-  >('python');
+    'cli' | 'cursor' | 'python' | 'node' | 'curl' | 'vercel' | 'langchain' | 'go' | 'rust'
+  >('cli');
 
   // Copy feedback state
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -269,8 +269,14 @@ graph LR
     }, 15);
   };
 
-  // --- Code Recipes Data across 8 Frameworks ---
+  // --- Code Recipes Data across 9 Frameworks ---
   const codeRecipes = {
+    cli: `# 1. Run zero-install streaming prompt in terminal:
+npx galxai --model "${model.id}" "Write a high-performance LRU cache in TypeScript"
+
+# 2. Or start an interactive chat session:
+npx galxai chat --model "${model.id}"`,
+
     curl: `curl https://galx.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer galx_live_your_gateway_key" \\
@@ -783,6 +789,20 @@ access-control-allow-origin: *`;
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5 font-mono text-xs">
+            <button
+              onClick={() => {
+                setActivePersona('developer');
+                setActiveRecipe('cli');
+              }}
+              className={`px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
+                activePersona === 'developer' && activeRecipe === 'cli'
+                  ? 'bg-amber-400/20 text-amber-300 border-amber-400 font-bold shadow-sm'
+                  : 'bg-black/40 text-zinc-400 hover:text-white border-white/5'
+              }`}
+            >
+              <span>⚡ npx CLI (Zero Install)</span>
+            </button>
+
             <button
               onClick={() => {
                 setActivePersona('developer');
@@ -1313,14 +1333,15 @@ response = client.chat.completions.create(
                 <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-black/50 border border-white/5 text-xs font-semibold">
                   {(
                     [
+                      { id: 'cli', label: 'npx CLI' },
+                      { id: 'cursor', label: 'Cursor / IDE' },
                       { id: 'python', label: 'Python' },
                       { id: 'node', label: 'TypeScript / Node' },
                       { id: 'curl', label: 'cURL' },
                       { id: 'vercel', label: 'Vercel AI' },
                       { id: 'langchain', label: 'LangChain' },
                       { id: 'go', label: 'Go' },
-                      { id: 'rust', label: 'Rust' },
-                      { id: 'cursor', label: 'Cursor / IDE' }
+                      { id: 'rust', label: 'Rust' }
                     ] as const
                   ).map((recipe) => (
                     <button
@@ -1342,6 +1363,8 @@ response = client.chat.completions.create(
               <div className="relative rounded-2xl bg-black/70 border border-white/10 overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/5 bg-white/[0.02]">
                   <span className="text-[11px] font-mono text-zinc-400">
+                    {activeRecipe === 'cli' && 'Zero-install terminal execution (Node.js 18+)'}
+                    {activeRecipe === 'cursor' && 'Cursor / Windsurf Model Base URL override'}
                     {activeRecipe === 'python' && 'Python 3.10+ (openai >= 1.0.0)'}
                     {activeRecipe === 'node' && 'Node.js / TypeScript (openai)'}
                     {activeRecipe === 'curl' && 'bash / terminal HTTP request'}
@@ -1349,7 +1372,6 @@ response = client.chat.completions.create(
                     {activeRecipe === 'langchain' && 'Python LangChain (langchain-openai)'}
                     {activeRecipe === 'go' && 'Go (github.com/sashabaranov/go-openai)'}
                     {activeRecipe === 'rust' && 'Rust (async-openai)'}
-                    {activeRecipe === 'cursor' && 'Cursor / Cline / Roo-Code .cursorrules'}
                   </span>
 
                   <button

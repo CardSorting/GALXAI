@@ -349,11 +349,11 @@ const { text } = await generateText({
               <div className="space-y-3">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold">
                   <Key className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>ZERO-HESITATION UNIVERSAL GATEWAY</span>
+                  <span>WHOLESALE CLEARINGHOUSE &amp; 429 BURST PASS</span>
                 </div>
-                <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">Developer Gateway API Keys</h1>
+                <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">Developer Universal API Keys</h1>
                 <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-2xl">
-                  Unified <code className="text-cyan-300 font-mono font-bold">galx_live_...</code> client tokens. Drop-in compatible with OpenAI, Anthropic, Ollama, LangChain, Cursor &amp; Windsurf. Absorbs every mental model and model alias with <strong>25%–40% wholesale savings</strong> and microsecond metering.
+                  Unified <code className="text-cyan-300 font-mono font-bold">galx_live_...</code> client tokens. Drop-in compatible with Cursor, Windsurf, Claude Code, OpenAI SDK, and LangChain. Unlocks <strong>25%–40% wholesale savings</strong>, <strong>75% prompt caching</strong>, and <strong>429 rate limit immunity</strong>.
                 </p>
               </div>
 

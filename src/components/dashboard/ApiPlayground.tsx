@@ -391,9 +391,9 @@ const res = await galx.chat.completions.create({
             <Zap className="w-3.5 h-3.5" />
             <span>INTERACTIVE ZERO-HESITATION SANDBOX &amp; PLAYGROUND</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white">Model Playground &amp; Gateway Sandbox</h1>
+          <h1 className="text-2xl sm:text-3xl font-black text-white">Model Playground &amp; Wholesale Compute Sandbox</h1>
           <p className="text-xs sm:text-sm text-zinc-300">
-            Test streaming completions, sub-15ms router latency, and 75% prompt caching live in your browser.
+            Test live streaming completions, 25%–40% wholesale savings, 429 burst immunity, and 75% prompt caching live in your browser.
           </p>
         </div>
 

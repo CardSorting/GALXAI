@@ -7,32 +7,50 @@ import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 function BaseQuickstartDocs() {
   const [activeSnippet, setActiveSnippet] = useState<
-    'curl' | 'python' | 'node' | 'anthropic' | 'ollama' | 'sdk' | 'cursor' | 'litellm'
-  >('curl');
+    'cli' | 'cursor' | 'python' | 'node' | 'anthropic' | 'sdk' | 'ollama' | 'curl' | 'litellm'
+  >('cli');
   const [copied, setCopied] = useState(false);
 
   const snippets = {
-    curl: `curl https://galx.ai/v1/chat/completions \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer galx_live_your_gateway_key" \\
-  -d '{
-    "model": "gpt-5.6-sol",
-    "messages": [
-      { "role": "system", "content": "You are an elite coding architect." },
-      { "role": "user", "content": "Explain zero-downtime database migrations." }
-    ],
-    "stream": true
-  }'`,
+    cli: `# Zero-Install Instant Terminal Execution (No npm install Needed):
+# 1. Immediate streaming prompt execution (GPT-5.6 Sol):
+npx galxai "Explain continuous token caching in 10 words"
+
+# 2. Run target reasoning model:
+npx galxai run "Audit distributed lock implementation" --model terra
+
+# 3. List active models, context windows, and wholesale rates:
+npx galxai models
+
+# 4. Measure sub-15ms Anycast edge gateway latency:
+npx galxai ping
+
+# 5. Start interactive terminal chat REPL:
+npx galxai chat`,
+
+    cursor: `// In Cursor IDE / Windsurf / Cline Settings -> Custom OpenAI Provider:
+{
+  "openai.baseUrl": "https://galx.ai/v1",
+  "openai.apiKey": "galx_live_your_gateway_key",
+  "openai.model": "gpt-5.6-sol",
+  "openai.customModels": [
+    "gpt-5.6-sol",
+    "gpt-5.6-terra",
+    "gpt-5.6-luna",
+    "x-ai/grok-4.6",
+    "text-embedding-3-small"
+  ]
+}`,
 
     python: `from openai import OpenAI
 
-# Universal Drop-in for Python OpenAI SDK (openai>=1.0.0)
+# Universal 1-Line Drop-in for Python (openai>=1.0.0)
 client = OpenAI(
     base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
-# Stream from pooled SOTA flagship shards with automatic failover
+# Stream with 25%–40% wholesale discount & 75% prompt cache pass-through
 response = client.chat.completions.create(
     model="gpt-5.6-sol",  # or "x-ai/grok-4.6", "gpt-5.6-terra", "gpt-5.6-luna"
     messages=[
@@ -70,7 +88,7 @@ main();`,
 
     anthropic: `import Anthropic from "@anthropic-ai/sdk";
 
-// Direct Drop-in for Anthropic SDK / Claude Code / Cursor Anthropic provider
+// Direct Drop-in for Anthropic SDK / Claude Code CLI
 const anthropic = new Anthropic({
   baseURL: "https://galx.ai",
   apiKey: process.env.GALX_API_KEY || "galx_live_your_gateway_key",
@@ -84,8 +102,20 @@ const message = await anthropic.messages.create({
 
 console.log(message.content[0].text);`,
 
+    sdk: `import { run, galx, batch, thread } from "@galxai/sdk";
+
+// 1. Ultra-effortless 1-line execution:
+const answer = await run("Explain continuous token caching in 10 words");
+
+// 2. Tagged template literal:
+const greeting = await galx\`Hello \${"GALXAI"}, explain zero-hesitation developer ergonomics\`;
+
+// 3. 100x high-throughput batch mapper:
+const summaries = await batch(["Doc 1", "Doc 2"], (doc) => \`Summarize: \${doc}\`);`,
+
     ollama: `# Point OpenWebUI, Continue.dev, Aider, or Ollama CLI to GALXAI:
-# In ~/.ollama or environment: OLLAMA_HOST=https://galx.ai
+export OLLAMA_HOST="https://galx.ai"
+export OLLAMA_API_KEY="galx_live_your_gateway_key"
 
 # Test raw Ollama Generate API:
 curl https://galx.ai/api/generate \\
@@ -95,41 +125,19 @@ curl https://galx.ai/api/generate \\
     "model": "sol",
     "prompt": "Write a high-performance LRU cache in Rust",
     "stream": true
-  }'
+  }'`,
 
-# List models formatted as Ollama tags:
-curl https://galx.ai/api/tags`,
-
-    sdk: `import { GalxAI, run, stream } from "@galxai/sdk";
-
-// 1. Ultra-effortless 1-line execution:
-const answer = await run("Explain quantum entanglement in 10 words");
-
-// 2. Ultra-effortless token streaming:
-for await (const token of stream("Write a haiku about high velocity")) {
-  process.stdout.write(token);
-}
-
-// 3. Multi-modal and background agent jobs:
-const galx = new GalxAI("galx_live_your_gateway_key");
-const res = await galx.chat.completions.create({
-  model: "gpt-5.6-sol",
-  messages: [{ role: "user", content: "Implement token bucket rate limiter." }]
-});`,
-
-    cursor: `// In Cursor IDE / Windsurf / Cline / Roo-Code Settings -> Custom OpenAI Provider:
-{
-  "openai.baseUrl": "https://galx.ai/v1",
-  "openai.apiKey": "galx_live_your_gateway_key",
-  "openai.model": "gpt-5.6-sol",
-  "openai.customModels": [
-    "gpt-5.6-sol",
-    "gpt-5.6-terra",
-    "gpt-5.6-luna",
-    "x-ai/grok-4.6",
-    "text-embedding-3-small"
-  ]
-}`,
+    curl: `curl https://galx.ai/v1/chat/completions \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer galx_live_your_gateway_key" \\
+  -d '{
+    "model": "gpt-5.6-sol",
+    "messages": [
+      { "role": "system", "content": "You are an elite coding architect." },
+      { "role": "user", "content": "Explain zero-downtime database migrations." }
+    ],
+    "stream": true
+  }'`,
 
     litellm: `# LiteLLM Proxy / LangChain / LlamaIndex Configuration (config.yaml)
 model_list:
@@ -162,7 +170,7 @@ model_list:
             Universal Multi-Mental-Model Developer Quickstart
           </h2>
           <p className="text-xs text-zinc-400 mt-0.5">
-            Zero-hesitation drop-in compatibility for OpenAI SDK, Anthropic SDK, Ollama, LangChain, and IDE agent extensions.
+            Zero-hesitation drop-in compatibility for CLI (`npx galxai`), Cursor, OpenAI SDK, Anthropic SDK, and Agent frameworks.
           </p>
         </div>
 
@@ -170,13 +178,14 @@ model_list:
         <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-white/5 text-xs font-semibold">
           {(
             [
-              ['curl', 'cURL'],
+              ['cli', 'npx CLI'],
+              ['cursor', 'Cursor / IDE'],
               ['python', 'Python'],
               ['node', 'Node.js'],
               ['anthropic', 'Anthropic'],
-              ['ollama', 'Ollama'],
               ['sdk', '@galxai/sdk'],
-              ['cursor', 'Cursor / IDE'],
+              ['ollama', 'Ollama'],
+              ['curl', 'cURL'],
               ['litellm', 'LiteLLM']
             ] as const
           ).map(([key, label]) => (
@@ -199,13 +208,14 @@ model_list:
       <div className="relative rounded-2xl bg-black/70 border border-white/10 overflow-hidden">
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/5 bg-white/[0.02]">
           <span className="text-[11px] font-mono text-zinc-400">
-            {activeSnippet === 'curl' && 'bash / terminal cURL'}
+            {activeSnippet === 'cli' && 'Zero-Install npx CLI (Terminal Instant Prompt)'}
+            {activeSnippet === 'cursor' && 'Cursor / Windsurf settings.json'}
             {activeSnippet === 'python' && 'Python 3.10+ (openai>=1.0.0)'}
             {activeSnippet === 'node' && 'Node.js / TypeScript (openai)'}
             {activeSnippet === 'anthropic' && '@anthropic-ai/sdk / Claude Code'}
-            {activeSnippet === 'ollama' && 'Ollama CLI & Local AI Clients'}
             {activeSnippet === 'sdk' && 'Official @galxai/sdk Universal Client'}
-            {activeSnippet === 'cursor' && 'Cursor / Windsurf settings.json'}
+            {activeSnippet === 'ollama' && 'Ollama CLI & Local AI Clients'}
+            {activeSnippet === 'curl' && 'bash / terminal cURL'}
             {activeSnippet === 'litellm' && 'LiteLLM / LangChain Proxy YAML'}
           </span>
           <button

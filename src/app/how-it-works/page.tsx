@@ -14,50 +14,53 @@ import {
   Sparkles,
   ArrowRight,
   RefreshCw,
-  Power
+  Power,
+  Coins,
+  ShieldCheck,
+  Terminal
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'How It Works — Multi-Account Router Architecture',
-  description: 'Understand the zero-residual cryptographic lifecycle of multi-account routing, continuous rate governance, and automated failover.',
+  title: 'How It Works — Wholesale AI Compute & 429 Burst Shield',
+  description: 'Understand the multi-account pooled volume arbitrage, continuous hydraulic headroom (P-AHT), and zero-residual cryptographic lifecycle.',
 };
 
 export default function HowItWorksPage() {
   const steps = [
     {
       num: '01',
-      title: '1-Click Provider Authentication',
-      desc: 'Connect your OpenAI or xAI Grok account. GALXAI automatically provisions compute quota into the router pool with AES-256-GCM hardware vaulting.',
-      icon: Shield,
-      tag: 'SECURITY INVARIANT'
+      title: 'Wholesale Tier Consolidation & Volume Arbitrage',
+      desc: 'GALXAI aggregates distributed developer request volume into enterprise-tier compute streams, securing 25%–40% wholesale discounts below retail list and passing them directly to your API key.',
+      icon: Coins,
+      tag: 'WHOLESALE ARBITRAGE'
     },
     {
       num: '02',
-      title: 'Monotonic Execution Lease Governor',
-      desc: 'When an incoming completion request arrives, the router acquires an atomic execution lease with an incremental fencing token, preventing concurrency races.',
-      icon: Layers,
-      tag: 'CONCURRENCY GOVERNOR'
+      title: 'Predictive Adaptive Hydraulic Headroom (P-AHT)',
+      desc: 'When high-concurrency requests or agent swarms spike, the router continuously models token capacity across pooled enterprise accounts. If one upstream tier approaches limits, traffic effortlessly deflects in <1ms without 429 rate limit stalls.',
+      icon: Activity,
+      tag: '429 BURST IMMUNITY'
     },
     {
       num: '03',
-      title: 'Continuous Token Calculus & Header Sync',
-      desc: 'Capacity is replenished continuously based on elapsed time without burst spikes. Upon receiving upstream responses, the bucket reconciles with authoritative rate-limit headers.',
-      icon: Activity,
-      tag: 'RATE GOVERNOR'
+      title: 'Continuous Prompt Caching & 75% Pass-Through',
+      desc: 'Shared system instructions, tool schemas, and document RAG prefixes (>1,024 tokens) are automatically matched against warm upstream caches, returning 75% prompt caching savings directly to your wallet.',
+      icon: Zap,
+      tag: '75% CACHE REBATE'
     },
     {
       num: '04',
-      title: 'Immediate Heap Memory Zeroization',
-      desc: 'When the HTTP response or SSE stream finishes, decrypted plaintext keys in RAM are immediately overwritten with binary zeroes in an unconditional finally block.',
-      icon: Cpu,
-      tag: '0% RESIDUAL MEMORY'
+      title: 'Zero-Hesitation Payload Normalization',
+      desc: 'Accepts raw text, GET query parameters, aspect ratios, and shorthand model aliases with zero 400 errors. 1:1 shims drop seamlessly into OpenAI, Anthropic, Cursor, and Vercel AI SDK.',
+      icon: Terminal,
+      tag: 'ZERO DEVELOPER FRICTION'
     },
     {
       num: '05',
-      title: '1-Click Instant Disconnect Killswitch',
-      desc: 'Disconnect or sign out anytime. Pressing Retract aborts active leases and wipes cached tokens in less than 40 milliseconds.',
+      title: 'Immediate Heap Memory Zeroization & Disconnect',
+      desc: 'When an SSE token stream finishes, decrypted RAM buffers are overwritten with binary zeroes in an unconditional finally block. Pressing Disconnect aborts active leases in <40ms.',
       icon: Power,
-      tag: '< 40MS RETRACTION'
+      tag: '0% RESIDUAL MEMORY'
     }
   ];
 
@@ -71,12 +74,12 @@ export default function HowItWorksPage() {
         {/* Hero Header */}
         <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-4 text-center relative overflow-hidden">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold">
-            <Shield className="w-3.5 h-3.5" />
-            <span>CRYPTOGRAPHIC ZERO-RESIDUAL ARCHITECTURE</span>
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>WHOLESALE CLEARINGHOUSE & 429 RESILIENCE ARCHITECTURE</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-white">How Unified Multi-Account Routing Works</h1>
+          <h1 className="text-3xl sm:text-4xl font-black text-white">How GALXAI Slashes Token Bills &amp; Eliminates 429 Stalls</h1>
           <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            A transparent architectural walkthrough of how GALXAI routes requests across multiple provider accounts with automated failover, zero RAM residue, and instant disengagement.
+            A transparent architectural walkthrough of how GALXAI consolidates volume, cycles quotas across pooled accounts, and executes with sub-millisecond overhead.
           </p>
         </div>
 
@@ -95,7 +98,7 @@ export default function HowItWorksPage() {
 
                 <div className="space-y-2 flex-1">
                   <div className="flex flex-wrap items-center gap-3">
-                    <span className="text-xs font-mono text-cyan-400 font-bold">STEP {step.num}</span>
+                    <span className="text-xs font-mono text-cyan-400 font-bold">STAGE {step.num}</span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-mono font-bold border border-indigo-500/30">
                       {step.tag}
                     </span>
@@ -112,16 +115,16 @@ export default function HowItWorksPage() {
 
         {/* CTA Footer */}
         <div className="glass-panel rounded-3xl p-8 text-center space-y-4">
-          <h3 className="text-xl font-bold text-white">Ready to Start Routing?</h3>
+          <h3 className="text-xl font-bold text-white">Ready to Cut Your AI Bill by 25%–40%?</h3>
           <p className="text-xs text-zinc-400 max-w-md mx-auto">
-            Connect your OpenAI or xAI Grok account in 1-click and start routing immediately.
+            Claim your $5 free test credit and deploy in 30 seconds with a 1-line configuration change.
           </p>
           <div className="flex justify-center gap-3">
             <Link
-              href="/auth/connect"
-              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20"
+              href="/keys/new"
+              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 font-mono"
             >
-              1-Click Connect
+              Get $5 Free Live Key
             </Link>
           </div>
         </div>

@@ -169,10 +169,10 @@ export default function PricingPage() {
 
           <div className="space-y-4 max-w-3xl mx-auto">
             <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-              The Most Cost-Effective AI Gateway on Earth
+              Direct Wholesale AI Rates with 0% Markup &amp; 429 Protection
             </h1>
             <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl mx-auto">
-              Save <strong className="text-emerald-300 font-semibold">25% to 40%</strong> off direct retail prices across OpenAI GPT-5.6 Sol, Terra, Luna and xAI Grok 4.5. Up to <strong className="text-amber-300 font-semibold">70%+ total net savings</strong> with compound prompt caching.
+              Save <strong className="text-emerald-300 font-semibold">25% to 40%</strong> off direct retail prices across OpenAI GPT-5.6 Sol, Terra, Luna, Grok 4.6, and Claude 3.7. Up to <strong className="text-amber-300 font-semibold">70%+ total net savings</strong> with compound 75% prompt caching.
             </p>
           </div>
 
@@ -608,7 +608,7 @@ export default function PricingPage() {
                 <td className="py-3.5 px-4 text-red-400">+5.0% Surcharge</td>
               </tr>
               <tr className="bg-emerald-500/10 font-bold">
-                <td className="py-3.5 px-4 text-emerald-300">GALXAI Universal Gateway</td>
+                <td className="py-3.5 px-4 text-emerald-300">GALXAI Wholesale Clearinghouse</td>
                 <td className="py-3.5 px-4 text-emerald-300">$16.41</td>
                 <td className="py-3.5 px-4 text-emerald-300">$70.31</td>
                 <td className="py-3.5 px-4 text-emerald-400">$0.00 (Zero Fee)</td>

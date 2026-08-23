@@ -1,4 +1,4 @@
-# 🌌 GALXAI: Universal Zero-Hesitation AI Gateway & Quota Cycling Substrate
+# 🌌 GALXAI: The Wholesale AI Compute Clearinghouse & 429 Burst Shield
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/CardSorting/GALXAI)
 [![Zero-Hesitation Ergonomics Tests](https://img.shields.io/badge/ergonomics%20audit-98%2F98%20passing%20(100%25)-success.svg)](https://github.com/CardSorting/GALXAI)
@@ -7,7 +7,52 @@
 [![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 
-**GALXAI** is an enterprise-grade AI model routing gateway, quota cycling substrate, and zero-hesitation developer execution engine. It unifies distributed compute credentials into a high-throughput, fault-tolerant pool with **25%–40% wholesale discounts**, **75% prompt cache pass-through**, and **sub-15ms edge routing**.
+> **Stop paying retail token prices and suffering 429 rate-limit stalls.**  
+> GALXAI is a **wholesale compute clearinghouse** and **zero-stall burst substrate** that slashes your monthly AI bills by **25%–40%**, passes through **75% prompt caching**, and absorbs high-concurrency agent traffic across pooled enterprise compute with **zero code modifications**.
+
+---
+
+## 🎯 The 4 Jobs Developers Hire GALXAI To Do
+
+Instead of building another derivative "gateway rectangle," GALXAI eliminates the four most painful, expensive bottlenecks in generative AI engineering:
+
+```mermaid
+mindmap
+  root((GALXAI Jobs To Be Done))
+    1. Cut Token Bills 25%-40%
+      Direct wholesale clearinghouse
+      100% prompt cache pass-through (75% discount)
+      1-line drop-in baseURL swap
+      No prompt refactoring needed
+    2. 429 Rate Limit Insurance
+      Zero 429 stalls on AI agent swarms
+      Continuous hydraulic quota pooling
+      Multi-account burst headroom
+    3. Universal Single-Wallet Pass
+      One balance for Cursor, Windsurf, Claude Code, Python
+      Zero minimum enterprise commitments
+      Instant prepaid compute packs
+    4. Zero-Hesitation Execution
+      npx galxai instant terminal prompt
+      Browser URL execution GET /v1/chat/completions
+      Raw text cURL with zero 400 errors
+```
+
+### 1. 💰 Job 1: Slash LLM Bills by 25%–40% (The Economic Job)
+* **The Pain**: You are burning $2,000–$50,000/mo on frontier LLMs (`gpt-5.6-sol`, `grok-4.6`, `claude-3-7`). You cannot afford $100k+ upfront enterprise sales commits, so you pay full retail list prices.
+* **The Solution**: Change your `baseURL` to `https://api.galx.ai/v1`. Your exact same app now runs at **wholesale tier rates (25%–40% off)** with **75% prompt cache pass-through**. No prompt rewrites, no model degradation.
+
+### 2. 🛡️ Job 2: 429 Rate Limit Insurance (The Reliability Job)
+* **The Pain**: Your autonomous coding agent, document extraction pipeline, or batch RAG job crashes in production with `429 Too Many Requests` because single provider keys hit RPM/TPM ceilings.
+* **The Solution**: GALXAI’s **Predictive Adaptive Hydraulic Headroom (P-AHT)** continuously levels and cycles traffic across pooled enterprise credentials, giving your agents instant burst capacity with `<1ms` routing overhead.
+
+### 3. 💳 Job 3: Single Universal Developer Pass (The Tooling Job)
+* **The Pain**: You want to use Cursor, Windsurf, Claude Code CLI, and backend scripts across OpenAI, Anthropic, and xAI without maintaining 4 separate billing accounts and expired credit cards.
+* **The Solution**: One API key (`galx_live_...`) and one shared wallet balance powers all your favorite developer tools and SOTA models seamlessly.
+
+### 4. ⚡ Job 4: Zero-Hesitation Execution (The Developer Friction Job)
+* **The Pain**: You want to test a quick prompt in a terminal script, bash pipeline, or browser tab without writing 20 lines of client boilerplate or debugging 400 parameter errors.
+* **The Solution**: Run `npx galxai "Explain token caching"` instantly, test directly in your browser address bar (`GET /v1/chat/completions?prompt=...`), or send raw text cURL payloads.
 
 ---
 
@@ -37,22 +82,7 @@ npx galxai chat
 
 ---
 
-## 🧠 Core Philosophy: Zero-Hesitation Developer Ergonomics
-
-> **"Our enemy is hesitation — ambiguity is our friend not our enemy, our enemy is developer friction and hesitation, ambiguity is required because they have their own mental model."**
-
-GALXAI absorbs all developer mental models, casing conventions, headers, query parameters, vision payloads, aspect ratios, streams, tool definitions, token counts, model aliases, zero-install CLI commands, and database memory operations with **zero friction, zero hesitation, and 100% graceful fallbacks**:
-
-- **Universal Model Catalog & Synonym Resolution**: Maps shorthands (`sol`, `terra`, `luna`, `grok-4.6`, `fast`, `reasoning`, `claude-3-7-sonnet`, `dall-e-3`, `flux`) to canonical targets with safe default fallback to `gpt-5.6-sol`.
-- **Multi-Header & Query Parameter Auth**: Ingests keys from `Authorization: Bearer <key>`, `x-api-key`, `x-galx-key`, `api-key`, URL query params (`?api_key=...`), and cookies.
-- **1:1 Framework Drop-In Shims**: Drop-ins for `openai`, `anthropic`, `ai` (Vercel), `langchain`, and `llamaindex`.
-- **Stateful Conversation Threads**: Multi-turn history accumulation and auto-truncation (`ConversationThread`).
-- **Universal GET Query & Forgiving Body Ingestion**: Enables testing in web browser address bars (`GET /v1/chat/completions?prompt=...`) and auto-converts raw text/malformed POST payloads into chat messages with zero 400 errors.
-- **Aspect Ratio Normalization**: Absorbs Midjourney/Flux parameters (`aspect_ratio: "16:9"` $\to$ `1792x1024`).
-
----
-
-## 🚀 Flagship Model Fleet & Wholesale Pricing
+## 🚀 Flagship Model Fleet & Wholesale Rates
 
 | Model ID | Target Specialization | Context Window | Max Output | Input / 1M | Output / 1M | Cached Input / 1M | Wholesale Discount |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -63,6 +93,18 @@ GALXAI absorbs all developer mental models, casing conventions, headers, query p
 | **`x-ai/grok-4.5`** | 500K Frontier: Visual data extraction, code analysis | $500,000$ | $32,768$ | **$1.80** | **$7.20** | **$0.60** | **28% OFF** |
 | **`openai-gpt-image-2`**| Ultra 4K Visual Synthesis (`16:9`, `9:16`, `1:1`) | $128,000$ | — | **$0.060**/img | — | — | **25% OFF** |
 | **`text-embedding-3-small`**| Vector Embeddings (1536-dim, Edge $<12\text{ms}$) | $8,191$ | — | **$0.015** | **$0.000** | — | **25% OFF** |
+
+---
+
+## 💻 30-Second IDE Quickstart (Cursor & Windsurf)
+
+1. Open **Cursor Settings** $\to$ **Models** $\to$ **Add Model**: `gpt-5.6-sol` (or `x-ai/grok-4.6`).
+2. Enable **Override OpenAI Base URL**:
+   ```text
+   https://galx.ai/v1
+   ```
+3. Paste your `galx_live_...` API key into the **API Key** field.
+4. Done! All completions in Cursor now run at 25%–40% wholesale discount with 75% prompt cache pass-through.
 
 ---
 
@@ -108,14 +150,31 @@ const user = await extract("John Doe, age 32, lives in San Francisco", {
 
 ## 🔄 1:1 Framework-Native Drop-In Shims
 
-### OpenAI SDK
+### Python (OpenAI Drop-In)
+```python
+from openai import OpenAI
+
+# 100% Drop-in: Only point baseURL to GALXAI
+client = OpenAI(
+    base_url="https://galx.ai/v1",
+    api_key="galx_live_your_key_here"
+)
+
+response = client.chat.completions.create(
+    model="gpt-5.6-sol",
+    messages=[{"role": "user", "content": "Explain continuous token caching."}]
+)
+print(response.choices[0].message.content)
+```
+
+### OpenAI Node / TypeScript SDK
 ```typescript
 import OpenAI from "@galxai/sdk/openai";
 
 const openai = new OpenAI();
 const stream = await openai.chat.completions.create({
   model: "gpt-5.6-sol",
-  messages: [{ role: "user", content: "Write a lock in TypeScript." }],
+  messages: [{ role: "user", content: "Write an atomic lock in TypeScript." }],
   stream: true,
 });
 ```
@@ -151,12 +210,6 @@ import { ChatGalxAI } from "@galxai/sdk/langchain";
 const llm = new ChatGalxAI({ model: "gpt-5.6-sol", streaming: true });
 ```
 
-### LlamaIndex RAG
-```typescript
-import { GalxLLM } from "@galxai/sdk/llamaindex";
-const llm = new GalxLLM({ model: "gpt-5.6-sol" });
-```
-
 ---
 
 ## 🌐 Instant Browser URL & Terminal cURL Testing
@@ -173,13 +226,13 @@ curl -X POST https://galx.ai/v1/chat/completions \
 
 ---
 
-## 🏛️ Architectural Documentation & Runbooks
+## 🏛️ Architectural Specifications & Deep-Dives
 
-- **[Architecture Decision Records (ADRs)](docs/adr/README.md)**: 42 formal architectural specifications governing security, routing, and DX ergonomics.
-  - **[ADR 0042: Universal Zero-Hesitation Developer Ergonomics & Mental Model Absorption](docs/adr/0042-universal-zero-hesitation-developer-ergonomics-and-mental-model-absorption.md)**
-- **[Operational Lifecycle Playbooks](docs/playbooks/README.md)**: 7 lifecycle runbooks for SREs, developers, and autonomous agents.
-  - **[Playbook 07: Zero-Hesitation Developer Ergonomics & API Protocol Governance](docs/playbooks/07-zero-hesitation-developer-ergonomics-and-api-governance.md)**
-- **[Model Catalog & Pricing Specification](docs/MODEL_CATALOG.md)**
+For engineers interested in the underlying substrate mechanics:
+- **[Routing Algorithms & Hydraulic Math](docs/ROUTING_ALGORITHMS.md)**: Mathematical formalization of P-AHT, SWRR, and BroccoliDB atomic reservations.
+- **[Architecture Decision Records (ADRs)](docs/adr/README.md)**: 42 formal specifications governing security, cryptographic envelope vaults, and DX.
+- **[Operational Lifecycle Playbooks](docs/playbooks/README.md)**: 7 lifecycle runbooks for SREs and autonomous agents.
+- **[Model Catalog & Wholesale Pricing Specification](docs/MODEL_CATALOG.md)**
 - **[Multi-Ecosystem SDK Cheatsheet](docs/SDK_CHEATSHEET.md)**
 - **[Quickstart Integration Guide](docs/QUICKSTART.md)**
 

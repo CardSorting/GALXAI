@@ -51,17 +51,22 @@ export default function DocsPage() {
   // Default to Plain English Strategy for immediate clarity
   const [activeTab, setActiveTab] = useState<'plain_english' | 'agents' | 'all'>('plain_english');
   const [monthlySpend, setMonthlySpend] = useState<number>(100);
-  const [selectedTool, setSelectedTool] = useState<'cursor' | 'chat_app' | 'python' | 'nocode'>('cursor');
+  const [selectedTool, setSelectedTool] = useState<'cli' | 'cursor' | 'chat_app' | 'python' | 'nocode'>('cli');
   const [copiedSnippet, setCopiedSnippet] = useState(false);
 
   const calculatedWholesale = Math.round(monthlySpend * 0.62);
   const annualSavings = Math.round((monthlySpend - calculatedWholesale) * 12);
 
   const toolSnippets = {
+    cli: {
+      title: 'Zero-Install Terminal CLI (npx galxai)',
+      desc: 'Run completions, estimate tokens, or start an interactive chat REPL directly in your terminal:',
+      code: `# 1. Immediate streaming prompt execution:\nnpx galxai "Explain continuous token caching in 10 words"\n\n# 2. Start interactive chat:\nnpx galxai chat`
+    },
     cursor: {
       title: 'Cursor IDE / Windsurf Setup',
       desc: 'In Cursor Settings > Models > OpenAI API Key, toggle "Override OpenAI Base URL":',
-      code: `Base URL: https://api.galx.ai/v1\nAPI Key: galx_live_your_key_here\nModels: gpt-5.6-sol, gpt-5.6-terra, x-ai/grok-4.5`
+      code: `Base URL: https://api.galx.ai/v1\nAPI Key: galx_live_your_key_here\nModels: gpt-5.6-sol, gpt-5.6-terra, x-ai/grok-4.6`
     },
     chat_app: {
       title: 'ChatGPT-Style Web UIs (LibreChat / TypingMind / OpenWebUI)',
@@ -315,6 +320,12 @@ export default function DocsPage() {
                 </div>
 
                 <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-white/10 font-mono text-xs overflow-x-auto">
+                  <button
+                    onClick={() => setSelectedTool('cli')}
+                    className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all whitespace-nowrap ${selectedTool === 'cli' ? 'bg-amber-400 text-black font-bold' : 'text-zinc-400 hover:text-white'}`}
+                  >
+                    npx CLI
+                  </button>
                   <button
                     onClick={() => setSelectedTool('cursor')}
                     className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all whitespace-nowrap ${selectedTool === 'cursor' ? 'bg-amber-400 text-black font-bold' : 'text-zinc-400 hover:text-white'}`}

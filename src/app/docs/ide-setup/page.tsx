@@ -29,7 +29,7 @@ import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
 import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export default function IdeSetupDocPage() {
-  const [activeTab, setActiveTab] = useState<'cursor' | 'windsurf' | 'continue' | 'cline'>('cursor');
+  const [activeTab, setActiveTab] = useState<'cursor' | 'windsurf' | 'claude_code' | 'continue' | 'cline'>('cursor');
   const [copiedKey, setCopiedKey] = useState(false);
 
   const configs = {
@@ -71,6 +71,20 @@ API Key: galx_live_your_gateway_key
   "temperature": 0.2,
   "max_tokens": 8192
 }`
+    },
+    claude_code: {
+      title: 'Claude Code CLI / Terminal Agent',
+      instructions: [
+        'Set ANTHROPIC_BASE_URL to point to GALXAI Wholesale Clearinghouse.',
+        'Set ANTHROPIC_API_KEY to your galx_live_... bearer key.',
+        'Run claude in any project directory with 25%–40% wholesale savings and 429 immunity.'
+      ],
+      snippet: `# In your shell (~/.zshrc or ~/.bashrc):
+export ANTHROPIC_BASE_URL="https://api.galx.ai/v1"
+export ANTHROPIC_API_KEY="galx_live_your_gateway_key"
+
+# Run Claude Code CLI directly:
+claude "Refactor this module with full test coverage"`
     },
     continue: {
       title: 'Continue.dev Extension (~/.continue/config.json)',
@@ -164,7 +178,7 @@ Max Output: 16384`
         {/* Interactive IDE Tabs */}
         <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-white/10">
           <div className="flex flex-wrap items-center gap-2 border-b border-white/10 pb-4 font-mono text-xs">
-            {(['cursor', 'windsurf', 'continue', 'cline'] as const).map((tab) => (
+            {(['cursor', 'windsurf', 'claude_code', 'continue', 'cline'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -174,7 +188,7 @@ Max Output: 16384`
                     : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10'
                 }`}
               >
-                {tab === 'cursor' ? '💻 Cursor IDE' : tab === 'windsurf' ? '🌊 Windsurf' : tab === 'continue' ? '⚡ Continue.dev' : '🤖 Cline / Roo-Code'}
+                {tab === 'cursor' ? '💻 Cursor IDE' : tab === 'windsurf' ? '🌊 Windsurf' : tab === 'claude_code' ? '⚡ Claude Code CLI' : tab === 'continue' ? '⚡ Continue.dev' : '🤖 Cline / Roo-Code'}
               </button>
             ))}
           </div>

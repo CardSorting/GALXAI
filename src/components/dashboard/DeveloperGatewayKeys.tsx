@@ -98,14 +98,14 @@ function BaseDeveloperGatewayKeys() {
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-black text-white flex items-center gap-2">
               <Key className="w-5 h-5 text-indigo-400" />
-              Developer Gateway Bearer Keys
+              Developer Universal Access Keys
             </h2>
             <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-mono font-bold border border-indigo-500/30">
               {keys.filter(k => !k.revoked).length} Active
             </span>
           </div>
           <p className="text-xs text-zinc-400 mt-0.5">
-            Use these keys as standard Bearer tokens in any OpenAI SDK or agent runtime pointing to <code className="text-cyan-300 font-mono">https://galx.ai/v1</code>.
+            Use these keys as standard Bearer tokens in Cursor, Windsurf, Python, Claude Code, or agent runtimes pointing to <code className="text-cyan-300 font-mono">https://galx.ai/v1</code>.
           </p>
         </div>
 
@@ -117,7 +117,7 @@ function BaseDeveloperGatewayKeys() {
           className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          Create Gateway Key
+          Create Access Key
         </button>
       </div>
 
@@ -218,7 +218,7 @@ function BaseDeveloperGatewayKeys() {
             ) : (
               <form onSubmit={handleCreateKey} className="space-y-4">
                 <div className="text-center space-y-1">
-                  <h3 className="text-lg font-black text-white">Create Developer Gateway Key</h3>
+                  <h3 className="text-lg font-black text-white">Create Developer Access Key</h3>
                   <p className="text-xs text-zinc-400">Generates a <code className="text-cyan-300 font-mono">galx_live_...</code> bearer token.</p>
                 </div>
 

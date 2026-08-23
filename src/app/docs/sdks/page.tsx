@@ -27,10 +27,12 @@ import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export default function SdksDocPage() {
-  const [activeTab, setActiveTab] = useState<'python' | 'ts' | 'vercel' | 'langchain' | 'llamaindex' | 'rust' | 'go' | 'curl'>('python');
+  const [activeTab, setActiveTab] = useState<'cli' | 'galx_sdk' | 'python' | 'ts' | 'vercel' | 'langchain' | 'llamaindex' | 'rust' | 'go' | 'curl'>('cli');
   const [copiedKey, setCopiedKey] = useState(false);
 
   const sdkTabs = [
+    { id: 'cli', label: '⚡ npx CLI (Zero Install)' },
+    { id: 'galx_sdk', label: '🌌 @galxai/sdk (Native)' },
     { id: 'python', label: '🐍 Python (openai>=1.0.0)' },
     { id: 'ts', label: '▲ TypeScript / Node' },
     { id: 'vercel', label: '⚡ Vercel AI SDK' },
@@ -42,6 +44,33 @@ export default function SdksDocPage() {
   ] as const;
 
   const recipes = {
+    cli: {
+      pkg: 'No package installation required (Node.js 18+)',
+      code: `# 1. Execute streaming completion instantly in any terminal:
+npx galxai "Explain continuous token caching in 10 words"
+
+# 2. Or start an interactive chat session:
+npx galxai chat --model gpt-5.6-sol`
+    },
+    galx_sdk: {
+      pkg: 'npm install @galxai/sdk',
+      code: `import { GalxAI } from "@galxai/sdk";
+
+// Initialize native GALXAI client with auto-failover & token tracking
+const galx = new GalxAI({
+  apiKey: process.env.GALX_API_KEY || "galx_live_your_key",
+});
+
+const stream = await galx.chat.completions.create({
+  model: "gpt-5.6-sol",
+  messages: [{ role: "user", content: "Optimize this PostgreSQL query." }],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content || "");
+}`
+    },
     python: {
       pkg: 'pip install openai',
       code: `from openai import OpenAI

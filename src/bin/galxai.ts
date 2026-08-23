@@ -11,7 +11,7 @@ async function main() {
   const args = process.argv.slice(2);
   const command = args[0] || 'doctor';
 
-  console.log('\n🌌 GALXAI Developer Gateway Diagnostics\n');
+  console.log('\n🌌 GALXAI Wholesale AI Compute & 429 Burst Shield Diagnostics\n');
 
   const apiKey = process.env.GALX_API_KEY;
   const baseURL = process.env.GALX_BASE_URL || 'https://gateway.galx.ai';

@@ -1,16 +1,29 @@
-# 🚀 GALXAI Quickstart & Universal Integration Guide
+# 🚀 GALXAI Quickstart: The 4 Jobs Integration Guide
 
-Connect your AI tools, frameworks, agent swarms, and IDEs to the GALXAI Universal Gateway in under 30 seconds with **25%–40% wholesale compute discounts**, **75% prompt cache pass-through**, and **zero developer friction**.
+Connect your AI tools, frameworks, agent swarms, and IDEs to GALXAI in under 30 seconds. Eliminate generic gateway friction and immediately unlock **25%–40% wholesale discounts**, **75% prompt cache pass-through**, and **multi-account 429 burst immunity**.
 
 ---
 
-## ⚡ 1. Zero-Install CLI (No Package Install Needed)
+## 🎯 Which Job Do You Need Solved?
 
-Test inference, estimate tokens, list models, and measure edge latency directly from your terminal:
+```mermaid
+graph TD
+    A[Start Here] --> B{What is your primary goal?}
+    B -->|Slash OpenAI/Anthropic Bills| C[1-Line Drop-in Python / Node SDK]
+    B -->|Stop Agent 429 Rate Limit Stalls| D[Hydraulic Quota Pooling & Swarms]
+    B -->|Cursor / Windsurf / Claude Code| E[Single Universal AI Wallet]
+    B -->|Instant Terminal & Bash Prompts| F[Zero-Install CLI: npx galxai]
+```
+
+---
+
+## ⚡ 1. Zero-Install CLI (`npx galxai`)
+
+Run completions, test models, estimate token savings, and measure edge latency directly from your terminal with **no packages to install**:
 
 ```bash
 # 1. Run immediate streaming completion (Flagship GPT-5.6 Sol)
-npx galxai "Explain token bucket rate limiting in 15 words"
+npx galxai "Explain continuous token caching in 10 words"
 
 # 2. Run target reasoning model
 npx galxai run "Audit distributed lock implementation" --model terra
@@ -30,7 +43,67 @@ npx galxai chat
 
 ---
 
-## 📦 2. Universal 1-Line TypeScript / Node SDK (`@galxai/sdk`)
+## 💻 2. Cursor & Windsurf IDE (Single-Wallet Setup)
+
+1. Open **Cursor Settings** $\to$ **Models** $\to$ **Add Model**: `gpt-5.6-sol` (or `x-ai/grok-4.6`).
+2. Enable **Override OpenAI Base URL**:
+   ```text
+   https://galx.ai/v1
+   ```
+3. Paste your `galx_live_...` API key into the **API Key** field.
+4. Enjoy continuous 25%–40% wholesale savings and 75% prompt cache pass-through on every prompt!
+
+---
+
+## 🐍 3. Python (OpenAI Drop-In)
+
+Keep your existing `openai>=1.0.0` library without installing new dependencies:
+
+```python
+from openai import OpenAI
+
+# 100% Drop-in: Only change base_url and api_key
+client = OpenAI(
+    base_url="https://galx.ai/v1",
+    api_key="galx_live_your_key_here"
+)
+
+response = client.chat.completions.create(
+    model="gpt-5.6-sol",
+    messages=[{"role": "user", "content": "Explain continuous token caching concisely."}],
+    stream=True
+)
+
+for chunk in response:
+    if chunk.choices and chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="", flush=True)
+```
+
+---
+
+## 🤖 4. Anthropic SDK & Claude Code CLI
+
+```typescript
+import Anthropic from "@anthropic-ai/sdk";
+
+// 100% Drop-in: Only change baseURL
+const anthropic = new Anthropic({
+  baseURL: "https://galx.ai",
+  apiKey: process.env.GALX_API_KEY || "galx_live_your_key_here",
+});
+
+const message = await anthropic.messages.create({
+  model: "gpt-5.6-sol", // or claude-3-7-sonnet alias
+  max_tokens: 2048,
+  messages: [{ role: "user", content: "Design a fault-tolerant distributed queue." }],
+});
+
+console.log(message.content[0].text);
+```
+
+---
+
+## 📦 5. Universal 1-Line TypeScript / Node SDK (`@galxai/sdk`)
 
 ```bash
 npm install @galxai/sdk
@@ -70,113 +143,10 @@ const user = await extract("John Doe, age 32, lives in San Francisco", {
 
 ---
 
-## 🔄 3. 1:1 Framework-Native Drop-In Compatibility Shims
-
-Migrate existing codebases with **zero code refactoring** by swapping only the import:
-
-### OpenAI Node SDK (100% Drop-In)
-```typescript
-// Replace: import OpenAI from "openai";
-import OpenAI from "@galxai/sdk/openai";
-
-const openai = new OpenAI(); // Auto-reads GALX_API_KEY from environment
-
-const completion = await openai.chat.completions.create({
-  model: "gpt-5.6-sol", // or 'gpt-4o', 'sol', 'flagship'
-  messages: [{ role: "user", content: "Write a high-performance LRU cache." }],
-  stream: true,
-});
-
-for await (const chunk of completion) {
-  process.stdout.write(chunk.choices[0]?.delta?.content || "");
-}
-```
-
-### Anthropic SDK & Claude Code (100% Drop-In)
-```typescript
-// Replace: import Anthropic from "@anthropic-ai/sdk";
-import Anthropic from "@galxai/sdk/anthropic";
-
-const anthropic = new Anthropic();
-
-const message = await anthropic.messages.create({
-  model: "claude-3-7-sonnet", // Automatically mapped to flagship SOTA
-  max_tokens: 2048,
-  system: "You are a systems architect.",
-  messages: [{ role: "user", content: "Design a fault-tolerant message queue." }],
-});
-
-console.log(message.content[0].text);
-```
-
-### Vercel AI SDK Core & UI
-```typescript
-import { createGalxAI, galxai } from "@galxai/sdk/ai";
-import { streamText } from "ai";
-
-export async function POST(req: Request) {
-  const { messages } = await req.json();
-
-  const result = streamText({
-    model: galxai("gpt-5.6-sol"),
-    messages,
-  });
-
-  return result.toDataStreamResponse();
-}
-```
-
-### LangChain Swarms & Runnables
-```typescript
-import { ChatGalxAI } from "@galxai/sdk/langchain";
-
-const llm = new ChatGalxAI({
-  model: "gpt-5.6-sol",
-  temperature: 0.2,
-  streaming: true,
-});
-
-for await (const chunk of await llm.stream("Audit this smart contract")) {
-  process.stdout.write(chunk.content);
-}
-```
-
-### LlamaIndex RAG Pipelines
-```typescript
-import { GalxLLM } from "@galxai/sdk/llamaindex";
-
-const llm = new GalxLLM({ model: "gpt-5.6-sol" });
-const response = await llm.complete("Summarize indexed document repository.");
-console.log(response.text);
-```
-
----
-
-## 🦙 4. Ollama CLI, OpenWebUI & Continue.dev Integration
-
-Point any local AI interface directly to GALXAI without installing local weights:
-
-```bash
-# Export Ollama environment variables
-export OLLAMA_HOST="https://galx.ai"
-export OLLAMA_API_KEY="galx_live_your_key_here"
-
-# Native Ollama API Call
-curl https://galx.ai/api/generate \
-  -H "Authorization: Bearer galx_live_your_key_here" \
-  -d '{
-    "model": "sol",
-    "prompt": "Explain zero-hesitation architecture",
-    "stream": true
-  }'
-```
-
----
-
-## 🌐 5. Instant Browser URL & cURL Testing
+## 🌐 6. Instant Browser URL & cURL Testing
 
 ### Browser Address Bar Direct Query
-Test directly in your web browser with zero tools:
+Test directly in your web browser with zero tooling:
 ```text
 https://galx.ai/v1/chat/completions?prompt=Hello+GALXAI&model=sol&api_key=galx_live_your_key_here
 ```
@@ -198,34 +168,3 @@ curl -X POST https://galx.ai/v1/chat/completions \
   -H "Authorization: Bearer galx_live_your_key_here" \
   -d "Explain gravity in 10 words"
 ```
-
----
-
-## 🎨 6. Multi-Paradigm Visual Synthesis ($0 Egress R2 CDN)
-
-Accepts Midjourney/Flux aspect ratios or discrete pixel dimensions:
-
-```bash
-curl https://galx.ai/v1/images/generations \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer galx_live_your_key_here" \
-  -d '{
-    "model": "flux",
-    "prompt": "Cyberpunk skyscraper with neon holo-gardens at sunset",
-    "aspect_ratio": "16:9"
-  }'
-```
-
-*(Supported aspect ratios: `16:9` $\to$ `1792x1024`, `9:16` $\to$ `1024x1792`, `4:3` $\to$ `1024x768`, `3:2` $\to$ `1536x1024`, `1:1` $\to$ `1024x1024`)*
-
----
-
-## 💻 7. Cursor & Windsurf IDE Setup
-
-1. Open **Cursor Settings** $\to$ **Models** $\to$ **Add Model**: `gpt-5.6-sol` (or `x-ai/grok-4.6`).
-2. Enable **Override OpenAI Base URL**:
-   ```text
-   https://galx.ai/v1
-   ```
-3. Paste your `galx_live_...` API key into the **API Key** field.
-4. Enjoy continuous 25%–40% wholesale savings and 75% prompt cache pass-through on every prompt!
