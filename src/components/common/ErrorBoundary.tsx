@@ -71,3 +71,22 @@ export class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
+
+/**
+ * Higher-Order Component to wrap any component with ErrorBoundary protection.
+ */
+export function withErrorBoundary<P extends object>(
+  WrappedComponent: React.ComponentType<P>,
+  options?: { name?: string; fallback?: ReactNode; onReset?: () => void }
+) {
+  const DisplayName = WrappedComponent.displayName || WrappedComponent.name || 'Component';
+
+  const ComponentWithErrorBoundary = (props: P) => (
+    <ErrorBoundary name={options?.name || DisplayName} fallback={options?.fallback} onReset={options?.onReset}>
+      <WrappedComponent {...props} />
+    </ErrorBoundary>
+  );
+
+  ComponentWithErrorBoundary.displayName = `withErrorBoundary(${DisplayName})`;
+  return ComponentWithErrorBoundary;
+}
