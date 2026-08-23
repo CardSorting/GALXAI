@@ -181,10 +181,12 @@ export default function HomePage() {
         </section>
 
         {/* Real-Time Live Network Arbitrage Ticker */}
-        <LiveArbitrageTicker />
+        <ErrorBoundary name="Live Arbitrage Ticker" autoRetry={true}>
+          <LiveArbitrageTicker />
+        </ErrorBoundary>
 
         {/* Zero-Auth Frictionless Live Model Sandbox Simulator */}
-        <ErrorBoundary name="Interactive Zero-Code Simulator">
+        <ErrorBoundary name="Interactive Zero-Code Simulator" autoRetry={true}>
           <NoCodeSandboxWidget />
         </ErrorBoundary>
 
@@ -221,9 +223,9 @@ export default function HomePage() {
             </div>
 
             <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 space-y-1">
-              <span className="text-[10px] text-emerald-400 uppercase font-bold">GALXAI Wholesale Gateway</span>
-              <div className="text-lg font-black text-emerald-300">$3.75 / 1M tokens</div>
-              <span className="text-[10px] text-emerald-400 font-bold">Save 25% Instant • 0% Markup</span>
+              <span className="text-[10px] text-emerald-400 uppercase font-bold">GALXAI Wholesale Pool</span>
+              <div className="text-base font-black text-emerald-300">$3.00 / 1M tokens</div>
+              <span className="text-[10px] text-emerald-400 font-bold">-40% Direct Savings • Shared Pool</span>
             </div>
           </div>
         </section>
@@ -234,17 +236,25 @@ export default function HomePage() {
         {/* Founding Cohort Rate Lock & Capacity Scarcity Ribbon */}
         <RateLockRibbon />
 
-        {/* Interactive Instant Invoice Spend Audit Tool */}
-        <SpendAuditTool />
+        {/* 1-Minute Waste Audit Diagnostic Tool */}
+        <ErrorBoundary name="Spend Audit Tool" autoRetry={true}>
+          <SpendAuditTool />
+        </ErrorBoundary>
 
         {/* Casino-Grade Savings Winnings Jackpot & Multiplier Reel */}
-        <SavingsJackpotReel />
+        <ErrorBoundary name="Savings Jackpot Reel" autoRetry={true}>
+          <SavingsJackpotReel />
+        </ErrorBoundary>
 
         {/* Non-Technical Real-World Business Workload Spend Translator */}
-        <WorkloadEstimator />
+        <ErrorBoundary name="Workload Estimator" autoRetry={true}>
+          <WorkloadEstimator />
+        </ErrorBoundary>
 
         {/* Interactive Dynamic ROI & Wholesale Arbitrage Calculator */}
-        <RoiCalculator />
+        <ErrorBoundary name="ROI Calculator" autoRetry={true}>
+          <RoiCalculator />
+        </ErrorBoundary>
 
         {/* 100% Risk-Free Guarantee & Enterprise Assurance Banner */}
         <section className="glass-panel rounded-3xl p-6 sm:p-10 border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 via-black/40 to-indigo-600/10 shadow-xl space-y-6">
@@ -369,7 +379,9 @@ export default function HomePage() {
         </section>
 
         {/* Apple-Style Non-Technical Model Matchmaker */}
-        <SimpleModelPicker />
+        <ErrorBoundary name="Model Matchmaker" autoRetry={true}>
+          <SimpleModelPicker />
+        </ErrorBoundary>
 
         {/* Featured Frontier Models Grid */}
         <section className="space-y-6">
@@ -440,9 +452,15 @@ export default function HomePage() {
       </main>
 
       {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
-      <FloatingConversionDock />
-      <LiveActivityToast />
-      <ExitIntentModal />
+      <ErrorBoundary name="Floating Conversion Dock">
+        <FloatingConversionDock />
+      </ErrorBoundary>
+      <ErrorBoundary name="Live Activity Toast">
+        <LiveActivityToast />
+      </ErrorBoundary>
+      <ErrorBoundary name="Exit Intent Modal">
+        <ExitIntentModal />
+      </ErrorBoundary>
     </div>
   );
 }
