@@ -519,26 +519,28 @@ export default function BillingPage() {
               </div>
             </div>
 
-            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-4">
-              <div className="text-right font-mono text-xs">
+            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
+              <div className="text-right font-mono text-xs hidden sm:block">
                 <div className="text-zinc-400">Total Credit Added:</div>
                 <div className="text-base font-black text-emerald-300">${totalCreditReceived.toFixed(2)} USD</div>
               </div>
 
+              <Link
+                href={`/checkout?amount=${Math.max(25, depositAmount)}`}
+                className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer font-mono hover:scale-105 active:scale-95"
+              >
+                <Lock className="w-4 h-4 fill-black" />
+                <span>Proceed to Secure Checkout (${depositAmount.toFixed(0)})</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+
               <button
                 onClick={handleDeposit}
                 disabled={isProcessing || depositAmount <= 0}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                className="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer font-mono disabled:opacity-50"
               >
-                {isProcessing ? (
-                  <span>Crediting Wallet...</span>
-                ) : (
-                  <>
-                    <Zap className="w-4 h-4 fill-black" />
-                    <span>Pay ${depositAmount.toFixed(2)} & Top Up</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
+                <Zap className="w-3.5 h-3.5 text-amber-400" />
+                <span>{isProcessing ? 'Crediting...' : '1-Click Fast Top-Up'}</span>
               </button>
             </div>
           </div>
