@@ -13,12 +13,9 @@ import {
   Rocket
 } from 'lucide-react';
 import { CommandMenu } from '@/components/common/CommandMenu';
-import { ShareButton } from '@/components/common/ShareButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
-import { GtmPromoBanner } from '@/components/dashboard/GtmPromoBanner';
-import { WalletQuickPeekPopover } from '@/components/wallet/WalletQuickPeekPopover';
 import { BroccoliOmniSearch } from '@/lib/resilience/BroccoliOmniSearch';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
@@ -26,7 +23,7 @@ function BaseNavigation() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { t } = useLanguage();
-  const { walletBalance, hasVerifiedDeposit } = useDepositVerification();
+  const { walletBalance } = useDepositVerification();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [commandMenuOpen, setCommandMenuOpen] = useState(false);
@@ -51,39 +48,31 @@ function BaseNavigation() {
     };
   }, [pathname]);
 
-  // Pure Flat Minimalist Nav Links with Native Accessibility Descriptions
   const navLinks = [
     {
-      label: t('nav.models', 'Models & Arena'),
+      label: t('nav.models', 'Models'),
       href: '/models',
-      ariaLabel: 'Frontier AI Models & Battle Arena - Compare 12 Models',
+      ariaLabel: 'Frontier AI Models Catalog and Specs',
     },
     {
-      label: t('nav.requests', 'Requests & Results'),
+      label: t('nav.requests', 'Queues'),
       href: '/queues',
-      ariaLabel: 'Submit Async AI Requests & View Live Results',
+      ariaLabel: 'Async Requests and Execution Queues',
     },
     {
-      label: t('nav.apps', 'Apps & Solutions'),
-      href: '/docs/simple',
-      ariaLabel: 'Zero-Code Apps & Solutions Setup',
-    },
-    {
-      label: t('nav.docs', 'Docs & SDKs'),
+      label: t('nav.docs', 'Docs'),
       href: '/docs',
-      ariaLabel: 'Developer Documentation & SDK Reference',
+      ariaLabel: 'Documentation and API Reference',
     },
     {
-      label: t('nav.pricing', 'Pricing & Trust'),
+      label: t('nav.pricing', 'Pricing'),
       href: '/pricing',
-      ariaLabel: 'Wholesale Pricing, Prompt Caching & Security Standards',
+      ariaLabel: 'Wholesale Pricing and Prompt Caching',
     },
   ];
 
   return (
     <>
-      <GtmPromoBanner />
-
       <CommandMenu
         isOpen={commandMenuOpen}
         onClose={() => setCommandMenuOpen(false)}
@@ -91,15 +80,15 @@ function BaseNavigation() {
 
       <header
         role="banner"
-        className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#07080d]/90 border-b border-white/10 px-3 sm:px-6 py-2.5 transition-all"
+        className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#07080d]/90 border-b border-white/10 px-4 sm:px-6 py-2 transition-all"
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-6">
-          {/* Left Brand & Direct Flat Navigation */}
-          <div className="flex items-center gap-4 sm:gap-7">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          {/* Left: Brand & Navigation Links */}
+          <div className="flex items-center gap-6 sm:gap-8">
             <Link
               href="/"
-              className="flex items-center gap-2 group cursor-pointer shrink-0 rounded-xl p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080d] transition-all"
-              aria-label="GALXAI Home - Universal AI Gateway & Router"
+              className="flex items-center gap-2 group cursor-pointer shrink-0 rounded-xl p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080d] transition-all"
+              aria-label="GALXAI Home - Universal AI Compute Clearinghouse"
             >
               <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-cyan-500 via-indigo-500 to-indigo-600 flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
                 <Zap className="w-3.5 h-3.5 text-white fill-white" />
@@ -110,25 +99,15 @@ function BaseNavigation() {
               </div>
             </Link>
 
-            {/* Subtle Live Systems Operational Status Indicator */}
-            <Link
-              href="/status"
-              className="hidden xl:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/25 text-[10px] font-mono font-bold transition-all"
-              title="Real-time multi-region health checks and operational status"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Operational</span>
-            </Link>
-
-            {/* Flat Text Nav Links with High-Contrast Accessible Hover & Focus */}
+            {/* Desktop Navigation Links */}
             <nav
               role="navigation"
               aria-label="Primary Navigation"
-              className="hidden lg:flex items-center gap-1"
+              className="hidden md:flex items-center gap-1"
             >
               {navLinks.map((link) => {
                 const isActive = link.href === '/docs'
-                  ? pathname === '/docs'
+                  ? pathname === '/docs' || (pathname.startsWith('/docs') && pathname !== '/docs/simple')
                   : pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
 
                 return (
@@ -137,11 +116,11 @@ function BaseNavigation() {
                     href={link.href}
                     aria-current={isActive ? 'page' : undefined}
                     aria-label={link.ariaLabel}
-                    className={`relative px-3.5 py-1.5 rounded-xl text-xs font-semibold tracking-normal transition-all duration-150 select-none ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold tracking-normal transition-all duration-150 select-none ${
                       isActive
-                        ? 'text-white bg-white/10 font-bold shadow-sm ring-1 ring-white/20'
-                        : 'text-zinc-300 hover:text-white hover:bg-white/10 active:scale-[0.98]'
-                    } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080d] focus-visible:bg-white/15 focus-visible:text-white`}
+                        ? 'text-white bg-white/10 font-bold shadow-sm ring-1 ring-white/15'
+                        : 'text-zinc-400 hover:text-white hover:bg-white/5 active:scale-[0.98]'
+                    } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080d]`}
                   >
                     <span>{link.label}</span>
                     {isActive && (
@@ -153,51 +132,38 @@ function BaseNavigation() {
             </nav>
           </div>
 
-          {/* Right Action Cluster (Flat, Minimal, Fully Accessible) */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Share Trigger */}
-            <ShareButton
-              variant="pill"
-              label={t('nav.share', 'Share')}
-              className="hidden sm:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080d]"
-            />
-
-            {/* ⌘K Search */}
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2">
+            {/* Search Button */}
             <button
               onClick={() => setCommandMenuOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-zinc-300 hover:text-white hover:bg-white/10 active:scale-[0.98] text-xs transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080d]"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 active:scale-[0.98] text-xs transition-all cursor-pointer border border-transparent hover:border-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
               title={t('nav.search', 'Search (⌘K)')}
               aria-label={t('a11y.search_aria', 'Search documentation and models')}
             >
               <Search className="w-3.5 h-3.5 text-zinc-400" />
-              <kbd className="hidden md:inline-block px-1.5 py-0.5 rounded bg-white/10 text-[9px] text-zinc-300 font-mono">
+              <kbd className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-white/10 text-[9px] text-zinc-300 font-mono">
                 ⌘K
               </kbd>
             </button>
 
-            {/* Interactive Wallet Quick-Peek Popover */}
-            <WalletQuickPeekPopover
-              balance={walletBalance}
-              hasVerifiedDeposit={hasVerifiedDeposit}
-            />
-
-            {/* Accessible API Keys Link */}
+            {/* API Keys Link */}
             <Link
               href="/keys"
               role="link"
               onMouseEnter={() => BroccoliOmniSearch.prefetchRoute('/keys')}
               onFocus={() => BroccoliOmniSearch.prefetchRoute('/keys')}
-              aria-label="Manage Developer API Keys and Access Tokens"
+              aria-label="Manage Developer API Keys"
               className={`hidden sm:inline-block px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                 pathname.startsWith('/keys')
-                  ? 'text-indigo-200 bg-indigo-500/20 border border-indigo-500/50 font-bold shadow-sm'
-                  : 'text-zinc-300 hover:text-white hover:bg-white/10 active:scale-[0.98]'
-              } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080d]`}
+                  ? 'text-indigo-200 bg-indigo-500/20 border border-indigo-500/40 font-bold'
+                  : 'text-zinc-300 hover:text-white hover:bg-white/5 active:scale-[0.98]'
+              } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400`}
             >
               {t('nav.keys', 'API Keys')}
             </Link>
 
-            {/* Flat Sign In / User Session Link */}
+            {/* User Session / Sign In */}
             {user ? (
               <div className="relative" ref={userRef}>
                 <button
@@ -205,7 +171,7 @@ function BaseNavigation() {
                   aria-expanded={userDropdownOpen}
                   aria-haspopup="true"
                   aria-label={`User account menu for ${user.name}`}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-200 hover:text-white hover:bg-white/10 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080d]"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-200 hover:text-white hover:bg-white/5 border border-white/10 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
                 >
                   <div
                     className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 ${
@@ -273,18 +239,27 @@ function BaseNavigation() {
                 href="/auth/connect"
                 role="link"
                 aria-label="Sign in to your GALXAI developer account"
-                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-zinc-200 hover:text-white hover:bg-white/10 active:scale-[0.98] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080d]"
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-300 hover:text-white hover:bg-white/5 active:scale-[0.98] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
               >
                 {t('nav.signin', 'Sign In')}
               </Link>
             )}
+
+            {/* Quick Mint CTA */}
+            <Link
+              href="/keys/new"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs font-mono tracking-tight shadow-md shadow-amber-500/20 active:scale-[0.98] transition-all cursor-pointer"
+            >
+              <Zap className="w-3 h-3 fill-black text-black" />
+              <span>Mint Key ($5)</span>
+            </Link>
 
             {/* Mobile Drawer Trigger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-expanded={mobileMenuOpen}
               aria-label={mobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
-              className="lg:hidden p-2 rounded-xl text-zinc-300 hover:text-white hover:bg-white/10 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080d]"
+              className="md:hidden p-2 rounded-xl text-zinc-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             >
               {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
@@ -296,7 +271,7 @@ function BaseNavigation() {
           <div
             role="region"
             aria-label="Mobile Navigation Menu"
-            className="lg:hidden mt-2 pt-2 border-t border-white/10 space-y-1 max-w-7xl mx-auto pb-2 animate-in fade-in duration-150"
+            className="md:hidden mt-2 pt-2 border-t border-white/10 space-y-1 max-w-7xl mx-auto pb-2 animate-in fade-in duration-150"
           >
             {navLinks.map((item) => {
               const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
@@ -319,6 +294,13 @@ function BaseNavigation() {
                 </Link>
               );
             })}
+            <Link
+              href="/keys/new"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block mt-2 px-3.5 py-2.5 rounded-xl text-xs font-bold text-center bg-gradient-to-r from-amber-400 to-orange-500 text-black font-mono"
+            >
+              Claim $5 Free API Key →
+            </Link>
           </div>
         )}
       </header>
@@ -328,11 +310,11 @@ function BaseNavigation() {
 
 function NavigationFallback() {
   return (
-    <header className="sticky top-0 z-50 glass-panel border-b border-white/10 bg-[#07090e]/95 px-4 py-3">
+    <header className="sticky top-0 z-50 glass-panel border-b border-white/10 bg-[#07090e]/95 px-4 py-2">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white font-black text-sm">
-            <Zap className="w-4 h-4" />
+          <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white font-black text-xs">
+            <Zap className="w-3.5 h-3.5" />
           </div>
           <span className="font-sans font-black text-base text-white">
             GALX<span className="text-cyan-400">AI</span>
@@ -340,9 +322,9 @@ function NavigationFallback() {
         </Link>
         <div className="flex items-center gap-4 text-xs font-mono">
           <Link href="/models" className="text-zinc-300 hover:text-white transition-colors">Models</Link>
-          <Link href="/billing" className="text-zinc-300 hover:text-white transition-colors">Billing</Link>
           <Link href="/keys" className="text-zinc-300 hover:text-white transition-colors">API Keys</Link>
           <Link href="/docs" className="text-zinc-300 hover:text-white transition-colors">Docs</Link>
+          <Link href="/pricing" className="text-zinc-300 hover:text-white transition-colors">Pricing</Link>
         </div>
       </div>
     </header>
@@ -353,4 +335,3 @@ export const Navigation = withErrorBoundary(BaseNavigation, {
   name: 'Global Navigation Header',
   fallback: <NavigationFallback />
 });
-
