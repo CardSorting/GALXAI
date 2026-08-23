@@ -9,6 +9,7 @@ import { Footer } from "@/components/dashboard/Footer";
 import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
 import { FloatingActionDock } from "@/components/common/FloatingActionDock";
 import { KeyboardShortcutsModal } from "@/components/common/KeyboardShortcutsModal";
+import { ClientResilienceProvider } from "@/components/common/ClientResilienceProvider";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://galx.ai";
 
@@ -160,21 +161,23 @@ export default function RootLayout({
           <div className="absolute inset-0 bg-cyber-grid bg-[size:40px_40px] opacity-20" />
         </div>
 
-        <LanguageProvider>
-          <SkipToContent />
-          <AccessibilityAnnouncer />
-          <AuthProvider>
-            <PersonaProvider>
-              <div id="main-content" tabIndex={-1} className="relative z-10 flex-1 flex flex-col pb-16 lg:pb-0 outline-none">
-                {children}
-                <Footer />
-              </div>
-              <FloatingActionDock />
-              <MobileBottomNav />
-              <KeyboardShortcutsModal />
-            </PersonaProvider>
-          </AuthProvider>
-        </LanguageProvider>
+        <ClientResilienceProvider>
+          <LanguageProvider>
+            <SkipToContent />
+            <AccessibilityAnnouncer />
+            <AuthProvider>
+              <PersonaProvider>
+                <div id="main-content" tabIndex={-1} className="relative z-10 flex-1 flex flex-col pb-16 lg:pb-0 outline-none">
+                  {children}
+                  <Footer />
+                </div>
+                <FloatingActionDock />
+                <MobileBottomNav />
+                <KeyboardShortcutsModal />
+              </PersonaProvider>
+            </AuthProvider>
+          </LanguageProvider>
+        </ClientResilienceProvider>
       </body>
     </html>
   );
