@@ -53,14 +53,6 @@ const nextConfig: NextConfig = {
       allowedOrigins: ["localhost:3000", "galx.ai", "*.galx.ai"],
     },
   },
-  webpack: (config, { dev }) => {
-    if (dev) {
-      config.cache = {
-        type: 'memory',
-      };
-    }
-    return config;
-  },
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 86400,
