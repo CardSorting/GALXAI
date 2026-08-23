@@ -8,7 +8,7 @@
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 
 > **Stop paying retail token prices and suffering rate-limit stalls.**  
-> GALXAI is a **wholesale compute clearinghouse** that slashes your monthly AI bills by **25%–40%**, passes through **75% prompt caching**, and delivers **99.99% enterprise uptime with zero rate-limit stalls**—with **zero code modifications**.
+> GALXAI is a **wholesale compute clearinghouse** that slashes your monthly AI bills by **25%–40%**, passes through **75% prompt caching**, and delivers **active failover resilience with zero rate-limit stalls**—with **zero code modifications**.
 
 ---
 
@@ -27,7 +27,7 @@ mindmap
     2. Zero Rate-Limit Stalls
       Zero 429 stalls on AI agent swarms
       Sub-1ms automatic failover
-      99.99% enterprise SLA uptime
+      Multi-region Anycast routing
     3. Universal Single-Wallet Pass
       One balance for Cursor, Windsurf, Claude Code, Python
       Zero minimum enterprise commitments
@@ -39,12 +39,12 @@ mindmap
 ```
 
 ### 1. 💰 Job 1: Slash LLM Bills by 25%–40% (The Economic Job)
-* **The Pain**: You are burning $2,000–$50,000/mo on frontier LLMs (`gpt-5.6-sol`, `grok-4.6`, `claude-3-7`). You cannot afford $100k+ upfront enterprise sales commits, so you pay full retail list prices.
+* **The Pain**: You are burning $2,000–$50,000/mo on frontier LLMs (`gpt-5.6-sol`, `grok-4.6`). You cannot afford $100k+ upfront enterprise sales commits, so you pay full retail list prices.
 * **The Solution**: Change your `baseURL` to `https://galx.ai/v1`. Your exact same app now runs at **wholesale tier rates (25%–40% off)** with **75% prompt cache pass-through**. No prompt rewrites, no model degradation.
 
 ### 2. 🛡️ Job 2: Zero Rate Limit Stalls (The Reliability Job)
 * **The Pain**: Your autonomous coding agent, document extraction pipeline, or batch RAG job crashes in production with `429 Too Many Requests` when bursts occur.
-* **The Solution**: Automatic high-availability failover reroutes traffic in `<1ms`, guaranteeing **99.99% enterprise uptime** and zero rate-limit stalls.
+* **The Solution**: Automatic high-availability failover reroutes traffic in `<1ms`, ensuring **active multi-region resilience** and zero rate-limit stalls.
 
 ### 3. 💳 Job 3: Single Universal Developer Pass (The Tooling Job)
 * **The Pain**: You want to use Cursor, Windsurf, Claude Code CLI, and backend scripts across OpenAI, Anthropic, and xAI without maintaining 4 separate billing accounts and expired credit cards.

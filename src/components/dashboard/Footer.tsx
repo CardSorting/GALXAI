@@ -45,7 +45,7 @@ function BaseFooter() {
       { name: 'Model Comparison Matrix', href: '/models/compare' },
       { name: 'Developer API Keys', href: '/keys' },
       { name: 'Compute Wallet & Billing', href: '/billing', badge: 'Autopay' },
-      { name: 'Real-Time Status & 99.99% SLA', href: '/status' },
+      { name: 'Real-Time System Status', href: '/status' },
     ],
     models: [
       { name: 'OpenAI GPT-5.6 Sol', href: '/models/gpt-5.6-sol', note: 'Reasoning & Coding' },
@@ -94,7 +94,7 @@ function BaseFooter() {
               <span>50% INSTANT COMPUTE MATCH ON DEPOSITS</span>
             </div>
             <h3 className="text-lg sm:text-xl font-bold text-white">Cut your OpenAI &amp; Grok inference bills by 25%–40% today</h3>
-            <p className="text-xs text-zinc-400">100% drop-in OpenAI SDK compatibility. Zero code refactoring. 99.99% enterprise uptime SLA.</p>
+            <p className="text-xs text-zinc-400">100% drop-in OpenAI SDK compatibility. Zero code refactoring. Active failover resilience.</p>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
@@ -154,7 +154,7 @@ function BaseFooter() {
                 <span>
                   {slaStatus?.status === 'offline'
                     ? 'Offline Mode (Cached)'
-                    : `${slaStatus?.uptimePercentage ?? 99.99}% SLA • All Systems Operational`}
+                    : 'Active • All Systems Operational'}
                 </span>
               </Link>
             </div>

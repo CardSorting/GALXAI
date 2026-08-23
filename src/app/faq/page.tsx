@@ -76,8 +76,8 @@ const FAQS: FAQItem[] = [
   {
     id: 'uptime-failover-sla',
     category: 'developer',
-    q: 'What is GALXAI\'s uptime SLA and failover capability?',
-    a: 'GALXAI provides a 99.99% Enterprise Uptime SLA. Our gateway continuously monitors endpoint health and applies sub-15ms automated failover, shielding your production applications and agent fleets from upstream downtime and rate limit spikes.'
+    q: 'How does GALXAI handle failover and high availability?',
+    a: 'GALXAI operates multi-region Anycast Edge Proxies. Our gateway continuously monitors endpoint health and applies sub-15ms automated failover, shielding your production applications and agent fleets from upstream downtime and rate limit spikes.'
   }
 ];
 

@@ -6,7 +6,7 @@ The generative AI developer market is suffering from **"Gateway Fatigue"**:
 1. **Raw Foundation Model APIs** (OpenAI, Anthropic, xAI) offer cutting-edge models but impose strict single-account rate limits, high retail list prices, and zero automated failover.
 2. **Generic API Gateways & Aggregators** (OpenRouter, Cloudflare AI Gateway) charge an additional **5%–10% routing markup** on top of retail rates, adding an extra middleware rectangle without solving underlying token unit economics.
 
-**GALXAI breaks this paradigm by positioning as a Wholesale Token Clearinghouse with 99.99% Enterprise Uptime:**
+**GALXAI breaks this paradigm by positioning as a Wholesale Token Clearinghouse with Sub-15ms Anycast Failover:**
 - **Value Proposition**: Direct **25%–40% wholesale pricing discounts**, **75% prompt caching pass-through**, and **zero rate-limit stalls** with **zero code modifications**.
 - **The Core Economic Moat**: High-volume wholesale arbitrage. By consolidating enterprise compute demand, GALXAI captures wholesale tier discounts and passes them directly to developers while generating sustainable platform gross margins ($\sim 33\%$).
 
@@ -25,7 +25,7 @@ mindmap
     2. Zero Rate-Limit Stalls
       Agent swarms & batch pipelines
       Sub-1ms automated failover
-      99.99% enterprise uptime
+      Multi-region Anycast routing
     3. Universal Developer Pass
       Cursor, Windsurf, Claude Code, Python
       One wallet for all frontier models
@@ -44,7 +44,7 @@ mindmap
 ### Persona 2: AI Agent & Batch Pipeline Engineers (The Reliability Job)
 - **Profile**: Developers building multi-agent swarms (CrewAI, LangGraph, AutoGen) and high-concurrency document RAG pipelines.
 - **Pain Point**: Frequent `429 Too Many Requests` upstream stalls when batch jobs spike.
-- **The Hook**: Sub-millisecond automatic failover that guarantees 99.99% uptime with zero rate-limit stalls.
+- **The Hook**: Sub-millisecond automatic failover that ensures multi-region resilience with zero rate-limit stalls.
 
 ### Persona 3: Power Hackers & IDE Users (The Tooling Job)
 - **Profile**: Developers using Cursor, Windsurf, Claude Code CLI, and local scripts.
@@ -64,7 +64,7 @@ mindmap
 | :--- | :--- | :--- | :--- |
 | **Pricing vs. Retail** | 100% Retail List Price | 105% (+5% Markup Fee) | **75%–60% (25%–40% DISCOUNT)** |
 | **Prompt Caching Rebate** | 50%–75% | Variable / Partial Retention | **100% Pass-Through (75%–85% Rebate)** |
-| **Failover & High Availability** | None (Single Key Fails) | Basic Provider Switching | **Sub-1ms Automatic Failover & 99.99% SLA** |
+| **Failover & High Availability** | None (Single Key Fails) | Basic Provider Switching | **Sub-1ms Automatic Failover & Edge Resilience** |
 | **Rate Limit Resilience** | Hard 429 Rate Limit Errors | Retry queue | **Zero Rate-Limit Stalls (<1ms Overhead)** |
 | **Edge Network Coverage** | Centralized Origin Regions | Centralized Origin Proxy | **300+ Global Edge PoPs (<15ms TTFT)** |
 | **CLI & Terminal DX** | None (SDK Required) | None (REST cURL Only) | **Zero-Install CLI (`npx galxai`)** |

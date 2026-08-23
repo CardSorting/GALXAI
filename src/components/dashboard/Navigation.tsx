@@ -110,14 +110,14 @@ function BaseNavigation() {
               </div>
             </Link>
 
-            {/* Subtle Live 99.99% SLA Status Indicator */}
+            {/* Subtle Live Systems Operational Status Indicator */}
             <Link
               href="/status"
               className="hidden xl:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/25 text-[10px] font-mono font-bold transition-all"
-              title="Real-time multi-region health checks and latency monitoring (99.99% SLA)"
+              title="Real-time multi-region health checks and operational status"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>99.99% SLA</span>
+              <span>Operational</span>
             </Link>
 
             {/* Flat Text Nav Links with High-Contrast Accessible Hover & Focus */}

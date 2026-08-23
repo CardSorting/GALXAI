@@ -203,13 +203,13 @@ const BASE_CATALOG_ITEMS: CatalogItem[] = [
     intentPhrases: ['where is my invoice', 'download tax receipt', 'billing invoice pdf', 'accounting receipt', 'corporate invoice', 'vat invoice'],
   },
   {
-    title: 'Live System Status & 99.99% SLA Uptime',
+    title: 'Live System Status & Operational Health',
     description: 'Real-time multi-region health checks, p50/p90/p99 edge latency probes, and circuit states.',
     category: 'Help & Diagnostics',
     href: '/status',
     shortcutKey: 'G S',
-    keywords: ['status', 'uptime', 'sla', 'health', 'ping', 'latency', 'incident', 'down', 'slow', 'offline', 'operational', 'history'],
-    intentPhrases: ['is the api down', 'check latency', 'service health', 'system operational status', 'why is it slow', 'is galxai working', 'how does 99.99 sla work', 'historical uptime'],
+    keywords: ['status', 'uptime', 'health', 'ping', 'latency', 'incident', 'down', 'slow', 'offline', 'operational', 'history'],
+    intentPhrases: ['is the api down', 'check latency', 'service health', 'system operational status', 'why is it slow', 'is galxai working', 'historical uptime'],
   },
   {
     title: 'Asynchronous Requests & Queue Governor',

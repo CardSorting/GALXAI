@@ -1,6 +1,6 @@
 # 🚀 GALXAI Quickstart: The 4 Jobs Integration Guide
 
-Connect your AI tools, frameworks, agent swarms, and IDEs to GALXAI in under 30 seconds. Eliminate generic gateway friction and immediately unlock **25%–40% wholesale discounts**, **75% prompt cache pass-through**, and **99.99% enterprise uptime with zero rate-limit stalls**.
+Connect your AI tools, frameworks, agent swarms, and IDEs to GALXAI in under 30 seconds. Eliminate generic gateway friction and immediately unlock **25%–40% wholesale discounts**, **75% prompt cache pass-through**, and **active Anycast failover with zero rate-limit stalls**.
 
 ---
 

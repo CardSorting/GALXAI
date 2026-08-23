@@ -71,5 +71,5 @@ GALXAI operates a prepaid compute wallet. Every new account receives an initial 
 #### 13. Does GALXAI store or log prompts?
 No. GALXAI enforces a strict **Zero Data Retention Policy (ZDR v10.0)**. Prompts and streaming chunks are processed purely in ephemeral memory buffers with 2-pass cryptographic zeroization (`0xAA` -> `0x00`) and are never logged to disk, stored in databases, or used for model training.
 
-#### 14. What is GALXAI's uptime SLA?
-GALXAI provides a **99.99% Enterprise Uptime SLA** backed by sub-15ms automated failover, 4-state circuit breakers, and 300+ global edge Points of Presence ($0 egress bandwidth on Cloudflare R2 `assets.galx.ai`).
+#### 14. How does GALXAI handle uptime and failover?
+GALXAI provides **high availability infrastructure** backed by sub-15ms automated failover, 4-state circuit breakers, and 300+ global edge Points of Presence ($0 egress bandwidth on Cloudflare R2 `assets.galx.ai`).

@@ -120,12 +120,12 @@ const PLATFORM_PAGES: PlatformPage[] = [
     description: 'Connect GALXAI base URL to your favorite AI IDE'
   },
   {
-    label: 'System Status & 99.99% Uptime SLA',
+    label: 'System Status & Operational Health',
     href: '/status',
     icon: CheckCircle2,
     category: 'Trust',
-    keywords: ['status', 'uptime', 'sla', 'health', 'is it down', 'latency', 'operational', 'monitoring'],
-    description: 'Real-time operational health and historical 99.99% SLA'
+    keywords: ['status', 'uptime', 'health', 'is it down', 'latency', 'operational', 'monitoring'],
+    description: 'Real-time multi-region operational health checks'
   },
   {
     label: 'Business Tax Invoices & Receipts',

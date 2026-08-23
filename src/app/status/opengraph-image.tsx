@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
 
-export const alt = 'GALXAI Live Router Status & 99.99% Uptime';
+export const alt = 'GALXAI Live Router Status & Operational Health';
 export const size = {
   width: 1200,
   height: 630,
@@ -96,7 +96,7 @@ export default async function Image() {
             Real-Time Gateway Uptime &amp; Router Metrics
           </div>
           <div style={{ fontSize: '22px', color: '#cbd5e1', lineHeight: 1.4 }}>
-            Sub-millisecond routing overhead, continuous circuit breaker health checks, and 99.99% multi-region SLA.
+            Sub-millisecond routing overhead, continuous circuit breaker health checks, and active Anycast failover.
           </div>
         </div>
 
@@ -115,7 +115,7 @@ export default async function Image() {
             <span style={{ fontSize: '12px', color: '#6ee7b7', textTransform: 'uppercase', fontWeight: 700 }}>
               Gateway Uptime
             </span>
-            <span style={{ fontSize: '22px', color: '#ffffff', fontWeight: 900 }}>99.99% SLA</span>
+            <span style={{ fontSize: '22px', color: '#ffffff', fontWeight: 900 }}>Operational</span>
           </div>
 
           <div

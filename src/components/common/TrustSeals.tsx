@@ -71,10 +71,10 @@ export function TrustSeals({ className = '', variant = 'grid' }: TrustSealsProps
       <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5 font-mono">
         <div className="flex items-center gap-2 text-indigo-400">
           <Zap className="w-4 h-4" />
-          <span className="font-bold text-xs">99.99% Enterprise SLA</span>
+          <span className="font-bold text-xs">Multi-Region Redundancy</span>
         </div>
         <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
-          Multi-region redundant failover across US, EU, and APAC clusters with sub-15ms switching.
+          Active failover routing across redundant Anycast nodes with sub-15ms health switching.
         </p>
       </div>
     </div>

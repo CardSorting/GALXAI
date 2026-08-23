@@ -50,7 +50,7 @@ export default function HomePage() {
           {/* Live GTM Free Credit Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-xs font-mono font-bold text-emerald-300 shadow-lg shadow-emerald-500/10">
             <Flame className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400" />
-            <span>WHOLESALE TOKEN CLEARINGHOUSE • 99.99% ENTERPRISE SLA • $5 FREE INSTANT CREDIT</span>
+            <span>WHOLESALE TOKEN CLEARINGHOUSE • ZERO RATE-LIMIT STALLS • $5 FREE INSTANT CREDIT</span>
           </div>
 
           <div className="space-y-2.5 max-w-3xl mx-auto">

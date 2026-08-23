@@ -49,7 +49,7 @@ function BaseLiveStatusDashboard() {
       name: 'OpenAI Codex Model Router (/v1/chat/completions)',
       status: probeResult?.status === 'offline' ? 'Offline' : 'Operational',
       latency: probeResult ? `${probeResult.edgeLatencyMs}ms` : '14ms',
-      uptime: '99.99%',
+      uptime: 'Healthy',
       icon: Zap,
       iconColor: 'text-amber-400',
     },
@@ -57,7 +57,7 @@ function BaseLiveStatusDashboard() {
       name: 'xAI Grok 4.5 500K Reasoning Router',
       status: probeResult?.status === 'offline' ? 'Offline' : 'Operational',
       latency: probeResult ? `${probeResult.p90LatencyMs}ms` : '18ms',
-      uptime: '99.98%',
+      uptime: 'Healthy',
       icon: Rocket,
       iconColor: 'text-emerald-400',
     },
@@ -142,7 +142,7 @@ function BaseLiveStatusDashboard() {
           </button>
 
           <div className="px-3.5 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-mono font-bold border border-emerald-500/40 shrink-0">
-            {probeResult?.uptimePercentage ? `${probeResult.uptimePercentage.toFixed(2)}% UPTIME` : '99.99% UPTIME'}
+            {probeResult?.uptimePercentage ? `${probeResult.uptimePercentage.toFixed(1)}% HEALTH` : 'SYSTEMS ACTIVE'}
           </div>
         </div>
       </div>

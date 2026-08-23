@@ -85,7 +85,7 @@ Net Annualized Savings: $${annualSavingsDollars.toLocaleString()} USD / year
 Founding Builder Deposit Match Grant: +$${matchGrantBonus} USD in Free Inference Credits
 Active Volume Tier: ${tierName} (+${tierExtraPct}% Volume Rebate)
 Prompt Caching Pass-Through: ${cachedPromptPct}% Context (75% Rebate)
-Latency SLA: Sub-15ms Anycast Failover with 99.99% Uptime SLA
+Latency & Health: Sub-15ms Anycast Failover Routing
 Switch in 30 Seconds: https://galx.ai/keys/new`;
 
     const success = await safeCopyToClipboard(auditText);

@@ -118,7 +118,7 @@ export default async function Image() {
                 boxShadow: '0 0 10px #10b981',
               }}
             />
-            <span>99.99% ROUTER UPTIME</span>
+            <span>ACTIVE FAILOVER ROUTING</span>
           </div>
         </div>
 

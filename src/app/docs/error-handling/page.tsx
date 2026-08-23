@@ -164,7 +164,7 @@ curl --retry 5 \\
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white">Error Handling &amp; Sub-15ms Failover Guide</h1>
           <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl font-sans">
-            Understand standard HTTP status codes, exponential backoff with full jitter, and automated multi-region circuit breaker recovery for 99.999% uptime.
+            Understand standard HTTP status codes, exponential backoff with full jitter, and automated multi-region circuit breaker recovery for resilient zero-stall execution.
           </p>
         </div>
 

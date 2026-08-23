@@ -61,9 +61,9 @@ export default function EnterpriseBillingPage() {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white">Enterprise Wholesale Contracts & Custom SLAs</h1>
+            <h1 className="text-2xl sm:text-3xl font-black text-white">Enterprise Wholesale Contracts &amp; Volume Terms</h1>
             <p className="text-xs text-zinc-400">
-              High-volume commitment pricing, custom invoicing terms (Net-30 / ACH / Wire), and dedicated 99.99% SLA guarantees.
+              High-volume commitment pricing, custom invoicing terms (Net-30 / ACH / Wire), and dedicated high-availability support.
             </p>
           </div>
 
@@ -108,7 +108,7 @@ export default function EnterpriseBillingPage() {
             <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-bold text-white">Enterprise BAA, DPA & 99.99% SLA</h3>
+            <h3 className="text-base font-bold text-white">Enterprise BAA, DPA &amp; SOC 2 Security</h3>
             <p className="text-xs text-zinc-300 leading-relaxed">
               Signed Business Associate Agreements (HIPAA), custom Data Processing Addendums (GDPR/CCPA), and zero data retention guarantees.
             </p>

@@ -167,24 +167,16 @@ export function ModelArchitectView({ model }: ModelArchitectViewProps) {
         </div>
       </div>
 
-      {/* SRE SLA & Infrastructure Guarantees */}
+      {/* SRE Infrastructure Guarantees */}
       <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-emerald-500/20">
         <div className="flex items-center gap-2">
           <Server className="w-5 h-5 text-emerald-400" />
-          <h3 className="text-lg font-black text-white">SRE &amp; Enterprise Production SLA</h3>
+          <h3 className="text-lg font-black text-white">SRE &amp; High-Availability Infrastructure</h3>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
           <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-1.5">
-            <div className="text-xl font-black text-emerald-300 font-mono">99.99%</div>
-            <span className="text-xs font-bold text-white block">Uptime Availability</span>
-            <p className="text-[11px] text-zinc-400 font-sans">
-              Multi-region Anycast failover prevents upstream outages from impacting your traffic.
-            </p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-1.5">
-            <div className="text-xl font-black text-cyan-300 font-mono">&lt; 14ms</div>
+            <div className="text-xl font-black text-emerald-300 font-mono">&lt; 14ms</div>
             <span className="text-xs font-bold text-white block">Gateway Transit TTFT</span>
             <p className="text-[11px] text-zinc-400 font-sans">
               Edge proxies distributed globally ensure zero latency overhead over direct connection.

@@ -140,8 +140,8 @@ export default function CompliancePage() {
               <div className="text-base font-bold text-cyan-300">TLS 1.3 / AES-256</div>
             </div>
             <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-              <span className="text-zinc-500 text-[10px] uppercase">Availability SLA</span>
-              <div className="text-base font-bold text-amber-300">99.99% Guaranteed</div>
+              <span className="text-zinc-500 text-[10px] uppercase">Infrastructure</span>
+              <div className="text-base font-bold text-amber-300">Anycast Failover</div>
             </div>
             <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 space-y-1">
               <span className="text-zinc-500 text-[10px] uppercase">Model Isolation</span>

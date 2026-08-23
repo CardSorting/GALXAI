@@ -12,9 +12,9 @@ export interface JargonTerm {
 
 export const JARGON_GLOSSARY: Record<string, JargonTerm> = {
   'sla-9999': {
-    title: '99.99% Enterprise Uptime SLA',
-    shortDesc: 'A contractual guarantee that the AI gateway is active and available 99.99% of the year.',
-    plainEnglishAnalogy: 'Like having an enterprise electrical backup generator that ensures less than 4 minutes of downtime across an entire month.',
+    title: 'High-Availability Anycast Routing',
+    shortDesc: 'Multi-region automated failover ensuring requests are continuously routed to responsive compute clusters.',
+    plainEnglishAnalogy: 'Like having an enterprise electrical backup generator that immediately kicks in if a main power line flickers.',
     category: 'Reliability'
   },
   'failover': {
@@ -83,7 +83,7 @@ export function JargonBuster({ termKey, label }: JargonBusterProps) {
   const info = JARGON_GLOSSARY[termKey] || {
     title: termKey,
     shortDesc: 'Technical concept explained in plain English.',
-    plainEnglishAnalogy: 'Optimized for high performance, cost savings, and 99.99% enterprise reliability.',
+    plainEnglishAnalogy: 'Optimized for high performance, cost savings, and enterprise reliability.',
     category: 'Overview'
   };
 

@@ -107,8 +107,8 @@ const PRESET_PROMPTS: PresetPromptItem[] = [
   },
   {
     label: 'Prompt #3',
-    tag: '🛡️ 99.99% SLA',
-    prompt: 'How does GALXAI guarantee 99.99% uptime with zero rate limits?'
+    tag: '🛡️ Rate Limit Shield',
+    prompt: 'How does GALXAI protect against rate limits and upstream errors?'
   }
 ];
 
@@ -262,7 +262,7 @@ impl AtomicTokenBucket {
     }
 
     if (lower.includes('429') || lower.includes('uptime') || lower.includes('sla') || lower.includes('stall') || lower.includes('resilience') || lower.includes('rate limit')) {
-      return `### 🛡️ 99.99% Enterprise Uptime & Zero Rate-Limit Stalls
+      return `### 🛡️ Enterprise Resilience & Zero Rate-Limit Stalls
 
 When autonomous coding agents (like Cursor, Windsurf, or custom agent swarms) run continuous execution loops, standard API keys frequently hit provider rate limits (**HTTP 429 Too Many Requests**).
 
@@ -275,16 +275,15 @@ When autonomous coding agents (like Cursor, Windsurf, or custom agent swarms) ru
   Guaranteed high-speed generation for mission-critical production pipelines.
 
 \`\`\`typescript
-// High Availability Guarantee
-export const sla = {
-  uptime: "99.99%",
+// High Availability Telemetry
+export const resilience = {
   rate_limit_stalls: 0,
   failover_latency_ms: "< 1ms",
   status: "OPTIMAL"
 };
 \`\`\`
 
-**Result:** Uninterrupted execution and 99.99% SLA uptime for all agent loops and backend services.`;
+**Result:** Uninterrupted execution and zero rate-limit stalls for all agent loops and backend services.`;
     }
 
     // Default rich response for any custom user prompt
@@ -484,7 +483,7 @@ const res = await client.chat.completions.create({
             <div className="flex items-center gap-2 font-mono text-xs">
               <span className="text-white font-bold tracking-wider uppercase">Apex Compute Clearinghouse</span>
               <span className="text-zinc-500">•</span>
-              <span className="text-emerald-400 font-semibold">99.99% Enterprise SLA</span>
+              <span className="text-emerald-400 font-semibold">Active Health Probes</span>
             </div>
           </div>
 
