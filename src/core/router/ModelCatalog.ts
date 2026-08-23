@@ -657,4 +657,83 @@ export class ModelCatalog {
   public static aggregate(query: DbAggregateQuery) {
     return this.getTable().aggregate(query);
   }
+
+  /**
+   * Calculates sub-cent token cost and retail savings with micro-precision.
+   */
+  public static calculateCost(
+    modelId: string,
+    usage: { promptTokens?: number; completionTokens?: number; cachedTokens?: number; imagesCount?: number }
+  ) {
+    const spec = this.resolveModel(modelId);
+    const category = spec.category;
+
+    if (category === 'image') {
+      const imagesCount = Math.max(1, usage.imagesCount || 1);
+      const unitWholesale = spec.inputPricePer1M ?? 0.040;
+      const unitRetail = spec.listPricePer1MInput ?? (unitWholesale * 1.33);
+      const totalCost = Number((imagesCount * unitWholesale).toFixed(6));
+      const retailTotal = Number((imagesCount * unitRetail).toFixed(6));
+      const savings = Number(Math.max(0, retailTotal - totalCost).toFixed(6));
+      const discountPct = spec.discountPercentage ?? 25;
+
+      return {
+        modelId: spec.id,
+        modelName: spec.name,
+        category: 'image' as const,
+        promptTokens: usage.promptTokens || 1000,
+        cachedTokens: 0,
+        completionTokens: 0,
+        totalTokens: usage.promptTokens || 1000,
+        imagesCount,
+        promptCostUsd: totalCost,
+        cachedCostUsd: 0,
+        completionCostUsd: 0,
+        totalCostUsd: totalCost,
+        retailTotalCostUsd: retailTotal,
+        savingsUsd: savings,
+        savingsPercentage: retailTotal > 0 ? Number(((savings / retailTotal) * 100).toFixed(1)) : discountPct
+      };
+    }
+
+    const totalPrompt = Math.max(0, usage.promptTokens || 0);
+    const cached = Math.min(totalPrompt, Math.max(0, usage.cachedTokens || 0));
+    const nonCached = Math.max(0, totalPrompt - cached);
+    const completion = Math.max(0, usage.completionTokens || 0);
+
+    const inputRate = spec.inputPricePer1M ?? 1.0;
+    const outputRate = spec.outputPricePer1M ?? 2.0;
+    const cachedRate = spec.cachedInputPricePer1M ?? (inputRate * 0.25);
+    const listInput = spec.listPricePer1MInput ?? (inputRate * 1.33);
+    const listOutput = spec.listPricePer1MOutput ?? (outputRate * 1.33);
+    const discountPct = spec.discountPercentage ?? 25;
+
+    const promptCost = Number(((nonCached * inputRate) / 1_000_000).toFixed(6));
+    const cachedCost = Number(((cached * cachedRate) / 1_000_000).toFixed(6));
+    const completionCost = Number(((completion * outputRate) / 1_000_000).toFixed(6));
+    const totalCost = Number((promptCost + cachedCost + completionCost).toFixed(6));
+
+    const retailPrompt = Number(((totalPrompt * listInput) / 1_000_000).toFixed(6));
+    const retailCompletion = Number(((completion * listOutput) / 1_000_000).toFixed(6));
+    const retailTotal = Number((retailPrompt + retailCompletion).toFixed(6));
+    const savings = Number(Math.max(0, retailTotal - totalCost).toFixed(6));
+
+    return {
+      modelId: spec.id,
+      modelName: spec.name,
+      category: category as 'llm' | 'embedding',
+      promptTokens: totalPrompt,
+      cachedTokens: cached,
+      completionTokens: completion,
+      totalTokens: totalPrompt + completion,
+      promptCostUsd: promptCost,
+      cachedCostUsd: cachedCost,
+      completionCostUsd: completionCost,
+      totalCostUsd: totalCost,
+      retailTotalCostUsd: retailTotal,
+      savingsUsd: savings,
+      savingsPercentage: retailTotal > 0 ? Number(((savings / retailTotal) * 100).toFixed(1)) : discountPct
+    };
+  }
 }
+

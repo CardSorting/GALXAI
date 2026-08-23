@@ -14,6 +14,8 @@ import { GalxCircuitBreaker } from '../circuit/GalxCircuitBreaker';
 import { GalxCredentialPool } from '../pool/GalxCredentialPool';
 import { GalxCryptoVault } from '../vault/GalxCryptoVault';
 import { ModelCatalog } from './ModelCatalog';
+import { TokenCostCalculator } from '../pricing/TokenCostCalculator';
+import { GalxEdgeBatchBuffer } from '../../workers/cloudflare/GalxEdgeBatchBuffer';
 import { OpenAIAdapter } from './adapters/OpenAIAdapter';
 import { GrokAdapter } from './adapters/GrokAdapter';
 import { GalxPreflightValidator } from '../validator/GalxPreflightValidator';
@@ -222,6 +224,10 @@ export class GalxModelRouter {
 
         // 7. Handle Streaming Response with On-the-Fly SHA-256 Rolling Digest Hasher
         if (isStream && response.body) {
+          const approxPromptTokens = sanitizedRequest.messages
+            ? Math.max(10, Math.ceil(JSON.stringify(sanitizedRequest.messages).length / 4))
+            : 100;
+
           const wrappedStream = this.wrapStreamingResponse(
             response.body,
             lease,
@@ -231,7 +237,10 @@ export class GalxModelRouter {
             requestStartMs,
             privacyPolicy,
             responseHeaders,
-            decrypted
+            decrypted,
+            userId,
+            requestId,
+            approxPromptTokens
           );
 
           return {
@@ -247,10 +256,50 @@ export class GalxModelRouter {
 
         // 8. Handle Non-Streaming Response
         const responseText = await response.text();
+        let promptTokens = 100;
+        let completionTokens = 400;
+        let cachedTokens = 0;
         let tokensUsed = 500;
+
         try {
           const parsed = JSON.parse(responseText);
-          tokensUsed = parsed.usage?.total_tokens || 500;
+          promptTokens = parsed.usage?.prompt_tokens ?? (sanitizedRequest.messages ? Math.max(10, Math.ceil(JSON.stringify(sanitizedRequest.messages).length / 4)) : 100);
+          completionTokens = parsed.usage?.completion_tokens ?? Math.max(1, Math.ceil(responseText.length / 4));
+          cachedTokens = parsed.usage?.prompt_tokens_details?.cached_tokens ?? 0;
+          tokensUsed = parsed.usage?.total_tokens ?? (promptTokens + completionTokens);
+        } catch {
+          completionTokens = Math.max(1, Math.ceil(responseText.length / 4));
+          tokensUsed = promptTokens + completionTokens;
+        }
+
+        // Granular sub-cent cost calculation down to $0.000001
+        const costBreakdown = TokenCostCalculator.calculateCost(modelSpec, {
+          promptTokens,
+          completionTokens,
+          cachedTokens
+        });
+
+        // Enqueue micro-metered token draw to Cloudflare buffer & Supabase ledger
+        try {
+          GalxEdgeBatchBuffer.getInstance().enqueueTokenDraw({
+            userId,
+            costUsd: costBreakdown.totalCostUsd,
+            description: `API Chat: ${modelSpec.name} (${costBreakdown.totalTokens.toLocaleString()} tokens • ${(costBreakdown.savingsPercentage).toFixed(0)}% OFF)`,
+            model: modelSpec.id,
+            promptTokens: costBreakdown.promptTokens,
+            completionTokens: costBreakdown.completionTokens,
+            cachedTokens: costBreakdown.cachedTokens,
+            shardId: lease.shardId,
+            metadata: {
+              requestId,
+              promptCostUsd: costBreakdown.promptCostUsd,
+              cachedCostUsd: costBreakdown.cachedCostUsd,
+              completionCostUsd: costBreakdown.completionCostUsd,
+              wholesaleSavingsUsd: costBreakdown.totalSavingsUsd,
+              retailEquivalentUsd: costBreakdown.retailTotalCostUsd,
+              latencyMs
+            }
+          });
         } catch {}
 
         // Non-streaming ZDR proof calculation
@@ -272,6 +321,11 @@ export class GalxModelRouter {
         });
 
         Object.entries(zdrHeaders).forEach(([k, v]) => responseHeaders.set(k, v));
+        responseHeaders.set('X-Galx-Tokens-Prompt', String(costBreakdown.promptTokens));
+        responseHeaders.set('X-Galx-Tokens-Completion', String(costBreakdown.completionTokens));
+        responseHeaders.set('X-Galx-Tokens-Cached', String(costBreakdown.cachedTokens));
+        responseHeaders.set('X-Galx-Cost-USD', costBreakdown.totalCostUsd.toFixed(6));
+        responseHeaders.set('X-Galx-Savings-USD', costBreakdown.totalSavingsUsd.toFixed(6));
 
         this.pool.releaseLease(
           lease.leaseId,
@@ -335,7 +389,10 @@ export class GalxModelRouter {
     requestStartMs?: number,
     privacyPolicy?: any,
     responseHeaders?: Headers,
-    decryptedSecrets?: DecryptedGalxSecret
+    decryptedSecrets?: DecryptedGalxSecret,
+    userId?: string,
+    requestId?: string,
+    approxPromptTokens: number = 100
   ): ReadableStream<Uint8Array> {
     let estimatedTokens = 0;
     const decoder = new TextDecoder();
@@ -375,6 +432,38 @@ export class GalxModelRouter {
       
       // Ephemerally zeroize lease credentials
       GalxZDRProtocol.scrubDecryptedCredentials(decryptedSecrets);
+
+      // Micro-metered stream token draw calculation
+      if (success && userId) {
+        try {
+          const completionTokens = Math.max(1, estimatedTokens);
+          const modelSpec = ModelCatalog.resolveModel(modelId);
+          const costBreakdown = TokenCostCalculator.calculateCost(modelSpec, {
+            promptTokens: approxPromptTokens,
+            completionTokens,
+            cachedTokens: 0
+          });
+
+          GalxEdgeBatchBuffer.getInstance().enqueueTokenDraw({
+            userId,
+            costUsd: costBreakdown.totalCostUsd,
+            description: `Stream Chat: ${modelSpec.name} (${costBreakdown.totalTokens.toLocaleString()} tokens)`,
+            model: modelSpec.id,
+            promptTokens: costBreakdown.promptTokens,
+            completionTokens: costBreakdown.completionTokens,
+            cachedTokens: 0,
+            shardId: lease.shardId,
+            metadata: {
+              requestId,
+              promptCostUsd: costBreakdown.promptCostUsd,
+              completionCostUsd: costBreakdown.completionCostUsd,
+              wholesaleSavingsUsd: costBreakdown.totalSavingsUsd,
+              retailEquivalentUsd: costBreakdown.retailTotalCostUsd,
+              latencyMs: totalDurationMs
+            }
+          });
+        } catch {}
+      }
 
       routerPool.releaseLease(
         lease.leaseId,
@@ -508,6 +597,36 @@ export class GalxModelRouter {
       }
 
       const latencyMs = Date.now() - startMs;
+      const imagesCount = sanitizedRequest.n || 1;
+      const costBreakdown = TokenCostCalculator.calculateCost(modelSpec, {
+        promptTokens: 1000,
+        imagesCount,
+        quality: sanitizedRequest.quality
+      });
+
+      // Micro-metered image draw
+      if (userId) {
+        try {
+          GalxEdgeBatchBuffer.getInstance().enqueueTokenDraw({
+            userId,
+            costUsd: costBreakdown.totalCostUsd,
+            description: `Visual Synthesis: ${modelSpec.name} (${imagesCount} image${imagesCount > 1 ? 's' : ''})`,
+            model: modelSpec.id,
+            promptTokens: 1000,
+            completionTokens: 0,
+            cachedTokens: 0,
+            shardId: lease.shardId,
+            metadata: {
+              requestId,
+              imagesCount,
+              wholesaleSavingsUsd: costBreakdown.totalSavingsUsd,
+              retailEquivalentUsd: costBreakdown.retailTotalCostUsd,
+              latencyMs
+            }
+          });
+        } catch {}
+      }
+
       this.pool.releaseLease(lease.leaseId, 100, true, undefined, undefined, Date.now(), latencyMs);
 
       this.metrics.recordSample({

@@ -18,6 +18,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 import { GtmPromoBanner } from '@/components/dashboard/GtmPromoBanner';
+import { WalletQuickPeekPopover } from '@/components/wallet/WalletQuickPeekPopover';
 
 export function Navigation() {
   const pathname = usePathname();
@@ -163,22 +164,11 @@ export function Navigation() {
               </kbd>
             </button>
 
-            {/* Accessible Wallet Balance Link */}
-            <Link
-              href="/billing"
-              role="link"
-              aria-label={`Developer Prepaid Wallet. Current balance: $${walletBalance.toFixed(2)}`}
-              className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
-                pathname === '/billing'
-                  ? 'text-emerald-200 bg-emerald-500/20 border border-emerald-500/50 shadow-sm'
-                  : hasVerifiedDeposit
-                    ? 'text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 active:scale-[0.98]'
-                    : 'text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 active:scale-[0.98]'
-              } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080d]`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${hasVerifiedDeposit ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
-              <span>${walletBalance.toFixed(2)}</span>
-            </Link>
+            {/* Interactive Wallet Quick-Peek Popover */}
+            <WalletQuickPeekPopover
+              balance={walletBalance}
+              hasVerifiedDeposit={hasVerifiedDeposit}
+            />
 
             {/* Accessible API Keys Link */}
             <Link
