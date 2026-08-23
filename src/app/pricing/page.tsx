@@ -35,6 +35,8 @@ import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
 import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 import { WorkloadEstimator } from '@/components/dashboard/WorkloadEstimator';
 import { TrustSeals } from '@/components/common/TrustSeals';
+import { SavingsJackpotReel } from '@/components/dashboard/SavingsJackpotReel';
+import { SpendAuditTool } from '@/components/dashboard/SpendAuditTool';
 
 interface VolumeTier {
   id: string;
@@ -274,6 +276,12 @@ export default function PricingPage() {
 
         {/* Founding Cohort Rate Lock & Capacity Ribbon */}
         <RateLockRibbon />
+
+        {/* Casino-Grade Savings Winnings Jackpot & Multiplier Reel */}
+        <SavingsJackpotReel />
+
+        {/* Instant Monthly Invoice Spend Audit Tool */}
+        <SpendAuditTool />
 
         {/* Non-Technical Real-World Business Workload Spend Translator */}
         <WorkloadEstimator />

@@ -48,6 +48,7 @@ import { GuidedSetupWizard } from '@/components/dashboard/GuidedSetupWizard';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { SimpleModelPicker } from '@/components/dashboard/SimpleModelPicker';
 import { SpendAuditTool } from '@/components/dashboard/SpendAuditTool';
+import { SavingsJackpotReel } from '@/components/dashboard/SavingsJackpotReel';
 
 export default function HomePage() {
   const [stats, setStats] = useState<any>(null);
@@ -184,6 +185,9 @@ export default function HomePage() {
 
         {/* Interactive Instant Invoice Spend Audit Tool */}
         <SpendAuditTool />
+
+        {/* Casino-Grade Savings Winnings Jackpot & Multiplier Reel */}
+        <SavingsJackpotReel />
 
         {/* Non-Technical Real-World Business Workload Spend Translator */}
         <WorkloadEstimator />
