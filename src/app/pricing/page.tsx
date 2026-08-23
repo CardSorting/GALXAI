@@ -172,7 +172,7 @@ export default function PricingPage() {
               Direct Wholesale AI Rates with 0% Markup &amp; 429 Protection
             </h1>
             <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl mx-auto">
-              Save <strong className="text-emerald-300 font-semibold">25% to 40%</strong> off direct retail prices across OpenAI GPT-5.6 Sol, Terra, Luna, Grok 4.6, and Claude 3.7. Up to <strong className="text-amber-300 font-semibold">70%+ total net savings</strong> with compound 75% prompt caching.
+              Save <strong className="text-emerald-300 font-semibold">25% to 40%</strong> off direct retail prices across OpenAI GPT-5.6 Sol, Terra, Luna, and Grok 4.6. Up to <strong className="text-amber-300 font-semibold">70%+ total net savings</strong> with compound 75% prompt caching.
             </p>
           </div>
 

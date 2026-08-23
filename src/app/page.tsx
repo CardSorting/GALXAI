@@ -114,7 +114,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-sm font-bold text-white">25%–40% Wholesale Pass</h3>
               <p className="text-xs text-zinc-400 leading-relaxed font-sans">
-                Get direct wholesale discounts on GPT-5.6, Grok 4.6, and Claude 3.7 with 0% gateway markup.
+                Get direct wholesale discounts on GPT-5.6 and Grok 4.6 with 0% gateway markup.
               </p>
             </div>
 

@@ -65,14 +65,14 @@ const HERO_MODELS: ModelPreset[] = [
     accentColor: 'from-cyan-400 to-indigo-500'
   },
   {
-    id: 'claude-3-7-sonnet',
-    name: 'Claude 3.7 Sonnet',
-    provider: 'Anthropic',
+    id: 'gpt-5.6-terra',
+    name: 'OpenAI GPT-5.6 Terra',
+    provider: 'OpenAI Reasoning',
     retailPrice: 3.00,
     wholesalePrice: 2.25,
     discountPct: 25,
-    contextK: 200,
-    specialty: 'Hybrid Thinking & Precision',
+    contextK: 900,
+    specialty: 'Balanced Frontier Reasoning',
     accentColor: 'from-orange-400 to-amber-500'
   },
   {
