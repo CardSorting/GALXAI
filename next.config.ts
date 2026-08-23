@@ -32,10 +32,21 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
   serverExternalPackages: ["pg"],
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+  },
   experimental: {
-    optimizePackageImports: ["lucide-react", "framer-motion", "clsx", "tailwind-merge"],
+    optimizePackageImports: [
+      "lucide-react",
+      "framer-motion",
+      "clsx",
+      "tailwind-merge"
+    ],
     serverActions: {
       bodySizeLimit: "10mb",
+      allowedOrigins: ["localhost:3000", "galx.ai", "*.galx.ai"],
     },
   },
   images: {
