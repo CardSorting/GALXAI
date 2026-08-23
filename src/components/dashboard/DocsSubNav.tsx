@@ -44,7 +44,7 @@ const ALL_DOCS_ITEMS: DocsNavItem[] = [
   { name: '1-Click Migration', href: '/docs/migration', icon: ArrowLeftRight, badge: '0-Code' },
   { name: 'Python SDK', href: '/docs/sdks/python', icon: Code2 },
   { name: 'TypeScript SDK', href: '/docs/sdks/typescript', icon: FileCode2 },
-  { name: 'Cursor & IDE', href: '/docs/ide-setup', icon: Terminal, badge: 'IDE' },
+  { name: 'Cursor Guide', href: '/docs/integrations/cursor', icon: Terminal, badge: 'IDE' },
   { name: 'SSE Streaming', href: '/docs/streaming', icon: Radio },
   { name: 'Cookbooks', href: '/docs/cookbook', icon: BookMarked, badge: 'Recipes' },
   { name: 'Function Calling', href: '/docs/function-calling', icon: Wrench },

@@ -3,15 +3,40 @@ import type { Metadata } from 'next';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { LiveStatusDashboard } from '@/components/status/LiveStatusDashboard';
+import { constructMetadata } from '@/lib/seo/metadata';
+import { JsonLd, createSoftwareAppSchema, createBreadcrumbSchema } from '@/lib/seo/jsonld';
 
-export const metadata: Metadata = {
-  title: 'System Status & Operational Health',
-  description: 'Real-time operational status, router latency metrics, and upstream availability for OpenAI Codex and xAI Grok.',
-};
+export const metadata: Metadata = constructMetadata({
+  title: 'Real-Time System Status & Operational SLA Health',
+  description: 'Real-time operational status, sub-15ms router latency metrics, and upstream availability for OpenAI Codex and xAI Grok.',
+  canonicalPath: '/status',
+  keywords: [
+    'GALXAI Status',
+    'AI Router Uptime',
+    'OpenAI Status Gateway',
+    'Grok API Operational Health',
+    'AI Gateway Latency Status',
+  ],
+});
 
 export default function StatusPage() {
+  const pageSchema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      createSoftwareAppSchema({
+        name: 'GALXAI Real-Time System Status',
+        description: 'Operational health, circuit breaker telemetry, and Anycast latency metrics.',
+      }),
+      createBreadcrumbSchema([
+        { name: 'Home', url: '/' },
+        { name: 'Status', url: '/status' },
+      ]),
+    ],
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
+      <JsonLd data={pageSchema} />
       <Navigation />
 
       <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">

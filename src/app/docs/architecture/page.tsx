@@ -1,44 +1,61 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { DocsSubNav } from '@/components/dashboard/DocsSubNav';
 import {
-  Shield,
   Activity,
-  Layers,
   Cpu,
   Server,
-  CheckCircle2,
   Zap,
-  Lock,
-  ArrowRight,
-  GitBranch,
-  Radio,
-  Clock,
-  Sparkles,
-  Bot
+  Bot,
 } from 'lucide-react';
 import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
+import { constructMetadata } from '@/lib/seo/metadata';
+import { JsonLd, createTechArticleSchema, createBreadcrumbSchema } from '@/lib/seo/jsonld';
 
-export const metadata: Metadata = {
-  title: 'Rate Governor & Failover Architecture | GALXAI Docs',
+export const metadata: Metadata = constructMetadata({
+  title: 'Rate Governor & Failover Architecture — Sub-15ms Substrate',
   description: 'Deep architectural dive into continuous token-bucket calculus, 4-state circuit breaker FSM, TASD swarm dispersion, and HKDF-SHA256 authenticated envelope encryption.',
-};
+  canonicalPath: '/docs/architecture',
+  keywords: [
+    'AI Gateway Architecture',
+    'Circuit Breaker FSM',
+    'Predictive Adaptive Headroom',
+    'Tenant-Affinity Shard Dispersion',
+    'AES-256-GCM Envelope Encryption',
+  ],
+});
 
 export default function ArchitectureDocPage() {
+  const pageSchema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      createTechArticleSchema({
+        headline: 'GALXAI Core Substrate Architecture & Rate Governor',
+        description: 'Comprehensive technical specification of token-bucket rate calculus, 4-state circuit breakers, and AES-256-GCM vaulting.',
+        path: '/docs/architecture',
+      }),
+      createBreadcrumbSchema([
+        { name: 'Home', url: '/' },
+        { name: 'Docs', url: '/docs' },
+        { name: 'Architecture', url: '/docs/architecture' },
+      ]),
+    ],
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
+      <JsonLd data={pageSchema} />
       <Navigation />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
         <Breadcrumbs
           items={[
             { label: 'Docs', href: '/docs' },
-            { label: 'Architecture & Rate Governor' }
+            { label: 'Architecture & Rate Governor' },
           ]}
         />
 
@@ -145,7 +162,7 @@ export default function ArchitectureDocPage() {
           </div>
 
           <p className="text-xs text-zinc-300 font-sans leading-relaxed">
-            GALXAI ranks upstream compute channels using the **Predictive Adaptive Headroom (P-AHT)** formula combined with **Tenant-Affinity Shard Dispersion (TASD)** to prevent agent loops from concentrating load onto a single upstream channel:
+            GALXAI ranks upstream compute channels using the <strong>Predictive Adaptive Headroom (P-AHT)</strong> formula combined with <strong>Tenant-Affinity Shard Dispersion (TASD)</strong> to prevent agent loops from concentrating load onto a single upstream channel:
           </p>
 
           <div className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-cyan-300 border border-white/5 space-y-2 overflow-x-auto">

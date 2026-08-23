@@ -10,8 +10,8 @@ import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
 import { FloatingActionDock } from "@/components/common/FloatingActionDock";
 import { KeyboardShortcutsModal } from "@/components/common/KeyboardShortcutsModal";
 import { ClientResilienceProvider } from "@/components/common/ClientResilienceProvider";
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://galx.ai";
+import { SITE_CONFIG } from "@/lib/seo/siteConfig";
+import { JsonLd, createOrganizationSchema, createWebSiteSchema, createSoftwareAppSchema } from "@/lib/seo/jsonld";
 
 export const viewport: Viewport = {
   themeColor: "#07080d",
@@ -21,44 +21,32 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(APP_URL),
+  metadataBase: new URL(SITE_CONFIG.url),
   title: {
-    default: "GALXAI — Unified AI Model Router & Universal API Gateway",
-    template: "%s | GALXAI",
+    default: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}`,
+    template: `%s | ${SITE_CONFIG.name}`,
   },
-  description: "One unified OpenAI-compatible API for the world's best models. Sub-millisecond routing, automatic failover, and rate-limit pooling across OpenAI Codex and xAI Grok with 25%–40% wholesale savings.",
-  keywords: [
-    "AI Gateway",
-    "Model Router",
-    "Unified AI API",
-    "OpenAI Codex",
-    "xAI Grok",
-    "gpt-5.6-sol",
-    "gpt-5.6-terra",
-    "gpt-5.6-luna",
-    "grok-4.6",
-    "grok-4.5",
-    "x-ai/grok-4.6",
-    "Continuous Token Governor",
-    "Circuit Breaker",
-    "Multi-Account Routing",
-    "Wholesale AI Tokens",
-    "Cursor AI API Key",
-    "Windsurf Base URL"
-  ],
-  authors: [{ name: "GALXAI Core Team" }],
-  creator: "GALXAI",
-  publisher: "GALXAI",
+  description: SITE_CONFIG.description,
+  keywords: SITE_CONFIG.keywords,
+  authors: SITE_CONFIG.authors,
+  creator: SITE_CONFIG.creator,
+  publisher: SITE_CONFIG.publisher,
   alternates: {
-    canonical: "/",
+    canonical: SITE_CONFIG.url,
+    types: {
+      'application/rss+xml': `${SITE_CONFIG.url}/feed.xml`,
+      'application/opensearchdescription+xml': `${SITE_CONFIG.url}/opensearch.xml`,
+    },
   },
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
       { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
     ],
     apple: [
       { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
   },
   manifest: "/manifest.webmanifest",
@@ -70,16 +58,26 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: APP_URL,
-    siteName: "GALXAI",
-    title: "GALXAI — Unified AI Model Router & Universal API Gateway",
-    description: "One unified API for the world's best AI models with automatic failover, sub-millisecond routing, and continuous rate limit governance.",
+    url: SITE_CONFIG.url,
+    siteName: SITE_CONFIG.name,
+    title: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}`,
+    description: SITE_CONFIG.description,
+    images: [
+      {
+        url: `${SITE_CONFIG.url}${SITE_CONFIG.ogImage}`,
+        width: 1200,
+        height: 630,
+        alt: `${SITE_CONFIG.name} Universal AI Gateway`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "GALXAI — Unified AI Model Router & Gateway",
+    title: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}`,
     description: "One unified API for OpenAI Codex and xAI Grok models with automated failover and 25%–40% wholesale savings.",
-    creator: "@galxai",
+    creator: SITE_CONFIG.twitterHandle,
+    site: SITE_CONFIG.twitterHandle,
+    images: [`${SITE_CONFIG.url}${SITE_CONFIG.ogImage}`],
   },
   robots: {
     index: true,
@@ -99,54 +97,32 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const structuredData = {
+  const rootGraphSchema = {
     "@context": "https://schema.org",
     "@graph": [
-      {
-        "@type": "Organization",
-        "@id": `${APP_URL}/#organization`,
-        "name": "GALXAI",
-        "url": APP_URL,
-        "logo": `${APP_URL}/icon.png`,
-        "description": "Enterprise-grade universal AI model router and low-latency API gateway.",
-        "sameAs": [
-          "https://twitter.com/galxai",
-          "https://github.com/galxai"
-        ]
-      },
-      {
-        "@type": "WebSite",
-        "@id": `${APP_URL}/#website`,
-        "url": APP_URL,
-        "name": "GALXAI",
-        "publisher": {
-          "@id": `${APP_URL}/#organization`
-        },
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": `${APP_URL}/models?q={search_term_string}`,
-          "query-input": "required name=search_term_string"
-        }
-      },
-      {
-        "@type": "SoftwareApplication",
-        "@id": `${APP_URL}/#software`,
-        "name": "GALXAI Universal Gateway",
-        "applicationCategory": "DeveloperApplication",
-        "operatingSystem": "All",
-        "offers": {
-          "@type": "Offer",
-          "price": "0.00",
-          "priceCurrency": "USD"
-        },
-        "description": "Universal AI model router and OpenAI-compatible API gateway for OpenAI Codex and xAI Grok frontier models with continuous rate-limit governance."
-      }
-    ]
+      createOrganizationSchema(),
+      createWebSiteSchema(),
+      createSoftwareAppSchema(),
+    ],
   };
 
   return (
     <html lang="en" className="dark">
       <head>
+        {/* OpenSearch Auto-Discovery for Browser URL bar integration */}
+        <link
+          rel="search"
+          type="application/opensearchdescription+xml"
+          title="GALXAI Model Search"
+          href="/opensearch.xml"
+        />
+        {/* RSS / Atom Feed Auto-Discovery */}
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="GALXAI Model & Engine Updates"
+          href="/feed.xml"
+        />
         {/* Network Resource Hints for Zero-Hesitation Connection Warm-Up */}
         <link rel="preconnect" href="https://mazhcjisettrzbqhorvp.supabase.co" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://mazhcjisettrzbqhorvp.supabase.co" />
@@ -157,10 +133,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
+
+        <JsonLd data={rootGraphSchema} />
       </head>
       <body className="min-h-screen bg-[#07080d] text-zinc-100 antialiased selection:bg-indigo-500 selection:text-white flex flex-col">
         {/* Ambient Nebula Background */}

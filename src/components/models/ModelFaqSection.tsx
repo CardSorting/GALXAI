@@ -7,9 +7,12 @@ import {
   ArrowRight,
   HelpCircle,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  GitCompare,
+  Zap,
 } from 'lucide-react';
 import type { ModelSpecItem } from '@/core/contracts/GalxContracts';
+import { CURATED_MATCHUPS } from '@/lib/data/comparisonData';
 
 interface ModelFaqSectionProps {
   model: ModelSpecItem;
@@ -25,29 +28,33 @@ export function ModelFaqSection({ model, siblingModels }: ModelFaqSectionProps) 
     );
   };
 
+  const relevantMatchups = CURATED_MATCHUPS.filter(
+    (m) => m.modelAId === model.id || m.modelBId === model.id
+  );
+
   const faqItems = [
     {
       q: `Are these official, genuine ${model.name} model weights?`,
-      a: `Yes, 100%. GALXAI routes directly to upstream enterprise clusters at OpenAI and xAI. The model weights, reasoning traces, and token generations are identical to direct API calls—just delivered at wholesale rates with 75% prompt cache pass-through.`
+      a: `Yes, 100%. GALXAI routes directly to upstream enterprise clusters at OpenAI and xAI. The model weights, reasoning traces, and token generations are identical to direct API calls—just delivered at wholesale rates with 75% prompt cache pass-through.`,
     },
     {
       q: 'Does GALXAI add latency to streaming completions?',
-      a: 'Zero measurable latency overhead. GALXAI operates Anycast Edge Proxies in 300+ global data centers. Responses begin streaming in < 14ms (TTFT), identical to or faster than connecting directly to single-region upstream origin servers.'
+      a: 'Zero measurable latency overhead. GALXAI operates Anycast Edge Proxies in 300+ global data centers. Responses begin streaming in < 14ms (TTFT), identical to or faster than connecting directly to single-region upstream origin servers.',
     },
     {
       q: 'How does the 75% Prompt Caching discount work?',
-      a: 'Whenever your system prompts or conversation context prefixes exceed 1,024 tokens, GALXAI matches cached RAM slices. You automatically pay 75% less on all matching input tokens without altering any request parameters.'
+      a: 'Whenever your system prompts or conversation context prefixes exceed 1,024 tokens, GALXAI matches cached RAM slices. You automatically pay 75% less on all matching input tokens without altering any request parameters.',
     },
     {
       q: 'Do I need to sign an enterprise contract to get these wholesale rates?',
-      a: 'No. There are zero minimum volume commitments, zero enterprise sales calls, and zero monthly subscriptions. You get immediate wholesale rates on your very first token with $5 in free compute credits.'
-    }
+      a: 'No. There are zero minimum volume commitments, zero enterprise sales calls, and zero monthly subscriptions. You get immediate wholesale rates on your very first token with $5 in free compute credits.',
+    },
   ];
 
   return (
     <>
       {/* Sibling Model Comparison Matrix */}
-      <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+      <section id="model-siblings" className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-amber-400 uppercase">
@@ -110,8 +117,50 @@ export function ModelFaqSection({ model, siblingModels }: ModelFaqSectionProps) 
         </div>
       </section>
 
+      {/* Head-to-Head Matchups Section (pSEO Internal Links) */}
+      {relevantMatchups.length > 0 && (
+        <section id="model-matchups" className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-indigo-500/20">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <div className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-indigo-400 uppercase">
+                <GitCompare className="w-3.5 h-3.5" />
+                <span>POPULAR HEAD-TO-HEAD BENCHMARKS</span>
+              </div>
+              <h3 className="text-lg font-black text-white">Compare {model.name} vs Rivals</h3>
+            </div>
+
+            <Link
+              href="/models/compare"
+              className="text-xs font-mono text-cyan-400 hover:text-cyan-300"
+            >
+              Compare All →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            {relevantMatchups.map((m) => (
+              <Link
+                key={m.slug}
+                href={`/models/vs/${m.slug}`}
+                className="p-4 rounded-2xl bg-black/40 border border-white/10 hover:border-amber-500/40 transition-all space-y-1.5 group flex flex-col justify-between"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-white group-hover:text-amber-300 font-mono">
+                    {m.title}
+                  </span>
+                  <ArrowRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-amber-300 group-hover:translate-x-1 transition-all shrink-0" />
+                </div>
+                <p className="text-[11px] text-zinc-400 font-sans line-clamp-2">
+                  {m.verdict.summary}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Interactive FAQ & Common Hesitations */}
-      <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+      <section id="model-faq" className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-cyan-400 uppercase">
             <HelpCircle className="w-3.5 h-3.5" />

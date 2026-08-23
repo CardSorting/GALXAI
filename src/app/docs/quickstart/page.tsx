@@ -11,104 +11,199 @@ import { TrustSeals } from '@/components/common/TrustSeals';
 import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
 import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 import { ShareButton } from '@/components/common/ShareButton';
-import { Zap, Sparkles, Terminal, Code2, ArrowRight, CheckCircle2, Copy, Flame, Coins, ShieldCheck } from 'lucide-react';
+import { Zap, Sparkles, Terminal, Code2, ArrowRight } from 'lucide-react';
+import { constructMetadata } from '@/lib/seo/metadata';
+import {
+  JsonLd,
+  createHowToSchema,
+  createTechArticleSchema,
+  createBreadcrumbSchema,
+  createSoftwareSourceCodeSchema,
+} from '@/lib/seo/jsonld';
 
-export const metadata: Metadata = {
-  title: '30-Second Quickstart Guide | GALXAI Docs',
-  description: 'Learn how to connect to the GALXAI API Gateway in under 30 seconds using Python, TypeScript, or cURL with 25%-40% wholesale savings.',
-};
+export const metadata: Metadata = constructMetadata({
+  title: '30-Second Quickstart Guide — Connect Python, TS & cURL',
+  description: 'Connect to the GALXAI API Gateway in under 30 seconds using Python, TypeScript, Cursor IDE, or cURL with 25%–40% wholesale savings and 0 code refactoring.',
+  canonicalPath: '/docs/quickstart',
+  keywords: [
+    'GALXAI Quickstart',
+    'OpenAI Python Quickstart',
+    'TypeScript LLM Setup',
+    'Cursor IDE Setup Guide',
+    'Fastest AI Router Quickstart',
+  ],
+});
 
 export default function QuickstartDocPage() {
-  const howToJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'HowTo',
+  const pythonCode = `from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key"
+)
+
+response = client.chat.completions.create(
+    model="gpt-5.6-sol",
+    messages=[{"role": "user", "content": "Explain prompt caching in 20 words"}]
+)
+print(response.choices[0].message.content)`;
+
+  const tsCode = `import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://api.galx.ai/v1",
+  apiKey: process.env.GALXAI_API_KEY || "galx_live_your_gateway_key",
+});
+
+const completion = await client.chat.completions.create({
+  model: "gpt-5.6-sol",
+  messages: [{ role: "user", content: "Hello GALXAI!" }],
+});
+console.log(completion.choices[0].message.content);`;
+
+  const howToSchema = createHowToSchema({
     name: 'How to Connect to the GALXAI Universal AI Gateway in 30 Seconds',
     description: 'Learn how to route OpenAI Codex and xAI Grok requests through GALXAI with 25%–40% wholesale savings and zero code refactoring.',
     totalTime: 'PT30S',
-    step: [
+    steps: [
       {
-        '@type': 'HowToStep',
-        position: 1,
         name: 'Mint Your Gateway API Key',
-        text: 'Generate a live developer API key (galx_live_...) with $5 free introductory credit.'
+        text: 'Generate a live developer API key (galx_live_...) with $5 free introductory credit.',
       },
       {
-        '@type': 'HowToStep',
-        position: 2,
         name: 'Set Your Base URL',
-        text: 'Set the OpenAI SDK or Cursor IDE Base URL to https://api.galx.ai/v1.'
+        text: 'Set the OpenAI SDK or Cursor IDE Base URL to https://api.galx.ai/v1.',
       },
       {
-        '@type': 'HowToStep',
-        position: 3,
         name: 'Execute Your First Completion',
-        text: 'Run standard chat completion code against GPT-5.6 Sol or Grok 4.5.'
-      }
-    ]
+        text: 'Run standard chat completion code against GPT-5.6 Sol or Grok 4.5.',
+      },
+    ],
+  });
+
+  const pageSchema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      howToSchema,
+      createSoftwareSourceCodeSchema({
+        name: 'GALXAI Python SDK Quickstart Snippet',
+        programmingLanguage: 'Python',
+        codeSample: pythonCode,
+        targetUrl: 'https://galx.ai/docs/quickstart#python-quickstart',
+      }),
+      createSoftwareSourceCodeSchema({
+        name: 'GALXAI TypeScript SDK Quickstart Snippet',
+        programmingLanguage: 'TypeScript',
+        codeSample: tsCode,
+        targetUrl: 'https://galx.ai/docs/quickstart#ts-quickstart',
+      }),
+      createTechArticleSchema({
+        headline: '30-Second Quickstart Guide: Connect Python, TS & cURL to GALXAI',
+        description: 'Complete quickstart tutorial with 1-line connection code for Python, TypeScript, and cURL.',
+        path: '/docs/quickstart',
+      }),
+      createBreadcrumbSchema([
+        { name: 'Home', url: '/' },
+        { name: 'Docs', url: '/docs' },
+        { name: 'Quickstart', url: '/docs/quickstart' },
+      ]),
+    ],
   };
 
   return (
     <div className="min-h-screen flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
-      />
+      <JsonLd data={pageSchema} />
       <Navigation />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
         <Breadcrumbs
           items={[
             { label: 'Docs', href: '/docs' },
-            { label: '30-Second Quickstart' }
+            { label: 'Getting Started' },
+            { label: '30-Second Quickstart Guide' },
           ]}
         />
 
-        <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-4 border border-white/10">
+        {/* Hero Header */}
+        <section id="hero-summary" className="glass-panel rounded-3xl p-6 sm:p-10 space-y-4 border border-white/10 relative overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-bold">
               <Zap className="w-3.5 h-3.5" />
-              <span>GET STARTED IN 30 SECONDS</span>
+              <span>30-SECOND ONBOARDING • 0 REFACTORING</span>
             </div>
             <ShareButton
               variant="pill"
               label="Share Guide"
-              title="GALXAI 30-Second Quickstart Guide"
-              description="Connect to GALXAI Universal Gateway in under 30 seconds with 1 line of configuration."
+              title="GALXAI 30-Second Developer Quickstart"
+              description="Learn how to connect to the GALXAI API Gateway in 30 seconds with 25%–40% wholesale savings."
             />
           </div>
-          <h1 className="text-3xl font-black text-white">30-Second Gateway Quickstart</h1>
-          <p className="text-sm text-zinc-400 leading-relaxed font-sans">
-            Follow these 3 simple steps to route OpenAI and xAI Grok frontier models through the high-throughput GALXAI router with 25%–40% wholesale savings.
+          <h1 className="text-3xl sm:text-4xl font-black text-white">30-Second Developer Quickstart</h1>
+          <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl font-sans">
+            Start routing completions through GALXAI in 30 seconds. Seamless 1-line drop-in for the official OpenAI Python and Node.js SDKs with sub-15ms Anycast latency.
           </p>
-        </div>
-
-        {/* Founding Builder Grant Highlight Banner */}
-        <div className="glass-panel rounded-2xl p-5 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-indigo-600/15 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-amber-400 text-black flex items-center justify-center font-black shrink-0">
-              <Flame className="w-4 h-4 text-black fill-black" />
-            </div>
-            <div>
-              <span className="text-white font-bold block">50% Instant Compute Match Bonus Active</span>
-              <span className="text-zinc-300 text-[11px]">Deposit $50+ to receive 50% matched inference credits. Includes instant $5 free credit token.</span>
-            </div>
-          </div>
-          <Link
-            href="/keys/new"
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-md shadow-amber-500/20 whitespace-nowrap cursor-pointer"
-          >
-            <span>Claim $5 Key</span>
-            <ArrowRight className="w-3.5 h-3.5 text-black" />
-          </Link>
-        </div>
+        </section>
 
         <DocsSubNav />
 
-        {/* Universal 30-Second Guided Setup Wizard */}
-        <GuidedSetupWizard />
-
         {/* Founding Cohort Rate Lock Ribbon */}
         <RateLockRibbon />
+
+        {/* Guided Wizard & Code Sandbox */}
+        <section id="guided-setup-wizard">
+          <GuidedSetupWizard />
+        </section>
+
+        {/* Quick Links & Next Steps */}
+        <section id="sdk-deep-dives" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Link
+            href="/docs/sdks/python"
+            className="glass-card rounded-3xl p-6 border border-white/5 space-y-2 hover:border-cyan-500/40 transition-all group"
+          >
+            <div className="flex items-center justify-between">
+              <Code2 className="w-5 h-5 text-cyan-400" />
+              <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:translate-x-1 group-hover:text-cyan-400 transition-all" />
+            </div>
+            <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">
+              Python SDK Deep Dive
+            </h3>
+            <p className="text-xs text-zinc-400">
+              Explore AsyncIO gathering, streaming generators, and Pydantic structured schemas.
+            </p>
+          </Link>
+
+          <Link
+            href="/docs/sdks/typescript"
+            className="glass-card rounded-3xl p-6 border border-white/5 space-y-2 hover:border-amber-500/40 transition-all group"
+          >
+            <div className="flex items-center justify-between">
+              <Terminal className="w-5 h-5 text-amber-400" />
+              <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:translate-x-1 group-hover:text-amber-400 transition-all" />
+            </div>
+            <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition-colors">
+              TypeScript SDK Deep Dive
+            </h3>
+            <p className="text-xs text-zinc-400">
+              Integrate with Vercel AI SDK, Next.js App Router, and end-to-end Zod parsing.
+            </p>
+          </Link>
+
+          <Link
+            href="/docs/ide-setup"
+            className="glass-card rounded-3xl p-6 border border-white/5 space-y-2 hover:border-indigo-500/40 transition-all group"
+          >
+            <div className="flex items-center justify-between">
+              <Sparkles className="w-5 h-5 text-indigo-400" />
+              <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:translate-x-1 group-hover:text-indigo-400 transition-all" />
+            </div>
+            <h3 className="text-base font-bold text-white group-hover:text-indigo-300 transition-colors">
+              Cursor &amp; Windsurf IDE Setup
+            </h3>
+            <p className="text-xs text-zinc-400">
+              Configure your AI code editor in 1 click for instant sub-second completions.
+            </p>
+          </Link>
+        </section>
 
         {/* Consumer-Grade Trust Seals */}
         <TrustSeals />

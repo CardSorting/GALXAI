@@ -25,8 +25,10 @@ Welcome to the comprehensive technical documentation and operational guides for 
 - **[Streaming & SSE Protocol Specification](STREAMING_AND_SSE_PROTOCOL.md)**: Sub-15ms TTFT streaming protocols, Keep-Alive ping intervals, and zero-copy buffers.
 - **[Asynchronous Queues & CloudTasks](QUEUE_SPECIFICATION.md)**: Background queue architecture, token-bucket pacing, and DLQ topologies.
 - **[Developer & Contributing Guide](DEVELOPER_GUIDE.md)**: Codebase organization, provider adapter design, and test suite conventions.
-- **[Architecture Decision Records (ADRs)](adr/README.md)**: 42 formal specifications governing security, cryptographic vaults, and developer ergonomics.
+- **[Architecture Decision Records (ADRs)](adr/README.md)**: 50 formal architectural specifications governing security, pSEO/AEO saturation, interactive developer tools, and SLA failovers.
 - **[Operational SRE Playbooks](playbooks/README.md)**: 7 lifecycle runbooks for deployment, incident remediation, and secret rotation.
+- **[Interactive Developer Tools Suite](../src/app/tools)**: Suite of 9 interactive developer tools including Prompt Caching Estimator, System Prompt Compressor, BPE Token Counter, Function Calling Builder, and Model Cost Comparator.
+- **[Incident Postmortems Hub](../src/app/postmortems)**: Verifiable real-world incident postmortems, root cause analyses, and multi-origin failover architectures.
 
 ---
 

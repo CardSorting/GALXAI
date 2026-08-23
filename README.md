@@ -242,7 +242,10 @@ curl -X POST https://galx.ai/v1/chat/completions \
 
 Explore our complete documentation library in [`docs/`](docs/README.md):
 - **[Documentation Sitemap Index](docs/README.md)**: Master directory of all guides and specifications.
+- **[50 Architecture Decision Records (ADRs)](docs/adr/README.md)**: Comprehensive architectural specifications covering security, resilience, pSEO/AEO saturation, and zero-hesitation developer ergonomics.
 - **[Go-To-Market & Value Positioning](docs/GTM_STRATEGY.md)**: Product positioning, competitive analysis, and JTBD framework.
+- **[Interactive Developer Studio Tools Suite](src/app/tools)**: In-browser tools for Prompt Caching, BPE Token Counting, JSON Schema to Zod/Pydantic, Function Calling, and Model Cost Comparisons.
+- **[AI Incident Postmortems Hub](src/app/postmortems)**: Verifiable root cause analyses, sub-second failover runbooks, and SLA guarantees.
 - **[Flagship Model Catalog & Wholesale Rates](docs/MODEL_CATALOG.md)**
 - **[Pricing & 4-Pillar Discount Strategy](docs/PRICING_AND_DISCOUNT_STRATEGY.md)**
 - **[Multi-Ecosystem SDK Cheatsheet](docs/SDK_CHEATSHEET.md)**

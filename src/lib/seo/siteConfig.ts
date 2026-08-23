@@ -1,0 +1,94 @@
+/**
+ * GALXAI Global SEO & Site Configuration (Apex Tier)
+ * Single source of truth for canonical domains, social metadata, branding, Wikidata Knowledge Graph mappings, and E-E-A-T descriptors.
+ */
+
+export const SITE_CONFIG = {
+  name: 'GALXAI',
+  legalName: 'GALXAI Technologies Inc.',
+  alternateName: ['GALX AI', 'GALXAI Gateway', 'GALXAI Universal Router'],
+  tagline: 'Unified AI Model Router & Universal API Gateway',
+  description:
+    'One unified OpenAI-compatible API for the world\'s best frontier AI models. Sub-millisecond Anycast routing, automatic failover, and rate-limit pooling across OpenAI Codex and xAI Grok with 25%–40% wholesale savings.',
+  url: process.env.NEXT_PUBLIC_APP_URL || 'https://galx.ai',
+  apiUrl: 'https://api.galx.ai/v1',
+  ogImage: '/og-image.png',
+  twitterHandle: '@galxai',
+  foundingDate: '2024-01-15',
+  address: {
+    streetAddress: '548 Market St, Suite 39201',
+    addressLocality: 'San Francisco',
+    addressRegion: 'CA',
+    postalCode: '94104',
+    addressCountry: 'US',
+  },
+  links: {
+    twitter: 'https://twitter.com/galxai',
+    github: 'https://github.com/galxai',
+    docs: 'https://galx.ai/docs',
+    status: 'https://galx.ai/status',
+    discord: 'https://discord.gg/galxai',
+    linkedin: 'https://linkedin.com/company/galxai',
+  },
+  wikidataEntities: {
+    openai: 'https://www.wikidata.org/wiki/Q105634538',
+    largeLanguageModel: 'https://www.wikidata.org/wiki/Q115305900',
+    artificialIntelligence: 'https://www.wikidata.org/wiki/Q11660',
+    serverSentEvents: 'https://www.wikidata.org/wiki/Q1890352',
+    applicationProgrammingInterface: 'https://www.wikidata.org/wiki/Q165137',
+    cloudComputing: 'https://www.wikidata.org/wiki/Q483247',
+    jsonSchema: 'https://www.wikidata.org/wiki/Q28935449',
+    computerSecurity: 'https://www.wikidata.org/wiki/Q3510521',
+  },
+  certifications: [
+    {
+      name: 'SOC 2 Type II Security Attestation',
+      auditor: 'Schellman & Company, LLC',
+      status: 'Active / Clean Unqualified Opinion',
+    },
+    {
+      name: 'ISO/IEC 27001:2022 Certification',
+      auditor: 'BSI Group Global Registrars',
+      status: 'ANAB Accredited',
+    },
+    {
+      name: 'HIPAA Business Associate Security Compliance',
+      status: 'Verified Zero PHI Storage',
+    },
+  ],
+  keywords: [
+    'AI Gateway',
+    'Model Router',
+    'Universal AI API',
+    'Wholesale AI Tokens',
+    'OpenAI Codex',
+    'xAI Grok',
+    'gpt-5.6-sol',
+    'gpt-5.6-terra',
+    'gpt-5.6-luna',
+    'grok-4.6',
+    'grok-4.5',
+    'Prompt Caching Rebate',
+    'Continuous Token Governor',
+    'Cursor AI Base URL',
+    'Windsurf API Key',
+    'Sub-millisecond AI Router',
+    'Zero Rate Limit Stalls',
+    '429 Protection',
+    'LLM Load Balancer',
+    'OpenAI SDK Drop-in',
+  ],
+  authors: [
+    {
+      name: 'GALXAI Systems & AI Security Architecture Group',
+      url: 'https://galx.ai/about',
+    },
+  ],
+  creator: 'GALXAI Technologies Inc.',
+  publisher: 'GALXAI Technologies Inc.',
+  contactPoint: {
+    email: 'support@galx.ai',
+    contactType: 'Customer Support & Security Incident Response',
+    availableLanguage: ['English'],
+  },
+};

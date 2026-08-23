@@ -1,6 +1,5 @@
-'use client';
-
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
@@ -15,30 +14,54 @@ import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
 import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 import {
   Lightbulb,
-  CheckCircle2,
-  HelpCircle,
   ShieldCheck,
-  Zap,
-  ArrowRight,
-  Sparkles,
   Smile,
   DollarSign,
-  Lock,
-  Copy,
-  Terminal,
-  Laptop
 } from 'lucide-react';
+import { constructMetadata } from '@/lib/seo/metadata';
+import { JsonLd, createTechArticleSchema, createBreadcrumbSchema } from '@/lib/seo/jsonld';
+
+export const metadata: Metadata = constructMetadata({
+  title: 'The Plain English Guide to GALXAI (For Beginners)',
+  description: 'Zero-jargon plain English guide explaining how GALXAI cuts AI token bills by 25% to 40% with 1-line setup and zero code changes.',
+  canonicalPath: '/docs/simple',
+  keywords: [
+    'AI Gateway Plain English',
+    'AI Token Savings Guide',
+    'OpenAI Drop-in Tutorial',
+    'AI for Beginners',
+    'Wholesale AI Explained',
+  ],
+});
 
 export default function PlainEnglishDocsPage() {
+  const pageSchema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      createTechArticleSchema({
+        headline: 'The Plain English Guide to GALXAI — Wholesale AI Explained',
+        description: 'Zero-jargon explanation of universal AI model routing, wholesale discounts, and prompt caching.',
+        path: '/docs/simple',
+      }),
+      createBreadcrumbSchema([
+        { name: 'Home', url: '/' },
+        { name: 'Docs', url: '/docs' },
+        { name: 'Plain English Guide', url: '/docs/simple' },
+      ]),
+    ],
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
+      <JsonLd data={pageSchema} />
+
       <Navigation />
 
       <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
         <Breadcrumbs
           items={[
             { label: 'Docs', href: '/docs' },
-            { label: 'Plain English Guide (For Beginners)' }
+            { label: 'Plain English Guide (For Beginners)' },
           ]}
         />
 
@@ -46,11 +69,11 @@ export default function PlainEnglishDocsPage() {
         <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-4 border border-amber-500/30 bg-amber-500/5">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
             <Smile className="w-3.5 h-3.5" />
-            <span>SIMPLE & PLAIN LANGUAGE • ZERO CONFUSION</span>
+            <span>SIMPLE &amp; PLAIN LANGUAGE • ZERO CONFUSION</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white">The Plain English Guide to GALXAI</h1>
           <p className="text-sm sm:text-base text-zinc-300 leading-relaxed font-sans">
-            Confused by API jargon, rate limits, and tokens? Don't worry. This guide explains everything in simple everyday words with zero technical fluff.
+            Confused by API jargon, rate limits, and tokens? Don&apos;t worry. This guide explains everything in simple everyday words with zero technical fluff.
           </p>
         </div>
 
