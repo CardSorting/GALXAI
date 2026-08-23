@@ -7,7 +7,7 @@ import { SafeStorage } from '@/lib/resilience/SafeStorage';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 function BaseGtmPromoBanner() {
-  const [dismissed, setDismissed] = useState(true);
+  const [dismissed, setDismissed] = useState(false);
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number }>({
     hours: 5,
     minutes: 42,
@@ -15,9 +15,10 @@ function BaseGtmPromoBanner() {
   });
 
   useEffect(() => {
-    const isDismissed = SafeStorage.getSessionItem('galx_promo_banner_dismissed');
-    if (!isDismissed) {
-      setDismissed(false);
+    // Only dismiss if explicitly closed in the current v2 session
+    const isDismissed = SafeStorage.getSessionItem('galx_gtm_promo_banner_v2_dismissed');
+    if (isDismissed === 'true') {
+      setDismissed(true);
     }
 
     // Dynamic ticking countdown timer (Amazon / Shopify flash sale strategy)
@@ -39,7 +40,7 @@ function BaseGtmPromoBanner() {
 
   const handleDismiss = () => {
     setDismissed(true);
-    SafeStorage.setSessionItem('galx_promo_banner_dismissed', 'true');
+    SafeStorage.setSessionItem('galx_gtm_promo_banner_v2_dismissed', 'true');
   };
 
   if (dismissed) return null;
