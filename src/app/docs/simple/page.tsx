@@ -6,6 +6,13 @@ import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { DocsSubNav } from '@/components/dashboard/DocsSubNav';
 import { DocsFeedback } from '@/components/dashboard/DocsFeedback';
+import { WorkloadEstimator } from '@/components/dashboard/WorkloadEstimator';
+import { GuidedSetupWizard } from '@/components/dashboard/GuidedSetupWizard';
+import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
+import { TrustSeals } from '@/components/common/TrustSeals';
+import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
+import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
+import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 import {
   Lightbulb,
   CheckCircle2,
@@ -49,6 +56,9 @@ export default function PlainEnglishDocsPage() {
 
         <DocsSubNav />
 
+        {/* Founding Cohort Rate Lock Ribbon */}
+        <RateLockRibbon />
+
         {/* 30-Second Explanation Card */}
         <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
           <h2 className="text-xl font-black text-white flex items-center gap-2 font-sans">
@@ -64,6 +74,9 @@ export default function PlainEnglishDocsPage() {
             </p>
           </div>
         </div>
+
+        {/* Non-Technical Business Workload Estimator */}
+        <WorkloadEstimator />
 
         {/* Why is my AI bill so high? */}
         <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
@@ -88,51 +101,8 @@ export default function PlainEnglishDocsPage() {
           </div>
         </div>
 
-        {/* 3 Simple Steps to Use It */}
-        <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-white/10">
-          <h2 className="text-xl font-black text-white flex items-center gap-2 font-sans">
-            <Sparkles className="w-5 h-5 text-cyan-400" />
-            3. How to use it in 3 easy steps (Takes 60 seconds)
-          </h2>
-
-          <div className="space-y-4 font-sans text-xs">
-            <div className="p-4 rounded-2xl bg-black/40 border border-white/5 flex items-start gap-4">
-              <div className="w-7 h-7 rounded-full bg-amber-400 text-black font-black text-xs flex items-center justify-center shrink-0 font-mono">
-                1
-              </div>
-              <div className="space-y-1">
-                <div className="font-bold text-white text-sm">Get your API Key</div>
-                <p className="text-zinc-400">
-                  Go to <Link href="/keys/new" className="text-cyan-300 hover:underline">Create Key</Link> and click "Mint Key". You'll get a key that looks like <code>galx_live_...</code>
-                </p>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-black/40 border border-white/5 flex items-start gap-4">
-              <div className="w-7 h-7 rounded-full bg-amber-400 text-black font-black text-xs flex items-center justify-center shrink-0 font-mono">
-                2
-              </div>
-              <div className="space-y-1">
-                <div className="font-bold text-white text-sm">Paste it into your favorite tool (Cursor, Windsurf, or Code)</div>
-                <p className="text-zinc-400">
-                  In Cursor or your app settings, change the OpenAI URL to <code className="text-amber-300">https://api.galx.ai/v1</code> and paste your key.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-black/40 border border-white/5 flex items-start gap-4">
-              <div className="w-7 h-7 rounded-full bg-amber-400 text-black font-black text-xs flex items-center justify-center shrink-0 font-mono">
-                3
-              </div>
-              <div className="space-y-1">
-                <div className="font-bold text-white text-sm">Enjoy instant savings</div>
-                <p className="text-zinc-400">
-                  That's it! Use your AI as you normally do. Your bill will instantly be 25% to 40% lower every month.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Universal 30-Second Guided Setup Wizard */}
+        <GuidedSetupWizard />
 
         {/* Safety FAQ */}
         <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
@@ -158,8 +128,16 @@ export default function PlainEnglishDocsPage() {
           </div>
         </div>
 
+        {/* Consumer-Grade Trust Seals */}
+        <TrustSeals />
+
         <DocsFeedback docTitle="The Plain English Guide to GALXAI" />
       </main>
+
+      {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
+      <FloatingConversionDock />
+      <LiveActivityToast />
+      <ExitIntentModal />
     </div>
   );
 }

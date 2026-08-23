@@ -5,7 +5,12 @@ import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { ModelCatalog, EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
-import { Cpu, Search, CheckCircle2, ArrowRight, Zap, Rocket, Terminal } from 'lucide-react';
+import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
+import { TrustSeals } from '@/components/common/TrustSeals';
+import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
+import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
+import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
+import { Cpu, Search, CheckCircle2, ArrowRight, Zap, Rocket, Terminal, Flame, ShieldCheck } from 'lucide-react';
 
 export default function ModelResolverPage() {
   const [query, setQuery] = useState('sol');
@@ -37,6 +42,9 @@ export default function ModelResolverPage() {
             Test how GALXAI resolves shorthand aliases, provider prefixes, and legacy model strings to canonical frontier specifications in 0ms.
           </p>
         </div>
+
+        {/* Founding Cohort Rate Lock Ribbon */}
+        <RateLockRibbon />
 
         {/* Search Input */}
         <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4">
@@ -118,7 +126,15 @@ export default function ModelResolverPage() {
             No matching model found for "{query}". Try "sol", "grok", or "dalle".
           </div>
         )}
+
+        {/* Consumer-Grade Trust Seals */}
+        <TrustSeals />
       </main>
+
+      {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
+      <FloatingConversionDock />
+      <LiveActivityToast />
+      <ExitIntentModal />
     </div>
   );
 }
