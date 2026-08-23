@@ -26,8 +26,9 @@ import {
   FileCheck
 } from 'lucide-react';
 import { LanguageBadge } from '@/components/common/LanguageBadge';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
-export function Footer() {
+function BaseFooter() {
   const footerNavigation = {
     product: [
       { name: 'Frontier AI Models', href: '/models', badge: '12 SOTA' },
@@ -250,3 +251,25 @@ export function Footer() {
     </footer>
   );
 }
+
+function FooterFallback() {
+  return (
+    <footer className="border-t border-white/10 bg-[#07090e] py-6 px-4 text-xs text-zinc-500 font-mono">
+      <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
+        <span>© 2026 GALXAI, Inc. All rights reserved.</span>
+        <div className="flex items-center gap-4">
+          <Link href="/models" className="hover:text-white transition-colors">Models</Link>
+          <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
+          <Link href="/billing" className="hover:text-white transition-colors">Billing</Link>
+          <Link href="/docs" className="hover:text-white transition-colors">Docs</Link>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+export const Footer = withErrorBoundary(BaseFooter, {
+  name: 'Global Footer',
+  fallback: <FooterFallback />
+});
+

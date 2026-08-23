@@ -13,8 +13,9 @@ import {
   Wallet,
   Sparkles
 } from 'lucide-react';
+import { withErrorBoundary } from './ErrorBoundary';
 
-export function KeyboardShortcutsModal() {
+function BaseKeyboardShortcutsModal() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
@@ -163,3 +164,9 @@ export function KeyboardShortcutsModal() {
     </div>
   );
 }
+
+export const KeyboardShortcutsModal = withErrorBoundary(BaseKeyboardShortcutsModal, {
+  name: 'Keyboard Shortcuts Modal',
+  fallback: null
+});
+

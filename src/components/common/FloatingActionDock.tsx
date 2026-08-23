@@ -11,8 +11,9 @@ import {
   Zap
 } from 'lucide-react';
 import { ShareModal } from './ShareModal';
+import { withErrorBoundary } from './ErrorBoundary';
 
-export function FloatingActionDock() {
+function BaseFloatingActionDock() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -105,3 +106,9 @@ export function FloatingActionDock() {
     </>
   );
 }
+
+export const FloatingActionDock = withErrorBoundary(BaseFloatingActionDock, {
+  name: 'Floating Action Dock',
+  fallback: null
+});
+
