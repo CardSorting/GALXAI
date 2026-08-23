@@ -69,3 +69,24 @@ Key dashboard panels to configure:
 2. **Tokens Per Minute Throughput Gauge** (`metrics.tokensPerMinute`).
 3. **Active Shard Health Gauge** (`healthyShards` vs `cooldownShards` from `/api/pool/stats`).
 4. **Error Rate Percentage Alert** (Trigger when `errorRatePercentage > 1.0%`).
+
+---
+
+## 4. Cloudflare Edge PoP Telemetry & Live Tail Stream
+
+To stream live real-time execution logs, request latencies, and `cf-ray` identifiers across Cloudflare's 300+ global Points of Presence:
+
+```bash
+# Stream live production edge gateway telemetry
+npm run worker:tail
+
+# Stream live staging telemetry
+npx wrangler tail --env staging
+```
+
+Each log line provides:
+- **`cf-ray`**: Unique edge request tracing token
+- **`x-galx-cache`**: SWR Cache status (`HIT` or `MISS`)
+- **`edgePoP`**: Physical Cloudflare airport data center code (e.g. `SJC`, `IAD`, `LHR`, `FRA`)
+- **`duration`**: Edge isolate execution duration in milliseconds
+

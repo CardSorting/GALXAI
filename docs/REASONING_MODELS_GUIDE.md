@@ -44,7 +44,7 @@ import os
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="http://localhost:3000/v1",
+    base_url="https://api.galx.ai/v1",
     api_key=os.environ.get("GALXAI_API_KEY", "galx_live_your_key_here")
 )
 

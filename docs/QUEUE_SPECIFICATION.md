@@ -238,16 +238,32 @@ All queue streams and task inspection views require authenticated developer sess
 
 ---
 
+---
+
+## 15. Cloudflare Edge Cron Queue Workers (ADR 0015 & 0037)
+
+Background task queues can be continuously drained and executed via Cloudflare Edge Worker cron triggers (`* * * * *`):
+- **Serverless Worker Fleet**: `GalxEdgeQueueWorker` polls pending tasks and processes batch chunks (`processBatch('default', 25)`) directly from V8 edge isolates.
+- **Zero Idle Compute Cost**: Workers scale to zero between minutes and spin up instantly upon cron invocation.
+- **Fencing Token Safety**: Atomic pull worker leasing with CAS monotonic fencing tokens prevents split-brain duplicate task execution.
+
+---
+
 ## 🧪 Forensic Test Verification Matrix
 
 All capabilities are continuously validated against the comprehensive automated test harness:
 ```bash
+# 1. Forensic Router & Queue Suite (177 tests)
 npm run test:router
-# (or: npx tsx scripts/validate-galxai-router.ts)
+
+# 2. Cloudflare Edge Mesh Verification Suite (46 tests)
+npm run worker:test
 ```
 - **Tests 1–31**: Vault Cryptography, Rate Governor, Circuit Breakers, Shard Pooling, TASD Leveling, Model Catalog.
 - **Tests 32–39**: Phase 1 Queue Pacing, Idempotency, Scheduled Delay, Worker Leases, Retry Calculus, DLQ.
 - **Tests 40–44**: Phase 2 FIFO Partition Grouping, Cron Scheduling, Progress Streaming, Bulk Redrive, SDK Helper.
 - **Tests 45–50**: Phase 3 DAG Dependencies, SSE EventBus, Content Deduplication, Dynamic Priority Aging, Deadlines, Draining Mode.
 - **Tests 51–177**: SOC 2 Compliance, ZDR v10.0 Memory Zeroization, BroccoliDB AST & L1 Tables, Multi-Index Range Scans, and Developer SDK Ergonomics.
+- **Edge Tests 1–46**: Edge Gateway, SSE Streaming, Failover, KV Cache, R2 CDN, Durable Objects, and Queue Worker Cron Fleet.
+
 

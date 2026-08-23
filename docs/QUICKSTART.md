@@ -91,7 +91,7 @@ from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(
     model="gpt-5.6-sol",
-    base_url="http://localhost:3000/v1",
+    base_url="https://api.galx.ai/v1",
     api_key="galx_live_your_key_here"
 )
 
@@ -101,16 +101,16 @@ print(result.content)
 
 ---
 
-## 3. IDE Setup (Cursor, Continue, VSCode)
+## 4. IDE Setup (Cursor, Continue, VSCode)
 
 ### Cursor IDE
 1. Open **Cursor Settings** $\to$ **Models**.
 2. Under **OpenAI API Key**, paste your `galx_live_...` key.
 3. Check **Override OpenAI Base URL** and enter:
    ```text
-   http://localhost:3000/v1
+   https://api.galx.ai/v1
    ```
-4. Add models: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `x-ai/grok-4.5`.
+4. Add models: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `x-ai/grok-4.6`, `x-ai/grok-4.5`.
 
 ### Continue (VSCode / JetBrains)
 In `~/.continue/config.json`:
@@ -121,14 +121,14 @@ In `~/.continue/config.json`:
       "title": "GALXAI GPT-5.6 Sol",
       "provider": "openai",
       "model": "gpt-5.6-sol",
-      "apiBase": "http://localhost:3000/v1",
+      "apiBase": "https://api.galx.ai/v1",
       "apiKey": "galx_live_your_key_here"
     },
     {
-      "title": "GALXAI Grok 4.5",
+      "title": "GALXAI Grok 4.6",
       "provider": "openai",
-      "model": "x-ai/grok-4.5",
-      "apiBase": "http://localhost:3000/v1",
+      "model": "x-ai/grok-4.6",
+      "apiBase": "https://api.galx.ai/v1",
       "apiKey": "galx_live_your_key_here"
     }
   ]
@@ -137,13 +137,33 @@ In `~/.continue/config.json`:
 
 ---
 
-## 4. Visual Synthesis Integration
+## 5. Vector Embeddings (Edge PoP $<15\text{ms}$)
 
 ```python
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="http://localhost:3000/v1",
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_key_here"
+)
+
+embedding = client.embeddings.create(
+    model="text-embedding-3-small",
+    input="Autonomous agent fleet coordination and consensus"
+)
+
+print(f"Vector dimensions: {len(embedding.data[0].embedding)}")
+```
+
+---
+
+## 6. Visual Synthesis & Multimodal CDN Integration ($0 Egress)
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
     api_key="galx_live_your_key_here"
 )
 
@@ -154,5 +174,6 @@ image = client.images.generate(
     quality="hd"
 )
 
+# Assets are stored in Cloudflare R2 and served via https://assets.galx.ai ($0 egress)
 print(image.data[0].url)
 ```

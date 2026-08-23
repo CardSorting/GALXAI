@@ -1,7 +1,8 @@
 # 🌌 GALXAI: High-Throughput Universal AI Gateway & Quota Cycling Substrate
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/CardSorting/GALXAI)
-[![Forensic Tests](https://img.shields.io/badge/forensic%20tests-31%2F31%20passing-success.svg)](https://github.com/CardSorting/GALXAI)
+[![Forensic Tests](https://img.shields.io/badge/forensic%20tests-177%2F177%20passing-success.svg)](https://github.com/CardSorting/GALXAI)
+[![Cloudflare Edge Tests](https://img.shields.io/badge/edge%20tests-46%2F46%20passing-success.svg)](https://github.com/CardSorting/GALXAI)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5-black.svg)](https://nextjs.org/)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
@@ -12,13 +13,14 @@
 
 ## ⚡ Key Architectural Capabilities
 
+- **🌐 Zero-Egress Cloudflare Edge Mesh (`api.galx.ai`)**: Terminates client TLS across 300+ global edge PoPs (<15ms latency), streams SSE token chunks directly to client sockets, and stores visual assets on Cloudflare R2 (`assets.galx.ai`) with **$0 egress fees**.
 - **🌊 Predictive Adaptive Hydraulic Headroom Cycling (P-AHT)**: Evaluates post-allocation token capacity, power-law concurrency saturation, dynamic reliability weights, and predictive drain avoidance (`MDA-Floor`) to level allocations across pooled credentials.
 - **🌐 Tenant-Affinity Shard Dispersion (TASD)**: Fans multi-request tenant bursts evenly across distinct shards, preventing hot-spotting on single high-capacity accounts.
 - **🔄 Smooth Weighted Round-Robin (SWRR)**: Implements Envoy/Nginx-grade smooth interleaving with dynamic reliability weights to eliminate burst clumping.
 - **🛡️ 2-Phase Atomic Token Reservation & Scavenger Recovery**: Soft-locks estimated quota upon lease acquisition and commits actual consumption upon request completion. Expired leases automatically recover orphaned soft reservations.
 - **⚡ 4-State Resilient Circuit Breaker**: Distinguishes between permanent credential revocations (401/403 $\to$ instant death) and transient rate limits (429/503 $\to$ exponential backoff with decorrelated jitter and `Retry-After` header parsing).
 - **🔒 AES-256-GCM Envelope Encryption with AAD Binding**: Keys and OAuth credentials are cryptographically bound to specific `tenantId` and `shardId` via Additional Authenticated Data (AAD), preventing cross-tenant ciphertext transplantation.
-- **🧹 Heap Memory Scrubbing**: Plaintext secrets in RAM are immediately overwritten with zeros (`GalxCryptoVault.zeroizeBuffer`) upon request completion or error.
+- **🧹 Heap Memory Scrubbing & ZDR v10.0**: Plaintext secrets in RAM are immediately overwritten with 2-pass zeroization (`0xAA` -> `0x00`) upon request completion or error.
 - **📊 Real-Time Histogram Metrics**: High-throughput circular ring buffer computes sliding-window $P_{50}, P_{90}, P_{99}$ latency, RPM, and TPM without database overhead.
 
 ---
@@ -52,14 +54,14 @@ GALXAI routes traffic across 12 exclusive flagship LLM and Visual Synthesis engi
 
 ## 💻 Quickstart Integration
 
-GALXAI exposes a 100% OpenAI-compatible `/v1` endpoint. Simply switch your `baseURL` and authenticate with your GALXAI gateway key.
+GALXAI exposes a 100% OpenAI-compatible `/v1` endpoint. Simply switch your `baseURL` to `https://api.galx.ai/v1` and authenticate with your GALXAI gateway key.
 
 ### Python (OpenAI SDK)
 ```python
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://galx.ai/v1",  # Or https://api.galx.ai/v1
+    base_url="https://api.galx.ai/v1",
     api_key="galx_live_your_gateway_key_here"
 )
 
@@ -83,7 +85,7 @@ for chunk in stream:
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
-  baseURL: 'https://galx.ai/v1',
+  baseURL: 'https://api.galx.ai/v1',
   apiKey: process.env.GALXAI_API_KEY || 'galx_live_your_gateway_key_here',
 });
 
@@ -101,7 +103,7 @@ main();
 
 ### cURL
 ```bash
-curl https://galx.ai/v1/chat/completions \
+curl https://api.galx.ai/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer galx_live_your_key_here" \
   -d '{
@@ -118,10 +120,16 @@ curl https://galx.ai/v1/chat/completions \
 # Install dependencies
 npm install
 
-# Run the 27-suite forensic verification test suite
+# Run the 50-suite forensic verification test runner (177 tests)
 npm run test:router
 
-# Build the Next.js production bundle (all 49 routes pre-rendered)
+# Run the 46-point Cloudflare Edge verification test runner
+npm run worker:test
+
+# Run live SDK-to-Edge smoke tests
+npx tsx scripts/test-sdk-edge.ts
+
+# Build the Next.js production bundle
 npm run build
 
 # Start local high-concurrency dev server
@@ -133,6 +141,8 @@ npm run dev
 ## 📚 Complete Technical Documentation
 
 - 🏛️ **[System Architecture Specification](docs/ARCHITECTURE.md)**: Deep dive into the request lifecycle, Mermaid sequence flow, streaming safety, and security model.
+- 🌐 **[Cloudflare Strategy & Edge Substrate](docs/CLOUDFLARE_STRATEGY.md)**: Edge compute mesh, R2 CDN, and custom domain routing.
+- ⚡ **[Universal Developer SDK Specification](docs/SDK_SPECIFICATION.md)**: Complete guide to `@galxai/sdk`, agents, builders, and vector embeddings.
 - 🌊 **[Routing Algorithms & Calculus](docs/ROUTING_ALGORITHMS.md)**: Mathematical derivations of Adaptive Hydraulic Headroom (P-AHT), Smooth Weighted Round-Robin (SWRR), and Least-Utilized.
 - 🧠 **[Next-Gen Reasoning Models Guide](docs/REASONING_MODELS_GUIDE.md)**: Developing with `gpt-5.6-sol`, `gpt-5.6-terra`, `x-ai/grok-4.5`, Chain of Thought (CoT), and token budgets.
 - ⚡ **[Streaming & SSE Protocol](docs/STREAMING_AND_SSE_PROTOCOL.md)**: Server-Sent Events specification, pure JS stream parser, client disconnects, and zero-leak cancellations.
@@ -147,9 +157,9 @@ npm run dev
 - 💳 **[Compute Wallet & Micro-Billing Architecture](docs/WALLET_AND_BILLING_STRATEGY.md)**: Prepaid bonus packs, auto-reload protection, token micro-metering, and per-key budgets.
 - 🔒 **[Security & Cryptographic Threat Model](docs/SECURITY.md)**: AAD envelope encryption, memory zeroization, and zero-prompt logging.
 - 📊 **[Telemetry, Metrics & Observability](docs/TELEMETRY_AND_OBSERVABILITY.md)**: Prometheus scraping, Datadog integration, and Grafana latency dashboards.
-- 📖 **[API Reference](docs/API_REFERENCE.md)**: REST endpoints for chat completions, visual synthesis, model catalog, and pool telemetry.
+- 📖 **[API Reference](docs/API_REFERENCE.md)**: REST endpoints for chat completions, vector embeddings, visual synthesis, model catalog, and pool telemetry.
 - 🚀 **[Quickstart & IDE Setup](docs/QUICKSTART.md)**: Drop-in setup for Python, Node.js, LangChain, Cursor IDE, and Continue.
-- 🐳 **[Production Deployment & Infrastructure Guide](docs/DEPLOYMENT.md)**: Docker, Docker Compose, Kubernetes manifests, and security checklist.
+- 🐳 **[Production Deployment & Infrastructure Guide](docs/DEPLOYMENT.md)**: Docker, Docker Compose, Kubernetes manifests, and Cloudflare Worker runbooks.
 - 🛠️ **[Developer & Contributing Guide](docs/DEVELOPER_GUIDE.md)**: Architecture layers, adding model adapters, and testing standards.
 - 🔧 **[Operational Playbook & Troubleshooting](docs/TROUBLESHOOTING.md)**: Error classifications, rate limit mitigations, and health monitoring.
 - ❓ **[Frequently Asked Questions (FAQs)](docs/FAQS.md)**: Common technical, billing, architectural, and security questions.
@@ -168,6 +178,10 @@ Detailed architectural justifications and technical specifications (see [ADR Mas
 - [ADR 0007: Proof-of-Deposit Security Gate & 50% Match Paywall Architecture](docs/adr/0007-proof-of-deposit-and-50pct-match-paywall-gate.md)
 - [ADR 0008: Tenant-Affinity Shard Dispersion (TASD) & Post-Allocation Headroom Leveling](docs/adr/0008-tenant-affinity-shard-dispersion-and-post-allocation-leveling.md)
 - [ADR 0009: 4-Phase Half-Open Canary Traffic Warming & Background Scavenger](docs/adr/0009-half-open-canary-traffic-warming-and-lease-scavenger.md)
+- [ADR 0036: Universal Developer Authentication Gating & Zero-Abuse Workspace Perimeter](docs/adr/0036-universal-developer-authentication-gating-and-zero-abuse-workspace-perimeter.md)
+- [ADR 0037: Zero-Egress Cloudflare Edge Gateway, R2 CDN & Custom Domain Substrate](docs/adr/0037-zero-egress-cloudflare-edge-gateway-and-r2-cdn-substrate.md)
+- [ADR 0038: Distributed Edge KV Rate Governance & Stale-While-Revalidate Model Catalog Caching](docs/adr/0038-distributed-edge-kv-rate-governance-and-swr-catalog-caching.md)
+- [ADR 0039: Edge-Native Vector Embeddings & Durable Object Swarm State Synchronization](docs/adr/0039-edge-native-vector-embeddings-and-durable-object-swarm-sync.md)
 
 ---
 

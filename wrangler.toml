@@ -2,20 +2,67 @@ name = "galxai-edge-gateway"
 main = "src/workers/cloudflare/index.ts"
 compatibility_date = "2026-08-22"
 compatibility_flags = ["nodejs_compat"]
+account_id = "33f8b2564698c222880cbad3e42decad"
+workers_dev = true
+
+# Custom Domain Routing for Production
+routes = [
+  { pattern = "api.galx.ai", custom_domain = true }
+]
 
 [vars]
-SUPABASE_URL = "https://your-project.supabase.co"
+ENVIRONMENT = "production"
+SUPABASE_URL = "https://mazhcjisettrzbqhorvp.supabase.co"
+PUBLIC_ASSETS_URL = "https://assets.galx.ai"
 
-# Hyperdrive Connection Accelerator to Supabase PostgreSQL (0 connection overhead)
+# Cloudflare KV for edge rate limiting & fast auth
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "97100b97dbcc429793d6b97bc53a172e"
+
+[[kv_namespaces]]
+binding = "EDGE_CACHE"
+id = "ea7e6fa94f144ab8b97d435718da54d5"
+
+# Cloudflare R2 Bucket for multimodal image & audio storage ($0 egress)
+[[r2_buckets]]
+binding = "ASSET_BUCKET"
+bucket_name = "galxai-assets"
+
+# Hyperdrive Connection Accelerator to Supabase PostgreSQL (optional)
 # [[hyperdrive]]
 # binding = "HYPERDRIVE"
 # id = "galxai_hyperdrive_pool"
 
-# Cloudflare KV for edge rate limiting cache
-# [[kv_namespaces]]
-# binding = "RATE_LIMIT_KV"
-# id = "galxai_edge_rate_kv"
-
 # Automated Cron Triggers for background worker queue polling (every minute)
 [triggers]
 crons = ["* * * * *"]
+
+# Staging Environment Overrides
+[env.staging]
+name = "galxai-edge-gateway-staging"
+workers_dev = true
+routes = [
+  { pattern = "api-staging.galx.ai", custom_domain = true }
+]
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+SUPABASE_URL = "https://mazhcjisettrzbqhorvp.supabase.co"
+PUBLIC_ASSETS_URL = "https://assets-staging.galx.ai"
+
+[[env.staging.kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "87c64242cba24f9ead628148df6b02f1"
+
+[[env.staging.kv_namespaces]]
+binding = "EDGE_CACHE"
+id = "301b54a2c2334306ae7ac3b0ad749a4f"
+
+[[env.staging.r2_buckets]]
+binding = "ASSET_BUCKET"
+bucket_name = "galxai-assets-staging"
+
+
+
+

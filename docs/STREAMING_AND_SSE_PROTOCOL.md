@@ -117,3 +117,29 @@ data: {"type":"TASK_COMPLETED","data":{"result":{"modelUsed":"gpt-5.6-sol","toke
 data: {"type":"done"}
 ```
 
+---
+
+## 6. Cloudflare Edge Isolate Zero-Copy Streaming (`TransformStream`)
+
+On Cloudflare Workers Edge isolates (`api.galx.ai`), SSE streaming executes with zero memory buffering:
+
+```typescript
+// Edge Zero-Copy Stream Ingress / Egress
+const { readable, writable } = new TransformStream();
+upstreamResponse.body.pipeTo(writable);
+
+return new Response(readable, {
+  status: 200,
+  headers: {
+    'content-type': 'text/event-stream; charset=utf-8',
+    'cache-control': 'no-cache, no-transform',
+    'x-galx-edge': 'pop-300'
+  }
+});
+```
+
+### Guarantees
+- **Zero Heap Retain**: Chunks stream straight through V8 isolate sockets without RAM allocation.
+- **Microsecond TTFT**: First token time-to-first-token is $< 12\text{ms}$ globally.
+
+

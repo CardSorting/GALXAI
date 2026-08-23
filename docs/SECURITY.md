@@ -107,7 +107,16 @@ To safeguard pooled compute allocations from anonymous denial-of-wallet vectors 
 
 ---
 
-## 7. Formal Architectural Decision Records
+## 7. Cloudflare Edge Perimeter & Fast-Path Key Validation (ADR 0037 & 0038)
+
+At the 300+ global edge PoP ingress layer:
+1. **Edge-Native WAF & DDoS Shielding**: Volumetric HTTP flood and malicious scraping attacks are dropped at the Anycast edge network before consuming compute.
+2. **Sub-Millisecond Fast-Path Prefix Filter**: API requests lacking the valid prefix (`galx_live_...` or `galx_test_...`) are rejected with `HTTP 401 Unauthorized` in $< 1\text{ms}$ at the edge PoP without touching database credentials.
+3. **HMAC Webhook Cryptographic Signatures**: Webhook payloads dispatched by `GalxEdgeWebhookDispatcher` include `X-Galx-Signature-256` computed with HMAC-SHA256.
+
+---
+
+## 8. Formal Architectural Decision Records
 
 For deep technical specifications, consult the official ADRs:
 - **[ADR 0020: Provider-as-Auth Paradigm](adr/0020-provider-as-auth-zero-friction-session-substrate.md)**
@@ -121,3 +130,6 @@ For deep technical specifications, consult the official ADRs:
 - **[ADR 0028: SOC 2 Type II Compliance Engine & Merkle Audit Ledger](adr/0028-soc2-type-ii-compliance-engine-drift-detector-and-merkle-audit-ledger.md)**
 - **[ADR 0035: Paranoid Supabase PostgreSQL Architecture](adr/0035-paranoid-supabase-postgresql-and-ai-agent-governance.md)**
 - **[ADR 0036: Universal Developer Authentication Gating & Zero-Abuse Workspace Perimeter](adr/0036-universal-developer-authentication-gating-and-zero-abuse-workspace-perimeter.md)**
+- **[ADR 0037: Zero-Egress Cloudflare Edge Gateway, R2 CDN & Custom Domain Substrate](adr/0037-zero-egress-cloudflare-edge-gateway-and-r2-cdn-substrate.md)**
+- **[ADR 0038: Distributed Edge KV Rate Governance & Stale-While-Revalidate Model Catalog Caching](adr/0038-distributed-edge-kv-rate-governance-and-swr-catalog-caching.md)**
+- **[ADR 0039: Edge-Native Vector Embeddings & Durable Object Swarm State Synchronization](adr/0039-edge-native-vector-embeddings-and-durable-object-swarm-sync.md)**

@@ -7,7 +7,7 @@ Complete drop-in code snippets for connecting any major AI framework, SDK, or pr
 ## ⚡ 1-Line Ultra-Flat Execution & Tagged Templates
 
 ```typescript
-import galx, { run, stream, extract, tool, generateImage } from 'galxai';
+import galx, { run, stream, extract, tool, embed, generateImage } from 'galxai';
 
 // 1. Tagged Template Literal
 const summary = await galx`Summarize the key takeaways for ${topic}`;
@@ -20,12 +20,16 @@ for await (const chunk of stream('Write a haiku about code')) {
   process.stdout.write(chunk);
 }
 
-// 4. 1-Line Schema Extraction
+// 4. 1-Line Vector Embeddings
+const vector = await embed('Zero-egress edge routing');
+console.log(vector.data[0].embedding.length); // 1536
+
+// 5. 1-Line Schema Extraction
 const user = await extract('Jane Doe, 29, Engineer in SF', {
   name: 'string', age: 'number', role: 'string', city: 'string'
 });
 
-// 5. 1-Line Image Generation
+// 6. 1-Line Image Generation
 const image = await generateImage('Futuristic cyber vehicle');
 ```
 

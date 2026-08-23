@@ -58,16 +58,23 @@ Rebates scale automatically with monthly token volume without requiring sales ca
 | `x-ai/grok-4.5` | xAI Grok | $500,000$ | $2.50 / $10.00 | **$1.80 / $7.20** | **$0.45 / 1M** | **Up to 43% OFF** |
 
 ### Visual Synthesis & Image Generation Fleet
-| Model ID | Provider | Resolution | Retail List / Image | GALXAI Base / Image | Max Savings (Enterprise) |
+| Model ID | Provider | Resolution | Retail List Price | GALXAI Base Rate | Max Savings (Enterprise) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `openai-gpt-image-2` | OpenAI | $1024 \times 1024$ | $0.080 | **$0.060** | **Up to 40% OFF** |
-| `openai-gpt-image-1.5` | OpenAI | $1024 \times 1024$ | $0.060 | **$0.045** | **Up to 40% OFF** |
-| `openai-gpt-image-1` | OpenAI | $1024 \times 1024$ | $0.040 | **$0.028** | **Up to 45% OFF** |
-| `openai-gpt4o-image` | OpenAI | $1024 \times 1024$ | $0.050 | **$0.038** | **Up to 39% OFF** |
-| `openai-dalle-3` | OpenAI | $1024 \times 1024$ | $0.040 | **$0.030** | **Up to 40% OFF** |
-| `openai-dalle-2` | OpenAI | $512 \times 512$ | $0.020 | **$0.014** | **Up to 45% OFF** |
-| `xai-grok-image` | xAI Grok | $1024 \times 1024$ | $0.050 | **$0.036** | **Up to 43% OFF** |
-| `xai-grok-2-image` | xAI Grok | $1024 \times 1024$ | $0.040 | **$0.030** | **Up to 40% OFF** |
+| `openai-gpt-image-2` | OpenAI | $1024 \times 1024$ | $0.080 / \text{img}$ | **$0.060 / \text{img}$** | **35% OFF** |
+| `openai-gpt-image-1.5` | OpenAI | $1024 \times 1024$ | $0.060 / \text{img}$ | **$0.045 / \text{img}$** | **35% OFF** |
+| `openai-gpt-image-1` | OpenAI | $1024 \times 1024$ | $0.040 / \text{img}$ | **$0.030 / \text{img}$** | **35% OFF** |
+| `openai-gpt4o-image` | OpenAI | $1024 \times 1024$ | $0.050 / \text{img}$ | **$0.038 / \text{img}$** | **35% OFF** |
+| `openai-dalle-3` | OpenAI | $1024 \times 1024$ | $0.040 / \text{img}$ | **$0.032 / \text{img}$** | **30% OFF** |
+| `openai-dalle-2` | OpenAI | $512 \times 512$ | $0.020 / \text{img}$ | **$0.016 / \text{img}$** | **35% OFF** |
+| `xai-grok-image` | xAI Grok | $1024 \times 1024$ | $0.050 / \text{img}$ | **$0.037 / \text{img}$** | **36% OFF** |
+| `xai-grok-2-image` | xAI Grok | $1024 \times 1024$ | $0.040 / \text{img}$ | **$0.030 / \text{img}$** | **35% OFF** |
+
+### Vector Embeddings & Multimodal Egress
+| Service / Model | Provider | Dimensions | Retail List Price | GALXAI Base Rate | Savings |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `text-embedding-3-small` | OpenAI / Edge | 1,536 | $0.020 / 1\text{M}$ | **$0.015 / 1\text{M}$** | **25% OFF** |
+| `text-embedding-3-large` | OpenAI / Edge | 3,072 | $0.130 / 1\text{M}$ | **$0.095 / 1\text{M}$** | **27% OFF** |
+| **Multimodal Storage Egress** | Cloudflare R2 | Anycast CDN | $0.090 / \text{GB}$ | **$0.000 / \text{GB}$** | **100% FREE ($0 Egress)** |
 
 ---
 

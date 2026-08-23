@@ -5,6 +5,7 @@
 
 import { GalxEdgeGateway, type CloudflareEnv } from './GalxEdgeGateway';
 import { GalxEdgeQueueWorker } from './GalxEdgeQueueWorker';
+import { GalxSwarmCoordinatorDO } from './GalxSwarmCoordinatorDO';
 
 export interface CloudflareExecutionContext {
   waitUntil(promise: Promise<any>): void;
@@ -17,7 +18,7 @@ export interface CloudflareScheduledEvent {
   type: string;
 }
 
-export { GalxEdgeGateway, GalxEdgeQueueWorker };
+export { GalxEdgeGateway, GalxEdgeQueueWorker, GalxSwarmCoordinatorDO };
 
 export default {
   /**

@@ -21,6 +21,9 @@ GALXAI serves as a high-performance compute pooling gateway and execution substr
 | **Upstream Model Data Retention** | Upstream LLM providers retain user prompts for model training. | **Critical** | **Zero Data Retention (ZDR v10.0)**: Enforces `store: false` parameter, strips tracking cookies, and applies strict `no-store` cache headers. |
 | **Audit Ledger Manipulation** | Rogue admin or compromised service deletes or alters compliance audit records. | **High** | **Merkle Tree SHA-256 Ledger**: Chains micro-batch Merkle roots with cryptographic tamper-evident signatures. |
 | **Silent Security Configuration Drift** | Shard encryption or rate limiting accidentally disabled during updates. | **High** | **Autonomous SOC 2 Drift Engine**: Evaluates 28 controls in real-time and triggers automatic self-healing routines. |
+| **Volumetric Edge Ingress Flooding** | Bot swarms attempt to exhaust origin servers with HTTP request storms. | **High** | **Cloudflare Anycast WAF & Fast-Path Prefix Filter**: Drops invalid keys and floods in $<1\text{ms}$ at the 300+ Edge PoPs. |
+| **Edge Rate Limit Query Storms** | Million-request bursts hammer PostgreSQL connection pools with rate checks. | **High** | **Distributed Edge KV Sliding-Window Limiter (`RATE_LIMIT_KV`)**: Evaluates token buckets in V8 isolates without DB IOPS. |
+| **Webhook Delivery Spoofing** | Attacker injects forged completion events to client webhook endpoints. | **Medium** | **HMAC-SHA256 Signatures (`GalxEdgeWebhookDispatcher`)**: Cryptographically signs every payload with `X-Galx-Signature-256`. |
 
 ---
 

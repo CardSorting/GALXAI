@@ -25,7 +25,11 @@ export interface SwarmSessionState {
 export class GalxSwarmCoordinatorDO {
   private state: SwarmSessionState;
 
-  constructor(public readonly swarmId: string, goal: string) {
+  constructor(stateOrId?: any, envOrGoal?: any) {
+    const isDOState = stateOrId && typeof stateOrId === 'object' && 'id' in stateOrId;
+    const swarmId = isDOState ? stateOrId.id.toString() : typeof stateOrId === 'string' ? stateOrId : 'default_swarm';
+    const goal = typeof envOrGoal === 'string' ? envOrGoal : 'Autonomous Swarm Coordination';
+
     this.state = {
       swarmId,
       goal,
@@ -35,6 +39,55 @@ export class GalxSwarmCoordinatorDO {
       createdAtMs: Date.now(),
       updatedAtMs: Date.now()
     };
+  }
+
+  /**
+   * Cloudflare Durable Object HTTP Ingress & RPC Dispatcher
+   */
+  async fetch(request: Request): Promise<Response> {
+    const url = new URL(request.url);
+
+    if (url.pathname === '/state' && request.method === 'GET') {
+      return new Response(JSON.stringify(this.getState()), {
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+
+    if (url.pathname === '/agent/register' && request.method === 'POST') {
+      const body = (await request.json()) as any;
+      this.registerAgent(body.agentId, body.role);
+      return new Response(JSON.stringify({ success: true, agentId: body.agentId }), {
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+
+    if (url.pathname === '/agent/status' && request.method === 'POST') {
+      const body = (await request.json()) as any;
+      this.updateAgentStatus(body.agentId, body.status, body.output);
+      return new Response(JSON.stringify({ success: true, state: this.getState() }), {
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+
+    if (url.pathname === '/context' && request.method === 'POST') {
+      const body = (await request.json()) as any;
+      this.setSharedContext(body.key, body.value);
+      return new Response(JSON.stringify({ success: true, context: this.state.sharedContext }), {
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+
+    if (url.pathname === '/complete' && request.method === 'POST') {
+      this.completeSwarm();
+      return new Response(JSON.stringify({ success: true, isFinished: true }), {
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+
+    return new Response(JSON.stringify({ error: `Durable Object route not found: ${url.pathname}` }), {
+      status: 404,
+      headers: { 'content-type': 'application/json' }
+    });
   }
 
   registerAgent(agentId: string, role: string): void {
@@ -87,3 +140,4 @@ export class GalxSwarmCoordinatorDO {
     this.state.updatedAtMs = Date.now();
   }
 }
+

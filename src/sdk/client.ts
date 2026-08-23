@@ -17,6 +17,7 @@ import type { ClientOptions } from './types';
 import { ChatResource } from './resources/chat';
 import { ImagesResource } from './resources/images';
 import { ModelsResource } from './resources/models';
+import { EmbeddingsResource } from './resources/embeddings';
 import { QueuesResource } from './resources/queues';
 import { WorkflowsResource } from './resources/workflows';
 import { WebhooksResource } from './resources/webhooks';
@@ -43,7 +44,13 @@ export class GalxAIClientCore {
 
   constructor(options: ClientOptions = {}) {
     this.apiKey = options.apiKey || (typeof process !== 'undefined' ? process.env?.GALX_API_KEY : '') || '';
-    this.baseURL = (options.baseURL || (typeof process !== 'undefined' ? process.env?.GALX_BASE_URL : '') || 'https://gateway.galx.ai').replace(/\/+$/, '');
+    this.baseURL = (
+      options.baseURL ||
+      (typeof process !== 'undefined'
+        ? process.env?.GALX_BASE_URL || process.env?.NEXT_PUBLIC_GALX_EDGE_URL || process.env?.GALX_EDGE_URL
+        : '') ||
+      'https://galxai-edge-gateway.notsosuper688651.workers.dev'
+    ).replace(/\/+$/, '');
     this.timeoutMs = options.timeoutMs ?? 60000;
     this.maxRetries = options.maxRetries ?? 2;
     this.defaultHeaders = options.defaultHeaders || {};
@@ -338,6 +345,7 @@ export class GalxAI {
   readonly chat: ChatResource;
   readonly images: ImagesResource;
   readonly models: ModelsResource;
+  readonly embeddings: EmbeddingsResource;
   readonly jobs: JobsResource;
   readonly queues: QueuesResource;
   readonly workflows: WorkflowsResource;
@@ -357,6 +365,7 @@ export class GalxAI {
     this.chat = new ChatResource(this.core);
     this.images = new ImagesResource(this.core);
     this.models = new ModelsResource(this.core);
+    this.embeddings = new EmbeddingsResource(this.core);
     this.jobs = new JobsResource(this.core);
     this.queues = new QueuesResource(this.core);
     this.workflows = new WorkflowsResource(this.core);

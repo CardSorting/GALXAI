@@ -14,6 +14,49 @@ Authorization: Bearer galx_live_abcdef1234567890
 
 ---
 
+## 🌐 Edge Gateways & Base URLs
+
+| Environment | Edge Ingress Base URL | Regional Coverage |
+| :--- | :--- | :--- |
+| **Production Edge Gateway** | `https://galxai-edge-gateway.notsosuper688651.workers.dev` (or `https://api.galxai.com`) | 300+ Global Edge PoPs ($0 Egress) |
+| **Staging Edge Gateway** | `https://galxai-edge-gateway-staging.notsosuper688651.workers.dev` | Staging Edge Mesh |
+| **Multimodal R2 Media CDN** | `https://pub-9aab2b19ca7947c59240e3869c544e20.r2.dev` (or `https://assets.galxai.com`) | Global Anycast Storage CDN |
+
+---
+
+## 📐 Vector Embeddings (`POST /v1/embeddings`)
+
+High-velocity OpenAI-compatible vector embedding calculation directly executed at the nearest Cloudflare Edge PoP (<15ms latency).
+
+### Request Body
+```json
+{
+  "model": "text-embedding-3-small",
+  "input": ["Distributed agent mesh", "Zero-egress inference"]
+}
+```
+
+### Response
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "object": "embedding",
+      "index": 0,
+      "embedding": [0.0893, 0.0806, -0.0420, "... 1536 dims ..."]
+    }
+  ],
+  "model": "text-embedding-3-small",
+  "usage": {
+    "prompt_tokens": 16,
+    "total_tokens": 16
+  }
+}
+```
+
+---
+
 ## 💬 Chat Completions (`POST /v1/chat/completions`)
 
 Standard OpenAI-compatible chat completion endpoint with automatic quota cycling and reasoning model support.

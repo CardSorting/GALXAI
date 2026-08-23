@@ -11,27 +11,33 @@ GALXAI is an enterprise-grade Universal AI Gateway providing high-throughput, lo
 No. You only need a single GALXAI Developer Gateway Key (`galx_live_...`). GALXAI provides unified access to all 12 reasoning and visual models across OpenAI and xAI without needing separate accounts or disparate billing systems.
 
 #### 3. Is GALXAI 100% compatible with OpenAI SDKs?
-Yes, completely. GALXAI natively implements standard OpenAI REST APIs (`/v1/chat/completions`, `/v1/images/generations`, `/v1/models`) and Server-Sent Events (SSE) streaming. Simply update `baseURL="https://api.galx.ai/v1"`.
+Yes, completely. GALXAI natively implements standard OpenAI REST APIs (`/v1/chat/completions`, `/v1/embeddings`, `/v1/images/generations`, `/v1/models`) and Server-Sent Events (SSE) streaming. Simply update `baseURL="https://api.galx.ai/v1"`.
+
+#### 4. Does GALXAI support Vector Embeddings at the Edge?
+Yes. GALXAI provides native `/v1/embeddings` support calculated directly at Cloudflare Edge PoPs (<15ms latency) returning 1536-dimensional or 3072-dimensional embedding arrays with standard OpenAI SDK parity or via `galx.embeddings.create(...)` / `embed(...)`.
+
+#### 5. How does $0 Multimodal Egress work with Cloudflare R2?
+Generated images (`openai-gpt-image-2`, `dall-e-3`) and audio artifacts are streamed directly to Cloudflare R2 object storage and served over the global Anycast CDN custom domain `assets.galx.ai`. Developers pay **$0 egress fees** regardless of download bandwidth or global consumer traffic.
 
 ---
 
 ### Pricing & Compute Wallet
 
-#### 4. How does GALXAI offer 25%–40% discounts compared to direct retail?
+#### 6. How does GALXAI offer 25%–40% discounts compared to direct retail?
 Through large-scale enterprise compute commitments and intelligent low-latency routing, GALXAI secures wholesale capacity and passes direct wholesale rates to developers with **0% markup**.
 
-#### 5. How does the 75% Prompt Caching Rebate work?
+#### 7. How does the 75% Prompt Caching Rebate work?
 For prompts containing system instructions or context prefixes exceeding 1,024 tokens, cached input tokens automatically receive a **75% discount**. GALXAI passes 100% of this rebate directly to your wallet.
 
-#### 6. How does developer billing work?
+#### 8. How does developer billing work?
 GALXAI operates a pay-as-you-go developer compute wallet. Every new account receives a **$5.00 free compute credit**. Deductions are micro-metered in real-time per token. Developers can also enable automated reload protection to guarantee zero downtime for production workloads.
 
 ---
 
 ### Security, Privacy & Reliability
 
-#### 7. Does GALXAI store or log prompts?
-No. GALXAI enforces a strict **Zero Content Retention Policy**. Prompts and streaming chunks are processed purely in ephemeral memory buffers and are never logged to disk, retained in databases, or used for model training.
+#### 9. Does GALXAI store or log prompts?
+No. GALXAI enforces a strict **Zero Content Retention Policy (ZDR v10.0)**. Prompts and streaming chunks are processed purely in ephemeral memory buffers with 2-pass cryptographic overwrite (`0xAA` -> `0x00`) and are never logged to disk, retained in databases, or used for model training.
 
-#### 8. What is GALXAI's uptime SLA?
-GALXAI provides a **99.99% Enterprise Uptime SLA** backed by sub-15ms automated failover, protecting agent fleets and production applications from upstream vendor hiccups and unexpected rate limits.
+#### 10. What is GALXAI's uptime SLA?
+GALXAI provides a **99.99% Enterprise Uptime SLA** backed by sub-15ms automated failover and 300+ edge Points of Presence, protecting agent fleets and production applications from upstream vendor hiccups and unexpected rate limits.

@@ -42,3 +42,28 @@ $$\text{ReplenishedTokens} = \left(\frac{t_{\text{now}} - t_{\text{last}}}{60000
 - **Zero Minute-Edge Spikes**: Eliminates thundering herd spikes at the top of every minute.
 - **Smooth Traffic Smoothing**: Naturally smooths erratic burst patterns into steady throughput.
 - **Microsecond Sub-Remainder Preservation**: Retains fractional token fractions across rapid sub-millisecond queries.
+
+---
+
+## 4. Edge-Native Sliding-Window KV Rate Governance (ADR 0038)
+
+At Cloudflare Edge PoPs, incoming requests to `api.galx.ai` are governed by `RATE_LIMIT_KV` before hitting compute:
+
+```typescript
+// Edge sliding-window token bucket throttling (120 req/min default per client IP/Key)
+const currentWindow = Math.floor(Date.now() / 60000);
+const rateKey = `rate_${clientIp}_${currentWindow}`;
+const count = await env.RATE_LIMIT_KV.get(rateKey);
+
+if (count && parseInt(count) >= 120) {
+  return new Response(JSON.stringify({ error: { message: 'Edge rate limit exceeded. Retry shortly.' } }), {
+    status: 429,
+    headers: { 'Retry-After': '60', 'content-type': 'application/json' }
+  });
+}
+```
+
+### Advantages
+- **Sub-5ms Throttling**: Rejection occurs at the physical edge PoP without database roundtrips.
+- **Fail-Open Resilience**: If KV experiences transient degraded latency, the edge gateway fails open to protect active inference streams.
+

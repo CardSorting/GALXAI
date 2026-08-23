@@ -98,6 +98,10 @@ const result = await job.result();
 
 // 1-line image generation
 const image = await generateImage('Futuristic skyline at dusk');
+
+// 1-line vector embeddings
+const vector = await embed('Zero-egress agentic computing');
+console.log(vector.data[0].embedding.length); // 1536
 ```
 
 ### Zero-Buffer Token Streaming (`stream`)
@@ -138,7 +142,7 @@ import { GalxAI } from 'galxai';
 
 const client = new GalxAI({
   apiKey: process.env.GALX_API_KEY,      // Defaults to process.env.GALX_API_KEY
-  baseURL: 'https://gateway.galx.ai',     // Custom gateway URL or local proxy
+  baseURL: 'https://api.galx.ai',         // Defaults to Cloudflare Edge Gateway (https://api.galx.ai)
   timeoutMs: 60000,                       // Request timeout (default: 60s)
   maxRetries: 3,                          // Automatic transient retries (default: 2)
   defaultHeaders: { 'X-App-Id': 'agents' }
@@ -147,7 +151,23 @@ const client = new GalxAI({
 
 ---
 
-## 3. Chat Completions API (`galx.chat`)
+## 4. Vector Embeddings API (`galx.embeddings`)
+
+High-velocity 1536-dimensional or 3072-dimensional vector embedding generation directly computed at the nearest Cloudflare Edge PoP (<15ms latency).
+
+```typescript
+// Single or batch embedding generation
+const embeddings = await galx.embeddings.create({
+  model: 'text-embedding-3-small',
+  input: ['Autonomous edge routing', 'Distributed agent swarms']
+});
+
+console.log(embeddings.data[0].embedding); // Float array of 1536 dimensions
+```
+
+---
+
+## 5. Chat Completions API (`galx.chat`)
 
 ### Synchronous Inference & SSE Token Streaming
 ```typescript

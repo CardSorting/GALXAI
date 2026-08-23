@@ -92,6 +92,25 @@ Full Shard Fleet (N Shards in accountTable)
 
 ---
 
+## 6. Edge In-Flight Provider Failover (`GalxEdgeRouter`)
+
+On Cloudflare Workers Edge isolates, `GalxEdgeRouter` executes in-flight provider failover within the active client HTTP stream:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    Client->>GalxEdgeGateway: POST /v1/chat/completions (api.galx.ai)
+    GalxEdgeGateway->>GalxEdgeRouter: routeWithFailover(model, primaryShard, backupShards)
+    GalxEdgeRouter->>OpenAIShard1: Attempt 1: Fetch upstream completion
+    OpenAIShard1-->>GalxEdgeRouter: 429 Rate Limited / Transient 503
+    Note over GalxEdgeRouter: Circuit Breaker triggers instant failover (<5ms)
+    GalxEdgeRouter->>OpenAIShard2: Attempt 2: Fetch backup shard
+    OpenAIShard2-->>GalxEdgeRouter: 200 OK (SSE Stream Chunks)
+    GalxEdgeRouter-->>Client: Direct zero-egress stream (Client never sees 429)
+```
+
+---
+
 ## 📊 Strategy Selection Matrix
 
 | Use Case | Recommended Strategy | Primary Advantage |
@@ -100,5 +119,7 @@ Full Shard Fleet (N Shards in accountTable)
 | **Homogeneous High-Volume Queues** | `smooth_weighted_round_robin` | Perfectly smooth interleave, zero burst clumping |
 | **Long-Running Batch Inference** | `least_utilized` | Prevents token debt skew across credentials |
 | **Tiered Failover Deployments** | `priority_failover` | Strict hierarchical failover guarantees |
+| **Cloudflare Edge Ingress** | `edge_failover` | In-flight transparent retry at edge PoPs with $0 egress |
 | **Micro-Subsecond Substrate Queries** | `broccolidb_natural` | Offline deterministic AST matching with zero GC overhead |
+
 

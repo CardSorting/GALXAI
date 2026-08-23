@@ -44,6 +44,9 @@ This directory contains the formal Architectural Decision Records (ADRs) that go
 | **[ADR 0034](0034-autonomous-agent-1-click-context-and-auto-copy-substrate.md)** | Autonomous Agent 1-Click Context & Zero-Friction Event Pipeline | **Agent UX** | `Accepted` | Structured Markdown agent context, direct 1-click format chips, and zero-click Auto-Copy on completion. |
 | **[ADR 0035](0035-paranoid-supabase-postgresql-and-ai-agent-governance.md)** | Paranoid Supabase PostgreSQL Architecture & AI Agent Long-Term Governance | **Database Security** | `Accepted` | 10 Commandments, AOP-DB protocol, mechanical SQL linter, and bi-directional rollbacks for non-SQL architects. |
 | **[ADR 0036](0036-universal-developer-authentication-gating-and-zero-abuse-workspace-perimeter.md)** | Universal Developer Authentication Gating & Zero-Abuse Workspace Perimeter | **Perimeter Security** | `Accepted` | Platform-wide `<AuthRequiredGate />`, guest pass retirement, programmatic worker streams, and 2-column checkout funnel. |
+| **[ADR 0037](0037-zero-egress-cloudflare-edge-gateway-and-r2-cdn-substrate.md)** | Zero-Egress Cloudflare Edge Gateway, R2 CDN & Custom Domain Substrate | **Edge & CDN** | `Accepted` | `api.galx.ai` Worker ingress, `assets.galx.ai` R2 media CDN, and $0 egress bandwidth across 300+ PoPs. |
+| **[ADR 0038](0038-distributed-edge-kv-rate-governance-and-swr-catalog-caching.md)** | Distributed Edge KV Rate Governance & Stale-While-Revalidate Model Catalog Caching | **Edge State & Cache** | `Accepted` | Sliding-window token bucket KV rate limiting and sub-10ms SWR model catalog caching at edge PoPs. |
+| **[ADR 0039](0039-edge-native-vector-embeddings-and-durable-object-swarm-sync.md)** | Edge-Native Vector Embeddings & Durable Object Swarm State Synchronization | **Embeddings & Swarms** | `Accepted` | Edge 1536-dim vector embeddings (`/v1/embeddings`) and in-memory Durable Object swarm synchronization. |
 
 ---
 

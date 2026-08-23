@@ -15,7 +15,7 @@ OPENAI_API_KEY=sk-proj-original_openai_key
 
 ### After (GALXAI Universal Gateway)
 ```env
-OPENAI_BASE_URL=http://localhost:3000/v1       # Or https://api.galx.ai/v1
+OPENAI_BASE_URL=https://api.galx.ai/v1
 OPENAI_API_KEY=galx_live_your_gateway_key_here
 ```
 
@@ -30,7 +30,8 @@ OPENAI_API_KEY=galx_live_your_gateway_key_here
 | `gpt-4o-mini` | `gpt-5.6-luna` | 900K context, ultra-low $0.11/1M input pricing |
 | `grok-3`, `grok-2` | `x-ai/grok-4.6` | Massive 1M context, frontier multimodal reasoning |
 | `grok-beta`, `grok-2` | `x-ai/grok-4.5` | Massive 500K context, native visual reasoning |
-| `dall-e-3` | `openai-dalle-3` / `openai-gpt-image-2` | Multi-resolution, 25% discount |
+| `text-embedding-3-small` | `text-embedding-3-small` | 1536-dim, $<15\text{ms}$ Edge PoP computation |
+| `dall-e-3` | `openai-dalle-3` / `openai-gpt-image-2` | Stored on Cloudflare R2 (`assets.galx.ai`) with $0 egress |
 
 ---
 
@@ -42,7 +43,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key_here
  
  client = OpenAI(
 -    api_key=os.environ["OPENAI_API_KEY"]
-+    base_url="http://localhost:3000/v1",
++    base_url="https://api.galx.ai/v1",
 +    api_key=os.environ["GALXAI_API_KEY"]
  )
 ```
@@ -53,7 +54,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key_here
  
  const openai = new OpenAI({
 -  apiKey: process.env.OPENAI_API_KEY,
-+  baseURL: 'http://localhost:3000/v1',
++  baseURL: 'https://api.galx.ai/v1',
 +  apiKey: process.env.GALXAI_API_KEY,
  });
 ```

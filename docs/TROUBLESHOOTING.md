@@ -58,11 +58,29 @@ This guide details common status codes, error classifications, and operational r
 
 ---
 
+### 5. Cloudflare Edge Gateway Status Codes (`api.galx.ai`)
+
+#### A. `HTTP 401 Invalid API key format`
+- **Root Cause**: The request `Authorization` header did not start with `Bearer galx_live_...` or `Bearer galx_test_...`.
+- **Remedy**: Ensure valid API keys generated from `/keys` are passed in `Authorization: Bearer <key>` headers.
+
+#### B. `HTTP 429 Edge rate limit exceeded`
+- **Root Cause**: Rapid client burst triggered the edge PoP sliding-window rate limiter in `RATE_LIMIT_KV` (default 120 req/min per IP/Key).
+- **Remedy**: Apply exponential backoff honoring the `Retry-After: 60` response header.
+
+#### C. `Cloudflare Error 1014 (CNAME Cross-User Banned / SSL Pending)`
+- **Root Cause**: Custom domain on R2 (`assets.galx.ai`) is awaiting Cloudflare Universal SSL issuance.
+- **Remedy**: Run `npx wrangler r2 bucket domain list galxai-assets` to check SSL verification status.
+
+---
+
 ## 📈 Monitoring & Health Checks
 
 | Endpoint | Method | Purpose |
 | :--- | :--- | :--- |
-| `/api/pool/stats` | `GET` | Instant snapshot of healthy, cooldown, and active shard counts. |
+| `https://api.galx.ai/health` | `GET` | Instant edge PoP health probe & latency tracker. |
+| `/api/pool/stats` | `GET` | Snapshot of healthy, cooldown, and active shard counts. |
 | `/api/pool/telemetry` | `GET` | Real-time sliding window latency percentiles ($P_{50}, P_{90}, P_{99}$), RPM, TPM, and error rates. |
-| `/v1/models` | `GET` | Live catalog of all 12 available models with active status. |
+| `https://api.galx.ai/v1/models` | `GET` | Live catalog of all 12 available models with active status and edge caching. |
 | `/status` | `GET` | Interactive web dashboard of global fleet availability and response times. |
+

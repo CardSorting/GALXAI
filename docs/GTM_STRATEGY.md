@@ -59,6 +59,8 @@ mindmap
 | **Prompt Caching Rebate** | 50%–75% | Variable / Partial Retention | **100% Pass-Through (75%–85% Rebate)** |
 | **Failover Architecture** | None (Single Key Fails) | Basic Provider Switching | **Sub-15ms Monotonic Multi-Account Leveling** |
 | **Rate Limit Resilience** | Hard 429 Rate Limit Errors | Retry queue | **Continuous Hydraulic Headroom (P-AHT)** |
+| **Edge Network Coverage** | Centralized Origin Regions | Centralized Origin Proxy | **300+ Global Edge PoPs (<15ms TTFT)** |
+| **Multimodal Storage & Egress** | $0.090–$0.120 / GB | Standard Origin Egress | **$0.00 / GB FREE ($0 Egress via R2 CDN)** |
 | **Security Architecture** | Standard API Key | Plaintext Gateway Storage | **AES-256-GCM + AAD Tenant Envelope Vault** |
 | **SDK Compatibility** | Native | OpenAI Compatible | **100% OpenAI & Anthropic Drop-in** |
 

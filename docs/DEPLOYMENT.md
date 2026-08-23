@@ -135,7 +135,7 @@ spec:
 
 ---
 
-## 6. Cloudflare Workers & Supabase PostgreSQL Hybrid Deployment (ADR 0015 & 0016)
+## 6. Cloudflare Workers & Supabase PostgreSQL Hybrid Deployment (ADR 0015, 0037–0039)
 
 For high-throughput, zero-egress production deployments:
 
@@ -146,7 +146,13 @@ Run the consolidated SQL setup script in your Supabase SQL Editor:
 psql "$SUPABASE_DB_URL" -f scripts/setup-supabase-schema.sql
 ```
 
-### Step 2: Configure Cloudflare Worker Secrets
+### Step 2: Provision Cloudflare KV & R2 Storage
+```bash
+# Automated provisioning & binding verification
+npm run cf:bootstrap
+```
+
+### Step 3: Configure Cloudflare Worker Secrets
 Bind environment secrets to Cloudflare Workers:
 ```bash
 # Configure Supabase credentials for Edge Workers
@@ -155,10 +161,22 @@ npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
 npx wrangler secret put GALX_VAULT_MASTER_SECRET
 ```
 
-### Step 3: Deploy Cloudflare Edge Gateway & Workers
+### Step 4: Deploy Cloudflare Edge Gateway & Workers
 Deploy the edge mesh across 300+ global Points of Presence with $0 egress bandwidth costs:
 ```bash
-# Deploy edge gateway and queue workers
-npx wrangler deploy
+# Production deployment (api.galx.ai)
+npm run worker:deploy
+
+# Staging deployment (api-staging.galx.ai)
+npx wrangler deploy --env staging
+```
+
+### Step 5: Verification & Smoke Testing
+```bash
+# Run 46-point edge verification suite
+npm run worker:test
+
+# Run live SDK-to-Edge smoke tests
+npx tsx scripts/test-sdk-edge.ts
 ```
 

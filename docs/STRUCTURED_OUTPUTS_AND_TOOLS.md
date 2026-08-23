@@ -13,7 +13,7 @@ Ensure 100% adherence to defined JSON schemas for reliable downstream parsing.
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="http://localhost:3000/v1",
+    base_url="https://api.galx.ai/v1",
     api_key="galx_live_your_key_here"
 )
 

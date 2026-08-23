@@ -188,9 +188,21 @@ The agent MUST output the impact statement in the following format before writin
 | `npm run db:status` | Displays migration audit history, applied versions, SHA-256 checksums, and pending migrations. |
 | `npm run db:migrate` | Safely applies pending migrations in atomic transaction blocks. |
 | `npm run db:rollback` | Safely rolls back the last applied migration using its `.down.sql` definition. |
+| `npm run worker:test` | Runs the 46-point Cloudflare Edge Mesh verification suite (KV, DO, R2, SWR cache). |
 
 ---
 
-## 🎯 6. Conclusion & Guarantee
+## 🔗 6. Related Architecture Decision Records (ADRs)
+
+- **[ADR 0017: Atomic Transactional Settlement & Double-Entry Ledger](adr/0017-atomic-transactional-settlement-and-double-entry-ledger.md)**
+- **[ADR 0035: Paranoid Supabase PostgreSQL Architecture](adr/0035-paranoid-supabase-postgresql-and-ai-agent-governance.md)**
+- **[ADR 0037: Zero-Egress Cloudflare Edge Gateway, R2 CDN & Custom Domain Substrate](adr/0037-zero-egress-cloudflare-edge-gateway-and-r2-cdn-substrate.md)**
+- **[ADR 0038: Distributed Edge KV Rate Governance & Stale-While-Revalidate Model Catalog Caching](adr/0038-distributed-edge-kv-rate-governance-and-swr-catalog-caching.md)**
+- **[ADR 0039: Edge-Native Vector Embeddings & Durable Object Swarm State Synchronization](adr/0039-edge-native-vector-embeddings-and-durable-object-swarm-sync.md)**
+
+---
+
+## 🎯 7. Conclusion & Guarantee
 
 By decoupling high-level architectural intent from low-level SQL mechanics through **strict mechanical guardrails**, the Senior Architect can fearlessly steer the platform while AI agents safely manage the database with zero risk of catastrophic downtime, privilege escalation, or data loss.
+

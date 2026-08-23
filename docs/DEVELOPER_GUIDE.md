@@ -9,9 +9,10 @@ This guide covers the internal codebase structure, architectural layers, how to 
 ```text
 GALXAI/
 ├── docs/                             # Comprehensive Architecture & API Documentation
-│   ├── adr/                          # Architecture Decision Records (0001-0034)
+│   ├── adr/                          # Architecture Decision Records (0001-0039)
 │   ├── ARCHITECTURE.md               # System overview, lifecycle, and security model
 │   ├── API_REFERENCE.md              # REST API endpoint specifications (/v1 & /api)
+│   ├── CLOUDFLARE_STRATEGY.md        # Edge Mesh, R2 CDN & Custom Domain Substrate
 │   ├── SDK_SPECIFICATION.md          # Universal Developer SDK & Ultra-Flat Ergonomics
 │   ├── QUICKSTART.md                 # Python, Node.js, Cursor, Continue setup
 │   ├── ROUTING_ALGORITHMS.md         # Mathematical derivations of P-AHT, SWRR, WLC
@@ -19,6 +20,9 @@ GALXAI/
 │   ├── DEVELOPER_GUIDE.md            # Contributing guide and adapter development
 │   └── TROUBLESHOOTING.md            # Error classification and operational playbooks
 ├── scripts/
+│   ├── bootstrap-cloudflare.ts       # Automated Cloudflare resource provisioner
+│   ├── test-cloudflare-workers.ts    # 46-suite Cloudflare edge verification runner
+│   ├── test-sdk-edge.ts              # SDK to Edge Gateway live smoke test
 │   └── validate-galxai-router.ts     # 50-suite forensic verification test runner (177 tests)
 ├── src/
 │   ├── app/                          # Next.js App Router
@@ -397,14 +401,21 @@ GALXAI maintains dedicated forensic test runners:
 npm run test:router
 # (or: npx tsx scripts/validate-galxai-router.ts)
 
-# 2. Supabase PostgreSQL & Cloudflare Edge Substrate Test Suite
+# 2. Cloudflare Edge Mesh Verification Suite (46 edge tests)
+npm run worker:test
+# (or: npx tsx scripts/test-cloudflare-workers.ts)
+
+# 3. SDK -> Cloudflare Edge Live Smoke Test
+npx tsx scripts/test-sdk-edge.ts
+
+# 4. Supabase PostgreSQL & Integration Test Suite
 npm run test:supabase
 # (or: npx tsx scripts/test-supabase-integration.ts)
 
-# 3. TypeScript Type-Check
+# 5. TypeScript Type-Check
 npx tsc --noEmit
 
-# 4. Production Build Validation
+# 6. Production Build Validation
 npm run build
 ```
 

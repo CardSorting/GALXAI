@@ -11,6 +11,7 @@ export * from './types';
 export { ChatResource, CompletionsResource } from './resources/chat';
 export { ImagesResource } from './resources/images';
 export { ModelsResource } from './resources/models';
+export { EmbeddingsResource, type EmbeddingCreateRequest, type EmbeddingCreateResponse } from './resources/embeddings';
 export { JobsResource, type SubmitJobParams } from './resources/jobs';
 export { QueuesResource } from './resources/queues';
 export { WorkflowsResource } from './resources/workflows';
@@ -100,6 +101,23 @@ export async function generateImage(prompt: string, options?: { model?: string; 
  */
 export async function* stream(prompt: string, options?: { model?: string; system?: string; temperature?: number }) {
   yield* getClient().stream(prompt, options);
+}
+
+/**
+ * Ultra-effortless vector embeddings.
+ *
+ * @example
+ * ```ts
+ * import { embed } from 'galxai';
+ * const res = await embed('Autonomous edge agent computing');
+ * console.log(res.data[0].embedding);
+ * ```
+ */
+export async function embed(input: string | string[], options?: { model?: string }) {
+  return getClient().embeddings.create({
+    input,
+    model: options?.model || 'text-embedding-3-small'
+  });
 }
 
 /**

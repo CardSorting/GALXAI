@@ -8,6 +8,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "worker:dev": "wrangler dev",
+    "worker:build": "wrangler deploy --dry-run",
+    "worker:deploy": "wrangler deploy",
+    "worker:deploy:staging": "wrangler deploy --env staging",
+    "worker:tail": "wrangler tail",
+    "worker:test": "tsx scripts/test-cloudflare-workers.ts",
+    "cf:bootstrap": "tsx scripts/bootstrap-cloudflare.ts",
     "test:router": "tsx scripts/validate-galxai-router.ts",
     "db:verify": "tsx scripts/verify-supabase-integrity.ts",
     "db:test": "tsx scripts/test-supabase-integration.ts",
@@ -30,6 +37,7 @@
     "tailwind-merge": "^3.0.1"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260823.1",
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -40,6 +48,7 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.19.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.125.0"
   }
 }

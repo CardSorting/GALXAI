@@ -133,6 +133,7 @@ Applications can mint scoped, short-lived bearer tokens for downstream workers o
 | :--- | :--- | :--- |
 | `*` | All API and admin endpoints | None |
 | `chat:*` | `chat:completions`, `chat:stream` | `images:generations`, `admin:sudo` |
+| `embeddings:*` | `embeddings:create` | `chat:completions`, `images:generations` |
 | `images:*` | `images:generations`, `images:edits` | `chat:completions`, `billing:read` |
 | `shards:read` | `shards:read` | `shards:write`, `admin:sudo` |
 | `admin:sudo` | Privileged administrative actions | Unprivileged scopes if restricted |

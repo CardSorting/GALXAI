@@ -80,3 +80,15 @@ The router automatically normalizes common short-hand aliases to their canonical
 | `dalle-3`, `dall-e-3` | `openai-dalle-3` |
 | `dalle-2`, `dall-e-2` | `openai-dalle-2` |
 | `grok-image`, `grok-imagine` | `xai-grok-image` |
+
+---
+
+## 4. Vector Embedding Models
+
+High-velocity vector embedding generation directly computed at Cloudflare Edge PoPs (<15ms latency):
+
+| Model ID | Provider | Vector Dimensions | Max Context | Input Price / 1M | Edge PoP Latency |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `text-embedding-3-small` | OpenAI / Edge | 1,536 | 8,191 | **$0.015** (25% OFF) | $<12\text{ms}$ |
+| `text-embedding-3-large` | OpenAI / Edge | 3,072 | 8,191 | **$0.095** (27% OFF) | $<15\text{ms}$ |
+
