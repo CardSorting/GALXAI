@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "bin": {
+    "galxai": "./bin/galxai.mjs"
+  },
   "scripts": {
     "predev": "kill $(lsof -ti:3000) 2>/dev/null || true",
     "dev": "next dev",

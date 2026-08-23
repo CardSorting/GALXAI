@@ -24,6 +24,7 @@ import { WebhooksResource } from './resources/webhooks';
 import type { GalxQueueEvent } from '../core/contracts/GalxContracts';
 
 import { MiddlewarePipeline, type GalxPlugin } from './middleware';
+import { ConversationThread, type ThreadOptions } from './thread';
 
 export interface RequestOptions {
   method?: string;
@@ -42,19 +43,35 @@ export class GalxAIClientCore {
   readonly customFetch?: typeof fetch;
   readonly middleware: MiddlewarePipeline;
 
-  constructor(options: ClientOptions = {}) {
-    this.apiKey = options.apiKey || (typeof process !== 'undefined' ? process.env?.GALX_API_KEY : '') || '';
-    this.baseURL = (
-      options.baseURL ||
+  constructor(options: string | ClientOptions = {}) {
+    const opts = typeof options === 'string' ? { apiKey: options } : options || {};
+
+    this.apiKey =
+      opts.apiKey ||
+      opts.api_key ||
+      opts.token ||
+      opts.authToken ||
       (typeof process !== 'undefined'
-        ? process.env?.GALX_BASE_URL || process.env?.NEXT_PUBLIC_GALX_EDGE_URL || process.env?.GALX_EDGE_URL
+        ? process.env?.GALX_API_KEY || process.env?.OPENAI_API_KEY || process.env?.ANTHROPIC_API_KEY
         : '') ||
-      'https://galxai-edge-gateway.notsosuper688651.workers.dev'
-    ).replace(/\/+$/, '');
-    this.timeoutMs = options.timeoutMs ?? 60000;
-    this.maxRetries = options.maxRetries ?? 2;
-    this.defaultHeaders = options.defaultHeaders || {};
-    this.customFetch = options.fetch;
+      '';
+
+    const rawBaseUrl =
+      opts.baseURL ||
+      opts.baseUrl ||
+      opts.base_url ||
+      opts.host ||
+      opts.endpoint ||
+      (typeof process !== 'undefined'
+        ? process.env?.GALX_BASE_URL || process.env?.NEXT_PUBLIC_GALX_EDGE_URL || process.env?.GALX_EDGE_URL || process.env?.OPENAI_BASE_URL
+        : '') ||
+      'https://galx.ai/v1';
+
+    this.baseURL = rawBaseUrl.replace(/\/+$/, '');
+    this.timeoutMs = opts.timeoutMs ?? opts.timeout ?? opts.timeout_ms ?? 60000;
+    this.maxRetries = opts.maxRetries ?? opts.max_retries ?? opts.retries ?? 2;
+    this.defaultHeaders = opts.defaultHeaders || opts.headers || {};
+    this.customFetch = opts.fetch;
     this.middleware = new MiddlewarePipeline();
   }
 
@@ -332,6 +349,7 @@ import { BatchEvaluator } from './batch';
 import { MultiModalHelper } from './multimodal';
 import { AgentRuntime, type AgentConfig } from './agent';
 import { TokenOptimizer } from './tokens';
+import { ChatCompletionBuilder } from './builder';
 
 /**
  * Official GALXAI Universal Developer SDK Client.
@@ -343,6 +361,16 @@ import { JobsResource } from './resources/jobs';
 
 export class GalxAI {
   readonly chat: ChatResource;
+  readonly messages: {
+    create: (params: {
+      model?: string;
+      messages: Array<{ role: string; content: any }>;
+      max_tokens?: number;
+      temperature?: number;
+      stream?: boolean;
+      system?: string | any[];
+    }) => Promise<any>;
+  };
   readonly images: ImagesResource;
   readonly models: ModelsResource;
   readonly embeddings: EmbeddingsResource;
@@ -360,9 +388,21 @@ export class GalxAI {
 
   private readonly core: GalxAIClientCore;
 
-  constructor(options: ClientOptions = {}) {
+  constructor(options: string | ClientOptions = {}) {
     this.core = new GalxAIClientCore(options);
     this.chat = new ChatResource(this.core);
+    this.messages = {
+      create: async (params) => {
+        const mappedModel = params.model || 'gpt-5.6-sol';
+        return this.core.request('/v1/messages', {
+          method: 'POST',
+          body: {
+            ...params,
+            model: mappedModel
+          }
+        });
+      }
+    };
     this.images = new ImagesResource(this.core);
     this.models = new ModelsResource(this.core);
     this.embeddings = new EmbeddingsResource(this.core);
@@ -577,6 +617,37 @@ ${formattedResult}
       }
     };
   }
+
+  /**
+   * Ultra-forgiving chat execution accepting string or message array.
+   */
+  public async generate(prompt: string, options: { model?: string; system?: string; temperature?: number } = {}) {
+    return this.run(prompt, options);
+  }
+
+  /**
+   * Universal vector embeddings helper.
+   */
+  public async embed(input: string | string[], options: { model?: string } = {}) {
+    return this.embeddings.create({
+      input,
+      model: options.model || 'text-embedding-3-small'
+    });
+  }
+
+  /**
+   * Fluent method-chaining builder for chat completions & async jobs.
+   */
+  public builder(model?: string): ChatCompletionBuilder {
+    return new ChatCompletionBuilder(this.chat.completions, model);
+  }
+
+  /**
+   * Creates a stateful multi-turn conversation thread.
+   */
+  public thread(options: ThreadOptions = {}): ConversationThread {
+    return new ConversationThread(this, options);
+  }
 }
 
-
+export { GalxAI as GalxAIClient, GalxAI as Client, GalxAI as Galx };

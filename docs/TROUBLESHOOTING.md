@@ -1,81 +1,103 @@
 # 🔧 GALXAI Operational Playbook & Troubleshooting Guide
 
-This guide details common status codes, error classifications, deployment diagnostic playbooks, and operational remedies when running or integrating with GALXAI.
+This guide details common status codes, error classifications, developer diagnostic playbooks, and operational remedies when integrating with or operating GALXAI.
 
 ---
 
-## 🛑 Common Error Classifications
+## ⚡ Zero-Hesitation Quick Diagnostic Commands
+
+Run instant diagnostic checks against the gateway in 0 milliseconds:
+
+```bash
+# 1. Measure edge Anycast roundtrip ping latency (<15ms expected)
+$ npx galxai ping
+
+# 2. Test 0ms model alias resolution
+$ npx galxai resolve claude-3-7-sonnet
+
+# 3. Test live streaming completion from flagship model
+$ npx galxai "Say hello to GALXAI"
+
+# 4. Run automated 98-test zero-hesitation verification suite
+$ npx tsx scripts/verify-zero-hesitation-ergonomics.ts
+```
+
+---
+
+## 🛑 Common Error Classifications & Remediation
 
 ### 1. `tenant_pool_quota_capped` (HTTP 429)
-
 ```json
 {
   "error": "Tenant 'client_abc' reached maximum simultaneous concurrent gateway allocation (20)"
 }
 ```
-
-- **Root Cause**: The client application launched more parallel concurrent requests than the fair-share ceiling allows ($20$ for standard tiers, $40$ for priority tiers).
+- **Root Cause**: The client launched more concurrent parallel requests than the tier allows.
 - **Remedy**:
-  - Implement a client-side concurrency semaphore or worker queue limit.
+  - Implement a client-side concurrency semaphore or worker queue limit (`concurrency: 10`).
   - Upgrade the tenant key to Priority Tier in `/keys` to expand maximum simultaneous in-flight allocations.
 
 ---
 
 ### 2. `all_shards_cooldown` (HTTP 503)
-
 ```json
 {
-  "error": "All active shards for provider 'openai' are in cooldown or saturated at maximum capacity (10 concurrent)"
+  "error": "All active shards for provider 'openai' are in cooldown or saturated at maximum capacity"
 }
 ```
-
 - **Root Cause**: Upstream provider experienced a global outage or dense 429 rate limit wave across all registered credentials simultaneously.
 - **Remedy**:
   - Deposit additional credential shards via `/vault/deposit` to broaden pool capacity.
-  - Enable `x-galx-allow-fallback: true` in your request headers to automatically fall back to adjacent models (e.g. `x-ai/grok-4.5`).
+  - Enable `x-galx-allow-fallback: true` in your request headers to automatically fall back to adjacent models (e.g. `x-ai/grok-4.6`).
 
 ---
 
-### 3. `GalxVaultDecryptionError` (HTTP 500)
+### 3. Authentication & Key Ingestion Issues (HTTP 401)
+```json
+{
+  "error": "Invalid API key format"
+}
+```
+- **Diagnostic Step**: Check the header or query parameter format.
+- **Remedy**:
+  - GALXAI accepts keys across multiple headers: `Authorization: Bearer <key>`, `x-api-key: <key>`, `x-galx-key: <key>`, `api-key: <key>`, or URL search parameters `?api_key=<key>`.
+  - Ensure quotes around the key are stripped (the gateway automatically removes surrounding `'...'` and `"..."` quotes).
 
+---
+
+### 4. Unrecognized Model String or Alias Warnings
+- **Diagnostic Step**: Test model resolution via `npx galxai resolve <your-string>`.
+- **Behavior**: GALXAI strips provider namespaces (`openai/`, `x-ai/`, `anthropic/`, `@anthropic/`) and lifecycle suffixes (`:latest`, `-preview`, `-2026-08-01`).
+- **Fallback**: Any completely unknown or empty model string automatically falls back to **`gpt-5.6-sol`** with zero 400 errors.
+
+---
+
+### 5. `GalxVaultDecryptionError` (HTTP 500)
 ```json
 {
   "error": "Failed to authenticate ciphertext with provided AAD"
 }
 ```
-
-- **Root Cause**: Cryptographic envelope authentication failed. This occurs if ciphertext has been transplanted across tenants, or if `GALX_VAULT_MASTER_SECRET` was rotated without re-encrypting existing database records.
+- **Root Cause**: Cryptographic envelope authentication failed. This occurs if ciphertext was transplanted across tenants, or if `GALX_VAULT_MASTER_SECRET` was rotated without re-encrypting existing database records.
 - **Remedy**:
-  - Verify that `GALX_VAULT_MASTER_SECRET` in your `.env.local` or Vercel environment matches the key used during credential registration.
+  - Verify that `GALX_VAULT_MASTER_SECRET` in `.env.local` matches the key used during credential registration.
   - Run `npm run vault:populate` to test and re-verify your vault keys.
-  - Re-deposit the affected shard credentials via `/vault/deposit`.
 
 ---
 
-### 4. `HTTP 499 Client Closed Request` (Telemetry Log)
+### 6. Cloudflare Edge Gateway Status Codes (`api.galx.ai`)
 
-- **Root Cause**: The client disconnected or aborted an SSE stream before generation finished.
-- **Behavior**: GALXAI's `ReadableStream` cancel handler immediately freed the shard lease and committed only the actual tokens decoded so far, preventing leaked concurrency slots.
-
----
-
-### 5. Cloudflare Edge Gateway Status Codes (`api.galx.ai`)
-
-#### A. `HTTP 401 Invalid API key format`
-- **Root Cause**: The request `Authorization` header did not start with `Bearer galx_live_...` or `Bearer galx_test_...`.
-- **Remedy**: Ensure valid API keys generated from `/keys` are passed in `Authorization: Bearer <key>` headers.
-
-#### B. `HTTP 429 Edge rate limit exceeded`
+#### A. `HTTP 429 Edge rate limit exceeded`
 - **Root Cause**: Rapid client burst triggered the edge PoP sliding-window rate limiter in `RATE_LIMIT_KV` (default 120 req/min per IP/Key).
 - **Remedy**: Apply exponential backoff honoring the `Retry-After: 60` response header.
 
-#### C. `Cloudflare Error 1014 (CNAME Cross-User Banned / SSL Pending)`
+#### B. `Cloudflare Error 1014 (CNAME Cross-User Banned / SSL Pending)`
 - **Root Cause**: Custom domain on R2 (`assets.galx.ai`) is awaiting Cloudflare Universal SSL issuance.
 - **Remedy**: Run `npx wrangler r2 bucket domain list galxai-assets` to check SSL verification status.
 
 ---
 
-## 🚀 Vercel Deployment & Build Troubleshooting
+## 🚀 Pre-Flight Verification & Build Troubleshooting
 
 ### 1. Pre-Flight Audit Gate Failures (`npm run deploy:check`)
 
@@ -91,37 +113,12 @@ This guide details common status codes, error classifications, deployment diagno
 
 ---
 
-### 2. TypeScript Identifier Conflict in `worker-configuration.d.ts`
+## 🧪 Verification Commands Matrix
 
-#### Problem: `Cannot find name 'KVNamespace'` or DOM global redefinition conflicts
-- **Root Cause**: Running uncurated `wrangler types` dumped 15,000+ global lines colliding with TypeScript's standard DOM library.
-- **Remedy**: Ensure `worker-configuration.d.ts` uses scoped dynamic import types:
-  ```typescript
-  type CloudflareKVNamespace = import('@cloudflare/workers-types').KVNamespace;
-  type CloudflareR2Bucket = import('@cloudflare/workers-types').R2Bucket;
-  type CloudflareDurableObjectNamespace = import('@cloudflare/workers-types').DurableObjectNamespace;
-  ```
-  Run `npx tsc --noEmit` to verify clean resolution with 0 errors.
-
----
-
-### 3. Post-Deployment Smoke Test Failures (`npm run vercel:smoke`)
-
-#### Problem: Smoke test fails on `/opengraph-image`
-- **Remedy**: Verify that `export const runtime = 'edge'` is declared in OpenGraph route handlers and that Edge-compatible fonts are loaded via `fetch()`.
-
-#### Problem: Live response security headers missing
-- **Remedy**: Check that `next.config.ts` includes `securityHeaders` in `headers()` and that `vercel.json` is deployed.
-
----
-
-## 📈 Monitoring & Health Checks
-
-| Endpoint | Method | Purpose |
+| Verification Suite | Target Validation Scope | Execution Command |
 | :--- | :--- | :--- |
-| `https://api.galx.ai/api/health` | `GET` | Edge PoP health probe & latency tracker. |
-| `https://galx.ai/api/health` | `GET` | Next.js Vercel serverless diagnostic health & commit telemetry. |
-| `/api/pool/stats` | `GET` | Snapshot of healthy, cooldown, and active shard counts. |
-| `/api/pool/telemetry` | `GET` | Real-time sliding window latency percentiles ($P_{50}, P_{90}, P_{99}$), RPM, TPM, and error rates. |
-| `https://api.galx.ai/v1/models` | `GET` | Live catalog of all 12 available models with active status and edge caching. |
-| `/status` | `GET` | Interactive web dashboard of global fleet availability and response times. |
+| **Zero-Hesitation Ergonomics** | Multi-mental-model absorption, CLI, GET queries, aspect ratios, fallbacks | `npx tsx scripts/verify-zero-hesitation-ergonomics.ts` (98 tests) |
+| **Universal Router & Privacy** | AES-256-GCM vault, BroccoliDB, ZDR v10.0, SOC 2 Type II audit | `npm run test:router` (177 tests) |
+| **Cloudflare Edge Mesh** | Zero-egress edge gateway, R2 CDN routes, SWR caching | `npm run worker:test` (46 tests) |
+| **TypeScript Compilation** | Static typing across serverless & worker runtimes | `npx tsc --noEmit` (0 errors) |
+| **Production App Router** | Production bundle generation across all routes | `npm run build` |

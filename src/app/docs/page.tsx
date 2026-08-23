@@ -39,6 +39,11 @@ import {
 import { ShareButton } from '@/components/common/ShareButton';
 import { ReadingProgressBar } from '@/components/common/ReadingProgressBar';
 import { NoCodeSandboxWidget } from '@/components/dashboard/NoCodeSandboxWidget';
+import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
+import { TrustSeals } from '@/components/common/TrustSeals';
+import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
+import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
+import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export default function DocsPage() {
   // Default to Plain English Strategy for immediate clarity
@@ -484,8 +489,19 @@ response = client.chat.completions.create(
         {/* Quickstart Interactive Snippets */}
         <QuickstartDocs />
 
+        {/* Founding Cohort Rate Lock Ribbon */}
+        <RateLockRibbon />
+
+        {/* Consumer-Grade Trust Seals */}
+        <TrustSeals />
+
         <DocsFeedback docTitle="GALXAI Developer Documentation Center" />
       </main>
+
+      {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
+      <FloatingConversionDock />
+      <LiveActivityToast />
+      <ExitIntentModal />
     </div>
   );
 }

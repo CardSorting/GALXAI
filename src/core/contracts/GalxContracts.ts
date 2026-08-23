@@ -319,10 +319,13 @@ export interface ChatMessage {
 export interface ChatCompletionRequest {
   model: string;
   messages: ChatMessage[];
+  system?: string | any[];
+  prompt?: string | string[];
   temperature?: number;
   top_p?: number;
   n?: number;
   stream?: boolean;
+  stop?: string | string[];
   max_tokens?: number;
   max_completion_tokens?: number;
   presence_penalty?: number;

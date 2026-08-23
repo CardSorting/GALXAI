@@ -40,14 +40,112 @@ export async function POST(req: NextRequest) {
     const isPriorityUser = authResult.isPriorityUser;
 
 
-    // 2. Parse & Validate Body
-    const body = (await req.json()) as ChatCompletionRequest;
-    if (!body.messages || !Array.isArray(body.messages) || body.messages.length === 0) {
-      return NextResponse.json(
-        { error: { message: 'Missing required parameter: messages must be a non-empty array', type: 'invalid_request_error' } },
-        { status: 400 }
-      );
+    // 2. Parse & Hyper-Forgiving Normalization of Request Body
+    let rawBody: any = {};
+    try {
+      const text = await req.text();
+      if (!text || text.trim() === '') {
+        rawBody = { messages: [{ role: 'user', content: 'Hello' }] };
+      } else {
+        try {
+          rawBody = JSON.parse(text);
+        } catch {
+          // If JSON parse fails, absorb the raw text directly as user message
+          rawBody = { messages: [{ role: 'user', content: text.trim() }] };
+        }
+      }
+    } catch {
+      rawBody = { messages: [{ role: 'user', content: 'Hello' }] };
     }
+
+    // A. Forgiving Messages Ingestion (handles prompt, input, text, string messages, Anthropic system)
+    const normalizedMessages: Array<{ role: 'system' | 'user' | 'assistant' | 'tool'; content: any; name?: string; tool_calls?: any[] }> = [];
+
+    // Top-level Anthropic system prompt
+    if (rawBody.system) {
+      const systemStr = typeof rawBody.system === 'string'
+        ? rawBody.system
+        : Array.isArray(rawBody.system)
+        ? rawBody.system.map((s: any) => s.text || '').join('\n')
+        : String(rawBody.system);
+      if (systemStr.trim()) {
+        normalizedMessages.push({ role: 'system', content: systemStr });
+      }
+    }
+
+    if (rawBody.messages) {
+      if (Array.isArray(rawBody.messages)) {
+        for (const msg of rawBody.messages) {
+          if (typeof msg === 'string') {
+            normalizedMessages.push({ role: 'user', content: msg });
+          } else if (msg && typeof msg === 'object') {
+            normalizedMessages.push({
+              role: msg.role || 'user',
+              content: msg.content !== undefined ? msg.content : (msg.text || ''),
+              name: msg.name,
+              tool_calls: msg.tool_calls || msg.toolCalls
+            });
+          }
+        }
+      } else if (typeof rawBody.messages === 'string') {
+        normalizedMessages.push({ role: 'user', content: rawBody.messages });
+      } else if (typeof rawBody.messages === 'object') {
+        normalizedMessages.push({
+          role: rawBody.messages.role || 'user',
+          content: rawBody.messages.content || rawBody.messages.text || ''
+        });
+      }
+    } else if (rawBody.prompt) {
+      const promptStr = Array.isArray(rawBody.prompt) ? rawBody.prompt.join('\n') : String(rawBody.prompt);
+      normalizedMessages.push({ role: 'user', content: promptStr });
+    } else if (rawBody.input) {
+      const inputStr = Array.isArray(rawBody.input) ? rawBody.input.join('\n') : String(rawBody.input);
+      normalizedMessages.push({ role: 'user', content: inputStr });
+    } else if (rawBody.text) {
+      normalizedMessages.push({ role: 'user', content: String(rawBody.text) });
+    } else if (rawBody.content) {
+      normalizedMessages.push({ role: 'user', content: String(rawBody.content) });
+    }
+
+    if (normalizedMessages.length === 0) {
+      normalizedMessages.push({ role: 'user', content: 'Hello' });
+    }
+
+    // B. Parameter Forgiveness & Alias Resolution
+    const maxTokens = rawBody.max_tokens ?? rawBody.max_completion_tokens ?? rawBody.maxTokens ?? rawBody.max_length ?? 2048;
+    const temperature = rawBody.temperature !== undefined ? parseFloat(String(rawBody.temperature)) : 0.7;
+    const topP = rawBody.top_p !== undefined ? parseFloat(String(rawBody.top_p)) : (rawBody.topP !== undefined ? parseFloat(String(rawBody.topP)) : undefined);
+    const isStream = rawBody.stream === true || rawBody.stream === 'true' || rawBody.stream === 1 || rawBody.stream === '1';
+
+    // C. Response Format Normalization
+    let responseFormat = rawBody.response_format || rawBody.responseFormat;
+    if (responseFormat === 'json' || rawBody.json === true) {
+      responseFormat = { type: 'json_object' };
+    }
+
+    // D. Tool / Function Normalization (converting legacy OpenAI functions to tools)
+    let tools = rawBody.tools;
+    if (!tools && rawBody.functions && Array.isArray(rawBody.functions)) {
+      tools = rawBody.functions.map((fn: any) => ({
+        type: 'function',
+        function: fn
+      }));
+    }
+
+    const body: ChatCompletionRequest = {
+      model: rawBody.model || 'gpt-5.6-sol',
+      messages: normalizedMessages as any,
+      temperature: isNaN(temperature) ? 0.7 : temperature,
+      max_tokens: Number(maxTokens) || 2048,
+      top_p: topP !== undefined && !isNaN(topP) ? topP : undefined,
+      stream: isStream,
+      stop: typeof rawBody.stop === 'string' ? [rawBody.stop] : rawBody.stop,
+      response_format: responseFormat,
+      tools,
+      tool_choice: rawBody.tool_choice || rawBody.toolChoice || (rawBody.function_call ? { type: 'function', function: { name: rawBody.function_call } } : undefined),
+      user: rawBody.user,
+      privacy: rawBody.privacy
+    };
 
     // 3. Asynchronous Queue Processing (CloudTasks / CloudRun pattern)
     const isAsync = req.headers.get('x-galx-async') === 'true' || req.headers.get('prefer') === 'respond-async';
@@ -154,4 +252,28 @@ export async function POST(req: NextRequest) {
       }
     );
   }
+}
+
+/**
+ * Universal GET /v1/chat/completions Endpoint.
+ * Allows effortless testing in browser address bar or terminal cURL query params:
+ * e.g. /v1/chat/completions?prompt=Hello&model=sol
+ */
+export async function GET(req: NextRequest) {
+  const url = new URL(req.url);
+  const prompt = url.searchParams.get('prompt') || url.searchParams.get('q') || url.searchParams.get('message') || url.searchParams.get('input') || 'Hello GALXAI';
+  const model = url.searchParams.get('model') || 'gpt-5.6-sol';
+  const stream = url.searchParams.get('stream') === 'true';
+
+  const syntheticReq = new NextRequest(req.url, {
+    method: 'POST',
+    headers: req.headers,
+    body: JSON.stringify({
+      model,
+      messages: [{ role: 'user', content: prompt }],
+      stream
+    })
+  });
+
+  return POST(syntheticReq);
 }

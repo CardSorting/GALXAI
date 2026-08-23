@@ -6,7 +6,7 @@ GALXAI delivers market-leading pricing by combining **pooled infrastructure arbi
 
 ## 1. Core Economic Model & Arbitrage Architecture
 
-Traditional developers purchase individual API access at retail rates with low individual volume brackets. GALXAI operates a high-concurrency unified compute fleet that consolidates multi-tenant query volume into Tier-5 enterprise capacity brackets.
+Traditional developers purchase individual API access at retail rates with low individual volume brackets. GALXAI operates a high-concurrency unified compute fleet that consolidates multi-tenant query volume into Tier-5 enterprise capacity brackets:
 
 ```mermaid
 flowchart LR
@@ -17,7 +17,7 @@ flowchart LR
     subgraph GALXAI Pooled Gateway
         Dev1[Dev 1] & Dev2[Dev 2] & Dev3[Dev 3] --> Gateway[GALXAI Gateway]
         Gateway -->|Consolidated High-Throughput Pool| O2[Upstream Tier-5 Fleet: Volume Brackets]
-        Gateway -->|Pass-Through 25%-40% Discount| Dev1 & Dev2 & Dev3
+        Gateway -->|Pass-Through 20%-36% Discount| Dev1 & Dev2 & Dev3
     end
 ```
 
@@ -25,8 +25,8 @@ flowchart LR
 
 ## 2. Four Pillars of the Discount Strategy
 
-### Pillar 1: Pooled Infrastructure Arbitrage (25% to 40% Base Discount)
-- High-volume pooled compute slots reduce per-token infrastructure costs by 25% to 40% below direct single-key list prices.
+### Pillar 1: Pooled Infrastructure Arbitrage (20% to 36% Base Discount)
+- High-volume pooled compute slots reduce per-token infrastructure costs by 20% to 36% below direct single-key list prices.
 - Dispatches are automatically leveled across available accounts using **Predictive Adaptive Hydraulic Headroom (P-AHT)**, avoiding single-key rate spikes while maximizing volume tier benefits.
 
 ### Pillar 2: 75% Prompt-Caching Automatic Pass-Through
@@ -49,49 +49,59 @@ Rebates scale automatically with monthly token volume without requiring sales ca
 ## 3. Flagship Model Rates & Discount Matrix
 
 ### Flagship Reasoning & LLM Fleet
-| Model ID | Provider | Context Window | Retail List Rate (In / Out) | GALXAI Base Rate | Cached Prompt Rate | Max Savings (Enterprise) |
+| Model ID | Provider | Context Window | Retail List Rate (In / Out) | GALXAI Base Rate | Cached Prompt Rate | Wholesale Discount |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `gpt-5.6-sol` | OpenAI | $900,000$ | $5.00 / $20.00 | **$3.75 / $15.00** | **$0.93 / 1M** | **Up to 40% OFF** |
-| `gpt-5.6-terra` | OpenAI | $900,000$ | $3.00 / $12.00 | **$2.25 / $9.00** | **$0.56 / 1M** | **Up to 40% OFF** |
-| `gpt-5.6-luna` | OpenAI | $900,000$ | $1.50 / $6.00 | **$0.95 / $3.80** | **$0.24 / 1M** | **Up to 51% OFF** |
-| `x-ai/grok-4.6` | xAI Grok | $1,000,000$ | $3.00 / $12.00 | **$2.10 / $8.40** | **$0.52 / 1M** | **Up to 45% OFF** |
-| `x-ai/grok-4.5` | xAI Grok | $500,000$ | $2.50 / $10.00 | **$1.80 / $7.20** | **$0.45 / 1M** | **Up to 43% OFF** |
+| **`gpt-5.6-sol`** | OpenAI | $900,000$ | $5.00 / $20.00 | **$3.75 / $15.00** | **$1.25 / 1M** | **25% OFF** |
+| **`gpt-5.6-terra`** | OpenAI | $900,000$ | $3.00 / $12.00 | **$2.25 / $9.00** | **$0.75 / 1M** | **25% OFF** |
+| **`gpt-5.6-luna`** | OpenAI | $900,000$ | $1.50 / $6.00 | **$0.95 / $3.80** | **$0.30 / 1M** | **36% OFF** |
+| **`x-ai/grok-4.6`** | xAI Grok | $1,000,000$ | $3.00 / $12.00 | **$2.10 / $8.40** | **$0.70 / 1M** | **30% OFF** |
+| **`x-ai/grok-4.5`** | xAI Grok | $500,000$ | $2.50 / $10.00 | **$1.80 / $7.20** | **$0.60 / 1M** | **28% OFF** |
 
 ### Visual Synthesis & Image Generation Fleet
-| Model ID | Provider | Resolution | Retail List Price | GALXAI Base Rate | Max Savings (Enterprise) |
+| Model ID | Provider | Resolution | Retail List Price | GALXAI Base Rate | Wholesale Discount |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `openai-gpt-image-2` | OpenAI | $1024 \times 1024$ | $0.080 / \text{img}$ | **$0.060 / \text{img}$** | **35% OFF** |
-| `openai-gpt-image-1.5` | OpenAI | $1024 \times 1024$ | $0.060 / \text{img}$ | **$0.045 / \text{img}$** | **35% OFF** |
-| `openai-gpt-image-1` | OpenAI | $1024 \times 1024$ | $0.040 / \text{img}$ | **$0.030 / \text{img}$** | **35% OFF** |
-| `openai-gpt4o-image` | OpenAI | $1024 \times 1024$ | $0.050 / \text{img}$ | **$0.038 / \text{img}$** | **35% OFF** |
-| `openai-dalle-3` | OpenAI | $1024 \times 1024$ | $0.040 / \text{img}$ | **$0.032 / \text{img}$** | **30% OFF** |
-| `openai-dalle-2` | OpenAI | $512 \times 512$ | $0.020 / \text{img}$ | **$0.016 / \text{img}$** | **35% OFF** |
-| `xai-grok-image` | xAI Grok | $1024 \times 1024$ | $0.050 / \text{img}$ | **$0.037 / \text{img}$** | **36% OFF** |
-| `xai-grok-2-image` | xAI Grok | $1024 \times 1024$ | $0.040 / \text{img}$ | **$0.030 / \text{img}$** | **35% OFF** |
-
-### Vector Embeddings & Multimodal Egress
-| Service / Model | Provider | Dimensions | Retail List Price | GALXAI Base Rate | Savings |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| `text-embedding-3-small` | OpenAI / Edge | 1,536 | $0.020 / 1\text{M}$ | **$0.015 / 1\text{M}$** | **25% OFF** |
-| `text-embedding-3-large` | OpenAI / Edge | 3,072 | $0.130 / 1\text{M}$ | **$0.095 / 1\text{M}$** | **27% OFF** |
-| **Multimodal Storage Egress** | Cloudflare R2 | Anycast CDN | $0.090 / \text{GB}$ | **$0.000 / \text{GB}$** | **100% FREE ($0 Egress)** |
+| **`openai-gpt-image-2`** | OpenAI | $1792 \times 1024$ | $0.080 / \text{img}$ | **$0.060 / \text{img}$** | **25% OFF** |
+| **`openai-gpt-image-1.5`**| OpenAI | $1024 \times 1024$ | $0.060 / \text{img}$ | **$0.045 / \text{img}$** | **25% OFF** |
+| **`openai-gpt-image-1`** | OpenAI | $1024 \times 1024$ | $0.040 / \text{img}$ | **$0.030 / \text{img}$** | **30% OFF** |
+| **`openai-gpt4o-image`** | OpenAI | $1024 \times 1024$ | $0.050 / \text{img}$ | **$0.038 / \text{img}$** | **24% OFF** |
+| **`openai-dalle-3`** | OpenAI | $1792 \times 1024$ | $0.040 / \text{img}$ | **$0.030 / \text{img}$** | **25% OFF** |
+| **`openai-dalle-2`** | OpenAI | $512 \times 512$ | $0.020 / \text{img}$ | **$0.014 / \text{img}$** | **30% OFF** |
+| **`xai-grok-image`** | xAI Grok | $1024 \times 1024$ | $0.050 / \text{img}$ | **$0.036 / \text{img}$** | **28% OFF** |
+| **`xai-grok-2-image`** | xAI Grok | $1024 \times 1024$ | $0.040 / \text{img}$ | **$0.028 / \text{img}$** | **30% OFF** |
 
 ---
 
-## 4. Market Competitor Benchmark Analysis
+## 4. Measuring Savings via CLI & SDK
 
-### Benchmark Workload: 10 Million Tokens on Flagship Reasoning (`gpt-5.6-sol`)
-*Assumes 5M input tokens (50% cached) + 5M output tokens.*
+### Instant Terminal Calculation (`npx galxai tokens`)
+```bash
+npx galxai tokens "Paste massive document text here..."
+# Output:
+# 📊 Token Count: ~12,450 tokens
+# 💰 Retail Cost: $0.0623
+# 🌟 GALXAI Cost: $0.0467
+# 💵 You Save:    $0.0156 (25% instant savings)
+```
 
-| Provider | Input Cost (5M) | Output Cost (5M) | Total Workload Cost | Gateway Markup | Net Savings vs. Retail |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **GALXAI Pooled Gateway** | **$11.72** | **$75.00** | **$86.72** | **0%** | **Save $28.90 (25.0% Net)** |
+### Programmatic SDK Savings Calculator
+```typescript
+import { TokenOptimizer } from '@galxai/sdk';
+
+const savings = TokenOptimizer.calculateSavings({
+  inputTokens: 100_000,
+  outputTokens: 50_000,
+  cachedTokens: 80_000,
+  model: 'gpt-5.6-sol'
+});
+
+console.log(`Standard Retail: $${savings.standardCostUsd.toFixed(4)}`);
+console.log(`GALXAI Wholesale: $${savings.galxaiCostUsd.toFixed(4)}`);
+console.log(`Total Saved: $${savings.savingsUsd.toFixed(4)} (${savings.savingsPercentage}%)`);
+```
 
 ---
 
 ## 5. Prepay Compute Packs & Instant Match Grants
-
-GALXAI offers structured, high-value compute top-up packs with immediate compute match grants deposited to the developer's wallet upon settlement:
 
 | Compute Tier | Prepay Amount | Match Grant / Volume Bonus | Total Credited Wallet Balance | Effective Bonus | Workload Capacity Estimate |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -99,22 +109,3 @@ GALXAI offers structured, high-value compute top-up packs with immediate compute
 | **Growth Builder** | **$50.00 USD** | +$12.50 (+25% Grant) | **$62.50 USD** | +25% | ~40,000 to ~55,000 queries |
 | **Scale Fleet (Recommended)** | **$100.00 USD** | +$50.00 (50% Match Grant) | **$150.00 USD** | +50% | ~88,000 to ~120,000 queries |
 | **Enterprise Fleet** | **$250.00 USD** | +$125.00 (50% Match Grant) | **$375.00 USD** | +50% | ~220,000+ deep reasoning tasks |
-
----
-
-## 6. Workload Capacity Estimation Matrix
-
-To provide non-technical and executive transparency, compute credits map to concrete engineering capacity:
-
-```mermaid
-pie title $100 Scale Pack Value Allocation ($150 Usable Credit)
-    "GPT-5.6 Sol Coding Tokens (60M tok)" : 45
-    "Prompt Cache Hit Rebates (80M tok)" : 25
-    "xAI Grok 4.5 500K Multimodal" : 20
-    "Continuous Buffer Reserve" : 10
-```
-
-- **Coding IDE Queries (Cursor / Windsurf)**: ~88,000 inline completions and multi-file diffs.
-- **Autonomous Agent Swarms (LangChain / AutoGen)**: ~32,000 multi-step reasoning steps.
-- **Visual Asset Synthesis (GPT-Image-2 4K)**: ~2,500 full-resolution images.
-

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
@@ -12,10 +12,36 @@ import {
   Sliders,
   CheckCircle2,
   Cpu,
-  Layers
+  Layers,
+  Sparkles,
+  ArrowRight,
+  Flame,
+  ShieldCheck,
+  Play,
+  RotateCcw
 } from 'lucide-react';
+import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
+import { TrustSeals } from '@/components/common/TrustSeals';
+import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
+import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
+import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export default function RateLimitsDocsPage() {
+  const [tokens, setTokens] = useState<number>(8500);
+  const maxCapacity = 10000;
+  const refillRate = 2500; // tokens per second simulated
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTokens((prev) => Math.min(maxCapacity, prev + 25));
+    }, 50);
+    return () => clearInterval(timer);
+  }, []);
+
+  const simulateBurst = () => {
+    setTokens((prev) => Math.max(0, prev - 4000));
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
@@ -29,31 +55,90 @@ export default function RateLimitsDocsPage() {
           ]}
         />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white">Rate Limits & Concurrency Governor Guide</h1>
-            <p className="text-xs text-zinc-400">
-              Continuous fractional token replenishment calculus, 2-phase token reservations, and burst handling.
-            </p>
+        {/* Hero Header */}
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-4 border border-white/10 relative overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
+              <Gauge className="w-3.5 h-3.5" />
+              <span>CONTINUOUS TOKEN REPLENISHMENT</span>
+            </div>
+            <Link
+              href="/keys/rate-limits"
+              className="px-4 py-2.5 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer"
+            >
+              <Gauge className="w-3.5 h-3.5" />
+              <span>Manage Key Quotas →</span>
+            </Link>
           </div>
-
-          <Link
-            href="/keys/rate-limits"
-            className="px-4 py-2.5 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-mono font-bold flex items-center gap-2 transition-all"
-          >
-            <Gauge className="w-3.5 h-3.5" />
-            <span>Manage Key Quotas →</span>
-          </Link>
+          <h1 className="text-3xl sm:text-4xl font-black text-white">Rate Limits &amp; Concurrency Governor Guide</h1>
+          <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl font-sans">
+            Continuous fractional token replenishment calculus, 2-phase token reservations, and burst smoothing eliminate top-of-minute 429 stampedes.
+          </p>
         </div>
 
         <DocsSubNav />
 
+        {/* Founding Cohort Rate Lock Ribbon */}
+        <RateLockRibbon />
+
+        {/* Interactive Continuous Governor Visualizer */}
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-amber-500/30 bg-amber-500/5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-1">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2 font-mono">
+                <Activity className="w-5 h-5 text-amber-400" />
+                <span>Live Continuous Token Replenishment Simulator</span>
+              </h2>
+              <p className="text-xs text-zinc-400">Tokens refill smoothly microsecond-by-microsecond rather than resetting in a cliff at :00.</p>
+            </div>
+
+            <button
+              onClick={simulateBurst}
+              className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black text-xs font-mono font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 shadow-md"
+            >
+              <Zap className="w-3.5 h-3.5 fill-black" />
+              <span>Simulate 4,000 Token Burst</span>
+            </button>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-black/80 border border-white/10 space-y-3 font-mono text-xs">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-zinc-400">Available Token Governor Capacity:</span>
+              <span className="text-amber-300 font-bold">{tokens.toLocaleString()} / {maxCapacity.toLocaleString()} TPM</span>
+            </div>
+
+            <div className="w-full h-3 bg-black/60 rounded-full overflow-hidden border border-white/10">
+              <div
+                className="h-full bg-gradient-to-r from-amber-400 to-emerald-400 transition-all duration-75"
+                style={{ width: `${(tokens / maxCapacity) * 100}%` }}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-[11px]">
+              <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-0.5">
+                <span className="text-zinc-500 text-[9px] uppercase">Refill Granularity</span>
+                <div className="text-white font-bold">1 microsecond</div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-0.5">
+                <span className="text-zinc-500 text-[9px] uppercase">Top-of-Minute Jitter</span>
+                <div className="text-emerald-400 font-bold">0.0 ms (Eliminated)</div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-0.5">
+                <span className="text-zinc-500 text-[9px] uppercase">Scavenger Reclaim</span>
+                <div className="text-cyan-300 font-bold">Instant on disconnect</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Section: Continuous Fractional Calculus */}
         <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
           <div className="space-y-1">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2 font-mono">
               <Activity className="w-5 h-5 text-indigo-400" />
-              1. Continuous Fractional Token Calculus
+              1. Continuous Fractional Token Calculus Formula
             </h2>
             <p className="text-xs text-zinc-400">
               Unlike traditional gateways that reset rate limits at the top of every minute, GALXAI recalculates capacity microsecond by microsecond.
@@ -75,9 +160,9 @@ bucket.currentTokens = Math.min(bucket.maxCapacity, bucket.currentTokens + fract
         {/* Section: 2-Phase Token Reservation */}
         <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
           <div className="space-y-1">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2 font-mono">
               <Zap className="w-5 h-5 text-amber-400" />
-              2. 2-Phase Token Reservation & Long-Stream Leases
+              2. 2-Phase Token Reservation &amp; Long-Stream Leases
             </h2>
             <p className="text-xs text-zinc-400">
               Prevents concurrent requests from exhausting token ceilings during long generation streams.
@@ -88,7 +173,15 @@ bucket.currentTokens = Math.min(bucket.maxCapacity, bucket.currentTokens + fract
             When an inference request is accepted, an initial soft reservation is locked in the governor. As output tokens stream back, the reservation is continuously reconciled with actual usage. If a client disconnects early, unused reserved tokens are immediately reclaimed by the scavenger engine.
           </p>
         </div>
+
+        {/* Consumer-Grade Trust Seals */}
+        <TrustSeals />
       </main>
+
+      {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
+      <FloatingConversionDock />
+      <LiveActivityToast />
+      <ExitIntentModal />
     </div>
   );
 }

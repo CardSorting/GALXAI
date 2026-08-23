@@ -82,3 +82,24 @@ export class BatchEvaluator {
     return results;
   }
 }
+
+const defaultBatchEvaluator = new BatchEvaluator();
+
+/**
+ * 1-line high-throughput batch runner.
+ *
+ * @example
+ * ```ts
+ * import { batch } from '@galxai/sdk';
+ * const results = await batch(['topic 1', 'topic 2'], async (topic) => {
+ *   return await galx.run(`Explain ${topic}`);
+ * });
+ * ```
+ */
+export async function batch<T, R = any>(
+  items: T[],
+  fn: (item: T, index: number) => Promise<R>,
+  options?: BatchMapOptions<T, R>
+): Promise<Array<BatchResultItem<T, R>>> {
+  return defaultBatchEvaluator.mapConcurrent(items, fn, options);
+}

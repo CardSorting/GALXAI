@@ -14,9 +14,11 @@ import {
   Cpu,
   Clock,
   Coins,
-  CheckCircle2
+  CheckCircle2,
+  Layers
 } from 'lucide-react';
-import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/ModelCatalog';
+import { Search } from 'lucide-react';
 
 interface SimpleCategory {
   id: string;
@@ -63,36 +65,79 @@ const CATEGORIES: SimpleCategory[] = [
     label: 'Live Real-Time & High Velocity',
     sublabel: 'Best for Real-Time Search, Scraping & Grok Speed',
     icon: Flame,
-    recommendedModelId: 'x-ai/grok-4.5',
+    recommendedModelId: 'x-ai/grok-4.6',
     plainUseCases: [
       'Real-time news synthesis and live web intelligence',
-      'Unrestricted creative problem-solving and brainstorming',
+      'Frontier multimodal reasoning with 1M context window',
       'High-throughput background data extraction pipelines'
     ],
-    retailComparison: '$3.00 / 1M tokens retail',
-    galxDiscount: 'Save 40% ($1.80 direct wholesale)'
+    retailComparison: '$12.00 / 1M tokens retail',
+    galxDiscount: 'Save 30% ($2.10 in / $8.40 out)'
   },
   {
     id: 'visuals',
     label: 'Photorealistic 4K Visual Studio',
     sublabel: 'Best for Ad Creatives, Product Mockups & Banners',
     icon: ImageIcon,
-    recommendedModelId: 'openai/gpt-image-2',
+    recommendedModelId: 'openai-gpt-image-2',
     plainUseCases: [
       'Studio-quality 4K product photography and renders',
       'High-converting social media ad visual assets',
       'Website hero banners and graphic design'
     ],
-    retailComparison: '$0.040 / render retail',
-    galxDiscount: 'Save 50% ($0.020 direct wholesale)'
+    retailComparison: '$0.080 / 1M retail',
+    galxDiscount: 'Save 25% ($0.060 direct wholesale)'
+  },
+  {
+    id: 'embeddings',
+    label: 'Vector Embeddings & Semantic Search',
+    sublabel: 'Best for RAG Pipelines, Knowledge Retrieval & Hybrid Search',
+    icon: Layers,
+    recommendedModelId: 'text-embedding-3-small',
+    plainUseCases: [
+      'Dense 1536-dimensional semantic vector indexing',
+      'Retrieval-Augmented Generation (RAG) vector stores',
+      'Instant semantic deduplication and document clustering'
+    ],
+    retailComparison: '$0.020 / 1M retail',
+    galxDiscount: 'Save 25% ($0.015 direct wholesale)'
   }
 ];
 
 export function SimpleModelPicker() {
   const [selectedCatId, setSelectedCatId] = useState<string>('fast');
+  const [naturalQuery, setNaturalQuery] = useState<string>('');
+
+  // Ambiguity-absorbing intent query
+  const handleQueryChange = (text: string) => {
+    setNaturalQuery(text);
+    if (!text.trim()) return;
+
+    const resolved = ModelCatalog.resolveModel(text);
+    if (resolved) {
+      if (resolved.category === 'embedding') setSelectedCatId('embeddings');
+      else if (resolved.category === 'image') setSelectedCatId('visuals');
+      else if (resolved.provider === 'xai-grok') setSelectedCatId('velocity');
+      else if (resolved.id.includes('terra')) setSelectedCatId('reasoning');
+      else setSelectedCatId('fast');
+    } else {
+      const lower = text.toLowerCase();
+      if (lower.includes('embed') || lower.includes('vector') || lower.includes('rag') || lower.includes('semantic')) {
+        setSelectedCatId('embeddings');
+      } else if (lower.includes('code') || lower.includes('refactor') || lower.includes('logic')) {
+        setSelectedCatId('reasoning');
+      } else if (lower.includes('grok') || lower.includes('search') || lower.includes('realtime') || lower.includes('1m')) {
+        setSelectedCatId('velocity');
+      } else if (lower.includes('image') || lower.includes('photo') || lower.includes('render') || lower.includes('dalle')) {
+        setSelectedCatId('visuals');
+      } else if (lower.includes('chat') || lower.includes('fast') || lower.includes('support')) {
+        setSelectedCatId('fast');
+      }
+    }
+  };
 
   const currentCat = CATEGORIES.find(c => c.id === selectedCatId) || CATEGORIES[0];
-  const modelSpecs = EXCLUSIVE_MODEL_CATALOG.find(m => m.id === currentCat.recommendedModelId);
+  const modelSpecs = EXCLUSIVE_MODEL_CATALOG.find(m => m.id === currentCat.recommendedModelId) || ModelCatalog.resolveModel(currentCat.recommendedModelId);
 
   return (
     <section className="glass-panel rounded-3xl p-6 sm:p-10 space-y-8 border border-white/10 relative overflow-hidden shadow-2xl">
@@ -103,13 +148,13 @@ export function SimpleModelPicker() {
         <div className="space-y-1">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>INTERACTIVE MODEL MATCHMAKER</span>
+            <span>INTERACTIVE INTENT &amp; MODEL MATCHMAKER</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-            Which AI Engine is Right for Your Business?
+            Which AI Engine Fits Your Exact Mental Model?
           </h2>
           <p className="text-xs sm:text-sm text-zinc-300">
-            Select your primary business objective below to find the ideal model and wholesale pricing tier.
+            Click your primary business goal or describe your task in plain English to auto-match the optimal engine.
           </p>
         </div>
 
@@ -117,9 +162,40 @@ export function SimpleModelPicker() {
           href="/models"
           className="text-xs font-mono text-cyan-300 hover:text-cyan-200 flex items-center gap-1 self-start md:self-auto"
         >
-          <span>View All 12 Raw Specifications</span>
+          <span>View All {EXCLUSIVE_MODEL_CATALOG.length} Raw Specifications</span>
           <ArrowRight className="w-3 h-3" />
         </Link>
+      </div>
+
+      {/* Natural Language Intent & Ambiguity Search Bar */}
+      <div className="p-3.5 rounded-2xl bg-black/50 border border-white/10 space-y-2">
+        <div className="relative">
+          <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={naturalQuery}
+            onChange={(e) => handleQueryChange(e.target.value)}
+            placeholder="Type your use case or alias in plain English (e.g. 'refactor full repo', 'grok 1m', 'extract invoices', 'sol')..."
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black/60 border border-white/10 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-amber-400 font-mono"
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-zinc-400">
+          <span className="text-zinc-500">Quick Mental Models:</span>
+          {[
+            { label: 'Refactor Code', query: 'refactor code' },
+            { label: 'Grok 1M Context', query: 'grok 4.6' },
+            { label: '4K Images', query: 'gpt-image-2' },
+            { label: 'Fast Autocomplete', query: 'sol' }
+          ].map((tag) => (
+            <button
+              key={tag.label}
+              onClick={() => handleQueryChange(tag.query)}
+              className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 transition-colors cursor-pointer border border-white/5"
+            >
+              {tag.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* 4 Apple-Style Category Selectors */}

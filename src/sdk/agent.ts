@@ -1,6 +1,7 @@
 /**
- * GALXAI Developer SDK: Autonomous Agent Runtime & Tool Calling Loop
+ * GALXAI Developer SDK: Autonomous Agent Runtime & Universal Tool Calling Loop
  * Automatically executes local functions, captures outputs, and loops until final synthesis.
+ * Absorbs all tool formats: pure function maps, OpenAI tool arrays, Anthropic tool arrays, and LangChain tools.
  */
 
 import type { ChatMessage, ChatCompletionResponse } from '../core/contracts/GalxContracts';
@@ -8,20 +9,36 @@ import type { CompletionsResource } from './resources/chat';
 import { APIError } from './errors';
 
 export interface AgentToolDefinition<TParams = any, TResult = any> {
-  description: string;
-  parameters: {
+  description?: string;
+  parameters?: {
     type?: 'object';
     properties?: Record<string, any>;
     required?: string[];
     [key: string]: any;
   };
-  execute: (params: TParams) => Promise<TResult> | TResult;
+  input_schema?: any; // Anthropic format
+  execute?: (params: TParams) => Promise<TResult> | TResult;
+  call?: (params: TParams) => Promise<TResult> | TResult;
+  run?: (params: TParams) => Promise<TResult> | TResult;
 }
+
+export type ForgivingToolInput =
+  | ((params: any) => Promise<any> | any)
+  | AgentToolDefinition
+  | {
+      type: 'function';
+      function: {
+        name: string;
+        description?: string;
+        parameters?: any;
+        execute?: (params: any) => Promise<any> | any;
+      };
+    };
 
 export interface AgentConfig {
   model?: string;
   systemPrompt?: string;
-  tools?: Record<string, AgentToolDefinition>;
+  tools?: Record<string, ForgivingToolInput> | Array<ForgivingToolInput & { name?: string }>;
   maxSteps?: number;
   temperature?: number;
   onStep?: (step: { stepNumber: number; toolCalls?: any[]; output?: string }) => void;
@@ -44,6 +61,17 @@ export interface AgentExecutionResult {
   };
 }
 
+interface NormalizedTool {
+  name: string;
+  description: string;
+  parameters: {
+    type: 'object';
+    properties: Record<string, any>;
+    required: string[];
+  };
+  execute: (params: any) => Promise<any> | any;
+}
+
 export class AgentRuntime {
   private readonly completions: CompletionsResource;
   private readonly config: AgentConfig;
@@ -56,6 +84,86 @@ export class AgentRuntime {
       temperature: 0.2,
       ...config
     };
+  }
+
+  /**
+   * Normalizes any tool input into standard executable tools.
+   */
+  private normalizeTools(): Map<string, NormalizedTool> {
+    const registry = new Map<string, NormalizedTool>();
+    const rawTools = this.config.tools;
+
+    if (!rawTools) return registry;
+
+    // If passed as array
+    if (Array.isArray(rawTools)) {
+      for (const item of rawTools) {
+        if (!item) continue;
+        if (typeof item === 'object' && 'type' in item && item.type === 'function' && item.function) {
+          const fn = item.function;
+          registry.set(fn.name, {
+            name: fn.name,
+            description: fn.description || `Execute ${fn.name}`,
+            parameters: fn.parameters || { type: 'object', properties: {}, required: [] },
+            execute: fn.execute || (async () => ({ success: true }))
+          });
+        } else if (typeof item === 'object') {
+          const name = (item as any).name || 'custom_tool';
+          const description = (item as any).description || `Tool ${name}`;
+          const parameters = (item as any).parameters || (item as any).input_schema || { type: 'object', properties: {}, required: [] };
+          const execute = (item as any).execute || (item as any).call || (item as any).run || (async () => ({ success: true }));
+          registry.set(name, {
+            name,
+            description,
+            parameters: {
+              type: 'object',
+              properties: parameters.properties || {},
+              required: parameters.required || []
+            },
+            execute
+          });
+        }
+      }
+      return registry;
+    }
+
+    // If passed as dictionary / object
+    for (const [name, def] of Object.entries(rawTools)) {
+      if (typeof def === 'function') {
+        registry.set(name, {
+          name,
+          description: `Execute tool ${name}`,
+          parameters: { type: 'object', properties: {}, required: [] },
+          execute: def
+        });
+      } else if (def && typeof def === 'object') {
+        if ('type' in def && def.type === 'function' && def.function) {
+          const fn = def.function;
+          registry.set(name, {
+            name: fn.name || name,
+            description: fn.description || `Execute tool ${name}`,
+            parameters: fn.parameters || { type: 'object', properties: {}, required: [] },
+            execute: fn.execute || (async () => ({ success: true }))
+          });
+        } else {
+          const toolObj = def as AgentToolDefinition;
+          const execute = toolObj.execute || toolObj.call || toolObj.run || (async () => ({ success: true }));
+          const parameters = toolObj.parameters || toolObj.input_schema || { type: 'object', properties: {}, required: [] };
+          registry.set(name, {
+            name,
+            description: toolObj.description || `Execute tool ${name}`,
+            parameters: {
+              type: 'object',
+              properties: parameters.properties || {},
+              required: parameters.required || []
+            },
+            execute
+          });
+        }
+      }
+    }
+
+    return registry;
   }
 
   /**
@@ -74,17 +182,13 @@ export class AgentRuntime {
       messages.push(...userInput);
     }
 
-    const toolsConfig = this.config.tools || {};
-    const formattedTools = Object.entries(toolsConfig).map(([name, def]) => ({
+    const toolMap = this.normalizeTools();
+    const formattedTools = Array.from(toolMap.values()).map(t => ({
       type: 'function' as const,
       function: {
-        name,
-        description: def.description,
-        parameters: {
-          type: 'object',
-          properties: def.parameters.properties || {},
-          required: def.parameters.required || []
-        }
+        name: t.name,
+        description: t.description,
+        parameters: t.parameters
       }
     }));
 
@@ -120,7 +224,6 @@ export class AgentRuntime {
       // Check for tool calls
       const toolCalls = message.tool_calls;
       if (toolCalls && toolCalls.length > 0) {
-        // Append assistant message with tool calls
         messages.push({
           role: 'assistant',
           content: message.content || '',
@@ -134,10 +237,12 @@ export class AgentRuntime {
           const fnArgsStr = tc.function?.arguments || '{}';
           let parsedArgs = {};
           try {
-            parsedArgs = JSON.parse(fnArgsStr);
-          } catch {}
+            parsedArgs = typeof fnArgsStr === 'string' ? JSON.parse(fnArgsStr) : fnArgsStr;
+          } catch {
+            parsedArgs = { raw: fnArgsStr };
+          }
 
-          const toolDef = toolsConfig[fnName];
+          const toolDef = toolMap.get(fnName);
           let toolResult: any;
 
           if (toolDef) {
@@ -156,19 +261,18 @@ export class AgentRuntime {
             result: toolResult
           });
 
-          // Append tool result message
           messages.push({
-            role: 'developer', // or tool in OpenAI specs
+            role: 'developer',
             content: typeof toolResult === 'string' ? toolResult : JSON.stringify(toolResult),
             name: fnName
           });
         }
 
-        // Loop continues to let model process tool outputs
+        // Continue loop to process tool outputs
         continue;
       }
 
-      // No more tool calls; final answer reached
+      // Final answer reached
       const finalContent = message.content || '';
       messages.push({ role: 'assistant', content: finalContent });
 

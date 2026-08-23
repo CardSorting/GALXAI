@@ -1,6 +1,39 @@
-# 🌊 Quota Routing Algorithms & Mathematical Calculus
+# 🌊 Quota Routing Algorithms, Mathematical Calculus & Model Resolution
 
-GALXAI employs mathematical dispatch algorithms designed to maximize throughput, prevent upstream rate-limit collisions, and provide latency-optimized allocation across pooled credentials.
+GALXAI employs mathematical dispatch algorithms and zero-hesitation model resolution designed to maximize throughput, eliminate upstream rate-limit collisions, and provide latency-optimized allocation across pooled credentials.
+
+---
+
+## 🏛️ Routing Topography & Two-Stage Dispatch Sequence
+
+Every incoming query executes a two-stage routing pipeline:
+1. **Stage 1: Zero-Hesitation Model & Intent Resolution**: Resolves developer shorthands, intent aliases, and legacy provider IDs to a canonical flagship model ID in $< 0.02\text{ms}$.
+2. **Stage 2: Mathematical Shard Candidate Selection**: Evaluates physical credential shards using **Predictive Adaptive Hydraulic Headroom (P-AHT)**, **Smooth Weighted Round-Robin (SWRR)**, or **Weighted Least-Utilized (WLC)**.
+
+```mermaid
+flowchart TD
+    ClientReq["Incoming Request / Shorthand Model / Alias"] --> Stage1
+    
+    subgraph Stage1["Stage 1: Zero-Hesitation Model & Intent Resolution"]
+        Strip["Prefix / Suffix Stripper (openai/, :latest, @20260801)"]
+        Synonym["Synonym & Intent Lookup (sol, terra, grok, fast, o1, claude-3-7)"]
+        FallbackModel["Graceful Default Fallback (gpt-5.6-sol)"]
+        Strip --> Synonym --> FallbackModel
+    end
+    
+    Stage1 --> CanonicalModel["Canonical Target Model ID"]
+    CanonicalModel --> Stage2
+    
+    subgraph Stage2["Stage 2: Mathematical Shard Selection & Lease Acquisition"]
+        BDB["BroccoliDB Reactive Pre-Filter (< 2µs)"]
+        BreakerFilter["4-State Circuit Breaker Filter"]
+        PAHT["P-AHT Hydraulic Scoring Matrix (S_i)"]
+        SoftReserve["2-Phase Soft Reservation & Fencing Token"]
+        BDB --> BreakerFilter --> PAHT --> SoftReserve
+    end
+    
+    Stage2 --> ExecutionShard["Target Physical Upstream Shard"]
+```
 
 ---
 
@@ -9,7 +42,6 @@ GALXAI employs mathematical dispatch algorithms designed to maximize throughput,
 The primary and recommended quota cycling algorithm is **Predictive Adaptive Hydraulic Headroom (P-AHT)**. It treats the pooled credential fleet as a system of interconnected pressurized hydraulic reservoirs.
 
 ### Mathematical Formulation
-
 For each candidate shard $i$, the dynamic hydraulic score $S_i$ is computed continuously in real-time:
 
 $$S_i = \left( R_i \right)^{1.2} \times C_i \times H_i \times D_i \times L_i \times W_i \times P_i \times M_i \times T_i + \epsilon_i$$
@@ -35,91 +67,35 @@ Where:
 
 Based on the **Envoy Proxy & Nginx upstream load balancing algorithm**, SWRR guarantees completely smooth interleaving of traffic without burst clumping across homogeneous or weighted credentials.
 
-### Algorithm Mechanics
-
-1. Each shard $i$ has an effective weight $w_i \ge 1$ and an internal dynamic state variable $c_i$ (`currentWeight`), initialized to $0$.
-2. Upon request arrival:
-   - For every candidate shard $i$: $c_i \leftarrow c_i + w_i$.
-   - Select candidate $k$ with the maximum current weight: $k = \arg\max_i(c_i)$.
-   - Deduct total weight sum from selected shard: $c_k \leftarrow c_k - \sum_i w_i$.
-3. Return shard $k$.
-
 ### Mathematical Invariant
-
 Over any window of $N = \sum_i w_i$ requests, shard $i$ is selected exactly $w_i$ times, and selections are distributed with mathematical maximum uniformity:
 
 $$\max_{t_1, t_2} \left| \text{Selections}_i(t_1, t_2) - w_i \frac{t_2 - t_1}{N} \right| < 1$$
 
 ---
 
-## 3. Weighted Least-Utilized (WLC)
+## 3. Client-Side Resilience Topologies (`fallbackCascade` & `race`)
 
-Designed for batch background pipelines and long-context reasoning models:
+`@galxai/sdk` exposes programmatic client-side routing algorithms:
 
-$$\text{Rank}(i) = \left( \text{inFlight}_i, \; \text{totalTokensConsumed}_i, \; -\text{priority}_i, \; \text{id}_i \right)$$
+### Multi-Model Fallback Cascade (`fallbackCascade`)
+Sequentially attempts execution across a list of models if an upstream provider experiences severe degradation:
+```typescript
+import { fallback } from '@galxai/sdk';
 
-Sorts candidates primarily by active in-flight worker count, breaking ties by lifetime token consumption leveler.
-
----
-
-## 4. Priority Failover Cascade
-
-Designed for mission-critical enterprise workloads requiring hierarchical cascade routing:
-
-1. Highest priority tier shards ($\text{priority} \ge 90$) receive 100% of traffic.
-## 5. BroccoliDB Sub-Microsecond Candidate Pre-Filtering
-
-Before scoring algorithms evaluate candidate shards, **BroccoliDB reactive secondary indices** pre-filter candidate pools in $< 2\mu\text{s}$:
-
-```text
-Full Shard Fleet (N Shards in accountTable)
-                 │
-                 ▼
-  [Index Lookup: provider == 'openai' & status != 'revoked']  -> O(1) Candidate Set
-                 │
-                 ▼
-  [Index Lookup: shardMode == 'pooled' & permissionRetracted == false] -> O(1) Filter
-                 │
-                 ▼
-  [Circuit Breaker Filter: status != 'dead' & status != 'exhausted']
-                 │
-                 ▼
-  [P-AHT Mathematical Scoring Matrix: S_i]
-                 │
-                 ▼
-       Selected Execution Shard
+const response = await fallback(
+  ['gpt-5.6-sol', 'x-ai/grok-4.6', 'gpt-5.6-terra'],
+  "Mission critical architecture task"
+);
 ```
 
----
+### Lowest TTFB Multi-Model Race (`race`)
+Fires simultaneous speculative requests across candidate models, streaming the fastest arriving token chunk to the consumer while aborting trailing streams:
+```typescript
+import { race } from '@galxai/sdk';
 
-## 6. Edge In-Flight Provider Failover (`GalxEdgeRouter`)
-
-On Cloudflare Workers Edge isolates, `GalxEdgeRouter` executes in-flight provider failover within the active client HTTP stream:
-
-```mermaid
-sequenceDiagram
-    autonumber
-    Client->>GalxEdgeGateway: POST /v1/chat/completions (api.galx.ai)
-    GalxEdgeGateway->>GalxEdgeRouter: routeWithFailover(model, primaryShard, backupShards)
-    GalxEdgeRouter->>OpenAIShard1: Attempt 1: Fetch upstream completion
-    OpenAIShard1-->>GalxEdgeRouter: 429 Rate Limited / Transient 503
-    Note over GalxEdgeRouter: Circuit Breaker triggers instant failover (<5ms)
-    GalxEdgeRouter->>OpenAIShard2: Attempt 2: Fetch backup shard
-    OpenAIShard2-->>GalxEdgeRouter: 200 OK (SSE Stream Chunks)
-    GalxEdgeRouter-->>Client: Direct zero-egress stream (Client never sees 429)
+const fastestStream = await race(
+  ['gpt-5.6-luna', 'gpt-5.6-sol'],
+  "Latency-critical real-time response"
+);
 ```
-
----
-
-## 📊 Strategy Selection Matrix
-
-| Use Case | Recommended Strategy | Primary Advantage |
-| :--- | :--- | :--- |
-| **Mixed Interactive AI Workloads** | `adaptive_headroom` | Lowest latency, zero 429 stampedes, proactive token leveling |
-| **Homogeneous High-Volume Queues** | `smooth_weighted_round_robin` | Perfectly smooth interleave, zero burst clumping |
-| **Long-Running Batch Inference** | `least_utilized` | Prevents token debt skew across credentials |
-| **Tiered Failover Deployments** | `priority_failover` | Strict hierarchical failover guarantees |
-| **Cloudflare Edge Ingress** | `edge_failover` | In-flight transparent retry at edge PoPs with $0 egress |
-| **Micro-Subsecond Substrate Queries** | `broccolidb_natural` | Offline deterministic AST matching with zero GC overhead |
-
-

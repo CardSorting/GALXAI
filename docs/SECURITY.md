@@ -133,3 +133,5 @@ For deep technical specifications, consult the official ADRs:
 - **[ADR 0037: Zero-Egress Cloudflare Edge Gateway, R2 CDN & Custom Domain Substrate](adr/0037-zero-egress-cloudflare-edge-gateway-and-r2-cdn-substrate.md)**
 - **[ADR 0038: Distributed Edge KV Rate Governance & Stale-While-Revalidate Model Catalog Caching](adr/0038-distributed-edge-kv-rate-governance-and-swr-catalog-caching.md)**
 - **[ADR 0039: Edge-Native Vector Embeddings & Durable Object Swarm State Synchronization](adr/0039-edge-native-vector-embeddings-and-durable-object-swarm-sync.md)**
+- **[ADR 0042: Universal Zero-Hesitation Developer Ergonomics & Mental Model Absorption](adr/0042-universal-zero-hesitation-developer-ergonomics-and-mental-model-absorption.md)**
+

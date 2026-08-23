@@ -1,13 +1,14 @@
 /**
  * GALXAI Developer SDK: Fluent Prompt & Async Task Builder
  * Method-chaining ergonomics inspired by Stripe, Prisma, and LangChain.
+ * Supports direct `await builder` (thenable) and `for await (const chunk of builder)` (AsyncIterable).
  */
 
 import type { ChatMessage, ChatCompletionResponse, ChatCompletionChunk } from '../core/contracts/GalxContracts';
 import type { ChatCompletionAsyncParams, AsyncTaskHandle } from './types';
 import type { CompletionsResource } from './resources/chat';
 
-export class ChatCompletionBuilder {
+export class ChatCompletionBuilder implements PromiseLike<ChatCompletionResponse | AsyncTaskHandle<ChatCompletionResponse>>, AsyncIterable<string> {
   private readonly completions: CompletionsResource;
   private _model: string;
   private _messages: ChatMessage[] = [];
@@ -74,6 +75,9 @@ export class ChatCompletionBuilder {
     return this;
   }
 
+  /**
+   * Directly executes the completion request.
+   */
   public async execute(): Promise<ChatCompletionResponse | AsyncIterable<ChatCompletionChunk> | AsyncTaskHandle<ChatCompletionResponse>> {
     if (this._asyncParams) {
       return this.completions.createAsync({
@@ -102,5 +106,31 @@ export class ChatCompletionBuilder {
       max_tokens: this._maxTokens,
       stream: false
     });
+  }
+
+  /**
+   * Thenable interface: enables `await builder` without calling `.execute()`.
+   */
+  public then<TResult1 = ChatCompletionResponse | AsyncTaskHandle<ChatCompletionResponse>, TResult2 = never>(
+    onfulfilled?: ((value: ChatCompletionResponse | AsyncTaskHandle<ChatCompletionResponse>) => TResult1 | PromiseLike<TResult1>) | null,
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null
+  ): Promise<TResult1 | TResult2> {
+    return (this.execute() as Promise<ChatCompletionResponse | AsyncTaskHandle<ChatCompletionResponse>>).then(onfulfilled, onrejected);
+  }
+
+  /**
+   * AsyncIterable interface: enables `for await (const token of builder)` streaming.
+   */
+  public async *[Symbol.asyncIterator](): AsyncIterator<string> {
+    this._stream = true;
+    const streamRes = await this.execute();
+    if (streamRes && typeof (streamRes as any)[Symbol.asyncIterator] === 'function') {
+      for await (const chunk of streamRes as AsyncIterable<ChatCompletionChunk>) {
+        const delta = chunk.choices?.[0]?.delta?.content;
+        if (delta) {
+          yield delta;
+        }
+      }
+    }
   }
 }

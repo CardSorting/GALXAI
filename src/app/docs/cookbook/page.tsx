@@ -17,8 +17,16 @@ import {
   Cpu,
   Layers,
   Sparkles,
-  Bot
+  Bot,
+  ShieldCheck,
+  Flame,
+  Filter
 } from 'lucide-react';
+import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
+import { TrustSeals } from '@/components/common/TrustSeals';
+import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
+import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
+import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 interface Recipe {
   id: string;
@@ -132,11 +140,49 @@ async def main():
     print(f"Processed {len(results)} items successfully with zero 429 dropouts!")
 
 asyncio.run(main())`
+  },
+  {
+    id: 'zdr_scrubber',
+    title: 'Zero-Data-Retention & PII Token Masking Proxy',
+    category: 'Enterprise Security',
+    badge: 'ZDR Enforced',
+    description: 'Mask sensitive PII tokens client-side and stream through GALXAI with cryptographic zeroization guarantees.',
+    code: `from openai import OpenAI
+import re
+
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key",
+    default_headers={"X-GALXAI-ZDR": "enforce-zero-retention"}
+)
+
+def anonymize_and_prompt(raw_prompt: str) -> str:
+    # 1. Anonymize sensitive emails & credit cards
+    scrubbed = re.sub(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', '[REDACTED_EMAIL]', raw_prompt)
+    
+    # 2. Dispatch through zero-retention memory gateway
+    response = client.chat.completions.create(
+        model="gpt-5.6-sol",
+        messages=[
+            {"role": "system", "content": "You are a HIPAA-compliant medical records assistant."},
+            {"role": "user", "content": scrubbed}
+        ]
+    )
+    return response.choices[0].message.content
+
+print(anonymize_and_prompt("Patient john.doe@hospital.com has hypertension. Recommend therapy."))`
   }
 ];
 
 export default function CookbookDocsPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+
+  const categories = ['All', 'Agent Orchestration', 'Information Retrieval', 'High Throughput', 'Enterprise Security'];
+
+  const filteredRecipes = selectedCategory === 'All'
+    ? RECIPES
+    : RECIPES.filter((r) => r.category === selectedCategory);
 
   const handleCopy = (code: string, id: string) => {
     navigator.clipboard.writeText(code);
@@ -157,27 +203,56 @@ export default function CookbookDocsPage() {
           ]}
         />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white">Production AI Cookbooks & Reference Recipes</h1>
-            <p className="text-xs text-zinc-400">
-              End-to-end executable code patterns for multi-agent swarms, 500K context RAG, and bulk batch processing pipelines.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-xs font-bold flex items-center gap-1.5">
+        {/* Hero Header */}
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-4 border border-white/10 relative overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
               <BookMarked className="w-3.5 h-3.5" />
               <span>TESTED PRODUCTION RECIPES</span>
-            </span>
+            </div>
+            <Link
+              href="/keys/new"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase font-mono tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
+            >
+              <Zap className="w-3.5 h-3.5 fill-black" />
+              <span>Mint Key ($5 Credit)</span>
+            </Link>
           </div>
+          <h1 className="text-3xl sm:text-4xl font-black text-white">Production AI Cookbooks &amp; Reference Recipes</h1>
+          <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl font-sans">
+            End-to-end executable code patterns for multi-agent swarms, 500K context RAG, bulk batch processing pipelines, and zero-data-retention security workflows.
+          </p>
         </div>
 
         <DocsSubNav />
 
+        {/* Founding Cohort Rate Lock Ribbon */}
+        <RateLockRibbon />
+
+        {/* Category Filters */}
+        <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
+          <div className="flex items-center gap-1 text-zinc-500 mr-2 uppercase text-[10px] font-bold">
+            <Filter className="w-3 h-3" />
+            <span>Category:</span>
+          </div>
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-3.5 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+                selectedCategory === cat
+                  ? 'bg-amber-400 text-black shadow-md'
+                  : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
         {/* Recipes Stream */}
         <div className="space-y-6">
-          {RECIPES.map((recipe) => (
+          {filteredRecipes.map((recipe) => (
             <div
               key={recipe.id}
               className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10 hover:border-white/20 transition-all"
@@ -214,7 +289,15 @@ export default function CookbookDocsPage() {
             </div>
           ))}
         </div>
+
+        {/* Consumer-Grade Trust Seals */}
+        <TrustSeals />
       </main>
+
+      {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
+      <FloatingConversionDock />
+      <LiveActivityToast />
+      <ExitIntentModal />
     </div>
   );
 }

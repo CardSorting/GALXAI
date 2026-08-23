@@ -1,154 +1,145 @@
-# 🔄 Migration Guide: Moving to GALXAI
+# 🔄 Universal Migration Guide: Seamless Transition to GALXAI
 
-Step-by-step instructions for switching existing OpenAI, Anthropic, Azure, OpenRouter, and framework-based applications to **GALXAI**.
+Step-by-step instructions for switching existing OpenAI, Anthropic, Ollama, LangChain, LlamaIndex, Vercel AI SDK, LiteLLM, and OpenRouter applications to **GALXAI** with **zero code refactoring**, **25%–40% wholesale savings**, and **75% prompt cache rebates**.
 
 ---
 
-## 1. Zero-Code-Change Environment Variable Switch
+## ⚡ 1. The Zero-Code-Change Environment Variable Migration
 
-If your application uses standard SDKs and environment variables, you can migrate instantly without editing application source code:
+If your application reads standard environment variables, you can migrate instantly without changing a single line of code:
 
-### Standard OpenAI Applications
+### OpenAI SDK Applications (Node.js & Python)
 ```env
-OPENAI_BASE_URL=https://api.galx.ai/v1
+OPENAI_BASE_URL=https://galx.ai/v1
 OPENAI_API_KEY=galx_live_your_gateway_key_here
 ```
 
-### Anthropic Claude Applications (Claude Code, Windsurf, Anthropic SDK)
+### Anthropic SDK & Claude Code CLI
 ```env
-ANTHROPIC_BASE_URL=https://api.galx.ai
+ANTHROPIC_BASE_URL=https://galx.ai
 ANTHROPIC_API_KEY=galx_live_your_gateway_key_here
 ```
 
----
+### Ollama CLI, OpenWebUI & Continue.dev
+```env
+OLLAMA_HOST=https://galx.ai
+OLLAMA_API_KEY=galx_live_your_gateway_key_here
+```
 
-## 2. Model ID Mapping Table
-
-| Previous Provider / Model | Recommended GALXAI Model ID | Key Advantages & Savings |
-| :--- | :--- | :--- |
-| `o1`, `o1-preview`, `o3-mini` | `gpt-5.6-sol` | 900K context, sub-15ms edge routing, **25% OFF** |
-| `gpt-4o`, `gpt-4o-2024-11-20` | `gpt-5.6-terra` | 900K context, balanced cost and speed, **23% OFF** |
-| `gpt-4o-mini` | `gpt-5.6-luna` | 900K context, ultra-low $0.11/1M input pricing, **27% OFF** |
-| `claude-3-7-sonnet`, `claude-3-5-sonnet` | `claude-3-7-sonnet` | Native `/v1/messages` compatibility, streaming SSE |
-| `grok-3`, `grok-2` | `x-ai/grok-4.6` | Massive 1M context, frontier multimodal reasoning, **30% OFF** |
-| `grok-beta`, `grok-2` | `x-ai/grok-4.5` | Massive 500K context, native visual reasoning, **28% OFF** |
-| `text-embedding-3-small` | `text-embedding-3-small` | 1536-dim, $<15\text{ms}$ Edge PoP computation |
-| `dall-e-3` | `openai-dalle-3` / `openai-gpt-image-2` | Stored on Cloudflare R2 (`assets.galx.ai`) with **$0 egress** |
+### LiteLLM Proxy / Python SDK
+```env
+OPENAI_API_BASE=https://galx.ai/v1
+OPENAI_API_KEY=galx_live_your_gateway_key_here
+```
 
 ---
 
-## 3. Framework Migration Recipes
+## 📦 2. 1-Line Import Swaps (TypeScript & Node.js)
 
-### A. Vercel AI SDK (`@ai-sdk/openai`)
-```typescript
-import { createOpenAI } from '@ai-sdk/openai';
-import { generateText, streamText } from 'ai';
+If you prefer using dedicated client shims, simply swap the import statement:
 
-const galxai = createOpenAI({
-  baseURL: 'https://api.galx.ai/v1',
-  apiKey: process.env.GALXAI_API_KEY,
+### OpenAI Node.js Migration
+```diff
+- import OpenAI from "openai";
++ import OpenAI from "@galxai/sdk/openai";
+
+const openai = new OpenAI(); // Automatically routes to https://galx.ai/v1
+```
+
+### Anthropic SDK Migration
+```diff
+- import Anthropic from "@anthropic-ai/sdk";
++ import Anthropic from "@galxai/sdk/anthropic";
+
+const anthropic = new Anthropic(); // Automatically routes to https://galx.ai
+```
+
+### Vercel AI SDK Migration
+```diff
+- import { createOpenAI } from "@ai-sdk/openai";
+- const openai = createOpenAI({ baseURL: "https://..." });
++ import { galxai } from "@galxai/sdk/ai";
+
+const result = streamText({
+- model: openai("gpt-4o"),
++ model: galxai("gpt-5.6-sol"),
+  messages,
 });
+```
 
-// Streaming completion with gpt-5.6-sol
-export async function POST(req: Request) {
-  const { prompt } = await req.json();
-  const result = await streamText({
-    model: galxai('gpt-5.6-sol'),
-    prompt,
-  });
-  return result.toDataStreamResponse();
-}
+### LangChain Migration
+```diff
+- import { ChatOpenAI } from "@langchain/openai";
+- const llm = new ChatOpenAI({ openAIApiKey: "...", configuration: { baseURL: "..." } });
++ import { ChatGalxAI } from "@galxai/sdk/langchain";
++ const llm = new ChatGalxAI({ model: "gpt-5.6-sol" });
+```
+
+### LlamaIndex Migration
+```diff
+- import { OpenAI } from "llamaindex";
+- const llm = new OpenAI({ apiKey: "..." });
++ import { GalxLLM } from "@galxai/sdk/llamaindex";
++ const llm = new GalxLLM({ model: "gpt-5.6-sol" });
 ```
 
 ---
 
-### B. Python (OpenAI SDK)
-```python
-import os
-from openai import OpenAI
+## 🗺️ 3. Model ID Mapping & Automatic Resolution Matrix
 
-client = OpenAI(
-    base_url="https://api.galx.ai/v1",
-    api_key=os.environ.get("GALXAI_API_KEY")
-)
+You do not need to rename your model strings in existing codebases. The GALXAI router automatically resolves prior provider model IDs to their optimal flagship counterpart:
 
-stream = client.chat.completions.create(
-    model="gpt-5.6-sol",
-    messages=[{"role": "user", "content": "Analyze quantum circuit optimization."}],
-    stream=True
-)
+| Existing Model ID in Codebase | Automatically Resolved Canonical Model | Advantage & Wholesale Savings |
+| :--- | :--- | :--- |
+| `gpt-4o`, `gpt-4`, `chatgpt-4o`, `coding`, `sol` | **`gpt-5.6-sol`** | Flagship SOTA coding & logic, 900K context, **25% OFF** |
+| `o1`, `o1-preview`, `o3`, `o3-mini`, `deepseek-r1` | **`gpt-5.6-terra`** | Frontier reasoning & chain-of-thought, **25% OFF** |
+| `gpt-4o-mini`, `gemini-2.0-flash`, `fast`, `luna` | **`gpt-5.6-luna`** | Sub-15ms completions, $0.95/1M in, **36% OFF** |
+| `claude-3-7-sonnet`, `claude-3-5-sonnet` | **`gpt-5.6-sol`** (or native messages endpoint) | SOTA reasoning, full `/v1/messages` SSE streaming |
+| `grok-3`, `grok-2`, `xai-grok`, `grok` | **`x-ai/grok-4.6`** | 1M context multimodal reasoning, **30% OFF** |
+| `dall-e-3`, `dalle-3`, `midjourney`, `flux` | **`openai-gpt-image-2`** | 4K synthesis, aspect ratio support, **25% OFF** ($0 egress R2) |
+| `text-embedding-3-small`, `text-embedding-ada-002` | **`text-embedding-3-small`** | 1536-dim vector embeddings, $<12\text{ms}$ Edge PoP |
 
-for chunk in stream:
-    if chunk.choices[0].delta.content:
-        print(chunk.choices[0].delta.content, end="", flush=True)
+---
+
+## 🛠️ 4. Tool & IDE Migration
+
+### Cursor IDE & Windsurf
+1. Navigate to **Cursor Settings** $\to$ **Models**.
+2. Set **Override OpenAI Base URL**:
+   ```text
+   https://galx.ai/v1
+   ```
+3. Paste your `galx_live_...` key in the **OpenAI API Key** field.
+4. Add models: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `x-ai/grok-4.6`.
+
+### Claude Code CLI
+```bash
+export ANTHROPIC_BASE_URL="https://galx.ai"
+export ANTHROPIC_API_KEY="galx_live_your_key_here"
+claude
+```
+
+### Aider Terminal Pair Programmer
+```bash
+export OPENAI_API_BASE="https://galx.ai/v1"
+export OPENAI_API_KEY="galx_live_your_key_here"
+aider --model gpt-5.6-sol
+```
+
+### OpenWebUI (Docker / Local)
+In your `docker-compose.yml` or OpenWebUI settings:
+```yaml
+environment:
+  - OPENAI_API_BASE_URL=https://galx.ai/v1
+  - OPENAI_API_KEY=galx_live_your_key_here
 ```
 
 ---
 
-### C. Anthropic Python SDK
-```python
-import os
-from anthropic import Anthropic
+## 🔒 5. Verification After Migration
 
-client = Anthropic(
-    base_url="https://api.galx.ai",
-    api_key=os.environ.get("GALXAI_API_KEY")
-)
-
-message = client.messages.create(
-    model="claude-3-7-sonnet",
-    max_tokens=1024,
-    messages=[{"role": "user", "content": "Explain zero-knowledge rollups."}]
-)
-print(message.content[0].text)
+Validate your connection in 1 second using the zero-install CLI:
+```bash
+npx galxai "Verify GALXAI connection"
+# Outputs immediate streaming completion from flagship model
 ```
-
----
-
-### D. LangChain (Python & TypeScript)
-```python
-from langchain_openai import ChatOpenAI
-
-llm = ChatOpenAI(
-    model="gpt-5.6-sol",
-    base_url="https://api.galx.ai/v1",
-    api_key=os.environ["GALXAI_API_KEY"]
-)
-
-response = llm.invoke("Summarize state-of-the-art retrieval algorithms.")
-print(response.content)
-```
-
----
-
-### E. LlamaIndex (Python)
-```python
-from llama_index.llms.openai import OpenAI
-
-llm = OpenAI(
-    model="gpt-5.6-sol",
-    api_base="https://api.galx.ai/v1",
-    api_key=os.environ["GALXAI_API_KEY"]
-)
-
-response = llm.complete("Explain vector embeddings indexing.")
-print(response.text)
-```
-
----
-
-### F. Cursor IDE / Continue Dev Setup
-1. Open **Cursor Settings > Models > OpenAI API Key**.
-2. Set **Base URL** (Override): `https://api.galx.ai/v1`.
-3. Set **API Key**: `galx_live_your_gateway_key_here`.
-4. Add custom model names: `gpt-5.6-sol`, `gpt-5.6-terra`, `x-ai/grok-4.5`.
-
----
-
-## 4. Why Migrate to GALXAI?
-
-1. **Continuous Rate Limit Immunity**: No single-key 429 bottlenecks; traffic is cycled across pooled physical credentials with sub-15ms failover.
-2. **Instant 20%–40% Cost Arbitrage**: Wholesale compute volume discounts passed directly to your account with 0% markups.
-3. **100% Prompt Caching Pass-Through**: 75% prompt caching discounts credited directly to your prepaid compute wallet.
-4. **Zero-Egress Multimodal Storage**: All generated images and media artifacts stream to Cloudflare R2 (`assets.galx.ai`) with $0 egress fees.
-5. **Zero Data Retention (ZDR v10.0)**: Hardware-level memory zeroization (`0xAA` -> `0x00`) guaranteeing enterprise HIPAA and GDPR Safe Harbor compliance.

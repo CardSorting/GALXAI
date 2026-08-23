@@ -27,6 +27,7 @@ flowchart LR
 | **Stage 4** | [04: Incident Response & Triage](04-incident-response-and-sev-triage.md) | Sev-1 through Sev-4 incident classifications, 4-state circuit breaker failovers, database connection pool exhaustion triage, cryptographic AAD mismatches, and DDoS mitigations. |
 | **Stage 5** | [05: Security & Compliance](05-security-key-rotation-and-compliance.md) | Zero-downtime Vault Master Secret rotation (`v1` $\to$ `v2`), SOC 2 Type II signed evidence extraction (`/api/compliance/evidence`), GDPR Article 17 purge, and Merkle audit chain verification. |
 | **Stage 6** | [06: Disaster Recovery & Post-Mortems](06-disaster-recovery-and-postmortems.md) | Cloudflare edge PoP evacuation, Supabase Point-in-Time Recovery (PITR), R2 multimodal asset recovery, blameless post-mortem template, and automated regression test authoring. |
+| **Stage 7** | [07: Zero-Hesitation DX & API Governance](07-zero-hesitation-developer-ergonomics-and-api-governance.md) | Universal multi-mental-model absorption (OpenAI, Anthropic, Ollama, LangChain, Vercel AI, Midjourney), zero-install CLI operations (`npx galxai`), GET browser execution, and 98-test verification gates. |
 
 ---
 

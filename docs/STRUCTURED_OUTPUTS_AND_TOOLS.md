@@ -1,53 +1,128 @@
-# ⚙️ Structured Outputs & Function Calling Guide
+# ⚙️ Structured Outputs, Tool Calling & Agent Runtimes
 
-GALXAI natively supports strict JSON Schema enforcement and parallel function / tool calling across reasoning flagships (`gpt-5.6-sol`, `gpt-5.6-terra`, `x-ai/grok-4.5`).
+GALXAI natively supports strict JSON Schema enforcement, parallel tool calling, and zero-boilerplate autonomous agent execution across reasoning flagships (`gpt-5.6-sol`, `gpt-5.6-terra`, `x-ai/grok-4.6`).
 
 ---
 
-## 1. Strict Structured Outputs (`json_schema`)
+## ⚡ 1. Top-Level 1-Line Structured Extraction (`extract`)
 
-Ensure 100% adherence to defined JSON schemas for reliable downstream parsing.
+Extract strongly-typed data from unstructured text in 1 line with zero schema boilerplate:
 
-### Python Example
+```typescript
+import { extract } from '@galxai/sdk';
+
+const invoice = await extract(
+  "Invoice #INV-2026-904 for Acme Corp totaling $14,250.00 due on September 15th, 2026",
+  {
+    invoiceNumber: "string",
+    client: "string",
+    totalAmountUsd: "number",
+    dueDate: "string"
+  }
+);
+
+console.log(invoice.client);         // "Acme Corp"
+console.log(invoice.totalAmountUsd); // 14250.00
+```
+
+---
+
+## 🤖 2. Autonomous Multi-Step Tool Calling Agent (`galx.agent`)
+
+The agent runtime automatically executes functions, parses parameters, appends assistant/tool messages, and continues until a final answer is produced:
+
+```typescript
+import { GalxAI, tool } from '@galxai/sdk';
+
+const galx = new GalxAI();
+
+const agent = galx.agent({
+  model: 'gpt-5.6-sol',
+  tools: {
+    // 1. Raw TypeScript async function (auto-registered)
+    getWeather: async ({ city }: { city: string }) => {
+      return { city, temperatureC: 22, condition: "Sunny" };
+    },
+    
+    // 2. Explicit tool definition helper
+    calculateTax: tool(
+      "calculateTax",
+      "Calculates estimated sales tax for a given transaction",
+      async ({ amount, state }: { amount: number; state: string }) => {
+        const rate = state === "CA" ? 0.0825 : 0.06;
+        return { estimatedTax: amount * rate };
+      },
+      {
+        amount: { type: "number", description: "Subtotal amount in USD" },
+        state: { type: "string", description: "2-letter US state code" }
+      }
+    )
+  }
+});
+
+const result = await agent.run("What is the weather in San Francisco, and what is the sales tax on a $200 purchase in CA?");
+console.log(result.text);
+```
+
+---
+
+## 🔄 3. Multi-Mental-Model Tool Normalization
+
+`galx.agent` automatically absorbs diverse tool definition formats:
+
+```typescript
+// A. Raw JavaScript object map
+const toolsA = {
+  fetchStock: async ({ ticker }) => ({ price: 150 })
+};
+
+// B. Standard OpenAI tool format
+const toolsB = [
+  {
+    type: "function",
+    function: {
+      name: "fetchStock",
+      description: "Gets stock price",
+      parameters: { type: "object", properties: { ticker: { type: "string" } } }
+    }
+  }
+];
+
+// C. Anthropic Claude tool format
+const toolsC = [
+  {
+    name: "fetchStock",
+    description: "Gets stock price",
+    input_schema: { type: "object", properties: { ticker: { type: "string" } } }
+  }
+];
+```
+
+---
+
+## 🔒 4. Strict JSON Schema Adherence (`response_format`)
+
 ```python
 from openai import OpenAI
 
-client = OpenAI(
-    base_url="https://api.galx.ai/v1",
-    api_key="galx_live_your_key_here"
-)
+client = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_...")
 
 response = client.chat.completions.create(
     model="gpt-5.6-sol",
-    messages=[
-        {"role": "system", "content": "Extract entity attributes accurately."},
-        {"role": "user", "content": "Order #4928 placed by Alice Smith (alice@example.com) for 3 units of SKU-X92."}
-    ],
+    messages=[{"role": "user", "content": "Extract customer details: Alice, 30, Denver"}],
     response_format={
         "type": "json_schema",
         "json_schema": {
-            "name": "OrderExtraction",
+            "name": "CustomerExtraction",
             "strict": True,
             "schema": {
                 "type": "object",
                 "properties": {
-                    "order_id": {"type": "integer"},
-                    "customer_name": {"type": "string"},
-                    "email": {"type": "string"},
-                    "items": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "sku": {"type": "string"},
-                                "quantity": {"type": "integer"}
-                            },
-                            "required": ["sku", "quantity"],
-                            "additionalProperties": False
-                        }
-                    }
+                    "name": {"type": "string"},
+                    "age": {"type": "integer"},
+                    "city": {"type": "string"}
                 },
-                "required": ["order_id", "customer_name", "email", "items"],
+                "required": ["name", "age", "city"],
                 "additionalProperties": False
             }
         }
@@ -56,76 +131,3 @@ response = client.chat.completions.create(
 
 print(response.choices[0].message.content)
 ```
-
----
-
-## 2. Type-Safe Structured Extraction with `@galxai/sdk`
-
-The official SDK automatically handles JSON Schema serialization and runtime extraction:
-
-```typescript
-import { GalxAI } from '@/sdk';
-
-const galx = new GalxAI();
-
-interface UserProfile {
-  name: string;
-  role: string;
-  skills: string[];
-}
-
-const profile = await galx.chat.structured<UserProfile>({
-  model: 'gpt-5.6-sol',
-  messages: [{ role: 'user', content: 'Alice Smith is a Principal Distributed Systems Engineer specialized in Raft and Rust.' }],
-  schema: {
-    type: 'object',
-    properties: {
-      name: { type: 'string' },
-      role: { type: 'string' },
-      skills: { type: 'array', items: { type: 'string' } }
-    },
-    required: ['name', 'role', 'skills']
-  }
-});
-
-console.log(profile.name);   // "Alice Smith"
-console.log(profile.skills); // ["Raft", "Rust"]
-```
-
----
-
-## 3. Autonomous Multi-Step Tool Calling Runtime (`galx.agent`)
-
-Eliminate manual while loops, argument parsers, and tool message appending with `galx.agent`:
-
-```typescript
-import { GalxAI } from '@/sdk';
-
-const galx = new GalxAI();
-
-const agent = galx.agent({
-  model: 'gpt-5.6-sol',
-  systemPrompt: 'You are an autonomous cloud infrastructure engineer.',
-  tools: {
-    getClusterHealth: {
-      description: 'Get real-time health stats for a compute cluster',
-      parameters: {
-        type: 'object',
-        properties: { clusterId: { type: 'string' } },
-        required: ['clusterId']
-      },
-      execute: async ({ clusterId }) => {
-        return { clusterId, status: 'HEALTHY', activeNodes: 48, p99LatencyMs: 12.4 };
-      }
-    }
-  },
-  maxSteps: 5
-});
-
-const result = await agent.run('Check the health of cluster us-east-prod-1 and summarize findings.');
-
-console.log(result.text);                // Final synthesized answer
-console.log(result.toolCallsExecuted);   // Full execution history
-console.log(result.stepsCount);          // Number of execution steps taken
-```
-

@@ -1,15 +1,15 @@
-# ⚡ Server-Sent Events (SSE) Streaming Protocol
+# ⚡ Universal Streaming & SSE Protocols
 
-GALXAI implements high-performance, zero-allocation Server-Sent Events (SSE) streaming compliant with the OpenAI API protocol and RFC 8895.
+GALXAI implements high-performance, zero-allocation Server-Sent Events (SSE) streaming compliant with OpenAI, Anthropic, Ollama, and Vercel AI SDK standards (RFC 8895).
 
 ---
 
-## 1. Protocol Specification
+## 1. Protocol Specifications
 
-### HTTP Ingress Request
+### A. OpenAI Standard SSE Stream (`/v1/chat/completions`)
 ```http
 POST /v1/chat/completions HTTP/1.1
-Host: api.galx.ai
+Host: galx.ai
 Authorization: Bearer galx_live_...
 Content-Type: application/json
 
@@ -20,18 +20,12 @@ Content-Type: application/json
 }
 ```
 
-### HTTP Egress Response Headers
 ```http
 HTTP/1.1 200 OK
 Content-Type: text/event-stream; charset=utf-8
 Cache-Control: no-cache, no-transform
 Connection: keep-alive
 X-Accel-Buffering: no
-```
-
-### Event Stream Frame Format
-```text
-data: {"id":"chatcmpl-01","object":"chat.completion.chunk","created":1700000000,"model":"gpt-5.6-sol","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
 
 data: {"id":"chatcmpl-01","object":"chat.completion.chunk","created":1700000000,"model":"gpt-5.6-sol","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}
 
@@ -40,7 +34,31 @@ data: {"id":"chatcmpl-01","object":"chat.completion.chunk","created":1700000000,
 data: {"id":"chatcmpl-01","object":"chat.completion.chunk","created":1700000000,"model":"gpt-5.6-sol","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
 
 data: [DONE]
+```
 
+### B. Browser Address Bar Direct Stream (`GET /v1/chat/completions`)
+```text
+https://galx.ai/v1/chat/completions?prompt=Explain+gravity&model=sol&stream=true&api_key=galx_live_...
+```
+
+### C. Ollama Streaming NDJSON Protocol (`/api/generate` & `/api/chat`)
+```http
+POST /api/generate HTTP/1.1
+Host: galx.ai
+Authorization: Bearer galx_live_...
+Content-Type: application/json
+
+{
+  "model": "sol",
+  "prompt": "Hello from Ollama CLI",
+  "stream": true
+}
+```
+
+```json
+{"model":"gpt-5.6-sol","created_at":"2026-08-23T06:00:00Z","response":"Hello","done":false}
+{"model":"gpt-5.6-sol","created_at":"2026-08-23T06:00:00Z","response":" world!","done":false}
+{"model":"gpt-5.6-sol","created_at":"2026-08-23T06:00:00Z","response":"","done":true,"total_duration":120000000,"load_duration":5000000,"prompt_eval_count":12,"eval_count":42}
 ```
 
 ---
@@ -64,82 +82,47 @@ sequenceDiagram
     Gateway->>Metrics: Log HTTP 499 Disconnect Sample
 ```
 
-### Key Guarantees
+### Key Guarantees:
 1. **Zero Leaked Concurrency Slots**: The shard lease is freed immediately upon client disconnect without waiting for upstream generation to finish.
 2. **Zero Leaked Token Quota**: The 2-Phase Token Reservation releases unconsumed tokens back into the shard's bucket.
 3. **Instant Upstream Cancellation**: Aborts the active fetch stream, preventing upstream token billing for abandoned generations.
 
 ---
 
-## 4. Vercel AI SDK & Next.js App Router Integration
-
-`@galxai/sdk` includes zero-boilerplate stream adapters for the Vercel AI SDK Data Stream protocol:
+## 3. Web Stream Protocol Adapters (`@galxai/sdk`)
 
 ```typescript
-// app/api/chat/route.ts in Next.js
-import { GalxAI } from '@/sdk';
+import { 
+  toTextStream, 
+  toTextStreamResponse, 
+  toDataStreamResponse, 
+  toSSEResponse 
+} from '@galxai/sdk';
 
-const galx = new GalxAI();
+// 1. Text Stream (Web standard ReadableStream)
+const readable = toTextStream(asyncChunkGenerator);
 
-export async function POST(req: Request) {
-  const { messages } = await req.json();
+// 2. Plain Text HTTP Response (text/plain; charset=utf-8)
+const textResponse = toTextStreamResponse(asyncChunkGenerator);
 
-  const stream = await galx.chat.completions.create({
-    model: 'gpt-5.6-sol',
-    messages,
-    stream: true
-  });
+// 3. Vercel AI SDK Data Stream (text/plain; x-vercel-ai-data-stream: v1)
+const dataStreamResponse = toDataStreamResponse(asyncChunkGenerator);
 
-  // Emits 0:"token"\n with x-vercel-ai-data-stream: v1 headers
-  return galx.adapters.toDataStreamResponse(stream);
+// 4. Server-Sent Events SSE Response (text/event-stream)
+const sseResponse = toSSEResponse(asyncChunkGenerator);
+```
+
+---
+
+## 4. Stateful Conversation Thread Streaming
+
+```typescript
+import { thread } from '@galxai/sdk';
+
+const conv = thread({ model: 'gpt-5.6-sol', system: 'You are a staff engineer.' });
+
+// Stream response chunk by chunk to stdout
+for await (const chunk of conv.streamReply('Explain Raft consensus Leader Election.')) {
+  process.stdout.write(chunk);
 }
 ```
-
----
-
-## 5. Asynchronous Queue SSE Lifecycle Stream
-
-In addition to token streaming, GALXAI exposes native SSE event streams for asynchronous tasks:
-
-```http
-GET /api/queues/llm-batch/tasks/task_123/stream HTTP/1.1
-Accept: text/event-stream
-```
-
-### Event Payload Frames
-```text
-data: {"type":"snapshot","data":{"id":"task_123","status":"RUNNING","progress":{"percentage":50,"message":"Evaluating dataset batch 2/4"}}}
-
-data: {"type":"TASK_PROGRESS","data":{"percentage":75,"message":"Evaluating dataset batch 3/4"}}
-
-data: {"type":"TASK_COMPLETED","data":{"result":{"modelUsed":"gpt-5.6-sol","tokens":1450}}}
-
-data: {"type":"done"}
-```
-
----
-
-## 6. Cloudflare Edge Isolate Zero-Copy Streaming (`TransformStream`)
-
-On Cloudflare Workers Edge isolates (`api.galx.ai`), SSE streaming executes with zero memory buffering:
-
-```typescript
-// Edge Zero-Copy Stream Ingress / Egress
-const { readable, writable } = new TransformStream();
-upstreamResponse.body.pipeTo(writable);
-
-return new Response(readable, {
-  status: 200,
-  headers: {
-    'content-type': 'text/event-stream; charset=utf-8',
-    'cache-control': 'no-cache, no-transform',
-    'x-galx-edge': 'pop-300'
-  }
-});
-```
-
-### Guarantees
-- **Zero Heap Retain**: Chunks stream straight through V8 isolate sockets without RAM allocation.
-- **Microsecond TTFT**: First token time-to-first-token is $< 12\text{ms}$ globally.
-
-

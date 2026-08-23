@@ -52,6 +52,40 @@ export class DatabaseResource {
   }
 
   /**
+   * Stores a key-value memory item with optional TTL.
+   */
+  public remember(key: string, value: any, ttlMs?: number): void {
+    const table = this.kernel.getTable<{ key: string; value: any; expiresAt?: number }>('agent_memory');
+    table.put(key, {
+      key,
+      value,
+      expiresAt: ttlMs ? Date.now() + ttlMs : undefined
+    });
+  }
+
+  /**
+   * Recalls a stored memory item by key. Returns null if expired or not found.
+   */
+  public recall<T = any>(key: string): T | null {
+    const table = this.kernel.getTable<{ key: string; value: any; expiresAt?: number }>('agent_memory');
+    const found = table.get(key);
+    if (!found) return null;
+    if (found.expiresAt && found.expiresAt < Date.now()) {
+      table.delete(key);
+      return null;
+    }
+    return found.value as T;
+  }
+
+  /**
+   * Forgets a stored memory item.
+   */
+  public forget(key: string): boolean {
+    const table = this.kernel.getTable<{ key: string; value: any; expiresAt?: number }>('agent_memory');
+    return table.delete(key);
+  }
+
+  /**
    * Executes the 4-Pillar Forensic Diagnostic Probe.
    */
   public async health() {

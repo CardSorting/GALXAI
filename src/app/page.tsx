@@ -49,6 +49,7 @@ import { TrustSeals } from '@/components/common/TrustSeals';
 import { SimpleModelPicker } from '@/components/dashboard/SimpleModelPicker';
 import { SpendAuditTool } from '@/components/dashboard/SpendAuditTool';
 import { SavingsJackpotReel } from '@/components/dashboard/SavingsJackpotReel';
+import { NoCodeSandboxWidget } from '@/components/dashboard/NoCodeSandboxWidget';
 
 export default function HomePage() {
   const [stats, setStats] = useState<any>(null);
@@ -113,6 +114,50 @@ export default function HomePage() {
             />
           </div>
 
+          {/* Instant Mental Model Quick Launch Bar */}
+          <div className="p-3 sm:p-4 rounded-2xl bg-black/40 border border-white/10 max-w-4xl mx-auto space-y-2 text-left">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-mono font-bold text-zinc-400 uppercase flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-amber-400" />
+                <span>Meet Your Mental Model — Instant 1-Click Launch:</span>
+              </span>
+              <span className="text-[10px] text-zinc-500 font-mono hidden sm:inline">0ms Ambiguity Tolerance</span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1.5 font-mono text-xs">
+              <Link
+                href="/models/gpt-5.6-sol"
+                className="px-3 py-1.5 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/30 transition-all flex items-center gap-1.5"
+              >
+                <span>💻 Cursor / Windsurf</span>
+              </Link>
+              <Link
+                href="/models/gpt-5.6-sol"
+                className="px-3 py-1.5 rounded-xl bg-cyan-400/10 hover:bg-cyan-400/20 text-cyan-300 border border-cyan-400/30 transition-all flex items-center gap-1.5"
+              >
+                <span>🐍 Python SDK</span>
+              </Link>
+              <Link
+                href="/models/gpt-5.6-sol"
+                className="px-3 py-1.5 rounded-xl bg-indigo-400/10 hover:bg-indigo-400/20 text-indigo-300 border border-indigo-400/30 transition-all flex items-center gap-1.5"
+              >
+                <span>▲ Next.js / Vercel AI</span>
+              </Link>
+              <Link
+                href="/models/x-ai-grok-4-6"
+                className="px-3 py-1.5 rounded-xl bg-emerald-400/10 hover:bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 transition-all flex items-center gap-1.5"
+              >
+                <span>🚀 xAI Grok 4.6 (1M)</span>
+              </Link>
+              <Link
+                href="/docs/simple"
+                className="px-3 py-1.5 rounded-xl bg-purple-400/10 hover:bg-purple-400/20 text-purple-300 border border-purple-400/30 transition-all flex items-center gap-1.5"
+              >
+                <span>🌱 Plain English Guide</span>
+              </Link>
+            </div>
+          </div>
+
           {/* Social Proof & Metrics Bar */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 max-w-3xl mx-auto border-t border-white/10 font-mono text-xs">
             <div className="space-y-0.5">
@@ -136,6 +181,9 @@ export default function HomePage() {
 
         {/* Real-Time Live Network Arbitrage Ticker */}
         <LiveArbitrageTicker />
+
+        {/* Zero-Auth Frictionless Live Model Sandbox Simulator */}
+        <NoCodeSandboxWidget />
 
         {/* Aggressive Competitor Comparison Ribbon */}
         <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-emerald-500/30">

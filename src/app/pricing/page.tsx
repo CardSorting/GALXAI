@@ -315,6 +315,71 @@ export default function PricingPage() {
             </div>
           </div>
 
+          {/* 1-Click Mental Model Stack Presets */}
+          <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-mono font-bold text-zinc-400 uppercase flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-amber-400" />
+                <span>Quick Workload Presets (Meet Your Stack):</span>
+              </span>
+              <span className="text-[10px] text-zinc-500 font-mono hidden sm:inline">Instant 1-Click Projection</span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
+              <button
+                onClick={() => {
+                  setInputTokensK(60);
+                  setOutputTokensK(15);
+                  setCachedPromptPct(70);
+                  setSelectedModelId('gpt-5.6-sol');
+                  setSelectedTierId('starter');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-all cursor-pointer"
+              >
+                <span>🧑‍💻 Solo Dev / Cursor ($50/mo)</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setInputTokensK(300);
+                  setOutputTokensK(60);
+                  setCachedPromptPct(65);
+                  setSelectedModelId('gpt-5.6-sol');
+                  setSelectedTierId('scale');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition-all cursor-pointer"
+              >
+                <span>🚀 SaaS App / Support Bot ($500/mo)</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setInputTokensK(750);
+                  setOutputTokensK(120);
+                  setCachedPromptPct(80);
+                  setSelectedModelId('gpt-5.6-terra');
+                  setSelectedTierId('production');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition-all cursor-pointer"
+              >
+                <span>⚡ Agent Fleet / Code Swarm ($2,500/mo)</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setInputTokensK(950);
+                  setOutputTokensK(180);
+                  setCachedPromptPct(90);
+                  setSelectedModelId('gpt-5.6-luna');
+                  setSelectedTierId('enterprise');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 transition-all cursor-pointer"
+              >
+                <span>🏢 High-Volume Ingestion ($10,000+/mo)</span>
+              </button>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* Left Controls */}
             <div className="lg:col-span-7 space-y-6">

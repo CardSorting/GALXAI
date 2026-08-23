@@ -314,5 +314,8 @@ jobs:
 | **Edge Gateway Health** | `curl -i https://api.galx.ai/health` | `HTTP 200 { status: 'healthy', edgePoP: '...' }` |
 | **Model Catalog (Cached)** | `curl -i https://api.galx.ai/v1/models -H "Authorization: Bearer galx_test_..."` | `HTTP 200 { object: 'list', data: [...] }` |
 | **Zero-Egress SSE Stream** | `curl -N -X POST https://api.galx.ai/v1/chat/completions -H "Authorization: Bearer galx_live_..." -H "Content-Type: application/json" -d '{"model":"gpt-5.6-sol","messages":[{"role":"user","content":"Ping"}],"stream":true}'` | Immediate chunked SSE streaming (`data: {...}`) with $<25\text{ms}$ TTFT |
+| **Browser Direct GET Query** | `curl -i "https://api.galx.ai/v1/chat/completions?prompt=Ping&model=sol&api_key=galx_live_..."` | `HTTP 200` with JSON completion or SSE stream |
+| **Ollama Native Protocol** | `curl -i -X POST https://api.galx.ai/api/generate -H "Authorization: Bearer galx_live_..." -d '{"model":"sol","prompt":"Ping"}'` | `HTTP 200` with streaming NDJSON chunks and `done: true` |
 | **R2 Asset CDN** | `curl -i https://assets.galx.ai/generations/test.webp` | `HTTP 200` with `CF-Cache-Status: HIT` |
 | **Scheduled Worker Queue** | `npx wrangler tail` | Scheduled cron event executing `processBatch('default', 25)` without uncaught exceptions |
+

@@ -1,10 +1,13 @@
 /**
  * GALXAI Developer SDK: Multi-Model Resilience & Stream Racing
+ * Enables automatic fallback cascades and parallel lowest-latency racing.
  */
 
 import type { ChatCompletionRequest, ChatCompletionResponse, ChatCompletionChunk } from '../core/contracts/GalxContracts';
 import type { CompletionsResource } from './resources/chat';
 import { APIError } from './errors';
+
+export type ForgivingResilienceParams = string | Omit<ChatCompletionRequest, 'model'>;
 
 export class ModelResilience {
   private readonly completions: CompletionsResource;
@@ -13,17 +16,27 @@ export class ModelResilience {
     this.completions = completions;
   }
 
+  private normalizeParams(params: ForgivingResilienceParams): Omit<ChatCompletionRequest, 'model'> {
+    if (typeof params === 'string') {
+      return {
+        messages: [{ role: 'user', content: params }]
+      };
+    }
+    return params;
+  }
+
   /**
    * Cascades through a prioritized list of fallback models until one succeeds.
    */
   public async fallbackCascade(
     models: string[],
-    params: Omit<ChatCompletionRequest, 'model'>
+    params: ForgivingResilienceParams
   ): Promise<ChatCompletionResponse & { successfulModel: string; attemptsMade: number }> {
     if (!models || models.length === 0) {
       throw new APIError('At least one model must be specified in fallbackCascade', 400);
     }
 
+    const normalized = this.normalizeParams(params);
     const errors: Array<{ model: string; error: string }> = [];
     let attempt = 0;
 
@@ -31,7 +44,7 @@ export class ModelResilience {
       attempt++;
       try {
         const response = await this.completions.create({
-          ...params,
+          ...normalized,
           model,
           stream: false
         });
@@ -59,15 +72,17 @@ export class ModelResilience {
    */
   public async race(
     models: string[],
-    params: Omit<ChatCompletionRequest, 'model'>
+    params: ForgivingResilienceParams
   ): Promise<AsyncIterable<ChatCompletionChunk> & { winningModel: string }> {
     if (!models || models.length === 0) {
       throw new APIError('At least one model must be specified in race', 400);
     }
 
+    const normalized = this.normalizeParams(params);
+
     const streamPromises = models.map(async (model) => {
       const stream = await this.completions.create({
-        ...params,
+        ...normalized,
         model,
         stream: true
       });

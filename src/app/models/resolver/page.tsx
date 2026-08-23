@@ -17,7 +17,24 @@ export default function ModelResolverPage() {
 
   const resolved = ModelCatalog.resolveModel(query.trim());
 
-  const quickAliases = ['sol', 'terra', 'luna', 'grok', 'grok-4.6', 'grok-4.5', 'gpt-image-2', 'dalle-3', 'imagine'];
+  const quickAliases = [
+    'gpt-5',
+    'sol',
+    'terra',
+    'luna',
+    'grok-4.6',
+    'claude-3-7-sonnet',
+    'deepseek-r1',
+    'o3-mini',
+    'fast',
+    'cheap',
+    'coding',
+    'image',
+    'embedding',
+    'dalle-3',
+    'openai/gpt-5.6-sol:latest',
+    '@anthropic/claude-3-5-sonnet'
+  ];
 
   return (
     <div className="min-h-screen flex flex-col">

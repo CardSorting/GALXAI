@@ -49,6 +49,7 @@ This directory contains the formal Architectural Decision Records (ADRs) that go
 | **[ADR 0039](0039-edge-native-vector-embeddings-and-durable-object-swarm-sync.md)** | Edge-Native Vector Embeddings & Durable Object Swarm State Synchronization | **Embeddings & Swarms** | `Accepted` | Edge 1536-dim vector embeddings (`/v1/embeddings`) and in-memory Durable Object swarm synchronization. |
 | **[ADR 0040](0040-enterprise-vercel-pre-deployment-gate-and-multi-region-topology.md)** | Enterprise Vercel Pre-Deployment Gate, Next.js 15 Optimization & Multi-Region Topology | **Deployment & CI/CD** | `Accepted` | 8-Phase pre-flight audit engine, package import optimizations, HSTS headers, and multi-region serverless placement. |
 | **[ADR 0041](0041-zero-collision-typescript-ambient-isolation-and-dual-runtime-mesh.md)** | Zero-Collision TypeScript Ambient Isolation & Dual-Engine Runtime Mesh | **Typing & Runtime** | `Accepted` | Scoped dynamic import typing for Cloudflare bindings preventing global DOM / Web API identifier collisions. |
+| **[ADR 0042](0042-universal-zero-hesitation-developer-ergonomics-and-mental-model-absorption.md)** | Universal Zero-Hesitation Developer Ergonomics & Mental Model Absorption | **DX Ergonomics** | `Accepted` | Multi-mental-model absorption (OpenAI, Anthropic, Ollama, LangChain, Vercel AI), 0-install CLI, GET browser execution, and aspect ratio normalization. |
 
 ---
 

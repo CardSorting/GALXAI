@@ -34,12 +34,45 @@ export class StructuredOutputExtractor {
 
   /**
    * Generates and parses a structured JSON output validated against a JSON Schema.
+   * Absorbs flat dictionaries, example objects, and standard JSON schemas.
    */
   public async extract<T = any>(params: StructuredChatParams<T>): Promise<T> {
     const schemaName = params.schemaName || 'structured_response';
 
+    // Normalize schema if provided as flat dictionary or loose definition
+    let normalizedSchema: any = params.schema;
+    if (!normalizedSchema.type) {
+      if (normalizedSchema.properties) {
+        normalizedSchema = { type: 'object', ...normalizedSchema };
+      } else {
+        // Convert flat field dictionary { name: 'string', age: 'number' } or { name: { type: 'string' } }
+        const properties: Record<string, any> = {};
+        const required: string[] = [];
+        for (const [key, val] of Object.entries(normalizedSchema)) {
+          required.push(key);
+          if (typeof val === 'string') {
+            properties[key] = { type: val === 'number' || val === 'int' ? 'number' : val === 'boolean' || val === 'bool' ? 'boolean' : 'string' };
+          } else if (val && typeof val === 'object' && 'type' in val) {
+            properties[key] = val;
+          } else if (typeof val === 'number') {
+            properties[key] = { type: 'number' };
+          } else if (typeof val === 'boolean') {
+            properties[key] = { type: 'boolean' };
+          } else {
+            properties[key] = { type: 'string' };
+          }
+        }
+        normalizedSchema = {
+          type: 'object',
+          properties,
+          required,
+          additionalProperties: false
+        };
+      }
+    }
+
     const response = await this.completions.create({
-      model: params.model,
+      model: params.model || 'gpt-5.6-sol',
       messages: params.messages,
       temperature: params.temperature ?? 0,
       max_tokens: params.maxTokens,
@@ -49,8 +82,8 @@ export class StructuredOutputExtractor {
           name: schemaName,
           strict: true,
           schema: {
-            ...params.schema,
-            additionalProperties: params.schema.additionalProperties ?? false
+            ...normalizedSchema,
+            additionalProperties: normalizedSchema.additionalProperties ?? false
           }
         }
       }
@@ -63,7 +96,12 @@ export class StructuredOutputExtractor {
 
     let parsed: any;
     try {
-      parsed = JSON.parse(rawContent);
+      const cleanContent = rawContent
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/```\s*$/i, '')
+        .trim();
+      parsed = JSON.parse(cleanContent);
     } catch (err: any) {
       throw new APIError(`Failed to parse structured JSON from model: ${err.message}. Content was: ${rawContent}`, 500, 'invalid_json_format');
     }

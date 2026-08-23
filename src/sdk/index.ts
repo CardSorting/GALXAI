@@ -3,7 +3,7 @@
  * Zero-dependency AI Gateway & Background Queue Client
  */
 
-export { GalxAI } from './client';
+export { GalxAI, GalxAIClient, Client, Galx } from './client';
 export * from './errors';
 export * from './types';
 
@@ -23,12 +23,19 @@ export { DatabaseResource } from './resources/database';
 // DX & Ergonomic Extensions
 export { ChatCompletionBuilder } from './builder';
 export { StructuredOutputExtractor, type JSONSchemaDefinition, type StructuredChatParams } from './structured';
-export { StreamAdapters } from './adapters';
-export { MultiModalHelper, type MultiModalImageInput } from './multimodal';
-export { BatchEvaluator, type BatchMapOptions, type BatchResultItem } from './batch';
+export {
+  StreamAdapters,
+  toTextStream,
+  toTextStreamResponse,
+  toDataStreamResponse,
+  toSSEResponse,
+  type StreamInput
+} from './adapters';
+export { MultiModalHelper, type MultiModalImageInput, type ForgivingImageSource } from './multimodal';
+export { BatchEvaluator, batch, type BatchMapOptions, type BatchResultItem } from './batch';
 
 // Agent Runtime & Plugins
-export { AgentRuntime, type AgentConfig, type AgentToolDefinition, type AgentExecutionResult } from './agent';
+export { AgentRuntime, type AgentConfig, type AgentToolDefinition, type AgentExecutionResult, type ForgivingToolInput } from './agent';
 export {
   MiddlewarePipeline,
   type GalxPlugin,
@@ -37,10 +44,18 @@ export {
   type MiddlewareErrorContext,
   createCostTrackerPlugin,
   createLRUCachePlugin,
-  createPrivacyShieldPlugin
+  createPrivacyShieldPlugin,
+  createFallbackModelPlugin,
+  createLoggingPlugin
 } from './middleware';
-export { ModelResilience } from './resilience';
-export { TokenOptimizer } from './tokens';
+export { ModelResilience, type ForgivingResilienceParams } from './resilience';
+export { TokenOptimizer, estimateTokens, truncateToFit } from './tokens';
+export { OpenAI } from './openai';
+export { Anthropic } from './anthropic';
+export { createGalxAI, galxai, GalxAIModelWrapper } from './ai';
+export { ChatGalxAI } from './langchain';
+export { GalxLLM } from './llamaindex';
+export { ConversationThread, type ThreadOptions } from './thread';
 
 // Default export & Top-Level Zero-Config Helpers
 import { GalxAI } from './client';
@@ -73,6 +88,39 @@ export async function run(
   }
 ) {
   return getClient().run(prompt, options);
+}
+
+/**
+ * Ultra-effortless direct text generation alias.
+ */
+export async function generate(
+  prompt: string,
+  options?: {
+    model?: string;
+    system?: string;
+    background?: boolean;
+    priority?: number;
+    type?: 'chat' | 'image' | 'workflow';
+  }
+) {
+  return getClient().run(prompt, options);
+}
+
+/**
+ * Ultra-effortless chat completion helper.
+ */
+export async function chat(
+  promptOrMessages: string | Array<{ role: string; content: string }>,
+  options?: { model?: string; temperature?: number }
+) {
+  if (typeof promptOrMessages === 'string') {
+    return getClient().run(promptOrMessages, options);
+  }
+  return getClient().chat.completions.create({
+    model: options?.model || 'gpt-5.6-sol',
+    messages: promptOrMessages as any,
+    temperature: options?.temperature
+  });
 }
 
 /**
@@ -143,6 +191,36 @@ export function tool(
   parameters?: Record<string, any>
 ) {
   return getClient().tool(name, description, execute, parameters);
+}
+
+/**
+ * Fluent method-chaining builder for chat completions & streaming.
+ */
+export function builder(model?: string) {
+  return getClient().builder(model);
+}
+
+/**
+ * Creates a stateful multi-turn conversation thread.
+ */
+export function thread(options?: import('./thread').ThreadOptions) {
+  return getClient().thread(options);
+}
+
+/**
+ * Executes a fallback cascade through prioritized models until one succeeds.
+ */
+export async function fallback(models: string[], promptOrParams: import('./resilience').ForgivingResilienceParams) {
+  const resilience = new (await import('./resilience')).ModelResilience(getClient().chat.completions);
+  return resilience.fallbackCascade(models, promptOrParams);
+}
+
+/**
+ * Races multiple models concurrently and streams from the fastest engine.
+ */
+export async function race(models: string[], promptOrParams: import('./resilience').ForgivingResilienceParams) {
+  const resilience = new (await import('./resilience')).ModelResilience(getClient().chat.completions);
+  return resilience.race(models, promptOrParams);
 }
 
 /**

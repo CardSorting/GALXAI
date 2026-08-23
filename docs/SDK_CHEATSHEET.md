@@ -1,272 +1,249 @@
-# 💻 GALXAI Multi-Ecosystem SDK Cheatsheet
+# 💻 GALXAI Multi-Ecosystem SDK & CLI Cheatsheet
 
-Complete drop-in code snippets for connecting any major AI framework, SDK, or programming language to GALXAI.
+Complete drop-in code snippets for connecting any major AI framework, SDK, CLI, or programming language to GALXAI.
 
 ---
 
-## ⚡ 1-Line Ultra-Flat Execution & Tagged Templates
+## ⚡ 1. Zero-Install Developer CLI (`npx galxai`)
+
+Run directly in terminal without installing dependencies:
+
+```bash
+# 1. Fast streaming prompt execution
+npx galxai "Explain token bucket rate limiting in 10 words"
+
+# 2. Targeted model execution
+npx galxai run "Audit distributed lock implementation" --model terra
+
+# 3. Model catalog overview with context windows & discount rates
+npx galxai models
+
+# 4. 0ms Alias resolution test
+npx galxai resolve claude-3-7-sonnet
+
+# 5. Token count & wholesale dollar savings calculation
+npx galxai tokens "Sample 50-page document text..."
+
+# 6. Anycast edge latency ping test
+npx galxai ping
+
+# 7. Interactive terminal REPL
+npx galxai chat
+```
+
+---
+
+## 🚀 2. Top-Level 1-Line Helpers & Stateful Threads (`@galxai/sdk`)
 
 ```typescript
-import galx, { run, stream, extract, tool, embed, generateImage } from 'galxai';
+import { run, galx, batch, thread, fallback, race, extract, embed, estimateTokens } from '@galxai/sdk';
 
-// 1. Tagged Template Literal
-const summary = await galx`Summarize the key takeaways for ${topic}`;
-
-// 2. Direct 1-Line Run
+// 1. Ultra-fast 1-line execution
 const answer = await run('Explain quantum mechanics in simple terms');
 
-// 3. 1-Line Streaming
-for await (const chunk of stream('Write a haiku about code')) {
-  process.stdout.write(chunk);
-}
+// 2. Tagged template literal
+const summary = await galx`Summarize the key takeaways for ${topic}`;
 
-// 4. 1-Line Vector Embeddings
-const vector = await embed('Zero-egress edge routing');
-console.log(vector.data[0].embedding.length); // 1536
+// 3. Stateful multi-turn conversation thread with auto-truncation
+const conv = thread({ model: 'gpt-5.6-sol', system: 'You are a staff engineer.' });
+const reply1 = await conv.reply('What is an LSM Tree?');
+const reply2 = await conv.reply('How does it differ from a B-Tree?');
 
-// 5. 1-Line Schema Extraction
+// 4. 100x high-throughput concurrent batch mapper
+const summaries = await batch(
+  ['Doc 1 text...', 'Doc 2 text...'],
+  (doc) => `Summarize: ${doc}`,
+  { concurrency: 10 }
+);
+
+// 5. Automatic multi-model fallback cascade
+const result = await fallback(['gpt-5.6-sol', 'x-ai/grok-4.6', 'gpt-5.6-terra'], 'High priority task');
+
+// 6. Multi-model race (fastest engine wins)
+const fastestReply = await race(['gpt-5.6-luna', 'gpt-5.6-sol'], 'Speed-critical query');
+
+// 7. Structured schema extraction
 const user = await extract('Jane Doe, 29, Engineer in SF', {
-  name: 'string', age: 'number', role: 'string', city: 'string'
+  name: 'string',
+  age: 'number',
+  city: 'string'
 });
 
-// 6. 1-Line Image Generation
-const image = await generateImage('Futuristic cyber vehicle');
+// 8. Vector embeddings (1536-dim)
+const embedding = await embed('Zero-egress edge routing');
+console.log(embedding.data[0].embedding.length); // 1536
 ```
 
 ---
 
-## 🌌 Official GALXAI Universal SDK (`@galxai/sdk`)
+## 🔄 3. 1:1 Framework-Native Drop-In Compatibility Shims
+
+### 1. OpenAI Node.js / TypeScript SDK (100% Drop-In)
+```typescript
+import OpenAI from '@galxai/sdk/openai';
+
+const openai = new OpenAI(); // Auto-reads GALX_API_KEY from environment
+
+const stream = await openai.chat.completions.create({
+  model: 'gpt-5.6-sol', // or 'gpt-4o', 'sol', 'flagship'
+  messages: [{ role: 'user', content: 'Write an atomic lock in TypeScript.' }],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content || '');
+}
+```
+
+### 2. Anthropic SDK & Claude Code (100% Drop-In)
+```typescript
+import Anthropic from '@galxai/sdk/anthropic';
+
+const anthropic = new Anthropic();
+
+const response = await anthropic.messages.create({
+  model: 'claude-3-7-sonnet', // Automatically mapped to flagship SOTA
+  max_tokens: 2048,
+  system: 'You are a systems architect.',
+  messages: [{ role: 'user', content: 'Design a distributed rate limiter.' }],
+});
+
+console.log(response.content[0].text);
+```
+
+### 3. Vercel AI SDK Core & Next.js App Router
+```typescript
+import { createGalxAI, galxai } from '@galxai/sdk/ai';
+import { streamText } from 'ai';
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const result = streamText({
+    model: galxai('gpt-5.6-sol'),
+    messages,
+  });
+
+  return result.toDataStreamResponse();
+}
+```
+
+### 4. LangChain Swarms & Runnables
+```typescript
+import { ChatGalxAI } from '@galxai/sdk/langchain';
+
+const llm = new ChatGalxAI({
+  model: 'gpt-5.6-sol',
+  temperature: 0.2,
+  streaming: true,
+});
+
+for await (const chunk of await llm.stream('Audit smart contract')) {
+  process.stdout.write(chunk.content);
+}
+```
+
+### 5. LlamaIndex RAG & Agent Pipelines
+```typescript
+import { GalxLLM } from '@galxai/sdk/llamaindex';
+
+const llm = new GalxLLM({ model: 'gpt-5.6-sol' });
+const response = await llm.complete('Summarize vector-indexed codebase.');
+console.log(response.text);
+```
+
+---
+
+## 💾 4. Database & Session Memory KV (`galx.db`)
+
+Persist session memory, scratchpad tokens, and agent scratchpad states with sub-microsecond in-memory lookups:
 
 ```typescript
-import { GalxAI, createCostTrackerPlugin, createLRUCachePlugin } from 'galxai';
+import { galx } from '@galxai/sdk';
 
-const client = new GalxAI({ apiKey: process.env.GALX_API_KEY });
+// 1. Remember structured memory with optional TTL
+galx.db.remember('session_user_42', { authenticated: true, role: 'admin' }, 3600_000);
 
-// 1. Fluent Builder with Streaming
-const stream = await client.chat
-  .builder('gpt-5.6-sol')
-  .system('You are an expert systems architect.')
-  .user('Explain Raft consensus.')
-  .temperature(0.2)
-  .stream(true)
-  .execute();
+// 2. Recall memory state
+const session = galx.db.recall<{ authenticated: boolean; role: string }>('session_user_42');
+console.log(session?.role); // 'admin'
 
-// 2. Autonomous Multi-Step Agent Tool Loop
-const agent = client.agent({
-  model: 'gpt-5.6-sol',
-  tools: {
-    getQuote: {
-      description: 'Get stock quote',
-      parameters: { ticker: { type: 'string' } },
-      execute: async ({ ticker }) => ({ price: 135.50 })
-    }
-  }
-});
-const result = await agent.run('What is Nvidia trading at?');
-
-// 3. Strongly-Typed Structured Outputs
-const invoice = await galx.chat.structured({
-  model: 'gpt-5.6-sol',
-  messages: [{ role: 'user', content: 'Invoice #1024 total $450' }],
-  schema: {
-    type: 'object',
-    properties: { invoiceId: { type: 'string' }, total: { type: 'number' } },
-    required: ['invoiceId', 'total']
-  }
-});
-
-// 4. Background Queue with Real-Time SSE Progress
-const task = await galx.chat.completions.createAsync({
-  model: 'gpt-5.6-sol',
-  messages: [{ role: 'user', content: 'Mass evaluation' }],
-  queue: 'llm-batch',
-  groupId: 'session_1'
-});
+// 3. Forget memory key
+galx.db.forget('session_user_42');
 ```
 
 ---
 
-## 🐍 Python Ecosystem
+## 🐍 5. Python Ecosystem
 
-### 1. Official OpenAI Python SDK
+### Standard OpenAI Python SDK
 ```python
 import os
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="http://localhost:3000/v1",  # Or https://api.galx.ai/v1
+    base_url="https://galx.ai/v1",
     api_key=os.environ.get("GALXAI_API_KEY", "galx_live_your_key_here")
 )
 
 response = client.chat.completions.create(
     model="gpt-5.6-sol",
-    messages=[{"role": "user", "content": "Explain quantum teleportation in 3 sentences."}],
-    temperature=0.7
+    messages=[{"role": "user", "content": "Explain continuous token caching."}],
+    stream=True
 )
 
-
-print(response.choices[0].message.content)
+for chunk in response:
+    if chunk.choices and chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="", flush=True)
 ```
 
----
-
-### 2. Vercel AI SDK (TypeScript / Node.js)
-```typescript
-import { createOpenAI } from '@ai-sdk/openai';
-import { streamText } from 'ai';
-
-const galxai = createOpenAI({
-  baseURL: 'http://localhost:3000/v1',
-  apiKey: process.env.GALXAI_API_KEY!,
-});
-
-async function main() {
-  const result = await streamText({
-    model: galxai('gpt-5.6-sol'),
-    prompt: 'Write an optimized binary search tree in TypeScript.',
-  });
-
-  for await (const textPart of result.textStream) {
-    process.stdout.write(textPart);
-  }
-}
-
-main();
-```
-
----
-
-### 3. LangChain (Python)
+### LangChain Python
 ```python
 from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(
     model="gpt-5.6-sol",
-    base_url="http://localhost:3000/v1",
-    api_key="galx_live_your_key_here",
-    temperature=0.3
+    openai_api_base="https://galx.ai/v1",
+    openai_api_key="galx_live_your_key_here"
 )
 
-response = llm.invoke("What are the primary invariants of smooth weighted round-robin?")
-print(response.content)
+result = llm.invoke("Summarize the benefits of pooled quota cycling.")
+print(result.content)
 ```
 
 ---
 
-### 4. LlamaIndex (Python)
-```python
-from llama_index.llms.openai import OpenAI
+## 🦙 6. Ollama CLI & OpenWebUI
 
-llm = OpenAI(
-    model="x-ai/grok-4.5",
-    api_base="http://localhost:3000/v1",
-    api_key="galx_live_your_key_here"
-)
+```bash
+export OLLAMA_HOST="https://galx.ai"
+export OLLAMA_API_KEY="galx_live_your_key_here"
 
-response = llm.complete("Summarize the benefits of 2-Phase Token Reservation.")
-print(response.text)
+curl https://galx.ai/api/generate \
+  -H "Authorization: Bearer galx_live_your_key_here" \
+  -d '{
+    "model": "sol",
+    "prompt": "Hello GALXAI from Ollama CLI",
+    "stream": true
+  }'
 ```
 
 ---
 
-### 5. Instructor (Structured Outputs with Pydantic)
-```python
-import instructor
-from pydantic import BaseModel, Field
-from openai import OpenAI
+## 🌊 7. Stream Protocol Adapters
 
-class VulnerabilityReport(BaseModel):
-    title: str = Field(description="Name of the security vulnerability")
-    severity: str = Field(description="Low, Medium, High, or Critical")
-    remediation_steps: list[str]
+```typescript
+import { toTextStream, toTextStreamResponse, toDataStreamResponse, toSSEResponse } from '@galxai/sdk';
 
-client = instructor.from_openai(
-    OpenAI(
-        base_url="http://localhost:3000/v1",
-        api_key="galx_live_your_key_here"
-    )
-)
+// 1. Text Stream (Web ReadableStream)
+const readable = toTextStream(asyncGenerator);
 
-report = client.chat.completions.create(
-    model="gpt-5.6-sol",
-    response_model=VulnerabilityReport,
-    messages=[{"role": "user", "content": "Analyze SQL injection in string concatenations."}]
-)
+// 2. Text Stream Response (text/plain)
+const textRes = toTextStreamResponse(asyncGenerator);
 
-print(report.model_dump_json(indent=2))
-```
+// 3. Vercel AI SDK Data Stream Response (text/plain; x-vercel-ai-data-stream: v1)
+const dataRes = toDataStreamResponse(asyncGenerator);
 
----
-
-## 🦀 Rust (`async-openai`)
-
-```rust
-use async_openai::{
-    config::OpenAIConfig,
-    types::{CreateChatCompletionRequestArgs, ChatCompletionRequestUserMessageArgs},
-    Client,
-};
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let config = OpenAIConfig::new()
-        .with_api_base("http://localhost:3000/v1")
-        .with_api_key("galx_live_your_key_here");
-
-    let client = Client::with_config(config);
-
-    let request = CreateChatCompletionRequestArgs::default()
-        .model("gpt-5.6-sol")
-        .messages([ChatCompletionRequestUserMessageArgs::default()
-            .content("Derive the time complexity of A* search.")
-            .build()?
-            .into()])
-        .build()?;
-
-    let response = client.chat().create(request).await?;
-    println!("{}", response.choices[0].message.content.as_deref().unwrap_or(""));
-
-    Ok(())
-}
-```
-
----
-
-## 🐹 Go (`sashabaranov/go-openai`)
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"github.com/sashabaranov/go-openai"
-)
-
-func main() {
-	config := openai.DefaultConfig("galx_live_your_key_here")
-	config.BaseURL = "http://localhost:3000/v1"
-
-	client := openai.NewClientWithConfig(config)
-
-	resp, err := client.CreateChatCompletion(
-		context.Background(),
-		openai.ChatCompletionRequest{
-			Model: "x-ai/grok-4.5",
-			Messages: []openai.ChatCompletionMessage{
-				{
-					Role:    openai.ChatMessageRoleUser,
-					Content: "Explain continuous token bucket replenishment calculus.",
-				},
-			},
-		},
-	)
-
-	if err != nil {
-		fmt.Printf("ChatCompletion error: %v\n", err)
-		return
-	}
-
-	fmt.Println(resp.Choices[0].Message.Content)
-}
+// 4. Server-Sent Events SSE Response (text/event-stream)
+const sseRes = toSSEResponse(asyncGenerator);
 ```

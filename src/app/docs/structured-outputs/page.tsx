@@ -14,13 +14,113 @@ import {
   Zap,
   Terminal,
   ArrowRight,
-  ShieldCheck
+  ShieldCheck,
+  Flame,
+  Layers,
+  FileCode2
 } from 'lucide-react';
+import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
+import { TrustSeals } from '@/components/common/TrustSeals';
+import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
+import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
+import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export default function StructuredOutputsDocsPage() {
-  const [copiedSection, setCopiedSection] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'pydantic' | 'zod' | 'vercel' | 'raw'>('pydantic');
+  const [copiedKey, setCopiedKey] = useState(false);
 
-  const rawJsonSnippet = `curl https://api.galx.ai/v1/chat/completions \\
+  const recipes = {
+    pydantic: {
+      title: 'Python + Pydantic (openai>=1.50.0)',
+      code: `from openai import OpenAI
+from pydantic import BaseModel, Field
+from typing import List
+
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key"
+)
+
+class ProductCatalog(BaseModel):
+    product_name: str = Field(description="Name of the software or hardware tool")
+    pricing_tier: str = Field(description="Monthly or annual price string")
+    key_features: List[str] = Field(description="Top 3 core capabilities")
+    enterprise_ready: bool
+
+# Guaranteed 100% Schema Compliance with 0 hallucinations
+completion = client.beta.chat.completions.parse(
+    model="gpt-5.6-sol",
+    messages=[
+        {"role": "system", "content": "Extract structured product catalog specifications."},
+        {"role": "user", "content": "Acme AI Gateway costs $25/mo with sub-15ms TTFT, prompt caching, and zero data retention for enterprise scale."}
+    ],
+    response_format=ProductCatalog
+)
+
+product: ProductCatalog = completion.choices[0].message.parsed
+print(f"Product: {product.product_name} | Enterprise: {product.enterprise_ready}")`
+    },
+    zod: {
+      title: 'TypeScript + Zod (openai/helpers/zod)',
+      code: `import OpenAI from "openai";
+import { zodResponseFormat } from "openai/helpers/zod";
+import { z } from "zod";
+
+const client = new OpenAI({
+  baseURL: "https://api.galx.ai/v1",
+  apiKey: process.env.GALXAI_API_KEY || "galx_live_your_gateway_key",
+});
+
+const ExtractionSchema = z.object({
+  user_id: z.string(),
+  intent: z.enum(["billing_inquiry", "bug_report", "feature_request"]),
+  urgency_score: z.number().min(1).max(5),
+  action_items: z.array(z.string()),
+});
+
+const completion = await client.beta.chat.completions.parse({
+  model: "gpt-5.6-sol",
+  messages: [
+    { role: "system", content: "Extract support ticket classification." },
+    { role: "user", content: "Our production cluster timed out on query #4492! We need this fixed ASAP." }
+  ],
+  response_format: zodResponseFormat(ExtractionSchema, "support_ticket"),
+});
+
+const ticket = completion.choices[0].message.parsed;
+console.log("Classified Intent:", ticket?.intent);`
+    },
+    vercel: {
+      title: 'Next.js & Vercel AI SDK (generateObject)',
+      code: `import { openai } from "@ai-sdk/openai";
+import { generateObject } from "ai";
+import { z } from "zod";
+
+const galxai = openai({
+  baseURL: "https://api.galx.ai/v1",
+  apiKey: process.env.GALXAI_API_KEY,
+});
+
+export async function POST(req: Request) {
+  const { resumeText } = await req.json();
+
+  const { object: candidate } = await generateObject({
+    model: galxai("gpt-5.6-sol"),
+    schema: z.object({
+      fullName: z.string(),
+      yearsExperience: z.number(),
+      skills: z.array(z.string()),
+      verifiedMatches: z.array(z.string()),
+    }),
+    prompt: \`Extract candidate profile from resume:\\n\${resumeText}\`,
+  });
+
+  return Response.json({ candidate });
+}`
+    },
+    raw: {
+      title: 'Raw REST API JSON Schema (cURL)',
+      code: `curl https://api.galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer galx_live_your_gateway_key" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -46,12 +146,14 @@ export default function StructuredOutputsDocsPage() {
         }
       }
     }
-  }'`;
+  }'`
+    }
+  };
 
-  const handleCopy = (code: string, id: string) => {
+  const handleCopy = (code: string) => {
     navigator.clipboard.writeText(code);
-    setCopiedSection(id);
-    setTimeout(() => setCopiedSection(null), 2000);
+    setCopiedKey(true);
+    setTimeout(() => setCopiedKey(false), 2000);
   };
 
   return (
@@ -67,23 +169,31 @@ export default function StructuredOutputsDocsPage() {
           ]}
         />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white">Guaranteed Structured JSON Outputs Guide</h1>
-            <p className="text-xs text-zinc-400">
-              Enforce 100% adherence to complex JSON Schemas, Pydantic classes, and Zod types with zero hallucinations.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-mono text-xs font-bold flex items-center gap-1.5">
+        {/* Hero Header */}
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-4 border border-white/10 relative overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>100% SCHEMA COMPLIANCE</span>
-            </span>
+              <span>100% SCHEMA ADHERENCE GUARANTEE</span>
+            </div>
+            <Link
+              href="/keys/new"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase font-mono tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
+            >
+              <Zap className="w-3.5 h-3.5 fill-black" />
+              <span>Get Live Key</span>
+            </Link>
           </div>
+          <h1 className="text-3xl sm:text-4xl font-black text-white">Guaranteed Structured JSON Outputs Guide</h1>
+          <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl font-sans">
+            Enforce 100% adherence to complex JSON Schemas, Pydantic models, and Zod definitions with zero missing keys, zero syntax errors, and zero hallucinations.
+          </p>
         </div>
 
         <DocsSubNav />
+
+        {/* Founding Cohort Rate Lock Ribbon */}
+        <RateLockRibbon />
 
         {/* Benefits Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
@@ -95,7 +205,7 @@ export default function StructuredOutputsDocsPage() {
 
           <div className="glass-panel p-5 rounded-3xl space-y-1 border border-cyan-500/30 bg-cyan-500/5">
             <span className="text-cyan-400 text-[10px] uppercase font-sans font-semibold">Parser Support</span>
-            <div className="text-2xl font-black text-cyan-300">Zod & Pydantic</div>
+            <div className="text-2xl font-black text-cyan-300">Zod &amp; Pydantic</div>
             <div className="text-[11px] text-cyan-400 font-sans">Native SDK client helper integration</div>
           </div>
 
@@ -106,26 +216,56 @@ export default function StructuredOutputsDocsPage() {
           </div>
         </div>
 
-        {/* OpenAPI Specification JSON Schema */}
-        <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-white font-mono flex items-center gap-2">
-              <Code2 className="w-4 h-4 text-amber-400" />
-              Raw REST API JSON Schema Specification
-            </h2>
-            <button
-              onClick={() => handleCopy(rawJsonSnippet, 'raw')}
-              className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-zinc-300 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer border border-white/5"
-            >
-              {copiedSection === 'raw' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedSection === 'raw' ? 'Copied' : 'Copy cURL'}</span>
-            </button>
+        {/* Tabbed Recipes Workbench */}
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-white/10">
+          <div className="flex flex-wrap items-center gap-2 border-b border-white/10 pb-4 font-mono text-xs">
+            {(['pydantic', 'zod', 'vercel', 'raw'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-2 rounded-xl font-bold uppercase transition-all cursor-pointer ${
+                  activeTab === tab
+                    ? 'bg-amber-400 text-black shadow-md'
+                    : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                {tab === 'pydantic' ? '🐍 Python (Pydantic)' : tab === 'zod' ? '▲ TypeScript (Zod)' : tab === 'vercel' ? '⚡ Vercel AI SDK' : '💻 Raw JSON Schema (cURL)'}
+              </button>
+            ))}
           </div>
-          <pre className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-cyan-300 border border-white/5 overflow-x-auto">
-            <code>{rawJsonSnippet}</code>
-          </pre>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-white font-mono flex items-center gap-2">
+                <Code2 className="w-4 h-4 text-cyan-400" />
+                <span>{recipes[activeTab].title}</span>
+              </h2>
+
+              <button
+                onClick={() => handleCopy(recipes[activeTab].code)}
+                className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white flex items-center gap-1.5 transition-all text-xs cursor-pointer font-sans"
+              >
+                {copiedKey ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedKey ? 'Copied Recipe!' : 'Copy Recipe'}</span>
+              </button>
+            </div>
+
+            <div className="relative rounded-2xl bg-black/80 border border-white/10 p-5 font-mono text-xs overflow-hidden">
+              <pre className="text-amber-300 overflow-x-auto leading-relaxed">
+                {recipes[activeTab].code}
+              </pre>
+            </div>
+          </div>
         </div>
+
+        {/* Consumer-Grade Trust Seals */}
+        <TrustSeals />
       </main>
+
+      {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
+      <FloatingConversionDock />
+      <LiveActivityToast />
+      <ExitIntentModal />
     </div>
   );
 }

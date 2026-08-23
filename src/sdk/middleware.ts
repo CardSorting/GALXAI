@@ -235,3 +235,51 @@ export function createPrivacyShieldPlugin(options: {
     }
   };
 }
+
+/**
+ * Built-in Plugin: Automatic Model Fallback / Degradation Grace
+ */
+export function createFallbackModelPlugin(options: {
+  fallbackModel?: string;
+  onFallbackTriggered?: (originalModel: string, fallbackModel: string, error: Error) => void;
+} = {}): GalxPlugin {
+  const fallback = options.fallbackModel || 'gpt-5.6-luna';
+
+  return {
+    name: 'FallbackModelPlugin',
+    onRequest: (ctx) => {
+      // Injects fallback header into gateway
+      ctx.headers['X-Galx-Fallback-Model'] = fallback;
+    },
+    onError: (ctx) => {
+      if (ctx.error && (ctx.error as any).statusCode >= 500) {
+        options.onFallbackTriggered?.('primary', fallback, ctx.error);
+      }
+    }
+  };
+}
+
+/**
+ * Built-in Plugin: Zero-Friction Tracing & Logging Interceptor
+ */
+export function createLoggingPlugin(options: {
+  verbose?: boolean;
+  logger?: (msg: string, meta?: any) => void;
+} = {}): GalxPlugin {
+  const log = options.logger || ((msg, meta) => console.log(`[GALXAI Plugin] ${msg}`, meta || ''));
+
+  return {
+    name: 'LoggingPlugin',
+    onRequest: (ctx) => {
+      if (options.verbose) {
+        log(`--> ${ctx.method} ${ctx.path}`, { timestamp: ctx.timestampMs });
+      }
+    },
+    onResponse: (ctx) => {
+      log(`<-- ${ctx.statusCode} ${ctx.path} (${ctx.durationMs}ms)`);
+    },
+    onError: (ctx) => {
+      log(`<!- ERROR ${ctx.path}: ${ctx.error.message} (${ctx.durationMs}ms)`);
+    }
+  };
+}

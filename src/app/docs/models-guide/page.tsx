@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
@@ -14,8 +14,15 @@ import {
   ShieldCheck,
   CheckCircle2,
   Sparkles,
-  GitCompare
+  GitCompare,
+  Copy,
+  Check
 } from 'lucide-react';
+import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
+import { TrustSeals } from '@/components/common/TrustSeals';
+import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
+import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
+import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 const MODELS_GUIDE_DATA = [
   {
@@ -81,6 +88,14 @@ const MODELS_GUIDE_DATA = [
 ];
 
 export default function ModelsGuideDocsPage() {
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = (id: string) => {
+    navigator.clipboard.writeText(id);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
@@ -94,24 +109,31 @@ export default function ModelsGuideDocsPage() {
           ]}
         />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white">Frontier AI Model Selection Guide</h1>
-            <p className="text-xs text-zinc-400">
-              Comparative benchmark capabilities, context windows, and workload recommendations across all 12 supported frontier engines.
-            </p>
+        {/* Hero Header */}
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-4 border border-white/10 relative overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>FRONTIER MODEL DIRECTORY</span>
+            </div>
+            <Link
+              href="/models/compare"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase font-mono tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
+            >
+              <GitCompare className="w-3.5 h-3.5 fill-black" />
+              <span>Side-by-Side Arena →</span>
+            </Link>
           </div>
-
-          <Link
-            href="/models/compare"
-            className="px-4 py-2.5 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-mono font-bold flex items-center gap-2 transition-all"
-          >
-            <GitCompare className="w-3.5 h-3.5" />
-            <span>Interactive Model Matrix →</span>
-          </Link>
+          <h1 className="text-3xl sm:text-4xl font-black text-white">Frontier AI Model Selection Guide</h1>
+          <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl font-sans">
+            Comparative benchmark capabilities, context windows, and workload recommendations across all 12 supported frontier engines with 0ms ambiguity resolution.
+          </p>
         </div>
 
         <DocsSubNav />
+
+        {/* Founding Cohort Rate Lock Ribbon */}
+        <RateLockRibbon />
 
         {/* Models Comparison Cards */}
         <div className="space-y-4 font-mono text-xs">
@@ -121,15 +143,31 @@ export default function ModelsGuideDocsPage() {
               className="glass-panel rounded-3xl p-6 sm:p-7 space-y-4 border border-white/10 hover:border-white/20 transition-all"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <h2 className="text-base font-bold text-white font-sans">{model.name}</h2>
                   <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-bold">
                     {model.badge}
                   </span>
+                  <button
+                    onClick={() => handleCopy(model.id)}
+                    className="px-2 py-1 rounded-md bg-white/5 hover:bg-white/10 text-[10px] text-zinc-400 hover:text-white flex items-center gap-1 transition-all cursor-pointer border border-white/5"
+                  >
+                    {copiedId === model.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedId === model.id ? 'Copied ID' : `ID: ${model.id}`}</span>
+                  </button>
                 </div>
 
-                <div className="text-emerald-400 font-bold text-[11px]">
-                  {model.cacheDiscount}
+                <div className="flex items-center gap-3">
+                  <div className="text-emerald-400 font-bold text-[11px]">
+                    {model.cacheDiscount}
+                  </div>
+                  <Link
+                    href={`/models/${model.id}`}
+                    className="text-cyan-400 hover:text-cyan-300 font-sans text-xs flex items-center gap-1 hover:underline"
+                  >
+                    <span>View Model Card</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
                 </div>
               </div>
 
@@ -156,7 +194,15 @@ export default function ModelsGuideDocsPage() {
             </div>
           ))}
         </div>
+
+        {/* Consumer-Grade Trust Seals */}
+        <TrustSeals />
       </main>
+
+      {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
+      <FloatingConversionDock />
+      <LiveActivityToast />
+      <ExitIntentModal />
     </div>
   );
 }

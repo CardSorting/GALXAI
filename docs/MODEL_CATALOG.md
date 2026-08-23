@@ -1,94 +1,65 @@
-# 🧠 GALXAI Model Catalog & Modality Specification
+# 🧠 GALXAI Universal Model Catalog & Modality Specification
 
-GALXAI exclusively routes traffic across 12 flagship models spanning advanced reasoning, lightweight code synthesis, and multi-resolution visual generation.
-
----
-
-## 1. Flagship Reasoning & LLM Fleet
-
-### 🌟 `gpt-5.6-sol` (OpenAI Flagship Deep Reasoning)
-- **Primary Use Case**: Complex mathematics, architectural planning, multi-step formal reasoning, large-scale codebase refactoring.
-- **Context Window**: $900,000$ tokens
-- **Max Output Tokens**: $32,768$ tokens
-- **Modality Support**: Text, Vision, Reasoning CoT, JSON Schema, Function Calling, Streaming.
-- **Pricing**: Input: **$2.25** / 1M tokens (25% off list $3.00) \| Output: **$9.00** / 1M tokens (25% off list $12.00).
+GALXAI exclusively routes traffic across modern flagship LLMs, reasoning engines, vector embeddings, and visual synthesis models with **20%–36% wholesale discounts** and **75% prompt caching rebates**.
 
 ---
 
-### 🌍 `gpt-5.6-terra` (OpenAI Balanced General Intelligence)
-- **Primary Use Case**: High-velocity agentic workflows, conversational assistants, continuous CI/CD automated review.
-- **Context Window**: $900,000$ tokens
-- **Max Output Tokens**: $16,384$ tokens
-- **Modality Support**: Text, Vision, Function Calling, Streaming.
-- **Pricing**: Input: **$1.15** / 1M tokens (23% off list $1.50) \| Output: **$4.60** / 1M tokens (23% off list $6.00).
+## 1. Flagship Reasoning, Coding & LLM Fleet
 
----
-
-### 🌙 `gpt-5.6-luna` (OpenAI High-Speed Lightweight Engine)
-- **Primary Use Case**: Real-time autocomplete, intent routing, low-latency streaming chat, high-throughput text classification.
-- **Context Window**: $900,000$ tokens
-- **Max Output Tokens**: $8,192$ tokens
-- **Modality Support**: Text, Structured Outputs, Streaming.
-- **Pricing**: Input: **$0.11** / 1M tokens (27% off list $0.15) \| Output: **$0.45** / 1M tokens (25% off list $0.60).
-
----
-
-### ⚡ `x-ai/grok-4.6` (xAI Grok 4.6 Frontier Multimodal & Reasoning)
-- **Primary Use Case**: Massive 1M context analysis, frontier reasoning, autonomous tool execution, complex document synthesis.
-- **Context Window**: $1,000,000$ tokens
-- **Max Output Tokens**: $128,000$ tokens
-- **Modality Support**: Text, Vision, Streaming, Code Generation, Tool Calling.
-- **Pricing**: Input: **$2.10** / 1M tokens (30% off list $3.00) \| Output: **$8.40** / 1M tokens (30% off list $12.00).
-
----
-
-### ⚡ `x-ai/grok-4.5` (xAI Grok Reasoning & Vision Flagship)
-- **Primary Use Case**: Massive 500K context analysis, multi-document synthesis, visual data extraction, advanced logic puzzles.
-- **Context Window**: $500,000$ tokens
-- **Max Output Tokens**: $32,768$ tokens
-- **Modality Support**: Text, Vision, Streaming, Code Generation.
-- **Pricing**: Input: **$1.80** / 1M tokens (28% off list $2.50) \| Output: **$7.20** / 1M tokens (28% off list $10.00).
+| Model ID | Name & Target Specialization | Context Window | Max Output | Input / 1M | Output / 1M | Cached Input / 1M | Wholesale Discount |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **`gpt-5.6-sol`** | Flagship SOTA: Coding, deep mathematics, multi-file architecture | $900,000$ | $128,000$ | **$3.75** | **$15.00** | **$1.25** | **25% OFF** |
+| **`gpt-5.6-terra`** | Balanced Frontier: High-throughput reasoning & general intelligence | $900,000$ | $64,000$ | **$2.25** | **$9.00** | **$0.75** | **25% OFF** |
+| **`gpt-5.6-luna`** | High-Velocity: Sub-15ms completions, intent routing, autocomplete | $900,000$ | $32,000$ | **$0.95** | **$3.80** | **$0.30** | **36% OFF** |
+| **`x-ai/grok-4.6`** | 1M Frontier: Multimodal vision, realtime analysis, tool calling | $1,000,000$ | $128,000$ | **$2.10** | **$8.40** | **$0.70** | **30% OFF** |
+| **`x-ai/grok-4.5`** | 500K Frontier: Visual data extraction, code generation & analysis | $500,000$ | $32,768$ | **$1.80** | **$7.20** | **$0.60** | **28% OFF** |
 
 ---
 
 ## 2. Visual Synthesis & Image Generation Fleet
 
-| Model ID | Provider | Max Resolution | Quality Tiers | Formats Supported | GALXAI Price / Image | List Price | Discount |
+| Model ID | Provider | Max Resolution | Aspect Ratios Supported | Formats | GALXAI Price | List Price | Discount |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `openai-gpt-image-2` | OpenAI | $1024 \times 1024$ | Standard, HD | URL, Base64 JSON | **$0.060** | $0.080 | **25% OFF** |
-| `openai-gpt-image-1.5` | OpenAI | $1024 \times 1024$ | Standard, HD | URL, Base64 JSON | **$0.045** | $0.060 | **25% OFF** |
-| `openai-gpt-image-1` | OpenAI | $1024 \times 1024$ | Standard | URL, Base64 JSON | **$0.030** | $0.040 | **25% OFF** |
-| `openai-gpt4o-image` | OpenAI | $1024 \times 1024$ | Standard, HD | URL, Base64 JSON | **$0.038** | $0.050 | **24% OFF** |
-| `openai-dalle-3` | OpenAI | $1024 \times 1024$ | Standard, HD | URL, Base64 JSON | **$0.032** | $0.040 | **20% OFF** |
-| `openai-dalle-2` | OpenAI | $512 \times 512$ | Standard | URL, Base64 JSON | **$0.016** | $0.020 | **20% OFF** |
-| `xai-grok-image` | xAI Grok | $1024 \times 1024$ | Standard, HD | URL | **$0.037** | $0.050 | **26% OFF** |
-| `xai-grok-2-image` | xAI Grok | $1024 \times 1024$ | Standard | URL | **$0.030** | $0.040 | **25% OFF** |
+| **`openai-gpt-image-2`** | OpenAI Codex | $1792 \times 1024$ | `16:9`, `9:16`, `4:3`, `3:2`, `1:1` | URL, Base64 | **$0.060** | $0.080 | **25% OFF** |
+| **`openai-gpt-image-1.5`** | OpenAI Codex | $1024 \times 1024$ | `16:9`, `9:16`, `1:1` | URL, Base64 | **$0.045** | $0.060 | **25% OFF** |
+| **`openai-gpt-image-1`** | OpenAI Codex | $1024 \times 1024$ | `1:1` | URL, Base64 | **$0.030** | $0.040 | **30% OFF** |
+| **`openai-gpt4o-image`** | OpenAI Multimodal | $1024 \times 1024$ | `1:1` | URL, Base64 | **$0.038** | $0.050 | **24% OFF** |
+| **`openai-dalle-3`** | OpenAI DALL·E 3 | $1792 \times 1024$ | `16:9`, `9:16`, `1:1` | URL, Base64 | **$0.030** | $0.040 | **25% OFF** |
+| **`openai-dalle-2`** | OpenAI DALL·E 2 | $512 \times 512$ | `1:1` | URL, Base64 | **$0.014** | $0.020 | **30% OFF** |
+| **`xai-grok-image`** | xAI Imagine 1.0 | $1024 \times 1024$ | `16:9`, `9:16`, `1:1` | URL | **$0.036** | $0.050 | **28% OFF** |
+| **`xai-grok-2-image`** | xAI Grok-2 Image | $1024 \times 1024$ | `1:1` | URL | **$0.028** | $0.040 | **30% OFF** |
 
 ---
 
-## 3. Canonical Aliasing & Automatic Normalization
+## 3. Vector Embedding Models (Edge $<15\text{ms}$)
 
-The router automatically normalizes common short-hand aliases to their canonical model identifiers:
-
-| Shorthand Alias | Canonical Resolved Model ID |
-| :--- | :--- |
-| `sol`, `gpt-sol`, `gpt-5-sol` | `gpt-5.6-sol` |
-| `terra`, `gpt-terra` | `gpt-5.6-terra` |
-| `luna`, `gpt-luna` | `gpt-5.6-luna` |
-| `grok`, `grok-4.6`, `xai/grok-4.6`, `xai-grok-4.6` | `x-ai/grok-4.6` |
-| `grok-4.5`, `xai/grok-4.5`, `xai-grok-4.5` | `x-ai/grok-4.5` |
-| `dalle-3`, `dall-e-3` | `openai-dalle-3` |
-| `dalle-2`, `dall-e-2` | `openai-dalle-2` |
-| `grok-image`, `grok-imagine` | `xai-grok-image` |
-
----
-
-## 4. Vector Embedding Models
-
-High-velocity vector embedding generation directly computed at Cloudflare Edge PoPs (<15ms latency):
-
-| Model ID | Provider | Vector Dimensions | Max Context | Input Price / 1M | Edge PoP Latency |
+| Model ID | Provider | Dimensions | Max Context | Input Price / 1M | Edge PoP Latency |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `text-embedding-3-small` | OpenAI / Edge | 1,536 | 8,191 | **$0.015** (25% OFF) | $<12\text{ms}$ |
-| `text-embedding-3-large` | OpenAI / Edge | 3,072 | 8,191 | **$0.095** (27% OFF) | $<15\text{ms}$ |
+| **`text-embedding-3-small`** | OpenAI / Edge | 1,536 | 8,191 | **$0.015** (25% OFF) | $<12\text{ms}$ |
+| **`text-embedding-3-large`** | OpenAI / Edge | 3,072 | 8,191 | **$0.095** (27% OFF) | $<15\text{ms}$ |
 
+---
+
+## 4. Universal Synonym & Mental Model Normalization
+
+The router automatically resolves developer shorthands and external model IDs to the optimal canonical target:
+
+| Input Alias / Synonym Pattern | Canonical Resolved Target | Rationale |
+| :--- | :--- | :--- |
+| `sol`, `gpt-5`, `gpt5`, `flagship`, `sota`, `best`, `smart`, `coding`, `agent`, `auto`, `default`, `latest` | `gpt-5.6-sol` | Flagship coding & reasoning intent |
+| `gpt-4o`, `gpt-4`, `chatgpt-4o`, `claude-3-7-sonnet`, `claude-3-5-sonnet`, `deepseek-v3`, `gemini-2.5-pro` | `gpt-5.6-sol` | Drop-in frontier model replacement |
+| `terra`, `balanced`, `reasoning`, `reasoner`, `thinking`, `o1`, `o1-mini`, `o3`, `o3-mini`, `deepseek-r1` | `gpt-5.6-terra` | Balanced reasoning intent |
+| `luna`, `fast`, `flash`, `speed`, `turbo`, `cheap`, `velocity`, `instant`, `autocomplete`, `gpt-4o-mini`, `gemini-2.0-flash` | `gpt-5.6-luna` | High-velocity low-latency intent |
+| `grok`, `grok-4.6`, `xai-grok`, `grok-1m`, `1m`, `realtime`, `live`, `grok-3` | `x-ai/grok-4.6` | 1M Context Frontier Reasoning |
+| `image`, `generate-image`, `dall-e-3`, `midjourney`, `flux`, `photoreal` | `openai-gpt-image-2` | Visual synthesis intent |
+| `embedding`, `embed`, `vector`, `text-embedding` | `text-embedding-3-small` | Vector embedding intent |
+| `""` (empty), `undefined`, `null`, unknown model string | `gpt-5.6-sol` | Safe default fallback |
+
+---
+
+## 5. Automated Suffix & Prefix Stripping
+
+The gateway automatically strips lifecycle suffixes and provider prefixes before matching:
+- **Prefixes Removed**: `openai/`, `x-ai/`, `anthropic/`, `google/`, `meta/`, `deepseek/`, `galx/`, `galxai/`, `@openai/`, `@anthropic/`
+- **Suffixes Removed**: `:latest`, `-latest`, `-preview`, `-2026-08-01`, `@20260801`
+- **Formatting Variations**: `gpt-5-6-sol` $\to$ `gpt-5.6-sol`

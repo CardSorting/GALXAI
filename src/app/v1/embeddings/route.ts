@@ -31,18 +31,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json();
-    const input = body.input;
+    const body = await req.json().catch(() => ({}));
+    const rawInput = body.input ?? body.text ?? body.prompt ?? body.content ?? body.inputs ?? body.data ?? 'Hello';
     const model = body.model || 'text-embedding-3-small';
 
-    if (!input) {
-      return NextResponse.json(
-        { error: { message: 'Missing required parameter: input', type: 'invalid_request_error' } },
-        { status: 400 }
-      );
-    }
-
-    const inputs = Array.isArray(input) ? input : [input];
+    const inputs = Array.isArray(rawInput) ? rawInput.map(String) : [String(rawInput)];
     const embeddingRepo = EmbeddingsRepository.getInstance();
 
     const data = inputs.map((text: string, index: number) => {

@@ -2,61 +2,74 @@
 
 ---
 
-### General & Architecture
+## 🌟 General & Zero-Hesitation Developer Ergonomics
 
 #### 1. What is GALXAI?
-GALXAI is an enterprise-grade Universal AI Gateway providing high-throughput, low-latency access to frontier reasoning and visual models (OpenAI GPT-5.6 Sol, Terra, Luna and xAI Grok 4.6/4.5) at **25% to 40% below direct retail prices**. It acts as a 1-line drop-in replacement for the official OpenAI and Anthropic SDKs.
+GALXAI is an enterprise-grade Universal AI Gateway and zero-hesitation developer execution substrate. It provides high-throughput, low-latency access to flagship reasoning, coding, and visual synthesis models (OpenAI GPT-5.6 Sol, Terra, Luna, and xAI Grok 4.6/4.5) at **20% to 36% below direct retail prices** with **75% prompt caching pass-through** and **sub-15ms edge routing**.
 
-#### 2. Do I need to manage multiple provider accounts or SDKs?
-No. You only need a single GALXAI Developer Gateway Key (`galx_live_...`). GALXAI provides unified access to all 12 reasoning and visual models across OpenAI and xAI without needing separate accounts, subscriptions, or disparate billing systems.
+#### 2. What is the "Zero-Hesitation" philosophy?
+> *"Our enemy is hesitation — ambiguity is our friend not our enemy, our enemy is developer friction and hesitation, ambiguity is required because they have their own mental model."*
 
-#### 3. Is GALXAI 100% compatible with OpenAI and Anthropic SDKs?
-Yes, completely. GALXAI natively implements standard OpenAI REST APIs (`/v1/chat/completions`, `/v1/embeddings`, `/v1/images/generations`, `/v1/models`) and Anthropic Claude APIs (`/v1/messages`). Simply update your base URL to `https://api.galx.ai/v1` or `https://api.galx.ai`.
+Developers approach AI gateways from dozens of different frameworks, IDEs, and languages. Rather than failing with rigid `400 Bad Request` or `405 Method Not Allowed` errors when encountering casing variations, unquoted keys, raw text bodies, or aspect ratio parameters, GALXAI absorbs developer intent gracefully with **zero friction, zero hesitation, and 100% safe defaults**.
 
-#### 4. Does GALXAI support Vector Embeddings at the Edge?
-Yes. GALXAI provides native `/v1/embeddings` calculated directly across 300+ Cloudflare Edge PoPs (<15ms latency) returning 1536-dimensional or 3072-dimensional embedding vectors with standard OpenAI SDK parity or via the `@galxai/sdk`.
+#### 3. How does the Universal Synonym & Model Catalog work?
+GALXAI automatically resolves shorthand nicknames, intent aliases, and legacy provider IDs to canonical flagship models:
+- `sol`, `gpt-5`, `flagship`, `sota`, `coding`, `gpt-4o`, `claude-3-7-sonnet`, `deepseek-v3` $\to$ **`gpt-5.6-sol`**
+- `terra`, `balanced`, `reasoning`, `thinking`, `o1`, `o3-mini`, `deepseek-r1` $\to$ **`gpt-5.6-terra`**
+- `luna`, `fast`, `cheap`, `velocity`, `gpt-4o-mini`, `gemini-2.0-flash` $\to$ **`gpt-5.6-luna`**
+- `grok`, `grok-4.6`, `grok-1m`, `1m`, `realtime` $\to$ **`x-ai/grok-4.6`**
+- `image`, `dall-e-3`, `flux`, `midjourney` $\to$ **`openai-gpt-image-2`**
+- Empty strings, `undefined`, or unknown models safely default to **`gpt-5.6-sol`**.
 
-#### 5. How does $0 Multimodal Egress work with Cloudflare R2?
-Generated images (`openai-gpt-image-2`, `openai-dalle-3`) and audio artifacts are streamed directly to Cloudflare R2 object storage and served over the global Anycast CDN custom domain `assets.galx.ai`. Developers pay **$0 egress fees** regardless of download bandwidth or global traffic volumes.
+#### 4. Can I use the zero-install CLI without installing anything?
+Yes. Simply run `npx galxai "Your prompt here"`. It streams completions to stdout immediately, provides formatted model tables (`npx galxai models`), measures edge ping latency (`npx galxai ping`), and estimates BPE token counts and wholesale dollar savings (`npx galxai tokens "..."`).
 
----
+#### 5. Can I test completions directly in my web browser?
+Yes. The gateway natively supports HTTP `GET` queries:
+```text
+https://galx.ai/v1/chat/completions?prompt=Hello+GALXAI&model=sol&api_key=galx_live_...
+```
 
-### Deployment & Infrastructure
-
-#### 6. How is GALXAI deployed in production?
-GALXAI utilizes a dual-engine architecture:
-- **Vercel**: Next.js 15 App Router web platform, dashboard, and Serverless API routes (multi-region in `sfo1` and `iad1`).
-- **Cloudflare Workers**: Zero-egress global edge gateway (`api.galx.ai`) and R2 media CDN (`assets.galx.ai`).
-- **Supabase**: Authoritative PostgreSQL database with Transaction Pooling (Port 6543) and AES-256-GCM Credential Vault.
-
-#### 7. How do I run the automated pre-deployment verification gate?
-Run `npm run deploy:check`. This executes the **8-Phase Pre-Flight Audit Engine**, validates all cryptographic HKDF keys, verifies live Supabase HTTPS reachability, runs ESLint and TypeScript checks, and builds the production Next.js bundle across all 117 pages.
-
-#### 8. How do I test a live Vercel deployment?
-Run `npm run vercel:smoke -- --url=https://galx.ai` to execute automated live HTTP/HTTPS smoke tests validating health telemetry, HTML prerendering, Edge OG images, robots.txt, and security headers.
+#### 6. How does GALXAI handle Midjourney / Flux aspect ratios?
+When generating images via `POST /v1/images/generations`, GALXAI automatically converts `aspect_ratio: "16:9"` to `1792x1024`, `9:16` to `1024x1792`, `4:3` to `1024x768`, `3:2` to `1536x1024`, and `1:1` to `1024x1024`.
 
 ---
 
-### Pricing & Compute Wallet
+## 🔄 Framework & Multi-Mental-Model Integration
 
-#### 9. How does GALXAI offer 25%–40% discounts compared to direct retail?
-Through large-scale enterprise compute commitments and intelligent low-latency routing, GALXAI secures wholesale capacity and passes direct wholesale rates to developers with **0% markup**.
+#### 7. Is GALXAI compatible with the OpenAI and Anthropic SDKs?
+Yes, 100%. You can either update `baseURL` to `https://galx.ai/v1` or use our dedicated 1:1 drop-in shims:
+- `import OpenAI from "@galxai/sdk/openai"`
+- `import Anthropic from "@galxai/sdk/anthropic"`
+- `import { createGalxAI, galxai } from "@galxai/sdk/ai"` (Vercel AI SDK)
+- `import { ChatGalxAI } from "@galxai/sdk/langchain"` (LangChain)
+- `import { GalxLLM } from "@galxai/sdk/llamaindex"` (LlamaIndex)
 
-#### 10. How does the 75% Prompt Caching Rebate work?
+#### 8. Can I use Ollama CLI, OpenWebUI, or Continue.dev?
+Yes. Set `export OLLAMA_HOST="https://galx.ai"` and `export OLLAMA_API_KEY="galx_live_..."`. GALXAI natively implements `/api/generate`, `/api/chat`, `/api/tags`, `/api/version`, and `/api/show`.
+
+#### 9. How do Stateful Conversation Threads work?
+Using `const thread = galx.thread({ model: 'gpt-5.6-sol', system: '...' })`, the SDK automatically manages conversation turns, pins system instructions, and uses `TokenOptimizer.truncateToFit()` to intelligently prune oldest non-system turns when approaching context limits.
+
+---
+
+## 💰 Pricing, Discounts & Compute Wallet
+
+#### 10. How does GALXAI offer 20%–36% wholesale discounts?
+Through pooled enterprise capacity commitments and zero-overhead edge routing, GALXAI captures wholesale volume pricing and passes direct wholesale rates to developers with **0% markup**.
+
+#### 11. How does the 75% Prompt Caching Rebate work?
 For prompts containing system instructions or context prefixes exceeding 1,024 tokens, cached input tokens automatically receive a **75% discount**. GALXAI passes 100% of this rebate directly to your wallet.
 
-#### 11. How does developer billing work?
-GALXAI operates a prepaid pay-as-you-go compute wallet. Every new account receives an initial **$5.00 introductory compute credit**. Deductions are micro-metered in real-time per token. Developers can also enable automated reload protection to guarantee zero downtime for production agent workloads.
+#### 12. How does developer billing work?
+GALXAI operates a prepaid compute wallet. Every new account receives an initial **$5.00 introductory compute credit**. Deductions are micro-metered in real-time per token.
 
 ---
 
-### Security, Privacy & Compliance
+## 🔒 Security, Privacy & Compliance
 
-#### 12. Does GALXAI store or log prompts?
-No. GALXAI enforces a strict **Zero Content Retention Policy (ZDR v10.0)**. Prompts and streaming chunks are processed purely in ephemeral memory buffers with 2-pass cryptographic overwrite (`0xAA` -> `0x00`) and are never logged to disk, retained in databases, or used for model training.
+#### 13. Does GALXAI store or log prompts?
+No. GALXAI enforces a strict **Zero Data Retention Policy (ZDR v10.0)**. Prompts and streaming chunks are processed purely in ephemeral memory buffers with 2-pass cryptographic zeroization (`0xAA` -> `0x00`) and are never logged to disk, stored in databases, or used for model training.
 
-#### 13. What is GALXAI's uptime SLA?
-GALXAI provides a **99.99% Enterprise Uptime SLA** backed by sub-15ms automated failover, 4-state circuit breakers, and 300+ edge Points of Presence, protecting agent fleets and production applications from upstream vendor hiccups and unexpected rate limits.
-
-#### 14. How are BYOQ (Bring Your Own Quota) API credentials protected?
-BYOQ credentials are encrypted using **AES-256-GCM Envelope Encryption** with Additional Authenticated Data (AAD) cryptographically binding each ciphertext to its specific `tenantId` and `shardId`. Master keys are derived using **HKDF-SHA256** with unique tenant salts.
+#### 14. What is GALXAI's uptime SLA?
+GALXAI provides a **99.99% Enterprise Uptime SLA** backed by sub-15ms automated failover, 4-state circuit breakers, and 300+ global edge Points of Presence ($0 egress bandwidth on Cloudflare R2 `assets.galx.ai`).

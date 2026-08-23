@@ -114,6 +114,7 @@ export class BroccoliWriteAheadLog {
       this.writeBuffer = [];
 
       const serializedLines = batch.map((f) => JSON.stringify(f)).join("\n") + "\n";
+      await fs.mkdir(path.dirname(this.walPath), { recursive: true });
       await fs.appendFile(this.walPath, serializedLines, "utf-8");
       this.lastSyncTimestamp = Date.now();
     });

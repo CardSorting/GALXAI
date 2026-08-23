@@ -567,3 +567,58 @@ const controls = galx.compliance.getControls();
 console.log(`Active Controls: ${controls.length}/28`);
 ```
 
+---
+
+## 20. 1:1 Framework-Native Drop-In Compatibility Shims
+
+GALXAI exports dedicated drop-in modules for every major developer ecosystem:
+
+```typescript
+// 1. OpenAI Node/TypeScript Drop-In
+import OpenAI from '@galxai/sdk/openai';
+const openai = new OpenAI();
+
+// 2. Anthropic SDK & Claude Code Drop-In
+import Anthropic from '@galxai/sdk/anthropic';
+const anthropic = new Anthropic();
+
+// 3. Vercel AI SDK Core/UI Provider
+import { createGalxAI, galxai } from '@galxai/sdk/ai';
+const model = galxai('gpt-5.6-sol');
+
+// 4. LangChain Runnable Chat Model
+import { ChatGalxAI } from '@galxai/sdk/langchain';
+const langModel = new ChatGalxAI({ model: 'gpt-5.6-sol' });
+
+// 5. LlamaIndex RAG LLM
+import { GalxLLM } from '@galxai/sdk/llamaindex';
+const llamaModel = new GalxLLM({ model: 'gpt-5.6-sol' });
+```
+
+---
+
+## 21. Stateful Conversation Threads (`galx.thread`)
+
+Manage multi-turn context without manual history array manipulation:
+
+```typescript
+import { thread } from '@galxai/sdk';
+
+const conv = thread({
+  model: 'gpt-5.6-sol',
+  system: 'You are a principal database architect.'
+});
+
+// Synchronous turn
+const reply1 = await conv.reply('Explain WAL flush coalescing.');
+
+// Streaming turn
+for await (const chunk of conv.streamReply('How does it prevent write stalls?')) {
+  process.stdout.write(chunk);
+}
+
+// Retrieve full history
+const history = conv.getHistory();
+```
+
+

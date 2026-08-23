@@ -1,179 +1,231 @@
-# 🚀 GALXAI Quickstart & Integration Guide
+# 🚀 GALXAI Quickstart & Universal Integration Guide
 
-Connect your AI tools, frameworks, agents, and IDEs to GALXAI in under 60 seconds with **25%–40% wholesale compute discounts** and **75% prompt cache pass-through**.
-
----
-
-## 1. Get Your Gateway API Key
-
-1. **Sign In or Connect Account**: Visit `/auth/connect` or navigate to `/checkout?amount=25` to activate your account.
-2. **Mint Gateway Key**: Head to the **Keys** tab at `/keys/new` or grab your instant key on `/checkout/success`.
-3. **Copy Key**: Format `galx_live_...`.
+Connect your AI tools, frameworks, agent swarms, and IDEs to the GALXAI Universal Gateway in under 30 seconds with **25%–40% wholesale compute discounts**, **75% prompt cache pass-through**, and **zero developer friction**.
 
 ---
 
-## 2. Ultra-Flat Zero-Dependency SDK (TypeScript & Node.js)
+## ⚡ 1. Zero-Install CLI (No Package Install Needed)
 
-```typescript
-import { galx } from '@galxai/sdk';
+Test inference, estimate tokens, list models, and measure edge latency directly from your terminal:
 
-// 1. Tagged Template Literal Direct Execution
-const answer = await galx`Explain the Raft consensus algorithm concisely.`;
-console.log(answer);
+```bash
+# 1. Run immediate streaming completion (Flagship GPT-5.6 Sol)
+npx galxai "Explain token bucket rate limiting in 15 words"
 
-// 2. Direct Model Run with 75% Prompt Cache Rebate
-const res = await galx.run({
-  model: 'gpt-5.6-sol',
-  prompt: 'Write an asynchronous worker queue in TypeScript.'
-});
-console.log(res.text);
+# 2. Run target reasoning model
+npx galxai run "Audit distributed lock implementation" --model terra
 
-// 3. Asynchronous Background Task Dispatch
-const handle = await galx.jobs.submit({
-  model: 'gpt-5.6-sol',
-  prompt: 'Conduct a comprehensive code review of the repository.'
-});
-const result = await handle.result();
-console.log(result.text);
+# 3. List all models, context windows, and wholesale rates
+npx galxai models
+
+# 4. Count BPE tokens and calculate dollar savings
+npx galxai tokens "500-page earnings report..."
+
+# 5. Measure sub-15ms Anycast edge gateway latency
+npx galxai ping
+
+# 6. Start interactive terminal chat REPL
+npx galxai chat
 ```
 
 ---
 
-## 3. Standard OpenAI Client SDK Integrations
+## 📦 2. Universal 1-Line TypeScript / Node SDK (`@galxai/sdk`)
 
-### Python (OpenAI SDK)
-```python
-import os
-from openai import OpenAI
-
-client = OpenAI(
-    base_url="https://api.galx.ai/v1",
-    api_key=os.environ.get("GALXAI_API_KEY", "galx_live_your_key_here")
-)
-
-response = client.chat.completions.create(
-    model="gpt-5.6-sol",
-    messages=[{"role": "user", "content": "Explain quantum error correction."}],
-    stream=True
-)
-
-for chunk in response:
-    print(chunk.choices[0].delta.content or "", end="", flush=True)
+```bash
+npm install @galxai/sdk
 ```
 
-### TypeScript / OpenAI SDK
 ```typescript
-import OpenAI from 'openai';
+import { run, galx, batch, thread, fallback, race, extract } from '@galxai/sdk';
 
-const client = new OpenAI({
-  baseURL: 'https://api.galx.ai/v1',
-  apiKey: process.env.GALXAI_API_KEY,
+// 1. Ultra-fast 1-liner
+const answer = await run("Explain continuous token caching concisely.");
+
+// 2. Tagged template literal
+const greeting = await galx`Hello ${"GALXAI"}, explain zero-hesitation developer ergonomics`;
+
+// 3. Stateful multi-turn conversation thread with auto-truncation
+const conv = thread({ model: 'gpt-5.6-sol', system: 'You are a staff engineer.' });
+const reply1 = await conv.reply("How does Raft consensus work?");
+const reply2 = await conv.reply("How does it handle network partitions?");
+
+// 4. 100x high-throughput concurrent batch mapper
+const summaries = await batch(
+  ["Article 1 content...", "Article 2 content..."],
+  (article) => `Summarize key takeaways: ${article}`,
+  { concurrency: 10 }
+);
+
+// 5. Automatic multi-model fallback cascade
+const robustResult = await fallback(['gpt-5.6-sol', 'x-ai/grok-4.6', 'gpt-5.6-terra'], "Mission critical query");
+
+// 6. Structured schema extraction
+const user = await extract("John Doe, age 32, lives in San Francisco", {
+  name: "string",
+  age: "number",
+  city: "string"
+});
+```
+
+---
+
+## 🔄 3. 1:1 Framework-Native Drop-In Compatibility Shims
+
+Migrate existing codebases with **zero code refactoring** by swapping only the import:
+
+### OpenAI Node SDK (100% Drop-In)
+```typescript
+// Replace: import OpenAI from "openai";
+import OpenAI from "@galxai/sdk/openai";
+
+const openai = new OpenAI(); // Auto-reads GALX_API_KEY from environment
+
+const completion = await openai.chat.completions.create({
+  model: "gpt-5.6-sol", // or 'gpt-4o', 'sol', 'flagship'
+  messages: [{ role: "user", content: "Write a high-performance LRU cache." }],
+  stream: true,
 });
 
-async function main() {
-  const stream = await client.chat.completions.create({
-    model: 'x-ai/grok-4.5',
-    messages: [{ role: 'user', content: 'Stream a technical summary of Raft consensus.' }],
-    stream: true,
+for await (const chunk of completion) {
+  process.stdout.write(chunk.choices[0]?.delta?.content || "");
+}
+```
+
+### Anthropic SDK & Claude Code (100% Drop-In)
+```typescript
+// Replace: import Anthropic from "@anthropic-ai/sdk";
+import Anthropic from "@galxai/sdk/anthropic";
+
+const anthropic = new Anthropic();
+
+const message = await anthropic.messages.create({
+  model: "claude-3-7-sonnet", // Automatically mapped to flagship SOTA
+  max_tokens: 2048,
+  system: "You are a systems architect.",
+  messages: [{ role: "user", content: "Design a fault-tolerant message queue." }],
+});
+
+console.log(message.content[0].text);
+```
+
+### Vercel AI SDK Core & UI
+```typescript
+import { createGalxAI, galxai } from "@galxai/sdk/ai";
+import { streamText } from "ai";
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const result = streamText({
+    model: galxai("gpt-5.6-sol"),
+    messages,
   });
 
-  for await (const chunk of stream) {
-    process.stdout.write(chunk.choices[0]?.delta?.content || '');
-  }
+  return result.toDataStreamResponse();
 }
-
-main();
 ```
 
-### LangChain (Python)
-```python
-from langchain_openai import ChatOpenAI
+### LangChain Swarms & Runnables
+```typescript
+import { ChatGalxAI } from "@galxai/sdk/langchain";
 
-llm = ChatOpenAI(
-    model="gpt-5.6-sol",
-    base_url="https://api.galx.ai/v1",
-    api_key="galx_live_your_key_here"
-)
+const llm = new ChatGalxAI({
+  model: "gpt-5.6-sol",
+  temperature: 0.2,
+  streaming: true,
+});
 
-result = llm.invoke("Summarize the benefits of pooled quota cycling.")
-print(result.content)
+for await (const chunk of await llm.stream("Audit this smart contract")) {
+  process.stdout.write(chunk.content);
+}
+```
+
+### LlamaIndex RAG Pipelines
+```typescript
+import { GalxLLM } from "@galxai/sdk/llamaindex";
+
+const llm = new GalxLLM({ model: "gpt-5.6-sol" });
+const response = await llm.complete("Summarize indexed document repository.");
+console.log(response.text);
 ```
 
 ---
 
-## 4. IDE Setup (Cursor, Continue, VSCode)
+## 🦙 4. Ollama CLI, OpenWebUI & Continue.dev Integration
 
-### Cursor IDE
-1. Open **Cursor Settings** $\to$ **Models**.
-2. Under **OpenAI API Key**, paste your `galx_live_...` key.
-3. Check **Override OpenAI Base URL** and enter:
+Point any local AI interface directly to GALXAI without installing local weights:
+
+```bash
+# Export Ollama environment variables
+export OLLAMA_HOST="https://galx.ai"
+export OLLAMA_API_KEY="galx_live_your_key_here"
+
+# Native Ollama API Call
+curl https://galx.ai/api/generate \
+  -H "Authorization: Bearer galx_live_your_key_here" \
+  -d '{
+    "model": "sol",
+    "prompt": "Explain zero-hesitation architecture",
+    "stream": true
+  }'
+```
+
+---
+
+## 🌐 5. Instant Browser URL & cURL Testing
+
+### Browser Address Bar Direct Query
+Test directly in your web browser with zero tools:
+```text
+https://galx.ai/v1/chat/completions?prompt=Hello+GALXAI&model=sol&api_key=galx_live_your_key_here
+```
+
+### Hyper-Forgiving Terminal cURL
+```bash
+# 1. Standard OpenAI SSE streaming
+curl https://galx.ai/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer galx_live_your_key_here" \
+  -d '{
+    "model": "gpt-5.6-sol",
+    "messages": [{"role": "user", "content": "Hello GALXAI!"}],
+    "stream": true
+  }'
+
+# 2. Raw text payload (automatically converted to chat message with zero 400 errors)
+curl -X POST https://galx.ai/v1/chat/completions \
+  -H "Authorization: Bearer galx_live_your_key_here" \
+  -d "Explain gravity in 10 words"
+```
+
+---
+
+## 🎨 6. Multi-Paradigm Visual Synthesis ($0 Egress R2 CDN)
+
+Accepts Midjourney/Flux aspect ratios or discrete pixel dimensions:
+
+```bash
+curl https://galx.ai/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer galx_live_your_key_here" \
+  -d '{
+    "model": "flux",
+    "prompt": "Cyberpunk skyscraper with neon holo-gardens at sunset",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+*(Supported aspect ratios: `16:9` $\to$ `1792x1024`, `9:16` $\to$ `1024x1792`, `4:3` $\to$ `1024x768`, `3:2` $\to$ `1536x1024`, `1:1` $\to$ `1024x1024`)*
+
+---
+
+## 💻 7. Cursor & Windsurf IDE Setup
+
+1. Open **Cursor Settings** $\to$ **Models** $\to$ **Add Model**: `gpt-5.6-sol` (or `x-ai/grok-4.6`).
+2. Enable **Override OpenAI Base URL**:
    ```text
-   https://api.galx.ai/v1
+   https://galx.ai/v1
    ```
-4. Add models: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `x-ai/grok-4.6`, `x-ai/grok-4.5`.
-
-### Continue (VSCode / JetBrains)
-In `~/.continue/config.json`:
-```json
-{
-  "models": [
-    {
-      "title": "GALXAI GPT-5.6 Sol",
-      "provider": "openai",
-      "model": "gpt-5.6-sol",
-      "apiBase": "https://api.galx.ai/v1",
-      "apiKey": "galx_live_your_key_here"
-    },
-    {
-      "title": "GALXAI Grok 4.6",
-      "provider": "openai",
-      "model": "x-ai/grok-4.6",
-      "apiBase": "https://api.galx.ai/v1",
-      "apiKey": "galx_live_your_key_here"
-    }
-  ]
-}
-```
-
----
-
-## 5. Vector Embeddings (Edge PoP $<15\text{ms}$)
-
-```python
-from openai import OpenAI
-
-client = OpenAI(
-    base_url="https://api.galx.ai/v1",
-    api_key="galx_live_your_key_here"
-)
-
-embedding = client.embeddings.create(
-    model="text-embedding-3-small",
-    input="Autonomous agent fleet coordination and consensus"
-)
-
-print(f"Vector dimensions: {len(embedding.data[0].embedding)}")
-```
-
----
-
-## 6. Visual Synthesis & Multimodal CDN Integration ($0 Egress)
-
-```python
-from openai import OpenAI
-
-client = OpenAI(
-    base_url="https://api.galx.ai/v1",
-    api_key="galx_live_your_key_here"
-)
-
-image = client.images.generate(
-    model="openai-gpt-image-2",
-    prompt="Futuristic Tokyo skyline at dusk with bioluminescent gardens",
-    size="1024x1024",
-    quality="hd"
-)
-
-# Assets are stored in Cloudflare R2 and served via https://assets.galx.ai ($0 egress)
-print(image.data[0].url)
-```
+3. Paste your `galx_live_...` API key into the **API Key** field.
+4. Enjoy continuous 25%–40% wholesale savings and 75% prompt cache pass-through on every prompt!

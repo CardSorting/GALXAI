@@ -13,7 +13,8 @@ import {
   Sparkles,
   Key,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  Terminal
 } from 'lucide-react';
 
 interface SetupTab {
@@ -29,53 +30,112 @@ interface SetupTab {
 
 const SETUP_TABS: SetupTab[] = [
   {
+    id: 'sdk',
+    name: '@galxai/sdk',
+    category: 'Universal SDK',
+    icon: Sparkles,
+    stepTitle: 'Zero-Hesitation 1-Line Universal TypeScript / Node SDK',
+    instructions: [
+      'Install npm install @galxai/sdk.',
+      'Import run, chat, batch, or galx directly with zero configuration.',
+      'Auto-reads GALX_API_KEY from environment with sub-15ms edge streaming.'
+    ],
+    configSnippet: `import { run, galx, batch } from "@galxai/sdk";
+
+// 1. Ultra-fast 1-liner:
+const answer = await run("Explain continuous token caching in 10 words");
+
+// 2. Tagged template literal:
+const greeting = await galx\`Hello \${"GALXAI"}, explain zero-hesitation developer ergonomics\`;
+
+// 3. 100x high-throughput batch mapper:
+const summaries = await batch(["Article 1", "Article 2"], (doc) => \`Summarize: \${doc}\`);`,
+    copyLabel: 'Copy @galxai/sdk Code'
+  },
+  {
     id: 'cursor',
-    name: 'Cursor / Windsurf IDE',
+    name: 'Cursor & Windsurf',
     category: 'AI Code Editors',
     icon: Laptop,
-    stepTitle: 'Connect in Cursor / Windsurf Settings (20 Seconds)',
+    stepTitle: 'Connect Cursor / Windsurf in 20 Seconds',
     instructions: [
-      'Open Cursor Settings → Models → OpenAI API Key.',
-      'Set Override OpenAI Base URL to: https://galx.ai/v1',
+      'Open Cursor Settings → Models → Add Model: gpt-5.6-sol (or grok-4.6).',
+      'Enable Override OpenAI Base URL: https://galx.ai/v1',
       'Paste your GALXAI key into the API Key field.'
     ],
-    configSnippet: `// Cursor / Windsurf Configuration
+    configSnippet: `// Cursor / Windsurf / Cline Settings Override:
 Base URL: https://galx.ai/v1
 API Key:  galx_live_your_key_here
-Models:   gpt-5.6-sol, gpt-5.6-terra, grok-4.5`,
+Models:   gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.6`,
     copyLabel: 'Copy Cursor Settings'
   },
   {
-    id: 'nocode',
-    name: 'Zapier / Make / Dify',
-    category: 'No-Code Workflows',
-    icon: Zap,
-    stepTitle: 'Connect to No-Code AI Workflows (30 Seconds)',
+    id: 'anthropic',
+    name: 'Anthropic / Claude Code',
+    category: 'Anthropic SDK',
+    icon: Bot,
+    stepTitle: 'Drop into Claude Code CLI or @anthropic-ai/sdk',
     instructions: [
-      'In Zapier / Make.com / Dify, select "OpenAI Compatible" module.',
-      'Set the Custom Base URL endpoint to: https://galx.ai/v1',
-      'Save connection and select your preferred wholesale model.'
+      'Set ANTHROPIC_BASE_URL="https://galx.ai".',
+      'Set ANTHROPIC_API_KEY="galx_live_...".',
+      'Seamlessly supports /v1/messages and prompt caching.'
     ],
-    configSnippet: `// No-Code Webhook / Custom Provider Config
-Provider: Custom OpenAI Compatible
-Endpoint: https://galx.ai/v1/chat/completions
-Headers:  Authorization: Bearer galx_live_your_key_here`,
-    copyLabel: 'Copy No-Code Headers'
+    configSnippet: `import Anthropic from "@anthropic-ai/sdk";
+
+// 100% Drop-in: Only point baseURL to GALXAI
+const anthropic = new Anthropic({
+  baseURL: "https://galx.ai",
+  apiKey: process.env.GALX_API_KEY || "galx_live_your_key_here",
+});
+
+const message = await anthropic.messages.create({
+  model: "gpt-5.6-sol", // or claude-3-7-sonnet alias
+  max_tokens: 2048,
+  messages: [{ role: "user", content: "Write a high-performance LRU cache in TypeScript." }],
+});
+
+console.log(message.content[0].text);`,
+    copyLabel: 'Copy Anthropic Code'
+  },
+  {
+    id: 'ollama',
+    name: 'Ollama / Local AI',
+    category: 'Local Dev & WebUI',
+    icon: Terminal,
+    stepTitle: 'Point OpenWebUI, Continue.dev, or Ollama CLI to GALXAI',
+    instructions: [
+      'Export OLLAMA_HOST="https://galx.ai".',
+      'Works with native /api/generate, /api/chat, and /api/tags.',
+      'Seamless streaming NDJSON responses with 0ms configuration.'
+    ],
+    configSnippet: `# Point Ollama CLI or OpenWebUI to GALXAI:
+export OLLAMA_HOST="https://galx.ai"
+export OLLAMA_API_KEY="galx_live_your_key_here"
+
+# Native Ollama API call:
+curl https://galx.ai/api/generate \\
+  -H "Authorization: Bearer galx_live_your_key_here" \\
+  -d '{
+    "model": "sol",
+    "prompt": "Hello GALXAI from Ollama!",
+    "stream": true
+  }'`,
+    copyLabel: 'Copy Ollama Command'
   },
   {
     id: 'python',
-    name: 'Python (1-Line Drop-in)',
+    name: 'Python (openai)',
     category: 'Standard Backend',
     icon: Code2,
-    stepTitle: 'Drop into your existing OpenAI Python Code',
+    stepTitle: 'Drop into your existing OpenAI Python Code (1 Line Change)',
     instructions: [
-      'Install or use the standard openai package (no new dependencies).',
+      'Keep standard openai>=1.0.0 (no new dependencies).',
       'Set base_url="https://galx.ai/v1" and api_key="galx_live_...".',
-      'Run your inference with 25%–40% instant wholesale savings.'
+      'Run inference with 25%–40% wholesale savings and 75% prompt caching.'
     ],
     configSnippet: `from openai import OpenAI
 
-# 100% Drop-in: Zero code rewrite required
+# 100% Drop-in: Only change base_url
 client = OpenAI(
     base_url="https://galx.ai/v1",
     api_key="galx_live_your_key_here"
@@ -83,34 +143,118 @@ client = OpenAI(
 
 response = client.chat.completions.create(
     model="gpt-5.6-sol",
-    messages=[{"role": "user", "content": "Analyze quarterly financials"}]
+    messages=[{"role": "user", "content": "Explain continuous token caching."}],
+    stream=True
 )
-print(response.choices[0].message.content)`,
+
+for chunk in response:
+    if chunk.choices and chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="", flush=True)`,
     copyLabel: 'Copy Python Code'
   },
   {
+    id: 'vercel',
+    name: 'Vercel AI SDK',
+    category: 'Next.js App Router',
+    icon: Sparkles,
+    stepTitle: 'Stream with @ai-sdk/openai & Vercel AI SDK',
+    instructions: [
+      'Install npm i ai @ai-sdk/openai.',
+      'Initialize createOpenAI with baseURL: "https://galx.ai/v1".',
+      'Stream text directly to your frontend React components.'
+    ],
+    configSnippet: `import { createOpenAI } from "@ai-sdk/openai";
+import { streamText } from "ai";
+
+const galxai = createOpenAI({
+  baseURL: "https://galx.ai/v1",
+  apiKey: process.env.GALXAI_API_KEY,
+});
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+  const result = streamText({
+    model: galxai("gpt-5.6-sol"),
+    messages,
+  });
+  return result.toDataStreamResponse();
+}`,
+    copyLabel: 'Copy Vercel AI Code'
+  },
+  {
     id: 'node',
-    name: 'Node.js / TypeScript',
+    name: 'TypeScript / Node',
     category: 'Full-Stack Apps',
     icon: Bot,
     stepTitle: 'Drop into your Next.js or Node.js Backend',
     instructions: [
-      'Use the standard npm install openai client.',
+      'Use standard npm i openai package.',
       'Initialize with baseURL: "https://galx.ai/v1".',
-      'Execute completions with sub-15ms automated anycast routing.'
+      'Completions stream with sub-15ms Anycast routing.'
     ],
-    configSnippet: `import OpenAI from 'openai';
+    configSnippet: `import OpenAI from "openai";
 
 const openai = new OpenAI({
-  baseURL: 'https://galx.ai/v1',
-  apiKey: process.env.GALX_API_KEY, // galx_live_...
+  baseURL: "https://galx.ai/v1",
+  apiKey: process.env.GALXAI_API_KEY,
 });
 
-const completion = await openai.chat.completions.create({
-  model: 'gpt-5.6-sol',
-  messages: [{ role: 'user', content: 'Generate executive summary' }],
-});`,
+const stream = await openai.chat.completions.create({
+  model: "gpt-5.6-sol",
+  messages: [{ role: "user", content: "Implement atomic distributed lock." }],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content || "");
+}`,
     copyLabel: 'Copy TypeScript Code'
+  },
+  {
+    id: 'curl',
+    name: 'cURL / REST',
+    category: 'Terminal & CLI',
+    icon: Terminal,
+    stepTitle: 'Direct HTTP REST API Ingestion',
+    instructions: [
+      'POST to https://galx.ai/v1/chat/completions.',
+      'Send Bearer Authorization header with your live key.',
+      'Supports full streaming Server-Sent Events (SSE).'
+    ],
+    configSnippet: `curl https://galx.ai/v1/chat/completions \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer galx_live_your_key_here" \\
+  -d '{
+    "model": "gpt-5.6-sol",
+    "messages": [{"role": "user", "content": "Hello GALXAI!"}],
+    "stream": true
+  }'`,
+    copyLabel: 'Copy cURL Command'
+  },
+  {
+    id: 'langchain',
+    name: 'LangChain / Agents',
+    category: 'Autonomous Swarms',
+    icon: Bot,
+    stepTitle: 'Orchestrate Autonomous Agents in LangChain',
+    instructions: [
+      'Use standard ChatOpenAI in langchain_openai.',
+      'Set openai_api_base="https://galx.ai/v1".',
+      'Enjoy 75% prompt caching on multi-turn agent scratchpads.'
+    ],
+    configSnippet: `from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage
+
+llm = ChatOpenAI(
+    model="gpt-5.6-sol",
+    openai_api_base="https://galx.ai/v1",
+    openai_api_key="galx_live_your_key_here",
+    streaming=True
+)
+
+for chunk in llm.stream([HumanMessage(content="Audit smart contract")]):
+    print(chunk.content, end="", flush=True)`,
+    copyLabel: 'Copy LangChain Code'
   }
 ];
 
@@ -154,7 +298,7 @@ export function GuidedSetupWizard() {
       </div>
 
       {/* Environment Selector Tabs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-2">
         {SETUP_TABS.map((tab) => {
           const isSelected = tab.id === activeTabId;
           const Icon = tab.icon;

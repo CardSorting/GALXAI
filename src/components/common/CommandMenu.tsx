@@ -22,7 +22,7 @@ import {
   BookOpen,
   Swords
 } from 'lucide-react';
-import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/ModelCatalog';
 
 interface CommandMenuProps {
   isOpen: boolean;
@@ -189,6 +189,8 @@ export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
     onClose();
   };
 
+  const resolvedFromQuery = query.trim() ? ModelCatalog.resolveModel(query.trim()) : null;
+
   const filteredModels = EXCLUSIVE_MODEL_CATALOG.filter(m =>
     m.id.toLowerCase().includes(query.toLowerCase()) ||
     m.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -225,8 +227,8 @@ export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search models, pricing, API docs, or commands..."
-            className="flex-1 bg-transparent text-white placeholder:text-zinc-500 text-sm focus:outline-none"
+            placeholder="Type any model alias (e.g. sol, grok, dalle, fast, cursor)..."
+            className="flex-1 bg-transparent text-white placeholder:text-zinc-500 text-sm focus:outline-none font-mono"
           />
           <button
             onClick={onClose}
@@ -238,6 +240,32 @@ export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
 
         {/* Results Body */}
         <div className="overflow-y-auto p-3 space-y-4">
+          {/* Ambiguity-Resolved Match Card */}
+          {resolvedFromQuery && (
+            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-indigo-600/15 border border-amber-500/40 space-y-2">
+              <div className="flex items-center justify-between text-[10px] font-mono font-bold text-amber-300 uppercase">
+                <span className="flex items-center gap-1">
+                  <Zap className="w-3 h-3 text-amber-400 fill-amber-400" />
+                  <span>0ms Resolved Model for "{query}":</span>
+                </span>
+                <span>-{resolvedFromQuery.discountPercentage}% Wholesale</span>
+              </div>
+              <button
+                onClick={() => navigateTo(`/models/${resolvedFromQuery.id}`)}
+                className="w-full flex items-center justify-between p-2 rounded-xl bg-black/60 hover:bg-black/80 transition-all text-left cursor-pointer border border-white/5"
+              >
+                <div>
+                  <div className="text-xs font-bold text-white font-mono">{resolvedFromQuery.name}</div>
+                  <div className="text-[11px] text-cyan-300 font-mono">ID: {resolvedFromQuery.id} • ${resolvedFromQuery.inputPricePer1M.toFixed(2)} / 1M</div>
+                </div>
+                <div className="px-3 py-1.5 rounded-lg bg-amber-400 text-black font-mono font-black text-xs flex items-center gap-1">
+                  <span>View Specs</span>
+                  <ArrowRight className="w-3 h-3 text-black" />
+                </div>
+              </button>
+            </div>
+          )}
+
           {/* Models Section */}
           {filteredModels.length > 0 && (
             <div className="space-y-1">

@@ -23,26 +23,38 @@ export interface ClientOptions {
    * Defaults to process.env.GALX_API_KEY if not provided.
    */
   apiKey?: string;
+  api_key?: string;
+  token?: string;
+  authToken?: string;
 
   /**
-   * Custom Gateway Base URL (e.g. 'https://gateway.galx.ai' or 'http://localhost:3000')
+   * Custom Gateway Base URL (e.g. 'https://galx.ai/v1' or 'http://localhost:3000')
    */
   baseURL?: string;
+  baseUrl?: string;
+  base_url?: string;
+  host?: string;
+  endpoint?: string;
 
   /**
    * Request timeout in milliseconds (default: 60,000ms)
    */
   timeoutMs?: number;
+  timeout?: number;
+  timeout_ms?: number;
 
   /**
    * Maximum automatic retry attempts for transient errors (429, 500, 502, 503, 504). Default: 2
    */
   maxRetries?: number;
+  max_retries?: number;
+  retries?: number;
 
   /**
    * Custom HTTP headers injected into all requests
    */
   defaultHeaders?: Record<string, string>;
+  headers?: Record<string, string>;
 
   /**
    * Custom fetch implementation (optional, for custom proxying or mocking)

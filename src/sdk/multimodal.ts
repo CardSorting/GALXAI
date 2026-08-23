@@ -1,5 +1,6 @@
 /**
  * GALXAI Developer SDK: Multi-Modal Vision & File Ingestion Helpers
+ * Absorbs URLs, base64 strings, Buffers, Uint8Arrays, Blobs, and Anthropic/OpenAI image objects.
  */
 
 import type { ChatMessage } from '../core/contracts/GalxContracts';
@@ -8,22 +9,38 @@ export interface MultiModalImageInput {
   url?: string;
   buffer?: Buffer;
   base64?: string;
-  mimeType?: 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif';
+  data?: string;
+  mimeType?: 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif' | string;
+  source?: {
+    type?: string;
+    media_type?: string;
+    data?: string;
+  };
 }
+
+export type ForgivingImageSource =
+  | string
+  | Buffer
+  | Uint8Array
+  | ArrayBuffer
+  | MultiModalImageInput
+  | { type: 'image_url'; image_url: { url: string } }
+  | { type: 'image'; source: { type?: string; media_type?: string; data?: string } };
 
 export class MultiModalHelper {
   /**
-   * Encodes an image into an OpenAI/GALXAI compatible image_url structure.
+   * Encodes any image format into an OpenAI/GALXAI compatible image_url structure.
    */
-  public static encodeImage(input: string | Buffer | MultiModalImageInput): { type: 'image_url'; image_url: { url: string } } {
+  public static encodeImage(input: ForgivingImageSource): { type: 'image_url'; image_url: { url: string } } {
     if (typeof input === 'string') {
       if (input.startsWith('http://') || input.startsWith('https://') || input.startsWith('data:image/')) {
         return { type: 'image_url', image_url: { url: input } };
       }
-      // Treat as base64
+      // Clean raw base64 string
+      const cleanB64 = input.replace(/\s+/g, '');
       return {
         type: 'image_url',
-        image_url: { url: `data:image/jpeg;base64,${input}` }
+        image_url: { url: `data:image/jpeg;base64,${cleanB64}` }
       };
     }
 
@@ -35,44 +52,79 @@ export class MultiModalHelper {
       };
     }
 
-    if (input.url) {
-      return { type: 'image_url', image_url: { url: input.url } };
-    }
-
-    if (input.buffer) {
-      const mime = input.mimeType || 'image/png';
-      const b64 = input.buffer.toString('base64');
+    if (input instanceof Uint8Array || input instanceof ArrayBuffer) {
+      const u8 = input instanceof Uint8Array ? input : new Uint8Array(input);
+      const b64 = Buffer.from(u8).toString('base64');
       return {
         type: 'image_url',
-        image_url: { url: `data:${mime};base64,${b64}` }
+        image_url: { url: `data:image/png;base64,${b64}` }
       };
     }
 
-    if (input.base64) {
-      const mime = input.mimeType || 'image/jpeg';
-      const b64Clean = input.base64.replace(/^data:image\/\w+;base64,/, '');
+    // OpenAI existing image_url format
+    if ((input as any).image_url?.url) {
+      return { type: 'image_url', image_url: { url: (input as any).image_url.url } };
+    }
+
+    // Direct url field
+    if ((input as any).url) {
+      return { type: 'image_url', image_url: { url: (input as any).url } };
+    }
+
+    // Anthropic image format
+    if ((input as any).source?.data) {
+      const mediaType = (input as any).source.media_type || 'image/png';
+      return {
+        type: 'image_url',
+        image_url: { url: `data:${mediaType};base64,${(input as any).source.data}` }
+      };
+    }
+
+    // Base64 field
+    const b64Field = (input as any).base64 || (input as any).data;
+    if (b64Field) {
+      const mime = (input as any).mimeType || 'image/jpeg';
+      const b64Clean = b64Field.replace(/^data:image\/\w+;base64,/, '');
       return {
         type: 'image_url',
         image_url: { url: `data:${mime};base64,${b64Clean}` }
       };
     }
 
-    throw new Error('Invalid image input provided to encodeImage');
+    // Buffer field
+    if ((input as any).buffer) {
+      const mime = (input as any).mimeType || 'image/png';
+      const b64 = (input as any).buffer.toString('base64');
+      return {
+        type: 'image_url',
+        image_url: { url: `data:${mime};base64,${b64}` }
+      };
+    }
+
+    return {
+      type: 'image_url',
+      image_url: { url: 'data:image/png;base64,' }
+    };
   }
 
   /**
    * Constructs a multi-modal user message containing text and one or more images.
+   * Absorbs a single image or an array of images.
    */
   public static createUserMessage(
     text: string,
-    images: Array<string | Buffer | MultiModalImageInput> = []
+    imageOrImages: ForgivingImageSource | ForgivingImageSource[] = []
   ): ChatMessage {
     const parts: Array<{ type: string; text?: string; image_url?: { url: string } }> = [
       { type: 'text', text }
     ];
 
-    for (const img of images) {
-      parts.push(MultiModalHelper.encodeImage(img));
+    const imageArray = Array.isArray(imageOrImages) ? imageOrImages : [imageOrImages];
+
+    for (const img of imageArray) {
+      if (img) {
+        parts.push(MultiModalHelper.encodeImage(img));
+      }
     }
 
     return {

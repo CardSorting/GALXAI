@@ -698,6 +698,8 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.6, x-ai/grok-4.5`,
           )}
         </div>
         )}
+        {/* Consumer-Grade Trust Seals */}
+        <TrustSeals />
       </main>
 
       {/* Paywall Blocker Modal */}

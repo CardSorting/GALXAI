@@ -20,6 +20,11 @@ import {
   Sparkles,
   Bot
 } from 'lucide-react';
+import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
+import { TrustSeals } from '@/components/common/TrustSeals';
+import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
+import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
+import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export const metadata: Metadata = {
   title: 'Rate Governor & Failover Architecture | GALXAI Docs',
@@ -232,7 +237,18 @@ export default function ArchitectureDocPage() {
             If an attacker attempts to transplant a ciphertext across tenants or providers, the GCM authentication tag verification fails immediately and triggers a cryptographic security fault.
           </p>
         </section>
+
+        {/* Founding Cohort Rate Lock Ribbon */}
+        <RateLockRibbon />
+
+        {/* Consumer-Grade Trust Seals */}
+        <TrustSeals />
       </main>
+
+      {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
+      <FloatingConversionDock />
+      <LiveActivityToast />
+      <ExitIntentModal />
     </div>
   );
 }

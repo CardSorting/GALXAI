@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
+import { ModelCatalog } from '@/core/router/ModelCatalog';
 import type { ImageGenerationRequest } from '@/core/contracts/GalxContracts';
 
 export const runtime = 'nodejs';
@@ -18,7 +19,7 @@ export async function OPTIONS() {
 }
 
 /**
- * Universal OpenAI-Compatible POST /v1/images/generations Endpoint.
+ * Universal OpenAI/Midjourney/Stability-Compatible POST /v1/images/generations Endpoint.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -35,14 +36,42 @@ export async function POST(req: NextRequest) {
     const userId = authResult.userId;
     const isPriorityUser = authResult.isPriorityUser;
 
+    const rawBody = (await req.json().catch(() => ({}))) as any;
+    const promptStr = rawBody.prompt ?? rawBody.text ?? rawBody.description ?? rawBody.input ?? rawBody.image_prompt ?? '';
+    const resolvedPrompt = Array.isArray(promptStr) ? promptStr.join(' ') : String(promptStr || 'A futuristic AI landscape');
 
-    const body = (await req.json()) as ImageGenerationRequest;
-    if (!body.prompt || typeof body.prompt !== 'string' || body.prompt.trim().length === 0) {
-      return NextResponse.json(
-        { error: { message: 'Missing required parameter: prompt', type: 'invalid_request_error' } },
-        { status: 400 }
-      );
+    // Universal Aspect Ratio & Dimensions Normalizer
+    let resolvedSize: any = rawBody.size;
+    if (!resolvedSize) {
+      if (rawBody.aspect_ratio || rawBody.aspectRatio) {
+        const ar = String(rawBody.aspect_ratio || rawBody.aspectRatio).trim();
+        if (ar === '16:9' || ar === '16/9') resolvedSize = '1792x1024';
+        else if (ar === '9:16' || ar === '9/16') resolvedSize = '1024x1792';
+        else if (ar === '4:3' || ar === '4/3') resolvedSize = '1024x768';
+        else if (ar === '3:2' || ar === '3/2') resolvedSize = '1536x1024';
+        else if (ar === '1:1') resolvedSize = '1024x1024';
+        else resolvedSize = '1024x1024';
+      } else if (rawBody.width && rawBody.height) {
+        resolvedSize = `${rawBody.width}x${rawBody.height}`;
+      } else {
+        resolvedSize = '1024x1024';
+      }
     }
+
+    // Resolve model alias
+    const requestedModel = rawBody.model || 'openai-gpt-image-2';
+    const resolvedModelSpec = ModelCatalog.resolveModel(requestedModel);
+    const resolvedModelId = resolvedModelSpec.category === 'image' ? resolvedModelSpec.id : 'openai-gpt-image-2';
+
+    const body: ImageGenerationRequest = {
+      prompt: resolvedPrompt,
+      model: resolvedModelId,
+      n: Number(rawBody.n || rawBody.num_images || rawBody.count || rawBody.batch_size || 1),
+      size: resolvedSize,
+      quality: rawBody.quality || 'standard',
+      response_format: rawBody.response_format || rawBody.responseFormat || rawBody.format || 'url',
+      user: rawBody.user
+    };
 
     // Asynchronous Queue Processing
     const isAsync = req.headers.get('x-galx-async') === 'true' || req.headers.get('prefer') === 'respond-async';
