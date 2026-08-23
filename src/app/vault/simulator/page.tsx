@@ -18,6 +18,7 @@ import {
   Server
 } from 'lucide-react';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface SimulatedShard {
   id: string;
@@ -30,7 +31,7 @@ interface SimulatedShard {
   requestsServed: number;
 }
 
-export default function VaultSimulatorPage() {
+function BaseVaultSimulatorPage() {
   const [shards, setShards] = useState<SimulatedShard[]>([
     {
       id: 'shard_openai_alpha',
@@ -260,3 +261,7 @@ export default function VaultSimulatorPage() {
     </div>
   );
 }
+
+export default withErrorBoundary(BaseVaultSimulatorPage, {
+  name: 'Vault Simulator Page'
+});

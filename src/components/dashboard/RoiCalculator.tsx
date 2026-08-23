@@ -21,6 +21,8 @@ import {
   Cpu
 } from 'lucide-react';
 import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 interface RoiCalculatorProps {
   initialMonthlySpend?: number;
@@ -28,7 +30,7 @@ interface RoiCalculatorProps {
   showTitle?: boolean;
 }
 
-export function RoiCalculator({
+function BaseRoiCalculator({
   initialMonthlySpend = 2500,
   className = '',
   showTitle = true
@@ -69,7 +71,7 @@ export function RoiCalculator({
   // Matching grant calculation
   const matchGrantBonus = monthlySpend >= 1000 ? 500 : monthlySpend >= 500 ? 250 : monthlySpend >= 100 ? 50 : 25;
 
-  const handleCopyAudit = () => {
+  const handleCopyAudit = async () => {
     const auditText = `GALXAI Executive AI Spend Audit & Cost Optimization Summary
 -------------------------------------------------------------
 Target Model: ${selectedModel.id} (${selectedModel.name})
@@ -86,9 +88,11 @@ Prompt Caching Pass-Through: ${cachedPromptPct}% Context (75% Rebate)
 Latency SLA: Sub-15ms Anycast Failover with 99.99% Uptime SLA
 Switch in 30 Seconds: https://galx.ai/keys/new`;
 
-    navigator.clipboard.writeText(auditText);
-    setCopiedAudit(true);
-    setTimeout(() => setCopiedAudit(false), 2500);
+    const success = await safeCopyToClipboard(auditText);
+    if (success) {
+      setCopiedAudit(true);
+      setTimeout(() => setCopiedAudit(false), 2500);
+    }
   };
 
   return (
@@ -288,3 +292,7 @@ Switch in 30 Seconds: https://galx.ai/keys/new`;
     </div>
   );
 }
+
+export const RoiCalculator = withErrorBoundary(BaseRoiCalculator, {
+  name: 'ROI & Wholesale Savings Calculator'
+});

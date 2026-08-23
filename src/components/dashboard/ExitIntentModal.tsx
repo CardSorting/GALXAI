@@ -15,8 +15,9 @@ import {
   CheckCircle2,
   Sparkles
 } from 'lucide-react';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
-export function ExitIntentModal() {
+function BaseExitIntentModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [secondsRemaining, setSecondsRemaining] = useState(899); // 14:59
 
@@ -131,3 +132,8 @@ export function ExitIntentModal() {
     </div>
   );
 }
+
+export const ExitIntentModal = withErrorBoundary(BaseExitIntentModal, {
+  name: 'Exit Intent Modal',
+  fallback: null
+});

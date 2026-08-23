@@ -16,6 +16,7 @@ import {
   Clock
 } from 'lucide-react';
 import { WalletTopUpModal } from './WalletTopUpModal';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface WalletQuickPeekPopoverProps {
   balance: number;
@@ -23,7 +24,7 @@ interface WalletQuickPeekPopoverProps {
   onTopUpSuccess?: (amount: number, totalCredited: number) => void;
 }
 
-export function WalletQuickPeekPopover({
+function BaseWalletQuickPeekPopover({
   balance,
   hasVerifiedDeposit,
   onTopUpSuccess
@@ -185,3 +186,7 @@ export function WalletQuickPeekPopover({
     </div>
   );
 }
+
+export const WalletQuickPeekPopover = withErrorBoundary(BaseWalletQuickPeekPopover, {
+  name: 'Wallet Quick Peek Popover'
+});

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { ShareModal } from './ShareModal';
 import { withErrorBoundary } from './ErrorBoundary';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 function BaseFloatingActionDock() {
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -31,11 +32,13 @@ function BaseFloatingActionDock() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleCopyLink = () => {
+  const handleCopyLink = async () => {
     if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      const success = await safeCopyToClipboard(window.location.href);
+      if (success) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
     }
   };
 

@@ -29,11 +29,14 @@ import {
 } from 'lucide-react';
 import { formatTimeAgo } from '@/lib/utils';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
+import { resilientFetch } from '@/lib/resilience/ResilientClient';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
-export default function KeyDetailPage() {
+function BaseKeyDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const keyId = params.id as string;
+  const id = params?.id as string;
 
   const [keyData, setKeyData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,33 +49,40 @@ export default function KeyDetailPage() {
   const [testResult, setTestResult] = useState<{ success: boolean; latencyMs: number; message: string } | null>(null);
 
   const fetchKey = async () => {
+    setIsLoading(true);
     try {
-      const res = await fetch('/api/keys');
-      const data = await res.json();
-      const found = data.keys?.find((k: any) => k.id === keyId);
-      setKeyData(found || null);
-    } catch {} finally {
+      const res = await resilientFetch<{ key: any }>(`/api/keys/${id}`, { enableCacheFallback: true });
+      if (res.data?.key) {
+        setKeyData(res.data.key);
+      }
+    } catch {
+      // Offline fallback
+    } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchKey();
-  }, [keyId]);
+    if (id) {
+      fetchKey();
+    }
+  }, [id]);
 
   const handleRevoke = async () => {
     if (!keyData || !window.confirm(`Are you sure you want to revoke "${keyData.name}"? This action cannot be undone.`)) return;
     try {
-      await fetch(`/api/keys?id=${keyData.id}`, { method: 'DELETE' });
+      await resilientFetch(`/api/keys?id=${keyData.id}`, { method: 'DELETE' });
       fetchKey();
     } catch {}
   };
 
-  const handleCopyPrefix = () => {
+  const handleCopyPrefix = async () => {
     if (!keyData) return;
-    navigator.clipboard.writeText(`${keyData.keyPrefix}...`);
-    setCopiedPrefix(true);
-    setTimeout(() => setCopiedPrefix(false), 2000);
+    const success = await safeCopyToClipboard(`${keyData.keyPrefix}...`);
+    if (success) {
+      setCopiedPrefix(true);
+      setTimeout(() => setCopiedPrefix(false), 2000);
+    }
   };
 
   const getSnippets = (prefix: string) => ({
@@ -135,12 +145,14 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.6, x-ai/grok-4.5`,
   }'`
   });
 
-  const handleCopySnippet = () => {
+  const handleCopySnippet = async () => {
     if (!keyData) return;
     const snippets = getSnippets(keyData.keyPrefix);
-    navigator.clipboard.writeText(snippets[activeSnippetTab]);
-    setCopiedSnippet(true);
-    setTimeout(() => setCopiedSnippet(false), 2000);
+    const success = await safeCopyToClipboard(snippets[activeSnippetTab]);
+    if (success) {
+      setCopiedSnippet(true);
+      setTimeout(() => setCopiedSnippet(false), 2000);
+    }
   };
 
   const handleRunTest = async () => {
@@ -377,3 +389,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.6, x-ai/grok-4.5`,
     </div>
   );
 }
+
+export default withErrorBoundary(BaseKeyDetailPage, {
+  name: 'Key Detail Page'
+});

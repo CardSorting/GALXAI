@@ -20,6 +20,8 @@ import {
   Users,
   Copy
 } from 'lucide-react';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 interface WorkloadPreset {
   id: string;
@@ -100,7 +102,7 @@ const WORKLOAD_PRESETS: WorkloadPreset[] = [
   }
 ];
 
-export function WorkloadEstimator() {
+function BaseWorkloadEstimator() {
   const [selectedPresetId, setSelectedPresetId] = useState<string>('support-bot');
   const [volume, setVolume] = useState<number>(5000);
   const [copiedSummary, setCopiedSummary] = useState(false);
@@ -121,11 +123,13 @@ export function WorkloadEstimator() {
   const savingsPct = Math.round((monthlySavings / retailCost) * 100);
   const bonusGrantValue = Math.min(2500, Math.round(galxDirectCost * 0.5));
 
-  const handleCopyReport = () => {
+  const handleCopyReport = async () => {
     const reportText = `GALXAI Executive Spend Assessment:\nWorkload: ${currentPreset.title} (${volume.toLocaleString()} ${currentPreset.volumeUnit})\nStandard Retail Cost: $${retailCost.toFixed(2)}/mo\nGALXAI Direct Wholesale: $${galxDirectCost.toFixed(2)}/mo\nMonthly Net Savings: $${monthlySavings.toFixed(2)}/mo (${savingsPct}% saved)\nAnnualized Savings: $${annualSavings.toFixed(2)}/yr\n50% Compute Match Bonus: +$${bonusGrantValue.toFixed(2)} free compute`;
-    navigator.clipboard.writeText(reportText);
-    setCopiedSummary(true);
-    setTimeout(() => setCopiedSummary(false), 2000);
+    const success = await safeCopyToClipboard(reportText);
+    if (success) {
+      setCopiedSummary(true);
+      setTimeout(() => setCopiedSummary(false), 2000);
+    }
   };
 
   return (
@@ -288,3 +292,7 @@ export function WorkloadEstimator() {
     </section>
   );
 }
+
+export const WorkloadEstimator = withErrorBoundary(BaseWorkloadEstimator, {
+  name: 'Workload Cost Estimator'
+});

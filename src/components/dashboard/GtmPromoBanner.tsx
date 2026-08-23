@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Flame, Sparkles, ArrowRight, X, ShieldCheck, Zap, Coins } from 'lucide-react';
+import { SafeStorage } from '@/lib/resilience/SafeStorage';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
-export function GtmPromoBanner() {
+function BaseGtmPromoBanner() {
   const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {
-    const isDismissed = sessionStorage.getItem('galx_promo_banner_dismissed');
+    const isDismissed = SafeStorage.getSessionItem('galx_promo_banner_dismissed');
     if (!isDismissed) {
       setDismissed(false);
     }
@@ -16,7 +18,7 @@ export function GtmPromoBanner() {
 
   const handleDismiss = () => {
     setDismissed(true);
-    sessionStorage.setItem('galx_promo_banner_dismissed', 'true');
+    SafeStorage.setSessionItem('galx_promo_banner_dismissed', 'true');
   };
 
   if (dismissed) return null;
@@ -63,3 +65,8 @@ export function GtmPromoBanner() {
     </aside>
   );
 }
+
+export const GtmPromoBanner = withErrorBoundary(BaseGtmPromoBanner, {
+  name: 'GTM Promo Banner',
+  fallback: null
+});

@@ -102,11 +102,10 @@ export function ShardVaultManager({
                     {/* Provider & Label */}
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-2.5">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                          shard.provider === 'xai-grok'
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${shard.provider === 'xai-grok'
                             ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
                             : 'bg-amber-500/10 border border-amber-500/30 text-amber-400'
-                        }`}>
+                          }`}>
                           {shard.provider === 'xai-grok' ? <Rocket className="w-4 h-4" /> : <Zap className="w-4 h-4 fill-amber-400" />}
                         </div>
                         <div>
@@ -127,11 +126,10 @@ export function ShardVaultManager({
                     <td className="py-3.5 px-4">
                       <button
                         onClick={() => onToggleMode(shard.id, shard.shardMode || 'pooled')}
-                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer border ${
-                          shard.shardMode === 'private'
+                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer border ${shard.shardMode === 'private'
                             ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40 hover:bg-indigo-500/30'
                             : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 hover:bg-cyan-500/30'
-                        }`}
+                          }`}
                         title="Click to toggle between Pooled and Dedicated Private"
                       >
                         {shard.shardMode === 'private' ? (
@@ -148,16 +146,14 @@ export function ShardVaultManager({
 
                     {/* Status */}
                     <td className="py-3.5 px-4">
-                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase flex items-center gap-1.5 w-max border ${
-                        shard.status === 'healthy'
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase flex items-center gap-1.5 w-max border ${shard.status === 'healthy'
                           ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
                           : shard.status === 'cooldown'
-                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                          : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
-                      }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${
-                          shard.status === 'healthy' ? 'bg-emerald-400' : 'bg-amber-400'
-                        }`} />
+                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                            : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                        }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${shard.status === 'healthy' ? 'bg-emerald-400' : 'bg-amber-400'
+                          }`} />
                         {shard.status}
                       </span>
                     </td>
@@ -171,13 +167,12 @@ export function ShardVaultManager({
                         </div>
                         <div className="w-full h-1.5 rounded-full bg-zinc-800 overflow-hidden">
                           <div
-                            className={`h-full transition-all duration-300 ${
-                              tokenPercent < 20
+                            className={`h-full transition-all duration-300 ${tokenPercent < 20
                                 ? 'bg-rose-500'
                                 : tokenPercent < 50
-                                ? 'bg-amber-500'
-                                : 'bg-gradient-to-r from-indigo-500 to-cyan-400'
-                            }`}
+                                  ? 'bg-amber-500'
+                                  : 'bg-gradient-to-r from-indigo-500 to-cyan-400'
+                              }`}
                             style={{ width: `${tokenPercent}%` }}
                           />
                         </div>

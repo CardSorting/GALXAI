@@ -4,6 +4,7 @@ import React from 'react';
 import { Layers, Activity, Cpu, ShieldCheck, RefreshCw, Zap, Rocket } from 'lucide-react';
 import type { PoolStats, GalxRotationStrategy } from '@/core/contracts/GalxContracts';
 import { formatNumber } from '@/lib/utils';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface PoolMetricsOverviewProps {
   stats: PoolStats | null;
@@ -12,7 +13,7 @@ interface PoolMetricsOverviewProps {
   isLoading?: boolean;
 }
 
-export function PoolMetricsOverview({
+function BasePoolMetricsOverview({
   stats,
   onStrategyChange,
   onRefresh,
@@ -181,3 +182,7 @@ export function PoolMetricsOverview({
     </div>
   );
 }
+
+export const PoolMetricsOverview = withErrorBoundary(BasePoolMetricsOverview, {
+  name: 'Pool Metrics Overview'
+});

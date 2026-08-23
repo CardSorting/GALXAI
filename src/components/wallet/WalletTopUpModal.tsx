@@ -15,6 +15,8 @@ import {
   Lock,
   Landmark
 } from 'lucide-react';
+import { resilientFetch } from '@/lib/resilience/ResilientClient';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface TopUpPack {
   amount: number;
@@ -38,7 +40,7 @@ interface WalletTopUpModalProps {
   initialAmount?: number;
 }
 
-export function WalletTopUpModal({
+function BaseWalletTopUpModal({
   isOpen,
   onClose,
   onSuccess,
@@ -68,16 +70,17 @@ export function WalletTopUpModal({
     setIsProcessing(true);
 
     try {
-      const res = await fetch('/api/wallet/deposit', {
+      const res = await resilientFetch<{ success: boolean }>('/api/wallet/deposit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           depositAmount,
           paymentMethod
-        })
+        }),
+        enableCacheFallback: false,
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = res.data;
+      if (data?.success) {
         setSuccessMsg(`Successfully credited $${totalCredited.toFixed(2)} to your compute wallet!`);
         setTimeout(() => {
           setIsProcessing(false);
@@ -290,3 +293,8 @@ export function WalletTopUpModal({
     </div>
   );
 }
+
+export const WalletTopUpModal = withErrorBoundary(BaseWalletTopUpModal, {
+  name: 'Compute Wallet Top-Up Modal',
+  fallback: null
+});

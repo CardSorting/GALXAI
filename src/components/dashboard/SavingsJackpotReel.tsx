@@ -17,6 +17,7 @@ import {
   RotateCw,
   Award
 } from 'lucide-react';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface MultiplierTier {
   id: string;
@@ -42,19 +43,19 @@ const MULTIPLIER_TIERS: MultiplierTier[] = [
     id: 'growth',
     deposit: 50,
     multiplier: 1.6,
-    label: 'VIP High-Roller',
+    label: 'Growth Accelerator',
     badge: '1.60x MATCH',
-    unlockedPerk: '$80.00 Usable Balance + VIP Shard Lane',
+    unlockedPerk: '$80.00 Compute + Auto-Retry Failover',
     color: 'from-emerald-400 to-cyan-500'
   },
   {
     id: 'scale',
     deposit: 100,
     multiplier: 1.75,
-    label: 'Fleet Jackpot',
+    label: 'Scale Commander',
     badge: '1.75x MATCH',
-    unlockedPerk: '$175.00 Usable Balance + 600 RPM Concurrency',
-    color: 'from-cyan-400 to-blue-500'
+    unlockedPerk: '$175.00 Usable Balance + 75% Prompt Caching Pass',
+    color: 'from-cyan-400 to-indigo-500'
   },
   {
     id: 'enterprise',
@@ -67,7 +68,7 @@ const MULTIPLIER_TIERS: MultiplierTier[] = [
   }
 ];
 
-export function SavingsJackpotReel() {
+function BaseSavingsJackpotReel() {
   const [selectedTierId, setSelectedTierId] = useState<string>('growth');
   const [monthlyAISpend, setMonthlyAISpend] = useState<number>(600);
   const [isSpinning, setIsSpinning] = useState<boolean>(false);
@@ -266,3 +267,7 @@ export function SavingsJackpotReel() {
     </section>
   );
 }
+
+export const SavingsJackpotReel = withErrorBoundary(BaseSavingsJackpotReel, {
+  name: 'Savings Jackpot Reel'
+});

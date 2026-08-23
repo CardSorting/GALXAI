@@ -20,16 +20,160 @@ import {
   GitCompare,
   HelpCircle,
   BookOpen,
-  Swords
+  FileText,
+  DollarSign,
+  ShieldCheck,
+  LifeBuoy
 } from 'lucide-react';
 import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/ModelCatalog';
+import { withErrorBoundary } from './ErrorBoundary';
 
 interface CommandMenuProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
+interface PlatformPage {
+  label: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  category: string;
+  keywords: string[];
+  description: string;
+}
+
+const PLATFORM_PAGES: PlatformPage[] = [
+  {
+    label: 'Frontier AI Models & Arena',
+    href: '/models',
+    icon: Cpu,
+    category: 'Models',
+    keywords: ['models', 'gpt', 'grok', 'sol', 'terra', 'luna', 'ai', 'engines', 'intelligence'],
+    description: 'Explore and compare 12 state-of-the-art AI models'
+  },
+  {
+    label: 'Requests & Live Results (Async AI)',
+    href: '/queues',
+    icon: Activity,
+    category: 'Workloads',
+    keywords: ['requests', 'results', 'queues', 'async', 'tasks', 'jobs', 'batch'],
+    description: 'Submit background AI tasks and stream live results'
+  },
+  {
+    label: 'Plain-English Beginner Guide',
+    href: '/docs/simple',
+    icon: Sparkles,
+    category: 'Getting Started',
+    keywords: ['beginner', 'simple', 'easy', 'plain english', 'guide', 'start', 'how to', 'tutorial', 'no-code'],
+    description: 'Zero technical jargon walkthrough for new users'
+  },
+  {
+    label: 'Developer API Keys',
+    href: '/keys',
+    icon: Key,
+    category: 'Access',
+    keywords: ['api keys', 'keys', 'tokens', 'secret', 'create key', 'credentials', 'auth'],
+    description: 'Generate and manage universal gateway API access keys'
+  },
+  {
+    label: 'Create New Gateway API Key',
+    href: '/keys/new',
+    icon: Key,
+    category: 'Actions',
+    keywords: ['new key', 'generate key', 'make key', 'add key'],
+    description: 'Instantly generate an OpenAI-compatible API key'
+  },
+  {
+    label: 'Wallet & Compute Balance',
+    href: '/billing',
+    icon: DollarSign,
+    category: 'Finance',
+    keywords: ['wallet', 'balance', 'deposit', 'add money', 'add funds', 'billing', 'credits', 'pay'],
+    description: 'View balance, top up credits with 50% match grant'
+  },
+  {
+    label: 'Wholesale Pricing & Calculator',
+    href: '/pricing',
+    icon: CreditCard,
+    category: 'Finance',
+    keywords: ['pricing', 'cost', 'cheapest', 'cheap', 'rates', 'discount', 'wholesale', 'savings', 'calculator'],
+    description: 'Wholesale rates: 25%–40% below retail token prices'
+  },
+  {
+    label: 'Model Comparison Matrix',
+    href: '/models/compare',
+    icon: GitCompare,
+    category: 'Tools',
+    keywords: ['compare', 'matrix', 'benchmark', 'side by side', 'difference', 'which model'],
+    description: 'Side-by-side benchmark comparison of all 12 models'
+  },
+  {
+    label: 'Cursor & Windsurf IDE Setup',
+    href: '/docs/ide-setup',
+    icon: Terminal,
+    category: 'Solutions',
+    keywords: ['cursor', 'windsurf', 'vscode', 'ide', 'code editor', 'setup', 'copilot'],
+    description: 'Connect GALXAI base URL to your favorite AI IDE'
+  },
+  {
+    label: 'System Status & 99.99% Uptime SLA',
+    href: '/status',
+    icon: CheckCircle2,
+    category: 'Trust',
+    keywords: ['status', 'uptime', 'sla', 'health', 'is it down', 'latency', 'operational', 'monitoring'],
+    description: 'Real-time operational health and historical 99.99% SLA'
+  },
+  {
+    label: 'Business Tax Invoices & Receipts',
+    href: '/billing/invoices',
+    icon: FileText,
+    category: 'Finance',
+    keywords: ['invoices', 'receipts', 'tax', 'pdf', 'bills', 'accounting'],
+    description: 'Download PDF invoices with corporate tax details'
+  },
+  {
+    label: 'SOC2 & Zero-Retention Compliance',
+    href: '/compliance',
+    icon: ShieldCheck,
+    category: 'Security',
+    keywords: ['compliance', 'soc2', 'security', 'privacy', 'hipaa', 'gdpr', 'zero retention', 'encryption', 'private', 'safe'],
+    description: 'Security certifications, DPA agreement, and data safety'
+  },
+  {
+    label: 'Interactive API & Model Playground',
+    href: '/playground',
+    icon: Sparkles,
+    category: 'Tools',
+    keywords: ['playground', 'try', 'test', 'demo', 'sandbox', 'chat', 'prompt', 'experiment', 'run model'],
+    description: 'Test prompts live across OpenAI and Grok models with 0 config'
+  },
+  {
+    label: 'Linked Accounts & Cooperative Shards',
+    href: '/vault',
+    icon: Shield,
+    category: 'Access',
+    keywords: ['vault', 'shards', 'accounts', 'link openai', 'link grok', 'pool', 'private mode', 'connect key'],
+    description: 'Manage connected provider accounts and high-concurrency shards'
+  },
+  {
+    label: 'Traffic Simulator & Failover Demo',
+    href: '/vault/simulator',
+    icon: Activity,
+    category: 'Tools',
+    keywords: ['simulator', 'failover', 'stress test', 'circuit breaker', 'demo', 'sub-15ms', 'latency test'],
+    description: 'Simulate high concurrency spikes and automatic 15ms failover'
+  },
+  {
+    label: 'Knowledge Base & Frequently Asked Questions',
+    href: '/faq',
+    icon: HelpCircle,
+    category: 'Support',
+    keywords: ['faq', 'help', 'support', 'questions', 'answers', 'contact', 'troubleshooting', 'cancel', 'refund'],
+    description: 'Instant answers to billing, models, and integration questions'
+  },
+];
+
+function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
@@ -163,17 +307,10 @@ export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
               </span>
             </div>
             <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5">
-              <span className="text-zinc-300">Go to Compare Matrix</span>
+              <span className="text-zinc-300">Go to Status & Uptime</span>
               <span className="space-x-1">
                 <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">g</kbd>
-                <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">c</kbd>
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5">
-              <span className="text-zinc-300">Go to Docs</span>
-              <span className="space-x-1">
-                <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">g</kbd>
-                <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">d</kbd>
+                <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">s</kbd>
               </span>
             </div>
           </div>
@@ -189,32 +326,22 @@ export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
     onClose();
   };
 
-  const resolvedFromQuery = query.trim() ? ModelCatalog.resolveModel(query.trim()) : null;
+  const normalizedQuery = query.toLowerCase().trim();
+  const resolvedFromQuery = normalizedQuery ? ModelCatalog.resolveModel(normalizedQuery) : null;
 
-  const filteredModels = EXCLUSIVE_MODEL_CATALOG.filter(m =>
-    m.id.toLowerCase().includes(query.toLowerCase()) ||
-    m.name.toLowerCase().includes(query.toLowerCase()) ||
-    m.provider.toLowerCase().includes(query.toLowerCase())
+  const filteredModels = EXCLUSIVE_MODEL_CATALOG.filter(
+    (m) =>
+      m.id.toLowerCase().includes(normalizedQuery) ||
+      m.name.toLowerCase().includes(normalizedQuery) ||
+      m.provider.toLowerCase().includes(normalizedQuery)
   );
 
-  const quickPages = [
-    { label: 'Requests & Results (Async AI)', href: '/queues', icon: Activity, category: 'Navigation' },
-    { label: 'Models & Pricing Matrix', href: '/models', icon: Cpu, category: 'Navigation' },
-    { label: 'Plain English Beginner Guide', href: '/docs/simple', icon: Sparkles, category: 'Getting Started' },
-    { label: 'AI Agents & Swarms Infrastructure', href: '/docs/agents', icon: Rocket, category: 'Solutions' },
-    { label: 'Cursor & Windsurf IDE Setup', href: '/docs/ide-setup', icon: Terminal, category: 'Solutions' },
-    { label: 'Developer API Keys', href: '/keys', icon: Key, category: 'Navigation' },
-    { label: 'Create New Gateway API Key', href: '/keys/new', icon: Key, category: 'Actions' },
-    { label: 'Model Comparison Matrix', href: '/models/compare', icon: GitCompare, category: 'Tools' },
-    { label: '0ms Model Alias Resolver', href: '/models/resolver', icon: Cpu, category: 'Tools' },
-    { label: 'Wholesale Pricing & Calculator', href: '/pricing', icon: CreditCard, category: 'Pricing' },
-    { label: '1-Click Migration Guide', href: '/docs/migration', icon: Sparkles, category: 'Docs' },
-    { label: 'Production Cookbooks & Recipes', href: '/docs/cookbook', icon: BookOpen, category: 'Docs' },
-    { label: '75% Prompt Caching Architecture', href: '/docs/prompt-caching', icon: Sparkles, category: 'Docs' },
-    { label: 'REST & SSE API Reference', href: '/docs/api-reference', icon: Code2, category: 'Docs' },
-    { label: 'System Status & Uptime (99.99%)', href: '/status', icon: CheckCircle2, category: 'Trust' },
-    { label: 'Knowledge Base & FAQ', href: '/faq', icon: HelpCircle, category: 'Support' },
-  ].filter(p => p.label.toLowerCase().includes(query.toLowerCase()));
+  const matchedPages = PLATFORM_PAGES.filter(
+    (p) =>
+      p.label.toLowerCase().includes(normalizedQuery) ||
+      p.description.toLowerCase().includes(normalizedQuery) ||
+      p.keywords.some((k) => k.includes(normalizedQuery))
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
@@ -227,12 +354,14 @@ export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Type any model alias (e.g. sol, grok, dalle, fast, cursor)..."
+            placeholder="Search models, pricing, guides, API keys, or type 'help'..."
             className="flex-1 bg-transparent text-white placeholder:text-zinc-500 text-sm focus:outline-none font-mono"
+            aria-label="Universal Command Search"
           />
           <button
             onClick={onClose}
             className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer"
+            aria-label="Close Command Search"
           >
             <X className="w-4 h-4" />
           </button>
@@ -246,7 +375,7 @@ export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
               <div className="flex items-center justify-between text-[10px] font-mono font-bold text-amber-300 uppercase">
                 <span className="flex items-center gap-1">
                   <Zap className="w-3 h-3 text-amber-400 fill-amber-400" />
-                  <span>0ms Resolved Model for "{query}":</span>
+                  <span>Resolved Model for "{query}":</span>
                 </span>
                 <span>-{resolvedFromQuery.discountPercentage}% Wholesale</span>
               </div>
@@ -306,13 +435,13 @@ export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
           )}
 
           {/* Navigation & Actions Section */}
-          {quickPages.length > 0 && (
+          {matchedPages.length > 0 && (
             <div className="space-y-1">
               <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
-                Platform Pages & Actions
+                Platform Pages & Actions ({matchedPages.length})
               </div>
               <div className="space-y-1">
-                {quickPages.map((p) => {
+                {matchedPages.map((p) => {
                   const Icon = p.icon;
                   return (
                     <button
@@ -321,14 +450,17 @@ export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
                       className="w-full px-3.5 py-2.5 rounded-xl hover:bg-white/5 flex items-center justify-between group transition-all text-left cursor-pointer"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                        <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0">
                           <Icon className="w-3.5 h-3.5" />
                         </div>
-                        <span className="font-bold text-white text-xs group-hover:text-indigo-300 transition-colors">
-                          {p.label}
-                        </span>
+                        <div>
+                          <div className="font-bold text-white text-xs group-hover:text-indigo-300 transition-colors">
+                            {p.label}
+                          </div>
+                          <p className="text-[10px] text-zinc-400 leading-tight">{p.description}</p>
+                        </div>
                       </div>
-                      <span className="text-[10px] uppercase font-mono text-zinc-500">{p.category}</span>
+                      <span className="text-[10px] uppercase font-mono text-zinc-500 shrink-0">{p.category}</span>
                     </button>
                   );
                 })}
@@ -347,3 +479,8 @@ export function CommandMenu({ isOpen, onClose }: CommandMenuProps) {
     </div>
   );
 }
+
+export const CommandMenu = withErrorBoundary(BaseCommandMenu, {
+  name: 'Universal Command Menu',
+  fallback: null
+});

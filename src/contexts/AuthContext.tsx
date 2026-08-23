@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { resilientFetch } from '@/lib/resilience/ResilientClient';
+import { SafeStorage } from '@/lib/resilience/SafeStorage';
 
 export interface AuthUser {
   id: string;
@@ -34,23 +36,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(AUTH_STORAGE_KEY);
-      if (stored) {
-        const parsed: AuthUser = JSON.parse(stored);
+      const parsed = SafeStorage.getJSON<AuthUser | null>(AUTH_STORAGE_KEY, null);
+      if (parsed) {
         setUser(parsed);
 
         // Background session verification against Supabase PostgreSQL
         if (parsed.token && parsed.token.startsWith('galx_sess_')) {
-          fetch('/api/auth/session', {
+          resilientFetch<{ valid: boolean }>('/api/auth/session', {
             method: 'GET',
-            headers: { Authorization: `Bearer ${parsed.token}` }
+            headers: { Authorization: `Bearer ${parsed.token}` },
+            enableCacheFallback: false,
           })
-            .then(res => res.json())
-            .then(data => {
-              if (!data.valid) {
+            .then(({ data }) => {
+              if (data && !data.valid) {
                 // Session expired or revoked in database - log out
                 setUser(null);
-                localStorage.removeItem(AUTH_STORAGE_KEY);
+                SafeStorage.removeItem(AUTH_STORAGE_KEY);
               }
             })
             .catch(() => {
@@ -71,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }) => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/auth/openai', {
+      const res = await resilientFetch<{ success: boolean; user: AuthUser; error?: string }>('/api/auth/openai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -81,14 +82,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           mode: options?.mode || 'pooled'
         })
       });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Failed to authenticate with OpenAI');
+      const data = res.data;
+      if (!data?.success || !data?.user) {
+        throw new Error(data?.error || 'Failed to authenticate with OpenAI');
       }
 
       const authUser: AuthUser = data.user;
       setUser(authUser);
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authUser));
+      SafeStorage.setJSON(AUTH_STORAGE_KEY, authUser);
     } finally {
       setIsLoading(false);
     }
@@ -102,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }) => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/auth/grok', {
+      const res = await resilientFetch<{ success: boolean; user: AuthUser; error?: string }>('/api/auth/grok', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -112,14 +113,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           mode: options?.mode || 'pooled'
         })
       });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Failed to authenticate with xAI Grok');
+      const data = res.data;
+      if (!data?.success || !data?.user) {
+        throw new Error(data?.error || 'Failed to authenticate with xAI Grok');
       }
 
       const authUser: AuthUser = data.user;
       setUser(authUser);
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authUser));
+      SafeStorage.setJSON(AUTH_STORAGE_KEY, authUser);
     } finally {
       setIsLoading(false);
     }
@@ -128,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginAsGuest = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/auth/openai', {
+      const res = await resilientFetch<{ success: boolean; user: AuthUser }>('/api/auth/openai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -137,14 +138,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           mode: 'pooled'
         })
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = res.data;
+      if (data?.success && data?.user) {
         const guestUser: AuthUser = {
           ...data.user,
           provider: 'guest'
         };
         setUser(guestUser);
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(guestUser));
+        SafeStorage.setJSON(AUTH_STORAGE_KEY, guestUser);
       }
     } finally {
       setIsLoading(false);
@@ -157,11 +158,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const activeUserId = user?.id;
 
     setUser(null);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
+    SafeStorage.removeItem(AUTH_STORAGE_KEY);
 
     // Asynchronously revoke session in Supabase PostgreSQL
     if (activeToken) {
-      fetch('/api/auth/session', {
+      resilientFetch('/api/auth/session', {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${activeToken}` }
       }).catch(() => {});
@@ -169,7 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (activeShardId) {
       try {
-        await fetch(`/api/shards/${activeShardId}/retract`, {
+        await resilientFetch(`/api/shards/${activeShardId}/retract`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: activeUserId })

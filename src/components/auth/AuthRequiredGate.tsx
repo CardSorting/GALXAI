@@ -12,6 +12,7 @@ import {
   Activity,
   ArrowRight
 } from 'lucide-react';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface AuthRequiredGateProps {
   title?: string;
@@ -20,7 +21,7 @@ interface AuthRequiredGateProps {
   children: React.ReactNode;
 }
 
-export function AuthRequiredGate({
+function BaseAuthRequiredGate({
   title = 'Developer Authentication Required',
   description = 'You must connect your developer account or sign in to access your private workspace, telemetry, keys, and billing records.',
   checkoutAmount = 50,
@@ -102,3 +103,7 @@ export function AuthRequiredGate({
 
   return <>{children}</>;
 }
+
+export const AuthRequiredGate = withErrorBoundary(BaseAuthRequiredGate, {
+  name: 'Auth Required Gate'
+});

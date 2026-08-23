@@ -9,8 +9,10 @@ import { ShardVaultManager } from '@/components/dashboard/ShardVaultManager';
 import { Plus, Shield, Sparkles, Activity } from 'lucide-react';
 import type { GalxShardAccount, PoolStats, GalxRotationStrategy } from '@/core/contracts/GalxContracts';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
+import { resilientFetch } from '@/lib/resilience/ResilientClient';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
-export default function VaultPage() {
+function BaseVaultPage() {
   const [shards, setShards] = useState<GalxShardAccount[]>([]);
   const [stats, setStats] = useState<PoolStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,17 +25,19 @@ export default function VaultPage() {
 
   const fetchShards = async () => {
     try {
-      const res = await fetch('/api/shards');
-      const data = await res.json();
-      setShards(data.shards || []);
+      const res = await resilientFetch<{ shards: GalxShardAccount[] }>('/api/shards', {
+        enableCacheFallback: true,
+      });
+      setShards(res.data?.shards || []);
     } catch {}
   };
 
   const fetchStats = async () => {
     try {
-      const res = await fetch('/api/pool/stats');
-      const data = await res.json();
-      setStats(data);
+      const res = await resilientFetch<PoolStats>('/api/pool/stats', {
+        enableCacheFallback: true,
+      });
+      setStats(res.data);
     } catch {}
   };
 
@@ -46,8 +50,10 @@ export default function VaultPage() {
   useEffect(() => {
     refreshAll();
     const interval = setInterval(() => {
-      fetchShards();
-      fetchStats();
+      if (document.visibilityState === 'visible') {
+        fetchShards();
+        fetchStats();
+      }
     }, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -55,7 +61,7 @@ export default function VaultPage() {
   const handleToggleMode = async (id: string, currentMode: 'pooled' | 'private') => {
     const nextMode = currentMode === 'private' ? 'pooled' : 'private';
     try {
-      await fetch(`/api/shards/${id}`, {
+      await resilientFetch(`/api/shards/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -73,7 +79,7 @@ export default function VaultPage() {
   const handleToggleStatus = async (id: string, currentStatus: string) => {
     const nextStatus = currentStatus === 'healthy' ? 'cooldown' : 'healthy';
     try {
-      await fetch(`/api/shards/${id}`, {
+      await resilientFetch(`/api/shards/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: nextStatus })
@@ -87,13 +93,12 @@ export default function VaultPage() {
 
   const handleRetract = async (id: string, userId: string) => {
     try {
-      const res = await fetch(`/api/shards/${id}/retract`, {
+      const res = await resilientFetch<{ success: boolean }>(`/api/shards/${id}/retract`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId })
       });
-      const data = await res.json();
-      if (data.success) {
+      if (res.data?.success) {
         showToast('🛑 1-Click Retraction: Account disconnected and cache zeroized in < 40ms');
         refreshAll();
       }
@@ -104,7 +109,7 @@ export default function VaultPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      await fetch(`/api/shards/${id}`, { method: 'DELETE' });
+      await resilientFetch(`/api/shards/${id}`, { method: 'DELETE' });
       showToast('Account removed from pool');
       refreshAll();
     } catch {
@@ -114,13 +119,12 @@ export default function VaultPage() {
 
   const handleStrategyChange = async (strategy: GalxRotationStrategy) => {
     try {
-      const res = await fetch('/api/pool/stats', {
+      const res = await resilientFetch<{ success: boolean }>('/api/pool/stats', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ strategy })
       });
-      const data = await res.json();
-      if (data.success) {
+      if (res.data?.success) {
         fetchStats();
       }
     } catch {}
@@ -151,7 +155,7 @@ export default function VaultPage() {
 
             <Link
               href="/auth/connect"
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 text-black text-xs font-bold shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 text-black text-xs font-bold shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2 font-mono"
             >
               <Plus className="w-4 h-4" />
               <span>Connect Provider</span>
@@ -186,3 +190,7 @@ export default function VaultPage() {
     </div>
   );
 }
+
+export default withErrorBoundary(BaseVaultPage, {
+  name: 'Shard Vault Page'
+});

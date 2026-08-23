@@ -1,31 +1,29 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Radio, RefreshCw, Shield, Zap, AlertTriangle, Key } from 'lucide-react';
 import { formatTimeAgo } from '@/lib/utils';
+import { useResilientQuery } from '@/lib/resilience/useResilientQuery';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
-export function TelemetryFeed() {
-  const [logs, setLogs] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+interface TelemetryResponse {
+  logs: any[];
+}
 
-  const fetchLogs = async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch('/api/pool/telemetry');
-      const data = await res.json();
-      setLogs(data.logs || []);
-    } catch {
-      // Ignore
-    } finally {
-      setIsLoading(false);
-    }
-  };
+function BaseTelemetryFeed() {
+  const {
+    data,
+    isLoading,
+    isRefetching,
+    refetch,
+    isStale
+  } = useResilientQuery<TelemetryResponse>('/api/pool/telemetry', {
+    refetchIntervalMs: 5000,
+    enableCacheFallback: true,
+    initialData: { logs: [] }
+  });
 
-  useEffect(() => {
-    fetchLogs();
-    const interval = setInterval(fetchLogs, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  const logs = data?.logs || [];
 
   return (
     <div className="glass-panel rounded-3xl p-6 lg:p-8 space-y-6">
@@ -39,6 +37,11 @@ export function TelemetryFeed() {
             <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-mono font-bold border border-emerald-500/30">
               {logs.length} Events
             </span>
+            {isStale && (
+              <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 text-[10px] font-mono border border-amber-500/30">
+                Cached State
+              </span>
+            )}
           </div>
           <p className="text-xs text-zinc-400 mt-0.5">
             Real-time audit log of lease allocations, token replenishments, circuit breaker trips, and 1-click retractions.
@@ -46,11 +49,13 @@ export function TelemetryFeed() {
         </div>
 
         <button
-          onClick={fetchLogs}
-          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer"
+          onClick={() => refetch()}
+          disabled={isLoading || isRefetching}
+          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer disabled:opacity-50"
           title="Refresh Feed"
+          aria-label="Refresh Telemetry Feed"
         >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 ${isLoading || isRefetching ? 'animate-spin text-cyan-400' : ''}`} />
         </button>
       </div>
 
@@ -68,7 +73,7 @@ export function TelemetryFeed() {
 
             return (
               <div
-                key={log.id}
+                key={log.id || `${log.timestampMs}-${Math.random()}`}
                 className="p-3.5 rounded-2xl bg-black/30 border border-white/5 hover:border-white/10 transition-colors flex items-start justify-between gap-4 text-xs"
               >
                 <div className="flex items-start gap-3">
@@ -118,3 +123,7 @@ export function TelemetryFeed() {
     </div>
   );
 }
+
+export const TelemetryFeed = withErrorBoundary(BaseTelemetryFeed, {
+  name: 'Telemetry Feed Monitor'
+});

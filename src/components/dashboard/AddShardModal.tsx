@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { X, Key, Shield, Sparkles, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import type { ProviderType } from '@/core/contracts/GalxContracts';
+import { resilientFetch } from '@/lib/resilience/ResilientClient';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface AddShardModalProps {
   isOpen: boolean;
@@ -10,7 +12,7 @@ interface AddShardModalProps {
   onSuccess: () => void;
 }
 
-export function AddShardModal({ isOpen, onClose, onSuccess }: AddShardModalProps) {
+function BaseAddShardModal({ isOpen, onClose, onSuccess }: AddShardModalProps) {
   const [apiKey, setApiKey] = useState('');
   const [accountLabel, setAccountLabel] = useState('');
   const [provider, setProvider] = useState<ProviderType>('openai');
@@ -41,7 +43,7 @@ export function AddShardModal({ isOpen, onClose, onSuccess }: AddShardModalProps
     setError(null);
 
     try {
-      const res = await fetch('/api/shards', {
+      const res = await resilientFetch<{ success?: boolean; error?: string }>('/api/shards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -50,11 +52,12 @@ export function AddShardModal({ isOpen, onClose, onSuccess }: AddShardModalProps
           provider,
           shardMode,
           priority: Number(priority)
-        })
+        }),
+        enableCacheFallback: false,
       });
 
-      const data = await res.json();
-      if (!res.ok || data.error) {
+      const data = res.data;
+      if (!data?.success && data?.error) {
         throw new Error(data.error || 'Failed to deposit key');
       }
 
@@ -212,3 +215,8 @@ export function AddShardModal({ isOpen, onClose, onSuccess }: AddShardModalProps
     </div>
   );
 }
+
+export const AddShardModal = withErrorBoundary(BaseAddShardModal, {
+  name: 'Add Shard Modal',
+  fallback: null
+});

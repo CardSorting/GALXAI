@@ -41,8 +41,11 @@ import type {
   GalxTask,
   TaskStatus
 } from '@/core/contracts/GalxContracts';
+import { resilientFetch } from '@/lib/resilience/ResilientClient';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
-export default function RequestsAndResultsCanvas() {
+function BaseRequestsAndResultsCanvas() {
   const { user, isLoading: authLoading } = useAuth();
   const [tasks, setTasks] = useState<GalxTask[]>([]);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
@@ -72,24 +75,25 @@ export default function RequestsAndResultsCanvas() {
       if (user?.token) {
         headers['Authorization'] = `Bearer ${user.token}`;
       }
-      const res = await fetch('/api/queues/default/tasks?limit=100', { headers });
-      if (res.ok) {
-        const data = await res.json();
-        const taskList: GalxTask[] = data.tasks || [];
-        setTasks(taskList);
-        if (!selectedTaskId && taskList.length > 0) {
-          setSelectedTaskId(taskList[0].id);
-        }
+      const res = await resilientFetch<{ tasks: GalxTask[] }>('/api/queues/default/tasks?limit=100', {
+        headers,
+        enableCacheFallback: true,
+      });
+      const taskList: GalxTask[] = res.data?.tasks || [];
+      setTasks(taskList);
+      if (!selectedTaskId && taskList.length > 0) {
+        setSelectedTaskId(taskList[0].id);
+      }
 
-        // Auto-Copy check
-        if (autoCopyForAgent && taskList.length > 0) {
-          const newest = taskList[0];
-          if (newest.status === 'COMPLETED' && newest.id !== lastCompletedTaskIdRef.current) {
-            lastCompletedTaskIdRef.current = newest.id;
-            const snippet = getAgentContextSnippet(newest);
-            navigator.clipboard.writeText(snippet);
-            showToast('⚡ Auto-Copied Result for Agent!');
-          }
+      // Auto-Copy check
+      if (autoCopyForAgent && taskList.length > 0) {
+        const newest = taskList[0];
+        if (newest.status === 'COMPLETED' && newest.id !== lastCompletedTaskIdRef.current) {
+          lastCompletedTaskIdRef.current = newest.id;
+          const snippet = getAgentContextSnippet(newest);
+          safeCopyToClipboard(snippet).then(copied => {
+            if (copied) showToast('⚡ Auto-Copied Result for Agent!');
+          });
         }
       }
     } catch {
@@ -111,23 +115,27 @@ export default function RequestsAndResultsCanvas() {
   useEffect(() => {
     if (!autoRefresh || !user) return;
     const interval = setInterval(() => {
-      fetchTasks();
+      if (document.visibilityState === 'visible') {
+        fetchTasks();
+      }
     }, 2000);
     return () => clearInterval(interval);
   }, [autoRefresh, selectedTaskId, autoCopyForAgent, user]);
 
   const selectedTask = tasks.find(t => t.id === selectedTaskId) || tasks[0] || null;
 
-  const handleCopy = (text: string, id: string, label: string = 'Copied') => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    showToast(`${label}! ✓`);
-    setTimeout(() => setCopiedId(null), 2000);
+  const handleCopy = async (text: string, id: string, label: string = 'Copied') => {
+    const success = await safeCopyToClipboard(text);
+    if (success) {
+      setCopiedId(id);
+      showToast(`${label}! ✓`);
+      setTimeout(() => setCopiedId(null), 2000);
+    }
   };
 
   const handleRetry = async (task: GalxTask) => {
     try {
-      await fetch(`/api/queues/${task.queueId}/tasks/${task.id}/retry`, { method: 'POST' });
+      await resilientFetch(`/api/queues/${task.queueId}/tasks/${task.id}/retry`, { method: 'POST' });
       await fetchTasks();
       showToast('Re-running request in background...');
     } catch {}
@@ -630,3 +638,7 @@ console.log(response.choices[0].message.content);`)}
     </div>
   );
 }
+
+export default withErrorBoundary(BaseRequestsAndResultsCanvas, {
+  name: 'Requests & Results Canvas'
+});

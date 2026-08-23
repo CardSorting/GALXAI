@@ -18,6 +18,7 @@ import {
   Coins
 } from 'lucide-react';
 import { ShareButton } from '@/components/common/ShareButton';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface MatchmakerGoal {
   id: string;
@@ -114,7 +115,7 @@ const GOALS: MatchmakerGoal[] = [
   },
 ];
 
-export function ModelMatchmaker() {
+function BaseModelMatchmaker() {
   const [selectedGoalId, setSelectedGoalId] = useState<string>('writing');
   const activeGoal = GOALS.find((g) => g.id === selectedGoalId) || GOALS[0];
 
@@ -213,3 +214,7 @@ export function ModelMatchmaker() {
     </div>
   );
 }
+
+export const ModelMatchmaker = withErrorBoundary(BaseModelMatchmaker, {
+  name: 'Model Matchmaker'
+});

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Zap,
@@ -27,8 +27,17 @@ import {
 } from 'lucide-react';
 import { LanguageBadge } from '@/components/common/LanguageBadge';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { SlaHealthEngine, SlaProbeResult } from '@/lib/resilience/SlaHealthEngine';
 
 function BaseFooter() {
+  const [slaStatus, setSlaStatus] = useState<SlaProbeResult | null>(null);
+
+  useEffect(() => {
+    const engine = SlaHealthEngine.getInstance();
+    const unsubscribe = engine.subscribe(setSlaStatus);
+    engine.probe();
+    return () => unsubscribe();
+  }, []);
   const footerNavigation = {
     product: [
       { name: 'Frontier AI Models', href: '/models', badge: '12 SOTA' },
@@ -131,10 +140,22 @@ function BaseFooter() {
             <div className="pt-2">
               <Link
                 href="/status"
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-[11px] font-mono text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-mono transition-colors ${
+                  slaStatus?.status === 'offline'
+                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
+                    : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20'
+                }`}
               >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>All Systems 100% Operational</span>
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    slaStatus?.status === 'offline' ? 'bg-amber-400' : 'bg-emerald-400'
+                  } animate-pulse`}
+                />
+                <span>
+                  {slaStatus?.status === 'offline'
+                    ? 'Offline Mode (Cached)'
+                    : `${slaStatus?.uptimePercentage ?? 99.99}% SLA • All Systems Operational`}
+                </span>
               </Link>
             </div>
           </div>

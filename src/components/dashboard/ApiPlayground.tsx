@@ -26,6 +26,7 @@ import {
   Compass
 } from 'lucide-react';
 import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/ModelCatalog';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface PromptPreset {
   id: string;
@@ -148,7 +149,7 @@ const MENTAL_MODELS = [
   { id: 'embed', name: '📐 Dense Embeddings', model: 'text-embedding-3-small', icon: Layers, badge: '-25%' }
 ];
 
-export function ApiPlayground() {
+function BaseApiPlayground() {
   const [modelInput, setModelInput] = useState<string>('gpt-5.6-sol');
   const [prompt, setPrompt] = useState<string>(PRESETS[0].prompt);
   const [streamingOutput, setStreamingOutput] = useState<string>('');
@@ -632,3 +633,7 @@ const res = await galx.chat.completions.create({
     </div>
   );
 }
+
+export const ApiPlayground = withErrorBoundary(BaseApiPlayground, {
+  name: 'API Interactive Playground'
+});

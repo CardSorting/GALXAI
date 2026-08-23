@@ -20,6 +20,8 @@ import {
   Share2
 } from 'lucide-react';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 interface PromoCredit {
   id: string;
@@ -28,7 +30,7 @@ interface PromoCredit {
   amount: number;
   remaining: number;
   expiresAt: string;
-  status: 'active' | 'expired';
+  status: 'active' | 'exhausted' | 'expired';
 }
 
 const INITIAL_PROMOS: PromoCredit[] = [
@@ -52,7 +54,7 @@ const INITIAL_PROMOS: PromoCredit[] = [
   }
 ];
 
-export default function PromoCreditsPage() {
+function BasePromoCreditsPage() {
   const [promos, setPromos] = useState<PromoCredit[]>(INITIAL_PROMOS);
   const [voucherCode, setVoucherCode] = useState('');
   const [isRedeeming, setIsRedeeming] = useState(false);
@@ -72,7 +74,7 @@ export default function PromoCreditsPage() {
       const codeUpper = voucherCode.trim().toUpperCase();
       const newCredit: PromoCredit = {
         id: `promo_${Date.now()}`,
-        name: `Redeemed Voucher (${codeUpper})`,
+        name: `Redeemed Voucher: ${codeUpper}`,
         code: codeUpper,
         amount: 50.00,
         remaining: 50.00,
@@ -86,10 +88,12 @@ export default function PromoCreditsPage() {
     }, 700);
   };
 
-  const handleCopyReferral = () => {
-    navigator.clipboard.writeText(referralUrl);
-    setCopiedReferral(true);
-    setTimeout(() => setCopiedReferral(false), 2000);
+  const handleCopyReferral = async () => {
+    const success = await safeCopyToClipboard(referralUrl);
+    if (success) {
+      setCopiedReferral(true);
+      setTimeout(() => setCopiedReferral(false), 2000);
+    }
   };
 
   const totalActivePromoRemaining = promos
@@ -252,3 +256,7 @@ export default function PromoCreditsPage() {
     </div>
   );
 }
+
+export default withErrorBoundary(BasePromoCreditsPage, {
+  name: 'Promo Credits Page'
+});

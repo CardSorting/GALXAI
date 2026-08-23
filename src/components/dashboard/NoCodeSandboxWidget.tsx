@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import { ShareButton } from '@/components/common/ShareButton';
 import { TokenCostCalculator } from '@/core/pricing/TokenCostCalculator';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 interface ToolConfig {
   name: string;
@@ -112,7 +114,7 @@ const SIM_MODELS: SimModel[] = [
   }
 ];
 
-export function NoCodeSandboxWidget() {
+function BaseNoCodeSandboxWidget() {
   const [selectedTool, setSelectedTool] = useState<string>('cursor');
   const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5.6-sol');
   const [isStreaming, setIsStreaming] = useState(false);
@@ -169,11 +171,13 @@ export function NoCodeSandboxWidget() {
     setStreamProgress(0);
   };
 
-  const handleCopy = () => {
+  const handleCopy = async () => {
     const code = activeTool.getCode(activeModel.id);
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    const success = await safeCopyToClipboard(code);
+    if (success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   useEffect(() => {
@@ -389,3 +393,7 @@ export function NoCodeSandboxWidget() {
     </div>
   );
 }
+
+export const NoCodeSandboxWidget = withErrorBoundary(BaseNoCodeSandboxWidget, {
+  name: 'No-Code Sandbox Widget'
+});

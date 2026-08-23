@@ -42,13 +42,15 @@ import { ShareButton } from '@/components/common/ShareButton';
 import { JargonBuster } from '@/components/common/JargonBuster';
 import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { TrustSeals } from '@/components/common/TrustSeals';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 interface ModelCardClientProps {
   model: ModelSpecItem;
   siblingModels: ModelSpecItem[];
 }
 
-export function ModelCardClient({ model, siblingModels }: ModelCardClientProps) {
+function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
   // Persona switcher: 'creator' (Explain Like I'm New), 'developer' (30s Quickstart), 'architect' (Deep Specs & Benchmarks)
   const [activePersona, setActivePersona] = useState<'creator' | 'developer' | 'architect'>('developer');
 
@@ -88,12 +90,14 @@ export function ModelCardClient({ model, siblingModels }: ModelCardClientProps) 
   const isGrok = model.provider === 'xai-grok';
   const isImage = model.category === 'image';
 
-  const triggerCopy = (text: string, identifier: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedKey(identifier);
-    setTimeout(() => {
-      setCopiedKey((prev) => (prev === identifier ? null : prev));
-    }, 2000);
+  const triggerCopy = async (text: string, identifier: string) => {
+    const success = await safeCopyToClipboard(text);
+    if (success) {
+      setCopiedKey(identifier);
+      setTimeout(() => {
+        setCopiedKey((prev) => (prev === identifier ? null : prev));
+      }, 2000);
+    }
   };
 
   // --- Dynamic Benchmark Data ---
@@ -1876,3 +1880,7 @@ response = client.chat.completions.create(
     </div>
   );
 }
+
+export const ModelCardClient = withErrorBoundary(BaseModelCardClient, {
+  name: 'Model Detail Card Client'
+});

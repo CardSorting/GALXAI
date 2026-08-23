@@ -18,6 +18,9 @@ import {
   Sparkles
 } from 'lucide-react';
 
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
+
 export interface TransactionDetail {
   id: string;
   type: 'deposit' | 'usage' | 'grant' | 'refund';
@@ -45,7 +48,7 @@ interface TransactionDetailModalProps {
   onClose: () => void;
 }
 
-export function TransactionDetailModal({ transaction, onClose }: TransactionDetailModalProps) {
+function BaseTransactionDetailModal({ transaction, onClose }: TransactionDetailModalProps) {
   const [copiedHash, setCopiedHash] = useState(false);
   const [copiedJson, setCopiedJson] = useState(false);
 
@@ -58,18 +61,22 @@ export function TransactionDetailModal({ transaction, onClose }: TransactionDeta
   const completionTokens = transaction.completionTokens || 0;
   const totalTokens = transaction.totalTokens || (promptTokens + completionTokens);
 
-  const handleCopyHash = () => {
+  const handleCopyHash = async () => {
     if (transaction.zdrDigest) {
-      navigator.clipboard.writeText(transaction.zdrDigest);
-      setCopiedHash(true);
-      setTimeout(() => setCopiedHash(false), 2000);
+      const success = await safeCopyToClipboard(transaction.zdrDigest);
+      if (success) {
+        setCopiedHash(true);
+        setTimeout(() => setCopiedHash(false), 2000);
+      }
     }
   };
 
-  const handleCopyJson = () => {
-    navigator.clipboard.writeText(JSON.stringify(transaction, null, 2));
-    setCopiedJson(true);
-    setTimeout(() => setCopiedJson(false), 2000);
+  const handleCopyJson = async () => {
+    const success = await safeCopyToClipboard(JSON.stringify(transaction, null, 2));
+    if (success) {
+      setCopiedJson(true);
+      setTimeout(() => setCopiedJson(false), 2000);
+    }
   };
 
   return (
@@ -265,3 +272,8 @@ export function TransactionDetailModal({ transaction, onClose }: TransactionDeta
     </div>
   );
 }
+
+export const TransactionDetailModal = withErrorBoundary(BaseTransactionDetailModal, {
+  name: 'Transaction Detail Modal',
+  fallback: null
+});

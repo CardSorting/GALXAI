@@ -2,8 +2,10 @@
 
 import React, { useState } from 'react';
 import { Copy, Check, Terminal, Code2, Sparkles, Zap, Rocket, Globe, Bot, Layers } from 'lucide-react';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
-export function QuickstartDocs() {
+function BaseQuickstartDocs() {
   const [activeSnippet, setActiveSnippet] = useState<
     'curl' | 'python' | 'node' | 'anthropic' | 'ollama' | 'sdk' | 'cursor' | 'litellm'
   >('curl');
@@ -143,10 +145,12 @@ model_list:
       api_key: os.environ/GALX_API_KEY`
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(snippets[activeSnippet]);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = async () => {
+    const success = await safeCopyToClipboard(snippets[activeSnippet]);
+    if (success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
@@ -240,3 +244,7 @@ model_list:
     </div>
   );
 }
+
+export const QuickstartDocs = withErrorBoundary(BaseQuickstartDocs, {
+  name: 'Quickstart Docs'
+});

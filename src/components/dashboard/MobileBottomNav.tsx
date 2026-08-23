@@ -12,8 +12,9 @@ import {
   Key
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
-export function MobileBottomNav() {
+function BaseMobileBottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
 
@@ -81,3 +82,8 @@ export function MobileBottomNav() {
     </div>
   );
 }
+
+export const MobileBottomNav = withErrorBoundary(BaseMobileBottomNav, {
+  name: 'Mobile Bottom Navigation',
+  fallback: null
+});

@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { Zap, Rocket, X, CheckCircle2, ShieldCheck, ArrowRight, Sparkles } from 'lucide-react';
+import { resilientFetch } from '@/lib/resilience/ResilientClient';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface AuthProviderModalProps {
   isOpen: boolean;
@@ -9,7 +11,7 @@ interface AuthProviderModalProps {
   onSuccess: (user: any) => void;
 }
 
-export function AuthProviderModal({ isOpen, onClose, onSuccess }: AuthProviderModalProps) {
+function BaseAuthProviderModal({ isOpen, onClose, onSuccess }: AuthProviderModalProps) {
   const [loadingProvider, setLoadingProvider] = useState<'openai' | 'grok' | 'guest' | null>(null);
   const [mode, setMode] = useState<'pooled' | 'private'>('pooled');
 
@@ -18,17 +20,18 @@ export function AuthProviderModal({ isOpen, onClose, onSuccess }: AuthProviderMo
   const handleOpenAIAuth = async () => {
     setLoadingProvider('openai');
     try {
-      const res = await fetch('/api/auth/openai', {
+      const res = await resilientFetch<{ success: boolean; user: any }>('/api/auth/openai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           displayName: 'OpenAI Developer',
           email: 'dev@openai.codex',
           mode
-        })
+        }),
+        enableCacheFallback: false,
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = res.data;
+      if (data?.success) {
         onSuccess(data.user);
         onClose();
       }
@@ -42,17 +45,18 @@ export function AuthProviderModal({ isOpen, onClose, onSuccess }: AuthProviderMo
   const handleGrokAuth = async () => {
     setLoadingProvider('grok');
     try {
-      const res = await fetch('/api/auth/grok', {
+      const res = await resilientFetch<{ success: boolean; user: any }>('/api/auth/grok', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           displayName: 'Grok Developer',
-          email: 'dev@x.ai',
+          email: 'dev@grok.xai',
           mode
-        })
+        }),
+        enableCacheFallback: false,
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = res.data;
+      if (data?.success) {
         onSuccess(data.user);
         onClose();
       }
@@ -189,3 +193,8 @@ export function AuthProviderModal({ isOpen, onClose, onSuccess }: AuthProviderMo
     </div>
   );
 }
+
+export const AuthProviderModal = withErrorBoundary(BaseAuthProviderModal, {
+  name: 'Auth Provider Modal',
+  fallback: null
+});

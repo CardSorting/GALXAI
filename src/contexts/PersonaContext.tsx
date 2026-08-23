@@ -65,6 +65,8 @@ export const PERSONA_CONFIGS: Record<UserPersona, PersonaDetails> = {
   },
 };
 
+import { SafeStorage } from '@/lib/resilience/SafeStorage';
+
 interface PersonaContextType {
   persona: UserPersona;
   setPersona: (p: UserPersona) => void;
@@ -80,7 +82,7 @@ export function PersonaProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('galx_user_persona') as UserPersona;
+      const saved = SafeStorage.getItem('galx_user_persona') as UserPersona;
       if (saved && PERSONA_CONFIGS[saved]) {
         setPersonaState(saved);
         setIsCustomized(true);
@@ -93,9 +95,7 @@ export function PersonaProvider({ children }: { children: React.ReactNode }) {
   const setPersona = (newPersona: UserPersona) => {
     setPersonaState(newPersona);
     setIsCustomized(true);
-    try {
-      localStorage.setItem('galx_user_persona', newPersona);
-    } catch {}
+    SafeStorage.setItem('galx_user_persona', newPersona);
   };
 
   return (

@@ -15,6 +15,8 @@ import {
   Terminal
 } from 'lucide-react';
 
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
+
 interface RouteErrorBoundaryCardProps {
   error: Error & { digest?: string };
   reset: () => void;
@@ -89,14 +91,19 @@ export function RouteErrorBoundaryCard({
     return () => clearInterval(timer);
   }, [autoRetryEnabled, countdown, isOnline, reset]);
 
-  const handleCopyDiagnostic = () => {
+  const handleCopyDiagnostic = async () => {
+    const sanitize = (text: string) =>
+      text
+        .replace(/Bearer\s+[A-Za-z0-9_\-\.]+/gi, 'Bearer [REDACTED]')
+        .replace(/(?:sk|galx_live_sk|xai)_[A-Za-z0-9_\-]+/gi, '[REDACTED_KEY]');
+
     const diagnosticReport = JSON.stringify(
       {
         timestamp: new Date().toISOString(),
         title,
-        message: error.message || 'Unknown runtime error',
+        message: sanitize(error.message || 'Unknown runtime error'),
         digest: error.digest || 'N/A',
-        stack: error.stack || 'N/A',
+        stack: sanitize(error.stack || 'N/A'),
         url: typeof window !== 'undefined' ? window.location.href : 'SSR',
         userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
         online: isOnline,
@@ -105,9 +112,11 @@ export function RouteErrorBoundaryCard({
       2
     );
 
-    navigator.clipboard.writeText(diagnosticReport);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    const success = await safeCopyToClipboard(diagnosticReport);
+    if (success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   // Color classes mapping

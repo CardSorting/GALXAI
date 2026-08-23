@@ -15,10 +15,11 @@ import {
   Clock,
   Coins,
   CheckCircle2,
-  Layers
+  Layers,
+  Search
 } from 'lucide-react';
 import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/ModelCatalog';
-import { Search } from 'lucide-react';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface SimpleCategory {
   id: string;
@@ -104,7 +105,7 @@ const CATEGORIES: SimpleCategory[] = [
   }
 ];
 
-export function SimpleModelPicker() {
+function BaseSimpleModelPicker() {
   const [selectedCatId, setSelectedCatId] = useState<string>('fast');
   const [naturalQuery, setNaturalQuery] = useState<string>('');
 
@@ -305,3 +306,7 @@ export function SimpleModelPicker() {
     </section>
   );
 }
+
+export const SimpleModelPicker = withErrorBoundary(BaseSimpleModelPicker, {
+  name: 'Simple Model Picker'
+});

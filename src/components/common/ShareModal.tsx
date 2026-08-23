@@ -17,6 +17,8 @@ import {
   Smartphone,
   Flame
 } from 'lucide-react';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -26,7 +28,7 @@ interface ShareModalProps {
   url?: string;
 }
 
-export function ShareModal({
+function BaseShareModal({
   isOpen,
   onClose,
   title = 'GALXAI — Universal AI Model Router & Gateway',
@@ -180,22 +182,28 @@ export function ShareModal({
     }
   };
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(shareUrl);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2000);
+  const handleCopyLink = async () => {
+    const success = await safeCopyToClipboard(shareUrl);
+    if (success) {
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    }
   };
 
-  const handleCopyMarkdown = () => {
-    navigator.clipboard.writeText(markdownSnippet);
-    setCopiedMarkdown(true);
-    setTimeout(() => setCopiedMarkdown(false), 2000);
+  const handleCopyMarkdown = async () => {
+    const success = await safeCopyToClipboard(markdownSnippet);
+    if (success) {
+      setCopiedMarkdown(true);
+      setTimeout(() => setCopiedMarkdown(false), 2000);
+    }
   };
 
-  const handleCopyBadge = () => {
-    navigator.clipboard.writeText(badgeMarkdown);
-    setCopiedBadge(true);
-    setTimeout(() => setCopiedBadge(false), 2000);
+  const handleCopyBadge = async () => {
+    const success = await safeCopyToClipboard(badgeMarkdown);
+    if (success) {
+      setCopiedBadge(true);
+      setTimeout(() => setCopiedBadge(false), 2000);
+    }
   };
 
   const encodedUrl = encodeURIComponent(shareUrl);
@@ -616,3 +624,8 @@ export function ShareModal({
     </div>
   );
 }
+
+export const ShareModal = withErrorBoundary(BaseShareModal, {
+  name: 'Share Modal',
+  fallback: null
+});

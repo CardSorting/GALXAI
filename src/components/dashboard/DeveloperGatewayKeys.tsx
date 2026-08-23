@@ -5,8 +5,10 @@ import { Key, Plus, Trash2, Copy, Check, ShieldAlert, Sparkles, X, Gift } from '
 import { formatTimeAgo } from '@/lib/utils';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
+import { resilientFetch } from '@/lib/resilience/ResilientClient';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
-export function DeveloperGatewayKeys() {
+function BaseDeveloperGatewayKeys() {
   const [keys, setKeys] = useState<any[]>([]);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
@@ -19,11 +21,12 @@ export function DeveloperGatewayKeys() {
 
   const fetchKeys = async () => {
     try {
-      const res = await fetch('/api/keys');
-      const data = await res.json();
-      setKeys(data.keys || []);
+      const res = await resilientFetch<{ keys: any[] }>('/api/keys', {
+        enableCacheFallback: true,
+      });
+      setKeys(res.data?.keys || []);
     } catch {
-      // Ignore
+      // Ignored gracefully with cached fallback
     }
   };
 
@@ -34,7 +37,7 @@ export function DeveloperGatewayKeys() {
   const createKeyDirectly = async (keyName: string, balance: number) => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/keys', {
+      const res = await resilientFetch<{ success: boolean; key?: { apiKey: string } }>('/api/keys', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -43,14 +46,13 @@ export function DeveloperGatewayKeys() {
           depositedAmount: balance
         })
       });
-      const data = await res.json();
-      if (data.success && data.key?.apiKey) {
-        setCreatedSecretKey(data.key.apiKey);
+      if (res.data?.success && res.data.key?.apiKey) {
+        setCreatedSecretKey(res.data.key.apiKey);
         setNewKeyName('');
         fetchKeys();
       }
     } catch {
-      // Ignore
+      // Handled gracefully
     } finally {
       setIsLoading(false);
     }
@@ -75,10 +77,10 @@ export function DeveloperGatewayKeys() {
 
   const handleRevokeKey = async (keyId: string) => {
     try {
-      await fetch(`/api/keys?id=${keyId}`, { method: 'DELETE' });
+      await resilientFetch(`/api/keys?id=${keyId}`, { method: 'DELETE' });
       fetchKeys();
     } catch {
-      // Ignore
+      // Ignored gracefully
     }
   };
 
@@ -102,7 +104,7 @@ export function DeveloperGatewayKeys() {
             </span>
           </div>
           <p className="text-xs text-zinc-400 mt-0.5">
-            Use these keys as standard Bearer tokens in any OpenAI SDK or agent runtime pointing to <code className="text-cyan-300">https://galx.ai/v1</code>.
+            Use these keys as standard Bearer tokens in any OpenAI SDK or agent runtime pointing to <code className="text-cyan-300 font-mono">https://galx.ai/v1</code>.
           </p>
         </div>
 
@@ -226,7 +228,7 @@ export function DeveloperGatewayKeys() {
                     value={newKeyName}
                     onChange={(e) => setNewKeyName(e.target.value)}
                     placeholder="e.g. Production Backend, Local Agent, Cursor"
-                    className="w-full py-2.5 px-3 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500"
+                    className="w-full py-2.5 px-3 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 font-sans"
                     required
                   />
                 </div>
@@ -234,7 +236,7 @@ export function DeveloperGatewayKeys() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs uppercase cursor-pointer transition-all disabled:opacity-50"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs uppercase cursor-pointer transition-all disabled:opacity-50 font-mono"
                 >
                   {isLoading ? 'Generating Key...' : 'Generate API Key'}
                 </button>
@@ -254,3 +256,7 @@ export function DeveloperGatewayKeys() {
     </div>
   );
 }
+
+export const DeveloperGatewayKeys = withErrorBoundary(BaseDeveloperGatewayKeys, {
+  name: 'Developer Gateway Key Manager'
+});

@@ -21,6 +21,8 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { TrustSeals } from '@/components/common/TrustSeals';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
@@ -43,10 +45,12 @@ function CheckoutSuccessContent() {
     year: 'numeric'
   });
 
-  const handleCopyKey = () => {
-    navigator.clipboard.writeText(liveApiKey);
-    setCopiedKey(true);
-    setTimeout(() => setCopiedKey(false), 2000);
+  const handleCopyKey = async () => {
+    const success = await safeCopyToClipboard(liveApiKey);
+    if (success) {
+      setCopiedKey(true);
+      setTimeout(() => setCopiedKey(false), 2000);
+    }
   };
 
   const handlePrintReceipt = () => {
@@ -288,7 +292,7 @@ console.log(res.choices[0].message.content);`}</code>
   );
 }
 
-export default function CheckoutSuccessPage() {
+function BaseCheckoutSuccessPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-[#07080d] flex items-center justify-center text-zinc-400 font-mono text-xs">
@@ -299,3 +303,7 @@ export default function CheckoutSuccessPage() {
     </Suspense>
   );
 }
+
+export default withErrorBoundary(BaseCheckoutSuccessPage, {
+  name: 'Checkout Success Receipt Page'
+});

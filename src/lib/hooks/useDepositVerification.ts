@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { resilientFetch } from '@/lib/resilience/ResilientClient';
+import { SafeStorage } from '@/lib/resilience/SafeStorage';
 
 const STORAGE_KEY_VERIFIED = 'galx_deposit_verified';
 const STORAGE_KEY_BALANCE = 'galx_wallet_balance';
@@ -14,8 +16,8 @@ export function useDepositVerification() {
 
   const readStateFromStorage = useCallback(() => {
     try {
-      const storedVerified = localStorage.getItem(STORAGE_KEY_VERIFIED);
-      const storedBalance = localStorage.getItem(STORAGE_KEY_BALANCE);
+      const storedVerified = SafeStorage.getItem(STORAGE_KEY_VERIFIED);
+      const storedBalance = SafeStorage.getItem(STORAGE_KEY_BALANCE);
 
       if (storedVerified === 'true') {
         setHasVerifiedDeposit(true);
@@ -25,13 +27,12 @@ export function useDepositVerification() {
         setWalletBalance(storedBalance ? parseFloat(storedBalance) : DEFAULT_INITIAL_BALANCE);
       } else {
         // First-time visit: check if user already has active keys in backend
-        fetch('/api/keys')
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.keys && data.keys.length > 0) {
+        resilientFetch<{ keys: any[] }>('/api/keys', { enableCacheFallback: true })
+          .then(({ data }) => {
+            if (data?.keys && data.keys.length > 0) {
               setHasVerifiedDeposit(true);
               setWalletBalance(storedBalance ? parseFloat(storedBalance) : 114.59);
-              localStorage.setItem(STORAGE_KEY_VERIFIED, 'true');
+              SafeStorage.setItem(STORAGE_KEY_VERIFIED, 'true');
             } else {
               setHasVerifiedDeposit(false);
               setWalletBalance(storedBalance ? parseFloat(storedBalance) : DEFAULT_INITIAL_BALANCE);
@@ -80,8 +81,8 @@ export function useDepositVerification() {
     setHasVerifiedDeposit(true);
 
     try {
-      localStorage.setItem(STORAGE_KEY_VERIFIED, 'true');
-      localStorage.setItem(STORAGE_KEY_BALANCE, newBalance.toFixed(2));
+      SafeStorage.setItem(STORAGE_KEY_VERIFIED, 'true');
+      SafeStorage.setItem(STORAGE_KEY_BALANCE, newBalance.toFixed(2));
       window.dispatchEvent(new CustomEvent(WALLET_EVENT_NAME, { detail: { newBalance, hasVerifiedDeposit: true } }));
     } catch {
       // Ignore storage error
@@ -94,8 +95,8 @@ export function useDepositVerification() {
     setHasVerifiedDeposit(false);
     setWalletBalance(0);
     try {
-      localStorage.removeItem(STORAGE_KEY_VERIFIED);
-      localStorage.removeItem(STORAGE_KEY_BALANCE);
+      SafeStorage.removeItem(STORAGE_KEY_VERIFIED);
+      SafeStorage.removeItem(STORAGE_KEY_BALANCE);
       window.dispatchEvent(new CustomEvent(WALLET_EVENT_NAME, { detail: { newBalance: 0, hasVerifiedDeposit: false } }));
     } catch {}
   };

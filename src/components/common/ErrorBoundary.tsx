@@ -1,7 +1,8 @@
 'use client';
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertCircle, RefreshCw, Copy, Check, Terminal } from 'lucide-react';
+import { AlertCircle, RefreshCw, Copy, Check, Terminal, ShieldCheck } from 'lucide-react';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 interface Props {
   children: ReactNode;
@@ -20,6 +21,16 @@ interface State {
   errorInfo: ErrorInfo | null;
   retryCount: number;
   copied: boolean;
+  isRetrying: boolean;
+}
+
+function sanitizeDiagnostics(text: string): string {
+  if (!text) return '';
+  // Redact potential API keys or Bearer tokens
+  return text
+    .replace(/Bearer\s+[a-zA-Z0-9_\-\.]+/gi, 'Bearer [REDACTED]')
+    .replace(/galx_[a-zA-Z0-9_\-]+/gi, 'galx_[REDACTED]')
+    .replace(/sk-[a-zA-Z0-9_\-]+/gi, 'sk-[REDACTED]');
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -31,10 +42,11 @@ export class ErrorBoundary extends Component<Props, State> {
     errorInfo: null,
     retryCount: 0,
     copied: false,
+    isRetrying: false,
   };
 
   public static getDerivedStateFromError(error: Error): Partial<State> {
-    return { hasError: true, error };
+    return { hasError: true, error, isRetrying: false };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -48,12 +60,14 @@ export class ErrorBoundary extends Component<Props, State> {
       const delay = (this.props.retryDelayMs ?? 1500) * Math.pow(1.5, this.state.retryCount);
       console.log(`🔄 [GALXAI ErrorBoundary] Auto-retrying ${this.props.name || 'Component'} in ${delay}ms (attempt ${this.state.retryCount + 1}/${maxRetries})...`);
 
+      this.setState({ isRetrying: true });
       this.retryTimeoutId = setTimeout(() => {
         this.setState((prev) => ({
           hasError: false,
           error: null,
           errorInfo: null,
           retryCount: prev.retryCount + 1,
+          isRetrying: false,
         }));
       }, delay);
     }
@@ -80,26 +94,33 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.retryTimeoutId) {
       clearTimeout(this.retryTimeoutId);
     }
-    this.setState({ hasError: false, error: null, errorInfo: null, retryCount: 0 });
+    this.setState({ hasError: false, error: null, errorInfo: null, retryCount: 0, isRetrying: false });
     if (this.props.onReset) {
       this.props.onReset();
     }
   };
 
-  private handleCopy = () => {
+  private handleCopy = async () => {
+    const rawMessage = this.state.error?.message || 'Unknown';
+    const rawStack = this.state.error?.stack || 'N/A';
+
     const report = JSON.stringify(
       {
         component: this.props.name || 'Anonymous Component',
-        error: this.state.error?.message || 'Unknown',
-        stack: this.state.error?.stack || 'N/A',
+        error: sanitizeDiagnostics(rawMessage),
+        stack: sanitizeDiagnostics(rawStack),
         timestamp: new Date().toISOString(),
+        url: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
       },
       null,
       2
     );
-    navigator.clipboard.writeText(report);
-    this.setState({ copied: true });
-    setTimeout(() => this.setState({ copied: false }), 2000);
+
+    const success = await safeCopyToClipboard(report);
+    if (success) {
+      this.setState({ copied: true });
+      setTimeout(() => this.setState({ copied: false }), 2000);
+    }
   };
 
   public render() {
@@ -115,37 +136,39 @@ export class ErrorBoundary extends Component<Props, State> {
           </div>
 
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase text-rose-400">
-              <span>COMPONENT ISOLATION SAFEGUARD</span>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-[10px] font-mono font-bold uppercase text-rose-400">
+              <ShieldCheck className="w-3 h-3 text-rose-400" />
+              <span>ISOLATED FAULT SAFEGUARD</span>
             </div>
             <h4 className="text-sm font-bold text-white font-sans">
               Unable to display {this.props.name || 'this module'}
             </h4>
             <p className="text-xs text-zinc-400 font-sans max-w-sm mx-auto">
-              An unexpected render issue was safely caught. Surrounding modules continue running smoothly.
+              A temporary issue occurred in this section. Your account, wallet, and surrounding services are working normally.
             </p>
           </div>
 
           {this.state.error?.message && (
             <div className="p-2.5 rounded-xl bg-black/60 border border-white/5 font-mono text-[10px] text-rose-300 max-w-md mx-auto truncate text-left flex items-center gap-2">
               <Terminal className="w-3 h-3 text-zinc-500 shrink-0" />
-              <span className="truncate">{this.state.error.message}</span>
+              <span className="truncate">{sanitizeDiagnostics(this.state.error.message)}</span>
             </div>
           )}
 
           <div className="flex items-center justify-center gap-2 font-mono text-xs pt-1">
             <button
               onClick={this.handleReset}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-black font-bold transition-all cursor-pointer shadow-md shadow-rose-500/20"
+              disabled={this.state.isRetrying}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 disabled:opacity-50 text-black font-bold transition-all cursor-pointer shadow-md shadow-rose-500/20"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>Retry Component</span>
+              <RefreshCw className={`w-3.5 h-3.5 ${this.state.isRetrying ? 'animate-spin' : ''}`} />
+              <span>{this.state.isRetrying ? 'Auto-retrying...' : 'Retry View'}</span>
             </button>
 
             <button
               onClick={this.handleCopy}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all border border-white/10 cursor-pointer"
-              title="Copy error details for debugging"
+              title="Copy sanitized error details for support"
             >
               {this.state.copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-zinc-400" />}
               <span>{this.state.copied ? 'Copied' : 'Diagnostics'}</span>

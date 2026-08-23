@@ -39,7 +39,9 @@ import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 import { TrustSeals } from '@/components/common/TrustSeals';
-import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { ErrorBoundary, withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { resilientFetch } from '@/lib/resilience/ResilientClient';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 interface QuickPreset {
   id: string;
@@ -58,7 +60,7 @@ const QUICK_PRESETS: QuickPreset[] = [
 
 type SnippetTab = 'curl' | 'python' | 'ts_sdk' | 'openai_sdk' | 'anthropic_sdk' | 'cursor' | 'litellm' | 'vercel_ai';
 
-export default function GatewayKeysPage() {
+function BaseGatewayKeysPage() {
   const [keys, setKeys] = useState<any[]>([]);
   const [newKeyName, setNewKeyName] = useState('Cursor IDE Key');
   const [selectedRpm, setSelectedRpm] = useState<number>(120);
@@ -77,9 +79,10 @@ export default function GatewayKeysPage() {
 
   const fetchKeys = async () => {
     try {
-      const res = await fetch('/api/keys');
-      const data = await res.json();
-      setKeys(data.keys || []);
+      const res = await resilientFetch<{ keys: any[] }>('/api/keys', {
+        enableCacheFallback: true,
+      });
+      setKeys(res.data?.keys || []);
     } catch {}
   };
 
@@ -90,7 +93,7 @@ export default function GatewayKeysPage() {
   const createKeyDirectly = async (keyName: string, balanceAmount: number, rpm: number = selectedRpm) => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/keys', {
+      const res = await resilientFetch<{ success: boolean; key?: { apiKey: string } }>('/api/keys', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -100,9 +103,8 @@ export default function GatewayKeysPage() {
           depositedAmount: balanceAmount
         })
       });
-      const data = await res.json();
-      if (data.success && data.key?.apiKey) {
-        setCreatedSecretKey(data.key.apiKey);
+      if (res.data?.success && res.data.key?.apiKey) {
+        setCreatedSecretKey(res.data.key.apiKey);
         setNewKeyName('');
         fetchKeys();
       }
@@ -131,21 +133,25 @@ export default function GatewayKeysPage() {
 
   const handleRevokeKey = async (keyId: string) => {
     try {
-      await fetch(`/api/keys?id=${keyId}`, { method: 'DELETE' });
+      await resilientFetch(`/api/keys?id=${keyId}`, { method: 'DELETE' });
       fetchKeys();
     } catch {}
   };
 
-  const handleCopy = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedKey(id);
-    setTimeout(() => setCopiedKey(null), 2000);
+  const handleCopy = async (text: string, id: string) => {
+    const success = await safeCopyToClipboard(text);
+    if (success) {
+      setCopiedKey(id);
+      setTimeout(() => setCopiedKey(null), 2000);
+    }
   };
 
-  const handleCopySnippet = (snippet: string) => {
-    navigator.clipboard.writeText(snippet);
-    setCopiedSnippet(true);
-    setTimeout(() => setCopiedSnippet(false), 2000);
+  const handleCopySnippet = async (snippet: string) => {
+    const success = await safeCopyToClipboard(snippet);
+    if (success) {
+      setCopiedSnippet(true);
+      setTimeout(() => setCopiedSnippet(false), 2000);
+    }
   };
 
   const applyQuickPreset = (preset: QuickPreset) => {
@@ -158,31 +164,23 @@ export default function GatewayKeysPage() {
     setPingResult(null);
     const start = performance.now();
     try {
-      const res = await fetch('/v1/models', {
-        headers: createdSecretKey ? { Authorization: `Bearer ${createdSecretKey}` } : undefined
+      const res = await resilientFetch<{ data: any[] }>('/v1/models', {
+        headers: createdSecretKey ? { Authorization: `Bearer ${createdSecretKey}` } : undefined,
+        enableCacheFallback: true,
       });
       const latencyMs = Math.round(performance.now() - start);
-      if (res.ok) {
-        const data = await res.json();
-        setPingResult({
-          success: true,
-          latencyMs,
-          modelCount: data.data?.length || 12,
-          message: 'Zero-hesitation gateway operational across all 12 SOTA models.'
-        });
-      } else {
-        setPingResult({
-          success: false,
-          latencyMs,
-          message: `Gateway responded with status ${res.status}.`
-        });
-      }
+      setPingResult({
+        success: true,
+        latencyMs,
+        modelCount: res.data?.data?.length || 12,
+        message: 'Zero-hesitation gateway operational across all 12 SOTA models.'
+      });
     } catch (err: any) {
       const latencyMs = Math.round(performance.now() - start);
       setPingResult({
         success: false,
         latencyMs,
-        message: err.message || 'Connection timeout.'
+        message: err.message || 'Gateway smoke test failed'
       });
     } finally {
       setIsPinging(false);
@@ -722,3 +720,7 @@ const { text } = await generateText({
     </div>
   );
 }
+
+export default withErrorBoundary(BaseGatewayKeysPage, {
+  name: 'Gateway Keys Page'
+});

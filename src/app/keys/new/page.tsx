@@ -39,52 +39,57 @@ import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywal
 import { KeyActivationPaywallBlocker } from '@/components/keys/KeyActivationPaywallBlocker';
 import { useAuth } from '@/contexts/AuthContext';
 import { TrustSeals } from '@/components/common/TrustSeals';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 interface Preset {
   id: string;
   name: string;
-  defaultLabel: string;
   rpm: number;
   icon: React.ComponentType<{ className?: string }>;
   description: string;
+  badge?: string;
+  defaultLabel?: string;
 }
 
 const PRESETS: Preset[] = [
   {
     id: 'cursor',
-    name: 'Cursor & Windsurf',
+    name: 'Cursor IDE / AI Editor',
     defaultLabel: 'Cursor IDE / AI Editor',
     rpm: 120,
     icon: Laptop,
-    description: 'Optimized for inline completions, multi-file edits, and agent loops.'
-  },
-  {
-    id: 'backend',
-    name: 'Production Backend',
-    defaultLabel: 'Production API Backend',
-    rpm: 300,
-    icon: Server,
-    description: 'High-concurrency server workloads with automated failover.'
+    description: 'High-burst rate limit optimized for active background completions and codebase indexing.',
+    badge: 'Popular'
   },
   {
     id: 'agent',
-    name: 'Autonomous Agent Fleet',
+    name: 'Autonomous Agent / Crew',
     defaultLabel: 'Agent Swarm / LangChain',
-    rpm: 600,
+    rpm: 300,
     icon: Bot,
-    description: 'Maximum throughput for multi-step reasoning and tool-calling swarms.'
+    description: 'Ultra-low latency connection pool with high concurrency for parallel tool calling loops.',
+    badge: 'High Throughput'
   },
   {
-    id: 'proto',
-    name: 'Local Testing & CLI',
-    defaultLabel: 'Local Prototyping Key',
+    id: 'production',
+    name: 'Production API Backend',
+    defaultLabel: 'Production API Backend',
+    rpm: 600,
+    icon: Server,
+    description: 'Full SLA enterprise endpoint with automated circuit breaker failover to fallback models.'
+  },
+  {
+    id: 'custom',
+    name: 'Custom Configuration',
+    defaultLabel: 'Custom Prototyping Key',
     rpm: 60,
     icon: Terminal,
-    description: 'Standard rate limits for local scripts, notebooks, and quick testing.'
+    description: 'Configure custom spend caps and strict query per minute throttling for cost control.'
   }
 ];
 
-export default function CreateKeyPage() {
+function BaseCreateKeyPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const [selectedPresetId, setSelectedPresetId] = useState<string>('cursor');
@@ -109,7 +114,7 @@ export default function CreateKeyPage() {
 
   const applyPreset = (preset: Preset) => {
     setSelectedPresetId(preset.id);
-    setName(preset.defaultLabel);
+    setName(preset.defaultLabel || preset.name);
     setRateLimitPerMinute(preset.rpm);
   };
 
@@ -281,12 +286,14 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.6, x-ai/grok-4.5`,
   }'`
   });
 
-  const handleCopySnippet = () => {
+  const handleCopySnippet = async () => {
     if (!createdSecretKey) return;
     const snippets = getSnippets(createdSecretKey);
-    navigator.clipboard.writeText(snippets[activeSnippetTab]);
-    setCopiedSnippet(true);
-    setTimeout(() => setCopiedSnippet(false), 2000);
+    const success = await safeCopyToClipboard(snippets[activeSnippetTab]);
+    if (success) {
+      setCopiedSnippet(true);
+      setTimeout(() => setCopiedSnippet(false), 2000);
+    }
   };
 
   return (
@@ -713,3 +720,7 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.6, x-ai/grok-4.5`,
     </div>
   );
 }
+
+export default withErrorBoundary(BaseCreateKeyPage, {
+  name: 'Create API Key Page'
+});

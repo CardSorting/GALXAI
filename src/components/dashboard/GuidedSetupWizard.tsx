@@ -16,6 +16,8 @@ import {
   CheckCircle2,
   Terminal
 } from 'lucide-react';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 interface SetupTab {
   id: string;
@@ -258,16 +260,18 @@ for chunk in llm.stream([HumanMessage(content="Audit smart contract")]):
   }
 ];
 
-export function GuidedSetupWizard() {
+function BaseGuidedSetupWizard() {
   const [activeTabId, setActiveTabId] = useState<string>('cursor');
   const [copied, setCopied] = useState(false);
 
   const currentTab = SETUP_TABS.find(t => t.id === activeTabId) || SETUP_TABS[0];
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(currentTab.configSnippet);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = async () => {
+    const success = await safeCopyToClipboard(currentTab.configSnippet);
+    if (success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
@@ -364,3 +368,7 @@ export function GuidedSetupWizard() {
     </section>
   );
 }
+
+export const GuidedSetupWizard = withErrorBoundary(BaseGuidedSetupWizard, {
+  name: 'Guided Setup Wizard'
+});

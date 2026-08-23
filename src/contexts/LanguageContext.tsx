@@ -7,6 +7,7 @@ import {
   TRANSLATIONS,
   LanguageInfo
 } from '@/lib/i18n/translations';
+import { SafeStorage } from '@/lib/resilience/SafeStorage';
 
 interface LanguageContextType {
   language: SupportedLanguage;
@@ -29,7 +30,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === 'undefined') return;
 
     // Check if user previously chose a preference manually
-    const saved = localStorage.getItem('galx_language_preference') as SupportedLanguage | null;
+    const saved = SafeStorage.getItem('galx_language_preference') as SupportedLanguage | null;
     if (saved && SUPPORTED_LANGUAGES[saved]) {
       setLanguageState(saved);
       setIsAutoDetected(false);
@@ -70,7 +71,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const setLanguage = (lang: SupportedLanguage) => {
     setLanguageState(lang);
     setIsAutoDetected(false);
-    localStorage.setItem('galx_language_preference', lang);
+    SafeStorage.setItem('galx_language_preference', lang);
     applyHtmlLanguage(lang);
   };
 

@@ -16,8 +16,11 @@ import {
   Check,
   RotateCcw
 } from 'lucide-react';
+import { formatNumber } from '@/lib/utils';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
-export function SpendAuditTool() {
+function BaseSpendAuditTool() {
   const [monthlySpend, setMonthlySpend] = useState<number>(500);
   const [isCopied, setIsCopied] = useState(false);
 
@@ -28,11 +31,13 @@ export function SpendAuditTool() {
   const matchBonus = Math.min(2500, Math.round(wholesaleCost * 0.5));
   const freeTokensEquivalent = Math.round((monthlySaved / 3.75) * 1000000);
 
-  const handleCopyAudit = () => {
+  const handleCopyAudit = async () => {
     const text = `GALXAI Spend Audit Summary:\nCurrent Monthly Retail AI Spend: $${monthlySpend.toLocaleString()} USD/mo\nGALXAI Direct Wholesale Cost: $${wholesaleCost.toFixed(2)} USD/mo\nMonthly Net Savings: $${monthlySaved.toFixed(2)} USD/mo (33.3% reduction)\nAnnualized Cashflow Kept: $${annualSaved.toFixed(2)} USD/yr\n50% Compute Match Bonus: +$${matchBonus.toLocaleString()} USD in free compute\nFree Token Mileage: ~${(freeTokensEquivalent / 1000000).toFixed(1)}M free tokens/mo`;
-    navigator.clipboard.writeText(text);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
+    const success = await safeCopyToClipboard(text);
+    if (success) {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    }
   };
 
   return (
@@ -161,3 +166,7 @@ export function SpendAuditTool() {
     </section>
   );
 }
+
+export const SpendAuditTool = withErrorBoundary(BaseSpendAuditTool, {
+  name: 'Spend Audit Tool'
+});
