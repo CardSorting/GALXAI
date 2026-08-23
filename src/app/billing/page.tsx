@@ -51,6 +51,7 @@ import { GranularUsageExplorer } from '@/components/wallet/GranularUsageExplorer
 import { LiveUsageLedger } from '@/components/wallet/LiveUsageLedger';
 import { CostEstimatorCalculator } from '@/components/wallet/CostEstimatorCalculator';
 import { WalletTopUpModal } from '@/components/wallet/WalletTopUpModal';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface TopUpPack {
   amount: number;
@@ -544,26 +545,34 @@ export default function BillingPage() {
                 </div>
 
                 {/* Granular Usage Preview & Link */}
-                <GranularUsageExplorer />
+                <ErrorBoundary name="Granular Usage Preview">
+                  <GranularUsageExplorer />
+                </ErrorBoundary>
               </div>
             )}
 
             {/* Tab 2: Granular Usage Analytics */}
             {activeTab === 'usage' && (
-              <GranularUsageExplorer />
+              <ErrorBoundary name="Granular Usage Explorer">
+                <GranularUsageExplorer />
+              </ErrorBoundary>
             )}
 
             {/* Tab 3: Live Precision Ledger */}
             {activeTab === 'ledger' && (
-              <LiveUsageLedger />
+              <ErrorBoundary name="Live Usage Ledger">
+                <LiveUsageLedger />
+              </ErrorBoundary>
             )}
 
             {/* Tab 4: Workload Cost Estimator */}
             {activeTab === 'estimator' && (
-              <CostEstimatorCalculator
-                currentBalance={balance}
-                onSelectTopUp={(amt) => handleOpenTopUpModal(amt)}
-              />
+              <ErrorBoundary name="Workload Cost Estimator">
+                <CostEstimatorCalculator
+                  currentBalance={balance}
+                  onSelectTopUp={(amt) => handleOpenTopUpModal(amt)}
+                />
+              </ErrorBoundary>
             )}
 
             {/* Tab 5: Auto-Reload & Safeguards */}

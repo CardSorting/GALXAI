@@ -50,6 +50,7 @@ import { SimpleModelPicker } from '@/components/dashboard/SimpleModelPicker';
 import { SpendAuditTool } from '@/components/dashboard/SpendAuditTool';
 import { SavingsJackpotReel } from '@/components/dashboard/SavingsJackpotReel';
 import { NoCodeSandboxWidget } from '@/components/dashboard/NoCodeSandboxWidget';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 export default function HomePage() {
   const [stats, setStats] = useState<any>(null);
@@ -183,7 +184,9 @@ export default function HomePage() {
         <LiveArbitrageTicker />
 
         {/* Zero-Auth Frictionless Live Model Sandbox Simulator */}
-        <NoCodeSandboxWidget />
+        <ErrorBoundary name="Interactive Zero-Code Simulator">
+          <NoCodeSandboxWidget />
+        </ErrorBoundary>
 
         {/* Aggressive Competitor Comparison Ribbon */}
         <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-emerald-500/30">
