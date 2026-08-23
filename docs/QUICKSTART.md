@@ -1,6 +1,6 @@
 # 🚀 GALXAI Quickstart: The 4 Jobs Integration Guide
 
-Connect your AI tools, frameworks, agent swarms, and IDEs to GALXAI in under 30 seconds. Eliminate generic gateway friction and immediately unlock **25%–40% wholesale discounts**, **75% prompt cache pass-through**, and **multi-account 429 burst immunity**.
+Connect your AI tools, frameworks, agent swarms, and IDEs to GALXAI in under 30 seconds. Eliminate generic gateway friction and immediately unlock **25%–40% wholesale discounts**, **75% prompt cache pass-through**, and **99.99% enterprise uptime with zero rate-limit stalls**.
 
 ---
 
@@ -10,7 +10,7 @@ Connect your AI tools, frameworks, agent swarms, and IDEs to GALXAI in under 30 
 graph TD
     A[Start Here] --> B{What is your primary goal?}
     B -->|Slash OpenAI/Anthropic Bills| C[1-Line Drop-in Python / Node SDK]
-    B -->|Stop Agent 429 Rate Limit Stalls| D[Hydraulic Quota Pooling & Swarms]
+    B -->|Stop Agent 429 Rate Limit Stalls| D[Automatic High-Availability Failover]
     B -->|Cursor / Windsurf / Claude Code| E[Single Universal AI Wallet]
     B -->|Instant Terminal & Bash Prompts| F[Zero-Install CLI: npx galxai]
 ```

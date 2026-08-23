@@ -49,7 +49,7 @@ Microsecond profiling of internal normalization, synonym resolution, auth ingest
 
 ---
 
-## 🛡️ Raw Direct Key vs. GALXAI Pooled Fleet Comparison
+## 🛡️ Raw Direct Key vs. GALXAI High-Availability Clearinghouse Comparison
 
 Under a simulated burst traffic spike (200 requests requesting 50,000 tokens within 5 seconds):
 
@@ -59,7 +59,7 @@ Throughput Success Rate Under 200-Worker Burst Spike:
 Direct Static Key (Single Upstream Org):
 [██████████████░░░░░░░░░░░░░░░░░░░░] 38.5% Success (61.5% HTTP 429 Rate Limited)
 
-GALXAI Unified Pooled Substrate:
+GALXAI High-Availability Substrate:
 [██████████████████████████████████] 100.0% Success (0.0% HTTP 429 Rate Limited)
 ```
 

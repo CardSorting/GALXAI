@@ -135,11 +135,6 @@ function BaseNavigation() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    role="link"
-                    onMouseEnter={() => BroccoliOmniSearch.prefetchRoute(link.href)}
-                    onFocus={() => BroccoliOmniSearch.prefetchRoute(link.href)}
-                    onTouchStart={() => BroccoliOmniSearch.prefetchRoute(link.href)}
-                    onPointerDown={() => BroccoliOmniSearch.prefetchRoute(link.href)}
                     aria-current={isActive ? 'page' : undefined}
                     aria-label={link.ariaLabel}
                     className={`relative px-3.5 py-1.5 rounded-xl text-xs font-semibold tracking-normal transition-all duration-150 select-none ${

@@ -297,7 +297,7 @@ export default function DocsPage() {
                 </div>
 
                 <div className="pt-2 flex items-center justify-between text-xs font-mono text-zinc-400">
-                  <span>Calculated based on pooled token volume rates</span>
+                  <span>Calculated based on direct wholesale token volume rates</span>
                   <ShareButton
                     variant="pill"
                     label="Share This Estimate"

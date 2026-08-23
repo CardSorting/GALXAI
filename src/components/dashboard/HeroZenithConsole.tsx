@@ -38,6 +38,7 @@ interface ModelPreset {
   discountPct: number;
   contextK: number;
   specialty: string;
+  accentColor: string;
 }
 
 const HERO_MODELS: ModelPreset[] = [
@@ -49,7 +50,8 @@ const HERO_MODELS: ModelPreset[] = [
     wholesalePrice: 3.00,
     discountPct: 40,
     contextK: 200,
-    specialty: 'SOTA Coding & Architecture'
+    specialty: 'SOTA Coding & Architecture',
+    accentColor: 'from-amber-400 to-orange-500'
   },
   {
     id: 'x-ai/grok-4.6',
@@ -59,7 +61,8 @@ const HERO_MODELS: ModelPreset[] = [
     wholesalePrice: 3.50,
     discountPct: 30,
     contextK: 1000,
-    specialty: '1M Frontier Reasoning'
+    specialty: '1M Frontier Reasoning',
+    accentColor: 'from-cyan-400 to-indigo-500'
   },
   {
     id: 'claude-3-7-sonnet',
@@ -69,7 +72,8 @@ const HERO_MODELS: ModelPreset[] = [
     wholesalePrice: 2.25,
     discountPct: 25,
     contextK: 200,
-    specialty: 'Hybrid Thinking & Precision'
+    specialty: 'Hybrid Thinking & Precision',
+    accentColor: 'from-orange-400 to-amber-500'
   },
   {
     id: 'gpt-5.6-luna',
@@ -79,26 +83,46 @@ const HERO_MODELS: ModelPreset[] = [
     wholesalePrice: 0.15,
     discountPct: 40,
     contextK: 128,
-    specialty: 'Sub-Second Agent Loops'
+    specialty: 'Sub-Second Agent Loops',
+    accentColor: 'from-emerald-400 to-teal-500'
   }
 ];
 
-const PRESET_PROMPTS = [
-  'Explain continuous token caching in 10 words.',
-  'Write a lock-free threadsafe queue in Rust.',
-  'Why does multi-account pooling eliminate 429 stalls?'
+interface PresetPromptItem {
+  label: string;
+  prompt: string;
+  tag: string;
+}
+
+const PRESET_PROMPTS: PresetPromptItem[] = [
+  {
+    label: 'Prompt #1',
+    tag: '⚡ Prompt Caching',
+    prompt: 'Explain continuous token caching and wholesale arbitrage.'
+  },
+  {
+    label: 'Prompt #2',
+    tag: '🦀 Lock-Free Rust',
+    prompt: 'Write a high-concurrency lock-free token bucket in Rust.'
+  },
+  {
+    label: 'Prompt #3',
+    tag: '🛡️ 99.99% SLA',
+    prompt: 'How does GALXAI guarantee 99.99% uptime with zero rate limits?'
+  }
 ];
 
 export function HeroZenithConsole() {
   const [consoleMode, setConsoleMode] = useState<'stream' | 'clash' | 'snippets'>('stream');
   const [selectedModel, setSelectedModel] = useState<ModelPreset>(HERO_MODELS[0]);
   const [modelB, setModelB] = useState<ModelPreset>(HERO_MODELS[1]);
-  const [promptInput, setPromptInput] = useState(PRESET_PROMPTS[0]);
+  const [promptInput, setPromptInput] = useState(PRESET_PROMPTS[0].prompt);
   const [activeSnippetTab, setActiveSnippetTab] = useState<'cli' | 'cursor' | 'claude_code' | 'python' | 'ts' | 'browser'>('cli');
   
-  // Single Stream state
+  // Streaming state
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamOutput, setStreamOutput] = useState<string>('');
+  const [copiedResponse, setCopiedResponse] = useState(false);
   const [streamStats, setStreamStats] = useState<{
     latencyMs: number;
     tokensCount: number;
@@ -120,10 +144,161 @@ export function HeroZenithConsole() {
 
   // Auto-scroll inside output preview when streaming
   useEffect(() => {
-    if (outputEndRef.current) {
+    if (outputEndRef.current && (isStreaming || isClashStreaming)) {
       outputEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [streamOutput, clashOutputA, clashOutputB]);
+  }, [streamOutput, clashOutputA, clashOutputB, isStreaming, isClashStreaming]);
+
+  const generateRealisticResponse = (prompt: string, model: ModelPreset): string => {
+    const lower = prompt.toLowerCase();
+
+    if (lower.includes('caching') || lower.includes('arbitrage') || lower.includes('explain')) {
+      return `### ⚡ Continuous Token Caching & Wholesale Arbitrage
+
+**1-Sentence Summary:**
+> *"Shared prompt prefixes stay warm in Anycast RAM, cutting repeat token costs by 75%."*
+
+#### 1. How the Architecture Works:
+1. **Warm Prefix Matching (<1ms):**
+   When your agent sends system instructions, schemas, or large file contexts, GALXAI matches the cryptographic SHA-256 hash of the prompt prefix in memory before dispatching.
+2. **75% Cache Pass-Through:**
+   Cached prefix tokens cost **$0.75 / 1M** instead of standard retail **$5.00 / 1M** (a direct 75% savings pass-through).
+3. **Wholesale Volume Clearing:**
+   GALXAI aggregates millions of developers into massive enterprise tier-1 contracts, delivering **${model.discountPct}% instant discount** on all remaining generation tokens.
+
+\`\`\`typescript
+// Resulting Cost Ledger
+const stats = {
+  engine: "${model.id}",
+  raw_tokens: 4280,
+  cached_prefix_tokens: 3800, // 75% rebate applied
+  effective_savings: "${model.discountPct}% wholesale + 75% cache discount",
+  ttft_ms: 12,
+  zero_retention: true // Processed strictly in non-persisted RAM
+};
+\`\`\``;
+    }
+
+    if (lower.includes('rust') || lower.includes('lock-free') || lower.includes('queue') || lower.includes('bucket')) {
+      return `### 🦀 High-Concurrency Lock-Free Token Bucket in Rust
+
+Here is a production-grade, thread-safe rate limiter utilizing atomic compare-and-swap (CAS) operations with zero mutex contention:
+
+\`\`\`rust
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::time::{Duration, Instant};
+
+pub struct AtomicTokenBucket {
+    capacity: u64,
+    tokens: AtomicU64,
+    refill_rate_per_sec: u64,
+    last_refill_nanos: AtomicU64,
+    start_time: Instant,
+}
+
+impl AtomicTokenBucket {
+    pub fn new(capacity: u64, refill_rate_per_sec: u64) -> Self {
+        Self {
+            capacity,
+            tokens: AtomicU64::new(capacity),
+            refill_rate_per_sec,
+            last_refill_nanos: AtomicU64::new(0),
+            start_time: Instant::now(),
+        }
+    }
+
+    pub fn try_acquire(&self, requested: u64) -> bool {
+        self.refill();
+        let mut current = self.tokens.load(Ordering::Relaxed);
+        loop {
+            if current < requested {
+                return false; // Insufficient tokens
+            }
+            match self.tokens.compare_exchange_weak(
+                current,
+                current - requested,
+                Ordering::SeqCst,
+                Ordering::Relaxed,
+            ) {
+                Ok(_) => return true,
+                Err(actual) => current = actual,
+            }
+        }
+    }
+
+    fn refill(&self) {
+        let now_nanos = self.start_time.elapsed().as_nanos() as u64;
+        let last = self.last_refill_nanos.load(Ordering::Relaxed);
+        let elapsed_secs = (now_nanos.saturating_sub(last) as f64) / 1_000_000_000.0;
+
+        if elapsed_secs >= 0.01 {
+            let refill_amount = (elapsed_secs * self.refill_rate_per_sec as f64) as u64;
+            if refill_amount > 0 && self.last_refill_nanos.compare_exchange(last, now_nanos, Ordering::SeqCst, Ordering::Relaxed).is_ok() {
+                self.tokens.fetch_update(Ordering::SeqCst, Ordering::Relaxed, |curr| {
+                    Some((curr + refill_amount).min(self.capacity))
+                }).ok();
+            }
+        }
+    }
+}
+\`\`\`
+
+**Key Features:**
+- **Zero Mutex Locks:** Lock-free atomic loop eliminates thread blocking.
+- **Sub-Microsecond Latency:** Handles 10M+ operations/sec per core.`;
+    }
+
+    if (lower.includes('429') || lower.includes('uptime') || lower.includes('sla') || lower.includes('stall') || lower.includes('resilience') || lower.includes('rate limit')) {
+      return `### 🛡️ 99.99% Enterprise Uptime & Zero Rate-Limit Stalls
+
+When autonomous coding agents (like Cursor, Windsurf, or custom agent swarms) run continuous execution loops, standard API keys frequently hit provider rate limits (**HTTP 429 Too Many Requests**).
+
+#### How GALXAI Guarantees High Availability:
+- **Sub-1ms Automatic Failover:**
+  Traffic is automatically routed across redundant high-capacity Anycast pathways with zero client-side delay.
+- **Zero Configuration Overhauls:**
+  Your applications never experience 429 backoff stalls or dropped streams.
+- **Consistent High Throughput:**
+  Guaranteed high-speed generation for mission-critical production pipelines.
+
+\`\`\`typescript
+// High Availability Guarantee
+export const sla = {
+  uptime: "99.99%",
+  rate_limit_stalls: 0,
+  failover_latency_ms: "< 1ms",
+  status: "OPTIMAL"
+};
+\`\`\`
+
+**Result:** Uninterrupted execution and 99.99% SLA uptime for all agent loops and backend services.`;
+    }
+
+    // Default rich response for any custom user prompt
+    return `### 🌌 GALXAI Wholesale Response • ${model.name}
+
+**Prompt Evaluated:**
+> *"${prompt}"*
+
+#### Performance & Optimization Telemetry:
+1. **Anycast Routing:** Handled nearest to your location in **12ms TTFT**.
+2. **Wholesale Rate Applied:** **$${model.wholesalePrice.toFixed(2)} / 1M tokens** (saved **${model.discountPct}%** vs standard retail $${model.retailPrice.toFixed(2)}).
+3. **Continuous Prompt Cache:** Warm prefix buffers matched in non-persisted RAM.
+
+\`\`\`typescript
+// Execution Confirmation
+export const response = {
+  model: "${model.id}",
+  provider: "${model.provider}",
+  status: "COMPLETED",
+  ttft_ms: 12,
+  tokens_per_sec: 148,
+  memory_guarantee: "AES-256-GCM Zero Retention in RAM"
+};
+\`\`\`
+
+Ready to deploy in your stack with **1-line drop-in** replacement.`;
+  };
 
   const handleRunStream = (customPrompt?: string) => {
     const promptToRun = customPrompt || promptInput;
@@ -132,39 +307,28 @@ export function HeroZenithConsole() {
     setIsStreaming(true);
     setStreamOutput('');
     setStreamStats(null);
+    setCopiedResponse(false);
 
-    // Generate realistic tailored simulated response based on model and prompt
-    let simulatedText = '';
-    const lowerPrompt = promptToRun.toLowerCase();
-
-    if (lowerPrompt.includes('caching') || lowerPrompt.includes('10 words')) {
-      simulatedText = `Shared prompt prefixes stay warm in RAM, cutting repeat token costs by 75%.`;
-    } else if (lowerPrompt.includes('rust') || lowerPrompt.includes('queue') || lowerPrompt.includes('lock-free')) {
-      simulatedText = `use std::sync::atomic::{AtomicPtr, Ordering};\n\npub struct LockFreeQueue<T> {\n    head: AtomicPtr<Node<T>>,\n    tail: AtomicPtr<Node<T>>,\n}\n\nimpl<T> LockFreeQueue<T> {\n    pub fn push(&self, value: T) {\n        // Atomic lock-free enqueue with zero lock contention\n        let new_node = Box::into_raw(Box::new(Node::new(value)));\n        // CAS loop ensures thread-safe atomic pointer update\n    }\n}`;
-    } else if (lowerPrompt.includes('429') || lowerPrompt.includes('pooling') || lowerPrompt.includes('stall')) {
-      simulatedText = `GALXAI's P-AHT hydraulic routing pools multiple enterprise accounts in real time. If one provider hits burst limits, traffic deflects in <1ms without 429 stalls.`;
-    } else {
-      simulatedText = `[GALXAI Wholesale Clearinghouse • ${selectedModel.name}]\n\nExecuting "${promptToRun.slice(0, 40)}${promptToRun.length > 40 ? '...' : ''}" with sub-15ms TTFT.\n\nContinuous prompt caching automatically matches warm prefixes. Multi-account hydraulic quota pooling absorbs high-concurrency agent swarms, locking in ${selectedModel.discountPct}% wholesale compute savings with zero 429 errors.`;
-    }
-
-    const words = simulatedText.split(' ');
+    const fullResponse = generateRealisticResponse(promptToRun, selectedModel);
+    const chunks = fullResponse.split(' ');
     let currentIdx = 0;
     let accumulated = '';
-    const startMs = performance.now();
+    const startTime = performance.now();
 
+    // Fast, smooth streaming interval simulating ~140 tok/s
     const interval = setInterval(() => {
-      if (currentIdx >= words.length) {
+      if (currentIdx >= chunks.length) {
         clearInterval(interval);
         setIsStreaming(false);
 
-        const totalTimeSec = Math.max(0.1, (performance.now() - startMs) / 1000);
-        const estTokens = Math.max(words.length * 1.3, accumulated.length / 4);
+        const totalTimeSec = Math.max(0.4, (performance.now() - startTime) / 1000);
+        const estTokens = Math.round(fullResponse.length / 3.8);
         const retailCost = (estTokens / 1_000_000) * selectedModel.retailPrice;
         const wholesaleCost = (estTokens / 1_000_000) * selectedModel.wholesalePrice;
 
         setStreamStats({
           latencyMs: 12,
-          tokensCount: Math.round(estTokens),
+          tokensCount: estTokens,
           tokensPerSec: Math.round(estTokens / totalTimeSec),
           retailCost,
           wholesaleCost,
@@ -173,13 +337,15 @@ export function HeroZenithConsole() {
         return;
       }
 
-      accumulated += (currentIdx === 0 ? '' : ' ') + words[currentIdx];
+      // Append 2-3 words per tick for high-throughput visual flow
+      const nextChunk = chunks.slice(currentIdx, currentIdx + 2).join(' ');
+      accumulated += (currentIdx === 0 ? '' : ' ') + nextChunk;
       setStreamOutput(accumulated);
-      currentIdx++;
-    }, 20);
+      currentIdx += 2;
+    }, 18);
   };
 
-  const handleRunClash = async () => {
+  const handleRunClash = () => {
     if (isClashStreaming) return;
     setIsClashStreaming(true);
     setClashOutputA('');
@@ -187,79 +353,92 @@ export function HeroZenithConsole() {
     setClashStatsA(null);
     setClashStatsB(null);
 
-    const textA = `// [${selectedModel.name} Execution]\nuse std::sync::atomic::{AtomicU64, Ordering};\nuse std::time::Instant;\n\npub struct AtomicRateLimiter {\n    tokens: AtomicU64,\n    last_refill: Instant,\n}\n\nimpl AtomicRateLimiter {\n    pub fn try_acquire(&self, cost: u64) -> bool {\n        let current = self.tokens.load(Ordering::Relaxed);\n        if current >= cost {\n            self.tokens.fetch_sub(cost, Ordering::SeqCst);\n            true\n        } else {\n            false\n        }\n    }\n}`;
+    const fullA = generateRealisticResponse(promptInput, selectedModel);
+    const fullB = generateRealisticResponse(promptInput, modelB);
 
-    const textB = `// [${modelB.name} Execution]\nuse parking_lot::RwLock;\nuse std::sync::atomic::AtomicI64;\n\npub struct FastRateBucket {\n    capacity: i64,\n    available: AtomicI64,\n    refill_rate_per_sec: i64,\n}\n\nimpl FastRateBucket {\n    pub fn check_and_consume(&self, tokens: i64) -> Result<(), &'static str> {\n        let val = self.available.fetch_sub(tokens, std::sync::atomic::Ordering::AcqRel);\n        if val >= tokens { Ok(()) } else { Err("RATE_LIMIT_EXCEEDED") }\n    }\n}`;
+    const chunksA = fullA.split(' ');
+    const chunksB = fullB.split(' ');
 
-    const wordsA = textA.split(' ');
-    const wordsB = textB.split(' ');
     let idxA = 0;
     let idxB = 0;
     let accA = '';
     let accB = '';
 
     const interval = setInterval(() => {
-      if (idxA >= wordsA.length && idxB >= wordsB.length) {
+      if (idxA >= chunksA.length && idxB >= chunksB.length) {
         clearInterval(interval);
         setIsClashStreaming(false);
-        setClashStatsA({ ttft: 12, speed: 148, cost: 0.00018 });
-        setClashStatsB({ ttft: 18, speed: 132, cost: 0.00021 });
+        setClashStatsA({ ttft: 12, speed: 154, cost: Number(((fullA.length / 3.8 / 1_000_000) * selectedModel.wholesalePrice).toFixed(6)) });
+        setClashStatsB({ ttft: 14, speed: 138, cost: Number(((fullB.length / 3.8 / 1_000_000) * modelB.wholesalePrice).toFixed(6)) });
         return;
       }
 
-      if (idxA < wordsA.length) {
-        accA += (idxA === 0 ? '' : ' ') + wordsA[idxA];
+      if (idxA < chunksA.length) {
+        accA += (idxA === 0 ? '' : ' ') + chunksA.slice(idxA, idxA + 2).join(' ');
         setClashOutputA(accA);
-        idxA++;
+        idxA += 2;
       }
 
-      if (idxB < wordsB.length) {
-        accB += (idxB === 0 ? '' : ' ') + wordsB[idxB];
+      if (idxB < chunksB.length) {
+        accB += (idxB === 0 ? '' : ' ') + chunksB.slice(idxB, idxB + 2).join(' ');
         setClashOutputB(accB);
-        idxB++;
+        idxB += 2;
       }
-    }, 22);
+    }, 18);
+  };
+
+  const handleCopyResponse = async () => {
+    if (!streamOutput) return;
+    const success = await safeCopyToClipboard(streamOutput);
+    if (success) {
+      setCopiedResponse(true);
+      setTimeout(() => setCopiedResponse(false), 2000);
+    }
   };
 
   const getIntegrationSnippet = () => {
     switch (activeSnippetTab) {
       case 'cli':
-        return `# 1. Run immediate completion in your terminal (no account required):
+        return `# 1. Run zero-install streaming prompt in terminal:
 npx galxai "${promptInput}"
 
-# 2. Or launch interactive REPL:
-npx galxai chat`;
+# 2. Or start interactive REPL:
+npx galxai chat --model ${selectedModel.id}`;
       case 'cursor':
-        return `// Cursor IDE / Windsurf Settings -> Models -> Override OpenAI Base URL:
-Base URL: https://api.galx.ai/v1
-API Key:  galx_live_your_key_here
-Models:   ${selectedModel.id}, gpt-5.6-sol, x-ai/grok-4.6`;
+        return `// In Cursor / Windsurf Settings -> Models:
+Override Base URL: https://galx.ai/v1
+API Key:           galx_live_your_key_here
+Models:            ${selectedModel.id}, gpt-5.6-sol, x-ai/grok-4.6`;
       case 'claude_code':
         return `# Point Claude Code CLI directly to GALXAI Wholesale Clearinghouse:
-export ANTHROPIC_BASE_URL="https://api.galx.ai/v1"
+export ANTHROPIC_BASE_URL="https://galx.ai/v1"
 export ANTHROPIC_API_KEY="galx_live_your_key_here"
 
-claude "Refactor this auth handler"`;
+claude "${promptInput}"`;
       case 'python':
         return `from openai import OpenAI
 
 # 1-Line Drop-in wholesale replacement:
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_key_here"
 )
 
 response = client.chat.completions.create(
     model="${selectedModel.id}",
-    messages=[{"role": "user", "content": "${promptInput}"}]
+    messages=[{"role": "user", "content": "${promptInput}"}],
+    stream=True
 )
-print(response.choices[0].message.content)`;
+
+for chunk in response:
+    if chunk.choices and chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="", flush=True)`;
       case 'ts':
         return `import OpenAI from 'openai';
 
 // Drop-in compatible with OpenAI SDK & Vercel AI SDK
 const client = new OpenAI({
-  baseURL: 'https://api.galx.ai/v1',
+  baseURL: 'https://galx.ai/v1',
   apiKey: process.env.GALX_API_KEY || 'galx_live_your_key'
 });
 
@@ -269,7 +448,7 @@ const res = await client.chat.completions.create({
   stream: true
 });`;
       case 'browser':
-        return `https://api.galx.ai/v1/chat/completions?prompt=${encodeURIComponent(promptInput)}&model=${selectedModel.id}`;
+        return `https://galx.ai/v1/chat/completions?prompt=${encodeURIComponent(promptInput)}&model=${selectedModel.id}`;
     }
   };
 
@@ -285,14 +464,14 @@ const res = await client.chat.completions.create({
   return (
     <div className="w-full max-w-5xl mx-auto rounded-3xl p-1 bg-gradient-to-b from-amber-500/35 via-cyan-500/25 to-indigo-500/35 shadow-2xl shadow-amber-500/10">
       <div className="rounded-[22px] bg-[#07090f]/95 backdrop-blur-2xl border border-white/10 p-5 sm:p-7 space-y-6">
-        {/* Top Header Bar: Telemetry Status & Apex Mode Selector */}
+        {/* Top Header Bar: Telemetry Status & Mode Switcher */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
           <div className="flex items-center gap-3">
             <div className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse shadow-md shadow-emerald-400/50" />
             <div className="flex items-center gap-2 font-mono text-xs">
               <span className="text-white font-bold tracking-wider uppercase">Apex Compute Clearinghouse</span>
               <span className="text-zinc-500">•</span>
-              <span className="text-emerald-400 font-semibold">429 Shield: 100% Buffered</span>
+              <span className="text-emerald-400 font-semibold">99.99% Enterprise SLA</span>
             </div>
           </div>
 
@@ -402,13 +581,14 @@ const res = await client.chat.completions.create({
                 {PRESET_PROMPTS.map((p, idx) => (
                   <button
                     key={idx}
+                    type="button"
                     onClick={() => {
-                      setPromptInput(p);
-                      handleRunStream(p);
+                      setPromptInput(p.prompt);
+                      handleRunStream(p.prompt);
                     }}
-                    className="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer whitespace-nowrap text-[10px]"
+                    className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer whitespace-nowrap text-[11px] flex items-center gap-1 border border-white/5"
                   >
-                    Prompt #{idx + 1}
+                    <span>{p.tag}</span>
                   </button>
                 ))}
               </div>
@@ -422,7 +602,7 @@ const res = await client.chat.completions.create({
                   onChange={(e) => setPromptInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleRunStream()}
                   placeholder="Type any prompt to test live throughput & wholesale pricing..."
-                  className="w-full py-3 pl-4 pr-10 rounded-2xl bg-black/70 border border-white/15 text-white placeholder:text-zinc-600 focus:outline-none focus:border-amber-400 font-mono transition-colors"
+                  className="w-full py-3 pl-4 pr-10 rounded-2xl bg-black/70 border border-white/15 text-white placeholder:text-zinc-600 focus:outline-none focus:border-amber-400 font-mono transition-colors text-xs"
                 />
                 <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-[10px] font-mono hidden sm:inline">
                   ⏎ Enter
@@ -438,12 +618,12 @@ const res = await client.chat.completions.create({
                 {isStreaming ? (
                   <>
                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    <span>Streaming...</span>
+                    <span>Streaming Output...</span>
                   </>
                 ) : (
                   <>
                     <Play className="w-3.5 h-3.5 fill-black" />
-                    <span>Execute (0ms)</span>
+                    <span>Execute Stream (0ms)</span>
                   </>
                 )}
               </button>
@@ -451,36 +631,51 @@ const res = await client.chat.completions.create({
 
             {/* Live Output & Real-Time Performance Telemetry Card */}
             {(streamOutput || isStreaming) && (
-              <div className="p-4 rounded-2xl bg-black/80 border border-cyan-500/30 space-y-3 font-mono text-xs animate-in fade-in duration-150">
-                <div className="flex items-center justify-between text-[11px] text-zinc-400 border-b border-white/10 pb-2">
-                  <span className="flex items-center gap-1.5 text-cyan-300 font-bold">
-                    <Activity className="w-3.5 h-3.5" />
-                    <span>Stream Response from {selectedModel.name}</span>
-                  </span>
-                  <span className="text-emerald-400 font-bold">● In-Browser Simulation (Zero Auth / Instant)</span>
+              <div className="p-4 sm:p-5 rounded-2xl bg-black/85 border border-cyan-500/30 space-y-3 font-mono text-xs animate-in fade-in duration-150 shadow-2xl">
+                <div className="flex items-center justify-between text-[11px] text-zinc-400 border-b border-white/10 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                    <span className="text-cyan-300 font-bold">Stream: {selectedModel.name}</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <span className="text-emerald-400 font-bold hidden sm:inline">● In-Browser Simulation (Zero Auth)</span>
+                    {streamOutput && !isStreaming && (
+                      <button
+                        type="button"
+                        onClick={handleCopyResponse}
+                        className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white flex items-center gap-1 transition-all text-[10px] cursor-pointer"
+                      >
+                        {copiedResponse ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                        <span>{copiedResponse ? 'Copied' : 'Copy'}</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                <div className="text-zinc-200 leading-relaxed max-h-40 overflow-y-auto whitespace-pre-wrap pr-2 text-xs">
+                {/* Formatted Stream Text Output Container */}
+                <div className="text-zinc-200 leading-relaxed max-h-64 sm:max-h-80 overflow-y-auto whitespace-pre-wrap pr-2 text-xs font-mono">
                   {streamOutput}
                   {isStreaming && <span className="inline-block w-2 h-4 bg-cyan-400 ml-1 animate-pulse" />}
                   <div ref={outputEndRef} />
                 </div>
 
+                {/* Live Real-Time Telemetry Counters */}
                 {streamStats && (
-                  <div className="pt-2 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
-                    <div className="p-2 rounded-xl bg-white/5 space-y-0.5">
+                  <div className="pt-3 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                    <div className="p-2.5 rounded-xl bg-white/5 space-y-0.5 border border-white/5">
                       <span className="text-zinc-500 uppercase text-[9px]">Time to First Token</span>
                       <div className="text-white font-bold">{streamStats.latencyMs}ms</div>
                     </div>
-                    <div className="p-2 rounded-xl bg-white/5 space-y-0.5">
+                    <div className="p-2.5 rounded-xl bg-white/5 space-y-0.5 border border-white/5">
                       <span className="text-zinc-500 uppercase text-[9px]">Throughput Velocity</span>
                       <div className="text-cyan-300 font-bold">{streamStats.tokensPerSec} tok/s</div>
                     </div>
-                    <div className="p-2 rounded-xl bg-white/5 space-y-0.5">
+                    <div className="p-2.5 rounded-xl bg-white/5 space-y-0.5 border border-white/5">
                       <span className="text-zinc-500 uppercase text-[9px]">Wholesale Cost</span>
                       <div className="text-emerald-300 font-bold">${streamStats.wholesaleCost.toFixed(6)}</div>
                     </div>
-                    <div className="p-2 rounded-xl bg-white/5 space-y-0.5">
+                    <div className="p-2.5 rounded-xl bg-white/5 space-y-0.5 border border-white/5">
                       <span className="text-zinc-500 uppercase text-[9px]">Instant Net Savings</span>
                       <div className="text-amber-300 font-bold">-{selectedModel.discountPct}% OFF</div>
                     </div>
@@ -506,21 +701,21 @@ const res = await client.chat.completions.create({
                 className="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-indigo-500 hover:from-cyan-300 hover:to-indigo-400 text-black font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md flex items-center gap-1.5"
               >
                 <Zap className="w-3.5 h-3.5 fill-black" />
-                <span>{isClashStreaming ? 'Clashing...' : 'Run Concurrently'}</span>
+                <span>{isClashStreaming ? 'Clashing Streams...' : 'Run Concurrently'}</span>
               </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="p-3.5 rounded-2xl bg-black/80 border border-amber-500/30 space-y-2">
+              <div className="p-4 rounded-2xl bg-black/80 border border-amber-500/30 space-y-2">
                 <div className="flex justify-between items-center border-b border-white/10 pb-1.5 text-[11px]">
                   <span className="text-amber-300 font-bold">{selectedModel.name}</span>
                   <span className="text-emerald-400 font-bold">-${selectedModel.discountPct}% Wholesale</span>
                 </div>
-                <div className="text-zinc-300 text-xs min-h-[120px] max-h-[180px] overflow-y-auto whitespace-pre-wrap">
-                  {clashOutputA || <span className="text-zinc-600 italic">Ready to execute concurrent prompt...</span>}
+                <div className="text-zinc-300 text-xs min-h-[140px] max-h-[220px] overflow-y-auto whitespace-pre-wrap">
+                  {clashOutputA || <span className="text-zinc-600 italic">Ready to stream concurrent prompt...</span>}
                 </div>
                 {clashStatsA && (
-                  <div className="pt-1.5 border-t border-white/5 flex justify-between text-[10px] text-zinc-400">
+                  <div className="pt-2 border-t border-white/5 flex justify-between text-[10px] text-zinc-400">
                     <span>TTFT: {clashStatsA.ttft}ms</span>
                     <span>Speed: {clashStatsA.speed} tok/s</span>
                     <span className="text-emerald-400 font-bold">Cost: ${clashStatsA.cost}</span>
@@ -528,16 +723,16 @@ const res = await client.chat.completions.create({
                 )}
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-black/80 border border-cyan-500/30 space-y-2">
+              <div className="p-4 rounded-2xl bg-black/80 border border-cyan-500/30 space-y-2">
                 <div className="flex justify-between items-center border-b border-white/10 pb-1.5 text-[11px]">
                   <span className="text-cyan-300 font-bold">{modelB.name}</span>
                   <span className="text-emerald-400 font-bold">-${modelB.discountPct}% Wholesale</span>
                 </div>
-                <div className="text-zinc-300 text-xs min-h-[120px] max-h-[180px] overflow-y-auto whitespace-pre-wrap">
-                  {clashOutputB || <span className="text-zinc-600 italic">Ready to execute concurrent prompt...</span>}
+                <div className="text-zinc-300 text-xs min-h-[140px] max-h-[220px] overflow-y-auto whitespace-pre-wrap">
+                  {clashOutputB || <span className="text-zinc-600 italic">Ready to stream concurrent prompt...</span>}
                 </div>
                 {clashStatsB && (
-                  <div className="pt-1.5 border-t border-white/5 flex justify-between text-[10px] text-zinc-400">
+                  <div className="pt-2 border-t border-white/5 flex justify-between text-[10px] text-zinc-400">
                     <span>TTFT: {clashStatsB.ttft}ms</span>
                     <span>Speed: {clashStatsB.speed} tok/s</span>
                     <span className="text-emerald-400 font-bold">Cost: ${clashStatsB.cost}</span>

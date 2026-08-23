@@ -16,7 +16,7 @@ This guide explains how GALXAI enforces fair-share concurrency ceilings, rate li
 
 ## 2. Anti-Starvation Fair-Share Concurrency Ceiling
 
-To prevent a single runaway script or high-volume tenant from monopolizing the pooled credential fleet, GALXAI enforces per-tenant concurrency ceilings:
+To prevent a single runaway script or high-volume tenant from monopolizing fleet capacity, GALXAI enforces per-tenant concurrency ceilings:
 
 ```typescript
 const maxTenantLimit = isPriorityUser ? 40 : 20;

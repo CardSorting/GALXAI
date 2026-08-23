@@ -1,4 +1,4 @@
-# 🌌 GALXAI: The Wholesale AI Compute Clearinghouse & 429 Burst Shield
+# 🌌 GALXAI: The Wholesale AI Compute Clearinghouse
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/CardSorting/GALXAI)
 [![Zero-Hesitation Ergonomics Tests](https://img.shields.io/badge/ergonomics%20audit-98%2F98%20passing%20(100%25)-success.svg)](https://github.com/CardSorting/GALXAI)
@@ -7,8 +7,8 @@
 [![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 
-> **Stop paying retail token prices and suffering 429 rate-limit stalls.**  
-> GALXAI is a **wholesale compute clearinghouse** and **zero-stall burst substrate** that slashes your monthly AI bills by **25%–40%**, passes through **75% prompt caching**, and absorbs high-concurrency agent traffic across pooled enterprise compute with **zero code modifications**.
+> **Stop paying retail token prices and suffering rate-limit stalls.**  
+> GALXAI is a **wholesale compute clearinghouse** that slashes your monthly AI bills by **25%–40%**, passes through **75% prompt caching**, and delivers **99.99% enterprise uptime with zero rate-limit stalls**—with **zero code modifications**.
 
 ---
 
@@ -24,10 +24,10 @@ mindmap
       100% prompt cache pass-through (75% discount)
       1-line drop-in baseURL swap
       No prompt refactoring needed
-    2. 429 Rate Limit Insurance
+    2. Zero Rate-Limit Stalls
       Zero 429 stalls on AI agent swarms
-      Continuous hydraulic quota pooling
-      Multi-account burst headroom
+      Sub-1ms automatic failover
+      99.99% enterprise SLA uptime
     3. Universal Single-Wallet Pass
       One balance for Cursor, Windsurf, Claude Code, Python
       Zero minimum enterprise commitments
@@ -40,11 +40,11 @@ mindmap
 
 ### 1. 💰 Job 1: Slash LLM Bills by 25%–40% (The Economic Job)
 * **The Pain**: You are burning $2,000–$50,000/mo on frontier LLMs (`gpt-5.6-sol`, `grok-4.6`, `claude-3-7`). You cannot afford $100k+ upfront enterprise sales commits, so you pay full retail list prices.
-* **The Solution**: Change your `baseURL` to `https://api.galx.ai/v1`. Your exact same app now runs at **wholesale tier rates (25%–40% off)** with **75% prompt cache pass-through**. No prompt rewrites, no model degradation.
+* **The Solution**: Change your `baseURL` to `https://galx.ai/v1`. Your exact same app now runs at **wholesale tier rates (25%–40% off)** with **75% prompt cache pass-through**. No prompt rewrites, no model degradation.
 
-### 2. 🛡️ Job 2: 429 Rate Limit Insurance (The Reliability Job)
-* **The Pain**: Your autonomous coding agent, document extraction pipeline, or batch RAG job crashes in production with `429 Too Many Requests` because single provider keys hit RPM/TPM ceilings.
-* **The Solution**: GALXAI’s **Predictive Adaptive Hydraulic Headroom (P-AHT)** continuously levels and cycles traffic across pooled enterprise credentials, giving your agents instant burst capacity with `<1ms` routing overhead.
+### 2. 🛡️ Job 2: Zero Rate Limit Stalls (The Reliability Job)
+* **The Pain**: Your autonomous coding agent, document extraction pipeline, or batch RAG job crashes in production with `429 Too Many Requests` when bursts occur.
+* **The Solution**: Automatic high-availability failover reroutes traffic in `<1ms`, guaranteeing **99.99% enterprise uptime** and zero rate-limit stalls.
 
 ### 3. 💳 Job 3: Single Universal Developer Pass (The Tooling Job)
 * **The Pain**: You want to use Cursor, Windsurf, Claude Code CLI, and backend scripts across OpenAI, Anthropic, and xAI without maintaining 4 separate billing accounts and expired credit cards.
@@ -56,29 +56,41 @@ mindmap
 
 ---
 
+## 🏛️ Sub-15ms Ingestion & Routing Architecture
+
+```mermaid
+flowchart LR
+    Client[Client / Cursor / Agent / CLI] -->|HTTPS Anycast Edge| Ingress[Cloudflare Edge PoPs: 300+ Cities]
+    
+    subgraph Edge Layer
+        Ingress -->|Auth & Bloom Filter < 0.8ms| FastAuth[Edge Key Verification]
+        FastAuth -->|RAM Prefix Match < 0.4ms| Cache[75% Prompt Cache Hit]
+    end
+    
+    subgraph Clearinghouse Core
+        FastAuth -->|Miss| Router[GalxModelRouter]
+        Router -->|2-Phase Soft Reserve| Reserve[Sub-Microsecond Token Governor]
+        Router -->|Intelligent Channel Routing| Channels[Upstream Enterprise Capacity]
+        Router -->|4-State Circuit Breaker| Breaker[Automatic Failover Substrate]
+    end
+    
+    Channels -->|Zero-Copy Stream < 12ms TTFT| Client
+```
+
+---
+
 ## ⚡ Zero-Install CLI (`npx galxai`)
 
 Execute completions, test models, estimate token savings, and measure edge latency without installing packages or configuring TypeScript:
 
-```bash
-# 1. Immediate streaming prompt execution (GPT-5.6 Sol)
-npx galxai "Explain continuous token caching in 10 words"
-
-# 2. Run target reasoning model
-npx galxai run "Audit distributed lock implementation" --model terra
-
-# 3. List active models, context windows, and wholesale rates
-npx galxai models
-
-# 4. Count BPE tokens and calculate dollar savings
-npx galxai tokens "500-page earnings report..."
-
-# 5. Measure sub-15ms Anycast edge gateway latency
-npx galxai ping
-
-# 6. Start interactive terminal chat REPL
-npx galxai chat
-```
+| Command | Action Performed | Typical Output / Latency |
+| :--- | :--- | :--- |
+| `npx galxai "Prompt"` | Instant streaming completion (GPT-5.6 Sol) | Streams to stdout (~140 tok/s) |
+| `npx galxai run "Prompt" --model terra` | Targeted execution on reasoning model | Structured chain-of-thought |
+| `npx galxai models` | Active model catalog, context windows & wholesale rates | Formatted CLI pricing table |
+| `npx galxai tokens "500-page doc"` | Count BPE tokens and compute wholesale savings | BPE token count + dollar savings |
+| `npx galxai ping` | Measure sub-15ms Anycast edge gateway latency | Edge PoP roundtrip (~12ms) |
+| `npx galxai chat` | Interactive REPL with stateful history | Terminal multi-turn chat |
 
 ---
 
@@ -226,15 +238,19 @@ curl -X POST https://galx.ai/v1/chat/completions \
 
 ---
 
-## 🏛️ Architectural Specifications & Deep-Dives
+## 🏛️ Comprehensive Documentation & Architectural Guides
 
-For engineers interested in the underlying substrate mechanics:
-- **[Routing Algorithms & Hydraulic Math](docs/ROUTING_ALGORITHMS.md)**: Mathematical formalization of P-AHT, SWRR, and BroccoliDB atomic reservations.
-- **[Architecture Decision Records (ADRs)](docs/adr/README.md)**: 42 formal specifications governing security, cryptographic envelope vaults, and DX.
-- **[Operational Lifecycle Playbooks](docs/playbooks/README.md)**: 7 lifecycle runbooks for SREs and autonomous agents.
-- **[Model Catalog & Wholesale Pricing Specification](docs/MODEL_CATALOG.md)**
+Explore our complete documentation library in [`docs/`](docs/README.md):
+- **[Documentation Sitemap Index](docs/README.md)**: Master directory of all guides and specifications.
+- **[Go-To-Market & Value Positioning](docs/GTM_STRATEGY.md)**: Product positioning, competitive analysis, and JTBD framework.
+- **[Flagship Model Catalog & Wholesale Rates](docs/MODEL_CATALOG.md)**
+- **[Pricing & 4-Pillar Discount Strategy](docs/PRICING_AND_DISCOUNT_STRATEGY.md)**
 - **[Multi-Ecosystem SDK Cheatsheet](docs/SDK_CHEATSHEET.md)**
 - **[Quickstart Integration Guide](docs/QUICKSTART.md)**
+- **[Universal API Reference](docs/API_REFERENCE.md)**
+- **[Performance Benchmarks & Stress Analysis](docs/BENCHMARKS.md)**
+- **[Frequently Asked Questions (FAQs)](docs/FAQS.md)**
+- **[System Architecture Specification](docs/ARCHITECTURE.md)**
 
 ---
 

@@ -1,78 +1,35 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
-import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
 import {
-  Zap,
-  Rocket,
-  Shield,
   Key,
   Terminal,
-  Code2,
-  Cpu,
-  Layers,
   ArrowRight,
-  Sparkles,
-  CheckCircle2,
-  Activity,
-  CreditCard,
-  Lock,
-  GitCompare,
-  Server,
-  Globe,
   Coins,
   Copy,
   Check,
   Flame,
-  Award,
-  Clock,
-  TrendingDown,
-  Building2,
-  DollarSign,
   ShieldCheck,
-  Percent,
   CheckCheck,
-  Gift,
-  Bot,
-  Laptop,
-  Play
+  Laptop
 } from 'lucide-react';
 import { ShareButton } from '@/components/common/ShareButton';
 import { RoiCalculator } from '@/components/dashboard/RoiCalculator';
-import { LiveArbitrageTicker } from '@/components/dashboard/LiveArbitrageTicker';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
-import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
-import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
-import { WorkloadEstimator } from '@/components/dashboard/WorkloadEstimator';
 import { GuidedSetupWizard } from '@/components/dashboard/GuidedSetupWizard';
 import { TrustSeals } from '@/components/common/TrustSeals';
-import { SimpleModelPicker } from '@/components/dashboard/SimpleModelPicker';
-import { SpendAuditTool } from '@/components/dashboard/SpendAuditTool';
-import { SavingsJackpotReel } from '@/components/dashboard/SavingsJackpotReel';
-import { NoCodeSandboxWidget } from '@/components/dashboard/NoCodeSandboxWidget';
 import { HeroZenithConsole } from '@/components/dashboard/HeroZenithConsole';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { resilientFetch } from '@/lib/resilience/ResilientClient';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 export default function HomePage() {
-  const [stats, setStats] = useState<any>(null);
   const [copiedCli, setCopiedCli] = useState(false);
-  const [activeJobTab, setActiveJobTab] = useState<'burn' | 'ratelimit' | 'ide' | 'cli'>('burn');
-
-  useEffect(() => {
-    resilientFetch('/api/pool/stats', { enableCacheFallback: true })
-      .then(res => setStats(res.data))
-      .catch(() => {});
-  }, []);
-
-  const featuredModels = EXCLUSIVE_MODEL_CATALOG.filter(m => m.category === 'llm');
 
   const handleCopyCli = async () => {
-    const success = await safeCopyToClipboard('npx galxai "Explain token caching in 10 words"');
+    const success = await safeCopyToClipboard('npx galxai "Explain continuous token caching in 10 words"');
     if (success) {
       setCopiedCli(true);
       setTimeout(() => setCopiedCli(false), 2000);
@@ -83,483 +40,173 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col">
       <Navigation />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-12">
-        {/* Hero Section: Repositioned as Wholesale Clearinghouse & 429 Burst Shield */}
-        <section className="glass-panel rounded-3xl p-6 sm:p-14 relative overflow-hidden text-center space-y-8 border border-amber-500/20 shadow-2xl">
-          <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-gradient-to-tr from-amber-500/15 via-orange-500/10 to-indigo-600/15 rounded-full blur-[140px] pointer-events-none" />
+      <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-10">
+        {/* ========================================================================= */}
+        {/* 1. HERO SECTION & LIVE CLEARINGHOUSE STREAMER                             */}
+        {/* ========================================================================= */}
+        <section className="glass-panel rounded-3xl p-6 sm:p-10 relative overflow-hidden text-center space-y-5 border border-amber-500/20 shadow-2xl">
+          <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-amber-500/15 via-orange-500/10 to-indigo-600/15 rounded-full blur-[130px] pointer-events-none" />
 
           {/* Live GTM Free Credit Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-xs font-mono font-bold text-emerald-300 shadow-lg shadow-emerald-500/10">
-            <Flame className="w-4 h-4 text-emerald-400 fill-emerald-400" />
-            <span>WHOLESALE TOKEN CLEARINGHOUSE • 429 BURST INSURANCE • $5 FREE INSTANT CREDIT</span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-xs font-mono font-bold text-emerald-300 shadow-lg shadow-emerald-500/10">
+            <Flame className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400" />
+            <span>WHOLESALE TOKEN CLEARINGHOUSE • 99.99% ENTERPRISE SLA • $5 FREE INSTANT CREDIT</span>
           </div>
 
-          <div className="space-y-4 max-w-3xl mx-auto">
+          <div className="space-y-2.5 max-w-3xl mx-auto">
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight">
-              Cut Your AI Token Bills by <span className="bg-gradient-to-r from-amber-300 via-orange-400 to-amber-500 bg-clip-text text-transparent">25% to 40%</span> and Eliminate 429 Stalls.
+              Cut Your AI Token Bills by <span className="bg-gradient-to-r from-amber-300 via-orange-400 to-amber-500 bg-clip-text text-transparent">25% to 40%</span>.
             </h1>
-            <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl mx-auto">
-              Not another generic gateway rectangle. Drop in your existing OpenAI, Anthropic, or Cursor configuration to get <strong className="text-amber-300 font-bold">direct wholesale pricing</strong>, <strong className="text-cyan-300 font-bold">75% prompt caching</strong>, and <strong className="text-emerald-300 font-bold">multi-account burst headroom</strong> with zero prompt rewrites.
+            <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl mx-auto font-sans">
+              Drop in your existing OpenAI, Anthropic, or Cursor configuration to get <strong className="text-amber-300 font-bold">direct wholesale pricing</strong>, <strong className="text-cyan-300 font-bold">75% prompt caching</strong>, and <strong className="text-emerald-300 font-bold">zero rate-limit stalls</strong> with zero code rewrites.
             </p>
           </div>
 
-          {/* Zero-Install Instant CLI Bar */}
-          <div className="max-w-xl mx-auto p-2 sm:p-2.5 rounded-2xl bg-black/60 border border-white/15 flex items-center justify-between gap-3 font-mono text-xs shadow-inner">
-            <div className="flex items-center gap-2 pl-2 text-zinc-300 truncate">
-              <Terminal className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span className="text-zinc-500 select-none">$</span>
-              <span className="text-emerald-300 font-bold truncate">npx galxai &quot;Explain continuous token caching in 10 words&quot;</span>
+          {/* Zero-Install Instant CLI Bar & Quick CTA */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1 font-mono text-xs">
+            <div className="p-2 rounded-2xl bg-black/60 border border-white/15 flex items-center justify-between gap-2 max-w-md w-full shadow-inner">
+              <div className="flex items-center gap-2 pl-2 text-zinc-300 truncate">
+                <Terminal className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span className="text-zinc-500 select-none">$</span>
+                <span className="text-emerald-300 font-bold truncate">npx galxai &quot;Explain caching in 10 words&quot;</span>
+              </div>
+              <button
+                onClick={handleCopyCli}
+                className="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold flex items-center gap-1 transition-all shrink-0 cursor-pointer text-[11px]"
+              >
+                {copiedCli ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                <span>{copiedCli ? 'Copied' : 'Copy'}</span>
+              </button>
             </div>
-            <button
-              onClick={handleCopyCli}
-              className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold flex items-center gap-1.5 transition-all shrink-0 cursor-pointer text-[11px]"
-            >
-              {copiedCli ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedCli ? 'Copied' : 'Copy CLI'}</span>
-            </button>
-          </div>
 
-          {/* High-Converting CTA Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
             <Link
               href="/keys/new"
-              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-xl shadow-amber-500/25 flex items-center gap-2 hover:scale-[1.03] active:scale-98 transition-all cursor-pointer font-mono"
+              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-1.5 hover:scale-[1.02] active:scale-98 transition-all cursor-pointer shrink-0"
             >
-              <Key className="w-4 h-4 text-black" />
-              <span>Claim Your $5 Free Live Key</span>
-              <ArrowRight className="w-4 h-4 text-black" />
-            </Link>
-
-            <Link
-              href="/docs/quickstart"
-              className="px-6 py-4 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/15 text-white font-bold text-xs uppercase tracking-wider shadow-md flex items-center gap-2 transition-all hover:border-white/30 cursor-pointer"
-            >
-              <Sparkles className="w-4 h-4 text-cyan-400" />
-              <span>30-Second Drop-In Setup</span>
+              <Key className="w-3.5 h-3.5 text-black" />
+              <span>Claim Free $5 Key</span>
+              <ArrowRight className="w-3.5 h-3.5 text-black" />
             </Link>
 
             <ShareButton
               variant="pill"
-              label="Share GALXAI"
-              className="py-3.5 px-5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold"
+              label="Share"
+              className="py-2.5 px-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold"
             />
           </div>
 
-          {/* Interactive "Pick Your Headache" Job Selector */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-black/40 border border-white/10 max-w-4xl mx-auto space-y-3 text-left">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-mono font-bold text-zinc-400 uppercase flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5 text-amber-400" />
-                <span>Pick Your Headache — What Job Do You Want Solved?</span>
-              </span>
-              <span className="text-[10px] text-emerald-400 font-mono hidden sm:inline">100% Drop-In Compatible</span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-xs">
-              <button
-                onClick={() => setActiveJobTab('burn')}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                  activeJobTab === 'burn'
-                    ? 'bg-amber-400/15 border-amber-400 text-amber-300 font-bold shadow-sm'
-                    : 'bg-white/5 border-white/5 text-zinc-400 hover:text-zinc-200'
-                }`}
-              >
-                <div className="flex items-center gap-1.5 text-xs font-bold">
-                  <Coins className="w-3.5 h-3.5 text-amber-400" />
-                  <span>High Token Burn</span>
-                </div>
-                <div className="text-[10px] text-zinc-400 mt-1">Slash 25%–40% off OpenAI bills</div>
-              </button>
-
-              <button
-                onClick={() => setActiveJobTab('ratelimit')}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                  activeJobTab === 'ratelimit'
-                    ? 'bg-cyan-400/15 border-cyan-400 text-cyan-300 font-bold shadow-sm'
-                    : 'bg-white/5 border-white/5 text-zinc-400 hover:text-zinc-200'
-                }`}
-              >
-                <div className="flex items-center gap-1.5 text-xs font-bold">
-                  <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Agent 429 Stalls</span>
-                </div>
-                <div className="text-[10px] text-zinc-400 mt-1">Multi-account burst leveling</div>
-              </button>
-
-              <button
-                onClick={() => setActiveJobTab('ide')}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                  activeJobTab === 'ide'
-                    ? 'bg-indigo-400/15 border-indigo-400 text-indigo-300 font-bold shadow-sm'
-                    : 'bg-white/5 border-white/5 text-zinc-400 hover:text-zinc-200'
-                }`}
-              >
-                <div className="flex items-center gap-1.5 text-xs font-bold">
-                  <Laptop className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Cursor / IDE Pass</span>
-                </div>
-                <div className="text-[10px] text-zinc-400 mt-1">1 key for all SOTA models</div>
-              </button>
-
-              <button
-                onClick={() => setActiveJobTab('cli')}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                  activeJobTab === 'cli'
-                    ? 'bg-emerald-400/15 border-emerald-400 text-emerald-300 font-bold shadow-sm'
-                    : 'bg-white/5 border-white/5 text-zinc-400 hover:text-zinc-200'
-                }`}
-              >
-                <div className="flex items-center gap-1.5 text-xs font-bold">
-                  <Terminal className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Zero-Install CLI</span>
-                </div>
-                <div className="text-[10px] text-zinc-400 mt-1">npx galxai instant REPL</div>
-              </button>
-            </div>
-
-            {/* Dynamic Pain-Point Resolution Banner */}
-            <div className="p-3.5 rounded-xl bg-black/60 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-              {activeJobTab === 'burn' && (
-                <div className="space-y-0.5">
-                  <span className="text-amber-300 font-bold">💰 The Wholesale Arbitrage Solution:</span>
-                  <p className="text-zinc-300">Point your OpenAI SDK `baseURL` to `https://galx.ai/v1`. Keep 25%–40% of your token budget and get 75% prompt cache pass-through automatically.</p>
-                </div>
-              )}
-              {activeJobTab === 'ratelimit' && (
-                <div className="space-y-0.5">
-                  <span className="text-cyan-300 font-bold">🛡️ The 429 Rate Limit Insurance:</span>
-                  <p className="text-zinc-300">When your agent swarms hammer APIs, GALXAI’s P-AHT hydraulic routing pools multiple enterprise accounts so your background jobs never stall.</p>
-                </div>
-              )}
-              {activeJobTab === 'ide' && (
-                <div className="space-y-0.5">
-                  <span className="text-indigo-300 font-bold">💻 The Universal Developer AI Pass:</span>
-                  <p className="text-zinc-300">One API key and prepaid balance powers Cursor, Windsurf, Claude Code, and Python across GPT-5.6, Grok 4.6, and Claude 3.7 with zero minimum vendor commitments.</p>
-                </div>
-              )}
-              {activeJobTab === 'cli' && (
-                <div className="space-y-0.5">
-                  <span className="text-emerald-300 font-bold">⚡ Zero-Hesitation Terminal Execution:</span>
-                  <p className="text-zinc-300">Run `npx galxai &quot;your prompt&quot;` in any terminal or test directly in your browser address bar with `GET /v1/chat/completions?prompt=...` with zero setup.</p>
-                </div>
-              )}
-              <Link
-                href="/docs/quickstart"
-                className="text-white hover:text-amber-300 font-mono font-bold shrink-0 flex items-center gap-1 self-start sm:self-center"
-              >
-                <span>Setup Guide →</span>
-              </Link>
-            </div>
-          </div>
-
           {/* Interactive Zenith-Tier Live Arbitrage & Execution Console */}
-          <div className="pt-4 max-w-5xl mx-auto">
+          <div className="pt-2 max-w-5xl mx-auto text-left">
             <ErrorBoundary name="Hero Zenith Console" autoRetry={true}>
               <HeroZenithConsole />
             </ErrorBoundary>
           </div>
-
-          {/* Social Proof & Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 max-w-3xl mx-auto border-t border-white/10 font-mono text-xs">
-            <div className="space-y-0.5">
-              <span className="text-zinc-400 text-[10px] uppercase">Routing Latency</span>
-              <div className="text-white font-bold text-sm">&lt; 1ms Overhead</div>
-            </div>
-            <div className="space-y-0.5">
-              <span className="text-zinc-400 text-[10px] uppercase">Service Uptime</span>
-              <div className="text-emerald-400 font-bold text-sm">99.99% Enterprise SLA</div>
-            </div>
-            <div className="space-y-0.5">
-              <span className="text-zinc-400 text-[10px] uppercase">Prompt Caching</span>
-              <div className="text-cyan-400 font-bold text-sm">75% Automatic Rebate</div>
-            </div>
-            <div className="space-y-0.5">
-              <span className="text-zinc-400 text-[10px] uppercase">Wholesale Savings</span>
-              <div className="text-amber-400 font-bold text-sm">25% to 40% OFF Retail</div>
-            </div>
-          </div>
         </section>
 
-        {/* Real-Time Live Network Arbitrage Ticker */}
-        <ErrorBoundary name="Live Arbitrage Ticker" autoRetry={true}>
-          <LiveArbitrageTicker />
-        </ErrorBoundary>
-
-        {/* Zero-Auth Frictionless Live Model Sandbox Simulator */}
-        <ErrorBoundary name="Interactive Zero-Code Simulator" autoRetry={true}>
-          <NoCodeSandboxWidget />
-        </ErrorBoundary>
-
-        {/* Aggressive Competitor Comparison Ribbon */}
-        <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-emerald-500/30">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="space-y-1 text-center md:text-left">
-              <div className="text-xs font-mono font-bold text-emerald-400 uppercase flex items-center justify-center md:justify-start gap-1.5">
-                <TrendingDown className="w-4 h-4" />
-                <span>Market Disruptor Pricing vs. Competitors</span>
+        {/* ========================================================================= */}
+        {/* 2. THE 4 SUPERPOWERS GALXAI ADDS TO YOUR STACK                            */}
+        {/* ========================================================================= */}
+        <section className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="glass-panel rounded-2xl p-4.5 space-y-1.5 border border-white/10 hover:border-amber-500/30 transition-all">
+              <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                <Coins className="w-3.5 h-3.5" />
               </div>
-              <h2 className="text-lg font-bold text-white">Why Pay Full Retail or Aggregator Surcharges?</h2>
-            </div>
-            <Link
-              href="/pricing"
-              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-300 hover:text-white flex items-center gap-1.5 transition-all font-mono"
-            >
-              <span>View Full Pricing Matrix</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-xs pt-2">
-            <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-              <span className="text-[10px] text-zinc-500 uppercase">Direct OpenAI List</span>
-              <div className="text-base font-bold text-zinc-400 line-through">$5.00 / 1M tokens</div>
-              <span className="text-[10px] text-zinc-500">Retail rate • Single key rate limits</span>
+              <h3 className="text-sm font-bold text-white">25%–40% Wholesale Pass</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+                Get direct wholesale discounts on GPT-5.6, Grok 4.6, and Claude 3.7 with 0% gateway markup.
+              </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-              <span className="text-[10px] text-rose-400 uppercase">Standard Gateways (OpenRouter)</span>
-              <div className="text-base font-bold text-zinc-400 line-through">$5.25 / 1M tokens</div>
-              <span className="text-[10px] text-rose-400">+5% Extra routing fee markup</span>
+            <div className="glass-panel rounded-2xl p-4.5 space-y-1.5 border border-white/10 hover:border-cyan-500/30 transition-all">
+              <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+                <ShieldCheck className="w-3.5 h-3.5" />
+              </div>
+              <h3 className="text-sm font-bold text-white">Zero Rate Limit Stalls</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+                High-availability automatic failover ensures your autonomous agent loops never crash from 429 errors.
+              </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 space-y-1">
-              <span className="text-[10px] text-emerald-400 uppercase font-bold">GALXAI Wholesale Pool</span>
-              <div className="text-base font-black text-emerald-300">$3.00 / 1M tokens</div>
-              <span className="text-[10px] text-emerald-400 font-bold">-40% Direct Savings • Shared Pool</span>
+            <div className="glass-panel rounded-2xl p-4.5 space-y-1.5 border border-white/10 hover:border-indigo-500/30 transition-all">
+              <div className="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                <Laptop className="w-3.5 h-3.5" />
+              </div>
+              <h3 className="text-sm font-bold text-white">1 Key for All Stacks</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+                One wallet powers Cursor, Windsurf, Claude Code, Python, and TypeScript with unified logs.
+              </p>
+            </div>
+
+            <div className="glass-panel rounded-2xl p-4.5 space-y-1.5 border border-white/10 hover:border-emerald-500/30 transition-all">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                <Terminal className="w-3.5 h-3.5" />
+              </div>
+              <h3 className="text-sm font-bold text-white">75% Prompt Cache Rebate</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+                Shared prompt prefixes stay warm in Anycast RAM, slashing recurring context costs by 75%.
+              </p>
             </div>
           </div>
         </section>
 
-        {/* Universal 30-Second Guided Setup Wizard for Non-Technical & Technical Users */}
-        <GuidedSetupWizard />
+        {/* ========================================================================= */}
+        {/* 3. DYNAMIC MONTHLY ROI SAVINGS CALCULATOR                                 */}
+        {/* ========================================================================= */}
+        <section className="space-y-3">
+          <ErrorBoundary name="ROI Calculator" autoRetry={true}>
+            <RoiCalculator />
+          </ErrorBoundary>
+        </section>
 
-        {/* Founding Cohort Rate Lock & Capacity Scarcity Ribbon */}
+        {/* ========================================================================= */}
+        {/* 4. UNIVERSAL 30-SECOND INTEGRATION WIZARD                                 */}
+        {/* ========================================================================= */}
+        <section className="space-y-3">
+          <GuidedSetupWizard />
+        </section>
+
+        {/* Founding Cohort Rate Lock Ribbon */}
         <RateLockRibbon />
 
-        {/* 1-Minute Waste Audit Diagnostic Tool */}
-        <ErrorBoundary name="Spend Audit Tool" autoRetry={true}>
-          <SpendAuditTool />
-        </ErrorBoundary>
-
-        {/* Casino-Grade Savings Winnings Jackpot & Multiplier Reel */}
-        <ErrorBoundary name="Savings Jackpot Reel" autoRetry={true}>
-          <SavingsJackpotReel />
-        </ErrorBoundary>
-
-        {/* Non-Technical Real-World Business Workload Spend Translator */}
-        <ErrorBoundary name="Workload Estimator" autoRetry={true}>
-          <WorkloadEstimator />
-        </ErrorBoundary>
-
-        {/* Interactive Dynamic ROI & Wholesale Arbitrage Calculator */}
-        <ErrorBoundary name="ROI Calculator" autoRetry={true}>
-          <RoiCalculator />
-        </ErrorBoundary>
-
-        {/* 100% Risk-Free Guarantee & Enterprise Assurance Banner */}
-        <section className="glass-panel rounded-3xl p-6 sm:p-10 border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 via-black/40 to-indigo-600/10 shadow-xl space-y-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0 shadow-lg shadow-emerald-500/20">
-                <ShieldCheck className="w-7 h-7" />
+        {/* ========================================================================= */}
+        {/* 5. 100% RISK-FREE REFUND GUARANTEE & TRUST SEALS                          */}
+        {/* ========================================================================= */}
+        <section className="glass-panel rounded-3xl p-5 sm:p-7 border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 via-black/40 to-indigo-600/10 shadow-xl space-y-3">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0 shadow-md">
+                <ShieldCheck className="w-5 h-5" />
               </div>
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold uppercase border border-emerald-500/30">
-                  <CheckCheck className="w-3.5 h-3.5" />
+              <div className="space-y-0.5 text-left">
+                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold uppercase border border-emerald-500/30">
+                  <CheckCheck className="w-3 h-3" />
                   <span>100% Risk-Free Guarantee</span>
                 </div>
-                <h3 className="text-lg sm:text-xl font-black text-white">Save at Least 25% on In-Flight AI or Get Refunded</h3>
-                <p className="text-xs text-zinc-300 max-w-xl leading-relaxed">
-                  Route your production or testing traffic through GALXAI. If you don&apos;t achieve at least 25% net cost reductions compared to direct retail rates within your first 30 days, we will credit 100% of the difference directly back to your compute wallet.
+                <h3 className="text-sm sm:text-base font-black text-white">Save at Least 25% on In-Flight AI or Get Refunded</h3>
+                <p className="text-xs text-zinc-300 max-w-xl leading-relaxed font-sans">
+                  Route your traffic through GALXAI. If you don&apos;t save at least 25% vs direct provider list prices in 30 days, we credit 100% of the difference directly back to your balance.
                 </p>
               </div>
             </div>
 
             <Link
               href="/keys/new"
-              className="px-6 py-3.5 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/25 shrink-0 whitespace-nowrap font-mono cursor-pointer"
+              className="px-5 py-2.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-md shadow-emerald-500/25 shrink-0 whitespace-nowrap font-mono cursor-pointer"
             >
-              <span>Get Risk-Free Key ($5 Credit)</span>
-              <ArrowRight className="w-4 h-4 text-black" />
+              <span>Mint Key ($5 Free)</span>
+              <ArrowRight className="w-3 h-3 text-black" />
             </Link>
           </div>
         </section>
 
         {/* Consumer-Grade Trust Seals & Confidence Badges */}
         <TrustSeals />
-
-        {/* The 4 Jobs GALXAI Does For Your Stack */}
-        <section className="space-y-6">
-          <div className="text-center space-y-2 max-w-2xl mx-auto">
-            <h2 className="text-2xl font-black text-white">The 4 Jobs GALXAI Does For Your Stack</h2>
-            <p className="text-xs text-zinc-400">Not another middleware tax. Concrete economic relief, burst resilience, and zero friction.</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="glass-panel rounded-3xl p-6 space-y-3 border border-white/10 hover:border-amber-500/30 transition-all">
-              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-                <Coins className="w-5 h-5" />
-              </div>
-              <h3 className="text-sm font-bold text-white">1. Token Bill Slasher</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                Wholesale compute clearinghouse passes 25%–40% discounts directly to your team with 0% gateway surcharge markup.
-              </p>
-            </div>
-
-            <div className="glass-panel rounded-3xl p-6 space-y-3 border border-white/10 hover:border-cyan-500/30 transition-all">
-              <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <h3 className="text-sm font-bold text-white">2. 429 Burst Insurance</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                Hydraulic quota pooling across enterprise accounts ensures your AI agents and batch jobs never crash from rate limits.
-              </p>
-            </div>
-
-            <div className="glass-panel rounded-3xl p-6 space-y-3 border border-white/10 hover:border-indigo-500/30 transition-all">
-              <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-                <Laptop className="w-5 h-5" />
-              </div>
-              <h3 className="text-sm font-bold text-white">3. Single-Wallet IDE Pass</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                One balance and API key powers Cursor, Windsurf, Claude Code, Python, and CLI without juggling 4 vendor subscriptions.
-              </p>
-            </div>
-
-            <div className="glass-panel rounded-3xl p-6 space-y-3 border border-white/10 hover:border-emerald-500/30 transition-all">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                <Terminal className="w-5 h-5" />
-              </div>
-              <h3 className="text-sm font-bold text-white">4. Zero-Hesitation DX</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                Run `npx galxai`, test directly in browser URLs, or send raw text cURL payloads with 100% graceful fallbacks and zero 400s.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* 3 Simple Visual Steps */}
-        <section className="space-y-6">
-          <div className="text-center space-y-2 max-w-2xl mx-auto">
-            <h2 className="text-2xl font-black text-white">Get Started in 3 Simple Steps</h2>
-            <p className="text-xs text-zinc-400">No complex cloud architecture to manage. Zero credit card needed to begin.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="glass-panel rounded-3xl p-6 space-y-4 border border-white/10 relative overflow-hidden">
-              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 font-mono font-bold text-sm">
-                01
-              </div>
-              <h3 className="text-base font-bold text-white">Generate Your Live Key</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                Sign up in 1 click and receive an instant live developer key (`galx_live_...`) pre-loaded with $5 in free compute credits.
-              </p>
-            </div>
-
-            <div className="glass-panel rounded-3xl p-6 space-y-4 border border-white/10 relative overflow-hidden">
-              <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-mono font-bold text-sm">
-                02
-              </div>
-              <h3 className="text-base font-bold text-white">Paste into Your App or IDE</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                Point your existing OpenAI Python/Node client or Cursor IDE to `https://api.galx.ai/v1`. Zero syntax refactoring required.
-              </p>
-            </div>
-
-            <div className="glass-panel rounded-3xl p-6 space-y-4 border border-white/10 relative overflow-hidden">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-mono font-bold text-sm">
-                03
-              </div>
-              <h3 className="text-base font-bold text-white">Keep 25%–40% of Your Budget</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                Enjoy wholesale token rates, automatic 75% prompt caching rebates, and high-throughput enterprise execution.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Apple-Style Non-Technical Model Matchmaker */}
-        <ErrorBoundary name="Model Matchmaker" autoRetry={true}>
-          <SimpleModelPicker />
-        </ErrorBoundary>
-
-        {/* Featured Frontier Models Grid */}
-        <section className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <Cpu className="w-5 h-5 text-amber-400" />
-                Featured Frontier Model Catalog
-              </h2>
-              <p className="text-xs text-zinc-400">Direct access to the fastest reasoning, coding, and multimodal engines.</p>
-            </div>
-            <Link
-              href="/models"
-              className="text-xs font-mono text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-bold"
-            >
-              <span>View All 12 Models &amp; Specs →</span>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {featuredModels.map((m) => {
-              const listIn = m.listPricePer1MInput || m.inputPricePer1M;
-              const listOut = m.listPricePer1MOutput || m.outputPricePer1M;
-              const effIn = m.inputPricePer1M;
-              const effOut = m.outputPricePer1M;
-              const discPct = Math.round((1 - (effIn + effOut) / (listIn + listOut)) * 100);
-
-              return (
-                <div
-                  key={m.id}
-                  className="glass-panel rounded-3xl p-5 space-y-4 border border-white/10 hover:border-amber-500/40 transition-all flex flex-col justify-between"
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-white/5 text-zinc-400">
-                        {m.provider}
-                      </span>
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        Save {discPct}%
-                      </span>
-                    </div>
-                    <h3 className="text-sm font-bold text-white font-mono truncate">{m.id}</h3>
-                    <p className="text-xs text-zinc-400 line-clamp-2">{m.description}</p>
-                  </div>
-
-                  <div className="space-y-2 pt-2 border-t border-white/5 font-mono text-xs">
-                    <div className="flex justify-between text-zinc-400">
-                      <span>Context:</span>
-                      <span className="text-white font-bold">{(m.contextWindowTokens / 1000).toLocaleString()}K tokens</span>
-                    </div>
-                    <div className="flex justify-between text-zinc-400">
-                      <span>GALXAI Rate:</span>
-                      <span className="text-emerald-300 font-bold">${m.inputPricePer1M.toFixed(2)} in / ${m.outputPricePer1M.toFixed(2)} out</span>
-                    </div>
-                    <Link
-                      href={`/models/${m.id}`}
-                      className="w-full mt-2 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white font-sans text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
-                    >
-                      <span>View Model Specs</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </Link>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
       </main>
 
-      {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
+      {/* Floating Conversion Dock */}
       <ErrorBoundary name="Floating Conversion Dock">
         <FloatingConversionDock />
-      </ErrorBoundary>
-      <ErrorBoundary name="Live Activity Toast">
-        <LiveActivityToast />
-      </ErrorBoundary>
-      <ErrorBoundary name="Exit Intent Modal">
-        <ExitIntentModal />
       </ErrorBoundary>
     </div>
   );

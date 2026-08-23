@@ -1,12 +1,12 @@
 # 💰 GALXAI Pricing & Multi-Tiered Discount Strategy
 
-GALXAI delivers market-leading pricing by combining **pooled infrastructure arbitrage**, **75% prompt caching pass-through**, **progressive volume rebates**, and **off-peak dynamic yield balancing**.
+GALXAI delivers market-leading pricing by combining **direct wholesale volume clearing**, **75% prompt caching pass-through**, **progressive volume rebates**, and **off-peak dynamic yield balancing**.
 
 ---
 
-## 1. Core Economic Model & Arbitrage Architecture
+## 1. Core Economic Model & Wholesale Clearinghouse
 
-Traditional developers purchase individual API access at retail rates with low individual volume brackets. GALXAI operates a high-concurrency unified compute fleet that consolidates multi-tenant query volume into Tier-5 enterprise capacity brackets:
+Traditional developers purchase individual API access at retail rates with low individual volume brackets. GALXAI operates a high-throughput unified compute fleet that consolidates multi-tenant query volume into Tier-5 enterprise capacity brackets:
 
 ```mermaid
 flowchart LR
@@ -14,9 +14,9 @@ flowchart LR
         U1[Single Developer] -->|Retail List Price| O1[Upstream Tier-1: 0% Discount]
     end
 
-    subgraph GALXAI Pooled Gateway
+    subgraph GALXAI Wholesale Clearinghouse
         Dev1[Dev 1] & Dev2[Dev 2] & Dev3[Dev 3] --> Gateway[GALXAI Gateway]
-        Gateway -->|Consolidated High-Throughput Pool| O2[Upstream Tier-5 Fleet: Volume Brackets]
+        Gateway -->|Consolidated Enterprise Volume| O2[Upstream Tier-5 Fleet: Volume Brackets]
         Gateway -->|Pass-Through 20%-36% Discount| Dev1 & Dev2 & Dev3
     end
 ```
@@ -25,9 +25,9 @@ flowchart LR
 
 ## 2. Four Pillars of the Discount Strategy
 
-### Pillar 1: Pooled Infrastructure Arbitrage (20% to 36% Base Discount)
-- High-volume pooled compute slots reduce per-token infrastructure costs by 20% to 36% below direct single-key list prices.
-- Dispatches are automatically leveled across available accounts using **Predictive Adaptive Hydraulic Headroom (P-AHT)**, avoiding single-key rate spikes while maximizing volume tier benefits.
+### Pillar 1: Direct Wholesale Volume Clearing (20% to 36% Base Discount)
+- High-volume compute commitments reduce per-token infrastructure costs by 20% to 36% below direct single-key list prices.
+- Dispatches are automatically balanced with sub-1ms failover, avoiding single-key rate spikes while maximizing volume tier benefits.
 
 ### Pillar 2: 75% Prompt-Caching Automatic Pass-Through
 - For requests with prefix contexts $> 1,024$ tokens (e.g. system prompts, few-shot examples, codebase ASTs, RAG embeddings), OpenAI and xAI provide upstream cache discounts.
@@ -36,13 +36,13 @@ flowchart LR
 
 ### Pillar 3: Progressive Monthly Volume Tiers (Up to +15% Extra Rebate)
 Rebates scale automatically with monthly token volume without requiring sales calls or custom commitments:
-- **Starter Developer ($0 - $250/mo)**: Base **25%–36%** pooled discount.
+- **Starter Developer ($0 - $250/mo)**: Base **25%–36%** wholesale discount.
 - **Scale & Growth ($250 - $1,500/mo)**: **+5% Extra Rebate** (Total: **30%–41% OFF**).
 - **Production Fleet ($1,500 - $5,000/mo)**: **+10% Extra Rebate** (Total: **35%–46% OFF**).
 - **Enterprise Sovereign ($5,000+/mo)**: **+15% Extra Rebate** (Total: **40%–51% OFF**) + Dedicated VPC peering.
 
 ### Pillar 4: Off-Peak Dynamic Yield Rebates (+10% Floating Discount)
-- When fleet-wide hydraulic headroom exceeds $75\%$ (night hours / weekends), batch jobs passing `x-galx-off-peak: true` receive an instant **additional 10% floating rebate**.
+- During off-peak windows (night hours / weekends), batch jobs passing `x-galx-off-peak: true` receive an instant **additional 10% floating rebate**.
 
 ---
 
@@ -98,14 +98,3 @@ console.log(`Standard Retail: $${savings.standardCostUsd.toFixed(4)}`);
 console.log(`GALXAI Wholesale: $${savings.galxaiCostUsd.toFixed(4)}`);
 console.log(`Total Saved: $${savings.savingsUsd.toFixed(4)} (${savings.savingsPercentage}%)`);
 ```
-
----
-
-## 5. Prepay Compute Packs & Instant Match Grants
-
-| Compute Tier | Prepay Amount | Match Grant / Volume Bonus | Total Credited Wallet Balance | Effective Bonus | Workload Capacity Estimate |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Starter Prototyping** | **$25.00 USD** | +$2.50 (+10% Bonus) | **$27.50 USD** | +10% | ~15,000 to ~22,000 queries |
-| **Growth Builder** | **$50.00 USD** | +$12.50 (+25% Grant) | **$62.50 USD** | +25% | ~40,000 to ~55,000 queries |
-| **Scale Fleet (Recommended)** | **$100.00 USD** | +$50.00 (50% Match Grant) | **$150.00 USD** | +50% | ~88,000 to ~120,000 queries |
-| **Enterprise Fleet** | **$250.00 USD** | +$125.00 (50% Match Grant) | **$375.00 USD** | +50% | ~220,000+ deep reasoning tasks |

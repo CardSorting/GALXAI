@@ -56,7 +56,7 @@ Using `const thread = galx.thread({ model: 'gpt-5.6-sol', system: '...' })`, the
 ## 💰 Pricing, Discounts & Compute Wallet
 
 #### 10. How does GALXAI offer 20%–36% wholesale discounts?
-Through pooled enterprise capacity commitments and zero-overhead edge routing, GALXAI captures wholesale volume pricing and passes direct wholesale rates to developers with **0% markup**.
+Through high-volume enterprise capacity commitments and zero-overhead edge routing, GALXAI captures wholesale volume pricing and passes direct wholesale rates to developers with **0% markup**.
 
 #### 11. How does the 75% Prompt Caching Rebate work?
 For prompts containing system instructions or context prefixes exceeding 1,024 tokens, cached input tokens automatically receive a **75% discount**. GALXAI passes 100% of this rebate directly to your wallet.

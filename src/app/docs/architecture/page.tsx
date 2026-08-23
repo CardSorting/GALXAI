@@ -23,8 +23,6 @@ import {
 import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
-import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
-import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export const metadata: Metadata = {
   title: 'Rate Governor & Failover Architecture | GALXAI Docs',
@@ -48,71 +46,56 @@ export default function ArchitectureDocPage() {
         <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-4 border border-white/10 relative overflow-hidden bg-gradient-to-r from-indigo-500/10 via-black/40 to-black/60 shadow-2xl">
           <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/15 rounded-full blur-[120px] pointer-events-none" />
 
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold">
-            <Shield className="w-3.5 h-3.5" />
-            <span>ARCHITECTURAL SPECIFICATIONS</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold">
+            <Cpu className="w-3.5 h-3.5" />
+            <span>CORE SUBSTRATE ARCHITECTURE</span>
           </div>
+
           <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-            Continuous Rate Governor & Routing Architecture
+            Rate Governor, Failover &amp; Cryptographic Security
           </h1>
-          <p className="text-sm text-zinc-300 max-w-3xl leading-relaxed font-sans">
-            Detailed mathematical and cryptographic specifications governing GALXAI's continuous token-bucket calculus, 2-phase token reservation, circuit breaker state machine, and Tenant-Affinity Shard Dispersion (TASD).
+
+          <p className="text-sm text-zinc-300 max-w-2xl leading-relaxed">
+            A comprehensive technical specification of GALXAI&apos;s sub-15ms router substrate: token-bucket rate calculus, 2-phase reservation settlement, 4-state circuit breakers, and AES-256-GCM envelope vault.
           </p>
+
+          <DocsSubNav />
         </div>
 
-        <DocsSubNav />
-
-        {/* Section 1: Continuous Token-Bucket Calculus */}
+        {/* Section 1: Sub-15ms Anycast Ingestion */}
         <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <Activity className="w-5 h-5 text-indigo-400" />
-              <h2 className="text-lg font-bold text-white font-mono">1. Continuous Fractional Token Calculus</h2>
+              <Zap className="w-5 h-5 text-amber-400" />
+              <h2 className="text-lg font-bold text-white font-mono">1. Anycast Global Edge Ingestion (&lt;15ms TTFT)</h2>
             </div>
-            <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 text-[10px] font-mono font-bold">
-              Sub-Millisecond Precision
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 text-[10px] font-mono font-bold">
+              Edge Tier
             </span>
           </div>
 
           <p className="text-xs text-zinc-300 font-sans leading-relaxed">
-            Traditional API gateways use discrete 60-second polling windows, which trigger massive artificial traffic spikes at the start of each minute. GALXAI calculates continuous replenishment as a smooth linear function of elapsed microsecond time:
+            Inbound API traffic hits the nearest Cloudflare Edge PoP across 300+ global locations. TLS termination and token authentication occur in &lt;1.2ms without hitting origin database instances:
           </p>
 
-          <div className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-cyan-300 border border-white/5 space-y-1.5 overflow-x-auto">
-            <div className="text-zinc-500">// Continuous fractional replenishment formula</div>
-            <div>const elapsedMinutes = (nowMs - lastRefillMs) / 60000;</div>
-            <div>const tokensToAdd = elapsedMinutes * refillRatePerMinute;</div>
-            <div>const remainingTokens = Math.min(maxTokens, currentTokens + tokensToAdd);</div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 font-mono text-xs">
-            <div className="p-3 rounded-xl bg-white/5 border border-white/5 space-y-1">
-              <span className="text-[10px] text-zinc-400 uppercase">Quantization Drift</span>
-              <div className="text-emerald-400 font-bold">0.00% Error</div>
-              <p className="text-[10px] text-zinc-500 font-sans">Fractional remainders preserved</p>
-            </div>
-            <div className="p-3 rounded-xl bg-white/5 border border-white/5 space-y-1">
-              <span className="text-[10px] text-zinc-400 uppercase">NTP Clock Skew</span>
-              <div className="text-cyan-300 font-bold">Immune</div>
-              <p className="text-[10px] text-zinc-500 font-sans">Handles backward time steps</p>
-            </div>
-            <div className="p-3 rounded-xl bg-white/5 border border-white/5 space-y-1">
-              <span className="text-[10px] text-zinc-400 uppercase">Upstream Sync</span>
-              <div className="text-amber-300 font-bold">Header Ingestion</div>
-              <p className="text-[10px] text-zinc-500 font-sans">Reconciles x-ratelimit-reset</p>
-            </div>
+          <div className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-zinc-300 border border-white/5 space-y-2 overflow-x-auto">
+            <div className="text-zinc-500">// Edge Ingestion Pipeline</div>
+            <div>1. Client Request → Anycast DNS Routing (&lt;10ms)</div>
+            <div>2. Edge Worker: SHA-256 Key Verification via In-Memory Bloom Filter (&lt;0.8ms)</div>
+            <div>3. Prompt Prefix Match: RAM Cache Hash Lookup (&lt;0.4ms)</div>
+            <div>4. SSE Streaming Tunnel: Zero-Copy Token Passthrough</div>
           </div>
         </section>
 
-        {/* Section 2: 2-Phase Token Reservation Protocol */}
+        {/* Section 2: 2-Phase Reservation & Token-Bucket Calculus */}
         <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <GitBranch className="w-5 h-5 text-amber-400" />
-              <h2 className="text-lg font-bold text-white font-mono">2. 2-Phase Atomic Token Reservation</h2>
+              <Activity className="w-5 h-5 text-emerald-400" />
+              <h2 className="text-lg font-bold text-white font-mono">2. 2-Phase Token Reservation &amp; CAS Settlement</h2>
             </div>
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 text-[10px] font-mono font-bold">
-              Stampede Immunity
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 text-[10px] font-mono font-bold">
+              Sub-Microsecond Locks
             </span>
           </div>
 
@@ -124,7 +107,7 @@ export default function ArchitectureDocPage() {
             <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2">
               <div className="text-amber-300 font-bold uppercase text-[11px] flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-amber-400" />
-                Phase 1: Soft Reservation (`reserve`)
+                Phase 1: Soft Reservation (reserve)
               </div>
               <p className="text-zinc-400 font-sans text-xs leading-relaxed">
                 When a lease is acquired, the router locks the estimated token capacity (<code className="text-cyan-300">reservedTokens</code>). Subsequent requests immediately see reduced headroom:
@@ -137,7 +120,7 @@ export default function ArchitectureDocPage() {
             <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2">
               <div className="text-emerald-300 font-bold uppercase text-[11px] flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                Phase 2: Final Settlement (`commit`)
+                Phase 2: Final Settlement (commit)
               </div>
               <p className="text-zinc-400 font-sans text-xs leading-relaxed">
                 When the upstream response finishes or the stream ends, actual token consumption is deducted and the soft reservation is released.
@@ -149,12 +132,12 @@ export default function ArchitectureDocPage() {
           </div>
         </section>
 
-        {/* Section 3: Predictive Adaptive Hydraulic Headroom & TASD */}
+        {/* Section 3: Predictive Adaptive Headroom & TASD */}
         <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <Bot className="w-5 h-5 text-cyan-400" />
-              <h2 className="text-lg font-bold text-white font-mono">3. Adaptive Hydraulic Headroom & Swarm Dispersion (TASD)</h2>
+              <h2 className="text-lg font-bold text-white font-mono">3. Adaptive Headroom &amp; Swarm Dispersion (TASD)</h2>
             </div>
             <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 text-[10px] font-mono font-bold">
               Autonomous Swarms
@@ -162,11 +145,11 @@ export default function ArchitectureDocPage() {
           </div>
 
           <p className="text-xs text-zinc-300 font-sans leading-relaxed">
-            GALXAI ranks available pooled credentials using the **Predictive Adaptive Hydraulic Headroom (P-AHT)** formula combined with **Tenant-Affinity Shard Dispersion (TASD)** to prevent agent loops from concentrating bursts onto a single upstream credential:
+            GALXAI ranks upstream compute channels using the **Predictive Adaptive Headroom (P-AHT)** formula combined with **Tenant-Affinity Shard Dispersion (TASD)** to prevent agent loops from concentrating load onto a single upstream channel:
           </p>
 
           <div className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-cyan-300 border border-white/5 space-y-2 overflow-x-auto">
-            <div className="text-zinc-500">// Dynamic hydraulic scoring equation</div>
+            <div className="text-zinc-500">// Dynamic routing scoring equation</div>
             <div className="text-white font-bold">
               Score = (PostAllocationHeadroom)^1.2 × ConcurrencyHeadroom × CircuitHealth × ReliabilityWeight × TenantDispersion + MicroJitter
             </div>
@@ -182,7 +165,7 @@ export default function ArchitectureDocPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <Server className="w-5 h-5 text-rose-400" />
-              <h2 className="text-lg font-bold text-white font-mono">4. 4-State Circuit Breaker & Canary Warming</h2>
+              <h2 className="text-lg font-bold text-white font-mono">4. 4-State Circuit Breaker &amp; Canary Warming</h2>
             </div>
             <span className="px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-300 text-[10px] font-mono font-bold">
               Sub-15ms Failover
@@ -230,7 +213,7 @@ export default function ArchitectureDocPage() {
           </p>
 
           <div className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-emerald-300 border border-white/5">
-            AAD = `${`tenantUid`}:${`keyId`}:${`provider`}`;
+            AAD = &quot;tenantUid:keyId:provider&quot;;
           </div>
 
           <p className="text-xs text-zinc-400 font-sans">
@@ -245,10 +228,8 @@ export default function ArchitectureDocPage() {
         <TrustSeals />
       </main>
 
-      {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
+      {/* Floating Conversion Dock */}
       <FloatingConversionDock />
-      <LiveActivityToast />
-      <ExitIntentModal />
     </div>
   );
 }
