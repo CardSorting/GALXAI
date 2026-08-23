@@ -16,6 +16,7 @@ import { CommandMenu } from '@/components/common/CommandMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
+import { GtmPromoBanner } from '@/components/dashboard/GtmPromoBanner';
 import { BroccoliOmniSearch } from '@/lib/resilience/BroccoliOmniSearch';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
@@ -73,6 +74,8 @@ function BaseNavigation() {
 
   return (
     <>
+      <GtmPromoBanner />
+
       <CommandMenu
         isOpen={commandMenuOpen}
         onClose={() => setCommandMenuOpen(false)}
