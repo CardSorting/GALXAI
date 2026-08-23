@@ -35,8 +35,7 @@ import {
   Key,
   Layers,
   CheckCheck,
-  Lock,
-  UserCheck
+  Lock
 } from 'lucide-react';
 import type {
   GalxTask,
@@ -44,7 +43,7 @@ import type {
 } from '@/core/contracts/GalxContracts';
 
 export default function RequestsAndResultsCanvas() {
-  const { user, isLoading: authLoading, loginAsGuest } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [tasks, setTasks] = useState<GalxTask[]>([]);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -282,31 +281,22 @@ console.log(response.choices[0].message.content);`;
                 Sign In to View Your Queues &amp; Task Stream
               </h2>
               <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans">
-                Task queues, execution streams, and background worker logs are private to your workspace. Connect your developer account or sign in as guest to inspect your real-time telemetry.
+                Task queues, execution streams, and background worker logs are private to your workspace. Connect your developer account or mint a live API key to inspect your real-time telemetry.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl mx-auto font-mono text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto font-mono text-xs">
               <Link
                 href="/auth/connect"
-                className="p-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black uppercase tracking-wider shadow-lg shadow-amber-500/25 flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer hover:scale-105"
+                className="p-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black uppercase tracking-wider shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-105"
               >
                 <Key className="w-4 h-4 text-black fill-black" />
-                <span>Connect Account</span>
+                <span>Connect Developer Account</span>
               </Link>
-
-              <button
-                type="button"
-                onClick={() => loginAsGuest()}
-                className="p-4 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-bold uppercase tracking-wider flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer hover:scale-105"
-              >
-                <UserCheck className="w-4 h-4 text-cyan-400" />
-                <span>Guest Sign In</span>
-              </button>
 
               <Link
                 href="/keys/new"
-                className="p-4 rounded-2xl bg-black/60 hover:bg-black/80 border border-emerald-500/40 text-emerald-300 font-bold uppercase tracking-wider flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer hover:scale-105"
+                className="p-4 rounded-2xl bg-black/60 hover:bg-black/80 border border-emerald-500/40 text-emerald-300 font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-105"
               >
                 <Zap className="w-4 h-4 text-emerald-400 fill-emerald-400" />
                 <span>Mint $5 Free Key</span>

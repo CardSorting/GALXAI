@@ -23,9 +23,9 @@ import {
 
 export default function ConnectProviderPage() {
   const router = useRouter();
-  const { user, loginWithOpenAI, loginWithGrok, loginAsGuest, logout } = useAuth();
+  const { user, loginWithOpenAI, loginWithGrok, logout } = useAuth();
 
-  const [loadingProvider, setLoadingProvider] = useState<'openai' | 'grok' | 'guest' | null>(null);
+  const [loadingProvider, setLoadingProvider] = useState<'openai' | 'grok' | null>(null);
   const [connectingStep, setConnectingStep] = useState<'idle' | 'verifying' | 'authorizing' | 'ready'>('idle');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [customKey, setCustomKey] = useState('');
@@ -79,22 +79,6 @@ export default function ConnectProviderPage() {
       setError(err.message || 'Failed to authenticate with xAI Grok');
       setLoadingProvider(null);
       setConnectingStep('idle');
-    }
-  };
-
-  const handleGuestConnect = async () => {
-    setLoadingProvider('guest');
-    setConnectingStep('verifying');
-    setError(null);
-    try {
-      await loginAsGuest();
-      setConnectingStep('ready');
-      setTimeout(() => {
-        router.push('/keys');
-      }, 300);
-    } catch (err: any) {
-      setError(err.message || 'Failed to initialize guest pass');
-      setLoadingProvider(null);
     }
   };
 
@@ -255,24 +239,6 @@ export default function ConnectProviderPage() {
                   )}
                 </button>
               </div>
-
-              {/* Guest Sandbox Pass */}
-              <div className="relative flex items-center justify-center">
-                <div className="w-full border-t border-zinc-800" />
-                <span className="absolute px-3 bg-zinc-950 text-[10px] uppercase font-mono font-bold text-zinc-500">
-                  Or Preview As Guest
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleGuestConnect}
-                disabled={loadingProvider !== null}
-                className="w-full py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Instant 1-Click Guest Pass (Zero Credentials)</span>
-              </button>
 
               {/* Optional Developer Advanced Accordion */}
               <div className="pt-2 border-t border-white/5">
