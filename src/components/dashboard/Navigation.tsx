@@ -248,13 +248,13 @@ function BaseNavigation() {
               </Link>
             )}
 
-            {/* Quick Mint CTA */}
+            {/* Primary High-Converting CTA */}
             <Link
               href="/keys/new"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs font-mono tracking-tight shadow-md shadow-amber-500/20 active:scale-[0.98] transition-all cursor-pointer"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 hover:from-amber-300 hover:to-orange-300 text-black font-black text-xs font-sans tracking-tight shadow-md shadow-amber-500/20 active:scale-[0.98] transition-all cursor-pointer"
             >
-              <Zap className="w-3 h-3 fill-black text-black" />
-              <span>Mint Key ($5)</span>
+              <Zap className="w-3.5 h-3.5 fill-black text-black" />
+              <span>Claim $5 Free Credit</span>
             </Link>
 
             {/* Mobile Drawer Trigger */}
@@ -300,9 +300,9 @@ function BaseNavigation() {
             <Link
               href="/keys/new"
               onClick={() => setMobileMenuOpen(false)}
-              className="block mt-2 px-3.5 py-2.5 rounded-xl text-xs font-bold text-center bg-gradient-to-r from-amber-400 to-orange-500 text-black font-mono"
+              className="block mt-2 px-3.5 py-2.5 rounded-xl text-xs font-bold text-center bg-gradient-to-r from-amber-400 to-orange-500 text-black font-sans shadow-md"
             >
-              Claim $5 Free API Key →
+              Claim $5 Free Credit (No Card Required) →
             </Link>
           </div>
         )}

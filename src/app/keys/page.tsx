@@ -563,7 +563,7 @@ const { text } = await generateText({
                   className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>{isLoading ? 'Generating...' : 'Mint Key in 1-Click'}</span>
+                  <span>{isLoading ? 'Generating...' : 'Create Key in 1-Click'}</span>
                 </button>
               </form>
             )}

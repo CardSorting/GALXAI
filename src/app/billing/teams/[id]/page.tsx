@@ -213,7 +213,7 @@ export default function SingleTeamCostCenterPage({ params }: { params: Promise<{
                 Assigned Gateway API Keys
               </h3>
               <Link href="/keys/new" className="text-xs font-mono text-cyan-300 hover:underline">
-                + Mint Key
+                + New Key
               </Link>
             </div>
 
