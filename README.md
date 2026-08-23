@@ -129,6 +129,9 @@ npm run test:router
 # Run the 46-point Cloudflare Edge verification test runner
 npm run worker:test
 
+# Run the 6-stage operational lifecycle playbook diagnostic suite
+npm run playbook
+
 # Run live post-deployment smoke test suite
 npm run vercel:smoke -- --url=https://galx.ai
 
@@ -143,6 +146,7 @@ npm run dev
 
 ## 📚 Complete Technical Documentation
 
+- 🚨 **[Operational Lifecycle Playbooks](docs/playbooks/README.md)**: 6-stage lifecycle runbooks (Provisioning, Deployment, Live Traffic, Incident Triage, Security/SOC 2, Disaster Recovery).
 - 🗺️ **[System Topology & Maintenance Onboarding](docs/SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md)**: Architecture map, DNS routing, cryptographic enclave, incident response playbooks, and maintainer onboarding.
 - 🚀 **[Vercel Production Deployment Guide](docs/VERCEL_DEPLOYMENT.md)**: 8-phase pre-flight verification gate, Next.js 15 optimization, environment synchronizer, and live smoke test.
 - 🏛️ **[System Architecture Specification](docs/ARCHITECTURE.md)**: Deep dive into the request lifecycle, Mermaid sequence flow, streaming safety, and security model.

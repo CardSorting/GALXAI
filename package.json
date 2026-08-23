@@ -27,6 +27,7 @@
     "vault:populate": "tsx scripts/populate-vault-secrets.ts",
     "prebuild": "tsx scripts/verify-vercel-readiness.ts",
     "deploy:check": "npm run vercel:verify && npm run lint && npm run build",
+    "playbook": "tsx scripts/run-lifecycle-playbook.ts",
     "vercel:smoke": "tsx scripts/verify-deployment-smoke.ts",
     "vercel:env:sync": "tsx scripts/sync-vercel-env.ts",
     "vercel:env:print": "tsx scripts/sync-vercel-env.ts --print-cli"

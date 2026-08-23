@@ -10,6 +10,7 @@ This guide covers the internal codebase structure, architectural layers, how to 
 GALXAI/
 ├── docs/                             # Comprehensive Architecture & API Documentation
 │   ├── adr/                          # Architecture Decision Records (0001-0041)
+│   ├── playbooks/                    # Operational Lifecycle Playbooks (Stages 1-6)
 │   ├── ARCHITECTURE.md               # System overview, lifecycle, and security model
 │   ├── SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md # Architecture map & onboarding runbook
 │   ├── API_REFERENCE.md              # REST API endpoint specifications (/v1 & /api)
