@@ -46,6 +46,8 @@ import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 import { WorkloadEstimator } from '@/components/dashboard/WorkloadEstimator';
 import { GuidedSetupWizard } from '@/components/dashboard/GuidedSetupWizard';
 import { TrustSeals } from '@/components/common/TrustSeals';
+import { SimpleModelPicker } from '@/components/dashboard/SimpleModelPicker';
+import { SpendAuditTool } from '@/components/dashboard/SpendAuditTool';
 
 export default function HomePage() {
   const [stats, setStats] = useState<any>(null);
@@ -180,6 +182,9 @@ export default function HomePage() {
         {/* Founding Cohort Rate Lock & Capacity Scarcity Ribbon */}
         <RateLockRibbon />
 
+        {/* Interactive Instant Invoice Spend Audit Tool */}
+        <SpendAuditTool />
+
         {/* Non-Technical Real-World Business Workload Spend Translator */}
         <WorkloadEstimator />
 
@@ -307,6 +312,9 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* Apple-Style Non-Technical Model Matchmaker */}
+        <SimpleModelPicker />
 
         {/* Featured Frontier Models Grid */}
         <section className="space-y-6">

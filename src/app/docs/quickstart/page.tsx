@@ -4,8 +4,13 @@ import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { DocsSubNav } from '@/components/dashboard/DocsSubNav';
-import { ShareButton } from '@/components/common/ShareButton';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
+import { GuidedSetupWizard } from '@/components/dashboard/GuidedSetupWizard';
+import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
+import { TrustSeals } from '@/components/common/TrustSeals';
+import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
+import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
+import { ShareButton } from '@/components/common/ShareButton';
 import { Zap, Sparkles, Terminal, Code2, ArrowRight, CheckCircle2, Copy, Flame, Coins, ShieldCheck } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -99,67 +104,20 @@ export default function QuickstartDocPage() {
 
         <DocsSubNav />
 
-        {/* Step 1 */}
-        <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-3 border border-white/10">
-          <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 font-bold">
-            STEP 01
-          </div>
-          <h2 className="text-lg font-bold text-white">1. Mint Your Gateway API Key</h2>
-          <p className="text-xs text-zinc-400 font-sans">
-            Create an API key with 1-click workload presets (Cursor IDE, Production Backend, or Agent Swarm).
-          </p>
-          <div className="pt-2">
-            <Link
-              href="/keys/new"
-              className="inline-flex items-center gap-1.5 px-5 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black text-xs font-mono font-black uppercase tracking-wider shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
-            >
-              <Zap className="w-3.5 h-3.5 fill-black" />
-              <span>Mint Live API Key ($5 Free Credit)</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </section>
+        {/* Universal 30-Second Guided Setup Wizard */}
+        <GuidedSetupWizard />
 
-        {/* Step 2 */}
-        <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-3 border border-white/10">
-          <div className="flex items-center gap-2 text-xs font-mono text-amber-400 font-bold">
-            STEP 02
-          </div>
-          <h2 className="text-lg font-bold text-white">2. Point Your Client Base URL</h2>
-          <p className="text-xs text-zinc-400 font-sans">
-            Change your client&apos;s base URL to <code className="text-cyan-300 font-mono">https://api.galx.ai/v1</code>. No code refactoring is required.
-          </p>
-          <div className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-zinc-300 border border-white/5 space-y-1">
-            <div className="text-zinc-500"># In your .env or environment configuration:</div>
-            <div className="text-cyan-300">OPENAI_BASE_URL=&quot;https://api.galx.ai/v1&quot;</div>
-            <div className="text-amber-300">OPENAI_API_KEY=&quot;galx_live_your_key_here&quot;</div>
-          </div>
-        </section>
+        {/* Founding Cohort Rate Lock Ribbon */}
+        <RateLockRibbon />
 
-        {/* Step 3 */}
-        <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-3 border border-white/10">
-          <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 font-bold">
-            STEP 03
-          </div>
-          <h2 className="text-lg font-bold text-white">3. Execute Your First Completion</h2>
-          <p className="text-xs text-zinc-400 font-sans">
-            Call any supported model like <code className="text-cyan-300 font-mono">gpt-5.6-sol</code> or <code className="text-cyan-300 font-mono">x-ai/grok-4.5</code>.
-          </p>
-          <pre className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-cyan-300 border border-white/5 overflow-x-auto">
-            <code>{`from openai import OpenAI
-
-client = OpenAI(base_url="https://api.galx.ai/v1", api_key="galx_live_...")
-res = client.chat.completions.create(
-    model="gpt-5.6-sol",
-    messages=[{"role": "user", "content": "Hello!"}]
-)
-print(res.choices[0].message.content)`}</code>
-          </pre>
-        </section>
+        {/* Consumer-Grade Trust Seals */}
+        <TrustSeals />
       </main>
 
-      {/* Floating Conversion Dock */}
+      {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
       <FloatingConversionDock />
+      <LiveActivityToast />
+      <ExitIntentModal />
     </div>
   );
 }

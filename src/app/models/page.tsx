@@ -21,10 +21,14 @@ import {
   Flame,
   Award
 } from 'lucide-react';
-import { ModelMatchmaker } from '@/components/dashboard/ModelMatchmaker';
 import { ReadingProgressBar } from '@/components/common/ReadingProgressBar';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import { ShareButton } from '@/components/common/ShareButton';
+import { SimpleModelPicker } from '@/components/dashboard/SimpleModelPicker';
+import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
+import { TrustSeals } from '@/components/common/TrustSeals';
+import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
+import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
 
 export default function ModelsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -87,8 +91,11 @@ export default function ModelsPage() {
           </div>
         </div>
 
-        {/* Plain English Intent Matchmaker for Non-Technical Users */}
-        <ModelMatchmaker />
+        {/* Founding Cohort Rate Lock Scarcity Ribbon */}
+        <RateLockRibbon />
+
+        {/* Apple-Style Plain English Intent Matchmaker */}
+        <SimpleModelPicker />
 
         {/* Search, Category Filter & Live Volume Tier Selector */}
         <div className="glass-panel rounded-2xl p-4 flex flex-col lg:flex-row items-center justify-between gap-4">
@@ -264,10 +271,15 @@ export default function ModelsPage() {
             );
           })}
         </div>
+
+        {/* Consumer Trust Seals */}
+        <TrustSeals />
       </main>
 
-      {/* Floating Conversion Dock */}
+      {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
       <FloatingConversionDock />
+      <LiveActivityToast />
+      <ExitIntentModal />
     </div>
   );
 }
