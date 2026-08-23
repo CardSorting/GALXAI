@@ -19,8 +19,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 import { GtmPromoBanner } from '@/components/dashboard/GtmPromoBanner';
 import { WalletQuickPeekPopover } from '@/components/wallet/WalletQuickPeekPopover';
+import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
-export function Navigation() {
+function BaseNavigation() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { t } = useLanguage();
@@ -312,3 +313,32 @@ export function Navigation() {
     </>
   );
 }
+
+function NavigationFallback() {
+  return (
+    <header className="sticky top-0 z-50 glass-panel border-b border-white/10 bg-[#07090e]/95 px-4 py-3">
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white font-black text-sm">
+            <Zap className="w-4 h-4" />
+          </div>
+          <span className="font-sans font-black text-base text-white">
+            GALX<span className="text-cyan-400">AI</span>
+          </span>
+        </Link>
+        <div className="flex items-center gap-4 text-xs font-mono">
+          <Link href="/models" className="text-zinc-300 hover:text-white transition-colors">Models</Link>
+          <Link href="/billing" className="text-zinc-300 hover:text-white transition-colors">Billing</Link>
+          <Link href="/keys" className="text-zinc-300 hover:text-white transition-colors">API Keys</Link>
+          <Link href="/docs" className="text-zinc-300 hover:text-white transition-colors">Docs</Link>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+export const Navigation = withErrorBoundary(BaseNavigation, {
+  name: 'Global Navigation Header',
+  fallback: <NavigationFallback />
+});
+
