@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import type { ProviderType, ShardIsolationMode } from '@/core/contracts/GalxContracts';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
+import { resilientFetch } from '@/lib/resilience/ResilientClient';
 
 export default function DepositShardPage() {
   const router = useRouter();
@@ -57,7 +58,7 @@ export default function DepositShardPage() {
     setError(null);
 
     try {
-      const res = await fetch('/api/shards', {
+      const res = await resilientFetch<{ success: boolean; error?: string }>('/api/shards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -70,9 +71,8 @@ export default function DepositShardPage() {
         })
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Failed to connect provider account');
+      if (!res.data.success) {
+        throw new Error(res.data.error || 'Failed to connect provider account');
       }
 
       router.push('/vault');

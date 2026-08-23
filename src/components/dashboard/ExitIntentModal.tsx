@@ -17,18 +17,20 @@ import {
 } from 'lucide-react';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
+import { SafeStorage } from '@/lib/resilience/SafeStorage';
+
 function BaseExitIntentModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [secondsRemaining, setSecondsRemaining] = useState(899); // 14:59
 
   useEffect(() => {
-    const hasTriggered = sessionStorage.getItem('galx_exit_intent_triggered');
+    const hasTriggered = SafeStorage.getSessionItem('galx_exit_intent_triggered');
     if (hasTriggered) return;
 
     const handleMouseLeave = (e: MouseEvent) => {
       // Trigger when mouse moves past the top boundary
-      if (e.clientY <= 10 && !sessionStorage.getItem('galx_exit_intent_triggered')) {
-        sessionStorage.setItem('galx_exit_intent_triggered', 'true');
+      if (e.clientY <= 10 && !SafeStorage.getSessionItem('galx_exit_intent_triggered')) {
+        SafeStorage.setSessionItem('galx_exit_intent_triggered', 'true');
         setIsOpen(true);
       }
     };

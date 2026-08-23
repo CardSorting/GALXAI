@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   Code2
 } from 'lucide-react';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 export default function TypeScriptSdkDocsPage() {
   const [copiedTab, setCopiedTab] = useState<string | null>(null);
@@ -85,8 +86,8 @@ for await (const chunk of stream) {
 }`
   };
 
-  const handleCopy = (code: string, id: string) => {
-    navigator.clipboard.writeText(code);
+  const handleCopy = async (code: string, id: string) => {
+    await safeCopyToClipboard(code);
     setCopiedTab(id);
     setTimeout(() => setCopiedTab(null), 2000);
   };

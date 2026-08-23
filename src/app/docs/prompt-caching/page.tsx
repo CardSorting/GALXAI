@@ -25,6 +25,7 @@ import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export default function PromptCachingDocsPage() {
@@ -81,8 +82,8 @@ const cachedTokens = response.usage?.prompt_tokens_details?.cached_tokens ?? 0;
 console.log(\`Cached Tokens (75% Rebate): \${cachedTokens} / \${response.usage?.prompt_tokens}\`);`
   };
 
-  const handleCopy = (code: string, tab: string) => {
-    navigator.clipboard.writeText(code);
+  const handleCopy = async (code: string, tab: string) => {
+    await safeCopyToClipboard(code);
     setCopiedTab(tab);
     setTimeout(() => setCopiedTab(null), 2000);
   };

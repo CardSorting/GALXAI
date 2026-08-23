@@ -64,6 +64,11 @@ function BaseKeyboardShortcutsModal() {
         if (e.key === 'd') router.push('/docs');
         if (e.key === 'k') router.push('/keys');
         if (e.key === 'b') router.push('/billing');
+        if (e.key === 'q') router.push('/queues');
+        if (e.key === 's') router.push('/status');
+        if (e.key === 'p') router.push('/playground');
+        if (e.key === 'c') router.push('/models/compare');
+        if (e.key === 'f') router.push('/faq');
         lastKey = '';
       }
     };
@@ -99,6 +104,9 @@ function BaseKeyboardShortcutsModal() {
         { label: 'Go to Documentation', keys: ['G', 'D'] },
         { label: 'Go to API Keys', keys: ['G', 'K'] },
         { label: 'Go to Developer Wallet', keys: ['G', 'B'] },
+        { label: 'Go to Requests & Queues', keys: ['G', 'Q'] },
+        { label: 'Go to Status & Uptime', keys: ['G', 'S'] },
+        { label: 'Go to API Playground', keys: ['G', 'P'] },
       ],
     },
   ];

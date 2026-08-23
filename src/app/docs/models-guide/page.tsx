@@ -22,6 +22,7 @@ import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 const MODELS_GUIDE_DATA = [
@@ -90,8 +91,8 @@ const MODELS_GUIDE_DATA = [
 export default function ModelsGuideDocsPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const handleCopy = (id: string) => {
-    navigator.clipboard.writeText(id);
+  const handleCopy = async (id: string) => {
+    await safeCopyToClipboard(id);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };

@@ -3,6 +3,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertCircle, RefreshCw, Copy, Check, Terminal, ShieldCheck } from 'lucide-react';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
+import { BroccoliResilienceSubstrate } from '@/lib/resilience/BroccoliResilienceSubstrate';
 
 interface Props {
   children: ReactNode;
@@ -52,6 +53,16 @@ export class ErrorBoundary extends Component<Props, State> {
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({ errorInfo });
     console.error(`💥 [GALXAI ErrorBoundary in ${this.props.name || 'Component'}]:`, error, errorInfo);
+
+    try {
+      BroccoliResilienceSubstrate.getInstance().recordSlaProbe({
+        endpoint: `client-component://${this.props.name || 'Anonymous'}`,
+        status: 'degraded',
+        latencyMs: 1,
+        success: false,
+        timestampMs: Date.now(),
+      });
+    } catch {}
 
     const maxRetries = this.props.maxRetries ?? 2;
     const shouldAutoRetry = this.props.autoRetry !== false && this.state.retryCount < maxRetries;

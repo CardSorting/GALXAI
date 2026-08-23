@@ -23,6 +23,7 @@ import {
   Filter
 } from 'lucide-react';
 import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
@@ -184,8 +185,8 @@ export default function CookbookDocsPage() {
     ? RECIPES
     : RECIPES.filter((r) => r.category === selectedCategory);
 
-  const handleCopy = (code: string, id: string) => {
-    navigator.clipboard.writeText(code);
+  const handleCopy = async (code: string, id: string) => {
+    await safeCopyToClipboard(code);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };

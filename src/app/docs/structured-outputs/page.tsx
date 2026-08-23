@@ -23,6 +23,7 @@ import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export default function StructuredOutputsDocsPage() {
@@ -150,8 +151,8 @@ export async function POST(req: Request) {
     }
   };
 
-  const handleCopy = (code: string) => {
-    navigator.clipboard.writeText(code);
+  const handleCopy = async (code: string) => {
+    await safeCopyToClipboard(code);
     setCopiedKey(true);
     setTimeout(() => setCopiedKey(false), 2000);
   };

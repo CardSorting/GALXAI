@@ -11,6 +11,7 @@ import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
 import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 export default function ApiReferenceDocPage() {
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
@@ -87,8 +88,8 @@ export default function ApiReferenceDocPage() {
     }
   ];
 
-  const handleCopy = (idx: number, text: string) => {
-    navigator.clipboard.writeText(text);
+  const handleCopy = async (idx: number, text: string) => {
+    await safeCopyToClipboard(text);
     setCopiedIdx(idx);
     setTimeout(() => setCopiedIdx(null), 2000);
   };

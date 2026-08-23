@@ -171,9 +171,9 @@ function BaseCreateKeyPage() {
     await mintKeyRequest(walletBalance);
   };
 
-  const handleCopyKey = () => {
+  const handleCopyKey = async () => {
     if (!createdSecretKey) return;
-    navigator.clipboard.writeText(createdSecretKey);
+    await safeCopyToClipboard(createdSecretKey);
     setCopiedKey(true);
     setTimeout(() => setCopiedKey(false), 2000);
   };

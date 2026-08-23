@@ -169,13 +169,17 @@ function BaseShareModal({
     try {
       const canvas = generateCardCanvas();
       canvas.toBlob(async (blob) => {
-        if (blob) {
-          await navigator.clipboard.write([
-            new ClipboardItem({ 'image/png': blob })
-          ]);
-          setCopiedImage(true);
-          setTimeout(() => setCopiedImage(false), 2000);
+        if (blob && typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.write === 'function') {
+          try {
+            await navigator.clipboard.write([
+              new ClipboardItem({ 'image/png': blob })
+            ]);
+            setCopiedImage(true);
+            setTimeout(() => setCopiedImage(false), 2000);
+            return;
+          } catch {}
         }
+        handleDownloadImage();
       });
     } catch {
       handleDownloadImage();

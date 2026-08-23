@@ -22,6 +22,7 @@ import {
   Award
 } from 'lucide-react';
 import { ReadingProgressBar } from '@/components/common/ReadingProgressBar';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import { ShareButton } from '@/components/common/ShareButton';
 import { SimpleModelPicker } from '@/components/dashboard/SimpleModelPicker';
@@ -50,8 +51,8 @@ export default function ModelsPage() {
     return m.category === activeCategory;
   });
 
-  const handleCopyModel = (id: string) => {
-    navigator.clipboard.writeText(id);
+  const handleCopyModel = async (id: string) => {
+    await safeCopyToClipboard(id);
     setCopiedModelId(id);
     setTimeout(() => setCopiedModelId(null), 2000);
   };

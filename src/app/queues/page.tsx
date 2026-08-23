@@ -44,6 +44,67 @@ import type {
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
+// Pure Helper Formatters for Task Context
+function getPromptText(task: GalxTask): string {
+  if (task.target.type === 'INTERNAL_MODEL') {
+    if (task.target.taskKind === 'chat_completion' && task.target.chatPayload) {
+      const messages = task.target.chatPayload.messages || [];
+      const userMsg = [...messages].reverse().find(m => m.role === 'user');
+      if (typeof userMsg?.content === 'string') return userMsg.content;
+      if (Array.isArray(userMsg?.content)) {
+        const textPart = (userMsg.content as any[]).find(p => p.type === 'text' && p.text);
+        if (textPart?.text) return textPart.text;
+      }
+      return 'Multi-turn chat payload';
+    }
+    if (task.target.taskKind === 'image_generation' && task.target.imagePayload) {
+      return task.target.imagePayload.prompt || 'Image generation prompt';
+    }
+  }
+  if (task.target.type === 'HTTP_PUSH') {
+    return `Webhook: ${task.target.url}`;
+  }
+  return task.progress?.message || task.id;
+}
+
+function getResultText(task: GalxTask): string {
+  if (!task.result?.data) return '';
+  if (typeof task.result.data === 'string') return task.result.data;
+  if (task.result.data.choices && task.result.data.choices[0]?.message?.content) {
+    return task.result.data.choices[0].message.content;
+  }
+  return JSON.stringify(task.result.data, null, 2);
+}
+
+function getAgentContextSnippet(task: GalxTask): string {
+  const p = getPromptText(task);
+  const r = getResultText(task);
+  return `### [GALXAI Autonomous Agent Context]
+Task ID: ${task.id}
+User Prompt: ${p}
+Model: ${task.result?.modelUsed || 'gpt-5.6-sol'}
+Status: ${task.status}
+
+=== RESULT OUTPUT ===
+${r}
+====================`;
+}
+
+function getPythonAgentSnippet(task: GalxTask): string {
+  const p = getPromptText(task);
+  return `from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_..."
+)
+
+response = client.chat.completions.create(
+    model="${task.result?.modelUsed || 'gpt-5.6-sol'}",
+    messages=[{"role": "user", "content": ${JSON.stringify(p)}}]
+)
+print(response.choices[0].message.content)`;
+}
 
 function BaseRequestsAndResultsCanvas() {
   const { user, isLoading: authLoading } = useAuth();
@@ -65,7 +126,7 @@ function BaseRequestsAndResultsCanvas() {
     setTimeout(() => setToastMessage(null), 2500);
   };
 
-  const fetchTasks = async () => {
+  const fetchTasks = React.useCallback(async () => {
     if (!user) {
       setIsLoading(false);
       return;
@@ -101,7 +162,7 @@ function BaseRequestsAndResultsCanvas() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, selectedTaskId, autoCopyForAgent]);
 
   useEffect(() => {
     if (user) {
@@ -109,7 +170,7 @@ function BaseRequestsAndResultsCanvas() {
     } else {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user, fetchTasks]);
 
   // Real-time polling
   useEffect(() => {
@@ -120,7 +181,7 @@ function BaseRequestsAndResultsCanvas() {
       }
     }, 2000);
     return () => clearInterval(interval);
-  }, [autoRefresh, selectedTaskId, autoCopyForAgent, user]);
+  }, [autoRefresh, user, fetchTasks]);
 
   const selectedTask = tasks.find(t => t.id === selectedTaskId) || tasks[0] || null;
 
@@ -141,66 +202,7 @@ function BaseRequestsAndResultsCanvas() {
     } catch {}
   };
 
-  const getPromptText = (task: GalxTask): string => {
-    if (task.target.type === 'INTERNAL_MODEL') {
-      if (task.target.taskKind === 'chat_completion' && task.target.chatPayload?.messages) {
-        const userMsg = task.target.chatPayload.messages.find(m => m.role === 'user');
-        if (typeof userMsg?.content === 'string') return userMsg.content;
-        if (Array.isArray(userMsg?.content)) {
-          const textPart = (userMsg.content as any[]).find(p => p.type === 'text' && p.text);
-          if (textPart?.text) return textPart.text;
-        }
-        return 'Multi-turn chat payload';
-      }
-      if (task.target.taskKind === 'image_generation' && task.target.imagePayload) {
-        return task.target.imagePayload.prompt || 'Image generation prompt';
-      }
-    }
-    if (task.target.type === 'HTTP_PUSH') {
-      return `Webhook: ${task.target.url}`;
-    }
-    return task.progress?.message || task.id;
-  };
 
-  const getResultText = (task: GalxTask): string => {
-    if (!task.result?.data) return '';
-    if (typeof task.result.data === 'string') return task.result.data;
-    if (task.result.data.choices && task.result.data.choices[0]?.message?.content) {
-      return task.result.data.choices[0].message.content;
-    }
-    return JSON.stringify(task.result.data, null, 2);
-  };
-
-  // Direct Formatters for 1-Click Agent Chips
-  const getAgentContextSnippet = (task: GalxTask): string => {
-    const p = getPromptText(task);
-    const r = getResultText(task);
-    return `### [GALXAI Autonomous Agent Context]
-Task ID: ${task.id}
-User Prompt: ${p}
-Model: ${task.result?.modelUsed || 'gpt-5.6-sol'}
-Status: ${task.status}
-
-=== RESULT OUTPUT ===
-${r}
-====================`;
-  };
-
-  const getPythonAgentSnippet = (task: GalxTask): string => {
-    const p = getPromptText(task);
-    return `from openai import OpenAI
-
-client = OpenAI(
-    base_url="https://api.galx.ai/v1",
-    api_key="galx_live_..."
-)
-
-response = client.chat.completions.create(
-    model="gpt-5.6-sol",
-    messages=[{"role": "user", "content": """${p.replace(/"""/g, '\\"\\"\\"')}"""}]
-)
-print(response.choices[0].message.content)`;
-  };
 
   const getTSAgentSnippet = (task: GalxTask): string => {
     const p = getPromptText(task);

@@ -23,6 +23,7 @@ import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export default function SdksDocPage() {
@@ -229,8 +230,8 @@ func main() {
     }
   };
 
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
+  const handleCopy = async (text: string) => {
+    await safeCopyToClipboard(text);
     setCopiedKey(true);
     setTimeout(() => setCopiedKey(false), 2000);
   };

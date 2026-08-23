@@ -26,6 +26,7 @@ import {
   LifeBuoy
 } from 'lucide-react';
 import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/ModelCatalog';
+import { BroccoliOmniSearch } from '@/lib/resilience/BroccoliOmniSearch';
 import { withErrorBoundary } from './ErrorBoundary';
 
 interface CommandMenuProps {
@@ -218,7 +219,10 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
 
       const now = Date.now();
       if (lastKey === 'g' && now - lastKeyTime < 1000) {
-        if (e.key === 'm') {
+        if (e.key === 'h') {
+          e.preventDefault();
+          router.push('/');
+        } else if (e.key === 'm') {
           e.preventDefault();
           router.push('/models');
         } else if (e.key === 'd') {
@@ -227,12 +231,18 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
         } else if (e.key === 'k') {
           e.preventDefault();
           router.push('/keys');
+        } else if (e.key === 'b') {
+          e.preventDefault();
+          router.push('/billing');
         } else if (e.key === 'q') {
           e.preventDefault();
           router.push('/queues');
         } else if (e.key === 's') {
           e.preventDefault();
           router.push('/status');
+        } else if (e.key === 'p') {
+          e.preventDefault();
+          router.push('/playground');
         } else if (e.key === 'c') {
           e.preventDefault();
           router.push('/models/compare');
@@ -321,26 +331,24 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
 
   if (!isOpen) return null;
 
-  const navigateTo = (href: string) => {
+  const navigateTo = (href: string, title?: string, category?: string) => {
+    if (title) {
+      BroccoliOmniSearch.recordVisit(title, href, category || 'Navigation');
+    }
     router.push(href);
     onClose();
   };
 
   const normalizedQuery = query.toLowerCase().trim();
   const resolvedFromQuery = normalizedQuery ? ModelCatalog.resolveModel(normalizedQuery) : null;
+  const recentVisits = BroccoliOmniSearch.getRecentVisits(3);
+  const omniResults = BroccoliOmniSearch.search(normalizedQuery, 8);
 
   const filteredModels = EXCLUSIVE_MODEL_CATALOG.filter(
     (m) =>
       m.id.toLowerCase().includes(normalizedQuery) ||
       m.name.toLowerCase().includes(normalizedQuery) ||
       m.provider.toLowerCase().includes(normalizedQuery)
-  );
-
-  const matchedPages = PLATFORM_PAGES.filter(
-    (p) =>
-      p.label.toLowerCase().includes(normalizedQuery) ||
-      p.description.toLowerCase().includes(normalizedQuery) ||
-      p.keywords.some((k) => k.includes(normalizedQuery))
   );
 
   return (
@@ -369,6 +377,38 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
 
         {/* Results Body */}
         <div className="overflow-y-auto p-3 space-y-4">
+          {/* Recent Navigation (Shown when query is empty) */}
+          {!normalizedQuery && recentVisits.length > 0 && (
+            <div className="space-y-1">
+              <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-indigo-400 font-mono flex items-center justify-between">
+                <span>Recently Visited Workflows</span>
+                <span className="text-zinc-500 font-normal">BroccoliDB L1</span>
+              </div>
+              <div className="space-y-1">
+                {recentVisits.map((r) => (
+                  <button
+                    key={r.href}
+                    onClick={() => navigateTo(r.href, r.title, r.category)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/5 flex items-center justify-between group transition-all text-left cursor-pointer border border-white/5"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0">
+                        <BookOpen className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-white text-xs group-hover:text-indigo-300 transition-colors">
+                          {r.title}
+                        </div>
+                        <p className="text-[10px] text-zinc-500 font-mono">{r.href}</p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono text-zinc-400 shrink-0">{r.category}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Ambiguity-Resolved Match Card */}
           {resolvedFromQuery && (
             <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-indigo-600/15 border border-amber-500/40 space-y-2">
@@ -380,7 +420,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
                 <span>-{resolvedFromQuery.discountPercentage}% Wholesale</span>
               </div>
               <button
-                onClick={() => navigateTo(`/models/${resolvedFromQuery.id}`)}
+                onClick={() => navigateTo(`/models/${resolvedFromQuery.id}`, resolvedFromQuery.name, 'Models & Engines')}
                 className="w-full flex items-center justify-between p-2 rounded-xl bg-black/60 hover:bg-black/80 transition-all text-left cursor-pointer border border-white/5"
               >
                 <div>
@@ -395,17 +435,72 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
             </div>
           )}
 
-          {/* Models Section */}
-          {filteredModels.length > 0 && (
+          {/* Intelligent OmniSearch Results (Non-Technical Natural Query Matching) */}
+          {normalizedQuery && omniResults.length > 0 && (
+            <div className="space-y-1">
+              <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-cyan-400 font-mono flex items-center justify-between">
+                <span>Matching Pages & Guides ({omniResults.length})</span>
+                <span className="text-zinc-500 font-normal">Natural Query Parser</span>
+              </div>
+              <div className="space-y-1">
+                {omniResults.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => navigateTo(item.href, item.title, item.category)}
+                    className="w-full px-3.5 py-2.5 rounded-xl hover:bg-white/5 flex items-center justify-between group transition-all text-left cursor-pointer border border-transparent hover:border-white/5"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center shrink-0">
+                        {item.category === 'Models & Engines' ? (
+                          <Cpu className="w-3.5 h-3.5" />
+                        ) : item.category === 'Documentation' ? (
+                          <FileText className="w-3.5 h-3.5" />
+                        ) : item.category === 'Help & Diagnostics' ? (
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                        ) : (
+                          <Sparkles className="w-3.5 h-3.5" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-white text-xs group-hover:text-cyan-300 transition-colors">
+                            {item.title}
+                          </span>
+                          {item.badge && (
+                            <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono text-[9px] font-bold">
+                              {item.badge}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-zinc-400 leading-tight">{item.description}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {item.shortcutKey && (
+                        <kbd className="px-1.5 py-0.5 rounded bg-black/60 border border-white/10 text-[10px] font-mono text-zinc-400">
+                          {item.shortcutKey}
+                        </kbd>
+                      )}
+                      <ArrowRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Direct Model Engine Matches */}
+          {filteredModels.length > 0 && !resolvedFromQuery && (
             <div className="space-y-1">
               <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
-                Models ({filteredModels.length})
+                Model Engines ({filteredModels.length})
               </div>
               <div className="space-y-1">
                 {filteredModels.map((m) => (
                   <button
                     key={m.id}
-                    onClick={() => navigateTo(`/models/${m.id.replace('/', '-')}`)}
+                    onClick={() => navigateTo(`/models/${m.id.replace('/', '-')}`, m.name, 'Models & Engines')}
                     className="w-full px-3.5 py-2.5 rounded-xl hover:bg-white/5 flex items-center justify-between group transition-all text-left cursor-pointer"
                   >
                     <div className="flex items-center gap-3">
@@ -430,40 +525,6 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
                     </div>
                   </button>
                 ))}
-              </div>
-            </div>
-          )}
-
-          {/* Navigation & Actions Section */}
-          {matchedPages.length > 0 && (
-            <div className="space-y-1">
-              <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
-                Platform Pages & Actions ({matchedPages.length})
-              </div>
-              <div className="space-y-1">
-                {matchedPages.map((p) => {
-                  const Icon = p.icon;
-                  return (
-                    <button
-                      key={p.href}
-                      onClick={() => navigateTo(p.href)}
-                      className="w-full px-3.5 py-2.5 rounded-xl hover:bg-white/5 flex items-center justify-between group transition-all text-left cursor-pointer"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0">
-                          <Icon className="w-3.5 h-3.5" />
-                        </div>
-                        <div>
-                          <div className="font-bold text-white text-xs group-hover:text-indigo-300 transition-colors">
-                            {p.label}
-                          </div>
-                          <p className="text-[10px] text-zinc-400 leading-tight">{p.description}</p>
-                        </div>
-                      </div>
-                      <span className="text-[10px] uppercase font-mono text-zinc-500 shrink-0">{p.category}</span>
-                    </button>
-                  );
-                })}
               </div>
             </div>
           )}

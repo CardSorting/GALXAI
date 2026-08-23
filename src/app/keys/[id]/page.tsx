@@ -48,7 +48,7 @@ function BaseKeyDetailPage() {
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; latencyMs: number; message: string } | null>(null);
 
-  const fetchKey = async () => {
+  const fetchKey = React.useCallback(async () => {
     setIsLoading(true);
     try {
       const res = await resilientFetch<{ key: any }>(`/api/keys/${id}`, { enableCacheFallback: true });
@@ -60,13 +60,13 @@ function BaseKeyDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     if (id) {
       fetchKey();
     }
-  }, [id]);
+  }, [id, fetchKey]);
 
   const handleRevoke = async () => {
     if (!keyData || !window.confirm(`Are you sure you want to revoke "${keyData.name}"? This action cannot be undone.`)) return;

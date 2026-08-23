@@ -2,6 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { WifiOff, Wifi, CheckCircle2 } from 'lucide-react';
+import { SafeStorage } from '@/lib/resilience/SafeStorage';
+import { BroccoliOutboxEngine } from '@/lib/resilience/BroccoliOutboxEngine';
+import { BroccoliSnapshotEngine } from '@/lib/resilience/BroccoliSnapshotEngine';
 
 /**
  * ClientResilienceProvider
@@ -14,9 +17,17 @@ import { WifiOff, Wifi, CheckCircle2 } from 'lucide-react';
 export function ClientResilienceProvider({ children }: { children: React.ReactNode }) {
   const [isOffline, setIsOffline] = useState(false);
   const [showReconnectedToast, setShowReconnectedToast] = useState(false);
+  const [pendingOutboxCount, setPendingOutboxCount] = useState(0);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // Self-healing double-buffered snapshot restore (<5ms)
+    BroccoliSnapshotEngine.restoreSnapshot();
+
+    const unsubscribeOutbox = BroccoliOutboxEngine.subscribe((mutations) => {
+      setPendingOutboxCount(mutations.length);
+    });
 
     // Track initial network state
     setIsOffline(!navigator.onLine);
@@ -62,11 +73,11 @@ export function ClientResilienceProvider({ children }: { children: React.ReactNo
         event.preventDefault();
         console.warn('🔄 [GALXAI Client Resilience] Deployment chunk mismatch detected — refreshing page cleanly...');
         const hasReloadedKey = 'galx_chunk_reload_attempt';
-        const lastAttempt = sessionStorage.getItem(hasReloadedKey);
+        const lastAttempt = SafeStorage.getSessionItem(hasReloadedKey);
         const now = Date.now();
 
         if (!lastAttempt || now - parseInt(lastAttempt, 10) > 10000) {
-          sessionStorage.setItem(hasReloadedKey, String(now));
+          SafeStorage.setSessionItem(hasReloadedKey, String(now));
           window.location.reload();
         }
         return;
@@ -115,6 +126,7 @@ export function ClientResilienceProvider({ children }: { children: React.ReactNo
     window.addEventListener('error', handleGlobalError);
 
     return () => {
+      unsubscribeOutbox();
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
@@ -145,6 +157,18 @@ export function ClientResilienceProvider({ children }: { children: React.ReactNo
         >
           <CheckCircle2 className="w-4 h-4 text-black" />
           <span>Connected — All Systems Synced</span>
+        </div>
+      )}
+
+      {/* Outbox Background Replay Indicator */}
+      {pendingOutboxCount > 0 && !isOffline && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 left-6 z-50 bg-black/90 border border-cyan-500/40 text-cyan-300 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold flex items-center gap-2 shadow-2xl backdrop-blur-md animate-in fade-in duration-200"
+        >
+          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+          <span>Replaying {pendingOutboxCount} offline action{pendingOutboxCount > 1 ? 's' : ''}...</span>
         </div>
       )}
 

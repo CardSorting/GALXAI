@@ -51,14 +51,14 @@ import { SpendAuditTool } from '@/components/dashboard/SpendAuditTool';
 import { SavingsJackpotReel } from '@/components/dashboard/SavingsJackpotReel';
 import { NoCodeSandboxWidget } from '@/components/dashboard/NoCodeSandboxWidget';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { resilientFetch } from '@/lib/resilience/ResilientClient';
 
 export default function HomePage() {
   const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
-    fetch('/api/pool/stats')
-      .then(res => res.json())
-      .then(data => setStats(data))
+    resilientFetch('/api/pool/stats', { enableCacheFallback: true })
+      .then(res => setStats(res.data))
       .catch(() => {});
   }, []);
 

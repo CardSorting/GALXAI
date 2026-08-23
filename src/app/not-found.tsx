@@ -11,6 +11,7 @@ import {
   FileText,
   Home
 } from 'lucide-react';
+import { NotFoundSearchHelper } from '@/components/common/NotFoundSearchHelper';
 
 export default function NotFound() {
   return (
@@ -37,6 +38,9 @@ export default function NotFound() {
               The requested endpoint or path is not mapped in the GALXAI model gateway routing table.
             </p>
           </div>
+
+          {/* Interactive Smart Search Recovery */}
+          <NotFoundSearchHelper />
 
           {/* Terminal Hint */}
           <div className="p-4 rounded-2xl bg-[#040508] border border-white/5 font-mono text-xs text-zinc-400 max-w-md mx-auto text-left space-y-1 shadow-inner">

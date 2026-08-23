@@ -3,11 +3,16 @@
  *
  * Continuously computes perceived SLA uptime, edge response latency, and circuit status
  * for sub-second failover monitoring against the 99.99% Enterprise Uptime SLA target.
+ * Leverages BroccoliResilienceSubstrate for in-memory percentile aggregation and cross-tab sync.
  */
+
+import { BroccoliResilienceSubstrate } from './BroccoliResilienceSubstrate';
 
 export interface SlaProbeResult {
   timestampMs: number;
   edgeLatencyMs: number;
+  p90LatencyMs: number;
+  p99LatencyMs: number;
   status: 'healthy' | 'degraded' | 'offline';
   uptimePercentage: number;
   activeCircuitsCount: number;
@@ -17,23 +22,32 @@ export interface SlaProbeResult {
 
 export class SlaHealthEngine {
   private static instance: SlaHealthEngine | null = null;
-  private currentUptime = 99.99;
-  private lastLatency = 14;
-  private probeHistory: { timestamp: number; latency: number; success: boolean }[] = [];
   private listeners = new Set<(status: SlaProbeResult) => void>();
   private isProbing = false;
+  private substrate: BroccoliResilienceSubstrate;
 
   private constructor() {
+    this.substrate = BroccoliResilienceSubstrate.getInstance();
+
     if (typeof window !== 'undefined') {
-      // Seed historical uptime samples
-      const now = Date.now();
-      for (let i = 0; i < 20; i++) {
-        this.probeHistory.push({
-          timestamp: now - (20 - i) * 60000,
-          latency: 12 + Math.floor(Math.random() * 8),
-          success: true,
-        });
+      // Seed historical uptime samples into BroccoliDB if empty
+      if (this.substrate.slaTable.count() === 0) {
+        const now = Date.now();
+        for (let i = 0; i < 20; i++) {
+          this.substrate.recordSlaProbe({
+            timestampMs: now - (20 - i) * 60000,
+            latencyMs: 12 + Math.floor(Math.random() * 8),
+            success: true,
+            status: 'healthy',
+            endpoint: '/api/version',
+          });
+        }
       }
+
+      // React to cross-tab probe updates
+      this.substrate.slaTable.subscribe(() => {
+        this.notify(this.getStatus());
+      });
     }
   }
 
@@ -57,7 +71,13 @@ export class SlaHealthEngine {
 
     try {
       if (typeof window !== 'undefined' && !navigator.onLine) {
-        this.recordSample(0, false);
+        this.substrate.recordSlaProbe({
+          timestampMs: Date.now(),
+          latencyMs: 0,
+          success: false,
+          status: 'offline',
+          endpoint: '/api/version',
+        });
         return this.getStatus();
       }
 
@@ -74,13 +94,22 @@ export class SlaHealthEngine {
       clearTimeout(timeoutId);
       const elapsed = typeof performance !== 'undefined' ? Math.round(performance.now() - start) : 15;
 
-      if (res.ok) {
-        this.recordSample(elapsed, true);
-      } else {
-        this.recordSample(elapsed, false);
-      }
+      const isSuccess = res.ok;
+      this.substrate.recordSlaProbe({
+        timestampMs: Date.now(),
+        latencyMs: elapsed,
+        success: isSuccess,
+        status: isSuccess ? (elapsed > 400 ? 'degraded' : 'healthy') : 'degraded',
+        endpoint: '/api/version',
+      });
     } catch {
-      this.recordSample(999, false);
+      this.substrate.recordSlaProbe({
+        timestampMs: Date.now(),
+        latencyMs: 999,
+        success: false,
+        status: 'degraded',
+        endpoint: '/api/version',
+      });
     } finally {
       this.isProbing = false;
     }
@@ -90,39 +119,24 @@ export class SlaHealthEngine {
     return currentStatus;
   }
 
-  private recordSample(latency: number, success: boolean) {
-    this.lastLatency = latency > 0 ? latency : 14;
-    this.probeHistory.push({
-      timestamp: Date.now(),
-      latency: this.lastLatency,
-      success,
-    });
-
-    // Keep last 100 samples
-    if (this.probeHistory.length > 100) {
-      this.probeHistory.shift();
-    }
-
-    // Compute uptime percentage
-    const successes = this.probeHistory.filter((p) => p.success).length;
-    const total = this.probeHistory.length;
-    this.currentUptime = Math.min(100, Math.max(99.9, Number(((successes / total) * 100).toFixed(2))));
-  }
-
   public getStatus(): SlaProbeResult {
+    const stats = this.substrate.getSlaStats(30);
+
     let status: 'healthy' | 'degraded' | 'offline' = 'healthy';
 
     if (typeof window !== 'undefined' && !navigator.onLine) {
       status = 'offline';
-    } else if (this.currentUptime < 99.0 || this.lastLatency > 500) {
+    } else if (stats.uptimePercentage < 99.0 || stats.p50LatencyMs > 500) {
       status = 'degraded';
     }
 
     return {
       timestampMs: Date.now(),
-      edgeLatencyMs: this.lastLatency,
+      edgeLatencyMs: stats.p50LatencyMs,
+      p90LatencyMs: stats.p90LatencyMs,
+      p99LatencyMs: stats.p99LatencyMs,
       status,
-      uptimePercentage: this.currentUptime,
+      uptimePercentage: stats.uptimePercentage,
       activeCircuitsCount: 12,
       totalCircuitsCount: 12,
       lastChecked: new Date().toLocaleTimeString(),

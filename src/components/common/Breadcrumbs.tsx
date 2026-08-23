@@ -1,6 +1,9 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronRight, Home } from 'lucide-react';
+import { BroccoliOmniSearch } from '@/lib/resilience/BroccoliOmniSearch';
 
 export interface BreadcrumbItem {
   label: string;
@@ -32,6 +35,18 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
       }))
     ]
   };
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || items.length === 0) return;
+    const current = items[items.length - 1];
+    if (current?.label) {
+      BroccoliOmniSearch.recordVisit(
+        current.label,
+        current.href || window.location.pathname,
+        'Navigation'
+      );
+    }
+  }, [items]);
 
   return (
     <>

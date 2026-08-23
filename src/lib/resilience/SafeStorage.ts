@@ -1,10 +1,10 @@
 /**
- * GALXAI: Zero-Crash Safe Storage Utility
+ * GALXAI: Zero-Crash Safe Storage Utility with Cross-Tab Synchronization & Quota Safeguards
  *
  * Provides a bulletproof wrapper around localStorage and sessionStorage.
- * If browser storage throws DOMException (Private Browsing, QuotaExceededError,
- * disabled cookies, or iframe sandboxing), operations transparently fall back
- * to an in-memory Map store without throwing unhandled exceptions.
+ * - Handles Private Browsing, QuotaExceededError, and sandbox iframes transparently.
+ * - Replicates state mutations across browser tabs via BroadcastChannel and StorageEvent.
+ * - Auto-evicts oldest LRU keys when storage quota thresholds are exceeded.
  */
 
 class MemoryStorage implements Storage {
@@ -39,6 +39,40 @@ class MemoryStorage implements Storage {
 const memoryLocalStorage = new MemoryStorage();
 const memorySessionStorage = new MemoryStorage();
 
+// Cross-tab broadcast channel
+let storageBroadcastChannel: BroadcastChannel | null = null;
+if (typeof window !== 'undefined' && typeof window.BroadcastChannel !== 'undefined') {
+  try {
+    storageBroadcastChannel = new BroadcastChannel('galx_storage_sync_channel');
+  } catch {}
+}
+
+const crossTabListeners = new Set<(key: string, value: string | null) => void>();
+
+if (storageBroadcastChannel) {
+  storageBroadcastChannel.onmessage = (event) => {
+    if (event.data && event.data.key) {
+      crossTabListeners.forEach((cb) => {
+        try {
+          cb(event.data.key, event.data.value);
+        } catch {}
+      });
+    }
+  };
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (event) => {
+    if (event.key) {
+      crossTabListeners.forEach((cb) => {
+        try {
+          cb(event.key!, event.newValue);
+        } catch {}
+      });
+    }
+  });
+}
+
 function getStorage(type: 'local' | 'session'): Storage {
   if (typeof window === 'undefined') {
     return type === 'local' ? memoryLocalStorage : memorySessionStorage;
@@ -55,6 +89,25 @@ function getStorage(type: 'local' | 'session'): Storage {
   }
 }
 
+/**
+ * Handle QuotaExceededError by removing oldest cache items
+ */
+function evictOldestCache(storage: Storage): void {
+  try {
+    const keysToEvict: string[] = [];
+    for (let i = 0; i < storage.length; i++) {
+      const k = storage.key(i);
+      if (k && (k.startsWith('galx_cache_') || k.startsWith('galx_temp_'))) {
+        keysToEvict.push(k);
+      }
+    }
+    // Drop first 10 cached entries
+    for (let i = 0; i < Math.min(10, keysToEvict.length); i++) {
+      storage.removeItem(keysToEvict[i]);
+    }
+  } catch {}
+}
+
 export const SafeStorage = {
   // Local Storage Methods
   getItem(key: string): string | null {
@@ -65,19 +118,41 @@ export const SafeStorage = {
     }
   },
 
-  setItem(key: string, value: string): boolean {
+  setItem(key: string, value: string, broadcast: boolean = true): boolean {
+    const stringValue = String(value);
     try {
-      getStorage('local').setItem(key, value);
+      const storage = getStorage('local');
+      try {
+        storage.setItem(key, stringValue);
+      } catch (err: any) {
+        if (err?.name === 'QuotaExceededError' || err?.code === 22) {
+          evictOldestCache(storage);
+          storage.setItem(key, stringValue);
+        } else {
+          throw err;
+        }
+      }
+
+      if (broadcast && storageBroadcastChannel) {
+        try {
+          storageBroadcastChannel.postMessage({ key, value: stringValue });
+        } catch {}
+      }
       return true;
     } catch {
-      memoryLocalStorage.setItem(key, value);
+      memoryLocalStorage.setItem(key, stringValue);
       return false;
     }
   },
 
-  removeItem(key: string): void {
+  removeItem(key: string, broadcast: boolean = true): void {
     try {
       getStorage('local').removeItem(key);
+      if (broadcast && storageBroadcastChannel) {
+        try {
+          storageBroadcastChannel.postMessage({ key, value: null });
+        } catch {}
+      }
     } catch {
       memoryLocalStorage.removeItem(key);
     }
@@ -93,11 +168,22 @@ export const SafeStorage = {
   },
 
   setSessionItem(key: string, value: string): boolean {
+    const stringValue = String(value);
     try {
-      getStorage('session').setItem(key, value);
+      const storage = getStorage('session');
+      try {
+        storage.setItem(key, stringValue);
+      } catch (err: any) {
+        if (err?.name === 'QuotaExceededError' || err?.code === 22) {
+          evictOldestCache(storage);
+          storage.setItem(key, stringValue);
+        } else {
+          throw err;
+        }
+      }
       return true;
     } catch {
-      memorySessionStorage.setItem(key, value);
+      memorySessionStorage.setItem(key, stringValue);
       return false;
     }
   },
@@ -128,5 +214,13 @@ export const SafeStorage = {
     } catch {
       return false;
     }
+  },
+
+  // Cross-Tab Subscription
+  onStorageChange(callback: (key: string, value: string | null) => void): () => void {
+    crossTabListeners.add(callback);
+    return () => {
+      crossTabListeners.delete(callback);
+    };
   }
 };

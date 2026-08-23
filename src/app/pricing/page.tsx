@@ -37,6 +37,7 @@ import { WorkloadEstimator } from '@/components/dashboard/WorkloadEstimator';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { SavingsJackpotReel } from '@/components/dashboard/SavingsJackpotReel';
 import { SpendAuditTool } from '@/components/dashboard/SpendAuditTool';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface VolumeTier {
   id: string;
@@ -278,13 +279,19 @@ export default function PricingPage() {
         <RateLockRibbon />
 
         {/* Casino-Grade Savings Winnings Jackpot & Multiplier Reel */}
-        <SavingsJackpotReel />
+        <ErrorBoundary name="Savings Jackpot Reel" autoRetry={true}>
+          <SavingsJackpotReel />
+        </ErrorBoundary>
 
         {/* Instant Monthly Invoice Spend Audit Tool */}
-        <SpendAuditTool />
+        <ErrorBoundary name="Spend Audit Tool" autoRetry={true}>
+          <SpendAuditTool />
+        </ErrorBoundary>
 
         {/* Non-Technical Real-World Business Workload Spend Translator */}
-        <WorkloadEstimator />
+        <ErrorBoundary name="Workload Estimator" autoRetry={true}>
+          <WorkloadEstimator />
+        </ErrorBoundary>
 
         {/* Interactive Compound Savings Simulator */}
         <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-8 border border-white/10">
@@ -617,9 +624,15 @@ export default function PricingPage() {
       </main>
 
       {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
-      <FloatingConversionDock />
-      <LiveActivityToast />
-      <ExitIntentModal />
+      <ErrorBoundary name="Floating Conversion Dock">
+        <FloatingConversionDock />
+      </ErrorBoundary>
+      <ErrorBoundary name="Live Activity Toast">
+        <LiveActivityToast />
+      </ErrorBoundary>
+      <ErrorBoundary name="Exit Intent Modal">
+        <ExitIntentModal />
+      </ErrorBoundary>
     </div>
   );
 }

@@ -36,6 +36,8 @@ import {
   Laptop,
   MessageSquare
 } from 'lucide-react';
+import { JargonBuster } from '@/components/common/JargonBuster';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { ShareButton } from '@/components/common/ShareButton';
 import { ReadingProgressBar } from '@/components/common/ReadingProgressBar';
 import { NoCodeSandboxWidget } from '@/components/dashboard/NoCodeSandboxWidget';
@@ -78,8 +80,8 @@ export default function DocsPage() {
     }
   };
 
-  const handleCopyToolSnippet = () => {
-    navigator.clipboard.writeText(toolSnippets[selectedTool].code);
+  const handleCopyToolSnippet = async () => {
+    await safeCopyToClipboard(toolSnippets[selectedTool].code);
     setCopiedSnippet(true);
     setTimeout(() => setCopiedSnippet(false), 2000);
   };

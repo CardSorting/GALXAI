@@ -24,6 +24,7 @@ import {
   Clock,
   Check
 } from 'lucide-react';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { ShareButton } from '@/components/common/ShareButton';
 
 interface GrantTier {
@@ -109,7 +110,7 @@ export default function GrantsPage() {
   const totalUsableCompute = calculatorSpend + calculatedMatchDollars;
   const estimatedAnnualSavings = Math.round(calculatorSpend * 0.35 * 12);
 
-  const handleCopySummary = () => {
+  const handleCopySummary = async () => {
     const summary = `GALXAI Builder & Scale Acceleration Grant Proposal
 -----------------------------------------------------------
 Requested Monthly Compute Budget: $${calculatorSpend.toLocaleString()} USD
@@ -120,7 +121,7 @@ Prompt Caching Pass-Through: 75% Automated Rebate
 SLA: 99.99% Enterprise Uptime with Sub-15ms Failover
 Claim Grant: https://galx.ai/grants`;
 
-    navigator.clipboard.writeText(summary);
+    await safeCopyToClipboard(summary);
     setCopiedGrantText(true);
     setTimeout(() => setCopiedGrantText(false), 2000);
   };

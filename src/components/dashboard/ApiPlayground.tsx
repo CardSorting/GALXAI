@@ -26,6 +26,8 @@ import {
   Compass
 } from 'lucide-react';
 import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/ModelCatalog';
+import { TrustSeals } from '@/components/common/TrustSeals';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface PromptPreset {
@@ -372,8 +374,8 @@ const res = await galx.chat.completions.create({
 // 3. API Key: ${apiKeyInput || 'galx_live_your_gateway_key'}`
   };
 
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText(snippets[codeTab]);
+  const handleCopyCode = async () => {
+    await safeCopyToClipboard(snippets[codeTab]);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2000);
   };

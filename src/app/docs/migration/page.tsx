@@ -16,6 +16,7 @@ import {
   ArrowRight,
   ShieldCheck
 } from 'lucide-react';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 export default function MigrationGuidePage() {
   const [activeSource, setActiveSource] = useState<
@@ -177,8 +178,8 @@ HEADER: Authorization: Bearer galx_live_your_gateway_key`
 
   const activeSnippet = migrationSnippets[activeSource];
 
-  const handleCopyEnv = () => {
-    navigator.clipboard.writeText(activeSnippet.env);
+  const handleCopyEnv = async () => {
+    await safeCopyToClipboard(activeSnippet.env);
     setCopiedDiff(true);
     setTimeout(() => setCopiedDiff(false), 2000);
   };

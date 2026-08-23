@@ -22,6 +22,7 @@ import {
   Flame
 } from 'lucide-react';
 import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
@@ -116,8 +117,8 @@ Max Output: 16384`
     }
   };
 
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
+  const handleCopy = async (text: string) => {
+    await safeCopyToClipboard(text);
     setCopiedKey(true);
     setTimeout(() => setCopiedKey(false), 2000);
   };

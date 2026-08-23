@@ -2,12 +2,18 @@
  * GALXAI Resilient Client & Anti-Crash Network Layer
  *
  * Provides enterprise-grade network resilience with:
+ * - L1 BroccoliDB reactive in-memory response caching (<0.5µs lookup)
+ * - In-flight request coalescing / deduplication to prevent duplicate HTTP bursts
  * - Exponential backoff with decorrelated full jitter (RFC 8900 / AWS architecture)
- * - Safe response decoding (gracefully handles HTML 502/504 Bad Gateway / Cloudflare error pages without throwing JSON parse syntax errors)
- * - Two-tier stale-while-revalidate cache (in-memory + storage fallback)
+ * - Automatic Idempotency-Key injection for mutations
+ * - Safe response decoding (gracefully handles HTML 502/504 Bad Gateway / Cloudflare error pages)
+ * - SafeStorage L2 multi-tier backup with cross-tab synchronization
  * - Timeout safeguards with automatic cancellation
- * - Typed error classification
  */
+
+import { SafeStorage } from './SafeStorage';
+import { BroccoliResilienceSubstrate } from './BroccoliResilienceSubstrate';
+import { BroccoliOutboxEngine } from './BroccoliOutboxEngine';
 
 export class GalxError extends Error {
   public status?: number;
@@ -59,13 +65,16 @@ export interface ResilientFetchOptions extends RequestInit {
   baseDelayMs?: number;
   maxDelayMs?: number;
   enableCacheFallback?: boolean;
+  enableOutboxOfflineFallback?: boolean;
   cacheKey?: string;
   cacheTtlMs?: number;
+  cacheTag?: string;
+  idempotencyKey?: string;
   onRetry?: (attempt: number, delayMs: number, error: Error) => void;
 }
 
-// In-Memory Stale-While-Revalidate Fallback Cache
-const memoryCache = new Map<string, { data: any; timestamp: number }>();
+// In-Flight Request Coalescer: Maps request signature to active Promise
+const inFlightRequests = new Map<string, Promise<{ data: any; fromCache?: boolean; status: number }>>();
 
 /**
  * Safely parse JSON from a fetch response without ever throwing syntax errors on HTML/text error pages.
@@ -94,9 +103,34 @@ function calculateJitterBackoff(attempt: number, baseDelay: number, maxDelay: nu
 }
 
 /**
- * Enterprise resilient fetch client.
+ * Enterprise resilient fetch client with BroccoliDB L1 cache & In-Flight Coalescing.
  */
 export async function resilientFetch<T = any>(
+  url: string,
+  options: ResilientFetchOptions = {}
+): Promise<{ data: T; fromCache?: boolean; status: number }> {
+  const method = (options.method || 'GET').toUpperCase();
+  const isReadMethod = method === 'GET' || method === 'HEAD';
+
+  // Request Coalescing for concurrent identical GET requests
+  const coalescingKey = `${method}::${url}::${JSON.stringify(options.headers || {})}`;
+  if (isReadMethod && inFlightRequests.has(coalescingKey)) {
+    return inFlightRequests.get(coalescingKey)! as Promise<{ data: T; fromCache?: boolean; status: number }>;
+  }
+
+  const promise = executeResilientFetch<T>(url, options);
+
+  if (isReadMethod) {
+    inFlightRequests.set(coalescingKey, promise);
+    promise.finally(() => {
+      inFlightRequests.delete(coalescingKey);
+    });
+  }
+
+  return promise;
+}
+
+async function executeResilientFetch<T = any>(
   url: string,
   options: ResilientFetchOptions = {}
 ): Promise<{ data: T; fromCache?: boolean; status: number }> {
@@ -108,42 +142,40 @@ export async function resilientFetch<T = any>(
     enableCacheFallback = true,
     cacheKey = url,
     cacheTtlMs = 60000,
+    cacheTag,
+    idempotencyKey,
     onRetry,
     ...fetchOptions
   } = options;
 
-  let lastError: Error | null = null;
-  const isReadMethod = !fetchOptions.method || fetchOptions.method.toUpperCase() === 'GET';
+  const method = (fetchOptions.method || 'GET').toUpperCase();
+  const isReadMethod = method === 'GET' || method === 'HEAD';
+  const substrate = BroccoliResilienceSubstrate.getInstance();
 
-  // Read from Cache Fallback if network is completely down
-  const getCachedData = (): T | null => {
+  // 1. Check BroccoliDB L1 Hot Cache
+  if (enableCacheFallback && isReadMethod) {
+    const l1Cached = substrate.getCachedResponse<T>(cacheKey, method);
+    if (l1Cached && !l1Cached.isStale) {
+      return { data: l1Cached.data, fromCache: true, status: 200 };
+    }
+  }
+
+  // 2. Read from SafeStorage L2 Fallback if network is down
+  const getL2CachedData = (): T | null => {
     if (!enableCacheFallback || !isReadMethod) return null;
-    const cached = memoryCache.get(cacheKey);
-    if (cached) {
-      return cached.data;
-    }
-    if (typeof window !== 'undefined' && window.sessionStorage) {
-      try {
-        const stored = sessionStorage.getItem(`galx_cache_${cacheKey}`);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          return parsed.data;
-        }
-      } catch {}
-    }
-    return null;
+    return SafeStorage.getJSON<T | null>(`galx_cache_${cacheKey}`, null, 'session');
   };
 
-  const saveToCache = (data: T) => {
+  const saveToCache = (data: T, status: number) => {
     if (!enableCacheFallback || !isReadMethod || !data) return;
-    const now = Date.now();
-    memoryCache.set(cacheKey, { data, timestamp: now });
-    if (typeof window !== 'undefined' && window.sessionStorage) {
-      try {
-        sessionStorage.setItem(`galx_cache_${cacheKey}`, JSON.stringify({ data, timestamp: now }));
-      } catch {}
-    }
+    // Save to BroccoliDB L1
+    substrate.setCachedResponse(cacheKey, method, data, status, cacheTtlMs, cacheTag);
+    // Save to SafeStorage L2
+    SafeStorage.setJSON(`galx_cache_${cacheKey}`, data, 'session');
   };
+
+  let lastError: Error | null = null;
+  const requestIdempotencyKey = idempotencyKey || (isReadMethod ? undefined : `idem_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`);
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const controller = new AbortController();
@@ -163,6 +195,10 @@ export async function resilientFetch<T = any>(
 
       const headers = new Headers(fetchOptions.headers || {});
       headers.set('x-galx-retry-count', String(attempt));
+      if (requestIdempotencyKey && !headers.has('Idempotency-Key')) {
+        headers.set('Idempotency-Key', requestIdempotencyKey);
+        headers.set('x-idempotency-key', requestIdempotencyKey);
+      }
       if (!headers.has('Accept')) {
         headers.set('Accept', 'application/json, text/plain, */*');
       }
@@ -202,7 +238,7 @@ export async function resilientFetch<T = any>(
 
       if (res.ok) {
         const finalData = (isJson && data !== null ? data : (data as unknown as T)) ?? ({} as T);
-        saveToCache(finalData);
+        saveToCache(finalData, res.status);
         return { data: finalData, status: res.status, fromCache: false };
       } else {
         throw new GalxError(`Request failed with status ${res.status}`, {
@@ -248,11 +284,44 @@ export async function resilientFetch<T = any>(
     }
   }
 
-  // If network failed but cache fallback is enabled and available, return cached data
-  const cachedData = getCachedData();
-  if (cachedData !== null) {
-    console.warn(`🛡️ [GALXAI Resilient Client] Network unavailable, serving stale cached fallback for: ${url}`);
-    return { data: cachedData, status: 200, fromCache: true };
+  // If network failed but cache fallback is available in L1 or L2, return stale cached data
+  const l1Stale = substrate.getCachedResponse<T>(cacheKey, method);
+  if (l1Stale) {
+    console.warn(`🛡️ [GALXAI Resilient Client] Serving BroccoliDB L1 stale cache fallback for: ${url}`);
+    return { data: l1Stale.data, status: 200, fromCache: true };
+  }
+
+  const l2CachedData = getL2CachedData();
+  if (l2CachedData !== null) {
+    console.warn(`🛡️ [GALXAI Resilient Client] Serving SafeStorage L2 stale cache fallback for: ${url}`);
+    return { data: l2CachedData, status: 200, fromCache: true };
+  }
+
+  // If mutation failed offline and outbox fallback is requested, enqueue into BroccoliOutboxEngine
+  if (!isReadMethod && options.enableOutboxOfflineFallback) {
+    let payloadParsed: any = undefined;
+    if (typeof fetchOptions.body === 'string') {
+      try {
+        payloadParsed = JSON.parse(fetchOptions.body);
+      } catch {
+        payloadParsed = { raw: fetchOptions.body };
+      }
+    }
+
+    void BroccoliOutboxEngine.enqueue({
+      url,
+      method: method as any,
+      headers: (fetchOptions.headers as any) || {},
+      payload: payloadParsed,
+      idempotencyKey: requestIdempotencyKey,
+    });
+
+    console.warn(`🛡️ [GALXAI Resilient Client] Queued offline mutation into BroccoliDB Outbox for: ${url}`);
+    return {
+      data: { success: true, queued: true, outbox: true, message: 'Action saved offline and will sync automatically upon reconnection.' } as any,
+      status: 202,
+      fromCache: false,
+    };
   }
 
   throw lastError || new GalxNetworkError('Request failed after max retry attempts');

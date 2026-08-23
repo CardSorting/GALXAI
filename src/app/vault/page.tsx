@@ -23,29 +23,29 @@ function BaseVaultPage() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const fetchShards = async () => {
+  const fetchShards = React.useCallback(async () => {
     try {
       const res = await resilientFetch<{ shards: GalxShardAccount[] }>('/api/shards', {
         enableCacheFallback: true,
       });
       setShards(res.data?.shards || []);
     } catch {}
-  };
+  }, []);
 
-  const fetchStats = async () => {
+  const fetchStats = React.useCallback(async () => {
     try {
       const res = await resilientFetch<PoolStats>('/api/pool/stats', {
         enableCacheFallback: true,
       });
       setStats(res.data);
     } catch {}
-  };
+  }, []);
 
-  const refreshAll = async () => {
+  const refreshAll = React.useCallback(async () => {
     setIsLoading(true);
     await Promise.all([fetchShards(), fetchStats()]);
     setIsLoading(false);
-  };
+  }, [fetchShards, fetchStats]);
 
   useEffect(() => {
     refreshAll();
@@ -56,7 +56,7 @@ function BaseVaultPage() {
       }
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [refreshAll, fetchShards, fetchStats]);
 
   const handleToggleMode = async (id: string, currentMode: 'pooled' | 'private') => {
     const nextMode = currentMode === 'private' ? 'pooled' : 'private';

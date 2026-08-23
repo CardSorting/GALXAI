@@ -21,6 +21,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
@@ -127,8 +128,8 @@ curl --retry 5 \\
     }
   };
 
-  const handleCopy = (code: string) => {
-    navigator.clipboard.writeText(code);
+  const handleCopy = async (code: string) => {
+    await safeCopyToClipboard(code);
     setCopiedKey(true);
     setTimeout(() => setCopiedKey(false), 2000);
   };

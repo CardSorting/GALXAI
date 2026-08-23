@@ -41,6 +41,7 @@ import {
   Users
 } from 'lucide-react';
 import { TrustSeals } from '@/components/common/TrustSeals';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface TierSpec {
   amount: number;
@@ -629,12 +630,14 @@ function CheckoutContent() {
 
 export default function CheckoutPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-[#07080d] flex items-center justify-center text-zinc-400 font-mono text-xs">
-        Loading secure checkout...
-      </div>
-    }>
-      <CheckoutContent />
-    </Suspense>
+    <ErrorBoundary name="Checkout Page">
+      <Suspense fallback={
+        <div className="min-h-screen bg-[#07080d] flex items-center justify-center text-zinc-400 font-mono text-xs">
+          Loading secure checkout...
+        </div>
+      }>
+        <CheckoutContent />
+      </Suspense>
+    </ErrorBoundary>
   );
 }

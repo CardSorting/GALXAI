@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { formatNumber, formatTimeAgo } from '@/lib/utils';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
+import { resilientFetch } from '@/lib/resilience/ResilientClient';
 
 export default function ShardDetailPage() {
   const params = useParams();
@@ -37,28 +38,27 @@ export default function ShardDetailPage() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const fetchShard = async () => {
+  const fetchShard = React.useCallback(async () => {
     try {
-      const res = await fetch('/api/shards');
-      const data = await res.json();
-      const found = data.shards?.find((s: any) => s.id === shardId);
+      const res = await resilientFetch<{ shards: any[] }>('/api/shards', { enableCacheFallback: true });
+      const found = res.data.shards?.find((s: any) => s.id === shardId);
       setShard(found || null);
     } catch {} finally {
       setIsLoading(false);
     }
-  };
+  }, [shardId]);
 
   useEffect(() => {
     fetchShard();
     const interval = setInterval(fetchShard, 3000);
     return () => clearInterval(interval);
-  }, [shardId]);
+  }, [fetchShard]);
 
   const handleToggleMode = async () => {
     if (!shard) return;
     const nextMode = shard.shardMode === 'private' ? 'pooled' : 'private';
     try {
-      await fetch(`/api/shards/${shard.id}`, {
+      await resilientFetch(`/api/shards/${shard.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -76,13 +76,12 @@ export default function ShardDetailPage() {
   const handleRetract = async () => {
     if (!shard) return;
     try {
-      const res = await fetch(`/api/shards/${shard.id}/retract`, {
+      const res = await resilientFetch<{ success: boolean }>(`/api/shards/${shard.id}/retract`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: shard.userId })
       });
-      const data = await res.json();
-      if (data.success) {
+      if (res.data.success) {
         showToast('🛑 1-Click Retraction: Shard evicted and memory zeroized');
         setTimeout(() => router.push('/vault'), 1000);
       }

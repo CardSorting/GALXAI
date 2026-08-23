@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
+import { BroccoliResilienceSubstrate } from '@/lib/resilience/BroccoliResilienceSubstrate';
 
 interface RouteErrorBoundaryCardProps {
   error: Error & { digest?: string };
@@ -47,8 +48,18 @@ export function RouteErrorBoundaryCard({
   const [countdown, setCountdown] = useState(autoRetrySeconds);
   const [autoRetryEnabled, setAutoRetryEnabled] = useState(true);
 
-  // Network online/offline auto-sensing
+  // Network online/offline auto-sensing & SLA probe telemetry
   useEffect(() => {
+    try {
+      BroccoliResilienceSubstrate.getInstance().recordSlaProbe({
+        endpoint: `route-error://${title}`,
+        status: 'degraded',
+        latencyMs: 1,
+        success: false,
+        timestampMs: Date.now(),
+      });
+    } catch {}
+
     if (typeof window === 'undefined') return;
 
     setIsOnline(navigator.onLine);
@@ -71,7 +82,7 @@ export function RouteErrorBoundaryCard({
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [reset]);
+  }, [reset, title]);
 
   // Auto-retry countdown timer
   useEffect(() => {

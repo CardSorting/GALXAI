@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { resilientFetch, ResilientFetchOptions } from './ResilientClient';
+import { BroccoliResilienceSubstrate } from './BroccoliResilienceSubstrate';
 
 export interface UseResilientQueryOptions<T> extends ResilientFetchOptions {
   enabled?: boolean;
@@ -50,6 +51,8 @@ export function useResilientQuery<T = any>(
   const isMountedRef = useRef(true);
   const optionsRef = useRef(options);
   optionsRef.current = options;
+  const fetchOptionsRef = useRef(fetchOptions);
+  fetchOptionsRef.current = fetchOptions;
 
   const executeFetch = useCallback(
     async (isBackground = false) => {
@@ -62,7 +65,7 @@ export function useResilientQuery<T = any>(
       }
 
       try {
-        const result = await resilientFetch<T>(url, fetchOptions);
+        const result = await resilientFetch<T>(url, fetchOptionsRef.current);
 
         if (!isMountedRef.current) return;
 

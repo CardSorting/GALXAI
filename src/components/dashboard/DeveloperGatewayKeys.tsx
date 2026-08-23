@@ -6,6 +6,7 @@ import { formatTimeAgo } from '@/lib/utils';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 function BaseDeveloperGatewayKeys() {
@@ -84,8 +85,8 @@ function BaseDeveloperGatewayKeys() {
     }
   };
 
-  const handleCopy = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
+  const handleCopy = async (text: string, id: string) => {
+    await safeCopyToClipboard(text);
     setCopiedKey(id);
     setTimeout(() => setCopiedKey(null), 2000);
   };

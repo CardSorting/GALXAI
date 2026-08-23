@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   Cpu
 } from 'lucide-react';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 export default function PythonSdkDocsPage() {
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
@@ -83,8 +84,8 @@ client = OpenAI(
 )`
   };
 
-  const handleCopy = (code: string, id: string) => {
-    navigator.clipboard.writeText(code);
+  const handleCopy = async (code: string, id: string) => {
+    await safeCopyToClipboard(code);
     setCopiedSection(id);
     setTimeout(() => setCopiedSection(null), 2000);
   };
