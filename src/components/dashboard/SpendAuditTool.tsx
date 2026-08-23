@@ -159,7 +159,7 @@ function BaseSpendAuditTool() {
           href="/keys/new"
           className="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/25 cursor-pointer"
         >
-          <span>Claim My ${monthlySaved.toFixed(0)} Monthly Savings ($5 Free Key)</span>
+          <span>Claim My ${monthlySaved.toFixed(0)} Monthly Savings (Claim Key)</span>
           <ArrowRight className="w-4 h-4 text-black" />
         </Link>
       </div>

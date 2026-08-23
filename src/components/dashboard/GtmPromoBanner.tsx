@@ -94,7 +94,7 @@ function BaseGtmPromoBanner() {
             href="/keys/new"
             className="px-3.5 py-1 rounded-lg bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 hover:from-amber-300 hover:to-orange-300 text-black font-black text-[11px] sm:text-xs tracking-tight shadow-md shadow-amber-500/20 active:scale-[0.98] transition-all flex items-center gap-1 whitespace-nowrap cursor-pointer"
           >
-            <span>Claim $5 Free Credit</span>
+            <span>Claim Key ($5 Credit)</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
 

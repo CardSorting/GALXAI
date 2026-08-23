@@ -260,7 +260,7 @@ function BaseSavingsJackpotReel() {
           className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-xl shadow-amber-500/30 font-mono cursor-pointer hover:scale-105 active:scale-95"
         >
           <Zap className="w-4 h-4 text-black fill-black" />
-          <span>Lock In {currentTier.multiplier}x Multiplier &amp; Mint Free Key</span>
+          <span>Lock In {currentTier.multiplier}x Multiplier &amp; Claim Key</span>
           <ArrowRight className="w-4 h-4 text-black" />
         </Link>
       </div>

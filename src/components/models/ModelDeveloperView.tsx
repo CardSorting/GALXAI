@@ -59,7 +59,7 @@ export function ModelDeveloperView({ model, triggerCopy, copiedKey }: ModelDevel
               href="/keys/new"
               className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-bold font-mono pt-1"
             >
-              <span>Generate Free Key →</span>
+              <span>Claim Key ($5 Credit) →</span>
             </Link>
           </div>
 

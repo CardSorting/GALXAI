@@ -182,7 +182,7 @@ export async function runAgentWorkflow(task: string) {
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase font-mono tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 fill-black" />
-              <span>Get Free Key ($5 Credit)</span>
+              <span>Claim Key ($5 Credit)</span>
             </Link>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white">AI Agents &amp; Autonomous Swarms Hub</h1>

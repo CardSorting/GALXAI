@@ -309,7 +309,7 @@ console.log(response.choices[0].message.content);`;
                 className="p-4 rounded-2xl bg-black/60 hover:bg-black/80 border border-emerald-500/40 text-emerald-300 font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-105"
               >
                 <Zap className="w-4 h-4 text-emerald-400 fill-emerald-400" />
-                <span>Mint $5 Free Key</span>
+                <span>Claim Key ($5 Credit)</span>
               </Link>
             </div>
 

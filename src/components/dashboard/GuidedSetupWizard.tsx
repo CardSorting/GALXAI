@@ -206,7 +206,7 @@ function BaseGuidedSetupWizard() {
           className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider font-mono shadow-md flex items-center gap-1.5 shrink-0 self-start md:self-auto cursor-pointer"
         >
           <Key className="w-3.5 h-3.5 text-black" />
-          <span>Get Free Key ($5 Credit)</span>
+          <span>Claim Key ($5 Credit)</span>
           <ArrowRight className="w-3.5 h-3.5 text-black" />
         </Link>
       </div>

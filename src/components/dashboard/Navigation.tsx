@@ -254,7 +254,7 @@ function BaseNavigation() {
               className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 hover:from-amber-300 hover:to-orange-300 text-black font-black text-xs font-sans tracking-tight shadow-md shadow-amber-500/20 active:scale-[0.98] transition-all cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 fill-black text-black" />
-              <span>Claim $5 Free Credit</span>
+              <span>Claim Key ($5 Credit)</span>
             </Link>
 
             {/* Mobile Drawer Trigger */}
@@ -302,7 +302,7 @@ function BaseNavigation() {
               onClick={() => setMobileMenuOpen(false)}
               className="block mt-2 px-3.5 py-2.5 rounded-xl text-xs font-bold text-center bg-gradient-to-r from-amber-400 to-orange-500 text-black font-sans shadow-md"
             >
-              Claim $5 Free Credit (No Card Required) →
+              Claim Key ($5 Credit Included) →
             </Link>
           </div>
         )}
