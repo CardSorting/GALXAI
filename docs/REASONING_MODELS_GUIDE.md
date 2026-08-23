@@ -76,6 +76,7 @@ for chunk in stream:
 
 | Model ID | Provider | Context Window | Max Output | Reasoning Strength | Latency Profile | Best For |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `gpt-5.6-sol` | OpenAI | $372,000$ | $32,768$ | **Maximum (Apex)** | Deep Exploration ($\sim 3-10\text{s}$ TTFT) | Complex Math, Compilers, Architecture Design |
-| `gpt-5.6-terra` | OpenAI | $186,000$ | $16,384$ | **High (Balanced)** | Fast ($\sim 1-3\text{s}$ TTFT) | Automated CI/CD, Code Review, Agent Planning |
+| `gpt-5.6-sol` | OpenAI | $900,000$ | $32,768$ | **Maximum (Apex)** | Deep Exploration ($\sim 3-10\text{s}$ TTFT) | Complex Math, Compilers, Architecture Design |
+| `gpt-5.6-terra` | OpenAI | $900,000$ | $16,384$ | **High (Balanced)** | Fast ($\sim 1-3\text{s}$ TTFT) | Automated CI/CD, Code Review, Agent Planning |
+| `x-ai/grok-4.6` | xAI Grok | $1,000,000$ | $128,000$ | **Maximum (Apex)** | Ultra-Scale ($\sim 2-4\text{s}$ TTFT) | 1M Extreme Document Reasoning, Tool Orchestration |
 | `x-ai/grok-4.5` | xAI Grok | $500,000$ | $32,768$ | **Maximum (Apex)** | High-Throughput ($\sim 2-5\text{s}$ TTFT) | 500K Massive Document Search, Multimodal Logic |

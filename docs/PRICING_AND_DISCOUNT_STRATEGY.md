@@ -51,9 +51,10 @@ Rebates scale automatically with monthly token volume without requiring sales ca
 ### Flagship Reasoning & LLM Fleet
 | Model ID | Provider | Context Window | Retail List Rate (In / Out) | GALXAI Base Rate | Cached Prompt Rate | Max Savings (Enterprise) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `gpt-5.6-sol` | OpenAI | $372,000$ | $5.00 / $20.00 | **$3.75 / $15.00** | **$0.93 / 1M** | **Up to 40% OFF** |
-| `gpt-5.6-terra` | OpenAI | $372,000$ | $3.00 / $12.00 | **$2.25 / $9.00** | **$0.56 / 1M** | **Up to 40% OFF** |
-| `gpt-5.6-luna` | OpenAI | $372,000$ | $1.50 / $6.00 | **$0.95 / $3.80** | **$0.24 / 1M** | **Up to 51% OFF** |
+| `gpt-5.6-sol` | OpenAI | $900,000$ | $5.00 / $20.00 | **$3.75 / $15.00** | **$0.93 / 1M** | **Up to 40% OFF** |
+| `gpt-5.6-terra` | OpenAI | $900,000$ | $3.00 / $12.00 | **$2.25 / $9.00** | **$0.56 / 1M** | **Up to 40% OFF** |
+| `gpt-5.6-luna` | OpenAI | $900,000$ | $1.50 / $6.00 | **$0.95 / $3.80** | **$0.24 / 1M** | **Up to 51% OFF** |
+| `x-ai/grok-4.6` | xAI Grok | $1,000,000$ | $3.00 / $12.00 | **$2.10 / $8.40** | **$0.52 / 1M** | **Up to 45% OFF** |
 | `x-ai/grok-4.5` | xAI Grok | $500,000$ | $2.50 / $10.00 | **$1.80 / $7.20** | **$0.45 / 1M** | **Up to 43% OFF** |
 
 ### Visual Synthesis & Image Generation Fleet

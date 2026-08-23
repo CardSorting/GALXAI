@@ -159,6 +159,7 @@ export class GalxEdgeGateway {
     const models = [
       { id: 'gpt-5.6-sol', object: 'model', owned_by: 'galxai-openai', pricing_tier: 'wholesale' },
       { id: 'gpt-5.6-nova', object: 'model', owned_by: 'galxai-openai', pricing_tier: 'wholesale' },
+      { id: 'x-ai/grok-4.6', object: 'model', owned_by: 'galxai-xai', pricing_tier: 'wholesale' },
       { id: 'x-ai/grok-4.5', object: 'model', owned_by: 'galxai-xai', pricing_tier: 'wholesale' },
       { id: 'dall-e-3', object: 'model', owned_by: 'galxai-openai', pricing_tier: 'wholesale' }
     ];

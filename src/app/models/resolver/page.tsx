@@ -17,7 +17,7 @@ export default function ModelResolverPage() {
 
   const resolved = ModelCatalog.resolveModel(query.trim());
 
-  const quickAliases = ['sol', 'terra', 'luna', 'grok', 'grok-4.5', 'gpt-image-2', 'dalle-3', 'imagine'];
+  const quickAliases = ['sol', 'terra', 'luna', 'grok', 'grok-4.6', 'grok-4.5', 'gpt-image-2', 'dalle-3', 'imagine'];
 
   return (
     <div className="min-h-screen flex flex-col">

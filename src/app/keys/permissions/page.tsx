@@ -31,6 +31,7 @@ export default function KeyPermissionsPage() {
     { id: 'gpt-5.6-sol', label: 'OpenAI GPT-5.6 Sol (Coding & Reasoning)' },
     { id: 'gpt-5.6-terra', label: 'OpenAI GPT-5.6 Terra (Balanced Frontier)' },
     { id: 'gpt-5.6-luna', label: 'OpenAI GPT-5.6 Luna (Sub-second Velocity)' },
+    { id: 'grok-4.6', label: 'xAI Grok 4.6 (1M Frontier Multimodal Reasoning)' },
     { id: 'grok-4.5', label: 'xAI Grok 4.5 (500K Multimodal Context)' },
     { id: 'gpt-image-2', label: 'OpenAI GPT-Image-2 (Visual Synthesis)' }
   ];

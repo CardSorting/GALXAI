@@ -536,16 +536,30 @@ async function runAllTests() {
     const sol = ModelCatalog.resolveModel('gpt-5.6-sol');
     assert.strictEqual(sol?.id, 'gpt-5.6-sol');
     assert.strictEqual(sol?.provider, 'openai');
-    assert.strictEqual(sol?.contextWindowTokens, 372_000);
+    assert.strictEqual(sol?.contextWindowTokens, 900_000);
     assert.strictEqual(sol?.discountPercentage, 25);
 
     const terra = ModelCatalog.resolveModel('terra');
     assert.strictEqual(terra?.id, 'gpt-5.6-terra');
     assert.strictEqual(terra?.provider, 'openai');
+    assert.strictEqual(terra?.contextWindowTokens, 900_000);
 
     const luna = ModelCatalog.resolveModel('luna');
     assert.strictEqual(luna?.id, 'gpt-5.6-luna');
     assert.strictEqual(luna?.provider, 'openai');
+    assert.strictEqual(luna?.contextWindowTokens, 900_000);
+
+    const grok46 = ModelCatalog.resolveModel('grok-4.6');
+    assert.strictEqual(grok46?.id, 'x-ai/grok-4.6');
+    assert.strictEqual(grok46?.provider, 'xai-grok');
+    assert.strictEqual(grok46?.contextWindowTokens, 1_000_000);
+    assert.strictEqual(grok46?.discountPercentage, 30);
+
+    const grokAlias = ModelCatalog.resolveModel('grok');
+    assert.strictEqual(grokAlias?.id, 'x-ai/grok-4.6');
+
+    const grokDirect = ModelCatalog.resolveModel('x-ai/grok-4.6');
+    assert.strictEqual(grokDirect?.id, 'x-ai/grok-4.6');
 
     const grok = ModelCatalog.resolveModel('grok-4.5');
     assert.strictEqual(grok?.id, 'x-ai/grok-4.5');

@@ -7,7 +7,7 @@ import type { DbQueryOptions, DbAggregateQuery } from '../broccolidb/broccolidb.
  * Exclusive Model Catalog for GALXAI.
  * Houses only the requested flagship modern generation LLMs & visual synthesis engines:
  * - OpenAI Codex: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `openai-gpt-image-2`, `openai-gpt-image-1.5`, `openai-gpt-image-1`, `openai-gpt4o-image`, `openai-dalle-3`, `openai-dalle-2`, `text-embedding-3-small`, `text-embedding-3-large`
- * - xAI Grok: `x-ai/grok-4.5`, `xai-grok-image`, `xai-grok-2-image`
+ * - xAI Grok: `x-ai/grok-4.6`, `x-ai/grok-4.5`, `xai-grok-image`, `xai-grok-2-image`
  *
  * Features competitive pricing with 20-36% discount vs direct list price + 75% prompt caching discount.
  */
@@ -19,7 +19,7 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     name: 'OpenAI Codex GPT-5.6 Sol (Flagship SOTA)',
     provider: 'openai',
     category: 'llm',
-    contextWindowTokens: 372_000,
+    contextWindowTokens: 900_000,
     maxOutputTokens: 128_000,
     listPricePer1MInput: 5.0,
     listPricePer1MOutput: 20.0,
@@ -38,7 +38,7 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     name: 'OpenAI Codex GPT-5.6 Terra (Balanced Frontier)',
     provider: 'openai',
     category: 'llm',
-    contextWindowTokens: 372_000,
+    contextWindowTokens: 900_000,
     maxOutputTokens: 128_000,
     listPricePer1MInput: 3.0,
     listPricePer1MOutput: 12.0,
@@ -57,7 +57,7 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     name: 'OpenAI Codex GPT-5.6 Luna (High-Velocity)',
     provider: 'openai',
     category: 'llm',
-    contextWindowTokens: 372_000,
+    contextWindowTokens: 900_000,
     maxOutputTokens: 128_000,
     listPricePer1MInput: 1.5,
     listPricePer1MOutput: 6.0,
@@ -72,6 +72,25 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
   },
 
   // --- 2. xAI Grok Flagship SOTA Reasoning Suite ---
+  {
+    id: 'x-ai/grok-4.6',
+    upstreamId: 'grok-4.6',
+    name: 'xAI Grok 4.6 (1M Frontier Multimodal Reasoning)',
+    provider: 'xai-grok',
+    category: 'llm',
+    contextWindowTokens: 1_000_000,
+    maxOutputTokens: 128_000,
+    listPricePer1MInput: 3.0,
+    listPricePer1MOutput: 12.0,
+    inputPricePer1M: 2.10, // 30% Discount
+    outputPricePer1M: 8.40, // 30% Discount
+    cachedInputPricePer1M: 0.70, // 76% Caching Discount
+    discountPercentage: 30,
+    supportsVision: true,
+    supportsReasoning: true,
+    supportsStreaming: true,
+    description: 'xAI next-generation flagship model with massive 1M context window, frontier reasoning, extreme tool orchestration, and multimodal comprehension.'
+  },
   {
     id: 'x-ai/grok-4.5',
     upstreamId: 'grok-4.5',
@@ -277,9 +296,16 @@ export class ModelCatalog {
       'gpt-terra': 'gpt-5.6-terra',
       'luna': 'gpt-5.6-luna',
       'gpt-luna': 'gpt-5.6-luna',
-      'grok': 'x-ai/grok-4.5',
+      'grok': 'x-ai/grok-4.6',
+      'grok-4.6': 'x-ai/grok-4.6',
+      'grok4.6': 'x-ai/grok-4.6',
+      'grok4-6': 'x-ai/grok-4.6',
+      'xai-grok-4.6': 'x-ai/grok-4.6',
+      'xai/grok-4.6': 'x-ai/grok-4.6',
       'grok-4.5': 'x-ai/grok-4.5',
       'grok4.5': 'x-ai/grok-4.5',
+      'xai-grok-4.5': 'x-ai/grok-4.5',
+      'xai/grok-4.5': 'x-ai/grok-4.5',
       'grok-image': 'xai-grok-image',
       'grok-imagine': 'xai-grok-image',
       'imagine': 'xai-grok-image',

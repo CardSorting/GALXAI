@@ -25,9 +25,10 @@ OPENAI_API_KEY=galx_live_your_gateway_key_here
 
 | Previous Provider / Model | Recommended GALXAI Model ID | Key Upgrades |
 | :--- | :--- | :--- |
-| `o1`, `o1-preview`, `o3-mini` | `gpt-5.6-sol` | 372K context, faster TTFT, 25% lower pricing |
-| `gpt-4o`, `gpt-4o-2024-11-20` | `gpt-5.6-terra` | 186K context, balanced cost and speed |
-| `gpt-4o-mini` | `gpt-5.6-luna` | 93K context, ultra-low $0.11/1M input pricing |
+| `o1`, `o1-preview`, `o3-mini` | `gpt-5.6-sol` | 900K context, faster TTFT, 25% lower pricing |
+| `gpt-4o`, `gpt-4o-2024-11-20` | `gpt-5.6-terra` | 900K context, balanced cost and speed |
+| `gpt-4o-mini` | `gpt-5.6-luna` | 900K context, ultra-low $0.11/1M input pricing |
+| `grok-3`, `grok-2` | `x-ai/grok-4.6` | Massive 1M context, frontier multimodal reasoning |
 | `grok-beta`, `grok-2` | `x-ai/grok-4.5` | Massive 500K context, native visual reasoning |
 | `dall-e-3` | `openai-dalle-3` / `openai-gpt-image-2` | Multi-resolution, 25% discount |
 

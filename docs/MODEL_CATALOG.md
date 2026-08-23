@@ -8,7 +8,7 @@ GALXAI exclusively routes traffic across 12 flagship models spanning advanced re
 
 ### 🌟 `gpt-5.6-sol` (OpenAI Flagship Deep Reasoning)
 - **Primary Use Case**: Complex mathematics, architectural planning, multi-step formal reasoning, large-scale codebase refactoring.
-- **Context Window**: $372,000$ tokens
+- **Context Window**: $900,000$ tokens
 - **Max Output Tokens**: $32,768$ tokens
 - **Modality Support**: Text, Vision, Reasoning CoT, JSON Schema, Function Calling, Streaming.
 - **Pricing**: Input: **$2.25** / 1M tokens (25% off list $3.00) \| Output: **$9.00** / 1M tokens (25% off list $12.00).
@@ -17,7 +17,7 @@ GALXAI exclusively routes traffic across 12 flagship models spanning advanced re
 
 ### 🌍 `gpt-5.6-terra` (OpenAI Balanced General Intelligence)
 - **Primary Use Case**: High-velocity agentic workflows, conversational assistants, continuous CI/CD automated review.
-- **Context Window**: $186,000$ tokens
+- **Context Window**: $900,000$ tokens
 - **Max Output Tokens**: $16,384$ tokens
 - **Modality Support**: Text, Vision, Function Calling, Streaming.
 - **Pricing**: Input: **$1.15** / 1M tokens (23% off list $1.50) \| Output: **$4.60** / 1M tokens (23% off list $6.00).
@@ -26,10 +26,19 @@ GALXAI exclusively routes traffic across 12 flagship models spanning advanced re
 
 ### 🌙 `gpt-5.6-luna` (OpenAI High-Speed Lightweight Engine)
 - **Primary Use Case**: Real-time autocomplete, intent routing, low-latency streaming chat, high-throughput text classification.
-- **Context Window**: $93,000$ tokens
+- **Context Window**: $900,000$ tokens
 - **Max Output Tokens**: $8,192$ tokens
 - **Modality Support**: Text, Structured Outputs, Streaming.
 - **Pricing**: Input: **$0.11** / 1M tokens (27% off list $0.15) \| Output: **$0.45** / 1M tokens (25% off list $0.60).
+
+---
+
+### ⚡ `x-ai/grok-4.6` (xAI Grok 4.6 Frontier Multimodal & Reasoning)
+- **Primary Use Case**: Massive 1M context analysis, frontier reasoning, autonomous tool execution, complex document synthesis.
+- **Context Window**: $1,000,000$ tokens
+- **Max Output Tokens**: $128,000$ tokens
+- **Modality Support**: Text, Vision, Streaming, Code Generation, Tool Calling.
+- **Pricing**: Input: **$2.10** / 1M tokens (30% off list $3.00) \| Output: **$8.40** / 1M tokens (30% off list $12.00).
 
 ---
 
@@ -38,7 +47,7 @@ GALXAI exclusively routes traffic across 12 flagship models spanning advanced re
 - **Context Window**: $500,000$ tokens
 - **Max Output Tokens**: $32,768$ tokens
 - **Modality Support**: Text, Vision, Streaming, Code Generation.
-- **Pricing**: Input: **$2.15** / 1M tokens (28% off list $3.00) \| Output: **$8.60** / 1M tokens (28% off list $12.00).
+- **Pricing**: Input: **$1.80** / 1M tokens (28% off list $2.50) \| Output: **$7.20** / 1M tokens (28% off list $10.00).
 
 ---
 
@@ -66,7 +75,8 @@ The router automatically normalizes common short-hand aliases to their canonical
 | `sol`, `gpt-sol`, `gpt-5-sol` | `gpt-5.6-sol` |
 | `terra`, `gpt-terra` | `gpt-5.6-terra` |
 | `luna`, `gpt-luna` | `gpt-5.6-luna` |
-| `grok`, `grok-4.5`, `xai/grok` | `x-ai/grok-4.5` |
+| `grok`, `grok-4.6`, `xai/grok-4.6`, `xai-grok-4.6` | `x-ai/grok-4.6` |
+| `grok-4.5`, `xai/grok-4.5`, `xai-grok-4.5` | `x-ai/grok-4.5` |
 | `dalle-3`, `dall-e-3` | `openai-dalle-3` |
 | `dalle-2`, `dall-e-2` | `openai-dalle-2` |
 | `grok-image`, `grok-imagine` | `xai-grok-image` |

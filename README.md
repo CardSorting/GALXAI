@@ -30,10 +30,11 @@ GALXAI routes traffic across 12 exclusive flagship LLM and Visual Synthesis engi
 ### 🧠 Flagship Reasoning & LLM Engines
 | Model ID | Provider | Context Window | Max Output | Input Price / 1M | Output Price / 1M | Discount |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `gpt-5.6-sol` | OpenAI | 372,000 | 32,768 | **$2.25** | **$9.00** | **25% OFF** |
-| `gpt-5.6-terra` | OpenAI | 186,000 | 16,384 | **$1.15** | **$4.60** | **23% OFF** |
-| `gpt-5.6-luna` | OpenAI | 93,000 | 8,192 | **$0.11** | **$0.45** | **27% OFF** |
-| `x-ai/grok-4.5` | xAI Grok | 500,000 | 32,768 | **$2.15** | **$8.60** | **28% OFF** |
+| `gpt-5.6-sol` | OpenAI | 900,000 | 32,768 | **$2.25** | **$9.00** | **25% OFF** |
+| `gpt-5.6-terra` | OpenAI | 900,000 | 16,384 | **$1.15** | **$4.60** | **23% OFF** |
+| `gpt-5.6-luna` | OpenAI | 900,000 | 8,192 | **$0.11** | **$0.45** | **27% OFF** |
+| `x-ai/grok-4.6` | xAI Grok | 1,000,000 | 128,000 | **$2.10** | **$8.40** | **30% OFF** |
+| `x-ai/grok-4.5` | xAI Grok | 500,000 | 32,768 | **$1.80** | **$7.20** | **28% OFF** |
 
 ### 🎨 Visual Synthesis Engines
 | Model ID | Provider | Resolution | List Price / Img | GALXAI Price / Img | Discount |

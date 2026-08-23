@@ -20,9 +20,8 @@ export async function generateStaticParams() {
 
 export default async function Image({ params }: Props) {
   const { id } = await params;
-  const canonicalId = id.replace('-', '/');
   const model = EXCLUSIVE_MODEL_CATALOG.find(
-    (m) => m.id === canonicalId || m.id === id || m.upstreamId === id
+    (m) => m.id === id || m.id.replace('/', '-') === id || m.upstreamId === id
   ) || EXCLUSIVE_MODEL_CATALOG[0];
 
   const isGrok = model.provider === 'xai-grok';

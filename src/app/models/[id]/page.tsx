@@ -41,10 +41,9 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: ModelDetailPageProps): Promise<Metadata> {
   const { id } = await params;
-  const canonicalId = id.replace('-', '/');
   const model = EXCLUSIVE_MODEL_CATALOG.find(
-    m => m.id === canonicalId || m.id === id || m.upstreamId === id
-  );
+    m => m.id === id || m.id.replace('/', '-') === id || m.upstreamId === id
+  ) || ModelCatalog.resolveModel(id);
 
   if (!model) {
     return { title: 'Model Not Found | GALXAI' };
@@ -59,10 +58,9 @@ export async function generateMetadata({ params }: ModelDetailPageProps): Promis
 
 export default async function ModelDetailPage({ params }: ModelDetailPageProps) {
   const { id } = await params;
-  const canonicalId = id.replace('-', '/');
   const model = EXCLUSIVE_MODEL_CATALOG.find(
-    m => m.id === canonicalId || m.id === id || m.upstreamId === id
-  );
+    m => m.id === id || m.id.replace('/', '-') === id || m.upstreamId === id
+  ) || ModelCatalog.resolveModel(id);
 
   if (!model) {
     notFound();

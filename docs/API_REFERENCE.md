@@ -33,9 +33,10 @@ Standard OpenAI-compatible chat completion endpoint with automatic quota cycling
 ```
 
 ### Supported Models
-- `gpt-5.6-sol` (OpenAI Flagship Reasoning, 372K context)
-- `gpt-5.6-terra` (OpenAI Balanced LLM, 186K context)
-- `gpt-5.6-luna` (OpenAI High-Speed Lightweight, 93K context)
+- `gpt-5.6-sol` (OpenAI Flagship Reasoning, 900K context)
+- `gpt-5.6-terra` (OpenAI Balanced LLM, 900K context)
+- `gpt-5.6-luna` (OpenAI High-Speed Lightweight, 900K context)
+- `x-ai/grok-4.6` (xAI Grok Frontier Reasoning & Multimodal, 1M context)
 - `x-ai/grok-4.5` (xAI Grok Reasoning & Vision, 500K context)
 
 ### Response (Streaming SSE)
@@ -119,7 +120,7 @@ Returns the exclusive 12-model fleet with pricing, context limits, and capabilit
       "object": "model",
       "created": 1700000000,
       "owned_by": "openai",
-      "context_window": 372000,
+      "context_window": 900000,
       "pricing": {
         "input_per_1m": 2.25,
         "output_per_1m": 9.00,

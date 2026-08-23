@@ -114,7 +114,7 @@ https://api.galx.ai/v1
 ${prefix}...
 
 // 3. Available Models:
-gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.5`,
+gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.6, x-ai/grok-4.5`,
     continue: `{
   "models": [
     {

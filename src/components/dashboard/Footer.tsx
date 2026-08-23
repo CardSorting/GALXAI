@@ -41,6 +41,7 @@ export function Footer() {
       { name: 'OpenAI GPT-5.6 Sol', href: '/models/gpt-5.6-sol', note: 'Reasoning & Coding' },
       { name: 'OpenAI GPT-5.6 Terra', href: '/models/gpt-5.6-terra', note: 'Balanced Frontier' },
       { name: 'OpenAI GPT-5.6 Luna', href: '/models/gpt-5.6-luna', note: 'Sub-second Speed' },
+      { name: 'xAI Grok 4.6 (1M)', href: '/models/x-ai-grok-4.6', note: 'Frontier Reasoning' },
       { name: 'xAI Grok 4.5 (500K)', href: '/models/x-ai-grok-4.5', note: 'Multimodal' },
       { name: 'OpenAI GPT-Image-2', href: '/models/openai-gpt-image-2', note: 'Visual Engine' },
       { name: 'OpenAI DALL-E 3', href: '/models/openai-dalle-3', note: 'High Definition' },
