@@ -40,17 +40,17 @@ export function DocsFeedback({ docTitle }: { docTitle: string }) {
           <div className="flex items-center gap-3">
             <button
               onClick={() => { setFeedback('yes'); setIsSubmitted(true); }}
-              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-300 text-zinc-300 transition-all flex items-center gap-1.5 cursor-pointer border border-white/10 font-bold"
+              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white hover:text-emerald-400 hover:border-emerald-500/40 transition-all flex items-center gap-1.5 cursor-pointer border border-white/10 font-bold"
             >
-              <ThumbsUp className="w-3.5 h-3.5" />
+              <ThumbsUp className="w-3.5 h-3.5 text-emerald-400" />
               <span>Yes, helpful</span>
             </button>
 
             <button
               onClick={() => setFeedback('no')}
-              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 text-zinc-300 transition-all flex items-center gap-1.5 cursor-pointer border border-white/10 font-bold"
+              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white hover:text-rose-400 hover:border-rose-500/40 transition-all flex items-center gap-1.5 cursor-pointer border border-white/10 font-bold"
             >
-              <ThumbsDown className="w-3.5 h-3.5" />
+              <ThumbsDown className="w-3.5 h-3.5 text-rose-400" />
               <span>Could be better</span>
             </button>
           </div>

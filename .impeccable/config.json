@@ -1,0 +1,25 @@
+{
+  "hook": {
+    "enabled": true,
+    "quiet": false,
+    "maxFindings": 10,
+    "perEditRules": "all"
+  },
+  "detector": {
+    "designSystem": {
+      "enabled": true
+    },
+    "ignoreRules": [],
+    "ignoreFiles": [
+      "**/opengraph-image.tsx",
+      "**/apple-icon.tsx",
+      "**/icon.tsx",
+      "**/twitter-image.tsx"
+    ],
+    "ignoreValues": {}
+  },
+  "live": {
+    "port": 3000,
+    "devCommand": "npm run dev"
+  }
+}

@@ -57,7 +57,7 @@ function BaseGtmPromoBanner() {
         <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap lg:flex-nowrap overflow-hidden">
           {/* Flash Offer Badge */}
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-black text-[10px] font-black uppercase tracking-wider font-mono shadow-sm shrink-0">
-            <Flame className="w-3 h-3 fill-black text-black animate-bounce" />
+            <Flame className="w-3 h-3 fill-black text-black" />
             <span>FLASH OFFER</span>
           </span>
 

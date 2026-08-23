@@ -133,7 +133,7 @@ function BaseVaultPage() {
   return (
     <div className="min-h-screen flex flex-col">
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl glass-panel-glow border border-indigo-500/50 text-white text-xs font-bold shadow-2xl flex items-center gap-2 animate-bounce">
+        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl glass-panel-glow border border-indigo-500/50 text-white text-xs font-bold shadow-2xl flex items-center gap-2 animate-pulse">
           <span>{toastMessage}</span>
         </div>
       )}

@@ -64,7 +64,7 @@ const MULTIPLIER_TIERS: MultiplierTier[] = [
     label: 'Mega Sovereign',
     badge: '2.00x DOUBLE',
     unlockedPerk: '$500.00 Usable Balance + Dedicated VPC Lane',
-    color: 'from-purple-400 to-pink-500'
+    color: 'from-amber-400 to-emerald-400'
   }
 ];
 
@@ -101,7 +101,7 @@ function BaseSavingsJackpotReel() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/50 text-amber-300 text-xs font-mono font-black tracking-wide shadow-lg shadow-amber-500/15">
-            <Trophy className="w-3.5 h-3.5 text-amber-400 animate-bounce" />
+            <Trophy className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
             <span>ANNUAL SAVINGS JACKPOT &amp; INSTANT MATCH REEL</span>
           </div>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">
@@ -160,11 +160,11 @@ function BaseSavingsJackpotReel() {
           </div>
 
           {/* Card 4: Free Equivalent Tasks */}
-          <div className="p-4 rounded-2xl bg-gradient-to-b from-purple-500/10 to-transparent border border-purple-500/30 space-y-1 relative">
-            <span className="text-[10px] text-purple-400 font-sans uppercase font-bold tracking-wider block">
+          <div className="p-4 rounded-2xl bg-gradient-to-b from-blue-500/10 to-transparent border border-blue-500/30 space-y-1 relative">
+            <span className="text-[10px] text-blue-400 font-sans uppercase font-bold tracking-wider block">
               Free Task Output Mileage
             </span>
-            <div className={`text-2xl sm:text-3xl lg:text-4xl font-black text-purple-300 tracking-tight transition-all duration-300 ${isSpinning ? 'blur-sm scale-95' : 'blur-0 scale-100'}`}>
+            <div className={`text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight transition-all duration-300 ${isSpinning ? 'blur-sm scale-95' : 'blur-0 scale-100'}`}>
               ~{freeCustomerChats.toLocaleString()}
             </div>
             <span className="text-[10px] text-zinc-400 font-sans block">Free customer chats/mo</span>

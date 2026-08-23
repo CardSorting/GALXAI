@@ -128,3 +128,8 @@ Thumbs.db
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
+
+# Impeccable local state
+.impeccable/*.local.json
+.impeccable/hook.cache.json
+

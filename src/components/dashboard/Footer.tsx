@@ -121,7 +121,7 @@ function BaseFooter() {
           {/* Brand & Global Status Column */}
           <div className="col-span-2 md:col-span-1 space-y-4">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 p-[1px] shadow-lg shadow-indigo-500/25 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 p-[1px] shadow-lg shadow-cyan-500/20 flex items-center justify-center group-hover:scale-105 transition-transform">
                 <div className="w-full h-full bg-[#0d101c] rounded-[10px] flex items-center justify-center">
                   <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400 animate-pulse" />
                 </div>
@@ -172,7 +172,7 @@ function BaseFooter() {
                   >
                     <span>{item.name}</span>
                     {item.badge && (
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-zinc-400 group-hover:text-cyan-300 border border-white/5">
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-zinc-400 group-hover:text-cyan-300 border border-white/5">
                         {item.badge}
                       </span>
                     )}
@@ -212,7 +212,7 @@ function BaseFooter() {
                   >
                     <span>{item.name}</span>
                     {item.badge && (
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-zinc-400 group-hover:text-amber-300 border border-white/5">
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-zinc-400 group-hover:text-amber-300 border border-white/5">
                         {item.badge}
                       </span>
                     )}
@@ -234,7 +234,7 @@ function BaseFooter() {
                   >
                     <span>{item.name}</span>
                     {item.badge && (
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                         {item.badge}
                       </span>
                     )}
