@@ -219,13 +219,35 @@ When attempts exceed `maxAttempts` or encounter non-retryable 4xx errors:
 
 ---
 
+---
+
+## 13. Developer Programmatic Stream & Async Worker Task Inspector (`/queues`)
+
+To optimize for infrastructure resilience and prevent upstream quota bleed from unauthenticated browser chatbots, the `/queues` portal has been architected strictly as a **Developer Programmatic Stream & Async Worker Task Inspector**:
+- **Elimination of Public Chat Textarea**: Public exploratory chat textareas and anonymous omnibars are deprecated in favor of structured SDK / REST dispatch.
+- **Interactive Multi-Language SDK Snippets**: Provides drop-in asynchronous dispatch templates for Python SDK (`galx.jobs.submit`), TypeScript SDK (`galx.jobs.submit`), and native cURL requests with `X-Galx-Async: true` header.
+- **Worker Execution Stream**: Real-time inspection of active worker leases, monotonic fencing tokens, attempt counters, latency percentiles, and DAG step progression.
+
+---
+
+## 14. Workspace Authentication & Queue Isolation (`<AuthRequiredGate />`)
+
+All queue streams and task inspection views require authenticated developer sessions:
+- **Private Task Streams**: Tasks submitted under tenant API keys are cryptographically partitioned by `tenantUid`.
+- **Authentication Gate**: Unauthenticated visitors are presented with the Developer Authentication Gate, preventing unauthorized monitoring of private background jobs.
+
+---
+
 ## 🧪 Forensic Test Verification Matrix
 
-All capabilities are continuously validated against a 50-suite automated test harness:
+All capabilities are continuously validated against the comprehensive automated test harness:
 ```bash
-npx tsx scripts/validate-galxai-router.ts
+npm run test:router
+# (or: npx tsx scripts/validate-galxai-router.ts)
 ```
 - **Tests 1–31**: Vault Cryptography, Rate Governor, Circuit Breakers, Shard Pooling, TASD Leveling, Model Catalog.
 - **Tests 32–39**: Phase 1 Queue Pacing, Idempotency, Scheduled Delay, Worker Leases, Retry Calculus, DLQ.
 - **Tests 40–44**: Phase 2 FIFO Partition Grouping, Cron Scheduling, Progress Streaming, Bulk Redrive, SDK Helper.
 - **Tests 45–50**: Phase 3 DAG Dependencies, SSE EventBus, Content Deduplication, Dynamic Priority Aging, Deadlines, Draining Mode.
+- **Tests 51–177**: SOC 2 Compliance, ZDR v10.0 Memory Zeroization, BroccoliDB AST & L1 Tables, Multi-Index Range Scans, and Developer SDK Ergonomics.
+

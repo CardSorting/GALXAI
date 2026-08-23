@@ -77,7 +77,36 @@ Rebates scale automatically with monthly token volume without requiring sales ca
 
 | Provider | Input Cost (5M) | Output Cost (5M) | Total Workload Cost | Gateway Markup | Net Savings vs. Retail |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Direct OpenAI Retail** | $15.62 | $100.00 | **$115.62** | 0% | Baseline ($0.00) |
-| **OpenRouter (Standard)** | $16.40 | $105.00 | **$121.40** | +5% | $-5.0\%$ (More expensive) |
-| **Azure OpenAI** | $15.62 | $100.00 | **$115.62** | 0% | Baseline ($0.00) |
 | **GALXAI Pooled Gateway** | **$11.72** | **$75.00** | **$86.72** | **0%** | **Save $28.90 (25.0% Net)** |
+
+---
+
+## 5. Prepay Compute Packs & Instant Match Grants
+
+GALXAI offers structured, high-value compute top-up packs with immediate compute match grants deposited to the developer's wallet upon settlement:
+
+| Compute Tier | Prepay Amount | Match Grant / Volume Bonus | Total Credited Wallet Balance | Effective Bonus | Workload Capacity Estimate |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Starter Prototyping** | **$25.00 USD** | +$2.50 (+10% Bonus) | **$27.50 USD** | +10% | ~15,000 to ~22,000 queries |
+| **Growth Builder** | **$50.00 USD** | +$12.50 (+25% Grant) | **$62.50 USD** | +25% | ~40,000 to ~55,000 queries |
+| **Scale Fleet (Recommended)** | **$100.00 USD** | +$50.00 (50% Match Grant) | **$150.00 USD** | +50% | ~88,000 to ~120,000 queries |
+| **Enterprise Fleet** | **$250.00 USD** | +$125.00 (50% Match Grant) | **$375.00 USD** | +50% | ~220,000+ deep reasoning tasks |
+
+---
+
+## 6. Workload Capacity Estimation Matrix
+
+To provide non-technical and executive transparency, compute credits map to concrete engineering capacity:
+
+```mermaid
+pie title $100 Scale Pack Value Allocation ($150 Usable Credit)
+    "GPT-5.6 Sol Coding Tokens (60M tok)" : 45
+    "Prompt Cache Hit Rebates (80M tok)" : 25
+    "xAI Grok 4.5 500K Multimodal" : 20
+    "Continuous Buffer Reserve" : 10
+```
+
+- **Coding IDE Queries (Cursor / Windsurf)**: ~88,000 inline completions and multi-file diffs.
+- **Autonomous Agent Swarms (LangChain / AutoGen)**: ~32,000 multi-step reasoning steps.
+- **Visual Asset Synthesis (GPT-Image-2 4K)**: ~2,500 full-resolution images.
+

@@ -158,22 +158,36 @@ GALXAI achieves strong unit economics through **wholesale tier arbitrage**:
 
 ---
 
-## 8. Quarterly GTM Execution Roadmap
+---
+
+## 9. Advanced E-Commerce Funnels & Value Capture Strategy
+
+To maximize developer activation and platform gross margins without revealing proprietary backend substrate routing mechanics, GALXAI employs an enterprise-grade e-commerce checkout and onboarding funnel:
 
 ```mermaid
-gantt
-    title GALXAI 2026 Go-To-Market Execution Roadmap
-    dateFormat  YYYY-MM-DD
-    section Phase 1: Launch & Developer Seeding
-    Launch Drop-In Gateway & 12 Model Fleet       :done, 2026-01-01, 2026-02-15
-    Release Cursor, Continue, LangChain SDKs     :done, 2026-02-15, 2026-03-15
-    $5 Free Credit Developer Onboarding Funnel   :done, 2026-03-15, 2026-03-31
-    section Phase 2: Growth & Viral Loops
-    Automated Volume Tier Brackets (Starter to Ent) :active, 2026-04-01, 2026-05-15
-    Viral Referral & Reward Rebate Program        :2026-05-15, 2026-06-30
-    Off-Peak Dynamic Yield Batch API             :2026-06-15, 2026-07-31
-    section Phase 3: Enterprise & Scale
-    Enterprise Sovereign VPC Peering & SOC2      :2026-08-01, 2026-09-30
-    Centralized Team Invoicing & SAML SSO        :2026-10-01, 2026-11-30
-    Global Multi-Region Edge Gateway Mesh         :2026-11-01, 2026-12-31
+flowchart LR
+    Landing[Homepage / Comparison / Model Catalog] -->|Intent Trigger: Prepay & Save| Checkout["2-Column Checkout Funnel (/checkout)"]
+    
+    subgraph Conversion & Trust Architecture
+        Checkout --> Express[1-Click Express Pay Strip: Apple Pay / G Pay / USDC]
+        Checkout --> Packs["Compute Packs: $25 (+10%), $50 (+25%), $100 (+50% Match), $250"]
+        Checkout --> Estimator["Workload Capacity Estimator: ~15,000 to ~220,000 queries"]
+        Checkout --> Timer["Urgency Signal: 14:59 Guaranteed Rate Lock"]
+        Checkout --> Bump["Amazon-Style Order Bump: Zero-Downtime Auto-Reload"]
+    end
+    
+    Checkout -->|Instant Settlement| Success["Order Confirmation & Key Reveal Hub (/checkout/success)"]
+    
+    subgraph Instant Activation Hub
+        Success --> BearerKey["Instant Live API Key Reveal (galx_live_...)"]
+        Success --> Receipt["Official Printable PDF Tax Receipt"]
+        Success --> QuickStart["30-Second IDE Setup: Cursor / Python / TypeScript"]
+    end
 ```
+
+### Key Funnel Ergonomics:
+1. **Zero-Vendor External Friction**: Complete checkout occurs natively without offsite redirects or third-party badge clutter.
+2. **Workload Framing**: Translates abstract dollar deposits into concrete engineering capacity (e.g. `"$100 Compute Pack = ~88,000 GPT-5.6 Coding Queries + ~32,000 Deep Reasoning Tasks"`).
+3. **Wholesale Rate Lock Urgency**: Emphasizes Founding Builder cohort pricing and permanent wholesale tier guarantees.
+4. **Instant Value Realization**: API bearer keys are generated and displayed immediately on `/checkout/success` with 1-click copy and IDE configuration guides.
+
