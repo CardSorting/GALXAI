@@ -20,6 +20,7 @@ import {
   ChevronDown,
   Info
 } from 'lucide-react';
+import { TierUnlockProgressBar } from '@/components/dashboard/TierUnlockProgressBar';
 
 interface Pack {
   amount: number;
@@ -30,10 +31,10 @@ interface Pack {
 }
 
 const DEPOSIT_PACKS: Pack[] = [
-  { amount: 10, label: 'Starter Key', badge: '50% Instant Match', popular: true, bonusMultiplier: 1.5 },
-  { amount: 25, label: 'Standard Dev', badge: '+$5.00 Free Match', bonusMultiplier: 1.2 },
-  { amount: 50, label: 'Growth Pro', badge: '+5% Extra Bonus', bonusMultiplier: 1.15 },
-  { amount: 100, label: 'Fleet Scale', badge: '+10% Extra Bonus', bonusMultiplier: 1.25 }
+  { amount: 25, label: 'Starter Key', badge: '50% Instant Match', popular: true, bonusMultiplier: 1.5 },
+  { amount: 50, label: 'Growth VIP', badge: 'VIP Shards 🔓', bonusMultiplier: 1.5 },
+  { amount: 100, label: 'Fleet Scale', badge: '600 RPM Fleet 🔓', bonusMultiplier: 1.5 },
+  { amount: 250, label: 'Enterprise Burst', badge: 'Unlimited VPC 🔓', bonusMultiplier: 1.5 }
 ];
 
 interface KeyActivationPaywallBlockerProps {
@@ -155,6 +156,12 @@ export function KeyActivationPaywallBlocker({
           </div>
         </div>
       </div>
+
+      {/* E-Commerce Reward Tier Progress Bar */}
+      <TierUnlockProgressBar
+        currentAmount={selectedPackAmt}
+        onSelectTierAmount={(amt) => setSelectedPackAmt(amt)}
+      />
 
       {/* Preset Packs Grid */}
       <div className="space-y-2 relative z-10">

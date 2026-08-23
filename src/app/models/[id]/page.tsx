@@ -24,6 +24,10 @@ import {
 } from 'lucide-react';
 import { ShareButton } from '@/components/common/ShareButton';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
+import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
+import { TrustSeals } from '@/components/common/TrustSeals';
+import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
+import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 interface ModelDetailPageProps {
   params: Promise<{ id: string }>;
@@ -246,6 +250,9 @@ for chunk in response:
           </Link>
         </div>
 
+        {/* Founding Cohort Rate Lock Ribbon */}
+        <RateLockRibbon />
+
         {/* Integration Code Snippets for this Model */}
         <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4">
           <h2 className="text-lg font-black text-white flex items-center gap-2">
@@ -278,10 +285,15 @@ for chunk in response:
             </div>
           </div>
         </section>
+
+        {/* Consumer-Grade Trust Seals */}
+        <TrustSeals />
       </main>
 
-      {/* Floating Conversion Dock */}
+      {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
       <FloatingConversionDock />
+      <LiveActivityToast />
+      <ExitIntentModal />
     </div>
   );
 }

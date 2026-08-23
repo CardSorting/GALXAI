@@ -5,6 +5,11 @@ import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
+import { TrustSeals } from '@/components/common/TrustSeals';
+import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
+import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
+import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 import {
   GitCompare,
   Zap,
@@ -15,7 +20,9 @@ import {
   Terminal,
   ArrowRight,
   Cpu,
-  Layers
+  Layers,
+  Flame,
+  ShieldCheck
 } from 'lucide-react';
 
 export default function CompareModelsPage() {
@@ -88,6 +95,9 @@ export default function CompareModelsPage() {
             })}
           </div>
         </div>
+
+        {/* Founding Cohort Rate Lock Ribbon */}
+        <RateLockRibbon />
 
         {/* Comparison Matrix Table */}
         <div className="glass-panel rounded-3xl p-6 overflow-x-auto">
@@ -225,7 +235,15 @@ export default function CompareModelsPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Consumer-Grade Trust Seals */}
+        <TrustSeals />
       </main>
+
+      {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
+      <FloatingConversionDock />
+      <LiveActivityToast />
+      <ExitIntentModal />
     </div>
   );
 }
