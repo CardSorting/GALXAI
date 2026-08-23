@@ -143,6 +143,7 @@ npm run dev
 
 ## 📚 Complete Technical Documentation
 
+- 🗺️ **[System Topology & Maintenance Onboarding](docs/SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md)**: Architecture map, DNS routing, cryptographic enclave, incident response playbooks, and maintainer onboarding.
 - 🚀 **[Vercel Production Deployment Guide](docs/VERCEL_DEPLOYMENT.md)**: 8-phase pre-flight verification gate, Next.js 15 optimization, environment synchronizer, and live smoke test.
 - 🏛️ **[System Architecture Specification](docs/ARCHITECTURE.md)**: Deep dive into the request lifecycle, Mermaid sequence flow, streaming safety, and security model.
 - 🌐 **[Cloudflare Strategy & Edge Substrate](docs/CLOUDFLARE_STRATEGY.md)**: Edge compute mesh, R2 CDN, and custom domain routing.

@@ -11,6 +11,7 @@ GALXAI/
 ├── docs/                             # Comprehensive Architecture & API Documentation
 │   ├── adr/                          # Architecture Decision Records (0001-0041)
 │   ├── ARCHITECTURE.md               # System overview, lifecycle, and security model
+│   ├── SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md # Architecture map & onboarding runbook
 │   ├── API_REFERENCE.md              # REST API endpoint specifications (/v1 & /api)
 │   ├── VERCEL_DEPLOYMENT.md          # 8-Phase Pre-Flight Audit & Next.js 15 Deployment
 │   ├── CLOUDFLARE_STRATEGY.md        # Edge Mesh, R2 CDN & Custom Domain Substrate
