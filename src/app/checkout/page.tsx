@@ -23,9 +23,14 @@ import {
   AlertCircle,
   HelpCircle,
   Laptop,
-  CheckCheck
+  CheckCheck,
+  MessageSquare,
+  Brain,
+  Image as ImageIcon,
+  Building2,
+  FileCheck2,
+  Receipt
 } from 'lucide-react';
-import { TierUnlockProgressBar } from '@/components/dashboard/TierUnlockProgressBar';
 import { TrustSeals } from '@/components/common/TrustSeals';
 
 interface TierSpec {
@@ -34,6 +39,7 @@ interface TierSpec {
   badge: string;
   multiplier: number;
   perks: string[];
+  outputMileage: string;
 }
 
 const CHECKOUT_TIERS: Record<number, TierSpec> = {
@@ -42,28 +48,32 @@ const CHECKOUT_TIERS: Record<number, TierSpec> = {
     label: 'Starter Builder',
     badge: '50% Match Bonus',
     multiplier: 1.5,
-    perks: ['50% Instant Compute Match', '$5 Free Welcome Credit', 'Standard Rate Lock']
+    perks: ['50% Instant Compute Match', '$5 Free Welcome Credit', 'Standard Rate Lock'],
+    outputMileage: '~15,000 Chat Completions or 800 Code Tasks'
   },
   50: {
     amount: 50,
     label: 'Growth VIP Shard',
     badge: 'VIP Shards 🔓',
     multiplier: 1.6,
-    perks: ['Sub-15ms VIP Shards', '+$30 Free Matched Compute', '75% Prompt Cache Pass-Through']
+    perks: ['Sub-15ms VIP Shards', '+$30 Free Matched Compute', '75% Prompt Cache Pass-Through'],
+    outputMileage: '~35,000 Chat Completions or 2,000 Code Tasks'
   },
   100: {
     amount: 100,
     label: 'Fleet Scale',
     badge: '600 RPM Fleet 🔓',
     multiplier: 1.75,
-    perks: ['600 RPM Concurrency Burst', '+$75 Free Matched Compute', 'Priority Anycast Failover']
+    perks: ['600 RPM Concurrency Burst', '+$75 Free Matched Compute', 'Priority Anycast Failover'],
+    outputMileage: '~80,000 Chat Completions or 5,000 Code Tasks'
   },
   250: {
     amount: 250,
     label: 'Enterprise Sovereign',
     badge: 'Unlimited VPC 🔓',
     multiplier: 2.0,
-    perks: ['2.00x Double Compute Match', 'Dedicated VPC Lane', 'Unlimited Concurrency Burst']
+    perks: ['2.00x Double Compute Match', 'Dedicated VPC Lane', 'Unlimited Concurrency Burst'],
+    outputMileage: '~220,000 Chat Completions or 15,000 Code Tasks'
   }
 };
 
@@ -84,6 +94,7 @@ function CheckoutContent() {
   const [appliedPromo, setAppliedPromo] = useState<string | null>('FOUNDING50');
   const [isProcessing, setIsProcessing] = useState(false);
   const [timeLeft, setTimeLeft] = useState(899); // 14:59 countdown
+  const [showWorkloadSim, setShowWorkloadSim] = useState(false);
 
   // 15-minute rate lock countdown
   useEffect(() => {
@@ -103,7 +114,6 @@ function CheckoutContent() {
   const welcomeGrant = 5.0;
   const matchBonusDollars = (selectedAmount * (currentTier.multiplier - 1));
   const totalUsableCompute = selectedAmount + welcomeGrant + matchBonusDollars;
-  const promoDiscount = appliedPromo ? 0 : 0; // Promotional match indicator
 
   const handleApplyPromo = () => {
     if (promoCode.trim().toUpperCase() === 'FOUNDING50' || promoCode.trim().toUpperCase() === 'WELCOME5') {
@@ -117,7 +127,6 @@ function CheckoutContent() {
     setIsProcessing(true);
 
     setTimeout(() => {
-      // Direct fulfillment to success receipt page
       router.push(`/checkout/success?amount=${selectedAmount}&total=${totalUsableCompute}&tier=${encodeURIComponent(currentTier.label)}&email=${encodeURIComponent(email || 'developer@company.com')}`);
     }, 1200);
   };
@@ -133,7 +142,7 @@ function CheckoutContent() {
       <Navigation />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8 relative z-10">
-        {/* Shopify-Style Breadcrumb Funnel Header */}
+        {/* Step Progression Breadcrumbs */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
           <div className="flex items-center gap-2 text-xs font-mono">
             <Link href="/pricing" className="text-zinc-400 hover:text-white transition-colors">
@@ -154,14 +163,14 @@ function CheckoutContent() {
           </div>
         </div>
 
-        {/* 2-Column Shopify / Amazon Plus Checkout Grid */}
+        {/* 2-Column E-Commerce Checkout Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: Express Checkout & Payment Details */}
+          {/* Left Column: Express 1-Click & Payment Details */}
           <div className="lg:col-span-7 space-y-6">
-            {/* Express 1-Click Checkout Banner (Shopify/Apple Style) */}
+            {/* Express 1-Click Checkout Banner */}
             <div className="glass-panel rounded-3xl p-6 border border-white/10 space-y-4 bg-black/40">
               <span className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400 block text-center">
-                Express 1-Click Checkout
+                ⚡ Express 1-Click Checkout
               </span>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -173,7 +182,7 @@ function CheckoutContent() {
                       router.push(`/checkout/success?amount=${selectedAmount}&total=${totalUsableCompute}&tier=${encodeURIComponent(currentTier.label)}&method=ApplePay`);
                     }, 800);
                   }}
-                  className="py-3 px-4 rounded-2xl bg-white hover:bg-zinc-200 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-lg transition-all cursor-pointer hover:scale-[1.02] active:scale-98"
+                  className="py-3.5 px-4 rounded-2xl bg-white hover:bg-zinc-200 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-lg transition-all cursor-pointer hover:scale-[1.02] active:scale-98"
                 >
                   <span> Pay</span>
                 </button>
@@ -186,9 +195,9 @@ function CheckoutContent() {
                       router.push(`/checkout/success?amount=${selectedAmount}&total=${totalUsableCompute}&tier=${encodeURIComponent(currentTier.label)}&method=GooglePay`);
                     }, 800);
                   }}
-                  className="py-3 px-4 rounded-2xl bg-[#5a31f4] hover:bg-[#4722d9] text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-lg transition-all cursor-pointer hover:scale-[1.02] active:scale-98"
+                  className="py-3.5 px-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-lg transition-all cursor-pointer hover:scale-[1.02] active:scale-98 border border-white/10 font-mono"
                 >
-                  <span>Shop Pay</span>
+                  <span>G Pay</span>
                 </button>
 
                 <button
@@ -199,7 +208,7 @@ function CheckoutContent() {
                       router.push(`/checkout/success?amount=${selectedAmount}&total=${totalUsableCompute}&tier=${encodeURIComponent(currentTier.label)}&method=USDC`);
                     }, 800);
                   }}
-                  className="col-span-2 sm:col-span-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-lg transition-all cursor-pointer hover:scale-[1.02] active:scale-98 font-mono"
+                  className="col-span-2 sm:col-span-1 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-lg transition-all cursor-pointer hover:scale-[1.02] active:scale-98 font-mono"
                 >
                   <Coins className="w-3.5 h-3.5" />
                   <span>USDC 1-Click</span>
@@ -209,17 +218,17 @@ function CheckoutContent() {
               <div className="relative flex items-center justify-center pt-2">
                 <div className="w-full border-t border-white/10" />
                 <span className="absolute px-3 bg-[#07080d] text-[10px] uppercase font-mono font-bold text-zinc-500">
-                  Or Pay with Credit Card / Invoice
+                  Or Pay with Credit Card / Corporate Invoice
                 </span>
               </div>
             </div>
 
-            {/* Standard Checkout Form */}
+            {/* Main Checkout Form */}
             <form onSubmit={handleSubmitOrder} className="glass-panel rounded-3xl p-6 sm:p-8 border border-white/10 space-y-6 bg-black/40">
               {/* Step 1: Compute Amount Selector */}
               <div className="space-y-3">
                 <label className="block text-xs font-mono font-bold text-zinc-300 uppercase">
-                  1. Select Compute Top-Up Pack:
+                  1. Select Compute Deposit Pack:
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {[25, 50, 100, 250].map((amt) => {
@@ -258,7 +267,7 @@ function CheckoutContent() {
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
                   <div>
-                    <span className="text-[11px] text-zinc-400 block mb-1">Receipt &amp; API Key Email *</span>
+                    <span className="text-[11px] text-zinc-400 block mb-1">API Key &amp; Receipt Email *</span>
                     <input
                       type="email"
                       required
@@ -323,7 +332,7 @@ function CheckoutContent() {
                         : 'bg-black/60 border-white/10 text-zinc-400 hover:text-white'
                     }`}
                   >
-                    <ShieldCheck className="w-4 h-4 text-purple-400" />
+                    <Building2 className="w-4 h-4 text-purple-400" />
                     <span>Bank ACH</span>
                   </button>
                 </div>
@@ -367,7 +376,7 @@ function CheckoutContent() {
                 )}
               </div>
 
-              {/* Amazon-Style Order Bump / Value Add-on */}
+              {/* Value Add-on Order Bump */}
               <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-3">
                 <input
                   type="checkbox"
@@ -398,11 +407,11 @@ function CheckoutContent() {
                 <ArrowRight className="w-4 h-4" />
               </button>
 
-              {/* Trust Footer Badges */}
+              {/* Trust Footers */}
               <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] font-mono text-zinc-400 pt-2">
                 <div className="flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>100% Refund Guarantee</span>
+                  <span>100% Unspent Refund Guarantee</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Lock className="w-3.5 h-3.5 text-cyan-400" />
@@ -416,12 +425,12 @@ function CheckoutContent() {
             </form>
           </div>
 
-          {/* Right Column: Shopify-Style Order Summary Drawer */}
+          {/* Right Column: Sticky Order Summary Drawer */}
           <div className="lg:col-span-5 space-y-6">
             <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-amber-500/30 bg-black/60 shadow-2xl space-y-6 sticky top-24">
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <h2 className="text-base font-bold text-white font-mono flex items-center gap-2">
-                  <Coins className="w-4 h-4 text-amber-400" />
+                  <Receipt className="w-4 h-4 text-amber-400" />
                   <span>Order Summary</span>
                 </h2>
                 <span className="text-xs font-mono font-bold text-amber-300 bg-amber-500/20 px-2.5 py-0.5 rounded-full border border-amber-500/30">
@@ -429,7 +438,7 @@ function CheckoutContent() {
                 </span>
               </div>
 
-              {/* Line Items Breakdown */}
+              {/* Itemized Breakdown */}
               <div className="space-y-3 font-mono text-xs">
                 <div className="flex justify-between items-center text-zinc-300">
                   <span>Prepaid Compute Deposit ({currentTier.label}):</span>
@@ -470,7 +479,7 @@ function CheckoutContent() {
                     type="text"
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)}
-                    placeholder="Promo or Grant Code"
+                    placeholder="Promo Code"
                     className="flex-1 py-2 px-3 rounded-xl bg-black/80 border border-white/10 text-xs text-white uppercase font-mono focus:outline-none focus:border-amber-400"
                   />
                   <button
@@ -493,7 +502,7 @@ function CheckoutContent() {
                 )}
               </div>
 
-              {/* Total Due & Usable Balance Comparison Card */}
+              {/* Total Due & Usable Balance Comparison */}
               <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-emerald-500/10 border border-amber-400/50 space-y-3 font-mono">
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-zinc-300 font-sans uppercase font-bold">Total Due Today:</span>
@@ -503,13 +512,23 @@ function CheckoutContent() {
                 <div className="flex justify-between items-center pt-2 border-t border-white/10">
                   <span className="text-xs text-amber-300 font-sans font-bold flex items-center gap-1">
                     <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    Total Compute Loaded to Key:
+                    Total Usable Compute Credited:
                   </span>
                   <div className="text-2xl font-black text-emerald-300">${totalUsableCompute.toFixed(2)} USD</div>
                 </div>
               </div>
 
-              {/* Unlocked Tier Perks Checklist */}
+              {/* Output Mileage Estimates */}
+              <div className="p-3.5 rounded-2xl bg-black/40 border border-white/10 space-y-1.5 text-xs font-mono">
+                <div className="flex items-center justify-between text-zinc-400">
+                  <span>Estimated Workload Capacity:</span>
+                </div>
+                <div className="text-white font-medium text-[11px] leading-relaxed">
+                  ⚡ {currentTier.outputMileage}
+                </div>
+              </div>
+
+              {/* Unlocked Tier Perks */}
               <div className="space-y-2 pt-2 border-t border-white/10">
                 <span className="text-[11px] font-mono font-bold uppercase text-zinc-400 block">
                   Included with Your Key:
