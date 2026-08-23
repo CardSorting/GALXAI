@@ -19,6 +19,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 import { GtmPromoBanner } from '@/components/dashboard/GtmPromoBanner';
 import { WalletQuickPeekPopover } from '@/components/wallet/WalletQuickPeekPopover';
+import { BroccoliOmniSearch } from '@/lib/resilience/BroccoliOmniSearch';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 function BaseNavigation() {
@@ -135,6 +136,10 @@ function BaseNavigation() {
                     key={link.href}
                     href={link.href}
                     role="link"
+                    onMouseEnter={() => BroccoliOmniSearch.prefetchRoute(link.href)}
+                    onFocus={() => BroccoliOmniSearch.prefetchRoute(link.href)}
+                    onTouchStart={() => BroccoliOmniSearch.prefetchRoute(link.href)}
+                    onPointerDown={() => BroccoliOmniSearch.prefetchRoute(link.href)}
                     aria-current={isActive ? 'page' : undefined}
                     aria-label={link.ariaLabel}
                     className={`relative px-3.5 py-1.5 rounded-xl text-xs font-semibold tracking-normal transition-all duration-150 select-none ${
@@ -185,6 +190,8 @@ function BaseNavigation() {
             <Link
               href="/keys"
               role="link"
+              onMouseEnter={() => BroccoliOmniSearch.prefetchRoute('/keys')}
+              onFocus={() => BroccoliOmniSearch.prefetchRoute('/keys')}
               aria-label="Manage Developer API Keys and Access Tokens"
               className={`hidden sm:inline-block px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                 pathname.startsWith('/keys')

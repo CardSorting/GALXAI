@@ -10,9 +10,28 @@ const WALLET_EVENT_NAME = 'galx_wallet_update';
 const DEFAULT_INITIAL_BALANCE = 0; // Default $0 for unverified accounts
 
 export function useDepositVerification() {
-  const [hasVerifiedDeposit, setHasVerifiedDeposit] = useState<boolean>(false);
-  const [walletBalance, setWalletBalance] = useState<number>(0);
-  const [isLoaded, setIsLoaded] = useState<boolean>(false);
+  const [hasVerifiedDeposit, setHasVerifiedDeposit] = useState<boolean>(() => {
+    try {
+      return SafeStorage.getItem(STORAGE_KEY_VERIFIED) === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [walletBalance, setWalletBalance] = useState<number>(() => {
+    try {
+      const stored = SafeStorage.getItem(STORAGE_KEY_BALANCE);
+      return stored ? parseFloat(stored) : (SafeStorage.getItem(STORAGE_KEY_VERIFIED) === 'true' ? 114.59 : DEFAULT_INITIAL_BALANCE);
+    } catch {
+      return DEFAULT_INITIAL_BALANCE;
+    }
+  });
+  const [isLoaded, setIsLoaded] = useState<boolean>(() => {
+    try {
+      return SafeStorage.getItem(STORAGE_KEY_VERIFIED) !== null;
+    } catch {
+      return false;
+    }
+  });
 
   const readStateFromStorage = useCallback(() => {
     try {

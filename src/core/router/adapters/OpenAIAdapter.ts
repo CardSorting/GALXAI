@@ -10,6 +10,18 @@ export class OpenAIAdapter {
   private static readonly BASE_URL = 'https://api.openai.com/v1';
 
   /**
+   * Pre-warms DNS and HTTP keep-alive socket connection to OpenAI endpoints in background.
+   */
+  static prewarmConnection(): void {
+    try {
+      fetch(`${this.BASE_URL}/models`, {
+        method: 'HEAD',
+        headers: { 'Connection': 'keep-alive' }
+      }).catch(() => {});
+    } catch {}
+  }
+
+  /**
    * Executes synchronous or streaming chat completion against OpenAI endpoint.
    */
   static async executeChatCompletion(
@@ -26,7 +38,9 @@ export class OpenAIAdapter {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
       'X-Zero-Data-Retention': 'true',
-      'X-No-Storage': 'true'
+      'X-No-Storage': 'true',
+      'Connection': 'keep-alive',
+      'Keep-Alive': 'timeout=60, max=1000'
     };
 
     if (secret.accountId) {

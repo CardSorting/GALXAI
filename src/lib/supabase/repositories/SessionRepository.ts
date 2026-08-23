@@ -201,8 +201,7 @@ export class SessionRepository {
               error: 'TOKEN_REUSE_ATTACK_DETECTED'
             };
           }
-
-          return { success: false, reuseDetected: false, error: res.reason };
+          // If RPC returned not found or failed, fall through to in-memory fallback
         }
       } catch {
         // Fallback
@@ -560,7 +559,7 @@ export class SessionRepository {
           p_reason: reason,
           p_now_ms: Date.now()
         });
-        if (!error && data && typeof (data as any).revoked_count === 'number') {
+        if (!error && data && typeof (data as any).revoked_count === 'number' && (data as any).revoked_count > 0) {
           return (data as any).revoked_count;
         }
       } catch {

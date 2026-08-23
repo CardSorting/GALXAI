@@ -208,13 +208,20 @@ export async function POST(req: NextRequest) {
       headers: req.headers
     });
 
-    // 5. Return formatted response with CORS headers & verified Privacy/ZDR Attestation
+    // 5. Return formatted response with CORS headers, TTFT streaming optimization & ZDR Attestation
     const headers = new Headers(result.headers);
     headers.set('Access-Control-Allow-Origin', '*');
     headers.set('X-Galx-Request-Id', requestId);
     headers.set('X-Galx-Shard-Id', result.shardId);
     headers.set('X-Galx-Model', result.modelUsed);
     headers.set('X-Galx-Provider', result.provider);
+
+    if (result.isStream) {
+      headers.set('Content-Type', 'text/event-stream; charset=utf-8');
+      headers.set('Cache-Control', 'no-cache, no-transform');
+      headers.set('Connection', 'keep-alive');
+      headers.set('X-Accel-Buffering', 'no');
+    }
 
     return new Response(result.body, {
       status: result.statusCode,

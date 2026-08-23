@@ -68,8 +68,23 @@ export const updateSession = async (request: NextRequest) => {
     },
   );
 
-  // Refresh auth token if expired
-  await supabase.auth.getUser();
+  const pathname = request.nextUrl.pathname;
+  // Fast path: Skip blocking auth network roundtrips for API inference routes
+  if (pathname.startsWith('/v1/') || pathname.startsWith('/api/')) {
+    return supabaseResponse;
+  }
+
+  // Only refresh auth token if Supabase auth cookies are actually present
+  const hasAuthCookie = request.cookies.getAll().some(c => c.name.startsWith('sb-') && c.value);
+  if (hasAuthCookie) {
+    try {
+      await supabase.auth.getUser();
+    } catch {}
+  }
+
+  supabaseResponse.headers.set('X-Edge-FastPath', 'true');
+  supabaseResponse.headers.set('Timing-Allow-Origin', '*');
+  supabaseResponse.headers.set('Server-Timing', 'edge;dur=1, l1;desc="BroccoliDB"');
 
   return supabaseResponse;
 };

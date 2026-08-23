@@ -185,14 +185,16 @@ export class WalletRepository {
 
         if (!error && data) {
           const res = data as any;
-          return {
-            success: res.success,
-            depositAmount: Number(res.deposit_amount),
-            matchGrant: Number(res.match_grant),
-            totalCredit: Number(res.total_credit),
-            newBalance: Number(res.new_balance),
-            proofOfDepositVerified: res.proof_of_deposit_verified
-          };
+          if (res.success) {
+            return {
+              success: true,
+              depositAmount: Number(res.deposit_amount),
+              matchGrant: Number(res.match_grant),
+              totalCredit: Number(res.total_credit),
+              newBalance: Number(res.new_balance),
+              proofOfDepositVerified: res.proof_of_deposit_verified
+            };
+          }
         }
       } catch {
         // Fallback
@@ -243,15 +245,17 @@ export class WalletRepository {
 
         if (!error && data) {
           const res = data as any;
-          return {
-            success: res.success,
-            reason: res.reason,
-            transactionId: res.transaction_id,
-            previousBalance: Number(res.previous_balance),
-            costUsd: Number(res.cost_usd),
-            newBalance: Number(res.new_balance),
-            triggerAutoReload: res.trigger_auto_reload
-          };
+          if (res.success) {
+            return {
+              success: true,
+              reason: res.reason,
+              transactionId: res.transaction_id,
+              previousBalance: Number(res.previous_balance),
+              costUsd: Number(res.cost_usd),
+              newBalance: Number(res.new_balance),
+              triggerAutoReload: res.trigger_auto_reload
+            };
+          }
         }
       } catch {
         // Fallback

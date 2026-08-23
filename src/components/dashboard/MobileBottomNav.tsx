@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { BroccoliOmniSearch } from '@/lib/resilience/BroccoliOmniSearch';
 
 function BaseMobileBottomNav() {
   const pathname = usePathname();
@@ -64,6 +65,9 @@ function BaseMobileBottomNav() {
             <Link
               key={tab.href}
               href={tab.href}
+              onMouseEnter={() => BroccoliOmniSearch.prefetchRoute(tab.href)}
+              onTouchStart={() => BroccoliOmniSearch.prefetchRoute(tab.href)}
+              onPointerDown={() => BroccoliOmniSearch.prefetchRoute(tab.href)}
               className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all relative group ${
                 isActive
                   ? 'text-cyan-400 font-bold'

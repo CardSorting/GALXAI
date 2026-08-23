@@ -40,13 +40,18 @@ export function useResilientQuery<T = any>(
     ...fetchOptions
   } = options;
 
-  const [data, setData] = useState<T | null>(initialData);
-  const [isLoading, setIsLoading] = useState<boolean>(!initialData);
+  // Synchronous BroccoliDB L1 cache lookup for 0ms instant render without blank spinners
+  const substrate = BroccoliResilienceSubstrate.getInstance();
+  const cacheKey = fetchOptions.cacheKey || url;
+  const initialCached = initialData ? null : substrate.getCachedResponse<T>(cacheKey, 'GET');
+
+  const [data, setData] = useState<T | null>(initialData || initialCached?.data || null);
+  const [isLoading, setIsLoading] = useState<boolean>(!initialData && !initialCached);
   const [isRefetching, setIsRefetching] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
-  const [isStale, setIsStale] = useState<boolean>(false);
-  const [status, setStatus] = useState<number | null>(null);
+  const [isStale, setIsStale] = useState<boolean>(Boolean(initialCached?.isStale));
+  const [status, setStatus] = useState<number | null>(initialCached ? 200 : null);
 
   const isMountedRef = useRef(true);
   const optionsRef = useRef(options);
@@ -69,7 +74,16 @@ export function useResilientQuery<T = any>(
 
         if (!isMountedRef.current) return;
 
-        setData(result.data);
+        setData((prev) => {
+          if (prev && result.data && typeof prev === 'object' && typeof result.data === 'object') {
+            try {
+              if (JSON.stringify(prev) === JSON.stringify(result.data)) {
+                return prev; // Retain exact object reference to skip React component re-renders
+              }
+            } catch {}
+          }
+          return result.data;
+        });
         setStatus(result.status);
         setIsStale(Boolean(result.fromCache));
         setIsError(false);

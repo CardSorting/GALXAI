@@ -147,6 +147,16 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
+        {/* Network Resource Hints for Zero-Hesitation Connection Warm-Up */}
+        <link rel="preconnect" href="https://mazhcjisettrzbqhorvp.supabase.co" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://mazhcjisettrzbqhorvp.supabase.co" />
+        <link rel="preconnect" href="https://api.openai.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://api.openai.com" />
+        <link rel="preconnect" href="https://api.x.ai" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://api.x.ai" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}

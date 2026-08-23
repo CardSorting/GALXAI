@@ -28,6 +28,7 @@ export interface CacheRecord<T = any> {
 export class GalxEdgeCache {
   private static instance: GalxEdgeCache;
   public readonly cacheTable: BroccoliDbTable<CacheRecord>;
+  private readonly inFlightFetches = new Map<string, Promise<any>>();
 
   private constructor() {
     this.cacheTable = new BroccoliDbTable<CacheRecord>('edge_cache');
@@ -44,7 +45,8 @@ export class GalxEdgeCache {
   }
 
   /**
-   * Retrieves or computes a cached value with Stale-While-Revalidate semantics.
+   * Retrieves or computes a cached value with Stale-While-Revalidate semantics
+   * and single-flight request coalescing to prevent backend cache stampedes.
    */
   async getOrFetch<T>(
     key: string,
@@ -65,20 +67,43 @@ export class GalxEdgeCache {
         return { value: entry.value, source: 'HIT' };
       }
 
-      // 2. Stale-While-Revalidate Hit (serve stale immediately, fetch fresh in background)
+      // 2. Stale-While-Revalidate Hit (serve stale immediately, trigger single-flight background refresh)
       if (age < entry.ttlMs + entry.swrTtlMs) {
-        // Trigger background refresh
-        fetchFn()
-          .then(fresh => this.set(key, fresh, { ttlMs, swrTtlMs }))
-          .catch(() => {});
+        if (!this.inFlightFetches.has(key)) {
+          const bgPromise = fetchFn()
+            .then(fresh => {
+              this.set(key, fresh, { ttlMs, swrTtlMs });
+              return fresh;
+            })
+            .catch(() => {})
+            .finally(() => {
+              this.inFlightFetches.delete(key);
+            });
+          this.inFlightFetches.set(key, bgPromise);
+        }
 
         return { value: entry.value, source: 'SWR_HIT' };
       }
     }
 
-    // 3. Cache Miss
-    const fresh = await fetchFn();
-    this.set(key, fresh, { ttlMs, swrTtlMs });
+    // 3. Cache Miss with Single-Flight Coalescing
+    if (this.inFlightFetches.has(key)) {
+      const coalesced = await this.inFlightFetches.get(key)!;
+      return { value: coalesced, source: 'MISS' };
+    }
+
+    const flightPromise = (async () => {
+      try {
+        const fresh = await fetchFn();
+        this.set(key, fresh, { ttlMs, swrTtlMs });
+        return fresh;
+      } finally {
+        this.inFlightFetches.delete(key);
+      }
+    })();
+
+    this.inFlightFetches.set(key, flightPromise);
+    const fresh = await flightPromise;
     return { value: fresh, source: 'MISS' };
   }
 

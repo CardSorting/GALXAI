@@ -304,6 +304,8 @@ export class ModelCatalog {
     EXCLUSIVE_MODEL_CATALOG.map(m => [m.id, m])
   );
 
+  private static fastPathCache: Map<string, ModelSpecItem> = new Map();
+
   /**
    * Hyper-Forgiving 0ms Model Alias Resolution.
    * Absorbs any developer mental model: prefixes, slashes, dashes, dots, spaces, shorthand aliases, intent tags, and fuzzy tokens.
@@ -315,6 +317,16 @@ export class ModelCatalog {
       return this.catalog.get('gpt-5.6-sol') || EXCLUSIVE_MODEL_CATALOG[0];
     }
 
+    if (this.fastPathCache.has(requestedModel)) {
+      return this.fastPathCache.get(requestedModel)!;
+    }
+
+    const resolved = this.computeResolution(requestedModel);
+    this.fastPathCache.set(requestedModel, resolved);
+    return resolved;
+  }
+
+  private static computeResolution(requestedModel: string): ModelSpecItem {
     let normalized = requestedModel.trim().toLowerCase();
 
     // 1. Direct match on canonical ID

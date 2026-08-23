@@ -103,6 +103,21 @@ function calculateJitterBackoff(attempt: number, baseDelay: number, maxDelay: nu
 }
 
 /**
+ * Normalizes URL query parameter ordering for deterministic single-flight request coalescing.
+ */
+function normalizeUrlForCoalescing(url: string): string {
+  try {
+    const isAbsolute = url.startsWith('http://') || url.startsWith('https://');
+    const u = new URL(url, isAbsolute ? undefined : 'http://localhost');
+    const sortedEntries = Array.from(u.searchParams.entries()).sort(([a], [b]) => a.localeCompare(b));
+    const search = sortedEntries.length > 0 ? `?${new URLSearchParams(sortedEntries).toString()}` : '';
+    return isAbsolute ? `${u.origin}${u.pathname}${search}` : `${u.pathname}${search}`;
+  } catch {
+    return url;
+  }
+}
+
+/**
  * Enterprise resilient fetch client with BroccoliDB L1 cache & In-Flight Coalescing.
  */
 export async function resilientFetch<T = any>(
@@ -112,8 +127,9 @@ export async function resilientFetch<T = any>(
   const method = (options.method || 'GET').toUpperCase();
   const isReadMethod = method === 'GET' || method === 'HEAD';
 
-  // Request Coalescing for concurrent identical GET requests
-  const coalescingKey = `${method}::${url}::${JSON.stringify(options.headers || {})}`;
+  // Request Coalescing with normalized query parameters for concurrent identical GET requests
+  const normalizedUrl = normalizeUrlForCoalescing(url);
+  const coalescingKey = `${method}::${normalizedUrl}::${JSON.stringify(options.headers || {})}`;
   if (isReadMethod && inFlightRequests.has(coalescingKey)) {
     return inFlightRequests.get(coalescingKey)! as Promise<{ data: T; fromCache?: boolean; status: number }>;
   }
@@ -128,6 +144,39 @@ export async function resilientFetch<T = any>(
   }
 
   return promise;
+}
+
+/**
+ * Proactively prefetches and primes BroccoliDB L1 and SafeStorage L2 caches
+ * before the user navigates, completely eliminating network roundtrips on route transition.
+ */
+export function prefetchQuery<T = any>(
+  url: string,
+  options: ResilientFetchOptions = {}
+): Promise<{ data: T; fromCache?: boolean; status: number }> {
+  const substrate = BroccoliResilienceSubstrate.getInstance();
+  const cacheKey = options.cacheKey || url;
+  const l1Cached = substrate.getCachedResponse<T>(cacheKey, 'GET');
+  if (l1Cached && !l1Cached.isStale) {
+    return Promise.resolve({ data: l1Cached.data, fromCache: true, status: 200 });
+  }
+  return resilientFetch<T>(url, {
+    ...options,
+    timeoutMs: options.timeoutMs || 8000,
+    maxRetries: options.maxRetries ?? 1,
+  });
+}
+
+/**
+ * Batches and concurrently prefetches multiple API endpoints with request coalescing,
+ * warming the BroccoliDB L1 cache for multiple routes simultaneously.
+ */
+export async function batchPrefetchQueries(
+  queries: Array<{ url: string; options?: ResilientFetchOptions }>
+): Promise<Array<{ data: any; fromCache?: boolean; status: number }>> {
+  return Promise.all(
+    queries.map(({ url, options }) => prefetchQuery(url, options))
+  );
 }
 
 async function executeResilientFetch<T = any>(

@@ -158,6 +158,9 @@ export async function POST(req: NextRequest) {
         headers: {
           'Content-Type': 'application/x-ndjson; charset=utf-8',
           'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-cache, no-transform',
+          'Connection': 'keep-alive',
+          'X-Accel-Buffering': 'no',
           'X-Galx-Model-Resolved': modelSpec.id
         }
       });
