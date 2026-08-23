@@ -39,6 +39,7 @@ import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 import { TrustSeals } from '@/components/common/TrustSeals';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface QuickPreset {
   id: string;
@@ -335,7 +336,9 @@ const { text } = await generateText({
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
         <Breadcrumbs items={[{ label: 'Developer Gateway API Keys' }]} />
 
-        <KeysSubNav />
+        <ErrorBoundary name="Keys Navigation">
+          <KeysSubNav />
+        </ErrorBoundary>
 
         <AuthRequiredGate
           title="Sign In to Access API Keys"
@@ -702,16 +705,20 @@ const { text } = await generateText({
         </AuthRequiredGate>
 
         {/* Consumer-Grade Trust Seals */}
-        <TrustSeals />
+        <ErrorBoundary name="Trust Seals">
+          <TrustSeals />
+        </ErrorBoundary>
       </main>
 
       {/* Paywall Blocker Modal */}
-      <KeyActivationPaywallModal
-        isOpen={isPaywallOpen}
-        onClose={() => setIsPaywallOpen(false)}
-        onSuccess={handlePaywallSuccess}
-        keyLabel={newKeyName || 'Developer API Key'}
-      />
+      <ErrorBoundary name="Paywall Modal">
+        <KeyActivationPaywallModal
+          isOpen={isPaywallOpen}
+          onClose={() => setIsPaywallOpen(false)}
+          onSuccess={handlePaywallSuccess}
+          keyLabel={newKeyName || 'Developer API Key'}
+        />
+      </ErrorBoundary>
     </div>
   );
 }

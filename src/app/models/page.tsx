@@ -29,6 +29,7 @@ import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 export default function ModelsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -92,10 +93,14 @@ export default function ModelsPage() {
         </div>
 
         {/* Founding Cohort Rate Lock Scarcity Ribbon */}
-        <RateLockRibbon />
+        <ErrorBoundary name="Rate Lock Ribbon">
+          <RateLockRibbon />
+        </ErrorBoundary>
 
         {/* Apple-Style Plain English Intent Matchmaker */}
-        <SimpleModelPicker />
+        <ErrorBoundary name="Model Matchmaker">
+          <SimpleModelPicker />
+        </ErrorBoundary>
 
         {/* Search, Category Filter & Live Volume Tier Selector */}
         <div className="glass-panel rounded-2xl p-4 flex flex-col lg:flex-row items-center justify-between gap-4">
@@ -273,13 +278,21 @@ export default function ModelsPage() {
         </div>
 
         {/* Consumer Trust Seals */}
-        <TrustSeals />
+        <ErrorBoundary name="Trust Seals">
+          <TrustSeals />
+        </ErrorBoundary>
       </main>
 
       {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
-      <FloatingConversionDock />
-      <LiveActivityToast />
-      <ExitIntentModal />
+      <ErrorBoundary name="Floating Conversion Dock">
+        <FloatingConversionDock />
+      </ErrorBoundary>
+      <ErrorBoundary name="Live Activity Toast">
+        <LiveActivityToast />
+      </ErrorBoundary>
+      <ErrorBoundary name="Exit Intent Modal">
+        <ExitIntentModal />
+      </ErrorBoundary>
     </div>
   );
 }
