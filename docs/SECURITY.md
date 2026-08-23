@@ -96,7 +96,18 @@ Audit records are streamed into Merkle Tree micro-batches with SHA-256 custody c
 
 ---
 
-## 6. Formal Architectural Decision Records
+---
+
+## 6. Universal Developer Authentication Perimeter (UDAP)
+
+To safeguard pooled compute allocations from anonymous denial-of-wallet vectors and protect private tenant metadata, GALXAI enforces the Universal Developer Authentication Perimeter across 100% of workspace routes:
+- **Guest Sign-In Elimination**: Retired ephemeral guest passes and public unauthenticated chat omnisets to prevent quota bleed.
+- **Client-Side Perimeter Gate (`<AuthRequiredGate />`)**: All API key management (`/keys/*`), financial accounting (`/billing/*`), provider shards (`/vault/*`), task queues (`/queues`), and live telemetry streams (`/telemetry`) require active developer session verification.
+- **Dual Conversion Funnel**: Unauthenticated traffic is seamlessly intercepted by high-converting developer connect and compute prepay checkout gates with ZDR-100 privacy guarantees.
+
+---
+
+## 7. Formal Architectural Decision Records
 
 For deep technical specifications, consult the official ADRs:
 - **[ADR 0020: Provider-as-Auth Paradigm](adr/0020-provider-as-auth-zero-friction-session-substrate.md)**
@@ -108,3 +119,5 @@ For deep technical specifications, consult the official ADRs:
 - **[ADR 0026: BroccoliDB Natural Query Parser & WAL Persistence](adr/0026-broccolidb-natural-language-query-ast-parser-and-wal-persistence.md)**
 - **[ADR 0027: Enterprise Privacy Substrate & ZDR v10.0 Memory Zeroization](adr/0027-enterprise-privacy-safe-harbor-18-gdpr-and-zdr-v10-memory-zeroization.md)**
 - **[ADR 0028: SOC 2 Type II Compliance Engine & Merkle Audit Ledger](adr/0028-soc2-type-ii-compliance-engine-drift-detector-and-merkle-audit-ledger.md)**
+- **[ADR 0035: Paranoid Supabase PostgreSQL Architecture](adr/0035-paranoid-supabase-postgresql-and-ai-agent-governance.md)**
+- **[ADR 0036: Universal Developer Authentication Gating & Zero-Abuse Workspace Perimeter](adr/0036-universal-developer-authentication-gating-and-zero-abuse-workspace-perimeter.md)**

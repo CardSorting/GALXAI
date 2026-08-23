@@ -95,10 +95,22 @@ To eliminate database connection thrashing during multi-agent swarm bursts, Clou
 
 ---
 
-## 8. Multi-Tenant Budget Alerts & Automated Webhooks (ADR 0019)
+---
 
-Organizations configure real-time spend thresholds across workspaces and environments:
-- **Threshold Policies**: Set triggers at 50%, 80%, and 100% of the monthly spend cap in `galx_budget_alerts`.
-- **Automated Webhooks**: `fn_check_budget_thresholds` dispatches HMAC-SHA256 signed webhooks directly from Cloudflare Edge Workers upon crossing spend milestones.
-- **Graceful Quota Soft/Hard Enforcement**: Non-critical background queues pause automatically while high-priority production endpoints remain operational.
+## 9. Dedicated 2-Column Checkout Funnel & 1-Click Express Pay (`/checkout`)
+
+To maximize conversion without third-party vendor lock-in or external redirects, GALXAI features a native 2-column e-commerce checkout funnel mirroring modern industry standards:
+- **3-Step Visual Breadcrumbs**: `1. Compute Tier` ➔ `2. Secure Checkout & Rate Lock` ➔ `3. Instant Key Activation`.
+- **Native 1-Click Express Pay Strip**: Integrated  Apple Pay, Google Pay, and USDC 1-Click crypto payments with zero-redirect settlement.
+- **Dynamic Tiered Compute Match Selectors**: Pre-selected compute amounts ($25, $50, $100, $250) with instant visual match bonuses (+10% to +50%).
+- **Interactive Workload Capacity Estimator**: Dynamically calculates and displays estimated frontier queries (~15,000 to ~220,000 queries) based on selected compute volume.
+- **Amazon-Style Zero-Downtime Order Bump**: 1-click opt-in checkbox to enable auto-reload safeguards with a 15% rate lock guarantee.
+- **Instant Key Reveal Hub (`/checkout/success`)**: Provides instantaneous live bearer API key provisioning (`galx_live_...`), 1-click copy, printable official tax receipt, and 30-second IDE/SDK drop-in configuration widget.
+
+---
+
+## 10. Authenticated Perimeter & Financial Privacy (`<AuthRequiredGate />`)
+
+All billing management routes (`/billing`, `/billing/invoices`, `/billing/payment-methods`, `/billing/auto-reload`, `/billing/expenses`, `/billing/teams`, `/billing/tax`, `/billing/reports`, `/billing/audit-logs`) are protected by the Universal Developer Authentication Perimeter. Unauthenticated visitors are presented with the high-converting Authentication Gate with dual onboarding and checkout pathways.
+
 

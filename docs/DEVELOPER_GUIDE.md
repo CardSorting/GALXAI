@@ -379,12 +379,21 @@ npx galxai chat gpt-5.6-sol "Explain the Raft consensus algorithm concisely."
 
 ---
 
+## 🛡️ Workspace Authentication & Route Protection Guidelines
+
+All internal, stateful, and developer management pages in GALXAI must implement the **Universal Developer Authentication Perimeter (ADR 0036)**:
+- Wrap private views in `<AuthRequiredGate title="..." description="..." checkoutAmount={...}>`.
+- Never expose unauthenticated chat textareas or guest passes that could trigger upstream quota consumption.
+- Guide unauthenticated visitors through the dual Developer Connect (`/auth/connect`) or Prepay Compute (`/checkout`) conversion funnels.
+
+---
+
 ## 🧪 Testing & Verification Standards
 
 GALXAI maintains dedicated forensic test runners:
 
 ```bash
-# 1. Universal Router, Privacy, SOC2 & BroccoliDB Verification Suite (162 tests)
+# 1. Universal Router, Privacy, SOC2, BroccoliDB & API Strategy Suite (177 forensic tests)
 npm run test:router
 # (or: npx tsx scripts/validate-galxai-router.ts)
 
