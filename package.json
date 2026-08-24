@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
   "bin": {
     "galxai": "./bin/galxai.mjs"
   },
@@ -33,7 +36,6 @@
     "db:dry-run": "tsx scripts/manage-migrations.ts --dry-run",
     "vercel:verify": "tsx scripts/verify-vercel-readiness.ts",
     "vault:populate": "tsx scripts/populate-vault-secrets.ts",
-    "prebuild": "tsx scripts/verify-vercel-readiness.ts",
     "deploy:check": "npm run vercel:verify && npm run design:health && npm run lint && npm run build",
     "playbook": "tsx scripts/run-lifecycle-playbook.ts",
     "vercel:smoke": "tsx scripts/verify-deployment-smoke.ts",

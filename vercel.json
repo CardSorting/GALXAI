@@ -4,11 +4,11 @@
   "buildCommand": "next build",
   "installCommand": "npm install",
   "cleanUrls": true,
-  "regions": ["sfo1", "iad1"],
+  "regions": ["iad1"],
   "crons": [
     {
       "path": "/api/health",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 0 * * *"
     }
   ],
   "headers": [
