@@ -9,35 +9,35 @@
 .dev.vars.*
 wrangler.secrets*
 
-# Cloudflare Workers & Edge Infrastructure files
-.wrangler/
-wrangler.toml
-worker-configuration.d.ts
+# Cloudflare Workers & Edge Infrastructure files (Root Only)
+/.wrangler/
+/wrangler.toml
+/worker-configuration.d.ts
 
-# Agents, Brain, and IDE Local Files
-.agents/
-.data/
-.git/
-.github/
-.codex/
-.impeccable/
-.broccolidb/
+# Agents, Brain, and IDE Local Files (Root Only)
+/.agents/
+/.data/
+/.git/
+/.github/
+/.codex/
+/.impeccable/
+/.broccolidb/
 .DS_Store
 *.DS_Store
 
-# Documentation & Knowledge Bases
-docs/
-README.md
-DESIGN.md
-DESIGN_SCORECARD.md
-PRODUCT.md
+# Root Documentation & Metadata (Root Only - Never ignore src/app/docs or src/components/docs)
+/docs/
+/README.md
+/DESIGN.md
+/DESIGN_SCORECARD.md
+/PRODUCT.md
 
-# Standalone Scripts & Database Management (Executed locally / CI, not in Next.js bundle)
-scripts/
-supabase/
-Dockerfile
-docker-compose.yml
-skills-lock.json
+# Standalone Scripts & Migrations (Root Only - Never ignore src/lib/supabase or src/utils/supabase)
+/scripts/
+/supabase/
+/Dockerfile
+/docker-compose.yml
+/skills-lock.json
 
 # Caches, Logs & Temporary Files
 *.log
