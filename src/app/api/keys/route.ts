@@ -4,6 +4,8 @@ import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import type { DeveloperGatewayKey } from '@/core/contracts/GalxContracts';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 const MINIMUM_INITIAL_DEPOSIT_USD = 10.00;

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import * as crypto from 'node:crypto';
 import { PRIMARY_KEY_VERSION } from '../../../../../core/vault/GalxCryptoVault';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Standard RFC 7517 JSON Web Key Set (JWKS) Endpoint.
  * Publishes active cryptographic public keys for edge verification and microservice JWT validation.

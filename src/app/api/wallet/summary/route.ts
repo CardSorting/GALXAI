@@ -3,6 +3,8 @@ import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { WalletRepository } from '@/lib/supabase/repositories/WalletRepository';
 import { TokenCostCalculator } from '@/core/pricing/TokenCostCalculator';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {

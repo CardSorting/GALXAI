@@ -4,6 +4,8 @@ import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 import type { TaskStatus, CreateTaskOptions } from '@/core/contracts/GalxContracts';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 export async function OPTIONS() {

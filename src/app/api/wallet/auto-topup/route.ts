@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 interface AutoTopUpConfig {

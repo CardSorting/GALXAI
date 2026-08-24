@@ -4,6 +4,8 @@ import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import type { ChatCompletionRequest } from '@/core/contracts/GalxContracts';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 

@@ -3,6 +3,8 @@ import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
 import { TokenCostCalculator } from '@/core/pricing/TokenCostCalculator';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {

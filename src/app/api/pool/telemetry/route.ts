@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { galxRouter } from '@/core/router/GalxModelRouter';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 export async function GET() {

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { WalletRepository } from '@/lib/supabase/repositories/WalletRepository';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 export interface EnrichedTransaction {

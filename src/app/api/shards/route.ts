@@ -4,6 +4,8 @@ import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import type { GalxShardAccount, ProviderType } from '@/core/contracts/GalxContracts';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {

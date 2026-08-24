@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GalxOAuthManager } from '@/core/auth/GalxOAuthManager';
 import type { ProviderType } from '@/core/contracts/GalxContracts';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 /**

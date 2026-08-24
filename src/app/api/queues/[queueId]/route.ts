@@ -3,6 +3,8 @@ import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 export async function OPTIONS() {

@@ -4,6 +4,8 @@ import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { OAuthRepository } from '@/lib/supabase/repositories/OAuthRepository';
 import type { ProviderType, ShardIsolationMode } from '@/core/contracts/GalxContracts';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 /**
