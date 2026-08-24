@@ -85,15 +85,32 @@ $ npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 
 ---
 
-### 6. Cloudflare Edge Gateway Status Codes (`api.galx.ai`)
+### 7. Ingestion Gateway & Transport Hardening Errors (`/api/auth/ingest`)
 
-#### A. `HTTP 429 Edge rate limit exceeded`
-- **Root Cause**: Rapid client burst triggered the edge PoP sliding-window rate limiter in `RATE_LIMIT_KV` (default 120 req/min per IP/Key).
-- **Remedy**: Apply exponential backoff honoring the `Retry-After: 60` response header.
+#### A. `HTTP 415 Unsupported Media Type`
+- **Root Cause**: Request did not provide `Content-Type: application/json`.
+- **Remedy**: Ensure the HTTP client attaches `-H "Content-Type: application/json"`.
 
-#### B. `Cloudflare Error 1014 (CNAME Cross-User Banned / SSL Pending)`
-- **Root Cause**: Custom domain on R2 (`assets.galx.ai`) is awaiting Cloudflare Universal SSL issuance.
-- **Remedy**: Run `npx wrangler r2 bucket domain list galxai-assets` to check SSL verification status.
+#### B. `HTTP 409 NONCE_REPLAYED`
+- **Root Cause**: The single-use `X-Request-Nonce` was transmitted more than once within the 10-minute anti-replay sliding window.
+- **Remedy**: Generate a unique cryptographically random hex nonce (e.g. `crypto.randomBytes(16).toString('hex')`) per ingestion flight.
+
+#### C. `HTTP 400 INTEGRITY_CHECK_FAILED`
+- **Root Cause**: The `Digest: sha-256=<base64>` header does not match the computed SHA-256 hash of the request body.
+- **Remedy**: Compute the SHA-256 digest of the exact raw serialized JSON string:
+  ```typescript
+  const digest = `sha-256=${crypto.createHash('sha256').update(rawBody).digest('base64')}`;
+  ```
+
+#### D. `HTTP 503 INGESTION_SATURATED`
+- **Root Cause**: In-flight ingestion backpressure circuit breaker reached maximum capacity (100 simultaneous requests).
+- **Remedy**: Honor the `Retry-After: 5` header and apply exponential backoff.
+
+#### E. `auth_exchange_failed` in `/auth/callback`
+- **Root Cause**: Supabase OAuth authorization code expired, was already consumed, or PKCE verifier cookie was blocked.
+- **Remedy**:
+  - Ensure browser cookies are enabled for third-party OAuth redirect flows.
+  - Verify that `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are configured in `.env.local`.
 
 ---
 
@@ -118,7 +135,8 @@ $ npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 | Verification Suite | Target Validation Scope | Execution Command |
 | :--- | :--- | :--- |
 | **Zero-Hesitation Ergonomics** | Multi-mental-model absorption, CLI, GET queries, aspect ratios, fallbacks | `npx tsx scripts/verify-zero-hesitation-ergonomics.ts` (98 tests) |
-| **Universal Router & Privacy** | AES-256-GCM vault, BroccoliDB, ZDR v10.0, SOC 2 Type II audit | `npm run test:router` (177 tests) |
+| **Universal Router & Ingestion** | AES-256-GCM vault, BroccoliDB, ZDR v10.0, RFC 9530 transport, SOC 2 Type II audit | `npm run test:router` (217 tests) |
 | **Cloudflare Edge Mesh** | Zero-egress edge gateway, R2 CDN routes, SWR caching | `npm run worker:test` (46 tests) |
 | **TypeScript Compilation** | Static typing across serverless & worker runtimes | `npx tsc --noEmit` (0 errors) |
 | **Production App Router** | Production bundle generation across all routes | `npm run build` |
+

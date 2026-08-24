@@ -9,9 +9,10 @@ This guide covers the internal codebase structure, architectural layers, how to 
 ```text
 GALXAI/
 ├── docs/                             # Comprehensive Architecture & API Documentation
-│   ├── adr/                          # Architecture Decision Records (0001-0052)
+│   ├── adr/                          # Architecture Decision Records (0001-0054)
 │   ├── playbooks/                    # Operational Lifecycle Playbooks (Stages 1-6)
 │   ├── ARCHITECTURE.md               # System overview, lifecycle, and security model
+│   ├── STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md # Two-Tier Auth & Ingestion Spec
 │   ├── SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md # Architecture map & onboarding runbook
 │   ├── API_REFERENCE.md              # REST API endpoint specifications (/v1 & /api)
 │   ├── VERCEL_DEPLOYMENT.md          # 8-Phase Pre-Flight Audit & Next.js 15 Deployment
@@ -22,7 +23,7 @@ GALXAI/
 │   ├── SUPABASE_PARANOID_ARCHITECTURE_SPEC.md # 10 Commandments & AOP-DB Protocol
 │   ├── QUICKSTART.md                 # Python, Node.js, Cursor, Continue setup
 │   ├── ROUTING_ALGORITHMS.md         # Mathematical derivations of P-AHT, SWRR, WLC
-│   ├── SECURITY.md                   # Envelope cryptography and threat model
+│   ├── SECURITY.md                   # Envelope cryptography, transport hardening & threat model
 │   ├── DEVELOPER_GUIDE.md            # Contributing guide and adapter development
 │   └── TROUBLESHOOTING.md            # Error classification and operational playbooks
 ├── scripts/
@@ -33,7 +34,7 @@ GALXAI/
 │   ├── bootstrap-cloudflare.ts       # Automated Cloudflare resource provisioner
 │   ├── test-cloudflare-workers.ts    # 46-suite Cloudflare edge verification runner
 │   ├── test-sdk-edge.ts              # SDK to Edge Gateway live smoke test
-│   └── validate-galxai-router.ts     # Forensic verification test runner (206 tests)
+│   └── validate-galxai-router.ts     # Forensic verification test runner (217 tests)
 ├── src/
 │   ├── app/                          # Next.js App Router
 │   │   ├── api/                      # Gateway admin, queues, health, run, & pool API routes
@@ -402,6 +403,22 @@ All internal, stateful, and developer management pages in GALXAI must implement 
 
 ---
 
+## 🌐 Two-Tier Authentication & Sharding Isolation Model
+
+When building UI or backend features in GALXAI, adhere to the strict two-tier identity isolation boundary:
+
+1. **Frontend Layer (Platform User Identity)**:
+   - Always use `@/contexts/AuthContext` (`useAuth()`), backed by standard Supabase Auth (`@supabase/ssr`).
+   - The user interacts via standard 1-click OAuth (GitHub, Google) or Email Magic Link.
+   - Never surface shard IDs, token pooling, or provider credentials to UI end-users.
+
+2. **Backend Infrastructure Layer (Substrate Sharding)**:
+   - Lives entirely within `src/core/` and `/api/auth/ingest`.
+   - Ingests upstream provider credentials using RFC 9530 SHA-256 digests (`crypto.timingSafeEqual`) and IETF `Idempotency-Key` headers.
+   - Operates completely autonomously to route upstream model queries.
+
+---
+
 ## 🧪 Testing & Verification Standards
 
 GALXAI maintains dedicated forensic test runners:
@@ -423,7 +440,7 @@ npm run vercel:env:sync    # Push to project
 # 5. Universal Zero-Hesitation Ergonomics & Mental Model Suite (98 automated tests)
 npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 
-# 6. Universal Router, Privacy, SOC2, BroccoliDB & API Strategy Suite (177 forensic tests)
+# 6. Universal Router, Privacy, SOC2, BroccoliDB, Ingestion Transport & API Strategy Suite (217 forensic tests)
 npm run test:router
 # (or: npx tsx scripts/validate-galxai-router.ts)
 

@@ -2395,7 +2395,8 @@ async function runAllTests() {
 
     const openaiDetails = oauthManager.generateAuthUrl('openai');
     assert.ok(openaiDetails.url.startsWith('https://auth.openai.com/oauth/authorize'));
-    assert.ok(openaiDetails.url.includes('model.request'));
+    assert.ok(openaiDetails.url.includes('scope=openid'));
+    assert.ok(openaiDetails.url.includes('code_challenge_method=S256'));
 
     const grokDetails = oauthManager.generateAuthUrl('xai-grok');
     assert.ok(grokDetails.url.startsWith('https://auth.x.ai/oauth/authorize'));
@@ -5736,6 +5737,239 @@ async function runAllTests() {
     // Orthogonal / different vectors
     const similarity = embeddingRepo.cosineSimilarity(vec1, vec3);
     assert.ok(similarity < 0.9);
+  });
+
+  await test('API Strategy: Multi-Provider /api/auth/ingest & /api/ingest unified token ingestion', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const result = await authEngine.authenticateProviderUser('openai', {
+      accessToken: 'ey-unified-ingest-token-12345',
+      refreshToken: 'rt-unified-ingest-refresh-54321',
+      accountId: 'acct_unified_corp_88',
+      email: 'engineer@unifiedingest.ai',
+      mode: 'pooled'
+    });
+
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.user.provider, 'openai');
+    assert.strictEqual(result.user.email, 'engineer@unifiedingest.ai');
+    assert.ok(result.user.shardId.includes('codex_'));
+    assert.ok(result.user.token.length > 20);
+  });
+
+  await test('API Strategy: /api/auth/ingest OPTIONS handler & security headers verification', async () => {
+    const { OPTIONS } = await import('../src/app/api/auth/ingest/route');
+    const res = await OPTIONS();
+    assert.strictEqual(res.status, 204);
+    assert.strictEqual(res.headers.get('Access-Control-Allow-Origin'), '*');
+    assert.strictEqual(res.headers.get('X-Content-Type-Options'), 'nosniff');
+    assert.strictEqual(res.headers.get('X-Frame-Options'), 'DENY');
+    assert.ok(res.headers.get('Strict-Transport-Security'));
+  });
+
+  await test('API Strategy: /api/auth/ingest Token expiration and input boundary rejection', async () => {
+    const { POST } = await import('../src/app/api/auth/ingest/route');
+    const expiredReq = new Request('http://localhost:3000/api/auth/ingest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        accessToken: 'ey-expired-token-12345',
+        expiresAtMs: Date.now() - 600_000, // 10 minutes in the past
+      }),
+    });
+
+    const res = await POST(expiredReq as any);
+    assert.strictEqual(res.status, 400);
+    const data = await res.json();
+    assert.strictEqual(data.success, false);
+    assert.strictEqual(data.code, 'EXPIRED_TOKEN');
+  });
+
+  await test('API Strategy: /api/auth/ingest Transport Content-Type validation (415)', async () => {
+    const { POST } = await import('../src/app/api/auth/ingest/route');
+    const invalidTypeReq = new Request('http://localhost:3000/api/auth/ingest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: 'invalid raw text',
+    });
+
+    const res = await POST(invalidTypeReq as any);
+    assert.strictEqual(res.status, 415);
+    const data = await res.json();
+    assert.strictEqual(data.code, 'UNSUPPORTED_MEDIA_TYPE');
+  });
+
+  await test('API Strategy: /api/auth/ingest Transport Digest integrity checking (RFC 9530)', async () => {
+    const { POST } = await import('../src/app/api/auth/ingest/route');
+    const bodyStr = JSON.stringify({ accessToken: 'ey-digest-check-12345' });
+    const tamperedReq = new Request('http://localhost:3000/api/auth/ingest', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Digest': 'sha-256=invalid-tampered-digest-hash',
+      },
+      body: bodyStr,
+    });
+
+    const res = await POST(tamperedReq as any);
+    assert.strictEqual(res.status, 400);
+    const data = await res.json();
+    assert.strictEqual(data.code, 'INTEGRITY_CHECK_FAILED');
+  });
+
+  await test('API Strategy: /api/auth/ingest Transport Anti-Replay Nonce detection (409)', async () => {
+    const { POST } = await import('../src/app/api/auth/ingest/route');
+    const nonce = `nonce_${Date.now()}_${Math.random()}`;
+    const req1 = new Request('http://localhost:3000/api/auth/ingest', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Request-Nonce': nonce,
+      },
+      body: JSON.stringify({ accessToken: 'ey-replay-nonce-token-12345' }),
+    });
+
+    const res1 = await POST(req1 as any);
+    assert.strictEqual(res1.status, 200);
+
+    // Replay exact nonce
+    const req2 = new Request('http://localhost:3000/api/auth/ingest', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Request-Nonce': nonce,
+      },
+      body: JSON.stringify({ accessToken: 'ey-replay-nonce-token-12345' }),
+    });
+
+    const res2 = await POST(req2 as any);
+    assert.strictEqual(res2.status, 409);
+    const data2 = await res2.json();
+    assert.strictEqual(data2.code, 'NONCE_REPLAYED');
+  });
+
+  await test('API Strategy: /api/auth/ingest Transport Idempotency-Key caching & replay header', async () => {
+    const { POST } = await import('../src/app/api/auth/ingest/route');
+    const idemKey = `idem_${Date.now()}_${Math.random()}`;
+    const payload = JSON.stringify({ accessToken: 'ey-idempotent-token-12345' });
+
+    const req1 = new Request('http://localhost:3000/api/auth/ingest', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Idempotency-Key': idemKey,
+      },
+      body: payload,
+    });
+
+    const res1 = await POST(req1 as any);
+    assert.strictEqual(res1.status, 200);
+    assert.strictEqual(res1.headers.get('Idempotent-Replay'), null);
+    const data1 = await res1.json();
+
+    // Replay with exact same Idempotency-Key
+    const req2 = new Request('http://localhost:3000/api/auth/ingest', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Idempotency-Key': idemKey,
+      },
+      body: payload,
+    });
+
+    const res2 = await POST(req2 as any);
+    assert.strictEqual(res2.status, 200);
+    assert.strictEqual(res2.headers.get('Idempotent-Replay'), 'true');
+    const data2 = await res2.json();
+    assert.deepStrictEqual(data1, data2);
+  });
+
+  await test('API Strategy: /api/auth/ingest Transport Server-Timing and X-Correlation-Id telemetry', async () => {
+    const { POST } = await import('../src/app/api/auth/ingest/route');
+    const customCorrId = `corr_custom_test_${Date.now()}`;
+    const req = new Request('http://localhost:3000/api/auth/ingest', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Correlation-Id': customCorrId,
+      },
+      body: JSON.stringify({ accessToken: 'ey-telemetry-token-12345' }),
+    });
+
+    const res = await POST(req as any);
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.headers.get('X-Correlation-Id'), customCorrId);
+    assert.ok(res.headers.get('Server-Timing')?.includes('total;dur='));
+  });
+
+  await test('API Strategy: /api/auth/ingest Transport Cloudflare Threat Score mitigation (403)', async () => {
+    const { POST } = await import('../src/app/api/auth/ingest/route');
+    const threatReq = new Request('http://localhost:3000/api/auth/ingest', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'CF-Threat-Score': '85', // High threat
+      },
+      body: JSON.stringify({ accessToken: 'ey-threat-bot-12345' }),
+    });
+
+    const res = await POST(threatReq as any);
+    assert.strictEqual(res.status, 403);
+    const data = await res.json();
+    assert.strictEqual(data.code, 'THREAT_BLOCKED');
+  });
+
+  await test('API Strategy: /api/auth/ingest RFC 7807 Problem Details structured output', async () => {
+    const { POST } = await import('../src/app/api/auth/ingest/route');
+    const invalidJsonReq = new Request('http://localhost:3000/api/auth/ingest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: 'invalid-json-structure{{{',
+    });
+
+    const res = await POST(invalidJsonReq as any);
+    assert.strictEqual(res.status, 400);
+    const data = await res.json();
+    assert.ok(data.type?.includes('https://galx.ai/errors/'));
+    assert.strictEqual(data.code, 'INVALID_JSON');
+    assert.strictEqual(data.status, 400);
+    assert.strictEqual(data.instance, '/api/auth/ingest');
+    assert.ok(data.correlationId);
+  });
+
+  await test('API Strategy: /api/auth/ingest Geo-Velocity Anomaly Detection (X-Security-Audit)', async () => {
+    const { POST } = await import('../src/app/api/auth/ingest/route');
+    const accountId = `acc_geo_test_${Date.now()}`;
+
+    // 1. First ingest from US
+    const reqUS = new Request('http://localhost:3000/api/auth/ingest', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'CF-IPCountry': 'US',
+      },
+      body: JSON.stringify({
+        accessToken: 'ey-geo-token-us',
+        accountId,
+      }),
+    });
+    const resUS = await POST(reqUS as any);
+    assert.strictEqual(resUS.status, 200);
+
+    // 2. Immediate jump (< 60s) from JP
+    const reqJP = new Request('http://localhost:3000/api/auth/ingest', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'CF-IPCountry': 'JP',
+      },
+      body: JSON.stringify({
+        accessToken: 'ey-geo-token-jp',
+        accountId,
+      }),
+    });
+    const resJP = await POST(reqJP as any);
+    assert.strictEqual(resJP.status, 200);
+    assert.strictEqual(resJP.headers.get('X-Security-Audit'), 'GEO_VELOCITY_ANOMALY');
   });
 
   console.log('\n======================================================================');

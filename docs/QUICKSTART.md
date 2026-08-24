@@ -168,3 +168,12 @@ curl -X POST https://galx.ai/v1/chat/completions \
   -H "Authorization: Bearer galx_live_your_key_here" \
   -d "Explain gravity in 10 words"
 ```
+
+---
+
+## 🔑 7. 1-Click Platform Sign-In & API Key Generation
+
+1. Navigate to **[https://galx.ai/auth/connect](https://galx.ai/auth/connect)**.
+2. Sign in with **1-Click GitHub**, **Google**, or **Email Magic Link** (powered by Supabase Auth).
+3. Jump into **API Keys** to claim your `galx_live_...` key with **$5 included trial credit**!
+

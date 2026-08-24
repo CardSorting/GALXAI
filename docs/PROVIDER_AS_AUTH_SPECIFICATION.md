@@ -383,3 +383,21 @@ This mathematically steers high-concurrency swarm bursts away from shards underg
 | **PostgreSQL Network Partition** | Transient connectivity loss to Supabase during inference. | Supabase RPC timeout ($> 3000\text{ms}$). | Seamlessly falls back to L1 BroccoliDB in-memory reactive tables without dropping requests. | **0ms (Zero downtime)** |
 | **DPoP Replay Attack** | Adversary intercepts Bearer token and attempts reuse without EC key. | `GalxOAuthManager.verifyDPoPProof` checks `jti` in BroccoliDB. | Rejects with `HTTP 401 Invalid DPoP Proof`; logs anti-replay violation. | **0ms (Blocked at edge)** |
 | **KMS Key Compromise** | Master vault key rotated from `v1` to `v2`. | SUDO admin executes `POST /api/auth/vault/re-wrap`. | Background atomic batch re-encrypts all ciphertexts in Supabase and BroccoliDB with zero downtime. | **0ms (Zero downtime)** |
+
+---
+
+## 14. Decoupled Architecture: Platform Identity vs. Provider Ingestion
+
+In current production releases, GALXAI strictly separates **Platform Identity** from **Provider Ingestion**:
+
+1. **Platform Identity (Frontend)**:
+   - Built on standard **Supabase OAuth** (`@supabase/ssr` / `@supabase/supabase-js`).
+   - Supports 1-click GitHub, Google, and Email Magic Links.
+   - Manages developer user accounts, API key generation, organization billing, and workspace settings.
+   - **Zero exposure to sharding, token pools, or provider routing.**
+
+2. **Provider Ingestion (Autonomous Backend Service)**:
+   - Ingests upstream provider credentials (OpenAI, xAI Grok, Anthropic) via `POST /api/auth/ingest` and `POST /api/ingest`.
+   - Hardened with RFC 9530 `Digest: sha-256=...` constant-time verification, RFC 9421 signatures, anti-replay nonces, and IETF `Idempotency-Key` deduplication.
+   - Vaults tokens in AES-256-GCM and provisions Substrate tenant shards for model routing without binding to frontend user sessions.
+

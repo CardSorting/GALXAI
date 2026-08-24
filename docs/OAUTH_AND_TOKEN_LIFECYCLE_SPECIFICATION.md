@@ -45,6 +45,10 @@ flowchart TD
 | **RFC 7009** | OAuth 2.0 Token Revocation | Standard token invalidation endpoint with enumeration protection. |
 | **RFC 7662** | OAuth 2.0 Token Introspection | Sub-millisecond offline token validation for microservices. |
 | **RFC 7517** | JSON Web Key Set (JWKS) | Public cryptographic KMS key distribution for token signature verification. |
+| **RFC 9530 / 3230** | Digest Fields in HTTP | SHA-256 wire payload digest verification via constant-time `crypto.timingSafeEqual`. |
+| **RFC 9421** | HTTP Message Signatures | Cryptographically verifiable request signatures for upstream agent payloads. |
+| **IETF Idempotency** | The Idempotency-Key HTTP Header Field | 24-hour request deduplication ensuring safe retries during network flapping. |
+| **RFC 7807** | Problem Details for HTTP APIs | Standardized structured error responses across all ingestion endpoints. |
 | **OIDC Back-Channel 1.0** | OpenID Connect Back-Channel Logout | Server-to-server asynchronous revocation propagation from upstream identity providers. |
 | **OIDC Discovery 1.0** | OpenID Connect Discovery Specification | RFC 8414 compliant metadata and endpoint discovery. |
 
@@ -358,3 +362,21 @@ await galx.auth.revokeToken({ token: 'galx_sess_v2...' });
 3. **Cryptographic Proof of Possession**: RFC 9449 DPoP headers bind access tokens to ephemeral client EC public keys, eliminating Bearer token replay threats.
 4. **Deterministic Token Theft Containment**: Stale refresh token replay outside the 30-second grace period triggers an immediate cluster-wide revocation of all sibling tokens in the session family.
 5. **Continuous Audit Merkle Chain**: Every authorization, rotation, revocation, and back-channel event is immutably appended to `galx_audit_logs` with SHA-256 cryptographic chaining.
+
+---
+
+## 10. Two-Tier Siloed Platform Auth & Ingestion Gateway
+
+GALXAI strictly decouples user identity management on the frontend from autonomous shard provisioning in the backend:
+
+### 10.1 Frontend Platform Authentication (Supabase OAuth)
+- **Engine**: `@supabase/ssr` / `@supabase/supabase-js`
+- **Providers**: GitHub, Google, Email Magic Links.
+- **Session Lifecycle**: Browser cookies managed transparently via `/auth/callback` (`exchangeCodeForSession`).
+- **Isolation Guarantee**: Zero exposure to substrate shards, quota keys, or provider tokens.
+
+### 10.2 Backend Autonomous Ingestion Gateway (`/api/auth/ingest`)
+- **Protocol**: HTTPS POST with RFC 9530 `Digest: sha-256=...` and IETF `Idempotency-Key`.
+- **Replay Protection**: Single-use `X-Request-Nonce` (10-min sliding window) and `X-Request-Timestamp` ($\pm 300\text{s}$ tolerance).
+- **Storage Substrate**: Encrypted with AES-256-GCM and indexed into BroccoliDB `substrate_shards` and PostgreSQL `galx_user_shards`.
+

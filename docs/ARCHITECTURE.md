@@ -91,6 +91,35 @@ All architectural components in GALXAI are governed by formal Architectural Deci
 | **[ADR 0050](adr/0050-incident-postmortems-resilience-engineering-and-sla-failover.md)** | AI Incident Postmortems, Resilience Engineering & Multi-Origin SLA Failover | Active-Active Anycast multi-origin failover, Layer 7 sponge attack defense, dynamic subsea fiber cut BGP rerouting, KV cache invalidation storm mitigation, and quota pool federation. |
 | **[ADR 0051](adr/0051-enterprise-oauth2-fapi-token-lifecycle-and-identity-mesh.md)** | Enterprise OAuth 2.0 / 2.1, FAPI Standards, Token Lifecycle & Identity Mesh | RFC 7636 PKCE, RFC 8628 Device Flow, RFC 9126 PAR, RFC 9449 DPoP, RFC 7009 Revocation, RFC 7662 Introspection, RFC 7517 JWKS, and single-flight token rotation mutex. |
 | **[ADR 0052](adr/0052-enterprise-oauth21-rtr-fapi-backchannel-and-vacuum-mesh.md)** | Enterprise OAuth 2.1 Refresh Token Rotation (RTR), Token Family Theft Containment, OIDC Back-Channel Logout & Substrate Vacuum Mesh | RFC 6819 Token Family theft containment cascades, 30s grace window replay tolerance, OpenID Connect Back-Channel Logout 1.0, and sub-millisecond PostgreSQL substrate vacuum stored procedures. |
+| **[ADR 0053](adr/0053-siloed-supabase-oauth-and-isolated-backend-sharding-mesh.md)** | Siloed Supabase OAuth Platform Authentication & Isolated Backend Substrate Sharding Mesh | Complete decoupling of frontend platform identity (standard Supabase OAuth with `@supabase/ssr`) from backend Substrate sharding infrastructure. |
+| **[ADR 0054](adr/0054-apex-transport-hardening-rfc9530-rfc9421-idempotency-and-anti-replay.md)** | Apex Transport Layer Hardening: RFC 9530 Digests, RFC 9421 Signatures, IETF Idempotency, and Anti-Replay Nonces | Constant-time SHA-256 digest validation, RFC 9421 message signatures, 24h Idempotency-Key caching, sliding-window rate limiting, and geo-velocity anomaly sensing. |
+
+---
+
+## 🛡️ Two-Tier Siloed Identity & Substrate Sharding Topology
+
+GALXAI enforces strict separation between user-facing platform identity and autonomous backend shard allocation:
+
+```mermaid
+flowchart TD
+    subgraph Tier1 ["Tier 1: Frontend Platform Identity (Supabase OAuth)"]
+        User["Developer / Platform User"] --> ConnectUI["/auth/connect"]
+        ConnectUI -->|1-Click GitHub / Google / Magic Link| SupabaseSSR["@supabase/ssr (createBrowserClient)"]
+        SupabaseSSR --> SSRCallback["/auth/callback (exchangeCodeForSession)"]
+        SSRCallback --> Dashboard["Developer Workspace / Keys / Billing"]
+    end
+
+    subgraph Tier2 ["Tier 2: Backend Autonomous Sharding (Substrate Subsystem)"]
+        CLI["CLI Agent (LUMI-NEW)"] --> Ingestion["POST /api/auth/ingest (RFC 9530 Digest + Idempotency)"]
+        Ingestion --> CryptoVault["GalxCryptoVault (AES-256-GCM + AAD Binding)"]
+        CryptoVault --> Shards["BroccoliDB Shard Tables & Postgres Substrate"]
+        Shards --> Pool["GalxCredentialPool (TASD Leveling & Circuit Breaker)"]
+        Pool --> Upstream["Upstream Model Fleet (OpenAI / xAI Grok)"]
+    end
+
+    style Tier1 fill:#0d1117,stroke:#3b82f6,stroke-width:2px
+    style Tier2 fill:#0d1117,stroke:#10b981,stroke-width:2px
+```
 
 ---
 
@@ -104,6 +133,8 @@ All architectural components in GALXAI are governed by formal Architectural Deci
 
 2. Gateway Authentication & Security
    ├── Multi-header ingestion (Bearer, x-api-key, x-galx-key, ?api_key=)
+   ├── RFC 9530 timing-safe content digest comparison (crypto.timingSafeEqual)
+   ├── IETF 24-hour Idempotency-Key cache lookup (Idempotent-Replay header)
    └── Adaptive behavioral risk scoring (IP subnet & UA fingerprinting)
 
 3. Sub-Nanosecond Model Resolution
@@ -130,6 +161,9 @@ All architectural components in GALXAI are governed by formal Architectural Deci
 | :--- | :--- | :--- |
 | **Credential Encryption** | AES-256-GCM with 96-bit random IV | Confidentiality and integrity of upstream API keys |
 | **AAD Envelope Binding** | `tenantId:shardId:provider` bound to tag | Prevents cross-tenant ciphertext transplantation |
+| **Transport Wire Integrity** | RFC 9530 SHA-256 digest + `crypto.timingSafeEqual` | Eliminates payload tampering and timing leaks |
+| **Anti-Replay Nonce Cache** | 10-minute sliding TTL single-use nonce tracking | Replay attack elimination (HTTP 409) |
+| **Idempotent Retries** | IETF Idempotency-Key 24-hour result cache | Eliminates duplicate database inserts on network retries |
 | **ZDR v10.0 Memory Zeroization** | 2-Pass cryptographic overwrite (`0xAA` -> `0x00`) | Zero residual plaintext tokens in memory |
 | **Forward Secrecy Key Ratchet** | HKDF-SHA256 streaming ratchet | Prevents past session compromise |
 | **Monotonic Fencing** | Incremental `fencingToken` per lease | Eliminates split-brain races on worker timeouts |
@@ -137,3 +171,4 @@ All architectural components in GALXAI are governed by formal Architectural Deci
 | **Merkle Audit Ledger** | Cryptographic SHA-256 Merkle block chaining | 100% tamper-evident audit custody proofs |
 | **Single-Flight Coalescing** | Mutex in-flight promise registry | Prevents cache stampedes and eliminates duplicate upstream flights |
 | **Zero-Copy Stream Sandbox** | Direct Uint8Array buffer streaming | Prevents heap fragmentation and reduces GC pauses |
+

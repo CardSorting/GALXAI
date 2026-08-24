@@ -82,7 +82,7 @@ export const OPENAI_OAUTH_CONFIG: OAuthProviderConfig = {
   tokenEndpoint: 'https://auth.openai.com/oauth/token',
   clientId: process.env.OPENAI_OAUTH_CLIENT_ID || 'app_EMoamEEZ73f0CkXaXp7hrann',
   redirectUri: process.env.OPENAI_OAUTH_REDIRECT_URI || 'http://localhost:3000/api/auth/oauth/callback',
-  scopes: 'openid profile email offline_access model.request'
+  scopes: process.env.OPENAI_OAUTH_SCOPES || 'openid profile email offline_access'
 };
 
 export const XAI_GROK_OAUTH_CONFIG: OAuthProviderConfig = {
@@ -90,7 +90,7 @@ export const XAI_GROK_OAUTH_CONFIG: OAuthProviderConfig = {
   tokenEndpoint: 'https://auth.x.ai/oauth/token',
   clientId: process.env.XAI_OAUTH_CLIENT_ID || 'app_galxai_grok_oauth',
   redirectUri: process.env.XAI_OAUTH_REDIRECT_URI || 'http://localhost:3000/api/auth/oauth/callback',
-  scopes: 'openid profile email offline_access'
+  scopes: process.env.XAI_OAUTH_SCOPES || 'openid profile email offline_access'
 };
 
 interface IdTokenClaims {
@@ -226,6 +226,8 @@ export class GalxOAuthManager {
       userId?: string;
       ipAddress?: string;
       userAgent?: string;
+      cliFlow?: boolean;
+      originator?: string;
     }
   ): OAuthUrlDetails {
     const config = this.getProviderConfig(provider);
@@ -241,10 +243,14 @@ export class GalxOAuthManager {
       code_challenge: codeChallenge,
       code_challenge_method: 'S256',
       response_type: 'code',
-      state,
-      codex_cli_simplified_flow: 'true',
-      originator: 'galxai'
+      state
     });
+
+    // If explicitly configured for OpenAI Codex CLI loopback flow
+    if (options?.cliFlow) {
+      params.set('codex_cli_simplified_flow', 'true');
+      params.set('originator', options.originator || 'codex_cli');
+    }
 
     const url = `${config.authorizationEndpoint}?${params.toString()}`;
 

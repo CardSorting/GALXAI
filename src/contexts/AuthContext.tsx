@@ -2,264 +2,174 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { resilientFetch } from '@/lib/resilience/ResilientClient';
-import { SafeStorage } from '@/lib/resilience/SafeStorage';
+import { createClient } from '@/utils/supabase/client';
+import type { Session, User, Provider } from '@supabase/supabase-js';
 
 export interface AuthUser {
   id: string;
-  email: string;
-  name: string;
-  provider: 'openai' | 'grok' | 'xai-grok';
-  shardId?: string;
-  shardMode?: 'pooled' | 'private';
-  token: string;
-  accountId?: string;
+  email?: string;
+  name?: string;
+  avatarUrl?: string;
+  provider?: string;
 }
 
 interface AuthContextType {
   user: AuthUser | null;
+  session: Session | null;
+  supabaseUser: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  loginWithOAuth: (provider: 'openai' | 'grok', options?: { mode?: 'pooled' | 'private' }) => Promise<void>;
-  loginWithTokens: (options: {
-    provider: 'openai' | 'grok';
-    accessToken: string;
-    refreshToken?: string;
-    accountId?: string;
-    email?: string;
-    displayName?: string;
-    mode?: 'pooled' | 'private';
-  }) => Promise<void>;
-  loginWithOpenAI: (options?: { apiKey?: string; accessToken?: string; refreshToken?: string; accountId?: string; email?: string; displayName?: string; mode?: 'pooled' | 'private' }) => Promise<void>;
-  loginWithGrok: (options?: { apiKey?: string; accessToken?: string; refreshToken?: string; accountId?: string; email?: string; displayName?: string; mode?: 'pooled' | 'private' }) => Promise<void>;
+  signInWithOAuth: (provider: Provider, options?: { redirectTo?: string }) => Promise<void>;
+  signInWithPassword: (credentials: { email: string; password: string }) => Promise<{ error: Error | null }>;
+  signUp: (credentials: { email: string; password: string }) => Promise<{ error: Error | null }>;
+  signInWithOtp: (credentials: { email: string; options?: { emailRedirectTo?: string } }) => Promise<{ error: Error | null }>;
+  signOut: () => Promise<void>;
+  // Backwards-compatible ergonomics
+  loginWithOAuth: (provider: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_STORAGE_KEY = 'galxai_auth_user';
+function mapSupabaseUser(user: User | null): AuthUser | null {
+  if (!user) return null;
+  const metadata = user.user_metadata || {};
+  return {
+    id: user.id,
+    email: user.email,
+    name: metadata.full_name || metadata.name || user.email?.split('@')[0] || 'Developer',
+    avatarUrl: metadata.avatar_url || metadata.picture,
+    provider: user.app_metadata?.provider || 'supabase',
+  };
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [supabaseUser, setSupabaseUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const supabase = createClient();
 
   useEffect(() => {
-    try {
-      const parsed = SafeStorage.getJSON<AuthUser | null>(AUTH_STORAGE_KEY, null);
-      if (parsed) {
-        setUser(parsed);
-
-        // Background session verification against Supabase PostgreSQL
-        if (parsed.token && parsed.token.startsWith('galx_sess_')) {
-          resilientFetch<{ valid: boolean }>('/api/auth/session', {
-            method: 'GET',
-            headers: { Authorization: `Bearer ${parsed.token}` },
-            enableCacheFallback: false,
-          })
-            .then(({ data }) => {
-              if (data && !data.valid) {
-                // Session expired or revoked in database - log out
-                setUser(null);
-                SafeStorage.removeItem(AUTH_STORAGE_KEY);
-              }
-            })
-            .catch(() => {
-              // Ignore network offline errors for offline-first resilience
-            });
-        }
-      }
-    } catch {} finally {
+    // 1. Initial user & session load from Supabase client
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setSupabaseUser(session?.user ?? null);
       setIsLoading(false);
-    }
-  }, []);
+    }).catch(() => {
+      setIsLoading(false);
+    });
 
-  const loginWithOAuth = async (provider: 'openai' | 'grok', options?: { mode?: 'pooled' | 'private' }) => {
+    // 2. Reactive Auth State Listener for cross-tab synchrony
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setSupabaseUser(session?.user ?? null);
+      setIsLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  const signInWithOAuth = async (provider: Provider, options?: { redirectTo?: string }) => {
     setIsLoading(true);
     try {
-      const providerParam = provider === 'grok' ? 'xai-grok' : 'openai';
-      const redirectUri = `${window.location.origin}/auth/callback`;
-      const res = await resilientFetch<{ success: boolean; url: string; codeVerifier: string; state: string }>(
-        `/api/auth/oauth/url?provider=${providerParam}&redirectUri=${encodeURIComponent(redirectUri)}`,
-        { enableCacheFallback: false }
-      );
-
-      if (!res.data?.success || !res.data?.url) {
-        throw new Error('Failed to generate OAuth login URL');
-      }
-
-      // Store PKCE verifier and state for callback verification
-      SafeStorage.setJSON('galxai_oauth_pkce', {
-        provider: providerParam,
-        codeVerifier: res.data.codeVerifier,
-        state: res.data.state,
-        mode: options?.mode || 'pooled'
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const redirectTo = options?.redirectTo || `${origin}/auth/callback`;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo,
+        },
       });
-
-      // Redirect to provider OAuth authorize page
-      window.location.href = res.data.url;
+      if (error) throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const loginWithTokens = async (options: {
-    provider: 'openai' | 'grok';
-    accessToken: string;
-    refreshToken?: string;
-    accountId?: string;
-    email?: string;
-    displayName?: string;
-    mode?: 'pooled' | 'private';
-  }) => {
+  const signInWithPassword = async ({ email, password }: { email: string; password: string }) => {
     setIsLoading(true);
     try {
-      const endpoint = options.provider === 'grok' ? '/api/auth/grok' : '/api/auth/openai';
-      const res = await resilientFetch<{ success: boolean; user: AuthUser; error?: string }>(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          accessToken: options.accessToken,
-          refreshToken: options.refreshToken,
-          accountId: options.accountId,
-          email: options.email,
-          displayName: options.displayName,
-          mode: options.mode || 'pooled',
-          authType: 'oauth'
-        }),
-        enableCacheFallback: false
-      });
-
-      const data = res.data;
-      if (!data?.success || !data?.user) {
-        throw new Error(data?.error || `Failed to authenticate with ${options.provider}`);
-      }
-
-      const authUser: AuthUser = data.user;
-      setUser(authUser);
-      SafeStorage.setJSON(AUTH_STORAGE_KEY, authUser);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      return { error };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const loginWithOpenAI = async (options?: {
-    apiKey?: string;
-    accessToken?: string;
-    refreshToken?: string;
-    accountId?: string;
-    email?: string;
-    displayName?: string;
-    mode?: 'pooled' | 'private';
-  }) => {
+  const signUp = async ({ email, password }: { email: string; password: string }) => {
     setIsLoading(true);
     try {
-      const res = await resilientFetch<{ success: boolean; user: AuthUser; error?: string }>('/api/auth/openai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          apiKey: options?.apiKey,
-          accessToken: options?.accessToken,
-          refreshToken: options?.refreshToken,
-          accountId: options?.accountId,
-          email: options?.email,
-          displayName: options?.displayName,
-          mode: options?.mode || 'pooled'
-        }),
-        enableCacheFallback: false
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${origin}/auth/callback`,
+        },
       });
-      const data = res.data;
-      if (!data?.success || !data?.user) {
-        throw new Error(data?.error || 'Failed to authenticate with OpenAI');
-      }
-
-      const authUser: AuthUser = data.user;
-      setUser(authUser);
-      SafeStorage.setJSON(AUTH_STORAGE_KEY, authUser);
+      return { error };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const loginWithGrok = async (options?: {
-    apiKey?: string;
-    accessToken?: string;
-    refreshToken?: string;
-    accountId?: string;
-    email?: string;
-    displayName?: string;
-    mode?: 'pooled' | 'private';
-  }) => {
+  const signInWithOtp = async ({ email, options }: { email: string; options?: { emailRedirectTo?: string } }) => {
     setIsLoading(true);
     try {
-      const res = await resilientFetch<{ success: boolean; user: AuthUser; error?: string }>('/api/auth/grok', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          apiKey: options?.apiKey,
-          accessToken: options?.accessToken,
-          refreshToken: options?.refreshToken,
-          accountId: options?.accountId,
-          email: options?.email,
-          displayName: options?.displayName,
-          mode: options?.mode || 'pooled'
-        }),
-        enableCacheFallback: false
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const emailRedirectTo = options?.emailRedirectTo || `${origin}/auth/callback`;
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo,
+        },
       });
-      const data = res.data;
-      if (!data?.success || !data?.user) {
-        throw new Error(data?.error || 'Failed to authenticate with xAI Grok');
-      }
-
-      const authUser: AuthUser = data.user;
-      setUser(authUser);
-      SafeStorage.setJSON(AUTH_STORAGE_KEY, authUser);
+      return { error };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = async () => {
-    const activeToken = user?.token;
-    const activeShardId = user?.shardId;
-    const activeUserId = user?.id;
-
-    setUser(null);
-    SafeStorage.removeItem(AUTH_STORAGE_KEY);
-
-    // Asynchronously revoke session in Supabase PostgreSQL
-    if (activeToken) {
-      resilientFetch('/api/auth/session', {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${activeToken}` }
-      }).catch(() => {});
+  const signOut = async () => {
+    setIsLoading(true);
+    try {
+      await supabase.auth.signOut();
+      setSession(null);
+      setSupabaseUser(null);
+      router.push('/auth/connect');
+    } finally {
+      setIsLoading(false);
     }
-
-    if (activeShardId) {
-      try {
-        await resilientFetch(`/api/shards/${activeShardId}/retract`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: activeUserId })
-        });
-      } catch {}
-    }
-
-    router.push('/auth/connect');
   };
 
+  // Backwards-compatible aliases
+  const loginWithOAuth = async (provider: string) => {
+    const validProvider = (provider === 'grok' || provider === 'xai-grok' ? 'twitter' : provider) as Provider;
+    return signInWithOAuth(validProvider);
+  };
+
+  const logout = signOut;
+
+  const mappedUser = mapSupabaseUser(supabaseUser);
 
   return (
     <AuthContext.Provider
       value={{
-        user,
-        isAuthenticated: !!user,
+        user: mappedUser,
+        session,
+        supabaseUser,
+        isAuthenticated: !!supabaseUser,
         isLoading,
+        signInWithOAuth,
+        signInWithPassword,
+        signUp,
+        signInWithOtp,
+        signOut,
         loginWithOAuth,
-        loginWithTokens,
-        loginWithOpenAI,
-        loginWithGrok,
-        logout
+        logout,
       }}
     >
       {children}

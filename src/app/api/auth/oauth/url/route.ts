@@ -17,8 +17,16 @@ export async function GET(req: NextRequest) {
     const redirectUri = searchParams.get('redirectUri') || undefined;
     const stateOverride = searchParams.get('state') || undefined;
 
+    const mode = (searchParams.get('mode') as 'pooled' | 'private') || undefined;
+    const cliFlow = searchParams.get('cli') === 'true' || searchParams.get('codex_cli_simplified_flow') === 'true';
+    const originator = searchParams.get('originator') || undefined;
+
     const oauthManager = GalxOAuthManager.getInstance();
-    const details = oauthManager.generateAuthUrl(provider, redirectUri, stateOverride);
+    const details = oauthManager.generateAuthUrl(provider, redirectUri, stateOverride, {
+      mode,
+      cliFlow,
+      originator
+    });
 
     const response = NextResponse.json({
       success: true,

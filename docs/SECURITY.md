@@ -140,6 +140,8 @@ For deep technical specifications, consult the official ADRs:
 - **[ADR 0042: Universal Zero-Hesitation Developer Ergonomics & Mental Model Absorption](adr/0042-universal-zero-hesitation-developer-ergonomics-and-mental-model-absorption.md)**
 - **[ADR 0051: Enterprise OAuth 2.0 / 2.1, FAPI Standards, Token Lifecycle & Identity Mesh](adr/0051-enterprise-oauth2-fapi-token-lifecycle-and-identity-mesh.md)**
 - **[ADR 0052: Enterprise OAuth 2.1 Refresh Token Rotation (RTR), Token Family Theft Containment, OIDC Back-Channel Logout & Substrate Vacuum Mesh](adr/0052-enterprise-oauth21-rtr-fapi-backchannel-and-vacuum-mesh.md)**
+- **[ADR 0053: Siloed Supabase OAuth Platform Authentication & Isolated Backend Substrate Sharding Mesh](adr/0053-siloed-supabase-oauth-and-isolated-backend-sharding-mesh.md)**
+- **[ADR 0054: Apex Transport Layer Hardening: RFC 9530 Digests, RFC 9421 Signatures, IETF Idempotency, and Anti-Replay Nonces](adr/0054-apex-transport-hardening-rfc9530-rfc9421-idempotency-and-anti-replay.md)**
 
 ---
 
@@ -157,4 +159,26 @@ To guarantee forward secrecy and protect multi-agent swarms against refresh toke
 
 1. **OIDC Back-Channel Logout 1.0**: Ingests server-to-server logout JWTs at `/api/auth/oauth/backchannel-logout`, executing atomic multi-session invalidation via `fn_process_backchannel_logout`.
 2. **Substrate Scavenger Vacuum**: PostgreSQL stored procedure `fn_scavenge_oauth_substrate_cron` automatically purges expired RFC 9449 DPoP proofs, expired PKCE states, unapproved device codes, and unused PAR URIs in single-transaction execution.
+
+---
+
+## 11. Apex Transport Layer Hardening (RFC 9530, RFC 9421, IETF Idempotency)
+
+For all token ingestion routes (`/api/auth/ingest` and `/api/ingest`), the gateway enforces a multi-tier transport security perimeter:
+
+1. **RFC 9530 Payload Integrity (Constant-Time SHA-256 Digest)**:
+   - Evaluates `Digest: sha-256=<base64>` against calculated payload hash.
+   - Compares digests using `crypto.timingSafeEqual()` to guarantee zero side-channel timing leaks.
+2. **Anti-Replay Single-Use Nonce Tracking**:
+   - `X-Request-Nonce` is indexed in a 10-minute sliding TTL cache. Duplicates are immediately rejected with `HTTP 409 Conflict` (`NONCE_REPLAYED`).
+3. **Request Timestamp Skew Bounds**:
+   - Rejects `X-Request-Timestamp` with clock drift exceeding $\pm 300\text{ seconds}$ (`HTTP 400 Request Expired`).
+4. **IETF Idempotency-Key 24-Hour Deduplication**:
+   - Duplicate network retry transmissions return cached cryptographic envelopes with `Idempotent-Replay: true` header without creating redundant database entries.
+5. **Concurrency Backpressure Circuit Breaker**:
+   - Caps concurrent active in-flight ingestions at 100 max, returning `HTTP 503 Service Unavailable` with `Retry-After: 5` to safeguard upstream database pools.
+6. **Edge Threat Mitigation & Geo-Velocity Anomaly Detection**:
+   - Evaluates Cloudflare `CF-Threat-Score` ($>50$ blocked with `HTTP 403`).
+   - Senses impossible geo-velocity country hops and attaches `X-Security-Audit: GEO_VELOCITY_ANOMALY` to compliance ledgers.
+
 

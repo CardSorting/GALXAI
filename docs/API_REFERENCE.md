@@ -264,3 +264,81 @@ Legacy text completion endpoint for older SDKs and CLI scripts:
 - **`DELETE /api/auth/sessions`**: Revokes all remote sessions except the current active session.
 - **`GET /api/auth/security/posture`**: Returns composite security grade (`A+` to `C`), risk score, and recommendations.
 
+---
+
+## 🛡️ Autonomous Backend Ingestion Gateway (`POST /api/auth/ingest` & `POST /api/ingest`)
+
+Apex-tier transport ingestion endpoint for external CLI tools (e.g. `LUMI-NEW`) and automated backend runners to vault upstream provider credentials (OpenAI, xAI Grok, Anthropic) into Substrate tenant shards.
+
+### Headers Specification
+| Header | Type | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | String | **Required**. Must be `application/json` (HTTP 415 on mismatch). |
+| `Digest` | String | **Recommended**. RFC 9530 SHA-256 payload integrity digest (`sha-256=<base64>`). |
+| `Idempotency-Key` | String | **Recommended**. IETF Idempotency Key for 24-hour retry deduplication. |
+| `X-Request-Timestamp` | Integer | **Recommended**. Unix timestamp in ms (skew must be within ±300s). |
+| `X-Request-Nonce` | String | **Recommended**. Single-use random hex nonce (10-minute anti-replay TTL). |
+| `X-Correlation-Id` | String | Optional. Client distributed trace identifier. |
+
+### Request Body Schema
+```json
+{
+  "provider": "openai" | "xai-grok",
+  "accessToken": "ey...",
+  "refreshToken": "rt...",
+  "accountId": "acc_12345",
+  "idToken": "ey...",
+  "expiresAtMs": 1724528600000,
+  "mode": "pooled" | "private",
+  "email": "engineer@company.com",
+  "displayName": "Lead Engineer"
+}
+```
+
+### Success Response (HTTP 200 OK)
+```json
+{
+  "success": true,
+  "user": {
+    "id": "openai_lz4m...",
+    "email": "engineer@company.com",
+    "name": "Lead Engineer",
+    "provider": "openai",
+    "shardId": "codex_openai_lz4m_1724525000000",
+    "shardMode": "pooled",
+    "token": "galx_sess_v2_...",
+    "scopes": ["*"],
+    "expiresAtMs": 1727117000000
+  }
+}
+```
+
+### Response Headers
+- `Server-Timing`: High-resolution microsecond duration (`total;dur=2.45;desc="Ingestion Processing"`).
+- `Idempotent-Replay`: Returned as `"true"` when serving a duplicate request from the 24-hour cache.
+- `X-Correlation-Id`: Propagated request trace ID.
+- `Cache-Control`: `no-store, no-cache, must-revalidate, private, no-transform`.
+
+### Error Response Schema (RFC 7807)
+```json
+{
+  "type": "https://galx.ai/errors/integrity_check_failed",
+  "title": "INTEGRITY CHECK FAILED",
+  "status": 400,
+  "detail": "Payload content digest does not match SHA-256 checksum",
+  "code": "INTEGRITY_CHECK_FAILED",
+  "instance": "/api/auth/ingest",
+  "correlationId": "corr_lz4m_88f2"
+}
+```
+
+---
+
+## 🌐 Frontend Platform Supabase OAuth (`/auth/callback` & `/auth/connect`)
+
+Standard, user-facing authentication managing platform accounts, developer dashboards, billing wallets, and project API keys via `@supabase/ssr`.
+
+- **`GET /auth/callback`**: Next.js App Router route handler exchanging OAuth authorization codes for Supabase cookies via `exchangeCodeForSession(code)`.
+- **`GET /auth/connect`**: 1-Click developer login portal supporting GitHub, Google, and Email Magic Links. Zero sharding exposure.
+
+

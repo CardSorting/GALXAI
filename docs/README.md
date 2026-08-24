@@ -7,7 +7,8 @@ Welcome to the comprehensive technical documentation and operational guides for 
 ## 🎯 Developer Guides & Integrations
 
 - **[Quickstart Integration Guide](QUICKSTART.md)**: 30-second drop-in guides for Python, TypeScript, Cursor, Windsurf, Claude Code CLI, and cURL.
-- **[Universal API Reference](API_REFERENCE.md)**: Complete REST API specifications for `/v1/chat/completions`, `/v1/messages`, `/v1/embeddings`, and `/v1/images/generations`.
+- **[Universal API Reference](API_REFERENCE.md)**: Complete REST API specifications for `/v1/chat/completions`, `/v1/messages`, `/v1/embeddings`, `/api/auth/ingest`, and `/api/ingest`.
+- **[Standardized OAuth & Ingestion Architecture](STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md)**: Detailed specification of two-tier identity isolation, Supabase SSR callback, and RFC 9530 transport security.
 - **[Flagship Model Catalog & Wholesale Rates](MODEL_CATALOG.md)**: Specifications, context windows, and wholesale pricing for GPT-5.6 Sol, Terra, Luna, and xAI Grok 4.6.
 - **[Pricing, Rebates & Economic Arbitrage](PRICING_AND_DISCOUNT_STRATEGY.md)**: Detailed breakdown of the 4-pillar discount architecture (25%–40% wholesale discount, 75% prompt caching rebate).
 - **[Multi-Ecosystem SDK Cheatsheet](SDK_CHEATSHEET.md)**: Drop-in code snippets for OpenAI, Anthropic, Vercel AI SDK, LangChain, and LlamaIndex.
@@ -18,14 +19,18 @@ Welcome to the comprehensive technical documentation and operational guides for 
 
 ## 🏛️ System Architecture & Substrates
 
-- **[System Architecture Specification](ARCHITECTURE.md)**: System topology, in-memory reactive BroccoliDB layer, ZDR v10.0 privacy, and circuit breaker FSM.
+- **[System Architecture Specification](ARCHITECTURE.md)**: System topology, two-tier siloed identity, in-memory reactive BroccoliDB layer, ZDR v10.0 privacy, and circuit breaker FSM.
+- **[Security Posture & Cryptographic Vault](SECURITY.md)**: AES-256-GCM envelope vault, HKDF key derivation, RFC 9530 constant-time digests, and anti-replay nonces.
+- **[Enterprise OAuth 2.0 / 2.1 & Token Lifecycle](OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md)**: RFC 6819 Refresh Token Rotation (RTR), Token Family Theft Containment, DPoP, and OIDC Back-Channel Logout.
+- **[Provider-as-Auth Technical Specification](PROVIDER_AS_AUTH_SPECIFICATION.md)**: Backend credential vaulting, Substrate tenant sharding, and upstream provider identity roots.
+- **[Natural Navigation & OmniSearch](NATURAL_NAVIGATION_AND_OMNISEARCH.md)**: BroccoliOmniSearch natural language routing, phonetic tolerance, and self-healing breadcrumbs.
+- **[Cloudflare Strategy & Edge Gateway](CLOUDFLARE_STRATEGY.md)**: Zero-egress Cloudflare Workers edge mesh, R2 CDN media acceleration, and custom domains.
 - **[Go-To-Market (GTM) Strategy](GTM_STRATEGY.md)**: Developer JTBD framework, market whitespace, and growth loops.
 - **[Mathematical Routing Algorithms](ROUTING_ALGORITHMS.md)**: Mathematical derivations of Predictive Adaptive Headroom (P-AHT), Smooth Weighted Round-Robin (SWRR), and TASD swarm dispersion.
-- **[Security Posture & Cryptographic Vault](SECURITY.md)**: AES-256-GCM envelope vault, HKDF key derivation, and authenticated tenant binding.
 - **[Streaming & SSE Protocol Specification](STREAMING_AND_SSE_PROTOCOL.md)**: Sub-15ms TTFT streaming protocols, Keep-Alive ping intervals, and zero-copy buffers.
 - **[Asynchronous Queues & CloudTasks](QUEUE_SPECIFICATION.md)**: Background queue architecture, token-bucket pacing, and DLQ topologies.
 - **[Developer & Contributing Guide](DEVELOPER_GUIDE.md)**: Codebase organization, provider adapter design, and test suite conventions.
-- **[Architecture Decision Records (ADRs)](adr/README.md)**: 50 formal architectural specifications governing security, pSEO/AEO saturation, interactive developer tools, and SLA failovers.
+- **[Architecture Decision Records (ADRs)](adr/README.md)**: 54 formal architectural specifications governing security, transport hardening, pSEO/AEO saturation, and SLA failovers.
 - **[Operational SRE Playbooks](playbooks/README.md)**: 7 lifecycle runbooks for deployment, incident remediation, and secret rotation.
 - **[Production Infrastructure & Deployment Guide](DEPLOYMENT.md)**: Multi-target deployment topology across Vercel, Cloudflare Edge, Docker, and Kubernetes.
 - **[Vercel Production Deployment & Hardening Guide](VERCEL_DEPLOYMENT.md)**: Complete guide for Next.js 15 deployment on Vercel, 8-phase pre-flight verification, environment sync, and 12-point automated live smoke testing.
@@ -38,8 +43,15 @@ Welcome to the comprehensive technical documentation and operational guides for 
 
 ## 🧪 Verification & Audit
 
-To verify all developer ergonomics, routes, and contracts across the platform:
+Run the automated test suites to verify platform resilience, security, and developer ergonomics:
+
 ```bash
+# 1. Universal Router, Privacy, SOC2, BroccoliDB, Ingestion Transport & API Strategy Suite (217 tests)
+npm run test:router
+
+# 2. Universal Zero-Hesitation Ergonomics & Mental Model Suite (98 tests)
 npx tsx scripts/verify-zero-hesitation-ergonomics.ts
-# 🏁 AUDIT RESULTS: 98 / 98 TESTS PASSED (100%)
+
+# 3. 8-Phase Enterprise Vercel Pre-Flight Readiness Engine
+npm run vercel:verify
 ```
