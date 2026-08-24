@@ -333,4 +333,165 @@ print(response.data[0].url)`,
       },
     ],
   },
+  {
+    slug: 'autonomous-voice-agents',
+    name: 'Real-Time Voice AI & Low-Latency Assistants',
+    badge: 'Sub-12ms TTFT',
+    title: 'Low-Latency Voice Agent Architecture with Sub-12ms Anycast Streaming',
+    headline: 'Power Conversational Voice Agents with Sub-12ms TTFT',
+    description:
+      'Deploy human-paced conversational voice bots with instant streaming Time-To-First-Token (TTFT), zero edge buffering, and 25% wholesale token savings on GPT-5.6 Luna.',
+    targetWorkload: 'Interactive telephone customer care, live AI interviewers, in-game NPC dialogue.',
+    primaryModelId: 'gpt-5.6-luna',
+    fallbackModelId: 'gpt-5.6-terra',
+    estimatedSavingsPct: 35,
+    keyBenefits: [
+      {
+        title: 'Sub-12ms Edge TTFT',
+        description: 'Anycast edge TLS termination eliminates speech-to-speech conversational lag.',
+      },
+      {
+        title: '140+ Tokens/Sec Velocity',
+        description: 'High-speed token delivery guarantees uninterrupted text-to-speech synthesis.',
+      },
+      {
+        title: '75% Prompt Caching Pass',
+        description: 'Keep complex agent persona prompts warm for maximum cost efficiency.',
+      },
+    ],
+    codeSnippet: {
+      language: 'Python',
+      code: `from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key"
+)
+
+# Stream immediate conversational response for TTS synthesis (<12ms TTFT)
+stream = client.chat.completions.create(
+    model="gpt-5.6-luna",
+    messages=[
+        {"role": "system", "content": "You are a concise voice assistant. Respond in short, speakable sentences."},
+        {"role": "user", "content": "Book an appointment for tomorrow at 2 PM."}
+    ],
+    stream=True
+)
+
+for chunk in stream:
+    print(chunk.choices[0].delta.content or "", end="", flush=True)`,
+    },
+    faqs: [
+      {
+        q: 'Why is GPT-5.6 Luna optimal for real-time voice agents?',
+        a: 'GPT-5.6 Luna delivers sub-12ms Anycast TTFT and 140+ tokens/second at just $0.75/1M input tokens, preventing user conversation lag.',
+      },
+    ],
+  },
+  {
+    slug: 'structured-data-extraction',
+    name: 'Guaranteed Structured JSON Extraction',
+    badge: '100% Schema Conformance',
+    title: 'Guaranteed Structured JSON Extraction API with Zod & Pydantic Validation',
+    headline: 'Deterministic Structured JSON Extraction from Unstructured Data',
+    description:
+      'Extract nested, strongly-typed JSON records from complex documents, web HTML, and receipts with 100% schema compliance and 75% prompt caching savings.',
+    targetWorkload: 'Invoice processing, financial filings parsing, automated web scraping ingestion.',
+    primaryModelId: 'gpt-5.6-sol',
+    fallbackModelId: 'gpt-5.6-terra',
+    estimatedSavingsPct: 30,
+    keyBenefits: [
+      {
+        title: 'Zero Hallucinated Keys',
+        description: 'Strict schema decoding enforces exact adherence to Zod or Pydantic definitions.',
+      },
+      {
+        title: '900K Document Context',
+        description: 'Ingest 500+ page PDFs and annual reports in a single extraction pass.',
+      },
+      {
+        title: 'Volatile RAM Processing',
+        description: 'Zero data retention ensures sensitive corporate invoices are never stored.',
+      },
+    ],
+    codeSnippet: {
+      language: 'TypeScript',
+      code: `import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://api.galx.ai/v1",
+  apiKey: process.env.GALXAI_API_KEY,
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-5.6-sol",
+  messages: [
+    { role: "system", content: "Extract line items and tax totals into valid JSON." },
+    { role: "user", content: "Invoice #9842: 5x Server Shards @ $120.00, Tax: $60.00, Total: $660.00" }
+  ],
+  response_format: { type: "json_object" }
+});
+
+console.log(JSON.parse(response.choices[0].message.content || "{}"));`,
+    },
+    faqs: [
+      {
+        q: 'Does GALXAI support JSON Schema structured outputs with function calling?',
+        a: 'Yes. Both response_format JSON schemas and tools function declarations are 100% supported.',
+      },
+    ],
+  },
+  {
+    slug: 'multi-agent-swarms',
+    name: 'Autonomous Multi-Agent Swarm Orchestration',
+    badge: '429 Failover Shield',
+    title: 'Multi-Agent Swarm AI Gateway with Automated 429 Rate Limit Shield',
+    headline: 'Run Multi-Agent Swarms with Zero 429 Rate-Limit Stalls',
+    description:
+      'Orchestrate dozens of parallel autonomous agents (CrewAI, AutoGen, LangGraph) without hitting rate limit walls, saving 25%–40% on recursive loop tokens.',
+    targetWorkload: 'Multi-agent software engineering, market research swarms, automated bug hunting.',
+    primaryModelId: 'gpt-5.6-sol',
+    fallbackModelId: 'x-ai/grok-4.6',
+    estimatedSavingsPct: 40,
+    keyBenefits: [
+      {
+        title: 'Enterprise Headroom Pooling',
+        description: 'Pre-warmed enterprise accounts absorb concurrent agent bursts seamlessly.',
+      },
+      {
+        title: '75% Shared Context Rebate',
+        description: 'Shared codebase and system instructions stay warm in Anycast cache.',
+      },
+      {
+        title: 'Unified Wallet & Logs',
+        description: 'Track per-agent token spend across OpenAI and Grok in a single dashboard.',
+      },
+    ],
+    codeSnippet: {
+      language: 'Python',
+      code: `from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key"
+)
+
+# Multi-agent swarm loops execute with continuous token governance
+response = client.chat.completions.create(
+    model="gpt-5.6-sol",
+    messages=[
+        {"role": "system", "content": "You are Agent 01: Systems Architect. Coordinate with Agent 02."},
+        {"role": "user", "content": "Design a resilient event-driven microservices topology."}
+    ]
+)
+print(response.choices[0].message.content)`,
+    },
+    faqs: [
+      {
+        q: 'How does GALXAI handle 429 errors from high concurrency swarms?',
+        a: 'GALXAI uses Predictive Adaptive Hydraulic Headroom (P-AHT) to shift requests across distributed enterprise accounts before rate limits are exceeded.',
+      },
+    ],
+  },
 ];
+

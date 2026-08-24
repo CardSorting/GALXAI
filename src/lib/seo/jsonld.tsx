@@ -490,3 +490,108 @@ export function createDefinedTermSetSchema({
   };
 }
 
+/**
+ * Schema.org Dataset for Frontier AI Benchmark & Telemetry Datasets
+ */
+export function createDatasetSchema({
+  name,
+  description,
+  url,
+  keywords = [],
+  variables = [],
+}: {
+  name: string;
+  description: string;
+  url: string;
+  keywords?: string[];
+  variables?: string[];
+}) {
+  const fullUrl = url.startsWith('http') ? url : `${SITE_CONFIG.url}${url.startsWith('/') ? url : `/${url}`}`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    '@id': `${fullUrl}/#dataset`,
+    name,
+    description,
+    url: fullUrl,
+    creator: {
+      '@type': 'Organization',
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.url,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.url,
+    },
+    license: 'https://creativecommons.org/licenses/by/4.0/',
+    isAccessibleForFree: true,
+    keywords: [...keywords, 'AI Benchmark', 'LLM Latency', 'Token Economics', 'SWE-bench', 'HumanEval'].join(', '),
+    ...(variables.length > 0 && {
+      variableMeasured: variables.map((v) => ({
+        '@type': 'PropertyValue',
+        name: v,
+      })),
+    }),
+  };
+}
+
+/**
+ * Creates a fully unified, interconnected Schema.org Graph linking WebSite, Organization,
+ * WebPage, Breadcrumbs, and Domain Entities for Google Knowledge Graph & AI Overviews.
+ */
+export function createItemPageGraph({
+  canonicalPath,
+  title,
+  description,
+  breadcrumbs = [],
+  entities = [],
+}: {
+  canonicalPath: string;
+  title: string;
+  description: string;
+  breadcrumbs?: { name: string; url?: string }[];
+  entities?: Record<string, any>[];
+}) {
+  const cleanPath = canonicalPath.startsWith('/') ? canonicalPath : `/${canonicalPath}`;
+  const pageUrl = `${SITE_CONFIG.url}${cleanPath === '/' ? '' : cleanPath}`;
+
+  const webPage = {
+    '@type': 'WebPage',
+    '@id': `${pageUrl}/#webpage`,
+    url: pageUrl,
+    name: title,
+    description,
+    isPartOf: {
+      '@id': `${SITE_CONFIG.url}/#website`,
+    },
+    breadcrumb: {
+      '@id': `${pageUrl}/#breadcrumb`,
+    },
+    inLanguage: 'en-US',
+    potentialAction: [
+      {
+        '@type': 'ReadAction',
+        target: [pageUrl],
+      },
+    ],
+  };
+
+  const breadcrumbList = createBreadcrumbSchema(breadcrumbs);
+  const breadcrumbWithId = {
+    ...breadcrumbList,
+    '@id': `${pageUrl}/#breadcrumb`,
+  };
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      createOrganizationSchema(),
+      createWebSiteSchema(),
+      webPage,
+      breadcrumbWithId,
+      ...entities,
+    ],
+  };
+}
+

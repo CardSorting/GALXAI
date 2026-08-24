@@ -236,4 +236,114 @@ foreach ($stream as $response) {
       },
     ],
   },
+  {
+    slug: 'csharp',
+    language: 'C# / .NET',
+    badge: 'Official Azure.AI.OpenAI / OpenAI .NET',
+    title: 'C# .NET AI Gateway Integration — Official OpenAI .NET Client Quickstart',
+    headline: 'Connect C# & .NET Applications to GALXAI Universal Gateway',
+    description:
+      'Integrate the official OpenAI NuGet package in ASP.NET Core, MAUI, and enterprise microservices with 25%–40% wholesale token savings and 75% prompt caching.',
+    packageManager: 'dotnet add package',
+    installCommand: 'dotnet add package OpenAI --prerelease',
+    codeSnippet: `using OpenAI;
+using OpenAI.Chat;
+
+// Initialize OpenAI Client pointing to GALXAI Universal Gateway
+var clientOptions = new OpenAIClientOptions {
+    Endpoint = new Uri("https://api.galx.ai/v1")
+};
+var client = new ChatClient("gpt-5.6-sol", "galx_live_your_gateway_key", clientOptions);
+
+ChatCompletion completion = await client.CompleteChatAsync("Hello from ASP.NET Core microservice!");
+Console.WriteLine(completion.Content[0].Text);`,
+    streamingSnippet: `// Asynchronous SSE Streaming in C# .NET
+await foreach (StreamingChatCompletionUpdate update in client.CompleteChatStreamingAsync("Stream response"))
+{
+    foreach (ChatMessageContentPart part in update.ContentUpdate)
+    {
+        Console.Write(part.Text);
+    }
+}`,
+    faqs: [
+      {
+        q: 'How do I configure the custom endpoint in the official C# OpenAI library?',
+        a: 'Set Endpoint = new Uri("https://api.galx.ai/v1") inside OpenAIClientOptions when instantiating the client.',
+      },
+    ],
+  },
+  {
+    slug: 'java',
+    language: 'Java / Spring Boot',
+    badge: 'LangChain4j & OpenAI Java Drop-in',
+    title: 'Java & Spring Boot AI Gateway Integration — LangChain4j Quickstart',
+    headline: 'Connect Java & Spring Boot Enterprise Services to GALXAI',
+    description:
+      'Power Java, Kotlin, and Spring AI backends with OpenAI GPT-5.6 and Grok 4.6 wholesale routing and 429 rate limit protection.',
+    packageManager: 'Maven / Gradle',
+    installCommand: 'implementation "dev.langchain4j:langchain4j-open-ai:0.35.0"',
+    codeSnippet: `import dev.langchain4j.model.openai.OpenAiChatModel;
+
+public class GalxAiQuickstart {
+    public static void main(String[] args) {
+        OpenAiChatModel model = OpenAiChatModel.builder()
+            .baseUrl("https://api.galx.ai/v1")
+            .apiKey("galx_live_your_gateway_key")
+            .modelName("gpt-5.6-sol")
+            .build();
+
+        String response = model.generate("Hello from Spring Boot enterprise cluster!");
+        System.out.println(response);
+    }
+}`,
+    streamingSnippet: `// LangChain4j Streaming in Java
+OpenAiStreamingChatModel streamingModel = OpenAiStreamingChatModel.builder()
+    .baseUrl("https://api.galx.ai/v1")
+    .apiKey("galx_live_your_gateway_key")
+    .modelName("gpt-5.6-luna")
+    .build();`,
+    faqs: [
+      {
+        q: 'Can I use Spring AI with GALXAI?',
+        a: 'Yes. Set spring.ai.openai.base-url=https://api.galx.ai/v1 and supply your GALXAI live key in application.properties.',
+      },
+    ],
+  },
+  {
+    slug: 'elixir',
+    language: 'Elixir / Phoenix',
+    badge: 'High-Concurrency BEAM',
+    title: 'Elixir & Phoenix AI Gateway Integration — openai.ex Setup',
+    headline: 'Connect Elixir & Phoenix LiveView to GALXAI Anycast Gateway',
+    description:
+      'Leverage the BEAM virtual machine for millions of concurrent streaming AI sessions with sub-12ms Anycast TTFT on GPT-5.6 Luna.',
+    packageManager: 'mix deps.get',
+    installCommand: '{:openai, "~> 0.6.2"}',
+    codeSnippet: `defmodule GalxAiDemo do
+  def complete do
+    OpenAI.chat_completion(
+      [
+        model: "gpt-5.6-sol",
+        messages: [%{role: "user", content: "Hello from Elixir Phoenix LiveView!"}]
+      ],
+      %{
+        api_key: "galx_live_your_gateway_key",
+        api_url: "https://api.galx.ai/v1"
+      }
+    )
+  end
+end`,
+    streamingSnippet: `// Server-Sent Events Streaming in Phoenix LiveView
+OpenAI.chat_completion_stream(
+  [model: "gpt-5.6-luna", messages: [%{role: "user", content: "Stream"}]],
+  &send(self(), {:chunk, &1})
+)`,
+    faqs: [
+      {
+        q: 'Is GALXAI compatible with Elixir OpenAI wrappers?',
+        a: 'Yes. Simply override api_url to "https://api.galx.ai/v1" in config/config.exs.',
+      },
+    ],
+  },
 ];
+

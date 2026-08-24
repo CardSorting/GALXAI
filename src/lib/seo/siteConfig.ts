@@ -39,6 +39,12 @@ export const SITE_CONFIG = {
     cloudComputing: 'https://www.wikidata.org/wiki/Q483247',
     jsonSchema: 'https://www.wikidata.org/wiki/Q28935449',
     computerSecurity: 'https://www.wikidata.org/wiki/Q3510521',
+    tokenBucket: 'https://www.wikidata.org/wiki/Q1499596',
+    reverseProxy: 'https://www.wikidata.org/wiki/Q1143875',
+    loadBalancing: 'https://www.wikidata.org/wiki/Q652487',
+    latency: 'https://www.wikidata.org/wiki/Q1819543',
+    throughput: 'https://www.wikidata.org/wiki/Q1412662',
+    zeroTrust: 'https://www.wikidata.org/wiki/Q85816911',
   },
   certifications: [
     {
@@ -77,6 +83,14 @@ export const SITE_CONFIG = {
     '429 Protection',
     'LLM Load Balancer',
     'OpenAI SDK Drop-in',
+    'Generative Engine Optimization',
+    'Answer Engine Optimization',
+    'LLM Context Window Visualizer',
+    'AI Latency Estimator',
+    'Together AI Alternative',
+    'OpenRouter Alternative',
+    'Portkey Alternative',
+    'Helicone Alternative',
   ],
   authors: [
     {

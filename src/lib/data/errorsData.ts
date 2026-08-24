@@ -299,4 +299,140 @@ response = client.chat.completions.create(
       },
     ],
   },
+  {
+    code: '503-service-unavailable',
+    httpStatus: 503,
+    errorType: 'server_error',
+    badge: 'Outage Circuit Breaker',
+    title: 'How to Fix OpenAI 503 Service Unavailable & Outage Errors',
+    headline: 'Bypass OpenAI 503 Outages with Automated Anycast Failover',
+    description:
+      'Prevent customer downtime during major OpenAI or xAI cloud outages. GALXAI automatically reroutes in-flight requests to healthy reserve compute shards in <5ms.',
+    rootCause:
+      'Upstream infrastructure outages, DNS failures, or regional Kubernetes control-plane degradations trigger HTTP 503 responses on direct endpoints.',
+    sampleErrorPayload: `{
+  "error": {
+    "message": "The server is temporarily unable to service your request due to maintenance or capacity issues.",
+    "type": "server_error",
+    "param": null,
+    "code": "service_unavailable"
+  }
+}`,
+    permanentFix:
+      'Route via GALXAI. Our distributed Anycast substrate maintains continuous active probes. When an upstream failure is detected, traffic shifts to warm redundant capacity pools automatically.',
+    codeSnippet: {
+      language: 'Python',
+      code: `from openai import OpenAI
+
+# Zero-Downtime Outage Bypass
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key"
+)
+
+# In-flight completions failover automatically during upstream outages
+response = client.chat.completions.create(
+    model="gpt-5.6-sol",
+    messages=[{"role": "user", "content": "Execute resilient inference"}]
+)`,
+    },
+    faqs: [
+      {
+        q: 'How quickly does GALXAI failover during an upstream provider outage?',
+        a: 'GALXAI detects connection stalls and status 503 responses in under 5 milliseconds, immediately dispatching to pre-warmed secondary capacity pools.',
+      },
+    ],
+  },
+  {
+    code: '400-invalid-request-error',
+    httpStatus: 400,
+    errorType: 'invalid_request_error',
+    badge: 'Schema Validation Fix',
+    title: 'How to Fix OpenAI 400 Invalid Request Error (Schema & Parameter Mismatch)',
+    headline: 'Fix OpenAI 400 Bad Request Errors in 30 Seconds',
+    description:
+      'Resolve schema validation failures, invalid tool call definitions, and malformed function arguments with GALXAI structured output validation.',
+    rootCause:
+      'Invalid JSON parameter schemas, unsupported model parameters, or malformed message role arrays trigger HTTP 400 rejection from upstream inference endpoints.',
+    sampleErrorPayload: `{
+  "error": {
+    "message": "'temperature' must be a number between 0 and 2",
+    "type": "invalid_request_error",
+    "param": "temperature",
+    "code": "invalid_value"
+  }
+}`,
+    permanentFix:
+      'GALXAI normalizes request payloads and provides guaranteed structured JSON schema adherence with Zod and Pydantic validation tools.',
+    codeSnippet: {
+      language: 'TypeScript',
+      code: `import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://api.galx.ai/v1",
+  apiKey: process.env.GALXAI_API_KEY,
+});
+
+// Normalized OpenAI request schema
+const completion = await client.chat.completions.create({
+  model: "gpt-5.6-sol",
+  messages: [{ role: "user", content: "Extract valid JSON schema" }],
+  response_format: { type: "json_object" }
+});`,
+    },
+    faqs: [
+      {
+        q: 'Does GALXAI validate function calling arguments before upstream dispatch?',
+        a: 'Yes. GALXAI provides pre-flight parameter validation tools (/tools/json-schema-generator) to ensure schemas conform exactly to OpenAPI specifications.',
+      },
+    ],
+  },
+  {
+    code: 'streaming-timeout-interrupted',
+    httpStatus: 408,
+    errorType: 'timeout_error',
+    badge: 'Volatile Chunk Buffering',
+    title: 'How to Fix AI Streaming Timeouts and Interrupted SSE Connections',
+    headline: 'Eliminate AI Streaming Timeouts & Dropped SSE Connections',
+    description:
+      'Prevent dropped Server-Sent Events (SSE) connections and client socket timeouts with GALXAI volatile streaming buffers and persistent HTTP/2 edge multiplexing.',
+    rootCause:
+      'Intermittent mobile network drops, proxy buffering, and long generation pauses trigger socket timeouts on downstream client connections.',
+    sampleErrorPayload: `{
+  "error": {
+    "message": "Connection closed before complete response received",
+    "type": "timeout_error",
+    "param": null,
+    "code": "stream_interrupted"
+  }
+}`,
+    permanentFix:
+      'GALXAI terminates client TLS connections at the nearest Anycast edge node and maintains persistent streaming state with automatic connection recovery.',
+    codeSnippet: {
+      language: 'Python',
+      code: `from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key"
+)
+
+# Persistent resilient SSE streaming
+stream = client.chat.completions.create(
+    model="gpt-5.6-luna",
+    messages=[{"role": "user", "content": "Stream 2000 words without interruption"}],
+    stream=True
+)
+
+for chunk in stream:
+    print(chunk.choices[0].delta.content or "", end="", flush=True)`,
+    },
+    faqs: [
+      {
+        q: 'How does Anycast edge routing prevent streaming drops?',
+        a: 'Anycast edge nodes terminate client TCP sockets locally, isolating downstream mobile packet loss from upstream compute clusters.',
+      },
+    ],
+  },
 ];
+

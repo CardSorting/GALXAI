@@ -344,4 +344,172 @@ response = client.images.generate(
       },
     ],
   },
+  {
+    slug: 'openai-direct',
+    sourceProvider: 'Direct OpenAI API',
+    badge: '1-Line Base URL Swap',
+    title: 'Migrate from Direct OpenAI API to GALXAI — Save 25% to 40% on AI Tokens',
+    headline: '1-Line Migration from Direct OpenAI API to GALXAI Wholesale',
+    description:
+      'Keep your exact OpenAI Python or TypeScript SDK code. Just change base_url to "https://api.galx.ai/v1" and enjoy instant 25%–40% wholesale savings and 429 failover protection.',
+    estimatedCostReductionPct: 35,
+    keyPainPointsSolved: [
+      '25% to 40% direct wholesale discount on identical model weights',
+      'Automatic multi-account failover shielding against 429 rate limits',
+      'Compound 75% prompt caching pass-through on system context',
+      'Single shared compute wallet for OpenAI and xAI Grok',
+    ],
+    beforeCode: {
+      language: 'python',
+      filename: 'direct_openai.py',
+      code: `from openai import OpenAI
+
+# Direct retail pricing without wholesale pooling
+client = OpenAI(
+    api_key="sk-openai-retail-key"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Execute task"}]
+)`,
+    },
+    afterCode: {
+      language: 'python',
+      filename: 'galxai_wholesale.py',
+      code: `from openai import OpenAI
+
+# 1-Line Base URL Swap: 25%–40% Wholesale Savings
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key"
+)
+
+response = client.chat.completions.create(
+    model="gpt-5.6-sol",
+    messages=[{"role": "user", "content": "Execute task"}]
+)`,
+    },
+    migrationSteps: [
+      {
+        step: 'Step 1: Set Base URL',
+        desc: 'Add base_url="https://api.galx.ai/v1" to your OpenAI client constructor.',
+      },
+      {
+        step: 'Step 2: Update API Key',
+        desc: 'Supply your GALXAI live key ("galx_live_...").',
+      },
+    ],
+    faqs: [
+      {
+        q: 'Do I need to rewrite my prompt structures or function calling schemas?',
+        a: 'No. GALXAI is 100% wire-compatible with the OpenAI REST and SSE streaming specification.',
+      },
+    ],
+  },
+  {
+    slug: 'together-ai',
+    sourceProvider: 'Together AI',
+    badge: 'Frontier Closed + SOTA',
+    title: 'Migrate from Together AI to GALXAI Universal Gateway',
+    headline: 'Migrate from Together AI to GALXAI Wholesale Clearinghouse',
+    description:
+      'Consolidate your inference stack with OpenAI GPT-5.6 and xAI Grok 4.6 (1M context) alongside wholesale token pricing and zero rate limit stalls.',
+    estimatedCostReductionPct: 30,
+    keyPainPointsSolved: [
+      'Access to frontier reasoning flagships (GPT-5.6 Sol, Grok 4.6 1M)',
+      '75% prompt caching pass-through on long prompts',
+      'Predictive 429 rate limit pooling across global Anycast edge nodes',
+    ],
+    beforeCode: {
+      language: 'typescript',
+      filename: 'together_legacy.ts',
+      code: `import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://api.together.xyz/v1",
+  apiKey: "together_api_key",
+});`,
+    },
+    afterCode: {
+      language: 'typescript',
+      filename: 'galxai_unified.ts',
+      code: `import OpenAI from "openai";
+
+// Unified OpenAI & xAI Wholesale Gateway
+const client = new OpenAI({
+  baseURL: "https://api.galx.ai/v1",
+  apiKey: process.env.GALXAI_API_KEY,
+});`,
+    },
+    migrationSteps: [
+      {
+        step: 'Step 1: Point Endpoint',
+        desc: 'Change baseURL to "https://api.galx.ai/v1".',
+      },
+      {
+        step: 'Step 2: Authenticate',
+        desc: 'Use your GALXAI developer key.',
+      },
+    ],
+    faqs: [
+      {
+        q: 'Can I route 1M context requests through GALXAI?',
+        a: 'Yes. xAI Grok 4.6 supports full 1,000,000 token context window queries with wholesale pricing.',
+      },
+    ],
+  },
+  {
+    slug: 'openrouter',
+    sourceProvider: 'OpenRouter',
+    badge: '0% Surcharge + Anycast',
+    title: 'Migrate from OpenRouter to GALXAI — 0% Gateway Markups',
+    headline: 'Migrate from OpenRouter to GALXAI Wholesale Gateway',
+    description:
+      'Eliminate routing markups, proxy latency jitter, and rate-limit errors with GALXAI’s wholesale token clearinghouse and sub-15ms Anycast routing.',
+    estimatedCostReductionPct: 35,
+    keyPainPointsSolved: [
+      '0% platform gateway markup (true wholesale token clearinghouse)',
+      'Sub-15ms Anycast TTFT with zero proxy hops',
+      'Automatic 75% prompt caching rebate pass-through',
+    ],
+    beforeCode: {
+      language: 'python',
+      filename: 'openrouter_legacy.py',
+      code: `from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key="sk-or-v1-..."
+)`,
+    },
+    afterCode: {
+      language: 'python',
+      filename: 'galxai_wholesale.py',
+      code: `from openai import OpenAI
+
+# 0% markup wholesale Anycast gateway
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key"
+)`,
+    },
+    migrationSteps: [
+      {
+        step: 'Step 1: Update Base URL',
+        desc: 'Set base_url="https://api.galx.ai/v1".',
+      },
+      {
+        step: 'Step 2: Start Saving',
+        desc: 'Enjoy immediate 25%–40% wholesale discounts on all model completions.',
+      },
+    ],
+    faqs: [
+      {
+        q: 'How does GALXAI compare in latency to OpenRouter?',
+        a: 'GALXAI routes traffic via multi-region Anycast POPs with sub-15ms Time-To-First-Token, eliminating intermediary proxy latency.',
+      },
+    ],
+  },
 ];
+

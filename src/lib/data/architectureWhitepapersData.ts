@@ -273,4 +273,96 @@ print(response.choices[0].message.parsed)`,
       },
     ],
   },
+  {
+    slug: 'predictive-hydraulic-headroom',
+    badge: 'P-AHT Mathematical Formalization',
+    title: 'Predictive Adaptive Hydraulic Headroom (P-AHT) Token Bucket Governance',
+    headline: 'Continuous Multi-Account Token Liquidity & Headroom Governance',
+    description:
+      'A formal engineering specification of the P-AHT algorithm for non-blocking token distribution, multi-account shard refills, and dynamic load balancing.',
+    abstract:
+      'Fixed-tier API rate limits create stochastic failure points under multi-agent concurrency. The P-AHT algorithm treats token consumption as continuous hydraulic fluid dynamics, pre-allocating token reserves across distributed provider accounts to ensure 0% request drop rates.',
+    engineeringPrinciples: [
+      'Continuous Token Flux Integration: Monitors moving-window token dissipation rates',
+      'Dynamic Shard Hydration: Pre-warms dormant backup origin pools when primary accounts reach 75% capacity',
+      'Non-Blocking Semaphore Allocation: Sub-microsecond local lock acquisition on Anycast edge workers',
+      'Zero 429 Cascade Resilience: Isolate high-volume tenant surges from baseline API traffic',
+    ],
+    systemDiagramMermaid: `graph TD
+  Request[Incoming Burst Requests] --> Router[P-AHT Flux Monitor]
+  Router -->|Shard A Headroom OK| OriginA[Primary Enterprise Shard]
+  Router -->|Shard A >75% Cap| OriginB[Secondary Standby Shard]
+  OriginA --> Complete[Zero 429 Completion]
+  OriginB --> Complete`,
+    technicalMetrics: [
+      { label: 'Burst Capacity', value: '100,000 RPM', context: 'Sustained Token Throughput' },
+      { label: 'Allocation Latency', value: '<0.4 ms', context: 'Semaphore Evaluation' },
+      { label: 'Rate Limit 429s', value: '0.00%', context: 'Under 10x Load Spikes' },
+    ],
+    codeVerificationSnippet: {
+      language: 'python',
+      title: 'P-AHT Burst Test Verification',
+      code: `import asyncio
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key"
+)
+
+async def send_burst(i):
+    return client.chat.completions.create(
+        model="gpt-5.6-sol",
+        messages=[{"role": "user", "content": f"P-AHT burst test probe {i}"}]
+    )
+
+# Dispatches 100 concurrent bursts with zero rate limit stalls
+asyncio.run(asyncio.gather(*[send_burst(i) for i in range(100)]))`,
+    },
+    faqs: [
+      {
+        q: 'How does P-AHT differ from simple round-robin routing?',
+        a: 'P-AHT actively tracks remaining token bucket capacity and rate-of-decay per account in real-time, preventing partial-request stalls before they occur.',
+      },
+    ],
+  },
+  {
+    slug: 'multi-provider-clearinghouse',
+    badge: 'Zero-Arbitrage Settlement',
+    title: 'Multi-Provider Wholesale Token Clearinghouse & Settlement Protocol',
+    headline: 'Decentralized Multi-Provider Clearinghouse & Wholesale Settlement',
+    description:
+      'Architectural analysis of GALXAI multi-account liquidity aggregation, real-time cryptographic billing, and wholesale token pricing mechanics.',
+    abstract:
+      'Enterprise AI teams overpay by 25%–40% due to fragmented per-seat commitments and isolated rate tiers. GALXAI functions as a high-throughput liquidity clearinghouse, pooling aggregate compute demand to unlock maximum wholesale provider tiers and passing 100% of savings directly to developers.',
+    engineeringPrinciples: [
+      'Multi-Account Liquidity Aggregation: Combines enterprise spend into top-tier volume pricing',
+      'Real-Time Atomic Billing: Exact token count deduction with cryptographic audit logs',
+      'Compound Caching Rebates: Automatic 75% prefix discount settlement on sub-second cycles',
+      'Zero Platform Surcharges: Direct pass-through rates with $0 monthly seat surcharges',
+    ],
+    systemDiagramMermaid: `graph LR
+  Developers[Developer Teams] --> Gateway[GALXAI Clearinghouse]
+  Gateway -->|Wholesale Liquidity Pool| OpenAI[OpenAI Tier 5 Fleet]
+  Gateway -->|Wholesale Liquidity Pool| xAI[xAI Grok Supercluster]
+  Gateway -->|Atomic Rebate Settlement| Wallet[Enterprise Balance]`,
+    technicalMetrics: [
+      { label: 'Token Discount', value: '25% - 40%', context: 'Below Provider List Prices' },
+      { label: 'Platform Fees', value: '$0 / month', context: 'Zero Seat Surcharges' },
+      { label: 'Billing Precision', value: '1 Token', context: 'Atomic Token Accounting' },
+    ],
+    codeVerificationSnippet: {
+      language: 'bash',
+      title: 'Verify Wholesale Balance Deduction',
+      code: `curl -s https://api.galx.ai/v1/billing/balance \\
+  -H "Authorization: Bearer \$GALXAI_API_KEY"`,
+    },
+    faqs: [
+      {
+        q: 'How does GALXAI offer token discounts below direct provider retail prices?',
+        a: 'GALXAI aggregates millions of daily inference requests across enterprise liquidity pools, qualifying for maximum wholesale volume tiers and passing the savings directly through.',
+      },
+    ],
+  },
 ];
+

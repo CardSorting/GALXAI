@@ -61,7 +61,7 @@ export function HomeClient() {
 
           <div className="space-y-2.5 max-w-3xl mx-auto">
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight">
-              Cut Your AI Token Bills by <span className="bg-gradient-to-r from-amber-300 via-orange-400 to-amber-500 bg-clip-text text-transparent">25% to 40%</span>.
+              Cut Your AI Token Bills by <span className="text-amber-400 font-black">25% to 40%</span>.
             </h1>
             <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl mx-auto font-sans">
               Drop in your existing OpenAI, Anthropic, or Cursor configuration to get <strong className="text-amber-300 font-bold">direct wholesale pricing</strong>, <strong className="text-cyan-300 font-bold">75% prompt caching</strong>, and <strong className="text-emerald-300 font-bold">zero rate-limit stalls</strong> with zero code rewrites.
@@ -215,7 +215,182 @@ export function HomeClient() {
         </section>
 
         {/* ========================================================================= */}
-        {/* 6. BEYOND-THE-FOLD DEVELOPER KNOWLEDGE & FAQ                              */}
+        {/* 6. BEYOND-THE-FOLD INTERACTIVE DEVELOPER TOOL SUITE & pSEO MATRIX         */}
+        {/* ========================================================================= */}
+        <section id="developer-tools-matrix" className="glass-panel rounded-3xl p-6 sm:p-8 space-y-8 border border-cyan-500/20 bg-gradient-to-b from-cyan-950/20 via-black/40 to-black/60 relative overflow-hidden">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-bold">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>INTERACTIVE DEVELOPER LAUNCHPAD</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-sans">
+                Engineered for High-Throughput AI Builders
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl font-sans">
+                Explore free browser-based architectural simulators, token calculators, and head-to-head frontier model benchmarks.
+              </p>
+            </div>
+
+            <Link
+              href="/docs/quickstart"
+              className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-mono text-xs font-bold border border-white/10 flex items-center gap-2 self-start md:self-auto transition-all"
+            >
+              <span>Read API Docs →</span>
+            </Link>
+          </div>
+
+          {/* Interactive Tools Grid */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-mono uppercase font-bold text-cyan-400 tracking-wider">
+                Free Developer Tools &amp; Simulators
+              </span>
+              <span className="text-[11px] font-mono text-zinc-500">100% Client-Side • Instant Output</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {[
+                {
+                  title: 'Context Window Visualizer',
+                  desc: 'Model 1M token capacities, AST code lines, and 75% prompt caching breakpoints.',
+                  badge: '1M TOKENS',
+                  href: '/tools/context-window-visualizer',
+                  tagColor: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
+                },
+                {
+                  title: 'Latency & TTFT Estimator',
+                  desc: 'Simulate Anycast edge TLS termination vs origin round-trip streaming velocity.',
+                  badge: '<12MS TTFT',
+                  href: '/tools/latency-estimator',
+                  tagColor: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30',
+                },
+                {
+                  title: 'Token Counter Studio',
+                  desc: 'Inspect Byte-Pair Encoding subwords for o200k_base and cl100k_base vocabularies.',
+                  badge: 'BPE STUDIO',
+                  href: '/tools/token-counter',
+                  tagColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
+                },
+                {
+                  title: 'Prompt Caching Calculator',
+                  desc: 'Calculate exact 75% prefix caching discounts across high-volume agent prompts.',
+                  badge: '-75% SAVINGS',
+                  href: '/tools/prompt-caching-calculator',
+                  tagColor: 'text-purple-400 bg-purple-500/10 border-purple-500/30',
+                },
+                {
+                  title: 'Model Cost Comparator',
+                  desc: 'Compare token rates across 15+ frontier models with instant wholesale pricing.',
+                  badge: 'ARBITRAGE',
+                  href: '/tools/model-cost-comparator',
+                  tagColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
+                },
+                {
+                  title: 'JSON Schema Generator',
+                  desc: 'Generate Zod and Pydantic schemas for guaranteed structured JSON outputs.',
+                  badge: 'STRUCTURED',
+                  href: '/tools/json-schema-generator',
+                  tagColor: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
+                },
+                {
+                  title: 'Function Calling Studio',
+                  desc: 'Build and validate parallel tool-calling schemas for multi-agent workflows.',
+                  badge: 'AGENT TOOLS',
+                  href: '/tools/function-calling-builder',
+                  tagColor: 'text-pink-400 bg-pink-500/10 border-pink-500/30',
+                },
+                {
+                  title: 'Prompt Compressor',
+                  desc: 'Compress repetitive instructions by up to 35% without losing semantic intent.',
+                  badge: '-35% TOKENS',
+                  href: '/tools/prompt-compressor',
+                  tagColor: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
+                },
+              ].map((tool, idx) => (
+                <Link
+                  key={idx}
+                  href={tool.href}
+                  className="p-4 rounded-2xl bg-black/50 border border-white/10 hover:border-cyan-500/40 hover:bg-white/[0.03] transition-all group flex flex-col justify-between space-y-3"
+                >
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold border ${tool.tagColor}`}>
+                        {tool.badge}
+                      </span>
+                      <ArrowRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-cyan-300 group-hover:translate-x-1 transition-all" />
+                    </div>
+                    <h3 className="text-xs font-bold text-white group-hover:text-cyan-300 font-sans transition-colors">
+                      {tool.title}
+                    </h3>
+                    <p className="text-[11px] text-zinc-400 leading-relaxed font-sans line-clamp-2">
+                      {tool.desc}
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-mono text-cyan-400 font-semibold">Launch Tool →</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Model Matchups & Alternatives Strip */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            <div className="p-5 rounded-2xl bg-black/60 border border-white/10 space-y-3">
+              <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                <span className="text-xs font-mono font-bold text-amber-400 uppercase">Head-to-Head Model Matchups</span>
+                <Link href="/models/compare" className="text-[11px] font-mono text-zinc-400 hover:text-white">
+                  All Comparisons →
+                </Link>
+              </div>
+              <div className="space-y-1.5 font-mono text-xs">
+                {[
+                  { name: 'GPT-5.6 Sol vs Grok 4.6 (1M)', href: '/models/vs/gpt-5.6-sol-vs-grok-4.6', delta: 'Coding vs 1M Context' },
+                  { name: 'GPT-5.6 Terra vs Grok 4.5', href: '/models/vs/gpt-5.6-terra-vs-x-ai-grok-4.5', delta: 'Balanced vs Multimodal' },
+                  { name: 'GPT-5.6 Sol vs GPT-5.6 Terra', href: '/models/vs/gpt-5.6-sol-vs-gpt-5.6-terra', delta: 'Flagship vs Workhorse' },
+                  { name: 'GPT-Image-2 vs Grok Image', href: '/models/vs/openai-gpt-image-2-vs-xai-grok-image', delta: 'Typography vs Photoreal' },
+                ].map((m, idx) => (
+                  <Link
+                    key={idx}
+                    href={m.href}
+                    className="flex items-center justify-between p-2 rounded-xl bg-white/[0.02] hover:bg-white/10 text-zinc-300 hover:text-white transition-all text-[11px]"
+                  >
+                    <span>{m.name}</span>
+                    <span className="text-amber-300 font-sans text-[10px]">{m.delta} →</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-black/60 border border-white/10 space-y-3">
+              <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                <span className="text-xs font-mono font-bold text-cyan-400 uppercase">Gateway Alternative Portals</span>
+                <Link href="/pricing" className="text-[11px] font-mono text-zinc-400 hover:text-white">
+                  Wholesale Rates →
+                </Link>
+              </div>
+              <div className="space-y-1.5 font-mono text-xs">
+                {[
+                  { name: 'Portkey vs GALXAI', href: '/alternatives/portkey', delta: '0% Surcharge vs Enterprise Fees' },
+                  { name: 'Together AI vs GALXAI', href: '/alternatives/together-ai', delta: 'Wholesale vs Retail Compute' },
+                  { name: 'OpenRouter vs GALXAI', href: '/alternatives/openrouter', delta: '0% Fee vs +5.5% Markup' },
+                  { name: 'LiteLLM vs GALXAI', href: '/alternatives/litellm', delta: 'Managed Anycast vs Self-Host Ops' },
+                ].map((alt, idx) => (
+                  <Link
+                    key={idx}
+                    href={alt.href}
+                    className="flex items-center justify-between p-2 rounded-xl bg-white/[0.02] hover:bg-white/10 text-zinc-300 hover:text-white transition-all text-[11px]"
+                  >
+                    <span>{alt.name}</span>
+                    <span className="text-cyan-300 font-sans text-[10px]">{alt.delta} →</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 7. BEYOND-THE-FOLD DEVELOPER KNOWLEDGE & FAQ                              */}
         {/* ========================================================================= */}
         <section id="faq" className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-white/10">
           <div className="flex items-center justify-between border-b border-white/10 pb-4">

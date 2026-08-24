@@ -154,4 +154,105 @@ export const CURATED_MATCHUPS: ModelMatchup[] = [
       },
     ],
   },
+  {
+    slug: 'gpt-5.6-terra-vs-x-ai-grok-4.5',
+    modelAId: 'gpt-5.6-terra',
+    modelBId: 'x-ai/grok-4.5',
+    title: 'OpenAI GPT-5.6 Terra vs xAI Grok 4.5 Benchmark & Cost Comparison',
+    headline: 'Frontier Balanced Workhorses: GPT-5.6 Terra vs Grok 4.5',
+    description:
+      'Evaluate OpenAI GPT-5.6 Terra and xAI Grok 4.5 on daily production workloads, 500K-900K context processing, multimodal capabilities, and wholesale token pricing.',
+    verdict: {
+      summary:
+        'GPT-5.6 Terra provides a 900K context window and optimal JSON structured output compliance at $2.25/1M input, while Grok 4.5 offers native multimodal image reasoning and deep search grounding at $2.40/1M input.',
+      modelABestFor: 'High-throughput structured backend pipelines, microservice tool execution, agent function calling.',
+      modelBBestFor: 'Multimodal vision workflows, visual document understanding, conversational reasoning.',
+      costDifferenceSummary:
+        'Terra is slightly more cost-effective for text processing at $2.25/1M input vs Grok 4.5 at $2.40/1M input.',
+    },
+    faqs: [
+      {
+        q: 'Which model is better for multimodal image analysis?',
+        a: 'xAI Grok 4.5 features native multimodal visual understanding and can inspect screenshots, diagrams, and UI mockups.',
+      },
+      {
+        q: 'How does prompt caching compare between Terra and Grok 4.5?',
+        a: 'Both models receive a 75% prompt caching rebate on GALXAI for prompt prefixes exceeding 1,024 tokens.',
+      },
+    ],
+  },
+  {
+    slug: 'grok-4.6-vs-grok-4.5',
+    modelAId: 'x-ai/grok-4.6',
+    modelBId: 'x-ai/grok-4.5',
+    title: 'xAI Grok 4.6 vs Grok 4.5 Architecture, Context & Benchmark Comparison',
+    headline: '1M Context Flagship vs High-Velocity Vision: Grok 4.6 vs Grok 4.5',
+    description:
+      'Deep technical comparison between xAI’s 1,000,000-token flagship Grok 4.6 and its agile 500K multimodal sibling Grok 4.5 on GALXAI.',
+    verdict: {
+      summary:
+        'Grok 4.6 offers a massive 1,000,000-token context window with deep algorithmic reasoning for massive repository analysis, while Grok 4.5 provides faster response velocity and vision support for daily interactive applications.',
+      modelABestFor: 'Whole-codebase refactoring, multi-volume document synthesis, massive telemetry log analysis.',
+      modelBBestFor: 'Multimodal image inspection, low-latency conversational agents, real-time customer assistants.',
+      costDifferenceSummary:
+        'Grok 4.6 is priced at $2.80/1M input ($0.75 cached) vs Grok 4.5 at $2.40/1M input ($0.75 cached).',
+    },
+    faqs: [
+      {
+        q: 'Can Grok 4.6 ingest an entire software codebase in a single request?',
+        a: 'Yes. Grok 4.6 features a full 1,000,000 token context window, capable of analyzing over 750,000 words of source code or documentation in one prompt.',
+      },
+      {
+        q: 'How do I access both Grok 4.6 and Grok 4.5 via the OpenAI SDK?',
+        a: 'Using GALXAI, both models are accessible via standard OpenAI client instances by setting model="x-ai/grok-4.6" or model="x-ai/grok-4.5".',
+      },
+    ],
+  },
+  {
+    slug: 'openai-gpt-image-2-vs-xai-grok-image',
+    modelAId: 'openai-gpt-image-2',
+    modelBId: 'xai-grok-image',
+    title: 'OpenAI GPT-Image-2 vs xAI Grok-Image Visual Synthesis Comparison',
+    headline: 'Next-Gen Visual Generation: GPT-Image-2 vs Grok-Image',
+    description:
+      'Compare photorealism, typography rendering, prompt fidelity, and per-image wholesale pricing between GPT-Image-2 and Grok-Image on the GALXAI Gateway.',
+    verdict: {
+      summary:
+        'GPT-Image-2 leads in precise typography, complex diagram rendering, and prompt following, while Grok-Image provides dynamic artistic composition and vibrant atmospheric styling at wholesale rates.',
+      modelABestFor: 'Marketing assets with legible text, UI component mockups, exact brand assets.',
+      modelBBestFor: 'Creative concept artwork, photorealistic scenes, dynamic aesthetic illustrations.',
+      costDifferenceSummary:
+        'GPT-Image-2 is $0.032/image (-20%) vs Grok-Image at $0.030/image (-25%) on GALXAI.',
+    },
+    faqs: [
+      {
+        q: 'Can both models be requested via the standard OpenAI /v1/images/generations endpoint?',
+        a: 'Yes. Both engines are fully mapped to the standard OpenAI wire protocol with identical parameter schemas.',
+      },
+    ],
+  },
+  {
+    slug: 'gpt-5.6-terra-vs-gpt-5.6-luna',
+    modelAId: 'gpt-5.6-terra',
+    modelBId: 'gpt-5.6-luna',
+    title: 'OpenAI GPT-5.6 Terra vs GPT-5.6 Luna Cost vs Velocity Comparison',
+    headline: 'Balanced Enterprise Workhorse vs Sub-Second Velocity: Terra vs Luna',
+    description:
+      'Analyze the throughput, latency, reasoning capabilities, and token economics between GPT-5.6 Terra and GPT-5.6 Luna.',
+    verdict: {
+      summary:
+        'GPT-5.6 Terra provides superior multi-step logic and 900K context for enterprise backend tasks, while GPT-5.6 Luna maximizes streaming speed (140+ tok/s) at an ultra-low cost ($0.75/1M input).',
+      modelABestFor: 'Complex data transformations, document summarization, agent workflow nodes.',
+      modelBBestFor: 'Real-time autocomplete, live transcription cleanup, instant user-facing chatbots.',
+      costDifferenceSummary:
+        'Luna is 66% cheaper at $0.75/1M input vs Terra at $2.25/1M input.',
+    },
+    faqs: [
+      {
+        q: 'When should I choose Luna over Terra?',
+        a: 'Choose Luna when sub-15ms TTFT and token volume economics are the primary constraints, such as typing autocompletion and high-concurrency classification.',
+      },
+    ],
+  },
 ];
+

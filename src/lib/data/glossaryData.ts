@@ -119,4 +119,83 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     wikidataUri: 'https://www.wikidata.org/wiki/Q28935449',
     relatedTerms: ['OpenAI Wire Compatibility', 'Parallel Function Calling', 'Prompt Caching Rebate'],
   },
+  {
+    slug: 'speculative-decoding',
+    term: 'Speculative Decoding',
+    category: 'latency',
+    shortDefinition:
+      'An inference acceleration technique where a fast draft model generates candidate tokens validated in parallel by a larger target model in a single forward pass.',
+    fullDefinition:
+      'Speculative decoding pairs a high-velocity draft model (e.g. GPT-5.6 Luna at 142 tok/s) with a deep reasoning verification model (e.g. GPT-5.6 Sol). The verifier accepts multiple valid tokens per step, accelerating token delivery by up to 60% without altering mathematical output fidelity.',
+    technicalContext:
+      'Verification utilizes causal mask tensor parallelism to evaluate K speculative draft tokens concurrently on the GPU.',
+    wikidataUri: 'https://www.wikidata.org/wiki/Q115305900',
+    relatedTerms: ['Time-To-First-Token (TTFT)', 'Anycast Model Routing', 'Byte-Pair Encoding (BPE)'],
+  },
+  {
+    slug: 'byte-pair-encoding',
+    term: 'Byte-Pair Encoding (BPE)',
+    category: 'routing',
+    shortDefinition:
+      'A subword tokenization algorithm that iteratively merges the most frequent byte pairs into unified vocabulary IDs.',
+    fullDefinition:
+      'BPE breaks raw text into numerical token IDs utilized by Transformer architectures. OpenAI models use the o200k_base (200,000 vocabulary) tokenizer, optimizing token compression across code, mathematical formulas, and multi-lingual text.',
+    technicalContext:
+      '1 token averages ~0.75 English words or ~4 characters. GALXAI provides interactive subword inspection at /tools/token-counter.',
+    wikidataUri: 'https://www.wikidata.org/wiki/Q1890352',
+    relatedTerms: ['Prompt Caching Rebate', 'Structured JSON Outputs', 'Speculative Decoding'],
+  },
+  {
+    slug: 'predictive-adaptive-hydraulic-headroom',
+    term: 'Predictive Adaptive Hydraulic Headroom (P-AHT)',
+    category: 'routing',
+    shortDefinition:
+      'A continuous token governance algorithm that models API quotas as fluid dynamics, pre-allocating compute across enterprise shards to eliminate 429 rate limit stalls.',
+    fullDefinition:
+      'Instead of reactive exponential backoff after receiving HTTP 429 errors, P-AHT monitors second-by-second token consumption across multi-tenant shards. Incoming bursts exceeding 75% capacity are dynamically shifted to pre-warmed reserve accounts with zero connection drops.',
+    technicalContext:
+      'Non-blocking semaphore allocation executes in <0.4ms across distributed Anycast edge workers.',
+    wikidataUri: 'https://www.wikidata.org/wiki/Q1890352',
+    relatedTerms: ['Rate-Limit Pooling', 'Anycast Model Routing', 'Wholesale Token Clearinghouse'],
+  },
+  {
+    slug: 'temperature-and-top-p',
+    term: 'Temperature & Top-p (Nucleus Sampling)',
+    category: 'routing',
+    shortDefinition:
+      'Hyperparameters controlling randomness and diversity in autoregressive language model token probability distributions.',
+    fullDefinition:
+      'Temperature scales the logit distribution before softmax (lower values produce deterministic responses, higher values increase creativity). Top-p (nucleus sampling) limits token selection to the smallest cumulative probability set exceeding threshold p.',
+    technicalContext:
+      'Setting temperature=0.0 produces greedy deterministic decoding ideal for code synthesis and structured JSON extraction.',
+    wikidataUri: 'https://www.wikidata.org/wiki/Q115305900',
+    relatedTerms: ['Structured JSON Outputs', 'Speculative Decoding', 'OpenAI Wire Compatibility'],
+  },
+  {
+    slug: 'vector-embeddings-rag',
+    term: 'Vector Embeddings & Retrieval-Augmented Generation (RAG)',
+    category: 'caching',
+    shortDefinition:
+      'High-dimensional numerical representations of text semantics enabling semantic search and dynamic document retrieval into LLM prompt contexts.',
+    fullDefinition:
+      'Vector embeddings map sentences and documents into dense floating-point arrays. In RAG architectures, query embeddings search local vector databases (Pinecone, Qdrant, pgvector) to retrieve top-k relevant context chunks, passing them into frontier models with 75% prompt caching discounts.',
+    technicalContext:
+      'Generated via /v1/embeddings using text-embedding-3-small (1536 dimensions) or text-embedding-3-large (3072 dimensions).',
+    wikidataUri: 'https://www.wikidata.org/wiki/Q115305900',
+    relatedTerms: ['Prompt Caching Rebate', '1,000,000 Token Context Window', 'Zero Data Retention (ZDR)'],
+  },
+  {
+    slug: 'parallel-tool-calling',
+    term: 'Parallel Tool & Function Calling',
+    category: 'routing',
+    shortDefinition:
+      'An API capability allowing the model to invoke multiple tool functions simultaneously in a single completion turn.',
+    fullDefinition:
+      'Parallel tool calling enables autonomous AI agents to execute multiple search queries, database mutations, or calculations concurrently without sequential conversational round-trips, slashing total execution latency for agent swarms.',
+    technicalContext:
+      'Supported on OpenAI GPT-5.6 and xAI Grok 4.6 via the tools array and tool_choice parameter.',
+    wikidataUri: 'https://www.wikidata.org/wiki/Q28935449',
+    relatedTerms: ['Structured JSON Outputs', 'OpenAI Wire Compatibility', 'Predictive Adaptive Hydraulic Headroom (P-AHT)'],
+  },
 ];
+

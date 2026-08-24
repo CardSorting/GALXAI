@@ -250,4 +250,142 @@ for chunk in stream:
       },
     ],
   },
+  {
+    slug: 'cybersecurity-and-soc',
+    badge: 'SOC 2 & SIEM Integration',
+    title: 'AI Gateway for Cybersecurity Operations, Threat Hunting & SIEM Triage',
+    headline: 'Automated SOC Triage & Threat Intelligence AI Substrate',
+    description:
+      'Analyze millions of SIEM event logs, decode malicious payloads, and automate incident response with 1M context windows, 75% prompt caching, and zero data retention.',
+    sectorName: 'Cybersecurity & Threat Intelligence',
+    targetWorkloads: ['Automated SIEM Alert Triaging', 'Vulnerability Exploitation Analysis', 'Zero-Day IOC Extraction'],
+    regulatoryCompliance: ['SOC 2 Type II Certified', 'ISO/IEC 27001:2022', 'Volatile RAM ZDR Protocol'],
+    recommendedModels: [
+      { name: 'xAI Grok 4.6 (1M)', modelId: 'x-ai/grok-4.6', role: 'Full network traffic capture & multi-gigabyte log analysis' },
+      { name: 'OpenAI GPT-5.6 Sol', modelId: 'gpt-5.6-sol', role: 'Decompiled assembly & reverse engineering reasoning' },
+    ],
+    architectureHighlights: [
+      '1,000,000 Token Threat Telemetry Ingestion: Ingest hours of packet traces in a single request',
+      'Ephemeral Volatile Buffers: Sensitive corporate network logs are never stored or used for training',
+      'Automated SOC 2 Audit Logs: Real-time cryptographic logging of all gateway authorization events',
+    ],
+    codeExample: {
+      language: 'python',
+      title: 'Automated SIEM Alert Triaging Script',
+      code: `from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key"
+)
+
+# Analyze massive security log with zero persistent retention
+response = client.chat.completions.create(
+    model="x-ai/grok-4.6",
+    messages=[
+        {"role": "system", "content": "You are a Principal SOC Threat Hunter. Identify malicious lateral movement."},
+        {"role": "user", "content": "Log dump: 2026-08-23T14:22:10Z auth.fail user=admin src=198.51.100.44..."}
+    ]
+)
+print(response.choices[0].message.content)`,
+    },
+    faqs: [
+      {
+        q: 'Are sensitive customer network logs retained by GALXAI?',
+        a: 'No. GALXAI enforces Cryptographic Zero Data Retention (ZDR). Payloads exist only in volatile RAM during active TCP socket processing.',
+      },
+    ],
+  },
+  {
+    slug: 'automotive-and-robotics',
+    badge: 'Edge Anycast Telemetry',
+    title: 'Low-Latency AI Gateway for Autonomous Robotics & Spatial Systems',
+    headline: 'Sub-15ms AI Routing for Autonomous Robotics & Spatial AI',
+    description:
+      'Execute real-time robot perception, trajectory validation, and multimodal sensor fusion with sub-15ms Anycast TTFT and zero rate-limit stalls.',
+    sectorName: 'Automotive & Autonomous Systems',
+    targetWorkloads: ['Robot Fleet Teleoperation Assistance', 'Spatial Point-Cloud Analysis', 'Multimodal Vision Sensor Fusion'],
+    regulatoryCompliance: ['ISO 26262 ASIL Compatible', 'Zero Content Retention', '99.99% Financial Uptime SLA'],
+    recommendedModels: [
+      { name: 'OpenAI GPT-5.6 Luna', modelId: 'gpt-5.6-luna', role: 'Sub-12ms real-time control decision streaming' },
+      { name: 'xAI Grok 4.5', modelId: 'x-ai/grok-4.5', role: 'High-resolution multimodal visual obstacle reasoning' },
+    ],
+    architectureHighlights: [
+      'Sub-15ms Global Anycast POPs: Terminate vehicle edge telemetry at the nearest geographical cloud node',
+      'Multimodal Visual Processing: Forward camera frames directly into Grok 4.5 vision channels',
+      'Rate-Limit Pooling: Continuous token governance prevents vehicle telemetry disconnects under fleet scale',
+    ],
+    codeExample: {
+      language: 'python',
+      title: 'Robotics Spatial Trajectory Query',
+      code: `from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key"
+)
+
+# Sub-second trajectory safety validation
+response = client.chat.completions.create(
+    model="gpt-5.6-luna",
+    messages=[
+        {"role": "system", "content": "You are a robotics collision avoidance validator."},
+        {"role": "user", "content": "LiDAR vector: obstacle at (x=2.4m, y=0.8m, z=0.1m), speed=1.2m/s"}
+    ]
+)`,
+    },
+    faqs: [
+      {
+        q: 'How does Anycast routing help robotics and IoT edge fleets?',
+        a: 'Vehicles and robotic units connect to the nearest global Anycast edge node, slashing network round-trip overhead before token processing.',
+      },
+    ],
+  },
+  {
+    slug: 'education-and-edtech',
+    badge: 'Classroom Concurrency',
+    title: 'High-Concurrency AI Gateway for EdTech & Personalized Learning',
+    headline: 'High-Throughput AI Gateway for EdTech & Adaptive Tutoring',
+    description:
+      'Empower millions of simultaneous students with instant AI tutoring, essay feedback, and STEM problem grading with 25%–40% wholesale savings and 75% prompt caching.',
+    sectorName: 'Education & EdTech',
+    targetWorkloads: ['1-on-1 Personalized Socratic Tutoring', 'Automated Code & Math Homework Feedback', 'Curriculum Synthesis'],
+    regulatoryCompliance: ['FERPA Compliant Processing', 'COPPA Zero Retention Rules', 'Student Data Privacy Shield'],
+    recommendedModels: [
+      { name: 'OpenAI GPT-5.6 Terra', modelId: 'gpt-5.6-terra', role: 'Balanced reasoning for complex STEM homework evaluation' },
+      { name: 'OpenAI GPT-5.6 Luna', modelId: 'gpt-5.6-luna', role: 'Ultra-low cost ($0.75/1M) conversational student chat' },
+    ],
+    architectureHighlights: [
+      'Classroom Concurrency Burst Absorber: Handles 10,000+ simultaneous student submissions at bell time',
+      '75% Course Context Caching: Ingest textbooks and rubrics once; reuse across student cohorts with 75% savings',
+      'Strict Zero Student Data Retention: Meets FERPA and COPPA student privacy mandates out of the box',
+    ],
+    codeExample: {
+      language: 'python',
+      title: 'Socratic Tutor Response Generation',
+      code: `from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key"
+)
+
+# Socratic feedback with wholesale token pricing
+stream = client.chat.completions.create(
+    model="gpt-5.6-terra",
+    messages=[
+        {"role": "system", "content": "You are a Socratic math tutor. Guide the student with questions rather than answers."},
+        {"role": "user", "content": "Why does x^2 + 5x + 6 factor into (x+2)(x+3)?"}
+    ],
+    stream=True
+)`,
+    },
+    faqs: [
+      {
+        q: 'Can GALXAI handle morning classroom login spikes without 429 errors?',
+        a: 'Yes. Multi-shard enterprise liquidity pooling absorbs peak morning student concurrency without throttling or dropped requests.',
+      },
+    ],
+  },
 ];
+

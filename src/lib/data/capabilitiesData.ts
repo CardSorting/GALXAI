@@ -246,4 +246,131 @@ curl -w "TTFB: %{time_starttransfer}s | Total: %{time_total}s\\n" \\
       },
     ],
   },
+  {
+    slug: 'predictive-rate-limit-shield',
+    badge: 'P-AHT Token Governor',
+    title: 'Predictive Adaptive Hydraulic Headroom (P-AHT) & 429 Rate Limit Shield',
+    headline: 'Eliminate 429 Rate-Limit Stalls with Predictive Headroom Governance',
+    description:
+      'Continuous token governance pools capacity across distributed enterprise accounts, pre-emptively rerouting bursts before upstream rate limits trigger HTTP 429 errors.',
+    architecturalOverview:
+      'P-AHT monitors second-by-second token consumption rates across all origin shards. When any upstream account approaches 80% utilization, new bursts dynamically shift to warm secondary accounts.',
+    technicalHighlights: [
+      'Zero HTTP 429 Rate Limit Exceeded stalls for high-concurrency multi-agent fleets',
+      'Multi-account enterprise token liquidity pooling across OpenAI and xAI clusters',
+      'Dynamic token bucket refills calculated in real-time with sub-millisecond precision',
+      'Zero dropped TCP connections during peak load shifts',
+    ],
+    benchmarkMetric: {
+      label: '429 Mitigation Rate',
+      value: '100.0%',
+      subtext: 'Zero dropped bursts at 10,000 RPM',
+    },
+    codeSnippet: {
+      language: 'python',
+      code: `from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key"
+)
+
+# Burst 100+ concurrent requests with zero 429 stalls
+response = client.chat.completions.create(
+    model="gpt-5.6-sol",
+    messages=[{"role": "user", "content": "Execute high-concurrency swarm task"}]
+)`,
+    },
+    faqs: [
+      {
+        q: 'How does GALXAI prevent 429 errors from high-concurrency swarms?',
+        a: 'GALXAI pools enterprise headroom dynamically across distributed shards so individual tenant spikes never trigger upstream rate limits.',
+      },
+    ],
+  },
+  {
+    slug: 'parallel-speculative-execution',
+    badge: 'Speculative Draft Verification',
+    title: 'Speculative Decoding & Multi-Candidate Verification for Sub-Second Code Generation',
+    headline: 'Sub-Second Code Generation via Speculative Drafting & Verification',
+    description:
+      'Pair high-velocity draft models (GPT-5.6 Luna) with deep reasoning verifiers (GPT-5.6 Sol) to generate multi-line code completions in sub-second latency.',
+    architecturalOverview:
+      'Luna drafts token candidates at 142 tokens/sec while Sol validates the token sequence in a single forward verification pass, slashing end-to-end latency by up to 60%.',
+    technicalHighlights: [
+      'Up to 60% faster code generation compared to standard autoregressive decoding',
+      'Preserves 100% of GPT-5.6 Sol reasoning fidelity and test-case passing rate',
+      'Automatic speculative draft verification handled entirely on GALXAI edge proxies',
+      'Wholesale token pricing applied to both draft and verification stages',
+    ],
+    benchmarkMetric: {
+      label: 'Latency Reduction',
+      value: '-58.4%',
+      subtext: 'On complex Python AST synthesis',
+    },
+    codeSnippet: {
+      language: 'python',
+      code: `from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key"
+)
+
+# Speculative decoding accelerated code synthesis
+response = client.chat.completions.create(
+    model="gpt-5.6-sol",
+    messages=[{"role": "user", "content": "Implement zero-allocation BPE tokenizer in Rust"}]
+)`,
+    },
+    faqs: [
+      {
+        q: 'Does speculative decoding alter the final model output quality?',
+        a: 'No. The verification stage guarantees exact mathematical equivalence to standard autoregressive generation.',
+      },
+    ],
+  },
+  {
+    slug: 'semantic-intent-routing',
+    badge: 'Zero-Latency Model Router',
+    title: 'Zero-Latency Semantic Intent Routing & Cost-Optimal Model Dispatch',
+    headline: 'Automatic Semantic Routing to the Most Cost-Effective Frontier Model',
+    description:
+      'Analyze incoming query complexity in sub-5ms and dispatch automatically to GPT-5.6 Luna, Terra, or Sol to achieve the lowest cost per successful completion.',
+    architecturalOverview:
+      'Edge intent classifiers evaluate query token length, reasoning depth, and required tool definitions to select the optimal model tier before dispatch.',
+    technicalHighlights: [
+      'Sub-5ms edge intent classification with zero measurable latency overhead',
+      'Slashes aggregate API token spend by up to 55% across mixed developer workloads',
+      'Manual model override supported at any time via standard model request parameters',
+      'Detailed telemetry logs breakdown model selection rationale per request',
+    ],
+    benchmarkMetric: {
+      label: 'Aggregate Savings',
+      value: '-55.2%',
+      subtext: 'Across mixed production traffic',
+    },
+    codeSnippet: {
+      language: 'python',
+      code: `from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key"
+)
+
+# Dispatch to automatic optimal frontier model tier
+response = client.chat.completions.create(
+    model="gpt-5.6-terra",  # Dispatches seamlessly based on task complexity
+    messages=[{"role": "user", "content": "Extract customer sentiment from feedback log"}]
+)`,
+    },
+    faqs: [
+      {
+        q: 'Can I force a specific model instead of using automatic routing?',
+        a: 'Yes. Explicitly passing any model identifier (e.g. gpt-5.6-sol) routes directly to that model with 100% determinism.',
+      },
+    ],
+  },
 ];
+

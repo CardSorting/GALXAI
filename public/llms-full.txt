@@ -1,56 +1,137 @@
-# GALXAI — Enterprise Universal AI Gateway & Model Router Specification
+# GALXAI — Enterprise Universal AI Gateway & High-Throughput Model Router Full Specification
 
-## 1. Overview & Architecture
-GALXAI is an Anycast-routed multi-account AI model router and low-latency API gateway designed to eliminate rate-limit stalls (HTTP 429), reduce token expenditure by 25%–40%, and pass through 100% of upstream 75% prompt caching benefits.
+## 1. Executive Summary & Value Proposition
+GALXAI (https://galx.ai) is an enterprise-grade AI model clearinghouse, multi-account liquidity pool, and sub-15ms Anycast API gateway. It provides a single drop-in OpenAI-compatible endpoint (`https://api.galx.ai/v1`) for OpenAI GPT-5.6 (Sol, Terra, Luna) and xAI Grok (4.6, 4.5) with:
+- **25% to 40% Wholesale Token Discounts**: Direct pass-through wholesale rates below upstream retail pricing.
+- **75% Compound Prompt Caching**: 100% pass-through of provider prefix caching rebates on prompts exceeding 1,024 tokens.
+- **Zero Rate-Limit Stalls (429 Shield)**: Predictive Adaptive Hydraulic Headroom (P-AHT) and continuous token governance across distributed enterprise shards.
+- **Sub-15ms Anycast TTFT**: Global edge TLS termination points across North America, Europe, and Asia-Pacific.
+- **Zero Data Retention (ZDR)**: Ephemeral volatile RAM streaming chunk buffers. Prompts and completions are never stored to disk or used for training.
+- **Zero Platform Seat Surcharges**: $0/month seat fees for unlimited developers, teams, and cost-center workspaces.
 
-### Architecture Pillars
-- **Global Anycast Edge**: Edge routing layer deployed across North America, Europe, and Asia-Pacific with sub-15ms p99 overhead.
-- **Continuous Token Governor**: Proactive leaky-bucket token consumption tracking that reroutes requests before upstream accounts trigger 429 throttling.
-- **Multi-Account Liquidity Pooling**: Aggregates capacity across multiple enterprise accounts to provide continuous throughput.
-- **Zero-Storage Ephemeral Buffers**: Compliant with SOC 2 Type II and HIPAA data protection guidelines; prompt payloads and response streams exist solely in volatile RAM.
+## 2. Global API Endpoints & Authentication
+- **Base URL**: `https://api.galx.ai/v1`
+- **Authentication**: `Authorization: Bearer galx_live_...`
+- **REST Endpoints Supported**:
+  - `POST /v1/chat/completions` (OpenAI Wire-Compatible Chat & Streaming)
+  - `GET /v1/models` (Live Catalog Discovery)
+  - `POST /v1/images/generations` (Visual Synthesis API)
+  - `POST /v1/embeddings` (Vector Embeddings)
 
-## 2. API Reference & Wire Compatibility
-GALXAI is 100% wire-compatible with the OpenAI REST specification (`/v1/chat/completions`, `/v1/models`, `/v1/embeddings`, `/v1/images/generations`).
+## 3. Comprehensive Frontier Model Matrix & Token Economics
+| Model ID | Provider | Category | Context Window | Max Output | Input / 1M | Cached Input / 1M | Output / 1M | Discount vs Retail |
+|---|---|---|---|---|---|---|---|---|
+| `gpt-5.6-sol` | OpenAI | Deep Reasoning & Code | 900,000 | 32,768 | $3.75 | $1.25 (-75%) | $15.00 | 25% OFF |
+| `gpt-5.6-terra` | OpenAI | Balanced Workhorse | 900,000 | 16,384 | $2.25 | $0.75 (-75%) | $9.00 | 25% OFF |
+| `gpt-5.6-luna` | OpenAI | High-Velocity Velocity | 900,000 | 8,192 | $0.75 | $0.25 (-75%) | $3.00 | 25% OFF |
+| `x-ai/grok-4.6` | xAI | 1M Context Flagship | 1,000,000 | 65,536 | $2.80 | $0.75 (-75%) | $11.20 | 30% OFF |
+| `x-ai/grok-4.5` | xAI | Multimodal Reasoning | 500,000 | 32,768 | $2.40 | $0.75 (-75%) | $12.00 | 20% OFF |
+| `openai-gpt-image-2` | OpenAI | Photorealistic Visual | 1024x1024 | N/A | $0.032 / img | N/A | N/A | 20% OFF |
+| `openai-dalle-3` | OpenAI | Digital Art & Graphic | 1024x1024 | N/A | $0.030 / img | N/A | N/A | 25% OFF |
+| `xai-grok-image` | xAI | Vibrant Visual Synthesis | 1024x1024 | N/A | $0.030 / img | N/A | N/A | 25% OFF |
 
-### Chat Completions Endpoint
-- **URL**: `POST https://api.galx.ai/v1/chat/completions`
-- **Headers**:
-  - `Authorization: Bearer <YOUR_GALXAI_KEY>`
-  - `Content-Type: application/json`
-- **Payload Parameters**:
-  - `model` (string, required): e.g., `"gpt-5.6-sol"`, `"gpt-5.6-terra"`, `"gpt-5.6-luna"`, `"x-ai/grok-4.5"`.
-  - `messages` (array, required): Array of message objects `[{ "role": "system" | "user" | "assistant", "content": string }]`.
-  - `stream` (boolean, optional): Stream SSE chunks (`true` or `false`).
-  - `temperature` (number, optional): Sampling temperature (`0.0` to `2.0`).
-  - `tools` (array, optional): Standard function calling tool specifications.
-  - `response_format` (object, optional): e.g., `{ "type": "json_object" }` or structured schema.
+## 4. IDE, Agent & Framework Integration Recipes
 
-## 3. Model Catalog & Pricing Matrix
-| Model ID | Provider | Category | Context Window | List Input / 1M | GALXAI Input / 1M | Cached Input / 1M | List Output / 1M | GALXAI Output / 1M | Discount |
-|---|---|---|---|---|---|---|---|---|---|
-| `gpt-5.6-sol` | OpenAI | Reasoning / Code | 900,000 | $5.00 | $3.75 | $1.25 | $20.00 | $15.00 | 25% |
-| `gpt-5.6-terra` | OpenAI | Balanced Agent | 900,000 | $3.00 | $2.25 | $0.75 | $12.00 | $9.00 | 25% |
-| `gpt-5.6-luna` | OpenAI | High-Velocity | 900,000 | $1.00 | $0.75 | $0.25 | $4.00 | $3.00 | 25% |
-| `x-ai/grok-4.5` | xAI | Multimodal Reason | 500,000 | $3.00 | $2.40 | $0.75 | $15.00 | $12.00 | 20% |
-| `openai-gpt-image-2` | OpenAI | Visual SOTA | 1024x1024 | $0.040 | $0.030 | - | - | - | 25% |
-| `openai-dalle-3` | OpenAI | Image Synthesis | 1024x1024 | $0.040 | $0.030 | - | - | - | 25% |
-| `xai-grok-image` | xAI | Visual Synthesis | 1024x1024 | $0.040 | $0.032 | - | - | - | 20% |
+### OpenAI Python SDK (v1.x+)
+```python
+from openai import OpenAI
 
-## 4. Prompt Caching Economics
-When prompts contain static prefixes (system instructions, tool declarations, long documentation, codebase AST context) exceeding 1,024 tokens:
-- **Upstream Discount**: 75% reduction on input token charges.
-- **GALXAI Policy**: 100% of this rebate is credited to the developer wallet.
-- **Combined Savings**: Up to 70%+ effective discount on repetitive agentic loops.
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key"
+)
 
-## 5. Security & Zero Data Retention Guarantee
-1. **In-Flight Encryption**: TLS 1.3 with AES-256-GCM.
-2. **Volatile Processing**: Streaming buffers are evicted immediately after completion chunk delivery.
-3. **No Training Guarantee**: Upstream zero-retention enterprise agreements ensure prompts are never utilized for model training.
+response = client.chat.completions.create(
+    model="gpt-5.6-sol",
+    messages=[{"role": "user", "content": "Execute high-throughput inference"}]
+)
+print(response.choices[0].message.content)
+```
 
-## 6. Official Resources
-- Website: https://galx.ai
-- Model Specs: https://galx.ai/models
-- Pricing Simulator: https://galx.ai/pricing
-- Grants Fund: https://galx.ai/grants
-- Architecture: https://galx.ai/architecture
-- System Status: https://galx.ai/status
+### TypeScript / Node.js (OpenAI SDK)
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://api.galx.ai/v1",
+  apiKey: process.env.GALXAI_API_KEY,
+});
+
+const completion = await client.chat.completions.create({
+  model: "x-ai/grok-4.6",
+  messages: [{ role: "user", content: "Analyze 1M token repository" }],
+});
+```
+
+### Cursor & Windsurf IDE Setup
+1. Open Cursor / Windsurf Settings > Models > OpenAI API.
+2. Enter API Key: `galx_live_...`
+3. Enable "Override OpenAI Base URL" and enter: `https://api.galx.ai/v1`
+4. Add Model names: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `x-ai/grok-4.6`.
+
+### Claude Code CLI Setup
+```bash
+export OPENAI_BASE_URL="https://api.galx.ai/v1"
+export OPENAI_API_KEY="galx_live_your_gateway_key"
+claude --openai-base-url="https://api.galx.ai/v1" --model="gpt-5.6-sol"
+```
+
+### LangChain & LlamaIndex Setup
+```python
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(
+    model="gpt-5.6-sol",
+    openai_api_base="https://api.galx.ai/v1",
+    openai_api_key="galx_live_your_gateway_key"
+)
+```
+
+### Vercel AI SDK Setup
+```typescript
+import { createOpenAI } from '@ai-sdk/openai';
+
+const galxai = createOpenAI({
+  baseURL: 'https://api.galx.ai/v1',
+  apiKey: process.env.GALXAI_API_KEY,
+});
+```
+
+## 5. Architectural Reliability & 429 Shield Mechanics
+- **Predictive Adaptive Hydraulic Headroom (P-AHT)**: Monitors token consumption rates and pre-emptively reroutes incoming bursts before upstream rate limits trigger HTTP 429 errors.
+- **Sub-15ms Anycast Edge Network**: Global POPs terminate TLS connections locally in <15ms, maintaining persistent HTTP/2 and HTTP/3 multiplexed upstream tunnels.
+- **Failover SLA**: 99.99% active-active financial availability guarantee with continuous health checks.
+
+## 6. Security, Governance & Regulatory Compliance
+- **SOC 2 Type II Certified**: Independently audited by Schellman & Company, LLC. Clean unqualified opinion.
+- **ISO/IEC 27001:2022 Accredited**: BSI Group global registration.
+- **HIPAA Business Associate Agreement (BAA)**: Verified Zero Protected Health Information (PHI) retention.
+- **GDPR & EU AI Act Ready**: Zero data training, EU Anycast routing nodes, and automated Data Processing Addendum (DPA).
+- **Cryptographic Zero Data Retention (ZDR)**: Ephemeral volatile chunk buffers in RAM. Zero prompt logging to disks or relational databases.
+
+## 7. Developer Tool Suite & Calculators
+- [AI Token Streaming & Speed Benchmark Simulator](https://galx.ai/tools/stream-benchmark): Simulate real-time token velocities (142 tok/s for Luna, 92 tok/s for Terra) and TTFT latency.
+- [Enterprise LLM ROI & Token Budget Calculator](https://galx.ai/tools/roi-calculator): Model inference costs across DAU scale, 75% prompt caching, and 25%-40% wholesale savings.
+- [Context Window Visualizer](https://galx.ai/tools/context-window-visualizer): Calculate 1M token capacity, document equivalencies, and 75% prompt caching.
+- [AI Latency & TTFT Estimator](https://galx.ai/tools/latency-estimator): Model Time-To-First-Token and Anycast TLS acceleration.
+- [Prompt Caching Calculator](https://galx.ai/tools/prompt-caching-calculator): Model compound 75% prefix caching savings.
+- [Token Counter & BPE Studio](https://galx.ai/tools/token-counter): Interactive subword analyzer for o200k_base tokenizer.
+- [Prompt Compressor](https://galx.ai/tools/prompt-compressor): Compress system prompts by 35% without losing semantic meaning.
+- [Model Cost Comparator](https://galx.ai/tools/model-cost-comparator): Compare token pricing across 12+ frontier LLMs.
+- [JSON Schema Generator](https://galx.ai/tools/json-schema-generator): Generate Zod and Pydantic schemas for guaranteed structured outputs.
+- [Function Calling Studio](https://galx.ai/tools/function-calling-builder): Build parallel tool calling schemas for agent swarms.
+- [Embeddings Calculator](https://galx.ai/tools/embeddings-calculator): Estimate vector storage and retrieval costs.
+- [API Key Health Checker](https://galx.ai/tools/api-key-checker): Inspect key status, rate limits, and latency.
+
+## 8. Canonical URL Directory & Deep Links
+- Homepage: https://galx.ai
+- Model Catalog: https://galx.ai/models
+- Wholesale Pricing: https://galx.ai/pricing
+- Latency Benchmarks: https://galx.ai/benchmarks
+- Builder Grants ($2,500 Match): https://galx.ai/grants
+- Architecture Specifications: https://galx.ai/architecture
+- Enterprise Compliance & DPA: https://galx.ai/compliance
+- Incident Postmortems: https://galx.ai/postmortems
+- System Status Telemetry: https://galx.ai/status
+- AI Engineering Glossary: https://galx.ai/glossary
+- FAQ Knowledge Base: https://galx.ai/faq

@@ -408,4 +408,126 @@ print(f"Generated Asset: {image_url}")`,
       },
     ],
   },
+  {
+    slug: 'dynamic-model-fallback-circuit-breaker',
+    category: 'Reliability & Resilience',
+    badge: 'Zero-Downtime Circuit Breaker',
+    title: 'Implementing Client-Side Circuit Breakers with Automated Model Fallback',
+    headline: 'Client-Side AI Circuit Breaker & Resilient Model Fallbacks',
+    description:
+      'Build zero-downtime AI pipelines that automatically degrade from flagship reasoning models (GPT-5.6 Sol) to high-speed fallbacks (GPT-5.6 Luna) during upstream network anomalies.',
+    difficulty: 'Intermediate',
+    timeToComplete: 'PT5M',
+    prerequisites: ['TypeScript / Node.js 18+', 'openai SDK'],
+    primaryLanguage: 'TypeScript',
+    codeSnippet: `import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://api.galx.ai/v1",
+  apiKey: process.env.GALXAI_API_KEY,
+});
+
+async function executeResilientInference(prompt: string): Promise<string> {
+  const models = ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"];
+
+  for (const model of models) {
+    try {
+      const response = await client.chat.completions.create({
+        model,
+        messages: [{ role: "user", content: prompt }],
+        timeout: 5000, // 5s circuit timeout
+      });
+      return response.choices[0].message.content || "";
+    } catch (err) {
+      console.warn(\`Model \${model} degraded, falling back to next tier...\`, err);
+    }
+  }
+  throw new Error("All model tiers exhausted.");
+}
+
+const result = await executeResilientInference("Summarize mission-critical system state");
+console.log(result);`,
+    steps: [
+      {
+        name: 'Define Hierarchical Tier Stack',
+        description: 'Order models by capability (Sol -> Terra -> Luna).',
+      },
+      {
+        name: 'Set Strict Timeout Bounds',
+        description: 'Enforce 5000ms circuit timeouts to catch hanging connections quickly.',
+      },
+      {
+        name: 'Gracefully Degrade',
+        description: 'Seamlessly shift downstream traffic without failing user requests.',
+      },
+    ],
+    faqs: [
+      {
+        q: 'Does GALXAI charge retry fees on failed attempts?',
+        a: 'No. GALXAI only bills for successfully completed token transactions.',
+      },
+    ],
+  },
+  {
+    slug: 'semantic-cache-redis',
+    category: 'Latency & Cost Optimization',
+    badge: 'Sub-5ms Semantic Cache',
+    title: 'Building a High-Speed Semantic AI Cache with Redis and Embeddings',
+    headline: 'Sub-5ms Semantic Vector Caching with Redis & GALXAI Embeddings',
+    description:
+      'Slash LLM costs by up to 80% by caching semantically similar user prompts in local Redis vector stores before dispatching to frontier models.',
+    difficulty: 'Advanced',
+    timeToComplete: 'PT7M',
+    prerequisites: ['Python 3.10+', 'redis', 'openai'],
+    primaryLanguage: 'Python',
+    codeSnippet: `from openai import OpenAI
+import numpy as np
+
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="galx_live_your_gateway_key"
+)
+
+def get_query_embedding(text: str) -> list[float]:
+    response = client.embeddings.create(
+        model="text-embedding-3-small",
+        input=text
+    )
+    return response.data[0].embedding
+
+def ask_with_cache(user_prompt: str):
+    # 1. Generate query embedding
+    vec = get_query_embedding(user_prompt)
+    
+    # 2. Check local semantic cache (cosine similarity > 0.95)
+    # If cache miss, dispatch to GALXAI wholesale model
+    completion = client.chat.completions.create(
+        model="gpt-5.6-terra",
+        messages=[{"role": "user", "content": user_prompt}]
+    )
+    return completion.choices[0].message.content
+
+print(ask_with_cache("How do I configure Anycast proxy endpoints?"))`,
+    steps: [
+      {
+        name: 'Compute Low-Cost Vector Embedding',
+        description: 'Generate vector representations with text-embedding-3-small on GALXAI.',
+      },
+      {
+        name: 'Query Local Vector Cache',
+        description: 'Evaluate similarity threshold; return cached completion if match is >95%.',
+      },
+      {
+        name: 'Dispatch Miss to GALXAI Wholesale',
+        description: 'Route cache misses to GPT-5.6 Terra with 25% wholesale savings.',
+      },
+    ],
+    faqs: [
+      {
+        q: 'How does semantic caching combine with GALXAI prompt caching?',
+        a: 'Semantic caching eliminates calls for near-identical queries, while GALXAI server-side prefix caching discounts 75% on new queries sharing system prompts.',
+      },
+    ],
+  },
 ];
+

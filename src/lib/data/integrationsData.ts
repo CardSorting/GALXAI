@@ -403,4 +403,335 @@ print(result)`,
       },
     ],
   },
+  {
+    slug: 'claude-code',
+    name: 'Claude Code CLI',
+    category: 'ide',
+    badge: 'Autonomous Terminal Agent',
+    title: 'Claude Code CLI Setup with GALXAI Wholesale Model Routing',
+    headline: 'Run Claude Code with GALXAI Wholesale Token Gateway',
+    description:
+      'Power your terminal-based autonomous coding agent with 25%–40% wholesale savings, 75% prompt caching, and zero rate-limit stalls on deep multi-file refactors.',
+    timeToSetup: 'PT30S',
+    envSnippet: `ANTHROPIC_BASE_URL=https://api.galx.ai/v1
+ANTHROPIC_API_KEY=galx_live_your_gateway_key`,
+    configSnippet: {
+      filename: '.env',
+      language: 'bash',
+      code: `export OPENAI_BASE_URL="https://api.galx.ai/v1"
+export OPENAI_API_KEY="galx_live_your_gateway_key"`,
+    },
+    codeExample: {
+      language: 'Bash',
+      code: `# Launch Claude Code pointing to GALXAI wholesale clearinghouse
+claude --openai-base-url="https://api.galx.ai/v1" --model="gpt-5.6-sol"`,
+    },
+    steps: [
+      {
+        name: 'Obtain GALXAI Key',
+        description: 'Mint a live key with $5 instant compute credits.',
+      },
+      {
+        name: 'Export Gateway Environment',
+        description: 'Set OPENAI_BASE_URL="https://api.galx.ai/v1" in your shell configuration.',
+      },
+      {
+        name: 'Launch Agent Sessions',
+        description: 'Run full repository refactors with 75% compound prompt caching.',
+      },
+    ],
+    faqs: [
+      {
+        q: 'How does prompt caching help Claude Code?',
+        a: 'Coding agents repeatedly re-send the full project file tree and system prompt. On GALXAI, prefixes exceeding 1,024 tokens receive a 75% prompt caching rebate automatically.',
+      },
+    ],
+  },
+  {
+    slug: 'dify',
+    name: 'Dify AI',
+    category: 'framework',
+    badge: 'Visual Workflow Orchestration',
+    title: 'Dify AI Workflow Integration with GALXAI Universal Gateway',
+    headline: 'Connect Dify LLM Workflows to GALXAI',
+    description:
+      'Build visual AI workflows, RAG agents, and assistants in Dify with sub-15ms Anycast latency, 75% prompt caching, and wholesale token pricing.',
+    timeToSetup: 'PT45S',
+    envSnippet: `OPENAI_API_BASE=https://api.galx.ai/v1
+OPENAI_API_KEY=galx_live_your_gateway_key`,
+    configSnippet: {
+      filename: 'dify_provider_config.json',
+      language: 'json',
+      code: `{
+  "provider": "openai",
+  "api_base": "https://api.galx.ai/v1",
+  "api_key": "galx_live_your_gateway_key",
+  "models": ["gpt-5.6-sol", "gpt-5.6-terra", "x-ai/grok-4.6"]
+}`,
+    },
+    codeExample: {
+      language: 'TypeScript',
+      code: `// Dify Custom Tool Execution via GALXAI
+const response = await fetch("https://api.galx.ai/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + process.env.GALXAI_API_KEY,
+  },
+  body: JSON.stringify({
+    model: "gpt-5.6-sol",
+    messages: [{ role: "user", content: "Synthesize workflow telemetry" }],
+  }),
+});`,
+    },
+    steps: [
+      {
+        name: 'Navigate to Dify Settings',
+        description: 'Open Dify > Model Providers > OpenAI-API-compatible.',
+      },
+      {
+        name: 'Configure Base URL',
+        description: 'Set Server URL to "https://api.galx.ai/v1" and enter your GALXAI key.',
+      },
+      {
+        name: 'Add Model Identifiers',
+        description: 'Add "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", and "x-ai/grok-4.6".',
+      },
+    ],
+    faqs: [
+      {
+        q: 'Can I use Dify RAG document pipelines with GALXAI?',
+        a: 'Yes. Dify knowledge bases and retrieval nodes route seamlessly with 75% cached token discounts on document prefixes.',
+      },
+    ],
+  },
+  {
+    slug: 'flowise',
+    name: 'Flowise AI',
+    category: 'framework',
+    badge: 'Low-Code Agent Builder',
+    title: 'Flowise AI Drag-and-Drop Workflow Integration with GALXAI',
+    headline: 'Drag-and-Drop LLM Flowise Orchestration via GALXAI',
+    description:
+      'Connect visual Flowise chains, tool agents, and LangChain nodes directly to GALXAI wholesale models with zero code modifications.',
+    timeToSetup: 'PT30S',
+    envSnippet: `OPENAI_API_BASE=https://api.galx.ai/v1
+OPENAI_API_KEY=galx_live_your_gateway_key`,
+    configSnippet: {
+      filename: '.env',
+      language: 'bash',
+      code: `OPENAI_API_BASE="https://api.galx.ai/v1"
+OPENAI_API_KEY="galx_live_your_gateway_key"`,
+    },
+    codeExample: {
+      language: 'TypeScript',
+      code: `// Flowise Chat Node Configuration
+const chatNode = {
+  modelName: "gpt-5.6-sol",
+  basePath: "https://api.galx.ai/v1",
+  openAIApiKey: process.env.GALXAI_API_KEY,
+  temperature: 0.2
+};`,
+    },
+    steps: [
+      {
+        name: 'Open Flowise Canvas',
+        description: 'Add a ChatOpenAI node to your canvas.',
+      },
+      {
+        name: 'Set Base Path Parameter',
+        description: 'Expand Additional Parameters and set BasePath to "https://api.galx.ai/v1".',
+      },
+      {
+        name: 'Test Flow Execution',
+        description: 'Chat with your agent with sub-15ms TTFT response streaming.',
+      },
+    ],
+    faqs: [
+      {
+        q: 'Does Flowise support Grok 4.6 via GALXAI?',
+        a: 'Yes. Simply specify "x-ai/grok-4.6" in the Custom Model Name input field in the Flowise node.',
+      },
+    ],
+  },
+  {
+    slug: 'open-webui',
+    name: 'Open WebUI',
+    category: 'ide',
+    badge: 'Self-Hosted AI UI',
+    title: 'Open WebUI Integration Guide with GALXAI Wholesale Token Gateway',
+    headline: 'Power Open WebUI with GALXAI Frontier Models',
+    description:
+      'Supercharge your self-hosted Open WebUI instance with OpenAI GPT-5.6, xAI Grok 4.6 (1M), 75% prompt caching, and wholesale billing.',
+    timeToSetup: 'PT30S',
+    envSnippet: `OPENAI_API_BASE_URL=https://api.galx.ai/v1
+OPENAI_API_KEY=galx_live_your_gateway_key`,
+    configSnippet: {
+      filename: 'docker-compose.yml',
+      language: 'yaml',
+      code: `services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    environment:
+      - OPENAI_API_BASE_URL=https://api.galx.ai/v1
+      - OPENAI_API_KEY=galx_live_your_gateway_key
+    ports:
+      - "3000:8080"`,
+    },
+    codeExample: {
+      language: 'Bash',
+      code: `docker run -d -p 3000:8080 \\
+  -e OPENAI_API_BASE_URL="https://api.galx.ai/v1" \\
+  -e OPENAI_API_KEY="galx_live_your_gateway_key" \\
+  --name open-webui ghcr.io/open-webui/open-webui:main`,
+    },
+    steps: [
+      {
+        name: 'Configure Environment',
+        description: 'Set OPENAI_API_BASE_URL="https://api.galx.ai/v1" and OPENAI_API_KEY in Open WebUI settings.',
+      },
+      {
+        name: 'Sync Model List',
+        description: 'Open WebUI will automatically populate all models from the GALXAI catalog.',
+      },
+      {
+        name: 'Start Chatting',
+        description: 'Chat with frontier models with wholesale pricing and zero rate limit stalls.',
+      },
+    ],
+    faqs: [
+      {
+        q: 'Does Open WebUI support vision models via GALXAI?',
+        a: 'Yes. Grok 4.5 and GPT-Image-2 image analysis endpoints work seamlessly with Open WebUI image uploads.',
+      },
+    ],
+  },
+  {
+    slug: 'continue-dev',
+    name: 'Continue.dev',
+    category: 'ide',
+    badge: 'VSCode & JetBrains Extension',
+    title: 'Continue.dev IDE Setup Guide with GALXAI Fast Anycast Gateway',
+    headline: 'Supercharge Continue.dev with GALXAI Wholesale AI',
+    description:
+      'Integrate the popular open-source VSCode and JetBrains coding assistant with GALXAI for sub-12ms inline autocomplete and deep chat refactoring.',
+    timeToSetup: 'PT30S',
+    envSnippet: `OPENAI_API_BASE=https://api.galx.ai/v1
+OPENAI_API_KEY=galx_live_your_gateway_key`,
+    configSnippet: {
+      filename: '~/.continue/config.json',
+      language: 'json',
+      code: `{
+  "models": [
+    {
+      "title": "GPT-5.6 Sol (Wholesale)",
+      "provider": "openai",
+      "model": "gpt-5.6-sol",
+      "apiBase": "https://api.galx.ai/v1",
+      "apiKey": "galx_live_your_gateway_key"
+    },
+    {
+      "title": "Grok 4.6 (1M Context)",
+      "provider": "openai",
+      "model": "x-ai/grok-4.6",
+      "apiBase": "https://api.galx.ai/v1",
+      "apiKey": "galx_live_your_gateway_key"
+    }
+  ],
+  "tabAutocompleteModel": {
+    "title": "GPT-5.6 Luna Autocomplete",
+    "provider": "openai",
+    "model": "gpt-5.6-luna",
+    "apiBase": "https://api.galx.ai/v1",
+    "apiKey": "galx_live_your_gateway_key"
+  }
+}`,
+    },
+    codeExample: {
+      language: 'TypeScript',
+      code: `// Set GPT-5.6 Luna as lightning-fast autocomplete model (<12ms TTFT)
+const config = {
+  tabAutocompleteModel: {
+    provider: "openai",
+    model: "gpt-5.6-luna",
+    apiBase: "https://api.galx.ai/v1",
+    apiKey: process.env.GALXAI_API_KEY,
+  }
+};`,
+    },
+    steps: [
+      {
+        name: 'Open Continue Config',
+        description: 'Click the gear icon in the Continue sidebar or edit ~/.continue/config.json.',
+      },
+      {
+        name: 'Add GALXAI Models',
+        description: 'Insert the GALXAI model definitions with apiBase="https://api.galx.ai/v1".',
+      },
+      {
+        name: 'Enjoy Wholesale Coding',
+        description: 'Experience sub-second completions with 75% prompt caching on project context.',
+      },
+    ],
+    faqs: [
+      {
+        q: 'Which model should I use for tab autocomplete in Continue?',
+        a: 'We recommend GPT-5.6 Luna, which streams at 140+ tokens/sec with sub-12ms Anycast TTFT at $0.75/1M input tokens.',
+      },
+    ],
+  },
+  {
+    slug: 'cline',
+    name: 'Cline (Autonomous Agent)',
+    category: 'ide',
+    badge: 'Autonomous VSCode Dev',
+    title: 'Cline Autonomous Agent Setup with GALXAI 429 Failover Shield',
+    headline: 'Run Cline Autonomous Coding Loops via GALXAI',
+    description:
+      'Prevent 429 rate limit stalls and slash high-volume token costs by 25%–40% when running Cline multi-file autonomous coding tasks.',
+    timeToSetup: 'PT30S',
+    envSnippet: `OPENAI_API_BASE=https://api.galx.ai/v1
+OPENAI_API_KEY=galx_live_your_gateway_key`,
+    configSnippet: {
+      filename: 'cline_settings.json',
+      language: 'json',
+      code: `{
+  "apiProvider": "openai-compatible",
+  "baseUrl": "https://api.galx.ai/v1",
+  "apiKey": "galx_live_your_gateway_key",
+  "modelId": "gpt-5.6-sol"
+}`,
+    },
+    codeExample: {
+      language: 'TypeScript',
+      code: `// Cline Provider Configuration
+const clineSettings = {
+  apiProvider: "openai-compatible",
+  baseUrl: "https://api.galx.ai/v1",
+  apiKey: process.env.GALXAI_API_KEY,
+  modelId: "gpt-5.6-sol"
+};`,
+    },
+    steps: [
+      {
+        name: 'Open Cline Settings',
+        description: 'Open the Cline panel in VSCode and click the Settings gear icon.',
+      },
+      {
+        name: 'Select OpenAI Compatible Provider',
+        description: 'Set Base URL to "https://api.galx.ai/v1" and supply your live key.',
+      },
+      {
+        name: 'Start Autonomous Tasks',
+        description: 'Execute multi-step tasks with continuous token governance and 75% cached prompt rebates.',
+      },
+    ],
+    faqs: [
+      {
+        q: 'Why do Cline users prefer GALXAI over direct API keys?',
+        a: 'Cline executes dozens of sequential tool calls with massive context windows. On direct tiers, this quickly hits 429 rate limits. GALXAI pools enterprise headroom so tasks never crash.',
+      },
+    ],
+  },
 ];
+

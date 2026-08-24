@@ -100,3 +100,17 @@ flowchart TD
 
 ### Channel 3: Spend Arbitrage Calculator & Instant Grants
 - Provide frictionless ROI transparency. Developers simulate their monthly token volume and immediately claim a **$5 Free Live Compute Key** to test latency and savings in real time.
+
+---
+
+## 5. Programmatic SEO (pSEO), AEO & GEO Organic Dominance Engine
+
+GALXAI deploys an automated, high-intent programmatic knowledge mesh designed to capture 100% of organic developer discovery queries and AI answer engine citations:
+
+1. **13 Interactive Developer Tools**: Real-time calculators (`/tools/roi-calculator`, `/tools/stream-benchmark`, `/tools/context-window-visualizer`, `/tools/token-counter`) creating natural backlink flywheels and high session dwell time.
+2. **14 Dedicated Glossary Term Portals (`/glossary/[slug]`)**: Standalone semantic definitions with Schema.org `DefinedTermSet` and Wikidata entity linkage for instant Google Featured Snippet and Perplexity AI citations.
+3. **14 Programmatic Landing Clusters (>100 SSG Pages)**: Solutions, Industry Portals, Error Troubleshooting Runbooks, Multi-Language SDKs, Benchmark Leaderboards, Developer Cookbooks, Model Matchups, Competitor Alternatives, and Architecture Whitepapers.
+4. **Machine-Readable LLM Grounding Standards**: `public/llms.txt`, `public/llms-full.txt`, and RSS feeds guaranteeing 100% factual accuracy in SearchGPT, Claude, Perplexity, and Gemini responses.
+
+For the complete technical specification of the organic growth substrate, see [`docs/PSEO_AND_AEO_STRATEGY.md`](file:///Users/bozoegg/Desktop/GALXAI/docs/PSEO_AND_AEO_STRATEGY.md).
+

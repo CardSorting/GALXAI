@@ -15,9 +15,10 @@ import { WORKLOAD_BENCHMARKS_DATA } from '@/lib/data/workloadBenchmarksData';
 import { ARCHITECTURE_WHITEPAPERS_DATA } from '@/lib/data/architectureWhitepapersData';
 import { SECURITY_SPECIFICATIONS_DATA } from '@/lib/data/securityData';
 import { RELIABILITY_DATA } from '@/lib/data/reliabilityData';
-import { INDUSTRIES_DATA } from '@/lib/data/industriesData';
 import { SECURITY_PATTERNS_DATA } from '@/lib/data/securityPatternsData';
 import { POSTMORTEMS_DATA } from '@/lib/data/postmortemsData';
+import { INDUSTRIES_DATA } from '@/lib/data/industriesData';
+import { GLOSSARY_TERMS } from '@/lib/data/glossaryData';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = SITE_CONFIG.url;
@@ -409,6 +410,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.9,
     },
+    {
+      url: `${baseUrl}/tools/context-window-visualizer`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.92,
+    },
+    {
+      url: `${baseUrl}/tools/latency-estimator`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.92,
+    },
+    {
+      url: `${baseUrl}/tools/stream-benchmark`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.93,
+    },
+    {
+      url: `${baseUrl}/tools/roi-calculator`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.93,
+    },
   ];
 
   // 12. Dynamic Developer Cookbook Recipes (pSEO)
@@ -521,6 +546,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
+  // 24. Dynamic Glossary DefinedTerm Landing Portals (pSEO & AEO)
+  const glossaryTermRoutes: MetadataRoute.Sitemap = GLOSSARY_TERMS.map((t) => ({
+    url: `${baseUrl}/glossary/${t.slug}`,
+    lastModified: currentDate,
+    changeFrequency: 'weekly',
+    priority: 0.88,
+  }));
+
   return [
     ...coreRoutes,
     ...docRoutes,
@@ -545,5 +578,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...industryRoutes,
     ...complianceRoutes,
     ...businessRoutes,
+    ...glossaryTermRoutes,
   ];
 }
+

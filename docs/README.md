@@ -27,7 +27,9 @@ Welcome to the comprehensive technical documentation and operational guides for 
 - **[Developer & Contributing Guide](DEVELOPER_GUIDE.md)**: Codebase organization, provider adapter design, and test suite conventions.
 - **[Architecture Decision Records (ADRs)](adr/README.md)**: 50 formal architectural specifications governing security, pSEO/AEO saturation, interactive developer tools, and SLA failovers.
 - **[Operational SRE Playbooks](playbooks/README.md)**: 7 lifecycle runbooks for deployment, incident remediation, and secret rotation.
-- **[Interactive Developer Tools Suite](../src/app/tools)**: Suite of 9 interactive developer tools including Prompt Caching Estimator, System Prompt Compressor, BPE Token Counter, Function Calling Builder, and Model Cost Comparator.
+- **[Programmatic SEO (pSEO), AEO & GEO Strategy](PSEO_AND_AEO_STRATEGY.md)**: Comprehensive architectural strategy covering 13 interactive developer tools, 14 programmatic content hubs, Schema.org `@graph` ontology, and machine-readable `llms.txt` standards.
+- **[Interactive Developer Tools Suite](../src/app/tools)**: Suite of 13 interactive browser tools including Enterprise LLM ROI & Token Budget Calculator, AI Token Streaming & Speed Benchmark Simulator, 1M Context Window Visualizer, Prompt Caching Estimator, BPE Token Counter, and Model Cost Comparator.
+- **[AEO Engineering Glossary Hub](../src/app/glossary)**: 14 dedicated programmatic glossary term portals (`/glossary/[slug]`) with Schema.org `DefinedTermSet` and Wikidata entity mapping.
 - **[Incident Postmortems Hub](../src/app/postmortems)**: Verifiable real-world incident postmortems, root cause analyses, and multi-origin failover architectures.
 
 ---
