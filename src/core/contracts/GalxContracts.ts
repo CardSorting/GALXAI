@@ -177,6 +177,8 @@ export interface GalxShardAccount {
   readonly privacyCapabilities?: PrivacyCapabilities;
   readonly fencingToken?: number;
   readonly permissionRetracted?: boolean;
+  readonly expiresAtMs?: number;
+  readonly accountId?: string;
   readonly cooldownUntilMs?: number;
   readonly cooldownUntilTimestampMs?: number;
   readonly createdAtMs: number;
@@ -219,6 +221,8 @@ export interface ShardAcquisitionRequest {
   readonly hipaaRequired?: boolean;
   readonly dataResidency?: DataResidencyRegion;
   readonly zdrRequired?: boolean;
+  readonly targetAccountId?: string;
+  readonly targetShardId?: string;
 }
 
 export interface ShardAcquisitionResult {
@@ -431,7 +435,7 @@ export interface AuthSessionClaims {
   readonly sub: string; // User ID
   readonly email?: string;
   readonly name?: string;
-  readonly provider: ProviderType | 'guest';
+  readonly provider: ProviderType;
   readonly shardId?: string;
   readonly shardMode?: ShardIsolationMode;
   readonly role?: 'developer' | 'admin' | 'owner' | 'viewer';
@@ -451,7 +455,7 @@ export interface AuthSessionClaims {
 export interface GalxUserSession {
   readonly id: string;
   readonly userId: string;
-  readonly provider: ProviderType | 'guest';
+  readonly provider: ProviderType;
   readonly shardId?: string;
   readonly sessionFamilyId?: string;
   readonly sequenceNumber?: number;
@@ -479,7 +483,7 @@ export interface GalxUserSession {
 export interface SessionDeviceInfo {
   readonly id: string;
   readonly userId: string;
-  readonly provider: ProviderType | 'guest';
+  readonly provider: ProviderType;
   readonly shardId?: string;
   readonly ipAddress?: string;
   readonly userAgent?: string;
@@ -553,11 +557,140 @@ export interface AuthIdentityResult {
   readonly claims?: AuthSessionClaims;
   readonly apiKey?: DeveloperGatewayKey;
   readonly session?: GalxUserSession;
+  readonly token?: string;
+  readonly error?: string;
+}
+
+export interface OAuthUrlDetails {
+  readonly url: string;
+  readonly codeVerifier: string;
+  readonly state: string;
+}
+
+export interface OAuthAuthorizationRequest {
+  readonly id: string;
+  readonly state: string;
+  readonly codeVerifier: string;
+  readonly provider: ProviderType;
+  readonly redirectUri: string;
+  readonly mode: ShardIsolationMode;
+  readonly workspaceId?: string;
+  readonly userId?: string;
+  readonly ipAddress?: string;
+  readonly userAgent?: string;
+  readonly isConsumed: boolean;
+  readonly consumedAtMs?: number;
+  readonly expiresAtMs: number;
+  readonly createdAtMs: number;
+}
+
+export interface OAuthIdentityRecord {
+  readonly id: string;
+  readonly userId: string;
+  readonly provider: ProviderType;
+  readonly providerAccountId: string;
+  readonly email: string;
+  readonly displayName?: string;
+  readonly shardId?: string;
+  readonly sessionFamilyId?: string;
+  readonly sequenceNumber?: number;
+  readonly refreshTokenHash?: string;
+  readonly previousRefreshTokenHash?: string;
+  readonly gracePeriodUntilMs?: number;
+  readonly encryptedAccessToken: EncryptedSecretPayload;
+  readonly encryptedRefreshToken?: EncryptedSecretPayload;
+  readonly idTokenClaims?: Record<string, any>;
+  readonly scopes?: string[];
+  readonly expiresAtMs?: number;
+  readonly lastRefreshedAtMs?: number;
+  readonly status: 'active' | 'expired' | 'revoked' | 'needs_reauth';
+  readonly createdAtMs: number;
+  readonly updatedAtMs: number;
+}
+
+export interface OAuthTokenRecord {
+  readonly provider: ProviderType;
+  readonly accessToken: string;
+  readonly refreshToken?: string;
+  readonly idToken?: string;
+  readonly accountId?: string;
+  readonly email?: string;
+  readonly name?: string;
+  readonly expiresAtMs: number;
+}
+
+export interface OAuthDeviceCodeDetails {
+  readonly deviceCode: string;
+  readonly userCode: string;
+  readonly verificationUri: string;
+  readonly verificationUriComplete: string;
+  readonly expiresIn: number;
+  readonly interval: number;
+}
+
+export interface OAuthDeviceCodeRecord {
+  readonly id: string;
+  readonly deviceCode: string;
+  readonly userCode: string;
+  readonly provider: ProviderType;
+  readonly status: 'pending' | 'approved' | 'denied' | 'expired';
+  readonly tokenRecord?: OAuthTokenRecord;
+  readonly sessionToken?: string;
+  readonly userId?: string;
+  readonly workspaceId?: string;
+  readonly ipAddress?: string;
+  readonly userAgent?: string;
+  readonly pollingIntervalSec: number;
+  readonly lastPolledAtMs?: number;
+  readonly expiresAtMs: number;
+  readonly createdAtMs: number;
+}
+
+export interface DPoPProofClaims {
+  readonly htm: string;
+  readonly htu: string;
+  readonly iat: number;
+  readonly jti: string;
+  readonly ath?: string;
+}
+
+export interface PushedAuthorizationRequestRecord {
+  readonly id: string;
+  readonly requestUri: string;
+  readonly provider: ProviderType;
+  readonly clientId: string;
+  readonly redirectUri: string;
+  readonly scope?: string;
+  readonly codeChallenge?: string;
+  readonly codeChallengeMethod?: string;
+  readonly state?: string;
+  readonly responseType?: string;
+  readonly workspaceId?: string;
+  readonly isConsumed: boolean;
+  readonly consumedAtMs?: number;
+  readonly expiresAtMs: number;
+  readonly createdAtMs: number;
+}
+
+export interface PushedAuthorizationResponse {
+  readonly request_uri: string;
+  readonly expires_in: number;
+}
+
+export interface OAuthExchangeResult {
+  readonly success: boolean;
+  readonly tokens?: OAuthTokenRecord;
   readonly error?: string;
 }
 
 export interface ProviderAuthParams {
   readonly apiKey?: string;
+  readonly accessToken?: string;
+  readonly refreshToken?: string;
+  readonly accountId?: string;
+  readonly idToken?: string;
+  readonly expiresAtMs?: number;
+  readonly authType?: 'oauth' | 'api_key';
   readonly email?: string;
   readonly displayName?: string;
   readonly mode?: ShardIsolationMode;
@@ -573,7 +706,7 @@ export interface ProviderAuthResult {
     readonly id: string;
     readonly email: string;
     readonly name: string;
-    readonly provider: ProviderType | 'guest';
+    readonly provider: ProviderType;
     readonly shardId: string;
     readonly shardMode: ShardIsolationMode;
     readonly token: string;

@@ -49,6 +49,8 @@ export class GalxAIClientCore {
     this.apiKey =
       opts.apiKey ||
       opts.api_key ||
+      opts.accessToken ||
+      opts.access_token ||
       opts.token ||
       opts.authToken ||
       (typeof process !== 'undefined'
@@ -70,7 +72,14 @@ export class GalxAIClientCore {
     this.baseURL = rawBaseUrl.replace(/\/+$/, '');
     this.timeoutMs = opts.timeoutMs ?? opts.timeout ?? opts.timeout_ms ?? 60000;
     this.maxRetries = opts.maxRetries ?? opts.max_retries ?? opts.retries ?? 2;
-    this.defaultHeaders = opts.defaultHeaders || opts.headers || {};
+    this.defaultHeaders = { ...(opts.defaultHeaders || opts.headers || {}) };
+
+    const accountId = opts.accountId || opts.account_id;
+    if (accountId) {
+      this.defaultHeaders['ChatGPT-Account-Id'] = accountId;
+      this.defaultHeaders['OpenAI-Account'] = accountId;
+    }
+
     this.customFetch = opts.fetch;
     this.middleware = new MiddlewarePipeline();
   }
@@ -358,8 +367,10 @@ import { PrivacyResource, PrivacyProfiles } from './resources/privacy';
 import { ComplianceResource } from './resources/compliance';
 import { DatabaseResource } from './resources/database';
 import { JobsResource } from './resources/jobs';
+import { AuthResource } from './resources/auth';
 
 export class GalxAI {
+  readonly auth: AuthResource;
   readonly chat: ChatResource;
   readonly messages: {
     create: (params: {
@@ -390,6 +401,7 @@ export class GalxAI {
 
   constructor(options: string | ClientOptions = {}) {
     this.core = new GalxAIClientCore(options);
+    this.auth = new AuthResource(this.core);
     this.chat = new ChatResource(this.core);
     this.messages = {
       create: async (params) => {

@@ -22,8 +22,8 @@ interface AuthRequiredGateProps {
 }
 
 function BaseAuthRequiredGate({
-  title = 'Developer Authentication Required',
-  description = 'You must connect your developer account or sign in to access your private workspace, telemetry, keys, and billing records.',
+  title = 'Sign In Required',
+  description = 'Sign in with your account to access your workspace, API keys, telemetry, and settings.',
   checkoutAmount = 50,
   children
 }: AuthRequiredGateProps) {
@@ -32,8 +32,8 @@ function BaseAuthRequiredGate({
   if (isLoading) {
     return (
       <div className="py-24 text-center space-y-3 font-mono text-xs text-zinc-400">
-        <Activity className="w-6 h-6 animate-spin text-cyan-400 mx-auto" />
-        <p>Authenticating developer workspace session...</p>
+        <Activity className="w-6 h-6 animate-spin text-amber-400 mx-auto" />
+        <p>Loading your workspace...</p>
       </div>
     );
   }
@@ -50,7 +50,7 @@ function BaseAuthRequiredGate({
         <div className="space-y-2 max-w-lg mx-auto">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-mono font-bold">
             <ShieldCheck className="w-3.5 h-3.5" />
-            <span>DEVELOPER AUTHENTICATION REQUIRED</span>
+            <span>AUTHENTICATION REQUIRED</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             {title}
@@ -60,13 +60,13 @@ function BaseAuthRequiredGate({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto font-mono text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto font-sans text-xs font-semibold">
           <Link
             href="/auth/connect"
-            className="p-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black uppercase tracking-wider shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-105"
+            className="p-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-bold tracking-wide shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-105"
           >
             <Key className="w-4 h-4 text-black fill-black" />
-            <span>Connect Developer Account</span>
+            <span>Sign In to Continue</span>
           </Link>
 
           <Link

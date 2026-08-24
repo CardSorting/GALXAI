@@ -156,10 +156,18 @@ export class GalxCredentialPool {
     const isPriorityUser = !!req.isPriorityUser;
 
     // 2. Fetch all active accounts for the target provider
-    const availableAccounts = this.substrate.listAccounts(undefined, req.provider);
+    let availableAccounts = this.substrate.listAccounts(undefined, req.provider);
+
+    if (req.targetShardId) {
+      availableAccounts = availableAccounts.filter((acc) => acc.id === req.targetShardId);
+    }
+    if (req.targetAccountId) {
+      availableAccounts = availableAccounts.filter((acc) => acc.accountId === req.targetAccountId);
+    }
+
     if (availableAccounts.length === 0) {
       return {
-        reason: `No active credential shards available for provider '${req.provider}'`,
+        reason: `No active credential shards available for provider '${req.provider}'${req.targetAccountId ? ` matching account '${req.targetAccountId}'` : ''}${req.targetShardId ? ` matching shard '${req.targetShardId}'` : ''}`,
         status: 'pool_exhausted'
       };
     }
@@ -363,6 +371,19 @@ export class GalxCredentialPool {
       }
       const tenantDispersionFactor = Math.pow(0.88, tenantLeasesOnShard);
 
+      // 9. Token Expiration Headroom (favors fresh shards while supporting auto-refresh)
+      let expiryMultiplier = 1.0;
+      if (acc.expiresAtMs) {
+        const remainingLifetimeMs = acc.expiresAtMs - nowMs;
+        if (remainingLifetimeMs < 0) {
+          expiryMultiplier = 0.6; // Expired (will trigger auto-refresh on route dispatch)
+        } else if (remainingLifetimeMs < 120_000) {
+          expiryMultiplier = 0.85; // Near expiry window
+        } else {
+          expiryMultiplier = 1.05; // Plentiful token lifespan
+        }
+      }
+
       // Hydraulic score: higher unreserved headroom + lower in-flight + faster latency + higher reliability + tenant dispersion = higher score
       const score =
         (Math.pow(tokenHeadroomRatio, 1.2) *
@@ -373,7 +394,8 @@ export class GalxCredentialPool {
           dynamicWeight *
           priorityBoost *
           drainPenalty *
-          tenantDispersionFactor) +
+          tenantDispersionFactor *
+          expiryMultiplier) +
         microJitter;
 
       if (score > bestScore) {
@@ -535,16 +557,42 @@ export class GalxCredentialPool {
   /**
    * Releases an execution lease upon request completion, committing actual tokens,
    * releasing soft reservations, reconciling upstream headers, updating EWMA latency, and notifying circuit breaker.
+   * Supports both ergonomic options object and positional arguments.
    */
   releaseLease(
     leaseId: string,
-    tokensUsed = 0,
+    tokensUsedOrOptions: number | {
+      tokensConsumed?: number;
+      tokensUsed?: number;
+      success?: boolean;
+      upstreamHeaders?: Record<string, string | number | undefined>;
+      errorReason?: string;
+      nowMs?: number;
+      latencyMs?: number;
+    } = 0,
     success = true,
     upstreamHeaders?: Record<string, string | number | undefined>,
     errorReason?: string,
     nowMs = Date.now(),
     latencyMs?: number
   ): boolean {
+    let actualTokensUsed = 0;
+    let actualSuccess = success;
+    let actualHeaders = upstreamHeaders;
+    let actualError = errorReason;
+    let actualNowMs = nowMs;
+    let actualLatency = latencyMs;
+
+    if (typeof tokensUsedOrOptions === 'object' && tokensUsedOrOptions !== null) {
+      actualTokensUsed = tokensUsedOrOptions.tokensConsumed ?? tokensUsedOrOptions.tokensUsed ?? 0;
+      actualSuccess = tokensUsedOrOptions.success ?? true;
+      actualHeaders = tokensUsedOrOptions.upstreamHeaders ?? upstreamHeaders;
+      actualError = tokensUsedOrOptions.errorReason ?? errorReason;
+      actualNowMs = tokensUsedOrOptions.nowMs ?? nowMs;
+      actualLatency = tokensUsedOrOptions.latencyMs ?? latencyMs;
+    } else if (typeof tokensUsedOrOptions === 'number') {
+      actualTokensUsed = tokensUsedOrOptions;
+    }
     const lease = this.activeLeases.get(leaseId);
     if (!lease) {
       return false;
@@ -577,24 +625,24 @@ export class GalxCredentialPool {
       return false;
     }
 
-    if (success) {
+    if (actualSuccess) {
       // Phase 2: Commit actual tokens consumed and release the held reservation
       let bucket = this.rateGovernor.commit(
         currentAccount.tokenBucket,
-        tokensUsed,
+        actualTokensUsed,
         lease.estimatedTokens,
         1,
-        nowMs
+        actualNowMs
       );
 
       // Reconcile with authoritative upstream headers if provided
-      if (upstreamHeaders) {
-        bucket = this.rateGovernor.reconcileWithUpstreamHeaders(bucket, upstreamHeaders, nowMs);
+      if (actualHeaders) {
+        bucket = this.rateGovernor.reconcileWithUpstreamHeaders(bucket, actualHeaders, actualNowMs);
       }
 
       // Calculate Exponentially Weighted Moving Average (EWMA) Latency: 80% history + 20% current
-      const prevLatency = currentAccount.stats?.averageLatencyMs || latencyMs || 400;
-      const newAverageLatency = latencyMs ? Math.round(0.8 * prevLatency + 0.2 * latencyMs) : prevLatency;
+      const prevLatency = currentAccount.stats?.averageLatencyMs || actualLatency || 400;
+      const newAverageLatency = actualLatency ? Math.round(0.8 * prevLatency + 0.2 * actualLatency) : prevLatency;
 
       const updated: GalxShardAccount = {
         ...currentAccount,
@@ -602,17 +650,17 @@ export class GalxCredentialPool {
         tokenBucket: bucket,
         stats: {
           totalRequestsServed: (currentAccount.stats?.totalRequestsServed || 0) + 1,
-          totalTokensConsumed: (currentAccount.stats?.totalTokensConsumed || 0) + tokensUsed,
+          totalTokensConsumed: (currentAccount.stats?.totalTokensConsumed || 0) + actualTokensUsed,
           successfulRequests: (currentAccount.stats?.successfulRequests || 0) + 1,
           failedRequests: currentAccount.stats?.failedRequests || 0,
           consecutiveFailures: 0,
           consecutiveSuccesses: (currentAccount.stats?.consecutiveSuccesses || 0) + 1,
-          lastUsedTimestampMs: nowMs,
+          lastUsedTimestampMs: actualNowMs,
           averageLatencyMs: newAverageLatency,
-          lastLatencyMs: latencyMs
+          lastLatencyMs: actualLatency
         },
         cooldownUntilTimestampMs: undefined,
-        updatedAtMs: nowMs
+        updatedAtMs: actualNowMs
       };
       this.substrate.updateAccount(updated);
     } else {
@@ -622,14 +670,14 @@ export class GalxCredentialPool {
         0,
         lease.estimatedTokens,
         1,
-        nowMs
+        actualNowMs
       );
 
-      const retryAfter = upstreamHeaders?.['retry-after'];
+      const retryAfter = actualHeaders?.['retry-after'];
       const classification = this.circuitBreaker.classifyFailure(
         currentAccount,
-        errorReason || 'Unknown error',
-        nowMs,
+        actualError || 'Unknown error',
+        actualNowMs,
         retryAfter
       );
       const updated: GalxShardAccount = {
@@ -642,13 +690,13 @@ export class GalxCredentialPool {
           failedRequests: (currentAccount.stats?.failedRequests || 0) + 1,
           consecutiveFailures: (currentAccount.stats?.consecutiveFailures || 0) + 1,
           consecutiveSuccesses: 0,
-          lastUsedTimestampMs: nowMs
+          lastUsedTimestampMs: actualNowMs
         },
         cooldownUntilTimestampMs:
           classification.cooldownMs && classification.cooldownMs < Infinity
-            ? nowMs + classification.cooldownMs
+            ? actualNowMs + classification.cooldownMs
             : undefined,
-        updatedAtMs: nowMs
+        updatedAtMs: actualNowMs
       };
       this.substrate.updateAccount(updated);
     }

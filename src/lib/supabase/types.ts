@@ -1216,6 +1216,321 @@ export interface Database {
         };
         Relationships: [];
       };
+      galx_oauth_identities: {
+        Row: {
+          id: string;
+          user_id: string;
+          provider: 'openai' | 'xai-grok' | 'anthropic';
+          provider_account_id: string;
+          email: string;
+          display_name: string | null;
+          shard_id: string | null;
+          session_family_id: string | null;
+          sequence_number: number;
+          refresh_token_hash: string | null;
+          previous_refresh_token_hash: string | null;
+          grace_period_until: string | null;
+          encrypted_access_token: Json;
+          encrypted_refresh_token: Json | null;
+          id_token_claims: Json | null;
+          scopes: string[] | null;
+          expires_at: string | null;
+          last_refreshed_at: string | null;
+          status: 'active' | 'expired' | 'revoked' | 'needs_reauth';
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          user_id: string;
+          provider: 'openai' | 'xai-grok' | 'anthropic';
+          provider_account_id: string;
+          email: string;
+          display_name?: string | null;
+          shard_id?: string | null;
+          session_family_id?: string | null;
+          sequence_number?: number;
+          refresh_token_hash?: string | null;
+          previous_refresh_token_hash?: string | null;
+          grace_period_until?: string | null;
+          encrypted_access_token: Json;
+          encrypted_refresh_token?: Json | null;
+          id_token_claims?: Json | null;
+          scopes?: string[] | null;
+          expires_at?: string | null;
+          last_refreshed_at?: string | null;
+          status?: 'active' | 'expired' | 'revoked' | 'needs_reauth';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          provider?: 'openai' | 'xai-grok' | 'anthropic';
+          provider_account_id?: string;
+          email?: string;
+          display_name?: string | null;
+          shard_id?: string | null;
+          session_family_id?: string | null;
+          sequence_number?: number;
+          refresh_token_hash?: string | null;
+          previous_refresh_token_hash?: string | null;
+          grace_period_until?: string | null;
+          encrypted_access_token?: Json;
+          encrypted_refresh_token?: Json | null;
+          id_token_claims?: Json | null;
+          scopes?: string[] | null;
+          expires_at?: string | null;
+          last_refreshed_at?: string | null;
+          status?: 'active' | 'expired' | 'revoked' | 'needs_reauth';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      galx_oauth_requests: {
+        Row: {
+          id: string;
+          state: string;
+          code_verifier: string;
+          provider: 'openai' | 'xai-grok' | 'anthropic';
+          redirect_uri: string;
+          mode: string;
+          workspace_id: string | null;
+          user_id: string | null;
+          ip_address: string | null;
+          user_agent: string | null;
+          is_consumed: boolean;
+          consumed_at: string | null;
+          expires_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          state: string;
+          code_verifier: string;
+          provider: 'openai' | 'xai-grok' | 'anthropic';
+          redirect_uri: string;
+          mode?: string;
+          workspace_id?: string | null;
+          user_id?: string | null;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          is_consumed?: boolean;
+          consumed_at?: string | null;
+          expires_at: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          state?: string;
+          code_verifier?: string;
+          provider?: 'openai' | 'xai-grok' | 'anthropic';
+          redirect_uri?: string;
+          mode?: string;
+          workspace_id?: string | null;
+          user_id?: string | null;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          is_consumed?: boolean;
+          consumed_at?: string | null;
+          expires_at?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      galx_oauth_device_codes: {
+        Row: {
+          id: string;
+          device_code: string;
+          user_code: string;
+          provider: 'openai' | 'xai-grok' | 'anthropic';
+          status: 'pending' | 'approved' | 'denied' | 'expired';
+          session_token: string | null;
+          token_record: Json | null;
+          user_id: string | null;
+          workspace_id: string | null;
+          ip_address: string | null;
+          user_agent: string | null;
+          polling_interval_sec: number;
+          last_polled_at_ms: number | null;
+          failed_attempts: number;
+          max_attempts: number;
+          expires_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          device_code: string;
+          user_code: string;
+          provider: 'openai' | 'xai-grok' | 'anthropic';
+          status?: 'pending' | 'approved' | 'denied' | 'expired';
+          session_token?: string | null;
+          token_record?: Json | null;
+          user_id?: string | null;
+          workspace_id?: string | null;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          polling_interval_sec?: number;
+          last_polled_at_ms?: number | null;
+          failed_attempts?: number;
+          max_attempts?: number;
+          expires_at: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          device_code?: string;
+          user_code?: string;
+          provider?: 'openai' | 'xai-grok' | 'anthropic';
+          status?: 'pending' | 'approved' | 'denied' | 'expired';
+          session_token?: string | null;
+          token_record?: Json | null;
+          user_id?: string | null;
+          workspace_id?: string | null;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          polling_interval_sec?: number;
+          last_polled_at_ms?: number | null;
+          failed_attempts?: number;
+          max_attempts?: number;
+          expires_at?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      galx_oauth_pushed_requests: {
+        Row: {
+          id: string;
+          request_uri: string;
+          provider: 'openai' | 'xai-grok' | 'anthropic';
+          client_id: string;
+          redirect_uri: string;
+          scope: string | null;
+          code_challenge: string | null;
+          code_challenge_method: string;
+          state: string | null;
+          response_type: string;
+          workspace_id: string | null;
+          is_consumed: boolean;
+          consumed_at: string | null;
+          expires_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          request_uri: string;
+          provider: 'openai' | 'xai-grok' | 'anthropic';
+          client_id: string;
+          redirect_uri: string;
+          scope?: string | null;
+          code_challenge?: string | null;
+          code_challenge_method?: string;
+          state?: string | null;
+          response_type?: string;
+          workspace_id?: string | null;
+          is_consumed?: boolean;
+          consumed_at?: string | null;
+          expires_at: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          request_uri?: string;
+          provider?: 'openai' | 'xai-grok' | 'anthropic';
+          client_id?: string;
+          redirect_uri?: string;
+          scope?: string | null;
+          code_challenge?: string | null;
+          code_challenge_method?: string;
+          state?: string | null;
+          response_type?: string;
+          workspace_id?: string | null;
+          is_consumed?: boolean;
+          consumed_at?: string | null;
+          expires_at?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      galx_oauth_dpop_proofs: {
+        Row: {
+          jti: string;
+          access_token_hash: string | null;
+          http_method: string;
+          http_uri: string;
+          issued_at: string;
+          expires_at: string;
+          created_at: string;
+        };
+        Insert: {
+          jti: string;
+          access_token_hash?: string | null;
+          http_method: string;
+          http_uri: string;
+          issued_at: string;
+          expires_at: string;
+          created_at?: string;
+        };
+        Update: {
+          jti?: string;
+          access_token_hash?: string | null;
+          http_method?: string;
+          http_uri?: string;
+          issued_at?: string;
+          expires_at?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      galx_oauth_backchannel_logouts: {
+        Row: {
+          id: string;
+          provider: 'openai' | 'xai-grok' | 'anthropic';
+          sub: string;
+          sid: string | null;
+          jti: string | null;
+          iss: string;
+          events: Json;
+          raw_logout_token: string;
+          is_processed: boolean;
+          identities_revoked: number;
+          sessions_revoked: number;
+          processed_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          provider: 'openai' | 'xai-grok' | 'anthropic';
+          sub: string;
+          sid?: string | null;
+          jti?: string | null;
+          iss: string;
+          events?: Json;
+          raw_logout_token: string;
+          is_processed?: boolean;
+          identities_revoked?: number;
+          sessions_revoked?: number;
+          processed_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          provider?: 'openai' | 'xai-grok' | 'anthropic';
+          sub?: string;
+          sid?: string | null;
+          jti?: string | null;
+          iss?: string;
+          events?: Json;
+          raw_logout_token?: string;
+          is_processed?: boolean;
+          identities_revoked?: number;
+          sessions_revoked?: number;
+          processed_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       galx_shard_health_probes: {
         Row: {
           id: string;
@@ -1565,6 +1880,114 @@ export interface Database {
           p_new_encrypted_payload: Json;
           p_new_version?: string;
           p_now_ms?: number;
+        };
+        Returns: Json;
+      };
+      fn_consume_oauth_request: {
+        Args: {
+          p_state: string;
+          p_provider?: string;
+        };
+        Returns: Json;
+      };
+      fn_approve_device_code: {
+        Args: {
+          p_user_code: string;
+          p_session_token: string;
+          p_token_record?: Json;
+          p_user_id?: string;
+        };
+        Returns: boolean;
+      };
+      fn_purge_expired_oauth_states: {
+        Args: Record<string, never>;
+        Returns: number;
+      };
+      fn_record_dpop_proof: {
+        Args: {
+          p_jti: string;
+          p_ath?: string;
+          p_htm?: string;
+          p_htu?: string;
+          p_iat_ms?: number;
+          p_exp_ms?: number;
+        };
+        Returns: Json;
+      };
+      fn_poll_device_code: {
+        Args: {
+          p_device_code: string;
+          p_now_ms?: number;
+        };
+        Returns: Json;
+      };
+      fn_consume_pushed_request: {
+        Args: {
+          p_request_uri: string;
+        };
+        Returns: Json;
+      };
+      fn_rotate_oauth_identity_tokens: {
+        Args: {
+          p_identity_id: string;
+          p_old_refresh_hash: string;
+          p_new_encrypted_access: Json;
+          p_new_encrypted_refresh: Json;
+          p_new_refresh_hash: string;
+          p_expires_at: string;
+          p_grace_window_sec?: number;
+        };
+        Returns: Json;
+      };
+      fn_process_backchannel_logout: {
+        Args: {
+          p_id: string;
+          p_provider: string;
+          p_sub: string;
+          p_iss: string;
+          p_raw_token: string;
+          p_sid?: string;
+          p_jti?: string;
+        };
+        Returns: Json;
+      };
+      fn_scavenge_oauth_substrate_cron: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      fn_save_oauth_identity: {
+        Args: {
+          p_id: string;
+          p_user_id: string;
+          p_provider: string;
+          p_provider_account_id: string;
+          p_email: string;
+          p_encrypted_access_token: Json;
+          p_display_name?: string | null;
+          p_shard_id?: string | null;
+          p_session_family_id?: string | null;
+          p_sequence_number?: number;
+          p_refresh_token_hash?: string | null;
+          p_previous_refresh_token_hash?: string | null;
+          p_grace_period_until?: string | null;
+          p_encrypted_refresh_token?: Json | null;
+          p_id_token_claims?: Json | null;
+          p_scopes?: string[] | null;
+          p_expires_at?: string | null;
+          p_last_refreshed_at?: string | null;
+          p_status?: string;
+        };
+        Returns: Json;
+      };
+      fn_get_oauth_identity_by_id: {
+        Args: {
+          p_id: string;
+        };
+        Returns: Json;
+      };
+      fn_get_oauth_identities_by_user: {
+        Args: {
+          p_user_id: string;
         };
         Returns: Json;
       };

@@ -19,13 +19,19 @@ import type {
 
 export interface ClientOptions {
   /**
-   * GALXAI Gateway API Key (e.g. 'galx_live_...')
+   * GALXAI Gateway API Key or OAuth Bearer Access Token
    * Defaults to process.env.GALX_API_KEY if not provided.
    */
   apiKey?: string;
   api_key?: string;
   token?: string;
   authToken?: string;
+  accessToken?: string;
+  access_token?: string;
+  refreshToken?: string;
+  refresh_token?: string;
+  accountId?: string;
+  account_id?: string;
 
   /**
    * Custom Gateway Base URL (e.g. 'https://galx.ai/v1' or 'http://localhost:3000')

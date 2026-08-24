@@ -9,7 +9,7 @@ This guide covers the internal codebase structure, architectural layers, how to 
 ```text
 GALXAI/
 ├── docs/                             # Comprehensive Architecture & API Documentation
-│   ├── adr/                          # Architecture Decision Records (0001-0041)
+│   ├── adr/                          # Architecture Decision Records (0001-0052)
 │   ├── playbooks/                    # Operational Lifecycle Playbooks (Stages 1-6)
 │   ├── ARCHITECTURE.md               # System overview, lifecycle, and security model
 │   ├── SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md # Architecture map & onboarding runbook
@@ -17,6 +17,9 @@ GALXAI/
 │   ├── VERCEL_DEPLOYMENT.md          # 8-Phase Pre-Flight Audit & Next.js 15 Deployment
 │   ├── CLOUDFLARE_STRATEGY.md        # Edge Mesh, R2 CDN & Custom Domain Substrate
 │   ├── SDK_SPECIFICATION.md          # Universal Developer SDK & Ultra-Flat Ergonomics
+│   ├── OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md # Enterprise OAuth 2.1 & Token Mesh
+│   ├── PROVIDER_AS_AUTH_SPECIFICATION.md # Provider-as-Auth Architecture & JWE Tokens
+│   ├── SUPABASE_PARANOID_ARCHITECTURE_SPEC.md # 10 Commandments & AOP-DB Protocol
 │   ├── QUICKSTART.md                 # Python, Node.js, Cursor, Continue setup
 │   ├── ROUTING_ALGORITHMS.md         # Mathematical derivations of P-AHT, SWRR, WLC
 │   ├── SECURITY.md                   # Envelope cryptography and threat model
@@ -30,7 +33,7 @@ GALXAI/
 │   ├── bootstrap-cloudflare.ts       # Automated Cloudflare resource provisioner
 │   ├── test-cloudflare-workers.ts    # 46-suite Cloudflare edge verification runner
 │   ├── test-sdk-edge.ts              # SDK to Edge Gateway live smoke test
-│   └── validate-galxai-router.ts     # 50-suite forensic verification test runner (177 tests)
+│   └── validate-galxai-router.ts     # Forensic verification test runner (206 tests)
 ├── src/
 │   ├── app/                          # Next.js App Router
 │   │   ├── api/                      # Gateway admin, queues, health, run, & pool API routes

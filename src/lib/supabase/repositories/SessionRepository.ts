@@ -670,7 +670,7 @@ export class SessionRepository {
     return {
       id: data.id,
       userId: data.user_id,
-      provider: data.provider as ProviderType | 'guest',
+      provider: data.provider as ProviderType,
       shardId: data.shard_id || undefined,
       sessionFamilyId: data.session_family_id || undefined,
       sequenceNumber: data.sequence_number || 1,

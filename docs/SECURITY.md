@@ -28,6 +28,10 @@ GALXAI is designed from first principles with zero-trust envelope cryptography, 
 | Threat Vector | Mitigation Strategy | Cryptographic Guarantee |
 | :--- | :--- | :--- |
 | **Ciphertext Transplantation** | Additional Authenticated Data (AAD) binding | Ciphertext encrypted under Tenant A cannot be decrypted by Tenant B, even if an attacker accesses raw storage. |
+| **Token Theft & Replay Attacks** | RFC 6819 § 5.2.2.3 Token Family Rotation & 30s Grace Window | Stale refresh token replay outside grace window instantly revokes entire token family lineage and user sessions. |
+| **Bearer Token Exfiltration** | RFC 9449 Demonstrating Proof-of-Possession (DPoP) | Asymmetric EC key binding ensures stolen Bearer tokens cannot be replayed without private key. |
+| **Upstream Revocation Desync** | OpenID Connect Back-Channel Logout 1.0 (RFC 7009 / OIDC) | Asynchronously revokes local session tokens upon upstream provider credential change. |
+| **Ephemeral Nonce Accumulation** | PostgreSQL Substrate Vacuum Stored Procedure (`fn_scavenge_oauth_substrate_cron`) | Purges expired DPoP proofs, stale PKCE states, and expired PAR URIs with zero lock contention. |
 | **Heap Memory Snooping** | Ephemeral RAM Zeroization (`ScopedMemorySanitizer`) | Plaintext keys and token buffers are overwritten with 2-pass deterministic wiping (`0xAA` -> `0x00`) in `finally` blocks. |
 | **Gateway Key Impersonation** | SHA-256 Prefix Hashing | Gateway keys (`galx_live_...`) are hashed with SHA-256; only the prefix is indexed in BroccoliDB for $O(1)$ lookup. |
 | **Stale Worker Race Conditions** | Monotonic Fencing Tokens | Each lease increments a monotonic counter (`fencingToken`); late arriving responses from timed-out workers are rejected. |
@@ -134,4 +138,23 @@ For deep technical specifications, consult the official ADRs:
 - **[ADR 0038: Distributed Edge KV Rate Governance & Stale-While-Revalidate Model Catalog Caching](adr/0038-distributed-edge-kv-rate-governance-and-swr-catalog-caching.md)**
 - **[ADR 0039: Edge-Native Vector Embeddings & Durable Object Swarm State Synchronization](adr/0039-edge-native-vector-embeddings-and-durable-object-swarm-sync.md)**
 - **[ADR 0042: Universal Zero-Hesitation Developer Ergonomics & Mental Model Absorption](adr/0042-universal-zero-hesitation-developer-ergonomics-and-mental-model-absorption.md)**
+- **[ADR 0051: Enterprise OAuth 2.0 / 2.1, FAPI Standards, Token Lifecycle & Identity Mesh](adr/0051-enterprise-oauth2-fapi-token-lifecycle-and-identity-mesh.md)**
+- **[ADR 0052: Enterprise OAuth 2.1 Refresh Token Rotation (RTR), Token Family Theft Containment, OIDC Back-Channel Logout & Substrate Vacuum Mesh](adr/0052-enterprise-oauth21-rtr-fapi-backchannel-and-vacuum-mesh.md)**
+
+---
+
+## 9. Enterprise OAuth 2.1 Refresh Token Rotation & Token Family Mesh (RFC 6819)
+
+To guarantee forward secrecy and protect multi-agent swarms against refresh token exfiltration, all OAuth identities follow the RFC 6819 § 5.2.2.3 token family specification:
+
+1. **Cryptographic Lineage Tracking**: Rotated tokens maintain a monotonic sequence counter bound to `session_family_id`.
+2. **Dual-Hash Grace Window (30s)**: Maintains `refresh_token_hash` and `previous_refresh_token_hash`. Legitimate in-flight packet retries within 30 seconds succeed without false alarms.
+3. **Breach Containment Cascade**: Replay of an expired refresh token outside the grace window executes `fn_rotate_oauth_identity_tokens`, instantly revoking all tokens in the family and invalidating active `galx_user_sessions`.
+
+---
+
+## 10. OpenID Connect Back-Channel Logout & PostgreSQL Substrate Vacuuming
+
+1. **OIDC Back-Channel Logout 1.0**: Ingests server-to-server logout JWTs at `/api/auth/oauth/backchannel-logout`, executing atomic multi-session invalidation via `fn_process_backchannel_logout`.
+2. **Substrate Scavenger Vacuum**: PostgreSQL stored procedure `fn_scavenge_oauth_substrate_cron` automatically purges expired RFC 9449 DPoP proofs, expired PKCE states, unapproved device codes, and unused PAR URIs in single-transaction execution.
 

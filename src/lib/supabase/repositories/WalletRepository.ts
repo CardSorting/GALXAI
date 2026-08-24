@@ -293,7 +293,7 @@ export class WalletRepository {
           p_draws: draws
         });
         if (!error && data && Array.isArray(data)) {
-          return (data as any[]).map(item => ({
+          const mapped = (data as any[]).map(item => ({
             userId: String(item.userId || ''),
             success: Boolean(item.success),
             reason: item.reason ? String(item.reason) : undefined,
@@ -301,6 +301,9 @@ export class WalletRepository {
             newBalance: item.newBalance !== undefined ? Number(item.newBalance) : undefined,
             costUsd: item.costUsd !== undefined ? Number(item.costUsd) : undefined
           }));
+          if (mapped.length === draws.length && mapped.every(m => m.success)) {
+            return mapped;
+          }
         }
       } catch {
         // Fallback

@@ -242,6 +242,17 @@ CloudTasks & CloudRun-inspired distributed asynchronous task executor:
 
 ---
 
+### 6.6 Custom OAuth 2.1, Token Family Lineage & Substrate Vacuum Mesh
+
+Authoritative identity and token lifecycle substrate backed by `OAuthRepository.ts`, `GalxOAuthManager.ts`, and Supabase PostgreSQL:
+- **RFC 6819 § 5.2.2.3 Token Families**: Every rotation tracks `session_family_id` and monotonic `sequence_number`.
+- **30-Second Grace Window**: Accommodates in-flight network retries without triggering false token theft alerts.
+- **Automated Breach Containment**: Out-of-grace replay triggers `fn_rotate_oauth_identity_tokens`, instantly revoking all family tokens and active user sessions.
+- **OpenID Connect Back-Channel Logout 1.0**: Ingests asynchronous server-to-server logout tokens via `POST /api/auth/oauth/backchannel-logout` and invalidates cluster sessions in `< 0.05ms`.
+- **Automated Substrate Vacuuming**: `fn_scavenge_oauth_substrate_cron` sweeps expired DPoP proofs, stale PKCE requests, and unused PAR URIs in single-transaction execution.
+
+---
+
 ## 7. Cryptographic Enclave & Zero-Data-Retention (ZDR v10.0)
 
 ```

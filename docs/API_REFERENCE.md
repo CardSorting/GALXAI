@@ -217,3 +217,50 @@ Legacy text completion endpoint for older SDKs and CLI scripts:
 
 - **`GET /api/health`**: Real-time gateway status, model count, server timestamp, and runtime version.
 - **`OPTIONS /api/health`**: Universal CORS pre-flight handler (HTTP 204).
+
+---
+
+## 🔐 Enterprise OAuth 2.1 & Token Lifecycle Endpoints
+
+### 1. OpenID Connect Discovery
+- **`GET /.well-known/openid-configuration`**: Standard RFC 8414 server metadata discovery.
+- **`GET /api/auth/vault/jwks`**: RFC 7517 JSON Web Key Set containing active KMS public verification keys.
+
+### 2. RFC 9126 Pushed Authorization Requests (PAR)
+- **`POST /api/auth/oauth/par`**
+  - **Headers**: `Content-Type: application/x-www-form-urlencoded`
+  - **Parameters**: `client_id`, `redirect_uri`, `scope`, `code_challenge`, `code_challenge_method=S256`
+  - **Response (201 Created)**: `{"request_uri": "urn:ietf:params:oauth:request_uri:...", "expires_in": 90}`
+
+### 3. RFC 8628 Device Authorization Grant (Headless CLI / Remote SSH)
+- **`POST /api/auth/oauth/device/code`**
+  - **Body**: `{"provider": "openai" | "xai-grok", "scopes": ["openid", "profile"]}`
+  - **Response (200 OK)**: `{"device_code": "...", "user_code": "WDJB-MJHT", "verification_uri": "https://galx.ai/device", "verification_uri_complete": "https://galx.ai/device?code=WDJB-MJHT", "expires_in": 900, "interval": 5}`
+- **`POST /api/auth/oauth/device/token`**
+  - **Body**: `{"device_code": "..."}`
+  - **Response (200 OK)**: `{"access_token": "galx_sess_v2...", "token_type": "Bearer", "expires_in": 2592000}`
+  - **Error (400 Bad Request)**: `{"error": "authorization_pending" | "slow_down" | "expired_token"}`
+
+### 4. RFC 7009 Token Revocation
+- **`POST /api/auth/oauth/revoke`**
+  - **Body**: `{"token": "galx_sess_v2...", "token_type_hint": "access_token" | "refresh_token"}`
+  - **Response (200 OK)**: `{"revoked": true}`
+
+### 5. RFC 7662 Token Introspection
+- **`POST /api/auth/oauth/introspect`**
+  - **Body**: `{"token": "galx_sess_v2..."}`
+  - **Response (200 OK)**: `{"active": true, "sub": "user_123", "scope": "openid profile", "provider": "openai", "exp": 1726937678, "iat": 1724345678, "token_type": "Bearer"}`
+
+### 6. OpenID Connect Back-Channel Logout 1.0
+- **`POST /api/auth/oauth/backchannel-logout`**
+  - **Headers**: `Content-Type: application/x-www-form-urlencoded`
+  - **Body**: `logout_token=<JWT>`
+  - **Response (200 OK)**: `{"success": true, "revoked": true}`
+
+### 7. Step-Up SUDO Elevation & Session Management
+- **`POST /api/auth/sudo/elevate`**: Elevates session to privileged SUDO mode for 15 minutes.
+- **`POST /api/auth/session/refresh`**: Executes atomic Refresh Token Rotation with 30s anti-replay grace window.
+- **`GET /api/auth/sessions`**: Lists all active devices with client fingerprint badges.
+- **`DELETE /api/auth/sessions`**: Revokes all remote sessions except the current active session.
+- **`GET /api/auth/security/posture`**: Returns composite security grade (`A+` to `C`), risk score, and recommendations.
+

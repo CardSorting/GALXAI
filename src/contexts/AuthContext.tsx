@@ -9,19 +9,29 @@ export interface AuthUser {
   id: string;
   email: string;
   name: string;
-  provider: 'openai' | 'grok' | 'guest';
+  provider: 'openai' | 'grok' | 'xai-grok';
   shardId?: string;
   shardMode?: 'pooled' | 'private';
   token: string;
+  accountId?: string;
 }
 
 interface AuthContextType {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  loginWithOpenAI: (options?: { apiKey?: string; email?: string; displayName?: string; mode?: 'pooled' | 'private' }) => Promise<void>;
-  loginWithGrok: (options?: { apiKey?: string; email?: string; displayName?: string; mode?: 'pooled' | 'private' }) => Promise<void>;
-  loginAsGuest: () => Promise<void>;
+  loginWithOAuth: (provider: 'openai' | 'grok', options?: { mode?: 'pooled' | 'private' }) => Promise<void>;
+  loginWithTokens: (options: {
+    provider: 'openai' | 'grok';
+    accessToken: string;
+    refreshToken?: string;
+    accountId?: string;
+    email?: string;
+    displayName?: string;
+    mode?: 'pooled' | 'private';
+  }) => Promise<void>;
+  loginWithOpenAI: (options?: { apiKey?: string; accessToken?: string; refreshToken?: string; accountId?: string; email?: string; displayName?: string; mode?: 'pooled' | 'private' }) => Promise<void>;
+  loginWithGrok: (options?: { apiKey?: string; accessToken?: string; refreshToken?: string; accountId?: string; email?: string; displayName?: string; mode?: 'pooled' | 'private' }) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -64,8 +74,80 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const loginWithOAuth = async (provider: 'openai' | 'grok', options?: { mode?: 'pooled' | 'private' }) => {
+    setIsLoading(true);
+    try {
+      const providerParam = provider === 'grok' ? 'xai-grok' : 'openai';
+      const redirectUri = `${window.location.origin}/auth/callback`;
+      const res = await resilientFetch<{ success: boolean; url: string; codeVerifier: string; state: string }>(
+        `/api/auth/oauth/url?provider=${providerParam}&redirectUri=${encodeURIComponent(redirectUri)}`,
+        { enableCacheFallback: false }
+      );
+
+      if (!res.data?.success || !res.data?.url) {
+        throw new Error('Failed to generate OAuth login URL');
+      }
+
+      // Store PKCE verifier and state for callback verification
+      SafeStorage.setJSON('galxai_oauth_pkce', {
+        provider: providerParam,
+        codeVerifier: res.data.codeVerifier,
+        state: res.data.state,
+        mode: options?.mode || 'pooled'
+      });
+
+      // Redirect to provider OAuth authorize page
+      window.location.href = res.data.url;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginWithTokens = async (options: {
+    provider: 'openai' | 'grok';
+    accessToken: string;
+    refreshToken?: string;
+    accountId?: string;
+    email?: string;
+    displayName?: string;
+    mode?: 'pooled' | 'private';
+  }) => {
+    setIsLoading(true);
+    try {
+      const endpoint = options.provider === 'grok' ? '/api/auth/grok' : '/api/auth/openai';
+      const res = await resilientFetch<{ success: boolean; user: AuthUser; error?: string }>(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accessToken: options.accessToken,
+          refreshToken: options.refreshToken,
+          accountId: options.accountId,
+          email: options.email,
+          displayName: options.displayName,
+          mode: options.mode || 'pooled',
+          authType: 'oauth'
+        }),
+        enableCacheFallback: false
+      });
+
+      const data = res.data;
+      if (!data?.success || !data?.user) {
+        throw new Error(data?.error || `Failed to authenticate with ${options.provider}`);
+      }
+
+      const authUser: AuthUser = data.user;
+      setUser(authUser);
+      SafeStorage.setJSON(AUTH_STORAGE_KEY, authUser);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const loginWithOpenAI = async (options?: {
     apiKey?: string;
+    accessToken?: string;
+    refreshToken?: string;
+    accountId?: string;
     email?: string;
     displayName?: string;
     mode?: 'pooled' | 'private';
@@ -77,10 +159,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           apiKey: options?.apiKey,
-          email: options?.email || 'creator@openai.user',
-          displayName: options?.displayName || 'OpenAI Creator',
+          accessToken: options?.accessToken,
+          refreshToken: options?.refreshToken,
+          accountId: options?.accountId,
+          email: options?.email,
+          displayName: options?.displayName,
           mode: options?.mode || 'pooled'
-        })
+        }),
+        enableCacheFallback: false
       });
       const data = res.data;
       if (!data?.success || !data?.user) {
@@ -97,6 +183,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loginWithGrok = async (options?: {
     apiKey?: string;
+    accessToken?: string;
+    refreshToken?: string;
+    accountId?: string;
     email?: string;
     displayName?: string;
     mode?: 'pooled' | 'private';
@@ -108,10 +197,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           apiKey: options?.apiKey,
-          email: options?.email || 'creator@x.ai',
-          displayName: options?.displayName || 'Grok Creator',
+          accessToken: options?.accessToken,
+          refreshToken: options?.refreshToken,
+          accountId: options?.accountId,
+          email: options?.email,
+          displayName: options?.displayName,
           mode: options?.mode || 'pooled'
-        })
+        }),
+        enableCacheFallback: false
       });
       const data = res.data;
       if (!data?.success || !data?.user) {
@@ -121,32 +214,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const authUser: AuthUser = data.user;
       setUser(authUser);
       SafeStorage.setJSON(AUTH_STORAGE_KEY, authUser);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loginAsGuest = async () => {
-    setIsLoading(true);
-    try {
-      const res = await resilientFetch<{ success: boolean; user: AuthUser }>('/api/auth/openai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: 'guest@galxai.demo',
-          displayName: 'Guest Creator',
-          mode: 'pooled'
-        })
-      });
-      const data = res.data;
-      if (data?.success && data?.user) {
-        const guestUser: AuthUser = {
-          ...data.user,
-          provider: 'guest'
-        };
-        setUser(guestUser);
-        SafeStorage.setJSON(AUTH_STORAGE_KEY, guestUser);
-      }
     } finally {
       setIsLoading(false);
     }
@@ -188,9 +255,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         isAuthenticated: !!user,
         isLoading,
+        loginWithOAuth,
+        loginWithTokens,
         loginWithOpenAI,
         loginWithGrok,
-        loginAsGuest,
         logout
       }}
     >

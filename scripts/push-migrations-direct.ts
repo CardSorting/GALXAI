@@ -72,6 +72,10 @@ async function run() {
 
     console.log(`[Migrations] Found ${files.length} total local migration files.`);
 
+    const force = process.argv.includes('--force');
+    const verIndex = process.argv.indexOf('--version');
+    const targetVersion = verIndex !== -1 ? process.argv[verIndex + 1] : null;
+
     for (const file of files) {
       const match = file.match(/^(\d+)_(.+)\.sql$/);
       if (!match) continue;
@@ -79,7 +83,11 @@ async function run() {
       const version = match[1];
       const name = match[2];
 
-      if (appliedVersions.has(version)) {
+      if (targetVersion && version !== targetVersion) {
+        continue;
+      }
+
+      if (appliedVersions.has(version) && !force && !targetVersion) {
         console.log(`[Skip] Migration already recorded: ${file} (v${version})`);
         continue;
       }
@@ -95,7 +103,9 @@ async function run() {
       try {
         await client.query(sql);
         await client.query(
-          `INSERT INTO supabase_migrations.schema_migrations (version, name, statements) VALUES ($1, $2, $3);`,
+          `INSERT INTO supabase_migrations.schema_migrations (version, name, statements) 
+           VALUES ($1, $2, $3)
+           ON CONFLICT (version) DO UPDATE SET name = EXCLUDED.name, statements = EXCLUDED.statements;`,
           [version, name, [sql]]
         );
         await client.query('COMMIT;');

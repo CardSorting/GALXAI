@@ -199,6 +199,8 @@ The agent MUST output the impact statement in the following format before writin
 - **[ADR 0037: Zero-Egress Cloudflare Edge Gateway, R2 CDN & Custom Domain Substrate](adr/0037-zero-egress-cloudflare-edge-gateway-and-r2-cdn-substrate.md)**
 - **[ADR 0038: Distributed Edge KV Rate Governance & Stale-While-Revalidate Model Catalog Caching](adr/0038-distributed-edge-kv-rate-governance-and-swr-catalog-caching.md)**
 - **[ADR 0039: Edge-Native Vector Embeddings & Durable Object Swarm State Synchronization](adr/0039-edge-native-vector-embeddings-and-durable-object-swarm-sync.md)**
+- **[ADR 0051: Enterprise OAuth 2.0 / 2.1, FAPI Standards, Token Lifecycle & Identity Mesh](adr/0051-enterprise-oauth2-fapi-token-lifecycle-and-identity-mesh.md)**
+- **[ADR 0052: Enterprise OAuth 2.1 Refresh Token Rotation (RTR), Token Family Theft Containment, OIDC Back-Channel Logout & Substrate Vacuum Mesh](adr/0052-enterprise-oauth21-rtr-fapi-backchannel-and-vacuum-mesh.md)**
 
 ---
 

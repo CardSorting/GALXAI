@@ -219,6 +219,22 @@ export class AuditRepository {
   }
 
   /**
+   * Fast in-memory query across BroccoliDB hot table.
+   */
+  queryLogs(filter?: Partial<AuditLogRecord>): AuditLogRecord[] {
+    if (!filter || Object.keys(filter).length === 0) {
+      return [...this.auditTable.query()];
+    }
+    const where: Record<string, any> = {};
+    for (const [k, v] of Object.entries(filter)) {
+      if (v !== undefined) {
+        where[k] = { $eq: v };
+      }
+    }
+    return [...this.auditTable.query({ where })];
+  }
+
+  /**
    * Executes deterministic offline natural language queries over the audit log (<0.1ms).
    */
   public queryNatural(naturalQuery: string): AuditLogRecord[] {

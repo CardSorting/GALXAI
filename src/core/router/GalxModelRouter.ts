@@ -22,6 +22,7 @@ import { GalxPreflightValidator } from '../validator/GalxPreflightValidator';
 import { GalxMetricsEngine } from '../telemetry/GalxMetricsEngine';
 import { GalxPrivacyComplianceEngine } from '../privacy/GalxPrivacyComplianceEngine';
 import { GalxZDRProtocol } from '../privacy/GalxZDRProtocol';
+import { GalxAuthEngine } from '../auth/GalxAuthEngine';
 
 export interface RouteChatOptions {
   request: ChatCompletionRequest;
@@ -138,6 +139,18 @@ export class GalxModelRouter {
         ? 4000
         : 2000;
 
+      const targetAccountId =
+        this.extractHeaderValue(incomingHeaders, 'x-galx-account-id') ||
+        this.extractHeaderValue(incomingHeaders, 'chatgpt-account-id') ||
+        this.extractHeaderValue(incomingHeaders, 'openai-account') ||
+        (options.request as any).accountId ||
+        undefined;
+
+      const targetShardId =
+        this.extractHeaderValue(incomingHeaders, 'x-galx-shard-id') ||
+        (options.request as any).shardId ||
+        undefined;
+
       // 3. Acquire atomic execution lease with Compliance Shard Gating (HIPAA BAA, EU Residency, ZDR)
       const acqResult = this.pool.acquireLease({
         userId,
@@ -149,7 +162,9 @@ export class GalxModelRouter {
         privacyProfile: privacyPolicy.profile,
         hipaaRequired: privacyPolicy.hipaaEnabled,
         dataResidency: privacyPolicy.dataResidency,
-        zdrRequired: privacyPolicy.zdrEnabled
+        zdrRequired: privacyPolicy.zdrEnabled,
+        targetAccountId,
+        targetShardId
       });
 
       if (!acqResult.lease) {
@@ -164,13 +179,37 @@ export class GalxModelRouter {
 
       try {
         // 4. Decrypt shard credentials with AAD verification
-        const encrypted = lease.account.encryptedPayload || lease.account.encryptedSecrets!;
-        const decrypted = GalxCryptoVault.decryptSecret(
+        let encrypted = lease.account.encryptedPayload || lease.account.encryptedSecrets!;
+        let decrypted = GalxCryptoVault.decryptSecret(
           encrypted,
           lease.account.userId,
           lease.account.id,
           provider
         );
+
+        // Proactive Token Expiration Check (Within 2 minutes of expiry)
+        if (
+          (lease.account.authType === 'oauth' || decrypted.accessToken) &&
+          decrypted.refreshToken &&
+          decrypted.expiresAtMs &&
+          Date.now() >= decrypted.expiresAtMs - 120_000
+        ) {
+          try {
+            const authEngine = GalxAuthEngine.getInstance();
+            const refreshed = await authEngine.refreshProviderShardTokens(lease.shardId);
+            if (refreshed) {
+              const updatedAccount = this.substrate.getAccount(lease.shardId);
+              if (updatedAccount?.encryptedSecrets) {
+                decrypted = GalxCryptoVault.decryptSecret(
+                  updatedAccount.encryptedSecrets,
+                  lease.account.userId,
+                  lease.account.id,
+                  provider
+                );
+              }
+            }
+          } catch {}
+        }
 
         rawTokenSecret = decrypted.apiKey || decrypted.accessToken;
 
@@ -180,6 +219,35 @@ export class GalxModelRouter {
           adapterResult = await GrokAdapter.executeChatCompletion(sanitizedRequest, decrypted, modelSpec);
         } else {
           adapterResult = await OpenAIAdapter.executeChatCompletion(sanitizedRequest, decrypted, modelSpec);
+        }
+
+        // Reactive 401 Unauthorized Recovery on OAuth Shards
+        if (
+          adapterResult.response.status === 401 &&
+          (lease.account.authType === 'oauth' || decrypted.accessToken) &&
+          decrypted.refreshToken
+        ) {
+          try {
+            const authEngine = GalxAuthEngine.getInstance();
+            const refreshed = await authEngine.refreshProviderShardTokens(lease.shardId);
+            if (refreshed) {
+              const updatedAccount = this.substrate.getAccount(lease.shardId);
+              if (updatedAccount?.encryptedSecrets) {
+                decrypted = GalxCryptoVault.decryptSecret(
+                  updatedAccount.encryptedSecrets,
+                  lease.account.userId,
+                  lease.account.id,
+                  provider
+                );
+                // Retry once with refreshed token
+                if (provider === 'xai-grok') {
+                  adapterResult = await GrokAdapter.executeChatCompletion(sanitizedRequest, decrypted, modelSpec);
+                } else {
+                  adapterResult = await OpenAIAdapter.executeChatCompletion(sanitizedRequest, decrypted, modelSpec);
+                }
+              }
+            }
+          } catch {}
         }
 
         const { response } = adapterResult;
@@ -230,6 +298,14 @@ export class GalxModelRouter {
         responseHeaders.set('x-galx-strategy', this.pool.getStrategy());
         responseHeaders.set('x-galx-routing-latency-ms', String(latencyMs));
         responseHeaders.set('x-galx-model', modelSpec.id);
+        if (lease.account.accountId) {
+          responseHeaders.set('x-galx-account-id', lease.account.accountId);
+        }
+        if (lease.account.expiresAtMs) {
+          const ttlSec = Math.max(0, Math.round((lease.account.expiresAtMs - Date.now()) / 1000));
+          responseHeaders.set('x-galx-token-expires-in', String(ttlSec));
+          responseHeaders.set('x-galx-token-status', ttlSec < 300 ? 'expiring_soon' : 'healthy');
+        }
 
         // 7. Handle Streaming Response with On-the-Fly SHA-256 Rolling Digest Hasher
         if (isStream && response.body) {
@@ -575,6 +651,18 @@ export class GalxModelRouter {
       privacyPolicy
     );
 
+    const targetAccountId =
+      this.extractHeaderValue(incomingHeaders, 'x-galx-account-id') ||
+      this.extractHeaderValue(incomingHeaders, 'chatgpt-account-id') ||
+      this.extractHeaderValue(incomingHeaders, 'openai-account') ||
+      (options.request as any).accountId ||
+      undefined;
+
+    const targetShardId =
+      this.extractHeaderValue(incomingHeaders, 'x-galx-shard-id') ||
+      (options.request as any).shardId ||
+      undefined;
+
     const acqResult = this.pool.acquireLease({
       userId,
       jobId: requestId,
@@ -585,7 +673,9 @@ export class GalxModelRouter {
       privacyProfile: privacyPolicy.profile,
       hipaaRequired: privacyPolicy.hipaaEnabled,
       dataResidency: privacyPolicy.dataResidency,
-      zdrRequired: privacyPolicy.zdrEnabled
+      zdrRequired: privacyPolicy.zdrEnabled,
+      targetAccountId,
+      targetShardId
     });
 
     if (!acqResult.lease) {
@@ -599,21 +689,79 @@ export class GalxModelRouter {
     const startMs = Date.now();
 
     try {
-      const encrypted = lease.account.encryptedPayload || lease.account.encryptedSecrets!;
-      const decrypted = GalxCryptoVault.decryptSecret(
+      let encrypted = lease.account.encryptedPayload || lease.account.encryptedSecrets!;
+      let decrypted = GalxCryptoVault.decryptSecret(
         encrypted,
         lease.account.userId,
         lease.account.id,
         provider
       );
 
+      // Proactive Token Expiration Check (Within 2 minutes of expiry)
+      if (
+        (lease.account.authType === 'oauth' || decrypted.accessToken) &&
+        decrypted.refreshToken &&
+        decrypted.expiresAtMs &&
+        Date.now() >= decrypted.expiresAtMs - 120_000
+      ) {
+        try {
+          const authEngine = GalxAuthEngine.getInstance();
+          const refreshed = await authEngine.refreshProviderShardTokens(lease.shardId);
+          if (refreshed) {
+            const updatedAccount = this.substrate.getAccount(lease.shardId);
+            if (updatedAccount?.encryptedSecrets) {
+              decrypted = GalxCryptoVault.decryptSecret(
+                updatedAccount.encryptedSecrets,
+                lease.account.userId,
+                lease.account.id,
+                provider
+              );
+            }
+          }
+        } catch {}
+      }
+
       rawTokenSecret = decrypted.apiKey || decrypted.accessToken;
 
       let result: ImageGenerationResponse;
-      if (provider === 'xai-grok') {
-        result = await GrokAdapter.executeImageGeneration(sanitizedRequest, decrypted, modelSpec, lease.shardId);
-      } else {
-        result = await OpenAIAdapter.executeImageGeneration(sanitizedRequest, decrypted, modelSpec, lease.shardId);
+      try {
+        if (provider === 'xai-grok') {
+          result = await GrokAdapter.executeImageGeneration(sanitizedRequest, decrypted, modelSpec, lease.shardId);
+        } else {
+          result = await OpenAIAdapter.executeImageGeneration(sanitizedRequest, decrypted, modelSpec, lease.shardId);
+        }
+      } catch (execErr: any) {
+        // Reactive 401 Recovery
+        if (
+          execErr.message?.includes('401') &&
+          (lease.account.authType === 'oauth' || decrypted.accessToken) &&
+          decrypted.refreshToken
+        ) {
+          const authEngine = GalxAuthEngine.getInstance();
+          const refreshed = await authEngine.refreshProviderShardTokens(lease.shardId);
+          if (refreshed) {
+            const updatedAccount = this.substrate.getAccount(lease.shardId);
+            if (updatedAccount?.encryptedSecrets) {
+              decrypted = GalxCryptoVault.decryptSecret(
+                updatedAccount.encryptedSecrets,
+                lease.account.userId,
+                lease.account.id,
+                provider
+              );
+              if (provider === 'xai-grok') {
+                result = await GrokAdapter.executeImageGeneration(sanitizedRequest, decrypted, modelSpec, lease.shardId);
+              } else {
+                result = await OpenAIAdapter.executeImageGeneration(sanitizedRequest, decrypted, modelSpec, lease.shardId);
+              }
+            } else {
+              throw execErr;
+            }
+          } else {
+            throw execErr;
+          }
+        } else {
+          throw execErr;
+        }
       }
 
       const latencyMs = Date.now() - startMs;
@@ -686,6 +834,15 @@ export class GalxModelRouter {
         this.privacyEngine['redactor'].zeroizeTokenMap(redactionResult.tokenMap);
       }
     }
+  }
+
+  private extractHeaderValue(headers: Headers | Record<string, string | null | undefined> | undefined, key: string): string | undefined {
+    if (!headers) return undefined;
+    if (typeof (headers as Headers).get === 'function') {
+      return (headers as Headers).get(key) || undefined;
+    }
+    const rec = headers as Record<string, string | null | undefined>;
+    return rec[key] || rec[key.toLowerCase()] || undefined;
   }
 }
 

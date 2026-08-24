@@ -277,7 +277,7 @@ export class GalxCryptoVault {
   static generateEncryptedSessionToken(
     params: {
       userId: string;
-      provider: ProviderType | 'guest';
+      provider: ProviderType;
       shardId?: string;
       shardMode?: 'pooled' | 'private';
       email?: string;
@@ -359,7 +359,7 @@ export class GalxCryptoVault {
   static generateSessionToken(
     params: {
       userId: string;
-      provider: ProviderType | 'guest';
+      provider: ProviderType;
       shardId?: string;
       shardMode?: 'pooled' | 'private';
       email?: string;

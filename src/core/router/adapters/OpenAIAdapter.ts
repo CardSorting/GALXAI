@@ -45,6 +45,7 @@ export class OpenAIAdapter {
 
     if (secret.accountId) {
       headers['OpenAI-Account'] = secret.accountId;
+      headers['ChatGPT-Account-Id'] = secret.accountId;
     }
 
     const body: Record<string, any> = {
@@ -96,6 +97,7 @@ export class OpenAIAdapter {
 
     if (secret.accountId) {
       headers['OpenAI-Account'] = secret.accountId;
+      headers['ChatGPT-Account-Id'] = secret.accountId;
     }
 
     const body: Record<string, any> = {

@@ -43,6 +43,11 @@ export class GrokAdapter {
       'Keep-Alive': 'timeout=60, max=1000'
     };
 
+    if (secret.accountId) {
+      headers['OpenAI-Account'] = secret.accountId;
+      headers['ChatGPT-Account-Id'] = secret.accountId;
+    }
+
     const body: Record<string, any> = {
       model: modelSpec.upstreamId,
       messages: req.messages,
@@ -82,13 +87,18 @@ export class GrokAdapter {
   ): Promise<ImageGenerationResponse> {
     const token = secret.apiKey || secret.accessToken;
     if (!token) {
-      throw new Error('Missing xAI Grok API key');
+      throw new Error('Missing xAI Grok API key or OAuth access token');
     }
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     };
+
+    if (secret.accountId) {
+      headers['OpenAI-Account'] = secret.accountId;
+      headers['ChatGPT-Account-Id'] = secret.accountId;
+    }
 
     const body: Record<string, any> = {
       model: modelSpec.upstreamId,

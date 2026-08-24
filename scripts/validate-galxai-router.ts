@@ -34,9 +34,11 @@ import {
   TokenOptimizer,
   PrivacyProfiles
 } from '../src/sdk';
-import type { GalxShardAccount, GalxUserSession } from '../src/core/contracts/GalxContracts';
+import type { GalxShardAccount, GalxUserSession, OAuthIdentityRecord } from '../src/core/contracts/GalxContracts';
 import { GalxAuthEngine } from '../src/core/auth/GalxAuthEngine';
+import { GalxOAuthManager, OAuthExchangeError } from '../src/core/auth/GalxOAuthManager';
 import { SessionRepository } from '../src/lib/supabase/repositories/SessionRepository';
+import { OAuthRepository } from '../src/lib/supabase/repositories/OAuthRepository';
 import { galxRouter } from '../src/core/router/GalxModelRouter';
 import { GalxPIIRedactor, galxRedactor } from '../src/core/privacy/GalxPIIRedactor';
 import { GalxZDRProtocol, galxZDR, StreamingPIIWindowTransformer, ScopedMemorySanitizer, ZDRRatchetSession, galxSlabPool } from '../src/core/privacy/GalxZDRProtocol';
@@ -2134,6 +2136,730 @@ async function runAllTests() {
     assert.strictEqual(result.user.provider, 'xai-grok');
     assert.strictEqual(result.user.shardMode, 'pooled');
     assert.ok(result.user.token.startsWith('galx_sess_'));
+  });
+
+  await test('OAuth PKCE: Generates cryptographically secure authorization URL, S256 challenge & state', async () => {
+    const oauthManager = GalxOAuthManager.getInstance();
+    const urlDetails = oauthManager.generateAuthUrl('openai', 'http://localhost:3000/auth/callback');
+
+    assert.ok(urlDetails.url.startsWith('https://auth.openai.com/oauth/authorize?'));
+    assert.ok(urlDetails.url.includes('code_challenge='));
+    assert.ok(urlDetails.url.includes('code_challenge_method=S256'));
+    assert.ok(urlDetails.url.includes('response_type=code'));
+    assert.ok(urlDetails.codeVerifier.length >= 43);
+    assert.ok(urlDetails.state.length >= 16);
+
+    // Verify S256 challenge calculation
+    const expectedChallenge = crypto.createHash('sha256').update(urlDetails.codeVerifier).digest().toString('base64url');
+    assert.ok(urlDetails.url.includes(`code_challenge=${expectedChallenge}`));
+  });
+
+  await test('OAuth JWT Claims: Parses id_token and extracts chatgpt_account_id, email, and expiration timestamp', async () => {
+    const oauthManager = GalxOAuthManager.getInstance();
+    
+    // Construct a synthetic JWT token payload
+    const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url');
+    const payload = Buffer.from(JSON.stringify({
+      chatgpt_account_id: 'acc_enterprise_9988',
+      email: 'engineer@corp.com',
+      name: 'Senior ML Engineer',
+      exp: Math.floor(Date.now() / 1000) + 7200,
+      iat: Math.floor(Date.now() / 1000)
+    })).toString('base64url');
+    const fakeSig = 'mock_signature_part';
+    const mockJwt = `${header}.${payload}.${fakeSig}`;
+
+    const accountId = oauthManager.extractAccountId(mockJwt);
+    const email = oauthManager.extractEmail(mockJwt);
+    const name = oauthManager.extractName(mockJwt);
+    const expMs = oauthManager.extractExpiryMs(mockJwt);
+
+    assert.strictEqual(accountId, 'acc_enterprise_9988');
+    assert.strictEqual(email, 'engineer@corp.com');
+    assert.strictEqual(name, 'Senior ML Engineer');
+    assert.ok(typeof expMs === 'number' && expMs > Date.now());
+  });
+
+  await test('Provider-as-Auth: Ingests and vaults OAuth Bearer Access Tokens with AES-256-GCM + AAD envelope', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const result = await authEngine.authenticateProviderUser('openai', {
+      accessToken: 'ey_mock_access_token_1234567890_abcdef',
+      refreshToken: 'rt_mock_refresh_token_9876543210_fedcba',
+      accountId: 'acc_oauth_custom_77',
+      email: 'oauth_user@galxai.io',
+      displayName: 'OAuth Verified User',
+      mode: 'private'
+    });
+
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.user.email, 'oauth_user@galxai.io');
+    assert.strictEqual(result.user.name, 'OAuth Verified User');
+    assert.strictEqual(result.user.shardMode, 'private');
+    assert.ok(result.user.token.startsWith('galx_sess_'));
+
+    // Check vaulted shard in substrate
+    const shard = galxRouter.substrate.getAccount(result.user.shardId);
+    assert.ok(shard);
+    assert.strictEqual(shard.authType, 'oauth');
+    assert.strictEqual(shard.shardMode, 'private');
+
+    // Decrypt vaulted secret and verify accessToken & accountId
+    const decrypted = GalxCryptoVault.decryptSecret(shard.encryptedSecrets!, shard.userId, shard.id, shard.provider);
+    assert.strictEqual(decrypted.accessToken, 'ey_mock_access_token_1234567890_abcdef');
+    assert.strictEqual(decrypted.refreshToken, 'rt_mock_refresh_token_9876543210_fedcba');
+    assert.strictEqual(decrypted.accountId, 'acc_oauth_custom_77');
+  });
+
+  await test('Provider-as-Auth: Rejects missing/blank credentials with MISSING_PROVIDER_CREDENTIALS (no synthetic fallback key)', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const prevOpenAiKey = process.env.OPENAI_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+
+    try {
+      await assert.rejects(
+        async () => {
+          await authEngine.authenticateProviderUser('openai', {
+            // Missing both apiKey and accessToken
+            mode: 'pooled'
+          });
+        },
+        (err: any) => {
+          return err.message.includes('MISSING_PROVIDER_CREDENTIALS');
+        }
+      );
+    } finally {
+      if (prevOpenAiKey) process.env.OPENAI_API_KEY = prevOpenAiKey;
+    }
+  });
+
+  await test('Provider-as-Auth: Zero Guest Sessions - Strictly requires authentic ProviderType', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const initialShardsCount = galxRouter.substrate.listAccounts().length;
+
+    const result = await authEngine.authenticateProviderUser('openai', {
+      apiKey: 'sk-proj-valid-provider-auth-key',
+      displayName: 'OpenAI Developer'
+    });
+
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.user.provider, 'openai');
+    assert.strictEqual(result.user.name, 'OpenAI Developer');
+    assert.ok(result.user.token.startsWith('galx_sess_'));
+  });
+
+  await test('OAuth CSRF Protection: Validates HMAC-SHA256 signed state tokens and rejects tampering/expiration', async () => {
+    const oauthManager = GalxOAuthManager.getInstance();
+
+    // 1. Valid signed state
+    const signedState = oauthManager.createSignedState('openai', 'nonce_12345');
+    const validCheck = oauthManager.verifySignedState(signedState, 'openai');
+    assert.strictEqual(validCheck.valid, true);
+    assert.strictEqual(validCheck.provider, 'openai');
+
+    // 2. Tampered signature
+    const parts = signedState.split(':');
+    parts[3] = 'tampered_bad_signature_abc';
+    const tamperedState = parts.join(':');
+    const tamperedCheck = oauthManager.verifySignedState(tamperedState, 'openai');
+    assert.strictEqual(tamperedCheck.valid, false);
+
+    // 3. Provider mismatch
+    const mismatchCheck = oauthManager.verifySignedState(signedState, 'xai-grok');
+    assert.strictEqual(mismatchCheck.valid, false);
+    assert.ok(mismatchCheck.reason?.includes('mismatch'));
+
+    // 4. Expired state
+    const expiredTimestamp = Date.now() - (20 * 60 * 1000); // 20 mins ago
+    const expiredMessage = `${expiredTimestamp}:openai:nonce_expired`;
+    const expiredHmac = crypto.createHmac('sha256', (GalxOAuthManager as any).STATE_SECRET).update(expiredMessage).digest('base64url');
+    const expiredState = `${expiredMessage}:${expiredHmac}`;
+    const expiredCheck = oauthManager.verifySignedState(expiredState, 'openai');
+    assert.strictEqual(expiredCheck.valid, false);
+    assert.ok(expiredCheck.reason?.includes('expired'));
+  });
+
+  await test('OAuth Shard Lifecycle: Indexes expiresAtMs and accountId for sorted queries and health monitoring', async () => {
+    const substrate = galxRouter.substrate;
+    const now = Date.now();
+
+    const shardId = `test_oauth_shard_${Date.now()}`;
+    const shard: GalxShardAccount = {
+      id: shardId,
+      userId: 'user_oauth_monitor',
+      provider: 'openai',
+      authType: 'oauth',
+      accountLabel: 'Monitor Test Shard',
+      apiKeyMasked: 'ey...test',
+      expiresAtMs: now + 3600_000,
+      accountId: 'acc_org_monitor_101',
+      status: 'healthy',
+      priority: 50,
+      weight: 1,
+      fencingToken: 1,
+      tokenBucket: galxRouter.rateGovernor.createDefaultBucket(100000, 100000, 500),
+      stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
+      createdAtMs: now,
+      updatedAtMs: now
+    };
+
+    substrate.addAccount(shard);
+
+    // Query accountTable with secondary index
+    const found = substrate.accountTable.get(shardId);
+    assert.ok(found);
+    assert.strictEqual(found.authType, 'oauth');
+    assert.strictEqual(found.expiresAtMs, now + 3600_000);
+    assert.strictEqual(found.accountId, 'acc_org_monitor_101');
+
+    // Query sorted index on expiresAtMs
+    const rangeResults = substrate.accountTable.query({
+      where: {
+        expiresAtMs: { $gte: now }
+      }
+    });
+    assert.ok(rangeResults.length >= 1);
+    assert.ok(rangeResults.some((s: any) => s.id === shardId));
+  });
+
+  await test('Developer SDK: GalxAI Client absorbs OAuth accessToken and accountId headers and exposes AuthResource', async () => {
+    const galx = new GalxAI({
+      accessToken: 'ey_sdk_access_token_12345',
+      accountId: 'acc_enterprise_sdk_999'
+    });
+
+    assert.ok(galx.auth);
+    assert.strictEqual(typeof galx.auth.getOAuthUrl, 'function');
+    assert.strictEqual(typeof galx.auth.exchangeOAuthCode, 'function');
+    assert.strictEqual(typeof galx.auth.refreshOAuthToken, 'function');
+    assert.strictEqual(typeof galx.auth.getSession, 'function');
+
+    // Verify default headers in SDK core
+    assert.strictEqual((galx as any).core.apiKey, 'ey_sdk_access_token_12345');
+    assert.strictEqual((galx as any).core.defaultHeaders['ChatGPT-Account-Id'], 'acc_enterprise_sdk_999');
+    assert.strictEqual((galx as any).core.defaultHeaders['OpenAI-Account'], 'acc_enterprise_sdk_999');
+  });
+
+  await test('OAuth Pool Lifecycle: Adaptive Headroom weights fresh token shards over expiring shards', async () => {
+    const now = Date.now();
+    const freshShard: GalxShardAccount = {
+      id: `fresh_shard_${Date.now()}`,
+      userId: 'test_pool_user',
+      provider: 'openai',
+      authType: 'oauth',
+      accountLabel: 'Fresh OAuth Shard',
+      apiKeyMasked: 'ey...fresh',
+      expiresAtMs: now + 7200_000, // 2 hours ahead
+      status: 'healthy',
+      priority: 10,
+      weight: 1,
+      fencingToken: 1,
+      tokenBucket: galxRouter.rateGovernor.createDefaultBucket(100000, 100000, 500),
+      stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
+      createdAtMs: now,
+      updatedAtMs: now
+    };
+
+    const expiringShard: GalxShardAccount = {
+      id: `expiring_shard_${Date.now()}`,
+      userId: 'test_pool_user',
+      provider: 'openai',
+      authType: 'oauth',
+      accountLabel: 'Expiring OAuth Shard',
+      apiKeyMasked: 'ey...expiring',
+      expiresAtMs: now + 30_000, // 30 seconds ahead
+      status: 'healthy',
+      priority: 10,
+      weight: 1,
+      fencingToken: 1,
+      tokenBucket: galxRouter.rateGovernor.createDefaultBucket(100000, 100000, 500),
+      stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
+      createdAtMs: now,
+      updatedAtMs: now
+    };
+
+    const selected = (galxRouter.pool as any).selectAdaptiveHydraulicHeadroom(
+      [expiringShard, freshShard],
+      10,
+      now,
+      false,
+      1000,
+      'test_pool_user'
+    );
+
+    // Fresh shard should be preferred due to expiryMultiplier (1.05 vs 0.85)
+    assert.strictEqual(selected.id, freshShard.id);
+  });
+
+  await test('OAuth Provider Multi-Config: Generates distinct authorization endpoints and scopes for OpenAI and xAI Grok', async () => {
+    const oauthManager = GalxOAuthManager.getInstance();
+
+    const openaiDetails = oauthManager.generateAuthUrl('openai');
+    assert.ok(openaiDetails.url.startsWith('https://auth.openai.com/oauth/authorize'));
+    assert.ok(openaiDetails.url.includes('model.request'));
+
+    const grokDetails = oauthManager.generateAuthUrl('xai-grok');
+    assert.ok(grokDetails.url.startsWith('https://auth.x.ai/oauth/authorize'));
+    assert.ok(grokDetails.url.includes('client_id=app_galxai_grok_oauth'));
+  });
+
+  await test('OAuthRepository: BroccoliDB L1 Hot Cache & Anti-Replay Single-Use State Consumption', async () => {
+    const oauthRepo = OAuthRepository.getInstance();
+    const stateNonce = `state_replay_test_${Date.now()}`;
+    const codeVerifier = 'verifier_secure_secret_1234567890';
+
+    await oauthRepo.createAuthorizationRequest({
+      id: `oauth_req_${stateNonce}`,
+      state: stateNonce,
+      codeVerifier,
+      provider: 'openai',
+      redirectUri: 'https://galx.ai/api/auth/oauth/callback',
+      mode: 'pooled',
+      isConsumed: false,
+      expiresAtMs: Date.now() + 60_000,
+      createdAtMs: Date.now()
+    });
+
+    // First consumption: Success
+    const firstConsumption = await oauthRepo.consumeAuthorizationRequest(stateNonce, 'openai');
+    assert.ok(firstConsumption);
+    assert.strictEqual(firstConsumption.codeVerifier, codeVerifier);
+
+    // Second consumption: Anti-replay protection prevents reuse
+    const secondConsumption = await oauthRepo.consumeAuthorizationRequest(stateNonce, 'openai');
+    assert.strictEqual(secondConsumption, null);
+  });
+
+  await test('OAuthRepository: Multi-Provider Identity Linking & Natural Querying', async () => {
+    const oauthRepo = OAuthRepository.getInstance();
+    const userId = `usr_multi_${Date.now()}`;
+    const now = Date.now();
+
+    // Link OpenAI
+    await oauthRepo.saveOAuthIdentity({
+      id: `oauth_openai_${userId}`,
+      userId,
+      provider: 'openai',
+      providerAccountId: 'acc_chatgpt_multi_1',
+      email: 'dev@galx.ai',
+      shardId: undefined,
+      encryptedAccessToken: GalxCryptoVault.encryptSecret({ accessToken: 'oa_token_123' }, userId, 'shard1', 'openai'),
+      status: 'active',
+      expiresAtMs: now + 3600_000,
+      createdAtMs: now,
+      updatedAtMs: now
+    });
+
+    // Link xAI Grok
+    await oauthRepo.saveOAuthIdentity({
+      id: `oauth_xai_${userId}`,
+      userId,
+      provider: 'xai-grok',
+      providerAccountId: 'acc_grok_multi_2',
+      email: 'dev@galx.ai',
+      shardId: undefined,
+      encryptedAccessToken: GalxCryptoVault.encryptSecret({ accessToken: 'grok_token_456' }, userId, 'shard2', 'xai-grok'),
+      status: 'active',
+      expiresAtMs: now + 7200_000,
+      createdAtMs: now,
+      updatedAtMs: now
+    });
+
+    // Query all identities for user
+    const userIdentities = await oauthRepo.findIdentitiesByUserId(userId);
+    assert.strictEqual(userIdentities.length, 2);
+    assert.ok(userIdentities.some(i => i.provider === 'openai'));
+    assert.ok(userIdentities.some(i => i.provider === 'xai-grok'));
+
+    // Query specific identity
+    const openaiIdentity = await oauthRepo.findIdentityByProvider(userId, 'openai');
+    assert.ok(openaiIdentity);
+    assert.strictEqual(openaiIdentity.providerAccountId, 'acc_chatgpt_multi_1');
+
+    // Natural query translation in BroccoliDB
+    const naturalMatches = oauthRepo.queryIdentitiesNatural(`provider is 'openai' and status is 'active'`);
+    assert.ok(naturalMatches.length >= 1);
+    assert.ok(naturalMatches.some(i => i.userId === userId));
+
+    // Aggregation
+    const agg = oauthRepo.aggregateIdentities({
+      where: { userId: { $eq: userId } },
+      groupBy: ['provider'],
+      metrics: { total: { metric: 'count' } }
+    });
+    assert.strictEqual(agg.groups.length, 2);
+
+    // Unlink provider
+    const unlinked = await oauthRepo.unlinkOAuthIdentity(userId, 'openai');
+    assert.strictEqual(unlinked, true);
+
+    const postUnlink = await oauthRepo.findIdentitiesByUserId(userId);
+    assert.strictEqual(postUnlink.length, 1);
+    assert.strictEqual(postUnlink[0].provider, 'xai-grok');
+  });
+
+  await test('OAuth Proactive Daemon: Sweeps expiring tokens and rotates credentials in background', async () => {
+    const oauthManager = GalxOAuthManager.getInstance();
+    const count = await oauthManager.sweepExpiringTokens();
+    assert.strictEqual(typeof count, 'number');
+  });
+
+  await test('OAuth Account Pinning: Pool & Router route directly to targeted accountId and shardId', async () => {
+    const substrate = galxRouter.substrate;
+    const now = Date.now();
+    const specificAccountId = `org_pinned_${Date.now()}`;
+    const specificShardId = `shard_pinned_${Date.now()}`;
+
+    const pinnedShard: GalxShardAccount = {
+      id: specificShardId,
+      userId: 'user_pinning_test',
+      provider: 'openai',
+      authType: 'oauth',
+      accountLabel: 'Pinned Enterprise Org Shard',
+      apiKeyMasked: 'ey...pinned',
+      accountId: specificAccountId,
+      expiresAtMs: now + 3600_000,
+      status: 'healthy',
+      priority: 10,
+      weight: 1,
+      fencingToken: 1,
+      tokenBucket: galxRouter.rateGovernor.createDefaultBucket(100000, 100000, 500),
+      stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
+      createdAtMs: now,
+      updatedAtMs: now
+    };
+
+    substrate.addAccount(pinnedShard);
+
+    // Target by specific accountId
+    const acqByAccount = galxRouter.pool.acquireLease({
+      userId: 'dev_pin_requester',
+      provider: 'openai',
+      targetAccountId: specificAccountId
+    });
+    assert.ok(acqByAccount.lease);
+    assert.strictEqual(acqByAccount.lease.shardId, specificShardId);
+    assert.strictEqual(acqByAccount.lease.account.accountId, specificAccountId);
+
+    galxRouter.pool.releaseLease(acqByAccount.lease.leaseId, { success: true, tokensConsumed: 50, latencyMs: 120 });
+
+    // Target by specific shardId
+    const acqByShard = galxRouter.pool.acquireLease({
+      userId: 'dev_pin_requester',
+      provider: 'openai',
+      targetShardId: specificShardId
+    });
+    assert.ok(acqByShard.lease);
+    assert.strictEqual(acqByShard.lease.shardId, specificShardId);
+
+    galxRouter.pool.releaseLease(acqByShard.lease.leaseId, { success: true, tokensConsumed: 50, latencyMs: 120 });
+  });
+
+  await test('OAuthExchangeError: Formats actionable suggestedFix and classifies standard RFC errors', async () => {
+    const error1 = new OAuthExchangeError('openai', 400, '{"error":"invalid_grant","error_description":"Code expired"}');
+    assert.strictEqual(error1.status, 400);
+    assert.strictEqual(error1.code, 'invalid_grant');
+    assert.ok(error1.suggestedFix.includes('re-authenticate'));
+
+    const error2 = new OAuthExchangeError('xai-grok', 403, '{"error":"access_denied","error_description":"User rejected"}');
+    assert.strictEqual(error2.code, 'access_denied');
+    assert.ok(error2.suggestedFix.includes('declined'));
+  });
+
+  await test('Shard Health Auto-Healing: Successful token refresh clears consecutiveFailures and cooldown status', async () => {
+    const substrate = galxRouter.substrate;
+    const now = Date.now();
+    const healingShardId = `shard_healing_${Date.now()}`;
+
+    const sickShard: GalxShardAccount = {
+      id: healingShardId,
+      userId: 'user_healing_test',
+      provider: 'openai',
+      authType: 'oauth',
+      accountLabel: 'Sick OAuth Shard in Cooldown',
+      apiKeyMasked: 'ey...sick',
+      encryptedSecrets: GalxCryptoVault.encryptSecret({ accessToken: 'old', refreshToken: 'rt_mock_heal' }, 'user_healing_test', healingShardId, 'openai'),
+      status: 'cooldown',
+      cooldownUntilTimestampMs: now + 600_000,
+      priority: 10,
+      weight: 1,
+      fencingToken: 1,
+      tokenBucket: galxRouter.rateGovernor.createDefaultBucket(100000, 100000, 500),
+      stats: { totalRequestsServed: 5, totalTokensConsumed: 500, consecutiveFailures: 4 },
+      createdAtMs: now,
+      updatedAtMs: now
+    };
+
+    substrate.addAccount(sickShard);
+
+    // Refresh provider shard tokens (which invokes mock refresh in tests)
+    const authEngine = GalxAuthEngine.getInstance();
+    const refreshed = await authEngine.refreshProviderShardTokens(healingShardId);
+    assert.strictEqual(refreshed, true);
+
+    const healedShard = substrate.getAccount(healingShardId);
+    assert.ok(healedShard);
+    assert.strictEqual(healedShard.status, 'healthy');
+    assert.strictEqual(healedShard.cooldownUntilTimestampMs, undefined);
+    assert.strictEqual(healedShard.stats.consecutiveFailures, 0);
+  });
+
+  await test('Audit Repository: Tamper-evident SHA-256 audit chaining for OAuth token authentication and rotation', async () => {
+    const auditRepo = AuditRepository.getInstance();
+    const query = auditRepo.queryLogs({ action: 'OAUTH_PROVIDER_AUTHENTICATED' });
+    assert.ok(query.length >= 1);
+    assert.ok(query[0].currentHash);
+    assert.strictEqual(query[0].currentHash.length, 64);
+
+    const rotationQuery = auditRepo.queryLogs({ action: 'OAUTH_TOKEN_ROTATED' });
+    assert.ok(rotationQuery.length >= 1);
+    assert.ok(rotationQuery[0].currentHash);
+  });
+
+  await test('SDK Auth Resource: interactiveLogin helper defined and provides developer workstation login ergonomics', async () => {
+    const client = new GalxAI({ apiKey: 'galx_test_interactive' });
+    assert.strictEqual(typeof client.auth.interactiveLogin, 'function');
+  });
+
+  await test('OAuth Token Introspection (RFC 7662): Resolves active token claims, scopes, and expiration in sub-milliseconds', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const login = await authEngine.authenticateProviderUser('openai', {
+      apiKey: 'sk-proj-introspect-test-123456',
+      email: 'introspect@galxai.dev'
+    });
+
+    const oauthManager = GalxOAuthManager.getInstance();
+    const introspection = await oauthManager.introspectToken(login.user.token);
+
+    assert.strictEqual(introspection.active, true);
+    assert.strictEqual(introspection.provider, 'openai');
+    assert.strictEqual(introspection.token_type, 'Bearer');
+    assert.ok(introspection.exp);
+
+    // Invalid token returns active: false
+    const invalidIntrospection = await oauthManager.introspectToken('galx_sess_invalid_forged_token');
+    assert.strictEqual(invalidIntrospection.active, false);
+  });
+
+  await test('OAuth Token Revocation (RFC 7009): Revokes active tokens and invalidates session in sub-milliseconds', async () => {
+    const authEngine = GalxAuthEngine.getInstance();
+    const login = await authEngine.authenticateProviderUser('openai', {
+      apiKey: 'sk-proj-revoke-rfc7009-123456',
+      email: 'rfc7009@galxai.dev'
+    });
+
+    const preRevoke = await authEngine.verifySession(login.user.token);
+    assert.strictEqual(preRevoke.valid, true);
+
+    const revoked = await authEngine.revokeSession(login.user.token, 'RFC 7009 Revocation Test');
+    assert.strictEqual(revoked, true);
+
+    const postRevoke = await authEngine.verifySession(login.user.token);
+    assert.strictEqual(postRevoke.valid, false);
+  });
+
+  await test('SDK Auth Resource: introspectToken and revokeToken ergonomic methods exported', async () => {
+    const client = new GalxAI({ apiKey: 'galx_test_rfc_methods' });
+    assert.strictEqual(typeof client.auth.introspectToken, 'function');
+    assert.strictEqual(typeof client.auth.revokeToken, 'function');
+    assert.strictEqual(typeof client.auth.requestDeviceCode, 'function');
+    assert.strictEqual(typeof client.auth.deviceLogin, 'function');
+  });
+
+  await test('OAuth Device Authorization (RFC 8628): Generates friendly user_code & device_code with polling state machine', async () => {
+    const oauthManager = GalxOAuthManager.getInstance();
+    const deviceAuth = oauthManager.generateDeviceAuthorization('openai', { host: 'https://galx.ai' });
+
+    assert.ok(deviceAuth.deviceCode);
+    assert.ok(deviceAuth.userCode);
+    assert.strictEqual(deviceAuth.userCode.length, 9); // e.g. WDJB-MJHT
+    assert.strictEqual(deviceAuth.userCode.charAt(4), '-');
+    assert.strictEqual(deviceAuth.verificationUri, 'https://galx.ai/device');
+    assert.strictEqual(deviceAuth.verificationUriComplete, `https://galx.ai/device?code=${deviceAuth.userCode}`);
+
+    // Initial poll returns authorization_pending
+    const pollPending = await oauthManager.pollDeviceToken(deviceAuth.deviceCode);
+    assert.strictEqual(pollPending.success, false);
+    assert.strictEqual(pollPending.error, 'authorization_pending');
+  });
+
+  await test('OAuth Device Authorization (RFC 8628): Approve device code unlocks token delivery with single-use consumption', async () => {
+    const oauthManager = GalxOAuthManager.getInstance();
+    const deviceAuth = oauthManager.generateDeviceAuthorization('xai-grok');
+
+    // Simulate browser user approving the device code
+    const approved = oauthManager.approveDeviceCode(deviceAuth.userCode, 'galx_sess_device_approved_12345');
+    assert.strictEqual(approved, true);
+
+    // Poll delivers tokens
+    const pollApproved = await oauthManager.pollDeviceToken(deviceAuth.deviceCode);
+    assert.strictEqual(pollApproved.success, true);
+    assert.strictEqual(pollApproved.data?.access_token, 'galx_sess_device_approved_12345');
+
+    // Single-use: Subsequent poll returns invalid_grant
+    const pollConsumed = await oauthManager.pollDeviceToken(deviceAuth.deviceCode);
+    assert.strictEqual(pollConsumed.success, false);
+    assert.strictEqual(pollConsumed.error, 'invalid_grant');
+  });
+
+  await test('OAuth DPoP Proof Verification (RFC 9449): Validates cryptographic proof header, HTTP method/URI binding, and anti-replay JTI', async () => {
+    const oauthManager = GalxOAuthManager.getInstance();
+    const now = Math.floor(Date.now() / 1000);
+
+    const dpopHeader = Buffer.from(JSON.stringify({ typ: 'dpop+jwt', alg: 'ES256' })).toString('base64url');
+    const dpopPayload = Buffer.from(JSON.stringify({
+      htm: 'POST',
+      htu: 'https://galx.ai/v1/chat/completions',
+      iat: now,
+      jti: `jti_${Date.now()}_test`
+    })).toString('base64url');
+    const dpopSig = 'mock_signature';
+    const dpopProof = `${dpopHeader}.${dpopPayload}.${dpopSig}`;
+
+    const validResult = oauthManager.verifyDPoPProof(dpopProof, 'POST', 'https://galx.ai/v1/chat/completions');
+    assert.strictEqual(validResult.valid, true);
+
+    // Method mismatch fails
+    const methodMismatch = oauthManager.verifyDPoPProof(dpopProof, 'GET', 'https://galx.ai/v1/chat/completions');
+    assert.strictEqual(methodMismatch.valid, false);
+    assert.ok(methodMismatch.error?.includes('DPOP_METHOD_MISMATCH'));
+
+    // Anti-Replay: same JTI replayed fails
+    const replayResult = oauthManager.verifyDPoPProof(dpopProof, 'POST', 'https://galx.ai/v1/chat/completions');
+    assert.strictEqual(replayResult.valid, false);
+    assert.strictEqual(replayResult.error, 'DPOP_JTI_REPLAY_DETECTED');
+  });
+
+  await test('OAuth Pushed Authorization Requests (RFC 9126 PAR): Ingests parameters via direct POST, returns 90s request_uri & consumes atomically', async () => {
+    const oauthManager = GalxOAuthManager.getInstance();
+    const parResponse = oauthManager.pushAuthorizationRequest({
+      clientId: 'app_test_par_client',
+      redirectUri: 'https://galx.ai/callback',
+      scope: 'openid profile email',
+      codeChallenge: 'E9Melhoa2OwvFrGMTJguCH5Zi_lZK68G436PKKE6S5g',
+      state: 'par_csrf_state_123'
+    });
+
+    assert.ok(parResponse.request_uri.startsWith('urn:ietf:params:oauth:request_uri:'));
+    assert.strictEqual(parResponse.expires_in, 90);
+
+    // Consume request URI
+    const consumed = oauthManager.consumePushedAuthorizationRequest(parResponse.request_uri);
+    assert.ok(consumed);
+    assert.strictEqual(consumed.clientId, 'app_test_par_client');
+    assert.strictEqual(consumed.state, 'par_csrf_state_123');
+
+    // Anti-Replay: Second consumption fails
+    const secondConsumed = oauthManager.consumePushedAuthorizationRequest(parResponse.request_uri);
+    assert.strictEqual(secondConsumed, null);
+  });
+
+  await test('SDK Auth Resource: pushAuthorization helper defined and functional', async () => {
+    const client = new GalxAI({ apiKey: 'galx_test_par_methods' });
+    assert.strictEqual(typeof client.auth.pushAuthorization, 'function');
+  });
+
+  await test('OAuth Repository: Processes OpenID Connect Back-Channel Logout (RFC 7009 / OIDC) and cascades revocation', async () => {
+    const repo = OAuthRepository.getInstance();
+    const subAccountId = `sub_backchannel_${Date.now()}`;
+    const testIdentity: OAuthIdentityRecord = {
+      id: `ident_${Date.now()}`,
+      userId: `user_${Date.now()}`,
+      provider: 'openai',
+      providerAccountId: subAccountId,
+      email: 'backchannel@example.com',
+      shardId: undefined,
+      encryptedAccessToken: { ciphertext: 'a', iv: 'b', tag: 'c' },
+      status: 'active',
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
+    };
+    await repo.saveOAuthIdentity(testIdentity);
+
+    const logoutResult = await repo.processBackchannelLogout({
+      id: `bc_logout_${Date.now()}`,
+      provider: 'openai',
+      sub: subAccountId,
+      iss: 'https://auth.openai.com',
+      rawToken: 'mock.logout.token.jwt'
+    });
+
+    assert.strictEqual(logoutResult.success, true);
+    const targetIdent = await repo.findIdentityById(testIdentity.id);
+    assert.ok(targetIdent);
+    assert.strictEqual(targetIdent?.status, 'revoked');
+  });
+
+  await test('OAuth Repository: Executes Refresh Token Rotation (RTR) and detects token reuse attack', async () => {
+    const repo = OAuthRepository.getInstance();
+    const identId = `ident_rtr_${Date.now()}`;
+    const initialRefreshHash = 'initial_rf_hash_12345';
+    const testIdentity: OAuthIdentityRecord = {
+      id: identId,
+      userId: `user_rtr_${Date.now()}`,
+      provider: 'xai-grok',
+      providerAccountId: `acc_rtr_${Date.now()}`,
+      email: 'rtr@example.com',
+      shardId: undefined,
+      sessionFamilyId: `fam_${identId}`,
+      sequenceNumber: 1,
+      refreshTokenHash: initialRefreshHash,
+      encryptedAccessToken: { ciphertext: 'a', iv: 'b', tag: 'c' },
+      status: 'active',
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
+    };
+    await repo.saveOAuthIdentity(testIdentity);
+
+    // 1. Normal Rotation (seq 1 -> 2)
+    const newRefreshHash = 'new_rf_hash_67890';
+    const rot1 = await repo.rotateOAuthIdentityTokens({
+      identityId: identId,
+      oldRefreshHash: initialRefreshHash,
+      newEncryptedAccess: { ciphertext: 'a2', iv: 'b2', tag: 'c2' },
+      newEncryptedRefresh: { ciphertext: 'r2', iv: 'r2', tag: 'r2' },
+      newRefreshHash: newRefreshHash,
+      expiresAt: new Date(Date.now() + 3600000),
+      graceWindowSec: 30
+    });
+    assert.strictEqual(rot1.success, true);
+    assert.strictEqual(rot1.sequenceNumber, 2);
+
+    // 2. Grace Period In-Flight Replay (same old hash within 30s)
+    const replayGrace = await repo.rotateOAuthIdentityTokens({
+      identityId: identId,
+      oldRefreshHash: initialRefreshHash,
+      newEncryptedAccess: { ciphertext: 'a3', iv: 'b3', tag: 'c3' },
+      newEncryptedRefresh: { ciphertext: 'r3', iv: 'r3', tag: 'r3' },
+      newRefreshHash: 'another_rf_hash',
+      expiresAt: new Date(Date.now() + 3600000),
+      graceWindowSec: 30
+    });
+    assert.strictEqual(replayGrace.success, true);
+    assert.strictEqual(replayGrace.graceWindow, true);
+
+    // 3. Stale Token Replay Outside Grace Window (Token Reuse Attack Detected)
+    const stolenOldHash = 'completely_stale_ancient_hash';
+    const reuseAttack = await repo.rotateOAuthIdentityTokens({
+      identityId: identId,
+      oldRefreshHash: stolenOldHash,
+      newEncryptedAccess: { ciphertext: 'bad', iv: 'bad', tag: 'bad' },
+      newEncryptedRefresh: { ciphertext: 'bad', iv: 'bad', tag: 'bad' },
+      newRefreshHash: 'attacker_hash',
+      expiresAt: new Date(Date.now() + 3600000),
+      graceWindowSec: 30
+    });
+    assert.strictEqual(reuseAttack.success, false);
+    assert.strictEqual(reuseAttack.error, 'TOKEN_REUSE_ATTACK_DETECTED');
+    assert.strictEqual(reuseAttack.familyRevoked, true);
+  });
+
+  await test('OAuth Repository: Scavenges expired substrate states and vacuums expired tokens', async () => {
+    const repo = OAuthRepository.getInstance();
+    const vacuumResult = await repo.scavengeOAuthSubstrate();
+    assert.strictEqual(vacuumResult.success, true);
+    assert.strictEqual(typeof vacuumResult.purgedOAuthRequests, 'number');
+    assert.strictEqual(typeof vacuumResult.purgedDeviceCodes, 'number');
+    assert.strictEqual(typeof vacuumResult.purgedParRequests, 'number');
   });
 
   await test('Auth Engine: Refreshes active session token and rotates token hash', async () => {

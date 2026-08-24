@@ -24,9 +24,11 @@ export class GalxCredentialSubstrate {
     this.accountTable.createIndex('status');
     this.accountTable.createIndex('userId');
     this.accountTable.createIndex('shardMode');
+    this.accountTable.createIndex('authType');
     this.accountTable.createIndex('permissionRetracted');
     this.accountTable.createSortedIndex('priority');
     this.accountTable.createSortedIndex('weight');
+    this.accountTable.createSortedIndex('expiresAtMs');
     this.accountTable.createSortedIndex('createdAtMs');
 
     this.initialize();

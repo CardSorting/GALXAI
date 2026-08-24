@@ -8,6 +8,8 @@ export * from './errors';
 export * from './types';
 
 // Core Resources
+export { AuthResource } from './resources/auth';
+export { OAuthExchangeError } from '../core/auth/GalxOAuthManager';
 export { ChatResource, CompletionsResource } from './resources/chat';
 export { ImagesResource } from './resources/images';
 export { ModelsResource } from './resources/models';

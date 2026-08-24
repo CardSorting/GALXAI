@@ -4,299 +4,180 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
-import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { useAuth } from '@/contexts/AuthContext';
 import {
-  Zap,
-  Rocket,
-  ShieldCheck,
   CheckCircle2,
-  Lock,
   ArrowRight,
   Sparkles,
-  ChevronDown,
-  ChevronUp,
-  Cpu,
-  Layers,
-  Key
+  Terminal,
+  AlertCircle,
+  X
 } from 'lucide-react';
 
-export default function ConnectProviderPage() {
+export default function AuthConnectPage() {
   const router = useRouter();
-  const { user, loginWithOpenAI, loginWithGrok, logout } = useAuth();
+  const { user, loginWithOAuth, logout } = useAuth();
 
   const [loadingProvider, setLoadingProvider] = useState<'openai' | 'grok' | null>(null);
-  const [connectingStep, setConnectingStep] = useState<'idle' | 'verifying' | 'authorizing' | 'ready'>('idle');
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [customKey, setCustomKey] = useState('');
-  const [customMode, setCustomMode] = useState<'pooled' | 'private'>('pooled');
   const [error, setError] = useState<string | null>(null);
 
-  const handleOpenAIConnect = async () => {
-    setLoadingProvider('openai');
-    setConnectingStep('verifying');
+  const handleOAuthSignIn = async (provider: 'openai' | 'grok') => {
+    setLoadingProvider(provider);
     setError(null);
     try {
-      await new Promise(r => setTimeout(r, 400));
-      setConnectingStep('authorizing');
-      await new Promise(r => setTimeout(r, 400));
-
-      await loginWithOpenAI({
-        apiKey: customKey.trim() || undefined,
-        mode: customMode
-      });
-
-      setConnectingStep('ready');
-      setTimeout(() => {
-        router.push('/keys');
-      }, 400);
+      await loginWithOAuth(provider);
     } catch (err: any) {
-      setError(err.message || 'Failed to authenticate with OpenAI');
+      setError(err.message || `Unable to connect to ${provider === 'grok' ? 'xAI' : 'OpenAI'}. Please try again.`);
       setLoadingProvider(null);
-      setConnectingStep('idle');
-    }
-  };
-
-  const handleGrokConnect = async () => {
-    setLoadingProvider('grok');
-    setConnectingStep('verifying');
-    setError(null);
-    try {
-      await new Promise(r => setTimeout(r, 400));
-      setConnectingStep('authorizing');
-      await new Promise(r => setTimeout(r, 400));
-
-      await loginWithGrok({
-        apiKey: customKey.trim() || undefined,
-        mode: customMode
-      });
-
-      setConnectingStep('ready');
-      setTimeout(() => {
-        router.push('/keys');
-      }, 400);
-    } catch (err: any) {
-      setError(err.message || 'Failed to authenticate with xAI Grok');
-      setLoadingProvider(null);
-      setConnectingStep('idle');
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#07090e] text-zinc-100 selection:bg-zinc-800 selection:text-white">
       <Navigation />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
-        <Breadcrumbs items={[{ label: 'Provider Single Sign-On' }]} />
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden">
+        {/* Subtle Ambient Glow */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[320px] bg-gradient-to-tr from-amber-500/10 via-orange-500/5 to-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
 
-        {/* Hero & Authenticated User Status */}
-        {user ? (
-          <div className="glass-panel rounded-3xl p-6 sm:p-10 border border-emerald-500/30 shadow-2xl space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center">
-                  <CheckCircle2 className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-xl sm:text-2xl font-black text-white">{user.name}</h1>
-                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-mono font-bold uppercase border border-emerald-500/30">
-                      {user.provider} Authenticated
-                    </span>
-                  </div>
-                  <p className="text-xs text-zinc-400 font-mono">
-                    Session Email: {user.email} • Vault Shard: <code className="text-cyan-300">{user.shardId}</code>
-                  </p>
+        <div className="w-full max-w-md relative z-10 space-y-6">
+          {/* Authenticated State */}
+          {user ? (
+            <div className="bg-zinc-900/80 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl space-y-6 text-center animate-in fade-in zoom-in-95 duration-200">
+              <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/10">
+                <CheckCircle2 className="w-8 h-8" />
+              </div>
+
+              <div className="space-y-1">
+                <h1 className="text-2xl font-bold text-white tracking-tight">You're Signed In</h1>
+                <p className="text-sm text-zinc-400">{user.email || user.name || 'Account Connected'}</p>
+                <div className="pt-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-zinc-300">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    {user.provider === 'xai-grok' || user.provider === 'grok' ? 'xAI Account' : 'OpenAI Account'}
+                  </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="space-y-3 pt-2">
                 <Link
-                  href="/keys"
-                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/30"
+                  href="/playground"
+                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-semibold text-sm shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 group cursor-pointer"
                 >
-                  Manage API Keys
+                  <span>Continue to App</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
+
                 <button
+                  type="button"
                   onClick={logout}
-                  className="px-4 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold transition-all cursor-pointer"
+                  className="w-full py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-all cursor-pointer"
                 >
                   Sign Out
                 </button>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Left: Value Proposition */}
-            <div className="lg:col-span-6 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-black uppercase tracking-wider">
-                <Zap className="w-3.5 h-3.5 fill-amber-400 animate-pulse" />
-                <span>Provider IS Auth Architecture</span>
-              </div>
-
-              <div className="space-y-3">
-                <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-                  One Sign-In.<br />
-                  <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 bg-clip-text text-transparent">
-                    Automatic Compute Quota.
-                  </span>
+          ) : (
+            /* Unauthenticated Login Card */
+            <div className="bg-zinc-900/80 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+              {/* Header */}
+              <div className="text-center space-y-2">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400/20 to-orange-500/20 border border-amber-500/30 flex items-center justify-center mx-auto shadow-inner">
+                  <Sparkles className="w-6 h-6 text-amber-400" />
+                </div>
+                <h1 className="text-2xl font-bold text-white tracking-tight">
+                  Welcome to GALXAI
                 </h1>
-                <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
-                  You don't need to know about API keys or paste complex <code className="text-amber-300 font-mono">sk-...</code> strings. Authenticating with OpenAI or xAI Grok automatically establishes your identity and provisions compute quota in one seamless step.
+                <p className="text-xs sm:text-sm text-zinc-400">
+                  Sign in with your provider to continue
                 </p>
               </div>
 
-              {/* Guarantees Matrix */}
-              <div className="space-y-3 pt-2 font-mono text-xs">
-                <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 flex items-start gap-3">
-                  <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="text-white font-sans block text-xs">Zero Manual API Keys Required</strong>
-                    <span className="text-zinc-400 text-[11px]">Identity establishes compute quota automatically.</span>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 flex items-start gap-3">
-                  <Lock className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="text-white font-sans block text-xs">Hardware AES-256-GCM Vaulting</strong>
-                    <span className="text-zinc-400 text-[11px]">Zero plaintext lingering in memory. Continuous token rate governance.</span>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 flex items-start gap-3">
-                  <Sparkles className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="text-white font-sans block text-xs">Instant 1-Click Disconnection</strong>
-                    <span className="text-zinc-400 text-[11px]">Retract or sign out anytime in under 40 milliseconds.</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right: Auth Card */}
-            <div className="lg:col-span-6 glass-panel rounded-3xl p-6 sm:p-8 border border-amber-500/30 shadow-2xl space-y-6">
-              <div className="text-center space-y-1">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30 mx-auto mb-3">
-                  <Zap className="w-6 h-6 text-black fill-black" />
-                </div>
-                <h2 className="text-xl font-black text-white">Choose Your Provider</h2>
-                <p className="text-xs text-zinc-400">Zero separate passwords • Instant 1-click single sign-on</p>
-              </div>
-
+              {/* Error Alert */}
               {error && (
-                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
-                  {error}
+                <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center justify-between gap-2 animate-in fade-in">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                    <span>{error}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setError(null)}
+                    className="text-rose-400 hover:text-rose-200 cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               )}
 
-              {/* 1-Click Buttons */}
-              <div className="space-y-3">
-                {/* Option 1: OpenAI */}
+              {/* Traditional OAuth Buttons */}
+              <div className="space-y-3 pt-1">
+                {/* Continue with OpenAI */}
                 <button
                   type="button"
-                  onClick={handleOpenAIConnect}
+                  onClick={() => handleOAuthSignIn('openai')}
                   disabled={loadingProvider !== null}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-sm uppercase tracking-wider shadow-xl shadow-amber-500/30 transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+                  className="w-full h-12 rounded-xl bg-white hover:bg-zinc-100 text-zinc-900 font-semibold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 active:scale-[0.99]"
                 >
                   {loadingProvider === 'openai' ? (
-                    <span className="flex items-center gap-2">
-                      <Zap className="w-4 h-4 fill-black animate-spin" />
-                      {connectingStep === 'verifying' && 'Connecting to OpenAI...'}
-                      {connectingStep === 'authorizing' && 'Provisioning Hardware Vault...'}
-                      {connectingStep === 'ready' && 'Authorized! Launching Gateway...'}
-                    </span>
+                    <>
+                      <div className="w-4 h-4 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" />
+                      <span>Connecting to OpenAI...</span>
+                    </>
                   ) : (
                     <>
-                      <Zap className="w-4 h-4 fill-black" />
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.259 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7466-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.6669zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/>
+                      </svg>
                       <span>Continue with OpenAI</span>
-                      <ArrowRight className="w-4 h-4" />
                     </>
                   )}
                 </button>
 
-                {/* Option 2: xAI Grok */}
+                {/* Continue with xAI */}
                 <button
                   type="button"
-                  onClick={handleGrokConnect}
+                  onClick={() => handleOAuthSignIn('grok')}
                   disabled={loadingProvider !== null}
-                  className="w-full py-4 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 hover:text-white font-black text-sm uppercase tracking-wider shadow-lg shadow-emerald-500/10 transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+                  className="w-full h-12 rounded-xl bg-zinc-800/90 hover:bg-zinc-700/90 border border-white/10 text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 active:scale-[0.99]"
                 >
                   {loadingProvider === 'grok' ? (
-                    <span className="flex items-center gap-2">
-                      <Rocket className="w-4 h-4 text-emerald-400 animate-spin" />
-                      {connectingStep === 'verifying' && 'Connecting to xAI Grok...'}
-                      {connectingStep === 'authorizing' && 'Provisioning Hardware Vault...'}
-                      {connectingStep === 'ready' && 'Authorized! Launching Gateway...'}
-                    </span>
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Connecting to xAI...</span>
+                    </>
                   ) : (
                     <>
-                      <Rocket className="w-4 h-4 text-emerald-400" />
-                      <span>Continue with xAI Grok</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                      </svg>
+                      <span>Continue with xAI</span>
                     </>
                   )}
                 </button>
               </div>
 
-              {/* Optional Developer Advanced Accordion */}
-              <div className="pt-2 border-t border-white/5">
-                <button
-                  type="button"
-                  onClick={() => setShowAdvanced(!showAdvanced)}
-                  className="w-full flex items-center justify-between text-[11px] text-zinc-500 hover:text-zinc-300 font-mono py-1 cursor-pointer"
+              {/* Terminal Device Login Link */}
+              <div className="pt-3 border-t border-white/5 text-center">
+                <Link
+                  href="/device"
+                  className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors py-1 cursor-pointer group"
                 >
-                  <span>Advanced Developer Options (Optional Custom Key)</span>
-                  {showAdvanced ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                </button>
-
-                {showAdvanced && (
-                  <div className="mt-3 space-y-3 p-3 rounded-2xl bg-black/40 border border-white/5 text-xs animate-in fade-in duration-150">
-                    <div>
-                      <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">
-                        Custom API Key (Optional)
-                      </label>
-                      <input
-                        type="password"
-                        value={customKey}
-                        onChange={(e) => setCustomKey(e.target.value)}
-                        placeholder="sk-... or xai-..."
-                        className="w-full py-2 px-3 rounded-xl bg-black/60 border border-white/10 text-xs text-white font-mono placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">
-                        Compute Allocation Mode
-                      </label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setCustomMode('pooled')}
-                          className={`py-1.5 px-2 rounded-lg text-[11px] font-semibold border ${
-                            customMode === 'pooled' ? 'bg-indigo-600/30 border-indigo-500 text-indigo-300' : 'bg-black/20 border-white/5 text-zinc-400'
-                          }`}
-                        >
-                          Cooperative Pooled
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setCustomMode('private')}
-                          className={`py-1.5 px-2 rounded-lg text-[11px] font-semibold border ${
-                            customMode === 'private' ? 'bg-indigo-600/30 border-indigo-500 text-indigo-300' : 'bg-black/20 border-white/5 text-zinc-400'
-                          }`}
-                        >
-                          Dedicated Private
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  <Terminal className="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
+                  <span>Signing in from a terminal? Enter code &rarr;</span>
+                </Link>
               </div>
+
+              {/* Terms & Privacy Assurance */}
+              <p className="text-[11px] text-zinc-500 text-center leading-relaxed">
+                By continuing, you agree to GALXAI's{' '}
+                <Link href="/terms" className="underline hover:text-zinc-300">Terms of Service</Link>{' '}
+                and{' '}
+                <Link href="/privacy" className="underline hover:text-zinc-300">Privacy Policy</Link>.
+              </p>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
     </div>
   );

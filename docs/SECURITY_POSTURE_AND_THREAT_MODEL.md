@@ -12,6 +12,7 @@ GALXAI serves as a high-performance compute pooling gateway and execution substr
 | :--- | :--- | :--- | :--- |
 | **Cross-Tenant Shard Transplantation** | Attacker transfers encrypted secret ciphertext from Tenant A's row to Tenant B's row in PostgreSQL. | **Critical** | **AAD Binding**: AES-256-GCM includes `${tenantUid}:${shardId}:${provider}` as AAD. Decryption fails unconditionally on row movement. |
 | **Token Replay / Theft Exfiltration** | Leaked bearer token is replayed by malicious actor from external network. | **High** | **OAuth 2.0 Token Rotation (RFC 6819)** with single-use tokens, 30s grace window, and automatic session family lineage killswitch. |
+| **Upstream Account Revocation Desynchronization** | Upstream account owner revokes access or terminates password at provider, but downstream gateway sessions remain active. | **High** | **OpenID Connect Back-Channel Logout 1.0 (RFC 7009 / OIDC)**: Ingests server-to-server logout tokens and cascades immediate revocation across linked identities and active sessions. |
 | **Plaintext Claims Metadata Leakage** | Intermediate proxies or extensions read user email/shard ID from standard JWTs. | **Medium** | **Compact JWE Encryption (`galx_sess_v2...`)**: Zero metadata is visible in plaintext over the wire. |
 | **Heap Memory Forensics** | Process crash dump or heap inspection exposes plaintext API keys. | **High** | **Active Heap Zeroization (`ScopedMemorySanitizer`)**: 2-pass deterministic overwrite (`0xAA` -> `0x00`) in `finally` blocks. |
 | **Unattended Session Privilege Abuse** | Co-worker or attacker uses an open laptop to export keys or change billing. | **High** | **Step-Up SUDO Mode**: Privileged mutations require elevation active within 15 minutes (`POST /api/auth/sudo/elevate`). |
@@ -24,6 +25,7 @@ GALXAI serves as a high-performance compute pooling gateway and execution substr
 | **Volumetric Edge Ingress Flooding** | Bot swarms attempt to exhaust origin servers with HTTP request storms. | **High** | **Cloudflare Anycast WAF & Fast-Path Prefix Filter**: Drops invalid keys and floods in $<1\text{ms}$ at the 300+ Edge PoPs. |
 | **Edge Rate Limit Query Storms** | Million-request bursts hammer PostgreSQL connection pools with rate checks. | **High** | **Distributed Edge KV Sliding-Window Limiter (`RATE_LIMIT_KV`)**: Evaluates token buckets in V8 isolates without DB IOPS. |
 | **Webhook Delivery Spoofing** | Attacker injects forged completion events to client webhook endpoints. | **Medium** | **HMAC-SHA256 Signatures (`GalxEdgeWebhookDispatcher`)**: Cryptographically signs every payload with `X-Galx-Signature-256`. |
+| **Ephemeral State Nonce Accumulation Bloat** | Millions of consumed DPoP proofs, device codes, and PAR URIs bloat database storage. | **Low** | **PostgreSQL Substrate Vacuum Cron (`fn_scavenge_oauth_substrate_cron`)**: Periodic single-transaction sweep of expired records. |
 
 ---
 

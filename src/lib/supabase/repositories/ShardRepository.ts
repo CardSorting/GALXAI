@@ -179,7 +179,9 @@ export class ShardRepository {
               expiresAtMs: res.expires_at_ms
             };
           }
-          return { success: false, reason: res.reason };
+          if (res.reason && res.reason !== 'SHARD_NOT_FOUND') {
+            return { success: false, reason: res.reason };
+          }
         }
       } catch {
         // Fallback
@@ -208,11 +210,13 @@ export class ShardRepository {
 
         if (!error && data) {
           const res = data as any;
-          return {
-            success: res.success,
-            committedTokens: res.committed_tokens,
-            reason: res.reason
-          };
+          if (res.success) {
+            return {
+              success: res.success,
+              committedTokens: res.committed_tokens,
+              reason: res.reason
+            };
+          }
         }
       } catch {
         // Fallback

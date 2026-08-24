@@ -10,7 +10,19 @@ export const runtime = 'nodejs';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { apiKey, email, displayName, mode = 'pooled', workspaceId } = body;
+    const {
+      apiKey,
+      accessToken,
+      refreshToken,
+      accountId,
+      idToken,
+      expiresAtMs,
+      authType,
+      email,
+      displayName,
+      mode = 'pooled',
+      workspaceId
+    } = body;
 
     const ipAddress = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || req.headers.get('cf-connecting-ip') || undefined;
     const userAgent = req.headers.get('user-agent') || undefined;
@@ -18,6 +30,12 @@ export async function POST(req: NextRequest) {
     const authEngine = GalxAuthEngine.getInstance();
     const result = await authEngine.authenticateProviderUser('xai-grok', {
       apiKey: apiKey?.trim() || undefined,
+      accessToken: accessToken?.trim() || undefined,
+      refreshToken: refreshToken?.trim() || undefined,
+      accountId: accountId?.trim() || undefined,
+      idToken: idToken?.trim() || undefined,
+      expiresAtMs: typeof expiresAtMs === 'number' ? expiresAtMs : undefined,
+      authType,
       email,
       displayName,
       mode,
@@ -28,7 +46,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(result);
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    const status = err.message?.includes('MISSING_PROVIDER_CREDENTIALS') || err.message?.includes('INVALID_') ? 400 : 500;
+    return NextResponse.json({ success: false, error: err.message }, { status });
   }
 }
 

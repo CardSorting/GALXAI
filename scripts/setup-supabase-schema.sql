@@ -1936,6 +1936,922 @@ ALTER TABLE galx_session_risk_events ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "service_role_all_galx_session_risk_events" ON galx_session_risk_events FOR ALL USING (auth.role() = 'service_role');
 CREATE POLICY "user_view_own_risk_events" ON galx_session_risk_events FOR SELECT USING (auth.uid()::text = user_id);
 
+-- ============================================================================
+-- 20260822000009_galxai_oauth_authoritative_mesh.sql
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS galx_oauth_identities (
+    id VARCHAR(64) PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    provider VARCHAR(32) NOT NULL CHECK (provider IN ('openai', 'xai-grok', 'anthropic')),
+    provider_account_id VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    display_name VARCHAR(255),
+    shard_id VARCHAR(64) REFERENCES galx_shard_accounts(id) ON DELETE SET NULL,
+    encrypted_access_token JSONB NOT NULL,
+    encrypted_refresh_token JSONB,
+    id_token_claims JSONB,
+    scopes TEXT[],
+    expires_at TIMESTAMPTZ,
+    last_refreshed_at TIMESTAMPTZ,
+    status VARCHAR(32) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'expired', 'revoked', 'needs_reauth')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT uq_galx_oauth_identity_user_provider UNIQUE(user_id, provider, provider_account_id)
+);
+
+CREATE TABLE IF NOT EXISTS galx_oauth_requests (
+    id VARCHAR(64) PRIMARY KEY,
+    state VARCHAR(255) NOT NULL UNIQUE,
+    code_verifier VARCHAR(255) NOT NULL,
+    provider VARCHAR(32) NOT NULL CHECK (provider IN ('openai', 'xai-grok', 'anthropic')),
+    redirect_uri TEXT NOT NULL,
+    mode VARCHAR(32) NOT NULL DEFAULT 'pooled',
+    workspace_id UUID REFERENCES galx_workspaces(id) ON DELETE SET NULL,
+    user_id VARCHAR(255),
+    ip_address VARCHAR(45) DEFAULT NULL,
+    user_agent TEXT DEFAULT NULL,
+    is_consumed BOOLEAN NOT NULL DEFAULT false,
+    consumed_at TIMESTAMPTZ DEFAULT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS galx_oauth_device_codes (
+    id VARCHAR(64) PRIMARY KEY,
+    device_code VARCHAR(128) NOT NULL UNIQUE,
+    user_code VARCHAR(16) NOT NULL UNIQUE,
+    provider VARCHAR(32) NOT NULL CHECK (provider IN ('openai', 'xai-grok', 'anthropic')),
+    status VARCHAR(32) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'denied', 'expired')),
+    session_token TEXT DEFAULT NULL,
+    token_record JSONB DEFAULT NULL,
+    user_id VARCHAR(255) DEFAULT NULL,
+    workspace_id UUID REFERENCES galx_workspaces(id) ON DELETE SET NULL,
+    ip_address VARCHAR(45) DEFAULT NULL,
+    user_agent TEXT DEFAULT NULL,
+    polling_interval_sec INT NOT NULL DEFAULT 5,
+    last_polled_at_ms BIGINT DEFAULT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS galx_oauth_pushed_requests (
+    id VARCHAR(64) PRIMARY KEY,
+    request_uri VARCHAR(128) NOT NULL UNIQUE,
+    provider VARCHAR(32) NOT NULL CHECK (provider IN ('openai', 'xai-grok', 'anthropic')),
+    client_id VARCHAR(255) NOT NULL,
+    redirect_uri TEXT NOT NULL,
+    scope TEXT DEFAULT NULL,
+    code_challenge VARCHAR(255) DEFAULT NULL,
+    code_challenge_method VARCHAR(32) DEFAULT 'S256',
+    state VARCHAR(255) DEFAULT NULL,
+    response_type VARCHAR(32) DEFAULT 'code',
+    workspace_id UUID REFERENCES galx_workspaces(id) ON DELETE SET NULL,
+    is_consumed BOOLEAN NOT NULL DEFAULT false,
+    consumed_at TIMESTAMPTZ DEFAULT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_ident_user ON galx_oauth_identities(user_id);
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_ident_provider ON galx_oauth_identities(provider);
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_ident_shard ON galx_oauth_identities(shard_id);
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_ident_active ON galx_oauth_identities(user_id, provider) WHERE status != 'revoked';
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_ident_expiring ON galx_oauth_identities(expires_at) WHERE status = 'active' AND expires_at IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_req_state ON galx_oauth_requests(state);
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_req_ws ON galx_oauth_requests(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_req_unconsumed ON galx_oauth_requests(state, provider) WHERE is_consumed = false;
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_req_expires ON galx_oauth_requests(expires_at);
+
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_dev_code ON galx_oauth_device_codes(device_code);
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_dev_user ON galx_oauth_device_codes(user_code);
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_dev_ws ON galx_oauth_device_codes(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_dev_pending ON galx_oauth_device_codes(user_code) WHERE status = 'pending';
+
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_par_uri ON galx_oauth_pushed_requests(request_uri);
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_par_ws ON galx_oauth_pushed_requests(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_par_unconsumed ON galx_oauth_pushed_requests(request_uri) WHERE is_consumed = false;
+
+ALTER TABLE galx_oauth_identities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE galx_oauth_identities FORCE ROW LEVEL SECURITY;
+
+ALTER TABLE galx_oauth_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE galx_oauth_requests FORCE ROW LEVEL SECURITY;
+
+ALTER TABLE galx_oauth_device_codes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE galx_oauth_device_codes FORCE ROW LEVEL SECURITY;
+
+ALTER TABLE galx_oauth_pushed_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE galx_oauth_pushed_requests FORCE ROW LEVEL SECURITY;
+
+CREATE POLICY p_service_role_oauth_identities ON galx_oauth_identities
+    FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+CREATE POLICY p_service_role_oauth_requests ON galx_oauth_requests
+    FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+CREATE POLICY p_service_role_oauth_device ON galx_oauth_device_codes
+    FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+CREATE POLICY p_service_role_oauth_par ON galx_oauth_pushed_requests
+    FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+CREATE OR REPLACE FUNCTION fn_consume_oauth_request(
+    p_state VARCHAR(255),
+    p_provider VARCHAR(32) DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_req RECORD;
+BEGIN
+    SELECT * INTO v_req
+    FROM galx_oauth_requests
+    WHERE state = p_state
+      AND (p_provider IS NULL OR provider = p_provider)
+      AND is_consumed = false
+      AND expires_at > NOW()
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RETURN jsonb_build_object('success', false, 'error', 'INVALID_OR_EXPIRED_STATE');
+    END IF;
+
+    UPDATE galx_oauth_requests
+    SET is_consumed = true,
+        consumed_at = NOW()
+    WHERE id = v_req.id;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'id', v_req.id,
+        'state', v_req.state,
+        'code_verifier', v_req.code_verifier,
+        'provider', v_req.provider,
+        'redirect_uri', v_req.redirect_uri,
+        'mode', v_req.mode,
+        'workspace_id', v_req.workspace_id,
+        'user_id', v_req.user_id
+    );
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_approve_device_code(
+    p_user_code VARCHAR(16),
+    p_session_token TEXT,
+    p_token_record JSONB DEFAULT NULL,
+    p_user_id VARCHAR(255) DEFAULT NULL
+)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_dev RECORD;
+BEGIN
+    SELECT * INTO v_dev
+    FROM galx_oauth_device_codes
+    WHERE user_code = UPPER(TRIM(p_user_code))
+      AND status = 'pending'
+      AND expires_at > NOW()
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RETURN false;
+    END IF;
+
+    UPDATE galx_oauth_device_codes
+    SET status = 'approved',
+        session_token = p_session_token,
+        token_record = p_token_record,
+        user_id = COALESCE(p_user_id, v_dev.user_id)
+    WHERE id = v_dev.id;
+
+    RETURN true;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_purge_expired_oauth_states()
+RETURNS INT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_deleted INT := 0;
+    v_cnt INT;
+BEGIN
+    DELETE FROM galx_oauth_requests WHERE expires_at < NOW() - INTERVAL '1 hour';
+    GET DIAGNOSTICS v_cnt = ROW_COUNT;
+    v_deleted := v_deleted + v_cnt;
+
+    DELETE FROM galx_oauth_device_codes WHERE expires_at < NOW() - INTERVAL '1 hour' AND status != 'approved';
+    GET DIAGNOSTICS v_cnt = ROW_COUNT;
+    v_deleted := v_deleted + v_cnt;
+
+    DELETE FROM galx_oauth_pushed_requests WHERE expires_at < NOW() - INTERVAL '1 hour';
+    GET DIAGNOSTICS v_cnt = ROW_COUNT;
+    v_deleted := v_deleted + v_cnt;
+
+    RETURN v_deleted;
+END;
+$$;
+
+-- ============================================================================
+-- 20260822000010_galxai_oauth_fapi_apex_hardening.sql
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS galx_oauth_dpop_proofs (
+    jti VARCHAR(128) PRIMARY KEY,
+    access_token_hash VARCHAR(128) DEFAULT NULL,
+    http_method VARCHAR(16) NOT NULL,
+    http_uri TEXT NOT NULL,
+    issued_at TIMESTAMPTZ NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_galx_dpop_expires_at ON galx_oauth_dpop_proofs(expires_at);
+CREATE INDEX IF NOT EXISTS idx_galx_dpop_ath ON galx_oauth_dpop_proofs(access_token_hash) WHERE access_token_hash IS NOT NULL;
+
+ALTER TABLE galx_oauth_dpop_proofs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE galx_oauth_dpop_proofs FORCE ROW LEVEL SECURITY;
+
+CREATE POLICY p_service_role_oauth_dpop ON galx_oauth_dpop_proofs
+    FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+CREATE OR REPLACE FUNCTION fn_record_dpop_proof(
+    p_jti VARCHAR(128),
+    p_ath VARCHAR(128) DEFAULT NULL,
+    p_htm VARCHAR(16) DEFAULT 'POST',
+    p_htu TEXT DEFAULT '',
+    p_iat_ms BIGINT DEFAULT NULL,
+    p_exp_ms BIGINT DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_now_ms BIGINT;
+    v_iat TIMESTAMPTZ;
+    v_exp TIMESTAMPTZ;
+    v_exists RECORD;
+BEGIN
+    v_now_ms := CAST(EXTRACT(EPOCH FROM NOW()) * 1000 AS BIGINT);
+    v_iat := TO_TIMESTAMP(COALESCE(p_iat_ms, v_now_ms) / 1000.0);
+    v_exp := TO_TIMESTAMP(COALESCE(p_exp_ms, v_now_ms + 300000) / 1000.0);
+
+    SELECT * INTO v_exists
+    FROM galx_oauth_dpop_proofs
+    WHERE jti = p_jti;
+
+    IF FOUND THEN
+        RETURN jsonb_build_object('valid', false, 'error', 'DPOP_JTI_REPLAY_DETECTED');
+    END IF;
+
+    INSERT INTO galx_oauth_dpop_proofs (
+        jti,
+        access_token_hash,
+        http_method,
+        http_uri,
+        issued_at,
+        expires_at,
+        created_at
+    ) VALUES (
+        p_jti,
+        p_ath,
+        UPPER(p_htm),
+        p_htu,
+        v_iat,
+        v_exp,
+        NOW()
+    );
+
+    RETURN jsonb_build_object('valid', true);
+EXCEPTION
+    WHEN unique_violation THEN
+        RETURN jsonb_build_object('valid', false, 'error', 'DPOP_JTI_REPLAY_DETECTED');
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_poll_device_code(
+    p_device_code VARCHAR(128),
+    p_now_ms BIGINT DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_now_ms BIGINT;
+    v_dev RECORD;
+    v_slow_interval INT;
+BEGIN
+    v_now_ms := COALESCE(p_now_ms, CAST(EXTRACT(EPOCH FROM NOW()) * 1000 AS BIGINT));
+
+    SELECT * INTO v_dev
+    FROM galx_oauth_device_codes
+    WHERE device_code = p_device_code
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RETURN jsonb_build_object('success', false, 'error', 'invalid_grant', 'error_description', 'Device code not found or invalid');
+    END IF;
+
+    IF v_dev.expires_at <= NOW() THEN
+        DELETE FROM galx_oauth_device_codes WHERE id = v_dev.id;
+        RETURN jsonb_build_object('success', false, 'error', 'expired_token', 'error_description', 'The device authorization code has expired.');
+    END IF;
+
+    IF v_dev.last_polled_at_ms IS NOT NULL AND (v_now_ms - v_dev.last_polled_at_ms) < (v_dev.polling_interval_sec * 1000 - 500) THEN
+        v_slow_interval := v_dev.polling_interval_sec + 5;
+        UPDATE galx_oauth_device_codes
+        SET polling_interval_sec = v_slow_interval,
+            last_polled_at_ms = v_now_ms
+        WHERE id = v_dev.id;
+
+        RETURN jsonb_build_object(
+            'success', false,
+            'error', 'slow_down',
+            'error_description', 'Polling too rapidly. Increase interval.',
+            'interval', v_slow_interval
+        );
+    END IF;
+
+    UPDATE galx_oauth_device_codes
+    SET last_polled_at_ms = v_now_ms
+    WHERE id = v_dev.id;
+
+    IF v_dev.status = 'pending' THEN
+        RETURN jsonb_build_object(
+            'success', false,
+            'error', 'authorization_pending',
+            'error_description', 'The user has not yet authorized the request.',
+            'interval', v_dev.polling_interval_sec
+        );
+    END IF;
+
+    IF v_dev.status = 'denied' THEN
+        DELETE FROM galx_oauth_device_codes WHERE id = v_dev.id;
+        RETURN jsonb_build_object(
+            'success', false,
+            'error', 'access_denied',
+            'error_description', 'The user denied the authorization request.'
+        );
+    END IF;
+
+    IF v_dev.status = 'approved' THEN
+        DELETE FROM galx_oauth_device_codes WHERE id = v_dev.id;
+
+        RETURN jsonb_build_object(
+            'success', true,
+            'access_token', v_dev.session_token,
+            'token_type', 'Bearer',
+            'expires_in', 2592000,
+            'token_record', v_dev.token_record
+        );
+    END IF;
+
+    RETURN jsonb_build_object('success', false, 'error', 'invalid_grant', 'error_description', 'Unexpected status');
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_consume_pushed_request(
+    p_request_uri VARCHAR(128)
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_par RECORD;
+BEGIN
+    SELECT * INTO v_par
+    FROM galx_oauth_pushed_requests
+    WHERE request_uri = p_request_uri
+      AND is_consumed = false
+      AND expires_at > NOW()
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RETURN jsonb_build_object('success', false, 'error', 'INVALID_OR_EXPIRED_REQUEST_URI');
+    END IF;
+
+    UPDATE galx_oauth_pushed_requests
+    SET is_consumed = true,
+        consumed_at = NOW()
+    WHERE id = v_par.id;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'id', v_par.id,
+        'request_uri', v_par.request_uri,
+        'provider', v_par.provider,
+        'client_id', v_par.client_id,
+        'redirect_uri', v_par.redirect_uri,
+        'scope', v_par.scope,
+        'code_challenge', v_par.code_challenge,
+        'code_challenge_method', v_par.code_challenge_method,
+        'state', v_par.state,
+        'response_type', v_par.response_type,
+        'workspace_id', v_par.workspace_id
+    );
+END;
+$$;
+
+-- ============================================================================
+-- 20260822000011_galxai_oauth_rtr_family_mesh.sql
+-- ============================================================================
+
+ALTER TABLE galx_oauth_identities ADD COLUMN IF NOT EXISTS session_family_id VARCHAR(64) DEFAULT NULL;
+ALTER TABLE galx_oauth_identities ADD COLUMN IF NOT EXISTS sequence_number INT NOT NULL DEFAULT 1;
+ALTER TABLE galx_oauth_identities ADD COLUMN IF NOT EXISTS refresh_token_hash VARCHAR(64) DEFAULT NULL;
+ALTER TABLE galx_oauth_identities ADD COLUMN IF NOT EXISTS previous_refresh_token_hash VARCHAR(64) DEFAULT NULL;
+ALTER TABLE galx_oauth_identities ADD COLUMN IF NOT EXISTS grace_period_until TIMESTAMPTZ DEFAULT NULL;
+
+ALTER TABLE galx_oauth_device_codes ADD COLUMN IF NOT EXISTS failed_attempts INT NOT NULL DEFAULT 0;
+ALTER TABLE galx_oauth_device_codes ADD COLUMN IF NOT EXISTS max_attempts INT NOT NULL DEFAULT 5;
+
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_ident_family ON galx_oauth_identities(user_id, session_family_id) WHERE session_family_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_ident_rf_hash ON galx_oauth_identities(refresh_token_hash) WHERE refresh_token_hash IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_galx_oauth_ident_prev_rf_hash ON galx_oauth_identities(previous_refresh_token_hash) WHERE previous_refresh_token_hash IS NOT NULL;
+
+CREATE OR REPLACE FUNCTION fn_rotate_oauth_identity_tokens(
+    p_identity_id VARCHAR(64),
+    p_old_refresh_hash VARCHAR(64),
+    p_new_encrypted_access JSONB,
+    p_new_encrypted_refresh JSONB,
+    p_new_refresh_hash VARCHAR(64),
+    p_expires_at TIMESTAMPTZ,
+    p_grace_window_sec INT DEFAULT 30
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_ident RECORD;
+    v_new_seq INT;
+    v_grace_until TIMESTAMPTZ;
+    v_family_id VARCHAR(64);
+    v_now TIMESTAMPTZ := NOW();
+    v_now_ms BIGINT := CAST(EXTRACT(EPOCH FROM NOW()) * 1000 AS BIGINT);
+BEGIN
+    SELECT * INTO v_ident
+    FROM galx_oauth_identities
+    WHERE id = p_identity_id
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RETURN jsonb_build_object('success', false, 'error', 'IDENTITY_NOT_FOUND');
+    END IF;
+
+    IF v_ident.status = 'revoked' THEN
+        RETURN jsonb_build_object('success', false, 'error', 'IDENTITY_ALREADY_REVOKED');
+    END IF;
+
+    v_family_id := COALESCE(v_ident.session_family_id, 'fam_' || SUBSTRING(v_ident.id FROM 1 FOR 16));
+
+    -- CASE 1: Standard Normal Rotation (Old refresh token matches current active hash)
+    IF v_ident.refresh_token_hash IS NULL OR v_ident.refresh_token_hash = p_old_refresh_hash THEN
+        v_new_seq := v_ident.sequence_number + 1;
+        v_grace_until := v_now + (p_grace_window_sec || ' seconds')::INTERVAL;
+
+        UPDATE galx_oauth_identities
+        SET session_family_id = v_family_id,
+            sequence_number = v_new_seq,
+            previous_refresh_token_hash = v_ident.refresh_token_hash,
+            refresh_token_hash = p_new_refresh_hash,
+            encrypted_access_token = p_new_encrypted_access,
+            encrypted_refresh_token = p_new_encrypted_refresh,
+            expires_at = p_expires_at,
+            last_refreshed_at = v_now,
+            grace_period_until = v_grace_until,
+            status = 'active',
+            updated_at = v_now
+        WHERE id = v_ident.id;
+
+        INSERT INTO galx_audit_logs (
+            id,
+            workspace_id,
+            user_id,
+            shard_id,
+            action,
+            resource_type,
+            resource_id,
+            metadata,
+            timestamp_ms,
+            created_at
+        ) VALUES (
+            'audit_' || v_now_ms || '_' || SUBSTRING(p_new_refresh_hash FROM 1 FOR 8),
+            NULL,
+            v_ident.user_id,
+            v_ident.shard_id,
+            'oauth.token_rotated',
+            'oauth_identity',
+            v_ident.id,
+            jsonb_build_object('sequence_number', v_new_seq, 'session_family_id', v_family_id, 'provider', v_ident.provider),
+            v_now_ms,
+            v_now
+        );
+
+        RETURN jsonb_build_object(
+            'success', true,
+            'sequence_number', v_new_seq,
+            'session_family_id', v_family_id,
+            'expires_at', p_expires_at
+        );
+    END IF;
+
+    -- CASE 2: Token Replay within Grace Period Window (Tolerates network retries)
+    IF v_ident.previous_refresh_token_hash = p_old_refresh_hash THEN
+        IF v_ident.grace_period_until IS NOT NULL AND v_now <= v_ident.grace_period_until THEN
+            RETURN jsonb_build_object(
+                'success', true,
+                'grace_window', true,
+                'sequence_number', v_ident.sequence_number,
+                'session_family_id', v_family_id,
+                'expires_at', v_ident.expires_at
+            );
+        END IF;
+    END IF;
+
+    -- CASE 3: TOKEN REUSE ATTACK DETECTED (RFC 6819 Token Theft Containment)
+    UPDATE galx_oauth_identities
+    SET status = 'revoked',
+        updated_at = v_now
+    WHERE session_family_id = v_family_id
+       OR user_id = v_ident.user_id;
+
+    UPDATE galx_user_sessions
+    SET is_revoked = true,
+        revoked_at = v_now,
+        revoked_reason = 'OAuth Refresh Token Reuse Attack Detected',
+        updated_at = v_now
+    WHERE user_id = v_ident.user_id
+      AND is_revoked = false;
+
+    INSERT INTO galx_audit_logs (
+        id,
+        workspace_id,
+        user_id,
+        shard_id,
+        action,
+        resource_type,
+        resource_id,
+        metadata,
+        timestamp_ms,
+        created_at
+    ) VALUES (
+        'threat_' || v_now_ms || '_' || SUBSTRING(p_old_refresh_hash FROM 1 FOR 8),
+        NULL,
+        v_ident.user_id,
+        v_ident.shard_id,
+        'oauth.threat.token_reuse_killswitch',
+        'oauth_identity',
+        v_ident.id,
+        jsonb_build_object(
+            'threat_level', 'CRITICAL',
+            'session_family_id', v_family_id,
+            'presented_hash', p_old_refresh_hash,
+            'expected_hash', v_ident.refresh_token_hash
+        ),
+        v_now_ms,
+        v_now
+    );
+
+    RETURN jsonb_build_object(
+        'success', false,
+        'error', 'TOKEN_REUSE_ATTACK_DETECTED',
+        'family_revoked', true,
+        'session_family_id', v_family_id
+    );
+END;
+$$;
+
+-- ============================================================================
+-- 20260822000012_galxai_oauth_backchannel_and_vacuum_mesh.sql
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS galx_oauth_backchannel_logouts (
+    id VARCHAR(64) PRIMARY KEY,
+    provider VARCHAR(32) NOT NULL CHECK (provider IN ('openai', 'xai-grok', 'anthropic')),
+    sub VARCHAR(255) NOT NULL,
+    sid VARCHAR(255) DEFAULT NULL,
+    jti VARCHAR(128) UNIQUE DEFAULT NULL,
+    iss TEXT NOT NULL,
+    events JSONB NOT NULL DEFAULT '{"http://schemas.openid.net/event/backchannel-logout": {}}'::jsonb,
+    raw_logout_token TEXT NOT NULL,
+    is_processed BOOLEAN NOT NULL DEFAULT false,
+    identities_revoked INT NOT NULL DEFAULT 0,
+    sessions_revoked INT NOT NULL DEFAULT 0,
+    processed_at TIMESTAMPTZ DEFAULT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_galx_bc_logout_provider_sub ON galx_oauth_backchannel_logouts(provider, sub);
+CREATE INDEX IF NOT EXISTS idx_galx_bc_logout_sid ON galx_oauth_backchannel_logouts(sid) WHERE sid IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_galx_bc_logout_jti ON galx_oauth_backchannel_logouts(jti) WHERE jti IS NOT NULL;
+
+ALTER TABLE galx_oauth_backchannel_logouts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE galx_oauth_backchannel_logouts FORCE ROW LEVEL SECURITY;
+
+CREATE POLICY p_service_role_oauth_backchannel ON galx_oauth_backchannel_logouts
+    FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+CREATE OR REPLACE FUNCTION fn_process_backchannel_logout(
+    p_id VARCHAR(64),
+    p_provider VARCHAR(32),
+    p_sub VARCHAR(255),
+    p_iss TEXT,
+    p_raw_token TEXT,
+    p_sid VARCHAR(255) DEFAULT NULL,
+    p_jti VARCHAR(128) DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_identities_revoked INT := 0;
+    v_sessions_revoked INT := 0;
+    v_target_user_id VARCHAR(255);
+    v_now TIMESTAMPTZ := NOW();
+    v_now_ms BIGINT := CAST(EXTRACT(EPOCH FROM NOW()) * 1000 AS BIGINT);
+BEGIN
+    SELECT user_id INTO v_target_user_id
+    FROM galx_oauth_identities
+    WHERE provider = p_provider
+      AND (provider_account_id = p_sub OR email = p_sub)
+    LIMIT 1;
+
+    UPDATE galx_oauth_identities
+    SET status = 'revoked',
+        updated_at = v_now
+    WHERE provider = p_provider
+      AND (provider_account_id = p_sub OR email = p_sub OR (v_target_user_id IS NOT NULL AND user_id = v_target_user_id));
+    GET DIAGNOSTICS v_identities_revoked = ROW_COUNT;
+
+    IF v_target_user_id IS NOT NULL THEN
+        UPDATE galx_user_sessions
+        SET is_revoked = true,
+            revoked_at = v_now,
+            revoked_reason = 'OIDC Back-Channel Logout (' || p_provider || ')',
+            updated_at = v_now
+        WHERE user_id = v_target_user_id
+          AND is_revoked = false;
+        GET DIAGNOSTICS v_sessions_revoked = ROW_COUNT;
+    END IF;
+
+    INSERT INTO galx_oauth_backchannel_logouts (
+        id,
+        provider,
+        sub,
+        sid,
+        jti,
+        iss,
+        raw_logout_token,
+        is_processed,
+        identities_revoked,
+        sessions_revoked,
+        processed_at,
+        created_at
+    ) VALUES (
+        p_id,
+        p_provider,
+        p_sub,
+        p_sid,
+        p_jti,
+        p_iss,
+        p_raw_token,
+        true,
+        v_identities_revoked,
+        v_sessions_revoked,
+        v_now,
+        v_now
+    );
+
+    INSERT INTO galx_audit_logs (
+        id,
+        workspace_id,
+        user_id,
+        shard_id,
+        action,
+        resource_type,
+        resource_id,
+        metadata,
+        timestamp_ms,
+        created_at
+    ) VALUES (
+        'audit_bc_' || v_now_ms || '_' || SUBSTRING(p_id FROM 1 FOR 8),
+        NULL,
+        v_target_user_id,
+        NULL,
+        'oauth.oidc.backchannel_logout',
+        'oauth_identity',
+        p_sub,
+        jsonb_build_object(
+            'provider', p_provider,
+            'sub', p_sub,
+            'sid', p_sid,
+            'identities_revoked', v_identities_revoked,
+            'sessions_revoked', v_sessions_revoked
+        ),
+        v_now_ms,
+        v_now
+    );
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'user_id', v_target_user_id,
+        'identities_revoked', v_identities_revoked,
+        'sessions_revoked', v_sessions_revoked
+    );
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_scavenge_oauth_substrate_cron()
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_purged_dpop INT := 0;
+    v_purged_requests INT := 0;
+    v_purged_devices INT := 0;
+    v_purged_par INT := 0;
+    v_expired_identities INT := 0;
+    v_cnt INT;
+BEGIN
+    DELETE FROM galx_oauth_dpop_proofs WHERE expires_at < NOW();
+    GET DIAGNOSTICS v_purged_dpop = ROW_COUNT;
+
+    DELETE FROM galx_oauth_requests WHERE expires_at < NOW() - INTERVAL '1 hour';
+    GET DIAGNOSTICS v_purged_requests = ROW_COUNT;
+
+    DELETE FROM galx_oauth_device_codes WHERE expires_at < NOW() - INTERVAL '1 hour' AND status != 'approved';
+    GET DIAGNOSTICS v_purged_devices = ROW_COUNT;
+
+    DELETE FROM galx_oauth_pushed_requests WHERE expires_at < NOW() - INTERVAL '1 hour';
+    GET DIAGNOSTICS v_purged_par = ROW_COUNT;
+
+    UPDATE galx_oauth_identities
+    SET status = 'expired',
+        updated_at = NOW()
+    WHERE status = 'active'
+      AND expires_at IS NOT NULL
+      AND expires_at < NOW();
+    GET DIAGNOSTICS v_expired_identities = ROW_COUNT;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'purged_dpop_proofs', v_purged_dpop,
+        'purged_oauth_requests', v_purged_requests,
+        'purged_device_codes', v_purged_devices,
+        'purged_par_requests', v_purged_par,
+        'expired_identities_marked', v_expired_identities
+    );
+END;
+$$;
+
+-- 4. ATOMIC IDENTITY UPSERT & RETRIEVAL FUNCTIONS (SECURITY DEFINER)
+CREATE OR REPLACE FUNCTION fn_save_oauth_identity(
+    p_id VARCHAR(64),
+    p_user_id VARCHAR(255),
+    p_provider VARCHAR(32),
+    p_provider_account_id VARCHAR(255),
+    p_email VARCHAR(255),
+    p_encrypted_access_token JSONB,
+    p_display_name VARCHAR(255) DEFAULT NULL,
+    p_shard_id VARCHAR(64) DEFAULT NULL,
+    p_session_family_id VARCHAR(64) DEFAULT NULL,
+    p_sequence_number INT DEFAULT 1,
+    p_refresh_token_hash VARCHAR(64) DEFAULT NULL,
+    p_previous_refresh_token_hash VARCHAR(64) DEFAULT NULL,
+    p_grace_period_until TIMESTAMPTZ DEFAULT NULL,
+    p_encrypted_refresh_token JSONB DEFAULT NULL,
+    p_id_token_claims JSONB DEFAULT NULL,
+    p_scopes TEXT[] DEFAULT NULL,
+    p_expires_at TIMESTAMPTZ DEFAULT NULL,
+    p_last_refreshed_at TIMESTAMPTZ DEFAULT NULL,
+    p_status VARCHAR(32) DEFAULT 'active'
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_now TIMESTAMPTZ := NOW();
+BEGIN
+    INSERT INTO galx_oauth_identities (
+        id, user_id, provider, provider_account_id, email, display_name,
+        shard_id, session_family_id, sequence_number, refresh_token_hash,
+        previous_refresh_token_hash, grace_period_until, encrypted_access_token,
+        encrypted_refresh_token, id_token_claims, scopes, expires_at,
+        last_refreshed_at, status, created_at, updated_at
+    ) VALUES (
+        p_id, p_user_id, p_provider, p_provider_account_id, p_email, p_display_name,
+        p_shard_id, p_session_family_id, p_sequence_number, p_refresh_token_hash,
+        p_previous_refresh_token_hash, p_grace_period_until, p_encrypted_access_token,
+        p_encrypted_refresh_token, p_id_token_claims, p_scopes, p_expires_at,
+        p_last_refreshed_at, p_status, v_now, v_now
+    )
+    ON CONFLICT (id) DO UPDATE SET
+        user_id = EXCLUDED.user_id,
+        provider = EXCLUDED.provider,
+        provider_account_id = EXCLUDED.provider_account_id,
+        email = EXCLUDED.email,
+        display_name = EXCLUDED.display_name,
+        shard_id = EXCLUDED.shard_id,
+        session_family_id = EXCLUDED.session_family_id,
+        sequence_number = EXCLUDED.sequence_number,
+        refresh_token_hash = EXCLUDED.refresh_token_hash,
+        previous_refresh_token_hash = EXCLUDED.previous_refresh_token_hash,
+        grace_period_until = EXCLUDED.grace_period_until,
+        encrypted_access_token = EXCLUDED.encrypted_access_token,
+        encrypted_refresh_token = EXCLUDED.encrypted_refresh_token,
+        id_token_claims = EXCLUDED.id_token_claims,
+        scopes = EXCLUDED.scopes,
+        expires_at = EXCLUDED.expires_at,
+        last_refreshed_at = EXCLUDED.last_refreshed_at,
+        status = EXCLUDED.status,
+        updated_at = v_now;
+
+    RETURN jsonb_build_object('success', true, 'id', p_id);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_get_oauth_identity_by_id(
+    p_id VARCHAR(64)
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_ident RECORD;
+BEGIN
+    SELECT * INTO v_ident
+    FROM galx_oauth_identities
+    WHERE id = p_id;
+
+    IF NOT FOUND THEN
+        RETURN jsonb_build_object('found', false);
+    END IF;
+
+    RETURN jsonb_build_object(
+        'found', true,
+        'identity', row_to_json(v_ident)
+    );
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_get_oauth_identities_by_user(
+    p_user_id VARCHAR(255)
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_list JSONB;
+BEGIN
+    SELECT COALESCE(jsonb_agg(row_to_json(i)), '[]'::jsonb)
+    INTO v_list
+    FROM (
+        SELECT * FROM galx_oauth_identities
+        WHERE user_id = p_user_id
+          AND status IN ('active', 'needs_reauth')
+        ORDER BY created_at DESC
+    ) i;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'identities', v_list
+    );
+END;
+$$;
+
+
+
+
+
+
 
 
 
