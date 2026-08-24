@@ -69,6 +69,21 @@ export const updateSession = async (request: NextRequest) => {
   );
 
   const pathname = request.nextUrl.pathname;
+
+  // Sub-millisecond Edge CORS preflight termination (zero serverless lambda cold-starts)
+  if (request.method === 'OPTIONS') {
+    return new NextResponse(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
+        'Access-Control-Allow-Headers': 'Authorization, Content-Type, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version, x-galx-key, x-galx-shard-id, x-api-key, dpop',
+        'Access-Control-Max-Age': '86400',
+        'X-Edge-FastPath': 'true'
+      }
+    });
+  }
+
   // Fast path: Skip blocking auth network roundtrips for API inference routes
   if (pathname.startsWith('/v1/') || pathname.startsWith('/api/')) {
     return supabaseResponse;

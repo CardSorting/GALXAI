@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxOAuthManager } from '../../../../../../core/auth/GalxOAuthManager';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 /**
  * Standard RFC 8628 OAuth 2.0 Device Token Polling Endpoint.
  * Resolves authorization_pending, slow_down, expired_token, access_denied, or issued credentials.

@@ -4,6 +4,7 @@ import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import type { ChatCompletionRequest } from '@/core/contracts/GalxContracts';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 // Handle CORS Pre-flight

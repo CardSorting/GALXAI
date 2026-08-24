@@ -5,6 +5,7 @@ import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 import type { BulkRedriveRequest } from '@/core/contracts/GalxContracts';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function OPTIONS() {
   return new NextResponse(null, {

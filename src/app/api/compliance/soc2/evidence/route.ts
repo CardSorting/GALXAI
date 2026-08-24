@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { galxSOC2 } from '@/core/compliance/GalxSOC2AuditEngine';
 
+export const runtime = 'nodejs';
+
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {

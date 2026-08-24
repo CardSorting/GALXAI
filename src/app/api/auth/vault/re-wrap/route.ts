@@ -3,6 +3,7 @@ import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { PRIMARY_KEY_VERSION } from '@/core/vault/GalxCryptoVault';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/auth/vault/re-wrap

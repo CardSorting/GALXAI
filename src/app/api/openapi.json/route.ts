@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
 
+export const runtime = 'nodejs';
+
 export const dynamic = 'force-static';
 export const revalidate = 86400; // 24 hours
 

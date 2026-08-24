@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/auth/tokens/restricted

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function OPTIONS() {
   return new NextResponse(null, {

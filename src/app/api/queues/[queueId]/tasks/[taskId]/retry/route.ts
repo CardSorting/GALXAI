@@ -4,6 +4,7 @@ import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function OPTIONS() {
   return new NextResponse(null, {

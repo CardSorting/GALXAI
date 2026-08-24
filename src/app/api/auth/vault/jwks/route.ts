@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import * as crypto from 'node:crypto';
 import { PRIMARY_KEY_VERSION } from '../../../../../core/vault/GalxCryptoVault';
 
+export const runtime = 'nodejs';
+
 export const dynamic = 'force-dynamic';
 
 /**

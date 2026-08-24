@@ -4,6 +4,7 @@ import { GalxQueueEventBus } from '@/core/queue/GalxQueueEventBus';
 import type { GalxQueueEvent } from '@/core/contracts/GalxContracts';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/queues/[queueId]/stream

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const runtime = 'nodejs';
+
 /**
  * Standard OpenID Connect Discovery 1.0 Endpoint.
  * Exposes authoritative endpoints and cryptographic capabilities to client libraries & SDKs.

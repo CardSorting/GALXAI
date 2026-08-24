@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 export const runtime = 'nodejs';
 

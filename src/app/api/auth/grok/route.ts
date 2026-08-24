@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 /**
  * 1-Click xAI Grok SSO / PKCE & Vault Registration ("Provider IS Auth").

@@ -3,6 +3,7 @@ import { galxPrivacy } from '@/core/privacy/GalxPrivacyComplianceEngine';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function OPTIONS() {
   return new NextResponse(null, {

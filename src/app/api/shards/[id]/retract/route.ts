@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter } from '@/core/router/GalxModelRouter';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 /**
  * 1-Click Instant Permission Retraction & Zero-Residual Eviction Killswitch.

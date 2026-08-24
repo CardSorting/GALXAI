@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GalxOAuthManager } from '../../../../../core/auth/GalxOAuthManager';
 import type { ProviderType } from '../../../../../core/contracts/GalxContracts';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 /**
  * Standard RFC 9126 OAuth 2.0 Pushed Authorization Requests (PAR) Endpoint.
  * Ingests authorization parameters via direct POST, eliminating URL query leakage.

@@ -4,6 +4,7 @@ import { WalletRepository } from '@/lib/supabase/repositories/WalletRepository';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {

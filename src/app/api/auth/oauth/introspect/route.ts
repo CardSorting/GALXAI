@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxOAuthManager } from '../../../../../core/auth/GalxOAuthManager';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 /**
  * Standard RFC 7662 OAuth 2.0 Token Introspection Endpoint.
  * Resolves token validity, claims, scopes, and expiration in sub-milliseconds.

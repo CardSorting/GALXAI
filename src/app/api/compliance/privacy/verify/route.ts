@@ -3,6 +3,7 @@ import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 import { galxZDR } from '@/core/privacy/GalxZDRProtocol';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function OPTIONS() {
   return new NextResponse(null, {

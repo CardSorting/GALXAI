@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 
+export const runtime = 'nodejs';
+
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 /**
  * Ultra-flat direct AI execution endpoint.

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GalxOAuthManager } from '../../../../../../core/auth/GalxOAuthManager';
 import { GalxAuthEngine } from '../../../../../../core/auth/GalxAuthEngine';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 /**
  * Endpoint to approve an RFC 8628 Device Authorization code from the browser.
  */

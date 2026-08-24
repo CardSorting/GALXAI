@@ -3,6 +3,7 @@ import { galxRouter } from '@/core/router/GalxModelRouter';
 import type { GalxShardAccount } from '@/core/contracts/GalxContracts';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

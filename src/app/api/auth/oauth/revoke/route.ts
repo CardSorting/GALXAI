@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '../../../../../core/auth/GalxAuthEngine';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 /**
  * Standard RFC 7009 OAuth 2.0 Token Revocation Endpoint.
  * Revokes active access tokens or refresh tokens and invalidates downstream caches.

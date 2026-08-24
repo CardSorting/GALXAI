@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GalxOAuthManager } from '../../../../../../core/auth/GalxOAuthManager';
 import type { ProviderType } from '../../../../../../core/contracts/GalxContracts';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 /**
  * Standard RFC 8628 OAuth 2.0 Device Authorization Endpoint.
  * Issues device_code and user_code for headless CLI / Terminal authentication.

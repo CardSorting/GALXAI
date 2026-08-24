@@ -3,6 +3,7 @@ import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/ModelCatalo
 import { TokenCostCalculator } from '@/core/pricing/TokenCostCalculator';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
