@@ -64,6 +64,7 @@ export default function robots(): MetadataRoute.Robots {
           '/apple-icon.png',
           '/opengraph-image.png',
           '/twitter-image.png',
+          '/.well-known/*',
         ],
         disallow: [
           '/api/v1/chat/completions',

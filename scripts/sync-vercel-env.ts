@@ -15,12 +15,22 @@ const REQUIRED_VARS = [
   'NEXT_PUBLIC_APP_URL',
   'NEXT_PUBLIC_SUPABASE_URL',
   'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+  'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',
+  'SUPABASE_SERVICE_ROLE_KEY',
   'DATABASE_URL',
   'GALX_VAULT_MASTER_SECRET',
   'GALX_VAULT_KEY',
   'GALX_VAULT_ACTIVE_KEY_VERSION',
   'NEXT_PUBLIC_GALX_EDGE_URL',
   'PUBLIC_ASSETS_URL',
+];
+
+const OPTIONAL_VARS = [
+  'SUPABASE_POOL_SIZE',
+  'SUPABASE_TIMEOUT_MS',
+  'OPENAI_API_KEY',
+  'XAI_API_KEY',
+  'GALX_API_KEY',
 ];
 
 function parseEnvFile(filePath: string): Record<string, string> {
@@ -68,7 +78,7 @@ async function syncVercelEnv() {
     ...process.env,
   };
 
-  const syncList: { key: string; value: string; isSecret: boolean }[] = [];
+  const syncList: { key: string; value: string; isSecret: boolean; isOptional?: boolean }[] = [];
 
   for (const key of REQUIRED_VARS) {
     const val = mergedEnv[key];
@@ -80,7 +90,15 @@ async function syncVercelEnv() {
     syncList.push({ key, value: val, isSecret });
   }
 
-  console.log(`  ${GREEN}✓${RESET} Identified ${BOLD}${syncList.length}/${REQUIRED_VARS.length}${RESET} critical environment variables.\n`);
+  for (const key of OPTIONAL_VARS) {
+    const val = mergedEnv[key];
+    if (val && val.trim() !== '') {
+      const isSecret = !key.startsWith('NEXT_PUBLIC_') && !key.startsWith('PUBLIC_');
+      syncList.push({ key, value: val, isSecret, isOptional: true });
+    }
+  }
+
+  console.log(`  ${GREEN}✓${RESET} Identified ${BOLD}${syncList.length}${RESET} critical & runtime environment variables (${REQUIRED_VARS.length} required, ${syncList.length - REQUIRED_VARS.length} optional).\n`);
 
   if (isPrintCli || isDryRun) {
     console.log(`${BOLD}Generated Vercel CLI Sync Commands:${RESET}`);
@@ -98,15 +116,47 @@ async function syncVercelEnv() {
   }
 
   // Attempt direct sync via vercel CLI if available
+  const isPush = args.includes('--push') || (!isDryRun && !isPrintCli);
   try {
     execSync('vercel --version', { stdio: 'ignore' });
     console.log(`  ${GREEN}✓${RESET} Vercel CLI detected on system path.`);
+
+    if (isPush) {
+      console.log(`\n${BOLD}Synchronizing environment variables to Vercel (${targetEnv})...${RESET}`);
+      let pushed = 0;
+      let failed = 0;
+
+      for (const item of syncList) {
+        try {
+          // Remove existing key in target env first to allow clean overwrite
+          try {
+            execSync(`vercel env rm ${item.key} ${targetEnv} -y`, { stdio: 'ignore' });
+          } catch {}
+
+          // Add fresh key
+          execSync(`printf "%s" "${item.value}" | vercel env add ${item.key} ${targetEnv}`, {
+            stdio: 'ignore',
+            input: item.value,
+          });
+          console.log(`  ${GREEN}✓${RESET} Pushed ${BOLD}${item.key}${RESET}`);
+          pushed++;
+        } catch {
+          console.log(`  ${YELLOW}⚠${RESET} Could not push ${BOLD}${item.key}${RESET} (run 'vercel login' if unauthenticated)`);
+          failed++;
+        }
+      }
+
+      console.log(`\n  ${GREEN}✓ Synchronized ${pushed}/${syncList.length} variables to ${targetEnv}.${RESET}`);
+      if (failed > 0) {
+        console.log(`  ${DIM}(Tip: Use 'npm run vercel:env:print' to inspect CLI commands manually)${RESET}`);
+      }
+    }
   } catch {
     console.log(`  ${YELLOW}⚠${RESET} Vercel CLI not found globally. To push secrets automatically:`);
     console.log(`     ${CYAN}npx vercel env add <KEY> ${targetEnv}${RESET}\n`);
   }
 
-  console.log(`${BOLD}${CYAN}======================================================================${RESET}\n`);
+  console.log(`\n${BOLD}${CYAN}======================================================================${RESET}\n`);
 }
 
 syncVercelEnv().catch((err) => {

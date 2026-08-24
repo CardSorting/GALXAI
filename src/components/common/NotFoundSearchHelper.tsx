@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Search, ArrowRight, Sparkles } from 'lucide-react';
@@ -10,7 +10,7 @@ export function NotFoundSearchHelper() {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const results: OmniSearchItem[] = query.trim() ? BroccoliOmniSearch.search(query, 4) : [];
+  const results: OmniSearchItem[] = useMemo(() => (query.trim() ? BroccoliOmniSearch.search(query, 4) : []), [query]);
 
   useEffect(() => {
     setSelectedIndex(0);
@@ -67,7 +67,7 @@ export function NotFoundSearchHelper() {
               <Sparkles className="w-3 h-3" />
               <span>INSTANT SMART MATCHES</span>
             </div>
-            <span className="text-[9px] text-zinc-500 font-normal">Use ↑ ↓ ↵</span>
+            <span className="text-[10px] text-zinc-500 font-normal">Use ↑ ↓ ↵</span>
           </div>
           {results.map((item, index) => {
             const isSelected = index === selectedIndex;

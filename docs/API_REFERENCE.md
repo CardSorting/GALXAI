@@ -194,10 +194,13 @@ Legacy text completion endpoint for older SDKs and CLI scripts:
 
 ---
 
-## 📋 Model Catalog Endpoints
+## 📋 Model Catalog & Discovery Endpoints
 
-- **`GET /v1/models`**: Returns all available models with pricing, context limits, and capabilities.
+- **`GET /v1/models`**: Returns all available models with pricing, context limits, and capabilities (with Edge SWR caching).
 - **`GET /v1/models/:id`**: Returns single model metadata by canonical ID or synonym alias (e.g. `/v1/models/sol` or `/v1/models/claude-3-7-sonnet`).
+- **`GET /opensearch.xml`**: OpenSearch 1.1 browser auto-discovery for URL bar model search.
+- **`GET /feed.xml`**: RSS 2.0 / Atom syndication feed of model updates and pricing revisions.
+- **`GET /.well-known/security.txt`**: RFC 9116 vulnerability disclosure policy.
 
 ---
 
@@ -207,3 +210,10 @@ Legacy text completion endpoint for older SDKs and CLI scripts:
 - **`POST /api/queues/:queueId/tasks`**: Enqueue an asynchronous inference task.
 - **`GET /api/queues/:queueId/tasks/:taskId`**: Poll task status, execution progress, and results.
 - **`DELETE /api/queues/:queueId/tasks/:taskId`**: Cancel a pending task.
+
+---
+
+## 🩺 System Health & Telemetry (`/api/health`)
+
+- **`GET /api/health`**: Real-time gateway status, model count, server timestamp, and runtime version.
+- **`OPTIONS /api/health`**: Universal CORS pre-flight handler (HTTP 204).

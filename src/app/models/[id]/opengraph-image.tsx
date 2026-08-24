@@ -201,6 +201,9 @@ export default async function Image({ params }: Props) {
     ),
     {
       ...size,
+      headers: {
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      },
     }
   );
 }

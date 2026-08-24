@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { PersonaProvider } from "@/contexts/PersonaContext";
@@ -12,6 +13,18 @@ import { KeyboardShortcutsModal } from "@/components/common/KeyboardShortcutsMod
 import { ClientResilienceProvider } from "@/components/common/ClientResilienceProvider";
 import { SITE_CONFIG } from "@/lib/seo/siteConfig";
 import { JsonLd, createOrganizationSchema, createWebSiteSchema, createSoftwareAppSchema } from "@/lib/seo/jsonld";
+
+const fontSans = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const fontMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains",
+  display: "swap",
+});
 
 export const viewport: Viewport = {
   themeColor: "#07080d",
@@ -50,6 +63,12 @@ export const metadata: Metadata = {
     ],
   },
   manifest: "/manifest.webmanifest",
+  applicationName: SITE_CONFIG.name,
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: SITE_CONFIG.name,
+  },
   formatDetection: {
     email: false,
     address: false,
@@ -107,7 +126,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className={`dark ${fontSans.variable} ${fontMono.variable}`}>
       <head>
         {/* OpenSearch Auto-Discovery for Browser URL bar integration */}
         <link
@@ -136,7 +155,7 @@ export default function RootLayout({
 
         <JsonLd data={rootGraphSchema} />
       </head>
-      <body className="min-h-screen bg-[#07080d] text-zinc-100 antialiased selection:bg-indigo-500 selection:text-white flex flex-col">
+      <body className="min-h-screen bg-[#07080d] text-foreground antialiased selection:bg-indigo-500 selection:text-white flex flex-col">
         {/* Ambient Nebula Background */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
           <div className="absolute -top-40 left-1/4 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[140px]" />

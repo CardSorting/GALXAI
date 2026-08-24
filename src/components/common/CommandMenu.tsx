@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Search,
@@ -293,7 +293,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
     }
   }, [selectedIndex, selectableItems, router]);
 
-  const navigateTo = async (
+  const navigateTo = useCallback(async (
     href: string,
     title?: string,
     category?: string,
@@ -317,7 +317,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
     }
     router.push(href);
     onClose();
-  };
+  }, [router, onClose]);
 
   useEffect(() => {
     let lastKey = '';
@@ -431,7 +431,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, showShortcutsModal, onClose, router, selectableItems, selectedIndex, autocompleteSuggestion]);
+  }, [isOpen, showShortcutsModal, onClose, router, selectableItems, selectedIndex, autocompleteSuggestion, navigateTo]);
 
   if (showShortcutsModal) {
     return (
@@ -553,7 +553,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
                       setQuery((q) => q + ' ');
                       setTimeout(() => setQuery((q) => q.trim()), 10);
                     }}
-                    className="text-zinc-500 hover:text-zinc-300 transition-colors uppercase text-[9px] cursor-pointer"
+                    className="text-zinc-500 hover:text-zinc-300 transition-colors uppercase text-[10px] cursor-pointer"
                   >
                     Clear
                   </button>
@@ -681,7 +681,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
                               {item.title}
                             </span>
                             {item.badge && (
-                              <span className={`px-1.5 py-0.2 rounded font-mono text-[9px] font-bold ${item.badge.includes('Quick Action') ? 'bg-amber-500/20 text-amber-300' : 'bg-cyan-500/20 text-cyan-300'}`}>
+                              <span className={`px-1.5 py-0.2 rounded font-mono text-[10px] font-bold ${item.badge.includes('Quick Action') ? 'bg-amber-500/20 text-amber-300' : 'bg-cyan-500/20 text-cyan-300'}`}>
                                 {item.badge}
                               </span>
                             )}

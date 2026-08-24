@@ -57,18 +57,20 @@ GALXAI employs an enterprise multi-tier deployment architecture designed for hig
 
 ## 3. Vercel Pre-Deployment & Production Workflow
 
-### Automated Verification Gate
+### Automated Verification & Deployment Workflow
 ```bash
 # 1. Run the unified 8-Phase Pre-Flight Audit & Next.js 15 build gate
 npm run deploy:check
 
-# 2. Inspect / generate formatted Vercel CLI sync commands
-npm run vercel:env:print
+# 2. Inspect / synchronize Vercel environment variables
+npm run vercel:env:print   # Inspect masked variables
+npm run vercel:env:sync    # Push variables to Vercel project
 
-# 3. Deploy to Vercel production
-npx vercel --prod
+# 3. Deploy to Vercel (Preview or Production)
+npm run vercel:deploy      # Deploy preview
+npm run vercel:deploy:prod # Deploy production
 
-# 4. Run automated live post-deployment smoke test suite
+# 4. Run automated 12-point live post-deployment smoke test suite
 npm run vercel:smoke -- --url=https://galx.ai
 ```
 

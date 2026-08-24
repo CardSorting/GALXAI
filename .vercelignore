@@ -19,10 +19,18 @@ worker-configuration.d.ts
 .data/
 .git/
 .github/
+.codex/
+.impeccable/
+.broccolidb/
+.DS_Store
+*.DS_Store
 
 # Documentation & Knowledge Bases
 docs/
 README.md
+DESIGN.md
+DESIGN_SCORECARD.md
+PRODUCT.md
 
 # Standalone Scripts & Database Management (Executed locally / CI, not in Next.js bundle)
 scripts/
@@ -31,8 +39,10 @@ Dockerfile
 docker-compose.yml
 skills-lock.json
 
-# Logs & Temporary Files
+# Caches, Logs & Temporary Files
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+tsconfig.tsbuildinfo
+*.tsbuildinfo

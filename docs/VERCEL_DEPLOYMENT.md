@@ -87,26 +87,27 @@ Configure the following environment variables in the **Vercel Project Settings >
 
 ---
 
-### Method B: Deploy via Vercel CLI
+### Method B: Deploy via Vercel CLI (or npm shortcuts)
 
-1. **Install or use Vercel CLI**:
+1. **Authenticate Vercel CLI**:
    ```bash
    npx vercel login
    ```
 
-2. **Link the project**:
+2. **Synchronize Environment Variables**:
    ```bash
-   npx vercel link
+   npm run vercel:env:print   # Inspect masked variables
+   npm run vercel:env:sync    # Push variables to Vercel
    ```
 
 3. **Deploy Preview build**:
    ```bash
-   npx vercel
+   npm run vercel:deploy
    ```
 
 4. **Deploy Production build**:
    ```bash
-   npx vercel --prod
+   npm run vercel:deploy:prod
    ```
 
 ---
@@ -139,4 +140,10 @@ The automated smoke suite validates:
 - [x] **Static Prerendering**: Verifies homepage HTML structure and page bundle delivery.
 - [x] **Edge OpenGraph Generator**: Checks `/opengraph-image` dynamic image generation.
 - [x] **Robots.txt & Sitemap**: Validates crawler directives and XML sitemap format.
-- [x] **Perimeter Security Headers**: Confirms `X-Content-Type-Options`, `X-Frame-Options`, and `Referrer-Policy` on live responses.
+- [x] **Perimeter Security Headers**: Confirms `X-Content-Type-Options`, `X-Frame-Options`, HSTS, and `Referrer-Policy`.
+- [x] **OpenAI Models Catalog**: Validates `/v1/models` list and SWR edge cache headers.
+- [x] **CORS Preflight**: Validates `OPTIONS /api/health` 204 handler.
+- [x] **OpenSearch XML**: Checks browser URL bar search discovery at `/opensearch.xml`.
+- [x] **Model RSS/Atom Feed**: Verifies XML syndicate feed at `/feed.xml`.
+- [x] **RFC 9116 Vulnerability Disclosure**: Verifies `/.well-known/security.txt`.
+- [x] **Individual Model Spec & SWR Caching**: Tests `/v1/models/[id]` edge response and headers.

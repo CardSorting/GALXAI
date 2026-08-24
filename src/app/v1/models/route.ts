@@ -60,7 +60,9 @@ export async function GET() {
     },
     {
       headers: {
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+        'x-galx-cached': 'edge-swr'
       }
     }
   );

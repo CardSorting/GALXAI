@@ -404,28 +404,43 @@ All internal, stateful, and developer management pages in GALXAI must implement 
 GALXAI maintains dedicated forensic test runners:
 
 ```bash
-# 1. Universal Zero-Hesitation Ergonomics & Mental Model Suite (98 automated tests)
+# 1. Complete Pre-Deployment Quality & Build Pipeline (Audit + Lint + SSG Build)
+npm run deploy:check
+
+# 2. 8-Phase Enterprise Vercel Pre-Flight Readiness Engine
+npm run vercel:verify
+
+# 3. 12-Point Post-Deployment Live Smoke Probes
+npm run vercel:smoke -- --url=https://galx.ai
+
+# 4. Vercel Secret Synchronizer
+npm run vercel:env:print   # Masked preview
+npm run vercel:env:sync    # Push to project
+
+# 5. Universal Zero-Hesitation Ergonomics & Mental Model Suite (98 automated tests)
 npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 
-# 2. Universal Router, Privacy, SOC2, BroccoliDB & API Strategy Suite (177 forensic tests)
+# 6. Universal Router, Privacy, SOC2, BroccoliDB & API Strategy Suite (177 forensic tests)
 npm run test:router
 # (or: npx tsx scripts/validate-galxai-router.ts)
 
-# 3. Cloudflare Edge Mesh Verification Suite (46 edge tests)
+# 7. 6-Stage Operational Lifecycle Diagnostics Playbook
+npm run playbook
+
+# 8. Supabase Paranoid PostgreSQL Schema & RLS Auditor
+npm run db:verify
+
+# 9. Cloudflare Edge Mesh Verification Suite (46 edge tests)
 npm run worker:test
 # (or: npx tsx scripts/test-cloudflare-workers.ts)
 
-# 4. SDK -> Cloudflare Edge Live Smoke Test
+# 10. SDK -> Cloudflare Edge Live Smoke Test
 npx tsx scripts/test-sdk-edge.ts
 
-# 5. Supabase PostgreSQL & Integration Test Suite
-npm run test:supabase
-# (or: npx tsx scripts/test-supabase-integration.ts)
+# 11. TypeScript Type-Check & ESLint 9 Flat Config
+npm run lint
 
-# 6. TypeScript Type-Check
-npx tsc --noEmit
-
-# 7. Production Build Validation
+# 12. Full Production Build (300 SSG Pages)
 npm run build
 ```
 

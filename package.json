@@ -38,7 +38,9 @@
     "playbook": "tsx scripts/run-lifecycle-playbook.ts",
     "vercel:smoke": "tsx scripts/verify-deployment-smoke.ts",
     "vercel:env:sync": "tsx scripts/sync-vercel-env.ts",
-    "vercel:env:print": "tsx scripts/sync-vercel-env.ts --print-cli"
+    "vercel:env:print": "tsx scripts/sync-vercel-env.ts --print-cli",
+    "vercel:deploy": "vercel",
+    "vercel:deploy:prod": "vercel --prod"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

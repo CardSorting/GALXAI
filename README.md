@@ -251,6 +251,8 @@ Explore our complete documentation library in [`docs/`](docs/README.md):
 - **[Multi-Ecosystem SDK Cheatsheet](docs/SDK_CHEATSHEET.md)**
 - **[Quickstart Integration Guide](docs/QUICKSTART.md)**
 - **[Universal API Reference](docs/API_REFERENCE.md)**
+- **[Production Infrastructure & Deployment Guide](docs/DEPLOYMENT.md)**
+- **[Vercel Production Deployment & Hardening Guide](docs/VERCEL_DEPLOYMENT.md)**
 - **[Performance Benchmarks & Stress Analysis](docs/BENCHMARKS.md)**
 - **[Frequently Asked Questions (FAQs)](docs/FAQS.md)**
 - **[System Architecture Specification](docs/ARCHITECTURE.md)**

@@ -22,7 +22,22 @@ colors:
   accent-emerald: "#10b981"
   accent-cyan: "#00f0ff"
   accent-rose: "#f43f5e"
+  black: "#000000"
+  zinc-500: "#71717a"
+  zinc-300: "#d4d4d8"
+  emerald-400: "#34d399"
+  amber-400: "#fbbf24"
+  cyan-glow: "rgba(6, 182, 212, 0.15)"
+  shadow-subtle: "rgba(0, 0, 0, 0.37)"
+  shadow-heavy: "rgba(0, 0, 0, 0.4)"
+  card-glow: "rgba(24, 30, 56, 0.75)"
+  track-dark: "rgba(10, 12, 20, 0.5)"
 typography:
+  heading-22:
+    fontFamily: "Inter, system-ui, sans-serif"
+    fontSize: "22px"
+    fontWeight: 600
+    lineHeight: 1.25
   display-2xl:
     fontFamily: "Inter, system-ui, sans-serif"
     fontSize: "3.75rem"

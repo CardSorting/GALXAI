@@ -6,6 +6,18 @@ import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-galx-key, x-galx-shard-id',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
+}
+
 /**
  * Universal Platform Health & Vercel Diagnostic Telemetry Discovery API.
  * GET /api/health

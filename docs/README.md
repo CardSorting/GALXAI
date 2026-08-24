@@ -27,6 +27,8 @@ Welcome to the comprehensive technical documentation and operational guides for 
 - **[Developer & Contributing Guide](DEVELOPER_GUIDE.md)**: Codebase organization, provider adapter design, and test suite conventions.
 - **[Architecture Decision Records (ADRs)](adr/README.md)**: 50 formal architectural specifications governing security, pSEO/AEO saturation, interactive developer tools, and SLA failovers.
 - **[Operational SRE Playbooks](playbooks/README.md)**: 7 lifecycle runbooks for deployment, incident remediation, and secret rotation.
+- **[Production Infrastructure & Deployment Guide](DEPLOYMENT.md)**: Multi-target deployment topology across Vercel, Cloudflare Edge, Docker, and Kubernetes.
+- **[Vercel Production Deployment & Hardening Guide](VERCEL_DEPLOYMENT.md)**: Complete guide for Next.js 15 deployment on Vercel, 8-phase pre-flight verification, environment sync, and 12-point automated live smoke testing.
 - **[Programmatic SEO (pSEO), AEO & GEO Strategy](PSEO_AND_AEO_STRATEGY.md)**: Comprehensive architectural strategy covering 13 interactive developer tools, 14 programmatic content hubs, Schema.org `@graph` ontology, and machine-readable `llms.txt` standards.
 - **[Interactive Developer Tools Suite](../src/app/tools)**: Suite of 13 interactive browser tools including Enterprise LLM ROI & Token Budget Calculator, AI Token Streaming & Speed Benchmark Simulator, 1M Context Window Visualizer, Prompt Caching Estimator, BPE Token Counter, and Model Cost Comparator.
 - **[AEO Engineering Glossary Hub](../src/app/glossary)**: 14 dedicated programmatic glossary term portals (`/glossary/[slug]`) with Schema.org `DefinedTermSet` and Wikidata entity mapping.
