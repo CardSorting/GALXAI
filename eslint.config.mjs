@@ -10,6 +10,20 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  {
+    ignores: [
+      ".next/**",
+      "node_modules/**",
+      ".wrangler/**",
+      "worker-configuration.d.ts",
+      "docs/**",
+      "scripts/**",
+      "supabase/**",
+      ".agents/**",
+      ".broccolidb/**",
+      ".impeccable/**"
+    ],
+  },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
     rules: {
@@ -22,16 +36,7 @@ const eslintConfig = [
       "import/no-anonymous-default-export": "off",
       "react/no-unescaped-entities": "off",
       "react/jsx-no-comment-textnodes": "off"
-    },
-    ignores: [
-      ".next/*",
-      "node_modules/*",
-      ".wrangler/*",
-      "worker-configuration.d.ts",
-      "docs/*",
-      "scripts/*",
-      "supabase/*"
-    ]
+    }
   }
 ];
 
