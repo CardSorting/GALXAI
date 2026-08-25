@@ -105,20 +105,20 @@ export const CURATED_MATCHUPS: ModelMatchup[] = [
     ],
   },
   {
-    slug: 'openai-gpt-image-2-vs-openai-dalle-3',
+    slug: 'openai-gpt-image-2-vs-openai-gpt-image-1.5',
     modelAId: 'openai-gpt-image-2',
-    modelBId: 'openai-dalle-3',
-    title: 'OpenAI GPT-Image-2 vs DALL-E 3 Visual Synthesis Benchmark',
-    headline: 'Visual Synthesis SOTA: GPT-Image-2 vs DALL-E 3',
+    modelBId: 'openai-gpt-image-1.5',
+    title: 'OpenAI GPT-Image-2 vs GPT-Image-1.5 Visual Synthesis Benchmark',
+    headline: 'Visual Synthesis SOTA: GPT-Image-2 vs GPT-Image-1.5',
     description:
-      'Detailed visual quality, typography rendering, prompt fidelity, and per-image pricing comparison between GPT-Image-2 and DALL-E 3 on GALXAI.',
+      'Detailed visual quality, typography rendering, prompt fidelity, and per-image pricing comparison between GPT-Image-2 and GPT-Image-1.5 on GALXAI.',
     verdict: {
       summary:
-        'GPT-Image-2 represents next-generation image synthesis with photorealistic text rendering and complex scene composition, while DALL-E 3 remains a reliable baseline for artistic illustrations.',
-      modelABestFor: 'Marketing assets with embedded readable text, photorealistic product renders, UI mockups.',
-      modelBBestFor: 'Stylized digital art, concept sketches, surreal illustrations.',
+        'GPT-Image-2 represents flagship 4K image synthesis with photorealistic text rendering and complex scene composition, while GPT-Image-1.5 offers balanced photorealistic asset creation at lower cost.',
+      modelABestFor: 'Flagship 4K visual assets, complex text layouts, raytraced scene composition.',
+      modelBBestFor: 'Photorealistic product mockups, rapid creative iterations.',
       costDifferenceSummary:
-        'GPT-Image-2 is $0.032/image (-20% wholesale) vs DALL-E 3 at $0.030/image (-25% wholesale) on GALXAI.',
+        'GPT-Image-2 is $0.060/image (-25% wholesale) vs GPT-Image-1.5 at $0.045/image (-25% wholesale) on GALXAI.',
     },
     faqs: [
       {

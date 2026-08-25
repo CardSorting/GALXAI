@@ -7,7 +7,7 @@ import type { DbQueryOptions, DbAggregateQuery } from '../broccolidb/broccolidb.
 /**
  * Exclusive Model Catalog for GALXAI.
  * Houses only the requested flagship modern generation LLMs & visual synthesis engines:
- * - OpenAI Codex: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `openai-gpt-image-2`, `openai-gpt-image-1.5`, `openai-gpt-image-1`, `openai-gpt4o-image`, `openai-dalle-3`, `openai-dalle-2`, `text-embedding-3-small`, `text-embedding-3-large`
+ * - OpenAI Codex: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `openai-gpt-image-2`, `openai-gpt-image-1.5`, `openai-gpt-image-1`, `text-embedding-3-small`, `text-embedding-3-large`
  * - xAI Grok: `x-ai/grok-4.6`, `x-ai/grok-4.5`, `xai-grok-image`, `xai-grok-2-image`
  *
  * Features competitive pricing with 20-36% discount vs direct list price + 75% prompt caching discount.
@@ -166,60 +166,6 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsReasoning: false,
     supportsStreaming: false,
     description: 'Rapid image generation engine optimized for low latency iterative visual prototyping.'
-  },
-  {
-    id: 'openai-gpt4o-image',
-    upstreamId: 'gpt-4o-image',
-    name: 'OpenAI GPT-4o Image (Multimodal Synthesis)',
-    provider: 'openai',
-    category: 'image',
-    contextWindowTokens: 128_000,
-    maxOutputTokens: 4_096,
-    listPricePer1MInput: 0.050,
-    listPricePer1MOutput: 0.050,
-    inputPricePer1M: 0.038, // 24% Discount
-    outputPricePer1M: 0.038,
-    discountPercentage: 24,
-    supportsVision: true,
-    supportsReasoning: true,
-    supportsStreaming: false,
-    description: 'Native conversational visual generation with multimodal prompt understanding.'
-  },
-  {
-    id: 'openai-dalle-3',
-    upstreamId: 'dall-e-3',
-    name: 'OpenAI DALL·E 3 (Artistic & Conceptual)',
-    provider: 'openai',
-    category: 'image',
-    contextWindowTokens: 128_000,
-    maxOutputTokens: 4_096,
-    listPricePer1MInput: 0.040,
-    listPricePer1MOutput: 0.040,
-    inputPricePer1M: 0.030, // 25% Discount
-    outputPricePer1M: 0.030,
-    discountPercentage: 25,
-    supportsVision: false,
-    supportsReasoning: false,
-    supportsStreaming: false,
-    description: 'High-detail artistic styling, intricate prompt comprehension, and high-fidelity rendering.'
-  },
-  {
-    id: 'openai-dalle-2',
-    upstreamId: 'dall-e-2',
-    name: 'OpenAI DALL·E 2 (Legacy Fast Prototyping)',
-    provider: 'openai',
-    category: 'image',
-    contextWindowTokens: 128_000,
-    maxOutputTokens: 4_096,
-    listPricePer1MInput: 0.020,
-    listPricePer1MOutput: 0.020,
-    inputPricePer1M: 0.014, // 30% Discount
-    outputPricePer1M: 0.014,
-    discountPercentage: 30,
-    supportsVision: false,
-    supportsReasoning: false,
-    supportsStreaming: false,
-    description: 'Fast and lightweight 512x512/1024x1024 visual diffusion for rapid layout drafts.'
   },
 
   // --- 4. xAI Grok Visual Synthesis Suite ---
@@ -540,15 +486,15 @@ export class ModelCatalog {
       'gpt-image-1-5': 'openai-gpt-image-1.5',
       'photoreal': 'openai-gpt-image-1.5',
       'gpt-image-1': 'openai-gpt-image-1',
-      'gpt4o-image': 'openai-gpt4o-image',
-      'gpt-4o-image': 'openai-gpt4o-image',
-      'dalle': 'openai-dalle-3',
-      'dalle-3': 'openai-dalle-3',
-      'dalle3': 'openai-dalle-3',
-      'dall-e': 'openai-dalle-3',
-      'dall-e-3': 'openai-dalle-3',
-      'dalle-2': 'openai-dalle-2',
-      'dall-e-2': 'openai-dalle-2',
+      'gpt4o-image': 'openai-gpt-image-2',
+      'gpt-4o-image': 'openai-gpt-image-2',
+      'dalle': 'openai-gpt-image-2',
+      'dalle-3': 'openai-gpt-image-2',
+      'dalle3': 'openai-gpt-image-2',
+      'dall-e': 'openai-gpt-image-2',
+      'dall-e-3': 'openai-gpt-image-2',
+      'dalle-2': 'openai-gpt-image-1',
+      'dall-e-2': 'openai-gpt-image-1',
       'grok-image': 'xai-grok-image',
       'grok-imagine': 'xai-grok-image',
       'imagine': 'xai-grok-image',

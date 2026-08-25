@@ -60,13 +60,10 @@ Rebates scale automatically with monthly token volume without requiring sales ca
 ### Visual Synthesis & Image Generation Fleet
 | Model ID | Provider | Resolution | Retail List Price | GALXAI Base Rate | Wholesale Discount |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`openai-gpt-image-2`** | OpenAI | $1792 \times 1024$ | $0.080 / \text{img}$ | **$0.060 / \text{img}$** | **25% OFF** |
+| **`openai-gpt-image-2`** | OpenAI | $3840 \times 2160$ | $0.080 / \text{img}$ | **$0.060 / \text{img}$** | **25% OFF** |
 | **`openai-gpt-image-1.5`**| OpenAI | $1024 \times 1024$ | $0.060 / \text{img}$ | **$0.045 / \text{img}$** | **25% OFF** |
-| **`openai-gpt-image-1`** | OpenAI | $1024 \times 1024$ | $0.040 / \text{img}$ | **$0.030 / \text{img}$** | **30% OFF** |
-| **`openai-gpt4o-image`** | OpenAI | $1024 \times 1024$ | $0.050 / \text{img}$ | **$0.038 / \text{img}$** | **24% OFF** |
-| **`openai-dalle-3`** | OpenAI | $1792 \times 1024$ | $0.040 / \text{img}$ | **$0.030 / \text{img}$** | **25% OFF** |
-| **`openai-dalle-2`** | OpenAI | $512 \times 512$ | $0.020 / \text{img}$ | **$0.014 / \text{img}$** | **30% OFF** |
-| **`xai-grok-image`** | xAI Grok | $1024 \times 1024$ | $0.050 / \text{img}$ | **$0.036 / \text{img}$** | **28% OFF** |
+| **`openai-gpt-image-1`** | OpenAI | $1024 \times 1024$ | $0.040 / \text{img}$ | **$0.028 / \text{img}$** | **30% OFF** |
+| **`xai-grok-image`** | xAI Grok | $1024 \times 1024$ | $0.050 / \text{img}$ | **$0.038 / \text{img}$** | **24% OFF** |
 | **`xai-grok-2-image`** | xAI Grok | $1024 \times 1024$ | $0.040 / \text{img}$ | **$0.028 / \text{img}$** | **30% OFF** |
 
 ---

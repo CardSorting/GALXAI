@@ -55,8 +55,7 @@ function BaseFooter() {
       { name: 'OpenAI GPT-5.6 Terra', href: '/models/gpt-5.6-terra', note: 'Balanced Frontier' },
       { name: 'OpenAI GPT-5.6 Luna', href: '/models/gpt-5.6-luna', note: 'Sub-second Speed' },
       { name: 'OpenAI GPT-Image-2', href: '/models/openai-gpt-image-2', note: 'Visual Engine' },
-      { name: 'OpenAI GPT-Image-1.5', href: '/models/openai-gpt-image-1.5', note: 'Photoreal Image' },
-      { name: 'OpenAI DALL-E 3', href: '/models/openai-dalle-3', note: 'High Definition' },
+      { name: 'OpenAI GPT-Image-1', href: '/models/openai-gpt-image-1', note: 'Turbo Diffusion' },
       { name: 'Text-Embedding-3 Small', href: '/models/text-embedding-3-small', note: 'Dense 1536d' },
     ],
     developers: [

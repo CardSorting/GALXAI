@@ -65,9 +65,10 @@ const completion = await client.chat.completions.create({
 - **x-ai/grok-4.6**: xAI 1,000,000 Token Context Flagship. Input: $2.80/1M (-30%), Output: $11.20/1M (-30%), Cached: $0.75/1M (-75%). Context: 1M tokens. Max output: 64K.
 - **x-ai/grok-4.5**: xAI 500K Context Multimodal Reasoning. Input: $2.40/1M (-20%), Output: $12.00/1M (-20%), Cached: $0.75/1M (-75%). Context: 500K tokens. Max output: 32K.
 - **Visual Synthesis Engines**:
-  - `openai-gpt-image-2`: Photorealistic typography and scenes ($0.032/image, -20%).
-  - `openai-dalle-3`: High-definition digital art ($0.030/image, -25%).
-  - `xai-grok-image`: Vibrant atmospheric visual synthesis ($0.030/image, -25%).
+  - `openai-gpt-image-2`: Flagship 4K visual synthesis & typography ($0.060/image, -25%).
+  - `openai-gpt-image-1.5`: Photorealistic image synthesis ($0.045/image, -25%).
+  - `openai-gpt-image-1`: Fast iterative diffusion ($0.028/image, -30%).
+  - `xai-grok-image`: Vibrant atmospheric visual synthesis ($0.038/image, -24%).
 
 ## Interactive Developer Tools
 - [AI Token Streaming & Speed Benchmark Simulator](https://galx.ai/tools/stream-benchmark): Simulate real-time token velocities (142 tok/s for Luna, 92 tok/s for Terra) and TTFT latency.

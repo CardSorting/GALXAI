@@ -20,13 +20,10 @@ GALXAI exclusively routes traffic across modern flagship LLMs, reasoning engines
 
 | Model ID | Provider | Max Resolution | Aspect Ratios Supported | Formats | GALXAI Price | List Price | Discount |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`openai-gpt-image-2`** | OpenAI Codex | $1792 \times 1024$ | `16:9`, `9:16`, `4:3`, `3:2`, `1:1` | URL, Base64 | **$0.060** | $0.080 | **25% OFF** |
+| **`openai-gpt-image-2`** | OpenAI Codex | $3840 \times 2160$ | `16:9`, `9:16`, `4:3`, `3:2`, `1:1` | URL, Base64 | **$0.060** | $0.080 | **25% OFF** |
 | **`openai-gpt-image-1.5`** | OpenAI Codex | $1024 \times 1024$ | `16:9`, `9:16`, `1:1` | URL, Base64 | **$0.045** | $0.060 | **25% OFF** |
-| **`openai-gpt-image-1`** | OpenAI Codex | $1024 \times 1024$ | `1:1` | URL, Base64 | **$0.030** | $0.040 | **30% OFF** |
-| **`openai-gpt4o-image`** | OpenAI Multimodal | $1024 \times 1024$ | `1:1` | URL, Base64 | **$0.038** | $0.050 | **24% OFF** |
-| **`openai-dalle-3`** | OpenAI DALL·E 3 | $1792 \times 1024$ | `16:9`, `9:16`, `1:1` | URL, Base64 | **$0.030** | $0.040 | **25% OFF** |
-| **`openai-dalle-2`** | OpenAI DALL·E 2 | $512 \times 512$ | `1:1` | URL, Base64 | **$0.014** | $0.020 | **30% OFF** |
-| **`xai-grok-image`** | xAI Imagine 1.0 | $1024 \times 1024$ | `16:9`, `9:16`, `1:1` | URL | **$0.036** | $0.050 | **28% OFF** |
+| **`openai-gpt-image-1`** | OpenAI Codex | $1024 \times 1024$ | `1:1` | URL, Base64 | **$0.028** | $0.040 | **30% OFF** |
+| **`xai-grok-image`** | xAI Imagine 1.0 | $1024 \times 1024$ | `16:9`, `9:16`, `1:1` | URL | **$0.038** | $0.050 | **24% OFF** |
 | **`xai-grok-2-image`** | xAI Grok-2 Image | $1024 \times 1024$ | `1:1` | URL | **$0.028** | $0.040 | **30% OFF** |
 
 ---

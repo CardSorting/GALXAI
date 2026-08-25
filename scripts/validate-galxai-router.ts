@@ -575,12 +575,15 @@ async function runAllTests() {
     assert.strictEqual(gptImg?.id, 'openai-gpt-image-2');
     assert.strictEqual(gptImg?.category, 'image');
 
+    const gptImg15 = ModelCatalog.resolveModel('openai-gpt-image-1.5');
+    assert.strictEqual(gptImg15?.id, 'openai-gpt-image-1.5');
+
     const grokImg = ModelCatalog.resolveModel('xai-grok-image');
     assert.strictEqual(grokImg?.id, 'xai-grok-image');
     assert.strictEqual(grokImg?.upstreamId, 'grok-imagine-1.0');
 
     const dalle = ModelCatalog.resolveModel('dalle-3');
-    assert.strictEqual(dalle?.id, 'openai-dalle-3');
+    assert.strictEqual(dalle?.id, 'openai-gpt-image-2');
   });
 
   // --- SUITE 6: Preflight Key Format & Upstream Target Validation ---

@@ -287,13 +287,13 @@ for batch_chunk in dataset_chunks:
     slug: 'visual-synthesis',
     name: 'Enterprise Visual Studio & Image Generation',
     badge: 'GPT-Image-2 & DALL-E 3',
-    title: 'Enterprise Visual Synthesis API with GPT-Image-2 & DALL-E 3',
+    title: 'Enterprise Visual Synthesis API with GPT-Image-2 & GPT-Image-1.5',
     headline: 'Enterprise Image Generation API with Wholesale Rates',
     description:
-      'Generate ultra-high-definition marketing graphics, UI mockups, and stylized illustrations at 20%–25% below direct list prices using standard OpenAI /v1/images endpoints.',
+      'Generate ultra-high-definition marketing graphics, UI mockups, and photorealistic renders at 25% below direct list prices using standard OpenAI /v1/images endpoints.',
     targetWorkload: 'Marketing creative generation, photorealistic product rendering, typography generation.',
     primaryModelId: 'openai-gpt-image-2',
-    fallbackModelId: 'openai-dalle-3',
+    fallbackModelId: 'openai-gpt-image-1.5',
     estimatedSavingsPct: 25,
     keyBenefits: [
       {

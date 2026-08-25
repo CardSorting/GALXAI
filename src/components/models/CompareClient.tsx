@@ -105,10 +105,10 @@ export function CompareClient() {
             </button>
 
             <button
-              onClick={() => setSelectedIds(['openai-gpt-image-2', 'openai-dalle-3'])}
+              onClick={() => setSelectedIds(['openai-gpt-image-2', 'openai-gpt-image-1.5'])}
               className="px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 transition-all cursor-pointer"
             >
-              <span>🎨 Visual Studio (GPT-Image-2 vs DALL-E 3)</span>
+              <span>🎨 Visual Studio (GPT-Image-2 vs GPT-Image-1.5)</span>
             </button>
           </div>
         </section>

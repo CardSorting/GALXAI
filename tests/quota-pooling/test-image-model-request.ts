@@ -79,9 +79,12 @@ async function requestImageModelFromPool() {
 
   // 2. Resolve Model Catalog Spec
   const modelSpec = ModelCatalog.resolveModel('openai-gpt-image-2');
+  const retailCost = modelSpec.listPricePer1MInput ?? 0.080;
+  const wholesaleCost = modelSpec.inputPricePer1M ?? 0.060;
+
   console.log(`[Model Selected] ${modelSpec.name} (${modelSpec.id})`);
   console.log(`  Category: ${modelSpec.category} | Wholesale Discount: ${modelSpec.discountPercentage}% OFF`);
-  console.log(`  List Price: $${modelSpec.listPricePer1MInput.toFixed(3)} | Effective Price: $${modelSpec.inputPricePer1M.toFixed(3)}`);
+  console.log(`  List Price: $${retailCost.toFixed(3)} | Effective Price: $${wholesaleCost.toFixed(3)}`);
   console.log(`  Features: ${modelSpec.description}`);
 
   const prompt = 'Ultra 4K high-definition futuristic cybernetic AI computing center with glowing neural glass conduits, holographic typography displaying "GALXAI GPT-IMAGE-2", cinematic volumetric blue and gold lighting, raytraced reflections, octane render 3D masterwork.';
@@ -121,11 +124,6 @@ async function requestImageModelFromPool() {
   const imageResolution = '3840x2160 (Ultra 4K)';
   const imageQuality = 'hd';
   const aspectRatio = '16:9';
-
-  // Cost Calculus
-  const retailCost = modelSpec.listPricePer1MInput;
-  const wholesaleCost = modelSpec.inputPricePer1M;
-  const userSavings = retailCost - wholesaleCost;
 
   const actualTokensConsumed = 200;
   const executionTimeMs = Date.now() - startTime;
