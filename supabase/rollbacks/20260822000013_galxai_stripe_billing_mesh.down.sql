@@ -1,0 +1,8 @@
+DROP FUNCTION IF EXISTS fn_fulfill_stripe_checkout_session(VARCHAR, VARCHAR, VARCHAR, VARCHAR);
+DROP FUNCTION IF EXISTS fn_record_stripe_checkout_session(VARCHAR, VARCHAR, VARCHAR, NUMERIC, NUMERIC, NUMERIC, JSONB);
+DROP FUNCTION IF EXISTS fn_upsert_stripe_customer(VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, JSONB);
+
+DROP TABLE IF EXISTS galx_stripe_events CASCADE;
+DROP TABLE IF EXISTS galx_stripe_invoices CASCADE;
+DROP TABLE IF EXISTS galx_stripe_checkout_sessions CASCADE;
+DROP TABLE IF EXISTS galx_stripe_customers CASCADE;

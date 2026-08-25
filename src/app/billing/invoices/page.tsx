@@ -11,14 +11,9 @@ import {
   CheckCircle2,
   Eye,
   Download,
-  Receipt,
-  FileText,
-  Printer,
   Check,
   Search,
-  SlidersHorizontal,
-  ExternalLink,
-  ShieldCheck
+  ExternalLink
 } from 'lucide-react';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
@@ -80,6 +75,24 @@ export default function InvoicesPage() {
   const [profileSavedMsg, setProfileSavedMsg] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedCsv, setCopiedCsv] = useState(false);
+  const [isOpeningPortal, setIsOpeningPortal] = useState(false);
+
+  const handleOpenPortal = async () => {
+    setIsOpeningPortal(true);
+    try {
+      const res = await fetch('/api/stripe/portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ returnUrl: window.location.href })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (data?.success && data.url) {
+        window.location.href = data.url;
+      }
+    } finally {
+      setIsOpeningPortal(false);
+    }
+  };
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,13 +148,22 @@ export default function InvoicesPage() {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white">Business Tax Invoices & Statements</h1>
+            <h1 className="text-2xl sm:text-3xl font-black text-white">Business Tax Invoices &amp; Statements</h1>
             <p className="text-xs text-zinc-400">
               Download and print official monthly tax receipts for corporate accounting and tax reporting.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={handleOpenPortal}
+              disabled={isOpeningPortal}
+              className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-mono font-bold flex items-center gap-2 border border-white/10 transition-all cursor-pointer disabled:opacity-50"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-cyan-400" />
+              <span>{isOpeningPortal ? 'Connecting...' : 'Stripe Receipts &amp; Portal'}</span>
+            </button>
+
             <button
               onClick={handleExportCsv}
               className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-mono font-bold flex items-center gap-2 border border-white/10 transition-all cursor-pointer"

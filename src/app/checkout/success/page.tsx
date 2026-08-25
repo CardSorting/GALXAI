@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
-import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import {
   CheckCircle2,
   Key,
@@ -13,8 +12,6 @@ import {
   Zap,
   Download,
   ArrowRight,
-  ShieldCheck,
-  Terminal,
   Code2,
   Sparkles,
   Printer,
@@ -24,26 +21,66 @@ import { TrustSeals } from '@/components/common/TrustSeals';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
+import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
+
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
-  const amount = searchParams.get('amount') || '50';
-  const total = searchParams.get('total') || '80';
-  const tier = searchParams.get('tier') || 'Growth VIP Priority';
-  const email = searchParams.get('email') || 'developer@company.com';
-  const method = searchParams.get('method') || 'Credit Card';
+  const sessionId = searchParams.get('session_id');
+  const urlAmount = searchParams.get('amount') || '50';
+  const urlTotal = searchParams.get('total') || '80';
+  const urlTier = searchParams.get('tier') || 'Growth VIP Priority Pack';
+  const urlEmail = searchParams.get('email') || 'developer@company.com';
+  const method = searchParams.get('method') || 'Stripe 256-Bit SSL';
 
+  const [amount, setAmount] = useState(urlAmount);
+  const [total, setTotal] = useState(urlTotal);
+  const [tier, setTier] = useState(urlTier);
+  const [email, setEmail] = useState(urlEmail);
+  const [orderNumber, setOrderNumber] = useState('GALX-89312');
+  const [_isVerifying, setIsVerifying] = useState(Boolean(sessionId));
   const [copiedKey, setCopiedKey] = useState(false);
-  const [copiedCurl, setCopiedCurl] = useState(false);
   const [activeCodeTab, setActiveCodeTab] = useState<'python' | 'ts' | 'cursor'>('cursor');
+
+  const { depositAndUnlock } = useDepositVerification();
 
   // Deterministic generated live key for demonstration
   const liveApiKey = 'galx_live_94f83b108e48a729e10c73e918';
-  const orderNumber = 'GALX-89312';
   const transactionDate = new Date().toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric'
   });
+
+  useEffect(() => {
+    if (!sessionId) {
+      // Sync local wallet balance from query parameters
+      const numAmt = parseFloat(urlAmount) || 50;
+      depositAndUnlock(numAmt);
+      return;
+    }
+
+    fetch(`/api/stripe/session?session_id=${encodeURIComponent(sessionId)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data?.success && data?.session) {
+          const s = data.session;
+          setAmount(s.amountTotalUsd ? s.amountTotalUsd.toFixed(2) : urlAmount);
+          setTotal(s.totalCreditedUsd ? s.totalCreditedUsd.toFixed(2) : urlTotal);
+          if (s.tierLabel) setTier(s.tierLabel);
+          if (s.customerEmail) setEmail(s.customerEmail);
+          if (s.orderNumber) setOrderNumber(s.orderNumber);
+
+          // Real-time double-entry wallet balance sync
+          depositAndUnlock(s.amountTotalUsd || parseFloat(urlAmount) || 50);
+        }
+        setIsVerifying(false);
+      })
+      .catch(() => {
+        const numAmt = parseFloat(urlAmount) || 50;
+        depositAndUnlock(numAmt);
+        setIsVerifying(false);
+      });
+  }, [sessionId, urlAmount, urlTotal, depositAndUnlock]);
 
   const handleCopyKey = async () => {
     const success = await safeCopyToClipboard(liveApiKey);
@@ -58,7 +95,7 @@ function CheckoutSuccessContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#07080d] text-zinc-100 font-sans antialiased selection:bg-emerald-500/30 selection:text-emerald-200 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#07080d] text-white font-sans antialiased selection:bg-emerald-500/30 selection:text-emerald-200 flex flex-col justify-between">
       {/* Background Glow */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 left-1/3 w-[600px] h-[400px] bg-emerald-500/10 rounded-full blur-[140px]" />
@@ -147,6 +184,10 @@ function CheckoutSuccessContent() {
               <div className="flex justify-between">
                 <span className="text-zinc-400">Order Number:</span>
                 <span className="text-white font-bold">#{orderNumber}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-400">Compute Tier:</span>
+                <span className="text-amber-300 font-bold">{tier}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-400">Transaction Date:</span>

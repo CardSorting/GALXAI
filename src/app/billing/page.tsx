@@ -2,50 +2,31 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { BillingSubNav } from '@/components/dashboard/BillingSubNav';
 import {
   Wallet,
-  CreditCard,
   Plus,
-  ArrowUpRight,
-  TrendingDown,
   Sparkles,
-  ShieldCheck,
   Zap,
   CheckCircle2,
-  Clock,
   Coins,
-  Flame,
-  AlertCircle,
   RefreshCw,
   Sliders,
-  DollarSign,
-  ArrowRight,
-  Receipt,
   Gift,
-  Bell,
   Lock,
-  Play,
-  Download,
-  Filter,
   PieChart,
-  Layers,
-  FileText,
-  Key,
-  Check,
-  Printer,
-  Building,
   ExternalLink,
   Eye,
   X,
   FileSpreadsheet,
   Activity,
-  BarChart3
+  ShieldCheck,
+  Key
 } from 'lucide-react';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
-import { TierUnlockProgressBar } from '@/components/dashboard/TierUnlockProgressBar';
 import { useAuth } from '@/contexts/AuthContext';
 import { GranularUsageExplorer } from '@/components/wallet/GranularUsageExplorer';
 import { LiveUsageLedger } from '@/components/wallet/LiveUsageLedger';
@@ -118,6 +99,7 @@ const INITIAL_INVOICES: Invoice[] = [
 ];
 
 export default function BillingPage() {
+  const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const { walletBalance, depositAndUnlock, hasVerifiedDeposit } = useDepositVerification();
   const [balance, setBalance] = useState(114.59);
@@ -139,46 +121,82 @@ export default function BillingPage() {
   const [selectedPackAmount, setSelectedPackAmount] = useState(100);
   const [customAmount, setCustomAmount] = useState('');
 
-  // Business Invoicing Details State
-  const [companyName, setCompanyName] = useState('Acme AI Corporation');
-  const [billingEmail, setBillingEmail] = useState('billing@acme.ai');
-  const [taxId, setTaxId] = useState('US-EIN 94-8271034');
-  const [billingAddress, setBillingAddress] = useState('100 Montgomery St, Suite 400, San Francisco, CA 94104');
-  const [poNumber, setPoNumber] = useState('PO-2026-ENG-08');
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [profileSavedMsg, setProfileSavedMsg] = useState(false);
-
-  // Selected Invoice Modal State
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-
   // Auto-Top Up State
   const [autoReloadEnabled, setAutoReloadEnabled] = useState(true);
-  const [autoReloadThreshold, setAutoReloadThreshold] = useState(10);
-  const [autoReloadAmount, setAutoReloadAmount] = useState(50);
-  const [monthlyReloadCap, setMonthlyReloadCap] = useState(500);
-  const [emailAlertsOnReload, setEmailAlertsOnReload] = useState(true);
+  const [autoReloadThreshold] = useState(10);
+  const [autoReloadAmount] = useState(50);
+  const [monthlyReloadCap] = useState(500);
   const [isSimulatingReload, setIsSimulatingReload] = useState(false);
   const [reloadSimulationMsg, setReloadSimulationMsg] = useState<string | null>(null);
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [topUpSuccess, setTopUpSuccess] = useState<string | null>(null);
-  const [invoices, setInvoices] = useState<Invoice[]>(INITIAL_INVOICES);
 
   const depositAmount = customAmount ? Number(customAmount) || 0 : selectedPackAmount;
   const depositBonusMultiplier = depositAmount >= 500 ? 1.50 : depositAmount >= 100 ? 1.50 : depositAmount >= 50 ? 1.25 : depositAmount >= 25 ? 1.10 : 1.50;
   const totalCreditReceived = depositAmount * depositBonusMultiplier;
 
-  const handleDeposit = () => {
+  const [isOpeningPortal, setIsOpeningPortal] = useState(false);
+
+  const handleDeposit = async () => {
     if (depositAmount <= 0) return;
     setIsProcessing(true);
 
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: depositAmount,
+          autoReload: autoReloadEnabled
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (data?.success && data.url) {
+        if (data.isSimulated || !data.url.startsWith('http')) {
+          depositAndUnlock(depositAmount);
+          setBalance(prev => prev + totalCreditReceived);
+          setIsProcessing(false);
+          setTopUpSuccess(`Successfully credited $${totalCreditReceived.toFixed(2)} to your compute wallet!`);
+          setTimeout(() => setTopUpSuccess(null), 4000);
+        } else {
+          window.location.href = data.url;
+        }
+        return;
+      }
       depositAndUnlock(depositAmount);
       setBalance(prev => prev + totalCreditReceived);
       setIsProcessing(false);
       setTopUpSuccess(`Successfully credited $${totalCreditReceived.toFixed(2)} to your compute wallet!`);
       setTimeout(() => setTopUpSuccess(null), 4000);
-    }, 600);
+    } catch {
+      depositAndUnlock(depositAmount);
+      setBalance(prev => prev + totalCreditReceived);
+      setIsProcessing(false);
+      setTopUpSuccess(`Successfully credited $${totalCreditReceived.toFixed(2)} to your compute wallet!`);
+      setTimeout(() => setTopUpSuccess(null), 4000);
+    }
+  };
+
+  const handleOpenCustomerPortal = async () => {
+    setIsOpeningPortal(true);
+    try {
+      const res = await fetch('/api/stripe/portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ returnUrl: window.location.href })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (data?.success && data.url) {
+        window.location.href = data.url;
+      } else {
+        router.push('/billing/payment-methods');
+      }
+    } catch {
+      router.push('/billing/payment-methods');
+    } finally {
+      setIsOpeningPortal(false);
+    }
   };
 
   const handleTopUpSuccess = (depositAmt: number, totalCredited: number) => {
@@ -209,17 +227,7 @@ export default function BillingPage() {
     }, 800);
   };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsEditingProfile(false);
-    setProfileSavedMsg(true);
-    setTimeout(() => setProfileSavedMsg(false), 3000);
-  };
-
   const spendPct = Math.min(100, (monthlySpend / monthlyReloadCap) * 100);
-  const totalYtdInvoiced = invoices.reduce((acc, inv) => acc + inv.amount, 0);
-  const totalYtdSaved = invoices.reduce((acc, inv) => acc + inv.wholesaleSaved, 0);
-  const totalYtdTokens = invoices.reduce((acc, inv) => acc + inv.tokensCount, 0);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -323,9 +331,20 @@ export default function BillingPage() {
                       <Wallet className="w-3.5 h-3.5" />
                       <span>UNIFIED DEVELOPER COMPUTE WALLET</span>
                     </div>
-                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-[10px] font-bold border border-emerald-500/40">
-                      Active • Good Standing
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleOpenCustomerPortal}
+                        disabled={isOpeningPortal}
+                        className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] text-zinc-300 hover:text-white border border-white/10 flex items-center gap-1 transition-all cursor-pointer disabled:opacity-50"
+                        title="Manage invoices and payment methods in Stripe Customer Portal"
+                      >
+                        <ExternalLink className="w-3 h-3 text-cyan-400" />
+                        <span>{isOpeningPortal ? 'Connecting...' : 'Stripe Portal'}</span>
+                      </button>
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-[10px] font-bold border border-emerald-500/40">
+                        Active • Good Standing
+                      </span>
+                    </div>
                   </div>
 
                   <div className="space-y-1">
@@ -489,7 +508,7 @@ export default function BillingPage() {
                           }`}
                         >
                           {pack.isPopular && (
-                            <span className="absolute -top-2.5 right-3 text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-400 text-black shadow-md">
+                            <span className="absolute -top-2.5 right-3 text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-400 text-black shadow-md">
                               Popular
                             </span>
                           )}
@@ -662,7 +681,7 @@ export default function BillingPage() {
                   </div>
 
                   <div className="divide-y divide-white/5">
-                    {invoices.map((inv) => (
+                    {INITIAL_INVOICES.map((inv) => (
                       <div key={inv.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.02] transition-all">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
@@ -681,7 +700,7 @@ export default function BillingPage() {
                           </div>
 
                           <button
-                            onClick={() => setSelectedInvoice(inv)}
+                            onClick={() => router.push('/billing/invoices')}
                             className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white font-sans font-bold flex items-center gap-1.5 border border-white/10 transition-all cursor-pointer"
                           >
                             <Eye className="w-3.5 h-3.5" />

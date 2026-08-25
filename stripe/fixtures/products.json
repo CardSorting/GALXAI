@@ -1,0 +1,162 @@
+{
+  "_meta": {
+    "template_version": 0
+  },
+  "fixtures": [
+    {
+      "name": "prod_starter_25",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "name": "GALXAI Prepaid Compute — Starter Builder Pack",
+        "statement_descriptor": "GALXAI COMPUTE $25",
+        "description": "Includes $25 USD base deposit + $5.00 welcome grant + $2.50 match ($32.50 total compute credit). Micro-billed per token with zero markups.",
+        "tax_code": "txcd_10000000",
+        "metadata": {
+          "galxai_tier_key": "starter_25",
+          "deposit_amount_usd": "25.00",
+          "total_credit_usd": "32.50",
+          "match_percentage": "10%"
+        }
+      }
+    },
+    {
+      "name": "price_starter_25",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${prod_starter_25:id}",
+        "unit_amount": 2500,
+        "currency": "usd",
+        "tax_behavior": "exclusive",
+        "metadata": {
+          "galxai_tier_key": "starter_25"
+        }
+      }
+    },
+    {
+      "name": "prod_growth_50",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "name": "GALXAI Prepaid Compute — Growth VIP Priority Pack",
+        "statement_descriptor": "GALXAI COMPUTE $50",
+        "description": "Includes $50 USD base deposit + $5.00 welcome grant + $12.50 match ($67.50 total compute credit). Sub-15ms VIP priority routing included.",
+        "tax_code": "txcd_10000000",
+        "metadata": {
+          "galxai_tier_key": "growth_50",
+          "deposit_amount_usd": "50.00",
+          "total_credit_usd": "67.50",
+          "match_percentage": "25%"
+        }
+      }
+    },
+    {
+      "name": "price_growth_50",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${prod_growth_50:id}",
+        "unit_amount": 5000,
+        "currency": "usd",
+        "tax_behavior": "exclusive",
+        "metadata": {
+          "galxai_tier_key": "growth_50"
+        }
+      }
+    },
+    {
+      "name": "prod_fleet_100",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "name": "GALXAI Prepaid Compute — Fleet Scale Pack",
+        "statement_descriptor": "GALXAI COMPUTE $100",
+        "description": "Includes $100 USD base deposit + $5.00 welcome grant + $50.00 match ($155.00 total compute credit). Maximum 50% match grant applied.",
+        "tax_code": "txcd_10000000",
+        "metadata": {
+          "galxai_tier_key": "fleet_100",
+          "deposit_amount_usd": "100.00",
+          "total_credit_usd": "155.00",
+          "match_percentage": "50%"
+        }
+      }
+    },
+    {
+      "name": "price_fleet_100",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${prod_fleet_100:id}",
+        "unit_amount": 10000,
+        "currency": "usd",
+        "tax_behavior": "exclusive",
+        "metadata": {
+          "galxai_tier_key": "fleet_100"
+        }
+      }
+    },
+    {
+      "name": "prod_sovereign_250",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "name": "GALXAI Prepaid Compute — Enterprise Sovereign Pack",
+        "statement_descriptor": "GALXAI COMPUTE $250",
+        "description": "Includes $250 USD base deposit + $5.00 welcome grant + $125.00 match ($380.00 total compute credit). Dedicated VPC private lane access.",
+        "tax_code": "txcd_10000000",
+        "metadata": {
+          "galxai_tier_key": "sovereign_250",
+          "deposit_amount_usd": "250.00",
+          "total_credit_usd": "380.00",
+          "match_percentage": "50%"
+        }
+      }
+    },
+    {
+      "name": "price_sovereign_250",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${prod_sovereign_250:id}",
+        "unit_amount": 25000,
+        "currency": "usd",
+        "tax_behavior": "exclusive",
+        "metadata": {
+          "galxai_tier_key": "sovereign_250"
+        }
+      }
+    },
+    {
+      "name": "prod_hyperscale_500",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "name": "GALXAI Prepaid Compute — Hyperscale Infrastructure Pack",
+        "statement_descriptor": "GALXAI COMPUTE $500",
+        "description": "Includes $500 USD base deposit + $5.00 welcome grant + $250.00 match ($755.00 total compute credit). Custom Enterprise SLA and dedicated engineer.",
+        "tax_code": "txcd_10000000",
+        "metadata": {
+          "galxai_tier_key": "hyperscale_500",
+          "deposit_amount_usd": "500.00",
+          "total_credit_usd": "755.00",
+          "match_percentage": "50%"
+        }
+      }
+    },
+    {
+      "name": "price_hyperscale_500",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${prod_hyperscale_500:id}",
+        "unit_amount": 50000,
+        "currency": "usd",
+        "tax_behavior": "exclusive",
+        "metadata": {
+          "galxai_tier_key": "hyperscale_500"
+        }
+      }
+    }
+  ]
+}

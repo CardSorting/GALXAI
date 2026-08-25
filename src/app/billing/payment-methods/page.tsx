@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { BillingSubNav } from '@/components/dashboard/BillingSubNav';
@@ -9,14 +8,9 @@ import {
   Landmark,
   CreditCard,
   Plus,
-  ShieldCheck,
-  Zap,
   CheckCircle2,
-  Trash2,
-  Check,
   X,
-  Lock,
-  Building2
+  ExternalLink
 } from 'lucide-react';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 
@@ -62,8 +56,26 @@ export default function PaymentMethodsPage() {
   const [isAdding, setIsAdding] = useState(false);
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
-  const [cardCvc, setCardCvc] = useState('');
+  const [_cardCvc, setCardCvc] = useState('');
   const [successMsg, setSuccessMsg] = useState(false);
+  const [isOpeningPortal, setIsOpeningPortal] = useState(false);
+
+  const handleOpenPortal = async () => {
+    setIsOpeningPortal(true);
+    try {
+      const res = await fetch('/api/stripe/portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ returnUrl: window.location.href })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (data?.success && data.url) {
+        window.location.href = data.url;
+      }
+    } finally {
+      setIsOpeningPortal(false);
+    }
+  };
 
   const handleAddCard = (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,19 +125,30 @@ export default function PaymentMethodsPage() {
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white">Payment Instruments & Invoicing Methods</h1>
+            <h1 className="text-2xl sm:text-3xl font-black text-white">Payment Instruments &amp; Invoicing Methods</h1>
             <p className="text-xs text-zinc-400">
               Manage corporate credit cards, ACH direct debit, and wire transfer accounts with automatic backup failover.
             </p>
           </div>
 
-          <button
-            onClick={() => setIsAdding(true)}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider font-mono flex items-center gap-1.5 shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add Payment Method</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleOpenPortal}
+              disabled={isOpeningPortal}
+              className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-xs font-mono flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-cyan-400" />
+              <span>{isOpeningPortal ? 'Connecting...' : 'Stripe Customer Portal'}</span>
+            </button>
+
+            <button
+              onClick={() => setIsAdding(true)}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider font-mono flex items-center gap-1.5 shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add Payment Method</span>
+            </button>
+          </div>
         </div>
 
         <BillingSubNav />
@@ -225,12 +248,12 @@ export default function PaymentMethodsPage() {
                       <span className="font-bold text-white font-sans text-sm">{method.brand}</span>
                       <span className="text-zinc-400">•••• {method.last4}</span>
                       {method.isDefault && (
-                        <span className="px-2 py-0.5 rounded-full bg-amber-400 text-black text-[9px] font-black uppercase tracking-wider">
+                        <span className="px-2 py-0.5 rounded-full bg-amber-400 text-black text-[10px] font-black uppercase tracking-wider">
                           Default Primary
                         </span>
                       )}
                       {method.isBackup && !method.isDefault && (
-                        <span className="px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-[9px] font-bold">
+                        <span className="px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-[10px] font-bold">
                           Backup Failover
                         </span>
                       )}

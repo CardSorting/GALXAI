@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-08-25T07:33:11.966Z",
+  "isLiveOrTest": "test",
+  "productsProvisioned": 5,
+  "pricesProvisioned": 5,
+  "taxConfigured": false,
+  "catalog": {
+    "starter_25": {
+      "productId": "prod_V8VsS8tAq8lYbR",
+      "productName": "GALXAI Prepaid Compute — Starter Builder Pack",
+      "priceId": "price_1U8Er6PiwsQkTwlTnsfyVcwO",
+      "amountUsd": 25,
+      "totalCreditUsd": 32.5
+    },
+    "growth_50": {
+      "productId": "prod_V8Vsd3rsaIVo7i",
+      "productName": "GALXAI Prepaid Compute — Growth VIP Priority Pack",
+      "priceId": "price_1U8Er6PiwsQkTwlT89EbjlpK",
+      "amountUsd": 50,
+      "totalCreditUsd": 67.5
+    },
+    "fleet_100": {
+      "productId": "prod_V8VsBPc7PCjkFY",
+      "productName": "GALXAI Prepaid Compute — Fleet Scale Pack",
+      "priceId": "price_1U8Er7PiwsQkTwlTu9fofrn2",
+      "amountUsd": 100,
+      "totalCreditUsd": 155
+    },
+    "sovereign_250": {
+      "productId": "prod_V8VsEZvZXp63jb",
+      "productName": "GALXAI Prepaid Compute — Enterprise Sovereign Pack",
+      "priceId": "price_1U8Er7PiwsQkTwlTFLXQmlwp",
+      "amountUsd": 250,
+      "totalCreditUsd": 380
+    },
+    "hyperscale_500": {
+      "productId": "prod_V8VsmM84aqQ5ak",
+      "productName": "GALXAI Prepaid Compute — Hyperscale Infrastructure Pack",
+      "priceId": "price_1U8Er8PiwsQkTwlT6AyNa4Sv",
+      "amountUsd": 500,
+      "totalCreditUsd": 755
+    }
+  },
+  "portalConfigId": "bpc_1U8Er8PiwsQkTwlTd12pIIH1"
+}

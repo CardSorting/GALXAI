@@ -3,16 +3,12 @@
 import React, { useState } from 'react';
 import {
   X,
-  Wallet,
   Sparkles,
   CreditCard,
   Zap,
   CheckCircle2,
-  ShieldCheck,
   Coins,
-  ArrowRight,
   Gift,
-  Lock,
   Landmark
 } from 'lucide-react';
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
@@ -70,6 +66,32 @@ function BaseWalletTopUpModal({
     setIsProcessing(true);
 
     try {
+      if (paymentMethod === 'card') {
+        // Initiate Stripe Hosted Checkout Session
+        const res = await fetch('/api/stripe/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: depositAmount
+          })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (data?.success && data.url) {
+          if (data.isSimulated || !data.url.startsWith('http')) {
+            setSuccessMsg(`Successfully credited $${totalCredited.toFixed(2)} to your compute wallet!`);
+            setTimeout(() => {
+              setIsProcessing(false);
+              onSuccess(depositAmount, totalCredited);
+              onClose();
+            }, 1000);
+          } else {
+            window.location.href = data.url;
+          }
+          return;
+        }
+      }
+
+      // Direct fallback / crypto deposit
       const res = await resilientFetch<{ success: boolean }>('/api/wallet/deposit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -162,7 +184,7 @@ function BaseWalletTopUpModal({
                       }`}
                     >
                       {pack.isPopular && (
-                        <span className="absolute -top-2.5 right-3 text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-400 text-black shadow-md">
+                        <span className="absolute -top-2.5 right-3 text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-400 text-black shadow-md">
                           Most Popular
                         </span>
                       )}

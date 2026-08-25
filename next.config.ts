@@ -19,7 +19,7 @@ const securityHeaders = [
   },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), payment=(self)",
+    value: "camera=(), microphone=(), geolocation=(), payment=*",
   },
   {
     key: "Strict-Transport-Security",
@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
-  serverExternalPackages: ["pg"],
+  serverExternalPackages: ["pg", "stripe"],
   eslint: {
     // Production build resilience: prevents transient linter crashes from aborting Vercel builds
     ignoreDuringBuilds: true,

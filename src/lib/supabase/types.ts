@@ -1603,6 +1603,159 @@ export interface Database {
         };
         Relationships: [];
       };
+      galx_stripe_customers: {
+        Row: {
+          id: string;
+          user_id: string;
+          stripe_customer_id: string;
+          email: string | null;
+          currency: string;
+          default_payment_method_id: string | null;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          stripe_customer_id: string;
+          email?: string | null;
+          currency?: string;
+          default_payment_method_id?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          stripe_customer_id?: string;
+          email?: string | null;
+          currency?: string;
+          default_payment_method_id?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      galx_stripe_checkout_sessions: {
+        Row: {
+          session_id: string;
+          user_id: string;
+          customer_id: string | null;
+          amount_usd: number;
+          match_grant_usd: number;
+          total_credited_usd: number;
+          status: string;
+          payment_status: string;
+          payment_intent_id: string | null;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          session_id: string;
+          user_id: string;
+          customer_id?: string | null;
+          amount_usd: number;
+          match_grant_usd?: number;
+          total_credited_usd: number;
+          status?: string;
+          payment_status?: string;
+          payment_intent_id?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          session_id?: string;
+          user_id?: string;
+          customer_id?: string | null;
+          amount_usd?: number;
+          match_grant_usd?: number;
+          total_credited_usd?: number;
+          status?: string;
+          payment_status?: string;
+          payment_intent_id?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      galx_stripe_invoices: {
+        Row: {
+          id: string;
+          user_id: string;
+          stripe_invoice_id: string;
+          amount_due_usd: number;
+          amount_paid_usd: number;
+          status: string;
+          hosted_invoice_url: string | null;
+          invoice_pdf_url: string | null;
+          period_start: string | null;
+          period_end: string | null;
+          metadata: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          stripe_invoice_id: string;
+          amount_due_usd?: number;
+          amount_paid_usd?: number;
+          status?: string;
+          hosted_invoice_url?: string | null;
+          invoice_pdf_url?: string | null;
+          period_start?: string | null;
+          period_end?: string | null;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          stripe_invoice_id?: string;
+          amount_due_usd?: number;
+          amount_paid_usd?: number;
+          status?: string;
+          hosted_invoice_url?: string | null;
+          invoice_pdf_url?: string | null;
+          period_start?: string | null;
+          period_end?: string | null;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      galx_stripe_events: {
+        Row: {
+          event_id: string;
+          event_type: string;
+          status: string;
+          error_message: string | null;
+          payload_hash: string;
+          created_at: string;
+        };
+        Insert: {
+          event_id: string;
+          event_type: string;
+          status?: string;
+          error_message?: string | null;
+          payload_hash: string;
+          created_at?: string;
+        };
+        Update: {
+          event_id?: string;
+          event_type?: string;
+          status?: string;
+          error_message?: string | null;
+          payload_hash?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
