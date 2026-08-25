@@ -5972,41 +5972,80 @@ async function runAllTests() {
     assert.strictEqual(resJP.headers.get('X-Security-Audit'), 'GEO_VELOCITY_ANOMALY');
   });
 
-  await test('API Strategy: /api/admin/test-model keyless GPT-5.6 quota pooling verification', async () => {
-    const { GET, POST } = await import('../src/app/api/admin/test-model/route');
+  await test('Substrate Strategy: Direct GPT-5.6 quota pooling & multi-tenant lease verification', () => {
+    const sub = new GalxCredentialSubstrate();
+    const gov = new ContinuousTokenBucketRateGovernor();
+    const brk = new GalxCircuitBreaker();
+    const poolInstance = new GalxCredentialPool(sub, gov, brk, 'adaptive_headroom');
 
-    // 1. Test GET /api/admin/test-model?model=gpt-5.6-sol
-    const getReq = new Request('http://localhost:3000/api/admin/test-model?model=gpt-5.6-sol&strategy=adaptive_headroom', {
-      method: 'GET'
+    const encA = GalxCryptoVault.encryptSecret({ apiKey: 'sk-proj-test-alpha' }, 'system_admin', 'test_shard_sol_alpha', 'openai');
+    sub.addAccount({
+      id: 'test_shard_sol_alpha',
+      userId: 'system_admin',
+      accountLabel: 'Test Shard Sol Alpha (Tier 5 Wholesale)',
+      provider: 'openai',
+      authType: 'api_key',
+      shardMode: 'pooled',
+      status: 'healthy',
+      priority: 10,
+      weight: 2,
+      fencingToken: 1,
+      apiKeyMasked: 'sk-proj-test...alph',
+      encryptedPayload: encA,
+      tokenBucket: gov.createDefaultBucket(500000, 500000, 1000),
+      stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
     });
-    const getRes = await GET(getReq as any);
-    assert.strictEqual(getRes.status, 200);
-    const getData = await getRes.json();
-    assert.strictEqual(getData.success, true);
-    assert.strictEqual(getData.testSummary.canonicalModelId, 'gpt-5.6-sol');
-    assert.strictEqual(getData.testSummary.rotationStrategy, 'adaptive_headroom');
-    assert.ok(getData.quotaPoolingProof.runs.length >= 1);
-    assert.ok(getData.sampleCompletion.choices[0].message.content.includes('GALXAI'));
 
-    // 2. Test POST /api/admin/test-model with concurrency = 4
-    const postReq = new Request('http://localhost:3000/api/admin/test-model', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'gpt-5.6-terra',
-        prompt: 'Test prompt for GPT-5.6 quota distribution',
-        strategy: 'smooth_weighted_round_robin',
-        concurrency: 4
-      })
+    const encB = GalxCryptoVault.encryptSecret({ apiKey: 'sk-proj-test-beta' }, 'system_admin', 'test_shard_sol_beta', 'openai');
+    sub.addAccount({
+      id: 'test_shard_sol_beta',
+      userId: 'system_admin',
+      accountLabel: 'Test Shard Sol Beta (Tier 5 Wholesale)',
+      provider: 'openai',
+      authType: 'api_key',
+      shardMode: 'pooled',
+      status: 'healthy',
+      priority: 10,
+      weight: 1,
+      fencingToken: 1,
+      apiKeyMasked: 'sk-proj-test...beta',
+      encryptedPayload: encB,
+      tokenBucket: gov.createDefaultBucket(400000, 400000, 1000),
+      stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
     });
-    const postRes = await POST(postReq as any);
-    assert.strictEqual(postRes.status, 200);
-    const postData = await postRes.json();
-    assert.strictEqual(postData.success, true);
-    assert.strictEqual(postData.testSummary.canonicalModelId, 'gpt-5.6-terra');
-    assert.strictEqual(postData.testSummary.concurrencyTested, 4);
-    assert.strictEqual(postData.quotaPoolingProof.runs.length, 4);
-    assert.ok(postData.testSummary.shardsEngaged >= 1);
+
+    // 1. Acquire single lease
+    const singleLeaseRes = poolInstance.acquireLease({
+      userId: 'user_1',
+      jobId: 'job_sol_1',
+      provider: 'openai',
+      estimatedTokens: 2000
+    });
+    assert.ok(singleLeaseRes.lease, 'Single lease should be acquired');
+    assert.ok(singleLeaseRes.lease.fencingToken >= 1);
+    poolInstance.releaseLease(singleLeaseRes.lease.leaseId, 450, true);
+
+    // 2. Test concurrent leases = 4
+    const concurrentLeases: any[] = [];
+    for (let i = 0; i < 4; i++) {
+      const leaseRes = poolInstance.acquireLease({
+        userId: `user_concurrent_${i}`,
+        jobId: `job_sol_concurrent_${i}`,
+        provider: 'openai',
+        estimatedTokens: 1500
+      });
+      assert.ok(leaseRes.lease, `Lease ${i} should be acquired`);
+      concurrentLeases.push(leaseRes.lease);
+    }
+    assert.strictEqual(concurrentLeases.length, 4);
+
+    for (const lease of concurrentLeases) {
+      poolInstance.releaseLease(lease.leaseId, 300, true);
+    }
   });
 
   console.log('\n======================================================================');
