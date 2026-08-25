@@ -301,7 +301,7 @@ export class ModelCatalog {
 
     // 4. Strip common provider / framework / routing prefixes and version suffixes
     const cleanId = normalized
-      .replace(/^(openai|x-ai|xai|anthropic|google|meta|deepseek|mistral|galx|galxai|models|router|gateway)[\/:_]/, '')
+      .replace(/^(openai|x-ai|xai|anthropic|google|meta|deepseek|mistral|galx|galxai|models|router|gateway)[/:_]/, '')
       .replace(/^@(openai|anthropic|google|deepseek)\//, '')
       .replace(/[:@](latest|preview|\d{4}-\d{2}-\d{2}|\d{8})$/, '')
       .replace(/-(latest|preview|\d{4}-\d{2}-\d{2}|\d{8})$/, '')

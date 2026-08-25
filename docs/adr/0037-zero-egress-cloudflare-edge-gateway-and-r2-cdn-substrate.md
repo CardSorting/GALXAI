@@ -16,7 +16,7 @@ High-bandwidth Large Language Model (LLM) streaming inference and multimodal ima
    - Upstream streaming responses from OpenAI and xAI Grok provider shards stream directly to client sockets via the native Web Streams API (`TransformStream`), bypassing intermediate database serialization and incurring **$0 outbound data egress fees**.
 
 3. **Multimodal Binary Offloading via Cloudflare R2**:
-   - Visual synthesis outputs (`openai-gpt-image-2`, `openai-dalle-3`) and audio buffers are streamed straight to Cloudflare R2 bucket `galxai-assets` via `GalxR2AssetAdapter` and direct edge upload (`PUT /v1/assets/upload`).
+   - Visual synthesis outputs (`openai-gpt-image-2`, `openai-gpt-image-1.5`) and audio buffers are streamed straight to Cloudflare R2 bucket `galxai-assets` via `GalxR2AssetAdapter` and direct edge upload (`PUT /v1/assets/upload`).
    - Assets are delivered to clients over the global Anycast CDN custom domain `assets.galx.ai` (and staging `assets-staging.galx.ai`) with full CORS support and zero egress bandwidth penalty.
    - Authoritative PostgreSQL stores only compact URI references.
 

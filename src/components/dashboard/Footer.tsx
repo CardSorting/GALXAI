@@ -4,26 +4,9 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Zap,
-  Key,
-  Terminal,
-  Cpu,
-  Coins,
-  ShieldCheck,
-  Activity,
-  Code2,
-  HelpCircle,
-  ArrowRight,
   Flame,
-  Globe,
-  ExternalLink,
-  Laptop,
-  CheckCircle2,
-  Lock,
-  GitCompare,
-  Building2,
-  PieChart,
-  Users2,
-  FileCheck
+  ArrowRight,
+  Lock
 } from 'lucide-react';
 import { LanguageBadge } from '@/components/common/LanguageBadge';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';

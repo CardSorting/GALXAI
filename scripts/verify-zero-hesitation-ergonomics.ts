@@ -353,7 +353,7 @@ async function runZeroHesitationAudit() {
 
   // --- 11. FRAMEWORK SHIMS & DROP-IN COMPATIBILITY ---
   console.log('\n📌 Testing Framework Shims & Drop-In Compatibility...');
-  const { OpenAI, Anthropic, createGalxAI, galxai: galxaiProvider, ChatGalxAI } = await import('../src/sdk/index');
+  const { OpenAI, Anthropic, createGalxAI, galxai: _galxaiProvider, ChatGalxAI } = await import('../src/sdk/index');
 
   const openaiShim = new OpenAI({ apiKey: 'galx_live_openai_shim_key' });
   assert((openaiShim as any).core.apiKey === 'galx_live_openai_shim_key', 'OpenAI class shim instantiated with drop-in signature');
@@ -368,7 +368,7 @@ async function runZeroHesitationAudit() {
   const langchainShim = new ChatGalxAI({ model: 'gpt-5.6-sol', temperature: 0.3 });
   assert(langchainShim.modelName === 'gpt-5.6-sol' && langchainShim.temperature === 0.3, 'ChatGalxAI LangChain shim initialized');
 
-  const { GalxLLM, thread, ConversationThread } = await import('../src/sdk/index');
+  const { GalxLLM, thread, ConversationThread: _ConversationThread } = await import('../src/sdk/index');
   const llamaShim = new GalxLLM({ model: 'gpt-5.6-sol', temperature: 0.2 });
   assert(llamaShim.model === 'gpt-5.6-sol' && llamaShim.temperature === 0.2, 'GalxLLM LlamaIndex shim initialized');
 

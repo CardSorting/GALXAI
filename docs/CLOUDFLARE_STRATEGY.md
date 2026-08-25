@@ -96,7 +96,7 @@ flowchart TD
 
 ### Pillar 3: Zero-Egress Multimodal Storage (Cloudflare R2 + CDN)
 - **Domain**: `assets.galx.ai`
-- **Mechanism**: Large visual generation outputs (`openai-gpt-image-2`, `openai-dalle-3`) and synthesized audio buffers are streamed straight to Cloudflare R2 via `GalxR2AssetAdapter`.
+- **Mechanism**: Large visual generation outputs (`openai-gpt-image-2`, `openai-gpt-image-1.5`) and synthesized audio buffers are streamed straight to Cloudflare R2 via `GalxR2AssetAdapter`.
 - **Database Optimization**: Supabase PostgreSQL only stores compact metadata URIs (e.g. `https://assets.galx.ai/generations/asset_123.webp`), keeping database size minimal.
 
 ### Pillar 4: Edge Caching & Distributed Rate Limiting (Cloudflare KV + Cache API)

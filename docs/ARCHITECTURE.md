@@ -32,8 +32,8 @@ flowchart TD
     end
     
     subgraph Upstream Fleet
-        ZDR -->|Zero Data Retention Stream| OA[OpenAI Fleet: gpt-5.6-*, dalle-*]
-        ZDR -->|Zero Data Retention Stream| Grok[xAI Grok Fleet: grok-4.5, grok-image]
+        ZDR -->|Zero Data Retention Stream| OA[OpenAI Fleet: gpt-5.6-*, gpt-image-*]
+        ZDR -->|Zero Data Retention Stream| Grok[xAI Grok Fleet: grok-4.6, grok-4.5, grok-image]
     end
 ```
 

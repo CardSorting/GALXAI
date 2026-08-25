@@ -19,10 +19,6 @@ import {
   Flame,
   Activity,
   Cpu,
-  Layers,
-  ArrowRight,
-  ShieldCheck,
-  Clock,
 } from 'lucide-react';
 
 export function CompareClient() {

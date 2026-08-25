@@ -75,7 +75,7 @@ flowchart TD
     end
 
     subgraph UpstreamProviders["5. Upstream Foundation Providers"]
-        OpenAIFleet["OpenAI Fleet (gpt-5.6-sol, terra, luna, dalle-3)"]
+        OpenAIFleet["OpenAI Fleet (gpt-5.6-sol, terra, luna, gpt-image-2)"]
         GrokFleet["xAI Grok Fleet (grok-4.6, grok-4.5)"]
     end
 
@@ -146,7 +146,7 @@ Every inference request traveling through `api.galx.ai` adheres to a strict late
 | :--- | :--- | :--- | :--- | :--- |
 | **`galx.ai`** / **`www.galx.ai`** | **Vercel** | Node.js 20.x Serverless | Automated Let's Encrypt / DigiCert | Next.js 15 App Router frontend, dashboard, billing, checkout, key minting, and SSR pages. |
 | **`api.galx.ai`** | **Cloudflare Workers** | V8 Edge Isolates | Cloudflare Universal SSL | High-throughput API gateway (`/v1/*`, `/api/queues`, `/api/health`, `/api/run`). |
-| **`assets.galx.ai`** | **Cloudflare R2** | Anycast Edge Storage | Cloudflare Managed SSL | Multimodal images (`dall-e-3`, `openai-gpt-image-2`), audio, and binary artifacts ($0 egress). |
+| **`assets.galx.ai`** | **Cloudflare R2** | Anycast Edge Storage | Cloudflare Managed SSL | Multimodal images (`openai-gpt-image-2`, `openai-gpt-image-1.5`), audio, and binary artifacts ($0 egress). |
 | **`aws-0-us-east-1.pooler.supabase.com`** | **Supabase** | PostgreSQL PgBouncer | TLS 1.3 Strict | Transaction Pooler (Port 6543) for ACID transactions and micro-batch token draws. |
 
 ---

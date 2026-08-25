@@ -31,8 +31,7 @@ import {
   createCostTrackerPlugin,
   createLRUCachePlugin,
   createPrivacyShieldPlugin,
-  TokenOptimizer,
-  PrivacyProfiles
+  TokenOptimizer
 } from '../src/sdk';
 import type { GalxShardAccount, GalxUserSession, OAuthIdentityRecord } from '../src/core/contracts/GalxContracts';
 import { GalxAuthEngine } from '../src/core/auth/GalxAuthEngine';
@@ -41,15 +40,15 @@ import { SessionRepository } from '../src/lib/supabase/repositories/SessionRepos
 import { OAuthRepository } from '../src/lib/supabase/repositories/OAuthRepository';
 import { galxRouter } from '../src/core/router/GalxModelRouter';
 import { GalxPIIRedactor, galxRedactor } from '../src/core/privacy/GalxPIIRedactor';
-import { GalxZDRProtocol, galxZDR, StreamingPIIWindowTransformer, ScopedMemorySanitizer, ZDRRatchetSession, galxSlabPool } from '../src/core/privacy/GalxZDRProtocol';
-import { GalxPrivacyComplianceEngine, galxPrivacy } from '../src/core/privacy/GalxPrivacyComplianceEngine';
+import { GalxZDRProtocol, galxZDR, StreamingPIIWindowTransformer, ScopedMemorySanitizer, galxSlabPool } from '../src/core/privacy/GalxZDRProtocol';
+import { galxPrivacy } from '../src/core/privacy/GalxPrivacyComplianceEngine';
 import { GalxSOC2AuditEngine, galxSOC2 } from '../src/core/compliance/GalxSOC2AuditEngine';
-import { GalxSOC2DriftDetector, galxDriftDetector } from '../src/core/compliance/GalxSOC2DriftDetector';
-import { GalxDynamicSecurityProbe, galxSecurityProbe } from '../src/core/compliance/GalxDynamicSecurityProbe';
-import { GalxHighThroughputAuditStreamer, galxAuditStreamer } from '../src/core/compliance/GalxHighThroughputAuditStreamer';
-import { LockFreeShardGovernor, lockFreeGovernor } from '../src/core/governor/LockFreeShardGovernor';
-import { GalxThreatDetector, galxThreatDetector } from '../src/core/compliance/GalxThreatDetector';
-import { BroccoliDatabaseKernel, BroccoliDbTable, BroccoliNaturalQueryParser, BroccoliAggregateEngine } from '../src/core/broccolidb';
+import { galxDriftDetector } from '../src/core/compliance/GalxSOC2DriftDetector';
+import { galxSecurityProbe } from '../src/core/compliance/GalxDynamicSecurityProbe';
+import { galxAuditStreamer } from '../src/core/compliance/GalxHighThroughputAuditStreamer';
+import { lockFreeGovernor } from '../src/core/governor/LockFreeShardGovernor';
+import { galxThreatDetector } from '../src/core/compliance/GalxThreatDetector';
+import { BroccoliDatabaseKernel, BroccoliDbTable, BroccoliNaturalQueryParser } from '../src/core/broccolidb';
 import { AuditRepository } from '../src/lib/supabase/repositories/AuditRepository';
 import { ApiKeyRepository } from '../src/lib/supabase/repositories/ApiKeyRepository';
 import { GalxPersistence } from '../src/lib/storage/GalxPersistence';
@@ -57,8 +56,6 @@ import { TelemetryRepository } from '../src/lib/supabase/repositories/TelemetryR
 import { ShardHealthRepository } from '../src/lib/supabase/repositories/ShardHealthRepository';
 import { IdempotencyRepository } from '../src/lib/supabase/repositories/IdempotencyRepository';
 import { DistributedLockRepository } from '../src/lib/supabase/repositories/DistributedLockRepository';
-import { WorkspaceRepository } from '../src/lib/supabase/repositories/WorkspaceRepository';
-import { BudgetRepository } from '../src/lib/supabase/repositories/BudgetRepository';
 import { WalletRepository } from '../src/lib/supabase/repositories/WalletRepository';
 import { EmbeddingsRepository } from '../src/lib/supabase/repositories/EmbeddingsRepository';
 import { ProjectRepository } from '../src/lib/supabase/repositories/ProjectRepository';
@@ -1580,7 +1577,7 @@ async function runAllTests() {
     const sdk = new GalxAI({
       apiKey: 'galx_live_test_sdk',
       baseURL: 'http://localhost:3000',
-      fetch: async (url, opts) => {
+      fetch: async (_url, _opts) => {
         // Mock gateway response for SDK async enqueue
         return new Response(JSON.stringify({
           id: `task_sdk_${Date.now()}`,
@@ -1606,14 +1603,12 @@ async function runAllTests() {
 
   await test('GalxAI Developer SDK: Fluent Builder Method Chaining & Async Execution', async () => {
     let capturedBody: any;
-    let capturedHeaders: any;
 
     const sdk = new GalxAI({
       apiKey: 'galx_live_test_builder',
       baseURL: 'http://localhost:3000',
-      fetch: async (url, opts: any) => {
+      fetch: async (_url, opts: any) => {
         capturedBody = JSON.parse(opts.body);
-        capturedHeaders = opts.headers;
         return new Response(JSON.stringify({
           id: 'chatcmpl_builder_123',
           object: 'chat.completion',
@@ -1646,7 +1641,7 @@ async function runAllTests() {
     const sdk = new GalxAI({
       apiKey: 'galx_live_test_structured',
       baseURL: 'http://localhost:3000',
-      fetch: async (url, opts: any) => {
+      fetch: async (_url, opts: any) => {
         const body = JSON.parse(opts.body);
         assert.strictEqual(body.response_format?.type, 'json_schema');
         assert.ok(body.response_format?.json_schema?.schema?.properties?.invoiceId);
@@ -1760,7 +1755,7 @@ async function runAllTests() {
       },
       {
         concurrency: 4,
-        onProgress: (completed, total) => {
+        onProgress: (completed, _total) => {
           processedProgress.push(completed);
         }
       }
@@ -1778,9 +1773,8 @@ async function runAllTests() {
     const sdk = new GalxAI({
       apiKey: 'galx_live_test_agent',
       baseURL: 'http://localhost:3000',
-      fetch: async (url, opts: any) => {
+      fetch: async (_url, _opts: any) => {
         callCount++;
-        const body = JSON.parse(opts.body);
 
         // Step 1: Model requests tool call
         if (callCount === 1) {
@@ -2237,7 +2231,6 @@ async function runAllTests() {
 
   await test('Provider-as-Auth: Zero Guest Sessions - Strictly requires authentic ProviderType', async () => {
     const authEngine = GalxAuthEngine.getInstance();
-    const initialShardsCount = galxRouter.substrate.listAccounts().length;
 
     const result = await authEngine.authenticateProviderUser('openai', {
       apiKey: 'sk-proj-valid-provider-auth-key',
@@ -3611,9 +3604,9 @@ async function runAllTests() {
   await test('Audit Repository: Cryptographic Tamper-Evident SHA-256 Hash Chaining', async () => {
     const auditRepo = AuditRepository.getInstance();
 
-    const id1 = await auditRepo.logAudit({ action: 'KEY_ACCESSED', metadata: { keyId: 'key_1' } });
-    const id2 = await auditRepo.logAudit({ action: 'SHARD_ROUTED', metadata: { shardId: 'shard_2' } });
-    const id3 = await auditRepo.logAudit({ action: 'SESSION_CREATED', metadata: { userId: 'usr_3' } });
+    await auditRepo.logAudit({ action: 'KEY_ACCESSED', metadata: { keyId: 'key_1' } });
+    await auditRepo.logAudit({ action: 'SHARD_ROUTED', metadata: { shardId: 'shard_2' } });
+    await auditRepo.logAudit({ action: 'SESSION_CREATED', metadata: { userId: 'usr_3' } });
 
     // Verify unbroken chain of custody
     const verification = auditRepo.verifyAuditChainIntegrity();
@@ -5608,8 +5601,7 @@ async function runAllTests() {
     // Mock fetch for job creation and polling
     let pollCount = 0;
     const testTaskId = `job_mock_${Date.now()}`;
-    const originalFetch = (galx as any).core.customFetch;
-    (galx as any).core.customFetch = async (url: string, opts: any) => {
+    (galx as any).core.customFetch = async (_url: string, opts: any) => {
       if (opts?.method === 'POST') {
         return {
           ok: true,
@@ -5648,7 +5640,7 @@ async function runAllTests() {
     const galx = new GalxAI({ apiKey: 'galx_test_key' });
 
     // Mock fetch for chat completions and images
-    (galx as any).core.customFetch = async (url: string, opts: any) => {
+    (galx as any).core.customFetch = async (url: string, _opts: any) => {
       if (url.includes('/chat/completions')) {
         return {
           ok: true,
