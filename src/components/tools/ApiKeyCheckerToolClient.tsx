@@ -73,32 +73,50 @@ export function ApiKeyCheckerToolClient() {
     };
   }, [apiKeyInput]);
 
+  function calculateShannonEntropy(str: string): number {
+    const map: Record<string, number> = {};
+    for (let i = 0; i < str.length; i++) {
+      const c = str[i];
+      map[c] = (map[c] || 0) + 1;
+    }
+    let entropy = 0;
+    for (const count of Object.values(map)) {
+      const p = count / str.length;
+      entropy -= p * Math.log2(p);
+    }
+    return Number(entropy.toFixed(2));
+  }
+
   const handleTestKey = () => {
-    if (!apiKeyInput.trim()) return;
+    const trimmed = apiKeyInput.trim();
+    if (!trimmed) return;
     setIsTesting(true);
+
+    const entropy = calculateShannonEntropy(trimmed);
+    const hasSufficientEntropy = entropy >= 3.8 && trimmed.length >= 32;
 
     setTimeout(() => {
       setIsTesting(false);
-      if (formatAnalysis.isFormValid) {
+      if (formatAnalysis.isFormValid && hasSufficientEntropy) {
         setTestResult({
           status: 'valid',
           keyType: formatAnalysis.formatLabel,
           entropyValid: true,
-          simulatedLatencyMs: 11.8,
-          activeModelsCount: 15,
-          tier: 'Wholesale Tier 5 (10,000 RPM)',
+          simulatedLatencyMs: 11.4,
+          activeModelsCount: 6,
+          tier: trimmed.startsWith('galx_live_') ? 'Production Gateway (10,000 RPM)' : 'Compatible Upstream Key',
         });
       } else {
         setTestResult({
           status: 'invalid',
           keyType: formatAnalysis.formatLabel,
-          entropyValid: false,
+          entropyValid: hasSufficientEntropy,
           simulatedLatencyMs: 0,
           activeModelsCount: 0,
-          tier: 'Invalid / Unrecognized',
+          tier: 'Invalid Cryptographic Entropy / Format',
         });
       }
-    }, 450);
+    }, 400);
   };
 
   const toolFaqs = [

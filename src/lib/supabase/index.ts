@@ -22,4 +22,9 @@ export * from './repositories/AuditRepository';
 export * from './repositories/BudgetRepository';
 export * from './repositories/ShardHealthRepository';
 export * from './repositories/SessionRepository';
+export * from './repositories/StripeRepository';
+export * from './repositories/TeamGovernanceRepository';
+export * from './repositories/EdgeGovernanceRepository';
+export * from './repositories/ProjectRoutingRepository';
+export * from './repositories/SloCanaryRepository';
 

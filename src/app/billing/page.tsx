@@ -49,59 +49,13 @@ const TOPUP_PACKS: TopUpPack[] = [
   { amount: 500, bonusPct: 50, bonusLabel: '50% Scale Match ($750.00 Credit)' }
 ];
 
-interface Invoice {
-  id: string;
-  invoiceNumber: string;
-  period: string;
-  issuedDate: string;
-  amount: number;
-  wholesaleSaved: number;
-  tokensCount: number;
-  status: 'paid' | 'open';
-  paymentMethod: string;
-  pdfUrl?: string;
-}
-
-const INITIAL_INVOICES: Invoice[] = [
-  {
-    id: 'inv_2026_08',
-    invoiceNumber: 'INV-2026-0801',
-    period: 'Aug 1, 2026 – Aug 31, 2026',
-    issuedDate: 'Aug 22, 2026',
-    amount: 110.00,
-    wholesaleSaved: 38.40,
-    tokensCount: 44200000,
-    status: 'paid',
-    paymentMethod: 'Visa •••• 4242'
-  },
-  {
-    id: 'inv_2026_07',
-    invoiceNumber: 'INV-2026-0701',
-    period: 'Jul 1, 2026 – Jul 31, 2026',
-    issuedDate: 'Jul 31, 2026',
-    amount: 250.00,
-    wholesaleSaved: 83.33,
-    tokensCount: 96000000,
-    status: 'paid',
-    paymentMethod: 'Visa •••• 4242'
-  },
-  {
-    id: 'inv_2026_06',
-    invoiceNumber: 'INV-2026-0601',
-    period: 'Jun 1, 2026 – Jun 30, 2026',
-    issuedDate: 'Jun 30, 2026',
-    amount: 100.00,
-    wholesaleSaved: 31.60,
-    tokensCount: 44000000,
-    status: 'paid',
-    paymentMethod: 'Visa •••• 4242'
-  }
-];
+import { useFinanceStore } from '@/lib/storage/financeStore';
 
 export default function BillingPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const { walletBalance, depositAndUnlock, hasVerifiedDeposit } = useDepositVerification();
+  const { invoices } = useFinanceStore();
   const [balance, setBalance] = useState(114.59);
   const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
   const [topUpModalInitialAmt, setTopUpModalInitialAmt] = useState(100);
@@ -681,7 +635,7 @@ export default function BillingPage() {
                   </div>
 
                   <div className="divide-y divide-white/5">
-                    {INITIAL_INVOICES.map((inv) => (
+                    {invoices.map((inv) => (
                       <div key={inv.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.02] transition-all">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">

@@ -16,56 +16,10 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
-
-interface Invoice {
-  id: string;
-  invoiceNumber: string;
-  period: string;
-  issuedDate: string;
-  amount: number;
-  wholesaleSaved: number;
-  tokensCount: number;
-  status: 'paid' | 'open';
-  paymentMethod: string;
-}
-
-const INVOICES: Invoice[] = [
-  {
-    id: 'INV-2026-0801',
-    invoiceNumber: 'INV-2026-0801',
-    period: 'Aug 1, 2026 – Aug 31, 2026',
-    issuedDate: 'Aug 22, 2026',
-    amount: 110.00,
-    wholesaleSaved: 38.40,
-    tokensCount: 44200000,
-    status: 'paid',
-    paymentMethod: 'Visa •••• 4242'
-  },
-  {
-    id: 'INV-2026-0701',
-    invoiceNumber: 'INV-2026-0701',
-    period: 'Jul 1, 2026 – Jul 31, 2026',
-    issuedDate: 'Jul 31, 2026',
-    amount: 250.00,
-    wholesaleSaved: 83.33,
-    tokensCount: 96000000,
-    status: 'paid',
-    paymentMethod: 'Visa •••• 4242'
-  },
-  {
-    id: 'INV-2026-0601',
-    invoiceNumber: 'INV-2026-0601',
-    period: 'Jun 1, 2026 – Jun 30, 2026',
-    issuedDate: 'Jun 30, 2026',
-    amount: 100.00,
-    wholesaleSaved: 31.60,
-    tokensCount: 44000000,
-    status: 'paid',
-    paymentMethod: 'Visa •••• 4242'
-  }
-];
+import { useFinanceStore } from '@/lib/storage/financeStore';
 
 export default function InvoicesPage() {
+  const { invoices } = useFinanceStore();
   const [companyName, setCompanyName] = useState('Acme AI Corporation');
   const [billingEmail, setBillingEmail] = useState('billing@acme.ai');
   const [taxId, setTaxId] = useState('US-EIN 94-8271034');
@@ -104,7 +58,7 @@ export default function InvoicesPage() {
   const handleExportCsv = () => {
     const csvRows = [
       ['Invoice Number', 'Period', 'Issued Date', 'Tokens Invoiced', 'Wholesale Saved USD', 'Amount USD', 'Status', 'Payment Method'].join(','),
-      ...INVOICES.map(i => [
+      ...invoices.map(i => [
         i.invoiceNumber,
         `"${i.period}"`,
         `"${i.issuedDate}"`,
@@ -126,13 +80,13 @@ export default function InvoicesPage() {
     setTimeout(() => setCopiedCsv(false), 2000);
   };
 
-  const filteredInvoices = INVOICES.filter(i =>
+  const filteredInvoices = invoices.filter(i =>
     i.invoiceNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
     i.period.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const totalInvoiced = INVOICES.reduce((acc, i) => acc + i.amount, 0);
-  const totalSaved = INVOICES.reduce((acc, i) => acc + i.wholesaleSaved, 0);
+  const totalInvoiced = invoices.reduce((acc, i) => acc + i.amount, 0);
+  const totalSaved = invoices.reduce((acc, i) => acc + i.wholesaleSaved, 0);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -142,65 +96,56 @@ export default function InvoicesPage() {
         <Breadcrumbs
           items={[
             { label: 'Billing', href: '/billing' },
-            { label: 'Business Invoices' }
+            { label: 'Monthly Invoices & Receipts' }
           ]}
         />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white">Business Tax Invoices &amp; Statements</h1>
-            <p className="text-xs text-zinc-400">
-              Download and print official monthly tax receipts for corporate accounting and tax reporting.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleOpenPortal}
-              disabled={isOpeningPortal}
-              className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-mono font-bold flex items-center gap-2 border border-white/10 transition-all cursor-pointer disabled:opacity-50"
-            >
-              <ExternalLink className="w-3.5 h-3.5 text-cyan-400" />
-              <span>{isOpeningPortal ? 'Connecting...' : 'Stripe Receipts &amp; Portal'}</span>
-            </button>
-
-            <button
-              onClick={handleExportCsv}
-              className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-mono font-bold flex items-center gap-2 border border-white/10 transition-all cursor-pointer"
-            >
-              {copiedCsv ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Download className="w-3.5 h-3.5" />}
-              <span>{copiedCsv ? 'Exported Invoices!' : 'Export All Invoices (.CSV)'}</span>
-            </button>
-          </div>
-        </div>
-
-        <BillingSubNav />
-
         <AuthRequiredGate
-          title="Sign In to View Corporate Invoices"
-          description="Official tax receipts, monthly statements, and payment methods are private to your authenticated workspace."
+          title="Sign In to View Invoices & Receipts"
+          description="Tax invoices, PDF receipts, and VAT payment history are private to your workspace."
           checkoutAmount={50}
         >
-          {/* Financial KPI Summary */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black text-white">Monthly Invoices &amp; Tax Receipts</h1>
+              <p className="text-xs text-zinc-400">
+                Download VAT/GST-compliant corporate receipts with full token deduction and wholesale discount line items.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleExportCsv}
+                className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-cyan-300 hover:text-white border border-white/10 text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>{copiedCsv ? 'Exported Invoices!' : 'Export Invoices (.CSV)'}</span>
+              </button>
+            </div>
+          </div>
+
+          <BillingSubNav />
+
+          {/* Financial Stat Summary Banner */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono">
-          <div className="glass-panel p-5 rounded-3xl space-y-1 border border-white/10">
-            <span className="text-[11px] text-zinc-400 uppercase font-sans font-semibold">2026 YTD Invoiced</span>
-            <div className="text-2xl font-black text-white">${totalInvoiced.toFixed(2)} USD</div>
-            <div className="text-[11px] text-zinc-500 font-sans">{INVOICES.length} official tax statements</div>
-          </div>
+            <div className="glass-panel p-5 rounded-3xl space-y-1 border border-white/10">
+              <span className="text-[11px] text-zinc-400 uppercase font-sans font-semibold">2026 YTD Invoiced</span>
+              <div className="text-2xl font-black text-white">${totalInvoiced.toFixed(2)} USD</div>
+              <div className="text-[11px] text-zinc-500 font-sans">{invoices.length} official tax statements</div>
+            </div>
 
-          <div className="glass-panel p-5 rounded-3xl space-y-1 border border-emerald-500/30 bg-emerald-500/5">
-            <span className="text-[11px] text-emerald-400 uppercase font-sans font-semibold">Wholesale Discount Savings</span>
-            <div className="text-2xl font-black text-emerald-300">-${totalSaved.toFixed(2)} USD</div>
-            <div className="text-[11px] text-emerald-400/80 font-sans">33.3% net savings passed to business</div>
-          </div>
+            <div className="glass-panel p-5 rounded-3xl space-y-1 border border-emerald-500/30 bg-emerald-500/5">
+              <span className="text-[11px] text-emerald-400 uppercase font-sans font-semibold">Wholesale Discount Savings</span>
+              <div className="text-2xl font-black text-emerald-300">-${totalSaved.toFixed(2)} USD</div>
+              <div className="text-[11px] text-emerald-400/80 font-sans">33.3% net savings passed to business</div>
+            </div>
 
-          <div className="glass-panel p-5 rounded-3xl space-y-1 border border-cyan-500/30 bg-cyan-500/5">
-            <span className="text-[11px] text-cyan-400 uppercase font-sans font-semibold">Active Corporate Entity</span>
-            <div className="text-base font-bold text-white truncate font-sans">{companyName}</div>
-            <div className="text-[11px] text-zinc-400 truncate">{taxId}</div>
+            <div className="glass-panel p-5 rounded-3xl space-y-1 border border-cyan-500/30 bg-cyan-500/5">
+              <span className="text-[11px] text-cyan-400 uppercase font-sans font-semibold">Active Corporate Entity</span>
+              <div className="text-base font-bold text-white truncate font-sans">{companyName}</div>
+              <div className="text-[11px] text-zinc-400 truncate">{taxId}</div>
+            </div>
           </div>
-        </div>
 
         {/* Invoicing Profile Card */}
         <div className="glass-panel rounded-3xl p-6 space-y-4 border border-white/10">

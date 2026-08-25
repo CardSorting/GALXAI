@@ -21,15 +21,23 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
+import { useFinanceStore } from '@/lib/storage/financeStore';
 
 export default function AutoReloadPage() {
-  const [autoReloadEnabled, setAutoReloadEnabled] = useState(true);
-  const [autoReloadThreshold, setAutoReloadThreshold] = useState(10);
-  const [autoReloadAmount, setAutoReloadAmount] = useState(50);
-  const [monthlyReloadCap, setMonthlyReloadCap] = useState(500);
-  const [emailAlertsOnReload, setEmailAlertsOnReload] = useState(true);
+  const { autoReload, updateAutoReload } = useFinanceStore();
+  const [autoReloadEnabled, setAutoReloadEnabled] = useState(autoReload.enabled);
+  const [autoReloadThreshold, setAutoReloadThreshold] = useState(autoReload.thresholdUsd);
+  const [autoReloadAmount, setAutoReloadAmount] = useState(autoReload.reloadAmountUsd);
+  const [monthlyReloadCap, setMonthlyReloadCap] = useState(autoReload.monthlyReloadCapUsd);
+  const [emailAlertsOnReload, setEmailAlertsOnReload] = useState(autoReload.emailAlerts);
   const [isSimulating, setIsSimulating] = useState(false);
   const [simulationResult, setSimulationResult] = useState<string | null>(null);
+
+  const toggleEnabled = () => {
+    const nextVal = !autoReloadEnabled;
+    setAutoReloadEnabled(nextVal);
+    updateAutoReload({ enabled: nextVal });
+  };
 
   const handleSimulate = () => {
     setIsSimulating(true);
@@ -37,6 +45,14 @@ export default function AutoReloadPage() {
 
     const bonusMult = autoReloadAmount >= 100 ? 1.10 : autoReloadAmount >= 50 ? 1.05 : 1.0;
     const netCredit = autoReloadAmount * bonusMult;
+
+    updateAutoReload({
+      enabled: autoReloadEnabled,
+      thresholdUsd: autoReloadThreshold,
+      reloadAmountUsd: autoReloadAmount,
+      monthlyReloadCapUsd: monthlyReloadCap,
+      emailAlerts: emailAlertsOnReload
+    });
 
     setTimeout(() => {
       setIsSimulating(false);
@@ -72,7 +88,7 @@ export default function AutoReloadPage() {
           </div>
 
           <button
-            onClick={() => setAutoReloadEnabled(!autoReloadEnabled)}
+            onClick={toggleEnabled}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer border ${
               autoReloadEnabled
                 ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40 shadow-lg shadow-emerald-500/10'

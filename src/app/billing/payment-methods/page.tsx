@@ -13,46 +13,10 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
-
-interface PaymentMethodItem {
-  id: string;
-  type: 'card' | 'ach' | 'wire';
-  brand: string;
-  last4: string;
-  expiry?: string;
-  isDefault: boolean;
-  isBackup?: boolean;
-}
-
-const INITIAL_METHODS: PaymentMethodItem[] = [
-  {
-    id: 'pm_visa_4242',
-    type: 'card',
-    brand: 'Visa',
-    last4: '4242',
-    expiry: '12/2028',
-    isDefault: true
-  },
-  {
-    id: 'pm_mc_8891',
-    type: 'card',
-    brand: 'Mastercard',
-    last4: '8891',
-    expiry: '09/2027',
-    isDefault: false,
-    isBackup: true
-  },
-  {
-    id: 'pm_ach_svb',
-    type: 'ach',
-    brand: 'ACH Direct Debit (JPMorgan Chase)',
-    last4: '9012',
-    isDefault: false
-  }
-];
+import { useFinanceStore } from '@/lib/storage/financeStore';
 
 export default function PaymentMethodsPage() {
-  const [methods, setMethods] = useState<PaymentMethodItem[]>(INITIAL_METHODS);
+  const { paymentMethods: methods, addPaymentMethod, setDefaultPaymentMethod, removePaymentMethod } = useFinanceStore();
   const [isAdding, setIsAdding] = useState(false);
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
@@ -80,16 +44,7 @@ export default function PaymentMethodsPage() {
   const handleAddCard = (e: React.FormEvent) => {
     e.preventDefault();
     const last4 = cardNumber.slice(-4) || '9988';
-    const newPm: PaymentMethodItem = {
-      id: `pm_${Date.now()}`,
-      type: 'card',
-      brand: 'Visa',
-      last4,
-      expiry: cardExpiry || '08/2029',
-      isDefault: false,
-      isBackup: true
-    };
-    setMethods([...methods, newPm]);
+    addPaymentMethod('Visa', last4, cardExpiry || '08/2029', false);
     setIsAdding(false);
     setCardNumber('');
     setCardExpiry('');
@@ -99,11 +54,7 @@ export default function PaymentMethodsPage() {
   };
 
   const handleSetDefault = (id: string) => {
-    setMethods(methods.map(m => ({
-      ...m,
-      isDefault: m.id === id,
-      isBackup: m.id !== id && m.isDefault ? true : m.isBackup
-    })));
+    setDefaultPaymentMethod(id);
   };
 
   return (

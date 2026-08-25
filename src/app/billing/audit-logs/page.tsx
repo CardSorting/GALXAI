@@ -20,73 +20,10 @@ import {
   Fingerprint
 } from 'lucide-react';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
-
-interface AuditLogEntry {
-  id: string;
-  action: string;
-  actor: string;
-  ip: string;
-  details: string;
-  hash: string;
-  timestamp: string;
-  status: 'verified' | 'tamper_proof';
-}
-
-const INITIAL_LOGS: AuditLogEntry[] = [
-  {
-    id: 'log_01',
-    action: 'AUTO_RELOAD_RULE_UPDATED',
-    actor: 'admin@acme.ai',
-    ip: '192.168.1.42',
-    details: 'Threshold set to $10.00, Reload amount set to $50.00 (+5% Bonus)',
-    hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-    timestamp: '2026-08-22 06:12:10 UTC',
-    status: 'verified'
-  },
-  {
-    id: 'log_02',
-    action: 'COMPUTE_WALLET_CREDITED',
-    actor: 'system_auto_topup_daemon',
-    ip: '10.0.4.19 [Internal VPC]',
-    details: '+$110.00 USD credited via Visa (••4242) with +10% Volume Bonus',
-    hash: '8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4',
-    timestamp: '2026-08-22 04:15:33 UTC',
-    status: 'verified'
-  },
-  {
-    id: 'log_03',
-    action: 'TEAM_BUDGET_CAP_MODIFIED',
-    actor: 'finance-lead@acme.ai',
-    ip: '192.168.1.88',
-    details: 'Cost Center CC-ENG-101 monthly budget increased to $1,500.00 USD',
-    hash: 'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb',
-    timestamp: '2026-08-21 22:45:01 UTC',
-    status: 'verified'
-  },
-  {
-    id: 'log_04',
-    action: 'DEVELOPER_KEY_MINTED',
-    actor: 'admin@acme.ai',
-    ip: '192.168.1.42',
-    details: 'Key galx_live_d819... minted for Cursor IDE (Rate: 120 RPM)',
-    hash: '3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d',
-    timestamp: '2026-08-21 19:30:12 UTC',
-    status: 'verified'
-  },
-  {
-    id: 'log_05',
-    action: 'TAX_INVOICE_GENERATED',
-    actor: 'system_billing_engine',
-    ip: '10.0.1.5 [Internal Gateway]',
-    details: 'Monthly tax invoice INV-2026-0801 generated for Acme AI Corp ($110.00)',
-    hash: '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae',
-    timestamp: '2026-08-21 00:00:00 UTC',
-    status: 'verified'
-  }
-];
+import { useFinanceStore } from '@/lib/storage/financeStore';
 
 export default function AuditLogsPage() {
-  const [logs] = useState<AuditLogEntry[]>(INITIAL_LOGS);
+  const { auditLogs: logs } = useFinanceStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedCsv, setCopiedCsv] = useState(false);
 

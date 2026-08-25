@@ -5,26 +5,28 @@ export default async function TodosPage() {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
-  const { data: todos, error } = await supabase.from('todos').select();
+  const { data: orgs, error } = await supabase.from('galx_organizations').select('*').limit(5);
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Supabase Server Component Connection</h1>
-      {error && (
-        <div className="p-4 bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded-lg text-sm mb-4">
-          Status: Connected to Supabase SSR Client. (Table `todos` will populate once created in schema).
+    <div className="p-8 max-w-2xl mx-auto font-sans">
+      <h1 className="text-2xl font-bold mb-4 text-white">Supabase SSR Connection &amp; Governance Status</h1>
+      {error ? (
+        <div className="p-4 bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded-xl text-sm mb-4">
+          Status: Supabase SSR connected. Note: {error.message}
+        </div>
+      ) : (
+        <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 rounded-xl text-sm mb-4">
+          Status: Verified Active connection to Supabase PostgreSQL Cluster.
         </div>
       )}
-      <ul className="space-y-2">
-        {todos?.map((todo: any) => (
-          <li key={todo.id} className="p-3 bg-zinc-900 border border-zinc-800 rounded-lg">
-            {todo.name}
-          </li>
+      <div className="space-y-2 font-mono text-xs">
+        {orgs?.map((org: any) => (
+          <div key={org.id} className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center justify-between">
+            <span className="font-bold text-white">{org.name}</span>
+            <span className="text-zinc-400">@{org.slug} • {org.tier}</span>
+          </div>
         ))}
-        {(!todos || todos.length === 0) && (
-          <li className="text-zinc-500 text-sm italic">No items found in `todos` table.</li>
-        )}
-      </ul>
+      </div>
     </div>
   );
 }

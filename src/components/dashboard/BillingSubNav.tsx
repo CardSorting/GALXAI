@@ -20,7 +20,8 @@ import {
   Webhook,
   Gift,
   FileCheck2,
-  Download
+  Download,
+  ArrowRight
 } from 'lucide-react';
 
 interface NavItem {
@@ -58,7 +59,7 @@ const NAV_GROUPS: NavGroup[] = [
       { name: 'Auto-Reload', href: '/billing/auto-reload', icon: RefreshCw, badge: 'Active' },
       { name: 'Budget Alerts', href: '/billing/budget-alerts', icon: BellRing },
       { name: 'Webhooks & SIEM', href: '/billing/webhooks', icon: Webhook },
-      { name: 'Cost Centers', href: '/billing/teams', icon: Users2, badge: '4 Squads' }
+      { name: 'Cost Centers', href: '/teams/cost-centers', icon: Building2, badge: '4 Squads' }
     ]
   },
   {
@@ -66,7 +67,7 @@ const NAV_GROUPS: NavGroup[] = [
     title: 'Enterprise & Trust',
     items: [
       { name: 'Audit Trail', href: '/billing/audit-logs', icon: FileCheck, badge: 'SOC2' },
-      { name: 'Volume Contracts', href: '/billing/enterprise', icon: Building2, badge: '40% OFF' },
+      { name: 'Volume Contracts', href: '/solutions/enterprise', icon: Building2, badge: '40% OFF' },
       { name: 'Legal & BAA', href: '/compliance', icon: ShieldCheck }
     ]
   }
@@ -106,8 +107,15 @@ export function BillingSubNav() {
           })}
         </div>
 
-        <div className="hidden md:flex items-center gap-2 text-[11px] text-zinc-500 font-sans">
-          <span>Enterprise Financial Substrate</span>
+        <div className="flex items-center gap-2 text-xs font-sans">
+          <Link
+            href="/teams/seats"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/30 transition-all font-mono font-bold"
+          >
+            <Users2 className="w-3.5 h-3.5 text-amber-400" />
+            <span>Workspace &amp; Seats</span>
+            <ArrowRight className="w-3 h-3" />
+          </Link>
         </div>
       </div>
 
@@ -131,7 +139,7 @@ export function BillingSubNav() {
               <span>{tab.name}</span>
               {tab.badge && (
                 <span
-                  className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
+                  className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
                     isActive
                       ? 'bg-black/20 text-black'
                       : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'

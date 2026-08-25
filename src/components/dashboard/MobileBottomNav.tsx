@@ -9,7 +9,9 @@ import {
   Smile,
   BookOpen,
   Wallet,
-  Key
+  Key,
+  Users2,
+  Coins
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
@@ -21,28 +23,28 @@ function BaseMobileBottomNav() {
 
   const tabs = [
     {
-      label: 'Home',
-      href: '/',
-      icon: Zap,
-      exact: true,
-    },
-    {
       label: 'Models',
       href: '/models',
       icon: Flame,
       exact: false,
     },
     {
-      label: 'No-Code',
-      href: '/docs/simple',
-      icon: Smile,
+      label: 'Seats',
+      href: '/teams/seats',
+      icon: Users2,
       exact: false,
+    },
+    {
+      label: 'Pricing',
+      href: '/pricing',
+      icon: Coins,
+      exact: true,
     },
     {
       label: 'Docs',
       href: '/docs',
       icon: BookOpen,
-      exact: true,
+      exact: false,
     },
     {
       label: user ? 'Wallet' : 'Sign In',

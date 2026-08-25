@@ -22,40 +22,10 @@ import {
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
-
-interface PromoCredit {
-  id: string;
-  name: string;
-  code: string;
-  amount: number;
-  remaining: number;
-  expiresAt: string;
-  status: 'active' | 'exhausted' | 'expired';
-}
-
-const INITIAL_PROMOS: PromoCredit[] = [
-  {
-    id: 'promo_yc_w26',
-    name: 'Y Combinator AI Batch Accelerator Grant',
-    code: 'YC-W26-GRANT',
-    amount: 500.00,
-    remaining: 320.50,
-    expiresAt: 'Dec 31, 2026',
-    status: 'active'
-  },
-  {
-    id: 'promo_dev_starter',
-    name: 'Verified Developer Welcome Bonus',
-    code: 'DEV-ACTIVATE-10',
-    amount: 10.00,
-    remaining: 0.00,
-    expiresAt: 'Jul 31, 2026',
-    status: 'expired'
-  }
-];
+import { useFinanceStore } from '@/lib/storage/financeStore';
 
 function BasePromoCreditsPage() {
-  const [promos, setPromos] = useState<PromoCredit[]>(INITIAL_PROMOS);
+  const { promos, redeemPromoCode } = useFinanceStore();
   const [voucherCode, setVoucherCode] = useState('');
   const [isRedeeming, setIsRedeeming] = useState(false);
   const [redeemSuccess, setRedeemSuccess] = useState<string | null>(null);
@@ -71,21 +41,16 @@ function BasePromoCreditsPage() {
     setIsRedeeming(true);
     setTimeout(() => {
       setIsRedeeming(false);
-      const codeUpper = voucherCode.trim().toUpperCase();
-      const newCredit: PromoCredit = {
-        id: `promo_${Date.now()}`,
-        name: `Redeemed Voucher: ${codeUpper}`,
-        code: codeUpper,
-        amount: 50.00,
-        remaining: 50.00,
-        expiresAt: 'Dec 31, 2026',
-        status: 'active'
-      };
-      setPromos([newCredit, ...promos]);
-      setRedeemSuccess(`🎉 Successfully redeemed code "${codeUpper}"! Credited +$50.00 USD promotional compute.`);
-      setVoucherCode('');
-      setTimeout(() => setRedeemSuccess(null), 5000);
-    }, 700);
+      const res = redeemPromoCode(voucherCode.trim());
+      if (res.success) {
+        setRedeemSuccess(`🎉 ${res.message}`);
+        setVoucherCode('');
+        setTimeout(() => setRedeemSuccess(null), 5000);
+      } else {
+        setRedeemSuccess(`⚠️ ${res.message}`);
+        setTimeout(() => setRedeemSuccess(null), 5000);
+      }
+    }, 500);
   };
 
   const handleCopyReferral = async () => {
@@ -229,7 +194,7 @@ function BasePromoCreditsPage() {
                       {promo.code}
                     </span>
                     <span
-                      className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
                         promo.status === 'active'
                           ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                           : 'bg-zinc-800 text-zinc-500'

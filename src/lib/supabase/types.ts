@@ -1756,11 +1756,968 @@ export interface Database {
         };
         Relationships: [];
       };
+      galx_organizations: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          tier: string;
+          seat_capacity: number;
+          billing_email: string;
+          default_role: string;
+          jurisdiction: string;
+          sso_config: Json;
+          security_policy: Json;
+          spend_safety_policy: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          name: string;
+          slug: string;
+          tier?: string;
+          seat_capacity?: number;
+          billing_email: string;
+          default_role?: string;
+          jurisdiction?: string;
+          sso_config?: Json;
+          security_policy?: Json;
+          spend_safety_policy?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          slug?: string;
+          tier?: string;
+          seat_capacity?: number;
+          billing_email?: string;
+          default_role?: string;
+          jurisdiction?: string;
+          sso_config?: Json;
+          security_policy?: Json;
+          spend_safety_policy?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      galx_organization_members: {
+        Row: {
+          id: string;
+          org_id: string;
+          user_id: string | null;
+          name: string;
+          email: string;
+          role: string;
+          avatar_bg: string | null;
+          assigned_keys_count: number;
+          monthly_spend_usd: number;
+          monthly_spend_cap_usd: number;
+          throttle_mode: string;
+          status: string;
+          sso_enabled: boolean;
+          two_factor_enabled: boolean;
+          department: string;
+          cost_center_code: string | null;
+          last_active_at: string;
+          joined_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          org_id: string;
+          user_id?: string | null;
+          name: string;
+          email: string;
+          role?: string;
+          avatar_bg?: string | null;
+          assigned_keys_count?: number;
+          monthly_spend_usd?: number;
+          monthly_spend_cap_usd?: number;
+          throttle_mode?: string;
+          status?: string;
+          sso_enabled?: boolean;
+          two_factor_enabled?: boolean;
+          department?: string;
+          cost_center_code?: string | null;
+          last_active_at?: string;
+          joined_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          org_id?: string;
+          user_id?: string | null;
+          name?: string;
+          email?: string;
+          role?: string;
+          avatar_bg?: string | null;
+          assigned_keys_count?: number;
+          monthly_spend_usd?: number;
+          monthly_spend_cap_usd?: number;
+          throttle_mode?: string;
+          status?: string;
+          sso_enabled?: boolean;
+          two_factor_enabled?: boolean;
+          department?: string;
+          cost_center_code?: string | null;
+          last_active_at?: string;
+          joined_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "galx_organization_members_org_id_fkey";
+            columns: ["org_id"];
+            referencedRelation: "galx_organizations";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      galx_team_cost_centers: {
+        Row: {
+          id: string;
+          org_id: string;
+          name: string;
+          code: string;
+          lead_email: string;
+          keys_count: number;
+          monthly_budget_cap_usd: number;
+          current_spend_usd: number;
+          auto_throttle_mode: string;
+          color: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          org_id: string;
+          name: string;
+          code: string;
+          lead_email: string;
+          keys_count?: number;
+          monthly_budget_cap_usd: number;
+          current_spend_usd?: number;
+          auto_throttle_mode?: string;
+          color?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          org_id?: string;
+          name?: string;
+          code?: string;
+          lead_email?: string;
+          keys_count?: number;
+          monthly_budget_cap_usd?: number;
+          current_spend_usd?: number;
+          auto_throttle_mode?: string;
+          color?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "galx_team_cost_centers_org_id_fkey";
+            columns: ["org_id"];
+            referencedRelation: "galx_organizations";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      galx_team_invitations: {
+        Row: {
+          id: string;
+          org_id: string;
+          email: string;
+          role: string;
+          spend_cap_usd: number;
+          invited_by_email: string;
+          status: string;
+          invite_token: string;
+          expires_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          org_id: string;
+          email: string;
+          role?: string;
+          spend_cap_usd?: number;
+          invited_by_email: string;
+          status?: string;
+          invite_token: string;
+          expires_at: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          org_id?: string;
+          email?: string;
+          role?: string;
+          spend_cap_usd?: number;
+          invited_by_email?: string;
+          status?: string;
+          invite_token?: string;
+          expires_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "galx_team_invitations_org_id_fkey";
+            columns: ["org_id"];
+            referencedRelation: "galx_organizations";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      galx_governance_audit_events: {
+        Row: {
+          id: string;
+          org_id: string;
+          actor_name: string;
+          actor_email: string;
+          action: string;
+          category: string;
+          details: string;
+          ip_address: string;
+          user_agent: string | null;
+          metadata: Json;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          org_id: string;
+          actor_name: string;
+          actor_email: string;
+          action: string;
+          category: string;
+          details: string;
+          ip_address: string;
+          user_agent?: string | null;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          org_id?: string;
+          actor_name?: string;
+          actor_email?: string;
+          action?: string;
+          category?: string;
+          details?: string;
+          ip_address?: string;
+          user_agent?: string | null;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "galx_governance_audit_events_org_id_fkey";
+            columns: ["org_id"];
+            referencedRelation: "galx_organizations";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      galx_rate_limit_quotas: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          api_key_id: string | null;
+          model_id: string;
+          rpm_limit: number;
+          tpm_limit: number;
+          burst_multiplier: number;
+          tokens_remaining: number;
+          window_started_at_ms: number;
+          last_replenished_at_ms: number;
+          is_throttled: boolean;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          workspace_id: string;
+          api_key_id?: string | null;
+          model_id: string;
+          rpm_limit?: number;
+          tpm_limit?: number;
+          burst_multiplier?: number;
+          tokens_remaining?: number;
+          window_started_at_ms: number;
+          last_replenished_at_ms: number;
+          is_throttled?: boolean;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          workspace_id?: string;
+          api_key_id?: string | null;
+          model_id?: string;
+          rpm_limit?: number;
+          tpm_limit?: number;
+          burst_multiplier?: number;
+          tokens_remaining?: number;
+          window_started_at_ms?: number;
+          last_replenished_at_ms?: number;
+          is_throttled?: boolean;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "galx_rate_limit_quotas_workspace_id_fkey";
+            columns: ["workspace_id"];
+            referencedRelation: "galx_workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "galx_rate_limit_quotas_api_key_id_fkey";
+            columns: ["api_key_id"];
+            referencedRelation: "galx_api_keys";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      galx_prompt_cache_registry: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          model_id: string;
+          prefix_hash_sha256: string;
+          token_count: number;
+          hit_count: number;
+          total_dollars_saved_usd: number;
+          edge_pop_locations: string[];
+          ttl_seconds: number;
+          expires_at: string;
+          created_at: string;
+          last_accessed_at: string;
+        };
+        Insert: {
+          id: string;
+          workspace_id: string;
+          model_id: string;
+          prefix_hash_sha256: string;
+          token_count: number;
+          hit_count?: number;
+          total_dollars_saved_usd?: number;
+          edge_pop_locations?: string[];
+          ttl_seconds?: number;
+          expires_at: string;
+          created_at?: string;
+          last_accessed_at?: string;
+        };
+        Update: {
+          id?: string;
+          workspace_id?: string;
+          model_id?: string;
+          prefix_hash_sha256?: string;
+          token_count?: number;
+          hit_count?: number;
+          total_dollars_saved_usd?: number;
+          edge_pop_locations?: string[];
+          ttl_seconds?: number;
+          expires_at?: string;
+          created_at?: string;
+          last_accessed_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "galx_prompt_cache_registry_workspace_id_fkey";
+            columns: ["workspace_id"];
+            referencedRelation: "galx_workspaces";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      galx_edge_shard_metrics: {
+        Row: {
+          id: string;
+          shard_id: string;
+          edge_pop: string;
+          latency_p50_ms: number;
+          latency_p90_ms: number;
+          latency_p99_ms: number;
+          ttft_avg_ms: number;
+          consecutive_errors: number;
+          circuit_status: 'closed' | 'half_open' | 'tripped_open';
+          last_health_ping_at_ms: number;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          shard_id: string;
+          edge_pop: string;
+          latency_p50_ms?: number;
+          latency_p90_ms?: number;
+          latency_p99_ms?: number;
+          ttft_avg_ms?: number;
+          consecutive_errors?: number;
+          circuit_status?: 'closed' | 'half_open' | 'tripped_open';
+          last_health_ping_at_ms: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          shard_id?: string;
+          edge_pop?: string;
+          latency_p50_ms?: number;
+          latency_p90_ms?: number;
+          latency_p99_ms?: number;
+          ttft_avg_ms?: number;
+          consecutive_errors?: number;
+          circuit_status?: 'closed' | 'half_open' | 'tripped_open';
+          last_health_ping_at_ms?: number;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "galx_edge_shard_metrics_shard_id_fkey";
+            columns: ["shard_id"];
+            referencedRelation: "galx_shards";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      galx_compliance_records: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          framework: 'SOC2_TYPE2' | 'GDPR' | 'HIPAA' | 'PCI_DSS' | 'CCPA' | 'EU_AI_ACT';
+          record_type: 'ZDR_ATTESTATION' | 'DATA_ERASURE_RECEIPT' | 'DPA_EXECUTION' | 'KEY_ROTATION_PROOF' | 'ACCESS_REVIEW';
+          cryptographic_digest_sha256: string;
+          attestation_signature: string;
+          verified_by: string;
+          metadata: Json;
+          issued_at: string;
+          expires_at: string | null;
+        };
+        Insert: {
+          id: string;
+          workspace_id: string;
+          framework: 'SOC2_TYPE2' | 'GDPR' | 'HIPAA' | 'PCI_DSS' | 'CCPA' | 'EU_AI_ACT';
+          record_type: 'ZDR_ATTESTATION' | 'DATA_ERASURE_RECEIPT' | 'DPA_EXECUTION' | 'KEY_ROTATION_PROOF' | 'ACCESS_REVIEW';
+          cryptographic_digest_sha256: string;
+          attestation_signature: string;
+          verified_by: string;
+          metadata?: Json;
+          issued_at?: string;
+          expires_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          workspace_id?: string;
+          framework?: 'SOC2_TYPE2' | 'GDPR' | 'HIPAA' | 'PCI_DSS' | 'CCPA' | 'EU_AI_ACT';
+          record_type?: 'ZDR_ATTESTATION' | 'DATA_ERASURE_RECEIPT' | 'DPA_EXECUTION' | 'KEY_ROTATION_PROOF' | 'ACCESS_REVIEW';
+          cryptographic_digest_sha256?: string;
+          attestation_signature?: string;
+          verified_by?: string;
+          metadata?: Json;
+          issued_at?: string;
+          expires_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "galx_compliance_records_workspace_id_fkey";
+            columns: ["workspace_id"];
+            referencedRelation: "galx_workspaces";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      galx_project_spend_allocations: {
+        Row: {
+          id: string;
+          project_id: string;
+          environment_name: string;
+          monthly_budget_cap_usd: number;
+          current_spend_usd: number;
+          auto_pause_on_cap: boolean;
+          warning_threshold_pct: number;
+          burst_headroom_pct: number;
+          is_paused: boolean;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          project_id: string;
+          environment_name?: string;
+          monthly_budget_cap_usd?: number;
+          current_spend_usd?: number;
+          auto_pause_on_cap?: boolean;
+          warning_threshold_pct?: number;
+          burst_headroom_pct?: number;
+          is_paused?: boolean;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          project_id?: string;
+          environment_name?: string;
+          monthly_budget_cap_usd?: number;
+          current_spend_usd?: number;
+          auto_pause_on_cap?: boolean;
+          warning_threshold_pct?: number;
+          burst_headroom_pct?: number;
+          is_paused?: boolean;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "galx_project_spend_allocations_project_id_fkey";
+            columns: ["project_id"];
+            referencedRelation: "galx_projects";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      galx_model_routing_rules: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          rule_name: string;
+          priority: number;
+          primary_model: string;
+          fallback_model: string;
+          max_latency_threshold_ms: number;
+          on_status_codes: number[];
+          preserve_prompt_cache: boolean;
+          is_active: boolean;
+          routing_strategy: 'latency_and_health' | 'cost_optimized' | 'priority_failover' | 'round_robin';
+          total_reroutes: number;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          workspace_id: string;
+          rule_name: string;
+          priority?: number;
+          primary_model: string;
+          fallback_model: string;
+          max_latency_threshold_ms?: number;
+          on_status_codes?: number[];
+          preserve_prompt_cache?: boolean;
+          is_active?: boolean;
+          routing_strategy?: 'latency_and_health' | 'cost_optimized' | 'priority_failover' | 'round_robin';
+          total_reroutes?: number;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          workspace_id?: string;
+          rule_name?: string;
+          priority?: number;
+          primary_model?: string;
+          fallback_model?: string;
+          max_latency_threshold_ms?: number;
+          on_status_codes?: number[];
+          preserve_prompt_cache?: boolean;
+          is_active?: boolean;
+          routing_strategy?: 'latency_and_health' | 'cost_optimized' | 'priority_failover' | 'round_robin';
+          total_reroutes?: number;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "galx_model_routing_rules_workspace_id_fkey";
+            columns: ["workspace_id"];
+            referencedRelation: "galx_workspaces";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      galx_billing_notification_channels: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          channel_type: 'slack' | 'discord' | 'pagerduty' | 'email_dl' | 'webhook' | 'teams';
+          destination_url: string;
+          channel_name: string;
+          is_enabled: boolean;
+          quiet_hours_start_utc: string | null;
+          quiet_hours_end_utc: string | null;
+          min_severity: 'info' | 'warning' | 'critical';
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          workspace_id: string;
+          channel_type: 'slack' | 'discord' | 'pagerduty' | 'email_dl' | 'webhook' | 'teams';
+          destination_url: string;
+          channel_name: string;
+          is_enabled?: boolean;
+          quiet_hours_start_utc?: string | null;
+          quiet_hours_end_utc?: string | null;
+          min_severity?: 'info' | 'warning' | 'critical';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          workspace_id?: string;
+          channel_type?: 'slack' | 'discord' | 'pagerduty' | 'email_dl' | 'webhook' | 'teams';
+          destination_url?: string;
+          channel_name?: string;
+          is_enabled?: boolean;
+          quiet_hours_start_utc?: string | null;
+          quiet_hours_end_utc?: string | null;
+          min_severity?: 'info' | 'warning' | 'critical';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "galx_billing_notification_channels_workspace_id_fkey";
+            columns: ["workspace_id"];
+            referencedRelation: "galx_workspaces";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      galx_department_cost_allocations: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          cost_center_code: string;
+          department_name: string;
+          gl_account_code: string;
+          allocated_percentage: number;
+          monthly_budget_cap_usd: number;
+          current_month_spend_usd: number;
+          burn_velocity_daily_usd: number;
+          owner_email: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          workspace_id: string;
+          cost_center_code: string;
+          department_name: string;
+          gl_account_code?: string;
+          allocated_percentage?: number;
+          monthly_budget_cap_usd?: number;
+          current_month_spend_usd?: number;
+          burn_velocity_daily_usd?: number;
+          owner_email: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          workspace_id?: string;
+          cost_center_code?: string;
+          department_name?: string;
+          gl_account_code?: string;
+          allocated_percentage?: number;
+          monthly_budget_cap_usd?: number;
+          current_month_spend_usd?: number;
+          burn_velocity_daily_usd?: number;
+          owner_email?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "galx_department_cost_allocations_workspace_id_fkey";
+            columns: ["workspace_id"];
+            referencedRelation: "galx_workspaces";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      galx_slo_agreements: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          tier: string;
+          target_uptime_pct: number;
+          target_latency_p95_ms: number;
+          target_latency_p99_ms: number;
+          error_budget_total_seconds: number;
+          error_budget_spent_seconds: number;
+          current_month_uptime_pct: number;
+          sla_credit_multiplier: number;
+          is_active: boolean;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          workspace_id: string;
+          tier?: string;
+          target_uptime_pct?: number;
+          target_latency_p95_ms?: number;
+          target_latency_p99_ms?: number;
+          error_budget_total_seconds?: number;
+          error_budget_spent_seconds?: number;
+          current_month_uptime_pct?: number;
+          sla_credit_multiplier?: number;
+          is_active?: boolean;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          workspace_id?: string;
+          tier?: string;
+          target_uptime_pct?: number;
+          target_latency_p95_ms?: number;
+          target_latency_p99_ms?: number;
+          error_budget_total_seconds?: number;
+          error_budget_spent_seconds?: number;
+          current_month_uptime_pct?: number;
+          sla_credit_multiplier?: number;
+          is_active?: boolean;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "galx_slo_agreements_workspace_id_fkey";
+            columns: ["workspace_id"];
+            referencedRelation: "galx_workspaces";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      galx_synthetic_canary_probes: {
+        Row: {
+          id: string;
+          probe_name: string;
+          edge_pop: string;
+          model_id: string;
+          status_code: number;
+          ttft_latency_ms: number;
+          total_duration_ms: number;
+          tls_handshake_ms: number;
+          is_healthy: boolean;
+          error_message: string | null;
+          probed_at_ms: number;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          probe_name: string;
+          edge_pop: string;
+          model_id: string;
+          status_code?: number;
+          ttft_latency_ms: number;
+          total_duration_ms: number;
+          tls_handshake_ms?: number;
+          is_healthy?: boolean;
+          error_message?: string | null;
+          probed_at_ms: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          probe_name?: string;
+          edge_pop?: string;
+          model_id?: string;
+          status_code?: number;
+          ttft_latency_ms?: number;
+          total_duration_ms?: number;
+          tls_handshake_ms?: number;
+          is_healthy?: boolean;
+          error_message?: string | null;
+          probed_at_ms?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      galx_incident_outage_ledger: {
+        Row: {
+          id: string;
+          incident_number: string;
+          title: string;
+          severity: 'minor' | 'major' | 'critical';
+          affected_components: string[];
+          affected_providers: string[];
+          root_cause_summary: string;
+          started_at: string;
+          resolved_at: string | null;
+          duration_seconds: number | null;
+          automatic_sla_credits_issued_usd: number;
+          postmortem_slug: string | null;
+          is_published: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          incident_number: string;
+          title: string;
+          severity: 'minor' | 'major' | 'critical';
+          affected_components?: string[];
+          affected_providers?: string[];
+          root_cause_summary: string;
+          started_at: string;
+          resolved_at?: string | null;
+          duration_seconds?: number | null;
+          automatic_sla_credits_issued_usd?: number;
+          postmortem_slug?: string | null;
+          is_published?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          incident_number?: string;
+          title?: string;
+          severity?: 'minor' | 'major' | 'critical';
+          affected_components?: string[];
+          affected_providers?: string[];
+          root_cause_summary?: string;
+          started_at?: string;
+          resolved_at?: string | null;
+          duration_seconds?: number | null;
+          automatic_sla_credits_issued_usd?: number;
+          postmortem_slug?: string | null;
+          is_published?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      galx_scheduled_maintenance_windows: {
+        Row: {
+          id: string;
+          title: string;
+          description: string;
+          scheduled_start: string;
+          scheduled_end: string;
+          expected_impact: string;
+          is_completed: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          title: string;
+          description: string;
+          scheduled_start: string;
+          scheduled_end: string;
+          expected_impact?: string;
+          is_completed?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string;
+          scheduled_start?: string;
+          scheduled_end?: string;
+          expected_impact?: string;
+          is_completed?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
+      galx_record_synthetic_canary_result: {
+        Args: {
+          p_probe_name: string;
+          p_edge_pop: string;
+          p_model_id: string;
+          p_status_code: number;
+          p_ttft_ms: number;
+          p_total_duration_ms: number;
+          p_tls_ms?: number;
+          p_error_msg?: string | null;
+        };
+        Returns: void;
+      };
+      galx_calculate_slo_error_budget: {
+        Args: {
+          p_workspace_id: string;
+          p_slo_id: string;
+        };
+        Returns: Json;
+      };
+      galx_evaluate_smart_model_route: {
+        Args: {
+          p_workspace_id: string;
+          p_requested_model: string;
+          p_observed_latency_ms: number;
+        };
+        Returns: Json;
+      };
+      galx_allocate_department_spend: {
+        Args: {
+          p_workspace_id: string;
+          p_cost_center_code: string;
+          p_spend_delta: number;
+        };
+        Returns: Json;
+      };
+      galx_record_prompt_cache_hit: {
+        Args: {
+          p_cache_id: string;
+          p_dollars_saved: number;
+          p_edge_pop: string;
+        };
+        Returns: void;
+      };
+      galx_evaluate_adaptive_rate_limit: {
+        Args: {
+          p_workspace_id: string;
+          p_model_id: string;
+          p_tokens_requested: number;
+        };
+        Returns: Json;
+      };
+      galx_record_governance_event: {
+        Args: {
+          p_org_id: string;
+          p_actor_name: string;
+          p_actor_email: string;
+          p_action: string;
+          p_category: string;
+          p_details: string;
+          p_ip_address?: string;
+          p_metadata?: Json;
+        };
+        Returns: string;
+      };
       fn_lease_queue_tasks: {
         Args: {
           p_queue_id: string;

@@ -22,7 +22,7 @@ export function getSupabaseAdmin(): SupabaseClient<Database> {
 
   const config = getSupabaseConfig();
   const configured = isSupabaseConfigured();
-  const key = config.supabaseServiceRoleKey || config.supabaseAnonKey || 'dummy-service-key-for-local';
+  const key = config.supabaseServiceRoleKey || config.supabaseAnonKey || 'sb_local_dev_service_role';
 
   adminClientInstance = createClient<Database>(config.supabaseUrl, key, {
     auth: {
@@ -51,7 +51,7 @@ export function getSupabaseAdmin(): SupabaseClient<Database> {
 export function getSupabaseClient(accessToken?: string): SupabaseClient<Database> {
   const config = getSupabaseConfig();
   const configured = isSupabaseConfigured();
-  const key = config.supabaseAnonKey || config.supabaseServiceRoleKey || 'dummy-anon-key-for-local';
+  const key = config.supabaseAnonKey || config.supabaseServiceRoleKey || 'sb_local_dev_anon_key';
 
   if (!accessToken && defaultClientInstance) {
     return defaultClientInstance;

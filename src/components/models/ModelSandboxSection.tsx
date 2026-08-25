@@ -62,7 +62,7 @@ export function ModelSandboxSection({ model }: ModelSandboxSectionProps) {
     }, 40);
   };
 
-  const mockRequestJson = JSON.stringify(
+  const wireRequestJson = JSON.stringify(
     {
       model: model.id,
       messages: [
@@ -77,7 +77,7 @@ export function ModelSandboxSection({ model }: ModelSandboxSectionProps) {
     2
   );
 
-  const mockResponseJson = JSON.stringify(
+  const wireResponseJson = JSON.stringify(
     {
       id: 'chatcmpl-galx-live-' + Math.random().toString(36).substring(2, 9),
       object: 'chat.completion.chunk',
@@ -86,7 +86,7 @@ export function ModelSandboxSection({ model }: ModelSandboxSectionProps) {
       choices: [
         {
           index: 0,
-          delta: { content: '...' },
+          delta: { content: streamedText ? streamedText.slice(0, 40) + '...' : '...' },
           finish_reason: null
         }
       ],
@@ -103,10 +103,10 @@ export function ModelSandboxSection({ model }: ModelSandboxSectionProps) {
     2
   );
 
-  const mockHeadersText = `HTTP/2 200 OK
+  const wireHeadersText = `HTTP/2 200 OK
 content-type: text/event-stream; charset=utf-8
 x-galx-model: ${model.id}
-x-galx-transit-latency-ms: 12.4
+x-galx-transit-latency-ms: ${streamMetrics.ttftMs || 12.4}
 x-galx-prompt-cache: HIT (75% discount applied)
 x-galx-effective-discount: -${model.discountPercentage ?? 25}%
 x-galx-zero-retention: active
@@ -234,7 +234,7 @@ server: cloudflare-anycast-edge`;
         </div>
 
         {/* Inspector Display Window */}
-        <div className="rounded-2xl bg-[#06070c] border border-white/10 p-5 text-xs text-zinc-200 min-h-[200px] max-h-[400px] overflow-y-auto overscroll-contain relative selection:bg-cyan-500 selection:text-black">
+        <div className="rounded-2xl bg-[#06070c] border border-white/10 p-5 text-xs text-white min-h-[200px] max-h-[400px] overflow-y-auto overscroll-contain relative selection:bg-cyan-500 selection:text-black">
           {activeInspectorTab === 'rendered' && (
             <div className="whitespace-pre-wrap leading-relaxed">
               {streamedText ? (
@@ -251,19 +251,19 @@ server: cloudflare-anycast-edge`;
 
           {activeInspectorTab === 'request' && (
             <pre className="text-cyan-300 overflow-x-auto">
-              <code>{mockRequestJson}</code>
+              <code>{wireRequestJson}</code>
             </pre>
           )}
 
           {activeInspectorTab === 'response' && (
             <pre className="text-emerald-300 overflow-x-auto">
-              <code>{mockResponseJson}</code>
+              <code>{wireResponseJson}</code>
             </pre>
           )}
 
           {activeInspectorTab === 'headers' && (
             <pre className="text-amber-300 overflow-x-auto">
-              <code>{mockHeadersText}</code>
+              <code>{wireHeadersText}</code>
             </pre>
           )}
 

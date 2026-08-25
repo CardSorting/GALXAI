@@ -21,40 +21,10 @@ import {
   Code
 } from 'lucide-react';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
-
-interface WebhookEndpoint {
-  id: string;
-  name: string;
-  url: string;
-  events: string[];
-  secret: string;
-  status: 'active' | 'failing';
-  lastDelivery: string;
-}
-
-const INITIAL_WEBHOOKS: WebhookEndpoint[] = [
-  {
-    id: 'wh_slack_fin',
-    name: 'Slack #finance-alerts Webhook',
-    url: 'https://hooks.slack.com/services/T0123/B0456/7890abcdef',
-    events: ['billing.threshold.90', 'billing.auto_reload.success', 'key.created'],
-    secret: 'whsec_9a8b7c6d5e4f3a2b1c0d',
-    status: 'active',
-    lastDelivery: 'Today at 04:15 UTC (200 OK)'
-  },
-  {
-    id: 'wh_datadog',
-    name: 'Datadog SIEM Security Audit Pipeline',
-    url: 'https://http-intake.logs.datadoghq.com/api/v2/logs',
-    events: ['key.deleted', 'budget.cap.exceeded', 'auth.failure'],
-    secret: 'whsec_dd8192a73c091f82b',
-    status: 'active',
-    lastDelivery: 'Yesterday at 22:45 UTC (200 OK)'
-  }
-];
+import { useFinanceStore } from '@/lib/storage/financeStore';
 
 export default function WebhooksPage() {
-  const [webhooks, setWebhooks] = useState<WebhookEndpoint[]>(INITIAL_WEBHOOKS);
+  const { webhooks, addWebhook, deleteWebhook } = useFinanceStore();
   const [isAdding, setIsAdding] = useState(false);
   const [name, setName] = useState('');
   const [url, setUrl] = useState('');
@@ -81,17 +51,7 @@ export default function WebhooksPage() {
     e.preventDefault();
     if (!name.trim() || !url.trim()) return;
 
-    const newWh: WebhookEndpoint = {
-      id: `wh_${Date.now()}`,
-      name: name.trim(),
-      url: url.trim(),
-      events: selectedEvents,
-      secret: `whsec_${Math.random().toString(36).substring(2, 15)}`,
-      status: 'active',
-      lastDelivery: 'Never delivered'
-    };
-
-    setWebhooks([...webhooks, newWh]);
+    addWebhook(name.trim(), url.trim(), selectedEvents);
     setIsAdding(false);
     setName('');
     setUrl('');
@@ -253,14 +213,14 @@ export default function WebhooksPage() {
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-white font-sans text-sm">{wh.name}</span>
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[9px] font-bold border border-emerald-500/20">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[10px] font-bold border border-emerald-500/20">
                         Active
                       </span>
                     </div>
                     <code className="text-zinc-400 text-[11px] truncate block max-w-xl">{wh.url}</code>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleTestDispatch(wh.id)}
                       disabled={isTesting === wh.id}
@@ -268,6 +228,14 @@ export default function WebhooksPage() {
                     >
                       <Send className="w-3.5 h-3.5" />
                       <span>{isTesting === wh.id ? 'Sending...' : 'Test Ping'}</span>
+                    </button>
+
+                    <button
+                      onClick={() => deleteWebhook(wh.id)}
+                      className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-all cursor-pointer"
+                      title="Delete Webhook"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>

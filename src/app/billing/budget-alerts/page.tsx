@@ -21,20 +21,22 @@ import {
   Check
 } from 'lucide-react';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
+import { useFinanceStore } from '@/lib/storage/financeStore';
 
 export default function BudgetAlertsPage() {
-  const [budgetCap, setBudgetCap] = useState(500);
-  const [alert50, setAlert50] = useState(true);
-  const [alert75, setAlert75] = useState(true);
-  const [alert90, setAlert90] = useState(true);
-  const [alert100, setAlert100] = useState(true);
+  const { budgetAlerts, updateBudgetAlerts } = useFinanceStore();
+  const [budgetCap, setBudgetCap] = useState(budgetAlerts.budgetCapUsd);
+  const [alert50, setAlert50] = useState(budgetAlerts.alert50);
+  const [alert75, setAlert75] = useState(budgetAlerts.alert75);
+  const [alert90, setAlert90] = useState(budgetAlerts.alert90);
+  const [alert100, setAlert100] = useState(budgetAlerts.alert100);
 
   // Channels
-  const [emailAlerts, setEmailAlerts] = useState(true);
-  const [emailAddress, setEmailAddress] = useState('engineering-alerts@acme.ai');
-  const [slackEnabled, setSlackEnabled] = useState(true);
-  const [slackWebhook, setSlackWebhook] = useState('https://hooks.slack.com/services/T00/B00/XXXXX');
-  const [haltOnOverspend, setHaltOnOverspend] = useState(false);
+  const [emailAlerts, setEmailAlerts] = useState(budgetAlerts.emailAlerts);
+  const [emailAddress, setEmailAddress] = useState(budgetAlerts.emailAddress);
+  const [slackEnabled, setSlackEnabled] = useState(budgetAlerts.slackEnabled);
+  const [slackWebhook, setSlackWebhook] = useState(budgetAlerts.slackWebhook);
+  const [haltOnOverspend, setHaltOnOverspend] = useState(budgetAlerts.haltOnOverspend);
 
   const [isTesting, setIsTesting] = useState(false);
   const [testSuccessMsg, setTestSuccessMsg] = useState<string | null>(null);
@@ -44,13 +46,25 @@ export default function BudgetAlertsPage() {
     setIsTesting(true);
     setTimeout(() => {
       setIsTesting(false);
-      setTestSuccessMsg('🔔 Test notification sent to Slack (#ai-infrastructure) and engineering-alerts@acme.ai!');
+      setTestSuccessMsg(`🔔 Test notification sent to Slack (${slackWebhook ? 'Webhook' : 'General'}) and ${emailAddress}!`);
       setTimeout(() => setTestSuccessMsg(null), 5000);
     }, 600);
   };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    updateBudgetAlerts({
+      budgetCapUsd: budgetCap,
+      alert50,
+      alert75,
+      alert90,
+      alert100,
+      emailAlerts,
+      emailAddress,
+      slackEnabled,
+      slackWebhook,
+      haltOnOverspend
+    });
     setSaveMsg(true);
     setTimeout(() => setSaveMsg(false), 3000);
   };

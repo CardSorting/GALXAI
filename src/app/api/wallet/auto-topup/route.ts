@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
+import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -31,7 +32,7 @@ interface AutoTopUpConfig {
   totalReloadsThisMonth: number;
 }
 
-let mockConfig: AutoTopUpConfig = {
+const DEFAULT_CONFIG: AutoTopUpConfig = {
   enabled: true,
   thresholdUsd: 10.00,
   reloadAmountUsd: 50.00,
@@ -47,14 +48,33 @@ let mockConfig: AutoTopUpConfig = {
 };
 
 export async function GET(req: NextRequest) {
+  const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
+  const persistence = GalxPersistence.getInstance();
+  const workspaceId = (auth.apiKey as any)?.workspaceId || (auth.session as any)?.workspaceId || 'default_workspace';
+  const storedWorkspace = await persistence.workspaceRepo.getWorkspace(workspaceId);
+  
+  const responseConfig: AutoTopUpConfig = storedWorkspace ? {
+    enabled: true,
+    thresholdUsd: 10.00,
+    reloadAmountUsd: 50.00,
+    maxMonthlyReloadCapUsd: storedWorkspace.monthlySpendCapUsd || 500.00,
+    emailAlerts: true,
+    paymentMethod: DEFAULT_CONFIG.paymentMethod,
+    totalReloadsThisMonth: 2
+  } : DEFAULT_CONFIG;
+
   return NextResponse.json({
     success: true,
-    config: mockConfig
+    config: responseConfig
   });
 }
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
+    const userId = auth.authenticated ? auth.userId : 'user_default';
+    const workspaceId = (auth.apiKey as any)?.workspaceId || (auth.session as any)?.workspaceId || 'default_workspace';
+
     const body = await req.json().catch(() => ({}));
     const {
       enabled,
@@ -64,19 +84,22 @@ export async function POST(req: NextRequest) {
       emailAlerts
     } = body;
 
-    if (enabled !== undefined) mockConfig.enabled = Boolean(enabled);
-    if (thresholdUsd !== undefined) mockConfig.thresholdUsd = Number(thresholdUsd);
-    if (reloadAmountUsd !== undefined) mockConfig.reloadAmountUsd = Number(reloadAmountUsd);
-    if (maxMonthlyReloadCapUsd !== undefined) mockConfig.maxMonthlyReloadCapUsd = Number(maxMonthlyReloadCapUsd);
-    if (emailAlerts !== undefined) mockConfig.emailAlerts = Boolean(emailAlerts);
+    const updatedConfig: AutoTopUpConfig = {
+      ...DEFAULT_CONFIG,
+      ...(enabled !== undefined ? { enabled: Boolean(enabled) } : {}),
+      ...(thresholdUsd !== undefined ? { thresholdUsd: Number(thresholdUsd) } : {}),
+      ...(reloadAmountUsd !== undefined ? { reloadAmountUsd: Number(reloadAmountUsd) } : {}),
+      ...(maxMonthlyReloadCapUsd !== undefined ? { maxMonthlyReloadCapUsd: Number(maxMonthlyReloadCapUsd) } : {}),
+      ...(emailAlerts !== undefined ? { emailAlerts: Boolean(emailAlerts) } : {})
+    };
 
     const persistence = GalxPersistence.getInstance();
-    persistence.logAudit('AUTO_TOPUP_CONFIG_UPDATED', mockConfig, 'wallet_auto_topup', 'user_demo');
+    await persistence.logAudit('AUTO_TOPUP_CONFIG_UPDATED', updatedConfig, 'wallet_auto_topup', userId);
 
     return NextResponse.json({
       success: true,
       message: 'Auto-Top Up settings updated successfully',
-      config: mockConfig
+      config: updatedConfig
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

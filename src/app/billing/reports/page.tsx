@@ -36,11 +36,51 @@ export default function ScheduledReportsPage() {
     setTimeout(() => {
       setIsExporting(false);
       const filename = `galxai_inference_report_${dateRange}_by_${groupBy}.${format}`;
-      const dummyContent = format === 'csv'
-        ? `Dimension,Inference Spend USD,Tokens Processed,Savings USD\nGPT-5.6 Sol,21.40,68000000,8.56\nGPT-5.6 Terra,9.80,42000000,3.92\nxAI Grok 4.5,4.80,18000000,1.92`
-        : JSON.stringify({ generatedAt: new Date().toISOString(), range: dateRange, groupBy, totalSpend: 36.00, totalTokens: 128000000 }, null, 2);
 
-      const blob = new Blob([dummyContent], { type: format === 'csv' ? 'text/csv' : 'application/json' });
+      let rows = [
+        { dimension: 'GPT-5.6 Sol (Apex Reasoning)', spendUsd: 184.20, tokens: 142000000, savingsUsd: 61.40 },
+        { dimension: 'GPT-5.6 Terra (High-Throughput)', spendUsd: 92.50, tokens: 185000000, savingsUsd: 37.00 },
+        { dimension: 'GPT-5.6 Luna (Sub-15ms Real-Time)', spendUsd: 41.80, tokens: 83600000, savingsUsd: 16.72 },
+        { dimension: 'xAI Grok 4.5 (2M Ultra-Long Context)', spendUsd: 28.60, tokens: 28600000, savingsUsd: 11.44 },
+      ];
+
+      if (groupBy === 'team') {
+        rows = [
+          { dimension: 'Core Engineering / AI Coding (CC-ENG-101)', spendUsd: 495.10, tokens: 285000000, savingsUsd: 165.00 },
+          { dimension: 'Data Science & ML Research Swarm (CC-DS-204)', spendUsd: 1240.00, tokens: 620000000, savingsUsd: 413.33 },
+          { dimension: 'Customer Support Agents (CC-CS-302)', spendUsd: 190.00, tokens: 95000000, savingsUsd: 63.33 },
+          { dimension: 'Product Prototyping Fleet (CC-PRD-405)', spendUsd: 85.00, tokens: 42500000, savingsUsd: 28.33 },
+        ];
+      } else if (groupBy === 'daily') {
+        rows = [
+          { dimension: '2026-08-25', spendUsd: 42.10, tokens: 32000000, savingsUsd: 14.03 },
+          { dimension: '2026-08-24', spendUsd: 38.60, tokens: 29500000, savingsUsd: 12.87 },
+          { dimension: '2026-08-23', spendUsd: 51.20, tokens: 41000000, savingsUsd: 17.07 },
+          { dimension: '2026-08-22', spendUsd: 34.00, tokens: 26000000, savingsUsd: 11.33 },
+        ];
+      }
+
+      const reportContent = format === 'csv'
+        ? [
+            ['Dimension', 'Inference Spend USD', 'Tokens Processed', includeDiscounts ? 'Wholesale Savings USD' : ''].filter(Boolean).join(','),
+            ...rows.map(r => [
+              `"${r.dimension}"`,
+              r.spendUsd.toFixed(2),
+              r.tokens,
+              includeDiscounts ? r.savingsUsd.toFixed(2) : ''
+            ].filter(Boolean).join(','))
+          ].join('\n')
+        : JSON.stringify({
+            generatedAt: new Date().toISOString(),
+            dateRange,
+            groupBy,
+            includeDiscounts,
+            totalSpendUsd: rows.reduce((a, b) => a + b.spendUsd, 0),
+            totalTokens: rows.reduce((a, b) => a + b.tokens, 0),
+            items: rows
+          }, null, 2);
+
+      const blob = new Blob([reportContent], { type: format === 'csv' ? 'text/csv' : 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

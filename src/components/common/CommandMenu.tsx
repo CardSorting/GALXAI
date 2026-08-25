@@ -25,7 +25,13 @@ import {
   ShieldCheck,
   LifeBuoy,
   Copy,
-  Check
+  Check,
+  Users2,
+  Building2,
+  Sliders,
+  UserPlus,
+  Settings,
+  Lock
 } from 'lucide-react';
 import { FRONTEND_VISIBLE_MODELS, ModelCatalog } from '@/core/router/ModelCatalog';
 import { BroccoliOmniSearch, OmniSearchItem } from '@/lib/resilience/BroccoliOmniSearch';
@@ -126,6 +132,102 @@ const PLATFORM_PAGES: PlatformPage[] = [
     category: 'Trust',
     keywords: ['status', 'uptime', 'health', 'is it down', 'latency', 'operational', 'monitoring'],
     description: 'Real-time multi-region operational health checks'
+  },
+  {
+    label: 'Seats & Team Member Governance',
+    href: '/teams/seats',
+    icon: Users2,
+    category: 'Teams',
+    keywords: ['seats', 'team', 'members', 'invite', 'rbac', 'roles', 'squad', 'small business', 'permissions', 'users', 'add seats'],
+    description: 'Manage team seats, invite colleagues, and assign RBAC roles and spend caps'
+  },
+  {
+    label: 'Pending Team Invitations & Magic Links',
+    href: '/teams/invites',
+    icon: UserPlus,
+    category: 'Teams',
+    keywords: ['invites', 'pending', 'magic link', 'join', 'email invite', 'domain auto-join'],
+    description: 'Track pending invites, send email invites, and generate shareable magic links'
+  },
+  {
+    label: 'Member Spend Caps & Auto-Throttles',
+    href: '/teams/spend-limits',
+    icon: Sliders,
+    category: 'Teams',
+    keywords: ['spend caps', 'limits', 'allowance', 'throttle', 'kill switch', 'budget control'],
+    description: 'Configure individual developer monthly allowances and hard freeze safety limits'
+  },
+  {
+    label: 'Small Business & Squad Workspace (5 Seats)',
+    href: '/solutions/small-business',
+    icon: Users2,
+    category: 'Solutions',
+    keywords: ['small business', 'startup', 'squad', '5 seats', 'team plan', 'shared wallet'],
+    description: 'Shared wallet, per-seat safety caps, and 5 seats with $100 pooled credits'
+  },
+  {
+    label: 'Enterprise Cost Centers & GL Budgets',
+    href: '/teams/cost-centers',
+    icon: Building2,
+    category: 'Teams',
+    keywords: ['cost center', 'gl', 'teams', 'departments', 'squads', 'budget', 'allocations'],
+    description: 'Allocate compute budgets with multi-tenant GL accounting'
+  },
+  {
+    label: 'RBAC Roles & Deterministic Permissions',
+    href: '/teams/roles',
+    icon: ShieldCheck,
+    category: 'Teams',
+    keywords: ['rbac', 'roles', 'permissions', 'admin', 'owner', 'developer', 'finops', 'viewer'],
+    description: 'Configure least-privilege role permissions across your organization'
+  },
+  {
+    label: 'Organization Security & 2FA Policies',
+    href: '/teams/security',
+    icon: Shield,
+    category: 'Security',
+    keywords: ['2fa', 'security', 'ip allowlist', 'cidr', 'session timeout', 'key rotation', 'policies'],
+    description: 'Enforce mandatory 2FA, corporate IP allowlisting, and key rotation baselines'
+  },
+  {
+    label: 'Enterprise SAML 2.0 SSO & SCIM Sync',
+    href: '/teams/sso',
+    icon: Lock,
+    category: 'Enterprise',
+    keywords: ['sso', 'saml', 'scim', 'okta', 'google workspace', 'azure ad', 'domain capture'],
+    description: 'Centralized authentication, domain capture, and automated directory sync'
+  },
+  {
+    label: 'Organization Activity & Governance Audit',
+    href: '/teams/activity',
+    icon: Activity,
+    category: 'Governance',
+    keywords: ['activity', 'audit log', 'events', 'history', 'soc 2', 'compliance log'],
+    description: 'Real-time audit log of member invitations, role changes, and budget updates'
+  },
+  {
+    label: 'Organization Profile & Workspace Settings',
+    href: '/teams/settings',
+    icon: Settings,
+    category: 'Settings',
+    keywords: ['settings', 'organization', 'slug', 'profile', 'data jurisdiction', 'sovereign routing'],
+    description: 'Manage organization identity, workspace slug, and US/EU sovereign data routing'
+  },
+  {
+    label: 'Small Business & Enterprise Seat Pricing',
+    href: '/pricing/seats',
+    icon: Users2,
+    category: 'Finance',
+    keywords: ['seat pricing', 'plans', 'small business', 'enterprise fleet', 'tiers', 'features'],
+    description: 'Dedicated team seat tiers with included monthly pooled compute credits'
+  },
+  {
+    label: 'Dual Seat & Compute ROI Calculator',
+    href: '/pricing/calculator',
+    icon: Sliders,
+    category: 'Finance',
+    keywords: ['calculator', 'roi', 'seat savings', 'compare', 'team cost', 'estimate', 'savings'],
+    description: 'Calculate net annual savings across team seats and wholesale compute'
   },
   {
     label: 'Business Tax Invoices & Receipts',

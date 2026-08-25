@@ -84,7 +84,7 @@ const HERO_MODELS: ModelPreset[] = [
     discountPct: 25,
     contextK: 128,
     specialty: 'Ultra 4K Visual Synthesis',
-    accentColor: 'from-purple-400 to-indigo-500'
+    accentColor: 'from-white via-zinc-200 to-zinc-400'
   }
 ];
 
@@ -678,19 +678,19 @@ const res = await client.chat.completions.create({
                 {streamStats && (
                   <div className="pt-3 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
                     <div className="p-2.5 rounded-xl bg-white/5 space-y-0.5 border border-white/5">
-                      <span className="text-zinc-500 uppercase text-[9px]">Time to First Token</span>
+                      <span className="text-zinc-500 uppercase text-[10px]">Time to First Token</span>
                       <div className="text-white font-bold">{streamStats.latencyMs}ms</div>
                     </div>
                     <div className="p-2.5 rounded-xl bg-white/5 space-y-0.5 border border-white/5">
-                      <span className="text-zinc-500 uppercase text-[9px]">Throughput Velocity</span>
+                      <span className="text-zinc-500 uppercase text-[10px]">Throughput Velocity</span>
                       <div className="text-cyan-300 font-bold">{streamStats.tokensPerSec} tok/s</div>
                     </div>
                     <div className="p-2.5 rounded-xl bg-white/5 space-y-0.5 border border-white/5">
-                      <span className="text-zinc-500 uppercase text-[9px]">Wholesale Cost</span>
+                      <span className="text-zinc-500 uppercase text-[10px]">Wholesale Cost</span>
                       <div className="text-emerald-300 font-bold">${streamStats.wholesaleCost.toFixed(6)}</div>
                     </div>
                     <div className="p-2.5 rounded-xl bg-white/5 space-y-0.5 border border-white/5">
-                      <span className="text-zinc-500 uppercase text-[9px]">Instant Net Savings</span>
+                      <span className="text-zinc-500 uppercase text-[10px]">Instant Net Savings</span>
                       <div className="text-amber-300 font-bold">-{selectedModel.discountPct}% OFF</div>
                     </div>
                   </div>

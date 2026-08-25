@@ -22,7 +22,12 @@ import {
   TelemetryRepository,
   EmbeddingsRepository,
   WorkspaceRepository,
-  SessionRepository
+  SessionRepository,
+  BudgetRepository,
+  TeamGovernanceRepository,
+  EdgeGovernanceRepository,
+  ProjectRoutingRepository,
+  SloCanaryRepository
 } from '../supabase';
 
 import { BroccoliDbTable } from '../../core/broccolidb/broccolidb-table';
@@ -67,6 +72,11 @@ export class GalxPersistence {
   public readonly embeddingsRepo: EmbeddingsRepository;
   public readonly workspaceRepo: WorkspaceRepository;
   public readonly sessionRepo: SessionRepository;
+  public readonly budgetRepo: BudgetRepository;
+  public readonly teamGovernanceRepo: TeamGovernanceRepository;
+  public readonly edgeGovernanceRepo: EdgeGovernanceRepository;
+  public readonly projectRoutingRepo: ProjectRoutingRepository;
+  public readonly sloCanaryRepo: SloCanaryRepository;
 
   // BroccoliDB L1 Hot Tables
   public readonly shardTable: BroccoliDbTable<GalxShardAccount>;
@@ -86,6 +96,11 @@ export class GalxPersistence {
     this.embeddingsRepo = EmbeddingsRepository.getInstance();
     this.workspaceRepo = WorkspaceRepository.getInstance();
     this.sessionRepo = SessionRepository.getInstance();
+    this.budgetRepo = BudgetRepository.getInstance();
+    this.teamGovernanceRepo = TeamGovernanceRepository.getInstance();
+    this.edgeGovernanceRepo = EdgeGovernanceRepository.getInstance();
+    this.projectRoutingRepo = ProjectRoutingRepository.getInstance();
+    this.sloCanaryRepo = SloCanaryRepository.getInstance();
 
     // Initialize BroccoliDB L1 Tables with Secondary Indices
     this.shardTable = new BroccoliDbTable<GalxShardAccount>('shards');
