@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-08-25T05:33:12.857Z",
+  "requestPrompt": "Ultra 4K high-definition futuristic cybernetic AI computing center with glowing neural glass conduits, holographic typography displaying \"GALXAI GPT-IMAGE-2\", cinematic volumetric blue and gold lighting, raytraced reflections, octane render 3D masterwork.",
+  "model": {
+    "id": "openai-gpt-image-2",
+    "name": "OpenAI Codex GPT-Image-2 (Ultra 4K SOTA)",
+    "upstreamId": "gpt-image-2",
+    "category": "image",
+    "wholesaleDiscount": "25% OFF",
+    "pricing": {
+      "listPrice": "$0.080",
+      "wholesalePrice": "$0.060",
+      "savings": "25%"
+    }
+  },
+  "synthesisParameters": {
+    "resolution": "3840x2160 (Ultra 4K)",
+    "quality": "hd",
+    "aspectRatio": "16:9",
+    "renderEngine": "Octane 3D Raytraced"
+  },
+  "quotaPoolExecutionProof": {
+    "leaseId": "lease_1787635992842_b3b5a407",
+    "shardId": "pool_shard_tier5_alpha",
+    "shardLabel": "OpenAI Tier-5 Wholesale Reservoir Alpha",
+    "fencingToken": 2,
+    "estimatedTokens": 200,
+    "actualTokensConsumed": 200,
+    "latencyMs": 0,
+    "remainingTokensBefore": 1000000,
+    "remainingTokensAfter": 999800,
+    "activeLeasesInFleet": 0,
+    "rotationStrategy": "adaptive_headroom"
+  },
+  "outputTelemetryFile": "/Users/bozoegg/Desktop/GALXAI/tests/quota-pooling/output/openai-gpt-image-2-generation.json",
+  "outputShowcaseHtml": "/Users/bozoegg/Desktop/GALXAI/tests/quota-pooling/output/image-model-showcase.html"
+}

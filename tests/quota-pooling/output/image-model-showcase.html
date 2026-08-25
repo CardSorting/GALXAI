@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GALXAI Visual Synthesis // OpenAI GPT-Image-2</title>
+  <style>
+    :root {
+      --bg: #06080f;
+      --card-bg: rgba(15, 23, 42, 0.85);
+      --neon-cyan: #00f0ff;
+      --neon-amber: #f59e0b;
+      --border: rgba(255, 255, 255, 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg) 80%);
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 1000px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .header {
+      text-align: center;
+      space-y: 0.5rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: var(--neon-amber);
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #fff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .preview-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    .image-wrapper {
+      position: relative;
+      width: 100%;
+      border-radius: 1rem;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 40px rgba(0, 240, 255, 0.15);
+    }
+    .image-wrapper img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .meta-item {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 0.75rem;
+      padding: 1rem;
+    }
+    .meta-label {
+      font-size: 0.7rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .meta-val {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 0.25rem;
+    }
+    .prompt-box {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #38bdf8;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="badge">⚡ 25% Wholesale Quota Pool Verified</div>
+      <h1>OpenAI Codex GPT-Image-2 (Ultra 4K SOTA)</h1>
+      <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.25rem;">
+        Flagship 4K high-definition visual synthesis & complex typography rendering
+      </p>
+    </div>
+
+    <div class="preview-card">
+      <div class="image-wrapper">
+        <img src="./gpt-image-2-showcase.jpg" alt="GALXAI GPT-Image-2 Synthesis Render" />
+      </div>
+
+      <div class="meta-grid">
+        <div class="meta-item">
+          <div class="meta-label">Allocated Shard</div>
+          <div class="meta-val" style="color: #38bdf8;">pool_shard_tier5_alpha</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Atomic Lease ID</div>
+          <div class="meta-val" style="font-family: monospace; font-size: 0.85rem;">lease_178763599284...</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Wholesale Rate</div>
+          <div class="meta-val" style="color: #f59e0b;">$0.060 (-25% OFF)</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Resolution / Engine</div>
+          <div class="meta-val" style="color: #10b981;">3840x2160 (Ultra 4K)</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.5rem;">
+        <div class="meta-label" style="margin-bottom: 0.5rem;">Prompt Dispatched to Pool</div>
+        <div class="prompt-box">Ultra 4K high-definition futuristic cybernetic AI computing center with glowing neural glass conduits, holographic typography displaying "GALXAI GPT-IMAGE-2", cinematic volumetric blue and gold lighting, raytraced reflections, octane render 3D masterwork.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
