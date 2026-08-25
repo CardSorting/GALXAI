@@ -1,44 +1,36 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { galxRouter } from '@/core/router/GalxModelRouter';
-import type { GalxShardAccount } from '@/core/contracts/GalxContracts';
+import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id } = await params;
-    const body = await req.json();
-    const { shardMode, status, priority, accountLabel } = body;
-
-    const account = galxRouter.substrate.getAccount(id);
-    if (!account) {
-      return NextResponse.json({ error: 'Shard not found' }, { status: 404 });
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'PATCH, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
     }
-
-    const updated: GalxShardAccount = {
-      ...account,
-      shardMode: shardMode || account.shardMode || 'pooled',
-      status: status || account.status,
-      priority: priority !== undefined ? Number(priority) : account.priority,
-      accountLabel: accountLabel || account.accountLabel,
-      updatedAtMs: Date.now()
-    };
-
-    galxRouter.substrate.updateAccount(updated);
-
-    return NextResponse.json({ success: true, shard: updated });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  }
+  });
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id } = await params;
-    galxRouter.substrate.deleteAccount(id);
-    return NextResponse.json({ success: true, message: `Shard ${id} deleted` });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  }
+export async function PATCH() {
+  return NextResponse.json(
+    {
+      error: 'Direct partition mutation is deprecated. Infrastructure routing is sovereign and managed at the gateway layer.',
+      code: 'endpoint_deprecated'
+    },
+    { status: 410, headers: { 'Access-Control-Allow-Origin': '*' } }
+  );
+}
+
+export async function DELETE() {
+  return NextResponse.json(
+    {
+      error: 'Direct partition deletion is deprecated. Infrastructure routing is sovereign and managed at the gateway layer.',
+      code: 'endpoint_deprecated'
+    },
+    { status: 410, headers: { 'Access-Control-Allow-Origin': '*' } }
+  );
 }

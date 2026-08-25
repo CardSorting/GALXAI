@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { galxRouter } from '@/core/router/GalxModelRouter';
+import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import type { ChatCompletionRequest } from '@/core/contracts/GalxContracts';
@@ -16,7 +16,7 @@ export async function OPTIONS() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Galx-Shard-Preference, X-Galx-Async, X-Galx-Queue, X-Galx-Webhook-Url, X-Galx-Priority, X-Galx-Delay-Ms, Idempotency-Key, Prefer',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Galx-Async, X-Galx-Queue, X-Galx-Webhook-Url, X-Galx-Priority, X-Galx-Delay-Ms, Idempotency-Key, Prefer',
       'Access-Control-Max-Age': '86400'
     }
   });
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     if (!authResult.authenticated) {
       return NextResponse.json(
         { error: { message: authResult.error || 'Authentication required. Please provide a valid Authorization header with Bearer token or API key.', type: 'invalid_request_error', code: 'invalid_api_key' } },
-        { status: 401 }
+        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
       );
     }
 
@@ -215,9 +215,8 @@ export async function POST(req: NextRequest) {
     const headers = new Headers(result.headers);
     headers.set('Access-Control-Allow-Origin', '*');
     headers.set('X-Galx-Request-Id', requestId);
-    headers.set('X-Galx-Shard-Id', result.shardId);
     headers.set('X-Galx-Model', result.modelUsed);
-    headers.set('X-Galx-Provider', result.provider);
+    headers.set('X-Galx-Router', 'apex-v2');
 
     if (result.isStream) {
       headers.set('Content-Type', 'text/event-stream; charset=utf-8');
@@ -231,10 +230,11 @@ export async function POST(req: NextRequest) {
       headers
     });
   } catch (error: any) {
-    const message = error.message || 'Internal Router Error';
-    const isRateLimited = message.includes('reached maximum simultaneous concurrent gateway allocation');
-    const isUnavailable = message.includes('No healthy') || message.includes('in cooldown') || message.includes('saturated');
-    const isBadRequest = message.includes('Unsupported model') || message.includes('Missing required');
+    const rawMessage = error.message || 'Internal Router Error';
+    const message = GalxModelRouter.sanitizeUpstreamError(rawMessage);
+    const isRateLimited = message.includes('saturated') || message.includes('reached maximum simultaneous') || message.toLowerCase().includes('rate limit');
+    const isUnavailable = message.includes('No healthy') || message.includes('in cooldown') || message.includes('overloaded') || message.includes('temporarily constrained');
+    const isBadRequest = rawMessage.includes('Unsupported model') || rawMessage.includes('Missing required');
 
     const status = isRateLimited ? 429 : isUnavailable ? 503 : isBadRequest ? 400 : 500;
     const errorType = isRateLimited
@@ -250,7 +250,7 @@ export async function POST(req: NextRequest) {
         error: {
           message,
           type: errorType,
-          code: isRateLimited ? 'rate_limit_exceeded' : isUnavailable ? 'all_shards_cooldown' : 'router_dispatch_failed'
+          code: isRateLimited ? 'rate_limit_exceeded' : isUnavailable ? 'compute_capacity_unavailable' : 'router_dispatch_failed'
         }
       },
       {

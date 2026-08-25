@@ -3,8 +3,19 @@ import { GalxOAuthManager } from '@/core/auth/GalxOAuthManager';
 import type { ProviderType } from '@/core/contracts/GalxContracts';
 
 export const dynamic = 'force-dynamic';
-
 export const runtime = 'nodejs';
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
 
 /**
  * GET /api/auth/oauth/url

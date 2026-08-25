@@ -125,9 +125,9 @@ export class APITimeoutError extends GalxError {
 
 export class InternalServerError extends APIError {
   constructor(
-    message = 'GALXAI upstream provider or gateway internal error',
+    message = 'GALXAI gateway internal error',
     statusCode = 500,
-    suggestedFix = 'Automatic shard failover was engaged. Retry request momentarily.'
+    suggestedFix = 'Automatic gateway failover was engaged. Retry request momentarily.'
   ) {
     super(message, statusCode, 'internal_server_error', undefined, suggestedFix);
     this.name = 'InternalServerError';

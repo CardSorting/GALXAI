@@ -19,7 +19,7 @@ export async function OPTIONS() {
 /**
  * POST /api/compliance/dsar/erase
  * GDPR Article 17: Right to Erasure ("Right to be Forgotten").
- * Permanently and cryptographically wipes all user sessions, API keys, shards, and anonymizes audit logs.
+ * Permanently and cryptographically wipes all user sessions, API keys, credentials, and anonymizes audit logs.
  */
 export async function POST(req: NextRequest) {
   try {

@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GalxOAuthManager } from '../../../../../../core/auth/GalxOAuthManager';
+import { GalxOAuthManager } from '@/core/auth/GalxOAuthManager';
+import { GalxModelRouter } from '@/core/router/GalxModelRouter';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
 
 /**
  * Standard RFC 8628 OAuth 2.0 Device Token Polling Endpoint.
@@ -27,7 +40,7 @@ export async function POST(req: NextRequest) {
     if (!deviceCode) {
       return NextResponse.json(
         { error: 'invalid_request', error_description: 'Missing device_code' },
-        { status: 400 }
+        { status: 400, headers: { 'Access-Control-Allow-Origin': '*' } }
       );
     }
 
@@ -38,6 +51,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(result.data, {
         status: 200,
         headers: {
+          'Access-Control-Allow-Origin': '*',
           'Cache-Control': 'no-store',
           'Pragma': 'no-cache'
         }
@@ -55,15 +69,17 @@ export async function POST(req: NextRequest) {
       {
         status: errorStatus,
         headers: {
+          'Access-Control-Allow-Origin': '*',
           'Cache-Control': 'no-store',
           'Pragma': 'no-cache'
         }
       }
     );
   } catch (err: any) {
+    const sanitized = GalxModelRouter.sanitizeUpstreamError(err?.message || 'Polling error');
     return NextResponse.json(
-      { error: 'server_error', error_description: err.message || 'Polling error' },
-      { status: 500 }
+      { error: 'server_error', error_description: sanitized },
+      { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
     );
   }
 }

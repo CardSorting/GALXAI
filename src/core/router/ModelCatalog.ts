@@ -7,7 +7,7 @@ import type { DbQueryOptions, DbAggregateQuery } from '../broccolidb/broccolidb.
 /**
  * Exclusive Model Catalog for GALXAI.
  * Houses only the requested flagship modern generation LLMs & visual synthesis engines:
- * - OpenAI Codex: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `openai-gpt-image-2`, `openai-gpt-image-1.5`, `openai-gpt-image-1`, `text-embedding-3-small`, `text-embedding-3-large`
+ * - OpenAI Codex: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `openai-gpt-image-2`, `openai-gpt-image-1.5`, `openai-gpt-image-1`
  * - xAI Grok: `x-ai/grok-4.6`, `x-ai/grok-4.5`, `xai-grok-image`, `xai-grok-2-image`
  *
  * Features competitive pricing with 20-36% discount vs direct list price + 75% prompt caching discount.
@@ -204,44 +204,6 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsReasoning: false,
     supportsStreaming: false,
     description: 'Stylistic diversity, rapid rendering, and versatile creative generation.'
-  },
-
-  // --- 5. Universal Vector Embeddings Suite ---
-  {
-    id: 'text-embedding-3-small',
-    upstreamId: 'text-embedding-3-small',
-    name: 'OpenAI Text-Embedding-3 Small (1536d High-Efficiency)',
-    provider: 'openai',
-    category: 'embedding',
-    contextWindowTokens: 8_191,
-    maxOutputTokens: 1_536,
-    listPricePer1MInput: 0.020,
-    listPricePer1MOutput: 0.0,
-    inputPricePer1M: 0.015, // 25% Discount
-    outputPricePer1M: 0.0,
-    discountPercentage: 25,
-    supportsVision: false,
-    supportsReasoning: false,
-    supportsStreaming: false,
-    description: 'High-efficiency 1536-dimensional vector embeddings for dense semantic retrieval and RAG.'
-  },
-  {
-    id: 'text-embedding-3-large',
-    upstreamId: 'text-embedding-3-large',
-    name: 'OpenAI Text-Embedding-3 Large (3072d High-Precision)',
-    provider: 'openai',
-    category: 'embedding',
-    contextWindowTokens: 8_191,
-    maxOutputTokens: 3_072,
-    listPricePer1MInput: 0.130,
-    listPricePer1MOutput: 0.0,
-    inputPricePer1M: 0.095, // 27% Discount
-    outputPricePer1M: 0.0,
-    discountPercentage: 27,
-    supportsVision: false,
-    supportsReasoning: false,
-    supportsStreaming: false,
-    description: 'SOTA 3072-dimensional vector embeddings with dense semantic precision and multi-language clustering.'
   }
 ];
 
@@ -505,17 +467,7 @@ export class ModelCatalog {
       'flux': 'openai-gpt-image-2',
       'flux-pro': 'openai-gpt-image-2',
       'flux-schnell': 'openai-gpt-image-2',
-      'stable-diffusion': 'openai-gpt-image-2',
-
-      // Embeddings
-      'embedding': 'text-embedding-3-small',
-      'embeddings': 'text-embedding-3-small',
-      'embed': 'text-embedding-3-small',
-      'vector': 'text-embedding-3-small',
-      'text-embedding': 'text-embedding-3-small',
-      'text-embedding-3': 'text-embedding-3-small',
-      'text-embedding-3-small': 'text-embedding-3-small',
-      'text-embedding-3-large': 'text-embedding-3-large'
+      'stable-diffusion': 'openai-gpt-image-2'
     };
 
     if (aliases[normalized] && this.catalog.has(aliases[normalized])) {
@@ -546,12 +498,9 @@ export class ModelCatalog {
       if (fuzzyFound) return fuzzyFound;
     }
 
-    // 8. Intent Category Detection: If developer requested an image or embedding term, route to that category
+    // 8. Intent Category Detection: If developer requested an image term, route to that category
     if (normalized.includes('image') || normalized.includes('draw') || normalized.includes('photo') || normalized.includes('art') || normalized.includes('dall')) {
       return this.catalog.get('openai-gpt-image-2') || EXCLUSIVE_MODEL_CATALOG.find(m => m.category === 'image')!;
-    }
-    if (normalized.includes('embed') || normalized.includes('vector')) {
-      return this.catalog.get('text-embedding-3-small') || EXCLUSIVE_MODEL_CATALOG.find(m => m.category === 'embedding')!;
     }
 
     // 9. Zero-hesitation ultimate fallback: default flagship LLM

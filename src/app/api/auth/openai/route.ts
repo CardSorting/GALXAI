@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
+import { GalxModelRouter } from '@/core/router/GalxModelRouter';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
 
 /**
  * 1-Click OpenAI SSO / PKCE & Vault Registration ("Provider IS Auth").
@@ -45,10 +58,28 @@ export async function POST(req: NextRequest) {
       userAgent
     });
 
-    return NextResponse.json(result);
+    const response = NextResponse.json(result, {
+      headers: { 'Access-Control-Allow-Origin': '*' }
+    });
+
+    if (result.success && result.user?.token) {
+      response.cookies.set('galx_session', result.user.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 30 * 24 * 60 * 60 // 30 days
+      });
+    }
+
+    return response;
   } catch (err: any) {
     const status = err.message?.includes('MISSING_PROVIDER_CREDENTIALS') || err.message?.includes('INVALID_') ? 400 : 500;
-    return NextResponse.json({ success: false, error: err.message }, { status });
+    const sanitized = GalxModelRouter.sanitizeUpstreamError(err?.message || 'Authentication failed');
+    return NextResponse.json({ success: false, error: sanitized }, {
+      status,
+      headers: { 'Access-Control-Allow-Origin': '*' }
+    });
   }
 }
 

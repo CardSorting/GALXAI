@@ -28,16 +28,7 @@ GALXAI exclusively routes traffic across modern flagship LLMs, reasoning engines
 
 ---
 
-## 3. Vector Embedding Models (Edge $<15\text{ms}$)
-
-| Model ID | Provider | Dimensions | Max Context | Input Price / 1M | Edge PoP Latency |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **`text-embedding-3-small`** | OpenAI / Edge | 1,536 | 8,191 | **$0.015** (25% OFF) | $<12\text{ms}$ |
-| **`text-embedding-3-large`** | OpenAI / Edge | 3,072 | 8,191 | **$0.095** (27% OFF) | $<15\text{ms}$ |
-
----
-
-## 4. Universal Synonym & Mental Model Normalization
+## 3. Universal Synonym & Mental Model Normalization
 
 The router automatically resolves developer shorthands and external model IDs to the optimal canonical target:
 
@@ -49,12 +40,11 @@ The router automatically resolves developer shorthands and external model IDs to
 | `luna`, `fast`, `flash`, `speed`, `turbo`, `cheap`, `velocity`, `instant`, `autocomplete`, `gpt-4o-mini`, `gemini-2.0-flash` | `gpt-5.6-luna` | High-velocity low-latency intent |
 | `grok`, `grok-4.6`, `xai-grok`, `grok-1m`, `1m`, `realtime`, `live`, `grok-3` | `x-ai/grok-4.6` | 1M Context Frontier Reasoning |
 | `image`, `generate-image`, `dall-e-3`, `midjourney`, `flux`, `photoreal` | `openai-gpt-image-2` | Visual synthesis intent |
-| `embedding`, `embed`, `vector`, `text-embedding` | `text-embedding-3-small` | Vector embedding intent |
 | `""` (empty), `undefined`, `null`, unknown model string | `gpt-5.6-sol` | Safe default fallback |
 
 ---
 
-## 5. Automated Suffix & Prefix Stripping
+## 4. Automated Suffix & Prefix Stripping
 
 The gateway automatically strips lifecycle suffixes and provider prefixes before matching:
 - **Prefixes Removed**: `openai/`, `x-ai/`, `anthropic/`, `google/`, `meta/`, `deepseek/`, `galx/`, `galxai/`, `@openai/`, `@anthropic/`

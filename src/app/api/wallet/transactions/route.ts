@@ -3,8 +3,19 @@ import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { WalletRepository } from '@/lib/supabase/repositories/WalletRepository';
 
 export const dynamic = 'force-dynamic';
-
 export const runtime = 'nodejs';
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
 
 export interface EnrichedTransaction {
   id: string;
@@ -74,11 +85,11 @@ const SEED_TRANSACTIONS: EnrichedTransaction[] = [
   {
     id: 'tx_live_8910',
     type: 'usage',
-    description: 'API Chat: xAI Grok 4.5 (500K)',
+    description: 'API Chat: OpenAI Codex GPT-5.6 Luna',
     amountUsd: -0.011240,
     balanceAfterUsd: 114.601170,
-    model: 'x-ai/grok-4.5',
-    modelName: 'xAI Grok 4.5 (500K)',
+    model: 'gpt-5.6-luna',
+    modelName: 'OpenAI Codex GPT-5.6 Luna',
     promptTokens: 4100,
     cachedTokens: 1800,
     completionTokens: 640,

@@ -97,7 +97,6 @@ You do not need to rename your model strings in existing codebases. The GALXAI r
 | `claude-3-7-sonnet`, `claude-3-5-sonnet` | **`gpt-5.6-sol`** (or native messages endpoint) | SOTA reasoning, full `/v1/messages` SSE streaming |
 | `grok-3`, `grok-2`, `xai-grok`, `grok` | **`x-ai/grok-4.6`** | 1M context multimodal reasoning, **30% OFF** |
 | `dall-e-3`, `dalle-3`, `midjourney`, `flux` | **`openai-gpt-image-2`** | 4K synthesis, aspect ratio support, **25% OFF** ($0 egress R2) |
-| `text-embedding-3-small`, `text-embedding-ada-002` | **`text-embedding-3-small`** | 1536-dim vector embeddings, $<12\text{ms}$ Edge PoP |
 
 ---
 

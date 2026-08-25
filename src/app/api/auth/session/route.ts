@@ -2,8 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 
 export const dynamic = 'force-dynamic';
-
 export const runtime = 'nodejs';
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
 
 /**
  * GET /api/auth/session
@@ -27,12 +38,16 @@ export async function GET(req: NextRequest) {
         email: identity.claims.email,
         name: identity.claims.name,
         provider: identity.claims.provider,
-        shardId: identity.claims.shardId,
-        shardMode: identity.claims.shardMode,
         token
       },
-      claims: identity.claims,
-      session: identity.session
+      claims: {
+        sub: identity.claims.sub,
+        email: identity.claims.email,
+        name: identity.claims.name,
+        provider: identity.claims.provider,
+        iat: identity.claims.iat,
+        exp: identity.claims.exp
+      }
     });
   } catch (err: any) {
     return NextResponse.json({ valid: false, error: err.message }, { status: 500 });

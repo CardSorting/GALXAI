@@ -146,8 +146,7 @@ const MENTAL_MODELS = [
   { id: 'sol', name: '⚡ SOTA Coding', model: 'gpt-5.6-sol', icon: Zap, badge: '-25%' },
   { id: 'terra', name: '🧠 Deep Logic', model: 'gpt-5.6-terra', icon: Brain, badge: '-25%' },
   { id: 'luna', name: '🚀 Fast Velocity', model: 'gpt-5.6-luna', icon: Flame, badge: '-36%' },
-  { id: 'image', name: '🎨 Visual Studio', model: 'openai-gpt-image-2', icon: ImageIcon, badge: '-25%' },
-  { id: 'embed', name: '📐 Dense Embeddings', model: 'text-embedding-3-small', icon: Layers, badge: '-25%' }
+  { id: 'image', name: '🎨 Visual Studio', model: 'openai-gpt-image-2', icon: ImageIcon, badge: '-25%' }
 ];
 
 function BaseApiPlayground() {
@@ -575,7 +574,7 @@ const res = await galx.chat.completions.create({
           {/* Tab Content */}
           <div className="flex-1 min-h-[300px] rounded-2xl bg-black/60 border border-white/10 p-4 font-mono text-xs overflow-hidden flex flex-col">
             {activeTab === 'output' && (
-              <div className="flex-1 overflow-y-auto space-y-2 text-zinc-200 whitespace-pre-wrap selection:bg-amber-500 selection:text-black">
+              <div className="flex-1 overflow-y-auto space-y-2 text-zinc-200 whitespace-pre-wrap">
                 {streamingOutput ? (
                   <div>{streamingOutput}</div>
                 ) : (
@@ -625,7 +624,7 @@ const res = await galx.chat.completions.create({
                   </button>
                 </div>
 
-                <pre className="flex-1 overflow-x-auto text-[11px] text-zinc-300 font-mono selection:bg-amber-500 selection:text-black">
+                <pre className="flex-1 overflow-x-auto text-[11px] text-zinc-300 font-mono">
                   <code>{snippets[codeTab]}</code>
                 </pre>
               </div>

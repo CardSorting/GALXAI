@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { galxRouter } from '@/core/router/GalxModelRouter';
+import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
 import type { ChatCompletionRequest } from '@/core/contracts/GalxContracts';
@@ -14,7 +14,7 @@ export async function OPTIONS() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-api-key, X-Galx-Shard-Preference'
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-api-key'
     }
   });
 }
@@ -176,9 +176,10 @@ export async function POST(req: NextRequest) {
       }
     });
   } catch (err: any) {
+    const safeError = GalxModelRouter.sanitizeUpstreamError(err.message || 'Internal error processing Ollama generate request');
     return NextResponse.json(
-      { error: err.message || 'Internal error processing Ollama generate request' },
-      { status: 500 }
+      { error: safeError },
+      { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
     );
   }
 }

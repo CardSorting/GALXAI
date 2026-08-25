@@ -1,58 +1,36 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { galxRouter } from '@/core/router/GalxModelRouter';
-import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
-import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
-import type { GalxShardAccount, ProviderType } from '@/core/contracts/GalxContracts';
+import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
-
 export const runtime = 'nodejs';
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  let userId = searchParams.get('userId') || undefined;
-  const provider = (searchParams.get('provider') as ProviderType) || undefined;
-
-  if (!userId) {
-    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-    if (auth.authenticated) {
-      userId = auth.userId;
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
     }
-  }
-
-  const shards = galxRouter.substrate.listAccounts(userId, provider).map(s => ({
-    id: s.id,
-    userId: s.userId,
-    accountLabel: s.accountLabel,
-    provider: s.provider,
-    authType: s.authType,
-    shardMode: s.shardMode,
-    status: s.status,
-    priority: s.priority,
-    weight: s.weight,
-    apiKeyMasked: s.apiKeyMasked,
-    tokenBucket: {
-      remainingTokens: Math.round(s.tokenBucket.remainingTokens),
-      maxTokens: s.tokenBucket.maxTokens,
-      remainingRequests: Math.round(s.tokenBucket.remainingRequests),
-      maxRequests: s.tokenBucket.maxRequests
-    },
-    stats: s.stats,
-    inFlight: galxRouter.pool.getInFlightCount(s.id),
-    cooldownUntil: s.cooldownUntilTimestampMs,
-    createdAt: s.createdAtMs,
-    updatedAt: s.updatedAtMs
-  }));
-
-  return NextResponse.json({ shards, total: shards.length });
+  });
 }
 
-export async function POST(_req: NextRequest) {
+export async function GET() {
   return NextResponse.json(
     {
-      error: 'Client-side shard creation is no longer supported. Model routing is managed automatically via enterprise gateway infrastructure.',
-      code: 'shard_creation_deprecated'
+      error: 'Direct partition inspection is deprecated. Infrastructure routing is sovereign and managed at the gateway layer.',
+      code: 'endpoint_deprecated'
     },
-    { status: 410 }
+    { status: 410, headers: { 'Access-Control-Allow-Origin': '*' } }
+  );
+}
+
+export async function POST() {
+  return NextResponse.json(
+    {
+      error: 'Direct partition creation is deprecated. Infrastructure routing is sovereign and managed at the gateway layer.',
+      code: 'endpoint_deprecated'
+    },
+    { status: 410, headers: { 'Access-Control-Allow-Origin': '*' } }
   );
 }

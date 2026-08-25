@@ -153,13 +153,13 @@ export function CompareClient() {
                   <th key={m.id} className="py-4 px-4 min-w-[200px]">
                     <div className="flex items-center gap-2">
                       <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                        m.provider === 'xai-grok' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
+                        m.category === 'image' ? 'bg-indigo-500/10 text-indigo-400' : 'bg-amber-500/10 text-amber-400'
                       }`}>
-                        {m.provider === 'xai-grok' ? <Rocket className="w-3.5 h-3.5" /> : <Zap className="w-3.5 h-3.5 fill-amber-400" />}
+                        {m.category === 'image' ? <Rocket className="w-3.5 h-3.5" /> : <Zap className="w-3.5 h-3.5 fill-amber-400" />}
                       </div>
                       <div>
                         <div className="font-bold text-white text-xs">{m.id}</div>
-                        <span className="text-[10px] text-zinc-500 font-mono uppercase">{m.provider}</span>
+                        <span className="text-[10px] text-zinc-500 font-mono uppercase">{m.provider === 'openai' ? 'OpenAI Codex' : 'GALXAI SOTA'}</span>
                       </div>
                     </div>
                   </th>

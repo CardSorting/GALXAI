@@ -26,14 +26,14 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       license: 'GALXAI Commercial Enterprise License',
-      modelfile: `# Modelfile generated for GALXAI ${spec.name}\nFROM ${spec.upstreamId}\nPARAMETER temperature 0.7\nPARAMETER stop "<|im_end|>"`,
+      modelfile: `# Modelfile generated for GALXAI ${spec.name}\nFROM ${spec.id}\nPARAMETER temperature 0.7\nPARAMETER stop "<|im_end|>"`,
       parameters: 'temperature 0.7\nnum_ctx ' + spec.contextWindowTokens,
       template: '{{ .System }}\nUSER: {{ .Prompt }}\nASSISTANT: ',
       details: {
         parent_model: '',
         format: 'gguf',
         family: spec.category === 'llm' ? 'frontier' : spec.category,
-        families: [spec.provider],
+        families: ['galxai'],
         parameter_size: spec.contextWindowTokens > 500000 ? 'frontier-1m' : 'frontier',
         quantization_level: 'f16'
       },

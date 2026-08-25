@@ -1,25 +1,26 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { galxRouter } from '@/core/router/GalxModelRouter';
+import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-/**
- * 1-Click Instant Permission Retraction & Zero-Residual Eviction Killswitch.
- */
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id } = await params;
-    const body = await req.json().catch(() => ({}));
-    const userId = body.userId || 'system_admin';
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
 
-    const success = galxRouter.substrate.retractAccount(id, userId);
-
-    return NextResponse.json({
-      success,
-      message: `Shard ${id} permission instantly retracted. Active leases aborted and memory zeroized.`
-    });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  }
+export async function POST() {
+  return NextResponse.json(
+    {
+      error: 'Direct partition retraction is deprecated. Infrastructure routing is sovereign and managed at the gateway layer.',
+      code: 'endpoint_deprecated'
+    },
+    { status: 410, headers: { 'Access-Control-Allow-Origin': '*' } }
+  );
 }

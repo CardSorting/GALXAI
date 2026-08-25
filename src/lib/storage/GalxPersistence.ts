@@ -326,19 +326,39 @@ export class GalxPersistence {
     return this.auditRepo.getAuditLogs(params);
   }
 
+  private sanitizeAuditMetadata(meta: any): any {
+    if (!meta || typeof meta !== 'object') return meta;
+    try {
+      const copy: any = Array.isArray(meta) ? [...meta] : { ...meta };
+      for (const [k, v] of Object.entries(copy)) {
+        if (typeof v === 'string') {
+          if (/token|secret|key|authorization|password|bearer/i.test(k)) {
+            copy[k] = v.length > 8 ? `${v.substring(0, 4)}...${v.substring(v.length - 4)}` : '****';
+          }
+        } else if (v && typeof v === 'object') {
+          copy[k] = this.sanitizeAuditMetadata(v);
+        }
+      }
+      return copy;
+    } catch {
+      return meta;
+    }
+  }
+
   public logAudit(action: string, metadata: any, shardId?: string, userId?: string): void {
+    const safeMeta = this.sanitizeAuditMetadata(metadata);
     const logItem = {
       id: `audit_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       shardId,
       userId,
       action,
-      metadata,
+      metadata: safeMeta,
       timestampMs: Date.now()
     };
     this.auditTable.put(logItem.id, logItem);
     this.auditRepo.logAudit({
       action,
-      metadata,
+      metadata: safeMeta,
       shardId,
       userId
     }).catch(() => {});

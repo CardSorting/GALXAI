@@ -101,7 +101,7 @@ async function runZeroHesitationAudit() {
   // Image & Embedding
   assert(ModelCatalog.resolveModel('image').id === 'openai-gpt-image-2', 'image intent resolves to openai-gpt-image-2');
   assert(ModelCatalog.resolveModel('dall-e-3').id === 'openai-gpt-image-2', 'dall-e-3 resolves to openai-gpt-image-2');
-  assert(ModelCatalog.resolveModel('embedding').id === 'text-embedding-3-small', 'embedding intent resolves to text-embedding-3-small');
+  assert(ModelCatalog.resolveModel('embedding').id === 'gpt-5.6-sol', 'embedding intent resolves to default gpt-5.6-sol');
 
   // Prefixes & Suffixes & Version Tags
   assert(ModelCatalog.resolveModel('openai/gpt-5.6-sol:latest').id === 'gpt-5.6-sol', 'openai/ prefix and :latest suffix stripped');

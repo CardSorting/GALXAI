@@ -18,10 +18,10 @@ export async function OPTIONS() {
   });
 }
 
-function authenticateRequest(req: NextRequest): { userId: string; isAuthorized: boolean } {
+function authenticateRequest(req: NextRequest, requireAuth = false): { userId: string; isAuthorized: boolean } {
   const authHeader = req.headers.get('authorization') || '';
   if (!authHeader.startsWith('Bearer ')) {
-    return { userId: 'anonymous_developer', isAuthorized: true };
+    return { userId: requireAuth ? '' : 'developer_sandbox', isAuthorized: !requireAuth };
   }
   const token = authHeader.substring(7).trim();
   if (token.startsWith('galx_live_')) {
@@ -68,9 +68,9 @@ export async function GET(req: NextRequest) {
  * Creates or updates a named queue configuration.
  */
 export async function POST(req: NextRequest) {
-  const auth = authenticateRequest(req);
+  const auth = authenticateRequest(req, true);
   if (!auth.isAuthorized) {
-    return NextResponse.json({ error: { message: 'Unauthorized Gateway API Key' } }, { status: 401 });
+    return NextResponse.json({ error: { message: 'Unauthorized Gateway API Key or Session Bearer Token required' } }, { status: 401 });
   }
 
   try {

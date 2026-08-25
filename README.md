@@ -104,7 +104,7 @@ Execute completions, test models, estimate token savings, and measure edge laten
 | **`x-ai/grok-4.6`** | 1M Frontier: Multimodal vision, realtime analysis | $1,000,000$ | $128,000$ | **$2.10** | **$8.40** | **$0.70** | **30% OFF** |
 | **`x-ai/grok-4.5`** | 500K Frontier: Visual data extraction, code analysis | $500,000$ | $32,768$ | **$1.80** | **$7.20** | **$0.60** | **28% OFF** |
 | **`openai-gpt-image-2`**| Ultra 4K Visual Synthesis (`16:9`, `9:16`, `1:1`) | $128,000$ | — | **$0.060**/img | — | — | **25% OFF** |
-| **`text-embedding-3-small`**| Vector Embeddings (1536-dim, Edge $<12\text{ms}$) | $8,191$ | — | **$0.015** | **$0.000** | — | **25% OFF** |
+| **`openai-gpt-image-1.5`**| Photoreal Visual Synthesis (`16:9`, `9:16`, `1:1`) | $128,000$ | — | **$0.045**/img | — | — | **25% OFF** |
 
 ---
 

@@ -138,8 +138,13 @@ export class GalxCryptoVault {
    */
   static maskApiKey(token: string): string {
     if (!token || typeof token !== 'string' || token.length < 8) return '****';
-    const clean = token.replace(/^Bearer\s+/i, '');
-    if (clean.startsWith('sk-') || clean.startsWith('xai-')) {
+    const clean = token.replace(/^Bearer\s+/i, '').trim();
+    if (clean.startsWith('galx_live_')) {
+      const prefix = clean.substring(0, 14);
+      const suffix = clean.substring(clean.length - 4);
+      return `${prefix}...${suffix}`;
+    }
+    if (clean.startsWith('sk-') || clean.startsWith('xai-') || clean.startsWith('ant-')) {
       const prefix = clean.substring(0, 8);
       const suffix = clean.substring(clean.length - 4);
       return `${prefix}...${suffix}`;

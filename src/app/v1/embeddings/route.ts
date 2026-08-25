@@ -12,7 +12,7 @@ export async function OPTIONS() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Galx-Shard-Preference',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400'
     }
   });
@@ -64,9 +64,11 @@ export async function POST(req: NextRequest) {
       }
     });
   } catch (err: any) {
+    const { GalxModelRouter } = await import('@/core/router/GalxModelRouter');
+    const sanitized = GalxModelRouter.sanitizeUpstreamError(err?.message || 'Internal server error');
     return NextResponse.json(
-      { error: { message: err.message || 'Internal server error', type: 'api_error' } },
-      { status: 500 }
+      { error: { message: sanitized, type: 'api_error' } },
+      { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
     );
   }
 }

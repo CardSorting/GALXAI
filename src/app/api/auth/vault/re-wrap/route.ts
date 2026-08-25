@@ -5,6 +5,18 @@ import { PRIMARY_KEY_VERSION } from '@/core/vault/GalxCryptoVault';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
+
 /**
  * POST /api/auth/vault/re-wrap
  * Administrative zero-downtime KMS key re-wrapping pipeline for stored credentials.
@@ -39,9 +51,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       targetKeyVersion,
-      totalShardsScanned: result.total,
-      shardsReencrypted: result.reencrypted,
-      message: `Successfully re-wrapped ${result.reencrypted} shard credentials to KMS key version '${targetKeyVersion}'.`
+      totalCredentialsScanned: result.total,
+      credentialsReencrypted: result.reencrypted,
+      message: `Successfully re-wrapped ${result.reencrypted} credentials to KMS key version '${targetKeyVersion}'.`
     });
   } catch (error: any) {
     return NextResponse.json(

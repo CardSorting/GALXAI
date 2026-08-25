@@ -1,11 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
+import { GalxModelRouter } from '@/core/router/GalxModelRouter';
 
 export const runtime = 'nodejs';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
 
 /**
  * Ultra-flat direct AI execution endpoint.
@@ -14,7 +27,7 @@ export const maxDuration = 60;
  */
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
     const prompt = body.prompt || '';
     const model = body.model || 'gpt-5.6-sol';
     const type = body.type || 'chat';
@@ -85,10 +98,11 @@ export async function POST(req: NextRequest) {
       }
 
       if (current && (current.status === 'DEAD_LETTERED' || current.status === 'CANCELLED' || current.status === 'EXPIRED')) {
+        const safeError = GalxModelRouter.sanitizeUpstreamError(current.lastError?.message || 'Execution failed');
         return NextResponse.json({
           id: current.id,
           status: current.status,
-          error: current.lastError?.message || 'Execution failed'
+          error: safeError
         }, { status: 500 });
       }
 
@@ -103,6 +117,7 @@ export async function POST(req: NextRequest) {
       taskUrl: `/api/queues/${targetQueue}/tasks/${task.id}`
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
+    const safeError = GalxModelRouter.sanitizeUpstreamError(err.message || 'Internal server error');
+    return NextResponse.json({ error: safeError }, { status: 500 });
   }
 }

@@ -32,7 +32,7 @@ export async function GET(
     id: modelSpec.id,
     object: 'model',
     created: 1735689600,
-    owned_by: modelSpec.provider === 'openai' ? 'openai-codex' : 'xai-grok',
+    owned_by: 'galxai',
     name: modelSpec.name,
     category: modelSpec.category,
     context_window: modelSpec.contextWindowTokens,

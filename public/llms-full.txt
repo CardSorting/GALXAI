@@ -1,7 +1,7 @@
 # GALXAI — Enterprise Universal AI Gateway & High-Throughput Model Router Full Specification
 
 ## 1. Executive Summary & Value Proposition
-GALXAI (https://galx.ai) is an enterprise-grade AI model clearinghouse, multi-account liquidity pool, and sub-15ms Anycast API gateway. It provides a single drop-in OpenAI-compatible endpoint (`https://api.galx.ai/v1`) for OpenAI GPT-5.6 (Sol, Terra, Luna) and xAI Grok (4.6, 4.5) with:
+GALXAI (https://galx.ai) is an enterprise-grade AI model clearinghouse, multi-account liquidity pool, and sub-15ms Anycast API gateway. It provides a single drop-in OpenAI-compatible endpoint (`https://api.galx.ai/v1`) for OpenAI GPT-5.6 (Sol, Terra, Luna) and visual synthesis engines with:
 - **25% to 40% Wholesale Token Discounts**: Direct pass-through wholesale rates below upstream retail pricing.
 - **75% Compound Prompt Caching**: 100% pass-through of provider prefix caching rebates on prompts exceeding 1,024 tokens.
 - **Zero Rate-Limit Stalls (429 Shield)**: Predictive Adaptive Hydraulic Headroom (P-AHT) and continuous token governance across distributed enterprise shards.
@@ -24,11 +24,9 @@ GALXAI (https://galx.ai) is an enterprise-grade AI model clearinghouse, multi-ac
 | `gpt-5.6-sol` | OpenAI | Deep Reasoning & Code | 900,000 | 32,768 | $3.75 | $1.25 (-75%) | $15.00 | 25% OFF |
 | `gpt-5.6-terra` | OpenAI | Balanced Workhorse | 900,000 | 16,384 | $2.25 | $0.75 (-75%) | $9.00 | 25% OFF |
 | `gpt-5.6-luna` | OpenAI | High-Velocity Velocity | 900,000 | 8,192 | $0.75 | $0.25 (-75%) | $3.00 | 25% OFF |
-| `x-ai/grok-4.6` | xAI | 1M Context Flagship | 1,000,000 | 65,536 | $2.80 | $0.75 (-75%) | $11.20 | 30% OFF |
 | `openai-gpt-image-2` | OpenAI | Ultra 4K Visual Synthesis | 3840x2160 | N/A | $0.060 / img | N/A | N/A | 25% OFF |
 | `openai-gpt-image-1.5` | OpenAI | Photoreal Synthesis | 1024x1024 | N/A | $0.045 / img | N/A | N/A | 25% OFF |
 | `openai-gpt-image-1` | OpenAI | Rapid Diffusion Drafts | 1024x1024 | N/A | $0.028 / img | N/A | N/A | 30% OFF |
-| `xai-grok-image` | xAI | Vibrant Visual Synthesis | 1024x1024 | N/A | $0.038 / img | N/A | N/A | 24% OFF |
 
 ## 4. IDE, Agent & Framework Integration Recipes
 
@@ -58,8 +56,8 @@ const client = new OpenAI({
 });
 
 const completion = await client.chat.completions.create({
-  model: "x-ai/grok-4.6",
-  messages: [{ role: "user", content: "Analyze 1M token repository" }],
+  model: "gpt-5.6-sol",
+  messages: [{ role: "user", content: "Analyze repository codebase" }],
 });
 ```
 
@@ -67,7 +65,7 @@ const completion = await client.chat.completions.create({
 1. Open Cursor / Windsurf Settings > Models > OpenAI API.
 2. Enter API Key: `galx_live_...`
 3. Enable "Override OpenAI Base URL" and enter: `https://api.galx.ai/v1`
-4. Add Model names: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `x-ai/grok-4.6`.
+4. Add Model names: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `openai-gpt-image-2`.
 
 ### Claude Code CLI Setup
 ```bash

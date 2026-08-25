@@ -542,7 +542,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
                   >
                     Clear
                   </button>
-                  <span className="text-zinc-600 font-normal">BroccoliDB L1</span>
+                  <span className="text-zinc-600 font-normal">Instant Cache L1</span>
                 </div>
               </div>
               <div className="space-y-1">
@@ -625,7 +625,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
             <div className="space-y-1">
               <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-cyan-400 font-mono flex items-center justify-between">
                 <span>Matching Pages & Actions ({omniResults.length})</span>
-                <span className="text-zinc-500 font-normal">BroccoliDB L1 Natural Parser</span>
+                <span className="text-zinc-500 font-normal">Edge Intent Matcher</span>
               </div>
               <div className="space-y-1">
                 {omniResults.map((item) => {

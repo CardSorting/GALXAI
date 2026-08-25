@@ -24,7 +24,7 @@ const COMPLIANCE_MAP: Record<string, ComplianceDocDetail> = {
       },
       {
         heading: '3. Multi-Tenant Key Vault Isolation',
-        content: 'API keys and shard authentication credentials utilize AES-256-GCM authenticated encryption with tenant-specific Additional Authenticated Data (AAD) preventing cross-tenant transplantation.',
+        content: 'API keys and provider authentication credentials utilize AES-256-GCM authenticated encryption with tenant-specific Additional Authenticated Data (AAD) preventing cross-tenant transplantation.',
       },
       {
         heading: '4. Auditor Opinion & Clean Attestation',

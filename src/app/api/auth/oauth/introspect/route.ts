@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GalxOAuthManager } from '../../../../../core/auth/GalxOAuthManager';
+import { GalxOAuthManager } from '@/core/auth/GalxOAuthManager';
+import { GalxModelRouter } from '@/core/router/GalxModelRouter';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
 
 /**
  * Standard RFC 7662 OAuth 2.0 Token Introspection Endpoint.
@@ -22,7 +35,14 @@ export async function POST(req: NextRequest) {
     }
 
     if (!token) {
-      return NextResponse.json({ active: false }, { status: 200 });
+      return NextResponse.json({ active: false }, {
+        status: 200,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+          'Content-Type': 'application/json'
+        }
+      });
     }
 
     const oauthManager = GalxOAuthManager.getInstance();
@@ -31,14 +51,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(result, {
       status: 200,
       headers: {
+        'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'no-store, no-cache, must-revalidate',
         'Content-Type': 'application/json'
       }
     });
   } catch (err: any) {
+    const sanitized = GalxModelRouter.sanitizeUpstreamError(err?.message || 'Introspection failed');
     return NextResponse.json(
-      { active: false, error: err.message || 'Introspection failed' },
-      { status: 500 }
+      { active: false, error: sanitized },
+      {
+        status: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-store'
+        }
+      }
     );
   }
 }

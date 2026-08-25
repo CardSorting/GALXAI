@@ -28,8 +28,6 @@ export interface OAuthIntrospectionResult {
   exp?: number;
   iat?: number;
   provider?: ProviderType | string;
-  accountId?: string;
-  shardId?: string;
   token_type?: 'Bearer';
 }
 
@@ -549,7 +547,6 @@ export class GalxOAuthManager {
         client_id: verified.claims.sub,
         scope: verified.claims.scopes?.join(' ') || 'openid profile',
         provider: verified.claims.provider,
-        shardId: verified.claims.shardId,
         exp: verified.claims.exp,
         iat: verified.claims.iat,
         token_type: 'Bearer'
@@ -568,7 +565,6 @@ export class GalxOAuthManager {
         sub: claims.email || this.extractAccountId(token) || 'oauth_user',
         exp: claims.exp,
         iat: claims.iat,
-        accountId: this.extractAccountId(token),
         token_type: 'Bearer'
       };
     }

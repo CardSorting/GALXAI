@@ -3,8 +3,19 @@ import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 
 export const dynamic = 'force-dynamic';
-
 export const runtime = 'nodejs';
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
 
 /**
  * GET /api/auth/audit/activity
@@ -18,7 +29,7 @@ export async function GET(req: NextRequest) {
     if (!auth.authenticated) {
       return NextResponse.json(
         { error: 'Unauthorized: Valid session bearer token is required' },
-        { status: 401 }
+        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
       );
     }
 
@@ -45,11 +56,15 @@ export async function GET(req: NextRequest) {
           description = 'SECURITY THREAT: Suspected token replay attack blocked; session family terminated';
         }
 
+        const cleanMeta = { ...meta };
+        delete cleanMeta.shardId;
+        delete cleanMeta.shardMode;
+
         return {
           id: log.id,
           action: log.action,
           description,
-          details: meta,
+          details: cleanMeta,
           timestamp: log.timestampMs,
           formattedDate: new Date(log.timestampMs).toISOString()
         };
@@ -60,11 +75,13 @@ export async function GET(req: NextRequest) {
       success: true,
       activities: userLogs,
       total: userLogs.length
+    }, {
+      headers: { 'Access-Control-Allow-Origin': '*' }
     });
   } catch (error: any) {
     return NextResponse.json(
       { error: error?.message || 'Failed to retrieve activity history' },
-      { status: 500 }
+      { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
     );
   }
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 
 export const runtime = 'nodejs';
@@ -8,14 +8,14 @@ export const dynamic = 'force-static';
 export const revalidate = 3600; // 1 hour
 
 export async function GET() {
-  const modelRates = EXCLUSIVE_MODEL_CATALOG.map((m) => {
+  const modelRates = FRONTEND_VISIBLE_MODELS.map((m) => {
     const contextK = Math.round(m.contextWindowTokens / 1000);
     const cachedInput = m.cachedInputPricePer1M ?? m.inputPricePer1M * 0.25;
 
     return {
       id: m.id,
       name: m.name,
-      provider: m.provider,
+      provider: 'GALXAI',
       category: m.category,
       context_window_tokens: m.contextWindowTokens,
       context_window_k: `${contextK}K`,

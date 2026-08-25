@@ -5,7 +5,7 @@ import { RouteErrorBoundaryCard } from '@/components/common/RouteErrorBoundaryCa
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Lock } from 'lucide-react';
 
-export default function SingleShardError({
+export default function SingleVaultKeyError({
   error,
   reset,
 }: {
@@ -13,7 +13,7 @@ export default function SingleShardError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('💥 [GALXAI Single Shard Error Boundary Caught]:', error);
+    console.error('💥 [GALXAI Key Error Boundary Caught]:', error.message || 'Key resolution error');
   }, [error]);
 
   return (

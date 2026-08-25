@@ -2,8 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 
 export const dynamic = 'force-dynamic';
-
 export const runtime = 'nodejs';
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
 
 /**
  * GET /api/auth/security/posture
@@ -17,7 +28,7 @@ export async function GET(req: NextRequest) {
     if (!auth.authenticated || !auth.session) {
       return NextResponse.json(
         { error: 'Unauthorized: Valid session bearer token is required' },
-        { status: 401 }
+        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
       );
     }
 
@@ -26,11 +37,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       posture
+    }, {
+      headers: { 'Access-Control-Allow-Origin': '*' }
     });
   } catch (error: any) {
     return NextResponse.json(
       { error: error?.message || 'Failed to retrieve security posture' },
-      { status: 500 }
+      { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
     );
   }
 }

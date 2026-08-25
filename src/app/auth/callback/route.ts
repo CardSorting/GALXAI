@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 /**
  * Standard Supabase SSR OAuth Callback Route Handler.
  * Exchanges authorization code for Supabase session and sets secure auth cookies.
- * Completely siloed from backend sharding and Substrate services.
+ * Completely siloed from backend routing and Substrate services.
  */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);

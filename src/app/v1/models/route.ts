@@ -25,7 +25,7 @@ export async function GET() {
     id: m.id,
     object: 'model',
     created: 1735689600,
-    owned_by: m.provider === 'openai' ? 'openai-codex' : 'xai-grok',
+    owned_by: 'galxai',
     name: m.name,
     category: m.category,
     context_window: m.contextWindowTokens,

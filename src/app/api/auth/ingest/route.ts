@@ -117,10 +117,8 @@ export async function OPTIONS() {
  * - Idempotency Key Protocol (IETF): Deterministic retry deduplication with 24-hour cache.
  * - Concurrency Backpressure: Circuit-breaker rejection on extreme load (503).
  * - Cloudflare Threat Score & Impossible Geo-Travel Anomaly Detection.
- * - Strict Content-Type enforcement (application/json) with HTTP 415 rejection.
- * - Anti-Replay single-use nonce cache (10-minute TTL).
- * - Memory zeroization on ephemeral cryptographic buffers.
- * - Substrate Shard Provisioning in Hybrid BroccoliDB and Supabase.
+ * - Ephemeral memory zeroization on cryptographic buffers.
+ * - Substrate Credential Partition Provisioning in Hybrid BroccoliDB and Supabase.
  * - JWE Encrypted Bearer Session Token Issuance.
  */
 export async function POST(req: NextRequest) {

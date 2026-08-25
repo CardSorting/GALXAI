@@ -24,7 +24,7 @@ export const metadata: Metadata = constructMetadata({
     'AI Gateway Architecture',
     'Circuit Breaker FSM',
     'Predictive Adaptive Headroom',
-    'Tenant-Affinity Shard Dispersion',
+    'Tenant-Affinity Channel Dispersion',
     'AES-256-GCM Envelope Encryption',
   ],
 });
@@ -162,7 +162,7 @@ export default function ArchitectureDocPage() {
           </div>
 
           <p className="text-xs text-zinc-300 font-sans leading-relaxed">
-            GALXAI ranks upstream compute channels using the <strong>Predictive Adaptive Headroom (P-AHT)</strong> formula combined with <strong>Tenant-Affinity Shard Dispersion (TASD)</strong> to prevent agent loops from concentrating load onto a single upstream channel:
+            GALXAI ranks upstream compute channels using the <strong>Predictive Adaptive Headroom (P-AHT)</strong> formula combined with <strong>Tenant-Affinity Channel Dispersion (TACD)</strong> to prevent agent loops from concentrating load onto a single upstream channel:
           </p>
 
           <div className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-cyan-300 border border-white/5 space-y-2 overflow-x-auto">
@@ -173,7 +173,7 @@ export default function ArchitectureDocPage() {
           </div>
 
           <p className="text-xs text-zinc-400 font-sans leading-relaxed">
-            If a tenant launches 30 parallel tool executions, TASD penalizes candidate shards that already have active leases for that tenant (<code className="text-cyan-300">0.88^tenantLeasesOnShard</code>), naturally distributing the swarm across distinct physical credentials.
+            If a tenant launches 30 parallel tool executions, TACD penalizes candidate channels that already have active leases for that tenant (<code className="text-cyan-300">0.88^tenantLeasesOnChannel</code>), naturally distributing the swarm across distinct compute channels.
           </p>
         </section>
 

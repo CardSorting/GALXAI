@@ -31,7 +31,7 @@ export async function GET() {
       parent_model: '',
       format: 'gguf',
       family: m.category === 'llm' ? 'frontier' : m.category,
-      families: [m.provider],
+      families: ['galxai'],
       parameter_size: m.contextWindowTokens > 500000 ? 'frontier-1m' : 'frontier',
       quantization_level: 'f16'
     }

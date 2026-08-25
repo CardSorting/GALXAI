@@ -91,6 +91,40 @@ export class GalxModelRouter {
   }
 
   /**
+   * Masks and sanitizes raw upstream error messages, endpoints, account IDs, and stack traces.
+   */
+  public static sanitizeUpstreamError(rawMessage: string): string {
+    if (!rawMessage || typeof rawMessage !== 'string') {
+      return 'Gateway request failed. Please retry.';
+    }
+
+    let sanitized = rawMessage
+      .replace(/postgres(?:ql)?:\/\/[^\s"',]+/gi, '[redacted-db-uri]')
+      .replace(/https?:\/\/[a-zA-Z0-9._-]+\.supabase\.co[^\s"',]*/gi, '[gateway-origin]')
+      .replace(/https?:\/\/[^\s"',]+/gi, '[gateway-origin]')
+      .replace(/api\.openai\.com[^\s"',]*/gi, 'gateway.galx.ai')
+      .replace(/api\.x\.ai[^\s"',]*/gi, 'gateway.galx.ai')
+      .replace(/api\.anthropic\.com[^\s"',]*/gi, 'gateway.galx.ai')
+      .replace(/org-[a-zA-Z0-9_-]+/gi, '[redacted-org]')
+      .replace(/proj_[a-zA-Z0-9_-]+/gi, '[redacted-proj]')
+      .replace(/acct_[a-zA-Z0-9_-]+/gi, '[redacted-acct]')
+      .replace(/(?:sk|xai|ant|ghp|gho)-[a-zA-Z0-9_-]{8,}/gi, '[redacted-key]')
+      .replace(/Bearer\s+[a-zA-Z0-9._-]{10,}/gi, 'Bearer [redacted-token]')
+      .replace(/eyJ[a-zA-Z0-9_-]{10,}\.eyJ[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}/gi, '[redacted-jwt]')
+      .replace(/shard_[a-zA-Z0-9_-]+/gi, '[gateway-partition]')
+      .replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, '[redacted-ip]');
+
+    if (sanitized.includes('429') || sanitized.toLowerCase().includes('rate limit')) {
+      return 'Capacity allocation currently saturated. Automatic retry buffer activated.';
+    }
+    if (sanitized.includes('503') || sanitized.includes('502') || sanitized.includes('504') || sanitized.toLowerCase().includes('overloaded')) {
+      return 'Compute origin is temporarily overloaded. Please back off and retry.';
+    }
+
+    return sanitized;
+  }
+
+  /**
    * Preflight key validation check using GalxPreflightValidator.
    */
   async validateKeyPreflight(apiKey: string, provider: ProviderType): Promise<{ valid: boolean; reason?: string }> {
@@ -256,12 +290,13 @@ export class GalxModelRouter {
         // 6. Handle non-2xx responses
         if (!response.ok) {
           const errorBody = await response.text();
+          const sanitizedErr = GalxModelRouter.sanitizeUpstreamError(errorBody);
           this.pool.releaseLease(
             lease.leaseId,
             0,
             false,
             adapterResult.headers,
-            `HTTP ${response.status}: ${errorBody}`,
+            `HTTP ${response.status}: ${sanitizedErr}`,
             Date.now(),
             latencyMs
           );
@@ -278,11 +313,11 @@ export class GalxModelRouter {
           });
 
           if (response.status === 429 || response.status >= 500) {
-            lastError = new Error(`Upstream ${provider} error (${response.status}): ${errorBody}`);
+            lastError = new Error(`Compute origin error (${response.status}): ${sanitizedErr}`);
             continue;
           }
 
-          throw new Error(`Upstream ${provider} returned HTTP ${response.status}: ${errorBody}`);
+          throw new Error(`Gateway returned HTTP ${response.status}: ${sanitizedErr}`);
         }
 
         const isStream = sanitizedRequest.stream === true;
@@ -293,19 +328,11 @@ export class GalxModelRouter {
           }
         });
 
-        // Gateway Diagnostic Headers
-        responseHeaders.set('x-galx-shard-id', lease.shardId);
-        responseHeaders.set('x-galx-strategy', this.pool.getStrategy());
+        // Standard Gateway Response Headers (Masked & Client-Safe)
+        responseHeaders.set('x-galx-router', 'apex-v2');
         responseHeaders.set('x-galx-routing-latency-ms', String(latencyMs));
         responseHeaders.set('x-galx-model', modelSpec.id);
-        if (lease.account.accountId) {
-          responseHeaders.set('x-galx-account-id', lease.account.accountId);
-        }
-        if (lease.account.expiresAtMs) {
-          const ttlSec = Math.max(0, Math.round((lease.account.expiresAtMs - Date.now()) / 1000));
-          responseHeaders.set('x-galx-token-expires-in', String(ttlSec));
-          responseHeaders.set('x-galx-token-status', ttlSec < 300 ? 'expiring_soon' : 'healthy');
-        }
+        responseHeaders.set('x-galx-request-id', requestId);
 
         // 7. Handle Streaming Response with On-the-Fly SHA-256 Rolling Digest Hasher
         if (isStream && response.body) {
@@ -811,7 +838,8 @@ export class GalxModelRouter {
       return result;
     } catch (err: any) {
       const latencyMs = Date.now() - startMs;
-      this.pool.releaseLease(lease.leaseId, 0, false, undefined, err.message || 'Image generation error');
+      const sanitizedErr = GalxModelRouter.sanitizeUpstreamError(err.message || 'Image generation error');
+      this.pool.releaseLease(lease.leaseId, 0, false, undefined, sanitizedErr);
       this.metrics.recordSample({
         timestampMs: Date.now(),
         latencyMs,
@@ -822,7 +850,7 @@ export class GalxModelRouter {
         shardId: lease.shardId,
         statusCode: 500
       });
-      throw err;
+      throw new Error(sanitizedErr);
     } finally {
       if (rawTokenSecret) {
         try {

@@ -58,7 +58,7 @@ export const updateSession = async (request: NextRequest) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
-        'Access-Control-Allow-Headers': 'Authorization, Content-Type, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version, x-galx-key, x-galx-shard-id, x-api-key, dpop',
+        'Access-Control-Allow-Headers': 'Authorization, Content-Type, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version, x-galx-key, x-api-key, dpop',
         'Access-Control-Max-Age': '86400',
         'X-Edge-FastPath': 'cors-preflight',
         'Server-Timing': 'edge-cors;dur=0.1'
@@ -71,7 +71,7 @@ export const updateSession = async (request: NextRequest) => {
     const apiResponse = NextResponse.next({ request });
     apiResponse.headers.set('X-Edge-FastPath', 'api-bypass');
     apiResponse.headers.set('Timing-Allow-Origin', '*');
-    apiResponse.headers.set('Server-Timing', 'edge;dur=0.1, l1;desc="BroccoliDB"');
+    apiResponse.headers.set('Server-Timing', 'edge;dur=0.1, cache;desc="L1-FastPath"');
     return apiResponse;
   }
 
@@ -115,7 +115,7 @@ export const updateSession = async (request: NextRequest) => {
 
   supabaseResponse.headers.set('X-Edge-FastPath', 'auth-verified');
   supabaseResponse.headers.set('Timing-Allow-Origin', '*');
-  supabaseResponse.headers.set('Server-Timing', 'edge;dur=1.2, l1;desc="BroccoliDB"');
+  supabaseResponse.headers.set('Server-Timing', 'edge;dur=1.2, l1;desc="L1-FastPath"');
 
   return supabaseResponse;
 };

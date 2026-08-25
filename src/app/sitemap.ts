@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
-import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
 import { CURATED_MATCHUPS } from '@/lib/data/comparisonData';
 import { INTEGRATION_GUIDES } from '@/lib/data/integrationsData';
 import { SOLUTION_GUIDES } from '@/lib/data/solutionsData';
@@ -273,7 +273,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   // 3. Dynamic Model Profile Pages
-  const modelRoutes: MetadataRoute.Sitemap = EXCLUSIVE_MODEL_CATALOG.map((m) => ({
+  const modelRoutes: MetadataRoute.Sitemap = FRONTEND_VISIBLE_MODELS.map((m) => ({
     url: `${baseUrl}/models/${m.id.replace('/', '-')}`,
     lastModified: currentDate,
     changeFrequency: 'weekly',

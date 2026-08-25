@@ -34,9 +34,9 @@ export class AuthResource {
   }
 
   /**
-   * Triggers single-flight token refresh for the active provider shard.
+   * Triggers single-flight token refresh for the active provider connection.
    */
-  async refreshOAuthToken(shardId?: string): Promise<{ success: boolean; shardId: string }> {
+  async refreshOAuthToken(shardId?: string): Promise<{ success: boolean; refreshed?: boolean; shardId?: string }> {
     return this.core.request('/api/auth/oauth/refresh', {
       method: 'POST',
       body: { shardId }

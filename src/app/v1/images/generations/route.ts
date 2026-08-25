@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { galxRouter } from '@/core/router/GalxModelRouter';
+import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
@@ -143,10 +143,11 @@ export async function POST(req: NextRequest) {
       }
     });
   } catch (error: any) {
-    const message = error.message || 'Image Generation Failed';
-    const isRateLimited = message.includes('reached maximum simultaneous concurrent gateway allocation');
-    const isUnavailable = message.includes('No healthy') || message.includes('in cooldown') || message.includes('saturated');
-    const isBadRequest = message.includes('Unsupported image model') || message.includes('Missing required');
+    const rawMessage = error.message || 'Image Generation Failed';
+    const message = GalxModelRouter.sanitizeUpstreamError(rawMessage);
+    const isRateLimited = rawMessage.includes('maximum simultaneous') || rawMessage.includes('Rate limit');
+    const isUnavailable = rawMessage.includes('No healthy') || rawMessage.includes('in cooldown') || rawMessage.includes('saturated');
+    const isBadRequest = rawMessage.includes('Unsupported image model') || rawMessage.includes('Missing required');
 
     const status = isRateLimited ? 429 : isUnavailable ? 503 : isBadRequest ? 400 : 500;
     const errorType = isRateLimited
@@ -162,7 +163,7 @@ export async function POST(req: NextRequest) {
         error: {
           message,
           type: errorType,
-          code: isRateLimited ? 'rate_limit_exceeded' : isUnavailable ? 'all_shards_cooldown' : 'image_generation_failed'
+          code: isRateLimited ? 'rate_limit_exceeded' : isUnavailable ? 'capacity_saturated' : 'image_generation_failed'
         }
       },
       {

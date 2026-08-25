@@ -86,22 +86,22 @@ const CATEGORIES: SimpleCategory[] = [
       'High-converting social media ad visual assets',
       'Website hero banners and graphic design'
     ],
-    retailComparison: '$0.080 / 1M retail',
+    retailComparison: '$0.080 / img retail',
     galxDiscount: 'Save 25% ($0.060 direct wholesale)'
   },
   {
-    id: 'embeddings',
-    label: 'Vector Embeddings & Semantic Search',
-    sublabel: 'Best for RAG Pipelines, Knowledge Retrieval & Hybrid Search',
-    icon: Layers,
-    recommendedModelId: 'text-embedding-3-small',
+    id: 'photoreal',
+    label: 'Photorealistic Visuals & Art',
+    sublabel: 'Best for Social Assets, Concept Art & UI Graphics',
+    icon: Sparkles,
+    recommendedModelId: 'openai-gpt-image-1.5',
     plainUseCases: [
-      'Dense 1536-dimensional semantic vector indexing',
-      'Retrieval-Augmented Generation (RAG) vector stores',
-      'Instant semantic deduplication and document clustering'
+      'Photorealistic social media graphics and lifestyle assets',
+      'Rapid concept art and editorial illustrations',
+      'High-detail UI/UX web layout mockups'
     ],
-    retailComparison: '$0.020 / 1M retail',
-    galxDiscount: 'Save 25% ($0.015 direct wholesale)'
+    retailComparison: '$0.060 / img retail',
+    galxDiscount: 'Save 25% ($0.045 direct wholesale)'
   }
 ];
 
@@ -116,20 +116,20 @@ function BaseSimpleModelPicker() {
 
     const resolved = ModelCatalog.resolveModel(text);
     if (resolved) {
-      if (resolved.category === 'embedding') setSelectedCatId('embeddings');
+      if (resolved.id.includes('1.5')) setSelectedCatId('photoreal');
       else if (resolved.category === 'image') setSelectedCatId('visuals');
       else if (resolved.id.includes('luna')) setSelectedCatId('velocity');
       else if (resolved.id.includes('terra')) setSelectedCatId('reasoning');
       else setSelectedCatId('fast');
     } else {
       const lower = text.toLowerCase();
-      if (lower.includes('embed') || lower.includes('vector') || lower.includes('rag') || lower.includes('semantic')) {
-        setSelectedCatId('embeddings');
+      if (lower.includes('photo') || lower.includes('real') || lower.includes('art')) {
+        setSelectedCatId('photoreal');
       } else if (lower.includes('code') || lower.includes('refactor') || lower.includes('logic')) {
         setSelectedCatId('reasoning');
       } else if (lower.includes('luna') || lower.includes('speed') || lower.includes('velocity') || lower.includes('fast')) {
         setSelectedCatId('velocity');
-      } else if (lower.includes('image') || lower.includes('photo') || lower.includes('render') || lower.includes('dalle')) {
+      } else if (lower.includes('image') || lower.includes('render') || lower.includes('dall') || lower.includes('4k')) {
         setSelectedCatId('visuals');
       } else if (lower.includes('chat') || lower.includes('support')) {
         setSelectedCatId('fast');
@@ -213,7 +213,7 @@ function BaseSimpleModelPicker() {
                 <div className="flex items-center justify-between">
                   <div
                     className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                      isSelected ? 'bg-amber-400 text-black shadow-md' : 'bg-white/10 text-zinc-300'
+                      isSelected ? 'bg-amber-400 text-amber-950 shadow-md' : 'bg-white/10 text-white'
                     }`}
                   >
                     <Icon className="w-5 h-5" />

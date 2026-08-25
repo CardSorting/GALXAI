@@ -38,7 +38,7 @@ npx galxai chat`,
     "gpt-5.6-terra",
     "gpt-5.6-luna",
     "openai-gpt-image-2",
-    "text-embedding-3-small"
+    "x-ai/grok-4.6"
   ]
 }`,
 
@@ -227,7 +227,7 @@ model_list:
           </button>
         </div>
 
-        <pre className="p-4 text-xs font-mono text-zinc-200 overflow-x-auto selection:bg-amber-500 selection:text-black">
+        <pre className="p-4 text-xs font-mono text-zinc-200 overflow-x-auto">
           <code>{snippets[activeSnippet]}</code>
         </pre>
       </div>

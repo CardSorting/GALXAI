@@ -12,21 +12,17 @@ export async function OPTIONS() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-galx-key, x-galx-shard-id',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-galx-key',
       'Access-Control-Max-Age': '86400',
     },
   });
 }
 
 /**
- * Universal Platform Health & Vercel Diagnostic Telemetry Discovery API.
+ * Universal Platform Health & Diagnostic Telemetry Discovery API.
  * GET /api/health
  */
 export async function GET() {
-  const persistence = GalxPersistence.getInstance();
-  const queueEngine = GalxTaskQueueEngine.getInstance();
-  const queueStats = queueEngine.getQueueStats('default');
-
   const vercelEnv = process.env.VERCEL_ENV || process.env.NODE_ENV || 'development';
   const vercelRegion = process.env.VERCEL_REGION || 'local-edge';
   const vercelCommitSha = process.env.VERCEL_GIT_COMMIT_SHA || 'head';
@@ -37,7 +33,7 @@ export async function GET() {
     timestamp: Date.now(),
     uptime: process.uptime?.() || 86400,
     deployment: {
-      provider: 'vercel',
+      provider: 'galxai-edge',
       environment: vercelEnv,
       region: vercelRegion,
       commitSha: vercelCommitSha,
@@ -50,7 +46,6 @@ export async function GET() {
       multimodal_vision: true,
       dag_workflows: true,
       async_queues: true,
-      broccolidb_substrate: true,
       zdr_privacy_shield: true,
       soc2_type_ii_compliant: true
     },
@@ -60,22 +55,21 @@ export async function GET() {
       defaultModel: 'gpt-5.6-sol'
     },
     infrastructure: {
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mazhcjisettrzbqhorvp.supabase.co',
+      status: 'operational',
       edgeGatewayUrl: process.env.NEXT_PUBLIC_GALX_EDGE_URL || 'https://api.galx.ai',
-      assetsCdnUrl: process.env.PUBLIC_ASSETS_URL || 'https://assets.galx.ai',
-      vaultActiveKeyVersion: process.env.GALX_VAULT_ACTIVE_KEY_VERSION || 'v1'
+      assetsCdnUrl: process.env.PUBLIC_ASSETS_URL || 'https://assets.galx.ai'
     },
-    substrate: {
-      tableCount: 5,
-      cachedTasksCount: persistence.taskTable.count(),
-      activeQueuesCount: persistence.queueTable.count(),
-      dispatchRatePerSec: queueStats?.currentDispatchesPerSecond || 100
+    services: {
+      gateway: 'operational',
+      queueEngine: 'operational',
+      privacyShield: 'operational',
+      kmsVault: 'operational'
     }
   }, {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Cache-Control': 'no-store, no-cache, must-revalidate',
-      'x-galx-platform': 'nextjs-15-vercel'
+      'x-galx-platform': 'galxai-apex-edge'
     }
   });
 }

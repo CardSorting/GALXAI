@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { galxRouter } from '@/core/router/GalxModelRouter';
+import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import type { ChatCompletionRequest } from '@/core/contracts/GalxContracts';
 
@@ -14,7 +14,7 @@ export async function OPTIONS() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-api-key, anthropic-version, anthropic-beta, X-Galx-Shard-Preference',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-api-key, anthropic-version, anthropic-beta',
       'Access-Control-Max-Age': '86400'
     }
   });
@@ -22,7 +22,8 @@ export async function OPTIONS() {
 
 /**
  * Universal Anthropic-Compatible POST /v1/messages Endpoint.
- * Allows Anthropic SDK, Claude Code, and Windsurf to point directly to GALXAI.
+ * Allows Anthropic SDK, Claude Code, Windsurf, and Cursor to point directly to GALXAI.
+ * Supports tool calling (input_schema <-> JSON Schema), thinking blocks, and SSE streaming.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -32,38 +33,81 @@ export async function POST(req: NextRequest) {
     if (!authResult.authenticated) {
       return NextResponse.json(
         { type: 'error', error: { type: 'authentication_error', message: authResult.error || 'Authentication required. Please provide a valid API key via x-api-key or Authorization header.' } },
-        { status: 401 }
+        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
       );
     }
 
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
     const systemPrompt = typeof body.system === 'string' ? body.system : Array.isArray(body.system) ? body.system.map((s: any) => s.text || '').join('\n') : '';
     const anthropicMessages = body.messages || [];
 
     if (!Array.isArray(anthropicMessages) || anthropicMessages.length === 0) {
       return NextResponse.json(
         { type: 'error', error: { type: 'invalid_request_error', message: 'messages must be a non-empty array' } },
-        { status: 400 }
+        { status: 400, headers: { 'Access-Control-Allow-Origin': '*' } }
       );
     }
 
     // Convert Anthropic messages format to standard ChatCompletionRequest format
-    const convertedMessages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [];
+    const convertedMessages: Array<{ role: 'system' | 'user' | 'assistant' | 'tool'; content: any; tool_call_id?: string; tool_calls?: any[] }> = [];
     if (systemPrompt) {
       convertedMessages.push({ role: 'system', content: systemPrompt });
     }
 
     for (const msg of anthropicMessages) {
-      let contentStr = '';
       if (typeof msg.content === 'string') {
-        contentStr = msg.content;
+        convertedMessages.push({
+          role: msg.role === 'assistant' ? 'assistant' : 'user',
+          content: msg.content
+        });
       } else if (Array.isArray(msg.content)) {
-        contentStr = msg.content.map((c: any) => c.text || JSON.stringify(c)).join('\n');
+        const toolResults = msg.content.filter((c: any) => c.type === 'tool_result');
+        const toolUses = msg.content.filter((c: any) => c.type === 'tool_use');
+        const textBlocks = msg.content.filter((c: any) => c.type === 'text' || !c.type);
+
+        if (toolResults.length > 0) {
+          for (const tr of toolResults) {
+            convertedMessages.push({
+              role: 'tool',
+              content: typeof tr.content === 'string' ? tr.content : JSON.stringify(tr.content || ''),
+              tool_call_id: tr.tool_use_id
+            });
+          }
+        } else if (toolUses.length > 0) {
+          const toolCalls = toolUses.map((tu: any) => ({
+            id: tu.id,
+            type: 'function',
+            function: {
+              name: tu.name,
+              arguments: typeof tu.input === 'string' ? tu.input : JSON.stringify(tu.input || {})
+            }
+          }));
+          convertedMessages.push({
+            role: 'assistant',
+            content: textBlocks.map((t: any) => t.text || '').join('\n'),
+            tool_calls: toolCalls
+          });
+        } else {
+          const contentStr = msg.content.map((c: any) => c.text || JSON.stringify(c)).join('\n');
+          convertedMessages.push({
+            role: msg.role === 'assistant' ? 'assistant' : 'user',
+            content: contentStr
+          });
+        }
       }
-      convertedMessages.push({
-        role: msg.role === 'assistant' ? 'assistant' : 'user',
-        content: contentStr
-      });
+    }
+
+    // Convert Anthropic Tools to standard OpenAI Function Tools
+    let tools: any[] | undefined = undefined;
+    if (body.tools && Array.isArray(body.tools)) {
+      tools = body.tools.map((t: any) => ({
+        type: 'function',
+        function: {
+          name: t.name,
+          description: t.description,
+          parameters: t.input_schema || t.parameters || {}
+        }
+      }));
     }
 
     const requestedModel = body.model || 'claude-3-7-sonnet';
@@ -74,7 +118,8 @@ export async function POST(req: NextRequest) {
       messages: convertedMessages as any,
       temperature: body.temperature !== undefined ? parseFloat(String(body.temperature)) : 0.7,
       max_tokens: body.max_tokens ?? body.max_completion_tokens ?? 2048,
-      stream: isStream
+      stream: isStream,
+      tools
     };
 
     const requestId = `msg_req_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
@@ -191,7 +236,7 @@ export async function POST(req: NextRequest) {
           'Cache-Control': 'no-cache, no-transform',
           'Connection': 'keep-alive',
           'X-Galx-Model-Resolved': requestedModel,
-          'X-Galx-Shard-Id': result.shardId,
+          'X-Galx-Router': 'apex-v2',
           'Access-Control-Allow-Origin': '*'
         }
       });
@@ -199,15 +244,52 @@ export async function POST(req: NextRequest) {
 
     // Non-Streaming response
     const parsed = typeof result.body === 'string' ? JSON.parse(result.body) : {};
-    const contentText = parsed.choices?.[0]?.message?.content || '';
+    const firstChoice = parsed.choices?.[0];
+    const messageObj = firstChoice?.message || {};
+    const contentBlocks: any[] = [];
+
+    if (messageObj.reasoning_content || messageObj.reasoning) {
+      contentBlocks.push({
+        type: 'thinking',
+        thinking: messageObj.reasoning_content || messageObj.reasoning
+      });
+    }
+
+    if (messageObj.content) {
+      contentBlocks.push({
+        type: 'text',
+        text: messageObj.content
+      });
+    }
+
+    let stopReason = 'end_turn';
+    if (messageObj.tool_calls && Array.isArray(messageObj.tool_calls) && messageObj.tool_calls.length > 0) {
+      stopReason = 'tool_use';
+      for (const tc of messageObj.tool_calls) {
+        let parsedInput = {};
+        try {
+          parsedInput = typeof tc.function?.arguments === 'string' ? JSON.parse(tc.function.arguments) : tc.function?.arguments || {};
+        } catch {}
+        contentBlocks.push({
+          type: 'tool_use',
+          id: tc.id || `tool_${Date.now()}`,
+          name: tc.function?.name || '',
+          input: parsedInput
+        });
+      }
+    }
+
+    if (contentBlocks.length === 0) {
+      contentBlocks.push({ type: 'text', text: '' });
+    }
 
     return NextResponse.json({
       id: `msg_${Date.now()}`,
       type: 'message',
       role: 'assistant',
       model: requestedModel,
-      content: [{ type: 'text', text: contentText }],
-      stop_reason: 'end_turn',
+      content: contentBlocks,
+      stop_reason: stopReason,
       usage: {
         input_tokens: parsed.usage?.prompt_tokens || 30,
         output_tokens: parsed.usage?.completion_tokens || 80
@@ -215,14 +297,39 @@ export async function POST(req: NextRequest) {
     }, {
       headers: {
         'X-Galx-Model-Resolved': requestedModel,
-        'X-Galx-Shard-Id': result.shardId,
+        'X-Galx-Router': 'apex-v2',
         'Access-Control-Allow-Origin': '*'
       }
     });
   } catch (err: any) {
+    const safeError = GalxModelRouter.sanitizeUpstreamError(err.message || 'Internal server error');
     return NextResponse.json(
-      { type: 'error', error: { type: 'api_error', message: err.message || 'Internal server error' } },
-      { status: 500 }
+      { type: 'error', error: { type: 'api_error', message: safeError } },
+      { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
     );
   }
+}
+
+/**
+ * Universal GET /v1/messages Endpoint.
+ * Allows instant testing of Anthropic-compatible endpoint via browser or URL query parameters:
+ * e.g. /v1/messages?prompt=Hello&model=claude-3-7-sonnet
+ */
+export async function GET(req: NextRequest) {
+  const url = new URL(req.url);
+  const prompt = url.searchParams.get('prompt') || url.searchParams.get('q') || url.searchParams.get('message') || url.searchParams.get('input') || 'Hello Claude';
+  const model = url.searchParams.get('model') || 'claude-3-7-sonnet';
+  const stream = url.searchParams.get('stream') === 'true';
+
+  const syntheticReq = new NextRequest(req.url, {
+    method: 'POST',
+    headers: req.headers,
+    body: JSON.stringify({
+      model,
+      messages: [{ role: 'user', content: prompt }],
+      stream
+    })
+  });
+
+  return POST(syntheticReq);
 }

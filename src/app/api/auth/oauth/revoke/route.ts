@@ -1,8 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GalxAuthEngine } from '../../../../../core/auth/GalxAuthEngine';
+import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
 
 /**
  * Standard RFC 7009 OAuth 2.0 Token Revocation Endpoint.
@@ -23,7 +35,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (!token) {
-      return NextResponse.json({ error: 'invalid_request', error_description: 'Missing token parameter' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'invalid_request', error_description: 'Missing token parameter' },
+        { status: 400, headers: { 'Access-Control-Allow-Origin': '*' } }
+      );
     }
 
     const authEngine = GalxAuthEngine.getInstance();
@@ -32,13 +47,21 @@ export async function POST(req: NextRequest) {
     return new NextResponse(null, {
       status: 200,
       headers: {
+        'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'no-store',
         'Pragma': 'no-cache'
       }
     });
-  } catch (err: any) {
+  } catch {
     // RFC 7009 § 2.2: The authorization server responds with HTTP status code 200
     // if the token has been revoked successfully or if the client submitted an invalid token.
-    return new NextResponse(null, { status: 200 });
+    return new NextResponse(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'no-store',
+        'Pragma': 'no-cache'
+      }
+    });
   }
 }

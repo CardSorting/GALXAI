@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
-import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
 
 export const runtime = 'nodejs';
 
@@ -14,7 +14,7 @@ export async function GET() {
       title: 'GALXAI Universal AI Gateway & Model Router API',
       version: '1.0.0',
       description:
-        'Universal OpenAI-compatible API gateway providing high-throughput access to OpenAI Codex (GPT-5.6 Sol, Terra, Luna) and xAI Grok with 25%–40% wholesale savings, 75% prompt caching, and zero data retention.',
+        'Universal OpenAI-compatible API gateway providing high-throughput access to OpenAI Codex (GPT-5.6 Sol, Terra, Luna) and visual synthesis models with 25%–40% wholesale savings, 75% prompt caching, and zero data retention.',
       contact: {
         name: 'GALXAI Developer Support',
         url: SITE_CONFIG.links.docs,
@@ -49,7 +49,7 @@ export async function GET() {
                   properties: {
                     model: {
                       type: 'string',
-                      enum: EXCLUSIVE_MODEL_CATALOG.filter((m) => m.category === 'llm').map((m) => m.id),
+                      enum: FRONTEND_VISIBLE_MODELS.filter((m) => m.category === 'llm').map((m) => m.id),
                       description: 'The target model identifier.',
                     },
                     messages: {

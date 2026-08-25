@@ -1,12 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxOAuthManager } from '@/core/auth/GalxOAuthManager';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
+import { GalxModelRouter } from '@/core/router/GalxModelRouter';
 import { OAuthRepository } from '@/lib/supabase/repositories/OAuthRepository';
 import type { ProviderType, ShardIsolationMode } from '@/core/contracts/GalxContracts';
 
 export const dynamic = 'force-dynamic';
-
 export const runtime = 'nodejs';
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
+
+function sanitizeRedirectUrl(returnTo: string | null, baseReqUrl: string): URL {
+  const fallback = new URL('/playground', baseReqUrl);
+  if (!returnTo || typeof returnTo !== 'string') return fallback;
+
+  const trimmed = returnTo.trim();
+  // Safe relative URL path starting with a single '/'
+  if (trimmed.startsWith('/') && !trimmed.startsWith('//') && !trimmed.startsWith('/\\')) {
+    try {
+      const parsed = new URL(trimmed, baseReqUrl);
+      if (parsed.origin === new URL(baseReqUrl).origin) {
+        return parsed;
+      }
+    } catch {}
+  }
+
+  // Safe absolute URL matching the exact origin
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.origin === new URL(baseReqUrl).origin) {
+      return parsed;
+    }
+  } catch {}
+
+  return fallback;
+}
 
 /**
  * GET /api/auth/oauth/callback
@@ -22,10 +60,11 @@ export async function GET(req: NextRequest) {
     const state = searchParams.get('state');
     const errorParam = searchParams.get('error');
     const errorDesc = searchParams.get('error_description');
-    const returnTo = searchParams.get('returnTo') || '/playground';
+    const returnTo = searchParams.get('returnTo');
 
     if (errorParam) {
-      const msg = errorDesc || errorParam || 'OAuth authorization denied';
+      const rawMsg = errorDesc || errorParam || 'OAuth authorization denied';
+      const msg = GalxModelRouter.sanitizeUpstreamError(rawMsg);
       return NextResponse.redirect(new URL(`/auth/connect?error=${encodeURIComponent(msg)}`, req.url));
     }
 
@@ -102,7 +141,8 @@ export async function GET(req: NextRequest) {
       userAgent
     });
 
-    const response = NextResponse.redirect(new URL(returnTo, req.url));
+    const destinationUrl = sanitizeRedirectUrl(returnTo, req.url);
+    const response = NextResponse.redirect(destinationUrl);
 
     // Set secure HTTP-only session cookie
     if (result.user?.token) {
@@ -126,7 +166,8 @@ export async function GET(req: NextRequest) {
 
     return response;
   } catch (err: any) {
-    return NextResponse.redirect(new URL(`/auth/connect?error=${encodeURIComponent(err.message || 'OAuth exchange failed')}`, req.url));
+    const safeError = GalxModelRouter.sanitizeUpstreamError(err.message || 'OAuth exchange failed');
+    return NextResponse.redirect(new URL(`/auth/connect?error=${encodeURIComponent(safeError)}`, req.url));
   }
 }
 
@@ -135,7 +176,7 @@ export async function GET(req: NextRequest) {
  * Client-Side JSON API Exchange Handler.
  * Exchanges OAuth authorization code + PKCE code verifier for access/refresh tokens,
  * vaults tokens in hardware-grade AES-256-GCM envelope, links identity in BroccoliDB/Supabase,
- * provisions an isolated shard, and returns a signed JWE-grade session bearer token.
+ * provisions an isolated credential partition, and returns a signed JWE-grade session bearer token.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -198,7 +239,7 @@ export async function POST(req: NextRequest) {
       redirectUri
     );
 
-    // 2. Provision vaulted shard, link identity in BroccoliDB/Supabase, and issue session token
+    // 2. Provision vaulted credential partition, link identity in BroccoliDB/Supabase, and issue session token
     const ipAddress = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || req.headers.get('cf-connecting-ip') || undefined;
     const userAgent = req.headers.get('user-agent') || undefined;
 
@@ -218,7 +259,9 @@ export async function POST(req: NextRequest) {
       userAgent
     });
 
-    const response = NextResponse.json(result);
+    const response = NextResponse.json(result, {
+      headers: { 'Access-Control-Allow-Origin': '*' }
+    });
 
     // Set secure HTTP-only session cookie for Next.js SSR hydration
     if (result.user?.token) {
@@ -242,6 +285,10 @@ export async function POST(req: NextRequest) {
 
     return response;
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    const sanitized = GalxModelRouter.sanitizeUpstreamError(err?.message || 'OAuth exchange failed');
+    return NextResponse.json(
+      { success: false, error: sanitized },
+      { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
+    );
   }
 }

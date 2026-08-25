@@ -4,8 +4,19 @@ import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
 import { TokenCostCalculator } from '@/core/pricing/TokenCostCalculator';
 
 export const dynamic = 'force-dynamic';
-
 export const runtime = 'nodejs';
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -48,9 +59,9 @@ export async function GET(req: NextRequest) {
         color: 'cyan'
       },
       {
-        modelId: 'x-ai/grok-4.5',
-        name: 'xAI Grok 4.5 (500K)',
-        category: 'Deep Context & Fast Synthesis',
+        modelId: 'gpt-5.6-luna',
+        name: 'OpenAI Codex GPT-5.6 Luna',
+        category: 'High-Velocity 140 tok/sec Synthesis',
         promptTokens: 12_000_000,
         cachedTokens: 6_000_000,
         completionTokens: 2_400_000,

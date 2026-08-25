@@ -129,7 +129,7 @@ export function ModelsClient() {
                   : 'text-zinc-400 hover:text-white'
               }`}
             >
-              LLM & Reasoning (4)
+              LLM & Reasoning ({FRONTEND_VISIBLE_MODELS.filter(m => m.category === 'llm').length})
             </button>
             <button
               onClick={() => setActiveCategory('image')}
@@ -139,7 +139,7 @@ export function ModelsClient() {
                   : 'text-zinc-400 hover:text-white'
               }`}
             >
-              Visual Synthesis (8)
+              Visual Synthesis ({FRONTEND_VISIBLE_MODELS.filter(m => m.category === 'image').length})
             </button>
           </div>
 
@@ -228,14 +228,14 @@ export function ModelsClient() {
                 <div className="pt-3 border-t border-white/5 space-y-3">
                   <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
                     <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 space-y-0.5">
-                      <span className="text-zinc-500 block text-[9px] uppercase">Input / 1M</span>
+                      <span className="text-zinc-500 block text-[10px] uppercase">Input / 1M</span>
                       <div className="flex items-baseline gap-1.5">
                         <span className="text-zinc-500 line-through text-[10px]">${model.listPricePer1MInput?.toFixed(2)}</span>
                         <span className="text-emerald-300 font-bold">${effIn.toFixed(2)}</span>
                       </div>
                     </div>
                     <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 space-y-0.5">
-                      <span className="text-zinc-500 block text-[9px] uppercase">Output / 1M</span>
+                      <span className="text-zinc-500 block text-[10px] uppercase">Output / 1M</span>
                       <div className="flex items-baseline gap-1.5">
                         <span className="text-zinc-500 line-through text-[10px]">${model.listPricePer1MOutput?.toFixed(2)}</span>
                         <span className="text-emerald-300 font-bold">${effOut.toFixed(2)}</span>

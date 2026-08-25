@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as crypto from 'node:crypto';
-import { PRIMARY_KEY_VERSION } from '../../../../../core/vault/GalxCryptoVault';
+import { PRIMARY_KEY_VERSION } from '@/core/vault/GalxCryptoVault';
 
 export const runtime = 'nodejs';
-
 export const dynamic = 'force-dynamic';
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
 
 /**
  * Standard RFC 7517 JSON Web Key Set (JWKS) Endpoint.
@@ -35,6 +46,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(jwks, {
     status: 200,
     headers: {
+      'Access-Control-Allow-Origin': '*',
       'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
       'Content-Type': 'application/json'
     }

@@ -1,9 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GalxOAuthManager } from '../../../../../../core/auth/GalxOAuthManager';
-import type { ProviderType } from '../../../../../../core/contracts/GalxContracts';
+import { GalxOAuthManager } from '@/core/auth/GalxOAuthManager';
+import { GalxModelRouter } from '@/core/router/GalxModelRouter';
+import type { ProviderType } from '@/core/contracts/GalxContracts';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
 
 /**
  * Standard RFC 8628 OAuth 2.0 Device Authorization Endpoint.
@@ -46,14 +59,16 @@ export async function POST(req: NextRequest) {
       interval: details.interval
     }, {
       headers: {
+        'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'no-store',
         'Pragma': 'no-cache'
       }
     });
   } catch (err: any) {
+    const sanitized = GalxModelRouter.sanitizeUpstreamError(err?.message || 'Failed to initiate device flow');
     return NextResponse.json(
-      { error: 'server_error', error_description: err.message || 'Failed to initiate device flow' },
-      { status: 500 }
+      { error: 'server_error', error_description: sanitized },
+      { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
     );
   }
 }

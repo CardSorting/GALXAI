@@ -5,25 +5,47 @@ import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import type { DeveloperGatewayKey } from '@/core/contracts/GalxContracts';
 
 export const dynamic = 'force-dynamic';
-
 export const runtime = 'nodejs';
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
 
 const MINIMUM_INITIAL_DEPOSIT_USD = 10.00;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  let userId = searchParams.get('userId') || undefined;
+  const requestedUserId = searchParams.get('userId') || undefined;
 
-  if (!userId) {
-    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-    if (auth.authenticated) {
-      userId = auth.userId;
-    }
+  const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
+  const targetUserId = auth.authenticated ? auth.userId : requestedUserId;
+
+  if (!targetUserId) {
+    return NextResponse.json(
+      { error: 'Unauthorized: Authentication or userId parameter required' },
+      { status: 401 }
+    );
+  }
+
+  // Prevent accessing keys belonging to other users
+  if (requestedUserId && auth.authenticated && requestedUserId !== auth.userId && !auth.claims?.scopes?.includes('admin:*')) {
+    return NextResponse.json(
+      { error: 'Forbidden: Cannot inspect keys belonging to another user' },
+      { status: 403 }
+    );
   }
 
   const persistence = GalxPersistence.getInstance();
   const keys = persistence.getGatewayKeys()
-    .filter(k => !userId || k.userId === userId)
+    .filter(k => k.userId === targetUserId)
     .map(k => ({
       id: k.id,
       keyPrefix: k.keyPrefix || k.prefix,
@@ -118,13 +140,24 @@ export async function DELETE(req: NextRequest) {
     const keyId = searchParams.get('id');
     if (!keyId) return NextResponse.json({ error: 'Missing key id' }, { status: 400 });
 
+    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
+    if (!auth.authenticated || !auth.userId) {
+      return NextResponse.json({ error: 'Unauthorized: Authentication required to revoke keys' }, { status: 401 });
+    }
+
     const persistence = GalxPersistence.getInstance();
     const keys = persistence.getGatewayKeys();
     const found = keys.find(k => k.id === keyId);
-    if (found) {
-      persistence.saveGatewayKey({ ...found, revoked: true });
-      persistence.logAudit('GATEWAY_KEY_REVOKED', { keyId }, keyId, found.userId);
+    if (!found) {
+      return NextResponse.json({ error: 'Key not found' }, { status: 404 });
     }
+
+    if (found.userId !== auth.userId && !auth.claims?.scopes?.includes('admin:*')) {
+      return NextResponse.json({ error: 'Forbidden: Cannot revoke a key belonging to another user' }, { status: 403 });
+    }
+
+    persistence.saveGatewayKey({ ...found, revoked: true });
+    persistence.logAudit('GATEWAY_KEY_REVOKED', { keyId }, keyId, found.userId);
 
     return NextResponse.json({ success: true, message: `Key ${keyId} revoked` });
   } catch (err: any) {
