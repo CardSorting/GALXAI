@@ -133,7 +133,7 @@ Claim Grant: https://galx.ai/grants`;
         <div className="glass-panel rounded-3xl p-6 sm:p-12 relative overflow-hidden space-y-6 border border-amber-500/30 text-center shadow-2xl">
           <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[650px] h-[650px] bg-gradient-to-tr from-amber-500/20 via-orange-500/15 to-indigo-600/20 rounded-full blur-[130px] pointer-events-none" />
 
-          {/* Allocation Pool Status */}
+          {/* Grant Fund Allocation Status */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-xs font-mono font-bold text-amber-300 shadow-lg">
             <Flame className="w-4 h-4 text-amber-400 fill-amber-400" />
             <span>Q3 BUILDER ACCELERATION FUND • $84,250 / $100,000 ALLOCATED</span>

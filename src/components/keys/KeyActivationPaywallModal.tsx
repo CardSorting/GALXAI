@@ -37,7 +37,7 @@ interface PaywallPack {
 
 const PAYWALL_PACKS: PaywallPack[] = [
   { amount: 25, label: 'Starter Key', tierBonusPct: 50, badge: '50% Match Bonus', popular: true },
-  { amount: 50, label: 'Growth VIP', tierBonusPct: 50, badge: 'VIP Shards 🔓' },
+  { amount: 50, label: 'Growth VIP', tierBonusPct: 50, badge: 'VIP Priority 🔓' },
   { amount: 100, label: 'Scale Fleet', tierBonusPct: 50, badge: '600 RPM Fleet 🔓' },
   { amount: 250, label: 'Enterprise Burst', tierBonusPct: 50, badge: 'Unlimited VPC 🔓' }
 ];
@@ -78,7 +78,7 @@ export function KeyActivationPaywallModal({
 
   // Live Token Mileage Estimates
   const tokensSol = Math.round((totalCreditReceived / 3.75) * 1000000);
-  const tokensGrok = Math.round((totalCreditReceived / 1.80) * 1000000);
+  const tokensLuna = Math.round((totalCreditReceived / 0.95) * 1000000);
   const totalImages = Math.round(totalCreditReceived / 0.02);
 
   const handlePayAndUnlock = () => {
@@ -100,7 +100,7 @@ export function KeyActivationPaywallModal({
   const faqItems = [
     {
       q: 'Why is an initial $10 deposit required to activate the $5 bonus?',
-      a: 'To guarantee sub-15ms routing and zero queue wait times on frontier models (GPT-5.6, Grok 4.5), we provision dedicated execution leases. The $10 refundable deposit prevents bot scraper swarms while ensuring 100% of your money goes directly toward usable tokens.'
+      a: 'To guarantee sub-15ms routing and zero queue wait times on frontier models (GPT-5.6 Sol, Terra, Luna), we provision dedicated high-availability routing slots. The $10 refundable deposit prevents bot scraper swarms while ensuring 100% of your money goes directly toward usable tokens.'
     },
     {
       q: 'What is the 50% Match Bonus?',
@@ -218,8 +218,8 @@ export function KeyActivationPaywallModal({
                   <strong className="text-white font-bold font-mono">~{(tokensSol / 1000000).toFixed(1)}M tokens</strong>
                 </div>
                 <div className="p-2 rounded-xl bg-white/5 space-y-0.5">
-                  <span className="text-[10px] text-zinc-400 font-sans block">xAI Grok 4.5</span>
-                  <strong className="text-cyan-300 font-bold font-mono">~{(tokensGrok / 1000000).toFixed(1)}M tokens</strong>
+                  <span className="text-[10px] text-zinc-400 font-sans block">GPT-5.6 Luna</span>
+                  <strong className="text-cyan-300 font-bold font-mono">~{(tokensLuna / 1000000).toFixed(1)}M tokens</strong>
                 </div>
                 <div className="p-2 rounded-xl bg-white/5 space-y-0.5">
                   <span className="text-[10px] text-zinc-400 font-sans block">4K Images</span>

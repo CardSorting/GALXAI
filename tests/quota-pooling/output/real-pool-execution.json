@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-08-24T23:58:17.187Z",
+  "testType": "REAL_DIRECT_POOL_EXECUTION",
+  "model": {
+    "requested": "gpt-5.6-sol",
+    "canonicalId": "gpt-5.6-sol",
+    "upstreamModel": "gpt-5.6-sol",
+    "provider": "openai",
+    "contextWindow": 900000,
+    "wholesaleDiscount": "25%"
+  },
+  "livePoolStateBefore": {
+    "shardsCount": 2,
+    "shards": [
+      {
+        "id": "pool_shard_tier5_alpha",
+        "label": "OpenAI Tier-5 Wholesale Reservoir Alpha",
+        "remainingTokens": 1000000,
+        "maxTokens": 1000000,
+        "status": "healthy"
+      },
+      {
+        "id": "pool_shard_tier5_beta",
+        "label": "OpenAI Tier-5 Wholesale Reservoir Beta",
+        "remainingTokens": 850000,
+        "maxTokens": 1000000,
+        "status": "healthy"
+      }
+    ]
+  },
+  "directLeaseExecution": {
+    "leaseId": "lease_1787615897155_f7d1c02e",
+    "chosenShardId": "pool_shard_tier5_alpha",
+    "chosenShardLabel": "OpenAI Tier-5 Wholesale Reservoir Alpha",
+    "fencingToken": 2,
+    "estimatedTokens": 2500,
+    "actualTokensConsumed": 58,
+    "latencyMs": 38,
+    "remainingTokensBefore": 1000000,
+    "remainingTokensAfter": 999942,
+    "updatedAverageLatencyMs": 256
+  },
+  "burstConcurrencyTest": {
+    "threadsCount": 8,
+    "distribution": {
+      "pool_shard_tier5_beta": 6,
+      "pool_shard_tier5_alpha": 2
+    },
+    "verdict": "PASS_LEVEL_DISPERSED"
+  },
+  "fleetTelemetryAfter": {
+    "activeLeasesRemaining": 0,
+    "tokensPerMinuteThroughput": 2000000,
+    "lifetimeTokensServed": 212658,
+    "averageFleetLatencyMs": 301
+  }
+}

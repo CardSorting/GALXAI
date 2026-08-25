@@ -111,9 +111,9 @@ response = client.chat.completions.create(
     title: 'Cheaper Direct OpenAI API Alternative — 25%–40% Wholesale Savings',
     headline: 'Save 25%–40% vs Direct OpenAI API Pricing',
     description:
-      'Route official OpenAI GPT-5.6 Sol, Terra, and Luna models through GALXAI for 25%–40% direct wholesale savings, multi-shard 429 shield pooling, and automated failover.',
+      'Route official OpenAI GPT-5.6 Sol, Terra, and Luna models through GALXAI for 25%–40% direct wholesale savings, Anycast 429 shield protection, and automated failover.',
     verdict:
-      'GALXAI delivers identical upstream OpenAI model weights with 25%–40% wholesale cost reductions, instant deposit matching, and enterprise rate limit pooling.',
+      'GALXAI delivers identical upstream OpenAI model weights with 25%–40% wholesale cost reductions, instant deposit matching, and enterprise rate limit protection.',
     feeComparison: [
       {
         feature: 'GPT-5.6 Sol Input Price / 1M',

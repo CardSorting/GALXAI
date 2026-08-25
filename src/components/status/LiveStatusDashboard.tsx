@@ -54,9 +54,9 @@ function BaseLiveStatusDashboard() {
       iconColor: 'text-amber-400',
     },
     {
-      name: 'xAI Grok 4.5 500K Reasoning Router',
+      name: 'OpenAI GPT-5.6 Luna High-Velocity Router',
       status: probeResult?.status === 'offline' ? 'Offline' : 'Operational',
-      latency: probeResult ? `${probeResult.p90LatencyMs}ms` : '18ms',
+      latency: probeResult ? `${probeResult.p90LatencyMs}ms` : '12ms',
       uptime: 'Healthy',
       icon: Rocket,
       iconColor: 'text-emerald-400',
@@ -125,7 +125,7 @@ function BaseLiveStatusDashboard() {
             <p className="text-xs text-zinc-400">
               {isOffline
                 ? 'Network disconnected. Offline SafeStorage cache is serving cached records.'
-                : 'All gateway endpoints, cryptographic vaults, and upstream pools are functioning normally.'}
+                : 'All gateway endpoints, cryptographic auth vaults, and upstream endpoints are functioning normally.'}
             </p>
           </div>
         </div>
@@ -166,11 +166,11 @@ function BaseLiveStatusDashboard() {
         </div>
 
         <div className="glass-panel rounded-3xl p-4 border border-white/10 space-y-1">
-          <span className="text-[10px] text-zinc-500 uppercase">Active Shard Circuits</span>
+          <span className="text-[10px] text-zinc-500 uppercase">Active Edge Circuits</span>
           <div className="text-lg font-bold text-emerald-300">
             {probeResult?.activeCircuitsCount || 12} / {probeResult?.totalCircuitsCount || 12}
           </div>
-          <span className="text-[10px] text-emerald-400">100% Pool Health</span>
+          <span className="text-[10px] text-emerald-400">100% Gateway Health</span>
         </div>
 
         <div className="glass-panel rounded-3xl p-4 border border-white/10 space-y-1">

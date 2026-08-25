@@ -120,8 +120,8 @@ graph LR
     Client([Client App / IDE]) -->|Anycast DNS <15ms| Edge([Cloudflare Edge Gateway])
     Edge -->|Token Bucket Rate-Limit| Cache[(Prefix Cache RAM Ring)]
     Cache -->|Cache HIT 75% Disc| FastStream([Instant SSE Transit])
-    Cache -->|Cache MISS| PoolCluster([GALXAI Pooled Capacity Hub])
-    PoolCluster -->|Dynamic Load Balance| Upstream([Genuine ${isGrok ? 'xAI Grok' : 'OpenAI'} Shards])
+    Cache -->|Cache MISS| GatewayCore([GALXAI Low-Latency Gateway Core])
+    GatewayCore -->|Dynamic Load Balance| Upstream([OpenAI Frontier Compute Cluster])
 \`\`\`
 
 1. **Anycast Tier-1 Ingestion**: Edge proxy terminates TLS in <15ms nearest to client.

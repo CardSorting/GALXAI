@@ -23,13 +23,13 @@ export default function SingleShardError({
         <RouteErrorBoundaryCard
           error={error}
           reset={reset}
-          title="Encrypted Shard View Unresolved"
-          subtitle="The cryptographic key fragment or isolated tenant enclave could not be decrypted in the browser session."
-          badge="ZERO-RETENTION SHARD SAFEGUARD"
+          title="Encrypted Key View Unresolved"
+          subtitle="The cryptographic key record or isolated tenant enclave could not be decrypted in the browser session."
+          badge="ZERO-RETENTION KEY SAFEGUARD"
           icon={Lock}
           accentColor="cyan"
-          primaryLinkHref="/vault"
-          primaryLinkLabel="Back to Vault"
+          primaryLinkHref="/keys"
+          primaryLinkLabel="Back to Keys"
           autoRetrySeconds={6}
         />
       </main>

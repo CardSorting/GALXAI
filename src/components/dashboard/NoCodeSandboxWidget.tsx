@@ -90,7 +90,7 @@ const SIM_MODELS: SimModel[] = [
     promptTokens: 420,
     completionTokens: 284,
     cachedTokens: 210,
-    sampleText: `GALXAI's sub-15ms router routes requests dynamically across high-concurrency enterprise pools:
+    sampleText: `GALXAI's sub-15ms router routes requests dynamically across high-concurrency enterprise infrastructure:
 
 1. **Wholesale Rate Arbitrage**: Aggregates billions of enterprise tokens, passing 25%–40% bulk discounts directly to you with zero markups.
 2. **Zero Quality Loss**: Requests hit authentic GPT-5.6 Sol model weights with identical latency and deterministic output.
@@ -98,17 +98,17 @@ const SIM_MODELS: SimModel[] = [
 4. **1-Line Switch**: Simply update your Base URL in Cursor, LibreChat, or your existing OpenAI SDK.`
   },
   {
-    id: 'x-ai/grok-4.6',
-    name: 'xAI Grok 4.5',
-    badge: '-32% Wholesale',
-    discountPct: 32,
+    id: 'gpt-5.6-luna',
+    name: 'GPT-5.6 Luna (Sub-Second Velocity)',
+    badge: '-36% Wholesale',
+    discountPct: 36,
     promptTokens: 380,
     completionTokens: 240,
     cachedTokens: 150,
-    sampleText: `xAI Grok 4.5 on GALXAI delivers frontier multimodal reasoning with ultra-low latency:
+    sampleText: `OpenAI Codex GPT-5.6 Luna on GALXAI delivers sub-15ms Time-To-First-Token and rapid inline generation:
 
-• **Sub-15ms Gateway Overhead**: Edge routing proxies with instant TCP reuse.
-• **High Concurrency Pools**: Zero queueing or 429 rate limit delays.
+• **Sub-15ms Gateway Overhead**: Edge routing proxies with instant TCP connection pooling.
+• **High-Throughput Global Gateway**: Zero queueing, jitter-free streaming, and no 429 stalls.
 • **ZDR-100 Privacy Guarantee**: Ephemeral in-memory handling with cryptographic zero-retention.
 • **Drop-in Compatible**: Point your baseURL to api.galx.ai/v1 with your live key.`
   }
@@ -212,7 +212,7 @@ function BaseNoCodeSandboxWidget() {
           variant="pill"
           label="Share Simulator"
           title="Try GALXAI Zero-Code Simulator"
-          description="Interactive prompt simulator testing GPT-5.6 and Grok 4.5 with live wholesale token savings."
+          description="Interactive prompt simulator testing GPT-5.6 Sol and Luna with live wholesale token savings."
         />
       </div>
 

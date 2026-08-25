@@ -151,7 +151,7 @@ bucket.currentTokens = Math.min(bucket.maxCapacity, bucket.currentTokens + fract
           <div className="space-y-1">
             <h2 className="text-lg font-bold text-white flex items-center gap-2 font-mono">
               <Zap className="w-5 h-5 text-amber-400" />
-              2. 2-Phase Token Reservation &amp; Long-Stream Leases
+              2. 2-Phase Token Reservation &amp; Stream Buffering
             </h2>
             <p className="text-xs text-zinc-400">
               Prevents concurrent requests from exhausting token ceilings during long generation streams.

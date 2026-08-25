@@ -5972,6 +5972,43 @@ async function runAllTests() {
     assert.strictEqual(resJP.headers.get('X-Security-Audit'), 'GEO_VELOCITY_ANOMALY');
   });
 
+  await test('API Strategy: /api/admin/test-model keyless GPT-5.6 quota pooling verification', async () => {
+    const { GET, POST } = await import('../src/app/api/admin/test-model/route');
+
+    // 1. Test GET /api/admin/test-model?model=gpt-5.6-sol
+    const getReq = new Request('http://localhost:3000/api/admin/test-model?model=gpt-5.6-sol&strategy=adaptive_headroom', {
+      method: 'GET'
+    });
+    const getRes = await GET(getReq as any);
+    assert.strictEqual(getRes.status, 200);
+    const getData = await getRes.json();
+    assert.strictEqual(getData.success, true);
+    assert.strictEqual(getData.testSummary.canonicalModelId, 'gpt-5.6-sol');
+    assert.strictEqual(getData.testSummary.rotationStrategy, 'adaptive_headroom');
+    assert.ok(getData.quotaPoolingProof.runs.length >= 1);
+    assert.ok(getData.sampleCompletion.choices[0].message.content.includes('GALXAI'));
+
+    // 2. Test POST /api/admin/test-model with concurrency = 4
+    const postReq = new Request('http://localhost:3000/api/admin/test-model', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'gpt-5.6-terra',
+        prompt: 'Test prompt for GPT-5.6 quota distribution',
+        strategy: 'smooth_weighted_round_robin',
+        concurrency: 4
+      })
+    });
+    const postRes = await POST(postReq as any);
+    assert.strictEqual(postRes.status, 200);
+    const postData = await postRes.json();
+    assert.strictEqual(postData.success, true);
+    assert.strictEqual(postData.testSummary.canonicalModelId, 'gpt-5.6-terra');
+    assert.strictEqual(postData.testSummary.concurrencyTested, 4);
+    assert.strictEqual(postData.quotaPoolingProof.runs.length, 4);
+    assert.ok(postData.testSummary.shardsEngaged >= 1);
+  });
+
   console.log('\n======================================================================');
   if (testsFailed === 0) {
     console.log(`   ALL ${testsPassed}/${testsPassed} FORENSIC VERIFICATION TESTS PASSED SUCCESSFULLY! `);

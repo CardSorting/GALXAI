@@ -295,9 +295,18 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsVision: false,
     supportsReasoning: false,
     supportsStreaming: false,
-    description: 'High-precision 3072-dimensional vector embeddings for complex domain taxonomy and classification.'
+    description: 'SOTA 3072-dimensional vector embeddings with dense semantic precision and multi-language clustering.'
   }
 ];
+
+/**
+ * Models visible in frontend UI components, calculators, pricing tables, and selectors.
+ * xAI Grok models are hidden from the frontend due to operational complexity while remaining
+ * resolvable in backend routing if requested via API.
+ */
+export const FRONTEND_VISIBLE_MODELS: ModelSpecItem[] = EXCLUSIVE_MODEL_CATALOG.filter(
+  m => m.provider !== 'xai-grok'
+);
 
 export class ModelCatalog {
   private static catalog: Map<string, ModelSpecItem> = new Map(
@@ -609,6 +618,10 @@ export class ModelCatalog {
 
   public static listModels(): ModelSpecItem[] {
     return EXCLUSIVE_MODEL_CATALOG;
+  }
+
+  public static listFrontendModels(): ModelSpecItem[] {
+    return FRONTEND_VISIBLE_MODELS;
   }
 
   public static getSupportedModels(): ModelSpecItem[] {

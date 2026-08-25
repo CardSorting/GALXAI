@@ -10,7 +10,7 @@ export const FAQS: FAQItem[] = [
     id: 'what-is-galxai',
     category: 'general',
     q: 'What is GALXAI and how does it work?',
-    a: 'GALXAI is an enterprise-grade Universal AI Gateway that provides direct, high-throughput access to the world\'s most powerful models—including OpenAI GPT-5.6 Sol, Terra, Luna and xAI Grok 4.5—at 25% to 40% below direct retail prices. It operates as a seamless, 1-line drop-in replacement for the official OpenAI SDK.',
+    a: 'GALXAI is an enterprise-grade Universal AI Gateway that provides direct, high-throughput access to the world\'s most powerful models—including OpenAI GPT-5.6 Sol, Terra, and Luna—at 25% to 40% below direct retail prices. It operates as a seamless, 1-line drop-in replacement for the official OpenAI SDK.',
   },
   {
     id: 'discounts-explained',
@@ -46,7 +46,7 @@ export const FAQS: FAQItem[] = [
     id: 'model-fleet-coverage',
     category: 'general',
     q: 'Which AI models and modalities are available?',
-    a: 'GALXAI exclusively hosts 12 flagship models: 4 frontier LLM and reasoning engines (GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, xAI Grok 4.5 with 500K context) and 8 high-definition visual synthesis models (GPT-Image-2, DALL-E 3, Grok Imagine, and more).',
+    a: 'GALXAI exclusively hosts flagship frontier models: OpenAI Codex coding and reasoning engines (GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna) and high-definition visual synthesis models (GPT-Image-2, DALL-E 3, and dense vector embeddings).',
   },
   {
     id: 'uptime-failover-sla',

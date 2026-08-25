@@ -67,10 +67,10 @@ const CHECKOUT_TIERS: Record<number, TierSpec> = {
   },
   50: {
     amount: 50,
-    label: 'Growth VIP Shard Pack',
+    label: 'Growth VIP Priority Pack',
     badge: 'VIP High-Roller 🔓',
     multiplier: 1.6,
-    perks: ['Sub-15ms VIP Shards', '+$30 Free Matched Compute', '75% Prompt Cache Pass-Through'],
+    perks: ['Sub-15ms VIP Priority Routing', '+$30 Free Matched Compute', '75% Prompt Cache Pass-Through'],
     chatCount: '35,000 queries',
     codeCount: '2,000 tasks',
     imageCount: '1,200 renders'

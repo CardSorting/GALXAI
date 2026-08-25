@@ -21,7 +21,7 @@ import {
 import { ShareButton } from '@/components/common/ShareButton';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
-import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 export function TokenCounterToolClient() {
@@ -100,7 +100,7 @@ export function TokenCounterToolClient() {
   // Multi-Model Cost Calculation Readout
   const modelCostEstimates = useMemo(() => {
     const tokens = tokenAnalysis.tokenCount;
-    return EXCLUSIVE_MODEL_CATALOG.filter((m) => m.category === 'llm').map((model) => {
+    return FRONTEND_VISIBLE_MODELS.filter((m) => m.category === 'llm').map((model) => {
       const inputCost = (tokens / 1_000_000) * model.inputPricePer1M;
       const cachedCost = (tokens / 1_000_000) * (model.inputPricePer1M * 0.25);
       return {

@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
-import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS, ModelCatalog } from '@/core/router/ModelCatalog';
 import { ModelCardClient } from '@/components/models/ModelCardClient';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
@@ -27,8 +27,8 @@ function resolveModelFromSlug(slug: string) {
   if (!slug) return null;
   const decoded = decodeURIComponent(slug).trim().toLowerCase();
 
-  // 1. Direct match
-  const direct = EXCLUSIVE_MODEL_CATALOG.find(
+  // 1. Direct match among frontend visible models
+  const direct = FRONTEND_VISIBLE_MODELS.find(
     (m) =>
       m.id.toLowerCase() === decoded ||
       m.id.replace('/', '-').toLowerCase() === decoded ||
@@ -40,22 +40,21 @@ function resolveModelFromSlug(slug: string) {
   const resolved =
     ModelCatalog.resolveModel(decoded) ||
     ModelCatalog.resolveModel(decoded.replace(/-/g, '.')) ||
-    ModelCatalog.resolveModel(decoded.replace(/-/g, '/')) ||
-    ModelCatalog.resolveModel(decoded.replace(/^x-ai-/, 'x-ai/'));
-  if (resolved) return resolved;
+    ModelCatalog.resolveModel(decoded.replace(/-/g, '/'));
+  if (resolved && resolved.provider !== 'xai-grok') return resolved;
 
   // 3. Fallback for dash separated version numbers like gpt-5-6-sol -> gpt-5.6-sol
   const dotNormalized = decoded.replace(/(\d+)-(\d+)/g, '$1.$2');
   const dotResolved =
     ModelCatalog.resolveModel(dotNormalized) ||
-    EXCLUSIVE_MODEL_CATALOG.find((m) => m.id.toLowerCase() === dotNormalized);
-  if (dotResolved) return dotResolved;
+    FRONTEND_VISIBLE_MODELS.find((m) => m.id.toLowerCase() === dotNormalized);
+  if (dotResolved && dotResolved.provider !== 'xai-grok') return dotResolved;
 
   return null;
 }
 
 export async function generateStaticParams() {
-  return EXCLUSIVE_MODEL_CATALOG.map((m) => ({
+  return FRONTEND_VISIBLE_MODELS.map((m) => ({
     id: m.id.replace('/', '-'),
   }));
 }
@@ -104,7 +103,7 @@ export default async function ModelDetailPage({ params }: ModelDetailPageProps) 
   }
 
   const slug = model.id.replace('/', '-');
-  const siblingModels = EXCLUSIVE_MODEL_CATALOG.filter((m) => m.id !== model.id);
+  const siblingModels = FRONTEND_VISIBLE_MODELS.filter((m) => m.id !== model.id);
   const contextK = Math.round(model.contextWindowTokens / 1000);
 
   const modelFaqs = [

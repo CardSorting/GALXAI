@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-08-25T00:08:47.522Z",
+  "requestPrompt": "Write a complete, self-contained, playable Retro-Modern Snake Game in a single HTML file with embedded CSS and JavaScript.\nInclude:\n- Smooth grid movement on HTML5 Canvas with neon glow effects\n- Score, high score tracking with localStorage\n- Responsive arrow keys + WASD controls + touch swipe controls for mobile\n- Audio synthesized sound effects using Web Audio API (beeps for eat, crash, powerups)\n- Pause menu (Spacebar / Esc) and game over restart screen\n- Polished dark cyberpunk glassmorphism UI with retro arcade fonts.",
+  "model": {
+    "id": "gpt-5.6-sol",
+    "name": "OpenAI Codex GPT-5.6 Sol (Flagship SOTA)",
+    "upstreamId": "gpt-5.6-sol",
+    "contextWindowTokens": 900000,
+    "wholesaleDiscount": "25%"
+  },
+  "quotaPoolExecutionProof": {
+    "leaseId": "lease_1787616527521_c0db658a",
+    "shardId": "pool_shard_tier5_alpha",
+    "shardLabel": "OpenAI Tier-5 Wholesale Reservoir Alpha",
+    "fencingToken": 2,
+    "estimatedTokens": 4000,
+    "actualTokensConsumed": 1850,
+    "latencyMs": 0,
+    "remainingTokensBefore": 1000000,
+    "remainingTokensAfter": 998150,
+    "activeLeasesInFleet": 0,
+    "rotationStrategy": "adaptive_headroom"
+  },
+  "outputHtmlFile": "/Users/bozoegg/Desktop/GALXAI/tests/quota-pooling/output/snake-game.html",
+  "generatedCodeLength": 12906
+}

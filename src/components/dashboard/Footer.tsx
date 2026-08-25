@@ -54,16 +54,16 @@ function BaseFooter() {
       { name: 'OpenAI GPT-5.6 Sol', href: '/models/gpt-5.6-sol', note: 'Reasoning & Coding' },
       { name: 'OpenAI GPT-5.6 Terra', href: '/models/gpt-5.6-terra', note: 'Balanced Frontier' },
       { name: 'OpenAI GPT-5.6 Luna', href: '/models/gpt-5.6-luna', note: 'Sub-second Speed' },
-      { name: 'xAI Grok 4.6 (1M)', href: '/models/x-ai-grok-4.6', note: 'Frontier Reasoning' },
-      { name: 'xAI Grok 4.5 (500K)', href: '/models/x-ai-grok-4.5', note: 'Multimodal' },
       { name: 'OpenAI GPT-Image-2', href: '/models/openai-gpt-image-2', note: 'Visual Engine' },
+      { name: 'OpenAI GPT-Image-1.5', href: '/models/openai-gpt-image-1.5', note: 'Photoreal Image' },
       { name: 'OpenAI DALL-E 3', href: '/models/openai-dalle-3', note: 'High Definition' },
+      { name: 'Text-Embedding-3 Small', href: '/models/text-embedding-3-small', note: 'Dense 1536d' },
     ],
     developers: [
       { name: 'AI Gateway Glossary', href: '/glossary', badge: 'New' },
       { name: 'Stream Benchmark Studio', href: '/tools/stream-benchmark', badge: 'Simulator' },
       { name: 'Enterprise ROI Calculator', href: '/tools/roi-calculator', badge: 'Budget' },
-      { name: 'Context Window Visualizer', href: '/tools/context-window-visualizer', badge: '1M Tokens' },
+      { name: 'Context Window Visualizer', href: '/tools/context-window-visualizer', badge: '900K Tokens' },
       { name: 'Latency & TTFT Estimator', href: '/tools/latency-estimator', badge: '<12ms' },
       { name: 'Model Cost Comparator', href: '/tools/model-cost-comparator', badge: 'Pricing' },
       { name: 'Voice Agents Solution', href: '/solutions/autonomous-voice-agents', badge: 'Voice' },
@@ -81,7 +81,6 @@ function BaseFooter() {
       { name: 'Coding LLM Benchmarks', href: '/benchmarks/coding-and-reasoning', badge: 'SOTA' },
       { name: 'Agent Tool Calling Benchmarks', href: '/benchmarks/autonomous-agentic-tool-calling', badge: '99.4%' },
       { name: 'OpenAI Gateway Portal', href: '/providers/openai', badge: 'Wholesale' },
-      { name: 'xAI Grok Provider Portal', href: '/providers/xai', badge: '1M Context' },
       { name: 'Prompt Compressor Tool', href: '/tools/prompt-compressor', badge: '-35%' },
       { name: 'Claude Code Setup', href: '/docs/integrations/claude-code', badge: 'CLI' },
       { name: 'Continue.dev IDE', href: '/docs/integrations/continue-dev', badge: 'IDE' },
@@ -133,7 +132,7 @@ function BaseFooter() {
               <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
               <span>50% INSTANT COMPUTE MATCH ON DEPOSITS</span>
             </div>
-            <h3 className="text-lg sm:text-xl font-bold text-white">Cut your OpenAI &amp; Grok inference bills by 25%–40% today</h3>
+            <h3 className="text-lg sm:text-xl font-bold text-white">Cut your OpenAI inference bills by 25%–40% today</h3>
             <p className="text-xs text-zinc-400">100% drop-in OpenAI SDK compatibility. Zero code refactoring. Active failover resilience.</p>
           </div>
 

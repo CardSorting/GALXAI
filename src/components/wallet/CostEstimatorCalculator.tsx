@@ -23,7 +23,7 @@ import {
   Lightbulb,
   Check
 } from 'lucide-react';
-import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS, ModelCatalog } from '@/core/router/ModelCatalog';
 import {
   TokenCostCalculator,
   SupportedCurrency,
@@ -72,7 +72,7 @@ const PRESETS: WorkloadPreset[] = [
     name: 'Autonomous Agent Fleet',
     description: 'Multi-agent LangChain / AutoGPT fleet running autonomous research and tool loops.',
     icon: Bot,
-    modelId: 'x-ai/grok-4.6',
+    modelId: 'gpt-5.6-sol',
     dailyRequests: 1200,
     avgPromptTokens: 4500,
     avgCompletionTokens: 850,
@@ -153,7 +153,7 @@ export function CostEstimatorCalculator({
   // Actionable Optimization Recommendations
   const recommendations = TokenCostCalculator.recommendOptimizations(singleQueryCost, dailyRequests * 30);
 
-  const selectedModel = EXCLUSIVE_MODEL_CATALOG.find(m => m.id === selectedModelId) || EXCLUSIVE_MODEL_CATALOG[0];
+  const selectedModel = FRONTEND_VISIBLE_MODELS.find(m => m.id === selectedModelId) || FRONTEND_VISIBLE_MODELS[0];
 
   return (
     <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-8 border border-white/10 bg-black/40">
@@ -265,7 +265,7 @@ export function CostEstimatorCalculator({
               Target AI Model
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              {EXCLUSIVE_MODEL_CATALOG.filter(m => m.category === 'llm').slice(0, 6).map((m) => (
+              {FRONTEND_VISIBLE_MODELS.filter(m => m.category === 'llm').slice(0, 6).map((m) => (
                 <button
                   key={m.id}
                   onClick={() => setSelectedModelId(m.id)}

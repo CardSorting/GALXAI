@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
-import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
 import {
   Zap,
   ArrowRight,
@@ -35,7 +35,7 @@ export function PricingClient() {
   const [selectedTierId, setSelectedTierId] = useState('starter');
   const [selectedModelId, setSelectedModelId] = useState('gpt-5.6-sol');
 
-  const selectedModel = EXCLUSIVE_MODEL_CATALOG.find(m => m.id === selectedModelId) || EXCLUSIVE_MODEL_CATALOG[0];
+  const selectedModel = FRONTEND_VISIBLE_MODELS.find(m => m.id === selectedModelId) || FRONTEND_VISIBLE_MODELS[0];
   const selectedTier = VOLUME_TIERS.find(t => t.id === selectedTierId) || VOLUME_TIERS[0];
 
   const listInputRate = selectedModel.listPricePer1MInput || selectedModel.inputPricePer1M;
@@ -83,7 +83,7 @@ export function PricingClient() {
               Direct Wholesale AI Rates with 0% Markup &amp; 429 Protection
             </h1>
             <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl mx-auto">
-              Save <strong className="text-emerald-300 font-semibold">25% to 40%</strong> off direct retail prices across OpenAI GPT-5.6 Sol, Terra, Luna, and Grok 4.6. Up to <strong className="text-amber-300 font-semibold">70%+ total net savings</strong> with compound 75% prompt caching.
+              Save <strong className="text-emerald-300 font-semibold">25% to 40%</strong> off direct retail prices across OpenAI GPT-5.6 Sol, Terra, Luna, and visual synthesis models. Up to <strong className="text-amber-300 font-semibold">70%+ total net savings</strong> with compound 75% prompt caching.
             </p>
           </div>
 
@@ -231,7 +231,7 @@ export function PricingClient() {
                 aria-label="Target AI Engine"
                 className="w-full py-2 px-3 rounded-xl bg-black/60 border border-white/10 text-xs text-amber-300 font-mono font-bold focus:outline-none"
               >
-                {EXCLUSIVE_MODEL_CATALOG.filter(m => m.category === 'llm').map(m => (
+                {FRONTEND_VISIBLE_MODELS.filter(m => m.category === 'llm').map(m => (
                   <option key={m.id} value={m.id} className="bg-zinc-900 text-white font-mono">
                     {m.id} ({m.provider})
                   </option>
@@ -451,7 +451,7 @@ export function PricingClient() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {EXCLUSIVE_MODEL_CATALOG.map((m) => {
+              {FRONTEND_VISIBLE_MODELS.map((m) => {
                 const effIn = m.inputPricePer1M * tierMultiplier;
                 const effOut = m.outputPricePer1M * tierMultiplier;
                 const effCached = (m.cachedInputPricePer1M || m.inputPricePer1M * 0.25) * tierMultiplier;

@@ -27,7 +27,7 @@ import {
   Copy,
   Check
 } from 'lucide-react';
-import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS, ModelCatalog } from '@/core/router/ModelCatalog';
 import { BroccoliOmniSearch, OmniSearchItem } from '@/lib/resilience/BroccoliOmniSearch';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { withErrorBoundary } from './ErrorBoundary';
@@ -149,23 +149,7 @@ const PLATFORM_PAGES: PlatformPage[] = [
     icon: Sparkles,
     category: 'Tools',
     keywords: ['playground', 'try', 'test', 'demo', 'sandbox', 'chat', 'prompt', 'experiment', 'run model'],
-    description: 'Test prompts live across OpenAI and Grok models with 0 config'
-  },
-  {
-    label: 'Linked Accounts & Cooperative Shards',
-    href: '/vault',
-    icon: Shield,
-    category: 'Access',
-    keywords: ['vault', 'shards', 'accounts', 'link openai', 'link grok', 'pool', 'private mode', 'connect key'],
-    description: 'Manage connected provider accounts and high-concurrency shards'
-  },
-  {
-    label: 'Traffic Simulator & Failover Demo',
-    href: '/vault/simulator',
-    icon: Activity,
-    category: 'Tools',
-    keywords: ['simulator', 'failover', 'stress test', 'circuit breaker', 'demo', 'sub-15ms', 'latency test'],
-    description: 'Simulate high concurrency spikes and automatic 15ms failover'
+    description: 'Test prompts live across OpenAI Codex models with 0 config'
   },
   {
     label: 'Knowledge Base & Frequently Asked Questions',
@@ -196,13 +180,14 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const normalizedQuery = query.toLowerCase().trim();
-  const resolvedFromQuery = normalizedQuery ? ModelCatalog.resolveModel(normalizedQuery) : null;
+  const resolvedCandidate = normalizedQuery ? ModelCatalog.resolveModel(normalizedQuery) : null;
+  const resolvedFromQuery = resolvedCandidate && resolvedCandidate.provider !== 'xai-grok' ? resolvedCandidate : null;
   const recentVisits = BroccoliOmniSearch.getRecentVisits(3);
   const omniResults = BroccoliOmniSearch.search(normalizedQuery, 8);
   const autocompleteSuggestion = BroccoliOmniSearch.getAutocompleteSuggestion(normalizedQuery);
 
   const filteredModels = useMemo(() => {
-    return EXCLUSIVE_MODEL_CATALOG.filter(
+    return FRONTEND_VISIBLE_MODELS.filter(
       (m) =>
         m.id.toLowerCase().includes(normalizedQuery) ||
         m.name.toLowerCase().includes(normalizedQuery) ||

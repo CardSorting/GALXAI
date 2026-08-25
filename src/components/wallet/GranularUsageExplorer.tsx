@@ -99,15 +99,15 @@ export function GranularUsageExplorer() {
       color: 'bg-cyan-400 text-cyan-400 border-cyan-400/30'
     },
     {
-      modelId: 'x-ai/grok-4.5',
-      name: 'xAI Grok 4.5 (500K)',
-      category: 'Deep Context & Fast Synthesis',
+      modelId: 'gpt-5.6-luna',
+      name: 'OpenAI GPT-5.6 Luna (Flash)',
+      category: 'Sub-Second Agent Loops & Velocity',
       promptTokens: 12_000_000,
       cachedTokens: 6_000_000,
       completionTokens: 2_400_000,
       totalTokens: 14_400_000,
       requestCount: 3_840,
-      avgLatencyMs: 245,
+      avgLatencyMs: 145,
       spendUsd: 4.80,
       retailEquivalentUsd: 6.72,
       savingsUsd: 1.92,
@@ -367,7 +367,7 @@ export function GranularUsageExplorer() {
                           ? 'bg-amber-400'
                           : model.modelId.includes('terra')
                           ? 'bg-cyan-400'
-                          : model.modelId.includes('grok')
+                          : model.modelId.includes('luna')
                           ? 'bg-indigo-400'
                           : 'bg-emerald-400'
                       }`}

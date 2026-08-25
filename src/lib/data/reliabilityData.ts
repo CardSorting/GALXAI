@@ -32,15 +32,15 @@ export const RELIABILITY_DATA: ReliabilityItem[] = [
       'When an upstream model provider suffers an unscheduled API outage or regional fiber cut, single-point-of-failure applications experience total disruption. GALXAI monitors health checks in real time and automatically re-routes traffic across isolated backup clusters in <50ms.',
     uptimeGuarantee: '99.99% Enterprise Uptime SLA with Sub-50ms Automatic Cutover',
     mitigationStrategy: [
-      'Active-Active Cluster Sharding: Distributes traffic across independent cloud availability zones',
+      'Active-Active Regional Routing: Distributes traffic across independent cloud availability zones',
       'Dynamic Health Check Probes: Origin probes detect HTTP 500/503 spikes in <500ms',
-      'Automatic Model Alias Failover: Seamless fallback from Sol to Terra or Grok with zero client code changes',
+      'Automatic Model Alias Failover: Seamless fallback from Sol to Terra with zero client code changes',
       'Non-Blocking Error Shields: Client streams receive gracefully formatted error frames rather than abrupt TCP drops',
     ],
     topologyDiagramMermaid: `graph LR
   Client[Client Application] --> Gateway[GALXAI Anycast Edge]
   Gateway -->|Primary 503 Detected| Breaker[Circuit Breaker Cutover]
-  Breaker -->|Auto-Reroute <50ms| Backup[Enterprise Shard Backup]
+  Breaker -->|Auto-Reroute <50ms| Backup[Enterprise Backup Cluster]
   Backup -->|Stream Output| Client`,
     runbookCodeSnippet: {
       language: 'python',
@@ -72,24 +72,24 @@ print(response.choices[0].message.content)`,
   {
     slug: 'zero-downtime-rate-limit-mitigation',
     badge: '429 Rate Limit Shield',
-    title: 'Zero-Downtime 429 Rate Limit Mitigation & Dynamic Capacity Pooling — GALXAI',
-    headline: 'Eliminating HTTP 429 Rate Limit Errors with Capacity Pooling',
+    title: 'Zero-Downtime 429 Rate Limit Mitigation & Dynamic Capacity Management — GALXAI',
+    headline: 'Eliminating HTTP 429 Rate Limit Errors with Dynamic Capacity Routing',
     description:
       'Architectural mechanisms for aggregating multi-tier provider quotas, dynamic token bucket smoothing, and priority traffic queuing.',
     incidentScenario:
       'Multi-agent systems and high-volume batch jobs frequently burst beyond single-account RPM/TPM limits, causing cascading 429 Rate Limit Exceeded exceptions and stalled user interactions.',
     uptimeGuarantee: '99.9% Elimination of Client-Facing HTTP 429 Exceptions',
     mitigationStrategy: [
-      'Aggregated Wholesale Token Pools: Combines multiple Tier-5 provider quotas into a unified multi-million TPM bucket',
+      'Aggregated Enterprise Capacity: High-throughput Tier-5 multi-million TPM compute bandwidth',
       'Leaky Bucket Smoothing: Buffers bursty agent invocations and dispatches them at optimal concurrency thresholds',
       'Priority Fair Queuing: Guarantees high-priority user-facing requests bypass asynchronous batch jobs',
-      'Adaptive Backoff Headers: Emits standard Retry-After metadata when pool utilization reaches 98%',
+      'Adaptive Backoff Headers: Emits standard Retry-After metadata when capacity approaches 98%',
     ],
     topologyDiagramMermaid: `graph TD
   Agents[100+ Agent Swarm] --> Buffer[Leaky Bucket Buffer]
-  Buffer --> Pool1[Wholesale Shard A (10k RPM)]
-  Buffer --> Pool2[Wholesale Shard B (10k RPM)]
-  Buffer --> Pool3[Wholesale Shard C (10k RPM)]`,
+  Buffer --> Node1[Edge Compute Cluster A (10k RPM)]
+  Buffer --> Node2[Edge Compute Cluster B (10k RPM)]
+  Buffer --> Node3[Edge Compute Cluster C (10k RPM)]`,
     runbookCodeSnippet: {
       language: 'python',
       title: 'High-Concurrency Multi-Agent Dispatch',

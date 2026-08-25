@@ -399,7 +399,7 @@ print(result)`,
     faqs: [
       {
         q: 'Why is GALXAI ideal for multi-agent swarms?',
-        a: 'Multi-agent swarms generate heavy concurrent bursts that trigger 429 rate limit stalls on direct provider tiers. GALXAI pools enterprise capacity across Anycast shards, ensuring zero dropped agent loops.',
+        a: 'Multi-agent swarms generate heavy concurrent bursts that trigger 429 rate limit stalls on direct provider tiers. GALXAI provisions enterprise Anycast routing with predictive capacity headroom, ensuring zero dropped agent loops.',
       },
     ],
   },

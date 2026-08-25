@@ -29,7 +29,7 @@ export const ERROR_TROUBLESHOOT_DATA: ErrorTroubleshootItem[] = [
     title: 'How to Fix OpenAI 429 Too Many Requests (Rate Limit Exceeded) Error',
     headline: 'Fix OpenAI 429 Too Many Requests in 30 Seconds',
     description:
-      'Eliminate 429 Rate Limit Exceeded and TPM/RPM quota errors by routing inference through the GALXAI 429 Shield with enterprise multi-shard capacity pooling.',
+      'Eliminate 429 Rate Limit Exceeded and TPM/RPM quota errors by routing inference through the GALXAI 429 Shield with enterprise Anycast capacity routing.',
     rootCause:
       'Direct provider accounts enforce strict Tier limits on Requests Per Minute (RPM) and Tokens Per Minute (TPM). Sudden concurrency bursts from multi-agent swarms or user traffic exhaust these quotas instantly.',
     sampleErrorPayload: `{
@@ -41,7 +41,7 @@ export const ERROR_TROUBLESHOOT_DATA: ErrorTroubleshootItem[] = [
   }
 }`,
     permanentFix:
-      'GALXAI pools traffic dynamically across distributed enterprise accounts. When an individual shard approaches capacity, requests shift seamlessly to warm backup shards with 0 dropped sockets.',
+      'GALXAI routes traffic dynamically across high-availability enterprise infrastructure. When an origin region approaches capacity, requests shift seamlessly to warm backup clusters with 0 dropped sockets.',
     codeSnippet: {
       language: 'Python',
       code: `from openai import OpenAI
@@ -261,7 +261,7 @@ print("Connected successfully! Models:", [m.id for m in models.data])`,
     errorType: 'server_error',
     badge: 'Multi-Cluster Failover',
     title: 'How to Fix 503 Service Unavailable (The engine is currently overloaded)',
-    headline: 'Fix 503 Overloaded Engine Errors with Automated Shard Failover',
+    headline: 'Fix 503 Overloaded Engine Errors with Automated Gateway Failover',
     description:
       'Shield your production apps from upstream outages with GALXAI multi-region failover and Predictive Adaptive Hydraulic Headroom (P-AHT).',
     rootCause:
@@ -290,7 +290,7 @@ client = OpenAI(
 response = client.chat.completions.create(
     model="gpt-5.6-sol",
     messages=[{"role": "user", "content": "Mission-critical production completion"}]
-)`,
+) `,
     },
     faqs: [
       {
@@ -307,7 +307,7 @@ response = client.chat.completions.create(
     title: 'How to Fix OpenAI 503 Service Unavailable & Outage Errors',
     headline: 'Bypass OpenAI 503 Outages with Automated Anycast Failover',
     description:
-      'Prevent customer downtime during major OpenAI or xAI cloud outages. GALXAI automatically reroutes in-flight requests to healthy reserve compute shards in <5ms.',
+      'Prevent customer downtime during major upstream cloud outages. GALXAI automatically reroutes in-flight requests to healthy reserve compute clusters in <5ms.',
     rootCause:
       'Upstream infrastructure outages, DNS failures, or regional Kubernetes control-plane degradations trigger HTTP 503 responses on direct endpoints.',
     sampleErrorPayload: `{

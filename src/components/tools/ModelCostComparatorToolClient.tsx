@@ -22,7 +22,7 @@ import {
 import { ShareButton } from '@/components/common/ShareButton';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
-import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 export function ModelCostComparatorToolClient() {
@@ -35,7 +35,7 @@ export function ModelCostComparatorToolClient() {
 
   // Filter LLM models for comparison
   const comparisonModels = useMemo(() => {
-    return EXCLUSIVE_MODEL_CATALOG.filter((m) => m.category === 'llm');
+    return FRONTEND_VISIBLE_MODELS.filter((m) => m.category === 'llm');
   }, []);
 
   const selectedModel = useMemo(() => {
@@ -55,7 +55,7 @@ export function ModelCostComparatorToolClient() {
       const galxOutputCost = (outputTokens / 1_000_000) * model.outputPricePer1M;
       const galxTotalMonthly = galxInputCost + galxCachedCost + galxOutputCost;
 
-      // Standard Direct Provider Pricing (+35% markup assumption without wholesale pool)
+      // Standard Direct Provider Pricing (+35% markup assumption without wholesale pricing)
       const directInputPrice = model.inputPricePer1M * 1.35;
       const directOutputPrice = model.outputPricePer1M * 1.35;
       const directInputCost = (regularInputTokens / 1_000_000) * directInputPrice;
@@ -108,15 +108,15 @@ print(response.choices[0].message.content)`;
   const toolFaqs = [
     {
       q: 'How does GALXAI offer 25% to 40% wholesale pricing compared to direct providers?',
-      a: 'GALXAI pools massive multi-tenant GPU reservation volumes with upstream infrastructure providers, passing wholesale volume tier discounts directly to developers without middleman surcharges.',
+      a: 'GALXAI negotiates high-volume enterprise compute reservations with upstream infrastructure providers, passing wholesale volume tier discounts directly to developers without middleman surcharges.',
     },
     {
       q: 'How does the 75% Prompt Caching discount work?',
       a: 'When an incoming request shares an identical prefix of 1,024+ tokens with previous requests, the cached tokens are processed at a 75% discount ($0.25 on the dollar) and delivered in <15ms.',
     },
     {
-      q: 'Can I switch between OpenAI and xAI models using the same API key?',
-      a: 'Yes. A single GALXAI API key unlocks unified routing across GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, Grok 4.6 (1M context), and GPT-Image-2.',
+      q: 'Can I switch between OpenAI models and visual models using the same API key?',
+      a: 'Yes. A single GALXAI API key unlocks unified routing across GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, GPT-Image-2, DALL-E 3, and Vector Embeddings.',
     },
   ];
 

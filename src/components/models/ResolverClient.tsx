@@ -22,7 +22,6 @@ export function ResolverClient() {
     'sol',
     'terra',
     'luna',
-    'grok-4.6',
     'claude-3-7-sonnet',
     'deepseek-r1',
     'o3-mini',
@@ -73,7 +72,7 @@ export function ResolverClient() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Type an alias (e.g. sol, grok, dalle)..."
+                placeholder="Type an alias (e.g. sol, terra, luna, dalle)..."
                 className="w-full pl-10 pr-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-cyan-500"
               />
             </div>
@@ -159,7 +158,7 @@ export function ResolverClient() {
           <div className="glass-panel rounded-3xl p-8 text-center space-y-2 border border-rose-500/20 bg-rose-500/5">
             <p className="text-sm text-zinc-300 font-mono">No direct match for &quot;{query}&quot;.</p>
             <p className="text-xs text-zinc-500">
-              Try shorthand aliases like <strong className="text-zinc-300">sol</strong>, <strong className="text-zinc-300">terra</strong>, <strong className="text-zinc-300">luna</strong>, or <strong className="text-zinc-300">grok</strong>.
+              Try shorthand aliases like <strong className="text-zinc-300">sol</strong>, <strong className="text-zinc-300">terra</strong>, <strong className="text-zinc-300">luna</strong>, or <strong className="text-zinc-300">dalle</strong>.
             </p>
           </div>
         )}

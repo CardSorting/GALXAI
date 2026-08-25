@@ -110,14 +110,16 @@ function BasePoolMetricsOverview({
                 {stats.providerBreakdown?.openai.healthy || 0}/{stats.providerBreakdown?.openai.total || 0} online
               </span>
             </div>
-            <div className="flex items-center justify-between text-xs font-semibold">
-              <span className="flex items-center gap-1.5 text-emerald-300">
-                <Rocket className="w-3.5 h-3.5 text-emerald-400" /> xAI Grok
-              </span>
-              <span className="font-mono text-zinc-200">
-                {stats.providerBreakdown?.['xai-grok'].healthy || 0}/{stats.providerBreakdown?.['xai-grok'].total || 0} online
-              </span>
-            </div>
+            {(stats.providerBreakdown?.['xai-grok']?.total || 0) > 0 && (
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span className="flex items-center gap-1.5 text-emerald-300">
+                  <Rocket className="w-3.5 h-3.5 text-emerald-400" /> xAI Grok
+                </span>
+                <span className="font-mono text-zinc-200">
+                  {stats.providerBreakdown?.['xai-grok']?.healthy || 0}/{stats.providerBreakdown?.['xai-grok']?.total || 0} online
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>

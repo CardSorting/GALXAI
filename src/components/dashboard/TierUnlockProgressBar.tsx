@@ -28,7 +28,7 @@ interface TierMilestone {
 
 const MILESTONES: TierMilestone[] = [
   { amount: 25, label: '$25 Starter', perk: '50% Match Bonus', icon: CoinsIcon },
-  { amount: 50, label: '$50 Growth', perk: 'Sub-15ms VIP Shard', icon: Zap },
+  { amount: 50, label: '$50 Growth', perk: 'Sub-15ms VIP Fast-Lane', icon: Zap },
   { amount: 100, label: '$100 Scale', perk: '600 RPM Concurrency', icon: Server },
   { amount: 250, label: '$250 Fleet', perk: 'Unlimited Burst Lane', icon: Cpu },
   { amount: 500, label: '$500 Enterprise', perk: '1-on-1 Arch Review', icon: ShieldCheck }

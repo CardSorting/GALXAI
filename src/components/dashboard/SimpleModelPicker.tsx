@@ -18,7 +18,7 @@ import {
   Layers,
   Search
 } from 'lucide-react';
-import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS, ModelCatalog } from '@/core/router/ModelCatalog';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface SimpleCategory {
@@ -63,17 +63,17 @@ const CATEGORIES: SimpleCategory[] = [
   },
   {
     id: 'velocity',
-    label: 'Live Real-Time & High Velocity',
-    sublabel: 'Best for Real-Time Search, Scraping & Grok Speed',
+    label: 'High-Velocity & Sub-Second Latency',
+    sublabel: 'Best for Autocomplete, Real-Time Editing & Instant Feedback',
     icon: Flame,
-    recommendedModelId: 'x-ai/grok-4.6',
+    recommendedModelId: 'gpt-5.6-luna',
     plainUseCases: [
-      'Real-time news synthesis and live web intelligence',
-      'Frontier multimodal reasoning with 1M context window',
-      'High-throughput background data extraction pipelines'
+      'Real-time inline code autocomplete and refactoring',
+      'High-throughput background data extraction pipelines',
+      'Instant sub-second conversational agent turns'
     ],
-    retailComparison: '$12.00 / 1M tokens retail',
-    galxDiscount: 'Save 30% ($2.10 in / $8.40 out)'
+    retailComparison: '$6.00 / 1M tokens retail',
+    galxDiscount: 'Save 36% ($0.95 in / $3.80 out)'
   },
   {
     id: 'visuals',
@@ -118,7 +118,7 @@ function BaseSimpleModelPicker() {
     if (resolved) {
       if (resolved.category === 'embedding') setSelectedCatId('embeddings');
       else if (resolved.category === 'image') setSelectedCatId('visuals');
-      else if (resolved.provider === 'xai-grok') setSelectedCatId('velocity');
+      else if (resolved.id.includes('luna')) setSelectedCatId('velocity');
       else if (resolved.id.includes('terra')) setSelectedCatId('reasoning');
       else setSelectedCatId('fast');
     } else {
@@ -127,56 +127,50 @@ function BaseSimpleModelPicker() {
         setSelectedCatId('embeddings');
       } else if (lower.includes('code') || lower.includes('refactor') || lower.includes('logic')) {
         setSelectedCatId('reasoning');
-      } else if (lower.includes('grok') || lower.includes('search') || lower.includes('realtime') || lower.includes('1m')) {
+      } else if (lower.includes('luna') || lower.includes('speed') || lower.includes('velocity') || lower.includes('fast')) {
         setSelectedCatId('velocity');
       } else if (lower.includes('image') || lower.includes('photo') || lower.includes('render') || lower.includes('dalle')) {
         setSelectedCatId('visuals');
-      } else if (lower.includes('chat') || lower.includes('fast') || lower.includes('support')) {
+      } else if (lower.includes('chat') || lower.includes('support')) {
         setSelectedCatId('fast');
       }
     }
   };
 
   const currentCat = CATEGORIES.find(c => c.id === selectedCatId) || CATEGORIES[0];
-  const modelSpecs = EXCLUSIVE_MODEL_CATALOG.find(m => m.id === currentCat.recommendedModelId) || ModelCatalog.resolveModel(currentCat.recommendedModelId);
+  const modelSpecs = FRONTEND_VISIBLE_MODELS.find(m => m.id === currentCat.recommendedModelId) || ModelCatalog.resolveModel(currentCat.recommendedModelId);
 
   return (
-    <section className="glass-panel rounded-3xl p-6 sm:p-10 space-y-8 border border-white/10 relative overflow-hidden shadow-2xl">
-      <div className="absolute top-0 left-1/3 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
-
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-white/10 relative overflow-hidden">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>INTERACTIVE INTENT &amp; MODEL MATCHMAKER</span>
+            <span>INSTANT INTENT MATCHMAKER • NON-TECHNICAL</span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-            Which AI Engine Fits Your Exact Mental Model?
+          <h2 className="text-xl sm:text-2xl font-black text-white">
+            Which Model Fits Your Application?
           </h2>
-          <p className="text-xs sm:text-sm text-zinc-300">
-            Click your primary business goal or describe your task in plain English to auto-match the optimal engine.
+          <p className="text-xs text-zinc-400">
+            Tell us what you want to build or choose a category below. We route directly to the optimal engine with wholesale savings.
           </p>
         </div>
 
-        <Link
-          href="/models"
-          className="text-xs font-mono text-cyan-300 hover:text-cyan-200 flex items-center gap-1 self-start md:self-auto"
-        >
-          <span>View All {EXCLUSIVE_MODEL_CATALOG.length} Raw Specifications</span>
-          <ArrowRight className="w-3 h-3" />
-        </Link>
+        <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
+          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <span>Zero-Latency Routing</span>
+        </div>
       </div>
 
-      {/* Natural Language Intent & Ambiguity Search Bar */}
-      <div className="p-3.5 rounded-2xl bg-black/50 border border-white/10 space-y-2">
+      {/* Plain English Search Bar */}
+      <div className="space-y-2">
         <div className="relative">
-          <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
           <input
             type="text"
             value={naturalQuery}
             onChange={(e) => handleQueryChange(e.target.value)}
-            placeholder="Type your use case or alias in plain English (e.g. 'refactor full repo', 'grok 1m', 'extract invoices', 'sol')..."
+            placeholder="Type your use case or alias in plain English (e.g. 'refactor full repo', 'sub-second chat', 'extract invoices', 'sol')..."
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black/60 border border-white/10 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-amber-400 font-mono"
           />
         </div>
@@ -184,9 +178,9 @@ function BaseSimpleModelPicker() {
           <span className="text-zinc-500">Quick Mental Models:</span>
           {[
             { label: 'Refactor Code', query: 'refactor code' },
-            { label: 'Grok 1M Context', query: 'grok 4.6' },
-            { label: '4K Images', query: 'gpt-image-2' },
-            { label: 'Fast Autocomplete', query: 'sol' }
+            { label: 'Deep Logic', query: 'terra reasoning' },
+            { label: 'Sub-Second Speed', query: 'luna fast' },
+            { label: '4K Images', query: 'gpt-image-2' }
           ].map((tag) => (
             <button
               key={tag.label}
@@ -303,7 +297,7 @@ function BaseSimpleModelPicker() {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 

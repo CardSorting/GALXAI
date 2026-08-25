@@ -22,7 +22,7 @@ import {
 import { ShareButton } from '@/components/common/ShareButton';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
-import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 export function ApiRequestBuilderClient() {
@@ -42,8 +42,8 @@ export function ApiRequestBuilderClient() {
 
   const selectedModel = useMemo(() => {
     return (
-      EXCLUSIVE_MODEL_CATALOG.find((m) => m.id === selectedModelId) ||
-      EXCLUSIVE_MODEL_CATALOG[0]
+      FRONTEND_VISIBLE_MODELS.find((m) => m.id === selectedModelId) ||
+      FRONTEND_VISIBLE_MODELS[0]
     );
   }, [selectedModelId]);
 
@@ -328,7 +328,7 @@ echo $result->choices[0]->message->content;`;
                 onChange={(e) => setSelectedModelId(e.target.value)}
                 className="w-full p-2.5 rounded-xl bg-black/60 border border-white/15 text-white font-mono text-xs focus:outline-none cursor-pointer"
               >
-                {EXCLUSIVE_MODEL_CATALOG.filter((m) => m.category === 'llm').map((model) => (
+                {FRONTEND_VISIBLE_MODELS.filter((m) => m.category === 'llm').map((model) => (
                   <option key={model.id} value={model.id}>
                     {model.name} (${model.inputPricePer1M.toFixed(2)}/1M)
                   </option>

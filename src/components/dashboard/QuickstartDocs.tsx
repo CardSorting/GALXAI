@@ -37,7 +37,7 @@ npx galxai chat`,
     "gpt-5.6-sol",
     "gpt-5.6-terra",
     "gpt-5.6-luna",
-    "x-ai/grok-4.6",
+    "openai-gpt-image-2",
     "text-embedding-3-small"
   ]
 }`,
@@ -52,7 +52,7 @@ client = OpenAI(
 
 # Stream with 25%–40% wholesale discount & 75% prompt cache pass-through
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",  # or "x-ai/grok-4.6", "gpt-5.6-terra", "gpt-5.6-luna"
+    model="gpt-5.6-sol",  # or "gpt-5.6-terra", "gpt-5.6-luna"
     messages=[
         {"role": "system", "content": "You are a software architect."},
         {"role": "user", "content": "Write an atomic lease manager in Python."}
@@ -74,7 +74,7 @@ const openai = new OpenAI({
 
 async function main() {
   const stream = await openai.chat.completions.create({
-    model: "gpt-5.6-sol", // Accepts aliases: 'gpt-5', 'sol', 'terra', 'grok', 'fast'
+    model: "gpt-5.6-sol", // Accepts aliases: 'gpt-5', 'sol', 'terra', 'luna', 'fast'
     messages: [{ role: "user", content: "Implement a distributed circuit breaker." }],
     stream: true,
   });
@@ -146,9 +146,9 @@ model_list:
       model: openai/gpt-5.6-sol
       api_base: https://galx.ai/v1
       api_key: os.environ/GALX_API_KEY
-  - model_name: galx-grok
+  - model_name: galx-terra
     litellm_params:
-      model: openai/x-ai/grok-4.6
+      model: openai/gpt-5.6-terra
       api_base: https://galx.ai/v1
       api_key: os.environ/GALX_API_KEY`
   };
@@ -236,7 +236,7 @@ model_list:
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
         <div className="p-4 rounded-2xl bg-black/30 border border-white/5 space-y-1">
           <div className="text-[11px] font-bold text-amber-300 font-mono">POST /v1/chat/completions</div>
-          <p className="text-[11px] text-zinc-400">Streaming SSE &amp; JSON completions for Sol, Terra, Luna &amp; Grok 4.6.</p>
+          <p className="text-[11px] text-zinc-400">Streaming SSE &amp; JSON completions for Sol, Terra, Luna &amp; Visual models.</p>
         </div>
         <div className="p-4 rounded-2xl bg-black/30 border border-white/5 space-y-1">
           <div className="text-[11px] font-bold text-violet-300 font-mono">POST /v1/messages</div>

@@ -68,13 +68,13 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     relatedTerms: ['Time-To-First-Token (TTFT)', 'Rate Limit Pooling (429 Shield)', 'Continuous Token Governor'],
   },
   {
-    slug: 'rate-limit-pooling',
-    term: 'Rate Limit Pooling (429 Shield)',
+    slug: 'rate-limit-resilience',
+    term: 'Rate Limit Resilience (429 Shield)',
     category: 'routing',
     shortDefinition:
-      'A distributed capacity aggregation technique that dynamically routes inference requests across multiple upstream enterprise shards to prevent 429 Too Many Requests errors.',
+      'A distributed capacity management technique that dynamically routes inference requests across high-availability enterprise endpoints to prevent 429 Too Many Requests errors.',
     fullDefinition:
-      'Rather than relying on a single upstream account subject to strict Tier rate limits (RPM and TPM), GALXAI distributes queries across pooled enterprise infrastructure. If an individual upstream shard approaches capacity thresholds, traffic shifts predictively with zero dropped connections.',
+      'Rather than relying on single connections subject to strict Tier rate limits (RPM and TPM), GALXAI distributes queries across high-availability enterprise infrastructure. If an upstream endpoint approaches capacity thresholds, traffic shifts predictively with zero dropped connections.',
     technicalContext:
       'Utilizes Predictive Adaptive Hydraulic Headroom (P-AHT) algorithms to maintain 99.99% successful dispatch.',
     wikidataUri: 'https://www.wikidata.org/wiki/Q165137',
@@ -150,13 +150,13 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     term: 'Predictive Adaptive Hydraulic Headroom (P-AHT)',
     category: 'routing',
     shortDefinition:
-      'A continuous token governance algorithm that models API quotas as fluid dynamics, pre-allocating compute across enterprise shards to eliminate 429 rate limit stalls.',
+      'A continuous token governance algorithm that models API quotas as fluid dynamics, pre-allocating compute across enterprise routing pipelines to eliminate 429 rate limit stalls.',
     fullDefinition:
-      'Instead of reactive exponential backoff after receiving HTTP 429 errors, P-AHT monitors second-by-second token consumption across multi-tenant shards. Incoming bursts exceeding 75% capacity are dynamically shifted to pre-warmed reserve accounts with zero connection drops.',
+      'Instead of reactive exponential backoff after receiving HTTP 429 errors, P-AHT monitors second-by-second token consumption across Anycast edge nodes. Incoming bursts exceeding 75% capacity are dynamically shifted to pre-warmed reserve routes with zero connection drops.',
     technicalContext:
       'Non-blocking semaphore allocation executes in <0.4ms across distributed Anycast edge workers.',
     wikidataUri: 'https://www.wikidata.org/wiki/Q1890352',
-    relatedTerms: ['Rate-Limit Pooling', 'Anycast Model Routing', 'Wholesale Token Clearinghouse'],
+    relatedTerms: ['Rate-Limit Resilience', 'Anycast Model Routing', 'Wholesale Token Clearinghouse'],
   },
   {
     slug: 'temperature-and-top-p',

@@ -20,7 +20,7 @@ import {
   Layers,
   Cpu
 } from 'lucide-react';
-import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
@@ -41,7 +41,7 @@ function BaseRoiCalculator({
   const [isOffPeakMode, setIsOffPeakMode] = useState(true);
   const [copiedAudit, setCopiedAudit] = useState(false);
 
-  const selectedModel = EXCLUSIVE_MODEL_CATALOG.find(m => m.id === selectedModelId) || EXCLUSIVE_MODEL_CATALOG[0];
+  const selectedModel = FRONTEND_VISIBLE_MODELS.find(m => m.id === selectedModelId) || FRONTEND_VISIBLE_MODELS[0];
 
   // Base list rates per 1M tokens
   const listIn = selectedModel.listPricePer1MInput || selectedModel.inputPricePer1M;
@@ -108,7 +108,7 @@ Switch in 30 Seconds: https://galx.ai/keys/new`;
               Project Your Team&apos;s Bottom-Line Savings
             </h2>
             <p className="text-xs text-zinc-400 max-w-xl">
-              Calculate exact wholesale price reductions across OpenAI Codex and xAI Grok 4.5 with compound prompt caching rebates.
+              Calculate exact wholesale price reductions across OpenAI Codex and visual models with compound prompt caching rebates.
             </p>
           </div>
 
@@ -135,7 +135,7 @@ Switch in 30 Seconds: https://galx.ai/keys/new`;
               onChange={(e) => setSelectedModelId(e.target.value)}
               className="w-full p-3 rounded-2xl bg-black/60 border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-amber-400 cursor-pointer shadow-inner"
             >
-              {EXCLUSIVE_MODEL_CATALOG.filter(m => m.category === 'llm').map(m => (
+              {FRONTEND_VISIBLE_MODELS.filter(m => m.category === 'llm').map(m => (
                 <option key={m.id} value={m.id} className="bg-zinc-900 text-white">
                   {m.id} ({m.name}) • ${m.inputPricePer1M.toFixed(2)} in / ${m.outputPricePer1M.toFixed(2)} out ({m.provider})
                 </option>

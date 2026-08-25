@@ -66,7 +66,7 @@ npx galxai chat --model gpt-5.6-sol`
     snippet: `// Cursor / Windsurf Settings -> Models:
 Override Base URL: https://galx.ai/v1
 API Key:           galx_live_your_key_here
-Models:            gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.6`
+Models:            gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`
   },
   {
     id: 'python',

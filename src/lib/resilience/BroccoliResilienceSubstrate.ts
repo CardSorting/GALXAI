@@ -121,7 +121,7 @@ export class BroccoliResilienceSubstrate {
         title: 'Multi-Region Edge Verification Check',
         impact: 'Zero user disruption. Routine canary latency benchmark passed across sfo1 and iad1.',
         rootCause: 'Scheduled quarterly routing table re-optimization.',
-        resolutionStrategy: 'Dynamic shard weights re-balanced with zero packet loss.',
+        resolutionStrategy: 'Dynamic edge weights re-balanced with zero packet loss.',
         affectedEndpoints: ['/api/v1/chat/completions', '/api/keys'],
         resolvedAt: Date.now() - 86400000 * 3 + 120000,
       });

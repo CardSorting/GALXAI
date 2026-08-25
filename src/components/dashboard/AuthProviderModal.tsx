@@ -152,34 +152,6 @@ function BaseAuthProviderModal({ isOpen, onClose, onSuccess }: AuthProviderModal
           </div>
         )}
 
-        {/* Shard Mode Toggle */}
-        <div className="mb-5 p-1.5 rounded-2xl bg-black/40 border border-white/5 grid grid-cols-2 gap-1.5 text-xs font-semibold">
-          <button
-            type="button"
-            onClick={() => setMode('pooled')}
-            className={`py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-              mode === 'pooled'
-                ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 shadow-sm'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            Cooperative Pool (Shared)
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('private')}
-            className={`py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-              mode === 'private'
-                ? 'bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 shadow-sm'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            Dedicated Private Pipeline
-          </button>
-        </div>
-
         {/* Tab 1: 1-Click OAuth */}
         {activeTab === 'oauth' && (
           <div className="space-y-3.5">
@@ -195,19 +167,6 @@ function BaseAuthProviderModal({ isOpen, onClose, onSuccess }: AuthProviderModal
               </span>
               {loadingProvider === 'openai' ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
             </button>
-
-            <button
-              type="button"
-              onClick={() => handleOAuthLogin('xai-grok')}
-              disabled={loadingProvider !== null}
-              className="w-full py-3.5 px-4 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 hover:text-white font-black text-sm uppercase tracking-wider shadow-lg shadow-emerald-500/10 hover:scale-[1.01] active:scale-98 transition-all flex items-center justify-between cursor-pointer disabled:opacity-50"
-            >
-              <span className="flex items-center gap-3">
-                <Rocket className="w-5 h-5 text-emerald-400" />
-                <span>{loadingProvider === 'grok' ? 'Connecting OAuth...' : 'Continue with xAI Grok OAuth'}</span>
-              </span>
-              {loadingProvider === 'grok' ? <Loader2 className="w-4 h-4 animate-spin text-emerald-400" /> : <ArrowRight className="w-4 h-4 text-emerald-400" />}
-            </button>
           </div>
         )}
 
@@ -218,24 +177,9 @@ function BaseAuthProviderModal({ isOpen, onClose, onSuccess }: AuthProviderModal
               <button
                 type="button"
                 onClick={() => setSelectedProvider('openai')}
-                className={`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
-                  selectedProvider === 'openai'
-                    ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
-                    : 'bg-black/40 border-white/10 text-zinc-400'
-                }`}
+                className="flex-1 py-2 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer bg-amber-500/20 border-amber-500/50 text-amber-300"
               >
-                OpenAI
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedProvider('xai-grok')}
-                className={`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
-                  selectedProvider === 'xai-grok'
-                    ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
-                    : 'bg-black/40 border-white/10 text-zinc-400'
-                }`}
-              >
-                xAI Grok
+                OpenAI Codex Suite
               </button>
             </div>
 

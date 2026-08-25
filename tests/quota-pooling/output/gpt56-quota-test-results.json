@@ -1,0 +1,300 @@
+{
+  "timestamp": "2026-08-25T00:08:46.770Z",
+  "totalDurationMs": 114,
+  "totalScenarios": 5,
+  "scenariosPassed": 5,
+  "verdict": "ALL_TESTS_PASSED",
+  "scenarios": [
+    {
+      "scenarioId": "SCENARIO_01_ADMIN_ENDPOINT",
+      "name": "Admin API GPT-5.6 Keyless Verification",
+      "strategy": "adaptive_headroom",
+      "description": "Verifies /api/admin/test-model accepts keyless requests, acquires leases, and commits tokens for GPT-5.6.",
+      "passed": true,
+      "metrics": {
+        "httpStatus": 200,
+        "executionTimeMs": 41,
+        "concurrency": 4,
+        "shardsEngaged": 2
+      },
+      "details": {
+        "success": true,
+        "message": "Admin GPT-5.6 quota pooling test completed successfully with zero client API keys.",
+        "testSummary": {
+          "modelRequested": "gpt-5.6-sol",
+          "canonicalModelId": "gpt-5.6-sol",
+          "upstreamModelName": "gpt-5.6-sol",
+          "provider": "openai",
+          "contextWindow": 900000,
+          "pricing": {
+            "listPricePer1MInput": "$5.00",
+            "listPricePer1MOutput": "$20.00",
+            "wholesaleInputPrice": "$3.75",
+            "wholesaleOutputPrice": "$15.00",
+            "wholesaleDiscount": "25%",
+            "promptCachingDiscount": "75%"
+          },
+          "rotationStrategy": "adaptive_headroom",
+          "concurrencyTested": 4,
+          "totalExecutionTimeMs": 41,
+          "shardsAvailable": 2,
+          "shardsEngaged": 2,
+          "shardDistribution": {
+            "admin_shard_openai_alpha": 3,
+            "admin_shard_openai_beta": 1
+          },
+          "verdict": "PASS: Successfully leveled 4 concurrent requests across 2 pooled shards via 'adaptive_headroom' strategy without quota errors."
+        },
+        "quotaPoolingProof": {
+          "runs": [
+            {
+              "runIndex": 1,
+              "shardId": "admin_shard_openai_alpha",
+              "shardLabel": "Admin Sandbox Shard Alpha (Tier 5 Wholesale)",
+              "fencingToken": 2,
+              "estimatedTokens": 2000,
+              "tokensConsumed": 50,
+              "remainingTokensBefore": 500000,
+              "remainingTokensAfter": 499950,
+              "latencyMs": 35,
+              "success": true
+            },
+            {
+              "runIndex": 2,
+              "shardId": "admin_shard_openai_alpha",
+              "shardLabel": "Admin Sandbox Shard Alpha (Tier 5 Wholesale)",
+              "fencingToken": 3,
+              "estimatedTokens": 2000,
+              "tokensConsumed": 54,
+              "remainingTokensBefore": 500000,
+              "remainingTokensAfter": 499946,
+              "latencyMs": 12,
+              "success": true
+            },
+            {
+              "runIndex": 3,
+              "shardId": "admin_shard_openai_alpha",
+              "shardLabel": "Admin Sandbox Shard Alpha (Tier 5 Wholesale)",
+              "fencingToken": 4,
+              "estimatedTokens": 2000,
+              "tokensConsumed": 47,
+              "remainingTokensBefore": 500000,
+              "remainingTokensAfter": 499916,
+              "latencyMs": 14,
+              "success": true
+            },
+            {
+              "runIndex": 4,
+              "shardId": "admin_shard_openai_beta",
+              "shardLabel": "Admin Sandbox Shard Beta (Tier 5 Wholesale)",
+              "fencingToken": 2,
+              "estimatedTokens": 2000,
+              "tokensConsumed": 35,
+              "remainingTokensBefore": 480058,
+              "remainingTokensAfter": 480207,
+              "latencyMs": 22,
+              "success": true
+            }
+          ],
+          "activeLeasesRemaining": 0,
+          "tokensPerMinuteFleetThroughput": 1000000,
+          "lifetimeFleetTokensServed": 52186,
+          "averageFleetLatencyMs": 246
+        },
+        "sampleCompletion": {
+          "id": "chatcmpl_admin_1787616526764_90nz4g",
+          "object": "chat.completion",
+          "created": 1787616526,
+          "model": "gpt-5.6-sol",
+          "system_fingerprint": "fp_galxai_zdr_admin_shard_",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "[GALXAI Router via gpt-5.6-sol on admin_shard_openai_alpha]: GALXAI pools enterprise compute quotas into a unified reservoir using Predictive Adaptive Hydraulic Headroom (P-AHT) to dynamically distribute bursts and eliminate 429 rate limit stalls across all client threads."
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 19,
+            "completion_tokens": 38,
+            "total_tokens": 57
+          }
+        },
+        "complianceAndZDR": {
+          "zeroDataRetention": true,
+          "hipaaCompliant": true,
+          "soc2TypeIIAttestation": "PASS",
+          "inMemoryRedaction": "Safe Harbor 18 & EU GDPR"
+        }
+      }
+    },
+    {
+      "scenarioId": "SCENARIO_02_P_AHT_ASYMMETRIC",
+      "name": "P-AHT Headroom Drain Protection",
+      "strategy": "adaptive_headroom",
+      "description": "Proves P-AHT biases traffic heavily towards high-capacity shards and protects draining shards.",
+      "passed": true,
+      "metrics": {
+        "totalRequests": 10,
+        "highHeadroomPicks": 10,
+        "lowHeadroomPicks": 0,
+        "biasRatio": "100%"
+      },
+      "details": {
+        "asymSelections": {
+          "shard_high_headroom": 10,
+          "shard_low_headroom": 0
+        }
+      }
+    },
+    {
+      "scenarioId": "SCENARIO_03_SWRR_INTERLEAVING",
+      "name": "Smooth Weighted Round-Robin (SWRR)",
+      "strategy": "smooth_weighted_round_robin",
+      "description": "Proves SWRR produces zero clumping with exact weight proportional distribution.",
+      "passed": true,
+      "metrics": {
+        "totalRequests": 6,
+        "shard1Picks": 4,
+        "shard2Picks": 2,
+        "expectedRatio": "2:1"
+      },
+      "details": {
+        "swrrSequence": [
+          "shard_swrr_1",
+          "shard_swrr_2",
+          "shard_swrr_1",
+          "shard_swrr_1",
+          "shard_swrr_2",
+          "shard_swrr_1"
+        ]
+      }
+    },
+    {
+      "scenarioId": "SCENARIO_04_TASD_DISPERSION",
+      "name": "Tenant-Affinity Shard Dispersion (TASD)",
+      "strategy": "adaptive_headroom",
+      "description": "Proves multi-request concurrent bursts from a single tenant fan out across distinct shards.",
+      "passed": true,
+      "metrics": {
+        "tenant": "swarming_agent_007",
+        "lease1Shard": "shard_tasd_1",
+        "lease2Shard": "shard_tasd_2",
+        "differentShards": true
+      },
+      "details": {
+        "lease1": {
+          "leaseId": "lease_1787616526769_42dbc1d6",
+          "shardId": "shard_tasd_1",
+          "userId": "swarming_agent_007",
+          "fencingToken": 2,
+          "acquiredAtMs": 1787616526769,
+          "expiresAtMs": 1787616586769,
+          "estimatedTokens": 5000,
+          "account": {
+            "id": "shard_tasd_1",
+            "userId": "admin_sys",
+            "accountLabel": "TASD Shard 1",
+            "provider": "openai",
+            "authType": "api_key",
+            "shardMode": "pooled",
+            "status": "healthy",
+            "priority": 10,
+            "weight": 1,
+            "fencingToken": 2,
+            "apiKeyMasked": "sk-proj...t1",
+            "encryptedSecrets": {
+              "ciphertext": "edcfa6463a24b0c9414d12b6e8a647f131dc9c4c35eee8",
+              "iv": "7c41e24ba1fc039ced53457e",
+              "tag": "fdfd72cf6536da1abe5f33140dad9f0b",
+              "keyVersion": "v1"
+            },
+            "tokenBucket": {
+              "maxTokens": 500000,
+              "remainingTokens": 500000,
+              "refillRatePerMinute": 500000,
+              "maxRequests": 100,
+              "remainingRequests": 100,
+              "lastRefillTimestampMs": 1787616526769,
+              "reservedTokens": 5000
+            },
+            "stats": {
+              "totalRequestsServed": 0,
+              "totalTokensConsumed": 0,
+              "consecutiveFailures": 0,
+              "averageLatencyMs": 300
+            },
+            "createdAtMs": 1787616526768,
+            "updatedAtMs": 1787616526769,
+            "permissionRetracted": false
+          }
+        },
+        "lease2": {
+          "leaseId": "lease_1787616526769_8660ee44",
+          "shardId": "shard_tasd_2",
+          "userId": "swarming_agent_007",
+          "fencingToken": 2,
+          "acquiredAtMs": 1787616526769,
+          "expiresAtMs": 1787616586769,
+          "estimatedTokens": 5000,
+          "account": {
+            "id": "shard_tasd_2",
+            "userId": "admin_sys",
+            "accountLabel": "TASD Shard 2",
+            "provider": "openai",
+            "authType": "api_key",
+            "shardMode": "pooled",
+            "status": "healthy",
+            "priority": 10,
+            "weight": 1,
+            "fencingToken": 2,
+            "apiKeyMasked": "sk-proj...t2",
+            "encryptedSecrets": {
+              "ciphertext": "f39a8e76e60e19df00cf645023373a8b6ac00a6248062b",
+              "iv": "6fcb1cb077ea08d0566c7843",
+              "tag": "ae549a54bfb554cd5f34fcfbaedd8115",
+              "keyVersion": "v1"
+            },
+            "tokenBucket": {
+              "maxTokens": 500000,
+              "remainingTokens": 500000,
+              "refillRatePerMinute": 500000,
+              "maxRequests": 100,
+              "remainingRequests": 100,
+              "lastRefillTimestampMs": 1787616526769,
+              "reservedTokens": 5000
+            },
+            "stats": {
+              "totalRequestsServed": 0,
+              "totalTokensConsumed": 0,
+              "consecutiveFailures": 0,
+              "averageLatencyMs": 300
+            },
+            "createdAtMs": 1787616526768,
+            "updatedAtMs": 1787616526769,
+            "permissionRetracted": false
+          }
+        }
+      }
+    },
+    {
+      "scenarioId": "SCENARIO_05_CIRCUIT_FAILOVER",
+      "name": "Circuit Breaker 429 Cooldown & Failover",
+      "strategy": "priority_failover",
+      "description": "Proves 429 errors place shards into cooldown and failover instantly with 0% downtime.",
+      "passed": true,
+      "metrics": {
+        "initialShard": "shard_failover_primary",
+        "failoverShard": "shard_failover_backup",
+        "failoverSuccessful": true
+      },
+      "details": {
+        "initialPick": "shard_failover_primary",
+        "failoverPick": "shard_failover_backup"
+      }
+    }
+  ]
+}

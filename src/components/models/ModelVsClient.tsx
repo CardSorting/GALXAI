@@ -101,8 +101,8 @@ const resB = await client.chat.completions.create({
     setOutputA('');
     setOutputB('');
 
-    const textA = `[${modelA.name} Output]\nAnycast model routing terminates client TCP/TLS handshakes at the edge in <14ms TTFT. By distributing global traffic across pooled enterprise shards, it eliminates 429 rate limit stalls and guarantees 75% prompt caching pass-through on prefixes exceeding 1,024 tokens.`;
-    const textB = `[${modelB.name} Output]\nDirect origin dispatch suffers from geographical RTT penalties (120ms+ cross-continental) and strict Tier rate limits. Routing through the GALXAI clearinghouse provides 25%–40% wholesale savings and automatic multi-shard failover with zero data retention.`;
+    const textA = `[${modelA.name} Output]\nAnycast model routing terminates client TCP/TLS handshakes at the edge in <14ms TTFT. By distributing global traffic across enterprise high-availability infrastructure, it eliminates 429 rate limit stalls and guarantees 75% prompt caching pass-through on prefixes exceeding 1,024 tokens.`;
+    const textB = `[${modelB.name} Output]\nDirect origin dispatch suffers from geographical RTT penalties (120ms+ cross-continental) and strict Tier rate limits. Routing through the GALXAI gateway provides 25%–40% wholesale savings and automatic active failover with zero data retention.`;
 
     const wordsA = textA.split(' ');
     const wordsB = textB.split(' ');

@@ -32,7 +32,7 @@ function BaseShareModal({
   isOpen,
   onClose,
   title = 'GALXAI — Universal AI Model Router & Gateway',
-  description = 'One unified API for OpenAI Codex & xAI Grok with sub-15ms routing and 25%–40% wholesale token savings.',
+  description = 'One unified API for OpenAI Codex and frontier models with sub-15ms routing and 25%–40% wholesale token savings.',
   url
 }: ShareModalProps) {
   const [activeTab, setActiveTab] = useState<'social' | 'qr' | 'markdown' | 'badge'>('social');

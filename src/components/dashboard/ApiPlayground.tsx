@@ -76,10 +76,10 @@ export async function POST(req: NextRequest) {
 }`
   },
   {
-    id: 'grok-reasoning',
-    label: '🚀 Grok 4.6 Concurrency Audit',
-    category: 'grok',
-    model: 'x-ai/grok-4.6',
+    id: 'luna-rate-limiter',
+    label: '🚀 Concurrency Rate Limiter Audit',
+    category: 'code',
+    model: 'gpt-5.6-sol',
     prompt: 'Audit this distributed token-bucket rate limiter for race conditions under high concurrency:\n\nclass DistributedLimiter {\n  private buckets = new Map<string, number>();\n  async take(key: string, cost: number) {\n    const current = this.buckets.get(key) || 100;\n    if (current < cost) return false;\n    this.buckets.set(key, current - cost);\n    return true;\n  }\n}',
     simulatedReply: `### Concurrency & Consistency Audit:
 
@@ -135,18 +135,17 @@ WHERE status = 'completed';
     label: '🏎️ Instant Luna Summarizer',
     category: 'fast',
     model: 'gpt-5.6-luna',
-    prompt: 'Summarize the core architectural benefit of pooled AI API keys in 3 bullet points.',
-    simulatedReply: `• **25-33% Direct Cost Savings**: Bypasses retail API markups through consolidated enterprise volume tiers.
-• **Sub-15ms Global Edge Routing**: Intelligent latency-optimized shard selection with automatic health failover.
-• **Zero Downtime Rate-Limit Smoothing**: Absorbs burst traffic spikes by dynamically distributing requests across 100+ authenticated upstream keys.`
+    prompt: 'Summarize the core architectural benefits of an enterprise AI gateway with prompt caching in 3 bullet points.',
+    simulatedReply: `• **25-36% Direct Cost Savings**: Bypasses retail API markups through consolidated enterprise volume tiers.
+• **Sub-15ms Global Edge Routing**: Intelligent latency-optimized anycast routing with automatic health failover.
+• **Zero Downtime Rate-Limit Smoothing**: Absorbs burst traffic spikes with 75% prompt cache pass-through and active resilience.`
   }
 ];
 
 const MENTAL_MODELS = [
   { id: 'sol', name: '⚡ SOTA Coding', model: 'gpt-5.6-sol', icon: Zap, badge: '-25%' },
-  { id: 'terra', name: '🧠 Deep Logic', model: 'gpt-5.6-terra', icon: Brain, badge: '-33%' },
-  { id: 'luna', name: '🚀 Fast Velocity', model: 'gpt-5.6-luna', icon: Flame, badge: '-25%' },
-  { id: 'grok', name: '🌐 1M Frontier', model: 'x-ai/grok-4.6', icon: Activity, badge: '-30%' },
+  { id: 'terra', name: '🧠 Deep Logic', model: 'gpt-5.6-terra', icon: Brain, badge: '-25%' },
+  { id: 'luna', name: '🚀 Fast Velocity', model: 'gpt-5.6-luna', icon: Flame, badge: '-36%' },
   { id: 'image', name: '🎨 Visual Studio', model: 'openai-gpt-image-2', icon: ImageIcon, badge: '-25%' },
   { id: 'embed', name: '📐 Dense Embeddings', model: 'text-embedding-3-small', icon: Layers, badge: '-25%' }
 ];
@@ -468,7 +467,7 @@ const res = await galx.chat.completions.create({
                 type="text"
                 value={modelInput}
                 onChange={(e) => setModelInput(e.target.value)}
-                placeholder="gpt-5, sol, grok-4.6, claude-3-7, fast..."
+                placeholder="gpt-5, sol, terra, luna, codex, fast..."
                 className="w-full py-2.5 px-3 rounded-xl bg-black/60 border border-white/10 text-amber-300 font-bold focus:outline-none focus:border-amber-400/50"
               />
             </div>

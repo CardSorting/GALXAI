@@ -47,22 +47,11 @@ const HERO_MODELS: ModelPreset[] = [
     name: 'OpenAI GPT-5.6 Sol',
     provider: 'OpenAI Codex',
     retailPrice: 5.00,
-    wholesalePrice: 3.00,
-    discountPct: 40,
-    contextK: 200,
+    wholesalePrice: 3.75,
+    discountPct: 25,
+    contextK: 900,
     specialty: 'SOTA Coding & Architecture',
     accentColor: 'from-amber-400 to-orange-500'
-  },
-  {
-    id: 'x-ai/grok-4.6',
-    name: 'xAI Grok 4.6',
-    provider: 'xAI Reasoning',
-    retailPrice: 5.00,
-    wholesalePrice: 3.50,
-    discountPct: 30,
-    contextK: 1000,
-    specialty: '1M Frontier Reasoning',
-    accentColor: 'from-cyan-400 to-indigo-500'
   },
   {
     id: 'gpt-5.6-terra',
@@ -79,12 +68,23 @@ const HERO_MODELS: ModelPreset[] = [
     id: 'gpt-5.6-luna',
     name: 'OpenAI GPT-5.6 Luna',
     provider: 'OpenAI Flash',
-    retailPrice: 0.25,
-    wholesalePrice: 0.15,
-    discountPct: 40,
-    contextK: 128,
-    specialty: 'Sub-Second Agent Loops',
+    retailPrice: 1.50,
+    wholesalePrice: 0.95,
+    discountPct: 36,
+    contextK: 900,
+    specialty: 'Sub-Second Agent Velocity',
     accentColor: 'from-emerald-400 to-teal-500'
+  },
+  {
+    id: 'openai-gpt-image-2',
+    name: 'OpenAI GPT-Image-2',
+    provider: 'OpenAI Visual',
+    retailPrice: 0.08,
+    wholesalePrice: 0.06,
+    discountPct: 25,
+    contextK: 128,
+    specialty: 'Ultra 4K Visual Synthesis',
+    accentColor: 'from-purple-400 to-indigo-500'
   }
 ];
 
@@ -420,7 +420,7 @@ npx galxai chat --model ${selectedModel.id}`;
         return `// In Cursor / Windsurf Settings -> Models:
 Override Base URL: https://galx.ai/v1
 API Key:           galx_live_your_key_here
-Models:            ${selectedModel.id}, gpt-5.6-sol, x-ai/grok-4.6`;
+Models:            ${selectedModel.id}, gpt-5.6-sol, gpt-5.6-luna`;
       case 'claude_code':
         return `# Point Claude Code CLI directly to GALXAI Wholesale Clearinghouse:
 export ANTHROPIC_BASE_URL="https://galx.ai/v1"

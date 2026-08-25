@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
 
-export const alt = 'GALXAI Shard Vault & Multi-Account Governor';
+export const alt = 'GALXAI Developer Key Manager — Zero Data Retention';
 export const size = {
   width: 1200,
   height: 630,
@@ -62,7 +62,7 @@ export default async function Image() {
             <div style={{ display: 'flex', alignItems: 'center', fontSize: '28px', fontWeight: 900 }}>
               <span>GALX</span>
               <span style={{ color: '#22d3ee' }}>AI</span>
-              <span style={{ color: '#94a3b8', fontSize: '20px', marginLeft: '10px', fontWeight: 500 }}>Shard Vault</span>
+              <span style={{ color: '#94a3b8', fontSize: '20px', marginLeft: '10px', fontWeight: 500 }}>Key Enclave</span>
             </div>
           </div>
 
@@ -95,10 +95,10 @@ export default async function Image() {
               color: '#ffffff',
             }}
           >
-            Encrypted Shard Vault &amp; Rate-Limit Governor
+            Encrypted Developer Key Vault &amp; Rate-Limit Shield
           </div>
           <div style={{ display: 'flex', fontSize: '22px', color: '#cbd5e1', lineHeight: 1.4 }}>
-            Multi-account capacity pooling with authenticated data isolation, sub-40ms instant retraction, and zero disk persistence.
+            High-availability token routing with authenticated data isolation, sub-15ms Anycast speed, and zero disk persistence.
           </div>
         </div>
 

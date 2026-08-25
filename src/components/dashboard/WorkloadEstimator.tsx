@@ -81,7 +81,7 @@ const WORKLOAD_PRESETS: WorkloadPreset[] = [
     minVolume: 1,
     maxVolume: 50,
     step: 1,
-    modelName: 'Grok 4.5 Fast Reasoning',
+    modelName: 'GPT-5.6 Sol & Luna Codex',
     upstreamCostPerUnit: 40.0, // $40/dev/mo on retail tokens
     galxCostPerUnit: 24.0      // $24/dev/mo on wholesale
   },

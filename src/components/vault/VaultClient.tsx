@@ -183,7 +183,6 @@ function BaseVaultClient() {
             onToggleStatus={handleToggleStatus}
             onRetract={handleRetract}
             onDelete={handleDelete}
-            onOpenAddModal={() => { window.location.href = '/auth/connect'; }}
           />
         </AuthRequiredGate>
       </main>

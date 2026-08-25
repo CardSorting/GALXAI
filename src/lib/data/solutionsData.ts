@@ -44,7 +44,7 @@ export const SOLUTION_GUIDES: SolutionGuide[] = [
       },
       {
         title: 'Zero Rate-Limit Stalls (429 Shield)',
-        description: 'Burst traffic from multi-agent worker swarms is pooled across Anycast shards with automated failover.',
+        description: 'Burst traffic from multi-agent worker swarms is balanced across Anycast edge routes with automated active failover.',
       },
       {
         title: 'Sub-15ms Anycast Latency',

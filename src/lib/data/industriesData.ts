@@ -383,7 +383,7 @@ stream = client.chat.completions.create(
     faqs: [
       {
         q: 'Can GALXAI handle morning classroom login spikes without 429 errors?',
-        a: 'Yes. Multi-shard enterprise liquidity pooling absorbs peak morning student concurrency without throttling or dropped requests.',
+        a: 'Yes. High-throughput Anycast routing and automated token buffering absorb peak morning student concurrency without throttling or dropped requests.',
       },
     ],
   },

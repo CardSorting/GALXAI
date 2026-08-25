@@ -183,12 +183,12 @@ print("ZDR Enclave Header:", resp.headers.get("x-galxai-zdr-verified"))`,
     ],
     systemDiagramMermaid: `graph TD
   Swarm[100+ Agent Swarm] --> Shield[429 Capacity Shield]
-  Shield -->|Load Balance| C1[Enterprise Shard Alpha]
-  Shield -->|Load Balance| C2[Enterprise Shard Beta]
-  Shield -->|Failover Pool| C3[Enterprise Shard Gamma]`,
+  Shield -->|Load Balance| C1[Enterprise Node Alpha]
+  Shield -->|Load Balance| C2[Enterprise Node Beta]
+  Shield -->|Failover Route| C3[Enterprise Standby Node]`,
     technicalMetrics: [
       { label: 'Failover Latency', value: '<50 ms', context: 'Sub-Second Cluster Cutover' },
-      { label: '429 Mitigation', value: '99.9%', context: 'Shield Capacity Pooling' },
+      { label: '429 Mitigation', value: '99.9%', context: 'Shield Capacity Management' },
       { label: 'Uptime SLA', value: '99.99%', context: 'Multi-Region Resilience' },
     ],
     codeVerificationSnippet: {
@@ -214,7 +214,7 @@ asyncio.run(asyncio.gather(*[dispatch_agent(i) for i in range(50)]))`,
     faqs: [
       {
         q: 'Do I need to manage multiple API keys for failover?',
-        a: 'No. You use a single GALXAI live developer key; the gateway manages upstream pool sharding and failover transparently.',
+        a: 'No. You use a single GALXAI live developer key; the gateway manages upstream routing and failover transparently.',
       },
     ],
   },
@@ -277,21 +277,21 @@ print(response.choices[0].message.parsed)`,
     slug: 'predictive-hydraulic-headroom',
     badge: 'P-AHT Mathematical Formalization',
     title: 'Predictive Adaptive Hydraulic Headroom (P-AHT) Token Bucket Governance',
-    headline: 'Continuous Multi-Account Token Liquidity & Headroom Governance',
+    headline: 'Continuous Multi-Route Token Liquidity & Headroom Governance',
     description:
-      'A formal engineering specification of the P-AHT algorithm for non-blocking token distribution, multi-account shard refills, and dynamic load balancing.',
+      'A formal engineering specification of the P-AHT algorithm for non-blocking token distribution, multi-route refills, and dynamic load balancing.',
     abstract:
-      'Fixed-tier API rate limits create stochastic failure points under multi-agent concurrency. The P-AHT algorithm treats token consumption as continuous hydraulic fluid dynamics, pre-allocating token reserves across distributed provider accounts to ensure 0% request drop rates.',
+      'Fixed-tier API rate limits create stochastic failure points under multi-agent concurrency. The P-AHT algorithm treats token consumption as continuous hydraulic fluid dynamics, pre-allocating token reserves across distributed provider infrastructure to ensure 0% request drop rates.',
     engineeringPrinciples: [
       'Continuous Token Flux Integration: Monitors moving-window token dissipation rates',
-      'Dynamic Shard Hydration: Pre-warms dormant backup origin pools when primary accounts reach 75% capacity',
+      'Dynamic Route Hydration: Pre-warms dormant backup origin routes when primary paths reach 75% capacity',
       'Non-Blocking Semaphore Allocation: Sub-microsecond local lock acquisition on Anycast edge workers',
       'Zero 429 Cascade Resilience: Isolate high-volume tenant surges from baseline API traffic',
     ],
     systemDiagramMermaid: `graph TD
   Request[Incoming Burst Requests] --> Router[P-AHT Flux Monitor]
-  Router -->|Shard A Headroom OK| OriginA[Primary Enterprise Shard]
-  Router -->|Shard A >75% Cap| OriginB[Secondary Standby Shard]
+  Router -->|Route A Headroom OK| OriginA[Primary Enterprise Compute Node]
+  Router -->|Route A >75% Cap| OriginB[Secondary Standby Compute Node]
   OriginA --> Complete[Zero 429 Completion]
   OriginB --> Complete`,
     technicalMetrics: [

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
-import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
 import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
@@ -30,7 +30,6 @@ export function CompareClient() {
     'gpt-5.6-sol',
     'gpt-5.6-terra',
     'gpt-5.6-luna',
-    'x-ai/grok-4.5',
   ]);
 
   const toggleModel = (id: string) => {
@@ -46,7 +45,7 @@ export function CompareClient() {
   };
 
   const comparedModels = selectedIds
-    .map((id) => EXCLUSIVE_MODEL_CATALOG.find((m) => m.id === id)!)
+    .map((id) => FRONTEND_VISIBLE_MODELS.find((m) => m.id === id)!)
     .filter(Boolean);
 
   return (
@@ -92,24 +91,24 @@ export function CompareClient() {
             </button>
 
             <button
-              onClick={() => setSelectedIds(['gpt-5.6-sol', 'x-ai/grok-4.6'])}
+              onClick={() => setSelectedIds(['gpt-5.6-sol', 'gpt-5.6-terra'])}
               className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition-all cursor-pointer"
             >
-              <span>⚔️ SOTA Reasoning Clash (Sol vs Grok 4.6)</span>
+              <span>⚔️ SOTA Coding vs Reasoning (Sol vs Terra)</span>
             </button>
 
             <button
-              onClick={() => setSelectedIds(['gpt-5.6-luna', 'x-ai/grok-4.5'])}
+              onClick={() => setSelectedIds(['gpt-5.6-sol', 'gpt-5.6-luna'])}
               className="px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition-all cursor-pointer"
             >
-              <span>⚡ High-Velocity Speed (Luna vs Grok 4.5)</span>
+              <span>⚡ Flagship vs High-Velocity (Sol vs Luna)</span>
             </button>
 
             <button
-              onClick={() => setSelectedIds(['openai-gpt-image-2', 'openai-dalle-3', 'xai-grok-image'])}
+              onClick={() => setSelectedIds(['openai-gpt-image-2', 'openai-dalle-3'])}
               className="px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 transition-all cursor-pointer"
             >
-              <span>🎨 Visual Studio (GPT-Image-2 vs DALL-E-3 vs Grok Image)</span>
+              <span>🎨 Visual Studio (GPT-Image-2 vs DALL-E 3)</span>
             </button>
           </div>
         </section>
@@ -118,7 +117,7 @@ export function CompareClient() {
         <div className="glass-panel rounded-2xl p-4 space-y-2">
           <span className="text-xs font-bold uppercase text-zinc-400 block font-mono">Custom Model Multi-Select (2 to 4)</span>
           <div className="flex flex-wrap gap-2">
-            {EXCLUSIVE_MODEL_CATALOG.map((m) => {
+            {FRONTEND_VISIBLE_MODELS.map((m) => {
               const isSelected = selectedIds.includes(m.id);
               return (
                 <button
@@ -306,7 +305,7 @@ export function CompareClient() {
             </Link>
           </div>
 
-          <SideBySideArena modelA={comparedModels[0] || EXCLUSIVE_MODEL_CATALOG[0]} modelB={comparedModels[1] || EXCLUSIVE_MODEL_CATALOG[1]} />
+          <SideBySideArena modelA={comparedModels[0] || FRONTEND_VISIBLE_MODELS[0]} modelB={comparedModels[1] || FRONTEND_VISIBLE_MODELS[1]} />
         </section>
 
         {/* Beyond the Fold: Benchmark Evaluation & Architecture Deep Dive */}
@@ -314,15 +313,15 @@ export function CompareClient() {
           <div className="space-y-1 border-b border-white/10 pb-4">
             <h2 className="text-lg font-bold text-white flex items-center gap-2 font-mono">
               <Cpu className="w-5 h-5 text-amber-400" />
-              <span>Architectural Decision Guide: Sol vs Terra vs Luna vs Grok</span>
+              <span>Architectural Decision Guide: Sol vs Terra vs Luna</span>
             </h2>
             <p className="text-xs text-zinc-400">Deep comparative guidance based on token throughput, reasoning depth, and cost efficiency.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-sans">
             <div className="p-5 rounded-2xl bg-black/40 border border-white/5 space-y-2">
               <div className="flex items-center justify-between text-amber-300 font-mono font-bold">
-                <span>When to choose OpenAI GPT-5.6 Sol</span>
+                <span>OpenAI GPT-5.6 Sol</span>
                 <span className="text-[10px] bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">Deep SOTA Reasoning</span>
               </div>
               <p className="text-zinc-300 leading-relaxed">
@@ -331,32 +330,22 @@ export function CompareClient() {
             </div>
 
             <div className="p-5 rounded-2xl bg-black/40 border border-white/5 space-y-2">
-              <div className="flex items-center justify-between text-emerald-300 font-mono font-bold">
-                <span>When to choose xAI Grok 4.6 / 4.5</span>
-                <span className="text-[10px] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Massive 1M Context</span>
+              <div className="flex items-center justify-between text-indigo-300 font-mono font-bold">
+                <span>OpenAI GPT-5.6 Terra</span>
+                <span className="text-[10px] bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">Balanced Workhorse</span>
               </div>
               <p className="text-zinc-300 leading-relaxed">
-                Choose Grok for full codebase ingestion, multi-hundred-page technical PDF analysis, and long-horizon document question answering up to 1,000,000 tokens without context truncations.
+                Choose Terra as the daily workhorse for production SaaS backend APIs, autonomous workflow logic, and general generation with a 900K context window at 25% wholesale discount.
               </p>
             </div>
 
             <div className="p-5 rounded-2xl bg-black/40 border border-white/5 space-y-2">
               <div className="flex items-center justify-between text-cyan-300 font-mono font-bold">
-                <span>When to choose GPT-5.6 Luna</span>
+                <span>OpenAI GPT-5.6 Luna</span>
                 <span className="text-[10px] bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">140 tok/sec Velocity</span>
               </div>
               <p className="text-zinc-300 leading-relaxed">
                 Choose Luna for inline code autocompletion, conversational customer chat, classification pipelines, and real-time streaming interfaces requiring sub-15ms Time-To-First-Token (TTFT).
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-black/40 border border-white/5 space-y-2">
-              <div className="flex items-center justify-between text-indigo-300 font-mono font-bold">
-                <span>When to choose GPT-5.6 Terra</span>
-                <span className="text-[10px] bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">Best Cost-Performance</span>
-              </div>
-              <p className="text-zinc-300 leading-relaxed">
-                Choose Terra as the daily workhorse for production SaaS backend APIs, autonomous workflow logic, and general generation with a 900K context window at just $0.40 / 1M tokens.
               </p>
             </div>
           </div>
@@ -374,7 +363,7 @@ export function CompareClient() {
   );
 }
 
-function SideBySideArena({ modelA, modelB }: { modelA: typeof EXCLUSIVE_MODEL_CATALOG[0]; modelB: typeof EXCLUSIVE_MODEL_CATALOG[0] }) {
+function SideBySideArena({ modelA, modelB }: { modelA: typeof FRONTEND_VISIBLE_MODELS[0]; modelB: typeof FRONTEND_VISIBLE_MODELS[0] }) {
   const [prompt, setPrompt] = useState<string>('Refactor this high-concurrency Node.js token bucket rate limiter into thread-safe Rust with atomic primitives.');
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [outputA, setOutputA] = useState<string>('');

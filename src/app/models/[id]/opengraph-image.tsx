@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
 
 export const size = {
   width: 1200,
@@ -13,16 +13,16 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  return EXCLUSIVE_MODEL_CATALOG.map((m) => ({
+  return FRONTEND_VISIBLE_MODELS.map((m) => ({
     id: m.id.replace('/', '-'),
   }));
 }
 
 export default async function Image({ params }: Props) {
   const { id } = await params;
-  const model = EXCLUSIVE_MODEL_CATALOG.find(
+  const model = FRONTEND_VISIBLE_MODELS.find(
     (m) => m.id === id || m.id.replace('/', '-') === id || m.upstreamId === id
-  ) || EXCLUSIVE_MODEL_CATALOG[0];
+  ) || FRONTEND_VISIBLE_MODELS[0];
 
   const isGrok = model.provider === 'xai-grok';
   const accentColor = isGrok ? '#34d399' : '#f59e0b';

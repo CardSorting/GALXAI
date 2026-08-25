@@ -25,7 +25,6 @@ interface ShardVaultManagerProps {
   onToggleStatus: (id: string, currentStatus: string) => void;
   onRetract: (id: string, userId: string) => void;
   onDelete: (id: string) => void;
-  onOpenAddModal: () => void;
 }
 
 export function ShardVaultManager({
@@ -34,7 +33,6 @@ export function ShardVaultManager({
   onToggleStatus,
   onRetract,
   onDelete,
-  onOpenAddModal
 }: ShardVaultManagerProps) {
   return (
     <div className="glass-panel rounded-3xl p-6 lg:p-8 space-y-6">
@@ -43,20 +41,12 @@ export function ShardVaultManager({
         <div>
           <h2 className="text-xl font-black text-white flex items-center gap-2">
             <Shield className="w-5 h-5 text-indigo-400" />
-            Linked Provider Accounts
+            Active Route Pipelines
           </h2>
           <p className="text-xs text-zinc-400 mt-0.5">
-            Active OpenAI and xAI Grok credentials participating in automatic failover and rate-limit pooling.
+            Enterprise gateway routing pipelines with automated failover and rate-limit buffering.
           </p>
         </div>
-
-        <button
-          onClick={onOpenAddModal}
-          className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 text-black text-xs font-bold shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2 cursor-pointer"
-        >
-          <Zap className="w-4 h-4 fill-black" />
-          <span>Connect Provider Account</span>
-        </button>
       </div>
 
       {/* Shards Table */}
@@ -65,16 +55,10 @@ export function ShardVaultManager({
           <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto text-indigo-400">
             <Shield className="w-6 h-6" />
           </div>
-          <h3 className="text-sm font-bold text-zinc-300">No Linked Accounts Yet</h3>
+          <h3 className="text-sm font-bold text-zinc-300">Default Enterprise Routes Active</h3>
           <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-            Connect an OpenAI or xAI Grok account to enable automatic model routing, high concurrency pooling, and failover.
+            Your requests are automatically routed across high-availability enterprise gateway pipelines with zero data retention.
           </p>
-          <button
-            onClick={onOpenAddModal}
-            className="px-4 py-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-indigo-300 text-xs font-semibold cursor-pointer"
-          >
-            Connect First Account
-          </button>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-white/5 bg-black/20">

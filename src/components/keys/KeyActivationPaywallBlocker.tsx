@@ -32,7 +32,7 @@ interface Pack {
 
 const DEPOSIT_PACKS: Pack[] = [
   { amount: 25, label: 'Starter Key', badge: '50% Instant Match', popular: true, bonusMultiplier: 1.5 },
-  { amount: 50, label: 'Growth VIP', badge: 'VIP Shards 🔓', bonusMultiplier: 1.5 },
+  { amount: 50, label: 'Growth VIP', badge: 'VIP Priority 🔓', bonusMultiplier: 1.5 },
   { amount: 100, label: 'Fleet Scale', badge: '600 RPM Fleet 🔓', bonusMultiplier: 1.5 },
   { amount: 250, label: 'Enterprise Burst', badge: 'Unlimited VPC 🔓', bonusMultiplier: 1.5 }
 ];
@@ -60,7 +60,7 @@ export function KeyActivationPaywallBlocker({
 
   // Compute live token mileage metrics for non-technical users
   const estimatedTokensSol = Math.round((totalBalanceReceived / 3.75) * 1000000);
-  const estimatedTokensGrok = Math.round((totalBalanceReceived / 1.80) * 1000000);
+  const estimatedTokensLuna = Math.round((totalBalanceReceived / 0.95) * 1000000);
   const estimatedImages = Math.round(totalBalanceReceived / 0.02);
 
   return (
@@ -140,20 +140,20 @@ export function KeyActivationPaywallBlocker({
             <span className="text-emerald-400 text-[10px] font-bold">25%–40% OFF</span>
           </div>
 
-          <div className="space-y-1.5 pt-1 text-[11px]">
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-300">GPT-5.6 Sol Reasoning:</span>
-              <strong className="text-white font-bold">~{(estimatedTokensSol / 1000000).toFixed(1)}M Tokens</strong>
+            <div className="space-y-1.5 pt-1 text-[11px]">
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-300">GPT-5.6 Sol Reasoning:</span>
+                <strong className="text-white font-bold">~{(estimatedTokensSol / 1000000).toFixed(1)}M Tokens</strong>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-300">GPT-5.6 Luna High-Velocity:</span>
+                <strong className="text-cyan-300 font-bold">~{(estimatedTokensLuna / 1000000).toFixed(1)}M Tokens</strong>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-300">Visual Image Synthesis:</span>
+                <strong className="text-amber-300 font-bold">~{estimatedImages} Renders</strong>
+              </div>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-300">xAI Grok 4.5 Fast Fleet:</span>
-              <strong className="text-cyan-300 font-bold">~{(estimatedTokensGrok / 1000000).toFixed(1)}M Tokens</strong>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-300">Visual Image Synthesis:</span>
-              <strong className="text-amber-300 font-bold">~{estimatedImages} Renders</strong>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -252,7 +252,7 @@ export function KeyActivationPaywallBlocker({
         {showFaq && (
           <div className="mt-3 p-4 rounded-2xl bg-black/60 border border-white/10 space-y-2 text-xs text-zinc-300 leading-relaxed font-sans animate-in fade-in duration-200">
             <p>
-              <strong>1. Anti-Bot Sybil Protection:</strong> We provide unthrottled access to expensive frontier models (GPT-5.6 Sol, xAI Grok 4.5). The $10 deposit stops automated bot farms from spamming free keys while giving 100% of your funds back as usable tokens.
+              <strong>1. Anti-Bot Sybil Protection:</strong> We provide unthrottled access to expensive frontier models (GPT-5.6 Sol, Terra, Luna). The $10 deposit stops automated bot farms from spamming free keys while giving 100% of your funds back as usable tokens.
             </p>
             <p>
               <strong>2. 100% Usable Balance:</strong> Zero dollars are kept as a "membership" or "platform fee". Every cent is credited directly to your token balance with sub-cent microsecond billing.

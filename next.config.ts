@@ -138,6 +138,25 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/vault",
+        destination: "/keys",
+        permanent: false,
+      },
+      {
+        source: "/vault/:path*",
+        destination: "/keys",
+        permanent: false,
+      },
+      {
+        source: "/telemetry",
+        destination: "/status",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

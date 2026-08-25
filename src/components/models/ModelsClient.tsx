@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
-import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
 import {
   Zap,
   Rocket,
@@ -32,7 +32,7 @@ export function ModelsClient() {
   const [tierLabel, setTierLabel] = useState('Standard Rates');
   const [copiedModelId, setCopiedModelId] = useState<string | null>(null);
 
-  const filteredModels = EXCLUSIVE_MODEL_CATALOG.filter(m => {
+  const filteredModels = FRONTEND_VISIBLE_MODELS.filter(m => {
     const matchesSearch =
       m.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -71,7 +71,7 @@ export function ModelsClient() {
                 Supported Frontier Models &amp; Architecture Specs
               </h1>
               <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
-                GALXAI exclusively routes to the latest generation OpenAI Codex coding models, xAI Grok 4.5 500K multimodal reasoning, and high-fidelity visual synthesis engines with 75% prompt caching pass-through.
+                GALXAI exclusively routes to the latest generation OpenAI Codex coding models (GPT-5.6 Sol, Terra, Luna) and high-fidelity visual synthesis engines with 75% prompt caching pass-through.
               </p>
             </div>
 
@@ -80,7 +80,7 @@ export function ModelsClient() {
                 variant="pill"
                 label="Share Models"
                 title="GALXAI Model Catalog & Wholesale Pricing"
-                description="Explore 12 frontier models including GPT-5.6 Sol and Grok 4.5 with 25%–40% wholesale savings."
+                description="Explore frontier models including GPT-5.6 Sol, Terra, and Luna with 25%–40% wholesale savings."
               />
             </div>
           </div>
@@ -119,7 +119,7 @@ export function ModelsClient() {
                   : 'text-zinc-400 hover:text-white'
               }`}
             >
-              All ({EXCLUSIVE_MODEL_CATALOG.length})
+              All ({FRONTEND_VISIBLE_MODELS.length})
             </button>
             <button
               onClick={() => setActiveCategory('llm')}

@@ -227,7 +227,7 @@ export async function POST(req: Request) {
           </div>
 
           <div className="glass-panel p-5 rounded-3xl space-y-1 border border-cyan-500/30 bg-cyan-500/5">
-            <span className="text-cyan-400 text-[10px] uppercase font-sans font-semibold">Lease TTL Extension</span>
+            <span className="text-cyan-400 text-[10px] uppercase font-sans font-semibold">Stream Keep-Alive</span>
             <div className="text-base font-bold text-cyan-300">Continuous Heartbeat</div>
             <div className="text-[11px] text-cyan-400/80 font-sans">Prevents mid-stream timeout drops</div>
           </div>

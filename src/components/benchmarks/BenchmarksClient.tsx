@@ -121,7 +121,7 @@ export function BenchmarksClient() {
                 variant="pill"
                 label="Share"
                 title="GALXAI LLM Latency & Throughput Benchmark Leaderboard"
-                description="Live Time-To-First-Token, tokens/sec throughput, and prompt cache hit latency across GPT-5.6 and Grok."
+                description="Live Time-To-First-Token, tokens/sec throughput, and prompt cache hit latency across GPT-5.6 Sol, Terra, and Luna."
               />
             </div>
           </div>
@@ -130,7 +130,7 @@ export function BenchmarksClient() {
             Real-Time LLM Latency &amp; Speed Leaderboard
           </h1>
           <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-3xl font-sans">
-            Authoritative, end-to-end telemetry measuring Time-To-First-Token (TTFT), generation velocity (tokens/second), and prompt caching acceleration across OpenAI Codex and xAI Grok on the GALXAI Anycast edge.
+            Authoritative, end-to-end telemetry measuring Time-To-First-Token (TTFT), generation velocity (tokens/second), and prompt caching acceleration across OpenAI Codex models on the GALXAI Anycast edge.
           </p>
 
           {/* Inverted Pyramid AEO Quick Summary */}

@@ -28,7 +28,7 @@ function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const amount = searchParams.get('amount') || '50';
   const total = searchParams.get('total') || '80';
-  const tier = searchParams.get('tier') || 'Growth VIP Shard';
+  const tier = searchParams.get('tier') || 'Growth VIP Priority';
   const email = searchParams.get('email') || 'developer@company.com';
   const method = searchParams.get('method') || 'Credit Card';
 

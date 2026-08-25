@@ -29,12 +29,12 @@ export const CAPABILITIES_DATA: CapabilityItem[] = [
     title: '1,000,000 Token Context Window — Full Codebase & Document Ingestion',
     headline: 'Ingest Massive 1M Token Contexts with Sub-15ms Anycast Routing',
     description:
-      'Process entire code repositories, full-length legal contracts, and historical financial filings in a single context window on xAI Grok 4.6 and 900K on OpenAI GPT-5.6 Sol.',
+      'Process entire code repositories, full-length legal contracts, and historical financial filings in a single context window of 900K tokens on OpenAI GPT-5.6 Sol.',
     architecturalOverview:
-      'GALXAI utilizes optimized Anycast memory sharding to stream multi-megabyte prompt contexts directly to origin model clusters without HTTP chunk drops or socket timeouts.',
+      'GALXAI utilizes optimized Anycast memory buffers to stream multi-megabyte prompt contexts directly to origin model clusters without HTTP chunk drops or socket timeouts.',
     technicalHighlights: [
-      '1,000,000 token active context window on xAI Grok 4.6 (500K on Grok 4.5)',
       '900,000 token active context window on OpenAI GPT-5.6 Sol (750K on Terra)',
+      '300,000 token context window on GPT-5.6 Luna for rapid high-velocity tasks',
       'Automatic 75% prompt caching rebate on repeated document prefix tokens',
       'Zero chunk drops with streaming SSE HTTP/2 keep-alive protocols',
     ],
@@ -252,12 +252,12 @@ curl -w "TTFB: %{time_starttransfer}s | Total: %{time_total}s\\n" \\
     title: 'Predictive Adaptive Hydraulic Headroom (P-AHT) & 429 Rate Limit Shield',
     headline: 'Eliminate 429 Rate-Limit Stalls with Predictive Headroom Governance',
     description:
-      'Continuous token governance pools capacity across distributed enterprise accounts, pre-emptively rerouting bursts before upstream rate limits trigger HTTP 429 errors.',
+      'Continuous token governance balances capacity across distributed enterprise infrastructure, pre-emptively rerouting bursts before upstream rate limits trigger HTTP 429 errors.',
     architecturalOverview:
-      'P-AHT monitors second-by-second token consumption rates across all origin shards. When any upstream account approaches 80% utilization, new bursts dynamically shift to warm secondary accounts.',
+      'P-AHT monitors second-by-second token consumption rates across all origin endpoints. When any upstream route approaches 80% utilization, new bursts dynamically shift to warm secondary routes.',
     technicalHighlights: [
       'Zero HTTP 429 Rate Limit Exceeded stalls for high-concurrency multi-agent fleets',
-      'Multi-account enterprise token liquidity pooling across OpenAI and xAI clusters',
+      'High-throughput enterprise token capacity across OpenAI compute clusters',
       'Dynamic token bucket refills calculated in real-time with sub-millisecond precision',
       'Zero dropped TCP connections during peak load shifts',
     ],
@@ -284,7 +284,7 @@ response = client.chat.completions.create(
     faqs: [
       {
         q: 'How does GALXAI prevent 429 errors from high-concurrency swarms?',
-        a: 'GALXAI pools enterprise headroom dynamically across distributed shards so individual tenant spikes never trigger upstream rate limits.',
+        a: 'GALXAI provisions enterprise headroom dynamically across distributed routing channels so individual tenant spikes never trigger upstream rate limits.',
       },
     ],
   },

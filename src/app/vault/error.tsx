@@ -24,7 +24,7 @@ export default function VaultError({
           error={error}
           reset={reset}
           title="Cryptographic Vault View Interrupted"
-          subtitle="An error occurred while loading the secure shard enclave. Your encrypted secrets and zero-retention parameters remain sealed in memory."
+          subtitle="An error occurred while loading the secure key enclave. Your encrypted credentials and zero-retention parameters remain sealed in memory."
           badge="ENCLAVE PRIVACY SAFEGUARD"
           icon={Lock}
           accentColor="cyan"

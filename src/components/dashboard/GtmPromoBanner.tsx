@@ -68,7 +68,7 @@ function BaseGtmPromoBanner() {
             <span className="text-emerald-300 font-semibold hidden sm:inline">$5 Free Instant Credit</span>
             <span className="text-zinc-500 hidden md:inline">•</span>
             <span className="text-zinc-300 hidden md:inline">
-              Save 25%–40% on OpenAI &amp; Grok
+              Save 25%–40% on OpenAI Codex &amp; Models
             </span>
           </div>
 
@@ -84,7 +84,7 @@ function BaseGtmPromoBanner() {
 
             <div className="flex items-center gap-1.5 pl-2 text-zinc-400">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Pool: <strong className="text-zinc-200">84% Claimed</strong></span>
+              <span>Grant Fund: <strong className="text-zinc-200">84% Claimed</strong></span>
             </div>
           </div>
         </div>

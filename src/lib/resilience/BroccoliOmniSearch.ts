@@ -7,7 +7,7 @@
  */
 
 import { BroccoliDbTable } from '@/core/broccolidb/broccolidb-table';
-import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
 import { SafeStorage } from './SafeStorage';
 
 export interface CatalogItem {
@@ -354,22 +354,6 @@ const BASE_CATALOG_ITEMS: CatalogItem[] = [
     intentPhrases: ['apply for grants', 'free compute credits', 'startup discount', 'accelerator grant', 'credit matching'],
   },
   {
-    title: 'Linked Accounts & Cooperative Shards',
-    description: 'Manage connected provider accounts, quota shards, and private routing pools.',
-    category: 'Actions & Tools',
-    href: '/vault',
-    keywords: ['vault', 'shards', 'accounts', 'link openai', 'link grok', 'pool', 'private mode', 'connect key'],
-    intentPhrases: ['link my openai account', 'connect grok key', 'vault management', 'custom shard setup'],
-  },
-  {
-    title: 'Traffic Simulator & Failover Demo',
-    description: 'Simulate high concurrency spikes and observe automatic sub-15ms shard failover in real-time.',
-    category: 'Actions & Tools',
-    href: '/vault/simulator',
-    keywords: ['simulator', 'failover', 'stress test', 'circuit breaker', 'demo', 'sub-15ms', 'latency test'],
-    intentPhrases: ['simulate traffic', 'test failover live', 'stress test api', 'latency benchmark demo'],
-  },
-  {
     title: 'Frequently Asked Questions (FAQ)',
     description: 'Transparent answers on zero data retention, latency SLA, uptime guarantees, and crypto payments.',
     category: 'Help & Diagnostics',
@@ -419,8 +403,8 @@ class BroccoliOmniSearchImpl {
       });
     });
 
-    // 2. Dynamically index all 12 models from EXCLUSIVE_MODEL_CATALOG
-    EXCLUSIVE_MODEL_CATALOG.forEach((model) => {
+    // 2. Dynamically index frontend visible models from FRONTEND_VISIBLE_MODELS
+    FRONTEND_VISIBLE_MODELS.forEach((model) => {
       const modelId = `model_${model.id.replace(/[^a-zA-Z0-9]/g, '_')}`;
       const isGrok = model.provider === 'xai-grok';
       const item: CatalogItem = {

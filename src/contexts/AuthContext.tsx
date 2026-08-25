@@ -11,6 +11,7 @@ export interface AuthUser {
   name?: string;
   avatarUrl?: string;
   provider?: string;
+  token?: string;
 }
 
 interface AuthContextType {
@@ -31,7 +32,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-function mapSupabaseUser(user: User | null): AuthUser | null {
+function mapSupabaseUser(user: User | null, session?: Session | null): AuthUser | null {
   if (!user) return null;
   const metadata = user.user_metadata || {};
   return {
@@ -40,6 +41,7 @@ function mapSupabaseUser(user: User | null): AuthUser | null {
     name: metadata.full_name || metadata.name || user.email?.split('@')[0] || 'Developer',
     avatarUrl: metadata.avatar_url || metadata.picture,
     provider: user.app_metadata?.provider || 'supabase',
+    token: session?.access_token,
   };
 }
 
@@ -153,7 +155,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = signOut;
 
-  const mappedUser = mapSupabaseUser(supabaseUser);
+  const mappedUser = mapSupabaseUser(supabaseUser, session);
 
   return (
     <AuthContext.Provider
