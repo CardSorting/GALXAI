@@ -40,6 +40,33 @@ function BaseSpendAuditTool() {
     }
   };
 
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleCaptureLead = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await fetch('/api/inbound/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          source: 'pricing',
+          estimatedMonthlySpend: monthlySpend,
+          notes: `Spend Audit Simulator: Current $${monthlySpend}/mo. Projected annual savings: $${annualSaved.toFixed(2)}/yr.`,
+        }),
+      });
+      setSubmitted(true);
+    } catch {
+      // fallback
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <section className="glass-panel rounded-3xl p-6 sm:p-10 space-y-6 border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-black/50 to-indigo-600/10 shadow-2xl relative overflow-hidden">
       <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -98,25 +125,27 @@ function BaseSpendAuditTool() {
                 key={preset}
                 type="button"
                 onClick={() => setMonthlySpend(preset)}
-                className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   monthlySpend === preset
-                    ? 'bg-emerald-400 text-black shadow-sm'
-                    : 'bg-white/5 text-zinc-300 hover:bg-white/10'
+                    ? 'bg-emerald-400 text-black shadow-md shadow-emerald-500/20'
+                    : 'bg-white/5 hover:bg-white/10 text-zinc-300'
                 }`}
               >
-                ${preset}
+                ${preset.toLocaleString()}
               </button>
             ))}
           </div>
 
+          {/* Interactive Range Slider */}
           <input
             type="range"
             min={50}
             max={10000}
             step={50}
             value={monthlySpend}
-            onChange={(e) => setMonthlySpend(parseFloat(e.target.value))}
-            className="w-full h-2.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-400"
+            onChange={(e) => setMonthlySpend(Number(e.target.value))}
+            aria-label="Monthly Spend Range Slider"
+            className="w-full accent-emerald-400 cursor-pointer h-2 bg-zinc-800 rounded-lg"
           />
         </div>
 
@@ -146,6 +175,43 @@ function BaseSpendAuditTool() {
             <span className="text-[10px] text-indigo-400/80 font-sans">Tokens routed free via savings</span>
           </div>
         </div>
+      </div>
+
+      {/* Inbound Lead Capture Box */}
+      <div className="p-4 rounded-2xl bg-black/70 border border-emerald-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
+        <div className="space-y-1 w-full sm:w-auto">
+          <div className="flex items-center gap-2 text-emerald-300 font-bold">
+            <Sparkles className="w-4 h-4 text-emerald-400" />
+            <span>Send Custom Spend Audit to Finance + Claim $100 Trial Key</span>
+          </div>
+          <p className="text-[11px] text-zinc-400 font-sans">
+            Get an instant executive PDF summary and 1-line code patch for your team.
+          </p>
+        </div>
+
+        {submitted ? (
+          <div className="px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold">
+            ✔ Audit Queued! Check your inbox shortly.
+          </div>
+        ) : (
+          <form onSubmit={handleCaptureLead} className="flex items-center gap-2 w-full sm:w-auto">
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="work@company.com"
+              className="px-3 py-2 rounded-xl bg-black border border-white/20 text-white placeholder:text-zinc-500 text-xs font-mono focus:border-emerald-400 focus:outline-none w-full sm:w-56"
+            />
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-4 py-2 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-black font-bold text-xs uppercase tracking-wider shrink-0 transition-all cursor-pointer disabled:opacity-50"
+            >
+              {isSubmitting ? 'Sending...' : 'Send Audit →'}
+            </button>
+          </form>
+        )}
       </div>
 
       {/* Bottom Conversion CTA Strip */}

@@ -117,6 +117,35 @@ Claim Grant: https://galx.ai/grants`;
     setTimeout(() => setCopiedGrantText(false), 2000);
   };
 
+  const [applicantEmail, setApplicantEmail] = useState('');
+  const [applicantCompany, setApplicantCompany] = useState('');
+  const [isApplying, setIsApplying] = useState(false);
+  const [grantApplied, setGrantApplied] = useState(false);
+
+  const handleApplyGrant = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!applicantEmail || isApplying) return;
+    setIsApplying(true);
+    try {
+      await fetch('/api/inbound/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: applicantEmail,
+          companyName: applicantCompany || 'Startup Applicant',
+          source: 'grants',
+          estimatedMonthlySpend: calculatorSpend,
+          notes: `Grant Application: ${selectedGrant.toUpperCase()} Tier. Target monthly spend: $${calculatorSpend}. Requested match: +$${calculatedMatchDollars}.`,
+        }),
+      });
+      setGrantApplied(true);
+    } catch {
+      // fallback
+    } finally {
+      setIsApplying(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
@@ -338,14 +367,43 @@ Claim Grant: https://galx.ai/grants`;
                 </p>
               </div>
 
-              <Link
-                href="/keys/new"
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 font-mono cursor-pointer"
-              >
-                <Zap className="w-4 h-4 fill-black" />
-                <span>Claim This Grant Balance</span>
-                <ArrowRight className="w-4 h-4 text-black" />
-              </Link>
+              {grantApplied ? (
+                <div className="p-3.5 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-mono">
+                  <div className="font-bold flex items-center gap-1.5">
+                    <Check className="w-4 h-4 text-emerald-400" />
+                    <span>Grant Application Received!</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-300 pt-1 font-sans">
+                    Our solutions team will provision your +${calculatedMatchDollars} grant credit key shortly.
+                  </p>
+                </div>
+              ) : (
+                <form onSubmit={handleApplyGrant} className="space-y-2">
+                  <input
+                    type="email"
+                    required
+                    value={applicantEmail}
+                    onChange={(e) => setApplicantEmail(e.target.value)}
+                    placeholder="founder@startup.com"
+                    className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/10 text-white placeholder:text-zinc-500 text-xs font-mono focus:border-amber-400 focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    value={applicantCompany}
+                    onChange={(e) => setApplicantCompany(e.target.value)}
+                    placeholder="Company or GitHub Org (optional)"
+                    className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/10 text-white placeholder:text-zinc-500 text-xs font-mono focus:border-amber-400 focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isApplying}
+                    className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 font-mono cursor-pointer disabled:opacity-50"
+                  >
+                    <Zap className="w-4 h-4 fill-black" />
+                    <span>{isApplying ? 'Applying...' : `Apply for $${calculatedMatchDollars} Match →`}</span>
+                  </button>
+                </form>
+              )}
             </div>
           </div>
         </div>

@@ -40,6 +40,36 @@ Always provide concise, production-ready code examples conforming to standard Op
   );
   const [copiedCode, setCopiedCode] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [inboundEmail, setInboundEmail] = useState('');
+  const [inboundCompany, setInboundCompany] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleCaptureLead = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inboundEmail || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await fetch('/api/inbound/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: inboundEmail,
+          companyName: inboundCompany || 'Prompt Engineering Team',
+          source: 'tools',
+          modelPreference: selectedModelId,
+          estimatedMonthlyTokens: tokenCount * 100_000,
+          estimatedMonthlySpend: pricingCalculations.uncachedCostPerCall * 100_000,
+          notes: `Prompt Caching Tool: ${tokenCount} tokens prompt. Estimated 100K call savings: $${pricingCalculations.savingsPer100kCalls.toFixed(2)}.`,
+        }),
+      });
+      setSubmitted(true);
+    } catch {
+      // fallback
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const selectedModel = useMemo(() => {
     return (
@@ -278,6 +308,37 @@ response = client.chat.completions.create(
               <Zap className="w-4 h-4 fill-black" />
               <span>Deploy Prompt with $5 Free Credits →</span>
             </Link>
+
+            {/* Inbound Lead Capture Box: Claim $100 Grant + Cache Optimization Audit */}
+            <div className="mt-3 p-3 rounded-2xl bg-black/60 border border-emerald-500/30 space-y-2">
+              <div className="flex items-center gap-1.5 text-emerald-300 font-mono text-xs font-bold">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Send Cache Audit &amp; Claim $100 Trial Key</span>
+              </div>
+              {submitted ? (
+                <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-300 text-[11px] font-mono">
+                  ✔ Cache audit dispatched!
+                </div>
+              ) : (
+                <form onSubmit={handleCaptureLead} className="space-y-1.5">
+                  <input
+                    type="email"
+                    required
+                    value={inboundEmail}
+                    onChange={(e) => setInboundEmail(e.target.value)}
+                    placeholder="engineering@company.com"
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-black border border-white/10 text-white placeholder:text-zinc-500 text-xs font-mono focus:border-emerald-400 focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs uppercase tracking-wider transition-all font-mono cursor-pointer disabled:opacity-50"
+                  >
+                    {isSubmitting ? 'Sending...' : 'Send Audit & Claim $100 →'}
+                  </button>
+                </form>
+              )}
+            </div>
           </section>
         </div>
 

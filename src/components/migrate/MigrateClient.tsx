@@ -32,6 +32,33 @@ interface MigrateClientProps {
 export function MigrateClient({ guide }: MigrateClientProps) {
   const [copiedCode, setCopiedCode] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [migrationEmail, setMigrationEmail] = useState('');
+  const [migrationCompany, setMigrationCompany] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [migrationSubmitted, setMigrationSubmitted] = useState(false);
+
+  const handleRequestMigrationAudit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!migrationEmail || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await fetch('/api/inbound/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: migrationEmail,
+          companyName: migrationCompany || 'Migrating Team',
+          source: 'migrate',
+          notes: `Migration Inquiry from ${guide.sourceProvider} (${guide.slug}). Estimated cost reduction: ~${guide.estimatedCostReductionPct}%.`,
+        }),
+      });
+      setMigrationSubmitted(true);
+    } catch {
+      // fallback
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleCopyCode = async () => {
     const ok = await safeCopyToClipboard(guide.afterCode.code);
@@ -149,6 +176,52 @@ export function MigrateClient({ guide }: MigrateClientProps) {
                 {guide.afterCode.code}
               </pre>
             </div>
+          </div>
+        </section>
+
+        {/* Inbound Migration Assessment Lead Card */}
+        <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-cyan-500/30 bg-gradient-to-r from-cyan-950/40 via-black/60 to-emerald-950/40">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-white font-mono flex items-center gap-2">
+                <Zap className="w-4 h-4 text-cyan-400" />
+                <span>Request Free Assisted Migration &amp; Spend Audit</span>
+              </h3>
+              <p className="text-xs text-zinc-300">
+                Receive a ready-to-merge GitHub pull request and custom token spend modeling for your team.
+              </p>
+            </div>
+
+            {migrationSubmitted ? (
+              <div className="px-4 py-2.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-mono font-bold">
+                ✔ Migration Request Received! Our engineering team will reach out shortly.
+              </div>
+            ) : (
+              <form onSubmit={handleRequestMigrationAudit} className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                <input
+                  type="email"
+                  required
+                  value={migrationEmail}
+                  onChange={(e) => setMigrationEmail(e.target.value)}
+                  placeholder="tech-lead@company.com"
+                  className="px-3 py-2 rounded-xl bg-black border border-white/20 text-white placeholder:text-zinc-500 text-xs font-mono focus:border-cyan-400 focus:outline-none w-full sm:w-56"
+                />
+                <input
+                  type="text"
+                  value={migrationCompany}
+                  onChange={(e) => setMigrationCompany(e.target.value)}
+                  placeholder="Company / Repo (optional)"
+                  className="px-3 py-2 rounded-xl bg-black border border-white/20 text-white placeholder:text-zinc-500 text-xs font-mono focus:border-cyan-400 focus:outline-none w-full sm:w-48"
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-bold text-xs uppercase tracking-wider shrink-0 transition-all cursor-pointer disabled:opacity-50 font-mono"
+                >
+                  {isSubmitting ? 'Requesting...' : 'Request Migration Plan →'}
+                </button>
+              </form>
+            )}
           </div>
         </section>
 

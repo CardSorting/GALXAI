@@ -32,6 +32,35 @@ export function ModelCostComparatorToolClient() {
   const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5.6-sol');
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [inboundEmail, setInboundEmail] = useState('');
+  const [inboundCompany, setInboundCompany] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleCaptureLead = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inboundEmail || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await fetch('/api/inbound/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: inboundEmail,
+          companyName: inboundCompany || 'Model Evaluation Team',
+          source: 'tools',
+          modelPreference: selectedModelId,
+          estimatedMonthlyTokens: (monthlyInputMillions + monthlyOutputMillions) * 1_000_000,
+          notes: `Model Cost Comparator: ${monthlyInputMillions}M In / ${monthlyOutputMillions}M Out (${cacheHitPercentage}% cache). Selected: ${selectedModel.name}.`,
+        }),
+      });
+      setSubmitted(true);
+    } catch {
+      // fallback
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Filter LLM models for comparison
   const comparisonModels = useMemo(() => {
@@ -299,6 +328,37 @@ print(response.choices[0].message.content)`;
               <Zap className="w-4 h-4 fill-black" />
               <span>Deploy {selectedModel.name} at Wholesale Rates →</span>
             </Link>
+
+            {/* Inbound Lead Capture Box: Claim $100 Grant + Model Benchmark Report */}
+            <div className="mt-3 p-3 rounded-2xl bg-black/60 border border-emerald-500/30 space-y-2">
+              <div className="flex items-center gap-1.5 text-emerald-300 font-mono text-xs font-bold">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Send Benchmark Report &amp; Claim $100 Trial Key</span>
+              </div>
+              {submitted ? (
+                <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-300 text-[11px] font-mono">
+                  ✔ Benchmark report dispatched!
+                </div>
+              ) : (
+                <form onSubmit={handleCaptureLead} className="space-y-1.5">
+                  <input
+                    type="email"
+                    required
+                    value={inboundEmail}
+                    onChange={(e) => setInboundEmail(e.target.value)}
+                    placeholder="engineering@company.com"
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-black border border-white/10 text-white placeholder:text-zinc-500 text-xs font-mono focus:border-emerald-400 focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs uppercase tracking-wider transition-all font-mono cursor-pointer disabled:opacity-50"
+                  >
+                    {isSubmitting ? 'Sending...' : 'Send Report & Claim $100 →'}
+                  </button>
+                </form>
+              )}
+            </div>
           </section>
         </div>
 

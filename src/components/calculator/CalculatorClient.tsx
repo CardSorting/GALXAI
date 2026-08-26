@@ -32,6 +32,10 @@ export function CalculatorClient() {
   const [cacheHitPercent, setCacheHitPercent] = useState<number>(60); // 60% cache hit
   const [copiedAudit, setCopiedAudit] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [inboundEmail, setInboundEmail] = useState<string>('');
+  const [inboundCompany, setInboundCompany] = useState<string>('');
+  const [isSubmittingLead, setIsSubmittingLead] = useState<boolean>(false);
+  const [leadSubmitted, setLeadSubmitted] = useState<boolean>(false);
 
   const selectedModel = useMemo(() => {
     return (
@@ -285,7 +289,7 @@ Source: https://galx.ai/calculator`;
               </div>
             </div>
 
-            <div className="space-y-2 pt-4">
+            <div className="space-y-3 pt-4">
               <button
                 onClick={handleCopyAudit}
                 className="w-full py-3 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-mono text-xs font-bold flex items-center justify-center gap-2 transition-all border border-white/10 cursor-pointer"
@@ -301,6 +305,79 @@ Source: https://galx.ai/calculator`;
                 <Zap className="w-4 h-4 fill-black" />
                 <span>Start Saving with $5 Free Credits →</span>
               </Link>
+            </div>
+
+            {/* Inbound Lead Capture Box: Claim $100 Grant & Full Custom Audit */}
+            <div className="mt-4 p-4 rounded-2xl bg-gradient-to-br from-emerald-950/40 to-cyan-950/40 border border-emerald-500/30 space-y-3">
+              <div className="flex items-center gap-2 text-emerald-300 font-mono text-xs font-bold">
+                <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse" />
+                <span>Claim $100 Compute Key + Custom Audit</span>
+              </div>
+              <p className="text-[11px] text-zinc-300 leading-relaxed">
+                Send this tailored spend audit to your team and receive a pre-loaded $100 enterprise trial key.
+              </p>
+
+              {leadSubmitted ? (
+                <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-mono flex items-center gap-2">
+                  <Check className="w-4 h-4 shrink-0 text-emerald-400" />
+                  <span>Audit queued! Your $100 key is being generated.</span>
+                </div>
+              ) : (
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    if (!inboundEmail || isSubmittingLead) return;
+                    setIsSubmittingLead(true);
+                    try {
+                      const res = await fetch('/api/inbound/lead', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          email: inboundEmail,
+                          companyName: inboundCompany || 'Undisclosed Team',
+                          source: 'calculator',
+                          modelPreference: selectedModel.id,
+                          estimatedMonthlyTokens: (inputTokensM + outputTokensM) * 1_000_000,
+                          estimatedMonthlySpend: calculations.retailTotal,
+                          stack: ['openai', 'nextjs'],
+                          notes: `Simulated ${inputTokensM}M In / ${outputTokensM}M Out with ${cacheHitPercent}% cache hit. Modeled savings: $${calculations.annualSavings.toFixed(2)}/yr`,
+                        }),
+                      });
+                      if (res.ok) {
+                        setLeadSubmitted(true);
+                      }
+                    } catch {
+                      // fallback
+                    } finally {
+                      setIsSubmittingLead(false);
+                    }
+                  }}
+                  className="space-y-2"
+                >
+                  <input
+                    type="email"
+                    required
+                    value={inboundEmail}
+                    onChange={(e) => setInboundEmail(e.target.value)}
+                    placeholder="name@company.com"
+                    className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/10 text-white placeholder:text-zinc-500 text-xs font-mono focus:border-emerald-400 focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    value={inboundCompany}
+                    onChange={(e) => setInboundCompany(e.target.value)}
+                    placeholder="Company or Project Name (optional)"
+                    className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/10 text-white placeholder:text-zinc-500 text-xs font-mono focus:border-emerald-400 focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSubmittingLead}
+                    className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-mono text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    {isSubmittingLead ? 'Submitting...' : 'Send Audit & Claim $100 Key →'}
+                  </button>
+                </form>
+              )}
             </div>
           </section>
         </div>
