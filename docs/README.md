@@ -4,6 +4,19 @@ Welcome to the comprehensive technical documentation and operational guides for 
 
 ---
 
+## 🏛️ Institutional Investor & Venture Diligence Data Room
+
+- **[Investor Data Room & Investment Memo Index](investors/README.md)**: Institutional diligence room for venture partners, angels, and financial auditors.
+  - **[01. Executive Summary & Investment Memo](investors/01_EXECUTIVE_SUMMARY_AND_MEMO.md)**: 1-pager covering company thesis, traction, financial highlights, and round terms.
+  - **[02. Pitch Deck Slide-by-Slide Specification](investors/02_PITCH_DECK_SLIDE_BY_SLIDE.md)**: 12-slide institutional pitch deck narrative.
+  - **[03. Market Sizing: TAM, SAM & SOM Analysis](investors/03_MARKET_SIZING_TAM_SAM_SOM.md)**: Econometric top-down ($1.3T TAM) and bottom-up ($1.31B SOM) sizing.
+  - **[04. Unit Economics: CAC, LTV, Margins & Payback](investors/04_UNIT_ECONOMICS_CAC_LTV_PAYBACK.md)**: Blended CAC ($185), LTV ($5,350), Gross Margins (42% $\to$ 68%), and 138% NDR.
+  - **[05. Competitive Landscape & Strategic Moats](investors/05_COMPETITIVE_LANDSCAPE_AND_MOATS.md)**: 2x2 positioning matrix, feature teardown, and 4 defensible moats.
+  - **[06. 5-Year Financial Projections & Operating Model](investors/06_FINANCIAL_PROJECTIONS_AND_MODEL.md)**: 5-year P&L forecast ($1.2M $\to$ $85M ARR) and headcount ramp.
+  - **[07. Technical Due Diligence & Architecture Proof](investors/07_TECHNICAL_DILIGENCE_AND_PATENTS.md)**: Architecture audit FAQs for Partner CTOs, sub-15ms wire proof, and ZDR privacy.
+
+---
+
 ## 🎯 Developer Guides & Integrations
 
 - **[Quickstart Integration Guide](QUICKSTART.md)**: 30-second drop-in guides for Python, TypeScript, Cursor, Windsurf, Claude Code CLI, and cURL.
