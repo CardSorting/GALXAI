@@ -329,8 +329,8 @@ asyncio.run(asyncio.gather(*[send_burst(i) for i in range(100)]))`,
   {
     slug: 'multi-provider-clearinghouse',
     badge: 'Zero-Arbitrage Settlement',
-    title: 'Multi-Provider Wholesale Token Clearinghouse & Settlement Protocol',
-    headline: 'Decentralized Multi-Provider Clearinghouse & Wholesale Settlement',
+    title: 'Wholesale Token Clearinghouse & Settlement Protocol',
+    headline: 'Wholesale Token Clearinghouse & Liquidity Settlement Protocol',
     description:
       'Architectural analysis of GALXAI multi-account liquidity aggregation, real-time cryptographic billing, and wholesale token pricing mechanics.',
     abstract:

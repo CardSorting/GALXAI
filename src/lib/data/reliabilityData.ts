@@ -64,7 +64,7 @@ print(response.choices[0].message.content)`,
     },
     faqs: [
       {
-        q: 'Do I need to rewrite my application logic to support multi-provider failover?',
+        q: 'Do I need to rewrite my application logic to support automatic quota failover?',
         a: 'No. Because GALXAI standardizes the OpenAI wire specification, failover happens at the gateway layer with zero client refactoring.',
       },
     ],

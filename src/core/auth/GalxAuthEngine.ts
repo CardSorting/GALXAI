@@ -214,7 +214,7 @@ export class GalxAuthEngine {
 
     galxRouter.substrate.addAccount(shard);
 
-    // 5b. Persist OAuth Provider Identity in OAuthRepository (Multi-Provider Identity Linking)
+    // 5b. Persist OAuth Provider Identity in OAuthRepository (Sovereign Identity Linking)
     if (authType === 'oauth' || accessToken) {
       try {
         const oauthRepo = OAuthRepository.getInstance();

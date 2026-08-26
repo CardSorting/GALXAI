@@ -1,7 +1,7 @@
 /**
  * GALXAI: Supabase & BroccoliDB Enterprise OAuth State & Identity Repository
  * Implements traditional enterprise OAuth 2.0 / 2.1 PKCE state management,
- * atomic single-use nonce consumption (anti-replay), multi-provider identity linking,
+ * atomic single-use nonce consumption (anti-replay), sovereign identity linking,
  * and background proactive token expiration scanning.
  */
 

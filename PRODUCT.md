@@ -19,8 +19,8 @@ GALXAI is an enterprise-grade AI API Gateway and sovereign model router. It prov
 ## Core Capabilities
 
 - **Unified Gateway Routing**: OpenAI-compatible REST & streaming endpoints with sub-15ms edge routing overhead via Cloudflare Workers.
-- **Shard Vault Management**: Zero-trust multi-provider API credential vaulting and health monitoring.
-- **Interactive Developer Playground**: Instant multi-model prompt testing, temperature controls, token counters, and code snippet generation (cURL, Python, Node.js).
+- **Shard Vault Management**: Zero-trust sovereign API credential vaulting, health monitoring, and quota pooling.
+- **Interactive Developer Playground**: Instant GPT flagship prompt testing, temperature controls, token counters, and code snippet generation (cURL, Python, Node.js).
 - **Wallet & Billing Ledger**: Prepaid credit system with double-entry immutability, automated top-ups, and cost-savings estimation.
 
 ## Constraints & Invariants

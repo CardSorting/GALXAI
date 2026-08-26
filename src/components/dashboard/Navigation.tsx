@@ -88,7 +88,7 @@ const NAV_CATEGORIES: NavCategory[] = [
       {
         name: 'Developer Shard Vaults',
         href: '/vault',
-        description: 'Zero-trust multi-provider key encryption and health monitoring',
+        description: 'Zero-trust sovereign key encryption and quota shard health monitoring',
         icon: ShieldCheck,
       },
       {
