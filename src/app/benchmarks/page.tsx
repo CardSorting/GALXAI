@@ -14,14 +14,14 @@ import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 export const metadata: Metadata = constructMetadata({
   title: 'Real-Time LLM Latency & Throughput Benchmark Leaderboard — GALXAI Anycast',
   description:
-    'Authoritative, real-time speed and TTFT benchmark leaderboard measuring sub-15ms Anycast latency, tokens/sec velocity, and 75% prompt caching speedups across OpenAI and xAI models.',
+    'Authoritative, real-time speed and TTFT benchmark leaderboard measuring sub-15ms Anycast latency, tokens/sec velocity, and 75% prompt caching speedups across OpenAI flagship models.',
   canonicalPath: '/benchmarks',
   keywords: [
     'LLM Speed Benchmark',
     'TTFT Latency Leaderboard',
     'Tokens Per Second LLM',
     'OpenAI Latency Benchmark',
-    'Grok Speed Benchmark',
+    'GPT-5.6 Speed Benchmark',
     'Prompt Caching Latency Delta',
     'Sub-15ms Anycast AI Gateway',
     'AEO Benchmark',

@@ -5,7 +5,7 @@ import { JsonLd, createTechArticleSchema, createBreadcrumbSchema } from '@/lib/s
 
 export const metadata: Metadata = constructMetadata({
   title: 'Function Calling & Agentic Tools Guide — Parallel Tool Calling',
-  description: 'Connect databases, APIs, and tools to GPT-5.6 and Grok 4.5. Parallel tool calling, automatic 75% tool schema caching, and zero latency overhead.',
+  description: 'Connect databases, APIs, and tools to GPT-5.6 models. Parallel tool calling, automatic 75% tool schema caching, and zero latency overhead.',
   canonicalPath: '/docs/function-calling',
   keywords: [
     'Function Calling OpenAI',

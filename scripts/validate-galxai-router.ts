@@ -2386,7 +2386,7 @@ async function runAllTests() {
     assert.strictEqual(selected.id, freshShard.id);
   });
 
-  await test('OAuth Provider Multi-Config: Generates distinct authorization endpoints and scopes for OpenAI and xAI Grok', async () => {
+  await test('OAuth Provider Config: Generates PKCE authorization endpoints and scopes for OpenAI', async () => {
     const oauthManager = GalxOAuthManager.getInstance();
 
     const openaiDetails = oauthManager.generateAuthUrl('openai');

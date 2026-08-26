@@ -160,7 +160,7 @@ export class GalxSOC2AuditEngine {
         controlId: 'A1.1',
         criteriaCategory: 'Availability',
         controlTitle: 'Multi-Region Shard Redundancy & Cascade Failover',
-        description: 'Automatic failover cascade across heterogeneous LLM providers (OpenAI, xAI Grok) with health circuit breakers.',
+        description: 'Automatic failover cascade across multi-region OpenAI quota shards with health circuit breakers.',
         implementationProof: 'src/core/circuit/GalxCircuitBreaker.ts',
         automatedVerificationStatus: 'enforced',
         lastAuditTimestamp: now

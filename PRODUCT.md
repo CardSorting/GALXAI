@@ -8,7 +8,7 @@ web
 
 ## Overview
 
-GALXAI is an enterprise-grade AI API Gateway and sovereign model router. It provides developers and engineering teams with a unified endpoint for routing, load balancing, cost optimization, and failover across top AI model providers (OpenAI, Anthropic, Google Gemini, xAI Grok, DeepSeek, and local shards).
+GALXAI is an enterprise-grade AI API Gateway and sovereign model router. It provides developers and engineering teams with a unified endpoint for routing, load balancing, cost optimization, and failover across OpenAI Codex & GPT flagship models (`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, and GPT-Image suites).
 
 ## Primary Users & Jobs to Be Done
 

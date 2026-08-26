@@ -241,7 +241,7 @@ https://api.galx.ai/v1
 ${k}
 
 // 3. Available Models:
-gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.6, x-ai/grok-4.5`,
+gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, openai-gpt-image-2`,
     python: `from openai import OpenAI
 
 # 1-Line Drop-in replacement for OpenAI SDK (25%-40% discount)

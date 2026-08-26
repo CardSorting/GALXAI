@@ -62,9 +62,9 @@ const INITIAL_RULES: RoutingRule[] = [
   },
   {
     id: 'rule_3',
-    name: 'Multi-Cloud Cross-Provider Shield (Sol -> Grok 4.6)',
+    name: 'High-Assurance Quota Pool Shield (Sol -> Terra)',
     primaryModel: 'gpt-5.6-sol',
-    fallbackModel: 'x-ai/grok-4.6',
+    fallbackModel: 'gpt-5.6-terra',
     latencyThresholdMs: 30,
     preservePromptCache: true,
     isActive: true,

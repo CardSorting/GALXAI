@@ -201,7 +201,7 @@ client = OpenAI(
     api_key="${activeDisplayKey}"
 )
 
-# Accepts any mental model alias: "sol", "gpt-5", "claude-3-7-sonnet", "grok-4.6"
+# Accepts any mental model alias: "sol", "gpt-5", "terra", "luna"
 response = client.chat.completions.create(
     model="gpt-5.6-sol", # or simply "sol"
     messages=[
@@ -290,7 +290,7 @@ const parsed = await galx.extract('Dr. Sarah Chen, 34, Neurologist at Stanford',
     "gpt-5.6-sol",
     "gpt-5.6-terra",
     "gpt-5.6-luna",
-    "x-ai/grok-4.6"
+    "openai-gpt-image-2"
   ]
 }`
     },
@@ -303,9 +303,9 @@ const parsed = await galx.extract('Dr. Sarah Chen, 34, Neurologist at Stanford',
       model: openai/gpt-5.6-sol
       api_base: https://galx.ai/v1
       api_key: ${activeDisplayKey}
-  - model_name: grok-4.6
+  - model_name: gpt-5.6-terra
     litellm_params:
-      model: openai/x-ai/grok-4.6
+      model: openai/gpt-5.6-terra
       api_base: https://galx.ai/v1
       api_key: ${activeDisplayKey}`
     },

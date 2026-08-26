@@ -63,7 +63,7 @@ console.log(completion.choices[0].message.content);`;
 
   const howToSchema = createHowToSchema({
     name: 'How to Connect to the GALXAI Universal AI Gateway in 30 Seconds',
-    description: 'Learn how to route OpenAI Codex and xAI Grok requests through GALXAI with 25%–40% wholesale savings and zero code refactoring.',
+    description: 'Learn how to route OpenAI Codex and GPT-5.6 requests through GALXAI with 25%–40% wholesale savings and zero code refactoring.',
     totalTime: 'PT30S',
     steps: [
       {
@@ -76,7 +76,7 @@ console.log(completion.choices[0].message.content);`;
       },
       {
         name: 'Execute Your First Completion',
-        text: 'Run standard chat completion code against GPT-5.6 Sol or Grok 4.5.',
+        text: 'Run standard chat completion code against GPT-5.6 Sol, Terra, or Luna.',
       },
     ],
   });

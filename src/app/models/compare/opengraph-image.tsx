@@ -99,7 +99,7 @@ export default async function Image() {
             Compare AI Models: Specs, Pricing &amp; Benchmarks
           </div>
           <div style={{ display: 'flex', fontSize: '22px', color: '#cbd5e1', lineHeight: 1.4 }}>
-            Side-by-side comparison across GPT-5.6 Sol/Terra/Luna, Grok 4.5, context lengths up to 2M tokens, and wholesale discounts.
+            Side-by-side comparison across GPT-5.6 Sol, Terra, Luna, context lengths up to 900K tokens, and wholesale discounts.
           </div>
         </div>
 

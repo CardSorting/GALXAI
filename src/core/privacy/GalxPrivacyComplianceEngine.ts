@@ -563,7 +563,7 @@ export class GalxPrivacyComplianceEngine {
           legalBasis: 'Article 6(1)(b) Contract',
           dataSubjectCategories: ['End Users', 'Patients (HIPAA Covered)', 'Data Subjects in Ingested Prompts'],
           personalDataCategories: ['Chat Prompts', 'Synthesized Responses', 'Tokenized PII/PHI'],
-          recipientCategories: ['Heterogeneous Upstream LLMs (OpenAI, xAI Grok - With store: false)'],
+          recipientCategories: ['Upstream OpenAI LLM Fleet (With store: false)'],
           internationalTransferSafeguards: 'EU Data Residency Routing & Binding Corporate Rules',
           retentionPolicy: '0 Seconds (Zero Data Retention Ephemeral In-Memory Transit)',
           technicalSecurityMeasures: [

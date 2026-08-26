@@ -41,7 +41,7 @@ export default function ScheduledReportsPage() {
         { dimension: 'GPT-5.6 Sol (Apex Reasoning)', spendUsd: 184.20, tokens: 142000000, savingsUsd: 61.40 },
         { dimension: 'GPT-5.6 Terra (High-Throughput)', spendUsd: 92.50, tokens: 185000000, savingsUsd: 37.00 },
         { dimension: 'GPT-5.6 Luna (Sub-15ms Real-Time)', spendUsd: 41.80, tokens: 83600000, savingsUsd: 16.72 },
-        { dimension: 'xAI Grok 4.5 (2M Ultra-Long Context)', spendUsd: 28.60, tokens: 28600000, savingsUsd: 11.44 },
+        { dimension: 'OpenAI GPT-Image-2 (Diffusion Vision)', spendUsd: 28.60, tokens: 28600000, savingsUsd: 11.44 },
       ];
 
       if (groupBy === 'team') {
@@ -166,7 +166,7 @@ export default function ScheduledReportsPage() {
                 onChange={(e) => setGroupBy(e.target.value as any)}
                 className="w-full py-2.5 px-3 rounded-xl bg-black/50 border border-white/10 text-white focus:outline-none focus:border-amber-500"
               >
-                <option value="model">Group by AI Model (Sol, Terra, Grok)</option>
+                <option value="model">Group by AI Model (Sol, Terra, Luna)</option>
                 <option value="team">Group by Team Cost Center (GL Allocation)</option>
                 <option value="key">Group by Gateway API Key</option>
                 <option value="daily">Group by Day (Daily Burn Rate)</option>

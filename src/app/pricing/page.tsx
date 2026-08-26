@@ -7,12 +7,12 @@ import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 
 export const metadata: Metadata = constructMetadata({
   title: 'Transparent Wholesale AI Pricing & Volume Rebates',
-  description: 'Direct wholesale rates on OpenAI GPT-5.6 Sol, Terra, Luna, and xAI Grok 4.5. 25% to 40% below direct list with 75% prompt caching and 0% gateway markup.',
+  description: 'Direct wholesale rates on OpenAI GPT-5.6 Sol, Terra, and Luna. 25% to 40% below direct list with 75% prompt caching and 0% gateway markup.',
   canonicalPath: '/pricing',
   keywords: [
     'Wholesale AI Pricing',
     'GPT-5.6 Pricing',
-    'Grok 4.5 Pricing',
+    'GPT-5.6 Sol Cost',
     'Prompt Caching Calculator',
     'Cheapest OpenAI API Gateway',
     'AI Token Discounts',

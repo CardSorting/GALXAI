@@ -85,13 +85,13 @@ export default async function Image() {
             Frontier AI Model Catalog &amp; Live Benchmarks
           </div>
           <div style={{ fontSize: '22px', color: '#cbd5e1', lineHeight: 1.4 }}>
-            Compare OpenAI GPT-5.6 Sol, Terra, Luna, and xAI Grok 4.5 specs, token rates, and latency side-by-side.
+            Compare OpenAI GPT-5.6 Sol, Terra, Luna, and GPT-Image specs, token rates, and latency side-by-side.
           </div>
         </div>
 
         {/* Model tags */}
         <div style={{ display: 'flex', gap: '14px' }}>
-          {['gpt-5.6-sol (900K Context)', 'grok-4.6 (1M Context)', 'gpt-5.6-terra (Reasoning)', 'gpt-5.6-luna (Fast)'].map((m, i) => (
+          {['gpt-5.6-sol (900K Context)', 'gpt-5.6-terra (Balanced)', 'gpt-5.6-luna (Fast)', 'openai-gpt-image-2 (Vision)'].map((m, i) => (
             <div
               key={i}
               style={{

@@ -398,8 +398,8 @@ export class GalxOAuthManager {
 
     const tokenSource = data.id_token || data.access_token;
     const accountId = this.extractAccountId(tokenSource);
-    const email = data.email || this.extractEmail(tokenSource) || (provider === 'openai' ? 'user@openai.oauth' : 'user@xai.oauth');
-    const name = this.extractName(tokenSource) || (provider === 'openai' ? 'OpenAI OAuth User' : 'Grok OAuth User');
+    const email = data.email || this.extractEmail(tokenSource) || 'user@openai.oauth';
+    const name = this.extractName(tokenSource) || 'OpenAI OAuth User';
     const jwtExpiry = this.extractExpiryMs(data.access_token);
     const expiresAtMs = typeof jwtExpiry === 'number' ? jwtExpiry : Date.now() + (data.expires_in ?? 3600) * 1000;
 
@@ -482,8 +482,8 @@ export class GalxOAuthManager {
 
         const tokenSource = data.id_token || data.access_token;
         const accountId = this.extractAccountId(tokenSource);
-        const email = data.email || this.extractEmail(tokenSource) || (provider === 'openai' ? 'user@openai.oauth' : 'user@xai.oauth');
-        const name = this.extractName(tokenSource) || (provider === 'openai' ? 'OpenAI OAuth User' : 'Grok OAuth User');
+        const email = data.email || this.extractEmail(tokenSource) || 'user@openai.oauth';
+        const name = this.extractName(tokenSource) || 'OpenAI OAuth User';
         const jwtExpiry = this.extractExpiryMs(data.access_token);
         const expiresAtMs = typeof jwtExpiry === 'number' ? jwtExpiry : Date.now() + (data.expires_in ?? 3600) * 1000;
 

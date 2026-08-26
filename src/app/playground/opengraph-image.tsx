@@ -98,7 +98,7 @@ export default async function Image() {
             Interactive AI Model Playground &amp; Code Sandbox
           </div>
           <div style={{ display: 'flex', fontSize: '22px', color: '#cbd5e1', lineHeight: 1.4 }}>
-            Test GPT-5.6 Sol, Grok 4.5, and reasoning models live in your browser with real-time token streaming and zero auth setup.
+            Test GPT-5.6 Sol, Terra, Luna, and reasoning models live in your browser with real-time token streaming and zero auth setup.
           </div>
         </div>
 

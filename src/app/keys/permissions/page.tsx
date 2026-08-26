@@ -22,7 +22,7 @@ import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 export default function KeyPermissionsPage() {
   const [selectedKey, setSelectedKey] = useState('galx_live_d819');
   const [ipAllowlist, setIpAllowlist] = useState('0.0.0.0/0');
-  const [allowedModels, setAllowedModels] = useState<string[]>(['gpt-5.6-sol', 'gpt-5.6-terra', 'grok-4.5']);
+  const [allowedModels, setAllowedModels] = useState<string[]>(['gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna']);
   const [maxTokensPerRequest, setMaxTokensPerRequest] = useState(8192);
   const [keyTtl, setKeyTtl] = useState('never');
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -31,9 +31,9 @@ export default function KeyPermissionsPage() {
     { id: 'gpt-5.6-sol', label: 'OpenAI GPT-5.6 Sol (Coding & Reasoning)' },
     { id: 'gpt-5.6-terra', label: 'OpenAI GPT-5.6 Terra (Balanced Frontier)' },
     { id: 'gpt-5.6-luna', label: 'OpenAI GPT-5.6 Luna (Sub-second Velocity)' },
-    { id: 'grok-4.6', label: 'xAI Grok 4.6 (1M Frontier Multimodal Reasoning)' },
-    { id: 'grok-4.5', label: 'xAI Grok 4.5 (500K Multimodal Context)' },
-    { id: 'gpt-image-2', label: 'OpenAI GPT-Image-2 (Visual Synthesis)' }
+    { id: 'openai-gpt-image-2', label: 'OpenAI GPT-Image-2 (4K Visual Synthesis)' },
+    { id: 'openai-gpt-image-1.5', label: 'OpenAI GPT-Image-1.5 (Fast Visual Generation)' },
+    { id: 'openai-gpt-image-1', label: 'OpenAI GPT-Image-1 (Foundation Diffusion)' }
   ];
 
   const handleToggleModel = (modelId: string) => {

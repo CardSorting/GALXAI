@@ -8,13 +8,13 @@ import { JsonLd, createSoftwareAppSchema, createBreadcrumbSchema } from '@/lib/s
 
 export const metadata: Metadata = constructMetadata({
   title: 'Real-Time System Status & Operational SLA Health',
-  description: 'Real-time operational status, sub-15ms router latency metrics, and upstream availability for OpenAI Codex and xAI Grok.',
+  description: 'Real-time operational status, sub-15ms router latency metrics, and upstream availability for OpenAI Codex and GPT-5.6.',
   canonicalPath: '/status',
   keywords: [
     'GALXAI Status',
     'AI Router Uptime',
     'OpenAI Status Gateway',
-    'Grok API Operational Health',
+    'GPT-5.6 Operational Health',
     'AI Gateway Latency Status',
   ],
 });

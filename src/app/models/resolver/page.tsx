@@ -10,7 +10,7 @@ export const metadata: Metadata = constructMetadata({
   keywords: [
     'Model Alias Resolver',
     'OpenAI Model Aliases',
-    'Grok Model Aliases',
+    'GPT-5.6 Model Aliases',
     'Canonical LLM Resolver',
     'Universal AI Router',
   ],

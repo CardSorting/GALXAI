@@ -4,13 +4,13 @@ import { constructMetadata } from '@/lib/seo/metadata';
 import { JsonLd, createTechArticleSchema, createBreadcrumbSchema } from '@/lib/seo/jsonld';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Frontier AI Model Capability & Selection Guide — GPT-5.6 & Grok',
-  description: 'Comparative benchmark capabilities, context windows, and workload recommendations across all 12 supported frontier engines with 0ms ambiguity resolution.',
+  title: 'Frontier AI Model Capability & Selection Guide — OpenAI Codex & GPT-5.6',
+  description: 'Comparative benchmark capabilities, context windows, and workload recommendations across supported OpenAI frontier engines with 0ms ambiguity resolution.',
   canonicalPath: '/docs/models-guide',
   keywords: [
     'AI Model Selection Guide',
     'GPT-5.6 Sol Specs',
-    'Grok 4.6 1M Context Guide',
+    'GPT-5.6 900K Context Guide',
     'Best Coding LLM Guide',
     'AI Model Benchmark Comparison',
   ],

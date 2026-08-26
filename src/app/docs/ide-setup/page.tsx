@@ -33,7 +33,7 @@ export default function IdeSetupDocPage() {
       },
       {
         name: 'Supply Developer Key',
-        text: 'Paste your GALXAI live developer key (galx_live_...) and select gpt-5.6-sol or grok-4.6.',
+        text: 'Paste your GALXAI live developer key (galx_live_...) and select gpt-5.6-sol or gpt-5.6-terra.',
       },
     ],
   });

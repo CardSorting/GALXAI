@@ -73,7 +73,7 @@ async function main() {
     {
       id: 'reasoning-heavy',
       name: 'Deep Reasoning & Long-Running Swarms',
-      description: 'Extended SLA queue for o1/o3/grok-4.5 deep thinking passes',
+      description: 'Extended SLA queue for GPT-5.6 Sol and deep reasoning passes',
       state: 'RUNNING' as const,
       rateLimits: {
         maxDispatchesPerSecond: 20,
@@ -95,7 +95,7 @@ async function main() {
     {
       id: 'images-async',
       name: 'Visual Synthesis & Diffusion Queue',
-      description: 'Asynchronous image generation (DALL-E 3, Grok Vision)',
+      description: 'Asynchronous image generation (OpenAI GPT-Image suite)',
       state: 'RUNNING' as const,
       rateLimits: {
         maxDispatchesPerSecond: 30,

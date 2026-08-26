@@ -437,7 +437,7 @@ async function runTests() {
     let fetchCount = 0;
     const computeModels = async () => {
       fetchCount++;
-      return ['gpt-5.6-sol', 'x-ai/grok-4.5'];
+      return ['gpt-5.6-sol', 'gpt-5.6-terra'];
     };
 
     const cacheRes1 = await edgeCache.getOrFetch('models:cached', computeModels, { ttlMs: 1000, swrTtlMs: 2000 });

@@ -96,7 +96,7 @@ async function runHybridBroccoliOmniSearchAudit() {
     { query: 'download tax receipt', targetHref: '/billing/invoices', label: 'Tax Receipt' },
     { query: 'cheapest model', targetHref: '/models', label: 'Cheapest Model' },
     { query: 'browse models', targetHref: '/models', label: 'Browse Models' },
-    { query: 'compare gpt with grok', targetHref: '/models/compare', label: 'Compare GPT with Grok' },
+    { query: 'compare gpt models', targetHref: '/models/compare', label: 'Compare GPT Models' },
     { query: 'create api key', targetHref: '/keys', label: 'Create API Key' },
     { query: 'claim free credits', targetHref: '/keys/new', label: 'Claim Free Credits' },
     { query: 'generate bearer token', targetHref: '/keys/new', label: 'Generate Bearer Token' },
@@ -139,8 +139,8 @@ async function runHybridBroccoliOmniSearchAudit() {
   const curlAction = actionResults.find(r => r.actionType === 'copy_curl');
   assert(curlAction !== undefined && typeof curlAction.actionData === 'string' && curlAction.actionData.includes('curl https://galx.ai/v1'), 'cURL quick action contains valid runnable bash snippet');
 
-  const modelResults = BroccoliOmniSearch.search('@ grok', 5);
-  assert(modelResults.length > 0 && modelResults.every(r => r.category === 'Models & Engines'), 'Category prefix "@ grok" strictly filters to Models & Engines');
+  const modelResults = BroccoliOmniSearch.search('@ terra', 5);
+  assert(modelResults.length > 0 && modelResults.every(r => r.category === 'Models & Engines'), 'Category prefix "@ terra" strictly filters to Models & Engines');
 
   const docResults = BroccoliOmniSearch.search('# caching', 5);
   assert(docResults.length > 0 && docResults.every(r => r.category === 'Documentation'), 'Category prefix "# caching" strictly filters to Documentation');
@@ -285,7 +285,7 @@ async function runHybridBroccoliOmniSearchAudit() {
   // Test socket pre-warming
   assert(typeof routerInstance.prewarmUpstreamSockets === 'function', 'GalxModelRouter exports prewarmUpstreamSockets method');
   routerInstance.prewarmUpstreamSockets();
-  assert(true, 'Upstream OpenAI and xAI Grok HTTP keep-alive sockets pre-warmed without error');
+  assert(true, 'Upstream OpenAI HTTP keep-alive sockets pre-warmed without error');
 
   // Test Zero-Copy Direct Buffer Passthrough
   assert(secondChunk.value instanceof Uint8Array, 'Stream chunks pass through as raw zero-copy Uint8Array buffers');

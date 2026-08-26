@@ -85,7 +85,7 @@ export default async function Image() {
             Developer Guides, Cookbooks &amp; No-Code Setup
           </div>
           <div style={{ fontSize: '22px', color: '#cbd5e1', lineHeight: 1.4 }}>
-            Integrate GPT-5.6 Sol and Grok 4.5 into Cursor, Python, TypeScript, Make.com, and AI Agent Swarms in seconds.
+            Integrate GPT-5.6 Sol, Terra, and Luna into Cursor, Python, TypeScript, Make.com, and AI Agent Swarms in seconds.
           </div>
         </div>
 

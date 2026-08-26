@@ -90,7 +90,7 @@ export default function PlainEnglishDocsPage() {
           </h2>
           <div className="p-5 rounded-2xl bg-black/40 border border-white/5 space-y-3 font-sans text-sm text-zinc-200 leading-relaxed">
             <p className="font-semibold text-white text-base">
-              GALXAI is a high-speed discount gateway that lets you use world-class AI models (like GPT-5.6 and Grok 4.5) for 25% to 40% cheaper than buying directly from OpenAI.
+              GALXAI is a high-speed discount gateway that lets you use world-class OpenAI GPT-5.6 models for 25% to 40% cheaper than buying directly from provider retail.
             </p>
             <p className="text-xs text-zinc-400">
               Think of it like Costco or a wholesale club for AI compute: you get the exact same authentic AI models, but with bulk wholesale savings passed directly to your account.

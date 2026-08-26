@@ -48,7 +48,7 @@ const TEAM_MAP: Record<string, TeamDetail> = {
     models: [
       { name: 'OpenAI GPT-5.6 Sol', spend: 320.00, pct: 66.7 },
       { name: 'OpenAI GPT-5.6 Terra', spend: 110.00, pct: 22.9 },
-      { name: 'xAI Grok 4.5', spend: 50.00, pct: 10.4 }
+      { name: 'OpenAI GPT-5.6 Luna', spend: 50.00, pct: 10.4 }
     ],
     keys: [
       { id: 'k1', name: 'Cursor IDE Coding Agent', prefix: 'galx_live_c910', rateLimit: 120, spend: 280.00 },
@@ -66,7 +66,7 @@ const TEAM_MAP: Record<string, TeamDetail> = {
     currentSpend: 1240.00,
     color: 'bg-cyan-400',
     models: [
-      { name: 'xAI Grok 4.5 (500K)', spend: 720.00, pct: 58.1 },
+      { name: 'OpenAI GPT-5.6 Luna (500K)', spend: 720.00, pct: 58.1 },
       { name: 'OpenAI GPT-5.6 Sol', spend: 400.00, pct: 32.3 },
       { name: 'OpenAI GPT-Image-2', spend: 120.00, pct: 9.6 }
     ],

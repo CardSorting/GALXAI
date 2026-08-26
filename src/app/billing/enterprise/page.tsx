@@ -90,7 +90,7 @@ export default function EnterpriseBillingPage() {
             </div>
             <h3 className="text-base font-bold text-white">Up to 40% Wholesale Volume Discount</h3>
             <p className="text-xs text-zinc-300 leading-relaxed">
-              Consolidate your entire engineering organization's OpenAI and Grok spend to unlock the highest wholesale margins in the industry.
+              Consolidate your entire engineering organization's OpenAI spend to unlock the highest wholesale margins in the industry.
             </p>
           </div>
 
@@ -162,7 +162,7 @@ export default function EnterpriseBillingPage() {
             <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-1">
               <span className="text-zinc-500 text-[10px] uppercase">Direct Retail Equivalent</span>
               <div className="text-2xl font-black text-zinc-400">${Math.round(retailEquivalent).toLocaleString()} / mo</div>
-              <div className="text-[11px] text-zinc-500 font-sans">OpenAI & Grok standard pricing</div>
+              <div className="text-[11px] text-zinc-500 font-sans">OpenAI provider list pricing</div>
             </div>
 
             <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-1">

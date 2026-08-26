@@ -93,7 +93,7 @@ export class GalxQueueClient {
   }
 
   /**
-   * Enqueues an asynchronous OpenAI/Grok chat completion workload.
+   * Enqueues an asynchronous OpenAI chat completion workload.
    */
   public enqueueChat(options: EnqueueChatOptions): { task: GalxTask; deduplicated: boolean } {
     const chatPayload: ChatCompletionRequest = {

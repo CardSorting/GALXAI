@@ -6,11 +6,11 @@ import { JsonLd, createModelItemListSchema, createBreadcrumbSchema } from '@/lib
 
 export const metadata: Metadata = constructMetadata({
   title: 'Compare Frontier AI Models Side-by-Side — Specs, Latency & Pricing',
-  description: 'Side-by-side benchmark comparison of OpenAI Codex (GPT-5.6 Sol, Terra, Luna) and xAI Grok 4.5. Compare TTFT latency, context windows, output limits, and wholesale pricing.',
+  description: 'Side-by-side benchmark comparison of OpenAI Codex and GPT-5.6 (Sol, Terra, Luna). Compare TTFT latency, context windows, output limits, and wholesale pricing.',
   canonicalPath: '/models/compare',
   keywords: [
     'AI Model Comparison',
-    'GPT-5.6 Sol vs Grok 4.5',
+    'GPT-5.6 Sol vs GPT-5.6 Terra',
     'GPT-5.6 Terra vs Luna',
     'AI Model Latency Benchmark',
     'LLM Price Comparison',

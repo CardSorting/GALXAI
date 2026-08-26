@@ -92,7 +92,7 @@ export default async function TwitterImage() {
             Sub-15ms AI Model Routing with Wholesale Savings
           </div>
           <div style={{ fontSize: '24px', color: '#94a3b8' }}>
-            Drop-in OpenAI SDK replacement for GPT-5.6 Sol, Grok 4.5, and frontier AI models.
+            Drop-in OpenAI SDK replacement for GPT-5.6 Sol, Terra, Luna, and frontier AI models.
           </div>
         </div>
 

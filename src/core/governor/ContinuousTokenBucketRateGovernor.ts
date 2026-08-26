@@ -198,8 +198,7 @@ export class ContinuousTokenBucketRateGovernor {
 
   /**
    * Reconciles internal token bucket capacity against authoritative upstream rate limit response headers
-   * from OpenAI (`x-ratelimit-remaining-tokens`, `x-ratelimit-remaining-requests`, `x-ratelimit-reset-tokens`)
-   * or xAI Grok.
+   * from OpenAI (`x-ratelimit-remaining-tokens`, `x-ratelimit-remaining-requests`, `x-ratelimit-reset-tokens`).
    */
   reconcileWithUpstreamHeaders(
     bucket: TokenBucketState,

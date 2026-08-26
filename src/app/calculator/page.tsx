@@ -13,13 +13,13 @@ import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 export const metadata: Metadata = constructMetadata({
   title: 'Universal AI Token & Prompt Caching Cost Calculator — GALXAI',
   description:
-    'Simulate production LLM workloads to calculate exact monthly savings, compound 75% prompt caching rebates, and net annual enterprise ROI across OpenAI Codex and xAI Grok.',
+    'Simulate production LLM workloads to calculate exact monthly savings, compound 75% prompt caching rebates, and net annual enterprise ROI across OpenAI Codex and GPT-5.6.',
   canonicalPath: '/calculator',
   keywords: [
     'AI Token Calculator',
     'Prompt Caching Calculator',
     'OpenAI Cost Calculator',
-    'Grok Token Pricing',
+    'GPT-5.6 Token Pricing',
     'Wholesale LLM Savings',
     'AI ROI Simulator',
     'AEO Calculator',
