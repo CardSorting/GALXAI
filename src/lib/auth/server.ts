@@ -115,7 +115,7 @@ export async function requireSudoElevation(): Promise<NonNullable<ServerSessionR
 }
 
 /**
- * Resolves all connected OAuth provider identities (OpenAI, xAI Grok) for the current user.
+ * Resolves all connected OAuth provider identities (OpenAI) for the current user.
  */
 export async function getLinkedIdentities(): Promise<readonly OAuthIdentityRecord[]> {
   const sessionResult = await getGalxSession();

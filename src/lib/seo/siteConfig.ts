@@ -9,7 +9,7 @@ export const SITE_CONFIG = {
   alternateName: ['GALX AI', 'GALXAI Gateway', 'GALXAI Universal Router'],
   tagline: 'Unified AI Model Router & Universal API Gateway',
   description:
-    'One unified OpenAI-compatible API for the world\'s best frontier AI models. Sub-millisecond Anycast routing, automatic failover, and rate-limit pooling across OpenAI Codex and xAI Grok with 25%–40% wholesale savings.',
+    'One unified OpenAI-compatible API for OpenAI frontier models. Sub-millisecond Anycast routing, automatic failover, and rate-limit pooling across OpenAI Codex and GPT-5.6 with 25%–40% wholesale savings.',
   url: process.env.NEXT_PUBLIC_APP_URL || 'https://galx.ai',
   apiUrl: 'https://api.galx.ai/v1',
   ogImage: '/og-image.png',

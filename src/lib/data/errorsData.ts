@@ -117,11 +117,11 @@ const stream = await client.chat.completions.create({
     code: 'context-length-exceeded',
     httpStatus: 400,
     errorType: 'invalid_request_error',
-    badge: '1M Context Expansion',
+    badge: '900K Context Expansion',
     title: 'How to Fix Maximum Context Length Exceeded in OpenAI & LangChain',
     headline: 'Fix Maximum Context Length Exceeded Errors in 1 Line',
     description:
-      'Upgrade from restrictive 128K context boundaries to 1,000,000 (1M) token context windows with Grok 4.6 and 900K on GPT-5.6 Sol on GALXAI.',
+      'Upgrade from restrictive 128K context boundaries to 900,000 (900K) token context windows with GPT-5.6 Sol on GALXAI.',
     rootCause:
       'Sending prompts, conversation histories, or RAG documents that exceed the model’s hard token capacity limit.',
     sampleErrorPayload: `{
@@ -133,7 +133,7 @@ const stream = await client.chat.completions.create({
   }
 }`,
     permanentFix:
-      'Switch to GALXAI x-ai/grok-4.6 (1,000,000 token context) or gpt-5.6-sol (900,000 token context) with automatic 75% prompt caching on large prefixes.',
+      'Switch to GALXAI gpt-5.6-sol (900,000 token context) with automatic 75% prompt caching on large prefixes.',
     codeSnippet: {
       language: 'Python',
       code: `from openai import OpenAI
@@ -145,14 +145,14 @@ client = OpenAI(
 
 # Route massive 500K+ token document without context length errors
 response = client.chat.completions.create(
-    model="x-ai/grok-4.6",  # 1,000,000 Token Context Window
+    model="gpt-5.6-sol",  # 900,000 Token Context Window
     messages=[{"role": "user", "content": huge_repository_context}]
 )`,
     },
     faqs: [
       {
         q: 'What is the largest context window available on GALXAI?',
-        a: 'xAI Grok 4.6 features a 1,000,000 token context window, and OpenAI GPT-5.6 Sol supports 900,000 tokens.',
+        a: 'OpenAI GPT-5.6 Sol supports 900,000 tokens with full 75% prompt caching pass-through.',
       },
     ],
   },

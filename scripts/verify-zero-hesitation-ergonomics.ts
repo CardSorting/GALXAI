@@ -92,11 +92,11 @@ async function runZeroHesitationAudit() {
   assert(ModelCatalog.resolveModel('gpt-4o-mini').id === 'gpt-5.6-luna', 'gpt-4o-mini resolves to gpt-5.6-luna');
   assert(ModelCatalog.resolveModel('gemini-2.0-flash').id === 'gpt-5.6-luna', 'gemini-2.0-flash resolves to gpt-5.6-luna');
 
-  // Grok 4.6 / 1M Frontier
-  assert(ModelCatalog.resolveModel('grok-4.6').id === 'x-ai/grok-4.6', 'grok-4.6 resolves to x-ai/grok-4.6');
-  assert(ModelCatalog.resolveModel('grok').id === 'x-ai/grok-4.6', 'grok shorthand resolves to x-ai/grok-4.6');
-  assert(ModelCatalog.resolveModel('xai-grok').id === 'x-ai/grok-4.6', 'xai-grok resolves to x-ai/grok-4.6');
-  assert(ModelCatalog.resolveModel('grok-1m').id === 'x-ai/grok-4.6', 'grok-1m resolves to x-ai/grok-4.6');
+  // Grok Aliases map cleanly to flagship GPT-5.6 Sol
+  assert(ModelCatalog.resolveModel('grok-4.6').id === 'gpt-5.6-sol', 'grok-4.6 resolves to gpt-5.6-sol');
+  assert(ModelCatalog.resolveModel('grok').id === 'gpt-5.6-sol', 'grok shorthand resolves to gpt-5.6-sol');
+  assert(ModelCatalog.resolveModel('xai-grok').id === 'gpt-5.6-sol', 'xai-grok resolves to gpt-5.6-sol');
+  assert(ModelCatalog.resolveModel('grok-1m').id === 'gpt-5.6-sol', 'grok-1m resolves to gpt-5.6-sol');
 
   // Image & Embedding
   assert(ModelCatalog.resolveModel('image').id === 'openai-gpt-image-2', 'image intent resolves to openai-gpt-image-2');

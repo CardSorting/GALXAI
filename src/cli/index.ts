@@ -28,7 +28,7 @@ async function main() {
 \x1b[1mEXAMPLES:\x1b[0m
   $ npx galxai "Refactor Express to Next.js"
   $ npx galxai run "Audit contract" --model terra
-  $ npx galxai resolve grok
+  $ npx galxai resolve luna
   $ npx galxai tokens "500-page earnings report"
     `);
     process.exit(0);

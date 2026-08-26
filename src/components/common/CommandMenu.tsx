@@ -58,7 +58,7 @@ const PLATFORM_PAGES: PlatformPage[] = [
     href: '/models',
     icon: Cpu,
     category: 'Models',
-    keywords: ['models', 'gpt', 'grok', 'sol', 'terra', 'luna', 'ai', 'engines', 'intelligence'],
+    keywords: ['models', 'gpt', 'openai', 'sol', 'terra', 'luna', 'ai', 'engines', 'intelligence'],
     description: 'Explore and compare 12 state-of-the-art AI models'
   },
   {
@@ -283,7 +283,7 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
 
   const normalizedQuery = query.toLowerCase().trim();
   const resolvedCandidate = normalizedQuery ? ModelCatalog.resolveModel(normalizedQuery) : null;
-  const resolvedFromQuery = resolvedCandidate && resolvedCandidate.provider !== 'xai-grok' ? resolvedCandidate : null;
+  const resolvedFromQuery = resolvedCandidate;
   const recentVisits = BroccoliOmniSearch.getRecentVisits(3);
   const omniResults = BroccoliOmniSearch.search(normalizedQuery, 8);
   const autocompleteSuggestion = BroccoliOmniSearch.getAutocompleteSuggestion(normalizedQuery);
@@ -819,12 +819,8 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                          m.provider === 'xai-grok'
-                            ? 'bg-emerald-500/10 text-emerald-400'
-                            : 'bg-amber-500/10 text-amber-400'
-                        }`}>
-                          {m.provider === 'xai-grok' ? <Rocket className="w-3.5 h-3.5" /> : <Zap className="w-3.5 h-3.5 fill-amber-400" />}
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-amber-500/10 text-amber-400">
+                          <Zap className="w-3.5 h-3.5 fill-amber-400" />
                         </div>
                         <div>
                           <div className={`font-bold text-xs transition-colors ${isSelected ? 'text-cyan-300' : 'text-white group-hover:text-cyan-300'}`}>

@@ -117,7 +117,7 @@ export function SdkLangClient({ guide }: SdkLangClientProps) {
                 <button
                   onClick={() => setActiveCodeTab('standard')}
                   className={`px-3 py-1 rounded-lg transition-all ${
-                    activeCodeTab === 'standard' ? 'bg-cyan-500/20 text-cyan-300 font-bold' : 'text-zinc-400'
+                    activeCodeTab === 'standard' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400 hover:text-zinc-200'
                   }`}
                 >
                   Standard
@@ -125,7 +125,7 @@ export function SdkLangClient({ guide }: SdkLangClientProps) {
                 <button
                   onClick={() => setActiveCodeTab('streaming')}
                   className={`px-3 py-1 rounded-lg transition-all ${
-                    activeCodeTab === 'streaming' ? 'bg-indigo-500/20 text-indigo-300 font-bold' : 'text-zinc-400'
+                    activeCodeTab === 'streaming' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400 hover:text-zinc-200'
                   }`}
                 >
                   SSE Streaming

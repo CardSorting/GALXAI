@@ -73,7 +73,7 @@ print(response.choices[0].message.content)`,
     faqs: [
       {
         q: 'How does GALXAI handle large multi-file codebase contexts in coding agents?',
-        a: 'GALXAI supports up to 1,000,000 token context windows on models like Grok 4.6 and 900,000 tokens on GPT-5.6 Sol, allowing entire repositories to be ingested in a single inference call.',
+        a: 'GALXAI supports up to 900,000 token context windows on OpenAI GPT-5.6 Sol, allowing entire repositories to be ingested in a single inference call.',
       },
       {
         q: 'Can I route between high-reasoning and fast autocomplete models dynamically?',
@@ -90,13 +90,13 @@ print(response.choices[0].message.content)`,
     description:
       'Slash recurring context costs by up to 70% on document question-answering, PDF parsing, and enterprise vector search pipelines with automatic 75% prompt caching.',
     targetWorkload: 'Retrieval-Augmented Generation, legal document analysis, semantic customer search.',
-    primaryModelId: 'x-ai/grok-4.6',
+    primaryModelId: 'gpt-5.6-sol',
     fallbackModelId: 'gpt-5.6-terra',
     estimatedSavingsPct: 65,
     keyBenefits: [
       {
-        title: 'Massive 1M Context Window',
-        description: 'Ingest hundreds of PDF pages simultaneously on Grok 4.6 without chunk truncation.',
+        title: 'Massive 900K Context Window',
+        description: 'Ingest hundreds of PDF pages simultaneously on GPT-5.6 Sol without chunk truncation.',
       },
       {
         title: 'Compound 75% Prompt Caching',
@@ -118,7 +118,7 @@ client = OpenAI(
 
 # 100K+ token document chunk automatically receives 75% prompt cache pass-through
 response = client.chat.completions.create(
-    model="x-ai/grok-4.6",
+    model="gpt-5.6-sol",
     messages=[
         {"role": "system", "content": "You are an enterprise research analyst. Reference document below:\\n" + large_pdf_text},
         {"role": "user", "content": "Extract all compliance liability clauses."}
@@ -194,7 +194,7 @@ const stream = await client.chat.completions.create({
       'Execute high-stakes financial analysis, contract review, and quantitative modeling with SOTA reasoning engines and verified Zero Data Retention (ZDR).',
     targetWorkload: 'M&A contract review, risk modeling, automated algorithmic audits.',
     primaryModelId: 'gpt-5.6-sol',
-    fallbackModelId: 'x-ai/grok-4.6',
+    fallbackModelId: 'gpt-5.6-terra',
     estimatedSavingsPct: 35,
     keyBenefits: [
       {
@@ -451,7 +451,7 @@ console.log(JSON.parse(response.choices[0].message.content || "{}"));`,
       'Orchestrate dozens of parallel autonomous agents (CrewAI, AutoGen, LangGraph) without hitting rate limit walls, saving 25%–40% on recursive loop tokens.',
     targetWorkload: 'Multi-agent software engineering, market research swarms, automated bug hunting.',
     primaryModelId: 'gpt-5.6-sol',
-    fallbackModelId: 'x-ai/grok-4.6',
+    fallbackModelId: 'gpt-5.6-terra',
     estimatedSavingsPct: 40,
     keyBenefits: [
       {
@@ -464,7 +464,7 @@ console.log(JSON.parse(response.choices[0].message.content || "{}"));`,
       },
       {
         title: 'Unified Wallet & Logs',
-        description: 'Track per-agent token spend across OpenAI and Grok in a single dashboard.',
+        description: 'Track per-agent token spend across all GPT models in a single dashboard.',
       },
     ],
     codeSnippet: {

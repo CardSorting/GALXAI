@@ -70,11 +70,11 @@ code = run_agent_turn(
 print("Generated Production Microservice:\\n", code)`,
   },
   {
-    id: 'rag_500k',
-    title: 'Massive Repository RAG Ingestion (Grok 4.5 - 500K Context)',
+    id: 'rag_900k',
+    title: 'Massive Repository RAG Ingestion (GPT-5.6 Sol - 900K Context)',
     category: 'Information Retrieval',
-    badge: '500K Context',
-    description: 'Ingest and reason across 500,000 tokens of raw source code in a single prompt without chunk fragmentation.',
+    badge: '900K Context',
+    description: 'Ingest and reason across 900,000 tokens of raw source code in a single prompt without chunk fragmentation.',
     code: `from openai import OpenAI
 
 client = OpenAI(
@@ -82,12 +82,12 @@ client = OpenAI(
     api_key="galx_live_your_gateway_key"
 )
 
-# Load entire repository into 500,000 token context window
+# Load entire repository into 900,000 token context window
 with open("combined_codebase.txt", "r") as f:
     entire_repo_text = f.read()
 
 response = client.chat.completions.create(
-    model="x-ai/grok-4.5", # 500,000 token context window
+    model="gpt-5.6-sol", # 900,000 token context window
     messages=[
         {"role": "system", "content": "You have full visibility into the entire enterprise codebase."},
         {"role": "user", "content": f"Repo Context:\\n{entire_repo_text}\\n\\nFind all potential SQL injection vulnerabilities across all controllers."}

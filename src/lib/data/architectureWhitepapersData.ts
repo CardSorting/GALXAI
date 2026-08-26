@@ -344,7 +344,7 @@ asyncio.run(asyncio.gather(*[send_burst(i) for i in range(100)]))`,
     systemDiagramMermaid: `graph LR
   Developers[Developer Teams] --> Gateway[GALXAI Clearinghouse]
   Gateway -->|Wholesale Liquidity Pool| OpenAI[OpenAI Tier 5 Fleet]
-  Gateway -->|Wholesale Liquidity Pool| xAI[xAI Grok Supercluster]
+  Gateway -->|Wholesale Liquidity Pool| Codex[OpenAI Codex Fleet]
   Gateway -->|Atomic Rebate Settlement| Wallet[Enterprise Balance]`,
     technicalMetrics: [
       { label: 'Token Discount', value: '25% - 40%', context: 'Below Provider List Prices' },

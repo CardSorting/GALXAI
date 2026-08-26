@@ -105,17 +105,17 @@ export function RateLimitsClient() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-[11px]">
               <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-0.5">
-                <span className="text-zinc-500 text-[9px] uppercase">Refill Granularity</span>
+                <span className="text-zinc-500 text-[10px] uppercase">Refill Granularity</span>
                 <div className="text-white font-bold">1 microsecond</div>
               </div>
 
               <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-0.5">
-                <span className="text-zinc-500 text-[9px] uppercase">Top-of-Minute Jitter</span>
+                <span className="text-zinc-500 text-[10px] uppercase">Top-of-Minute Jitter</span>
                 <div className="text-emerald-400 font-bold">0.0 ms (Eliminated)</div>
               </div>
 
               <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-0.5">
-                <span className="text-zinc-500 text-[9px] uppercase">Scavenger Reclaim</span>
+                <span className="text-zinc-500 text-[10px] uppercase">Scavenger Reclaim</span>
                 <div className="text-cyan-300 font-bold">Instant on disconnect</div>
               </div>
             </div>

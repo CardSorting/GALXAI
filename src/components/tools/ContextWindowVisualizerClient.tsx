@@ -51,17 +51,15 @@ interface ModelContextProfile {
 }
 
 const MODEL_PROFILES: ModelContextProfile[] = [
-  { name: 'xAI Grok 4.6', id: 'x-ai/grok-4.6', contextLimit: 1000000, inputCost1M: 2.80, cachedCost1M: 0.75, provider: 'xAI' },
   { name: 'OpenAI GPT-5.6 Sol', id: 'gpt-5.6-sol', contextLimit: 900000, inputCost1M: 3.75, cachedCost1M: 1.25, provider: 'OpenAI' },
-  { name: 'OpenAI GPT-5.6 Terra', id: 'gpt-5.6-terra', contextLimit: 900000, inputCost1M: 2.25, cachedCost1M: 0.75, provider: 'OpenAI' },
-  { name: 'OpenAI GPT-5.6 Luna', id: 'gpt-5.6-luna', contextLimit: 900000, inputCost1M: 0.75, cachedCost1M: 0.25, provider: 'OpenAI' },
-  { name: 'xAI Grok 4.5', id: 'x-ai/grok-4.5', contextLimit: 500000, inputCost1M: 2.40, cachedCost1M: 0.75, provider: 'xAI' },
+  { name: 'OpenAI GPT-5.6 Terra', id: 'gpt-5.6-terra', contextLimit: 750000, inputCost1M: 2.25, cachedCost1M: 0.75, provider: 'OpenAI' },
+  { name: 'OpenAI GPT-5.6 Luna', id: 'gpt-5.6-luna', contextLimit: 500000, inputCost1M: 0.75, cachedCost1M: 0.25, provider: 'OpenAI' },
   { name: 'OpenAI GPT-4o (Legacy)', id: 'gpt-4o', contextLimit: 128000, inputCost1M: 5.00, cachedCost1M: 2.50, provider: 'OpenAI' },
 ];
 
 export function ContextWindowVisualizerClient() {
   const [tokenCount, setTokenCount] = useState<number>(180000);
-  const [selectedModel, setSelectedModel] = useState<string>('x-ai/grok-4.6');
+  const [selectedModel, setSelectedModel] = useState<string>('gpt-5.6-sol');
   const [copiedCode, setCopiedCode] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
@@ -148,10 +146,10 @@ print(response.choices[0].message.content)`;
         <section id="aeo-direct-answer" className="glass-panel rounded-3xl p-6 sm:p-8 border border-emerald-500/30 bg-emerald-500/5 space-y-3">
           <div className="flex items-center gap-2 text-emerald-400 font-mono font-bold text-xs uppercase">
             <Sparkles className="w-4 h-4" />
-            <span>Direct Answer: How Much Fits in a 1,000,000 Token Context Window?</span>
+            <span>Direct Answer: How Much Fits in a 900,000 Token Context Window?</span>
           </div>
           <p className="text-sm sm:text-base text-white leading-relaxed font-sans">
-            A <strong>1,000,000 (1M) token context window</strong> (supported by <strong>xAI Grok 4.6</strong> on GALXAI) holds approximately <strong>750,000 English words</strong>, <strong>2,100 pages of text</strong>, or roughly <strong>80,000 lines of source code</strong> in a single prompt. On GALXAI, prefixes over 1,024 tokens automatically receive a <strong>75% prompt caching discount</strong>, reducing recurring 1M context analysis costs from $2.80 down to just $0.75 per million tokens.
+            A <strong>900,000 (900K) token context window</strong> (supported by <strong>OpenAI GPT-5.6 Sol</strong> on GALXAI) holds approximately <strong>675,000 English words</strong>, <strong>1,900 pages of text</strong>, or roughly <strong>75,000 lines of source code</strong> in a single prompt. On GALXAI, prefixes over 1,024 tokens automatically receive a <strong>75% prompt caching discount</strong>, reducing recurring context analysis costs from $3.75 down to just $1.25 per million tokens.
           </p>
         </section>
 
@@ -341,10 +339,10 @@ print(response.choices[0].message.content)`;
             {[
               {
                 q: 'What is the largest context window available on GALXAI?',
-                a: 'xAI Grok 4.6 offers a 1,000,000 (1M) token context window, while OpenAI GPT-5.6 Sol, Terra, and Luna offer 900,000 (900K) tokens with sub-15ms Anycast TTFT.',
+                a: 'OpenAI GPT-5.6 Sol offers a 900,000 (900K) token context window with sub-15ms Anycast TTFT and 75% prompt caching pass-through.',
               },
               {
-                q: 'How does prompt caching work on 1M token contexts?',
+                q: 'How does prompt caching work on 900K token contexts?',
                 a: 'When sending repeated prompts exceeding 1,024 tokens with identical leading prefixes (e.g. system instructions, documentation, or code repositories), GALXAI passes through the provider 75% cached token rebate automatically.',
               },
               {

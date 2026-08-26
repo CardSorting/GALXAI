@@ -34,7 +34,7 @@ export function LanguageBadge() {
         <Globe className="w-3.5 h-3.5 text-cyan-400" />
         <span>{details.nativeName}</span>
         {isAutoDetected && (
-          <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-bold">
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-bold">
             Auto
           </span>
         )}

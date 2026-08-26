@@ -150,7 +150,7 @@ client = OpenAI(
 
 # Stream massive context without TCP timeouts
 stream = client.chat.completions.create(
-    model="x-ai/grok-4.6",
+    model="gpt-5.6-sol",
     messages=[
         {"role": "system", "content": "You are analyzing a 500-page enterprise contract."},
         {"role": "user", "content": "Identify all indemnity liability caps."}

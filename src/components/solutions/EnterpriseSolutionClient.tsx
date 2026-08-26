@@ -105,7 +105,7 @@ export function EnterpriseSolutionClient() {
             </div>
             <h3 className="text-base font-bold text-white">Up to 40% Wholesale Volume Discount</h3>
             <p className="text-xs text-zinc-300 leading-relaxed">
-              Consolidate your entire organization&apos;s OpenAI and Grok spend to unlock the highest wholesale clearinghouse margins in the industry.
+              Consolidate your entire organization&apos;s OpenAI spend to unlock the highest wholesale clearinghouse margins in the industry.
             </p>
           </div>
 

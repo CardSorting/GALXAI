@@ -221,8 +221,8 @@ export function createModelItemListSchema(models: ModelSpecItem[]) {
         description: m.description,
         brand: {
           '@type': 'Brand',
-          name: m.provider === 'xai-grok' ? 'xAI' : 'OpenAI',
-          sameAs: m.provider === 'xai-grok' ? undefined : SITE_CONFIG.wikidataEntities.openai,
+          name: 'OpenAI',
+          sameAs: SITE_CONFIG.wikidataEntities.openai,
         },
         offers: {
           '@type': 'Offer',
@@ -240,7 +240,6 @@ export function createModelItemListSchema(models: ModelSpecItem[]) {
  * Schema.org Product for Individual Model Specs
  */
 export function createProductModelSchema(model: ModelSpecItem) {
-  const isGrok = model.provider === 'xai-grok';
   const canonicalUrl = `${SITE_CONFIG.url}/models/${model.id.replace('/', '-')}`;
 
   return {
@@ -253,8 +252,8 @@ export function createProductModelSchema(model: ModelSpecItem) {
     disambiguatingDescription: `Wholesale OpenAI-compatible API compute channel for ${model.name} with 75% prompt caching and zero rate limit stalls.`,
     brand: {
       '@type': 'Brand',
-      name: isGrok ? 'xAI' : 'OpenAI',
-      sameAs: isGrok ? undefined : SITE_CONFIG.wikidataEntities.openai,
+      name: 'OpenAI',
+      sameAs: SITE_CONFIG.wikidataEntities.openai,
     },
     offers: {
       '@type': 'Offer',

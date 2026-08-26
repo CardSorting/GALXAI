@@ -154,8 +154,7 @@ export class GalxMetricsEngine {
           maxMs: 0
         },
         providerBreakdown: {
-          openai: { requests: 0, tokens: 0, avgLatencyMs: 0, errorRate: 0 },
-          'xai-grok': { requests: 0, tokens: 0, avgLatencyMs: 0, errorRate: 0 }
+          openai: { requests: 0, tokens: 0, avgLatencyMs: 0, errorRate: 0 }
         },
         modelBreakdown: {},
         recentSamples: []
@@ -170,8 +169,7 @@ export class GalxMetricsEngine {
 
     const latencies: number[] = new Array(n);
     const providerMap: Record<ProviderType, { req: number; tok: number; latSum: number; err: number }> = {
-      openai: { req: 0, tok: 0, latSum: 0, err: 0 },
-      'xai-grok': { req: 0, tok: 0, latSum: 0, err: 0 }
+      openai: { req: 0, tok: 0, latSum: 0, err: 0 }
     };
     const modelMap: Record<string, { req: number; tok: number; latSum: number }> = {};
 
@@ -217,12 +215,6 @@ export class GalxMetricsEngine {
         tokens: providerMap.openai.tok,
         avgLatencyMs: providerMap.openai.req > 0 ? Math.round(providerMap.openai.latSum / providerMap.openai.req) : 0,
         errorRate: providerMap.openai.req > 0 ? Number(((providerMap.openai.err / providerMap.openai.req) * 100).toFixed(1)) : 0
-      },
-      'xai-grok': {
-        requests: providerMap['xai-grok'].req,
-        tokens: providerMap['xai-grok'].tok,
-        avgLatencyMs: providerMap['xai-grok'].req > 0 ? Math.round(providerMap['xai-grok'].latSum / providerMap['xai-grok'].req) : 0,
-        errorRate: providerMap['xai-grok'].req > 0 ? Number(((providerMap['xai-grok'].err / providerMap['xai-grok'].req) * 100).toFixed(1)) : 0
       }
     };
 

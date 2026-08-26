@@ -17,7 +17,6 @@ import { ModelCatalog } from './ModelCatalog';
 import { TokenCostCalculator } from '../pricing/TokenCostCalculator';
 import { GalxEdgeBatchBuffer } from '../../workers/cloudflare/GalxEdgeBatchBuffer';
 import { OpenAIAdapter } from './adapters/OpenAIAdapter';
-import { GrokAdapter } from './adapters/GrokAdapter';
 import { GalxPreflightValidator } from '../validator/GalxPreflightValidator';
 import { GalxMetricsEngine } from '../telemetry/GalxMetricsEngine';
 import { GalxPrivacyComplianceEngine } from '../privacy/GalxPrivacyComplianceEngine';
@@ -76,11 +75,10 @@ export class GalxModelRouter {
   }
 
   /**
-   * Proactively pre-warms DNS and HTTP keep-alive socket connections to OpenAI and xAI Grok.
+   * Proactively pre-warms DNS and HTTP keep-alive socket connections to OpenAI.
    */
   public prewarmUpstreamSockets(): void {
     OpenAIAdapter.prewarmConnection();
-    GrokAdapter.prewarmConnection();
   }
 
   static getInstance(): GalxModelRouter {
@@ -136,7 +134,7 @@ export class GalxModelRouter {
   }
 
   /**
-   * Routes OpenAI/Grok chat completion across pooled quota shards with HIPAA/ZDR/GDPR compliance.
+   * Routes OpenAI chat completion across pooled quota shards with HIPAA/ZDR/GDPR compliance.
    */
   async routeChatCompletion(options: RouteChatOptions): Promise<{
     body: ReadableStream<Uint8Array> | string;
@@ -248,12 +246,7 @@ export class GalxModelRouter {
         rawTokenSecret = decrypted.apiKey || decrypted.accessToken;
 
         // 5. Dispatch to Provider Adapter with store: false
-        let adapterResult: { response: Response; headers: Record<string, string> };
-        if (provider === 'xai-grok') {
-          adapterResult = await GrokAdapter.executeChatCompletion(sanitizedRequest, decrypted, modelSpec);
-        } else {
-          adapterResult = await OpenAIAdapter.executeChatCompletion(sanitizedRequest, decrypted, modelSpec);
-        }
+        let adapterResult = await OpenAIAdapter.executeChatCompletion(sanitizedRequest, decrypted, modelSpec);
 
         // Reactive 401 Unauthorized Recovery on OAuth Shards
         if (
@@ -274,11 +267,7 @@ export class GalxModelRouter {
                   provider
                 );
                 // Retry once with refreshed token
-                if (provider === 'xai-grok') {
-                  adapterResult = await GrokAdapter.executeChatCompletion(sanitizedRequest, decrypted, modelSpec);
-                } else {
-                  adapterResult = await OpenAIAdapter.executeChatCompletion(sanitizedRequest, decrypted, modelSpec);
-                }
+                adapterResult = await OpenAIAdapter.executeChatCompletion(sanitizedRequest, decrypted, modelSpec);
               }
             }
           } catch {}
@@ -752,11 +741,7 @@ export class GalxModelRouter {
 
       let result: ImageGenerationResponse;
       try {
-        if (provider === 'xai-grok') {
-          result = await GrokAdapter.executeImageGeneration(sanitizedRequest, decrypted, modelSpec, lease.shardId);
-        } else {
-          result = await OpenAIAdapter.executeImageGeneration(sanitizedRequest, decrypted, modelSpec, lease.shardId);
-        }
+        result = await OpenAIAdapter.executeImageGeneration(sanitizedRequest, decrypted, modelSpec, lease.shardId);
       } catch (execErr: any) {
         // Reactive 401 Recovery
         if (
@@ -775,11 +760,7 @@ export class GalxModelRouter {
                 lease.account.id,
                 provider
               );
-              if (provider === 'xai-grok') {
-                result = await GrokAdapter.executeImageGeneration(sanitizedRequest, decrypted, modelSpec, lease.shardId);
-              } else {
-                result = await OpenAIAdapter.executeImageGeneration(sanitizedRequest, decrypted, modelSpec, lease.shardId);
-              }
+              result = await OpenAIAdapter.executeImageGeneration(sanitizedRequest, decrypted, modelSpec, lease.shardId);
             } else {
               throw execErr;
             }

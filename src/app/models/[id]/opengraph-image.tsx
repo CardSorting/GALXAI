@@ -24,9 +24,8 @@ export default async function Image({ params }: Props) {
     (m) => m.id === id || m.id.replace('/', '-') === id || m.upstreamId === id
   ) || FRONTEND_VISIBLE_MODELS[0];
 
-  const isGrok = model.provider === 'xai-grok';
-  const accentColor = isGrok ? '#34d399' : '#f59e0b';
-  const providerLabel = isGrok ? 'xAI Grok' : 'OpenAI Codex';
+  const accentColor = '#f59e0b';
+  const providerLabel = 'OpenAI Codex';
 
   return new ImageResponse(
     (
@@ -53,7 +52,7 @@ export default async function Image({ params }: Props) {
             width: '450px',
             height: '450px',
             borderRadius: '50%',
-            background: `radial-gradient(circle, ${isGrok ? 'rgba(52, 211, 153, 0.3)' : 'rgba(245, 158, 11, 0.3)'} 0%, transparent 70%)`,
+            background: 'radial-gradient(circle, rgba(245, 158, 11, 0.3) 0%, transparent 70%)',
           }}
         />
 

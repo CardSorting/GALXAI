@@ -400,7 +400,7 @@ export const PLAN_COMPARISONS: FeatureComparisonRow[] = [
   {
     category: 'API Gateway & Compute',
     feature: 'Wholesale Token Discount',
-    description: 'Direct discount off OpenAI and Grok retail prices',
+    description: 'Direct discount off OpenAI retail prices',
     developer: '25%–36%',
     smallBusiness: '30%–41%',
     enterprise: '40%–51%',

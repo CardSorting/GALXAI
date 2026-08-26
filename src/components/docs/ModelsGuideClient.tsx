@@ -51,26 +51,6 @@ const MODELS_GUIDE_DATA = [
     badge: 'Sub-Second Velocity',
   },
   {
-    id: 'x-ai-grok-4.6',
-    name: 'xAI Grok 4.6',
-    idealFor: 'Massive Repositories, Frontier Multi-step Reasoning, Extreme Tool Use up to 1,000,000 Tokens',
-    contextWindow: '1M Tokens',
-    speed: '80 tok/sec',
-    pricing: '$2.10 / $8.40 per M (Wholesale: -30%)',
-    cacheDiscount: '75% OFF Cached Prefixes',
-    badge: '1M Context Window',
-  },
-  {
-    id: 'x-ai-grok-4.5',
-    name: 'xAI Grok 4.5',
-    idealFor: 'Massive Repositories, Full Codebase Ingestion, Document Analysis up to 500,000 Tokens',
-    contextWindow: '500K Tokens',
-    speed: '70 tok/sec',
-    pricing: '$1.80 / $7.20 per M (Wholesale: -28%)',
-    cacheDiscount: '75% OFF Cached Prefixes',
-    badge: '500K Context Window',
-  },
-  {
     id: 'openai-gpt-image-2',
     name: 'OpenAI GPT-Image-2',
     idealFor: 'High-Fidelity Visual Generation, UI Component Mockups, Creative Asset Synthesis',
@@ -79,6 +59,26 @@ const MODELS_GUIDE_DATA = [
     pricing: '$0.030 per standard image',
     cacheDiscount: 'N/A',
     badge: 'Visual Engine',
+  },
+  {
+    id: 'openai-gpt-image-1.5',
+    name: 'OpenAI GPT-Image-1.5',
+    idealFor: 'Fast Marketing Assets, Mid-Tier Visual Generation, E-commerce Mockups',
+    contextWindow: 'Image Generation',
+    speed: '~1.2s per render',
+    pricing: '$0.024 per standard image',
+    cacheDiscount: 'N/A',
+    badge: 'Balanced Visuals',
+  },
+  {
+    id: 'openai-gpt-image-1',
+    name: 'OpenAI GPT-Image-1',
+    idealFor: 'Foundation Visual Generation, High-Throughput Thumbnails, Prototyping',
+    contextWindow: 'Image Generation',
+    speed: '~0.9s per render',
+    pricing: '$0.016 per standard image',
+    cacheDiscount: 'N/A',
+    badge: 'Foundation Visuals',
   },
 ];
 
@@ -172,17 +172,17 @@ export function ModelsGuideClient() {
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2 border-t border-white/5 text-[11px]">
                 <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-0.5">
-                  <span className="text-zinc-500 text-[9px] uppercase">Context Window</span>
+                  <span className="text-zinc-500 text-[10px] uppercase">Context Window</span>
                   <div className="text-white font-bold">{model.contextWindow}</div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-0.5">
-                  <span className="text-zinc-500 text-[9px] uppercase">Inference Velocity</span>
+                  <span className="text-zinc-500 text-[10px] uppercase">Inference Velocity</span>
                   <div className="text-cyan-300 font-bold">{model.speed}</div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-0.5 col-span-2 sm:col-span-1">
-                  <span className="text-zinc-500 text-[9px] uppercase">Wholesale Compute Rate</span>
+                  <span className="text-zinc-500 text-[10px] uppercase">Wholesale Compute Rate</span>
                   <div className="text-amber-300 font-bold truncate">{model.pricing}</div>
                 </div>
               </div>

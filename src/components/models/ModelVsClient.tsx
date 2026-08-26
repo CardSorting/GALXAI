@@ -338,7 +338,7 @@ const resB = await client.chat.completions.create({
                 <button
                   onClick={() => setActiveCodeTab('python')}
                   className={`px-3 py-1 rounded-lg transition-all ${
-                    activeCodeTab === 'python' ? 'bg-cyan-500/20 text-cyan-300 font-bold' : 'text-zinc-400'
+                    activeCodeTab === 'python' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400 hover:text-zinc-200'
                   }`}
                 >
                   Python
@@ -346,7 +346,7 @@ const resB = await client.chat.completions.create({
                 <button
                   onClick={() => setActiveCodeTab('ts')}
                   className={`px-3 py-1 rounded-lg transition-all ${
-                    activeCodeTab === 'ts' ? 'bg-amber-500/20 text-amber-300 font-bold' : 'text-zinc-400'
+                    activeCodeTab === 'ts' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400 hover:text-zinc-200'
                   }`}
                 >
                   TypeScript

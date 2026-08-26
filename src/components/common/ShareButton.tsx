@@ -57,7 +57,7 @@ export function ShareButton({
       case 'pill':
         return 'px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer';
       case 'button':
-        return 'px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-indigo-500/20 transition-all cursor-pointer';
+        return 'px-4 py-2 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-white/5 transition-all cursor-pointer';
       case 'ghost':
         return 'px-2 py-1 text-xs text-zinc-400 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer';
       default:

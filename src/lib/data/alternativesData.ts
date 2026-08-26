@@ -75,7 +75,7 @@ export const COMPETITOR_ALTERNATIVES: CompetitorAlternative[] = [
       },
       {
         step: 'Step 3: Keep Model Identifiers',
-        desc: 'Use standard model IDs like "gpt-5.6-sol" or "x-ai/grok-4.6" with zero code changes.',
+        desc: 'Use standard model IDs like "gpt-5.6-sol" or "gpt-5.6-terra" with zero code changes.',
       },
     ],
     codeSnippet: {
@@ -175,13 +175,13 @@ response = client.chat.completions.create(
   {
     slug: 'together-ai',
     competitorName: 'Together AI',
-    badge: 'Frontier OpenAI & xAI Fleet',
-    title: 'Together AI Alternative with Native GPT-5.6 & Grok 4.5 Routing',
+    badge: 'Frontier OpenAI Fleet',
+    title: 'Together AI Alternative with Native GPT-5.6 & Frontier Routing',
     headline: 'Together AI Alternative for Frontier Model Routing',
     description:
-      'Access both OpenAI Codex and xAI Grok frontier models in a unified, wire-compatible gateway with 75% prompt caching and zero data retention.',
+      'Access OpenAI Codex and GPT-5.6 frontier models in a unified, wire-compatible gateway with 75% prompt caching and zero data retention.',
     verdict:
-      'While Together AI focuses heavily on open-weights inference, GALXAI specializes in enterprise wholesale access to frontier reasoning models (GPT-5.6 Sol, Grok 4.6) with Anycast low-latency routing.',
+      'While Together AI focuses heavily on open-weights inference, GALXAI specializes in enterprise wholesale access to frontier reasoning models (GPT-5.6 Sol, Terra, Luna) with Anycast low-latency routing.',
     feeComparison: [
       {
         feature: 'OpenAI GPT-5.6 Access',
@@ -189,8 +189,8 @@ response = client.chat.completions.create(
         competitor: 'Not Supported (Open Weights Only)',
       },
       {
-        feature: 'xAI Grok 4.6 (1M Context)',
-        galxai: 'Native Wholesale Routing',
+        feature: '900K Context Window',
+        galxai: 'Native Wholesale Routing (GPT-5.6 Sol)',
         competitor: 'Not Supported',
       },
       {
@@ -211,7 +211,7 @@ response = client.chat.completions.create(
       },
       {
         step: 'Step 2: Update Model Parameter',
-        desc: 'Specify "gpt-5.6-sol" or "x-ai/grok-4.6".',
+        desc: 'Specify "gpt-5.6-sol" or "gpt-5.6-terra".',
       },
     ],
     codeSnippet: {
@@ -224,14 +224,14 @@ const client = new OpenAI({
 });
 
 const res = await client.chat.completions.create({
-  model: "x-ai/grok-4.6",
-  messages: [{ role: "user", content: "Analyze 1M token context" }],
+  model: "gpt-5.6-sol",
+  messages: [{ role: "user", content: "Analyze 900K token context" }],
 });`,
     },
     faqs: [
       {
-        q: 'Can I route between OpenAI and xAI on GALXAI?',
-        a: 'Yes. A single API key and shared compute wallet routes seamlessly across OpenAI and xAI model suites.',
+        q: 'Can I route between OpenAI models on GALXAI?',
+        a: 'Yes. A single API key and shared compute wallet routes seamlessly across all OpenAI model tiers.',
       },
     ],
   },
@@ -458,8 +458,8 @@ const client = new OpenAI({
 });
 
 const completion = await client.chat.completions.create({
-  model: "x-ai/grok-4.6",
-  messages: [{ role: "user", content: "Managed 1M context routing" }],
+  model: "gpt-5.6-sol",
+  messages: [{ role: "user", content: "Managed 900K context routing" }],
 });`,
     },
     faqs: [
@@ -589,22 +589,22 @@ const res = await client.chat.completions.create({
   {
     slug: 'deepinfra',
     competitorName: 'DeepInfra',
-    badge: 'Frontier Reasoning + 1M Context',
-    title: 'DeepInfra Alternative — Frontier OpenAI & xAI Grok Routing',
+    badge: 'Frontier Reasoning + 900K Context',
+    title: 'DeepInfra Alternative — Frontier OpenAI Routing',
     headline: 'Frontier AI Gateway Alternative to DeepInfra',
     description:
-      'Access OpenAI GPT-5.6 and xAI Grok 4.6 with 1M context windows, 75% prompt caching, and wholesale token pricing on GALXAI.',
+      'Access OpenAI GPT-5.6 with 900K context windows, 75% prompt caching, and wholesale token pricing on GALXAI.',
     verdict:
-      'GALXAI provides frontier closed-source and reasoning model access with sub-15ms Anycast TTFT and zero rate limit stalls.',
+      'GALXAI provides frontier reasoning model access with sub-15ms Anycast TTFT and zero rate limit stalls.',
     feeComparison: [
       {
         feature: 'Model Portfolio',
-        galxai: 'OpenAI GPT-5.6 Suite & xAI Grok 4.6 (1M)',
+        galxai: 'OpenAI GPT-5.6 Suite (Sol, Terra, Luna)',
         competitor: 'Primarily Open-Source LLMs',
       },
       {
         feature: 'Context Window Capacity',
-        galxai: 'Up to 1,000,000 Tokens (Grok 4.6)',
+        galxai: 'Up to 900,000 Tokens (GPT-5.6 Sol)',
         competitor: 'Varies by Open-Source Checkpoint',
       },
       {
@@ -620,7 +620,7 @@ const res = await client.chat.completions.create({
       },
       {
         step: 'Step 2: Select SOTA Model',
-        desc: 'Specify model="gpt-5.6-sol" or model="x-ai/grok-4.6".',
+        desc: 'Specify model="gpt-5.6-sol" or model="gpt-5.6-terra".',
       },
     ],
     codeSnippet: {
@@ -633,14 +633,14 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="x-ai/grok-4.6",
-    messages=[{"role": "user", "content": "1M context frontier processing"}]
+    model="gpt-5.6-sol",
+    messages=[{"role": "user", "content": "900K context frontier processing"}]
 )`,
     },
     faqs: [
       {
         q: 'Can I route image generation models on GALXAI?',
-        a: 'Yes. GALXAI supports GPT-Image-2, DALL-E 3, and Grok-Image via standard /v1/images/generations requests.',
+        a: 'Yes. GALXAI supports GPT-Image-2, GPT-Image-1.5, and GPT-Image-1 via standard /v1/images/generations requests.',
       },
     ],
   },
@@ -653,11 +653,11 @@ response = client.chat.completions.create(
     description:
       'Route frontier reasoning and coding models with sub-15ms TTFT, 75% prompt caching pass-through, and wholesale token pricing.',
     verdict:
-      'GALXAI unites OpenAI GPT-5.6 and xAI Grok 4.6 under a single wholesale wallet with zero platform markups and zero 429 stalls.',
+      'GALXAI unites the OpenAI GPT-5.6 suite under a single wholesale wallet with zero platform markups and zero 429 stalls.',
     feeComparison: [
       {
         feature: 'Frontier Model Support',
-        galxai: 'GPT-5.6 Sol, Terra, Luna & Grok 4.6 (1M)',
+        galxai: 'GPT-5.6 Sol, Terra, Luna & GPT-Image-2',
         competitor: 'Specialized Open Weights & Fine-tunes',
       },
       {

@@ -196,7 +196,7 @@ console.log(completion.choices[0].message.content);`;
               <Sparkles className="w-5 h-5 text-indigo-400" />
               <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:translate-x-1 group-hover:text-indigo-400 transition-all" />
             </div>
-            <h3 className="text-base font-bold text-white group-hover:text-indigo-300 transition-colors">
+            <h3 className="text-base font-bold text-white group-hover:text-zinc-200 transition-colors">
               Cursor &amp; Windsurf IDE Setup
             </h3>
             <p className="text-xs text-zinc-400">

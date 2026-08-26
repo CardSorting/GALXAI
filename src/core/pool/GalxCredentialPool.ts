@@ -725,7 +725,6 @@ export class GalxCredentialPool {
     }
 
     const openaiShards = all.filter(a => a.provider === 'openai');
-    const grokShards = all.filter(a => a.provider === 'xai-grok');
 
     return {
       totalShards: all.length,
@@ -745,10 +744,6 @@ export class GalxCredentialPool {
         openai: {
           total: openaiShards.length,
           healthy: openaiShards.filter(a => a.status === 'healthy').length
-        },
-        'xai-grok': {
-          total: grokShards.length,
-          healthy: grokShards.filter(a => a.status === 'healthy').length
         }
       },
       rotationStrategy: this.strategy

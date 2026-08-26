@@ -67,18 +67,6 @@ const BENCHMARK_MODELS: BenchmarkModel[] = [
     badge: 'Balanced Workhorse (92 tok/s)',
   },
   {
-    id: 'x-ai/grok-4.6',
-    name: 'xAI Grok 4.6 (1M)',
-    provider: 'xAI',
-    tokensPerSec: 75,
-    ttftMs: 15.2,
-    inputCost1M: 2.8,
-    outputCost1M: 11.2,
-    retailInput1M: 4.0,
-    retailOutput1M: 16.0,
-    badge: '1M Context Flagship (75 tok/s)',
-  },
-  {
     id: 'gpt-5.6-sol',
     name: 'OpenAI GPT-5.6 Sol',
     provider: 'OpenAI',
@@ -217,7 +205,7 @@ for chunk in stream:
               variant="pill"
               label="Share Benchmark Tool"
               title="AI Streaming Speed & TTFT Benchmark Simulator — GALXAI"
-              description="Simulate real-time token generation velocities across GPT-5.6 and Grok 4.6."
+              description="Simulate real-time token generation velocities across GPT-5.6 Sol, Terra, and Luna."
             />
           </div>
 
@@ -225,7 +213,7 @@ for chunk in stream:
             AI Token Streaming &amp; Speed Benchmark Simulator
           </h1>
           <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-3xl font-sans">
-            Experience real-time Server-Sent Events (SSE) token generation velocities across OpenAI GPT-5.6 (Luna, Terra, Sol) and xAI Grok 4.6. Model Time-To-First-Token (TTFT), streaming duration, and wholesale token economics.
+            Experience real-time Server-Sent Events (SSE) token generation velocities across OpenAI GPT-5.6 (Luna, Terra, Sol). Model Time-To-First-Token (TTFT), streaming duration, and wholesale token economics.
           </p>
 
           {/* AEO Direct Answer Block */}
@@ -233,7 +221,7 @@ for chunk in stream:
             <div className="space-y-1">
               <span className="text-zinc-500 block text-[10px] uppercase font-bold">AEO Benchmark Summary:</span>
               <p className="text-zinc-200 font-sans text-xs">
-                <strong>GPT-5.6 Luna</strong> delivers fastest streaming velocity at <strong>142 tokens/sec</strong> with <strong>11.8ms TTFT</strong>. <strong>Grok 4.6</strong> streams at <strong>75 tokens/sec</strong> over <strong>1,000,000 tokens</strong> with 30% wholesale discounts.
+                <strong>GPT-5.6 Luna</strong> delivers fastest streaming velocity at <strong>142 tokens/sec</strong> with <strong>11.8ms TTFT</strong>. <strong>GPT-5.6 Terra</strong> and <strong>Sol</strong> provide deep reasoning with sub-15ms TTFT and 25%–40% wholesale discounts.
               </p>
             </div>
             <div className="flex items-center gap-2 text-emerald-400 font-bold shrink-0 self-start sm:self-auto">

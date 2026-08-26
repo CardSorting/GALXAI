@@ -345,7 +345,7 @@ const { text } = await generateText({
         >
           {/* Page Hero with Wallet Summary */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-            <div className="lg:col-span-8 glass-panel rounded-3xl p-6 sm:p-8 flex flex-col justify-between space-y-4 border border-white/10 bg-gradient-to-br from-indigo-950/20 via-black/40 to-cyan-950/20">
+            <div className="lg:col-span-8 glass-panel rounded-3xl p-6 sm:p-8 flex flex-col justify-between space-y-4 border border-white/10 bg-gradient-to-br from-zinc-950/20 via-black/40 to-cyan-950/20">
               <div className="space-y-3">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold">
                   <Key className="w-3.5 h-3.5 text-indigo-400" />
@@ -560,7 +560,7 @@ const { text } = await generateText({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="px-6 py-3 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
                   <span>{isLoading ? 'Generating...' : 'Create Key in 1-Click'}</span>

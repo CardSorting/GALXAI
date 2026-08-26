@@ -58,25 +58,9 @@ export class GalxPreflightValidator {
       };
     }
 
-    // 5. xAI Grok Key Signatures
-    if (trimmed.startsWith('xai-')) {
-      if (expectedProvider && expectedProvider !== 'xai-grok') {
-        return {
-          isValid: false,
-          error: `Key format matches xAI Grok ('xai-...') but expected '${expectedProvider}'`,
-          detectedProvider: 'xai-grok'
-        };
-      }
-      return {
-        isValid: true,
-        detectedProvider: 'xai-grok',
-        keyType: 'xai_live_key'
-      };
-    }
-
     return {
       isValid: false,
-      error: 'Unrecognized key format. Expected OpenAI key starting with "sk-" or xAI key starting with "xai-".'
+      error: 'Unrecognized key format. Expected OpenAI key starting with "sk-".'
     };
   }
 }

@@ -143,7 +143,7 @@ print(response.choices[0].message.content)`;
               variant="pill"
               label="Share Tool"
               title="GALXAI Model Cost Comparator & Savings Studio"
-              description="Calculate and compare monthly inference costs across OpenAI and xAI frontier models with wholesale discounts."
+              description="Calculate and compare monthly inference costs across OpenAI frontier models with wholesale discounts."
             />
           </div>
 
@@ -151,7 +151,7 @@ print(response.choices[0].message.content)`;
             Model Cost Comparator Studio
           </h1>
           <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-3xl font-sans">
-            Compare real-world monthly token costs across GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, and Grok 4.6 with automated 75% prompt caching and wholesale volume rebates.
+            Compare real-world monthly token costs across GPT-5.6 Sol, GPT-5.6 Terra, and GPT-5.6 Luna with automated 75% prompt caching and wholesale volume rebates.
           </p>
         </section>
 

@@ -127,18 +127,18 @@ print(completion.choices[0].message.parsed)`,
     slug: 'legal-and-contract-analysis',
     badge: '1M Context & Zero Retention',
     title: 'Zero Data Retention AI Gateway for Legal Discovery & Contract Analysis',
-    headline: '1M Token Context & Zero Retention for Legal Discovery',
+    headline: '900K Token Context & Zero Retention for Legal Discovery',
     description:
-      'Massive 1,000,000 token context window on Grok 4.6 and Sol for whole-docket indexing with strict confidentiality guarantees.',
+      'Massive 900,000 token context window on GPT-5.6 Sol for whole-docket indexing with strict confidentiality guarantees.',
     sectorName: 'Legal & Contract Intelligence',
     targetWorkloads: ['Multi-Gigabyte Litigation Discovery', 'M&A Due Diligence & Contract Audits', 'Regulatory Compliance Mapping'],
     regulatoryCompliance: ['Attorney-Client Privilege Protection', 'Cryptographic Zero Retention', 'ISO 27001 Certified'],
     recommendedModels: [
-      { name: 'xAI Grok 4.6 (1M)', modelId: 'x-ai/grok-4.6', role: '1,000,000 token whole-case litigation discovery' },
-      { name: 'OpenAI GPT-5.6 Sol', modelId: 'gpt-5.6-sol', role: 'Complex indemnity and liability cross-referencing' },
+      { name: 'OpenAI GPT-5.6 Sol', modelId: 'gpt-5.6-sol', role: '900,000 token whole-case litigation discovery' },
+      { name: 'OpenAI GPT-5.6 Terra', modelId: 'gpt-5.6-terra', role: 'Complex indemnity and liability cross-referencing' },
     ],
     architectureHighlights: [
-      '1M Token Ingestion: Analyze 500-page master service agreements in a single prompt without chunking loss',
+      '900K Token Ingestion: Analyze 500-page master service agreements in a single prompt without chunking loss',
       '75% Prompt Caching Rebate: Drastically lowers the cost of repeated multi-document cross-examinations',
       'Zero Model Training: Enforced upstream legal contracts guaranteeing client briefs are never used in training',
     ],
@@ -152,9 +152,9 @@ client = OpenAI(
     api_key="galx_live_your_gateway_key"
 )
 
-# 1M Token context enables single-pass contract review
+# 900K Token context enables single-pass contract review
 response = client.chat.completions.create(
-    model="x-ai/grok-4.6",
+    model="gpt-5.6-sol",
     messages=[
         {"role": "system", "content": "You are a senior partner examining contract liabilities."},
         {"role": "user", "content": "Review the full 200-page agreement and list all non-standard warranties."}
@@ -230,7 +230,7 @@ for chunk in stream:
     regulatoryCompliance: ['FedRAMP High Ready', 'FIPS 140-3 Validated', 'ITAR Data Segregation'],
     recommendedModels: [
       { name: 'OpenAI GPT-5.6 Sol', modelId: 'gpt-5.6-sol', role: 'High-assurance geopolitical and tactical reasoning' },
-      { name: 'xAI Grok 4.6', modelId: 'x-ai/grok-4.6', role: '1M token comprehensive intelligence brief synthesis' },
+      { name: 'OpenAI GPT-5.6 Terra', modelId: 'gpt-5.6-terra', role: 'Comprehensive intelligence brief synthesis' },
     ],
     architectureHighlights: [
       'CONUS-Only Anycast Nodes: Zero international packet transit or foreign edge proxy hops',
@@ -256,16 +256,16 @@ for chunk in stream:
     title: 'AI Gateway for Cybersecurity Operations, Threat Hunting & SIEM Triage',
     headline: 'Automated SOC Triage & Threat Intelligence AI Substrate',
     description:
-      'Analyze millions of SIEM event logs, decode malicious payloads, and automate incident response with 1M context windows, 75% prompt caching, and zero data retention.',
+      'Analyze millions of SIEM event logs, decode malicious payloads, and automate incident response with 900K context windows, 75% prompt caching, and zero data retention.',
     sectorName: 'Cybersecurity & Threat Intelligence',
     targetWorkloads: ['Automated SIEM Alert Triaging', 'Vulnerability Exploitation Analysis', 'Zero-Day IOC Extraction'],
     regulatoryCompliance: ['SOC 2 Type II Certified', 'ISO/IEC 27001:2022', 'Volatile RAM ZDR Protocol'],
     recommendedModels: [
-      { name: 'xAI Grok 4.6 (1M)', modelId: 'x-ai/grok-4.6', role: 'Full network traffic capture & multi-gigabyte log analysis' },
-      { name: 'OpenAI GPT-5.6 Sol', modelId: 'gpt-5.6-sol', role: 'Decompiled assembly & reverse engineering reasoning' },
+      { name: 'OpenAI GPT-5.6 Sol', modelId: 'gpt-5.6-sol', role: 'Full network traffic capture & multi-gigabyte log analysis' },
+      { name: 'OpenAI GPT-5.6 Terra', modelId: 'gpt-5.6-terra', role: 'Decompiled assembly & reverse engineering reasoning' },
     ],
     architectureHighlights: [
-      '1,000,000 Token Threat Telemetry Ingestion: Ingest hours of packet traces in a single request',
+      '900,000 Token Threat Telemetry Ingestion: Ingest hours of packet traces in a single request',
       'Ephemeral Volatile Buffers: Sensitive corporate network logs are never stored or used for training',
       'Automated SOC 2 Audit Logs: Real-time cryptographic logging of all gateway authorization events',
     ],
@@ -281,7 +281,7 @@ client = OpenAI(
 
 # Analyze massive security log with zero persistent retention
 response = client.chat.completions.create(
-    model="x-ai/grok-4.6",
+    model="gpt-5.6-sol",
     messages=[
         {"role": "system", "content": "You are a Principal SOC Threat Hunter. Identify malicious lateral movement."},
         {"role": "user", "content": "Log dump: 2026-08-23T14:22:10Z auth.fail user=admin src=198.51.100.44..."}
@@ -308,11 +308,11 @@ print(response.choices[0].message.content)`,
     regulatoryCompliance: ['ISO 26262 ASIL Compatible', 'Zero Content Retention', '99.99% Financial Uptime SLA'],
     recommendedModels: [
       { name: 'OpenAI GPT-5.6 Luna', modelId: 'gpt-5.6-luna', role: 'Sub-12ms real-time control decision streaming' },
-      { name: 'xAI Grok 4.5', modelId: 'x-ai/grok-4.5', role: 'High-resolution multimodal visual obstacle reasoning' },
+      { name: 'OpenAI GPT-5.6 Terra', modelId: 'gpt-5.6-terra', role: 'High-speed sensor telemetry interpretation' },
     ],
     architectureHighlights: [
       'Sub-15ms Global Anycast POPs: Terminate vehicle edge telemetry at the nearest geographical cloud node',
-      'Multimodal Visual Processing: Forward camera frames directly into Grok 4.5 vision channels',
+      'Multimodal Visual Processing: Forward camera frames directly into GPT-Image-2 vision channels',
       'Rate-Limit Pooling: Continuous token governance prevents vehicle telemetry disconnects under fleet scale',
     ],
     codeExample: {

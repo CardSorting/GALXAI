@@ -206,7 +206,7 @@ export function BenchmarksClient() {
                 <button
                   onClick={() => setSelectedCategory('all')}
                   className={`px-3 py-1 rounded-lg transition-all ${
-                    selectedCategory === 'all' ? 'bg-cyan-500/20 text-cyan-300 font-bold' : 'text-zinc-400'
+                    selectedCategory === 'all' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400'
                   }`}
                 >
                   All Providers
@@ -214,7 +214,7 @@ export function BenchmarksClient() {
                 <button
                   onClick={() => setSelectedCategory('openai')}
                   className={`px-3 py-1 rounded-lg transition-all ${
-                    selectedCategory === 'openai' ? 'bg-amber-500/20 text-amber-300 font-bold' : 'text-zinc-400'
+                    selectedCategory === 'openai' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400'
                   }`}
                 >
                   OpenAI
@@ -222,7 +222,7 @@ export function BenchmarksClient() {
                 <button
                   onClick={() => setSelectedCategory('xai')}
                   className={`px-3 py-1 rounded-lg transition-all ${
-                    selectedCategory === 'xai' ? 'bg-indigo-500/20 text-indigo-300 font-bold' : 'text-zinc-400'
+                    selectedCategory === 'xai' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400'
                   }`}
                 >
                   xAI
@@ -233,7 +233,7 @@ export function BenchmarksClient() {
                 <button
                   onClick={() => setSortBy('ttft')}
                   className={`px-3 py-1 rounded-lg transition-all ${
-                    sortBy === 'ttft' ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'text-zinc-400'
+                    sortBy === 'ttft' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400'
                   }`}
                 >
                   Lowest TTFT
@@ -241,7 +241,7 @@ export function BenchmarksClient() {
                 <button
                   onClick={() => setSortBy('tokens')}
                   className={`px-3 py-1 rounded-lg transition-all ${
-                    sortBy === 'tokens' ? 'bg-cyan-500/20 text-cyan-300 font-bold' : 'text-zinc-400'
+                    sortBy === 'tokens' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400'
                   }`}
                 >
                   Highest Tok/s
@@ -249,7 +249,7 @@ export function BenchmarksClient() {
                 <button
                   onClick={() => setSortBy('price')}
                   className={`px-3 py-1 rounded-lg transition-all ${
-                    sortBy === 'price' ? 'bg-amber-500/20 text-amber-300 font-bold' : 'text-zinc-400'
+                    sortBy === 'price' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400'
                   }`}
                 >
                   Lowest Price

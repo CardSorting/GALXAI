@@ -149,8 +149,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Backwards-compatible aliases
   const loginWithOAuth = async (provider: string) => {
-    const validProvider = (provider === 'grok' || provider === 'xai-grok' ? 'twitter' : provider) as Provider;
-    return signInWithOAuth(validProvider);
+    return signInWithOAuth(provider as Provider);
   };
 
   const logout = signOut;

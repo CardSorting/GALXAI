@@ -141,7 +141,7 @@ Claim Grant: https://galx.ai/grants`;
 
           <div className="space-y-4 max-w-3xl mx-auto">
             <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-              Fuel Your AI Pipeline with Up to <span className="bg-gradient-to-r from-amber-300 via-orange-400 to-amber-500 bg-clip-text text-transparent">$2,500 in Matching Compute</span>
+              Fuel Your AI Pipeline with Up to <span className="text-amber-300 font-black">$2,500 in Matching Compute</span>
             </h1>
             <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl mx-auto">
               We empower high-velocity builders, funded startups, and enterprise teams to scale frontier AI models at true wholesale pricing. Every dollar deposited is matched up to 50% in instant inference credits.
@@ -212,7 +212,7 @@ Claim Grant: https://galx.ai/grants`;
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-zinc-300 font-mono uppercase">{tier.name}</span>
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${
-                        isSelected ? 'bg-amber-400 text-black' : 'bg-white/10 text-zinc-300'
+                        isSelected ? 'bg-amber-400 text-amber-950 font-bold' : 'bg-white/10 text-white/80'
                       }`}>
                         {tier.badge}
                       </span>

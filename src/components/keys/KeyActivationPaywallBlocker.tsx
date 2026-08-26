@@ -186,7 +186,7 @@ export function KeyActivationPaywallBlocker({
                 }`}
               >
                 {pack.badge && (
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-tight text-amber-300 block mb-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-tight text-amber-300 block mb-1">
                     {pack.badge}
                   </span>
                 )}

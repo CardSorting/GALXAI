@@ -144,7 +144,7 @@ export default async function Image() {
             }}
           >
             Access <span style={{ color: '#f59e0b', fontWeight: 700 }}>OpenAI Codex</span> and{' '}
-            <span style={{ color: '#22d3ee', fontWeight: 700 }}>xAI Grok</span> with sub-15ms routing,
+            <span style={{ color: '#22d3ee', fontWeight: 700 }}>GPT-5.6</span> with sub-15ms routing,
             automatic failover, and <span style={{ color: '#34d399', fontWeight: 700 }}>25%–40% wholesale savings</span>.
           </div>
         </div>

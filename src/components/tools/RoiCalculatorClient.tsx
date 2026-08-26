@@ -68,16 +68,6 @@ const ROI_MODELS: ModelOption[] = [
     retailInput1M: 1.0,
     retailOutput1M: 4.0,
   },
-  {
-    id: 'x-ai/grok-4.6',
-    name: 'xAI Grok 4.6 (1M Context Flagship)',
-    provider: 'xAI',
-    inputCost1M: 2.8,
-    outputCost1M: 11.2,
-    cachedInputCost1M: 0.75,
-    retailInput1M: 4.0,
-    retailOutput1M: 16.0,
-  },
 ];
 
 export function RoiCalculatorClient() {

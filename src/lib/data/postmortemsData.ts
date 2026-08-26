@@ -277,12 +277,12 @@ print(response.choices[0].message.content)`,
     ],
   },
   {
-    slug: 'grok-reasoning-ddos-layer7-mitigation',
+    slug: 'gpt-reasoning-ddos-layer7-mitigation',
     badge: 'Volumetric L7 Defense',
-    title: 'Postmortem: Neutralizing 40M Req/Sec Layer 7 Volumetric Attack on xAI Reasoning Clusters',
+    title: 'Postmortem: Neutralizing 40M Req/Sec Layer 7 Volumetric Attack on OpenAI Reasoning Clusters',
     headline: 'Incident Postmortem: Layer 7 DDoS Mitigation & Token Starvation Defense',
     description:
-      'How GALXAI edge filtering absorbed and scrubbed a 40M request/second Layer 7 volumetric attack targeting xAI Grok and OpenAI reasoning endpoints with zero origin degradation.',
+      'How GALXAI edge filtering absorbed and scrubbed a 40M request/second Layer 7 volumetric attack targeting OpenAI reasoning endpoints with zero origin degradation.',
     incidentDate: 'February 18, 2027',
     impactMetrics: {
       downtimeDuration: '0s (Zero Latency Spike)',

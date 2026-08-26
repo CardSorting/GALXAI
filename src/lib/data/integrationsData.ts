@@ -51,7 +51,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
     "gpt-5.6-sol",
     "gpt-5.6-terra",
     "gpt-5.6-luna",
-    "x-ai/grok-4.5"
+    "openai-gpt-image-2"
   ]
 }`,
     },
@@ -77,7 +77,7 @@ curl https://api.galx.ai/v1/chat/completions \\
       },
       {
         name: 'Add Model Names',
-        description: 'Add "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", and "x-ai/grok-4.5" to the active model list.',
+        description: 'Add "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", and "openai-gpt-image-2" to the active model list.',
       },
     ],
     faqs: [
@@ -99,7 +99,7 @@ curl https://api.galx.ai/v1/chat/completions \\
     title: 'How to Connect Windsurf IDE to GALXAI Universal AI Gateway',
     headline: 'Connect Windsurf IDE to GALXAI in 30 Seconds',
     description:
-      'Set up Windsurf cascade flows and inline suggestions with wholesale AI token rates and automated failover across GPT-5.6 and Grok 4.5.',
+      'Set up Windsurf cascade flows and inline suggestions with wholesale AI token rates and automated failover across GPT-5.6 models.',
     timeToSetup: 'PT30S',
     envSnippet: `WINDSURF_API_BASE=https://api.galx.ai/v1
 WINDSURF_API_KEY=galx_live_your_gateway_key`,
@@ -112,7 +112,7 @@ WINDSURF_API_KEY=galx_live_your_gateway_key`,
       "name": "GALXAI Wholesale Gateway",
       "base_url": "https://api.galx.ai/v1",
       "api_key": "galx_live_your_gateway_key",
-      "models": ["gpt-5.6-sol", "gpt-5.6-terra", "x-ai/grok-4.5"]
+      "models": ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"]
     }
   ]
 }`,
@@ -195,7 +195,7 @@ export async function POST(req: Request) {
       },
       {
         name: 'Execute streamText / generateObject',
-        description: 'Invoke standard Vercel AI SDK methods with gpt-5.6-sol, gpt-5.6-terra, or x-ai/grok-4.5.',
+        description: 'Invoke standard Vercel AI SDK methods with gpt-5.6-sol, gpt-5.6-terra, or gpt-5.6-luna.',
       },
     ],
     faqs: [
@@ -466,7 +466,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
   "provider": "openai",
   "api_base": "https://api.galx.ai/v1",
   "api_key": "galx_live_your_gateway_key",
-  "models": ["gpt-5.6-sol", "gpt-5.6-terra", "x-ai/grok-4.6"]
+  "models": ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"]
 }`,
     },
     codeExample: {
@@ -495,7 +495,7 @@ const response = await fetch("https://api.galx.ai/v1/chat/completions", {
       },
       {
         name: 'Add Model Identifiers',
-        description: 'Add "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", and "x-ai/grok-4.6".',
+        description: 'Add "gpt-5.6-sol", "gpt-5.6-terra", and "gpt-5.6-luna".',
       },
     ],
     faqs: [
@@ -549,8 +549,8 @@ const chatNode = {
     ],
     faqs: [
       {
-        q: 'Does Flowise support Grok 4.6 via GALXAI?',
-        a: 'Yes. Simply specify "x-ai/grok-4.6" in the Custom Model Name input field in the Flowise node.',
+        q: 'Does Flowise support GPT-5.6 Sol via GALXAI?',
+        a: 'Yes. Simply specify "gpt-5.6-sol" in the Custom Model Name input field in the Flowise node.',
       },
     ],
   },
@@ -562,7 +562,7 @@ const chatNode = {
     title: 'Open WebUI Integration Guide with GALXAI Wholesale Token Gateway',
     headline: 'Power Open WebUI with GALXAI Frontier Models',
     description:
-      'Supercharge your self-hosted Open WebUI instance with OpenAI GPT-5.6, xAI Grok 4.6 (1M), 75% prompt caching, and wholesale billing.',
+      'Supercharge your self-hosted Open WebUI instance with OpenAI GPT-5.6, 75% prompt caching, and wholesale billing.',
     timeToSetup: 'PT30S',
     envSnippet: `OPENAI_API_BASE_URL=https://api.galx.ai/v1
 OPENAI_API_KEY=galx_live_your_gateway_key`,
@@ -602,7 +602,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
     faqs: [
       {
         q: 'Does Open WebUI support vision models via GALXAI?',
-        a: 'Yes. Grok 4.5 and GPT-Image-2 image analysis endpoints work seamlessly with Open WebUI image uploads.',
+        a: 'Yes. GPT-Image-2 image analysis endpoints work seamlessly with Open WebUI image uploads.',
       },
     ],
   },
@@ -631,9 +631,9 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
       "apiKey": "galx_live_your_gateway_key"
     },
     {
-      "title": "Grok 4.6 (1M Context)",
+      "title": "GPT-5.6 Terra (Balanced)",
       "provider": "openai",
-      "model": "x-ai/grok-4.6",
+      "model": "gpt-5.6-terra",
       "apiBase": "https://api.galx.ai/v1",
       "apiKey": "galx_live_your_gateway_key"
     }

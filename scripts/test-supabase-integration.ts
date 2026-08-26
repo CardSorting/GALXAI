@@ -493,7 +493,7 @@ async function runTests() {
       request: { model: 'gpt-5.6-sol', messages: [{ role: 'user', content: 'test' }] },
       primaryShard: { shardId: 'shard_fail_429', provider: 'openai', accountLabel: 'Primary', priority: 90, isHealthy: true },
       backupShards: [
-        { shardId: 'shard_healthy_backup', provider: 'xai-grok', accountLabel: 'Backup', priority: 80, isHealthy: true }
+        { shardId: 'shard_healthy_backup', provider: 'openai', accountLabel: 'Backup', priority: 80, isHealthy: true }
       ],
       executeFn: async (shard) => {
         callCount++;

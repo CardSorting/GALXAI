@@ -132,7 +132,7 @@ export function JargonBuster({ termKey, label }: JargonBusterProps) {
               <span>{info.title}</span>
             </div>
             {info.category && (
-              <span className="px-1.5 py-0.5 rounded bg-white/5 text-[9px] font-mono text-zinc-400 border border-white/5">
+              <span className="px-1.5 py-0.5 rounded bg-white/5 text-[10px] font-mono text-zinc-400 border border-white/5">
                 {info.category}
               </span>
             )}

@@ -52,9 +52,9 @@ client = OpenAI(
     api_key="galx_live_your_gateway_key"
 )
 
-# Ingest entire 1,000,000 token codebase in a single prompt
+# Ingest entire 900,000 token codebase in a single prompt
 response = client.chat.completions.create(
-    model="x-ai/grok-4.6",
+    model="gpt-5.6-sol",
     messages=[
         {"role": "system", "content": "You are analyzing an enterprise monolith codebase."},
         {"role": "user", "content": f"{massive_codebase_string}\\n\\nIdentify memory leaks in the socket pool."}
@@ -63,8 +63,8 @@ response = client.chat.completions.create(
     },
     faqs: [
       {
-        q: 'Which models support 1M context windows on GALXAI?',
-        a: 'xAI Grok 4.6 natively supports 1,000,000 tokens, while OpenAI GPT-5.6 Sol supports 900,000 tokens.',
+        q: 'Which models support massive context windows on GALXAI?',
+        a: 'OpenAI GPT-5.6 Sol natively supports 900,000 tokens with full 75% prompt caching pass-through.',
       },
       {
         q: 'How does prompt caching apply to large context windows?',

@@ -516,14 +516,14 @@ export function GranularUsageExplorer() {
               const heightPct = Math.min(100, (point.spend / maxSpend) * 100);
               return (
                 <div key={point.date} className="flex flex-col items-center gap-1.5 h-full justify-end group">
-                  <div className="text-[9px] text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="text-[10px] text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity">
                     ${point.spend.toFixed(1)}
                   </div>
                   <div
                     className="w-full bg-gradient-to-t from-amber-500 to-amber-300 rounded-t-lg transition-all group-hover:brightness-125"
                     style={{ height: `${heightPct}%`, minHeight: '6px' }}
                   />
-                  <span className="text-[9px] text-zinc-500 truncate w-full text-center">{point.date}</span>
+                  <span className="text-[10px] text-zinc-500 truncate w-full text-center">{point.date}</span>
                 </div>
               );
             })}

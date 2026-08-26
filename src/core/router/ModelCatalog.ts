@@ -7,8 +7,7 @@ import type { DbQueryOptions, DbAggregateQuery } from '../broccolidb/broccolidb.
 /**
  * Exclusive Model Catalog for GALXAI.
  * Houses only the requested flagship modern generation LLMs & visual synthesis engines:
- * - OpenAI Codex: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `openai-gpt-image-2`, `openai-gpt-image-1.5`, `openai-gpt-image-1`
- * - xAI Grok: `x-ai/grok-4.6`, `x-ai/grok-4.5`, `xai-grok-image`, `xai-grok-2-image`
+ * - OpenAI Codex & GPT-5.6 Suite: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `openai-gpt-image-2`, `openai-gpt-image-1.5`, `openai-gpt-image-1`
  *
  * Features competitive pricing with 20-36% discount vs direct list price + 75% prompt caching discount.
  */
@@ -72,47 +71,7 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     description: 'High-velocity rapid iteration coding engine optimized for instant sub-second completions.'
   },
 
-  // --- 2. xAI Grok Flagship SOTA Reasoning Suite ---
-  {
-    id: 'x-ai/grok-4.6',
-    upstreamId: 'grok-4.6',
-    name: 'xAI Grok 4.6 (1M Frontier Multimodal Reasoning)',
-    provider: 'xai-grok',
-    category: 'llm',
-    contextWindowTokens: 1_000_000,
-    maxOutputTokens: 128_000,
-    listPricePer1MInput: 3.0,
-    listPricePer1MOutput: 12.0,
-    inputPricePer1M: 2.10, // 30% Discount
-    outputPricePer1M: 8.40, // 30% Discount
-    cachedInputPricePer1M: 0.70, // 76% Caching Discount
-    discountPercentage: 30,
-    supportsVision: true,
-    supportsReasoning: true,
-    supportsStreaming: true,
-    description: 'xAI next-generation flagship model with massive 1M context window, frontier reasoning, extreme tool orchestration, and multimodal comprehension.'
-  },
-  {
-    id: 'x-ai/grok-4.5',
-    upstreamId: 'grok-4.5',
-    name: 'xAI Grok 4.5 (500K Frontier Multimodal)',
-    provider: 'xai-grok',
-    category: 'llm',
-    contextWindowTokens: 500_000,
-    maxOutputTokens: 128_000,
-    listPricePer1MInput: 2.5,
-    listPricePer1MOutput: 10.0,
-    inputPricePer1M: 1.80, // 28% Discount
-    outputPricePer1M: 7.20, // 28% Discount
-    cachedInputPricePer1M: 0.60, // 76% Caching Discount
-    discountPercentage: 28,
-    supportsVision: true,
-    supportsReasoning: true,
-    supportsStreaming: true,
-    description: 'xAI flagship model with massive 500K context window, frontier reasoning, and multimodal comprehension.'
-  },
-
-  // --- 3. OpenAI Visual Synthesis & Image Generation Suite ---
+  // --- 2. OpenAI Visual Synthesis & Image Generation Suite ---
   {
     id: 'openai-gpt-image-2',
     upstreamId: 'gpt-image-2',
@@ -166,55 +125,13 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsReasoning: false,
     supportsStreaming: false,
     description: 'Rapid image generation engine optimized for low latency iterative visual prototyping.'
-  },
-
-  // --- 4. xAI Grok Visual Synthesis Suite ---
-  {
-    id: 'xai-grok-image',
-    upstreamId: 'grok-imagine-1.0',
-    name: 'xAI Grok Imagine 1.0 (Flagship Visual)',
-    provider: 'xai-grok',
-    category: 'image',
-    contextWindowTokens: 128_000,
-    maxOutputTokens: 4_096,
-    listPricePer1MInput: 0.050,
-    listPricePer1MOutput: 0.050,
-    inputPricePer1M: 0.036, // 28% Discount
-    outputPricePer1M: 0.036,
-    discountPercentage: 28,
-    supportsVision: true,
-    supportsReasoning: false,
-    supportsStreaming: false,
-    description: 'xAI flagship image synthesis model with HDR color grading and cinematic lighting.'
-  },
-  {
-    id: 'xai-grok-2-image',
-    upstreamId: 'grok-2-image',
-    name: 'xAI Grok-2 Image (High-Diversity)',
-    provider: 'xai-grok',
-    category: 'image',
-    contextWindowTokens: 128_000,
-    maxOutputTokens: 4_096,
-    listPricePer1MInput: 0.040,
-    listPricePer1MOutput: 0.040,
-    inputPricePer1M: 0.028, // 30% Discount
-    outputPricePer1M: 0.028,
-    discountPercentage: 30,
-    supportsVision: true,
-    supportsReasoning: false,
-    supportsStreaming: false,
-    description: 'Stylistic diversity, rapid rendering, and versatile creative generation.'
   }
 ];
 
 /**
  * Models visible in frontend UI components, calculators, pricing tables, and selectors.
- * xAI Grok models are hidden from the frontend due to operational complexity while remaining
- * resolvable in backend routing if requested via API.
  */
-export const FRONTEND_VISIBLE_MODELS: ModelSpecItem[] = EXCLUSIVE_MODEL_CATALOG.filter(
-  m => m.provider !== 'xai-grok'
-);
+export const FRONTEND_VISIBLE_MODELS: ModelSpecItem[] = EXCLUSIVE_MODEL_CATALOG;
 
 export class ModelCatalog {
   private static catalog: Map<string, ModelSpecItem> = new Map(
@@ -403,36 +320,38 @@ export class ModelCatalog {
       'autocomplete': 'gpt-5.6-luna',
       'low-cost': 'gpt-5.6-luna',
 
-      // Grok 4.6 variations (Massive 1M Context & Real-time Reasoning)
-      'grok': 'x-ai/grok-4.6',
-      'grok-4.6': 'x-ai/grok-4.6',
-      'grok-4-6': 'x-ai/grok-4.6',
-      'grok4.6': 'x-ai/grok-4.6',
-      'grok4-6': 'x-ai/grok-4.6',
-      'grok46': 'x-ai/grok-4.6',
-      'xai-grok': 'x-ai/grok-4.6',
-      'xai-grok-4.6': 'x-ai/grok-4.6',
-      'xai-grok-4-6': 'x-ai/grok-4.6',
-      'xai/grok-4.6': 'x-ai/grok-4.6',
-      'xai/grok': 'x-ai/grok-4.6',
-      'grok-reasoning': 'x-ai/grok-4.6',
-      'grok-1m': 'x-ai/grok-4.6',
-      '1m': 'x-ai/grok-4.6',
-      'realtime': 'x-ai/grok-4.6',
-      'live': 'x-ai/grok-4.6',
-      'grok-3': 'x-ai/grok-4.6',
-      'grok-2': 'x-ai/grok-4.6',
-      'grok-beta': 'x-ai/grok-4.6',
+      // Grok variations -> Seamlessly route to GPT flagship reasoning & coding
+      'grok': 'gpt-5.6-sol',
+      'grok-4.6': 'gpt-5.6-sol',
+      'grok-4-6': 'gpt-5.6-sol',
+      'grok4.6': 'gpt-5.6-sol',
+      'grok4-6': 'gpt-5.6-sol',
+      'grok46': 'gpt-5.6-sol',
+      'x-ai/grok-4.6': 'gpt-5.6-sol',
+      'xai-grok': 'gpt-5.6-sol',
+      'xai-grok-4.6': 'gpt-5.6-sol',
+      'xai-grok-4-6': 'gpt-5.6-sol',
+      'xai/grok-4.6': 'gpt-5.6-sol',
+      'xai/grok': 'gpt-5.6-sol',
+      'grok-reasoning': 'gpt-5.6-sol',
+      'grok-1m': 'gpt-5.6-sol',
+      '1m': 'gpt-5.6-sol',
+      'realtime': 'gpt-5.6-sol',
+      'live': 'gpt-5.6-sol',
+      'grok-3': 'gpt-5.6-sol',
+      'grok-2': 'gpt-5.6-sol',
+      'grok-beta': 'gpt-5.6-sol',
 
-      // Grok 4.5 variations
-      'grok-4.5': 'x-ai/grok-4.5',
-      'grok-4-5': 'x-ai/grok-4.5',
-      'grok4.5': 'x-ai/grok-4.5',
-      'grok4-5': 'x-ai/grok-4.5',
-      'grok45': 'x-ai/grok-4.5',
-      'xai-grok-4.5': 'x-ai/grok-4.5',
-      'xai-grok-4-5': 'x-ai/grok-4.5',
-      'xai/grok-4.5': 'x-ai/grok-4.5',
+      // Grok 4.5 variations -> Seamlessly route to GPT balanced frontier
+      'grok-4.5': 'gpt-5.6-terra',
+      'grok-4-5': 'gpt-5.6-terra',
+      'grok4.5': 'gpt-5.6-terra',
+      'grok4-5': 'gpt-5.6-terra',
+      'grok45': 'gpt-5.6-terra',
+      'x-ai/grok-4.5': 'gpt-5.6-terra',
+      'xai-grok-4.5': 'gpt-5.6-terra',
+      'xai-grok-4-5': 'gpt-5.6-terra',
+      'xai/grok-4.5': 'gpt-5.6-terra',
 
       // Visual / Image Synthesis variations
       'image': 'openai-gpt-image-2',
@@ -457,12 +376,12 @@ export class ModelCatalog {
       'dall-e-3': 'openai-gpt-image-2',
       'dalle-2': 'openai-gpt-image-1',
       'dall-e-2': 'openai-gpt-image-1',
-      'grok-image': 'xai-grok-image',
-      'grok-imagine': 'xai-grok-image',
-      'imagine': 'xai-grok-image',
-      'imagine-1': 'xai-grok-image',
-      'grok-2-image': 'xai-grok-2-image',
-      'grok-image-2': 'xai-grok-2-image',
+      'grok-image': 'openai-gpt-image-2',
+      'grok-imagine': 'openai-gpt-image-2',
+      'imagine': 'openai-gpt-image-2',
+      'imagine-1': 'openai-gpt-image-2',
+      'grok-2-image': 'openai-gpt-image-2',
+      'grok-image-2': 'openai-gpt-image-2',
       'midjourney': 'openai-gpt-image-2',
       'flux': 'openai-gpt-image-2',
       'flux-pro': 'openai-gpt-image-2',

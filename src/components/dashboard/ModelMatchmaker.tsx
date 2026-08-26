@@ -161,7 +161,7 @@ function BaseModelMatchmaker() {
               }`}
             >
               <div className={`w-7 h-7 rounded-xl flex items-center justify-center ${
-                isSelected ? 'bg-indigo-500 text-white' : 'bg-white/5 text-zinc-400'
+                isSelected ? 'bg-white text-zinc-950 font-bold' : 'bg-white/5 text-zinc-400'
               }`}>
                 <Icon className="w-4 h-4" />
               </div>

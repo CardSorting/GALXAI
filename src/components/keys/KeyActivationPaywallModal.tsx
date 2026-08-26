@@ -180,7 +180,7 @@ export function KeyActivationPaywallModal({
               <div className="p-2.5 sm:p-3 rounded-xl bg-white/5 space-y-0.5">
                 <span className="text-[10px] text-zinc-400 uppercase font-sans font-semibold">1. Your Deposit</span>
                 <div className="text-base sm:text-xl font-black text-white">${currentAmt.toFixed(2)}</div>
-                <span className="text-[9px] text-zinc-500 font-sans">100% Usable</span>
+                <span className="text-[10px] text-zinc-500 font-sans">100% Usable</span>
               </div>
 
               <div className="p-2.5 sm:p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/40 space-y-0.5 relative overflow-hidden">
@@ -189,7 +189,7 @@ export function KeyActivationPaywallModal({
                   2. Free Match
                 </span>
                 <div className="text-base sm:text-xl font-black text-emerald-300">+${(welcomeBonus + tierBonus).toFixed(2)}</div>
-                <span className="text-[9px] text-emerald-400/90 font-sans font-semibold">Instant Grant</span>
+                <span className="text-[10px] text-emerald-400/90 font-sans font-semibold">Instant Grant</span>
               </div>
 
               <div className="p-2.5 sm:p-3 rounded-xl bg-amber-500/15 border border-amber-500/40 space-y-0.5 relative overflow-hidden">
@@ -198,7 +198,7 @@ export function KeyActivationPaywallModal({
                   3. Total Balance
                 </span>
                 <div className="text-base sm:text-xl font-black text-amber-300">${totalCreditReceived.toFixed(2)}</div>
-                <span className="text-[9px] text-amber-400/90 font-sans font-semibold">Available Now</span>
+                <span className="text-[10px] text-amber-400/90 font-sans font-semibold">Available Now</span>
               </div>
             </div>
 
@@ -263,7 +263,7 @@ export function KeyActivationPaywallModal({
                       }`}
                     >
                       {pack.badge && (
-                        <span className="text-[8px] font-mono font-bold uppercase tracking-tight text-amber-300 block mb-0.5">
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-tight text-amber-300 block mb-0.5">
                           {pack.badge}
                         </span>
                       )}

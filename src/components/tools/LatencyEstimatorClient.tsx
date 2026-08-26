@@ -37,10 +37,8 @@ interface ModelLatencyProfile {
 
 const MODELS: ModelLatencyProfile[] = [
   { name: 'OpenAI GPT-5.6 Luna', id: 'gpt-5.6-luna', prefillMsPer1k: 2.2, tokPerSec: 145, baseTlsHandshakeMs: 4 },
-  { name: 'OpenAI GPT-5.6 Terra', id: 'gpt-5.6-terra', prefillMsPer1k: 3.8, tokPerSec: 92, baseTlsHandshakeMs: 5 },
-  { name: 'OpenAI GPT-5.6 Sol', id: 'gpt-5.6-sol', prefillMsPer1k: 5.5, tokPerSec: 68, baseTlsHandshakeMs: 6 },
-  { name: 'xAI Grok 4.5', id: 'x-ai/grok-4.5', prefillMsPer1k: 4.1, tokPerSec: 110, baseTlsHandshakeMs: 5 },
-  { name: 'xAI Grok 4.6 (1M)', id: 'x-ai/grok-4.6', prefillMsPer1k: 6.2, tokPerSec: 75, baseTlsHandshakeMs: 6 },
+  { name: 'OpenAI GPT-5.6 Terra', id: 'gpt-5.6-terra', prefillMsPer1k: 3.8, tokPerSec: 110, baseTlsHandshakeMs: 5 },
+  { name: 'OpenAI GPT-5.6 Sol', id: 'gpt-5.6-sol', prefillMsPer1k: 5.5, tokPerSec: 88, baseTlsHandshakeMs: 6 },
 ];
 
 interface RegionLatency {

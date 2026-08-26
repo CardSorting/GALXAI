@@ -19,75 +19,88 @@ interface FixRule {
 }
 
 const FIX_RULES: FixRule[] = [
-  // 1. Bounce animations on static UI elements
+  // 1. Font sizes off the type ramp (8px, 9px -> 10px)
+  {
+    name: 'Fix type ramp font size text-[8px] and text-[9px]',
+    pattern: /\btext-\[(?:8|9)px\]\b/g,
+    replacement: 'text-[10px]',
+    description: 'Align sub-10px arbitrary font size to documented 10px type ramp'
+  },
+  // 2. Bounce animations on static UI elements
   {
     name: 'Remove animate-bounce',
     pattern: /\banimate-bounce\b/g,
     replacement: 'animate-pulse',
     description: 'Replace dated bouncy easing with subtle pulse animation'
   },
-  // 2. Gray text on colored badges (Contrast Failures)
+  // 3. Gray text on colored badges (Contrast Failures)
   {
     name: 'Fix gray-on-amber contrast (classes)',
-    pattern: /\btext-zinc-[234]00(\s+[^"']*?)?\s+bg-amber-[45]00\b/g,
+    pattern: /\btext-zinc-[1-5]00(\s+[^"']*?)?\s+bg-amber-[45]00\b/g,
     replacement: 'text-amber-950 font-bold$1 bg-amber-400',
     description: 'Ensure dark readable text on amber badges (≥4.5:1 contrast)'
   },
   {
     name: 'Fix bg-amber with gray text',
-    pattern: /\bbg-amber-[45]00(\s+[^"']*?)?\s+text-zinc-[234]00\b/g,
+    pattern: /\bbg-amber-[45]00(\s+[^"']*?)?\s+text-zinc-[1-5]00\b/g,
     replacement: 'bg-amber-400$1 text-amber-950 font-bold',
     description: 'Ensure dark readable text on amber badges (≥4.5:1 contrast)'
   },
   {
     name: 'Fix gray-on-emerald contrast',
-    pattern: /\btext-zinc-[234]00(\s+[^"']*?)?\s+bg-emerald-[45]00\b/g,
+    pattern: /\btext-zinc-[1-5]00(\s+[^"']*?)?\s+bg-emerald-[45]00\b/g,
     replacement: 'text-emerald-950 font-bold$1 bg-emerald-400',
     description: 'Ensure dark readable text on emerald badges (≥4.5:1 contrast)'
   },
   {
     name: 'Fix bg-emerald with gray text',
-    pattern: /\bbg-emerald-[45]00(\s+[^"']*?)?\s+text-zinc-[234]00\b/g,
+    pattern: /\bbg-emerald-[45]00(\s+[^"']*?)?\s+text-zinc-[1-5]00\b/g,
     replacement: 'bg-emerald-400$1 text-emerald-950 font-bold',
     description: 'Ensure dark readable text on emerald badges (≥4.5:1 contrast)'
   },
   {
     name: 'Fix gray-on-rose contrast',
-    pattern: /\btext-zinc-[234]00(\s+[^"']*?)?\s+bg-rose-[45]00\b/g,
+    pattern: /\btext-zinc-[1-5]00(\s+[^"']*?)?\s+bg-rose-[45]00\b/g,
     replacement: 'text-rose-950 font-bold$1 bg-rose-400',
     description: 'Ensure dark readable text on rose badges (≥4.5:1 contrast)'
   },
   {
     name: 'Fix bg-rose with gray text',
-    pattern: /\bbg-rose-[45]00(\s+[^"']*?)?\s+text-zinc-[234]00\b/g,
+    pattern: /\bbg-rose-[45]00(\s+[^"']*?)?\s+text-zinc-[1-5]00\b/g,
     replacement: 'bg-rose-400$1 text-rose-950 font-bold',
     description: 'Ensure dark readable text on rose badges (≥4.5:1 contrast)'
   },
   {
     name: 'Fix gray-on-cyan contrast',
-    pattern: /\btext-zinc-[234]00(\s+[^"']*?)?\s+bg-cyan-[45]00\b/g,
+    pattern: /\btext-zinc-[1-5]00(\s+[^"']*?)?\s+bg-cyan-[45]00\b/g,
     replacement: 'text-cyan-950 font-bold$1 bg-cyan-400',
     description: 'Ensure dark readable text on cyan badges (≥4.5:1 contrast)'
   },
   {
     name: 'Fix bg-cyan with gray text',
-    pattern: /\bbg-cyan-[45]00(\s+[^"']*?)?\s+text-zinc-[234]00\b/g,
+    pattern: /\bbg-cyan-[45]00(\s+[^"']*?)?\s+text-zinc-[1-5]00\b/g,
     replacement: 'bg-cyan-400$1 text-cyan-950 font-bold',
     description: 'Ensure dark readable text on cyan badges (≥4.5:1 contrast)'
   },
   {
     name: 'Fix gray-on-indigo contrast',
-    pattern: /\btext-zinc-[34]00(\s+[^"']*?)?\s+bg-indigo-[45]00\b/g,
+    pattern: /\btext-zinc-[1-5]00(\s+[^"']*?)?\s+bg-indigo-[45]00\b/g,
     replacement: 'text-indigo-950 font-bold$1 bg-indigo-400',
     description: 'Ensure dark readable text on indigo badges (≥4.5:1 contrast)'
   },
   {
     name: 'Fix bg-indigo with gray text',
-    pattern: /\bbg-indigo-[45]00(\s+[^"']*?)?\s+text-zinc-[34]00\b/g,
+    pattern: /\bbg-indigo-[45]00(\s+[^"']*?)?\s+text-zinc-[1-5]00\b/g,
     replacement: 'bg-indigo-400$1 text-indigo-950 font-bold',
     description: 'Ensure dark readable text on indigo badges (≥4.5:1 contrast)'
   },
-  // 3. AI Gradient Tell: from-indigo-600 to-indigo-500 / from-purple
+  // 4. AI Gradients & Color Palettes
+  {
+    name: 'Refine from-indigo-950',
+    pattern: /\bfrom-indigo-950\b/g,
+    replacement: 'from-zinc-950',
+    description: 'Replace generic indigo-950 background with neutral zinc-950'
+  },
   {
     name: 'Refine AI purple-indigo gradient buttons',
     pattern: /\bfrom-indigo-600\s+to-indigo-500\b/g,
@@ -106,7 +119,7 @@ const FIX_RULES: FixRule[] = [
     replacement: 'from-indigo-500 to-blue-600',
     description: 'Replace generic indigo gradient with cyber blue-indigo'
   },
-  // 4. Negative tracking below floor
+  // 5. Negative tracking below floor
   {
     name: 'Fix crushed tracking',
     pattern: /\btracking-\[-0\.0[5-9]em\]\b/g,

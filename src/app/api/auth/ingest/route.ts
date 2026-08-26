@@ -393,15 +393,7 @@ export async function POST(req: NextRequest) {
     geoTrackerCache.set(entityKey, { country, ip: ipAddress, timestampMs: now });
 
     // 13. Provider Resolution
-    let provider: ProviderType = explicitProvider === 'xai-grok' ? 'xai-grok' : 'openai';
-    if (!explicitProvider) {
-      const rawSecret = accessToken || apiKey || idToken || '';
-      if (rawSecret.startsWith('xai-') || rawSecret.toLowerCase().includes('grok')) {
-        provider = 'xai-grok';
-      } else {
-        provider = 'openai';
-      }
-    }
+    const provider: ProviderType = 'openai';
 
     // 14. Ingest & Provision via GalxAuthEngine
     const authEngine = GalxAuthEngine.getInstance();

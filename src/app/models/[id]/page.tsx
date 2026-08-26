@@ -41,14 +41,14 @@ function resolveModelFromSlug(slug: string) {
     ModelCatalog.resolveModel(decoded) ||
     ModelCatalog.resolveModel(decoded.replace(/-/g, '.')) ||
     ModelCatalog.resolveModel(decoded.replace(/-/g, '/'));
-  if (resolved && resolved.provider !== 'xai-grok') return resolved;
+  if (resolved) return resolved;
 
   // 3. Fallback for dash separated version numbers like gpt-5-6-sol -> gpt-5.6-sol
   const dotNormalized = decoded.replace(/(\d+)-(\d+)/g, '$1.$2');
   const dotResolved =
     ModelCatalog.resolveModel(dotNormalized) ||
     FRONTEND_VISIBLE_MODELS.find((m) => m.id.toLowerCase() === dotNormalized);
-  if (dotResolved && dotResolved.provider !== 'xai-grok') return dotResolved;
+  if (dotResolved) return dotResolved;
 
   return null;
 }

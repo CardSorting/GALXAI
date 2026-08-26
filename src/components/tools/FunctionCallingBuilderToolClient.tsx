@@ -315,7 +315,7 @@ runAgent();`;
                     <button
                       onClick={() => removeParam(param.id)}
                       disabled={params.length <= 1}
-                      className="p-1.5 rounded-lg hover:bg-rose-500/20 text-zinc-500 hover:text-rose-400 transition-colors cursor-pointer"
+                      className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-rose-400 transition-colors cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>

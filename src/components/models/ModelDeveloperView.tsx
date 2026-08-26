@@ -119,7 +119,7 @@ response = client.chat.completions.create(
                 -{model.discountPercentage ?? 25}% Wholesale + 75% Cache
               </span>
             </div>
-            <pre className="p-4 text-zinc-200 leading-relaxed overflow-x-auto selection:bg-emerald-500 selection:text-black">
+            <pre className="p-4 text-zinc-100 leading-relaxed overflow-x-auto selection:bg-white/20 selection:text-white">
 {`from openai import OpenAI
 
 # GALXAI Wholesale Gateway (Sub-15ms Anycast)
@@ -208,7 +208,7 @@ response = client.chat.completions.create(
             </button>
           </div>
 
-          <pre className="p-4 text-xs font-mono text-zinc-200 overflow-x-auto selection:bg-cyan-500 selection:text-black">
+          <pre className="p-4 text-xs font-mono text-zinc-100 overflow-x-auto selection:bg-white/20 selection:text-white">
             <code>{codeRecipes[activeRecipe]}</code>
           </pre>
         </div>

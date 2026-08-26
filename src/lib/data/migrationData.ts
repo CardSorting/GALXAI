@@ -230,14 +230,14 @@ response = client.chat.completions.create(
   {
     slug: 'groq',
     sourceProvider: 'Groq Cloud',
-    badge: '1M Context & SOTA Reasoning',
-    title: 'Migrate from Groq to GALXAI — Access SOTA Reasoning & 1M Context',
+    badge: '900K Context & SOTA Reasoning',
+    title: 'Migrate from Groq to GALXAI — Access SOTA Reasoning & 900K Context',
     headline: 'Migrate from Groq to GALXAI Universal Gateway',
     description:
-      'Combine sub-15ms Anycast speed with SOTA frontier reasoning (GPT-5.6 Sol) and 1,000,000 token context windows on xAI Grok 4.6.',
+      'Combine sub-15ms Anycast speed with SOTA frontier reasoning (GPT-5.6 Sol) and massive 900K token context windows on OpenAI Codex.',
     estimatedCostReductionPct: 25,
     keyPainPointsSolved: [
-      'Expands from 8K/32K open-weights context to 1,000,000 token context',
+      'Expands from 8K/32K open-weights context to 900,000 token context',
       'Provides flagship cognitive reasoning (GPT-5.6 Sol) alongside high velocity (Luna)',
       'Zero data retention security enclave with HIPAA/SOC 2 guarantees',
     ],
@@ -357,7 +357,7 @@ response = client.images.generate(
       '25% to 40% direct wholesale discount on identical model weights',
       'Automatic multi-account failover shielding against 429 rate limits',
       'Compound 75% prompt caching pass-through on system context',
-      'Single shared compute wallet for OpenAI and xAI Grok',
+      'Single shared compute wallet with zero rate-limit stalls',
     ],
     beforeCode: {
       language: 'python',
@@ -414,10 +414,10 @@ response = client.chat.completions.create(
     title: 'Migrate from Together AI to GALXAI Universal Gateway',
     headline: 'Migrate from Together AI to GALXAI Wholesale Clearinghouse',
     description:
-      'Consolidate your inference stack with OpenAI GPT-5.6 and xAI Grok 4.6 (1M context) alongside wholesale token pricing and zero rate limit stalls.',
+      'Consolidate your inference stack with OpenAI GPT-5.6 (900K context) alongside wholesale token pricing and zero rate limit stalls.',
     estimatedCostReductionPct: 30,
     keyPainPointsSolved: [
-      'Access to frontier reasoning flagships (GPT-5.6 Sol, Grok 4.6 1M)',
+      'Access to frontier reasoning flagships (GPT-5.6 Sol, Terra, Luna)',
       '75% prompt caching pass-through on long prompts',
       'Predictive 429 rate limit pooling across global Anycast edge nodes',
     ],
@@ -436,7 +436,7 @@ const client = new OpenAI({
       filename: 'galxai_unified.ts',
       code: `import OpenAI from "openai";
 
-// Unified OpenAI & xAI Wholesale Gateway
+// Unified OpenAI Wholesale Gateway
 const client = new OpenAI({
   baseURL: "https://api.galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
@@ -454,8 +454,8 @@ const client = new OpenAI({
     ],
     faqs: [
       {
-        q: 'Can I route 1M context requests through GALXAI?',
-        a: 'Yes. xAI Grok 4.6 supports full 1,000,000 token context window queries with wholesale pricing.',
+        q: 'Can I route 900K context requests through GALXAI?',
+        a: 'Yes. OpenAI GPT-5.6 Sol supports full 900,000 token context window queries with wholesale pricing.',
       },
     ],
   },

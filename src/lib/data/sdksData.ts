@@ -279,7 +279,7 @@ await foreach (StreamingChatCompletionUpdate update in client.CompleteChatStream
     title: 'Java & Spring Boot AI Gateway Integration — LangChain4j Quickstart',
     headline: 'Connect Java & Spring Boot Enterprise Services to GALXAI',
     description:
-      'Power Java, Kotlin, and Spring AI backends with OpenAI GPT-5.6 and Grok 4.6 wholesale routing and 429 rate limit protection.',
+      'Power Java, Kotlin, and Spring AI backends with OpenAI GPT-5.6 wholesale routing and 429 rate limit protection.',
     packageManager: 'Maven / Gradle',
     installCommand: 'implementation "dev.langchain4j:langchain4j-open-ai:0.35.0"',
     codeSnippet: `import dev.langchain4j.model.openai.OpenAiChatModel;

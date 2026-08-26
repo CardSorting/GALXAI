@@ -150,7 +150,7 @@ encoding.free();`;
     },
     {
       q: 'What is the difference between cl100k_base and o200k_base?',
-      a: 'cl100k_base was introduced with GPT-4 with a 100k vocabulary. o200k_base powers GPT-5.6 and Grok with a 200k vocabulary, improving compression density by 15%–20% on code and non-English text.',
+      a: 'cl100k_base was introduced with GPT-4 with a 100k vocabulary. o200k_base powers GPT-5.6 with a 200k vocabulary, improving compression density by 15%–20% on code and non-English text.',
     },
     {
       q: 'How does token count affect prompt caching rebates on GALXAI?',
@@ -213,7 +213,7 @@ encoding.free();`;
                       : 'text-zinc-400 hover:text-white'
                   }`}
                 >
-                  o200k_base (GPT-5.6/Grok)
+                  o200k_base (GPT-5.6)
                 </button>
                 <button
                   onClick={() => setSelectedTokenizer('cl100k_base')}

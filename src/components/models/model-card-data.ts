@@ -8,8 +8,6 @@ export interface SandboxPresetItem {
 }
 
 export function getSandboxPresets(model: ModelSpecItem): Record<'refactor' | 'audit' | 'json' | 'architecture', SandboxPresetItem> {
-  const isGrok = model.provider === 'xai-grok';
-
   return {
     refactor: {
       title: 'Full Codebase Refactor',

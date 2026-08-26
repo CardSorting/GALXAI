@@ -151,7 +151,7 @@ function BaseWalletQuickPeekPopover({
                       {tx.amount < 0 ? '-' : '+'}${Math.abs(tx.amount).toFixed(4)}
                     </div>
                     {tx.saved > 0 && (
-                      <div className="text-[9px] text-emerald-400">
+                      <div className="text-[10px] text-emerald-400">
                         Saved ${tx.saved.toFixed(4)}
                       </div>
                     )}

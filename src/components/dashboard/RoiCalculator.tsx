@@ -257,7 +257,7 @@ Switch in 30 Seconds: https://galx.ai/keys/new`;
                   <Flame className="w-4 h-4 text-amber-400 fill-amber-400" />
                 </div>
                 <div>
-                  <span className="text-zinc-400 block text-[9px] uppercase">50% Matching Grant</span>
+                  <span className="text-zinc-400 block text-[10px] uppercase">50% Matching Grant</span>
                   <span className="text-amber-300 font-bold">+${matchGrantBonus}.00 Free Compute Added</span>
                 </div>
               </div>

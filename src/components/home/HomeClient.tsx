@@ -128,7 +128,7 @@ export function HomeClient() {
               </div>
               <h3 className="text-sm font-bold text-white">25%–40% Wholesale Pass</h3>
               <p className="text-xs text-zinc-400 leading-relaxed font-sans">
-                Get direct wholesale discounts on GPT-5.6 and Grok 4.6 with 0% gateway markup.
+                Get direct wholesale discounts on OpenAI GPT-5.6 with 0% gateway markup.
               </p>
             </div>
 
@@ -344,10 +344,10 @@ export function HomeClient() {
               </div>
               <div className="space-y-1.5 font-mono text-xs">
                 {[
-                  { name: 'GPT-5.6 Sol vs Grok 4.6 (1M)', href: '/models/vs/gpt-5.6-sol-vs-grok-4.6', delta: 'Coding vs 1M Context' },
-                  { name: 'GPT-5.6 Terra vs Grok 4.5', href: '/models/vs/gpt-5.6-terra-vs-x-ai-grok-4.5', delta: 'Balanced vs Multimodal' },
                   { name: 'GPT-5.6 Sol vs GPT-5.6 Terra', href: '/models/vs/gpt-5.6-sol-vs-gpt-5.6-terra', delta: 'Flagship vs Workhorse' },
-                  { name: 'GPT-Image-2 vs Grok Image', href: '/models/vs/openai-gpt-image-2-vs-xai-grok-image', delta: 'Typography vs Photoreal' },
+                  { name: 'GPT-5.6 Sol vs GPT-5.6 Luna', href: '/models/vs/gpt-5.6-sol-vs-gpt-5.6-luna', delta: 'Reasoning vs Velocity' },
+                  { name: 'GPT-5.6 Terra vs GPT-5.6 Luna', href: '/models/vs/gpt-5.6-terra-vs-gpt-5.6-luna', delta: 'Balanced vs Velocity' },
+                  { name: 'GPT-Image-2 vs GPT-Image-1.5', href: '/models/vs/openai-gpt-image-2-vs-openai-gpt-image-1.5', delta: '4K Studio vs Agile' },
                 ].map((m, idx) => (
                   <Link
                     key={idx}

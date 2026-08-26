@@ -8,7 +8,7 @@ import type { ChatCompletionRequest } from '../../core/contracts/GalxContracts';
 
 export interface UpstreamShardCandidate {
   shardId: string;
-  provider: 'openai' | 'xai-grok';
+  provider: 'openai';
   accountLabel: string;
   priority: number;
   isHealthy: boolean;

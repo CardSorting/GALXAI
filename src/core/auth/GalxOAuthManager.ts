@@ -83,14 +83,6 @@ export const OPENAI_OAUTH_CONFIG: OAuthProviderConfig = {
   scopes: process.env.OPENAI_OAUTH_SCOPES || 'openid profile email offline_access'
 };
 
-export const XAI_GROK_OAUTH_CONFIG: OAuthProviderConfig = {
-  authorizationEndpoint: 'https://auth.x.ai/oauth/authorize',
-  tokenEndpoint: 'https://auth.x.ai/oauth/token',
-  clientId: process.env.XAI_OAUTH_CLIENT_ID || 'app_galxai_grok_oauth',
-  redirectUri: process.env.XAI_OAUTH_REDIRECT_URI || 'http://localhost:3000/api/auth/oauth/callback',
-  scopes: process.env.XAI_OAUTH_SCOPES || 'openid profile email offline_access'
-};
-
 interface IdTokenClaims {
   chatgpt_account_id?: string;
   organizations?: Array<{ id: string }>;
@@ -115,7 +107,7 @@ interface IdTokenClaims {
  * 2. JWT Claims Parser for automatic ChatGPT-Account-Id / OpenAI-Account extraction.
  * 3. Single-Flight Refresh Mutex: Coalesces parallel token refresh requests into a single network call
  *    to prevent Race-To-Refresh (RTR) token reuse invalidation collisions.
- * 4. Multi-provider configuration supporting OpenAI Codex and xAI Grok.
+ * 4. Hardened configuration supporting OpenAI Codex and ChatGPT OAuth.
  */
 export class GalxOAuthManager {
   private static instance: GalxOAuthManager;
@@ -146,10 +138,7 @@ export class GalxOAuthManager {
     return GalxOAuthManager.instance;
   }
 
-  getProviderConfig(provider: ProviderType): OAuthProviderConfig {
-    if (provider === 'xai-grok') {
-      return XAI_GROK_OAUTH_CONFIG;
-    }
+  getProviderConfig(_provider?: string): OAuthProviderConfig {
     return OPENAI_OAUTH_CONFIG;
   }
 

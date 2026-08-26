@@ -142,7 +142,7 @@ function BaseSpendAuditTool() {
 
           <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 space-y-1">
             <span className="text-[10px] text-indigo-300 uppercase font-sans font-bold">Free Token Mileage</span>
-            <div className="text-xl sm:text-2xl font-black text-indigo-300">~{(freeTokensEquivalent / 1000000).toFixed(1)}M</div>
+            <div className="text-xl sm:text-2xl font-black text-zinc-100">~{(freeTokensEquivalent / 1000000).toFixed(1)}M</div>
             <span className="text-[10px] text-indigo-400/80 font-sans">Tokens routed free via savings</span>
           </div>
         </div>

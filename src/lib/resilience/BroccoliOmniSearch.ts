@@ -143,11 +143,11 @@ const BASE_CATALOG_ITEMS: CatalogItem[] = [
   },
   {
     title: 'Supported Models & Pricing Catalog',
-    description: 'Explore wholesale rates across GPT-5.6 Sol/Terra/Luna and xAI Grok 4.5.',
+    description: 'Explore wholesale rates across GPT-5.6 Sol, Terra, and Luna.',
     category: 'Models & Engines',
     href: '/models',
     shortcutKey: 'G M',
-    keywords: ['models', 'pricing', 'catalog', 'gpt', 'grok', 'claude', 'deepseek', 'tokens', 'cost', 'cheap', 'rates'],
+    keywords: ['models', 'pricing', 'catalog', 'gpt', 'openai', 'sol', 'terra', 'luna', 'tokens', 'cost', 'cheap', 'rates'],
     intentPhrases: ['cheapest model', 'browse models', 'compare pricing', 'discount rates', 'which model is best', 'lowest cost', 'model list'],
   },
   {
@@ -165,7 +165,7 @@ const BASE_CATALOG_ITEMS: CatalogItem[] = [
     href: '/models/compare',
     shortcutKey: 'G C',
     keywords: ['compare', 'matrix', 'versus', 'benchmarks', 'speed', 'arena', 'diff', 'side by side'],
-    intentPhrases: ['compare gpt with grok', 'model benchmark', 'cost comparison table', 'difference between models', 'which model is faster'],
+    intentPhrases: ['compare gpt models', 'model benchmark', 'cost comparison table', 'difference between models', 'which model is faster'],
   },
   {
     title: 'Developer Gateway API Keys',
@@ -406,7 +406,6 @@ class BroccoliOmniSearchImpl {
     // 2. Dynamically index frontend visible models from FRONTEND_VISIBLE_MODELS
     FRONTEND_VISIBLE_MODELS.forEach((model) => {
       const modelId = `model_${model.id.replace(/[^a-zA-Z0-9]/g, '_')}`;
-      const isGrok = model.provider === 'xai-grok';
       const item: CatalogItem = {
         title: `${model.name} (${model.id})`,
         description: `${model.description} • $${model.inputPricePer1M.toFixed(2)}/1M input • ${model.contextWindowTokens / 1000}K ctx • -${model.discountPercentage}% Wholesale`,
@@ -422,8 +421,9 @@ class BroccoliOmniSearchImpl {
           'model',
           'engine',
           'ai',
-          ...(isGrok ? ['grok', 'xai', 'frontier reasoning'] : ['openai', 'gpt', 'sota']),
-          ...(model.supportsReasoning ? ['reasoning', 'math', 'coding', 'deepthink'] : ['fast', 'velocity']),
+          'openai',
+          'gpt',
+          'sota'
         ],
         intentPhrases: [
           `use ${model.name.toLowerCase()}`,

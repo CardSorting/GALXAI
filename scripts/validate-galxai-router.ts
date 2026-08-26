@@ -114,7 +114,7 @@ async function runAllTests() {
     const payload = GalxCryptoVault.encryptSecret(rawSecret, 'tenant_user', 'shard_001', 'openai');
 
     assert.throws(() => {
-      GalxCryptoVault.decryptSecret(payload, 'tenant_user', 'shard_001', 'xai-grok');
+      GalxCryptoVault.decryptSecret(payload, 'tenant_user', 'shard_001', 'openai_tampered' as any);
     }, /GalxVaultDecryptionError/);
   });
 
@@ -496,19 +496,19 @@ async function runAllTests() {
   });
 
   await test('Instant Retraction: 1-Click Retraction immediately purges leases in < 40ms', () => {
-    const encRetract = GalxCryptoVault.encryptSecret({ apiKey: 'xai-test-retract' }, 'user_retract', 'shard_grok_retract', 'xai-grok');
+    const encRetract = GalxCryptoVault.encryptSecret({ apiKey: 'sk-test-retract' }, 'user_retract', 'shard_codex_retract', 'openai');
     const shardRetract: GalxShardAccount = {
-      id: 'shard_grok_retract',
+      id: 'shard_codex_retract',
       userId: 'user_retract',
-      accountLabel: 'Retractable Grok',
-      provider: 'xai-grok',
+      accountLabel: 'Retractable Codex',
+      provider: 'openai',
       authType: 'api_key',
       shardMode: 'pooled',
       status: 'healthy',
       priority: 10,
       weight: 1,
       fencingToken: 1,
-      apiKeyMasked: 'xai-...retract',
+      apiKeyMasked: 'sk-...retract',
       encryptedPayload: encRetract,
       tokenBucket: governor.createDefaultBucket(),
       stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
@@ -517,17 +517,18 @@ async function runAllTests() {
     };
     substrate.addAccount(shardRetract);
 
-    const l = pool.acquireLease({ userId: 'c1', jobId: 'job_grok', provider: 'xai-grok' });
+    const l = pool.acquireLease({ userId: 'c1', jobId: 'job_codex', provider: 'openai', targetShardId: 'shard_codex_retract' });
     assert.ok(l.lease);
+    assert.strictEqual(l.lease.shardId, 'shard_codex_retract');
     assert.strictEqual(pool.isLeaseValid(l.lease.leaseId), true);
 
     const startMs = Date.now();
-    substrate.retractAccount('shard_grok_retract', 'user_retract');
+    substrate.retractAccount('shard_codex_retract', 'user_retract');
     const durationMs = Date.now() - startMs;
 
     assert.ok(durationMs < 40, `Retraction took ${durationMs}ms (must be < 40ms)`);
     assert.strictEqual(pool.isLeaseValid(l.lease.leaseId), false);
-    assert.strictEqual(substrate.getAccount('shard_grok_retract'), undefined);
+    assert.strictEqual(substrate.getAccount('shard_codex_retract'), undefined);
   });
 
   // --- SUITE 5: Exclusive Model Catalog & Canonical Alias Normalizer ---
@@ -549,22 +550,22 @@ async function runAllTests() {
     assert.strictEqual(luna?.contextWindowTokens, 900_000);
 
     const grok46 = ModelCatalog.resolveModel('grok-4.6');
-    assert.strictEqual(grok46?.id, 'x-ai/grok-4.6');
-    assert.strictEqual(grok46?.provider, 'xai-grok');
-    assert.strictEqual(grok46?.contextWindowTokens, 1_000_000);
-    assert.strictEqual(grok46?.discountPercentage, 30);
+    assert.strictEqual(grok46?.id, 'gpt-5.6-sol');
+    assert.strictEqual(grok46?.provider, 'openai');
+    assert.strictEqual(grok46?.contextWindowTokens, 900_000);
+    assert.strictEqual(grok46?.discountPercentage, 25);
 
     const grokAlias = ModelCatalog.resolveModel('grok');
-    assert.strictEqual(grokAlias?.id, 'x-ai/grok-4.6');
+    assert.strictEqual(grokAlias?.id, 'gpt-5.6-sol');
 
     const grokDirect = ModelCatalog.resolveModel('x-ai/grok-4.6');
-    assert.strictEqual(grokDirect?.id, 'x-ai/grok-4.6');
+    assert.strictEqual(grokDirect?.id, 'gpt-5.6-sol');
 
     const grok = ModelCatalog.resolveModel('grok-4.5');
-    assert.strictEqual(grok?.id, 'x-ai/grok-4.5');
-    assert.strictEqual(grok?.provider, 'xai-grok');
-    assert.strictEqual(grok?.contextWindowTokens, 500_000);
-    assert.strictEqual(grok?.discountPercentage, 28);
+    assert.strictEqual(grok?.id, 'gpt-5.6-terra');
+    assert.strictEqual(grok?.provider, 'openai');
+    assert.strictEqual(grok?.contextWindowTokens, 900_000);
+    assert.strictEqual(grok?.discountPercentage, 25);
   });
 
   await test('Model Catalog: Correctly maps exclusive visual synthesis models', () => {
@@ -576,8 +577,7 @@ async function runAllTests() {
     assert.strictEqual(gptImg15?.id, 'openai-gpt-image-1.5');
 
     const grokImg = ModelCatalog.resolveModel('xai-grok-image');
-    assert.strictEqual(grokImg?.id, 'xai-grok-image');
-    assert.strictEqual(grokImg?.upstreamId, 'grok-imagine-1.0');
+    assert.strictEqual(grokImg?.id, 'openai-gpt-image-2');
 
     const dalle = ModelCatalog.resolveModel('dalle-3');
     assert.strictEqual(dalle?.id, 'openai-gpt-image-2');
@@ -591,8 +591,8 @@ async function runAllTests() {
     const invalidOA = GalxPreflightValidator.validateKeyFormat('invalid-key', 'openai');
     assert.strictEqual(invalidOA.isValid, false);
 
-    const validGrok = GalxPreflightValidator.validateKeyFormat('xai-1234567890abcdef', 'xai-grok');
-    assert.strictEqual(validGrok.isValid, true);
+    const validSvcAcct = GalxPreflightValidator.validateKeyFormat('sk-svcacct-1234567890abcdef', 'openai');
+    assert.strictEqual(validSvcAcct.isValid, true);
   });
 
   // --- SUITE 7: Enterprise Metrics & Telemetry Ring Buffer Engine ---
@@ -2048,9 +2048,9 @@ async function runAllTests() {
   await test('Vault: Verifies valid HMAC-SHA256 session token', () => {
     const tokenResult = GalxCryptoVault.generateSessionToken({
       userId: 'usr_valid_123',
-      provider: 'xai-grok',
-      shardId: 'grok_shard_456',
-      email: 'dev@x.ai',
+      provider: 'openai',
+      shardId: 'codex_shard_456',
+      email: 'dev@openai.com',
       version: 'v1'
     });
 
@@ -2058,7 +2058,7 @@ async function runAllTests() {
     assert.strictEqual(verify.valid, true);
     assert.ok(verify.claims);
     assert.strictEqual(verify.claims?.sub, 'usr_valid_123');
-    assert.strictEqual(verify.claims?.provider, 'xai-grok');
+    assert.strictEqual(verify.claims?.provider, 'openai');
   });
 
   await test('Vault: Rejects tampered session token (corrupted signature or payload)', () => {
@@ -2119,18 +2119,18 @@ async function runAllTests() {
     assert.strictEqual(sessionCheck.claims?.sub, result.user.id);
   });
 
-  await test('Provider-as-Auth: Orchestrates xAI Grok 1-Click login and provisions vaulted shard + signed session', async () => {
+  await test('Provider-as-Auth: Orchestrates OpenAI 1-Click login and provisions vaulted shard + signed session', async () => {
     const authEngine = GalxAuthEngine.getInstance();
-    const result = await authEngine.authenticateProviderUser('xai-grok', {
-      apiKey: 'xai-testkey9876543210fedcba',
-      email: 'elon@x.ai',
-      displayName: 'Elon Creator',
+    const result = await authEngine.authenticateProviderUser('openai', {
+      apiKey: 'sk-proj-testkey9876543210fedcba',
+      email: 'sam@openai.com',
+      displayName: 'Sam Creator',
       mode: 'pooled'
     });
 
     assert.strictEqual(result.success, true);
-    assert.ok(result.user.id.startsWith('grok_'));
-    assert.strictEqual(result.user.provider, 'xai-grok');
+    assert.ok(result.user.id.startsWith('openai_'));
+    assert.strictEqual(result.user.provider, 'openai');
     assert.strictEqual(result.user.shardMode, 'pooled');
     assert.ok(result.user.token.startsWith('galx_sess_'));
   });
@@ -2260,7 +2260,7 @@ async function runAllTests() {
     assert.strictEqual(tamperedCheck.valid, false);
 
     // 3. Provider mismatch
-    const mismatchCheck = oauthManager.verifySignedState(signedState, 'xai-grok');
+    const mismatchCheck = oauthManager.verifySignedState(signedState, 'openai_other' as any);
     assert.strictEqual(mismatchCheck.valid, false);
     assert.ok(mismatchCheck.reason?.includes('mismatch'));
 
@@ -2394,9 +2394,9 @@ async function runAllTests() {
     assert.ok(openaiDetails.url.includes('scope=openid'));
     assert.ok(openaiDetails.url.includes('code_challenge_method=S256'));
 
-    const grokDetails = oauthManager.generateAuthUrl('xai-grok');
-    assert.ok(grokDetails.url.startsWith('https://auth.x.ai/oauth/authorize'));
-    assert.ok(grokDetails.url.includes('client_id=app_galxai_grok_oauth'));
+    const extraDetails = oauthManager.generateAuthUrl('openai', 'http://localhost:3000/auth/callback');
+    assert.ok(extraDetails.url.startsWith('https://auth.openai.com/oauth/authorize'));
+    assert.ok(extraDetails.url.includes('redirect_uri='));
   });
 
   await test('OAuthRepository: BroccoliDB L1 Hot Cache & Anti-Replay Single-Use State Consumption', async () => {
@@ -2446,15 +2446,15 @@ async function runAllTests() {
       updatedAtMs: now
     });
 
-    // Link xAI Grok
+    // Link second OpenAI account
     await oauthRepo.saveOAuthIdentity({
-      id: `oauth_xai_${userId}`,
+      id: `oauth_openai_secondary_${userId}`,
       userId,
-      provider: 'xai-grok',
-      providerAccountId: 'acc_grok_multi_2',
-      email: 'dev@galx.ai',
+      provider: 'openai',
+      providerAccountId: 'acc_chatgpt_multi_2',
+      email: 'dev2@galx.ai',
       shardId: undefined,
-      encryptedAccessToken: GalxCryptoVault.encryptSecret({ accessToken: 'grok_token_456' }, userId, 'shard2', 'xai-grok'),
+      encryptedAccessToken: GalxCryptoVault.encryptSecret({ accessToken: 'openai_token_456' }, userId, 'shard2', 'openai'),
       status: 'active',
       expiresAtMs: now + 7200_000,
       createdAtMs: now,
@@ -2464,13 +2464,11 @@ async function runAllTests() {
     // Query all identities for user
     const userIdentities = await oauthRepo.findIdentitiesByUserId(userId);
     assert.strictEqual(userIdentities.length, 2);
-    assert.ok(userIdentities.some(i => i.provider === 'openai'));
-    assert.ok(userIdentities.some(i => i.provider === 'xai-grok'));
+    assert.ok(userIdentities.every(i => i.provider === 'openai'));
 
     // Query specific identity
     const openaiIdentity = await oauthRepo.findIdentityByProvider(userId, 'openai');
     assert.ok(openaiIdentity);
-    assert.strictEqual(openaiIdentity.providerAccountId, 'acc_chatgpt_multi_1');
 
     // Natural query translation in BroccoliDB
     const naturalMatches = oauthRepo.queryIdentitiesNatural(`provider is 'openai' and status is 'active'`);
@@ -2483,15 +2481,14 @@ async function runAllTests() {
       groupBy: ['provider'],
       metrics: { total: { metric: 'count' } }
     });
-    assert.strictEqual(agg.groups.length, 2);
+    assert.strictEqual(agg.groups.length, 1);
 
-    // Unlink provider
+    // Unlink identity
     const unlinked = await oauthRepo.unlinkOAuthIdentity(userId, 'openai');
     assert.strictEqual(unlinked, true);
 
     const postUnlink = await oauthRepo.findIdentitiesByUserId(userId);
     assert.strictEqual(postUnlink.length, 1);
-    assert.strictEqual(postUnlink[0].provider, 'xai-grok');
   });
 
   await test('OAuth Proactive Daemon: Sweeps expiring tokens and rotates credentials in background', async () => {
@@ -2557,7 +2554,7 @@ async function runAllTests() {
     assert.strictEqual(error1.code, 'invalid_grant');
     assert.ok(error1.suggestedFix.includes('re-authenticate'));
 
-    const error2 = new OAuthExchangeError('xai-grok', 403, '{"error":"access_denied","error_description":"User rejected"}');
+    const error2 = new OAuthExchangeError('openai', 403, '{"error":"access_denied","error_description":"User rejected"}');
     assert.strictEqual(error2.code, 'access_denied');
     assert.ok(error2.suggestedFix.includes('declined'));
   });
@@ -2681,7 +2678,7 @@ async function runAllTests() {
 
   await test('OAuth Device Authorization (RFC 8628): Approve device code unlocks token delivery with single-use consumption', async () => {
     const oauthManager = GalxOAuthManager.getInstance();
-    const deviceAuth = oauthManager.generateDeviceAuthorization('xai-grok');
+    const deviceAuth = oauthManager.generateDeviceAuthorization('openai');
 
     // Simulate browser user approving the device code
     const approved = oauthManager.approveDeviceCode(deviceAuth.userCode, 'galx_sess_device_approved_12345');
@@ -2793,7 +2790,7 @@ async function runAllTests() {
     const testIdentity: OAuthIdentityRecord = {
       id: identId,
       userId: `user_rtr_${Date.now()}`,
-      provider: 'xai-grok',
+      provider: 'openai',
       providerAccountId: `acc_rtr_${Date.now()}`,
       email: 'rtr@example.com',
       shardId: undefined,
@@ -3530,18 +3527,18 @@ async function runAllTests() {
 
     // Shard US-only
     const usShardId = `shard_us_only_${Date.now()}`;
-    const encUs = GalxCryptoVault.encryptSecret({ apiKey: 'xai-us-key-123' }, 'user_us', usShardId, 'xai-grok');
+    const encUs = GalxCryptoVault.encryptSecret({ apiKey: 'sk-proj-us-key-123' }, 'user_us', usShardId, 'openai');
     substrate.addAccount({
       id: usShardId,
       userId: 'user_us',
-      accountLabel: 'US-Only xAI Shard',
-      provider: 'xai-grok',
+      accountLabel: 'US-Only OpenAI Shard',
+      provider: 'openai',
       authType: 'api_key',
       shardMode: 'pooled',
       status: 'healthy',
       priority: 10,
       weight: 1,
-      apiKeyMasked: 'xai-us...123',
+      apiKeyMasked: 'sk-us...123',
       encryptedSecrets: encUs,
       privacyCapabilities: {
         hipaaCompliant: true,
@@ -3559,25 +3556,25 @@ async function runAllTests() {
     // Request with EU data residency requirement -> Rejects US-only shard
     const rejectUs = pool.acquireLease({
       userId: 'berlin_fintech_1',
-      provider: 'xai-grok',
+      provider: 'openai',
       dataResidency: 'eu'
     });
     assert.strictEqual(rejectUs.status, 'no_compliant_shards');
 
     // Add EU-Sovereign Shard
     const euShardId = `shard_eu_sovereign_${Date.now()}`;
-    const encEu = GalxCryptoVault.encryptSecret({ apiKey: 'xai-eu-key-456' }, 'user_eu', euShardId, 'xai-grok');
+    const encEu = GalxCryptoVault.encryptSecret({ apiKey: 'sk-proj-eu-key-456' }, 'user_eu', euShardId, 'openai');
     substrate.addAccount({
       id: euShardId,
       userId: 'user_eu',
       accountLabel: 'Frankfurt EU Sovereign Vault',
-      provider: 'xai-grok',
+      provider: 'openai',
       authType: 'api_key',
       shardMode: 'pooled',
       status: 'healthy',
       priority: 50,
       weight: 1,
-      apiKeyMasked: 'xai-eu...456',
+      apiKeyMasked: 'sk-eu...456',
       encryptedSecrets: encEu,
       privacyCapabilities: {
         hipaaCompliant: true,
@@ -3594,7 +3591,7 @@ async function runAllTests() {
 
     const acceptEu = pool.acquireLease({
       userId: 'berlin_fintech_1',
-      provider: 'xai-grok',
+      provider: 'openai',
       dataResidency: 'eu'
     });
     assert.ok(acceptEu.lease);
@@ -4634,7 +4631,7 @@ async function runAllTests() {
       }
     });
 
-    assert.ok(pricingStats.groups.length >= 2);
+    assert.ok(pricingStats.groups.length >= 1);
     const openaiGroup = pricingStats.groups.find(g => g.keys.provider === 'openai');
     assert.ok(openaiGroup !== undefined);
     assert.ok(openaiGroup.metrics.modelCount > 0);
@@ -4677,10 +4674,10 @@ async function runAllTests() {
     persistence.saveShard({
       id: 'shard_zenith_2',
       userId: 'user_enterprise_99',
-      provider: 'xai-grok',
+      provider: 'openai',
       authType: 'api_key',
-      accountLabel: 'Zenith Grok Shard',
-      apiKeyMasked: 'xai-...grok',
+      accountLabel: 'Zenith Codex Shard',
+      apiKeyMasked: 'sk-...codex',
       status: 'healthy',
       priority: 50,
       weight: 1,
@@ -4702,7 +4699,7 @@ async function runAllTests() {
       shardMode: 'pooled'
     });
 
-    const naturalResults = persistence.queryShardsNatural('where userId = "user_enterprise_99" and provider = "openai"');
+    const naturalResults = persistence.queryShardsNatural('where userId = "user_enterprise_99" and shardMode = "private"');
     assert.strictEqual(naturalResults.length, 1);
     assert.strictEqual(naturalResults[0].id, 'shard_zenith_1');
 
@@ -4713,7 +4710,7 @@ async function runAllTests() {
         count: { metric: 'count' }
       }
     });
-    assert.ok(aggShards.groups.length >= 2);
+    assert.ok(aggShards.groups.length >= 1);
   });
 
   // --- SUITE 42: Workspace-Wide BroccoliDB (Session & Key Indexing & Developer SDK) ---
@@ -4826,8 +4823,8 @@ async function runAllTests() {
     await telemetryRepo.recordTelemetryBatch([
       { provider: 'openai', modelId: 'gpt-5.6-sol', shardId: 'shard_1', latencyMs: 120, totalTokens: 500, statusCode: 200, timestampMs: sampleBaseTime },
       { provider: 'openai', modelId: 'gpt-5.6-sol', shardId: 'shard_1', latencyMs: 180, totalTokens: 1200, statusCode: 200, timestampMs: sampleBaseTime },
-      { provider: 'xai-grok', modelId: 'x-ai/grok-4.5', shardId: 'shard_2', latencyMs: 250, totalTokens: 800, statusCode: 200, timestampMs: sampleBaseTime },
-      { provider: 'xai-grok', modelId: 'x-ai/grok-4.5', shardId: 'shard_2', latencyMs: 310, totalTokens: 950, statusCode: 500, isError: true, timestampMs: sampleBaseTime }
+      { provider: 'openai', modelId: 'gpt-5.6-terra', shardId: 'shard_2', latencyMs: 250, totalTokens: 800, statusCode: 200, timestampMs: sampleBaseTime },
+      { provider: 'openai', modelId: 'gpt-5.6-terra', shardId: 'shard_2', latencyMs: 310, totalTokens: 950, statusCode: 500, isError: true, timestampMs: sampleBaseTime }
     ]);
 
     // Query percentiles via BroccoliDB

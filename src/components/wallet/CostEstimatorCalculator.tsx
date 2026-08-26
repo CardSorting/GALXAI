@@ -195,7 +195,7 @@ export function CostEstimatorCalculator({
               }`}
             >
               <span>Batch (50% Off)</span>
-              <span className="text-[9px] px-1.5 py-0.2 rounded bg-black/20 uppercase">SAVE</span>
+              <span className="text-[10px] px-1.5 py-0.2 rounded bg-black/20 uppercase">SAVE</span>
             </button>
           </div>
 

@@ -33,7 +33,7 @@ import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 interface PromptPreset {
   id: string;
   label: string;
-  category: 'code' | 'reasoning' | 'grok' | 'fast' | 'visual' | 'embedding';
+  category: 'code' | 'reasoning' | 'fast' | 'visual' | 'embedding';
   model: string;
   prompt: string;
   simulatedReply: string;

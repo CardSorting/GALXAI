@@ -193,7 +193,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     fullDefinition:
       'Parallel tool calling enables autonomous AI agents to execute multiple search queries, database mutations, or calculations concurrently without sequential conversational round-trips, slashing total execution latency for agent swarms.',
     technicalContext:
-      'Supported on OpenAI GPT-5.6 and xAI Grok 4.6 via the tools array and tool_choice parameter.',
+      'Supported on OpenAI GPT-5.6 via the tools array and tool_choice parameter.',
     wikidataUri: 'https://www.wikidata.org/wiki/Q28935449',
     relatedTerms: ['Structured JSON Outputs', 'OpenAI Wire Compatibility', 'Predictive Adaptive Hydraulic Headroom (P-AHT)'],
   },

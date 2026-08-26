@@ -196,7 +196,7 @@ function BaseNoCodeSandboxWidget() {
           <div className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-cyan-300 uppercase">
             <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
             <span>Interactive Zero-Code Simulator</span>
-            <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 text-[9px] text-cyan-300 font-bold border border-cyan-500/30">
+            <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 text-[10px] text-cyan-300 font-bold border border-cyan-500/30">
               NO AUTH REQUIRED
             </span>
           </div>

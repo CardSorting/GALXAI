@@ -324,7 +324,7 @@ large_document_context = load_annual_report_markdown()  # ~25,000 tokens
 
 def query_knowledge_base(user_question: str):
     response = client.chat.completions.create(
-        model="x-ai/grok-4.6",  # 1M Context Window
+        model="gpt-5.6-sol",  # 900K Context Window
         messages=[
             {
                 "role": "system",

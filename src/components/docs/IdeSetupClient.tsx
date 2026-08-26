@@ -31,7 +31,7 @@ export function IdeSetupClient() {
         'Navigate to Models > OpenAI API Key.',
         'Toggle "Override OpenAI Base URL" and enter https://api.galx.ai/v1.',
         'Paste your API key (galx_live_...).',
-        'Add model names: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.6.',
+        'Add model names: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna.',
       ],
       snippet: `// In Cursor Settings -> Models:
 Override Base URL: https://api.galx.ai/v1
@@ -94,9 +94,9 @@ claude "Refactor this module with full test coverage"`,
       "apiKey": "galx_live_your_gateway_key"
     },
     {
-      "title": "GALXAI Grok 4.6 (1M Context)",
+      "title": "GALXAI GPT-5.6 Terra (Balanced)",
       "provider": "openai",
-      "model": "x-ai/grok-4.6",
+      "model": "gpt-5.6-terra",
       "apiBase": "https://api.galx.ai/v1",
       "apiKey": "galx_live_your_gateway_key"
     }

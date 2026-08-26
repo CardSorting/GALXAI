@@ -46,7 +46,7 @@ Models: gpt-4o, claude-3-5-sonnet`,
       after: `// GALXAI Sub-15ms Cursor Settings Override:
 Override Base URL: https://api.galx.ai/v1
 API Key: galx_live_your_gateway_key
-Models: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, x-ai/grok-4.6`,
+Models: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`,
       env: `// In .cursorrules or .vscode/settings.json:
 {
   "openai.baseUrl": "https://api.galx.ai/v1",

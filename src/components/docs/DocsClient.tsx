@@ -62,7 +62,7 @@ export function DocsClient() {
     cursor: {
       title: 'Cursor IDE / Windsurf Setup',
       desc: 'In Cursor Settings > Models > OpenAI API Key, toggle "Override OpenAI Base URL":',
-      code: `Base URL: https://api.galx.ai/v1\nAPI Key: galx_live_your_key_here\nModels: gpt-5.6-sol, gpt-5.6-terra, x-ai/grok-4.6`,
+      code: `Base URL: https://api.galx.ai/v1\nAPI Key: galx_live_your_key_here\nModels: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`,
     },
     chat_app: {
       title: 'ChatGPT-Style Web UIs (LibreChat / TypingMind / OpenWebUI)',
@@ -130,7 +130,7 @@ export function DocsClient() {
               variant="pill"
               label="Share Documentation"
               title="GALXAI Documentation & Quickstart Center"
-              description="Learn how to save 25%–40% on GPT-5.6 and Grok 4.5 with 0-code drop-in integrations."
+              description="Learn how to save 25%–40% on GPT-5.6 and OpenAI models with 0-code drop-in integrations."
             />
           </div>
 
@@ -199,7 +199,7 @@ export function DocsClient() {
                     What is GALXAI and How Does it Save Me Money?
                   </h2>
                   <p className="text-xs text-zinc-300 font-sans max-w-2xl">
-                    GALXAI is a high-speed discount gateway. You use the exact same frontier AI models you already love (GPT-5.6, Grok 4.5), but pay wholesale prices with 0 code changes.
+                    GALXAI is a high-speed discount gateway. You use the exact same frontier AI models you already love (GPT-5.6 Sol, Terra, Luna), but pay wholesale prices with 0 code changes.
                   </p>
                 </div>
 
@@ -319,31 +319,31 @@ export function DocsClient() {
                 <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-white/10 font-mono text-xs overflow-x-auto">
                   <button
                     onClick={() => setSelectedTool('cli')}
-                    className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all whitespace-nowrap ${selectedTool === 'cli' ? 'bg-amber-400 text-black font-bold' : 'text-zinc-400 hover:text-white'}`}
+                    className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all whitespace-nowrap ${selectedTool === 'cli' ? 'bg-amber-400 text-amber-950 font-bold' : 'text-white/70 hover:text-white'}`}
                   >
                     npx CLI
                   </button>
                   <button
                     onClick={() => setSelectedTool('cursor')}
-                    className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all whitespace-nowrap ${selectedTool === 'cursor' ? 'bg-amber-400 text-black font-bold' : 'text-zinc-400 hover:text-white'}`}
+                    className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all whitespace-nowrap ${selectedTool === 'cursor' ? 'bg-amber-400 text-amber-950 font-bold' : 'text-white/70 hover:text-white'}`}
                   >
                     Cursor / Windsurf
                   </button>
                   <button
                     onClick={() => setSelectedTool('chat_app')}
-                    className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all whitespace-nowrap ${selectedTool === 'chat_app' ? 'bg-amber-400 text-black font-bold' : 'text-zinc-400 hover:text-white'}`}
+                    className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all whitespace-nowrap ${selectedTool === 'chat_app' ? 'bg-amber-400 text-amber-950 font-bold' : 'text-white/70 hover:text-white'}`}
                   >
                     ChatGPT Web UI
                   </button>
                   <button
                     onClick={() => setSelectedTool('python')}
-                    className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all whitespace-nowrap ${selectedTool === 'python' ? 'bg-amber-400 text-black font-bold' : 'text-zinc-400 hover:text-white'}`}
+                    className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all whitespace-nowrap ${selectedTool === 'python' ? 'bg-amber-400 text-amber-950 font-bold' : 'text-white/70 hover:text-white'}`}
                   >
                     Python Script
                   </button>
                   <button
                     onClick={() => setSelectedTool('nocode')}
-                    className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all whitespace-nowrap ${selectedTool === 'nocode' ? 'bg-amber-400 text-black font-bold' : 'text-zinc-400 hover:text-white'}`}
+                    className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all whitespace-nowrap ${selectedTool === 'nocode' ? 'bg-amber-400 text-amber-950 font-bold' : 'text-white/70 hover:text-white'}`}
                   >
                     No-Code / Zapier
                   </button>
@@ -473,7 +473,7 @@ response = client.chat.completions.create(
                         <Icon className="w-5 h-5" />
                       </div>
                       {sec.badge && (
-                        <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-mono font-bold text-zinc-300">
+                        <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono font-bold text-zinc-300">
                           {sec.badge}
                         </span>
                       )}

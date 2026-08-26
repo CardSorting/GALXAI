@@ -191,7 +191,7 @@ export async function runAgentWorkflow(task: string) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
           <div className="glass-panel p-5 rounded-3xl space-y-1 border border-indigo-500/30 bg-indigo-500/5">
             <span className="text-indigo-400 text-[10px] uppercase font-sans font-semibold">Failover Speed</span>
-            <div className="text-2xl font-black text-indigo-300">&lt; 15 ms Failover</div>
+            <div className="text-2xl font-black text-zinc-100">&lt; 15 ms Failover</div>
             <div className="text-[11px] text-indigo-400 font-sans">Zero agent crashes on upstream outages</div>
           </div>
 

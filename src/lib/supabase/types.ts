@@ -11,7 +11,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type GalxProviderType = 'openai' | 'xai-grok';
+export type GalxProviderType = 'openai';
 export type GalxAuthType = 'api_key' | 'oauth';
 export type GalxShardMode = 'pooled' | 'private';
 export type GalxCredentialStatus = 'healthy' | 'cooldown' | 'exhausted' | 'dead' | 'paused' | 'revoked';
@@ -1220,7 +1220,7 @@ export interface Database {
         Row: {
           id: string;
           user_id: string;
-          provider: 'openai' | 'xai-grok' | 'anthropic';
+          provider: 'openai';
           provider_account_id: string;
           email: string;
           display_name: string | null;
@@ -1243,7 +1243,7 @@ export interface Database {
         Insert: {
           id: string;
           user_id: string;
-          provider: 'openai' | 'xai-grok' | 'anthropic';
+          provider: 'openai';
           provider_account_id: string;
           email: string;
           display_name?: string | null;
@@ -1266,7 +1266,7 @@ export interface Database {
         Update: {
           id?: string;
           user_id?: string;
-          provider?: 'openai' | 'xai-grok' | 'anthropic';
+          provider?: 'openai';
           provider_account_id?: string;
           email?: string;
           display_name?: string | null;
@@ -1293,7 +1293,7 @@ export interface Database {
           id: string;
           state: string;
           code_verifier: string;
-          provider: 'openai' | 'xai-grok' | 'anthropic';
+          provider: 'openai';
           redirect_uri: string;
           mode: string;
           workspace_id: string | null;
@@ -1309,7 +1309,7 @@ export interface Database {
           id: string;
           state: string;
           code_verifier: string;
-          provider: 'openai' | 'xai-grok' | 'anthropic';
+          provider: 'openai';
           redirect_uri: string;
           mode?: string;
           workspace_id?: string | null;
@@ -1325,7 +1325,7 @@ export interface Database {
           id?: string;
           state?: string;
           code_verifier?: string;
-          provider?: 'openai' | 'xai-grok' | 'anthropic';
+          provider?: 'openai';
           redirect_uri?: string;
           mode?: string;
           workspace_id?: string | null;
@@ -1344,7 +1344,7 @@ export interface Database {
           id: string;
           device_code: string;
           user_code: string;
-          provider: 'openai' | 'xai-grok' | 'anthropic';
+          provider: 'openai';
           status: 'pending' | 'approved' | 'denied' | 'expired';
           session_token: string | null;
           token_record: Json | null;
@@ -1363,7 +1363,7 @@ export interface Database {
           id: string;
           device_code: string;
           user_code: string;
-          provider: 'openai' | 'xai-grok' | 'anthropic';
+          provider: 'openai';
           status?: 'pending' | 'approved' | 'denied' | 'expired';
           session_token?: string | null;
           token_record?: Json | null;
@@ -1382,7 +1382,7 @@ export interface Database {
           id?: string;
           device_code?: string;
           user_code?: string;
-          provider?: 'openai' | 'xai-grok' | 'anthropic';
+          provider?: 'openai';
           status?: 'pending' | 'approved' | 'denied' | 'expired';
           session_token?: string | null;
           token_record?: Json | null;
@@ -1403,7 +1403,7 @@ export interface Database {
         Row: {
           id: string;
           request_uri: string;
-          provider: 'openai' | 'xai-grok' | 'anthropic';
+          provider: 'openai';
           client_id: string;
           redirect_uri: string;
           scope: string | null;
@@ -1420,7 +1420,7 @@ export interface Database {
         Insert: {
           id: string;
           request_uri: string;
-          provider: 'openai' | 'xai-grok' | 'anthropic';
+          provider: 'openai';
           client_id: string;
           redirect_uri: string;
           scope?: string | null;
@@ -1437,7 +1437,7 @@ export interface Database {
         Update: {
           id?: string;
           request_uri?: string;
-          provider?: 'openai' | 'xai-grok' | 'anthropic';
+          provider?: 'openai';
           client_id?: string;
           redirect_uri?: string;
           scope?: string | null;
@@ -1486,7 +1486,7 @@ export interface Database {
       galx_oauth_backchannel_logouts: {
         Row: {
           id: string;
-          provider: 'openai' | 'xai-grok' | 'anthropic';
+          provider: 'openai';
           sub: string;
           sid: string | null;
           jti: string | null;
@@ -1501,7 +1501,7 @@ export interface Database {
         };
         Insert: {
           id: string;
-          provider: 'openai' | 'xai-grok' | 'anthropic';
+          provider: 'openai';
           sub: string;
           sid?: string | null;
           jti?: string | null;
@@ -1516,7 +1516,7 @@ export interface Database {
         };
         Update: {
           id?: string;
-          provider?: 'openai' | 'xai-grok' | 'anthropic';
+          provider?: 'openai';
           sub?: string;
           sid?: string | null;
           jti?: string | null;

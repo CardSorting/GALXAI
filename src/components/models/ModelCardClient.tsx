@@ -34,7 +34,6 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
   const [activePersona, setActivePersona] = useState<'creator' | 'developer' | 'architect'>('developer');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  const isGrok = model.provider === 'xai-grok';
   const isImage = model.category === 'image';
 
   const triggerCopy = async (text: string, identifier: string) => {
@@ -56,7 +55,7 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
         {/* Glow ambient background */}
         <div
           className={`absolute -top-32 -right-32 w-96 h-96 rounded-full blur-[140px] pointer-events-none ${
-            isGrok ? 'bg-cyan-500/15' : isImage ? 'bg-purple-500/15' : 'bg-amber-500/15'
+            isImage ? 'bg-purple-500/15' : 'bg-amber-500/15'
           }`}
         />
 
@@ -65,14 +64,12 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
             <div className="flex flex-wrap items-center gap-2">
               <span
                 className={`px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider border shadow-sm ${
-                  isGrok
-                    ? 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30'
-                    : isImage
+                  isImage
                     ? 'bg-purple-500/10 text-purple-300 border-purple-500/30'
                     : 'bg-amber-500/10 text-amber-300 border-amber-500/30'
                 }`}
               >
-                {model.provider === 'openai' ? 'OpenAI Codex Suite' : 'xAI Grok Fleet'}
+                OpenAI Codex Suite
               </span>
 
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">

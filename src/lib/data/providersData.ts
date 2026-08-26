@@ -112,67 +112,6 @@ print(response.choices[0].message.content)`,
       },
     ],
   },
-  {
-    slug: 'xai',
-    providerName: 'xAI',
-    badge: '1M Context Gateway',
-    title: 'xAI Grok API Gateway — Wholesale Grok 4.6 (1M Context) & Grok 4.5',
-    headline: 'Access xAI Grok 4.6 & 4.5 with Sub-15ms Anycast Routing',
-    description:
-      'Deploy xAI Grok frontier reasoning models with 1,000,000 token context windows, real-time multimodal vision, and wholesale token pricing via standard OpenAI SDK compatibility.',
-    fleetSummary:
-      'The flagship xAI Grok 4.6 1M-token cognitive reasoning engine and Grok 4.5 multimodal vision models.',
-    discountPct: 30,
-    featuredModels: [
-      {
-        id: 'x-ai/grok-4.6',
-        name: 'xAI Grok 4.6',
-        role: '1,000,000 Token Massive Context',
-        context: '1,000K Tokens',
-        inputPrice: '$2.80/1M',
-        outputPrice: '$8.40/1M',
-        discount: '-30% Off',
-      },
-      {
-        id: 'x-ai/grok-4.5',
-        name: 'xAI Grok 4.5',
-        role: 'Multimodal Vision & High-Speed Chat',
-        context: '500K Tokens',
-        inputPrice: '$2.40/1M',
-        outputPrice: '$7.20/1M',
-        discount: '-20% Off',
-      },
-    ],
-    quickstartSnippet: {
-      language: 'python',
-      code: `from openai import OpenAI
-
-# 1-Line Drop-in Client for xAI Grok with 1M Token Context
-client = OpenAI(
-    base_url="https://api.galx.ai/v1",
-    api_key="galx_live_your_gateway_key"
-)
-
-response = client.chat.completions.create(
-    model="x-ai/grok-4.6",
-    messages=[{"role": "user", "content": "Analyze 1M token codebase context"}]
-)
-
-print(response.choices[0].message.content)`,
-    },
-    keyAdvantages: [
-      'Massive 1,000,000 token context window for full-repository ingestion',
-      'Sub-15ms Anycast Time-To-First-Token across North America, Europe, and Asia',
-      'Standard OpenAI SDK drop-in integration (zero custom SDK needed)',
-      'Direct wholesale rates starting on your very first token',
-    ],
-    faqs: [
-      {
-        q: 'Can I use the standard openai python package for xAI Grok?',
-        a: 'Yes. GALXAI provides 100% wire-compatibility, translating standard chat completions calls directly to xAI models.',
-      },
-    ],
-  },
 ];
 
 

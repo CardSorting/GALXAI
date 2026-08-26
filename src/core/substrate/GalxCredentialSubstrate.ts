@@ -61,7 +61,6 @@ export class GalxCredentialSubstrate {
 
   private seedInitialEnvShards(): void {
     const openaiKey = process.env.OPENAI_API_KEY;
-    const xaiKey = process.env.XAI_API_KEY;
 
     if (openaiKey && openaiKey.length > 10) {
       const shardId = `codex_root_${Date.now()}`;
@@ -78,49 +77,6 @@ export class GalxCredentialSubstrate {
         weight: 1,
         fencingToken: 1,
         apiKeyMasked: GalxCryptoVault.maskApiKey(openaiKey),
-        encryptedSecrets: encrypted,
-        privacyCapabilities: {
-          hipaaCompliant: true,
-          zdrCertified: true,
-          dataResidency: 'global',
-          baaSigned: true,
-          piiFiltering: true
-        },
-        tokenBucket: {
-          maxTokens: 500000,
-          remainingTokens: 500000,
-          refillRatePerMinute: 500000,
-          maxRequests: 1000,
-          remainingRequests: 1000,
-          lastRefillTimestampMs: Date.now()
-        },
-        stats: {
-          totalRequestsServed: 0,
-          totalTokensConsumed: 0,
-          consecutiveFailures: 0
-        },
-        permissionRetracted: false,
-        createdAtMs: Date.now(),
-        updatedAtMs: Date.now()
-      };
-      this.addAccount(shard);
-    }
-
-    if (xaiKey && xaiKey.length > 10) {
-      const shardId = `grok_root_${Date.now()}`;
-      const encrypted = GalxCryptoVault.encryptSecret({ apiKey: xaiKey }, 'system_admin', shardId, 'xai-grok');
-      const shard: GalxShardAccount = {
-        id: shardId,
-        userId: 'system_admin',
-        accountLabel: 'xAI Grok Root Seed Pool',
-        provider: 'xai-grok',
-        authType: 'api_key',
-        shardMode: 'pooled',
-        status: 'healthy',
-        priority: 10,
-        weight: 1,
-        fencingToken: 1,
-        apiKeyMasked: GalxCryptoVault.maskApiKey(xaiKey),
         encryptedSecrets: encrypted,
         privacyCapabilities: {
           hipaaCompliant: true,

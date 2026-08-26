@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     const userAgent = req.headers.get('user-agent') || undefined;
 
     const authEngine = GalxAuthEngine.getInstance();
-    const result = await authEngine.authenticateProviderUser('xai-grok', {
+    const result = await authEngine.authenticateProviderUser('openai', {
       apiKey: apiKey?.trim() || undefined,
       accessToken: accessToken?.trim() || undefined,
       refreshToken: refreshToken?.trim() || undefined,

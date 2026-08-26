@@ -10,7 +10,7 @@ export class AuthResource {
   /**
    * Generates an RFC 7636 PKCE Authorization URL with S256 code challenge.
    */
-  async getOAuthUrl(provider: 'openai' | 'xai-grok' = 'openai', redirectUri?: string): Promise<OAuthUrlDetails> {
+  async getOAuthUrl(provider: 'openai' = 'openai', redirectUri?: string): Promise<OAuthUrlDetails> {
     const params = new URLSearchParams({ provider });
     if (redirectUri) params.set('redirectUri', redirectUri);
     return this.core.request<OAuthUrlDetails>(`/api/auth/oauth/url?${params.toString()}`);
@@ -23,7 +23,7 @@ export class AuthResource {
     code: string;
     codeVerifier: string;
     state?: string;
-    provider?: 'openai' | 'xai-grok';
+    provider?: 'openai';
     redirectUri?: string;
     mode?: 'pooled' | 'private';
   }): Promise<any> {
@@ -78,7 +78,7 @@ export class AuthResource {
   }
 
   /**
-   * Lists all connected provider identities (OpenAI, xAI Grok) linked to the user account.
+   * Lists all connected provider identities (OpenAI) linked to the user account.
    */
   async listIdentities(): Promise<{ success: boolean; identities: any[] }> {
     return this.core.request('/api/auth/identities', { method: 'GET' });
@@ -87,7 +87,7 @@ export class AuthResource {
   /**
    * Unlinks / disconnects a specific provider account from the user profile.
    */
-  async unlinkProvider(provider: 'openai' | 'xai-grok'): Promise<{ success: boolean; message: string }> {
+  async unlinkProvider(provider: 'openai'): Promise<{ success: boolean; message: string }> {
     return this.core.request(`/api/auth/identities?provider=${provider}`, { method: 'DELETE' });
   }
 
@@ -95,7 +95,7 @@ export class AuthResource {
    * Pushes an authorization request directly according to RFC 9126 (PAR).
    */
   async pushAuthorization(params: {
-    provider?: 'openai' | 'xai-grok';
+    provider?: 'openai';
     clientId: string;
     redirectUri: string;
     scope?: string;
@@ -111,7 +111,7 @@ export class AuthResource {
   /**
    * Initiates an RFC 8628 Device Authorization Grant (Device Flow) for headless terminals / SSH sessions.
    */
-  async requestDeviceCode(provider: 'openai' | 'xai-grok' = 'openai'): Promise<{
+  async requestDeviceCode(provider: 'openai' = 'openai'): Promise<{
     device_code: string;
     user_code: string;
     verification_uri: string;
@@ -139,7 +139,7 @@ export class AuthResource {
    * Executes complete end-to-end Device Flow login with polling loop.
    */
   async deviceLogin(options?: {
-    provider?: 'openai' | 'xai-grok';
+    provider?: 'openai';
     onPrompt?: (details: { userCode: string; verificationUri: string; verificationUriComplete: string }) => void;
   }): Promise<{ access_token: string; user?: any }> {
     const details = await this.requestDeviceCode(options?.provider || 'openai');
@@ -182,7 +182,7 @@ export class AuthResource {
    * Tailored for CLI tools, autonomous agents, and developer workstations.
    */
   async interactiveLogin(options?: {
-    provider?: 'openai' | 'xai-grok';
+    provider?: 'openai';
     port?: number;
     timeoutMs?: number;
     openBrowser?: boolean;

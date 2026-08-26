@@ -89,10 +89,9 @@ export class GalxAuthEngine {
       scopes = ['*']
     } = params;
 
-    const effectiveProvider: ProviderType = provider === 'xai-grok' ? 'xai-grok' : 'openai';
-    const providerPrefix = effectiveProvider === 'openai' ? 'openai' : 'grok';
-    const uid = `${providerPrefix}_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`;
-    const shardId = `${effectiveProvider === 'xai-grok' ? 'grok' : 'codex'}_${uid.substring(0, 10)}_${Date.now()}`;
+    const effectiveProvider: ProviderType = 'openai';
+    const uid = `openai_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`;
+    const shardId = `codex_${uid.substring(0, 10)}_${Date.now()}`;
     const familyId = `fam_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
     const fingerprint = GalxCryptoVault.generateClientFingerprint(ipAddress, userAgent);
     const oauthManager = GalxOAuthManager.getInstance();
@@ -123,10 +122,10 @@ export class GalxAuthEngine {
         accountId = oauthManager.extractAccountId(tokenSource);
       }
       if (!email) {
-        email = oauthManager.extractEmail(tokenSource) || (effectiveProvider === 'openai' ? 'user@openai.oauth' : 'user@x.ai');
+        email = oauthManager.extractEmail(tokenSource) || 'user@openai.oauth';
       }
       if (!displayName) {
-        displayName = oauthManager.extractName(tokenSource) || (effectiveProvider === 'openai' ? 'OpenAI OAuth User' : 'Grok OAuth User');
+        displayName = oauthManager.extractName(tokenSource) || 'OpenAI OAuth User';
       }
       if (!expiresAtMs) {
         const parsedExp = oauthManager.extractExpiryMs(accessToken || '');
@@ -140,19 +139,19 @@ export class GalxAuthEngine {
       }
       rawTokenSecret = apiKey.trim();
       if (!email) {
-        email = effectiveProvider === 'openai' ? 'creator@openai.user' : 'creator@x.ai';
+        email = 'creator@openai.user';
       }
       if (!displayName) {
-        displayName = effectiveProvider === 'openai' ? 'OpenAI Creator' : 'Grok Creator';
+        displayName = 'OpenAI Creator';
       }
     } else {
       // Check server environment root fallback key (for dev/local infrastructure without placeholder generation)
-      const envKey = effectiveProvider === 'xai-grok' ? process.env.XAI_API_KEY : process.env.OPENAI_API_KEY;
+      const envKey = process.env.OPENAI_API_KEY;
       if (envKey && envKey.trim().length > 15) {
         authType = 'api_key';
         rawTokenSecret = envKey.trim();
-        if (!email) email = effectiveProvider === 'openai' ? 'creator@openai.user' : 'creator@x.ai';
-        if (!displayName) displayName = effectiveProvider === 'openai' ? 'OpenAI Creator' : 'Grok Creator';
+        if (!email) email = 'creator@openai.user';
+        if (!displayName) displayName = 'OpenAI Creator';
       } else {
         throw new Error(
           `MISSING_PROVIDER_CREDENTIALS: An OAuth access token or valid API key is required to authenticate with ${effectiveProvider}.`
@@ -180,16 +179,16 @@ export class GalxAuthEngine {
 
     // 4. Create Rate Governor Continuous Bucket
     const bucket = galxRouter.rateGovernor.createDefaultBucket(
-      effectiveProvider === 'xai-grok' ? 500000 : 400000,
-      effectiveProvider === 'xai-grok' ? 500000 : 400000,
-      effectiveProvider === 'xai-grok' ? 1000 : 800
+      400000,
+      400000,
+      800
     );
 
     // 5. Provision Shard Account
     const shard: GalxShardAccount = {
       id: shardId,
       userId: uid,
-      accountLabel: displayName ? `${displayName}'s ${effectiveProvider === 'xai-grok' ? 'xAI Grok' : 'OpenAI'} Vault` : 'Personal AI Shard',
+      accountLabel: displayName ? `${displayName}'s OpenAI Vault` : 'Personal AI Shard',
       provider: effectiveProvider,
       authType,
       shardMode: mode === 'private' ? 'private' : 'pooled',

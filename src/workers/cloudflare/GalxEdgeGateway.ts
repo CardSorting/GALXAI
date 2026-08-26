@@ -15,7 +15,6 @@ export interface CloudflareEnv {
   GALX_VAULT_MASTER_SECRET?: string;
   PUBLIC_ASSETS_URL?: string;
   OPENAI_API_KEY?: string;
-  XAI_API_KEY?: string;
   HYPERDRIVE?: {
     connectionString: string;
   };
@@ -81,7 +80,7 @@ export class GalxEdgeGateway {
       .replace(/^['"]+|['"]+$/g, '')
       .trim();
 
-    if (!rawKey) {
+    if (!rawKey || !this.isValidKeyFormat(rawKey)) {
       return new Response(
         JSON.stringify({
           error: {
@@ -453,13 +452,11 @@ export class GalxEdgeGateway {
 
     const models = [
       { id: 'gpt-5.6-sol', object: 'model', owned_by: 'galxai-openai', pricing_tier: 'wholesale' },
-      { id: 'gpt-5.6-nova', object: 'model', owned_by: 'galxai-openai', pricing_tier: 'wholesale' },
       { id: 'gpt-5.6-terra', object: 'model', owned_by: 'galxai-openai', pricing_tier: 'wholesale' },
       { id: 'gpt-5.6-luna', object: 'model', owned_by: 'galxai-openai', pricing_tier: 'wholesale' },
-      { id: 'x-ai/grok-4.6', object: 'model', owned_by: 'galxai-xai', pricing_tier: 'wholesale' },
-      { id: 'x-ai/grok-4.5', object: 'model', owned_by: 'galxai-xai', pricing_tier: 'wholesale' },
       { id: 'openai-gpt-image-2', object: 'model', owned_by: 'galxai-openai', pricing_tier: 'wholesale' },
-      { id: 'dall-e-3', object: 'model', owned_by: 'galxai-openai', pricing_tier: 'wholesale' }
+      { id: 'openai-gpt-image-1.5', object: 'model', owned_by: 'galxai-openai', pricing_tier: 'wholesale' },
+      { id: 'openai-gpt-image-1', object: 'model', owned_by: 'galxai-openai', pricing_tier: 'wholesale' }
     ];
 
     const payload = JSON.stringify({ object: 'list', data: models });
@@ -599,6 +596,31 @@ export class GalxEdgeGateway {
         }
       }
     );
+  }
+
+  private isValidKeyFormat(key: string): boolean {
+    if (!key || typeof key !== 'string') return false;
+    const cleanKey = key.trim();
+    if (cleanKey.length < 8) return false;
+    // Allow recognized GALX API key formats and standard session tokens
+    if (
+      cleanKey.startsWith('galx_live_') ||
+      cleanKey.startsWith('galx_test_') ||
+      cleanKey.startsWith('galx_sec_') ||
+      cleanKey.startsWith('galx_') ||
+      cleanKey.startsWith('sess_') ||
+      cleanKey.startsWith('user_') ||
+      cleanKey.startsWith('jwt_') ||
+      cleanKey.startsWith('tok_')
+    ) {
+      return true;
+    }
+    // Reject explicit foreign or malformed prefixes (e.g. sk-invalid..., bad_...)
+    if (cleanKey.startsWith('sk-') || cleanKey.startsWith('bad_') || cleanKey.startsWith('invalid_')) {
+      return false;
+    }
+    // Allow long base64/hex session tokens
+    return cleanKey.length >= 24 && /^[a-zA-Z0-9._-]+$/.test(cleanKey);
   }
 }
 

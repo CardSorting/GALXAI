@@ -112,7 +112,7 @@ export function TierUnlockProgressBar({
                   {isUnlocked ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Icon className="w-3 h-3" />}
                 </div>
                 <span className="text-[10px] font-bold mt-1">${m.amount}</span>
-                <span className="text-[9px] text-zinc-400 hidden sm:block truncate max-w-[70px]">{m.perk}</span>
+                <span className="text-[10px] text-zinc-400 hidden sm:block truncate max-w-[70px]">{m.perk}</span>
               </button>
             );
           })}

@@ -14,22 +14,21 @@ interface AuthProviderModalProps {
 
 function BaseAuthProviderModal({ isOpen, onClose, onSuccess }: AuthProviderModalProps) {
   const [activeTab, setActiveTab] = useState<'oauth' | 'token'>('oauth');
-  const [loadingProvider, setLoadingProvider] = useState<'openai' | 'grok' | null>(null);
+  const [loadingProvider, setLoadingProvider] = useState<'openai' | null>(null);
   const [mode, setMode] = useState<'pooled' | 'private'>('pooled');
   const [tokenInput, setTokenInput] = useState('');
-  const [selectedProvider, setSelectedProvider] = useState<'openai' | 'xai-grok'>('openai');
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   // 1. OAuth 2.0 PKCE Flow
-  const handleOAuthLogin = async (provider: 'openai' | 'xai-grok') => {
-    setLoadingProvider(provider === 'xai-grok' ? 'grok' : 'openai');
+  const handleOAuthLogin = async () => {
+    setLoadingProvider('openai');
     setError(null);
     try {
       const redirectUri = `${window.location.origin}/auth/callback`;
       const res = await resilientFetch<{ success: boolean; url: string; codeVerifier: string; state: string }>(
-        `/api/auth/oauth/url?provider=${provider}&redirectUri=${encodeURIComponent(redirectUri)}`,
+        `/api/auth/oauth/url?provider=openai&redirectUri=${encodeURIComponent(redirectUri)}`,
         { enableCacheFallback: false }
       );
 
@@ -38,7 +37,7 @@ function BaseAuthProviderModal({ isOpen, onClose, onSuccess }: AuthProviderModal
       }
 
       SafeStorage.setJSON('galxai_oauth_pkce', {
-        provider,
+        provider: 'openai',
         codeVerifier: res.data.codeVerifier,
         state: res.data.state,
         mode
@@ -59,11 +58,11 @@ function BaseAuthProviderModal({ isOpen, onClose, onSuccess }: AuthProviderModal
       return;
     }
 
-    setLoadingProvider(selectedProvider === 'xai-grok' ? 'grok' : 'openai');
+    setLoadingProvider('openai');
     setError(null);
 
-    const isApiKey = tokenInput.startsWith('sk-') || tokenInput.startsWith('xai-');
-    const endpoint = selectedProvider === 'xai-grok' ? '/api/auth/grok' : '/api/auth/openai';
+    const isApiKey = tokenInput.startsWith('sk-');
+    const endpoint = '/api/auth/openai';
 
     try {
       const res = await resilientFetch<{ success: boolean; user: any; error?: string }>(endpoint, {
@@ -113,7 +112,7 @@ function BaseAuthProviderModal({ isOpen, onClose, onSuccess }: AuthProviderModal
           </div>
           <h2 className="text-2xl font-black text-white">Provider Authentication</h2>
           <p className="text-xs text-zinc-400 max-w-xs mx-auto">
-            Connect your OpenAI or xAI account
+            Connect your OpenAI Codex credentials
           </p>
         </div>
 
@@ -157,7 +156,7 @@ function BaseAuthProviderModal({ isOpen, onClose, onSuccess }: AuthProviderModal
           <div className="space-y-3.5">
             <button
               type="button"
-              onClick={() => handleOAuthLogin('openai')}
+              onClick={handleOAuthLogin}
               disabled={loadingProvider !== null}
               className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-sm uppercase tracking-wider shadow-lg shadow-amber-500/20 hover:scale-[1.01] active:scale-98 transition-all flex items-center justify-between cursor-pointer disabled:opacity-50"
             >
@@ -173,16 +172,6 @@ function BaseAuthProviderModal({ isOpen, onClose, onSuccess }: AuthProviderModal
         {/* Tab 2: Direct Token / Key */}
         {activeTab === 'token' && (
           <form onSubmit={handleTokenSubmit} className="space-y-4">
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setSelectedProvider('openai')}
-                className="flex-1 py-2 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer bg-amber-500/20 border-amber-500/50 text-amber-300"
-              >
-                OpenAI Codex Suite
-              </button>
-            </div>
-
             <div>
               <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
                 OAuth Bearer Access Token or API Key
@@ -191,7 +180,7 @@ function BaseAuthProviderModal({ isOpen, onClose, onSuccess }: AuthProviderModal
                 type="password"
                 value={tokenInput}
                 onChange={(e) => setTokenInput(e.target.value)}
-                placeholder={selectedProvider === 'xai-grok' ? 'xai-... or Bearer Token' : 'sk-... or Bearer Token'}
+                placeholder="sk-... or Bearer Token"
                 className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-emerald-500 transition-all placeholder:text-zinc-600"
               />
             </div>

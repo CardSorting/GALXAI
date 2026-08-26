@@ -197,7 +197,7 @@ export async function POST(req: NextRequest) {
 
     const oauthRepo = OAuthRepository.getInstance();
     const oauthManager = GalxOAuthManager.getInstance();
-    let effectiveProvider: ProviderType = provider === 'xai-grok' ? 'xai-grok' : 'openai';
+    let effectiveProvider: ProviderType = 'openai';
 
     // 0. Verify and atomically consume authorization request from BroccoliDB / Supabase
     if (state && typeof state === 'string') {

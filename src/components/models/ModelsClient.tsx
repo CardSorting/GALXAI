@@ -167,7 +167,6 @@ export function ModelsClient() {
         {/* Models Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredModels.map((model) => {
-            const isGrok = model.provider === 'xai-grok';
             const isImage = model.category === 'image';
             const detailHref = `/models/${model.id.replace('/', '-')}`;
 
@@ -182,12 +181,8 @@ export function ModelsClient() {
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2.5">
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                        isGrok
-                          ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
-                          : 'bg-amber-500/10 border border-amber-500/30 text-amber-400'
-                      }`}>
-                        {isGrok ? <Rocket className="w-4 h-4" /> : <Zap className="w-4 h-4 fill-amber-400" />}
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-amber-500/10 border border-amber-500/30 text-amber-400">
+                        <Zap className="w-4 h-4 fill-amber-400" />
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">

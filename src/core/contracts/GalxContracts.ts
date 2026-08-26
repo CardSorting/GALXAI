@@ -3,7 +3,7 @@
  * High-concurrency routing, cryptographic secret vaulting, and circuit governance.
  */
 
-export type ProviderType = 'openai' | 'xai-grok';
+export type ProviderType = 'openai';
 export type ShardIsolationMode = 'private' | 'pooled';
 export type CredentialStatus = 'healthy' | 'cooldown' | 'exhausted' | 'dead' | 'paused' | 'revoked';
 export type GalxRotationStrategy =
@@ -273,7 +273,6 @@ export interface PoolStats {
   readonly totalPrivateShards?: number;
   readonly providerBreakdown?: {
     openai: { total: number; healthy: number };
-    'xai-grok': { total: number; healthy: number };
   };
 }
 

@@ -230,7 +230,7 @@ function BaseGuidedSetupWizard() {
               <div className="flex items-center justify-between">
                 <div
                   className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                    isSelected ? 'bg-amber-400 text-black font-bold' : 'bg-white/10 text-zinc-300'
+                    isSelected ? 'bg-amber-400 text-amber-950 font-bold' : 'bg-white/10 text-white/80'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />

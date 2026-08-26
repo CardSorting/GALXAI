@@ -1,11 +1,11 @@
 /**
  * GALXAI: Cloudflare Edge Pre-Warmed Connection Pool
- * Maintains warm HTTP/2 and TCP Keep-Alive sockets to OpenAI and Grok endpoints,
+ * Maintains warm HTTP/2 and TCP Keep-Alive sockets to OpenAI endpoints,
  * eliminating handshake latency on cold invocations and reducing P99 latency by up to 120ms.
  */
 
 export interface PreWarmedEndpoint {
-  provider: 'openai' | 'xai-grok';
+  provider: 'openai';
   baseUrl: string;
   isWarm: boolean;
   lastWarmedAtMs: number;
@@ -29,15 +29,9 @@ export class GalxEdgeConnectionPool {
       isWarm: true,
       lastWarmedAtMs: Date.now()
     });
-    this.endpoints.set('xai-grok', {
-      provider: 'xai-grok',
-      baseUrl: 'https://api.x.ai',
-      isWarm: true,
-      lastWarmedAtMs: Date.now()
-    });
   }
 
-  getWarmHeaders(provider: 'openai' | 'xai-grok'): Record<string, string> {
+  getWarmHeaders(provider: 'openai' = 'openai'): Record<string, string> {
     const ep = this.endpoints.get(provider);
     if (ep) {
       ep.lastWarmedAtMs = Date.now();

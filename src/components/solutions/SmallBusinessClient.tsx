@@ -68,7 +68,7 @@ export function SmallBusinessClient() {
               One Shared AI Workspace for Your Entire Engineering Squad
             </h1>
             <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl mx-auto font-sans">
-              Stop juggling separate company credit cards across OpenAI, Anthropic, and Grok. Consolidate your team seats, shared wallets, and individual developer spend caps under one sovereign roof.
+              Stop juggling separate company credit cards and isolated AI accounts. Consolidate your team seats, shared wallets, and individual developer spend caps under one sovereign roof.
             </p>
           </div>
 

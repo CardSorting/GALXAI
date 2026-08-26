@@ -206,21 +206,21 @@ async function main() {
       updatedAtMs: Date.now()
     });
 
-    const encGrok = GalxCryptoVault.encryptSecret(
-      { apiKey: 'xai-demo-grok-shard-001' },
+    const encOpenAI2 = GalxCryptoVault.encryptSecret(
+      { apiKey: 'sk-proj-demo-openai-shard-002' },
       primaryUserId,
-      'shard_grok_master',
-      'xai-grok'
+      'shard_openai_master_2',
+      'openai'
     );
     await shardRepo.saveShard({
-      id: 'shard_grok_master',
+      id: 'shard_openai_master_2',
       userId: primaryUserId,
-      provider: 'xai-grok',
+      provider: 'openai',
       authType: 'api_key',
-      accountLabel: 'xAI Grok Fleet Shard (Ultra Concurrency)',
-      apiKeyMasked: 'xai-...001',
-      encryptedPayload: encGrok,
-      encryptedSecrets: encGrok,
+      accountLabel: 'OpenAI Fleet Secondary Shard (Ultra Concurrency)',
+      apiKeyMasked: 'sk-...002',
+      encryptedPayload: encOpenAI2,
+      encryptedSecrets: encOpenAI2,
       shardMode: 'pooled',
       priority: 85,
       weight: 7,

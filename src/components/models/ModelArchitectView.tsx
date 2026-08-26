@@ -13,11 +13,7 @@ interface ModelArchitectViewProps {
 }
 
 export function ModelArchitectView({ model }: ModelArchitectViewProps) {
-  const isGrok = model.provider === 'xai-grok';
-
-  const benchmarkScores = isGrok
-    ? { humanEval: 92.4, sweBench: 54.8, math500: 91.2, gpqaDiamond: 68.4, multilingualMmlu: 89.6 }
-    : { humanEval: 94.8, sweBench: 59.2, math500: 93.6, gpqaDiamond: 72.1, multilingualMmlu: 91.4 };
+  const benchmarkScores = { humanEval: 94.8, sweBench: 59.2, math500: 93.6, gpqaDiamond: 72.1, multilingualMmlu: 91.4 };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
@@ -90,7 +86,7 @@ export function ModelArchitectView({ model }: ModelArchitectViewProps) {
             </div>
             <div className="w-full h-2.5 rounded-full bg-zinc-800 overflow-hidden">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-indigo-400 to-purple-500 transition-all duration-500"
+                className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-500"
                 style={{ width: `${benchmarkScores.gpqaDiamond}%` }}
               />
             </div>

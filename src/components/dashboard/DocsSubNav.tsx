@@ -81,7 +81,7 @@ export function DocsSubNav() {
               <span>{tab.name}</span>
               {tab.badge && (
                 <span
-                  className={`text-[9px] px-1.5 py-0.2 rounded-full font-bold ${
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
                     isActive
                       ? 'bg-black/20 text-black'
                       : 'bg-white/10 text-zinc-300'

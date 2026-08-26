@@ -180,7 +180,7 @@ function BaseWorkloadEstimator() {
               <div className="flex items-center justify-between">
                 <div
                   className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
-                    isSelected ? 'bg-amber-400 text-black shadow-md' : 'bg-white/10 text-zinc-300'
+                    isSelected ? 'bg-amber-400 text-amber-950 font-bold shadow-md' : 'bg-white/10 text-white/80'
                   }`}
                 >
                   <Icon className="w-5 h-5" />

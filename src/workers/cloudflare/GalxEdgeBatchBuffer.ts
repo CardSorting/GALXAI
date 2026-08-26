@@ -22,7 +22,7 @@ export interface BatchTokenDrawItem {
 }
 
 export interface BatchTelemetryItem {
-  provider: 'openai' | 'xai-grok';
+  provider: 'openai';
   modelId: string;
   shardId: string;
   latencyMs: number;

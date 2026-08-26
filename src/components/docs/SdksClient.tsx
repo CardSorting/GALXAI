@@ -75,7 +75,7 @@ client = OpenAI(
 
 # Stream responses with sub-15ms TTFT & 75% prompt caching
 response = client.chat.completions.create(
-    model="gpt-5.6-sol",  # or "x-ai/grok-4.6"
+    model="gpt-5.6-sol",  # or "gpt-5.6-terra", "gpt-5.6-luna"
     messages=[{"role": "user", "content": "Refactor this async pipeline in Python."}],
     stream=True
 )
