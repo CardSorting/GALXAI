@@ -263,7 +263,7 @@ export default function ToolsHubPage() {
       </div>
 
       {/* Bottom Conversion & Info Banner */}
-      <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-indigo-950/40 via-black to-cyan-950/30 p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-8">
+      <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-950/40 via-black to-cyan-950/30 p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-8">
         <div className="space-y-2 text-center md:text-left">
           <div className="inline-flex items-center gap-2 text-xs font-mono text-emerald-400 font-bold">
             <ShieldCheck className="w-4 h-4" />
