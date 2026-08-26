@@ -1,203 +1,148 @@
-# 🚀 GALXAI Quickstart: The 4 Jobs Integration Guide
+# 🚀 GALXAI Quickstart: The 30-Second Guide
 
-Connect your AI tools, frameworks, agent swarms, and IDEs to GALXAI in under 30 seconds. Eliminate generic gateway friction and immediately unlock **25%–40% wholesale discounts**, **75% prompt cache pass-through**, and **active Anycast failover with zero rate-limit stalls**.
+Add AI capabilities to your project in under 30 seconds with **wholesale rates (25%–40% off)**, **zero backend proxy wiring**, and **zero user-facing API key modals**.
 
 ---
 
-## 🎯 Which Job Do You Need Solved?
+## ⚡ The 3 Simple Ways to Connect
 
-```mermaid
-graph TD
-    A[Start Here] --> B{What is your primary goal?}
-    B -->|Slash OpenAI/Anthropic Bills| C[1-Line Drop-in Python / Node SDK]
-    B -->|Stop Agent 429 Rate Limit Stalls| D[Automatic High-Availability Failover]
-    B -->|Cursor / Windsurf / Claude Code| E[Single Universal AI Wallet]
-    B -->|Instant Terminal & Bash Prompts| F[Zero-Install CLI: npx galxai]
+```
+┌────────────────────────────────────────────────────────┐
+│ 1. React / Next.js -> Drop in <GalxImage /> & <GalxChat />
+│ 2. Existing Code   -> Add `import 'galxai/patch'`
+│ 3. AI Coding Agent -> Run `npx galxai skills`
+└────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## ⚡ 1. Zero-Install CLI (`npx galxai`)
+## 🔑 1. Setup Your Secret Key (Server Only)
 
-Run completions, test models, estimate token savings, and measure edge latency directly from your terminal with **no packages to install**:
+Put your API key in `.env.local` in your project root:
 
 ```bash
-# 1. Run immediate streaming completion (Flagship GPT-5.6 Sol)
-npx galxai "Explain continuous token caching in 10 words"
-
-# 2. Run target reasoning model
-npx galxai run "Audit distributed lock implementation" --model terra
-
-# 3. List all models, context windows, and wholesale rates
-npx galxai models
-
-# 4. Count BPE tokens and calculate dollar savings
-npx galxai tokens "500-page earnings report..."
-
-# 5. Measure sub-15ms Anycast edge gateway latency
-npx galxai ping
-
-# 6. Start interactive terminal chat REPL
-npx galxai chat
+# .env.local
+GALXAI_API_KEY=galx_live_your_key_here
 ```
+
+> 🔒 **Security Guarantee**: Your users are never asked for an API key. Everything is handled securely by the backend and server actions.
 
 ---
 
-## ⚡ 2. React & Next.js (Declarative & Server Actions)
+## 🖼️ 2. React & Next.js (Zero-Boilerplate)
 
-Set `GALXAI_API_KEY=galx_live_...` in `.env.local`. No client tokens or route boilerplate required:
+### A. Declarative Image Generator (`<GalxImage />`)
+Renders an image with automatic aspect ratios, loading placeholders, and live hover remixing:
 
 ```tsx
-// Option A: Declarative JSX Component
-import { GalxImage, GalxChat } from '@galxai/sdk/ui';
+import { GalxImage } from 'galxai/ui';
 
-export function VisualStudio() {
+export function Hero() {
   return (
-    <>
-      <GalxImage prompt="Cyberpunk skyline" aspectRatio="16:9" interactive />
-      <GalxChat model="gpt-5.6-sol" placeholder="Ask anything..." />
-    </>
+    <GalxImage
+      prompt="Cyberpunk metropolis at dusk"
+      aspectRatio="16:9"
+      interactive
+      className="w-full h-96 rounded-2xl shadow-xl"
+    />
   );
 }
+```
 
-// Option B: Direct React 19 Server Action (Zero API files needed)
-import { generateImageAction } from '@galxai/sdk/actions';
-const res = await generateImageAction('Neon avatar', { aspectRatio: '1:1' });
+### B. Streaming Chat Box (`<GalxChat />`)
+A complete multi-turn streaming chat interface in one line of JSX:
+
+```tsx
+import { GalxChat } from 'galxai/ui';
+
+export function ChatAssistant() {
+  return (
+    <GalxChat
+      model="gpt-5.6-sol"
+      placeholder="Ask anything..."
+      className="h-[500px]"
+    />
+  );
+}
+```
+
+### C. Direct Next.js 15 Server Action
+Invoke AI functions directly from your client components with **zero route files**:
+
+```tsx
+'use client';
+import { generateImageAction } from 'galxai/actions';
+
+export function Button() {
+  return (
+    <button onClick={async () => {
+      const res = await generateImageAction('Neon avatar', { aspectRatio: '1:1' });
+      console.log(res.data[0].url);
+    }}>
+      Synthesize
+    </button>
+  );
+}
 ```
 
 ---
 
-## 💻 3. Cursor & Windsurf IDE (Single-Wallet Setup)
+## 🤖 3. AI Coding Agents (Cursor, Claude Code, Windsurf)
 
-1. Open **Cursor Settings** $\to$ **Models** $\to$ **Add Model**: `gpt-5.6-sol` (or `x-ai/grok-4.6`).
-2. Enable **Override OpenAI Base URL**:
-   ```text
-   https://galx.ai/v1
-   ```
-3. Paste your `galx_live_...` API key into the **API Key** field.
-4. Enjoy continuous 25%–40% wholesale savings and 75% prompt cache pass-through on every prompt!
+If you use AI coding assistants to build software, run this command in your project:
+
+```bash
+npx galxai skills
+```
+
+This generates `.cursorrules`, `CLAUDE.md`, and `AGENTS.md` with complete architectural instructions so your agent builds flawless GALXAI integrations.
 
 ---
 
-## 🐍 3. Python (OpenAI Drop-In)
+## 🔄 4. Upgrading Existing OpenAI Code (1-Line Patch)
 
-Keep your existing `openai>=1.0.0` library without installing new dependencies:
+If your app already uses the official `openai` SDK:
+
+```typescript
+// Add at the top of your layout.tsx or index.ts:
+import 'galxai/patch';
+
+// Existing OpenAI calls now run through GALXAI at wholesale prices automatically:
+import OpenAI from 'openai';
+const openai = new OpenAI();
+```
+
+---
+
+## 🐍 5. Python (OpenAI SDK Drop-In)
 
 ```python
 from openai import OpenAI
+import os
 
-# 100% Drop-in: Only change base_url and api_key
 client = OpenAI(
     base_url="https://galx.ai/v1",
-    api_key="galx_live_your_key_here"
+    api_key=os.environ.get("GALXAI_API_KEY")
 )
 
 response = client.chat.completions.create(
     model="gpt-5.6-sol",
-    messages=[{"role": "user", "content": "Explain continuous token caching concisely."}],
-    stream=True
+    messages=[{"role": "user", "content": "Explain zero-hesitation architecture"}]
 )
-
-for chunk in response:
-    if chunk.choices and chunk.choices[0].delta.content:
-        print(chunk.choices[0].delta.content, end="", flush=True)
+print(response.choices[0].message.content)
 ```
 
 ---
 
-## 🤖 4. Anthropic SDK & Claude Code CLI
-
-```typescript
-import Anthropic from "@anthropic-ai/sdk";
-
-// 100% Drop-in: Only change baseURL
-const anthropic = new Anthropic({
-  baseURL: "https://galx.ai",
-  apiKey: process.env.GALX_API_KEY || "galx_live_your_key_here",
-});
-
-const message = await anthropic.messages.create({
-  model: "gpt-5.6-sol", // or claude-3-7-sonnet alias
-  max_tokens: 2048,
-  messages: [{ role: "user", content: "Design a fault-tolerant distributed queue." }],
-});
-
-console.log(message.content[0].text);
-```
-
----
-
-## 📦 5. Universal 1-Line TypeScript / Node SDK (`@galxai/sdk`)
+## 💻 6. Zero-Install CLI (`npx galxai`)
 
 ```bash
-npm install @galxai/sdk
+# 1. Run prompt in terminal
+npx galxai "Explain token bucket rate limiting in 10 words"
+
+# 2. Generate image
+npx galxai image "Cyberpunk city at midnight" --ratio 16:9
+
+# 3. Check health and latency
+npx galxai doctor
 ```
-
-```typescript
-import { run, galx, batch, thread, fallback, race, extract } from '@galxai/sdk';
-
-// 1. Ultra-fast 1-liner
-const answer = await run("Explain continuous token caching concisely.");
-
-// 2. Tagged template literal
-const greeting = await galx`Hello ${"GALXAI"}, explain zero-hesitation developer ergonomics`;
-
-// 3. Stateful multi-turn conversation thread with auto-truncation
-const conv = thread({ model: 'gpt-5.6-sol', system: 'You are a staff engineer.' });
-const reply1 = await conv.reply("How does Raft consensus work?");
-const reply2 = await conv.reply("How does it handle network partitions?");
-
-// 4. 100x high-throughput concurrent batch mapper
-const summaries = await batch(
-  ["Article 1 content...", "Article 2 content..."],
-  (article) => `Summarize key takeaways: ${article}`,
-  { concurrency: 10 }
-);
-
-// 5. Automatic multi-model fallback cascade
-const robustResult = await fallback(['gpt-5.6-sol', 'x-ai/grok-4.6', 'gpt-5.6-terra'], "Mission critical query");
-
-// 6. Structured schema extraction
-const user = await extract("John Doe, age 32, lives in San Francisco", {
-  name: "string",
-  age: "number",
-  city: "string"
-});
-```
-
----
-
-## 🌐 6. Instant Browser URL & cURL Testing
-
-### Browser Address Bar Direct Query
-Test directly in your web browser with zero tooling:
-```text
-https://galx.ai/v1/chat/completions?prompt=Hello+GALXAI&model=sol&api_key=galx_live_your_key_here
-```
-
-### Hyper-Forgiving Terminal cURL
-```bash
-# 1. Standard OpenAI SSE streaming
-curl https://galx.ai/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer galx_live_your_key_here" \
-  -d '{
-    "model": "gpt-5.6-sol",
-    "messages": [{"role": "user", "content": "Hello GALXAI!"}],
-    "stream": true
-  }'
-
-# 2. Raw text payload (automatically converted to chat message with zero 400 errors)
-curl -X POST https://galx.ai/v1/chat/completions \
-  -H "Authorization: Bearer galx_live_your_key_here" \
-  -d "Explain gravity in 10 words"
-```
-
----
-
-## 🔑 7. 1-Click Platform Sign-In & API Key Generation
-
-1. Navigate to **[https://galx.ai/auth/connect](https://galx.ai/auth/connect)**.
-2. Sign in with **1-Click GitHub**, **Google**, or **Email Magic Link** (powered by Supabase Auth).
-3. Jump into **API Keys** to claim your `galx_live_...` key with **$5 included trial credit**!
-
