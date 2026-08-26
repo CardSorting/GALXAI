@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="grad-bg" cx="70%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="40%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#030712"/>
+    </radialGradient>
+    <linearGradient id="neon-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="24" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#grad-bg)"/>
+
+  <!-- Decorative Cyber Grid -->
+  <g opacity="0.08" stroke="#38bdf8" stroke-width="1">
+    <line x1="0" y1="150" x2="1200" y2="150"/>
+    <line x1="0" y1="300" x2="1200" y2="300"/>
+    <line x1="0" y1="450" x2="1200" y2="450"/>
+    <line x1="200" y1="0" x2="200" y2="630"/>
+    <line x1="400" y1="0" x2="400" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="800" y1="0" x2="800" y2="630"/>
+    <line x1="1000" y1="0" x2="1000" y2="630"/>
+  </g>
+
+  <!-- Brand Pill -->
+  <rect x="80" y="70" width="160" height="38" rx="19" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <circle cx="102" cy="89" r="6" fill="#38bdf8" filter="url(#glow)"/>
+  <text x="120" y="95" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="14" font-weight="700" fill="#f8fafc" letter-spacing="1.5">GALXAI ANYCAST</text>
+
+  <!-- Main Headline -->
+  <text x="80" y="210" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="54" font-weight="900" fill="#ffffff" letter-spacing="-1">Stop Paying 45% Retail LLM Markup</text>
+  <text x="80" y="275" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="24" font-weight="400" fill="#94a3b8">Anycast Wholesale Routing for OpenAI & Anthropic Models</text>
+
+  <!-- Metric Card Box -->
+  <rect x="80" y="345" width="480" height="190" rx="18" fill="#0f172a" stroke="#1e293b" stroke-width="2" opacity="0.9"/>
+  <text x="120" y="435" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="64" font-weight="900" fill="url(#neon-accent)">-45% OFF</text>
+  <text x="120" y="485" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="18" font-weight="600" fill="#38bdf8">Sub-15ms Anycast TTFT Across 8 Global PoPs</text>
+
+  <!-- Code Snippet Box -->
+  <rect x="600" y="345" width="520" height="190" rx="18" fill="#020617" stroke="#1e293b" stroke-width="2"/>
+  <circle cx="630" cy="375" r="5" fill="#ef4444"/>
+  <circle cx="648" cy="375" r="5" fill="#f59e0b"/>
+  <circle cx="666" cy="375" r="5" fill="#10b981"/>
+  <text x="630" y="430" font-family="ui-monospace,Menlo,Monaco,Consolas,monospace" font-size="15" fill="#64748b"># Single line .env drop-in</text>
+  <text x="630" y="465" font-family="ui-monospace,Menlo,Monaco,Consolas,monospace" font-size="16" font-weight="700" fill="#38bdf8">OPENAI_BASE_URL=<tspan fill="#a5f3fc">"https://anycast.galx.ai/v1"</tspan></text>
+  <text x="630" y="500" font-family="ui-monospace,Menlo,Monaco,Consolas,monospace" font-size="14" fill="#34d399">✓ 13.9ms TTFT • 45% Wholesale Margin</text>
+</svg>
