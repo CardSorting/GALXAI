@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <defs>
+    <radialGradient id="voucher-bg" cx="50%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+    <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1080" height="1080" fill="url(#voucher-bg)"/>
+
+  <!-- Outer Border -->
+  <rect x="40" y="40" width="1000" height="1000" rx="32" fill="none" stroke="#38bdf8" stroke-width="3" stroke-dasharray="12 8" opacity="0.4"/>
+
+  <!-- Inner Card -->
+  <rect x="80" y="80" width="920" height="920" rx="24" fill="#0b0f19" stroke="#1e293b" stroke-width="2"/>
+
+  <!-- Logo -->
+  <text x="140" y="180" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="28" font-weight="900" fill="#38bdf8" letter-spacing="2">GALXAI ANYCAST</text>
+  <text x="140" y="230" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="20" fill="#94a3b8">Official Developer Compute Voucher</text>
+
+  <!-- Grant Amount -->
+  <text x="140" y="390" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="120" font-weight="900" fill="url(#gold-grad)">$250</text>
+  <text x="140" y="450" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="28" font-weight="700" fill="#ffffff">Pre-Funded Compute Credit</text>
+
+  <!-- Recipient -->
+  <rect x="140" y="520" width="800" height="100" rx="16" fill="#111827" stroke="#374151" stroke-width="1.5"/>
+  <text x="180" y="560" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="16" fill="#9ca3af">ISSUED TO BUILDER</text>
+  <text x="180" y="595" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="26" font-weight="800" fill="#38bdf8">@indie_builders</text>
+
+  <!-- Voucher Code -->
+  <rect x="140" y="660" width="800" height="120" rx="16" fill="#030712" stroke="#10b981" stroke-width="2"/>
+  <text x="180" y="705" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="15" fill="#34d399">1-CLICK ACTIVATE CODE</text>
+  <text x="180" y="750" font-family="ui-monospace,Menlo,monospace" font-size="32" font-weight="900" fill="#10b981">GALX-AI-MAKER-250</text>
+
+  <!-- Footer -->
+  <text x="140" y="850" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="20" fill="#94a3b8">No credit card required • Sub-15ms Anycast routing • 45% wholesale savings</text>
+  <text x="140" y="890" font-family="ui-monospace,Menlo,monospace" font-size="22" font-weight="700" fill="#38bdf8">Claim instantly at https://galx.ai/grants</text>
+</svg>
