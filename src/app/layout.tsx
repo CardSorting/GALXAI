@@ -146,10 +146,10 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-
-        <JsonLd data={rootGraphSchema} />
       </head>
-      <body className="min-h-screen bg-[#07080d] text-foreground antialiased selection:bg-indigo-500 selection:text-white flex flex-col">
+      <body className="min-h-screen bg-[#07090e] text-foreground antialiased selection:bg-indigo-500 selection:text-white flex flex-col">
+        <JsonLd data={rootGraphSchema} />
+
         {/* Ambient Nebula Background */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
           <div className="absolute -top-40 left-1/4 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[140px]" />

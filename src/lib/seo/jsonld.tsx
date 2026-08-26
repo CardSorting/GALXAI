@@ -6,15 +6,10 @@ import type { ModelSpecItem } from '@/core/contracts/GalxContracts';
  * XSS-Safe JSON-LD Structured Data Script Injection Component
  */
 export function JsonLd({ data }: { data: Record<string, any> | Record<string, any>[] }) {
-  const jsonString = JSON.stringify(data, null, 2)
-    .replace(/</g, '\\u003c')
-    .replace(/>/g, '\\u003e')
-    .replace(/&/g, '\\u0026');
-
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: jsonString }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />
   );
 }

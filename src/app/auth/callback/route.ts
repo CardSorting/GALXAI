@@ -23,7 +23,7 @@ export async function GET(request: Request) {
       error: errorParam,
       ...(errorDesc ? { error_description: errorDesc } : {})
     }).toString();
-    return NextResponse.redirect(`${origin}/auth/connect?${errorQuery}`);
+    return NextResponse.redirect(`${origin}/auth/signin?${errorQuery}`);
   }
 
   if (code) {
@@ -45,6 +45,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // Return the user to the connect page with an exchange failure notice
-  return NextResponse.redirect(`${origin}/auth/connect?error=auth_exchange_failed`);
+  // Return the user to the sign in page with an exchange failure notice
+  return NextResponse.redirect(`${origin}/auth/signin?error=auth_exchange_failed`);
 }

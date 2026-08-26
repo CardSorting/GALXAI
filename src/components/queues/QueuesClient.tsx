@@ -268,7 +268,7 @@ console.log(response.choices[0].message.content);`;
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto font-mono text-xs">
               <Link
-                href="/auth/connect"
+                href="/auth/signin"
                 className="p-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black uppercase tracking-wider shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-105"
               >
                 <Key className="w-4 h-4 text-black fill-black" />

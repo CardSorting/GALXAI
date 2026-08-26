@@ -88,7 +88,7 @@ export function LanguageBadge({ placement = 'bottom', className = '' }: Language
       </button>
 
       {open && (
-        <div className={`absolute ${dropdownPositionClass} w-52 rounded-2xl glass-panel border border-white/15 bg-[#07080d]/98 backdrop-blur-2xl shadow-2xl p-1.5 space-y-0.5 z-50 animate-in fade-in zoom-in-95 duration-100`}>
+        <div className={`absolute ${dropdownPositionClass} w-52 rounded-2xl border border-white/15 bg-[#0c0e18] backdrop-blur-2xl shadow-2xl shadow-black/80 p-1.5 space-y-0.5 z-50 animate-in fade-in zoom-in-95 duration-100`}>
           <div className="px-2.5 py-1.5 text-[10px] font-mono text-zinc-400 uppercase tracking-wider flex items-center justify-between border-b border-white/5">
             <span>{t('a11y.auto_detected_lang', 'Auto-detected language')}</span>
             <Sparkles className="w-3 h-3 text-cyan-400" />

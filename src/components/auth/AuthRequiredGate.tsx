@@ -62,7 +62,7 @@ function BaseAuthRequiredGate({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto font-sans text-xs font-semibold">
           <Link
-            href="/auth/connect"
+            href="/auth/signin"
             className="p-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-bold tracking-wide shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-105"
           >
             <Key className="w-4 h-4 text-black fill-black" />

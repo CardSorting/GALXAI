@@ -48,7 +48,7 @@ function BaseMobileBottomNav() {
     },
     {
       label: user ? 'Wallet' : 'Sign In',
-      href: user ? '/billing' : '/auth/connect',
+      href: user ? '/billing' : '/auth/signin',
       icon: user ? Wallet : Key,
       exact: false,
     },
