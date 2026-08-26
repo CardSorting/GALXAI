@@ -59,7 +59,7 @@ const PLATFORM_PAGES: PlatformPage[] = [
     icon: Cpu,
     category: 'Models',
     keywords: ['models', 'gpt', 'openai', 'sol', 'terra', 'luna', 'ai', 'engines', 'intelligence'],
-    description: 'Explore and compare 12 state-of-the-art AI models'
+    description: 'Explore and compare OpenAI Codex & GPT flagship models'
   },
   {
     label: 'Requests & Live Results (Async AI)',
@@ -115,7 +115,7 @@ const PLATFORM_PAGES: PlatformPage[] = [
     icon: GitCompare,
     category: 'Tools',
     keywords: ['compare', 'matrix', 'benchmark', 'side by side', 'difference', 'which model'],
-    description: 'Side-by-side benchmark comparison of all 12 models'
+    description: 'Side-by-side benchmark comparison of OpenAI GPT models'
   },
   {
     label: 'Cursor & Windsurf IDE Setup',

@@ -104,7 +104,7 @@ export default async function Image() {
 
         {/* Badges */}
         <div style={{ display: 'flex', gap: '14px' }}>
-          {['Real-time SSE Streaming', 'Sub-15ms Time to First Token', 'Zero Signup Sandbox', '12 Frontier Models'].map((item, i) => (
+          {['Real-time SSE Streaming', 'Sub-15ms Time to First Token', 'Zero Signup Sandbox', '6 Frontier Models'].map((item, i) => (
             <div
               key={i}
               style={{

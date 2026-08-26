@@ -121,7 +121,7 @@ export function ModelsGuideClient() {
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white">Frontier AI Model Selection Guide</h1>
           <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl font-sans">
-            Comparative benchmark capabilities, context windows, and workload recommendations across all 12 supported frontier engines with 0ms ambiguity resolution.
+            Comparative benchmark capabilities, context windows, and workload recommendations across supported OpenAI frontier engines with 0ms ambiguity resolution.
           </p>
         </div>
 

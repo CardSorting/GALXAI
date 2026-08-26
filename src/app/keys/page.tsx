@@ -172,8 +172,8 @@ function BaseGatewayKeysPage() {
       setPingResult({
         success: true,
         latencyMs,
-        modelCount: res.data?.data?.length || 12,
-        message: 'Zero-hesitation gateway operational across all 12 SOTA models.'
+        modelCount: res.data?.data?.length || 6,
+        message: 'Zero-hesitation gateway operational across OpenAI Codex & GPT flagship models.'
       });
     } catch (err: any) {
       const latencyMs = Math.round(performance.now() - start);

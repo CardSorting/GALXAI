@@ -74,7 +74,7 @@ const NAV_CATEGORIES: NavCategory[] = [
         href: '/models',
         description: 'Explore OpenAI Codex and GPT-5.6 flagship models with wholesale pricing',
         icon: Cpu,
-        badge: '12 SOTA',
+        badge: '6 SOTA',
         badgeColor: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20',
       },
       {

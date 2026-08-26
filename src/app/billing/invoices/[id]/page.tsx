@@ -163,7 +163,7 @@ export default function SingleInvoicePage({ params }: { params: Promise<{ id: st
               <div className="space-y-1 font-sans">
                 <div className="font-bold text-white">Prepaid Wholesale Compute Allocation ({invoice.period})</div>
                 <div className="text-xs text-zinc-400 font-mono">
-                  {(invoice.tokensCount / 1000000).toFixed(1)}M inference tokens across 12 frontier models
+                  {(invoice.tokensCount / 1000000).toFixed(1)}M inference tokens across OpenAI flagship models
                 </div>
               </div>
               <div className="font-bold text-white font-mono text-sm">${invoice.amount.toFixed(2)} USD</div>

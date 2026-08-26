@@ -101,7 +101,7 @@ export function DocsClient() {
     { title: 'SSE Streaming Guide', desc: 'Low-latency token streaming with sub-15ms Time-To-First-Token.', href: '/docs/streaming', icon: Radio, color: 'text-indigo-400' },
     { title: 'Guaranteed JSON Outputs', desc: 'Constrained decoding enforcing 100% adherence to complex schemas.', href: '/docs/structured-outputs', icon: Sparkles, color: 'text-cyan-400' },
     { title: 'REST API Reference', desc: 'Complete OpenAPI reference for chat, models, image, and management routes.', href: '/docs/api-reference', icon: Cpu, color: 'text-rose-400' },
-    { title: 'Model Capability Guide', desc: 'Benchmark comparison across all 12 supported frontier models.', href: '/docs/models-guide', icon: Flame, color: 'text-amber-300' },
+    { title: 'Model Capability Guide', desc: 'Benchmark comparison across OpenAI Codex & GPT flagship models.', href: '/docs/models-guide', icon: Flame, color: 'text-amber-300' },
     { title: '75% Prompt Caching', desc: 'Prefix caching mechanics that cut inference costs by 75% automatically.', href: '/docs/prompt-caching', icon: Sparkles, color: 'text-emerald-400' },
     { title: 'Errors & Failover', desc: 'HTTP status codes, exponential backoff with jitter, and sub-15ms failover.', href: '/docs/error-handling', icon: AlertTriangle, color: 'text-orange-400' },
     { title: 'Router Architecture', desc: 'Continuous token-bucket calculus, AAD isolation, and circuit breakers.', href: '/docs/architecture', icon: Layers, color: 'text-indigo-400' },

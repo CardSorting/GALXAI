@@ -104,7 +104,7 @@ export function ModelsClient() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search 12 models, providers, context..."
+              placeholder="Search models, context, specs..."
               className="w-full pl-10 pr-4 py-2 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-indigo-500 font-mono"
             />
           </div>

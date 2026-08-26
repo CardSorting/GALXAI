@@ -75,7 +75,7 @@ export default async function Image() {
               color: '#38bdf8',
             }}
           >
-            12 Frontier AI Models
+            6 Frontier AI Models
           </div>
         </div>
 

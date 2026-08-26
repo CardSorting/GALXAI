@@ -23,7 +23,7 @@ function BaseFooter() {
   }, []);
   const footerNavigation = {
     product: [
-      { name: 'Frontier AI Models', href: '/models', badge: '12 SOTA' },
+      { name: 'Frontier AI Models', href: '/models', badge: '6 SOTA' },
       { name: 'Speed & Latency Benchmarks', href: '/benchmarks', badge: 'Telemetry' },
       { name: 'Token Savings Calculator', href: '/calculator', badge: 'ROI' },
       { name: 'API Quickstart Guide', href: '/docs/quickstart', badge: '30s' },
