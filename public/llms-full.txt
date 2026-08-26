@@ -125,11 +125,25 @@ const galxai = createOpenAI({
 - Homepage: https://galx.ai
 - Model Catalog: https://galx.ai/models
 - Wholesale Pricing: https://galx.ai/pricing
+- Developer Tools Hub: https://galx.ai/tools
+- Developer Cookbooks: https://galx.ai/cookbook
+- Model Providers Hub: https://galx.ai/providers
+- Architectural Capabilities: https://galx.ai/capabilities
+- Enterprise Security Hub: https://galx.ai/security
+- OWASP Security Patterns: https://galx.ai/security/patterns
+- Reliability & SLA: https://galx.ai/reliability
+- Incident Postmortems: https://galx.ai/postmortems
+- Industry Blueprints: https://galx.ai/industries
+- Enterprise Solutions: https://galx.ai/solutions
+- Cloud Migration Center: https://galx.ai/migrate
+- Competitor Alternatives: https://galx.ai/alternatives
+- Model Matchup Matrix: https://galx.ai/models/vs
 - Latency Benchmarks: https://galx.ai/benchmarks
 - Builder Grants ($2,500 Match): https://galx.ai/grants
 - Architecture Specifications: https://galx.ai/architecture
 - Enterprise Compliance & DPA: https://galx.ai/compliance
-- Incident Postmortems: https://galx.ai/postmortems
 - System Status Telemetry: https://galx.ai/status
 - AI Engineering Glossary: https://galx.ai/glossary
 - FAQ Knowledge Base: https://galx.ai/faq
+- Terms of Service & SLA: https://galx.ai/terms
+- Privacy Policy & ZDR: https://galx.ai/privacy

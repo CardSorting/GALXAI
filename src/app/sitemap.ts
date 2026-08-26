@@ -24,7 +24,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = SITE_CONFIG.url;
   const currentDate = new Date();
 
-  // 1. High-Priority Conversion & Discovery Core Routes
+  // 1. High-Priority Conversion & Discovery Core Routes & Topic Hubs
   const coreRoutes: MetadataRoute.Sitemap = [
     {
       url: `${baseUrl}/`,
@@ -39,10 +39,94 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.95,
     },
     {
+      url: `${baseUrl}/models/compare`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.90,
+    },
+    {
+      url: `${baseUrl}/models/vs`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.92,
+    },
+    {
       url: `${baseUrl}/pricing`,
       lastModified: currentDate,
       changeFrequency: 'daily',
       priority: 0.95,
+    },
+    {
+      url: `${baseUrl}/tools`,
+      lastModified: currentDate,
+      changeFrequency: 'daily',
+      priority: 0.95,
+    },
+    {
+      url: `${baseUrl}/cookbook`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.92,
+    },
+    {
+      url: `${baseUrl}/providers`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.93,
+    },
+    {
+      url: `${baseUrl}/capabilities`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.92,
+    },
+    {
+      url: `${baseUrl}/security`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.93,
+    },
+    {
+      url: `${baseUrl}/security/patterns`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.92,
+    },
+    {
+      url: `${baseUrl}/reliability`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.93,
+    },
+    {
+      url: `${baseUrl}/postmortems`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.92,
+    },
+    {
+      url: `${baseUrl}/industries`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.92,
+    },
+    {
+      url: `${baseUrl}/solutions`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.93,
+    },
+    {
+      url: `${baseUrl}/migrate`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.93,
+    },
+    {
+      url: `${baseUrl}/alternatives`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.93,
     },
     {
       url: `${baseUrl}/grants`,
@@ -55,12 +139,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: currentDate,
       changeFrequency: 'daily',
       priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/models/compare`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.88,
     },
     {
       url: `${baseUrl}/models/resolver`,
@@ -135,12 +213,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/telemetry`,
+      url: `${baseUrl}/terms`,
       lastModified: currentDate,
-      changeFrequency: 'always',
-      priority: 0.6,
+      changeFrequency: 'monthly',
+      priority: 0.65,
+    },
+    {
+      url: `${baseUrl}/privacy`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly',
+      priority: 0.65,
+    },
+    {
+      url: `${baseUrl}/about`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly',
+      priority: 0.7,
     },
   ];
+
 
   // 2. Comprehensive Documentation Suite Routes
   const docRoutes: MetadataRoute.Sitemap = [
@@ -263,6 +354,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: currentDate,
       changeFrequency: 'monthly',
       priority: 0.78,
+    },
+    {
+      url: `${baseUrl}/docs/errors`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.88,
+    },
+    {
+      url: `${baseUrl}/docs/integrations`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.88,
     },
     {
       url: `${baseUrl}/docs/security-spec`,

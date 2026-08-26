@@ -8,7 +8,16 @@
 
 import { BroccoliDbTable } from '@/core/broccolidb/broccolidb-table';
 import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
+import { COOKBOOK_RECIPES_DATA } from '@/lib/data/cookbooksData';
+import { ERROR_TROUBLESHOOT_DATA } from '@/lib/data/errorsData';
+import { COMPETITOR_ALTERNATIVES } from '@/lib/data/alternativesData';
+import { SOLUTION_GUIDES } from '@/lib/data/solutionsData';
+import { MIGRATION_GUIDES_DATA } from '@/lib/data/migrationData';
+import { SECURITY_PATTERNS_DATA } from '@/lib/data/securityPatternsData';
+import { GLOSSARY_TERMS } from '@/lib/data/glossaryData';
+import { CAPABILITIES_DATA } from '@/lib/data/capabilitiesData';
 import { SafeStorage } from './SafeStorage';
+
 
 export interface CatalogItem {
   title: string;
@@ -436,6 +445,177 @@ class BroccoliOmniSearchImpl {
       this.searchTable.put(modelId, {
         id: modelId,
         ...item,
+      });
+    });
+
+    // 3. Dynamically index Interactive Developer Tools
+    const interactiveTools: CatalogItem[] = [
+      {
+        title: 'Enterprise LLM ROI & Token Budget Calculator',
+        description: 'Interactive financial modeling tool for enterprise AI inference costs, DAU scale forecasting, and compound 75% prompt caching savings.',
+        category: 'Actions & Tools',
+        href: '/tools/roi-calculator',
+        badge: 'Interactive Tool',
+        keywords: ['roi', 'calculator', 'token budget', 'savings', 'forecast', 'finance', 'caching rebate'],
+        intentPhrases: ['calculate roi', 'llm token budget calculator', 'estimate enterprise cost', 'prompt cache math'],
+      },
+      {
+        title: 'AI Token Streaming & Speed Benchmark Simulator',
+        description: 'Interactive real-time Server-Sent Events (SSE) token generation velocity and Time-To-First-Token (TTFT) benchmark simulator across OpenAI Codex GPT-5.6.',
+        category: 'Actions & Tools',
+        href: '/tools/stream-benchmark',
+        badge: 'Interactive Tool',
+        keywords: ['stream', 'benchmark', 'speed', 'ttft', 'tokens per second', 'sse', 'velocity'],
+        intentPhrases: ['test streaming speed', 'benchmark ttft', 'token velocity simulator', 'sse tester'],
+      },
+      {
+        title: '1,000,000 Token Context Window Capacity Visualizer',
+        description: 'Interactive 1,000,000 token context window simulator and prompt caching calculator for OpenAI Codex GPT-5.6.',
+        category: 'Actions & Tools',
+        href: '/tools/context-window-visualizer',
+        badge: 'Interactive Tool',
+        keywords: ['context window', '1m tokens', 'visualizer', 'capacity', 'ast lines', 'caching visualizer'],
+        intentPhrases: ['visualize 1m context', 'context window visualizer', 'how many tokens in document'],
+      },
+      {
+        title: 'OpenAI Token Counter & BPE Tokenizer Studio',
+        description: 'Interactive Byte-Pair Encoding (BPE) subword visualizer and token counter for o200k_base and cl100k_base vocabularies.',
+        category: 'Actions & Tools',
+        href: '/tools/token-counter',
+        badge: 'Interactive Tool',
+        keywords: ['token counter', 'bpe', 'tokenizer', 'o200k', 'cl100k', 'subwords', 'count tokens'],
+        intentPhrases: ['count my tokens', 'tokenizer studio', 'bpe token counter', 'how many tokens is this text'],
+      },
+      {
+        title: 'Anycast Latency & Time-To-First-Token (TTFT) Estimator',
+        description: 'Interactive streaming latency and TTFT simulator across Anycast Edge vs Single-Origin routing.',
+        category: 'Actions & Tools',
+        href: '/tools/latency-estimator',
+        badge: 'Interactive Tool',
+        keywords: ['latency', 'ttft', 'estimator', 'anycast', 'edge', 'tls handshake', 'ping'],
+        intentPhrases: ['estimate latency', 'ttft simulator', 'how fast is anycast routing'],
+      },
+      {
+        title: 'Prompt Compressor & System Instruction Optimizer',
+        description: 'Lexical redundancy reduction engine preserving instruction semantics and reducing token spend.',
+        category: 'Actions & Tools',
+        href: '/tools/prompt-compressor',
+        badge: 'Interactive Tool',
+        keywords: ['compress prompt', 'optimizer', 'reduce tokens', 'prompt compressor', 'system prompt'],
+        intentPhrases: ['compress my prompt', 'reduce token usage in system prompt', 'optimize prompt length'],
+      },
+      {
+        title: 'Compound Prompt Caching Rebate Calculator',
+        description: 'Calculate exact compound savings from 75% cached prefix pass-through across repetitive agent prompts.',
+        category: 'Actions & Tools',
+        href: '/tools/prompt-caching-calculator',
+        badge: 'Interactive Tool',
+        keywords: ['prompt caching calculator', 'rebate calculator', '75% discount', 'cache savings'],
+        intentPhrases: ['calculate prompt caching savings', 'cache rebate calculator'],
+      },
+      {
+        title: 'Wholesale Model Cost Comparator',
+        description: 'Side-by-side pricing matrix comparing GALXAI wholesale rates against direct OpenAI and competitor pricing.',
+        category: 'Actions & Tools',
+        href: '/tools/model-cost-comparator',
+        badge: 'Interactive Tool',
+        keywords: ['cost comparator', 'compare prices', 'wholesale comparator', 'cheapest llm'],
+        intentPhrases: ['compare model costs', 'who has cheapest gpt 5', 'model cost comparator'],
+      },
+    ];
+
+    interactiveTools.forEach((tool, idx) => {
+      const id = `tool_${idx}_${tool.href.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      this.searchTable.put(id, { id, ...tool });
+    });
+
+    // 4. Dynamically index Cookbooks
+    COOKBOOK_RECIPES_DATA.forEach((c) => {
+      const id = `cookbook_${c.slug}`;
+      this.searchTable.put(id, {
+        id,
+        title: c.title,
+        description: c.description,
+        category: 'Documentation',
+        href: `/cookbook/${c.slug}`,
+        badge: `${c.difficulty.toUpperCase()} • ${(c.primaryLanguage || 'TypeScript').toUpperCase()}`,
+        keywords: ['cookbook', 'recipe', 'code', (c.primaryLanguage || 'typescript').toLowerCase(), c.category.toLowerCase(), c.difficulty.toLowerCase()],
+        intentPhrases: [`how to ${c.title.toLowerCase()}`, `code for ${c.title.toLowerCase()}`, c.slug],
+      });
+    });
+
+    // 5. Dynamically index Error Runbooks
+    ERROR_TROUBLESHOOT_DATA.forEach((e) => {
+      const id = `error_${e.code}`;
+      this.searchTable.put(id, {
+        id,
+        title: `Fix HTTP ${e.httpStatus} (${e.code})`,
+        description: e.description,
+        category: 'Help & Diagnostics',
+        href: `/docs/errors/${e.code}`,
+        badge: `HTTP ${e.httpStatus}`,
+        keywords: ['error', 'fix', `${e.httpStatus}`, e.code, 'troubleshoot', 'failover'],
+        intentPhrases: [`fix ${e.code}`, `how to resolve http ${e.httpStatus}`, `error ${e.code} troubleshooting`],
+      });
+    });
+
+    // 6. Dynamically index Competitor Alternatives
+    COMPETITOR_ALTERNATIVES.forEach((a) => {
+      const id = `alt_${a.slug}`;
+      this.searchTable.put(id, {
+        id,
+        title: a.headline,
+        description: a.description,
+        category: 'Documentation',
+        href: `/alternatives/${a.slug}`,
+        badge: 'Alternative',
+        keywords: ['alternative', 'vs', a.competitorName.toLowerCase(), 'switch', 'compare'],
+        intentPhrases: [`switch from ${a.competitorName.toLowerCase()}`, `${a.competitorName.toLowerCase()} alternative`, `compare with ${a.competitorName.toLowerCase()}`],
+      });
+    });
+
+    // 7. Dynamically index Solutions
+    SOLUTION_GUIDES.forEach((s) => {
+      const id = `sol_${s.slug}`;
+      this.searchTable.put(id, {
+        id,
+        title: s.headline,
+        description: s.description,
+        category: 'Documentation',
+        href: `/solutions/${s.slug}`,
+        badge: s.badge || 'Solution',
+        keywords: ['solution', s.name.toLowerCase(), s.slug, 'workload', s.targetWorkload.toLowerCase()],
+        intentPhrases: [`solution for ${s.name.toLowerCase()}`, s.headline.toLowerCase()],
+      });
+    });
+
+    // 8. Dynamically index Security Patterns
+    SECURITY_PATTERNS_DATA.forEach((p) => {
+      const id = `sec_${p.slug}`;
+      this.searchTable.put(id, {
+        id,
+        title: p.headline,
+        description: p.description,
+        category: 'Help & Diagnostics',
+        href: `/security/patterns/${p.slug}`,
+        badge: p.badge || 'Security',
+        keywords: ['security', 'owasp', (p.owaspLlmMapping || '').toLowerCase(), p.slug, 'red team', 'defense'],
+        intentPhrases: [`mitigate ${(p.owaspLlmMapping || '').toLowerCase()}`, `how to defend against ${p.headline.toLowerCase()}`],
+      });
+    });
+
+    // 9. Dynamically index Glossary Terms
+    GLOSSARY_TERMS.forEach((g) => {
+      const id = `glossary_${g.slug}`;
+      this.searchTable.put(id, {
+        id,
+        title: `${g.term} — AI Glossary`,
+        description: g.shortDefinition,
+        category: 'Documentation',
+        href: `/glossary/${g.slug}`,
+        badge: 'Glossary',
+        keywords: ['glossary', 'definition', 'term', g.term.toLowerCase(), g.category],
+        intentPhrases: [`what is ${g.term.toLowerCase()}`, `define ${g.term.toLowerCase()}`],
       });
     });
   }

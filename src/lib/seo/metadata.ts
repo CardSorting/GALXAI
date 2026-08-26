@@ -12,6 +12,7 @@ export interface MetadataProps {
   modifiedTime?: string;
   authors?: string[];
   noIndex?: boolean;
+  category?: string;
 }
 
 /**
@@ -29,6 +30,7 @@ export function constructMetadata({
   modifiedTime,
   authors,
   noIndex = false,
+  category,
 }: MetadataProps = {}): Metadata {
   const cleanPath = canonicalPath.startsWith('/') ? canonicalPath : `/${canonicalPath}`;
   const canonicalUrl = `${SITE_CONFIG.url}${cleanPath === '/' ? '' : cleanPath}`;
@@ -42,9 +44,21 @@ export function constructMetadata({
     authors: authors ? authors.map(name => ({ name })) : SITE_CONFIG.authors,
     creator: SITE_CONFIG.creator,
     publisher: SITE_CONFIG.publisher,
+    category,
     metadataBase: new URL(SITE_CONFIG.url),
     alternates: {
       canonical: canonicalUrl,
+      types: {
+        'application/rss+xml': `${SITE_CONFIG.url}/feed.xml`,
+        'application/opensearchdescription+xml': `${SITE_CONFIG.url}/opensearch.xml`,
+      },
+    },
+    verification: {
+      google: SITE_CONFIG.verification.google,
+      yandex: SITE_CONFIG.verification.yandex,
+      other: {
+        'msvalidate.01': SITE_CONFIG.verification.bing,
+      },
     },
     openGraph: {
       title: fullTitle,

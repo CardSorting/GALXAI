@@ -589,3 +589,89 @@ export function createItemPageGraph({
   };
 }
 
+/**
+ * Creates Schema.org CollectionPage / ItemList schema for directory and topic hub pages
+ */
+export function createCollectionPageSchema({
+  name,
+  description,
+  url,
+  items,
+}: {
+  name: string;
+  description: string;
+  url: string;
+  items: { name: string; description?: string; url: string; position?: number }[];
+}) {
+  const fullUrl = url.startsWith('http') ? url : `${SITE_CONFIG.url}${url.startsWith('/') ? url : `/${url}`}`;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${fullUrl}/#collection`,
+    url: fullUrl,
+    name,
+    description,
+    isPartOf: {
+      '@id': `${SITE_CONFIG.url}/#website`,
+    },
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: items.map((item, idx) => ({
+        '@type': 'ListItem',
+        position: item.position ?? idx + 1,
+        name: item.name,
+        description: item.description,
+        url: item.url.startsWith('http') ? item.url : `${SITE_CONFIG.url}${item.url.startsWith('/') ? item.url : `/${item.url}`}`,
+      })),
+    },
+  };
+}
+
+/**
+ * Creates a complete topic hub Knowledge Graph linking Organization, WebSite, CollectionPage, Breadcrumbs, and ItemList
+ */
+export function createTopicHubGraph({
+  canonicalPath,
+  title,
+  description,
+  breadcrumbs = [],
+  items = [],
+  entities = [],
+}: {
+  canonicalPath: string;
+  title: string;
+  description: string;
+  breadcrumbs?: { name: string; url?: string }[];
+  items?: { name: string; description?: string; url: string }[];
+  entities?: Record<string, any>[];
+}) {
+  const cleanPath = canonicalPath.startsWith('/') ? canonicalPath : `/${canonicalPath}`;
+  const pageUrl = `${SITE_CONFIG.url}${cleanPath === '/' ? '' : cleanPath}`;
+
+  const collectionPage = createCollectionPageSchema({
+    name: title,
+    description,
+    url: pageUrl,
+    items,
+  });
+
+  const breadcrumbList = createBreadcrumbSchema(breadcrumbs);
+  const breadcrumbWithId = {
+    ...breadcrumbList,
+    '@id': `${pageUrl}/#breadcrumb`,
+  };
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      createOrganizationSchema(),
+      createWebSiteSchema(),
+      collectionPage,
+      breadcrumbWithId,
+      ...entities,
+    ],
+  };
+}
+
+

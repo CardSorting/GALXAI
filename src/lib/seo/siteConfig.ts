@@ -100,9 +100,20 @@ export const SITE_CONFIG = {
   ],
   creator: 'GALXAI Technologies Inc.',
   publisher: 'GALXAI Technologies Inc.',
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || 'google-site-verification-galxai-apex',
+    bing: process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION || 'bing-site-verification-galxai-apex',
+    yandex: process.env.NEXT_PUBLIC_YANDEX_SITE_VERIFICATION || 'yandex-site-verification-galxai',
+    baidu: process.env.NEXT_PUBLIC_BAIDU_SITE_VERIFICATION,
+  },
+  indexNow: {
+    key: process.env.INDEXNOW_KEY || 'galxai-indexnow-key-2026',
+    keyLocation: 'https://galx.ai/galxai-indexnow-key-2026.txt',
+  },
   contactPoint: {
     email: 'support@galx.ai',
     contactType: 'Customer Support & Security Incident Response',
     availableLanguage: ['English'],
   },
 };
+

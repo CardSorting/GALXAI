@@ -129,7 +129,7 @@ export default function SingleInvoicePage({ params }: { params: Promise<{ id: st
             </div>
 
             <div className="text-right font-mono text-xs space-y-1">
-              <div className="text-base font-bold text-white">{invoice.invoiceNumber}</div>
+              <h1 className="text-base font-bold text-white">{invoice.invoiceNumber}</h1>
               <div className="text-zinc-400">Issued: {invoice.issuedDate}</div>
               <div className="text-zinc-400">Status: <span className="text-emerald-400 font-bold">Paid in Full</span></div>
             </div>

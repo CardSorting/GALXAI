@@ -201,6 +201,15 @@ function CheckoutContent() {
           </div>
         </div>
 
+        {/* Page Title */}
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
+            <Lock className="w-6 h-6 text-amber-400" />
+            <span>Secure Compute Checkout</span>
+          </h1>
+          <p className="text-xs text-zinc-400">Lock in institutional wholesale token rates with $0 monthly platform seat fees and instant activation.</p>
+        </div>
+
         {checkoutError && (
           <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300 font-mono flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />

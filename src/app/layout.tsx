@@ -98,6 +98,13 @@ export const metadata: Metadata = {
     site: SITE_CONFIG.twitterHandle,
     images: [`${SITE_CONFIG.url}${SITE_CONFIG.ogImage}`],
   },
+  verification: {
+    google: SITE_CONFIG.verification.google,
+    yandex: SITE_CONFIG.verification.yandex,
+    other: {
+      'msvalidate.01': SITE_CONFIG.verification.bing,
+    },
+  },
   robots: {
     index: true,
     follow: true,

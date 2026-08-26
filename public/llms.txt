@@ -78,7 +78,22 @@ const completion = await client.chat.completions.create({
 - [JSON Schema Generator](https://galx.ai/tools/json-schema-generator): Generate Zod and Pydantic schemas for guaranteed structured outputs.
 - [Function Calling Studio](https://galx.ai/tools/function-calling-builder): Build parallel tool calling schemas for agent swarms.
 
-## Documentation & Deep Links
+## Documentation & Developer Knowledge Hubs
+- [Developer Tools Directory](https://galx.ai/tools): 13 free interactive calculators and simulators
+- [Developer Cookbooks](https://galx.ai/cookbook): Production code recipes in Python and TypeScript
+- [Model Providers Clearinghouse](https://galx.ai/providers): OpenAI and frontier model provider gateways
+- [Architectural Capabilities](https://galx.ai/capabilities): 1M context, ZDR, prompt caching, and Anycast routing
+- [Enterprise Security & Compliance](https://galx.ai/security): SOC 2, HIPAA, EU AI Act, and Zero Retention specs
+- [OWASP AI Security Patterns](https://galx.ai/security/patterns): Prompt injection and adversarial red-teaming runbooks
+- [AI Reliability & Resilience](https://galx.ai/reliability): 99.99% SLA active failover and circuit breaker engineering
+- [Incident Postmortems](https://galx.ai/postmortems): Real-world outage absorption and telemetry reports
+- [Industry Solutions](https://galx.ai/industries): Healthcare, FinTech, Legal, and DevOps industry gateways
+- [Enterprise Solutions](https://galx.ai/solutions): Coding agents, RAG, voice, and multi-agent swarm blueprints
+- [Cloud Migration Center](https://galx.ai/migrate): 30-second drop-in guides from Azure, AWS, and Google Vertex
+- [Competitor Alternatives](https://galx.ai/alternatives): OpenRouter, Together AI, and Portkey comparisons
+- [Model Matchups Matrix](https://galx.ai/models/vs): Head-to-head frontier model benchmarks
+- [Error Troubleshooting Directory](https://galx.ai/docs/errors): HTTP 429, 500, 503, and timeout runbooks
+- [Integrations Directory](https://galx.ai/docs/integrations): Cursor, Windsurf, Claude Code, and LangChain setup
 - [Quickstart Guide](https://galx.ai/docs/quickstart): 30-second connection walkthrough
 - [Model Catalog & Benchmarks](https://galx.ai/models): Live latency, throughput, and specs
 - [Pricing & Simulator](https://galx.ai/pricing): Real-time token economics calculator
@@ -88,3 +103,6 @@ const completion = await client.chat.completions.create({
 - [Builder Grants Fund](https://galx.ai/grants): Up to $2,500 matching compute fund
 - [Enterprise Compliance](https://galx.ai/compliance): SOC 2 Type II, HIPAA BAA, and GDPR DPA
 - [System Status & Uptime](https://galx.ai/status): Live telemetry and cluster health
+- [Terms of Service & SLA](https://galx.ai/terms): Master Service Agreement, 99.99% SLA, and wholesale billing terms
+- [Privacy Policy & ZDR](https://galx.ai/privacy): Zero Data Retention architecture and GDPR/CCPA data sovereignty
+

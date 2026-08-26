@@ -1,0 +1,6 @@
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: GALXAI Security Incident Response Team (security@galx.ai)
+Comment: Fingerprint: 4E5F 9A2D 81B3 C680 72EA 5109 DF44 38A1 99B2 05E1
+
+mQGNBGZ...GALXAI_SECURITY_KEY...
+-----END PGP PUBLIC KEY BLOCK-----

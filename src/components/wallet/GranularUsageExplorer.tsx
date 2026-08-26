@@ -243,9 +243,9 @@ export function GranularUsageExplorer() {
               Sub-Cent Precision
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-white font-sans">
+          <h1 className="text-xl sm:text-2xl font-black text-white font-sans">
             Multi-Dimensional Cost Analytics
-          </h2>
+          </h1>
         </div>
 
         <div className="flex items-center gap-3">

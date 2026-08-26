@@ -113,6 +113,19 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: "/:path*.(xml|txt|webmanifest)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
+          },
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*",
+          },
+        ],
+      },
+      {
         source: "/api/:path*",
         headers: [
           { key: "Access-Control-Allow-Credentials", value: "true" },
@@ -143,17 +156,17 @@ const nextConfig: NextConfig = {
       {
         source: "/vault",
         destination: "/keys",
-        permanent: false,
+        permanent: true,
       },
       {
         source: "/vault/:path*",
         destination: "/keys",
-        permanent: false,
+        permanent: true,
       },
       {
         source: "/telemetry",
         destination: "/status",
-        permanent: false,
+        permanent: true,
       },
     ];
   },

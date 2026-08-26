@@ -2,7 +2,7 @@
   "schema_version": "v1",
   "name_for_human": "GALXAI Universal AI Gateway",
   "name_for_model": "galxai_gateway",
-  "description_for_human": "Direct high-throughput access to OpenAI GPT-5.6, Grok 4.5, and DALL-E models with 25%–40% wholesale savings and sub-15ms TTFT.",
+  "description_for_human": "Direct high-throughput access to OpenAI GPT-5.6 Sol, Terra, Luna, and GPT-Image models with 25%–40% wholesale savings and sub-15ms TTFT.",
   "description_for_model": "GALXAI is an enterprise-grade Universal AI Model Router and Gateway supporting 1:1 drop-in OpenAI-compatible chat completions (/v1/chat/completions), embeddings (/v1/embeddings), and image generation (/v1/images/generations) with automatic 75% prompt caching discounts and 0-data retention.",
   "auth": {
     "type": "bearer"
@@ -13,5 +13,5 @@
   },
   "logo_url": "https://galx.ai/icon.png",
   "contact_email": "support@galx.ai",
-  "legal_info_url": "https://galx.ai/compliance/dpa_gdpr"
+  "legal_info_url": "https://galx.ai/terms"
 }
