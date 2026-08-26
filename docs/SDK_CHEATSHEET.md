@@ -33,7 +33,39 @@ npx galxai chat
 
 ---
 
-## 🚀 2. Top-Level 1-Line Helpers & Stateful Threads (`@galxai/sdk`)
+## 🖼️ 2. Ambient Declarative AI & React UI (`@galxai/sdk/ui`, `@galxai/sdk/actions`)
+
+```tsx
+// 1. Declarative React UI (No API routes, no state code)
+import { GalxImage, GalxChat } from '@galxai/sdk/ui';
+
+export function Studio() {
+  return (
+    <>
+      <GalxImage prompt="Cyberpunk skyline" aspectRatio="16:9" interactive />
+      <GalxChat model="gpt-5.6-sol" placeholder="Ask questions..." />
+    </>
+  );
+}
+
+// 2. Direct Server Action (Zero-route Next.js 15 RPC)
+import { generateImageAction } from '@galxai/sdk/actions';
+const res = await generateImageAction('Neon avatar', { aspectRatio: '1:1' });
+
+// 3. Zero-File Edge Middleware (middleware.ts)
+import { galxaiMiddleware } from '@galxai/sdk/middleware';
+export default galxaiMiddleware();
+export const config = { matcher: ['/api/galxai/:path*', '/api/generate', '/api/chat', '/api/models'] };
+
+// 4. Zero-Migration Auto-Patcher (Reroutes existing OpenAI code)
+import '@galxai/sdk/patch';
+import OpenAI from 'openai';
+const openai = new OpenAI(); // Automatically routed to GALXAI Wholesale Gateway
+```
+
+---
+
+## 🚀 3. Top-Level 1-Line Helpers & Stateful Threads (`@galxai/sdk`)
 
 ```typescript
 import { run, galx, batch, thread, fallback, race, extract, embed, estimateTokens } from '@galxai/sdk';

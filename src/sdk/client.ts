@@ -43,8 +43,20 @@ export class GalxAIClientCore {
   readonly customFetch?: typeof fetch;
   readonly middleware: MiddlewarePipeline;
 
+  readonly isDebug: boolean;
+  readonly isMock: boolean;
+
   constructor(options: string | ClientOptions = {}) {
     const opts = typeof options === 'string' ? { apiKey: options } : options || {};
+
+    this.isDebug = Boolean(
+      opts.debug ??
+      (typeof process !== 'undefined' && (process.env?.GALXAI_DEBUG === 'true' || process.env?.GALX_DEBUG === 'true'))
+    );
+    this.isMock = Boolean(
+      opts.mock ??
+      (typeof process !== 'undefined' && (process.env?.GALXAI_MOCK === 'true' || process.env?.GALX_MOCK === 'true'))
+    );
 
     this.apiKey =
       opts.apiKey ||
@@ -54,7 +66,14 @@ export class GalxAIClientCore {
       opts.token ||
       opts.authToken ||
       (typeof process !== 'undefined'
-        ? process.env?.GALX_API_KEY || process.env?.OPENAI_API_KEY || process.env?.ANTHROPIC_API_KEY
+        ? process.env?.GALXAI_API_KEY ||
+          process.env?.GALX_API_KEY ||
+          process.env?.GALX_KEY ||
+          process.env?.GALXAI_SECRET ||
+          process.env?.NEXT_PUBLIC_GALXAI_API_KEY ||
+          process.env?.NEXT_PUBLIC_GALX_API_KEY ||
+          process.env?.OPENAI_API_KEY ||
+          process.env?.ANTHROPIC_API_KEY
         : '') ||
       '';
 
@@ -65,7 +84,13 @@ export class GalxAIClientCore {
       opts.host ||
       opts.endpoint ||
       (typeof process !== 'undefined'
-        ? process.env?.GALX_BASE_URL || process.env?.NEXT_PUBLIC_GALX_EDGE_URL || process.env?.GALX_EDGE_URL || process.env?.OPENAI_BASE_URL
+        ? process.env?.GALXAI_BASE_URL ||
+          process.env?.GALX_BASE_URL ||
+          process.env?.NEXT_PUBLIC_GALXAI_BASE_URL ||
+          process.env?.NEXT_PUBLIC_GALX_BASE_URL ||
+          process.env?.NEXT_PUBLIC_GALX_EDGE_URL ||
+          process.env?.GALX_EDGE_URL ||
+          process.env?.OPENAI_BASE_URL
         : '') ||
       'https://galx.ai/v1';
 
@@ -123,6 +148,13 @@ export class GalxAIClientCore {
       return pluginEarlyRes.shortCircuitResponse as T;
     }
 
+    if (this.isMock) {
+      if (this.isDebug) {
+        console.log(`\x1b[35m[GALXAI MOCK]\x1b[0m ${method} ${path}`);
+      }
+      return this.handleMockResponse<T>(path, options);
+    }
+
     let attempt = 0;
     while (true) {
       attempt++;
@@ -146,6 +178,10 @@ export class GalxAIClientCore {
         }
 
         const data = await res.json();
+
+        if (this.isDebug) {
+          console.log(`\x1b[32m[GALXAI DEBUG]\x1b[0m ${method} ${path} -> ${res.status} (${Date.now() - startTime}ms)`);
+        }
 
         // Middleware onResponse Hook
         await this.middleware.executeOnResponse({
@@ -237,6 +273,50 @@ export class GalxAIClientCore {
     }
 
     throw new APIError(message, res.status, errorData?.error?.code, errorData);
+  }
+
+  private handleMockResponse<T>(path: string, options: RequestOptions): T {
+    if (path.includes('/images/generations')) {
+      const prompt = options.body?.prompt || 'artwork';
+      const seed = Math.abs(prompt.split('').reduce((acc: number, c: string) => acc + c.charCodeAt(0), 0)) % 1000;
+      return {
+        created: Math.floor(Date.now() / 1000),
+        data: [{ url: `https://picsum.photos/seed/galx-mock-${seed}/1024/1024`, revised_prompt: prompt }],
+        modelUsed: options.body?.model || 'openai-gpt-image-2',
+        shardId: 'mock_local_shard'
+      } as T;
+    }
+    if (path.includes('/models')) {
+      return {
+        data: [
+          { id: 'openai-gpt-image-2', name: 'GPT-Image-2 Studio', description: 'Flagship 4K visual synthesis' },
+          { id: 'openai-gpt-image-1.5', name: 'GPT-Image-1.5 Pro', description: 'High-speed character & artwork design' },
+          { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', description: 'Flagship reasoning & text generation' },
+          { id: 'gpt-5.6-terra', name: 'GPT-5.6 Terra', description: 'Deep analytical research engine' },
+          { id: 'gpt-5.6-luna', name: 'GPT-5.6 Luna', description: 'Fast code & multi-agent executor' }
+        ]
+      } as T;
+    }
+    if (path.includes('/chat/completions') || path.includes('/completions')) {
+      return {
+        id: `mock_chat_${Date.now()}`,
+        object: 'chat.completion',
+        created: Math.floor(Date.now() / 1000),
+        model: options.body?.model || 'gpt-5.6-sol',
+        choices: [
+          {
+            index: 0,
+            message: {
+              role: 'assistant',
+              content: 'GALXAI Mock Engine: Autonomous generation simulation completed successfully.'
+            },
+            finish_reason: 'stop'
+          }
+        ],
+        usage: { prompt_tokens: 12, completion_tokens: 14, total_tokens: 26 }
+      } as T;
+    }
+    return {} as T;
   }
 
   /**
@@ -397,7 +477,11 @@ export class GalxAI {
   readonly multimodal: typeof MultiModalHelper;
   readonly tokens: typeof TokenOptimizer;
 
-  private readonly core: GalxAIClientCore;
+  readonly core: GalxAIClientCore;
+
+  public request<T = any>(path: string, options?: RequestOptions): Promise<T> {
+    return this.core.request<T>(path, options);
+  }
 
   constructor(options: string | ClientOptions = {}) {
     this.core = new GalxAIClientCore(options);
@@ -510,17 +594,21 @@ export class GalxAI {
    *
    * @example
    * ```typescript
-   * const image = await galx.generateImage('A futuristic floating city at dusk');
+   * const image = await galx.image('A futuristic floating city at dusk', { aspectRatio: '16:9' });
    * ```
    */
-  public async generateImage(prompt: string, options: { model?: string; size?: string } = {}) {
-    const res = await this.images.generate({
-      prompt,
-      model: options.model || 'openai-gpt-image-2',
-      size: (options.size as any) || '1024x1024'
-    });
+  public async generateImage(
+    promptOrParams: string | import('./resources/images').ImageGenerateParams,
+    options: Omit<import('./resources/images').ImageGenerateParams, 'prompt'> = {}
+  ) {
+    const params = typeof promptOrParams === 'string'
+      ? { prompt: promptOrParams, ...options }
+      : promptOrParams;
+    const res = await this.images.generate(params);
     return res.data[0];
   }
+
+  public readonly image = this.generateImage.bind(this);
 
   /**
    * Formats a query and result into a clean, markdown-structured context block for autonomous agents.

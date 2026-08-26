@@ -66,6 +66,18 @@ export interface ClientOptions {
    * Custom fetch implementation (optional, for custom proxying or mocking)
    */
   fetch?: typeof fetch;
+
+  /**
+   * Enable verbose colored logging of request latency, shard routing, and token metrics.
+   * Can also be enabled via process.env.GALXAI_DEBUG=true.
+   */
+  debug?: boolean;
+
+  /**
+   * Enable offline simulation mode for local testing and CI/CD without network requests.
+   * Can also be enabled via process.env.GALXAI_MOCK=true.
+   */
+  mock?: boolean;
 }
 
 export interface ChatCompletionCreateParams extends ChatCompletionRequest {

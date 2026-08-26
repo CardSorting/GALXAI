@@ -621,4 +621,76 @@ for await (const chunk of conv.streamReply('How does it prevent write stalls?'))
 const history = conv.getHistory();
 ```
 
+---
+
+## 22. Ambient Declarative Substrate & Zero-Boilerplate Architecture
+
+The SDK provides an ambient connection layer requiring **zero route files**, **zero client-side API keys**, and **zero legacy code refactoring**:
+
+### A. Declarative React UI Primitives (`@galxai/sdk/ui`)
+```tsx
+import { GalxImage, GalxChat } from '@galxai/sdk/ui';
+
+// 1. Self-hydrating, interactive visual synthesis:
+export function Hero() {
+  return (
+    <GalxImage
+      prompt="Cyberpunk metropolis at midnight"
+      aspectRatio="16:9"
+      interactive
+      className="w-full h-96 rounded-2xl"
+    />
+  );
+}
+
+// 2. Turnkey streaming chat widget:
+export function SupportDrawer() {
+  return <GalxChat model="gpt-5.6-sol" placeholder="How can we assist?" />;
+}
+```
+
+### B. Direct React 19 / Next.js Server Actions (`@galxai/sdk/actions`)
+```tsx
+'use client';
+import { generateImageAction } from '@galxai/sdk/actions';
+
+export function Button() {
+  return (
+    <button onClick={async () => {
+      const res = await generateImageAction('Neon avatar', { aspectRatio: '1:1' });
+      console.log(res.data[0].url);
+    }}>
+      Synthesize
+    </button>
+  );
+}
+```
+
+### C. Zero-File Next.js Edge Middleware Interceptor (`@galxai/sdk/middleware`)
+```ts
+// middleware.ts in project root
+import { galxaiMiddleware } from '@galxai/sdk/middleware';
+export default galxaiMiddleware();
+export const config = { matcher: ['/api/galxai/:path*', '/api/generate', '/api/chat', '/api/models'] };
+```
+
+### D. Zero-Migration Runtime Auto-Patcher (`import '@galxai/sdk/patch'`)
+```ts
+// In index.ts / layout.tsx / server.ts
+import '@galxai/sdk/patch';
+
+// Existing OpenAI code is transparently rerouted to GALXAI Wholesale Gateway:
+import OpenAI from 'openai';
+const openai = new OpenAI();
+```
+
+### E. Natural Language Intent Ingestion Engine (`@galxai/sdk/intent`)
+```ts
+import { executeIntent } from '@galxai/sdk/intent';
+
+// Inferred as image synthesis in 16:9 HD:
+const image = await executeIntent('wide cinematic photo of an ancient temple in 4k');
+```
+
+
 

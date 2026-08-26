@@ -3,6 +3,51 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "main": "./src/sdk/index.ts",
+  "module": "./src/sdk/index.ts",
+  "types": "./src/sdk/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/sdk/index.ts",
+      "default": "./src/sdk/index.ts"
+    },
+    "./next": {
+      "types": "./src/sdk/next.ts",
+      "default": "./src/sdk/next.ts"
+    },
+    "./react": {
+      "types": "./src/sdk/react.tsx",
+      "default": "./src/sdk/react.tsx"
+    },
+    "./actions": {
+      "types": "./src/sdk/actions.ts",
+      "default": "./src/sdk/actions.ts"
+    },
+    "./middleware": {
+      "types": "./src/sdk/edge-interceptor.ts",
+      "default": "./src/sdk/edge-interceptor.ts"
+    },
+    "./intent": {
+      "types": "./src/sdk/intent.ts",
+      "default": "./src/sdk/intent.ts"
+    },
+    "./express": {
+      "types": "./src/sdk/frameworks/express.ts",
+      "default": "./src/sdk/frameworks/express.ts"
+    },
+    "./ui": {
+      "types": "./src/sdk/ui/index.ts",
+      "default": "./src/sdk/ui/index.ts"
+    },
+    "./patch": {
+      "types": "./src/sdk/patch.ts",
+      "default": "./src/sdk/patch.ts"
+    },
+    "./state": {
+      "types": "./src/sdk/state.ts",
+      "default": "./src/sdk/state.ts"
+    }
+  },
   "engines": {
     "node": "22.x"
   },

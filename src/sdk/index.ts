@@ -56,8 +56,52 @@ export { OpenAI } from './openai';
 export { Anthropic } from './anthropic';
 export { createGalxAI, galxai, GalxAIModelWrapper } from './ai';
 export { ChatGalxAI } from './langchain';
-export { GalxLLM } from './llamaindex';
 export { ConversationThread, type ThreadOptions } from './thread';
+
+// Next.js 1-Line Route Adapters
+export {
+  handleGalxAI,
+  createUniversalRoute,
+  createImageRoute,
+  createChatRoute,
+  createModelsRoute,
+  createGalxAIRouteHandler,
+  type RouteHandlerOptions
+} from './next';
+
+// React 19 / Next.js Direct Server Actions (Zero-Route)
+export {
+  generateImageAction,
+  chatAction,
+  listModelsAction
+} from './actions';
+
+// Natural Language Intent Engine (NL2API)
+export {
+  executeIntent,
+  inferIntent,
+  type IntentExecutionOptions,
+  type InferredIntent
+} from './intent';
+
+// Zero-File Edge Middleware Interceptor
+export {
+  galxaiMiddleware,
+  createEdgeInterceptor,
+  type MiddlewareConfig
+} from './edge-interceptor';
+
+// React Integration Hooks & Provider
+export {
+  GalxAIProvider,
+  useGalxAI,
+  useImageGeneration,
+  useChat,
+  useModels,
+  type GalxAIProviderProps,
+  type GalxAIContextValue,
+  type ChatMessage
+} from './react';
 
 // Default export & Top-Level Zero-Config Helpers
 import { GalxAI } from './client';
@@ -130,12 +174,24 @@ export async function chat(
  *
  * @example
  * ```ts
- * import { generateImage } from 'galxai';
- * const img = await generateImage('Futuristic skyline');
+ * import { generateImage, image } from 'galxai';
+ * const img = await image('Futuristic skyline', { aspectRatio: '16:9' });
  * ```
  */
-export async function generateImage(prompt: string, options?: { model?: string; size?: string }) {
-  return getClient().generateImage(prompt, options);
+export async function generateImage(
+  promptOrParams: string | import('./resources/images').ImageGenerateParams,
+  options?: Omit<import('./resources/images').ImageGenerateParams, 'prompt'>
+) {
+  return getClient().generateImage(promptOrParams, options);
+}
+
+export const image = generateImage;
+
+/**
+ * Ultra-effortless models listing.
+ */
+export async function listModels() {
+  return getClient().models.list();
 }
 
 /**

@@ -13,6 +13,22 @@ import type {
 } from '../types';
 import type { GalxAIClientCore } from '../client';
 
+export interface ImageGenerateParams {
+  prompt: string;
+  model?: string;
+  size?: string;
+  aspectRatio?: '1:1' | '16:9' | '9:16' | '4:3' | '3:2' | '4:5' | '21:9' | string;
+  aspect_ratio?: string;
+  quality?: 'standard' | 'hd';
+  n?: number;
+  negativePrompt?: string;
+  negative_prompt?: string;
+  responseFormat?: 'url' | 'b64_json';
+  response_format?: 'url' | 'b64_json';
+  style?: string;
+  seed?: number;
+}
+
 export class ImagesResource {
   private readonly client: GalxAIClientCore;
 
@@ -21,25 +37,68 @@ export class ImagesResource {
   }
 
   /**
+   * Helper to normalize aspect ratio into standard pixel resolutions
+   */
+  private normalizeParams(params: ImageGenerateParams): Record<string, any> {
+    const ratio = params.aspectRatio || params.aspect_ratio;
+    let size = params.size;
+
+    if (!size && ratio) {
+      switch (ratio) {
+        case '16:9':
+          size = '1792x1024';
+          break;
+        case '9:16':
+          size = '1024x1792';
+          break;
+        case '4:3':
+          size = '1024x768';
+          break;
+        case '3:2':
+          size = '1536x1024';
+          break;
+        case '4:5':
+          size = '896x1120';
+          break;
+        case '21:9':
+          size = '1792x768';
+          break;
+        case '1:1':
+        default:
+          size = '1024x1024';
+          break;
+      }
+    }
+
+    return {
+      prompt: params.prompt,
+      model: params.model || 'openai-gpt-image-2',
+      size: size || '1024x1024',
+      aspectRatio: ratio || '1:1',
+      quality: params.quality || 'standard',
+      n: params.n || 1,
+      negative_prompt: params.negativePrompt || params.negative_prompt,
+      response_format: params.responseFormat || params.response_format || 'url',
+      style: params.style,
+      seed: params.seed
+    };
+  }
+
+  /**
    * Generates images synchronously.
    */
-  public async generate(params: {
-    prompt: string;
-    model?: string;
-    size?: string;
-    quality?: 'standard' | 'hd';
-    n?: number;
-  }): Promise<ImageGenerationResponse> {
+  public async generate(params: ImageGenerateParams): Promise<ImageGenerationResponse> {
+    const payload = this.normalizeParams(params);
     return this.client.request<ImageGenerationResponse>('/v1/images/generations', {
       method: 'POST',
-      body: params
+      body: payload
     });
   }
 
   /**
    * Enqueues an asynchronous visual synthesis task into the dedicated GPU rate-managed queue.
    */
-  public async generateAsync(params: ImageGenerationAsyncParams): Promise<AsyncTaskHandle<ImageGenerationResponse>> {
+  public async generateAsync(params: ImageGenerationAsyncParams & ImageGenerateParams): Promise<AsyncTaskHandle<ImageGenerationResponse>> {
     const queue = params.queue || 'image-gen';
     const headers: Record<string, string> = {
       'X-Galx-Async': 'true',
@@ -54,6 +113,8 @@ export class ImagesResource {
     if (params.webhookCompletionUrl) headers['X-Galx-Webhook-Url'] = params.webhookCompletionUrl;
     if (params.webhookHmacSecret) headers['X-Galx-Webhook-Secret'] = params.webhookHmacSecret;
 
+    const payload = this.normalizeParams(params);
+
     const response = await this.client.request<{
       id: string;
       queue: string;
@@ -62,13 +123,7 @@ export class ImagesResource {
     }>('/v1/images/generations', {
       method: 'POST',
       headers,
-      body: {
-        prompt: params.prompt,
-        model: params.model,
-        size: params.size,
-        quality: params.quality,
-        n: params.n
-      }
+      body: payload
     });
 
     const client = this.client;

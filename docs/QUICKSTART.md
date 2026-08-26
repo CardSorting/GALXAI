@@ -43,7 +43,31 @@ npx galxai chat
 
 ---
 
-## 💻 2. Cursor & Windsurf IDE (Single-Wallet Setup)
+## ⚡ 2. React & Next.js (Declarative & Server Actions)
+
+Set `GALXAI_API_KEY=galx_live_...` in `.env.local`. No client tokens or route boilerplate required:
+
+```tsx
+// Option A: Declarative JSX Component
+import { GalxImage, GalxChat } from '@galxai/sdk/ui';
+
+export function VisualStudio() {
+  return (
+    <>
+      <GalxImage prompt="Cyberpunk skyline" aspectRatio="16:9" interactive />
+      <GalxChat model="gpt-5.6-sol" placeholder="Ask anything..." />
+    </>
+  );
+}
+
+// Option B: Direct React 19 Server Action (Zero API files needed)
+import { generateImageAction } from '@galxai/sdk/actions';
+const res = await generateImageAction('Neon avatar', { aspectRatio: '1:1' });
+```
+
+---
+
+## 💻 3. Cursor & Windsurf IDE (Single-Wallet Setup)
 
 1. Open **Cursor Settings** $\to$ **Models** $\to$ **Add Model**: `gpt-5.6-sol` (or `x-ai/grok-4.6`).
 2. Enable **Override OpenAI Base URL**:
