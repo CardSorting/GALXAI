@@ -68,7 +68,7 @@ function BaseGtmPromoBanner() {
             <span className="text-emerald-300 font-semibold hidden sm:inline">$5 Free Instant Credit</span>
             <span className="text-zinc-500 hidden md:inline">•</span>
             <span className="text-zinc-300 hidden md:inline">
-              Save 25%–40% on OpenAI Codex &amp; Models
+              Save 25%–40% on OpenAI Codex &amp; GPT-5.6
             </span>
           </div>
 

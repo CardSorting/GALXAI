@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-26T04:32:56.020Z",
+  "timestamp": "2026-08-26T04:49:57.674Z",
   "totalDurationMs": 12,
   "totalScenarios": 5,
   "scenariosPassed": 5,
@@ -75,64 +75,18 @@
       "passed": true,
       "metrics": {
         "tenant": "swarming_agent_007",
-        "lease1Shard": "shard_tasd_1",
-        "lease2Shard": "shard_tasd_2",
+        "lease1Shard": "shard_tasd_2",
+        "lease2Shard": "shard_tasd_1",
         "differentShards": true
       },
       "details": {
         "lease1": {
-          "leaseId": "lease_1787718776019_8a428aa6",
-          "shardId": "shard_tasd_1",
-          "userId": "swarming_agent_007",
-          "fencingToken": 2,
-          "acquiredAtMs": 1787718776019,
-          "expiresAtMs": 1787718836019,
-          "estimatedTokens": 5000,
-          "account": {
-            "id": "shard_tasd_1",
-            "userId": "admin_sys",
-            "accountLabel": "TASD Shard 1",
-            "provider": "openai",
-            "authType": "api_key",
-            "shardMode": "pooled",
-            "status": "healthy",
-            "priority": 10,
-            "weight": 1,
-            "fencingToken": 2,
-            "apiKeyMasked": "sk-proj...t1",
-            "encryptedSecrets": {
-              "ciphertext": "1867c26ab541cae29ede47465fa5fa7e9872cb1a531103",
-              "iv": "8148afd7192adbd9124ac164",
-              "tag": "fde20d23d4eed9c083a9a16c84652b90",
-              "keyVersion": "v1"
-            },
-            "tokenBucket": {
-              "maxTokens": 500000,
-              "remainingTokens": 500000,
-              "refillRatePerMinute": 500000,
-              "maxRequests": 100,
-              "remainingRequests": 100,
-              "lastRefillTimestampMs": 1787718776019,
-              "reservedTokens": 5000
-            },
-            "stats": {
-              "totalRequestsServed": 0,
-              "totalTokensConsumed": 0,
-              "consecutiveFailures": 0,
-              "averageLatencyMs": 300
-            },
-            "createdAtMs": 1787718776019,
-            "updatedAtMs": 1787718776019,
-            "permissionRetracted": false
-          }
-        },
-        "lease2": {
-          "leaseId": "lease_1787718776019_74a7d6e6",
+          "leaseId": "lease_1787719797673_97ae89a5",
           "shardId": "shard_tasd_2",
           "userId": "swarming_agent_007",
           "fencingToken": 2,
-          "acquiredAtMs": 1787718776019,
-          "expiresAtMs": 1787718836019,
+          "acquiredAtMs": 1787719797673,
+          "expiresAtMs": 1787719857673,
           "estimatedTokens": 5000,
           "account": {
             "id": "shard_tasd_2",
@@ -147,9 +101,9 @@
             "fencingToken": 2,
             "apiKeyMasked": "sk-proj...t2",
             "encryptedSecrets": {
-              "ciphertext": "366bc59b25895726e606471e84873c00881f5c4dd4c013",
-              "iv": "041c8e496ce5820ff892f6b0",
-              "tag": "34c2d6fe1559c27695d1c3a3b339dafc",
+              "ciphertext": "d6296a5d9cfe8b7ccccadf1b767211cdb655568e313c2d",
+              "iv": "0244e656c07fad4931c7a155",
+              "tag": "7b290dbd40fa794cfff6334710068e7d",
               "keyVersion": "v1"
             },
             "tokenBucket": {
@@ -158,7 +112,7 @@
               "refillRatePerMinute": 500000,
               "maxRequests": 100,
               "remainingRequests": 100,
-              "lastRefillTimestampMs": 1787718776019,
+              "lastRefillTimestampMs": 1787719797673,
               "reservedTokens": 5000
             },
             "stats": {
@@ -167,8 +121,54 @@
               "consecutiveFailures": 0,
               "averageLatencyMs": 300
             },
-            "createdAtMs": 1787718776019,
-            "updatedAtMs": 1787718776019,
+            "createdAtMs": 1787719797673,
+            "updatedAtMs": 1787719797673,
+            "permissionRetracted": false
+          }
+        },
+        "lease2": {
+          "leaseId": "lease_1787719797673_2d345093",
+          "shardId": "shard_tasd_1",
+          "userId": "swarming_agent_007",
+          "fencingToken": 2,
+          "acquiredAtMs": 1787719797673,
+          "expiresAtMs": 1787719857673,
+          "estimatedTokens": 5000,
+          "account": {
+            "id": "shard_tasd_1",
+            "userId": "admin_sys",
+            "accountLabel": "TASD Shard 1",
+            "provider": "openai",
+            "authType": "api_key",
+            "shardMode": "pooled",
+            "status": "healthy",
+            "priority": 10,
+            "weight": 1,
+            "fencingToken": 2,
+            "apiKeyMasked": "sk-proj...t1",
+            "encryptedSecrets": {
+              "ciphertext": "109ceb9dbcf08aca045cbd334bdad1644690eadd475fc3",
+              "iv": "ec1d28196b30679bc2851ce1",
+              "tag": "bc5ed12e385e869dee824985b9da24b2",
+              "keyVersion": "v1"
+            },
+            "tokenBucket": {
+              "maxTokens": 500000,
+              "remainingTokens": 500000,
+              "refillRatePerMinute": 500000,
+              "maxRequests": 100,
+              "remainingRequests": 100,
+              "lastRefillTimestampMs": 1787719797673,
+              "reservedTokens": 5000
+            },
+            "stats": {
+              "totalRequestsServed": 0,
+              "totalTokensConsumed": 0,
+              "consecutiveFailures": 0,
+              "averageLatencyMs": 300
+            },
+            "createdAtMs": 1787719797673,
+            "updatedAtMs": 1787719797673,
             "permissionRetracted": false
           }
         }

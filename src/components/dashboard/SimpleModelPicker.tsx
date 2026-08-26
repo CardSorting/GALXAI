@@ -44,8 +44,8 @@ const CATEGORIES: SimpleCategory[] = [
       'Automated email draft generation and summarization',
       'High-speed document reading and Q&A'
     ],
-    retailComparison: '$5.00 / 1M tokens retail',
-    galxDiscount: 'Save 25% ($3.75 direct wholesale)'
+    retailComparison: '$5.00 in / $20.00 out per 1M tokens retail',
+    galxDiscount: 'Save 25% ($3.75 in / $15.00 out wholesale)'
   },
   {
     id: 'reasoning',
@@ -58,8 +58,8 @@ const CATEGORIES: SimpleCategory[] = [
       'Full-stack code generation and bug diagnostics',
       'Complex contract evaluation and policy compliance'
     ],
-    retailComparison: '$15.00 / 1M tokens retail',
-    galxDiscount: 'Save 33% ($10.00 direct wholesale)'
+    retailComparison: '$3.00 in / $12.00 out per 1M tokens retail',
+    galxDiscount: 'Save 25% ($2.25 in / $9.00 out wholesale)'
   },
   {
     id: 'velocity',

@@ -36,6 +36,7 @@ import {
   Settings
 } from 'lucide-react';
 import { CommandMenu } from '@/components/common/CommandMenu';
+import { LanguageBadge } from '@/components/common/LanguageBadge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
@@ -90,6 +91,8 @@ const NAV_CATEGORIES: NavCategory[] = [
         href: '/vault',
         description: 'Zero-trust sovereign key encryption and quota shard health monitoring',
         icon: ShieldCheck,
+        badge: 'Zero-Trust',
+        badgeColor: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20',
       },
       {
         name: 'Interactive API Playground',
@@ -146,12 +149,16 @@ const NAV_CATEGORIES: NavCategory[] = [
         href: '/teams/cost-centers',
         description: 'Assign AI compute budgets across engineering squads with GL accounting',
         icon: Layers,
+        badge: 'GL Ledger',
+        badgeColor: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20',
       },
       {
         name: 'RBAC Roles & Governance',
         href: '/teams/roles',
         description: 'Zero-trust role permissions for Owner, Admin, Developer, FinOps, Viewer',
         icon: ShieldCheck,
+        badge: '5 Roles',
+        badgeColor: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
       },
       {
         name: 'Security, BAA & SOC 2 Compliance',
@@ -192,6 +199,8 @@ const NAV_CATEGORIES: NavCategory[] = [
         href: '/pricing/calculator',
         description: 'Simulate your exact team seat count and monthly token savings',
         icon: Sliders,
+        badge: 'Simulator',
+        badgeColor: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20',
       },
       {
         name: 'Founding Builder Deposit Match',
@@ -224,16 +233,20 @@ const NAV_CATEGORIES: NavCategory[] = [
         href: '/docs/quickstart',
         description: 'Drop-in replacement code snippets for cURL, Python, and TypeScript',
         icon: Zap,
+        badge: '30s',
+        badgeColor: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
       },
       {
         name: 'Developer SDK Reference',
-        href: '/docs',
+        href: '/docs/sdks/typescript',
         description: 'Official universal client libraries for Node.js, Python, and Edge runtimes',
         icon: BookOpen,
+        badge: 'v1.0',
+        badgeColor: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
       },
       {
         name: 'Production AI Cookbooks',
-        href: '/cookbook',
+        href: '/docs/cookbook',
         description: 'Recipes for autonomous coding agents, RAG pipelines, and image generation',
         icon: Code2,
         badge: 'Recipes',
@@ -338,22 +351,33 @@ function BaseNavigation() {
             >
               {NAV_CATEGORIES.map((cat) => {
                 const isOpen = activeDropdown === cat.id;
+                const isCatActive = cat.items?.some((item) => {
+                  const cleanItemHref = item.href.split('#')[0];
+                  return pathname === cleanItemHref || (cleanItemHref !== '/' && pathname.startsWith(cleanItemHref));
+                });
 
                 return (
                   <div key={cat.id} className="relative">
                     <button
                       type="button"
+                      id={`nav-cat-btn-${cat.id}`}
                       onClick={() => setActiveDropdown(isOpen ? null : cat.id)}
                       onMouseEnter={() => setActiveDropdown(cat.id)}
                       aria-expanded={isOpen}
                       aria-haspopup="true"
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold tracking-normal transition-all duration-150 flex items-center gap-1 cursor-pointer select-none ${
+                      aria-controls={`nav-cat-dropdown-${cat.id}`}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold tracking-normal transition-all duration-150 flex items-center gap-1.5 cursor-pointer select-none ${
                         isOpen
                           ? 'text-white bg-white/10 shadow-sm ring-1 ring-white/15'
+                          : isCatActive
+                          ? 'text-cyan-300 bg-cyan-500/10 border border-cyan-500/20'
                           : 'text-zinc-400 hover:text-white hover:bg-white/5'
                       } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400`}
                     >
                       <span>{cat.label}</span>
+                      {isCatActive && !isOpen && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                      )}
                       <ChevronDown
                         className={`w-3 h-3 text-zinc-400 transition-transform duration-200 ${
                           isOpen ? 'rotate-180 text-white' : ''
@@ -364,18 +388,30 @@ function BaseNavigation() {
                     {/* Mega-Menu Dropdown Panel */}
                     {isOpen && cat.items && (
                       <div
+                        id={`nav-cat-dropdown-${cat.id}`}
+                        role="region"
+                        aria-labelledby={`nav-cat-btn-${cat.id}`}
                         onMouseLeave={() => setActiveDropdown(null)}
                         className="absolute top-full left-0 mt-2 w-[420px] rounded-3xl p-3 bg-[#0d101c]/98 border border-white/15 shadow-2xl backdrop-blur-2xl z-50 animate-in fade-in zoom-in-95 duration-150 space-y-2"
                       >
                         <div className="space-y-1">
                           {cat.items.map((item) => {
                             const Icon = item.icon;
+                            const isItemActive = pathname === item.href.split('#')[0];
                             return (
                               <Link
                                 key={item.href}
                                 href={item.href}
                                 onClick={() => setActiveDropdown(null)}
-                                className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-white/5 transition-all text-left"
+                                onMouseEnter={() => {
+                                  const cleanHref = item.href.split('#')[0];
+                                  BroccoliOmniSearch.prefetchRoute(cleanHref);
+                                }}
+                                className={`group flex items-start gap-3 p-2.5 rounded-2xl transition-all text-left ${
+                                  isItemActive
+                                    ? 'bg-white/10 border border-white/15 text-white'
+                                    : 'hover:bg-white/5 text-zinc-300 hover:text-white'
+                                }`}
                               >
                                 <div className="w-8 h-8 rounded-xl bg-white/5 group-hover:bg-amber-400/15 border border-white/10 group-hover:border-amber-400/30 flex items-center justify-center text-white group-hover:text-amber-300 shrink-0 transition-colors">
                                   <Icon className="w-4 h-4" />
@@ -405,6 +441,10 @@ function BaseNavigation() {
                             <Link
                               href={cat.footerLink.href}
                               onClick={() => setActiveDropdown(null)}
+                              onMouseEnter={() => {
+                                const cleanHref = cat.footerLink?.href.split('#')[0];
+                                if (cleanHref) BroccoliOmniSearch.prefetchRoute(cleanHref);
+                              }}
                               className="text-[11px] font-mono text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-bold transition-colors"
                             >
                               <span>{cat.footerLink.label}</span>
@@ -419,7 +459,7 @@ function BaseNavigation() {
             </nav>
           </div>
 
-          {/* Right: Search, Workspace Switcher, and High-Converting CTAs */}
+          {/* Right: Search, Workspace Switcher, Language Badge and High-Converting CTAs */}
           <div className="flex items-center gap-2">
             {/* Quick ⌘K Search Trigger */}
             <button
@@ -433,6 +473,9 @@ function BaseNavigation() {
                 ⌘K
               </kbd>
             </button>
+
+            {/* Quick Language Selector (Top-Down Dropdown) */}
+            <LanguageBadge placement="top" className="hidden sm:inline-block" />
 
             {/* API Keys Link */}
             <Link
@@ -638,13 +681,19 @@ function BaseNavigation() {
           </div>
         </div>
 
-        {/* Mobile Navigation Drawer with Categories */}
+        {/* Mobile Navigation Drawer with Categories & Mobile Language Selector */}
         {mobileMenuOpen && (
           <div
             role="region"
             aria-label="Mobile Navigation Menu"
             className="md:hidden mt-3 pt-3 border-t border-white/10 space-y-3 max-w-7xl mx-auto pb-4 animate-in fade-in duration-150"
           >
+            {/* Mobile Language Selector */}
+            <div className="flex items-center justify-between px-2 py-1 bg-black/40 rounded-xl border border-white/5">
+              <span className="text-[11px] font-mono text-zinc-400">Language:</span>
+              <LanguageBadge placement="bottom" />
+            </div>
+
             {NAV_CATEGORIES.map((cat) => {
               const isExpanded = mobileExpandedCat === cat.id;
 
@@ -667,10 +716,21 @@ function BaseNavigation() {
                             key={item.href}
                             href={item.href}
                             onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-white/10 text-zinc-300 hover:text-white transition-all text-xs font-medium"
+                            onMouseEnter={() => {
+                              const cleanHref = item.href.split('#')[0];
+                              BroccoliOmniSearch.prefetchRoute(cleanHref);
+                            }}
+                            className="flex items-center justify-between p-2 rounded-xl hover:bg-white/10 text-zinc-300 hover:text-white transition-all text-xs font-medium"
                           >
-                            <Icon className="w-4 h-4 text-amber-400 shrink-0" />
-                            <span className="truncate">{item.name}</span>
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <Icon className="w-4 h-4 text-amber-400 shrink-0" />
+                              <span className="truncate">{item.name}</span>
+                            </div>
+                            {item.badge && (
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold border shrink-0 ${item.badgeColor || 'bg-white/10 text-zinc-300 border-white/15'}`}>
+                                {item.badge}
+                              </span>
+                            )}
                           </Link>
                         );
                       })}
@@ -710,7 +770,7 @@ function NavigationFallback() {
         </Link>
         <div className="flex items-center gap-4 text-xs font-mono">
           <Link href="/models" className="text-zinc-300 hover:text-white transition-colors">Models</Link>
-          <Link href="/billing/seats" className="text-amber-300 hover:text-white transition-colors">Seats &amp; Teams</Link>
+          <Link href="/teams/seats" className="text-amber-300 hover:text-white transition-colors">Seats &amp; Teams</Link>
           <Link href="/pricing" className="text-zinc-300 hover:text-white transition-colors">Pricing</Link>
           <Link href="/docs" className="text-zinc-300 hover:text-white transition-colors">Docs</Link>
         </div>
