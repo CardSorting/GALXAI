@@ -19,12 +19,13 @@ interface BreadcrumbsProps {
     name: string;
     plan?: string;
   };
+  includeJsonLd?: boolean;
 }
 
-export function Breadcrumbs({ items, workspaceContext }: BreadcrumbsProps) {
+export function Breadcrumbs({ items, workspaceContext, includeJsonLd = false }: BreadcrumbsProps) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://galx.ai';
 
-  const schemaJson = {
+  const schemaJson = includeJsonLd ? {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
@@ -41,7 +42,7 @@ export function Breadcrumbs({ items, workspaceContext }: BreadcrumbsProps) {
         item: item.href ? `${baseUrl}${item.href}` : undefined
       }))
     ]
-  };
+  } : null;
 
   useEffect(() => {
     if (typeof window === 'undefined' || items.length === 0) return;
@@ -57,10 +58,12 @@ export function Breadcrumbs({ items, workspaceContext }: BreadcrumbsProps) {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaJson) }}
-      />
+      {schemaJson && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaJson) }}
+        />
+      )}
 
       <nav
         aria-label="Breadcrumb"

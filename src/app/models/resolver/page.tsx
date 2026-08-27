@@ -23,6 +23,9 @@ export default function ModelResolverPage() {
       createSoftwareAppSchema({
         name: 'GALXAI 0ms Model Alias Resolver',
         description: 'Instant in-memory trie resolver for AI model aliases, provider prefixes, and legacy model identifiers.',
+        url: '/models/resolver',
+        id: 'https://galx.ai/models/resolver#software',
+        includeRating: false,
       }),
       createBreadcrumbSchema([
         { name: 'Home', url: '/' },

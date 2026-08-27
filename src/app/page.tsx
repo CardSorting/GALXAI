@@ -3,8 +3,6 @@ import { HomeClient } from '@/components/home/HomeClient';
 import { constructMetadata } from '@/lib/seo/metadata';
 import {
   JsonLd,
-  createOrganizationSchema,
-  createWebSiteSchema,
   createSoftwareAppSchema,
   createFAQPageSchema,
 } from '@/lib/seo/jsonld';
@@ -34,9 +32,7 @@ export default function HomePage() {
   const pageSchema = {
     '@context': 'https://schema.org',
     '@graph': [
-      createOrganizationSchema(),
-      createWebSiteSchema(),
-      createSoftwareAppSchema(),
+      createSoftwareAppSchema({ includeRating: true }),
       createFAQPageSchema(homeFaqSnippet),
     ],
   };

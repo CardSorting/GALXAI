@@ -12,7 +12,7 @@ import { FloatingActionDock } from "@/components/common/FloatingActionDock";
 import { KeyboardShortcutsModal } from "@/components/common/KeyboardShortcutsModal";
 import { ClientResilienceProvider } from "@/components/common/ClientResilienceProvider";
 import { SITE_CONFIG } from "@/lib/seo/siteConfig";
-import { JsonLd, createOrganizationSchema, createWebSiteSchema, createSoftwareAppSchema } from "@/lib/seo/jsonld";
+import { JsonLd, createOrganizationSchema, createWebSiteSchema } from "@/lib/seo/jsonld";
 
 const fontSans = Inter({
   subsets: ["latin"],
@@ -128,7 +128,6 @@ export default function RootLayout({
     "@graph": [
       createOrganizationSchema(),
       createWebSiteSchema(),
-      createSoftwareAppSchema(),
     ],
   };
 

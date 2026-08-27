@@ -78,8 +78,8 @@ export default async function ModelVsPage({ params }: ModelVsPageProps) {
   const pageSchema = {
     '@context': 'https://schema.org',
     '@graph': [
-      createProductModelSchema(modelA),
-      createProductModelSchema(modelB),
+      createProductModelSchema(modelA, { includeRating: false }),
+      createProductModelSchema(modelB, { includeRating: false }),
       createFAQPageSchema(matchup.faqs),
       createBreadcrumbSchema([
         { name: 'Home', url: '/' },

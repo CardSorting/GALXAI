@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { constructMetadata } from '@/lib/seo/metadata';
-import { JsonLd, createBreadcrumbSchema, createOrganizationSchema } from '@/lib/seo/jsonld';
+import { JsonLd, createBreadcrumbSchema } from '@/lib/seo/jsonld';
 import { Shield, Zap, Globe, Cpu, Award, ArrowRight, Layers, Lock, Users } from 'lucide-react';
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 
@@ -29,14 +29,13 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#07080d] text-zinc-100 flex flex-col font-sans selection:bg-cyan-500/30">
+    <div className="min-h-screen bg-[#07090e] text-foreground flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
       <JsonLd
         data={[
           createBreadcrumbSchema([
             { name: 'Home', url: SITE_CONFIG.url },
             { name: 'About', url: `${SITE_CONFIG.url}/about` },
           ]),
-          createOrganizationSchema(),
         ]}
       />
       <Navigation />
@@ -69,11 +68,11 @@ export default function AboutPage() {
             <div className="text-xs text-zinc-400 font-semibold">Anycast Edge TTFT</div>
           </div>
           <div className="p-6 rounded-2xl bg-zinc-900/40 border border-white/10 text-center space-y-1">
-            <div className="text-3xl sm:text-4xl font-black text-purple-400 font-mono">75%</div>
+            <div className="text-3xl sm:text-4xl font-black text-amber-400 font-mono">75%</div>
             <div className="text-xs text-zinc-400 font-semibold">Prompt Cache Rebate</div>
           </div>
           <div className="p-6 rounded-2xl bg-zinc-900/40 border border-white/10 text-center space-y-1">
-            <div className="text-3xl sm:text-4xl font-black text-amber-400 font-mono">99.99%</div>
+            <div className="text-3xl sm:text-4xl font-black text-sky-400 font-mono">99.99%</div>
             <div className="text-xs text-zinc-400 font-semibold">Active-Active Uptime</div>
           </div>
         </section>

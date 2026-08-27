@@ -27,7 +27,7 @@ export default function PlaygroundPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#07080d] text-zinc-100 font-sans selection:bg-cyan-500/30">
+    <div className="min-h-screen flex flex-col bg-[#07090e] text-foreground font-sans selection:bg-indigo-500 selection:text-white">
       <JsonLd
         data={[
           createBreadcrumbSchema([
@@ -37,6 +37,9 @@ export default function PlaygroundPage() {
           createSoftwareAppSchema({
             name: 'GALXAI Model Playground',
             description: 'Interactive developer sandbox for experimenting with frontier LLMs and prompt caching.',
+            url: `${SITE_CONFIG.url}/playground`,
+            id: `${SITE_CONFIG.url}/playground#software`,
+            includeRating: false,
           }),
         ]}
       />

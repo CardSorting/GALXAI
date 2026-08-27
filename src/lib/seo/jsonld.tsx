@@ -3,13 +3,25 @@ import { SITE_CONFIG } from './siteConfig';
 import type { ModelSpecItem } from '@/core/contracts/GalxContracts';
 
 /**
+ * Serializes JSON-LD data with XSS character protection for script tags.
+ */
+export function serializeJsonLd(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+}
+
+/**
  * XSS-Safe JSON-LD Structured Data Script Injection Component
  */
 export function JsonLd({ data }: { data: Record<string, any> | Record<string, any>[] }) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: serializeJsonLd(data) }}
     />
   );
 }
@@ -136,12 +148,19 @@ export function createWebSiteSchema() {
 export function createSoftwareAppSchema(props?: {
   name?: string;
   description?: string;
+  url?: string;
+  id?: string;
   featureList?: string[];
+  includeRating?: boolean;
 }) {
+  const isDefaultSoftware = !props?.name || props.name.includes('Universal AI Gateway');
+  const softwareId = props?.id || (isDefaultSoftware ? `${SITE_CONFIG.url}/#software` : `${props?.url || SITE_CONFIG.url}#software`);
+  const shouldIncludeRating = props?.includeRating ?? (isDefaultSoftware && !props?.id);
+
   return {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    '@id': `${SITE_CONFIG.url}/#software`,
+    '@id': softwareId,
     name: props?.name || 'GALXAI Universal AI Gateway & Model Router',
     applicationCategory: 'DeveloperApplication',
     operatingSystem: 'Cross-platform (HTTP REST / OpenAI SDK Compatible)',
@@ -152,38 +171,40 @@ export function createSoftwareAppSchema(props?: {
       availability: 'https://schema.org/InStock',
       description: 'Free developer account with $5 instant compute grant',
     },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.99',
-      ratingCount: '1420',
-      reviewCount: '680',
-      bestRating: '5',
-      worstRating: '1',
-    },
-    review: [
-      {
-        '@type': 'Review',
-        author: { '@type': 'Person', name: 'Alexander Chen' },
-        datePublished: '2026-02-14',
-        reviewBody: 'Cut our autonomous agent cluster token bills by 38% immediately with zero code changes. 1-line baseURL swap with OpenAI SDK.',
-        reviewRating: {
-          '@type': 'Rating',
-          ratingValue: '5',
-          bestRating: '5',
-        },
+    ...(shouldIncludeRating && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: '4.99',
+        ratingCount: '1420',
+        reviewCount: '680',
+        bestRating: '5',
+        worstRating: '1',
       },
-      {
-        '@type': 'Review',
-        author: { '@type': 'Person', name: 'Sarah Lindqvist' },
-        datePublished: '2026-03-01',
-        reviewBody: 'The 75% prompt caching rebate plus sub-15ms Anycast TTFT solved all our rate limit spikes under high concurrency.',
-        reviewRating: {
-          '@type': 'Rating',
-          ratingValue: '5',
-          bestRating: '5',
+      review: [
+        {
+          '@type': 'Review',
+          author: { '@type': 'Person', name: 'Alexander Chen' },
+          datePublished: '2026-02-14',
+          reviewBody: 'Cut our autonomous agent cluster token bills by 38% immediately with zero code changes. 1-line baseURL swap with OpenAI SDK.',
+          reviewRating: {
+            '@type': 'Rating',
+            ratingValue: '5',
+            bestRating: '5',
+          },
         },
-      },
-    ],
+        {
+          '@type': 'Review',
+          author: { '@type': 'Person', name: 'Sarah Lindqvist' },
+          datePublished: '2026-03-01',
+          reviewBody: 'The 75% prompt caching rebate plus sub-15ms Anycast TTFT solved all our rate limit spikes under high concurrency.',
+          reviewRating: {
+            '@type': 'Rating',
+            ratingValue: '5',
+            bestRating: '5',
+          },
+        },
+      ],
+    }),
     featureList: props?.featureList || [
       'Sub-millisecond Anycast dynamic routing (<15ms TTFT)',
       'Zero rate limit stalls & automatic multi-account failover',
@@ -234,7 +255,7 @@ export function createModelItemListSchema(models: ModelSpecItem[]) {
 /**
  * Schema.org Product for Individual Model Specs
  */
-export function createProductModelSchema(model: ModelSpecItem) {
+export function createProductModelSchema(model: ModelSpecItem, options?: { includeRating?: boolean }) {
   const canonicalUrl = `${SITE_CONFIG.url}/models/${model.id.replace('/', '-')}`;
 
   return {
@@ -262,13 +283,15 @@ export function createProductModelSchema(model: ModelSpecItem) {
         name: SITE_CONFIG.name,
       },
     },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.97',
-      reviewCount: '410',
-      bestRating: '5',
-      worstRating: '1',
-    },
+    ...(options?.includeRating !== false && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: '4.97',
+        reviewCount: '410',
+        bestRating: '5',
+        worstRating: '1',
+      },
+    }),
   };
 }
 
@@ -417,11 +440,13 @@ export function createTechArticleSchema({
     ],
     author: {
       '@type': 'Organization',
+      '@id': `${SITE_CONFIG.url}/#organization`,
       name: SITE_CONFIG.name,
       url: SITE_CONFIG.url,
     },
     publisher: {
       '@type': 'Organization',
+      '@id': `${SITE_CONFIG.url}/#organization`,
       name: SITE_CONFIG.name,
       url: SITE_CONFIG.url,
       logo: {
@@ -444,6 +469,7 @@ export function createGrantFinancialSchema() {
     description: 'Up to $2,500 in 50% compute match grants for AI builders, funded startups, and enterprise teams.',
     provider: {
       '@type': 'Organization',
+      '@id': `${SITE_CONFIG.url}/#organization`,
       name: SITE_CONFIG.name,
       url: SITE_CONFIG.url,
     },
@@ -510,11 +536,13 @@ export function createDatasetSchema({
     url: fullUrl,
     creator: {
       '@type': 'Organization',
+      '@id': `${SITE_CONFIG.url}/#organization`,
       name: SITE_CONFIG.name,
       url: SITE_CONFIG.url,
     },
     publisher: {
       '@type': 'Organization',
+      '@id': `${SITE_CONFIG.url}/#organization`,
       name: SITE_CONFIG.name,
       url: SITE_CONFIG.url,
     },
@@ -531,8 +559,8 @@ export function createDatasetSchema({
 }
 
 /**
- * Creates a fully unified, interconnected Schema.org Graph linking WebSite, Organization,
- * WebPage, Breadcrumbs, and Domain Entities for Google Knowledge Graph & AI Overviews.
+ * Creates a fully unified, interconnected Schema.org Graph linking
+ * WebPage, Breadcrumbs, and Domain Entities (referencing global WebSite & Organization).
  */
 export function createItemPageGraph({
   canonicalPath,
@@ -580,8 +608,6 @@ export function createItemPageGraph({
   return {
     '@context': 'https://schema.org',
     '@graph': [
-      createOrganizationSchema(),
-      createWebSiteSchema(),
       webPage,
       breadcrumbWithId,
       ...entities,
@@ -629,7 +655,7 @@ export function createCollectionPageSchema({
 }
 
 /**
- * Creates a complete topic hub Knowledge Graph linking Organization, WebSite, CollectionPage, Breadcrumbs, and ItemList
+ * Creates a complete topic hub Knowledge Graph linking CollectionPage, Breadcrumbs, and ItemList
  */
 export function createTopicHubGraph({
   canonicalPath,
@@ -665,13 +691,9 @@ export function createTopicHubGraph({
   return {
     '@context': 'https://schema.org',
     '@graph': [
-      createOrganizationSchema(),
-      createWebSiteSchema(),
       collectionPage,
       breadcrumbWithId,
       ...entities,
     ],
   };
 }
-
-

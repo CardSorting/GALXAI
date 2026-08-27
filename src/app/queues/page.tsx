@@ -23,6 +23,9 @@ export default function QueuesPage() {
       createSoftwareAppSchema({
         name: 'GALXAI API & SDK Task Queue Stream',
         description: 'Real-time telemetry and execution monitor for programmatic AI completions.',
+        url: '/queues',
+        id: 'https://galx.ai/queues#software',
+        includeRating: false,
       }),
       createBreadcrumbSchema([
         { name: 'Home', url: '/' },

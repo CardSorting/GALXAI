@@ -26,6 +26,9 @@ export default function StatusPage() {
       createSoftwareAppSchema({
         name: 'GALXAI Real-Time System Status',
         description: 'Operational health, circuit breaker telemetry, and Anycast latency metrics.',
+        url: '/status',
+        id: 'https://galx.ai/status#software',
+        includeRating: false,
       }),
       createBreadcrumbSchema([
         { name: 'Home', url: '/' },
