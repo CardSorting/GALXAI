@@ -71,4 +71,6 @@ export * from "./BroccoliSubstringTrieCompactor";
 export * from "./BroccoliEmbeddingCoalescer";
 export * from "./BroccoliContextRingBuffer";
 export * from "./BroccoliBinaryDeltaIngester";
+export * from "./BroccoliDocumentHeadTailSampler";
 export * from "./BroccoliSpendSubstrate";
+
