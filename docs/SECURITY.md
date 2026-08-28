@@ -205,5 +205,36 @@ flowchart TD
 3. **Monetary & Entity Grounding**: Currency amounts and entity identifiers must match raw token occurrences.
 4. **Zero-Hallucination Guarantee**: Across our 180-domain enterprise test suite, the system achieves **180 verified compactions and 0 safe fallbacks (100% Pass Rate)** with **77.6% aggregate spend savings**.
 
+---
+
+## 13. Institutional Entropy & Epistemic Context Security (ADR 0066 & 0067)
+
+In production enterprise codebases, context noise carries authority, timestamps, and social consequences (e.g. 65 historical ADRs, superseded cryptographic algorithms like `HS256`, and stale developer documentation). If injected unscrubbed into frontier reasoning models, models hallucinate outdated security protocols or violate active memory zeroization bounds.
+
+```mermaid
+flowchart TD
+    NoisyContext[Enterprise Repository Context: Code + Stale ADRs + RFC Minutes] --> Compactor[BroccoliArchitectureInvariantCompactor]
+    Compactor --> InvariantExtractor{Extract Active Invariants & Prune Noise}
+    
+    InvariantExtractor -->|Active Security Constraint| RS256[Enforce RS256 with v2 Key Pair]
+    InvariantExtractor -->|Active Memory Rule| Zeroize[Enforce zeroizeBuffer in finally Block]
+    InvariantExtractor -->|Active Deployment Rule| EdgeRuntime[Enforce runtime = 'edge']
+    InvariantExtractor -->|Superseded ADRs / Stale RFCs| Prune[Prune Obsolete Governance Artifacts]
+    
+    RS256 --> ActionSafeRep[Action-Safe Context Representation]
+    Zeroize --> ActionSafeRep
+    EdgeRuntime --> ActionSafeRep
+    Prune --> ActionSafeRep
+    
+    ActionSafeRep --> LLM[Model Inference Boundary]
+```
+
+### Institutional Security Guarantees:
+1. **Adversarial Context Trap Disarmament**: Verified across the 7-Tier Progressive Institutional Entropy Gradient (`npm run bench:entropy`).
+2. **Cryptographic Algorithm Defense**: Prevents deprecated symmetric schemes (`HS256`) from overriding active asymmetric standards (`RS256`).
+3. **Memory Safety Defense**: Ensures ephemeral buffer zeroization (`0xAA` -> `0x00`) remains strictly binding.
+4. **Adaptive Density Gate ($\text{ID}(C)$)**: Automatically passes clean prompts (<200 tokens) through verbatim to prevent unforced framing overhead.
+
+
 
 
