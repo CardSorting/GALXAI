@@ -77,7 +77,9 @@ export * from "./BroccoliSQLPlanCache";
 export * from "./BroccoliSymbolSlicer";
 export * from "./BroccoliStreamTokenPacker";
 export * from "./BroccoliMultiDocDeDuper";
+export * from "./BroccoliParaphraseNormalizer";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
