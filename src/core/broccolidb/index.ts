@@ -39,4 +39,5 @@ export * from "./BroccoliTemplateOptimizer";
 export * from "./BroccoliSystemHierarchyNormalizer";
 export * from "./BroccoliLiveSpendGuard";
 export * from "./BroccoliRollingHistoryCompactor";
+export * from "./BroccoliCodeBlockTruncator";
 export * from "./BroccoliSpendSubstrate";
