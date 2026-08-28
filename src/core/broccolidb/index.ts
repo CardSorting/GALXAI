@@ -62,4 +62,5 @@ export * from "./BroccoliPromptCanonicalizer";
 export * from "./BroccoliToolCallDeduplicator";
 export * from "./BroccoliRecordCompactor";
 export * from "./BroccoliPrefixTrieRouter";
+export * from "./BroccoliSemanticDictCompressor";
 export * from "./BroccoliSpendSubstrate";
