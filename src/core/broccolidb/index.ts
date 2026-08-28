@@ -90,7 +90,10 @@ export * from "./BroccoliContractRedlineCompactor";
 export * from "./BroccoliHipaaDeIdentifier";
 export * from "./BroccoliLegalDefinitionHoister";
 export * from "./BroccoliVitalsTrendCompactor";
+export * from "./BroccoliCourtCaptionCompactor";
+export * from "./BroccoliRadiologyCompactor";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
