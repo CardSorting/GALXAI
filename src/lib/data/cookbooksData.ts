@@ -529,5 +529,136 @@ print(ask_with_cache("How do I configure Anycast proxy endpoints?"))`,
       },
     ],
   },
+  {
+    slug: 'zero-proxy-react-primitives',
+    category: 'Frontend & UI',
+    badge: 'Zero-Proxy Velocity',
+    title: 'Building Production AI Features with Zero-Proxy React Primitives',
+    headline: 'Ship Chat, Image & Voice AI in React Without Backend Proxies',
+    description:
+      'Learn how to use GALXAI declarative React components (<GalxChat />, <GalxImage />, <GalxReasoningStream />, <GalxAudio />) with zero backend fetch boilerplate and server-only API key security.',
+    difficulty: 'Beginner',
+    timeToComplete: 'PT3M',
+    prerequisites: ['Next.js 14/15 or React 18/19', 'galxai package'],
+    primaryLanguage: 'TypeScript',
+    codeSnippet: `import { GalxChat, GalxImage, GalxReasoningStream, GalxAudio } from 'galxai/ui';
+
+export default function AIStudioPage() {
+  return (
+    <div className="max-w-4xl mx-auto p-6 space-y-8">
+      {/* 1. Declarative Reasoning Stream */}
+      <GalxReasoningStream
+        prompt="Explain the difference between SOTA reasoning and high-velocity tiers"
+        model="gpt-5.6-sol"
+        autoStart
+      />
+
+      {/* 2. Zero-Proxy Visual Synthesis */}
+      <GalxImage
+        prompt="Cyberpunk neon command center"
+        aspectRatio="16:9"
+      />
+
+      {/* 3. Drop-in Streaming Chat */}
+      <GalxChat
+        model="gpt-5.6-terra"
+        placeholder="Ask a question..."
+      />
+
+      {/* 4. Declarative Voice Playback */}
+      <GalxAudio
+        text="GALXAI compresses time-to-first-dollar by eliminating custom backend proxies."
+        voice="alloy"
+      />
+    </div>
+  );
+}`,
+    steps: [
+      {
+        name: 'Add GALXAI_API_KEY to .env.local',
+        description: 'Store your gateway key on the server. Client components never expose plaintext credentials.',
+      },
+      {
+        name: 'Import Declarative Primitives',
+        description: 'Import <GalxChat />, <GalxImage />, <GalxReasoningStream />, or <GalxAudio />.',
+      },
+      {
+        name: 'Render Components in JSX',
+        description: 'Components handle streaming, loading spinners, aspect ratios, and error boundaries automatically.',
+      },
+    ],
+    faqs: [
+      {
+        q: 'Are client-side API keys exposed to users in the browser?',
+        a: 'No. GALXAI UI primitives execute via secure Next.js Server Actions or server-side session handlers, preventing client-side key leakage.',
+      },
+      {
+        q: 'Do I need to write custom Express or Next.js route handlers?',
+        a: 'No. The components manage streaming socket connections and response state internally.',
+      },
+    ],
+  },
+  {
+    slug: 'autonomous-spend-governance-tier-cascading',
+    category: 'Enterprise & FinOps',
+    badge: 'Spend Governance',
+    title: 'Automating Spend Governance & Tier Cascading with OpenAI SDK',
+    headline: 'Stop Unnecessary AI Spend with 1-Line Gateway Governance',
+    description:
+      'Implement real-time spend governance, prefix cache preservation, and automated model tier cascading using standard OpenAI SDK and GALXAI Gateway.',
+    difficulty: 'Intermediate',
+    timeToComplete: 'PT5M',
+    prerequisites: ['Node.js or Python', 'OpenAI SDK'],
+    primaryLanguage: 'TypeScript',
+    codeSnippet: `import OpenAI from "openai";
+
+// 1-Line Drop-in Gateway Interception
+const openai = new OpenAI({
+  baseURL: "https://gateway.galx.ai/v1",
+  apiKey: process.env.GALXAI_API_KEY,
+});
+
+async function runClassificationTask(ticketText: string) {
+  // Low-entropy classification query:
+  // GalX automatically routes from Sol ($15/1M output) to Luna ($3/1M output)
+  // saving 80% with verified statistical quality equivalence.
+  const response = await openai.chat.completions.create({
+    model: "gpt-5.6-sol",
+    messages: [
+      {
+        role: "system",
+        content: "You are an automated support ticket classifier. Output only: billing, technical, or account.",
+      },
+      { role: "user", content: ticketText },
+    ],
+  });
+
+  return response.choices[0].message.content;
+}
+
+runClassificationTask("My credit card was charged twice on invoice #9201")
+  .then(console.log);`,
+    steps: [
+      {
+        name: 'Point baseURL to GALXAI Gateway',
+        description: 'Set baseURL to https://gateway.galx.ai/v1 in your existing OpenAI client initialization.',
+      },
+      {
+        name: 'Execute Normal Inference Calls',
+        description: 'Make standard chat.completions calls. GalX transparently evaluates entropy and applies tier cascading.',
+      },
+      {
+        name: 'Inspect Telemetry in /audit',
+        description: 'View real-time spend attribution, avoided waste, and prefix cache hit rates on your live dashboard.',
+      },
+    ],
+    faqs: [
+      {
+        q: 'Does Tier Cascading alter output accuracy on complex reasoning tasks?',
+        a: 'No. GalX only routes tasks where unexpired statistical evaluation evidence (Δ ≥ -0.010) proves parity, keeping complex reasoning on flagship tiers.',
+      },
+    ],
+  },
 ];
+
 
