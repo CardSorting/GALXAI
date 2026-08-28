@@ -128,7 +128,10 @@ export * from "./BroccoliResumeCompactor";
 export * from "./BroccoliPerformanceReviewCompactor";
 export * from "./BroccoliBolCompactor";
 export * from "./BroccoliPurchaseOrderCompactor";
+export * from "./BroccoliSoc2Compactor";
+export * from "./BroccoliPrivacyPolicyCompactor";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
