@@ -100,7 +100,10 @@ export * from "./BroccoliGitLogCompactor";
 export * from "./BroccoliSupportChatCompactor";
 export * from "./BroccoliEdgarCompactor";
 export * from "./BroccoliPriorAuthCompactor";
+export * from "./BroccoliLockfileCompactor";
+export * from "./BroccoliOrderTrackingCompactor";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
