@@ -35,4 +35,5 @@ export * from "./BroccoliRetryBreaker";
 export * from "./BroccoliMultimodalCompactor";
 export * from "./BroccoliCodePatcher";
 export * from "./BroccoliDeltaCompressor";
+export * from "./BroccoliTemplateOptimizer";
 export * from "./BroccoliSpendSubstrate";
