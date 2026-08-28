@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import { GalxSpendGovernanceEngine } from '../src/core/governance/GalxSpendGovernanceEngine';
+import { PromptPrefixRestructurer } from '../src/core/governance/PromptPrefixRestructurer';
+import { AgentCircuitBreaker } from '../src/core/governance/AgentCircuitBreaker';
 import { ModelCatalog } from '../src/core/router/ModelCatalog';
 import { TokenCostCalculator } from '../src/core/pricing/TokenCostCalculator';
 
@@ -24,6 +26,7 @@ const passingEvidence = {
 };
 
 function run(): void {
+  // 1. Basic Engine Tests
   const unattributed = GalxSpendGovernanceEngine.evaluate(baseRequest);
   assert.equal(unattributed.action, 'allow');
   assert.equal(unattributed.effectiveModel, 'gpt-5.6-sol');
@@ -80,6 +83,36 @@ function run(): void {
   assert.equal(capped.action, 'block');
   assert.ok(capped.reasonCodes.includes('OUTPUT_TOKEN_LIMIT_EXCEEDED'));
 
+  // 2. Prompt Prefix Restructurer Tests
+  const volatilePrompt = `Timestamp: 2026-08-27T22:30:00Z\nRequest ID: req_981723a89bcdef01\nYou are an enterprise SQL query generator. Follow the schema strictly:\nCREATE TABLE customers (id INT, name TEXT);`;
+  const restructured = PromptPrefixRestructurer.restructure(volatilePrompt);
+  assert.equal(restructured.wasRestructured, true);
+  assert.equal(restructured.detectedVolatileHeaders.length, 2);
+  assert.ok(restructured.restructuredPrompt.startsWith('You are an enterprise SQL query generator.'));
+
+  // 3. Agent Circuit Breaker Tests
+  const sessionId = 'test_agent_session_101';
+  AgentCircuitBreaker.resetSession(sessionId);
+  
+  for (let turn = 1; turn <= 12; turn++) {
+    const evalResult = AgentCircuitBreaker.evaluateSession(
+      sessionId,
+      [{ role: 'user', content: `Turn iteration ${turn}` }],
+      12
+    );
+    assert.equal(evalResult.shouldHalt, false);
+  }
+
+  // Turn 13 should trip circuit breaker
+  const tripped = AgentCircuitBreaker.evaluateSession(
+    sessionId,
+    [{ role: 'user', content: 'Turn iteration 13' }],
+    12
+  );
+  assert.equal(tripped.shouldHalt, true);
+  assert.equal(tripped.reason, 'MAX_TURNS_EXCEEDED');
+
+  // 4. Model Catalog & Pricing Validation
   const sol = ModelCatalog.resolveModel('gpt-5.6-sol');
   const terra = ModelCatalog.resolveModel('gpt-5.6-terra');
   const luna = ModelCatalog.resolveModel('gpt-5.6-luna');
@@ -110,7 +143,7 @@ function run(): void {
   assert.equal(longContext.promptCostUsd, 2.4);
   assert.equal(longContext.completionCostUsd, 0.03);
 
-  console.log('Spend governance validation passed.');
+  console.log('Spend governance validation passed (including Prefix Restructurer & Circuit Breaker).');
 }
 
 run();

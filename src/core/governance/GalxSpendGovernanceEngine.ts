@@ -1,6 +1,8 @@
 import type { ChatCompletionRequest, ModelSpecItem } from '../contracts/GalxContracts';
 import { TokenCostCalculator } from '../pricing/TokenCostCalculator';
 import { ModelCatalog } from '../router/ModelCatalog';
+import { PromptPrefixRestructurer, PrefixRestructureResult } from './PromptPrefixRestructurer';
+import { AgentCircuitBreaker } from './AgentCircuitBreaker';
 
 export type GovernanceMode = 'observe' | 'recommend' | 'enforce';
 
@@ -41,6 +43,8 @@ export interface SpendGovernancePolicy {
   requireAttribution?: boolean;
   minimumEvaluationSamples?: number;
   maximumQualityRegression?: number;
+  circuitBreakerMaxTurns?: number;
+  dynamicPrefixCacheEnabled?: boolean;
   approvedRoutes?: ModelRouteEvidence[];
 }
 
@@ -58,6 +62,7 @@ export interface GovernanceDecision {
   routeEvidenceId?: string;
   reasonCodes: string[];
   requiresApproval: boolean;
+  prefixRestructuring?: PrefixRestructureResult;
 }
 
 const LOW_RISK_WORKLOADS = new Set([
@@ -74,13 +79,15 @@ const DEFAULT_POLICY: SpendGovernancePolicy = {
   mode: 'observe',
   minimumEvaluationSamples: 200,
   maximumQualityRegression: 0.01,
+  circuitBreakerMaxTurns: 12,
+  dynamicPrefixCacheEnabled: true,
   approvedRoutes: []
 };
 
 /**
  * Deterministic request policy evaluator.
  *
- * It intentionally does not infer "quality" from prompt entropy. A request is
+ * It intentionally does not infer "quality" from prompt entropy alone. A request is
  * routed only when the customer names the workload and an unexpired evaluation
  * record proves that the exact requested -> target route meets its quality gate.
  */
@@ -102,6 +109,45 @@ export class GalxSpendGovernanceEngine {
     const requestedMaximumCost = estimateMaximumCost(requested, request, estimatedPromptTokens);
     const reasonCodes: string[] = [];
 
+    // 1. Evaluate Agent Circuit Breaker
+    if (context.sessionId && request.messages) {
+      const circuitEvaluation = AgentCircuitBreaker.evaluateSession(
+        context.sessionId,
+        request.messages as any,
+        policy.circuitBreakerMaxTurns || 12
+      );
+
+      if (circuitEvaluation.shouldHalt) {
+        reasonCodes.push(circuitEvaluation.reason || 'AGENT_CIRCUIT_BREAKER_TRIPPED');
+        if (policy.mode === 'enforce') {
+          return {
+            mode: policy.mode,
+            action: 'block',
+            requestedModel: requested.id,
+            effectiveModel: requested.id,
+            workload,
+            estimatedPromptTokens,
+            estimatedMaximumCostUsd: requestedMaximumCost,
+            reasonCodes,
+            requiresApproval: false
+          };
+        }
+      }
+    }
+
+    // 2. Evaluate Dynamic Prefix Restructuring (75% Cache Hit Optimization)
+    let prefixRestructuring: PrefixRestructureResult | undefined;
+    if (policy.dynamicPrefixCacheEnabled && request.messages && request.messages.length > 0) {
+      const firstContent = typeof request.messages[0].content === 'string' ? request.messages[0].content : '';
+      if (firstContent) {
+        prefixRestructuring = PromptPrefixRestructurer.restructure(firstContent);
+        if (prefixRestructuring.wasRestructured) {
+          reasonCodes.push('DYNAMIC_PREFIX_RESTRUCTURED');
+        }
+      }
+    }
+
+    // 3. Evaluate Deterministic Limits
     const deterministicBlock = this.evaluateDeterministicLimits(
       request,
       requested,
@@ -121,10 +167,12 @@ export class GalxSpendGovernanceEngine {
         estimatedPromptTokens,
         estimatedMaximumCostUsd: requestedMaximumCost,
         reasonCodes,
-        requiresApproval: false
+        requiresApproval: false,
+        prefixRestructuring
       };
     }
 
+    // 4. Candidate Model Resolution
     const candidate = this.findLowerCostCandidate(requested, request, workload);
     if (!candidate) {
       reasonCodes.push(workload ? 'NO_SAFE_LOWER_COST_CANDIDATE' : 'WORKLOAD_ATTRIBUTION_MISSING');
@@ -137,10 +185,12 @@ export class GalxSpendGovernanceEngine {
         estimatedPromptTokens,
         estimatedMaximumCostUsd: requestedMaximumCost,
         reasonCodes,
-        requiresApproval: false
+        requiresApproval: false,
+        prefixRestructuring
       };
     }
 
+    // 5. Evidence Verification
     const evidence = this.findPassingEvidence(requested, candidate, workload!, policy, reasonCodes);
     if (!evidence) {
       reasonCodes.push('QUALITY_EVIDENCE_REQUIRED');
@@ -154,7 +204,8 @@ export class GalxSpendGovernanceEngine {
         estimatedPromptTokens,
         estimatedMaximumCostUsd: requestedMaximumCost,
         reasonCodes,
-        requiresApproval: true
+        requiresApproval: true,
+        prefixRestructuring
       };
     }
 
@@ -171,7 +222,8 @@ export class GalxSpendGovernanceEngine {
         estimatedMaximumCostUsd: requestedMaximumCost,
         routeEvidenceId: evidence.id,
         reasonCodes,
-        requiresApproval: false
+        requiresApproval: false,
+        prefixRestructuring
       };
     }
 
@@ -187,7 +239,8 @@ export class GalxSpendGovernanceEngine {
       estimatedMaximumCostUsd: estimateMaximumCost(candidate, request, estimatedPromptTokens),
       routeEvidenceId: evidence.id,
       reasonCodes,
-      requiresApproval: false
+      requiresApproval: false,
+      prefixRestructuring
     };
   }
 
