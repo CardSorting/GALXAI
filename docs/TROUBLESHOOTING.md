@@ -114,6 +114,37 @@ $ npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 
 ---
 
+---
+
+### 8. BroccoliDB Compaction & Ingestion Gateway Errors (`/api/audit/broccolidb/compact`)
+
+#### A. `fidelityStatus: "fallback"` (Compaction reverted with 0 tokens saved)
+- **Root Cause**: The fail-closed factual grounding gate in `BroccoliCompactionSafety` detected an ungrounded number, currency figure, date, percentage, BIC, or identifier in the compacted text that did not match the original source input.
+- **Diagnostic Step**: Inspect the `unsupportedFacts` array in the response:
+  ```json
+  {
+    "fidelityStatus": "fallback",
+    "unsupportedFacts": ["3.8 bar", "2032-04-14"]
+  }
+  ```
+- **Remedy**:
+  - The fallback is an intentional safety guarantee preventing hallucinated facts.
+  - If the fact is valid but missing from extraction, update the domain compactor's regex to extract the field verbatim.
+
+#### B. `HTTP 413 Payload Too Large` (`PAYLOAD_TOO_LARGE`)
+- **Root Cause**: Payload exceeded the 10MB limit (`MAX_PAYLOAD_BYTES`), or input string exceeded the 2,000,000 character limit (`MAX_TEXT_LENGTH`).
+- **Remedy**: Chunk large document bundles into <2MB partitions or use `mode: "incident"` / `mode: "batch"` with streaming micro-digests.
+
+#### C. `HTTP 400 Bad Request` (`BAD_REQUEST` / `EMPTY_PAYLOAD`)
+- **Root Cause**: Request body is empty, invalid JSON, or missing required fields (`text`, `rawStreamText`, or `items`).
+- **Remedy**: Verify the JSON payload structure matches the requested mode (`domain`, `batch`, `incident`, `document`).
+
+#### D. `HTTP 401 Unauthorized` (`UNAUTHORIZED`)
+- **Root Cause**: In production (`NODE_ENV === 'production'`), the endpoint requires valid authentication via `Authorization: Bearer <key>`, `x-api-key`, or `x-galx-key`.
+- **Remedy**: Pass a valid developer key or session token.
+
+---
+
 ## 🚀 Pre-Flight Verification & Build Troubleshooting
 
 ### 1. Pre-Flight Audit Gate Failures (`npm run deploy:check`)
@@ -134,9 +165,13 @@ $ npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 
 | Verification Suite | Target Validation Scope | Execution Command |
 | :--- | :--- | :--- |
+| **BroccoliDB Compaction API** | Safe facade boundary, GET/POST/OPTIONS routes, bounds & auth gates | `npm run test:broccolidb:api` (7 tests) |
+| **BroccoliDB Hardening Suite** | Memory bounds, slab safety, collision-safe memoization, fail-closed safety | `npm run test:broccolidb:hardening` |
+| **180-Domain Master Suite** | 180 enterprise industry domain compactors across 21 clusters | `node --import tsx scripts/test-broccolidb-150-domain-suite.ts` |
 | **Zero-Hesitation Ergonomics** | Multi-mental-model absorption, CLI, GET queries, aspect ratios, fallbacks | `npx tsx scripts/verify-zero-hesitation-ergonomics.ts` (98 tests) |
-| **Universal Router & Ingestion** | AES-256-GCM vault, BroccoliDB, ZDR v10.0, RFC 9530 transport, SOC 2 Type II audit | `npm run test:router` (217 tests) |
+| **Universal Router & Ingestion** | AES-256-GCM vault, BroccoliDB, ZDR v10.0, RFC 9530 transport, SOC 2 Type II audit | `npm run test:router` (218 tests) |
 | **Cloudflare Edge Mesh** | Zero-egress edge gateway, R2 CDN routes, SWR caching | `npm run worker:test` (46 tests) |
 | **TypeScript Compilation** | Static typing across serverless & worker runtimes | `npx tsc --noEmit` (0 errors) |
 | **Production App Router** | Production bundle generation across all routes | `npm run build` |
+
 

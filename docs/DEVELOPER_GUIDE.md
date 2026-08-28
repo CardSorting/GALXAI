@@ -419,6 +419,27 @@ When building UI or backend features in GALXAI, adhere to the strict two-tier id
 
 ---
 
+---
+
+## 🥦 BroccoliDB Compaction Engine Contributing Guidelines
+
+When contributing to BroccoliDB data compaction, streaming deduplication, or domain spend optimization:
+
+1. **Single Public Boundary**:
+   - Application code, API routes, and external consumers must **only** import `BroccoliCompactionFacade` from `@/core/broccolidb`.
+   - Never import individual domain compactor classes (`BroccoliInterrogatoryCompactor`, `BroccoliPathologyCompactor`, etc.) directly into route handlers or UI components.
+2. **Barrel Cleanliness**:
+   - Never re-export generated domain compactors in `src/core/broccolidb/index.ts`. All 180 domain compactors are private implementation details dispatched internally by `BroccoliDomainSpendOptimizer`.
+3. **Fail-Closed Provenance Gate**:
+   - All domain compactions must be verified against the source text by `BroccoliCompactionSafety.verify()`.
+   - If any number, date, currency, percentage, or identifier cannot be grounded in the source text, the compactor must fail closed and return the unmodified source text (`fidelityStatus: 'fallback'`).
+4. **Input Size Bounding**:
+   - Always enforce defensive size limits (`BroccoliCompactionFacade.MAX_TEXT_LENGTH = 2,000,000` chars, `MAX_PAYLOAD_BYTES = 10MB`, `MAX_BATCH_FRAMES = 10,000`).
+5. **Onboarding Reference**:
+   - Read [BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md](BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md) for full mental model diagrams and runbooks.
+
+---
+
 ## 🧪 Testing & Verification Standards
 
 GALXAI maintains dedicated forensic test runners:
@@ -427,40 +448,49 @@ GALXAI maintains dedicated forensic test runners:
 # 1. Complete Pre-Deployment Quality & Build Pipeline (Audit + Lint + SSG Build)
 npm run deploy:check
 
-# 2. 8-Phase Enterprise Vercel Pre-Flight Readiness Engine
+# 2. BroccoliDB Compaction Gateway & Facade API Suite (7 test suites)
+npm run test:broccolidb:api
+
+# 3. BroccoliDB Production Hardening & Provenance Regressions
+npm run test:broccolidb:hardening
+
+# 4. Master 180-Domain Compactor Cluster Suite
+node --import tsx scripts/test-broccolidb-150-domain-suite.ts
+
+# 5. 8-Phase Enterprise Vercel Pre-Flight Readiness Engine
 npm run vercel:verify
 
-# 3. 12-Point Post-Deployment Live Smoke Probes
+# 6. 12-Point Post-Deployment Live Smoke Probes
 npm run vercel:smoke -- --url=https://galx.ai
 
-# 4. Vercel Secret Synchronizer
+# 7. Vercel Secret Synchronizer
 npm run vercel:env:print   # Masked preview
 npm run vercel:env:sync    # Push to project
 
-# 5. Universal Zero-Hesitation Ergonomics & Mental Model Suite (98 automated tests)
+# 8. Universal Zero-Hesitation Ergonomics & Mental Model Suite (98 automated tests)
 npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 
-# 6. Universal Router, Privacy, SOC2, BroccoliDB, Ingestion Transport & API Strategy Suite (217 forensic tests)
+# 9. Universal Router, Privacy, SOC2, BroccoliDB, Ingestion Transport & API Strategy Suite (218 forensic tests)
 npm run test:router
 # (or: npx tsx scripts/validate-galxai-router.ts)
 
-# 7. 6-Stage Operational Lifecycle Diagnostics Playbook
+# 10. 6-Stage Operational Lifecycle Diagnostics Playbook
 npm run playbook
 
-# 8. Supabase Paranoid PostgreSQL Schema & RLS Auditor
+# 11. Supabase Paranoid PostgreSQL Schema & RLS Auditor
 npm run db:verify
 
-# 9. Cloudflare Edge Mesh Verification Suite (46 edge tests)
+# 12. Cloudflare Edge Mesh Verification Suite (46 edge tests)
 npm run worker:test
 # (or: npx tsx scripts/test-cloudflare-workers.ts)
 
-# 10. SDK -> Cloudflare Edge Live Smoke Test
+# 13. SDK -> Cloudflare Edge Live Smoke Test
 npx tsx scripts/test-sdk-edge.ts
 
-# 11. TypeScript Type-Check & ESLint 9 Flat Config
+# 14. TypeScript Type-Check & ESLint 9 Flat Config
 npm run lint
 
-# 12. Full Production Build (300 SSG Pages)
+# 15. Full Production Build (300 SSG Pages)
 npm run build
 ```
 

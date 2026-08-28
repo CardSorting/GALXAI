@@ -97,6 +97,7 @@ All architectural components in GALXAI are governed by formal Architectural Deci
 | **[ADR 0056](adr/0056-broccolidb-85-buffer-deduplication-and-streaming-pipeline-substrate.md)** | BroccoliDB 85-Buffer Algorithmic DeDuplication & High-Velocity Streaming Substrate | 85 specialized deduplication buffers across 17 tiers achieving 70%–99% spend reduction, sub-5ns execution, and lock-free 1.74M ops/sec stream ingestion. |
 | **[ADR 0057](adr/0057-broccolidb-mega-incident-cascader-and-pyramid-compaction-substrate.md)** | Mega-Incident Stream Cascading & Mega-Document Hierarchical Pyramid Compactor | 4-Stage streaming anomaly cascader (2,000+ pages in 57ms, 98.9% spend cut) and 3-Layer hierarchical pyramid compactor (300+ pages in 14ms, 97.9% spend cut). |
 | **[ADR 0058](adr/0058-broccolidb-180-domain-industry-cluster-compactor-substrate.md)** | BroccoliDB 180-Domain Enterprise Industry Cluster Compaction Substrate | 180 production enterprise domain compactors across 21 industry clusters with 100% test coverage and standardized protocol schemas (HL7, FHIR, SWIFT, WITSML). |
+| **[ADR 0059](adr/0059-broccolidb-safe-compaction-facade-barrel-hardening-and-api-gateway.md)** | BroccoliDB Safe Compaction Facade, Barrel Hardening & Production API Gateway | Unified BroccoliCompactionFacade boundary, removal of unsafe generated compactor exports, strict size bounding (10MB/2M chars), and authenticated REST endpoint (/api/audit/broccolidb/compact). |
 
 
 ---

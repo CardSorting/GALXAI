@@ -99,7 +99,79 @@ Here is how data flows through the system:
 
 ---
 
-## 5. Engineer's Runbook: How to Do Common Tasks
+## 4.5 Decision Tree: Which Method Should I Call?
+
+Use this decision table to choose the right facade method for your workflow:
+
+```mermaid
+flowchart TD
+    Start["Incoming Text / Payload"] --> TypeCheck{"What type of data is this?"}
+    
+    TypeCheck -->|"High-throughput array of logs/events"| Batch["BroccoliCompactionFacade.compactBatch()"]
+    TypeCheck -->|"Huge time-series outage dump (>1,000 pages)"| Incident["BroccoliCompactionFacade.compactIncident()"]
+    TypeCheck -->|"Long multi-page contract / document (>50 pages)"| Doc["BroccoliCompactionFacade.compactDocument()"]
+    TypeCheck -->|"Domain-specific record (SWIFT, HL7, Legal, IT)"| Domain["BroccoliCompactionFacade.compactDomain()"]
+    TypeCheck -->|"Dynamic API request with variable JSON"| Poly["BroccoliCompactionFacade.compact(req)"]
+```
+
+| Use Case | Recommended Call | Key Options / Arguments |
+| :--- | :--- | :--- |
+| **Financial / Medical / Legal records** (e.g. SWIFT, HL7, Interrogatories) | `BroccoliCompactionFacade.compactDomain(text, domainHint?)` | `domainHint`: Optional explicit string or auto-detected. |
+| **Streaming Log Firehose** (e.g. 10,000 event frames) | `BroccoliCompactionFacade.compactBatch(items, options?)` | `items`: Array of `{ text, domain }`. Returns throughput & latency metrics. |
+| **Server Crash Storm / Outage Logs** (e.g. 500k tokens) | `BroccoliCompactionFacade.compactIncident(input)` | `targetTokenBudget`: Integer between 1,024 and 128,000 tokens. |
+| **Contracts, SEC Filings, Leases** (e.g. 300 pages) | `BroccoliCompactionFacade.compactDocument(input)` | `focusQuery`: Optional string topic for focused tier selection. |
+| **Polymorphic REST / Worker Dispatch** | `BroccoliCompactionFacade.compact(request)` | `request`: Typed `{ mode: 'domain' | 'batch' | 'incident' | 'document', ... }`. |
+
+---
+
+## 5. Concrete Payload Walkthrough: Before & After
+
+To see what the compaction engine actually does to real text, here is an example from legal discovery:
+
+### Original Raw Input (672 Tokens)
+```text
+PROPOUNDING PARTY: Plaintiff Acme Corporation
+RESPONDING PARTY: Defendant Zenith Global LLC
+SET NUMBER: One (1)
+
+INTERROGATORY NO. 1:
+Please state the full legal name, current residential address, business address, and telephone number of each and every person who participated in the preparation of responses to these Interrogatories.
+
+RESPONSE TO INTERROGATORY NO. 1:
+Defendant objects to this Interrogatory on the grounds that it is overly broad, unduly burdensome, and seeks information protected by the attorney-client privilege and attorney work product doctrine. Without waiving said objections and subject thereto, Defendant responds: John Doe, 123 Corporate Blvd, San Francisco, CA 94105, (415) 555-0199, VP of Engineering.
+
+INTERROGATORY NO. 2:
+Identify the exact date and time when the primary database cluster experienced the initial failover event on January 15, 2026.
+
+RESPONSE TO INTERROGATORY NO. 2:
+Defendant incorporates all General Objections. Subject to objections: The primary cluster failed over on 2026-01-15 at 04:12:00 UTC.
+```
+
+### Compacted Output via `compactDomain()` (168 Tokens - 75% Reduction)
+```text
+=== LITIGATION INTERROGATORY RECORD ===
+PARTIES: Plaintiff Acme Corporation v. Defendant Zenith Global LLC (Set 1)
+
+ROGS & RESPONSES:
+- ROG #1 [Prep Persons]: John Doe, 123 Corporate Blvd, San Francisco, CA 94105, (415) 555-0199, VP of Engineering.
+- ROG #2 [Incident Timing]: 2026-01-15 04:12:00 UTC.
+
+GROUNDED FACTS COMMITTED:
+- Addresses: 123 Corporate Blvd, San Francisco, CA 94105
+- Phone: (415) 555-0199
+- Timestamp: 2026-01-15 04:12:00 UTC
+- Status: VERIFIED (0 ungrounded facts)
+```
+
+**What Happened?**
+1. Repetitive objection boilerplate was stripped.
+2. The core factual assertions (names, addresses, phone numbers, ISO timestamps) were preserved verbatim.
+3. `BroccoliCompactionSafety` checked that `John Doe`, `(415) 555-0199`, and `2026-01-15` existed in the raw text.
+4. All facts were grounded $\to$ `fidelityStatus: 'verified'` $\to$ **Saved 504 tokens**.
+
+---
+
+## 6. Engineer's Runbook: How to Do Common Tasks
 
 ### Task 1: Compact Domain-Specific Text
 Used for financial, healthcare, legal, or infrastructure documents where you know (or want to auto-detect) the format.
@@ -182,7 +254,7 @@ curl -X POST https://galx.ai/api/audit/broccolidb/compact \
 
 ---
 
-## 6. Understanding "Verified" vs "Fallback"
+## 7. Understanding "Verified" vs "Fallback"
 
 When running tests or inspecting compaction results, you will see output like:
 
@@ -204,7 +276,7 @@ The 180-domain suite intentionally reports **104 verified compactions and 76 saf
 
 ---
 
-## 7. Rules of the Road (What NEVER to Do)
+## 8. Rules of the Road (What NEVER to Do)
 
 1. ❌ **NEVER import an individual compactor class directly in API routes or components.**  
    *Bad*: `import { BroccoliInterrogatoryCompactor } from '@/core/broccolidb/BroccoliInterrogatoryCompactor';`  
@@ -218,7 +290,7 @@ The 180-domain suite intentionally reports **104 verified compactions and 76 saf
 
 ---
 
-## 8. Verification & Test Suite Commands
+## 9. Verification & Test Suite Commands
 
 When you modify compaction code, run these commands to verify:
 
@@ -238,7 +310,7 @@ npx tsc --noEmit
 
 ---
 
-## 9. Relevant Files Summary
+## 10. Relevant Files Summary
 
 | File | Purpose |
 | :--- | :--- |
