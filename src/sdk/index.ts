@@ -21,6 +21,7 @@ export { WebhooksResource } from './resources/webhooks';
 export { PrivacyResource, PrivacyProfiles } from './resources/privacy';
 export { ComplianceResource } from './resources/compliance';
 export { DatabaseResource } from './resources/database';
+export { CompactionResource } from './resources/compaction';
 
 // DX & Ergonomic Extensions
 export { ChatCompletionBuilder } from './builder';
@@ -237,6 +238,20 @@ export async function embed(input: string | string[], options?: { model?: string
  */
 export async function extract<T = any>(input: string, schema: Record<string, any>, options?: { model?: string }): Promise<T> {
   return getClient().extract<T>(input, schema, options);
+}
+
+/**
+ * Ultra-effortless BroccoliDB data compaction and deduplication.
+ *
+ * @example
+ * ```ts
+ * import { compact } from 'galxai';
+ * const res = compact('PROPOUNDING PARTY: Plaintiff...', 'Interrogatory');
+ * console.log(res.compactedPrompt, res.tokensSaved);
+ * ```
+ */
+export function compact(text: string, domainHint?: string) {
+  return getClient().compaction.domain(text, domainHint);
 }
 
 /**

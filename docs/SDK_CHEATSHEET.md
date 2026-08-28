@@ -104,6 +104,11 @@ const user = await extract('Jane Doe, 29, Engineer in SF', {
 // 8. Vector embeddings (1536-dim)
 const embedding = await embed('Zero-egress edge routing');
 console.log(embedding.data[0].embedding.length); // 1536
+
+// 9. BroccoliDB Data Compaction (70% - 98% Token Reduction)
+import { compact } from '@galxai/sdk';
+const compacted = compact('PROPOUNDING PARTY: Plaintiff Acme...', 'Interrogatory');
+console.log(compacted.compactedPrompt, `Saved ${compacted.tokensSaved} tokens`);
 ```
 
 ---

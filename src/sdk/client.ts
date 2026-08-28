@@ -448,6 +448,7 @@ import { ComplianceResource } from './resources/compliance';
 import { DatabaseResource } from './resources/database';
 import { JobsResource } from './resources/jobs';
 import { AuthResource } from './resources/auth';
+import { CompactionResource } from './resources/compaction';
 
 export class GalxAI {
   readonly auth: AuthResource;
@@ -472,6 +473,7 @@ export class GalxAI {
   readonly privacy: PrivacyResource;
   readonly compliance: ComplianceResource;
   readonly db: DatabaseResource;
+  readonly compaction: CompactionResource;
   readonly adapters: StreamAdapters;
   readonly batch: BatchEvaluator;
   readonly multimodal: typeof MultiModalHelper;
@@ -509,6 +511,7 @@ export class GalxAI {
     this.privacy = new PrivacyResource();
     this.compliance = new ComplianceResource();
     this.db = new DatabaseResource();
+    this.compaction = new CompactionResource(this.core);
     this.adapters = new StreamAdapters();
     this.batch = new BatchEvaluator();
     this.multimodal = MultiModalHelper;

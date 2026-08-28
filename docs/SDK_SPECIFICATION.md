@@ -446,7 +446,48 @@ const isValid = galx.webhooks.verifySignature(rawBody, req.headers.get('x-galx-s
 
 ---
 
-## 15. Typed Error Hierarchy
+## 15. BroccoliDB Data Compaction & Ingestion Substrate (`galx.compaction`)
+
+The `galx.compaction` resource provides safe, size-bounded data compaction, streaming deduplication, mega-incident cascading, and document pyramid summarization with fail-closed provenance validation:
+
+```typescript
+// 1. Safe Domain Compaction
+const domainResult = galx.compaction.domain(interrogatoryText, 'Interrogatory');
+console.log(domainResult.compactedPrompt, `Saved ${domainResult.tokensSaved} tokens`);
+
+// 2. High-Velocity Batch Frame Ingestion
+const batchResult = galx.compaction.batch([
+  { text: swiftPayload, domain: 'SWIFT_MT103' },
+  { text: hl7Payload, domain: 'HL7_Observation' },
+]);
+console.log(`Processed ${batchResult.totalProcessed} frames at ${batchResult.throughputOpsPerSec} ops/sec`);
+
+// 3. Mega-Incident Stream Cascader (2,000+ page log storm)
+const incidentResult = galx.compaction.incident({
+  rawStreamText: logStormText,
+  targetTokenBudget: 4096,
+  incidentTitle: 'Core Cluster Outage',
+});
+console.log(incidentResult.compactedIncidentPrompt);
+
+// 4. Mega-Document Hierarchical Pyramid (300+ page contract)
+const docResult = galx.compaction.document({
+  rawText: masterAgreementText,
+  title: 'Master Service Agreement',
+});
+console.log(docResult.compactedPyramidPrompt);
+
+// 5. Remote Gateway API Call (/api/audit/broccolidb/compact)
+const remoteResult = await galx.compaction.compactRemote({
+  mode: 'domain',
+  text: rawPayload,
+  domainHint: 'SWIFT_MT103',
+});
+```
+
+---
+
+## 16. Typed Error Hierarchy
 
 ```typescript
 try {
