@@ -192,6 +192,8 @@ npm run bench:inference-boundary
 
 ## 📚 Documentation & Guides
 
+- 🛡️ **[Maintainers Guide & Governance](MAINTAINERS.md)**: Maintainer hierarchy, Day 1 onboarding ramp, subsystem ownership, and PR review rubric.
+- 🤝 **[Contributing Guide](CONTRIBUTING.md)**: Development workflow, Conventional Commits, and testing gates.
 - 🥦 **[BroccoliDB Compaction Onboarding Guide](docs/BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md)**: 19 streaming modes, 180 domain compactors, and the Epistemic Measurement Machinery.
 - 📊 **[Empirical Benchmarks & Inference Boundary](docs/BENCHMARKS.md)**: Head-to-head provider boundary tests on OpenAI models with $/success accounting.
 - 📋 **[Engineering Handover & Strategy Review](HANDOVER.md)**: Architectural review document, commercial thesis, and open design trade-offs for reviewing engineers.
@@ -200,4 +202,5 @@ npm run bench:inference-boundary
 - 🏛️ **[Architecture Decision Records (65 ADRs)](docs/adr/README.md)**: Deep technical specifications from ADR 0001 to ADR 0065.
 - ❓ **[Frequently Asked Questions (FAQs)](docs/FAQS.md)**: Zero-hesitation philosophy, model routing, and BroccoliDB economics.
 - 🔧 **[Troubleshooting & Operational Playbook](docs/TROUBLESHOOTING.md)**: Error codes, remediation steps, and verification commands.
+
 

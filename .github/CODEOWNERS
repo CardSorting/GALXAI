@@ -1,0 +1,32 @@
+# GALXAI Code Ownership Matrix
+# Syntax: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global Default
+* @CardSorting/core-architects
+
+# Substrate & Pure TypeScript Gateway Engine
+/src/core/ @CardSorting/core-architects
+/src/core/auth/ @CardSorting/security-auth-maintainers
+/src/core/vault/ @CardSorting/security-auth-maintainers
+/src/core/broccolidb/ @CardSorting/broccolidb-maintainers
+/src/core/broccolidb/eval/ @CardSorting/eval-bench-maintainers
+/src/core/circuit/ @CardSorting/router-sre-maintainers
+/src/core/pool/ @CardSorting/router-sre-maintainers
+/src/core/router/ @CardSorting/router-sre-maintainers
+
+# Edge Worker & Cloudflare Mesh
+/cloudflare-edge/ @CardSorting/edge-sre-maintainers
+/src/app/api/ @CardSorting/api-gateway-maintainers
+/src/app/v1/ @CardSorting/api-gateway-maintainers
+
+# Database Migrations & Paranoid PostgreSQL
+/supabase/migrations/ @CardSorting/database-operators
+
+# Developer SDK & UI Components
+/src/sdk/ @CardSorting/developer-experience
+/src/components/ @CardSorting/frontend-ui
+
+# Architecture Decision Records & Documentation
+/docs/adr/ @CardSorting/core-architects
+/docs/playbooks/ @CardSorting/router-sre-maintainers
+/docs/investors/ @CardSorting/executive-strategy

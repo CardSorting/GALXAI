@@ -440,15 +440,24 @@ npm run vercel:smoke -- --url=https://galx.ai
 
 ## 12. Maintainer Onboarding Checklist
 
-Complete this checklist when onboarding to a new development workstation:
+Complete this authoritative 7-point checklist when onboarding to a new development workstation:
 
-- [ ] **1. Node.js Version**: Verify Node.js `20.18.0` LTS (`node -v` or `nvm use`).
+- [ ] **1. Node.js Environment**: Verify Node.js `20.18.0` LTS (`node -v` or `nvm use`).
 - [ ] **2. Dependency Installation**: Run `npm install` to install all Next.js, React, and Cloudflare Worker dependencies.
-- [ ] **3. Environment Setup**: Ensure `.env.local` is present with Supabase and Vault variables.
+- [ ] **3. Environment Setup**: Ensure `.env.local` is present with Supabase and Vault variables (`GALX_VAULT_MASTER_SECRET`).
 - [ ] **4. Cryptographic Validation**: Run `npm run vault:populate` to test HKDF-SHA256 and AES-256-GCM cipher roundtrips.
-- [ ] **5. Execute Full Test Suite**:
+- [ ] **5. Empirical Inference Boundary Verification**:
+  - Run `npm run bench:inference-boundary` (Randomized Branch-Blinded A/B benchmarks must pass).
+  - Run `npm run test:broccolidb:api` (All 19 compaction modes must pass 7/7 suites).
+  - Run `npm run test:broccolidb:hardening` (Fail-closed safety regressions must pass).
+  - Run `node --import tsx scripts/test-broccolidb-150-domain-suite.ts` (180 domain compactors verified).
+- [ ] **6. Edge & Router Verification**:
   - Run `npm run worker:test` (46/46 edge tests must pass).
-  - Run `npm run test:router` (50 test suites must pass).
+  - Run `npm run test:router` (218 Router & Ingestion tests must pass).
   - Run `npm run vercel:verify` (All 8 pre-flight phases must pass).
   - Run `npx tsc --noEmit` (0 TypeScript errors).
-- [ ] **6. Launch Development Server**: Run `npm run dev` and navigate to `http://localhost:3000` to verify the dashboard and interactive API playground.
+- [ ] **7. Governance & Contribution Standards**:
+  - Review [MAINTAINERS.md](file:///Users/bozoegg/Desktop/GALXAI/MAINTAINERS.md) for PR review gates and emergency protocols.
+  - Review [CONTRIBUTING.md](file:///Users/bozoegg/Desktop/GALXAI/CONTRIBUTING.md) for conventional commits and ADR workflows.
+- [ ] **8. Launch Development Server**: Run `npm run dev` and navigate to `http://localhost:3000` to verify the dashboard and interactive API playground.
+
