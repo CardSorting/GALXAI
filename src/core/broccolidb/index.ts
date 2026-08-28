@@ -86,7 +86,10 @@ export * from "./BroccoliLegalCitationCompactor";
 export * from "./BroccoliLabReportCompactor";
 export * from "./BroccoliDepositionCompactor";
 export * from "./BroccoliMedicationCompactor";
+export * from "./BroccoliContractRedlineCompactor";
+export * from "./BroccoliHipaaDeIdentifier";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
