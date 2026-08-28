@@ -112,7 +112,10 @@ export * from "./BroccoliRealEstateCompactor";
 export * from "./BroccoliSettlementCompactor";
 export * from "./BroccoliObdCompactor";
 export * from "./BroccoliMonroneyCompactor";
+export * from "./BroccoliUrlaCompactor";
+export * from "./BroccoliAppraisalCompactor";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
