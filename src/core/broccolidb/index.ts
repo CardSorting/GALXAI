@@ -27,4 +27,5 @@ export * from "./BroccoliSpendForecaster";
 export * from "./BroccoliKVCacheOptimizer";
 export * from "./BroccoliContextPruner";
 export * from "./BroccoliTierCascader";
+export * from "./BroccoliToolCompactor";
 export * from "./BroccoliSpendSubstrate";
