@@ -20,4 +20,5 @@ export * from "./BroccoliPromptCASVault";
 export * from "./BroccoliSpendWAL";
 export * from "./BroccoliSpendLease";
 export * from "./BroccoliBatchCoalescer";
+export * from "./BroccoliSpeculativeRouter";
 export * from "./BroccoliSpendSubstrate";
