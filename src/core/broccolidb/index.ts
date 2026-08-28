@@ -49,4 +49,5 @@ export * from "./BroccoliTabularOutputCompactor";
 export * from "./BroccoliStopSequenceInjector";
 export * from "./BroccoliRepetitionBreaker";
 export * from "./BroccoliAudioCompactor";
+export * from "./BroccoliSubGraphCache";
 export * from "./BroccoliSpendSubstrate";
