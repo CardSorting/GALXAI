@@ -8,6 +8,7 @@
  */
 
 import { BroccoliDbTable } from './broccolidb-table';
+import { BroccoliCompactionSafety, CompactionFidelityStatus } from './BroccoliCompactionSafety';
 
 // Cluster 1: Legal, Courtroom, E-Discovery, IP & Restructuring
 import { BroccoliInterrogatoryCompactor } from './BroccoliInterrogatoryCompactor';
@@ -239,6 +240,8 @@ export interface DomainOptimizationResult {
   tokensSaved: number;
   savingsPercentage: number;
   compactedPrompt: string;
+  fidelityStatus: CompactionFidelityStatus;
+  unsupportedFacts: string[];
 }
 
 export class BroccoliDomainSpendOptimizer {
@@ -2126,6 +2129,15 @@ export class BroccoliDomainSpendOptimizer {
       }
     }
 
+    const fidelity = BroccoliCompactionSafety.verify(rawText, compactedPrompt);
+    if (fidelity.status === 'fallback') {
+      compactedPrompt = rawText;
+      originalTokens = Math.ceil(rawText.length / 4);
+      compactedTokens = originalTokens;
+      tokensSaved = 0;
+      savingsPercentage = 0;
+    }
+
     const auditId = `opt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     optimizer.masterTable.put(auditId, {
       id: auditId,
@@ -2142,6 +2154,8 @@ export class BroccoliDomainSpendOptimizer {
       tokensSaved,
       savingsPercentage,
       compactedPrompt,
+      fidelityStatus: fidelity.status,
+      unsupportedFacts: fidelity.unsupportedFacts,
     };
   }
 

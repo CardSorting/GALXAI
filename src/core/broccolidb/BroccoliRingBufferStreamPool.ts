@@ -1,10 +1,10 @@
 /**
  * GALXAI BroccoliDB High-Throughput Ring Buffer Stream Pool
  * 
- * Lock-free, zero-allocation pre-allocated circular ring buffer pool for mega-incident streams:
- * 1. Pre-allocates fixed-capacity slot rings (default 128 slots) to eliminate memory churn during multi-gigabyte stream ingestion.
- * 2. Manages atomic circular head/tail pointers with backpressure detection.
- * 3. Enables parallel producer-consumer stream decoupling for 100,000+ chunks/sec ingestion pipelines.
+ * Bounded, pre-allocated circular slot pool for same-thread stream ingestion:
+ * 1. Pre-allocates fixed-capacity slot records (default 128 slots).
+ * 2. Maintains circular head/tail pointers and explicit overwrite accounting.
+ * 3. Returns snapshots so reused slots cannot mutate data held by consumers.
  */
 
 import { BroccoliDbTable } from './broccolidb-table';
@@ -26,6 +26,7 @@ export class BroccoliRingBufferStreamPool {
   private readonly capacity: number;
   private headIndex = 0;
   private tailIndex = 0;
+  private activeCount = 0;
   private totalEnqueued = 0;
   private totalDequeued = 0;
   private totalOverwritten = 0;
@@ -39,6 +40,9 @@ export class BroccoliRingBufferStreamPool {
   }>;
 
   private constructor(capacity = 128) {
+    if (!Number.isSafeInteger(capacity) || capacity <= 0) {
+      throw new RangeError('Ring buffer capacity must be a positive safe integer.');
+    }
     this.capacity = capacity;
     this.slots = new Array<StreamSlot>(this.capacity);
     for (let i = 0; i < this.capacity; i++) {
@@ -63,13 +67,30 @@ export class BroccoliRingBufferStreamPool {
   }
 
   /**
+   * Creates an isolated pool. Prefer this for request- or stream-scoped ingestion;
+   * getInstance() remains available for the process-wide telemetry pool.
+   */
+  public static create(capacity = 128): BroccoliRingBufferStreamPool {
+    return new BroccoliRingBufferStreamPool(capacity);
+  }
+
+  /**
    * Enqueues a stream chunk into the circular ring buffer
    */
   public push(payload: string, anomalyScore = 0, metadata?: Record<string, any>): StreamSlot {
+    if (typeof payload !== 'string') {
+      throw new TypeError('Ring buffer payload must be a string.');
+    }
+    if (!Number.isFinite(anomalyScore)) {
+      throw new RangeError('Ring buffer anomalyScore must be finite.');
+    }
+
     const slot = this.slots[this.headIndex];
     if (slot.isOccupied) {
       this.totalOverwritten++;
       this.tailIndex = (this.tailIndex + 1) % this.capacity;
+    } else {
+      this.activeCount++;
     }
 
     slot.sequenceNumber = ++this.totalEnqueued;
@@ -77,11 +98,11 @@ export class BroccoliRingBufferStreamPool {
     slot.timestampMs = Date.now();
     slot.chunkSize = payload.length;
     slot.payload = payload;
-    slot.anomalyScore = anomalyScore;
+    slot.anomalyScore = Math.max(0, Math.min(1, anomalyScore));
     slot.metadata = metadata;
 
     this.headIndex = (this.headIndex + 1) % this.capacity;
-    return slot;
+    return this.snapshot(slot);
   }
 
   /**
@@ -93,10 +114,16 @@ export class BroccoliRingBufferStreamPool {
       return null;
     }
 
+    const result = this.snapshot(slot);
     slot.isOccupied = false;
+    slot.payload = '';
+    slot.chunkSize = 0;
+    slot.anomalyScore = 0;
+    slot.metadata = undefined;
+    this.activeCount--;
     this.totalDequeued++;
     this.tailIndex = (this.tailIndex + 1) % this.capacity;
-    return slot;
+    return result;
   }
 
   /**
@@ -105,13 +132,19 @@ export class BroccoliRingBufferStreamPool {
   public drainAll(): StreamSlot[] {
     const active: StreamSlot[] = [];
     let curr = this.tailIndex;
-    while (this.slots[curr].isOccupied) {
-      active.push({ ...this.slots[curr] });
-      this.slots[curr].isOccupied = false;
+    const countToDrain = this.activeCount;
+    for (let i = 0; i < countToDrain; i++) {
+      const slot = this.slots[curr];
+      active.push(this.snapshot(slot));
+      slot.isOccupied = false;
+      slot.payload = '';
+      slot.chunkSize = 0;
+      slot.anomalyScore = 0;
+      slot.metadata = undefined;
       this.totalDequeued++;
       curr = (curr + 1) % this.capacity;
-      if (curr === this.headIndex) break;
     }
+    this.activeCount = 0;
     this.tailIndex = this.headIndex;
     return active;
   }
@@ -128,10 +161,9 @@ export class BroccoliRingBufferStreamPool {
     headIndex: number;
     tailIndex: number;
   } {
-    const activeCount = this.slots.filter(s => s.isOccupied).length;
     return {
       capacity: this.capacity,
-      activeCount,
+      activeCount: this.activeCount,
       totalEnqueued: this.totalEnqueued,
       totalDequeued: this.totalDequeued,
       totalOverwritten: this.totalOverwritten,
@@ -148,9 +180,17 @@ export class BroccoliRingBufferStreamPool {
     }
     this.headIndex = 0;
     this.tailIndex = 0;
+    this.activeCount = 0;
     this.totalEnqueued = 0;
     this.totalDequeued = 0;
     this.totalOverwritten = 0;
     this.poolAuditTable.clear();
+  }
+
+  private snapshot(slot: StreamSlot): StreamSlot {
+    return {
+      ...slot,
+      metadata: slot.metadata ? { ...slot.metadata } : undefined,
+    };
   }
 }

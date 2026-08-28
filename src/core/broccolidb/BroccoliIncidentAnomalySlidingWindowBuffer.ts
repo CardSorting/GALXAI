@@ -41,6 +41,7 @@ export class BroccoliIncidentAnomalySlidingWindowBuffer {
   private static instance: BroccoliIncidentAnomalySlidingWindowBuffer;
   private readonly frames: TemporalWindowFrame[] = [];
   private readonly maxFrames: number;
+  private frameSequence = 0;
 
   public readonly windowAuditTable: BroccoliDbTable<{
     id: string;
@@ -51,6 +52,9 @@ export class BroccoliIncidentAnomalySlidingWindowBuffer {
   }>;
 
   private constructor(maxFrames = 10000) {
+    if (!Number.isSafeInteger(maxFrames) || maxFrames <= 0) {
+      throw new RangeError('Incident window maxFrames must be a positive safe integer.');
+    }
     this.maxFrames = maxFrames;
     this.windowAuditTable = new BroccoliDbTable('incident_anomaly_window_audit');
     this.windowAuditTable.createIndex('peakAnomaly');
@@ -63,24 +67,38 @@ export class BroccoliIncidentAnomalySlidingWindowBuffer {
     return BroccoliIncidentAnomalySlidingWindowBuffer.instance;
   }
 
+  /** Creates an isolated incident window for a single stream or request. */
+  public static create(maxFrames = 10000): BroccoliIncidentAnomalySlidingWindowBuffer {
+    return new BroccoliIncidentAnomalySlidingWindowBuffer(maxFrames);
+  }
+
   /**
    * Ingests a new event frame into the sliding temporal buffer
    */
   public recordFrame(frame: Omit<TemporalWindowFrame, 'frameId' | 'zone'>): TemporalWindowFrame {
+    if (!Number.isFinite(frame.timestampMs)) {
+      throw new RangeError('Incident frame timestampMs must be finite.');
+    }
+    if (!Number.isFinite(frame.anomalyScore)) {
+      throw new RangeError('Incident frame anomalyScore must be finite.');
+    }
+
     if (this.frames.length >= this.maxFrames) {
       this.frames.shift(); // Evict oldest frame
     }
 
+    const anomalyScore = Math.max(0, Math.min(1, frame.anomalyScore));
     let zone: TemporalZone = 'PRE_INCIDENT_BASELINE';
-    if (frame.anomalyScore >= 0.7 || /FATAL|PANIC|SEV-0|CRITICAL/i.test(frame.severityLevel)) {
-      zone = 'INCIDENT_SHOCKWAVE_T0';
-    } else if (/RECOVERED|RESOLVED|PROMOTED|RESTORED/i.test(frame.rawMessage)) {
+    if (/RECOVERED|RESOLVED|PROMOTED|RESTORED/i.test(frame.rawMessage)) {
       zone = 'POST_INCIDENT_RECOVERY';
+    } else if (anomalyScore >= 0.7 || /FATAL|PANIC|SEV-?0|CRITICAL/i.test(frame.severityLevel)) {
+      zone = 'INCIDENT_SHOCKWAVE_T0';
     }
 
     const fullFrame: TemporalWindowFrame = {
       ...frame,
-      frameId: `frm_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      anomalyScore,
+      frameId: `frm_${frame.timestampMs}_${++this.frameSequence}`,
       zone,
     };
 
@@ -98,8 +116,8 @@ export class BroccoliIncidentAnomalySlidingWindowBuffer {
     let recoveryCount = 0;
     let peakAnomaly = 0;
     let rootCauseFrame: TemporalWindowFrame | undefined;
-    let firstShockwaveTime = 0;
-    let lastShockwaveTime = 0;
+    let firstShockwaveTime = Number.POSITIVE_INFINITY;
+    let lastShockwaveTime = Number.NEGATIVE_INFINITY;
 
     for (let i = 0; i < total; i++) {
       const f = this.frames[i];
@@ -109,11 +127,11 @@ export class BroccoliIncidentAnomalySlidingWindowBuffer {
 
       if (f.zone === 'INCIDENT_SHOCKWAVE_T0') {
         shockwaveCount++;
-        if (!rootCauseFrame || f.anomalyScore > rootCauseFrame.anomalyScore) {
+        if (!rootCauseFrame || f.timestampMs < rootCauseFrame.timestampMs) {
           rootCauseFrame = f;
         }
-        if (firstShockwaveTime === 0) firstShockwaveTime = f.timestampMs;
-        lastShockwaveTime = f.timestampMs;
+        firstShockwaveTime = Math.min(firstShockwaveTime, f.timestampMs);
+        lastShockwaveTime = Math.max(lastShockwaveTime, f.timestampMs);
       } else if (f.zone === 'POST_INCIDENT_RECOVERY') {
         recoveryCount++;
       } else {
@@ -121,7 +139,9 @@ export class BroccoliIncidentAnomalySlidingWindowBuffer {
       }
     }
 
-    const shockwaveDurationMs = Math.max(0, lastShockwaveTime - firstShockwaveTime);
+    const shockwaveDurationMs = shockwaveCount > 0
+      ? Math.max(0, lastShockwaveTime - firstShockwaveTime)
+      : 0;
     const durationSeconds = shockwaveDurationMs > 0 ? shockwaveDurationMs / 1000 : 1;
     const peakVelocity = Number((shockwaveCount / durationSeconds).toFixed(1));
 
@@ -141,7 +161,14 @@ export class BroccoliIncidentAnomalySlidingWindowBuffer {
    * Extracts a concentrated slice of frames around the T0 root-cause trigger
    */
   public extractT0ShockwaveSlice(contextRadius = 15): TemporalWindowFrame[] {
-    const rootIndex = this.frames.findIndex(f => f.zone === 'INCIDENT_SHOCKWAVE_T0');
+    if (!Number.isSafeInteger(contextRadius) || contextRadius < 0) {
+      throw new RangeError('contextRadius must be a non-negative safe integer.');
+    }
+
+    const rootCauseFrame = this.evaluateWindow().isolatedRootCauseFrame;
+    const rootIndex = rootCauseFrame
+      ? this.frames.findIndex(frame => frame.frameId === rootCauseFrame.frameId)
+      : -1;
     if (rootIndex === -1) {
       return this.frames.slice(-contextRadius);
     }
@@ -153,6 +180,7 @@ export class BroccoliIncidentAnomalySlidingWindowBuffer {
 
   public clear(): void {
     this.frames.length = 0;
+    this.frameSequence = 0;
     this.windowAuditTable.clear();
   }
 }

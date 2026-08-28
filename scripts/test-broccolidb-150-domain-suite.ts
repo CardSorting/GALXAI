@@ -2127,13 +2127,14 @@ DECODED AUDIO: "Engine 4 on scene, 2-story commercial structure, smoke showing".
 
 async function runTestSuite() {
   console.log('================================================================');
-  console.log('  GALXAI BROCCOLIDB 180-DOMAIN ENTERPRISE SPEND-SAVING TEST SUITE  ');
+  console.log('  GALXAI BROCCOLIDB 180-DOMAIN FIDELITY & SAFE-FALLBACK TEST SUITE ');
   console.log('================================================================\n');
 
   let totalOriginalTokens = 0;
   let totalCompactedTokens = 0;
-  let passedCount = 0;
-  let failedCount = 0;
+  let verifiedCompactionCount = 0;
+  let safeFallbackCount = 0;
+  let invalidCount = 0;
 
   for (let i = 0; i < testCases.length; i++) {
     const tc = testCases[i];
@@ -2142,14 +2143,24 @@ async function runTestSuite() {
     totalOriginalTokens += result.originalTokens;
     totalCompactedTokens += result.compactedTokens;
 
-    const isSuccess = result.tokensSaved > 0 && result.savingsPercentage >= 60.0;
+    const isVerifiedCompaction = result.fidelityStatus === 'verified'
+      && result.tokensSaved > 0
+      && result.savingsPercentage >= 60.0;
+    const isSafeFallback = result.fidelityStatus === 'fallback'
+      && result.compactedPrompt === tc.sampleText
+      && result.tokensSaved === 0
+      && result.savingsPercentage === 0
+      && result.unsupportedFacts.length > 0;
 
-    if (isSuccess) {
-      passedCount++;
-      console.log(`[PASS] Domain ${String(i + 1).padStart(3, ' ')}/180: [${tc.cluster.padEnd(28, ' ')}] ${tc.domain.padEnd(28, ' ')} -> Saved: ${result.tokensSaved} tokens (${result.savingsPercentage}%)`);
+    if (isVerifiedCompaction) {
+      verifiedCompactionCount++;
+      console.log(`[VERIFIED] Domain ${String(i + 1).padStart(3, ' ')}/180: [${tc.cluster.padEnd(28, ' ')}] ${tc.domain.padEnd(28, ' ')} -> Saved: ${result.tokensSaved} tokens (${result.savingsPercentage}%)`);
+    } else if (isSafeFallback) {
+      safeFallbackCount++;
+      console.warn(`[SAFE FALLBACK] Domain ${String(i + 1).padStart(3, ' ')}/180: [${tc.cluster.padEnd(28, ' ')}] ${tc.domain.padEnd(28, ' ')} -> Unsupported: ${result.unsupportedFacts.slice(0, 3).join(', ')}`);
     } else {
-      failedCount++;
-      console.error(`[FAIL] Domain ${String(i + 1).padStart(3, ' ')}/180: [${tc.cluster}] ${tc.domain} -> FAILED (Saved: ${result.tokensSaved} tokens, ${result.savingsPercentage}%)`);
+      invalidCount++;
+      console.error(`[INVALID] Domain ${String(i + 1).padStart(3, ' ')}/180: [${tc.cluster}] ${tc.domain} -> Fidelity: ${result.fidelityStatus}, Saved: ${result.tokensSaved} tokens (${result.savingsPercentage}%)`);
     }
   }
 
@@ -2157,13 +2168,13 @@ async function runTestSuite() {
   const globalSavingsPct = Number(((globalTokensSaved / totalOriginalTokens) * 100).toFixed(1));
 
   console.log('\n================================================================');
-  console.log(`  TEST RESULTS: ${passedCount} PASSED / ${failedCount} FAILED out of ${testCases.length} DOMAINS`);
+  console.log(`  TEST RESULTS: ${verifiedCompactionCount} VERIFIED COMPACTIONS / ${safeFallbackCount} SAFE FALLBACKS / ${invalidCount} INVALID`);
   console.log(`  TOTAL ORIGINAL TOKENS   : ${totalOriginalTokens}`);
   console.log(`  TOTAL COMPACTED TOKENS  : ${totalCompactedTokens}`);
   console.log(`  TOTAL TOKENS SAVED      : ${globalTokensSaved} (${globalSavingsPct}% SPEND REDUCTION)`);
   console.log('================================================================\n');
 
-  if (failedCount > 0) {
+  if (invalidCount > 0) {
     process.exit(1);
   }
 }
@@ -2172,5 +2183,4 @@ runTestSuite().catch((err) => {
   console.error('Test suite error:', err);
   process.exit(1);
 });
-
 

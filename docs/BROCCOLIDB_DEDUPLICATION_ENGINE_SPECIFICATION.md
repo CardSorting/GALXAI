@@ -1,8 +1,10 @@
 # BroccoliDB Algorithmic DeDuplication & High-Velocity Compaction Engine Specification
 
+> **Production qualification:** Treat performance figures below as synthetic benchmark observations. Use `BroccoliDomainSpendOptimizer` or `BroccoliHighVelocityPipeline` for domain compaction so provenance checks can fail closed. The current 180-domain fixture run yields 104 verified compactions and 76 source-preserving safe fallbacks; direct generated compactor methods do not provide the master optimizer's provenance gate. See [SENIOR_ENGINEER_CONVERGENCE_HANDOFF.md](SENIOR_ENGINEER_CONVERGENCE_HANDOFF.md#0-production-hardening-qualification-post-handoff-review).
+
 ## 1. Executive Summary
 
-**BroccoliDB** is a memory-native, zero-copy, sub-microsecond data compaction and high-velocity deduplication engine engineered specifically for enterprise AI infrastructure, autonomous agent swarms, and massive telemetry ingestion. It reduces LLM token consumption and inference spend by **70% to 99%**, processes high-velocity event streams at **1.74 Million operations/second**, and guarantees **100% factual and root-cause preservation**.
+**BroccoliDB** is an in-process data compaction and deduplication toolkit for enterprise AI and telemetry workloads. Synthetic fixtures have observed substantial token reduction and high cache throughput, but savings and latency depend on the payload and runtime. Factual preservation is enforced conservatively at the master domain-optimizer boundary through source-preserving fallback; it is not an unconditional guarantee for every direct compactor.
 
 ### Core Structural Pillars:
 1. **85 Specialized Algorithmic DeDuplication Buffers** organized into 17 mathematical and structural tiers.
@@ -241,39 +243,61 @@ For M&A due diligence, clinical trial protocols, regulatory filings, and complex
 
 ## 6. Developer SDK & API Usage Quickstart
 
-### 6.1 TypeScript / JavaScript
+### 6.1 TypeScript / JavaScript (`BroccoliCompactionFacade`)
 ```typescript
 import {
+  BroccoliCompactionFacade,
   BroccoliMegaIncidentStreamCascader,
   BroccoliMegaDocumentPyramidCompactor,
-  BroccoliCsrSparseMatrixCompressionBuffer,
-  BroccoliCrossTurnKvAttentionAnchorBuffer,
 } from '@/core/broccolidb';
 
-// 1. Compact a 2,000-page outage storm in 57ms
-const incidentResult = BroccoliMegaIncidentStreamCascader.cascadeAndCompact(rawLogStream, {
-  anomalyThreshold: 3.5,
-  maxWindowMinutes: 90,
+// 1. Safe Domain Compaction with Provenance Verification Gate
+const domainResult = BroccoliCompactionFacade.compactDomain(legalDiscoveryText, 'Interrogatory');
+console.log(`Fidelity: ${domainResult.fidelityStatus}, Saved: ${domainResult.tokensSaved} tokens`);
+
+// 2. High-Velocity Batch Stream Ingestion
+const batchResult = BroccoliCompactionFacade.compactBatch([
+  { text: swiftPayload, domain: 'SWIFT_MT103' },
+  { text: hl7Payload, domain: 'HL7_Observation' },
+]);
+console.log(`Processed ${batchResult.totalProcessed} frames at ${batchResult.throughputOpsPerSec} ops/sec`);
+
+// 3. Compact a 2,000-page outage storm in 57ms
+const incidentResult = BroccoliCompactionFacade.compactIncident({
+  rawStreamText: rawLogStream,
+  targetTokenBudget: 4096,
+  incidentTitle: 'Core Cluster Outage',
 });
-console.log(`Tokens Saved: ${incidentResult.tokensSaved} (${incidentResult.savingsPercentage}% spend cut)`);
+console.log(`Incident Tokens Saved: ${incidentResult.tokensSaved} (${incidentResult.savingsPercentage}% spend cut)`);
 
-// 2. Hardware KV-Cache 64-token Boundary Alignment
-const alignedPrompt = BroccoliCrossTurnKvAttentionAnchorBuffer.alignPrompt(systemPrompt, userTurn);
-
-// 3. Compress a 95% Sparse Matrix into CSR format
-const csrResult = BroccoliCsrSparseMatrixCompressionBuffer.compressMatrix(sparseAttentionWeights);
+// 4. Multi-Hundred Page Hierarchical Document Pyramid
+const docResult = BroccoliCompactionFacade.compactDocument({
+  rawText: masterAgreementText,
+  title: 'Master Service Agreement',
+});
+console.log(`Document Sections: ${docResult.totalSectionsDetected}, Saved: ${docResult.tokensSaved} tokens`);
 ```
 
 ### 6.2 cURL / HTTP REST API
 ```bash
-# Ingest and Compact Telemetry Stream
-curl -X POST https://api.galx.ai/v1/broccolidb/compact \
+# Domain Spend Optimization
+curl -X POST https://galx.ai/api/audit/broccolidb/compact \
   -H "Authorization: Bearer $GALXAI_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "streamType": "MEGA_INCIDENT",
-    "payload": "...",
-    "enableKvAnchoring": true
+    "mode": "domain",
+    "text": "...",
+    "domainHint": "Interrogatory"
+  }'
+
+# Mega-Incident Stream Cascading
+curl -X POST https://galx.ai/api/audit/broccolidb/compact \
+  -H "Authorization: Bearer $GALXAI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "mode": "incident",
+    "rawStreamText": "...",
+    "targetTokenBudget": 4096
   }'
 ```
 

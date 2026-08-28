@@ -1,7 +1,7 @@
 /**
  * GALXAI BroccoliDB Multi-Hundred-Page Mega-Document High-Fidelity Pyramid Compactor
  * 
- * Slashes massive LLM token bills on 100-to-1,500+ page enterprise document bundles (contracts, 10-K filings, clinical dossiers, loan portfolios, architectural specs) WITHOUT LOSING QUALITY OR FACTUAL FIDELITY:
+ * Builds an extractive digest for large enterprise document strings:
  * 
  * 1. Page-Boundary & Topology AST Decomposition:
  *    - Strips repetitive running headers, footers, page numbering artifacts, watermarks, and boilerplate disclaimers across hundreds of pages.
@@ -9,13 +9,13 @@
  * 
  * 2. 3-Tier Semantic Density Pyramid:
  *    - Tier 1 (Topology & Cross-Reference Anchor Map): Builds an explicit table of contents with section cross-reference resolution.
- *    - Tier 2 (High-Entropy Information Extraction): Retains 100% of numerical figures, dates, financial formulas, entity roles, conditional carve-outs ("provided however", "notwithstanding"), and affirmative covenants ("shall", "must", "agrees to").
+ *    - Tier 2 (High-Entropy Information Extraction): Retains distinct source sentences matching numerical, date, obligation, carve-out, or focus-query patterns.
  *    - Tier 3 (Cross-Page Table & Exhibit Coalescing): Preserves tabular data structures as clean Markdown matrices.
  * 
  * 3. U-Shaped Attention Optimization:
  *    - Positions critical executive context at the Top (Primacy) and conclusive schedules/exhibits at the End (Recency), preventing the "Lost-in-the-Middle" attention deficit.
  * 
- * Result: Slashes 80%–92% of tokens on 100+ page documents while preserving 100% query accuracy and zero factual degradation.
+ * This is not a substitute for consulting source provisions outside the extraction policy.
  */
 
 import { BroccoliDbTable } from './broccolidb-table';
@@ -83,11 +83,14 @@ export class BroccoliMegaDocumentPyramidCompactor {
   }
 
   /**
-   * Main entry point: Compacts multi-hundred-page documents into a high-density, lossless semantic pyramid
+   * Main entry point: compacts multi-page documents into an extractive semantic pyramid.
    */
   public static compactMegaDocument(input: MultiPageDocumentInput | string): MegaDocumentPyramidResult {
     const compactor = this.getInstance();
     const rawText = typeof input === 'string' ? input : input.rawText;
+    if (typeof rawText !== 'string' || rawText.trim().length === 0) {
+      throw new TypeError('Mega-document input must contain non-empty rawText.');
+    }
     const focusQuery = typeof input === 'object' ? input.focusQuery?.toLowerCase() : undefined;
     const originalTokens = Math.ceil(rawText.length / 4);
 
@@ -120,13 +123,11 @@ export class BroccoliMegaDocumentPyramidCompactor {
         // Extract high-entropy entities, numerical figures & legal obligations
         const obligations = Array.from(sectionContent.matchAll(this.OBLIGATION_KEYWORD_REGEX))
           .map(m => m[0].toLowerCase())
-          .filter((v, idx, arr) => arr.indexOf(v) === idx)
-          .slice(0, 8);
+          .filter((v, idx, arr) => arr.indexOf(v) === idx);
 
         const numericalFacts = Array.from(sectionContent.matchAll(this.NUMERICAL_FACT_REGEX))
           .map(m => m[0].trim())
-          .filter((v, idx, arr) => arr.indexOf(v) === idx)
-          .slice(0, 12);
+          .filter((v, idx, arr) => arr.indexOf(v) === idx);
 
         // Compute relevance against focus query if provided
         const isHighRelevance = focusQuery
@@ -135,12 +136,12 @@ export class BroccoliMegaDocumentPyramidCompactor {
 
         // Produce dense summary preserving exact sentences with obligations or numbers
         const sentences = sectionContent.split(/(?<=[.?!])\s+/);
-        const retainedSentences = sentences.filter(s => {
+        const retainedSentences = Array.from(new Set(sentences.filter(s => {
           const sLower = s.toLowerCase();
-          return this.NUMERICAL_FACT_REGEX.test(s) || 
-                 this.OBLIGATION_KEYWORD_REGEX.test(s) ||
+          return this.regexTest(this.NUMERICAL_FACT_REGEX, s) ||
+                 this.regexTest(this.OBLIGATION_KEYWORD_REGEX, s) ||
                  (focusQuery && sLower.includes(focusQuery));
-        }).slice(0, 6);
+        })));
 
         const summaryText = retainedSentences.length > 0 
           ? retainedSentences.join(' ') 
@@ -168,10 +169,10 @@ export class BroccoliMegaDocumentPyramidCompactor {
         const chunkText = cleanedText.substring(c * chunkSize, (c + 1) * chunkSize);
         const numericalFacts = Array.from(chunkText.matchAll(this.NUMERICAL_FACT_REGEX))
           .map(m => m[0].trim())
-          .slice(0, 10);
+          .filter((v, idx, arr) => arr.indexOf(v) === idx);
         const obligations = Array.from(chunkText.matchAll(this.OBLIGATION_KEYWORD_REGEX))
           .map(m => m[0].toLowerCase())
-          .slice(0, 6);
+          .filter((v, idx, arr) => arr.indexOf(v) === idx);
 
         const approxPage = Math.max(1, Math.round(((c + 1) / totalChunks) * detectedTotalPages));
 
@@ -199,7 +200,7 @@ export class BroccoliMegaDocumentPyramidCompactor {
     // --- TOP: Document Topology & Executive Header (Primacy Attention Zone) ---
     outputLines.push(`## MEGA-DOCUMENT HIGH-FIDELITY PYRAMID DIGEST: ${docTitle.toUpperCase()}`);
     outputLines.push(`- **Topology**: ${detectedTotalPages} Total Pages Processed | ${sections.length} Structural Sections | ${crossReferenceCount} Cross-References Verified`);
-    outputLines.push('- **Fidelity Guarantee**: 100% of Financial Figures, Dates, Covenants, Negative Restrictions & Key Carve-Outs Preserved.');
+    outputLines.push('- **Extraction Policy**: Distinct source sentences containing figures, dates, obligations, restrictions, carve-outs, or the focus query are retained verbatim.');
     outputLines.push('\n### MASTER SECTION SKELETON & TOPOLOGY MAP:');
     for (const sec of sections.slice(0, 25)) {
       outputLines.push(`  - [${sec.sectionNumber}] ${sec.heading} (${sec.pageRange})`);
@@ -224,7 +225,7 @@ export class BroccoliMegaDocumentPyramidCompactor {
     // --- BOTTOM: Schedules, Exhibits & Conclusive Addenda (Recency Attention Zone) ---
     outputLines.push('\n### CONCLUSIVE EXECUTION & SCHEDULE VERIFICATION:');
     outputLines.push('- **Cross-Page State**: All running header noise, duplicate legalese disclaimers, and whitespace padding pruned.');
-    outputLines.push('- **Integrity Check**: Zero orphaned references or missing signature exhibits.');
+    outputLines.push('- **Integrity Notice**: This is an extractive digest; consumers should consult the source for provisions outside the extraction policy.');
 
     const compactedPyramidPrompt = outputLines.join('\n');
     const compactedTokens = Math.ceil(compactedPyramidPrompt.length / 4);
@@ -261,5 +262,12 @@ export class BroccoliMegaDocumentPyramidCompactor {
   public static clear(): void {
     const compactor = this.getInstance();
     compactor.megaDocTable.clear();
+  }
+
+  private static regexTest(regex: RegExp, value: string): boolean {
+    regex.lastIndex = 0;
+    const matched = regex.test(value);
+    regex.lastIndex = 0;
+    return matched;
   }
 }

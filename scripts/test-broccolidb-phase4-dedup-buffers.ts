@@ -60,7 +60,7 @@ async function runPhase4DedupSuite() {
     'Billing card 4532-1234-5678-9012 charged for visit. Contact patient at 555-839-2049.';
 
   const piiResult = BroccoliPiiDeidentificationMaskBuffer.maskAndDeduplicate(clinicalRecord);
-  const rehydrated = BroccoliPiiDeidentificationMaskBuffer.rehydrate(piiResult.maskedText);
+  const rehydrated = BroccoliPiiDeidentificationMaskBuffer.rehydrate(piiResult.maskedText, piiResult.surrogateMap);
 
   console.log(`      Original Tokens     : ${piiResult.originalTokens} | Masked Tokens: ${piiResult.compactedTokens}`);
   console.log(`      Entities Masked     : ${piiResult.distinctEntitiesMasked}`);

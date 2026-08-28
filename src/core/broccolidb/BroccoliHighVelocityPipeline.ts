@@ -2,10 +2,10 @@
  * GALXAI BroccoliDB Ultra High-Velocity Compaction & Ingestion Pipeline
  * 
  * High-Performance Sub-Microsecond Spend-Saving Engine for 180+ Enterprise Domains:
- * 1. O(1) Radix Prefix Domain Router: Replaces linear sequential scanning with a pre-compiled multi-level keyword trie and bitmask hash index.
- * 2. L1/L2 Hot-Ingestion Ring Buffer & LRU Memoizer: Employs 64-bit FNV-1a hashing to achieve <50ns hit latency on recurrent log streams, telemetry batches, and standardized message frames.
- * 3. Zero-Allocation Fast-Path Stream Interceptor: Streamlines token extraction without intermediate GC string allocations for 100,000+ docs/sec high-throughput pipelines.
- * 4. Micro-Batched Coalescing Substrate: Auto-vectorizes multi-tenant prompt batches with atomic in-memory telemetry recording in BroccoliDB.
+ * 1. Single-pass Aho-Corasick domain router for deterministic keyword classification.
+ * 2. Bounded LRU memoizer with source verification at the sampled-hash boundary.
+ * 3. Fail-closed domain compaction via BroccoliDomainSpendOptimizer provenance checks.
+ * 4. Batched processing with in-memory telemetry recording.
  */
 
 import { BroccoliDbTable } from './broccolidb-table';
@@ -31,11 +31,23 @@ export interface IngestionStreamFrame {
   domainHint?: string;
 }
 
+interface HighVelocityCacheEntry {
+  rawText: string;
+  domainHint: string;
+  result: DomainOptimizationResult;
+}
+
+interface KeywordAutomatonNode {
+  next: Map<string, number>;
+  failure: number;
+  outputs: number[];
+}
+
 export class BroccoliHighVelocityPipeline {
   private static instance: BroccoliHighVelocityPipeline;
   
   // Fast L1 LRU Memoization Cache (capacity: 65,536 entries)
-  private readonly l1Cache: Map<string, DomainOptimizationResult> = new Map();
+  private readonly l1Cache: Map<string, HighVelocityCacheEntry> = new Map();
   private readonly l1MaxEntries = 65536;
 
   // Telemetry Table
@@ -48,7 +60,7 @@ export class BroccoliHighVelocityPipeline {
     timestampMs: number;
   }>;
 
-  // Pre-compiled keyword trie dictionary for sub-microsecond O(1) domain resolution
+  // Keyword dictionary compiled lazily into a single-pass Aho-Corasick automaton.
   private static readonly KEYWORD_TRIE: Array<{ keyword: string; domain: string }> = [
     // Banking & Treasury
     { keyword: 'mt103', domain: 'SWIFT_MT103' },
@@ -180,6 +192,7 @@ export class BroccoliHighVelocityPipeline {
     { keyword: 'solar pv', domain: 'SolarInverterTelemetry' },
     { keyword: 'witsml', domain: 'OffshoreDrillingWITSML' }
   ];
+  private static keywordAutomaton: KeywordAutomatonNode[] | undefined;
 
   private constructor() {
     this.velocityMetricsTable = new BroccoliDbTable('high_velocity_pipeline_metrics');
@@ -194,9 +207,13 @@ export class BroccoliHighVelocityPipeline {
   }
 
   /**
-   * Fast 64-bit FNV-1a Hash for high-velocity L1 cache lookup (<15ns)
+   * Sampled 32-bit FNV-1a accelerator. Cache hits are always verified against
+   * the original source and domain hint, so collisions cannot cross-contaminate results.
    */
   public static fastHash(text: string, domainHint = ''): string {
+    if (typeof text !== 'string') {
+      throw new TypeError('High-velocity pipeline input must be a string.');
+    }
     let hash = 0x811c9dc5;
     const len = text.length;
     const stride = Math.max(1, Math.floor(len / 128)); // Sample up to 128 bytes for speed
@@ -217,37 +234,56 @@ export class BroccoliHighVelocityPipeline {
   }
 
   /**
-   * Sub-microsecond O(1) keyword trie domain detector
+   * O(input length + matches) keyword automaton domain detector.
    */
   public static fastDetectDomain(rawText: string, domainHint?: string): string {
+    if (typeof rawText !== 'string') {
+      throw new TypeError('Domain detection input must be a string.');
+    }
     if (domainHint && domainHint !== 'Generic' && domainHint !== 'Auto') {
       return domainHint;
     }
 
     const lower = rawText.toLowerCase();
-    const trie = BroccoliHighVelocityPipeline.KEYWORD_TRIE;
-    const len = trie.length;
+    const automaton = this.getKeywordAutomaton();
+    let state = 0;
+    let bestKeywordIndex = Number.POSITIVE_INFINITY;
 
-    for (let i = 0; i < len; i++) {
-      if (lower.includes(trie[i].keyword)) {
-        return trie[i].domain;
+    for (let i = 0; i < lower.length; i++) {
+      const char = lower[i];
+      while (state !== 0 && !automaton[state].next.has(char)) {
+        state = automaton[state].failure;
+      }
+      state = automaton[state].next.get(char) ?? 0;
+      for (const keywordIndex of automaton[state].outputs) {
+        bestKeywordIndex = Math.min(bestKeywordIndex, keywordIndex);
+      }
+      if (bestKeywordIndex === 0) {
+        return this.KEYWORD_TRIE[0].domain;
       }
     }
 
+    if (Number.isFinite(bestKeywordIndex)) {
+      return this.KEYWORD_TRIE[bestKeywordIndex].domain;
+    }
     return BroccoliDomainSpendOptimizer.detectDomain(rawText);
   }
 
   /**
-   * High-Velocity Single-Item Optimization with L1 Memoization (<50ns on hit, <5µs on cold)
+   * High-velocity single-item optimization with bounded LRU memoization.
    */
   public static processSingle(rawText: string, domainHint?: string): DomainOptimizationResult {
     const pipeline = this.getInstance();
-    const hash = this.fastHash(rawText, domainHint);
+    const normalizedHint = domainHint ?? '';
+    const hash = this.fastHash(rawText, normalizedHint);
 
-    // 1. L1 Hot-Cache Lookup (<50ns)
+    // Verify the original key material on every hit. The sampled 32-bit hash is
+    // an accelerator, not an identity boundary.
     const cached = pipeline.l1Cache.get(hash);
-    if (cached) {
-      return cached;
+    if (cached && cached.rawText === rawText && cached.domainHint === normalizedHint) {
+      pipeline.l1Cache.delete(hash);
+      pipeline.l1Cache.set(hash, cached);
+      return this.cloneResult(cached.result);
     }
 
     // 2. Fast Domain Resolution
@@ -257,13 +293,9 @@ export class BroccoliHighVelocityPipeline {
     const result = BroccoliDomainSpendOptimizer.optimize(rawText, resolvedDomain);
 
     // 4. L1 Cache Write (bounded with LRU eviction)
-    if (pipeline.l1Cache.size >= pipeline.l1MaxEntries) {
-      const firstKey = pipeline.l1Cache.keys().next().value;
-      if (firstKey) pipeline.l1Cache.delete(firstKey);
-    }
-    pipeline.l1Cache.set(hash, result);
+    this.writeCacheEntry(pipeline, hash, rawText, normalizedHint, result);
 
-    return result;
+    return this.cloneResult(result);
   }
 
   /**
@@ -285,23 +317,26 @@ export class BroccoliHighVelocityPipeline {
 
     for (let i = 0; i < totalCount; i++) {
       const item = items[i];
-      const hash = this.fastHash(item.text, item.domain);
+      if (!item || typeof item.text !== 'string') {
+        throw new TypeError(`Batch item ${i} must contain a string text field.`);
+      }
+      const normalizedHint = item.domain ?? '';
+      const hash = this.fastHash(item.text, normalizedHint);
 
-      let res = pipeline.l1Cache.get(hash);
-      if (res) {
+      const cached = pipeline.l1Cache.get(hash);
+      let res: DomainOptimizationResult;
+      if (cached && cached.rawText === item.text && cached.domainHint === normalizedHint) {
         cacheHits++;
+        pipeline.l1Cache.delete(hash);
+        pipeline.l1Cache.set(hash, cached);
+        res = cached.result;
       } else {
         const domain = this.fastDetectDomain(item.text, item.domain);
         res = BroccoliDomainSpendOptimizer.optimize(item.text, domain);
-
-        if (pipeline.l1Cache.size >= pipeline.l1MaxEntries) {
-          const firstKey = pipeline.l1Cache.keys().next().value;
-          if (firstKey) pipeline.l1Cache.delete(firstKey);
-        }
-        pipeline.l1Cache.set(hash, res);
+        this.writeCacheEntry(pipeline, hash, item.text, normalizedHint, res);
       }
 
-      results[i] = res;
+      results[i] = this.cloneResult(res);
       totalOriginalTokens += res.originalTokens;
       totalCompactedTokens += res.compactedTokens;
       totalTokensSaved += res.tokensSaved;
@@ -347,5 +382,71 @@ export class BroccoliHighVelocityPipeline {
     const pipeline = this.getInstance();
     pipeline.l1Cache.clear();
     pipeline.velocityMetricsTable.clear();
+  }
+
+  private static writeCacheEntry(
+    pipeline: BroccoliHighVelocityPipeline,
+    hash: string,
+    rawText: string,
+    domainHint: string,
+    result: DomainOptimizationResult
+  ): void {
+    if (!pipeline.l1Cache.has(hash) && pipeline.l1Cache.size >= pipeline.l1MaxEntries) {
+      const oldestKey = pipeline.l1Cache.keys().next().value;
+      if (oldestKey) pipeline.l1Cache.delete(oldestKey);
+    }
+    pipeline.l1Cache.delete(hash);
+    pipeline.l1Cache.set(hash, {
+      rawText,
+      domainHint,
+      result: this.cloneResult(result),
+    });
+  }
+
+  private static cloneResult(result: DomainOptimizationResult): DomainOptimizationResult {
+    return {
+      ...result,
+      unsupportedFacts: [...result.unsupportedFacts],
+    };
+  }
+
+  private static getKeywordAutomaton(): KeywordAutomatonNode[] {
+    if (this.keywordAutomaton) return this.keywordAutomaton;
+
+    const nodes: KeywordAutomatonNode[] = [{ next: new Map(), failure: 0, outputs: [] }];
+    for (let keywordIndex = 0; keywordIndex < this.KEYWORD_TRIE.length; keywordIndex++) {
+      let state = 0;
+      for (const char of this.KEYWORD_TRIE[keywordIndex].keyword) {
+        let nextState = nodes[state].next.get(char);
+        if (nextState === undefined) {
+          nextState = nodes.length;
+          nodes[state].next.set(char, nextState);
+          nodes.push({ next: new Map(), failure: 0, outputs: [] });
+        }
+        state = nextState;
+      }
+      nodes[state].outputs.push(keywordIndex);
+    }
+
+    const queue: number[] = [];
+    for (const child of nodes[0].next.values()) {
+      queue.push(child);
+    }
+
+    for (let cursor = 0; cursor < queue.length; cursor++) {
+      const state = queue[cursor];
+      for (const [char, nextState] of nodes[state].next.entries()) {
+        queue.push(nextState);
+        let fallback = nodes[state].failure;
+        while (fallback !== 0 && !nodes[fallback].next.has(char)) {
+          fallback = nodes[fallback].failure;
+        }
+        nodes[nextState].failure = nodes[fallback].next.get(char) ?? 0;
+        nodes[nextState].outputs.push(...nodes[nodes[nextState].failure].outputs);
+      }
+    }
+
+    this.keywordAutomaton = nodes;
+    return nodes;
   }
 }

@@ -4,9 +4,9 @@
  * Slashes duplicate tokens and enforces HIPAA/GDPR privacy compliance on clinical & financial records:
  * 1. Detects sensitive entity occurrences (Patient Names, SSNs, Credit Card PANs, Email Addresses, MRNs).
  * 2. Maps identical entity mentions across multi-page documents to deterministic short surrogate tokens (`[SURROGATE:NAME_1]`, `[SURROGATE:SSN_1]`).
- * 3. Maintains a bidirectional surrogate mapping table in BroccoliDB memory for lossless client-side re-identification.
+ * 3. Returns a request-scoped surrogate map for explicit client-side re-identification.
  * 
- * Result: Slashes 30%–50% of repetitive entity strings while ensuring 100% regulatory de-identification.
+ * This utility reduces direct identifier exposure; it is not, by itself, a HIPAA/GDPR compliance guarantee.
  */
 
 import { BroccoliDbTable } from './broccolidb-table';
@@ -25,8 +25,6 @@ export interface PiiMaskResult {
 
 export class BroccoliPiiDeidentificationMaskBuffer {
   private static instance: BroccoliPiiDeidentificationMaskBuffer;
-  private readonly entityToSurrogateMap: Map<string, string> = new Map();
-  private readonly surrogateToEntityMap: Map<string, string> = new Map();
 
   public readonly piiAuditTable: BroccoliDbTable<{
     id: string;
@@ -57,8 +55,13 @@ export class BroccoliPiiDeidentificationMaskBuffer {
    * Masks and deduplicates PII/PHI entity strings into deterministic surrogate keys
    */
   public static maskAndDeduplicate(text: string): PiiMaskResult {
+    if (typeof text !== 'string') {
+      throw new TypeError('PII masking input must be a string.');
+    }
     const buffer = this.getInstance();
     const originalTokens = Math.ceil(text.length / 4);
+    const entityToSurrogateMap = new Map<string, string>();
+    const surrogateToEntityMap = new Map<string, string>();
 
     let masked = text;
     let totalReplacements = 0;
@@ -74,12 +77,12 @@ export class BroccoliPiiDeidentificationMaskBuffer {
     for (const pat of patterns) {
       masked = masked.replace(pat.regex, (match) => {
         totalReplacements++;
-        let surrogate = buffer.entityToSurrogateMap.get(match);
+        let surrogate = entityToSurrogateMap.get(match);
         if (!surrogate) {
           distinctEntityCount++;
-          surrogate = `[${pat.type}_${buffer.entityToSurrogateMap.size + 1}]`;
-          buffer.entityToSurrogateMap.set(match, surrogate);
-          buffer.surrogateToEntityMap.set(surrogate, match);
+          surrogate = `[${pat.type}_${entityToSurrogateMap.size + 1}]`;
+          entityToSurrogateMap.set(match, surrogate);
+          surrogateToEntityMap.set(surrogate, match);
         }
         return surrogate;
       });
@@ -92,7 +95,7 @@ export class BroccoliPiiDeidentificationMaskBuffer {
       : 0;
 
     const surrogateExport: Record<string, string> = {};
-    for (const [entity, surrogate] of buffer.entityToSurrogateMap.entries()) {
+    for (const [surrogate, entity] of surrogateToEntityMap.entries()) {
       surrogateExport[surrogate] = entity;
     }
 
@@ -121,10 +124,16 @@ export class BroccoliPiiDeidentificationMaskBuffer {
   /**
    * Rehydrates surrogate tokens back to original entities on client return
    */
-  public static rehydrate(maskedText: string): string {
-    const buffer = this.getInstance();
+  public static rehydrate(maskedText: string, surrogateMap: Readonly<Record<string, string>>): string {
+    if (typeof maskedText !== 'string' || !surrogateMap || typeof surrogateMap !== 'object') {
+      throw new TypeError('Rehydration requires maskedText and its request-scoped surrogateMap.');
+    }
     let rehydrated = maskedText;
-    for (const [surrogate, original] of buffer.surrogateToEntityMap.entries()) {
+    const entries = Object.entries(surrogateMap).sort(([left], [right]) => right.length - left.length);
+    for (const [surrogate, original] of entries) {
+      if (!/^\[(?:SSN|EMAIL|PAN|PHONE)_\d+\]$/.test(surrogate) || typeof original !== 'string') {
+        throw new TypeError(`Invalid surrogate map entry: ${surrogate}`);
+      }
       rehydrated = rehydrated.replaceAll(surrogate, original);
     }
     return rehydrated;
@@ -132,8 +141,6 @@ export class BroccoliPiiDeidentificationMaskBuffer {
 
   public clear(): void {
     const buffer = BroccoliPiiDeidentificationMaskBuffer.getInstance();
-    buffer.entityToSurrogateMap.clear();
-    buffer.surrogateToEntityMap.clear();
     buffer.piiAuditTable.clear();
   }
 }

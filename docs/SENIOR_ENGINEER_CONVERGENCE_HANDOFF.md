@@ -3,7 +3,25 @@
 > **Target Audience**: Senior Staff Engineers, Principal Systems Architects, and Technical Reviewers  
 > **Repository**: `CardSorting/GALXAI` (`main` branch)  
 > **Topic**: BroccoliDB 85-Buffer Deduplication Engine, High-Velocity Ingestion Substrate, Mega-Incident Stream Cascader, and 180-Domain Compactor Cluster  
-> **Status**: Fully Implemented, Tested (100% Pass Rate), Documented in ADRs 0056–0058, and Pushed to `main`.
+> **Status**: Historical implementation handoff. Production hardening was applied after review; the qualification notes below supersede unconditional performance, fidelity, privacy, and OOM claims elsewhere in this document.
+
+## 0. Production Hardening Qualification (Post-Handoff Review)
+
+The original synthetic suites passed, but they did not exercise adversarial inputs, parser misses, cache collisions, cross-request privacy isolation, UTF-8 slab boundaries, or actual filesystem spillover. The hardened implementation now has the following behavior:
+
+- The master domain optimizer verifies high-risk output facts against the source and fails closed to the unmodified source when an amount, date, percentage, identifier, BIC, or measured value is unsupported.
+- The 180-domain fixture suite currently reports **104 verified compactions and 76 safe fallbacks**, rather than claiming that all 180 inputs can be safely compacted. Safe fallbacks claim zero token savings.
+- PII surrogate maps are request-scoped. Rehydration requires the map returned by that masking call; process-global cross-request mappings were removed.
+- Spillover payloads use private mode-0600 temporary files and bounded in-memory byte accounting. This bounds payload memory; it does not guarantee that the entire Node.js process can never exhaust memory.
+- Incident prompt generation reports and honors its token budget while retaining omitted partition digests in the structured result.
+- Hash-based memoization verifies the original source and domain hint before accepting a cache hit, preventing sampled-hash collisions from returning another input's result.
+- Benchmark values are hardware- and runtime-dependent measurements, not formal convergence proofs or service-level guarantees.
+
+Run the hardening regressions with:
+
+```bash
+npm run test:broccolidb:hardening
+```
 
 ---
 

@@ -2,8 +2,8 @@
  * GALXAI BroccoliDB Ultra High-Velocity Processing Benchmark Suite
  * 
  * Benchmarks:
- * 1. L1 Hot-Memoization hit latency (<50 nanoseconds)
- * 2. O(1) Radix Prefix Domain routing speed (<1 microsecond)
+ * 1. L1 hot-memoization hit latency
+ * 2. Single-pass keyword automaton domain routing speed
  * 3. High-throughput vectorized batch processing (100,000+ ops/second)
  * 4. 180-Domain aggregate token spend reduction validation (>77%)
  */
@@ -103,8 +103,8 @@ async function runHighVelocityBenchmark() {
   console.log(`      L1 Cache Hit Ratio         : ${(batchBenchmark.cacheHitRatio * 100).toFixed(1)}%`);
   console.log(`      Batch Tokens Saved         : ${batchBenchmark.totalTokensSaved.toLocaleString()} (${batchBenchmark.aggregateSavingsPercentage}% Spend Reduction)`);
 
-  // Test 4: O(1) Fast Keyword Trie vs Dynamic Domain Resolution
-  console.log('\n[4/4] Benchmarking O(1) Radix Keyword Trie Domain Resolution (50,000 ops)...');
+  // Test 4: Single-pass Aho-Corasick Keyword Automaton
+  console.log('\n[4/4] Benchmarking Single-Pass Keyword Automaton Domain Resolution (50,000 ops)...');
   const trieStart = performance.now();
   for (let i = 0; i < 50000; i++) {
     BroccoliHighVelocityPipeline.fastDetectDomain(sampleWorkload[i % sampleWorkload.length].text);
@@ -113,8 +113,19 @@ async function runHighVelocityBenchmark() {
   const trieNs = (trieElapsedMs * 1e6) / 50000;
   console.log(`      Domain Resolution Latency  : ${trieNs.toFixed(2)} ns/lookup (${Math.round((50000 / trieElapsedMs) * 1000).toLocaleString()} lookups/sec)`);
 
+  const routingOpsPerSec = Math.round((50000 / trieElapsedMs) * 1000);
+  const failures: string[] = [];
+  if (avgHotNs > 10_000) failures.push(`hot cache latency ${avgHotNs.toFixed(0)}ns exceeded 10,000ns`);
+  if (batchBenchmark.throughputOpsPerSec < 100_000) failures.push(`batch throughput ${batchBenchmark.throughputOpsPerSec} was below 100,000 ops/sec`);
+  if (batchBenchmark.cacheHitRatio < 0.99) failures.push(`cache hit ratio ${batchBenchmark.cacheHitRatio} was below 0.99`);
+  if (routingOpsPerSec < 10_000) failures.push(`routing throughput ${routingOpsPerSec} was below 10,000 lookups/sec`);
+
+  if (failures.length > 0) {
+    throw new Error(`Benchmark targets missed: ${failures.join('; ')}`);
+  }
+
   console.log('\n================================================================');
-  console.log('  HIGH-VELOCITY BENCHMARK RESULTS: ALL TARGETS EXCEEDED!        ');
+  console.log('  HIGH-VELOCITY BENCHMARK RESULTS: ALL CONFIGURED TARGETS PASSED');
   console.log('================================================================\n');
 }
 

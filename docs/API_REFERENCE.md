@@ -334,11 +334,93 @@ Apex-tier transport ingestion endpoint for external CLI tools (e.g. `LUMI-NEW`) 
 
 ---
 
-## 🌐 Frontend Platform Supabase OAuth (`/auth/callback` & `/auth/connect`)
+## 🥦 BroccoliDB Data Compaction & Ingestion Gateway (`POST /api/audit/broccolidb/compact` & `POST /api/broccolidb/compact`)
 
-Standard, user-facing authentication managing platform accounts, developer dashboards, billing wallets, and project API keys via `@supabase/ssr`.
+High-velocity, size-bounded data compaction, streaming deduplication, mega-incident cascading, and hierarchical document summarization with fail-closed provenance validation.
 
-- **`GET /auth/callback`**: Next.js App Router route handler exchanging OAuth authorization codes for Supabase cookies via `exchangeCodeForSession(code)`.
-- **`GET /auth/connect`**: 1-Click developer login portal supporting GitHub, Google, and Email Magic Links. Zero sharding exposure.
+### Endpoints
+- `POST /api/audit/broccolidb/compact` (Authoritative Gateway)
+- `POST /api/broccolidb/compact` (Direct Alias)
+- `GET /api/audit/broccolidb/compact` (Health & Capacity Introspection)
+- `OPTIONS /api/audit/broccolidb/compact` (CORS Preflight)
+
+### Request Headers
+| Header | Type | Description |
+| :--- | :--- | :--- |
+| `Content-Type` | String | `application/json` |
+| `Authorization` | String | `Bearer <token>` or `<api-key>` |
+| `x-api-key` / `x-galx-key` | String | Alternative API key header formats |
+
+### Supported Modes & Request Schemas
+
+#### 1. Domain Compaction (`mode: "domain"`)
+```json
+{
+  "mode": "domain",
+  "text": "PROPOUNDING PARTY: Plaintiff Acme Corp\nRESPONDING PARTY: Defendant Zenith LLC\n...",
+  "domainHint": "Interrogatory"
+}
+```
+
+#### 2. High-Velocity Batch Compaction (`mode: "batch"`)
+```json
+{
+  "mode": "batch",
+  "items": [
+    { "text": "Payload 1...", "domain": "SWIFT_MT103" },
+    { "text": "Payload 2...", "domain": "HL7_Observation" }
+  ],
+  "options": {
+    "flushMetrics": true
+  }
+}
+```
+
+#### 3. Mega-Incident Stream Cascader (`mode: "incident"`)
+```json
+{
+  "mode": "incident",
+  "rawStreamText": "2026-01-01T00:00:00.000Z FATAL SEV-0 ROOT_CAUSE primary DB crashed\n...",
+  "targetTokenBudget": 4096,
+  "incidentTitle": "Production Outage Postmortem"
+}
+```
+
+#### 4. Mega-Document Hierarchical Pyramid (`mode: "document"`)
+```json
+{
+  "mode": "document",
+  "rawText": "SECTION 1: TITLE\n...",
+  "title": "Commercial Credit Agreement"
+}
+```
+
+### Success Response (HTTP 200 OK)
+```json
+{
+  "status": "success",
+  "mode": "domain",
+  "data": {
+    "domain": "Interrogatory",
+    "cluster": "Legal & IP",
+    "originalTokens": 672,
+    "compactedTokens": 168,
+    "tokensSaved": 504,
+    "savingsPercentage": 75.0,
+    "compactedPrompt": "=== LITIGATION INTERROGATORY RECORD ===\n...",
+    "fidelityStatus": "verified",
+    "unsupportedFacts": []
+  },
+  "authenticatedUser": "user_lz4m_88f2",
+  "timestampMs": 1724528600000
+}
+```
+
+### Defensive Size Limits
+- **Max Payload Size**: 10MB (`HTTP 413 Payload Too Large`)
+- **Max Text Character Length**: 2,000,000 characters
+- **Max Batch Item Count**: 10,000 items
+- **Incident Token Budget**: 1,024 to 128,000 tokens
+
 
 

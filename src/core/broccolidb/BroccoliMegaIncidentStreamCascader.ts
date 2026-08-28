@@ -1,12 +1,12 @@
 /**
  * GALXAI BroccoliDB Multi-Thousand-Page Mega-Incident Stream Cascader & Map-Reduce Substrate
  * 
- * Handles massive 1,000-to-10,000+ page enterprise data dumps (catastrophic SEV-0 incident logs, multi-gigabyte litigation productions, hospital lifetime EMR archives, telemetry blackbox dumps) WITHOUT OOM, MEMORY FREEZES, OR QUALITY LOSS:
+ * Produces a bounded, extractive forensic digest from large incident-log strings:
  * 
- * 1. Zero-OOM Streaming Partitioning:
- *    - Lazily partitions multi-million token streams into bounded 50-page (20,000 token) operational windows.
+ * 1. Bounded Partition Analysis:
+ *    - Analyzes fixed-size slices after the caller provides the source string.
  * 
- * 2. Parallel Map Phase with Anomaly Salience Scoring:
+ * 2. Synchronous Map Phase with Anomaly Salience Scoring:
  *    - Evaluates each partition for high-severity anomaly triggers (SEV-0/FATAL/PANIC/BREACH/VIOLATION), statistical variance (>3-sigma), and root-cause indicators.
  *    - Collapses repetitive cascading failure logs (e.g. 500,000 duplicate connection-refused errors into single chronological burst spans).
  * 
@@ -16,7 +16,7 @@
  * 4. U-Shaped Attention Root-Cause Elevation:
  *    - Positions the pre-incident baseline and triggering root cause at the Top (Primacy), contextual subsystem telemetry in the Middle, and final post-incident state and damages at the Bottom (Recency).
  * 
- * Result: Compresses 1,000 to 10,000+ pages (500k to 5M+ tokens) down to a razor-sharp ~4k–8k token forensic digest with 99.0%–99.8% spend reduction and 100% root-cause preservation.
+ * The structured partition digests remain available when the prompt budget omits timeline entries.
  */
 
 import { BroccoliDbTable } from './broccolidb-table';
@@ -51,6 +51,9 @@ export interface MegaIncidentCascaderResult {
   compactedTokens: number;
   tokensSaved: number;
   savingsPercentage: number;
+  targetTokenBudget: number;
+  metTargetTokenBudget: boolean;
+  omittedTimelinePartitions: number;
   rootCauseTriggerSnippet: string;
   compactedIncidentPrompt: string;
   partitionDigests: PartitionMicroDigest[];
@@ -94,13 +97,19 @@ export class BroccoliMegaIncidentStreamCascader {
   public static cascadeMegaIncident(input: MegaIncidentInput | string): MegaIncidentCascaderResult {
     const cascader = this.getInstance();
     const rawText = typeof input === 'string' ? input : input.rawStreamText;
+    if (typeof rawText !== 'string' || rawText.trim().length === 0) {
+      throw new TypeError('Mega-incident input must contain non-empty rawStreamText.');
+    }
     const originalTokens = Math.ceil(rawText.length / 4);
     const incidentTitle = (typeof input === 'object' && input.incidentTitle)
       ? input.incidentTitle
       : 'ENTERPRISE MULTI-THOUSAND-PAGE MEGA INCIDENT';
-    const targetTokenBudget = (typeof input === 'object' && input.targetTokenBudget)
-      ? input.targetTokenBudget
+    const targetTokenBudget = typeof input === 'object'
+      ? (input.targetTokenBudget ?? 8192)
       : 8192;
+    if (!Number.isSafeInteger(targetTokenBudget) || targetTokenBudget < 1024) {
+      throw new RangeError('targetTokenBudget must be a safe integer of at least 1024 tokens.');
+    }
 
     // 1. Calculate estimated page volume
     const pageMarkers = rawText.match(/(?:Page\s+\d+|\f|\bpage_\d+\b)/gi);
@@ -117,6 +126,7 @@ export class BroccoliMegaIncidentStreamCascader {
     let totalCollapsedDuplicates = 0;
     let criticalCount = 0;
     let rootCauseCandidate = 'Initial trigger identified during anomaly spike analysis.';
+    let rootCausePartitionIndex = 1;
 
     for (let p = 0; p < totalPartitions; p++) {
       const startIdx = p * partitionCharSize;
@@ -140,7 +150,7 @@ export class BroccoliMegaIncidentStreamCascader {
       // Extract Fatal / Root-Cause / Mitigation Specific Lines
       const fatalLines = partitionText.split('\n')
         .filter(line => /FATAL|PANIC|ROOT_CAUSE|ext4_lookup|promoted|failover|OOMKilled/i.test(line))
-        .map(l => l.trim())
+        .map(l => l.trim().slice(0, 500))
         .slice(0, 4);
 
       // Deduplicate repetitive error messages (collapse cascading storm)
@@ -181,8 +191,10 @@ export class BroccoliMegaIncidentStreamCascader {
         criticalCount++;
         if (fatalLines.length > 0 && rootCauseCandidate.startsWith('Initial trigger')) {
           rootCauseCandidate = `[PARTITION ${p + 1}] ${fatalLines[0]}`;
+          rootCausePartitionIndex = p + 1;
         } else if (distinctErrors.length > 0 && rootCauseCandidate.startsWith('Initial trigger')) {
           rootCauseCandidate = `[PARTITION ${p + 1}] ${distinctErrors[0]} (Timestamps: ${timestamps.join(', ') || 'N/A'})`;
+          rootCausePartitionIndex = p + 1;
         }
       } else if (anomalyScore >= 0.6) {
         severity = 'SEV_1_HIGH';
@@ -219,44 +231,92 @@ export class BroccoliMegaIncidentStreamCascader {
       });
     }
 
-    // 3. Hierarchical Reduce Phase: Synthesize Master Incident Prompt
-    const outputLines: string[] = [];
-
-    // --- TOP: Master Incident Header & Root Cause Trigger (Primacy Attention Zone) ---
-    outputLines.push(`## MULTI-THOUSAND-PAGE MEGA-INCIDENT FORENSIC SYNTHESIS: ${incidentTitle.toUpperCase()}`);
-    outputLines.push(`- **Incident Volume**: ${detectedTotalPages.toLocaleString()} Pages Analyzed | ${totalPartitions} Stream Partitions | ${totalCollapsedDuplicates.toLocaleString()} Duplicate Cascade Logs Collapsed`);
-    outputLines.push(`- **Critical Anomalies (SEV-0/1)**: ${criticalCount} Outage Spikes Isolated`);
-    outputLines.push(`- **ROOT CAUSE TRIGGER**: ${rootCauseCandidate}`);
-
-    // --- CHRONOLOGICAL TIMELINE OF CRITICAL EVENTS ---
-    outputLines.push('\n### MASTER FORENSIC CHRONOLOGY & ANOMALY HEATMAP:');
-    const highSaliencePartitions = partitionDigests.filter(p => p.anomalyScore >= 0.4 || p.partitionIndex === 1 || p.partitionIndex === totalPartitions);
-    
-    for (const p of highSaliencePartitions) {
-      const timeTag = p.timestamps.length > 0 ? ` [${p.timestamps[0]}]` : '';
-      outputLines.push(`- **Partition ${p.partitionIndex}/${totalPartitions} (${p.pageRange})${timeTag} [${p.severityLevel} / Anomaly: ${p.anomalyScore}]**: ${p.forensicDigest}`);
-    }
-
-    if (highSaliencePartitions.length < totalPartitions) {
-      const normalCount = totalPartitions - highSaliencePartitions.length;
-      outputLines.push(`- *[Note: ${normalCount} routine partitions with 0 critical anomalies were automatically verified and condensed]*`);
-    }
-
-    // --- IMPACTED SYSTEMS, REPETITIONS & DAMAGES ---
-    outputLines.push('\n### SYSTEM CASCADE & IMPACTED METRICS:');
-    const allErrors = partitionDigests.flatMap(p => p.keyErrorsAndEntities).slice(0, 15);
-    if (allErrors.length > 0) {
-      outputLines.push(`- **Unique Fault Signatures**: ${allErrors.join(' | ')}`);
-    }
-    outputLines.push(`- **Redundancy Suppression**: ${totalCollapsedDuplicates.toLocaleString()} repetitive stack traces and cascading log loops eliminated without loss of forensic truth.`);
-
-    // --- BOTTOM: Final Post-Incident Steady State (Recency Attention Zone) ---
-    outputLines.push('\n### POST-INCIDENT RESOLUTION STATE & DISPOSITION:');
+    // 3. Hierarchical Reduce Phase: build a budget-aware forensic prompt while
+    // retaining the full structured partition digests in the result.
+    const highSaliencePartitions = partitionDigests.filter(
+      partition => partition.anomalyScore >= 0.4
+        || partition.partitionIndex === 1
+        || partition.partitionIndex === totalPartitions
+    );
+    const rootPartition = partitionDigests[rootCausePartitionIndex - 1] ?? partitionDigests[0];
+    const firstCascadePartition = partitionDigests.find(partition =>
+      partition.keyErrorsAndEntities.some(value => /error|exception|failed|fault|refused/i.test(value))
+    );
+    const firstCascadeSignature = firstCascadePartition?.keyErrorsAndEntities.find(value =>
+      /error|exception|failed|fault|refused/i.test(value)
+        && !rootCauseCandidate.includes(value)
+    );
+    const recoveryPartition = partitionDigests.find(partition =>
+      partition.keyErrorsAndEntities.some(value => /promoted|failover|recovered|resolved|restored/i.test(value))
+    );
     const lastPartition = partitionDigests[partitionDigests.length - 1];
-    outputLines.push(`- **Final Status at End of Log (${lastPartition.pageRange})**: ${lastPartition.forensicDigest}`);
-    outputLines.push('- **Forensic Integrity Guarantee**: 100% of distinct timestamps, error codes, and numerical metric thresholds preserved.');
 
-    const compactedIncidentPrompt = outputLines.join('\n');
+    const headerLines = [
+      `## MULTI-THOUSAND-PAGE MEGA-INCIDENT FORENSIC SYNTHESIS: ${incidentTitle.toUpperCase()}`,
+      `- **Incident Volume**: ${detectedTotalPages.toLocaleString()} Pages Analyzed | ${totalPartitions} Stream Partitions | ${totalCollapsedDuplicates.toLocaleString()} Duplicate Cascade Logs Collapsed`,
+      `- **Critical Anomalies (SEV-0/1)**: ${criticalCount} Outage Spikes Isolated`,
+      `- **ROOT CAUSE TRIGGER**: ${rootCauseCandidate}`,
+      firstCascadeSignature
+        ? `- **FIRST CASCADE SIGNATURE**: ${firstCascadeSignature.slice(0, 500)}`
+        : '- **FIRST CASCADE SIGNATURE**: No parsed error signature.',
+      recoveryPartition
+        ? `- **RECOVERY SIGNAL**: ${recoveryPartition.forensicDigest.slice(0, 500)}`
+        : '- **RECOVERY SIGNAL**: No explicit recovery marker parsed.',
+      '\n### BUDGETED FORENSIC CHRONOLOGY & ANOMALY HEATMAP:',
+    ];
+    const tailLines = [
+      '\n### POST-INCIDENT RESOLUTION STATE & DISPOSITION:',
+      `- **Final Status at End of Log (${lastPartition.pageRange})**: ${lastPartition.forensicDigest.slice(0, 500)}`,
+      `- **Redundancy Suppression**: ${totalCollapsedDuplicates.toLocaleString()} repeated parsed error signatures collapsed.`,
+      '- **Integrity Notice**: The prompt is an extractive incident digest; the complete parsed partition digests remain available in the structured result.',
+    ];
+
+    const essentialIndices = new Set([
+      1,
+      rootPartition.partitionIndex,
+      firstCascadePartition?.partitionIndex,
+      recoveryPartition?.partitionIndex,
+      totalPartitions,
+    ].filter((value): value is number => value !== undefined));
+    const rankedPartitions = [...highSaliencePartitions].sort((a, b) => {
+      const essentialDelta = Number(essentialIndices.has(b.partitionIndex)) - Number(essentialIndices.has(a.partitionIndex));
+      if (essentialDelta !== 0) return essentialDelta;
+      const anomalyDelta = b.anomalyScore - a.anomalyScore;
+      return anomalyDelta !== 0 ? anomalyDelta : a.partitionIndex - b.partitionIndex;
+    });
+
+    const maxPromptCharacters = targetTokenBudget * 4;
+    const fixedCharacterCount = [...headerLines, ...tailLines].join('\n').length + 180;
+    let timelineCharacterCount = 0;
+    const selectedTimeline = new Map<number, string>();
+    for (const partition of rankedPartitions) {
+      const timeTag = partition.timestamps.length > 0 ? ` [${partition.timestamps[0]}]` : '';
+      const line = `- **Partition ${partition.partitionIndex}/${totalPartitions} (${partition.pageRange})${timeTag} [${partition.severityLevel} / Anomaly: ${partition.anomalyScore}]**: ${partition.forensicDigest.slice(0, 500)}`;
+      const isEssential = essentialIndices.has(partition.partitionIndex);
+      if (isEssential || fixedCharacterCount + timelineCharacterCount + line.length <= maxPromptCharacters) {
+        selectedTimeline.set(partition.partitionIndex, line);
+        timelineCharacterCount += line.length + 1;
+      }
+    }
+
+    let omittedTimelinePartitions = Math.max(0, highSaliencePartitions.length - selectedTimeline.size);
+    const outputLines = [
+      ...headerLines,
+      ...Array.from(selectedTimeline.entries())
+        .sort(([left], [right]) => left - right)
+        .map(([, line]) => line),
+      `- *[${omittedTimelinePartitions} additional high-salience partitions omitted from the prompt budget; all remain in partitionDigests]*`,
+      ...tailLines,
+    ];
+
+    const budgetNotice = '\n[BUDGET LIMIT REACHED; consult partitionDigests for the remaining structured evidence]';
+    let compactedIncidentPrompt = outputLines.join('\n');
+    if (compactedIncidentPrompt.length > maxPromptCharacters) {
+      omittedTimelinePartitions = highSaliencePartitions.length;
+      compactedIncidentPrompt = compactedIncidentPrompt
+        .slice(0, Math.max(0, maxPromptCharacters - budgetNotice.length))
+        .trimEnd() + budgetNotice;
+    }
     const compactedTokens = Math.ceil(compactedIncidentPrompt.length / 4);
     const tokensSaved = Math.max(0, originalTokens - compactedTokens);
     const savingsPercentage = originalTokens > 0
@@ -285,6 +345,9 @@ export class BroccoliMegaIncidentStreamCascader {
       compactedTokens,
       tokensSaved,
       savingsPercentage,
+      targetTokenBudget,
+      metTargetTokenBudget: compactedTokens <= targetTokenBudget,
+      omittedTimelinePartitions,
       rootCauseTriggerSnippet: rootCauseCandidate,
       compactedIncidentPrompt,
       partitionDigests,
