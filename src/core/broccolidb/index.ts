@@ -92,7 +92,10 @@ export * from "./BroccoliLegalDefinitionHoister";
 export * from "./BroccoliVitalsTrendCompactor";
 export * from "./BroccoliCourtCaptionCompactor";
 export * from "./BroccoliRadiologyCompactor";
+export * from "./BroccoliTestOutputCompactor";
+export * from "./BroccoliSupportEmailThreadCompactor";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
