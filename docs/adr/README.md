@@ -74,8 +74,10 @@ This directory contains the formal Architectural Decision Records (ADRs) that go
 | **[ADR 0064](0064-broccolidb-openai-inference-boundary-measurement-and-task-suite.md)** | BroccoliDB OpenAI Inference Boundary Empirical Measurement & Task Suite | **Empirical ROI & Benchmarking** | `Accepted` | Head-to-head empirical measurement of actual billed OpenAI dollars, 4-workload task suite (Coding, Research, Agent, Telemetry), 69.89% billed dollar reduction, and 3.32x cost efficiency per successful task. |
 | **[ADR 0065](0065-broccolidb-blinded-evaluator-protocol-and-out-of-sample-validation.md)** | BroccoliDB Blinded Evaluator Protocol & Out-of-Sample Validation | **Scientific Methodology & Integrity** | `Accepted` | Double-Blind A/B evaluation protocol with randomized branch assignment ($\alpha$ vs $\beta$), zero target-seeking priors, 5-tier empirical regime classification, and out-of-sample workload ingestion. |
 | **[ADR 0066](0066-institutional-entropy-resistance-and-epistemic-compression.md)** | Institutional Entropy Resistance & Epistemic Representation Compression | **Epistemic Compression & Governance** | `Accepted` | Formalizes resistance to organizational noise (65 ADRs, stale RFCs, contradictory guidance), establishing that the evaluation target is action safety under 99% context removal rather than subjective summary quality. |
+| **[ADR 0067](0067-representation-selection-and-adaptive-density-bypass.md)** | Adaptive Representation Selection & Density Bypass Substrate | **Representation Selection & Architecture** | `Accepted` | Formalizes BroccoliDB as a dynamic representation-selection engine with Adaptive Density Bypass (identity operator for clean contexts <200 tokens) and specialized architecture invariant routing, achieving 100% action safety across clean and saturated regimes. |
 
 ---
+
 
 
 ## 🧭 Architectural Principles

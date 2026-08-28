@@ -123,25 +123,23 @@ async function runInstitutionalEntropyBenchmark() {
     const rawInstitutionalText = generateInstitutionalNoise(gradient.noiseRatio, gradient.trapsIncluded);
     const rawTokens = Math.round(rawInstitutionalText.length / 4);
 
-    // Apply BroccoliDB Compaction
-    const compactionResult = BroccoliCompactionFacade.compact({
-      mode: 'incident',
-      rawStreamText: rawInstitutionalText,
-      incidentTitle: `Institutional Entropy Eval Level ${gradient.level}`,
-      targetTokenBudget: 1024
+    // Apply BroccoliDB Representation-Selection Substrate (ADR 0067)
+    const selection = BroccoliCompactionFacade.selectRepresentation({
+      text: rawInstitutionalText,
+      taskType: 'architecture_invariants',
+      tokenBudget: 1024
     });
 
-    const resObj = (compactionResult as any).result;
-    const compactedText = resObj && resObj.compactedIncidentPrompt ? resObj.compactedIncidentPrompt : rawInstitutionalText;
-    const compactedTokens = Math.round(compactedText.length / 4);
-    const tokenReduction = ((rawTokens - compactedTokens) / rawTokens) * 100;
-
+    const compactedText = selection.selectedRepresentation;
+    const compactedTokens = selection.outputTokens;
+    const tokenReduction = selection.reductionPercentage;
 
     const evalScores = evaluateActionSafety(compactedText, rawInstitutionalText, gradient);
 
     const verdict = evalScores.galxSafety >= 0.85
       ? 'ACTION_SAFE (Invariants Intact)'
       : 'DEGRADED (Conflicting Context Breach)';
+
 
     results.push({
       level: gradient.level,
