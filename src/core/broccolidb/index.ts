@@ -47,4 +47,5 @@ export * from "./BroccoliMatryoshkaCompactor";
 export * from "./BroccoliCacheWarmer";
 export * from "./BroccoliTabularOutputCompactor";
 export * from "./BroccoliStopSequenceInjector";
+export * from "./BroccoliRepetitionBreaker";
 export * from "./BroccoliSpendSubstrate";
