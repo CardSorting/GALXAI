@@ -378,9 +378,36 @@ Supports 19 specialized compaction modes:
 | `ebpf_stream` | Linux kernel syscalls & MITRE TTPs | `events` (eBPF syscall events) | 95% – 98% |
 | `k8s_watch_stream` | Kubernetes event stream & pod restarts | `events` (K8s watch deltas) | 90% – 96% |
 | `geospatial_stream` | AIS vessel & ADS-B flight telemetry | `points` (lat/lon/alt coords) | 92% – 98% |
-| `arrow_dict_stream` | Apache Arrow column dictionary batches | `batch` (Arrow dictionary tables) | 80% – 90% |
+| `arrow_dict_stream` | Apache Arrow dictionary encoding | `columns` (column arrays) | 80% – 90% |
+| `select_representation` | Adaptive representation selection & density bypass | `text`, `taskType`, `tokenBudget` | 0% (ID Bypass) or 50%–92% (Noise Pruning) |
+
+### Representation Selection & Adaptive Density Gate (ADR 0067)
+When passing `mode: "select_representation"` or setting `x-galx-compact: true` on chat routes:
+- **Clean Contexts (<200 tokens)**: Bypasses compaction automatically (`BYPASS_IDENTITY`), returning raw text with zero token overhead and 100% baseline preservation.
+- **Institutionally Noisy Contexts**: Invokes `BroccoliArchitectureInvariantCompactor` to prune superseded ADRs, meeting minutes, and RFC forms while elevating active code constraints (`RS256`, `zeroizeBuffer`, `runtime = 'edge'`).
+
+```json
+// Example POST /api/audit/broccolidb/compact
+{
+  "mode": "select_representation",
+  "text": "## ACTIVE CODE BASE INVARIANTS:\n- Invariant 1: JWT authorization must use RS256 with key version v2.\n\n## INSTITUTIONAL GOVERNANCE:\nRFC-9482: GUIDELINES FOR DUAL-KEY ROTATION CEREMONY...",
+  "taskType": "architecture_invariants"
+}
+
+// Response (200 OK)
+{
+  "mode": "select_representation",
+  "decision": "COMPACT_GOVERNANCE",
+  "selectedRepresentation": "## ACTIVE ACTION-SAFE CODE INVARIANTS (2026):\n- Invariant 1: JWT authorization must use RS256 with key version v2.\n\n[PRUNED 1 DEPRECATED ADRS, MINUTES & GOVERNANCE CEREMONIES]",
+  "originalTokens": 1402,
+  "outputTokens": 111,
+  "reductionPercentage": 92.1,
+  "reason": "Filtered 1 institutional noise records while preserving binding active code invariants."
+}
+```
 
 #### Example 1: Linux Kernel eBPF Stream Compaction (`mode: "ebpf_stream"`)
+
 ```json
 {
   "mode": "ebpf_stream",

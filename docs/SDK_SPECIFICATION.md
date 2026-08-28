@@ -735,11 +735,28 @@ const image = await executeIntent('wide cinematic photo of an ancient temple in 
 
 ---
 
-## 20. BroccoliDB Data Compaction & Inference Boundary API (`galx.compact`)
+## 20. BroccoliDB Dynamic Context Representation Layer (`galx.representation` & `galx.compact`)
 
-The SDK embeds the **BroccoliDB Compaction Substrate**, allowing developers to compress context before sending it to foundation models:
+The SDK embeds the **BroccoliDB Representation-Selection Substrate** (ADRs 0056–0067), allowing applications to evaluate incoming context $C \to \{ \text{ID}(C), T(C) \}$:
 
-### A. In-Process Context Compaction (19 Modes)
+### A. Adaptive Representation Selection & Density Bypass (ADR 0067)
+```typescript
+import { selectRepresentation } from '@galxai/sdk';
+
+// Automatically passes small/clean contexts (<200 tokens) through verbatim (0% dilation overhead)
+// Automatically prunes institutional noise (superseded ADRs, meeting minutes, RFC forms) on complex code
+const selection = selectRepresentation({
+  text: rawContextText,
+  taskType: 'architecture_invariants',
+  tokenBudget: 1024,
+});
+
+console.log(selection.decision);               // 'BYPASS_IDENTITY' | 'COMPACT_GOVERNANCE' | 'COMPACT_INCIDENT'
+console.log(selection.selectedRepresentation); // Task-relevant actionable representation
+console.log(selection.reductionPercentage);    // e.g. 92.1% noise reduction
+```
+
+### B. In-Process Context Compaction (19 Modes)
 ```typescript
 import { compact } from '@galxai/sdk';
 
@@ -758,17 +775,21 @@ const ebpfResult = await compact({
 console.log(`Compacted eBPF Context:`, ebpfResult.compactedPrompt);
 ```
 
-### B. Head-to-Head Inference Boundary Evaluation
+### C. Head-to-Head Inference Boundary & Institutional Entropy Evaluation
 ```typescript
-import { evaluateInferenceBoundary } from '@galxai/sdk/eval';
+import { evaluateInferenceBoundary, evaluateInstitutionalEntropy } from '@galxai/sdk/eval';
 
+// 1. OpenAI empirical billed dollar benchmark
 const report = await evaluateInferenceBoundary({
   modelId: 'gpt-4o',
 });
 console.log(`Dollars Saved: $${report.totalDollarsSavedUSD} (${report.overallBilledCostReductionPercentage}%)`);
-console.log(`Input Token Reduction: ${report.compressibleCostSavingsPercentage}%`);
-console.log(`Non-Compressible Spend Floor: $${report.irreducibleCostFloorUSD}`);
+
+// 2. 7-Tier progressive institutional entropy gradient
+const entropyReport = await evaluateInstitutionalEntropy();
+console.log(`Action Safety: ${entropyReport.actionSafetyPercentage}% (${entropyReport.disarmedTrapsCount}/7 Traps Disarmed)`);
 ```
+
 
 
 
