@@ -67,4 +67,5 @@ export * from "./BroccoliJSONStreamClamper";
 export * from "./BroccoliTokenArbitrageur";
 export * from "./BroccoliStackTracePruner";
 export * from "./BroccoliSystemVarSplitter";
+export * from "./BroccoliSubstringTrieCompactor";
 export * from "./BroccoliSpendSubstrate";
