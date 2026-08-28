@@ -28,6 +28,16 @@ Welcome to the comprehensive technical documentation and operational guides for 
 - **[Universal Migration Guide](MIGRATION_GUIDE.md)**: Step-by-step zero-code-change migration instructions from raw OpenAI, Anthropic, or OpenRouter setups.
 - **[BroccoliDB Compaction Onboarding Guide](BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md)**: Master engineer onboarding guide covering the 19-mode safe facade, 180 domain industry clusters, fail-closed safety gate, and the Epistemic Machinery for inference boundary benchmarking.
 - **[BroccoliDB Deduplication & Compaction Engine Specification](BROCCOLIDB_DEDUPLICATION_ENGINE_SPECIFICATION.md)**: 85-buffer algorithmic deduplication, sub-microsecond vector batching, Drain log clustering, eBPF syscalls, and TSDB metric telemetry.
+- **[BroccoliDB Research, Philosophy & Formal Theory Suite](broccolidb/README.md)**:
+  - **[01. Philosophy of BroccoliDB](broccolidb/01_PHILOSOPHY_THE_AGGRESSIVE_VEGETABLE.md)**: The representation layer, compute-prepper fallacy, botanical isomorphism, and the aggressive vegetable.
+  - **[02. Technical Whitepaper](broccolidb/02_WHITEPAPER_REPRESENTATION_SELECTION.md)**: Task-conditioned representation selection under epistemic and information-theoretic constraints.
+  - **[03. Stakeholder & Maintainer Brief](broccolidb/03_STAKEHOLDER_AND_ONBOARDING_BRIEF.md)**: Commercial pitch vs. diligence room, 30-second elevator explanation, and 3 golden invariants.
+  - **[04. Formal Mathematical Proof](broccolidb/04_FORMAL_MATHEMATICAL_PROOF.md)**: Academically rigorous proofs for Risk Monotonicity, Identity Optimality, Bounded Action Degradation, Institutional Entropy Resistance, and Category-Theoretic Functors.
+  - **[05. Formal TLA+ & State-Machine Specification](broccolidb/05_FORMAL_TLA_STATE_MACHINE_SPECIFICATION.md)**: TLA+ specification module, temporal logic invariants ($\Box \text{InvariantSafety}$), and WAL crash recovery engine.
+  - **[06. Architectural Audit & Empirical Evaluation Report](broccolidb/06_ARCHITECTURAL_AUDIT_AND_EMPIRICAL_EVALUATION.md)**: Exhaustive 420-file code audit, ISO/IEC 25010 assessment, chaos fault injection matrix, and frontier LLM benchmarks.
+  - **[07. Lean 4 Formal Verification Blueprint](broccolidb/07_LEAN4_FORMAL_VERIFICATION_BLUEPRINT.md)**: Machine-checked inductive types, Galois connection soundness, identity bypass proofs, and tactic automation.
+  - **[08. Compiler IR Lowering & Program Slicing](broccolidb/08_COMPILER_IR_LOWERING_AND_PROGRAM_SLICING.md)**: LLVM SSA intermediate representations, dominator trees, Weiser's backward slicing, and invariant hoisting.
+  - **[09. RFC-BROCCOLIDB-0001 Protocol Specification](broccolidb/09_RFC_BROCCOLIDB_0001_TASK_CONDITIONED_REPRESENTATION_SELECTION_PROTOCOL.md)**: Formal RFC 2119 / IETF-style protocol standard (TCRSP/1.0), wire formats, headers, and ZDR v10.0.
 - **[Frequently Asked Questions (FAQs)](FAQS.md)**: Clear answers covering zero-hesitation ergonomics, prompt caching, billing, security, and uptime SLAs.
 
 ---
