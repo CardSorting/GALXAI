@@ -57,4 +57,5 @@ export * from "./BroccoliChunkMemoizer";
 export * from "./BroccoliGrammarFSM";
 export * from "./BroccoliThinkingCompactor";
 export * from "./BroccoliContextSlicer";
+export * from "./BroccoliSessionDiffCompactor";
 export * from "./BroccoliSpendSubstrate";
