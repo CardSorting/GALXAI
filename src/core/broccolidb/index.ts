@@ -110,7 +110,10 @@ export * from "./BroccoliOpenApiCompactor";
 export * from "./BroccoliInvoiceCompactor";
 export * from "./BroccoliRealEstateCompactor";
 export * from "./BroccoliSettlementCompactor";
+export * from "./BroccoliObdCompactor";
+export * from "./BroccoliMonroneyCompactor";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
