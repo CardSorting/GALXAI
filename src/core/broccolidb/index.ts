@@ -98,7 +98,10 @@ export * from "./BroccoliGitStatusCompactor";
 export * from "./BroccoliSupportKbCompactor";
 export * from "./BroccoliGitLogCompactor";
 export * from "./BroccoliSupportChatCompactor";
+export * from "./BroccoliEdgarCompactor";
+export * from "./BroccoliPriorAuthCompactor";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
