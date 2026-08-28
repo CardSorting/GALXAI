@@ -44,4 +44,5 @@ export * from "./BroccoliExemplarCompactor";
 export * from "./BroccoliKVSuffixHoister";
 export * from "./BroccoliToolOutputCompactor";
 export * from "./BroccoliMatryoshkaCompactor";
+export * from "./BroccoliCacheWarmer";
 export * from "./BroccoliSpendSubstrate";
