@@ -82,7 +82,10 @@ export * from "./BroccoliEntityRegexShortCircuiter";
 export * from "./BroccoliTemporalExpressionNormalizer";
 export * from "./BroccoliLegalClauseCompactor";
 export * from "./BroccoliClinicalNoteCompactor";
+export * from "./BroccoliLegalCitationCompactor";
+export * from "./BroccoliLabReportCompactor";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
