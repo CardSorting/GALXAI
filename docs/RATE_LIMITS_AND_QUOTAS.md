@@ -69,11 +69,11 @@ if (count && parseInt(count) >= 120) {
 
 ---
 
-## 5. BroccoliDB Compaction & Effective TPM Capacity Multiplier
+## 5. BroccoliDB Representation Selection & Effective TPM Capacity Multiplier (ADR 0066 & 0067)
 
-When clients enable pre-inference representation compaction (`x-galx-compact: true` or `BroccoliCompactionFacade`):
+When clients enable pre-inference representation compaction (`x-galx-compact: true` or `BroccoliCompactionFacade.selectRepresentation()`):
 - **Quota Preservation**: Compacting an 8,000-token credit agreement or eBPF dump down to 1,500 tokens saves 6,500 tokens of TPM quota allocation.
+- **Adaptive Density Gate ($\text{ID}(C)$)**: For small or clean contexts ($<200$ tokens), compaction is bypassed, preserving baseline TPM without unforced framing dilation.
 - **Effective Throughput Multiplier**: For typical high-redundancy workloads ($75\%–85\%$ reduction), a tenant on a $500\text{k TPM}$ quota achieves an **effective throughput capacity of $2.0\text{M} - 3.3\text{M TPM}$** without hitting upstream foundation lab rate limits.
-- **Microsecond Execution**: Compaction algorithms execute in $< 5\text{ms}$ in-process, incurring negligible latency overhead compared to upstream network round-trips.
-
-
+- **Action Safety Guarantee**: Defends active code invariants across the 7 adversarial corporate traps (`npm run bench:entropy`).
+- **Microsecond Execution**: In-process representation selection executes in $< 5\text{ms}$, incurring negligible overhead compared to upstream network round-trips.

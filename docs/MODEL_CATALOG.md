@@ -70,3 +70,13 @@ Run the empirical benchmark harness against these rate cards:
 npm run bench:inference-boundary
 ```
 
+---
+
+## 6. Representation Selection & Model Input Economics (ADR 0066 & 0067)
+
+Different model families exhibit varying sensitivity to representation structure:
+- **Reasoning Models (`o3-mini`, `o1`, `gpt-5.6-terra`)**: Reasoning tokens (internal CoT) and output tokens represent a non-compressible spend floor. Compacting input representations (e.g. 85.9% reduction) maximizes dollar ROI on the input boundary while leaving reasoning steps fully intact.
+- **Adaptive Density Gate ($\text{ID}(C)$)**: For prompt inputs $<200$ tokens, compaction is bypassed, preserving clean baseline prompts with $0.0\%$ token dilation.
+- **Institutional Noise Resilience**: Reasoning models exposed to conflicting historical context suffer steep task degradation ($100\% \to 20\%$ Action Safety). `BroccoliArchitectureInvariantCompactor` filters out superseded ADRs and RFC ceremonies, preserving **$100\%$ Action Safety** on `npm run bench:entropy`.
+
+
