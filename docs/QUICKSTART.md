@@ -149,24 +149,35 @@ npx galxai doctor
 
 ---
 
-## 🥦 7. Slash Prompt Spend with BroccoliDB
+## 🥦 7. Dynamic Representation Selection with BroccoliDB
 
-To compress large context logs, ASTs, or documents before calling the LLM:
+Evaluate and optimize incoming context with automatic density bypass and institutional noise pruning:
 
 ```typescript
 import { BroccoliCompactionFacade } from '@/core/broccolidb';
 
-// Slashes input prompt tokens by up to 85.9% with fail-closed provenance validation
-const { compactedPrompt, tokensSaved } = BroccoliCompactionFacade.compact({
-  mode: 'log_stream',
-  logs: rawLogLines,
+// Adaptive representation selection:
+// - Clean prompts (<200 tokens) bypass compaction (0% dilation overhead, 100% baseline preservation)
+// - Noisy prompts/incident streams are compacted up to 92.1% with fail-closed provenance validation
+const selection = BroccoliCompactionFacade.selectRepresentation({
+  text: rawContextText,
+  taskType: 'architecture_invariants',
+  tokenBudget: 1024,
 });
 
-console.log(`Saved ${tokensSaved} input tokens before model invocation`);
+console.log(selection.selectedRepresentation); // Actionable, task-relevant context
 ```
 
-To run the empirical inference boundary test across OpenAI models:
+To run empirical benchmarks:
 ```bash
+# 1. 8-Point maintainer workstation diagnostic (<5s)
+npm run onboard
+
+# 2. 7-Tier progressive institutional entropy benchmark
+npm run bench:entropy
+
+# 3. OpenAI billed dollar empirical benchmark
 npm run bench:inference-boundary
 ```
+
 

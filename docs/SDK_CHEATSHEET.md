@@ -287,35 +287,50 @@ const sseRes = toSSEResponse(asyncGenerator);
 
 ---
 
-## 🥦 8. BroccoliDB Context Compaction Cheatsheet
+## 🥦 8. BroccoliDB Representation Selection & Compaction Cheatsheet
 
 ```typescript
 import { BroccoliCompactionFacade } from '@/core/broccolidb';
 
-// 1. Domain Compaction (180 industry domains, fail-closed safety gate)
+// 1. Dynamic Representation Selection & Adaptive Density Bypass (ADR 0067)
+// Automatically passes small/clean prompts (<200 tokens) through verbatim (0% dilation)
+// Automatically prunes institutional noise (superseded ADRs, meeting minutes) on complex code
+const selection = BroccoliCompactionFacade.selectRepresentation({
+  text: rawContextText,
+  taskType: 'architecture_invariants',
+  tokenBudget: 1024,
+});
+console.log(selection.decision);               // 'BYPASS_IDENTITY' | 'COMPACT_GOVERNANCE' | 'COMPACT_INCIDENT'
+console.log(selection.selectedRepresentation); // Actionable, task-relevant representation
+
+// 2. Domain Compaction (180 industry domains, fail-closed safety gate)
 const legal = BroccoliCompactionFacade.compactDomain(discoveryText, 'Interrogatory');
 console.log(`Saved ${legal.tokensSaved} tokens (${legal.savingsPercentage}%)`);
 
-// 2. Linux Kernel eBPF Telemetry Stream
+// 3. Linux Kernel eBPF Telemetry Stream
 const ebpf = BroccoliCompactionFacade.compact({
   mode: 'ebpf_stream',
   events: syscallEvents,
 });
 
-// 3. Kubernetes Watch Stream Compaction
+// 4. Kubernetes Watch Stream Compaction
 const k8s = BroccoliCompactionFacade.compact({
   mode: 'k8s_watch_stream',
   events: k8sWatchDeltas,
 });
 
-// 4. 2,000+ Page Outage Storm Cascader (57ms)
+// 5. 2,000+ Page Outage Storm Cascader (57ms)
 const incident = BroccoliCompactionFacade.compactIncident({
   rawStreamText: logStormText,
   targetTokenBudget: 4096,
   incidentTitle: 'Production DB Failover',
 });
 
-// 5. Run Empirical OpenAI Boundary Benchmark
-// npm run bench:inference-boundary
+// 6. Empirical Verification Commands:
+// npm run onboard                    (8-Point Workstation Diagnostic)
+// npm run bench:entropy              (7-Tier Progressive Entropy Benchmark)
+// npm run bench:inference-boundary   (OpenAI Billed Dollar Empirical Suite)
+// npm run scaffold:compactor         (Interactive Compactor Scaffolder)
 ```
+
 

@@ -306,7 +306,10 @@ Any engineer modifying or adding to the BroccoliDB deduplication substrate must 
 4. **OOM Immunity Invariant**: All unbounded stream ingress must be wrapped in `BroccoliCascadingSpilloverBuffer` to guarantee disk spillover protection.
 5. **Factual Grounding & Anti-Hallucination Invariant**: Any semantic compactor must verify numbers, dates, currencies, and identifiers against the source (`BroccoliCompactionSafety`) and fail closed to raw source text if an unsupported fact is detected.
 6. **Epistemic Provenance Invariant**: Benchmarking must report empirical provider-boundary usage and dollar receipts under Randomized Branch-Blinded A/B evaluation, acknowledging workload dispersion without target priors.
-7. **No Regressions**: Any commit must pass `npx tsc --noEmit`, `npm run test:broccolidb:api`, `npm run test:broccolidb:hardening`, and `npm run bench:inference-boundary` with zero failures.
+7. **No Regressions**: Any commit must pass `npx tsc --noEmit`, `npm run test:broccolidb:api`, `npm run test:broccolidb:hardening`, `npm run bench:inference-boundary`, and `npm run bench:entropy` with zero failures.
 8. **Unframed Observation Invariant**: Before inventing new abstractions or imposing conceptual models on users, conduct unframed behavioral trials ([Stage 8 Playbook](playbooks/08-unframed-developer-observation-protocol.md)) and treat induced developer mental models as primary product data.
+9. **Representation Selection & Identity Operator Invariant (ADR 0067)**: The system must evaluate $C \to \{ \text{ID}(C), T(C) \}$. When context is already dense and clean ($<200$ tokens), the **Adaptive Density Gate** must return the unmodified identity representation $\text{ID}(C)$, eliminating negative compression overhead.
+10. **Institutional Entropy Resistance Invariant (ADR 0066)**: In noisy corporate environments with conflicting historical guidance, the system must evaluate **Action Safety** across the 7 adversarial traps, pruning obsolete governance while defending binding cryptographic, memory, and runtime invariants (`npm run bench:entropy`).
+
 
 
