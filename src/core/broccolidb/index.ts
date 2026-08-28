@@ -74,7 +74,9 @@ export * from "./BroccoliBinaryDeltaIngester";
 export * from "./BroccoliDocumentHeadTailSampler";
 export * from "./BroccoliSlotCompactor";
 export * from "./BroccoliSQLPlanCache";
+export * from "./BroccoliSymbolSlicer";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
