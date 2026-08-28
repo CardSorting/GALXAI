@@ -10,6 +10,9 @@ import {
   GalxSpendGovernanceEngine,
   type GovernanceDecision
 } from '../../core/governance/GalxSpendGovernanceEngine';
+import { ContextCompactor } from '../../core/optimization/ContextCompactor';
+import { OutputVerbosityOptimizer } from '../../core/optimization/OutputVerbosityOptimizer';
+import { BroccoliSpendSubstrate } from '../../core/broccolidb/BroccoliSpendSubstrate';
 
 export interface CloudflareEnv {
   ENVIRONMENT?: string;
@@ -589,6 +592,34 @@ export class GalxEdgeGateway {
 
     const modelSpec = ModelCatalog.resolveModel(governanceDecision.effectiveModel);
     body.model = modelSpec.id;
+
+    // Apply Context Compaction (Deflate O(N^2) History Bloat)
+    const compaction = ContextCompactor.compact(body.messages as any);
+    if (compaction.wasCompacted) {
+      body.messages = compaction.compactedMessages as any;
+    }
+
+    // Apply Output Verbosity Optimization (Slash Conversational Fluff)
+    const verbosity = OutputVerbosityOptimizer.optimizeRequest(body.messages as any, { isApiCall: true });
+    if (verbosity.result.wasOptimized) {
+      body.messages = verbosity.optimizedMessages as any;
+    }
+
+    // Ingest into Unified BroccoliDB AI Spend Substrate (CAS Vault, WAL, Lease, CDC)
+    const promptText = (body.messages as any[]).map((m: any) => (typeof m.content === 'string' ? m.content : JSON.stringify(m.content || ''))).join('\n');
+    BroccoliSpendSubstrate.processLifecycle({
+      traceId: `trace_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
+      department: request.headers.get('x-galx-department') || 'general',
+      costCenter: request.headers.get('x-galx-cost-center') || 'infrastructure',
+      serviceId: request.headers.get('x-galx-workload') || 'chat',
+      model: modelSpec.id,
+      promptText,
+      estimatedCostUsd: governanceDecision.estimatedMaximumCostUsd,
+      promptTokens: Math.ceil(promptText.length / 4),
+      completionTokens: body.max_tokens || 2048,
+      durationMs: 25.0,
+    });
+
     const allowSyntheticResponses = this.syntheticResponsesAllowed();
 
     // 3. Upstream OpenAI Pass-Through if OPENAI_API_KEY is configured and provider is openai
