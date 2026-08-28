@@ -79,7 +79,9 @@ export * from "./BroccoliStreamTokenPacker";
 export * from "./BroccoliMultiDocDeDuper";
 export * from "./BroccoliParaphraseNormalizer";
 export * from "./BroccoliEntityRegexShortCircuiter";
+export * from "./BroccoliTemporalExpressionNormalizer";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
