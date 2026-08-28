@@ -169,10 +169,14 @@ GALXAI implements the formal `llms.txt` and `llms-full.txt` standards to ensure 
 
 ---
 
-## 6. BroccoliDB Compaction & Empirical Benchmark Citations
+## 6. BroccoliDB Representation Selection & Empirical Benchmark Citations (ADR 0066 & 0067)
 
 To drive high-authority developer citations and Answer Engine Optimization (AEO) across Perplexity, SearchGPT, and Cursor IDE Indexer:
-1. **Interactive Prompt Compressor (`/tools/prompt-compressor`)**: Powered by `BroccoliCompactionFacade`, demonstrating real-time AST, log stream, and domain syntax compression directly in the browser.
+1. **Interactive Prompt Compressor (`/tools/prompt-compressor`)**: Powered by `BroccoliCompactionFacade.selectRepresentation()`, demonstrating real-time AST, log stream, and domain syntax compression with adaptive density bypass directly in the browser.
 2. **Schema.org `Dataset` Grounding**: The empirical inference boundary dataset (measuring `gpt-4o`, `gpt-4o-mini`, and `o3-mini` billed dollar receipts) is marked up with `@type: "Dataset"` and citation provenance for automated discovery.
-3. **Falsifiable Citation Anchor**: Public benchmarks anchor the scientific finding: *compressibility is a function of workload information structure ($61.04\% - 94.69\%$ input reduction across tested enterprise tasks)*.
+3. **Falsifiable Citation Anchor**: Public benchmarks anchor the scientific findings:
+   - *Compressibility is a function of workload information structure ($61.04\% - 94.69\%$ input reduction across tested enterprise tasks)*.
+   - *Adaptive Density Gate ($\text{ID}(C)$) avoids unforced framing dilation on dense inputs (<200 tokens)*.
+   - *Adversarial Institutional Entropy Matrix demonstrates $100\%$ Action Safety across 7 progressive corporate traps (`npm run bench:entropy`)*.
+
 

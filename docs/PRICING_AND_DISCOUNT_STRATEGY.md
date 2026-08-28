@@ -98,27 +98,34 @@ console.log(`Total Saved: $${savings.savingsUsd.toFixed(4)} (${savings.savingsPe
 
 ---
 
-## 5. BroccoliDB Input Compaction Multiplier & Inference Boundary Economics
+## 5. BroccoliDB Representation Selection Multiplier & Boundary Economics (ADR 0066 & 0067)
 
-While wholesale rate clearing reduces the unit price per million tokens, **BroccoliDB Compaction** slashes the required volume of input tokens at the source:
+While wholesale rate clearing reduces the unit price per million tokens, **BroccoliDB Representation Selection** dynamically optimizes the input representation presented to the model:
 
 ```mermaid
 flowchart LR
-    Raw[Raw Context: 100K Tokens] -->|BroccoliDB Compaction (85.9% Input Cut)| Compacted[Compacted Context: 14.1K Tokens]
+    Raw[Raw Context: 100K Tokens] -->|BroccoliDB Representation Selection (85.9% Input Cut)| Compacted[Task-Relevant Representation: 14.1K Tokens]
     Compacted -->|GALXAI Wholesale Tier-5 Clearing (25%-36% OFF)| Model[Model Inference Boundary]
     Model --> Spend[Compound Net Savings: 75% - 85% Total Billed $ Cut]
 ```
 
-### The Cost Decomposition:
+### The Cost Decomposition & Governance Guarantees:
 1. **Compressible Input Spend**: Slashed by **85.93%** across 180 domain compactors, log clustering, and AST reduction.
-2. **Observed Non-Compressible Output Floor**: Output generation and internal reasoning tokens remain the execution floor.
-3. **Compound ROI**:
+2. **Adaptive Density Gate ($\text{ID}(C)$)**: For small, clean inputs ($<200$ tokens), compaction is bypassed, preserving baseline prompt pricing without negative token dilation overhead.
+3. **Institutional Entropy Resistance (ADR 0066)**: Prunes corporate noise, superseded ADRs, and RFC ceremonies while enforcing active invariants, preserving **$100\%$ Action Safety** on `npm run bench:entropy`.
+4. **Observed Non-Compressible Output Floor**: Output generation and internal reasoning tokens remain the execution floor.
+5. **Compound ROI**:
    - Standard retail: $\$0.0321$ per run
    - Compacted input: $\$0.0097$ per run (**$69.9\%$ saved**)
    - Compacted $+$ Wholesale Tier-5: $\$0.0073$ per run (**$77.3\%$ total savings**)
 
-Run the empirical benchmark to verify exact provider-reported savings:
+Run the empirical benchmark suites to verify exact provider-reported savings and entropy resilience:
 ```bash
+# 1. 7-Tier Progressive Institutional Entropy Benchmark
+npm run bench:entropy
+
+# 2. OpenAI Billed Dollar Empirical Benchmark (Randomized Branch-Blinded)
 npm run bench:inference-boundary
 ```
+
 
