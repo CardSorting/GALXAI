@@ -175,8 +175,9 @@ RESPONSE TO SPECIAL INTERROGATORY NO. 14: Responding party objects on grounds of
 
 
   console.log('\n======================================================================');
-  console.log(`  ONBOARDING DIAGNOSTIC SCORECARD: ${passCount} PASSED | ${warnCount} WARNINGS | ${failCount} FAILS`);
+  console.log(`  ONBOARDING DIAGNOSTIC SCORECARD: ${passCount} PASSED | ${warnCount} WARNINGS | ${failCount} FAILS (0 committees harmed)`);
   console.log('======================================================================');
+
 
   if (failCount === 0) {
     console.log('\n🎉 WORKSTATION READY! You are fully equipped for GALXAI maintenance.');
