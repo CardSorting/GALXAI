@@ -65,4 +65,5 @@ export * from "./BroccoliPrefixTrieRouter";
 export * from "./BroccoliSemanticDictCompressor";
 export * from "./BroccoliJSONStreamClamper";
 export * from "./BroccoliTokenArbitrageur";
+export * from "./BroccoliStackTracePruner";
 export * from "./BroccoliSpendSubstrate";
