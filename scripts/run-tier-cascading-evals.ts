@@ -21,12 +21,7 @@ function generateBenchmarkSamples(count: number): EvalSample[] {
 }
 
 function run(): void {
-  console.log('======================================================================');
-  console.log('  RUNNING GALXAI QUALITY EQUIVALENCE & TIER CASCADING EVAL HARNESS');
-  console.log('======================================================================\n');
-
-  const samples = generateBenchmarkSamples(250);
-  console.log(`[1/3] Generated ${samples.length} production classification benchmark samples.`);
+  const samples = generateBenchmarkSamples(300);
 
   const result = TierCascadingEvalHarness.evaluateWorkload(
     'classification',
@@ -35,18 +30,14 @@ function run(): void {
     'gpt-5.6-luna'
   );
 
-  console.log(`[2/3] Executed Quality Comparison:`);
-  console.log(`      - Baseline Model (gpt-5.6-sol) Accuracy: ${(result.baselineAccuracy * 100).toFixed(1)}%`);
-  console.log(`      - Candidate Model (gpt-5.6-luna) Accuracy: ${(result.candidateAccuracy * 100).toFixed(1)}%`);
-  console.log(`      - Statistical Lower-Bound Delta (95% CI): ${result.evidence.lowerBoundQualityDelta}`);
-  console.log(`      - Cost Reduction Percentage: ${result.costReductionPercentage}%`);
-  console.log(`      - Approved for Autonomous Routing: ${result.isApprovedForAutonomousRouting ? 'YES (PASSED)' : 'NO'}`);
+  const report = TierCascadingEvalHarness.generateAttestationReport(result);
+  console.log(report);
 
   assert.equal(result.isApprovedForAutonomousRouting, true);
   assert.ok(result.evidence.lowerBoundQualityDelta >= -0.01);
+  assert.ok(result.attestationDigest.length === 64);
 
   // Validate that the generated evidence satisfies the SpendGovernanceEngine
-  console.log(`\n[3/3] Feeding Evidence Record into GalxSpendGovernanceEngine...`);
   const decision = GalxSpendGovernanceEngine.evaluate(
     {
       model: 'gpt-5.6-sol',
@@ -61,13 +52,7 @@ function run(): void {
   assert.equal(decision.effectiveModel, 'gpt-5.6-luna');
   assert.equal(decision.routeEvidenceId, result.evidence.id);
 
-  console.log(`      - Governance Decision: ${decision.action.toUpperCase()}`);
-  console.log(`      - Effective Route: ${decision.effectiveModel} (Original: ${decision.requestedModel})`);
-  console.log(`      - Route Evidence ID: ${decision.routeEvidenceId}`);
-
-  console.log('\n======================================================================');
-  console.log('   TIER CASCADING QUALITY EQUIVALENCE VERIFICATION PASSED (100%)');
-  console.log('======================================================================\n');
+  console.log('\n✅ Verified: ModelRouteEvidence passed cryptographic and policy enforcement checks.\n');
 }
 
 run();
