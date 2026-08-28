@@ -102,7 +102,10 @@ export * from "./BroccoliEdgarCompactor";
 export * from "./BroccoliPriorAuthCompactor";
 export * from "./BroccoliLockfileCompactor";
 export * from "./BroccoliOrderTrackingCompactor";
+export * from "./BroccoliDockerfileCompactor";
+export * from "./BroccoliRmaCompactor";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
