@@ -24,8 +24,9 @@ GALXAI serves as a high-performance compute pooling gateway and execution substr
 | **Silent Security Configuration Drift** | Shard encryption or rate limiting accidentally disabled during updates. | **High** | **Autonomous SOC 2 Drift Engine**: Evaluates 28 controls in real-time and triggers automatic self-healing routines. |
 | **Volumetric Edge Ingress Flooding** | Bot swarms attempt to exhaust origin servers with HTTP request storms. | **High** | **Cloudflare Anycast WAF & Fast-Path Prefix Filter**: Drops invalid keys and floods in $<1\text{ms}$ at the 300+ Edge PoPs. |
 | **Edge Rate Limit Query Storms** | Million-request bursts hammer PostgreSQL connection pools with rate checks. | **High** | **Distributed Edge KV Sliding-Window Limiter (`RATE_LIMIT_KV`)**: Evaluates token buckets in V8 isolates without DB IOPS. |
-| **Ephemeral State Nonce Accumulation Bloat** | Millions of consumed DPoP proofs, device codes, and PAR URIs bloat database storage. | **Low** | **PostgreSQL Substrate Vacuum Cron (`fn_scavenge_oauth_substrate_cron`)**: Periodic single-transaction sweep of expired records. |
 | **Ungrounded Compaction Hallucination** | Regex or semantic compaction mutates a financial dollar figure, account number, or date. | **Critical** | **`BroccoliCompactionSafety`**: Deterministic fact-checking gate verifying all numbers, dates, percentages, and entities; fails closed to unmodified raw source text upon any discrepancy. |
+| **Institutional Context Poisoning & Superseded Guidance** | Stale corporate documentation and superseded historical ADRs (e.g. deprecated `HS256` schemes) misguide reasoning models into violating active security rules. | **Critical** | **`BroccoliArchitectureInvariantCompactor` (ADR 0066/0067)**: Epistemic invariant filtering isolates active cryptographic, memory (`zeroizeBuffer`), and runtime (`edge`) invariants while pruning historical minutes and deprecated RFCs (`npm run bench:entropy`). |
+
 
 
 ---

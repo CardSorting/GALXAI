@@ -128,12 +128,38 @@ In high-concurrency client environments, duplicate requests often fire concurren
 
 ---
 
-## 6. Pre-Inference Representation Transformation Routing
+## 6. Pre-Inference Representation Transformation & Adaptive Selection Routing
 
-Before an incoming request is dispatched to physical shards via P-AHT or SWRR, the payload passes through the **BroccoliDB Representation Router**:
+Before an incoming request is dispatched to physical shards via P-AHT or SWRR, the payload passes through **`BroccoliCompactionFacade.selectRepresentation()`** (ADRs 0056–0067):
 
-1. **Entropy & Redundancy Classification**: Analyzes incoming context structure (raw log lines, eBPF events, JSON time series, or contractual legal clauses).
-2. **Specialized Reducer Selection**: Routes payload to the matching reducer among 19 specialized modes (or 180 domain industry compactors via Aho-Corasick trie matching).
+```mermaid
+flowchart TD
+    RawContext[Incoming Context C & Task T] --> DensityGate{Adaptive Density Gate<br>Tokens < 200 or Clean?}
+    
+    DensityGate -->|YES (Clean / Low Token Count)| ID[Identity Operator ID C<br>0.0% Overhead / 100% Action Safety]
+    DensityGate -->|NO (Noise Detected)| Classifier{Context Archetype Classifier}
+    
+    Classifier -->|Institutional Noise / ADRs| InvariantCompactor[BroccoliArchitectureInvariantCompactor<br>Prunes 65 ADRs & Stale RFCs]
+    Classifier -->|Incident Logs / Outages| Cascader[BroccoliMegaIncidentStreamCascader]
+    Classifier -->|180 Industry Domains| DomainOpt[BroccoliDomainSpendOptimizer]
+    Classifier -->|Kernel eBPF & K8s Watch| HighVel[BroccoliHighVelocityPipeline]
+    
+    InvariantCompactor --> ProvenanceGate{BroccoliCompactionSafety<br>Fail-Closed Fact Verification}
+    Cascader --> ProvenanceGate
+    DomainOpt --> ProvenanceGate
+    HighVel --> ProvenanceGate
+    
+    ProvenanceGate -->|VERIFIED| CompactedRep[Task-Relevant Representation C']
+    ProvenanceGate -->|UNSUPPORTED FACT| SafeFallback[Safe Fallback to Raw Source Text]
+    
+    ID --> SoftReservation[Downstream P-AHT Soft Token Reservation]
+    CompactedRep --> SoftReservation
+    SafeFallback --> SoftReservation
+```
+
+1. **Adaptive Density Gate ($\text{ID}(C)$)**: If context is already dense and clean ($<200$ tokens), it bypasses transformation entirely, preventing negative token dilation.
+2. **Institutional Invariant Isolation (ADR 0066)**: When corporate noise is detected, it strips obsolete governance artifacts while elevating active cryptographic (`RS256`), memory (`zeroizeBuffer`), and runtime (`edge`) invariants (`npm run bench:entropy`).
 3. **Fail-Closed Provenance Gate (`BroccoliCompactionSafety`)**: Verifies all output numbers, dates, BICs, percentages, and IDs against the original input. If any discrepancy exists, fails closed to unmodified source text.
 4. **Hydraulic Quota Benefit**: Downstream P-AHT computes soft reservation tokens against the *compacted* token count, saving up to $85.9\%$ of reserved shard headroom.
+
 
