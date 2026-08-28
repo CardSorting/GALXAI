@@ -108,7 +108,10 @@ export * from "./BroccoliNdaCompactor";
 export * from "./BroccoliDischargeCompactor";
 export * from "./BroccoliOpenApiCompactor";
 export * from "./BroccoliInvoiceCompactor";
+export * from "./BroccoliRealEstateCompactor";
+export * from "./BroccoliSettlementCompactor";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
