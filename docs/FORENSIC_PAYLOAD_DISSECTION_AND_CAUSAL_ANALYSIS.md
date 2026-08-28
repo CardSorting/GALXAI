@@ -204,7 +204,37 @@ Compression opportunity is fundamentally a function of **redundancy in the repre
 
 ---
 
-## 6. Summary Matrix of Transformations & Associated Mechanisms
+## 6. Workload 5: Enterprise Repository Institutional Entropy & Action Safety (ADR 0066 & 0067)
+
+### A. The Transformation
+```
+┌────────────────────────────────────────────────────────┐
+│ BASELINE INPUT (L7 Saturated): ~1,402 tokens           │
+│ • Active code invariants (RS256, key v2, edge runtime) │
+│ • Superseded ADRs (ADR 0012: HS256)                    │
+│ • Stale README start scripts                           │
+│ • Governance ceremonies (RFC 42-B, meeting minutes)    │
+├────────────────────────────────────────────────────────┤
+│                          ▼                             │
+│       BroccoliArchitectureInvariantCompactor           │
+│       (with Adaptive Density Gate for L1 Bypass)       │
+│                          ▼                             │
+├────────────────────────────────────────────────────────┤
+│ COMPACTED INPUT: ~111 tokens (444 characters)          │
+│ • Pruned historical governance minutes and stale ADRs  │
+│ • Preserved binding active cryptographic & code rules  │
+└────────────────────────────────────────────────────────┘
+```
+
+### B. Causal Mechanism & Action Safety Analysis
+- **What Was Removed**: 1,291 tokens of historical corporate ceremony, superseded RFC proposals, and deprecated `HS256` architectural decisions.
+- **What Was Retained**: Invariant 1 (`RS256` with key `v2`), Invariant 2 (`zeroizeBuffer()` in `finally`), Invariant 3 (`runtime = 'edge'`).
+- **Why It Worked**: Unlike raw LLMs that become confused by conflicting historical authority (causing safety to collapse to $20\%$), representation selection isolates active code invariants from historical archives, preserving **$100\%$ Action Safety** with a **$92.1\%$ token reduction**.
+- **The Identity Path ($L_1$)**: For clean inputs ($94$ tokens), the **Adaptive Density Gate** bypasses transformation entirely ($0.0\%$ dilation overhead, $100\%$ action safety preserved).
+
+---
+
+## 7. Summary Matrix of Transformations & Associated Mechanisms
 
 | Workload | Input Reduction | Transformation Performed | Invariant Preserved | Associated Mechanism |
 | :--- | :---: | :--- | :--- | :--- |
@@ -212,16 +242,25 @@ Compression opportunity is fundamentally a function of **redundancy in the repre
 | **Research (Legal)** | **61.04%** | Pruned page headers & statutory definitions | Covenant caps, deadlines, rates | Document structure indexing |
 | **DevOps (eBPF)** | **94.69%** | Collapsed 140 benign polling heartbeats | Attacker PID, container, reverse shell | Anomaly isolation vs equilibrium noise |
 | **Telemetry (IoT)** | **94.34%** | Replaced 150 discrete JSONs with summary moments | ISO 10816 CRITICAL, peak 9.1 mm/s | Statistical moment reduction |
+| **Governance (ADR 0066)** | **92.10%** | Pruned obsolete RFC forms & superseded ADRs | RS256, zeroizeBuffer, runtime='edge' | Epistemic invariant isolation |
 
 ---
 
-## 7. How to Inspect Live Payloads Yourself
+## 8. How to Inspect Live Payloads Yourself
 
-Run the payload dissection tool locally:
+Run the payload dissection and benchmark tools locally:
 
 ```bash
+# 1. Inspect before/after payload transformations and token math
 npx tsx scripts/dissect-payloads-and-causal-analysis.ts
+
+# 2. Run the 7-Tier Progressive Institutional Entropy Matrix
+npm run bench:entropy
+
+# 3. Run the Empirical OpenAI Inference Boundary Benchmark
+npm run bench:inference-boundary
 ```
 
 The sausage is open. The product transforms representations based on information structure. 🥦🔬
+
 
