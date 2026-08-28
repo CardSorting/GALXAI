@@ -122,7 +122,10 @@ export * from "./BroccoliFixCompactor";
 export * from "./BroccoliK8sCompactor";
 export * from "./BroccoliBoardMinutesCompactor";
 export * from "./BroccoliHl7Compactor";
+export * from "./BroccoliAcordCompactor";
+export * from "./BroccoliFnolCompactor";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
