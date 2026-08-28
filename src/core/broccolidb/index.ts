@@ -68,4 +68,5 @@ export * from "./BroccoliTokenArbitrageur";
 export * from "./BroccoliStackTracePruner";
 export * from "./BroccoliSystemVarSplitter";
 export * from "./BroccoliSubstringTrieCompactor";
+export * from "./BroccoliEmbeddingCoalescer";
 export * from "./BroccoliSpendSubstrate";
