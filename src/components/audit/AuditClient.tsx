@@ -37,6 +37,7 @@ import { ShareButton } from '@/components/common/ShareButton';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
+import { BroccoliLiveTelemetryWidget } from './BroccoliLiveTelemetryWidget';
 
 interface EnterpriseScalePreset {
   id: string;
@@ -882,6 +883,11 @@ Audit generated via: https://galx.ai/audit
             </div>
           </section>
         )}
+
+        {/* Live BroccoliDB L1 In-Memory Telemetry Substrate Widget */}
+        <section>
+          <BroccoliLiveTelemetryWidget />
+        </section>
 
         {/* 1-Line Gateway Multi-Language Drop-in Panel */}
         <section className="glass-panel p-6 sm:p-8 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 space-y-4">
