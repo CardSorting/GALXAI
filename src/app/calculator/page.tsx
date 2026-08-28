@@ -11,23 +11,37 @@ import {
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Universal AI Token & Prompt Caching Cost Calculator — GALXAI',
+  title: 'Universal AI Velocity & Total Cost of Ownership (TCO) Calculator — GALXAI',
   description:
-    'Simulate production LLM workloads to calculate exact monthly savings, compound 75% prompt caching rebates, and net annual enterprise ROI across OpenAI Codex and GPT-5.6.',
+    'Calculate the true economics of operating OpenAI models. Simulate 25%–40% wholesale token pricing, 75% compound prompt caching rebates, avoided developer infrastructure tuition, and accelerated time-to-first-dollar.',
   canonicalPath: '/calculator',
   keywords: [
-    'AI Token Calculator',
-    'Prompt Caching Calculator',
+    'AI Velocity Calculator',
+    'AI Total Cost of Ownership',
     'OpenAI Cost Calculator',
+    'Time to First Dollar AI',
+    'Prompt Caching Calculator',
     'GPT-5.6 Token Pricing',
     'Wholesale LLM Savings',
-    'AI ROI Simulator',
-    'AEO Calculator',
+    'Avoided Engineering Tuition',
+    'AI FinOps Simulator',
   ],
 });
 
 export default function CalculatorPage() {
   const calculatorFaqs = [
+    {
+      q: 'How does GALXAI compress Time-to-First-Dollar for AI applications?',
+      a: 'Building production AI traditionally requires 3–6 weeks of engineering time spent writing backend proxy routes, managing client-side API key security, handling 429 rate-limit retries, and building complex loading states. GALXAI eliminates this with drop-in React components (<GalxChat />, <GalxImage />), zero-route Server Actions, and automatic 1-line OpenAI SDK patching (import "galxai/patch").',
+    },
+    {
+      q: 'What is "Avoided Engineering Tuition"?',
+      a: 'Engineering teams typically waste 15+ hours per month per developer debugging inference edge cases, maintaining custom proxy servers, and fixing streaming socket failures. GALXAI provides pre-built, hardened infrastructure so your team avoids paying that operational and engineering tuition.',
+    },
+    {
+      q: 'How does Intelligent Tier Cascading prevent frontier model overspend?',
+      a: 'Many teams accidentally use flagship reasoning models (like gpt-5.6-sol) for simple classification, routing, or formatting tasks. Intelligent Tier Cascading automatically identifies simple workloads and routes them to high-velocity tiers (like gpt-5.6-terra or gpt-5.6-luna), unlocking an additional 20%–40% cost reduction without quality degradation.',
+    },
     {
       q: 'How is the prompt caching savings calculated?',
       a: 'When prompt prefixes exceed 1,024 tokens and match cached RAM slices, GALXAI applies a 75% compound rebate on the input token price, passing 100% of the upstream savings directly to your wallet.',
@@ -36,26 +50,22 @@ export default function CalculatorPage() {
       q: 'Do I need an enterprise subscription to access wholesale rates?',
       a: 'No. GALXAI provides direct wholesale rates starting on your very first token with zero monthly seat licenses and zero minimum commitments.',
     },
-    {
-      q: 'Can I export this calculation for my finance / budget approval team?',
-      a: 'Yes. Click "Copy ROI Audit Report" above to copy a machine-formatted summary ready for inclusion in team budget proposals.',
-    },
   ];
 
   const appSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: 'GALXAI Universal AI Token & Prompt Caching Cost Calculator',
+    name: 'GALXAI Universal AI Velocity & Total Cost of Ownership (TCO) Calculator',
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Any',
     url: `${SITE_CONFIG.url}/calculator`,
     description:
-      'Interactive financial tool for simulating LLM inference token costs, prompt caching rebates, and annual enterprise savings.',
+      'Interactive economic simulator for measuring OpenAI inference token savings, prompt caching rebates, avoided developer infrastructure tuition, and time-to-first-dollar velocity.',
     offers: {
       '@type': 'Offer',
       price: '0.00',
       priceCurrency: 'USD',
-      description: 'Free instant ROI simulator and budget forecasting tool',
+      description: 'Free instant AI velocity and TCO forecasting tool',
     },
   };
 
@@ -66,14 +76,14 @@ export default function CalculatorPage() {
       createFAQPageSchema(calculatorFaqs),
       createBreadcrumbSchema([
         { name: 'Home', url: '/' },
-        { name: 'Calculator', url: '/calculator' },
+        { name: 'AI Velocity & TCO Calculator', url: '/calculator' },
       ]),
       createTechArticleSchema({
-        headline: 'Universal AI Token & Prompt Caching Cost Calculator',
+        headline: 'Universal AI Velocity & Total Cost of Ownership (TCO) Calculator',
         description:
-          'Simulate production LLM workloads to calculate monthly savings and prompt caching rebates.',
+          'Simulate production OpenAI workloads to calculate monthly token savings, prompt caching rebates, and avoided developer infrastructure tuition.',
         path: '/calculator',
-        keywords: ['Token Calculator', 'Prompt Caching', 'AI Pricing', 'AEO'],
+        keywords: ['AI Velocity Calculator', 'TCO Calculator', 'Prompt Caching', 'OpenAI Pricing', 'AEO'],
       }),
     ],
   };

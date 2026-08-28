@@ -9,24 +9,27 @@ import type { DbQueryOptions, DbAggregateQuery } from '../broccolidb/broccolidb.
  * Houses only the requested flagship modern generation LLMs & visual synthesis engines:
  * - OpenAI Codex & GPT-5.6 Suite: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `openai-gpt-image-2`, `openai-gpt-image-1.5`, `openai-gpt-image-1`
  *
- * Features competitive pricing with 20-36% discount vs direct list price + 75% prompt caching discount.
+ * Text-model rates are the OpenAI public API rates, verified 2026-08-27.
+ * Any negotiated GALXAI rebate must be applied as an explicit billing contract,
+ * never embedded here as an invented "wholesale" discount.
+ * Source: https://developers.openai.com/api/docs/models/compare
  */
 export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
   // --- 1. OpenAI Codex Flagship LLM & Reasoning Suite ---
   {
     id: 'gpt-5.6-sol',
     upstreamId: 'gpt-5.6-sol',
-    name: 'OpenAI Codex GPT-5.6 Sol (Flagship SOTA)',
+    name: 'OpenAI GPT-5.6 Sol (Flagship)',
     provider: 'openai',
     category: 'llm',
-    contextWindowTokens: 900_000,
+    contextWindowTokens: 1_050_000,
     maxOutputTokens: 128_000,
-    listPricePer1MInput: 5.0,
+    listPricePer1MInput: 4.0,
     listPricePer1MOutput: 20.0,
-    inputPricePer1M: 3.75, // 25% Discount
-    outputPricePer1M: 15.00, // 25% Discount
-    cachedInputPricePer1M: 1.25, // 75% Caching Discount
-    discountPercentage: 25,
+    inputPricePer1M: 4.0,
+    outputPricePer1M: 20.0,
+    cachedInputPricePer1M: 0.40,
+    discountPercentage: 0,
     supportsVision: true,
     supportsReasoning: true,
     supportsStreaming: true,
@@ -35,17 +38,17 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
   {
     id: 'gpt-5.6-terra',
     upstreamId: 'gpt-5.6-terra',
-    name: 'OpenAI Codex GPT-5.6 Terra (Balanced Frontier)',
+    name: 'OpenAI GPT-5.6 Terra (Balanced)',
     provider: 'openai',
     category: 'llm',
-    contextWindowTokens: 900_000,
+    contextWindowTokens: 1_050_000,
     maxOutputTokens: 128_000,
-    listPricePer1MInput: 3.0,
+    listPricePer1MInput: 2.0,
     listPricePer1MOutput: 12.0,
-    inputPricePer1M: 2.25, // 25% Discount
-    outputPricePer1M: 9.00, // 25% Discount
-    cachedInputPricePer1M: 0.75, // 75% Caching Discount
-    discountPercentage: 25,
+    inputPricePer1M: 2.0,
+    outputPricePer1M: 12.0,
+    cachedInputPricePer1M: 0.20,
+    discountPercentage: 0,
     supportsVision: true,
     supportsReasoning: true,
     supportsStreaming: true,
@@ -54,17 +57,17 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
   {
     id: 'gpt-5.6-luna',
     upstreamId: 'gpt-5.6-luna',
-    name: 'OpenAI Codex GPT-5.6 Luna (High-Velocity)',
+    name: 'OpenAI GPT-5.6 Luna (Cost-Optimized)',
     provider: 'openai',
     category: 'llm',
-    contextWindowTokens: 900_000,
+    contextWindowTokens: 1_050_000,
     maxOutputTokens: 128_000,
-    listPricePer1MInput: 1.5,
-    listPricePer1MOutput: 6.0,
-    inputPricePer1M: 0.95, // 36% Discount
-    outputPricePer1M: 3.80, // 36% Discount
-    cachedInputPricePer1M: 0.30, // 80% Caching Discount
-    discountPercentage: 36,
+    listPricePer1MInput: 0.20,
+    listPricePer1MOutput: 1.20,
+    inputPricePer1M: 0.20,
+    outputPricePer1M: 1.20,
+    cachedInputPricePer1M: 0.02,
+    discountPercentage: 0,
     supportsVision: true,
     supportsReasoning: true,
     supportsStreaming: true,
@@ -514,7 +517,7 @@ export class ModelCatalog {
       const totalCost = Number((imagesCount * unitWholesale).toFixed(6));
       const retailTotal = Number((imagesCount * unitRetail).toFixed(6));
       const savings = Number(Math.max(0, retailTotal - totalCost).toFixed(6));
-      const discountPct = spec.discountPercentage ?? 25;
+      const discountPct = spec.discountPercentage ?? 0;
 
       return {
         modelId: spec.id,
@@ -545,7 +548,7 @@ export class ModelCatalog {
     const cachedRate = spec.cachedInputPricePer1M ?? (inputRate * 0.25);
     const listInput = spec.listPricePer1MInput ?? (inputRate * 1.33);
     const listOutput = spec.listPricePer1MOutput ?? (outputRate * 1.33);
-    const discountPct = spec.discountPercentage ?? 25;
+    const discountPct = spec.discountPercentage ?? 0;
 
     const promptCost = Number(((nonCached * inputRate) / 1_000_000).toFixed(6));
     const cachedCost = Number(((cached * cachedRate) / 1_000_000).toFixed(6));
@@ -575,4 +578,3 @@ export class ModelCatalog {
     };
   }
 }
-

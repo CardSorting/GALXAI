@@ -217,9 +217,17 @@ export class GalxPersistence {
     this.apiKeyRepo.saveGatewayKey(key).catch(() => {});
   }
 
-  public async saveGatewayKeyAsync(key: DeveloperGatewayKey): Promise<void> {
+  public async saveGatewayKeyAsync(
+    key: DeveloperGatewayKey,
+    options: { requireRemote?: boolean } = {}
+  ): Promise<void> {
     this.apiKeyTable.put(key.id, key);
-    await this.apiKeyRepo.saveGatewayKey(key);
+    try {
+      await this.apiKeyRepo.saveGatewayKey(key, options);
+    } catch (error) {
+      this.apiKeyTable.delete(key.id);
+      throw error;
+    }
   }
 
   // ==========================================

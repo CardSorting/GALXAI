@@ -144,12 +144,12 @@ Returns model architecture, context length, parameters, and template definitions
 
 ## 🎨 Visual Synthesis & Image Generation (`POST /v1/images/generations`)
 
-Visual synthesis endpoint routing across OpenAI and xAI Grok image generation engines with Midjourney/Flux aspect ratio absorption.
+Visual synthesis endpoint routing across OpenAI GPT-Image engines (`openai-gpt-image-2`, `openai-gpt-image-1.5`, `openai-gpt-image-1`) with declarative aspect ratio absorption.
 
 ### Request Body
 ```json
 {
-  "model": "flux",
+  "model": "openai-gpt-image-2",
   "prompt": "Cybernetic space station overlooking a nebula in 8k octane render",
   "aspect_ratio": "16:9",
   "response_format": "url"

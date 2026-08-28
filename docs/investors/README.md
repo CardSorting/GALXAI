@@ -15,6 +15,8 @@ Welcome to the **GALXAI Institutional Diligence Data Room**. This repository con
 | **[05. Competitive Landscape & Strategic Moats](05_COMPETITIVE_LANDSCAPE_AND_MOATS.md)** | 2x2 positioning matrix, feature teardown vs OpenRouter / Cloudflare / Portkey, and 4 defensible moats. | **Competitive Moats** |
 | **[06. 5-Year Financial Projections & Operating Model](06_FINANCIAL_PROJECTIONS_AND_MODEL.md)** | 5-year P&L forecast ($1.2M ARR $\to$ $85M ARR), headcount ramp, OpEx breakdown, and Rule of 40 index. | **Financial Model** |
 | **[07. Technical Due Diligence & Architecture Proof](07_TECHNICAL_DILIGENCE_AND_PATENTS.md)** | Technical audit FAQs for Partner CTOs, sub-15ms wire TTFT proof, ZDR v10 privacy, and test suite backing. | **Technical Diligence**|
+| **[08. Commercial Thesis & Customer Discovery Playbook](08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md)** | ICP segmentation matrix, procurement psychology ($100k vs $900k paradox), and 10-question discovery script. | **Commercial Discovery** |
+| **[09. Enterprise Spend Governance & Control Plane](09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md)** | "Why is our AI bill so high and how do we make it stop?" 7 waste root causes, Day 1 reverse-audit, and 3-tier remediation. | **Spend Governance** |
 
 ---
 

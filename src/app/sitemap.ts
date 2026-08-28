@@ -171,6 +171,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.91,
     },
     {
+      url: `${baseUrl}/audit`,
+      lastModified: currentDate,
+      changeFrequency: 'daily',
+      priority: 0.94,
+    },
+    {
       url: `${baseUrl}/architecture`,
       lastModified: currentDate,
       changeFrequency: 'monthly',

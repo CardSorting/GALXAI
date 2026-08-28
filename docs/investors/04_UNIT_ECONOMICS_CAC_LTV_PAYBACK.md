@@ -72,7 +72,7 @@ flowchart LR
 ```
 
 ### Margin Mechanism 1: Tier Volume Aggregation (Float Arbitrage)
-GALXAI aggregates millions of small developer requests into single tier-5 enterprise accounts with upstream providers (OpenAI, Anthropic, xAI), capturing the 25%–35% delta between retail retail tier-1 and wholesale tier-5 pricing.
+GALXAI aggregates millions of small developer requests into single tier-5 enterprise accounts with OpenAI, capturing the 25%–35% delta between retail tier-1 and wholesale tier-5 pricing.
 
 ### Margin Mechanism 2: Compound Prompt Caching Pass-Through
 Prefix caching yields a 75% provider rebate on long context queries. GALXAI passes the full discount to the customer while maintaining its clearing fee on total processed throughput.

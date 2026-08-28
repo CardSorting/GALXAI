@@ -39,8 +39,8 @@ export function BenchmarksClient() {
   const filteredData = useMemo(() => {
     return BENCHMARKS_DATA.filter((item) => {
       if (selectedCategory === 'all') return true;
-      if (selectedCategory === 'openai') return item.provider === 'OpenAI';
-      if (selectedCategory === 'xai') return item.provider === 'xAI';
+      if (selectedCategory === 'llm') return item.category.toLowerCase() === 'llm';
+      if (selectedCategory === 'image') return item.category.toLowerCase() === 'image';
       return true;
     }).sort((a, b) => {
       if (sortBy === 'ttft') return a.avgTtftMs - b.avgTtftMs;
@@ -209,23 +209,23 @@ export function BenchmarksClient() {
                     selectedCategory === 'all' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400'
                   }`}
                 >
-                  All Providers
+                  All Models
                 </button>
                 <button
-                  onClick={() => setSelectedCategory('openai')}
+                  onClick={() => setSelectedCategory('llm')}
                   className={`px-3 py-1 rounded-lg transition-all ${
-                    selectedCategory === 'openai' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400'
+                    selectedCategory === 'llm' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400'
                   }`}
                 >
-                  OpenAI
+                  Reasoning &amp; LLMs
                 </button>
                 <button
-                  onClick={() => setSelectedCategory('xai')}
+                  onClick={() => setSelectedCategory('image')}
                   className={`px-3 py-1 rounded-lg transition-all ${
-                    selectedCategory === 'xai' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400'
+                    selectedCategory === 'image' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400'
                   }`}
                 >
-                  xAI
+                  GPT-Image Engines
                 </button>
               </div>
 

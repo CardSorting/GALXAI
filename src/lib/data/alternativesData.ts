@@ -242,7 +242,7 @@ const res = await client.chat.completions.create({
     title: 'Anyscale Endpoints Alternative — Sub-15ms Anycast Routing & Wholesale Rates',
     headline: 'High-Velocity Alternative to Anyscale Endpoints',
     description:
-      'Seamlessly route OpenAI and xAI completions with zero cold starts, sub-15ms Anycast TTFT, and wholesale billing with 0% platform markups.',
+      'Seamlessly route OpenAI completions with zero cold starts, sub-15ms Anycast TTFT, and wholesale billing with 0% platform markups.',
     verdict:
       'GALXAI provides instant key minting and Anycast low-latency routing without complex cluster provisioning or compute hour management.',
     feeComparison: [
@@ -358,7 +358,7 @@ const response = await client.chat.completions.create({
     title: 'Helicone Alternative — Fast AI Gateway with Volatile RAM ZDR',
     headline: 'Zero Data Retention Alternative to Helicone',
     description:
-      'Route OpenAI and xAI models through an ultra-low latency gateway with 25%–40% token savings, continuous token governance, and cryptographic Zero Data Retention (ZDR).',
+      'Route OpenAI models through an ultra-low latency gateway with 25%–40% token savings, continuous token governance, and cryptographic Zero Data Retention (ZDR).',
     verdict:
       'GALXAI combines transparent wholesale token pricing and automatic 75% prompt caching with zero disk-logging or data retention.',
     feeComparison: [

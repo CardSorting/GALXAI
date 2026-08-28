@@ -32,9 +32,11 @@ export interface VolumeTierInfo {
 
 export const VOLUME_TIERS: Record<VolumeDiscountTier, VolumeTierInfo> = {
   hobby: { tier: 'hobby', label: 'Starter / Developer', minMonthlySpendUsd: 0, additionalRebatePct: 0 },
-  startup: { tier: 'startup', label: 'Growth / Startup', minMonthlySpendUsd: 100, additionalRebatePct: 5 },
-  scale: { tier: 'scale', label: 'Scale / Team', minMonthlySpendUsd: 500, additionalRebatePct: 10 },
-  enterprise: { tier: 'enterprise', label: 'Frontier Enterprise', minMonthlySpendUsd: 2500, additionalRebatePct: 15 }
+  // Contract discounts must come from the customer's signed rate card. Until
+  // that source of truth is wired in, higher spend must not invent a rebate.
+  startup: { tier: 'startup', label: 'Growth / Startup', minMonthlySpendUsd: 100, additionalRebatePct: 0 },
+  scale: { tier: 'scale', label: 'Scale / Team', minMonthlySpendUsd: 500, additionalRebatePct: 0 },
+  enterprise: { tier: 'enterprise', label: 'Frontier Enterprise', minMonthlySpendUsd: 2500, additionalRebatePct: 0 }
 };
 
 export type SupportedCurrency = 'USD' | 'EUR' | 'GBP' | 'JPY' | 'CAD' | 'AUD' | 'CHF' | 'SGD';
@@ -92,7 +94,7 @@ export interface GranularCostBreakdown {
   volumeTierRebateUsd: number;
   netCostUsd: number;
   
-  // Direct Retail Comparison (OpenAI/xAI List Price)
+  // Direct Retail Comparison (OpenAI List Price)
   retailPromptCostUsd: number;
   retailCompletionCostUsd: number;
   retailTotalCostUsd: number;
@@ -180,7 +182,7 @@ export class TokenCostCalculator {
       const totalSavingsUsd = Number(Math.max(0, retailTotalCostUsd - netCostUsd).toFixed(6));
       const savingsPercentage = retailTotalCostUsd > 0
         ? Number(((totalSavingsUsd / retailTotalCostUsd) * 100).toFixed(1))
-        : (spec.discountPercentage ?? 25);
+        : (spec.discountPercentage ?? 0);
 
       const summary = `Generated ${imagesCount} image${imagesCount > 1 ? 's' : ''} on ${spec.name} for $${netCostUsd.toFixed(4)} USD (Saved $${totalSavingsUsd.toFixed(4)} vs direct retail list price).`;
 
@@ -237,7 +239,7 @@ export class TokenCostCalculator {
       const totalSavingsUsd = Number(Math.max(0, retailTotalCostUsd - netCostUsd).toFixed(6));
       const savingsPercentage = retailTotalCostUsd > 0
         ? Number(((totalSavingsUsd / retailTotalCostUsd) * 100).toFixed(1))
-        : (spec.discountPercentage ?? 25);
+        : (spec.discountPercentage ?? 0);
 
       const summary = `Embedded ${totalPrompt.toLocaleString()} tokens with ${spec.name} for $${netCostUsd.toFixed(6)} USD.`;
 
@@ -291,10 +293,23 @@ export class TokenCostCalculator {
     const audioInTokens = usage.audioInputTokens || (usage.audioInputSeconds ? Math.ceil(usage.audioInputSeconds * 25) : 0);
     const audioOutTokens = usage.audioOutputTokens || (usage.audioOutputSeconds ? Math.ceil(usage.audioOutputSeconds * 50) : 0);
 
-    // GALXAI Wholesale Rates (per 1M tokens) with safe fallbacks
+    // Active customer rates (per 1M tokens) with safe fallbacks.
     const galxInputRate = spec.inputPricePer1M ?? 1.0;
     const galxCachedRate = spec.cachedInputPricePer1M ?? (galxInputRate * 0.25);
     const galxOutputRate = spec.outputPricePer1M ?? 2.0;
+
+    // GPT-5.6 pricing rules verified against the OpenAI model documentation on
+    // 2026-08-27: cache writes cost 1.25x input; requests above 272K input
+    // tokens cost 2x input/cached input and 1.5x output for the full request.
+    const usesGpt56Pricing = spec.id.startsWith('gpt-5.6-');
+    const longContext = usesGpt56Pricing && totalPrompt > 272_000;
+    const inputMultiplier = longContext ? 2.0 : 1.0;
+    const outputMultiplier = longContext ? 1.5 : 1.0;
+    const cacheWriteMultiplier = usesGpt56Pricing ? 1.25 : 1.0;
+    const effectiveGalxInputRate = galxInputRate * inputMultiplier;
+    const effectiveGalxCachedRate = galxCachedRate * inputMultiplier;
+    const effectiveGalxCacheWriteRate = galxInputRate * cacheWriteMultiplier * inputMultiplier;
+    const effectiveGalxOutputRate = galxOutputRate * outputMultiplier;
 
     // Audio rates ($40/1M in, $80/1M out standard)
     const audioInRate = 40.0;
@@ -305,19 +320,19 @@ export class TokenCostCalculator {
     const listOutputRate = spec.listPricePer1MOutput ?? (galxOutputRate * 1.33);
 
     // Micro-Costs down to 6 decimals (with batch multiplier)
-    const promptCostUsd = Number((((nonCachedPromptTokens * galxInputRate) / 1_000_000) * batchMultiplier).toFixed(6));
-    const cachedCostUsd = Number((((cachedTokens * galxCachedRate) / 1_000_000) * batchMultiplier).toFixed(6));
-    const cacheCreationCostUsd = Number((((cacheCreationTokens * galxInputRate) / 1_000_000) * batchMultiplier).toFixed(6));
-    const completionCostUsd = Number((((standardCompletionTokens * galxOutputRate) / 1_000_000) * batchMultiplier).toFixed(6));
-    const reasoningCostUsd = Number((((reasoningTokens * galxOutputRate) / 1_000_000) * batchMultiplier).toFixed(6));
+    const promptCostUsd = Number((((nonCachedPromptTokens * effectiveGalxInputRate) / 1_000_000) * batchMultiplier).toFixed(6));
+    const cachedCostUsd = Number((((cachedTokens * effectiveGalxCachedRate) / 1_000_000) * batchMultiplier).toFixed(6));
+    const cacheCreationCostUsd = Number((((cacheCreationTokens * effectiveGalxCacheWriteRate) / 1_000_000) * batchMultiplier).toFixed(6));
+    const completionCostUsd = Number((((standardCompletionTokens * effectiveGalxOutputRate) / 1_000_000) * batchMultiplier).toFixed(6));
+    const reasoningCostUsd = Number((((reasoningTokens * effectiveGalxOutputRate) / 1_000_000) * batchMultiplier).toFixed(6));
     const audioCostUsd = Number(((((audioInTokens * audioInRate) + (audioOutTokens * audioOutRate)) / 1_000_000) * batchMultiplier).toFixed(6));
 
     const standardTotalCostUsd = Number((
-      ((nonCachedPromptTokens * galxInputRate) +
-       (cachedTokens * galxCachedRate) +
-       (cacheCreationTokens * galxInputRate) +
-       (standardCompletionTokens * galxOutputRate) +
-       (reasoningTokens * galxOutputRate) +
+      ((nonCachedPromptTokens * effectiveGalxInputRate) +
+       (cachedTokens * effectiveGalxCachedRate) +
+       (cacheCreationTokens * effectiveGalxCacheWriteRate) +
+       (standardCompletionTokens * effectiveGalxOutputRate) +
+       (reasoningTokens * effectiveGalxOutputRate) +
        (audioInTokens * audioInRate) +
        (audioOutTokens * audioOutRate)) / 1_000_000
     ).toFixed(6));
@@ -330,22 +345,24 @@ export class TokenCostCalculator {
     const netCostUsd = Number((rawTotalCostUsd - volumeRebateUsd).toFixed(6));
 
     // Direct Retail Equivalent Cost
-    const retailPromptCostUsd = Number(((totalPrompt * listInputRate) / 1_000_000).toFixed(6));
-    const retailCompletionCostUsd = Number(((completionTokens * listOutputRate) / 1_000_000).toFixed(6));
+    const effectiveListInputRate = listInputRate * inputMultiplier;
+    const effectiveListOutputRate = listOutputRate * outputMultiplier;
+    const retailPromptCostUsd = Number(((totalPrompt * effectiveListInputRate) / 1_000_000).toFixed(6));
+    const retailCompletionCostUsd = Number(((completionTokens * effectiveListOutputRate) / 1_000_000).toFixed(6));
     const retailTotalCostUsd = Number((retailPromptCostUsd + retailCompletionCostUsd).toFixed(6));
 
     // Savings Calculation
     const wholesaleSavingsUsd = Number(
-      Math.max(0, (retailPromptCostUsd - (promptCostUsd + cacheCreationCostUsd + ((cachedTokens * galxInputRate) / 1_000_000))) +
+      Math.max(0, (retailPromptCostUsd - (promptCostUsd + cacheCreationCostUsd + ((cachedTokens * effectiveGalxInputRate) / 1_000_000))) +
       (retailCompletionCostUsd - (completionCostUsd + reasoningCostUsd))).toFixed(6)
     );
     const cachingSavingsUsd = Number(
-      Math.max(0, (cachedTokens * (galxInputRate - galxCachedRate)) / 1_000_000).toFixed(6)
+      Math.max(0, (cachedTokens * (effectiveGalxInputRate - effectiveGalxCachedRate)) / 1_000_000).toFixed(6)
     );
     const totalSavingsUsd = Number(Math.max(0, retailTotalCostUsd - netCostUsd).toFixed(6));
     const savingsPercentage = retailTotalCostUsd > 0
       ? Number(((totalSavingsUsd / retailTotalCostUsd) * 100).toFixed(1))
-      : (spec.discountPercentage ?? 25);
+      : (spec.discountPercentage ?? 0);
 
     // Energy & Carbon Calculations (avg ~0.3Wh per 1K reasoning tokens)
     const estimatedEnergyWattHours = Number(((totalTokens / 1000) * 0.35).toFixed(4));
@@ -408,13 +425,16 @@ export class TokenCostCalculator {
     const recommendations: OptimizationRecommendation[] = [];
 
     // 1. Prompt Caching Recommendation
-    if (breakdown.promptTokens > 1500 && breakdown.cachedTokens === 0) {
-      const potentialMonthlySavings = Number((((breakdown.promptTokens * 0.75 * 2.5) / 1_000_000) * monthlyQueries).toFixed(2));
+    if (breakdown.promptTokens >= 1024 && breakdown.cachedTokens === 0) {
+      const spec = EXCLUSIVE_MODEL_CATALOG.find(model => model.id === breakdown.modelId);
+      const inputRate = spec?.inputPricePer1M ?? 0;
+      const cachedRate = spec?.cachedInputPricePer1M ?? inputRate;
+      const potentialMonthlySavings = Number((((breakdown.promptTokens * Math.max(0, inputRate - cachedRate)) / 1_000_000) * monthlyQueries).toFixed(2));
       if (potentialMonthlySavings > 5) {
         recommendations.push({
           type: 'caching',
-          title: 'Enable Prompt Caching on System Prompts',
-          description: `You are sending ~${breakdown.promptTokens} input tokens with 0% cache hits. Placing static tool schemas and system instructions at the start of your prompt enables 75% cache read rebates.`,
+          title: 'Preserve a Reusable Prompt Prefix',
+          description: `You are sending ~${breakdown.promptTokens} input tokens with 0% cache hits. Keep reusable instructions and tool schemas stable, use the provider's cache controls, and track both cache reads and cache-write tokens before rollout.`,
           estimatedMonthlySavingsUsd: potentialMonthlySavings,
           impactLevel: 'high'
         });
@@ -433,7 +453,7 @@ export class TokenCostCalculator {
         recommendations.push({
           type: 'model_selection',
           title: 'Route Lightweight Tasks to GPT-5.6 Luna',
-          description: `Short queries (<1k tokens) can often be handled by GPT-5.6 Luna with ~74% lower compute cost and sub-50ms latency.`,
+          description: `This workload has a lower-cost Luna candidate. Validate it on a representative regression set and production shadow sample before changing the route.`,
           estimatedMonthlySavingsUsd: monthlySavings,
           impactLevel: 'medium'
         });
@@ -491,7 +511,7 @@ export class TokenCostCalculator {
     const cachedRate = spec.cachedInputPricePer1M ?? (inputRate * 0.25);
     const listInput = spec.listPricePer1MInput ?? (inputRate * 1.33);
     const listOutput = spec.listPricePer1MOutput ?? (outputRate * 1.33);
-    const discountPct = spec.discountPercentage ?? 25;
+    const discountPct = spec.discountPercentage ?? 0;
 
     let formattedRateDisplay = `$${inputRate.toFixed(2)} in / $${outputRate.toFixed(2)} out per 1M`;
     if (spec.category === 'image') {

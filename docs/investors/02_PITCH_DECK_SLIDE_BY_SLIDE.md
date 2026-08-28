@@ -26,7 +26,7 @@ An institutional-grade 12-slide investor pitch deck structure optimized for Tier
 ### 🎴 Slide 3: The Solution
 - **Headline**: Wholesale Pricing + Ambient Declarative Integration
 - **Key Columns**:
-  - **Wholesale Clearinghouse**: 25%–40% instant discounts on GPT-5.6 Sol, Claude, Flux, and SD with 100% prompt cache pass-through.
+  - **Wholesale Clearinghouse**: 25%–40% instant discounts on OpenAI Codex GPT-5.6 Sol, Terra, Luna, and GPT-Image Suites with 100% prompt cache pass-through.
   - **Ambient Declarative UI**: Drop-in `<GalxImage />` & `<GalxChat />` components—zero backend proxy routes needed.
   - **Zero-Migration Auto-Patcher**: 1-line `import 'galxai/patch'` instantly discounts existing OpenAI codebases.
   - **Deterministic Agent Directives**: `npx galxai skills` turns Cursor, Claude Code, and Windsurf into viral installation engines.

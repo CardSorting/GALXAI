@@ -29,7 +29,7 @@ A comprehensive competitive analysis evaluating GALXAI against direct and indire
 
 ## 📊 2. Feature & Architectural Comparison Matrix
 
-| Capability / Metric | **GALXAI** | **OpenRouter** | **Cloudflare AI Gateway** | **Portkey / Helicone** | **Direct OpenAI / Anthropic** |
+| Capability / Metric | **GALXAI** | **OpenRouter** | **Cloudflare AI Gateway** | **Portkey / Helicone** | **Direct OpenAI Retail** |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Pricing Model** | **25%–40% Wholesale Discount** | Retail + Platform Spread | Retail Pass-Through | Retail + SaaS Subscription | Full Retail List Price |
 | **Prompt Caching Pass-Through** | **100% (75% Rebate)** | Partial | Inconsistent | Metadata Tracking Only | 50%–75% (Conditional) |

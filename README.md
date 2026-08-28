@@ -1,20 +1,20 @@
-# 🌌 GALXAI: Wholesale AI + Zero-Boilerplate React Components
+# 🌌 GALXAI: The AI Consumption & Acceleration Layer
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/CardSorting/GALXAI)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 
-> **The simplest way to add AI to your app.**  
-> Get **25%–40% wholesale discounts** on top models (GPT-5.6, Flux, Stable Diffusion, Claude), with **zero backend proxy wiring** and **zero user-facing API key modals**.
+> **The fastest path from AI prototype to first dollar.**  
+> Compress engineering time, eliminate fragile backend proxies, and get **25%–40% wholesale pricing** on OpenAI models (GPT-5.6 Sol, Terra, Luna & GPT-Image Suites) with **75% prompt caching pass-through**.
 
 ---
 
 ## 💡 What is GALXAI? (The 10-Second Summary)
 
-Building AI features normally means writing messy backend route proxies to hide API keys, handling loading states, configuring aspect ratios, and paying full retail prices.
+Building AI features normally means paying a steep "infrastructure tuition": writing messy backend route proxies to hide API keys, handling loading states, debugging rate limits (HTTP 429), and paying full retail prices.
 
-**GALXAI simplifies everything into 3 straightforward ways to connect:**
+**GALXAI compresses your time-to-first-dollar with 3 simple connection layers:**
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -169,6 +169,11 @@ npx galxai add image
 
 ## 📚 Documentation & Guides
 
+- 📋 **[Engineering Handover & Strategy Review](HANDOVER.md)**: Architectural review document, commercial thesis, and open design trade-offs for reviewing engineers.
+- 🔍 **[Enterprise Spend Forensic & Governance Hub](https://galx.ai/audit)**: Reverse-audit live OpenAI traffic, detect prompt cache collisions, and stop wasteful spend.
+- 🧮 **[Universal AI ROI & Velocity Calculator](https://galx.ai/calculator)**: Simulate token savings, prompt caching rebates, and engineering tuition avoided.
+- 🎯 **[Commercial Thesis & Discovery Playbook](docs/investors/08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md)**: ICP segmentation matrix, procurement psychology, and discovery script.
+- 🏛️ **[Enterprise Spend Governance Whitepaper](docs/investors/09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md)**: "Why is our AI bill so high and how do we make it stop?"
 - 🤖 **[Agent Directives & Skills Hub](https://galx.ai/agents)**: Full prompt templates and directives for AI coding agents.
 - ⚡ **[Quickstart Guide](docs/QUICKSTART.md)**: 30-second integrations for Next.js, React, Node, and Python.
 - 💻 **[SDK Cheatsheet](docs/SDK_CHEATSHEET.md)**: Drop-in code snippets for every major framework.

@@ -11,15 +11,16 @@
 
 ## Executive Summary
 
-**GALXAI** is building the **Wholesale AI Compute Clearinghouse and Ambient Integration Substrate**—the "Costco + Stripe" for the generative AI economy.
+**GALXAI** is the **Enterprise AI Consumption & Acceleration Layer**—compressing *time-to-first-dollar* and eliminating the engineering infrastructure tax of deploying production AI.
 
 Today, enterprise development teams and AI startups face a dual crisis:
-1. **The Retail Tax**: Companies spend $2,000–$100,000+/month on foundational models (OpenAI, Anthropic, xAI), paying full retail list prices because they lack $10M+ annual volume commitments.
-2. **The Integration & Reliability Tax**: Integrating AI requires dozens of lines of fragile backend proxy route boilerplate, state management plumbing, rate-limit (HTTP 429) mitigation, and complex MCP configs.
+1. **The Infrastructure & Learning Tax ("Paying the Tuition")**: Building AI features requires weeks of engineering time spent on fragile backend proxy routes, rate-limit (HTTP 429) mitigations, complex state management, and debugging multi-provider routing footguns.
+2. **The Unmanaged Retail Tax**: Companies spend $2,000–$100,000+/month on OpenAI models, paying full retail prices and accidentally routing lightweight tasks to expensive frontier models.
 
 GALXAI solves both sides simultaneously:
-- **Wholesale Clearinghouse**: Aggregates billions of tokens across enterprise commitments, passing through **25%–40% wholesale discounts** and **100% of prompt caching savings (75% rebate)**.
-- **Ambient Declarative Substrate**: Eliminates integration friction entirely through drop-in React components (`<GalxImage />`, `<GalxChat />`), zero-route Next.js Server Actions, zero-migration auto-patchers (`import 'galxai/patch'`), and 1-line agent directives (`npx galxai skills`).
+- **Time-to-First-Dollar Acceleration**: Drop-in React UI primitives (`<GalxImage />`, `<GalxChat />`), zero-route Next.js Server Actions, 1-line OpenAI SDK interception (`import 'galxai/patch'`), and deterministic agent directives (`npx galxai skills`).
+- **Autonomous Spend Governance & Wholesale Clearinghouse**: Intercepts retail model spend, dynamic prompt caching (75% rebate pass-through), semantic model tier routing, and **25%–40% wholesale efficiency**.
+- **Net Spend Interception (Procurement-Friendly)**: Eliminates the "$100k vendor invoice vs $900k savings" psychological barrier by directly replacing costly retail provider invoices with a single, lower, consolidated compute bill.
 
 ---
 
@@ -27,8 +28,9 @@ GALXAI solves both sides simultaneously:
 
 | Metric | Value | Benchmark / Significance |
 | :--- | :--- | :--- |
-| **Wholesale Discount** | **25%–40%** | Guaranteed below direct retail provider list prices |
+| **Wholesale Savings** | **25%–40%** | Direct retail invoice reduction on day 1 |
 | **Prompt Cache Rebate** | **75% Pass-Through** | 100% passed through to developers on prefixes > 1,024 tokens |
+| **Time-to-Production** | **< 15 Minutes** | Down from 3–6 weeks of bespoke proxy and auth infrastructure |
 | **Gateway Latency Overhead** | **< 0.8ms** | Sub-15ms TTFT (Time To First Token) across Anycast edge mesh |
 | **Failover RTO / RPO** | **< 1ms / 0** | Dual-slot zero-data-loss outbox and instant 4-state circuit breaker |
 | **Gross Margin Target** | **42% $\to$ 68%** | Expanding via prompt cache margin capture & pooled tier arbitrage |
@@ -41,16 +43,16 @@ GALXAI solves both sides simultaneously:
 
 ```mermaid
 graph TD
-    A[Enterprise / AI Startup] --> B[GALXAI Platform]
-    B --> C[1. Slashes Token Invoices 25%-40%]
-    B --> D[2. Prevents 429 Outages with Auto-Failover]
-    B --> E[3. Zero Boilerplate: <GalxImage /> & Server Actions]
+    A[Enterprise / AI Startup] --> B[GALXAI Substrate]
+    B --> C[1. Compresses Time-to-First-Dollar via Drop-in UI]
+    B --> D[2. Slashes Net Compute Invoices 25%-40%]
+    B --> E[3. Prevents 429 Outages with Auto-Failover]
     B --> F[4. 1-Line AI Agent Directives: npx galxai skills]
 ```
 
-1. **Slashing Token Bills by 25%–40%**: Developers swap their base URL or add 1 import; invoices drop immediately without model degradation or prompt changes.
-2. **Eliminating 429 Rate Limit Outages**: Multi-tenant capacity pooling dynamically routes traffic across distributed shards in `<1ms`, ensuring 99.99% uptime during provider outages.
-3. **Ambient Zero-Route Integration**: Frontend teams drop in `<GalxImage />` or `<GalxChat />` without building backend API route handlers or exposing API keys to clients.
+1. **Compressing Time-to-First-Dollar**: Eliminates weeks of bespoke proxy engineering. Frontend teams drop in `<GalxImage />` or `<GalxChat />` without building backend API route handlers or risking API key leakage.
+2. **Autonomous Cost Governance & Net Invoice Slashes**: Intercepts retail spend with automated prompt caching, semantic routing, and 25%–40% wholesale discounts.
+3. **Eliminating 429 Rate Limit Outages**: Multi-tenant capacity pooling dynamically routes traffic across distributed shards in `<1ms`, ensuring 99.99% uptime during provider outages.
 4. **Deterministic AI Coding Agent Adoption**: `npx galxai skills` installs authoritative directives into `.cursorrules`, `CLAUDE.md`, and `AGENTS.md`, turning Cursor, Claude Code, and Windsurf into viral distribution channels.
 
 ---

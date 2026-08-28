@@ -30,7 +30,7 @@ Yes. The gateway natively supports HTTP `GET` queries:
 https://galx.ai/v1/chat/completions?prompt=Hello+GALXAI&model=sol&api_key=galx_live_...
 ```
 
-#### 6. How does GALXAI handle Midjourney / Flux aspect ratios?
+#### 6. How does GALXAI handle declarative aspect ratios?
 When generating images via `POST /v1/images/generations`, GALXAI automatically converts `aspect_ratio: "16:9"` to `1792x1024`, `9:16` to `1024x1792`, `4:3` to `1024x768`, `3:2` to `1536x1024`, and `1:1` to `1024x1024`.
 
 ---

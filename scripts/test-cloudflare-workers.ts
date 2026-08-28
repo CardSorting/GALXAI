@@ -25,8 +25,12 @@ import { GalxEdgeWire } from '../src/workers/cloudflare/GalxEdgeWire';
 import { GalxEdgeQueueWorker } from '../src/workers/cloudflare/GalxEdgeQueueWorker';
 
 const mockEnv = {
+  ENVIRONMENT: 'test',
   SUPABASE_URL: 'https://test-project.supabase.co',
-  SUPABASE_SERVICE_ROLE_KEY: 'test-service-key-1234567890'
+  SUPABASE_SERVICE_ROLE_KEY: 'test-service-key-1234567890',
+  GATEWAY_AUTH_MODE: 'format-only',
+  ALLOW_SYNTHETIC_RESPONSES: 'true',
+  GOVERNANCE_MODE: 'observe'
 };
 
 let testsPassed = 0;
@@ -71,6 +75,20 @@ async function runAllTests() {
   const unauthResp = await gateway.handleRequest(unauthReq);
   assert(unauthResp.status === 401, 'Invalid API key format rejected with HTTP 401');
 
+  const unconfiguredAuthGateway = new GalxEdgeGateway({
+    ENVIRONMENT: 'production',
+    SUPABASE_URL: 'https://test-project.supabase.co'
+  });
+  const unconfiguredAuthResp = await unconfiguredAuthGateway.handleRequest(new Request('https://api.galx.ai/v1/models', {
+    headers: { Authorization: 'Bearer galx_live_test_key_123' }
+  }));
+  assert(unconfiguredAuthResp.status === 503, 'Production authentication fails closed when its backend is not configured');
+
+  const queryCredentialResp = await unconfiguredAuthGateway.handleRequest(new Request(
+    'https://api.galx.ai/v1/models?api_key=galx_live_test_key_123'
+  ));
+  assert(queryCredentialResp.status === 401, 'Production rejects API keys in query strings');
+
   // 1.3 List Models Endpoint
   const modelsReq = new Request('https://api.galx.ai/v1/models', {
     method: 'GET',
@@ -81,6 +99,7 @@ async function runAllTests() {
   const modelsJson = await modelsResp.json() as any;
   assert(Array.isArray(modelsJson.data) && modelsJson.data.length > 0, 'Models payload contains non-empty array');
   assert(modelsJson.data.some((m: any) => m.id === 'gpt-5.6-sol'), 'Model catalog contains "gpt-5.6-sol"');
+  assert(modelsJson.data.every((m: any) => m.pricing_tier === 'provider_public'), 'Model catalog does not invent a wholesale pricing tier');
 
   // 1.4 Non-Streaming Chat Completion
   const nonStreamReq = new Request('https://api.galx.ai/v1/chat/completions', {
@@ -100,6 +119,65 @@ async function runAllTests() {
   const nonStreamJson = await nonStreamResp.json() as any;
   assert(nonStreamJson.choices[0].message.role === 'assistant', 'Response has assistant message');
   assert(nonStreamJson.usage.total_tokens > 0, 'Response includes token usage statistics');
+  assert(nonStreamResp.headers.get('x-galx-simulated') === 'true', 'Local synthetic response is explicitly labeled');
+
+  const unsupportedModelResp = await gateway.handleRequest(new Request('https://api.galx.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer galx_live_test_key_123',
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({ model: 'gpt-5.6-slo', messages: [{ role: 'user', content: 'Typo' }] })
+  }));
+  assert(unsupportedModelResp.status === 400, 'Unknown model IDs fail explicitly instead of silently changing models');
+
+  const failClosedGateway = new GalxEdgeGateway({
+    ENVIRONMENT: 'development',
+    SUPABASE_URL: 'https://test-project.supabase.co',
+    GATEWAY_AUTH_MODE: 'format-only'
+  });
+  const failClosedResp = await failClosedGateway.handleRequest(new Request('https://api.galx.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer galx_live_test_key_123',
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({ model: 'gpt-5.6-sol', messages: [{ role: 'user', content: 'Hello' }] })
+  }));
+  assert(failClosedResp.status === 503, 'Missing upstream compute fails closed instead of returning a synthetic success');
+
+  const evidenceGateway = new GalxEdgeGateway({
+    ...mockEnv,
+    GOVERNANCE_MODE: 'enforce',
+    GOVERNANCE_POLICY_JSON: JSON.stringify({
+      mode: 'enforce',
+      approvedRoutes: [{
+        id: 'eval_edge_classification_v1',
+        requestedModel: 'gpt-5.6-sol',
+        targetModel: 'gpt-5.6-luna',
+        workload: 'classification',
+        status: 'approved',
+        sampleSize: 500,
+        baselineSuccessRate: 0.98,
+        candidateSuccessRate: 0.98,
+        lowerBoundQualityDelta: -0.005,
+        evaluatedAt: '2026-08-27T00:00:00.000Z',
+        expiresAt: '2027-08-27T00:00:00.000Z'
+      }]
+    })
+  });
+  const evidenceResp = await evidenceGateway.handleRequest(new Request('https://api.galx.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer galx_live_test_key_123',
+      'content-type': 'application/json',
+      'x-galx-workload': 'classification',
+      'x-galx-department': 'support'
+    },
+    body: JSON.stringify({ model: 'gpt-5.6-sol', messages: [{ role: 'user', content: 'Classify this ticket' }] })
+  }));
+  assert(evidenceResp.headers.get('x-galx-governance-action') === 'route', 'Approved quality evidence enables enforcement routing');
+  assert(evidenceResp.headers.get('x-galx-model-effective') === 'gpt-5.6-luna', 'Governance route exposes the effective model');
 
   // 1.5 SSE Streaming Chat Completion
   const streamReq = new Request('https://api.galx.ai/v1/chat/completions', {

@@ -4,9 +4,12 @@
  * Pipes upstream SSE chunks directly to clients with zero intermediate database egress.
  */
 
-import { GalxCryptoVault } from '../../core/vault/GalxCryptoVault';
 import { ModelCatalog } from '../../core/router/ModelCatalog';
 import type { ChatCompletionRequest } from '../../core/contracts/GalxContracts';
+import {
+  GalxSpendGovernanceEngine,
+  type GovernanceDecision
+} from '../../core/governance/GalxSpendGovernanceEngine';
 
 export interface CloudflareEnv {
   ENVIRONMENT?: string;
@@ -15,6 +18,10 @@ export interface CloudflareEnv {
   GALX_VAULT_MASTER_SECRET?: string;
   PUBLIC_ASSETS_URL?: string;
   OPENAI_API_KEY?: string;
+  GATEWAY_AUTH_MODE?: string;
+  ALLOW_SYNTHETIC_RESPONSES?: string;
+  GOVERNANCE_MODE?: string;
+  GOVERNANCE_POLICY_JSON?: string;
   HYPERDRIVE?: {
     connectionString: string;
   };
@@ -22,6 +29,20 @@ export interface CloudflareEnv {
   EDGE_CACHE?: any;
   ASSET_BUCKET?: any;
 }
+
+interface AuthenticatedGatewayKey {
+  id: string;
+  userId: string;
+  keyHash: string;
+  rateLimitPerMinute: number;
+  allowedModels?: string[];
+  spendCapUsd?: number;
+  currentSpendUsd: number;
+}
+
+type GatewayAuthenticationResult =
+  | { ok: true; key: AuthenticatedGatewayKey }
+  | { ok: false; status: 401 | 402 | 503; code: string; message: string };
 
 export class GalxEdgeGateway {
   constructor(private readonly env: CloudflareEnv) {}
@@ -36,7 +57,20 @@ export class GalxEdgeGateway {
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-galx-client, x-galx-session',
+          'Access-Control-Allow-Headers': [
+            'Content-Type',
+            'Authorization',
+            'x-api-key',
+            'x-galx-key',
+            'x-galx-client',
+            'x-galx-session',
+            'x-galx-workspace',
+            'x-galx-project',
+            'x-galx-department',
+            'x-galx-cost-center',
+            'x-galx-environment',
+            'x-galx-workload'
+          ].join(', '),
           'Access-Control-Max-Age': '86400'
         }
       });
@@ -62,6 +96,8 @@ export class GalxEdgeGateway {
     }
 
     // 3. API Key & Session Authentication Guard with Universal Ingestion
+    const queryCredentialsAllowed =
+      this.env.ENVIRONMENT === 'test' || this.env.ENVIRONMENT === 'development';
     let rawAuth =
       request.headers.get('Authorization') ||
       request.headers.get('authorization') ||
@@ -70,9 +106,9 @@ export class GalxEdgeGateway {
       request.headers.get('api-key') ||
       request.headers.get('apikey') ||
       request.headers.get('x-auth-token') ||
-      url.searchParams.get('api_key') ||
-      url.searchParams.get('apiKey') ||
-      url.searchParams.get('key') ||
+      (queryCredentialsAllowed ? url.searchParams.get('api_key') : null) ||
+      (queryCredentialsAllowed ? url.searchParams.get('apiKey') : null) ||
+      (queryCredentialsAllowed ? url.searchParams.get('key') : null) ||
       '';
 
     const rawKey = rawAuth
@@ -99,13 +135,22 @@ export class GalxEdgeGateway {
       );
     }
 
+    const authResult = await this.authenticateGatewayKey(rawKey);
+    if (!authResult.ok) {
+      return this.errorResponse(authResult.status, authResult.code, authResult.message);
+    }
+
     // 4. Rate Limiting Check via KV (Sliding Window)
-    const isAllowed = await this.checkRateLimit(rawKey, 120, 60);
+    const isAllowed = await this.checkRateLimit(
+      authResult.key.keyHash,
+      authResult.key.rateLimitPerMinute,
+      60
+    );
     if (!isAllowed) {
       return new Response(
         JSON.stringify({
           error: {
-            message: 'Rate limit exceeded (120 req/min). Please back off.',
+            message: `Rate limit exceeded (${authResult.key.rateLimitPerMinute} req/min). Please back off.`,
             type: 'rate_limit_error',
             code: 'rate_limit_exceeded'
           }
@@ -125,11 +170,11 @@ export class GalxEdgeGateway {
     const path = url.pathname.replace(/\/+$/, '');
 
     if ((path === '/v1/chat/completions' || path === '/chat/completions' || path === '/api/chat' || path === '/v1/completions' || path === '/completions' || path === '/api/generate') && (request.method === 'POST' || request.method === 'GET')) {
-      return this.handleChatCompletions(request, rawKey);
+      return this.handleChatCompletions(request, authResult.key);
     }
 
     if ((path === '/v1/messages' || path === '/messages') && request.method === 'POST') {
-      return this.handleChatCompletions(request, rawKey);
+      return this.handleChatCompletions(request, authResult.key);
     }
 
     if ((path === '/v1/models' || path === '/models' || path === '/api/tags') && request.method === 'GET') {
@@ -224,6 +269,177 @@ export class GalxEdgeGateway {
     );
   }
 
+  /**
+   * Authenticates the SHA-256 digest of a gateway key against the authoritative
+   * Supabase record. Production never falls back to prefix/shape validation.
+   */
+  private async authenticateGatewayKey(rawKey: string): Promise<GatewayAuthenticationResult> {
+    const keyHash = await this.sha256(rawKey);
+    const isLocalFormatOnly =
+      this.env.GATEWAY_AUTH_MODE === 'format-only' &&
+      (this.env.ENVIRONMENT === 'test' || this.env.ENVIRONMENT === 'development');
+
+    if (isLocalFormatOnly) {
+      return {
+        ok: true,
+        key: {
+          id: `local_${keyHash.slice(0, 16)}`,
+          userId: 'local_test_user',
+          keyHash,
+          rateLimitPerMinute: 120,
+          currentSpendUsd: 0
+        }
+      };
+    }
+
+    if (!this.env.SUPABASE_URL || !this.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return {
+        ok: false,
+        status: 503,
+        code: 'authentication_backend_unavailable',
+        message: 'Gateway authentication is not configured. The request was denied fail-closed.'
+      };
+    }
+
+    try {
+      const endpoint = new URL('/rest/v1/galx_developer_keys', this.env.SUPABASE_URL);
+      endpoint.searchParams.set('key_hash', `eq.${keyHash}`);
+      endpoint.searchParams.set('is_revoked', 'eq.false');
+      endpoint.searchParams.set(
+        'select',
+        'id,user_id,rate_limit_per_minute,spend_cap_usd,current_spend_usd,allowed_models'
+      );
+      endpoint.searchParams.set('limit', '1');
+
+      const response = await fetch(endpoint, {
+        headers: {
+          apikey: this.env.SUPABASE_SERVICE_ROLE_KEY,
+          Authorization: `Bearer ${this.env.SUPABASE_SERVICE_ROLE_KEY}`,
+          Accept: 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        return {
+          ok: false,
+          status: 503,
+          code: 'authentication_backend_unavailable',
+          message: 'Gateway authentication could not be verified. The request was denied fail-closed.'
+        };
+      }
+
+      const rows = await response.json() as Array<{
+        id: string;
+        user_id: string;
+        rate_limit_per_minute: number;
+        spend_cap_usd: number | string | null;
+        current_spend_usd: number | string | null;
+        allowed_models: string[] | null;
+      }>;
+      const row = rows[0];
+
+      if (!row) {
+        return {
+          ok: false,
+          status: 401,
+          code: 'invalid_api_key',
+          message: 'The supplied gateway key is invalid or revoked.'
+        };
+      }
+
+      const spendCapUsd = row.spend_cap_usd === null ? undefined : Number(row.spend_cap_usd);
+      const currentSpendUsd = Number(row.current_spend_usd || 0);
+      if (spendCapUsd !== undefined && currentSpendUsd >= spendCapUsd) {
+        return {
+          ok: false,
+          status: 402,
+          code: 'spend_cap_exceeded',
+          message: 'This gateway key has reached its configured spend cap.'
+        };
+      }
+
+      return {
+        ok: true,
+        key: {
+          id: row.id,
+          userId: row.user_id,
+          keyHash,
+          rateLimitPerMinute: Math.max(1, Number(row.rate_limit_per_minute) || 120),
+          allowedModels: row.allowed_models || undefined,
+          spendCapUsd,
+          currentSpendUsd
+        }
+      };
+    } catch {
+      return {
+        ok: false,
+        status: 503,
+        code: 'authentication_backend_unavailable',
+        message: 'Gateway authentication could not be verified. The request was denied fail-closed.'
+      };
+    }
+  }
+
+  private async sha256(value: string): Promise<string> {
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+    return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+  }
+
+  private syntheticResponsesAllowed(): boolean {
+    return (
+      this.env.ALLOW_SYNTHETIC_RESPONSES === 'true' &&
+      (this.env.ENVIRONMENT === 'test' || this.env.ENVIRONMENT === 'development')
+    );
+  }
+
+  private withGovernanceHeaders(
+    headers: Record<string, string>,
+    decision: GovernanceDecision
+  ): Record<string, string> {
+    return {
+      ...headers,
+      'x-galx-governance-mode': decision.mode,
+      'x-galx-governance-action': decision.action,
+      'x-galx-model-requested': decision.requestedModel,
+      'x-galx-model-effective': decision.effectiveModel,
+      'x-galx-governance-reasons': decision.reasonCodes.join(','),
+      'x-galx-estimated-max-cost-usd': decision.estimatedMaximumCostUsd.toFixed(6),
+      'Access-Control-Expose-Headers': [
+        'x-galx-governance-mode',
+        'x-galx-governance-action',
+        'x-galx-model-requested',
+        'x-galx-model-effective',
+        'x-galx-model-recommended',
+        'x-galx-governance-reasons',
+        'x-galx-estimated-max-cost-usd',
+        'x-galx-route-evidence-id'
+      ].join(', '),
+      ...(decision.recommendedModel ? { 'x-galx-model-recommended': decision.recommendedModel } : {}),
+      ...(decision.routeEvidenceId ? { 'x-galx-route-evidence-id': decision.routeEvidenceId } : {})
+    };
+  }
+
+  private errorResponse(
+    status: number,
+    code: string,
+    message: string,
+    governanceDecision?: GovernanceDecision
+  ): Response {
+    const headers = {
+      'content-type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    };
+    return new Response(
+      JSON.stringify({ error: { message, type: 'gateway_error', code } }),
+      {
+        status,
+        headers: governanceDecision
+          ? this.withGovernanceHeaders(headers, governanceDecision)
+          : headers
+      }
+    );
+  }
+
   private async checkRateLimit(key: string, limit = 120, windowSeconds = 60): Promise<boolean> {
     if (!this.env.RATE_LIMIT_KV) return true;
     try {
@@ -239,7 +455,10 @@ export class GalxEdgeGateway {
     }
   }
 
-  private async handleChatCompletions(request: Request, rawKey: string): Promise<Response> {
+  private async handleChatCompletions(
+    request: Request,
+    gatewayKey: AuthenticatedGatewayKey
+  ): Promise<Response> {
     let rawBody: any = {};
     const url = new URL(request.url);
 
@@ -294,18 +513,83 @@ export class GalxEdgeGateway {
       normalizedMessages.push({ role: 'user', content: 'Hello' });
     }
 
-    // 2. Resolve Model Specification & Target Upstream
-    const modelSpec = ModelCatalog.resolveModel(rawBody.model);
+    // 2. Resolve Model Specification & Target Upstream. The request path is
+    // deliberately strict: a typo must not silently become a different model.
+    const requestedModelId = typeof rawBody.model === 'string' && rawBody.model.trim()
+      ? rawBody.model.trim()
+      : 'gpt-5.6-sol';
+    const requestedModelSpec = ModelCatalog.listAll().find(model =>
+      model.id === requestedModelId && model.category === 'llm'
+    );
+    if (!requestedModelSpec) {
+      return this.errorResponse(
+        400,
+        'unsupported_model',
+        `The requested chat model "${requestedModelId}" is not supported. Use an exact model ID returned by /v1/models.`
+      );
+    }
     const isStream = rawBody.stream === true || rawBody.stream === 'true' || rawBody.stream === 1;
     const maxTokens = rawBody.max_tokens ?? rawBody.max_completion_tokens ?? 2048;
 
     const body: ChatCompletionRequest = {
-      model: modelSpec.id,
+      model: requestedModelSpec.id,
       messages: normalizedMessages as any,
       temperature: rawBody.temperature !== undefined ? parseFloat(String(rawBody.temperature)) : 0.7,
       max_tokens: Number(maxTokens) || 2048,
-      stream: isStream
+      stream: isStream,
+      top_p: rawBody.top_p,
+      presence_penalty: rawBody.presence_penalty,
+      frequency_penalty: rawBody.frequency_penalty,
+      response_format: rawBody.response_format,
+      tools: Array.isArray(rawBody.tools) ? rawBody.tools : undefined,
+      tool_choice: rawBody.tool_choice,
+      user: rawBody.user
     };
+
+    const configuredPolicy = GalxSpendGovernanceEngine.parsePolicy(
+      this.env.GOVERNANCE_POLICY_JSON,
+      this.env.GOVERNANCE_MODE
+    );
+    const governanceDecision = GalxSpendGovernanceEngine.evaluate(
+      body,
+      {
+        workspaceId: request.headers.get('x-galx-workspace') || undefined,
+        projectId: request.headers.get('x-galx-project') || undefined,
+        department: request.headers.get('x-galx-department') || undefined,
+        costCenter: request.headers.get('x-galx-cost-center') || undefined,
+        environment: request.headers.get('x-galx-environment') || undefined,
+        workload: request.headers.get('x-galx-workload') || undefined,
+        sessionId: request.headers.get('x-galx-session') || undefined
+      },
+      {
+        ...configuredPolicy,
+        allowedModels: gatewayKey.allowedModels || configuredPolicy.allowedModels
+      }
+    );
+
+    if (governanceDecision.action === 'block') {
+      return new Response(
+        JSON.stringify({
+          error: {
+            message: 'Request blocked by the active GALXAI spend governance policy.',
+            type: 'policy_violation_error',
+            code: 'governance_policy_block',
+            reason_codes: governanceDecision.reasonCodes
+          }
+        }),
+        {
+          status: 403,
+          headers: this.withGovernanceHeaders({
+            'content-type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          }, governanceDecision)
+        }
+      );
+    }
+
+    const modelSpec = ModelCatalog.resolveModel(governanceDecision.effectiveModel);
+    body.model = modelSpec.id;
+    const allowSyntheticResponses = this.syntheticResponsesAllowed();
 
     // 3. Upstream OpenAI Pass-Through if OPENAI_API_KEY is configured and provider is openai
     if (this.env.OPENAI_API_KEY && modelSpec.provider === 'openai') {
@@ -325,29 +609,45 @@ export class GalxEdgeGateway {
         if (body.stream && upstreamResp.body) {
           return new Response(upstreamResp.body, {
             status: upstreamResp.status,
-            headers: {
+            headers: this.withGovernanceHeaders({
               'content-type': 'text/event-stream; charset=utf-8',
               'cache-control': 'no-cache, no-transform',
               connection: 'keep-alive',
               'Access-Control-Allow-Origin': '*',
               'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge',
               'x-galx-model-resolved': modelSpec.id
-            }
+            }, governanceDecision)
           });
         }
 
-        const data = await upstreamResp.text();
-        return new Response(data, {
+        return new Response(upstreamResp.body, {
           status: upstreamResp.status,
-          headers: {
-            'content-type': 'application/json',
+          headers: this.withGovernanceHeaders({
+            'content-type': upstreamResp.headers.get('content-type') || 'application/json',
             'Access-Control-Allow-Origin': '*',
-            'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge'
-          }
+            'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge',
+            'x-galx-model-resolved': modelSpec.id
+          }, governanceDecision)
         });
       } catch {
-        // Fallback to simulated edge stream if upstream transiently fails
+        if (!allowSyntheticResponses) {
+          return this.errorResponse(
+            502,
+            'upstream_unavailable',
+            'The model provider could not be reached. No synthetic response was substituted.',
+            governanceDecision
+          );
+        }
       }
+    }
+
+    if (!this.env.OPENAI_API_KEY && !allowSyntheticResponses) {
+      return this.errorResponse(
+        503,
+        'upstream_not_configured',
+        'The model provider is not configured. No synthetic response was substituted.',
+        governanceDecision
+      );
     }
 
     // Zero-Egress Streaming Transform Stream
@@ -389,13 +689,14 @@ export class GalxEdgeGateway {
 
       return new Response(readable, {
         status: 200,
-        headers: {
+        headers: this.withGovernanceHeaders({
           'content-type': 'text/event-stream; charset=utf-8',
           'cache-control': 'no-cache, no-transform',
           connection: 'keep-alive',
           'Access-Control-Allow-Origin': '*',
-          'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge'
-        }
+          'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge',
+          'x-galx-simulated': 'true'
+        }, governanceDecision)
       });
     }
 
@@ -424,11 +725,12 @@ export class GalxEdgeGateway {
 
     return new Response(JSON.stringify(responsePayload), {
       status: 200,
-      headers: {
+      headers: this.withGovernanceHeaders({
         'content-type': 'application/json',
         'Access-Control-Allow-Origin': '*',
-        'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge'
-      }
+        'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge',
+        'x-galx-simulated': 'true'
+      }, governanceDecision)
     });
   }
 
@@ -451,12 +753,12 @@ export class GalxEdgeGateway {
     }
 
     const models = [
-      { id: 'gpt-5.6-sol', object: 'model', owned_by: 'galxai-openai', pricing_tier: 'wholesale' },
-      { id: 'gpt-5.6-terra', object: 'model', owned_by: 'galxai-openai', pricing_tier: 'wholesale' },
-      { id: 'gpt-5.6-luna', object: 'model', owned_by: 'galxai-openai', pricing_tier: 'wholesale' },
-      { id: 'openai-gpt-image-2', object: 'model', owned_by: 'galxai-openai', pricing_tier: 'wholesale' },
-      { id: 'openai-gpt-image-1.5', object: 'model', owned_by: 'galxai-openai', pricing_tier: 'wholesale' },
-      { id: 'openai-gpt-image-1', object: 'model', owned_by: 'galxai-openai', pricing_tier: 'wholesale' }
+      { id: 'gpt-5.6-sol', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' },
+      { id: 'gpt-5.6-terra', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' },
+      { id: 'gpt-5.6-luna', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' },
+      { id: 'openai-gpt-image-2', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' },
+      { id: 'openai-gpt-image-1.5', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' },
+      { id: 'openai-gpt-image-1', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' }
     ];
 
     const payload = JSON.stringify({ object: 'list', data: models });
@@ -486,7 +788,7 @@ export class GalxEdgeGateway {
     }
 
     const contentType = request.headers.get('content-type') || 'application/octet-stream';
-    const assetId = `asset_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const assetId = `asset_${crypto.randomUUID()}`;
     const extension = contentType.split('/')[1] || 'bin';
     const key = `generations/${assetId}.${extension}`;
 
@@ -524,6 +826,41 @@ export class GalxEdgeGateway {
       });
     }
 
+    if (this.env.OPENAI_API_KEY) {
+      try {
+        const upstreamResponse = await fetch('https://api.openai.com/v1/embeddings', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            Authorization: `Bearer ${this.env.OPENAI_API_KEY}`
+          },
+          body: JSON.stringify(body)
+        });
+        return new Response(upstreamResponse.body, {
+          status: upstreamResponse.status,
+          headers: {
+            'content-type': upstreamResponse.headers.get('content-type') || 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge'
+          }
+        });
+      } catch {
+        if (!this.syntheticResponsesAllowed()) {
+          return this.errorResponse(
+            502,
+            'upstream_unavailable',
+            'The embeddings provider could not be reached. No synthetic vector was substituted.'
+          );
+        }
+      }
+    } else if (!this.syntheticResponsesAllowed()) {
+      return this.errorResponse(
+        503,
+        'upstream_not_configured',
+        'The embeddings provider is not configured. No synthetic vector was substituted.'
+      );
+    }
+
     const model = body.model || 'text-embedding-3-small';
     const input = body.input || '';
     const inputs = Array.isArray(input) ? input : [input];
@@ -549,7 +886,8 @@ export class GalxEdgeGateway {
         headers: {
           'content-type': 'application/json',
           'Access-Control-Allow-Origin': '*',
-          'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge'
+          'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge',
+          'x-galx-simulated': 'true'
         }
       }
     );
@@ -566,13 +904,49 @@ export class GalxEdgeGateway {
       });
     }
 
+    if (this.env.OPENAI_API_KEY) {
+      try {
+        const modelSpec = ModelCatalog.resolveModel(body.model || 'openai-gpt-image-2');
+        const upstreamResponse = await fetch('https://api.openai.com/v1/images/generations', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            Authorization: `Bearer ${this.env.OPENAI_API_KEY}`
+          },
+          body: JSON.stringify({ ...body, model: modelSpec.upstreamId })
+        });
+        return new Response(upstreamResponse.body, {
+          status: upstreamResponse.status,
+          headers: {
+            'content-type': upstreamResponse.headers.get('content-type') || 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge'
+          }
+        });
+      } catch {
+        if (!this.syntheticResponsesAllowed()) {
+          return this.errorResponse(
+            502,
+            'upstream_unavailable',
+            'The image provider could not be reached. No synthetic image was substituted.'
+          );
+        }
+      }
+    } else if (!this.syntheticResponsesAllowed()) {
+      return this.errorResponse(
+        503,
+        'upstream_not_configured',
+        'The image provider is not configured. No synthetic image was substituted.'
+      );
+    }
+
     const prompt = body.prompt || 'Synthesized generation';
     const model = body.model || 'openai-gpt-image-2';
     const n = Math.min(body.n || 1, 4);
     const publicBase = this.env.PUBLIC_ASSETS_URL || 'https://pub-9aab2b19ca7947c59240e3869c544e20.r2.dev';
 
     const resultData = new Array(n).fill(0).map((_, i) => {
-      const assetId = `gen_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const assetId = `gen_${crypto.randomUUID()}`;
       const filename = `generations/${assetId}.webp`;
       return {
         url: `${publicBase}/${filename}`,
@@ -592,7 +966,8 @@ export class GalxEdgeGateway {
         headers: {
           'content-type': 'application/json',
           'Access-Control-Allow-Origin': '*',
-          'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge'
+          'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge',
+          'x-galx-simulated': 'true'
         }
       }
     );
@@ -623,4 +998,3 @@ export class GalxEdgeGateway {
     return cleanKey.length >= 24 && /^[a-zA-Z0-9._-]+$/.test(cleanKey);
   }
 }
-

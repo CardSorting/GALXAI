@@ -72,5 +72,4 @@ To rigorously validate the top-down TAM/SAM/SOM, we calculate bottom-up revenue 
 | :--- | :--- |
 | **Shift from Chatbots to Autonomous Agent Swarms** | Agent loops invoke 50x–200x more tokens per task than human chat, intensifying the need for wholesale rate arbitration and 429 rate limit prevention. |
 | **Proliferation of AI Coding IDEs (Cursor, Windsurf, Claude Code)** | Over 60% of modern software is written with AI assistants. `npx galxai skills` acts as an ambient installer that embeds GALXAI into every generated codebase. |
-| **Enterprise Cost Scrutiny (FinOps for AI)** | CFOs are mandating 25%+ reductions in raw AI provider invoices. GALXAI provides immediate non-invasive arbitrage. |
-| **Decentralization of Model Supply** | As open-weight and proprietary models diversify (GPT-5.6, Claude 3.7, Grok, DeepSeek, Flux), developers demand a single universal clearinghouse rather than 10 separate credit cards. |
+| **Specialization of Frontier AI Workloads** | As OpenAI releases differentiated tier models (GPT-5.6 Sol for deep reasoning, Terra for balanced coding, Luna for high-velocity completions), developers demand an intelligent routing and clearinghouse layer rather than paying frontier flagship rates for basic tasks. |

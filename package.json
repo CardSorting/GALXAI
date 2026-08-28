@@ -82,6 +82,7 @@
     "stripe:trigger:invoice": "stripe trigger invoice.payment_succeeded",
     "test:stripe": "tsx scripts/test-stripe-integration.ts",
     "test:router": "tsx scripts/validate-galxai-router.ts",
+    "test:governance": "node --import tsx scripts/validate-spend-governance.ts",
     "test:quota": "tsx tests/quota-pooling/test-gpt56-pooling.ts",
     "test:quota:real": "tsx tests/quota-pooling/test-live-pool-real.ts",
     "test:snake": "tsx tests/quota-pooling/test-snake-request.ts",

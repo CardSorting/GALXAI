@@ -102,11 +102,27 @@ const PLATFORM_PAGES: PlatformPage[] = [
     description: 'View balance, top up credits with 50% match grant'
   },
   {
-    label: 'Wholesale Pricing & Calculator',
-    href: '/pricing',
+    label: 'Enterprise AI Spend Forensic & Governance',
+    href: '/audit',
+    icon: ShieldCheck,
+    category: 'Governance',
+    keywords: ['audit', 'spend', 'forensic', 'governance', 'waste', 'bills', 'finops', 'tco', 'reduce spend'],
+    description: 'Reverse-audit live OpenAI traffic to identify and stop spend leakage'
+  },
+  {
+    label: 'Universal AI Velocity & TCO Calculator',
+    href: '/calculator',
     icon: CreditCard,
     category: 'Finance',
-    keywords: ['pricing', 'cost', 'cheapest', 'cheap', 'rates', 'discount', 'wholesale', 'savings', 'calculator'],
+    keywords: ['calculator', 'tco', 'roi', 'savings', 'prompt caching', 'tuition', 'time to first dollar'],
+    description: 'Calculate exact savings with 75% prompt caching and avoided engineering tuition'
+  },
+  {
+    label: 'Wholesale Pricing & Token Rates',
+    href: '/pricing',
+    icon: DollarSign,
+    category: 'Finance',
+    keywords: ['pricing', 'cost', 'cheapest', 'cheap', 'rates', 'discount', 'wholesale', 'savings'],
     description: 'Wholesale rates: 25%–40% below retail token prices'
   },
   {

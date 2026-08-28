@@ -143,15 +143,33 @@ export class ApiKeyRepository {
     return matches[0] || null;
   }
 
-  async saveGatewayKey(key: DeveloperGatewayKey): Promise<void> {
+  async saveGatewayKey(
+    key: DeveloperGatewayKey,
+    options: { requireRemote?: boolean } = {}
+  ): Promise<void> {
     this.keyTable.put(key.id, key);
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        const row = this.mapKeyToRow(key);
-        await supabase.from('galx_developer_keys').upsert(row, { onConflict: 'id' });
-      } catch {
-        // Fallback
+
+    if (!isSupabaseConfigured()) {
+      if (options.requireRemote) {
+        this.keyTable.delete(key.id);
+        throw new Error('Authoritative API-key storage is not configured.');
+      }
+      return;
+    }
+
+    try {
+      const supabase = getSupabaseAdmin();
+      const row = this.mapKeyToRow(key);
+      const { error } = await supabase
+        .from('galx_developer_keys')
+        .upsert(row, { onConflict: 'id' });
+
+      if (error) throw error;
+    } catch (error) {
+      if (options.requireRemote) {
+        this.keyTable.delete(key.id);
+        const message = error instanceof Error ? error.message : 'Unknown persistence error';
+        throw new Error(`Failed to persist the API key authoritatively: ${message}`);
       }
     }
   }

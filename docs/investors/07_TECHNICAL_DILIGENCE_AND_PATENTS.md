@@ -24,9 +24,9 @@ flowchart TD
     end
     
     subgraph Upstream Provider Mesh
-        CircuitBreaker -->|Primary Channel| P1[OpenAI Tier-5 Bulk Shards]
-        CircuitBreaker -->|Auto-Failover < 1ms| P2[Anthropic / Bedrock Shards]
-        CircuitBreaker -->|Visual Synthesis| P3[Flux / Stable Diffusion Shards]
+        CircuitBreaker -->|Primary Channel| P1[OpenAI Tier-5 Direct Shards]
+        CircuitBreaker -->|Auto-Failover < 1ms| P2[Azure OpenAI Dedicated Shards]
+        CircuitBreaker -->|Visual Synthesis| P3[OpenAI GPT-Image Engines]
     end
     
     subgraph Compliance & Memory Zeroization
@@ -52,7 +52,7 @@ flowchart TD
 ### Q2: What prevents provider outages from breaking customer applications?
 **Answer**:
 1. **4-State Circuit Breaker Finite State Machine (`Closed` $\to$ `Degraded` $\to$ `Open` $\to$ `Half-Open`)**: Detects latency spikes (>2,000ms) or HTTP 429/5xx status codes within 3 consecutive samples.
-2. **Sub-1ms Dynamic Failover**: Requests are immediately redirected to alternative upstream capacity pools (e.g., direct OpenAI $\to$ Azure OpenAI $\to$ Anthropic Sonnet equivalent) without dropping client connections.
+2. **Sub-1ms Dynamic Failover**: Requests are immediately redirected to alternative upstream capacity pools (e.g., direct OpenAI tier-5 $\to$ Azure OpenAI dedicated capacity) without dropping client connections.
 3. **Dual-Slot Outbox State Machine**: High-priority tasks are queued with RPO=0 and RTO<5ms guarantees.
 
 ---

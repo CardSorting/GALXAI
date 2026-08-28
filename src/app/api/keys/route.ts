@@ -116,7 +116,11 @@ export async function POST(req: NextRequest) {
       revoked: false
     };
 
-    persistence.saveGatewayKey(newKey);
+    // Production edge authentication reads Supabase directly, so never return a
+    // raw key until its authoritative hash is durably queryable there.
+    await persistence.saveGatewayKeyAsync(newKey, {
+      requireRemote: process.env.NODE_ENV === 'production'
+    });
     persistence.logAudit('GATEWAY_KEY_CREATED', { keyId, keyPrefix, name, antiBotVerified: true }, keyId, userId);
 
     return NextResponse.json({

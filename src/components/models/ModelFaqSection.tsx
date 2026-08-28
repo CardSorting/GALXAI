@@ -35,7 +35,7 @@ export function ModelFaqSection({ model, siblingModels }: ModelFaqSectionProps) 
   const faqItems = [
     {
       q: `Are these official, genuine ${model.name} model weights?`,
-      a: `Yes, 100%. GALXAI routes directly to upstream enterprise clusters at OpenAI and xAI. The model weights, reasoning traces, and token generations are identical to direct API calls—just delivered at wholesale rates with 75% prompt cache pass-through.`,
+      a: `Yes, 100%. GALXAI routes directly to upstream enterprise clusters at OpenAI. The model weights, reasoning traces, and token generations are identical to direct API calls—just delivered at wholesale rates with 75% prompt cache pass-through.`,
     },
     {
       q: 'Does GALXAI add latency to streaming completions?',

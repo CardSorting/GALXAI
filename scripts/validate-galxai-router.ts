@@ -536,24 +536,24 @@ async function runAllTests() {
     const sol = ModelCatalog.resolveModel('gpt-5.6-sol');
     assert.strictEqual(sol?.id, 'gpt-5.6-sol');
     assert.strictEqual(sol?.provider, 'openai');
-    assert.strictEqual(sol?.contextWindowTokens, 900_000);
-    assert.strictEqual(sol?.discountPercentage, 25);
+    assert.strictEqual(sol?.contextWindowTokens, 1_050_000);
+    assert.strictEqual(sol?.discountPercentage, 0);
 
     const terra = ModelCatalog.resolveModel('terra');
     assert.strictEqual(terra?.id, 'gpt-5.6-terra');
     assert.strictEqual(terra?.provider, 'openai');
-    assert.strictEqual(terra?.contextWindowTokens, 900_000);
+    assert.strictEqual(terra?.contextWindowTokens, 1_050_000);
 
     const luna = ModelCatalog.resolveModel('luna');
     assert.strictEqual(luna?.id, 'gpt-5.6-luna');
     assert.strictEqual(luna?.provider, 'openai');
-    assert.strictEqual(luna?.contextWindowTokens, 900_000);
+    assert.strictEqual(luna?.contextWindowTokens, 1_050_000);
 
     const grok46 = ModelCatalog.resolveModel('grok-4.6');
     assert.strictEqual(grok46?.id, 'gpt-5.6-sol');
     assert.strictEqual(grok46?.provider, 'openai');
-    assert.strictEqual(grok46?.contextWindowTokens, 900_000);
-    assert.strictEqual(grok46?.discountPercentage, 25);
+    assert.strictEqual(grok46?.contextWindowTokens, 1_050_000);
+    assert.strictEqual(grok46?.discountPercentage, 0);
 
     const grokAlias = ModelCatalog.resolveModel('grok');
     assert.strictEqual(grokAlias?.id, 'gpt-5.6-sol');
@@ -564,8 +564,8 @@ async function runAllTests() {
     const grok = ModelCatalog.resolveModel('grok-4.5');
     assert.strictEqual(grok?.id, 'gpt-5.6-terra');
     assert.strictEqual(grok?.provider, 'openai');
-    assert.strictEqual(grok?.contextWindowTokens, 900_000);
-    assert.strictEqual(grok?.discountPercentage, 25);
+    assert.strictEqual(grok?.contextWindowTokens, 1_050_000);
+    assert.strictEqual(grok?.discountPercentage, 0);
   });
 
   await test('Model Catalog: Correctly maps exclusive visual synthesis models', () => {
