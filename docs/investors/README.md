@@ -17,6 +17,7 @@ Welcome to the **GALXAI Institutional Diligence Data Room**. This repository con
 | **[07. Technical Due Diligence & Architecture Proof](07_TECHNICAL_DILIGENCE_AND_PATENTS.md)** | Technical audit FAQs for Partner CTOs, sub-15ms wire TTFT proof, ZDR v10 privacy, and test suite backing. | **Technical Diligence**|
 | **[08. Commercial Thesis & Customer Discovery Playbook](08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md)** | ICP segmentation matrix, procurement psychology ($100k vs $900k paradox), and 10-question discovery script. | **Commercial Discovery** |
 | **[09. Enterprise Spend Governance & Control Plane](09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md)** | "Why is our AI bill so high and how do we make it stop?" 7 waste root causes, Day 1 reverse-audit, and 3-tier remediation. | **Spend Governance** |
+| **[10. Enterprise Pilot Agreement & Proposal](10_ENTERPRISE_PILOT_PROPOSAL_AND_AGREEMENT.md)** | 30-Day Zero-Risk Reverse-Audit pilot contract terms, Net Spend Interception invoicing, and SLA exit criteria. | **Commercial Pilot** |
 
 ---
 

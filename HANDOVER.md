@@ -81,10 +81,14 @@ Across production workloads, **40% to 70% of gross AI spend is pure operational 
    * Interactive TCO simulator modeling wholesale rates, 75% prompt caching pass-through, avoided developer tuition (~15 hrs/mo/dev), and 1-click archetype presets.
 2. **`/audit`** ([src/components/audit/AuditClient.tsx](file:///Users/bozoegg/Desktop/GALXAI/src/components/audit/AuditClient.tsx)):
    * Interactive Spend Forensic Control Tower with dynamic scale slider ($5k to $5M/mo), before/after code diff inspectors, departmental chargeback table, and live payload entropy analyzer.
-3. **Model Catalog & Router** ([src/core/router/ModelCatalog.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/router/ModelCatalog.ts)):
+3. **Quality Equivalence & Tier Cascading Eval Harness** ([src/core/evals/TierCascadingEvalHarness.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/evals/TierCascadingEvalHarness.ts)):
+   * Statistical benchmark harness (`scripts/run-tier-cascading-evals.ts`) measuring 95% Wilson confidence intervals ($\Delta \ge -0.005$) to prove zero quality degradation when cascading from Sol to Luna/Terra.
+4. **Declarative UI Component Suite** ([src/sdk/ui/](file:///Users/bozoegg/Desktop/GALXAI/src/sdk/ui/)):
+   * `<GalxChat />`, `<GalxImage />`, and `<GalxReasoningStream />` React primitives with zero-proxy server-side security.
+5. **Model Catalog & Router** ([src/core/router/ModelCatalog.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/router/ModelCatalog.ts)):
    * Strictly configured for OpenAI flagship suite (`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, and GPT-Image suites).
-4. **Investor Diligence Room** ([docs/investors/](file:///Users/bozoegg/Desktop/GALXAI/docs/investors/)):
-   * 9 comprehensive diligence memos including [08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md](file:///Users/bozoegg/Desktop/GALXAI/docs/investors/08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md) and [09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md](file:///Users/bozoegg/Desktop/GALXAI/docs/investors/09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md).
+6. **Investor Diligence Room** ([docs/investors/](file:///Users/bozoegg/Desktop/GALXAI/docs/investors/)):
+   * 10 comprehensive diligence memos including [08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md](file:///Users/bozoegg/Desktop/GALXAI/docs/investors/08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md), [09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md](file:///Users/bozoegg/Desktop/GALXAI/docs/investors/09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md), and [10_ENTERPRISE_PILOT_PROPOSAL_AND_AGREEMENT.md](file:///Users/bozoegg/Desktop/GALXAI/docs/investors/10_ENTERPRISE_PILOT_PROPOSAL_AND_AGREEMENT.md).
 
 ---
 
