@@ -11,3 +11,12 @@ export * from "./broccolidb-cas";
 export * from "./broccolidb-aggregation";
 export * from "./broccolidb-table";
 export * from "./broccolidb-kernel";
+
+// AI Spend Governance & FinOps Substrate
+export * from "./BroccoliSpendAnalytics";
+export * from "./BroccoliSpendStreamer";
+export * from "./BroccoliSpendTimeline";
+export * from "./BroccoliPromptCASVault";
+export * from "./BroccoliSpendWAL";
+export * from "./BroccoliSpendLease";
+export * from "./BroccoliSpendSubstrate";
