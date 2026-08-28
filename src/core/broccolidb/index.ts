@@ -46,4 +46,5 @@ export * from "./BroccoliToolOutputCompactor";
 export * from "./BroccoliMatryoshkaCompactor";
 export * from "./BroccoliCacheWarmer";
 export * from "./BroccoliTabularOutputCompactor";
+export * from "./BroccoliStopSequenceInjector";
 export * from "./BroccoliSpendSubstrate";
