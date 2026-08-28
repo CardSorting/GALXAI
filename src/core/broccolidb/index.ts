@@ -106,7 +106,10 @@ export * from "./BroccoliDockerfileCompactor";
 export * from "./BroccoliRmaCompactor";
 export * from "./BroccoliNdaCompactor";
 export * from "./BroccoliDischargeCompactor";
+export * from "./BroccoliOpenApiCompactor";
+export * from "./BroccoliInvoiceCompactor";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
