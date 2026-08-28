@@ -126,7 +126,10 @@ export * from "./BroccoliAcordCompactor";
 export * from "./BroccoliFnolCompactor";
 export * from "./BroccoliResumeCompactor";
 export * from "./BroccoliPerformanceReviewCompactor";
+export * from "./BroccoliBolCompactor";
+export * from "./BroccoliPurchaseOrderCompactor";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
