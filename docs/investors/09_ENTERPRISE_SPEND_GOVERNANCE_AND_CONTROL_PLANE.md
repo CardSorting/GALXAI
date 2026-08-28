@@ -29,8 +29,10 @@ Across enterprise codebases, **40% to 70% of gross AI spend is pure operational 
 │ 5. Orphaned Pipeline Keys  │ CI/CD automated test suites querying prod models     │
 │ 6. Oversized Context Dumps │ Ingesting 100k tokens when 4k tokens were relevant   │
 │ 7. Output Token Explosions │ Models rambling when JSON schema constraints lacked  │
+│ 8. Context Redundancy      │ Verbose ASTs, equilibrium telemetry, legal fluff     │
 └───────────────────────────────────────────────────────────────────────────────────┘
 ```
+
 
 ### 1. Frontier Model Misallocation
 * **The Reality**: Developers default to `model: "gpt-5.6-sol"` ($3.75 in / $15.00 out) for every feature, including binary classification, sentiment extraction, and basic JSON formatting.

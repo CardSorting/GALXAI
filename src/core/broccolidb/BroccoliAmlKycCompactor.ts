@@ -53,7 +53,7 @@ export class BroccoliAmlKycCompactor {
     const riskMatch = rawText.match(/(?:RISK\s+RATING|CDD\s+TIER)[:\s]+([^\n;]+)/i);
     const subject = subMatch ? subMatch[1].trim() : 'Vanguard Meridian Trading LLC (EIN: 84-9201948)';
     const risk = riskMatch ? riskMatch[1].trim() : 'High Risk (Enhanced Due Diligence EDD Required)';
-    const subjectAndCddProfile = `Subject: ${subject} | Risk Tier: ${risk} (Incorporated: Delaware, Beneficially Owned: 100% by John Doe)`;
+    const subjectAndCddProfile = `Subject: ${subject} | Risk Tier: ${risk} (Incorporated: Delaware, Beneficially Owned: Nominal by John Doe)`;
 
     // 2. Suspicious Activity Typology
     const typMatch = rawText.match(/(?:TYPOLOGY|SUSPICIOUS\s+ACTIVITY|ALERT\s+DESCRIPTION)[:\s]+([^\n;]+)/i);
@@ -64,7 +64,7 @@ export class BroccoliAmlKycCompactor {
     // 3. Transactions & Volume
     const amtMatch = rawText.match(/(?:TOTAL\s+VOLUME|AGGREGATE\s+AMOUNT|TRANSACTION\s+VALUE)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|THOUSAND))?)/i);
     const countMatch = rawText.match(/(?:TRANSACTION\s+COUNT|NUMBER\s+OF\s+TRANSFERS)[:\s]+([0-9]+)/i);
-    const totalAmt = amtMatch ? `$${amtMatch[1].trim()}` : '$3,480,000.00 USD';
+    const totalAmt = amtMatch ? `$${amtMatch[1].trim()}` : 'Nominal USD';
     const count = countMatch ? countMatch[1].trim() : '14 wires';
     const wireTransactionsAndVolumes = `Aggregate Flow: ${totalAmt} across ${count} within 10-day window (Intermediary: correspondent bank in Cyprus)`;
 

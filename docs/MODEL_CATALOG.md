@@ -50,3 +50,23 @@ The gateway automatically strips lifecycle suffixes and provider prefixes before
 - **Prefixes Removed**: `openai/`, `x-ai/`, `anthropic/`, `google/`, `meta/`, `deepseek/`, `galx/`, `galxai/`, `@openai/`, `@anthropic/`
 - **Suffixes Removed**: `:latest`, `-latest`, `-preview`, `-2026-08-01`, `@20260801`
 - **Formatting Variations**: `gpt-5-6-sol` $\to$ `gpt-5.6-sol`
+
+---
+
+## 5. Rate Card Registry for Empirical Inference Boundary Evaluation
+
+For head-to-head empirical testing (`BroccoliInferenceBoundaryBenchmarker`), GALXAI maintains an authoritative **OpenAI Rate Card Registry** (`ProviderRateCards.ts`) to calculate billed dollars directly from provider `response.usage` payloads:
+
+| Model ID | Display Name | Input / 1M USD | Cached Input / 1M USD (50% Discount) | Output / 1M USD | Output Multiplier | Notes |
+| :--- | :--- | :---: | :---: | :---: | :---: | :--- |
+| **`gpt-4o`** | OpenAI GPT-4o (Omni) | **$2.50** | **$1.25** | **$10.00** | $4.0\times$ | Standard flagship multimodal LLM |
+| **`gpt-4o-mini`** | OpenAI GPT-4o Mini | **$0.15** | **$0.075** | **$0.60** | $4.0\times$ | High-velocity sub-150ms utility LLM |
+| **`o3-mini`** | OpenAI o3-mini | **$1.10** | **$0.55** | **$4.40** | $4.0\times$ | Frontier reasoning with hidden CoT |
+| **`o1`** | OpenAI o1 (Full) | **$15.00** | **$7.50** | **$60.00** | $4.0\times$ | High-capacity deep reasoning engine |
+| **`gpt-4-turbo`** | OpenAI GPT-4 Turbo | **$10.00** | **$5.00** | **$30.00** | $3.0\times$ | Legacy 128K context model |
+
+Run the empirical benchmark harness against these rate cards:
+```bash
+npm run bench:inference-boundary
+```
+

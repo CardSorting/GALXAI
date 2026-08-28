@@ -59,7 +59,7 @@ export class BroccoliSatelliteTelemetryCompactor {
     const orbitalEphemerisAndTle = 'Orbit: Altitude 524 km Circular | Inclination: 97.48° | Period: 95.1 mins (15.1 orbits/day) | Beta Angle: +28.4° (Eclipse duration: 34.2 mins/orbit)';
 
     // 3. Electrical Power System (EPS) & Thermal
-    const epsPowerAndThermalTelemetry = 'EPS Status: Solar Array Generation = 1,480 W (Sun-tracking nominal); Main 28V Bus Voltage = 28.32V; Battery State of Charge: 92.4% (Li-ion Depth of Discharge: 18.5%); Payload Thermal: +18.4°C (Safe limit: -10°C to +40°C)';
+    const epsPowerAndThermalTelemetry = 'EPS Status: Solar Array Generation = 1,480 W (Sun-tracking nominal); Main 28V Bus Voltage = 28.32V; Battery State of Charge: 92.4% (Li-ion Depth of Discharge: Nominal); Payload Thermal: +18.4°C (Safe limit: -10°C to +40°C)';
 
     // 4. ADCS Attitude & RF Link
     const adcsAttitudeAndRfLinkMargin = 'ADCS: Star Tracker locked on 18 stars; 3-Axis Pointing Error: 0.012° (Spec <0.05°); Reaction Wheels 1-4: 1,840 to 2,420 RPM (Momentum dump unloaded via magnetorquers); X-Band Downlink (1.2 Gbps): Eb/N0 = 14.8 dB (Link Margin: +6.2 dB over threshold)';

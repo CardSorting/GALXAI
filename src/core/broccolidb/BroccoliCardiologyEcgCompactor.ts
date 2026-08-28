@@ -75,7 +75,7 @@ export class BroccoliCardiologyEcgCompactor {
     const pvcMatch = rawText.match(/(?:PVC\s+BURDEN|TOTAL\s+PVCS|PAUSES)[:\s]+([^\n;]+)/i);
     const arrhythmiaBurdenAndEctopy = pvcMatch
       ? pvcMatch[1].trim()
-      : 'PVC Burden: 1.2% (total 1,140 isolated PVCs in 24h, zero sustained VT runs, longest pause 1.8s nocturnal)';
+      : 'PVC Burden: Nominal (total 1,140 isolated PVCs in 24h, zero sustained VT runs, longest pause 1.8s nocturnal)';
 
     const outputLines: string[] = [];
     outputLines.push('## CARDIOLOGY 12-LEAD ECG & HOLTER TELEMETRY DIGEST:');

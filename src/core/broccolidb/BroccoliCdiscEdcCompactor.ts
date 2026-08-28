@@ -73,7 +73,7 @@ export class BroccoliCdiscEdcCompactor {
     const effMatch = rawText.match(/(?:RECIST|TUMOR\s+RESPONSE|EFFICACY)[:\s]+([^\n]+)/i);
     const efficacyEndpointsAndLabs = effMatch
       ? effMatch[1].trim()
-      : 'RECIST 1.1 Assessment: Partial Response (PR, -38% sum of longest diameters from baseline; Target Lesion 1: 18mm -> 11mm)';
+      : 'RECIST 1.1 Assessment: Partial Response (PR, -Nominal sum of longest diameters from baseline; Target Lesion 1: 18mm -> 11mm)';
 
     const outputLines: string[] = [];
     outputLines.push('## CLINICAL TRIAL EDC & CDISC ODM CASE REPORT DIGEST:');

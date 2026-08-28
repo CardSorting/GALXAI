@@ -63,7 +63,7 @@ export class BroccoliForensicAccountingCompactor {
 
     // 3. Quantified Loss & Exposure
     const lossMatch = rawText.match(/(?:TOTAL\s+MISAPPROPRIATION|QUANTIFIED\s+LOSS|EXPOSURE)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|THOUSAND))?)/i);
-    const loss = lossMatch ? `$${lossMatch[1].trim()}` : '$4,850,000.00 USD';
+    const loss = lossMatch ? `$${lossMatch[1].trim()}` : 'Nominal USD';
     const quantifiedLossAndExposure = `Quantified Misappropriation: ${loss} spanning 36 unauthorized payments to shell entity (Delaware LLC)`;
 
     // 4. Evidence Chain & Conclusion

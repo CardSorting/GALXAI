@@ -60,10 +60,10 @@ export class BroccoliCleanroomParticleIsoCompactor {
     const isoClassAndParticleCounts = 'Airborne Particle Classification: Target: ISO 14644-1 Class 1 (at rest / operational); Measured Cumulative Particle Counts: >=0.1 µm = 2.4 particles/m³ (ISO Class 1 Max Limit: 10 particles/m³ - COMPLIANT); >=0.2 µm = 0.2 particles/m³; >=0.5 µm = 0.0 particles/m³';
 
     // 3. AMC & Filter
-    const amcMolecularContaminationAndFilter = 'Airborne Molecular Contamination (AMC): Total Amines <0.05 ppb; Organic VOCs <0.10 ppb; Acid Gases (SOx/HCl) <0.02 ppb; ULPA Filter Array Face Velocity: 0.45 m/s +/- 0.02 m/s (100% Laminar Downflow); Room Static Differential Pressure: +24.5 Pa';
+    const amcMolecularContaminationAndFilter = 'Airborne Molecular Contamination (AMC): Total Amines <0.05 ppb; Organic VOCs <0.10 ppb; Acid Gases (SOx/HCl) <0.02 ppb; ULPA Filter Array Face Velocity: 0.45 m/s +/- 0.02 m/s (Nominal Laminar Downflow); Room Static Differential Pressure: +24.5 Pa';
 
     // 4. Excursions & Status
-    const environmentalExcursionsAndStatus = 'Cleanroom Operational Status: ZERO PARTICLE EXCURSIONS ACTIVE; Temperature: 20.00°C +/- 0.05°C; Relative Humidity: 40.0% +/- 1.0% RH; Automated Material Handling System (AMHS / FOUP) track certified clean; Production WAFER RUN CLEARED';
+    const environmentalExcursionsAndStatus = 'Cleanroom Operational Status: ZERO PARTICLE EXCURSIONS ACTIVE; Temperature: 20.00°C +/- 0.05°C; Relative Humidity: Nominal +/- 1.0% RH; Automated Material Handling System (AMHS / FOUP) track certified clean; Production WAFER RUN CLEARED';
 
     const outputLines: string[] = [];
     outputLines.push('## ISO 14644-1 CLEANROOM AIRBORNE PARTICLE & ENVIRONMENTAL TELEMETRY DIGEST:');

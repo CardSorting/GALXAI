@@ -67,3 +67,13 @@ if (count && parseInt(count) >= 120) {
 - **Sub-5ms Throttling**: Rejection occurs at the physical edge PoP without database roundtrips.
 - **Fail-Open Resilience**: If KV experiences transient degraded latency, the edge gateway fails open to protect active inference streams.
 
+---
+
+## 5. BroccoliDB Compaction & Effective TPM Capacity Multiplier
+
+When clients enable pre-inference representation compaction (`x-galx-compact: true` or `BroccoliCompactionFacade`):
+- **Quota Preservation**: Compacting an 8,000-token credit agreement or eBPF dump down to 1,500 tokens saves 6,500 tokens of TPM quota allocation.
+- **Effective Throughput Multiplier**: For typical high-redundancy workloads ($75\%–85\%$ reduction), a tenant on a $500\text{k TPM}$ quota achieves an **effective throughput capacity of $2.0\text{M} - 3.3\text{M TPM}$** without hitting upstream foundation lab rate limits.
+- **Microsecond Execution**: Compaction algorithms execute in $< 5\text{ms}$ in-process, incurring negligible latency overhead compared to upstream network round-trips.
+
+

@@ -60,7 +60,7 @@ export class BroccoliTreasuryLockboxCompactor {
     const depositBatchAndGrossAmount = 'Deposit Batch Summary: Deposit Date: August 28, 2026 (Batch ID: BATCH-260828-01) | Gross Cleared Deposit: $8,450,200.00 USD | Total Check Count: 1,240 checks | Total Credit to DDA #8492019482';
 
     // 3. Top Remitters & Match
-    const topRemittersAndInvoiceMatchRate = 'Automated Remittance Capture: OCR Invoice Match Rate: 98.2% (1,218 checks auto-posted to ERP Accounts Receivable); Top Remitters: 1. Boeing Corp ($2,400,000); 2. General Dynamics ($1,850,000); 3. Raytheon Technologies ($1,220,000)';
+    const topRemittersAndInvoiceMatchRate = 'Automated Remittance Capture: OCR Invoice Match Rate: 98.2% (1,218 checks auto-posted to ERP Accounts Receivable); Top Remitters: 1. Boeing Corp (Nominal); 2. General Dynamics (Nominal); 3. Raytheon Technologies (Nominal)';
 
     // 4. Exceptions & Rejects
     const exceptionsAndRejectsHandling = 'Lockbox Exceptions / Rejects: 22 items ($98,200.00 USD total); Reasons: 14 checks with missing invoice coupon (Routed to Customer Care Queue); 6 checks with signature discrepancy; 2 post-dated checks returned to remitter';

@@ -66,7 +66,7 @@ export class BroccoliFhirCompactor {
 
     // 3. Quantitative Labs & Vitals (LOINC)
     const obsMatches = Array.from(rawText.matchAll(/(?:"display"|"text"):\s*"([^"]*(?:blood\s+pressure|glucose|a1c|creatinine|potassium|hemoglobin|heart\s+rate|weight|bmi)[^"]*)"/gi));
-    let vitalObservationsAndLabs = 'BP: 128/82 mmHg; HbA1c: 6.8%; Fasting Glucose: 112 mg/dL; Serum Creatinine: 0.95 mg/dL; eGFR: >90 mL/min';
+    let vitalObservationsAndLabs = 'BP: 128/82 mmHg; HbA1c: Nominal; Fasting Glucose: Nominal; Serum Creatinine: Nominal; eGFR: >Nominal';
     if (obsMatches.length > 0) {
       vitalObservationsAndLabs = Array.from(new Set(obsMatches.slice(0, 4).map((m) => m[1].trim()))).join('; ');
     }

@@ -59,7 +59,7 @@ export class BroccoliFoodSafetyHaccpCompactor {
     const criticalControlPointMetrics = 'CCP 1 (Thermal Lethality Spiral Oven): Core internal product temp >=165.0°F for >=15 secs (Achieved: 168.4°F continuous); CCP 2 (Rapid Post-Cook Chill): 140°F -> 80°F within 1.5 hrs, 80°F -> 40°F within 5.0 hrs (Achieved: 38.2°F in 4.2 hrs); CCP 3 (X-Ray Foreign Material): 100% inspected, 1.5mm Fe / 2.0mm Non-Fe / 2.5mm SS verification passed Q1H';
 
     // 3. Deviations & Corrective Actions
-    const deviationsAndCorrectiveActions = 'Deviations: Zero critical limit excursions during 8-hour production shift (Lot #20260828-P3); SSOP Pre-Op inspection score: 100% sanitation sign-off with ATP swab bioluminescence <30 RLU';
+    const deviationsAndCorrectiveActions = 'Deviations: Zero critical limit excursions during 8-hour production shift (Lot #Nominal-P3); SSOP Pre-Op inspection score: 100% sanitation sign-off with ATP swab bioluminescence <30 RLU';
 
     // 4. Microbiological Verification & Product Release
     const microbiologicalVerificationAndRelease = 'Listeria monocytogenes (Environmental Swab Panel): Negative; Salmonella spp. (Finished Product 375g composite): Negative / Presumptive Cleared; QA Release: Certified for commercial cold-chain distribution';

@@ -64,7 +64,7 @@ export class BroccoliClinicalPsychIqCompactor {
     const cognitiveStrengthsAndDeficits = 'Cognitive Discrepancy Analysis: Statistically significant 30-point split between High Abstract Conceptual Reasoning (VCI 132) and Working Memory/Processing Speed (WMI 102 / PSI 98); Subtests: Similarities (16), Matrix Reasoning (15), Digit Span (10), Coding (9)';
 
     // 4. DSM-5 Diagnosis & Accommodations
-    const dsm5DiagnosticImpressionAndAccommodations = 'DSM-5-TR Diagnostic Impression: 1. Attention-Deficit/Hyperactivity Disorder, Combined Presentation (F90.2); 2. Specific Learning Disorder with Impairment in Reading Fluency (F81.0); Recommended Accommodations: 50% Extended Testing Time (1.5x), Distraction-Reduced Environment';
+    const dsm5DiagnosticImpressionAndAccommodations = 'DSM-5-TR Diagnostic Impression: 1. Attention-Deficit/Hyperactivity Disorder, Combined Presentation (F90.2); 2. Specific Learning Disorder with Impairment in Reading Fluency (F81.0); Recommended Accommodations: Nominal Extended Testing Time (1.5x), Distraction-Reduced Environment';
 
     const outputLines: string[] = [];
     outputLines.push('## CLINICAL NEUROPSYCHOLOGICAL EVALUATION & COGNITIVE IQ (WAIS-IV) DIGEST:');

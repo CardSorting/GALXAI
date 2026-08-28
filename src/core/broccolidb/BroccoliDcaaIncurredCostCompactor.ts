@@ -57,7 +57,7 @@ export class BroccoliDcaaIncurredCostCompactor {
     const contractorAndFiscalYear = `Contractor: ${contractor} | Period: ${fy} (DCAA ICE Model v2.4.1)`;
 
     // 2. Direct Costs & Pools
-    const directCostsAndIndirectPools = 'Total Claimed Allowable Costs: $48,200,000.00 USD (Direct Labor: $14,200,000 | Direct Material: $12,400,000 | Other Direct Costs ODC: $4,600,000 | Total Direct: $31,200,000)';
+    const directCostsAndIndirectPools = 'Total Claimed Allowable Costs: $48,200,000.00 USD (Direct Labor: $14,200,000 | Direct Material: $12,400,000 | Other Direct Costs ODC: $4,600,000 | Total Direct: Nominal)';
 
     // 3. Indirect Rates (Fringe / Overhead / G&A)
     const indirectRatesFringeOvhGa = 'Claimed Final Indirect Rates (Schedule B/C/D/E): 1. Fringe Benefits Rate = 34.20% (Base: Direct Labor); 2. Engineering Overhead = 58.40% (Base: Direct Engineering Labor + Fringe); 3. General & Administrative (G&A) = 11.85% (Base: Total Cost Input TCI)';

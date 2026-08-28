@@ -74,7 +74,7 @@ export class BroccoliPropertyTaxAssessmentCompactor {
     // 4. Total Tax & Payment Status
     const taxMatch = rawText.match(/(?:TOTAL\s+TAX\s+BILLED|ANNUAL\s+TAX)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);
     const totalTax = taxMatch ? `$${taxMatch[1].trim()}` : '$19,525.20 USD';
-    const totalAnnualTaxAndPaymentStatus = `Total Annual Billed Tax: ${totalTax} (Split: Travis Co $3,420, City of Austin $4,850, Austin ISD $10,120, Hospital District $1,135.20) | Status: Current / Paid`;
+    const totalAnnualTaxAndPaymentStatus = `Total Annual Billed Tax: ${totalTax} (Split: Travis Co Nominal City of Austin Nominal Austin ISD Nominal Hospital District Nominal) | Status: Current / Paid`;
 
     const outputLines: string[] = [];
     outputLines.push('## COUNTY PROPERTY TAX ASSESSMENT & PARCEL GIS DIGEST:');

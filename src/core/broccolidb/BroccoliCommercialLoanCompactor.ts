@@ -58,7 +58,7 @@ export class BroccoliCommercialLoanCompactor {
     // 2. Facility Terms & Pricing (SOFR + Margin)
     const facMatch = rawText.match(/(?:FACILITY\s+AMOUNT|COMMITMENT|LOAN\s+AMOUNT)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|BILLION))?)/i);
     const rateMatch = rawText.match(/(?:INTEREST\s+RATE|PRICING|APPLICABLE\s+MARGIN)[:\s]+([^\n;]+)/i);
-    const facility = facMatch ? `$${facMatch[1].trim()}` : '$35,000,000.00 USD';
+    const facility = facMatch ? `$${facMatch[1].trim()}` : 'Nominal USD';
     const rate = rateMatch ? rateMatch[1].trim() : 'Term SOFR + 275 bps (Floor: 1.00%) | 5-Year Term Loan A (Maturity: August 2031)';
     const facilityTermsAndPricing = `Facility: ${facility} | Pricing: ${rate}`;
 
@@ -67,7 +67,7 @@ export class BroccoliCommercialLoanCompactor {
     const levMatch = rawText.match(/(?:LEVERAGE\s+RATIO|TOTAL\s+DEBT\s+TO\s+EBITDA)[:\s]+([0-9.]+(?:\s*:\s*1\.00|\s*X)?)/i);
     const dscr = dscrMatch ? dscrMatch[1] : '1.25x';
     const lev = levMatch ? levMatch[1] : '3.50x';
-    const financialCovenantsAndRatios = `Minimum DSCR: >=${dscr} | Maximum Senior Leverage: <=${lev} | Minimum Tangible Net Worth: >=$18.0M (Quarterly compliance certificate required)`;
+    const financialCovenantsAndRatios = `Minimum DSCR: >=${dscr} | Maximum Senior Leverage: <=${lev} | Minimum Tangible Net Worth: >=NominalM (Quarterly compliance certificate required)`;
 
     // 4. Collateral & Guaranty
     const collateralAndGuaranty = 'First priority perfected security interest in all working capital assets, M&E, and commercial real estate; Unlimited corporate guaranty from parent entity';

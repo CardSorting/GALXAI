@@ -102,3 +102,17 @@ for chunk in stream:
 | **`gpt-5.6-sol`** | OpenAI | $900,000$ | $128,000$ | **$3.75** | **$15.00** | **$1.25** | **25% OFF** |
 | **`gpt-5.6-terra`** | OpenAI | $900,000$ | $64,000$ | **$2.25** | **$9.00** | **$0.75** | **25% OFF** |
 | **`x-ai/grok-4.6`** | xAI Grok | $1,000,000$ | $128,000$ | **$2.10** | **$8.40** | **$0.70** | **30% OFF** |
+
+---
+
+## 6. Reasoning Models & BroccoliDB Input Compaction Economics
+
+When reasoning models (`gpt-5.6-terra`, `o3-mini`, `o1`) process large multi-file codebases, log storms, or technical specifications, **excess input boilerplate pollutes the hidden reasoning window** and inflates latency.
+
+### The Input Compaction Advantage for Reasoning
+- **85.93% Input Prompt Spend Reduction**: BroccoliDB strips non-essential syntax, noisy telemetry loops, and repetitive AST nodes before the prompt reaches the model.
+- **Latency Acceleration**: In empirical testing (`npm run bench:inference-boundary`), compacting the input prompt cut `o3-mini` response latency from **$1404\text{ms} \to 472\text{ms}$ (a $932\text{ms}$ / $66\%$ speedup)**.
+- **Cost Decomposition**: Hidden reasoning tokens and visible completion tokens represent the model's observed non-compressible floor ($0.0040 USD per run). Compacting the input reduces total billed expenditure by **$65.45\%$** on reasoning models without compromising factual verification accuracy.
+- **Forensic Dissection**: See [FORENSIC_PAYLOAD_DISSECTION_AND_CAUSAL_ANALYSIS.md](FORENSIC_PAYLOAD_DISSECTION_AND_CAUSAL_ANALYSIS.md) for the exact before/after payload transformations across reasoning workloads.
+
+

@@ -228,13 +228,14 @@ The circuit breaker operates across four strict lifecycle states:
 
 ---
 
-### 6.4 BroccoliDB High-Velocity Compaction & Safe Deduplication Substrate
+### 6.4 BroccoliDB Representation Transformation & Compaction Substrate
 
-Embedded compaction subsystem reducing prompt token consumption by 70%–98% across domain, telemetry, incident, and document workloads:
-- **`BroccoliCompactionFacade`**: Unified public gateway enforcing defensive size bounds (2MB strings, 10k batch frames, 1k-128k token budgets).
+Embedded representation transformation subsystem reducing input prompt token consumption across 180 domains and 19 streaming modes:
+- **The Core Representation Invariant**: Compaction opportunity is a property of the representation, not a fixed property of the model ($\text{Representation} \to \text{Transformation} \to \text{Task-Relevant Representation} \to \text{Inference}$).
+- **`BroccoliCompactionFacade`**: Unified public gateway enforcing defensive size bounds (10MB payload limit, 2MB string bounds, 10k batch frames, 1k-128k token budgets).
 - **`BroccoliCompactionSafety`**: Conservative fail-closed factual grounding gate ensuring 100% data integrity on numbers, currencies, dates, and identifiers.
-- **Master Compaction Engines**: `BroccoliDomainSpendOptimizer` (180 specialized domains), `BroccoliHighVelocityPipeline` (single-pass Aho-Corasick + L1 LRU memoization), `BroccoliMegaIncidentStreamCascader` ($T_0$ root cause isolation), and `BroccoliMegaDocumentPyramidCompactor` (3-tier hierarchical extractive pyramid).
-- **Barrel Hygiene**: Private generated compactors are shielded from direct public imports, preventing ungrounded bypass bugs.
+- **Empirical Boundary Verification**: Benchmarked via `npm run bench:inference-boundary` across `gpt-4o`, `gpt-4o-mini`, and `o3-mini` with Randomized Branch-Blinded A/B evaluation ([ADR 0064](adr/0064-broccolidb-openai-inference-boundary-measurement-and-task-suite.md) and [ADR 0065](adr/0065-broccolidb-blinded-evaluator-protocol-and-out-of-sample-validation.md)).
+- **Forensic Payload Dissection**: Byte-by-byte before/after payload diffs and causal mechanism analysis in [FORENSIC_PAYLOAD_DISSECTION_AND_CAUSAL_ANALYSIS.md](FORENSIC_PAYLOAD_DISSECTION_AND_CAUSAL_ANALYSIS.md).
 - **Onboarding Guide**: Full developer mental models and runbooks are available in [BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md](BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md).
 
 ---
@@ -247,11 +248,12 @@ For multi-agent swarm collaboration and DAG workflows, `GalxSwarmCoordinatorDO` 
 
 ---
 
-### 6.5 GalxTaskQueueEngine & DAG Fan-In Orchestrator
+### 6.6 GalxTaskQueueEngine & DAG Fan-In Orchestrator
 
 CloudTasks & CloudRun-inspired distributed asynchronous task executor:
 - **FIFO Group Partitioning**: Guarantees ordered execution across turn-based conversational sessions (`groupId`).
 - **Fan-In Aggregation**: Child tasks wait until all parent tasks (`dependsOn: [taskA, taskB]`) transition to `COMPLETED` before dispatching to downstream LLMs.
+
 
 ---
 

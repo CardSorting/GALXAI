@@ -28,6 +28,8 @@ flowchart LR
 | **Stage 5** | [05: Security & Compliance](05-security-key-rotation-and-compliance.md) | Zero-downtime Vault Master Secret rotation (`v1` $\to$ `v2`), SOC 2 Type II signed evidence extraction (`/api/compliance/evidence`), GDPR Article 17 purge, and Merkle audit chain verification. |
 | **Stage 6** | [06: Disaster Recovery & Post-Mortems](06-disaster-recovery-and-postmortems.md) | Cloudflare edge PoP evacuation, Supabase Point-in-Time Recovery (PITR), R2 multimodal asset recovery, blameless post-mortem template, and automated regression test authoring. |
 | **Stage 7** | [07: Zero-Hesitation DX & API Governance](07-zero-hesitation-developer-ergonomics-and-api-governance.md) | Universal multi-mental-model absorption (OpenAI, Anthropic, Ollama, LangChain, Vercel AI, Midjourney), zero-install CLI operations (`npx galxai`), GET browser execution, and 98-test verification gates. |
+| **Stage 8** | [08: Unframed Developer Observation Protocol](08-unframed-developer-observation-protocol.md) | 8-vector behavioral observation protocol for unframed developer trials, induced mental model taxonomy, and qualitative product signal capture. |
+
 
 ---
 

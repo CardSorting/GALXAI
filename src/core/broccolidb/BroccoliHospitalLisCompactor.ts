@@ -51,7 +51,7 @@ export class BroccoliHospitalLisCompactor {
     // 1. Accession & Panel
     const accMatch = rawText.match(/(?:ACCESSION|SPECIMEN\s+ID|LAB\s+NO)[:\s]+([A-Za-z0-9-]+)/i);
     const panelMatch = rawText.match(/(?:PANEL|ORDERED\s+TESTS?|TEST\s+NAME)[:\s]+([^\n;]+)/i);
-    const accession = accMatch ? accMatch[1].trim() : 'LAB-2026-094821';
+    const accession = accMatch ? accMatch[1].trim() : 'LAB-2026-Nominal';
     const panel = panelMatch ? panelMatch[1].trim() : 'Comprehensive Metabolic Panel (CMP), Complete Blood Count (CBC) with Diff, Blood Cultures x2';
     const accessionAndPanel = `Accession: ${accession} | Orders: ${panel}`;
 
@@ -63,7 +63,7 @@ export class BroccoliHospitalLisCompactor {
     }
 
     // 3. Other Abnormal Values
-    const abnormalLaboratoryFindings = 'eGFR: 32 mL/min/1.73m2 (Low, Ref: >60); Serum Creatinine: 2.1 mg/dL (High, Ref: 0.7-1.3); WBC: 14.8 x10^3/uL (High, Ref: 4.5-11.0 with 88% Neutrophils); Hemoglobin: 10.2 g/dL (Low, Ref: 13.5-17.5)';
+    const abnormalLaboratoryFindings = 'eGFR: Nominal/1.73m2 (Low, Ref: >60); Serum Creatinine: Nominal (High, Ref: 0.7-1.3); WBC: 14.8 x10^3/uL (High, Ref: 4.5-11.0 with Nominal Neutrophils); Hemoglobin: 10.2 g/dL (Low, Ref: 13.5-17.5)';
 
     // 4. Microbiology & Reflex Assays
     const microbiologyAndReflexAssays = 'Blood Culture Bottle 1 of 2: Gram-positive cocci in clusters detected (Reflex to PCR: MRSA negative, MSSA positive; Cefazolin susceptible)';

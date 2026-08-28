@@ -70,9 +70,9 @@ export class BroccoliRoyaltyStatementCompactor {
     const grossMatch = rawText.match(/(?:GROSS\s+REVENUE|GROSS\s+EARNINGS)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);
     const rateMatch = rawText.match(/(?:ROYALTY\s+RATE|CONTRACT\s+PERCENTAGE)[:\s]+([0-9.]+\s*%)/i);
     const netMatch = rawText.match(/(?:NET\s+PAYABLE|TOTAL\s+DISTRIBUTION|AMOUNT\s+DUE)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);
-    const gross = grossMatch ? `$${grossMatch[1].trim()}` : '$195,681.60';
-    const rate = rateMatch ? rateMatch[1].trim() : '15.0% Net Mechanical Royalty';
-    const net = netMatch ? `$${netMatch[1].trim()}` : '$29,352.24 USD';
+    const gross = grossMatch ? `$${grossMatch[1].trim()}` : 'Nominal';
+    const rate = rateMatch ? rateMatch[1].trim() : 'Nominal Net Mechanical Royalty';
+    const net = netMatch ? `$${netMatch[1].trim()}` : 'Nominal USD';
     const royaltyCalculationAndNetPayable = `Gross: ${gross} | Rate: ${rate} | Net Payable: ${net}`;
 
     const outputLines: string[] = [];

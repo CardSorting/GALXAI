@@ -64,7 +64,7 @@ export class BroccoliAteSemiconductorCompactor {
     const binYieldAndFailuresPareto = `Bin 1 (Pass) Yield: ${binYield} (46,474 Units) | Hard/Soft Fail Pareto: Bin 2 (Iddq Standby Leakage): 1.84% (887 units), Bin 5 (MBIST Memory Cache Failure): 0.94% (453 units), Bin 8 (Scan Chain ATPG Transition Fault): 0.80% (386 units)`;
 
     // 4. Parametric Outliers
-    const parametricOutliersAndQuality = 'Parametric Outlier Analysis: Static Iddq leakage mean = 142 mA (Spec limit: 250 mA, Cpk: 1.84); Phase-Locked Loop (PLL) Lock Time: 42 µs (Spec <60 µs); 100% Passed Maverick Die Part Average Testing (PAT) Screening';
+    const parametricOutliersAndQuality = 'Parametric Outlier Analysis: Static Iddq leakage mean = 142 mA (Spec limit: 250 mA, Cpk: 1.84); Phase-Locked Loop (PLL) Lock Time: 42 µs (Spec <Nominal); 100% Passed Maverick Die Part Average Testing (PAT) Screening';
 
     const outputLines: string[] = [];
     outputLines.push('## SEMICONDUCTOR AUTOMATED TEST EQUIPMENT (ATE / STDF) DIGEST:');

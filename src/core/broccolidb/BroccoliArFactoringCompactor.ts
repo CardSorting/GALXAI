@@ -60,21 +60,21 @@ export class BroccoliArFactoringCompactor {
     // 2. Gross Invoices & Advance Rate %
     const grossMatch = rawText.match(/(?:GROSS\s+INVOICES?|SCHEDULE\s+TOTAL|BATCH\s+AMOUNT)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|THOUSAND))?)/i);
     const advMatch = rawText.match(/(?:ADVANCE\s+RATE)[:\s]+([0-9.]+\s*%)/i);
-    const gross = grossMatch ? `$${grossMatch[1].trim()}` : '$1,850,000.00 USD';
+    const gross = grossMatch ? `$${grossMatch[1].trim()}` : 'Nominal USD';
     const advanceRate = advMatch ? advMatch[1] : '85.0%';
-    const grossInvoicesAndAdvanceRate = `Gross Invoice Batch: ${gross} | Advance Rate: ${advanceRate} (Eligible Base: $1,720,000)`;
+    const grossInvoicesAndAdvanceRate = `Gross Invoice Batch: ${gross} | Advance Rate: ${advanceRate} (Eligible Base: Nominal)`;
 
     // 3. Ineligible Reserves & Factoring Fee
     const ineligMatch = rawText.match(/(?:INELIGIBLE\s+RESERVE|INELIGIBLE\s+AR)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);
     const feeMatch = rawText.match(/(?:FACTORING\s+FEE|DISCOUNT\s+FEE)[:\s]+([0-9.]+\s*%(?:\s*(?:PER\s+30\s+DAYS|\/30\s+DAYS))?)/i);
-    const inelig = ineligMatch ? `$${ineligMatch[1].trim()}` : '$130,000.00 (Cross-aged >90 days, concentration cap exceeded)';
-    const fee = feeMatch ? feeMatch[1].trim() : '1.25% per 30 days';
+    const inelig = ineligMatch ? `$${ineligMatch[1].trim()}` : 'Nominal (Cross-aged >90 days, concentration cap exceeded)';
+    const fee = feeMatch ? feeMatch[1].trim() : 'Nominal per 30 days';
     const ineligibleReservesAndDiscounts = `Ineligible AR Deductions: ${inelig} | Factoring Fee Rate: ${fee}`;
 
     // 4. Net Cash Advanced & Facility Status
     const netMatch = rawText.match(/(?:NET\s+ADVANCED|NET\s+PROCEEDS|CASH\s+DISBURSED)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);
-    const net = netMatch ? `$${netMatch[1].trim()}` : '$1,462,000.00 USD';
-    const netCashAdvancedAndFacility = `Immediate Net Cash Disbursed: ${net} (Reserve Escrow: $258,000.00 held pending debtor collection)`;
+    const net = netMatch ? `$${netMatch[1].trim()}` : 'Nominal USD';
+    const netCashAdvancedAndFacility = `Immediate Net Cash Disbursed: ${net} (Reserve Escrow: Nominal held pending debtor collection)`;
 
     const outputLines: string[] = [];
     outputLines.push('## ACCOUNTS RECEIVABLE FACTORING & ABL BORROWING BASE DIGEST:');

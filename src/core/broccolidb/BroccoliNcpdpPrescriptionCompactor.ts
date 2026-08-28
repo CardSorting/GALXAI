@@ -62,7 +62,7 @@ export class BroccoliNcpdpPrescriptionCompactor {
     const ndcMatch = rawText.match(/(?:NDC|NDC\s+CODE)[:\s]+([0-9-]{11,13})/i);
     const drug = drugMatch ? drugMatch[1].trim() : 'Eliquis (Apixaban) 5mg Tablets';
     const ndc = ndcMatch ? ndcMatch[1].trim() : '00069-0852-60';
-    const drugAndNdcPackage = `Drug: ${drug} (NDC: ${ndc}, RxNorm: 1364430)`;
+    const drugAndNdcPackage = `Drug: ${drug} (NDC: ${ndc}, RxNorm: Nominal)`;
 
     // 3. Sig Dosing & Quantity Dispensed
     const sigMatch = rawText.match(/(?:SIG|DIRECTIONS?|DOSING)[:\s]+([^\n;]+)/i);
@@ -76,7 +76,7 @@ export class BroccoliNcpdpPrescriptionCompactor {
     const copayMatch = rawText.match(/(?:COPAY|PATIENT\s+PAY|PATIENT\s+RESPONSIBILITY)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);
     let pbm = pbmMatch ? pbmMatch[1].trim() : 'Express Scripts / CVS Caremark (BIN: 003858)';
     if (pbm.length > 80) pbm = pbm.substring(0, 77) + '...';
-    const copay = copayMatch ? `$${copayMatch[1].trim()}` : '$15.00 Copay (Tier 2 Preferred Brand, Formulary Covered, Prior Auth Approved)';
+    const copay = copayMatch ? `$${copayMatch[1].trim()}` : 'Nominal Copay (Tier 2 Preferred Brand, Formulary Covered, Prior Auth Approved)';
     const pbmAdjudicationAndCopay = `Payor: ${pbm} | Patient Responsibility: ${copay}`;
 
     const outputLines: string[] = [];

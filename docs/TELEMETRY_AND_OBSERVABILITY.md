@@ -90,3 +90,41 @@ Each log line provides:
 - **`edgePoP`**: Physical Cloudflare airport data center code (e.g. `SJC`, `IAD`, `LHR`, `FRA`)
 - **`duration`**: Edge isolate execution duration in milliseconds
 
+---
+
+## 5. BroccoliDB Compaction & Inference Boundary Metrics
+
+GALXAI exposes real-time telemetry on input context compression and provider-boundary financial economics:
+
+```json
+{
+  "broccolidb": {
+    "totalCompactionEvents": 18450,
+    "grossInputTokensCompressed": 48200000,
+    "grossInputTokensSaved": 37400000,
+    "aggregateCompressionRatio": 0.776,
+    "averageCompactionLatencyMs": 0.45,
+    "fidelityStatus": {
+      "verified": 18450,
+      "fallback": 0
+    },
+    "estimatedDollarsSavedUSD": 93.50,
+    "modeBreakdown": {
+      "domain": { "events": 8200, "savedTokens": 16400000 },
+      "ebpf_stream": { "events": 4100, "savedTokens": 14760000 },
+      "log_stream": { "events": 3200, "savedTokens": 4160000 },
+      "k8s_watch_stream": { "events": 1800, "savedTokens": 1540000 },
+      "incident": { "events": 1150, "savedTokens": 540000 }
+    }
+  }
+}
+```
+
+### Prometheus Metrics Definitions:
+- `galxai_broccolidb_events_total{mode="...", status="verified|fallback"}`
+- `galxai_broccolidb_tokens_saved_total{mode="..."}`
+- `galxai_broccolidb_compression_ratio{mode="..."}`
+- `galxai_broccolidb_latency_ms_bucket{le="..."}`
+- `galxai_broccolidb_dollars_saved_usd_total{model="..."}`
+
+

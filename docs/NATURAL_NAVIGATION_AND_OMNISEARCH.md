@@ -121,14 +121,17 @@ When a user selects an Action result (e.g. `> curl` or `> python`), the action s
 | `g h` | **Home** (`/`) | Gateway overview and featured routers |
 | `g m` | **Models** (`/models`) | 12 state-of-the-art model pricing catalog |
 | `g c` | **Compare** (`/models/compare`) | Benchmark matrix and context windows |
+| `g a` | **Audit** (`/audit`) | Autonomous Spend Governance & Forensic Control Tower |
 | `g k` | **API Keys** (`/keys`) | Manage zero-markup developer tokens |
 | `g b` | **Billing** (`/billing`) | Compute wallet, invoices, and deposits |
 | `g q` | **Queues** (`/queues`) | Async background tasks & live results |
 | `g p` | **Playground** (`/playground`) | Interactive prompt & token tester |
+| `g t` | **Tools** (`/tools/prompt-compressor`) | Interactive BroccoliDB prompt compressor & simulators |
 | `g d` | **Documentation** (`/docs`) | Developer guides and SDK cheatsheets |
 | `g s` | **Status** (`/status`) | Real-time multi-region SLA health |
 | `g f` | **FAQ** (`/faq`) | Zero data retention & security answers |
 | `?` | **Shortcuts Modal** | Displays all keyboard shortcuts overlay |
+
 
 ---
 

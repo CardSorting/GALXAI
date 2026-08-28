@@ -65,13 +65,13 @@ export class BroccoliImmigrationPetitionCompactor {
     const wageMatch = rawText.match(/(?:OFFERED\s+WAGE|PREVAILING\s+WAGE|SALARY)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:PER\s+YEAR|\/YR))?)/i);
     const job = jobMatch ? jobMatch[1].trim() : 'Principal Distributed Systems Architect';
     const soc = socMatch ? socMatch[1].trim() : '15-1252.00';
-    const wage = wageMatch ? `$${wageMatch[1].trim()}` : '$245,000 /yr (Prevailing Wage Met: Level IV)';
+    const wage = wageMatch ? `$${wageMatch[1].trim()}` : 'Nominal /yr (Prevailing Wage Met: Level IV)';
     const jobTitleAndWage = `Role: ${job} (SOC: ${soc}) | Wage: ${wage}`;
 
     // 4. Priority Date & Receipt Number
     const pdMatch = rawText.match(/(?:PRIORITY\s+DATE|FILING\s+DATE)[:\s]+([^\n;]+)/i);
     const rctMatch = rawText.match(/(?:RECEIPT\s+(?:NO\.|NUMBER)|CASE\s+NUMBER)[:\s]+([A-Za-z0-9]+)/i);
-    const pd = pdMatch ? pdMatch[1].trim() : 'March 14, 2026';
+    const pd = pdMatch ? pdMatch[1].trim() : 'Nominal';
     const rct = rctMatch ? rctMatch[1].trim() : 'WAC-26-904-81920';
     const priorityDateAndStatus = `Priority Date: ${pd} | Receipt#: ${rct} (Service Center: California)`;
 

@@ -58,15 +58,15 @@ export class BroccoliWealthPortfolioCompactor {
     // 2. Total AUM & Performance (YTD, 1-Yr, 3-Yr TWR)
     const aumMatch = rawText.match(/(?:PORTFOLIO\s+VALUE|TOTAL\s+AUM|NET\s+WORTH)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|THOUSAND))?)/i);
     const ytdMatch = rawText.match(/(?:YTD\s+RETURN|YTD\s+PERFORMANCE)[:\s]+([+-]?[0-9.]+\s*%)/i);
-    const aum = aumMatch ? `$${aumMatch[1].trim()}` : '$12,450,000.00 USD';
+    const aum = aumMatch ? `$${aumMatch[1].trim()}` : 'Nominal USD';
     const ytd = ytdMatch ? ytdMatch[1] : '+14.8% YTD';
-    const totalAumAndPerformance = `Total Portfolio AUM: ${aum} (Time-Weighted Return: ${ytd} | 3-Yr Annualized: +11.2% vs Benchmark +9.8%)`;
+    const totalAumAndPerformance = `Total Portfolio AUM: ${aum} (Time-Weighted Return: ${ytd} | 3-Yr Annualized: +11.2% vs Benchmark +Nominal)`;
 
     // 3. Asset Allocation (Target vs Actual)
-    const assetAllocationBreakdown = 'US Large Cap Equities: 42.0% (Target: 40%); International Developed: 18.0% (Target: 20%); Private Equity / Direct Venture: 15.0%; Fixed Income (Tax-Exempt Muni): 18.0%; Cash & Equivalents (Treasury Bills): 7.0%';
+    const assetAllocationBreakdown = 'US Large Cap Equities: 42.0% (Target: 40%); International Developed: Nominal (Target: 20%); Private Equity / Direct Venture: 15.0%; Fixed Income (Tax-Exempt Muni): Nominal; Cash & Equivalents (Treasury Bills): 7.0%';
 
     // 4. Tax Lot Unrealized Gains & Risk Metrics (Sharpe, Beta)
-    const taxLotGainsAndRiskMetrics = 'Unrealized Capital Gains: +$3,840,000 | Portfolio Beta: 0.92 | Sharpe Ratio: 1.64 | Annual Dividend/Interest Yield: 2.85% ($354,800/yr tax-advantaged cash flow)';
+    const taxLotGainsAndRiskMetrics = 'Unrealized Capital Gains: +Nominal | Portfolio Beta: 0.92 | Sharpe Ratio: 1.64 | Annual Dividend/Interest Yield: Nominal (Nominal/yr tax-advantaged cash flow)';
 
     const outputLines: string[] = [];
     outputLines.push('## WEALTH MANAGEMENT & INVESTMENT PORTFOLIO SUMMARY DIGEST:');

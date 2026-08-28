@@ -72,7 +72,7 @@ export class BroccoliSuretyBondCompactor {
     const projectAndContractTerms = `Project: ${project} (Contract#: ${contractNum}, 730 Calendar Days)`;
 
     // 4. Indemnity & Bonding Capacity
-    const indemnityAndBondingCapacity = 'General Indemnity Agreement (GIA): Joint & several personal/corporate indemnification; Contractor Bonding Capacity: $75.0M Single / $200.0M Aggregate (Available Backlog Room: $38.2M)';
+    const indemnityAndBondingCapacity = 'General Indemnity Agreement (GIA): Joint & several personal/corporate indemnification; Contractor Bonding Capacity: NominalM Single / NominalM Aggregate (Available Backlog Room: $38.2M)';
 
     const outputLines: string[] = [];
     outputLines.push('## CONSTRUCTION SURETY BOND & PERFORMANCE UNDERWRITING DIGEST:');

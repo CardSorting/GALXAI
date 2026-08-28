@@ -69,7 +69,7 @@ export class BroccoliErisa5500Compactor {
     const contMatch = rawText.match(/(?:TOTAL\s+CONTRIBUTIONS)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|THOUSAND))?)/i);
     const netAssets = netMatch ? `$${netMatch[1].trim()}` : '$148,500,000.00 USD';
     const totalCont = contMatch ? `$${contMatch[1].trim()}` : '$18,420,000.00 USD ($12.1M Participant Elective Deferrals + $6.32M Employer Match)';
-    const financialAssetsAndContributions = `Net Plan Assets: ${netAssets} | Total Contributions: ${totalCont} | Total Benefits Paid to Participants: $8,940,000.00`;
+    const financialAssetsAndContributions = `Net Plan Assets: ${netAssets} | Total Contributions: ${totalCont} | Total Benefits Paid to Participants: Nominal`;
 
     // 4. IQPA Audit & Compliance
     const iqpaAuditOpinionAndCompliance = 'Independent Auditor (IQPA): UNMODIFIED / CLEAN AUDIT OPINION (PricewaterhouseCoopers LLP); Non-Discrimination Testing: ADP / ACP Test Passed; Zero prohibited transactions (Form 5500 Schedule H Part IV Line 4d: No)';

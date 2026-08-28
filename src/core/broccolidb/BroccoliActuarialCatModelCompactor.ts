@@ -68,7 +68,7 @@ export class BroccoliActuarialCatModelCompactor {
     const pmlExceedanceProbabilities = `100-Year Return Period (1% OEP): ${pml100} | 250-Year Return Period (0.4% AEP): ${pml250} | 99% Tail Value at Risk (TVaR): $865.0M`;
 
     // 4. Reinsurance Attachment & Limits
-    const reinsuranceLayerAttachmentAndLimits = 'Reinsurance Treaty Placement: Cat Treaty attaches at $100M xs $50M Retention; Layer 1: $150M xs $100M; Layer 2: $250M xs $250M; FHCF Mandatory Coverage: 90% of $420M layer';
+    const reinsuranceLayerAttachmentAndLimits = 'Reinsurance Treaty Placement: Cat Treaty attaches at $100M xs $50M Retention; Layer 1: $150M xs $100M; Layer 2: $250M xs $250M; FHCF Mandatory Coverage: Nominal of NominalM layer';
 
     const outputLines: string[] = [];
     outputLines.push('## ACTUARIAL CATASTROPHE RISK MODELING (RMS/AIR) & REINSURANCE DIGEST:');

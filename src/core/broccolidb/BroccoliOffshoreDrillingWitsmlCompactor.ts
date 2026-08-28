@@ -63,7 +63,7 @@ export class BroccoliOffshoreDrillingWitsmlCompactor {
     const depthAndRateOfPenetration = `Depth: ${md} | ROP: ${rop} | Inclination: 38.4° / Azimuth: 142.8°`;
 
     // 3. Dynamics & Mud Weight
-    const drillingDynamicsAndMudWeight = 'Weight on Bit (WOB): 24.5 klbs | Top Drive Torque: 18,400 ft-lbs @ 140 RPM | Mud Weight In/Out: 12.8 / 12.9 PPG Synthetic Oil-Based Mud (SBM) | Equivalent Circulating Density (ECD): 13.4 PPG @ 850 GPM Standpipe Pressure: 3,840 psi';
+    const drillingDynamicsAndMudWeight = 'Weight on Bit (WOB): 24.5 klbs | Top Drive Torque: 18,400 ft-lbs @ 140 RPM | Mud Weight In/Out: 12.8 / 12.9 PPG Synthetic Oil-Based Mud (SBM) | Equivalent Circulating Density (ECD): 13.4 PPG @ 850 GPM Standpipe Pressure: 3,Nominal';
 
     // 4. Gas & Well Control
     const formationGasAndWellControlStatus = 'Formation Gas: Total Gas = 420 Units (Background: 80 Units / Connection Gas: 850 Units peak C1-C5 chromatograph); Pit Volume: +1.2 bbls (Normal fluctuation); Well Control: GREEN / ZERO KICK DETECTED; Subsea BOP Tested & Ready';

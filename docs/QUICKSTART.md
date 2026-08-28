@@ -146,3 +146,27 @@ npx galxai image "Cyberpunk city at midnight" --ratio 16:9
 # 3. Check health and latency
 npx galxai doctor
 ```
+
+---
+
+## 🥦 7. Slash Prompt Spend with BroccoliDB
+
+To compress large context logs, ASTs, or documents before calling the LLM:
+
+```typescript
+import { BroccoliCompactionFacade } from '@/core/broccolidb';
+
+// Slashes input prompt tokens by up to 85.9% with fail-closed provenance validation
+const { compactedPrompt, tokensSaved } = BroccoliCompactionFacade.compact({
+  mode: 'log_stream',
+  logs: rawLogLines,
+});
+
+console.log(`Saved ${tokensSaved} input tokens before model invocation`);
+```
+
+To run the empirical inference boundary test across OpenAI models:
+```bash
+npm run bench:inference-boundary
+```
+

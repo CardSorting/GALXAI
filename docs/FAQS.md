@@ -73,3 +73,39 @@ No. GALXAI enforces a strict **Zero Data Retention Policy (ZDR v10.0)**. Prompts
 
 #### 14. How does GALXAI handle uptime and failover?
 GALXAI provides **high availability infrastructure** backed by sub-15ms automated failover, 4-state circuit breakers, and 300+ global edge Points of Presence ($0 egress bandwidth on Cloudflare R2 `assets.galx.ai`).
+
+---
+
+## 🥦 BroccoliDB Compaction & Inference Boundary Economics
+
+#### 15. What is BroccoliDB and how does it reduce AI inference costs?
+BroccoliDB is GALXAI's in-process compaction engine operating at the model input boundary. It supports 19 specialized modes (including 180 domain industry compactors, Drain log clustering, TSDB metrics, eBPF syscalls, K8s watch streams, and geospatial coordinates), stripping non-essential syntax, noisy telemetry, and repetitive boilerplate before prompts reach the LLM.
+
+#### 16. How does BroccoliDB prevent hallucinations in compacted data?
+BroccoliDB enforces **fail-closed factual provenance verification** (`BroccoliCompactionSafety`). If a compactor produces any number, date, currency amount, or key entity that did not exist in the raw source input, it immediately triggers a safe fallback to the original raw text. Across our 180-domain regression cluster, it achieves **180 verified compactions and 0 safe fallbacks (100% Pass Rate)** with **77.6% aggregate spend savings**.
+
+#### 17. What is the difference between Compressible Input Spend vs. Non-Compressible Output Floor?
+Enterprise AI inference cost decomposes into:
+$$\text{Total Billed Cost} = \underbrace{\text{Input Prompt Spend}}_{\text{Compressible by BroccoliDB (85.93\% Saved)}} + \underbrace{\text{Output Generation Spend} + \text{Reasoning (CoT) Spend}}_{\text{Observed Non-Compressible Floor}}$$
+BroccoliDB dramatically compresses the input prompt boundary. Output tokens and hidden chain-of-thought tokens represent required task execution and remain an observable non-compressible spend floor.
+
+#### 18. How do I run empirical benchmarks against OpenAI models?
+Run the built-in CLI benchmark runner:
+```bash
+npm run bench:inference-boundary
+```
+This executes head-to-head empirical tests across `gpt-4o`, `gpt-4o-mini`, and `o3-mini`, measuring exact provider-reported billed dollars, wall-clock latency, and $/success metrics with explicit provenance tags (`LIVE_OPENAI_API` vs `CALIBRATED_OFFLINE_SIMULATION`).
+
+#### 19. What is the Core Representation Thesis of BroccoliDB?
+> **Compaction opportunity is a property of the representation, not a fixed property of the model.**
+>
+> $$\text{Representation} \xrightarrow{\text{Transformation}} \text{Task-Relevant Representation} \xrightarrow{\text{Inference}} \text{Outcome}$$
+
+Tokens and dollars are the observable measurement units at the provider boundary; **representation redundancy** is the governing physical variable. High-redundancy contexts (equilibrium telemetry, repeating ASTs) yield $78\%–95\%$ reduction; dense or already-compressed contexts yield $0\%$ or negative deltas due to framing overhead.
+
+#### 20. Is BroccoliDB a general representation reducer or a framework of specialized reducers?
+> **Definition**: *GALX is a pre-inference representation transformation layer that attempts to preserve task-relevant invariants while eliminating representational redundancy.*
+
+Currently, BroccoliDB operates as a **high-performance collection of specialized domain reducers** (180 industry domain compactors, Drain log clusterers, TSDB statistical aggregators, and eBPF kernel analyzers) orchestrated behind a single, safe interface (`BroccoliCompactionFacade`). The ongoing research frontier is extending this into **unsupervised equivalence discovery** where the engine autonomously identifies equivalence classes in novel, unstructured payloads without domain priors.
+
+

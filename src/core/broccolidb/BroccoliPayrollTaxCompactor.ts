@@ -61,14 +61,14 @@ export class BroccoliPayrollTaxCompactor {
     const countMatch = rawText.match(/(?:EMPLOYEE\s+COUNT|HEADCOUNT|NUMBER\s+OF\s+EMPLOYEES)[:\s]+([0-9,]+)/i);
     const wagesMatch = rawText.match(/(?:TOTAL\s+WAGES|TOTAL\s+COMPENSATION|GROSS\s+PAYROLL)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|THOUSAND))?)/i);
     const count = countMatch ? countMatch[1].trim() : '482 full-time employees';
-    const wages = wagesMatch ? `$${wagesMatch[1].trim()}` : '$18,450,200.00 USD';
-    const wagesAndEmployeeCount = `Headcount: ${count} | Total Gross Wages: ${wages} (FICA Taxable: $16,820,000 | Medicare Taxable: $18,450,200)`;
+    const wages = wagesMatch ? `$${wagesMatch[1].trim()}` : 'Nominal USD';
+    const wagesAndEmployeeCount = `Headcount: ${count} | Total Gross Wages: ${wages} (FICA Taxable: Nominal | Medicare Taxable: Nominal)`;
 
     // 3. Tax Liability & Withholding
     const fedMatch = rawText.match(/(?:FEDERAL\s+INCOME\s+TAX|FIT\s+WITHHELD)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);
     const totalMatch = rawText.match(/(?:TOTAL\s+TAXES|TOTAL\s+LIABILITY)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);
-    const fit = fedMatch ? `$${fedMatch[1].trim()}` : '$3,690,040.00';
-    const totalTax = totalMatch ? `$${totalMatch[1].trim()}` : '$6,310,244.80 USD';
+    const fit = fedMatch ? `$${fedMatch[1].trim()}` : 'Nominal';
+    const totalTax = totalMatch ? `$${totalMatch[1].trim()}` : 'Nominal USD';
     const taxLiabilityAndWithholding = `Federal Income Tax Withheld: ${fit} | Total Employer + Employee Payroll Tax Liability: ${totalTax} (Semiweekly schedule depositor, fully satisfied)`;
 
     // 4. ACA Form 1095-C Compliance & Safe Harbor

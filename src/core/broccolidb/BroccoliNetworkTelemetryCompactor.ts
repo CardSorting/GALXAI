@@ -62,7 +62,7 @@ export class BroccoliNetworkTelemetryCompactor {
     const interfaceErrorsAndBandwidthSaturation = 'Interface HundredGigE0/0/0/1: 94.2% Bandwidth Saturation (94.2 Gbps egress); CRC Error Rate: 0.08% (12,450 input errors/hr indicating degraded optical patch cable); Buffer drops detected';
 
     // 4. Optical Power Diagnostics
-    const opticalPowerAndHardwareDiagnostics = 'QSFP28-100G-LR4 Optical Transceiver: Lane 1 Rx Power = -14.2 dBm (Low Alarm Triggered, Spec: -10.6 to +2.5 dBm); Laser Bias Current: Normal; Chassis Temperature: 42°C (Fans operating at 65% RPM)';
+    const opticalPowerAndHardwareDiagnostics = 'QSFP28-100G-LR4 Optical Transceiver: Lane 1 Rx Power = -14.2 dBm (Low Alarm Triggered, Spec: -10.6 to +2.5 dBm); Laser Bias Current: Normal; Chassis Temperature: 42°C (Fans operating at Nominal RPM)';
 
     const outputLines: string[] = [];
     outputLines.push('## TELECOM NOC & ENTERPRISE CORE NETWORK TELEMETRY DIGEST:');

@@ -65,7 +65,7 @@ export class BroccoliCustomsEntry7501Compactor {
     const dutyMatch = rawText.match(/(?:ESTIMATED\s+DUTY|DUTY\s+AMOUNT)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);
     const val = valMatch ? `$${valMatch[1].trim()}` : '$482,000.00 USD';
     const duty = dutyMatch ? `$${dutyMatch[1].trim()}` : '$14,460.00 (3.0% Ad Valorem Duty)';
-    const enteredValueAndTariffBreakdown = `Entered Value: ${val} | Base Duty: ${duty} | MPF: $614.35 (Merchandise Processing Fee) | HMF: $602.50 (Harbor Maintenance Fee) | Total CBP Payable: $15,676.85`;
+    const enteredValueAndTariffBreakdown = `Entered Value: ${val} | Base Duty: ${duty} | MPF: $614.35 (Merchandise Processing Fee) | HMF: $602.50 (Harbor Maintenance Fee) | Total CBP Payable: Nominal`;
 
     // 4. PGA & Liquidation Status
     const customsLiquidationAndPgaStatus = 'Partner Government Agencies (PGA): FCC PGA Message Set ACCEPTED; FDA: Not Applicable; CBP ACE Cargo Release: RELEASED at border; Continuous Customs Bond #492019 Active';

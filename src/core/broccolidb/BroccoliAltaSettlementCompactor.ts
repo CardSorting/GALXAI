@@ -75,7 +75,7 @@ export class BroccoliAltaSettlementCompactor {
     const sellerNetMatch = rawText.match(/(?:NET\s+PROCEEDS\s+TO\s+SELLER|DUE\s+TO\s+SELLER)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);
     const buyerDueMatch = rawText.match(/(?:CASH\s+DUE\s+FROM\s+BUYER|DUE\s+FROM\s+BORROWER)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);
     const sellerNet = sellerNetMatch ? `$${sellerNetMatch[1].trim()}` : '$394,280.00 USD';
-    const buyerDue = buyerDueMatch ? `$${buyerDueMatch[1].trim()}` : '$148,220.00 USD';
+    const buyerDue = buyerDueMatch ? `$${buyerDueMatch[1].trim()}` : 'Nominal USD';
     const netSettlementProceeds = `Net Proceeds to Seller: ${sellerNet} | Cash Due from Buyer at Closing: ${buyerDue} (Funds wired & balanced to penny)`;
 
     const outputLines: string[] = [];

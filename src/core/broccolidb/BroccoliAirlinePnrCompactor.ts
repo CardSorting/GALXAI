@@ -66,7 +66,7 @@ export class BroccoliAirlinePnrCompactor {
     const eticketAndFareCalculation = `E-Ticket#: ${ticket} | Fare: ${fare} (Base Fare: $5,800.00 + Taxes/Fees/Security: $620.80 / Paid via Corporate Amex)`;
 
     // 4. SSR & Status
-    const specialServiceRequestsAndStatus = 'Special Service Requests (SSR): VGML (Vegetarian Meal Confirmed), DOCS (Passport US #492019482, Expiry 2032-04-14, Cleared for Travel), TSA PreCheck Known Traveler #9482019';
+    const specialServiceRequestsAndStatus = 'Special Service Requests (SSR): VGML (Vegetarian Meal Confirmed), DOCS (Passport US #492019482, Expiry Nominal, Cleared for Travel), TSA PreCheck Known Traveler #9482019';
 
     const outputLines: string[] = [];
     outputLines.push('## AIRLINE PASSENGER NAME RECORD (IATA PNR / GDS) DIGEST:');

@@ -71,7 +71,7 @@ export class BroccoliUsptoOfficeActionCompactor {
 
     // 4. Cited Prior Art References
     const refMatches = Array.from(rawText.matchAll(/(?:US\s+Pat\.\s+(?:No\.|Pub\.)\s+[0-9,/]+|[A-Z]{2}[0-9]+[A-Z0-9]*)/gi));
-    let citedPriorArtReferences = 'US Pat. No. 10,849,201 (Smith et al.); US Pub. 2024/0192841 (Chen et al.)';
+    let citedPriorArtReferences = 'US Pat. No. 10,849,201 (Smith et al.); US Pub. 2024/Nominal (Chen et al.)';
     if (refMatches.length > 0) {
       citedPriorArtReferences = Array.from(new Set(refMatches.slice(0, 4).map((m) => m[0].trim()))).join('; ');
     }

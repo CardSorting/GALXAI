@@ -58,7 +58,7 @@ export class BroccoliOpenRanCompactor {
     const oDuAndORuRadioNode = `O-DU Node: ${oDu} | O-RU Radio Unit: ${oRu}`;
 
     // 2. Sync & PTP
-    const ieee1588SyncAndClockStatus = 'Fronthaul Synchronization: IEEE 1588v2 PTP / SyncE (ITU-T G.8275.1 Telecom Profile); PTP Lock State: LOCKED (Time Error TE = +4.2 ns / Max Limit: +/- 32.0 ns ITU-T Class C); Frequency Offset: 0.002 ppm';
+    const ieee1588SyncAndClockStatus = 'Fronthaul Synchronization: IEEE 1588v2 PTP / SyncE (ITU-T G.8275.1 Telecom Profile); PTP Lock State: LOCKED (Time Error TE = +4.2 ns / Max Limit: +/- Nominal ITU-T Class C); Frequency Offset: 0.002 ppm';
 
     // 3. C-Plane & BFP
     const cPlaneBeamformingAndIqCompression = 'O-RAN Fronthaul Split 7.2x C/U-Plane: eCPRI Transport (100GbE QSFP28); IQ Compression Scheme: 9-bit Block Floating Point (BFP / 64% Bandwidth Savings); Beamforming: Digital Section Type 1 Dynamic 64-Beam Codebook matrix';

@@ -98,6 +98,65 @@ All architectural components in GALXAI are governed by formal Architectural Deci
 | **[ADR 0057](adr/0057-broccolidb-mega-incident-cascader-and-pyramid-compaction-substrate.md)** | Mega-Incident Stream Cascading & Mega-Document Hierarchical Pyramid Compactor | 4-Stage streaming anomaly cascader (2,000+ pages in 57ms, 98.9% spend cut) and 3-Layer hierarchical pyramid compactor (300+ pages in 14ms, 97.9% spend cut). |
 | **[ADR 0058](adr/0058-broccolidb-180-domain-industry-cluster-compactor-substrate.md)** | BroccoliDB 180-Domain Enterprise Industry Cluster Compaction Substrate | 180 production enterprise domain compactors across 21 industry clusters with 100% test coverage and standardized protocol schemas (HL7, FHIR, SWIFT, WITSML). |
 | **[ADR 0059](adr/0059-broccolidb-safe-compaction-facade-barrel-hardening-and-api-gateway.md)** | BroccoliDB Safe Compaction Facade, Barrel Hardening & Production API Gateway | Unified BroccoliCompactionFacade boundary, removal of unsafe generated compactor exports, strict size bounding (10MB/2M chars), and authenticated REST endpoint (/api/audit/broccolidb/compact). |
+| **[ADR 0060](adr/0060-broccolidb-high-velocity-domain-expansion-and-stream-compaction.md)** | High-Velocity 180-Domain Aho-Corasick Router & Drain/TSDB Stream Compaction Substrate | High-velocity streaming pipeline integrating 180 domain compactors with Drain log clustering, TSDB metric downsampling, OTel trace spans, and JSON streams (80%–98% token cuts). |
+| **[ADR 0061](adr/0061-broccolidb-network-orderbook-and-sliding-window-stream-compaction.md)** | NetFlow Security, L2 Order Book Depth & Sliding-Window Stream Compaction Substrate | Specialized compaction for NetFlow/PCAP network security, high-frequency L2/L3 order books, and temporal sliding windows (85%–96% token cuts). |
+| **[ADR 0062](adr/0062-broccolidb-industrial-iot-clickstream-genomics-and-hybrid-stream-multiplexing.md)** | Industrial IoT Sensors, Clickstream RUM, Genomics & Hybrid Stream Multiplexing Substrate | Domain compaction for ISO 10816 industrial vibration telemetry, real-user monitoring clickstreams, genomic VCF/SAM sequences, and multi-stream multiplexing. |
+| **[ADR 0063](adr/0063-broccolidb-ebpf-k8s-geospatial-and-arrow-dictionary-stream-compaction.md)** | Kernel eBPF Security, Kubernetes Watch, Geospatial ADS-B/AIS & Apache Arrow Dictionaries | Deep-substrate compaction for Linux kernel eBPF syscalls, Kubernetes watch events, maritime/aerospace geospatial trajectories, and Apache Arrow columnar tables. |
+| **[ADR 0064](adr/0064-broccolidb-openai-inference-boundary-measurement-and-task-suite.md)** | OpenAI Inference Boundary Empirical Measurement Engine & Task Suite | Head-to-head empirical testing harness across OpenAI models (`gpt-4o`, `gpt-4o-mini`, `o3-mini`) measuring actual provider-reported billed dollars, latency, and $/success metrics with explicit provenance. |
+| **[ADR 0065](adr/0065-broccolidb-blinded-evaluator-protocol-and-out-of-sample-validation.md)** | Double-Blind A/B Evaluator Protocol & Out-of-Sample Validation | Eliminates target-seeking confirmation bias via randomized branch assignments ($\alpha$ vs $\beta$), zero target priors, 5-tier empirical regime classification, and open out-of-sample workload ingestion. |
+
+---
+
+## 🥦 BroccoliDB Representation Transformation & Compaction Substrate
+
+GALXAI embeds the **BroccoliDB Compaction Substrate**, an enterprise pre-inference representation transformation layer operating at the model input boundary:
+
+> ### 🥦 The Core Representation Invariant:
+> **Compaction opportunity is a property of the representation, not a fixed property of the model.**
+>
+> $$\text{Representation} \xrightarrow{\text{Transformation}} \text{Task-Relevant Representation} \xrightarrow{\text{Inference}} \text{Outcome}$$
+>
+> *GALX is a pre-inference representation transformation layer that attempts to preserve task-relevant invariants while eliminating representational redundancy.*
+
+```mermaid
+flowchart TD
+    RawInput[Raw Context / Logs / Telemetry / AST / Contracts] --> Ingress[BroccoliCompactionFacade (Size Bound: 10MB)]
+    
+    subgraph Representation Reducers (19 Modes)
+        Ingress --> Route{Select Compaction Mode}
+        Route -->|180 Industry Domains| AhoCorasick[Aho-Corasick Multi-Pattern Domain Router]
+        Route -->|Log Streams| Drain[Drain Fixed-Depth Log Clustering Engine]
+        Route -->|Metric Streams| TSDB[TSDB Anomaly & EWMA Downsampler]
+        Route -->|Trace Streams| OTel[OTel DAG & Critical Latency Extractor]
+        Route -->|Kernel Telemetry| eBPF[eBPF Syscall & MITRE TTP Classifier]
+        Route -->|Cluster Telemetry| K8s[K8s Watch Event Delta Reducer]
+        Route -->|Flight / Maritime| Geo[Douglas-Peucker Trajectory Simplifier]
+        Route -->|Columnar Data| Arrow[Bit-Packed Arrow Dictionary Encoder]
+        Route -->|Incident Storm| Cascader[Mega-Incident 4-Stage Cascader]
+        Route -->|Massive Document| Pyramid[Hierarchical Document Pyramid]
+    end
+    
+    subgraph Factual Provenance Guard
+        AhoCorasick --> Safety[BroccoliCompactionSafety: Fail-Closed Zero-Hallucination Guard]
+        Drain --> Safety
+        TSDB --> Safety
+        eBPF --> Safety
+        K8s --> Safety
+        Geo --> Safety
+        Arrow --> Safety
+        Cascader --> Safety
+        Pyramid --> Safety
+    end
+    
+    subgraph Downstream Output & Epistemic Measurement
+        Safety -->|Verified Compacted Prompt (61-95% Input Reduction)| ModelIngress[OpenAI / Grok Inference Boundary]
+        Safety -->|Fallback on Unsupported Fact| RawFallback[Raw Text Passthrough (Zero Risk)]
+        ModelIngress --> Benchmarker[BroccoliInferenceBoundaryBenchmarker: Randomized Branch-Blinded A/B Protocol]
+    end
+```
+
+---
+
 
 
 ---

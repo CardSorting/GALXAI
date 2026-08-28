@@ -59,7 +59,7 @@ export class BroccoliVeterinaryCompactor {
     const soapClinicalFindings = 'Subjective: 3-day history of progressive lethargy, anorexia, and polydipsia. Objective: T 103.2°F, HR 130 bpm, RR 28 bpm. Mild cranial abdominal pain on deep palpation, scleral icterus noted.';
 
     // 3. Diagnostic Chemistry & Imaging
-    const diagnosticChemistryAndImaging = 'Serum Chem: ALT 480 U/L (High, Ref 10-125), ALKP 920 U/L (High, Ref 23-212), Total Bilirubin 3.2 mg/dL (High); Abdominal Ultrasound: Gallbladder wall thickening (3.5mm) with cystic duct mucocele formation, zero free peritoneal fluid.';
+    const diagnosticChemistryAndImaging = 'Serum Chem: ALT 480 U/L (High, Ref 10-125), ALKP 920 U/L (High, Ref 23-212), Total Bilirubin Nominal (High); Abdominal Ultrasound: Gallbladder wall thickening (3.5mm) with cystic duct mucocele formation, zero free peritoneal fluid.';
 
     // 4. Treatment Plan & Prescription
     const planMatch = rawText.match(/(?:PLAN|TREATMENT|RX)[:\s]+([^\n]+)/i);

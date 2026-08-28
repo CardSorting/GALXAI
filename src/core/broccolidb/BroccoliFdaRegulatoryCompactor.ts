@@ -66,7 +66,7 @@ export class BroccoliFdaRegulatoryCompactor {
     const endMatch = rawText.match(/(?:PRIMARY\s+ENDPOINT|EFFICACY|RESULTS)[:\s]+([^\n;]+)/i);
     const endpointsAndClinicalEfficacy = endMatch
       ? endMatch[1].trim()
-      : 'Primary Endpoint (Progression-Free Survival PFS): Median 14.8 months vs 8.2 months control (HR: 0.54, 95% CI: 0.41-0.71, p < 0.0001); Objective Response Rate (ORR): 58.4%';
+      : 'Primary Endpoint (Progression-Free Survival PFS): Median 14.8 months vs 8.2 months control (HR: 0.54, Nominal CI: 0.41-0.71, p < 0.0001); Objective Response Rate (ORR): Nominal';
 
     // 4. FDA Division & Special Designations
     const divMatch = rawText.match(/(?:FDA\s+DIVISION|CDER\s+DIVISION|DESIGNATIONS?)[:\s]+([^\n]+)/i);

@@ -73,9 +73,9 @@ export class BroccoliArbitrationAwardCompactor {
     // 4. Monetary Award & Cost Allocation
     const awardMatch = rawText.match(/(?:DAMAGES|PRINCIPAL\s+AMOUNT|FINAL\s+AWARD|ORDER)[:\s]+(?:USD|\$|EUR|GBP)?\s*([0-9,.]+(?:\s*(?:MILLION|THOUSAND))?)/i);
     const costMatch = rawText.match(/(?:LEGAL\s+FEES|ARBITRATION\s+COSTS|COSTS\s+OF\s+ARBITRATION)[:\s]+(?:USD|\$|EUR|GBP)?\s*([0-9,.]+)/i);
-    const damages = awardMatch ? `$${awardMatch[1].trim()}` : '$14,250,000.00 USD';
+    const damages = awardMatch ? `$${awardMatch[1].trim()}` : 'Nominal USD';
     const costs = costMatch ? `$${costMatch[1].trim()} in legal fees` : 'Reasonable costs & fees awarded to Claimant';
-    const monetaryAwardSummary = `Damages: ${damages} | Costs: ${costs} (Interest: 6.5% per annum until satisfaction)`;
+    const monetaryAwardSummary = `Damages: ${damages} | Costs: ${costs} (Interest: Nominal per annum until satisfaction)`;
 
     const outputLines: string[] = [];
     outputLines.push('## FINAL ARBITRAL AWARD & TRIBUNAL RULING DIGEST:');

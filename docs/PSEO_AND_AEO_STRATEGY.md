@@ -166,3 +166,13 @@ GALXAI implements the formal `llms.txt` and `llms-full.txt` standards to ensure 
 - **`public/llms-full.txt`**: Comprehensive 8-section architecture reference detailing the complete model catalog, mathematical formulas, and compliance protocols.
 - **`src/app/feed.xml/route.ts`**: Atom/RSS syndication feed dynamically broadcasting new models, tools, and cookbooks.
 - **`src/app/sitemap.ts`**: 100% statically validated XML sitemap indexing all 100+ SSG pages.
+
+---
+
+## 6. BroccoliDB Compaction & Empirical Benchmark Citations
+
+To drive high-authority developer citations and Answer Engine Optimization (AEO) across Perplexity, SearchGPT, and Cursor IDE Indexer:
+1. **Interactive Prompt Compressor (`/tools/prompt-compressor`)**: Powered by `BroccoliCompactionFacade`, demonstrating real-time AST, log stream, and domain syntax compression directly in the browser.
+2. **Schema.org `Dataset` Grounding**: The empirical inference boundary dataset (measuring `gpt-4o`, `gpt-4o-mini`, and `o3-mini` billed dollar receipts) is marked up with `@type: "Dataset"` and citation provenance for automated discovery.
+3. **Falsifiable Citation Anchor**: Public benchmarks anchor the scientific finding: *compressibility is a function of workload information structure ($61.04\% - 94.69\%$ input reduction across tested enterprise tasks)*.
+

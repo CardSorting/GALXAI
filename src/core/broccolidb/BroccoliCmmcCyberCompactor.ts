@@ -60,7 +60,7 @@ export class BroccoliCmmcCyberCompactor {
     const cmmcLevelAndSprsScore = 'CMMC Target Tier: CMMC 2.0 Level 2 (NIST SP 800-171 Rev 2 / 110 Requirements) | SPRS Assessment Score: 104 / 110 (Passed DIBCAC High / C3PAO Lead Assessor Verified)';
 
     // 3. CUI Boundary & Key Controls
-    const cuiBoundaryAndKeyControls = 'CUI Enclave Boundary: Isolated AWS GovCloud (US) VPC + Entra ID GCC High Tenant; FIPS 140-3 Cryptography: AES-256 GCM enforced on all data-at-rest and in-transit; Phishing-Resistant FIDO2 Hardware MFA mandatory for 100% of privileged users';
+    const cuiBoundaryAndKeyControls = 'CUI Enclave Boundary: Isolated AWS GovCloud (US) VPC + Entra ID GCC High Tenant; FIPS 140-3 Cryptography: AES-256 GCM enforced on all data-at-rest and in-transit; Phishing-Resistant FIDO2 Hardware MFA mandatory for Nominal of privileged users';
 
     // 4. POA&M Deficiencies & Closeout
     const poamDeficienciesAndCloseout = 'Active POA&M Items (6 Points remaining): 1. NIST 3.5.3 (Multifactor authentication for local non-privileged console logins - Closeout: 60 days); 2. NIST 3.13.11 (FIPS validation on legacy branch router - Closeout: 90 days); Zero 5-point critical failures';

@@ -39,7 +39,7 @@ export async function GET() {
       status: 'operational',
       service: 'broccolidb-compaction-gateway',
       version: '2.0.0',
-      supportedModes: ['domain', 'batch', 'incident', 'document'],
+      supportedModes: ['domain', 'batch', 'log_stream', 'metric_stream', 'trace_stream', 'structured_stream', 'network_stream', 'orderbook_stream', 'window_stream', 'sensor_stream', 'clickstream', 'genomic_stream', 'stream_envelope', 'ebpf_stream', 'k8s_watch_stream', 'geospatial_stream', 'arrow_dict_stream', 'incident', 'document'],
       limits: {
         maxPayloadBytes: MAX_PAYLOAD_BYTES,
         maxTextLengthChars: BroccoliCompactionFacade.MAX_TEXT_LENGTH,

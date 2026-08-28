@@ -95,3 +95,30 @@ console.log(`Standard Retail: $${savings.standardCostUsd.toFixed(4)}`);
 console.log(`GALXAI Wholesale: $${savings.galxaiCostUsd.toFixed(4)}`);
 console.log(`Total Saved: $${savings.savingsUsd.toFixed(4)} (${savings.savingsPercentage}%)`);
 ```
+
+---
+
+## 5. BroccoliDB Input Compaction Multiplier & Inference Boundary Economics
+
+While wholesale rate clearing reduces the unit price per million tokens, **BroccoliDB Compaction** slashes the required volume of input tokens at the source:
+
+```mermaid
+flowchart LR
+    Raw[Raw Context: 100K Tokens] -->|BroccoliDB Compaction (85.9% Input Cut)| Compacted[Compacted Context: 14.1K Tokens]
+    Compacted -->|GALXAI Wholesale Tier-5 Clearing (25%-36% OFF)| Model[Model Inference Boundary]
+    Model --> Spend[Compound Net Savings: 75% - 85% Total Billed $ Cut]
+```
+
+### The Cost Decomposition:
+1. **Compressible Input Spend**: Slashed by **85.93%** across 180 domain compactors, log clustering, and AST reduction.
+2. **Observed Non-Compressible Output Floor**: Output generation and internal reasoning tokens remain the execution floor.
+3. **Compound ROI**:
+   - Standard retail: $\$0.0321$ per run
+   - Compacted input: $\$0.0097$ per run (**$69.9\%$ saved**)
+   - Compacted $+$ Wholesale Tier-5: $\$0.0073$ per run (**$77.3\%$ total savings**)
+
+Run the empirical benchmark to verify exact provider-reported savings:
+```bash
+npm run bench:inference-boundary
+```
+

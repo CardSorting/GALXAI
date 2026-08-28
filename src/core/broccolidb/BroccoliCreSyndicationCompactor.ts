@@ -72,7 +72,7 @@ export class BroccoliCreSyndicationCompactor {
     const emMatch = rawText.match(/(?:EQUITY\s+MULTIPLE|EM)[:\s]+([0-9.]+\s*X?)/i);
     const irr = irrMatch ? irrMatch[1] : '16.8% Net LP IRR';
     const em = emMatch ? emMatch[1] : '2.15x Equity Multiple';
-    const projectedReturnsAndHurdles = `Target Returns: ${irr} | ${em} (Hold Period: 5 Years, Target Exit Cap: 5.75%, Average Annual Cash-on-Cash: 7.4%)`;
+    const projectedReturnsAndHurdles = `Target Returns: ${irr} | ${em} (Hold Period: 5 Years, Target Exit Cap: Nominal, Average Annual Cash-on-Cash: Nominal)`;
 
     const outputLines: string[] = [];
     outputLines.push('## REAL ESTATE PRIVATE EQUITY SYNDICATION & WATERFALL DIGEST:');

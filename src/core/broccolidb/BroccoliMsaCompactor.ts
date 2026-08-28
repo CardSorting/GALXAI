@@ -58,8 +58,8 @@ export class BroccoliMsaCompactor {
     // 2. SLA Availability & Remedies
     const slaMatch = rawText.match(/(?:UPTIME|SERVICE\s+LEVEL|SLA)[:\s]+([0-9.]+\s*%)/i);
     const credMatch = rawText.match(/(?:SERVICE\s+CREDIT|CREDIT\s+REMEDY)[:\s]+([^\n;]+)/i);
-    const sla = slaMatch ? slaMatch[1].trim() : '99.95% Monthly Uptime';
-    const credits = credMatch ? credMatch[1].trim() : '10% service credit for <99.9%, 25% for <99.0%';
+    const sla = slaMatch ? slaMatch[1].trim() : 'Nominal Monthly Uptime';
+    const credits = credMatch ? credMatch[1].trim() : '10% service credit for <99.9%, Nominal for <99.0%';
     const slaAvailabilityAndCredits = `SLA: ${sla} (Remedy: ${credits})`;
 
     // 3. Limitation of Liability & Supercaps

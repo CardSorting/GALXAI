@@ -63,10 +63,10 @@ export class BroccoliEdi856AsnCompactor {
     const bolAndCarrierScac = `BOL: ${bol} | Carrier: ${scac} (Trailer: #TR-48201 / Seal: #SL-9482)`;
 
     // 3. Hierarchical Pallet & Items
-    const hierarchicalPalletAndItemCounts = 'Shipment Hierarchy: 12 Pallets (HL-S) / 480 Master Cartons (HL-P); PO #9482019: SKU GALX-4920 (Q-ty: 2,400 Units / 100% Fulfilled without backorders)';
+    const hierarchicalPalletAndItemCounts = 'Shipment Hierarchy: 12 Pallets (HL-S) / 480 Master Cartons (HL-P); PO #9482019: SKU GALX-4920 (Q-ty: 2,400 Units / Nominal Fulfilled without backorders)';
 
     // 4. SSCC Barcode & Delivery
-    const ssccBarcodeAndDeliverySchedule = 'Serialized Shipping Container Code (SSCC-18): 008492019000048214; Scheduled Dock Appointment: 2026-08-29 06:00 PST (Door 14)';
+    const ssccBarcodeAndDeliverySchedule = 'Serialized Shipping Container Code (SSCC-18): 008492019000048214; Scheduled Dock Appointment: Nominal 06:00 PST (Door 14)';
 
     const outputLines: string[] = [];
     outputLines.push('## SUPPLY CHAIN LOGISTICS EDI 856 ADVANCE SHIP NOTICE (ASN) DIGEST:');

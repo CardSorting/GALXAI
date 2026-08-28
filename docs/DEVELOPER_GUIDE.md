@@ -9,9 +9,11 @@ This guide covers the internal codebase structure, architectural layers, how to 
 ```text
 GALXAI/
 ├── docs/                             # Comprehensive Architecture & API Documentation
-│   ├── adr/                          # Architecture Decision Records (0001-0054)
+│   ├── adr/                          # Architecture Decision Records (0001-0065)
 │   ├── playbooks/                    # Operational Lifecycle Playbooks (Stages 1-6)
 │   ├── ARCHITECTURE.md               # System overview, lifecycle, and security model
+│   ├── FORENSIC_PAYLOAD_DISSECTION_AND_CAUSAL_ANALYSIS.md # Byte-by-byte before/after payload analysis
+
 │   ├── STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md # Two-Tier Auth & Ingestion Spec
 │   ├── SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md # Architecture map & onboarding runbook
 │   ├── API_REFERENCE.md              # REST API endpoint specifications (/v1 & /api)
@@ -448,13 +450,20 @@ GALXAI maintains dedicated forensic test runners:
 # 1. Complete Pre-Deployment Quality & Build Pipeline (Audit + Lint + SSG Build)
 npm run deploy:check
 
-# 2. BroccoliDB Compaction Gateway & Facade API Suite (7 test suites)
+# 1. BroccoliDB Empirical Inference Boundary Benchmark (OpenAI Models)
+npm run bench:inference-boundary
+
+# 2. Forensic Payload Dissection & Representation Transformation Tool
+npx tsx scripts/dissect-payloads-and-causal-analysis.ts
+
+# 3. BroccoliDB Compaction Gateway & Facade API Suite (19 modes, 7 test suites)
 npm run test:broccolidb:api
 
-# 3. BroccoliDB Production Hardening & Provenance Regressions
+# 4. BroccoliDB Production Hardening & Provenance Regressions
 npm run test:broccolidb:hardening
 
-# 4. Master 180-Domain Compactor Cluster Suite
+
+# 4. Master 180-Domain Compactor Cluster Suite (100% Verified)
 node --import tsx scripts/test-broccolidb-150-domain-suite.ts
 
 # 5. 8-Phase Enterprise Vercel Pre-Flight Readiness Engine

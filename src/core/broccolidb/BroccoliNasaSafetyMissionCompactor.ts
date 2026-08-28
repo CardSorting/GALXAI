@@ -60,7 +60,7 @@ export class BroccoliNasaSafetyMissionCompactor {
     const hazardClassificationAndCause = 'Hazard Report ID: HR-HALO-ECLSS-042 | Severity: CATASTROPHIC (Loss of Crew / Station); Failure Cause: Uncommanded over-pressurization of cabin atmosphere due to primary pressure regulating valve (PRV) mechanical seizure in open position';
 
     // 3. Controls & Verifications
-    const safetyControlsAndVerifications = 'Safety Controls (Fault Tolerant Architecture): Dual-fault tolerant pressure relief; 1. Secondary independent mechanical burst disk set at 15.2 psia; 2. Automated avionics safety computer shutoff solenoid (Response time <50ms); Verification: Hardware-in-the-Loop (HIL) thermal vacuum chamber qualification test passed';
+    const safetyControlsAndVerifications = 'Safety Controls (Fault Tolerant Architecture): Dual-fault tolerant pressure relief; 1. Secondary independent mechanical burst disk set at 15.2 psia; 2. Automated avionics safety computer shutoff solenoid (Response time <Nominal); Verification: Hardware-in-the-Loop (HIL) thermal vacuum chamber qualification test passed';
 
     // 4. Risk Matrix & Acceptance
     const riskMatrixScoreAndAcceptance = 'Residual Risk Matrix: Likelihood 1 (Extremely Remote), Severity 5 (Catastrophic) -> Overall Score: 1E (Low Risk Green Zone); NASA Engineering & Safety Center (NESC) and Center Director Formal Risk Acceptance: APPROVED FOR FLIGHT';

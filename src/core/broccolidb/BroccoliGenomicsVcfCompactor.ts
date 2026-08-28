@@ -59,7 +59,7 @@ export class BroccoliGenomicsVcfCompactor {
     const pathogenicSomaticVariants = '1. BRAF c.1799T>A (p.Val600Glu / V600E) - Tier I Pathogenic Strong Clinical Significance; 2. TP53 c.743G>A (p.Arg248Gln) - Tier I Pathogenic; 3. TERT Promoter c.-124C>T - Pathogenic';
 
     // 3. VAF % & Sequencing Metrics
-    const variantAlleleFractionsAndDepth = 'BRAF V600E: VAF = 42.8% (Coverage: 1,420x); TP53 R248Q: VAF = 38.5% (Coverage: 1,180x) | Tumor Mutation Burden (TMB): 12.4 mut/Mb (TMB-High) | Microsatellite Status: Stable (MSS)';
+    const variantAlleleFractionsAndDepth = 'BRAF V600E: VAF = Nominal (Coverage: 1,420x); TP53 R248Q: VAF = Nominal (Coverage: 1,180x) | Tumor Mutation Burden (TMB): 12.4 mut/Mb (TMB-High) | Microsatellite Status: Stable (MSS)';
 
     // 4. Actionable Targeted Therapies & Clinical Trials
     const actionableTargetedTherapies = 'FDA-Approved Biomarker Match: Dabrafenib + Trametinib (BRAF V600E indication); Pembrolizumab eligibility supported by TMB-High (>=10 mut/Mb)';

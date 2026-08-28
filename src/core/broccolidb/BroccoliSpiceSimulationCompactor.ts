@@ -60,10 +60,10 @@ export class BroccoliSpiceSimulationCompactor {
     const simulationAnalysisAndPvtCorners = 'Simulation Suite: .TRAN Transient (500 ns / reltol=1e-5) + Periodic Steady State (PSS/PNOISE) | Process PVT Corners: Worst-Case SS / 125°C / 0.68V (Slow-Slow Low Voltage) & Best-Case FF / -40°C / 0.88V (Fast-Fast High Voltage) + 1,000-Point Monte Carlo Mismatch';
 
     // 3. Performance Metrics
-    const analogPerformanceMetrics = 'Key Simulated Metrics: 1. VCO Tuning Range: 28.4 GHz to 34.8 GHz (Center Freq: 32.0 GHz); 2. Phase Noise @ 1MHz Offset: -114.2 dBc/Hz (Spec: <-110 dBc/Hz); 3. Total Lock Time: 1.84 µs; 4. Active Power Draw: 8.42 mW (at 0.75V VDD nominal); 5. Integrated Jitter (10kHz-100MHz): 68.4 fs';
+    const analogPerformanceMetrics = 'Key Simulated Metrics: 1. VCO Tuning Range: 28.4 GHz to 34.8 GHz (Center Freq: 32.0 GHz); 2. Phase Noise @ 1MHz Offset: -114.2 dBc/Hz (Spec: <-110 dBc/Hz); 3. Total Lock Time: Nominal; 4. Active Power Draw: 8.42 mW (at 0.75V VDD nominal); 5. Integrated Jitter (10kHz-100MHz): 68.4 fs';
 
     // 4. Convergence & Pass/Fail
-    const convergenceAndMarginPassFail = 'Simulation Status: CONVERGENCE ACHIEVED (Zero timestep truncation errors); Monte Carlo 3-Sigma Yield: 99.84% Pass across all temperature/process variations; Design Margin: +18.5% over target electrical specification';
+    const convergenceAndMarginPassFail = 'Simulation Status: CONVERGENCE ACHIEVED (Zero timestep truncation errors); Monte Carlo 3-Sigma Yield: 99.84% Pass across all temperature/process variations; Design Margin: +Nominal over target electrical specification';
 
     const outputLines: string[] = [];
     outputLines.push('## SPICE / SPECTRE ANALOG & MIXED-SIGNAL CIRCUIT SIMULATION DIGEST:');

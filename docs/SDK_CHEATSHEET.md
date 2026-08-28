@@ -284,3 +284,38 @@ const dataRes = toDataStreamResponse(asyncGenerator);
 // 4. Server-Sent Events SSE Response (text/event-stream)
 const sseRes = toSSEResponse(asyncGenerator);
 ```
+
+---
+
+## 🥦 8. BroccoliDB Context Compaction Cheatsheet
+
+```typescript
+import { BroccoliCompactionFacade } from '@/core/broccolidb';
+
+// 1. Domain Compaction (180 industry domains, fail-closed safety gate)
+const legal = BroccoliCompactionFacade.compactDomain(discoveryText, 'Interrogatory');
+console.log(`Saved ${legal.tokensSaved} tokens (${legal.savingsPercentage}%)`);
+
+// 2. Linux Kernel eBPF Telemetry Stream
+const ebpf = BroccoliCompactionFacade.compact({
+  mode: 'ebpf_stream',
+  events: syscallEvents,
+});
+
+// 3. Kubernetes Watch Stream Compaction
+const k8s = BroccoliCompactionFacade.compact({
+  mode: 'k8s_watch_stream',
+  events: k8sWatchDeltas,
+});
+
+// 4. 2,000+ Page Outage Storm Cascader (57ms)
+const incident = BroccoliCompactionFacade.compactIncident({
+  rawStreamText: logStormText,
+  targetTokenBudget: 4096,
+  incidentTitle: 'Production DB Failover',
+});
+
+// 5. Run Empirical OpenAI Boundary Benchmark
+// npm run bench:inference-boundary
+```
+

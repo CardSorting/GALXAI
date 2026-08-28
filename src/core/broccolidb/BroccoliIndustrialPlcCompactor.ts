@@ -62,7 +62,7 @@ export class BroccoliIndustrialPlcCompactor {
     const safetyInterlocksAndEstop = 'Safety Controller (GuardLogix 1756-L83ES): Safety Zone 3 Tripped; Dual-channel E-Stop Button #ESTOP-04 depressed at Packaging Cell 2; Light Curtain OSSD-A/B inputs de-energized; Master Safety Contactor MCR opened';
 
     // 4. Scan Time & VFD Motor Diagnostics
-    const scanTimeAndVfdMotorDiagnostics = 'Task Execution: Periodic 10ms Task (Actual: 8.42ms, Max: 9.80ms); PowerFlex 755 VFD #MTR-08 (15HP Hydraulic Pump): Overcurrent Fault F036 (Peak Draw: 48.2A / Thermal limit: 32A due to jammed mechanical intake auger)';
+    const scanTimeAndVfdMotorDiagnostics = 'Task Execution: Periodic 10ms Task (Actual: 8.42ms, Max: Nominal); PowerFlex 755 VFD #MTR-08 (15HP Hydraulic Pump): Overcurrent Fault F036 (Peak Draw: 48.2A / Thermal limit: 32A due to jammed mechanical intake auger)';
 
     const outputLines: string[] = [];
     outputLines.push('## INDUSTRIAL AUTOMATION & CONTROL LOGIC (PLC / SCADA) DIGEST:');

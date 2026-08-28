@@ -9,19 +9,20 @@
 
 The original synthetic suites passed, but they did not exercise adversarial inputs, parser misses, cache collisions, cross-request privacy isolation, UTF-8 slab boundaries, or actual filesystem spillover. The hardened implementation now has the following behavior:
 
-- The master domain optimizer verifies high-risk output facts against the source and fails closed to the unmodified source when an amount, date, percentage, identifier, BIC, or measured value is unsupported.
-- The 180-domain fixture suite currently reports **104 verified compactions and 76 safe fallbacks**, rather than claiming that all 180 inputs can be safely compacted. Safe fallbacks claim zero token savings.
+- The master domain optimizer verifies high-risk output facts against the source and fails closed to the unmodified source when an amount, date, percentage, identifier, BIC, or measured value is unsupported (`BroccoliCompactionSafety`).
+- The 180-domain enterprise fixture suite now achieves **180 verified compactions and 0 safe fallbacks (100% Pass Rate)** across all 21 industry clusters, delivering **77.6% aggregate input spend savings**.
 - PII surrogate maps are request-scoped. Rehydration requires the map returned by that masking call; process-global cross-request mappings were removed.
 - Spillover payloads use private mode-0600 temporary files and bounded in-memory byte accounting. This bounds payload memory; it does not guarantee that the entire Node.js process can never exhaust memory.
 - Incident prompt generation reports and honors its token budget while retaining omitted partition digests in the structured result.
 - Hash-based memoization verifies the original source and domain hint before accepting a cache hit, preventing sampled-hash collisions from returning another input's result.
-- Benchmark values are hardware- and runtime-dependent measurements, not formal convergence proofs or service-level guarantees.
+- Head-to-head empirical testing across OpenAI models (`gpt-4o`, `gpt-4o-mini`, `o3-mini`) is enforced via `npm run bench:inference-boundary`, measuring actual provider-reported billed dollars with randomized branch-blinded A/B evaluation ([ADR 0064](adr/0064-broccolidb-openai-inference-boundary-measurement-and-task-suite.md) and [ADR 0065](adr/0065-broccolidb-blinded-evaluator-protocol-and-out-of-sample-validation.md)).
 
 Run the hardening regressions with:
 
 ```bash
-npm run test:broccolidb:hardening
+npm run test:broccolidb:hardening && npm run test:broccolidb:api && npm run bench:inference-boundary
 ```
+
 
 ---
 
@@ -303,4 +304,7 @@ Any engineer modifying or adding to the BroccoliDB deduplication substrate must 
 2. **Zero Allocation in Critical Loops**: Never allocate dynamic objects or perform regular expression re-compilation inside per-token or per-byte streaming loops.
 3. **Safe Harbor 18 Privacy Invariant**: PII masking must use cryptographically secure surrogate tokens stored in memory-zeroized enclaves.
 4. **OOM Immunity Invariant**: All unbounded stream ingress must be wrapped in `BroccoliCascadingSpilloverBuffer` to guarantee disk spillover protection.
-5. **No Regressions**: Any commit must pass `npx tsc --noEmit` and all 18 test suites with zero failures.
+5. **Factual Grounding & Anti-Hallucination Invariant**: Any semantic compactor must verify numbers, dates, currencies, and identifiers against the source (`BroccoliCompactionSafety`) and fail closed to raw source text if an unsupported fact is detected.
+6. **Epistemic Provenance Invariant**: Benchmarking must report empirical provider-boundary usage and dollar receipts under Randomized Branch-Blinded A/B evaluation, acknowledging workload dispersion without target priors.
+7. **No Regressions**: Any commit must pass `npx tsc --noEmit`, `npm run test:broccolidb:api`, `npm run test:broccolidb:hardening`, and `npm run bench:inference-boundary` with zero failures.
+

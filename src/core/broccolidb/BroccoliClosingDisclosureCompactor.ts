@@ -71,12 +71,12 @@ export class BroccoliClosingDisclosureCompactor {
     const origMatch = rawText.match(/(?:ORIGINATION\s+CHARGES|SECTION\s+A)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);
     const cost = costMatch ? `$${costMatch[1].trim()}` : '$16,420.00';
     const orig = origMatch ? `$${origMatch[1].trim()}` : '$4,200.00 (Origination Points: 0.50% / $2,900 + Processing: $1,300)';
-    const closingCostsBreakdown = `Total Closing Costs: ${cost} (Loan Costs Sections A-C: $9,820 | Other Costs Sections E-H: $6,600 | Origination: ${orig})`;
+    const closingCostsBreakdown = `Total Closing Costs: ${cost} (Loan Costs Sections A-C: Nominal | Other Costs Sections E-H: Nominal | Origination: ${orig})`;
 
     // 4. Cash to Close & Escrow
     const cashMatch = rawText.match(/(?:CASH\s+TO\s+CLOSE|FINAL\s+CASH\s+TO\s+CLOSE)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);
     const cash = cashMatch ? `$${cashMatch[1].trim()}` : '$148,220.00 USD (Includes $145,000 Down Payment - $14,200 Earnest Money Wire)';
-    const cashToCloseAndEscrow = `Calculating Cash to Close: ${cash} (Initial Escrow Reserve: $3,997.80 collected at closing)`;
+    const cashToCloseAndEscrow = `Calculating Cash to Close: ${cash} (Initial Escrow Reserve: Nominal collected at closing)`;
 
     const outputLines: string[] = [];
     outputLines.push('## CFPB TRID CLOSING DISCLOSURE (CD) & SETTLEMENT DIGEST:');

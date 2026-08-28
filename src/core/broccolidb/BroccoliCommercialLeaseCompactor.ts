@@ -73,7 +73,7 @@ export class BroccoliCommercialLeaseCompactor {
     const nnnMatch = rawText.match(/(?:PROPORTIONATE\s+SHARE|NNN\s+SHARE)[:\s]+([0-9.]+\s*%)/i);
     const tiMatch = rawText.match(/(?:TI\s+ALLOWANCE|TENANT\s+IMPROVEMENT)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:\/RSF|\/SF))?)/i);
     const nnn = nnnMatch ? nnnMatch[1] : '5.84% of Building Operating Expenses, CAM, and Real Estate Taxes';
-    const ti = tiMatch ? `$${tiMatch[1].trim()}` : '$125.00 / RSF ($8,550,000.00 Total TI Allowance with $15/RSF test-fit space planning credit)';
+    const ti = tiMatch ? `$${tiMatch[1].trim()}` : '$125.00 / RSF ($8,550,000.00 Total TI Allowance with Nominal/RSF test-fit space planning credit)';
     const nnnExpensesAndTiAllowance = `Proportionate NNN Share: ${nnn} | Tenant Improvement (TI): ${ti}`;
 
     const outputLines: string[] = [];

@@ -68,7 +68,7 @@ export class BroccoliBai2BankStatementCompactor {
     const openingAndClosingAvailableBalances = 'Daily Balances (Record 03): 1. Opening Ledger Balance (Code 010): $84,250,000.00 USD; 2. Closing Ledger Balance (Code 015): $92,410,000.00 USD; 3. Closing Available Balance (Code 040): $91,850,000.00 USD (Immediate Liquidity)';
 
     // 4. Credits / Debits & Float
-    const totalCreditsDebitsAndFloat = 'Aggregate Daily Activity: Total Credits (Code 100): +$18,420,000.00 USD (348 transactions); Total Debits (Code 400): -$10,260,000.00 USD (112 transactions); 1-Day Float (Code 072): $560,000.00 USD | 2-Day Float: $0.00';
+    const totalCreditsDebitsAndFloat = 'Aggregate Daily Activity: Total Credits (Code 100): +$18,420,000.00 USD (348 transactions); Total Debits (Code 400): -$10,260,000.00 USD (112 transactions); 1-Day Float (Code 072): Nominal USD | 2-Day Float: $0.00';
 
     const outputLines: string[] = [];
     outputLines.push('## BAI2 CASH MANAGEMENT & DAILY BANK BALANCE REPORTING DIGEST:');

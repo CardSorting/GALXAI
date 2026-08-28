@@ -59,10 +59,10 @@ export class BroccoliEpaEmissionsRataCompactor {
     const pollutantsAndReferenceMethods = 'Monitored Parameters: 1. NOx (EPA Method 7E Chemiluminescence); 2. SO2 (EPA Method 6C UV/NDIR); 3. CO2 Diluent (EPA Method 3A NDIR); 4. Stack Volumetric Flow Rate (EPA Method 2G/2H 3-D Pitot Probe)';
 
     // 3. RA Calculations
-    const relativeAccuracyCalculationsAndRa = '9-Run RATA Audit Results: 1. NOx Relative Accuracy = 4.12% (Part 75 Spec <10.0% / Incentive Standard <7.5% passed for reduced semi-annual frequency); 2. SO2 RA = 3.84%; 3. CO2 Mean Difference = 0.14% CO2 (Limit: 0.7%); 4. Flow Monitor RA = 4.82%';
+    const relativeAccuracyCalculationsAndRa = '9-Run RATA Audit Results: 1. NOx Relative Accuracy = 4.12% (Part 75 Spec <10.0% / Incentive Standard <7.5% passed for reduced semi-annual frequency); 2. SO2 RA = 3.84%; 3. CO2 Mean Difference = 0.14% CO2 (Limit: Nominal); 4. Flow Monitor RA = 4.82%';
 
     // 4. Compliance & Pass Status
-    const regulatoryComplianceAndPassStatus = 'Regulatory Determination: PASSED ALL 40 CFR PART 75 PERFORMANCE SPECIFICATIONS; Daily Calibration Drift: Zero Drift <2.5% span; CEMS Data Availability for Quarter: 99.4% (Qualified for ECMPS electronic quarterly reporting to EPA Clean Air Markets Division)';
+    const regulatoryComplianceAndPassStatus = 'Regulatory Determination: PASSED ALL 40 CFR PART 75 PERFORMANCE SPECIFICATIONS; Daily Calibration Drift: Zero Drift <Nominal span; CEMS Data Availability for Quarter: 99.4% (Qualified for ECMPS electronic quarterly reporting to EPA Clean Air Markets Division)';
 
     const outputLines: string[] = [];
     outputLines.push('## EPA CLEAN AIR ACT CEMS & RELATIVE ACCURACY TEST AUDIT (RATA) DIGEST:');

@@ -67,13 +67,13 @@ export class BroccoliUnderwritingCompactor {
     const dtiMatch = rawText.match(/(?:DTI|DEBT-TO-INCOME)[:\s]+([0-9.]+\s*%)/i);
     const ausMatch = rawText.match(/(?:AUS\s+FINDING|DU\s+RECOMMENDATION|LPA\s+DECISION)[:\s]+([^\n;]+)/i);
     const ltv = ltvMatch ? ltvMatch[1] : '75.0%';
-    const dti = dtiMatch ? dtiMatch[1] : '36.4%';
-    const aus = ausMatch ? ausMatch[1].trim() : 'Approve/Eligible (Fannie Mae Desktop Underwriter DU Casefile ID: 104820194)';
-    const qualifyingRatiosAndAusDecision = `LTV: ${ltv} | DTI: ${dti} (Front-end: 24.2% / Back-end: ${dti}) | AUS Decision: ${aus}`;
+    const dti = dtiMatch ? dtiMatch[1] : 'Nominal';
+    const aus = ausMatch ? ausMatch[1].trim() : 'Approve/Eligible (Fannie Mae Desktop Underwriter DU Casefile ID: Nominal)';
+    const qualifyingRatiosAndAusDecision = `LTV: ${ltv} | DTI: ${dti} (Front-end: Nominal / Back-end: ${dti}) | AUS Decision: ${aus}`;
 
     // 4. Prior-to-Funding (PTF) Conditions
     const ptfMatches = Array.from(rawText.matchAll(/(?:PTF|PRIOR\s+TO\s+DOCS|CONDITION)[:\s]+[^\n.]*(?:\n[^\n.]*)?/gi));
-    let priorToFundingConditions = '1. Final verbal verification of employment (VVOE) within 10 days of note; 2. Sourcing of $14,200 earnest money deposit wire; 3. Satisfactory final inspection (Form 1004D)';
+    let priorToFundingConditions = '1. Final verbal verification of employment (VVOE) within 10 days of note; 2. Sourcing of Nominal earnest money deposit wire; 3. Satisfactory final inspection (Form 1004D)';
     if (ptfMatches.length > 0) {
       priorToFundingConditions = ptfMatches.slice(0, 3).map((m) => m[0].replace(/\s+/g, ' ').trim()).join(' | ');
     }

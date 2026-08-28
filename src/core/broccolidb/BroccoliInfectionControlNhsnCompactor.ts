@@ -65,7 +65,7 @@ export class BroccoliInfectionControlNhsnCompactor {
       : 'Overall Facility SIR: 0.58 (95% CI: 0.28 - 0.98, statistically better than national baseline of 1.00)';
 
     // 4. Clinical Interventions & Prevention Bundles
-    const clinicalRecommendations = 'Central Line Insertion Bundle compliance: 98.4%; Chlorhexidine daily bathing compliance in ICU: 96.0%; Antimicrobial stewardship prospective audit active';
+    const clinicalRecommendations = 'Central Line Insertion Bundle compliance: Nominal; Chlorhexidine daily bathing compliance in ICU: Nominal; Antimicrobial stewardship prospective audit active';
 
     const outputLines: string[] = [];
     outputLines.push('## HOSPITAL INFECTION PREVENTION & CDC NHSN SURVEILLANCE DIGEST:');

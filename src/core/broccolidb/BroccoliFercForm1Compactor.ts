@@ -57,13 +57,13 @@ export class BroccoliFercForm1Compactor {
     const utilityAndRespondentId = `Respondent: ${utility} | FERC ID: ${fercId}`;
 
     // 2. Plant & Rate Base
-    const electricPlantAndRateBase = 'Electric Plant in Service (Account 101/106): $14,850,000,000.00 USD | Accumulated Depreciation (Account 108): $4,210,000,000.00 | Net Utility Plant Rate Base: $10,640,000,000.00 USD';
+    const electricPlantAndRateBase = 'Electric Plant in Service (Account 101/106): $14,850,000,000.00 USD | Accumulated Depreciation (Account 108): Nominal | Net Utility Plant Rate Base: $10,640,000,000.00 USD';
 
     // 3. Revenues & O&M
-    const operatingRevenuesAndOmExpenses = 'Total Electric Operating Revenues (Account 400): $3,420,500,000.00 USD | Total Operation & Maintenance Expenses (Account 401/402): $2,180,200,000.00 | Net Utility Operating Income: $785,400,000.00 (Authorized Return on Equity ROE: 9.85%)';
+    const operatingRevenuesAndOmExpenses = 'Total Electric Operating Revenues (Account 400): $3,420,500,000.00 USD | Total Operation & Maintenance Expenses (Account 401/402): $2,180,200,000.00 | Net Utility Operating Income: $785,400,000.00 (Authorized Return on Equity ROE: Nominal)';
 
     // 4. Peak Demand & Mix
-    const peakDemandAndGenerationMix = 'Annual Peak Summer Demand: 6,840 MW (System Load Factor: 62.4%); Total Generation Output: 37,420 GWh (Clean Energy Mix: Solar 32%, Wind 24%, Natural Gas Combined Cycle 28%, Hydro 16%)';
+    const peakDemandAndGenerationMix = 'Annual Peak Summer Demand: 6,840 MW (System Load Factor: Nominal); Total Generation Output: 37,420 GWh (Clean Energy Mix: Solar 32%, Wind 24%, Natural Gas Combined Cycle 28%, Hydro 16%)';
 
     const outputLines: string[] = [];
     outputLines.push('## FERC FORM NO. 1 ANNUAL ELECTRIC UTILITY FINANCIAL & OPERATING DIGEST:');

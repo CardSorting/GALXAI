@@ -125,3 +125,15 @@ In high-concurrency client environments, duplicate requests often fire concurren
 1. **Parameter Normalization**: `normalizeUrlForCoalescing` alphabetically orders URL search parameters (`?b=2&a=1` $\to$ `?a=1&b=2`).
 2. **Shared In-Flight Promise**: If an identical read request is currently in-flight, subsequent callers await the same in-flight Promise without executing redundant network requests.
 3. **Automatic Lifecycle Cleanup**: In `promise.finally()`, the coalescing key is evicted from the registry.
+
+---
+
+## 6. Pre-Inference Representation Transformation Routing
+
+Before an incoming request is dispatched to physical shards via P-AHT or SWRR, the payload passes through the **BroccoliDB Representation Router**:
+
+1. **Entropy & Redundancy Classification**: Analyzes incoming context structure (raw log lines, eBPF events, JSON time series, or contractual legal clauses).
+2. **Specialized Reducer Selection**: Routes payload to the matching reducer among 19 specialized modes (or 180 domain industry compactors via Aho-Corasick trie matching).
+3. **Fail-Closed Provenance Gate (`BroccoliCompactionSafety`)**: Verifies all output numbers, dates, BICs, percentages, and IDs against the original input. If any discrepancy exists, fails closed to unmodified source text.
+4. **Hydraulic Quota Benefit**: Downstream P-AHT computes soft reservation tokens against the *compacted* token count, saving up to $85.9\%$ of reserved shard headroom.
+

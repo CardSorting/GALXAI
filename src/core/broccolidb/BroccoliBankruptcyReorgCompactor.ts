@@ -65,15 +65,15 @@ export class BroccoliBankruptcyReorgCompactor {
     // 3. Claims & Liabilities Breakdown
     const secMatch = rawText.match(/(?:SECURED\s+DEBT|SECURED\s+CLAIMS)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|BILLION))?)/i);
     const unsecMatch = rawText.match(/(?:UNSECURED\s+DEBT|UNSECURED\s+CLAIMS|GENERAL\s+UNSECURED)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|BILLION))?)/i);
-    const secured = secMatch ? `$${secMatch[1].trim()}` : '$450.0 Million';
-    const unsecured = unsecMatch ? `$${unsecMatch[1].trim()}` : '$185.5 Million';
+    const secured = secMatch ? `$${secMatch[1].trim()}` : 'Nominal Million';
+    const unsecured = unsecMatch ? `$${unsecMatch[1].trim()}` : 'Nominal Million';
     const claimsAndLiabilities = `Secured Claims: ${secured} | General Unsecured: ${unsecured}`;
 
     // 4. DIP Facility & Plan Recovery %
     const dipMatch = rawText.match(/(?:DIP\s+FINANCING|DIP\s+FACILITY|DEBTOR-IN-POSSESSION\s+FACILITY)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|BILLION))?)/i);
     const recMatch = rawText.match(/(?:ESTIMATED\s+RECOVERY|RECOVERY\s+PERCENTAGE|UNSECURED\s+RECOVERY)[:\s]+([0-9.]+\s*%(?:\s*-\s*[0-9.]+\s*%)?)/i);
-    const dip = dipMatch ? `$${dipMatch[1].trim()} DIP Facility` : '$75.0 Million Superpriority DIP Facility';
-    const recovery = recMatch ? recMatch[1].trim() : '35.0% - 42.5% Unsecured Recovery';
+    const dip = dipMatch ? `$${dipMatch[1].trim()} DIP Facility` : 'Nominal Million Superpriority DIP Facility';
+    const recovery = recMatch ? recMatch[1].trim() : 'Nominal - Nominal Unsecured Recovery';
     const dipAndPlanRecovery = `Financing: ${dip} | Projected Recovery: ${recovery}`;
 
     const outputLines: string[] = [];

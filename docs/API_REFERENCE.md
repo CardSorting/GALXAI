@@ -49,7 +49,9 @@ Universal OpenAI-compatible chat completion endpoint with automatic quota cyclin
 }
 ```
 
-### Hyper-Forgiving Ingestion
+### Hyper-Forgiving Ingestion & Pre-Inference Compaction
+- **Pre-Inference Input Compaction (`x-galx-compact: true`)**: Automatically runs incoming user context through BroccoliDB to reduce representation redundancy before dispatching to upstream frontier models.
+- **Explicit Mode Override (`x-galx-compaction-mode: "ebpf_stream"`)**: Selects any of the 19 compaction modes (`domain`, `ebpf_stream`, `k8s_watch_stream`, `sensor_stream`, `document`, `incident`).
 - **Raw Text Payloads**: If a client sends raw string text (`-d "Explain gravity"`), the gateway automatically converts it into `{ messages: [{ role: "user", content: "Explain gravity" }] }` with zero 400 errors.
 - **Top-Level Prompts**: Accepts `prompt`, `input`, or `text` at root level.
 - **Anthropic Systems**: Accepts root `system` string or content blocks array.
@@ -58,6 +60,7 @@ Universal OpenAI-compatible chat completion endpoint with automatic quota cyclin
 ```text
 https://galx.ai/v1/chat/completions?prompt=Explain+Raft+consensus&model=sol&api_key=galx_live_...
 ```
+
 
 ### Supported Flagship Models & Aliases
 - `gpt-5.6-sol` (Aliases: `sol`, `gpt-5`, `flagship`, `sota`, `coding`, `claude-3-7-sonnet`, `deepseek-v3`, `gpt-4o`)
@@ -353,45 +356,58 @@ High-velocity, size-bounded data compaction, streaming deduplication, mega-incid
 
 ### Supported Modes & Request Schemas
 
-#### 1. Domain Compaction (`mode: "domain"`)
+Supports 19 specialized compaction modes:
+
+| CompactionMode | Purpose | Payload Fields | Typical Token Savings |
+| :--- | :--- | :--- | :---: |
+| `domain` | 180 enterprise industry domains | `text`, `domainHint` | 70% – 85% |
+| `batch` | High-velocity multi-item batch | `items`, `options` | 75% – 85% |
+| `incident` | 2,000+ page log storm cascader | `rawStreamText`, `targetTokenBudget` | 95% – 99% |
+| `document` | 300+ page legal/technical pyramid | `rawText`, `title` | 90% – 98% |
+| `log_stream` | Drain log pattern clustering | `logs` (array of strings) | 90% – 98% |
+| `metric_stream` | TSDB metric time-series downsampling | `metrics` (timestamped points) | 85% – 95% |
+| `trace_stream` | OTel trace DAG & latency critical path | `spans` (span objects) | 90% – 95% |
+| `structured_stream` | High-velocity JSON/JSONL stream | `events` (JSON records) | 80% – 90% |
+| `network_stream` | NetFlow / PCAP security traffic | `flows` (NetFlow records) | 90% – 96% |
+| `orderbook_stream` | L2/L3 order book depth & trades | `orderBook` / `ticks` | 85% – 95% |
+| `window_stream` | Sliding temporal window aggregation | `window` (sliding stream) | 80% – 92% |
+| `sensor_stream` | Industrial IoT sensor telemetry | `readings` (IoT sensor points) | 85% – 95% |
+| `clickstream` | Real user monitoring (RUM) sessions | `events` (clickstream records) | 85% – 95% |
+| `genomic_stream` | VCF/SAM variant and sequence data | `variants` (genomic records) | 90% – 98% |
+| `stream_envelope` | Multi-stream multiplexing | `streams` (composite streams) | 85% – 95% |
+| `ebpf_stream` | Linux kernel syscalls & MITRE TTPs | `events` (eBPF syscall events) | 95% – 98% |
+| `k8s_watch_stream` | Kubernetes event stream & pod restarts | `events` (K8s watch deltas) | 90% – 96% |
+| `geospatial_stream` | AIS vessel & ADS-B flight telemetry | `points` (lat/lon/alt coords) | 92% – 98% |
+| `arrow_dict_stream` | Apache Arrow column dictionary batches | `batch` (Arrow dictionary tables) | 80% – 90% |
+
+#### Example 1: Linux Kernel eBPF Stream Compaction (`mode: "ebpf_stream"`)
 ```json
 {
-  "mode": "domain",
-  "text": "PROPOUNDING PARTY: Plaintiff Acme Corp\nRESPONDING PARTY: Defendant Zenith LLC\n...",
-  "domainHint": "Interrogatory"
+  "mode": "ebpf_stream",
+  "events": [
+    { "timestamp": 1724528600000, "pid": 1234, "comm": "nc", "syscall": "connect", "ret": 0, "args": { "ip": "10.0.0.5", "port": 4444 } },
+    { "timestamp": 1724528600100, "pid": 1234, "comm": "sh", "syscall": "execve", "ret": 0, "args": { "filename": "/bin/sh" } }
+  ]
 }
 ```
 
-#### 2. High-Velocity Batch Compaction (`mode: "batch"`)
+#### Example 2: Kubernetes Watch Stream Compaction (`mode: "k8s_watch_stream"`)
 ```json
 {
-  "mode": "batch",
-  "items": [
-    { "text": "Payload 1...", "domain": "SWIFT_MT103" },
-    { "text": "Payload 2...", "domain": "HL7_Observation" }
-  ],
-  "options": {
-    "flushMetrics": true
-  }
+  "mode": "k8s_watch_stream",
+  "events": [
+    { "type": "MODIFIED", "object": { "kind": "Pod", "metadata": { "name": "payment-api-7b8f9" }, "status": { "phase": "Failed", "reason": "CrashLoopBackOff" } } }
+  ]
 }
 ```
 
-#### 3. Mega-Incident Stream Cascader (`mode: "incident"`)
+#### Example 3: AIS / ADS-B Geospatial Stream Compaction (`mode: "geospatial_stream"`)
 ```json
 {
-  "mode": "incident",
-  "rawStreamText": "2026-01-01T00:00:00.000Z FATAL SEV-0 ROOT_CAUSE primary DB crashed\n...",
-  "targetTokenBudget": 4096,
-  "incidentTitle": "Production Outage Postmortem"
-}
-```
-
-#### 4. Mega-Document Hierarchical Pyramid (`mode: "document"`)
-```json
-{
-  "mode": "document",
-  "rawText": "SECTION 1: TITLE\n...",
-  "title": "Commercial Credit Agreement"
+  "mode": "geospatial_stream",
+  "points": [
+    { "entityId": "VESSEL-US-9821", "latitude": 37.7749, "longitude": -122.4194, "altitude": 0, "timestamp": 1724528600000 }
+  ]
 }
 ```
 

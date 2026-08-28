@@ -733,5 +733,43 @@ import { executeIntent } from '@galxai/sdk/intent';
 const image = await executeIntent('wide cinematic photo of an ancient temple in 4k');
 ```
 
+---
+
+## 20. BroccoliDB Data Compaction & Inference Boundary API (`galx.compact`)
+
+The SDK embeds the **BroccoliDB Compaction Substrate**, allowing developers to compress context before sending it to foundation models:
+
+### A. In-Process Context Compaction (19 Modes)
+```typescript
+import { compact } from '@galxai/sdk';
+
+// 1. Compact massive log storms with fail-closed provenance validation
+const result = await compact({
+  mode: 'log_stream',
+  logs: rawLogLines,
+});
+console.log(`Saved ${result.tokensSaved} tokens (${result.savingsPercentage}% spend cut)`);
+
+// 2. Compact Linux kernel eBPF security telemetry
+const ebpfResult = await compact({
+  mode: 'ebpf_stream',
+  events: syscallEvents,
+});
+console.log(`Compacted eBPF Context:`, ebpfResult.compactedPrompt);
+```
+
+### B. Head-to-Head Inference Boundary Evaluation
+```typescript
+import { evaluateInferenceBoundary } from '@galxai/sdk/eval';
+
+const report = await evaluateInferenceBoundary({
+  modelId: 'gpt-4o',
+});
+console.log(`Dollars Saved: $${report.totalDollarsSavedUSD} (${report.overallBilledCostReductionPercentage}%)`);
+console.log(`Input Token Reduction: ${report.compressibleCostSavingsPercentage}%`);
+console.log(`Non-Compressible Spend Floor: $${report.irreducibleCostFloorUSD}`);
+```
+
+
 
 

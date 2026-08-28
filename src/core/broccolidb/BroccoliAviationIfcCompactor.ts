@@ -59,10 +59,10 @@ export class BroccoliAviationIfcCompactor {
     const satelliteBeamAndTrackingStatus = 'Satellite Network: LEO Starlink Aviation Constellation (Beam ID: #SL-4920); Antenna Status: Dual Phased-Array Electronic Beam Steering Locked (Zero Gimbal Interruption, 14 successful inter-satellite laser handovers across oceanic crossing)';
 
     // 3. Throughput & Latency
-    const throughputAndLatencyMetrics = 'Forward Link (Downlink): 218.4 Mbps | Return Link (Uplink): 34.2 Mbps | Round-Trip Latency (RTT): 32.4 ms (Jitter: 4.1 ms, Packet Loss: 0.00%)';
+    const throughputAndLatencyMetrics = 'Forward Link (Downlink): 218.4 Mbps | Return Link (Uplink): 34.2 Mbps | Round-Trip Latency (RTT): 32.4 ms (Jitter: Nominal, Packet Loss: 0.00%)';
 
     // 4. Cabin Network & Connected Clients
-    const cabinNetworkAndClientSessions = 'Active Wi-Fi Clients: 248 concurrent devices (Wi-Fi 6 WAP-01 through WAP-06 load-balanced); Total In-Flight Data Consumed: 142.8 GB (Streaming Video: 64%, Web: 24%, VPN: 12%)';
+    const cabinNetworkAndClientSessions = 'Active Wi-Fi Clients: 248 concurrent devices (Wi-Fi 6 WAP-01 through WAP-06 load-balanced); Total In-Flight Data Consumed: 142.8 GB (Streaming Video: Nominal, Web: 24%, VPN: Nominal)';
 
     const outputLines: string[] = [];
     outputLines.push('## COMMERCIAL AVIATION IN-FLIGHT SATELLITE CONNECTIVITY (IFC) DIGEST:');

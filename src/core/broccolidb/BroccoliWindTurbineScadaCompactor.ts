@@ -63,7 +63,7 @@ export class BroccoliWindTurbineScadaCompactor {
     const windSpeedAndPowerGeneration = `Wind Speed: ${speed} | Generation: ${power} (Cut-in: 3.0 m/s, Cut-out: 25.0 m/s)`;
 
     // 3. Rotor Pitch & Gearbox Thermal
-    const rotorPitchAndGearboxThermal = 'Rotor Speed: 12.1 RPM; Blade Pitch Angles (1/2/3): 0.8° / 0.8° / 0.8° (Synchronized); High-Speed Shaft Gearbox Bearing Temp: 68.4°C (Safe limit <85°C); Generator Stator Temp: 74.2°C; Lube Oil Pressure: 3.8 bar Nominal';
+    const rotorPitchAndGearboxThermal = 'Rotor Speed: 12.1 RPM; Blade Pitch Angles (1/2/3): 0.8° / 0.8° / 0.8° (Synchronized); High-Speed Shaft Gearbox Bearing Temp: 68.4°C (Safe limit <85°C); Generator Stator Temp: 74.2°C; Lube Oil Pressure: Nominal Nominal';
 
     // 4. Yaw & Availability
     const yawAlignmentAndAvailability = 'Nacelle Yaw Error / Misalignment: 1.4° (Optimal alignment); Grid Availability: 99.8%; Turbine Status: CODE 100 - FULL RUNNING POWER GENERATION';

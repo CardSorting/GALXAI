@@ -2,7 +2,8 @@
  * GALXAI BroccoliDB Production Compaction Facade
  * 
  * The supported, safe public boundary for all enterprise data compaction, streaming
- * deduplication, and forensic log reduction workflows.
+ * deduplication, high-velocity log/trace/metric/network/orderbook/window/sensor/clickstream/genomic/envelope/ebpf/k8s/geospatial/arrow streams,
+ * and forensic reduction workflows.
  * 
  * Guarantees:
  * 1. Provenance Gate Enforcement: Direct generated compactors are shielded; all domain
@@ -10,6 +11,11 @@
  * 2. Strict Input Bounds: Rejects unbounded strings, malformed budgets, and out-of-range
  *    frame batches to prevent heap exhaustion before token slicing.
  * 3. Unified Polymorphic API: Single safe entry point for domain, high-velocity batch,
+ *    Drain log clustering, TSDB metric downsampling, OTel trace critical path extraction,
+ *    columnar structured streaming, NetFlow packet summaries, Level-2 order book depth,
+ *    sliding-window streaming, sensor telemetry, frontend clickstreams, genomic mutations,
+ *    multi-stream hybrid envelopes, Linux kernel eBPF runtime security, K8s cluster watch diffs,
+ *    AIS/ADS-B geospatial trajectories, Apache Arrow columnar dictionary encoding,
  *    mega-incident log cascade, and hierarchical document pyramid workflows.
  */
 
@@ -21,6 +27,36 @@ import {
   BroccoliHighVelocityPipeline,
   HighVelocityBatchResult,
   IngestionStreamFrame,
+  LogStreamCluster,
+  LogStreamCompactionResult,
+  MetricStreamSeries,
+  MetricStreamCompactionResult,
+  TraceSpanSummary,
+  TraceStreamCompactionResult,
+  StructuredStreamColumnSummary,
+  StructuredStreamCompactionResult,
+  NetworkPacketFlowSummary,
+  NetworkPacketStreamCompactionResult,
+  OrderBookDepthLevel,
+  OrderBookStreamCompactionResult,
+  SlidingWindowStats,
+  SlidingWindowStreamCompactionResult,
+  SensorTelemetryChannel,
+  SensorStreamCompactionResult,
+  ClickstreamSessionSummary,
+  ClickstreamCompactionResult,
+  GenomicVariantSummary,
+  GenomicStreamCompactionResult,
+  StreamEnvelopeDigestItem,
+  StreamEnvelopeCompactionResult,
+  EbpfProcessTreeItem,
+  EbpfStreamCompactionResult,
+  K8sResourceDelta,
+  K8sWatchStreamCompactionResult,
+  GeospatialTrajectory,
+  GeospatialStreamCompactionResult,
+  ArrowDictionaryColumn,
+  ArrowDictionaryStreamCompactionResult,
 } from './BroccoliHighVelocityPipeline';
 import {
   BroccoliMegaIncidentStreamCascader,
@@ -44,6 +80,36 @@ export type {
   DomainOptimizationResult,
   HighVelocityBatchResult,
   IngestionStreamFrame,
+  LogStreamCluster,
+  LogStreamCompactionResult,
+  MetricStreamSeries,
+  MetricStreamCompactionResult,
+  TraceSpanSummary,
+  TraceStreamCompactionResult,
+  StructuredStreamColumnSummary,
+  StructuredStreamCompactionResult,
+  NetworkPacketFlowSummary,
+  NetworkPacketStreamCompactionResult,
+  OrderBookDepthLevel,
+  OrderBookStreamCompactionResult,
+  SlidingWindowStats,
+  SlidingWindowStreamCompactionResult,
+  SensorTelemetryChannel,
+  SensorStreamCompactionResult,
+  ClickstreamSessionSummary,
+  ClickstreamCompactionResult,
+  GenomicVariantSummary,
+  GenomicStreamCompactionResult,
+  StreamEnvelopeDigestItem,
+  StreamEnvelopeCompactionResult,
+  EbpfProcessTreeItem,
+  EbpfStreamCompactionResult,
+  K8sResourceDelta,
+  K8sWatchStreamCompactionResult,
+  GeospatialTrajectory,
+  GeospatialStreamCompactionResult,
+  ArrowDictionaryColumn,
+  ArrowDictionaryStreamCompactionResult,
   MegaIncidentInput,
   MegaIncidentCascaderResult,
   PartitionMicroDigest,
@@ -54,7 +120,26 @@ export type {
   CompactionFidelityResult,
 };
 
-export type CompactionMode = 'domain' | 'batch' | 'incident' | 'document';
+export type CompactionMode =
+  | 'domain'
+  | 'batch'
+  | 'incident'
+  | 'document'
+  | 'log_stream'
+  | 'metric_stream'
+  | 'trace_stream'
+  | 'structured_stream'
+  | 'network_stream'
+  | 'orderbook_stream'
+  | 'window_stream'
+  | 'sensor_stream'
+  | 'clickstream'
+  | 'genomic_stream'
+  | 'stream_envelope'
+  | 'ebpf_stream'
+  | 'k8s_watch_stream'
+  | 'geospatial_stream'
+  | 'arrow_dict_stream';
 
 export interface CompactionBatchItem {
   text?: string;
@@ -82,6 +167,127 @@ export interface CompactionBatchPayload {
   };
 }
 
+export interface CompactionLogStreamPayload {
+  mode: 'log_stream';
+  logs: string | string[];
+  options?: {
+    maxClusters?: number;
+    preserveVerbatimSamples?: number;
+  };
+}
+
+export interface CompactionMetricStreamPayload {
+  mode: 'metric_stream';
+  metrics: string | string[];
+  options?: {
+    maxSeries?: number;
+  };
+}
+
+export interface CompactionTraceStreamPayload {
+  mode: 'trace_stream';
+  traces: string | string[] | any[];
+  options?: {
+    maxSpans?: number;
+  };
+}
+
+export interface CompactionStructuredStreamPayload {
+  mode: 'structured_stream';
+  records: string | any[];
+  options?: {
+    maxRows?: number;
+  };
+}
+
+export interface CompactionNetworkStreamPayload {
+  mode: 'network_stream';
+  packets: string | string[] | any[];
+  options?: {
+    maxFlows?: number;
+  };
+}
+
+export interface CompactionOrderBookStreamPayload {
+  mode: 'orderbook_stream';
+  ticks: string | string[] | any[];
+  options?: {
+    depthLevels?: number;
+  };
+}
+
+export interface CompactionWindowStreamPayload {
+  mode: 'window_stream';
+  frames: string | string[] | any[];
+  options?: {
+    windowSeconds?: number;
+  };
+}
+
+export interface CompactionSensorStreamPayload {
+  mode: 'sensor_stream';
+  readings: string | string[] | any[];
+  options?: {
+    maxChannels?: number;
+  };
+}
+
+export interface CompactionClickstreamPayload {
+  mode: 'clickstream';
+  events: string | string[] | any[];
+  options?: {
+    maxSessions?: number;
+  };
+}
+
+export interface CompactionGenomicStreamPayload {
+  mode: 'genomic_stream';
+  variants: string | string[] | any[];
+  options?: {
+    maxVariants?: number;
+  };
+}
+
+export interface CompactionStreamEnvelopePayload {
+  mode: 'stream_envelope';
+  payloads: Array<{ type?: string; data: any } | string>;
+  options?: {
+    maxSections?: number;
+  };
+}
+
+export interface CompactionEbpfStreamPayload {
+  mode: 'ebpf_stream';
+  events: string | string[] | any[];
+  options?: {
+    maxProcesses?: number;
+  };
+}
+
+export interface CompactionK8sWatchStreamPayload {
+  mode: 'k8s_watch_stream';
+  events: string | string[] | any[];
+  options?: {
+    maxDeltas?: number;
+  };
+}
+
+export interface CompactionGeospatialStreamPayload {
+  mode: 'geospatial_stream';
+  points: string | string[] | any[];
+  options?: {
+    maxEntities?: number;
+  };
+}
+
+export interface CompactionArrowDictionaryStreamPayload {
+  mode: 'arrow_dict_stream';
+  rows: any[];
+  options?: {
+    maxColumns?: number;
+  };
+}
+
 export interface CompactionIncidentPayload {
   mode: 'incident';
   rawStreamText: string;
@@ -102,6 +308,21 @@ export interface CompactionDocumentPayload {
 export type CompactionRequest =
   | CompactionDomainPayload
   | CompactionBatchPayload
+  | CompactionLogStreamPayload
+  | CompactionMetricStreamPayload
+  | CompactionTraceStreamPayload
+  | CompactionStructuredStreamPayload
+  | CompactionNetworkStreamPayload
+  | CompactionOrderBookStreamPayload
+  | CompactionWindowStreamPayload
+  | CompactionSensorStreamPayload
+  | CompactionClickstreamPayload
+  | CompactionGenomicStreamPayload
+  | CompactionStreamEnvelopePayload
+  | CompactionEbpfStreamPayload
+  | CompactionK8sWatchStreamPayload
+  | CompactionGeospatialStreamPayload
+  | CompactionArrowDictionaryStreamPayload
   | CompactionIncidentPayload
   | CompactionDocumentPayload;
 
@@ -113,6 +334,81 @@ export interface CompactionDomainResponse {
 export interface CompactionBatchResponse {
   mode: 'batch';
   result: HighVelocityBatchResult;
+}
+
+export interface CompactionLogStreamResponse {
+  mode: 'log_stream';
+  result: LogStreamCompactionResult;
+}
+
+export interface CompactionMetricStreamResponse {
+  mode: 'metric_stream';
+  result: MetricStreamCompactionResult;
+}
+
+export interface CompactionTraceStreamResponse {
+  mode: 'trace_stream';
+  result: TraceStreamCompactionResult;
+}
+
+export interface CompactionStructuredStreamResponse {
+  mode: 'structured_stream';
+  result: StructuredStreamCompactionResult;
+}
+
+export interface CompactionNetworkStreamResponse {
+  mode: 'network_stream';
+  result: NetworkPacketStreamCompactionResult;
+}
+
+export interface CompactionOrderBookStreamResponse {
+  mode: 'orderbook_stream';
+  result: OrderBookStreamCompactionResult;
+}
+
+export interface CompactionWindowStreamResponse {
+  mode: 'window_stream';
+  result: SlidingWindowStreamCompactionResult;
+}
+
+export interface CompactionSensorStreamResponse {
+  mode: 'sensor_stream';
+  result: SensorStreamCompactionResult;
+}
+
+export interface CompactionClickstreamResponse {
+  mode: 'clickstream';
+  result: ClickstreamCompactionResult;
+}
+
+export interface CompactionGenomicStreamResponse {
+  mode: 'genomic_stream';
+  result: GenomicStreamCompactionResult;
+}
+
+export interface CompactionStreamEnvelopeResponse {
+  mode: 'stream_envelope';
+  result: StreamEnvelopeCompactionResult;
+}
+
+export interface CompactionEbpfStreamResponse {
+  mode: 'ebpf_stream';
+  result: EbpfStreamCompactionResult;
+}
+
+export interface CompactionK8sWatchStreamResponse {
+  mode: 'k8s_watch_stream';
+  result: K8sWatchStreamCompactionResult;
+}
+
+export interface CompactionGeospatialStreamResponse {
+  mode: 'geospatial_stream';
+  result: GeospatialStreamCompactionResult;
+}
+
+export interface CompactionArrowDictionaryStreamResponse {
+  mode: 'arrow_dict_stream';
+  result: ArrowDictionaryStreamCompactionResult;
 }
 
 export interface CompactionIncidentResponse {
@@ -128,6 +424,21 @@ export interface CompactionDocumentResponse {
 export type CompactionResponse =
   | CompactionDomainResponse
   | CompactionBatchResponse
+  | CompactionLogStreamResponse
+  | CompactionMetricStreamResponse
+  | CompactionTraceStreamResponse
+  | CompactionStructuredStreamResponse
+  | CompactionNetworkStreamResponse
+  | CompactionOrderBookStreamResponse
+  | CompactionWindowStreamResponse
+  | CompactionSensorStreamResponse
+  | CompactionClickstreamResponse
+  | CompactionGenomicStreamResponse
+  | CompactionStreamEnvelopeResponse
+  | CompactionEbpfStreamResponse
+  | CompactionK8sWatchStreamResponse
+  | CompactionGeospatialStreamResponse
+  | CompactionArrowDictionaryStreamResponse
   | CompactionIncidentResponse
   | CompactionDocumentResponse;
 
@@ -185,6 +496,285 @@ export class BroccoliCompactionFacade {
     }
 
     return BroccoliHighVelocityPipeline.processBatch(normalizedItems, options);
+  }
+
+  /**
+   * High-velocity Drain-style parameterized log clustering.
+   */
+  public static compactLogStream(
+    logs: string | string[],
+    options?: { maxClusters?: number; preserveVerbatimSamples?: number }
+  ): LogStreamCompactionResult {
+    if (typeof logs === 'string') {
+      this.validateString(logs, 'logs', this.MAX_TEXT_LENGTH);
+    } else if (Array.isArray(logs)) {
+      if (logs.length > this.MAX_BATCH_FRAMES) {
+        throw new RangeError(`Log lines count (${logs.length}) exceeds maximum limit (${this.MAX_BATCH_FRAMES})`);
+      }
+    } else {
+      throw new TypeError('logs must be a string or array of log strings');
+    }
+    return BroccoliHighVelocityPipeline.compactLogStream(logs, options);
+  }
+
+  /**
+   * High-velocity time-series metric telemetry downsampling.
+   */
+  public static compactMetricStream(
+    metrics: string | string[],
+    options?: { maxSeries?: number }
+  ): MetricStreamCompactionResult {
+    if (typeof metrics === 'string') {
+      this.validateString(metrics, 'metrics', this.MAX_TEXT_LENGTH);
+    } else if (Array.isArray(metrics)) {
+      if (metrics.length > this.MAX_BATCH_FRAMES) {
+        throw new RangeError(`Metric points count (${metrics.length}) exceeds maximum limit (${this.MAX_BATCH_FRAMES})`);
+      }
+    } else {
+      throw new TypeError('metrics must be a string or array of metric strings');
+    }
+    return BroccoliHighVelocityPipeline.compactMetricStream(metrics, options);
+  }
+
+  /**
+   * OpenTelemetry / W3C distributed trace call graph compactor.
+   */
+  public static compactTraceStream(
+    traces: string | string[] | any[],
+    options?: { maxSpans?: number }
+  ): TraceStreamCompactionResult {
+    if (typeof traces === 'string') {
+      this.validateString(traces, 'traces', this.MAX_TEXT_LENGTH);
+    } else if (Array.isArray(traces)) {
+      if (traces.length > this.MAX_BATCH_FRAMES) {
+        throw new RangeError(`Trace spans count (${traces.length}) exceeds maximum limit (${this.MAX_BATCH_FRAMES})`);
+      }
+    } else {
+      throw new TypeError('traces must be a string, array of span strings, or array of span objects');
+    }
+    return BroccoliHighVelocityPipeline.compactTraceStream(traces, options);
+  }
+
+  /**
+   * High-velocity columnar structured stream compactor for JSON / NDJSON object streams.
+   */
+  public static compactStructuredStream(
+    records: string | any[],
+    options?: { maxRows?: number }
+  ): StructuredStreamCompactionResult {
+    if (typeof records === 'string') {
+      this.validateString(records, 'records', this.MAX_TEXT_LENGTH);
+    } else if (Array.isArray(records)) {
+      if (records.length > this.MAX_BATCH_FRAMES) {
+        throw new RangeError(`Structured records count (${records.length}) exceeds maximum limit (${this.MAX_BATCH_FRAMES})`);
+      }
+    } else {
+      throw new TypeError('records must be a JSON string or array of objects');
+    }
+    return BroccoliHighVelocityPipeline.compactStructuredStream(records, options);
+  }
+
+  /**
+   * Network Packet / NetFlow / IPFIX / sFlow / PCAP flow log compactor.
+   */
+  public static compactNetworkStream(
+    packets: string | string[] | any[],
+    options?: { maxFlows?: number }
+  ): NetworkPacketStreamCompactionResult {
+    if (typeof packets === 'string') {
+      this.validateString(packets, 'packets', this.MAX_TEXT_LENGTH);
+    } else if (Array.isArray(packets)) {
+      if (packets.length > this.MAX_BATCH_FRAMES) {
+        throw new RangeError(`Packets count (${packets.length}) exceeds maximum limit (${this.MAX_BATCH_FRAMES})`);
+      }
+    } else {
+      throw new TypeError('packets must be a string, array of packet strings, or array of flow objects');
+    }
+    return BroccoliHighVelocityPipeline.compactNetworkPacketStream(packets, options);
+  }
+
+  /**
+   * Financial Level-2 / Level-3 Order Book Depth compactor.
+   */
+  public static compactOrderBookStream(
+    ticks: string | string[] | any[],
+    options?: { depthLevels?: number }
+  ): OrderBookStreamCompactionResult {
+    if (typeof ticks === 'string') {
+      this.validateString(ticks, 'ticks', this.MAX_TEXT_LENGTH);
+    } else if (Array.isArray(ticks)) {
+      if (ticks.length > this.MAX_BATCH_FRAMES) {
+        throw new RangeError(`Ticks count (${ticks.length}) exceeds maximum limit (${this.MAX_BATCH_FRAMES})`);
+      }
+    } else {
+      throw new TypeError('ticks must be a string, array of tick strings, or array of tick objects');
+    }
+    return BroccoliHighVelocityPipeline.compactOrderBookStream(ticks, options);
+  }
+
+  /**
+   * Continuous Sliding-Window Stream Compactor.
+   */
+  public static compactSlidingWindowStream(
+    frames: string | string[] | any[],
+    options?: { windowSeconds?: number }
+  ): SlidingWindowStreamCompactionResult {
+    if (typeof frames === 'string') {
+      this.validateString(frames, 'frames', this.MAX_TEXT_LENGTH);
+    } else if (Array.isArray(frames)) {
+      if (frames.length > this.MAX_BATCH_FRAMES) {
+        throw new RangeError(`Frames count (${frames.length}) exceeds maximum limit (${this.MAX_BATCH_FRAMES})`);
+      }
+    } else {
+      throw new TypeError('frames must be a string or array of stream frames');
+    }
+    return BroccoliHighVelocityPipeline.compactSlidingWindowStream(frames, options);
+  }
+
+  /**
+   * Industrial IoT & Predictive Maintenance Sensor Array Compactor.
+   */
+  public static compactSensorStream(
+    readings: string | string[] | any[],
+    options?: { maxChannels?: number }
+  ): SensorStreamCompactionResult {
+    if (typeof readings === 'string') {
+      this.validateString(readings, 'readings', this.MAX_TEXT_LENGTH);
+    } else if (Array.isArray(readings)) {
+      if (readings.length > this.MAX_BATCH_FRAMES) {
+        throw new RangeError(`Readings count (${readings.length}) exceeds maximum limit (${this.MAX_BATCH_FRAMES})`);
+      }
+    } else {
+      throw new TypeError('readings must be a string or array of sensor readings');
+    }
+    return BroccoliHighVelocityPipeline.compactSensorStream(readings, options);
+  }
+
+  /**
+   * Frontend RUM, Web Vitals, & Session Replay Clickstream Compactor.
+   */
+  public static compactClickstream(
+    events: string | string[] | any[],
+    options?: { maxSessions?: number }
+  ): ClickstreamCompactionResult {
+    if (typeof events === 'string') {
+      this.validateString(events, 'events', this.MAX_TEXT_LENGTH);
+    } else if (Array.isArray(events)) {
+      if (events.length > this.MAX_BATCH_FRAMES) {
+        throw new RangeError(`Events count (${events.length}) exceeds maximum limit (${this.MAX_BATCH_FRAMES})`);
+      }
+    } else {
+      throw new TypeError('events must be a string or array of clickstream events');
+    }
+    return BroccoliHighVelocityPipeline.compactClickstream(events, options);
+  }
+
+  /**
+   * Genomic NGS Variant & Alignment Mutation Stream Compactor.
+   */
+  public static compactGenomicStream(
+    variants: string | string[] | any[],
+    options?: { maxVariants?: number }
+  ): GenomicStreamCompactionResult {
+    if (typeof variants === 'string') {
+      this.validateString(variants, 'variants', this.MAX_TEXT_LENGTH);
+    } else if (Array.isArray(variants)) {
+      if (variants.length > this.MAX_BATCH_FRAMES) {
+        throw new RangeError(`Variants count (${variants.length}) exceeds maximum limit (${this.MAX_BATCH_FRAMES})`);
+      }
+    } else {
+      throw new TypeError('variants must be a string or array of genomic variants');
+    }
+    return BroccoliHighVelocityPipeline.compactGenomicStream(variants, options);
+  }
+
+  /**
+   * Multi-Stream Hybrid Multiplexing Ingestion Envelope.
+   */
+  public static compactStreamEnvelope(
+    payloads: Array<{ type?: string; data: any } | string>,
+    options?: { maxSections?: number }
+  ): StreamEnvelopeCompactionResult {
+    if (!Array.isArray(payloads)) {
+      throw new TypeError('payloads must be an array of stream envelope items');
+    }
+    if (payloads.length > this.MAX_BATCH_FRAMES) {
+      throw new RangeError(`Payloads count (${payloads.length}) exceeds maximum limit (${this.MAX_BATCH_FRAMES})`);
+    }
+    return BroccoliHighVelocityPipeline.compactStreamEnvelope(payloads, options);
+  }
+
+  /**
+   * Linux Kernel eBPF Syscall & Runtime Security Event Stream Compactor.
+   */
+  public static compactEbpfStream(
+    events: string | string[] | any[],
+    options?: { maxProcesses?: number }
+  ): EbpfStreamCompactionResult {
+    if (typeof events === 'string') {
+      this.validateString(events, 'events', this.MAX_TEXT_LENGTH);
+    } else if (Array.isArray(events)) {
+      if (events.length > this.MAX_BATCH_FRAMES) {
+        throw new RangeError(`eBPF events count (${events.length}) exceeds maximum limit (${this.MAX_BATCH_FRAMES})`);
+      }
+    } else {
+      throw new TypeError('events must be a string or array of eBPF syscall events');
+    }
+    return BroccoliHighVelocityPipeline.compactEbpfStream(events, options);
+  }
+
+  /**
+   * Kubernetes API Server Watch & Cluster State Delta Stream Compactor.
+   */
+  public static compactK8sWatchStream(
+    events: string | string[] | any[],
+    options?: { maxDeltas?: number }
+  ): K8sWatchStreamCompactionResult {
+    if (typeof events === 'string') {
+      this.validateString(events, 'events', this.MAX_TEXT_LENGTH);
+    } else if (Array.isArray(events)) {
+      if (events.length > this.MAX_BATCH_FRAMES) {
+        throw new RangeError(`K8s watch events count (${events.length}) exceeds maximum limit (${this.MAX_BATCH_FRAMES})`);
+      }
+    } else {
+      throw new TypeError('events must be a string or array of K8s watch events');
+    }
+    return BroccoliHighVelocityPipeline.compactK8sWatchStream(events, options);
+  }
+
+  /**
+   * AIS Maritime & ADS-B Flight Geospatial Transponder Telemetry Compactor.
+   */
+  public static compactGeospatialStream(
+    points: string | string[] | any[],
+    options?: { maxEntities?: number }
+  ): GeospatialStreamCompactionResult {
+    if (typeof points === 'string') {
+      this.validateString(points, 'points', this.MAX_TEXT_LENGTH);
+    } else if (Array.isArray(points)) {
+      if (points.length > this.MAX_BATCH_FRAMES) {
+        throw new RangeError(`Geospatial points count (${points.length}) exceeds maximum limit (${this.MAX_BATCH_FRAMES})`);
+      }
+    } else {
+      throw new TypeError('points must be a string or array of geospatial point fixes');
+    }
+    return BroccoliHighVelocityPipeline.compactGeospatialStream(points, options);
+  }
+
+  /**
+   * Apache Arrow / Parquet Dictionary & Bit-Packed Columnar Compactor.
+   */
+  public static compactArrowDictionaryStream(
+    rows: any[],
+    options?: { maxColumns?: number }
+  ): ArrowDictionaryStreamCompactionResult {
+    if (!Array.isArray(rows)) {
+      throw new TypeError('rows must be an array of table row objects');
+    }
+    if (rows.length > this.MAX_BATCH_FRAMES) {
+      throw new RangeError(`Rows count (${rows.length}) exceeds maximum limit (${this.MAX_BATCH_FRAMES})`);
+    }
+    return BroccoliHighVelocityPipeline.compactArrowDictionaryStream(rows, options);
   }
 
   /**
@@ -246,6 +836,81 @@ export class BroccoliCompactionFacade {
         const result = this.compactBatch(rawItems, payload.options);
         return { mode: 'batch', result };
       }
+      case 'log_stream': {
+        const payload = req as CompactionLogStreamPayload;
+        const result = this.compactLogStream(payload.logs, payload.options);
+        return { mode: 'log_stream', result };
+      }
+      case 'metric_stream': {
+        const payload = req as CompactionMetricStreamPayload;
+        const result = this.compactMetricStream(payload.metrics, payload.options);
+        return { mode: 'metric_stream', result };
+      }
+      case 'trace_stream': {
+        const payload = req as CompactionTraceStreamPayload;
+        const result = this.compactTraceStream(payload.traces, payload.options);
+        return { mode: 'trace_stream', result };
+      }
+      case 'structured_stream': {
+        const payload = req as CompactionStructuredStreamPayload;
+        const result = this.compactStructuredStream(payload.records, payload.options);
+        return { mode: 'structured_stream', result };
+      }
+      case 'network_stream': {
+        const payload = req as CompactionNetworkStreamPayload;
+        const result = this.compactNetworkStream(payload.packets, payload.options);
+        return { mode: 'network_stream', result };
+      }
+      case 'orderbook_stream': {
+        const payload = req as CompactionOrderBookStreamPayload;
+        const result = this.compactOrderBookStream(payload.ticks, payload.options);
+        return { mode: 'orderbook_stream', result };
+      }
+      case 'window_stream': {
+        const payload = req as CompactionWindowStreamPayload;
+        const result = this.compactSlidingWindowStream(payload.frames, payload.options);
+        return { mode: 'window_stream', result };
+      }
+      case 'sensor_stream': {
+        const payload = req as CompactionSensorStreamPayload;
+        const result = this.compactSensorStream(payload.readings, payload.options);
+        return { mode: 'sensor_stream', result };
+      }
+      case 'clickstream': {
+        const payload = req as CompactionClickstreamPayload;
+        const result = this.compactClickstream(payload.events, payload.options);
+        return { mode: 'clickstream', result };
+      }
+      case 'genomic_stream': {
+        const payload = req as CompactionGenomicStreamPayload;
+        const result = this.compactGenomicStream(payload.variants, payload.options);
+        return { mode: 'genomic_stream', result };
+      }
+      case 'stream_envelope': {
+        const payload = req as CompactionStreamEnvelopePayload;
+        const result = this.compactStreamEnvelope(payload.payloads, payload.options);
+        return { mode: 'stream_envelope', result };
+      }
+      case 'ebpf_stream': {
+        const payload = req as CompactionEbpfStreamPayload;
+        const result = this.compactEbpfStream(payload.events, payload.options);
+        return { mode: 'ebpf_stream', result };
+      }
+      case 'k8s_watch_stream': {
+        const payload = req as CompactionK8sWatchStreamPayload;
+        const result = this.compactK8sWatchStream(payload.events, payload.options);
+        return { mode: 'k8s_watch_stream', result };
+      }
+      case 'geospatial_stream': {
+        const payload = req as CompactionGeospatialStreamPayload;
+        const result = this.compactGeospatialStream(payload.points, payload.options);
+        return { mode: 'geospatial_stream', result };
+      }
+      case 'arrow_dict_stream': {
+        const payload = req as CompactionArrowDictionaryStreamPayload;
+        const result = this.compactArrowDictionaryStream(payload.rows, payload.options);
+        return { mode: 'arrow_dict_stream', result };
+      }
       case 'incident': {
         const payload = req as CompactionIncidentPayload;
         const result = this.compactIncident(payload);
@@ -257,7 +922,9 @@ export class BroccoliCompactionFacade {
         return { mode: 'document', result };
       }
       default: {
-        throw new RangeError(`Unsupported compaction mode: ${(req as any).mode}. Supported modes: domain, batch, incident, document`);
+        throw new RangeError(
+          `Unsupported compaction mode: ${(req as any).mode}. Supported modes: domain, batch, log_stream, metric_stream, trace_stream, structured_stream, network_stream, orderbook_stream, window_stream, sensor_stream, clickstream, genomic_stream, stream_envelope, ebpf_stream, k8s_watch_stream, geospatial_stream, arrow_dict_stream, incident, document`
+        );
       }
     }
   }

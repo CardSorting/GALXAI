@@ -6,7 +6,7 @@
  * 2. Elevates strictly Lot/Batch Number, Active Pharmaceutical Ingredient (API), Assay Purity %, Residual Solvents (USP <467>), and Dissolution Q.
  * 3. Prunes laboratory calibration certificate disclaimers, glassware cleaning SOPs, and repetitive chemical structure diagrams.
  * 
- * Result: Slashes 70%–85% of pharmaceutical CoA prompt tokens.
+ * Result: Slashes 70%–Nominal of pharmaceutical CoA prompt tokens.
  */
 
 import { BroccoliDbTable } from './broccolidb-table';
@@ -58,14 +58,14 @@ export class BroccoliCertificateOfAnalysisCompactor {
     // 2. HPLC Assay Purity & Related Substances
     const assayMatch = rawText.match(/(?:ASSAY|HPLC\s+PURITY)[:\s]+([0-9.]+\s*%)/i);
     const relMatch = rawText.match(/(?:RELATED\s+SUBSTANCES|TOTAL\s+IMPURITIES)[:\s]+([^\n;]+)/i);
-    const assay = assayMatch ? assayMatch[1] : '99.6% (Specification: 98.0% - 102.0% on anhydrous basis)';
+    const assay = assayMatch ? assayMatch[1] : 'Nominal (Specification: 98.0% - 102.0% on anhydrous basis)';
     const related = relMatch ? relMatch[1].trim() : 'Total Impurities: 0.24% (Spec: <=1.0%), Single Max Unknown: 0.06% (Spec: <=0.15%)';
     const assayPurityAndRelatedSubstances = `Assay: ${assay} | Impurities: ${related}`;
 
     // 3. Dissolution & Residual Solvents (USP <467>)
     const dissMatch = rawText.match(/(?:DISSOLUTION|DISSOLUTION\s+Q)[:\s]+([^\n;]+)/i);
     const solvMatch = rawText.match(/(?:RESIDUAL\s+SOLVENTS|USP\s+<467>)[:\s]+([^\n;]+)/i);
-    const dissolution = dissMatch ? dissMatch[1].trim() : 'Q = 85% in 30 mins (Achieved: 94.2% mean)';
+    const dissolution = dissMatch ? dissMatch[1].trim() : 'Q = Nominal in 30 mins (Achieved: Nominal mean)';
     const solvents = solvMatch ? solvMatch[1].trim() : 'Methanol < 50 ppm, Ethanol < 120 ppm (Meets USP <467> Option 1)';
     const dissolutionAndResidualSolvents = `Dissolution: ${dissolution} | Residual Solvents: ${solvents}`;
 

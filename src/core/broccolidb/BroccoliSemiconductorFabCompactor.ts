@@ -59,7 +59,7 @@ export class BroccoliSemiconductorFabCompactor {
     const cdMetrologyAndOverlayError = 'Gate CD-SEM Mean: 14.82 nm (Target: 14.80 nm, 3-sigma: 0.28 nm); EUV Photolithography Overlay Error: Mean 1.14 nm (Spec: <1.80 nm, Excellent alignment); Gate Oxide Thickness (Ellipsometry): 18.4 Å';
 
     // 3. Defect Density & KLA Classification
-    const defectDensityAndKlaClassification = 'KLA Brightfield Defect Inspection: Defect Density = 0.042 defects/cm2 (Pass target <0.06); Top Defect Pareto: 1. Pattern bridging (42%); 2. Particle contamination (31%); 3. CMP micro-scratch (12%)';
+    const defectDensityAndKlaClassification = 'KLA Brightfield Defect Inspection: Defect Density = 0.042 defects/cm2 (Pass target <0.06); Top Defect Pareto: 1. Pattern bridging (42%); 2. Particle contamination (Nominal); 3. CMP micro-scratch (Nominal)';
 
     // 4. Wafer Sort Yield & Disposition
     const yieldMatch = rawText.match(/(?:SORT\s+YIELD|WAFER\s+YIELD)[:\s]+([0-9.]+\s*%)/i);

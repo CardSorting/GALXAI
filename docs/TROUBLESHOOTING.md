@@ -165,7 +165,8 @@ $ npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 
 | Verification Suite | Target Validation Scope | Execution Command |
 | :--- | :--- | :--- |
-| **BroccoliDB Compaction API** | Safe facade boundary, GET/POST/OPTIONS routes, bounds & auth gates | `npm run test:broccolidb:api` (7 tests) |
+| **Inference Boundary Benchmark** | Head-to-head empirical testing on OpenAI models (`gpt-4o`, `gpt-4o-mini`, `o3-mini`) | `npm run bench:inference-boundary` |
+| **BroccoliDB Compaction API** | Safe facade boundary, GET/POST/OPTIONS routes, 19 modes, bounds & auth gates | `npm run test:broccolidb:api` (7 tests) |
 | **BroccoliDB Hardening Suite** | Memory bounds, slab safety, collision-safe memoization, fail-closed safety | `npm run test:broccolidb:hardening` |
 | **180-Domain Master Suite** | 180 enterprise industry domain compactors across 21 clusters | `node --import tsx scripts/test-broccolidb-150-domain-suite.ts` |
 | **Zero-Hesitation Ergonomics** | Multi-mental-model absorption, CLI, GET queries, aspect ratios, fallbacks | `npx tsx scripts/verify-zero-hesitation-ergonomics.ts` (98 tests) |
@@ -173,5 +174,6 @@ $ npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 | **Cloudflare Edge Mesh** | Zero-egress edge gateway, R2 CDN routes, SWR caching | `npm run worker:test` (46 tests) |
 | **TypeScript Compilation** | Static typing across serverless & worker runtimes | `npx tsc --noEmit` (0 errors) |
 | **Production App Router** | Production bundle generation across all routes | `npm run build` |
+
 
 

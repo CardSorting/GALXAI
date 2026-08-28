@@ -63,7 +63,7 @@ export class BroccoliSolarInverterTelemetryCompactor {
     const solarIrradianceAndDcInput = `Solar Irradiance: ${ghi} | DC Generation: ${dcPower}`;
 
     // 3. AC Grid Power & Efficiency
-    const acGridPowerAndEfficiency = 'AC Injected Grid Power: 4,220 kW AC (4.22 MW @ 690 VAC, Power Factor: 1.000 Unity); Inverter Conversion Efficiency: 98.60% (California Energy Commission CEC Weighted: 98.5%)';
+    const acGridPowerAndEfficiency = 'AC Injected Grid Power: 4,220 kW AC (4.22 MW @ 690 VAC, Power Factor: 1.000 Unity); Inverter Conversion Efficiency: 98.60% (California Energy Commission CEC Weighted: Nominal)';
 
     // 4. MPPT & Alarms
     const stringMpptAndInverterAlarms = 'Maximum Power Point Tracking (MPPT): High-Efficiency Nominal; DC Combiner #18: String #04 blown 20A gPV fuse detected (Open Circuit / Zero Amps); Inverter Status: NORMAL GRID-CONNECTED OPERATION';

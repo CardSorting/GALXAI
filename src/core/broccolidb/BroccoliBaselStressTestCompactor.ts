@@ -56,17 +56,17 @@ export class BroccoliBaselStressTestCompactor {
     const bankAndReportingHorizon = `BHC: ${bank} | Submission: ${horizon}`;
 
     // 2. Stress Scenarios & Macroeconomic Shocks
-    const stressScenariosAndMacroShocks = 'Severely Adverse Scenario: Real GDP contraction -8.5%, Peak Unemployment 10.0%, Commercial Real Estate (CRE) prices -40%, Equity Market -50%';
+    const stressScenariosAndMacroShocks = 'Severely Adverse Scenario: Real GDP contraction -Nominal, Peak Unemployment 10.0%, Commercial Real Estate (CRE) prices -Nominal, Equity Market -50%';
 
     // 3. Post-Stress Capital Ratios (CET1, Tier 1, Total Risk-Based)
     const cet1Match = rawText.match(/(?:MINIMUM\s+CET1|POST-STRESS\s+CET1)[:\s]+([0-9.]+\s*%)/i);
     const cet1 = cet1Match ? cet1Match[1] : '9.8%';
-    const capitalRatiosAndPostStressCet1 = `Starting CET1: 12.4% -> Minimum Post-Stress CET1: ${cet1} (Regulatory Minimum: 4.5% + 2.5% SCB = 7.0%, Buffer: +280 bps)`;
+    const capitalRatiosAndPostStressCet1 = `Starting CET1: Nominal -> Minimum Post-Stress CET1: ${cet1} (Regulatory Minimum: 4.5% + Nominal SCB = Nominal, Buffer: +280 bps)`;
 
     // 4. Projected Loan Losses & Capital Distribution
     const lossMatch = rawText.match(/(?:TOTAL\s+LOAN\s+LOSSES|PROJECTED\s+LOSSES)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|BILLION))?)/i);
-    const loss = lossMatch ? `$${lossMatch[1].trim()}` : '$14.2 Billion';
-    const loanLossesAndCapitalDistribution = `9-Quarter Projected Loan Losses: ${loss} (CRE Loss Rate: 8.4%, C&I: 4.2%, Cards: 12.8%) | Capital Distribution: Common dividends maintained at $0.45/share`;
+    const loss = lossMatch ? `$${lossMatch[1].trim()}` : 'Nominal Billion';
+    const loanLossesAndCapitalDistribution = `9-Quarter Projected Loan Losses: ${loss} (CRE Loss Rate: Nominal, C&I: Nominal, Cards: Nominal) | Capital Distribution: Common dividends maintained at Nominal/share`;
 
     const outputLines: string[] = [];
     outputLines.push('## BASEL III & FED CCAR / DFAST CAPITAL STRESS TEST DIGEST:');

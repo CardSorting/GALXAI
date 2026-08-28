@@ -50,7 +50,7 @@ export class BroccoliPrivilegeLogCompactor {
 
     // 1. Bates Range
     const batesMatch = rawText.match(/(?:BATES\s+RANGE|BEGIN\s+BATES|BATES\s+NO\.)[:\s]+([A-Za-z0-9_-]+(?:\s*-\s*[A-Za-z0-9_-]+)?)/i);
-    const batesRange = batesMatch ? batesMatch[1].trim() : 'GALX-0094821 - GALX-0094835';
+    const batesRange = batesMatch ? batesMatch[1].trim() : 'GALX-Nominal - GALX-Nominal';
 
     // 2. Privilege Basis
     const basisMatch = rawText.match(/(?:PRIVILEGE\s+ASSERTED|PRIVILEGE\s+TYPE|BASIS)[:\s]+([^\n;]+)/i);

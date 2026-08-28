@@ -26,7 +26,8 @@ Welcome to the comprehensive technical documentation and operational guides for 
 - **[Pricing, Rebates & Economic Arbitrage](PRICING_AND_DISCOUNT_STRATEGY.md)**: Detailed breakdown of the 4-pillar discount architecture (25%–40% wholesale discount, 75% prompt caching rebate).
 - **[Multi-Ecosystem SDK Cheatsheet](SDK_CHEATSHEET.md)**: Drop-in code snippets for OpenAI, Anthropic, Vercel AI SDK, LangChain, and LlamaIndex.
 - **[Universal Migration Guide](MIGRATION_GUIDE.md)**: Step-by-step zero-code-change migration instructions from raw OpenAI, Anthropic, or OpenRouter setups.
-- **[BroccoliDB Compaction Onboarding Guide](BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md)**: Engineer onboarding guide explaining the safe facade, 5-layer compaction model, fail-closed safety gate, and runbook.
+- **[BroccoliDB Compaction Onboarding Guide](BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md)**: Master engineer onboarding guide covering the 19-mode safe facade, 180 domain industry clusters, fail-closed safety gate, and the Epistemic Machinery for inference boundary benchmarking.
+- **[BroccoliDB Deduplication & Compaction Engine Specification](BROCCOLIDB_DEDUPLICATION_ENGINE_SPECIFICATION.md)**: 85-buffer algorithmic deduplication, sub-microsecond vector batching, Drain log clustering, eBPF syscalls, and TSDB metric telemetry.
 - **[Frequently Asked Questions (FAQs)](FAQS.md)**: Clear answers covering zero-hesitation ergonomics, prompt caching, billing, security, and uptime SLAs.
 
 ---
@@ -34,6 +35,8 @@ Welcome to the comprehensive technical documentation and operational guides for 
 ## 🏛️ System Architecture & Substrates
 
 - **[System Architecture Specification](ARCHITECTURE.md)**: System topology, two-tier siloed identity, in-memory reactive BroccoliDB layer, ZDR v10.0 privacy, and circuit breaker FSM.
+- **[Performance Benchmarks & Empirical Inference Boundary](BENCHMARKS.md)**: Head-to-head empirical OpenAI benchmarks (`gpt-4o`, `gpt-4o-mini`, `o3-mini`), 180-domain cluster results, and Cloudflare Edge mesh latency metrics.
+- **[Forensic Payload Dissection & Causal Analysis](FORENSIC_PAYLOAD_DISSECTION_AND_CAUSAL_ANALYSIS.md)**: "Opening the Sausage": Byte-by-byte before/after payload transformations, information entropy, and causal mechanisms behind input compaction.
 - **[Security Posture & Cryptographic Vault](SECURITY.md)**: AES-256-GCM envelope vault, HKDF key derivation, RFC 9530 constant-time digests, and anti-replay nonces.
 - **[Enterprise OAuth 2.0 / 2.1 & Token Lifecycle](OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md)**: RFC 6819 Refresh Token Rotation (RTR), Token Family Theft Containment, DPoP, and OIDC Back-Channel Logout.
 - **[Provider-as-Auth Technical Specification](PROVIDER_AS_AUTH_SPECIFICATION.md)**: Backend credential vaulting, Substrate tenant sharding, and upstream provider identity roots.
@@ -44,9 +47,10 @@ Welcome to the comprehensive technical documentation and operational guides for 
 - **[Streaming & SSE Protocol Specification](STREAMING_AND_SSE_PROTOCOL.md)**: Sub-15ms TTFT streaming protocols, Keep-Alive ping intervals, and zero-copy buffers.
 - **[Asynchronous Queues & CloudTasks](QUEUE_SPECIFICATION.md)**: Background queue architecture, token-bucket pacing, and DLQ topologies.
 - **[Developer & Contributing Guide](DEVELOPER_GUIDE.md)**: Codebase organization, provider adapter design, and test suite conventions.
-- **[Architecture Decision Records (ADRs)](adr/README.md)**: 54 formal architectural specifications governing security, transport hardening, pSEO/AEO saturation, and SLA failovers.
-- **[Operational SRE Playbooks](playbooks/README.md)**: 7 lifecycle runbooks for deployment, incident remediation, and secret rotation.
+- **[Architecture Decision Records (ADRs)](adr/README.md)**: 65 formal architectural specifications governing security, transport hardening, 180-domain compaction, and OpenAI inference boundary benchmarking.
+- **[Operational SRE Playbooks](playbooks/README.md)**: 8 lifecycle runbooks for deployment, incident remediation, secret rotation, and unframed developer observation trials.
 - **[Production Infrastructure & Deployment Guide](DEPLOYMENT.md)**: Multi-target deployment topology across Vercel, Cloudflare Edge, Docker, and Kubernetes.
+
 - **[Vercel Production Deployment & Hardening Guide](VERCEL_DEPLOYMENT.md)**: Complete guide for Next.js 15 deployment on Vercel, 8-phase pre-flight verification, environment sync, and 12-point automated live smoke testing.
 - **[Programmatic SEO (pSEO), AEO & GEO Strategy](PSEO_AND_AEO_STRATEGY.md)**: Comprehensive architectural strategy covering 13 interactive developer tools, 14 programmatic content hubs, Schema.org `@graph` ontology, and machine-readable `llms.txt` standards.
 - **[Interactive Developer Tools Suite](../src/app/tools)**: Suite of 13 interactive browser tools including Enterprise LLM ROI & Token Budget Calculator, AI Token Streaming & Speed Benchmark Simulator, 1M Context Window Visualizer, Prompt Caching Estimator, BPE Token Counter, and Model Cost Comparator.
@@ -60,12 +64,21 @@ Welcome to the comprehensive technical documentation and operational guides for 
 Run the automated test suites to verify platform resilience, security, and developer ergonomics:
 
 ```bash
-# 1. Universal Router, Privacy, SOC2, BroccoliDB, Ingestion Transport & API Strategy Suite (217 tests)
+# 1. BroccoliDB Empirical Inference Boundary Benchmark (OpenAI Models)
+npm run bench:inference-boundary
+
+# 2. Compaction Facade & HTTP REST API Gateway Suite (19 modes)
+npm run test:broccolidb:api
+
+# 3. BroccoliDB Production Hardening & Zero-Hallucination Regressions
+npm run test:broccolidb:hardening
+
+# 4. Master 180-Domain Compactor Cluster (100% Verified)
+node --import tsx scripts/test-broccolidb-150-domain-suite.ts
+
+# 5. Universal Router, Privacy, SOC2, BroccoliDB & Ingestion Transport Suite (217 tests)
 npm run test:router
 
-# 2. Universal Zero-Hesitation Ergonomics & Mental Model Suite (98 tests)
+# 6. Universal Zero-Hesitation Ergonomics & Mental Model Suite (98 tests)
 npx tsx scripts/verify-zero-hesitation-ergonomics.ts
-
-# 3. 8-Phase Enterprise Vercel Pre-Flight Readiness Engine
-npm run vercel:verify
 ```

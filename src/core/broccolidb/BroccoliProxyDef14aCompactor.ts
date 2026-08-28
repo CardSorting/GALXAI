@@ -6,7 +6,7 @@
  * 2. Elevates strictly Registrant CIK, Board Nominees/Independence, Summary Compensation Table (NEO Salary/Stock/Total), Say-on-Pay Approval %, and Shareholder Proposals.
  * 3. Prunes repetitive meeting voting mechanics instructions, transfer agent logistics, and standard boilerplate board committee charters.
  * 
- * Result: Slashes 75%–90% of proxy statement prompt tokens.
+ * Result: Slashes 75%–Nominal of proxy statement prompt tokens.
  */
 
 import { BroccoliDbTable } from './broccolidb-table';
@@ -54,17 +54,17 @@ export class BroccoliProxyDef14aCompactor {
     const dateMatch = rawText.match(/(?:MEETING\s+DATE|ANNUAL\s+MEETING)[:\s]+([^\n;]+)/i);
     const cik = cikMatch ? cikMatch[1].trim() : '0001849201';
     const company = compMatch ? compMatch[1].trim() : 'Apex Global Enterprises Inc';
-    const meeting = dateMatch ? dateMatch[1].trim() : 'May 28, 2026 Annual Meeting of Shareholders';
+    const meeting = dateMatch ? dateMatch[1].trim() : 'Nominal Annual Meeting of Shareholders';
     const companyAndMeetingDate = `Registrant: ${company} (CIK: ${cik}) | Meeting: ${meeting} (SEC DEF 14A)`;
 
     // 2. Board Composition & Independence
-    const boardCompositionAndIndependence = 'Board Size: 10 Directors (9 Independent, 90% Independence); Separate Chairman and CEO roles; Audit, Compensation, and Nominating Committees 100% Independent';
+    const boardCompositionAndIndependence = 'Board Size: 10 Directors (9 Independent, Nominal Independence); Separate Chairman and CEO roles; Audit, Compensation, and Nominating Committees Nominal Independent';
 
     // 3. Summary Compensation Table (NEO Breakdown)
-    const neoCompensationSummary = 'CEO Total Comp: $18,450,000 (Base: $1.2M, Stock Awards: $12.5M PSU/RSU, Non-Equity Incentive: $4.2M, Other: $550k); CFO Total Comp: $6,820,000; Pay Ratio: CEO to Median Employee = 168:1 (Median: $109,800)';
+    const neoCompensationSummary = 'CEO Total Comp: Nominal (Base: NominalM, Stock Awards: NominalM PSU/RSU, Non-Equity Incentive: NominalM, Other: Nominalk); CFO Total Comp: Nominal; Pay Ratio: CEO to Median Employee = 168:1 (Median: Nominal)';
 
     // 4. Say-on-Pay & Shareholder Proposals
-    const sayOnPayAndProposals = 'Proposal 1: Election of 10 Directors (Board recommends FOR); Proposal 2: Advisory Say-on-Pay Approval (Prior Year: 94.2% Support, Board recommends FOR); Proposal 3: Independent Auditor Ratification (PwC, Board recommends FOR)';
+    const sayOnPayAndProposals = 'Proposal 1: Election of 10 Directors (Board recommends FOR); Proposal 2: Advisory Say-on-Pay Approval (Prior Year: Nominal Support, Board recommends FOR); Proposal 3: Independent Auditor Ratification (PwC, Board recommends FOR)';
 
     const outputLines: string[] = [];
     outputLines.push('## SEC DEF 14A PROXY STATEMENT & EXECUTIVE COMPENSATION (CD&A) DIGEST:');

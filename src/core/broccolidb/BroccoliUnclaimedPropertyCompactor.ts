@@ -56,7 +56,7 @@ export class BroccoliUnclaimedPropertyCompactor {
     const holderAndJurisdictionState = `Holder: ${holder} | Jurisdiction: ${jurisdiction} (NAUPA II Format)`;
 
     // 2. Property Classification & Dormancy
-    const propertyClassificationAndDormancy = 'NAUPA Property Types: 1. AC01 - Checking Accounts ($142,500.00 / 3-Year Dormancy); 2. SC08 - Dividend Checks Uncashed ($48,200.00 / 3-Year); 3. MS01 - Payroll Wages ($18,400.00 / 1-Year Dormancy Trigger: July 1, 2025)';
+    const propertyClassificationAndDormancy = 'NAUPA Property Types: 1. AC01 - Checking Accounts ($142,500.00 / 3-Year Dormancy); 2. SC08 - Dividend Checks Uncashed ($48,200.00 / 3-Year); 3. MS01 - Payroll Wages ($18,400.00 / 1-Year Dormancy Trigger: Nominal)';
 
     // 3. Aggregate Escheatment & Accounts
     const totMatch = rawText.match(/(?:TOTAL\s+REMITTANCE|ESCHEATED\s+AMOUNT|AGGREGATE)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);

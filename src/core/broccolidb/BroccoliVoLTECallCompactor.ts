@@ -64,7 +64,7 @@ export class BroccoliVoLTECallCompactor {
     const audioCodecAndSdpNegotiation = 'SDP Audio Media Session: Negotiated Voice Codec: 3GPP EVS (Enhanced Voice Services / Primary Mode: 13.2 kbps / Channel-Aware / 32 kHz Sampling Super-Wideband); RTP Payload Type: 98 (Dynamic / Octet-Aligned); RTP IP: 198.51.100.18:49200';
 
     // 4. Termination & MOS
-    const callTerminationAndVoiceQualityMos = 'Call Completion Summary: Call Duration: 14 minutes 22 seconds; Termination Reason: Normal Call Clearing (SIP BYE 200 OK / Q.850 Cause Code 16); RTP Packet Loss: 0.02% | Mean Jitter: 3.4 ms | Voice Quality MOS Score: 4.42 / 5.0 (HD Voice Premium)';
+    const callTerminationAndVoiceQualityMos = 'Call Completion Summary: Call Duration: 14 minutes 22 seconds; Termination Reason: Normal Call Clearing (SIP BYE 200 OK / Q.850 Cause Code 16); RTP Packet Loss: 0.02% | Mean Jitter: Nominal | Voice Quality MOS Score: 4.42 / 5.0 (HD Voice Premium)';
 
     const outputLines: string[] = [];
     outputLines.push('## 3GPP VoLTE / IMS SIP CALL SIGNALING & SDP CODEC DIGEST:');

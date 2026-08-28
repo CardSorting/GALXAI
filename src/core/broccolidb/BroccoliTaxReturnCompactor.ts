@@ -60,23 +60,23 @@ export class BroccoliTaxReturnCompactor {
     // 2. Gross Income & AGI
     const agiMatch = rawText.match(/(?:ADJUSTED\s+GROSS\s+INCOME|AGI)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|THOUSAND))?)/i);
     const ordMatch = rawText.match(/(?:ORDINARY\s+BUSINESS\s+INCOME|W-2\s+WAGES)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|THOUSAND))?)/i);
-    const agi = agiMatch ? `$${agiMatch[1].trim()}` : '$485,200.00 USD';
-    const ordinary = ordMatch ? `$${ordMatch[1].trim()}` : '$320,000 W-2 Wages + $165,200 Schedule E K-1 Pass-Through';
+    const agi = agiMatch ? `$${agiMatch[1].trim()}` : 'Nominal USD';
+    const ordinary = ordMatch ? `$${ordMatch[1].trim()}` : 'Nominal W-2 Wages + Nominal Schedule E K-1 Pass-Through';
     const grossIncomeAndAgi = `Adjusted Gross Income (AGI): ${agi} | Sources: ${ordinary}`;
 
     // 3. Deductions & Depreciation (Section 179 / Bonus)
     const dedMatch = rawText.match(/(?:ITEMIZED\s+DEDUCTIONS|STANDARD\s+DEDUCTION)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);
     const depMatch = rawText.match(/(?:SECTION\s+179|DEPRECIATION)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);
-    const deduction = dedMatch ? `$${dedMatch[1].trim()}` : '$42,500 (Itemized: State & Local Taxes cap, Mortgage Interest, Charitable)';
+    const deduction = dedMatch ? `$${dedMatch[1].trim()}` : 'Nominal (Itemized: State & Local Taxes cap, Mortgage Interest, Charitable)';
     const depreciation = depMatch ? `$${depMatch[1].trim()}` : '$28,400 MACRS/Section 179 Depreciation';
-    const deductionsAndDepreciation = `Deductions: ${deduction} | Depreciation: ${depreciation} (QBI Section 199A Deduction: $33,040)`;
+    const deductionsAndDepreciation = `Deductions: ${deduction} | Depreciation: ${depreciation} (QBI Section 199A Deduction: Nominal)`;
 
     // 4. Total Tax & Refund/Owed
     const taxMatch = rawText.match(/(?:TOTAL\s+TAX|TAX\s+LIABILITY)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);
     const refMatch = rawText.match(/(?:REFUND|AMOUNT\s+OWED|BALANCE\s+DUE)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);
-    const totalTax = taxMatch ? `$${taxMatch[1].trim()}` : '$114,680.00 USD';
-    const ref = refMatch ? `$${refMatch[1].trim()}` : '$4,280.00 Overpayment / Refund to be applied to 2026 estimated tax';
-    const totalTaxAndRefundOwed = `Total Tax Liability: ${totalTax} (Effective Tax Rate: 23.6%) | Settlement: ${ref}`;
+    const totalTax = taxMatch ? `$${taxMatch[1].trim()}` : 'Nominal USD';
+    const ref = refMatch ? `$${refMatch[1].trim()}` : 'Nominal Overpayment / Refund to be applied to 2026 estimated tax';
+    const totalTaxAndRefundOwed = `Total Tax Liability: ${totalTax} (Effective Tax Rate: Nominal) | Settlement: ${ref}`;
 
     const outputLines: string[] = [];
     outputLines.push('## FEDERAL / STATE TAX RETURN & SCHEDULE K-1 DIGEST:');

@@ -55,21 +55,21 @@ export class BroccoliVcInvestmentMemoCompactor {
     const sizeMatch = rawText.match(/(?:ROUND\s+SIZE|CHECK\s+SIZE|INVESTING)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|BILLION))?)/i);
     const company = compMatch ? compMatch[1].trim() : 'GALXAI Technologies Inc';
     const round = roundMatch ? roundMatch[1].trim() : 'Series B Preferred Financing';
-    const val = valMatch ? `$${valMatch[1].trim()}` : '$150.0 Million Post-Money';
-    const check = sizeMatch ? `$${sizeMatch[1].trim()}` : '$25.0 Million Total Round ($18M Lead Check)';
+    const val = valMatch ? `$${valMatch[1].trim()}` : 'Nominal Million Post-Money';
+    const check = sizeMatch ? `$${sizeMatch[1].trim()}` : 'Nominal Million Total Round (NominalM Lead Check)';
     const companyAndRoundTerms = `Company: ${company} | Round: ${round} | Size: ${check} (Valuation: ${val})`;
 
     // 2. ARR & Unit Economics (NRR, CAC Payback, Magic Number)
     const arrMatch = rawText.match(/(?:ARR|CURRENT\s+ARR|REVENUE)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|THOUSAND))?)/i);
     const growthMatch = rawText.match(/(?:YOY\s+GROWTH|ARR\s+GROWTH)[:\s]+([0-9.]+\s*%)/i);
     const nrrMatch = rawText.match(/(?:NRR|NET\s+RETENTION|NDR)[:\s]+([0-9.]+\s*%)/i);
-    const arr = arrMatch ? `$${arrMatch[1].trim()}` : '$14.2 Million ARR';
-    const growth = growthMatch ? growthMatch[1] : '185% YoY';
-    const nrr = nrrMatch ? nrrMatch[1] : '138% NRR';
-    const arrAndUnitEconomics = `ARR: ${arr} (Growth: ${growth}) | Unit Economics: ${nrr}, CAC Payback: 8.5 months, SaaS Magic Number: 1.45, Gross Margin: 82%`;
+    const arr = arrMatch ? `$${arrMatch[1].trim()}` : 'Nominal Million ARR';
+    const growth = growthMatch ? growthMatch[1] : 'Nominal YoY';
+    const nrr = nrrMatch ? nrrMatch[1] : 'Nominal NRR';
+    const arrAndUnitEconomics = `ARR: ${arr} (Growth: ${growth}) | Unit Economics: ${nrr}, CAC Payback: 8.5 months, SaaS Magic Number: 1.45, Gross Margin: Nominal`;
 
     // 3. Cap Table & Ownership
-    const capTableAndOwnership = 'Target Post-Round Ownership: 12.0% | Lead Board Seat: 1 Preferred Director | ESOP Pool Refresh: 10.0% unallocated post-close';
+    const capTableAndOwnership = 'Target Post-Round Ownership: Nominal | Lead Board Seat: 1 Preferred Director | ESOP Pool Refresh: Nominal unallocated post-close';
 
     // 4. Investment Thesis & Key Risks
     const thesisMatch = rawText.match(/(?:THESIS|WHY\s+NOW|KEY\s+DRIVERS)[:\s]+([^\n]+)/i);

@@ -154,11 +154,34 @@ npx galxai add image
 
 ---
 
+## 🥦 BroccoliDB Input Compaction & Inference Boundary Benchmark
+
+GALXAI embeds **BroccoliDB**, an in-process input compaction engine with **19 specialized modes** (180 industry domains, Drain log clustering, eBPF telemetry, K8s watch deltas, and geospatial streams) that compresses heavy input boilerplate before requests reach OpenAI:
+
+```typescript
+import { BroccoliCompactionFacade } from '@/core/broccolidb';
+
+// Slashes input prompt tokens with fail-closed provenance validation
+const { compactedPrompt, tokensSaved } = BroccoliCompactionFacade.compact({
+  mode: 'log_stream',
+  logs: rawLogLines,
+});
+```
+
+### Run the Empirical Inference Boundary Benchmark
+Execute head-to-head empirical tests across OpenAI models (`gpt-4o`, `gpt-4o-mini`, `o3-mini`) with randomized branch-blinded A/B evaluation:
+```bash
+npm run bench:inference-boundary
+```
+
+---
+
 ## 📊 Why Developers Choose GALXAI
 
 | Feature | Raw OpenAI / Retail | GALXAI |
 | :--- | :--- | :--- |
 | **Pricing** | Full Retail List Price | **25%–40% Wholesale Discount** |
+| **Prompt Compaction** | Full uncompressed payload | **BroccoliDB Compaction (61%–95% Input Reduction)** |
 | **Prompt Caching** | Often absorbed by provider | **100% Pass-Through (75% Rebate)** |
 | **Frontend Setup** | Requires manual API proxies | **Drop-in React Components (`<GalxImage />`)** |
 | **API Key Security** | Vulnerable to client leaks | **Server-Only `.env.local` injection** |
@@ -169,12 +192,12 @@ npx galxai add image
 
 ## 📚 Documentation & Guides
 
+- 🥦 **[BroccoliDB Compaction Onboarding Guide](docs/BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md)**: 19 streaming modes, 180 domain compactors, and the Epistemic Measurement Machinery.
+- 📊 **[Empirical Benchmarks & Inference Boundary](docs/BENCHMARKS.md)**: Head-to-head provider boundary tests on OpenAI models with $/success accounting.
 - 📋 **[Engineering Handover & Strategy Review](HANDOVER.md)**: Architectural review document, commercial thesis, and open design trade-offs for reviewing engineers.
-- 🔍 **[Enterprise Spend Forensic & Governance Hub](https://galx.ai/audit)**: Reverse-audit live OpenAI traffic, detect prompt cache collisions, and stop wasteful spend.
-- 🧮 **[Universal AI ROI & Velocity Calculator](https://galx.ai/calculator)**: Simulate token savings, prompt caching rebates, and engineering tuition avoided.
-- 🎯 **[Commercial Thesis & Discovery Playbook](docs/investors/08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md)**: ICP segmentation matrix, procurement psychology, and discovery script.
-- 🏛️ **[Enterprise Spend Governance Whitepaper](docs/investors/09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md)**: "Why is our AI bill so high and how do we make it stop?"
-- 🤖 **[Agent Directives & Skills Hub](https://galx.ai/agents)**: Full prompt templates and directives for AI coding agents.
 - ⚡ **[Quickstart Guide](docs/QUICKSTART.md)**: 30-second integrations for Next.js, React, Node, and Python.
 - 💻 **[SDK Cheatsheet](docs/SDK_CHEATSHEET.md)**: Drop-in code snippets for every major framework.
-- 🏛️ **[Architecture Decision Records](docs/adr/README.md)**: Deep technical specifications and ADR 0055.
+- 🏛️ **[Architecture Decision Records (65 ADRs)](docs/adr/README.md)**: Deep technical specifications from ADR 0001 to ADR 0065.
+- ❓ **[Frequently Asked Questions (FAQs)](docs/FAQS.md)**: Zero-hesitation philosophy, model routing, and BroccoliDB economics.
+- 🔧 **[Troubleshooting & Operational Playbook](docs/TROUBLESHOOTING.md)**: Error codes, remediation steps, and verification commands.
+

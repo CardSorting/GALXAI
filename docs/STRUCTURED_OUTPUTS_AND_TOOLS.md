@@ -131,3 +131,54 @@ response = client.chat.completions.create(
 
 print(response.choices[0].message.content)
 ```
+
+---
+
+## 🥦 5. Compacting Tool Outputs in Autonomous Agent Loops
+
+Autonomous agents that query database catalogs, Kubernetes clusters, or log streams often blow out context windows with bloated JSON tool responses.
+
+With **BroccoliDB Compaction**, tool outputs can be compressed in-line before appending them to the agent's turn history:
+
+```typescript
+import { GalxAI } from '@galxai/sdk';
+import { BroccoliCompactionFacade } from '@/core/broccolidb';
+
+const galx = new GalxAI();
+
+const agent = galx.agent({
+  model: 'gpt-5.6-sol',
+  tools: {
+    // 1. Tool that returns massive Kubernetes watch event streams
+    inspectClusterEvents: async ({ namespace }: { namespace: string }) => {
+      const rawEvents = await fetchK8sEvents(namespace);
+      
+      // Compact raw K8s events by up to 94.6% before returning to the LLM
+      const compacted = BroccoliCompactionFacade.compact({
+        mode: 'k8s_watch_stream',
+        events: rawEvents,
+      });
+
+      return compacted.compactedPrompt;
+    },
+
+    // 2. Tool that queries database schemas
+    getDatabaseSchema: async ({ table }: { table: string }) => {
+      const rawDDL = await fetchTableSchema(table);
+      
+      // Compact DDL AST syntax
+      const compacted = BroccoliCompactionFacade.compact({
+        mode: 'domain',
+        text: rawDDL,
+        domainHint: 'DatabaseSchema',
+      });
+
+      return compacted.compactedPrompt;
+    }
+  }
+});
+
+const report = await agent.run("Investigate pod crash loops in namespace 'production'");
+console.log(report.text);
+```
+

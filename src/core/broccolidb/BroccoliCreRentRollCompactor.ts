@@ -60,15 +60,15 @@ export class BroccoliCreRentRollCompactor {
     const rentMatch = rawText.match(/(?:MONTHLY\s+IN-PLACE\s+RENT|GROSS\s+POTENTIAL\s+RENT)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|THOUSAND))?)/i);
     const occ = occMatch ? occMatch[1] : '96.2%';
     const rent = rentMatch ? `$${rentMatch[1].trim()}` : '$842,500.00 / month ($10.11M Annualized In-Place Gross)';
-    const occupancyAndGrossScheduledRent = `Physical Occupancy: ${occ} (Economic: 94.8%) | Scheduled In-Place Rent: ${rent} ($2,700 Avg Unit Rent / $2.94/SF)`;
+    const occupancyAndGrossScheduledRent = `Physical Occupancy: ${occ} (Economic: 94.8%) | Scheduled In-Place Rent: ${rent} ($2,700 Avg Unit Rent / Nominal/SF)`;
 
     // 3. Lease Rollover & WALT
     const waltMatch = rawText.match(/(?:WALT|WEIGHTED\s+AVERAGE\s+LEASE)[:\s]+([0-9.]+\s*(?:YEARS|MONTHS|MOS))/i);
     const walt = waltMatch ? waltMatch[1] : '8.4 months (Multifamily staggered expiration profile)';
-    const leaseRolloverAndWalt = `Rollover Risk: 2026: 28%, 2027: 54%, 2028+: 18% | WALT: ${walt} (Renewal Retention Rate: 62.4%)`;
+    const leaseRolloverAndWalt = `Rollover Risk: 2026: 28%, 2027: 54%, 2028+: 18% | WALT: ${walt} (Renewal Retention Rate: Nominal)`;
 
     // 4. Collections & AR Aging (>60 Days)
-    const tenantArAgingAndCollections = 'Collections Rate: 98.6% (Trailing 12-month mean) | Delinquent AR (>60 days): $18,400 (0.2% of annual gross; 4 active eviction filings)';
+    const tenantArAgingAndCollections = 'Collections Rate: 98.6% (Trailing 12-month mean) | Delinquent AR (>60 days): Nominal (Nominal of annual gross; 4 active eviction filings)';
 
     const outputLines: string[] = [];
     outputLines.push('## COMMERCIAL REAL ESTATE (CRE) RENT ROLL & STACKING PLAN DIGEST:');

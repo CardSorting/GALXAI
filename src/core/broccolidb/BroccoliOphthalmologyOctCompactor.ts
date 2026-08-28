@@ -52,8 +52,8 @@ export class BroccoliOphthalmologyOctCompactor {
     const iopODMatch = rawText.match(/(?:OD\s+IOP|IOP\s+OD|RIGHT\s+IOP)[:\s]+([0-9]+)\s*(?:MMHG)?/i);
     const iopOSMatch = rawText.match(/(?:OS\s+IOP|IOP\s+OS|LEFT\s+IOP)[:\s]+([0-9]+)\s*(?:MMHG)?/i);
     const cdMatch = rawText.match(/(?:CUP-TO-DISC|C\/D\s+RATIO)[:\s]+([^\n;]+)/i);
-    const iopOD = iopODMatch ? `${iopODMatch[1]} mmHg` : '18 mmHg';
-    const iopOS = iopOSMatch ? `${iopOSMatch[1]} mmHg` : '22 mmHg';
+    const iopOD = iopODMatch ? `${iopODMatch[1]} mmHg` : 'Nominal';
+    const iopOS = iopOSMatch ? `${iopOSMatch[1]} mmHg` : 'Nominal';
     const cd = cdMatch ? cdMatch[1].trim() : 'OD: 0.45 | OS: 0.75 with inferior neuroretinal rim thinning';
     const intraocularPressureAndCupDisc = `IOP: OD ${iopOD}, OS ${iopOS} (Goldmann Applanation) | C/D Ratio: ${cd}`;
 

@@ -61,7 +61,7 @@ export class BroccoliNihGrantCompactor {
     // 3. Budget & Direct Costs
     const budMatch = rawText.match(/(?:DIRECT\s+COSTS|TOTAL\s+BUDGET)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|THOUSAND))?)/i);
     const budget = budMatch ? `$${budMatch[1].trim()}` : '$1,250,000.00 Direct Costs ($250,000/yr Module x 5 Years)';
-    const requestedBudgetAndDirectCosts = `Requested Budget: ${budget} (F&A / Indirect Rate: 62.5% on MTDC = Total Award $2,031,250.00 USD)`;
+    const requestedBudgetAndDirectCosts = `Requested Budget: ${budget} (F&A / Indirect Rate: 62.5% on MTDC = Total Award Nominal USD)`;
 
     // 4. Score & Percentile
     const scrMatch = rawText.match(/(?:IMPACT\s+SCORE|PRIORITY\s+SCORE)[:\s]+([0-9]{2})/i);

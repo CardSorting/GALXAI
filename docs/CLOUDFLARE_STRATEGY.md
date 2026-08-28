@@ -317,5 +317,7 @@ jobs:
 | **Browser Direct GET Query** | `curl -i "https://api.galx.ai/v1/chat/completions?prompt=Ping&model=sol&api_key=galx_live_..."` | `HTTP 200` with JSON completion or SSE stream |
 | **Ollama Native Protocol** | `curl -i -X POST https://api.galx.ai/api/generate -H "Authorization: Bearer galx_live_..." -d '{"model":"sol","prompt":"Ping"}'` | `HTTP 200` with streaming NDJSON chunks and `done: true` |
 | **R2 Asset CDN** | `curl -i https://assets.galx.ai/generations/test.webp` | `HTTP 200` with `CF-Cache-Status: HIT` |
+| **BroccoliDB Edge Compaction** | `curl -X POST https://api.galx.ai/api/audit/broccolidb/compact -H "Authorization: Bearer galx_live_..." -H "Content-Type: application/json" -d '{"mode":"log_stream","logs":["..."]}'` | `HTTP 200` with compacted text and token savings metadata |
 | **Scheduled Worker Queue** | `npx wrangler tail` | Scheduled cron event executing `processBatch('default', 25)` without uncaught exceptions |
+
 

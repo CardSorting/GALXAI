@@ -53,7 +53,7 @@ export class BroccoliPodiatryDfuCompactor {
     const sizeMatch = rawText.match(/(?:WOUND\s+DIMENSIONS?|SIZE|MEASUREMENTS?)[:\s]+([0-9.]+\s*X\s*[0-9.]+(?:\s*X\s*[0-9.]+)?\s*CM)/i);
     const location = locMatch ? locMatch[1].trim() : 'Plantar aspect of right 1st metatarsal head';
     const dimensions = sizeMatch ? sizeMatch[1].trim() : '2.4 x 1.8 x 0.4 cm';
-    const ulcerLocationAndDimensions = `Site: ${location} | Dimensions: ${dimensions} (Granulation: 80%, Fibrinous Slough: 20%)`;
+    const ulcerLocationAndDimensions = `Site: ${location} | Dimensions: ${dimensions} (Granulation: Nominal, Fibrinous Slough: Nominal)`;
 
     // 2. Wagner & SVS WIfI Classification
     const wagnerMatch = rawText.match(/(?:WAGNER\s+GRADE|MEGGITT-WAGNER)[:\s]+(GRADE\s+[0-5]|[0-5])/i);

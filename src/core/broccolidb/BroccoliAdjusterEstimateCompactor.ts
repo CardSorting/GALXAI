@@ -67,7 +67,7 @@ export class BroccoliAdjusterEstimateCompactor {
     const rcvAndDepreciationSettlement = `Gross RCV: ${rcv} | Recoverable Depreciation: ${dep} | ACV: ${acv}`;
 
     // 3. Room-by-Room Breakdown
-    const roomByRoomDamageSummary = 'Roof & Gutters: $64,200 (Complete architectural shingle tear-off and replacement); Kitchen & Living Room: $48,100 (Drywall, hardwood flooring, insulation water mitigation); Exterior Siding: $18,400; General Conditions & Debris Removal: $11,800';
+    const roomByRoomDamageSummary = 'Roof & Gutters: Nominal (Complete architectural shingle tear-off and replacement); Kitchen & Living Room: Nominal (Drywall, hardwood flooring, insulation water mitigation); Exterior Siding: Nominal; General Conditions & Debris Removal: Nominal';
 
     // 4. Net Claim Payable & Deductible
     const dedMatch = rawText.match(/(?:DEDUCTIBLE)[:\s]+(?:USD|\$)?\s*([0-9,.]+)/i);

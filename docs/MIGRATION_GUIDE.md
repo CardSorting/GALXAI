@@ -135,10 +135,55 @@ environment:
 
 ---
 
-## 🔒 5. Verification After Migration
+## 🥦 6. Upgrading to BroccoliDB Universal Input Compaction
+
+If your application sends massive log dumps, AST files, database schemas, or multi-page documents to OpenAI models, you can integrate **BroccoliDB Compaction** to slash input prompt spend by **up to 85.9%** before calling the LLM:
+
+### A. TypeScript In-Process Compaction (`@galxai/sdk` or `src/core/broccolidb`)
+```typescript
+import { BroccoliCompactionFacade } from '@/core/broccolidb';
+import OpenAI from '@galxai/sdk/openai';
+
+const openai = new OpenAI();
+
+// 1. Compact raw log storm, incident stream, or codebase context
+const compacted = BroccoliCompactionFacade.compact({
+  mode: 'log_stream',
+  logs: rawLogLines,
+});
+
+// 2. Dispatch the compacted prompt to OpenAI (85.9% fewer input tokens)
+const response = await openai.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [
+    { role: 'user', content: `Diagnose outage:\n${compacted.compactedPrompt}` }
+  ],
+});
+```
+
+### B. HTTP Gateway Compaction (`POST /api/audit/broccolidb/compact`)
+```bash
+curl -X POST https://galx.ai/api/audit/broccolidb/compact \
+  -H "Authorization: Bearer $GALXAI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "mode": "ebpf_stream",
+    "events": [ ... ]
+  }'
+```
+
+---
+
+## 🔒 7. Verification After Migration
 
 Validate your connection in 1 second using the zero-install CLI:
 ```bash
 npx galxai "Verify GALXAI connection"
 # Outputs immediate streaming completion from flagship model
 ```
+
+To run the empirical inference boundary test across OpenAI models:
+```bash
+npm run bench:inference-boundary
+```
+

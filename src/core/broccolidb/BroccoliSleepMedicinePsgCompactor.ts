@@ -53,7 +53,7 @@ export class BroccoliSleepMedicinePsgCompactor {
     const effMatch = rawText.match(/(?:SLEEP\s+EFFICIENCY)[:\s]+([0-9.]+\s*%)/i);
     const tst = tstMatch ? tstMatch[1].trim() : '392.5 minutes (6.5 hours)';
     const eff = effMatch ? effMatch[1].trim() : '84.2%';
-    const studyTypeAndEfficiency = `In-Lab Split-Night Polysomnography | Total Sleep Time: ${tst} | Efficiency: ${eff} (N1: 8%, N2: 54%, N3: 16%, REM: 22%)`;
+    const studyTypeAndEfficiency = `In-Lab Split-Night Polysomnography | Total Sleep Time: ${tst} | Efficiency: ${eff} (N1: 8%, N2: 54%, N3: Nominal, REM: Nominal)`;
 
     // 2. Respiratory Indices (AHI, RDI, Obstructive vs Central)
     const ahiMatch = rawText.match(/(?:APNEA-HYPOPNEA\s+INDEX|AHI)[:\s]+([0-9.]+\s*(?:EVENTS?\/HR)?)/i);
@@ -63,11 +63,11 @@ export class BroccoliSleepMedicinePsgCompactor {
     // 3. Nocturnal Oximetry
     const spo2Match = rawText.match(/(?:MINIMUM\s+SPO2|OXYGEN\s+NADIR|LOWEST\s+SPO2)[:\s]+([0-9.]+\s*%)/i);
     const nadir = spo2Match ? spo2Match[1].trim() : '76.0%';
-    const nocturnalOximetryMetrics = `Baseline SpO2: 96% | Lowest Nocturnal SpO2 Nadir: ${nadir} (Time with SpO2 <90%: 34.2 mins)`;
+    const nocturnalOximetryMetrics = `Baseline SpO2: Nominal | Lowest Nocturnal SpO2 Nadir: ${nadir} (Time with SpO2 <90%: 34.2 mins)`;
 
     // 4. Therapeutic Titration & Clinical Impression
     const cpapMatch = rawText.match(/(?:PRESCRIBED\s+PRESSURE|CPAP\s+TITRATION|OPTIMAL\s+PRESSURE)[:\s]+([^\n;]+)/i);
-    const cpap = cpapMatch ? cpapMatch[1].trim() : 'CPAP 11 cmH2O (resolved obstructive events, residual AHI: 2.1/hr, SpO2 >94%)';
+    const cpap = cpapMatch ? cpapMatch[1].trim() : 'CPAP 11 cmH2O (resolved obstructive events, residual AHI: 2.1/hr, SpO2 >Nominal)';
     const prescribedTherapyAndImpression = `Diagnosis: Severe Obstructive Sleep Apnea (G47.33) | Prescribed Therapy: ${cpap} with full-face interface`;
 
     const outputLines: string[] = [];

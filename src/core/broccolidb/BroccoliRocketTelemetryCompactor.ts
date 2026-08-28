@@ -59,7 +59,7 @@ export class BroccoliRocketTelemetryCompactor {
     const tTimelineAndAscentMilestones = 'T-00:00:00 (Liftoff); T+00:01:12 (Max-Q / Max Dynamic Pressure: 34.8 kPa @ Mach 1.6); T+00:02:34 (MECO - Main Engine Cutoff @ 68 km altitude); T+00:02:38 (Stage Separation / Pneumatic Pushers Clean); T+00:02:44 (SES-1 Second Stage Engine Start); T+00:08:42 (SECO-1 / Target LEO Orbit Insertion: 280 x 285 km @ 28.5°)';
 
     // 3. Propulsion & Chamber Pressures
-    const propulsionAndChamberPressures = 'Stage 1 Booster: 9x Methalox Staged Combustion Engines @ 100% Throttle (Chamber Pressure: 250 bar nominal across all engines, Turbopump RPM: 38,400); Stage 2 Vacuum Engine: Chamber Pressure 120 bar (Isp: 382s in vacuum)';
+    const propulsionAndChamberPressures = 'Stage 1 Booster: 9x Methalox Staged Combustion Engines @ 100% Throttle (Chamber Pressure: 250 bar nominal across all engines, Turbopump RPM: 38,400); Stage 2 Vacuum Engine: Chamber Pressure Nominal (Isp: 382s in vacuum)';
 
     // 4. Guidance, Navigation (G&C) & AFTS
     const guidanceNavigationAndAftsStatus = 'Avionics: Triple-redundant Ring Laser Gyro INS & GPS tightly coupled; Pointing error: <0.02°; Autonomous Flight Termination System (AFTS): Green / Safe throughout entire ascent trajectory; Payload fairing jettison confirmed at T+03:15';

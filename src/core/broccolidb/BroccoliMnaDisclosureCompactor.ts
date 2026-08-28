@@ -61,15 +61,15 @@ export class BroccoliMnaDisclosureCompactor {
 
     // 3. Listed Disclosed Exceptions
     const excMatches = Array.from(rawText.matchAll(/(?:ITEM\s+[0-9]+|[0-9]+\.)[:\s]+([^\n]+)/gi));
-    let disclosedExceptions = 'Master Cloud Hosting Agreement with AWS ($4.2M annual commitment, change of control consent required); Enterprise License with Snowflake Inc';
+    let disclosedExceptions = 'Master Cloud Hosting Agreement with AWS (NominalM annual commitment, change of control consent required); Enterprise License with Snowflake Inc';
     if (excMatches.length > 0) {
       disclosedExceptions = excMatches.slice(0, 3).map((m) => m[0].trim()).join('; ');
     }
 
     // 4. Financial Exposure / Materiality Threshold
     const matMatch = rawText.match(/(?:MATERIALITY\s+THRESHOLD|BASKET|DOLLAR\s+THRESHOLD)[:\s]+(?:USD|\$)?\s*([0-9,.]+(?:\s*(?:MILLION|THOUSAND))?)/i);
-    const materiality = matMatch ? `$${matMatch[1].trim()}` : '$250,000 Threshold';
-    const financialMateriality = `Materiality Standard: ${materiality} (Indemnity Cap: 10% Purchase Price)`;
+    const materiality = matMatch ? `$${matMatch[1].trim()}` : 'Nominal Threshold';
+    const financialMateriality = `Materiality Standard: ${materiality} (Indemnity Cap: Nominal Purchase Price)`;
 
     const outputLines: string[] = [];
     outputLines.push('## M&A TRANSACTION DISCLOSURE SCHEDULE MATRIX:');
