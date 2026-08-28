@@ -59,4 +59,5 @@ export * from "./BroccoliThinkingCompactor";
 export * from "./BroccoliContextSlicer";
 export * from "./BroccoliSessionDiffCompactor";
 export * from "./BroccoliPromptCanonicalizer";
+export * from "./BroccoliToolCallDeduplicator";
 export * from "./BroccoliSpendSubstrate";
