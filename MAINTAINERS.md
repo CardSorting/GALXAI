@@ -79,14 +79,18 @@ See [`.github/CODEOWNERS`](.github/CODEOWNERS) for authoritative subsystem path 
 
 4. **Execute The Core Maintainer Verification Harness**:
    ```bash
-   npm run bench:inference-boundary  # 1. Empirical boundary benchmark
-   npm run test:broccolidb:api        # 2. 19 Compaction mode API tests
-   npm run test:broccolidb:hardening  # 3. Fail-closed safety regressions
-   npm run test:router                # 4. 218 Router & Ingestion tests
-   npx tsc --noEmit                   # 5. Strict TypeScript check (0 errors)
+   npm run onboard                   # 0. Fast 8-point maintainer workstation diagnostic (<5s)
+   npm run hooks:install             # 1. Install pre-commit & commit-msg invariant hooks
+   npm run bench:entropy             # 2. 7-Tier Progressive Institutional Entropy Benchmark
+   npm run bench:inference-boundary  # 3. Empirical boundary benchmark (OpenAI models)
+   npm run test:broccolidb:api        # 4. 19 Compaction mode API tests
+   npm run test:broccolidb:hardening  # 5. Fail-closed safety regressions
+   npm run test:router                # 6. 218 Router & Ingestion tests
+   npx tsc --noEmit                   # 7. Strict TypeScript check (0 errors)
    ```
 
 ---
+
 
 ### 🗓️ Day 2: Codebase Anatomy & The Request Tracing Walkthrough
 **Goal**: Trace a single streaming inference request through all 7 architectural layers.

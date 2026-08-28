@@ -38,11 +38,12 @@
    npm run onboard
    ```
 3. **Verify All Core Suites**:
-   - `npm run bench:inference-boundary`
-   - `npm run test:broccolidb:api`
-   - `npm run test:broccolidb:hardening`
-   - `npm run test:router`
-   - `npx tsc --noEmit`
+   - `npm run bench:entropy` (7-Tier Progressive Institutional Entropy Benchmark)
+   - `npm run bench:inference-boundary` (Randomized Branch-Blinded A/B Benchmark)
+   - `npm run test:broccolidb:api` (19 Compaction Modes & Facade REST API)
+   - `npm run test:broccolidb:hardening` (Fail-Closed Factual Provenance Gate)
+   - `npm run test:router` (218 Router, Vault & Auth Tests)
+   - `npx tsc --noEmit` (Strict TypeScript Validation)
 4. **Deliverable**: Post a screenshot of your clean `npm run onboard` scorecard to the maintainer channel.
 
 ---
@@ -51,7 +52,7 @@
 Read through and trace a request across these files in order:
 1. `src/app/v1/chat/completions/route.ts` (API Gateway & Header Parse)
 2. `src/core/auth/GalxAuthEngine.ts` (Bearer Key Hash & JWE Decryption)
-3. `src/core/broccolidb/BroccoliCompactionFacade.ts` (Polymorphic Compaction Dispatcher)
+3. `src/core/broccolidb/BroccoliCompactionFacade.ts` (Polymorphic Compaction Dispatcher & Representation Selection)
 4. `src/core/broccolidb/BroccoliCompactionSafety.ts` (Fail-Closed Factual Provenance Gate)
 5. `src/core/pool/GalxCredentialPool.ts` (P-AHT Hydraulic Headroom Shard Selection)
 6. `src/core/circuit/GalxCircuitBreaker.ts` (4-State Circuit Breaker)
@@ -72,12 +73,15 @@ Read through and trace a request across these files in order:
 ## 🗓️ Phase 2: Days 4–14 — First PR & Subsystem Specialization
 
 ### Week 1 Milestone: Add a New Domain Compactor
-1. Pick an industry domain from the backlog (or `.github/ISSUE_TEMPLATE/compactor_addition.yml`).
-2. Implement the compactor class in `src/core/broccolidb/` (e.g. `BroccoliDicomMetadataCompactor.ts`).
-3. Wire the compactor into `BroccoliDomainSpendOptimizer.ts`.
-4. Add verification test cases in `scripts/test-broccolidb-150-domain-suite.ts`.
-5. Run `npm run bench:180-domains && npm run test:broccolidb:api && npm run test:broccolidb:hardening`.
-6. Submit your PR using the [PULL_REQUEST_TEMPLATE](../../.github/PULL_REQUEST_TEMPLATE.md).
+1. Scaffold a new compactor using the maintainer CLI:
+   ```bash
+   npm run scaffold:compactor -- --name=DicomImaging --cluster="Clinical Medicine"
+   ```
+2. Refine the compactor regex patterns in `src/core/broccolidb/BroccoliDicomImagingCompactor.ts`.
+3. Wire into `BroccoliDomainSpendOptimizer.ts`.
+4. Run verification suites: `npm run bench:180-domains && npm run test:broccolidb:api && npm run test:broccolidb:hardening`.
+5. Submit your PR using the [PULL_REQUEST_TEMPLATE](../../.github/PULL_REQUEST_TEMPLATE.md).
+
 
 ---
 

@@ -154,23 +154,33 @@ npx galxai add image
 
 ---
 
-## 🥦 BroccoliDB Input Compaction & Inference Boundary Benchmark
+## 🥦 BroccoliDB Context Representation Layer & Empirical Boundaries
 
-GALXAI embeds **BroccoliDB**, an in-process input compaction engine with **19 specialized modes** (180 industry domains, Drain log clustering, eBPF telemetry, K8s watch deltas, and geospatial streams) that compresses heavy input boilerplate before requests reach OpenAI:
+GALXAI embeds **BroccoliDB**, an adaptive representation-selection substrate that evaluates incoming context $C \to \{ \text{ID}(C), T(C) \}$:
+- **Identity Bypass ($\text{ID}(C)$)**: When context is already dense and clean ($<200$ tokens), compaction is bypassed entirely ($0.0\%$ dilation overhead, $100\%$ baseline preservation).
+- **Transformation Regime ($T(C)$)**: For institutionally noisy codebases, multi-thousand-page incident logs, or high-velocity streams (180 domains, eBPF, K8s watch), it strips ceremonial redundancy while defending active invariants under strict fail-closed safety gates.
 
 ```typescript
 import { BroccoliCompactionFacade } from '@/core/broccolidb';
 
-// Slashes input prompt tokens with fail-closed provenance validation
-const { compactedPrompt, tokensSaved } = BroccoliCompactionFacade.compact({
-  mode: 'log_stream',
-  logs: rawLogLines,
+// Adaptive representation selection with fail-closed provenance validation
+const selection = BroccoliCompactionFacade.selectRepresentation({
+  text: rawContext,
+  taskType: 'architecture_invariants',
+  tokenBudget: 1024,
 });
 ```
 
-### Run the Empirical Inference Boundary Benchmark
-Execute head-to-head empirical tests across OpenAI models (`gpt-4o`, `gpt-4o-mini`, `o3-mini`) with randomized branch-blinded A/B evaluation:
+### Empirical Test Suites
+
 ```bash
+# 1. Maintainer Workstation Onboarding Diagnostics (8 Invariant Checks)
+npm run onboard
+
+# 2. Adversarial Institutional Entropy & Action Safety Benchmark (7-Tier Gradient)
+npm run bench:entropy
+
+# 3. Empirical Inference Boundary Benchmark across OpenAI Models (Blinded A/B)
 npm run bench:inference-boundary
 ```
 
@@ -181,7 +191,7 @@ npm run bench:inference-boundary
 | Feature | Raw OpenAI / Retail | GALXAI |
 | :--- | :--- | :--- |
 | **Pricing** | Full Retail List Price | **25%–40% Wholesale Discount** |
-| **Prompt Compaction** | Full uncompressed payload | **BroccoliDB Compaction (61%–95% Input Reduction)** |
+| **Prompt Representation** | Full uncompressed payload | **BroccoliDB Adaptive Selection ($C \to \{\text{ID}(C), T(C)\}$)** |
 | **Prompt Caching** | Often absorbed by provider | **100% Pass-Through (75% Rebate)** |
 | **Frontend Setup** | Requires manual API proxies | **Drop-in React Components (`<GalxImage />`)** |
 | **API Key Security** | Vulnerable to client leaks | **Server-Only `.env.local` injection** |
@@ -192,15 +202,16 @@ npm run bench:inference-boundary
 
 ## 📚 Documentation & Guides
 
-- 🛡️ **[Maintainers Guide & Governance](MAINTAINERS.md)**: Maintainer hierarchy, Day 1 onboarding ramp, subsystem ownership, and PR review rubric.
-- 🤝 **[Contributing Guide](CONTRIBUTING.md)**: Development workflow, Conventional Commits, and testing gates.
+- 🛡️ **[Maintainers Knowledge Base (20 Manuals)](docs/maintainers/README.md)**: Deep internal architectural blueprints, 30-day onboarding ramp, subsystem matrices, CI specs, outage failovers, and on-call runbooks.
+- 🏛️ **[Architecture Decision Records (67 ADRs)](docs/adr/README.md)**: Deep technical specifications from ADR 0001 to ADR 0067 (including ADR 0066 Institutional Entropy and ADR 0067 Representation Selection).
+- 🤝 **[Contributing Guide](CONTRIBUTING.md)**: Development workflow, Conventional Commits, and automated git hooks (`npm run hooks:install`).
 - 🥦 **[BroccoliDB Compaction Onboarding Guide](docs/BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md)**: 19 streaming modes, 180 domain compactors, and the Epistemic Measurement Machinery.
 - 📊 **[Empirical Benchmarks & Inference Boundary](docs/BENCHMARKS.md)**: Head-to-head provider boundary tests on OpenAI models with $/success accounting.
 - 📋 **[Engineering Handover & Strategy Review](HANDOVER.md)**: Architectural review document, commercial thesis, and open design trade-offs for reviewing engineers.
 - ⚡ **[Quickstart Guide](docs/QUICKSTART.md)**: 30-second integrations for Next.js, React, Node, and Python.
 - 💻 **[SDK Cheatsheet](docs/SDK_CHEATSHEET.md)**: Drop-in code snippets for every major framework.
-- 🏛️ **[Architecture Decision Records (65 ADRs)](docs/adr/README.md)**: Deep technical specifications from ADR 0001 to ADR 0065.
 - ❓ **[Frequently Asked Questions (FAQs)](docs/FAQS.md)**: Zero-hesitation philosophy, model routing, and BroccoliDB economics.
 - 🔧 **[Troubleshooting & Operational Playbook](docs/TROUBLESHOOTING.md)**: Error codes, remediation steps, and verification commands.
+
 
 
