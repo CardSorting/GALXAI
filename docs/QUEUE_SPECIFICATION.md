@@ -249,11 +249,13 @@ Background task queues can be continuously drained and executed via Cloudflare E
 
 ---
 
-## 16. In-Queue BroccoliDB Payload Compaction
+## 16. In-Queue BroccoliDB Representation Selection (ADR 0066 & 0067)
 
 When enqueuing large context payloads (multi-file AST audits, 50-page credit agreements, log storms) into async queues:
-- **Automatic Ingress Compaction**: Passing `x-galx-compact: true` or `compaction: { mode: 'log_stream' }` runs the payload through `BroccoliCompactionFacade` before queue persistence.
-- **Storage Optimization**: Slashes queue storage memory and WAL footprint by up to 85.9%.
+- **Adaptive Ingress Representation Selection**: Passing `x-galx-compact: true` or `taskType: 'architecture_invariants'` invokes `BroccoliCompactionFacade.selectRepresentation()`.
+- **Adaptive Density Gate ($\text{ID}(C)$)**: If task payload is $<200$ tokens, it bypasses transformation with $0.0\%$ storage dilation.
+- **Storage & WAL Optimization**: Slashes queue storage memory, WAL footprint, and worker payload deserialization overhead by up to $85.9\%$.
+- **Action Safety Guarantee**: Disarms contradictory corporate records and superseded historical ADRs before queue dispatch (`npm run bench:entropy`).
 - **Worker Acceleration**: Workers lease pre-compacted context, drastically cutting LLM time-to-first-token and billed token expenditure.
 
 ---
@@ -262,13 +264,19 @@ When enqueuing large context payloads (multi-file AST audits, 50-page credit agr
 
 All capabilities are continuously validated against the comprehensive automated test harness:
 ```bash
-# 1. Forensic Router & Queue Suite (177 tests)
+# 1. Maintainer Workstation 8-Point Onboarding Diagnostic (<5s)
+npm run onboard
+
+# 2. Adversarial Institutional Entropy & Action Safety Benchmark (7-Tier Gradient)
+npm run bench:entropy
+
+# 3. Forensic Router & Queue Suite (177 tests)
 npm run test:router
 
-# 2. Cloudflare Edge Mesh Verification Suite (46 tests)
+# 4. Cloudflare Edge Mesh Verification Suite (46 tests)
 npm run worker:test
 
-# 3. BroccoliDB Compaction Facade & Inference Boundary Suite
+# 5. BroccoliDB Compaction Facade & Inference Boundary Suite
 npm run test:broccolidb:api && npm run bench:inference-boundary
 ```
 - **Tests 1–31**: Vault Cryptography, Rate Governor, Circuit Breakers, Shard Pooling, TASD Leveling, Model Catalog.
@@ -277,6 +285,7 @@ npm run test:broccolidb:api && npm run bench:inference-boundary
 - **Tests 45–50**: Phase 3 DAG Dependencies, SSE EventBus, Content Deduplication, Dynamic Priority Aging, Deadlines, Draining Mode.
 - **Tests 51–177**: SOC 2 Compliance, ZDR v10.0 Memory Zeroization, BroccoliDB AST & L1 Tables, Multi-Index Range Scans, and Developer SDK Ergonomics.
 - **Edge Tests 1–46**: Edge Gateway, SSE Streaming, Failover, KV Cache, R2 CDN, Durable Objects, and Queue Worker Cron Fleet.
+
 
 
 

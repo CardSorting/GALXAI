@@ -38,15 +38,25 @@ This guide details the complete process for deploying the **GALXAI Next.js 15 We
 GALXAI features an automated **8-Phase Pre-Flight Audit Engine** and CI verification gate. Run the full pre-deployment check before initiating a deployment:
 
 ```bash
-# 1. Run the complete pre-deployment audit & build gate (8 Phases + ESLint + Next.js Build)
+# 1. Maintainer Workstation 8-Point Onboarding Diagnostic (<5s)
+npm run onboard
+
+# 2. Adversarial Institutional Entropy & Action Safety Benchmark (7-Tier Gradient)
+npm run bench:entropy
+
+# 3. OpenAI Empirical Inference Boundary Benchmark (Randomized Branch-Blinded)
+npm run bench:inference-boundary
+
+# 4. Run the complete pre-deployment audit & build gate (8 Phases + ESLint + Next.js Build)
 npm run deploy:check
 
-# 2. Synchronize or inspect Vercel environment variables
+# 5. Synchronize or inspect Vercel environment variables
 npm run vercel:env:print
 
-# 3. Populate or rotate cryptographic vault master secrets
+# 6. Populate or rotate cryptographic vault master secrets
 npm run vault:populate
 ```
+
 
 ---
 
