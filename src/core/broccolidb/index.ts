@@ -30,4 +30,5 @@ export * from "./BroccoliTierCascader";
 export * from "./BroccoliToolCompactor";
 export * from "./BroccoliSchemaCompactor";
 export * from "./BroccoliLexicalCompressor";
+export * from "./BroccoliMaxTokenClamper";
 export * from "./BroccoliSpendSubstrate";
