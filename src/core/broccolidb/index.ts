@@ -51,4 +51,5 @@ export * from "./BroccoliRepetitionBreaker";
 export * from "./BroccoliAudioCompactor";
 export * from "./BroccoliSubGraphCache";
 export * from "./BroccoliLogitBiasClamper";
+export * from "./BroccoliLostInMiddlePruner";
 export * from "./BroccoliSpendSubstrate";
