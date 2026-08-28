@@ -56,6 +56,12 @@ function run() {
 
   console.log('      - Slack & PagerDuty payloads generated and validated.');
 
+  // 4. Test BroccoliDB Natural Language Query on Anomalies
+  console.log('\n[4/4] Testing BroccoliDB Natural Queries on Spend Anomalies...');
+  const naturalAnomalies = SpendAnomalyDetector.queryAnomaliesNatural('find anomalies in department cx_ops');
+  assert.equal(naturalAnomalies.length, 1);
+  console.log('      - BroccoliDB Natural Language Query Verified on Anomaly Table.');
+
   console.log('\n======================================================================');
   console.log('   ALL SPEND ANOMALY & ALERTING TESTS PASSED (100%)');
   console.log('======================================================================\n');

@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GalxSpendGovernanceEngine } from '@/core/governance/GalxSpendGovernanceEngine';
 import { PromptPrefixRestructurer } from '@/core/governance/PromptPrefixRestructurer';
 import { AgentCircuitBreaker } from '@/core/governance/AgentCircuitBreaker';
-import { SpendAnomalyDetector, AnomalyDetectionResult } from '@/core/governance/SpendAnomalyDetector';
+import { SpendAnomalyDetector, AnomalyDetectionRecord } from '@/core/governance/SpendAnomalyDetector';
 import { GovernanceAlertDispatcher } from '@/core/governance/GovernanceAlertDispatcher';
 import { TokenCostCalculator } from '@/core/pricing/TokenCostCalculator';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       remediation: string;
     }> = [];
 
-    const detectedAnomalies: AnomalyDetectionResult[] = [];
+    const detectedAnomalies: AnomalyDetectionRecord[] = [];
 
     const sol = ModelCatalog.resolveModel('gpt-5.6-sol');
     const luna = ModelCatalog.resolveModel('gpt-5.6-luna');

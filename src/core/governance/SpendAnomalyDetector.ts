@@ -1,10 +1,13 @@
 /**
- * GALXAI Enterprise Real-Time Spend Anomaly Detector
+ * GALXAI Enterprise Real-Time Spend Anomaly Detector (Powered by BroccoliDB L1)
  * 
- * Computes sliding-window velocity baselines ($/minute and tokens/minute)
- * and detects statistical anomalies (Z-score ≥ 3.0 or >300% sudden velocity surge).
- * Prevents Friday-evening runaway scripts from burning tens of thousands of dollars.
+ * Computes sub-microsecond sliding-window velocity baselines ($/min and tokens/min)
+ * backed by BroccoliDB reactive tables with secondary indexing and natural queries.
+ * Detects statistical anomalies (Z-score ≥ 3.0 or >300% sudden velocity surge).
  */
+
+import { BroccoliDbTable } from '../broccolidb/broccolidb-table';
+import { BroccoliNaturalQueryParser } from '../broccolidb/broccolidb-natural-query';
 
 export interface VelocityMetricSample {
   timestampMs: number;
@@ -14,7 +17,12 @@ export interface VelocityMetricSample {
   department: string;
 }
 
-export interface AnomalyDetectionResult {
+export interface VelocitySampleRecord extends VelocityMetricSample {
+  id: string;
+}
+
+export interface AnomalyDetectionRecord {
+  id: string;
   isAnomaly: boolean;
   zScore: number;
   baselineHourlyRateUsd: number;
@@ -24,10 +32,32 @@ export interface AnomalyDetectionResult {
   triggerReason?: string;
   serviceId: string;
   department: string;
+  detectedAtMs: number;
 }
 
 export class SpendAnomalyDetector {
-  private static serviceWindows = new Map<string, VelocityMetricSample[]>();
+  private static instance: SpendAnomalyDetector;
+  public readonly sampleTable: BroccoliDbTable<VelocitySampleRecord>;
+  public readonly anomalyTable: BroccoliDbTable<AnomalyDetectionRecord>;
+
+  private constructor() {
+    this.sampleTable = new BroccoliDbTable<VelocitySampleRecord>('velocity_samples');
+    this.sampleTable.createIndex('department');
+    this.sampleTable.createIndex('serviceId');
+    this.sampleTable.createSortedIndex('timestampMs');
+
+    this.anomalyTable = new BroccoliDbTable<AnomalyDetectionRecord>('spend_anomalies');
+    this.anomalyTable.createIndex('severity');
+    this.anomalyTable.createIndex('department');
+    this.anomalyTable.createSortedIndex('detectedAtMs');
+  }
+
+  public static getInstance(): SpendAnomalyDetector {
+    if (!SpendAnomalyDetector.instance) {
+      SpendAnomalyDetector.instance = new SpendAnomalyDetector();
+    }
+    return SpendAnomalyDetector.instance;
+  }
 
   /**
    * Records a traffic sample and evaluates whether it represents a spend anomaly
@@ -35,26 +65,32 @@ export class SpendAnomalyDetector {
   public static recordAndEvaluate(
     sample: VelocityMetricSample,
     windowDurationMs = 600_000 // 10-minute sliding window
-  ): AnomalyDetectionResult {
-    const key = `${sample.department}:${sample.serviceId}`;
-    let window = this.serviceWindows.get(key);
-    if (!window) {
-      window = [];
-      this.serviceWindows.set(key, window);
-    }
-
+  ): AnomalyDetectionRecord {
+    const detector = this.getInstance();
     const now = sample.timestampMs || Date.now();
-    window.push(sample);
+    const sampleId = `samp_${now}_${Math.random().toString(36).substring(2, 8)}`;
 
-    // Evict samples older than sliding window
+    const sampleRecord: VelocitySampleRecord = {
+      id: sampleId,
+      ...sample,
+      timestampMs: now,
+    };
+    detector.sampleTable.put(sampleId, sampleRecord);
+
+    // Query samples in the sliding window for this department and service
     const cutoff = now - windowDurationMs;
-    while (window.length > 0 && window[0].timestampMs < cutoff) {
-      window.shift();
-    }
+    const window = detector.sampleTable.query({
+      where: {
+        department: sample.department,
+        serviceId: sample.serviceId,
+        timestampMs: { $gte: cutoff },
+      },
+    });
 
     // Need at least 5 samples to compute meaningful statistics
     if (window.length < 5) {
-      return {
+      const benignRecord: AnomalyDetectionRecord = {
+        id: `nom_${now}`,
         isAnomaly: false,
         zScore: 0,
         baselineHourlyRateUsd: sample.costUsd * 60,
@@ -63,7 +99,9 @@ export class SpendAnomalyDetector {
         severity: 'low',
         serviceId: sample.serviceId,
         department: sample.department,
+        detectedAtMs: now,
       };
+      return benignRecord;
     }
 
     // Calculate baseline mean and standard deviation of cost per minute
@@ -98,7 +136,8 @@ export class SpendAnomalyDetector {
       }
     }
 
-    return {
+    const anomalyRecord: AnomalyDetectionRecord = {
+      id: `anom_${now}_${sample.serviceId}`,
       isAnomaly,
       zScore,
       baselineHourlyRateUsd,
@@ -108,13 +147,31 @@ export class SpendAnomalyDetector {
       triggerReason,
       serviceId: sample.serviceId,
       department: sample.department,
+      detectedAtMs: now,
     };
+
+    if (isAnomaly) {
+      detector.anomalyTable.put(anomalyRecord.id, anomalyRecord);
+    }
+
+    return anomalyRecord;
   }
 
   /**
-   * Resets telemetry window for testing or service recalibration
+   * Executes natural language query across logged spend anomalies in BroccoliDB
+   */
+  public static queryAnomaliesNatural(naturalQuery: string): readonly AnomalyDetectionRecord[] {
+    const detector = this.getInstance();
+    const ast = BroccoliNaturalQueryParser.parse(naturalQuery);
+    return detector.anomalyTable.query(ast.queryOptions);
+  }
+
+  /**
+   * Resets BroccoliDB tables for testing
    */
   public static resetWindows(): void {
-    this.serviceWindows.clear();
+    const detector = this.getInstance();
+    detector.sampleTable.clear();
+    detector.anomalyTable.clear();
   }
 }

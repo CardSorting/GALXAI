@@ -76,8 +76,16 @@ function run() {
   console.log(`      - Latency Saved: ${lookupHit.latencySavedMs}ms`);
   console.log(`      - Cost on Duplicate Query: $0.000 (100% saved)`);
 
-  assert.equal(lookupHit.hit, true);
-  assert.equal(lookupHit.entry?.hitCount, 1);
+  // Test BroccoliDB Natural Queries & Aggregation Stats
+  const stats = SemanticEdgeCache.getStats();
+  console.log(`      - BroccoliDB Cached Entries: ${stats.totalEntries}`);
+  console.log(`      - BroccoliDB Total Hits: ${stats.totalHits}`);
+  assert.equal(stats.totalEntries, 1);
+  assert.equal(stats.totalHits, 1);
+
+  const naturalResults = SemanticEdgeCache.queryNatural('find cached completions for model gpt-5.6-sol');
+  assert.equal(naturalResults.length, 1);
+  console.log('      - BroccoliDB Natural Language Query Verified.');
 
   console.log('\n======================================================================');
   console.log('   ALL STRUCTURAL TOKEN REDUCTION TESTS PASSED (100%)');

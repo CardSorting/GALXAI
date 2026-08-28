@@ -5,7 +5,7 @@
  * and standard RFC 7807 Webhook endpoints for real-time incident alerting.
  */
 
-import type { AnomalyDetectionResult } from './SpendAnomalyDetector';
+import type { AnomalyDetectionRecord } from './SpendAnomalyDetector';
 
 export interface AlertNotificationPayload {
   incidentId: string;
@@ -28,7 +28,7 @@ export class GovernanceAlertDispatcher {
   /**
    * Generates a standard Slack Block Kit formatted message payload
    */
-  public static formatSlackPayload(anomaly: AnomalyDetectionResult, incidentId: string) {
+  public static formatSlackPayload(anomaly: AnomalyDetectionRecord, incidentId: string) {
     const emoji = anomaly.severity === 'critical' ? '🚨' : anomaly.severity === 'high' ? '⚠️' : 'ℹ️';
     
     return {
@@ -92,7 +92,7 @@ export class GovernanceAlertDispatcher {
   /**
    * Generates a standard PagerDuty v2 Trigger Event payload
    */
-  public static formatPagerDutyPayload(anomaly: AnomalyDetectionResult, incidentId: string, routingKey: string) {
+  public static formatPagerDutyPayload(anomaly: AnomalyDetectionRecord, incidentId: string, routingKey: string) {
     return {
       routing_key: routingKey,
       event_action: 'trigger',
