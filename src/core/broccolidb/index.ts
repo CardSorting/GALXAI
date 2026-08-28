@@ -94,7 +94,10 @@ export * from "./BroccoliCourtCaptionCompactor";
 export * from "./BroccoliRadiologyCompactor";
 export * from "./BroccoliTestOutputCompactor";
 export * from "./BroccoliSupportEmailThreadCompactor";
+export * from "./BroccoliGitStatusCompactor";
+export * from "./BroccoliSupportKbCompactor";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
