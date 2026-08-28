@@ -2648,6 +2648,257 @@ export interface Database {
         };
         Relationships: [];
       };
+      galx_spend_governance_policies: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          department: string | null;
+          cost_center: string | null;
+          environment: string;
+          mode: 'observe' | 'recommend' | 'enforce';
+          tier_cascading_enabled: boolean;
+          dynamic_prefix_cache_enabled: boolean;
+          circuit_breaker_max_turns: number;
+          staging_spend_ceiling_daily_usd: number;
+          max_output_tokens: number | null;
+          max_estimated_request_cost_usd: number | null;
+          require_attribution: boolean;
+          minimum_evaluation_samples: number;
+          maximum_quality_regression: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          workspace_id: string;
+          department?: string | null;
+          cost_center?: string | null;
+          environment?: string;
+          mode?: 'observe' | 'recommend' | 'enforce';
+          tier_cascading_enabled?: boolean;
+          dynamic_prefix_cache_enabled?: boolean;
+          circuit_breaker_max_turns?: number;
+          staging_spend_ceiling_daily_usd?: number;
+          max_output_tokens?: number | null;
+          max_estimated_request_cost_usd?: number | null;
+          require_attribution?: boolean;
+          minimum_evaluation_samples?: number;
+          maximum_quality_regression?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          workspace_id?: string;
+          department?: string | null;
+          cost_center?: string | null;
+          environment?: string;
+          mode?: 'observe' | 'recommend' | 'enforce';
+          tier_cascading_enabled?: boolean;
+          dynamic_prefix_cache_enabled?: boolean;
+          circuit_breaker_max_turns?: number;
+          staging_spend_ceiling_daily_usd?: number;
+          max_output_tokens?: number | null;
+          max_estimated_request_cost_usd?: number | null;
+          require_attribution?: boolean;
+          minimum_evaluation_samples?: number;
+          maximum_quality_regression?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "galx_spend_governance_policies_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "galx_workspaces";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      galx_model_route_evidence: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          requested_model: string;
+          target_model: string;
+          workload: string;
+          status: 'draft' | 'approved' | 'revoked';
+          sample_size: number;
+          baseline_success_rate: number;
+          candidate_success_rate: number;
+          lower_bound_quality_delta: number;
+          attestation_digest: string;
+          evaluated_at: string;
+          expires_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          workspace_id: string;
+          requested_model: string;
+          target_model: string;
+          workload: string;
+          status?: 'draft' | 'approved' | 'revoked';
+          sample_size: number;
+          baseline_success_rate: number;
+          candidate_success_rate: number;
+          lower_bound_quality_delta: number;
+          attestation_digest: string;
+          evaluated_at: string;
+          expires_at: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          workspace_id?: string;
+          requested_model?: string;
+          target_model?: string;
+          workload?: string;
+          status?: 'draft' | 'approved' | 'revoked';
+          sample_size?: number;
+          baseline_success_rate?: number;
+          candidate_success_rate?: number;
+          lower_bound_quality_delta?: number;
+          attestation_digest?: string;
+          evaluated_at?: string;
+          expires_at?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "galx_model_route_evidence_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "galx_workspaces";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      galx_forensic_waste_incidents: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          incident_type: 'FRONTIER_MISALLOCATION' | 'CACHE_BUSTING_PREFIX' | 'UNCAPPED_STAGING_KEY' | 'RUNAWAY_AGENT_LOOP' | 'REDUNDANT_SEMANTIC_QUERY' | 'CONTEXT_BLOAT' | 'OUTPUT_EXPLOSION';
+          severity: 'low' | 'medium' | 'high' | 'critical';
+          requested_model: string;
+          remediation_action: string;
+          estimated_waste_usd: number;
+          recovered_savings_usd: number;
+          department: string | null;
+          cost_center: string | null;
+          repository_name: string | null;
+          service_name: string | null;
+          fingerprint: string;
+          metadata: Json;
+          detected_at: string;
+        };
+        Insert: {
+          id: string;
+          workspace_id: string;
+          incident_type: 'FRONTIER_MISALLOCATION' | 'CACHE_BUSTING_PREFIX' | 'UNCAPPED_STAGING_KEY' | 'RUNAWAY_AGENT_LOOP' | 'REDUNDANT_SEMANTIC_QUERY' | 'CONTEXT_BLOAT' | 'OUTPUT_EXPLOSION';
+          severity?: 'low' | 'medium' | 'high' | 'critical';
+          requested_model: string;
+          remediation_action: string;
+          estimated_waste_usd?: number;
+          recovered_savings_usd?: number;
+          department?: string | null;
+          cost_center?: string | null;
+          repository_name?: string | null;
+          service_name?: string | null;
+          fingerprint?: string;
+          metadata?: Json;
+          detected_at?: string;
+        };
+        Update: {
+          id?: string;
+          workspace_id?: string;
+          incident_type?: 'FRONTIER_MISALLOCATION' | 'CACHE_BUSTING_PREFIX' | 'UNCAPPED_STAGING_KEY' | 'RUNAWAY_AGENT_LOOP' | 'REDUNDANT_SEMANTIC_QUERY' | 'CONTEXT_BLOAT' | 'OUTPUT_EXPLOSION';
+          severity?: 'low' | 'medium' | 'high' | 'critical';
+          requested_model?: string;
+          remediation_action?: string;
+          estimated_waste_usd?: number;
+          recovered_savings_usd?: number;
+          department?: string | null;
+          cost_center?: string | null;
+          repository_name?: string | null;
+          service_name?: string | null;
+          fingerprint?: string;
+          metadata?: Json;
+          detected_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "galx_forensic_waste_incidents_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "galx_workspaces";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      galx_departmental_spend_attributions: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          period_date: string;
+          department: string;
+          cost_center: string;
+          gross_retail_spend_usd: number;
+          net_galx_spend_usd: number;
+          total_requests: number;
+          total_input_tokens: number;
+          total_output_tokens: number;
+          cached_input_tokens: number;
+          avoided_waste_usd: number;
+          cache_rebate_usd: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          workspace_id: string;
+          period_date: string;
+          department: string;
+          cost_center: string;
+          gross_retail_spend_usd?: number;
+          net_galx_spend_usd?: number;
+          total_requests?: number;
+          total_input_tokens?: number;
+          total_output_tokens?: number;
+          cached_input_tokens?: number;
+          avoided_waste_usd?: number;
+          cache_rebate_usd?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          workspace_id?: string;
+          period_date?: string;
+          department?: string;
+          cost_center?: string;
+          gross_retail_spend_usd?: number;
+          net_galx_spend_usd?: number;
+          total_requests?: number;
+          total_input_tokens?: number;
+          total_output_tokens?: number;
+          cached_input_tokens?: number;
+          avoided_waste_usd?: number;
+          cache_rebate_usd?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "galx_departmental_spend_attributions_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "galx_workspaces";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
