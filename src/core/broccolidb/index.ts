@@ -25,4 +25,5 @@ export * from "./BroccoliStreamInterceptor";
 export * from "./BroccoliPromptDeduplicator";
 export * from "./BroccoliSpendForecaster";
 export * from "./BroccoliKVCacheOptimizer";
+export * from "./BroccoliContextPruner";
 export * from "./BroccoliSpendSubstrate";
