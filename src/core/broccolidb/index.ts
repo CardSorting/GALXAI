@@ -32,4 +32,5 @@ export * from "./BroccoliSchemaCompactor";
 export * from "./BroccoliLexicalCompressor";
 export * from "./BroccoliMaxTokenClamper";
 export * from "./BroccoliRetryBreaker";
+export * from "./BroccoliMultimodalCompactor";
 export * from "./BroccoliSpendSubstrate";
