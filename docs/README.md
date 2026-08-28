@@ -26,6 +26,7 @@ Welcome to the comprehensive technical documentation and operational guides for 
 - **[Pricing, Rebates & Economic Arbitrage](PRICING_AND_DISCOUNT_STRATEGY.md)**: Detailed breakdown of the 4-pillar discount architecture (25%–40% wholesale discount, 75% prompt caching rebate).
 - **[Multi-Ecosystem SDK Cheatsheet](SDK_CHEATSHEET.md)**: Drop-in code snippets for OpenAI, Anthropic, Vercel AI SDK, LangChain, and LlamaIndex.
 - **[Universal Migration Guide](MIGRATION_GUIDE.md)**: Step-by-step zero-code-change migration instructions from raw OpenAI, Anthropic, or OpenRouter setups.
+- **[BroccoliDB Compaction Onboarding Guide](BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md)**: Engineer onboarding guide explaining the safe facade, 5-layer compaction model, fail-closed safety gate, and runbook.
 - **[Frequently Asked Questions (FAQs)](FAQS.md)**: Clear answers covering zero-hesitation ergonomics, prompt caching, billing, security, and uptime SLAs.
 
 ---
