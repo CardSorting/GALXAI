@@ -1,0 +1,39 @@
+name: 🐛 Bug Report
+description: Report an issue, regression, or unexpected behavior in GALXAI.
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please provide as much context as possible to help maintainers reproduce and diagnose the issue.
+  - type: textarea
+    id: what_happened
+    attributes:
+      label: What happened?
+      description: Describe the bug and the unexpected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: Steps to Reproduce
+      description: Provide minimal, reproducible steps or code snippets.
+      placeholder: |
+        1. Run `npx galxai run ...`
+        2. Set header `x-galx-compact: true`
+        3. Observe error ...
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment Info
+      placeholder: "Node.js 20.18.0, macOS Sonoma, npm 10.8.2"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Log Output or Error Stack
+      render: shell

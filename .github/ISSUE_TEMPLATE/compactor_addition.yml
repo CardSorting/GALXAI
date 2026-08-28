@@ -1,0 +1,49 @@
+name: 🥦 Propose New Domain / Stream Compactor
+description: Propose a new industry domain or streaming mode compactor for BroccoliDB.
+title: "[Compactor]: "
+labels: ["enhancement", "broccolidb", "compactor"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for proposing a new domain or streaming compactor for BroccoliDB!
+        Please describe the target industry, structural representation redundancies, and factual invariants to preserve.
+  - type: input
+    id: domain_name
+    attributes:
+      label: Domain / Stream Name
+      placeholder: "e.g., DICOM Medical Imaging Metadata / Apache Iceberg Manifest"
+    validations:
+      required: true
+  - type: textarea
+    id: redundant_patterns
+    attributes:
+      label: Representational Redundancy
+      description: What structural repetition, static boilerplate, or high-entropy noise exists in this data format?
+      placeholder: "e.g., Repeating XML tags, static preamble headers, continuous equilibrium polling frames..."
+    validations:
+      required: true
+  - type: textarea
+    id: factual_invariants
+    attributes:
+      label: Factual Invariants to Preserve
+      description: What high-risk numbers, dates, identifiers, codes, or measurement values must NEVER be altered or dropped?
+      placeholder: "e.g., Patient Study UID, radiation dosage (mGy), transaction amounts ($), ISO 8601 timestamps..."
+    validations:
+      required: true
+  - type: textarea
+    id: raw_sample
+    attributes:
+      label: Representative Raw Sample (Before)
+      description: Paste a realistic raw snippet of the data format.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected_compacted
+    attributes:
+      label: Ideal Compacted Representation (After)
+      description: Paste what the dense, task-relevant representation should look like.
+      render: text
+    validations:
+      required: true

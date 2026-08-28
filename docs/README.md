@@ -49,7 +49,9 @@ Welcome to the comprehensive technical documentation and operational guides for 
 - **[Developer & Contributing Guide](DEVELOPER_GUIDE.md)**: Codebase organization, provider adapter design, and test suite conventions.
 - **[Architecture Decision Records (ADRs)](adr/README.md)**: 65 formal architectural specifications governing security, transport hardening, 180-domain compaction, and OpenAI inference boundary benchmarking.
 - **[Operational SRE Playbooks](playbooks/README.md)**: 8 lifecycle runbooks for deployment, incident remediation, secret rotation, and unframed developer observation trials.
+- **[Maintainer Knowledge Base & Internal Manual](maintainers/README.md)**: Onboarding Day 1–30 roadmap, subsystem dependency DAG, and debugging runbooks.
 - **[Production Infrastructure & Deployment Guide](DEPLOYMENT.md)**: Multi-target deployment topology across Vercel, Cloudflare Edge, Docker, and Kubernetes.
+
 
 - **[Vercel Production Deployment & Hardening Guide](VERCEL_DEPLOYMENT.md)**: Complete guide for Next.js 15 deployment on Vercel, 8-phase pre-flight verification, environment sync, and 12-point automated live smoke testing.
 - **[Programmatic SEO (pSEO), AEO & GEO Strategy](PSEO_AND_AEO_STRATEGY.md)**: Comprehensive architectural strategy covering 13 interactive developer tools, 14 programmatic content hubs, Schema.org `@graph` ontology, and machine-readable `llms.txt` standards.

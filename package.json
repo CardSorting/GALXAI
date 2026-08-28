@@ -55,11 +55,15 @@
     "galxai": "./bin/galxai.mjs"
   },
   "scripts": {
+    "onboard": "node --import tsx scripts/onboard-maintainer.ts",
+    "dissect:payloads": "node --import tsx scripts/dissect-payloads-and-causal-analysis.ts",
+    "bench:180-domains": "node --import tsx scripts/test-broccolidb-150-domain-suite.ts",
     "predev": "kill $(lsof -ti:3000) 2>/dev/null || true",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+
     "lint:design": "npx -y impeccable detect src",
     "design:health": "tsx scripts/verify-design-health.ts",
     "design:hints": "tsx scripts/verify-design-health.ts --hints",

@@ -1,0 +1,28 @@
+name: 💡 Feature or Architecture Request
+description: Propose an idea, new integration adapter, or architectural capability.
+title: "[Feature]: "
+labels: ["enhancement", "discussion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        We welcome proposals for new features, provider adapters, and developer tooling!
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Explain the developer pain point, architectural gap, or economic opportunity.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe your proposed design, API contract, or user flow.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What other approaches or existing libraries did you consider?
