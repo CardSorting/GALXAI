@@ -2,14 +2,16 @@
  * GALXAI Enterprise Forensic Audit Batch Ingestion Endpoint
  * 
  * Ingests live production traffic logs from enterprise proxies, Cloudflare Logpush,
- * or OTel collectors, evaluates the 4 waste drivers in real-time, logs incidents
- * to Supabase, and computes instant financial attribution metrics.
+ * or OTel collectors, evaluates the 4 waste drivers in real-time, detects spend anomalies,
+ * and computes instant financial attribution metrics with Slack/PagerDuty alerting.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxSpendGovernanceEngine } from '@/core/governance/GalxSpendGovernanceEngine';
 import { PromptPrefixRestructurer } from '@/core/governance/PromptPrefixRestructurer';
 import { AgentCircuitBreaker } from '@/core/governance/AgentCircuitBreaker';
+import { SpendAnomalyDetector, AnomalyDetectionResult } from '@/core/governance/SpendAnomalyDetector';
+import { GovernanceAlertDispatcher } from '@/core/governance/GovernanceAlertDispatcher';
 import { TokenCostCalculator } from '@/core/pricing/TokenCostCalculator';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
 
@@ -27,6 +29,17 @@ export interface IngestedTraceItem {
   promptTokens?: number;
   completionTokens?: number;
   status?: number;
+}
+
+export async function GET() {
+  return NextResponse.json({
+    status: 'healthy',
+    service: 'galxai-forensic-ingest-engine',
+    version: '1.4.0',
+    supportedProtocols: ['json_batch', 'cloudflare_logpush', 'opentelemetry_genai'],
+    maxBatchSize: 1000,
+    documentation: 'https://galx.ai/audit',
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -66,6 +79,8 @@ export async function POST(req: NextRequest) {
       remediation: string;
     }> = [];
 
+    const detectedAnomalies: AnomalyDetectionResult[] = [];
+
     const sol = ModelCatalog.resolveModel('gpt-5.6-sol');
     const luna = ModelCatalog.resolveModel('gpt-5.6-luna');
 
@@ -83,6 +98,19 @@ export async function POST(req: NextRequest) {
       // Calculate baseline gross retail on Sol
       const grossCost = TokenCostCalculator.calculateCost(sol, { promptTokens, completionTokens }).netCostUsd;
       totalGrossRetailUsd += grossCost;
+
+      // Real-Time Spend Anomaly Evaluation
+      const anomalyCheck = SpendAnomalyDetector.recordAndEvaluate({
+        timestampMs: trace.timestamp ? Date.parse(trace.timestamp) : Date.now(),
+        costUsd: grossCost,
+        tokens: promptTokens + completionTokens,
+        serviceId: workload,
+        department,
+      });
+
+      if (anomalyCheck.isAnomaly) {
+        detectedAnomalies.push(anomalyCheck);
+      }
 
       // 1. Evaluate Frontier Misallocation
       if ((workload === 'classification' || workload === 'intent_routing') && trace.model.includes('sol')) {
@@ -155,6 +183,16 @@ export async function POST(req: NextRequest) {
       ? Number(((totalAvoidedWasteUsd / totalGrossRetailUsd) * 100).toFixed(1))
       : 0;
 
+    // Format optional Slack alert payload if critical anomalies detected
+    let alertNotification = null;
+    if (detectedAnomalies.length > 0) {
+      const topAnomaly = detectedAnomalies[0];
+      alertNotification = {
+        slackBlockKit: GovernanceAlertDispatcher.formatSlackPayload(topAnomaly, 'inc_surge_live'),
+        pagerDutyEvent: GovernanceAlertDispatcher.formatPagerDutyPayload(topAnomaly, 'inc_surge_live', 'galx_routing_key'),
+      };
+    }
+
     return NextResponse.json({
       status: 'analyzed',
       tracesIngested: traces.length,
@@ -168,8 +206,10 @@ export async function POST(req: NextRequest) {
         frontierMisallocations: frontierMisallocationCount,
         cacheBustingHeaders: cacheBustingHeaderCount,
         agentLoopsClamped: circuitBreakerTrippedCount,
+        anomaliesDetected: detectedAnomalies.length,
       },
       recentIncidents: detectedIncidents.slice(0, 20),
+      alertNotification,
     });
   } catch (error: any) {
     return NextResponse.json(
