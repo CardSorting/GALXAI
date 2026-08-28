@@ -60,6 +60,8 @@
     "scaffold:compactor": "node --import tsx scripts/scaffold-compactor.ts",
     "dissect:payloads": "node --import tsx scripts/dissect-payloads-and-causal-analysis.ts",
     "bench:180-domains": "node --import tsx scripts/test-broccolidb-150-domain-suite.ts",
+    "bench:entropy": "node --import tsx scripts/bench-institutional-entropy-matrix.ts",
+
 
 
     "predev": "kill $(lsof -ti:3000) 2>/dev/null || true",

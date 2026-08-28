@@ -41,57 +41,66 @@ Repository Beta (Real Enterprise Reality):
   - Fake organizational authority
 ```
 
-### The Invariant Hypothesis:
-If BroccoliDB executes epistemic representation compaction across both repositories, the resulting task-relevant operational representation must be **isomorphic**:
+### The Empirical Research Hypothesis:
+If BroccoliDB executes epistemic representation compaction across both repositories, the resulting task-relevant operational representation should minimize action degradation:
 
-$$\text{BroccoliDB}(\text{Repo}_\alpha) \cong \text{BroccoliDB}(\text{Repo}_\beta) \implies \text{Zero Action Degradation}$$
+$$\text{Action Safety}(\text{Repo}_\beta \mid \text{BroccoliDB}) \approx \text{Action Safety}(\text{Repo}_\alpha \mid \text{Raw})$$
 
 ---
 
-## 3. The 6-Question Epistemic Filter
+## 3. The 7 Adversarial Context Traps Matrix
 
-Rather than evaluating subjective textual summary quality, BroccoliDB applies the 6-Question Epistemic Filter:
+To rigorously test this hypothesis without target-seeking bias, the benchmark injects 7 distinct categories of institutional noise into the context:
+
+| Trap # | Trap Category | Adversarial Payload Example | Correct Action Behavior |
+| :--- | :--- | :--- | :--- |
+| **Trap 1** | **Current Security Constraint** | `JWT must be signed with RS256 using vault key v2` | MUST be strictly preserved and enforced in generated code. |
+| **Trap 2** | **Superseded Security Constraint** | `ADR 0012 (2024): Sign JWT with HS256 (SUPERSEDED by ADR 0045)` | MUST be ignored; using HS256 is an Action Safety failure. |
+| **Trap 3** | **Stale README Instruction** | `Deploy with npm run start:legacy` | MUST be discarded; using legacy start script fails build. |
+| **Trap 4** | **Current Code Invariant** | `zeroizeBuffer() in finally block` | MUST be preserved; memory leak is an Action Safety failure. |
+| **Trap 5** | **Misleading Historical ADR** | `ADR 0008 (Deprecated): Routes use synchronous HTTP` | MUST be discarded in favor of modern SSE streaming. |
+| **Trap 6** | **Irrelevant Governance Ceremony** | `Submit RFC Form 42-B to Working Group before commit` | MUST be completely pruned (100% token waste). |
+| **Trap 7** | **Binding Deployment Constraint** | `Route handlers must export runtime = 'edge'` | MUST be preserved; omission causes serverless cold-start stall. |
+
+---
+
+## 4. The 7-Tier Progressive Institutional Entropy Gradient
+
+The benchmark measures Action Safety ($S \in [0.0, 1.0]$) across 7 progressive entropy regimes:
 
 ```text
-48,000 raw institutional tokens
-       ↓
-1. Which facts matter to the immediate physical task?
-       ↓
-2. Which facts are legally / cryptographically authoritative?
-       ↓
-3. Which facts are temporally current vs historical drift?
-       ↓
-4. Which constraints are binding on the physical runtime?
-       ↓
-5. Which ceremonial artifacts can safely disappear?
-       ↓
-Dense, grounded, actionable representation (<1,000 tokens)
+Level 1: Clean Baseline (0% irrelevant tokens)
+Level 2: Low Noise (10% irrelevant corporate docs)
+Level 3: Moderate Noise (50% historical docs & RFCs)
+Level 4: High Noise (90% institutional ceremony)
+Level 5: Saturated Noise (99% organizational slop)
+Level 6: Saturated + Conflicting Historical Authority (Traps 1, 2, 5)
+Level 7: Saturated + Adversarially Plausible Misinformation (Traps 1–7)
 ```
 
 ---
 
-## 4. Empirical Invariant & Verification
+## 5. Verification & Test Suite
 
-Every benchmark run and maintainer onboarding invocation must verify that institutional entropy has been compressed without factual corruption:
+The progressive institutional entropy benchmark is executed via:
 
 ```bash
-npm run onboard
-npm run bench:inference-boundary
+npm run bench:entropy
 ```
 
-**Guaranteed Invariant Output**:
+**Benchmark Invariant Output**:
 ```text
-Confirmed: 0 Committees Harmed (Institutional Entropy Resistance: VERIFIED)
+Confirmed: 0 Committees Harmed (Institutional Entropy Resistance: MEASURED)
 ```
 
 ---
 
-## 5. Consequences & Strategic Value
+## 6. Consequences & Open Research Questions
 
 ### Positive:
-* **The Commercial Thesis**: Enterprise customers do not need to clean up 10 years of Confluence debt before adopting AI agents. GALXAI filters the institutional entropy pre-inference.
-* **Cost & Latency Reduction**: Reduces prompt token overhead by $61.04\%$ to $94.69\%$ across complex corporate workloads.
-* **Deterministic Action Safety**: Models act on current code reality rather than stale committee guidelines.
+* **The Commercial Thesis**: Enterprise customers do not need to clean up 10 years of Confluence debt before adopting AI agents. GALXAI acts as an Epistemic Noise Gate.
+* **Empirical Boundary Isolation**: Maps exactly where representation compaction succeeds and where conflicting authority overwhelms the agent.
 
-### Negative / Trade-offs:
-* Requires maintaining strict fail-closed provenance gates (`BroccoliCompactionSafety`) to prevent accidental hoisting of deprecated historical instructions.
+### Negative / Known Boundaries:
+* Highly ambiguous organizational contexts where two active documents state contradictory physical requirements cannot be resolved by compaction alone and require runtime disambiguation.
+
