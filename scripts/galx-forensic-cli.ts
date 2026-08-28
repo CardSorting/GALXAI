@@ -129,6 +129,8 @@ export function runForensicAudit(traffic: TrafficRecord[]) {
     if (restructure.wasRestructured && promptTokens > 1000) {
       cacheBustingCount++;
       // Unlocks 75% prompt caching rebate
+      const cachedPromptTokens = Math.floor(promptTokens * 0.75);
+      const normalPromptTokens = promptTokens - cachedPromptTokens;
       const cachedInputRate = sol.cachedInputPricePer1M ?? (sol.inputPricePer1M * 0.25);
       const netCachedCost = (normalPromptTokens * sol.inputPricePer1M + cachedPromptTokens * cachedInputRate + completionTokens * sol.outputPricePer1M) / 1_000_000;
       const savings = grossCost - netCachedCost;
