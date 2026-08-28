@@ -139,9 +139,13 @@ $ npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 - **Root Cause**: Request body is empty, invalid JSON, or missing required fields (`text`, `rawStreamText`, or `items`).
 - **Remedy**: Verify the JSON payload structure matches the requested mode (`domain`, `batch`, `incident`, `document`).
 
-#### D. `HTTP 401 Unauthorized` (`UNAUTHORIZED`)
-- **Root Cause**: In production (`NODE_ENV === 'production'`), the endpoint requires valid authentication via `Authorization: Bearer <key>`, `x-api-key`, or `x-galx-key`.
-- **Remedy**: Pass a valid developer key or session token.
+#### E. Context Dilation on Clean/Small Prompts (`DENSITY_OVERHEAD`)
+- **Root Cause**: Forcing a small, clean prompt (<200 tokens) into a complex hierarchical summary structure can bloat token size (e.g. 94 tokens $\to$ 289 tokens).
+- **Remedy**: Use `BroccoliCompactionFacade.selectRepresentation()`. The built-in **Adaptive Density Gate** (ADR 0067) will automatically invoke the **Identity Operator** ($\text{ID}(C)$) passing the prompt through verbatim ($0.0\%$ overhead, $100\%$ baseline preservation).
+
+#### F. Conflicting Authority & Stale Deprecated ADRs (`INSTITUTIONAL_ENTROPY`)
+- **Root Cause**: Legacy repositories contain contradictory historical guidance (e.g. superseded `HS256` instructions or deprecated start scripts) that mislead LLMs.
+- **Remedy**: Route via `BroccoliCompactionFacade.selectRepresentation({ taskType: 'architecture_invariants' })` to filter out archival minutes and superseded RFCs while preserving active cryptographic invariants (`RS256`, `v2` keys), memory safety (`zeroizeBuffer`), and runtime rules (`runtime = 'edge'`). Verify via `npm run bench:entropy`.
 
 ---
 
@@ -165,15 +169,20 @@ $ npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 
 | Verification Suite | Target Validation Scope | Execution Command |
 | :--- | :--- | :--- |
+| **Maintainer Onboarding** | 8-Point Workstation Diagnostic (Node, Vault, Safety, Docs, Git Hooks) | `npm run onboard` |
+| **Institutional Entropy Benchmark** | 7-Tier Progressive Entropy Gradient & 7 Adversarial Traps (ADR 0066/0067) | `npm run bench:entropy` |
 | **Inference Boundary Benchmark** | Head-to-head empirical testing on OpenAI models (`gpt-4o`, `gpt-4o-mini`, `o3-mini`) | `npm run bench:inference-boundary` |
 | **BroccoliDB Compaction API** | Safe facade boundary, GET/POST/OPTIONS routes, 19 modes, bounds & auth gates | `npm run test:broccolidb:api` (7 tests) |
 | **BroccoliDB Hardening Suite** | Memory bounds, slab safety, collision-safe memoization, fail-closed safety | `npm run test:broccolidb:hardening` |
-| **180-Domain Master Suite** | 180 enterprise industry domain compactors across 21 clusters | `node --import tsx scripts/test-broccolidb-150-domain-suite.ts` |
+| **180-Domain Master Suite** | 180 enterprise industry domain compactors across 21 clusters | `npm run bench:180-domains` |
+| **Compactor Scaffolding CLI** | Interactive generator for new domain compactors | `npm run scaffold:compactor` |
+| **Git Invariant Hooks** | Pre-commit (`tsc`) and commit-msg (`Conventional Commits`) hooks | `npm run hooks:install` |
 | **Zero-Hesitation Ergonomics** | Multi-mental-model absorption, CLI, GET queries, aspect ratios, fallbacks | `npx tsx scripts/verify-zero-hesitation-ergonomics.ts` (98 tests) |
 | **Universal Router & Ingestion** | AES-256-GCM vault, BroccoliDB, ZDR v10.0, RFC 9530 transport, SOC 2 Type II audit | `npm run test:router` (218 tests) |
 | **Cloudflare Edge Mesh** | Zero-egress edge gateway, R2 CDN routes, SWR caching | `npm run worker:test` (46 tests) |
 | **TypeScript Compilation** | Static typing across serverless & worker runtimes | `npx tsc --noEmit` (0 errors) |
 | **Production App Router** | Production bundle generation across all routes | `npm run build` |
+
 
 
 

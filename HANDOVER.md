@@ -89,11 +89,15 @@ Across production workloads, **40% to 70% of gross AI spend is pure operational 
    * Strictly configured for OpenAI flagship suite (`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, and GPT-Image suites).
 6. **Investor Diligence Room** ([docs/investors/](file:///Users/bozoegg/Desktop/GALXAI/docs/investors/)):
    * 10 comprehensive diligence memos including [08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md](file:///Users/bozoegg/Desktop/GALXAI/docs/investors/08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md), [09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md](file:///Users/bozoegg/Desktop/GALXAI/docs/investors/09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md), and [10_ENTERPRISE_PILOT_PROPOSAL_AND_AGREEMENT.md](file:///Users/bozoegg/Desktop/GALXAI/docs/investors/10_ENTERPRISE_PILOT_PROPOSAL_AND_AGREEMENT.md).
-7. **BroccoliDB 19-Mode Compaction Substrate & Empirical Inference Boundary Engine** ([docs/SENIOR_ENGINEER_CONVERGENCE_HANDOFF.md](file:///Users/bozoegg/Desktop/GALXAI/docs/SENIOR_ENGINEER_CONVERGENCE_HANDOFF.md)):
+7. **BroccoliDB Dynamic Context Representation Layer & Empirical Boundary Apparatus** ([docs/SENIOR_ENGINEER_CONVERGENCE_HANDOFF.md](file:///Users/bozoegg/Desktop/GALXAI/docs/SENIOR_ENGINEER_CONVERGENCE_HANDOFF.md)):
+   * Evaluates incoming context via the Representation Selection Thesis: $C \to \{ \text{ID}(C), T(C) \}$.
+   * **Adaptive Density Bypass ($\text{ID}(C)$)**: Leaves clean/small contexts ($<200$ tokens) untouched to prevent negative compression and preserve $100\%$ baseline action safety.
+   * **Institutional Entropy Resistance ($T(C)$)**: Prunes organizational noise (65 ADRs, stale RFC forms) while defending active code invariants (`npm run bench:entropy`).
    * 19 specialized compaction modes (180 enterprise industry domains with 100% verified pass rate and zero fallbacks, Drain log clustering, eBPF telemetry, K8s watch deltas, and geospatial streams) delivering 77.6% aggregate spend savings.
-   * Head-to-head empirical testing apparatus (`npm run bench:inference-boundary`) measuring actual billed OpenAI dollars across `gpt-4o`, `gpt-4o-mini`, and `o3-mini` with Randomized Branch-Blinded A/B evaluation. Full specifications in ADRs 0056–0065.
+   * Head-to-head empirical testing apparatus (`npm run bench:inference-boundary`) measuring actual billed OpenAI dollars across `gpt-4o`, `gpt-4o-mini`, and `o3-mini` with Randomized Branch-Blinded A/B evaluation. Full specifications in ADRs 0056–0067.
 8. **Unframed Developer Observation & Behavioral Protocol** ([docs/playbooks/08-unframed-developer-observation-protocol.md](docs/playbooks/08-unframed-developer-observation-protocol.md)):
    * 8-vector qualitative observation framework testing spontaneous developer adoption and induced mental models with zero-framing trials.
+
 
 
 
