@@ -89,6 +89,9 @@ Across production workloads, **40% to 70% of gross AI spend is pure operational 
    * Strictly configured for OpenAI flagship suite (`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, and GPT-Image suites).
 6. **Investor Diligence Room** ([docs/investors/](file:///Users/bozoegg/Desktop/GALXAI/docs/investors/)):
    * 10 comprehensive diligence memos including [08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md](file:///Users/bozoegg/Desktop/GALXAI/docs/investors/08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md), [09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md](file:///Users/bozoegg/Desktop/GALXAI/docs/investors/09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md), and [10_ENTERPRISE_PILOT_PROPOSAL_AND_AGREEMENT.md](file:///Users/bozoegg/Desktop/GALXAI/docs/investors/10_ENTERPRISE_PILOT_PROPOSAL_AND_AGREEMENT.md).
+7. **BroccoliDB 85-Buffer DeDuplication Engine & Mega-Incident Cascader** ([docs/SENIOR_ENGINEER_CONVERGENCE_HANDOFF.md](file:///Users/bozoegg/Desktop/GALXAI/docs/SENIOR_ENGINEER_CONVERGENCE_HANDOFF.md)):
+   * 85 specialized deduplication buffers across 17 tiers achieving 70% to 99% spend reduction, lock-free 1.74M ops/sec streaming ingestion, 4-stage mega-incident cascader (2,000+ pages in 57ms), 3-layer document pyramid (300+ pages in 14ms), and 180 enterprise industry compactors across 21 clusters. Full ADR specifications in [ADR 0056](docs/adr/0056-broccolidb-85-buffer-deduplication-and-streaming-pipeline-substrate.md), [ADR 0057](docs/adr/0057-broccolidb-mega-incident-cascader-and-pyramid-compaction-substrate.md), and [ADR 0058](docs/adr/0058-broccolidb-180-domain-industry-cluster-compactor-substrate.md).
+
 
 ---
 
