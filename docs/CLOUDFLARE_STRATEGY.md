@@ -318,6 +318,8 @@ jobs:
 | **Ollama Native Protocol** | `curl -i -X POST https://api.galx.ai/api/generate -H "Authorization: Bearer galx_live_..." -d '{"model":"sol","prompt":"Ping"}'` | `HTTP 200` with streaming NDJSON chunks and `done: true` |
 | **R2 Asset CDN** | `curl -i https://assets.galx.ai/generations/test.webp` | `HTTP 200` with `CF-Cache-Status: HIT` |
 | **BroccoliDB Edge Compaction** | `curl -X POST https://api.galx.ai/api/audit/broccolidb/compact -H "Authorization: Bearer galx_live_..." -H "Content-Type: application/json" -d '{"mode":"log_stream","logs":["..."]}'` | `HTTP 200` with compacted text and token savings metadata |
+| **Representation Selection & Density Gate** | `curl -X POST https://api.galx.ai/api/audit/broccolidb/compact -H "Authorization: Bearer galx_live_..." -H "Content-Type: application/json" -d '{"mode":"select_representation","text":"...","taskType":"architecture_invariants"}'` | `HTTP 200` with `decision: "BYPASS_IDENTITY"` (for $<200$ tokens) or action-safe invariant extraction (ADR 0066/0067) |
 | **Scheduled Worker Queue** | `npx wrangler tail` | Scheduled cron event executing `processBatch('default', 25)` without uncaught exceptions |
+
 
 

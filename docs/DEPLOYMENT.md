@@ -211,19 +211,29 @@ spec:
 Before tagging a production deployment, all automated CI verification gates must pass:
 
 ```bash
-# 1. BroccoliDB 19-Mode Compaction API & Hardening Regression
+# 1. Maintainer Workstation 8-Point Onboarding Diagnostic (<5s)
+npm run onboard
+
+# 2. Adversarial Institutional Entropy & Action Safety Benchmark (7-Tier Gradient)
+npm run bench:entropy
+
+# 3. BroccoliDB 19-Mode Compaction API & Hardening Regression
 npm run test:broccolidb:api && npm run test:broccolidb:hardening
 
-# 2. OpenAI Empirical Inference Boundary Benchmark (Randomized Branch-Blinded)
+# 4. OpenAI Empirical Inference Boundary Benchmark (Randomized Branch-Blinded)
 npm run bench:inference-boundary
 
-# 3. Universal Router & Cryptographic Vault Tests (218 tests)
+# 5. Master 180-Domain Compactor Cluster Suite (100% Verified)
+npm run bench:180-domains
+
+# 6. Universal Router & Cryptographic Vault Tests (218 tests)
 npm run test:router
 
-# 4. Zero-Hesitation Multi-Mental-Model Suite (98 tests)
+# 7. Zero-Hesitation Multi-Mental-Model Suite (98 tests)
 npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 
-# 5. Full Strict TypeScript Compilation
+# 8. Full Strict TypeScript Compilation
 npx tsc --noEmit
 ```
+
 
