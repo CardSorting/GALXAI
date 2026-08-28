@@ -198,7 +198,16 @@ This is a safe enforcement slice, not a complete control plane. It must remain i
 - measured audit findings replacing the UI's explicitly labeled scenario percentages;
 - a versioned rate-card source covering non-text modalities, service tiers, batch pricing, tools, and customer contracts.
 
-Production deployment also requires `SUPABASE_SERVICE_ROLE_KEY` and `OPENAI_API_KEY` as Worker secrets, a reachable `galx_developer_keys` REST resource, and an explicit `GOVERNANCE_MODE=observe`. Missing authentication or upstream compute now fails closed.
+---
+
+## Representation-Selection Governance Boundaries (ADR 0066 & ADR 0067)
+
+Context compaction and representation transformation are subject to the same evidence-gated governance principles:
+
+1. **Adaptive Density Gate ($\text{ID}(C)$)**: Compaction must not be unconditionally forced on small or already-dense contexts ($<200$ tokens). The system enforces an automatic identity bypass to prevent negative token dilation and preserve $100\%$ baseline fidelity.
+2. **Action Safety over Summary Quality (ADR 0066)**: In noisy corporate environments with conflicting historical authority, compaction is governed by **Action Safety** (disarming the 7 adversarial traps) rather than subjective summary quality.
+3. **Fail-Closed Provenance Verification (`BroccoliCompactionSafety`)**: If an extracted representation introduces ungrounded entities, amounts, or identifiers, the control plane immediately aborts the transformation and safely falls back to raw source text.
+4. **Empirical Boundary Verification**: Governed under the 7-Tier Progressive Institutional Entropy Matrix (`npm run bench:entropy`) and the OpenAI empirical billing suite (`npm run bench:inference-boundary`).
 
 ## Current sources
 
@@ -209,3 +218,4 @@ Production deployment also requires `SUPABASE_SERVICE_ROLE_KEY` and `OPENAI_API_
 - Cloudflare dynamic routing concepts: https://developers.cloudflare.com/ai-gateway/features/dynamic-routing/
 - Cloudflare Workers production practices: https://developers.cloudflare.com/workers/best-practices/workers-best-practices/
 - Langfuse cost and evaluation concepts: https://langfuse.com/docs/observability/features/token-and-cost-tracking and https://langfuse.com/docs/evaluation/core-concepts
+
