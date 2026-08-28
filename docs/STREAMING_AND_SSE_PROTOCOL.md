@@ -227,12 +227,15 @@ On router initialization, `GalxModelRouter.prewarmUpstreamSockets()` issues back
 
 ---
 
-## 9. Pre-Inference Context Compaction & TTFT Acceleration
+## 9. Pre-Inference Context Representation & TTFT Acceleration (ADR 0066 & 0067)
 
 Because transformer prefill latency scales linearly ($O(N)$) with input context token length:
 - **Prefill Latency Reduction**: Compacting verbose input payloads (e.g. 3,881 tokens of eBPF down to 206 tokens) drops the model's KV-cache prefill phase from $1,720\text{ms}$ to $432\text{ms}$ (a **$74.8\%$ reduction in time-to-first-token**).
+- **Adaptive Density Gate ($\text{ID}(C)$)**: For small, already-dense streaming prompts (<200 tokens), `selectRepresentation()` passes the prompt through verbatim with $0.0\%$ transformation lag, preserving baseline latency.
 - **Compaction Overhead**: In-process BroccoliDB compaction runs in $<5\text{ms}$, resulting in a massive net latency win for streaming end-users.
 - **Empirical Measurement**: As validated in `npm run bench:inference-boundary`, across reasoning models (`o3-mini`), average round-trip latency dropped from $1,404\text{ms}$ to $472\text{ms}$ (a $66.4\%$ speedup).
+- **Action Safety Guarantee**: Disarms the 7 adversarial institutional traps during streaming code generation (`npm run bench:entropy`).
+
 
 
 

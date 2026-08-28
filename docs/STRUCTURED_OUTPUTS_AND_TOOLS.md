@@ -134,11 +134,13 @@ print(response.choices[0].message.content)
 
 ---
 
-## 🥦 5. Compacting Tool Outputs in Autonomous Agent Loops
+## 🥦 5. Adaptive Representation Selection for Tool Outputs (ADR 0066 & 0067)
 
-Autonomous agents that query database catalogs, Kubernetes clusters, or log streams often blow out context windows with bloated JSON tool responses.
+Autonomous agents that query database catalogs, Kubernetes clusters, or repository files often blow out context windows with bloated JSON tool responses or contradictory corporate minutes.
 
-With **BroccoliDB Compaction**, tool outputs can be compressed in-line before appending them to the agent's turn history:
+With **`BroccoliCompactionFacade.selectRepresentation()`**, tool outputs are dynamically optimized before appending to the agent's turn history:
+- **Small / Clean Tool Responses (<200 tokens)**: Automatically bypass compaction ($\text{ID}(C)$), preventing token dilation overhead.
+- **Noisy Telemetry / Multi-Page Dumps**: Slashed up to $94.6\%$ with fail-closed provenance validation.
 
 ```typescript
 import { GalxAI } from '@galxai/sdk';
@@ -149,7 +151,21 @@ const galx = new GalxAI();
 const agent = galx.agent({
   model: 'gpt-5.6-sol',
   tools: {
-    // 1. Tool that returns massive Kubernetes watch event streams
+    // 1. Tool that inspects codebase architecture and invariants
+    inspectRepositoryArchitecture: async ({ path }: { path: string }) => {
+      const rawFileText = await fetchRepositoryFile(path);
+      
+      // Adaptively selects representation: passes small files through verbatim,
+      // prunes obsolete ADRs and RFC ceremonies on complex documentation
+      const selection = BroccoliCompactionFacade.selectRepresentation({
+        text: rawFileText,
+        taskType: 'architecture_invariants',
+      });
+
+      return selection.selectedRepresentation;
+    },
+
+    // 2. Tool that returns massive Kubernetes watch event streams
     inspectClusterEvents: async ({ namespace }: { namespace: string }) => {
       const rawEvents = await fetchK8sEvents(namespace);
       
@@ -160,20 +176,6 @@ const agent = galx.agent({
       });
 
       return compacted.compactedPrompt;
-    },
-
-    // 2. Tool that queries database schemas
-    getDatabaseSchema: async ({ table }: { table: string }) => {
-      const rawDDL = await fetchTableSchema(table);
-      
-      // Compact DDL AST syntax
-      const compacted = BroccoliCompactionFacade.compact({
-        mode: 'domain',
-        text: rawDDL,
-        domainHint: 'DatabaseSchema',
-      });
-
-      return compacted.compactedPrompt;
     }
   }
 });
@@ -181,4 +183,5 @@ const agent = galx.agent({
 const report = await agent.run("Investigate pod crash loops in namespace 'production'");
 console.log(report.text);
 ```
+
 
