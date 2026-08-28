@@ -114,7 +114,10 @@ export * from "./BroccoliObdCompactor";
 export * from "./BroccoliMonroneyCompactor";
 export * from "./BroccoliUrlaCompactor";
 export * from "./BroccoliAppraisalCompactor";
+export * from "./BroccoliPatentCompactor";
+export * from "./BroccoliClinicalTrialCompactor";
 export * from "./BroccoliSpendSubstrate";
+
 
 
 
