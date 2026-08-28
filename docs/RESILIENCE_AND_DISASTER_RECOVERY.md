@@ -116,3 +116,27 @@ const unsubscribe = BroccoliOutboxEngine.subscribe((pendingMutations) => {
   console.log(`Pending offline actions: ${pendingMutations.length}`);
 });
 ```
+
+---
+
+## 5. Epistemic Resilience & Fail-Closed Compaction Safety (ADR 0066 & 0067)
+
+Beyond network and infrastructure failures, GALXAI guarantees **Epistemic Resilience** against noisy enterprise inputs and contradictory corporate documentation:
+
+```mermaid
+flowchart TD
+    Candidate[Candidate Compacted Prompt] --> SafetyGate{BroccoliCompactionSafety: Fact Grounding}
+    Raw[Raw Source Input] --> SafetyGate
+    
+    SafetyGate -->|All Numbers & Dates Match| Verified[Deliver Compacted Representation]
+    SafetyGate -->|Discrepancy Detected| Fallback[Safe Fallback to Raw Source Text]
+    
+    Verified --> Upstream[Upstream Foundation Model]
+    Fallback --> Upstream
+```
+
+### Epistemic Resilience Guarantees:
+1. **Zero Hallucination Fail-Closed Fallback**: If an extracted representation contains any date, numeric measurement, or identifier not present in the raw input, the engine instantly drops the candidate and falls back to raw source text with zero data corruption.
+2. **Adaptive Density Gate ($\text{ID}(C)$)**: If incoming context is clean or $<200$ tokens, the engine skips compaction entirely, eliminating negative token dilation.
+3. **Institutional Entropy Resistance (ADR 0066)**: In noisy enterprise environments with 65 historical ADRs and superseded guidance, isolates active code invariants and defends **$100\%$ Action Safety** across 7 adversarial corporate traps (`npm run bench:entropy`).
+

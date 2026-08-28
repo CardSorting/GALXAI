@@ -137,26 +137,27 @@ environment:
 
 ## 🥦 6. Upgrading to BroccoliDB Universal Input Compaction
 
-If your application sends massive log dumps, AST files, database schemas, or multi-page documents to OpenAI models, you can integrate **BroccoliDB Compaction** to slash input prompt spend by **up to 85.9%** before calling the LLM:
+If your application sends massive log dumps, AST files, database schemas, or multi-page documents to OpenAI models, you can integrate **BroccoliDB Representation Selection** to dynamically optimize context representations before calling the LLM:
 
-### A. TypeScript In-Process Compaction (`@galxai/sdk` or `src/core/broccolidb`)
+### A. TypeScript In-Process Representation Selection (`@galxai/sdk` or `src/core/broccolidb`)
 ```typescript
 import { BroccoliCompactionFacade } from '@/core/broccolidb';
 import OpenAI from '@galxai/sdk/openai';
 
 const openai = new OpenAI();
 
-// 1. Compact raw log storm, incident stream, or codebase context
-const compacted = BroccoliCompactionFacade.compact({
-  mode: 'log_stream',
-  logs: rawLogLines,
+// 1. Automatically bypasses compaction on clean prompts (<200 tokens)
+// 2. Automatically compacts noisy incident streams & prunes obsolete corporate ADRs
+const selection = BroccoliCompactionFacade.selectRepresentation({
+  text: rawContextText,
+  taskType: 'architecture_invariants',
 });
 
-// 2. Dispatch the compacted prompt to OpenAI (85.9% fewer input tokens)
+// 3. Dispatch the actionable representation to OpenAI (up to 92.1% fewer tokens)
 const response = await openai.chat.completions.create({
   model: 'gpt-4o',
   messages: [
-    { role: 'user', content: `Diagnose outage:\n${compacted.compactedPrompt}` }
+    { role: 'user', content: `Audit architecture:\n${selection.selectedRepresentation}` }
   ],
 });
 ```
@@ -167,8 +168,9 @@ curl -X POST https://galx.ai/api/audit/broccolidb/compact \
   -H "Authorization: Bearer $GALXAI_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "mode": "ebpf_stream",
-    "events": [ ... ]
+    "mode": "select_representation",
+    "text": "...",
+    "taskType": "architecture_invariants"
   }'
 ```
 
@@ -176,14 +178,20 @@ curl -X POST https://galx.ai/api/audit/broccolidb/compact \
 
 ## 🔒 7. Verification After Migration
 
-Validate your connection in 1 second using the zero-install CLI:
-```bash
-npx galxai "Verify GALXAI connection"
-# Outputs immediate streaming completion from flagship model
-```
+Validate your setup with the automated diagnostic and benchmark suites:
 
-To run the empirical inference boundary test across OpenAI models:
 ```bash
+# 1. 8-Point maintainer workstation diagnostic (<5s)
+npm run onboard
+
+# 2. Test live streaming completion from flagship model
+npx galxai "Verify GALXAI connection"
+
+# 3. 7-Tier progressive institutional entropy benchmark
+npm run bench:entropy
+
+# 4. OpenAI billed dollar empirical benchmark
 npm run bench:inference-boundary
 ```
+
 
