@@ -56,8 +56,10 @@
   },
   "scripts": {
     "onboard": "node --import tsx scripts/onboard-maintainer.ts",
+    "hooks:install": "node --import tsx scripts/setup-git-hooks.ts",
     "dissect:payloads": "node --import tsx scripts/dissect-payloads-and-causal-analysis.ts",
     "bench:180-domains": "node --import tsx scripts/test-broccolidb-150-domain-suite.ts",
+
     "predev": "kill $(lsof -ti:3000) 2>/dev/null || true",
     "dev": "next dev",
     "build": "next build",

@@ -1,0 +1,77 @@
+# 📈 Maintainer Guide: Telemetry, Observability & Prometheus Metrics
+
+> **Target Audience**: Observability Engineers, SREs, and Platform Maintainers.  
+> **Subsystem**: OpenTelemetry (OTel), Prometheus metrics exporter, and Structured JSON loggers.
+
+---
+
+## 1. Core Prometheus Metrics Exported by GALXAI
+
+GALXAI exposes a standard Prometheus `/metrics` endpoint with zero-overhead atomic counters and histograms:
+
+| Metric Name | Type | Labels | Description |
+| :--- | :--- | :--- | :--- |
+| `galx_http_requests_total` | Counter | `method`, `route`, `status` | Total incoming HTTP/REST requests. |
+| `galx_compaction_input_tokens_total` | Counter | `mode`, `domain` | Total uncompressed raw input tokens. |
+| `galx_compaction_output_tokens_total` | Counter | `mode`, `domain` | Total compacted task-relevant tokens. |
+| `galx_compaction_tokens_saved_total` | Counter | `mode`, `domain` | Cumulative token savings delivered by BroccoliDB. |
+| `galx_compaction_duration_ms` | Histogram | `mode` | In-process compaction execution latency buckets. |
+| `galx_compaction_fidelity_status_total` | Counter | `mode`, `status` | Count of `verified` vs `fallback` compaction results. |
+| `galx_vault_decryption_failures_total` | Counter | `tenant_uid`, `reason` | AAD mismatch or decryption failure alarms. |
+| `galx_paht_shard_headroom_ratio` | Gauge | `shard_id`, `provider` | Real-time hydraulic headroom ratio ($0.0 - 1.0$). |
+| `galx_circuit_breaker_state` | Gauge | `shard_id` | State enum ($0=\text{CLOSED}, 1=\text{DEGRADED}, 2=\text{OPEN}, 3=\text{HALF-OPEN}$). |
+
+---
+
+## 2. Structured JSON Log Fields
+
+All serverless and edge logs are emitted in high-density structured JSON format:
+
+```json
+{
+  "timestamp": "2026-08-28T10:53:00.000Z",
+  "level": "info",
+  "service": "galx-router",
+  "traceId": "0af7651916cd43dd8448eb211c80319c",
+  "tenantUid": "usr_9482_enterprise",
+  "modelRequested": "gpt-4o",
+  "shardSelected": "shard_openai_tier5_01",
+  "compactionMode": "domain",
+  "domainHint": "legal-interrogatory",
+  "rawTokens": 1479,
+  "compactedTokens": 322,
+  "savingsPercentage": 78.23,
+  "fidelityStatus": "verified",
+  "latencyMs": 235,
+  "billedDollarsSaved": 0.002892
+}
+```
+
+---
+
+## 3. High-Priority Alert Rules (Grafana / Alertmanager)
+
+```yaml
+groups:
+  - name: galxai_critical_alerts
+    rules:
+      - alert: CompactionFidelityFallbackSpike
+        expr: rate(galx_compaction_fidelity_status_total{status="fallback"}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "BroccoliDB Compaction Safety fallback rate exceeds 5%."
+
+      - alert: ShardFleetHeadroomExhausted
+        expr: min(galx_paht_shard_headroom_ratio) < 0.10
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Hydraulic headroom is below 10% on all Tier-5 shards."
+```
+
+---
+
+*Observe everything with sub-millisecond precision.* 🥦📈⚡
