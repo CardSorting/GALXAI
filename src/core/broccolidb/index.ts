@@ -41,4 +41,5 @@ export * from "./BroccoliLiveSpendGuard";
 export * from "./BroccoliRollingHistoryCompactor";
 export * from "./BroccoliCodeBlockTruncator";
 export * from "./BroccoliExemplarCompactor";
+export * from "./BroccoliKVSuffixHoister";
 export * from "./BroccoliSpendSubstrate";
