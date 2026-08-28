@@ -94,6 +94,7 @@
     "test:router": "tsx scripts/validate-galxai-router.ts",
     "test:governance": "node --import tsx scripts/validate-spend-governance.ts",
     "test:broccolidb:hardening": "node --import tsx scripts/test-broccolidb-production-hardening.ts",
+    "test:broccolidb:backend-invariants": "node --import tsx scripts/test-broccolidb-backend-invariants.ts",
     "test:broccolidb:api": "node --import tsx scripts/test-broccolidb-compaction-api-route.ts",
     "bench:inference-boundary": "node --import tsx scripts/bench-broccolidb-openai-inference-boundary.ts",
     "test:quota": "tsx tests/quota-pooling/test-gpt56-pooling.ts",

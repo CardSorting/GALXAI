@@ -74,10 +74,14 @@ export class BroccoliCASStorageService {
 
     try {
       await fs.access(filePath);
+      await this.read(hash);
       this.verifiedCache.add(hash);
       return hash;
-    } catch {
-      // Blob does not exist yet
+    } catch (error: unknown) {
+      if ((error as { code?: string }).code !== "ENOENT" && !(error instanceof StorageIntegrityError)) {
+        throw error;
+      }
+      // Missing blobs and quarantined corrupt blobs are recreated below.
     }
 
     let payload: Buffer;
@@ -101,9 +105,13 @@ export class BroccoliCASStorageService {
     }
 
     await fs.mkdir(shardDir, { recursive: true });
-    const tmpPath = `${filePath}.tmp.${Date.now()}`;
-    await fs.writeFile(tmpPath, payload);
-    await fs.rename(tmpPath, filePath);
+    const tmpPath = `${filePath}.tmp.${crypto.randomUUID()}`;
+    try {
+      await fs.writeFile(tmpPath, payload, { flag: "wx" });
+      await fs.rename(tmpPath, filePath);
+    } finally {
+      await fs.unlink(tmpPath).catch(() => undefined);
+    }
     this.verifiedCache.add(hash);
     return hash;
   }
@@ -112,6 +120,7 @@ export class BroccoliCASStorageService {
    * Reads raw decompressed content from CAS.
    */
   async read(hash: string): Promise<Buffer | null> {
+    this.assertHash(hash);
     const shard = hash.slice(0, 2);
     const filePath = path.join(this.blobsDir, shard, hash);
 
@@ -155,6 +164,7 @@ export class BroccoliCASStorageService {
    * Checks whether a blob exists in CAS.
    */
   async exists(hash: string): Promise<boolean> {
+    this.assertHash(hash);
     if (this.verifiedCache.has(hash)) return true;
     const shard = hash.slice(0, 2);
     const filePath = path.join(this.blobsDir, shard, hash);
@@ -227,6 +237,7 @@ export class BroccoliCASStorageService {
       }
 
       for (const file of files) {
+        if (!/^[a-f0-9]{64}$/.test(file)) continue;
         if (!referencedHashes.has(file)) {
           try {
             await fs.unlink(path.join(shardDir, file));
@@ -279,7 +290,18 @@ export class BroccoliCASStorageService {
           const stat = await fs.stat(filePath);
           totalBlobs += 1;
           totalStoredBytes += stat.size;
-          totalRawBytes += stat.size;
+          try {
+            const stored = await fs.readFile(filePath);
+            if (stored.subarray(0, MAGIC_BROTLI.length).equals(MAGIC_BROTLI)) {
+              totalRawBytes += (await decompressBrotli(stored.subarray(MAGIC_BROTLI.length))).length;
+            } else if (stored.subarray(0, MAGIC_RAW.length).equals(MAGIC_RAW)) {
+              totalRawBytes += stored.length - MAGIC_RAW.length;
+            } else {
+              totalRawBytes += stored.length;
+            }
+          } catch {
+            totalRawBytes += stat.size;
+          }
         } catch {}
       }
     }
@@ -300,12 +322,18 @@ export class BroccoliCASStorageService {
       totalRawBytes,
       totalStoredBytes,
       compressionSavingsPct: savingsPct,
-      corruptCount: this.corruptCount + quarantinedBlobs.length,
+      corruptCount: Math.max(this.corruptCount, quarantinedBlobs.length),
       quarantinedBlobs,
     };
   }
 
   getBaseDir(): string {
     return this.baseDir;
+  }
+
+  private assertHash(hash: string): void {
+    if (!/^[a-f0-9]{64}$/.test(hash)) {
+      throw new TypeError("CAS hash must be a lowercase SHA-256 digest");
+    }
   }
 }

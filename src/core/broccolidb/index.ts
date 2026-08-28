@@ -20,6 +20,27 @@ export * from "./broccolidb-cas";
 export * from "./broccolidb-aggregation";
 export * from "./broccolidb-table";
 export * from "./broccolidb-kernel";
+export * from "./broccolidb-connection-pool";
+export * from "./broccolidb-lock-authority";
+export * from "./broccolidb-query-optimizer";
+export * from "./broccolidb-mvcc-engine";
+export * from "./broccolidb-sparse-index-engine";
+export * from "./broccolidb-cdc-stream";
+export * from "./broccolidb-vector-engine";
+export * from "./broccolidb-inverted-index-engine";
+export * from "./broccolidb-2pc-coordinator";
+export * from "./broccolidb-buffer-pool-manager";
+export * from "./broccolidb-lsm-store";
+export * from "./broccolidb-raft-consensus";
+export * from "./broccolidb-plan-cache";
+export * from "./broccolidb-saga-orchestrator";
+export * from "./broccolidb-tiered-kv-cache";
+export * from "./broccolidb-vector-ann-engine";
+export * from "./broccolidb-consistent-hash-ring";
+export * from "./broccolidb-timeseries-rollup-engine";
+export * from "./broccolidb-btree-index-engine";
+export * from "./broccolidb-deadlock-detector";
+export * from "./broccolidb-materialized-view-engine";
 
 // AI Spend Governance & FinOps Substrate
 export * from "./BroccoliSpendAnalytics";

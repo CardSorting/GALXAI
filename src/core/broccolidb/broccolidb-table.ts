@@ -31,6 +31,7 @@ export type WalHookFn = (
   recordId: string,
   payload?: Record<string, unknown>
 ) => void;
+export type MutationGuardFn = () => void;
 
 interface SortedEntry {
   value: number | string;
@@ -48,6 +49,7 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
   readonly name: string;
   private readonly records = new Map<string, T>();
   private readonly walHook?: WalHookFn;
+  private readonly mutationGuard?: MutationGuardFn;
 
   // Index Stores
   private readonly equalityIndices = new Map<string, Map<unknown, Set<string>>>();
@@ -63,9 +65,10 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
   private subscriptionSeq = 0;
   private readonly ttlTimers = new Map<string, NodeJS.Timeout>();
 
-  constructor(name: string, walHook?: WalHookFn) {
+  constructor(name: string, walHook?: WalHookFn, mutationGuard?: MutationGuardFn) {
     this.name = name;
     this.walHook = walHook;
+    this.mutationGuard = mutationGuard;
   }
 
   createIndex(field: keyof T & string): void {
@@ -144,17 +147,33 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
   }
 
   put(id: string, record: T, options?: DbPutOptions): T {
+    this.mutationGuard?.();
+    if (!id.length) throw new TypeError("Record id must be non-empty");
+    if (options?.ttlMs !== undefined && (!Number.isSafeInteger(options.ttlMs) || options.ttlMs < 0)) {
+      throw new RangeError("ttlMs must be a non-negative integer");
+    }
+    this.assertWalSerializable(record);
     const existing = this.records.get(id);
     const isUpdate = existing !== undefined;
     const beforeClone = existing ? { ...existing } : undefined;
 
     this.putInternal(id, record);
 
+    const existingTimer = this.ttlTimers.get(id);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+      this.ttlTimers.delete(id);
+    }
     if (options?.ttlMs && options.ttlMs > 0) {
-      const existingTimer = this.ttlTimers.get(id);
-      if (existingTimer) clearTimeout(existingTimer);
-
-      const timer = setTimeout(() => {
+      const expire = () => {
+        try {
+          this.mutationGuard?.();
+        } catch {
+          const retryTimer = setTimeout(expire, 1);
+          retryTimer.unref?.();
+          this.ttlTimers.set(id, retryTimer);
+          return;
+        }
         const expiredRec = this.records.get(id);
         if (expiredRec) {
           this.deleteInternal(id);
@@ -164,7 +183,8 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
             this.walHook("DELETE", this.name, id);
           }
         }
-      }, options.ttlMs);
+      };
+      const timer = setTimeout(expire, options.ttlMs);
       timer.unref?.();
       this.ttlTimers.set(id, timer);
     }
@@ -213,6 +233,7 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
   }
 
   delete(id: string): boolean {
+    this.mutationGuard?.();
     const existing = this.records.get(id);
     if (!existing) return false;
 
@@ -235,27 +256,25 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
   }
 
   deleteWhere(where: Record<string, DbWhereValue>): number {
-    const matching = this.query({ where });
     let deletedCount = 0;
-    for (const record of matching) {
-      const id = (record as any).id;
-      if (id && this.delete(id)) {
-        deletedCount++;
-      }
+    const ids = Array.from(this.records.entries())
+      .filter(([, record]) => this.evaluateWhere(record, where))
+      .map(([id]) => id);
+    for (const id of ids) {
+      if (this.delete(id)) deletedCount++;
     }
     return deletedCount;
   }
 
   updateWhere(where: Record<string, DbWhereValue>, updater: (record: T) => T): number {
-    const matching = this.query({ where });
     let updatedCount = 0;
-    for (const record of matching) {
-      const id = (record as any).id;
-      if (id) {
-        const updated = updater({ ...record });
-        this.put(id, updated);
-        updatedCount++;
-      }
+    const matching = Array.from(this.records.entries()).filter(([, record]) =>
+      this.evaluateWhere(record, where)
+    );
+    for (const [id, record] of matching) {
+      const updated = updater({ ...record });
+      this.put(id, updated);
+      updatedCount++;
     }
     return updatedCount;
   }
@@ -265,6 +284,7 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
   }
 
   clear(): void {
+    this.mutationGuard?.();
     this.records.clear();
     for (const m of this.equalityIndices.values()) m.clear();
     for (const arr of this.sortedIndices.values()) arr.length = 0;
@@ -352,12 +372,14 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
   }
 
   transaction<R>(fn: (tx: ITableTransaction<T>) => R): R {
+    this.mutationGuard?.();
     const snapshot = this.createSnapshot();
     const stagedMutations: Array<{ op: "PUT" | "DELETE"; id: string; record?: T }> = [];
 
     const tx: ITableTransaction<T> = {
       get: (id: string) => this.get(id),
       put: (id: string, record: T, options?: DbPutOptions) => {
+        this.assertWalSerializable(record);
         stagedMutations.push({ op: "PUT", id, record });
         this.putInternal(id, record);
         return { ...record };
@@ -524,6 +546,8 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
   }
 
   restoreSnapshot(snapshot: Map<string, T>): void {
+    for (const timer of this.ttlTimers.values()) clearTimeout(timer);
+    this.ttlTimers.clear();
     this.records.clear();
     for (const m of this.equalityIndices.values()) m.clear();
     for (const arr of this.sortedIndices.values()) arr.length = 0;
@@ -544,6 +568,15 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
 
     this.records.set(id, { ...record });
     this.addIndicesForRecord(id, record);
+  }
+
+  private assertWalSerializable(record: T): void {
+    if (!this.walHook) return;
+    try {
+      JSON.stringify(record);
+    } catch (error) {
+      throw new TypeError("Persistent BroccoliDB records must be JSON serializable", { cause: error });
+    }
   }
 
   private deleteInternal(id: string): boolean {
