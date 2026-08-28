@@ -12,13 +12,17 @@ This directory contains the deep internal architectural blueprints, onboarding r
 | Guide | Document Link | Description & Operational Scope |
 | :--- | :--- | :--- |
 | **Maintainer Onboarding Roadmap** | [DAY_1_TO_30_ONBOARDING_ROADMAP.md](DAY_1_TO_30_ONBOARDING_ROADMAP.md) | Comprehensive 30-day milestone roadmap for incoming engineers (Day 1 green build $\to$ Day 7 first PR $\to$ Day 14 on-call $\to$ Day 30 autonomous architecture). |
+| **Maintainer CLI Cheatsheet** | [MAINTAINER_CLI_CHEATSHEET.md](MAINTAINER_CLI_CHEATSHEET.md) | Quick-reference card of all maintainer CLI commands, testing flags, and operational scripts. |
 | **Subsystem Internals & Dependency DAG** | [SUBSYSTEM_INTERNALS_AND_DEPENDENCY_GRAPH.md](SUBSYSTEM_INTERNALS_AND_DEPENDENCY_GRAPH.md) | Full architectural component map, internal dataflow DAG, memory allocation limits, and concurrency models across Serverless and Edge mesh runtimes. |
 | **Debugging & Diagnostic Runbooks** | [DEBUGGING_AND_DIAGNOSTIC_RUNBOOKS.md](DEBUGGING_AND_DIAGNOSTIC_RUNBOOKS.md) | Step-by-step diagnostic decision trees, log analysis recipes, cryptographic decryption troubleshooting, and database connection pool triage. |
+| **PostgreSQL & AOP-DB Runbook** | [POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md](POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) | 3-Phase Expand/Contract schema protocol, zero-lock concurrent DDL rules, and default-deny RLS policy templates. |
+| **Cloudflare Edge Mesh Runbook** | [CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md](CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md) | 300+ PoP edge topology, RATE_LIMIT_KV sliding-window pacing, SWR cache purging, and canary deployment runbooks. |
 | **ADR Authoring & Lifecycle Guide** | [ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md](ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) | MADR specification, the 5-stage ADR lifecycle, mandatory triggers, standard templates, and Core Architect review checklists. |
 | **Flaky Tests & CI Triage Matrix** | [FLAKY_TESTS_AND_CI_TRIAGE.md](FLAKY_TESTS_AND_CI_TRIAGE.md) | Root causes of test flakiness (port collisions, P-AHT micro-jitter, V8 JIT warmup, time drift) and deterministic triage playbooks. |
 | **AI Agent Governance & Pair Programming** | [AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md](AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md) | Protocols for human architects and autonomous AI coding agents (Antigravity/Claude/Cursor), mechanical containment gates, and safety rules. |
 | **Master Maintainers Manual** | [../../MAINTAINERS.md](../../MAINTAINERS.md) | High-level maintainer governance, CODEOWNERS mapping, the 5-Gate PR checklist, and the 10 Invariant Commandments. |
 | **Operational SRE Playbooks** | [../playbooks/README.md](../playbooks/README.md) | 8-stage operational runbooks covering provisioning, deployment, live traffic scaling, incident triage, key rotation, DR, DX, and unframed developer observation. |
+
 
 
 ---
