@@ -10,7 +10,7 @@ This guide covers the internal codebase structure, architectural layers, how to 
 GALXAI/
 ├── docs/                             # Comprehensive Architecture & API Documentation
 │   ├── adr/                          # Architecture Decision Records (0001-0065)
-│   ├── playbooks/                    # Operational Lifecycle Playbooks (Stages 1-6)
+│   ├── playbooks/                    # Operational Lifecycle Playbooks (Stages 1-8)
 │   ├── ARCHITECTURE.md               # System overview, lifecycle, and security model
 │   ├── FORENSIC_PAYLOAD_DISSECTION_AND_CAUSAL_ANALYSIS.md # Byte-by-byte before/after payload analysis
 
@@ -450,57 +450,55 @@ GALXAI maintains dedicated forensic test runners:
 # 1. Complete Pre-Deployment Quality & Build Pipeline (Audit + Lint + SSG Build)
 npm run deploy:check
 
-# 1. BroccoliDB Empirical Inference Boundary Benchmark (OpenAI Models)
+# 2. BroccoliDB Empirical Inference Boundary Benchmark (OpenAI Models)
 npm run bench:inference-boundary
 
-# 2. Forensic Payload Dissection & Representation Transformation Tool
+# 3. Forensic Payload Dissection & Representation Transformation Tool
 npx tsx scripts/dissect-payloads-and-causal-analysis.ts
 
-# 3. BroccoliDB Compaction Gateway & Facade API Suite (19 modes, 7 test suites)
+# 4. BroccoliDB Compaction Gateway & Facade API Suite (19 modes, 7 test suites)
 npm run test:broccolidb:api
 
-# 4. BroccoliDB Production Hardening & Provenance Regressions
+# 5. BroccoliDB Production Hardening & Provenance Regressions
 npm run test:broccolidb:hardening
 
-
-# 4. Master 180-Domain Compactor Cluster Suite (100% Verified)
+# 6. Master 180-Domain Compactor Cluster Suite (100% Verified)
 node --import tsx scripts/test-broccolidb-150-domain-suite.ts
 
-# 5. 8-Phase Enterprise Vercel Pre-Flight Readiness Engine
+# 7. 8-Phase Enterprise Vercel Pre-Flight Readiness Engine
 npm run vercel:verify
 
-# 6. 12-Point Post-Deployment Live Smoke Probes
+# 8. 12-Point Post-Deployment Live Smoke Probes
 npm run vercel:smoke -- --url=https://galx.ai
 
-# 7. Vercel Secret Synchronizer
+# 9. Vercel Secret Synchronizer
 npm run vercel:env:print   # Masked preview
 npm run vercel:env:sync    # Push to project
 
-# 8. Universal Zero-Hesitation Ergonomics & Mental Model Suite (98 automated tests)
+# 10. Universal Zero-Hesitation Ergonomics & Mental Model Suite (98 automated tests)
 npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 
-# 9. Universal Router, Privacy, SOC2, BroccoliDB, Ingestion Transport & API Strategy Suite (218 forensic tests)
+# 11. Universal Router, Privacy, SOC2, BroccoliDB, Ingestion Transport & API Strategy Suite (218 forensic tests)
 npm run test:router
-# (or: npx tsx scripts/validate-galxai-router.ts)
 
-# 10. 6-Stage Operational Lifecycle Diagnostics Playbook
+# 12. 8-Stage Operational Lifecycle Diagnostics Playbook
 npm run playbook
 
-# 11. Supabase Paranoid PostgreSQL Schema & RLS Auditor
+# 13. Supabase Paranoid PostgreSQL Schema & RLS Auditor
 npm run db:verify
 
-# 12. Cloudflare Edge Mesh Verification Suite (46 edge tests)
+# 14. Cloudflare Edge Mesh Verification Suite (46 edge tests)
 npm run worker:test
-# (or: npx tsx scripts/test-cloudflare-workers.ts)
 
-# 13. SDK -> Cloudflare Edge Live Smoke Test
+# 15. SDK -> Cloudflare Edge Live Smoke Test
 npx tsx scripts/test-sdk-edge.ts
 
-# 14. TypeScript Type-Check & ESLint 9 Flat Config
+# 16. TypeScript Type-Check & ESLint 9 Flat Config
 npm run lint
 
-# 15. Full Production Build (300 SSG Pages)
+# 17. Full Production Build (300 SSG Pages)
 npm run build
+
 ```
 
 When contributing code changes, ensure all test suites pass with 0 errors.

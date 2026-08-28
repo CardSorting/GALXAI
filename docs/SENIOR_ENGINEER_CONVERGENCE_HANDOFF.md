@@ -307,4 +307,6 @@ Any engineer modifying or adding to the BroccoliDB deduplication substrate must 
 5. **Factual Grounding & Anti-Hallucination Invariant**: Any semantic compactor must verify numbers, dates, currencies, and identifiers against the source (`BroccoliCompactionSafety`) and fail closed to raw source text if an unsupported fact is detected.
 6. **Epistemic Provenance Invariant**: Benchmarking must report empirical provider-boundary usage and dollar receipts under Randomized Branch-Blinded A/B evaluation, acknowledging workload dispersion without target priors.
 7. **No Regressions**: Any commit must pass `npx tsc --noEmit`, `npm run test:broccolidb:api`, `npm run test:broccolidb:hardening`, and `npm run bench:inference-boundary` with zero failures.
+8. **Unframed Observation Invariant**: Before inventing new abstractions or imposing conceptual models on users, conduct unframed behavioral trials ([Stage 8 Playbook](playbooks/08-unframed-developer-observation-protocol.md)) and treat induced developer mental models as primary product data.
+
 

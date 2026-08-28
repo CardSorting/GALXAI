@@ -92,6 +92,9 @@ Across production workloads, **40% to 70% of gross AI spend is pure operational 
 7. **BroccoliDB 19-Mode Compaction Substrate & Empirical Inference Boundary Engine** ([docs/SENIOR_ENGINEER_CONVERGENCE_HANDOFF.md](file:///Users/bozoegg/Desktop/GALXAI/docs/SENIOR_ENGINEER_CONVERGENCE_HANDOFF.md)):
    * 19 specialized compaction modes (180 enterprise industry domains with 100% verified pass rate and zero fallbacks, Drain log clustering, eBPF telemetry, K8s watch deltas, and geospatial streams) delivering 77.6% aggregate spend savings.
    * Head-to-head empirical testing apparatus (`npm run bench:inference-boundary`) measuring actual billed OpenAI dollars across `gpt-4o`, `gpt-4o-mini`, and `o3-mini` with Randomized Branch-Blinded A/B evaluation. Full specifications in ADRs 0056–0065.
+8. **Unframed Developer Observation & Behavioral Protocol** ([docs/playbooks/08-unframed-developer-observation-protocol.md](docs/playbooks/08-unframed-developer-observation-protocol.md)):
+   * 8-vector qualitative observation framework testing spontaneous developer adoption and induced mental models with zero-framing trials.
+
 
 
 
