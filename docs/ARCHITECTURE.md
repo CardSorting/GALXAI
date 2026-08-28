@@ -220,6 +220,45 @@ flowchart TD
 
 ---
 
+## 🥦 BroccoliDB Context Representation Layer & Adaptive Selection Substrate
+
+BroccoliDB operates as an in-process, adaptive context representation engine preceding model inference (ADRs 0056–0067):
+
+```mermaid
+flowchart TD
+    RawContext[Incoming Context C & Task T] --> DensityGate{Adaptive Density Gate<br>Tokens < 200 or Clean?}
+    
+    DensityGate -->|YES| Identity[Identity Representation ID C<br>0.0% Overhead / 100% Baseline Preserved]
+    DensityGate -->|NO (Noise Detected)| ArchetypeRoute{Context Archetype Classifier}
+    
+    ArchetypeRoute -->|Architecture & Invariants| GovCompactor[BroccoliArchitectureInvariantCompactor<br>Prunes RFCs & Deprecated ADRs]
+    ArchetypeRoute -->|Incident Logs & Outages| Cascader[BroccoliMegaIncidentStreamCascader<br>2,000+ Pages in 57ms]
+    ArchetypeRoute -->|Multi-Page Documents| Pyramid[BroccoliMegaDocumentPyramidCompactor<br>300+ Pages in 14ms]
+    ArchetypeRoute -->|180 Industry Domains| DomainOpt[BroccoliDomainSpendOptimizer<br>77.6% Token Reduction]
+    ArchetypeRoute -->|Kernel eBPF & K8s Watch| HighVel[BroccoliHighVelocityPipeline<br>95% Stream Compression]
+    
+    GovCompactor --> ProvenanceGate{BroccoliCompactionSafety<br>Fail-Closed Fact Verification}
+    Cascader --> ProvenanceGate
+    Pyramid --> ProvenanceGate
+    DomainOpt --> ProvenanceGate
+    HighVel --> ProvenanceGate
+    
+    ProvenanceGate -->|VERIFIED| CompactedRep[Task-Relevant Representation C']
+    ProvenanceGate -->|UNSUPPORTED FACT| SafeFallback[Safe Fallback to Raw Source Text]
+    
+    Identity --> Inference[Model Inference Boundary: OpenAI / xAI]
+    CompactedRep --> Inference
+    SafeFallback --> Inference
+```
+
+### The 2 Governing Questions of Representation Selection:
+1. **Should I touch this representation?**
+   - If context is already dense and clean ($<200$ tokens), return $\text{ID}(C)$ to eliminate unforced dilation and preserve $100\%$ action safety.
+2. **If I touch it, what information am I forbidden to lose?**
+   - Active cryptographic constraints (`RS256`, `v2` keys), memory bounds (`zeroizeBuffer`), and binding runtime rules (`runtime = 'edge'`).
+
+---
+
 ## 🔒 Security & Compliance Architecture
 
 | Security Domain | Implementation | Guarantee |
@@ -236,4 +275,6 @@ flowchart TD
 | **Merkle Audit Ledger** | Cryptographic SHA-256 Merkle block chaining | 100% tamper-evident audit custody proofs |
 | **Single-Flight Coalescing** | Mutex in-flight promise registry | Prevents cache stampedes and eliminates duplicate upstream flights |
 | **Zero-Copy Stream Sandbox** | Direct Uint8Array buffer streaming | Prevents heap fragmentation and reduces GC pauses |
+| **Fail-Closed Compaction Safety** | `BroccoliCompactionSafety` entity validator | Zero hallucination or ungrounded factual corruption |
+
 

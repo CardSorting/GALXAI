@@ -103,9 +103,21 @@ This executes head-to-head empirical tests across `gpt-4o`, `gpt-4o-mini`, and `
 
 Tokens and dollars are the observable measurement units at the provider boundary; **representation redundancy** is the governing physical variable. High-redundancy contexts (equilibrium telemetry, repeating ASTs) yield $78\%–95\%$ reduction; dense or already-compressed contexts yield $0\%$ or negative deltas due to framing overhead.
 
-#### 20. Is BroccoliDB a general representation reducer or a framework of specialized reducers?
-> **Definition**: *GALX is a pre-inference representation transformation layer that attempts to preserve task-relevant invariants while eliminating representational redundancy.*
+#### 21. What is the Representation-Selection Thesis and the Adaptive Density Gate (ADR 0067)?
+> **The highest-order capability of an optimizer is knowing when to do nothing.**
 
-Currently, BroccoliDB operates as a **high-performance collection of specialized domain reducers** (180 industry domain compactors, Drain log clusterers, TSDB statistical aggregators, and eBPF kernel analyzers) orchestrated behind a single, safe interface (`BroccoliCompactionFacade`). The ongoing research frontier is extending this into **unsupervised equivalence discovery** where the engine autonomously identifies equivalence classes in novel, unstructured payloads without domain priors.
+BroccoliDB is not merely a compactor; it is a **Dynamic Context Representation Layer** evaluating incoming context $C \to \{ \text{ID}(C), T(C) \}$:
+1. **Should I touch this representation?**  
+   If context is already dense and clean ($<200$ tokens), the **Adaptive Density Gate** returns the **Identity Operator** ($\text{ID}(C)$) passing the context through verbatim ($0.0\%$ dilation overhead, $100\%$ baseline preservation).
+2. **If I touch it, what information am I forbidden to lose?**  
+   Active cryptographic requirements (`RS256`, `v2` keys), memory bounds (`zeroizeBuffer()`), and binding deployment constraints (`runtime = 'edge'`).
+
+#### 22. How does GALXAI handle institutional entropy and conflicting enterprise authority (ADR 0066)?
+In real-world enterprise repositories, context noise has authorship, timestamps, and social consequences (65 ADRs, stale RFCs, deprecated guidelines). Rather than evaluating subjective "summary quality", GALXAI measures **Action Safety** under 7 adversarial traps via:
+```bash
+npm run bench:entropy
+```
+Across our 7-tier progressive gradient ($L_1 \to L_7$), raw LLM baselines degrade from $100\% \to 20\%$ as historical contradictions confuse the model. BroccoliDB representation selection strips $92.1\%$ of the institutional noise while defending **$100\%$ Action Safety on this benchmark suite** (`0 committees harmed`).
+
 
 

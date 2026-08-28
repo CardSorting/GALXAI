@@ -9,9 +9,11 @@ This guide covers the internal codebase structure, architectural layers, how to 
 ```text
 GALXAI/
 ├── docs/                             # Comprehensive Architecture & API Documentation
-│   ├── adr/                          # Architecture Decision Records (0001-0065)
+│   ├── adr/                          # Architecture Decision Records (0001-0067)
+│   ├── maintainers/                  # Internal Maintainer Knowledge Base (20 Manuals)
 │   ├── playbooks/                    # Operational Lifecycle Playbooks (Stages 1-8)
 │   ├── ARCHITECTURE.md               # System overview, lifecycle, and security model
+
 │   ├── FORENSIC_PAYLOAD_DISSECTION_AND_CAUSAL_ANALYSIS.md # Byte-by-byte before/after payload analysis
 
 │   ├── STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md # Two-Tier Auth & Ingestion Spec
@@ -451,19 +453,30 @@ GALXAI maintains dedicated forensic test runners:
 npm run deploy:check
 
 # 2. BroccoliDB Empirical Inference Boundary Benchmark (OpenAI Models)
+# 0. Maintainer Workstation 8-Point Onboarding Diagnostic (<5s)
+npm run onboard
+
+# 1. Install Pre-Commit (tsc) & Commit-Msg (Conventional Commits) Hooks
+npm run hooks:install
+
+# 2. Interactive Maintainer Compactor Scaffolder CLI
+npm run scaffold:compactor -- --name=MyDomain --cluster=Healthcare
+
+# 3. Adversarial Institutional Entropy & Action Safety Benchmark (7-Tier Gradient)
+npm run bench:entropy
+
+# 4. BroccoliDB Empirical Inference Boundary Benchmark (OpenAI Models)
 npm run bench:inference-boundary
 
-# 3. Forensic Payload Dissection & Representation Transformation Tool
-npx tsx scripts/dissect-payloads-and-causal-analysis.ts
-
-# 4. BroccoliDB Compaction Gateway & Facade API Suite (19 modes, 7 test suites)
+# 5. Compaction Facade & HTTP API Gateway Suite (19 modes, 7 test suites)
 npm run test:broccolidb:api
 
-# 5. BroccoliDB Production Hardening & Provenance Regressions
+# 6. BroccoliDB Production Hardening & Provenance Regressions
 npm run test:broccolidb:hardening
 
-# 6. Master 180-Domain Compactor Cluster Suite (100% Verified)
-node --import tsx scripts/test-broccolidb-150-domain-suite.ts
+# 7. Master 180-Domain Compactor Cluster Suite (100% Verified)
+npm run bench:180-domains
+
 
 # 7. 8-Phase Enterprise Vercel Pre-Flight Readiness Engine
 npm run vercel:verify
