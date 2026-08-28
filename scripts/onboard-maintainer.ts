@@ -158,10 +158,21 @@ RESPONSE TO SPECIAL INTERROGATORY NO. 14: Responding party objects on grounds of
     recordCheck('Core Maintainer Documentation Suite', 'Documentation', 'PASS', 'All primary specs, ADRs & playbooks indexed');
   }
 
+  // 6. Git Hooks & Maintainer Guardrails
+  console.log('\n🪝 [PHASE 6: GIT HOOKS & CONVENTIONAL COMMITS GUARDRAILS]');
+  const preCommitHook = path.join(process.cwd(), '.git', 'hooks', 'pre-commit');
+  const commitMsgHook = path.join(process.cwd(), '.git', 'hooks', 'commit-msg');
+  if (fs.existsSync(preCommitHook) && fs.existsSync(commitMsgHook)) {
+    recordCheck('Git Invariant Hooks', 'Guardrails', 'PASS', 'Pre-commit (tsc) and commit-msg (Conventional Commits) active');
+  } else {
+    recordCheck('Git Invariant Hooks', 'Guardrails', 'WARN', 'Git hooks not installed (run `npm run hooks:install`)');
+  }
+
   // Summary Scorecard
   const passCount = checks.filter(c => c.status === 'PASS').length;
   const warnCount = checks.filter(c => c.status === 'WARN').length;
   const failCount = checks.filter(c => c.status === 'FAIL').length;
+
 
   console.log('\n======================================================================');
   console.log(`  ONBOARDING DIAGNOSTIC SCORECARD: ${passCount} PASSED | ${warnCount} WARNINGS | ${failCount} FAILS`);

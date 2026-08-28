@@ -21,6 +21,9 @@ This directory contains the deep internal architectural blueprints, onboarding r
 | **Multi-Tenant Shards & Key Rotation** | [MULTI_TENANT_SHARD_AND_KEY_ROTATION.md](MULTI_TENANT_SHARD_AND_KEY_ROTATION.md) | Shard fleet headroom, zero-downtime 3-phase master vault key rotation (`v1` $\to$ `v2`), and credential re-encryption. |
 | **Telemetry & Observability** | [TELEMETRY_AND_METRICS_OBSERVABILITY.md](TELEMETRY_AND_METRICS_OBSERVABILITY.md) | Prometheus `/metrics` gauges/counters, structured JSON logs, and high-priority Grafana alert rules. |
 | **Git Workflows & Conventional Hooks** | [GIT_WORKFLOWS_AND_HOOKS.md](GIT_WORKFLOWS_AND_HOOKS.md) | Conventional Commits 1.0.0, automated pre-commit typecheck hooks (`npm run hooks:install`), and branch guidelines. |
+| **Security Incidents & CVE Playbook** | [SECURITY_INCIDENT_AND_CVE_PLAYBOOK.md](SECURITY_INCIDENT_AND_CVE_PLAYBOOK.md) | Sev-1/Sev-2 incident response SLAs, emergency key compromise re-encryption drill, and private CVE advisories. |
+| **Upstream Provider Outage Response** | [UPSTREAM_PROVIDER_OUTAGE_AND_DEGRADATION.md](UPSTREAM_PROVIDER_OUTAGE_AND_DEGRADATION.md) | Outage failover mechanics, circuit breaker shard shedding, cross-model aliasing, and recovery probes. |
+| **Compactor Fuzzing & QA Matrix** | [COMPACTOR_FUZZING_AND_QA_MATRIX.md](COMPACTOR_FUZZING_AND_QA_MATRIX.md) | 5 fuzzing vectors (ReDoS, Unicode, deep nesting, entity tampering, truncated streams) and automated QA recipes. |
 | **Debugging & Diagnostic Runbooks** | [DEBUGGING_AND_DIAGNOSTIC_RUNBOOKS.md](DEBUGGING_AND_DIAGNOSTIC_RUNBOOKS.md) | Step-by-step diagnostic decision trees, log analysis recipes, cryptographic decryption troubleshooting, and database connection pool triage. |
 | **PostgreSQL & AOP-DB Runbook** | [POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md](POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) | 3-Phase Expand/Contract schema protocol, zero-lock concurrent DDL rules, and default-deny RLS policy templates. |
 | **Cloudflare Edge Mesh Runbook** | [CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md](CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md) | 300+ PoP edge topology, RATE_LIMIT_KV sliding-window pacing, SWR cache purging, and canary deployment runbooks. |
@@ -29,6 +32,7 @@ This directory contains the deep internal architectural blueprints, onboarding r
 | **AI Agent Governance & Pair Programming** | [AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md](AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md) | Protocols for human architects and autonomous AI coding agents (Antigravity/Claude/Cursor), mechanical containment gates, and safety rules. |
 | **Master Maintainers Manual** | [../../MAINTAINERS.md](../../MAINTAINERS.md) | High-level maintainer governance, CODEOWNERS mapping, the 5-Gate PR checklist, and the 10 Invariant Commandments. |
 | **Operational SRE Playbooks** | [../playbooks/README.md](../playbooks/README.md) | 8-stage operational runbooks covering provisioning, deployment, live traffic scaling, incident triage, key rotation, DR, DX, and unframed developer observation. |
+
 
 
 
