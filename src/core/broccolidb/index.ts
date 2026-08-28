@@ -21,4 +21,5 @@ export * from "./BroccoliSpendWAL";
 export * from "./BroccoliSpendLease";
 export * from "./BroccoliBatchCoalescer";
 export * from "./BroccoliSpeculativeRouter";
+export * from "./BroccoliStreamInterceptor";
 export * from "./BroccoliSpendSubstrate";
