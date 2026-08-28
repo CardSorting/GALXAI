@@ -398,19 +398,25 @@ We distinguish between two system paradigms:
 When you modify compaction or benchmarking code, run these commands to verify:
 
 ```bash
-# 1. Run the Empirical Inference Boundary Benchmark (OpenAI Models)
+# 1. Maintainer Workstation 8-Point Onboarding Diagnostic (<5s)
+npm run onboard
+
+# 2. Adversarial Institutional Entropy & Action Safety Benchmark (7-Tier Gradient)
+npm run bench:entropy
+
+# 3. Run the Empirical Inference Boundary Benchmark (OpenAI Models)
 npm run bench:inference-boundary
 
-# 2. Test the Compaction Facade & HTTP API route (19 modes, 7 test suites)
+# 4. Test the Compaction Facade & HTTP API route (19 modes, 7 test suites)
 npm run test:broccolidb:api
 
-# 3. Test Production Hardening & Zero-Hallucination Regressions
+# 5. Test Production Hardening & Zero-Hallucination Regressions
 npm run test:broccolidb:hardening
 
-# 4. Test the Master 180-Domain Compactor Cluster (100% Verified)
-node --import tsx scripts/test-broccolidb-150-domain-suite.ts
+# 6. Test the Master 180-Domain Compactor Cluster (100% Verified)
+npm run bench:180-domains
 
-# 5. Run TypeScript Compiler (Must have 0 errors)
+# 7. Run TypeScript Compiler (Must have 0 errors)
 npx tsc --noEmit
 ```
 
@@ -420,7 +426,8 @@ npx tsc --noEmit
 
 | File | Purpose |
 | :--- | :--- |
-| [src/core/broccolidb/BroccoliCompactionFacade.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/BroccoliCompactionFacade.ts) | **The Public Door**: Unified, safe, size-bounded entry point supporting 19 modes. |
+| [src/core/broccolidb/BroccoliCompactionFacade.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/BroccoliCompactionFacade.ts) | **The Public Door**: Unified entry point supporting 19 modes and `selectRepresentation` with Adaptive Density Bypass. |
+| [src/core/broccolidb/BroccoliArchitectureInvariantCompactor.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/BroccoliArchitectureInvariantCompactor.ts) | **The Invariant Sentinel**: Filters institutional noise and deprecated ADRs while preserving active code constraints. |
 | [src/core/broccolidb/BroccoliCompactionSafety.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/BroccoliCompactionSafety.ts) | **The Guard**: Fail-closed factual provenance verification. |
 | [src/core/broccolidb/eval/BroccoliInferenceBoundaryBenchmarker.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/eval/BroccoliInferenceBoundaryBenchmarker.ts) | **The Benchmarker**: Empirical OpenAI boundary measurement harness. |
 | [src/core/broccolidb/eval/OpenAiTaskSuite.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/eval/OpenAiTaskSuite.ts) | **The Task Suite**: 4 representative workloads (Coding, Research, DevOps, Telemetry). |
@@ -430,10 +437,9 @@ npx tsc --noEmit
 | [src/core/broccolidb/BroccoliMegaIncidentStreamCascader.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/BroccoliMegaIncidentStreamCascader.ts) | **The Incident Slicer**: 2,000+ page log storm reducer. |
 | [src/core/broccolidb/BroccoliMegaDocumentPyramidCompactor.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/BroccoliMegaDocumentPyramidCompactor.ts) | **The Document Pyramid**: 300+ page contract summarizer. |
 | [src/app/api/audit/broccolidb/compact/route.ts](file:///Users/bozoegg/Desktop/GALXAI/src/app/api/audit/broccolidb/compact/route.ts) | **The API Route**: Authenticated REST endpoint supporting all 19 modes. |
-| [scripts/bench-broccolidb-openai-inference-boundary.ts](file:///Users/bozoegg/Desktop/GALXAI/scripts/bench-broccolidb-openai-inference-boundary.ts) | **CLI Benchmark**: `npm run bench:inference-boundary`. |
-| [docs/adr/0060-broccolidb-high-velocity-domain-expansion-and-stream-compaction.md](file:///Users/bozoegg/Desktop/GALXAI/docs/adr/0060-broccolidb-high-velocity-domain-expansion-and-stream-compaction.md) | **ADR 0060**: High-Velocity 180-Domain Aho-Corasick & Drain/TSDB Stream Compaction. |
-| [docs/adr/0061-broccolidb-network-orderbook-and-sliding-window-stream-compaction.md](file:///Users/bozoegg/Desktop/GALXAI/docs/adr/0061-broccolidb-network-orderbook-and-sliding-window-stream-compaction.md) | **ADR 0061**: NetFlow Security, L2 Order Book Depth & Sliding-Window Stream Compaction. |
-| [docs/adr/0062-broccolidb-industrial-iot-clickstream-genomics-and-hybrid-stream-multiplexing.md](file:///Users/bozoegg/Desktop/GALXAI/docs/adr/0062-broccolidb-industrial-iot-clickstream-genomics-and-hybrid-stream-multiplexing.md) | **ADR 0062**: Industrial IoT Sensors, Clickstream RUM, Genomics & Hybrid Stream Multiplexing. |
-| [docs/adr/0063-broccolidb-ebpf-k8s-geospatial-and-arrow-dictionary-stream-compaction.md](file:///Users/bozoegg/Desktop/GALXAI/docs/adr/0063-broccolidb-ebpf-k8s-geospatial-and-arrow-dictionary-stream-compaction.md) | **ADR 0063**: Kernel eBPF Security, K8s Watch, Geospatial ADS-B/AIS & Apache Arrow Dictionaries. |
-| [docs/adr/0064-broccolidb-openai-inference-boundary-measurement-and-task-suite.md](file:///Users/bozoegg/Desktop/GALXAI/docs/adr/0064-broccolidb-openai-inference-boundary-measurement-and-task-suite.md) | **ADR 0064**: OpenAI Inference Boundary Empirical Measurement & Task Suite. |
+| [scripts/bench-institutional-entropy-matrix.ts](file:///Users/bozoegg/Desktop/GALXAI/scripts/bench-institutional-entropy-matrix.ts) | **Entropy Benchmark**: `npm run bench:entropy` (7-tier progressive gradient). |
+| [scripts/scaffold-compactor.ts](file:///Users/bozoegg/Desktop/GALXAI/scripts/scaffold-compactor.ts) | **Maintainer Scaffolder**: `npm run scaffold:compactor`. |
+| [docs/adr/0066-institutional-entropy-resistance-and-epistemic-compression.md](file:///Users/bozoegg/Desktop/GALXAI/docs/adr/0066-institutional-entropy-resistance-and-epistemic-compression.md) | **ADR 0066**: Institutional Entropy Resistance & Epistemic Representation Compression. |
+| [docs/adr/0067-representation-selection-and-adaptive-density-bypass.md](file:///Users/bozoegg/Desktop/GALXAI/docs/adr/0067-representation-selection-and-adaptive-density-bypass.md) | **ADR 0067**: Adaptive Representation Selection & Density Bypass Substrate. |
+
 

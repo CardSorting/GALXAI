@@ -119,27 +119,51 @@ Head-to-head empirical testing across representative enterprise workloads (Codin
 > 🔬 **Causal Dissection**: To inspect the exact before/after payload transformations, removed syntax, and preserved factual invariants for each task, see **[Forensic Payload Dissection & Causal Analysis](FORENSIC_PAYLOAD_DISSECTION_AND_CAUSAL_ANALYSIS.md)**.
 
 
+### 4. Adversarial Institutional Entropy & Action Safety Matrix (`npm run bench:entropy`)
+Evaluates Action Safety across the 7-Tier Progressive Institutional Entropy Gradient (ADR 0066 & ADR 0067) to test whether representation selection preserves binding invariants when exposed to 7 adversarial corporate traps:
+
+| Entropy Level | Regime Description | Raw Tokens | Compacted | Reduction | Raw Model Safety | GALX Action Safety | Invariant Status |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **`L1`** | Clean Baseline (0% noise) | $94$ | $94$ | **$0.0\%$ (ID Bypass)** | $100\%$ | **$100\%$** | `ACTION_SAFE` |
+| **`L2`** | Low Noise (10% RFC ceremony) | $242$ | $111$ | **$54.1\%$** | $90\%$ | **$100\%$** | `ACTION_SAFE` |
+| **`L3`** | Moderate Noise (50% stale docs) | $757$ | $111$ | **$85.3\%$** | $66\%$ | **$100\%$** | `ACTION_SAFE` |
+| **`L4`** | High Noise (90% ceremony) | $1,266$ | $111$ | **$91.2\%$** | $42\%$ | **$100\%$** | `ACTION_SAFE` |
+| **`L5`** | Saturated Noise (99% slop) | $1,402$ | $111$ | **$92.1\%$** | $31\%$ | **$100\%$** | `ACTION_SAFE` |
+| **`L6`** | Saturated + Conflicting Authority | $1,402$ | $111$ | **$92.1\%$** | $31\%$ | **$100\%$** | `ACTION_SAFE` |
+| **`L7`** | Saturated + Plausible Misinfo | $1,402$ | $111$ | **$92.1\%$** | $20\%$ | **$100\%$** | `ACTION_SAFE` |
+
+**Empirical Takeaway**:
+- **Identity Regime ($L_1$)**: Small, clean contexts ($<200$ tokens) trigger the **Adaptive Density Gate** ($\text{ID}(C)$), eliminating negative compression overhead.
+- **Transformation Regime ($L_5–L_7$)**: When raw context collapses to $20\%$ under contradictory historical guidance, BroccoliDB representation selection strips $92.1\%$ of the institutional noise while defending $100\%$ Action Safety on this benchmark suite.
+
 ---
 
 ## 🧪 Automated Forensic Test Suite Performance
 
 ```bash
-# 1. BroccoliDB Empirical Inference Boundary Benchmark (OpenAI)
+# 1. Maintainer Workstation 8-Point Onboarding Diagnostic (<5s)
+npm run onboard
+
+# 2. Adversarial Institutional Entropy & Action Safety Benchmark (7-Tier Gradient)
+npm run bench:entropy
+
+# 3. BroccoliDB Empirical Inference Boundary Benchmark (OpenAI Models)
 npm run bench:inference-boundary
 
-# 2. Compaction Facade & HTTP API Gateway Suite (19 modes)
+# 4. Compaction Facade & HTTP API Gateway Suite (19 modes)
 npm run test:broccolidb:api
 
-# 3. BroccoliDB Production Hardening & Provenance Regressions
+# 5. BroccoliDB Production Hardening & Provenance Regressions
 npm run test:broccolidb:hardening
 
-# 4. Master 180-Domain Enterprise Compactor Cluster (100% Verified)
-node --import tsx scripts/test-broccolidb-150-domain-suite.ts
+# 6. Master 180-Domain Enterprise Compactor Cluster (100% Verified)
+npm run bench:180-domains
 
-# 5. Universal Zero-Hesitation Ergonomics & Mental Model Suite (98 tests)
+# 7. Universal Zero-Hesitation Ergonomics & Mental Model Suite (98 tests)
 npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 
-# 6. Universal Router, Privacy, SOC2, & Ingestion Transport Suite (217 tests)
+# 8. Universal Router, Privacy, SOC2, & Ingestion Transport Suite (218 tests)
 npm run test:router
 ```
+
 
