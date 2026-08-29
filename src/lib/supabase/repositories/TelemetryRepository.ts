@@ -107,12 +107,20 @@ export class TelemetryRepository {
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
-        const { data, error } = await supabase.rpc('fn_batch_record_telemetry_cf', {
+        const { data, error } = await supabase.rpc('fn_batch_record_telemetry', {
           p_samples: samples as any
         });
 
-        if (!error && typeof data === 'number') {
-          return data;
+        if (!error && data && (data as any).success) {
+          return Number((data as any).inserted_samples_count || samples.length);
+        }
+
+        const { data: legacyData, error: legacyErr } = await supabase.rpc('fn_batch_record_telemetry_cf', {
+          p_samples: samples as any
+        });
+
+        if (!legacyErr && typeof legacyData === 'number') {
+          return legacyData;
         }
       } catch {
         // Fallback

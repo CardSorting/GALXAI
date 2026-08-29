@@ -7,10 +7,12 @@ import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
 import type { Database } from '../types';
 import type { DeveloperGatewayKey } from '../../../core/contracts/GalxContracts';
 import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
+import { GalxRequestCoalescer } from '../../cache/GalxRequestCoalescer';
 
 export class ApiKeyRepository {
   private static instance: ApiKeyRepository;
   private readonly keyTable: BroccoliDbTable<DeveloperGatewayKey>;
+  private readonly keyCoalescer = new GalxRequestCoalescer<DeveloperGatewayKey | null>({ ttlMs: 15000 });
 
   private constructor() {
     this.keyTable = new BroccoliDbTable<DeveloperGatewayKey>('gateway_keys');
@@ -55,57 +57,61 @@ export class ApiKeyRepository {
   }
 
   async getGatewayKeyById(id: string): Promise<DeveloperGatewayKey | null> {
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        const { data, error } = await supabase
-          .from('galx_developer_keys')
-          .select('*')
-          .eq('id', id)
-          .single();
+    return this.keyCoalescer.getOrFetch(`id:${id}`, async () => {
+      if (isSupabaseConfigured()) {
+        try {
+          const supabase = getSupabaseAdmin();
+          const { data, error } = await supabase
+            .from('galx_developer_keys')
+            .select('*')
+            .eq('id', id)
+            .single();
 
-        if (!error && data) {
-          const mapped = this.mapRowToGatewayKey(data);
-          this.keyTable.put(mapped.id, mapped);
-          return mapped;
+          if (!error && data) {
+            const mapped = this.mapRowToGatewayKey(data);
+            this.keyTable.put(mapped.id, mapped);
+            return mapped;
+          }
+        } catch {
+          // Fallback
         }
-      } catch {
-        // Fallback
       }
-    }
 
-    return this.keyTable.get(id) || null;
+      return this.keyTable.get(id) || null;
+    });
   }
 
   async findGatewayKeyByHash(keyHash: string): Promise<DeveloperGatewayKey | null> {
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        const { data, error } = await supabase
-          .from('galx_developer_keys')
-          .select('*')
-          .eq('key_hash', keyHash)
-          .eq('is_revoked', false)
-          .single();
+    return this.keyCoalescer.getOrFetch(`hash:${keyHash}`, async () => {
+      if (isSupabaseConfigured()) {
+        try {
+          const supabase = getSupabaseAdmin();
+          const { data, error } = await supabase
+            .from('galx_developer_keys')
+            .select('*')
+            .eq('key_hash', keyHash)
+            .eq('is_revoked', false)
+            .single();
 
-        if (!error && data) {
-          const mapped = this.mapRowToGatewayKey(data);
-          this.keyTable.put(mapped.id, mapped);
-          return mapped;
+          if (!error && data) {
+            const mapped = this.mapRowToGatewayKey(data);
+            this.keyTable.put(mapped.id, mapped);
+            return mapped;
+          }
+        } catch {
+          // Fallback
         }
-      } catch {
-        // Fallback
       }
-    }
 
-    const matches = this.keyTable.query({
-      where: {
-        keyHash: { $eq: keyHash },
-        revoked: { $eq: false }
-      }
-    }) as DeveloperGatewayKey[];
+      const matches = this.keyTable.query({
+        where: {
+          keyHash: { $eq: keyHash },
+          revoked: { $eq: false }
+        }
+      }) as DeveloperGatewayKey[];
 
-    return matches[0] || null;
+      return matches[0] || null;
+    });
   }
 
   async findKeyByHash(keyHash: string): Promise<DeveloperGatewayKey | null> {
@@ -148,6 +154,8 @@ export class ApiKeyRepository {
     options: { requireRemote?: boolean } = {}
   ): Promise<void> {
     this.keyTable.put(key.id, key);
+    this.keyCoalescer.invalidate(`id:${key.id}`);
+    this.keyCoalescer.invalidate(`hash:${key.keyHash}`);
 
     if (!isSupabaseConfigured()) {
       if (options.requireRemote) {
@@ -190,6 +198,10 @@ export class ApiKeyRepository {
       lastUsedAtMs: Date.now()
     };
     this.keyTable.put(keyId, updated);
+    this.keyCoalescer.set(`id:${keyId}`, updated);
+    if (updated.keyHash) {
+      this.keyCoalescer.set(`hash:${updated.keyHash}`, updated);
+    }
 
     if (isSupabaseConfigured()) {
       try {
@@ -212,7 +224,11 @@ export class ApiKeyRepository {
     const existing = this.keyTable.get(keyId);
     if (existing) {
       this.keyTable.put(keyId, { ...existing, revoked: true });
+      if (existing.keyHash) {
+        this.keyCoalescer.invalidate(`hash:${existing.keyHash}`);
+      }
     }
+    this.keyCoalescer.invalidate(`id:${keyId}`);
 
     if (isSupabaseConfigured()) {
       try {
@@ -232,7 +248,13 @@ export class ApiKeyRepository {
   }
 
   async deleteKey(keyId: string): Promise<void> {
+    const existing = this.keyTable.get(keyId);
+    if (existing?.keyHash) {
+      this.keyCoalescer.invalidate(`hash:${existing.keyHash}`);
+    }
+    this.keyCoalescer.invalidate(`id:${keyId}`);
     this.keyTable.delete(keyId);
+
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();

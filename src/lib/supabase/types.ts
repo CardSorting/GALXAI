@@ -3126,6 +3126,18 @@ export interface Database {
         };
         Returns: Json;
       };
+      fn_coalesced_wallet_batch_draw: {
+        Args: {
+          p_coalesced_draws: Json;
+        };
+        Returns: Json;
+      };
+      fn_batch_record_telemetry: {
+        Args: {
+          p_samples: Json;
+        };
+        Returns: Json;
+      };
       fn_get_wallet_by_user: {
         Args: {
           p_user_id: string;

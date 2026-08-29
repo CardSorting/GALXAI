@@ -37,6 +37,8 @@ import { GalxEdgeRouter } from '../src/workers/cloudflare/GalxEdgeRouter';
 import { GalxEdgeSpeculativeEngine } from '../src/workers/cloudflare/GalxEdgeSpeculativeEngine';
 import { GalxEdgeConnectionPool } from '../src/workers/cloudflare/GalxEdgeConnectionPool';
 import { GalxEdgeWebhookDispatcher } from '../src/workers/cloudflare/GalxEdgeWebhookDispatcher';
+import { GalxEdgeBatchBuffer } from '../src/workers/cloudflare/GalxEdgeBatchBuffer';
+import { GalxRequestCoalescer } from '../src/lib/cache/GalxRequestCoalescer';
 
 async function runTests() {
   console.log('======================================================================');
@@ -739,6 +741,97 @@ async function runTests() {
     assert(
       postureCheck.activeSessionsCount >= 1 && ['A+', 'A', 'B', 'C'].includes(postureCheck.overallGrade),
       'SessionRepo: Ingests risk anomaly event and calculates composite security posture grade'
+    );
+
+    // 45. SingleFlight Request Coalescing (Cache Stampede Defense)
+    const coalescer = new GalxRequestCoalescer<string>({ ttlMs: 5000 });
+    let dbQueryCount = 0;
+    const fetcher = async () => {
+      dbQueryCount++;
+      await new Promise(r => setTimeout(r, 20));
+      return 'authoritative_db_record_payload';
+    };
+
+    // Fire 50 concurrent requests simultaneously for the same key
+    const concurrentFetches = Array.from({ length: 50 }, () => coalescer.getOrFetch('user_stampede_key', fetcher));
+    const fetchResults = await Promise.all(concurrentFetches);
+    assert(
+      dbQueryCount === 1 && fetchResults.length === 50 && fetchResults.every(r => r === 'authoritative_db_record_payload'),
+      'GalxRequestCoalescer: Coalesces 50 concurrent in-flight requests into 1 single database fetch'
+    );
+
+    // 46. Negative Caching (Non-Existent Key Stampede Defense)
+    let negativeDbQueryCount = 0;
+    const negativeFetcher = async () => {
+      negativeDbQueryCount++;
+      return null;
+    };
+    await coalescer.getOrFetch('non_existent_key_123', negativeFetcher);
+    await coalescer.getOrFetch('non_existent_key_123', negativeFetcher);
+    assert(
+      negativeDbQueryCount === 1,
+      'GalxRequestCoalescer: Negative-caches null responses to prevent non-existent key stampedes'
+    );
+
+    // 47. Deadlock-Free Sorted Multi-User Micro-Batch Coalesced Draw
+    const batchUserA = `usr_batch_coalesce_a_${Date.now()}`;
+    const batchUserB = `usr_batch_coalesce_b_${Date.now()}`;
+    await walletRepo.verifyDepositAndApplyMatch({ userId: batchUserA, depositAmountUsd: 10, paymentRef: 'test_a' });
+    await walletRepo.verifyDepositAndApplyMatch({ userId: batchUserB, depositAmountUsd: 10, paymentRef: 'test_b' });
+
+    const coalescedBatchRes = await walletRepo.drawTokensCoalescedBatch([
+      {
+        userId: batchUserB,
+        totalCostUsd: 0.50,
+        requestCount: 5,
+        totalPromptTokens: 500,
+        totalCompletionTokens: 250,
+        totalCachedTokens: 100,
+        description: 'Coalesced stream chunks for User B'
+      },
+      {
+        userId: batchUserA,
+        totalCostUsd: 0.75,
+        requestCount: 8,
+        totalPromptTokens: 800,
+        totalCompletionTokens: 400,
+        totalCachedTokens: 200,
+        description: 'Coalesced stream chunks for User A'
+      }
+    ]);
+    assert(
+      coalescedBatchRes.success === true &&
+      coalescedBatchRes.processedUsersCount === 2 &&
+      Math.abs(coalescedBatchRes.totalDebitUsd - 1.25) < 0.000001,
+      'WalletRepo: Atomically executes multi-user coalesced batch debit in deadlock-free sorted order'
+    );
+
+    // 48. Edge Batch Buffer: Async Coalesced Enqueue & Deferred Settlement
+    const edgeBatchBuffer = GalxEdgeBatchBuffer.getInstance();
+    const batchUserC = `usr_batch_async_c_${Date.now()}`;
+    await walletRepo.verifyDepositAndApplyMatch({ userId: batchUserC, depositAmountUsd: 10, paymentRef: 'test_c' });
+
+    const asyncDrawPromise1 = edgeBatchBuffer.enqueueTokenDrawAsync({
+      userId: batchUserC,
+      costUsd: 0.10,
+      description: 'Stream chunk 1',
+      promptTokens: 100,
+      completionTokens: 50
+    });
+    const asyncDrawPromise2 = edgeBatchBuffer.enqueueTokenDrawAsync({
+      userId: batchUserC,
+      costUsd: 0.20,
+      description: 'Stream chunk 2',
+      promptTokens: 200,
+      completionTokens: 100
+    });
+
+    // Explicitly flush edge batch buffer
+    await edgeBatchBuffer.flushAll();
+    const [drawRes1, drawRes2] = await Promise.all([asyncDrawPromise1, asyncDrawPromise2]);
+    assert(
+      drawRes1.success === true && drawRes2.success === true && drawRes1.newBalance !== undefined,
+      'GalxEdgeBatchBuffer: Asynchronously coalesces stream token draws and resolves caller promises on batch flush'
     );
 
 

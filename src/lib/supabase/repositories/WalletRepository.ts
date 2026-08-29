@@ -11,6 +11,7 @@ import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
 import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-natural-query';
 import type { DbQueryOptions, DbAggregateQuery, DbAggregateResult } from '../../../core/broccolidb/broccolidb.contracts';
 import { calculateComputeCredit } from '../../stripe/config';
+import { GalxRequestCoalescer } from '../../cache/GalxRequestCoalescer';
 
 export interface WalletRecord {
   id: string;
@@ -70,6 +71,7 @@ export class WalletRepository {
   public readonly walletTable: BroccoliDbTable<WalletRecord>;
   public readonly txTable: BroccoliDbTable<WalletTransactionRecord>;
   public readonly holdTable: BroccoliDbTable<WalletHoldRecord>;
+  private readonly walletCoalescer = new GalxRequestCoalescer<WalletRecord | null>({ ttlMs: 10000 });
 
   private constructor() {
     this.walletTable = new BroccoliDbTable<WalletRecord>('wallets');
@@ -102,40 +104,42 @@ export class WalletRepository {
   }
 
   async getWallet(userId: string): Promise<WalletRecord | null> {
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        const { data, error } = await supabase.rpc('fn_get_wallet_by_user', {
-          p_user_id: userId
-        });
+    return this.walletCoalescer.getOrFetch(userId, async () => {
+      if (isSupabaseConfigured()) {
+        try {
+          const supabase = getSupabaseAdmin();
+          const { data, error } = await supabase.rpc('fn_get_wallet_by_user', {
+            p_user_id: userId
+          });
 
-        if (!error && data && (data as any).found) {
-          const mapped = this.mapRowToWallet(data as any);
-          this.walletTable.put(userId, mapped);
-          return mapped;
+          if (!error && data && (data as any).found) {
+            const mapped = this.mapRowToWallet(data as any);
+            this.walletTable.put(userId, mapped);
+            return mapped;
+          }
+
+          const { data: tableData, error: tableErr } = await supabase
+            .from('galx_wallets')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
+
+          if (!tableErr && tableData) {
+            const mapped = this.mapRowToWallet(tableData);
+            this.walletTable.put(userId, mapped);
+            return mapped;
+          }
+        } catch {
+          // Fallback
         }
-
-        const { data: tableData, error: tableErr } = await supabase
-          .from('galx_wallets')
-          .select('*')
-          .eq('user_id', userId)
-          .single();
-
-        if (!tableErr && tableData) {
-          const mapped = this.mapRowToWallet(tableData);
-          this.walletTable.put(userId, mapped);
-          return mapped;
-        }
-      } catch {
-        // Fallback
       }
-    }
 
-    const matches = this.walletTable.query({
-      where: { userId: { $eq: userId } }
-    }) as WalletRecord[];
+      const matches = this.walletTable.query({
+        where: { userId: { $eq: userId } }
+      }) as WalletRecord[];
 
-    return matches[0] || null;
+      return matches[0] || null;
+    });
   }
 
   async createOrGetWallet(userId: string): Promise<WalletRecord> {
@@ -207,6 +211,8 @@ export class WalletRepository {
     newBalance: number;
     proofOfDepositVerified: boolean;
   }> {
+    this.walletCoalescer.invalidate(params.userId);
+
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -219,6 +225,7 @@ export class WalletRepository {
         if (!error && data) {
           const res = data as any;
           if (res.success) {
+            this.walletCoalescer.invalidate(params.userId);
             return {
               success: true,
               depositAmount: Number(res.deposit_amount),
@@ -683,6 +690,8 @@ export class WalletRepository {
     newBalance?: number;
     triggerAutoReload?: boolean;
   }> {
+    this.walletCoalescer.invalidate(params.userId);
+
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -702,6 +711,7 @@ export class WalletRepository {
         if (!error && data) {
           const res = data as any;
           if (res.success) {
+            this.walletCoalescer.invalidate(params.userId);
             return {
               success: true,
               reason: res.reason,
@@ -779,6 +789,114 @@ export class WalletRepository {
       });
     }
     return results;
+  }
+
+  /**
+   * High-Throughput Coalesced Micro-Batch Token Deduction (Deadlock-Free Sorted Locking)
+   */
+  async drawTokensCoalescedBatch(coalesced: Array<{
+    userId: string;
+    totalCostUsd: number;
+    requestCount: number;
+    totalPromptTokens: number;
+    totalCompletionTokens: number;
+    totalCachedTokens: number;
+    model?: string;
+    description?: string;
+    metadata?: Record<string, any>;
+  }>): Promise<{
+    success: boolean;
+    processedUsersCount: number;
+    totalDebitUsd: number;
+    results: Array<{
+      userId: string;
+      success: boolean;
+      transactionId?: string;
+      costUsd?: number;
+      newBalance?: number;
+      reason?: string;
+    }>;
+  }> {
+    if (coalesced.length === 0) {
+      return { success: true, processedUsersCount: 0, totalDebitUsd: 0, results: [] };
+    }
+
+    // Invalidate local coalesced caches for affected users
+    for (const item of coalesced) {
+      this.walletCoalescer.invalidate(item.userId);
+    }
+
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseAdmin();
+        const { data, error } = await supabase.rpc('fn_coalesced_wallet_batch_draw', {
+          p_coalesced_draws: coalesced
+        });
+
+        if (!error && data) {
+          const res = data as any;
+          if (res.success) {
+            return {
+              success: true,
+              processedUsersCount: Number(res.processed_users_count || 0),
+              totalDebitUsd: Number(res.total_debit_usd || 0),
+              results: (res.results || []).map((r: any) => ({
+                userId: r.userId,
+                success: Boolean(r.success),
+                transactionId: r.transactionId,
+                costUsd: Number(r.costUsd || 0),
+                newBalance: Number(r.newBalance || 0),
+                reason: r.reason
+              }))
+            };
+          }
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    // Local fallback
+    const results = [];
+    let totalDebit = 0;
+    let processed = 0;
+
+    for (const item of coalesced) {
+      const res = await this.drawTokens({
+        userId: item.userId,
+        costUsd: item.totalCostUsd,
+        description: item.description || `Coalesced draw for ${item.requestCount} requests`,
+        model: item.model,
+        promptTokens: item.totalPromptTokens,
+        completionTokens: item.totalCompletionTokens,
+        cachedTokens: item.totalCachedTokens,
+        metadata: {
+          coalescedRequestsCount: item.requestCount,
+          ...(item.metadata || {})
+        }
+      });
+
+      if (res.success) {
+        processed++;
+        totalDebit += item.totalCostUsd;
+      }
+
+      results.push({
+        userId: item.userId,
+        success: res.success,
+        transactionId: res.transactionId,
+        costUsd: item.totalCostUsd,
+        newBalance: res.newBalance,
+        reason: res.reason
+      });
+    }
+
+    return {
+      success: true,
+      processedUsersCount: processed,
+      totalDebitUsd: Number(totalDebit.toFixed(6)),
+      results
+    };
   }
 
   async getTransactions(userId: string, limit = 50): Promise<WalletTransactionRecord[]> {
