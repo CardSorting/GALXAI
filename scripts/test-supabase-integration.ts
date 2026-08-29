@@ -39,6 +39,7 @@ import { GalxEdgeConnectionPool } from '../src/workers/cloudflare/GalxEdgeConnec
 import { GalxEdgeWebhookDispatcher } from '../src/workers/cloudflare/GalxEdgeWebhookDispatcher';
 import { GalxEdgeBatchBuffer } from '../src/workers/cloudflare/GalxEdgeBatchBuffer';
 import { GalxRequestCoalescer } from '../src/lib/cache/GalxRequestCoalescer';
+import { GalxBatchDataLoader } from '../src/lib/cache/GalxBatchDataLoader';
 
 async function runTests() {
   console.log('======================================================================');
@@ -832,6 +833,96 @@ async function runTests() {
     assert(
       drawRes1.success === true && drawRes2.success === true && drawRes1.newBalance !== undefined,
       'GalxEdgeBatchBuffer: Asynchronously coalesces stream token draws and resolves caller promises on batch flush'
+    );
+
+    // 49. GalxBatchDataLoader: Multi-Key Tick Batching (Meta/GraphQL Pattern)
+    let batchQueryCount = 0;
+    const dataLoader = new GalxBatchDataLoader<string, { id: string; name: string }>(
+      async (keys) => {
+        batchQueryCount++;
+        return keys.map(k => ({ id: k, name: `Loaded_${k}` }));
+      },
+      { batchWindowMs: 5 }
+    );
+
+    // Dispatch 20 individual load calls simultaneously
+    const loadPromises = Array.from({ length: 20 }, (_, i) => dataLoader.load(`key_${i}`));
+    const loadedResults = await Promise.all(loadPromises);
+    assert(
+      batchQueryCount === 1 && loadedResults.length === 20 && loadedResults[0].name === 'Loaded_key_0',
+      'GalxBatchDataLoader: Coalesces 20 individual load() calls in a tick into 1 single batch function execution'
+    );
+
+    // 50. GalxRequestCoalescer: Stale-While-Revalidate (SWR) Instant Return & Background Refresh
+    const swrCoalescer = new GalxRequestCoalescer<string>({ ttlMs: 50, staleTtlMs: 500 });
+    let swrFetchCount = 0;
+    const swrFetcher = async () => {
+      swrFetchCount++;
+      return `v${swrFetchCount}`;
+    };
+
+    // First fetch: fresh
+    const val1 = await swrCoalescer.getOrFetchSWR('swr_key', swrFetcher);
+    assert(val1 === 'v1' && swrFetchCount === 1, 'GalxRequestCoalescer: Fetches initial value');
+
+    // Wait for fresh TTL to expire (entering stale window)
+    await new Promise(r => setTimeout(r, 60));
+
+    // Stale fetch: returns 'v1' instantly (0ms) and queues background refresh
+    const val2 = await swrCoalescer.getOrFetchSWR('swr_key', swrFetcher);
+    assert(val2 === 'v1', 'GalxRequestCoalescer: SWR returns stale value immediately (0ms latency)');
+
+    // Wait for background refresh promise to settle
+    await new Promise(r => setTimeout(r, 20));
+    const val3 = await swrCoalescer.getOrFetchSWR('swr_key', swrFetcher);
+    assert(val3 === 'v2' && swrFetchCount === 2, 'GalxRequestCoalescer: SWR background revalidation updates cache');
+
+    // 51. WalletRepository: Bulk Array Resolution via DataLoader
+    const multiWallets = await walletRepo.getWalletsBatch([batchUserA, batchUserB, batchUserC]);
+    assert(
+      multiWallets.length === 3 && multiWallets.every(w => w !== null && w.userId.startsWith('usr_batch_')),
+      'WalletRepo: Resolves multiple user wallets in 1 batched array RPC lookup'
+    );
+
+    // 52. ApiKeyRepository: Bulk Array Resolution via DataLoader
+    const devKeyA: any = {
+      id: `key_dl_a_${Date.now()}`,
+      name: 'Batch Key A',
+      userId: batchUserA,
+      prefix: 'gk_live_a',
+      keyPrefix: 'gk_live_a',
+      keyHash: `hash_dl_a_${Date.now()}`,
+      rateLimitPerMinute: 100,
+      revoked: false
+    };
+    const devKeyB: any = {
+      id: `key_dl_b_${Date.now()}`,
+      name: 'Batch Key B',
+      userId: batchUserB,
+      prefix: 'gk_live_b',
+      keyPrefix: 'gk_live_b',
+      keyHash: `hash_dl_b_${Date.now()}`,
+      rateLimitPerMinute: 100,
+      revoked: false
+    };
+    await keyRepo.saveGatewayKey(devKeyA);
+    await keyRepo.saveGatewayKey(devKeyB);
+
+    const loadedKeys = await keyRepo.findKeysByHashesBatch([devKeyA.keyHash, devKeyB.keyHash]);
+    assert(
+      loadedKeys.length === 2 && loadedKeys[0]?.id === devKeyA.id && loadedKeys[1]?.id === devKeyB.id,
+      'ApiKeyRepo: Resolves multiple API keys by hashes in 1 batched array RPC lookup'
+    );
+
+    // 53. AuditRepository: Bulk Audit Event Recording via jsonb_to_recordset
+    const auditBatchRes = await auditRepo.recordAuditBatch([
+      { action: 'batch.audit.test.1', userId: batchUserA, metadata: { step: 1 } },
+      { action: 'batch.audit.test.2', userId: batchUserB, metadata: { step: 2 } },
+      { action: 'batch.audit.test.3', userId: batchUserC, metadata: { step: 3 } }
+    ]);
+    assert(
+      auditBatchRes.success === true && auditBatchRes.insertedCount === 3,
+      'AuditRepo: Ingests bulk audit events via high-velocity PostgreSQL jsonb_to_recordset RPC'
     );
 
 

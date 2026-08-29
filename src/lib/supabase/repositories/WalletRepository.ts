@@ -12,6 +12,7 @@ import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-
 import type { DbQueryOptions, DbAggregateQuery, DbAggregateResult } from '../../../core/broccolidb/broccolidb.contracts';
 import { calculateComputeCredit } from '../../stripe/config';
 import { GalxRequestCoalescer } from '../../cache/GalxRequestCoalescer';
+import { GalxBatchDataLoader } from '../../cache/GalxBatchDataLoader';
 
 export interface WalletRecord {
   id: string;
@@ -73,6 +74,46 @@ export class WalletRepository {
   public readonly holdTable: BroccoliDbTable<WalletHoldRecord>;
   private readonly walletCoalescer = new GalxRequestCoalescer<WalletRecord | null>({ ttlMs: 10000 });
 
+  public readonly walletDataLoader = new GalxBatchDataLoader<string, WalletRecord | null>(
+    async (userIds) => {
+      const results: Array<WalletRecord | null> = [];
+      const userMap = new Map<string, WalletRecord>();
+
+      if (isSupabaseConfigured()) {
+        try {
+          const supabase = getSupabaseAdmin();
+          const { data, error } = await supabase.rpc('fn_batch_get_wallets_by_users', {
+            p_user_ids: Array.from(userIds)
+          });
+
+          if (!error && data && Array.isArray(data)) {
+            for (const row of data as any[]) {
+              if (row && row.user_id) {
+                const mapped = this.mapRowToWallet(row);
+                userMap.set(row.user_id, mapped);
+                this.walletTable.put(row.user_id, mapped);
+              }
+            }
+          }
+        } catch {
+          // Fallback
+        }
+      }
+
+      for (const uid of userIds) {
+        if (userMap.has(uid)) {
+          results.push(userMap.get(uid)!);
+        } else {
+          const local = this.walletTable.query({ where: { userId: { $eq: uid } } }) as WalletRecord[];
+          results.push(local[0] || null);
+        }
+      }
+
+      return results;
+    },
+    { maxBatchSize: 100, batchWindowMs: 5, cacheTtlMs: 15000 }
+  );
+
   private constructor() {
     this.walletTable = new BroccoliDbTable<WalletRecord>('wallets');
     this.walletTable.createIndex('userId');
@@ -105,41 +146,12 @@ export class WalletRepository {
 
   async getWallet(userId: string): Promise<WalletRecord | null> {
     return this.walletCoalescer.getOrFetch(userId, async () => {
-      if (isSupabaseConfigured()) {
-        try {
-          const supabase = getSupabaseAdmin();
-          const { data, error } = await supabase.rpc('fn_get_wallet_by_user', {
-            p_user_id: userId
-          });
-
-          if (!error && data && (data as any).found) {
-            const mapped = this.mapRowToWallet(data as any);
-            this.walletTable.put(userId, mapped);
-            return mapped;
-          }
-
-          const { data: tableData, error: tableErr } = await supabase
-            .from('galx_wallets')
-            .select('*')
-            .eq('user_id', userId)
-            .single();
-
-          if (!tableErr && tableData) {
-            const mapped = this.mapRowToWallet(tableData);
-            this.walletTable.put(userId, mapped);
-            return mapped;
-          }
-        } catch {
-          // Fallback
-        }
-      }
-
-      const matches = this.walletTable.query({
-        where: { userId: { $eq: userId } }
-      }) as WalletRecord[];
-
-      return matches[0] || null;
+      return this.walletDataLoader.load(userId);
     });
+  }
+
+  async getWalletsBatch(userIds: string[]): Promise<Array<WalletRecord | null>> {
+    return this.walletDataLoader.loadMany(userIds);
   }
 
   async createOrGetWallet(userId: string): Promise<WalletRecord> {
@@ -212,6 +224,7 @@ export class WalletRepository {
     proofOfDepositVerified: boolean;
   }> {
     this.walletCoalescer.invalidate(params.userId);
+    this.walletDataLoader.clear(params.userId);
 
     if (isSupabaseConfigured()) {
       try {
@@ -226,6 +239,7 @@ export class WalletRepository {
           const res = data as any;
           if (res.success) {
             this.walletCoalescer.invalidate(params.userId);
+            this.walletDataLoader.clear(params.userId);
             return {
               success: true,
               depositAmount: Number(res.deposit_amount),
@@ -691,6 +705,7 @@ export class WalletRepository {
     triggerAutoReload?: boolean;
   }> {
     this.walletCoalescer.invalidate(params.userId);
+    this.walletDataLoader.clear(params.userId);
 
     if (isSupabaseConfigured()) {
       try {
@@ -712,6 +727,7 @@ export class WalletRepository {
           const res = data as any;
           if (res.success) {
             this.walletCoalescer.invalidate(params.userId);
+            this.walletDataLoader.clear(params.userId);
             return {
               success: true,
               reason: res.reason,

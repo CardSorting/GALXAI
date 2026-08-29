@@ -134,6 +134,98 @@ export class AuditRepository {
   }
 
   /**
+   * High-Velocity Bulk Audit Event Recording via jsonb_to_recordset PostgreSQL RPC.
+   */
+  async recordAuditBatch(events: Array<{
+    action: string;
+    metadata?: Record<string, any>;
+    shardId?: string;
+    userId?: string;
+    workspaceId?: string;
+    resourceType?: string;
+    resourceId?: string;
+    ipAddress?: string;
+    userAgent?: string;
+    timestampMs?: number;
+  }>): Promise<{ success: boolean; insertedCount: number }> {
+    if (events.length === 0) return { success: true, insertedCount: 0 };
+
+    const records: AuditLogRecord[] = [];
+    const dbPayload = [];
+
+    for (const params of events) {
+      const now = params.timestampMs || Date.now();
+      const id = `audit_${now}_${Math.random().toString(36).substring(2, 8)}`;
+      const prevHash = this.latestHash;
+      const currentHash = AuditRepository.computeEntryHash(prevHash, id, params.action, now, params.metadata);
+      this.latestHash = currentHash;
+
+      const record: AuditLogRecord = {
+        id,
+        workspaceId: params.workspaceId || null,
+        userId: params.userId || null,
+        shardId: params.shardId || null,
+        action: params.action,
+        resourceType: params.resourceType || null,
+        resourceId: params.resourceId || null,
+        metadata: params.metadata || {},
+        ipAddress: params.ipAddress || null,
+        userAgent: params.userAgent || null,
+        timestampMs: now,
+        createdAt: new Date(now).toISOString(),
+        prevHash,
+        currentHash
+      };
+
+      records.push(record);
+      this.inMemoryLogs.unshift(record);
+      this.auditTable.put(record.id, record);
+
+      dbPayload.push({
+        id,
+        workspace_id: params.workspaceId || null,
+        user_id: params.userId || null,
+        shard_id: params.shardId || null,
+        action: params.action,
+        resource_type: params.resourceType || null,
+        resource_id: params.resourceId || null,
+        metadata: {
+          ...(params.metadata || {}),
+          _prevHash: prevHash,
+          _currentHash: currentHash
+        },
+        ip_address: params.ipAddress || null,
+        user_agent: params.userAgent || null,
+        timestamp_ms: now
+      });
+    }
+
+    if (this.inMemoryLogs.length > 2000) {
+      this.inMemoryLogs.splice(2000);
+    }
+
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseAdmin();
+        const { data, error } = await supabase.rpc('fn_batch_record_audit_events', {
+          p_events: dbPayload as any
+        });
+
+        if (!error && data && (data as any).success) {
+          return {
+            success: true,
+            insertedCount: Number((data as any).inserted_events_count || events.length)
+          };
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    return { success: true, insertedCount: events.length };
+  }
+
+  /**
    * Cryptographically verifies the unbroken chain of custody for all audit log entries.
    */
   public verifyAuditChainIntegrity(): AuditIntegrityVerificationResult {

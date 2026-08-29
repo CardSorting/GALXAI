@@ -3132,9 +3132,27 @@ export interface Database {
         };
         Returns: Json;
       };
+      fn_batch_get_wallets_by_users: {
+        Args: {
+          p_user_ids: string[];
+        };
+        Returns: Json;
+      };
+      fn_batch_get_developer_keys_by_hashes: {
+        Args: {
+          p_key_hashes: string[];
+        };
+        Returns: Json;
+      };
       fn_batch_record_telemetry: {
         Args: {
           p_samples: Json;
+        };
+        Returns: Json;
+      };
+      fn_batch_record_audit_events: {
+        Args: {
+          p_events: Json;
         };
         Returns: Json;
       };

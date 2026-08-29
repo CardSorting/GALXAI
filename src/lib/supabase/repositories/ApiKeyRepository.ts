@@ -8,11 +8,54 @@ import type { Database } from '../types';
 import type { DeveloperGatewayKey } from '../../../core/contracts/GalxContracts';
 import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
 import { GalxRequestCoalescer } from '../../cache/GalxRequestCoalescer';
+import { GalxBatchDataLoader } from '../../cache/GalxBatchDataLoader';
 
 export class ApiKeyRepository {
   private static instance: ApiKeyRepository;
   private readonly keyTable: BroccoliDbTable<DeveloperGatewayKey>;
   private readonly keyCoalescer = new GalxRequestCoalescer<DeveloperGatewayKey | null>({ ttlMs: 15000 });
+
+  public readonly keyDataLoader = new GalxBatchDataLoader<string, DeveloperGatewayKey | null>(
+    async (hashes) => {
+      const results: Array<DeveloperGatewayKey | null> = [];
+      const keyMap = new Map<string, DeveloperGatewayKey>();
+
+      if (isSupabaseConfigured()) {
+        try {
+          const supabase = getSupabaseAdmin();
+          const { data, error } = await supabase.rpc('fn_batch_get_developer_keys_by_hashes', {
+            p_key_hashes: Array.from(hashes)
+          });
+
+          if (!error && data && Array.isArray(data)) {
+            for (const row of data as any[]) {
+              if (row && row.key_hash) {
+                const mapped = this.mapRowToGatewayKey(row);
+                keyMap.set(row.key_hash, mapped);
+                this.keyTable.put(mapped.id, mapped);
+              }
+            }
+          }
+        } catch {
+          // Fallback
+        }
+      }
+
+      for (const hash of hashes) {
+        if (keyMap.has(hash)) {
+          results.push(keyMap.get(hash)!);
+        } else {
+          const matches = this.keyTable.query({
+            where: { keyHash: { $eq: hash }, revoked: { $eq: false } }
+          }) as DeveloperGatewayKey[];
+          results.push(matches[0] || null);
+        }
+      }
+
+      return results;
+    },
+    { maxBatchSize: 100, batchWindowMs: 5, cacheTtlMs: 15000 }
+  );
 
   private constructor() {
     this.keyTable = new BroccoliDbTable<DeveloperGatewayKey>('gateway_keys');
@@ -83,35 +126,12 @@ export class ApiKeyRepository {
 
   async findGatewayKeyByHash(keyHash: string): Promise<DeveloperGatewayKey | null> {
     return this.keyCoalescer.getOrFetch(`hash:${keyHash}`, async () => {
-      if (isSupabaseConfigured()) {
-        try {
-          const supabase = getSupabaseAdmin();
-          const { data, error } = await supabase
-            .from('galx_developer_keys')
-            .select('*')
-            .eq('key_hash', keyHash)
-            .eq('is_revoked', false)
-            .single();
-
-          if (!error && data) {
-            const mapped = this.mapRowToGatewayKey(data);
-            this.keyTable.put(mapped.id, mapped);
-            return mapped;
-          }
-        } catch {
-          // Fallback
-        }
-      }
-
-      const matches = this.keyTable.query({
-        where: {
-          keyHash: { $eq: keyHash },
-          revoked: { $eq: false }
-        }
-      }) as DeveloperGatewayKey[];
-
-      return matches[0] || null;
+      return this.keyDataLoader.load(keyHash);
     });
+  }
+
+  async findKeysByHashesBatch(keyHashes: string[]): Promise<Array<DeveloperGatewayKey | null>> {
+    return this.keyDataLoader.loadMany(keyHashes);
   }
 
   async findKeyByHash(keyHash: string): Promise<DeveloperGatewayKey | null> {
@@ -156,6 +176,7 @@ export class ApiKeyRepository {
     this.keyTable.put(key.id, key);
     this.keyCoalescer.invalidate(`id:${key.id}`);
     this.keyCoalescer.invalidate(`hash:${key.keyHash}`);
+    this.keyDataLoader.clear(key.keyHash);
 
     if (!isSupabaseConfigured()) {
       if (options.requireRemote) {
@@ -201,6 +222,7 @@ export class ApiKeyRepository {
     this.keyCoalescer.set(`id:${keyId}`, updated);
     if (updated.keyHash) {
       this.keyCoalescer.set(`hash:${updated.keyHash}`, updated);
+      this.keyDataLoader.clear(updated.keyHash);
     }
 
     if (isSupabaseConfigured()) {
@@ -226,9 +248,11 @@ export class ApiKeyRepository {
       this.keyTable.put(keyId, { ...existing, revoked: true });
       if (existing.keyHash) {
         this.keyCoalescer.invalidate(`hash:${existing.keyHash}`);
+        this.keyDataLoader.clear(existing.keyHash);
       }
     }
     this.keyCoalescer.invalidate(`id:${keyId}`);
+    this.keyDataLoader.clearAll();
 
     if (isSupabaseConfigured()) {
       try {
@@ -251,9 +275,11 @@ export class ApiKeyRepository {
     const existing = this.keyTable.get(keyId);
     if (existing?.keyHash) {
       this.keyCoalescer.invalidate(`hash:${existing.keyHash}`);
+      this.keyDataLoader.clear(existing.keyHash);
     }
     this.keyCoalescer.invalidate(`id:${keyId}`);
     this.keyTable.delete(keyId);
+    this.keyDataLoader.clearAll();
 
     if (isSupabaseConfigured()) {
       try {
