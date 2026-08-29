@@ -13,9 +13,6 @@ export interface JobRole {
   responsibilities: string[];
   requirements: string[];
   niceToHave: string[];
-  salaryRange: string;
-  equity: string;
-  equityNumber: number; // percentage e.g. 0.50
 }
 
 export const JOB_ROLES: JobRole[] = [
@@ -52,9 +49,6 @@ export const JOB_ROLES: JobRole[] = [
       'Experience authoring custom Linux network drivers or eBPF tracing programs.',
       'Prior background at a high-scale CDN, DNS provider, or cloud hyperscaler.',
     ],
-    salaryRange: '$220,000 – $310,000 USD',
-    equity: '0.25% – 0.75%',
-    equityNumber: 0.50,
   },
   {
     id: 'gpu-cuda-engineer',
@@ -88,9 +82,6 @@ export const JOB_ROLES: JobRole[] = [
       'Contributions to open-source LLM inference engines (vLLM, TensorRT-LLM, llama.cpp, SGLang).',
       'Experience with FP8 / FP4 quantization techniques and mixed-precision arithmetic.',
     ],
-    salaryRange: '$230,000 – $320,000 USD',
-    equity: '0.25% – 0.70%',
-    equityNumber: 0.45,
   },
   {
     id: 'kernel-ebpf-specialist',
@@ -123,11 +114,7 @@ export const JOB_ROLES: JobRole[] = [
       'Contributions to the Linux kernel network subsystem or eBPF tooling.',
       'Experience with DPDK or hardware NIC offloading.',
     ],
-    salaryRange: '$215,000 – $305,000 USD',
-    equity: '0.25% – 0.65%',
-    equityNumber: 0.45,
   },
-
   {
     id: 'backend-protocol-engineer',
     title: 'Senior Backend & High-Throughput Protocol Engineer',
@@ -160,9 +147,6 @@ export const JOB_ROLES: JobRole[] = [
       'Experience building financial ledger systems or wholesale billing engines.',
       'Familiarity with Stripe API / Stripe Connect integration protocols.',
     ],
-    salaryRange: '$190,000 – $260,000 USD',
-    equity: '0.15% – 0.45%',
-    equityNumber: 0.30,
   },
   {
     id: 'sre-reliability-engineer',
@@ -196,9 +180,6 @@ export const JOB_ROLES: JobRole[] = [
       'Experience managing ClickHouse clusters storing billions of daily telemetry records.',
       'Certifications or deep familiarity with AWS/GCP multi-region architectures.',
     ],
-    salaryRange: '$195,000 – $275,000 USD',
-    equity: '0.15% – 0.45%',
-    equityNumber: 0.30,
   },
 
   // 2. Research
@@ -234,9 +215,6 @@ export const JOB_ROLES: JobRole[] = [
       'Hands-on CUDA kernel programming or Triton kernel optimization experience.',
       'Familiarity with memory-efficient attention (FlashAttention-3, PagedAttention).',
     ],
-    salaryRange: '$210,000 – $295,000 USD',
-    equity: '0.20% – 0.65%',
-    equityNumber: 0.40,
   },
   {
     id: 'ml-compiler-engineer',
@@ -269,9 +247,6 @@ export const JOB_ROLES: JobRole[] = [
       'Contributions to LLVM, MLIR, or Triton open-source compiler repositories.',
       'Experience with custom hardware accelerator architectures and NPU instruction sets.',
     ],
-    salaryRange: '$225,000 – $315,000 USD',
-    equity: '0.25% – 0.70%',
-    equityNumber: 0.45,
   },
   {
     id: 'ai-agent-architect',
@@ -305,9 +280,6 @@ export const JOB_ROLES: JobRole[] = [
       'Experience with reinforcement learning from human / AI feedback (RLHF / RLAIF).',
       'Author of open-source agent frameworks or developer productivity extensions.',
     ],
-    salaryRange: '$205,000 – $285,000 USD',
-    equity: '0.20% – 0.60%',
-    equityNumber: 0.40,
   },
   {
     id: 'multimodal-vision-engineer',
@@ -341,9 +313,6 @@ export const JOB_ROLES: JobRole[] = [
       'Experience optimizing Whisper or Bark/Fish-Speech models for real-time edge streaming.',
       'Background in game engine audio or interactive computer graphics.',
     ],
-    salaryRange: '$200,000 – $280,000 USD',
-    equity: '0.15% – 0.55%',
-    equityNumber: 0.35,
   },
 
   // 3. Product & Design
@@ -379,9 +348,6 @@ export const JOB_ROLES: JobRole[] = [
       'Experience building rich WebGL/Canvas visualization widgets or generative AI studio tools.',
       'Strong graphic design sensibility and typography fundamentals.',
     ],
-    salaryRange: '$190,000 – $265,000 USD',
-    equity: '0.15% – 0.50%',
-    equityNumber: 0.35,
   },
   {
     id: 'staff-product-designer',
@@ -415,9 +381,6 @@ export const JOB_ROLES: JobRole[] = [
       'Ability to write clean CSS, Tailwind classes, or React prototypes.',
       '3D illustration or blender rendering skills for brand assets.',
     ],
-    salaryRange: '$175,000 – $240,000 USD',
-    equity: '0.15% – 0.45%',
-    equityNumber: 0.30,
   },
   {
     id: 'frontend-performance-engineer',
@@ -451,9 +414,6 @@ export const JOB_ROLES: JobRole[] = [
       'Experience writing Rust-to-WebAssembly modules for text processing.',
       'Prior work on high-frequency trading dashboards or collaborative canvas editors.',
     ],
-    salaryRange: '$180,000 – $250,000 USD',
-    equity: '0.15% – 0.45%',
-    equityNumber: 0.30,
   },
 
   // 4. Security & Cryptography
@@ -489,9 +449,6 @@ export const JOB_ROLES: JobRole[] = [
       'Experience with hardware security modules (HSMs) and zero-knowledge proof primitives.',
       'Prior security engineering experience at a top-tier fintech or enterprise security company.',
     ],
-    salaryRange: '$225,000 – $320,000 USD',
-    equity: '0.25% – 0.70%',
-    equityNumber: 0.45,
   },
   {
     id: 'ai-safety-red-team-lead',
@@ -525,9 +482,6 @@ export const JOB_ROLES: JobRole[] = [
       'Published research or CVEs in AI security, jailbreak analysis, or LLM safety.',
       'Offensive security certifications (OSCP, OSCE, GPEN).',
     ],
-    salaryRange: '$195,000 – $270,000 USD',
-    equity: '0.15% – 0.50%',
-    equityNumber: 0.35,
   },
 
   // 5. DevRel & Solutions
@@ -562,9 +516,6 @@ export const JOB_ROLES: JobRole[] = [
       'Author or maintainer of a widely used open-source CLI tool or developer utility.',
       'Active contributions to the Rust or TypeScript compiler/tooling ecosystem.',
     ],
-    salaryRange: '$185,000 – $255,000 USD',
-    equity: '0.15% – 0.45%',
-    equityNumber: 0.35,
   },
   {
     id: 'developer-relations-lead',
@@ -598,9 +549,6 @@ export const JOB_ROLES: JobRole[] = [
       'Active YouTube channel, technical podcast, or popular technical newsletter.',
       'Experience organizing hackathons or developer workshops.',
     ],
-    salaryRange: '$160,000 – $220,000 USD',
-    equity: '0.10% – 0.35%',
-    equityNumber: 0.20,
   },
   {
     id: 'enterprise-solutions-architect',
@@ -634,9 +582,6 @@ export const JOB_ROLES: JobRole[] = [
       'Experience working at an enterprise cloud or infrastructure provider (Cloudflare, AWS, Datadog, Snowflake).',
       'Hands-on coding ability to write proof-of-concept scripts in Python or Node.js.',
     ],
-    salaryRange: '$180,000 – $250,000 USD',
-    equity: '0.15% – 0.40%',
-    equityNumber: 0.25,
   },
 ];
 

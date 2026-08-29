@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: RolePageProps): Promise<Metad
   }
 
   return constructMetadata({
-    title: `${role.title} (${role.salaryRange}) — Careers at GALX AI`,
+    title: `${role.title} — Careers at GALX AI`,
     description: `${role.description} Join our core engineering fleet in building the next-generation Anycast routing and reasoning substrate. 100% remote, top compensation + equity.`,
     canonicalPath: `/careers/${role.id}`,
     keywords: [

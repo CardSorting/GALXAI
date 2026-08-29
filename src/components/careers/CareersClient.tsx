@@ -11,88 +11,17 @@ import {
   Shield,
   Zap,
   Globe,
-  CheckCircle2,
-  Heart,
-  Laptop,
-  Plane,
-  DollarSign,
-  Coffee,
   Code2,
-  Cpu,
   ChevronRight,
   ChevronDown,
-  Send,
   X,
-  User,
-  Mail,
-  AlertCircle,
   Search,
-  Filter,
-  Terminal,
-  HelpCircle,
-  TrendingUp,
-  Activity,
-  Award,
   Flame,
-  Gift,
   Check,
-  Calculator,
   Compass,
-  Rocket,
-  Palette,
-  Eye,
-  Radio,
-  Server,
-  Database,
-  Lock,
-  Box,
-  HardDrive,
   Copy
 } from 'lucide-react';
 import { JOB_ROLES, JobRole } from '@/data/jobRoles';
-
-const PERKS = [
-  {
-    icon: DollarSign,
-    title: 'Top-of-Market Comp',
-    desc: 'Competitive base salaries + meaningful early equity ownership in high-growth frontier infrastructure.',
-  },
-  {
-    icon: Globe,
-    title: '100% Remote-First',
-    desc: 'Work from anywhere in the world. We hire the best minds regardless of time zone or geographic borders.',
-  },
-  {
-    icon: Laptop,
-    title: '$10,000 Workspace Grant',
-    desc: 'Generous initial hardware budget (M4 Max MacBook, 4K displays, Herman Miller chair) + yearly upgrades.',
-  },
-  {
-    icon: Heart,
-    title: 'Comprehensive Healthcare',
-    desc: 'Premium health, dental, and vision insurance with 100% premium coverage for you and your dependents.',
-  },
-  {
-    icon: Cpu,
-    title: 'Unlimited AI Sandbox',
-    desc: 'Free, unrestricted access to the entire GALX AI model fleet, GPU clusters, and prompt playgrounds for personal research.',
-  },
-  {
-    icon: Plane,
-    title: 'Global Team Offsites',
-    desc: 'All-expenses-paid bi-annual company retreats in cities like Tokyo, San Francisco, Zurich, and Kyoto.',
-  },
-  {
-    icon: Coffee,
-    title: 'Unlimited Time Off',
-    desc: 'Flexible, trust-based PTO policy with mandatory minimums so you stay refreshed and inspired.',
-  },
-  {
-    icon: Shield,
-    title: '$3,500 Learning Grant',
-    desc: 'Annual stipend for books, online courses, technical conference tickets, and personal development.',
-  },
-];
 
 const HIRING_STAGES = [
   {
@@ -117,7 +46,7 @@ const HIRING_STAGES = [
     step: '04',
     title: 'Fast-Track Offer',
     duration: '< 48 hours',
-    desc: 'Transparent, top-tier compensation and equity offer package delivered rapidly with zero corporate delays.',
+    desc: 'Transparent compensation and equity offer package delivered rapidly with zero corporate delays.',
   },
 ];
 
@@ -148,19 +77,6 @@ export function CareersClient() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [copiedCmd, setCopiedCmd] = useState<string | null>(null);
 
-  // Referral Modal State
-  const [referralModalOpen, setReferralModalOpen] = useState(false);
-  const [referrerName, setReferrerName] = useState('');
-  const [referrerEmail, setReferrerEmail] = useState('');
-  const [candidateName, setCandidateName] = useState('');
-  const [candidateProfile, setCandidateProfile] = useState('');
-  const [referralSuccess, setReferralSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  // Interactive Equity Calculator State
-  const [calcEquityPercent, setCalcEquityPercent] = useState<number>(0.40);
-  const [calcValuationTier, setCalcValuationTier] = useState<number>(1000000000); // $1B
-
   const departments = ['All', 'Engineering', 'Research', 'Product', 'Security', 'DevRel'];
   const experiences = ['All', 'Staff', 'Lead', 'Senior', 'Mid'];
 
@@ -187,34 +103,14 @@ export function CareersClient() {
     });
   }, [selectedDepartment, selectedExperience, onlyImmediate, searchQuery]);
 
-  const projectedEquityValue = useMemo(() => {
-    return (calcValuationTier * (calcEquityPercent / 100)).toLocaleString('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0,
-    });
-  }, [calcValuationTier, calcEquityPercent]);
-
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopiedCmd(text);
     setTimeout(() => setCopiedCmd(null), 2000);
   };
 
-  const handleReferralSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!referrerName || !referrerEmail || !candidateName) {
-      return;
-    }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setReferralSuccess(true);
-    }, 600);
-  };
-
   return (
-    <div className="space-y-24">
+    <div className="space-y-20">
       {/* Top Urgent Recruiting Banner */}
       <section className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-cyan-950/60 via-zinc-900 to-indigo-950/60 border border-cyan-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg shadow-cyan-950/30">
         <div className="flex items-center gap-3 text-center sm:text-left">
@@ -231,27 +127,18 @@ export function CareersClient() {
               </span>
             </div>
             <p className="text-xs text-zinc-400">
-              We are aggressively scaling our core engineering fleet. Every technical application is reviewed by engineering leads in &lt;24 hours.
+              We are scaling our core engineering fleet. Every technical application is reviewed by engineering leads in &lt;24 hours.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={() => setReferralModalOpen(true)}
-            className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
-          >
-            <Gift className="w-3.5 h-3.5 text-amber-400" />
-            <span>$10k Referral Bounty</span>
-          </button>
-          <a
-            href="#open-roles"
-            className="px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black text-xs font-bold font-mono flex items-center gap-1 transition-all cursor-pointer"
-          >
-            <span>View All Openings ({JOB_ROLES.length})</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </a>
-        </div>
+        <a
+          href="#open-roles"
+          className="px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black text-xs font-bold font-mono flex items-center gap-1 transition-all shrink-0 cursor-pointer"
+        >
+          <span>View Openings ({JOB_ROLES.length})</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </a>
       </section>
 
       {/* Hero Header Section */}
@@ -278,13 +165,6 @@ export function CareersClient() {
             <span>Explore Open Positions ({JOB_ROLES.length})</span>
             <ArrowRight className="w-4 h-4" />
           </a>
-          <a
-            href="#equity-calculator"
-            className="px-6 py-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold text-xs transition-all cursor-pointer flex items-center gap-2"
-          >
-            <Calculator className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Equity Calculator</span>
-          </a>
         </div>
       </section>
 
@@ -296,7 +176,7 @@ export function CareersClient() {
         </div>
         <div className="p-6 rounded-2xl bg-zinc-900/40 border border-white/10 text-center space-y-1">
           <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">100% Remote</div>
-          <div className="text-xs text-zinc-400 font-semibold">Across 7 Global Timezones</div>
+          <div className="text-xs text-zinc-400 font-semibold">Across Global Timezones</div>
         </div>
         <div className="p-6 rounded-2xl bg-zinc-900/40 border border-white/10 text-center space-y-1">
           <div className="text-2xl sm:text-3xl font-black text-amber-400 font-mono">75% Cache Pass</div>
@@ -417,115 +297,6 @@ export function CareersClient() {
               )}
             </button>
           </div>
-        </div>
-      </section>
-
-      {/* Interactive Equity & Compensation Value Visualizer */}
-      <section id="equity-calculator" className="p-8 sm:p-12 rounded-3xl bg-gradient-to-b from-zinc-900/80 to-zinc-950/80 border border-white/10 space-y-8 scroll-mt-24">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-1.5 text-xs font-mono text-cyan-400 uppercase font-bold tracking-wider">
-              <Calculator className="w-3.5 h-3.5" />
-              <span>TRANSPARENT REWARDS</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Interactive Equity &amp; Upside Visualizer</h2>
-            <p className="text-sm text-zinc-400">Model the financial value of early founding equity as GALX AI scales.</p>
-          </div>
-          <div className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
-            10-Year Post-Termination Exercise Window
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-          {/* Sliders Control */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Equity % Slider */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs font-mono">
-                <span className="text-zinc-300">Equity Grant Ownership</span>
-                <span className="text-cyan-400 font-bold">{calcEquityPercent.toFixed(2)}%</span>
-              </div>
-              <input
-                type="range"
-                min="0.10"
-                max="0.75"
-                step="0.05"
-                value={calcEquityPercent}
-                onChange={(e) => setCalcEquityPercent(parseFloat(e.target.value))}
-                className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
-              />
-              <div className="flex justify-between text-[10px] font-mono text-zinc-500">
-                <span>0.10% (Mid/Senior)</span>
-                <span>0.40% (Senior Lead)</span>
-                <span>0.75% (Staff/Principal)</span>
-              </div>
-            </div>
-
-            {/* Valuation Scenarios */}
-            <div className="space-y-2">
-              <span className="text-xs font-mono text-zinc-300 block">GALX AI Valuation Scenario</span>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { label: '$250M (Series A/B)', val: 250000000 },
-                  { label: '$1.0B (Unicorn)', val: 1000000000 },
-                  { label: '$5.0B (Hyperscale)', val: 5000000000 },
-                ].map((tier) => (
-                  <button
-                    key={tier.val}
-                    type="button"
-                    onClick={() => setCalcValuationTier(tier.val)}
-                    className={`p-3 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer text-center ${
-                      calcValuationTier === tier.val
-                        ? 'bg-cyan-500 text-black shadow-md shadow-cyan-500/20'
-                        : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10'
-                    }`}
-                  >
-                    {tier.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Outcome Card */}
-          <div className="p-6 rounded-2xl bg-black/60 border border-cyan-500/30 text-center space-y-3">
-            <span className="text-[11px] font-mono text-zinc-400 uppercase">Estimated Equity Upside</span>
-            <div className="text-3xl sm:text-4xl font-black text-cyan-400 font-mono tracking-tight">
-              {projectedEquityValue}
-            </div>
-            <div className="text-[11px] text-zinc-400 leading-relaxed">
-              Plus <span className="text-white font-bold">$160k – $320k base salary</span>, 100% health coverage, and $10k annual hardware grants.
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits & Perks Grid */}
-      <section id="benefits" className="space-y-8 scroll-mt-24">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-1.5 text-xs font-mono text-cyan-400 uppercase font-bold tracking-wider">
-            <span>PERKS &amp; COMPENSATION</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Designed for World-Class Builders</h2>
-          <p className="text-sm text-zinc-400">Everything you need to do the best work of your career, unrestricted.</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {PERKS.map((perk, idx) => {
-            const Icon = perk.icon;
-            return (
-              <div
-                key={idx}
-                className="p-6 rounded-2xl bg-zinc-900/40 border border-white/10 hover:border-cyan-500/30 transition-all space-y-3 group"
-              >
-                <div className="w-9 h-9 rounded-xl bg-white/5 group-hover:bg-cyan-500/10 text-zinc-300 group-hover:text-cyan-400 flex items-center justify-center transition-colors">
-                  <Icon className="w-4 h-4" />
-                </div>
-                <h3 className="text-sm font-bold text-white">{perk.title}</h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">{perk.desc}</p>
-              </div>
-            );
-          })}
         </div>
       </section>
 
@@ -686,10 +457,10 @@ export function CareersClient() {
                       ))}
                     </div>
 
-                    <div className="flex items-center gap-4 text-xs font-mono text-zinc-400 pt-1">
-                      <span className="text-emerald-400 font-bold">{role.salaryRange}</span>
-                      <span>+</span>
-                      <span className="text-purple-400 font-bold">{role.equity} Equity</span>
+                    <div className="flex flex-wrap items-center gap-2 text-xs font-mono pt-1">
+                      <span className="px-3 py-1 rounded-lg bg-white/[0.04] border border-white/10 text-zinc-300 backdrop-blur-md">
+                        Early-Stage Compensation &amp; Equity (Open)
+                      </span>
                     </div>
                   </div>
 
@@ -769,146 +540,6 @@ export function CareersClient() {
           })}
         </div>
       </section>
-
-      {/* General Inquiry & Referral CTA */}
-      <section className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-indigo-950/40 via-zinc-900 to-cyan-950/40 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-6">
-        <div className="space-y-1 text-center sm:text-left">
-          <div className="inline-flex items-center gap-1 text-xs font-mono text-amber-400 font-bold uppercase">
-            <Gift className="w-3.5 h-3.5" />
-            <span>EARN A $10,000 REFERRAL BOUNTY</span>
-          </div>
-          <h3 className="text-lg sm:text-xl font-bold text-white">Know someone exceptional?</h3>
-          <p className="text-xs text-zinc-400 max-w-lg">
-            Refer an engineer or research colleague who joins our full-time fleet, and we will wire you a $10,000 cash bonus.
-          </p>
-        </div>
-        <button
-          onClick={() => setReferralModalOpen(true)}
-          className="px-6 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs font-mono flex items-center gap-2 transition-all shrink-0 cursor-pointer shadow-md"
-        >
-          <Gift className="w-4 h-4 text-black" />
-          <span>Submit a Referral ($10k)</span>
-        </button>
-      </section>
-
-      {/* Referral Modal */}
-      {referralModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg bg-[#0d101d] border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
-            <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
-              <div>
-                <div className="flex items-center gap-1 text-xs font-mono text-amber-400 font-bold uppercase">
-                  <Gift className="w-3.5 h-3.5" />
-                  <span>$10,000 Referral Bounty</span>
-                </div>
-                <h2 className="text-xl font-black text-white">Refer an Elite Builder</h2>
-              </div>
-              <button
-                onClick={() => {
-                  setReferralModalOpen(false);
-                  setReferralSuccess(false);
-                }}
-                className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {!referralSuccess ? (
-              <form onSubmit={handleReferralSubmit} className="space-y-4">
-                <p className="text-xs text-zinc-400">
-                  Provide your contact details and a link to the candidate's GitHub, LinkedIn, or personal website. We'll reach out discreetly and credit you.
-                </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-mono text-zinc-400 mb-1">Your Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={referrerName}
-                      onChange={(e) => setReferrerName(e.target.value)}
-                      placeholder="Your Name"
-                      className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder-zinc-500 focus:outline-none focus:border-cyan-400"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-mono text-zinc-400 mb-1">Your Email (for bounty) *</label>
-                    <input
-                      type="email"
-                      required
-                      value={referrerEmail}
-                      onChange={(e) => setReferrerEmail(e.target.value)}
-                      placeholder="your@email.com"
-                      className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder-zinc-500 focus:outline-none focus:border-cyan-400"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-mono text-zinc-400 mb-1">Candidate's Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={candidateName}
-                    onChange={(e) => setCandidateName(e.target.value)}
-                    placeholder="Candidate Name"
-                    className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder-zinc-500 focus:outline-none focus:border-cyan-400"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-mono text-zinc-400 mb-1">Candidate GitHub / LinkedIn / Portfolio *</label>
-                  <input
-                    type="url"
-                    required
-                    value={candidateProfile}
-                    onChange={(e) => setCandidateProfile(e.target.value)}
-                    placeholder="https://github.com/username or https://linkedin.com/in/..."
-                    className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder-zinc-500 focus:outline-none focus:border-cyan-400"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setReferralModalOpen(false)}
-                    className="px-4 py-2 rounded-xl bg-white/5 text-zinc-400 text-xs font-semibold"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="px-5 py-2 rounded-xl bg-amber-400 text-black font-bold text-xs font-mono hover:bg-amber-300 transition-all cursor-pointer"
-                  >
-                    {loading ? 'Submitting...' : 'Submit Referral'}
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <div className="py-8 text-center space-y-3">
-                <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto">
-                  <CheckCircle2 className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-white">Referral Registered!</h3>
-                <p className="text-xs text-zinc-400 max-w-sm mx-auto">
-                  Thank you! We will reach out to {candidateName}. If hired, we'll notify you at {referrerEmail} with your $10,000 bonus.
-                </p>
-                <button
-                  onClick={() => {
-                    setReferralModalOpen(false);
-                    setReferralSuccess(false);
-                  }}
-                  className="px-5 py-2 rounded-xl bg-white text-black font-bold text-xs font-mono"
-                >
-                  Done
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

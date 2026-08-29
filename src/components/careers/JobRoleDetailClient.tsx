@@ -12,13 +12,7 @@ import {
   Zap,
   Globe,
   CheckCircle2,
-  Heart,
-  Laptop,
-  Plane,
-  DollarSign,
-  Coffee,
   Code2,
-  Cpu,
   ChevronRight,
   ChevronLeft,
   Send,
@@ -28,9 +22,7 @@ import {
   Linkedin,
   AlertCircle,
   Flame,
-  Gift,
   Check,
-  Calculator,
   Compass,
   Rocket,
   Share2,
@@ -65,7 +57,7 @@ const HIRING_STAGES = [
     step: '04',
     title: 'Fast-Track Offer',
     duration: '< 48 hours',
-    desc: 'Transparent, top-tier compensation and equity offer package delivered rapidly with zero corporate delays.',
+    desc: 'Transparent compensation and equity offer package delivered rapidly with zero corporate delays.',
   },
 ];
 
@@ -181,10 +173,10 @@ export function JobRoleDetailClient({ role }: JobRoleDetailClientProps) {
 
         {/* Compensation & SLA Badges */}
         <div className="pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-4 text-sm font-mono">
-            <span className="text-emerald-400 font-black text-base">{role.salaryRange}</span>
-            <span className="text-zinc-600">•</span>
-            <span className="text-purple-400 font-black text-base">{role.equity} Equity</span>
+          <div className="flex items-center gap-2 text-xs font-mono">
+            <span className="px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-zinc-300 backdrop-blur-md">
+              Early-Stage Compensation &amp; Equity (Open)
+            </span>
           </div>
 
           <a
@@ -197,7 +189,7 @@ export function JobRoleDetailClient({ role }: JobRoleDetailClientProps) {
         </div>
       </header>
 
-      {/* Main Content Grid: Detailed Specs on Left, Compensation & Perks Sidebar on Right */}
+      {/* Main Content Grid: Detailed Specs on Left, Position Summary on Right */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Role Details */}
         <div className="lg:col-span-2 space-y-10">
@@ -412,70 +404,40 @@ export function JobRoleDetailClient({ role }: JobRoleDetailClientProps) {
           </section>
         </div>
 
-        {/* Right Column: Sticky Sidebar with Compensation, Benefits, and Referrals */}
+        {/* Right Column: Sticky Sidebar with Compensation & Role Overview */}
         <div className="space-y-6">
-          {/* Quick Summary Card */}
           <div className="p-6 rounded-3xl bg-zinc-900/50 border border-white/10 space-y-5 sticky top-24">
             <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
-              Compensation &amp; Package
+              Position Overview
             </h3>
 
             <div className="space-y-3 text-xs font-mono">
-              <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-1">
-                <span className="text-[10px] text-zinc-500 uppercase">Base Salary (Annual)</span>
-                <div className="text-emerald-400 font-bold text-base">{role.salaryRange}</div>
+              <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-1.5 backdrop-blur-md">
+                <span className="text-[10px] text-zinc-500 uppercase">Offering &amp; Equity</span>
+                <div className="text-white font-semibold text-xs">Early-Stage Package (Open)</div>
+                <span className="text-[10px] text-zinc-400 block font-sans leading-relaxed">
+                  Early-stage salary &amp; direct equity ownership tailored to candidate caliber and ownership appetite.
+                </span>
               </div>
 
               <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-1">
-                <span className="text-[10px] text-zinc-500 uppercase">Founding Equity Grant</span>
-                <div className="text-purple-400 font-bold text-base">{role.equity} Ownership</div>
-                <span className="text-[10px] text-zinc-500 block font-sans">10-year post-termination exercise window</span>
+                <span className="text-[10px] text-zinc-500 uppercase">Work Location</span>
+                <div className="text-white font-bold text-xs font-sans">{role.location}</div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-1">
+                <span className="text-[10px] text-zinc-500 uppercase">Application Review</span>
+                <div className="text-cyan-400 font-bold text-xs font-sans">Reviewed in &lt;24 hours</div>
               </div>
             </div>
 
-            {/* Perks Summary */}
-            <div className="space-y-3 pt-3 border-t border-white/5">
-              <h4 className="text-xs font-mono text-zinc-400 font-bold uppercase">Included Benefits:</h4>
-              <ul className="space-y-2 text-xs text-zinc-300">
-                <li className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  <span>100% Remote (Work from anywhere)</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  <span>$10,000 Workspace Setup Budget</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  <span>100% Health, Dental &amp; Vision</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  <span>Unlimited GPU Sandbox Compute</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  <span>Global Team Retreats (Tokyo, Zurich)</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* $10k Referral Callout */}
-            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-2 text-xs">
-              <div className="flex items-center gap-1.5 text-amber-400 font-bold font-mono">
-                <Gift className="w-4 h-4" />
-                <span>$10,000 Referral Bounty</span>
-              </div>
-              <p className="text-zinc-400 text-[11px] leading-relaxed">
-                Know someone perfect for this role? Refer them and receive a $10k bonus upon hire.
-              </p>
-              <Link
-                href="/careers"
-                className="text-amber-300 font-mono text-[11px] hover:underline block pt-1"
-              >
-                Submit Referral on Careers Page &rarr;
-              </Link>
-            </div>
+            <a
+              href="#apply-form"
+              className="w-full py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-bold text-xs font-mono flex items-center justify-center gap-1.5 transition-all shadow-md shadow-cyan-500/20 block text-center"
+            >
+              <span>Apply Directly</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </a>
           </div>
         </div>
       </div>
