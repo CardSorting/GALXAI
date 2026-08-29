@@ -125,6 +125,42 @@ export class StripeRepository {
     return matches[0] || null;
   }
 
+  async getCustomerByStripeId(stripeCustomerId: string): Promise<StripeCustomerRecord | null> {
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseAdmin();
+        const { data, error } = await supabase
+          .from('galx_stripe_customers')
+          .select('*')
+          .eq('stripe_customer_id', stripeCustomerId)
+          .single();
+
+        if (!error && data) {
+          const mapped: StripeCustomerRecord = {
+            id: data.id,
+            userId: data.user_id,
+            stripeCustomerId: data.stripe_customer_id,
+            email: data.email,
+            currency: data.currency,
+            defaultPaymentMethodId: data.default_payment_method_id,
+            metadata: (data.metadata as Record<string, any>) || {},
+            createdAt: data.created_at,
+            updatedAt: data.updated_at
+          };
+          this.customerTable.put(mapped.userId, mapped);
+          return mapped;
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    const matches = this.customerTable.query({
+      where: { stripeCustomerId: { $eq: stripeCustomerId } }
+    }) as StripeCustomerRecord[];
+    return matches[0] || null;
+  }
+
   async upsertCustomer(params: {
     userId: string;
     stripeCustomerId: string;

@@ -282,6 +282,38 @@ async function runTests() {
       'WalletRepo: Debits exact micro-metered token cost from compute balance'
     );
 
+    // 13b. Wallet Repository: Inference Credit Hold & Settlement (Two-Phase Pre-Auth)
+    const holdRes = await walletRepo.reserveHold({
+      userId: testDevUser,
+      estimatedCostUsd: 1.000000,
+      holdTtlMs: 60000,
+      metadata: { model: 'gpt-5.6-reasoning' }
+    });
+    assert(
+      holdRes.success === true && typeof holdRes.holdId === 'string' && holdRes.reservedUsd === 1.0,
+      'WalletRepo: Reserves inference credit pre-auth hold'
+    );
+
+    const commitRes = await walletRepo.commitHold({
+      holdId: holdRes.holdId!,
+      actualCostUsd: 0.350000,
+      description: 'gpt-5.6-reasoning finalized stream with 450 thinking tokens',
+      model: 'gpt-5.6-reasoning',
+      promptTokens: 50,
+      completionTokens: 450
+    });
+    assert(
+      commitRes.success === true && Math.abs((commitRes.refundedDeltaUsd || 0) - 0.65) < 0.000001,
+      'WalletRepo: Commits actual token usage and refunds unused hold remainder'
+    );
+
+    // 13c. Wallet Repository: Cryptographic Ledger Chain Integrity Audit
+    const auditLedgerRes = await walletRepo.verifyLedgerIntegrity(testDevUser);
+    assert(
+      auditLedgerRes.valid === true && auditLedgerRes.auditedBlocks >= 1,
+      'WalletRepo: Verifies cryptographic SHA-256 Merkle ledger chain integrity'
+    );
+
     // 14. Telemetry Repository (Latency Percentiles)
     const telemetryRepo = TelemetryRepository.getInstance();
     await telemetryRepo.recordTelemetry({ provider: 'openai', modelId: 'gpt-5.6-sol', shardId, latencyMs: 180 });
@@ -399,7 +431,10 @@ async function runTests() {
     // 21. Cloudflare Edge Gateway (Zero-Egress SSE Streaming & Direct Dispatch)
     const edgeGateway = new GalxEdgeGateway({
       SUPABASE_URL: config.supabaseUrl,
-      SUPABASE_SERVICE_ROLE_KEY: config.supabaseServiceRoleKey
+      SUPABASE_SERVICE_ROLE_KEY: config.supabaseServiceRoleKey,
+      ENVIRONMENT: 'test',
+      GATEWAY_AUTH_MODE: 'format-only',
+      ALLOW_SYNTHETIC_RESPONSES: 'true'
     });
 
     const streamReq = new Request('https://api.galx.ai/v1/chat/completions', {

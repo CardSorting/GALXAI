@@ -1,45 +1,47 @@
 {
-  "timestamp": "2026-08-25T07:33:11.966Z",
-  "isLiveOrTest": "test",
+  "timestamp": "2026-08-29T00:27:47.449Z",
+  "isLiveOrTest": "live",
   "productsProvisioned": 5,
   "pricesProvisioned": 5,
-  "taxConfigured": false,
+  "taxConfigured": true,
   "catalog": {
     "starter_25": {
-      "productId": "prod_V8VsS8tAq8lYbR",
+      "productId": "prod_V9tvNOYriT9X2g",
       "productName": "GALXAI Prepaid Compute — Starter Builder Pack",
-      "priceId": "price_1U8Er6PiwsQkTwlTnsfyVcwO",
+      "priceId": "price_1U9a7bIA2zQnWbn5PAtSACkj",
       "amountUsd": 25,
       "totalCreditUsd": 32.5
     },
     "growth_50": {
-      "productId": "prod_V8Vsd3rsaIVo7i",
+      "productId": "prod_V9tvoq8YU3h6gr",
       "productName": "GALXAI Prepaid Compute — Growth VIP Priority Pack",
-      "priceId": "price_1U8Er6PiwsQkTwlT89EbjlpK",
+      "priceId": "price_1U9a7cIA2zQnWbn5DZLpbm6l",
       "amountUsd": 50,
       "totalCreditUsd": 67.5
     },
     "fleet_100": {
-      "productId": "prod_V8VsBPc7PCjkFY",
+      "productId": "prod_V9tvtnaGgIzEWy",
       "productName": "GALXAI Prepaid Compute — Fleet Scale Pack",
-      "priceId": "price_1U8Er7PiwsQkTwlTu9fofrn2",
+      "priceId": "price_1U9a7cIA2zQnWbn5xuXLzGbl",
       "amountUsd": 100,
       "totalCreditUsd": 155
     },
     "sovereign_250": {
-      "productId": "prod_V8VsEZvZXp63jb",
+      "productId": "prod_V9tvZvWXmiRwHg",
       "productName": "GALXAI Prepaid Compute — Enterprise Sovereign Pack",
-      "priceId": "price_1U8Er7PiwsQkTwlTFLXQmlwp",
+      "priceId": "price_1U9a7dIA2zQnWbn5EapFGsYi",
       "amountUsd": 250,
       "totalCreditUsd": 380
     },
     "hyperscale_500": {
-      "productId": "prod_V8VsmM84aqQ5ak",
+      "productId": "prod_V9tvtqgBuw6px9",
       "productName": "GALXAI Prepaid Compute — Hyperscale Infrastructure Pack",
-      "priceId": "price_1U8Er8PiwsQkTwlT6AyNa4Sv",
+      "priceId": "price_1U9a7dIA2zQnWbn5N36bM3Gl",
       "amountUsd": 500,
       "totalCreditUsd": 755
     }
   },
-  "portalConfigId": "bpc_1U8Er8PiwsQkTwlTd12pIIH1"
+  "portalConfigId": "bpc_1SfRJBIA2zQnWbn5wccY9XgR",
+  "webhookSecret": "whsec_UpsRFuPsTOK0dWhLQHkxj579XY6gM8tu",
+  "webhookEndpointId": "we_1U9a7eIA2zQnWbn5LqRUImfH"
 }

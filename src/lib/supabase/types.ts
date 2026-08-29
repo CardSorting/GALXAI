@@ -3050,6 +3050,95 @@ export interface Database {
         };
         Returns: Json;
       };
+      fn_record_wallet_refund_or_adjustment: {
+        Args: {
+          p_user_id: string;
+          p_refund_amount_usd: number;
+          p_reason?: string;
+          p_payment_ref?: string;
+          p_reverse_bonus?: boolean;
+        };
+        Returns: Json;
+      };
+      fn_try_acquire_advisory_xact_lock: {
+        Args: {
+          p_lock_key: string;
+        };
+        Returns: Json;
+      };
+      fn_search_audit_logs: {
+        Args: {
+          p_query: string;
+          p_limit?: number;
+        };
+        Returns: Array<{
+          id: string;
+          action: string;
+          user_id: string;
+          resource_id: string;
+          metadata: Json;
+          timestamp_ms: number;
+          created_at: string;
+          rank: number;
+        }>;
+      };
+      fn_reserve_wallet_hold: {
+        Args: {
+          p_user_id: string;
+          p_estimated_cost_usd: number;
+          p_hold_ttl_ms?: number;
+          p_metadata?: Json;
+        };
+        Returns: Json;
+      };
+      fn_commit_wallet_hold: {
+        Args: {
+          p_hold_id: string;
+          p_actual_cost_usd: number;
+          p_description?: string;
+          p_model?: string;
+          p_prompt_tokens?: number;
+          p_completion_tokens?: number;
+          p_cached_tokens?: number;
+          p_metadata?: Json;
+        };
+        Returns: Json;
+      };
+      fn_release_expired_wallet_holds: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
+      fn_record_tamper_proof_transaction: {
+        Args: {
+          p_wallet_id: string;
+          p_user_id: string;
+          p_transaction_type: string;
+          p_amount_usd: number;
+          p_balance_after_usd: number;
+          p_description: string;
+          p_api_key_id?: string;
+          p_shard_id?: string;
+          p_model?: string;
+          p_prompt_tokens?: number;
+          p_completion_tokens?: number;
+          p_cached_tokens?: number;
+          p_metadata?: Json;
+        };
+        Returns: Json;
+      };
+      fn_get_wallet_by_user: {
+        Args: {
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
+      fn_verify_wallet_ledger_integrity: {
+        Args: {
+          p_user_id?: string;
+          p_wallet_id?: string;
+        };
+        Returns: Json;
+      };
       fn_acquire_shard_lease: {
         Args: {
           p_shard_id: string;

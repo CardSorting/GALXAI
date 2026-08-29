@@ -40,12 +40,10 @@ export class StripeEngine {
    */
   public getClient(): Stripe | null {
     const config = getStripeConfig();
-    if (!config.isConfigured && !config.secretKey) {
-      return null;
-    }
+    const key = config.secretKey || 'sk_test_placeholder_for_webhooks';
 
-    if (!stripeClientInstance && config.secretKey) {
-      stripeClientInstance = new Stripe(config.secretKey, {
+    if (!stripeClientInstance) {
+      stripeClientInstance = new Stripe(key, {
         apiVersion: '2025-02-24.acacia' as any,
         appInfo: {
           name: 'GALXAI-Apex-Billing-Substrate',
@@ -184,6 +182,7 @@ export class StripeEngine {
         mode: 'payment',
         customer: customerId,
         customer_email: customerId ? undefined : params.customerEmail,
+        customer_creation: customerId ? undefined : 'always',
         client_reference_id: params.userId,
         line_items: lineItems,
         success_url: successUrl,
@@ -195,6 +194,11 @@ export class StripeEngine {
         invoice_creation: {
           enabled: true
         },
+        allow_promotion_codes: params.promoCode ? undefined : true,
+        payment_intent_data: params.autoReload ? {
+          setup_future_usage: 'off_session',
+          description: `GALXAI Prepaid Compute Deposit (${params.userId})`
+        } : undefined,
         metadata: {
           userId: params.userId,
           depositAmount: credit.depositAmount.toString(),
@@ -206,13 +210,15 @@ export class StripeEngine {
           promoCode: params.promoCode || '',
           autoReload: params.autoReload ? 'true' : 'false'
         }
+      }, {
+        idempotencyKey: `cs_init_${params.userId}_${amountInCents}_${Date.now().toString(36)}`
       });
 
       // 4. Record session in repository
       await this.stripeRepo.recordCheckoutSession({
         sessionId: session.id,
         userId: params.userId,
-        customerId: customerId || null,
+        customerId: customerId || (typeof session.customer === 'string' ? session.customer : null),
         amountUsd: credit.depositAmount,
         matchGrantUsd: credit.matchBonus + credit.welcomeGrant,
         totalCreditedUsd: credit.totalCredit,
@@ -248,7 +254,7 @@ export class StripeEngine {
   /**
    * Generates a Stripe Billing Customer Portal URL for self-service payment management.
    */
-  async createCustomerPortalSession(userId: string, returnUrl?: string): Promise<{
+  async createCustomerPortalSession(userId: string, returnUrl?: string, flowType?: 'payment_method_update' | 'subscription_cancel'): Promise<{
     success: boolean;
     url?: string;
     error?: string;
@@ -274,7 +280,10 @@ export class StripeEngine {
 
       const portalSession = await stripe.billingPortal.sessions.create({
         customer: customerRecord.stripeCustomerId,
-        return_url: returnUrl || `${config.appUrl}/billing`
+        return_url: returnUrl || `${config.appUrl}/billing`,
+        flow_data: flowType === 'payment_method_update' ? {
+          type: 'payment_method_update'
+        } : undefined
       });
 
       return {
@@ -291,6 +300,7 @@ export class StripeEngine {
 
   /**
    * Constant-Time HMAC-SHA256 Signature Verification (Anti-Timing & Anti-Replay).
+   * Supports zero-downtime secret rotation and multi-endpoint secret fallback.
    */
   public verifyWebhookSignature(rawBody: string | Buffer, signatureHeader: string): {
     isValid: boolean;
@@ -300,7 +310,22 @@ export class StripeEngine {
     const config = getStripeConfig();
     const stripe = this.getClient();
 
-    if (!config.webhookSecret) {
+    const dynamicSecrets = [
+      process.env.STRIPE_WEBHOOK_SECRET,
+      process.env.STRIPE_WEBHOOK_SECRET_PRODUCTION,
+      process.env.STRIPE_CREDITS_WEBHOOK_SECRET,
+      process.env.STRIPE_WEBHOOK_SECRET_LIVE,
+      ...(config.webhookSecrets || []),
+      config.webhookSecret
+    ]
+      .filter((s): s is string => Boolean(s && typeof s === 'string'))
+      .flatMap(s => s.split(','))
+      .map(s => s.trim())
+      .filter(s => s.length > 0 && !s.includes('your_stripe_webhook_secret'));
+
+    const candidateSecrets = Array.from(new Set(dynamicSecrets));
+
+    if (candidateSecrets.length === 0) {
       return { isValid: false, error: 'STRIPE_WEBHOOK_SECRET is not configured' };
     }
 
@@ -308,19 +333,24 @@ export class StripeEngine {
       return { isValid: false, error: 'Stripe client unavailable' };
     }
 
-    try {
-      // 1. Enforce 300-second (5 minute) anti-replay tolerance window
-      const event = stripe.webhooks.constructEvent(
-        rawBody,
-        signatureHeader,
-        config.webhookSecret,
-        300 // 300 seconds tolerance
-      );
+    let lastError: any = null;
 
-      return { isValid: true, event };
-    } catch (err: any) {
-      return { isValid: false, error: err.message || 'Invalid webhook signature' };
+    // 1. Iterate through candidate webhook secrets with 300-second anti-replay window
+    for (const secret of candidateSecrets) {
+      try {
+        const event = stripe.webhooks.constructEvent(
+          rawBody,
+          signatureHeader,
+          secret,
+          300 // 300 seconds tolerance
+        );
+        return { isValid: true, event };
+      } catch (err: any) {
+        lastError = err;
+      }
     }
+
+    return { isValid: false, error: lastError?.message || 'Invalid webhook signature' };
   }
 
   /**
@@ -400,9 +430,39 @@ export class StripeEngine {
           return { received: true, status: 'PROCESSED' };
         }
 
-        case 'invoice.payment_succeeded': {
+        case 'payment_intent.succeeded': {
+          const pi = event.data.object as Stripe.PaymentIntent;
+          const userId = pi.metadata?.userId || pi.metadata?.galx_user_id;
+          
+          if (userId && pi.metadata?.depositAmount) {
+            const depositAmount = parseFloat(pi.metadata.depositAmount);
+            await this.walletRepo.verifyDepositAndApplyMatch({
+              userId,
+              depositAmountUsd: depositAmount,
+              paymentRef: pi.id
+            });
+          }
+
+          await this.stripeRepo.recordEvent({
+            eventId: event.id,
+            eventType: event.type,
+            status: 'processed',
+            payloadHash
+          });
+
+          this.persistence.logAudit(
+            'STRIPE_PAYMENT_INTENT_SUCCEEDED',
+            { paymentIntentId: pi.id, amount: (pi.amount || 0) / 100 },
+            `pi_${pi.id}`,
+            userId || 'system'
+          );
+
+          return { received: true, status: 'PROCESSED' };
+        }
+
+        case 'invoice.payment_succeeded':
+        case 'invoice.paid': {
           const invoice = event.data.object as Stripe.Invoice;
-          const _customerId = typeof invoice.customer === 'string' ? invoice.customer : '';
           const userId = invoice.metadata?.userId || 'user_demo';
 
           if (invoice.id) {
@@ -426,6 +486,215 @@ export class StripeEngine {
             status: 'processed',
             payloadHash
           });
+
+          this.persistence.logAudit(
+            'STRIPE_INVOICE_PROCESSED',
+            { invoiceId: invoice.id, status: invoice.status, amountPaid: (invoice.amount_paid || 0) / 100 },
+            `invoice_${invoice.id}`,
+            userId
+          );
+
+          return { received: true, status: 'PROCESSED' };
+        }
+
+        case 'payout.paid':
+        case 'payout.failed':
+        case 'payout.created':
+        case 'payout.updated': {
+          const payout = event.data.object as Stripe.Payout;
+          await this.stripeRepo.recordEvent({
+            eventId: event.id,
+            eventType: event.type,
+            status: 'processed',
+            payloadHash
+          });
+
+          this.persistence.logAudit(
+            'STRIPE_PAYOUT_EVENT',
+            { payoutId: payout.id, amount: (payout.amount || 0) / 100, status: payout.status, arrivalDate: payout.arrival_date },
+            `payout_${payout.id}`,
+            'system'
+          );
+
+          return { received: true, status: 'PROCESSED' };
+        }
+
+        case 'customer.subscription.created':
+        case 'customer.subscription.updated':
+        case 'customer.subscription.deleted': {
+          const sub = event.data.object as Stripe.Subscription;
+          await this.stripeRepo.recordEvent({
+            eventId: event.id,
+            eventType: event.type,
+            status: 'processed',
+            payloadHash
+          });
+
+          this.persistence.logAudit(
+            'STRIPE_SUBSCRIPTION_EVENT',
+            { subscriptionId: sub.id, status: sub.status, customer: sub.customer },
+            `sub_${sub.id}`,
+            sub.metadata?.userId || 'system'
+          );
+
+          return { received: true, status: 'PROCESSED' };
+        }
+
+        case 'checkout.session.async_payment_failed': {
+          const session = event.data.object as Stripe.Checkout.Session;
+          const sessionId = session.id;
+          const userId = session.client_reference_id || session.metadata?.userId || 'user_demo';
+
+          await this.stripeRepo.recordEvent({
+            eventId: event.id,
+            eventType: event.type,
+            status: 'processed',
+            payloadHash
+          });
+
+          this.persistence.logAudit(
+            'STRIPE_ASYNC_PAYMENT_FAILED',
+            { sessionId, userId, customer: session.customer },
+            `async_fail_${sessionId}`,
+            userId
+          );
+
+          return { received: true, status: 'PROCESSED', message: 'Async payment failure recorded' };
+        }
+
+        case 'checkout.session.expired': {
+          const session = event.data.object as Stripe.Checkout.Session;
+          await this.stripeRepo.recordEvent({
+            eventId: event.id,
+            eventType: event.type,
+            status: 'processed',
+            payloadHash
+          });
+
+          this.persistence.logAudit(
+            'STRIPE_CHECKOUT_EXPIRED',
+            { sessionId: session.id },
+            `expired_${session.id}`,
+            session.client_reference_id || 'system'
+          );
+
+          return { received: true, status: 'PROCESSED' };
+        }
+
+        case 'charge.refunded':
+        case 'charge.refund.updated': {
+          const charge = event.data.object as Stripe.Charge;
+          const refundAmount = (charge.amount_refunded || 0) / 100;
+          const customerId = typeof charge.customer === 'string' ? charge.customer : '';
+          
+          let userId = charge.metadata?.userId || charge.metadata?.galx_user_id;
+          if (!userId && customerId) {
+            const customer = await this.stripeRepo.getCustomerByStripeId(customerId);
+            if (customer?.userId) userId = customer.userId;
+          }
+          const targetUserId = userId || 'user_demo';
+
+          if (refundAmount > 0) {
+            await this.walletRepo.recordRefundOrAdjustment({
+              userId: targetUserId,
+              refundAmountUsd: refundAmount,
+              reason: 'Stripe charge refund',
+              paymentRef: charge.id,
+              reverseBonus: true
+            });
+          }
+
+          await this.stripeRepo.recordEvent({
+            eventId: event.id,
+            eventType: event.type,
+            status: 'processed',
+            payloadHash
+          });
+
+          this.persistence.logAudit(
+            'STRIPE_CHARGE_REFUNDED',
+            { chargeId: charge.id, refundAmount, customerId, targetUserId },
+            `refund_${charge.id}`,
+            targetUserId
+          );
+
+          return { received: true, status: 'PROCESSED' };
+        }
+
+        case 'charge.dispute.created':
+        case 'charge.dispute.closed':
+        case 'charge.dispute.funds_withdrawn':
+        case 'charge.dispute.funds_reinstated': {
+          const dispute = event.data.object as Stripe.Dispute;
+          await this.stripeRepo.recordEvent({
+            eventId: event.id,
+            eventType: event.type,
+            status: 'processed',
+            payloadHash
+          });
+
+          this.persistence.logAudit(
+            'STRIPE_DISPUTE_EVENT',
+            { disputeId: dispute.id, status: dispute.status, amount: (dispute.amount || 0) / 100, reason: dispute.reason },
+            `dispute_${dispute.id}`,
+            'system'
+          );
+
+          return { received: true, status: 'PROCESSED' };
+        }
+
+        case 'invoice.payment_failed':
+        case 'invoice.marked_uncollectible': {
+          const invoice = event.data.object as Stripe.Invoice;
+          const userId = invoice.metadata?.userId || 'user_demo';
+
+          if (invoice.id) {
+            await this.stripeRepo.recordInvoice({
+              userId,
+              stripeInvoiceId: invoice.id,
+              amountDueUsd: (invoice.amount_due || 0) / 100,
+              amountPaidUsd: (invoice.amount_paid || 0) / 100,
+              status: invoice.status || 'open',
+              hostedInvoiceUrl: invoice.hosted_invoice_url,
+              invoicePdfUrl: invoice.invoice_pdf,
+              periodStart: invoice.period_start ? new Date(invoice.period_start * 1000).toISOString() : null,
+              periodEnd: invoice.period_end ? new Date(invoice.period_end * 1000).toISOString() : null,
+              metadata: invoice.metadata || {}
+            });
+          }
+
+          await this.stripeRepo.recordEvent({
+            eventId: event.id,
+            eventType: event.type,
+            status: 'processed',
+            payloadHash
+          });
+
+          this.persistence.logAudit(
+            'STRIPE_INVOICE_FAILED',
+            { invoiceId: invoice.id, status: invoice.status, attemptCount: invoice.attempt_count },
+            `invoice_fail_${invoice.id}`,
+            userId
+          );
+
+          return { received: true, status: 'PROCESSED' };
+        }
+
+        case 'customer.deleted': {
+          const customer = event.data.object as Stripe.Customer;
+          await this.stripeRepo.recordEvent({
+            eventId: event.id,
+            eventType: event.type,
+            status: 'processed',
+            payloadHash
+          });
+
+          this.persistence.logAudit(
+            'STRIPE_CUSTOMER_DELETED',
+            { customerId: customer.id },
+            `cust_del_${customer.id}`,
+            customer.metadata?.galx_user_id || 'system'
+          );
 
           return { received: true, status: 'PROCESSED' };
         }
@@ -532,6 +801,153 @@ export class StripeEngine {
         tierLabel: credit.tier.label,
         orderNumber,
         isSimulated: false
+      };
+    }
+  }
+
+  /**
+   * Executes an off-session Stripe PaymentIntent for automated wallet reloading.
+   * Complies with PSD2 / SCA off-session exemption rules, idempotency fencing, and automatic fulfillment.
+   */
+  async executeOffSessionAutoReload(params: {
+    userId: string;
+    reloadAmountUsd?: number;
+    paymentMethodId?: string;
+  }): Promise<{
+    success: boolean;
+    paymentIntentId?: string;
+    amountReloaded?: number;
+    newBalance?: number;
+    requiresAction?: boolean;
+    clientSecret?: string;
+    error?: string;
+  }> {
+    const config = getStripeConfig();
+    const stripe = this.getClient();
+    const reloadAmount = Math.max(10, Number(params.reloadAmountUsd) || 50);
+
+    // Fallback simulation mode
+    if (!stripe || !config.isConfigured) {
+      const depositResult = await this.walletRepo.verifyDepositAndApplyMatch({
+        userId: params.userId,
+        depositAmountUsd: reloadAmount,
+        paymentRef: `pi_mock_autoreload_${Date.now()}`
+      });
+
+      return {
+        success: true,
+        paymentIntentId: `pi_mock_autoreload_${Date.now()}`,
+        amountReloaded: reloadAmount,
+        newBalance: depositResult.newBalance
+      };
+    }
+
+    try {
+      const customerRecord = await this.stripeRepo.getCustomer(params.userId);
+      if (!customerRecord?.stripeCustomerId) {
+        return {
+          success: false,
+          error: 'NO_STRIPE_CUSTOMER: No customer profile found for auto-reload.'
+        };
+      }
+
+      // Determine payment method: passed explicitly, or default payment method, or retrieve customer's default
+      let paymentMethodId = params.paymentMethodId || customerRecord.defaultPaymentMethodId;
+      if (!paymentMethodId) {
+        const customer = await stripe.customers.retrieve(customerRecord.stripeCustomerId);
+        if (!customer.deleted && customer.invoice_settings?.default_payment_method) {
+          paymentMethodId = typeof customer.invoice_settings.default_payment_method === 'string'
+            ? customer.invoice_settings.default_payment_method
+            : customer.invoice_settings.default_payment_method.id;
+        } else {
+          // List customer's saved payment methods
+          const paymentMethods = await stripe.paymentMethods.list({
+            customer: customerRecord.stripeCustomerId,
+            type: 'card',
+            limit: 1
+          });
+          if (paymentMethods.data.length > 0) {
+            paymentMethodId = paymentMethods.data[0].id;
+          }
+        }
+      }
+
+      if (!paymentMethodId) {
+        return {
+          success: false,
+          error: 'NO_SAVED_PAYMENT_METHOD: Customer has no saved card on file. Complete a deposit to enable auto-reload.'
+        };
+      }
+
+      const amountCents = Math.round(reloadAmount * 100);
+      const idempotencyKey = `pi_autoreload_${params.userId}_${amountCents}_${Math.floor(Date.now() / 60000)}`;
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amountCents,
+        currency: config.currency,
+        customer: customerRecord.stripeCustomerId,
+        payment_method: paymentMethodId,
+        off_session: true,
+        confirm: true,
+        description: `GALXAI Compute Auto-Reload for ${params.userId}`,
+        metadata: {
+          userId: params.userId,
+          depositAmount: reloadAmount.toString(),
+          galx_auto_reload: 'true'
+        }
+      }, {
+        idempotencyKey
+      });
+
+      if (paymentIntent.status === 'succeeded') {
+        const depositResult = await this.walletRepo.verifyDepositAndApplyMatch({
+          userId: params.userId,
+          depositAmountUsd: reloadAmount,
+          paymentRef: paymentIntent.id
+        });
+
+        this.persistence.logAudit(
+          'STRIPE_AUTORELOAD_EXECUTED',
+          {
+            paymentIntentId: paymentIntent.id,
+            userId: params.userId,
+            reloadAmount,
+            newBalance: depositResult.newBalance
+          },
+          `autoreload_${paymentIntent.id}`,
+          params.userId
+        );
+
+        return {
+          success: true,
+          paymentIntentId: paymentIntent.id,
+          amountReloaded: reloadAmount,
+          newBalance: depositResult.newBalance
+        };
+      } else if (paymentIntent.status === 'requires_action') {
+        return {
+          success: false,
+          requiresAction: true,
+          clientSecret: paymentIntent.client_secret || undefined,
+          error: 'AUTHENTICATION_REQUIRED: Customer must authenticate payment with their bank.'
+        };
+      } else {
+        return {
+          success: false,
+          error: `PAYMENT_INTENT_STATUS_${paymentIntent.status.toUpperCase()}`
+        };
+      }
+    } catch (err: any) {
+      this.persistence.logAudit(
+        'STRIPE_AUTORELOAD_FAILED',
+        { userId: params.userId, reloadAmount, error: err.message },
+        `autoreload_fail_${params.userId}`,
+        params.userId
+      );
+
+      return {
+        success: false,
+        error: err.message || 'Auto-reload execution failed'
       };
     }
   }

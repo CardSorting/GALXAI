@@ -4,6 +4,48 @@ import { StripeEngine } from '@/lib/stripe/stripe';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+/**
+ * OPTIONS /api/stripe/webhook
+ * Standard preflight handler with CORS permissive headers.
+ */
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, GET, HEAD, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Stripe-Signature, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
+}
+
+/**
+ * GET /api/stripe/webhook
+ * Health and endpoint diagnostic check for Stripe and monitoring uptime pings.
+ */
+export async function GET() {
+  return NextResponse.json({
+    status: 'healthy',
+    endpoint: '/api/stripe/webhook',
+    service: 'GALXAI Stripe Webhook Receiver',
+    timestamp: new Date().toISOString(),
+  });
+}
+
+/**
+ * HEAD /api/stripe/webhook
+ * Lightweight probe response.
+ */
+export async function HEAD() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
 export async function POST(req: NextRequest) {
   const signature = req.headers.get('stripe-signature');
 

@@ -151,6 +151,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/api/credits/stripe",
+        destination: "/api/internal/credits/stripe",
+      },
+    ];
+  },
   async redirects() {
     return [
       {

@@ -237,41 +237,68 @@ async function runMasterStripeProvisioner() {
   // STEP 3: Webhook Endpoint Configuration
   // ===========================================================================
   console.log('\n--- 3. Provisioning Webhook Endpoints ---');
-  const targetWebhookUrl = `${config.appUrl}/api/stripe/webhook`;
+  const liveBaseUrl = config.appUrl.startsWith('https://') ? config.appUrl : 'https://galx.ai';
+  const targetEndpoints = [
+    {
+      url: `${liveBaseUrl}/api/internal/credits/stripe`,
+      description: 'GALXAI Live Compute Credit & Double-Entry Ingestion Webhook'
+    },
+    {
+      url: `${liveBaseUrl}/api/stripe/webhook`,
+      description: 'GALXAI Apex Billing & Lifecycle Webhook'
+    }
+  ];
+
   const desiredEvents: Stripe.WebhookEndpointCreateParams.EnabledEvent[] = [
     'checkout.session.completed',
     'checkout.session.async_payment_succeeded',
+    'checkout.session.async_payment_failed',
+    'checkout.session.expired',
     'payment_intent.succeeded',
-    'invoice.payment_succeeded'
+    'payment_intent.payment_failed',
+    'invoice.payment_succeeded',
+    'invoice.paid',
+    'invoice.payment_failed',
+    'charge.refunded',
+    'charge.dispute.created',
+    'charge.dispute.closed',
+    'customer.subscription.created',
+    'customer.subscription.updated',
+    'customer.subscription.deleted',
+    'payout.paid',
+    'payout.failed'
   ];
 
   try {
     const existingEndpoints = await stripe.webhookEndpoints.list({ limit: 20 });
-    let endpoint = existingEndpoints.data.find(ep => ep.url === targetWebhookUrl);
 
-    if (!endpoint) {
-      endpoint = await stripe.webhookEndpoints.create({
-        url: targetWebhookUrl,
-        enabled_events: desiredEvents,
-        description: 'GALXAI Apex Compute Fulfillment Webhook',
-        metadata: {
-          galxai_webhook: 'true',
-          provisioned_by: 'GALXAI_CLI'
+    for (const target of targetEndpoints) {
+      let endpoint = existingEndpoints.data.find(ep => ep.url === target.url);
+
+      if (!endpoint) {
+        endpoint = await stripe.webhookEndpoints.create({
+          url: target.url,
+          enabled_events: desiredEvents,
+          description: target.description,
+          metadata: {
+            galxai_webhook: 'true',
+            provisioned_by: 'GALXAI_CLI'
+          }
+        });
+        console.log(`  ✓ Created Webhook Endpoint: ${endpoint.id} -> ${target.url}`);
+        if (endpoint.secret) {
+          report.webhookSecret = endpoint.secret;
+          console.log(`  ✓ Received Webhook Secret: ${endpoint.secret.substring(0, 10)}...`);
         }
-      });
-      console.log(`  ✓ Created Webhook Endpoint: ${endpoint.id} -> ${targetWebhookUrl}`);
-      if (endpoint.secret) {
-        report.webhookSecret = endpoint.secret;
-        console.log(`  ✓ Received Webhook Secret: ${endpoint.secret.substring(0, 10)}...`);
+      } else {
+        endpoint = await stripe.webhookEndpoints.update(endpoint.id, {
+          enabled_events: desiredEvents,
+          description: target.description
+        });
+        console.log(`  ✓ Verified Webhook Endpoint: ${endpoint.id} -> ${target.url}`);
       }
-    } else {
-      endpoint = await stripe.webhookEndpoints.update(endpoint.id, {
-        enabled_events: desiredEvents,
-        description: 'GALXAI Apex Compute Fulfillment Webhook'
-      });
-      console.log(`  ✓ Verified Webhook Endpoint: ${endpoint.id} -> ${targetWebhookUrl}`);
+      report.webhookEndpointId = endpoint.id;
     }
-    report.webhookEndpointId = endpoint.id;
   } catch (err: any) {
     console.warn(`  ⚠ Webhook Endpoint Notice: ${err.message}`);
   }

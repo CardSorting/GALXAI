@@ -129,7 +129,7 @@ CREATE POLICY "Users can view spend governance policies in accessible workspaces
     USING (
         workspace_id IN (
             SELECT workspace_id FROM public.galx_workspace_members
-            WHERE user_id = (SELECT auth.uid())
+            WHERE user_id = (SELECT auth.uid()::text)
         )
     );
 
@@ -140,13 +140,13 @@ CREATE POLICY "Workspace admins can manage spend governance policies"
     USING (
         workspace_id IN (
             SELECT workspace_id FROM public.galx_workspace_members
-            WHERE user_id = (SELECT auth.uid()) AND role IN ('owner', 'admin')
+            WHERE user_id = (SELECT auth.uid()::text) AND role IN ('owner', 'admin')
         )
     )
     WITH CHECK (
         workspace_id IN (
             SELECT workspace_id FROM public.galx_workspace_members
-            WHERE user_id = (SELECT auth.uid()) AND role IN ('owner', 'admin')
+            WHERE user_id = (SELECT auth.uid()::text) AND role IN ('owner', 'admin')
         )
     );
 
@@ -158,7 +158,7 @@ CREATE POLICY "Users can view route evidence in accessible workspaces"
     USING (
         workspace_id IN (
             SELECT workspace_id FROM public.galx_workspace_members
-            WHERE user_id = (SELECT auth.uid())
+            WHERE user_id = (SELECT auth.uid()::text)
         )
     );
 
@@ -169,13 +169,13 @@ CREATE POLICY "Workspace admins can insert or update route evidence"
     USING (
         workspace_id IN (
             SELECT workspace_id FROM public.galx_workspace_members
-            WHERE user_id = (SELECT auth.uid()) AND role IN ('owner', 'admin')
+            WHERE user_id = (SELECT auth.uid()::text) AND role IN ('owner', 'admin')
         )
     )
     WITH CHECK (
         workspace_id IN (
             SELECT workspace_id FROM public.galx_workspace_members
-            WHERE user_id = (SELECT auth.uid()) AND role IN ('owner', 'admin')
+            WHERE user_id = (SELECT auth.uid()::text) AND role IN ('owner', 'admin')
         )
     );
 
@@ -187,7 +187,7 @@ CREATE POLICY "Users can view waste incidents in accessible workspaces"
     USING (
         workspace_id IN (
             SELECT workspace_id FROM public.galx_workspace_members
-            WHERE user_id = (SELECT auth.uid())
+            WHERE user_id = (SELECT auth.uid()::text)
         )
     );
 
@@ -199,7 +199,7 @@ CREATE POLICY "Users can view spend attributions in accessible workspaces"
     USING (
         workspace_id IN (
             SELECT workspace_id FROM public.galx_workspace_members
-            WHERE user_id = (SELECT auth.uid())
+            WHERE user_id = (SELECT auth.uid()::text)
         )
     );
 

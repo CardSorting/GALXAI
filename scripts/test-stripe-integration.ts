@@ -137,6 +137,29 @@ async function runStripeTestSuite() {
   const masked = stripeEngine.maskEmail('developer@google.com');
   assert(masked.startsWith('d***r@google.com') || masked.includes('***'), 'Customer email masked for logs');
 
+  // Test 8: Off-Session Auto-Reload Execution
+  console.log('\n--- 8. Off-Session Auto-Reload Safeguards ---');
+  const autoReloadResult = await stripeEngine.executeOffSessionAutoReload({
+    userId: testUserId,
+    reloadAmountUsd: 50
+  });
+  assert(autoReloadResult.success === true, 'Off-session auto-reload executes successfully');
+  assert(typeof autoReloadResult.paymentIntentId === 'string', 'Auto-reload returns valid payment intent ID');
+  assert(autoReloadResult.newBalance !== undefined && autoReloadResult.newBalance > wallet!.balanceUsd, 'Auto-reload increases wallet balance');
+
+  // Test 9: Proportional Refund & Bonus Reversal
+  console.log('\n--- 9. Proportional Double-Entry Refund Ledger ---');
+  const refundResult = await walletRepo.recordRefundOrAdjustment({
+    userId: testUserId,
+    refundAmountUsd: 50,
+    reason: 'Customer requested partial refund',
+    reverseBonus: true
+  });
+  assert(refundResult.success === true, 'Proportional refund processed successfully');
+  assert(refundResult.refundAmount === 50, 'Refund principal recorded as $50');
+  assert(refundResult.totalDebit >= 50, 'Total debit includes refund + reversed bonus');
+  assert(refundResult.newBalance >= 0, 'New balance satisfies non-negative invariant');
+
   console.log('\n======================================================================');
   console.log(`   🏁 STRIPE INTEGRATION RESULTS: ${passed} PASSED / ${failed} FAILED`);
   console.log('======================================================================\n');

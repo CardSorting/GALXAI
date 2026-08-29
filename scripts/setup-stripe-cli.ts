@@ -42,16 +42,17 @@ function runCheck() {
   console.log('   $ stripe login\n');
 
   console.log('2. Start the local webhook forwarding tunnel:');
-  console.log('   $ npm run stripe:listen');
+  console.log('   $ stripe listen --forward-to localhost:3000/api/internal/credits/stripe');
   console.log('   (or: stripe listen --forward-to localhost:3000/api/stripe/webhook)\n');
 
   console.log('3. Copy the webhook signing secret from the CLI output:');
   console.log('   > Ready! Your webhook signing secret is whsec_xxxxxxxxxx');
   console.log('   Paste it into .env.local as STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxx\n');
 
-  console.log('4. Trigger test checkout events in another terminal:');
-  console.log('   $ npm run stripe:trigger:checkout');
-  console.log('   $ npm run stripe:trigger:invoice\n');
+  console.log('4. Trigger test events in another terminal:');
+  console.log('   $ stripe trigger checkout.session.completed');
+  console.log('   $ stripe trigger invoice.payment_succeeded');
+  console.log('   $ stripe trigger charge.refunded\n');
 
   console.log('======================================================================\n');
 }

@@ -87,7 +87,22 @@ export function getStripeConfig() {
 
   const secretKey = process.env.STRIPE_SECRET_KEY || '';
   const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || process.env.STRIPE_PUBLISHABLE_KEY || '';
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
+  
+  // Aggregate all candidate webhook secrets for zero-downtime secret rotation and multi-endpoint setups
+  const candidateSecretSources = [
+    process.env.STRIPE_WEBHOOK_SECRET,
+    process.env.STRIPE_WEBHOOK_SECRET_PRODUCTION,
+    process.env.STRIPE_CREDITS_WEBHOOK_SECRET,
+    process.env.STRIPE_WEBHOOK_SECRET_LIVE
+  ];
+
+  const webhookSecrets = candidateSecretSources
+    .filter((s): s is string => Boolean(s && typeof s === 'string'))
+    .flatMap(s => s.split(','))
+    .map(s => s.trim())
+    .filter(s => s.length > 0 && !s.includes('your_stripe_webhook_secret'));
+
+  const webhookSecret = webhookSecrets[0] || process.env.STRIPE_WEBHOOK_SECRET || '';
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
   const isConfigured = Boolean(
@@ -100,6 +115,7 @@ export function getStripeConfig() {
     secretKey,
     publishableKey,
     webhookSecret,
+    webhookSecrets,
     appUrl,
     isConfigured,
     currency: 'usd'
@@ -118,13 +134,7 @@ export function calculateComputeCredit(amountUsd: number) {
   };
 
   const welcomeGrant = 5.0;
-  let matchBonus = 0;
-  if (deposit >= 10 && deposit < 25) {
-    matchBonus = 5.0; // $10 deposit gets $5 bonus -> $15 total credit
-  } else {
-    matchBonus = Number((deposit * (tier.multiplier - 1)).toFixed(2));
-  }
-
+  const matchBonus = deposit >= 25 ? Number((deposit * (tier.multiplier - 1)).toFixed(2)) : 0;
   const totalCredit = Number((deposit + welcomeGrant + matchBonus).toFixed(2));
 
   return {
