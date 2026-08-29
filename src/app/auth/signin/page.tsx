@@ -35,7 +35,7 @@ function SignInContent() {
   const [canQuickCreate, setCanQuickCreate] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const returnUrl = searchParams.get('next') || searchParams.get('returnUrl') || searchParams.get('redirect') || '/';
+  const returnUrl = searchParams.get('next') || searchParams.get('returnUrl') || searchParams.get('redirect') || '/chat';
 
   useEffect(() => {
     const errorParam = searchParams.get('error');
@@ -147,7 +147,7 @@ function SignInContent() {
 
           <div className="flex items-center gap-3 text-xs">
             <Link
-              href="/"
+              href="/chat"
               className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-colors"
             >
               ← Back to Chat
@@ -180,7 +180,7 @@ function SignInContent() {
               </div>
 
               <div className="space-y-3 pt-2">
-                {returnUrl && returnUrl !== '/' ? (
+                {returnUrl && returnUrl !== '/chat' && returnUrl !== '/' ? (
                   <Link
                     href={returnUrl}
                     className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 group cursor-pointer font-mono"
@@ -190,7 +190,7 @@ function SignInContent() {
                   </Link>
                 ) : (
                   <Link
-                    href="/"
+                    href="/chat"
                     className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-cyan-400 via-indigo-400 to-cyan-500 hover:from-cyan-300 hover:to-indigo-300 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2 group cursor-pointer"
                   >
                     <span>Launch GALX AI Chat</span>

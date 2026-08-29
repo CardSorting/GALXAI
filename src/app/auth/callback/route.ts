@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') || searchParams.get('redirect') || searchParams.get('returnUrl') || '/';
+  const next = searchParams.get('next') || searchParams.get('redirect') || searchParams.get('returnUrl') || '/chat';
   const errorParam = searchParams.get('error');
   const errorDesc = searchParams.get('error_description');
 

@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { PersonaProvider } from "@/contexts/PersonaContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { AppearanceProvider } from "@/contexts/AppearanceContext";
 import { SkipToContent } from "@/components/common/SkipToContent";
 import { AccessibilityAnnouncer } from "@/components/common/AccessibilityAnnouncer";
 import { Footer } from "@/components/dashboard/Footer";
@@ -157,7 +158,7 @@ export default function RootLayout({
         <JsonLd data={rootGraphSchema} />
 
         {/* Ambient Nebula Background */}
-        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="ambient-nebula-glow fixed inset-0 pointer-events-none overflow-hidden z-0">
           <div className="absolute -top-40 left-1/4 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[140px]" />
           <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-[140px]" />
           <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[160px]" />
@@ -165,21 +166,23 @@ export default function RootLayout({
         </div>
 
         <ClientResilienceProvider>
-          <LanguageProvider>
-            <SkipToContent />
-            <AccessibilityAnnouncer />
-            <AuthProvider>
-              <PersonaProvider>
-                <div id="main-content" tabIndex={-1} className="relative z-10 flex-1 flex flex-col pb-16 lg:pb-0 outline-none">
-                  {children}
-                  <Footer />
-                </div>
-                <FloatingActionDock />
-                <MobileBottomNav />
-                <KeyboardShortcutsModal />
-              </PersonaProvider>
-            </AuthProvider>
-          </LanguageProvider>
+          <AppearanceProvider>
+            <LanguageProvider>
+              <SkipToContent />
+              <AccessibilityAnnouncer />
+              <AuthProvider>
+                <PersonaProvider>
+                  <div id="main-content" tabIndex={-1} className="relative z-10 flex-1 flex flex-col pb-16 lg:pb-0 outline-none">
+                    {children}
+                    <Footer />
+                  </div>
+                  <FloatingActionDock />
+                  <MobileBottomNav />
+                  <KeyboardShortcutsModal />
+                </PersonaProvider>
+              </AuthProvider>
+            </LanguageProvider>
+          </AppearanceProvider>
         </ClientResilienceProvider>
       </body>
     </html>

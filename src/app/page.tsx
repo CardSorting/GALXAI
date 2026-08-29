@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { GalxChatInterface } from '@/components/chat/GalxChatInterface';
+import { GalxScenicHero } from '@/components/home/GalxScenicHero';
 import { constructMetadata } from '@/lib/seo/metadata';
 import {
   JsonLd,
@@ -9,20 +9,17 @@ import {
 import { FAQS } from '@/lib/data/faqData';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'GALX AI — Frontier AI Chat, Codex Reasoning & Wholesale Gateway',
-  description: 'ChatGPT-inspired conversational AI interface powered directly by OpenAI Codex and GPT-5.6 frontier models with sub-millisecond Anycast routing and 75% prompt caching.',
+  title: 'GALX AI — Get Access to Frontier AI & OpenAI Codex',
+  description: 'Chat, code, and create with OpenAI Codex & GPT-5.6 reasoning models.',
   canonicalPath: '/',
   keywords: [
     'GALX AI',
-    'ChatGPT Alternative',
     'OpenAI Codex Chat',
     'GPT-5.6 Sol',
     'GPT-5.6 Terra',
-    'Unified AI Chat',
     'AI Model Router',
-    'Wholesale AI Tokens',
-    'Sub-15ms Anycast',
-    'Prompt Caching AI',
+    'AI Coding',
+    'ChatGPT Alternative',
   ],
 });
 
@@ -33,8 +30,8 @@ export default function HomePage() {
     '@context': 'https://schema.org',
     '@graph': [
       createSoftwareAppSchema({
-        name: 'GALX AI Chat Interface',
-        description: 'ChatGPT-inspired conversational AI interface powered by OpenAI Codex and GPT-5.6 models.',
+        name: 'GALX AI Platform',
+        description: 'Chat, code, and create with OpenAI Codex & GPT-5.6 reasoning models.',
         includeRating: true,
       }),
       createFAQPageSchema(homeFaqSnippet),
@@ -44,7 +41,8 @@ export default function HomePage() {
   return (
     <>
       <JsonLd data={pageSchema} />
-      <GalxChatInterface />
+      <GalxScenicHero />
     </>
   );
 }
+

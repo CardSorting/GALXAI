@@ -307,38 +307,8 @@ export function ChatHeader({
           )}
         </div>
 
-        {/* Dynamic Seat Tier Badge */}
-        <Link
-          href="/billing/seats"
-          className={`hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-2xl border text-xs font-mono font-bold transition-all cursor-pointer ${
-            seatTier?.tier === 'apex'
-              ? 'bg-purple-500/15 border-purple-500/40 text-purple-300 shadow-sm shadow-purple-500/20 hover:border-purple-400'
-              : seatTier?.tier === 'enterprise'
-              ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-sm shadow-cyan-500/20 hover:border-cyan-400'
-              : seatTier?.tier === 'small-business'
-              ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 shadow-sm shadow-amber-500/20 hover:border-amber-400'
-              : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:border-white/20'
-          }`}
-          title={`Active Seat License & Rolling Windows\n5-Hour Limit: ${seatTier?.fiveHourWindow?.percentRemaining ?? 100}% (${seatTier?.fiveHourWindow?.refreshIn ?? 'fully refreshed'})\nWeekly Limit: ${seatTier?.weeklyWindow?.percentRemaining ?? 100}% (${seatTier?.weeklyWindow?.refreshIn ?? 'fully refreshed'})`}
-        >
-          <Shield className="w-3.5 h-3.5" />
-          <span>
-            {seatTier?.tierLabel || (user?.role === 'enterprise' ? 'Enterprise Fleet' : user?.role === 'lead' ? 'Small Business Seat' : 'Solo Developer Seat')}
-          </span>
-          {seatTier?.fiveHourWindow && (
-            <span className="hidden xl:inline-flex items-center px-1.5 py-0.5 rounded-md bg-black/40 text-[10px] text-emerald-300 border border-emerald-500/30">
-              5h: {seatTier.fiveHourWindow.percentRemaining}%
-            </span>
-          )}
-          {seatTier?.weeklyWindow && (
-            <span className="hidden xl:inline-flex items-center px-1.5 py-0.5 rounded-md bg-black/40 text-[10px] text-cyan-300 border border-cyan-500/30">
-              Wk: {seatTier.weeklyWindow.percentRemaining}%
-            </span>
-          )}
-        </Link>
-
-        {/* Active Character Pill or Explore Characters Trigger */}
-        {activePersona ? (
+        {/* Active Character Pill (Only shown when a persona is active) */}
+        {activePersona && (
           <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-500/15 border border-pink-500/40 text-pink-300 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5 text-pink-400" />
             <Link
@@ -359,14 +329,6 @@ export function ChatHeader({
               </button>
             )}
           </div>
-        ) : (
-          <Link
-            href="/characters"
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl bg-gradient-to-r from-pink-500/10 to-purple-500/10 hover:from-pink-500/20 hover:to-purple-500/20 border border-pink-500/25 text-pink-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-pink-400 group-hover:rotate-12 transition-transform" />
-            <span>AI Personas</span>
-          </Link>
         )}
 
         {/* Temp Chat Badge Indicator */}

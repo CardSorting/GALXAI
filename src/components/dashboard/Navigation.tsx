@@ -35,7 +35,7 @@ import { BroccoliOmniSearch } from '@/lib/resilience/BroccoliOmniSearch';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 const NAV_LINKS = [
-  { name: 'Chat', href: '/', icon: MessageSquare },
+  { name: 'Chat', href: '/chat', icon: MessageSquare },
   { name: 'Gateway', href: '/gateway', icon: Zap },
   { name: 'Models', href: '/models', icon: Cpu },
   { name: 'Playground', href: '/playground', icon: Terminal },

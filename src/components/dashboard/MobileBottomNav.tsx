@@ -22,14 +22,14 @@ function BaseMobileBottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
 
-  if (pathname === '/') {
+  if (pathname === '/' || pathname === '/chat') {
     return null;
   }
 
   const tabs = [
     {
       label: 'Chat',
-      href: '/',
+      href: '/chat',
       icon: MessageSquare,
       exact: true,
     },

@@ -155,9 +155,9 @@ export function ChatSidebar({
         {/* Top Header */}
         <div className="px-3 py-2.5 border-b border-white/10 flex items-center justify-between gap-2">
           <Link
-            href="/gateway"
+            href="/"
             className="flex items-center gap-2 group px-1.5 py-0.5 rounded-lg hover:bg-white/5 transition-colors"
-            title="Go to GALXAI Developer Gateway"
+            title="Go to GALXAI Home"
           >
             <div className="w-5 h-5 rounded-md bg-gradient-to-tr from-cyan-500 via-indigo-500 to-indigo-600 flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
               <Zap className="w-3 h-3 text-white fill-white" />

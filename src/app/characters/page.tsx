@@ -96,7 +96,7 @@ export default function CharactersPage() {
       <header className="sticky top-0 z-40 bg-[#07090e]/90 backdrop-blur-xl border-b border-white/10 px-4 sm:px-8 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3 sm:gap-4">
           <Link
-            href="/"
+            href="/chat"
             className="flex items-center gap-2 p-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-all text-xs font-bold"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -252,7 +252,7 @@ export default function CharactersPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      router.push(`/?persona=${encodeURIComponent(persona.id)}`);
+                      router.push(`/chat?persona=${encodeURIComponent(persona.id)}`);
                     }}
                     className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-pink-500 text-white hover:text-black font-bold text-xs transition-all cursor-pointer shadow group-hover:bg-pink-500 group-hover:text-black"
                   >

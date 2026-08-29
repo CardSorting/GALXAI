@@ -100,7 +100,13 @@ function BaseGalxChatInterface() {
     try {
       const storedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
       if (storedSettings) {
-        setSettings(JSON.parse(storedSettings));
+        const parsed = JSON.parse(storedSettings);
+        setSettings((prev) => ({
+          ...DEFAULT_CHAT_SETTINGS,
+          ...prev,
+          ...parsed,
+          systemPrompt: parsed.systemPrompt || DEFAULT_CHAT_SETTINGS.systemPrompt,
+        }));
       }
 
       const storedPersonas = localStorage.getItem(PERSONAS_STORAGE_KEY);

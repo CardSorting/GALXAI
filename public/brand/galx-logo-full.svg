@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 36" fill="none">
+  <defs>
+    <linearGradient id="galxSpiralGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+    <linearGradient id="galxSpiralGrad2" x1="100%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#a855f7" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <radialGradient id="galxCore" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="40%" stop-color="#e0f2fe" />
+      <stop offset="80%" stop-color="#38bdf8" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="galxAiTextGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#818cf8" />
+    </linearGradient>
+  </defs>
+
+  <!-- Galaxy Icon Group -->
+  <g transform="translate(0, 0)">
+    <!-- Outer Cosmic Orbital Ring -->
+    <ellipse
+      cx="18"
+      cy="18"
+      rx="15"
+      ry="7.5"
+      transform="rotate(-28 18 18)"
+      stroke="url(#galxSpiralGrad1)"
+      stroke-width="1.75"
+      stroke-dasharray="40 12"
+      stroke-linecap="round"
+      opacity="0.85"
+    />
+
+    <!-- Intersecting Second Spiral Arm -->
+    <ellipse
+      cx="18"
+      cy="18"
+      rx="14"
+      ry="6"
+      transform="rotate(38 18 18)"
+      stroke="url(#galxSpiralGrad2)"
+      stroke-width="1.5"
+      stroke-dasharray="32 10"
+      stroke-linecap="round"
+      opacity="0.75"
+    />
+
+    <!-- Swirling Spiral Galaxy Core Petals -->
+    <path
+      d="M 18,18 C 14,14 10,17 7,15 C 4,13 6,8 10,9 C 14,10 16,15 18,18 Z"
+      fill="url(#galxSpiralGrad1)"
+      opacity="0.9"
+    />
+    <path
+      d="M 18,18 C 22,22 26,19 29,21 C 32,23 30,28 26,27 C 22,26 20,21 18,18 Z"
+      fill="url(#galxSpiralGrad2)"
+      opacity="0.9"
+    />
+
+    <!-- Glowing Galactic Core Pulsar -->
+    <circle cx="18" cy="18" r="4.5" fill="url(#galxCore)" />
+    <circle cx="18" cy="18" r="1.75" fill="#ffffff" />
+
+    <!-- Sparkling Satellite Stars -->
+    <circle cx="28" cy="10" r="0.9" fill="#ffffff" opacity="0.9" />
+    <circle cx="8" cy="26" r="0.8" fill="#38bdf8" opacity="0.9" />
+    <circle cx="29" cy="25" r="0.7" fill="#ec4899" opacity="0.8" />
+    <circle cx="7" cy="11" r="0.75" fill="#a855f7" opacity="0.85" />
+  </g>
+
+  <!-- Typography: galx.ai -->
+  <text x="46" y="26" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="24" letter-spacing="-0.04em">
+    <tspan fill="#ffffff">galx</tspan>
+    <tspan fill="#38bdf8">.</tspan>
+    <tspan fill="url(#galxAiTextGrad)">ai</tspan>
+  </text>
+</svg>

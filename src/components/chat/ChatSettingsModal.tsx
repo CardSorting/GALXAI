@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Sliders, Shield, Sparkles, Bot, RotateCcw, Check, Clock, Calendar, Gauge } from 'lucide-react';
+import { X, Sliders, Sparkles, RotateCcw, Check, Clock, Calendar, Gauge } from 'lucide-react';
 import type { SeatTierPublicSummary } from '@/core/subscription/GalxSeatTierEngine';
+import { GALX_DEFAULT_SYSTEM_PROMPT } from '@/core/prompt/GalxDefaultSystemPrompt';
 
 export interface ChatSettings {
   temperature: number;
@@ -18,29 +19,11 @@ export const DEFAULT_CHAT_SETTINGS: ChatSettings = {
   temperature: 0.7,
   maxTokens: 2048,
   reasoningEffort: 'high',
-  systemPrompt: 'You are GALX AI, a world-class frontier AI assistant and systems architect with direct access to OpenAI Codex and GPT-5.6 models. You provide concise, ultra-accurate, production-grade code, distributed system architectures, and technical analysis.',
+  systemPrompt: GALX_DEFAULT_SYSTEM_PROMPT,
   customApiKey: '',
   enablePromptCaching: true,
   webSearchEnabled: false,
 };
-
-const PRESET_PERSONAS = [
-  {
-    name: 'GALX Systems Architect',
-    description: 'Specializes in high-concurrency distributed systems, Next.js, and TypeScript',
-    prompt: 'You are GALX AI, a world-class frontier AI assistant and systems architect with direct access to OpenAI Codex and GPT-5.6 models. You provide concise, ultra-accurate, production-grade code, distributed system architectures, and technical analysis.'
-  },
-  {
-    name: 'Senior Security Auditor',
-    description: 'Paranoid code reviews, race conditions, JWT/JWE, cryptographic hardening',
-    prompt: 'You are a Senior Principal Security Auditor. Focus intensely on memory safety, race conditions, auth bypasses, injection vectors, and timing attacks. Deliver concrete remediation code.'
-  },
-  {
-    name: 'Ultra-Concise Minimalist',
-    description: 'Zero conversational fluff, bullet points only, pure code output',
-    prompt: 'You are an ultra-concise technical engine. Omit introductory pleasantries and conversational filler. Provide only direct solutions, code, and critical caveats.'
-  }
-];
 
 interface ChatSettingsModalProps {
   isOpen: boolean;
@@ -254,43 +237,6 @@ export function ChatSettingsModal({ isOpen, onClose, settings, onSaveSettings }:
                 </button>
               ))}
             </div>
-          </div>
-
-          {/* System Instruction / Persona */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
-                <Bot className="w-3.5 h-3.5 text-indigo-400" />
-                <span>System Instructions</span>
-              </label>
-            </div>
-
-            {/* Persona Quick Select */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {PRESET_PERSONAS.map((p) => (
-                <button
-                  key={p.name}
-                  type="button"
-                  onClick={() => setLocalSettings({ ...localSettings, systemPrompt: p.prompt })}
-                  className={`p-2 rounded-xl text-left border transition-all cursor-pointer ${
-                    localSettings.systemPrompt === p.prompt
-                      ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-200'
-                      : 'bg-black/30 border-white/5 text-zinc-400 hover:bg-white/5 hover:text-zinc-200'
-                  }`}
-                >
-                  <p className="text-[11px] font-bold truncate">{p.name}</p>
-                  <p className="text-[9px] text-zinc-500 line-clamp-1">{p.description}</p>
-                </button>
-              ))}
-            </div>
-
-            <textarea
-              rows={3}
-              value={localSettings.systemPrompt}
-              onChange={(e) => setLocalSettings({ ...localSettings, systemPrompt: e.target.value })}
-              className="w-full p-3 rounded-2xl bg-black/50 border border-white/10 text-xs text-zinc-200 focus:outline-none focus:border-cyan-500/50 font-mono resize-none"
-              placeholder="Enter custom instructions for GALX..."
-            />
           </div>
         </div>
 

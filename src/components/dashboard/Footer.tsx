@@ -24,7 +24,18 @@ function BaseFooter() {
     return () => unsubscribe();
   }, []);
 
-  if (pathname === '/') {
+  const isChatOrStudioOrPersona =
+    !pathname ||
+    pathname === '/' ||
+    pathname.startsWith('/chat') ||
+    pathname.startsWith('/studio') ||
+    pathname.startsWith('/characters') ||
+    pathname.startsWith('/persona') ||
+    pathname.startsWith('/personas') ||
+    pathname.startsWith('/settings') ||
+    pathname.startsWith('/share');
+
+  if (isChatOrStudioOrPersona) {
     return null;
   }
   const footerNavigation = {
@@ -32,10 +43,11 @@ function BaseFooter() {
       { name: 'Frontier AI Models', href: '/models', badge: '6 SOTA' },
       { name: 'Speed & Latency Benchmarks', href: '/benchmarks', badge: 'Telemetry' },
       { name: 'Token Savings Calculator', href: '/calculator', badge: 'ROI' },
+      { name: 'About GALX AI', href: '/about' },
+      { name: 'Careers & Open Roles', href: '/careers', badge: 'Hiring' },
       { name: 'API Quickstart Guide', href: '/docs/quickstart', badge: '30s' },
       { name: 'Model Comparison Matrix', href: '/models/compare' },
       { name: 'Developer API Keys', href: '/keys' },
-      { name: 'AI Engineering Glossary', href: '/glossary', badge: 'AEO' },
       { name: 'Compute Wallet & Billing', href: '/billing', badge: 'Autopay' },
       { name: 'Real-Time System Status', href: '/status' },
     ],
