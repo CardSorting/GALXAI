@@ -57,6 +57,14 @@ When an AI agent modifies the GALXAI codebase, it must adhere strictly to these 
 - **Rule**: Never manufacture or assert hardcoded synthetic token savings without running the empirical measurement suite (`npm run bench:inference-boundary`).
 - **Rule**: All benchmark outputs must reflect actual provider-boundary tokens, latency, and dollars.
 
+### Commandment 6: Invariant Tool Turn-Pair Inseparability
+- **Rule**: Never sever an `assistant` message containing `tool_calls` from its subsequent `tool` execution outputs across sliding-window compaction boundaries.
+- **Rule**: Always execute `GalxRollingContextEngine.ensureAtomicTurnPairs` to prevent upstream HTTP 400 validation crashes.
+
+### Commandment 7: Idempotent Concurrency & Lease TTLs
+- **Rule**: All multi-worker concurrency reservations in `galx_seat_request_leases` must be protected by explicit TTLs (`180s`) and released upon stream conclusion or failure.
+- **Rule**: Single-hop composite procedures (`fn_evaluate_and_acquire_seat_gate_v2`, `fn_settle_seat_stream_completion_composite_v2`) must execute atomically without unindexed scans.
+
 ---
 
 ## 3. Recommended AI Agent Prompts for Common Maintenance Tasks

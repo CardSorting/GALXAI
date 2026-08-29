@@ -65,4 +65,25 @@ The empirical evaluation protocol in `BroccoliInferenceBoundaryBenchmarker.ts` w
 
 ---
 
+## ⚡ 5. Rolling Context & Seat Governance Lexicon
+
+### **5-Level Multi-Resolution Context Pyramid**
+The hierarchical context structuring model implemented in `GalxRollingContextEngine` (ADR 0069):
+- **Level 1 (Workspace Anchors)**: Global compliance, architecture schemas, and immutable system directives.
+- **Level 2 (Thematic Episodes)**: Chronological conversational milestones clustered into 10-turn bounded blocks.
+- **Level 3 (Temporal Decision Graph)**: Knowledge graph edges (`depends_on`, `configures`, `fixes`, `references`) traversed via recursive in-memory search.
+- **Level 4 (Reciprocal Rank Fusion RAG)**: Sub-millisecond BM25 keyword and token proximity ranking over multi-page document chunks in RAM (`<0.5ms`).
+- **Level 5 (Atomic Sliding Verbatim Buffer)**: Uncompressed recent conversation turns (default 8 turns).
+
+### **Atomic Tool Turn-Pair Inseparability**
+The invariant rule ensuring that assistant messages containing `tool_calls` and their corresponding `tool` result messages are never split across compaction boundaries, eliminating provider HTTP 400 validation crashes.
+
+### **Dual Rolling Window Seat Quotas**
+The human-centric capacity governance model providing a fast-replenishing **5-Hour burst window** and a durable **7-Day weekly window** with natural language refresh countdowns.
+
+### **Expiring Idempotent Seat Request Leases (`galx_seat_request_leases`)**
+Distributed concurrency reservations with automatic TTL expiration (`180s`) managed via single-hop composite stored procedures (`fn_evaluate_and_acquire_seat_gate_v2`, `fn_settle_seat_stream_completion_composite_v2`), preventing orphaned concurrency locks on dropped client connections.
+
+---
+
 *Preserve terminological precision across all specifications.* 🥦📖🛡️

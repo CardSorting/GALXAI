@@ -20,12 +20,21 @@ flowchart LR
 ## 2. File Naming & Migration Structure
 
 Every database change MUST produce two atomic, idempotent files:
-1. `supabase/migrations/YYYYMMDDHHMMSS_action_name.up.sql` (Forward migration)
-2. `supabase/migrations/YYYYMMDDHHMMSS_action_name.down.sql` (Reversible rollback)
+1. `supabase/migrations/YYYYMMDDHHMMSS_action_name.sql` (Forward migration)
+2. `supabase/rollbacks/YYYYMMDDHHMMSS_action_name.down.sql` (Reversible rollback)
 
 ---
 
-## 3. Zero-Lock DDL Rules
+## 3. Single-Hop Composite Stored Procedures & Request Leases (V44–V53)
+
+To eliminate network roundtrips and race conditions across distributed edge workers:
+- **Atomic Preflight & Settlement**: Combine multiple validation checks (tier entitlement, spend caps, sliding 5-hour and weekly capacity) and state updates into single PL/pgSQL stored procedures (`fn_evaluate_and_acquire_seat_gate_v2`, `fn_settle_seat_stream_completion_composite_v2`).
+- **Expiring Request Leases (`galx_seat_request_leases`)**: Enforce automatic TTL expiration on in-flight stream reservations to prevent orphaned locks when client connections drop.
+- **Exact-Owner Chat Persistence (`fn_upsert_owned_chat_messages`)**: Validate conversation ownership against `auth.uid()` / `p_user_id` inside the stored procedure before executing batch message inserts.
+
+---
+
+## 4. Zero-Lock DDL Rules
 
 ### ❌ Forbidden Patterns:
 ```sql
@@ -54,7 +63,7 @@ ALTER TABLE orders VALIDATE CONSTRAINT fk_orders_user;
 
 ---
 
-## 4. Default-Deny RLS Policy Template
+## 5. Default-Deny RLS Policy Template
 
 Every new table created in `public` must execute:
 
@@ -82,7 +91,7 @@ CREATE POLICY "tenant_isolated_access"
 
 ---
 
-## 5. `SECURITY DEFINER` Search Path Sanitization
+## 6. `SECURITY DEFINER` Search Path Sanitization
 
 Any RPC stored procedure with `SECURITY DEFINER` MUST explicitly pin its search path:
 
@@ -101,12 +110,13 @@ $$;
 
 ---
 
-## 6. Migration Verification Checklist
+## 7. Migration Verification Checklist & Commands
 
 Before applying any migration to staging or production:
-1. [ ] Run `npm run db:verify` to execute the automated paranoia linter.
-2. [ ] Test the rollback script: Apply `.up.sql`, then apply `.down.sql`, and verify zero residue.
-3. [ ] Verify that TypeScript types in `src/core/contracts/` stay in lockstep.
+1. [ ] Run `npm run db:verify` to execute the automated paranoia linter across all 53 migrations.
+2. [ ] Run `npm run db:push` to apply pending migrations to the Supabase pooler.
+3. [ ] Run `npm run db:test` to execute the full 92-test zero-egress database integration suite.
+4. [ ] Verify that TypeScript types in `src/lib/supabase/types.ts` stay in lockstep.
 
 ---
 

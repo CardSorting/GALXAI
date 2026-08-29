@@ -159,6 +159,7 @@ npx galxai add image
 GALXAI embeds **BroccoliDB**, an adaptive representation-selection substrate that evaluates incoming context $C \to \{ \text{ID}(C), T(C) \}$:
 - **Identity Bypass ($\text{ID}(C)$)**: When context is already dense and clean ($<200$ tokens), compaction is bypassed entirely ($0.0\%$ dilation overhead, $100\%$ baseline preservation).
 - **Transformation Regime ($T(C)$)**: For institutionally noisy codebases, multi-thousand-page incident logs, or high-velocity streams (180 domains, eBPF, K8s watch), it strips ceremonial redundancy while defending active invariants under strict fail-closed safety gates.
+- **Hybrid Rolling Memory Mesh (5-Level Pyramid)**: Structures long-horizon conversational turns in L1 BroccoliDB RAM (`<0.08ms`) coupled with durable PostgreSQL CTEs and dynamic 1,050,000 frontier token window scaling.
 
 ```typescript
 import { BroccoliCompactionFacade } from '@/core/broccolidb';
@@ -182,6 +183,15 @@ npm run bench:entropy
 
 # 3. Empirical Inference Boundary Benchmark across OpenAI Models (Blinded A/B)
 npm run bench:inference-boundary
+
+# 4. Chat Context Hardening & Tool Invariant Test Suite
+npx tsx scripts/test-chat-context-hardening.ts
+
+# 5. Paranoid Database Integrity & 53-Migration Linter
+npm run db:verify
+
+# 6. Live Supabase 92-Test Zero-Egress Database Integration Suite
+npm run db:test
 ```
 
 ---
@@ -191,9 +201,12 @@ npm run bench:inference-boundary
 | Feature | Raw OpenAI / Retail | GALXAI |
 | :--- | :--- | :--- |
 | **Pricing** | Full Retail List Price | **25%–40% Wholesale Discount** |
+| **Context Window Envelope** | Static / Clamped | **Dynamic 1.05M Frontier Sizing (Zero Clamps)** |
 | **Prompt Representation** | Full uncompressed payload | **BroccoliDB Adaptive Selection ($C \to \{\text{ID}(C), T(C)\}$)** |
+| **Long-Horizon Memory** | Monolithic lossy summaries | **Hybrid 5-Level Pyramid in RAM (<0.08ms)** |
+| **Seat Quota Model** | Static monthly cliffs | **Dual Sliding Windows (5-Hour & Weekly Meters)** |
 | **Prompt Caching** | Often absorbed by provider | **100% Pass-Through (75% Rebate)** |
-| **Frontend Setup** | Requires manual API proxies | **Drop-in React Components (`<GalxImage />`)** |
+| **Frontend Setup** | Requires manual API proxies | **Drop-in React Components (`<GalxImage />`, `<GalxChat />`)** |
 | **API Key Security** | Vulnerable to client leaks | **Server-Only `.env.local` injection** |
 | **AI Agent Directives** | Agents hallucinate boilerplate | **1-Line `npx galxai skills` setup** |
 | **Rate Limit Stalls** | 429 errors during traffic spikes | **Automatic Sub-1ms Anycast Failover** |
@@ -203,11 +216,11 @@ npm run bench:inference-boundary
 ## 📚 Documentation & Guides
 
 - 🛡️ **[Maintainers Knowledge Base (20 Manuals)](docs/maintainers/README.md)**: Deep internal architectural blueprints, 30-day onboarding ramp, subsystem matrices, CI specs, outage failovers, and on-call runbooks.
-- 🏛️ **[Architecture Decision Records (67 ADRs)](docs/adr/README.md)**: Deep technical specifications from ADR 0001 to ADR 0067 (including ADR 0066 Institutional Entropy and ADR 0067 Representation Selection).
+- 🏛️ **[Architecture Decision Records (72 ADRs)](docs/adr/README.md)**: Deep technical specifications from ADR 0001 to ADR 0072 (including Dual Rolling Windows, Hybrid 5-Level Pyramid, and Exact-Owner Chat Persistence).
+- 📋 **[Senior Engineering Review: Chat & Rolling Context](docs/SENIOR_ENGINEERING_REVIEW_CHAT_AND_ROLLING_CONTEXT.md)**: Architectural review of Hybrid BroccoliDB (L1) + PostgreSQL (L2) rolling memory, dynamic 1.05M context governor, dual rolling seat quotas, and V44-V53 migrations.
 - 🤝 **[Contributing Guide](CONTRIBUTING.md)**: Development workflow, Conventional Commits, and automated git hooks (`npm run hooks:install`).
 - 🥦 **[BroccoliDB Compaction Onboarding Guide](docs/BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md)**: 19 streaming modes, 180 domain compactors, and the Epistemic Measurement Machinery.
 - 📊 **[Empirical Benchmarks & Inference Boundary](docs/BENCHMARKS.md)**: Head-to-head provider boundary tests on OpenAI models with $/success accounting.
-- 📋 **[Engineering Handover & Strategy Review](HANDOVER.md)**: Architectural review document, commercial thesis, and open design trade-offs for reviewing engineers.
 - ⚡ **[Quickstart Guide](docs/QUICKSTART.md)**: 30-second integrations for Next.js, React, Node, and Python.
 - 💻 **[SDK Cheatsheet](docs/SDK_CHEATSHEET.md)**: Drop-in code snippets for every major framework.
 - ❓ **[Frequently Asked Questions (FAQs)](docs/FAQS.md)**: Zero-hesitation philosophy, model routing, and BroccoliDB economics.

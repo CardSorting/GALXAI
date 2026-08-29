@@ -103,4 +103,44 @@ A tenant's request volume exceeded the available soft reservation capacity in th
 
 ---
 
+## Diagnostic 5: Seat Request Lease Contention & Orphaned Stream Leases
+
+### 🚨 Symptoms
+- Client receives `HTTP 429 concurrency_limit_exceeded` or `seat_lease_timeout` despite low active stream counts.
+
+### 🔍 Cause
+An unhandled client disconnect or network interruption terminated a stream without completing `fn_settle_seat_stream_completion_composite_v2`, leaving an active reservation in `galx_seat_request_leases`.
+
+### 🛠️ Remediation Steps
+1. **Automatic TTL Resolution**:
+   Leases expire automatically after their TTL (`180s`). Active streams are freed automatically.
+2. **Execute Manual Lease Release**:
+   ```sql
+   SELECT fn_release_seat_request_lease('lease_uuid_here');
+   ```
+3. **Verify Concurrency Semaphore in Test Suite**:
+   ```bash
+   npx tsx scripts/test-chat-context-hardening.ts
+   ```
+
+---
+
+## Diagnostic 6: Tool Turn-Pair Compaction Boundary Invariant Failures
+
+### 🚨 Symptoms
+- Upstream provider rejects chat completion with HTTP 400 (`orphaned_tool_message` or `tool_use_id without matching tool_result`).
+
+### 🔍 Cause
+A client or custom compaction strategy severed an `assistant` message containing `tool_calls` from its subsequent `tool` execution response across sliding window boundaries.
+
+### 🛠️ Remediation Steps
+1. **Verify `ensureAtomicTurnPairs`**:
+   Ensure `GalxRollingContextEngine.buildOptimalRollingContext` executes `ensureAtomicTurnPairs` to shift compaction boundaries leftward to enclose assistant triggers.
+2. **Run Request Normalizer Verification**:
+   ```bash
+   npx tsx scripts/test-chat-context-hardening.ts
+   ```
+
+---
+
 *For full operational playbooks, see [../playbooks/README.md](../playbooks/README.md).* 🥦🔧🚀

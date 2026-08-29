@@ -40,6 +40,9 @@
 3. **Verify All Core Suites**:
    - `npm run bench:entropy` (7-Tier Progressive Institutional Entropy Benchmark)
    - `npm run bench:inference-boundary` (Randomized Branch-Blinded A/B Benchmark)
+   - `npx tsx scripts/test-chat-context-hardening.ts` (Chat Normalization & Context Hardening Suite)
+   - `npm run db:verify` (53-Migration Paranoid Linter & Rollback Validation)
+   - `npm run db:test` (Live Supabase 92-Test Zero-Egress Database Suite)
    - `npm run test:broccolidb:api` (19 Compaction Modes & Facade REST API)
    - `npm run test:broccolidb:hardening` (Fail-Closed Factual Provenance Gate)
    - `npm run test:router` (218 Router, Vault & Auth Tests)
@@ -48,25 +51,28 @@
 
 ---
 
-### Day 2: The 7-Layer Request Tracing Walkthrough
+### Day 2: The 8-Layer Request Tracing Walkthrough
 Read through and trace a request across these files in order:
-1. `src/app/v1/chat/completions/route.ts` (API Gateway & Header Parse)
+1. `src/app/v1/chat/completions/route.ts` & `src/app/api/chat/route.ts` (API Gateway, Dynamic Context Bounds, Header Parse)
 2. `src/core/auth/GalxAuthEngine.ts` (Bearer Key Hash & JWE Decryption)
-3. `src/core/broccolidb/BroccoliCompactionFacade.ts` (Polymorphic Compaction Dispatcher & Representation Selection)
-4. `src/core/broccolidb/BroccoliCompactionSafety.ts` (Fail-Closed Factual Provenance Gate)
-5. `src/core/pool/GalxCredentialPool.ts` (P-AHT Hydraulic Headroom Shard Selection)
-6. `src/core/circuit/GalxCircuitBreaker.ts` (4-State Circuit Breaker)
-7. `src/core/router/GalxModelRouter.ts` (Zero-Copy SSE Stream Engine)
+3. `src/core/subscription/GalxSeatTierEngine.ts` (Dual Rolling Window Quota & Concurrency Semaphore)
+4. `src/core/governor/GalxElasticContextGovernor.ts` (Dynamic 1.05M Frontier Window Sizing)
+5. `src/core/router/GalxRollingContextEngine.ts` (5-Level Memory Pyramid, Episodic Clusters, and In-Memory RRF)
+6. `src/core/broccolidb/BroccoliCompactionFacade.ts` (Polymorphic Compaction Dispatcher & Representation Selection)
+7. `src/core/pool/GalxCredentialPool.ts` (P-AHT Hydraulic Headroom Shard Selection)
+8. `src/core/router/GalxModelRouter.ts` (Zero-Copy SSE Stream Engine & Streaming Tap)
 
-**Exercise**: Add a log line inside `BroccoliCompactionFacade.compactDomain` and run `npx tsx scripts/dissect-payloads-and-causal-analysis.ts` to see your log in action.
+**Exercise**: Add a test turn in a scratch script and run `npx tsx scripts/test-chat-context-hardening.ts` to see the rolling context compaction and atomic turn-pair preservation in action.
 
 ---
 
 ### Day 3: Simulation & Fault-Injection Drills
 1. **Test Fail-Closed Grounding**:
    Intentionally alter a number in a test fixture in `scripts/test-broccolidb-production-hardening.ts` and verify that `BroccoliCompactionSafety` fails closed to raw source text with 0 corruption.
-2. **Test Cryptographic AAD Protection**:
-   Attempt to decrypt a secret using a different `tenantUid` in `scripts/populate-vault-secrets.ts` and confirm `GalxVaultDecryptionError` is thrown unconditionally.
+2. **Test Atomic Tool Turn-Pair Boundary Protection**:
+   Simulate a custom client pruning tool history in `scripts/test-chat-context-hardening.ts` and verify that `ensureAtomicTurnPairs` shifts compaction boundaries to keep assistant tool calls and tool responses intact.
+3. **Test Expiring Request Lease Auto-Reclamation**:
+   Verify that abandoned streaming leases in `galx_seat_request_leases` expire automatically after TTL without locking concurrency slots.
 
 ---
 

@@ -35,16 +35,19 @@ npm run bench:180-domains
 
 ---
 
-## 🛡️ 3. Core Engine, Routing & Ergonomics
+## 🛡️ 3. Core Engine, Routing & Context Hardening
 
 ```bash
-# 1. Universal Model Router, Vault, Privacy & SOC2 Suite (218 Tests)
+# 1. Chat Normalization, Tool Turn-Pairs & Dynamic 1M Context Hardening Suite (21 Tests)
+npx tsx scripts/test-chat-context-hardening.ts
+
+# 2. Universal Model Router, Vault, Privacy & SOC2 Suite (218 Tests)
 npm run test:router
 
-# 2. Universal Developer Mental Model & SDK Parity Suite (98 Tests)
+# 3. Universal Developer Mental Model & SDK Parity Suite (98 Tests)
 npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 
-# 3. Spend Governance Attribution & Control Plane Suite
+# 4. Spend Governance Attribution & Control Plane Suite
 npm run test:governance
 ```
 

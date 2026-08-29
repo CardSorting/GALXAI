@@ -9,7 +9,10 @@
 
 | Metric | Target SLO | Measurement Method | Alert Threshold |
 | :--- | :--- | :--- | :--- |
+| **L1 Rolling Memory Lookup** | $P_{95} \le 0.08\text{ms}$<br>$P_{99} \le 0.12\text{ms}$ | `performance.now()` in `GalxRollingContextEngine` | $P_{99} > 0.50\text{ms}$ |
+| **Reciprocal Rank Fusion (RRF) RAG** | $P_{95} \le 0.45\text{ms}$<br>$P_{99} \le 0.85\text{ms}$ | In-memory 1,000-page document ranking | $P_{99} > 2.0\text{ms}$ |
 | **Compaction Execution Overhead** | $P_{95} \le 1.5\text{ms}$<br>$P_{99} \le 5.0\text{ms}$ | `performance.now()` in `BroccoliCompactionFacade` | $P_{99} > 10.0\text{ms}$ |
+| **PostgreSQL 1-Hop Composite Gate** | $P_{95} \le 1.5\text{ms}$<br>$P_{99} \le 3.0\text{ms}$ | PL/pgSQL composite stored procedure | $P_{99} > 6.0\text{ms}$ |
 | **Time-to-First-Token (TTFT)** | $P_{95} \le 25\text{ms}$ (Edge Mesh)<br>$P_{99} \le 45\text{ms}$ (Serverless Origin) | Synthetic edge probes across global PoPs | $P_{99} > 80.0\text{ms}$ |
 | **Token Reduction Efficiency** | $\ge 60\%$ (High Redundancy)<br>$\ge 40\%$ (Moderate Redundancy) | `BroccoliInferenceBoundaryBenchmarker` | Reduction $< 35\%$ on baseline test |
 | **Zero-Copy Memory Spillover** | $\le 32\text{MB}$ peak volatile heap | `process.memoryUsage().heapUsed` | Heap breach $> 48\text{MB}$ slab |

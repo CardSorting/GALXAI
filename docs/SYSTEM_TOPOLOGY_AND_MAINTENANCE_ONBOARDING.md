@@ -19,6 +19,8 @@
    - [6.5 GalxSwarmCoordinatorDO (Durable Objects State Engine)](#65-galxswarmcoordinatordo-durable-objects-state-engine)
    - [6.6 GalxTaskQueueEngine & DAG Fan-In Orchestrator](#66-galxtaskqueueengine--dag-fan-in-orchestrator)
    - [6.7 Custom OAuth 2.1, Token Family Lineage & Substrate Vacuum Mesh](#67-custom-oauth-21-token-family-lineage--substrate-vacuum-mesh)
+   - [6.8 GalxRollingContextEngine & 5-Level Memory Pyramid](#68-galxrollingcontextengine--5-level-memory-pyramid-adr-00690071)
+   - [6.9 GalxSeatTierEngine & Expiring Request Leases](#69-galxseattierengine--expiring-request-leases-adr-0068--0072)
 7. [Cryptographic Enclave & Zero-Data-Retention (ZDR v10.0)](#7-cryptographic-enclave--zero-data-retention-zdr-v100)
 8. [Database Governance: The Paranoid PostgreSQL Protocol (AOP-DB)](#8-database-governance-the-paranoid-postgresql-protocol-aop-db)
 9. [Operational Maintenance Fleet & Command Matrix](#9-operational-maintenance-fleet--command-matrix)
@@ -258,6 +260,24 @@ CloudTasks & CloudRun-inspired distributed asynchronous task executor:
 ---
 
 ### 6.7 Custom OAuth 2.1, Token Family Lineage & Substrate Vacuum Mesh
+Custom RFC 6819 refresh token rotation engine with automatic reuse attack detection cascades, DPoP cryptographic proof binding, and automated expired token vacuuming.
+
+---
+
+### 6.8 GalxRollingContextEngine & 5-Level Memory Pyramid (ADR 0069–0071)
+Sub-microsecond long-horizon memory engine coupling **L1 BroccoliDB RAM Tables** with **L2 PostgreSQL CTEs**:
+- **5-Level Multi-Resolution Pyramid**: Structures context into (1) Workspace Anchors, (2) 10-turn Thematic Episodes, (3) Temporal Decision Graphs (`WITH RECURSIVE`), (4) Reciprocal Rank Fusion (RRF) RAG in RAM (`<0.5ms`), and (5) Atomic Sliding Verbatim Buffers.
+- **Dynamic 1.05M Context Window Allocation**: `GalxElasticContextGovernor` dynamically envelopes large multi-hundred-page documents without artificial 2k/4k token clamps.
+- **Atomic Tool Turn-Pair Boundary Protection**: Enforces strict inseparability between `assistant` messages with `tool_calls` and corresponding `tool` execution outputs.
+- **Stable Prefix Cache Hashing**: Deterministic SHA-256 fingerprinting locks in $>98\%$ prompt cache reuse on upstream frontier models.
+
+---
+
+### 6.9 GalxSeatTierEngine & Expiring Request Leases (ADR 0068 & 0072)
+Sovereign enterprise seat governance with dual sliding rolling window telemetry:
+- **Dual Sliding Meters**: Computes sliding 5-hour burst limits and 7-day weekly capacity with natural language countdowns (`"90% remaining • resets in 4 hours, 17 minutes"`).
+- **Expiring Idempotent Seat Request Leases (`galx_seat_request_leases`)**: Single-hop atomic preflight validation (`fn_evaluate_and_acquire_seat_gate_v2`) and post-inference settlement (`fn_settle_seat_stream_completion_composite_v2`), preventing runaway concurrency locks on dropped client connections.
+
 
 Authoritative identity and token lifecycle substrate backed by `OAuthRepository.ts`, `GalxOAuthManager.ts`, and Supabase PostgreSQL:
 - **RFC 6819 § 5.2.2.3 Token Families**: Every rotation tracks `session_family_id` and monotonic `sequence_number`.
