@@ -35,8 +35,10 @@ import { SEAT_TIERS, ROLE_PERMISSIONS, type RolePermission } from '@/lib/data/pr
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { useOrganizationStore } from '@/lib/storage/organizationStore';
 import { RoleType } from '@/lib/data/organizationData';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function SeatsManagementClient() {
+  const { user } = useAuth();
   const {
     org,
     members,
@@ -47,6 +49,8 @@ export function SeatsManagementClient() {
     createInvites
   } = useOrganizationStore();
 
+  const workspaceName = user?.company || org.name || 'Acme AI Corp';
+  const tierName = user?.role === 'enterprise' ? 'Enterprise Fleet' : 'Small Business Tier';
   const totalSeats = org.seatCapacity;
   const [activeTab, setActiveTab] = useState<'roster' | 'permissions' | 'sso'>('roster');
   
@@ -119,7 +123,8 @@ export function SeatsManagementClient() {
   };
 
   const handleCopyInviteLink = async () => {
-    const inviteUrl = `https://galx.ai/auth/join?team=acme-ai&ref=${Date.now()}`;
+    const slug = (user?.company || org.name || 'acme-ai').toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const inviteUrl = `https://galx.ai/auth/join?team=${slug}&ref=${Date.now()}`;
     await safeCopyToClipboard(inviteUrl);
     setInviteLinkCopied(true);
     setTimeout(() => setInviteLinkCopied(false), 2000);
@@ -161,7 +166,7 @@ export function SeatsManagementClient() {
             <div className="flex flex-wrap items-center gap-2">
               <span className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-xs font-bold flex items-center gap-1.5">
                 <Building2 className="w-3.5 h-3.5 text-amber-400" />
-                <span>Acme AI Corp • Small Business Tier</span>
+                <span>{workspaceName} • {tierName}</span>
               </span>
               <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-mono text-[11px] font-bold">
                 ● 100% Active Sovereign Governance

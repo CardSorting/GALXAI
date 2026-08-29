@@ -18,7 +18,7 @@ import {
 function DeviceContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, loginWithOAuth } = useAuth();
+  const { user, signInWithDemo } = useAuth();
 
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -92,14 +92,29 @@ function DeviceContent() {
             </p>
           </div>
 
-          <div className="pt-2">
+          <div className="pt-2 space-y-2 font-mono text-xs">
             <Link
-              href="/playground"
-              className="w-full py-3.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white font-semibold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+              href="/keys"
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-amber-500/20"
             >
-              <span>Go to Playground</span>
+              <span>View API Keys</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
+
+            <div className="grid grid-cols-2 gap-2">
+              <Link
+                href="/teams/seats"
+                className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-amber-300 font-bold text-center transition-all"
+              >
+                Teams &amp; Seats
+              </Link>
+              <Link
+                href="/playground"
+                className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-cyan-300 font-bold text-center transition-all"
+              >
+                Sandbox
+              </Link>
+            </div>
           </div>
         </div>
       ) : (
@@ -135,6 +150,50 @@ function DeviceContent() {
             </div>
           )}
 
+          {/* User Account Context / Auth Notice */}
+          {!user ? (
+            <div className="space-y-3 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs">
+              <div className="flex items-center justify-between text-amber-300 font-bold font-mono">
+                <span className="flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <span>SIGN IN TO LINK CLI TOKEN</span>
+                </span>
+              </div>
+              <p className="text-[11px] text-zinc-300 font-sans">
+                You must be logged in so the CLI token can be mapped to your developer account and compute wallet.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 font-mono">
+                <button
+                  type="button"
+                  onClick={() => {
+                    signInWithDemo({
+                      role: 'dev',
+                      name: 'Terminal Developer',
+                      email: 'terminal.dev@galx.ai'
+                    });
+                  }}
+                  className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-bold text-xs uppercase flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5 fill-black" />
+                  <span>1-Click Sandbox</span>
+                </button>
+
+                <Link
+                  href={`/auth/signin?next=${encodeURIComponent(code ? `/device?code=${code}` : '/device')}`}
+                  className="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white font-bold text-xs text-center flex items-center justify-center transition-all cursor-pointer"
+                >
+                  Sign In with Email
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-xs flex items-center justify-between font-mono">
+              <span>Authorizing for: <strong className="text-white">{user.email || user.name}</strong></span>
+              <span className="text-emerald-400 font-bold text-[10px] uppercase">Active Session</span>
+            </div>
+          )}
+
           {/* Form */}
           <form onSubmit={handleAuthorize} className="space-y-4">
             <div>
@@ -152,14 +211,14 @@ function DeviceContent() {
 
             <button
               type="submit"
-              disabled={loading || code.replace(/[^A-Z0-9]/g, '').length < 8}
-              className="w-full h-12 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-semibold text-sm shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99]"
+              disabled={loading || !user || code.replace(/[^A-Z0-9]/g, '').length < 8}
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-bold text-xs uppercase tracking-wider font-mono shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99]"
             >
               {loading ? (
                 <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>Authorize Device</span>
+                  <span>Authorize CLI Device</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -169,7 +228,7 @@ function DeviceContent() {
           {/* Back to regular login */}
           <div className="pt-2 border-t border-white/5 text-center">
             <Link
-              href="/auth/connect"
+              href="/auth/signin"
               className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors py-1 cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />

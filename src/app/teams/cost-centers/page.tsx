@@ -22,8 +22,8 @@ import {
   Lock,
   ArrowRight
 } from 'lucide-react';
-import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 import { useOrganizationStore } from '@/lib/storage/organizationStore';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function TeamCostCentersPage() {
   const { costCenters: teams, createCostCenter } = useOrganizationStore();
@@ -78,13 +78,17 @@ export default function TeamCostCentersPage() {
     setTimeout(() => setCopiedCsv(false), 2000);
   };
 
+  const { user } = useAuth();
+  const workspaceName = user?.company || 'Acme AI Corp';
+  const planName = user?.role === 'enterprise' ? 'Enterprise Fleet' : 'Small Business';
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
         <Breadcrumbs
-          workspaceContext={{ name: 'Acme AI Corp', plan: 'Small Business' }}
+          workspaceContext={{ name: workspaceName, plan: planName }}
           items={[
             { label: 'Workspace & Teams', href: '/teams/seats', icon: Users2 },
             { label: 'Members & Access' },
@@ -106,7 +110,7 @@ export default function TeamCostCentersPage() {
               className="px-4 py-2.5 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-mono font-bold flex items-center gap-1.5 transition-all"
             >
               <Users2 className="w-3.5 h-3.5 text-amber-400" />
-              <span>Manage Seats (10)</span>
+              <span>Manage Seats</span>
             </Link>
 
             <button
@@ -129,13 +133,8 @@ export default function TeamCostCentersPage() {
 
         <TeamsSubNav />
 
-        <AuthRequiredGate
-          title="Sign In to Manage Team Cost Centers"
-          description="Cost center GL allocations, team sub-budgets, and squad spend limits are private to your workspace."
-          checkoutAmount={100}
-        >
-          {/* Executive KPI Strip */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono">
+        {/* Executive KPI Strip */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono">
             <div className="glass-panel p-5 rounded-3xl space-y-1 border border-white/10">
               <span className="text-[11px] text-zinc-400 uppercase font-sans font-semibold">Allocated Team Budgets</span>
               <div className="text-2xl font-black text-white">${totalAllocatedBudget.toLocaleString()} / mo</div>
@@ -327,7 +326,6 @@ export default function TeamCostCentersPage() {
               );
             })}
           </div>
-        </AuthRequiredGate>
       </main>
     </div>
   );

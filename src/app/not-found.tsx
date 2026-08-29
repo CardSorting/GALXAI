@@ -9,7 +9,8 @@ import {
   Key,
   CreditCard,
   FileText,
-  Home
+  Home,
+  Users2
 } from 'lucide-react';
 import { NotFoundSearchHelper } from '@/components/common/NotFoundSearchHelper';
 
@@ -53,7 +54,7 @@ export default function NotFound() {
           </div>
 
           {/* Quick Destination Links */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto font-mono text-xs pt-2">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 max-w-2xl mx-auto font-mono text-xs pt-2">
             <Link
               href="/"
               className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white flex flex-col items-center justify-center gap-1.5 transition-all group"
@@ -79,8 +80,16 @@ export default function NotFound() {
             </Link>
 
             <Link
-              href="/docs"
+              href="/teams/seats"
               className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white flex flex-col items-center justify-center gap-1.5 transition-all group"
+            >
+              <Users2 className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+              <span className="font-bold">Seats</span>
+            </Link>
+
+            <Link
+              href="/docs"
+              className="col-span-2 sm:col-span-1 p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white flex flex-col items-center justify-center gap-1.5 transition-all group"
             >
               <FileText className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
               <span className="font-bold">Docs</span>

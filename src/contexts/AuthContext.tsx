@@ -61,6 +61,26 @@ function mapSupabaseUser(user: User | null, session?: Session | null): AuthUser 
   };
 }
 
+function persistCustomSession(user: AuthUser | null) {
+  if (typeof window === 'undefined') return;
+  if (user) {
+    SafeStorage.setJSON(CUSTOM_AUTH_KEY, user);
+    try {
+      const isHttps = window.location.protocol === 'https:';
+      const maxAge = 2592000; // 30 days
+      const secureFlag = isHttps ? '; Secure' : '';
+      document.cookie = `galx_session=${encodeURIComponent(user.token || user.id)}; path=/; max-age=${maxAge}; SameSite=Lax${secureFlag}`;
+      document.cookie = `galx_user_role=${encodeURIComponent(user.role || 'developer')}; path=/; max-age=${maxAge}; SameSite=Lax${secureFlag}`;
+    } catch {}
+  } else {
+    SafeStorage.removeItem(CUSTOM_AUTH_KEY);
+    try {
+      document.cookie = 'galx_session=; path=/; max-age=0; SameSite=Lax';
+      document.cookie = 'galx_user_role=; path=/; max-age=0; SameSite=Lax';
+    } catch {}
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [supabaseUser, setSupabaseUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -74,6 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const savedCustom = SafeStorage.getJSON<AuthUser | null>(CUSTOM_AUTH_KEY, null);
     if (savedCustom) {
       setCustomUser(savedCustom);
+      persistCustomSession(savedCustom);
     }
 
     // 2. Initial user & session load from Supabase client
@@ -132,7 +153,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           company: 'Personal Sandbox'
         };
         setCustomUser(authUser);
-        SafeStorage.setJSON(CUSTOM_AUTH_KEY, authUser);
+        persistCustomSession(authUser);
       }
       return { error: null, data };
     } catch (err: any) {
@@ -170,7 +191,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         company: 'Personal Sandbox'
       };
       setCustomUser(authUser);
-      SafeStorage.setJSON(CUSTOM_AUTH_KEY, authUser);
+      persistCustomSession(authUser);
 
       return { error: null, data: { user: authUser, session: data?.session } };
     } catch (err: any) {
@@ -186,13 +207,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         company: 'Personal Sandbox'
       };
       setCustomUser(authUser);
-      SafeStorage.setJSON(CUSTOM_AUTH_KEY, authUser);
+      persistCustomSession(authUser);
       return { error: null, data: { user: authUser } };
     } finally {
       setIsLoading(false);
     }
   };
-
 
   const signInWithOtp = async ({ email, options }: { email: string; options?: { emailRedirectTo?: string } }) => {
     setIsLoading(true);
@@ -229,7 +249,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     setCustomUser(demoUser);
-    SafeStorage.setJSON(CUSTOM_AUTH_KEY, demoUser);
+    persistCustomSession(demoUser);
   };
 
   const signInWithProviderKey = async ({ apiKey, provider = 'openai' }: { apiKey: string; provider?: string }) => {
@@ -263,7 +283,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             role: 'developer'
           };
           setCustomUser(providerUser);
-          SafeStorage.setJSON(CUSTOM_AUTH_KEY, providerUser);
+          persistCustomSession(providerUser);
           return { success: true };
         }
         return { success: false, error: json.error || 'Failed to authenticate provider key' };
@@ -280,7 +300,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           role: 'developer'
         };
         setCustomUser(authUser);
-        SafeStorage.setJSON(CUSTOM_AUTH_KEY, authUser);
+        persistCustomSession(authUser);
       }
       return { success: true };
     } catch (err: any) {
@@ -295,7 +315,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           role: 'developer'
         };
         setCustomUser(providerUser);
-        SafeStorage.setJSON(CUSTOM_AUTH_KEY, providerUser);
+        persistCustomSession(providerUser);
         return { success: true };
       }
       return { success: false, error: err.message || 'Key authentication error' };
@@ -324,7 +344,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
 
       setCustomUser(ssoUser);
-      SafeStorage.setJSON(CUSTOM_AUTH_KEY, ssoUser);
+      persistCustomSession(ssoUser);
       return { success: true };
     } finally {
       setIsLoading(false);
@@ -335,7 +355,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       setCustomUser(null);
-      SafeStorage.removeItem(CUSTOM_AUTH_KEY);
+      persistCustomSession(null);
       await supabase.auth.signOut();
       setSession(null);
       setSupabaseUser(null);

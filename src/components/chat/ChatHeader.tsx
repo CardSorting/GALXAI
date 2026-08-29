@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   Menu,
   ChevronDown,
@@ -147,6 +148,7 @@ export function ChatHeader({
   onOpenAuth,
   seatTier,
 }: ChatHeaderProps) {
+  const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
   const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -500,7 +502,7 @@ export function ChatHeader({
           </div>
         ) : (
           <Link
-            href="/auth/signin"
+            href={pathname && pathname !== '/' && !pathname.startsWith('/auth') ? `/auth/signin?next=${encodeURIComponent(pathname)}` : '/auth/signin'}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs shadow-md transition-all cursor-pointer"
           >
             <LogIn className="w-3.5 h-3.5" />

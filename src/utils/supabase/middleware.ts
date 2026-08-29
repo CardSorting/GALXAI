@@ -41,11 +41,39 @@ export const createClient = (request: NextRequest) => {
   return { supabase, response: supabaseResponse };
 };
 
+function applySecurityHeaders(response: NextResponse, pathname: string): NextResponse {
+  // Standard enterprise defense-in-depth headers
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+  response.headers.set('X-XSS-Protection', '1; mode=block');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+
+  // Route security classification & zero-cache enforcement for private workspace surfaces
+  const isProtectedPath = 
+    pathname.startsWith('/teams') ||
+    pathname.startsWith('/billing') ||
+    pathname.startsWith('/keys') ||
+    pathname.startsWith('/queues') ||
+    pathname.startsWith('/device') ||
+    pathname.startsWith('/settings') ||
+    pathname === '/models/routing';
+
+  if (isProtectedPath) {
+    response.headers.set('X-GALX-Route-Classification', 'protected-workspace');
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    response.headers.set('Pragma', 'no-cache');
+  }
+
+  return response;
+}
+
 /**
  * Hyper-optimized Edge session handler.
  * - Sub-millisecond CORS preflight termination (<0.1ms)
  * - Zero-allocation API & inference route bypass
  * - Conditional SSR client creation (only instantiated when sb-* auth cookies exist)
+ * - Enterprise security & route classification headers
  */
 export const updateSession = async (request: NextRequest) => {
   const method = request.method;
@@ -72,19 +100,19 @@ export const updateSession = async (request: NextRequest) => {
     apiResponse.headers.set('X-Edge-FastPath', 'api-bypass');
     apiResponse.headers.set('Timing-Allow-Origin', '*');
     apiResponse.headers.set('Server-Timing', 'edge;dur=0.1, cache;desc="L1-FastPath"');
-    return apiResponse;
+    return applySecurityHeaders(apiResponse, pathname);
   }
 
-  // 3. Check for presence of Supabase auth cookies before initializing SSR client
+  // 3. Check for presence of Supabase or custom auth cookies before initializing SSR client
   const allCookies = request.cookies.getAll();
-  const hasAuthCookie = allCookies.some(c => c.name.startsWith('sb-') && c.value);
+  const hasAuthCookie = allCookies.some(c => (c.name.startsWith('sb-') || c.name === 'galx_session') && c.value);
 
   if (!hasAuthCookie) {
     const unauthResponse = NextResponse.next({ request });
     unauthResponse.headers.set('X-Edge-FastPath', 'public-pass');
     unauthResponse.headers.set('Timing-Allow-Origin', '*');
     unauthResponse.headers.set('Server-Timing', 'edge;dur=0.1');
-    return unauthResponse;
+    return applySecurityHeaders(unauthResponse, pathname);
   }
 
   // 4. Authenticated state: Update session and refresh tokens if necessary
@@ -117,5 +145,5 @@ export const updateSession = async (request: NextRequest) => {
   supabaseResponse.headers.set('Timing-Allow-Origin', '*');
   supabaseResponse.headers.set('Server-Timing', 'edge;dur=1.2, l1;desc="L1-FastPath"');
 
-  return supabaseResponse;
+  return applySecurityHeaders(supabaseResponse, pathname);
 };

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   Plus,
   MessageSquare,
@@ -92,6 +93,7 @@ export function ChatSidebar({
   onPrefetchSession,
   onOpenAuth,
 }: ChatSidebarProps) {
+  const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -553,7 +555,7 @@ export function ChatSidebar({
               </div>
 
               <Link
-                href="/auth/signin"
+                href={pathname && pathname !== '/' && !pathname.startsWith('/auth') ? `/auth/signin?next=${encodeURIComponent(pathname)}` : '/auth/signin'}
                 className="w-full py-1.5 px-2.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow cursor-pointer text-center"
               >
                 <LogIn className="w-3 h-3" />

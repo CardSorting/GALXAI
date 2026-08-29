@@ -35,7 +35,7 @@ function SignUpContent() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const returnUrl = searchParams.get('returnUrl') || searchParams.get('redirect') || '/';
+  const returnUrl = searchParams.get('next') || searchParams.get('returnUrl') || searchParams.get('redirect') || '/';
 
   useEffect(() => {
     const errorParam = searchParams.get('error');
@@ -120,7 +120,7 @@ function SignUpContent() {
     setError(null);
     try {
       await signInWithOAuth(provider, {
-        redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(returnUrl)}`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(returnUrl)}`,
       });
     } catch (err: any) {
       setError(err.message || `Failed to authenticate with ${provider}.`);
@@ -180,13 +180,50 @@ function SignUpContent() {
               </div>
 
               <div className="space-y-3 pt-2">
-                <Link
-                  href="/"
-                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-cyan-400 via-indigo-400 to-cyan-500 hover:from-cyan-300 hover:to-indigo-300 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2 group cursor-pointer"
-                >
-                  <span>Launch GALX AI Chat</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
+                {returnUrl && returnUrl !== '/' ? (
+                  <Link
+                    href={returnUrl}
+                    className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 group cursor-pointer font-mono"
+                  >
+                    <span>Continue to Destination ({returnUrl})</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+                ) : (
+                  <Link
+                    href="/"
+                    className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-cyan-400 via-indigo-400 to-cyan-500 hover:from-cyan-300 hover:to-indigo-300 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2 group cursor-pointer"
+                  >
+                    <span>Launch GALX AI Chat</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+                )}
+
+                <div className="grid grid-cols-2 gap-2 text-xs font-semibold font-mono">
+                  <Link
+                    href="/teams/seats"
+                    className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-amber-300 transition-all text-center"
+                  >
+                    Teams &amp; Seats
+                  </Link>
+                  <Link
+                    href="/billing"
+                    className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-emerald-300 transition-all text-center"
+                  >
+                    Compute Wallet
+                  </Link>
+                  <Link
+                    href="/keys"
+                    className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-300 transition-all text-center"
+                  >
+                    API Keys
+                  </Link>
+                  <Link
+                    href="/gateway"
+                    className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-cyan-300 transition-all text-center"
+                  >
+                    Gateway
+                  </Link>
+                </div>
 
                 <button
                   type="button"
@@ -217,7 +254,7 @@ function SignUpContent() {
               {/* Segmented Switcher */}
               <div className="grid grid-cols-2 p-1 rounded-2xl bg-black/60 border border-white/10 text-xs font-bold shadow-inner">
                 <Link
-                  href="/auth/signin"
+                  href={returnUrl && returnUrl !== '/' ? `/auth/signin?next=${encodeURIComponent(returnUrl)}` : '/auth/signin'}
                   className="py-2 px-3 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-white/5 font-semibold flex items-center justify-center transition-colors text-center"
                 >
                   Sign In
@@ -418,7 +455,7 @@ function SignUpContent() {
               {/* Bottom Route Link */}
               <div className="pt-2 text-center">
                 <Link
-                  href="/auth/signin"
+                  href={returnUrl && returnUrl !== '/' ? `/auth/signin?next=${encodeURIComponent(returnUrl)}` : '/auth/signin'}
                   className="text-xs text-zinc-400 hover:text-cyan-300 transition-colors"
                 >
                   Already have an account? <strong className="text-cyan-400 font-bold underline ml-1">Sign In →</strong>

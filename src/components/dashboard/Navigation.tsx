@@ -18,7 +18,12 @@ import {
   BookOpen,
   Key,
   Coins,
-  MessageSquare
+  MessageSquare,
+  ChevronDown,
+  CreditCard,
+  Settings,
+  Building2,
+  User as UserIcon
 } from 'lucide-react';
 import { CommandMenu } from '@/components/common/CommandMenu';
 import { LanguageBadge } from '@/components/common/LanguageBadge';
@@ -46,11 +51,25 @@ function BaseNavigation() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [commandMenuOpen, setCommandMenuOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const userDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close mobile drawer on route change
+  // Close mobile drawer and dropdown on route change
   useEffect(() => {
     setMobileMenuOpen(false);
+    setUserDropdownOpen(false);
   }, [pathname]);
+
+  // Click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(e.target as Node)) {
+        setUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const handleOpenCommand = () => setCommandMenuOpen(true);
@@ -59,6 +78,7 @@ function BaseNavigation() {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setMobileMenuOpen(false);
+        setUserDropdownOpen(false);
       }
     };
 
@@ -162,27 +182,93 @@ function BaseNavigation() {
               API Keys
             </Link>
 
-            {/* User State */}
+            {/* User State & Dropdown */}
             {user ? (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/playground"
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-200 hover:text-white transition-all"
-                >
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="hidden sm:inline font-mono">{user.name || 'Account'}</span>
-                </Link>
+              <div className="relative" ref={userDropdownRef}>
                 <button
-                  onClick={logout}
-                  className="p-1.5 rounded-xl text-rose-400/80 hover:text-rose-200 hover:bg-rose-500/15 border border-transparent hover:border-rose-500/30 transition-all cursor-pointer"
-                  title="Sign Out"
+                  type="button"
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-200 hover:text-white transition-all cursor-pointer"
                 >
-                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                  <span className="hidden sm:inline font-mono max-w-[110px] truncate">
+                    {user.name || user.email?.split('@')[0] || 'Account'}
+                  </span>
+                  <ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform ${userDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
+
+                {userDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-60 rounded-2xl bg-[#0b0e17] border border-white/15 p-2 shadow-2xl space-y-1 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="px-3 py-2 border-b border-white/10 space-y-0.5">
+                      <p className="text-xs font-bold text-white truncate">{user.name || 'Developer'}</p>
+                      <p className="text-[10px] text-zinc-400 font-mono truncate">{user.email || 'Sandbox User'}</p>
+                      <div className="flex items-center gap-1.5 pt-1">
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                          {user.role || 'Developer'}
+                        </span>
+                        {user.company && (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-mono text-zinc-400 bg-white/5 border border-white/10 truncate max-w-[110px]">
+                            {user.company}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <Link
+                      href="/teams/seats"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                      <Users2 className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Teams &amp; Seats</span>
+                    </Link>
+
+                    <Link
+                      href="/billing"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                      <CreditCard className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Wallet &amp; Billing</span>
+                    </Link>
+
+                    <Link
+                      href="/keys"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                      <Key className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Universal API Keys</span>
+                    </Link>
+
+                    <Link
+                      href="/settings"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                      <Settings className="w-3.5 h-3.5 text-zinc-400" />
+                      <span>Settings</span>
+                    </Link>
+
+                    <div className="pt-1 border-t border-white/10">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUserDropdownOpen(false);
+                          logout();
+                        }}
+                        className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors text-left cursor-pointer"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <Link
-                href="/auth/signin"
+                href={pathname && pathname !== '/' && !pathname.startsWith('/auth') ? `/auth/signin?next=${encodeURIComponent(pathname)}` : '/auth/signin'}
                 className="px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-300 hover:text-white hover:bg-white/5 active:scale-[0.98] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
               >
                 {t('nav.signin', 'Sign In')}
@@ -210,15 +296,72 @@ function BaseNavigation() {
           </div>
         </div>
 
-        {/* Mobile Navigation Drawer (Direct Clean Links - No Dropdowns) */}
+        {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
           <div
             role="region"
             aria-label="Mobile Navigation Menu"
-            className="lg:hidden mt-3 pt-3 border-t border-white/10 space-y-2 max-w-7xl mx-auto pb-4 max-h-[calc(100vh-5rem)] overflow-y-auto animate-in fade-in duration-150"
+            className="lg:hidden mt-3 pt-3 border-t border-white/10 space-y-3 max-w-7xl mx-auto pb-4 max-h-[calc(100vh-5rem)] overflow-y-auto animate-in fade-in duration-150"
           >
+            {/* User Profile Card on Mobile */}
+            {user ? (
+              <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <div>
+                      <p className="text-xs font-bold text-white">{user.name || 'Developer'}</p>
+                      <p className="text-[10px] text-zinc-400 font-mono">{user.email || 'Sandbox Account'}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      logout();
+                    }}
+                    className="p-1.5 rounded-xl text-rose-400 hover:bg-rose-500/10 transition-colors"
+                    title="Sign Out"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 pt-1 font-mono text-[11px]">
+                  <Link
+                    href="/teams/seats"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-2 rounded-xl bg-black/40 border border-white/5 text-center text-amber-300 hover:bg-white/5"
+                  >
+                    Seats
+                  </Link>
+                  <Link
+                    href="/billing"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-2 rounded-xl bg-black/40 border border-white/5 text-center text-emerald-300 hover:bg-white/5"
+                  >
+                    Billing
+                  </Link>
+                  <Link
+                    href="/keys"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-2 rounded-xl bg-black/40 border border-white/5 text-center text-indigo-300 hover:bg-white/5"
+                  >
+                    Keys
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <Link
+                href={pathname && pathname !== '/' && !pathname.startsWith('/auth') ? `/auth/signin?next=${encodeURIComponent(pathname)}` : '/auth/signin'}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2.5 rounded-2xl text-xs font-bold text-center bg-white/10 hover:bg-white/15 text-white font-sans border border-white/10"
+              >
+                {t('nav.signin', 'Sign In')}
+              </Link>
+            )}
+
             {/* Mobile Language Selector */}
-            <div className="flex items-center justify-between px-3 py-2 bg-black/40 rounded-2xl border border-white/5 mb-2">
+            <div className="flex items-center justify-between px-3 py-2 bg-black/40 rounded-2xl border border-white/5">
               <span className="text-[11px] font-mono text-zinc-400">Language:</span>
               <LanguageBadge placement="bottom" />
             </div>
@@ -257,7 +400,7 @@ function BaseNavigation() {
               </Link>
             </div>
 
-            <div className="pt-2 space-y-2">
+            <div className="pt-2">
               <Link
                 href="/solutions/small-business"
                 onClick={() => setMobileMenuOpen(false)}

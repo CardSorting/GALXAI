@@ -21,7 +21,13 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-    const userId = auth.authenticated ? auth.userId : (body.userId || 'user_demo');
+    if (!auth.authenticated || !auth.userId) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required to access Stripe Customer Portal' },
+        { status: 401 }
+      );
+    }
+    const userId = auth.userId;
 
     const stripeEngine = StripeEngine.getInstance();
     const result = await stripeEngine.createCustomerPortalSession(userId, body.returnUrl);

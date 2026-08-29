@@ -223,12 +223,12 @@ export default function SettingsPage() {
             <p className="text-xs text-zinc-400 font-sans">
               Need to add team seats, increase monthly spend caps, or unlock dedicated shard hardware?
             </p>
-            <a
-              href="/billing/seats"
+            <Link
+              href="/teams/seats"
               className="px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 hover:text-white text-xs font-mono font-bold transition-all cursor-pointer"
             >
               Manage Seat Plan →
-            </a>
+            </Link>
           </div>
         </div>
       </main>

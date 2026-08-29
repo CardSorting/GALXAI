@@ -21,16 +21,20 @@ export async function OPTIONS() {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    let userId = searchParams.get('userId') || undefined;
+    const requestedUserId = searchParams.get('userId') || undefined;
 
-    if (!userId) {
-      const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-      if (auth.authenticated) {
-        userId = auth.userId;
-      }
+    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
+    const targetUserId = auth.authenticated ? auth.userId : (requestedUserId || 'user_demo');
+
+    // Prevent unauthorized inspection of another developer's compute wallet
+    if (requestedUserId && auth.authenticated && requestedUserId !== auth.userId && !auth.claims?.scopes?.includes('admin:*')) {
+      return NextResponse.json(
+        { error: 'Forbidden: Cannot inspect wallet belonging to another account' },
+        { status: 403 }
+      );
     }
 
-    const effectiveUserId = userId || 'user_demo';
+    const effectiveUserId = targetUserId;
     const walletRepo = WalletRepository.getInstance();
     const wallet = await walletRepo.createOrGetWallet(effectiveUserId);
 

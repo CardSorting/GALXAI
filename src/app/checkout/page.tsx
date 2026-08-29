@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface TierSpec {
   amount: number;
@@ -88,6 +89,7 @@ const CHECKOUT_TIERS: Record<number, TierSpec> = {
 function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
 
   const rawAmount = parseInt(searchParams.get('amount') || '50', 10);
   const initialAmount = [25, 50, 100, 250].includes(rawAmount) ? rawAmount : 50;
@@ -103,6 +105,14 @@ function CheckoutContent() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(899); // 14:59 countdown
+
+  // Pre-fill email and company if authenticated
+  useEffect(() => {
+    if (user) {
+      if (user.email && !email) setEmail(user.email);
+      if (user.company && !companyName) setCompanyName(user.company);
+    }
+  }, [user]);
 
   // 15-minute rate lock countdown
   useEffect(() => {
@@ -141,8 +151,9 @@ function CheckoutContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: selectedAmount,
-          email: email || undefined,
-          companyName: companyName || undefined,
+          userId: user?.id || user?.email || undefined,
+          email: email || user?.email || undefined,
+          companyName: companyName || user?.company || undefined,
           promoCode: appliedPromo || promoCode || undefined,
           autoReload: autoReloadEnabled
         })
@@ -311,12 +322,27 @@ function CheckoutContent() {
                 </div>
               </div>
 
-              {/* Step 2: Customer & Invoice Details */}
+              {/* Step 2: Customer Identity & Delivery */}
               <div className="space-y-4 pt-2">
-                <label className="text-xs font-mono font-bold text-zinc-200 uppercase flex items-center gap-1.5">
-                  <span className="w-5 h-5 rounded-full bg-amber-400/20 text-amber-300 flex items-center justify-center text-[10px]">2</span>
-                  <span>Contact &amp; Invoice Delivery:</span>
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-mono font-bold text-zinc-200 uppercase flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded-full bg-amber-400/20 text-amber-300 flex items-center justify-center text-[10px]">2</span>
+                    <span>Contact &amp; Invoice Delivery:</span>
+                  </label>
+                  {user ? (
+                    <span className="text-[11px] font-mono text-emerald-400 font-bold flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>Crediting: {user.name || user.email?.split('@')[0]}</span>
+                    </span>
+                  ) : (
+                    <Link
+                      href={`/auth/signin?next=${encodeURIComponent(`/checkout?amount=${selectedAmount}`)}`}
+                      className="text-[11px] font-mono text-cyan-400 hover:text-cyan-300 underline"
+                    >
+                      Sign In to Link Account →
+                    </Link>
+                  )}
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
                   <div>

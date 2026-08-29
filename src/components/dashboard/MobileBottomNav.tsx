@@ -53,7 +53,7 @@ function BaseMobileBottomNav() {
     },
     {
       label: user ? 'Wallet' : 'Sign In',
-      href: user ? '/billing' : '/auth/signin',
+      href: user ? '/billing' : (pathname && pathname !== '/' && !pathname.startsWith('/auth') ? `/auth/signin?next=${encodeURIComponent(pathname)}` : '/auth/signin'),
       icon: user ? Wallet : Key,
       exact: false,
     },
