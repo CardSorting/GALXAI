@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
+import { GalxSeatTierEngine } from '@/core/subscription/GalxSeatTierEngine';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
 import type { ImageGenerationRequest } from '@/core/contracts/GalxContracts';
@@ -22,21 +23,32 @@ export async function OPTIONS() {
 
 /**
  * Universal OpenAI/Midjourney/Stability-Compatible POST /v1/images/generations Endpoint.
+ * Governed seamlessly by sovereign Seat Subscription Tiers with zero frontend key leakage.
  */
 export async function POST(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
 
-    if (!authResult.authenticated) {
+    const seatEngine = GalxSeatTierEngine.getInstance();
+    const entitlement = await seatEngine.resolveUserSeatTier(authResult);
+
+    if (entitlement.isCapped) {
       return NextResponse.json(
-        { error: { message: authResult.error || 'Authentication required. Please provide a valid Authorization header with Bearer token or API key.', type: 'invalid_request_error', code: 'invalid_api_key' } },
-        { status: 401 }
+        {
+          error: {
+            message: 'Monthly seat compute quota reached. Please contact your organization administrator to increase limits.',
+            type: 'rate_limit_error',
+            code: 'seat_spend_cap_exceeded',
+            tier: entitlement.tier
+          }
+        },
+        { status: 429, headers: { 'Access-Control-Allow-Origin': '*', 'Retry-After': '60' } }
       );
     }
 
-    const userId = authResult.userId;
-    const isPriorityUser = authResult.isPriorityUser;
+    const userId = authResult.userId || 'anonymous_developer';
+    const isPriorityUser = entitlement.isPriorityUser;
 
     const rawBody = (await req.json().catch(() => ({}))) as any;
     const promptStr = rawBody.prompt ?? rawBody.text ?? rawBody.description ?? rawBody.input ?? rawBody.image_prompt ?? '';
@@ -134,12 +146,20 @@ export async function POST(req: NextRequest) {
       headers: req.headers
     });
 
+    const currentWindows = seatEngine.calculateRollingWindows(userId, entitlement.tier);
+
     return NextResponse.json(result, {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'X-Galx-ZDR-Verified': 'true',
         'X-Galx-ZDR-Retention': '0s',
-        'X-Galx-AI-Generated': 'true'
+        'X-Galx-AI-Generated': 'true',
+        'X-Galx-Seat-Tier': entitlement.tier,
+        'X-Galx-Seat-Role': entitlement.role,
+        'X-Galx-Seat-5Hour-Remaining-Pct': String(currentWindows.fiveHourWindow.percentRemaining),
+        'X-Galx-Seat-5Hour-Refresh-In': currentWindows.fiveHourWindow.refreshIn,
+        'X-Galx-Seat-Weekly-Remaining-Pct': String(currentWindows.weeklyWindow.percentRemaining),
+        'X-Galx-Seat-Weekly-Refresh-In': currentWindows.weeklyWindow.refreshIn
       }
     });
   } catch (error: any) {

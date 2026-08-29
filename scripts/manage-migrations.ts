@@ -65,7 +65,7 @@ class MigrationManager {
     console.log('======================================================================');
     console.log('   🏛️  GALXAI SUPABASE MIGRATION STATUS & AUDIT TRAIL               ');
     console.log('======================================================================\n');
-    console.log(`Configured Database: ${isSupabaseConfigured() ? 'Supabase PostgreSQL (Active)' : 'Offline / In-Memory Substrate'}`);
+    console.log(`Database credentials: ${isSupabaseConfigured() ? 'configured (applied state not queried)' : 'not configured'}`);
     console.log(`Total Discovered Migrations: ${this.migrations.length}\n`);
 
     console.log('| Version        | Migration Name                        | Checksum (SHA-256) | Rollback Parity |');
@@ -156,16 +156,18 @@ DROP TABLE IF EXISTS galx_${cleanName} CASCADE;
   }
 
   public async applyMigrations(dryRun = false): Promise<boolean> {
-    console.log(`\nStarting migration execution (${dryRun ? 'DRY-RUN' : 'LIVE'})...\n`);
+    if (!dryRun) {
+      throw new Error(
+        'This repository manager is inventory-only and cannot apply SQL. Use the Supabase CLI migration workflow so applied versions are recorded by the database.'
+      );
+    }
+
+    console.log('\nStarting migration inventory dry-run (no SQL parsing or database mutation)...\n');
     for (const m of this.migrations) {
       console.log(`  [+] Processing: ${m.upFile} (Checksum: ${m.checksum.substring(0, 10)}...)`);
-      if (dryRun) {
-        console.log(`      [DRY-RUN] Validated SQL syntax and invariants.`);
-      } else {
-        console.log(`      [APPLY] Migration verified and tracked in audit log.`);
-      }
+      console.log(`      [INVENTORY] File readable; SQL execution state not asserted.`);
     }
-    console.log(`\n✓ Successfully processed ${this.migrations.length} migrations cleanly.\n`);
+    console.log(`\n✓ Inventoried ${this.migrations.length} migrations. Run db:verify and Supabase CLI checks separately.\n`);
     return true;
   }
 }

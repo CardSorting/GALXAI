@@ -81,7 +81,7 @@ export const updateSession = async (request: NextRequest) => {
 
   if (!hasAuthCookie) {
     const unauthResponse = NextResponse.next({ request });
-    unauthResponse.headers.set('X-Edge-FastPath', 'guest-pass');
+    unauthResponse.headers.set('X-Edge-FastPath', 'public-pass');
     unauthResponse.headers.set('Timing-Allow-Origin', '*');
     unauthResponse.headers.set('Server-Timing', 'edge;dur=0.1');
     return unauthResponse;

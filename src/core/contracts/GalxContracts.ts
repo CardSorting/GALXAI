@@ -313,10 +313,19 @@ export interface ModelSpecItem {
   readonly description: string;
 }
 
+export interface ChatMessageContentPart {
+  type: string;
+  text?: string;
+  image_url?: { url: string };
+  prompt_cache_breakpoint?: { mode: 'explicit' };
+}
+
 export interface ChatMessage {
-  role: 'system' | 'user' | 'assistant' | 'developer';
-  content: string | Array<{ type: string; text?: string; image_url?: { url: string } }>;
+  role: 'system' | 'user' | 'assistant' | 'developer' | 'tool';
+  content: string | ChatMessageContentPart[] | null;
   name?: string;
+  tool_calls?: any[];
+  tool_call_id?: string;
 }
 
 export interface ChatCompletionRequest {
@@ -338,6 +347,12 @@ export interface ChatCompletionRequest {
   tools?: any[];
   tool_choice?: any;
   store?: boolean;
+  prompt_cache_key?: string;
+  prompt_cache_options?: {
+    mode?: 'implicit' | 'explicit';
+    ttl?: '30m';
+  };
+  safety_identifier?: string;
   privacy?: PrivacyOptions;
 }
 
@@ -416,7 +431,7 @@ export interface ImageGenerationResponse {
     revised_prompt?: string;
   }>;
   modelUsed: string;
-  shardId: string;
+  shardId?: string;
 }
 
 export interface UpstreamRateLimitHeaders {
@@ -960,7 +975,6 @@ export interface MemorySlab {
 }
 
 export * from './GalxQueueContracts';
-
 
 
 

@@ -11,7 +11,8 @@ import {
   Wallet,
   Key,
   Users2,
-  Coins
+  Coins,
+  MessageSquare
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
@@ -21,7 +22,23 @@ function BaseMobileBottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
 
+  if (pathname === '/') {
+    return null;
+  }
+
   const tabs = [
+    {
+      label: 'Chat',
+      href: '/',
+      icon: MessageSquare,
+      exact: true,
+    },
+    {
+      label: 'Gateway',
+      href: '/gateway',
+      icon: Zap,
+      exact: true,
+    },
     {
       label: 'Models',
       href: '/models',
@@ -29,22 +46,10 @@ function BaseMobileBottomNav() {
       exact: false,
     },
     {
-      label: 'Seats',
-      href: '/teams/seats',
-      icon: Users2,
-      exact: false,
-    },
-    {
       label: 'Pricing',
       href: '/pricing',
       icon: Coins,
       exact: true,
-    },
-    {
-      label: 'Docs',
-      href: '/docs',
-      icon: BookOpen,
-      exact: false,
     },
     {
       label: user ? 'Wallet' : 'Sign In',

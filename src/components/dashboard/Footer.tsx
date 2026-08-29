@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   Zap,
   Flame,
@@ -13,6 +14,7 @@ import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 import { SlaHealthEngine, SlaProbeResult } from '@/lib/resilience/SlaHealthEngine';
 
 function BaseFooter() {
+  const pathname = usePathname();
   const [slaStatus, setSlaStatus] = useState<SlaProbeResult | null>(null);
 
   useEffect(() => {
@@ -21,6 +23,10 @@ function BaseFooter() {
     engine.probe();
     return () => unsubscribe();
   }, []);
+
+  if (pathname === '/') {
+    return null;
+  }
   const footerNavigation = {
     product: [
       { name: 'Frontier AI Models', href: '/models', badge: '6 SOTA' },

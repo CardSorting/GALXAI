@@ -29,6 +29,7 @@ import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/ModelCatalo
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PromptPreset {
   id: string;
@@ -150,6 +151,7 @@ const MENTAL_MODELS = [
 ];
 
 function BaseApiPlayground() {
+  const { user } = useAuth();
   const [modelInput, setModelInput] = useState<string>('gpt-5.6-sol');
   const [prompt, setPrompt] = useState<string>(PRESETS[0].prompt);
   const [streamingOutput, setStreamingOutput] = useState<string>('');
@@ -196,8 +198,8 @@ function BaseApiPlayground() {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (apiKeyInput.trim()) {
         headers['Authorization'] = `Bearer ${apiKeyInput.trim()}`;
-      } else {
-        headers['Authorization'] = 'Bearer galx_test_sandbox_guest';
+      } else if (user?.token) {
+        headers['Authorization'] = `Bearer ${user.token}`;
       }
 
       const res = await fetch('/v1/chat/completions', {
@@ -475,7 +477,7 @@ const res = await galx.chat.completions.create({
               <label className="block text-[10px] text-zinc-400 uppercase font-bold mb-1">Optional Live Key</label>
               <input
                 type="password"
-                placeholder="galx_live_... (or test guest sandbox)"
+                placeholder="galx_live_... (or active session)"
                 value={apiKeyInput}
                 onChange={(e) => setApiKeyInput(e.target.value)}
                 className="w-full py-2.5 px-3 rounded-xl bg-black/60 border border-white/10 text-white placeholder-zinc-500 focus:outline-none"

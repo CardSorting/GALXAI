@@ -16,7 +16,17 @@
       "**/icon.tsx",
       "**/twitter-image.tsx"
     ],
-    "ignoreValues": {}
+    "ignoreValues": [
+      {
+        "rule": "ai-color-palette",
+        "value": "*",
+        "files": [
+          "src/lib/supabase/repositories/ChatRepository.ts"
+        ],
+        "createdAt": "2026-08-29T18:24:43.352Z",
+        "reason": "False positive: backend repository data mapping contains no visual palette or UI styling."
+      }
+    ]
   },
   "live": {
     "port": 3000,

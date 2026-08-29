@@ -96,6 +96,29 @@ export class TeamGovernanceRepository {
     return !error;
   }
 
+  /**
+   * Atomically increments a member's monthly spend USD in real-time.
+   */
+  async incrementMemberSpend(userIdOrMemberId: string, deltaUsd: number): Promise<boolean> {
+    if (!isSupabaseConfigured() || deltaUsd <= 0) return true;
+    try {
+      const client = getSupabaseAdmin();
+      const { data: member } = await (client.from as any)('galx_organization_members')
+        .select('id, monthly_spend_usd')
+        .or(`id.eq.${userIdOrMemberId},user_id.eq.${userIdOrMemberId}`)
+        .maybeSingle();
+
+      if (member) {
+        const newSpend = (Number(member.monthly_spend_usd) || 0) + deltaUsd;
+        await (client.from as any)('galx_organization_members')
+          .update({ monthly_spend_usd: newSpend, updated_at: new Date().toISOString() })
+          .eq('id', member.id);
+        return true;
+      }
+    } catch {}
+    return false;
+  }
+
   // Cost Centers
   async listCostCenters(orgId: string): Promise<Database['public']['Tables']['galx_team_cost_centers']['Row'][]> {
     if (!isSupabaseConfigured()) return [];
@@ -151,5 +174,188 @@ export class TeamGovernanceRepository {
 
     if (error || !data) return null;
     return data as string;
+  }
+
+  // Dual Rolling Window & Concurrency Mesh
+  async recordSeatRollingUsage(params: {
+    userId: string;
+    modelId: string;
+    units?: number;
+    tokens?: number;
+    costUsd?: number;
+    requestId?: string;
+    tier?: string;
+    orgId?: string;
+  }): Promise<any> {
+    if (!isSupabaseConfigured() || !params.userId) return null;
+    const client = getSupabaseAdmin();
+    const { data, error } = await (client as any).rpc('fn_record_seat_rolling_usage', {
+      p_user_id: params.userId,
+      p_model_id: params.modelId,
+      p_units: params.units ?? 1.0,
+      p_tokens: params.tokens ?? 0,
+      p_cost_usd: params.costUsd ?? 0.0,
+      p_request_id: params.requestId || null,
+      p_tier: params.tier || 'developer',
+      p_org_id: params.orgId || null
+    });
+
+    if (error || !data) return null;
+    return data;
+  }
+
+  async getSeatRollingTelemetry(userId: string, tier: string = 'developer'): Promise<any> {
+    if (!isSupabaseConfigured() || !userId) return null;
+    const client = getSupabaseAdmin();
+    const { data, error } = await (client as any).rpc('fn_get_seat_rolling_telemetry', {
+      p_user_id: userId,
+      p_tier: tier
+    });
+
+    if (error || !data) return null;
+    return data;
+  }
+
+  async acquireSeatConcurrencySlot(userId: string, limit: number = 20): Promise<boolean> {
+    if (!isSupabaseConfigured() || !userId) return true;
+    const client = getSupabaseAdmin();
+    const { data, error } = await (client as any).rpc('fn_acquire_seat_concurrency_slot', {
+      p_user_id: userId,
+      p_limit: limit
+    });
+
+    if (error) return true;
+    return data === true;
+  }
+
+  async releaseSeatConcurrencySlot(userId: string): Promise<void> {
+    if (!isSupabaseConfigured() || !userId) return;
+    const client = getSupabaseAdmin();
+    try {
+      await (client as any).rpc('fn_release_seat_concurrency_slot', {
+        p_user_id: userId
+      });
+    } catch {}
+  }
+
+  // 1-Hop Zero-Roundtrip Pre-Inference Gate
+  async evaluateAndAcquireSeatGate(params: {
+    userId: string;
+    requestedModel: string;
+    orgId?: string;
+    isStream?: boolean;
+  }): Promise<any> {
+    if (!isSupabaseConfigured() || !params.userId) return null;
+    const client = getSupabaseAdmin();
+    const { data, error } = await (client as any).rpc('fn_evaluate_and_acquire_seat_gate', {
+      p_user_id: params.userId,
+      p_requested_model: params.requestedModel,
+      p_org_id: params.orgId || null,
+      p_is_stream: params.isStream !== false
+    });
+
+    if (error || !data) return null;
+    return data;
+  }
+
+  // 1-Hop Zero-Roundtrip Post-Inference Stream Tap Settlement
+  async settleSeatStreamCompletionComposite(params: {
+    userId: string;
+    modelId: string;
+    tokens?: number;
+    costUsd?: number;
+    units?: number;
+    requestId?: string;
+    conversationId?: string;
+    userMessage?: any;
+    assistantMessage?: any;
+    isStream?: boolean;
+  }): Promise<any> {
+    if (!isSupabaseConfigured() || !params.userId) return null;
+    const client = getSupabaseAdmin();
+    const { data, error } = await (client as any).rpc('fn_settle_seat_stream_completion_composite', {
+      p_user_id: params.userId,
+      p_model_id: params.modelId,
+      p_tokens: params.tokens ?? 0,
+      p_cost_usd: params.costUsd ?? 0.0,
+      p_units: params.units ?? 1.0,
+      p_request_id: params.requestId || null,
+      p_conversation_id: params.conversationId || null,
+      p_user_message: params.userMessage || null,
+      p_assistant_message: params.assistantMessage || null,
+      p_is_stream: params.isStream !== false
+    });
+
+    if (error || !data) return null;
+    return data;
+  }
+
+  async evaluateAndAcquireSeatGateV2(params: {
+    userId: string;
+    requestId: string;
+    requestedModel: string;
+    orgId?: string;
+    isStream: boolean;
+    reservedUnits: number;
+    leaseTtlSeconds?: number;
+    fallbackTier?: string;
+  }): Promise<any | null> {
+    if (!isSupabaseConfigured()) return null;
+    const client = getSupabaseAdmin();
+    const { data, error } = await (client as any).rpc('fn_evaluate_and_acquire_seat_gate_v2', {
+      p_user_id: params.userId,
+      p_request_id: params.requestId,
+      p_requested_model: params.requestedModel,
+      p_org_id: params.orgId || null,
+      p_is_stream: params.isStream,
+      p_reserved_units: params.reservedUnits,
+      p_lease_ttl_seconds: params.leaseTtlSeconds ?? 180,
+      p_fallback_tier: params.fallbackTier || 'developer',
+    });
+    if (error) throw error;
+    if (!data || typeof data.allowed !== 'boolean') {
+      throw new Error('Seat gate returned an invalid response.');
+    }
+    return data;
+  }
+
+  async settleSeatRequestLeaseV2(params: {
+    userId: string;
+    requestId: string;
+    modelId: string;
+    tokens?: number;
+    costUsd?: number;
+    units?: number;
+    conversationId?: string;
+    userMessage?: any;
+    assistantMessage?: any;
+  }): Promise<any | null> {
+    if (!isSupabaseConfigured()) return null;
+    const client = getSupabaseAdmin();
+    const { data, error } = await (client as any).rpc('fn_settle_seat_request_lease_v2', {
+      p_user_id: params.userId,
+      p_request_id: params.requestId,
+      p_model_id: params.modelId,
+      p_tokens: Math.max(0, Math.trunc(params.tokens || 0)),
+      p_cost_usd: Math.max(0, params.costUsd || 0),
+      p_units: params.units ?? null,
+      p_conversation_id: params.conversationId || null,
+      p_user_message: params.userMessage || null,
+      p_assistant_message: params.assistantMessage || null,
+    });
+    if (error) throw error;
+    if (!data?.success) throw new Error('Seat lease settlement was not acknowledged.');
+    return data;
+  }
+
+  async releaseSeatRequestLeaseV2(userId: string, requestId: string): Promise<boolean | null> {
+    if (!isSupabaseConfigured()) return null;
+    const client = getSupabaseAdmin();
+    const { data, error } = await (client as any).rpc('fn_release_seat_request_lease_v2', {
+      p_user_id: userId,
+      p_request_id: requestId,
+    });
+    if (error) throw error;
+    return data === true;
   }
 }

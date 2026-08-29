@@ -55,6 +55,7 @@ class SupabaseParanoiaLinter {
     this.auditRollbackParity();
     this.auditSQLParanoiaInvariants();
     this.auditSecurityDefinerSearchPaths();
+    this.auditChatSecurityBoundary();
     this.auditRowLevelSecurityCoverage();
     this.auditDoubleEntryFinancialInvariants();
     this.auditTypeScriptTypeSync();
@@ -242,6 +243,48 @@ class SupabaseParanoiaLinter {
   }
 
   /**
+   * Verify the forward hardening migration closes the legacy chat/context Data API
+   * surface and installs a cross-instance, expiring quota/concurrency lease.
+   */
+  private auditChatSecurityBoundary(): void {
+    const hardeningFile = '20260829000053_galxai_chat_context_production_hardening.sql';
+    const hardeningPath = path.join(MIGRATIONS_DIR, hardeningFile);
+    if (!fs.existsSync(hardeningPath)) {
+      this.violations.push({
+        level: 'FATAL',
+        category: 'CHAT_SECURITY_BOUNDARY',
+        file: hardeningFile,
+        message: 'Chat/context forward hardening migration is missing.',
+        remediation: 'Restore V53 before deploying chat persistence or durable context.'
+      });
+      return;
+    }
+
+    const sql = fs.readFileSync(hardeningPath, 'utf8');
+    const invariants: Array<[RegExp, string]> = [
+      [/REVOKE ALL ON TABLE %s FROM anon, authenticated/i, 'Data API table grants are not revoked.'],
+      [/DROP POLICY IF EXISTS %I ON %s/i, 'Legacy permissive RLS policies are not removed.'],
+      [/fn_upsert_owned_chat_messages/i, 'Exact-owner message upsert is missing.'],
+      [/galx_seat_request_leases/i, 'Distributed request lease table is missing.'],
+      [/pg_advisory_xact_lock/i, 'Per-user transactional serialization is missing.'],
+      [/fn_settle_seat_request_lease_v2/i, 'Idempotent request settlement is missing.'],
+      [/fn_release_seat_request_lease_v2/i, 'Request cancellation/release path is missing.'],
+      [/REVOKE EXECUTE ON FUNCTION %s FROM PUBLIC, anon, authenticated/i, 'Internal SECURITY DEFINER execution is still public.']
+    ];
+    for (const [pattern, message] of invariants) {
+      if (!pattern.test(sql)) {
+        this.violations.push({
+          level: 'FATAL',
+          category: 'CHAT_SECURITY_BOUNDARY',
+          file: hardeningFile,
+          message,
+          remediation: 'Restore the corresponding V53 security invariant.'
+        });
+      }
+    }
+  }
+
+  /**
    * 5. Audit Row Level Security (RLS) Coverage on 100% of public tables.
    */
   private auditRowLevelSecurityCoverage(): void {
@@ -323,7 +366,17 @@ class SupabaseParanoiaLinter {
       'galx_task_queues',
       'galx_user_sessions',
       'galx_budget_alerts',
-      'galx_shard_health_probes'
+      'galx_shard_health_probes',
+      'chat_conversations',
+      'chat_messages',
+      'galx_chat_rolling_memory',
+      'galx_chat_document_chunks',
+      'galx_chat_memory_graph_edges',
+      'galx_chat_context_episodes',
+      'galx_chat_universal_workspace_anchors',
+      'galx_seat_rolling_usage_events',
+      'galx_seat_rolling_windows_state',
+      'galx_seat_request_leases'
     ];
 
     for (const tbl of requiredTables) {
@@ -345,7 +398,7 @@ class SupabaseParanoiaLinter {
     const infos = this.violations.filter(v => v.level === 'INFO');
 
     console.log(`Audited Migrations : ${this.migrationFiles.length} files`);
-    console.log(`Audited Rollbacks  : ${this.migrationFiles.length} paired .down.sql files`);
+    console.log(`Rollback Presence  : ${this.migrationFiles.length} paired .down.sql files (content not executed)`);
     console.log(`Fatal Violations   : ${fatals.length}`);
     console.log(`Warnings           : ${warnings.length}\n`);
 
@@ -369,8 +422,8 @@ class SupabaseParanoiaLinter {
 
     if (fatals.length === 0) {
       console.log('======================================================================');
-      console.log('  ✨ ALL PARANOID POSTGRESQL & AI CONTAINMENT INVARIANTS SATISFIED!  ');
-      console.log('  Zero destructive DDL, 100% RLS coverage, verified rollbacks.       ');
+      console.log('  STATIC POSTGRESQL INTEGRITY CHECKS PASSED                           ');
+      console.log('  SQL execution and applied migration state require separate checks.  ');
       console.log('======================================================================\n');
     }
   }

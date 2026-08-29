@@ -22,6 +22,7 @@ import { GalxMetricsEngine } from '../telemetry/GalxMetricsEngine';
 import { GalxPrivacyComplianceEngine } from '../privacy/GalxPrivacyComplianceEngine';
 import { GalxZDRProtocol } from '../privacy/GalxZDRProtocol';
 import { GalxAuthEngine } from '../auth/GalxAuthEngine';
+import { GalxSeatTierEngine } from '../subscription/GalxSeatTierEngine';
 
 export interface RouteChatOptions {
   request: ChatCompletionRequest;
@@ -109,7 +110,7 @@ export class GalxModelRouter {
       .replace(/(?:sk|xai|ant|ghp|gho)-[a-zA-Z0-9_-]{8,}/gi, '[redacted-key]')
       .replace(/Bearer\s+[a-zA-Z0-9._-]{10,}/gi, 'Bearer [redacted-token]')
       .replace(/eyJ[a-zA-Z0-9_-]{10,}\.eyJ[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}/gi, '[redacted-jwt]')
-      .replace(/shard_[a-zA-Z0-9_-]+/gi, '[gateway-partition]')
+      .replace(/(?:shard|codex|lease|acc)_[a-zA-Z0-9_-]+/gi, '[gateway-route]')
       .replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, '[redacted-ip]');
 
     if (sanitized.includes('429') || sanitized.toLowerCase().includes('rate limit')) {
@@ -311,13 +312,17 @@ export class GalxModelRouter {
 
         const isStream = sanitizedRequest.stream === true;
         const responseHeaders = new Headers();
+        
+        // Strictly whitelist safe content headers and drop all upstream vendor/provider headers
+        const allowedUpstreamHeaders = new Set(['content-type', 'content-length', 'cache-control', 'etag', 'last-modified']);
         response.headers.forEach((val, key) => {
-          if (!key.toLowerCase().startsWith('transfer-encoding')) {
+          const lowerKey = key.toLowerCase();
+          if (allowedUpstreamHeaders.has(lowerKey)) {
             responseHeaders.set(key, val);
           }
         });
 
-        // Standard Gateway Response Headers (Masked & Client-Safe)
+        // Standard Apex Gateway Response Headers (Masked & Client-Safe)
         responseHeaders.set('x-galx-router', 'apex-v2');
         responseHeaders.set('x-galx-routing-latency-ms', String(latencyMs));
         responseHeaders.set('x-galx-model', modelSpec.id);
@@ -401,6 +406,8 @@ export class GalxModelRouter {
               latencyMs
             }
           });
+          GalxSeatTierEngine.getInstance().recordSeatTokenDraw(userId, costBreakdown.totalCostUsd).catch(() => {});
+          GalxSeatTierEngine.getInstance().recordSeatUsage(userId, modelSpec.id, tokensUsed, requestId);
         } catch {}
 
         // Non-streaming ZDR proof calculation
@@ -536,6 +543,11 @@ export class GalxModelRouter {
       // Ephemerally zeroize lease credentials
       GalxZDRProtocol.scrubDecryptedCredentials(decryptedSecrets);
 
+      // Release active concurrency stream slot
+      if (userId) {
+        GalxSeatTierEngine.getInstance().releaseSeatStreamSlot(userId);
+      }
+
       // Micro-metered stream token draw calculation
       if (success && userId) {
         try {
@@ -565,6 +577,13 @@ export class GalxModelRouter {
               latencyMs: totalDurationMs
             }
           });
+          GalxSeatTierEngine.getInstance().recordSeatTokenDraw(userId, costBreakdown.totalCostUsd).catch(() => {});
+          GalxSeatTierEngine.getInstance().recordSeatUsage(
+            userId,
+            modelSpec.id,
+            approxPromptTokens + completionTokens,
+            requestId
+          );
         } catch {}
       }
 
@@ -800,6 +819,8 @@ export class GalxModelRouter {
               latencyMs
             }
           });
+          GalxSeatTierEngine.getInstance().recordSeatTokenDraw(userId, costBreakdown.totalCostUsd).catch(() => {});
+          GalxSeatTierEngine.getInstance().recordSeatUsage(userId, modelSpec.id, 1000, requestId);
         } catch {}
       }
 
@@ -816,7 +837,9 @@ export class GalxModelRouter {
         statusCode: 200
       });
 
-      return result;
+      // Completely scrub shardId from client-facing visual synthesis response
+      const { shardId: _scrubbedShard, ...publicResult } = result;
+      return publicResult;
     } catch (err: any) {
       const latencyMs = Date.now() - startMs;
       const sanitizedErr = GalxModelRouter.sanitizeUpstreamError(err.message || 'Image generation error');
@@ -856,4 +879,3 @@ export class GalxModelRouter {
 }
 
 export const galxRouter = GalxModelRouter.getInstance();
-

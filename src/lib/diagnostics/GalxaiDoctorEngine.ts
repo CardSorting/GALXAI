@@ -44,7 +44,7 @@ export class GalxaiDoctorEngine {
       promptCachingRebateVerified: true,
       apiKeyQuota: {
         valid: hasKey,
-        tier: hasKey ? 'Scale Developer Sandbox' : 'Unauthenticated Sandbox',
+        tier: hasKey ? 'Enterprise Scale Seat' : 'Solo Developer Tier',
         sandboxBalanceUsd: hasKey ? 100.0 : 5.0,
         rpmLimit: hasKey ? 1200 : 60,
       },

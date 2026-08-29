@@ -20,6 +20,7 @@ import type {
 } from '../contracts/GalxContracts';
 import { GalxPersistence } from '../../lib/storage/GalxPersistence';
 import { GalxModelRouter } from '../router/GalxModelRouter';
+import { GalxSeatTierEngine } from '../subscription/GalxSeatTierEngine';
 import { GalxQueueEventBus } from './GalxQueueEventBus';
 
 interface DestinationCircuitBreakerState {
@@ -1399,30 +1400,94 @@ export class GalxTaskQueueEngine {
     const router = GalxModelRouter.getInstance();
 
     if (target.taskKind === 'chat_completion' && target.chatPayload) {
-      const res = await router.routeChatCompletion({
-        request: target.chatPayload,
+      const requestId = `async_${task.id}`;
+      const seatEngine = GalxSeatTierEngine.getInstance();
+      const gate = await seatEngine.evaluateAndAcquireDistributedGate({
         userId: task.userId,
-        requestId: `async_${task.id}`,
-        isPriorityUser: target.isPriorityUser
+        requestId,
+        requestedModel: target.chatPayload.model,
+        isStream: false,
+        leaseTtlSeconds: 900,
       });
+      if (gate && !gate.allowed) {
+        const code = gate.rejectionCode || 'seat_gate_rejected';
+        const gateError = new Error(`ASYNC_SEAT_GATE_REJECTED:${code}`) as Error & { statusCode: number };
+        gateError.statusCode = code.startsWith('request_') || code === 'tier_model_restricted' || code === 'seat_inactive'
+          ? 409
+          : 429;
+        throw gateError;
+      }
+
+      let res: Awaited<ReturnType<typeof router.routeChatCompletion>>;
+      try {
+        res = await router.routeChatCompletion({
+          request: target.chatPayload,
+          userId: task.userId,
+          requestId,
+          isPriorityUser: target.isPriorityUser
+        });
+      } catch (error) {
+        if (gate) {
+          try {
+            await seatEngine.releaseDistributedRequest(task.userId, requestId);
+          } catch (releaseError) {
+            console.error('[GalxTaskQueueEngine] Failed to release async seat lease:', releaseError);
+          }
+        }
+        throw error;
+      }
 
       let responseData: any = null;
-      if (typeof res.body === 'string') {
+      let responseSize = 0;
+      try {
+        if (typeof res.body === 'string') {
+          responseSize = Buffer.byteLength(res.body);
+          try {
+            responseData = JSON.parse(res.body);
+          } catch {
+            responseData = res.body;
+          }
+        } else {
+          const reader = (res.body as ReadableStream<Uint8Array>).getReader();
+          const decoder = new TextDecoder();
+          let streamAccumulator = '';
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            responseSize += value.byteLength;
+            streamAccumulator += decoder.decode(value, { stream: true });
+          }
+          streamAccumulator += decoder.decode();
+          responseData = streamAccumulator;
+        }
+
+      } catch (completionError) {
+        if (gate) {
+          try {
+            await seatEngine.releaseDistributedRequest(task.userId, requestId);
+          } catch (releaseError) {
+            console.error('[GalxTaskQueueEngine] Failed to release incomplete async seat lease:', releaseError);
+          }
+        }
+        throw completionError;
+      }
+
+      if (gate) {
         try {
-          responseData = JSON.parse(res.body);
-        } catch {
-          responseData = res.body;
+          await seatEngine.settleDistributedRequest({
+            userId: task.userId,
+            requestId,
+            modelId: res.modelUsed,
+            tokens: Math.ceil(responseSize / 4),
+          });
+        } catch (settlementError) {
+          console.error('[GalxTaskQueueEngine] Async seat lease settlement failed:', settlementError);
+          try {
+            await seatEngine.releaseDistributedRequest(task.userId, requestId);
+          } catch (releaseError) {
+            console.error('[GalxTaskQueueEngine] Failed to release unsettled async seat lease:', releaseError);
+          }
         }
-      } else {
-        const reader = (res.body as ReadableStream<Uint8Array>).getReader();
-        const decoder = new TextDecoder();
-        let streamAccumulator = '';
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          streamAccumulator += decoder.decode(value, { stream: true });
-        }
-        responseData = streamAccumulator;
       }
 
       task.result = {

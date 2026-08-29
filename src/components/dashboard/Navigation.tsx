@@ -17,7 +17,8 @@ import {
   DollarSign,
   BookOpen,
   Key,
-  Coins
+  Coins,
+  MessageSquare
 } from 'lucide-react';
 import { CommandMenu } from '@/components/common/CommandMenu';
 import { LanguageBadge } from '@/components/common/LanguageBadge';
@@ -29,11 +30,10 @@ import { BroccoliOmniSearch } from '@/lib/resilience/BroccoliOmniSearch';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 const NAV_LINKS = [
+  { name: 'Chat', href: '/', icon: MessageSquare },
+  { name: 'Gateway', href: '/gateway', icon: Zap },
   { name: 'Models', href: '/models', icon: Cpu },
   { name: 'Playground', href: '/playground', icon: Terminal },
-  { name: 'Queues', href: '/queues', icon: Activity },
-  { name: 'Vault', href: '/vault', icon: ShieldCheck },
-  { name: 'Teams & Seats', href: '/teams/seats', icon: Users2 },
   { name: 'Pricing', href: '/pricing', icon: DollarSign },
   { name: 'Docs', href: '/docs', icon: BookOpen },
 ];

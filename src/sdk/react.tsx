@@ -129,7 +129,6 @@ export function useImageGeneration(options: { endpoint?: string; defaultModel?: 
           created: Math.floor(Date.now() / 1000),
           data: [{ url: mockUrl, revised_prompt: prompt }],
           modelUsed: payload.model || 'openai-gpt-image-2',
-          shardId: 'galx_preview'
         };
         setResult(mockResult);
         setImageUrl(mockUrl);

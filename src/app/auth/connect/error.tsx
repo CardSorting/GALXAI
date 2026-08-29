@@ -24,7 +24,7 @@ export default function AuthConnectError({
           error={error}
           reset={reset}
           title="Account Connection Interrupted"
-          subtitle="An error occurred during account authorization. You can retry the login or connect as a developer guest."
+          subtitle="An error occurred during account authorization. Please retry the login or proceed with your active session."
           badge="IDENTITY AUTH SAFEGUARD"
           icon={Key}
           accentColor="indigo"

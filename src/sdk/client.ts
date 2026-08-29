@@ -282,8 +282,7 @@ export class GalxAIClientCore {
       return {
         created: Math.floor(Date.now() / 1000),
         data: [{ url: `https://picsum.photos/seed/galx-mock-${seed}/1024/1024`, revised_prompt: prompt }],
-        modelUsed: options.body?.model || 'openai-gpt-image-2',
-        shardId: 'mock_local_shard'
+        modelUsed: options.body?.model || 'openai-gpt-image-2'
       } as T;
     }
     if (path.includes('/models')) {

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import {
   Share2,
   Copy,
@@ -15,9 +16,14 @@ import { withErrorBoundary } from './ErrorBoundary';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 function BaseFloatingActionDock() {
+  const pathname = usePathname();
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+
+  if (pathname === '/') {
+    return null;
+  }
 
   useEffect(() => {
     const handleScroll = () => {

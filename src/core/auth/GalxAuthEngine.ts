@@ -930,18 +930,6 @@ export class GalxAuthEngine {
         };
       }
 
-      // If test token or developer sandbox key in development/staging
-      if (token.startsWith('galx_test_') || token.startsWith('sk-demo') || token.includes('mock') || token.includes('test')) {
-        return {
-          authenticated: true,
-          userId: `dev_${token.substring(0, 16)}`,
-          authType: 'developer_key',
-          isPriorityUser: false,
-          scopes: ['*'],
-          isSudoElevated: true
-        };
-      }
-
       return {
         authenticated: false,
         userId: 'anonymous_developer',

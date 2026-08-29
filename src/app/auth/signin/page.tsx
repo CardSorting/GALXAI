@@ -3,8 +3,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Navigation } from '@/components/dashboard/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   CheckCircle2,
@@ -17,22 +15,27 @@ import {
   Eye,
   EyeOff,
   Loader2,
-  Sparkles
+  Sparkles,
+  ShieldCheck,
+  Github
 } from 'lucide-react';
 
 function SignInContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user, signInWithPassword, signUp, logout } = useAuth();
+  const { user, signInWithPassword, signInWithDemo, signInWithOAuth, logout } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
 
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [canQuickCreate, setCanQuickCreate] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const returnUrl = searchParams.get('returnUrl') || searchParams.get('redirect') || '/';
 
   useEffect(() => {
     const errorParam = searchParams.get('error');
@@ -71,16 +74,18 @@ function SignInContent() {
     try {
       const { error: signInError } = await signInWithPassword({
         email: emailInput.trim(),
-        password: passwordInput
+        password: passwordInput,
       });
 
       if (signInError) {
         setCanQuickCreate(true);
-        throw new Error('Account not found or password incorrect. Would you like to create an account?');
+        throw new Error('Account not found or password incorrect. You can create an account or use Demo Sign In.');
       }
 
-      setSuccessMessage('Successfully signed in!');
-      router.push('/playground');
+      setSuccessMessage('Successfully signed in! Redirecting...');
+      setTimeout(() => {
+        router.push(returnUrl);
+      }, 500);
     } catch (err: any) {
       setError(err.message || 'Authentication failed. Please verify your credentials.');
     } finally {
@@ -88,63 +93,84 @@ function SignInContent() {
     }
   };
 
-  const handleQuickRegister = async () => {
-    if (!emailInput || !passwordInput) {
-      router.push(`/auth/signup?email=${encodeURIComponent(emailInput)}`);
-      return;
-    }
-
+  const handleDemoSignIn = () => {
     setLoading(true);
     setError(null);
     try {
-      await signUp({
-        email: emailInput.trim(),
-        password: passwordInput,
-        name: emailInput.split('@')[0]
+      signInWithDemo({
+        email: emailInput.trim() || 'developer@galx.ai',
+        name: emailInput ? emailInput.split('@')[0] : 'GALX Engineer',
+        role: 'dev',
       });
-      setSuccessMessage('Account successfully created and signed in!');
-      router.push('/playground');
+      setSuccessMessage('Signed in as Sandbox Developer! Redirecting...');
+      setTimeout(() => {
+        router.push(returnUrl);
+      }, 400);
     } catch (err: any) {
-      setError(err.message || 'Failed to create account.');
+      setError(err.message || 'Demo sign in failed.');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleOAuth = async (provider: 'github' | 'google') => {
+    setOauthLoading(provider);
+    setError(null);
+    try {
+      await signInWithOAuth(provider, {
+        redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(returnUrl)}`,
+      });
+    } catch (err: any) {
+      setError(err.message || `Failed to authenticate with ${provider}.`);
+      setOauthLoading(null);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#07090e] text-zinc-100 selection:bg-zinc-800 selection:text-white">
-      <Navigation />
+    <div className="min-h-screen flex flex-col justify-between bg-[#07090e] text-zinc-100 selection:bg-cyan-500 selection:text-black relative">
+      {/* Top Navbar */}
+      <header className="sticky top-0 z-30 w-full backdrop-blur-xl bg-[#07090e]/80 border-b border-white/10 px-4 sm:px-6 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 group cursor-pointer"
+            title="Return to GALX AI Chat"
+          >
+            <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-indigo-600 flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+              <Zap className="w-4 h-4 text-white fill-white" />
+            </div>
+            <div className="flex items-baseline font-black tracking-tight text-base">
+              <span className="text-white font-sans">GALX</span>
+              <span className="text-cyan-400 font-sans ml-0.5">AI</span>
+            </div>
+          </Link>
 
+          <div className="flex items-center gap-3 text-xs">
+            <Link
+              href="/"
+              className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-colors"
+            >
+              ← Back to Chat
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Container */}
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden">
-        {/* Subtle Ambient Glow */}
-        <motion.div 
-          animate={{ 
-            scale: [1, 1.08, 1],
-            opacity: [0.12, 0.22, 0.12]
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[300px] bg-gradient-to-tr from-cyan-500/10 via-indigo-500/10 to-amber-500/10 rounded-full blur-[120px] pointer-events-none" 
-        />
+        {/* Ambient Glows */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[320px] bg-gradient-to-tr from-cyan-500/15 via-indigo-500/10 to-pink-500/10 rounded-full blur-[120px] pointer-events-none" />
 
-        <motion.div
-          initial={{ opacity: 0, y: 14, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-md relative z-10 space-y-4"
-        >
+        <div className="w-full max-w-md relative z-10 space-y-4 my-8">
           {user ? (
-            <div className="bg-[#0c0e18] border border-white/15 rounded-3xl p-8 shadow-2xl shadow-black/80 space-y-6 text-center animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-[#0c101c] border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-center">
               <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/10">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
 
               <div className="space-y-1.5">
                 <h1 className="text-2xl font-black text-white tracking-tight">You're Signed In</h1>
-                <p className="text-sm text-zinc-400 font-mono">{user.email || user.name || 'Account Connected'}</p>
+                <p className="text-xs text-zinc-400 font-mono">{user.email || user.name || 'Account Connected'}</p>
                 <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-zinc-300">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -155,25 +181,25 @@ function SignInContent() {
 
               <div className="space-y-3 pt-2">
                 <Link
-                  href="/playground"
-                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 hover:from-amber-300 hover:to-orange-300 text-black font-black text-sm shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 group cursor-pointer"
+                  href="/"
+                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-cyan-400 via-indigo-400 to-cyan-500 hover:from-cyan-300 hover:to-indigo-300 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2 group cursor-pointer"
                 >
-                  <span>Continue to Compute Playground</span>
+                  <span>Launch GALX AI Chat</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
 
                 <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
                   <Link
-                    href="/keys"
+                    href="/gateway"
                     className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-200 transition-all text-center"
                   >
-                    API Keys
+                    Developer Gateway
                   </Link>
                   <Link
-                    href="/billing"
-                    className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-emerald-300 transition-all text-center"
+                    href="/pricing"
+                    className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-pink-300 transition-all text-center"
                   >
-                    Wallet &amp; Billing
+                    Plans & Pricing
                   </Link>
                 </div>
 
@@ -187,44 +213,39 @@ function SignInContent() {
               </div>
             </div>
           ) : (
-            <div className="bg-[#0c0e18] border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/80 space-y-5">
+            <div className="bg-[#0c101c] border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/80 space-y-5">
               {/* Header */}
               <div className="text-center space-y-1.5">
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-amber-400 p-[1px] mx-auto shadow-md shadow-indigo-500/20 flex items-center justify-center">
-                  <div className="w-full h-full bg-[#0c0e18] rounded-[15px] flex items-center justify-center">
-                    <Zap className="w-5 h-5 text-cyan-400 fill-cyan-400" />
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-pink-500 p-[1px] mx-auto shadow-lg shadow-cyan-500/20 flex items-center justify-center">
+                  <div className="w-full h-full bg-[#0c101c] rounded-[15px] flex items-center justify-center">
+                    <Zap className="w-6 h-6 text-cyan-400 fill-cyan-400" />
                   </div>
                 </div>
                 <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                  Welcome Back
+                  Welcome to GALX AI
                 </h1>
                 <p className="text-xs text-zinc-400">
-                  Sign in to access your compute playground, keys, and models
+                  Sign in to save chats, create anime companions, and access 4K image studio.
                 </p>
               </div>
 
-              {/* Dedicated Route Segmented Switcher with Shared Layout Spring */}
-              <div className="grid grid-cols-2 p-1.5 rounded-2xl bg-black/80 border border-white/15 text-xs font-bold shadow-inner relative z-20">
-                <div className="relative py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 select-none">
-                  <motion.div
-                    layoutId="auth-active-tab-pill"
-                    className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-indigo-500 to-indigo-600 rounded-xl shadow-lg shadow-cyan-500/30 ring-2 ring-cyan-400/50"
-                    transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                  />
-                  <span className="relative z-10 w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                  <span className="relative z-10 text-white font-black">Sign In</span>
+              {/* Segmented Switcher */}
+              <div className="grid grid-cols-2 p-1 rounded-2xl bg-black/60 border border-white/10 text-xs font-bold shadow-inner">
+                <div className="py-2 px-3 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-indigo-600 text-white font-bold flex items-center justify-center gap-1.5 shadow-md">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                  <span>Sign In</span>
                 </div>
                 <Link
                   href="/auth/signup"
-                  className="relative py-2.5 px-4 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-white/5 font-semibold opacity-70 hover:opacity-100 flex items-center justify-center gap-2 transition-all cursor-pointer select-none"
+                  className="py-2 px-3 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-white/5 font-semibold flex items-center justify-center transition-colors text-center"
                 >
-                  <span className="relative z-10">Create Account</span>
+                  Create Account
                 </Link>
               </div>
 
-              {/* Error Alert with Quick Action */}
+              {/* Error Alert */}
               {error && (
-                <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/25 text-rose-300 text-xs space-y-2 animate-in fade-in">
+                <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/25 text-rose-300 text-xs space-y-2">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-start gap-2">
                       <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
@@ -243,11 +264,11 @@ function SignInContent() {
                   {canQuickCreate && (
                     <button
                       type="button"
-                      onClick={handleQuickRegister}
+                      onClick={handleDemoSignIn}
                       className="w-full py-2 px-3 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
-                      <span>Create account now with this email</span>
+                      <span>Sign in as Instant Sandbox User</span>
                     </button>
                   )}
                 </div>
@@ -255,7 +276,7 @@ function SignInContent() {
 
               {/* Success Alert */}
               {successMessage && (
-                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2 animate-in fade-in">
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
                   <span>{successMessage}</span>
                 </div>
@@ -273,7 +294,7 @@ function SignInContent() {
                       type="email"
                       value={emailInput}
                       onChange={(e) => setEmailInput(e.target.value)}
-                      placeholder="willcruzdesigner@gmail.com"
+                      placeholder="developer@galx.ai"
                       autoComplete="email"
                       autoFocus
                       required
@@ -333,19 +354,77 @@ function SignInContent() {
                     </>
                   )}
                 </button>
-
-                {/* Bottom Route Link */}
-                <div className="pt-2 text-center">
-                  <Link
-                    href="/auth/signup"
-                    className="text-xs text-zinc-400 hover:text-cyan-300 transition-colors"
-                  >
-                    Don't have an account? <strong className="text-cyan-400 font-bold underline ml-1">Create one now →</strong>
-                  </Link>
-                </div>
               </form>
 
-              {/* Terms & Privacy Assurance */}
+              {/* OAuth Providers Divider */}
+              <div className="relative flex items-center justify-center my-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/10" />
+                </div>
+                <span className="relative px-2 bg-[#0c101c] text-[10px] uppercase font-mono text-zinc-500">
+                  Or continue with
+                </span>
+              </div>
+
+              {/* Social Login Buttons */}
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleOAuth('github')}
+                  disabled={Boolean(oauthLoading)}
+                  className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-xs font-semibold text-zinc-200 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                >
+                  {oauthLoading === 'github' ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
+                  ) : (
+                    <Github className="w-4 h-4" />
+                  )}
+                  <span>GitHub</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleOAuth('google')}
+                  disabled={Boolean(oauthLoading)}
+                  className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-xs font-semibold text-zinc-200 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                >
+                  {oauthLoading === 'google' ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
+                  ) : (
+                    <svg className="w-4 h-4" viewBox="0 0 24 24">
+                      <path
+                        fill="#EA4335"
+                        d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"
+                      />
+                      <path
+                        fill="#4285F4"
+                        d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3 0-.8.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12.3 0 15.1c0 2.8.7 5.4 1.9 7.8l3.7-2.9z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 23.5c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2-6.4-4.8L1.9 16.9C3.7 20.6 7.5 23.5 12 23.5z"
+                      />
+                    </svg>
+                  )}
+                  <span>Google</span>
+                </button>
+              </div>
+
+              {/* Bottom Route Link */}
+              <div className="pt-2 text-center">
+                <Link
+                  href="/auth/signup"
+                  className="text-xs text-zinc-400 hover:text-cyan-300 transition-colors"
+                >
+                  Don't have an account? <strong className="text-cyan-400 font-bold underline ml-1">Create one now →</strong>
+                </Link>
+              </div>
+
+              {/* Terms & Privacy */}
               <p className="text-[11px] text-zinc-500 text-center leading-relaxed font-sans pt-1">
                 By continuing, you agree to GALXAI's{' '}
                 <Link href="/terms" className="underline hover:text-zinc-300">Terms</Link>{' '}
@@ -355,7 +434,7 @@ function SignInContent() {
             </div>
           )}
 
-          {/* Enterprise Trust Row */}
+          {/* Security Row */}
           <div className="pt-2 flex items-center justify-center gap-4 text-[11px] text-zinc-500 font-mono">
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
@@ -369,10 +448,10 @@ function SignInContent() {
             <span>•</span>
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-              <span>Zero PHI</span>
+              <span>Sub-15ms Edge</span>
             </span>
           </div>
-        </motion.div>
+        </div>
       </main>
     </div>
   );
@@ -380,7 +459,20 @@ function SignInContent() {
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#07090e]" />}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-[#07090e] text-cyan-400">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-pink-500 p-[1px] shadow-lg animate-pulse flex items-center justify-center">
+              <div className="w-full h-full bg-[#0c101c] rounded-[15px] flex items-center justify-center">
+                <Zap className="w-5 h-5 text-cyan-400 fill-cyan-400" />
+              </div>
+            </div>
+            <span className="text-xs font-mono text-zinc-400">Loading GALX AI Auth...</span>
+          </div>
+        </div>
+      }
+    >
       <SignInContent />
     </Suspense>
   );

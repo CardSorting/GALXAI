@@ -2899,11 +2899,428 @@ export interface Database {
           }
         ];
       };
+      chat_conversations: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          persona_id: string | null;
+          title: string;
+          model_id: string;
+          is_pinned: boolean;
+          is_archived: boolean;
+          deleted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          user_id?: string | null;
+          persona_id?: string | null;
+          title: string;
+          model_id?: string;
+          is_pinned?: boolean;
+          is_archived?: boolean;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['chat_conversations']['Insert']>;
+        Relationships: [];
+      };
+      chat_messages: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          role: 'user' | 'assistant' | 'system';
+          content: string;
+          alternative_contents: Json;
+          active_index: number;
+          thinking_content: string | null;
+          model_id: string | null;
+          persona_id: string | null;
+          metrics: Json | null;
+          attachments: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          conversation_id: string;
+          role: 'user' | 'assistant' | 'system';
+          content: string;
+          alternative_contents?: Json;
+          active_index?: number;
+          thinking_content?: string | null;
+          model_id?: string | null;
+          persona_id?: string | null;
+          metrics?: Json | null;
+          attachments?: Json | null;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['chat_messages']['Insert']>;
+        Relationships: [];
+      };
+      galx_chat_rolling_memory: {
+        Row: {
+          conversation_id: string;
+          user_id: string;
+          summary_content: string;
+          compacted_turns_count: number;
+          last_compacted_message_id: string | null;
+          pinned_document_refs: Json;
+          token_count: number;
+          user_profile: Json;
+          active_decisions: Json;
+          file_index: Json;
+          pending_tasks: Json;
+          cache_hash: string | null;
+          stable_cache_hash: string | null;
+          atomic_turn_boundary: number;
+          code_diff_manifest: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          conversation_id: string;
+          user_id: string;
+          summary_content: string;
+          compacted_turns_count?: number;
+          last_compacted_message_id?: string | null;
+          pinned_document_refs?: Json;
+          token_count?: number;
+          user_profile?: Json;
+          active_decisions?: Json;
+          file_index?: Json;
+          pending_tasks?: Json;
+          cache_hash?: string | null;
+          stable_cache_hash?: string | null;
+          atomic_turn_boundary?: number;
+          code_diff_manifest?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['galx_chat_rolling_memory']['Insert']>;
+        Relationships: [];
+      };
+      galx_chat_document_chunks: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          document_name: string;
+          chunk_index: number;
+          page_start: number;
+          page_end: number;
+          content: string;
+          token_count: number;
+          doc_sha256: string | null;
+          search_vector: unknown;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          document_name: string;
+          chunk_index?: number;
+          page_start?: number;
+          page_end?: number;
+          content: string;
+          token_count?: number;
+          doc_sha256?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['galx_chat_document_chunks']['Insert']>;
+        Relationships: [];
+      };
+      galx_chat_memory_graph_edges: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          source_entity: string;
+          relation_type: string;
+          target_entity: string;
+          turn_index: number;
+          metadata: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          source_entity: string;
+          relation_type?: string;
+          target_entity: string;
+          turn_index?: number;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['galx_chat_memory_graph_edges']['Insert']>;
+        Relationships: [];
+      };
+      galx_chat_context_episodes: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          episode_index: number;
+          start_turn_index: number;
+          end_turn_index: number;
+          thematic_topic: string;
+          executive_summary: string;
+          key_artifacts: Json;
+          resolved_decisions: Json;
+          token_volume: number;
+          compressed_tokens: number;
+          compression_ratio: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          episode_index?: number;
+          start_turn_index?: number;
+          end_turn_index?: number;
+          thematic_topic?: string;
+          executive_summary: string;
+          key_artifacts?: Json;
+          resolved_decisions?: Json;
+          token_volume?: number;
+          compressed_tokens?: number;
+          compression_ratio?: number;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['galx_chat_context_episodes']['Insert']>;
+        Relationships: [];
+      };
+      galx_chat_universal_workspace_anchors: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          anchor_type: string;
+          anchor_key: string;
+          anchor_content: string;
+          token_count: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          workspace_id?: string;
+          anchor_type?: string;
+          anchor_key: string;
+          anchor_content: string;
+          token_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['galx_chat_universal_workspace_anchors']['Insert']>;
+        Relationships: [];
+      };
+      galx_seat_rolling_usage_events: {
+        Row: {
+          id: string;
+          user_id: string;
+          org_id: string | null;
+          model_id: string;
+          units: number;
+          tokens_consumed: number;
+          cost_usd: number;
+          request_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          org_id?: string | null;
+          model_id: string;
+          units?: number;
+          tokens_consumed?: number;
+          cost_usd?: number;
+          request_id?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['galx_seat_rolling_usage_events']['Insert']>;
+        Relationships: [];
+      };
+      galx_seat_rolling_windows_state: {
+        Row: {
+          user_id: string;
+          org_id: string | null;
+          tier: 'developer' | 'small-business' | 'enterprise' | 'apex';
+          five_hour_used_units: number;
+          five_hour_limit_units: number;
+          five_hour_reset_at: string;
+          weekly_used_units: number;
+          weekly_limit_units: number;
+          weekly_reset_at: string;
+          active_concurrent_streams: number;
+          concurrency_limit: number;
+          last_event_at: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          org_id?: string | null;
+          tier?: 'developer' | 'small-business' | 'enterprise' | 'apex';
+          five_hour_used_units?: number;
+          five_hour_limit_units?: number;
+          five_hour_reset_at?: string;
+          weekly_used_units?: number;
+          weekly_limit_units?: number;
+          weekly_reset_at?: string;
+          active_concurrent_streams?: number;
+          concurrency_limit?: number;
+          last_event_at?: string | null;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['galx_seat_rolling_windows_state']['Insert']>;
+        Relationships: [];
+      };
+      galx_seat_request_leases: {
+        Row: {
+          request_id: string;
+          user_id: string;
+          org_id: string | null;
+          model_id: string;
+          tier: 'developer' | 'small-business' | 'enterprise' | 'apex';
+          reserved_units: number;
+          actual_units: number | null;
+          is_stream: boolean;
+          expires_at: string;
+          settled_at: string | null;
+          released_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          request_id: string;
+          user_id: string;
+          org_id?: string | null;
+          model_id: string;
+          tier: 'developer' | 'small-business' | 'enterprise' | 'apex';
+          reserved_units?: number;
+          actual_units?: number | null;
+          is_stream?: boolean;
+          expires_at: string;
+          settled_at?: string | null;
+          released_at?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['galx_seat_request_leases']['Insert']>;
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
+      fn_upsert_owned_chat_messages: {
+        Args: { p_conversation_id: string; p_user_id: string; p_messages: Json };
+        Returns: Json;
+      };
+      galx_sync_chat_session: {
+        Args: {
+          p_id: string;
+          p_user_id: string;
+          p_title: string;
+          p_model_id: string;
+          p_persona_id?: string | null;
+          p_is_pinned?: boolean;
+          p_is_archived?: boolean;
+        };
+        Returns: Json;
+      };
+      galx_delete_chat_conversation: {
+        Args: { p_id: string; p_user_id?: string | null; p_hard_delete?: boolean };
+        Returns: boolean;
+      };
+      fn_get_chat_composite_bootstrap: {
+        Args: { p_user_id?: string | null; p_active_session_id?: string | null };
+        Returns: Json;
+      };
+      fn_sync_chat_bundle: {
+        Args: {
+          p_session?: Json | null;
+          p_messages?: Json | null;
+          p_user_id?: string | null;
+          p_delete_session_id?: string | null;
+        };
+        Returns: Json;
+      };
+      fn_get_chat_delta_sync: {
+        Args: {
+          p_user_id?: string | null;
+          p_client_etag?: string | null;
+          p_since_epoch?: number | null;
+          p_active_session_id?: string | null;
+        };
+        Returns: Json;
+      };
+      fn_upsert_semantic_rolling_memory: {
+        Args: {
+          p_conversation_id: string;
+          p_user_id: string;
+          p_summary_content: string;
+          p_compacted_turns_count?: number;
+          p_last_compacted_message_id?: string | null;
+          p_user_profile?: Json;
+          p_active_decisions?: Json;
+          p_file_index?: Json;
+          p_pending_tasks?: Json;
+          p_token_count?: number;
+          p_cache_hash?: string | null;
+        };
+        Returns: Json;
+      };
+      fn_upsert_semantic_rolling_memory_v2: {
+        Args: {
+          p_conversation_id: string;
+          p_user_id: string;
+          p_summary_content: string;
+          p_compacted_turns_count?: number;
+          p_last_compacted_message_id?: string | null;
+          p_user_profile?: Json;
+          p_active_decisions?: Json;
+          p_file_index?: Json;
+          p_pending_tasks?: Json;
+          p_token_count?: number;
+          p_cache_hash?: string | null;
+          p_stable_cache_hash?: string | null;
+          p_atomic_turn_boundary?: number;
+          p_code_diff_manifest?: Json;
+        };
+        Returns: Json;
+      };
+      fn_search_relevant_document_chunks: {
+        Args: { p_conversation_id: string; p_query_text: string; p_limit?: number };
+        Returns: Json;
+      };
+      fn_evaluate_and_acquire_seat_gate_v2: {
+        Args: {
+          p_user_id: string;
+          p_request_id: string;
+          p_requested_model?: string;
+          p_org_id?: string | null;
+          p_is_stream?: boolean;
+          p_reserved_units?: number;
+          p_lease_ttl_seconds?: number;
+          p_fallback_tier?: string;
+        };
+        Returns: Json;
+      };
+      fn_settle_seat_request_lease_v2: {
+        Args: {
+          p_user_id: string;
+          p_request_id: string;
+          p_model_id: string;
+          p_tokens?: number;
+          p_cost_usd?: number;
+          p_units?: number | null;
+          p_conversation_id?: string | null;
+          p_user_message?: Json | null;
+          p_assistant_message?: Json | null;
+        };
+        Returns: Json;
+      };
+      fn_release_seat_request_lease_v2: {
+        Args: { p_user_id: string; p_request_id: string };
+        Returns: boolean;
+      };
       galx_record_synthetic_canary_result: {
         Args: {
           p_probe_name: string;

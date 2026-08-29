@@ -61,6 +61,9 @@ export class OpenAIAdapter {
     if (req.top_p !== undefined) body.top_p = req.top_p;
     if (req.presence_penalty !== undefined) body.presence_penalty = req.presence_penalty;
     if (req.frequency_penalty !== undefined) body.frequency_penalty = req.frequency_penalty;
+    if (req.prompt_cache_key !== undefined) body.prompt_cache_key = req.prompt_cache_key;
+    if (req.prompt_cache_options !== undefined) body.prompt_cache_options = req.prompt_cache_options;
+    if (req.safety_identifier !== undefined) body.safety_identifier = req.safety_identifier;
 
     const response = await fetch(`${this.BASE_URL}/chat/completions`, {
       method: 'POST',

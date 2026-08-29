@@ -208,3 +208,4 @@ export * from "./BroccoliPaxosRaftLogTermSplicerBuffer";
 export * from "./BroccoliSparsePolynomialHornerCanonicalizerBuffer";
 export * from "./BroccoliTopologicalBettiNumberInvariantBuffer";
 export * from "./BroccoliQuadTreeSpatialHierarchyBuffer";
+export * from "./BroccoliChatDatabase";
