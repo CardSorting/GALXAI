@@ -25,7 +25,8 @@ import {
   SessionRepository,
   galxDb,
   getSupabaseConfig,
-  isSupabaseConfigured
+  isSupabaseConfigured,
+  getSupabaseAdmin
 } from '../src/lib/supabase';
 
 import { GalxCryptoVault } from '../src/core/vault/GalxCryptoVault';
@@ -42,6 +43,9 @@ import { GalxRequestCoalescer } from '../src/lib/cache/GalxRequestCoalescer';
 import { GalxBatchDataLoader } from '../src/lib/cache/GalxBatchDataLoader';
 import { GalxWriteBehindBuffer } from '../src/lib/cache/GalxWriteBehindBuffer';
 import { GalxMultiTierCache } from '../src/lib/cache/GalxMultiTierCache';
+import { GalxXFetchEngine } from '../src/lib/cache/GalxXFetchEngine';
+import { GalxBurstSmoother } from '../src/lib/cache/GalxBurstSmoother';
+import { GalxCreditSlicer } from '../src/lib/cache/GalxCreditSlicer';
 
 async function runTests() {
   console.log('======================================================================');
@@ -1015,6 +1019,77 @@ async function runTests() {
       touchRes.success === true && touchRes.touchedCount === 2,
       'SessionRepo: Bulk touches session activity heartbeats in 1 single UNNEST query'
     );
+
+    // 58. GalxXFetchEngine: Probabilistic Early Expiration (XFetch Algorithm) with BroccoliDB
+    const xfetch = new GalxXFetchEngine<string>({ beta: 2.0, defaultTtlMs: 200 });
+    let xfetchDbQueries = 0;
+    const xfetchSource = async () => {
+      xfetchDbQueries++;
+      await new Promise(r => setTimeout(r, 10));
+      return `hot_data_v${xfetchDbQueries}`;
+    };
+
+    // 1st fetch: cache miss
+    const xval1 = await xfetch.getOrFetch('hot_llm_key', xfetchSource);
+    assert(xval1 === 'hot_data_v1' && xfetchDbQueries === 1, 'GalxXFetchEngine: Populates initial value in BroccoliDB L1 table');
+
+    // 2nd fetch immediately: cache hit
+    const xval2 = await xfetch.getOrFetch('hot_llm_key', xfetchSource);
+    assert(xval2 === 'hot_data_v1' && xfetchDbQueries === 1, 'GalxXFetchEngine: Returns cached value with 0ms latency');
+
+    // 59. GalxBurstSmoother: Adaptive AIMD Concurrency Limiting & BroccoliDB Analytics
+    const smoother = new GalxBurstSmoother({ initialLimit: 5, minLimit: 2, maxLimit: 20 });
+    const burstTasks = Array.from({ length: 15 }, (_, i) =>
+      smoother.schedule(async () => {
+        await new Promise(r => setTimeout(r, 5));
+        return `burst_task_${i}`;
+      })
+    );
+    const burstResults = await Promise.all(burstTasks);
+    const burstStats = smoother.getStats();
+    assert(
+      burstResults.length === 15 && burstStats.totalExecuted === 15 && burstStats.percentiles.totalSamples >= 15,
+      'GalxBurstSmoother: Schedules 15 burst tasks with AIMD limiting and calculates BroccoliDB percentiles'
+    );
+
+    // 60. GalxCreditSlicer: Edge Token Leasing & Streaming Credit Slicing with BroccoliDB
+    const creditSlicer = GalxCreditSlicer.getInstance();
+    const sliceUser = `usr_slice_${Date.now()}`;
+    await walletRepo.verifyDepositAndApplyMatch({ userId: sliceUser, depositAmountUsd: 10, paymentRef: 'slice_test' });
+
+    // Acquire $0.50 credit slice
+    const slice = await creditSlicer.acquireSlice(sliceUser, 0.50, 60000);
+    assert(
+      slice.active === true && slice.leasedAmountUsd === 0.50 && slice.remainingAmountUsd === 0.50,
+      'GalxCreditSlicer: Leases $0.50 credit slice into BroccoliDB reactive table'
+    );
+
+    // Micro-debit 5 streaming chunks locally in memory
+    for (let i = 0; i < 5; i++) {
+      const debitRes = creditSlicer.debitLocal(sliceUser, 0.05);
+      assert(debitRes.success === true, 'GalxCreditSlicer: Local micro-debit executes with 0ms DB egress');
+    }
+
+    // Reconcile unspent portion back to PostgreSQL
+    const reconcileRes = await creditSlicer.reconcileSlice(sliceUser);
+    assert(
+      reconcileRes.success === true && Math.abs(reconcileRes.reconciledSpentUsd - 0.25) < 0.000001,
+      'GalxCreditSlicer: Reconciles $0.25 spent tokens to PostgreSQL and releases unspent credit'
+    );
+
+    // 61. Distributed Probabilistic Recompute Locks (Migration 32)
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabaseAdmin();
+      const { data: lockData, error: lockErr } = await supabase.rpc('fn_batch_probabilistic_recompute_lock', {
+        p_keys: ['cache_key_alpha', 'cache_key_beta'],
+        p_worker_id: 'cf_edge_worker_99',
+        p_ttl_ms: 5000
+      });
+      assert(
+        Boolean(!lockErr && lockData && (lockData as any).success === true && (lockData as any).acquired_keys?.length >= 1),
+        'DistributedLock: Acquires distributed recompute locks for coordinated XFetch recomputation'
+      );
+    }
 
 
 

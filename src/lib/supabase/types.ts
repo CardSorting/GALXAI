@@ -3126,6 +3126,30 @@ export interface Database {
         };
         Returns: Json;
       };
+      fn_lease_wallet_credit_slice: {
+        Args: {
+          p_user_id: string;
+          p_slice_amount_usd: number;
+          p_slice_ttl_ms?: number;
+        };
+        Returns: Json;
+      };
+      fn_reconcile_wallet_credit_slice: {
+        Args: {
+          p_user_id: string;
+          p_lease_id: string;
+          p_actual_spent_usd: number;
+        };
+        Returns: Json;
+      };
+      fn_batch_probabilistic_recompute_lock: {
+        Args: {
+          p_keys: string[];
+          p_worker_id: string;
+          p_ttl_ms?: number;
+        };
+        Returns: Json;
+      };
       fn_coalesced_wallet_batch_draw: {
         Args: {
           p_coalesced_draws: Json;
