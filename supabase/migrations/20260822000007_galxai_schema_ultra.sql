@@ -93,7 +93,11 @@ CREATE OR REPLACE FUNCTION fn_check_budget_thresholds(
     p_workspace_id UUID,
     p_additional_spend_usd NUMERIC(12, 6) DEFAULT 0
 )
-RETURNS JSONB AS $$
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 DECLARE
     v_ws galx_workspaces%ROWTYPE;
     v_new_spend NUMERIC(12, 6);
@@ -154,7 +158,7 @@ BEGIN
         'triggeredAlerts', v_triggered_alerts
     );
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 ALTER TABLE galx_budget_alerts ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "service_role_all_galx_budget_alerts" ON galx_budget_alerts;

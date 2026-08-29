@@ -148,6 +148,21 @@ export class WorkspaceRepository {
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
+        const { data: rpcData, error: rpcError } = await supabase.rpc('fn_create_workspace' as any, {
+          p_slug: params.slug,
+          p_name: params.name,
+          p_owner_user_id: params.ownerUserId,
+          p_tier: params.tier || 'standard',
+          p_monthly_spend_cap_usd: params.monthlySpendCapUsd || 1000.0,
+          p_metadata: params.metadata || {}
+        });
+
+        if (!rpcError && rpcData && (rpcData as any).success && (rpcData as any).workspace) {
+          const mapped = this.mapWorkspaceRow((rpcData as any).workspace);
+          this.workspaceTable.put(mapped.id, mapped);
+          return mapped;
+        }
+
         const { data: wsData, error: wsError } = await supabase
           .from('galx_workspaces')
           .insert({

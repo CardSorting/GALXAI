@@ -46,6 +46,8 @@ import { GalxMultiTierCache } from '../src/lib/cache/GalxMultiTierCache';
 import { GalxXFetchEngine } from '../src/lib/cache/GalxXFetchEngine';
 import { GalxBurstSmoother } from '../src/lib/cache/GalxBurstSmoother';
 import { GalxCreditSlicer } from '../src/lib/cache/GalxCreditSlicer';
+import { GalxGatewayMesh } from '../src/lib/cache/GalxGatewayMesh';
+import { GalxMultiQueryPipeliner } from '../src/lib/cache/GalxMultiQueryPipeliner';
 
 async function runTests() {
   console.log('======================================================================');
@@ -1088,6 +1090,217 @@ async function runTests() {
       assert(
         Boolean(!lockErr && lockData && (lockData as any).success === true && (lockData as any).acquired_keys?.length >= 1),
         'DistributedLock: Acquires distributed recompute locks for coordinated XFetch recomputation'
+      );
+    }
+
+    // 62. GalxGatewayMesh: 1-Hop Composite Preflight Pipeline (Migration 33)
+    const gatewayMesh = GalxGatewayMesh.getInstance();
+    const preflightUser = `usr_mesh_${Date.now()}`;
+    const preflightKey = `gk_live_${Date.now()}_alpha`;
+    const preflightKeyHash = GalxCryptoVault.hashSessionToken(preflightKey);
+    const preflightWsId = 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d';
+
+    // Provision test wallet and active developer key
+    await walletRepo.verifyDepositAndApplyMatch({ userId: preflightUser, depositAmountUsd: 10, paymentRef: 'mesh_test' });
+    await keyRepo.saveGatewayKey({
+      id: `key_mesh_${Date.now()}`,
+      userId: preflightUser,
+      prefix: 'gk_live',
+      keyPrefix: 'gk_live',
+      keyHash: preflightKeyHash,
+      name: 'Gateway Mesh Test Key',
+      rateLimitPerMinute: 1000,
+      totalRequests: 0,
+      totalTokens: 0,
+      createdAtMs: Date.now(),
+      revoked: false
+    });
+
+    const ticket = await gatewayMesh.executePreflight(preflightKeyHash, 'gpt-4o', 0.10);
+    assert(
+      ticket.userId === preflightUser && ticket.currentBalanceUsd >= 10.0 && ticket.model === 'gpt-4o',
+      'GalxGatewayMesh: 1-hop atomic preflight resolves key, workspace, wallet, and shard lease in 1 RPC'
+    );
+
+    // 63. GalxGatewayMesh: Hot Caller Preflight in BroccoliDB L1 (0ms)
+    const hotTicket = await gatewayMesh.executePreflight(preflightKeyHash, 'gpt-4o', 0.10);
+    assert(
+      hotTicket.ticketId === ticket.ticketId && gatewayMesh.getStats().preflightL1Hits >= 1,
+      'GalxGatewayMesh: Hot caller preflight returns instantly from BroccoliDB L1 table (0ms)'
+    );
+
+    // 64. GalxGatewayMesh: 1-Hop Composite Postflight Reconciliation (Migration 33)
+    const postflightRes = await gatewayMesh.executePostflight({
+      userId: preflightUser,
+      workspaceId: preflightWsId,
+      shardId: ticket.shardId,
+      leaseId: ticket.leaseId,
+      actualCostUsd: 0.05,
+      model: 'gpt-4o',
+      promptTokens: 100,
+      completionTokens: 50,
+      cachedTokens: 20,
+      latencyMs: 120,
+      statusCode: 200
+    });
+    assert(
+      postflightRes.success === true && postflightRes.finalBalanceUsd !== undefined,
+      'GalxGatewayMesh: 1-hop composite postflight debits wallet, releases lease, and logs audit in 1 RPC'
+    );
+
+    // 65. Workspace: 1-Hop Composite State Hydration (Migration 34)
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabaseAdmin();
+      const { data: wsState, error: wsErr } = await supabase.rpc('fn_get_workspace_composite_state', {
+        p_workspace_id: ws.id
+      });
+      assert(
+        Boolean(!wsErr && wsState && (wsState as any).success === true && Array.isArray((wsState as any).environments)),
+        'Workspace: 1-hop composite state query aggregates workspace, environments, keys, budget alerts, and audits'
+      );
+    }
+
+    // 66. Stripe: 1-Hop Bulk Deposit Fulfillment Batch (Migration 34)
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabaseAdmin();
+      const bulkDepositUser1 = `usr_bulk_dep1_${Date.now()}`;
+      const bulkDepositUser2 = `usr_bulk_dep2_${Date.now()}`;
+      const { data: bulkDepData, error: bulkDepErr } = await supabase.rpc('fn_bulk_verify_deposit_and_match', {
+        p_deposits: [
+          { user_id: bulkDepositUser1, deposit_amount_usd: 20, payment_ref: 'bulk_dep_1' },
+          { user_id: bulkDepositUser2, deposit_amount_usd: 50, payment_ref: 'bulk_dep_2' }
+        ]
+      });
+      assert(
+        Boolean(!bulkDepErr && bulkDepData && (bulkDepData as any).processed_deposits_count === 2 && (bulkDepData as any).total_credit_granted_usd === 105),
+        'Stripe: 1-hop bulk deposit fulfillment processes multiple deposits with 50% match'
+      );
+    }
+
+    // 67. Model Routing: 1-Hop Atomic Policy Routing Evaluation (Migration 34)
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabaseAdmin();
+      const { data: routeData, error: routeErr } = await supabase.rpc('fn_route_model_atomic_eval', {
+        p_workspace_id: ws.id,
+        p_requested_model: 'grok-beta',
+        p_prompt_preview: 'Hello world',
+        p_max_cost: 0.10
+      });
+      assert(
+        Boolean(!routeErr && routeData && (routeData as any).success === true && (routeData as any).selected_provider === 'xai-grok'),
+        'Model Routing: 1-hop atomic policy routing selects provider and logs evidence in 1 RPC'
+      );
+    }
+
+    // 68. GalxMultiQueryPipeliner: 1-Hop Batch Multi-RPC Multiplexer (Migration 36)
+    const pipeliner = GalxMultiQueryPipeliner.getInstance();
+    const pipeResults = await Promise.all([
+      pipeliner.executeRpc('get_wallet', { user_id: preflightUser }),
+      pipeliner.executeRpc('route_model', { requested_model: 'gpt-4o' }),
+      pipeliner.executeRpc('verify_tokens', { token_hashes: [preflightKeyHash] })
+    ]);
+    assert(
+      pipeResults.length === 3 && pipeResults[0] !== undefined && pipeliner.getStats().totalDispatchedBatches >= 1,
+      'GalxMultiQueryPipeliner: Batches 3 RPC calls into 1 multiplexed multi-RPC roundtrip'
+    );
+
+    // 69. Token Verification: 1-Hop Multi-Token Lookup (Migration 35)
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabaseAdmin();
+      const { data: tokData, error: tokErr } = await supabase.rpc('fn_batch_verify_tokens', {
+        p_token_hashes: [preflightKeyHash]
+      });
+      assert(
+        Boolean(!tokErr && tokData && (tokData as any).success === true && (tokData as any).verified_count >= 1),
+        'Token Verification: 1-hop multi-token lookup checks API keys and sessions simultaneously'
+      );
+    }
+
+    // 70. Merkle Proofs: 1-Hop Windowed Merkle Chain Proof (Migration 35)
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabaseAdmin();
+      const walRes = await walletRepo.getWallet(preflightUser);
+      if (walRes) {
+        const { data: merkleData, error: merkleErr } = await supabase.rpc('fn_verify_merkle_chain_window', {
+          p_wallet_id: walRes.id,
+          p_limit: 50
+        });
+        assert(
+          Boolean(!merkleErr && merkleData && (merkleData as any).success === true && (merkleData as any).chain_valid === true),
+          'Merkle Proofs: 1-hop windowed Merkle chain integrity verification executes natively in PostgreSQL'
+        );
+      }
+    }
+
+    // 71. Organization: 1-Hop Full Hierarchy State Hydration (Migration 36)
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabaseAdmin();
+      const testOrgId = `org_test_${Date.now()}`;
+      await supabase.rpc('fn_create_organization' as any, {
+        p_id: testOrgId,
+        p_name: 'Enterprise Apex Org',
+        p_slug: `apex-org-${Date.now()}`,
+        p_tier: 'enterprise',
+        p_seat_capacity: 100,
+        p_billing_email: 'finance@apex-org.io'
+      });
+      const { data: orgData, error: orgErr } = await supabase.rpc('fn_get_organization_full_hierarchy_state', {
+        p_org_id: testOrgId
+      });
+      assert(
+        Boolean(!orgErr && orgData && (orgData as any).success === true && (orgData as any).organization?.id === testOrgId),
+        'Organization: 1-hop full hierarchy state hydration returns complete org graph'
+      );
+    }
+
+    // 72. Multi-RPC Dispatcher: Executes Heterogenous RPCs in 1 JSON Transaction (Migration 36)
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabaseAdmin();
+      const { data: multiData, error: multiErr } = await supabase.rpc('fn_batch_multi_rpc_dispatch', {
+        p_calls: [
+          { id: 'c1', procedure: 'get_wallet', args: { user_id: preflightUser } },
+          { id: 'c2', procedure: 'route_model', args: { requested_model: 'claude-3-5-sonnet' } }
+        ]
+      });
+      assert(
+        Boolean(!multiErr && multiData && (multiData as any).success === true && (multiData as any).total_calls_executed === 2),
+        'Multi-RPC Dispatcher: Executes heterogenous RPCs in 1 single JSON roundtrip'
+      );
+    }
+
+    // 73. Atomic Merkle Leaf Append: C-Native SHA-256 Digest (Migration 37)
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabaseAdmin();
+      const walRes = await walletRepo.getWallet(preflightUser);
+      if (walRes) {
+        const { data: leafData, error: leafErr } = await supabase.rpc('fn_atomic_merkle_leaf_append', {
+          p_wallet_id: walRes.id,
+          p_user_id: preflightUser,
+          p_tx_type: 'deposit',
+          p_amount: 5.0,
+          p_desc: 'C-native Merkle Leaf Test Append'
+        });
+        assert(
+          Boolean(!leafErr && leafData && (leafData as any).success === true && (leafData as any).ledger_hash?.length === 64),
+          'Merkle Leaf: Appends cryptographic Merkle leaf with C-native SHA-256 parent chaining in 1 RPC'
+        );
+      }
+    }
+
+    // 74. Synthetic Canary SLO Error Budget Rollup (Migration 37)
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabaseAdmin();
+      const { data: canaryData, error: canaryErr } = await supabase.rpc('fn_ingest_canary_probe_and_eval_slo', {
+        p_probe_data: {
+          target_url: 'https://api.galxai.internal/healthz',
+          status_code: 200,
+          latency_ms: 35,
+          region: 'us-west-2'
+        }
+      });
+      assert(
+        Boolean(!canaryErr && canaryData && (canaryData as any).success === true && (canaryData as any).is_success === true),
+        'Synthetic Canary: 1-hop probe ingestion and SLO error budget evaluation'
       );
     }
 

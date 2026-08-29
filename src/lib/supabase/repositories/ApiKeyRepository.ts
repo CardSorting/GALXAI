@@ -188,12 +188,23 @@ export class ApiKeyRepository {
 
     try {
       const supabase = getSupabaseAdmin();
-      const row = this.mapKeyToRow(key);
-      const { error } = await supabase
-        .from('galx_developer_keys')
-        .upsert(row, { onConflict: 'id' });
+      const { error: rpcError } = await supabase.rpc('fn_save_developer_key' as any, {
+        p_id: key.id,
+        p_user_id: key.userId,
+        p_name: key.name,
+        p_prefix: key.prefix || key.keyPrefix || '',
+        p_key_hash: key.keyHash,
+        p_rate_limit_per_minute: key.rateLimitPerMinute || 600
+      });
 
-      if (error) throw error;
+      if (rpcError) {
+        const row = this.mapKeyToRow(key);
+        const { error } = await supabase
+          .from('galx_developer_keys')
+          .upsert(row, { onConflict: 'id' });
+
+        if (error) throw error;
+      }
     } catch (error) {
       if (options.requireRemote) {
         this.keyTable.delete(key.id);
@@ -257,14 +268,21 @@ export class ApiKeyRepository {
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
-        await supabase
-          .from('galx_developer_keys')
-          .update({
-            is_revoked: true,
-            revoked_at: new Date().toISOString(),
-            revoked_reason: reason
-          })
-          .eq('id', keyId);
+        const { error: rpcErr } = await supabase.rpc('fn_revoke_developer_key' as any, {
+          p_id: keyId,
+          p_reason: reason
+        });
+
+        if (rpcErr) {
+          await supabase
+            .from('galx_developer_keys')
+            .update({
+              is_revoked: true,
+              revoked_at: new Date().toISOString(),
+              revoked_reason: reason
+            })
+            .eq('id', keyId);
+        }
       } catch {
         // Fallback
       }

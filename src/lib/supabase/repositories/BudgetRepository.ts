@@ -62,6 +62,29 @@ export class BudgetRepository {
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
+        const { data: rpcData, error: rpcErr } = await supabase.rpc('fn_create_budget_alert' as any, {
+          p_workspace_id: params.workspaceId,
+          p_threshold_percentage: params.thresholdPercentage,
+          p_notification_webhook_url: params.notificationWebhookUrl,
+          p_environment_id: params.environmentId || null
+        });
+
+        if (!rpcErr && rpcData && (rpcData as any).success && (rpcData as any).alert) {
+          const row = (rpcData as any).alert;
+          const mapped: BudgetAlertRecord = {
+            id: row.id,
+            workspaceId: row.workspace_id,
+            environmentId: row.environment_id,
+            thresholdPercentage: row.threshold_percentage,
+            notificationWebhookUrl: row.notification_webhook_url,
+            isTriggered: row.is_triggered,
+            triggeredAt: row.triggered_at,
+            createdAt: row.created_at
+          };
+          this.alertTable.put(mapped.id, mapped);
+          return mapped;
+        }
+
         const { data, error } = await supabase
           .from('galx_budget_alerts')
           .insert({

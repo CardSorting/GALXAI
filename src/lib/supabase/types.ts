@@ -3126,6 +3126,95 @@ export interface Database {
         };
         Returns: Json;
       };
+      fn_atomic_merkle_leaf_append: {
+        Args: {
+          p_wallet_id: string;
+          p_user_id: string;
+          p_tx_type: string;
+          p_amount: number;
+          p_desc: string;
+          p_metadata?: Json;
+        };
+        Returns: Json;
+      };
+      fn_ingest_canary_probe_and_eval_slo: {
+        Args: {
+          p_probe_data: Json;
+        };
+        Returns: Json;
+      };
+      fn_batch_multi_rpc_dispatch: {
+        Args: {
+          p_calls: Json;
+        };
+        Returns: Json;
+      };
+      fn_get_organization_full_hierarchy_state: {
+        Args: {
+          p_org_id: string;
+        };
+        Returns: Json;
+      };
+      fn_batch_verify_tokens: {
+        Args: {
+          p_token_hashes: string[];
+        };
+        Returns: Json;
+      };
+      fn_verify_merkle_chain_window: {
+        Args: {
+          p_wallet_id: string;
+          p_limit?: number;
+        };
+        Returns: Json;
+      };
+      fn_get_workspace_composite_state: {
+        Args: {
+          p_workspace_id: string;
+        };
+        Returns: Json;
+      };
+      fn_bulk_verify_deposit_and_match: {
+        Args: {
+          p_deposits: Json;
+        };
+        Returns: Json;
+      };
+      fn_route_model_atomic_eval: {
+        Args: {
+          p_workspace_id?: string;
+          p_requested_model: string;
+          p_prompt_preview?: string;
+          p_max_cost?: number;
+        };
+        Returns: Json;
+      };
+      fn_gateway_preflight_composite_mesh: {
+        Args: {
+          p_key_hash: string;
+          p_requested_model: string;
+          p_estimated_cost?: number;
+          p_worker_id?: string;
+        };
+        Returns: Json;
+      };
+      fn_gateway_postflight_composite_mesh: {
+        Args: {
+          p_user_id: string;
+          p_workspace_id?: string;
+          p_shard_id?: string;
+          p_lease_id?: string;
+          p_actual_cost: number;
+          p_model: string;
+          p_prompt_tokens?: number;
+          p_completion_tokens?: number;
+          p_cached_tokens?: number;
+          p_latency_ms?: number;
+          p_status_code?: number;
+          p_client_ip?: string;
+        };
+        Returns: Json;
+      };
       fn_lease_wallet_credit_slice: {
         Args: {
           p_user_id: string;
