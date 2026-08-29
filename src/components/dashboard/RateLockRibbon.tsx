@@ -36,11 +36,11 @@ export function RateLockRibbon({
           </div>
 
           <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-            Grandfather Your Account at 25%–40% Wholesale Rates Forever
+            Lock In Wholesale Rates Forever
           </h3>
 
           <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
-            The first 500 verified accounts lock in <strong className="text-amber-300">Lifetime 0% Routing Markup</strong>, <strong className="text-cyan-300">75% automated prompt caching pass-through</strong>, and <strong className="text-emerald-300">50% Instant Compute Match</strong>. Once the Q3 capacity quota is reached, base entry pricing adjusts to standard tiers.
+            First 500 accounts lock in <strong className="text-amber-300">0% routing markup</strong>, <strong className="text-cyan-300">75% prompt caching</strong>, and a <strong className="text-emerald-300">50% compute match</strong>. Once quota is reached, pricing shifts to standard tiers.
           </p>
         </div>
 

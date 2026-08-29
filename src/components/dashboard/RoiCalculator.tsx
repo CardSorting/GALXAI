@@ -72,7 +72,7 @@ function BaseRoiCalculator({
   const matchGrantBonus = monthlySpend >= 1000 ? 500 : monthlySpend >= 500 ? 250 : monthlySpend >= 100 ? 50 : 25;
 
   const handleCopyAudit = async () => {
-    const auditText = `GALXAI Executive AI Spend Audit & Cost Optimization Summary
+    const auditText = `GALXAI Token Spend Audit & Savings Summary
 -------------------------------------------------------------
 Target Model: ${selectedModel.id} (${selectedModel.name})
 Current Monthly AI Spend: $${monthlySpend.toLocaleString()} USD / month
@@ -102,13 +102,13 @@ Switch in 30 Seconds: https://galx.ai/keys/new`;
           <div className="space-y-1">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-mono font-bold">
               <Coins className="w-3.5 h-3.5 text-amber-400" />
-              <span>EXECUTIVE AI COST AUDIT &amp; ARBITRAGE SIMULATOR</span>
+              <span>SAVINGS CALCULATOR</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-              Project Your Team&apos;s Bottom-Line Savings
+              Calculate Your Monthly Savings
             </h2>
             <p className="text-xs text-zinc-400 max-w-xl">
-              Calculate exact wholesale price reductions across OpenAI Codex and visual models with compound prompt caching rebates.
+              Model wholesale discounts and 75% prompt caching rebates across frontier models.
             </p>
           </div>
 
@@ -127,7 +127,7 @@ Switch in 30 Seconds: https://galx.ai/keys/new`;
           {/* Model Selection Dropdown */}
           <div className="space-y-2">
             <div className="flex justify-between items-center text-xs font-bold text-zinc-300 uppercase font-mono">
-              <span>1. Target AI Inference Engine</span>
+              <span>1. Target Model</span>
               <span className="text-emerald-400">-{selectedModel.discountPercentage}% Wholesale Base</span>
             </div>
             <select
@@ -146,7 +146,7 @@ Switch in 30 Seconds: https://galx.ai/keys/new`;
           {/* Current Monthly Spend Slider */}
           <div className="space-y-2">
             <div className="flex justify-between text-xs font-mono">
-              <span className="text-zinc-300 font-bold">2. Your Current Monthly LLM / API Spend:</span>
+              <span className="text-zinc-300 font-bold">2. Current Monthly AI Spend:</span>
               <span className="text-amber-300 font-bold text-sm bg-amber-500/10 px-2.5 py-0.5 rounded-lg border border-amber-500/20">
                 ${monthlySpend.toLocaleString()} / month
               </span>
@@ -225,7 +225,7 @@ Switch in 30 Seconds: https://galx.ai/keys/new`;
                 <span className="line-through text-zinc-400">${monthlySpend.toLocaleString()} / mo</span>
               </div>
               <div className="flex justify-between items-center text-rose-400 text-[11px]">
-                <span>Aggregator (with 5% surcharge):</span>
+                <span>Aggregator (+5% fee):</span>
                 <span className="line-through">${openRouterSurchargeCost.toLocaleString()} / mo</span>
               </div>
               <div className="flex justify-between items-center text-white font-bold text-sm">
@@ -273,7 +273,7 @@ Switch in 30 Seconds: https://galx.ai/keys/new`;
                 className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 font-mono cursor-pointer"
               >
                 <Key className="w-4 h-4 text-black" />
-                <span>Claim $5 Key + Lock In 50% Match</span>
+                <span>Claim $5 Key (50% Match)</span>
                 <ArrowRight className="w-4 h-4 text-black" />
               </Link>
 
@@ -283,7 +283,7 @@ Switch in 30 Seconds: https://galx.ai/keys/new`;
                 className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white font-mono text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
               >
                 {copiedAudit ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-zinc-400" />}
-                <span>{copiedAudit ? 'Executive Audit Copied to Clipboard!' : 'Copy Executive Spend Report'}</span>
+                <span>{copiedAudit ? 'Savings Summary Copied!' : 'Copy Savings Summary'}</span>
               </button>
             </div>
           </div>

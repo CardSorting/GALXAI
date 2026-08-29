@@ -41,20 +41,20 @@ export function TrustSeals({ className = '', variant = 'grid' }: TrustSealsProps
       <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5 font-mono">
         <div className="flex items-center gap-2 text-emerald-400">
           <RotateCcw className="w-4 h-4" />
-          <span className="font-bold text-xs">1-Click Unused Refund</span>
+          <span className="font-bold text-xs">1-Click Refund</span>
         </div>
         <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
-          100% money-back guarantee. Withdraw unspent wallet balance back to your card with a single click.
+          100% money-back guarantee. Withdraw unspent balance back to your card anytime.
         </p>
       </div>
 
       <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5 font-mono">
         <div className="flex items-center gap-2 text-cyan-400">
           <ShieldCheck className="w-4 h-4" />
-          <span className="font-bold text-xs">Zero Overdraft Lock</span>
+          <span className="font-bold text-xs">Zero Overdraft</span>
         </div>
         <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
-          Prepaid wallet architecture prevents runaway loop bills or surprise month-end charges.
+          Prepaid wallet architecture prevents runaway loop bills and surprise charges.
         </p>
       </div>
 
@@ -64,17 +64,17 @@ export function TrustSeals({ className = '', variant = 'grid' }: TrustSealsProps
           <span className="font-bold text-xs">Zero Data Retention</span>
         </div>
         <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
-          ZDR-100 certified. Your prompts and completions are never stored or used to train upstream models.
+          ZDR-100 certified. Prompts and completions are never stored or trained on.
         </p>
       </div>
 
       <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5 font-mono">
         <div className="flex items-center gap-2 text-indigo-400">
           <Zap className="w-4 h-4" />
-          <span className="font-bold text-xs">Multi-Region Redundancy</span>
+          <span className="font-bold text-xs">Multi-Region Anycast</span>
         </div>
         <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
-          Active failover routing across redundant Anycast nodes with sub-15ms health switching.
+          Sub-15ms automated failover across redundant global edge nodes.
         </p>
       </div>
     </div>

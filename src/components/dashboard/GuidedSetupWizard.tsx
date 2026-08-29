@@ -35,17 +35,17 @@ interface SetupProfile {
 const SETUP_PROFILES: SetupProfile[] = [
   {
     id: 'cli',
-    name: 'Terminal CLI (Zero Install)',
-    badge: 'Node.js 18+',
+    name: 'Terminal CLI',
+    badge: 'Zero Install',
     icon: Terminal,
-    description: 'Instant CLI streaming without installing packages or configuring local environments.',
+    description: 'Instant CLI completions and interactive REPL without local dependencies.',
     language: 'bash',
     steps: [
-      'Open any terminal (macOS, Linux, Windows WSL)',
-      'Run npx galxai with your prompt or start interactive REPL with npx galxai chat',
-      'Optionally export GALX_API_KEY to unlock higher concurrency tiers'
+      'Run npx galxai with your prompt or npx galxai chat for REPL',
+      'Optionally export GALX_API_KEY for higher concurrency',
+      'Receive instant streamed output'
     ],
-    snippet: `# 1. Instant 1-off prompt completion in terminal:
+    snippet: `# 1. Instant prompt completion in terminal:
 npx galxai "Explain continuous token caching in 10 words"
 
 # 2. Or start an interactive chat session:
@@ -53,15 +53,15 @@ npx galxai chat --model gpt-5.6-sol`
   },
   {
     id: 'cursor',
-    name: 'Cursor & Windsurf IDE',
-    badge: '1-Click Override',
+    name: 'Cursor / Windsurf',
+    badge: 'IDE Override',
     icon: Laptop,
-    description: 'Connect Cursor, Windsurf, or Cline with sub-15ms router latency and 75% prompt cache savings.',
+    description: 'Connect Cursor, Windsurf, or Cline with 75% prompt caching.',
     language: 'json',
     steps: [
-      'Open Settings → Models → Toggle "Override OpenAI Base URL"',
+      'Settings → Models → Toggle "Override OpenAI Base URL"',
       'Set Base URL to: https://galx.ai/v1',
-      'Paste your GALXAI live access key into the API Key field'
+      'Paste your GALXAI key into the API Key field'
     ],
     snippet: `// Cursor / Windsurf Settings -> Models:
 Override Base URL: https://galx.ai/v1
@@ -70,19 +70,18 @@ Models:            gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`
   },
   {
     id: 'python',
-    name: 'Python (openai & LangChain)',
-    badge: 'Python 3.10+',
+    name: 'Python',
+    badge: 'OpenAI SDK',
     icon: Code2,
-    description: '100% drop-in replacement for OpenAI Python SDK with zero code refactoring.',
+    description: 'Drop-in OpenAI SDK replacement with zero code changes.',
     language: 'python',
     steps: [
-      'Keep standard pip install openai (no custom dependencies)',
-      'Change base_url to "https://galx.ai/v1"',
-      'Run inference with automatic 25%–40% wholesale discount'
+      'Keep standard pip install openai (no extra packages)',
+      'Set base_url="https://galx.ai/v1" and supply your key',
+      'Run completions with wholesale pricing'
     ],
     snippet: `from openai import OpenAI
 
-# 1-Line Drop-in: Only point base_url to GALXAI
 client = OpenAI(
     base_url="https://galx.ai/v1",
     api_key="galx_live_your_key_here"
@@ -90,7 +89,7 @@ client = OpenAI(
 
 response = client.chat.completions.create(
     model="gpt-5.6-sol",
-    messages=[{"role": "user", "content": "Refactor this module with atomic error handling"}],
+    messages=[{"role": "user", "content": "Explain caching"}],
     stream=True
 )
 
@@ -100,20 +99,19 @@ for chunk in response:
   },
   {
     id: 'ts',
-    name: 'TypeScript & Vercel AI SDK',
-    badge: 'Node / Next.js',
+    name: 'TypeScript',
+    badge: 'AI SDK',
     icon: Sparkles,
-    description: 'Native streaming with OpenAI SDK, Vercel AI SDK (@ai-sdk/openai), or @galxai/sdk.',
+    description: 'Streaming with OpenAI SDK and Vercel AI SDK.',
     language: 'typescript',
     steps: [
-      'Initialize OpenAI or @ai-sdk/openai client with baseURL: "https://galx.ai/v1"',
-      'Pass process.env.GALX_API_KEY from your .env.local file',
-      'Stream text directly to React components with zero rate limit stalls'
+      'Set baseURL: "https://galx.ai/v1" in your client config',
+      'Pass process.env.GALX_API_KEY from environment',
+      'Stream text with zero rate-limit stalls'
     ],
     snippet: `import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
 
-// Point Vercel AI SDK to GALXAI Universal Gateway
 const galxai = createOpenAI({
   baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALX_API_KEY,
@@ -130,34 +128,34 @@ export async function POST(req: Request) {
   },
   {
     id: 'claude_code',
-    name: 'Claude Code CLI',
-    badge: 'Anthropic SDK',
+    name: 'Claude Code',
+    badge: 'Agent CLI',
     icon: Bot,
-    description: 'Route Claude Code agentic loops through GALXAI with wholesale pricing and zero rate limit stalls.',
+    description: 'Route Claude Code agent loops with wholesale rates and zero 429 stalls.',
     language: 'bash',
     steps: [
-      'Export ANTHROPIC_BASE_URL="https://galx.ai/v1" in your shell',
+      'Export ANTHROPIC_BASE_URL="https://galx.ai/v1"',
       'Export ANTHROPIC_API_KEY="galx_live_your_key_here"',
-      'Run claude in any project directory with instant savings'
+      'Run claude in any project directory'
     ],
     snippet: `# In your shell configuration (~/.zshrc or ~/.bashrc):
 export ANTHROPIC_BASE_URL="https://galx.ai/v1"
 export ANTHROPIC_API_KEY="galx_live_your_key_here"
 
-# Execute Claude Code directly:
+# Execute Claude Code:
 claude "Refactor auth pipeline and write unit tests"`
   },
   {
     id: 'curl',
-    name: 'cURL / Direct HTTP',
-    badge: 'REST API',
+    name: 'cURL / REST',
+    badge: 'Direct HTTP',
     icon: Terminal,
-    description: 'Standard HTTP POST request to /v1/chat/completions with SSE streaming.',
+    description: 'Standard HTTP POST to /v1/chat/completions with SSE streaming.',
     language: 'bash',
     steps: [
-      'Target endpoint: https://galx.ai/v1/chat/completions',
-      'Set header: Authorization: Bearer galx_live_your_key',
-      'Receive standard OpenAI-compatible SSE JSON chunks'
+      'POST to endpoint: https://galx.ai/v1/chat/completions',
+      'Include header: Authorization: Bearer galx_live_your_key',
+      'Receive standard OpenAI-compatible SSE JSON stream'
     ],
     snippet: `curl https://galx.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
@@ -191,13 +189,13 @@ function BaseGuidedSetupWizard() {
         <div className="space-y-1">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-bold">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>UNIVERSAL 30-SECOND INTEGRATION</span>
+            <span>30-SECOND SETUP</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-            Connect in 30 Seconds with Zero Code Changes
+            Drop-In Integration
           </h2>
           <p className="text-xs sm:text-sm text-zinc-300">
-            Works out-of-the-box with all OpenAI-compatible editors, scripts, and agent frameworks.
+            Works with OpenAI SDK, Cursor, Claude Code, Python, and TypeScript.
           </p>
         </div>
 
@@ -206,7 +204,7 @@ function BaseGuidedSetupWizard() {
           className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider font-mono shadow-md flex items-center gap-1.5 shrink-0 self-start md:self-auto cursor-pointer"
         >
           <Key className="w-3.5 h-3.5 text-black" />
-          <span>Claim Key ($5 Credit)</span>
+          <span>Claim $5 Free Key</span>
           <ArrowRight className="w-3.5 h-3.5 text-black" />
         </Link>
       </div>
@@ -259,7 +257,7 @@ function BaseGuidedSetupWizard() {
             className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-zinc-200 text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer self-start sm:self-auto shrink-0"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copied ? 'Copied to Clipboard!' : 'Copy Code Snippet'}</span>
+            <span>{copied ? 'Copied!' : 'Copy Snippet'}</span>
           </button>
         </div>
 

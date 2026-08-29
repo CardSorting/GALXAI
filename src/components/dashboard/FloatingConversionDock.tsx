@@ -73,7 +73,7 @@ export function FloatingConversionDock() {
         {submitted ? (
           <div className="flex items-center gap-1 text-emerald-300 font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-[10px]">
             <Check className="w-3 h-3 text-emerald-400" />
-            <span>Key &amp; $5 Free Credits Queued!</span>
+            <span>$5 Key Sent!</span>
           </div>
         ) : isExpanded ? (
           <form onSubmit={handleQuickClaim} className="flex items-center gap-1.5">

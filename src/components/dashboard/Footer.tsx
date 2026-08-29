@@ -160,7 +160,7 @@ function BaseFooter() {
             </Link>
 
             <p className="text-xs text-zinc-400 leading-relaxed">
-              The wholesale AI compute clearinghouse and 429 burst shield delivering 25%–40% token savings, sub-15ms failover, and 75% prompt cache pass-through.
+              The universal AI gateway and 429 burst shield delivering 25%–40% token savings, sub-15ms failover, and 75% prompt cache pass-through.
             </p>
 
             <div className="pt-2">

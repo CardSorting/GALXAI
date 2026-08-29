@@ -25,7 +25,8 @@ import {
   Layers,
   CheckCircle2,
   Sliders,
-  Scale
+  Scale,
+  Square
 } from 'lucide-react';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
@@ -44,46 +45,46 @@ interface ModelPreset {
 const HERO_MODELS: ModelPreset[] = [
   {
     id: 'gpt-5.6-sol',
-    name: 'OpenAI GPT-5.6 Sol',
-    provider: 'OpenAI Codex',
+    name: 'GPT-5.6 Sol',
+    provider: 'Codex',
     retailPrice: 5.00,
     wholesalePrice: 3.75,
     discountPct: 25,
     contextK: 900,
-    specialty: 'SOTA Coding & Architecture',
+    specialty: 'Code & Architecture',
     accentColor: 'from-amber-400 to-orange-500'
   },
   {
     id: 'gpt-5.6-terra',
-    name: 'OpenAI GPT-5.6 Terra',
-    provider: 'OpenAI Reasoning',
+    name: 'GPT-5.6 Terra',
+    provider: 'Reasoning',
     retailPrice: 3.00,
     wholesalePrice: 2.25,
     discountPct: 25,
     contextK: 900,
-    specialty: 'Balanced Frontier Reasoning',
+    specialty: 'Frontier Reasoning',
     accentColor: 'from-orange-400 to-amber-500'
   },
   {
     id: 'gpt-5.6-luna',
-    name: 'OpenAI GPT-5.6 Luna',
-    provider: 'OpenAI Flash',
+    name: 'GPT-5.6 Luna',
+    provider: 'Flash',
     retailPrice: 1.50,
     wholesalePrice: 0.95,
     discountPct: 36,
     contextK: 900,
-    specialty: 'Sub-Second Agent Velocity',
+    specialty: 'Fast Agent Loops',
     accentColor: 'from-emerald-400 to-teal-500'
   },
   {
     id: 'openai-gpt-image-2',
-    name: 'OpenAI GPT-Image-2',
-    provider: 'OpenAI Visual',
+    name: 'GPT-Image-2',
+    provider: 'Visual',
     retailPrice: 0.08,
     wholesalePrice: 0.06,
     discountPct: 25,
     contextK: 128,
-    specialty: 'Ultra 4K Visual Synthesis',
+    specialty: 'Image Synthesis',
     accentColor: 'from-white via-zinc-200 to-zinc-400'
   }
 ];
@@ -97,17 +98,17 @@ interface PresetPromptItem {
 const PRESET_PROMPTS: PresetPromptItem[] = [
   {
     label: 'Prompt #1',
-    tag: '⚡ Prompt Caching',
+    tag: '⚡ Caching',
     prompt: 'Explain continuous token caching and wholesale arbitrage.'
   },
   {
     label: 'Prompt #2',
-    tag: '🦀 Lock-Free Rust',
+    tag: '🦀 Rust Limiter',
     prompt: 'Write a high-concurrency lock-free token bucket in Rust.'
   },
   {
     label: 'Prompt #3',
-    tag: '🛡️ Rate Limit Shield',
+    tag: '🛡️ 429 Shield',
     prompt: 'How does GALXAI protect against rate limits and upstream errors?'
   }
 ];
@@ -166,28 +167,19 @@ export function HeroZenithConsole() {
     const lower = prompt.toLowerCase();
 
     if (lower.includes('caching') || lower.includes('arbitrage') || lower.includes('explain')) {
-      return `### ⚡ Continuous Token Caching & Wholesale Arbitrage
+      return `### ⚡ Continuous Token Caching & Pricing Arbitrage
 
-**1-Sentence Summary:**
-> *"Shared prompt prefixes stay warm in Anycast RAM, cutting repeat token costs by 75%."*
-
-#### 1. How the Architecture Works:
-1. **Warm Prefix Matching (<1ms):**
-   When your agent sends system instructions, schemas, or large file contexts, GALXAI matches the cryptographic SHA-256 hash of the prompt prefix in memory before dispatching.
-2. **75% Cache Pass-Through:**
-   Cached prefix tokens cost **$0.75 / 1M** instead of standard retail **$5.00 / 1M** (a direct 75% savings pass-through).
-3. **Wholesale Volume Clearing:**
-   GALXAI aggregates millions of developers into massive enterprise tier-1 contracts, delivering **${model.discountPct}% instant discount** on all remaining generation tokens.
+1. **Warm Prefix Matching (<1ms):** Prompts with matching system instructions and context prefixes are instantly recognized in Anycast RAM.
+2. **75% Cache Rebate:** Cached prefix tokens cost **$0.75 / 1M** instead of standard retail **$5.00 / 1M** (100% rebate pass-through).
+3. **Wholesale Routing:** 0% platform markup delivers a direct **${model.discountPct}% instant discount** on generation tokens.
 
 \`\`\`typescript
-// Resulting Cost Ledger
 const stats = {
   engine: "${model.id}",
-  raw_tokens: 4280,
   cached_prefix_tokens: 3800, // 75% rebate applied
   effective_savings: "${model.discountPct}% wholesale + 75% cache discount",
   ttft_ms: 12,
-  zero_retention: true // Processed strictly in non-persisted RAM
+  zero_retention: true // Strictly processed in ephemeral RAM
 };
 \`\`\``;
     }
@@ -195,7 +187,7 @@ const stats = {
     if (lower.includes('rust') || lower.includes('lock-free') || lower.includes('queue') || lower.includes('bucket')) {
       return `### 🦀 High-Concurrency Lock-Free Token Bucket in Rust
 
-Here is a production-grade, thread-safe rate limiter utilizing atomic compare-and-swap (CAS) operations with zero mutex contention:
+Production-grade rate limiter with atomic compare-and-swap (CAS) and zero mutex contention:
 
 \`\`\`rust
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -225,7 +217,7 @@ impl AtomicTokenBucket {
         let mut current = self.tokens.load(Ordering::Relaxed);
         loop {
             if current < requested {
-                return false; // Insufficient tokens
+                return false;
             }
             match self.tokens.compare_exchange_weak(
                 current,
@@ -256,26 +248,19 @@ impl AtomicTokenBucket {
 }
 \`\`\`
 
-**Key Features:**
-- **Zero Mutex Locks:** Lock-free atomic loop eliminates thread blocking.
-- **Sub-Microsecond Latency:** Handles 10M+ operations/sec per core.`;
+**Result:** Zero mutex contention • Sub-microsecond latency • 10M+ ops/sec.`;
     }
 
     if (lower.includes('429') || lower.includes('uptime') || lower.includes('sla') || lower.includes('stall') || lower.includes('resilience') || lower.includes('rate limit')) {
-      return `### 🛡️ Enterprise Resilience & Zero Rate-Limit Stalls
+      return `### 🛡️ Enterprise Resilience & Zero 429 Stalls
 
-When autonomous coding agents (like Cursor, Windsurf, or custom agent swarms) run continuous execution loops, standard API keys frequently hit provider rate limits (**HTTP 429 Too Many Requests**).
+When autonomous agent loops (Cursor, Windsurf, Claude Code) run high-volume concurrency, direct provider rate limits cause sudden halts.
 
-#### How GALXAI Guarantees High Availability:
-- **Sub-1ms Automatic Failover:**
-  Traffic is automatically routed across redundant high-capacity Anycast pathways with zero client-side delay.
-- **Zero Configuration Overhauls:**
-  Your applications never experience 429 backoff stalls or dropped streams.
-- **Consistent High Throughput:**
-  Guaranteed high-speed generation for mission-critical production pipelines.
+- **Sub-1ms Anycast Failover:** Traffic is instantly shifted across redundant high-capacity pools.
+- **Zero Code Rewrites:** Applications avoid 429 backoff stalls and dropped streams.
+- **High Concurrency:** Consistent high-speed generation for mission-critical agent swarms.
 
 \`\`\`typescript
-// High Availability Telemetry
 export const resilience = {
   rate_limit_stalls: 0,
   failover_latency_ms: "< 1ms",
@@ -283,42 +268,65 @@ export const resilience = {
 };
 \`\`\`
 
-**Result:** Uninterrupted execution and zero rate-limit stalls for all agent loops and backend services.`;
+**Result:** Continuous execution with zero rate-limit stalls.`;
     }
 
-    // Default rich response for any custom user prompt
-    return `### 🌌 GALXAI Wholesale Response • ${model.name}
+    // Default response for any custom user prompt
+    return `### ⚡ GALXAI Live Response • ${model.name}
 
-**Prompt Evaluated:**
 > *"${prompt}"*
 
-#### Performance & Optimization Telemetry:
-1. **Anycast Routing:** Handled nearest to your location in **12ms TTFT**.
-2. **Wholesale Rate Applied:** **$${model.wholesalePrice.toFixed(2)} / 1M tokens** (saved **${model.discountPct}%** vs standard retail $${model.retailPrice.toFixed(2)}).
-3. **Continuous Prompt Cache:** Warm prefix buffers matched in non-persisted RAM.
+1. **Anycast Routing:** Handled nearest to your origin in **12ms TTFT**.
+2. **Wholesale Rate Applied:** **$${model.wholesalePrice.toFixed(2)} / 1M tokens** (saved **${model.discountPct}%** vs retail $${model.retailPrice.toFixed(2)}).
+3. **Prompt Cache:** Warm prefix buffers matched in non-persisted RAM.
 
 \`\`\`typescript
-// Execution Confirmation
 export const response = {
   model: "${model.id}",
   provider: "${model.provider}",
   status: "COMPLETED",
   ttft_ms: 12,
   tokens_per_sec: 148,
-  memory_guarantee: "AES-256-GCM Zero Retention in RAM"
+  guarantee: "Zero Data Retention (ZDR-100)"
 };
-\`\`\`
+\`\`\``;
+  };
 
-Ready to deploy in your stack with **1-line drop-in** replacement.`;
+  const streamIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const clashIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clean up timers on unmount
+  useEffect(() => {
+    return () => {
+      if (streamIntervalRef.current) clearInterval(streamIntervalRef.current);
+      if (clashIntervalRef.current) clearInterval(clashIntervalRef.current);
+    };
+  }, []);
+
+  const handleStopStream = () => {
+    if (streamIntervalRef.current) {
+      clearInterval(streamIntervalRef.current);
+      streamIntervalRef.current = null;
+    }
+    if (clashIntervalRef.current) {
+      clearInterval(clashIntervalRef.current);
+      clashIntervalRef.current = null;
+    }
+    setIsStreaming(false);
+    setIsClashStreaming(false);
   };
 
   const handleRunStream = (customPrompt?: string) => {
     const promptToRun = customPrompt || promptInput;
-    if (!promptToRun.trim() || isStreaming) return;
+    if (!promptToRun.trim()) return;
+
+    if (isStreaming) {
+      handleStopStream();
+      return;
+    }
 
     setIsStreaming(true);
     setStreamOutput('');
-    setStreamStats(null);
     setCopiedResponse(false);
 
     const fullResponse = generateRealisticResponse(promptToRun, selectedModel);
@@ -327,10 +335,23 @@ Ready to deploy in your stack with **1-line drop-in** replacement.`;
     let accumulated = '';
     const startTime = performance.now();
 
-    // Fast, smooth streaming interval simulating ~140 tok/s
-    const interval = setInterval(() => {
+    // Initial live stats
+    setStreamStats({
+      latencyMs: 12,
+      tokensCount: 0,
+      tokensPerSec: 145,
+      retailCost: 0,
+      wholesaleCost: 0,
+      savingsUsd: 0
+    });
+
+    if (streamIntervalRef.current) clearInterval(streamIntervalRef.current);
+
+    // Fast, smooth streaming interval simulating ~140-160 tok/s
+    streamIntervalRef.current = setInterval(() => {
       if (currentIdx >= chunks.length) {
-        clearInterval(interval);
+        if (streamIntervalRef.current) clearInterval(streamIntervalRef.current);
+        streamIntervalRef.current = null;
         setIsStreaming(false);
 
         const totalTimeSec = Math.max(0.4, (performance.now() - startTime) / 1000);
@@ -354,16 +375,33 @@ Ready to deploy in your stack with **1-line drop-in** replacement.`;
       accumulated += (currentIdx === 0 ? '' : ' ') + nextChunk;
       setStreamOutput(accumulated);
       currentIdx += 2;
-    }, 18);
+
+      // Update real-time live telemetry as tokens stream
+      const elapsedSec = Math.max(0.05, (performance.now() - startTime) / 1000);
+      const currentTokens = Math.round(accumulated.length / 3.8);
+      const currentWholesale = (currentTokens / 1_000_000) * selectedModel.wholesalePrice;
+      const currentRetail = (currentTokens / 1_000_000) * selectedModel.retailPrice;
+
+      setStreamStats({
+        latencyMs: 12,
+        tokensCount: currentTokens,
+        tokensPerSec: Math.round(currentTokens / elapsedSec),
+        retailCost: currentRetail,
+        wholesaleCost: currentWholesale,
+        savingsUsd: currentRetail - currentWholesale
+      });
+    }, 16);
   };
 
   const handleRunClash = () => {
-    if (isClashStreaming) return;
+    if (isClashStreaming) {
+      handleStopStream();
+      return;
+    }
+
     setIsClashStreaming(true);
     setClashOutputA('');
     setClashOutputB('');
-    setClashStatsA(null);
-    setClashStatsB(null);
 
     const fullA = generateRealisticResponse(promptInput, selectedModel);
     const fullB = generateRealisticResponse(promptInput, modelB);
@@ -375,13 +413,29 @@ Ready to deploy in your stack with **1-line drop-in** replacement.`;
     let idxB = 0;
     let accA = '';
     let accB = '';
+    const startTime = performance.now();
 
-    const interval = setInterval(() => {
+    setClashStatsA({ ttft: 12, speed: 154, cost: 0 });
+    setClashStatsB({ ttft: 14, speed: 138, cost: 0 });
+
+    if (clashIntervalRef.current) clearInterval(clashIntervalRef.current);
+
+    clashIntervalRef.current = setInterval(() => {
       if (idxA >= chunksA.length && idxB >= chunksB.length) {
-        clearInterval(interval);
+        if (clashIntervalRef.current) clearInterval(clashIntervalRef.current);
+        clashIntervalRef.current = null;
         setIsClashStreaming(false);
-        setClashStatsA({ ttft: 12, speed: 154, cost: Number(((fullA.length / 3.8 / 1_000_000) * selectedModel.wholesalePrice).toFixed(6)) });
-        setClashStatsB({ ttft: 14, speed: 138, cost: Number(((fullB.length / 3.8 / 1_000_000) * modelB.wholesalePrice).toFixed(6)) });
+        const totalSec = Math.max(0.4, (performance.now() - startTime) / 1000);
+        setClashStatsA({ 
+          ttft: 12, 
+          speed: Math.round((fullA.length / 3.8) / totalSec), 
+          cost: Number(((fullA.length / 3.8 / 1_000_000) * selectedModel.wholesalePrice).toFixed(6)) 
+        });
+        setClashStatsB({ 
+          ttft: 14, 
+          speed: Math.round((fullB.length / 3.8) / totalSec), 
+          cost: Number(((fullB.length / 3.8 / 1_000_000) * modelB.wholesalePrice).toFixed(6)) 
+        });
         return;
       }
 
@@ -396,7 +450,19 @@ Ready to deploy in your stack with **1-line drop-in** replacement.`;
         setClashOutputB(accB);
         idxB += 2;
       }
-    }, 18);
+
+      const elapsed = Math.max(0.05, (performance.now() - startTime) / 1000);
+      setClashStatsA({ 
+        ttft: 12, 
+        speed: Math.round((accA.length / 3.8) / elapsed), 
+        cost: Number(((accA.length / 3.8 / 1_000_000) * selectedModel.wholesalePrice).toFixed(6)) 
+      });
+      setClashStatsB({ 
+        ttft: 14, 
+        speed: Math.round((accB.length / 3.8) / elapsed), 
+        cost: Number(((accB.length / 3.8 / 1_000_000) * modelB.wholesalePrice).toFixed(6)) 
+      });
+    }, 16);
   };
 
   const handleCopyResponse = async () => {
@@ -411,18 +477,18 @@ Ready to deploy in your stack with **1-line drop-in** replacement.`;
   const getIntegrationSnippet = () => {
     switch (activeSnippetTab) {
       case 'cli':
-        return `# 1. Run zero-install streaming prompt in terminal:
+        return `# Run streaming prompt in terminal:
 npx galxai "${promptInput}"
 
-# 2. Or start interactive REPL:
+# Or start interactive chat:
 npx galxai chat --model ${selectedModel.id}`;
       case 'cursor':
-        return `// In Cursor / Windsurf Settings -> Models:
+        return `// Cursor / Windsurf -> Settings -> Models:
 Override Base URL: https://galx.ai/v1
 API Key:           galx_live_your_key_here
 Models:            ${selectedModel.id}, gpt-5.6-sol, gpt-5.6-luna`;
       case 'claude_code':
-        return `# Point Claude Code CLI directly to GALXAI Wholesale Clearinghouse:
+        return `# Point Claude Code to GALXAI Gateway:
 export ANTHROPIC_BASE_URL="https://galx.ai/v1"
 export ANTHROPIC_API_KEY="galx_live_your_key_here"
 
@@ -430,7 +496,6 @@ claude "${promptInput}"`;
       case 'python':
         return `from openai import OpenAI
 
-# 1-Line Drop-in wholesale replacement:
 client = OpenAI(
     base_url="https://galx.ai/v1",
     api_key="galx_live_your_key_here"
@@ -448,7 +513,6 @@ for chunk in response:
       case 'ts':
         return `import OpenAI from 'openai';
 
-// Drop-in compatible with OpenAI SDK & Vercel AI SDK
 const client = new OpenAI({
   baseURL: 'https://galx.ai/v1',
   apiKey: process.env.GALX_API_KEY || 'galx_live_your_key'
@@ -481,9 +545,9 @@ const res = await client.chat.completions.create({
           <div className="flex items-center gap-3">
             <div className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse shadow-md shadow-emerald-400/50" />
             <div className="flex items-center gap-2 font-mono text-xs">
-              <span className="text-white font-bold tracking-wider uppercase">Apex Compute Clearinghouse</span>
+              <span className="text-white font-bold tracking-wider uppercase">Global Edge Router</span>
               <span className="text-zinc-500">•</span>
-              <span className="text-emerald-400 font-semibold">Active Health Probes</span>
+              <span className="text-emerald-400 font-semibold">&lt;15ms Anycast</span>
             </div>
           </div>
 
@@ -499,7 +563,7 @@ const res = await client.chat.completions.create({
               }`}
             >
               <Play className="w-3 h-3 fill-current" />
-              <span>Live Stream</span>
+              <span>Stream</span>
             </button>
 
             <button
@@ -512,7 +576,7 @@ const res = await client.chat.completions.create({
               }`}
             >
               <Scale className="w-3 h-3" />
-              <span>Dual Clash</span>
+              <span>Compare</span>
             </button>
 
             <button
@@ -525,7 +589,7 @@ const res = await client.chat.completions.create({
               }`}
             >
               <Code2 className="w-3 h-3" />
-              <span>1-Line Stack</span>
+              <span>Code</span>
             </button>
           </div>
         </div>
@@ -535,14 +599,14 @@ const res = await client.chat.completions.create({
           <div className="flex items-center justify-between font-mono text-xs">
             <span className="text-zinc-400 font-bold uppercase flex items-center gap-1.5">
               <Cpu className="w-3.5 h-3.5 text-amber-400" />
-              <span>1. Select Frontier Model:</span>
+              <span>1. Select Model:</span>
             </span>
             <div className="flex items-center gap-2 font-mono text-[11px]">
               <span className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 font-bold">
-                -{selectedModel.discountPct}% Wholesale Off Retail
+                -{selectedModel.discountPct}% Wholesale Base
               </span>
               <span className="px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 font-bold hidden sm:inline">
-                75% Cache Pass-Through
+                75% Prompt Caching
               </span>
             </div>
           </div>
@@ -586,10 +650,10 @@ const res = await client.chat.completions.create({
             <div className="flex items-center justify-between font-mono text-xs">
               <span className="text-zinc-400 font-bold uppercase flex items-center gap-1.5">
                 <Terminal className="w-3.5 h-3.5 text-cyan-400" />
-                <span>2. Interactive Test Execution:</span>
+                <span>2. Live Test:</span>
               </span>
               <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 overflow-x-auto">
-                <span className="hidden sm:inline">Try quick prompts:</span>
+                <span className="hidden sm:inline">Presets:</span>
                 {PRESET_PROMPTS.map((p, idx) => (
                   <button
                     key={idx}
@@ -613,7 +677,7 @@ const res = await client.chat.completions.create({
                   value={promptInput}
                   onChange={(e) => setPromptInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleRunStream()}
-                  placeholder="Type any prompt to test live throughput & wholesale pricing..."
+                  placeholder='Prompt (e.g. "Explain prompt caching")...'
                   className="w-full py-3 pl-4 pr-10 rounded-2xl bg-black/70 border border-white/15 text-white placeholder:text-zinc-600 focus:outline-none focus:border-amber-400 font-mono transition-colors text-xs"
                 />
                 <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-[10px] font-mono hidden sm:inline">
@@ -624,18 +688,22 @@ const res = await client.chat.completions.create({
               <button
                 type="button"
                 onClick={() => handleRunStream()}
-                disabled={isStreaming || !promptInput.trim()}
-                className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 font-mono shrink-0"
+                disabled={!promptInput.trim()}
+                className={`w-full sm:w-auto px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 font-mono shrink-0 ${
+                  isStreaming
+                    ? 'bg-rose-500 hover:bg-rose-400 text-white shadow-rose-500/20 ring-1 ring-rose-400/50 animate-pulse'
+                    : 'bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black shadow-amber-500/20'
+                }`}
               >
                 {isStreaming ? (
                   <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    <span>Streaming Output...</span>
+                    <Square className="w-3.5 h-3.5 fill-current" />
+                    <span>Stop Stream</span>
                   </>
                 ) : (
                   <>
                     <Play className="w-3.5 h-3.5 fill-black" />
-                    <span>Execute Stream (0ms)</span>
+                    <span>Run (0ms)</span>
                   </>
                 )}
               </button>
@@ -643,15 +711,24 @@ const res = await client.chat.completions.create({
 
             {/* Live Output & Real-Time Performance Telemetry Card */}
             {(streamOutput || isStreaming) && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-black/85 border border-cyan-500/30 space-y-3 font-mono text-xs animate-in fade-in duration-150 shadow-2xl">
+              <div className={`p-4 sm:p-5 rounded-2xl bg-black/85 border space-y-3 font-mono text-xs animate-in fade-in duration-150 shadow-2xl transition-all ${
+                isStreaming ? 'border-cyan-400/60 ring-1 ring-cyan-400/40 shadow-cyan-500/10' : 'border-cyan-500/30'
+              }`}>
                 <div className="flex items-center justify-between text-[11px] text-zinc-400 border-b border-white/10 pb-2.5">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
                     <span className="text-cyan-300 font-bold">Stream: {selectedModel.name}</span>
+                    {isStreaming && (
+                      <span className="px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 text-[10px] animate-pulse">
+                        LIVE
+                      </span>
+                    )}
                   </div>
                   
                   <div className="flex items-center gap-3">
-                    <span className="text-emerald-400 font-bold hidden sm:inline">● In-Browser Simulation (Zero Auth)</span>
+                    <span className="text-emerald-400 font-bold hidden sm:inline">
+                      {isStreaming && streamStats ? `${streamStats.tokensCount} tok • ${streamStats.tokensPerSec} tok/s` : '● Instant Stream'}
+                    </span>
                     {streamOutput && !isStreaming && (
                       <button
                         type="button"
@@ -677,20 +754,20 @@ const res = await client.chat.completions.create({
                 {/* Live Real-Time Telemetry Counters */}
                 {streamStats && (
                   <div className="pt-3 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
-                    <div className="p-2.5 rounded-xl bg-white/5 space-y-0.5 border border-white/5">
-                      <span className="text-zinc-500 uppercase text-[10px]">Time to First Token</span>
+                    <div className="p-2.5 rounded-xl bg-white/5 space-y-0.5 border border-white/5 transition-all">
+                      <span className="text-zinc-500 uppercase text-[10px]">TTFT</span>
                       <div className="text-white font-bold">{streamStats.latencyMs}ms</div>
                     </div>
-                    <div className="p-2.5 rounded-xl bg-white/5 space-y-0.5 border border-white/5">
-                      <span className="text-zinc-500 uppercase text-[10px]">Throughput Velocity</span>
+                    <div className="p-2.5 rounded-xl bg-white/5 space-y-0.5 border border-white/5 transition-all">
+                      <span className="text-zinc-500 uppercase text-[10px]">Throughput</span>
                       <div className="text-cyan-300 font-bold">{streamStats.tokensPerSec} tok/s</div>
                     </div>
-                    <div className="p-2.5 rounded-xl bg-white/5 space-y-0.5 border border-white/5">
+                    <div className="p-2.5 rounded-xl bg-white/5 space-y-0.5 border border-white/5 transition-all">
                       <span className="text-zinc-500 uppercase text-[10px]">Wholesale Cost</span>
                       <div className="text-emerald-300 font-bold">${streamStats.wholesaleCost.toFixed(6)}</div>
                     </div>
-                    <div className="p-2.5 rounded-xl bg-white/5 space-y-0.5 border border-white/5">
-                      <span className="text-zinc-500 uppercase text-[10px]">Instant Net Savings</span>
+                    <div className="p-2.5 rounded-xl bg-white/5 space-y-0.5 border border-white/5 transition-all">
+                      <span className="text-zinc-500 uppercase text-[10px]">Instant Savings</span>
                       <div className="text-amber-300 font-bold">-{selectedModel.discountPct}% OFF</div>
                     </div>
                   </div>
@@ -704,23 +781,56 @@ const res = await client.chat.completions.create({
         {consoleMode === 'clash' && (
           <div className="space-y-4 font-mono text-xs">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-2 border-b border-white/10 pb-2">
-              <span className="text-zinc-400 font-bold uppercase flex items-center gap-1.5">
-                <Scale className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Dual Model Concurrency Clash: {selectedModel.name} vs {modelB.name}</span>
-              </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-zinc-400 font-bold uppercase flex items-center gap-1.5">
+                  <Scale className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Compare:</span>
+                </span>
+                <span className="text-amber-300 font-bold">{selectedModel.name}</span>
+                <span className="text-zinc-500">vs</span>
+                <select
+                  value={modelB.id}
+                  onChange={(e) => {
+                    const found = HERO_MODELS.find(m => m.id === e.target.value);
+                    if (found) setModelB(found);
+                  }}
+                  className="px-2 py-1 rounded-lg bg-black/80 border border-white/20 text-cyan-300 text-xs font-mono font-bold focus:outline-none focus:border-cyan-400 cursor-pointer"
+                >
+                  {HERO_MODELS.map(m => (
+                    <option key={m.id} value={m.id} className="bg-zinc-900 text-white">
+                      {m.name} (-{m.discountPct}%)
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <button
                 type="button"
                 onClick={handleRunClash}
-                disabled={isClashStreaming}
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-indigo-500 hover:from-cyan-300 hover:to-indigo-400 text-black font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md flex items-center gap-1.5"
+                className={`px-5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md flex items-center gap-1.5 self-end sm:self-auto shrink-0 font-bold ${
+                  isClashStreaming
+                    ? 'bg-rose-500 hover:bg-rose-400 text-white shadow-rose-500/20 ring-1 ring-rose-400/50 animate-pulse'
+                    : 'bg-gradient-to-r from-cyan-400 to-indigo-500 hover:from-cyan-300 hover:to-indigo-400 text-black font-black'
+                }`}
               >
-                <Zap className="w-3.5 h-3.5 fill-black" />
-                <span>{isClashStreaming ? 'Clashing Streams...' : 'Run Concurrently'}</span>
+                {isClashStreaming ? (
+                  <>
+                    <Square className="w-3.5 h-3.5 fill-current" />
+                    <span>Stop</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-3.5 h-3.5 fill-black" />
+                    <span>Run Comparison</span>
+                  </>
+                )}
               </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="p-4 rounded-2xl bg-black/80 border border-amber-500/30 space-y-2">
+              <div className={`p-4 rounded-2xl bg-black/80 border space-y-2 transition-all ${
+                isClashStreaming ? 'border-amber-400/60 ring-1 ring-amber-400/30' : 'border-amber-500/30'
+              }`}>
                 <div className="flex justify-between items-center border-b border-white/10 pb-1.5 text-[11px]">
                   <span className="text-amber-300 font-bold">{selectedModel.name}</span>
                   <span className="text-emerald-400 font-bold">-${selectedModel.discountPct}% Wholesale</span>
@@ -740,7 +850,9 @@ const res = await client.chat.completions.create({
                 )}
               </div>
 
-              <div className="p-4 rounded-2xl bg-black/80 border border-cyan-500/30 space-y-2">
+              <div className={`p-4 rounded-2xl bg-black/80 border space-y-2 transition-all ${
+                isClashStreaming ? 'border-cyan-400/60 ring-1 ring-cyan-400/30' : 'border-cyan-500/30'
+              }`}>
                 <div className="flex justify-between items-center border-b border-white/10 pb-1.5 text-[11px]">
                   <span className="text-cyan-300 font-bold">{modelB.name}</span>
                   <span className="text-emerald-400 font-bold">-${modelB.discountPct}% Wholesale</span>
@@ -768,18 +880,18 @@ const res = await client.chat.completions.create({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <span className="text-zinc-400 font-bold uppercase font-mono text-xs flex items-center gap-1.5">
               <Code2 className="w-3.5 h-3.5 text-indigo-400" />
-              <span>3. 1-Line Drop-In for Your Stack:</span>
+              <span>3. Code Snippet:</span>
             </span>
 
             {/* Snippet Tabs */}
             <div className="flex items-center gap-1 p-1 rounded-xl bg-black/60 border border-white/10 font-mono text-[11px] overflow-x-auto">
               {[
-                { id: 'cli', label: 'Terminal CLI' },
-                { id: 'cursor', label: 'Cursor / Windsurf' },
+                { id: 'cli', label: 'CLI' },
+                { id: 'cursor', label: 'Cursor' },
                 { id: 'claude_code', label: 'Claude Code' },
                 { id: 'python', label: 'Python' },
                 { id: 'ts', label: 'TypeScript' },
-                { id: 'browser', label: 'Browser URL' }
+                { id: 'browser', label: 'Browser' }
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -804,7 +916,7 @@ const res = await client.chat.completions.create({
               className="absolute top-3 right-3 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white flex items-center gap-1.5 transition-all text-[11px] cursor-pointer"
             >
               {copiedSnippet ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedSnippet ? 'Copied Snippet!' : 'Copy Code'}</span>
+              <span>{copiedSnippet ? 'Copied!' : 'Copy'}</span>
             </button>
 
             {activeSnippetTab === 'browser' ? (
@@ -828,18 +940,18 @@ const res = await client.chat.completions.create({
           </div>
         </div>
 
-        {/* Bottom Zenith Conversion Guarantee Footer */}
+        {/* Bottom Conversion Guarantee Footer */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-white/10 font-mono text-xs">
           <div className="flex items-center gap-2 text-zinc-400">
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>Zero Lock-in • $5 Free Instant Credit • 100% Unspent Refund Guarantee</span>
+            <span>No lock-in • $5 free credit • 100% refund on unspent balance</span>
           </div>
 
           <Link
             href="/keys/new"
             className="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 hover:underline shrink-0"
           >
-            <span>Mint Live Access Key &rarr;</span>
+            <span>Claim Free $5 Key &rarr;</span>
           </Link>
         </div>
       </div>

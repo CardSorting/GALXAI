@@ -89,7 +89,7 @@ function BaseNavigation() {
             <Link
               href="/"
               className="flex items-center gap-2 group cursor-pointer shrink-0 rounded-xl p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080d] transition-all"
-              aria-label="GALXAI Home - Universal AI Compute Clearinghouse"
+              aria-label="GALXAI Home - Universal AI Gateway & Model Router"
             >
               <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-cyan-500 via-indigo-500 to-indigo-600 flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
                 <Zap className="w-3.5 h-3.5 text-white fill-white" />
