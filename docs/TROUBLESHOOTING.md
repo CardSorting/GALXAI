@@ -149,6 +149,32 @@ $ npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 
 ---
 
+## ⚡ 4. Rolling Context & Seat Quota Troubleshooting
+
+### A. `seat_quota_exceeded` (HTTP 429)
+```json
+{
+  "error": "You have exhausted your 5-hour limit (0% remaining). It will fully refresh in 2 hours, 14 minutes."
+}
+```
+- **Root Cause**: The user's sliding 5-hour burst quota has been completely consumed.
+- **Remedy**: Wait for the sliding window to replenish, or upgrade the user's seat entitlement tier (`developer` $\to$ `small_business` $\to$ `enterprise` $\to$ `apex`).
+
+### B. `orphaned_tool_message` / `incomplete_tool_sequence` (HTTP 400)
+```json
+{
+  "error": "Tool message at index 5 does not follow an assistant message with tool_calls"
+}
+```
+- **Root Cause**: A custom client pruned intermediate conversational turns and severed the assistant message containing `tool_calls` from the matching `tool` result message.
+- **Remedy**: Ensure `GalxRollingContextEngine.ensureAtomicTurnPairs` is enabled or pass unbroken tool turn sequences. The normalizer automatically preserves assistant tool calls and results together.
+
+### C. `seat_lease_timeout` (HTTP 504)
+- **Root Cause**: An active stream hung or network connection was severed without sending an explicit disconnect, leaving an in-flight reservation in `galx_seat_request_leases`.
+- **Remedy**: Leases expire automatically after their TTL (`180s`). For immediate cleanup, call `fn_release_seat_request_lease`.
+
+---
+
 ## 🚀 Pre-Flight Verification & Build Troubleshooting
 
 ### 1. Pre-Flight Audit Gate Failures (`npm run deploy:check`)
@@ -172,6 +198,9 @@ $ npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 | **Maintainer Onboarding** | 8-Point Workstation Diagnostic (Node, Vault, Safety, Docs, Git Hooks) | `npm run onboard` |
 | **Institutional Entropy Benchmark** | 7-Tier Progressive Entropy Gradient & 7 Adversarial Traps (ADR 0066/0067) | `npm run bench:entropy` |
 | **Inference Boundary Benchmark** | Head-to-head empirical testing on OpenAI models (`gpt-4o`, `gpt-4o-mini`, `o3-mini`) | `npm run bench:inference-boundary` |
+| **Chat Context Hardening Suite** | Request normalizer, tool turn pairs, dynamic output bounds, RRF search | `npx tsx scripts/test-chat-context-hardening.ts` (21 assertions) |
+| **Paranoid Supabase Linter** | 53 migration audit, 53 paired .down.sql rollbacks, RLS & search_path check | `npm run db:verify` |
+| **Live Database Test Suite** | 92 zero-egress database integration tests on Supabase | `npm run db:test` |
 | **BroccoliDB Compaction API** | Safe facade boundary, GET/POST/OPTIONS routes, 19 modes, bounds & auth gates | `npm run test:broccolidb:api` (7 tests) |
 | **BroccoliDB Hardening Suite** | Memory bounds, slab safety, collision-safe memoization, fail-closed safety | `npm run test:broccolidb:hardening` |
 | **180-Domain Master Suite** | 180 enterprise industry domain compactors across 21 clusters | `npm run bench:180-domains` |

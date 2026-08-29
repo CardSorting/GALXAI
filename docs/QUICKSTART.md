@@ -180,4 +180,57 @@ npm run bench:entropy
 npm run bench:inference-boundary
 ```
 
+---
+
+## ⚡ 8. High-Velocity Multi-Page Document Ingestion & Rolling Memory
+
+Attach multi-hundred-page documents, code diff manifests, or long transcripts with **zero artificial clamping**:
+
+```typescript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  baseURL: 'https://galx.ai/v1',
+  apiKey: process.env.GALXAI_API_KEY,
+  defaultHeaders: {
+    'x-galx-rolling-memory': 'true', // Activates 5-Level Memory Pyramid in RAM
+    'x-galx-workspace-id': 'ws_acme_core',
+  },
+});
+
+// Stream conversation with dynamic 1.05M frontier token window
+const stream = await client.chat.completions.create({
+  model: 'gpt-5.6-sol',
+  messages: [
+    { role: 'system', content: 'You are the lead architect reviewing system logs.' },
+    { role: 'user', content: `Analyze this 500-page infrastructure log dump:\n${largeLogData}` },
+  ],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content || '');
+}
+```
+
+---
+
+## ⏱️ 9. Inspecting Live Dual Rolling Seat Quotas
+
+Check live 5-hour and weekly capacity meters with human-readable refresh timers:
+
+```typescript
+import { GalxSeatTierEngine } from '@/core/subscription/GalxSeatTierEngine';
+
+const seatEngine = GalxSeatTierEngine.getInstance();
+const telemetry = await seatEngine.getRollingSeatTelemetry('user_123');
+
+console.log(`5-Hour Limit Remaining: ${telemetry.fiveHourLimitRemainingPct}%`);
+console.log(`5-Hour Refresh Status: ${telemetry.fiveHourRefreshText}`); // "fully refresh in 4 hours, 17 minutes"
+
+console.log(`Weekly Limit Remaining: ${telemetry.weeklyLimitRemainingPct}%`);
+console.log(`Weekly Refresh Status: ${telemetry.weeklyRefreshText}`); // "fully refresh in 3 days"
+```
+
+
 
