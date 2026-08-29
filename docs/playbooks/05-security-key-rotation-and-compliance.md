@@ -100,5 +100,7 @@ curl -X POST https://api.galx.ai/api/compliance/dsar/purge \
 ### Verification of Erasure:
 1. All API keys for `userId` are permanently deleted from `public.galx_api_keys`.
 2. All encrypted credential shards for `userId` are zeroized in `public.galx_vault_shards`.
-3. Cached KV sessions across 300+ Edge PoPs are purged via `RATE_LIMIT_KV`.
-4. A signed **Proof of Cryptographic Erasure Certificate** is returned in the HTTP 200 response.
+3. All chat conversations, message turns, universal anchors, and rolling context memory blocks are deleted via `galx_chat_conversations` and `galx_chat_rolling_memory` foreign key cascades.
+4. Active seat request leases in `galx_seat_request_leases` are invalidated.
+5. Cached KV sessions across 300+ Edge PoPs are purged via `RATE_LIMIT_KV`.
+6. A signed **Proof of Cryptographic Erasure Certificate** is returned in the HTTP 200 response.

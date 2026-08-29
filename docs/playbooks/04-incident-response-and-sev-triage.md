@@ -85,6 +85,26 @@
 
 ---
 
+### Playbook 4.5: Seat Request Lease Exhaustion & Stream Concurrency Stalls (ADR 0068)
+1. **Symptom**: Interactive chat users receive `HTTP 429 concurrency_limit_exceeded` or `seat_lease_timeout` during high traffic spikes.
+2. **Diagnostic**:
+   - Query `galx_seat_request_leases` for active unreleased leases:
+   ```sql
+   SELECT lease_id, user_id, created_at, expires_at 
+   FROM galx_seat_request_leases 
+   WHERE expires_at > NOW() AND settled_at IS NULL AND released_at IS NULL;
+   ```
+3. **Immediate Remediation**:
+   - Leases auto-expire in 180s. To instantly purge orphaned locks for a specific user:
+   ```sql
+   UPDATE galx_seat_request_leases 
+   SET released_at = NOW() 
+   WHERE user_id = 'target_user_id' AND settled_at IS NULL AND released_at IS NULL;
+   ```
+   - Validate with `npx tsx scripts/test-chat-context-hardening.ts`.
+
+---
+
 ## 📢 Communications & Status Updates
 - Post update to `/status` within 10 minutes of incident declaration.
 - Provide status updates every 15 minutes during Sev-1 events.

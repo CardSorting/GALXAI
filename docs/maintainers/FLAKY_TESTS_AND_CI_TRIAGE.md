@@ -76,6 +76,16 @@ Distributed inference gateways and high-velocity compaction engines have specifi
 
 ---
 
+### Scenario E: Seat Lease Contention & Sliding Window Drift in CI
+- **Symptom**: Parallel integration tests fail with `concurrency_limit_exceeded` or sliding 5-hour quota errors.
+- **Root Cause**: Tests sharing the same `userId` fixture run concurrently without releasing leases in `finally` blocks, or sliding window queries encounter clock skew.
+- **Deterministic Fix**:
+  1. Generate unique random UUIDs for `userId` in each test run (`test_user_${crypto.randomUUID()}`).
+  2. Always release leases in `afterEach()` or `finally` blocks using `fn_release_seat_request_lease`.
+  3. Execute `npx tsx scripts/test-chat-context-hardening.ts` to verify isolated lease behavior.
+
+---
+
 ## 3. Fast Triage Command Playbook
 
 When a CI run fails unexpectedly:
@@ -84,13 +94,17 @@ When a CI run fails unexpectedly:
 # 1. Run local maintainer diagnostic
 npm run onboard
 
-# 2. Run the exact failing suite with verbose output
+# 2. Run chat context hardening and database integrity checks
+npx tsx scripts/test-chat-context-hardening.ts
+npm run db:verify
+
+# 3. Run the exact failing suite with verbose output
 npx tsx scripts/validate-galxai-router.ts --verbose
 
-# 3. Check for lingering node background processes
+# 4. Check for lingering node background processes
 ps aux | grep node
 
-# 4. Clear Next.js & TypeScript compilation caches
+# 5. Clear Next.js & TypeScript compilation caches
 rm -rf .next
 npx tsc --build --clean
 npx tsc --noEmit

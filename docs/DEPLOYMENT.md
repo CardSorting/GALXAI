@@ -59,18 +59,26 @@ GALXAI employs an enterprise multi-tier deployment architecture designed for hig
 
 ### Automated Verification & Deployment Workflow
 ```bash
-# 1. Run the unified 8-Phase Pre-Flight Audit & Next.js 15 build gate
+# 1. Verify database integrity and apply pending migrations (53 migrations)
+npm run db:verify          # Audit static schema and .down.sql rollback parity
+npm run db:push            # Apply pending SQL migrations to Supabase pooler
+npm run db:test            # Execute 92-test zero-egress live database suite
+
+# 2. Run chat context hardening and tool turn-pair invariant suite
+npx tsx scripts/test-chat-context-hardening.ts
+
+# 3. Run the unified 8-Phase Pre-Flight Audit & Next.js 15 build gate
 npm run deploy:check
 
-# 2. Inspect / synchronize Vercel environment variables
+# 4. Inspect / synchronize Vercel environment variables
 npm run vercel:env:print   # Inspect masked variables
 npm run vercel:env:sync    # Push variables to Vercel project
 
-# 3. Deploy to Vercel (Preview or Production)
+# 5. Deploy to Vercel (Preview or Production)
 npm run vercel:deploy      # Deploy preview
 npm run vercel:deploy:prod # Deploy production
 
-# 4. Run automated 12-point live post-deployment smoke test suite
+# 6. Run automated 12-point live post-deployment smoke test suite
 npm run vercel:smoke -- --url=https://galx.ai
 ```
 

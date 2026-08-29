@@ -15,11 +15,15 @@ GALXAI exposes a standard Prometheus `/metrics` endpoint with zero-overhead atom
 | `galx_compaction_input_tokens_total` | Counter | `mode`, `domain` | Total uncompressed raw input tokens. |
 | `galx_compaction_output_tokens_total` | Counter | `mode`, `domain` | Total compacted task-relevant tokens. |
 | `galx_compaction_tokens_saved_total` | Counter | `mode`, `domain` | Cumulative token savings delivered by BroccoliDB. |
-| `galx_compaction_duration_ms` | Histogram | `mode` | In-process compaction execution latency buckets. |
 | `galx_compaction_fidelity_status_total` | Counter | `mode`, `status` | Count of `verified` vs `fallback` compaction results. |
 | `galx_vault_decryption_failures_total` | Counter | `tenant_uid`, `reason` | AAD mismatch or decryption failure alarms. |
 | `galx_paht_shard_headroom_ratio` | Gauge | `shard_id`, `provider` | Real-time hydraulic headroom ratio ($0.0 - 1.0$). |
 | `galx_circuit_breaker_state` | Gauge | `shard_id` | State enum ($0=\text{CLOSED}, 1=\text{DEGRADED}, 2=\text{OPEN}, 3=\text{HALF-OPEN}$). |
+| `galx_seat_5h_limit_remaining_pct` | Gauge | `user_id`, `tier` | User's 5-hour sliding window capacity remaining ($0-100\%$). |
+| `galx_seat_weekly_limit_remaining_pct` | Gauge | `user_id`, `tier` | User's weekly sliding window capacity remaining ($0-100\%$). |
+| `galx_seat_active_leases_total` | Gauge | `user_id` | Number of active concurrent stream leases in `galx_seat_request_leases`. |
+| `galx_chat_rolling_memory_hits_total` | Counter | `source` (`l1_broccolidb`, `l2_postgres`) | In-memory RAM vs durable database rolling memory lookups. |
+| `galx_chat_prompt_cache_hits_total` | Counter | `model_id` | Count of upstream prompt cache hits verified via stable prefix hashing. |
 
 ---
 

@@ -123,4 +123,25 @@ To maximize conversion without third-party vendor lock-in or external redirects,
 
 All billing management routes (`/billing`, `/billing/invoices`, `/billing/payment-methods`, `/billing/auto-reload`, `/billing/expenses`, `/billing/teams`, `/billing/tax`, `/billing/reports`, `/billing/audit-logs`) are protected by the Universal Developer Authentication Perimeter. Unauthenticated visitors are presented with the high-converting Authentication Gate with dual onboarding and checkout pathways.
 
+---
+
+## 11. Dual Rolling Window Seat Quotas & Seat Entitlement Billing (ADR 0068)
+
+For interactive chat, agent workspaces, and team memberships, GALXAI bifurcates developer billing into **Compute Ledger Wallet draws** (for pure API throughput) and **Dual Rolling Window Seat Quotas** (for conversational UI seats):
+
+```mermaid
+flowchart LR
+    User["Interactive Enterprise Seat"] --> DualMeter["Dual Sliding Rolling Meters"]
+    DualMeter --> Burst["5-Hour Burst Meter<br>(Fast replenishment for sprint sessions)"]
+    DualMeter --> Weekly["7-Day Capacity Meter<br>(Durable weekly envelope with 0 monthly cliffs)"]
+    Burst & Weekly --> Leases["Expiring Seat Request Leases<br>(galx_seat_request_leases)"]
+    Leases --> Settlement["Single-Hop Composite Settlement<br>(fn_settle_seat_stream_completion_composite_v2)"]
+```
+
+### Key Seat Principles:
+1. **No Artificial Token Caps**: Dynamic 1.05M token envelope scaling adapts context windows to user requirements rather than arbitrary truncations.
+2. **Dual Rolling Meters**: Users experience human-centric sliding metrics (`"55% remaining • resets in 4 hours, 17 minutes"`) instead of rigid midnight or end-of-month lockouts.
+3. **Expiring Request Leases**: Prevents orphaned stream concurrency slots during network interruptions or browser tab closures.
+4. **Exact User Ownership**: All conversations, universal anchors, and episodic summaries are enforced via strict `user_id` ownership checks in PostgreSQL.
+
 

@@ -138,5 +138,26 @@ flowchart TD
 ### Epistemic Resilience Guarantees:
 1. **Zero Hallucination Fail-Closed Fallback**: If an extracted representation contains any date, numeric measurement, or identifier not present in the raw input, the engine instantly drops the candidate and falls back to raw source text with zero data corruption.
 2. **Adaptive Density Gate ($\text{ID}(C)$)**: If incoming context is clean or $<200$ tokens, the engine skips compaction entirely, eliminating negative token dilation.
-3. **Institutional Entropy Resistance (ADR 0066)**: In noisy enterprise environments with 65 historical ADRs and superseded guidance, isolates active code invariants and defends **$100\%$ Action Safety** across 7 adversarial corporate traps (`npm run bench:entropy`).
+3. **Institutional Entropy Resistance (ADR 0066)**: In noisy enterprise environments with 72 formal ADRs and superseded guidance, isolates active code invariants and defends **$100\%$ Action Safety** across 7 adversarial corporate traps (`npm run bench:entropy`).
+
+---
+
+## 6. Dual Rolling Window Concurrency Resilience & Expiring Leases (ADR 0068)
+
+For interactive multi-turn streaming and agent sessions, GALXAI enforces distributed concurrency resilience to protect both user experience and database poolers:
+
+```mermaid
+flowchart TD
+    Req[Incoming Chat Request] --> Gate["fn_evaluate_and_acquire_seat_gate_v2<br>(Single-Hop Evaluation)"]
+    Gate -->|Within 5h & Weekly Quotas| Lease["Create Expiring Request Lease<br>(TTL: 180s in galx_seat_request_leases)"]
+    Gate -->|Over Quota| SoftReject["HTTP 429<br>(Natural language countdown)"]
+    Lease --> Stream[Stream SSE Response]
+    Stream -->|Complete| Settle["fn_settle_seat_stream_completion_composite_v2<br>(Release Lease & Deduct Tokens)"]
+    Stream -->|Aborted / Network Drop| AutoExpire["Automatic TTL Expiration<br>(Zero Concurrency Slot Leaks)"]
+```
+
+### Key Concurrency Invariants:
+1. **Idempotent Expiring Leases**: Leases automatically expire after 180s if client network drops mid-stream, preventing permanent locking of concurrency slots.
+2. **Atomic Tool Turn-Pair Inseparability**: Turn pairs are kept strictly together across sliding-window compaction boundaries, eliminating provider HTTP 400 validation failures.
+3. **Single-Hop Composite Settlement**: Consolidates balance validation, lease acquisition, token incrementing, and lease release into single PL/pgSQL atomic CTEs.
 

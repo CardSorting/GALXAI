@@ -319,6 +319,8 @@ jobs:
 | **R2 Asset CDN** | `curl -i https://assets.galx.ai/generations/test.webp` | `HTTP 200` with `CF-Cache-Status: HIT` |
 | **BroccoliDB Edge Compaction** | `curl -X POST https://api.galx.ai/api/audit/broccolidb/compact -H "Authorization: Bearer galx_live_..." -H "Content-Type: application/json" -d '{"mode":"log_stream","logs":["..."]}'` | `HTTP 200` with compacted text and token savings metadata |
 | **Representation Selection & Density Gate** | `curl -X POST https://api.galx.ai/api/audit/broccolidb/compact -H "Authorization: Bearer galx_live_..." -H "Content-Type: application/json" -d '{"mode":"select_representation","text":"...","taskType":"architecture_invariants"}'` | `HTTP 200` with `decision: "BYPASS_IDENTITY"` (for $<200$ tokens) or action-safe invariant extraction (ADR 0066/0067) |
+| **Dual Rolling Seat Telemetry & Cache Hash** | `curl -i -N -X POST https://api.galx.ai/v1/chat/completions -H "Authorization: Bearer galx_live_..." -H "Content-Type: application/json" -d '{"model":"gpt-5.6-sol","messages":[{"role":"user","content":"Hi"}]}'` | `HTTP 200` with headers `x-galx-seat-5h-limit-remaining`, `x-galx-seat-weekly-limit-remaining`, and `x-galx-stable-cache-hash` |
+| **Chat Delta Sync & Ownership** | `curl -i "https://api.galx.ai/api/chat/sync?conversationId=...&since=..." -H "Authorization: Bearer galx_live_..."` | `HTTP 200` with ETag and delta messages (ADR 0072) |
 | **Scheduled Worker Queue** | `npx wrangler tail` | Scheduled cron event executing `processBatch('default', 25)` without uncaught exceptions |
 
 

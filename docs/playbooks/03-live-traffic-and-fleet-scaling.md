@@ -95,3 +95,27 @@ Model catalog queries (`/v1/models`) are cached at Edge PoPs with an SWR policy 
 ```bash
 npx wrangler kv:key delete --binding=CACHE_KV "galx:models:catalog"
 ```
+
+---
+
+## 💺 6. Dual Rolling Window Seat Quota & Concurrency Leases (ADR 0068)
+
+Interactive chat requests consume dynamic capacity evaluated across two simultaneous sliding rolling meters:
+
+| Seat Tier | 5-Hour Burst Limit | 7-Day Weekly Limit | Max Concurrent Stream Leases |
+| :--- | :--- | :--- | :--- |
+| **`standard`** | 100,000 tokens | 1,000,000 tokens | 2 active streams |
+| **`pro`** | 500,000 tokens | 5,000,000 tokens | 5 active streams |
+| **`enterprise`** | 2,000,000 tokens | 20,000,000 tokens | 15 active streams |
+| **`custom`** | Negotiated | Negotiated | Unlimited / Custom |
+
+### Inspecting & Elevating Seat Quotas:
+```sql
+-- 1. Inspect live rolling 5-hour and 7-day token consumption
+SELECT * FROM fn_get_seat_window_telemetry('user_uuid_here');
+
+-- 2. Upgrade user seat tier in Supabase
+UPDATE public.galx_user_seats
+SET tier = 'enterprise', concurrency_limit = 15
+WHERE user_id = 'user_uuid_here';
+```

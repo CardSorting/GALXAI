@@ -127,4 +127,27 @@ GALXAI exposes real-time telemetry on input context compression and provider-bou
 - `galxai_broccolidb_latency_ms_bucket{le="..."}`
 - `galxai_broccolidb_dollars_saved_usd_total{model="..."}`
 
+---
+
+## 6. Dual Rolling Window Seat Telemetry & Prompt Cache Observability
+
+GALXAI injects rich observability headers on all streaming and REST responses:
+
+```http
+x-galx-seat-tier: enterprise
+x-galx-seat-5h-limit-remaining: 90%
+x-galx-seat-5h-reset-in: 4 hours, 17 minutes
+x-galx-seat-weekly-limit-remaining: 55%
+x-galx-seat-weekly-reset-in: 3 days
+x-galx-stable-cache-hash: a7f8c9b2e14d3390f0e81c...
+x-galx-rolling-memory-compacted: true
+x-galx-compaction-ratio: 0.776
+```
+
+### Key Seat Observability Prometheus Metrics:
+- `galx_seat_5h_limit_remaining_pct{user_id="...", tier="..."}`: Real-time sliding 5-hour burst headroom.
+- `galx_seat_weekly_limit_remaining_pct{user_id="...", tier="..."}`: Real-time sliding 7-day capacity headroom.
+- `galx_seat_active_leases_total{user_id="..."}`: Number of currently leased in-flight streams.
+- `galx_chat_rolling_memory_hits_total{source="l1_broccolidb|l2_postgres"}`: Memory lookup hits.
+
 

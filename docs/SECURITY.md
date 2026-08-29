@@ -235,6 +235,28 @@ flowchart TD
 3. **Memory Safety Defense**: Ensures ephemeral buffer zeroization (`0xAA` -> `0x00`) remains strictly binding.
 4. **Adaptive Density Gate ($\text{ID}(C)$)**: Automatically passes clean prompts (<200 tokens) through verbatim to prevent unforced framing overhead.
 
+---
+
+## 14. Exact-Owner Chat Persistence, IDOR Isolation & Seat Security (ADR 0068 & 0072)
+
+To prevent Insecure Direct Object Reference (IDOR) attacks across multi-tenant conversational sessions:
+
+```mermaid
+flowchart TD
+    UserReq[Client Session Request] --> AuthCheck{auth.uid == p_user_id?}
+    AuthCheck -->|No: Cross-Tenant Attempt| Deny[Raise HTTP 403 / Zero Result Set]
+    AuthCheck -->|Yes: Verified Owner| PGStoredProc[Execute PL/pgSQL Atomic Procedure]
+    
+    PGStoredProc --> Lease["fn_evaluate_and_acquire_seat_gate_v2<br>(Acquires 180s Expiring Lease)"]
+    PGStoredProc --> Messages["fn_upsert_owned_chat_messages<br>(Enforces user_id ownership in SQL)"]
+    PGStoredProc --> Sync["fn_get_chat_delta_sync<br>(Validates conversation ownership)"]
+```
+
+### Key Security Invariants:
+1. **In-Database Ownership Enforcement**: Stored procedures validate `WHERE user_id = p_user_id` inside PostgreSQL rather than relying on application middleware alone.
+2. **Atomic Tool Turn-Pair Inseparability**: Turn pairs are kept strictly together across sliding-window compaction boundaries, eliminating provider validation crashes and prompt injection severed states.
+3. **Automatic Lease Expiration**: In-flight stream reservations in `galx_seat_request_leases` auto-expire after TTL (`180s`), preventing denial-of-service via orphaned stream holds.
+
 
 
 

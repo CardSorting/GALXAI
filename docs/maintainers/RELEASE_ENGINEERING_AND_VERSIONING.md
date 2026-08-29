@@ -49,16 +49,25 @@ npm run test:broccolidb:api
 # Step 4: Hardening & Fail-Closed Safety Regressions
 npm run test:broccolidb:hardening
 
-# Step 5: Master 180-Domain Compactor Cluster Suite
+# Step 5: Chat Context Hardening & Tool Invariant Suite
+npx tsx scripts/test-chat-context-hardening.ts
+
+# Step 6: Paranoid Supabase PostgreSQL 53-Migration Linter
+npm run db:verify
+
+# Step 7: Live Supabase 92-Test Zero-Egress Database Suite
+npm run db:test
+
+# Step 8: Master 180-Domain Compactor Cluster Suite
 npm run bench:180-domains
 
-# Step 6: Universal Router & Ingestion Suite (218 Tests)
+# Step 9: Universal Router & Ingestion Suite (218 Tests)
 npm run test:router
 
-# Step 7: Cloudflare Edge Mesh 46-Point Test Suite
+# Step 10: Cloudflare Edge Mesh 46-Point Test Suite
 npm run worker:test
 
-# Step 8: Strict TypeScript Typecheck
+# Step 11: Strict TypeScript Typecheck
 npx tsc --noEmit
 ```
 
@@ -73,10 +82,13 @@ npm version minor -m "chore(release): bump version to %s"
 # 2. Push commit and tag to origin
 git push origin main --follow-tags
 
-# 3. Deploy Cloudflare Edge Mesh to Production
+# 3. Push pending database migrations
+npm run db:push
+
+# 4. Deploy Cloudflare Edge Mesh to Production
 npm run worker:deploy
 
-# 4. Trigger Vercel Production Deployment
+# 5. Trigger Vercel Production Deployment
 vercel --prod
 ```
 
@@ -93,7 +105,12 @@ If a critical Sev-1 regression is detected in production:
    ```
 2. **Vercel Instant Rollback**:
    In the Vercel Dashboard, promote the previous green deployment to Production instantly.
-3. **Author Hotfix PR**:
+3. **Database Migration Reversion (if applicable)**:
+   Roll back the last migration safely using its `.down.sql` script:
+   ```bash
+   npm run db:rollback
+   ```
+4. **Author Hotfix PR**:
    Branch from the release tag, author the patch with regression tests, pass all 5 gates, and cut a patch release (`v0.1.1`).
 
 ---

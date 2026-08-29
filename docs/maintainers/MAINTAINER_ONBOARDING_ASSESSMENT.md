@@ -87,4 +87,20 @@
 
 ---
 
-*Score $\ge 9/10$? You are officially ready to review PRs and take on-call shifts!* 🥦🎓🚀
+### 11. How does `GalxRollingContextEngine` prevent upstream HTTP 400 crashes during multi-turn compaction?
+- **A)** By deleting all tool messages.
+- **B)** By strictly enforcing atomic tool turn-pair inseparability (`ensureAtomicTurnPairs`), shifting compaction boundaries to keep assistant `tool_calls` and matching `tool` results together.
+- **C)** By converting tool responses to plain markdown.
+- *Answer*: **B**.
+
+---
+
+### 12. How does the Dual Rolling Window seat quota system prevent orphaned concurrency locks on dropped client connections?
+- **A)** By requiring manual administrative intervention.
+- **B)** Through expiring idempotent seat request leases (`galx_seat_request_leases`) with automatic TTLs (`180s`) evaluated in single-hop atomic PL/pgSQL procedures.
+- **C)** By restarting the database nightly.
+- *Answer*: **B**.
+
+---
+
+*Score $\ge 11/12$? You are officially ready to review PRs and take on-call shifts!* 🥦🎓🚀

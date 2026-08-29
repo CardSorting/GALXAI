@@ -106,6 +106,20 @@ npm run deploy:check
 - [x] **Phase 7: Next.js Configuration**: Package import optimization (`optimizePackageImports`) and HSTS enabled.
 - [x] **Phase 8: Production Build Verification**: Zero TypeScript errors and clean chunk manifests.
 
+### Step 6: Database Integrity & Chat Context Hardening Audits
+Validate Supabase PostgreSQL migrations and context governor boundaries:
+
+```bash
+# 1. Audit all 53 PostgreSQL migrations and .down.sql rollback pairings
+npm run db:verify
+
+# 2. Run the 92-test live zero-egress database integration suite
+npm run db:test
+
+# 3. Verify chat request normalization and tool turn-pair boundaries
+npx tsx scripts/test-chat-context-hardening.ts
+```
+
 ---
 
 ## 🛑 Rollback & Recovery
@@ -113,3 +127,4 @@ If pre-flight fails:
 1. Review the specific failed phase in the CLI output.
 2. Check network firewall rules for Supabase HTTPS port 443.
 3. Re-run `npm run vault:populate` if cipher tests fail.
+4. Run `npm run db:verify` to pinpoint schema or RLS policy violations.

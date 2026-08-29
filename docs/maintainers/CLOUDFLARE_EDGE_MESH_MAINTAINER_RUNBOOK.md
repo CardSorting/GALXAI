@@ -87,4 +87,14 @@ npm run worker:tail
 
 ---
 
+## 6. Edge Rolling Context & Seat Telemetry Headers (ADR 0068 & 0071)
+
+The Cloudflare Edge Gateway intercepts upstream model completions and attaches standard telemetry headers:
+- `x-galx-seat-5h-limit-remaining`: Sliding 5-hour burst window percentage remaining.
+- `x-galx-seat-weekly-limit-remaining`: Sliding 7-day capacity window percentage remaining.
+- `x-galx-stable-cache-hash`: SHA-256 stable prefix cache hash locking in $>98\%$ prompt caching.
+- `x-galx-rolling-memory-compacted`: Boolean indicating multi-turn memory pyramid compaction.
+
+---
+
 *For full Cloudflare architectural strategy, see [CLOUDFLARE_STRATEGY.md](../CLOUDFLARE_STRATEGY.md).* 🥦🌐🚀

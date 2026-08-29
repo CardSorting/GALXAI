@@ -54,4 +54,20 @@ When a reported vulnerability is confirmed:
 
 ---
 
+## 4. IDOR Chat Ownership & Unauthorized Session Access Protocol (ADR 0072)
+
+If cross-tenant conversation or message extraction attempts are reported:
+
+1. **Verify Database Procedure Guards**:
+   All chat stored procedures (`fn_upsert_owned_chat_messages`, `fn_get_chat_delta_sync`, `galx_delete_chat_conversation`) enforce explicit `WHERE user_id = p_user_id` checks in PostgreSQL.
+2. **Execute Database Integrity Verification**:
+   ```bash
+   npm run db:verify
+   npm run db:test
+   ```
+3. **Audit Token Revocation**:
+   Inspect `galx_token_revocation_log` and `galx_session_risk_events` to identify compromised tokens.
+
+---
+
 *Security is paramount. Guard the cryptographic enclaves.* 🥦🚨🔒

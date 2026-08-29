@@ -32,9 +32,13 @@ If catastrophic database corruption or accidental data alteration occurs:
    - In the Supabase Dashboard > **Database > Backups > Point in Time**.
    - Select a restore target time $t = t_{\text{corruption}} - 60\text{s}$.
    - Initiate the restore onto a secondary clone.
-3. **Verify Restored Database Integrity**:
+3. **Verify Restored Database Integrity & Ledger Tests**:
    ```bash
+   # 1. Paranoid 53-migration audit & rollback check
    npm run db:verify
+
+   # 2. 92-point live zero-egress database integration suite
+   npm run db:test
    ```
 4. **Promote Restored Database**:
    - Update `DATABASE_URL` in Vercel and CI environments with the restored connection string.

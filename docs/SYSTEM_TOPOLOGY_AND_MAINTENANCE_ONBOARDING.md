@@ -344,6 +344,12 @@ All database operations executed by AI Autonomous Operators MUST adhere to the *
 # ==============================================================================
 # TIER 1: PRE-FLIGHT AUDIT GATES & STATIC TYPE INTEGRITY
 # ==============================================================================
+# Run static PostgreSQL 53-migration linter and rollback pairing validator
+npm run db:verify
+
+# Run chat context hardening and tool turn-pair invariant suite
+npx tsx scripts/test-chat-context-hardening.ts
+
 # Run the unified 8-phase pre-deployment audit & production Next.js build
 npm run deploy:check
 
@@ -354,8 +360,11 @@ npm run vercel:verify
 npx tsc --noEmit
 
 # ==============================================================================
-# TIER 2: FORENSIC VERIFICATION & EDGE TEST RUNNERS
+# TIER 2: FORENSIC VERIFICATION & DATABASE TEST RUNNERS
 # ==============================================================================
+# Run live Supabase 92-test zero-egress database integration suite
+npm run db:test
+
 # Run 46-point Cloudflare Edge Mesh verification suite
 npm run worker:test
 

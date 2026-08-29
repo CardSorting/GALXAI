@@ -113,11 +113,34 @@ BroccoliDB is not merely a compactor; it is a **Dynamic Context Representation L
    Active cryptographic requirements (`RS256`, `v2` keys), memory bounds (`zeroizeBuffer()`), and binding deployment constraints (`runtime = 'edge'`).
 
 #### 22. How does GALXAI handle institutional entropy and conflicting enterprise authority (ADR 0066)?
-In real-world enterprise repositories, context noise has authorship, timestamps, and social consequences (65 ADRs, stale RFCs, deprecated guidelines). Rather than evaluating subjective "summary quality", GALXAI measures **Action Safety** under 7 adversarial traps via:
+In real-world enterprise repositories, context noise has authorship, timestamps, and social consequences (72 ADRs, stale RFCs, deprecated guidelines). Rather than evaluating subjective "summary quality", GALXAI measures **Action Safety** under 7 adversarial traps via:
 ```bash
 npm run bench:entropy
 ```
 Across our 7-tier progressive gradient ($L_1 \to L_7$), raw LLM baselines degrade from $100\% \to 20\%$ as historical contradictions confuse the model. BroccoliDB representation selection strips $92.1\%$ of the institutional noise while defending **$100\%$ Action Safety on this benchmark suite** (`0 committees harmed`).
+
+---
+
+## ⚡ Rolling Context, Dual Seat Quotas & Tool Invariants
+
+#### 23. How does GALXAI handle long-horizon chat context without losing memory (ADR 0069–0071)?
+GALXAI deploys a **Hybrid 5-Level Memory Pyramid** coupling **L1 BroccoliDB RAM Tables** (`<0.08ms`) with **L2 PostgreSQL CTEs**:
+1. **Level 1 (Universal Workspace Anchors)**: Global project rules and schemas (`galx_chat_universal_workspace_anchors`).
+2. **Level 2 (Thematic Episodes)**: Chronological conversational milestones clustered into 10-turn bounded blocks.
+3. **Level 3 (Temporal Decision Graph)**: Knowledge graph edges (`depends_on`, `configures`, `fixes`, `references`) traversed via recursive in-memory search.
+4. **Level 4 (Reciprocal Rank Fusion RAG in RAM)**: Sub-millisecond BM25 keyword and token proximity ranking over multi-page document chunks (`<0.5ms`).
+5. **Level 5 (Atomic Sliding Verbatim Buffer)**: Uncompressed recent conversation turns (default 8 turns).
+Furthermore, deterministic SHA-256 stable prefix hashing locks in $>98\%$ prompt cache reuse across turns.
+
+#### 24. How does the Dual Rolling Window seat quota experience work for enterprise teams (ADR 0068)?
+Unlike rigid monthly cliffs or static token throttles, GALXAI uses human-centric **Dual Sliding Rolling Meters**:
+- **5-Hour Burst Meter**: Fast-replenishing headroom for high-intensity coding and document analysis sprints.
+- **7-Day Capacity Meter**: Durable weekly envelope that smoothly recovers over time.
+- **Natural Language Telemetry**: Header and UI countdowns tell users exactly where they stand (`"90% remaining • resets in 4 hours, 17 minutes"`).
+- **Expiring Request Leases (`galx_seat_request_leases`)**: Single-hop atomic preflight checks prevent concurrency leaks if client connections drop mid-stream.
+
+#### 25. How does GALXAI prevent LLM provider crashes when compacting conversations with tool calls (ADR 0070)?
+OpenAI and Anthropic APIs strictly mandate that every `tool` execution result message must be preceded immediately by an `assistant` message containing matching `tool_calls`. GALXAI's `GalxRollingContextEngine` enforces **Atomic Tool Turn-Pair Inseparability** (`ensureAtomicTurnPairs`), dynamically shifting compaction boundaries leftward so tool call triggers and responses are never severed.
 
 
 

@@ -58,11 +58,11 @@ Whenever a new HTTP route or ingestion behavior is added to Next.js App Router:
 ### SOP 03: Running the Zero-Hesitation Automated Verification Suite
 Execute the comprehensive automated test suite before any release:
 ```bash
-# Run full 98-test zero-hesitation verification suite
+# 1. Run full 98-test zero-hesitation verification suite
 npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 
-# Expected output:
-# 🏁 AUDIT RESULTS: 98 / 98 TESTS PASSED (100%)
+# 2. Run chat context hardening and tool turn-pair invariant suite
+npx tsx scripts/test-chat-context-hardening.ts
 ```
 
 ---
@@ -104,5 +104,6 @@ If developers report unexpected errors when connecting third-party tools:
 | :--- | :--- | :--- | :--- |
 | Client receives `401 Unauthorized` | Key has quotes or unexpected header format | `curl -H "x-api-key: 'key'" https://galx.ai/v1/models` | Verify `GalxAuthEngine.ts` quote stripping regex `replace(/^['"]+\|['"]+$/g, '')`. |
 | Client receives `400 Bad Request` on image generation | Unhandled aspect ratio or parameter name | Inspect payload size and aspect_ratio | Verify `aspectRatioMap` in `src/app/v1/images/generations/route.ts`. |
+| Client receives `400 orphaned_tool_message` | Client pruned assistant tool trigger | Inspect turn history | Verify `ensureAtomicTurnPairs` in `GalxRollingContextEngine.ts`. |
 | New IDE/CLI client reports unrecognized model | Model name contains new version tag (e.g. `:preview`) | `node bin/galxai.mjs resolve <new-name>` | Add suffix pattern to `cleanAlias` in `ModelCatalog.ts`. |
 | Browser direct URL query returns blank | Missing query parameter parser | `curl "https://galx.ai/v1/chat/completions?prompt=hi"` | Verify `GET` handler in `src/app/v1/chat/completions/route.ts`. |

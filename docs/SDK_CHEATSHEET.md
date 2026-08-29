@@ -333,4 +333,35 @@ const incident = BroccoliCompactionFacade.compactIncident({
 // npm run scaffold:compactor         (Interactive Compactor Scaffolder)
 ```
 
+---
+
+## ⚡ 9. Hybrid Rolling Memory & Dual Rolling Seat Telemetry (`@galxai/sdk`)
+
+```typescript
+import { galx } from '@galxai/sdk';
+
+// 1. Inspect live dual rolling window seat quota
+const seat = await galx.seat.getQuota();
+console.log(`5h Limit: ${seat.fiveHourLimitRemaining}% • Resets in ${seat.fiveHourResetIn}`);
+console.log(`Weekly Limit: ${seat.weeklyLimitRemaining}% • Resets in ${seat.weeklyResetIn}`);
+
+// 2. Stateful rolling context session with dynamic 1.05M tokens & tool turn-pair integrity
+const session = galx.chat.rollingSession({
+  userId: 'usr_enterprise_01',
+  conversationId: 'conv_arch_design',
+  model: 'gpt-5.6-sol',
+  tools: [/* myToolDefinitions */],
+});
+
+// 3. Send turn with automatic 5-level memory pyramid and sub-microsecond RAM caching
+const stream = await session.sendTurn('Review the multi-page schema migration spec');
+for await (const chunk of stream) {
+  process.stdout.write(chunk.content);
+}
+
+// 4. Inspect telemetry response headers
+console.log('Stable Cache Hash:', stream.headers['x-galx-stable-cache-hash']);
+console.log('Seat Remaining:', stream.headers['x-galx-seat-5h-limit-remaining']);
+```
+
 

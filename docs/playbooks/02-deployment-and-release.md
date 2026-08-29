@@ -29,20 +29,17 @@ sequenceDiagram
 ## 📋 Release Execution Procedure
 
 ### Step 1: Database Migration Execution (Expand Phase)
-Under the **AI Agent Database Operating Protocol (AOP-DB)**, migrations must be non-destructive and backward-compatible with existing active serverless containers:
+Under the **AI Agent Database Operating Protocol (AOP-DB)**, migrations must be non-destructive, paired with reversible `.down.sql` scripts, and backward-compatible with active serverless containers:
 
 ```bash
-# 1. Verify migration status and pending schema changes
-npm run db:status
-
-# 2. Dry-run pending migrations against the database
-npm run db:dry-run
-
-# 3. Apply pending migrations transactionally via the pooler
-npm run db:migrate
-
-# 4. Verify RLS policies and table structure
+# 1. Audit static migration integrity and rollback parity (53 migrations)
 npm run db:verify
+
+# 2. Push pending migrations to the Supabase pooler
+npm run db:push
+
+# 3. Execute the 92-test zero-egress live database integration suite
+npm run db:test
 ```
 
 ---
