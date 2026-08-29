@@ -236,6 +236,22 @@ Because transformer prefill latency scales linearly ($O(N)$) with input context 
 - **Empirical Measurement**: As validated in `npm run bench:inference-boundary`, across reasoning models (`o3-mini`), average round-trip latency dropped from $1,404\text{ms}$ to $472\text{ms}$ (a $66.4\%$ speedup).
 - **Action Safety Guarantee**: Disarms the 7 adversarial institutional traps during streaming code generation (`npm run bench:entropy`).
 
+---
+
+## 10. Streaming Tap, Expiring Leases & Composite Settlement (ADR 0068 & 0072)
+
+When an interactive chat streaming session begins:
+
+1. **Atomic Preflight Lease Acquisition**:
+   - `fn_evaluate_and_acquire_seat_gate_v2` checks the user's 5-hour and weekly seat limits and creates an expiring reservation in `galx_seat_request_leases` (`expires_at = NOW() + 180s`).
+2. **Zero-Overhead Stream Tap**:
+   - As the response streams back to the client, a lightweight non-blocking byte accumulator (`streamTap`) tracks generated tokens without interrupting the raw `Uint8Array` stream chunks.
+3. **Single-Hop Composite Settlement**:
+   - Upon stream completion, the gateway dispatches `fn_settle_seat_stream_completion_composite_v2`, recording the actual token draw, marking the seat lease as settled, and asynchronously updating L1 BroccoliDB RAM and L2 PostgreSQL tables.
+4. **Auto-Reclaiming TTL**:
+   - If the client terminates the connection prematurely, the seat lease automatically expires, freeing up the concurrent stream slot without database locking.
+
+
 
 
 

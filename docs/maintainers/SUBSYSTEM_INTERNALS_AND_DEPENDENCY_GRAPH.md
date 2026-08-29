@@ -33,6 +33,10 @@ flowchart TD
         Cascader["BroccoliMegaIncidentStreamCascader"]
         Pyramid["BroccoliMegaDocumentPyramidCompactor"]
         
+        RollingEngine["GalxRollingContextEngine (5-Level Pyramid + RRF)"]
+        ElasticGov["GalxElasticContextGovernor (Dynamic 1M Context Sizing)"]
+        SeatEngine["GalxSeatTierEngine (5-Hour & Weekly Dual Windows)"]
+        
         Pool["GalxCredentialPool (P-AHT Headroom Calculus)"]
         Circuit["GalxCircuitBreaker (4-State FSM)"]
         Router["GalxModelRouter (Zero-Hesitation Aliasing)"]
@@ -45,6 +49,9 @@ flowchart TD
         CompactionFacade --> Cascader
         CompactionFacade --> Pyramid
         
+        Router --> RollingEngine
+        Router --> ElasticGov
+        Router --> SeatEngine
         Router --> CompactionFacade
         Router --> Pool
         Router --> Circuit
@@ -53,8 +60,14 @@ flowchart TD
 
     subgraph StorageSubstrate["Authoritative Data Substrate"]
         PgPool["Supabase Transaction Pooler (Port 6543)"]
-        Postgres["PostgreSQL 16 (RLS, Double-Entry Ledgers, Shards)"]
-        BroccoliL1["BroccoliDB Reactive In-Memory Ring Buffer"]
+        Postgres["PostgreSQL 16 (RLS, Double-Entry Ledgers, 53 Migrations)"]
+        BroccoliL1["BroccoliDB In-Memory RAM Tables (<0.08ms)"]
+        BroccoliChat["BroccoliChatDatabase (Hybrid L1/L2 Mesh)"]
+        
+        RollingEngine --> BroccoliL1
+        RollingEngine --> BroccoliChat
+        SeatEngine --> Postgres
+        BroccoliChat --> Postgres
     end
 
     ClientPerimeter --> EdgeLayer

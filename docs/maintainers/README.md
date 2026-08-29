@@ -61,13 +61,22 @@ npm run test:broccolidb:hardening
 # 5. Master 180-Domain Compactor Cluster Suite
 npm run bench:180-domains
 
-# 6. Universal Router & Ingestion Suite (218 Tests)
+# 6. Chat Context Hardening & Tool Invariant Test Suite
+npx tsx scripts/test-chat-context-hardening.ts
+
+# 7. Paranoid Supabase PostgreSQL 53-Migration Linter
+npm run db:verify
+
+# 8. Live Supabase 92-Test Zero-Egress Database Integration Suite
+npm run db:test
+
+# 9. Universal Router & Ingestion Suite (218 Tests)
 npm run test:router
 
-# 7. Cloudflare Edge Mesh 46-Point Test Suite
+# 10. Cloudflare Edge Mesh 46-Point Test Suite
 npm run worker:test
 
-# 8. Strict TypeScript Typecheck
+# 11. Strict TypeScript Typecheck
 npx tsc --noEmit
 ```
 

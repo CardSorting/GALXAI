@@ -184,4 +184,18 @@ const report = await agent.run("Investigate pod crash loops in namespace 'produc
 console.log(report.text);
 ```
 
+---
+
+## 🔒 6. Atomic Tool Turn-Pair Inseparability & Dynamic Context Allocation (ADR 0070)
+
+When agents execute multi-turn tool loops across long-horizon workflows:
+
+1. **Turn-Pair Boundary Inseparability**:
+   - Compaction algorithms in `GalxRollingContextEngine` strictly treat `assistant` messages with `tool_calls` and corresponding `tool` execution outputs as **atomic units**.
+   - Compaction split boundaries automatically shift left to encompass the assistant trigger, preventing API 400 validation failures (`orphaned_tool_message`).
+
+2. **Dynamic 1.05M Frontier Token Context Allocation**:
+   - `GalxElasticContextGovernor` dynamically envelopes large JSON schemas, nested tool responses, and multi-file diff manifests up to 1,050,000 frontier tokens with zero artificial clamping.
+
+
 
