@@ -7,15 +7,13 @@ This guide covers the internal codebase structure, architectural layers, how to 
 ## 📁 Repository Structure
 
 ```text
-GALXAI/
 ├── docs/                             # Comprehensive Architecture & API Documentation
-│   ├── adr/                          # Architecture Decision Records (0001-0067)
+│   ├── adr/                          # Architecture Decision Records (0001-0072)
 │   ├── maintainers/                  # Internal Maintainer Knowledge Base (20 Manuals)
 │   ├── playbooks/                    # Operational Lifecycle Playbooks (Stages 1-8)
 │   ├── ARCHITECTURE.md               # System overview, lifecycle, and security model
-
+│   ├── SENIOR_ENGINEERING_REVIEW_CHAT_AND_ROLLING_CONTEXT.md # Chat memory & seat review
 │   ├── FORENSIC_PAYLOAD_DISSECTION_AND_CAUSAL_ANALYSIS.md # Byte-by-byte before/after payload analysis
-
 │   ├── STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md # Two-Tier Auth & Ingestion Spec
 │   ├── SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md # Architecture map & onboarding runbook
 │   ├── API_REFERENCE.md              # REST API endpoint specifications (/v1 & /api)
@@ -31,6 +29,11 @@ GALXAI/
 │   ├── DEVELOPER_GUIDE.md            # Contributing guide and adapter development
 │   └── TROUBLESHOOTING.md            # Error classification and operational playbooks
 ├── scripts/
+│   ├── manage-migrations.ts          # Migration executor and status manager
+│   ├── push-migrations-direct.ts     # Direct Supabase migration push script (npm run db:push)
+│   ├── verify-supabase-integrity.ts  # Paranoid PostgreSQL linter (npm run db:verify)
+│   ├── test-supabase-integration.ts  # Live Supabase 92-test zero-egress suite (npm run db:test)
+│   ├── test-chat-context-hardening.ts # Chat normalization & context hardening test
 │   ├── verify-vercel-readiness.ts    # 8-Phase Pre-Flight Audit Engine
 │   ├── sync-vercel-env.ts            # Automated Vercel Secret Synchronizer
 │   ├── verify-deployment-smoke.ts    # Post-Deployment Live Smoke Test Suite
@@ -41,28 +44,34 @@ GALXAI/
 │   └── validate-galxai-router.ts     # Forensic verification test runner (217 tests)
 ├── src/
 │   ├── app/                          # Next.js App Router
-│   │   ├── api/                      # Gateway admin, queues, health, run, & pool API routes
+│   │   ├── api/                      # Gateway admin, chat sync, sessions, personas, & pool API routes
 │   │   ├── v1/                       # OpenAI & Anthropic-compatible public API routes
-│   │   │   ├── chat/completions/     # OpenAI chat completions
+│   │   │   ├── chat/completions/     # OpenAI chat completions (with dynamic 1M context)
 │   │   │   ├── messages/             # Anthropic Claude messages
 │   │   │   ├── embeddings/           # OpenAI vector embeddings
 │   │   │   ├── images/generations/   # Multi-modal image generation
 │   │   │   └── models/               # Model discovery
-│   │   ├── queues/                   # Requests & Results canvas (1-click agent copy)
-│   │   ├── docs/                     # In-app interactive documentation pages
-│   │   ├── keys/                     # Developer Gateway Key management
-│   │   ├── models/                   # Model explorer and comparator
-│   │   ├── playground/               # Interactive real-time test environment
-│   │   └── vault/                    # Credential deposit and simulator
+│   │   ├── characters/               # Custom character creator and persona hub
+│   │   ├── studio/                   # Multi-modal AI image and remix studio
+│   │   ├── gateway/                  # Gateway management and API keys
+│   │   └── settings/                 # Seat quota and rolling window settings
 │   ├── sdk/                          # Zero-dependency Universal SDK (TypeScript / Python)
-│   ├── components/                   # React UI Components
+│   ├── components/                   # React UI Components (ChatInterface, Sidebar, InputArea, Header)
 │   ├── core/                         # Pure TypeScript Gateway Engine (zero React dependencies)
+│   │   ├── broccolidb/               # BroccoliDB In-Memory Reactive Tables & Compaction Mesh
+│   │   ├── chat/                     # Request Normalizer & Persistence Validator
 │   │   ├── circuit/                  # 4-State Circuit Breaker with Canary Warming
 │   │   ├── contracts/                # Core TypeScript contracts and interfaces
-│   │   ├── governor/                 # Continuous Token-Bucket Calculus Governor
+│   │   ├── governor/                 # GalxElasticContextGovernor (Dynamic 1M context sizing)
 │   │   ├── pool/                     # Adaptive Hydraulic Headroom (P-AHT) Pool Engine
-│   │   ├── router/                   # Universal Model Router & Adapter Pipeline
+│   │   ├── router/                   # GalxModelRouter & GalxRollingContextEngine
 │   │   │   └── adapters/             # Provider-specific execution adapters (OpenAI, Grok)
+│   │   ├── subscription/             # GalxSeatTierEngine (5-Hour & Weekly Quotas)
+│   │   ├── substrate/                # In-memory shard cache & persistent storage bridge
+│   │   ├── telemetry/                # Circular Ring Buffer Histogram Metrics Engine
+│   │   ├── validator/                # Preflight key format & upstream validator
+│   │   └── vault/                    # AES-256-GCM Envelope Encryption with AAD
+│   └── lib/                          # Storage helpers, Supabase repositories, and utilities      # Provider-specific execution adapters (OpenAI, Grok)
 │   │   ├── substrate/                # In-memory shard cache & persistent storage bridge
 │   │   ├── telemetry/                # Circular Ring Buffer Histogram Metrics Engine
 │   │   ├── validator/                # Preflight key format & upstream validator

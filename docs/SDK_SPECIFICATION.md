@@ -27,6 +27,7 @@
 17. [BroccoliDB In-Memory Natural Querying (`galx.models`, `galx.queues`, `galx.privacy`, `galx.db`)](#17-broccolidb-in-memory-natural-querying-galxmodels-galxqueues-galxprivacy-galxdb)
 18. [Privacy Shield Plugin & Zero Data Retention Middleware (`createPrivacyShieldPlugin`)](#18-privacy-shield-plugin--zero-data-retention-middleware-createprivacyshieldplugin)
 19. [SOC 2 Type II Compliance & GRC Auditor SDK (`galx.compliance`)](#19-soc-2-type-ii-compliance--grc-auditor-sdk-galxcompliance)
+20. [Hybrid Rolling Context & Seat Governance SDK (`galx.chat.rolling`, `galx.seat`)](#20-hybrid-rolling-context--seat-governance-sdk-galxchatrolling-galxseat)
 
 ---
 
@@ -789,6 +790,52 @@ console.log(`Dollars Saved: $${report.totalDollarsSavedUSD} (${report.overallBil
 const entropyReport = await evaluateInstitutionalEntropy();
 console.log(`Action Safety: ${entropyReport.actionSafetyPercentage}% (${entropyReport.disarmedTrapsCount}/7 Traps Disarmed)`);
 ```
+
+---
+
+## 20. Hybrid Rolling Context & Seat Governance SDK (`galx.chat.rolling`, `galx.seat`)
+
+### A. Dynamic 1M Context Governor & Rolling Memory
+```typescript
+import { galx } from '@galxai/sdk';
+
+// Streaming turn with 5-level multi-resolution context pyramid in L1 BroccoliDB RAM
+const stream = await galx.chat.stream({
+  model: 'gpt-5.6-sol',
+  messages: longSessionTurns,
+  rollingMemory: {
+    enabled: true,
+    recentBufferCount: 8,
+    workspaceId: 'ws_enterprise_001',
+  },
+  // Automatically scaled up to 1,050,000 frontier tokens without artificial clamps
+  elasticContext: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.content || '');
+}
+
+// Inspect stable prompt cache hash and seat telemetry from stream metadata
+console.log('Stable Cache Hash:', stream.headers['x-galx-stable-cache-hash']);
+console.log('5-Hour Quota Remaining:', stream.headers['x-galx-seat-5h-limit-remaining']);
+console.log('Weekly Quota Remaining:', stream.headers['x-galx-seat-weekly-limit-remaining']);
+```
+
+### B. Dual Rolling Window Seat Telemetry
+```typescript
+import { galx } from '@galxai/sdk';
+
+const telemetry = await galx.seat.getTelemetry({
+  userId: 'usr_architect_123',
+  orgId: 'org_acme_corp',
+});
+
+console.log(`5-Hour Limit: ${telemetry.fiveHourRemainingPct}% (resets in ${telemetry.fiveHourRefreshText})`);
+console.log(`Weekly Limit: ${telemetry.weeklyRemainingPct}% (resets in ${telemetry.weeklyRefreshText})`);
+console.log(`Active Concurrent Streams: ${telemetry.activeConcurrentStreams} / ${telemetry.concurrencyLimit}`);
+```
+
 
 
 

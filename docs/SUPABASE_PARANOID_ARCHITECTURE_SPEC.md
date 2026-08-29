@@ -183,8 +183,9 @@ The agent MUST output the impact statement in the following format before writin
 
 | Command | Purpose |
 | :--- | :--- |
-| `npm run db:verify` | Runs the Paranoid SQL Linter, RLS audit, search_path verification, rollback pairing check, and TypeScript type alignment test. |
-| `npm run db:test` | Runs the full 48-point integration test suite against the Supabase & Edge Mesh substrate. |
+| `npm run db:verify` | Runs the Paranoid SQL Linter across all 53 migrations, RLS audit, search_path verification, rollback pairing check, and TypeScript type alignment test. |
+| `npm run db:push` | Pushes pending migrations to Supabase live database pooler with transaction wrapping and validation. |
+| `npm run db:test` | Runs the full 92-point integration test suite against the Supabase & Edge Mesh substrate. |
 | `npm run db:status` | Displays migration audit history, applied versions, SHA-256 checksums, and pending migrations. |
 | `npm run db:migrate` | Safely applies pending migrations in atomic transaction blocks. |
 | `npm run db:rollback` | Safely rolls back the last applied migration using its `.down.sql` definition. |
@@ -201,6 +202,11 @@ The agent MUST output the impact statement in the following format before writin
 - **[ADR 0039: Edge-Native Vector Embeddings & Durable Object Swarm State Synchronization](adr/0039-edge-native-vector-embeddings-and-durable-object-swarm-sync.md)**
 - **[ADR 0051: Enterprise OAuth 2.0 / 2.1, FAPI Standards, Token Lifecycle & Identity Mesh](adr/0051-enterprise-oauth2-fapi-token-lifecycle-and-identity-mesh.md)**
 - **[ADR 0052: Enterprise OAuth 2.1 Refresh Token Rotation (RTR), Token Family Theft Containment, OIDC Back-Channel Logout & Substrate Vacuum Mesh](adr/0052-enterprise-oauth21-rtr-fapi-backchannel-and-vacuum-mesh.md)**
+- **[ADR 0068: Dual Rolling Window Seat Quotas & Distributed Request Leases](adr/0068-dual-rolling-window-seat-quotas-and-distributed-request-leases.md)**
+- **[ADR 0069: Hybrid BroccoliDB-PostgreSQL Rolling Context & 5-Level Pyramid](adr/0069-hybrid-broccolidb-postgres-rolling-context-and-5-level-pyramid.md)**
+- **[ADR 0070: Elastic Dynamic Context Governor & Atomic Turn-Pair Integrity](adr/0070-elastic-dynamic-context-governor-and-atomic-turn-pair-integrity.md)**
+- **[ADR 0071: Cross-Session Universal Workspace Anchors & Hardware Cache Topology](adr/0071-cross-session-universal-workspace-anchors-and-hardware-cache-topology.md)**
+- **[ADR 0072: Exact-Owner Chat Persistence & Delta Sync Mesh](adr/0072-exact-owner-chat-persistence-and-delta-sync-mesh.md)**
 
 ---
 
