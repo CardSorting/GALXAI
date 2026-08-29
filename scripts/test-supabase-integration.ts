@@ -40,6 +40,8 @@ import { GalxEdgeWebhookDispatcher } from '../src/workers/cloudflare/GalxEdgeWeb
 import { GalxEdgeBatchBuffer } from '../src/workers/cloudflare/GalxEdgeBatchBuffer';
 import { GalxRequestCoalescer } from '../src/lib/cache/GalxRequestCoalescer';
 import { GalxBatchDataLoader } from '../src/lib/cache/GalxBatchDataLoader';
+import { GalxWriteBehindBuffer } from '../src/lib/cache/GalxWriteBehindBuffer';
+import { GalxMultiTierCache } from '../src/lib/cache/GalxMultiTierCache';
 
 async function runTests() {
   console.log('======================================================================');
@@ -923,6 +925,95 @@ async function runTests() {
     assert(
       auditBatchRes.success === true && auditBatchRes.insertedCount === 3,
       'AuditRepo: Ingests bulk audit events via high-velocity PostgreSQL jsonb_to_recordset RPC'
+    );
+
+    // 54. GalxWriteBehindBuffer: Double-Buffering Atomic Swap & Batch Draining
+    let drainedItemsCount = 0;
+    const writeBehind = new GalxWriteBehindBuffer<{ id: string; val: number }>({
+      maxBatchSize: 10,
+      flushIntervalMs: 500,
+      drainHandler: async (batch) => {
+        drainedItemsCount += batch.length;
+      }
+    });
+
+    for (let i = 0; i < 25; i++) {
+      writeBehind.enqueue({ id: `wb_${i}`, val: i });
+    }
+    await writeBehind.flush();
+    const wbMetrics = writeBehind.getMetrics();
+    assert(
+      drainedItemsCount === 25 && wbMetrics.totalFlushes >= 2 && wbMetrics.currentQueueDepth === 0,
+      'GalxWriteBehindBuffer: Double-buffering atomic swap and monotonic batch draining verified'
+    );
+    writeBehind.destroy();
+
+    // 55. GalxMultiTierCache: 3-Tier L1/L2/L3 with O(1) Tag-Based Invalidation
+    const multiTier = new GalxMultiTierCache<string>();
+    let dbTierHitCount = 0;
+    const l3DbFetcher = async () => {
+      dbTierHitCount++;
+      return 'user_settings_payload';
+    };
+
+    // First fetch: populates L1 and L2 with tags
+    const tierVal1 = await multiTier.getOrFetch('user:usr_999:settings', l3DbFetcher, ['user:usr_999', 'org:org_alpha']);
+    assert(tierVal1 === 'user_settings_payload' && dbTierHitCount === 1, 'GalxMultiTierCache: Fetches and tags L3 DB payload');
+
+    // Second fetch: L1 hit (0 DB queries)
+    const tierVal2 = await multiTier.getOrFetch('user:usr_999:settings', l3DbFetcher, ['user:usr_999']);
+    assert(tierVal2 === 'user_settings_payload' && dbTierHitCount === 1, 'GalxMultiTierCache: Returns L1 cached result');
+
+    // Invalidate by tag 'org:org_alpha'
+    const invalidatedCount = multiTier.invalidateTag('org:org_alpha');
+    assert(invalidatedCount === 1, 'GalxMultiTierCache: O(1) Tagged invalidation purges matching cache keys');
+
+    // 56. WalletRepository: Native C-Array UNNEST Batch Token Draw
+    const unnestDrawRes = await walletRepo.drawTokensUnnestBatch([
+      { userId: batchUserA, costUsd: 0.25, description: 'Unnest draw 1', promptTokens: 100, completionTokens: 50 },
+      { userId: batchUserA, costUsd: 0.25, description: 'Unnest draw 2', promptTokens: 150, completionTokens: 75 },
+      { userId: batchUserB, costUsd: 0.50, description: 'Unnest draw 3', promptTokens: 300, completionTokens: 100 }
+    ]);
+    assert(
+      unnestDrawRes.success === true &&
+      unnestDrawRes.processedUsersCount === 2 &&
+      Math.abs(unnestDrawRes.totalDebitUsd - 1.00) < 0.000001,
+      'WalletRepo: Executes native C-array UNNEST batch debit with zero JSON parsing overhead'
+    );
+
+    // 57. SessionRepository: High-Velocity Bulk Session Heartbeat Touch
+    const sessTokenHashA = `hash_touch_a_${Date.now()}`;
+    const sessTokenHashB = `hash_touch_b_${Date.now()}`;
+    const nowTouch = Date.now();
+    await sessionRepo.createSession({
+      id: `sess_touch_a_${nowTouch}`,
+      userId: batchUserA,
+      provider: 'openai',
+      tokenHash: sessTokenHashA,
+      isRevoked: false,
+      issuedAtMs: nowTouch,
+      expiresAtMs: nowTouch + 3600000,
+      lastActiveAtMs: nowTouch,
+      createdAt: new Date(nowTouch).toISOString(),
+      updatedAt: new Date(nowTouch).toISOString()
+    });
+    await sessionRepo.createSession({
+      id: `sess_touch_b_${nowTouch}`,
+      userId: batchUserB,
+      provider: 'openai',
+      tokenHash: sessTokenHashB,
+      isRevoked: false,
+      issuedAtMs: nowTouch,
+      expiresAtMs: nowTouch + 3600000,
+      lastActiveAtMs: nowTouch,
+      createdAt: new Date(nowTouch).toISOString(),
+      updatedAt: new Date(nowTouch).toISOString()
+    });
+
+    const touchRes = await sessionRepo.touchSessionsBatch([sessTokenHashA, sessTokenHashB], Date.now());
+    assert(
+      touchRes.success === true && touchRes.touchedCount === 2,
+      'SessionRepo: Bulk touches session activity heartbeats in 1 single UNNEST query'
     );
 
 

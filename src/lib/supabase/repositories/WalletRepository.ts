@@ -915,6 +915,84 @@ export class WalletRepository {
     };
   }
 
+  /**
+   * Ultra High-Throughput Token Draw via Native C-Array UNNEST in PostgreSQL.
+   */
+  async drawTokensUnnestBatch(items: Array<{
+    userId: string;
+    costUsd: number;
+    description: string;
+    model?: string;
+    promptTokens?: number;
+    completionTokens?: number;
+    cachedTokens?: number;
+  }>): Promise<{
+    success: boolean;
+    processedUsersCount: number;
+    totalDebitUsd: number;
+    results: any[];
+  }> {
+    if (items.length === 0) {
+      return { success: true, processedUsersCount: 0, totalDebitUsd: 0, results: [] };
+    }
+
+    for (const it of items) {
+      this.walletCoalescer.invalidate(it.userId);
+      this.walletDataLoader.clear(it.userId);
+    }
+
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseAdmin();
+        const userIds = items.map(i => i.userId);
+        const costs = items.map(i => i.costUsd);
+        const descriptions = items.map(i => i.description);
+        const models = items.map(i => i.model || 'unknown');
+        const promptTokens = items.map(i => i.promptTokens || 0);
+        const completionTokens = items.map(i => i.completionTokens || 0);
+        const cachedTokens = items.map(i => i.cachedTokens || 0);
+
+        const { data, error } = await supabase.rpc('fn_bulk_unnest_draw_wallet_tokens', {
+          p_user_ids: userIds,
+          p_costs: costs,
+          p_descriptions: descriptions,
+          p_models: models,
+          p_prompt_tokens: promptTokens,
+          p_completion_tokens: completionTokens,
+          p_cached_tokens: cachedTokens
+        });
+
+        if (!error && data && (data as any).success) {
+          const res = data as any;
+          for (const it of items) {
+            this.walletCoalescer.invalidate(it.userId);
+            this.walletDataLoader.clear(it.userId);
+          }
+          return {
+            success: true,
+            processedUsersCount: Number(res.processed_users_count || 0),
+            totalDebitUsd: Number(res.total_debit_usd || 0),
+            results: res.results || []
+          };
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    // Local fallback
+    return this.drawTokensCoalescedBatch(items.map(i => ({
+      userId: i.userId,
+      totalCostUsd: i.costUsd,
+      requestCount: 1,
+      totalPromptTokens: i.promptTokens || 0,
+      totalCompletionTokens: i.completionTokens || 0,
+      totalCachedTokens: i.cachedTokens || 0,
+      model: i.model,
+      description: i.description
+    })));
+  }
+
   async getTransactions(userId: string, limit = 50): Promise<WalletTransactionRecord[]> {
     if (isSupabaseConfigured()) {
       try {

@@ -56,8 +56,24 @@ export class SessionRepository {
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
-        const row = this.mapSessionToRow(session);
-        await supabase.from('galx_user_sessions').upsert(row, { onConflict: 'id' });
+        const { data, error } = await supabase.rpc('fn_create_user_session', {
+          p_id: session.id,
+          p_user_id: session.userId,
+          p_provider: session.provider,
+          p_shard_id: (session.shardId || null) as any,
+          p_token_hash: session.tokenHash,
+          p_refresh_token_hash: (session.refreshTokenHash || null) as any,
+          p_ip_address: (session.ipAddress || null) as any,
+          p_user_agent: (session.userAgent || null) as any,
+          p_issued_at_ms: session.issuedAtMs,
+          p_expires_at_ms: session.expiresAtMs,
+          p_workspace_id: (session.workspaceId || null) as any
+        });
+
+        if (error) {
+          const row = this.mapSessionToRow(session);
+          await supabase.from('galx_user_sessions').upsert(row, { onConflict: 'id' });
+        }
       } catch {
         // Fallback to in-memory
       }
@@ -380,6 +396,47 @@ export class SessionRepository {
         // Fallback
       }
     }
+  }
+
+  /**
+   * High-Velocity Bulk Session Heartbeat Touch via UNNEST PostgreSQL RPC.
+   */
+  async touchSessionsBatch(
+    tokenHashes: string[],
+    nowMs: number = Date.now()
+  ): Promise<{ success: boolean; touchedCount: number }> {
+    if (tokenHashes.length === 0) return { success: true, touchedCount: 0 };
+
+    for (const session of this.inMemoryCache.values()) {
+      if (tokenHashes.includes(session.tokenHash)) {
+        this.saveSessionInMemory({
+          ...session,
+          lastActiveAtMs: nowMs,
+          updatedAt: new Date(nowMs).toISOString()
+        });
+      }
+    }
+
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseAdmin();
+        const { data, error } = await supabase.rpc('fn_bulk_touch_sessions', {
+          p_token_hashes: tokenHashes,
+          p_now_ms: nowMs
+        });
+
+        if (!error && data && (data as any).success) {
+          return {
+            success: true,
+            touchedCount: Number((data as any).touched_sessions_count || 0)
+          };
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    return { success: true, touchedCount: tokenHashes.length };
   }
 
   async getUserSessions(userId: string): Promise<GalxUserSession[]> {

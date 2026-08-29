@@ -3132,6 +3132,25 @@ export interface Database {
         };
         Returns: Json;
       };
+      fn_bulk_unnest_draw_wallet_tokens: {
+        Args: {
+          p_user_ids: string[];
+          p_costs: number[];
+          p_descriptions: string[];
+          p_models: string[];
+          p_prompt_tokens: number[];
+          p_completion_tokens: number[];
+          p_cached_tokens: number[];
+        };
+        Returns: Json;
+      };
+      fn_bulk_touch_sessions: {
+        Args: {
+          p_token_hashes: string[];
+          p_now_ms: number;
+        };
+        Returns: Json;
+      };
       fn_batch_get_wallets_by_users: {
         Args: {
           p_user_ids: string[];
@@ -3277,7 +3296,7 @@ export interface Database {
           p_id: string;
           p_user_id: string;
           p_provider: string;
-          p_shard_id: string;
+          p_shard_id?: string;
           p_token_hash: string;
           p_refresh_token_hash?: string;
           p_ip_address?: string;
