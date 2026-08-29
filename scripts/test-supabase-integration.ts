@@ -744,9 +744,9 @@ async function runTests() {
     );
 
     // 45. SingleFlight Request Coalescing (Cache Stampede Defense)
-    const coalescer = new GalxRequestCoalescer<string>({ ttlMs: 5000 });
+    const coalescer = new GalxRequestCoalescer<string | null>({ ttlMs: 5000 });
     let dbQueryCount = 0;
-    const fetcher = async () => {
+    const fetcher = async (): Promise<string | null> => {
       dbQueryCount++;
       await new Promise(r => setTimeout(r, 20));
       return 'authoritative_db_record_payload';
@@ -762,7 +762,7 @@ async function runTests() {
 
     // 46. Negative Caching (Non-Existent Key Stampede Defense)
     let negativeDbQueryCount = 0;
-    const negativeFetcher = async () => {
+    const negativeFetcher = async (): Promise<string | null> => {
       negativeDbQueryCount++;
       return null;
     };
