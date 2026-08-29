@@ -56,8 +56,11 @@ All architectural components in GALXAI are governed by formal Architectural Deci
 | **Half-Open Canary & Scavenger** | [ADR 0009](adr/0009-half-open-canary-traffic-warming-and-lease-scavenger.md) | 4-phase canary recovery warming + automated lease scavenger for orphaned streaming reservations. |
 | **CloudTasks & CloudRun Queue** | [ADR 0010](adr/0010-cloudtasks-cloudrun-asynchronous-queue-substrate.md) | Asynchronous task queue, token-bucket dispatch pacing, Cloud Run push webhooks, and DLQ topologies. |
 | **DAG Workflows & Real-Time SSE** | [ADR 0011](adr/0011-directed-acyclic-graph-workflows-and-realtime-event-streaming.md) | Real-time SSE streaming, DAG Fan-In orchestration, destination circuit breakers, and anti-starvation aging. |
-| **Universal Developer SDK** | [ADR 0012](adr/0012-universal-developer-sdk-and-ergonomics-substrate.md) | Zero-dependency TypeScript & Python SDK with OpenAI drop-in parity and background queue APIs. |
 | **DX Ergonomics & Adapters** | [ADR 0013](adr/0013-fluent-builders-structured-outputs-and-dx-ergonomics.md) | Fluent prompt builders, structured JSON outputs, Vercel AI SDK adapters, and batch swarm runners. |
+| **Dual Rolling Window Seat Quotas** | [ADR 0068](adr/0068-dual-rolling-window-seat-quotas-and-distributed-request-leases.md) | 5-Hour burst and 7-Day weekly rolling quotas with expiring idempotent request leases (`galx_seat_request_leases`). |
+| **Hybrid Rolling Context Pyramid** | [ADR 0069](adr/0069-hybrid-broccolidb-postgres-rolling-context-and-5-level-pyramid.md) | 5-Level multi-resolution memory pyramid combining L1 BroccoliDB (<0.08ms) and durable PostgreSQL CTEs. |
+| **Elastic Dynamic Context Governor**| [ADR 0070](adr/0070-elastic-dynamic-context-governor-and-atomic-turn-pair-integrity.md) | Dynamic 1.05M token frontier window sizing with strict OpenAI/Anthropic tool turn-pair integrity guarantees. |
+| **Universal Workspace Anchors** | [ADR 0071](adr/0071-cross-session-universal-workspace-anchors-and-hardware-cache-topology.md) | Workspace-wide architectural schema anchors and deterministic SHA-256 stable prefix hashing (>98% cache hit rate). |
 | **Apex Agent Runtime & Middleware**| [ADR 0014](adr/0014-apex-agent-runtime-middleware-and-resilience-substrate.md) | Autonomous agent tool loops, pluggable middleware pipeline, LRU caching, and fallback cascades. |
 | **Zero-Egress Cloudflare Edge Mesh**| [ADR 0015](adr/0015-zero-egress-cloudflare-workers-edge-compute-mesh.md) | Offloads high-bandwidth SSE streaming and queue execution to Cloudflare Workers for $0 egress bandwidth costs. |
 | **Authoritative Supabase PostgreSQL**| [ADR 0016](adr/0016-authoritative-supabase-postgresql-substrate.md) | Authoritative single source of truth for ACID double-entry ledgers, AES-256-GCM vault, and pgvector. |
@@ -276,5 +279,38 @@ flowchart TD
 | **Single-Flight Coalescing** | Mutex in-flight promise registry | Prevents cache stampedes and eliminates duplicate upstream flights |
 | **Zero-Copy Stream Sandbox** | Direct Uint8Array buffer streaming | Prevents heap fragmentation and reduces GC pauses |
 | **Fail-Closed Compaction Safety** | `BroccoliCompactionSafety` entity validator | Zero hallucination or ungrounded factual corruption |
+
+---
+
+## ⚡ Hybrid BroccoliDB-PostgreSQL Rolling Context & 5-Level Memory Pyramid (ADR 0069–0071)
+
+GALXAI couples sub-microsecond in-memory RAM lookup with authoritative PostgreSQL storage to maintain long-horizon conversational context without losing critical facts or exceeding frontier token budgets:
+
+```mermaid
+flowchart TD
+    Inbound[Inbound Message / Document] --> Engine[GalxRollingContextEngine Apex V5.3]
+    
+    subgraph L1_BroccoliDB [L1 In-Memory BroccoliDB Tables <0.08ms]
+        Anchors[Level 1: Universal Workspace Policy Anchors]
+        Episodes[Level 2: Thematic Context Episodes 10-turn milestones]
+        Graph[Level 3: Temporal Decision Graph WITH RECURSIVE CTE]
+        RRF[Level 4: Reciprocal Rank Fusion RRF Document Search <0.5ms]
+        Verbatim[Level 5: Atomic Sliding Verbatim Window]
+    end
+    
+    Engine --> L1_BroccoliDB
+    L1_BroccoliDB --> Synth[Memory Synthesis & Deterministic SHA-256 Checkpoint]
+    Synth --> Governor[GalxElasticContextGovernor: Dynamic 1.05M Window Sizing]
+    Governor --> Inference[Frontier Inference Provider]
+    Inference --> Settlement[Single-Hop Composite Settlement CTE]
+    Settlement --> DualWrite[Async Dual-Write to L1 RAM + L2 PostgreSQL]
+```
+
+### Key Context Invariants:
+1. **5-Level Multi-Resolution Pyramid**: Bridges high-level organizational compliance policies (Level 1) with chronological episodic milestones (Level 2), temporal decision graphs (Level 3), sub-millisecond document chunk retrieval (Level 4), and atomic recent turns (Level 5).
+2. **Atomic Tool Turn-Pair Boundary Protection**: Guarantees that assistant `tool_calls` and tool execution result messages are never severed across sliding window compaction boundaries, eliminating upstream HTTP 400 validation failures.
+3. **Dynamic Elastic Sizing**: Automatically sizes context envelopes up to the model's full **1,050,000 frontier token window** (~3,000–4,000 pages of text) with zero artificial clamping.
+4. **Deterministic Stable Prefix Hashing**: Locks in $>98\%$ prompt cache reuse on upstream foundation models with $<250\text{ms}$ TTFT.
+
 
 

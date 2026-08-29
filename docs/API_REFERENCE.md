@@ -49,12 +49,22 @@ Universal OpenAI-compatible chat completion endpoint with automatic quota cyclin
 }
 ```
 
-### Hyper-Forgiving Ingestion & Pre-Inference Compaction
+### Hyper-Forgiving Ingestion, Rolling Context & Seat Governance
+- **Dynamic Context Sizing (Zero Artificial Clamps)**: Supports dynamic high-velocity multi-page payloads scaled up to the model's full **1,050,000 frontier token context window** (~3,000–4,000 pages of text) with up to **128,000 output tokens**.
+- **Hybrid Rolling Memory Mesh (`x-galx-rolling-memory: true`)**: Activates the 5-level multi-resolution context pyramid in L1 BroccoliDB RAM, providing sub-millisecond retrieval of earlier conversational turns without token explosion.
 - **Pre-Inference Input Compaction (`x-galx-compact: true`)**: Automatically runs incoming user context through BroccoliDB to reduce representation redundancy before dispatching to upstream frontier models.
 - **Explicit Mode Override (`x-galx-compaction-mode: "ebpf_stream"`)**: Selects any of the 19 compaction modes (`domain`, `ebpf_stream`, `k8s_watch_stream`, `sensor_stream`, `document`, `incident`).
 - **Raw Text Payloads**: If a client sends raw string text (`-d "Explain gravity"`), the gateway automatically converts it into `{ messages: [{ role: "user", content: "Explain gravity" }] }` with zero 400 errors.
 - **Top-Level Prompts**: Accepts `prompt`, `input`, or `text` at root level.
 - **Anthropic Systems**: Accepts root `system` string or content blocks array.
+
+### Response Headers
+- `x-galx-stable-cache-hash`: Deterministic SHA-256 fingerprint of the prompt cache prefix block.
+- `x-galx-rolling-memory-compacted`: `true` when intermediate conversation turns were compacted into memory blocks.
+- `x-galx-seat-5h-limit-remaining`: Remaining percentage of user's 5-hour rolling window quota (e.g. `90%`).
+- `x-galx-seat-weekly-limit-remaining`: Remaining percentage of user's weekly rolling window quota (e.g. `55%`).
+- `x-galx-seat-5h-refresh`: Formatted natural duration string to full 5-hour refresh (e.g. `4 hours, 17 minutes`).
+- `x-galx-seat-weekly-refresh`: Formatted natural duration string to full weekly refresh (e.g. `3 days`).
 
 ### Browser Address Bar Direct Query (`GET /v1/chat/completions`)
 ```text

@@ -56,8 +56,9 @@ Welcome to the comprehensive technical documentation and operational guides for 
 - **[Mathematical Routing Algorithms](ROUTING_ALGORITHMS.md)**: Mathematical derivations of Predictive Adaptive Headroom (P-AHT), Smooth Weighted Round-Robin (SWRR), and TASD swarm dispersion.
 - **[Streaming & SSE Protocol Specification](STREAMING_AND_SSE_PROTOCOL.md)**: Sub-15ms TTFT streaming protocols, Keep-Alive ping intervals, and zero-copy buffers.
 - **[Asynchronous Queues & CloudTasks](QUEUE_SPECIFICATION.md)**: Background queue architecture, token-bucket pacing, and DLQ topologies.
+- **[Senior Engineering Review: Chat & Rolling Context](SENIOR_ENGINEERING_REVIEW_CHAT_AND_ROLLING_CONTEXT.md)**: Deep architectural review of Hybrid BroccoliDB (L1) + PostgreSQL (L2) rolling memory, dynamic 1.05M context governor, dual rolling seat quotas, and V44-V53 migrations.
 - **[Developer & Contributing Guide](DEVELOPER_GUIDE.md)**: Codebase organization, provider adapter design, and test suite conventions.
-- **[Architecture Decision Records (ADRs)](adr/README.md)**: 65 formal architectural specifications governing security, transport hardening, 180-domain compaction, and OpenAI inference boundary benchmarking.
+- **[Architecture Decision Records (ADRs)](adr/README.md)**: 71 formal architectural specifications governing security, transport hardening, 180-domain compaction, dual rolling window seat quotas, 5-level rolling context pyramids, and OpenAI inference boundary benchmarking.
 - **[Operational SRE Playbooks](playbooks/README.md)**: 8 lifecycle runbooks for deployment, incident remediation, secret rotation, and unframed developer observation trials.
 - **[Maintainer Knowledge Base & Internal Manual](maintainers/README.md)**: Onboarding Day 1–30 roadmap, subsystem dependency DAG, and debugging runbooks.
 - **[Production Infrastructure & Deployment Guide](DEPLOYMENT.md)**: Multi-target deployment topology across Vercel, Cloudflare Edge, Docker, and Kubernetes.

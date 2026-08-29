@@ -77,3 +77,29 @@ When clients enable pre-inference representation compaction (`x-galx-compact: tr
 - **Effective Throughput Multiplier**: For typical high-redundancy workloads ($75\%–85\%$ reduction), a tenant on a $500\text{k TPM}$ quota achieves an **effective throughput capacity of $2.0\text{M} - 3.3\text{M TPM}$** without hitting upstream foundation lab rate limits.
 - **Action Safety Guarantee**: Defends active code invariants across the 7 adversarial corporate traps (`npm run bench:entropy`).
 - **Microsecond Execution**: In-process representation selection executes in $< 5\text{ms}$, incurring negligible overhead compared to upstream network round-trips.
+
+---
+
+## 6. Dual Rolling Window Seat Quota Experience & Distributed Leases (ADR 0068)
+
+In addition to token credit limits, organization seats and interactive chat users operate under **Dual Sliding Rolling Windows** without artificial end-of-month cliffs:
+
+### 6.1. Dual Window Structure
+1. **5-Hour Burst Limit**: Governs fast-recovery interactive chat turns and developer iterations (e.g. 30 units on Developer, 100 on Small Business, 350 on Enterprise, 1,500 on Apex). Resets continuously with human-readable countdowns (`"You have used some of your 5-hour limit, it will fully refresh in 4 hours, 17 minutes. 90%"`).
+2. **Weekly (7-Day) Capacity Limit**: Governs continuous weekly volume (e.g. 200 units on Developer, 1,000 on Small Business, 5,000 on Enterprise, 25,000 on Apex). Resets continuously (`"You have used some of your weekly limit, it will fully refresh in 3 days. 55%"`).
+
+### 6.2. Seat Tier Entitlements
+
+| Entitlement Tier | 5-Hour Limit | Weekly Limit | Max Output Tokens | Allowed Models | Max Concurrency |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Developer** | 30 units | 200 units | 16,384 tokens | `gpt-5.6-sol` | 20 streams |
+| **Small Business** | 100 units | 1,000 units | 32,768 tokens | `gpt-5.6-sol`, `gpt-5.6-terra`, `claude-3-7-sonnet` | 50 streams |
+| **Enterprise Fleet** | 350 units | 5,000 units | 65,536 tokens | All models + Deep Reasoning + Image Studio | 200 streams |
+| **Apex Sovereign** | 1,500 units | 25,000 units | 128,000 tokens | All models + Sovereign Custom Enclaves | 500 streams |
+
+### 6.3. Distributed Expiring Request Leases (`galx_seat_request_leases`)
+To prevent concurrent stream leaks across distributed worker nodes, requests acquire an atomic expiring lease:
+- **Preflight Allocation**: `fn_evaluate_and_acquire_seat_gate_v2` checks all 5-hour, weekly, spend-cap, and concurrency boundaries in 1 single transaction and reserves an expiring lease (`expires_at = NOW() + TTL`).
+- **Stream Completion**: `fn_settle_seat_stream_completion_composite_v2` writes actual token consumption and marks the lease as settled.
+- **Fail-Safe Expiration**: In-flight stream disconnects automatically release their slot upon lease TTL expiration (`180s`), preventing orphaned locks.
+
