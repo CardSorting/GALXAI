@@ -9,6 +9,7 @@
 
 | Document | Title & Focus | Key Contents |
 |---|---|---|
+| **[00. Apex Strategy Overview](00_APEX_SYNTHETIC_CURATION_AND_STRATEGY_OVERVIEW.md)** | Executive Architecture & Strategy Overview | Complete technical blueprint of the 7-phase training lifecycle, $O(1)$ SimHash dedup, Slime RL programmatic rewards, and benchmark decision gates. |
 | **[01. Strategy & Target Goal](01_STRATEGY_AND_TARGET_GOAL.md)** | Core Strategic Objectives & Competitive Moats | GLM-5.3 Flash parity thesis, 2026 base model selection (`Qwen3-8B-Base`), IndexShare sparse attention, and zero-egress streaming economics. |
 | **[02. Timeframe & Sprint Milestones](02_TIMEFRAME_AND_SPRINT_MILESTONES.md)** | 16-Day 7-Phase Execution Timeline | Chronological Gantt chart, daily sprint schedules, and quantitative Go/No-Go milestone quality gates. |
 | **[03. Dataset & Curriculum Specification](03_DATASET_AND_CURRICULUM_SPECIFICATION.md)** | 4-Tier Curriculum & Data Engine Flywheel | 200K+ sample stratification, CoT distillation from 671B teacher models, PII scrubbing, SimHash dedup, and SHA-256 Merkle sealing. |
