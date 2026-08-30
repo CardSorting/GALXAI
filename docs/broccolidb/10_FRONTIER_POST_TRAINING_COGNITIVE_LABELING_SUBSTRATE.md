@@ -78,12 +78,9 @@ The **GalxR2TrainingSyncEngine** synchronizes in-memory datasets directly to Clo
 
 ## 5. Verification & Test Execution
 
-The post-training labeling and sync substrate is verified via the 15-phase master test suite:
+The post-training labeling and sync substrate is verified via the authoritative 10-Pillar Master Adversarial Invariant Suite:
 
 ```bash
-# Execute the 15-Phase Master Post-Training Hardening Suite
-npx tsx tests/r2-training-sync.test.ts
-
-# Execute the Continuous Learning & Privacy Alignment Suite
-npx tsx tests/training-stream.test.ts
+# Execute the 10-Pillar Master Adversarial Invariant Suite
+npm run test:training
 ```

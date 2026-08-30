@@ -57,6 +57,7 @@ supabase/.branches/
 # 2. DATABASE DUMPS, WAL & EPHEMERAL STORAGE
 # ------------------------------------------------------------------------------
 .data/
+.galxai_cache/
 *.db
 *.sqlite
 *.sqlite3
