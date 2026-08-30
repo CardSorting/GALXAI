@@ -3,77 +3,93 @@
 
 ---
 
-## 1. Benchmark Acceptance Matrix (GLM-5.3 Flash Parity Gate)
+## 1. Automated Benchmark Evaluation Harness Commands
 
-Before the model can graduate to production, it must pass the automated benchmark suite with scores equal to or exceeding the **GLM-5.3 Flash & GPT-4o-mini baseline**:
+To prevent manual grading bias, evaluate model checkpoints using standardized CLI harnesses across MMLU-Pro, GSM8K, MATH-500, HumanEval, and SWE-bench:
 
+### 1.1 Reasoning & Math (`lm-evaluation-harness`)
+```bash
+lm_eval --model vllm \
+  --model_args pretrained=./checkpoints/galx_flash_8b_final,dtype=bfloat16,gpu_memory_utilization=0.9 \
+  --tasks mmlu_pro,gsm8k_cot,math_500 \
+  --batch_size auto \
+  --output_path results/reasoning_eval.json
 ```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                  GALX-Flash-8B Benchmark Acceptance Targets                 │
-├────────────────────┬──────────────┬──────────────┬──────────────┬────────────┤
-│ Benchmark Suite    │ Domain Focus │ Base Model   │ GLM-5.3 Flash│ GALX Target│
-├────────────────────┼──────────────┼──────────────┼──────────────┼────────────┤
-│ HumanEval          │ Python Code  │ 68.4%        │ 85.2%        │ ≥ 86.5%    │
-│ GSM8K              │ Grade Math   │ 79.5%        │ 91.0%        │ ≥ 92.0%    │
-│ MATH-500           │ Olympiad Math│ 44.2%        │ 62.8%        │ ≥ 64.0%    │
-│ SWE-bench Lite     │ Real-world SE│ 18.2%        │ 34.5%        │ ≥ 36.0%    │
-│ MMLU-Pro           │ Reasoning    │ 52.0%        │ 66.8%        │ ≥ 68.0%    │
-│ IFEval             │ Instructions │ 76.0%        │ 88.0%        │ ≥ 89.5%    │
-│ P99 Latency (TTFT) │ Response Time│ 110ms        │ 55ms         │ ≤ 45ms     │
-│ Throughput (INT4)  │ Velocity     │ 90 tok/s     │ 120 tok/s    │ ≥ 140 tok/s│
-└────────────────────┴──────────────┴──────────────┴──────────────┴────────────┘
+
+### 1.2 Python & Rust Code Synthesis (`bigcode-evaluation-harness`)
+```bash
+accelerate launch main.py \
+  --model ./checkpoints/galx_flash_8b_final \
+  --tasks humaneval,multiple-rs \
+  --max_length_generation 2048 \
+  --temperature 0.2 \
+  --n_samples 50 \
+  --batch_size 16 \
+  --allow_code_execution \
+  --output_dir results/code_eval
 ```
 
 ---
 
-## 2. Quantization Workflow (INT4 AWQ & GGUF)
+## 2. GGUF Quantization & Perplexity Validation
 
-Convert the FP16/BF16 merged transformer weights into high-throughput edge inference formats:
+Before shipping to edge environments (Ollama, LM Studio, Apple Silicon Mac), verify that INT4 quantization degrades perplexity by $<0.15\text{ PPL}$:
 
-### 2.1 GGUF Export (for Consumer GPUs & Apple Silicon Mac)
 ```bash
-# 1. Convert Hugging Face weights to GGUF format
-python llama.cpp/convert_hf_to_gguf.py ./checkpoints/galx_flash_8b_final --outtype q8_0
+# 1. Quantize FP16 weights to Q4_K_M
+./llama.cpp/llama-quantize ./checkpoints/galx_flash_8b.gguf ./models/galx_flash_8b_q4_k_m.gguf Q4_K_M
 
-# 2. Quantize to Q4_K_M (Optimal size/perplexity balance)
-./llama.cpp/llama-quantize ./checkpoints/galx_flash_8b_final/ggml-model-q8_0.gguf ./models/galx_flash_8b_q4_k_m.gguf Q4_K_M
-```
-
-### 2.2 AutoAWQ Export (for vLLM Server Inference)
-```bash
-python -c "
-from awq import AutoAWQForCausalLM
-from transformers import AutoTokenizer
-
-model_path = './checkpoints/galx_flash_8b_final'
-quant_path = './models/galx_flash_8b_awq'
-
-model = AutoAWQForCausalLM.from_pretrained(model_path)
-tokenizer = AutoTokenizer.from_pretrained(model_path)
-
-model.quantize(tokenizer, quant_config={'zero_point': True, 'q_group_size': 128, 'w_bit': 4, 'version': 'GEMM'})
-model.save_quantized(quant_path)
-tokenizer.save_pretrained(quant_path)
-print('AWQ Quantization Complete!')
-"
+# 2. Measure WikiText-2 Perplexity
+./llama.cpp/llama-perplexity \
+  -m ./models/galx_flash_8b_q4_k_m.gguf \
+  -f data/wikitext-2-raw-v1/wiki.test.raw \
+  --ctx-size 4096
+# Target: PPL <= 5.85 (Baseline FP16: 5.72)
 ```
 
 ---
 
-## 3. Production vLLM Deployment & 5% Canary Release
+## 3. Production vLLM Systemd Service File (`/etc/systemd/system/vllm.service`)
 
-Deploy the quantized model to the vLLM serving pool:
+```ini
+[Unit]
+Description=GALXAI vLLM Production Serving Engine (GALX-Flash-8B)
+After=network.target
 
-```bash
-vllm serve ./models/galx_flash_8b_awq \
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/galxai/models
+Environment="CUDA_VISIBLE_DEVICES=0,1,2,3"
+Environment="VLLM_ENGINE_ITERATION_TIMEOUT_S=60"
+ExecStart=/usr/local/bin/vllm serve ./galx_flash_8b_awq \
   --quantization awq \
   --max-model-len 131072 \
   --gpu-memory-utilization 0.92 \
   --enable-chunked-prefill \
+  --tensor-parallel-size 4 \
   --port 8000
+Restart=always
+RestartSec=5
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
 ```
 
-### Canary Traffic Gating:
-1. Update Cloudflare Workers Edge Gateway to route **5% of incoming traffic** targeting `galx-reason-1` to the new `GALX-Flash-8B` worker pool.
-2. Monitor real-time error rates, P99 TTFT, and user feedback (DPO/KTO swiping).
-3. If error rate $<0.01\%$ over 24 hours, ramp traffic: $5\% \to 25\% \to 100\%$.
+---
+
+## 4. Production 5% Canary Release & Traffic Ramping Gate
+
+```mermaid
+flowchart TD
+    A[Benchmark Certified M6 Passed] --> B[Deploy to Edge Cluster PoPs]
+    B --> C[Cloudflare Workers Canary: 5% Live Traffic]
+    C --> D{Monitor 24h: Error Rate < 0.01% & P99 TTFT < 45ms?}
+    D -- No --> E[Immediate Rollback to GPT-5.6-Sol Baseline]
+    D -- Yes --> F[Ramp to 25% Traffic Split]
+    F --> G{Monitor 12h: User Swiping Ratio > 88%?}
+    G -- No --> E
+    G -- Yes --> H[100% Full Production Rollout & Announcement]
+```

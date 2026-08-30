@@ -3,93 +3,83 @@
 
 ---
 
-## 1. Step-by-Step Operator Checklist
+## 1. On-Call Incident Playbooks
 
-Follow these exact operational steps to launch and manage the **GALX-Flash-8B** training run:
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                       GALX-Flash-8B Operator Flow                           │
-│                                                                             │
-│ [1. Pre-Flight] ──> [2. Compaction] ──> [3. Cluster Provision] ──> [4. SFT] │
-│                                                                     │       │
-│ [7. Canary] <──── [6. Quantize] <──── [5. Slime RL & DPO] <─────────┘       │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 2. Stage 1: Pre-Flight Health Probe
-
-Before launching GPU compute instances, execute the comprehensive diagnostic probe to verify dataset consistency:
-
+### Playbook 1: NCCL Ring Timeout / InfiniBand Connection Reset
+**Symptom**: Slurm job output reports `NCCL WARN [send] Connection reset by peer` or process hangs indefinitely at barrier synchronization:
 ```bash
-# Run the 10-Pillar Invariant Test Suite
-npm run test:training
+# 1. Inspect kernel dmesg for InfiniBand link flaps
+dmesg -T | grep -i mlx5
 
-# Run the 6-Stage Cloudflare R2 Storage Probe
-npm run r2:bootstrap
+# 2. Check for hung GPU ranks and issue graceful SIGTERM
+kill -15 $(pgrep -f "axolotl|torchrun|accelerate")
 
-# Deep verification of Gzip decompression and Merkle proof trees
-npm run r2:verify
+# 3. If processes do not terminate within 10s, force kill
+kill -9 $(pgrep -f "axolotl|torchrun|accelerate")
+
+# 4. Relaunch with expanded socket timeout
+export NCCL_COMM_BLOCKING=1
+export NCCL_TIMEOUT=3600
+accelerate launch -m axolotl.cli.train axolotl_train.yaml --resume_from_checkpoint=./checkpoints/last
 ```
 
 ---
 
-## 3. Stage 2: Shard Compaction
-
-Trigger autonomous compaction to merge micro-shards into optimal 50MB–250MB shards:
-
+### Playbook 2: CUDA Memory Fragmentation (`CUDA OOM` on Packed Sequences)
+**Symptom**: `torch.cuda.OutOfMemoryError: CUDA out of memory` during variable-length packed sequence backward pass:
 ```bash
-curl -X POST "http://localhost:3000/api/internal/training" \
-  -H "Authorization: Bearer $GALXAI_INTERNAL_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"action": "compact"}'
+# 1. Enable PyTorch expandable segments allocator in environment
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+# 2. Lower micro-batch size and increase gradient accumulation
+sed -i 's/micro_batch_size: 4/micro_batch_size: 2/g' axolotl_train.yaml
+sed -i 's/gradient_accumulation_steps: 4/gradient_accumulation_steps: 8/g' axolotl_train.yaml
+
+# 3. Resume training from last checkpoint
+accelerate launch -m axolotl.cli.train axolotl_train.yaml --resume_from_checkpoint=./checkpoints/last
 ```
 
 ---
 
-## 4. Stage 3: GPU Cluster Launch & SFT Execution
-
+### Playbook 3: Deadlocked Rank Termination Script (`kill_stalled_ranks.sh`)
 ```bash
-# 1. SSH into the 8x H100 GPU Node
-ssh ubuntu@<H100_CLUSTER_IP>
-
-# 2. Fetch Axolotl Training Configuration
-curl -H "Authorization: Bearer $GALXAI_INTERNAL_KEY" \
-  "https://api.galx.ai/api/internal/training?format=axolotl_yaml" > axolotl_train.yaml
-
-# 3. Launch Multi-GPU Training via Accelerate
-accelerate launch \
-  --num_processes=8 \
-  --mixed_precision=bf16 \
-  -m axolotl.cli.train axolotl_train.yaml
+#!/usr/bin/env bash
+# Watchdog: Terminate orphaned distributed ranks occupying GPU memory
+STALLED_PIDS=$(nvidia-smi --query-compute-apps=pid --format=csv,noheader,nounits)
+if [ -n "$STALLED_PIDS" ]; then
+    echo "Found orphaned GPU processes: $STALLED_PIDS"
+    for pid in $STALLED_PIDS; do
+        echo "Killing PID $pid..."
+        kill -9 $pid 2>/dev/null
+    done
+    echo "GPU memory cleared successfully."
+else
+    echo "No orphaned GPU processes detected."
+fi
 ```
 
 ---
 
-## 5. Live Telemetry & Loss Anomaly Monitoring
+## 2. Telemetry Alarm Matrix & PagerDuty Alerts
 
-### Key Telemetry Signals to Track in WandB:
-- **Gradient Norm**: Should fluctuate between `0.4` and `1.2`. If $\text{norm} > 5.0$, gradient clipping is active.
-- **Validation Loss**: Should steadily decrease toward $\le 0.85$.
-- **Learning Rate Curve**: Cosine warmup for the first 5% of steps, decaying to $1\times 10^{-5}$.
+| Metric Monitored | Warning Threshold (SEV-3) | Critical Alarm (SEV-1) | Automated Action |
+|---|---|---|---|
+| **Validation Loss Delta** | $\Delta \mathcal{L}_{\text{val}} > +0.10$ | $\Delta \mathcal{L}_{\text{val}} > +0.40$ | Alert ML lead on warning; auto-rollback checkpoint on critical. |
+| **Gradient L2 Norm** | $\|\mathbf{g}\|_2 > 2.5$ | $\|\mathbf{g}\|_2 > 5.0$ or NaN | Clip gradients to $1.0$; halt job if NaN is detected. |
+| **GPU Core Temperature** | $\text{Temp} \ge 78^\circ\text{C}$ | $\text{Temp} \ge 84^\circ\text{C}$ | Trigger fan speed increase; throttle clock frequency. |
+| **R2 Presigned Shard Latency**| $\text{Latency} \ge 450\text{ms}$ | HTTP 5xx on 3 consecutive shards | Failover to local shared-memory cache; alert Data SRE. |
+| **Docker Sandbox Memory** | $\text{RAM} \ge 80\%$ | $\text{RAM} \ge 95\%$ | Terminate container; re-spawn with clean memory limits. |
 
 ---
 
-## 6. Anomaly Playbooks & Emergency Recovery
+## 3. Dead-Letter Queue (DLQ) Auto-Drain Protocol
 
-### Playbook A: Loss Spike / Gradient Explosion (NaN)
-1. **Immediate Halt**: Press `Ctrl+C` or issue `kill -9 $(pgrep -f axolotl)`.
-2. **Rollback**: Resume from the last saved clean checkpoint:
-   ```bash
-   accelerate launch -m axolotl.cli.train axolotl_train.yaml --resume_from_checkpoint=./checkpoints/checkpoint-500
-   ```
-3. **Hyperparameter Adjustment**: Halve the learning rate (`learning_rate: 0.0001`) and increase warmup ratio (`warmup_ratio: 0.10`).
-
-### Playbook B: Dead-Letter Queue (DLQ) Drain
-If transient network errors caused failed shard uploads during continuous sync:
+If continuous data streaming from live user interactions experiences network timeouts:
 ```bash
+# Verify DLQ buffer size
+curl "http://localhost:3000/api/internal/training?format=telemetry"
+
+# Trigger replay and drain of failed shards
 curl -X POST "http://localhost:3000/api/internal/training" \
   -H "Authorization: Bearer $GALXAI_INTERNAL_KEY" \
   -H "Content-Type: application/json" \

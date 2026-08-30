@@ -1,180 +1,150 @@
 # 🧪 Document 05: Training Recipes & Hyperparameters
-## Production Configurations for SFT, Slime Asynchronous RL, DPO, and KTO
+## Production Configurations for Axolotl, Meta Torchtune, LLaMA-Factory, and StreamingDataset
 
 ---
 
-## 1. SFT Warmup Recipe (Axolotl / DeepSpeed)
+## 1. Production Meta Torchtune Recipe (`torchtune_recipe.yaml`)
 
 ```yaml
 # ============================================================================== #
-# GALX-Flash-8B: Axolotl SFT Training Configuration                              #
-# Target Base Model: Qwen/Qwen3-8B-Base                                          #
+# GALX-Flash-8B: Meta Torchtune Official LoRA Recipe                             #
 # ============================================================================== #
 
-base_model: Qwen/Qwen3-8B-Base
-model_type: AutoModelForCausalLM
-tokenizer_type: AutoTokenizer
+# Model Configuration
+model:
+  _component_: torchtune.models.llama3_1.lora_llama3_1_8b
+  lora_attn_modules: ['q_proj', 'v_proj', 'k_proj', 'output_proj']
+  apply_lora_to_mlp: true
+  apply_lora_to_output: false
+  lora_rank: 32
+  lora_alpha: 64
+  lora_dropout: 0.05
 
-# Distributed Topology
-deepspeed: deepspeed_configs/zero3_bf16.json
-fsdp:
-fsdp_config:
+# Tokenizer
+tokenizer:
+  _component_: torchtune.models.llama3_1.llama3_1_tokenizer
+  path: checkpoints/tokenizer.model
 
-# Sequence Packing & Context Length
-sequence_len: 4096
-sample_packing: true
-pad_to_sequence_len: true
-eval_sample_packing: false
+# Optimizer & LR Schedule
+optimizer:
+  _component_: torch.optim.AdamW
+  lr: 2.0e-4
+  fused: true
+  weight_decay: 0.01
 
-# LoRA Adapters (Rank 32, Alpha 64)
-adapter: lora
-lora_r: 32
-lora_alpha: 64
-lora_dropout: 0.05
-lora_target_modules:
-  - q_proj
-  - k_proj
-  - v_proj
-  - o_proj
-  - gate_proj
-  - up_proj
-  - down_proj
+lr_scheduler:
+  _component_: torchtune.modules.get_cosine_schedule_with_warmup
+  num_warmup_steps: 100
 
-# Optimization & Hyperparameters
-learning_rate: 0.0002
-lr_scheduler: cosine
-warmup_ratio: 0.05
-min_lr_rate: 0.00001
-weight_decay: 0.01
-optimizer: adamw_torch_fused
-max_grad_norm: 1.0
-
-# Batch Geometry
-micro_batch_size: 4
+# Training Hyperparameters
+batch_size: 4
+epochs: 3
+max_steps_per_epoch: null
 gradient_accumulation_steps: 4
-num_epochs: 3
+dtype: bf16
+enable_activation_checkpointing: true
 
-# Precision & Kernel Acceleration
-bf16: true
-fp16: false
-flash_attention: true
-gradient_checkpointing: true
-gradient_checkpointing_kwargs:
-  use_reentrant: false
-
-# Checkpointing & Telemetry
-val_set_size: 0.05
-eval_steps: 100
-save_steps: 250
-save_total_limit: 5
-wandb_project: galx-flash-8b-sft
-wandb_watch: gradients
+# Zero-Egress Cloudflare R2 Streaming Dataset
+dataset:
+  _component_: torchtune.datasets.instruct_dataset
+  source: json
+  data_files: https://datasets.galx.ai/datasets/manifest.json.gz
+  split: train
 ```
 
 ---
 
-## 2. Direct Preference Optimization (DPO) Recipe
+## 2. Production LLaMA-Factory Configuration (`llama_factory_train.yaml`)
 
 ```yaml
 # ============================================================================== #
-# GALX-Flash-8B: DPO Alignment & Length-Debiasing Configuration                   #
+# GALX-Flash-8B: LLaMA-Factory Multi-GPU Training Configuration                  #
 # ============================================================================== #
 
-base_model: ./checkpoints/sft_final
-model_type: AutoModelForCausalLM
-tokenizer_type: AutoTokenizer
+model_name_or_path: Qwen/Qwen3-8B-Base
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_target: all
+lora_rank: 32
+lora_alpha: 64
 
-loss_type: sigmoid
-beta: 0.1
-label_smoothing: 0.0
-learning_rate: 0.000005
-lr_scheduler: cosine
-warmup_ratio: 0.1
-weight_decay: 0.0
+dataset: galxai_sft_stream
+dataset_dir: ./data
+template: qwen
+cutoff_len: 4096
+packing: true
 
-sequence_len: 4096
-max_prompt_len: 2048
-max_completion_len: 2048
+output_dir: ./saves/galx_flash_8b/sft
+logging_steps: 10
+save_steps: 250
+plot_loss: true
+overwrite_output_dir: true
 
-micro_batch_size: 2
-gradient_accumulation_steps: 8
-num_epochs: 2
+per_device_train_batch_size: 4
+gradient_accumulation_steps: 4
+learning_rate: 0.0002
+num_train_epochs: 3.0
+lr_scheduler_type: cosine
+warmup_ratio: 0.05
 bf16: true
-flash_attention: true
-
-# Length-Debiasing Penalty
-length_normalization: true
-reference_free: false
+flash_attn: fa2
 ```
 
 ---
 
-## 3. 1-Click Python Training Script (`Unsloth / TRL`)
+## 3. MosaicML StreamingDataset Python Loader (`StreamingDataLoader.py`)
 
 ```python
 """
-GALX-Flash-8B: 1-Click Fast SFT Runner via Unsloth & TRL
+MosaicML StreamingDataset: Zero-Disk PyTorch Shard Streaming from Cloudflare R2
 """
 
-import os
-import requests
-from unsloth import FastLanguageModel
-from datasets import load_dataset
-from trl import SFTTrainer
-from transformers import TrainingArguments
+from streaming import StreamingDataset
+from torch.utils.data import DataLoader
+import transformers
 
-# 1. Fetch Presigned Dataset URLs from Cloudflare R2
-res = requests.get("https://api.galx.ai/api/internal/training?format=presigned_urls")
-splits = res.json()["splits"]
-train_urls = [shard["url"] for shard in splits["train"]]
-val_urls = [shard["url"] for shard in splits["validation"]]
+class GalxR2StreamingDataset(StreamingDataset):
+    def __init__(self, remote_url: str, local_scratch: str, split: str):
+        super().__init__(
+            remote=remote_url,
+            local=local_scratch,
+            split=split,
+            shuffle=True,
+            predownload=64, # Prefetch 64 shards in shared memory
+            batch_size=4,
+        )
 
-# 2. Initialize Foundation Model
-model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name="Qwen/Qwen3-8B-Base",
-    max_seq_length=4096,
-    dtype=None,
-    load_in_4bit=False,
-)
+    def __getitem__(self, idx: int):
+        sample = super().__getitem__(idx)
+        return {
+            "input_ids": sample["input_ids"],
+            "attention_mask": sample["attention_mask"],
+            "labels": sample["labels"],
+        }
 
-# 3. Attach LoRA Adapters
-model = FastLanguageModel.get_peft_model(
-    model,
-    r=32,
-    target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-    lora_alpha=64,
-    lora_dropout=0.05,
-    bias="none",
-    use_gradient_checkpointing="unsloth",
-)
-
-# 4. Stream Dataset Shards
-dataset = load_dataset("json", data_files={"train": train_urls, "validation": val_urls})
-
-# 5. Execute Training Loop
-trainer = SFTTrainer(
-    model=model,
-    tokenizer=tokenizer,
-    train_dataset=dataset["train"],
-    eval_dataset=dataset["validation"],
-    dataset_text_field="messages",
-    max_seq_length=4096,
-    packing=True,
-    args=TrainingArguments(
-        per_device_train_batch_size=4,
-        gradient_accumulation_steps=4,
-        warmup_ratio=0.05,
-        num_train_epochs=3,
-        learning_rate=2e-4,
-        bf16=True,
-        logging_steps=10,
-        save_strategy="steps",
-        save_steps=250,
-        output_dir="outputs/galx_flash_8b",
-    ),
-)
-
-if __name__ == "__main__":
-    trainer.train()
-    model.save_pretrained_merged("checkpoints/galx_flash_8b_merged", tokenizer, save_method="merged_16bit")
+def create_streaming_loader(split: str = "train", batch_size: int = 4) -> DataLoader:
+    dataset = GalxR2StreamingDataset(
+        remote_url="https://datasets.galx.ai/datasets/microbatches/v1",
+        local_scratch="/tmp/galx_scratch",
+        split=split,
+    )
+    return DataLoader(dataset, batch_size=batch_size, num_workers=4, pin_memory=True)
 ```
+
+---
+
+## 4. Mathematical Learning Rate Schedule Formulation
+
+Learning rate $\eta_t$ at training step $t \in [0, T]$ follows a cosine decay with warm restart suppression:
+
+$$\eta_t = \begin{cases} 
+\eta_{\text{min}} + \frac{t}{T_{\text{warm}}} (\eta_{\text{max}} - \eta_{\text{min}}), & t \le T_{\text{warm}} \\ 
+\eta_{\text{min}} + \frac{1}{2} (\eta_{\text{max}} - \eta_{\text{min}}) \left(1 + \cos\left(\frac{t - T_{\text{warm}}}{T - T_{\text{warm}}} \pi\right)\right), & t > T_{\text{warm}} 
+\end{cases}$$
+
+Where:
+- $\eta_{\text{max}} = 2.0 \times 10^{-4}$ (Maximum learning rate).
+- $\eta_{\text{min}} = 1.0 \times 10^{-5}$ (Floor learning rate).
+- $T_{\text{warm}} = 0.05 \cdot T$ (5% Linear warmup ratio).
+- Weight decay $\lambda = 0.01$ is **strictly excluded** for all 1D bias vectors and LayerNorm gain/offset parameters.

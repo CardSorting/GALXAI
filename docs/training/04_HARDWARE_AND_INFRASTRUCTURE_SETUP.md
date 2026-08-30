@@ -3,70 +3,98 @@
 
 ---
 
-## 1. Primary GPU Hardware Topology
+## 1. Slurm Multi-Node Job Submission Script (`train_h100.sbatch`)
 
-To achieve rapid training turnaround and efficient distributed execution, we specify an **8x NVIDIA H100 (80GB SXM5)** cluster connected via 3.2 Tbps NVIDIA Quantum-2 InfiniBand:
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    8x NVIDIA H100 SXM5 Cluster Topology                     │
-├───────────────────────┬─────────────────────────────────────────────────────┤
-│ Hardware Attribute    │ Specification & Configuration                       │
-├───────────────────────┼─────────────────────────────────────────────────────┤
-│ GPU Accelerators      │ 8x NVIDIA H100 80GB SXM5 (640GB aggregate VRAM)     │
-│ Interconnect          │ NVLink 4 (900 GB/s bidirectional per GPU)           │
-│ Networking            │ 8x 400 Gbps InfiniBand (3.2 Tbps aggregate)         │
-│ Host CPU & RAM        │ 2x Intel Xeon Platinum 8480+ (112 cores), 1.5TB RAM │
-│ Storage Attached      │ 4x 3.84TB NVMe SSDs in RAID-0 (Local cache scratch) │
-│ Cloud Provider        │ Lambda Labs, RunPod, or CoreWeave                   │
-│ Target Compute Cost   │ ~$24.00 / hour (~$2,304 total for 96 compute-hours) │
-└───────────────────────┴─────────────────────────────────────────────────────┘
-```
-
----
-
-## 2. Zero-Egress Cloudflare R2 Streaming Architecture
-
-Unlike traditional training pipelines that require staging hundreds of gigabytes onto local cluster disks before execution, the GALXAI pipeline streams datasets directly into PyTorch data loaders using **SigV4 signed GET URLs**:
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant GPU as 8x H100 Cluster Worker
-    participant R2 as Cloudflare R2 (datasets.galx.ai)
-    participant Engine as GALXAI Training Engine
-
-    GPU->>Engine: GET /api/internal/training?format=presigned_urls
-    Engine-->>GPU: 200 OK (Signed URLs with 24h TTL)
-    loop Parallel Shard Streaming
-        GPU->>R2: HTTP GET (Range: bytes=0-...) with SigV4 auth
-        R2-->>GPU: 200/206 Partial Content (Gzipped JSONL Shard)
-        GPU->>GPU: In-Memory Decompression & Sample Packing
-    end
-```
-
-**Financial Impact**: $0.00 bandwidth egress fees regardless of epoch count or cluster re-runs.
-
----
-
-## 3. Slime Docker Sandboxed Execution Environment
-
-For **Phase 4: Slime Asynchronous Reinforcement Learning**, a dedicated worker node runs isolated container sandboxes to execute generated Python, Rust, and SQL code:
+For enterprise distributed clusters managed via Slurm (RunPod / Lambda / CoreWeave / Slurm), use the following production batch submission script:
 
 ```bash
-# Provision docker execution sandbox on CPU worker node
-docker run -d \
-  --name galx-eval-sandbox \
-  --cpus="32" \
-  --memory="64g" \
-  --pids-limit=256 \
-  --network none \
-  --security-opt no-new-privileges \
-  -v /tmp/galx_eval:/workspace:ro \
-  galxai/sandbox-executor:latest
+#!/usr/bin/env bash
+#SBATCH --job-name=galx-flash-8b-sft
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=8
+#SBATCH --gpus-per-node=8
+#SBATCH --cpus-per-task=14
+#SBATCH --mem=1000G
+#SBATCH --time=48:00:00
+#SBATCH --partition=gpu-h100
+#SBATCH --output=logs/%x-%j.out
+#SBATCH --error=logs/%x-%j.err
+
+# ============================================================================== #
+# NCCL InfiniBand & GPU Performance Optimization Flags                            #
+# ============================================================================== #
+export NCCL_DEBUG=INFO
+export NCCL_DEBUG_SUBSYS=INIT,COLL,ENV
+export NCCL_IB_DISABLE=0
+export NCCL_IB_CUDA_SUPPORT=1
+export NCCL_NET_GDR_LEVEL=5
+export NCCL_BUFFSIZE=8388608
+export NCCL_P2P_LEVEL=NVL
+export NCCL_P2P_DISABLE=0
+export CUDA_DEVICE_MAX_CONNECTIONS=1
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+# Cloudflare R2 Zero-Egress Storage Credentials
+export R2_ACCOUNT_ID="<YOUR_R2_ACCOUNT_ID>"
+export R2_ACCESS_KEY_ID="<YOUR_R2_ACCESS_KEY_ID>"
+export R2_SECRET_ACCESS_KEY="<YOUR_R2_SECRET_ACCESS_KEY>"
+export R2_BUCKET_NAME="galxai-training-datasets"
+
+# Fetch Presigned URLs and Axolotl Recipe
+curl -H "Authorization: Bearer $GALXAI_INTERNAL_KEY" \
+  "https://api.galx.ai/api/internal/training?format=axolotl_yaml" > axolotl_train.yaml
+
+# Launch Distributed Training
+srun --kill-on-bad-exit=1 \
+  accelerate launch \
+    --num_processes=8 \
+    --mixed_precision=bf16 \
+    -m axolotl.cli.train axolotl_train.yaml
 ```
 
-### Sandbox Security Constraints:
-- `--network none`: Strictly air-gapped; no external socket connections.
-- `--pids-limit=256`: Prevents fork-bomb denial-of-service.
-- Read-only root filesystem with ephemeral memory-backed `/tmp` scratchpad.
+---
+
+## 2. InfiniBand Fabric & Hardware Diagnostics
+
+Before commencing training, execute these diagnostic commands on the node to ensure full NVLink 4 and InfiniBand bandwidth saturation:
+
+```bash
+# 1. Inspect InfiniBand HCA Status (Must show State: Active, Rate: 400 Gb/s)
+ibstat | grep -E "(State|Physical state|Rate)"
+
+# 2. Verify GPU Topology & Direct NVLink Interconnects
+nvidia-smi topo -m
+
+# 3. Benchmark Point-to-Point NVLink Bandwidth (~900 GB/s per GPU)
+/usr/local/cuda/samples/1_Utilities/p2pBandwidthLatencyTest
+```
+
+---
+
+## 3. Decoupled Ray / vLLM Architecture for Slime RL
+
+For **Phase 4: Slime Asynchronous Reinforcement Learning**, rollout generation is decoupled across distributed Ray workers:
+
+```mermaid
+graph TD
+    subgraph Centralized Learner [8x NVIDIA H100 GPU Node]
+        A[GRPO Policy Optimizer] --> B[Target Policy Network]
+        B --> C[Loss Gradient Accumulator]
+    end
+
+    subgraph Rollout Actors [32x Ray CPU/GPU Workers]
+        D[Worker 1: vLLM Fast Rollout] --> E[Docker Sandbox: Python REPL]
+        F[Worker 2: vLLM Fast Rollout] --> G[Docker Sandbox: Rust Compiler]
+        H[Worker N: vLLM Fast Rollout] --> I[Docker Sandbox: SQL Engine]
+    end
+
+    E & G & I -->|Programmatic Reward + Trajectory| A
+```
+
+---
+
+## 4. Zero-Egress Cloudflare R2 Streaming Mechanics
+
+- Training shards are streamed into PyTorch `DataLoader` workers via standard HTTP range requests authenticated via AWS SigV4 signed URLs.
+- Shards are decompressed in volatile memory without ever touching local node storage disks.
+- Total egress cost for 100 epochs over 155M tokens: **$0.00 USD**.

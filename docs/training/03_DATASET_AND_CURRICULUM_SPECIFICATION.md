@@ -3,87 +3,78 @@
 
 ---
 
-## 1. 4-Tier Curriculum Stratification
+## 1. Granular Curriculum Mix & Domain Breakdown
 
-To endow **GALX-Flash-8B** with frontier reasoning and coding capabilities, training data is partitioned into four balanced curriculum tiers:
-
-```
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│                           4-Tier Curriculum Mix Overview                         │
-├─────────────────┬──────────┬──────────────┬───────────────┬──────────────────────┤
-│ Tier Name       │ Weight   │ Min Samples  │ Min Tokens    │ Target Domains       │
-├─────────────────┼──────────┼──────────────┼───────────────┼──────────────────────┤
-│ Tier 1: Fact CoT│ 20%      │ 40,000       │ 30,000,000    │ Factuality, System 1 │
-│ Tier 2: Logic   │ 30%      │ 60,000       │ 45,000,000    │ Multi-step Logic, Math│
-│ Tier 3: Code    │ 35%      │ 70,000       │ 55,000,000    │ Rust, Python, Tool Use│
-│ Tier 4: STEM    │ 15%      │ 30,000       │ 25,000,000    │ Olympiad Math, Algorth│
-├─────────────────┼──────────┼──────────────┼───────────────┼──────────────────────┤
-│ **Total**       │ **100%** │ **200,000**  │ **155,000,000**│ Full Spectrum Engine │
-└─────────────────┴──────────┴──────────────┴───────────────┴──────────────────────┘
-```
-
----
-
-## 2. Ingestion & In-Memory Data Pipeline
-
-```mermaid
-flowchart TD
-    A[Incoming Web Chat / Developer API] --> B{API Call or Opt-Out?}
-    B -- Yes --> C[Zero Data Retention ZDR: Drop from RAM]
-    B -- No --> D[Bloom Exact Filter <10ns]
-    D --> E[SimHash 64-bit Fuzzy Redundancy <50ns]
-    E --> F[In-Flight Multi-Pattern PII Scrubbing]
-    F --> G[BroccoliDB Cognitive Labeling Classifier <50µs]
-    G --> H[Volatile In-Memory Ring Buffer]
-    H --> I[Gzip Compression & SHA-256 Merkle Proofing]
-    I --> J[Cloudflare R2 Partitioned Shard Upload]
-```
-
-### 2.1 Invariant Guarantees
-1. **Zero Data Retention (ZDR)**: Developer API traffic and opted-out consumer sessions strictly bypass training memory buffers.
-2. **Volatile PII Redaction**: AWS access keys, Stripe keys, SSNs, credit cards, emails, and IPv4/IPv6 addresses are redacted in RAM prior to buffering.
-3. **Sub-$50\mu\text{s}$ Cognitive Labeling**: The `BroccoliDataLabelingClassifier` extracts educational score, novelty ratio, and task categorization with zero filesystem overhead.
-4. **Deterministic 90/10 Train/Validation Splitting**: MD5 hash modulo routing automatically segments shards into `split=train` and `split=validation`.
-
----
-
-## 3. Storage Hierarchy on Cloudflare R2
-
-Dataset shards are organized into partitioned, S3-compliant prefix hierarchies:
+To endow **GALX-Flash-8B** with frontier multi-domain proficiency, the 155M-token dataset is divided across 4 curriculum tiers with strict domain allocations:
 
 ```
-galxai-training-datasets/
-├── datasets/
-│   ├── sft/
-│   │   └── v1/
-│   │       ├── split=train/
-│   │       │   └── curriculum=tier_2_intermediate/year=2026/month=08/day=30/sft_shard_001.jsonl.gz
-│   │       └── split=validation/
-│   │           └── curriculum=tier_2_intermediate/year=2026/month=08/day=30/sft_shard_002.jsonl.gz
-│   ├── dpo/
-│   │   └── v1/
-│   │       ├── split=train/
-│   │       └── split=validation/
-│   ├── kto/
-│   ├── microbatches/
-│   ├── compacted/
-│   ├── manifest.json.gz          # Master SHA-256 Merkle index
-│   ├── README.md                 # Hugging Face Dataset Card
-│   ├── index.json                # MosaicML StreamingDataset catalog
-│   └── curriculum_state.json     # Curriculum tier progression
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 4-Tier Curriculum Dataset Composition                                  │
+├─────────────────┬──────────┬──────────────┬───────────────┬────────────────────────────────────────────┤
+│ Curriculum Tier │ Weight   │ Sample Count │ Token Volume  │ Granular Domain Subsets & Allocations      │
+├─────────────────┼──────────┼──────────────┼───────────────┼────────────────────────────────────────────┤
+│ Tier 1: Fact CoT│ 20%      │ 40,000       │ 30,000,000    │ • System-1 Direct QA (35%)                 │
+│                 │          │              │               │ • Wikipedia & Academic Summaries (35%)     │
+│                 │          │              │               │ • Multi-turn Dialogue Context (30%)        │
+├─────────────────┼──────────┼──────────────┼───────────────┼────────────────────────────────────────────┤
+│ Tier 2: Logic   │ 30%      │ 60,000       │ 45,000,000    │ • GSM8K Multi-Step Reasoning (40%)         │
+│                 │          │              │               │ • Formal Logic & Syllogisms (30%)          │
+│                 │          │              │               │ • Symbolic Puzzles & Game Trees (30%)      │
+├─────────────────┼──────────┼──────────────┼───────────────┼────────────────────────────────────────────┤
+│ Tier 3: Code    │ 35%      │ 70,000       │ 55,000,000    │ • Python Backend & Data Science (35%)      │
+│                 │          │              │               │ • Rust Memory Safety & Systems (25%)       │
+│                 │          │              │               │ • TypeScript / Next.js Fullstack (20%)     │
+│                 │          │              │               │ • SQL & Database Query Plans (10%)         │
+│                 │          │              │               │ • Tool Calling & JSON Schema Routing (10%) │
+├─────────────────┼──────────┼──────────────┼───────────────┼────────────────────────────────────────────┤
+│ Tier 4: STEM    │ 15%      │ 30,000       │ 25,000,000    │ • MATH-500 Olympiad Problems (45%)         │
+│                 │          │              │               │ • LeetCode Hard Algorithmic Synthesis (35%)│
+│                 │          │              │               │ • Physics & Quantum Simulations (20%)      │
+├─────────────────┼──────────┼──────────────┼───────────────┼────────────────────────────────────────────┤
+│ **Total**       │ **100%** │ **200,000**  │ **155,000,000**│ Full Spectrum Frontier Engine              │
+└─────────────────┴──────────┴──────────────┴───────────────┴────────────────────────────────────────────┘
 ```
 
 ---
 
-## 4. Verification & Audit Commands
+## 2. SimHash Fuzzy Deduplication & Bloom Filter Mechanics
 
-```bash
-# Execute local R2 dataset sync and probe
-npm run r2:bootstrap
+To eliminate redundant prompt-response pairs while maintaining sub-50ns classification throughput in memory:
 
-# Verify Merkle root derivation and Gzip decompression
-npm run r2:verify
+### 2.1 Bloom Exact Filter
+- Capacity: $m = 10,000,000\text{ bits}$ ($1.19\text{MB}$ in RAM).
+- Hash Functions: $k = 7$ independent cryptographic hash projections derived via MurmurHash3.
+- Theoretical False Positive Rate:
+  $$P(\text{false positive}) \approx \left(1 - e^{-k \cdot n / m}\right)^k \le 0.0001 \quad (\le 0.01\%)$$
 
-# Inspect active split distribution
-curl "http://localhost:3000/api/internal/training?format=splits"
-```
+### 2.2 SimHash 64-Bit Fuzzy Vectorization
+For token sequence $T = (t_1, t_2, \dots, t_N)$:
+1. Each token $t_i$ produces 64-bit hash $h(t_i)$.
+2. Weight vector $V = \sum_{i=1}^N w(t_i) \cdot (2 \cdot h(t_i) - 1)$.
+3. 64-bit SimHash fingerprint $S = \text{sign}(V)$.
+4. Samples with Hamming distance $D_H(S_1, S_2) \le 3$ are immediately pruned from the buffer.
+
+---
+
+## 3. DPO Negative Mining & Alignment Heuristics
+
+For **Phase 5: Length-Debiased DPO Alignment**, preference pairs $(y_w, y_l)$ are mined using four adversarial heuristics:
+
+1. **Length-Matched Rejection**: Pairing long, verbose answers with equally detailed but mathematically flawed alternatives to prevent the model from exploiting length as a proxy for quality.
+2. **Sycophancy Injection**: Injecting subtle user misconceptions into prompts; rewarding responses that politely correct the error and penalizing responses that flatter false premises.
+3. **Hallucination Injection**: Replacing code package imports with hallucinated/deprecated APIs in the rejected set.
+4. **Superficial Formatting Rejection**: Penalizing boilerplate preamble (`"Sure, I'd be happy to help with that!"`) in favor of direct, zero-filler thought chains.
+
+---
+
+## 4. Cryptographic Merkle Root Sealing
+
+Every training shard $S_i$ is hashed using SHA-256:
+
+$$H(S_i) = \text{SHA256}(\text{CompressedBytes}(S_i))$$
+
+The root hash $\mathcal{R}_{\text{Merkle}}$ is computed across all shard hashes in binary order and sealed into `datasets/manifest.json.gz`:
+
+$$\mathcal{R} = H(H(S_1 \| S_2) \| H(S_3 \| S_4))$$
+
+Remote GPU workers verify leaf proofs before consuming training shards, guaranteeing tamper-proof training data integrity.
