@@ -179,17 +179,11 @@ async function main() {
   console.log(`   • Sprint ID:         ${result.sprintId}`);
   console.log(`   • Samples Curated:   ${result.samplesCurated.toLocaleString()}`);
   console.log(`   • Tokens Yielded:    ${result.tokensYielded.toLocaleString()}`);
-  console.log(`   • Micro-Shards:      ${result.microShardsCommitted}`);
+  console.log(`   • Master Shards:     ${result.microShardsCommitted}`);
   console.log(`   • Merkle Tree Root:  ${result.merkleRoot}`);
   console.log(`   • Elapsed Time:      ${result.elapsedSeconds} seconds`);
   console.log(`   • Status:            ${result.status.toUpperCase()}`);
   console.log('─'.repeat(80) + '\n');
-
-  if (options.syncR2) {
-    console.log('☁️  Synchronizing Master Shards with Cloudflare R2...');
-    const syncRes = await syncEngine.syncAllDatasets();
-    console.log(`✓ Synchronized ${syncRes.syncedShards} shards (${syncRes.totalTokens.toLocaleString()} tokens). Merkle Root: ${syncRes.manifest.merkleTreeRoot}\n`);
-  }
 }
 
 main().catch((err) => {

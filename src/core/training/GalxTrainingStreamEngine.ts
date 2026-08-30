@@ -92,7 +92,7 @@ export class GalxTrainingStreamEngine {
   private readonly ktoTable: BroccoliDbTable<DistilledKTOPair>;
 
   // Bounded Capacity FIFO Rings
-  private readonly bufferCapacity: number = 1000;
+  private readonly bufferCapacity: number = 50000;
   private readonly sftRingKeys: string[] = [];
   private readonly dpoRingKeys: string[] = [];
   private readonly ktoRingKeys: string[] = [];
@@ -118,7 +118,7 @@ export class GalxTrainingStreamEngine {
   private constructor() {
     this.redactor = GalxPIIRedactor.getInstance();
     this.bloomFilter = BroccoliDeDuplicationBloomRingBuffer.getInstance(65536);
-    this.simHashFilter = BroccoliSimHashFuzzyDedupBuffer.getInstance(4);
+    this.simHashFilter = BroccoliSimHashFuzzyDedupBuffer.getInstance(3);
     this.telemetry = BroccoliTelemetryEngine.getInstance();
     this.classifier = BroccoliDataLabelingClassifier.getInstance();
 

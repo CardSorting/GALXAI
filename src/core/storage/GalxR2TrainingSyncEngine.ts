@@ -219,7 +219,7 @@ export class GalxR2TrainingSyncEngine {
     const records: R2SyncRecord[] = [];
 
     // 1. Sync SFT Shards with Train / Validation Split
-    const sftSamples = trainingEngine.getRecentSFTSamples(500);
+    const sftSamples = trainingEngine.getRecentSFTSamples(50000);
     if (sftSamples.length > 0) {
       const { train, validation } = this.partitionBySplit(sftSamples, 0.1);
 
@@ -259,7 +259,7 @@ export class GalxR2TrainingSyncEngine {
     }
 
     // 2. Sync DPO Shards with Train / Validation Split
-    const dpoPairs = trainingEngine.getRecentDPOPairs(500);
+    const dpoPairs = trainingEngine.getRecentDPOPairs(50000);
     if (dpoPairs.length > 0) {
       const { train, validation } = this.partitionBySplit(dpoPairs, 0.1);
 
@@ -299,7 +299,7 @@ export class GalxR2TrainingSyncEngine {
     }
 
     // 3. Sync KTO Shards
-    const ktoPairs = trainingEngine.getRecentKTOPairs(500);
+    const ktoPairs = trainingEngine.getRecentKTOPairs(50000);
     if (ktoPairs.length > 0) {
       const ktoJsonl = trainingEngine.exportKtoJsonl(500);
       const tokenCount = ktoPairs.reduce((acc, k) => acc + Math.ceil((k.prompt.length + k.completion.length) / 3.8), 0);
@@ -314,8 +314,8 @@ export class GalxR2TrainingSyncEngine {
       records.push(record);
     }
 
-    // 4. Sync Micro-Batches
-    const batches = trainingEngine.exportTokenPackedMicroBatches(4096);
+    // 4. Sync Representative Micro-Batches
+    const batches = trainingEngine.exportTokenPackedMicroBatches(4096).slice(0, 3);
     if (batches.length > 0) {
       for (const batch of batches) {
         const batchJson = JSON.stringify(batch, null, 2);
