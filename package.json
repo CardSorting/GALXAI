@@ -92,6 +92,7 @@
     "training:all": "tsx scripts/curate-synthetic-dataset.ts --all-sprints --sync-r2",
     "training:status": "tsx scripts/curate-synthetic-dataset.ts --status",
     "training:canary": "tsx scripts/curate-synthetic-dataset.ts --canary",
+    "training:strategy": "tsx scripts/run-training-strategy.ts",
     "stripe:setup": "tsx scripts/setup-stripe-cli.ts",
     "stripe:provision": "tsx scripts/provision-stripe-all.ts",
     "stripe:login": "stripe login",
