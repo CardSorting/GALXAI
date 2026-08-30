@@ -192,14 +192,17 @@ export class GalxTrainingStreamEngine {
     const assistantClean = this.applyDifferentialPrivacyAndScrub(assistantText);
     const hasRedaction = userClean !== userText || assistantClean !== assistantText;
 
-    const messagesPayload: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
-      { role: 'user', content: userClean },
-      { role: 'assistant', content: assistantClean },
+    const promptTokens = Math.ceil(userClean.length / 3.8);
+    const completionTokens = Math.ceil(assistantClean.length / 3.8);
+    const estimatedTokens = promptTokens + completionTokens;
+
+    const messagesPayload: Array<{ role: 'system' | 'user' | 'assistant'; content: string; lossWeight?: number }> = [
+      { role: 'user', content: userClean, lossWeight: 0.0 },
+      { role: 'assistant', content: assistantClean, lossWeight: 1.0 },
     ];
 
     if (hasRedaction) this.totalPIIRedactedCount += 3;
 
-    const estimatedTokens = Math.ceil((userClean.length + assistantClean.length) / 3.8);
     const taxonomy = this.classifier.classify(userClean, assistantClean, { teacherModelId: params.modelId });
 
     const trainingPair: DistilledTrainingPair = {
@@ -211,6 +214,8 @@ export class GalxTrainingStreamEngine {
       piiRedacted: hasRedaction,
       entitiesScrubbedCount: hasRedaction ? 3 : 0,
       estimatedTokens,
+      promptTokens,
+      completionTokens,
       taxonomy,
       timestamp: new Date().toISOString(),
     };
@@ -485,6 +490,54 @@ export class GalxTrainingStreamEngine {
             educationalScore: k.taxonomy?.educationalValueScore,
             hmac: k.taxonomy?.provenanceHmac,
           },
+        })
+      )
+      .join('\n');
+  }
+
+  public exportChatMLJsonl(limit = 500): string {
+    return this.getRecentSFTSamples(limit)
+      .map((s) => {
+        let formatted = '';
+        for (const msg of s.messages) {
+          formatted += `<|im_start|>${msg.role}\n${msg.content}<|im_end|>\n`;
+        }
+        return JSON.stringify({
+          text: formatted.trim(),
+          id: s.id,
+          model: s.modelId,
+          tier: s.taxonomy?.curriculumTier,
+        });
+      })
+      .join('\n');
+  }
+
+  public exportLlama3PromptJsonl(limit = 500): string {
+    return this.getRecentSFTSamples(limit)
+      .map((s) => {
+        let formatted = '<|begin_of_text|>';
+        for (const msg of s.messages) {
+          formatted += `<|start_header_id|>${msg.role}<|end_header_id|>\n\n${msg.content}<|eot_id|>`;
+        }
+        return JSON.stringify({
+          text: formatted,
+          id: s.id,
+          model: s.modelId,
+          tokens: s.estimatedTokens,
+        });
+      })
+      .join('\n');
+  }
+
+  public exportShareGPTJsonl(limit = 500): string {
+    return this.getRecentSFTSamples(limit)
+      .map((s) =>
+        JSON.stringify({
+          id: s.id,
+          conversations: s.messages.map((m) => ({
+            from: m.role === 'user' ? 'human' : m.role === 'assistant' ? 'gpt' : 'system',
+            value: m.content,
+          })),
         })
       )
       .join('\n');

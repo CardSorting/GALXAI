@@ -69,6 +69,37 @@ export async function GET(req: NextRequest) {
         });
       }
 
+      case 'chatml': {
+        const chatml = trainingEngine.exportChatMLJsonl(limit);
+        return new NextResponse(chatml, {
+          headers: {
+            ...streamHeaders,
+            'Content-Disposition': 'attachment; filename="galx_chatml_dataset.jsonl"',
+          },
+        });
+      }
+
+      case 'llama3':
+      case 'llama3_instruct': {
+        const llama3 = trainingEngine.exportLlama3PromptJsonl(limit);
+        return new NextResponse(llama3, {
+          headers: {
+            ...streamHeaders,
+            'Content-Disposition': 'attachment; filename="galx_llama3_dataset.jsonl"',
+          },
+        });
+      }
+
+      case 'sharegpt': {
+        const sharegpt = trainingEngine.exportShareGPTJsonl(limit);
+        return new NextResponse(sharegpt, {
+          headers: {
+            ...streamHeaders,
+            'Content-Disposition': 'attachment; filename="galx_sharegpt_dataset.jsonl"',
+          },
+        });
+      }
+
       case 'microbatches': {
         const maxTokens = parseInt(searchParams.get('maxTokens') || '4096', 10);
         const batches = trainingEngine.exportTokenPackedMicroBatches(maxTokens);

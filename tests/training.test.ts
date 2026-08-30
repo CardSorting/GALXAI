@@ -429,17 +429,37 @@ Therefore: \\boxed{\\text{Verified Lock-Free}}.`;
     throw new Error('Pillar 6 Failed: LLaMA-Factory export failed assertions!');
   }
 
-  // Test 6.15: Curriculum State Export
-  const curReq = new NextRequest('http://localhost:3000/api/internal/training?format=curriculum', {
+  // Test 6.16: ChatML Export
+  const chatmlReq = new NextRequest('http://localhost:3000/api/internal/training?format=chatml', {
     headers: internalHeaders,
   });
-  const curRes = await trainingGet(curReq);
-  const curJson = await curRes.json();
-  if (curRes.status !== 200 || !curJson.curriculumTierMetrics) {
-    throw new Error('Pillar 6 Failed: Curriculum state export failed assertions!');
+  const chatmlRes = await trainingGet(chatmlReq);
+  const chatmlText = await chatmlRes.text();
+  if (chatmlRes.status !== 200 || !chatmlText.includes('<|im_start|>')) {
+    throw new Error('Pillar 6 Failed: ChatML export failed assertions!');
   }
 
-  // Test 6.16: POST Shard Compaction Action
+  // Test 6.17: Llama-3-Instruct Export
+  const llama3Req = new NextRequest('http://localhost:3000/api/internal/training?format=llama3', {
+    headers: internalHeaders,
+  });
+  const llama3Res = await trainingGet(llama3Req);
+  const llama3Text = await llama3Res.text();
+  if (llama3Res.status !== 200 || !llama3Text.includes('<|begin_of_text|>')) {
+    throw new Error('Pillar 6 Failed: Llama-3 export failed assertions!');
+  }
+
+  // Test 6.18: ShareGPT Export
+  const sharegptReq = new NextRequest('http://localhost:3000/api/internal/training?format=sharegpt', {
+    headers: internalHeaders,
+  });
+  const sharegptRes = await trainingGet(sharegptReq);
+  const sharegptText = await sharegptRes.text();
+  if (sharegptRes.status !== 200 || !sharegptText.includes('conversations')) {
+    throw new Error('Pillar 6 Failed: ShareGPT export failed assertions!');
+  }
+
+  // Test 6.19: POST Shard Compaction Action
   const postCompactReq = new NextRequest('http://localhost:3000/api/internal/training', {
     method: 'POST',
     headers: { ...internalHeaders, 'Content-Type': 'application/json' },

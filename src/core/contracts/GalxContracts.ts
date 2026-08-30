@@ -164,11 +164,14 @@ export interface DistilledTrainingPair {
   readonly messages: Array<{
     readonly role: 'system' | 'user' | 'assistant';
     readonly content: string;
+    readonly lossWeight?: number;
   }>;
   readonly qualityScore: number;
   readonly piiRedacted: boolean;
   readonly entitiesScrubbedCount: number;
   readonly estimatedTokens: number;
+  readonly promptTokens?: number;
+  readonly completionTokens?: number;
   readonly taxonomy?: FrontierTaxonomyLabel;
   readonly timestamp: string;
 }
