@@ -29,6 +29,7 @@ flowchart LR
 | **Stage 6** | [06: Disaster Recovery & Post-Mortems](06-disaster-recovery-and-postmortems.md) | Cloudflare edge PoP evacuation, Supabase Point-in-Time Recovery (PITR), 92-test zero-egress database validation, R2 multimodal asset recovery, blameless post-mortem template, and automated regression test authoring. |
 | **Stage 7** | [07: Zero-Hesitation DX & API Governance](07-zero-hesitation-developer-ergonomics-and-api-governance.md) | Universal multi-mental-model absorption (OpenAI, Anthropic, Ollama, LangChain, Vercel AI, Midjourney), zero-install CLI operations (`npx galxai`), chat context hardening, and 98-test verification gates. |
 | **Stage 8** | [08: Unframed Developer Observation Protocol](08-unframed-developer-observation-protocol.md) | 8-vector behavioral observation protocol for unframed developer trials, induced mental model taxonomy, and qualitative product signal capture. |
+| **Stage 9** | [09: Continuous Learning & Training Runbook](09-continuous-learning-and-training-runbook.md) | Zero-egress Cloudflare R2 training dataset syncing, automated shard compaction, Axolotl / Torchtune / Unsloth remote GPU launch, Slime asynchronous RL, INT4 AWQ/GGUF quantization, and vLLM canary deployment. |
 
 
 ---
