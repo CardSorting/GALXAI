@@ -108,7 +108,7 @@ export function ComplianceDetailClient({ doc }: { doc: ComplianceDocDetail }) {
             <div className="text-zinc-400 space-y-0.5">
               <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Digitally Signed &amp; Certified Cryptographically</span>
+                <span>Digitally Signed &amp; Cryptographically Verified</span>
               </div>
               <div className="text-[11px] text-zinc-500">SHA-256 Digest: <code className="text-zinc-400">7f83b1657ff1...</code></div>
             </div>

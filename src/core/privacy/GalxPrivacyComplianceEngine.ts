@@ -183,11 +183,11 @@ export class GalxPrivacyComplianceEngine {
       };
     }
 
-    // ZDR Certification Check
+    // ZDR Compliance Check
     if (policy.zdrEnabled && !caps.zdrCertified) {
       return {
         eligible: false,
-        failureReason: `Shard '${shard.id}' lacks verified Zero Data Retention certification.`
+        failureReason: `Shard '${shard.id}' lacks verified Zero Data Retention policy enforcement.`
       };
     }
 

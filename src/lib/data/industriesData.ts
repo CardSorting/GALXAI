@@ -28,7 +28,7 @@ export interface IndustryItem {
 export const INDUSTRIES_DATA: IndustryItem[] = [
   {
     slug: 'healthcare-and-lifesciences',
-    badge: 'HIPAA & BAA Certified',
+    badge: 'HIPAA & BAA Ready',
     title: 'HIPAA-Compliant AI Gateway for Healthcare, Clinical Trials & EHR Systems',
     headline: 'HIPAA-Compliant AI Gateway for Healthcare & Life Sciences',
     description:
@@ -132,7 +132,7 @@ print(completion.choices[0].message.parsed)`,
       'Massive 900,000 token context window on GPT-5.6 Sol for whole-docket indexing with strict confidentiality guarantees.',
     sectorName: 'Legal & Contract Intelligence',
     targetWorkloads: ['Multi-Gigabyte Litigation Discovery', 'M&A Due Diligence & Contract Audits', 'Regulatory Compliance Mapping'],
-    regulatoryCompliance: ['Attorney-Client Privilege Protection', 'Cryptographic Zero Retention', 'ISO 27001 Certified'],
+    regulatoryCompliance: ['Attorney-Client Privilege Protection', 'Cryptographic Zero Retention', 'ISO/IEC 27001 Aligned'],
     recommendedModels: [
       { name: 'OpenAI GPT-5.6 Sol', modelId: 'gpt-5.6-sol', role: '900,000 token whole-case litigation discovery' },
       { name: 'OpenAI GPT-5.6 Terra', modelId: 'gpt-5.6-terra', role: 'Complex indemnity and liability cross-referencing' },
@@ -246,7 +246,7 @@ for chunk in stream:
     faqs: [
       {
         q: 'Is traffic guaranteed to stay within the United States?',
-        a: 'Yes. Dedicated sovereign contracts enforce BGP Anycast routes restricted exclusively to certified CONUS data centers.',
+        a: 'Yes. Dedicated sovereign contracts enforce BGP Anycast routes restricted exclusively to sovereign CONUS data centers.',
       },
     ],
   },
@@ -259,7 +259,7 @@ for chunk in stream:
       'Analyze millions of SIEM event logs, decode malicious payloads, and automate incident response with 900K context windows, 75% prompt caching, and zero data retention.',
     sectorName: 'Cybersecurity & Threat Intelligence',
     targetWorkloads: ['Automated SIEM Alert Triaging', 'Vulnerability Exploitation Analysis', 'Zero-Day IOC Extraction'],
-    regulatoryCompliance: ['SOC 2 Type II Certified', 'ISO/IEC 27001:2022', 'Volatile RAM ZDR Protocol'],
+    regulatoryCompliance: ['SOC 2 Type II Aligned', 'ISO/IEC 27001:2022', 'Volatile RAM ZDR Protocol'],
     recommendedModels: [
       { name: 'OpenAI GPT-5.6 Sol', modelId: 'gpt-5.6-sol', role: 'Full network traffic capture & multi-gigabyte log analysis' },
       { name: 'OpenAI GPT-5.6 Terra', modelId: 'gpt-5.6-terra', role: 'Decompiled assembly & reverse engineering reasoning' },

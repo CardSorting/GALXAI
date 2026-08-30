@@ -101,7 +101,7 @@ export default function AuditLogsPage() {
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div className="space-y-0.5">
-              <span className="font-bold text-white">SOC 2 Type II & ISO 27001 Financial Trail Certified</span>
+              <span className="font-bold text-white">SOC 2 Type II &amp; ISO 27001 Financial Trail Enforced</span>
               <p className="text-[11px] text-emerald-400/80">Every event is hashed with immutable SHA-256 signatures and zero data retention.</p>
             </div>
           </div>

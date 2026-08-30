@@ -90,9 +90,9 @@ export function createOrganizationSchema() {
       },
     ],
     award: [
-      'SOC 2 Type II Security Certified',
-      'ISO/IEC 27001:2022 Accredited',
-      'HIPAA BAA Verified Zero PHI Storage',
+      'SOC 2 Type II Security Architecture',
+      'ISO/IEC 27001:2022 Security Framework',
+      'HIPAA BAA Compliant Zero PHI Architecture',
     ],
     contactPoint: {
       '@type': 'ContactPoint',

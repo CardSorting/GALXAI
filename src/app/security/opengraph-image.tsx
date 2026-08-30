@@ -89,7 +89,7 @@ export default async function Image() {
               fontWeight: 700,
             }}
           >
-            <span>SOC 2 Type II &amp; HIPAA Certified</span>
+            <span>SOC 2 Type II &amp; HIPAA Architecture</span>
           </div>
         </div>
 

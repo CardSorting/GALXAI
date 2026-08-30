@@ -25,7 +25,7 @@ export const SECURITY_SPECIFICATIONS_DATA: SecuritySpecificationItem[] = [
     slug: 'pci-dss',
     badge: 'PCI DSS Level 1',
     title: 'PCI DSS Level 1 Tokenized Billing & Financial Isolation Compliance — GALXAI',
-    headline: 'PCI DSS Level 1 Certified Financial Inference Substrate',
+    headline: 'PCI DSS Level 1 Financial Inference & Isolation Substrate',
     description:
       'Architectural specifications for tokenized credit balances, cardholder data environment (CDE) isolation, and automated cryptographic billing ledgers.',
     regulatoryBody: 'Payment Card Industry Security Standards Council (PCI SSC)',
@@ -119,14 +119,14 @@ print("EU Compliance Attestation:", resp.headers.get("x-galxai-eu-act-compliance
   },
   {
     slug: 'ccpa-cpra',
-    badge: 'CCPA / CPRA Certified',
+    badge: 'CCPA / CPRA Compliant',
     title: 'California Consumer Privacy Act (CCPA / CPRA) Compliance — GALXAI',
     headline: 'California Privacy Rights Act (CPRA) Data Protection Architecture',
     description:
-      'Enforced consumer data privacy rights, automated zero-sale certifications, and instant cryptographic data deletion protocols.',
+      'Enforced consumer data privacy rights, automated zero-sale guarantees, and instant cryptographic data deletion protocols.',
     regulatoryBody: 'California Privacy Protection Agency (CPPA)',
-    auditFrequency: 'Annual Privacy Impact Assessment (PIA) & Third-Party Legal Review',
-    enforcementMechanism: 'Zero Data Retention Policy + Do Not Sell Certification + RAM Erasure',
+    auditFrequency: 'Annual Privacy Impact Assessment (PIA) & Internal Legal Review',
+    enforcementMechanism: 'Zero Data Retention Policy + Do Not Sell Guarantee + RAM Erasure',
     complianceGuarantees: [
       'Zero Sale of Personal Data: Binding contractual guarantee that inference payloads are never monetized or sold',
       'Automated Right to Deletion: Payloads in volatile RAM dissolve immediately upon TCP connection termination',
@@ -139,7 +139,7 @@ print("EU Compliance Attestation:", resp.headers.get("x-galxai-eu-act-compliance
       code: `import requests
 
 resp = requests.get("https://api.galx.ai/compliance/cpra-statement")
-print("Do Not Sell Certification Status:", resp.json().get("certified_status"))`,
+print("Do Not Sell Policy Status:", resp.json().get("policy_status"))`,
     },
     faqs: [
       {
@@ -150,12 +150,12 @@ print("Do Not Sell Certification Status:", resp.json().get("certified_status"))`
   },
   {
     slug: 'penetration-testing',
-    badge: 'CREST Certified Pentest',
+    badge: 'CREST Standard Pentest',
     title: 'Independent Penetration Testing & Vulnerability Assessment Reports — GALXAI',
     headline: 'Independent Third-Party Penetration Testing & Vulnerability Reports',
     description:
       'Comprehensive red-team assessments, dynamic application security testing (DAST), and prompt injection resistance audits.',
-    regulatoryBody: 'CREST & Offensive Security Certified Professionals (OSCP)',
+    regulatoryBody: 'CREST & OSCP Aligned Security Methodologies',
     auditFrequency: 'Bi-Annual Grey-Box & Black-Box Red Team Engagements',
     enforcementMechanism: 'Automated Daily Static Analysis + Bug Bounty Vulnerability Program',
     complianceGuarantees: [

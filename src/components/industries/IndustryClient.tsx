@@ -85,7 +85,7 @@ export function IndustryClient({ industry }: IndustryClientProps) {
 
           {/* Compliance & Workloads Tags */}
           <div className="flex flex-wrap items-center gap-2 pt-2">
-            <span className="text-xs font-mono text-zinc-400">Certified Compliance:</span>
+            <span className="text-xs font-mono text-zinc-400">Security &amp; Compliance Standards:</span>
             {industry.regulatoryCompliance.map((rc, idx) => (
               <span key={idx} className="px-2.5 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px] font-mono font-bold">
                 {rc}

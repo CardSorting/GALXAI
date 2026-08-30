@@ -230,7 +230,7 @@ export default function EnterpriseBillingPage() {
               <select className="w-full py-3 px-4 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-amber-500">
                 <option>Standard Enterprise Contract</option>
                 <option>Custom BAA (HIPAA Compliance)</option>
-                <option>Zero-Retention Certified DPA (GDPR/CCPA)</option>
+                <option>Zero-Retention DPA (GDPR/CCPA Compliant)</option>
                 <option>Custom Multi-Tenant Team Sub-Accounts</option>
               </select>
             </div>

@@ -13,11 +13,17 @@ export function FloatingConversionDock() {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
+    if (dismissed) return;
+
+    let ticking = false;
     const handleScroll = () => {
-      if (window.scrollY > 450 && !dismissed) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const shouldShow = window.scrollY > 450;
+          setIsVisible((prev) => (prev !== shouldShow ? shouldShow : prev));
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 

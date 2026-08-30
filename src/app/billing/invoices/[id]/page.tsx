@@ -182,7 +182,7 @@ export default function SingleInvoicePage({ params }: { params: Promise<{ id: st
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-white/10 font-mono text-xs">
             <div className="text-zinc-400 space-y-0.5">
               <div>Payment received via Stripe • Transaction ID: <code className="text-zinc-300">ch_3N184G...</code></div>
-              <div className="text-[11px] text-zinc-500">Zero Content Retention Certified • 100% Cryptographically Isolated</div>
+              <div className="text-[11px] text-zinc-500">Zero Content Retention Enforced • 100% Cryptographically Isolated</div>
             </div>
 
             <div className="text-right space-y-1">

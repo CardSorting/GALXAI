@@ -21,22 +21,28 @@ function BaseFloatingActionDock() {
   const [copied, setCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
 
-  if (pathname === '/') {
-    return null;
-  }
-
   useEffect(() => {
+    if (pathname === '/') return;
+
+    let ticking = false;
     const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowScrollTop(true);
-      } else {
-        setShowScrollTop(false);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const shouldShow = window.scrollY > 300;
+          setShowScrollTop((prev) => (prev !== shouldShow ? shouldShow : prev));
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [pathname]);
+
+  if (pathname === '/') {
+    return null;
+  }
 
   const handleCopyLink = async () => {
     if (typeof window !== 'undefined') {

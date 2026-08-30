@@ -244,7 +244,7 @@ export function EnterpriseSolutionClient() {
               <select className="w-full py-3 px-4 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-cyan-500 cursor-pointer">
                 <option>Standard Enterprise Agreement</option>
                 <option>Custom HIPAA BAA Signed</option>
-                <option>Zero Data Retention (ZDR) Certified DPA</option>
+                <option>Zero Data Retention (ZDR) Enforced DPA</option>
                 <option>Dedicated Private VPC Peering &amp; SLA</option>
               </select>
             </div>

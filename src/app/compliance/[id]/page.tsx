@@ -8,7 +8,7 @@ const COMPLIANCE_MAP: Record<string, ComplianceDocDetail> = {
     id: 'soc2',
     title: 'SOC 2 Type II Security Audit Attestation',
     category: 'Security & Availability',
-    badge: 'Certified Clean Opinion',
+    badge: 'Security Attestation',
     lastUpdated: 'August 2026',
     version: 'v2026.2',
     auditor: 'Schellman & Company, LLC (Independent CPA)',

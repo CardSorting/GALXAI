@@ -428,7 +428,7 @@ function CheckoutContent() {
                   <div className="flex items-center justify-between text-zinc-300">
                     <span className="flex items-center gap-1.5 text-emerald-400 font-bold text-[11px]">
                       <ShieldCheck className="w-4 h-4" />
-                      <span>PCI-DSS SAQ-A Certified Zero-Scope Vault</span>
+                      <span>PCI-DSS SAQ-A Compliant Zero-Scope Vault</span>
                     </span>
                     <span className="text-[10px] text-zinc-500 font-mono">Stripe Hosted Vault</span>
                   </div>

@@ -51,8 +51,6 @@ export function ImageStudioModal({ isOpen, onClose, onInsertToChat }: ImageStudi
   const [recentGallery, setRecentGallery] = useState<GeneratedImageItem[]>([]);
   const [copiedUrl, setCopiedUrl] = useState(false);
 
-  if (!isOpen) return null;
-
   const handleGenerate = async () => {
     if (!prompt.trim() || isGenerating) return;
 
@@ -134,6 +132,8 @@ export function ImageStudioModal({ isOpen, onClose, onInsertToChat }: ImageStudi
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
 
   return (
     <div

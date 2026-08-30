@@ -140,7 +140,7 @@ response = client.chat.completions.create(
     technicalMetrics: [
       { label: 'Disk Persistence', value: '0 ms', context: 'RAM Purged on Socket Close' },
       { label: 'Encryption', value: 'AES-256', context: 'GCM Hardware Authenticated' },
-      { label: 'Compliance', value: 'SOC 2 / HIPAA', context: 'Zero Retention Certified' },
+      { label: 'Compliance', value: 'SOC 2 / HIPAA', context: 'Zero Retention Architecture' },
     ],
     codeVerificationSnippet: {
       language: 'python',

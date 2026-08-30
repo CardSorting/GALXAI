@@ -15,6 +15,16 @@ export function ChatShareModal({ isOpen, onClose, title, messages }: ChatShareMo
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedMarkdown, setCopiedMarkdown] = useState(false);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const conversationMarkdown = `# ${title || 'GALX AI Conversation'}\n\n*Exported from GALX AI — Unified Frontier Model Gateway*\n\n---\n\n` +
@@ -52,16 +62,6 @@ export function ChatShareModal({ isOpen, onClose, title, messages }: ChatShareMo
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
 
   return (
     <div

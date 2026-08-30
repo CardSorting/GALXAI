@@ -117,7 +117,7 @@ function BaseFooter() {
       { name: 'Education & EdTech AI', href: '/industries/education-and-edtech', badge: 'FERPA' },
       { name: 'Healthcare & Life Sciences', href: '/industries/healthcare-and-lifesciences', badge: 'HIPAA/BAA' },
       { name: 'Active-Active Failover SLA', href: '/reliability/preventing-outages-during-openai-downtime', badge: '99.99%' },
-      { name: 'EU AI Act Compliance', href: '/security/eu-ai-act', badge: 'Certified' },
+      { name: 'EU AI Act Compliance', href: '/security/eu-ai-act', badge: 'Compliant' },
       { name: 'OpenRouter vs GALXAI', href: '/alternatives/openrouter' },
       { name: '75% Prompt Caching Pass', href: '/pricing#caching' },
       { name: 'Enterprise Compliance & DPA', href: '/compliance', badge: 'HIPAA/GDPR' },
@@ -298,7 +298,7 @@ function BaseFooter() {
             <span>•</span>
             <span className="flex items-center gap-1 text-zinc-400">
               <Lock className="w-3 h-3 text-emerald-400" />
-              <span>Zero Content Retention Certified</span>
+              <span>Zero Content Retention Enforced</span>
             </span>
           </div>
 

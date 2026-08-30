@@ -117,24 +117,24 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Compliance & Certifications */}
+        {/* Compliance & Security Standards */}
         <section className="p-8 rounded-3xl bg-zinc-900/30 border border-white/10 space-y-6">
           <div className="flex items-center gap-3">
             <Award className="w-6 h-6 text-amber-400" />
-            <h2 className="text-xl font-bold text-white">Enterprise Governance &amp; Security Certifications</h2>
+            <h2 className="text-xl font-bold text-white">Enterprise Governance &amp; Security Architecture</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-zinc-300">
             <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-1">
-              <div className="font-bold text-white">SOC 2 Type II Certified</div>
-              <div className="text-zinc-500">Audited by Schellman &amp; Co.</div>
+              <div className="font-bold text-white">SOC 2 Type II Aligned</div>
+              <div className="text-zinc-500">Continuous Security Control Monitoring</div>
             </div>
             <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-1">
               <div className="font-bold text-white">ISO/IEC 27001:2022</div>
-              <div className="text-zinc-500">BSI Group ANAB Accredited</div>
+              <div className="text-zinc-500">Information Security Management Framework</div>
             </div>
             <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-1">
               <div className="font-bold text-white">HIPAA BAA Compliant</div>
-              <div className="text-zinc-500">Zero PHI Retention Guarantee</div>
+              <div className="text-zinc-500">Zero PHI Retention Architecture</div>
             </div>
           </div>
         </section>

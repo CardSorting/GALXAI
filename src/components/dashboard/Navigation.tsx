@@ -11,7 +11,6 @@ import {
   LogOut,
   Cpu,
   Activity,
-  Terminal,
   ShieldCheck,
   Users2,
   DollarSign,
@@ -23,14 +22,16 @@ import {
   CreditCard,
   Settings,
   Building2,
-  User as UserIcon
+  User as UserIcon,
+  Sparkles,
+  ArrowRight
 } from 'lucide-react';
 import { CommandMenu } from '@/components/common/CommandMenu';
 import { LanguageBadge } from '@/components/common/LanguageBadge';
+import { GalxGalaxyLogo } from '@/components/brand/GalxGalaxyLogo';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
-import { GtmPromoBanner } from '@/components/dashboard/GtmPromoBanner';
 import { BroccoliOmniSearch } from '@/lib/resilience/BroccoliOmniSearch';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
@@ -38,7 +39,6 @@ const NAV_LINKS = [
   { name: 'Chat', href: '/chat', icon: MessageSquare },
   { name: 'Gateway', href: '/gateway', icon: Zap },
   { name: 'Models', href: '/models', icon: Cpu },
-  { name: 'Playground', href: '/playground', icon: Terminal },
   { name: 'Pricing', href: '/pricing', icon: DollarSign },
   { name: 'Docs', href: '/docs', icon: BookOpen },
 ];
@@ -49,10 +49,29 @@ function BaseNavigation() {
   const { t } = useLanguage();
   const { walletBalance } = useDepositVerification();
 
+  const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [commandMenuOpen, setCommandMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const userDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Throttled scroll listener using requestAnimationFrame for zero jitter
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const isScrolled = window.scrollY > 8;
+          setScrolled((prev) => (prev !== isScrolled ? isScrolled : prev));
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Close mobile drawer and dropdown on route change
   useEffect(() => {
@@ -92,8 +111,6 @@ function BaseNavigation() {
 
   return (
     <>
-      <GtmPromoBanner />
-
       <CommandMenu
         isOpen={commandMenuOpen}
         onClose={() => setCommandMenuOpen(false)}
@@ -101,30 +118,28 @@ function BaseNavigation() {
 
       <header
         role="banner"
-        className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#07080d]/95 border-b border-white/10 px-4 sm:px-6 py-2.5 transition-all"
+        className={`sticky top-0 z-40 w-full transform-gpu transition-[background-color,border-color,box-shadow] duration-200 px-4 sm:px-6 py-2.5 ${
+          scrolled
+            ? 'bg-[#07080d]/92 backdrop-blur-2xl border-b border-white/[0.12] shadow-xl shadow-black/40'
+            : 'bg-[#07080d]/70 backdrop-blur-xl border-b border-white/[0.06]'
+        }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
-          {/* Left: Brand Logo */}
+          {/* Left: Brand Logo & Navigation */}
           <div className="flex items-center gap-6 lg:gap-8 shrink-0">
             <Link
               href="/"
-              className="flex items-center gap-2 group cursor-pointer shrink-0 rounded-xl p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080d] transition-all"
+              className="flex items-center gap-2 group cursor-pointer shrink-0 rounded-xl p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080d] transition-transform active:scale-95"
               aria-label="GALXAI Home - Universal AI Gateway & Model Router"
             >
-              <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-cyan-500 via-indigo-500 to-indigo-600 flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-                <Zap className="w-3.5 h-3.5 text-white fill-white" />
-              </div>
-              <div className="flex items-baseline font-black tracking-tight text-base">
-                <span className="text-white font-sans">GALX</span>
-                <span className="text-cyan-400 font-sans">AI</span>
-              </div>
+              <GalxGalaxyLogo size={28} showText={true} textClassName="text-lg font-black tracking-tight" />
             </Link>
 
-            {/* Desktop Direct Navigation Links (No Dropdowns) */}
+            {/* Desktop Direct Navigation Links */}
             <nav
               role="navigation"
               aria-label="Primary Navigation"
-              className="hidden lg:flex items-center gap-1"
+              className="hidden lg:flex items-center gap-1 bg-white/[0.03] p-1 rounded-2xl border border-white/[0.06]"
             >
               {NAV_LINKS.map((link) => {
                 const cleanHref = link.href.split('#')[0];
@@ -137,8 +152,8 @@ function BaseNavigation() {
                     onMouseEnter={() => BroccoliOmniSearch.prefetchRoute(cleanHref)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-semibold tracking-normal transition-all duration-150 flex items-center gap-1.5 cursor-pointer select-none ${
                       isActive
-                        ? 'text-cyan-300 bg-cyan-500/10 border border-cyan-500/30 shadow-sm font-bold'
-                        : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                        ? 'text-cyan-300 bg-cyan-500/10 border border-cyan-500/30 shadow-[0_0_12px_rgba(6,182,212,0.12)] font-bold'
+                        : 'text-zinc-400 hover:text-white hover:bg-white/[0.06] border border-transparent'
                     } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400`}
                   >
                     <span>{link.name}</span>
@@ -151,17 +166,18 @@ function BaseNavigation() {
             </nav>
           </div>
 
-          {/* Right: Search, Language Badge, API Keys, Auth & Actions */}
+          {/* Right: Search, Language, API Keys & Auth */}
           <div className="flex items-center gap-2">
             {/* Quick ⌘K Search Trigger */}
             <button
               onClick={() => setCommandMenuOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 active:scale-[0.98] text-xs transition-all cursor-pointer border border-transparent hover:border-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+              className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-cyan-500/30 text-zinc-400 hover:text-zinc-200 active:scale-[0.98] text-xs transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
               title="Search documentation, models, and seats (⌘K)"
               aria-label="Search documentation and platform"
             >
               <Search className="w-3.5 h-3.5 text-zinc-400" />
-              <kbd className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-white/10 text-[10px] text-zinc-300 font-mono">
+              <span className="hidden md:inline text-xs text-zinc-400">Search</span>
+              <kbd className="hidden sm:inline-block px-1.5 py-0.2 rounded bg-white/10 text-[10px] text-zinc-300 font-mono border border-white/10">
                 ⌘K
               </kbd>
             </button>
@@ -188,7 +204,7 @@ function BaseNavigation() {
                 <button
                   type="button"
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-200 hover:text-white transition-all cursor-pointer"
+                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-200 hover:text-white transition-all cursor-pointer"
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                   <span className="hidden sm:inline font-mono max-w-[110px] truncate">
@@ -198,17 +214,17 @@ function BaseNavigation() {
                 </button>
 
                 {userDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-60 rounded-2xl bg-[#0b0e17] border border-white/15 p-2 shadow-2xl space-y-1 z-50 animate-in fade-in zoom-in-95 duration-150">
-                    <div className="px-3 py-2 border-b border-white/10 space-y-0.5">
+                  <div className="absolute right-0 top-full mt-2 w-64 rounded-2xl bg-[#0b0e17]/95 backdrop-blur-2xl border border-white/15 p-2 shadow-2xl space-y-1 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="px-3 py-2 border-b border-white/10 space-y-1">
                       <p className="text-xs font-bold text-white truncate">{user.name || 'Developer'}</p>
                       <p className="text-[10px] text-zinc-400 font-mono truncate">{user.email || 'Sandbox User'}</p>
-                      <div className="flex items-center gap-1.5 pt-1">
+                      <div className="flex items-center gap-1.5 pt-0.5">
                         <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
                           {user.role || 'Developer'}
                         </span>
-                        {user.company && (
-                          <span className="px-1.5 py-0.5 rounded text-[9px] font-mono text-zinc-400 bg-white/5 border border-white/10 truncate max-w-[110px]">
-                            {user.company}
+                        {walletBalance !== undefined && (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                            ${walletBalance.toFixed(2)} USD
                           </span>
                         )}
                       </div>
@@ -217,7 +233,7 @@ function BaseNavigation() {
                     <Link
                       href="/teams/seats"
                       onClick={() => setUserDropdownOpen(false)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
                     >
                       <Users2 className="w-3.5 h-3.5 text-amber-400" />
                       <span>Teams &amp; Seats</span>
@@ -226,7 +242,7 @@ function BaseNavigation() {
                     <Link
                       href="/billing"
                       onClick={() => setUserDropdownOpen(false)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
                     >
                       <CreditCard className="w-3.5 h-3.5 text-emerald-400" />
                       <span>Wallet &amp; Billing</span>
@@ -235,7 +251,7 @@ function BaseNavigation() {
                     <Link
                       href="/keys"
                       onClick={() => setUserDropdownOpen(false)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
                     >
                       <Key className="w-3.5 h-3.5 text-indigo-400" />
                       <span>Universal API Keys</span>
@@ -244,7 +260,7 @@ function BaseNavigation() {
                     <Link
                       href="/settings"
                       onClick={() => setUserDropdownOpen(false)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
                     >
                       <Settings className="w-3.5 h-3.5 text-zinc-400" />
                       <span>Settings</span>
@@ -257,7 +273,7 @@ function BaseNavigation() {
                           setUserDropdownOpen(false);
                           logout();
                         }}
-                        className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors text-left cursor-pointer"
+                        className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors text-left cursor-pointer"
                       >
                         <LogOut className="w-3.5 h-3.5" />
                         <span>Sign Out</span>
@@ -418,19 +434,13 @@ function BaseNavigation() {
 
 function NavigationFallback() {
   return (
-    <header className="sticky top-0 z-50 glass-panel border-b border-white/10 bg-[#07090e]/95 px-4 py-2.5">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#07090e]/95 backdrop-blur-xl px-4 py-2.5">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white font-black text-xs">
-            <Zap className="w-3.5 h-3.5" />
-          </div>
-          <span className="font-sans font-black text-base text-white">
-            GALX<span className="text-cyan-400">AI</span>
-          </span>
+          <GalxGalaxyLogo size={28} showText={true} textClassName="text-lg font-black tracking-tight" />
         </Link>
         <div className="flex items-center gap-4 text-xs font-mono">
           <Link href="/models" className="text-zinc-300 hover:text-white transition-colors">Models</Link>
-          <Link href="/playground" className="text-zinc-300 hover:text-white transition-colors">Playground</Link>
           <Link href="/pricing" className="text-zinc-300 hover:text-white transition-colors">Pricing</Link>
           <Link href="/docs" className="text-zinc-300 hover:text-white transition-colors">Docs</Link>
         </div>
@@ -443,3 +453,4 @@ export const Navigation = withErrorBoundary(BaseNavigation, {
   name: 'Global Navigation Header',
   fallback: <NavigationFallback />
 });
+

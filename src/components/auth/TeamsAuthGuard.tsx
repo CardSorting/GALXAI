@@ -315,7 +315,7 @@ export function TeamsAuthGuard({ children }: TeamsAuthGuardProps) {
                 <div className="pt-4 border-t border-white/10 grid grid-cols-2 gap-2 text-[11px] font-mono text-zinc-400">
                   <div className="flex items-center gap-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                    <span>SOC 2 Type II Certified</span>
+                    <span>SOC 2 Type II Security</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Lock className="w-3.5 h-3.5 text-cyan-400 shrink-0" />

@@ -64,7 +64,7 @@ export function TrustSeals({ className = '', variant = 'grid' }: TrustSealsProps
           <span className="font-bold text-xs">Zero Data Retention</span>
         </div>
         <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
-          ZDR-100 certified. Prompts and completions are never stored or trained on.
+          Zero Data Retention (ZDR) architecture. Prompts and completions are never stored or trained on.
         </p>
       </div>
 
