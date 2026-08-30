@@ -454,7 +454,14 @@ export class GalxUnifiedR2StorageManager {
         return this.executeSigV4Get(bucketName, key);
       }, `GET ${bucketName}/${key}`);
 
-      const decompressed = result.isGzipped ? zlib.gunzipSync(result.data) : result.data;
+      let decompressed = result.data;
+      if (result.isGzipped) {
+        try {
+          decompressed = zlib.gunzipSync(result.data);
+        } catch {
+          decompressed = result.data;
+        }
+      }
       this.cacheL1Put(bucketName, key, decompressed, result.contentType, result.etag);
 
       return {
