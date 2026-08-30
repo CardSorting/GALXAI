@@ -49,6 +49,39 @@ export async function middleware(request: NextRequest) {
     });
   }
 
+  // 4. Edge Crawler Firewall: Strictly block Googlebot, Google-Extended, and automated crawlers from training endpoints
+  const isTrainingOrInternalEndpoint = pathname.startsWith('/api/internal') || pathname.startsWith('/api/training') || pathname.startsWith('/datasets');
+  if (isTrainingOrInternalEndpoint) {
+    const userAgent = (request.headers.get('user-agent') || '').toLowerCase();
+    const isGoogleCrawler = 
+      userAgent.includes('googlebot') ||
+      userAgent.includes('google-extended') ||
+      userAgent.includes('googleother') ||
+      userAgent.includes('mediapartners-google') ||
+      userAgent.includes('adsbot-google') ||
+      userAgent.includes('feedfetcher-google') ||
+      userAgent.includes('apis-google') ||
+      userAgent.includes('appengine-google');
+
+    if (isGoogleCrawler) {
+      return new NextResponse(
+        JSON.stringify({
+          error: 'Access Denied. Search engine and data crawlers are strictly quarantined from internal training substrates.',
+          status: 'crawler_quarantine_active',
+        }),
+        {
+          status: 403,
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+            'X-Robots-Tag': 'noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate',
+            'Googlebot': 'noindex, nofollow, noarchive',
+          },
+        }
+      );
+    }
+  }
+
   return await updateSession(request);
 }
 

@@ -7,8 +7,16 @@
  * and generates ready-to-run Axolotl, Torchtune, Unsloth, and LLaMA-Factory configs.
  */
 
+import * as fs from 'node:fs';
 import { GalxR2TrainingSyncEngine } from '../src/core/storage/GalxR2TrainingSyncEngine';
 import { GalxTrainingStreamEngine } from '../src/core/training/GalxTrainingStreamEngine';
+
+// Automatically load .env.local and .env in standalone script execution
+if (fs.existsSync('.env.local')) {
+  try { (process as any).loadEnvFile?.('.env.local'); } catch {}
+} else if (fs.existsSync('.env')) {
+  try { (process as any).loadEnvFile?.('.env'); } catch {}
+}
 
 async function bootstrapR2Training() {
   console.log('================================================================================');

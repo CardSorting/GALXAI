@@ -31,6 +31,10 @@ export interface CloudflareEnv {
   RATE_LIMIT_KV?: any;
   EDGE_CACHE?: any;
   ASSET_BUCKET?: any;
+  TRAINING_DATASET_BUCKET?: any;
+  USER_WEBAPPS_BUCKET?: any;
+  DREAMBEES_BUCKET?: any;
+  STICKER_BUCKET?: any;
 }
 
 interface AuthenticatedGatewayKey {

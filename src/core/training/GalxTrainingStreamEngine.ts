@@ -514,8 +514,40 @@ export class GalxTrainingStreamEngine {
     };
   }
 
-  public getRecentSFTSamples(limit = 100): DistilledTrainingPair[] {
-    return this.sftTable.getAll().slice(-limit);
+  public async ingestSyntheticBatch(
+    samples: Array<IngestInteractionParams & { sprintId?: string; curriculumTier?: string; mode?: 'thinking' | 'non_thinking' }>
+  ): Promise<{ accepted: number; rejected: number; totalTokens: number; sampleIds: string[] }> {
+    let accepted = 0;
+    let rejected = 0;
+    let totalTokens = 0;
+    const sampleIds: string[] = [];
+
+    for (const sample of samples) {
+      const result = await this.ingestInteraction({
+        ...sample,
+        source: 'internal_distillation',
+        allowModelTraining: true,
+        isApiCall: false,
+      });
+
+      if (result.status === 'distilled' && result.sampleId) {
+        accepted++;
+        totalTokens += result.tokensCaptured || 0;
+        sampleIds.push(result.sampleId);
+      } else {
+        rejected++;
+      }
+    }
+
+    return { accepted, rejected, totalTokens, sampleIds };
+  }
+
+  public getRecentSFTSamples(limit = 100, filter?: { sprintId?: string; curriculumTier?: string }): DistilledTrainingPair[] {
+    let all = this.sftTable.getAll();
+    if (filter?.curriculumTier) {
+      all = all.filter((s) => s.taxonomy?.curriculumTier === filter.curriculumTier);
+    }
+    return all.slice(-limit);
   }
 
   public getRecentDPOPairs(limit = 100): DistilledDPOPair[] {
@@ -537,3 +569,4 @@ export class GalxTrainingStreamEngine {
 }
 
 export const galxTrainingEngine = GalxTrainingStreamEngine.getInstance();
+
