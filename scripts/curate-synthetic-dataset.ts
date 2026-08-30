@@ -11,9 +11,17 @@
  *   npx tsx scripts/curate-synthetic-dataset.ts --export-unsloth
  */
 
+import * as fs from 'node:fs';
 import { GalxSyntheticCuratorEngine, SPRINT_REGISTRY, type SprintId } from '../src/core/training/GalxSyntheticCuratorEngine';
 import { GalxR2TrainingSyncEngine } from '../src/core/storage/GalxR2TrainingSyncEngine';
 import { GalxTrainingStreamEngine } from '../src/core/training/GalxTrainingStreamEngine';
+
+// Automatically load .env.local and .env
+if (fs.existsSync('.env.local')) {
+  try { (process as any).loadEnvFile?.('.env.local'); } catch {}
+} else if (fs.existsSync('.env')) {
+  try { (process as any).loadEnvFile?.('.env'); } catch {}
+}
 
 function renderHeader(title: string) {
   console.log('\n' + '═'.repeat(80));

@@ -8,6 +8,7 @@
  *   npx tsx scripts/run-training-strategy.ts --phase=6
  */
 
+import * as fs from 'node:fs';
 import { GalxSyntheticCuratorEngine } from '../src/core/training/GalxSyntheticCuratorEngine';
 import { GalxR2TrainingSyncEngine } from '../src/core/storage/GalxR2TrainingSyncEngine';
 import { GalxTrainingStreamEngine } from '../src/core/training/GalxTrainingStreamEngine';
@@ -15,6 +16,13 @@ import { GalxSlimeRLEngine } from '../src/core/training/GalxSlimeRLEngine';
 import { GalxDPOMiningEngine } from '../src/core/training/GalxDPOMiningEngine';
 import { GalxBenchmarkGateEvaluator } from '../src/core/training/GalxBenchmarkGateEvaluator';
 import { GalxDeploymentOrchestrator } from '../src/core/training/GalxDeploymentOrchestrator';
+
+// Automatically load .env.local and .env
+if (fs.existsSync('.env.local')) {
+  try { (process as any).loadEnvFile?.('.env.local'); } catch {}
+} else if (fs.existsSync('.env')) {
+  try { (process as any).loadEnvFile?.('.env'); } catch {}
+}
 
 function renderBanner(title: string) {
   console.log('\n' + '═'.repeat(80));
