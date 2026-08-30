@@ -1,26 +1,19 @@
 /**
- * GALXAI: Enterprise Synthetic Dataset Curation CLI Operator Tool
+ * GALXAI: Next-Gen Industrial Synthetic Dataset Curator CLI & Multi-Stage Pipeline Runner
  *
- * Command-line runner for 2.5-hour bounded synthetic post-training sprints:
  * Usage:
- *   npm run training:curate -- --canary
- *   npm run training:curate -- --sprint=1A --samples=12500 --sync-r2
- *   npm run training:curate -- --sprint=1A --dry-run
- *   npm run training:curate -- --status
- *   npm run training:curate -- --export-axolotl
+ *   npx tsx scripts/curate-synthetic-dataset.ts --canary
+ *   npx tsx scripts/curate-synthetic-dataset.ts --sprint=1A --samples=12500 --sync-r2
+ *   npx tsx scripts/curate-synthetic-dataset.ts --all-sprints --sync-r2
+ *   npx tsx scripts/curate-synthetic-dataset.ts --status
+ *   npx tsx scripts/curate-synthetic-dataset.ts --export-axolotl
+ *   npx tsx scripts/curate-synthetic-dataset.ts --export-torchtune
+ *   npx tsx scripts/curate-synthetic-dataset.ts --export-unsloth
  */
 
-import * as fs from 'node:fs';
-import { GalxSyntheticCuratorEngine, type SprintId } from '../src/core/training/GalxSyntheticCuratorEngine';
+import { GalxSyntheticCuratorEngine, SPRINT_REGISTRY, type SprintId } from '../src/core/training/GalxSyntheticCuratorEngine';
 import { GalxR2TrainingSyncEngine } from '../src/core/storage/GalxR2TrainingSyncEngine';
 import { GalxTrainingStreamEngine } from '../src/core/training/GalxTrainingStreamEngine';
-
-// Automatically load .env.local and .env in standalone script execution
-if (fs.existsSync('.env.local')) {
-  try { (process as any).loadEnvFile?.('.env.local'); } catch {}
-} else if (fs.existsSync('.env')) {
-  try { (process as any).loadEnvFile?.('.env'); } catch {}
-}
 
 function renderHeader(title: string) {
   console.log('\n' + '═'.repeat(80));
@@ -39,6 +32,7 @@ function parseArgs(): {
   exportAxolotl: boolean;
   exportTorchtune: boolean;
   exportUnsloth: boolean;
+  allSprints: boolean;
 } {
   const args = process.argv.slice(2);
   let canary = false;
@@ -51,9 +45,11 @@ function parseArgs(): {
   let exportAxolotl = false;
   let exportTorchtune = false;
   let exportUnsloth = false;
+  let allSprints = false;
 
   for (const arg of args) {
     if (arg === '--canary' || arg === '-c') canary = true;
+    else if (arg === '--all-sprints' || arg === '--all') allSprints = true;
     else if (arg.startsWith('--sprint=')) {
       const val = arg.split('=')[1];
       if (val === '0' || val === 'canary') sprintId = 'sprint_0';
@@ -95,6 +91,7 @@ function parseArgs(): {
     exportAxolotl,
     exportTorchtune,
     exportUnsloth,
+    allSprints,
   };
 }
 
@@ -104,7 +101,7 @@ async function main() {
   const syncEngine = GalxR2TrainingSyncEngine.getInstance();
   const streamEngine = GalxTrainingStreamEngine.getInstance();
 
-  // 1. Export Handlers
+  // 1. Recipe Exporters
   if (options.exportAxolotl) {
     renderHeader('Axolotl Recipe Exporter');
     const yaml = syncEngine.exportAxolotlDatasetConfig();
@@ -126,7 +123,7 @@ async function main() {
     return;
   }
 
-  // 2. Status Display
+  // 2. Storage & Stream Telemetry Status
   if (options.status) {
     renderHeader('Curriculum Saturation & Storage Status');
     const r2Health = await syncEngine.verifyR2TrainingStorage();
@@ -148,7 +145,7 @@ async function main() {
     return;
   }
 
-  // 3. Preflight Canary Mode (Sprint 0)
+  // 3. Preflight Canary Probe (Sprint 0)
   if (options.canary) {
     renderHeader('Preflight Canary Diagnostic Probe (Sprint 0)');
     console.log('Starting end-to-end 50-sample diagnostic validation...\n');
@@ -158,7 +155,60 @@ async function main() {
     return;
   }
 
-  // 4. Operational Sprint Execution (Sprint 1A, etc.)
+  // 4. Multi-Sprint Sequential Execution (--all-sprints)
+  if (options.allSprints) {
+    renderHeader('Full Curriculum Progression Runner (Stages 1A to 4B)');
+    const stages: SprintId[] = [
+      'sprint_1A', 'sprint_1B',
+      'sprint_2A', 'sprint_2B',
+      'sprint_3A', 'sprint_3B',
+      'sprint_4A', 'sprint_4B',
+    ];
+
+    console.log(`Cascading through all ${stages.length} curricular stages with direct R2 synchronization...\n`);
+    let totalCurated = 0;
+    let totalTokens = 0;
+    const stageSummaries: Array<{ stage: string; samples: number; tokens: number; timeSec: number; merkleRoot: string }> = [];
+
+    for (const stage of stages) {
+      const config = SPRINT_REGISTRY[stage];
+      const targetSamples = options.samples || (options.dryRun ? 100 : config.targetSamples);
+      console.log(`▶ Starting ${config.stageName} (${stage}) | Target: ${targetSamples.toLocaleString()} samples`);
+
+      const res = await curator.executeSprint({
+        sprintId: stage,
+        sampleTarget: targetSamples,
+        dryRun: options.dryRun,
+        onProgress: (status) => {
+          process.stdout.write(
+            `\r  [${status.sprintId}] Curated: ${status.samplesAccepted.toLocaleString()} | Tokens: ${status.tokensGenerated.toLocaleString()} | Velocity: ${status.currentVelocityTokensPerSec.toLocaleString()} tok/s`
+          );
+        },
+      });
+
+      totalCurated += res.samplesCurated;
+      totalTokens += res.tokensYielded;
+      stageSummaries.push({
+        stage,
+        samples: res.samplesCurated,
+        tokens: res.tokensYielded,
+        timeSec: res.elapsedSeconds,
+        merkleRoot: res.merkleRoot,
+      });
+
+      console.log(`\n  ✓ ${stage} Completed in ${res.elapsedSeconds}s (Merkle: ${res.merkleRoot.slice(0, 16)}...)\n`);
+    }
+
+    console.log('═'.repeat(80));
+    console.log('🎉 ALL CURRICULAR STAGES SUCCESSFULLY COMPLETED & NOTARIZED');
+    console.log(`   • Total Curated Samples: ${totalCurated.toLocaleString()}`);
+    console.log(`   • Total Yielded Tokens:  ${totalTokens.toLocaleString()}`);
+    console.log(`   • Stages Executed:       ${stages.join(' → ')}`);
+    console.log('═'.repeat(80) + '\n');
+    return;
+  }
+
+  // 5. Single Sprint Execution
   renderHeader(`Operational Curation Runner (${options.sprintId})`);
   console.log(`Target: ${options.samples || (options.dryRun ? 50 : 12500)} samples | Time Budget: ${options.timeLimit || 150}m | Mode: ${options.dryRun ? 'DRY-RUN' : 'PRODUCTION'}\n`);
 

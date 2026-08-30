@@ -216,9 +216,9 @@ export class GalxR2TrainingSyncEngine {
     manifest: DatasetManifest;
   }> {
     const trainingEngine = GalxTrainingStreamEngine.getInstance();
-    const records: R2SyncRecord[] = [];
+    const uploadTasks: Promise<R2SyncRecord>[] = [];
 
-    // 1. Sync SFT Shards with Train / Validation Split
+    // 1. Parallel SFT Shards (Train & Validation)
     const sftSamples = trainingEngine.getRecentSFTSamples(50000);
     if (sftSamples.length > 0) {
       const { train, validation } = this.partitionBySplit(sftSamples, 0.1);
@@ -229,15 +229,14 @@ export class GalxR2TrainingSyncEngine {
           metadata: { id: s.id, model: s.modelId, score: s.qualityScore, domain: s.taxonomy?.primaryDomain, tier: s.taxonomy?.curriculumTier }
         })).join('\n');
         const tokenCount = train.reduce((acc, s) => acc + s.estimatedTokens, 0);
-        const record = await this.compressAndUploadShard({
+        uploadTasks.push(this.compressAndUploadShard({
           datasetType: 'sft',
           split: 'train',
           rawContent: trainJsonl,
           sampleCount: train.length,
           tokenCount,
           taxonomy: train[train.length - 1]?.taxonomy,
-        });
-        records.push(record);
+        }));
       }
 
       if (validation.length > 0) {
@@ -246,19 +245,18 @@ export class GalxR2TrainingSyncEngine {
           metadata: { id: s.id, model: s.modelId, score: s.qualityScore, domain: s.taxonomy?.primaryDomain, tier: s.taxonomy?.curriculumTier }
         })).join('\n');
         const tokenCount = validation.reduce((acc, s) => acc + s.estimatedTokens, 0);
-        const record = await this.compressAndUploadShard({
+        uploadTasks.push(this.compressAndUploadShard({
           datasetType: 'sft',
           split: 'validation',
           rawContent: valJsonl,
           sampleCount: validation.length,
           tokenCount,
           taxonomy: validation[validation.length - 1]?.taxonomy,
-        });
-        records.push(record);
+        }));
       }
     }
 
-    // 2. Sync DPO Shards with Train / Validation Split
+    // 2. Parallel DPO Shards
     const dpoPairs = trainingEngine.getRecentDPOPairs(50000);
     if (dpoPairs.length > 0) {
       const { train, validation } = this.partitionBySplit(dpoPairs, 0.1);
@@ -269,15 +267,14 @@ export class GalxR2TrainingSyncEngine {
           metadata: { id: d.id, model: d.modelId, qualityDelta: d.qualityDelta, domain: d.taxonomy?.primaryDomain }
         })).join('\n');
         const tokenCount = train.reduce((acc, d) => acc + Math.ceil((d.prompt.length + d.chosen.length + d.rejected.length) / 3.8), 0);
-        const record = await this.compressAndUploadShard({
+        uploadTasks.push(this.compressAndUploadShard({
           datasetType: 'dpo',
           split: 'train',
           rawContent: trainJsonl,
           sampleCount: train.length,
           tokenCount,
           taxonomy: train[train.length - 1]?.taxonomy,
-        });
-        records.push(record);
+        }));
       }
 
       if (validation.length > 0) {
@@ -286,84 +283,82 @@ export class GalxR2TrainingSyncEngine {
           metadata: { id: d.id, model: d.modelId, qualityDelta: d.qualityDelta, domain: d.taxonomy?.primaryDomain }
         })).join('\n');
         const tokenCount = validation.reduce((acc, d) => acc + Math.ceil((d.prompt.length + d.chosen.length + d.rejected.length) / 3.8), 0);
-        const record = await this.compressAndUploadShard({
+        uploadTasks.push(this.compressAndUploadShard({
           datasetType: 'dpo',
           split: 'validation',
           rawContent: valJsonl,
           sampleCount: validation.length,
           tokenCount,
           taxonomy: validation[validation.length - 1]?.taxonomy,
-        });
-        records.push(record);
+        }));
       }
     }
 
-    // 3. Sync KTO Shards
+    // 3. Parallel KTO Shards
     const ktoPairs = trainingEngine.getRecentKTOPairs(50000);
     if (ktoPairs.length > 0) {
-      const ktoJsonl = trainingEngine.exportKtoJsonl(500);
+      const ktoJsonl = trainingEngine.exportKtoJsonl(50000);
       const tokenCount = ktoPairs.reduce((acc, k) => acc + Math.ceil((k.prompt.length + k.completion.length) / 3.8), 0);
-      const record = await this.compressAndUploadShard({
+      uploadTasks.push(this.compressAndUploadShard({
         datasetType: 'kto',
         split: 'train',
         rawContent: ktoJsonl,
         sampleCount: ktoPairs.length,
         tokenCount,
         taxonomy: ktoPairs[ktoPairs.length - 1]?.taxonomy,
-      });
-      records.push(record);
+      }));
     }
 
-    // 4. Sync Representative Micro-Batches
+    // 4. Parallel Representative Micro-Batches
     const batches = trainingEngine.exportTokenPackedMicroBatches(4096).slice(0, 3);
-    if (batches.length > 0) {
-      for (const batch of batches) {
-        const batchJson = JSON.stringify(batch, null, 2);
-        const record = await this.compressAndUploadShard({
-          datasetType: 'microbatch',
-          split: 'train',
-          rawContent: batchJson,
-          sampleCount: batch.totalSamples,
-          tokenCount: batch.totalPackedTokens,
-          customKey: `datasets/microbatches/v1/split=train/curriculum=tier_3_advanced/year=${new Date().getUTCFullYear()}/month=${String(new Date().getUTCMonth() + 1).padStart(2, '0')}/day=${String(new Date().getUTCDate()).padStart(2, '0')}/microbatch_${batch.batchId}.json.gz`,
-        });
-        records.push(record);
-      }
+    for (const batch of batches) {
+      const batchJson = JSON.stringify(batch, null, 2);
+      uploadTasks.push(this.compressAndUploadShard({
+        datasetType: 'microbatch',
+        split: 'train',
+        rawContent: batchJson,
+        sampleCount: batch.totalSamples,
+        tokenCount: batch.totalPackedTokens,
+        customKey: `datasets/microbatches/v1/split=train/curriculum=tier_3_advanced/year=${new Date().getUTCFullYear()}/month=${String(new Date().getUTCMonth() + 1).padStart(2, '0')}/day=${String(new Date().getUTCDate()).padStart(2, '0')}/microbatch_${batch.batchId}.json.gz`,
+      }));
     }
+
+    const records = await Promise.all(uploadTasks);
 
     // 5. Update Atomic Manifest with Merkle Root
     const manifest = await this.generateAndUploadManifest();
 
-    // 6. Update Hugging Face Dataset Card (README.md), Streaming Index, & Curriculum State
+    // 6. Parallel Upload Metadata Artifacts
     const cardMarkdown = this.exportDatasetCardMarkdown();
-    await this.compressAndUploadShard({
-      datasetType: 'microbatch',
-      split: 'train',
-      rawContent: cardMarkdown,
-      sampleCount: 1,
-      tokenCount: 100,
-      customKey: 'datasets/README.md',
-    });
-
     const streamingIndex = JSON.stringify(this.exportStreamingIndexJson(), null, 2);
-    await this.compressAndUploadShard({
-      datasetType: 'microbatch',
-      split: 'train',
-      rawContent: streamingIndex,
-      sampleCount: 1,
-      tokenCount: 100,
-      customKey: 'datasets/index.json',
-    });
-
     const curriculumState = JSON.stringify(this.exportCurriculumStateJson(), null, 2);
-    await this.compressAndUploadShard({
-      datasetType: 'microbatch',
-      split: 'train',
-      rawContent: curriculumState,
-      sampleCount: 1,
-      tokenCount: 100,
-      customKey: 'datasets/curriculum_state.json',
-    });
+
+    await Promise.all([
+      this.compressAndUploadShard({
+        datasetType: 'microbatch',
+        split: 'train',
+        rawContent: cardMarkdown,
+        sampleCount: 1,
+        tokenCount: 100,
+        customKey: 'datasets/README.md',
+      }),
+      this.compressAndUploadShard({
+        datasetType: 'microbatch',
+        split: 'train',
+        rawContent: streamingIndex,
+        sampleCount: 1,
+        tokenCount: 100,
+        customKey: 'datasets/index.json',
+      }),
+      this.compressAndUploadShard({
+        datasetType: 'microbatch',
+        split: 'train',
+        rawContent: curriculumState,
+        sampleCount: 1,
+        tokenCount: 100,
+        customKey: 'datasets/curriculum_state.json',
+      }),
+    ]);
 
     const totalUncompressed = records.reduce((acc, r) => acc + r.uncompressedSizeBytes, 0);
     const totalCompressed = records.reduce((acc, r) => acc + r.compressedSizeBytes, 0);

@@ -125,6 +125,43 @@ export async function GET(req: NextRequest) {
         });
       }
 
+      case 'hf_info':
+      case 'huggingface': {
+        const streamingIndex = syncEngine.exportStreamingIndexJson();
+        const shards = syncEngine.getRecentSyncRecords();
+        const trainCount = shards.filter((s) => s.split === 'train').reduce((acc, s) => acc + s.sampleCount, 0);
+        const valCount = shards.filter((s) => s.split === 'validation').reduce((acc, s) => acc + s.sampleCount, 0);
+        return NextResponse.json(
+          {
+            dataset_name: 'galxai-synthetic-distillation',
+            version: '8.0.0',
+            splits: {
+              train: { num_examples: trainCount || 1000 },
+              validation: { num_examples: valCount || 100 },
+            },
+            features: {
+              messages: [{ role: 'string', content: 'string' }],
+              metadata: { id: 'string', model: 'string', score: 'float', domain: 'string', tier: 'string' },
+            },
+            streaming: streamingIndex,
+          },
+          { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate', 'X-Robots-Tag': 'noindex, nofollow' } }
+        );
+      }
+
+      case 'dataset_card':
+      case 'readme': {
+        const card = syncEngine.exportDatasetCardMarkdown();
+        return new NextResponse(card, {
+          headers: {
+            'Content-Type': 'text/markdown; charset=utf-8',
+            'Cache-Control': 'no-store, no-cache, must-revalidate',
+            'Content-Disposition': 'attachment; filename="README.md"',
+            'X-Robots-Tag': 'noindex, nofollow',
+          },
+        });
+      }
+
       case 'streaming_index':
       case 'index_json': {
         const streamingIndex = syncEngine.exportStreamingIndexJson();
@@ -155,12 +192,20 @@ export async function GET(req: NextRequest) {
         });
       }
 
-      case 'manifest': {
-        const auditRecords = syncEngine.getRecentSyncRecords();
-        return NextResponse.json(
-          { totalShards: auditRecords.length, shards: auditRecords },
-          { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate', 'X-Robots-Tag': 'noindex, nofollow' } }
-        );
+      case 'llamafactory':
+      case 'llama_factory': {
+        const lf = syncEngine.exportLlamaFactoryDatasetInfo();
+        return NextResponse.json(lf, {
+          headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate', 'X-Robots-Tag': 'noindex, nofollow' },
+        });
+      }
+
+      case 'curriculum':
+      case 'curriculum_state': {
+        const curriculum = syncEngine.exportCurriculumStateJson();
+        return NextResponse.json(curriculum, {
+          headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate', 'X-Robots-Tag': 'noindex, nofollow' },
+        });
       }
 
       case 'telemetry':
