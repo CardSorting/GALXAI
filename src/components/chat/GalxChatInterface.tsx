@@ -135,6 +135,11 @@ function BaseGalxChatInterface() {
       setSessions(updatedSessions);
     });
 
+    // Subscribe to BroccoliDB cross-tab privacy consent mesh
+    const unsubPrivacy = broccoliChatDb.onPrivacyConsentChange((allow) => {
+      setSettings((prev) => ({ ...prev, allowModelTraining: allow }));
+    });
+
     // 1-Hop Atomic Cloud Synchronizer (fetches sessions, active messages & custom personas in 1 single roundtrip)
     const initialTargetId = initialSessions.length > 0 ? initialSessions[0].id : undefined;
     broccoliChatDb.syncWithCloud(initialTargetId).then((result) => {
@@ -437,19 +442,70 @@ function BaseGalxChatInterface() {
     setStreamingMessageId(undefined);
   };
 
-  // Handle Alternative Response Swiping (< 1/3 >)
+  // Handle Alternative Response Swiping (< 1/3 >) with DPO Feedback Extraction
   const handleSwipeAlternative = (messageId: string, direction: 'prev' | 'next') => {
-    setMessages((prev) =>
-      prev.map((m) => {
-        if (m.id !== messageId) return m;
-        const alts = m.alternativeContents || [m.content];
-        const currentIdx = m.activeIndex || 0;
-        let newIdx = currentIdx;
-        if (direction === 'prev' && currentIdx > 0) newIdx = currentIdx - 1;
-        if (direction === 'next' && currentIdx < alts.length - 1) newIdx = currentIdx + 1;
-        return { ...m, activeIndex: newIdx, content: alts[newIdx] };
-      })
-    );
+    setMessages((prev) => {
+      const msgIdx = prev.findIndex((m) => m.id === messageId);
+      if (msgIdx === -1) return prev;
+      const targetMsg = prev[msgIdx];
+      const alts = targetMsg.alternativeContents || [targetMsg.content];
+      const currentIdx = targetMsg.activeIndex || 0;
+      let newIdx = currentIdx;
+      if (direction === 'prev' && currentIdx > 0) newIdx = currentIdx - 1;
+      if (direction === 'next' && currentIdx < alts.length - 1) newIdx = currentIdx + 1;
+      if (newIdx === currentIdx) return prev;
+
+      // Extract DPO pair: the previously displayed completion is rejected, the newly chosen one is chosen
+      const userPromptMsg = prev.slice(0, msgIdx).reverse().find((m) => m.role === 'user');
+      if (userPromptMsg && settings.allowModelTraining !== false) {
+        fetch('/api/chat/feedback', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Galx-Client': 'web-chat',
+            'X-Galx-Allow-Training': 'true',
+          },
+          body: JSON.stringify({
+            prompt: userPromptMsg.content,
+            chosen: alts[newIdx],
+            rejected: alts[currentIdx],
+            modelId: targetMsg.modelId || selectedModelId,
+            source: 'web_chat_swipe',
+          }),
+        }).catch(() => {});
+      }
+
+      return prev.map((m) =>
+        m.id === messageId ? { ...m, activeIndex: newIdx, content: alts[newIdx] } : m
+      );
+    });
+  };
+
+  // Handle User Thumbs Up / Down Rating (KTO Prospect Theory Alignment Feed)
+  const handleRatingChange = (messageId: string, rating: 'up' | 'down') => {
+    if (settings.allowModelTraining === false) return;
+    const msgIdx = messages.findIndex((m) => m.id === messageId);
+    if (msgIdx === -1) return;
+    const targetMsg = messages[msgIdx];
+    const userPromptMsg = messages.slice(0, msgIdx).reverse().find((m) => m.role === 'user');
+    if (!userPromptMsg) return;
+
+    fetch('/api/chat/feedback', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Galx-Client': 'web-chat',
+        'X-Galx-Allow-Training': 'true',
+      },
+      body: JSON.stringify({
+        type: 'kto',
+        prompt: userPromptMsg.content,
+        completion: targetMsg.content,
+        label: rating === 'up',
+        modelId: targetMsg.modelId || selectedModelId,
+        source: 'user_thumb_rating',
+      }),
+    }).catch(() => {});
   };
 
   // Generate / Send Message
@@ -546,6 +602,8 @@ function BaseGalxChatInterface() {
     try {
       const requestHeaders: Record<string, string> = {
         'Content-Type': 'application/json',
+        'X-Galx-Client': 'web-chat',
+        'X-Galx-Allow-Training': String(settings.allowModelTraining !== false),
       };
       if (user?.token) {
         requestHeaders['Authorization'] = `Bearer ${user.token}`;
@@ -565,6 +623,7 @@ function BaseGalxChatInterface() {
           user_message_id: userMessage.id,
           assistant_message_id: assistantMsgId,
           persona_id: activePersona?.id,
+          allow_model_training: settings.allowModelTraining !== false,
         }),
         signal: abortController.signal,
       });
@@ -802,6 +861,7 @@ function BaseGalxChatInterface() {
           onRegenerateLast={handleRegenerateLast}
           onEditPrompt={handleEditPrompt}
           onSwipeAlternative={handleSwipeAlternative}
+          onRatingChange={handleRatingChange}
         />
 
         {/* Chat Bottom Input Prompt Bar */}

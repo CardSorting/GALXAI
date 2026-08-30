@@ -5,6 +5,7 @@ import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxSeatTierEngine } from '@/core/subscription/GalxSeatTierEngine';
 import { GalxRollingContextEngine } from '@/core/router/GalxRollingContextEngine';
 import { GalxElasticContextGovernor } from '@/core/governor/GalxElasticContextGovernor';
+import { GalxTrainingStreamEngine } from '@/core/training/GalxTrainingStreamEngine';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
 import type { ChatCompletionRequest } from '@/core/contracts/GalxContracts';
 import {
@@ -361,6 +362,30 @@ export async function POST(req: NextRequest) {
             }
           }
           if (lease?.localStream) seatEngine.releaseSeatStreamSlot(userId);
+
+          // Zero-Storage Streaming Training Distillation Tap
+          if (completed && accumulatedContent) {
+            const lastUser = normalizedMessages.filter((message) => message.role === 'user').pop();
+            const userContent = lastUser
+              ? (typeof lastUser.content === 'string' ? lastUser.content : JSON.stringify(lastUser.content))
+              : undefined;
+
+            GalxTrainingStreamEngine.getInstance()
+              .ingestInteraction({
+                source: 'web_chat',
+                userId,
+                modelId: modelSpec.id,
+                messages: normalizedMessages,
+                userPrompt: userContent,
+                completionContent: accumulatedContent,
+                allowModelTraining: (rawBody as any).allow_model_training,
+                isApiCall: false,
+                headers: req.headers,
+              })
+              .catch((err) => {
+                console.warn('[api/chat] Training distillation notice:', err?.message);
+              });
+          }
         }
       })();
 
@@ -373,6 +398,7 @@ export async function POST(req: NextRequest) {
           'Cache-Control': 'no-cache, no-transform',
           'Connection': 'keep-alive',
           'X-Accel-Buffering': 'no',
+          'X-Galx-Data-Policy': 'chat-model-improvement-opt-out-governed',
           'X-Galx-Model-Resolved': modelSpec.id,
           'X-Galx-Seat-Tier': entitlement.tier,
           'X-Galx-Seat-Role': entitlement.role,
@@ -429,6 +455,30 @@ export async function POST(req: NextRequest) {
       acquiredRequest = undefined;
     }
 
+    // Zero-Storage Streaming Training Distillation Tap (Non-Streaming)
+    if (contentText) {
+      const lastUser = normalizedMessages.filter((message) => message.role === 'user').pop();
+      const userContent = lastUser
+        ? (typeof lastUser.content === 'string' ? lastUser.content : JSON.stringify(lastUser.content))
+        : undefined;
+
+      GalxTrainingStreamEngine.getInstance()
+        .ingestInteraction({
+          source: 'web_chat',
+          userId,
+          modelId: modelSpec.id,
+          messages: normalizedMessages,
+          userPrompt: userContent,
+          completionContent: contentText,
+          allowModelTraining: (rawBody as any).allow_model_training,
+          isApiCall: false,
+          headers: req.headers,
+        })
+        .catch((err) => {
+          console.warn('[api/chat] Non-streaming training notice:', err?.message);
+        });
+    }
+
     return NextResponse.json({
       model: modelSpec.id,
       created_at: createdAt,
@@ -445,6 +495,7 @@ export async function POST(req: NextRequest) {
     }, {
       headers: {
         'Access-Control-Allow-Origin': '*',
+        'X-Galx-Data-Policy': 'chat-model-improvement-opt-out-governed',
         'X-Galx-Model-Resolved': modelSpec.id,
         'X-Galx-Seat-Tier': entitlement.tier,
         'X-Galx-Seat-Role': entitlement.role,

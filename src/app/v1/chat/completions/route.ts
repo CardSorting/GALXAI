@@ -7,6 +7,7 @@ import { GalxElasticContextGovernor } from '@/core/governor/GalxElasticContextGo
 import { GalxRollingContextEngine } from '@/core/router/GalxRollingContextEngine';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import { ChatRepository } from '@/lib/supabase/repositories/ChatRepository';
+import { GalxTrainingStreamEngine } from '@/core/training/GalxTrainingStreamEngine';
 import type { ChatCompletionRequest } from '@/core/contracts/GalxContracts';
 import {
   ChatRequestValidationError,
@@ -372,9 +373,13 @@ export async function POST(req: NextRequest) {
     });
 
     // 5. Return formatted response with CORS headers, TTFT streaming optimization & ZDR Attestation
+    const isWebChatClient = req.headers.get('x-galx-client') === 'web-chat';
+    const isApiCall = authResult.authType === 'developer_key' || !isWebChatClient;
+
     const headers = new Headers(result.headers);
     headers.set('Access-Control-Allow-Origin', '*');
     headers.set('X-Galx-Request-Id', requestId);
+    headers.set('X-Galx-Data-Policy', isApiCall ? 'api-private-zero-retention' : 'chat-model-improvement-opt-out-governed');
     const currentWindows = seatEngine.calculateRollingWindows(userId, entitlement.tier);
     headers.set('X-Galx-Model', result.modelUsed);
     headers.set('X-Galx-Router', 'apex-v2');
@@ -489,6 +494,25 @@ export async function POST(req: NextRequest) {
           console.error('[CompletionsRoute] Stream lease finalization failed:', settlementError);
         } finally {
           if (lease?.localStream) seatEngine.releaseSeatStreamSlot(userId);
+          
+          // Zero-Storage Streaming Training Distillation Tap
+          if (completed && (accumulatedContent || accumulatedThinking)) {
+            GalxTrainingStreamEngine.getInstance()
+              .ingestInteraction({
+                source: isApiCall ? 'api_route' : 'web_chat',
+                userId,
+                modelId: result.modelUsed,
+                messages: normalizedMessages,
+                userPrompt: userContent,
+                completionContent: accumulatedContent,
+                allowModelTraining: (rawBody as any).allow_model_training ?? (rawBody as any).privacy?.allowModelTraining,
+                isApiCall,
+                headers: req.headers,
+              })
+              .catch((err) => {
+                console.warn('[CompletionsRoute] Training ingestion notice:', err?.message);
+              });
+          }
         }
       };
 
@@ -578,6 +602,37 @@ export async function POST(req: NextRequest) {
     if (acquiredRequest?.localStream) {
       seatEngine.releaseSeatStreamSlot(userId);
       acquiredRequest = undefined;
+    }
+
+    // Zero-Storage Streaming Training Distillation Tap (Non-Streaming)
+    if (result.statusCode >= 200 && result.statusCode < 400) {
+      let nonStreamContent = '';
+      if (typeof result.body === 'string') {
+        try {
+          const parsed = JSON.parse(result.body);
+          nonStreamContent = parsed.choices?.[0]?.message?.content || '';
+        } catch {}
+      }
+      const lastUser = normalizedMessages.filter((message) => message.role === 'user').pop();
+      const userContent = lastUser
+        ? (typeof lastUser.content === 'string' ? lastUser.content : JSON.stringify(lastUser.content))
+        : undefined;
+
+      GalxTrainingStreamEngine.getInstance()
+        .ingestInteraction({
+          source: isApiCall ? 'api_route' : 'web_chat',
+          userId,
+          modelId: result.modelUsed,
+          messages: normalizedMessages,
+          userPrompt: userContent,
+          completionContent: nonStreamContent,
+          allowModelTraining: (rawBody as any).allow_model_training ?? (rawBody as any).privacy?.allowModelTraining,
+          isApiCall,
+          headers: req.headers,
+        })
+        .catch((err) => {
+          console.warn('[CompletionsRoute] Non-streaming training ingestion notice:', err?.message);
+        });
     }
 
     return new Response(result.body, {

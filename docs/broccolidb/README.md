@@ -17,6 +17,7 @@ Welcome to the backend engineering, theoretical foundations, and operational doc
 | **07** | **[Lean 4 Formal Verification Blueprint](07_LEAN4_FORMAL_VERIFICATION_BLUEPRINT.md)** | Interactive Theorem Provers | Machine-checked inductive types, Galois connection soundness, identity bypass proofs, and tactic automation. |
 | **08** | **[Compiler IR Lowering & Program Slicing Architecture](08_COMPILER_IR_LOWERING_AND_PROGRAM_SLICING.md)** | Compiler Engineers & Systems | LLVM SSA intermediate representations, dominator trees, Weiser's backward slicing, and invariant hoisting. |
 | **09** | **[RFC-BROCCOLIDB-0001 Protocol Specification](09_RFC_BROCCOLIDB_0001_TASK_CONDITIONED_REPRESENTATION_SELECTION_PROTOCOL.md)** | Network & Protocol Engineers | Formal RFC 2119 / IETF-style protocol standard (TCRSP/1.0), wire formats, headers, state machines, and ZDR v10.0. |
+| **10** | **[Frontier Post-Training Cognitive Labeling & 4-Stage Substrate](10_FRONTIER_POST_TRAINING_COGNITIVE_LABELING_SUBSTRATE.md)** | ML Engineers & Researchers | Zero-dependency 4-stage post-training pipeline (Collection, Cleaning, Schema, Provenance), 75+ multi-axis cognitive vectors (MLA, FP8, EAGLE-2, Medusa, DualPipe, DPO Debiasing), and autonomous R2 Merkle sync. |
 
 ---
 
@@ -32,6 +33,12 @@ BroccoliDB is governed by a series of formal Architecture Decision Records locat
 * **[ADR 0064: BroccoliDB OpenAI Inference Boundary Measurement](../adr/0064-broccolidb-openai-inference-boundary-measurement-and-task-suite.md)**
 * **[ADR 0066: Institutional Entropy Resistance & Epistemic Compression](../adr/0066-institutional-entropy-resistance-and-epistemic-compression.md)**
 * **[ADR 0067: Adaptive Representation Selection & Density Bypass Substrate](../adr/0067-representation-selection-and-adaptive-density-bypass.md)**
+* **[ADR 0073: Zero-Dependency Post-Training Cognitive Labeling & 4-Stage Substrate](../adr/0073-zero-dependency-post-training-cognitive-labeling-and-4-stage-substrate.md)**
+* **[ADR 0074: DeepSeek-V3/R1 Multi-Head Latent Attention (MLA), KV Dequantization & DualPipe](../adr/0074-deepseek-v3-r1-mla-compression-latent-kv-dequantization-and-dualpipe.md)**
+* **[ADR 0075: Speculative Verification Trees, EAGLE-2, Medusa & Head Entropy Pruning](../adr/0075-speculative-verification-trees-eagle2-medusa-and-head-entropy-pruning.md)**
+* **[ADR 0076: Dynamic Sequence Packing Mask Slicing, Online DPO Length Debiasing & Gradient Shield](../adr/0076-dynamic-sequence-packing-mask-slicing-dpo-length-debiasing-and-gradient-shield.md)**
+* **[ADR 0077: Autonomous Cloudflare R2 Sync & Cryptographic Merkle Manifest Catalog](../adr/0077-autonomous-cloudflare-r2-sync-and-cryptographic-merkle-manifest-catalog.md)**
+* **[ADR 0078: GLM-5.3 Flash IndexShare Sparse Attention, Slime Asynchronous RL & Hybrid Thinking Modes](../adr/0078-glm-53-flash-indexshare-sparse-attention-and-slime-async-rl.md)**
 
 ---
 

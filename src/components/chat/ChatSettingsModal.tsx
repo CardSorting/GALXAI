@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Sliders, Sparkles, RotateCcw, Check, Clock, Calendar, Gauge } from 'lucide-react';
+import { X, Sliders, Sparkles, RotateCcw, Check, Clock, Calendar, Gauge, Shield, ExternalLink } from 'lucide-react';
 import type { SeatTierPublicSummary } from '@/core/subscription/GalxSeatTierEngine';
 import { GALX_DEFAULT_SYSTEM_PROMPT } from '@/core/prompt/GalxDefaultSystemPrompt';
 
@@ -13,6 +13,7 @@ export interface ChatSettings {
   customApiKey: string;
   enablePromptCaching: boolean;
   webSearchEnabled: boolean;
+  allowModelTraining?: boolean;
 }
 
 export const DEFAULT_CHAT_SETTINGS: ChatSettings = {
@@ -23,6 +24,7 @@ export const DEFAULT_CHAT_SETTINGS: ChatSettings = {
   customApiKey: '',
   enablePromptCaching: true,
   webSearchEnabled: false,
+  allowModelTraining: true,
 };
 
 interface ChatSettingsModalProps {
@@ -236,6 +238,65 @@ export function ChatSettingsModal({ isOpen, onClose, settings, onSaveSettings }:
                   {level} {level === 'high' && '🔥'}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Improve the Model For Everyone (Opt-Out Training Setting) */}
+          <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#0c1220] to-[#080d18] border border-white/10 space-y-2.5 shadow-lg">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-white text-xs tracking-tight">Improve the model for everyone</span>
+                  <span
+                    className={`text-[9px] font-mono px-2 py-0.5 rounded-full border font-bold ${
+                      localSettings.allowModelTraining !== false
+                        ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
+                        : 'bg-zinc-500/15 text-zinc-400 border-white/10'
+                    }`}
+                  >
+                    {localSettings.allowModelTraining !== false ? 'Active' : 'Opted Out'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-zinc-400 leading-relaxed">
+                  Allow your content to be used to train our models, which makes GALX better for you and everyone who uses it. We take steps to protect your privacy.{' '}
+                  <a
+                    href="https://help.openai.com/en/articles/5722486"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-cyan-400 hover:text-cyan-300 hover:underline inline-flex items-center gap-0.5 font-medium"
+                  >
+                    <span>Learn more</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                </p>
+              </div>
+
+              {/* Opt-Out Switch Toggle */}
+              <button
+                type="button"
+                role="switch"
+                aria-checked={localSettings.allowModelTraining !== false}
+                onClick={() =>
+                  setLocalSettings({
+                    ...localSettings,
+                    allowModelTraining: localSettings.allowModelTraining === false,
+                  })
+                }
+                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  localSettings.allowModelTraining !== false ? 'bg-cyan-500' : 'bg-zinc-700'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    localSettings.allowModelTraining !== false ? 'translate-x-4' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 pt-1 border-t border-white/5 text-[10px] text-zinc-400 font-mono">
+              <Shield className="w-3 h-3 text-emerald-400 shrink-0" />
+              <span>In-flight PII redaction active • Direct API keys are always 100% private</span>
             </div>
           </div>
         </div>

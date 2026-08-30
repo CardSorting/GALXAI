@@ -69,9 +69,9 @@ export default function PrivacyPolicyPage() {
             <div className="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
               <EyeOff className="w-4 h-4" />
             </div>
-            <h2 className="font-bold text-white text-base">No Model Training</h2>
+            <h2 className="font-bold text-white text-base">API Zero Data Retention &amp; Chat Controls</h2>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              We never use your customer data or API inputs/outputs to train, refine, or fine-tune any AI models, foundation architectures, or classifier systems.
+              Developer API endpoints are 100% private under strict Zero Data Retention (ZDR). Web chat users can manage or opt out of &quot;Improve the model for everyone&quot; in settings with zero raw session database storage and automated in-flight PII redaction.
             </p>
           </div>
 

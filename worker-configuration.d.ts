@@ -22,6 +22,7 @@ interface Env {
 	RATE_LIMIT_KV?: CloudflareKVNamespace;
 	EDGE_CACHE?: CloudflareKVNamespace;
 	ASSET_BUCKET?: CloudflareR2Bucket;
+	TRAINING_DATASET_BUCKET?: CloudflareR2Bucket;
 	SWARM_COORDINATOR?: CloudflareDurableObjectNamespace;
 }
 

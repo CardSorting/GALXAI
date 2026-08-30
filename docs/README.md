@@ -38,6 +38,7 @@ Welcome to the comprehensive technical documentation and operational guides for 
   - **[07. Lean 4 Formal Verification Blueprint](broccolidb/07_LEAN4_FORMAL_VERIFICATION_BLUEPRINT.md)**: Machine-checked inductive types, Galois connection soundness, identity bypass proofs, and tactic automation.
   - **[08. Compiler IR Lowering & Program Slicing](broccolidb/08_COMPILER_IR_LOWERING_AND_PROGRAM_SLICING.md)**: LLVM SSA intermediate representations, dominator trees, Weiser's backward slicing, and invariant hoisting.
   - **[09. RFC-BROCCOLIDB-0001 Protocol Specification](broccolidb/09_RFC_BROCCOLIDB_0001_TASK_CONDITIONED_REPRESENTATION_SELECTION_PROTOCOL.md)**: Formal RFC 2119 / IETF-style protocol standard (TCRSP/1.0), wire formats, headers, and ZDR v10.0.
+  - **[10. Frontier Post-Training Cognitive Labeling Substrate](broccolidb/10_FRONTIER_POST_TRAINING_COGNITIVE_LABELING_SUBSTRATE.md)**: Zero-dependency 4-stage post-training pipeline (Collection, Cleaning, Schema, Provenance), 75+ multi-axis cognitive vectors (MLA, FP8, EAGLE-2, Medusa, DualPipe, DPO Debiasing), and autonomous R2 Merkle sync.
 - **[Frequently Asked Questions (FAQs)](FAQS.md)**: Clear answers covering zero-hesitation ergonomics, prompt caching, billing, security, and uptime SLAs.
 
 ---
@@ -58,7 +59,7 @@ Welcome to the comprehensive technical documentation and operational guides for 
 - **[Asynchronous Queues & CloudTasks](QUEUE_SPECIFICATION.md)**: Background queue architecture, token-bucket pacing, and DLQ topologies.
 - **[Senior Engineering Review: Chat & Rolling Context](SENIOR_ENGINEERING_REVIEW_CHAT_AND_ROLLING_CONTEXT.md)**: Deep architectural review of Hybrid BroccoliDB (L1) + PostgreSQL (L2) rolling memory, dynamic 1.05M context governor, dual rolling seat quotas, and V44-V53 migrations.
 - **[Developer & Contributing Guide](DEVELOPER_GUIDE.md)**: Codebase organization, provider adapter design, and test suite conventions.
-- **[Architecture Decision Records (ADRs)](adr/README.md)**: 71 formal architectural specifications governing security, transport hardening, 180-domain compaction, dual rolling window seat quotas, 5-level rolling context pyramids, and OpenAI inference boundary benchmarking.
+- **[Architecture Decision Records (ADRs)](adr/README.md)**: 78 formal architectural specifications governing security, transport hardening, 180-domain compaction, dual rolling window seat quotas, 5-level rolling context pyramids, zero-dependency post-training cognitive labeling, GLM-5.3 Flash IndexShare sparse attention, and autonomous R2 Merkle tree sync.
 - **[Operational SRE Playbooks](playbooks/README.md)**: 8 lifecycle runbooks for deployment, incident remediation, secret rotation, and unframed developer observation trials.
 - **[Maintainer Knowledge Base & Internal Manual](maintainers/README.md)**: Onboarding Day 1–30 roadmap, subsystem dependency DAG, and debugging runbooks.
 - **[Production Infrastructure & Deployment Guide](DEPLOYMENT.md)**: Multi-target deployment topology across Vercel, Cloudflare Edge, Docker, and Kubernetes.

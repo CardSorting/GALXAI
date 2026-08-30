@@ -74,6 +74,7 @@ interface ChatMessageItemProps {
   onRegenerate?: () => void;
   onEditPrompt?: (content: string) => void;
   onSwipeAlternative?: (messageId: string, direction: 'prev' | 'next') => void;
+  onRatingChange?: (messageId: string, rating: 'up' | 'down') => void;
 }
 
 export function ChatMessageItem({
@@ -83,6 +84,7 @@ export function ChatMessageItem({
   onRegenerate,
   onEditPrompt,
   onSwipeAlternative,
+  onRatingChange,
 }: ChatMessageItemProps) {
   const [copied, setCopied] = useState(false);
   const [rating, setRating] = useState<'up' | 'down' | null>(null);
@@ -307,7 +309,11 @@ export function ChatMessageItem({
               )}
 
               <button
-                onClick={() => setRating(rating === 'up' ? null : 'up')}
+                onClick={() => {
+                  const nextRating = rating === 'up' ? null : 'up';
+                  setRating(nextRating);
+                  if (nextRating && onRatingChange) onRatingChange(message.id, nextRating);
+                }}
                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                   rating === 'up' ? 'text-emerald-400 bg-emerald-500/10' : 'hover:bg-white/10 hover:text-white'
                 }`}
@@ -317,7 +323,11 @@ export function ChatMessageItem({
               </button>
 
               <button
-                onClick={() => setRating(rating === 'down' ? null : 'down')}
+                onClick={() => {
+                  const nextRating = rating === 'down' ? null : 'down';
+                  setRating(nextRating);
+                  if (nextRating && onRatingChange) onRatingChange(message.id, nextRating);
+                }}
                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                   rating === 'down' ? 'text-red-400 bg-red-500/10' : 'hover:bg-white/10 hover:text-white'
                 }`}

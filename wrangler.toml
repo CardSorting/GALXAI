@@ -29,6 +29,11 @@ id = "ea7e6fa94f144ab8b97d435718da54d5"
 binding = "ASSET_BUCKET"
 bucket_name = "galxai-assets"
 
+# Cloudflare R2 Bucket for continuous model training datasets ($0 egress)
+[[r2_buckets]]
+binding = "TRAINING_DATASET_BUCKET"
+bucket_name = "galxai-training-datasets"
+
 # Hyperdrive Connection Accelerator to Supabase PostgreSQL (optional)
 # [[hyperdrive]]
 # binding = "HYPERDRIVE"
@@ -62,6 +67,11 @@ id = "301b54a2c2334306ae7ac3b0ad749a4f"
 [[env.staging.r2_buckets]]
 binding = "ASSET_BUCKET"
 bucket_name = "galxai-assets-staging"
+
+[[env.staging.r2_buckets]]
+binding = "TRAINING_DATASET_BUCKET"
+bucket_name = "galxai-training-datasets-staging"
+
 
 
 

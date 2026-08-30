@@ -176,4 +176,39 @@ print("Do Not Sell Policy Status:", resp.json().get("policy_status"))`,
       },
     ],
   },
+  {
+    slug: 'zero-storage-training-privacy',
+    badge: 'Zero-Storage Distillation',
+    title: 'API Zero Data Retention & Consumer Chat Training Privacy Specification — GALXAI',
+    headline: 'Zero-Storage Model Improvement & API Data Isolation Architecture',
+    description:
+      'Architectural specifications ensuring 100% private developer API endpoints, client-level opt-out model training controls, and in-flight zero-storage PII de-identification.',
+    regulatoryBody: 'Global Privacy Standards, FTC AI Guidelines & EU AI Act Art. 50',
+    auditFrequency: 'Continuous Telemetry Verification & Automated Redaction Auditing',
+    enforcementMechanism: 'Strict API Routing Isolation + In-Flight Volatile PII Redactor + Ephemeral RAM Buffers',
+    complianceGuarantees: [
+      'Developer API Isolation: Direct API routes (/v1/chat/completions) with API keys are strictly 100% private with Zero Data Retention (ZDR)',
+      'Consumer Chat Opt-Out: Web chat users have instant self-serve controls to opt out of "Improve the model for everyone"',
+      'Zero Session Storage Overhead: Continuous learning signals are distilled in volatile RAM without storing multi-turn chat sessions in databases',
+      'In-Flight PII Redaction: Automated scrubbing of PHI, PII, API tokens, passwords, and secrets before training stream ingestion',
+    ],
+    systemVerificationSnippet: {
+      language: 'bash',
+      title: 'Verify API Private Zero-Retention Policy Header',
+      code: `curl -I https://api.galx.ai/v1/chat/completions \\
+  -H "Authorization: Bearer $GALXAI_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"model":"gpt-5.6-sol","messages":[{"role":"user","content":"Ping"}]}' | grep -i "x-galx-data-policy"`,
+    },
+    faqs: [
+      {
+        q: 'Is developer API data ever used to train GALXAI foundation models?',
+        a: 'Never. Developer API endpoints operate under binding Zero Data Retention (ZDR) guarantees and bypass all model training distillation pipelines.',
+      },
+      {
+        q: 'How does GALXAI protect consumer chat privacy while improving models?',
+        a: 'All consumer chat turns pass through real-time in-memory PII redactors that strip personal identifiers and secrets before ephemeral token extraction, and users can opt out at any time.',
+      },
+    ],
+  },
 ];

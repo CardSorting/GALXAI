@@ -22,6 +22,7 @@ import {
   Type,
   Database,
   ChevronRight,
+  ExternalLink,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -195,7 +196,7 @@ export default function SettingsPage() {
       id: 'privacy' as SettingsTab,
       label: 'Privacy',
       icon: Database,
-      gated: !isAuthenticated,
+      gated: false,
     },
   ];
 
@@ -552,7 +553,7 @@ export default function SettingsPage() {
             )}
 
             {/* 3. GATED TABS (WHEN NOT LOGGED IN) */}
-            {!isAuthenticated && activeTab !== 'appearance' && activeTab !== 'language' && (
+            {!isAuthenticated && activeTab !== 'appearance' && activeTab !== 'language' && activeTab !== 'privacy' && (
               <div className="p-8 rounded-2xl bg-[#0c101c] border border-white/10 text-center space-y-4 animate-in fade-in duration-150">
                 <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 mx-auto">
                   <Lock className="w-5 h-5" />
@@ -669,15 +670,104 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* 7. PRIVACY TAB (AUTHENTICATED) */}
-            {isAuthenticated && activeTab === 'privacy' && (
-              <div className="p-5 rounded-2xl bg-[#0c101c] border border-white/10 space-y-4 animate-in fade-in duration-150">
-                <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Privacy & Data</h2>
+            {/* 7. PRIVACY TAB */}
+            {activeTab === 'privacy' && (
+              <div className="p-5 rounded-2xl bg-[#0c101c] border border-white/10 space-y-5 animate-in fade-in duration-150">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Privacy & Data Controls</h2>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-bold">
+                    Zero-Storage Training Pipeline
+                  </span>
+                </div>
 
-                <div className="flex items-center justify-between p-3 rounded-xl bg-black/30 border border-white/5">
+                {/* Improve the Model For Everyone Card */}
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-[#0e1424] via-[#090d16] to-[#120e24] border border-white/10 space-y-4 shadow-xl">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1.5 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-white text-sm tracking-tight">Improve the model for everyone</span>
+                        <span
+                          className={`text-[10px] font-mono px-2 py-0.5 rounded-full border font-bold ${
+                            chatSettings.allowModelTraining !== false
+                              ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
+                              : 'bg-zinc-500/15 text-zinc-400 border-white/10'
+                          }`}
+                        >
+                          {chatSettings.allowModelTraining !== false ? 'Data Sharing: Active' : 'Data Sharing: Opted Out'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-zinc-300 leading-relaxed">
+                        Allow your content to be used to train our models, which makes GALX better for you and everyone who uses it. We take steps to protect your privacy.{' '}
+                        <a
+                          href="https://help.openai.com/en/articles/5722486"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-cyan-400 hover:text-cyan-300 hover:underline inline-flex items-center gap-0.5 font-medium"
+                        >
+                          <span>Learn more</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </p>
+                    </div>
+
+                    {/* Opt-Out Switch Toggle */}
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={chatSettings.allowModelTraining !== false}
+                      onClick={() => {
+                        const updated = {
+                          ...chatSettings,
+                          allowModelTraining: chatSettings.allowModelTraining === false,
+                        };
+                        setChatSettings(updated);
+                        try {
+                          localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(updated));
+                        } catch {}
+                      }}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                        chatSettings.allowModelTraining !== false ? 'bg-cyan-500' : 'bg-zinc-700'
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                          chatSettings.allowModelTraining !== false ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Privacy Safeguards Details Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-white/5 text-xs">
+                    <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1">
+                      <p className="text-[10px] text-emerald-400 font-bold font-mono">Developer API Routes</p>
+                      <p className="font-bold text-white text-[11px]">100% Always Private</p>
+                      <p className="text-[10px] text-zinc-400 leading-normal">
+                        Direct API calls with API keys are never stored or used for model training under strict ZDR.
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1">
+                      <p className="text-[10px] text-cyan-400 font-bold font-mono">In-Flight Scrubbing</p>
+                      <p className="font-bold text-white text-[11px]">Automated PII Redaction</p>
+                      <p className="text-[10px] text-zinc-400 leading-normal">
+                        Names, emails, phone numbers, and credentials are removed in volatile RAM before ingestion.
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1">
+                      <p className="text-[10px] text-purple-400 font-bold font-mono">Zero Database Cost</p>
+                      <p className="font-bold text-white text-[11px]">No Session Hoarding</p>
+                      <p className="text-[10px] text-zinc-400 leading-normal">
+                        Training signals stream into a volatile buffer without storing bloated multi-turn chat sessions.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Local Storage & Browser State Card */}
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-black/30 border border-white/5">
                   <div>
-                    <p className="text-xs font-bold text-white">Browser Cache</p>
-                    <p className="text-[10px] text-zinc-400">Clear offline cache and saved local state</p>
+                    <p className="text-xs font-bold text-white">Browser Offline Cache</p>
+                    <p className="text-[10px] text-zinc-400">Clear offline cache and reset saved local state</p>
                   </div>
                   <button
                     type="button"
@@ -687,7 +777,7 @@ export default function SettingsPage() {
                         window.location.reload();
                       } catch {}
                     }}
-                    className="px-3 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 font-bold text-xs cursor-pointer hover:bg-rose-500/30"
+                    className="px-3 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 font-bold text-xs cursor-pointer hover:bg-rose-500/30 transition-all"
                   >
                     Clear Cache
                   </button>

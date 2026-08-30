@@ -16,6 +16,7 @@ interface ChatMessageListProps {
   onEditPrompt: (content: string) => void;
   onSwipeAlternative?: (messageId: string, direction: 'prev' | 'next') => void;
   onOpenCharacterHub?: () => void;
+  onRatingChange?: (messageId: string, rating: 'up' | 'down') => void;
 }
 
 export function ChatMessageList({
@@ -28,6 +29,7 @@ export function ChatMessageList({
   onEditPrompt,
   onSwipeAlternative,
   onOpenCharacterHub,
+  onRatingChange,
 }: ChatMessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -88,6 +90,7 @@ export function ChatMessageList({
               onRegenerate={idx === messages.length - 1 && message.role === 'assistant' ? onRegenerateLast : undefined}
               onEditPrompt={message.role === 'user' ? onEditPrompt : undefined}
               onSwipeAlternative={onSwipeAlternative}
+              onRatingChange={onRatingChange}
             />
           </React.Fragment>
         ))}
