@@ -128,7 +128,12 @@ export type CurriculumTier =
   | 'tier_2_intermediate'
   | 'tier_3_advanced'
   | 'tier_4_expert_competition'
-  | 'tier_5_frontier_research';
+  | 'tier_5_frontier_research'
+  | 'tier_1_facts'
+  | 'tier_2_reasoning'
+  | 'tier_3_code'
+  | 'tier_4_frontier'
+  | 'tier_5_agentic';
 
 export interface FrontierTaxonomyLabel {
   readonly primaryDomain: string;        // e.g. 'code.rust', 'code.typescript', 'math.algebra', 'finance.tax', 'general'
