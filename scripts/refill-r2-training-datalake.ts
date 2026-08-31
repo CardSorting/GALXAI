@@ -95,33 +95,36 @@ async function refillDatalake() {
     (seed: number) => curator.synthesizeTopologicalAnyonBraidingSample('galx-flash-8b', 'sprint_5A', seed),
   ];
 
-  let ingestedCount = 0;
+  const TOTAL_CYCLES = 100;
+  const SAMPLES_PER_CYCLE = 2500;
+  console.log(`▶ [STEP 1] Executing 100x Scale Mass-Distillation (${TOTAL_CYCLES} cycles x ${SAMPLES_PER_CYCLE.toLocaleString()} samples = 250,000+ samples)...`);
 
-  // Pass A: Multi-seed grid across all 60 frontier synthesizer disciplines (30 iterations per synthesizer = 1,800 samples)
-  console.log('  • Pass A: Running 30-cycle multi-seed grid across all 60 sovereign synthesizers (1,800 samples)...');
-  for (let cycle = 0; cycle < 30; cycle++) {
+  const sprints = ['sprint_1A', 'sprint_1B', 'sprint_2A', 'sprint_2B', 'sprint_3A', 'sprint_3B', 'sprint_4A', 'sprint_4B'] as const;
+  let totalCumulativeSamples = 0;
+  let latestLakeResult: any = null;
+
+  const startTime = Date.now();
+
+  for (let cycle = 1; cycle <= TOTAL_CYCLES; cycle++) {
+    // 1. Synthesize dedicated frontier domain samples for current cycle
     for (const synth of synthesizers) {
-      const sample = synth(cycle * 100 + 1);
+      const sample = synth(cycle * 1000 + 1);
       await streamEngine.ingestInteraction({
         source: 'internal_distillation',
-        userId: `galxai_datalake_master_grid_${cycle}`,
+        userId: `galxai_datalake_mass_grid_${cycle}`,
         userPrompt: sample.userPrompt,
         completionContent: sample.completionContent,
         modelId: sample.modelId,
         allowModelTraining: true,
         isApiCall: false,
       });
-      ingestedCount++;
+      totalCumulativeSamples++;
     }
-  }
 
-  // Pass B: Combinatorial Mass Distillation across all 8 sprints (2,500 samples per sprint = 20,000 samples)
-  const sprints = ['sprint_1A', 'sprint_1B', 'sprint_2A', 'sprint_2B', 'sprint_3A', 'sprint_3B', 'sprint_4A', 'sprint_4B'] as const;
-  console.log(`  • Pass B: Running 2,500-sample combinatorial batches across all 8 sprints (20,000 samples)...`);
-
-  for (const sp of sprints) {
+    // 2. Synthesize combinatorial multi-tier batch across rotating sprints
+    const targetSprint = sprints[(cycle - 1) % sprints.length];
     const sprintBatch = curator.generateSyntheticBatch({
-      count: 2500,
+      count: SAMPLES_PER_CYCLE - synthesizers.length,
       tierDistribution: {
         tier1Fact: 0.10,
         tier2Logic: 0.20,
@@ -130,81 +133,64 @@ async function refillDatalake() {
         tier5Agentic: 0.15,
       },
       teacherModelId: 'galx-flash-8b',
-      sprintId: sp,
-      batchSeedOffset: Math.floor(Math.random() * 100000),
+      sprintId: targetSprint,
+      batchSeedOffset: cycle * 10000 + 42,
     });
 
     for (const s of sprintBatch) {
       await streamEngine.ingestInteraction({
         source: 'internal_distillation',
-        userId: `galxai_datalake_${sp}_refill`,
+        userId: `galxai_datalake_${targetSprint}_c${cycle}`,
         userPrompt: s.userPrompt,
         completionContent: s.completionContent,
         modelId: 'galx-flash-8b',
         allowModelTraining: true,
         isApiCall: false,
       });
-      ingestedCount++;
+      totalCumulativeSamples++;
     }
-  }
 
-  // Pass C: Rich Multi-Domain DPO Pairwise Preferences (100 pairs)
-  console.log('  • Pass C: Ingesting high-density length-debiased DPO pairwise preferences...');
-  for (let i = 0; i < 50; i++) {
+    // 3. Ingest DPO pairwise feedback
     await streamEngine.ingestDPOFeedback({
-      prompt: `[DPO-${i}] Derive optimal Ring-AllReduce communication volume for $N = ${i + 4}$ GPUs and size $S = ${(i + 1) * 2} \\text{ GB}$.`,
-      chosen: `<thought>\n1. Scatter-Reduce: ${i + 3}/${i + 4} * S.\n2. All-Gather: ${i + 3}/${i + 4} * S.\n3. Total = 2(${i + 3})/${i + 4} * S.\n</thought>\nRing-AllReduce exact communication volume is $2 \\cdot \\frac{${i + 3}}{${i + 4}} \\cdot ${(i + 1) * 2}\\text{ GB} = ${(2 * (i + 3) * (i + 1) * 2 / (i + 4)).toFixed(3)}\\text{ GB}$.`,
-      rejected: `Ring-AllReduce sends ${(i + 1) * 4} GB always without pipeline optimization.`,
+      prompt: `[DPO-C${cycle}] Derive optimal Ring-AllReduce communication volume for $N = ${(cycle % 16) + 4}$ GPUs and size $S = ${cycle * 2} \\text{ GB}$.`,
+      chosen: `<thought>\n1. Scatter-Reduce: ${(cycle % 16) + 3}/${(cycle % 16) + 4} * S.\n2. All-Gather: ${(cycle % 16) + 3}/${(cycle % 16) + 4} * S.\n3. Total = 2(${(cycle % 16) + 3})/${(cycle % 16) + 4} * S.\n</thought>\nRing-AllReduce communication volume is $2 \\cdot \\frac{${(cycle % 16) + 3}}{${(cycle % 16) + 4}} \\cdot ${cycle * 2}\\text{ GB}$.`,
+      rejected: `Ring-AllReduce sends ${cycle * 4} GB always.`,
       modelId: 'galx-flash-8b',
       allowModelTraining: true,
       isApiCall: false,
     });
-    ingestedCount++;
+    totalCumulativeSamples++;
 
-    await streamEngine.ingestDPOFeedback({
-      prompt: `[DPO-Sec-${i}] Implement constant-time cryptographic byte comparison for token length ${16 + i * 8} bytes in Rust.`,
-      chosen: `<thought>\n1. Accumulate bitwise XOR.\n2. Return constant-time boolean predicate.\n</thought>\n#[inline(never)]\npub fn ct_compare_${i}(a: &[u8; ${16 + i * 8}], b: &[u8; ${16 + i * 8}]) -> bool {\n    let mut diff = 0u8;\n    for i in 0..${16 + i * 8} { diff |= a[i] ^ b[i]; }\n    diff == 0\n}`,
-      rejected: `pub fn compare_${i}(a: &[u8], b: &[u8]) -> bool { a == b }`,
-      modelId: 'galx-flash-8b',
-      allowModelTraining: true,
-      isApiCall: false,
-    });
-    ingestedCount++;
-  }
-
-  // Pass D: Rich Multi-Domain KTO Binary Preferences (40 pairs)
-  console.log('  • Pass D: Ingesting high-density KTO Kahneman-Tversky binary alignment preferences...');
-  for (let i = 0; i < 20; i++) {
+    // 4. Ingest KTO binary preference feedback
     await streamEngine.ingestKTOFeedback({
-      prompt: `[KTO-Proof-${i}] Formally prove Raft Joint Consensus dynamic cluster membership change safety under $2F + 1 = ${2 * i + 3}$ nodes.`,
-      completion: `<thought>1. Quorum intersection $C_{\\text{old}} \\cap C_{\\text{new}} \\ne \\emptyset$...</thought> Proof of Disjoint Quorum Impossibility across two-phase joint configuration transitions under partition seed ${i}...`,
+      prompt: `[KTO-C${cycle}] Formally prove Raft Joint Consensus dynamic cluster membership change safety under $N = ${2 * cycle + 3}$ nodes.`,
+      completion: `<thought>1. Quorum intersection $C_{\\text{old}} \\cap C_{\\text{new}} \\ne \\emptyset$...</thought> Proof of Disjoint Quorum Impossibility across joint transitions in cycle ${cycle}...`,
       modelId: 'galx-flash-8b',
       label: true,
       allowModelTraining: true,
       isApiCall: false,
     });
-    ingestedCount++;
+    totalCumulativeSamples++;
 
-    await streamEngine.ingestKTOFeedback({
-      prompt: `[KTO-Negative-${i}] Hallucinate arbitrary cryptographic commitment algorithm.`,
-      completion: `Just multiply by a random non-invertible matrix without polynomial trace consistency.`,
-      modelId: 'galx-flash-8b',
-      label: false,
-      allowModelTraining: true,
-      isApiCall: false,
-    });
-    ingestedCount++;
+    // 5. Synchronize and seal current batch into R2 datalake
+    latestLakeResult = await syncEngine.syncDomainPartitionedDatalake();
+    streamEngine.clearBuffer();
+
+    if (cycle % 10 === 0 || cycle === TOTAL_CYCLES) {
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      const tokens = latestLakeResult?.totalTokens || 0;
+      const shards = latestLakeResult?.syncedShards || 0;
+      console.log(`  • [Cycle ${cycle}/${TOTAL_CYCLES}] Notarized: ${tokens.toLocaleString()} tokens | Shards: ${shards} | Samples: ${totalCumulativeSamples.toLocaleString()} (${elapsed}s)`);
+    }
   }
 
-  console.log(`\n  ✅ TOTAL SYNTHESIS COMPLETED: Ingested ${ingestedCount.toLocaleString()} high-density domain samples and preferences into stream ring!\n`);
+  console.log(`\n  ✅ 100X MASS DISTILLATION COMPLETE: Ingested & Notarized ${totalCumulativeSamples.toLocaleString()} samples across ${TOTAL_CYCLES} cycles!\n`);
 
-  console.log('▶ [STEP 2] Synchronizing Gold/Silver Tiered Domain Shards & Preferences to R2...');
-  const lakeResult = await syncEngine.syncDomainPartitionedDatalake();
-  console.log(`  • Lake Shards Uploaded:  ${lakeResult.syncedShards}`);
-  console.log(`  • Total Tokens Yielded:  ${lakeResult.totalTokens.toLocaleString()} tokens`);
-  console.log(`  • Merkle Tree Root:      ${lakeResult.merkleTreeRoot}`);
-  console.log(`  • Lake Manifest Key:     datasets/lake/manifest.json`);
-  console.log('  ✓ Domain partitioned lake sealed in R2.\n');
+  console.log('▶ [STEP 2] Sealed Master 100x Datalake Manifest in R2:');
+  console.log(`  • Total Lake Shards:     ${latestLakeResult.syncedShards}`);
+  console.log(`  • Total Tokens Yielded:  ${latestLakeResult.totalTokens.toLocaleString()} tokens`);
+  console.log(`  • Merkle Tree Root:      ${latestLakeResult.merkleTreeRoot}`);
+  console.log(`  • Lake Manifest Key:     datasets/lake/manifest.json\n`);
 
   console.log('▶ [STEP 3] Generating Columnar Parquet Lake & ZSTD Level-3 Manifest...');
   const parquetResult = await syncEngine.syncDomainPartitionedParquetLake();
@@ -246,7 +232,7 @@ async function refillDatalake() {
   // Final verification
   const listAll = await r2.listObjects({ bucket: 'training', maxKeys: 1000 });
   console.log('═'.repeat(80));
-  console.log(`🎉 MASS REFILL COMPLETE: Successfully populated \`${resolved.bucketName}\`!`);
+  console.log(`🎉 100X MASS REFILL COMPLETE: Successfully populated \`${resolved.bucketName}\`!`);
   console.log(`   Total Active Artifacts in Bucket: ${listAll.objects.length}`);
   console.log('═'.repeat(80) + '\n');
 }

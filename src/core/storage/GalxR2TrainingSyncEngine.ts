@@ -1620,21 +1620,29 @@ dataset = load_dataset("json", data_files={"train": "${this.publicDomain}/datase
     }
 
     const records = await Promise.all(uploadTasks);
-    const totalTokens = records.reduce((acc, r) => acc + r.tokenCount, 0);
-    const uncompressedBytes = records.reduce((acc, r) => acc + r.uncompressedSizeBytes, 0);
-    const compressedBytes = records.reduce((acc, r) => acc + r.compressedSizeBytes, 0);
+    const allRecords = this.syncAuditTable.getAll().filter((r) => r.key.startsWith('datasets/lake/'));
+    const totalTokens = allRecords.reduce((acc, r) => acc + r.tokenCount, 0);
+    const uncompressedBytes = allRecords.reduce((acc, r) => acc + r.uncompressedSizeBytes, 0);
+    const compressedBytes = allRecords.reduce((acc, r) => acc + r.compressedSizeBytes, 0);
 
-    const sortedHashes = records.map((r) => r.sha256).sort();
+    const sortedHashes = allRecords.map((r) => r.sha256).sort();
     const merkleTreeRoot = crypto.createHash('sha256').update(sortedHashes.join('')).digest('hex');
+
+    const accumulatedDomainShards: Record<string, number> = {};
+    for (const r of allRecords) {
+      const match = r.key.match(/datasets\/lake\/([^/]+)\/domain=([^/]+)/);
+      const domainKey = match ? `${match[1]}.${match[2]}` : (r.dominantDomain || 'general');
+      accumulatedDomainShards[domainKey] = (accumulatedDomainShards[domainKey] || 0) + 1;
+    }
 
     const catalogManifest = {
       catalogName: 'galxai-datalake-domain-partitions',
       generatedAt: new Date().toISOString(),
       merkleTreeRoot,
-      totalShards: records.length,
+      totalShards: allRecords.length,
       totalTokens,
-      domainShards,
-      records: records.map((r) => ({
+      domainShards: accumulatedDomainShards,
+      records: allRecords.map((r) => ({
         key: r.key,
         domain: r.dominantDomain,
         tier: r.curriculumTier,
@@ -1654,13 +1662,13 @@ dataset = load_dataset("json", data_files={"train": "${this.publicDomain}/datase
     });
 
     return {
-      syncedShards: records.length,
+      syncedShards: allRecords.length,
       totalTokens,
       uncompressedBytes,
       compressedBytes,
-      domainShards,
+      domainShards: accumulatedDomainShards,
       merkleTreeRoot,
-      records,
+      records: allRecords,
       catalogManifestKey: catalogKey,
     };
   }
