@@ -1,14 +1,18 @@
 /**
- * GALXAI: Master R2 Datalake Refill & Population Engine
- * Generates and uploads the comprehensive 66-domain sovereign curriculum,
- * Gold/Silver tiered shards, DPO/KTO preference pairs, Parquet manifests,
- * MDS streaming indexes, and Merkle-sealed catalogs to Cloudflare R2.
+ * GALXAI: Master Sovereign Datalake Refill Pipeline (Dual-Hemisphere DHEI Architecture)
+ *
+ * Populates Cloudflare R2 bucket `galxai-training-datasets` with the Dual-Hemisphere
+ * Engineering Intelligence (DHEI) curriculum:
+ * - 65% Deterministic Left Hemisphere: 5-Phase SWE-Bench Trajectories, AST Unified Git Diffs, Multi-File Refactoring
+ * - 35% Cognitive Right Hemisphere: RFC 2119 / 8174 Specifications, FMEA Risk Scoring, Hegelian Dialectics, Adversarial Tournaments
  */
 
 import * as fs from 'node:fs';
-import { GalxSyntheticCuratorEngine } from '../src/core/training/GalxSyntheticCuratorEngine';
-import { GalxR2TrainingSyncEngine } from '../src/core/storage/GalxR2TrainingSyncEngine';
 import { GalxTrainingStreamEngine } from '../src/core/training/GalxTrainingStreamEngine';
+import { GalxSyntheticCuratorEngine, type SprintId } from '../src/core/training/GalxSyntheticCuratorEngine';
+import { GalxAgenticSweCuratorEngine } from '../src/core/training/GalxAgenticSweCurator';
+import { GalxArchitecturalRhetoricCuratorEngine } from '../src/core/training/GalxArchitecturalRhetoricCurator';
+import { GalxR2TrainingSyncEngine } from '../src/core/storage/GalxR2TrainingSyncEngine';
 import { GalxUnifiedR2StorageManager } from '../src/core/storage/GalxUnifiedR2StorageManager';
 
 // Auto-load environment
@@ -18,195 +22,59 @@ if (fs.existsSync('.env.local')) {
   try { (process as any).loadEnvFile?.('.env'); } catch {}
 }
 
-const curator = GalxSyntheticCuratorEngine.getInstance();
-const syncEngine = GalxR2TrainingSyncEngine.getInstance();
-const streamEngine = GalxTrainingStreamEngine.getInstance();
-const r2 = GalxUnifiedR2StorageManager.getInstance();
+const TOTAL_CYCLES = 100;
+const SAMPLES_PER_CYCLE = 2500;
 
-async function refillDatalake() {
-  console.log('═'.repeat(80));
-  console.log('🚀 GALXAI: CLOUDFLARE R2 SOVEREIGN DATALAKE REFILL & INITIALIZATION');
-  console.log('═'.repeat(80) + '\n');
+async function refillDheiDatalake() {
+  console.log('================================================================================');
+  console.log('🛸 GALXAI: SOVEREIGN DUAL-HEMISPHERE DATALAKE REFILL (DHEI 32K)');
+  console.log('   Left-Brain: 5-Phase SWE-Bench Trajectories & AST Unified Git Diffs');
+  console.log('   Right-Brain: RFC 2119 Specs, FMEA Risk Tables & Hegelian Systems Dialectics');
+  console.log('================================================================================\n');
+
+  const streamEngine = GalxTrainingStreamEngine.getInstance();
+  const curator = GalxSyntheticCuratorEngine.getInstance();
+  const sweEngine = GalxAgenticSweCuratorEngine.getInstance();
+  const rhetoricEngine = GalxArchitecturalRhetoricCuratorEngine.getInstance();
+  const syncEngine = GalxR2TrainingSyncEngine.getInstance();
+  const r2 = GalxUnifiedR2StorageManager.getInstance();
 
   const resolved = r2.resolveBucket('training');
-  console.log(`Target Bucket: \`${resolved.bucketName}\`\n`);
+  console.log(`Target Bucket: \`${resolved.bucketName}\``);
+  console.log(`Total Cycles:  ${TOTAL_CYCLES}`);
+  console.log(`Per-Cycle:     ${SAMPLES_PER_CYCLE.toLocaleString()} samples`);
+  console.log(`Target Mass:   ${(TOTAL_CYCLES * SAMPLES_PER_CYCLE).toLocaleString()} high-density DHEI samples\n`);
 
-  console.log('▶ [STEP 1] Running Deep Mass-Distillation Across All 66 Sovereign Domains & 5 Tiers...');
-  const synthesizers = [
-    (seed: number) => curator.synthesizeFormalVerificationSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeFormalVerificationSample('galx-flash-8b', 'sprint_4A', seed + 100), // TLA+ 2PC
-    (seed: number) => curator.synthesizeProverVerifierSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeDialecticalSynthesisSample('galx-flash-8b', 'sprint_3A', seed),
-    (seed: number) => curator.synthesizeVirtualSandboxFuzzSample('galx-flash-8b', 'sprint_3B', seed),
-    (seed: number) => curator.synthesizeHardwareSIMDZKSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeParetoTradeoffSample('galx-flash-8b', 'sprint_3A', seed),
-    (seed: number) => curator.synthesizeCrucibleDialogueSample('galx-flash-8b', 'sprint_3B', seed),
-    (seed: number) => curator.synthesizeSelfCorrectionBacktrackingSample('galx-flash-8b', 'sprint_3A', seed),
-    (seed: number) => curator.synthesizeEbpfKernelFilterSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeDistributedCrdtDeltaSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeHoareLogicTripleSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeNuancedDualUseSafetySample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeMCTSRolloutSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeDropLossGatingSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeSpectralDecorrelationSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeCoqInteractiveTheoremSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeProverVerifierTournamentSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeKZGPolynomialCommitmentSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeLockFreeEBRSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeCudaTensorCoreGEMMSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizePlonkPermutationArgumentSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeIsabelleHOLProofSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeQuantumStateSimulationSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeRdmaRoceNetworkDriverSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeThreePhaseCommitSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeHyperLogLogSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeYonedaLemmaSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeTritonFlashAttention2Sample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeStarkDeepAliConstraintSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeRaftSafetyInvariantSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeHomotopyPathInductionSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeSpeculativeDecodingSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizePagedKVCacheSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeMetamathFormalLogicSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeDifferentialPrivacyDPSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeHomomorphicEncryptionSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeRingAllReduceNCCLSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeRiemannianManifoldOptSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeSystemVerilogFormalSVASample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeNovaFoldingSchemeSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeActorSupervisionTreeSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeLatticeKyberPQCSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeReverseModeAutogradSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeCompCertValidationSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeSparseMoERoutingSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeSpdzMpcProtocolSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeRaftJointConsensusSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeXmssPqcSignatureSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeHashgraphAbftSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeToricSurfaceCodeQecSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeNeuralOdeAdjointSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeSeL4CapabilitySecuritySample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeBrakedownLinearZkSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeIsogenyCryptosystemSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeCalvinDeterministicDbSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeYangMillsGaugeTheorySample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeMambaSelectiveSsmSample('galx-flash-8b', 'sprint_4B', seed),
-    (seed: number) => curator.synthesizeSpeculativeLoadHardeningSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeTopologicalAnyonBraidingSample('galx-flash-8b', 'sprint_5A', seed),
-    (seed: number) => curator.synthesizeFluxQubitHamiltonianSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeRiscVZkVMProverSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeSevSnpAttestationSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeEpaxosConsensusSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizePersistentHomologySample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizePmdkNvramPersistenceSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeSimdJsonParserSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeFalconLatticeSignatureSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeTlaCacheReplacementSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeZxCalculusCircuitOptSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeCudaWarpMmaSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeSoftwareTransactionalMemorySample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeLimitOrderBookSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeBfvHomomorphicEncryptionSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizePolyhedralLoopOptSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeGraphNeuralNetPartitionSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeMultivariateUovSignatureSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeBarrelfishMultikernelIpcSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeHardwareTransactionalMemorySample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeDiracEquationDiscretizationSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeDpdkZeroCopyDriverSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizePippengerMsmCudaSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeQuboQuantumAnnealingSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeMvccTimeTravelGcSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeDafnyBoundedFifoSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeDisruptorRingBufferSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeClassicMcelieceGoppaSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeMachZehnderOpticalNnSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeTamarinDhProtocolSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeConjugateGradientPrecondSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeFugueCrdtSequenceSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeSpikingNeuralNetworkLifSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeBvhRayTracingSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeQkdDecoyStateBb84Sample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeProtostarFoldingSchemeSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeLinuxTcBpfSchedulerSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeAgdaMonoidalCategorySample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeAvx512BitMatrixTransposeSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizePathOramObliviousMemorySample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeMultiRaftRangeSplitSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeBurgersEquationPinnSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeEventBDistributed3pcSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeCapnProtoZeroCopySample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeBaconShorQecCodeSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeMatrixProductStatesMpsSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeIoUringSqpollStorageSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeLatticeVrfBlindSignatureSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeRowhammerTargetRowRefreshSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeFramaCFloatBoundsSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeOmniLedgerShardedConsensusSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeQatFp8QuantizationSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeNumberTheoreticTransformNttSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeQuantumEntanglementSwappingSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeCompCertClightCoqSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeArmMteMemoryTaggingSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizePointproofsVectorCommitmentSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizePatriciaMerkleTrieSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeLatticeBlindKemSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeEquivariantGraphNeuralNetSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeIdrisDependentTypeFifoSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeDuckDbVectorizedExecutionSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeQuantumPhaseEstimationSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeLinuxRcuTreeHierarchySample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeLogUpLookupArgumentSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeHnswVectorIndexPartitionSample('galx-flash-8b', 'sprint_4A', seed),
-    (seed: number) => curator.synthesizeChiselPipelineHazardProofSample('galx-flash-8b', 'sprint_4A', seed),
+  const dheiSprints: SprintId[] = [
+    'sprint_dhei_bootstrap',
+    'sprint_dhei_core',
+    'sprint_dhei_frontier',
   ];
 
-  const TOTAL_CYCLES = 200;
-  const SAMPLES_PER_CYCLE = 2500;
-  console.log(`▶ [STEP 1] Executing 200x Scale Mass-Distillation Across 132 Sovereign Domains (${TOTAL_CYCLES} cycles x ${SAMPLES_PER_CYCLE.toLocaleString()} samples = 500,000+ samples)...`);
-
-  const sprints = ['sprint_1A', 'sprint_1B', 'sprint_2A', 'sprint_2B', 'sprint_3A', 'sprint_3B', 'sprint_4A', 'sprint_4B'] as const;
+  const startTime = Date.now();
   let totalCumulativeSamples = 0;
   let latestLakeResult: any = null;
 
-  const startTime = Date.now();
+  console.log('▶ [STEP 1] Executing High-Throughput DHEI Distillation Loop...');
 
   for (let cycle = 1; cycle <= TOTAL_CYCLES; cycle++) {
-    // 1. Synthesize dedicated frontier domain samples for current cycle
-    for (const synth of synthesizers) {
-      const sample = synth(cycle * 1000 + 1);
+    const targetSprint = dheiSprints[(cycle - 1) % dheiSprints.length];
+
+    // 1. Synthesize specialized Left-Hemisphere SWE & Right-Hemisphere Rhetoric Core Samples
+    const coreSamples = [
+      sweEngine.synthesizeSweBenchTrajectory('galx-flash-8b', targetSprint, cycle * 10 + 1),
+      sweEngine.synthesizeUnifiedDiffPatchSample('galx-flash-8b', targetSprint, cycle * 10 + 2),
+      sweEngine.synthesizeMultiFileRefactoringSample('galx-flash-8b', targetSprint, cycle * 10 + 3),
+      rhetoricEngine.synthesizeRfcArchitecturalSpecification('galx-flash-8b', targetSprint, cycle * 10 + 4),
+      rhetoricEngine.synthesizeDialecticalSystemsTradeoff('galx-flash-8b', targetSprint, cycle * 10 + 5),
+      rhetoricEngine.synthesizeAdversarialConcurrencyTournament('galx-flash-8b', targetSprint, cycle * 10 + 6),
+      rhetoricEngine.synthesizeExpandContractMigrationPlaybook('galx-flash-8b', targetSprint, cycle * 10 + 7),
+    ];
+
+    for (const s of coreSamples) {
       await streamEngine.ingestInteraction({
         source: 'internal_distillation',
-        userId: `galxai_datalake_mass_grid_${cycle}`,
-        userPrompt: sample.userPrompt,
-        completionContent: sample.completionContent,
-        modelId: sample.modelId,
-        allowModelTraining: true,
-        isApiCall: false,
-      });
-      totalCumulativeSamples++;
-    }
-
-    // 2. Synthesize combinatorial multi-tier batch across rotating sprints
-    const targetSprint = sprints[(cycle - 1) % sprints.length];
-    const sprintBatch = curator.generateSyntheticBatch({
-      count: SAMPLES_PER_CYCLE - synthesizers.length,
-      tierDistribution: {
-        tier1Fact: 0.10,
-        tier2Logic: 0.20,
-        tier3Code: 0.30,
-        tier4Stem: 0.25,
-        tier5Agentic: 0.15,
-      },
-      teacherModelId: 'galx-flash-8b',
-      sprintId: targetSprint,
-      batchSeedOffset: cycle * 10000 + 42,
-    });
-
-    for (const s of sprintBatch) {
-      await streamEngine.ingestInteraction({
-        source: 'internal_distillation',
-        userId: `galxai_datalake_${targetSprint}_c${cycle}`,
+        userId: `galxai_dhei_core_${cycle}`,
         userPrompt: s.userPrompt,
         completionContent: s.completionContent,
         modelId: 'galx-flash-8b',
@@ -216,29 +84,72 @@ async function refillDatalake() {
       totalCumulativeSamples++;
     }
 
-    // 3. Ingest DPO pairwise feedback
-    await streamEngine.ingestDPOFeedback({
-      prompt: `[DPO-C${cycle}] Derive optimal Ring-AllReduce communication volume for $N = ${(cycle % 16) + 4}$ GPUs and size $S = ${cycle * 2} \\text{ GB}$.`,
-      chosen: `<thought>\n1. Scatter-Reduce: ${(cycle % 16) + 3}/${(cycle % 16) + 4} * S.\n2. All-Gather: ${(cycle % 16) + 3}/${(cycle % 16) + 4} * S.\n3. Total = 2(${(cycle % 16) + 3})/${(cycle % 16) + 4} * S.\n</thought>\nRing-AllReduce communication volume is $2 \\cdot \\frac{${(cycle % 16) + 3}}{${(cycle % 16) + 4}} \\cdot ${cycle * 2}\\text{ GB}$.`,
-      rejected: `Ring-AllReduce sends ${cycle * 4} GB always.`,
-      modelId: 'galx-flash-8b',
-      allowModelTraining: true,
-      isApiCall: false,
+    // 2. Synthesize high-density combinatorial batch weighted for DHEI
+    const sprintBatch = curator.generateSyntheticBatch({
+      count: SAMPLES_PER_CYCLE - coreSamples.length - 2,
+      tierDistribution: {
+        tier1Fact: 0.0,
+        tier2Logic: 0.05,
+        tier3Code: 0.30,
+        tier4Stem: 0.05,
+        tier5Agentic: 0.60,
+      },
+      teacherModelId: 'galx-flash-8b',
+      sprintId: targetSprint,
+      batchSeedOffset: cycle * 10000 + 42,
     });
+
+    for (const s of sprintBatch) {
+      await streamEngine.ingestInteraction({
+        source: 'internal_distillation',
+        userId: `galxai_dhei_${targetSprint}_c${cycle}`,
+        userPrompt: s.userPrompt,
+        completionContent: s.completionContent,
+        modelId: 'galx-flash-8b',
+        allowModelTraining: true,
+        isApiCall: false,
+      });
+      totalCumulativeSamples++;
+    }
+
+    // 3. Ingest DPO pairwise feedback (alternating SWE surgical vs ADR architectural)
+    if (cycle % 2 === 0) {
+      const sweDpo = sweEngine.synthesizeSweDpoPairs('galx-flash-8b', cycle);
+      await streamEngine.ingestDPOFeedback({
+        source: 'synthetic_critique',
+        userId: `galxai_dpo_swe_c${cycle}`,
+        prompt: sweDpo.prompt,
+        chosen: sweDpo.chosen,
+        rejected: sweDpo.rejected,
+        modelId: 'galx-flash-8b',
+      });
+    } else {
+      const archDpo = rhetoricEngine.synthesizeArchitecturalDpoPairs('galx-flash-8b', cycle);
+      await streamEngine.ingestDPOFeedback({
+        source: 'synthetic_critique',
+        userId: `galxai_dpo_arch_c${cycle}`,
+        prompt: archDpo.prompt,
+        chosen: archDpo.chosen,
+        rejected: archDpo.rejected,
+        modelId: 'galx-flash-8b',
+      });
+    }
     totalCumulativeSamples++;
 
     // 4. Ingest KTO binary preference feedback
-    await streamEngine.ingestKTOFeedback({
-      prompt: `[KTO-C${cycle}] Formally prove Raft Joint Consensus dynamic cluster membership change safety under $N = ${2 * cycle + 3}$ nodes.`,
-      completion: `<thought>1. Quorum intersection $C_{\\text{old}} \\cap C_{\\text{new}} \\ne \\emptyset$...</thought> Proof of Disjoint Quorum Impossibility across joint transitions in cycle ${cycle}...`,
-      modelId: 'galx-flash-8b',
-      label: true,
-      allowModelTraining: true,
-      isApiCall: false,
-    });
-    totalCumulativeSamples++;
+    const sweKto = sweEngine.synthesizeSweKtoSamples('galx-flash-8b', cycle);
+    for (const kto of sweKto) {
+      await streamEngine.ingestKTOFeedback({
+        userId: `galxai_kto_c${cycle}`,
+        prompt: kto.prompt,
+        completion: kto.completion,
+        modelId: 'galx-flash-8b',
+        label: kto.label,
+      });
+      totalCumulativeSamples++;
+    }
 
-    // 5. Synchronize and seal current batch into R2 datalake
+    // 5. Synchronize and seal batch to Cloudflare R2
     latestLakeResult = await syncEngine.syncDomainPartitionedDatalake();
     streamEngine.clearBuffer();
 
@@ -246,13 +157,13 @@ async function refillDatalake() {
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
       const tokens = latestLakeResult?.totalTokens || 0;
       const shards = latestLakeResult?.syncedShards || 0;
-      console.log(`  • [Cycle ${cycle}/${TOTAL_CYCLES}] Notarized: ${tokens.toLocaleString()} tokens | Shards: ${shards} | Samples: ${totalCumulativeSamples.toLocaleString()} (${elapsed}s)`);
+      console.log(`  • [DHEI Cycle ${cycle}/${TOTAL_CYCLES}] Notarized: ${tokens.toLocaleString()} tokens | Shards: ${shards} | Samples: ${totalCumulativeSamples.toLocaleString()} (${elapsed}s)`);
     }
   }
 
-  console.log(`\n  ✅ 100X MASS DISTILLATION COMPLETE: Ingested & Notarized ${totalCumulativeSamples.toLocaleString()} samples across ${TOTAL_CYCLES} cycles!\n`);
+  console.log(`\n  ✅ DHEI REFILL COMPLETE: Ingested & Notarized ${totalCumulativeSamples.toLocaleString()} samples across ${TOTAL_CYCLES} cycles!\n`);
 
-  console.log('▶ [STEP 2] Sealed Master 100x Datalake Manifest in R2:');
+  console.log('▶ [STEP 2] Master Datalake Manifest in R2:');
   console.log(`  • Total Lake Shards:     ${latestLakeResult.syncedShards}`);
   console.log(`  • Total Tokens Yielded:  ${latestLakeResult.totalTokens.toLocaleString()} tokens`);
   console.log(`  • Merkle Tree Root:      ${latestLakeResult.merkleTreeRoot}`);
@@ -279,7 +190,7 @@ async function refillDatalake() {
   });
   console.log('  • MDS Streaming Index:   datasets/lake/mds_index.json uploaded.\n');
 
-  console.log('▶ [STEP 5] Exporting Training Framework Recipes to R2...');
+  console.log('▶ [STEP 5] Exporting 32k Training Framework Recipes to R2...');
   const recipes = [
     { key: 'datasets/lake/recipes/torchtune_lora_recipe.yaml', body: syncEngine.exportTorchtuneRecipeYaml(), type: 'text/yaml' },
     { key: 'datasets/lake/recipes/axolotl_distributed_config.yaml', body: syncEngine.exportAxolotlDatasetConfig(), type: 'text/yaml' },
@@ -293,17 +204,19 @@ async function refillDatalake() {
       contentType: rec.type,
     });
   }
-  console.log(`  • Uploaded ${recipes.length} training recipes (Torchtune, Axolotl, LLaMA-Factory).\n`);
+  console.log('  • Uploaded 3 training recipes (Torchtune 32k, Axolotl 32k, LLaMA-Factory).\n');
 
-  // Final verification
-  const listAll = await r2.listObjects({ bucket: 'training', maxKeys: 1000 });
-  console.log('═'.repeat(80));
-  console.log(`🎉 100X MASS REFILL COMPLETE: Successfully populated \`${resolved.bucketName}\`!`);
-  console.log(`   Total Active Artifacts in Bucket: ${listAll.objects.length}`);
-  console.log('═'.repeat(80) + '\n');
+  console.log('================================================================================');
+  console.log('🎉 SOVEREIGN DHEI DATALAKE REFILL & CRYPTOGRAPHIC SEALING COMPLETE');
+  console.log(`   Total Shards Sealed in R2:     ${latestLakeResult.syncedShards}`);
+  console.log(`   Total Parquet Shards:          ${parquetResult.parquetShardsCount}`);
+  console.log(`   Total Notarized Tokens:        ${latestLakeResult.totalTokens.toLocaleString()} tokens`);
+  console.log(`   Total Records Ingested:        ${totalCumulativeSamples.toLocaleString()} samples`);
+  console.log(`   Cryptographic Merkle Root:     ${latestLakeResult.merkleTreeRoot}`);
+  console.log('================================================================================\n');
 }
 
-refillDatalake().catch(err => {
-  console.error('❌ Datalake refill failed:', err);
+refillDheiDatalake().catch((err) => {
+  console.error('Failed to refill DHEI datalake:', err);
   process.exit(1);
 });

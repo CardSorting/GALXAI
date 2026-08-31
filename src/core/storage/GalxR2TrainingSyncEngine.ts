@@ -174,6 +174,19 @@ export class GalxR2TrainingSyncEngine {
     return GalxR2TrainingSyncEngine.instance;
   }
 
+  /**
+   * Clears the local in-memory/disk sync audit tables and cache.
+   */
+  public clearLocalAuditTable(): void {
+    this.syncAuditTable.clear();
+    this.deadLetterTable.clear();
+    if (fs.existsSync(this.localCacheDir)) {
+      try {
+        fs.rmSync(this.localCacheDir, { recursive: true, force: true });
+      } catch {}
+    }
+  }
+
   public generatePartitionedKey(
     datasetType: 'sft' | 'dpo' | 'kto' | 'microbatch' | 'compacted',
     identifier: string,
@@ -736,10 +749,15 @@ export class GalxR2TrainingSyncEngine {
     }
 
     yamlLines.push('');
-    yamlLines.push('sequence_len: 4096');
+    yamlLines.push('sequence_len: 32768');
     yamlLines.push('sample_packing: true');
     yamlLines.push('pad_to_sequence_len: true');
     yamlLines.push('eval_sample_packing: false');
+    yamlLines.push('flash_attention: true');
+    yamlLines.push('rope_scaling:');
+    yamlLines.push('  type: yarn');
+    yamlLines.push('  factor: 4.0');
+    yamlLines.push('  original_max_position_embeddings: 8192');
 
     return yamlLines.join('\n');
   }
@@ -753,13 +771,14 @@ export class GalxR2TrainingSyncEngine {
     const trainUrls = shards.filter((s) => s.split === 'train').map((s) => `"${this.generatePresignedGetUrl(s.key, expires)}"`);
 
     return `# ============================================================================== #
-# GALXAI: Meta Torchtune Post-Training Recipe Configuration                      #
+# GALXAI: Meta Torchtune Post-Training Recipe Configuration (DHEI 32k Context)   #
 # ============================================================================== #
 
 model:
   _component_: torchtune.models.qwen2.lora_qwen2
-  lora_rank: 16
-  lora_alpha: 32
+  lora_rank: 64
+  lora_alpha: 128
+  lora_dropout: 0.05
 
 tokenizer:
   _component_: torchtune.models.qwen2.qwen2_tokenizer
@@ -772,12 +791,17 @@ dataset:
     train: [${trainUrls.join(', ')}]
   conversation_column: messages
   split: train
+  max_seq_len: 32768
 
-batch_size: 4
+batch_size: 2
+gradient_accumulation_steps: 8
 epochs: 1
 optimizer:
   _component_: torch.optim.AdamW
-  lr: 2e-4
+  lr: 1.5e-4
+  weight_decay: 0.01
+loss:
+  _component_: torchtune.modules.loss.MaskedCrossEntropyLoss
 `;
   }
 

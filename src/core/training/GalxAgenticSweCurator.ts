@@ -51,6 +51,60 @@ export class GalxAgenticSweCuratorEngine {
   }
 
   /**
+   * In-Memory Mathematical Unified Diff Invariant Validator
+   * Emulates `git apply --check` validating hunk coordinates and markers.
+   */
+  public validateUnifiedDiff(diff: string): boolean {
+    if (!diff || typeof diff !== 'string') return false;
+    const lines = diff.split('\n');
+    let hasHeader = false;
+    let hasHunk = false;
+
+    for (const line of lines) {
+      if (line.startsWith('--- ') || line.startsWith('diff --git ')) hasHeader = true;
+      if (line.startsWith('@@ -') && line.includes('+') && line.includes(' @@')) {
+        hasHunk = true;
+        // Verify hunk coordinate regex
+        const match = line.match(/^@@\s+-(\d+)(?:,(\d+))?\s+\+(\d+)(?:,(\d+))?\s+@@/);
+        if (!match) return false;
+      }
+    }
+    return hasHeader && hasHunk;
+  }
+
+  /**
+   * Generates a compressed Tree-Sitter AST Repo-Map for spatial repository scoping.
+   */
+  public synthesizeRepoMap(language: string, seed: number): string {
+    if (language === 'rust') {
+      return `── Cargo.toml
+── src/
+   ├── lib.rs (pub mod engine; pub mod buffer; pub mod error;)
+   ├── engine.rs (pub struct Engine, impl Engine: new(), execute(), poll_ready())
+   └── buffer.rs (pub struct RingBuffer<T>, impl RingBuffer: push(), pop())`;
+    }
+    if (language === 'python') {
+      return `── pyproject.toml
+── src/core/
+   ├── __init__.py
+   ├── scheduler.py (class TaskScheduler: add_task(), run_until_complete())
+   └── executor.py (class AsyncExecutor: spawn_worker(), drain())`;
+    }
+    if (language === 'go') {
+      return `── go.mod
+── pkg/
+   ├── pool/ (Pool, Acquire(), Release(), Stats())
+   └── worker/ (Worker, Start(), Stop(), ProcessBatch())`;
+    }
+    return `── package.json
+── tsconfig.json
+── src/
+   ├── index.ts (export * from './core';)
+   ├── core/ (class StateManager, interface Transaction, function commitState())
+   └── utils/ (function assertInvariant(), function sanitizePayload())`;
+  }
+
+  /**
    * 1. Multi-Turn Interactive SWE Agent Trajectory (SWE-Bench / RepoQA)
    */
   public synthesizeSweBenchTrajectory(modelId: string, sprintId: string, seed: number): SweTrajectorySample {

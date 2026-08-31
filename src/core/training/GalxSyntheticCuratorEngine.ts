@@ -15,6 +15,7 @@ import { GalxR2TrainingSyncEngine, type R2SyncRecord } from '../storage/GalxR2Tr
 import { BroccoliDataLabelingClassifier } from './BroccoliDataLabelingClassifier';
 import { BroccoliTelemetryEngine } from '../telemetry/BroccoliTelemetryEngine';
 import { GalxAgenticSweCuratorEngine } from './GalxAgenticSweCurator';
+import { GalxArchitecturalRhetoricCuratorEngine } from './GalxArchitecturalRhetoricCurator';
 import type { CurriculumTier, FrontierTaxonomyLabel } from '../contracts/GalxContracts';
 
 function curatorCryptoHash(input: string): string {
@@ -30,7 +31,10 @@ export type SprintId =
   | 'sprint_3A'
   | 'sprint_3B'
   | 'sprint_4A'
-  | 'sprint_4B';
+  | 'sprint_4B'
+  | 'sprint_dhei_bootstrap'
+  | 'sprint_dhei_core'
+  | 'sprint_dhei_frontier';
 
 export interface SprintConfig {
   sprintId: SprintId;
@@ -157,6 +161,36 @@ export const SPRINT_REGISTRY: Record<SprintId, SprintConfig> = {
     targetTokens: 32000000,
     maxDurationMinutes: 150,
     tierDistribution: { tier1Fact: 0.05, tier2Logic: 0.15, tier3Code: 0.25, tier4Stem: 0.25, tier5Agentic: 0.30 },
+    adaptiveWorkerPoolSize: 8,
+    directR2Streaming: true,
+  },
+  sprint_dhei_bootstrap: {
+    sprintId: 'sprint_dhei_bootstrap',
+    stageName: 'DHEI Phase 0: Preflight SWE & Architectural Canary',
+    targetSamples: 200,
+    targetTokens: 200000,
+    maxDurationMinutes: 10,
+    tierDistribution: { tier1Fact: 0.05, tier2Logic: 0.10, tier3Code: 0.20, tier4Stem: 0.15, tier5Agentic: 0.50 },
+    adaptiveWorkerPoolSize: 4,
+    directR2Streaming: true,
+  },
+  sprint_dhei_core: {
+    sprintId: 'sprint_dhei_core',
+    stageName: 'DHEI Phase 1: Dual-Hemisphere Core (65% SWE Agentics + 35% Architectural Systems Discourse)',
+    targetSamples: 50000,
+    targetTokens: 40000000,
+    maxDurationMinutes: 150,
+    tierDistribution: { tier1Fact: 0.0, tier2Logic: 0.05, tier3Code: 0.30, tier4Stem: 0.05, tier5Agentic: 0.60 },
+    adaptiveWorkerPoolSize: 8,
+    directR2Streaming: true,
+  },
+  sprint_dhei_frontier: {
+    sprintId: 'sprint_dhei_frontier',
+    stageName: 'DHEI Phase 2: Frontier Multi-File Invariants & Adversarial Red-Team Tournament',
+    targetSamples: 50000,
+    targetTokens: 40000000,
+    maxDurationMinutes: 150,
+    tierDistribution: { tier1Fact: 0.0, tier2Logic: 0.05, tier3Code: 0.25, tier4Stem: 0.05, tier5Agentic: 0.65 },
     adaptiveWorkerPoolSize: 8,
     directR2Streaming: true,
   },
@@ -1723,7 +1757,8 @@ ORDER BY txn_date DESC, rolling_7d_revenue_cents DESC;
    */
   private synthesizeTier5Sample(modelId: string, sprintId: string, seed: number) {
     const sweEngine = GalxAgenticSweCuratorEngine.getInstance();
-    const roll = seed % 36;
+    const rhetoricEngine = GalxArchitecturalRhetoricCuratorEngine.getInstance();
+    const roll = seed % 40;
     if (roll === 0) return this.synthesizeProverVerifierSample(modelId, sprintId, seed);
     if (roll === 1) return this.synthesizeCrucibleDialogueSample(modelId, sprintId, seed);
     if (roll === 2) return this.synthesizeVirtualSandboxFuzzSample(modelId, sprintId, seed);
@@ -1760,6 +1795,10 @@ ORDER BY txn_date DESC, rolling_7d_revenue_cents DESC;
     if (roll === 33) return sweEngine.synthesizeSweBenchTrajectory(modelId, sprintId, seed);
     if (roll === 34) return sweEngine.synthesizeUnifiedDiffPatchSample(modelId, sprintId, seed);
     if (roll === 35) return sweEngine.synthesizeMultiFileRefactoringSample(modelId, sprintId, seed);
+    if (roll === 36) return rhetoricEngine.synthesizeRfcArchitecturalSpecification(modelId, sprintId, seed);
+    if (roll === 37) return rhetoricEngine.synthesizeDialecticalSystemsTradeoff(modelId, sprintId, seed);
+    if (roll === 38) return rhetoricEngine.synthesizeAdversarialConcurrencyTournament(modelId, sprintId, seed);
+    if (roll === 39) return rhetoricEngine.synthesizeExpandContractMigrationPlaybook(modelId, sprintId, seed);
 
     const salt = crypto.createHash('sha256').update(`t5_${sprintId}_${seed}_${Date.now()}_${Math.random()}`).digest('hex').slice(0, 10);
     const archetype = seed % 3;
@@ -6712,6 +6751,26 @@ void vectorized_filter_greater_than(const int32_t *__restrict input, int32_t thr
 
   public synthesizeSweKtoSamples(modelId: string, seed: number) {
     return GalxAgenticSweCuratorEngine.getInstance().synthesizeSweKtoSamples(modelId, seed);
+  }
+
+  public synthesizeRfcArchitecturalSpecification(modelId: string, sprintId: string, seed: number) {
+    return GalxArchitecturalRhetoricCuratorEngine.getInstance().synthesizeRfcArchitecturalSpecification(modelId, sprintId, seed);
+  }
+
+  public synthesizeDialecticalSystemsTradeoff(modelId: string, sprintId: string, seed: number) {
+    return GalxArchitecturalRhetoricCuratorEngine.getInstance().synthesizeDialecticalSystemsTradeoff(modelId, sprintId, seed);
+  }
+
+  public synthesizeAdversarialConcurrencyTournament(modelId: string, sprintId: string, seed: number) {
+    return GalxArchitecturalRhetoricCuratorEngine.getInstance().synthesizeAdversarialConcurrencyTournament(modelId, sprintId, seed);
+  }
+
+  public synthesizeExpandContractMigrationPlaybook(modelId: string, sprintId: string, seed: number) {
+    return GalxArchitecturalRhetoricCuratorEngine.getInstance().synthesizeExpandContractMigrationPlaybook(modelId, sprintId, seed);
+  }
+
+  public synthesizeArchitecturalDpoPairs(modelId: string, seed: number) {
+    return GalxArchitecturalRhetoricCuratorEngine.getInstance().synthesizeArchitecturalDpoPairs(modelId, seed);
   }
 
   public haltSprint(): void {
