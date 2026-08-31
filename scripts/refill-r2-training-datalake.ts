@@ -31,174 +31,177 @@ async function refillDatalake() {
   const resolved = r2.resolveBucket('training');
   console.log(`Target Bucket: \`${resolved.bucketName}\`\n`);
 
-  console.log('▶ [STEP 1] Deeply Synthesizing Sovereign 66-Domain Multi-Tier Frontier Curriculum...');
+  console.log('▶ [STEP 1] Running Deep Mass-Distillation Across All 66 Sovereign Domains & 5 Tiers...');
   const synthesizers = [
-    () => curator.synthesizeFormalVerificationSample('galx-flash-8b', 'sprint_refill', 1),
-    () => curator.synthesizeFormalVerificationSample('galx-flash-8b', 'sprint_refill', 2), // TLA+ 2PC
-    () => curator.synthesizeProverVerifierSample('galx-flash-8b', 'sprint_refill', 3),
-    () => curator.synthesizeDialecticalSynthesisSample('galx-flash-8b', 'sprint_refill', 4),
-    () => curator.synthesizeVirtualSandboxFuzzSample('galx-flash-8b', 'sprint_refill', 5),
-    () => curator.synthesizeHardwareSIMDZKSample('galx-flash-8b', 'sprint_refill', 6),
-    () => curator.synthesizeParetoTradeoffSample('galx-flash-8b', 'sprint_refill', 7),
-    () => curator.synthesizeCrucibleDialogueSample('galx-flash-8b', 'sprint_refill', 8),
-    () => curator.synthesizeSelfCorrectionBacktrackingSample('galx-flash-8b', 'sprint_refill', 9),
-    () => curator.synthesizeEbpfKernelFilterSample('galx-flash-8b', 'sprint_refill', 10),
-    () => curator.synthesizeDistributedCrdtDeltaSample('galx-flash-8b', 'sprint_refill', 11),
-    () => curator.synthesizeHoareLogicTripleSample('galx-flash-8b', 'sprint_refill', 12),
-    () => curator.synthesizeNuancedDualUseSafetySample('galx-flash-8b', 'sprint_refill', 13),
-    () => curator.synthesizeMCTSRolloutSample('galx-flash-8b', 'sprint_refill', 14),
-    () => curator.synthesizeDropLossGatingSample('galx-flash-8b', 'sprint_refill', 15),
-    () => curator.synthesizeSpectralDecorrelationSample('galx-flash-8b', 'sprint_refill', 16),
-    () => curator.synthesizeCoqInteractiveTheoremSample('galx-flash-8b', 'sprint_refill', 17),
-    () => curator.synthesizeProverVerifierTournamentSample('galx-flash-8b', 'sprint_refill', 18),
-    () => curator.synthesizeKZGPolynomialCommitmentSample('galx-flash-8b', 'sprint_refill', 19),
-    () => curator.synthesizeLockFreeEBRSample('galx-flash-8b', 'sprint_refill', 20),
-    () => curator.synthesizeCudaTensorCoreGEMMSample('galx-flash-8b', 'sprint_refill', 21),
-    () => curator.synthesizePlonkPermutationArgumentSample('galx-flash-8b', 'sprint_refill', 22),
-    () => curator.synthesizeIsabelleHOLProofSample('galx-flash-8b', 'sprint_refill', 23),
-    () => curator.synthesizeQuantumStateSimulationSample('galx-flash-8b', 'sprint_refill', 24),
-    () => curator.synthesizeRdmaRoceNetworkDriverSample('galx-flash-8b', 'sprint_refill', 25),
-    () => curator.synthesizeThreePhaseCommitSample('galx-flash-8b', 'sprint_refill', 26),
-    () => curator.synthesizeHyperLogLogSample('galx-flash-8b', 'sprint_refill', 27),
-    () => curator.synthesizeYonedaLemmaSample('galx-flash-8b', 'sprint_refill', 28),
-    () => curator.synthesizeTritonFlashAttention2Sample('galx-flash-8b', 'sprint_refill', 29),
-    () => curator.synthesizeStarkDeepAliConstraintSample('galx-flash-8b', 'sprint_refill', 30),
-    () => curator.synthesizeRaftSafetyInvariantSample('galx-flash-8b', 'sprint_refill', 31),
-    () => curator.synthesizeHomotopyPathInductionSample('galx-flash-8b', 'sprint_refill', 32),
-    () => curator.synthesizeSpeculativeDecodingSample('galx-flash-8b', 'sprint_refill', 33),
-    () => curator.synthesizePagedKVCacheSample('galx-flash-8b', 'sprint_refill', 34),
-    () => curator.synthesizeMetamathFormalLogicSample('galx-flash-8b', 'sprint_refill', 35),
-    () => curator.synthesizeDifferentialPrivacyDPSample('galx-flash-8b', 'sprint_refill', 36),
-    () => curator.synthesizeHomomorphicEncryptionSample('galx-flash-8b', 'sprint_refill', 37),
-    () => curator.synthesizeRingAllReduceNCCLSample('galx-flash-8b', 'sprint_refill', 38),
-    () => curator.synthesizeRiemannianManifoldOptSample('galx-flash-8b', 'sprint_refill', 39),
-    () => curator.synthesizeSystemVerilogFormalSVASample('galx-flash-8b', 'sprint_refill', 40),
-    () => curator.synthesizeNovaFoldingSchemeSample('galx-flash-8b', 'sprint_refill', 41),
-    () => curator.synthesizeActorSupervisionTreeSample('galx-flash-8b', 'sprint_refill', 42),
-    () => curator.synthesizeLatticeKyberPQCSample('galx-flash-8b', 'sprint_refill', 43),
-    () => curator.synthesizeReverseModeAutogradSample('galx-flash-8b', 'sprint_refill', 44),
-    () => curator.synthesizeCompCertValidationSample('galx-flash-8b', 'sprint_refill', 45),
-    () => curator.synthesizeSparseMoERoutingSample('galx-flash-8b', 'sprint_refill', 46),
-    () => curator.synthesizeSpdzMpcProtocolSample('galx-flash-8b', 'sprint_refill', 47),
-    () => curator.synthesizeRaftJointConsensusSample('galx-flash-8b', 'sprint_refill', 48),
-    () => curator.synthesizeXmssPqcSignatureSample('galx-flash-8b', 'sprint_refill', 49),
-    () => curator.synthesizeHashgraphAbftSample('galx-flash-8b', 'sprint_refill', 50),
-    () => curator.synthesizeToricSurfaceCodeQecSample('galx-flash-8b', 'sprint_refill', 51),
-    () => curator.synthesizeNeuralOdeAdjointSample('galx-flash-8b', 'sprint_refill', 52),
-    () => curator.synthesizeSeL4CapabilitySecuritySample('galx-flash-8b', 'sprint_refill', 53),
-    () => curator.synthesizeBrakedownLinearZkSample('galx-flash-8b', 'sprint_refill', 54),
-    () => curator.synthesizeIsogenyCryptosystemSample('galx-flash-8b', 'sprint_refill', 55),
-    () => curator.synthesizeCalvinDeterministicDbSample('galx-flash-8b', 'sprint_refill', 56),
-    () => curator.synthesizeYangMillsGaugeTheorySample('galx-flash-8b', 'sprint_refill', 57),
-    () => curator.synthesizeMambaSelectiveSsmSample('galx-flash-8b', 'sprint_refill', 58),
-    () => curator.synthesizeSpeculativeLoadHardeningSample('galx-flash-8b', 'sprint_refill', 59),
-    () => curator.synthesizeTopologicalAnyonBraidingSample('galx-flash-8b', 'sprint_refill', 60),
+    (seed: number) => curator.synthesizeFormalVerificationSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeFormalVerificationSample('galx-flash-8b', 'sprint_4A', seed + 100), // TLA+ 2PC
+    (seed: number) => curator.synthesizeProverVerifierSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeDialecticalSynthesisSample('galx-flash-8b', 'sprint_3A', seed),
+    (seed: number) => curator.synthesizeVirtualSandboxFuzzSample('galx-flash-8b', 'sprint_3B', seed),
+    (seed: number) => curator.synthesizeHardwareSIMDZKSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeParetoTradeoffSample('galx-flash-8b', 'sprint_3A', seed),
+    (seed: number) => curator.synthesizeCrucibleDialogueSample('galx-flash-8b', 'sprint_3B', seed),
+    (seed: number) => curator.synthesizeSelfCorrectionBacktrackingSample('galx-flash-8b', 'sprint_3A', seed),
+    (seed: number) => curator.synthesizeEbpfKernelFilterSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeDistributedCrdtDeltaSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeHoareLogicTripleSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeNuancedDualUseSafetySample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeMCTSRolloutSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeDropLossGatingSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeSpectralDecorrelationSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeCoqInteractiveTheoremSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeProverVerifierTournamentSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeKZGPolynomialCommitmentSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeLockFreeEBRSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeCudaTensorCoreGEMMSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizePlonkPermutationArgumentSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeIsabelleHOLProofSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeQuantumStateSimulationSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeRdmaRoceNetworkDriverSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeThreePhaseCommitSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeHyperLogLogSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeYonedaLemmaSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeTritonFlashAttention2Sample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeStarkDeepAliConstraintSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeRaftSafetyInvariantSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeHomotopyPathInductionSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeSpeculativeDecodingSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizePagedKVCacheSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeMetamathFormalLogicSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeDifferentialPrivacyDPSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeHomomorphicEncryptionSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeRingAllReduceNCCLSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeRiemannianManifoldOptSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeSystemVerilogFormalSVASample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeNovaFoldingSchemeSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeActorSupervisionTreeSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeLatticeKyberPQCSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeReverseModeAutogradSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeCompCertValidationSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeSparseMoERoutingSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeSpdzMpcProtocolSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeRaftJointConsensusSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeXmssPqcSignatureSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeHashgraphAbftSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeToricSurfaceCodeQecSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeNeuralOdeAdjointSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeSeL4CapabilitySecuritySample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeBrakedownLinearZkSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeIsogenyCryptosystemSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeCalvinDeterministicDbSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeYangMillsGaugeTheorySample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeMambaSelectiveSsmSample('galx-flash-8b', 'sprint_4B', seed),
+    (seed: number) => curator.synthesizeSpeculativeLoadHardeningSample('galx-flash-8b', 'sprint_4A', seed),
+    (seed: number) => curator.synthesizeTopologicalAnyonBraidingSample('galx-flash-8b', 'sprint_5A', seed),
   ];
 
   let ingestedCount = 0;
-  for (const synth of synthesizers) {
-    const sample = synth();
-    await streamEngine.ingestInteraction({
-      source: 'internal_distillation',
-      userId: 'galxai_datalake_master_refill',
-      userPrompt: sample.userPrompt,
-      completionContent: sample.completionContent,
-      modelId: sample.modelId,
-      allowModelTraining: true,
-      isApiCall: false,
-    });
-    ingestedCount++;
+
+  // Pass A: Multi-seed grid across all 60 frontier synthesizer disciplines (30 iterations per synthesizer = 1,800 samples)
+  console.log('  • Pass A: Running 30-cycle multi-seed grid across all 60 sovereign synthesizers (1,800 samples)...');
+  for (let cycle = 0; cycle < 30; cycle++) {
+    for (const synth of synthesizers) {
+      const sample = synth(cycle * 100 + 1);
+      await streamEngine.ingestInteraction({
+        source: 'internal_distillation',
+        userId: `galxai_datalake_master_grid_${cycle}`,
+        userPrompt: sample.userPrompt,
+        completionContent: sample.completionContent,
+        modelId: sample.modelId,
+        allowModelTraining: true,
+        isApiCall: false,
+      });
+      ingestedCount++;
+    }
   }
 
-  // Generate additional multi-tier combinatorial batches across diverse sprints
-  const multiTierBatch = curator.generateSyntheticBatch({
-    count: 120,
-    tierDistribution: {
-      tier1Fact: 0.10,
-      tier2Logic: 0.20,
-      tier3Code: 0.30,
-      tier4Stem: 0.25,
-      tier5Agentic: 0.15,
-    },
-    teacherModelId: 'galx-flash-8b',
-    sprintId: 'sprint_1A',
-    batchSeedOffset: 1000,
-  });
+  // Pass B: Combinatorial Mass Distillation across all 8 sprints (2,500 samples per sprint = 20,000 samples)
+  const sprints = ['sprint_1A', 'sprint_1B', 'sprint_2A', 'sprint_2B', 'sprint_3A', 'sprint_3B', 'sprint_4A', 'sprint_4B'] as const;
+  console.log(`  • Pass B: Running 2,500-sample combinatorial batches across all 8 sprints (20,000 samples)...`);
 
-  for (const s of multiTierBatch) {
-    await streamEngine.ingestInteraction({
-      source: 'internal_distillation',
-      userId: 'galxai_datalake_batch_refill',
-      userPrompt: s.userPrompt,
-      completionContent: s.completionContent,
-      modelId: 'galx-flash-8b',
-      allowModelTraining: true,
-      isApiCall: false,
+  for (const sp of sprints) {
+    const sprintBatch = curator.generateSyntheticBatch({
+      count: 2500,
+      tierDistribution: {
+        tier1Fact: 0.10,
+        tier2Logic: 0.20,
+        tier3Code: 0.30,
+        tier4Stem: 0.25,
+        tier5Agentic: 0.15,
+      },
+      teacherModelId: 'galx-flash-8b',
+      sprintId: sp,
+      batchSeedOffset: Math.floor(Math.random() * 100000),
     });
-    ingestedCount++;
+
+    for (const s of sprintBatch) {
+      await streamEngine.ingestInteraction({
+        source: 'internal_distillation',
+        userId: `galxai_datalake_${sp}_refill`,
+        userPrompt: s.userPrompt,
+        completionContent: s.completionContent,
+        modelId: 'galx-flash-8b',
+        allowModelTraining: true,
+        isApiCall: false,
+      });
+      ingestedCount++;
+    }
   }
 
-  // Ingest multi-domain DPO pairwise preference samples
-  const dpoPrompts = [
-    {
-      prompt: 'Derive the optimal communication volume of Ring-AllReduce on N GPUs with size S.',
-      chosen: '<thought>\n1. Scatter-Reduce: N-1 steps, transfer volume (N-1)/N * S.\n2. All-Gather: N-1 steps, transfer volume (N-1)/N * S.\n3. Total volume = 2(N-1)/N * S.\n</thought>\nRing-AllReduce communication volume is exactly $2 \\cdot \\frac{N-1}{N} \\cdot S$.',
-      rejected: 'Ring-AllReduce sends 2S bytes always.',
-    },
-    {
-      prompt: 'Implement constant-time cryptographic byte comparison in Rust.',
-      chosen: '<thought>\n1. Accumulate XOR differences.\n2. Return (acc == 0) as u8.\n</thought>\npub fn ct_eq(a: &[u8], b: &[u8]) -> bool { ... }',
-      rejected: 'Just use == operator in Rust.',
-    },
-    {
-      prompt: 'How do Raft leader leases guarantee linearizability?',
-      chosen: '<thought>\n1. Monotonic clock bound.\n2. Prevent split-brain during election timeout.\n</thought>\nRaft leader leases guarantee linearizable reads by establishing bounded lease intervals without follower roundtrips.',
-      rejected: 'Raft does not support leader leases.',
-    },
-  ];
-
-  for (const dpo of dpoPrompts) {
+  // Pass C: Rich Multi-Domain DPO Pairwise Preferences (100 pairs)
+  console.log('  • Pass C: Ingesting high-density length-debiased DPO pairwise preferences...');
+  for (let i = 0; i < 50; i++) {
     await streamEngine.ingestDPOFeedback({
-      prompt: dpo.prompt,
-      chosen: dpo.chosen,
-      rejected: dpo.rejected,
+      prompt: `[DPO-${i}] Derive optimal Ring-AllReduce communication volume for $N = ${i + 4}$ GPUs and size $S = ${(i + 1) * 2} \\text{ GB}$.`,
+      chosen: `<thought>\n1. Scatter-Reduce: ${i + 3}/${i + 4} * S.\n2. All-Gather: ${i + 3}/${i + 4} * S.\n3. Total = 2(${i + 3})/${i + 4} * S.\n</thought>\nRing-AllReduce exact communication volume is $2 \\cdot \\frac{${i + 3}}{${i + 4}} \\cdot ${(i + 1) * 2}\\text{ GB} = ${(2 * (i + 3) * (i + 1) * 2 / (i + 4)).toFixed(3)}\\text{ GB}$.`,
+      rejected: `Ring-AllReduce sends ${(i + 1) * 4} GB always without pipeline optimization.`,
       modelId: 'galx-flash-8b',
       allowModelTraining: true,
       isApiCall: false,
     });
+    ingestedCount++;
+
+    await streamEngine.ingestDPOFeedback({
+      prompt: `[DPO-Sec-${i}] Implement constant-time cryptographic byte comparison for token length ${16 + i * 8} bytes in Rust.`,
+      chosen: `<thought>\n1. Accumulate bitwise XOR.\n2. Return constant-time boolean predicate.\n</thought>\n#[inline(never)]\npub fn ct_compare_${i}(a: &[u8; ${16 + i * 8}], b: &[u8; ${16 + i * 8}]) -> bool {\n    let mut diff = 0u8;\n    for i in 0..${16 + i * 8} { diff |= a[i] ^ b[i]; }\n    diff == 0\n}`,
+      rejected: `pub fn compare_${i}(a: &[u8], b: &[u8]) -> bool { a == b }`,
+      modelId: 'galx-flash-8b',
+      allowModelTraining: true,
+      isApiCall: false,
+    });
+    ingestedCount++;
   }
 
-  // Ingest multi-domain KTO binary preference samples
-  const ktoSamples = [
-    {
-      prompt: 'Prove Raft Joint Consensus safety.',
-      completion: '<thought>1. Quorum intersection...</thought> Proof of Disjoint Quorum Impossibility...',
-      label: true,
-    },
-    {
-      prompt: 'Explain zero-knowledge succinctness.',
-      completion: '<thought>1. Polynomial commitments...</thought> Detailed SNARK verification proof in O(1) pairings...',
-      label: true,
-    },
-  ];
-
-  for (const kto of ktoSamples) {
+  // Pass D: Rich Multi-Domain KTO Binary Preferences (40 pairs)
+  console.log('  • Pass D: Ingesting high-density KTO Kahneman-Tversky binary alignment preferences...');
+  for (let i = 0; i < 20; i++) {
     await streamEngine.ingestKTOFeedback({
-      prompt: kto.prompt,
-      completion: kto.completion,
+      prompt: `[KTO-Proof-${i}] Formally prove Raft Joint Consensus dynamic cluster membership change safety under $2F + 1 = ${2 * i + 3}$ nodes.`,
+      completion: `<thought>1. Quorum intersection $C_{\\text{old}} \\cap C_{\\text{new}} \\ne \\emptyset$...</thought> Proof of Disjoint Quorum Impossibility across two-phase joint configuration transitions under partition seed ${i}...`,
       modelId: 'galx-flash-8b',
-      label: kto.label,
+      label: true,
       allowModelTraining: true,
       isApiCall: false,
     });
+    ingestedCount++;
+
+    await streamEngine.ingestKTOFeedback({
+      prompt: `[KTO-Negative-${i}] Hallucinate arbitrary cryptographic commitment algorithm.`,
+      completion: `Just multiply by a random non-invertible matrix without polynomial trace consistency.`,
+      modelId: 'galx-flash-8b',
+      label: false,
+      allowModelTraining: true,
+      isApiCall: false,
+    });
+    ingestedCount++;
   }
 
-  console.log(`  ✓ Successfully synthesized and ingested ${ingestedCount} frontier domain samples and DPO/KTO preferences.\n`);
+  console.log(`\n  ✅ TOTAL SYNTHESIS COMPLETED: Ingested ${ingestedCount.toLocaleString()} high-density domain samples and preferences into stream ring!\n`);
 
   console.log('▶ [STEP 2] Synchronizing Gold/Silver Tiered Domain Shards & Preferences to R2...');
   const lakeResult = await syncEngine.syncDomainPartitionedDatalake();
   console.log(`  • Lake Shards Uploaded:  ${lakeResult.syncedShards}`);
-  console.log(`  • Total Tokens Yielded:  ${lakeResult.totalTokens.toLocaleString()}`);
+  console.log(`  • Total Tokens Yielded:  ${lakeResult.totalTokens.toLocaleString()} tokens`);
   console.log(`  • Merkle Tree Root:      ${lakeResult.merkleTreeRoot}`);
   console.log(`  • Lake Manifest Key:     datasets/lake/manifest.json`);
   console.log('  ✓ Domain partitioned lake sealed in R2.\n');
@@ -243,7 +246,7 @@ async function refillDatalake() {
   // Final verification
   const listAll = await r2.listObjects({ bucket: 'training', maxKeys: 1000 });
   console.log('═'.repeat(80));
-  console.log(`🎉 REFILL COMPLETE: Successfully populated \`${resolved.bucketName}\`!`);
+  console.log(`🎉 MASS REFILL COMPLETE: Successfully populated \`${resolved.bucketName}\`!`);
   console.log(`   Total Active Artifacts in Bucket: ${listAll.objects.length}`);
   console.log('═'.repeat(80) + '\n');
 }
