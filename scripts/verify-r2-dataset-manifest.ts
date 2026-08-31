@@ -42,16 +42,22 @@ async function verifyR2DatasetManifest() {
     process.exit(1);
   }
 
-  console.log('[2/5] Fetching Master Dataset Manifest (`datasets/manifest.json`)...');
-  const manifestHead = await r2.headObject('training', 'datasets/manifest.json');
+  console.log('[2/5] Fetching Master Dataset Manifest (`datasets/lake/manifest.json`)...');
+  let targetManifestKey = 'datasets/lake/manifest.json';
+  let manifestHead = await r2.headObject('training', targetManifestKey);
+
+  if (!manifestHead.exists) {
+    targetManifestKey = 'datasets/manifest.json';
+    manifestHead = await r2.headObject('training', targetManifestKey);
+  }
 
   if (!manifestHead.exists) {
     console.warn('⚠️  No manifest found in R2 bucket yet (Bucket is clean and empty).');
-    console.log('   Run `npx tsx scripts/curate-synthetic-dataset.ts --sprint=1A --sync-r2` to generate shards.');
+    console.log('   Run `npx tsx scripts/refill-r2-training-datalake.ts` to populate sovereign datalake.');
     return;
   }
 
-  const manifestObj = await r2.getObject('training', 'datasets/manifest.json');
+  const manifestObj = await r2.getObject('training', targetManifestKey);
   let rawBuf = manifestObj.data;
   if (rawBuf[0] === 0x1f && rawBuf[1] === 0x8b) {
     try {
@@ -67,17 +73,18 @@ async function verifyR2DatasetManifest() {
     process.exit(1);
   }
 
-  console.log('  • Manifest Version:      ', manifest.manifestVersion);
+  const shards: any[] = manifest.records || manifest.shards || [];
+  const totalSamples = manifest.totalSamples || shards.reduce((acc, s) => acc + (s.samples || s.sampleCount || 0), 0);
+  const totalTokens = manifest.totalTokens || shards.reduce((acc, s) => acc + (s.tokens || s.tokenCount || 0), 0);
+
+  console.log('  • Manifest Type:         ', manifest.catalogName || 'galxai-training-manifest');
   console.log('  • Merkle Tree Root:      ', manifest.merkleTreeRoot);
-  console.log('  • Total Shards:          ', manifest.totalShards);
-  console.log('  • Total Samples:         ', manifest.totalSamples?.toLocaleString());
-  console.log('  • Total Tokens:          ', manifest.totalTokens?.toLocaleString());
-  console.log('  • Compressed Shard Bytes:', (manifest.totalCompressedBytes / 1024).toFixed(1), 'KB');
-  console.log('  • Train / Val Split:     ', `${manifest.splitDistribution?.trainSamples} train / ${manifest.splitDistribution?.validationSamples} val`);
-  console.log('  • Domain Breakdown:      ', JSON.stringify(manifest.domainDistribution || {}));
+  console.log('  • Total Shards:          ', shards.length);
+  console.log('  • Total Samples:         ', totalSamples.toLocaleString());
+  console.log('  • Total Tokens:          ', totalTokens.toLocaleString());
+  console.log('  • Domain Breakdown:      ', JSON.stringify(manifest.domainShards || manifest.domainDistribution || {}));
 
   console.log('\n[3/5] Performing Deep Cryptographic SHA-256 Audit on Remote Shards...');
-  const shards = manifest.shards || [];
   let validShards = 0;
   let invalidShards = 0;
 
@@ -105,7 +112,8 @@ async function verifyR2DatasetManifest() {
       }
 
       validShards++;
-      console.log(`  ✓ [Shard ${i + 1}/${shards.length}] ${shard.key.slice(0, 48)}... | VALID (${(shard.compressedSizeBytes / 1024).toFixed(1)} KB, ${shard.sampleCount} samples)`);
+      const samplesCount = shard.samples || shard.sampleCount || 0;
+      console.log(`  ✓ [Shard ${i + 1}/${shards.length}] ${shard.key.slice(0, 48)}... | VALID (${(shardData.size / 1024).toFixed(1)} KB, ${samplesCount} samples)`);
     } catch (err: any) {
       invalidShards++;
       console.error(`  ❌ [Shard ${i + 1}/${shards.length}] ${shard.key} | Audit error: ${err.message}`);
