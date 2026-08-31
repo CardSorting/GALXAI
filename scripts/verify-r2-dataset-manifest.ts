@@ -113,7 +113,8 @@ async function verifyR2DatasetManifest() {
 
       validShards++;
       const samplesCount = shard.samples || shard.sampleCount || 0;
-      console.log(`  ✓ [Shard ${i + 1}/${shards.length}] ${shard.key.slice(0, 48)}... | VALID (${(shardData.size / 1024).toFixed(1)} KB, ${samplesCount} samples)`);
+      const sizeBytes = shardData.data.length;
+      console.log(`  ✓ [Shard ${i + 1}/${shards.length}] ${shard.key.slice(0, 48)}... | VALID (${(sizeBytes / 1024).toFixed(1)} KB, ${samplesCount} samples)`);
     } catch (err: any) {
       invalidShards++;
       console.error(`  ❌ [Shard ${i + 1}/${shards.length}] ${shard.key} | Audit error: ${err.message}`);
