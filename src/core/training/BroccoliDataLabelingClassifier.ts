@@ -116,7 +116,13 @@ export class BroccoliDataLabelingClassifier {
     const isRefusal = /i cannot help with that|as an ai language model, i am unable to/i.test(completion);
     const language = /[\u4e00-\u9fa5]/.test(combined) ? 'zh' : (/[\u3040-\u30ff]/.test(combined) ? 'ja' : 'en');
 
-    // 9. HMAC Lineage & 64-bit Bitmask
+    // 9. Lexical Diversity & Reasoning Characteristics
+    const lexicalMetrics = this.calculateLexicalMetrics(combined);
+    const backtrackingMatches = combined.match(/(?:wait,|let's reconsider|let's recheck|backtracking to|re-evaluating|falsification|falsifying)/gi) || [];
+    const backtrackingCount = backtrackingMatches.length;
+    const crucibleDebate = /(?:\[architect\]|\[security auditor\]|\[formal methods\]|\[prover claim\]|\[verifier adversarial\])/i.test(combined);
+
+    // 10. HMAC Lineage & 64-bit Bitmask
     const provenancePayload = `${options?.teacherModelId || 'gpt-5.6-sol'}:${Date.now()}:${combined.slice(0, 80)}`;
     const provenanceHmac = crypto.createHmac('sha256', this.hmacSecretKey).update(provenancePayload).digest('hex');
     const rawBitmask = BigInt(bitmaskDomain) | (BigInt(bitmaskReasoning) << 16n) | (BigInt(Math.round(educationalValueScore * 10)) << 32n);
@@ -145,11 +151,82 @@ export class BroccoliDataLabelingClassifier {
       language,
       provenanceHmac,
       taxonomyBitmask,
+      lexicalMetrics,
+      backtrackingCount,
+      crucibleDebate,
     };
 
     this.classificationCacheTable.put(hash, label);
     return label;
   }
+
+  public calculateLexicalMetrics(text: string): {
+    mtld: number;
+    hdd: number;
+    yulesK: number;
+    maas: number;
+    shannonEntropy: number;
+  } {
+    const words = text.toLowerCase().match(/\b\w+\b/g) || [];
+    const N = words.length;
+    if (N === 0) {
+      return { mtld: 50.0, hdd: 0.5, yulesK: 100.0, maas: 0.2, shannonEntropy: 0.0 };
+    }
+
+    const freqMap = new Map<string, number>();
+    for (const w of words) {
+      freqMap.set(w, (freqMap.get(w) || 0) + 1);
+    }
+    const V = freqMap.size;
+
+    // 1. Shannon Token Entropy
+    let shannonEntropy = 0.0;
+    for (const count of freqMap.values()) {
+      const p = count / N;
+      if (p > 0) shannonEntropy -= p * Math.log2(p);
+    }
+
+    // 2. Yule's Characteristic K
+    const spectrum = new Map<number, number>();
+    for (const count of freqMap.values()) {
+      spectrum.set(count, (spectrum.get(count) || 0) + 1);
+    }
+    let sumSpectrum = 0;
+    for (const [i, vi] of spectrum.entries()) {
+      sumSpectrum += i * i * vi;
+    }
+    const yulesK = N > 1 ? Number(((10000 * (sumSpectrum - N)) / (N * N)).toFixed(2)) : 0.0;
+
+    // 3. Maas Index: (log N - log V) / (log N)^2
+    const logN = Math.log(N);
+    const logV = Math.log(Math.max(1, V));
+    const maas = logN > 0 ? Number(((logN - logV) / (logN * logN)).toFixed(4)) : 0.0;
+
+    // 4. MTLD approximation
+    let factorCount = 0;
+    let currentTokens = 0;
+    const currentTypes = new Set<string>();
+    for (const w of words) {
+      currentTokens++;
+      currentTypes.add(w);
+      if (currentTokens > 10 && currentTypes.size / currentTokens < 0.72) {
+        factorCount++;
+        currentTokens = 0;
+        currentTypes.clear();
+      }
+    }
+    const mtld = factorCount > 0 ? Number((N / factorCount).toFixed(2)) : Number(N.toFixed(2));
+    const hdd = Number((V / N).toFixed(4));
+
+    return {
+      mtld: Math.min(300, Math.max(10, mtld)),
+      hdd,
+      yulesK: Math.max(0, yulesK),
+      maas: Math.max(0, maas),
+      shannonEntropy: Number(shannonEntropy.toFixed(4)),
+    };
+  }
+
 
   public detectDomain(lower: string, raw: string): {
     primaryDomain: string;
@@ -158,8 +235,26 @@ export class BroccoliDataLabelingClassifier {
     microSpecialty: string;
     bitmaskDomain: number;
   } {
-    if (raw.includes('```rust') || lower.includes('impl ') || lower.includes('crossbeam') || lower.includes('cargo.toml')) {
+    if (raw.includes('```lean') || raw.includes('```tla') || lower.includes('tla+') || lower.includes('hoare logic') || lower.includes('by omega')) {
+      return { primaryDomain: 'formal_logic.spec', rootDomain: 'formal_logic', subDomain: 'interactive_prover', microSpecialty: 'machine_checked_invariants', bitmaskDomain: 0x05 };
+    }
+    if (lower.includes('avx512') || lower.includes('_mm512_') || lower.includes('simd') || lower.includes('vectorized dot product')) {
+      return { primaryDomain: 'hardware.simd', rootDomain: 'hardware', subDomain: 'simd_acceleration', microSpecialty: 'vectorized_pipelining', bitmaskDomain: 0x40 };
+    }
+    if (lower.includes('zk-snark') || lower.includes('r1cs') || lower.includes('groth16') || lower.includes('zero-knowledge')) {
+      return { primaryDomain: 'cryptography.zk', rootDomain: 'cryptography', subDomain: 'zk_circuits', microSpecialty: 'algebraic_constraint_gates', bitmaskDomain: 0x50 };
+    }
+    if (lower.includes('lsm-tree') || lower.includes('mvcc') || lower.includes('write-ahead log') || lower.includes('b+ tree')) {
+      return { primaryDomain: 'database.internals', rootDomain: 'database', subDomain: 'storage_engine', microSpecialty: 'acid_compaction_recovery', bitmaskDomain: 0x60 };
+    }
+    if (lower.includes('vulnerability') || lower.includes('cve-') || lower.includes('buffer overflow') || lower.includes('format string')) {
+      return { primaryDomain: 'cybersecurity.forensics', rootDomain: 'cybersecurity', subDomain: 'forensics', microSpecialty: 'exploit_mitigation', bitmaskDomain: 0x30 };
+    }
+    if (raw.includes('```rust') || lower.includes('impl ') || lower.includes('crossbeam') || lower.includes('cargo.toml') || lower.includes('#[repr(align(')) {
       return { primaryDomain: 'code.rust', rootDomain: 'code', subDomain: 'rust', microSpecialty: 'memory_safety_concurrency', bitmaskDomain: 0x01 };
+    }
+    if (raw.includes('```cpp') || lower.includes('std::') || lower.includes('#include <')) {
+      return { primaryDomain: 'code.cpp', rootDomain: 'code', subDomain: 'cpp', microSpecialty: 'systems_meta_programming', bitmaskDomain: 0x08 };
     }
     if (raw.includes('```typescript') || raw.includes('```ts') || raw.includes('interface ') || raw.includes(': Promise<')) {
       return { primaryDomain: 'code.typescript', rootDomain: 'code', subDomain: 'typescript', microSpecialty: 'type_gymnastics_async', bitmaskDomain: 0x02 };
@@ -182,11 +277,10 @@ export class BroccoliDataLabelingClassifier {
     if (lower.includes('tax') || lower.includes('ebitda') || lower.includes('balance sheet')) {
       return { primaryDomain: 'finance.tax', rootDomain: 'finance', subDomain: 'tax_accounting', microSpecialty: 'corporate_fiscal_analysis', bitmaskDomain: 0x20 };
     }
-    if (lower.includes('vulnerability') || lower.includes('cve-') || lower.includes('buffer overflow')) {
-      return { primaryDomain: 'cybersecurity.forensics', rootDomain: 'cybersecurity', subDomain: 'forensics', microSpecialty: 'exploit_mitigation', bitmaskDomain: 0x30 };
-    }
     return { primaryDomain: 'general_knowledge.qa', rootDomain: 'general', subDomain: 'knowledge', microSpecialty: 'factual_synthesis', bitmaskDomain: 0x90 };
   }
+
+
 
   public detectTaskType(lowerPrompt: string, lowerComp: string): FrontierTaxonomyLabel['taskType'] {
     if (lowerPrompt.includes('debug') || lowerPrompt.includes('fix ') || lowerComp.includes('the bug is')) return 'debugging';

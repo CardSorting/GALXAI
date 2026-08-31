@@ -231,6 +231,23 @@ export async function GET(req: NextRequest) {
         });
       }
 
+      case 'datalake':
+      case 'datalake_catalog': {
+        const domainParam = searchParams.get('domain');
+        const tierParam = searchParams.get('tier');
+        const records = syncEngine.queryDatalakeByDomain({
+          domains: domainParam ? [domainParam] : undefined,
+          tiers: tierParam ? [tierParam] : undefined,
+        });
+        return NextResponse.json({
+          status: 'success',
+          totalMatchedShards: records.length,
+          shards: records,
+        }, {
+          headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate', 'X-Robots-Tag': 'noindex, nofollow' },
+        });
+      }
+
       case 'curriculum':
       case 'curriculum_state': {
         const curriculum = syncEngine.exportCurriculumStateJson();
@@ -238,6 +255,7 @@ export async function GET(req: NextRequest) {
           headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate', 'X-Robots-Tag': 'noindex, nofollow' },
         });
       }
+
 
       case 'telemetry':
       default: {
@@ -303,7 +321,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (action === 'sync_datalake') {
+      const lakeResult = await syncEngine.syncDomainPartitionedDatalake();
+
+      return NextResponse.json(
+        {
+          success: true,
+          engine: 'Cloudflare_R2_Domain_Partitioned_Datalake_Synchronizer',
+          syncedShards: lakeResult.syncedShards,
+          totalTokens: lakeResult.totalTokens,
+          domainShards: lakeResult.domainShards,
+          manifestKey: lakeResult.catalogManifestKey,
+          records: lakeResult.records,
+        },
+        { status: 200, headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate', 'X-Robots-Tag': 'noindex, nofollow' } }
+      );
+    }
+
     if (action === 'sync') {
+
       const syncResult = await syncEngine.syncAllDatasets();
 
       return NextResponse.json(

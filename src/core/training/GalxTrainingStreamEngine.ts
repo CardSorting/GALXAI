@@ -611,6 +611,47 @@ export class GalxTrainingStreamEngine {
     return this.ktoTable.getAll().slice(-limit);
   }
 
+  public applyAntiMonoculturePerturbation(text: string): string {
+    // Dynamically perturb non-semantic formatting and identifiers while preserving code AST semantics
+    return text
+      .replace(/\b([a-z])_idx\b/g, '$1_index')
+      .replace(/\bresult_val\b/g, 'computed_result')
+      .replace(/\bbuf_ptr\b/g, 'buffer_pointer');
+  }
+
+  public applySequenceCutMix(
+    sampleA: DistilledTrainingPair,
+    sampleB: DistilledTrainingPair
+  ): DistilledTrainingPair {
+    const compositeId = `cutmix_${sampleA.id.slice(0, 8)}_${sampleB.id.slice(0, 8)}`;
+    const compositeMessages = [
+      ...sampleA.messages,
+      {
+        role: 'user' as const,
+        content: `Now, cross-correlate this domain solution with the following invariant:\n${sampleB.messages.find((m) => m.role === 'user')?.content || ''}`,
+      },
+      {
+        role: 'assistant' as const,
+        content: sampleB.messages.find((m) => m.role === 'assistant')?.content || '',
+      },
+    ];
+
+    const estimatedTokens = sampleA.estimatedTokens + sampleB.estimatedTokens;
+
+    return {
+      id: compositeId,
+      source: 'internal_distillation',
+      modelId: sampleA.modelId,
+      messages: compositeMessages,
+      qualityScore: Number(((sampleA.qualityScore + sampleB.qualityScore) / 2).toFixed(2)),
+      piiRedacted: false,
+      entitiesScrubbedCount: 0,
+      estimatedTokens,
+      taxonomy: sampleA.taxonomy,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
   public clearBuffer(): void {
     this.sftRingKeys.length = 0;
     this.dpoRingKeys.length = 0;
@@ -622,4 +663,5 @@ export class GalxTrainingStreamEngine {
 }
 
 export const galxTrainingEngine = GalxTrainingStreamEngine.getInstance();
+
 

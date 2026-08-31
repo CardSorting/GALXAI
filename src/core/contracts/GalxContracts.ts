@@ -153,7 +153,17 @@ export interface FrontierTaxonomyLabel {
   readonly language: string;             // 'en', 'zh', 'ja', etc.
   readonly provenanceHmac: string;       // SHA-256 HMAC
   readonly taxonomyBitmask: string;      // 64-bit compact hex signature
+  readonly lexicalMetrics?: {
+    readonly mtld: number;
+    readonly hdd: number;
+    readonly yulesK: number;
+    readonly maas: number;
+    readonly shannonEntropy: number;
+  };
+  readonly backtrackingCount?: number;
+  readonly crucibleDebate?: boolean;
 }
+
 
 export type LeanTrainingTaxonomy = FrontierTaxonomyLabel;
 
