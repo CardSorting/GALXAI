@@ -16,6 +16,7 @@ import { BroccoliDataLabelingClassifier } from './BroccoliDataLabelingClassifier
 import { BroccoliTelemetryEngine } from '../telemetry/BroccoliTelemetryEngine';
 import { GalxAgenticSweCuratorEngine } from './GalxAgenticSweCurator';
 import { GalxArchitecturalRhetoricCuratorEngine } from './GalxArchitecturalRhetoricCurator';
+import { GalxCodemarieHarnessCuratorEngine } from './GalxCodemarieHarnessCurator';
 import type { CurriculumTier, FrontierTaxonomyLabel } from '../contracts/GalxContracts';
 
 function curatorCryptoHash(input: string): string {
@@ -34,7 +35,8 @@ export type SprintId =
   | 'sprint_4B'
   | 'sprint_dhei_bootstrap'
   | 'sprint_dhei_core'
-  | 'sprint_dhei_frontier';
+  | 'sprint_dhei_frontier'
+  | 'sprint_codemarie_hms';
 
 export interface SprintConfig {
   sprintId: SprintId;
@@ -191,6 +193,16 @@ export const SPRINT_REGISTRY: Record<SprintId, SprintConfig> = {
     targetTokens: 40000000,
     maxDurationMinutes: 150,
     tierDistribution: { tier1Fact: 0.0, tier2Logic: 0.05, tier3Code: 0.25, tier4Stem: 0.05, tier5Agentic: 0.65 },
+    adaptiveWorkerPoolSize: 8,
+    directR2Streaming: true,
+  },
+  sprint_codemarie_hms: {
+    sprintId: 'sprint_codemarie_hms',
+    stageName: 'Complete 40-Dimensional Harness-Model Symbiosis (HMS) & JoyZoning Datalake Ingestion',
+    targetSamples: 50000,
+    targetTokens: 40000000,
+    maxDurationMinutes: 150,
+    tierDistribution: { tier1Fact: 0.0, tier2Logic: 0.05, tier3Code: 0.20, tier4Stem: 0.05, tier5Agentic: 0.70 },
     adaptiveWorkerPoolSize: 8,
     directR2Streaming: true,
   },
@@ -520,8 +532,9 @@ export class GalxSyntheticCuratorEngine {
    * Evol-Instruct Orthogonal Matrix Synthesizer (5-Tier Diamond Curriculum)
    */
   public generateSyntheticBatch(params: {
-    count: number;
-    tierDistribution: SprintConfig['tierDistribution'];
+    count?: number;
+    batchSize?: number;
+    tierDistribution?: SprintConfig['tierDistribution'];
     teacherModelId: string;
     sprintId: SprintId;
     batchSeedOffset?: number;
@@ -534,7 +547,15 @@ export class GalxSyntheticCuratorEngine {
     curriculumTier: CurriculumTier;
     mode: 'thinking' | 'non_thinking';
   }> {
-    const { count, tierDistribution, teacherModelId, sprintId, batchSeedOffset = 0 } = params;
+    const count = params.count ?? params.batchSize ?? 10;
+    const tierDistribution = params.tierDistribution ?? SPRINT_REGISTRY[params.sprintId]?.tierDistribution ?? {
+      tier1Fact: 0.1,
+      tier2Logic: 0.2,
+      tier3Code: 0.3,
+      tier4Stem: 0.1,
+      tier5Agentic: 0.3,
+    };
+    const { teacherModelId, sprintId, batchSeedOffset = 0 } = params;
     const samples: Array<any> = [];
 
     const tier1Count = Math.round(count * tierDistribution.tier1Fact);
@@ -1758,7 +1779,14 @@ ORDER BY txn_date DESC, rolling_7d_revenue_cents DESC;
   private synthesizeTier5Sample(modelId: string, sprintId: string, seed: number) {
     const sweEngine = GalxAgenticSweCuratorEngine.getInstance();
     const rhetoricEngine = GalxArchitecturalRhetoricCuratorEngine.getInstance();
-    const roll = seed % 40;
+    const hmsEngine = GalxCodemarieHarnessCuratorEngine.getInstance();
+
+    if (sprintId === 'sprint_codemarie_hms') {
+      return hmsEngine.synthesizeDimensionSample(seed, modelId, sprintId, seed);
+    }
+
+    const roll = seed % 44;
+    if (roll >= 40) return hmsEngine.synthesizeDimensionSample(seed, modelId, sprintId, seed);
     if (roll === 0) return this.synthesizeProverVerifierSample(modelId, sprintId, seed);
     if (roll === 1) return this.synthesizeCrucibleDialogueSample(modelId, sprintId, seed);
     if (roll === 2) return this.synthesizeVirtualSandboxFuzzSample(modelId, sprintId, seed);
@@ -1964,7 +1992,16 @@ impl ClusterStateMachine {
 
   public synthesizeDPOSample(sprintId: string, seed: number): { prompt: string; chosen: string; rejected: string } {
     const salt = crypto.createHash('sha256').update(`dpo_${sprintId}_${seed}_${Date.now()}`).digest('hex').slice(0, 8);
-    const mode = seed % 5;
+    const mode = seed % 6;
+
+    if (sprintId === 'sprint_codemarie_hms' || mode === 5) {
+      const hmsDpo = GalxCodemarieHarnessCuratorEngine.getInstance().synthesizeCodemarieDpoPairs('galx-teacher', seed);
+      return {
+        prompt: `[HMS-DPO-${salt}] ${hmsDpo.prompt}`,
+        chosen: hmsDpo.chosen,
+        rejected: hmsDpo.rejected,
+      };
+    }
 
     if (mode === 0) {
       return {
