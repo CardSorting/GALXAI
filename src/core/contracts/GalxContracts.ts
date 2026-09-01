@@ -444,6 +444,8 @@ export interface GatewayApiKey {
   readonly expiresAtMs?: number;
   readonly description?: string;
   readonly checksum?: string;
+  readonly computePool?: 'shared_community' | 'priority_dedicated';
+  readonly freeMonthlyGrantUsd?: number;
 }
 
 export type DeveloperGatewayKey = GatewayApiKey;

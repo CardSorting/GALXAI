@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxSeatTierEngine } from '@/core/subscription/GalxSeatTierEngine';
+import { GalxCommunityPoolGovernor } from '@/core/governor/GalxCommunityPoolGovernor';
 import { GalxElasticContextGovernor } from '@/core/governor/GalxElasticContextGovernor';
 import { GalxRollingContextEngine } from '@/core/router/GalxRollingContextEngine';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
@@ -95,6 +96,35 @@ export async function POST(req: NextRequest) {
 
     const userId = authResult.userId;
     const isPriorityUser = entitlement.isPriorityUser;
+
+    // 2. Evaluate Community Free Pool vs Dedicated Priority Pool ($30 Monthly Free Grant)
+    const poolGovernor = GalxCommunityPoolGovernor.getInstance();
+    const poolResult = poolGovernor.evaluateRequest(userId, authResult.apiKey, entitlement.creditsIncludedUsd || 0);
+
+    if (!poolResult.allowed && poolResult.rejectionReason) {
+      return NextResponse.json(
+        {
+          error: {
+            message: poolResult.rejectionReason.message,
+            type: 'free_compute_pool_exhausted',
+            code: poolResult.rejectionReason.code,
+            reset_at: poolResult.rejectionReason.resetAt,
+            reset_in_seconds: poolResult.rejectionReason.resetInSeconds,
+            upgrade_url: poolResult.rejectionReason.upgradeUrl,
+            pool: poolResult.pool
+          }
+        },
+        {
+          status: 429,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Retry-After': String(poolResult.rejectionReason.resetInSeconds),
+            'X-Galx-Compute-Pool': poolResult.pool,
+            'X-Galx-Pool-Reset': poolResult.rejectionReason.resetAt
+          }
+        }
+      );
+    }
 
 
     // 2. Parse the OpenAI-compatible JSON envelope with bounded input validation.

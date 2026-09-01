@@ -7,7 +7,7 @@ import { SafeStorage } from '@/lib/resilience/SafeStorage';
 const STORAGE_KEY_VERIFIED = 'galx_deposit_verified';
 const STORAGE_KEY_BALANCE = 'galx_wallet_balance';
 const WALLET_EVENT_NAME = 'galx_wallet_update';
-const DEFAULT_INITIAL_BALANCE = 0; // Default $0 for unverified accounts
+const DEFAULT_INITIAL_BALANCE = 30.00; // Modal-style $30.00/mo Free Compute Grant for every developer
 
 export function useDepositVerification() {
   const [hasVerifiedDeposit, setHasVerifiedDeposit] = useState<boolean>(() => {
@@ -45,13 +45,13 @@ export function useDepositVerification() {
         setHasVerifiedDeposit(false);
         setWalletBalance(storedBalance ? parseFloat(storedBalance) : DEFAULT_INITIAL_BALANCE);
       } else {
-        // First-time visit: check if user already has active keys in backend
+        // First-time visit: grant $30 free compute immediately
         resilientFetch<{ keys: any[] }>('/api/keys', { enableCacheFallback: true })
           .then(({ data }) => {
             if (data?.keys && data.keys.length > 0) {
-              setHasVerifiedDeposit(true);
-              setWalletBalance(storedBalance ? parseFloat(storedBalance) : 114.59);
-              SafeStorage.setItem(STORAGE_KEY_VERIFIED, 'true');
+              const hasPaidKey = data.keys.some((k: any) => k.computePool === 'priority_dedicated');
+              setHasVerifiedDeposit(hasPaidKey);
+              setWalletBalance(storedBalance ? parseFloat(storedBalance) : (hasPaidKey ? 114.59 : DEFAULT_INITIAL_BALANCE));
             } else {
               setHasVerifiedDeposit(false);
               setWalletBalance(storedBalance ? parseFloat(storedBalance) : DEFAULT_INITIAL_BALANCE);
@@ -60,14 +60,14 @@ export function useDepositVerification() {
           })
           .catch(() => {
             setHasVerifiedDeposit(false);
-            setWalletBalance(0);
+            setWalletBalance(DEFAULT_INITIAL_BALANCE);
             setIsLoaded(true);
           });
         return;
       }
     } catch {
       setHasVerifiedDeposit(false);
-      setWalletBalance(0);
+      setWalletBalance(DEFAULT_INITIAL_BALANCE);
     }
     setIsLoaded(true);
   }, []);

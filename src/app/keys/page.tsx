@@ -138,11 +138,7 @@ function BaseGatewayKeysPage() {
     if (e) e.preventDefault();
     if (!newKeyName.trim()) return;
 
-    if (!hasVerifiedDeposit && newKeyEnv === 'live') {
-      setIsPaywallOpen(true);
-      return;
-    }
-
+    // Direct 1-click key creation with $30 Free Compute Grant
     await createKeyDirectly(newKeyName, walletBalance, selectedRpm, newKeyEnv, selectedExpiresInDays);
   };
 
@@ -150,7 +146,7 @@ function BaseGatewayKeysPage() {
     const { totalCredited } = depositAndUnlock(depositAmt);
     setIsPaywallOpen(false);
     await createKeyDirectly(
-      newKeyName || 'Developer API Key (Activated)',
+      newKeyName || 'Developer API Key (Priority)',
       walletBalance + totalCredited,
       selectedRpm,
       newKeyEnv,
@@ -418,7 +414,7 @@ const { text } = await generateText({
                   className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 flex items-center gap-1.5 transition-all cursor-pointer"
                 >
                   <Plus className="w-4 h-4 text-black" />
-                  <span>Advanced Key Wizard ($5 Free Grant)</span>
+                  <span>Advanced Key Wizard ($30 Free Grant)</span>
                 </Link>
 
                 <button
@@ -450,7 +446,7 @@ const { text } = await generateText({
                     Compute Wallet
                   </span>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold">
-                    Autopay Active
+                    $30 Grant Active
                   </span>
                 </div>
                 <div className="text-3xl font-black text-white font-mono">${walletBalance.toFixed(2)} <span className="text-xs text-zinc-400 font-sans">USD</span></div>
@@ -538,37 +534,34 @@ const { text } = await generateText({
             </div>
           )}
 
-          {/* Unverified Deposit Match Banner */}
-          {!hasVerifiedDeposit && (
-            <div className="glass-panel rounded-3xl p-6 border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-black/40 space-y-3 relative overflow-hidden">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
-                    <Gift className="w-5 h-5" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[10px] font-bold">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                      <span>50% INSTANT DEPOSIT MATCH • $5 FREE COMPUTE</span>
-                    </div>
-                    <h2 className="text-base font-bold text-white">Deposit $10 to Mint Your Key &amp; Claim $5 Free Compute</h2>
-                    <p className="text-xs text-zinc-300 max-w-xl">
-                      Make your first refundable compute deposit of <strong>$10.00 USD</strong> to unlock live gateway routing and receive <strong className="text-emerald-300">$15.00 Total Usable Balance</strong> with 0 platform fees.
-                    </p>
-                  </div>
+          {/* Modal-Style Community Free Compute Pool Status Banner */}
+          <div className="glass-panel rounded-3xl p-6 border border-cyan-500/30 bg-gradient-to-r from-cyan-500/10 via-indigo-500/5 to-black/40 space-y-3 relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+                  <Gift className="w-5 h-5" />
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => setIsPaywallOpen(true)}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs font-mono uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
-                >
-                  <Key className="w-3.5 h-3.5" />
-                  <span>Deposit $10 &amp; Unlock</span>
-                </button>
+                <div className="space-y-1">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono text-[10px] font-bold">
+                    <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>$30.00 / MO FREE COMPUTE GRANT ACTIVE • SHARED INGESTION SHARD</span>
+                  </div>
+                  <h2 className="text-base font-bold text-white">Modal-Style $30 Free Compute for Every Developer</h2>
+                  <p className="text-xs text-zinc-300 max-w-xl">
+                    Every key is instantly active in the <strong>Shared Community Compute Pool</strong> with shared model ingestion. Free tier daily capacity resets every midnight at <strong>00:00 UTC</strong>. Need dedicated GPU priority and 5,000 RPM? Top up compute wallet anytime.
+                  </p>
+                </div>
               </div>
+
+              <Link
+                href="/billing"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 text-black font-black text-xs font-mono uppercase tracking-wider shadow-lg shadow-cyan-500/20 flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+              >
+                <Zap className="w-3.5 h-3.5" />
+                <span>Upgrade to Dedicated Priority ($10+)</span>
+              </Link>
             </div>
-          )}
+          </div>
 
           {/* Quick 1-Click Key Generator with Mental Model Presets & Environment Selection */}
           <div className="glass-panel rounded-3xl p-6 space-y-5 border border-white/10">

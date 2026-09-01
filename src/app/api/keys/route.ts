@@ -193,21 +193,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Anti-Bot Proof-of-Deposit Security Gate for production live keys
-    if (!hasVerifiedDeposit && existingKeys.length === 0 && Number(depositedAmount) < MINIMUM_INITIAL_DEPOSIT_USD && cleanEnv === 'live') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'MINIMUM_INITIAL_DEPOSIT_REQUIRED',
-          message: `To activate your high-throughput gateway key and claim your $5.00 free compute grant, an initial deposit of at least $${MINIMUM_INITIAL_DEPOSIT_USD.toFixed(2)} USD is required. 100% of your deposit is credited directly to your compute wallet ($15.00 total compute credit).`,
-          requiredDepositUsd: MINIMUM_INITIAL_DEPOSIT_USD,
-          depositUrl: '/billing',
-          welcomeBonusUsd: 5.00,
-          totalComputeOnDepositUsd: 15.00
-        },
-        { status: 402 }
-      );
-    }
+    // Modal-Style Free Tier Grant ($30.00/mo) & Compute Pool Routing
+    const isPaid = Boolean(hasVerifiedDeposit || Number(depositedAmount) > 0);
+    const computePool: 'shared_community' | 'priority_dedicated' = isPaid ? 'priority_dedicated' : 'shared_community';
+    const effectiveRpm = isPaid ? cleanRpm : Math.min(cleanRpm, 60);
 
     const { apiKey, keyPrefix, keyHash, checksum } = GalxCryptoVault.generateGatewayKey(cleanName, userId, { environment: cleanEnv });
     const keyId = `key_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
@@ -219,7 +208,7 @@ export async function POST(req: NextRequest) {
       keyHash,
       name: cleanName,
       userId,
-      rateLimitPerMinute: cleanRpm,
+      rateLimitPerMinute: effectiveRpm,
       totalRequests: 0,
       totalTokens: 0,
       createdAtMs: Date.now(),
@@ -228,7 +217,9 @@ export async function POST(req: NextRequest) {
       scopes: cleanScopes,
       ipWhitelist: Array.isArray(ipWhitelist) ? ipWhitelist.filter(ip => typeof ip === 'string').slice(0, 20) : undefined,
       expiresAtMs,
-      checksum
+      checksum,
+      computePool,
+      freeMonthlyGrantUsd: 30.00
     };
 
     // Save to authoritative database and memory cache
@@ -242,14 +233,15 @@ export async function POST(req: NextRequest) {
 
     persistence.logAudit(
       'GATEWAY_KEY_CREATED',
-      { keyId, keyPrefix, name: cleanName, environment: cleanEnv, scopes: cleanScopes },
+      { keyId, keyPrefix, name: cleanName, environment: cleanEnv, scopes: cleanScopes, computePool, freeMonthlyGrantUsd: 30.00 },
       keyId,
       userId
     );
 
     return NextResponse.json({
       success: true,
-      antiBotVerified: true,
+      freeGrantUsd: 30.00,
+      computePool: newKey.computePool,
       key: {
         id: newKey.id,
         name: newKey.name,
@@ -257,6 +249,8 @@ export async function POST(req: NextRequest) {
         environment: newKey.environment,
         scopes: newKey.scopes,
         rateLimitPerMinute: newKey.rateLimitPerMinute,
+        computePool: newKey.computePool,
+        freeMonthlyGrantUsd: 30.00,
         expiresAt: newKey.expiresAtMs,
         apiKey // Full raw token returned once upon creation!
       }
