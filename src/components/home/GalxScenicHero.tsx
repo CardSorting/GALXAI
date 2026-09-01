@@ -14,6 +14,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { GalxGalaxyLogo } from '@/components/brand/GalxGalaxyLogo';
+import { ArtisanalSignalSection } from '@/components/home/ArtisanalSignalSection';
 
 export function GalxScenicHero() {
   const router = useRouter();
@@ -322,74 +323,310 @@ export function GalxScenicHero() {
           </div>
         </div>
 
+        {/* Artisanal Pure-Signal Section */}
+        <ArtisanalSignalSection />
       </main>
 
-      {/* Double-Tiered High-Fidelity Footer */}
-      <footer className="w-full max-w-[1400px] mx-auto px-4 sm:px-8 pt-5 pb-6 border-t border-white/5 space-y-3.5 text-xs">
-        {/* Tier 1: Platform & Company Navigation */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          {/* Primary Navigation Links */}
-          <nav className="flex flex-wrap items-center justify-center md:justify-start gap-x-5 gap-y-2 text-zinc-300 font-medium">
-            <Link href="/models" className="hover:text-cyan-400 transition-colors">
-              Models
-            </Link>
-            <Link href="/gateway" className="hover:text-cyan-400 transition-colors">
-              Gateway API
-            </Link>
-            <Link href="/pricing" className="hover:text-cyan-400 transition-colors">
-              Pricing
-            </Link>
-            <Link href="/characters" className="hover:text-cyan-400 transition-colors">
-              Companions
-            </Link>
-            <span className="hidden sm:inline text-zinc-700">|</span>
-            <Link href="/about" className="hover:text-white transition-colors">
-              About
-            </Link>
-            <Link href="/careers" className="hover:text-white transition-colors">
-              Careers
-            </Link>
-            <Link href="/security" className="hover:text-white transition-colors">
-              Safety Center
-            </Link>
-            <Link href="/docs" className="hover:text-white transition-colors">
-              Blog &amp; Docs
-            </Link>
-          </nav>
-        </div>
+      {/* Merged Hyper-Competitive SEO & Platform Footer */}
+      <footer className="w-full border-t border-white/10 bg-[#05070d]/95 backdrop-blur-2xl relative z-20 mt-16 pt-12 pb-8 text-xs">
+        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-8 space-y-12">
+          
+          {/* Top Primary Strategic Navigation Strip */}
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-6 pb-8 border-b border-white/10">
+            {/* Primary Navigation Links (Exact Invariants) */}
+            <nav className="flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-3 text-zinc-200 font-semibold text-sm">
+              <Link href="/models" className="hover:text-cyan-400 transition-colors">
+                Models
+              </Link>
+              <Link href="/gateway" className="hover:text-cyan-400 transition-colors">
+                Gateway API
+              </Link>
+              <Link href="/pricing" className="hover:text-cyan-400 transition-colors">
+                Pricing
+              </Link>
+              <Link href="/characters" className="hover:text-cyan-400 transition-colors">
+                Companions
+              </Link>
+              <span className="hidden sm:inline text-zinc-700 select-none">|</span>
+              <Link href="/about" className="hover:text-white transition-colors text-zinc-400">
+                About
+              </Link>
+              <Link href="/careers" className="hover:text-white transition-colors text-zinc-400">
+                Careers
+              </Link>
+              <Link href="/security" className="hover:text-white transition-colors text-zinc-400">
+                Safety Center
+              </Link>
+              <Link href="/docs" className="hover:text-white transition-colors text-zinc-400">
+                Blog &amp; Docs
+              </Link>
+            </nav>
 
-        {/* Tier 2: Legal, Privacy & Compliance */}
-        <div className="pt-3 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-zinc-500 font-sans">
-          {/* Legal Compliance Links */}
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1.5">
-            <span>&copy; {new Date().getFullYear()} GALX AI, Inc.</span>
-            <span className="text-zinc-700">•</span>
-            <Link href="/privacy#cookies" className="hover:text-zinc-300 transition-colors">
-              Cookie Policy
-            </Link>
-            <Link href="/privacy" className="hover:text-zinc-300 transition-colors">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="hover:text-zinc-300 transition-colors">
-              Terms of Service
-            </Link>
-            <Link href="/terms#compute" className="hover:text-zinc-300 transition-colors">
-              Compute Terms of Use
-            </Link>
-            <Link
-              href="/privacy#choices"
-              className="inline-flex items-center gap-1 text-cyan-400/90 hover:text-cyan-300 transition-colors"
-            >
-              <span>Your Privacy Choices</span>
-              <svg className="w-3 h-3 text-cyan-400" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 12.5a5.5 5.5 0 110-11 5.5 5.5 0 010 11zM8 4a1 1 0 100 2 1 1 0 000-2zm1 4H7v4h2V8z"/>
-              </svg>
-            </Link>
+            {/* Live Telemetry & SLA Indicator */}
+            <div className="flex items-center gap-3">
+              <Link
+                href="/status"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-medium hover:bg-emerald-500/20 transition-all shadow-sm"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>All Systems Operational • Sub-15ms Anycast SLA</span>
+              </Link>
+            </div>
           </div>
 
-          <div className="text-zinc-600 font-mono text-[10px]">
-            <span>v5.6 Codex Engine</span>
+          {/* Hyper-Competitive 5-Column SEO Discovery Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-10 text-xs">
+            
+            {/* Column 1: Frontier Models */}
+            <div className="space-y-3">
+              <h4 className="text-[11px] font-mono font-bold text-white uppercase tracking-widest flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                <span>Frontier Models</span>
+              </h4>
+              <ul className="space-y-2 text-zinc-400 font-mono text-[11px]">
+                <li>
+                  <Link href="/models/gpt-5.6-sol" className="hover:text-cyan-300 transition-colors block">
+                    <span className="text-zinc-200 font-semibold block">GPT-5.6 Sol</span>
+                    <span className="text-[10px] text-zinc-500 font-sans">Reasoning &amp; Coding SOTA</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/models/gpt-5.6-terra" className="hover:text-cyan-300 transition-colors block">
+                    <span className="text-zinc-200 font-semibold block">GPT-5.6 Terra</span>
+                    <span className="text-[10px] text-zinc-500 font-sans">Balanced Frontier</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/models/gpt-5.6-luna" className="hover:text-cyan-300 transition-colors block">
+                    <span className="text-zinc-200 font-semibold block">GPT-5.6 Luna</span>
+                    <span className="text-[10px] text-zinc-500 font-sans">Sub-second Speed</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/models/openai-gpt-image-2" className="hover:text-cyan-300 transition-colors block">
+                    <span className="text-zinc-200 font-semibold block">OpenAI GPT-Image-2</span>
+                    <span className="text-[10px] text-zinc-500 font-sans">Photoreal SOTA</span>
+                  </Link>
+                </li>
+                <li className="pt-1">
+                  <Link href="/models/compare" className="text-cyan-400 hover:text-cyan-300 font-sans font-medium flex items-center gap-1">
+                    <span>Compare All Models →</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 2: Developer Tools & pSEO */}
+            <div className="space-y-3">
+              <h4 className="text-[11px] font-mono font-bold text-white uppercase tracking-widest flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                <span>Developer Tools</span>
+              </h4>
+              <ul className="space-y-2 text-zinc-400 text-xs">
+                <li>
+                  <Link href="/tools/roi-calculator" className="hover:text-white transition-colors flex items-center justify-between">
+                    <span>Savings Calculator</span>
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">ROI</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/tools/stream-benchmark" className="hover:text-white transition-colors flex items-center justify-between">
+                    <span>Stream Benchmark</span>
+                    <span className="text-[10px] font-mono text-zinc-500">TTFT</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/tools/context-window-visualizer" className="hover:text-white transition-colors flex items-center justify-between">
+                    <span>1M Context Visualizer</span>
+                    <span className="text-[10px] font-mono text-indigo-400">1.05M</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/tools/token-counter" className="hover:text-white transition-colors flex items-center justify-between">
+                    <span>BPE Token Counter</span>
+                    <span className="text-[10px] font-mono text-zinc-500">TikToken</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/tools/prompt-compressor" className="hover:text-white transition-colors flex items-center justify-between">
+                    <span>Prompt Compressor</span>
+                    <span className="text-[10px] font-mono text-amber-400">-70%</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/tools/json-schema-generator" className="hover:text-white transition-colors">
+                    <span>JSON Schema to Zod</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 3: Framework Recipes & SDKs */}
+            <div className="space-y-3">
+              <h4 className="text-[11px] font-mono font-bold text-white uppercase tracking-widest flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span>Frameworks &amp; SDKs</span>
+              </h4>
+              <ul className="space-y-2 text-zinc-400 text-xs">
+                <li>
+                  <Link href="/cookbook/streaming-sse-nextjs" className="hover:text-white transition-colors flex items-center justify-between">
+                    <span>Next.js 15 Streaming</span>
+                    <span className="text-[10px] font-mono text-cyan-400">Recipe</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/docs/integrations/cursor" className="hover:text-white transition-colors flex items-center justify-between">
+                    <span>Cursor &amp; Windsurf</span>
+                    <span className="text-[10px] font-mono text-zinc-500">IDE</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/docs/integrations/claude-code" className="hover:text-white transition-colors flex items-center justify-between">
+                    <span>Claude Code Agent</span>
+                    <span className="text-[10px] font-mono text-amber-400">CLI</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/docs/sdks/typescript" className="hover:text-white transition-colors">
+                    <span>TypeScript &amp; React SDK</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/docs/sdks/python" className="hover:text-white transition-colors">
+                    <span>Python &amp; FastAPI SDK</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/docs/api-reference" className="hover:text-white transition-colors">
+                    <span>REST &amp; SSE API Docs</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 4: Alternatives & Comparisons (AEO) */}
+            <div className="space-y-3">
+              <h4 className="text-[11px] font-mono font-bold text-white uppercase tracking-widest flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                <span>Comparisons &amp; AEO</span>
+              </h4>
+              <ul className="space-y-2 text-zinc-400 text-xs">
+                <li>
+                  <Link href="/alternatives/openrouter" className="hover:text-white transition-colors flex items-center justify-between">
+                    <span>vs OpenRouter</span>
+                    <span className="text-[10px] font-mono text-emerald-400 font-bold">0% Fee</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/alternatives/portkey" className="hover:text-white transition-colors flex items-center justify-between">
+                    <span>vs Portkey</span>
+                    <span className="text-[10px] font-mono text-zinc-500">No Seats</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/alternatives/together-ai" className="hover:text-white transition-colors flex items-center justify-between">
+                    <span>vs Together AI</span>
+                    <span className="text-[10px] font-mono text-amber-400">Wholesale</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/alternatives/litellm" className="hover:text-white transition-colors flex items-center justify-between">
+                    <span>vs LiteLLM</span>
+                    <span className="text-[10px] font-mono text-zinc-500">Managed</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/migrate/openai-direct" className="hover:text-white transition-colors">
+                    <span>Migrate from OpenAI Direct</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/glossary" className="hover:text-white transition-colors">
+                    <span>AI Gateway Glossary</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 5: Enterprise, Security & Governance */}
+            <div className="space-y-3">
+              <h4 className="text-[11px] font-mono font-bold text-white uppercase tracking-widest flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                <span>Trust &amp; Governance</span>
+              </h4>
+              <ul className="space-y-2 text-zinc-400 text-xs">
+                <li>
+                  <Link href="/billing/audit-logs" className="hover:text-white transition-colors flex items-center justify-between">
+                    <span>SOC 2 Type II Audit</span>
+                    <span className="text-[10px] font-mono text-zinc-500">Tamper-Proof</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/industries/healthcare-and-lifesciences" className="hover:text-white transition-colors flex items-center justify-between">
+                    <span>HIPAA &amp; BAA Eligible</span>
+                    <span className="text-[10px] font-mono text-emerald-400">BAA</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/security" className="hover:text-white transition-colors">
+                    <span>Zero Content Retention</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/reliability/preventing-outages-during-openai-downtime" className="hover:text-white transition-colors">
+                    <span>99.99% Failover SLA</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/postmortems/openai-major-outage-failover" className="hover:text-white transition-colors">
+                    <span>OpenAI Outage Postmortems</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/compliance" className="hover:text-white transition-colors">
+                    <span>Enterprise DPA &amp; GDPR</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
           </div>
+
+          {/* Tier 2: Legal, Privacy & Compliance (Exact Invariants) */}
+          <div className="pt-8 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-zinc-500 font-sans">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2">
+              <span>&copy; {new Date().getFullYear()} GALX AI, Inc.</span>
+              <span className="text-zinc-700">•</span>
+              <Link href="/privacy#cookies" className="hover:text-zinc-300 transition-colors">
+                Cookie Policy
+              </Link>
+              <Link href="/privacy" className="hover:text-zinc-300 transition-colors">
+                Privacy Policy
+              </Link>
+              <Link href="/terms" className="hover:text-zinc-300 transition-colors">
+                Terms of Service
+              </Link>
+              <Link href="/terms#compute" className="hover:text-zinc-300 transition-colors">
+                Compute Terms of Use
+              </Link>
+              <Link
+                href="/privacy#choices"
+                className="inline-flex items-center gap-1 text-cyan-400/90 hover:text-cyan-300 transition-colors font-medium"
+              >
+                <span>Your Privacy Choices</span>
+                <svg className="w-3 h-3 text-cyan-400" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 12.5a5.5 5.5 0 110-11 5.5 5.5 0 010 11zM8 4a1 1 0 100 2 1 1 0 000-2zm1 4H7v4h2V8z" />
+                </svg>
+              </Link>
+            </div>
+
+            <div className="flex items-center gap-3 text-zinc-600 font-mono text-[10px]">
+              <span>v5.6 Codex Engine</span>
+              <span>•</span>
+              <span className="text-zinc-500">Anycast BGP Edge</span>
+            </div>
+          </div>
+
         </div>
       </footer>
     </div>

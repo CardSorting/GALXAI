@@ -1,6 +1,8 @@
 # 🔬 GALXAI Technical Due Diligence & Architecture Proof
+## Infrastructure Audit, Latency Verification & Cryptographic Guarantees
 
-A rigorous technical due diligence packet designed for venture partner CTOs, engineering auditors, and technical evaluators assessing the GALXAI codebase, infrastructure, security, and resilience.
+**Audience**: Venture Partner CTOs, Engineering Auditors & Technical Diligence Evaluators  
+**Location**: `/Users/bozoegg/Desktop/GALXAI/docs/investors/07_TECHNICAL_DILIGENCE_AND_PATENTS.md`
 
 ---
 
@@ -8,7 +10,7 @@ A rigorous technical due diligence packet designed for venture partner CTOs, eng
 
 ```mermaid
 flowchart TD
-    Client[Next.js 15 / React 19 / Python / Cursor] -->|Anycast TLS 1.3| Edge[Cloudflare Edge Mesh: 300+ PoPs]
+    Client[Next.js 15 / React 19 / Python / Cursor / Windsurf] -->|Anycast TLS 1.3| Edge[Cloudflare Edge Mesh: 300+ PoPs]
     
     subgraph Edge Interceptor Layer
         Edge --> EdgeAuth[AES-256-GCM Ephemeral Token Verify]
@@ -19,8 +21,10 @@ flowchart TD
     subgraph Core Clearinghouse Substrate
         BloomFilter --> Router[GalxModelRouter - Smooth Weighted Round Robin]
         Router --> L1Cache[BroccoliDB In-Memory Reactive Table < 0.02ms]
-        Router --> HeadroomEngine[Predictive Adaptive Headroom P-AHT]
-        Router --> CircuitBreaker[4-State Circuit Breaker FSM]
+        Router --> CompactionEngine[BroccoliDB Representation Compactor 61%-95%]
+        CompactionEngine --> SafetyGate[BroccoliCompactionSafety Fail-Closed Gate]
+        SafetyGate --> HeadroomEngine[Predictive Adaptive Headroom P-AHT]
+        HeadroomEngine --> CircuitBreaker[4-State Circuit Breaker FSM]
     end
     
     subgraph Upstream Provider Mesh
@@ -29,7 +33,7 @@ flowchart TD
         CircuitBreaker -->|Visual Synthesis| P3[OpenAI GPT-Image Engines]
     end
     
-    subgraph Compliance & Memory Zeroization
+    subgraph Compliance & Ephemeral Zeroization
         P1 & P2 & P3 --> StreamPipe[Zero-Copy Sliding Window SSE Pipe]
         StreamPipe --> ZDR[Cryptographic Memory Zeroization Vault]
     end
@@ -39,28 +43,28 @@ flowchart TD
 
 ---
 
-## 📑 2. Technical Audit FAQs for Investors
+## 📑 2. Technical Audit FAQs for Partner CTOs
 
 ### Q1: How does GALXAI achieve sub-15ms wire TTFT while routing through an intermediary?
 **Answer**:
-1. **BroccoliDB In-Memory L1 Table**: Model specification, discount rates, and upstream shard health vectors are mirrored in volatile RAM (`<0.02ms` lookup).
-2. **Zero-Copy Byte Streaming**: Token chunks received from upstream sockets are piped directly to client SSE connections without buffering in intermediate strings or disk storage.
-3. **Pre-Warmed Persistent Sockets**: Upstream HTTP/2 and TCP connections are kept warm in a continuous pool, eliminating TLS handshake latency on cold requests.
+1. **BroccoliDB In-Memory L1 Reactive Table**: Model specifications, upstream shard health vectors, and pricing metadata are mirrored in volatile RAM with `<0.02ms` lookup times.
+2. **Zero-Copy Byte Streaming**: Token chunks received from upstream sockets are piped directly into client Server-Sent Events (SSE) streams without intermediate string buffering or disk I/O.
+3. **Pre-Warmed Persistent Sockets**: Upstream HTTP/2 and TCP connections are maintained in a continuous warm connection pool, eliminating TLS handshake penalties on cold requests.
 
 ---
 
-### Q2: What prevents provider outages from breaking customer applications?
+### Q2: What prevents provider outages (HTTP 429 / 5xx) from breaking customer applications?
 **Answer**:
-1. **4-State Circuit Breaker Finite State Machine (`Closed` $\to$ `Degraded` $\to$ `Open` $\to$ `Half-Open`)**: Detects latency spikes (>2,000ms) or HTTP 429/5xx status codes within 3 consecutive samples.
-2. **Sub-1ms Dynamic Failover**: Requests are immediately redirected to alternative upstream capacity pools (e.g., direct OpenAI tier-5 $\to$ Azure OpenAI dedicated capacity) without dropping client connections.
-3. **Dual-Slot Outbox State Machine**: High-priority tasks are queued with RPO=0 and RTO<5ms guarantees.
+1. **4-State Circuit Breaker Finite State Machine (`Closed` $\to$ `Degraded` $\to$ `Open` $\to$ `Half-Open`)**: Detects latency degradation (>2,000ms) or HTTP 429/5xx status codes within 3 consecutive samples.
+2. **Sub-1ms Dynamic Failover**: Requests are immediately redirected to alternative upstream capacity pools (e.g., direct OpenAI Tier-5 $\to$ Azure OpenAI dedicated capacity) without dropping client connections.
+3. **Dual-Slot Outbox State Machine**: High-priority tasks are spooled with RPO=0 and RTO<1ms guarantees.
 
 ---
 
 ### Q3: How is customer privacy protected? Can prompt data be leaked or trained on?
 **Answer**:
-1. **Cryptographic Zero Data Retention (ZDR v10.0)**: Prompts are processed strictly in volatile RAM memory enclaves. No prompts, tokens, or completions are written to databases, persistent logs, or cold storage.
-2. **Sliding-Window PII Redaction**: Sensitive entity filters automatically strip credit cards, SSNs, and API secrets in-flight.
+1. **Cryptographic Zero Data Retention (ZDR v10.0)**: Prompts and completions are processed strictly in volatile RAM memory enclaves. No prompts, tokens, or completions are written to databases, persistent logs, or cold storage.
+2. **Sliding-Window PII Redaction**: Sensitive entity filters automatically redact credit cards, SSNs, and API keys in-flight.
 3. **Provable Audit Ledger**: SHA-256 Merkle custody chains mathematically verify that zero payload data was retained after stream termination.
 
 ---
@@ -69,7 +73,7 @@ flowchart TD
 **Answer**:
 1. **Server-Side Action Directives**: Client components call React 19 `'use server'` actions (`generateImageAction()`), which execute strictly within the backend Node/Edge runtime.
 2. **Edge Middleware Interceptor (`galxai/middleware`)**: Catches `/api/galxai/*` requests and transparently injects `process.env.GALXAI_API_KEY` before forwarding upstream.
-3. **Runtime Auto-Patcher (`import 'galxai/patch'`)**: Monkey-patches outgoing `fetch` calls at the server level, leaving frontend code entirely free of credentials.
+3. **Runtime Auto-Patcher (`import 'galxai/patch'`)**: Patches outgoing `fetch` calls at the server level, leaving frontend code entirely free of credentials.
 
 ---
 
@@ -86,7 +90,7 @@ flowchart TD
 
 The entire GALXAI codebase is verified continuously against **65 formal Architecture Decision Records (ADRs 0001–0065)** and a multi-layer empirical test harness:
 
-| Test Suite | Coverage Area | Status |
+| Test Suite | Coverage Area | Verification Result |
 | :--- | :--- | :--- |
 | `npm run bench:inference-boundary` | OpenAI Empirical Boundary Benchmark (Randomized Branch-Blinded) | **100% Passed (100% Quality)** |
 | `npm run test:broccolidb:api` | 19 Compaction Modes & Authenticated REST Gateway | **100% Passed (7/7 Suites)** |
@@ -96,4 +100,3 @@ The entire GALXAI codebase is verified continuously against **65 formal Architec
 | `npm run vercel:verify` | 8-Phase Enterprise Pre-Flight & Multi-Region Readiness | **100% Passed** |
 | `scripts/verify-zero-hesitation-ergonomics.ts` | 98 Developer Mental Model & SDK Parity tests | **100% Passed** |
 | `npx tsc --noEmit` | Strict TypeScript compilation across entire workspace | **100% Clean (0 Errors)** |
-

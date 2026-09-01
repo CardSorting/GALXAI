@@ -1,16 +1,38 @@
-# 🏛️ GALXAI Institutional Investor & Venture Diligence Room
+# 🏛️ GALXAI Institutional & Strategic Diligence Room
+## Flattening and Easing the Path to the First Dollar Made with AI
 
-Welcome to the **GALXAI Institutional Diligence Data Room**. This repository contains all quantitative models, pitch deck specifications, market sizing econometrics, competitive teardowns, and technical architecture proofs for institutional investors, venture partners, and angel syndicates.
+Welcome to the **GALXAI Product, Strategy & Diligence Room**. This repository contains all plain-language executive summaries, interactive pitch decks, market sizing models, competitive teardowns, and technical architecture proofs.
 
 ---
 
-## 📑 Data Room Table of Contents
+> **The Core Catch**:  
+> **"GALXAI flattens and eases the path to the first dollar made with AI."**  
+> We turn complex, expensive AI engineering into a **15-minute journey from prototype to profitable revenue**.
+
+---
+
+## ⚡ Fast-Track 10-to-20 Minute Meeting Track
+
+If you are preparing for or reviewing a **10-to-20 minute executive meeting**, start with these fast-track assets:
+
+| Asset | Purpose | Format / Read Time |
+| :--- | :--- | :--- |
+| 🎴 **[Interactive HTML Pitch Deck](deck.html)** | Standalone 8-slide deck: Stopping the Tokenmaxxing Crisis for CFOs, Net Spend Interception, and Open-Source Funnel Traction. | **Live Web Deck** |
+| 📊 **[GALXAI Pitch Deck (Google Slides / PPTX)](GALXAI_Pitch_Deck.pptx)** | Native 16:9 widescreen presentation with dark theme, speaker notes, financial table, and comparison cards. | **Google Slides / PPTX** |
+| ⚡ **[Google Slides Apps Script Generator](generate_google_slides.js)** | 1-click Google Apps Script to generate the presentation natively in Google Drive. | **Apps Script** |
+| ⏱️ **[00. 10-to-20 Minute Meeting Playbook](00_10_MINUTE_INVESTOR_MEETING_PLAYBOOK.md)** | Crisis talk tracks, Net Spend Interception math, 30-second objection killers, and executive close. | **2 mins** |
+| 📄 **[00. Executive One-Pager & Fact Sheet](00_ONE_PAGER_EXECUTIVE_TEASER.md)** | High-density 1-page visual tear sheet with the Tokenmaxxing Crisis, unit economics, open-source moats, and financials. | **2 mins** |
+| 📊 **[02. Pitch Deck Slide-by-Slide Specification](02_PITCH_DECK_SLIDE_BY_SLIDE.md)** | 8-slide crisis-and-traction cheat sheet with speaker notes, timing cues, and transition bridges. | **3 mins** |
+
+---
+
+## 📑 Full Data Room Table of Contents
 
 | Document | Description | Focus Area |
 | :--- | :--- | :--- |
-| **[01. Executive Summary & Investment Memo](01_EXECUTIVE_SUMMARY_AND_MEMO.md)** | Comprehensive 1-pager covering company thesis, traction, financial highlights, and round terms. | **Executive Memo** |
-| **[02. Pitch Deck Slide-by-Slide Specification](02_PITCH_DECK_SLIDE_BY_SLIDE.md)** | Institutional 12-slide narrative designed for Tier-1 Seed and Series A venture funds. | **Pitch Deck** |
-| **[03. Market Sizing: TAM, SAM & SOM Analysis](03_MARKET_SIZING_TAM_SAM_SOM.md)** | Top-down ($1.3T TAM) and bottom-up ($1.31B near-term SOM) econometric sizing with CAGR benchmarks. | **Market Sizing** |
+| **[01. Executive Memorandum & Product Brief](01_EXECUTIVE_SUMMARY_AND_MEMO.md)** | Comprehensive memo covering company thesis, traction, financial highlights, and partnerships. | **Executive Memo** |
+| **[02. Pitch Deck Slide-by-Slide Specification](02_PITCH_DECK_SLIDE_BY_SLIDE.md)** | 12-slide narrative designed for executive partner meetings with full talk tracks. | **Pitch Deck** |
+| **[03. Market Sizing: TAM, SAM & SOM Analysis](03_MARKET_SIZING_TAM_SAM_SOM.md)** | Top-down ($1.30T TAM) and bottom-up ($1.31B near-term SOM) econometric sizing with CAGR benchmarks. | **Market Sizing** |
 | **[04. Unit Economics: CAC, LTV, Margins & Payback](04_UNIT_ECONOMICS_CAC_LTV_PAYBACK.md)** | Blended CAC ($185), LTV ($5,350), Gross Margins (42% $\to$ 68%), and 138% Net Dollar Retention (NDR). | **Unit Economics** |
 | **[05. Competitive Landscape & Strategic Moats](05_COMPETITIVE_LANDSCAPE_AND_MOATS.md)** | 2x2 positioning matrix, feature teardown vs OpenRouter / Cloudflare / Portkey, and 4 defensible moats. | **Competitive Moats** |
 | **[06. 5-Year Financial Projections & Operating Model](06_FINANCIAL_PROJECTIONS_AND_MODEL.md)** | 5-year P&L forecast ($1.2M ARR $\to$ $85M ARR), headcount ramp, OpEx breakdown, and Rule of 40 index. | **Financial Model** |
@@ -21,21 +43,24 @@ Welcome to the **GALXAI Institutional Diligence Data Room**. This repository con
 
 ---
 
-## 💎 The Investment Thesis in Brief
+## 💎 The Value Proposition in Brief
 
-1. **Massive Market Wave**: The global AI compute market is rapidly shifting from model training to **model inference**—a **$1.3 Trillion TAM by 2030**.
-2. **Structural Economic Arbitrage**: Large foundation labs offer 30%–50% bulk discounts on Tier-5 enterprise commitments. GALXAI aggregates billions of developer tokens to capture this spread while passing through 25%–40% wholesale savings to customers.
-3. **Frictionless Developer Distribution (PLG)**:
-   - **Declarative UI**: `<GalxImage />` and `<GalxChat />` eliminate backend proxy wiring.
+1. **Massive Market Wave**: The global AI market is shifting from training models to **running AI in production**—a **$1.3 Trillion market by 2030 (38.2% CAGR)**.
+2. **Costco Wholesale Pricing for Compute**: We buy AI capacity in massive bulk and pass 25%–40% wholesale discounts directly to companies.
+3. **Stripe-Level Developer Simplicity**:
+   - **Drop-In UI**: `<GalxImage />` and `<GalxChat />` eliminate backend proxy routes.
    - **Zero-Migration Auto-Patch**: `import 'galxai/patch'` upgrades existing OpenAI apps in 1 line.
-   - **AI Coding Agent Directives**: `npx galxai skills` embeds GALXAI into Cursor, Claude Code, Windsurf, and Devin workflows by default.
-4. **Strong Unit Economics**: LTV:CAC of **28.9x** (Gross) / **12.1x** (Net Margin LTV), blended payback period of **2.1 months**, and **138% Net Dollar Retention**.
+   - **AI Coding Agent Directives**: `npx galxai skills` embeds GALXAI into Cursor, Claude Code, and Windsurf workflows by default.
+4. **Smart Context Fluff Trimming (BroccoliDB)**:
+   - Slashes input token costs by **60%–90%** with 100% verified action safety across 180 domain tests and 0 errors.
+   - Sub-15ms wire response times across our global edge network.
+5. **Top-Tier Unit Economics**: Blended CAC of **$185**, payback period of **2.1 months**, and **138% Net Dollar Retention**.
 
 ---
 
-## 📬 Investor Contact & Inquiries
+## 📬 Contact & Inquiries
 
-- **Direct Inquiries**: `founders@galx.ai`
+- **Direct Inquiries**: `willcruzanswers@gmail.com`
 - **Live Platform**: [https://galx.ai](https://galx.ai)
-- **Live AI Coding Agent Hub**: [https://galx.ai/agents](https://galx.ai/agents)
+- **Developer Hub**: [https://galx.ai/agents](https://galx.ai/agents)
 - **Developer Documentation**: [https://galx.ai/docs](https://galx.ai/docs)
