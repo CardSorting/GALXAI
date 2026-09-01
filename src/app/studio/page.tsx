@@ -15,7 +15,6 @@ import {
   RotateCcw,
   Download,
   X,
-  Layers,
 } from 'lucide-react';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { useAuth } from '@/contexts/AuthContext';
@@ -190,26 +189,11 @@ function BaseImageStudioPage() {
           </div>
         </div>
 
-        {/* Studio Tabs Navigation (Links to /studio and /studio/remix) */}
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-black/50 border border-white/10">
-          <Link
-            href="/studio"
-            className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md"
-          >
-            <Wand2 className="w-3.5 h-3.5" />
-            <span>Text-to-Image</span>
-          </Link>
-
-          <Link
-            href="/studio/remix"
-            className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-zinc-400 hover:text-white"
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Remix Engine</span>
-            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-400/20 text-amber-300 font-extrabold hidden sm:inline">
-              +5⚡ Remix
-            </span>
-          </Link>
+        {/* Studio Status / Model Badge */}
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-mono font-bold text-purple-300 bg-purple-500/15 border border-purple-500/30 px-2.5 py-1 rounded-lg">
+            GPT-Image-2 4K
+          </span>
         </div>
       </header>
 

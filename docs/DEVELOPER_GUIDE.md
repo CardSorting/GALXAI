@@ -52,7 +52,7 @@ This guide covers the internal codebase structure, architectural layers, how to 
 │   │   │   ├── images/generations/   # Multi-modal image generation
 │   │   │   └── models/               # Model discovery
 │   │   ├── characters/               # Custom character creator and persona hub
-│   │   ├── studio/                   # Multi-modal AI image and remix studio
+│   │   ├── studio/                   # Multi-modal AI 4K image generation studio
 │   │   ├── gateway/                  # Gateway management and API keys
 │   │   └── settings/                 # Seat quota and rolling window settings
 │   ├── sdk/                          # Zero-dependency Universal SDK (TypeScript / Python)
