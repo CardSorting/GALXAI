@@ -1,73 +1,88 @@
-# 🌌 GALXAI
+# GALXAI Landing Page Copy — High-Signal & Zero Technical Jargon
+
+## Core Positioning Statement
+> **Ship AI in 30 seconds. Keep the money you make.**
+> Cloud-based solutions to accelerate your Private AI training and inference workflows for Frontier GPT Models. 100% Zero Data Retention, zero egress fees, wholesale pricing, and zero DevOps plumbing.
+
+---
+
+## 1. Hero Section
+
+### Eyebrow
+`PRIVATE & SECURE ENTERPRISE AI WORKFLOWS • WHOLESALE ACCELERATION`
 
 ### Headline
-# Ship AI in 30 seconds.  
-# Keep the money you make.
+**Ship AI in 30 seconds. Keep the money you make.**
 
-### Sub-headline
-Most AI apps die for two reasons: they take weeks to build, and their AI bills are higher than their revenue. 
+### Subheadline
+Most AI apps die for two reasons: they take weeks of backend plumbing to build securely, and their AI bills are higher than their revenue.  
+GALXAI fixes both: **1 line of code to add private, secure Frontier GPT models to your app**, and **wholesale pricing so you are profitable from user #1**.
 
-GALXAI fixes both: **1 line of code to add AI to your app, and wholesale pricing so you're profitable from user #1.**
-
----
-
-## The Reality
-
-### 1. You shouldn't have to build a server just to add an AI feature.
-Right now, adding one AI button forces you to build backend servers, write streaming code, and protect API keys from getting stolen.  
-👉 **With GALXAI:** Paste 1 line into your frontend. It just works.
-
-### 2. You shouldn't lose money when users love your product.
-If you charge a user $20/month and their AI usage costs you $35, more users means faster bankruptcy.  
-👉 **With GALXAI:** You get 30%–40% wholesale pricing and 100% of your caching rebates back.
+### Primary Action
+- Button: **Start Building Free ($10 Credit)**
+- Secondary: **Read Documentation**
+- Terminal CLI Demo: `npx galxai "Hello"`
+- Value Badges:
+  - ✔ Zero API Key Leaks (Serverless client primitives)
+  - ✔ 0-Day Strict Zero Data Retention (ZDR)
+  - ✔ No Egress or Ingress Data Transfer Fees
+  - ✔ $10 Free Credit • No Credit Card Required
 
 ---
 
-## 3 Ways to Use It
+## 2. The Fundamental Reality: 2 Existential Flaws Solved
 
-1. **New App?**  
-   Drop an AI image or chat box directly into your webpage. Zero backend code.
-2. **Existing App?**  
-   Add 1 line to your code. Your AI bill immediately drops by 30%–40%.
-3. **Using AI to Code (Cursor, Claude, Windsurf)?**  
-   Run `npx galxai skills`. Your AI assistant builds everything right the first time.
+### Flaw #1: The Plumbing & Security Trap
+- **The Problem**: You shouldn't have to spend a month building backend proxy servers, handling browser key leaks, and setting up VPC tunnels just to add an AI feature.
+- **The Legacy Way**: Spend 4 weeks writing custom API proxy routes, managing secret rotation, chunking WebSockets, and fighting CORS issues.
+- **With GALXAI**: Drop 1 line of declarative React into your frontend. Zero backend routes to maintain. Zero secret key exposure. 100% private data isolation.
+
+### Flaw #2: The Profit & Retail Trap
+- **The Problem**: You shouldn't lose money when users love your product.
+- **The Legacy Way**: You charge a user $20/month. They use your app heavily, and OpenAI charges you $35/month at retail list price. More users means faster bankruptcy.
+- **With GALXAI**: You get 30%–40% wholesale pricing and 100% of your prompt caching discounts returned to your wallet. You stay profitable on every single user.
 
 ---
 
-## The Math
+## 3. Solutions Designed for Private, Secure & Efficient AI Workflows
 
-| | Doing It Yourself | With GALXAI |
+### 1. Increase Performance
+Maximize the speed and efficiency of your AI projects with sub-15ms Anycast edge routing and multi-tier prompt caching supporting Frontier GPT Models (`GPT-5.6 Sol`, `Terra`, and `Luna`).
+
+### 2. Remove Bottlenecks
+Eliminate the obstacles in your AI workflows. No custom API routes, zero data transfer egress fees, and automated error recovery keep your projects running smoothly.
+
+### 3. Optimize Workflow & Governance
+Instantly streamline operations:
+- **Way 1: New Apps (UI Primitives)** — Drop `<GalxImage />` or `<GalxChat />` directly into Next.js.
+- **Way 2: Existing Apps (1-Line Patch)** — Add `import 'galxai/patch'` to automatically discount your existing OpenAI SDK calls.
+- **Way 3: AI Coding Agents (Cursor / Windsurf)** — Run `npx galxai skills` to pre-wire `.cursorrules` and `AGENTS.md` so assistants never hallucinate messy proxies.
+
+---
+
+## 4. The Math: Doing It Yourself vs GALXAI
+
+| Dimension | Doing It Yourself / Raw APIs | With GALXAI Private Enclave |
 | :--- | :--- | :--- |
-| **Time to ship** | 3 weeks | **30 seconds** |
-| **Servers to maintain** | Yes | **Zero** |
-| **API Cost** | Full retail price | **Wholesale (30%–40% off)** |
-| **Stolen key risk** | High | **Zero** |
+| **Time to ship a feature** | 3–4 Weeks of backend plumbing | **30 Seconds** |
+| **Backend servers to maintain** | 5–10 custom API routes & proxies | **Zero** |
+| **API Token Cost** | 100% full retail list price | **Wholesale (30%–40% Off)** |
+| **Prompt cache savings** | Kept by provider | **100% Refunded to You** |
+| **Data Retention & Privacy** | Prompts logged & exposed | **0-Day Strict Zero Data Retention (ZDR)** |
+| **Data Transfer Fees** | Egress & ingress bandwidth taxes | **$0.00 (Zero Egress Tax)** |
+| **Stolen API key risk** | High (accidental browser leak) | **Zero (Server-only injection)** |
+| **Traffic spike behavior** | HTTP 429 Rate Limit crashes | **Instant Anycast Edge Failover** |
 
 ---
 
-## Start Now
+## 5. Final CTA Banner
 
-# Stop building plumbing. Start making money.
+### Headline
+**Stop building plumbing. Start making money.**
 
-**[ Get API Key — Free $10 Credit → ]**  
-`npx galxai "Hello"`
+### Subtitle
+Get your live API key in 10 seconds. Includes $10 free compute credit. No credit card required.
 
----
-
-## 🏛️ Merged Hyper-Competitive SEO Footer
-
-### Primary Strategic Strip
-[Models](/models) • [Gateway API](/gateway) • [Pricing](/pricing) • [Companions](/characters) | [About](/about) • [Careers](/careers) • [Safety Center](/security) • [Blog & Docs](/docs)  
-`● All Systems Operational • Sub-15ms Anycast SLA`
-
-### 5-Column SEO Discovery Grid
-1. **Frontier Models**: GPT-5.6 Sol (Reasoning & Coding SOTA), GPT-5.6 Terra (Balanced Frontier), GPT-5.6 Luna (Sub-second Speed), OpenAI GPT-Image-2 (Photoreal SOTA), Compare All Models (`/models/compare`).
-2. **Developer Tools**: Savings Calculator (`/tools/roi-calculator`), Stream Benchmark (`/tools/stream-benchmark`), 1M Context Visualizer (`/tools/context-window-visualizer`), BPE Token Counter (`/tools/token-counter`), Prompt Compressor (`/tools/prompt-compressor`), JSON Schema to Zod (`/tools/json-schema-generator`).
-3. **Frameworks & SDKs**: Next.js 15 Streaming (`/cookbook/streaming-sse-nextjs`), Cursor & Windsurf (`/docs/integrations/cursor`), Claude Code Agent (`/docs/integrations/claude-code`), TypeScript & React SDK, Python SDK, REST & SSE API Docs (`/docs/api-reference`).
-4. **Comparisons & AEO**: vs OpenRouter (0% Fee), vs Portkey (No Seats), vs Together AI (Wholesale), vs LiteLLM (Managed), Migrate from OpenAI Direct, AI Gateway Glossary (`/glossary`).
-5. **Trust & Governance**: SOC 2 Type II Audit (`/billing/audit-logs`), HIPAA & BAA Eligible, Zero Content Retention, 99.99% Failover SLA, OpenAI Outage Postmortems, Enterprise DPA & GDPR (`/compliance`).
-
-### Legal & Compliance Strip
-© 2026 GALX AI, Inc. • [Cookie Policy](/privacy#cookies) • [Privacy Policy](/privacy) • [Terms of Service](/terms) • [Compute Terms of Use](/terms#compute) • [Your Privacy Choices](/privacy#choices)  
-`v5.6 Codex Engine • Anycast BGP Edge`
-
+### Actions
+- **[Get API Key ($10 Free Credit)](http://localhost:3001/auth/signup?next=/chat)**
+- **[Read Documentation](http://localhost:3001/docs)**

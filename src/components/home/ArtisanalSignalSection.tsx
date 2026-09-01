@@ -127,7 +127,32 @@ export function ArtisanalSignalSection() {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [activeModeTab, setActiveModeTab] = useState<'ui' | 'patch' | 'agents'>('ui');
   const [activeUiDemo, setActiveUiDemo] = useState<'image' | 'chat'>('image');
-  const [sandboxMode, setSandboxMode] = useState<'terminal' | 'image' | 'roi' | 'speed'>('terminal');
+  const [sandboxMode, setSandboxMode] = useState<'terminal' | 'image' | 'roi' | 'speed' | 'enclave'>('terminal');
+
+  // ===========================================================================
+  // 5. SIMULATED SOVEREIGN PRIVATE ENCLAVE & ZERO DATA RETENTION STATE
+  // ===========================================================================
+  const [enclaveVpcActive, setEnclaveVpcActive] = useState(true);
+  const [zeroRetentionActive, setZeroRetentionActive] = useState(true);
+  const [zeroEgressActive, setZeroEgressActive] = useState(true);
+  const [frontierEnclaveTier, setFrontierEnclaveTier] = useState<'sol' | 'terra' | 'luna'>('sol');
+  const [isVerifyingEnclave, setIsVerifyingEnclave] = useState(false);
+  const [enclaveAuditLog, setEnclaveAuditLog] = useState(
+    '🔒 [ENCLAVE READY] Single-Tenant Memory Vault Initialized • BGP Anycast Peering Active • Strict Zero Data Retention Enforced (0-Day volatile buffer)'
+  );
+
+  const verifyPrivateEnclave = (tier: 'sol' | 'terra' | 'luna') => {
+    setFrontierEnclaveTier(tier);
+    setIsVerifyingEnclave(true);
+    setEnclaveAuditLog('🔄 Verifying cryptographic Zero Data Retention handshake with Dedicated VPC...');
+
+    setTimeout(() => {
+      setIsVerifyingEnclave(false);
+      setEnclaveAuditLog(
+        `✅ [CRYPTOGRAPHIC AUDIT PASSED] GPT-5.6 ${tier.toUpperCase()} Enclave Verified\n✔ Data Retention: 0 Days (Strict ZDR Policy)\n✔ Customer Prompt Training: 100% Exemption Guaranteed\n✔ Egress / Ingress Transfer Fee: $0.00 / GB\n✔ Latency: 5ms Local Anycast Edge Handshake`
+      );
+    }, 600);
+  };
 
   // ===========================================================================
   // 1. SIMULATED TERMINAL CLI STATE
@@ -486,7 +511,7 @@ export function ArtisanalSignalSection() {
             </div>
 
             {/* Sandbox View Tabs */}
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/60 border border-white/10 text-xs font-mono">
+            <div className="flex items-center flex-wrap gap-1.5 p-1 rounded-xl bg-black/60 border border-white/10 text-xs font-mono">
               <button
                 onClick={() => setSandboxMode('terminal')}
                 className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold hover:scale-[1.03] active:scale-[0.97] ${
@@ -526,6 +551,16 @@ export function ArtisanalSignalSection() {
                 }`}
               >
                 4. 30s Speed Race
+              </button>
+              <button
+                onClick={() => setSandboxMode('enclave')}
+                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold hover:scale-[1.03] active:scale-[0.97] ${
+                  sandboxMode === 'enclave'
+                    ? 'bg-purple-500 text-white font-bold shadow-md shadow-purple-500/20'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                5. Private Enclave
               </button>
             </div>
           </div>
@@ -905,6 +940,132 @@ export function ArtisanalSignalSection() {
           )}
 
           {/* ===================================================================== */}
+          {/* TAB 5: SOVEREIGN PRIVATE ENCLAVE & ZERO DATA RETENTION SIMULATOR       */}
+          {/* ===================================================================== */}
+          {sandboxMode === 'enclave' && (
+            <div className="space-y-4 animate-in fade-in duration-200 font-sans">
+              {/* Header Info & Frontier Model Switcher */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-black/40 p-3.5 rounded-2xl border border-purple-500/30">
+                <div className="space-y-0.5">
+                  <span className="text-xs font-mono text-purple-300 font-bold flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-purple-400" />
+                    Dedicated Frontier GPT Private Enclave
+                  </span>
+                  <span className="text-[11px] text-zinc-400 font-sans">
+                    Guaranteed Zero Data Retention (ZDR) &amp; Zero Egress Fees behind single-tenant VPCs
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex rounded-xl bg-white/5 p-1 text-xs font-mono">
+                    {(['sol', 'terra', 'luna'] as const).map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => verifyPrivateEnclave(t)}
+                        className={`px-3 py-1 rounded-lg transition-all cursor-pointer font-bold capitalize hover:scale-[1.03] active:scale-[0.97] ${
+                          frontierEnclaveTier === t
+                            ? 'bg-purple-500 text-white shadow-md shadow-purple-500/20'
+                            : 'text-zinc-400 hover:text-white'
+                        }`}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* 4 Interactive Security Policy Toggles */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 font-mono text-xs">
+                <div
+                  onClick={() => setZeroRetentionActive(!zeroRetentionActive)}
+                  className={`p-3 rounded-2xl border transition-all cursor-pointer select-none space-y-1 hover:scale-[1.02] active:scale-[0.98] ${
+                    zeroRetentionActive
+                      ? 'bg-purple-950/20 border-purple-500/40 text-purple-200'
+                      : 'bg-black/30 border-white/5 text-zinc-500'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase">Zero Data Retention</span>
+                    <span className={`w-2 h-2 rounded-full ${zeroRetentionActive ? 'bg-purple-400 animate-pulse' : 'bg-zinc-600'}`} />
+                  </div>
+                  <span className="text-xs font-bold block">0-Day Buffer</span>
+                  <span className="text-[10px] text-zinc-400 font-sans block">Never stored or trained on</span>
+                </div>
+
+                <div
+                  onClick={() => setEnclaveVpcActive(!enclaveVpcActive)}
+                  className={`p-3 rounded-2xl border transition-all cursor-pointer select-none space-y-1 hover:scale-[1.02] active:scale-[0.98] ${
+                    enclaveVpcActive
+                      ? 'bg-cyan-950/20 border-cyan-500/40 text-cyan-200'
+                      : 'bg-black/30 border-white/5 text-zinc-500'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase">Dedicated VPC</span>
+                    <span className={`w-2 h-2 rounded-full ${enclaveVpcActive ? 'bg-cyan-400 animate-pulse' : 'bg-zinc-600'}`} />
+                  </div>
+                  <span className="text-xs font-bold block">Private Anycast</span>
+                  <span className="text-[10px] text-zinc-400 font-sans block">Sub-15ms edge routing</span>
+                </div>
+
+                <div
+                  onClick={() => setZeroEgressActive(!zeroEgressActive)}
+                  className={`p-3 rounded-2xl border transition-all cursor-pointer select-none space-y-1 hover:scale-[1.02] active:scale-[0.98] ${
+                    zeroEgressActive
+                      ? 'bg-emerald-950/20 border-emerald-500/40 text-emerald-200'
+                      : 'bg-black/30 border-white/5 text-zinc-500'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase">Egress Data Fee</span>
+                    <span className={`w-2 h-2 rounded-full ${zeroEgressActive ? 'bg-emerald-400 animate-pulse' : 'bg-zinc-600'}`} />
+                  </div>
+                  <span className="text-xs font-bold block">$0.00 / GB Tax</span>
+                  <span className="text-[10px] text-zinc-400 font-sans block">Free data transfers</span>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-amber-950/20 border border-amber-500/40 text-amber-200 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase">Prompt Cache</span>
+                    <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  </div>
+                  <span className="text-xs font-bold block">-75% Token Rebate</span>
+                  <span className="text-[10px] text-zinc-400 font-sans block">100% sent to balance</span>
+                </div>
+              </div>
+
+              {/* Cryptographic Audit Terminal Box */}
+              <div className="rounded-2xl bg-[#030509] border border-purple-500/30 p-4 font-mono text-xs text-purple-200 min-h-[110px] shadow-inner flex flex-col justify-between space-y-3">
+                <pre className="whitespace-pre-wrap leading-relaxed font-mono text-[11px] sm:text-xs">
+                  <code>{enclaveAuditLog}</code>
+                </pre>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-purple-500/20 text-[10px] text-zinc-400">
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-1 text-emerald-400">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      SOC-2 Type II Certified
+                    </span>
+                    <span className="flex items-center gap-1 text-emerald-400">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      HIPAA / GDPR Ready
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => verifyPrivateEnclave(frontierEnclaveTier)}
+                    disabled={isVerifyingEnclave}
+                    className="px-3 py-1 rounded-lg bg-purple-500/20 border border-purple-500/40 text-purple-300 hover:bg-purple-500 hover:text-white transition-all cursor-pointer font-bold disabled:opacity-50 hover:scale-[1.03] active:scale-[0.97]"
+                  >
+                    {isVerifyingEnclave ? 'Auditing Enclave...' : 'Run Cryptographic Audit'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ===================================================================== */}
           {/* Primary High-Impact CTA Row (Always Visible)                          */}
           {/* ===================================================================== */}
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10">
@@ -1059,13 +1220,128 @@ export function ArtisanalSignalSection() {
       </div>
 
       {/* ========================================================================= */}
+      {/* 2. SOLUTIONS DESIGNED FOR PRIVATE & SECURE AI WORKFLOWS (3 PILLARS)       */}
+      {/* ========================================================================= */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between border-b border-white/10 pb-4">
+          <div className="space-y-1">
+            <span className="text-xs font-mono font-bold tracking-widest text-purple-400 uppercase">
+              02 • Enterprise Neocloud Architecture
+            </span>
+            <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              Solutions Designed for Seamless, Secure, and Efficient Private AI Workflows
+            </h3>
+          </div>
+          <span className="text-xs text-zinc-500 font-mono hidden sm:inline">Frontier GPT Sovereign Infrastructure</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+          {/* Card 1: Increase Performance */}
+          <BespokeSpotlightCard
+            glowColor="cyan"
+            tilt={true}
+            className="bg-[#090d1a]/85 border border-white/10 backdrop-blur-xl shadow-2xl h-full flex flex-col"
+            innerClassName="p-6 sm:p-7 flex flex-col justify-between space-y-5 h-full"
+          >
+            <div className="space-y-3.5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-bold">
+                <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400" />
+                <span>INCREASE PERFORMANCE</span>
+              </div>
+              <h4 className="text-xl font-bold text-white leading-snug">
+                Sub-15ms Anycast Routing &amp; Continuous Cache
+              </h4>
+              <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed font-sans">
+                Maximize the speed and efficiency of your AI projects with our high-performance edge infrastructure. Multi-tiered continuous prefix caching cuts token latency by 75% on Frontier GPT models.
+              </p>
+            </div>
+
+            <div className="pt-3 border-t border-white/10 space-y-2 font-mono text-[11px]">
+              <div className="flex items-center justify-between text-zinc-300">
+                <span className="text-zinc-500">First Token Latency:</span>
+                <span className="text-emerald-400 font-bold">sub-15ms Anycast BGP</span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-300">
+                <span className="text-zinc-500">Prefix Cache Rebate:</span>
+                <span className="text-cyan-300 font-bold">-75% Cost Pass-Through</span>
+              </div>
+            </div>
+          </BespokeSpotlightCard>
+
+          {/* Card 2: Remove Bottlenecks */}
+          <BespokeSpotlightCard
+            glowColor="indigo"
+            tilt={true}
+            className="bg-[#090d1a]/85 border border-white/10 backdrop-blur-xl shadow-2xl h-full flex flex-col"
+            innerClassName="p-6 sm:p-7 flex flex-col justify-between space-y-5 h-full"
+          >
+            <div className="space-y-3.5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold">
+                <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+                <span>REMOVE BOTTLENECKS</span>
+              </div>
+              <h4 className="text-xl font-bold text-white leading-snug">
+                Zero Data Retention &amp; $0.00 Egress Tax
+              </h4>
+              <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed font-sans">
+                Eliminate obstacles in your enterprise AI workflows. Prompts and outputs are processed in volatile memory with guaranteed Zero Data Retention behind your firewall with zero bandwidth egress penalties.
+              </p>
+            </div>
+
+            <div className="pt-3 border-t border-white/10 space-y-2 font-mono text-[11px]">
+              <div className="flex items-center justify-between text-zinc-300">
+                <span className="text-zinc-500">Data Retention:</span>
+                <span className="text-purple-300 font-bold">0-Day Strict ZDR</span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-300">
+                <span className="text-zinc-500">Egress / Ingress:</span>
+                <span className="text-emerald-400 font-bold">$0.00 (Zero Egress Tax)</span>
+              </div>
+            </div>
+          </BespokeSpotlightCard>
+
+          {/* Card 3: Optimize Workflow */}
+          <BespokeSpotlightCard
+            glowColor="amber"
+            tilt={true}
+            className="bg-[#090d1a]/85 border border-white/10 backdrop-blur-xl shadow-2xl h-full flex flex-col"
+            innerClassName="p-6 sm:p-7 flex flex-col justify-between space-y-5 h-full"
+          >
+            <div className="space-y-3.5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>OPTIMIZE WORKFLOW</span>
+              </div>
+              <h4 className="text-xl font-bold text-white leading-snug">
+                1-Line Primitives &amp; Pre-Wired Agent Rules
+              </h4>
+              <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed font-sans">
+                Streamline operations and accelerate time-to-market. Drop React primitives directly into your UI, or automatically write `.cursorrules` and `AGENTS.md` so coding assistants build clean architectures on prompt #1.
+              </p>
+            </div>
+
+            <div className="pt-3 border-t border-white/10 space-y-2 font-mono text-[11px]">
+              <div className="flex items-center justify-between text-zinc-300">
+                <span className="text-zinc-500">Integration Speed:</span>
+                <span className="text-amber-300 font-bold">30 Seconds (1 Line)</span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-300">
+                <span className="text-zinc-500">AI Coding Assistant:</span>
+                <span className="text-cyan-300 font-bold">Auto .cursorrules</span>
+              </div>
+            </div>
+          </BespokeSpotlightCard>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
       {/* 3. THREE WAYS TO USE IT (BESPOKE INTERACTIVE WORKBENCH)                    */}
       {/* ========================================================================= */}
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
           <div className="space-y-1">
             <span className="text-xs font-mono font-bold tracking-widest text-indigo-400 uppercase">
-              02 • Architecture in Practice
+              03 • Architecture in Practice
             </span>
             <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
               3 Ways to Use GALXAI
@@ -1371,7 +1647,7 @@ export function ArtisanalSignalSection() {
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <div className="space-y-1">
             <span className="text-xs font-mono font-bold tracking-widest text-emerald-400 uppercase">
-              03 • The Unit Economics
+              04 • The Unit Economics
             </span>
             <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
               The Math: Doing It Yourself vs GALXAI
@@ -1383,7 +1659,8 @@ export function ArtisanalSignalSection() {
         <BespokeSpotlightCard
           glowColor="emerald"
           tilt={false}
-          className="border border-white/10 bg-[#090d18]/90 backdrop-blur-2xl shadow-2xl"
+          className="border border-white/10 bg-[#090d18]/90 backdrop-blur-2xl shadow-2xl overflow-hidden"
+          innerClassName="w-full"
         >
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-sm font-sans">
@@ -1414,6 +1691,16 @@ export function ArtisanalSignalSection() {
                   <td className="py-4 px-6 font-medium text-white">Prompt cache savings</td>
                   <td className="py-4 px-6 text-zinc-400">Kept by provider</td>
                   <td className="py-4 px-6 font-bold text-emerald-300 bg-emerald-500/5">100% Refunded to You</td>
+                </tr>
+                <tr className="hover:bg-white/[0.02] transition-colors">
+                  <td className="py-4 px-6 font-medium text-white">Data Retention &amp; Privacy</td>
+                  <td className="py-4 px-6 text-zinc-400">Prompts logged &amp; training risk</td>
+                  <td className="py-4 px-6 font-bold text-emerald-300 bg-emerald-500/5">0-Day Strict Zero Data Retention (ZDR)</td>
+                </tr>
+                <tr className="hover:bg-white/[0.02] transition-colors">
+                  <td className="py-4 px-6 font-medium text-white">Data Transfer Fees</td>
+                  <td className="py-4 px-6 text-zinc-400">Egress &amp; ingress bandwidth taxes</td>
+                  <td className="py-4 px-6 font-bold text-emerald-300 bg-emerald-500/5">$0.00 (Zero Egress Tax)</td>
                 </tr>
                 <tr className="hover:bg-white/[0.02] transition-colors">
                   <td className="py-4 px-6 font-medium text-white">Stolen API key risk</td>
