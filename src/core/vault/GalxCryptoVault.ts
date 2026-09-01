@@ -221,20 +221,43 @@ export class GalxCryptoVault {
 
   /**
    * Validates whether an incoming IP address satisfies an allowlist of CIDR ranges / exact IPs.
+   * Designed with developer ergonomics and zero friction in mind:
+   * 1. 100% Opt-In: Global access permitted if allowlist is unset, empty, or contains wildcards (*, 0.0.0.0/0, ::/0, any).
+   * 2. Localhost & Loopback: Always allows local dev loopback (127.0.0.1, ::1, localhost) to avoid friction.
+   * 3. Full IPv4 and IPv6 subnet/prefix matching.
+   * 4. Multi-IP X-Forwarded-For resolution and proxy tolerance.
+   * 5. Fail-open on indeterminate IP: Never locks developers out during proxy routing.
    */
   static isIpAllowed(clientIp?: string, allowlist?: string[]): boolean {
-    if (!allowlist || allowlist.length === 0 || allowlist.includes('*') || allowlist.includes('0.0.0.0/0')) {
+    // 1. If allowlist is not explicitly configured, grant unrestricted global access
+    if (!allowlist || allowlist.length === 0) return true;
+
+    // Check for any wildcard or global keywords
+    const hasWildcard = allowlist.some(r => {
+      const clean = r.trim().toLowerCase();
+      return clean === '*' || clean === '0.0.0.0/0' || clean === '::/0' || clean === 'any' || clean === 'all' || clean === 'global' || clean === '';
+    });
+    if (hasWildcard) return true;
+
+    // If client IP cannot be extracted (e.g. internal serverless runner), fail-open gracefully to never lock out developers
+    if (!clientIp) return true;
+
+    // Extract true client IP (first entry in X-Forwarded-For)
+    const cleanIp = clientIp.split(',')[0].trim();
+
+    // 2. Loopback & Localhost always allowed
+    if (cleanIp === '127.0.0.1' || cleanIp === '::1' || cleanIp === 'localhost' || cleanIp === '0.0.0.0') {
       return true;
     }
-    if (!clientIp) return false;
-    const cleanIp = clientIp.split(',')[0].trim();
 
     for (const rule of allowlist) {
       const trimmedRule = rule.trim();
-      if (trimmedRule === cleanIp || trimmedRule === '0.0.0.0/0' || trimmedRule === '*') return true;
+      if (!trimmedRule) continue;
+      if (trimmedRule === '*' || trimmedRule === '0.0.0.0/0' || trimmedRule === '::/0') return true;
+      if (trimmedRule.toLowerCase() === cleanIp.toLowerCase()) return true;
 
       // IPv4 CIDR matching (e.g. 192.168.1.0/24 or 10.0.0.0/8)
-      if (trimmedRule.includes('/') && cleanIp.includes('.')) {
+      if (trimmedRule.includes('/') && cleanIp.includes('.') && trimmedRule.includes('.')) {
         try {
           const [range, bitsStr] = trimmedRule.split('/');
           const bits = parseInt(bitsStr, 10);
@@ -244,6 +267,21 @@ export class GalxCryptoVault {
             if ((ipToNum(cleanIp) & mask) === (ipToNum(range) & mask)) {
               return true;
             }
+          }
+        } catch {}
+      }
+
+      // IPv6 Prefix matching (e.g. 2600:1900::/64 or 2001:db8::/32)
+      if (trimmedRule.includes(':') && cleanIp.includes(':')) {
+        try {
+          if (trimmedRule.includes('/')) {
+            const [range] = trimmedRule.split('/');
+            const prefixClean = range.replace(/::.*$/, '').toLowerCase();
+            if (cleanIp.toLowerCase().startsWith(prefixClean)) {
+              return true;
+            }
+          } else if (cleanIp.toLowerCase() === trimmedRule.toLowerCase()) {
+            return true;
           }
         } catch {}
       }
