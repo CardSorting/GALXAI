@@ -438,6 +438,12 @@ export interface GatewayApiKey {
   readonly createdAtMs: number;
   readonly lastUsedAtMs?: number;
   readonly revoked: boolean;
+  readonly environment?: 'live' | 'test';
+  readonly scopes?: string[];
+  readonly ipWhitelist?: string[];
+  readonly expiresAtMs?: number;
+  readonly description?: string;
+  readonly checksum?: string;
 }
 
 export type DeveloperGatewayKey = GatewayApiKey;

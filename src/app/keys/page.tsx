@@ -32,7 +32,11 @@ import {
   Layers,
   Cpu,
   ShieldCheck,
-  Play
+  RefreshCw,
+  Clock,
+  Shield,
+  Filter,
+  AlertTriangle
 } from 'lucide-react';
 import { formatTimeAgo } from '@/lib/utils';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
@@ -63,13 +67,22 @@ type SnippetTab = 'curl' | 'python' | 'ts_sdk' | 'openai_sdk' | 'anthropic_sdk' 
 function BaseGatewayKeysPage() {
   const [keys, setKeys] = useState<any[]>([]);
   const [newKeyName, setNewKeyName] = useState('Cursor IDE Key');
+  const [newKeyEnv, setNewKeyEnv] = useState<'live' | 'test'>('live');
   const [selectedRpm, setSelectedRpm] = useState<number>(120);
+  const [selectedExpiresInDays, setSelectedExpiresInDays] = useState<number>(0);
   const [createdSecretKey, setCreatedSecretKey] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [copiedSnippet, setCopiedSnippet] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const [activeSnippetTab, setActiveSnippetTab] = useState<SnippetTab>('python');
+  const [environmentFilter, setEnvironmentFilter] = useState<'all' | 'live' | 'test'>('all');
+
+  // Key Rolling / Zero-Downtime Rotation State
+  const [rollingKey, setRollingKey] = useState<any | null>(null);
+  const [rollingGraceHours, setRollingGraceHours] = useState<number>(24);
+  const [isRolling, setIsRolling] = useState(false);
+  const [rolledResultKey, setRolledResultKey] = useState<string | null>(null);
 
   // Live Gateway Smoke Test & Ping
   const [isPinging, setIsPinging] = useState(false);
@@ -90,7 +103,13 @@ function BaseGatewayKeysPage() {
     fetchKeys();
   }, []);
 
-  const createKeyDirectly = async (keyName: string, balanceAmount: number, rpm: number = selectedRpm) => {
+  const createKeyDirectly = async (
+    keyName: string,
+    balanceAmount: number,
+    rpm: number = selectedRpm,
+    env: 'live' | 'test' = newKeyEnv,
+    expiresDays: number = selectedExpiresInDays
+  ) => {
     setIsLoading(true);
     try {
       const res = await resilientFetch<{ success: boolean; key?: { apiKey: string } }>('/api/keys', {
@@ -98,7 +117,9 @@ function BaseGatewayKeysPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: keyName.trim() || 'Developer API Key',
+          environment: env,
           rateLimitPerMinute: rpm,
+          expiresInDays: expiresDays > 0 ? expiresDays : undefined,
           hasVerifiedDeposit: true,
           depositedAmount: balanceAmount
         })
@@ -117,18 +138,24 @@ function BaseGatewayKeysPage() {
     if (e) e.preventDefault();
     if (!newKeyName.trim()) return;
 
-    if (!hasVerifiedDeposit) {
+    if (!hasVerifiedDeposit && newKeyEnv === 'live') {
       setIsPaywallOpen(true);
       return;
     }
 
-    await createKeyDirectly(newKeyName, walletBalance, selectedRpm);
+    await createKeyDirectly(newKeyName, walletBalance, selectedRpm, newKeyEnv, selectedExpiresInDays);
   };
 
   const handlePaywallSuccess = async (depositAmt: number, totalCredit: number) => {
     const { totalCredited } = depositAndUnlock(depositAmt);
     setIsPaywallOpen(false);
-    await createKeyDirectly(newKeyName || 'Developer API Key (Activated)', walletBalance + totalCredited, selectedRpm);
+    await createKeyDirectly(
+      newKeyName || 'Developer API Key (Activated)',
+      walletBalance + totalCredited,
+      selectedRpm,
+      newKeyEnv,
+      selectedExpiresInDays
+    );
   };
 
   const handleRevokeKey = async (keyId: string) => {
@@ -136,6 +163,28 @@ function BaseGatewayKeysPage() {
       await resilientFetch(`/api/keys?id=${keyId}`, { method: 'DELETE' });
       fetchKeys();
     } catch {}
+  };
+
+  const handleExecuteRollKey = async () => {
+    if (!rollingKey) return;
+    setIsRolling(true);
+    try {
+      const res = await resilientFetch<{ success: boolean; key?: { apiKey: string }; message?: string }>(
+        `/api/keys/${rollingKey.id}/roll`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ gracePeriodHours: rollingGraceHours })
+        }
+      );
+      if (res.data?.success && res.data.key?.apiKey) {
+        setRolledResultKey(res.data.key.apiKey);
+        setRollingKey(null);
+        fetchKeys();
+      }
+    } catch {} finally {
+      setIsRolling(false);
+    }
   };
 
   const handleCopy = async (text: string, id: string) => {
@@ -187,7 +236,7 @@ function BaseGatewayKeysPage() {
     }
   };
 
-  const activeDisplayKey = createdSecretKey || 'galx_live_sk_89f02c918e90a427';
+  const activeDisplayKey = createdSecretKey || rolledResultKey || 'galx_live_89f02c918e90a42701bf4e';
 
   const snippets: Record<SnippetTab, { title: string; lang: string; code: string }> = {
     python: {
@@ -327,12 +376,18 @@ const { text } = await generateText({
     }
   };
 
+  const filteredKeys = keys.filter(k => {
+    if (environmentFilter === 'all') return true;
+    const keyEnv = k.environment || (k.keyPrefix?.includes('test') || k.prefix?.includes('test') ? 'test' : 'live');
+    return keyEnv === environmentFilter;
+  });
+
   return (
     <div className="min-h-screen flex flex-col bg-[#07090e]">
       <Navigation />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
-        <Breadcrumbs items={[{ label: 'Developer Gateway API Keys' }]} />
+        <Breadcrumbs items={[{ label: 'Developer Universal API Keys' }]} />
 
         <ErrorBoundary name="Keys Navigation">
           <KeysSubNav />
@@ -353,7 +408,7 @@ const { text } = await generateText({
                 </div>
                 <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">Developer Universal API Keys</h1>
                 <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-2xl">
-                  Unified <code className="text-cyan-300 font-mono font-bold">galx_live_...</code> client tokens. Drop-in compatible with Cursor, Windsurf, Claude Code, OpenAI SDK, and LangChain. Unlocks <strong>25%–40% wholesale savings</strong>, <strong>75% prompt caching</strong>, and <strong>429 rate limit immunity</strong>.
+                  Unified <code className="text-cyan-300 font-mono font-bold">galx_live_...</code> and <code className="text-amber-300 font-mono font-bold">galx_test_...</code> client tokens with embedded checksums. Drop-in compatible with Cursor, Windsurf, Claude Code, OpenAI SDK, and LangChain. Unlocks <strong>25%–40% wholesale savings</strong>, <strong>75% prompt caching</strong>, and <strong>429 rate limit immunity</strong>.
                 </p>
               </div>
 
@@ -449,6 +504,40 @@ const { text } = await generateText({
             </div>
           )}
 
+          {/* Rolled Key Reveal Notification */}
+          {rolledResultKey && (
+            <div className="p-5 rounded-3xl bg-gradient-to-r from-cyan-950/40 via-indigo-950/40 to-black/80 border border-cyan-500/40 space-y-3 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold text-cyan-300 uppercase">
+                  <RefreshCw className="w-4 h-4 text-cyan-400 animate-spin-slow" />
+                  <span>Key Rotated Successfully (Zero-Downtime Roll)</span>
+                </div>
+                <span className="text-[10px] font-mono text-zinc-400">Copy now • Revealed once</span>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-black/80 font-mono text-xs text-cyan-300 flex items-center justify-between gap-3 border border-cyan-500/40 break-all">
+                <span className="select-all font-bold">{rolledResultKey}</span>
+                <button
+                  onClick={() => handleCopy(rolledResultKey, 'rolled')}
+                  className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 shrink-0 transition-all cursor-pointer flex items-center gap-1 text-xs font-bold font-sans"
+                >
+                  {copiedKey === 'rolled' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedKey === 'rolled' ? 'Copied' : 'Copy Key'}</span>
+                </button>
+              </div>
+
+              <div className="text-[11px] text-zinc-400 flex items-center justify-between">
+                <span>Update your environment variables. Your previous key remains functional until its grace period ends.</span>
+                <button
+                  onClick={() => setRolledResultKey(null)}
+                  className="text-cyan-400 hover:text-cyan-300 text-xs underline cursor-pointer"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Unverified Deposit Match Banner */}
           {!hasVerifiedDeposit && (
             <div className="glass-panel rounded-3xl p-6 border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-black/40 space-y-3 relative overflow-hidden">
@@ -459,7 +548,7 @@ const { text } = await generateText({
                   </div>
                   <div className="space-y-1">
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[10px] font-bold">
-                      <Sparkles className="w-3 h-3 text-amber-400" />
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                       <span>50% INSTANT DEPOSIT MATCH • $5 FREE COMPUTE</span>
                     </div>
                     <h2 className="text-base font-bold text-white">Deposit $10 to Mint Your Key &amp; Claim $5 Free Compute</h2>
@@ -481,7 +570,7 @@ const { text } = await generateText({
             </div>
           )}
 
-          {/* Quick 1-Click Key Generator with Mental Model Presets */}
+          {/* Quick 1-Click Key Generator with Mental Model Presets & Environment Selection */}
           <div className="glass-panel rounded-3xl p-6 space-y-5 border border-white/10">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="space-y-1">
@@ -527,13 +616,13 @@ const { text } = await generateText({
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-black/70 font-mono text-xs text-emerald-300 flex items-center justify-between gap-3 border border-emerald-500/30 break-all">
-                  <span className="select-all">{createdSecretKey}</span>
+                  <span className="select-all font-bold">{createdSecretKey}</span>
                   <button
                     onClick={() => handleCopy(createdSecretKey, 'banner')}
                     className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 shrink-0 transition-all cursor-pointer flex items-center gap-1 text-xs font-bold font-sans"
                   >
                     {copiedKey === 'banner' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedKey === 'banner' ? 'Copied' : 'Copy'}</span>
+                    <span>{copiedKey === 'banner' ? 'Copied' : 'Copy Key'}</span>
                   </button>
                 </div>
 
@@ -548,23 +637,52 @@ const { text } = await generateText({
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleCreateKey} className="flex flex-col sm:flex-row gap-3">
-                <input
-                  type="text"
-                  value={newKeyName}
-                  onChange={(e) => setNewKeyName(e.target.value)}
-                  placeholder="e.g. Cursor IDE, Production Agent Fleet, CLI Tool"
-                  className="flex-1 py-3 px-4 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 font-mono"
-                  required
-                />
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="px-6 py-3 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>{isLoading ? 'Generating...' : 'Create Key in 1-Click'}</span>
-                </button>
+              <form onSubmit={handleCreateKey} className="space-y-3">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="text"
+                    value={newKeyName}
+                    onChange={(e) => setNewKeyName(e.target.value)}
+                    placeholder="e.g. Cursor IDE, Production Agent Fleet, CLI Tool"
+                    className="flex-1 py-3 px-4 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 font-mono"
+                    required
+                  />
+
+                  {/* Environment Selector */}
+                  <div className="flex rounded-xl bg-black/40 p-1 border border-white/10 text-xs font-mono">
+                    <button
+                      type="button"
+                      onClick={() => setNewKeyEnv('live')}
+                      className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                        newKeyEnv === 'live'
+                          ? 'bg-emerald-500 text-black shadow-sm'
+                          : 'text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      Live Key
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewKeyEnv('test')}
+                      className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                        newKeyEnv === 'test'
+                          ? 'bg-amber-400 text-black shadow-sm'
+                          : 'text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      Test Key
+                    </button>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="px-6 py-3 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    <Plus className="w-4 h-4 text-black" />
+                    <span>{isLoading ? 'Generating...' : 'Create Key in 1-Click'}</span>
+                  </button>
+                </div>
               </form>
             )}
           </div>
@@ -638,17 +756,55 @@ const { text } = await generateText({
             </div>
           </div>
 
-          {/* Active Keys Table */}
+          {/* Active Keys Table with Environment Tabs & Actions */}
           <div className="glass-panel rounded-3xl p-6 space-y-4 border border-white/10">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-white">Active Gateway Keys ({keys.filter(k => !k.revoked).length})</h2>
-              <span className="text-xs text-zinc-400 font-mono">Shared Wallet Auto-Deduction</span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="space-y-0.5">
+                <h2 className="text-base font-bold text-white">Active Gateway Keys ({filteredKeys.filter(k => !k.revoked && !k.isExpired).length})</h2>
+                <span className="text-xs text-zinc-400 font-mono">Shared Wallet Auto-Deduction • Dual Environment Isolation</span>
+              </div>
+
+              {/* Environment Filter Pills */}
+              <div className="flex items-center gap-1 bg-black/60 p-1 rounded-xl border border-white/10 text-xs font-mono">
+                <button
+                  onClick={() => setEnvironmentFilter('all')}
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer font-bold ${
+                    environmentFilter === 'all'
+                      ? 'bg-white/20 text-white'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  All ({keys.length})
+                </button>
+                <button
+                  onClick={() => setEnvironmentFilter('live')}
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer font-bold flex items-center gap-1.5 ${
+                    environmentFilter === 'live'
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                      : 'text-zinc-400 hover:text-emerald-300'
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <span>Live</span>
+                </button>
+                <button
+                  onClick={() => setEnvironmentFilter('test')}
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer font-bold flex items-center gap-1.5 ${
+                    environmentFilter === 'test'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                      : 'text-zinc-400 hover:text-amber-300'
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                  <span>Test</span>
+                </button>
+              </div>
             </div>
 
-            {keys.length === 0 ? (
+            {filteredKeys.length === 0 ? (
               <div className="text-center py-12 px-4 rounded-2xl bg-black/30 border border-dashed border-white/10 space-y-2">
                 <Key className="w-8 h-8 text-zinc-500 mx-auto" />
-                <p className="text-xs text-zinc-400">No gateway keys generated yet. Use the 1-click generator above to mint your first key.</p>
+                <p className="text-xs text-zinc-400">No {environmentFilter !== 'all' ? environmentFilter : ''} gateway keys generated yet. Use the 1-click generator above to mint your first key.</p>
               </div>
             ) : (
               <div className="overflow-x-auto rounded-2xl border border-white/5 bg-black/20">
@@ -656,45 +812,72 @@ const { text } = await generateText({
                   <thead>
                     <tr className="border-b border-white/10 text-zinc-400 font-bold uppercase text-[10px]">
                       <th className="py-3 px-4 font-sans">Name / Label</th>
+                      <th className="py-3 px-4 font-sans">Env</th>
                       <th className="py-3 px-4 font-sans">Key Prefix</th>
                       <th className="py-3 px-4 font-sans">Rate Limit</th>
                       <th className="py-3 px-4 font-sans">Total Requests</th>
-                      <th className="py-3 px-4 font-sans">Spend Cap</th>
                       <th className="py-3 px-4 font-sans">Created</th>
                       <th className="py-3 px-4 font-sans">Status</th>
                       <th className="py-3 px-4 text-right font-sans">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
-                    {keys.map((k) => (
-                      <tr key={k.id} className="hover:bg-white/[0.02] transition-colors">
-                        <td className="py-3.5 px-4 font-bold text-white">{k.name}</td>
-                        <td className="py-3.5 px-4 font-mono text-cyan-300">{k.keyPrefix}...</td>
-                        <td className="py-3.5 px-4 text-zinc-400">{k.rateLimitPerMinute || 120} RPM</td>
-                        <td className="py-3.5 px-4 text-zinc-300 font-mono">{k.totalRequests || 0}</td>
-                        <td className="py-3.5 px-4 text-emerald-400 font-bold">Auto-Wallet</td>
-                        <td className="py-3.5 px-4 text-zinc-500 font-sans">{formatTimeAgo(k.createdAt)}</td>
-                        <td className="py-3.5 px-4">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
-                            k.revoked
-                              ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
-                              : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                          }`}>
-                            {k.revoked ? 'Revoked' : 'Active'}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 text-right">
-                          {!k.revoked && (
-                            <button
-                              onClick={() => handleRevokeKey(k.id)}
-                              className="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold cursor-pointer transition-all font-sans"
-                            >
-                              Revoke
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                    {filteredKeys.map((k) => {
+                      const isLive = (k.environment || (k.keyPrefix?.includes('live') || k.prefix?.includes('live') ? 'live' : 'test')) === 'live';
+                      return (
+                        <tr key={k.id} className="hover:bg-white/[0.02] transition-colors">
+                          <td className="py-3.5 px-4 font-bold text-white">{k.name}</td>
+                          <td className="py-3.5 px-4">
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase font-mono ${
+                              isLive
+                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                            }`}>
+                              {isLive ? 'LIVE' : 'TEST'}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-cyan-300">{k.keyPrefix || k.prefix}...</td>
+                          <td className="py-3.5 px-4 text-zinc-400">{k.rateLimitPerMinute || 120} RPM</td>
+                          <td className="py-3.5 px-4 text-zinc-300 font-mono">{k.totalRequests || 0}</td>
+                          <td className="py-3.5 px-4 text-zinc-500 font-sans">{formatTimeAgo(k.createdAt)}</td>
+                          <td className="py-3.5 px-4">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
+                              k.revoked
+                                ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                                : k.isExpired
+                                ? 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                            }`}>
+                              {k.revoked ? 'Revoked' : k.isExpired ? 'Expired' : 'Active'}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              {!k.revoked && !k.isExpired && (
+                                <>
+                                  <button
+                                    onClick={() => setRollingKey(k)}
+                                    className="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold cursor-pointer transition-all font-sans flex items-center gap-1"
+                                    title="Zero-downtime key rotation"
+                                  >
+                                    <RefreshCw className="w-3 h-3" />
+                                    <span>Roll</span>
+                                  </button>
+
+                                  <button
+                                    onClick={() => handleRevokeKey(k.id)}
+                                    className="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold cursor-pointer transition-all font-sans flex items-center gap-1"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                    <span>Revoke</span>
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -707,6 +890,80 @@ const { text } = await generateText({
           <TrustSeals />
         </ErrorBoundary>
       </main>
+
+      {/* Key Roll / Zero-Downtime Rotation Modal */}
+      {rollingKey && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-md rounded-3xl bg-[#0b0e18] border border-white/20 p-6 space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-white font-bold text-base">
+                <RefreshCw className="w-4 h-4 text-cyan-400" />
+                <span>Zero-Downtime Key Rotation</span>
+              </div>
+              <button
+                onClick={() => setRollingKey(null)}
+                className="p-1 text-zinc-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2 text-xs text-zinc-300 font-sans">
+              <p>
+                Rolling <strong>{rollingKey.name}</strong> (<code className="text-cyan-300 font-mono">{rollingKey.keyPrefix || rollingKey.prefix}...</code>).
+              </p>
+              <p className="text-zinc-400">
+                A new key will be minted with identical rate limits and scopes. Select a migration grace period for the previous key so running processes are not disrupted.
+              </p>
+            </div>
+
+            {/* Grace Period Selector */}
+            <div className="space-y-1.5 font-mono text-xs">
+              <span className="text-[11px] text-zinc-400 font-sans font-semibold">Migration Grace Period:</span>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { hours: 0, label: 'Instant Revoke' },
+                  { hours: 1, label: '1 Hour' },
+                  { hours: 24, label: '24 Hours (Rec)' },
+                  { hours: 168, label: '7 Days' }
+                ].map((g) => (
+                  <button
+                    key={g.hours}
+                    type="button"
+                    onClick={() => setRollingGraceHours(g.hours)}
+                    className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer text-left ${
+                      rollingGraceHours === g.hours
+                        ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-200'
+                        : 'bg-black/40 border-white/10 text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    {g.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setRollingKey(null)}
+                className="flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-bold font-sans transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleExecuteRollKey}
+                disabled={isRolling}
+                className="flex-1 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-black font-sans uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isRolling ? 'animate-spin' : ''}`} />
+                <span>{isRolling ? 'Rolling...' : 'Confirm Roll'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Paywall Blocker Modal */}
       <ErrorBoundary name="Paywall Modal">

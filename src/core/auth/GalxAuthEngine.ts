@@ -915,16 +915,51 @@ export class GalxAuthEngine {
 
     // 5. Developer Gateway API Key (`galx_live_...`, `galx_test_...`, `sk-galx-...`)
     if (token.startsWith('galx_live_') || token.startsWith('galx_test_') || token.startsWith('sk-galx-') || token.startsWith('sk-')) {
+      // Offline format validation & checksum verification
+      const formatCheck = GalxCryptoVault.validateKeyFormat(token);
+      if (!formatCheck.valid) {
+        return {
+          authenticated: false,
+          userId: 'anonymous_developer',
+          authType: 'developer_key',
+          isPriorityUser: false,
+          error: 'INVALID_GATEWAY_API_KEY_CHECKSUM'
+        };
+      }
+
       const keyHash = GalxCryptoVault.hashApiKey(token);
       const foundKey = await this.persistence.apiKeyRepo.findKeyByHash(keyHash);
       if (foundKey && !foundKey.revoked) {
+        // Expiration Verification
+        if (foundKey.expiresAtMs && foundKey.expiresAtMs <= Date.now()) {
+          return {
+            authenticated: false,
+            userId: foundKey.userId,
+            authType: 'developer_key',
+            isPriorityUser: false,
+            error: 'EXPIRED_GATEWAY_API_KEY'
+          };
+        }
+
+        // Granular Scopes Verification
+        const grantedScopes = foundKey.scopes && foundKey.scopes.length > 0 ? foundKey.scopes : ['*'];
+        if (requiredScope && !GalxCryptoVault.validateTokenScope(grantedScopes, requiredScope)) {
+          return {
+            authenticated: false,
+            userId: foundKey.userId,
+            authType: 'developer_key',
+            isPriorityUser: false,
+            error: 'INSUFFICIENT_KEY_SCOPES'
+          };
+        }
+
         this.persistence.apiKeyRepo.incrementUsage(foundKey.id, 1, 0, 0).catch(() => {});
         return {
           authenticated: true,
           userId: foundKey.userId,
           authType: 'developer_key',
           isPriorityUser: true,
-          scopes: ['*'],
+          scopes: grantedScopes,
           isSudoElevated: true,
           apiKey: foundKey
         };

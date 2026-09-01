@@ -13,7 +13,7 @@ export async function OPTIONS() {
     status: 204,
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, x-api-key, x-galx-key',
       'Access-Control-Max-Age': '86400'
     }
@@ -42,10 +42,38 @@ function sanitizeRateLimit(rawRpm: unknown): number {
   return Math.floor(parsed);
 }
 
+/**
+ * Sanitizes capability scopes
+ */
+function sanitizeScopes(rawScopes: unknown): string[] {
+  if (!Array.isArray(rawScopes) || rawScopes.length === 0) return ['*'];
+  const allowed = new Set([
+    '*',
+    'chat:*',
+    'chat:completions',
+    'models:*',
+    'models:read',
+    'images:*',
+    'images:generate',
+    'embeddings:*',
+    'audio:*',
+    'agents:*'
+  ]);
+  const cleaned = rawScopes
+    .filter((s): s is string => typeof s === 'string' && allowed.has(s.trim()))
+    .map(s => s.trim());
+  return cleaned.length > 0 ? cleaned : ['*'];
+}
+
+/**
+ * GET /api/keys
+ * Lists all active and historical developer API keys for the authenticated user
+ */
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const requestedUserId = searchParams.get('userId') || undefined;
+    const environmentFilter = searchParams.get('environment') as 'live' | 'test' | null;
 
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
     const targetUserId = auth.authenticated ? auth.userId : requestedUserId;
@@ -74,36 +102,57 @@ export async function GET(req: NextRequest) {
       keys = persistence.getGatewayKeys().filter(k => k.userId === targetUserId);
     }
 
-    const sanitizedKeys = keys.map(k => ({
-      id: k.id,
-      keyPrefix: k.keyPrefix || k.prefix,
-      name: k.name,
-      userId: k.userId,
-      rateLimitPerMinute: k.rateLimitPerMinute || 120,
-      totalRequests: k.totalRequests || 0,
-      totalTokens: k.totalTokens || 0,
-      createdAt: k.createdAtMs || Date.now(),
-      lastUsedAt: k.lastUsedAtMs,
-      revoked: Boolean(k.revoked)
-    }));
+    let sanitizedKeys = keys.map(k => {
+      const env = k.environment || (k.prefix.includes('test') ? 'test' : 'live');
+      const isExpired = Boolean(k.expiresAtMs && k.expiresAtMs <= Date.now());
+      return {
+        id: k.id,
+        keyPrefix: k.keyPrefix || k.prefix,
+        name: k.name,
+        userId: k.userId,
+        environment: env,
+        scopes: k.scopes || ['*'],
+        rateLimitPerMinute: k.rateLimitPerMinute || 120,
+        totalRequests: k.totalRequests || 0,
+        totalTokens: k.totalTokens || 0,
+        createdAt: k.createdAtMs || Date.now(),
+        lastUsedAt: k.lastUsedAtMs,
+        expiresAt: k.expiresAtMs,
+        isExpired,
+        revoked: Boolean(k.revoked)
+      };
+    });
+
+    if (environmentFilter) {
+      sanitizedKeys = sanitizedKeys.filter(k => k.environment === environmentFilter);
+    }
 
     return NextResponse.json({
       success: true,
       keys: sanitizedKeys,
-      total: sanitizedKeys.length
+      total: sanitizedKeys.length,
+      activeCount: sanitizedKeys.filter(k => !k.revoked && !k.isExpired).length
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
   }
 }
 
+/**
+ * POST /api/keys
+ * Mints a new developer gateway key with SHA-256 hash and embedded checksum
+ */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     let {
       name,
       userId = 'user_demo',
+      environment = 'live',
       rateLimitPerMinute,
+      scopes,
+      expiresInDays,
+      ipWhitelist,
       depositedAmount = 0,
       hasVerifiedDeposit = false
     } = body;
@@ -112,7 +161,6 @@ export async function POST(req: NextRequest) {
     if (auth.authenticated) {
       userId = auth.userId;
     } else if (process.env.NODE_ENV === 'production' && (!userId || userId === 'user_demo')) {
-      // In production, reject unauthenticated anonymous key creation if auth required
       return NextResponse.json(
         { error: 'Unauthorized: Sign-in is required to mint developer API keys' },
         { status: 401 }
@@ -121,6 +169,13 @@ export async function POST(req: NextRequest) {
 
     const cleanName = sanitizeKeyName(name);
     const cleanRpm = sanitizeRateLimit(rateLimitPerMinute);
+    const cleanScopes = sanitizeScopes(scopes);
+    const cleanEnv: 'live' | 'test' = environment === 'test' ? 'test' : 'live';
+
+    let expiresAtMs: number | undefined = undefined;
+    if (expiresInDays && Number(expiresInDays) > 0) {
+      expiresAtMs = Date.now() + Math.min(Number(expiresInDays), 730) * 86400 * 1000;
+    }
 
     const persistence = GalxPersistence.getInstance();
     const keyRepo = ApiKeyRepository.getInstance();
@@ -138,9 +193,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Anti-Bot Proof-of-Deposit Security Gate
-    // Require at least $10.00 USD initial deposit to activate key and unlock $5 free compute grant
-    if (!hasVerifiedDeposit && existingKeys.length === 0 && Number(depositedAmount) < MINIMUM_INITIAL_DEPOSIT_USD) {
+    // Anti-Bot Proof-of-Deposit Security Gate for production live keys
+    if (!hasVerifiedDeposit && existingKeys.length === 0 && Number(depositedAmount) < MINIMUM_INITIAL_DEPOSIT_USD && cleanEnv === 'live') {
       return NextResponse.json(
         {
           success: false,
@@ -155,7 +209,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { apiKey, keyPrefix, keyHash } = GalxCryptoVault.generateGatewayKey(cleanName, userId);
+    const { apiKey, keyPrefix, keyHash, checksum } = GalxCryptoVault.generateGatewayKey(cleanName, userId, { environment: cleanEnv });
     const keyId = `key_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
     const newKey: DeveloperGatewayKey = {
@@ -169,10 +223,15 @@ export async function POST(req: NextRequest) {
       totalRequests: 0,
       totalTokens: 0,
       createdAtMs: Date.now(),
-      revoked: false
+      revoked: false,
+      environment: cleanEnv,
+      scopes: cleanScopes,
+      ipWhitelist: Array.isArray(ipWhitelist) ? ipWhitelist.filter(ip => typeof ip === 'string').slice(0, 20) : undefined,
+      expiresAtMs,
+      checksum
     };
 
-    // Save to both authoritative repository and persistent memory store
+    // Save to authoritative database and memory cache
     await keyRepo.saveGatewayKey(newKey, {
       requireRemote: process.env.NODE_ENV === 'production'
     }).catch(async () => {
@@ -181,7 +240,12 @@ export async function POST(req: NextRequest) {
       });
     });
 
-    persistence.logAudit('GATEWAY_KEY_CREATED', { keyId, keyPrefix, name: cleanName, antiBotVerified: true }, keyId, userId);
+    persistence.logAudit(
+      'GATEWAY_KEY_CREATED',
+      { keyId, keyPrefix, name: cleanName, environment: cleanEnv, scopes: cleanScopes },
+      keyId,
+      userId
+    );
 
     return NextResponse.json({
       success: true,
@@ -190,8 +254,11 @@ export async function POST(req: NextRequest) {
         id: newKey.id,
         name: newKey.name,
         keyPrefix: newKey.keyPrefix,
+        environment: newKey.environment,
+        scopes: newKey.scopes,
         rateLimitPerMinute: newKey.rateLimitPerMinute,
-        apiKey // Raw token returned exactly once upon creation
+        expiresAt: newKey.expiresAtMs,
+        apiKey // Full raw token returned once upon creation!
       }
     });
   } catch (err: any) {
@@ -199,6 +266,70 @@ export async function POST(req: NextRequest) {
   }
 }
 
+/**
+ * PATCH /api/keys
+ * Updates key metadata (name, rate limits, scopes, IP whitelisting)
+ */
+export async function PATCH(req: NextRequest) {
+  try {
+    const body = await req.json().catch(() => ({}));
+    const { id: keyId, name, rateLimitPerMinute, scopes, ipWhitelist } = body;
+
+    if (!keyId) {
+      return NextResponse.json({ error: 'Missing key ID parameter' }, { status: 400 });
+    }
+
+    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
+    if (!auth.authenticated || !auth.userId) {
+      return NextResponse.json({ error: 'Unauthorized: Authentication required' }, { status: 401 });
+    }
+
+    const persistence = GalxPersistence.getInstance();
+    const keyRepo = ApiKeyRepository.getInstance();
+
+    const existing = (await keyRepo.getGatewayKeyById(keyId)) || persistence.getGatewayKeys().find(k => k.id === keyId);
+
+    if (!existing) {
+      return NextResponse.json({ error: 'Key not found' }, { status: 404 });
+    }
+
+    if (existing.userId !== auth.userId && !auth.claims?.scopes?.includes('admin:*')) {
+      return NextResponse.json({ error: 'Forbidden: Cannot modify an API key belonging to another user' }, { status: 403 });
+    }
+
+    const updatedKey: DeveloperGatewayKey = {
+      ...existing,
+      name: name !== undefined ? sanitizeKeyName(name) : existing.name,
+      rateLimitPerMinute: rateLimitPerMinute !== undefined ? sanitizeRateLimit(rateLimitPerMinute) : existing.rateLimitPerMinute,
+      scopes: scopes !== undefined ? sanitizeScopes(scopes) : existing.scopes,
+      ipWhitelist: Array.isArray(ipWhitelist) ? ipWhitelist.filter(ip => typeof ip === 'string').slice(0, 20) : existing.ipWhitelist
+    };
+
+    await keyRepo.saveGatewayKey(updatedKey).catch(() => {});
+    persistence.saveGatewayKey(updatedKey);
+    persistence.logAudit('GATEWAY_KEY_UPDATED', { keyId, updates: { name, rateLimitPerMinute, scopes } }, keyId, auth.userId);
+
+    return NextResponse.json({
+      success: true,
+      message: 'API key settings updated successfully',
+      key: {
+        id: updatedKey.id,
+        name: updatedKey.name,
+        keyPrefix: updatedKey.keyPrefix,
+        environment: updatedKey.environment,
+        scopes: updatedKey.scopes,
+        rateLimitPerMinute: updatedKey.rateLimitPerMinute
+      }
+    });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Failed to update key' }, { status: 500 });
+  }
+}
+
+/**
+ * DELETE /api/keys
+ * Instantly revokes a developer API key
+ */
 export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);

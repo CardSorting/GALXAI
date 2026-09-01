@@ -155,18 +155,48 @@ export class GalxCryptoVault {
   }
 
   /**
-   * Generates a secure developer gateway API key with `galx_live_` prefix and SHA-256 hash.
+   * Generates a secure developer gateway API key with `galx_live_` or `galx_test_` prefix and SHA-256 hash.
+   * Mirrors Stripe and GitHub enterprise token formats with embedded checksum for fast offline format validation.
    */
-  static generateGatewayKey(name?: string, userId?: string): { apiKey: string; keyPrefix: string; keyHash: string; rawKey: string; prefix: string } {
+  static generateGatewayKey(
+    name?: string,
+    userId?: string,
+    options?: { environment?: 'live' | 'test' }
+  ): { apiKey: string; keyPrefix: string; keyHash: string; rawKey: string; prefix: string; checksum: string; environment: 'live' | 'test' } {
+    const environment = options?.environment === 'test' ? 'test' : 'live';
     const randomHex = crypto.randomBytes(24).toString('hex');
-    const apiKey = `galx_live_${randomHex}`;
-    const keyPrefix = apiKey.substring(0, 18);
+    const payload = `${environment}_${randomHex}`;
+    const checksum = crypto.createHash('sha256').update(payload).digest('hex').substring(0, 6);
+    const apiKey = `galx_${environment}_${randomHex}_${checksum}`;
+    const keyPrefix = `galx_${environment}_${randomHex.substring(0, 6)}`;
     const keyHash = crypto.createHash('sha256').update(apiKey).digest('hex');
-    return { apiKey, keyPrefix, keyHash, rawKey: apiKey, prefix: keyPrefix };
+    return { apiKey, keyPrefix, keyHash, rawKey: apiKey, prefix: keyPrefix, checksum, environment };
   }
 
-  static generateGatewayApiKey(): { rawKey: string; keyHash: string; prefix: string; apiKey: string; keyPrefix: string } {
-    return this.generateGatewayKey();
+  static generateGatewayApiKey(options?: { environment?: 'live' | 'test' }) {
+    return this.generateGatewayKey(undefined, undefined, options);
+  }
+
+  /**
+   * Validates token format and embedded checksum offline before database lookup.
+   */
+  static validateKeyFormat(token: string): { valid: boolean; environment?: 'live' | 'test' } {
+    if (!token || typeof token !== 'string') return { valid: false };
+    const clean = token.replace(/^(Bearer|Token)\s+/i, '').trim();
+    const match = clean.match(/^galx_(live|test)_([0-9a-f]{48})_([0-9a-f]{6})$/i);
+    if (!match) {
+      // Legacy prefix compatibility support (e.g. galx_live_48hex or sk-...)
+      if (clean.startsWith('galx_live_') || clean.startsWith('galx_test_') || clean.startsWith('sk-galx-') || clean.startsWith('sk-')) {
+        return { valid: true, environment: clean.includes('test') ? 'test' : 'live' };
+      }
+      return { valid: false };
+    }
+    const [, env, hex, providedChecksum] = match;
+    const computedChecksum = crypto.createHash('sha256').update(`${env}_${hex}`).digest('hex').substring(0, 6);
+    if (computedChecksum.toLowerCase() !== providedChecksum.toLowerCase()) {
+      return { valid: false };
+    }
+    return { valid: true, environment: env as 'live' | 'test' };
   }
 
   /**

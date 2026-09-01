@@ -309,7 +309,7 @@ export class ApiKeyRepository {
     }
   }
 
-  private mapRowToGatewayKey(data: Database['public']['Tables']['galx_developer_keys']['Row']): DeveloperGatewayKey {
+  private mapRowToGatewayKey(data: Database['public']['Tables']['galx_developer_keys']['Row'] | any): DeveloperGatewayKey {
     return {
       id: data.id,
       name: data.name,
@@ -318,15 +318,21 @@ export class ApiKeyRepository {
       keyPrefix: data.prefix,
       keyHash: data.key_hash,
       rateLimitPerMinute: data.rate_limit_per_minute,
-      totalRequests: Number(data.total_requests),
-      totalTokens: Number(data.total_tokens),
+      totalRequests: Number(data.total_requests || 0),
+      totalTokens: Number(data.total_tokens || 0),
       createdAtMs: new Date(data.created_at).getTime(),
       lastUsedAtMs: data.last_used_at ? new Date(data.last_used_at).getTime() : undefined,
-      revoked: data.is_revoked
+      revoked: Boolean(data.is_revoked),
+      environment: data.environment || (data.prefix?.includes('test') ? 'test' : 'live'),
+      scopes: Array.isArray(data.scopes) ? data.scopes : ['*'],
+      ipWhitelist: Array.isArray(data.ip_whitelist) ? data.ip_whitelist : undefined,
+      expiresAtMs: data.expires_at ? new Date(data.expires_at).getTime() : undefined,
+      description: data.description || undefined,
+      checksum: data.checksum || undefined
     };
   }
 
-  private mapKeyToRow(key: DeveloperGatewayKey): Database['public']['Tables']['galx_developer_keys']['Insert'] {
+  private mapKeyToRow(key: DeveloperGatewayKey): Database['public']['Tables']['galx_developer_keys']['Insert'] | any {
     return {
       id: key.id,
       user_id: key.userId,
@@ -338,7 +344,10 @@ export class ApiKeyRepository {
       total_tokens: key.totalTokens,
       is_revoked: key.revoked || false,
       last_used_at: key.lastUsedAtMs ? new Date(key.lastUsedAtMs).toISOString() : null,
-      created_at: new Date(key.createdAtMs).toISOString()
+      created_at: new Date(key.createdAtMs).toISOString(),
+      ...(key.environment ? { environment: key.environment } : {}),
+      ...(key.scopes ? { scopes: key.scopes } : {}),
+      ...(key.expiresAtMs ? { expires_at: new Date(key.expiresAtMs).toISOString() } : {})
     };
   }
 }
