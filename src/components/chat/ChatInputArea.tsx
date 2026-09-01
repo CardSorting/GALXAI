@@ -454,12 +454,12 @@ export function ChatInputArea({
 
         {/* Micro-Disclaimer & Developer Gateway Link */}
         <div className="flex items-center justify-between text-[10.5px] sm:text-[11px] text-zinc-500 px-2 font-mono">
-          <span className="truncate pr-2">GALX AI routes across OpenAI Codex & GPT-5.6 frontier models.</span>
+          <span className="truncate pr-2">GALX AI routes across OpenAI Codex &amp; GPT-5.6 frontier models.</span>
           <Link
-            href="/gateway"
-            className="text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1 font-bold shrink-0"
+            href="/keys"
+            className="text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1 font-bold shrink-0 hover:underline"
           >
-            <span>Developer Gateway & API →</span>
+            <span>Developer API Key &amp; Gateway →</span>
           </Link>
         </div>
       </div>

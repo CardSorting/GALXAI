@@ -27,6 +27,7 @@ import {
   Brain,
   Code2,
   Bot,
+  Key,
 } from 'lucide-react';
 import { CustomPersona } from './PersonaContracts';
 import { useAuth } from '@/contexts/AuthContext';
@@ -491,6 +492,14 @@ export function ChatSidebar({
         <div className="p-2 border-t border-white/10 space-y-1.5 bg-[#05070a]/95">
           {/* Quick Links */}
           <div className="space-y-0.5 font-sans text-[11px]">
+            <Link
+              href="/keys"
+              className="w-full flex items-center gap-2 px-2 py-1 rounded-lg text-zinc-300 hover:text-white hover:bg-white/5 transition-colors group cursor-pointer"
+            >
+              <Key className="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform" />
+              <span>Developer API Keys</span>
+            </Link>
+
             <Link
               href="/pricing"
               className="w-full flex items-center gap-2 px-2 py-1 rounded-lg text-zinc-300 hover:text-white hover:bg-white/5 transition-colors group cursor-pointer"

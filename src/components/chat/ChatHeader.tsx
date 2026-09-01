@@ -27,6 +27,7 @@ import {
   LogOut,
   Settings as SettingsIcon,
   CreditCard,
+  Key,
 } from 'lucide-react';
 import { CustomPersona } from './PersonaContracts';
 import { useAuth } from '@/contexts/AuthContext';
@@ -426,6 +427,15 @@ export function ChatHeader({
                 >
                   <Zap className="w-3.5 h-3.5 text-cyan-400" />
                   <span>Developer Dashboard</span>
+                </Link>
+
+                <Link
+                  href="/keys"
+                  onClick={() => setUserMenuOpen(false)}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-white hover:bg-white/5 transition-colors"
+                >
+                  <Key className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Developer API Keys</span>
                 </Link>
 
                 <Link
