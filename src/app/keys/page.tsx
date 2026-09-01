@@ -534,7 +534,7 @@ const { text } = await generateText({
             </div>
           )}
 
-          {/* Modal-Style Community Free Compute Pool Status Banner */}
+          {/* Community Free Compute Pool Status Banner */}
           <div className="glass-panel rounded-3xl p-6 border border-cyan-500/30 bg-gradient-to-r from-cyan-500/10 via-indigo-500/5 to-black/40 space-y-3 relative overflow-hidden">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-start gap-3">
@@ -546,7 +546,7 @@ const { text } = await generateText({
                     <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
                     <span>$30.00 / MO FREE COMPUTE GRANT ACTIVE • SHARED INGESTION SHARD</span>
                   </div>
-                  <h2 className="text-base font-bold text-white">Modal-Style $30 Free Compute for Every Developer</h2>
+                  <h2 className="text-base font-bold text-white">$30 Monthly Free Compute Allowance</h2>
                   <p className="text-xs text-zinc-300 max-w-xl">
                     Every key is instantly active in the <strong>Shared Community Compute Pool</strong> with shared model ingestion. Free tier daily capacity resets every midnight at <strong>00:00 UTC</strong>. Need dedicated GPU priority and 5,000 RPM? Top up compute wallet anytime.
                   </p>

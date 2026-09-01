@@ -7,7 +7,7 @@ import { SafeStorage } from '@/lib/resilience/SafeStorage';
 const STORAGE_KEY_VERIFIED = 'galx_deposit_verified';
 const STORAGE_KEY_BALANCE = 'galx_wallet_balance';
 const WALLET_EVENT_NAME = 'galx_wallet_update';
-const DEFAULT_INITIAL_BALANCE = 30.00; // Modal-style $30.00/mo Free Compute Grant for every developer
+const DEFAULT_INITIAL_BALANCE = 30.00; // $30.00/mo Free Compute Grant for every developer
 
 export function useDepositVerification() {
   const [hasVerifiedDeposit, setHasVerifiedDeposit] = useState<boolean>(() => {

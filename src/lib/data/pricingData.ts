@@ -106,11 +106,12 @@ export const SEAT_TIERS: SeatTier[] = [
     perSeatPriceUsd: 0,
     includedSeats: 1,
     maxSeats: 1,
-    includedMonthlyComputeCredits: 5,
+    includedMonthlyComputeCredits: 30,
     badge: '100% Free Seats',
     highlightColor: 'border-white/10 hover:border-white/20',
     features: [
       { title: '1 Personal Seat', description: 'Dedicated personal sandbox workspace', included: true },
+      { title: '$30 Monthly Free Compute Allowance', description: 'Instant access to shared community compute pool', included: true },
       { title: 'Wholesale Token Rates', description: '25%–36% savings with 0% gateway markup', included: true },
       { title: '75% Prompt Caching Pass-Through', description: 'Automatic cache rebate on repeat context', included: true },
       { title: 'Sub-15ms Anycast Routing', description: 'Automated 429 failover to backup providers', included: true },

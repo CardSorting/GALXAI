@@ -1,7 +1,7 @@
 /**
  * GALXAI: Community Free Compute Pool Governor
  * 
- * Implements Modal-style $30.00/month free compute grants for every developer while protecting
+ * Implements $30.00/month free compute grants for every developer while protecting
  * paid infrastructure from being starved:
  * 
  * 1. Shared Ingestion Shards: Free tier guest keys and paid keys share identical model routing

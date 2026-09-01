@@ -103,7 +103,7 @@ export function PricingClient() {
       ? 75 + Math.max(0, simulatedSeats - 5) * 15
       : 499 + Math.max(0, simulatedSeats - 25) * 10;
 
-  const galxIncludedCredits = simulatedSeats <= 1 ? 5 : simulatedSeats <= 25 ? 100 : 600;
+  const galxIncludedCredits = simulatedSeats <= 1 ? 30 : simulatedSeats <= 25 ? 100 : 600;
   const netPayableCompute = Math.max(0, (simulatedMonthlySpend * 0.72) - galxIncludedCredits);
   const galxTotalMonthly = galxBasePlanCost + netPayableCompute;
 

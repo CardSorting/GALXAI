@@ -61,11 +61,7 @@ function BaseDeveloperGatewayKeys() {
 
   const handleCreateKey = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!hasVerifiedDeposit) {
-      setIsOpenModal(false);
-      setIsPaywallOpen(true);
-      return;
-    }
+    if (!newKeyName.trim()) return;
     await createKeyDirectly(newKeyName, walletBalance);
   };
 

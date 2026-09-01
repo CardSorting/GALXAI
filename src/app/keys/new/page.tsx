@@ -340,7 +340,7 @@ DEFAULT_MODEL="gpt-5.6-sol"`,
             </p>
           </div>
 
-          {/* Modal-Style Free Compute Grant Banner */}
+          {/* Free Compute Grant Banner */}
           <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-cyan-500/10 via-indigo-500/5 to-black/40 border border-cyan-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-mono text-xs">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">

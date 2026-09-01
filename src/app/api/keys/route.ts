@@ -193,7 +193,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Modal-Style Free Tier Grant ($30.00/mo) & Compute Pool Routing
+    // Free Tier Compute Grant ($30.00/mo) & Compute Pool Routing
     const isPaid = Boolean(hasVerifiedDeposit || Number(depositedAmount) > 0);
     const computePool: 'shared_community' | 'priority_dedicated' = isPaid ? 'priority_dedicated' : 'shared_community';
     const effectiveRpm = isPaid ? cleanRpm : Math.min(cleanRpm, 60);
