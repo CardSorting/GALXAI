@@ -36,8 +36,8 @@ import {
 } from 'lucide-react';
 import { formatTimeAgo } from '@/lib/utils';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
+import { useAuth } from '@/contexts/AuthContext';
 import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
-import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { ErrorBoundary, withErrorBoundary } from '@/components/common/ErrorBoundary';
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
@@ -61,6 +61,7 @@ const QUICK_PRESETS: QuickPreset[] = [
 type SnippetTab = 'curl' | 'python' | 'ts_sdk' | 'openai_sdk' | 'anthropic_sdk' | 'cursor' | 'litellm' | 'vercel_ai';
 
 function BaseGatewayKeysPage() {
+  const { user, signInWithDemo } = useAuth();
   const [keys, setKeys] = useState<any[]>([]);
   const [newKeyName, setNewKeyName] = useState('Cursor IDE Key');
   const [selectedRpm, setSelectedRpm] = useState<number>(120);
@@ -87,8 +88,10 @@ function BaseGatewayKeysPage() {
   };
 
   useEffect(() => {
-    fetchKeys();
-  }, []);
+    if (user) {
+      fetchKeys();
+    }
+  }, [user]);
 
   const createKeyDirectly = async (keyName: string, balanceAmount: number, rpm: number = selectedRpm) => {
     setIsLoading(true);
@@ -116,6 +119,10 @@ function BaseGatewayKeysPage() {
   const handleCreateKey = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!newKeyName.trim()) return;
+
+    if (!user) {
+      signInWithDemo({ role: 'dev', name: 'Developer Sandbox', email: 'developer@galx.ai' });
+    }
 
     if (!hasVerifiedDeposit) {
       setIsPaywallOpen(true);
@@ -338,307 +345,334 @@ const { text } = await generateText({
           <KeysSubNav />
         </ErrorBoundary>
 
-        <AuthRequiredGate
-          title="Sign In to Access API Keys"
-          description="Your dedicated API keys, per-key rate limit configurations, and live consumption metrics are private to your workspace."
-          checkoutAmount={25}
-        >
-          {/* Page Hero with Wallet Summary */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-            <div className="lg:col-span-8 glass-panel rounded-3xl p-6 sm:p-8 flex flex-col justify-between space-y-4 border border-white/10 bg-gradient-to-br from-zinc-950/20 via-black/40 to-cyan-950/20">
-              <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold">
-                  <Key className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>WHOLESALE CLEARINGHOUSE &amp; 429 BURST PASS</span>
-                </div>
-                <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">Developer Universal API Keys</h1>
-                <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-2xl">
-                  Unified <code className="text-cyan-300 font-mono font-bold">galx_live_...</code> client tokens. Drop-in compatible with Cursor, Windsurf, Claude Code, OpenAI SDK, and LangChain. Unlocks <strong>25%–40% wholesale savings</strong>, <strong>75% prompt caching</strong>, and <strong>429 rate limit immunity</strong>.
-                </p>
+        {/* Unauthenticated Developer Public Preview Banner */}
+        {!user && (
+          <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-cyan-950/20 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 fill-amber-400/30" />
               </div>
-
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <Link
-                  href="/keys/new"
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 flex items-center gap-1.5 transition-all cursor-pointer"
-                >
-                  <Plus className="w-4 h-4 text-black" />
-                  <span>Advanced Key Wizard ($5 Free Grant)</span>
-                </Link>
-
-                <button
-                  type="button"
-                  onClick={runGatewaySmokeTest}
-                  disabled={isPinging}
-                  className="px-4 py-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
-                >
-                  <Zap className={`w-3.5 h-3.5 text-indigo-400 ${isPinging ? 'animate-pulse' : ''}`} />
-                  <span>{isPinging ? 'Pinging Gateway...' : 'Live Smoke Test (0ms)'}</span>
-                </button>
-
-                <Link
-                  href="/docs/quickstart"
-                  className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-semibold flex items-center gap-1.5 transition-all"
-                >
-                  <Code2 className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Quickstart Docs</span>
-                </Link>
+              <div>
+                <h2 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+                  <span>Developer Gateway Sandbox</span>
+                  <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-mono font-bold">
+                    Public Preview
+                  </span>
+                </h2>
+                <p className="text-[11px] text-zinc-300">
+                  Explore universal SDK configurations, test live model latency, or launch a 1-click sandbox to mint your live API key with $10 free credit.
+                </p>
               </div>
             </div>
 
-            {/* Wallet Balance Widget */}
-            <div className="lg:col-span-4 glass-panel rounded-3xl p-6 flex flex-col justify-between space-y-4 border border-emerald-500/30 bg-emerald-500/5 shadow-xl">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono text-zinc-400 uppercase font-bold flex items-center gap-1.5">
-                    <Wallet className="w-3.5 h-3.5 text-emerald-400" />
-                    Compute Wallet
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold">
-                    Autopay Active
-                  </span>
-                </div>
-                <div className="text-3xl font-black text-white font-mono">${walletBalance.toFixed(2)} <span className="text-xs text-zinc-400 font-sans">USD</span></div>
-                <p className="text-[11px] text-zinc-400">All active keys draw from this shared compute balance with microsecond metering.</p>
+            <button
+              type="button"
+              onClick={() => signInWithDemo({ role: 'dev', name: 'Developer Sandbox', email: 'developer@galx.ai' })}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs font-mono uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-1.5 transition-all cursor-pointer shrink-0 hover:scale-[1.03] active:scale-[0.97]"
+            >
+              <Key className="w-3.5 h-3.5" />
+              <span>Launch 1-Click Sandbox ($10 Credit)</span>
+            </button>
+          </div>
+        )}
+
+        {/* Page Hero with Wallet Summary */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          <div className="lg:col-span-8 glass-panel rounded-3xl p-6 sm:p-8 flex flex-col justify-between space-y-4 border border-white/10 bg-gradient-to-br from-zinc-950/20 via-black/40 to-cyan-950/20">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold">
+                <Key className="w-3.5 h-3.5 text-indigo-400" />
+                <span>WHOLESALE CLEARINGHOUSE &amp; 429 BURST PASS</span>
               </div>
+              <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">Developer Universal API Keys</h1>
+              <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-2xl">
+                Unified <code className="text-cyan-300 font-mono font-bold">galx_live_...</code> client tokens. Drop-in compatible with Cursor, Windsurf, Claude Code, OpenAI SDK, and LangChain. Unlocks <strong>25%–40% wholesale savings</strong>, <strong>75% prompt caching</strong>, and <strong>429 rate limit immunity</strong>.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <Link
+                href="/keys/new"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 flex items-center gap-1.5 transition-all cursor-pointer"
+              >
+                <Plus className="w-4 h-4 text-black" />
+                <span>Advanced Key Wizard ($5 Free Grant)</span>
+              </Link>
+
+              <button
+                type="button"
+                onClick={runGatewaySmokeTest}
+                disabled={isPinging}
+                className="px-4 py-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+              >
+                <Zap className={`w-3.5 h-3.5 text-indigo-400 ${isPinging ? 'animate-pulse' : ''}`} />
+                <span>{isPinging ? 'Pinging Gateway...' : 'Live Smoke Test (0ms)'}</span>
+              </button>
 
               <Link
-                href="/billing"
-                className="w-full py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer font-mono"
+                href="/docs/quickstart"
+                className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-semibold flex items-center gap-1.5 transition-all"
               >
-                <span>Manage Wallet &amp; Top Up</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <Code2 className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Quickstart Docs</span>
               </Link>
             </div>
           </div>
 
-          {/* Live Smoke Test Result Banner */}
-          {pingResult && (
-            <div className={`glass-panel rounded-2xl p-4 border flex items-center justify-between gap-4 transition-all ${
-              pingResult.success ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-rose-500/40 bg-rose-500/10'
-            }`}>
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                  pingResult.success ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
-                }`}>
-                  {pingResult.success ? <Check className="w-4 h-4" /> : <ShieldAlert className="w-4 h-4" />}
+          {/* Wallet Balance Widget */}
+          <div className="lg:col-span-4 glass-panel rounded-3xl p-6 flex flex-col justify-between space-y-4 border border-emerald-500/30 bg-emerald-500/5 shadow-xl">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono text-zinc-400 uppercase font-bold flex items-center gap-1.5">
+                  <Wallet className="w-3.5 h-3.5 text-emerald-400" />
+                  Compute Wallet
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold">
+                  {user ? 'Autopay Active' : 'Sandbox Balance'}
+                </span>
+              </div>
+              <div className="text-3xl font-black text-white font-mono">${walletBalance.toFixed(2)} <span className="text-xs text-zinc-400 font-sans">USD</span></div>
+              <p className="text-[11px] text-zinc-400">All active keys draw from this shared compute balance with microsecond metering.</p>
+            </div>
+
+            <Link
+              href="/billing"
+              className="w-full py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer font-mono"
+            >
+              <span>Manage Wallet &amp; Top Up</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+
+        {/* Live Smoke Test Result Banner */}
+        {pingResult && (
+          <div className={`glass-panel rounded-2xl p-4 border flex items-center justify-between gap-4 transition-all ${
+            pingResult.success ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-rose-500/40 bg-rose-500/10'
+          }`}>
+            <div className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                pingResult.success ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
+              }`}>
+                {pingResult.success ? <Check className="w-4 h-4" /> : <ShieldAlert className="w-4 h-4" />}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono font-bold text-white uppercase">
+                    {pingResult.success ? 'Gateway Verified Online' : 'Gateway Connectivity Warning'}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-md bg-black/40 text-[10px] font-mono text-cyan-300 font-bold border border-white/10">
+                    {pingResult.latencyMs}ms RTT
+                  </span>
+                  {pingResult.modelCount && (
+                    <span className="px-2 py-0.5 rounded-md bg-black/40 text-[10px] font-mono text-emerald-300 font-bold border border-white/10">
+                      {pingResult.modelCount} Models Ready
+                    </span>
+                  )}
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold text-white uppercase">
-                      {pingResult.success ? 'Gateway Verified Online' : 'Gateway Connectivity Warning'}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-md bg-black/40 text-[10px] font-mono text-cyan-300 font-bold border border-white/10">
-                      {pingResult.latencyMs}ms RTT
-                    </span>
-                    {pingResult.modelCount && (
-                      <span className="px-2 py-0.5 rounded-md bg-black/40 text-[10px] font-mono text-emerald-300 font-bold border border-white/10">
-                        {pingResult.modelCount} Models Ready
-                      </span>
-                    )}
+                <p className="text-xs text-zinc-300">{pingResult.message}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setPingResult(null)}
+              className="p-1 text-zinc-400 hover:text-white transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Unverified Deposit Match Banner */}
+        {!hasVerifiedDeposit && (
+          <div className="glass-panel rounded-3xl p-6 border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-black/40 space-y-3 relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                  <Gift className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[10px] font-bold">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>50% INSTANT DEPOSIT MATCH • $5 FREE COMPUTE</span>
                   </div>
-                  <p className="text-xs text-zinc-300">{pingResult.message}</p>
+                  <h2 className="text-base font-bold text-white">Deposit $10 to Mint Your Key &amp; Claim $5 Free Compute</h2>
+                  <p className="text-xs text-zinc-300 max-w-xl">
+                    Make your first refundable compute deposit of <strong>$10.00 USD</strong> to unlock live gateway routing and receive <strong className="text-emerald-300">$15.00 Total Usable Balance</strong> with 0 platform fees.
+                  </p>
                 </div>
               </div>
+
               <button
-                onClick={() => setPingResult(null)}
-                className="p-1 text-zinc-400 hover:text-white transition-colors"
+                type="button"
+                onClick={() => setIsPaywallOpen(true)}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs font-mono uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
               >
-                <X className="w-4 h-4" />
+                <Key className="w-3.5 h-3.5" />
+                <span>Deposit $10 &amp; Unlock</span>
               </button>
             </div>
-          )}
-
-          {/* Unverified Deposit Match Banner */}
-          {!hasVerifiedDeposit && (
-            <div className="glass-panel rounded-3xl p-6 border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-black/40 space-y-3 relative overflow-hidden">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
-                    <Gift className="w-5 h-5" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[10px] font-bold">
-                      <Sparkles className="w-3 h-3 text-amber-400" />
-                      <span>50% INSTANT DEPOSIT MATCH • $5 FREE COMPUTE</span>
-                    </div>
-                    <h2 className="text-base font-bold text-white">Deposit $10 to Mint Your Key &amp; Claim $5 Free Compute</h2>
-                    <p className="text-xs text-zinc-300 max-w-xl">
-                      Make your first refundable compute deposit of <strong>$10.00 USD</strong> to unlock live gateway routing and receive <strong className="text-emerald-300">$15.00 Total Usable Balance</strong> with 0 platform fees.
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setIsPaywallOpen(true)}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs font-mono uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
-                >
-                  <Key className="w-3.5 h-3.5" />
-                  <span>Deposit $10 &amp; Unlock</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Quick 1-Click Key Generator with Mental Model Presets */}
-          <div className="glass-panel rounded-3xl p-6 space-y-5 border border-white/10">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="space-y-1">
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  <Plus className="w-4 h-4 text-indigo-400" />
-                  <span>Instant 1-Click Key Generator</span>
-                </h2>
-                <p className="text-xs text-zinc-400">Zero hesitation. Choose a mental model preset or enter a custom identifier.</p>
-              </div>
-
-              {/* Quick Preset Chips */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                {QUICK_PRESETS.map((preset) => {
-                  const Icon = preset.icon;
-                  const isSelected = newKeyName === preset.defaultLabel;
-                  return (
-                    <button
-                      key={preset.id}
-                      type="button"
-                      onClick={() => applyQuickPreset(preset)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
-                        isSelected
-                          ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/30'
-                          : 'bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border border-white/5'
-                      }`}
-                    >
-                      <Icon className="w-3 h-3" />
-                      <span>{preset.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {createdSecretKey ? (
-              <div className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/40 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-300 uppercase">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                    <span>Your Secret API Key is Ready</span>
-                  </div>
-                  <span className="text-[10px] font-mono text-zinc-400">Copy now • Stored hashed with SHA-256</span>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-black/70 font-mono text-xs text-emerald-300 flex items-center justify-between gap-3 border border-emerald-500/30 break-all">
-                  <span className="select-all">{createdSecretKey}</span>
-                  <button
-                    onClick={() => handleCopy(createdSecretKey, 'banner')}
-                    className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 shrink-0 transition-all cursor-pointer flex items-center gap-1 text-xs font-bold font-sans"
-                  >
-                    {copiedKey === 'banner' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedKey === 'banner' ? 'Copied' : 'Copy'}</span>
-                  </button>
-                </div>
-
-                <div className="text-[11px] text-zinc-400 flex items-center justify-between">
-                  <span>Tested &amp; ready to use in any OpenAI, Anthropic, or LangChain SDK instance below.</span>
-                  <button
-                    onClick={() => setCreatedSecretKey(null)}
-                    className="text-zinc-500 hover:text-zinc-300 text-xs underline cursor-pointer"
-                  >
-                    Done
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleCreateKey} className="flex flex-col sm:flex-row gap-3">
-                <input
-                  type="text"
-                  value={newKeyName}
-                  onChange={(e) => setNewKeyName(e.target.value)}
-                  placeholder="e.g. Cursor IDE, Production Agent Fleet, CLI Tool"
-                  className="flex-1 py-3 px-4 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 font-mono"
-                  required
-                />
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="px-6 py-3 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>{isLoading ? 'Generating...' : 'Create Key in 1-Click'}</span>
-                </button>
-              </form>
-            )}
           </div>
+        )}
 
-          {/* Interactive Multi-Mental-Model Code Snippets & Drop-in Matrix */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-white/10 bg-black/40">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 font-mono text-[10px] font-bold border border-cyan-500/30">
-                  <Sparkles className="w-3 h-3 text-cyan-400" />
-                  <span>DROP-IN REPLACEMENT ANYWHERE</span>
-                </div>
-                <h2 className="text-lg font-black text-white">How to Connect from Any Mental Model</h2>
-                <p className="text-xs text-zinc-400">
-                  Simply point your favorite SDK, agent framework, or IDE to <code className="text-cyan-300 font-mono">https://galx.ai/v1</code>.
-                </p>
-              </div>
+        {/* Quick 1-Click Key Generator with Mental Model Presets */}
+        <div className="glass-panel rounded-3xl p-6 space-y-5 border border-white/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="space-y-1">
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <Plus className="w-4 h-4 text-indigo-400" />
+                <span>Instant 1-Click Key Generator</span>
+              </h2>
+              <p className="text-xs text-zinc-400">Zero hesitation. Choose a mental model preset or enter a custom identifier.</p>
+            </div>
 
-              {/* Code Snippet Tab Bar */}
-              <div className="flex flex-wrap items-center gap-1 bg-black/50 p-1.5 rounded-2xl border border-white/10">
-                {(
-                  [
-                    { id: 'python', label: 'Python' },
-                    { id: 'openai_sdk', label: 'OpenAI (Node)' },
-                    { id: 'anthropic_sdk', label: 'Anthropic' },
-                    { id: 'ts_sdk', label: '@galxai/sdk' },
-                    { id: 'curl', label: 'cURL' },
-                    { id: 'cursor', label: 'Cursor IDE' },
-                    { id: 'litellm', label: 'LiteLLM' },
-                    { id: 'vercel_ai', label: 'Vercel AI' }
-                  ] as { id: SnippetTab; label: string }[]
-                ).map((tab) => (
+            {/* Quick Preset Chips */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {QUICK_PRESETS.map((preset) => {
+                const Icon = preset.icon;
+                const isSelected = newKeyName === preset.defaultLabel;
+                return (
                   <button
-                    key={tab.id}
+                    key={preset.id}
                     type="button"
-                    onClick={() => setActiveSnippetTab(tab.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
-                      activeSnippetTab === tab.id
-                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                        : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                    onClick={() => applyQuickPreset(preset)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/30'
+                        : 'bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border border-white/5'
                     }`}
                   >
-                    {tab.label}
+                    <Icon className="w-3 h-3" />
+                    <span>{preset.name}</span>
                   </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Code Display Area */}
-            <div className="relative rounded-2xl bg-black/80 border border-white/10 overflow-hidden font-mono text-xs">
-              <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10 bg-white/[0.02]">
-                <div className="flex items-center gap-2 text-zinc-400 text-[11px]">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/70" />
-                  <span className="ml-2 text-zinc-400 font-semibold">{snippets[activeSnippetTab].title}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleCopySnippet(snippets[activeSnippetTab].code)}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 flex items-center gap-1.5 text-[11px] font-sans font-bold cursor-pointer transition-all border border-white/5"
-                >
-                  {copiedSnippet ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-cyan-400" />}
-                  <span>{copiedSnippet ? 'Copied to Clipboard' : 'Copy Code'}</span>
-                </button>
-              </div>
-
-              <pre className="p-4 sm:p-5 text-zinc-300 overflow-x-auto leading-relaxed">
-                <code>{snippets[activeSnippetTab].code}</code>
-              </pre>
+                );
+              })}
             </div>
           </div>
 
-          {/* Active Keys Table */}
+          {createdSecretKey ? (
+            <div className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/40 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold text-emerald-300 uppercase">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <span>Your Secret API Key is Ready</span>
+                </div>
+                <span className="text-[10px] font-mono text-zinc-400">Copy now • Stored hashed with SHA-256</span>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-black/70 font-mono text-xs text-emerald-300 flex items-center justify-between gap-3 border border-emerald-500/30 break-all">
+                <span className="select-all">{createdSecretKey}</span>
+                <button
+                  onClick={() => handleCopy(createdSecretKey, 'banner')}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 shrink-0 transition-all cursor-pointer flex items-center gap-1 text-xs font-bold font-sans"
+                >
+                  {copiedKey === 'banner' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedKey === 'banner' ? 'Copied' : 'Copy'}</span>
+                </button>
+              </div>
+
+              <div className="text-[11px] text-zinc-400 flex items-center justify-between">
+                <span>Tested &amp; ready to use in any OpenAI, Anthropic, or LangChain SDK instance below.</span>
+                <button
+                  onClick={() => setCreatedSecretKey(null)}
+                  className="text-zinc-500 hover:text-zinc-300 text-xs underline cursor-pointer"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleCreateKey} className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="text"
+                value={newKeyName}
+                onChange={(e) => setNewKeyName(e.target.value)}
+                placeholder="e.g. Cursor IDE, Production Agent Fleet, CLI Tool"
+                className="flex-1 py-3 px-4 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 font-mono"
+                required
+              />
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="px-6 py-3 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{isLoading ? 'Generating...' : 'Create Key in 1-Click'}</span>
+              </button>
+            </form>
+          )}
+        </div>
+
+        {/* Interactive Multi-Mental-Model Code Snippets & Drop-in Matrix */}
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-white/10 bg-black/40">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 font-mono text-[10px] font-bold border border-cyan-500/30">
+                <Sparkles className="w-3 h-3 text-cyan-400" />
+                <span>DROP-IN REPLACEMENT ANYWHERE</span>
+              </div>
+              <h2 className="text-lg font-black text-white">How to Connect from Any Mental Model</h2>
+              <p className="text-xs text-zinc-400">
+                Simply point your favorite SDK, agent framework, or IDE to <code className="text-cyan-300 font-mono">https://galx.ai/v1</code>.
+              </p>
+            </div>
+
+            {/* Code Snippet Tab Bar */}
+            <div className="flex flex-wrap items-center gap-1 bg-black/50 p-1.5 rounded-2xl border border-white/10">
+              {(
+                [
+                  { id: 'python', label: 'Python' },
+                  { id: 'openai_sdk', label: 'OpenAI (Node)' },
+                  { id: 'anthropic_sdk', label: 'Anthropic' },
+                  { id: 'ts_sdk', label: '@galxai/sdk' },
+                  { id: 'curl', label: 'cURL' },
+                  { id: 'cursor', label: 'Cursor IDE' },
+                  { id: 'litellm', label: 'LiteLLM' },
+                  { id: 'vercel_ai', label: 'Vercel AI' }
+                ] as { id: SnippetTab; label: string }[]
+              ).map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveSnippetTab(tab.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                    activeSnippetTab === tab.id
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                      : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Code Display Area */}
+          <div className="relative rounded-2xl bg-black/80 border border-white/10 overflow-hidden font-mono text-xs">
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10 bg-white/[0.02]">
+              <div className="flex items-center gap-2 text-zinc-400 text-[11px]">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/70" />
+                <span className="ml-2 text-zinc-400 font-semibold">{snippets[activeSnippetTab].title}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleCopySnippet(snippets[activeSnippetTab].code)}
+                className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 flex items-center gap-1.5 text-[11px] font-sans font-bold cursor-pointer transition-all border border-white/5"
+              >
+                {copiedSnippet ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-cyan-400" />}
+                <span>{copiedSnippet ? 'Copied to Clipboard' : 'Copy Code'}</span>
+              </button>
+            </div>
+
+            <pre className="p-4 sm:p-5 text-zinc-300 overflow-x-auto leading-relaxed">
+              <code>{snippets[activeSnippetTab].code}</code>
+            </pre>
+          </div>
+        </div>
+
+        {/* Active Keys Table or Guest Connect Card */}
+        {user ? (
           <div className="glass-panel rounded-3xl p-6 space-y-4 border border-white/10">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold text-white">Active Gateway Keys ({keys.filter(k => !k.revoked).length})</h2>
@@ -700,7 +734,34 @@ const { text } = await generateText({
               </div>
             )}
           </div>
-        </AuthRequiredGate>
+        ) : (
+          <div className="glass-panel rounded-3xl p-8 border border-white/10 text-center space-y-4 bg-gradient-to-b from-white/[0.02] to-transparent">
+            <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mx-auto text-cyan-400">
+              <Key className="w-6 h-6" />
+            </div>
+            <div className="space-y-1 max-w-md mx-auto">
+              <h3 className="text-base font-bold text-white">Your Workspace API Keys</h3>
+              <p className="text-xs text-zinc-400">
+                Sign in or launch a 1-click sandbox session to create, view, and manage your private API keys with per-key spend caps and custom rate limits.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => signInWithDemo({ role: 'dev', name: 'Developer Sandbox', email: 'developer@galx.ai' })}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 text-black font-black text-xs font-mono uppercase tracking-wider shadow-lg shadow-amber-500/20 hover:scale-[1.03] active:scale-[0.97] transition-all cursor-pointer"
+              >
+                Launch 1-Click Sandbox ($10 Credit)
+              </button>
+              <Link
+                href="/auth/signin?next=/keys"
+                className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-bold transition-all border border-white/10"
+              >
+                Sign In
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Consumer-Grade Trust Seals */}
         <ErrorBoundary name="Trust Seals">
