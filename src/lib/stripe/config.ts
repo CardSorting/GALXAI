@@ -14,45 +14,53 @@ export interface StripeTierConfig {
 }
 
 export const STRIPE_CHECKOUT_PACKS: Record<number, StripeTierConfig> = {
+  10: {
+    amount: 10,
+    label: 'LUMI Stellar Pass (Monthly)',
+    badge: 'LUMI $10/MO ✨',
+    multiplier: 1.50,
+    welcomeGrant: 5.0,
+    perks: ['OpenAI Flagship Curated Lineup', 'Rolling 5-Hour Warp Quotas (~$60/mo compute)', 'Zero Data Retention (ZDR) Enclave']
+  },
   25: {
     amount: 25,
     label: 'Starter Builder Pack',
-    badge: '10% Bonus Match',
-    multiplier: 1.10,
+    badge: '50% Match Bonus',
+    multiplier: 1.50,
     welcomeGrant: 5.0,
-    perks: ['10% Instant Compute Match', '$5 Free Welcome Credit', 'Standard Rate Lock Guarantee']
+    perks: ['50% Instant Compute Match', '$5 Free Welcome Credit', 'Standard Rate Lock Guarantee']
   },
   50: {
     amount: 50,
     label: 'Growth VIP Priority Pack',
-    badge: '25% Match Bonus 🔓',
-    multiplier: 1.25,
+    badge: 'VIP High-Roller 🔓',
+    multiplier: 1.60,
     welcomeGrant: 5.0,
-    perks: ['Sub-15ms VIP Priority Routing', '+$12.50 Matched Compute', '75% Prompt Cache Pass-Through']
+    perks: ['Sub-15ms VIP Priority Routing', '+$30 Free Matched Compute', '75% Prompt Cache Pass-Through']
   },
   100: {
     amount: 100,
     label: 'Fleet Scale Pack',
-    badge: '50% Match Grant 🔓',
-    multiplier: 1.50,
+    badge: '600 RPM Fleet 🔓',
+    multiplier: 1.75,
     welcomeGrant: 5.0,
-    perks: ['50% Double Match Compute', '600 RPM Concurrency Burst', 'Priority Anycast Failover']
+    perks: ['600 RPM Concurrency Burst', '+$75 Free Matched Compute', 'Priority Anycast Failover']
   },
   250: {
     amount: 250,
     label: 'Enterprise Sovereign Pack',
-    badge: '50% Match Grant 🔓',
-    multiplier: 1.50,
+    badge: 'Unlimited VPC 🔓',
+    multiplier: 2.00,
     welcomeGrant: 5.0,
-    perks: ['50% Scale Match Compute', 'Dedicated VPC Private Lane', 'Unlimited Concurrency Burst']
+    perks: ['2.00x Double Compute Match', 'Dedicated VPC Private Lane', 'Unlimited Concurrency Burst']
   },
   500: {
     amount: 500,
     label: 'Hyperscale Infrastructure Pack',
-    badge: '50% Apex Match 🔓',
-    multiplier: 1.50,
+    badge: '100% Double Match 🔓',
+    multiplier: 2.00,
     welcomeGrant: 5.0,
-    perks: ['50% Hyperscale Match ($750 Credit)', 'Dedicated Account Architect', 'Custom Enterprise SLA']
+    perks: ['100% Hyperscale Match ($1,000 Credit)', 'Dedicated Account Architect', 'Custom Enterprise SLA']
   }
 };
 
@@ -127,8 +135,8 @@ export function calculateComputeCredit(amountUsd: number) {
   const tier = STRIPE_CHECKOUT_PACKS[deposit] || {
     amount: deposit,
     label: `${deposit.toFixed(0)} Compute Pack`,
-    badge: deposit >= 100 ? '50% Match' : deposit >= 50 ? '25% Bonus' : deposit >= 25 ? '10% Bonus' : 'Standard',
-    multiplier: deposit >= 100 ? 1.50 : deposit >= 50 ? 1.25 : deposit >= 25 ? 1.10 : (deposit >= 10 ? 1.50 : 1.0),
+    badge: deposit >= 250 ? '100% Double Match' : deposit >= 100 ? '75% Match' : deposit >= 50 ? '60% Match' : deposit >= 25 ? '50% Match' : 'Standard',
+    multiplier: deposit >= 250 ? 2.00 : deposit >= 100 ? 1.75 : deposit >= 50 ? 1.60 : deposit >= 25 ? 1.50 : 1.0,
     welcomeGrant: 5.0,
     perks: ['Instant micro-metered token credit', '75% prompt caching pass-through']
   };

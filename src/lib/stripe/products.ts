@@ -29,29 +29,56 @@ export interface StripeProductTier {
 }
 
 export const STRIPE_PRODUCT_TIERS: Record<string, StripeProductTier> = {
+  lumi_10: {
+    id: 'lumi_10',
+    name: 'GALXAI LUMI Stellar Pass — OpenAI Monthly Subscription',
+    statementDescriptor: 'GALXAI LUMI $10',
+    description: 'Flat $10/month micro-pass for OpenAI frontier reasoning and coding models with generous rolling 5-hour warp limits and Zero Data Retention.',
+    depositAmountUsd: 10,
+    welcomeGrantUsd: 5.0,
+    matchBonusUsd: 5.00,
+    totalCreditUsd: 20.00,
+    multiplier: 1.50,
+    badge: 'LUMI $10/MO ✨',
+    taxCode: 'txcd_10000000',
+    features: [
+      'OpenAI Flagship Curated Lineup (GPT-5.6 Sol, Terra, Luna, o3, 4o)',
+      'Rolling 5-Hour Warp Burst Windows',
+      'Zero Data Retention (ZDR) Enclave Protection',
+      'Universal Drop-In for Cursor, Windsurf & Agents'
+    ],
+    metadata: {
+      galxai_tier_key: 'lumi_10',
+      deposit_amount_usd: '10.00',
+      total_credit_usd: '20.00',
+      match_percentage: '50%',
+      rate_lock: 'guaranteed',
+      sla_priority: 'lumi_standard'
+    }
+  },
   starter_25: {
     id: 'starter_25',
     name: 'GALXAI Prepaid Compute — Starter Builder Pack',
     statementDescriptor: 'GALXAI COMPUTE $25',
-    description: 'Includes $25 USD base deposit + $5.00 welcome grant + $2.50 match ($32.50 total compute credit). Micro-billed per token with zero markups.',
+    description: 'Includes $25 USD base deposit + $5.00 welcome grant + $12.50 match ($42.50 total compute credit). Micro-billed per token with zero markups.',
     depositAmountUsd: 25,
     welcomeGrantUsd: 5.0,
-    matchBonusUsd: 2.50,
-    totalCreditUsd: 32.50,
-    multiplier: 1.10,
-    badge: '10% Bonus Match',
+    matchBonusUsd: 12.50,
+    totalCreditUsd: 42.50,
+    multiplier: 1.50,
+    badge: '50% Match Bonus',
     taxCode: 'txcd_10000000',
     features: [
-      '$32.50 Total Usable Compute Credit',
-      'Standard 60 RPM Concurrency Limit',
+      '$42.50 Total Usable Compute Credit (50% Match)',
+      'Standard 120 RPM Concurrency Limit',
       'Non-Expiring Balance & Standard Rate Lock',
       '75% Prompt Cache Cost Savings'
     ],
     metadata: {
       galxai_tier_key: 'starter_25',
       deposit_amount_usd: '25.00',
-      total_credit_usd: '32.50',
-      match_percentage: '10%',
+      total_credit_usd: '42.50',
+      match_percentage: '50%',
       rate_lock: 'guaranteed',
       sla_priority: 'standard'
     }
@@ -60,26 +87,26 @@ export const STRIPE_PRODUCT_TIERS: Record<string, StripeProductTier> = {
     id: 'growth_50',
     name: 'GALXAI Prepaid Compute — Growth VIP Priority Pack',
     statementDescriptor: 'GALXAI COMPUTE $50',
-    description: 'Includes $50 USD base deposit + $5.00 welcome grant + $12.50 match ($67.50 total compute credit). Sub-15ms VIP priority routing included.',
+    description: 'Includes $50 USD base deposit + $5.00 welcome grant + $30.00 match ($85.00 total compute credit). Sub-15ms VIP priority routing included.',
     depositAmountUsd: 50,
     welcomeGrantUsd: 5.0,
-    matchBonusUsd: 12.50,
-    totalCreditUsd: 67.50,
-    multiplier: 1.25,
-    badge: '25% Match Bonus 🔓',
+    matchBonusUsd: 30.00,
+    totalCreditUsd: 85.00,
+    multiplier: 1.60,
+    badge: 'VIP High-Roller 🔓',
     isPopular: true,
     taxCode: 'txcd_10000000',
     features: [
-      '$67.50 Total Usable Compute Credit',
+      '$85.00 Total Usable Compute Credit (60% Match)',
       'Sub-15ms VIP Priority Routing Lane',
-      '180 RPM Concurrency Burst Capacity',
+      '300 RPM Concurrency Burst Capacity',
       '75% Prompt Cache Pass-Through'
     ],
     metadata: {
       galxai_tier_key: 'growth_50',
       deposit_amount_usd: '50.00',
-      total_credit_usd: '67.50',
-      match_percentage: '25%',
+      total_credit_usd: '85.00',
+      match_percentage: '60%',
       rate_lock: 'guaranteed',
       sla_priority: 'vip'
     }
@@ -88,17 +115,17 @@ export const STRIPE_PRODUCT_TIERS: Record<string, StripeProductTier> = {
     id: 'fleet_100',
     name: 'GALXAI Prepaid Compute — Fleet Scale Pack',
     statementDescriptor: 'GALXAI COMPUTE $100',
-    description: 'Includes $100 USD base deposit + $5.00 welcome grant + $50.00 match ($155.00 total compute credit). Maximum 50% match grant applied.',
+    description: 'Includes $100 USD base deposit + $5.00 welcome grant + $75.00 match ($180.00 total compute credit). Maximum 75% scale match applied.',
     depositAmountUsd: 100,
     welcomeGrantUsd: 5.0,
-    matchBonusUsd: 50.00,
-    totalCreditUsd: 155.00,
-    multiplier: 1.50,
-    badge: '50% Match Grant 🔓',
+    matchBonusUsd: 75.00,
+    totalCreditUsd: 180.00,
+    multiplier: 1.75,
+    badge: '600 RPM Fleet 🔓',
     isPopular: true,
     taxCode: 'txcd_10000000',
     features: [
-      '$155.00 Total Usable Compute Credit (50% Match)',
+      '$180.00 Total Usable Compute Credit (75% Match)',
       '600 RPM Concurrency Burst for Autonomous Agents',
       'Priority Global Anycast Routing & Failover',
       'Direct Discord Architect Support Channel'
@@ -106,8 +133,8 @@ export const STRIPE_PRODUCT_TIERS: Record<string, StripeProductTier> = {
     metadata: {
       galxai_tier_key: 'fleet_100',
       deposit_amount_usd: '100.00',
-      total_credit_usd: '155.00',
-      match_percentage: '50%',
+      total_credit_usd: '180.00',
+      match_percentage: '75%',
       rate_lock: 'guaranteed',
       sla_priority: 'fleet'
     }
@@ -116,16 +143,16 @@ export const STRIPE_PRODUCT_TIERS: Record<string, StripeProductTier> = {
     id: 'sovereign_250',
     name: 'GALXAI Prepaid Compute — Enterprise Sovereign Pack',
     statementDescriptor: 'GALXAI COMPUTE $250',
-    description: 'Includes $250 USD base deposit + $5.00 welcome grant + $125.00 match ($380.00 total compute credit). Dedicated VPC private lane access.',
+    description: 'Includes $250 USD base deposit + $5.00 welcome grant + $250.00 match ($505.00 total compute credit). Dedicated VPC private lane access with 100% double match.',
     depositAmountUsd: 250,
     welcomeGrantUsd: 5.0,
-    matchBonusUsd: 125.00,
-    totalCreditUsd: 380.00,
-    multiplier: 1.50,
-    badge: '50% Match Grant 🔓',
+    matchBonusUsd: 250.00,
+    totalCreditUsd: 505.00,
+    multiplier: 2.00,
+    badge: 'Unlimited VPC 🔓',
     taxCode: 'txcd_10000000',
     features: [
-      '$380.00 Total Usable Compute Credit (50% Match)',
+      '$505.00 Total Usable Compute Credit (100% Double Match)',
       'Dedicated VPC Private Lane & Zero-Data-Retention Vault',
       '1,200 RPM High-Concurrency Pipeline',
       'Custom Corporate Invoicing & ACH Net-30 Terms'
@@ -133,8 +160,8 @@ export const STRIPE_PRODUCT_TIERS: Record<string, StripeProductTier> = {
     metadata: {
       galxai_tier_key: 'sovereign_250',
       deposit_amount_usd: '250.00',
-      total_credit_usd: '380.00',
-      match_percentage: '50%',
+      total_credit_usd: '505.00',
+      match_percentage: '100%',
       rate_lock: 'guaranteed',
       sla_priority: 'enterprise'
     }
@@ -143,16 +170,16 @@ export const STRIPE_PRODUCT_TIERS: Record<string, StripeProductTier> = {
     id: 'hyperscale_500',
     name: 'GALXAI Prepaid Compute — Hyperscale Infrastructure Pack',
     statementDescriptor: 'GALXAI COMPUTE $500',
-    description: 'Includes $500 USD base deposit + $5.00 welcome grant + $250.00 match ($755.00 total compute credit). Custom Enterprise SLA and dedicated engineer.',
+    description: 'Includes $500 USD base deposit + $5.00 welcome grant + $500.00 match ($1,005.00 total compute credit). Custom Enterprise SLA and dedicated engineer.',
     depositAmountUsd: 500,
     welcomeGrantUsd: 5.0,
-    matchBonusUsd: 250.00,
-    totalCreditUsd: 755.00,
-    multiplier: 1.50,
-    badge: '50% Apex Match 🔓',
+    matchBonusUsd: 500.00,
+    totalCreditUsd: 1005.00,
+    multiplier: 2.00,
+    badge: '100% Double Match 🔓',
     taxCode: 'txcd_10000000',
     features: [
-      '$755.00 Total Usable Compute Credit (50% Match)',
+      '$1,005.00 Total Usable Compute Credit (100% Double Match)',
       'Unlimited Concurrency Burst & Dedicated Account Architect',
       '99.99% Availability Custom Enterprise SLA Guarantee',
       'Direct Private Slack Channel with Core Infrastructure Team'
@@ -160,8 +187,8 @@ export const STRIPE_PRODUCT_TIERS: Record<string, StripeProductTier> = {
     metadata: {
       galxai_tier_key: 'hyperscale_500',
       deposit_amount_usd: '500.00',
-      total_credit_usd: '755.00',
-      match_percentage: '50%',
+      total_credit_usd: '1005.00',
+      match_percentage: '100%',
       rate_lock: 'guaranteed',
       sla_priority: 'hyperscale'
     }

@@ -7,9 +7,39 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { getSupabaseConfig } from './config';
+import { BroccoliAuthoritativeGovernor } from '@/core/broccolidb/BroccoliAuthoritativeGovernor';
 
 let adminClientInstance: SupabaseClient<Database> | null = null;
 let defaultClientInstance: SupabaseClient<Database> | null = null;
+
+export class SupabaseCircuitBreakerError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'SupabaseCircuitBreakerError';
+  }
+}
+
+function createGovernedFetch(): typeof fetch {
+  const governor = BroccoliAuthoritativeGovernor.getInstance();
+  return async (input: RequestInfo | URL, init?: RequestInit) => {
+    if (!governor.canExecuteOutboundQuery()) {
+      throw new SupabaseCircuitBreakerError('Supabase circuit breaker OPEN or outbound rate limit reached; using local BroccoliDB cache.');
+    }
+
+    try {
+      const response = await fetch(input, init);
+      if (response.status >= 500) {
+        governor.recordFailure();
+      } else {
+        governor.recordSuccess();
+      }
+      return response;
+    } catch (err) {
+      governor.recordFailure();
+      throw err;
+    }
+  };
+}
 
 /**
  * Returns the privileged admin Supabase client (Service Role).
@@ -38,7 +68,7 @@ export function getSupabaseAdmin(): SupabaseClient<Database> {
         ? (async () => {
             throw new Error('Supabase not configured in local environment; using memory cache.');
           }) as unknown as typeof fetch
-        : undefined
+        : createGovernedFetch()
     }
   });
 
@@ -72,7 +102,7 @@ export function getSupabaseClient(accessToken?: string): SupabaseClient<Database
         ? (async () => {
             throw new Error('Supabase not configured in local environment; using memory cache.');
           }) as unknown as typeof fetch
-        : undefined
+        : createGovernedFetch()
     }
   });
 

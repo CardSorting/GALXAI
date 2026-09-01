@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import { BroccoliAuthoritativeGovernor } from "@/core/broccolidb/BroccoliAuthoritativeGovernor";
 
 const defaultUrl = 'https://mazhcjisettrzbqhorvp.supabase.co';
 const defaultKey = 'sb_publishable_9eyEPgM-hF00Va7TLE90yA_LV4iGcoE';
@@ -9,6 +10,28 @@ const supabaseKey =
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   defaultKey;
+
+function createGovernedMiddlewareFetch(): typeof fetch {
+  const governor = BroccoliAuthoritativeGovernor.getInstance();
+  return async (input: RequestInfo | URL, init?: RequestInit) => {
+    if (!governor.canExecuteOutboundQuery()) {
+      throw new Error('Supabase circuit breaker OPEN or outbound rate limit reached in edge middleware; failing fast.');
+    }
+
+    try {
+      const response = await fetch(input, init);
+      if (response.status >= 500) {
+        governor.recordFailure();
+      } else {
+        governor.recordSuccess();
+      }
+      return response;
+    } catch (err) {
+      governor.recordFailure();
+      throw err;
+    }
+  };
+}
 
 export const createClient = (request: NextRequest) => {
   let supabaseResponse = NextResponse.next({
@@ -35,6 +58,9 @@ export const createClient = (request: NextRequest) => {
           );
         },
       },
+      global: {
+        fetch: createGovernedMiddlewareFetch()
+      }
     },
   );
 

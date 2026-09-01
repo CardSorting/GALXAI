@@ -4,11 +4,13 @@ import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxSeatTierEngine } from '@/core/subscription/GalxSeatTierEngine';
 import { GalxCommunityPoolGovernor } from '@/core/governor/GalxCommunityPoolGovernor';
+import { GalxLumiQoSPoolGovernor } from '@/core/governor/GalxLumiQoSPoolGovernor';
 import { GalxElasticContextGovernor } from '@/core/governor/GalxElasticContextGovernor';
 import { GalxRollingContextEngine } from '@/core/router/GalxRollingContextEngine';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import { ChatRepository } from '@/lib/supabase/repositories/ChatRepository';
 import { GalxTrainingStreamEngine } from '@/core/training/GalxTrainingStreamEngine';
+import { vectorizedSyncEngine } from '@/core/sync/GalxVectorizedSyncEngine';
 import type { ChatCompletionRequest } from '@/core/contracts/GalxContracts';
 import {
   ChatRequestValidationError,
@@ -158,6 +160,38 @@ export async function POST(req: NextRequest) {
             ...(isLimit ? { 'Retry-After': is5h ? '1800' : '86400' } : {}),
             'X-Galx-Seat-Tier': entitlement.tier,
             'X-Galx-Seat-Role': entitlement.role
+          }
+        }
+      );
+    }
+
+    // 3. Evaluate Dedicated LUMI QoS Pool Governor (Prevent Shared Pool Exhaustion)
+    const lumiGovernor = GalxLumiQoSPoolGovernor.getInstance();
+    const isLumiUser: boolean = entitlement.tier === 'developer' || Boolean(entitlement.tierLabel?.toLowerCase().includes('lumi'));
+    const lumiResult = lumiGovernor.evaluateRequest(userId, isLumiUser, isPriorityUser, requestedModel);
+
+    if (!lumiResult.allowed && lumiResult.rejectionReason) {
+      return NextResponse.json(
+        {
+          error: {
+            message: lumiResult.rejectionReason.message,
+            type: 'qos_pool_exhausted',
+            code: lumiResult.rejectionReason.code,
+            reset_at: lumiResult.rejectionReason.resetAt,
+            retry_after_seconds: lumiResult.rejectionReason.retryAfterSeconds,
+            upgrade_url: lumiResult.rejectionReason.upgradeUrl,
+            pool: lumiResult.pool,
+            headroom_preserved_pct: lumiResult.poolStatus.reservedVipFloorPct
+          }
+        },
+        {
+          status: 429,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Retry-After': String(lumiResult.rejectionReason.retryAfterSeconds),
+            'X-Galx-QoS-Pool': lumiResult.pool,
+            'X-Galx-Congestion-State': lumiResult.poolStatus.congestionState,
+            'X-Galx-Reserved-Vip-Floor': `${lumiResult.poolStatus.reservedVipFloorPct}%`
           }
         }
       );
@@ -524,6 +558,7 @@ export async function POST(req: NextRequest) {
           console.error('[CompletionsRoute] Stream lease finalization failed:', settlementError);
         } finally {
           if (lease?.localStream) seatEngine.releaseSeatStreamSlot(userId);
+          GalxLumiQoSPoolGovernor.getInstance().releaseStreamSlot(userId, isLumiUser);
           
           // Zero-Storage Streaming Training Distillation Tap
           if (completed && (accumulatedContent || accumulatedThinking)) {
@@ -577,6 +612,7 @@ export async function POST(req: NextRequest) {
         },
       });
 
+      headers.set('Galx-Transport-Engine', 'zero-copy-v3-zenith');
       return new Response(managedStream, { status: result.statusCode, headers });
     }
 
@@ -633,6 +669,7 @@ export async function POST(req: NextRequest) {
       seatEngine.releaseSeatStreamSlot(userId);
       acquiredRequest = undefined;
     }
+    GalxLumiQoSPoolGovernor.getInstance().releaseStreamSlot(userId, isLumiUser);
 
     // Zero-Storage Streaming Training Distillation Tap (Non-Streaming)
     if (result.statusCode >= 200 && result.statusCode < 400) {
@@ -680,6 +717,7 @@ export async function POST(req: NextRequest) {
         }
       }
       if (acquiredRequest.localStream) seatEngine.releaseSeatStreamSlot(acquiredRequest.userId);
+      GalxLumiQoSPoolGovernor.getInstance().releaseStreamSlot(acquiredRequest.userId, true);
     }
     if (error instanceof ChatRequestValidationError) {
       return NextResponse.json(

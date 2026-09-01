@@ -25,13 +25,17 @@ import {
   ArrowRight,
   Sparkles,
   Sliders,
-  DollarSign
+  DollarSign,
+  Gift,
+  Server
 } from 'lucide-react';
 import { formatTimeAgo } from '@/lib/utils';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
+import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 
 function BaseKeyDetailPage() {
   const params = useParams();
@@ -43,6 +47,10 @@ function BaseKeyDetailPage() {
   const [activeSnippetTab, setActiveSnippetTab] = useState<'python' | 'node' | 'env' | 'cursor' | 'continue' | 'curl'>('python');
   const [copiedSnippet, setCopiedSnippet] = useState(false);
   const [copiedPrefix, setCopiedPrefix] = useState(false);
+  const [isPaywallOpen, setIsPaywallOpen] = useState(false);
+  const [paywallSelectedAmt, setPaywallSelectedAmt] = useState<number>(50);
+
+  const { depositAndUnlock, walletBalance } = useDepositVerification();
 
   // Smoke test state
   const [isTesting, setIsTesting] = useState(false);
@@ -211,6 +219,16 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, openai-gpt-image-2`,
     );
   }
 
+  const handlePaywallSuccess = async (depositAmt: number, totalCredit: number) => {
+    depositAndUnlock(depositAmt);
+    setIsPaywallOpen(false);
+    fetchKey();
+  };
+
+  const currentRpm = keyData?.rateLimitPerMinute || 120;
+  const isStarterTier = currentRpm <= 120;
+  const isGrowthTier = currentRpm > 120 && currentRpm <= 300;
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
@@ -302,6 +320,48 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, openai-gpt-image-2`,
           </div>
         </div>
 
+        {/* Contextual Throughput & VIP Upgrade Card */}
+        {!keyData.revoked && (
+          <div className="glass-panel rounded-3xl p-6 border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-black/50 space-y-4 shadow-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                  <Gift className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[10px] font-bold border border-amber-500/30">
+                    <Zap className="w-3 h-3 text-amber-400" />
+                    <span>
+                      {isStarterTier ? 'UPGRADE AVAILABLE: GROWTH VIP (300 RPM + 60% MATCH)' : isGrowthTier ? 'UPGRADE AVAILABLE: SCALE FLEET (600 RPM + 75% MATCH)' : 'ENTERPRISE SOVEREIGN LANE ACTIVE'}
+                    </span>
+                  </div>
+                  <h3 className="text-base font-bold text-white">
+                    {isStarterTier ? 'Unlock Sub-15ms VIP Fast-Lane & 300 RPM' : isGrowthTier ? 'Unlock 600 RPM Concurrency Burst Pass' : 'Enterprise Concurrency Governor'}
+                  </h3>
+                  <p className="text-xs text-zinc-300 max-w-xl">
+                    {isStarterTier
+                      ? 'Elevate this key from 120 RPM to 300 RPM with sub-15ms dedicated Anycast routing and a +60% Match Bonus on your next deposit.'
+                      : 'Scale to 600 RPM with high-concurrency burst passes and automated multi-cloud failover.'}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setPaywallSelectedAmt(isStarterTier ? 50 : 100);
+                  setIsPaywallOpen(true);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs font-mono uppercase tracking-wider shadow-lg shadow-amber-500/25 flex items-center gap-1.5 transition-all cursor-pointer shrink-0 hover:scale-[1.02] active:scale-98"
+              >
+                <Zap className="w-3.5 h-3.5 text-black" />
+                <span>Upgrade Key ({isStarterTier ? '$50 Tier' : '$100 Tier'})</span>
+                <ArrowRight className="w-3.5 h-3.5 text-black" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Live Key Verification / Test Bar */}
         <div className="glass-panel rounded-3xl p-6 space-y-4 border border-cyan-500/30 bg-cyan-500/5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -386,6 +446,15 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, openai-gpt-image-2`,
         </div>
         </AuthRequiredGate>
       </main>
+
+      {/* Paywall Blocker & Upgrade Modal */}
+      <KeyActivationPaywallModal
+        isOpen={isPaywallOpen}
+        onClose={() => setIsPaywallOpen(false)}
+        onSuccess={handlePaywallSuccess}
+        keyLabel={keyData?.name || 'Developer Gateway Key'}
+        initialAmount={paywallSelectedAmt}
+      />
     </div>
   );
 }

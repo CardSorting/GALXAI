@@ -16,6 +16,7 @@ function BaseDeveloperGatewayKeys() {
   const [newKeyName, setNewKeyName] = useState('');
   const [createdSecretKey, setCreatedSecretKey] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [snippetTab, setSnippetTab] = useState<'env' | 'python' | 'curl'>('env');
   const [isLoading, setIsLoading] = useState(false);
 
   const { hasVerifiedDeposit, walletBalance, depositAndUnlock } = useDepositVerification();
@@ -236,11 +237,54 @@ function BaseDeveloperGatewayKeys() {
                   </div>
                 </div>
 
+                {/* Quick Drop-in Code Snippet */}
+                <div className="space-y-2 pt-1 border-t border-white/10">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono text-zinc-400 uppercase">Quick Integration:</span>
+                    <div className="flex gap-1">
+                      {(['env', 'python', 'curl'] as const).map((t) => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setSnippetTab(t)}
+                          className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors cursor-pointer ${
+                            snippetTab === t ? 'bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30' : 'text-zinc-500 hover:text-white'
+                          }`}
+                        >
+                          {t === 'env' ? '.env' : t === 'python' ? 'Python' : 'cURL'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-black/80 border border-white/10 font-mono text-[11px] text-zinc-300 overflow-x-auto relative">
+                    <pre className="pr-16">
+                      {snippetTab === 'env' && `OPENAI_API_BASE=https://galx.ai/v1\nOPENAI_API_KEY=${createdSecretKey}`}
+                      {snippetTab === 'python' && `from openai import OpenAI\nclient = OpenAI(base_url="https://galx.ai/v1", api_key="${createdSecretKey}")`}
+                      {snippetTab === 'curl' && `curl https://galx.ai/v1/chat/completions \\\n  -H "Authorization: Bearer ${createdSecretKey}" \\\n  -H "Content-Type: application/json"`}
+                    </pre>
+                    <button
+                      onClick={() => {
+                        const snippet = snippetTab === 'env'
+                          ? `OPENAI_API_BASE=https://galx.ai/v1\nOPENAI_API_KEY=${createdSecretKey}`
+                          : snippetTab === 'python'
+                          ? `from openai import OpenAI\nclient = OpenAI(base_url="https://galx.ai/v1", api_key="${createdSecretKey}")`
+                          : `curl https://galx.ai/v1/chat/completions -H "Authorization: Bearer ${createdSecretKey}"`;
+                        handleCopy(snippet, 'snippet');
+                      }}
+                      className="absolute top-2.5 right-2.5 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] flex items-center gap-1 cursor-pointer"
+                    >
+                      {copiedKey === 'snippet' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedKey === 'snippet' ? 'Copied' : 'Copy'}</span>
+                    </button>
+                  </div>
+                </div>
+
                 <button
                   onClick={() => setIsOpenModal(false)}
-                  className="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs cursor-pointer transition-colors"
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-black font-black text-xs uppercase tracking-wider font-mono cursor-pointer transition-all shadow-md shadow-amber-500/20"
                 >
-                  Done
+                  Done &amp; Close
                 </button>
               </div>
             ) : (

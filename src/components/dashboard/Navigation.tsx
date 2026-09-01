@@ -38,6 +38,7 @@ import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 const NAV_LINKS = [
   { name: 'Chat', href: '/chat', icon: MessageSquare },
   { name: 'API Keys', href: '/keys', icon: Key },
+  { name: 'LUMI $10', href: '/lumi', icon: Sparkles },
   { name: 'Models', href: '/models', icon: Cpu },
   { name: 'Pricing', href: '/pricing', icon: DollarSign },
   { name: 'Docs', href: '/docs', icon: BookOpen },
@@ -197,6 +198,18 @@ function BaseNavigation() {
             >
               API Keys
             </Link>
+
+            {/* Live Wallet Balance Pill */}
+            {walletBalance > 0 && (
+              <Link
+                href="/keys"
+                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold transition-all cursor-pointer"
+                title="Active Compute Credit Balance"
+              >
+                <Coins className="w-3.5 h-3.5 text-emerald-400" />
+                <span>${walletBalance.toFixed(2)}</span>
+              </Link>
+            )}
 
             {/* User State & Dropdown */}
             {user ? (

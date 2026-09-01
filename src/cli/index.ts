@@ -21,6 +21,9 @@ async function main() {
   $ npx galxai setup                         Auto-configure project environment (.env.local) & templates
   $ npx galxai doctor                        Perform full connectivity, API key & Next.js health audit
   $ npx galxai add <component>               Eject UI component (image, chat) into your components directory
+  $ npx galxai tiers                         List all compute tiers, match bonuses & RPM quotas
+  $ npx galxai stripe sync                   Provision & push all compute tiers & prices to Stripe
+  $ npx galxai checkout [amount]             Generate 1-click Stripe Checkout session URL
   $ npx galxai <prompt>                      Run a fast completion (gpt-5.6-sol)
   $ npx galxai run "<prompt>" [--model <id>] Execute prompt against model or alias
   $ npx galxai image "<prompt>"              Generate visual image directly in terminal
@@ -31,9 +34,11 @@ async function main() {
   $ npx galxai chat                          Start interactive terminal REPL chat
 
 \x1b[1mEXAMPLES:\x1b[0m
+  $ npx galxai tiers
+  $ npx galxai stripe sync
+  $ npx galxai checkout 50
   $ npx galxai skills
   $ npx galxai doctor
-  $ npx galxai add image
   $ npx galxai image "Cyberpunk city at midnight" --ratio 16:9
   $ npx galxai "Refactor Express to Next.js"
     `);
@@ -337,6 +342,154 @@ ${agentMarkdown}
     };
 
     promptUser();
+    return;
+  }
+
+  if (command === 'tiers' || command === 'pricing') {
+    const { STRIPE_PRODUCT_TIERS } = await import('../lib/stripe/products');
+    console.log(`\n\x1b[1m\x1b[36m⚡ GALXAI PREPAID COMPUTE TIERS & STRIPE MATCH BONUSES\x1b[0m\n`);
+    console.log(`  Tier Key         Deposit   Match %   Bonus Grant   Total Credit   RPM Quota  Perks`);
+    console.log(`  ---------------------------------------------------------------------------------------`);
+    for (const [key, tier] of Object.entries(STRIPE_PRODUCT_TIERS)) {
+      const matchPct = `${Math.round((tier.multiplier - 1) * 100)}%`;
+      const rpm = tier.depositAmountUsd >= 500 ? 'Unlimited' : tier.depositAmountUsd >= 250 ? '1,200 RPM' : tier.depositAmountUsd >= 100 ? '600 RPM' : tier.depositAmountUsd >= 50 ? '300 RPM' : '120 RPM';
+      console.log(`  \x1b[1m${key.padEnd(16)}\x1b[0m $${tier.depositAmountUsd.toString().padEnd(8)} ${matchPct.padEnd(9)} +$${(tier.matchBonusUsd + tier.welcomeGrantUsd).toFixed(2).padEnd(11)} \x1b[32m$${tier.totalCreditUsd.toFixed(2).padEnd(13)}\x1b[0m ${rpm.padEnd(10)} ${tier.badge}`);
+    }
+    console.log(`\n  \x1b[90mIncludes $5.00 introductory welcome grant on all tiers. 100% refundable unspent balances.\x1b[0m`);
+    console.log(`  \x1b[90mRun \x1b[1mnpx galxai checkout <amount>\x1b[0m\x1b[90m to initiate 1-click Stripe top-up.\x1b[0m\n`);
+    return;
+  }
+
+  if (command === 'stripe') {
+    const sub = args[1] || 'sync';
+    const { STRIPE_PRODUCT_TIERS } = await import('../lib/stripe/products');
+    const { getStripeConfig } = await import('../lib/stripe/config');
+    const fs = await import('fs');
+    const path = await import('path');
+
+    console.log(`\n\x1b[1m\x1b[36m🚀 GALXAI Stripe Product & Price Substrate Provisioner\x1b[0m\n`);
+
+    const config = getStripeConfig();
+    const isMock = !config.isConfigured || !config.secretKey || config.secretKey.includes('Mock');
+
+    if (isMock) {
+      console.log(`  \x1b[33mℹ Notice: Running in Local Simulation / Offline Dev Mode.\x1b[0m`);
+      console.log(`  Generating mock Stripe Product & Price catalog...\n`);
+
+      const generatedMap: Record<string, any> = {};
+      for (const [key, tier] of Object.entries(STRIPE_PRODUCT_TIERS)) {
+        generatedMap[key] = {
+          tierKey: key,
+          depositAmount: tier.depositAmountUsd,
+          totalCredit: tier.totalCreditUsd,
+          productId: `prod_galxai_${key}`,
+          productName: tier.name,
+          priceId: `price_galxai_${key}`,
+          currency: 'usd',
+          unitAmount: tier.depositAmountUsd * 100
+        };
+        console.log(`  ✓ Synced Tier [\x1b[1m${key.padEnd(15)}\x1b[0m]: $${tier.depositAmountUsd.toString().padEnd(3)} deposit -> \x1b[32m$${tier.totalCreditUsd.toFixed(2)} compute\x1b[0m (Price ID: price_galxai_${key})`);
+      }
+
+      const outputPath = path.resolve(process.cwd(), 'src/lib/stripe/stripe-products.generated.json');
+      fs.writeFileSync(outputPath, JSON.stringify(generatedMap, null, 2), 'utf8');
+      console.log(`\n  \x1b[32m✓ Success: Generated Stripe product catalog written to src/lib/stripe/stripe-products.generated.json\x1b[0m\n`);
+      return;
+    }
+
+    try {
+      const StripeLib = (await import('stripe')).default;
+      const stripe = new StripeLib(config.secretKey, {
+        apiVersion: '2025-02-24.acacia' as any,
+        appInfo: { name: 'GALXAI-CLI-Seeder', version: '3.0.0' }
+      });
+
+      console.log(`  Connecting to Stripe API (${config.secretKey.slice(0, 8)}...)...`);
+      const existingProducts = await stripe.products.list({ limit: 100, active: true });
+      const productByTierKey = new Map<string, any>();
+      for (const prod of existingProducts.data) {
+        if (prod.metadata?.galxai_tier_key) {
+          productByTierKey.set(prod.metadata.galxai_tier_key, prod);
+        }
+      }
+
+      const generatedMap: Record<string, any> = {};
+      for (const [key, tier] of Object.entries(STRIPE_PRODUCT_TIERS)) {
+        let product = productByTierKey.get(key);
+        if (!product) {
+          product = await stripe.products.create({
+            name: tier.name,
+            description: tier.description,
+            statement_descriptor: tier.statementDescriptor,
+            tax_code: tier.taxCode,
+            metadata: tier.metadata
+          });
+          console.log(`  ✓ Product Created: ${product.id} (${tier.name})`);
+        } else {
+          product = await stripe.products.update(product.id, {
+            name: tier.name,
+            description: tier.description,
+            statement_descriptor: tier.statementDescriptor,
+            tax_code: tier.taxCode,
+            metadata: tier.metadata
+          });
+          console.log(`  ✓ Product Updated: ${product.id} (${tier.name})`);
+        }
+
+        const prices = await stripe.prices.list({ product: product.id, active: true, limit: 10 });
+        const targetAmountCents = tier.depositAmountUsd * 100;
+        let price = prices.data.find(p => p.unit_amount === targetAmountCents && p.currency === 'usd');
+
+        if (!price) {
+          price = await stripe.prices.create({
+            product: product.id,
+            unit_amount: targetAmountCents,
+            currency: 'usd',
+            metadata: {
+              galxai_tier_key: key,
+              total_credit_usd: tier.totalCreditUsd.toFixed(2),
+              match_percentage: `${Math.round((tier.multiplier - 1) * 100)}%`
+            }
+          });
+          console.log(`    ✓ Price Created: ${price.id} ($${tier.depositAmountUsd}.00)`);
+        } else {
+          console.log(`    ✓ Price Active: ${price.id} ($${tier.depositAmountUsd}.00)`);
+        }
+
+        generatedMap[key] = {
+          tierKey: key,
+          depositAmount: tier.depositAmountUsd,
+          totalCredit: tier.totalCreditUsd,
+          productId: product.id,
+          productName: tier.name,
+          priceId: price.id,
+          currency: 'usd',
+          unitAmount: targetAmountCents
+        };
+      }
+
+      const outputPath = path.resolve(process.cwd(), 'src/lib/stripe/stripe-products.generated.json');
+      fs.writeFileSync(outputPath, JSON.stringify(generatedMap, null, 2), 'utf8');
+      console.log(`\n  \x1b[32m✓ All ${Object.keys(generatedMap).length} Tiers Successfully Pushed to Stripe!\x1b[0m\n`);
+    } catch (err: any) {
+      console.error(`  \x1b[31mStripe Sync Error:\x1b[0m ${err.message}`);
+    }
+    return;
+  }
+
+  if (command === 'checkout' || command === 'topup') {
+    const rawAmt = parseFloat(args[1] || '50');
+    const amt = isNaN(rawAmt) || rawAmt <= 0 ? 50 : rawAmt;
+    const { calculateComputeCredit } = await import('../lib/stripe/config');
+    const credit = calculateComputeCredit(amt);
+
+    console.log(`\n\x1b[1m\x1b[36m💳 GALXAI 1-Click Stripe Checkout Session\x1b[0m\n`);
+    console.log(`  Tier:         \x1b[1m${credit.tier.label}\x1b[0m`);
+    console.log(`  Deposit:      \x1b[1m$${credit.depositAmount.toFixed(2)} USD\x1b[0m`);
+    console.log(`  Match Bonus:  \x1b[32m+$${(credit.matchBonus + credit.welcomeGrant).toFixed(2)} USD\x1b[0m`);
+    console.log(`  Total Tokens: \x1b[1m\x1b[32m$${credit.totalCredit.toFixed(2)} USD\x1b[0m (100% Usable)`);
+    console.log(`\n  \x1b[1mCheckout URL:\x1b[0m`);
+    console.log(`  \x1b[4m\x1b[36mhttps://galx.ai/checkout?amount=${credit.depositAmount}&source=cli\x1b[0m\n`);
     return;
   }
 

@@ -44,6 +44,16 @@ interface TierSpec {
 }
 
 const CHECKOUT_TIERS: Record<number, TierSpec> = {
+  10: {
+    amount: 10,
+    label: 'LUMI Stellar Pass (Monthly)',
+    badge: 'LUMI $10/MO ✨',
+    multiplier: 1.5,
+    perks: ['OpenAI Flagship Curated Lineup', 'Rolling 5-Hour Warp Quotas (~$60/mo compute)', 'Zero Data Retention (ZDR) Enclave'],
+    chatCount: '8,500 queries',
+    codeCount: '450 tasks',
+    imageCount: '300 renders'
+  },
   25: {
     amount: 25,
     label: 'Starter Builder Pack',
@@ -92,7 +102,7 @@ function CheckoutContent() {
   const { user } = useAuth();
 
   const rawAmount = parseInt(searchParams.get('amount') || '50', 10);
-  const initialAmount = [25, 50, 100, 250].includes(rawAmount) ? rawAmount : 50;
+  const initialAmount = [10, 25, 50, 100, 250].includes(rawAmount) ? rawAmount : 50;
 
   const [selectedAmount, setSelectedAmount] = useState<number>(initialAmount);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'crypto' | 'ach'>('card');
@@ -100,6 +110,7 @@ function CheckoutContent() {
   const [companyName, setCompanyName] = useState('');
   const [autoReloadEnabled, setAutoReloadEnabled] = useState(true);
   const [rateLockConsent, setRateLockConsent] = useState(true);
+  const [teamSeatsSelected, setTeamSeatsSelected] = useState(false);
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<string | null>('FOUNDING50');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -132,6 +143,8 @@ function CheckoutContent() {
   const welcomeGrant = 5.0;
   const matchBonusDollars = (selectedAmount * (currentTier.multiplier - 1));
   const totalUsableCompute = selectedAmount + welcomeGrant + matchBonusDollars;
+  const teamSeatsCost = teamSeatsSelected ? 75 : 0;
+  const totalPayable = selectedAmount + teamSeatsCost;
 
   const handleApplyPromo = () => {
     if (promoCode.trim().toUpperCase() === 'FOUNDING50' || promoCode.trim().toUpperCase() === 'WELCOME5') {
@@ -151,6 +164,7 @@ function CheckoutContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: selectedAmount,
+          teamSeats: teamSeatsSelected,
           userId: user?.id || user?.email || undefined,
           email: email || user?.email || undefined,
           companyName: companyName || user?.company || undefined,
@@ -477,7 +491,26 @@ function CheckoutContent() {
                       <span>Lock In Founding Builder Cohort Multipliers (50% Compute Match)</span>
                     </div>
                     <p className="text-zinc-400 text-[11px]">
-                      Permanently locks in your 50% match grant on all subsequent top-ups.
+                      Permanently locks in your promotional match grant on all subsequent top-ups.
+                    </p>
+                  </label>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/25 flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    id="teamSeatsUpgrade"
+                    checked={teamSeatsSelected}
+                    onChange={(e) => setTeamSeatsSelected(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded text-indigo-400 accent-indigo-400 cursor-pointer"
+                  />
+                  <label htmlFor="teamSeatsUpgrade" className="text-xs space-y-0.5 cursor-pointer">
+                    <div className="font-bold text-indigo-300 flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Add Small Business Team Workspace (+5 Shared Seats for $75/mo)</span>
+                    </div>
+                    <p className="text-zinc-400 text-[11px]">
+                      Share this compute wallet across up to 5 team members with unified RBAC, per-seat spend caps, and centralized invoices.
                     </p>
                   </label>
                 </div>
@@ -490,7 +523,7 @@ function CheckoutContent() {
                 className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-2xl shadow-amber-500/30 cursor-pointer hover:scale-[1.01] active:scale-99 disabled:opacity-50 font-mono"
               >
                 <Lock className="w-4 h-4 fill-black" />
-                <span>{isProcessing ? 'Processing Secure Deposit...' : `Pay $${selectedAmount}.00 & Claim $${totalUsableCompute.toFixed(2)} Credits`}</span>
+                <span>{isProcessing ? 'Processing Secure Deposit...' : `Pay $${totalPayable.toFixed(2)} & Claim $${totalUsableCompute.toFixed(2)} Credits`}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
@@ -531,6 +564,16 @@ function CheckoutContent() {
                   <span>Prepaid Compute Deposit ({currentTier.label}):</span>
                   <span className="font-bold text-white">${selectedAmount.toFixed(2)}</span>
                 </div>
+
+                {teamSeatsSelected && (
+                  <div className="flex justify-between items-center text-indigo-300">
+                    <span className="flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Small Business Plan (5 Team Seats):</span>
+                    </span>
+                    <span className="font-bold">+$75.00/mo</span>
+                  </div>
+                )}
 
                 <div className="flex justify-between items-center text-emerald-400">
                   <span className="flex items-center gap-1.5">
@@ -593,7 +636,7 @@ function CheckoutContent() {
               <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-emerald-500/10 border border-amber-400/50 space-y-3 font-mono">
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-zinc-300 font-sans uppercase font-bold">Total Due Today:</span>
-                  <div className="text-2xl font-black text-white">${selectedAmount.toFixed(2)} USD</div>
+                  <div className="text-2xl font-black text-white">${totalPayable.toFixed(2)} USD</div>
                 </div>
 
                 <div className="flex justify-between items-center pt-2 border-t border-white/10">

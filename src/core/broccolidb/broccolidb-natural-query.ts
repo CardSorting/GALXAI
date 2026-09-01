@@ -140,7 +140,7 @@ export class BroccoliNaturalQueryParser {
     }
 
     // 6. StartsWith / Prefix (e.g. "userId starts with user_prod", "shardId starting with gpt")
-    const startRegex = /([a-zA-Z0-9_\-]+)\s+(?:starts?\s+with|starting\s+with)\s+['"]?([a-zA-Z0-9_\-]+)['"]?/gi;
+    const startRegex = /([a-zA-Z0-9_\-\.]+)\s+(?:starts?\s+with|starting\s+with)\s+['"]?([^'"\s,]+)['"]?/gi;
     let sMatch: RegExpExecArray | null;
     while ((sMatch = startRegex.exec(text)) !== null) {
       const field = sMatch[1];
@@ -149,22 +149,22 @@ export class BroccoliNaturalQueryParser {
       tokensMatched.push(sMatch[0]);
     }
 
-    // 7. Contains / Text Search (e.g. "action contains EXFILTRATION", "metadata contains error")
-    const containRegex = /([a-zA-Z0-9_\-]+)\s+(?:contains?|containing)\s+['"]?([a-zA-Z0-9_\-]+)['"]?/gi;
+    // 7. Contains / Text Search (e.g. "action contains EXFILTRATION", 'metadata.error contains "timeout"')
+    const containRegex = /([a-zA-Z0-9_\-\.]+)\s+(?:contains?|containing)\s+(?:["']([^"']+)["']|([^\s,]+))/gi;
     let ctMatch: RegExpExecArray | null;
     while ((ctMatch = containRegex.exec(text)) !== null) {
       const field = ctMatch[1];
-      const substring = ctMatch[2];
+      const substring = ctMatch[2] ?? ctMatch[3];
       where[field] = { $contains: substring };
       tokensMatched.push(ctMatch[0]);
     }
 
-    // 8. Equality (e.g. "status is healthy", "with action INFERENCE", "region:us")
-    const eqRegex = /(?:\bwhere\s+|\bwith\s+|\b)([a-zA-Z0-9_\-]+)\s*(?::|\s+is\s+|=)\s*['"]?([^'"\s,]+)['"]?/gi;
+    // 8. Equality (e.g. "status is healthy", "with action INFERENCE", 'metadata.code is "ERR_404"')
+    const eqRegex = /(?:\bwhere\s+|\bwith\s+|\b)([a-zA-Z0-9_\-\.]+)\s*(?::|\s+is\s+|=)\s*(?:["']([^"']+)["']|([^'"\s,]+))/gi;
     let eMatch: RegExpExecArray | null;
     while ((eMatch = eqRegex.exec(text)) !== null) {
       const field = eMatch[1];
-      const rawVal = eMatch[2];
+      const rawVal = eMatch[2] ?? eMatch[3];
       const reserved = ["table", "limit", "offset", "sort", "sorted", "order", "ordered", "by", "asc", "desc", "and", "or", "not", "where", "with", "in", "from", "select"];
       if (!reserved.includes(field.toLowerCase()) && !(field in where)) {
         let parsedVal: any = rawVal;

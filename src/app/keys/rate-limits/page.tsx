@@ -16,10 +16,14 @@ import {
   TrendingUp,
   Activity,
   Flame,
-  Save
+  Save,
+  Gift,
+  ArrowRight
 } from 'lucide-react';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
+import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
+import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 
 export default function RateLimitsPage() {
   const [keys, setKeys] = useState<any[]>([]);
@@ -30,6 +34,10 @@ export default function RateLimitsPage() {
   const [retryBackoff, setRetryBackoff] = useState('exponential_jitter');
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPaywallOpen, setIsPaywallOpen] = useState(false);
+  const [paywallSelectedAmt, setPaywallSelectedAmt] = useState(50);
+
+  const { depositAndUnlock } = useDepositVerification();
 
   const fetchKeys = async () => {
     try {
@@ -237,6 +245,37 @@ export default function RateLimitsPage() {
                   </div>
                 </div>
 
+                {/* Contextual VIP High-Throughput Banner */}
+                {rpmLimit >= 300 && (
+                  <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs animate-in fade-in duration-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-amber-400 text-black flex items-center justify-center font-bold shrink-0">
+                        <Gift className="w-4 h-4 text-black" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-white block">
+                          {rpmLimit >= 1200 ? 'Enterprise VIP Dedicated Shard' : rpmLimit >= 600 ? 'Scale Fleet Burst Pass (600 RPM)' : 'Growth VIP Fast-Lane (300 RPM)'}
+                        </span>
+                        <span className="text-zinc-300 text-[11px]">
+                          High concurrency requires an active VIP compute deposit. Unlock with up to 100% Match Bonus.
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaywallSelectedAmt(rpmLimit >= 1200 ? 250 : rpmLimit >= 600 ? 100 : 50);
+                        setIsPaywallOpen(true);
+                      }}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-[11px] uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer shrink-0 shadow-md shadow-amber-500/20"
+                    >
+                      <span>Unlock VIP Tier</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+
                 <div className="flex justify-end pt-4 border-t border-white/5">
                   <button
                     type="submit"
@@ -252,6 +291,19 @@ export default function RateLimitsPage() {
           )}
         </AuthRequiredGate>
       </main>
+
+      {/* Paywall Blocker & Upgrade Modal */}
+      <KeyActivationPaywallModal
+        isOpen={isPaywallOpen}
+        onClose={() => setIsPaywallOpen(false)}
+        onSuccess={(depositAmt) => {
+          depositAndUnlock(depositAmt);
+          setIsPaywallOpen(false);
+          fetchKeys();
+        }}
+        keyLabel="Throughput Governor Upgrade"
+        initialAmount={paywallSelectedAmt}
+      />
     </div>
   );
 }

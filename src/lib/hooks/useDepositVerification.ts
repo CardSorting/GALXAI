@@ -90,9 +90,9 @@ export function useDepositVerification() {
 
   const depositAndUnlock = (depositAmt: number): { totalCredited: number; bonus: number } => {
     const welcomeBonus = 5.0; // The $5 free compute grant
-    const bonusPct = depositAmt >= 100 ? 0.1 : depositAmt >= 50 ? 0.05 : 0;
-    const tierBonus = depositAmt * bonusPct;
-    const totalBonus = welcomeBonus + tierBonus;
+    const matchMultiplier = depositAmt >= 250 ? 2.0 : depositAmt >= 100 ? 1.75 : depositAmt >= 50 ? 1.6 : 1.5;
+    const matchBonus = depositAmt * (matchMultiplier - 1);
+    const totalBonus = welcomeBonus + matchBonus;
     const totalCredited = depositAmt + totalBonus;
     const newBalance = (walletBalance || 0) + totalCredited;
 

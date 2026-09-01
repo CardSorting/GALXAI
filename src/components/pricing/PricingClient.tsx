@@ -773,7 +773,7 @@ export function PricingClient() {
                     href="/keys/new"
                     className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all font-mono"
                   >
-                    <span>Deploy with $5 Free Credit</span>
+                    <span>Mint Instant Key ($30 Free Grant)</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>

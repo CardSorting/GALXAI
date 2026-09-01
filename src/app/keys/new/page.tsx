@@ -32,7 +32,8 @@ import {
   Bot,
   Layers,
   Gift,
-  Activity
+  Activity,
+  Plus
 } from 'lucide-react';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
@@ -106,10 +107,10 @@ function BaseCreateKeyPage() {
   const [isTestingKey, setIsTestingKey] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; latencyMs: number; message: string } | null>(null);
 
-  // Account Verification & Paywall State ($10 Minimum Initial Deposit to Unlock $5 Bonus)
+  // Account Verification & Paywall State ($25 Minimum Initial Deposit to Unlock 50% Match Bonus)
   const { hasVerifiedDeposit, walletBalance, depositAndUnlock } = useDepositVerification();
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
-  const [paywallSelectedAmt, setPaywallSelectedAmt] = useState<number>(10);
+  const [paywallSelectedAmt, setPaywallSelectedAmt] = useState<number>(25);
   const [isDepositing, setIsDepositing] = useState(false);
   const [depositSuccessMsg, setDepositSuccessMsg] = useState<string | null>(null);
 
@@ -146,7 +147,7 @@ function BaseCreateKeyPage() {
     setTimeout(() => {
       const { totalCredited } = depositAndUnlock(amt);
       setIsDepositing(false);
-      setDepositSuccessMsg(`Successfully deposited $${amt.toFixed(2)} USD! Credited +$${totalCredited.toFixed(2)} ($${amt.toFixed(2)} + $5.00 Welcome Grant) to your compute wallet.`);
+      setDepositSuccessMsg(`Successfully deposited $${amt.toFixed(2)} USD! Credited +$${totalCredited.toFixed(2)} ($${amt.toFixed(2)} + 50% Match Bonus) to your compute wallet.`);
       setTimeout(() => setDepositSuccessMsg(null), 5000);
       mintKeyRequest(walletBalance + totalCredited);
     }, 800);
@@ -157,6 +158,12 @@ function BaseCreateKeyPage() {
     setIsPaywallOpen(false);
     setDepositSuccessMsg(`Payment verified! Credited +$${totalCredited.toFixed(2)} to wallet. Minting live key...`);
     mintKeyRequest(walletBalance + totalCredited);
+  };
+
+  const handleMintFreeKey = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!name.trim()) return;
+    await mintKeyRequest(walletBalance);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -618,35 +625,37 @@ DEFAULT_MODEL="gpt-5.6-sol"`,
                 </div>
               </div>
 
-              {/* Submit Buttons */}
-              <div className="flex justify-end gap-3 pt-2">
+              {/* Submit Actions */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-white/10">
                 <Link
                   href="/keys"
-                  className="px-5 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white text-xs font-semibold transition-all"
+                  className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white text-xs font-semibold text-center transition-all"
                 >
                   Cancel
                 </Link>
-                <button
-                  type="submit"
-                  disabled={isLoading || !name.trim()}
-                  className="px-8 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer font-mono"
-                >
-                  {isLoading ? (
-                    <span>Minting Key...</span>
-                  ) : !hasVerifiedDeposit ? (
-                    <>
-                      <Gift className="w-4 h-4 text-black" />
-                      <span>Unlock with $10 Deposit ($15 Credit)</span>
-                      <ArrowRight className="w-4 h-4 text-black" />
-                    </>
-                  ) : (
-                    <>
-                      <Key className="w-4 h-4 text-black" />
-                      <span>Mint Verified Key</span>
-                      <ArrowRight className="w-4 h-4 text-black" />
-                    </>
-                  )}
-                </button>
+
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                  <button
+                    type="button"
+                    onClick={handleMintFreeKey}
+                    disabled={isLoading || !name.trim()}
+                    className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Mint Free Developer Key ($30 Grant)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsPaywallOpen(true)}
+                    disabled={isLoading || !name.trim()}
+                    className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer font-mono hover:scale-[1.02] active:scale-98"
+                  >
+                    <Gift className="w-4 h-4 text-black" />
+                    <span>Activate VIP Tier (+50% Match Bonus)</span>
+                    <ArrowRight className="w-4 h-4 text-black" />
+                  </button>
+                </div>
               </div>
             </form>
           )}

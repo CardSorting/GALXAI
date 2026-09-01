@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import {
   Key,
   CreditCard,
@@ -23,9 +24,14 @@ import {
   Copy,
   Terminal,
   Layers,
-  Bot
+  Bot,
+  Building2,
+  ExternalLink,
+  Receipt,
+  QrCode
 } from 'lucide-react';
 import { TierUnlockProgressBar } from '@/components/dashboard/TierUnlockProgressBar';
+import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 interface PaywallPack {
   amount: number;
@@ -33,13 +39,15 @@ interface PaywallPack {
   tierBonusPct: number;
   badge?: string;
   popular?: boolean;
+  multiplier: number;
+  highlight: string;
 }
 
 const PAYWALL_PACKS: PaywallPack[] = [
-  { amount: 25, label: 'Starter Key', tierBonusPct: 50, badge: '50% Match Bonus', popular: true },
-  { amount: 50, label: 'Growth VIP', tierBonusPct: 50, badge: 'VIP Priority 🔓' },
-  { amount: 100, label: 'Scale Fleet', tierBonusPct: 50, badge: '600 RPM Fleet 🔓' },
-  { amount: 250, label: 'Enterprise Burst', tierBonusPct: 50, badge: 'Unlimited VPC 🔓' }
+  { amount: 25, label: 'Starter Builder', tierBonusPct: 50, badge: '50% Instant Match', popular: true, multiplier: 1.5, highlight: '120 RPM • 75% Prompt Caching' },
+  { amount: 50, label: 'Growth VIP', tierBonusPct: 60, badge: 'VIP Fast-Lane 🔓', multiplier: 1.6, highlight: '300 RPM • Sub-15ms VIP Anycast' },
+  { amount: 100, label: 'Scale Fleet', tierBonusPct: 75, badge: '600 RPM Fleet 🔓', multiplier: 1.75, highlight: '600 RPM • Concurrency Burst Pass' },
+  { amount: 250, label: 'Enterprise Sovereign', tierBonusPct: 100, badge: '100% Double Match 🔓', multiplier: 2.0, highlight: 'Unlimited Concurrency • Custom VPC' }
 ];
 
 interface KeyActivationPaywallModalProps {
@@ -55,11 +63,15 @@ export function KeyActivationPaywallModal({
   onClose,
   onSuccess,
   keyLabel = 'Developer Gateway Key',
-  initialAmount = 10
+  initialAmount = 25
 }: KeyActivationPaywallModalProps) {
   const [selectedAmount, setSelectedAmount] = useState<number>(initialAmount);
   const [customAmount, setCustomAmount] = useState<string>('');
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'apple' | 'crypto'>('card');
+  const [activePersona, setActivePersona] = useState<'cursor' | 'agent' | 'chat' | 'multimodal'>('cursor');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'stripe' | 'crypto'>('card');
+  const [autoReload, setAutoReload] = useState(true);
+  const [cryptoNetwork, setCryptoNetwork] = useState<'base' | 'arbitrum' | 'solana' | 'polygon'>('base');
+  const [copiedAddress, setCopiedAddress] = useState(false);
   const [cardNumber, setCardNumber] = useState('4242 •••• •••• 4242');
   const [cardExp, setCardExp] = useState('12/28');
   const [cardCvc, setCardCvc] = useState('888');
@@ -70,22 +82,82 @@ export function KeyActivationPaywallModal({
 
   if (!isOpen) return null;
 
-  const currentAmt = customAmount ? Math.max(10, parseFloat(customAmount) || 10) : selectedAmount;
-  const currentPack = PAYWALL_PACKS.find(p => p.amount === currentAmt) || { amount: currentAmt, label: 'Custom Pack', tierBonusPct: currentAmt >= 100 ? 10 : currentAmt >= 50 ? 5 : 0 };
-  const welcomeBonus = 5.0; // Guaranteed $5 introductory compute grant
+  const currentAmt = customAmount ? Math.max(10, parseFloat(customAmount) || 25) : selectedAmount;
+  const currentPack = PAYWALL_PACKS.find(p => p.amount === currentAmt) || {
+    amount: currentAmt,
+    label: 'Custom Tier',
+    tierBonusPct: currentAmt >= 250 ? 100 : currentAmt >= 100 ? 75 : currentAmt >= 50 ? 60 : 50,
+    multiplier: currentAmt >= 250 ? 2.0 : currentAmt >= 100 ? 1.75 : currentAmt >= 50 ? 1.6 : 1.5,
+    highlight: 'Standard High-Speed Anycast Routing'
+  };
+  const welcomeBonus = 5.0; // Instant introductory compute grant
   const tierBonus = currentAmt * (currentPack.tierBonusPct / 100);
   const totalCreditReceived = currentAmt + welcomeBonus + tierBonus;
 
-  // Live Token Mileage Estimates
-  const tokensSol = Math.round((totalCreditReceived / 3.75) * 1000000);
-  const tokensLuna = Math.round((totalCreditReceived / 0.95) * 1000000);
-  const totalImages = Math.round(totalCreditReceived / 0.02);
+  // Persona-based metrics calculation
+  const getModalMetrics = () => {
+    switch (activePersona) {
+      case 'cursor':
+        return [
+          { label: 'Code Completions', val: `~${Math.round((totalCreditReceived / 0.035) * 10).toLocaleString()}` },
+          { label: 'Refactor Tasks', val: `~${Math.round(totalCreditReceived / 0.08).toLocaleString()}` },
+          { label: 'Cache Rebate', val: '75% Active' }
+        ];
+      case 'agent':
+        return [
+          { label: 'Tool Steps', val: `~${Math.round(totalCreditReceived * 240).toLocaleString()}` },
+          { label: 'Goal Executions', val: `~${Math.round(totalCreditReceived * 18).toLocaleString()}` },
+          { label: 'Throughput', val: `${currentAmt >= 250 ? '1,200' : currentAmt >= 100 ? '600' : currentAmt >= 50 ? '300' : '120'} RPM` }
+        ];
+      case 'chat':
+        return [
+          { label: 'Chat Turns', val: `~${Math.round((totalCreditReceived / 0.002) * 10).toLocaleString()}` },
+          { label: 'Tokens Streamed', val: `~${Math.round(totalCreditReceived * 320).toLocaleString()}k` },
+          { label: 'Anycast Latency', val: '< 15ms' }
+        ];
+      case 'multimodal':
+        return [
+          { label: 'Image Renders', val: `~${Math.round(totalCreditReceived / 0.02).toLocaleString()}` },
+          { label: 'Embedding Dims', val: `~${Math.round(totalCreditReceived * 25).toLocaleString()}M` },
+          { label: 'Wholesale Discount', val: '25%–40%' }
+        ];
+    }
+  };
+
+  const handleStripeCheckoutRedirect = async () => {
+    setIsProcessing(true);
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: currentAmt,
+          autoReload: autoReload,
+          successUrl: `${window.location.origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}&amount=${currentAmt}&total=${totalCreditReceived}&tier=${encodeURIComponent(currentPack.label)}&source=key_activation`,
+          cancelUrl: `${window.location.origin}/keys?canceled=true`
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (data?.success && data.url) {
+        window.location.href = data.url;
+      } else {
+        handlePayAndUnlock();
+      }
+    } catch {
+      handlePayAndUnlock();
+    }
+  };
 
   const handlePayAndUnlock = () => {
+    if (paymentMethod === 'stripe') {
+      handleStripeCheckoutRedirect();
+      return;
+    }
+
     setIsProcessing(true);
     setActivationStep(1); // 1: Authorizing payment
     setTimeout(() => {
-      setActivationStep(2); // 2: Applying $5 match grant
+      setActivationStep(2); // 2: Applying match grant
       setTimeout(() => {
         setActivationStep(3); // 3: Minting key
         setTimeout(() => {
@@ -99,20 +171,20 @@ export function KeyActivationPaywallModal({
 
   const faqItems = [
     {
-      q: 'Why is an initial $10 deposit required to activate the $5 bonus?',
-      a: 'To guarantee sub-15ms routing and zero queue wait times on frontier models (GPT-5.6 Sol, Terra, Luna), we provision dedicated high-availability routing slots. The $10 refundable deposit prevents bot scraper swarms while ensuring 100% of your money goes directly toward usable tokens.'
+      q: 'How does the 50%–100% Match Bonus work?',
+      a: 'When you activate a compute tier, we immediately credit your wallet with your full deposit plus a guaranteed promotional match grant (e.g. deposit $25, receive $37.50 + $5 welcome bonus = $42.50 total compute credit).'
     },
     {
-      q: 'What is the 50% Match Bonus?',
-      a: 'When you deposit $10 for your first key, we immediately add a $5.00 welcome grant from our developer fund. You start with $15.00 in usable compute credits with zero platform fees.'
+      q: 'Can I get a refund on unspent balances?',
+      a: 'Yes. 100% of any unspent deposited funds can be refunded back to your original payment method at any time with 1 click from the Billing settings.'
     },
     {
-      q: 'Can I get a refund on unspent funds?',
-      a: 'Yes. Any unspent balance from your initial deposit can be refunded with 1 click directly from the Billing dashboard at any time.'
+      q: 'Do compute credits or match bonuses expire?',
+      a: 'Never. All deposited balances and match credits remain active in your workspace wallet indefinitely.'
     },
     {
-      q: 'Do compute credits expire?',
-      a: 'No. Deposited compute balances and promotional match grants never expire.'
+      q: 'Can I use this single key across Cursor, Windsurf, Python, and Claude Code?',
+      a: 'Yes. GALXAI keys are universal OpenAI/Anthropic drop-in tokens. Simply point your base URL to https://galx.ai/v1.'
     }
   ];
 
@@ -142,7 +214,7 @@ export function KeyActivationPaywallModal({
             <div className="space-y-2 max-w-sm mx-auto">
               <h3 className="text-xl font-black text-white">
                 {activationStep === 1 && 'Authorizing Deposit...'}
-                {activationStep === 2 && 'Applying +$5.00 Match Bonus...'}
+                {activationStep === 2 && 'Applying Match Bonus...'}
                 {activationStep === 3 && 'Minting Dedicated Bearer Key...'}
               </h3>
               <p className="text-xs text-amber-300/90 font-mono">
@@ -164,14 +236,14 @@ export function KeyActivationPaywallModal({
             {/* Header & GTM Badge */}
             <div className="space-y-2 text-center relative z-10">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-mono font-bold shadow-md shadow-amber-500/10">
-                <Gift className="w-3.5 h-3.5" />
-                <span>50% INSTANT MATCH • $5 FREE COMPUTE GRANT</span>
+                <Gift className="w-3.5 h-3.5 text-amber-400" />
+                <span>UP TO 100% MATCH • $5.00 WELCOME GRANT INCLUDED</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                Deposit $10 to Unlock Key & Claim $5 Free
+                Activate {currentPack.label} (${currentAmt})
               </h2>
               <p className="text-xs sm:text-sm text-zinc-300 max-w-lg mx-auto leading-relaxed">
-                Deposit <strong className="text-white">$10.00</strong> to activate your key. We instantly match you with <strong className="text-emerald-300">+$5.00 Free Compute</strong>, crediting <strong className="text-amber-300">$15.00 Total Usable Balance</strong> with 0 platform fees.
+                Deposit <strong className="text-white">${currentAmt.toFixed(2)} USD</strong> to unlock your universal key with <strong className="text-emerald-300">+{currentPack.tierBonusPct}% Match Bonus</strong> (${totalCreditReceived.toFixed(2)} Total Usable Credits). 100% refundable with $0 platform fees.
               </p>
             </div>
 
@@ -207,24 +279,31 @@ export function KeyActivationPaywallModal({
               <div className="flex items-center justify-between text-zinc-400">
                 <span className="font-sans font-semibold text-[11px] text-white flex items-center gap-1.5">
                   <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-                  Token Mileage on ${totalCreditReceived.toFixed(2)} Balance:
+                  Workload Mileage:
                 </span>
-                <span className="text-emerald-400 text-[10px] font-bold">25%–40% Wholesale Rates</span>
+                <div className="flex gap-1">
+                  {(['cursor', 'agent', 'chat', 'multimodal'] as const).map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setActivePersona(p)}
+                      className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold transition-all cursor-pointer ${
+                        activePersona === p ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40' : 'text-zinc-500 hover:text-zinc-300'
+                      }`}
+                    >
+                      {p === 'cursor' ? 'IDE' : p === 'agent' ? 'Agents' : p === 'chat' ? 'Chat' : 'Media'}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="grid grid-cols-3 gap-2 pt-1 text-center text-[11px]">
-                <div className="p-2 rounded-xl bg-white/5 space-y-0.5">
-                  <span className="text-[10px] text-zinc-400 font-sans block">GPT-5.6 Sol</span>
-                  <strong className="text-white font-bold font-mono">~{(tokensSol / 1000000).toFixed(1)}M tokens</strong>
-                </div>
-                <div className="p-2 rounded-xl bg-white/5 space-y-0.5">
-                  <span className="text-[10px] text-zinc-400 font-sans block">GPT-5.6 Luna</span>
-                  <strong className="text-cyan-300 font-bold font-mono">~{(tokensLuna / 1000000).toFixed(1)}M tokens</strong>
-                </div>
-                <div className="p-2 rounded-xl bg-white/5 space-y-0.5">
-                  <span className="text-[10px] text-zinc-400 font-sans block">4K Images</span>
-                  <strong className="text-amber-300 font-bold font-mono">~{totalImages} renders</strong>
-                </div>
+                {getModalMetrics().map((m, idx) => (
+                  <div key={idx} className="p-2 rounded-xl bg-white/5 space-y-0.5">
+                    <span className="text-[10px] text-zinc-400 font-sans block">{m.label}</span>
+                    <strong className="text-white font-bold font-mono">{m.val}</strong>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -237,11 +316,17 @@ export function KeyActivationPaywallModal({
               }}
             />
 
-            {/* Deposit Packs Selection Grid */}
+            {/* Deposit Packs Selection Grid & Custom Amount */}
             <div className="space-y-2 relative z-10">
-              <label className="block text-xs font-mono font-bold text-zinc-300 uppercase">
-                Select Deposit Tier
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-mono font-bold text-zinc-300 uppercase">
+                  Select Deposit Tier
+                </label>
+                <span className="text-[11px] font-mono text-amber-300">
+                  Tier Bonus: +{currentPack.tierBonusPct}%
+                </span>
+              </div>
+
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 {PAYWALL_PACKS.map((pack) => {
                   const isSelected = selectedAmount === pack.amount && !customAmount;
@@ -258,7 +343,7 @@ export function KeyActivationPaywallModal({
                       }}
                       className={`p-3 rounded-2xl border text-left transition-all cursor-pointer relative flex flex-col justify-between ${
                         isSelected
-                          ? 'bg-amber-500/20 border-amber-400 shadow-md shadow-amber-500/15 scale-[1.02]'
+                          ? 'bg-amber-500/20 border-amber-400 shadow-md shadow-amber-500/15 scale-[1.02] ring-1 ring-amber-400/50'
                           : 'bg-black/40 border-white/10 hover:border-white/20'
                       }`}
                     >
@@ -275,6 +360,35 @@ export function KeyActivationPaywallModal({
                   );
                 })}
               </div>
+
+              {/* Custom Amount Input Bar */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 rounded-2xl bg-black/50 border border-white/10 font-mono text-xs">
+                <span className="text-zinc-400 text-[11px] flex items-center gap-1.5">
+                  <Coins className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Custom Compute Amount:</span>
+                </span>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <div className="relative flex-1 sm:w-36">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-bold">$</span>
+                    <input
+                      type="number"
+                      min="10"
+                      max="5000"
+                      step="5"
+                      placeholder="Custom USD"
+                      value={customAmount}
+                      onChange={(e) => setCustomAmount(e.target.value)}
+                      className="w-full py-1.5 pl-7 pr-3 rounded-xl bg-black/80 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
+                  {customAmount && Number(customAmount) >= 10 && (
+                    <span className="text-emerald-400 font-bold text-[11px] whitespace-nowrap">
+                      → ${totalCreditReceived.toFixed(2)} Credit
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Payment Method Selector Tabs */}
@@ -284,7 +398,7 @@ export function KeyActivationPaywallModal({
                   Payment Method
                 </label>
                 <div className="flex items-center gap-1 p-0.5 rounded-xl bg-black/50 border border-white/10 text-[11px] font-mono">
-                  {(['card', 'apple', 'crypto'] as const).map((method) => (
+                  {(['card', 'stripe', 'crypto'] as const).map((method) => (
                     <button
                       key={method}
                       type="button"
@@ -295,7 +409,7 @@ export function KeyActivationPaywallModal({
                           : 'text-zinc-400 hover:text-white'
                       }`}
                     >
-                      {method === 'card' ? 'Credit Card' : method === 'apple' ? 'Apple Pay' : 'Crypto USDC'}
+                      {method === 'card' ? 'Quick Card' : method === 'stripe' ? 'Stripe Checkout' : 'Crypto USDC'}
                     </button>
                   ))}
                 </div>
@@ -348,28 +462,109 @@ export function KeyActivationPaywallModal({
                       />
                     </div>
                   </div>
+
+                  {/* Auto-Reload Toggle */}
+                  <div className="pt-2 border-t border-white/10 flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      id="modalAutoReload"
+                      checked={autoReload}
+                      onChange={(e) => setAutoReload(e.target.checked)}
+                      className="mt-0.5 w-3.5 h-3.5 rounded accent-amber-400 cursor-pointer"
+                    />
+                    <label htmlFor="modalAutoReload" className="text-[11px] text-zinc-400 cursor-pointer">
+                      <span className="text-white font-bold">Auto-reload balance</span> when tokens dip below $5.00 (+10% match bonus on all reloads).
+                    </label>
+                  </div>
                 </div>
               )}
 
-              {/* Apple Pay Form */}
-              {paymentMethod === 'apple' && (
-                <div className="p-5 rounded-2xl bg-black/50 border border-white/10 text-center space-y-2 font-mono text-xs">
-                  <div className="w-12 h-12 rounded-2xl bg-white text-black flex items-center justify-center mx-auto font-black text-sm">
-                    Pay
+              {/* Stripe Hosted Checkout Form */}
+              {paymentMethod === 'stripe' && (
+                <div className="p-4 sm:p-5 rounded-2xl bg-black/50 border border-[#635BFF]/40 space-y-3 font-mono text-xs">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded bg-[#635BFF]/20 text-[#635BFF] font-black text-xs border border-[#635BFF]/40">
+                        stripe
+                      </span>
+                      <span className="text-white font-bold text-xs">Official Hosted Checkout</span>
+                    </div>
+                    <span className="text-[10px] text-emerald-400 font-mono font-bold">PCI SAQ-A Zero-Scope</span>
                   </div>
-                  <div className="text-white font-bold text-sm">Instant 1-Click Biometric Checkout</div>
-                  <p className="text-[11px] text-zinc-400">Authenticated via Touch ID / Face ID with $0 card processing fees.</p>
+
+                  <p className="text-[11px] text-zinc-300 font-sans leading-relaxed">
+                    Redirects to Stripe&apos;s encrypted payment page with support for <strong className="text-white">Apple Pay</strong>, <strong className="text-white">Google Pay</strong>, <strong className="text-white">Link</strong>, company tax invoice PDF generation, and automated VAT collection.
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-2 pt-1 font-mono text-[10px]">
+                    <div className="p-2 rounded-xl bg-white/5 flex items-center gap-1.5 text-zinc-300">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <span>256-Bit TLS Bank Encrypted</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-white/5 flex items-center gap-1.5 text-zinc-300">
+                      <Receipt className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                      <span>Instant VAT Tax Receipt</span>
+                    </div>
+                  </div>
                 </div>
               )}
 
               {/* Crypto Form */}
               {paymentMethod === 'crypto' && (
-                <div className="p-5 rounded-2xl bg-black/50 border border-white/10 text-center space-y-2 font-mono text-xs">
-                  <Coins className="w-8 h-8 text-cyan-400 mx-auto" />
-                  <div className="text-cyan-300 font-bold text-sm">Instant Stablecoin Top-Up (USDC / USDT)</div>
-                  <p className="text-[11px] text-zinc-400">Supported networks: Arbitrum One, Solana, Base, and Polygon with zero slippage.</p>
+                <div className="p-4 rounded-2xl bg-black/50 border border-white/10 space-y-3 font-mono text-xs">
+                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                    <span className="text-[11px] text-zinc-400">Select Blockchain Network:</span>
+                    <div className="flex gap-1">
+                      {(['base', 'arbitrum', 'solana', 'polygon'] as const).map((net) => (
+                        <button
+                          key={net}
+                          type="button"
+                          onClick={() => setCryptoNetwork(net)}
+                          className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold transition-all cursor-pointer ${
+                            cryptoNetwork === net ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'text-zinc-500 hover:text-zinc-300'
+                          }`}
+                        >
+                          {net}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-zinc-400 uppercase">USDC Escrow Deposit Address ({cryptoNetwork.toUpperCase()}):</span>
+                    <div className="flex items-center justify-between p-2 rounded-xl bg-black/80 border border-white/10 text-[11px] text-cyan-300">
+                      <code className="truncate max-w-[260px]">0x71C...89eF43</code>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          await safeCopyToClipboard('0x71C25e771F7A4384914c62c2fD7E690B4489eF43');
+                          setCopiedAddress(true);
+                          setTimeout(() => setCopiedAddress(false), 2000);
+                        }}
+                        className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] flex items-center gap-1 cursor-pointer"
+                      >
+                        {copiedAddress ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                        <span>{copiedAddress ? 'Copied' : 'Copy'}</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
+            </div>
+
+            {/* Corporate Invoice & Tax Receipt Link */}
+            <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-between text-xs font-mono">
+              <div className="flex items-center gap-2">
+                <Receipt className="w-4 h-4 text-indigo-400 shrink-0" />
+                <span className="text-zinc-300 text-[11px]">Need a company expense invoice, VAT, or multi-seat team checkout?</span>
+              </div>
+              <Link
+                href={`/checkout?amount=${currentAmt}`}
+                className="text-[11px] font-bold text-indigo-300 hover:text-indigo-200 flex items-center gap-1 shrink-0 underline"
+              >
+                <span>Full Invoice Checkout</span>
+                <ExternalLink className="w-3 h-3" />
+              </Link>
             </div>
 
             {/* In-Modal FAQ Accordion */}
@@ -414,11 +609,25 @@ export function KeyActivationPaywallModal({
               <button
                 type="button"
                 onClick={handlePayAndUnlock}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer font-mono order-1 sm:order-2 hover:scale-[1.02] active:scale-98"
+                className={`w-full sm:w-auto px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider shadow-xl flex items-center justify-center gap-2 transition-all cursor-pointer font-mono order-1 sm:order-2 hover:scale-[1.02] active:scale-98 ${
+                  paymentMethod === 'stripe'
+                    ? 'bg-gradient-to-r from-[#635BFF] to-[#7a73ff] hover:from-[#5851ea] hover:to-[#6c65f0] text-white shadow-[#635BFF]/30'
+                    : 'bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black shadow-amber-500/25'
+                }`}
               >
-                <Key className="w-4 h-4 text-black" />
-                <span>Pay ${currentAmt.toFixed(2)} & Unlock Key ($${totalCreditReceived.toFixed(2)} Credit)</span>
-                <ArrowRight className="w-4 h-4 text-black" />
+                {paymentMethod === 'stripe' ? (
+                  <>
+                    <ExternalLink className="w-4 h-4 text-white" />
+                    <span>Proceed to Stripe Checkout (${currentAmt.toFixed(2)})</span>
+                    <ArrowRight className="w-4 h-4 text-white" />
+                  </>
+                ) : (
+                  <>
+                    <Key className="w-4 h-4 text-black" />
+                    <span>Pay ${currentAmt.toFixed(2)} & Unlock Key (${totalCreditReceived.toFixed(2)} Credit)</span>
+                    <ArrowRight className="w-4 h-4 text-black" />
+                  </>
+                )}
               </button>
             </div>
           </>

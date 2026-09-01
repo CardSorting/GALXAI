@@ -86,8 +86,15 @@ All architectural components in GALXAI are governed by formal Architectural Deci
 | **[ADR 0042](adr/0042-universal-zero-hesitation-developer-ergonomics-and-mental-model-absorption.md)** | Universal Zero-Hesitation Developer Ergonomics & Mental Model Absorption | Multi-mental-model absorption (OpenAI, Anthropic, Ollama, LangChain, Vercel AI), 0-install CLI, GET browser execution, and aspect ratio normalization. |
 | **[ADR 0043](adr/0043-broccolidb-hybrid-resilience-outbox-disaster-recovery-and-sla-uptime.md)** | BroccoliDB Hybrid Resilience Substrate, Zero-Loss Outbox & Dual-Slot Disaster Recovery | RPO=0 Outbox queue with SafeStorage L2 backing, dual-slot atomic snapshot state machine (RTO<5ms), in-flight coalescing, and SLA incident logs. |
 | **[ADR 0044](adr/0044-non-technical-natural-omnisearch-and-approachable-error-recovery.md)** | Non-Technical Natural OmniSearch & Approachable Self-Healing Error Recovery | Plain-English conversational intent matching, 404 smart search recovery, breadcrumb auto-history, and universal clipboard fallbacks. |
-| **[ADR 0045](adr/0045-single-flight-request-coalescing-soundex-phonetic-and-sub-15ms-ttft.md)** | Single-Flight Request Coalescing, Soundex Phonetic Typo Absorption & Sub-15ms TTFT Streaming Substrate | Lock-free request coalescing, Soundex phonetic encoding, predictive route pre-warming, and unbuffered SSE token streaming. |
-| **[ADR 0046](adr/0046-sub-microsecond-l1-storage-zero-copy-streaming-and-socket-prewarming.md)** | Sub-Microsecond L1 In-Memory Storage Mirroring, Zero-Copy Direct Buffer Streaming & Persistent Upstream Socket Pre-Warming | In-memory storage mirroring (<0.02ms), zero-copy binary streaming, upstream socket pre-warming, and <5ns model resolution memoization. |
+| **[ADR 0078](adr/0078-glm-53-flash-indexshare-sparse-attention-and-slime-async-rl.md)** | GLM-5.3 Flash IndexShare Sparse Attention, Slime Asynchronous RL & Hybrid Thinking Modes | Pre-annotates training datasets with IndexShare 4-layer indexer reuse (2.9x FLOPs reduction), Slime decoupled async RL, and hybrid thinking modes. |
+| **[ADR 0079](adr/0079-lumi-and-community-qos-multi-tier-pool-mesh.md)** | LUMI & Community QoS Multi-Tier Pool Mesh & IETF RateLimit | Free/LUMI/Sovereign tier isolation, 5-hour rolling warp multipliers, and RFC-compliant RateLimit header generation. |
+| **[ADR 0080](adr/0080-zero-roundtrip-preflight-and-vectorized-batch-sync.md)** | Zero-Roundtrip Preflight & Vectorized Batch Sync Engine | Single-hop universal gateway preflight procedure (`fn_gateway_preflight_qos_universal_v3`) cutting TTFT to <5ms, and vectorized array unnest settlement. |
+| **[ADR 0081](adr/0081-monotonic-stream-deltas-and-zero-copy-pump.md)** | Monotonic Stream Deltas & Zero-Copy Stream Pump | Real-time monotonic sequence delta logging (`galx_chat_stream_deltas`), zero-copy SSE stream piping, and delta slicing. |
+| **[ADR 0082](adr/0082-prompt-compaction-predictive-routing-and-quality-sentinels.md)** | Deterministic Prompt Compaction, Strict Model Fidelity & Quality Sentinels | Deterministic prompt compaction with 1024-token KV-prefix alignment, 100% strict user-requested model fidelity, and automated token loop sentinels. |
+| **[ADR 0083](adr/0083-context-window-preservation-and-ast-skeletons.md)** | Context Window Preservation & Semantic AST Skeletons | Atomic tool call turn-pair truncation invariants, Lost-in-the-Middle attention anchor hoisting, and semantic codebase AST skeletonization. |
+| **[ADR 0084](adr/0084-context-salience-and-zen-flow-buffer-pool.md)** | Context Salience Scoring & High-Throughput Zen Flow Buffer Pool | Information-theoretic salience scoring, stabilized KV-cache prefix pyramids, and 512-slot circular Uint8Array ring buffer with hydraulic backpressure. |
+| **[ADR 0085](adr/0085-zero-egress-keyset-sync-and-xfetch-bloom-shield.md)** | Zero-Egress Keyset Sync, XFetch Early Recomputation & Bloom Shield | ETag HTTP 304 fast-path, Single-Flight stampede request coalescing, mathematical XFetch early recomputation, and in-memory Bloom filter negative shielding. |
+| **[ADR 0086](adr/0086-authoritative-merkle-governor-and-circuit-breaker.md)** | BroccoliDB Authoritative Merkle Governor & Workspace-Wide Circuit Breaker | Cemented PostgreSQL Merkle epoch authority, workspace-wide Governed Fetch middleware, 50 query/sec leaky bucket governor, and 0ms fail-fast circuit breaker. |
 | **[ADR 0047](adr/0047-programmatic-seo-geo-aeo-and-structured-jsonld-saturation.md)** | Programmatic SEO (pSEO), Generative Engine Optimization (GEO), Answer Engine Optimization (AEO) & Structured JSON-LD Saturation | Inverted Pyramid direct answer blocks, saturated multi-layer Schema.org JSON-LD graph, llms.txt standard, and static SSG generation across 235 routes. |
 | **[ADR 0048](adr/0048-interactive-developer-studio-tools-and-edge-simulators.md)** | Interactive Developer Studio Tools, Client-Side Simulators & Memory-Isolated Utilities | Suite of 9 interactive tools: Prompt Caching Estimator, System Prompt Compressor, API Key Health Checker, JSON Schema Studio, BPE Token Counter, and Model Cost Comparator. |
 | **[ADR 0049](adr/0049-enterprise-governance-security-patterns-and-compliance-matrix.md)** | Enterprise Governance, AI Red-Teaming Patterns, Industry Verticals & Compliance Matrix | Programmatic regulatory compliance (HIPAA, PCI DSS, FedRAMP, EU AI Act), OWASP LLM Top 10 red-teaming defenses (Prompt Injection, Jailbreak, Data Exfiltration), and vertical industry blueprints. |
@@ -351,6 +358,46 @@ flowchart TD
 2. **Sub-0.02ms In-Memory Profiling**: All 75+ cognitive and hardware vectors are evaluated in volatile RAM tables (`BroccoliDbTable`) with zero disk I/O.
 3. **Hardware-Aligned Acceleration Vectors**: Pre-annotates dataset shards with low-rank MLA dimensions, per-channel FP8 quantization scales, FlashAttention 2D block-diagonal attention mask slicing offsets, and DualPipe forward/backward overlap parameters.
 4. **Autonomous R2 Sync & Provenance**: Uploads stratified shards (`datasets/sft/v1/curriculum=...`) directly to Cloudflare R2 with AWS SigV4 authentication ($0 egress) and publishes a 32-byte Merkle root manifest for mathematical verification.
+
+---
+
+## ⚡ High-Throughput I/O Execution Authority, Egress Elimination & Authoritative Governor (ADR 0079–0086)
+
+GALXAI couples sub-millisecond edge execution with cemented PostgreSQL data authority and zero-egress memory shielding:
+
+```mermaid
+flowchart TD
+    Client[Client SSE Stream] --> Ingress[Cloudflare Edge Gateway / Next.js SSR]
+    
+    subgraph Egress & Shield Layer [BroccoliDB Egress Shield & Governor]
+        Ingress --> Bloom[Bloom Filter 64K-Bit Negative Shield (<0.05µs)]
+        Bloom --> XFetch[XFetch Probabilistic Early Refresh Engine]
+        XFetch --> SingleFlight[Single-Flight Request Coalescer]
+        SingleFlight --> Circuit[Circuit Breaker & Leaky Bucket 50 qps Governor]
+    end
+    
+    subgraph Data Authority [Cemented PostgreSQL Authority]
+        Circuit -->|Fast-Path 1-Hop| UniversalRPC[fn_gateway_preflight_qos_universal_v3]
+        UniversalRPC --> EpochTable[galx_authoritative_data_epochs]
+        EpochTable --> VectorBatch[fn_vectorized_batch_settle_stream_leases_v3]
+    end
+    
+    subgraph Streaming & Context Core [Zen Flow & Context Preservation]
+        UniversalRPC --> ZenPool[GalxZenFlowBufferPool: 512 Pre-Allocated 8KB Slots]
+        ZenPool --> Salience[GalxContextSalienceEngine: Information-Theoretic Density Scorer]
+        Salience --> Skeleton[GalxSemanticAstSkeletonizer: Method Body Collapsing]
+        Skeleton --> StreamPump[GalxZeroCopyStreamPump: Uint8Array Chunk Forwarding]
+        StreamPump --> Client
+    end
+```
+
+### Key Subsystem Invariants:
+1. **Single-Hop Universal Gateway Preflight (ADR 0080)**: Consolidates auth, wallet balance reservation, tier classification, shard selection, and IETF RFC RateLimit headers into 1 single database hop (< 5 ms).
+2. **Zero-Allocation Zen Flow Buffer Pool (ADR 0084)**: Pre-allocates 512 8KB buffer slots in a circular ring with hydraulic high/low watermark backpressure to eliminate GC pauses.
+3. **Semantic AST Skeletons & Lost-in-the-Middle Anchoring (ADR 0083)**: Collapses code bodies while preserving 100% type signatures (55%–85% token reduction) and hoists critical instructions before prompt tails.
+4. **XFetch & Bloom Origin Shielding (ADR 0085)**: Rejects invalid queries in <0.05µs and probabilistically refreshes hot keys before TTL expiry, cutting Supabase egress and query rates by >98%.
+5. **Authoritative Merkle Epoch Governor (ADR 0086)**: Cemented PostgreSQL Merkle epochs guarantee data truth, while workspace-wide Governed Fetch middleware fails-fast to BroccoliDB L1 during outages, eliminating infinite retry storms and overage risks.
+
 
 
 

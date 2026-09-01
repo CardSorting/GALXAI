@@ -855,7 +855,13 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
         if (typeof actualVal !== "string" || !actualVal.endsWith(filter.$endsWith)) return false;
       }
       if (filter.$contains !== undefined) {
-        if (typeof actualVal !== "string" || !actualVal.includes(filter.$contains)) return false;
+        if (Array.isArray(actualVal)) {
+          if (!actualVal.some((item) => String(item).toLowerCase().includes(String(filter.$contains).toLowerCase()))) return false;
+        } else if (typeof actualVal === "string") {
+          if (!actualVal.toLowerCase().includes(String(filter.$contains).toLowerCase())) return false;
+        } else {
+          return false;
+        }
       }
       if (filter.$regex !== undefined) {
         const re = typeof filter.$regex === "string" ? new RegExp(filter.$regex, "i") : filter.$regex;
@@ -866,7 +872,18 @@ export class BroccoliDbTable<T extends Record<string, any> = Record<string, any>
   }
 
   private resolveFieldValue(record: T, field: string): unknown {
-    return record[field];
+    if (!field) return undefined;
+    if (field in (record as any)) return record[field];
+    if (field.includes(".")) {
+      const parts = field.split(".");
+      let current: any = record;
+      for (const part of parts) {
+        if (current === null || current === undefined || typeof current !== "object") return undefined;
+        current = current[part];
+      }
+      return current;
+    }
+    return undefined;
   }
 
   private normalizeSortableValue(val: unknown): number | string | undefined {

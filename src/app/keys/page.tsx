@@ -75,8 +75,14 @@ function BaseGatewayKeysPage() {
   const [copiedSnippet, setCopiedSnippet] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
+  const [paywallSelectedAmt, setPaywallSelectedAmt] = useState<number>(25);
   const [activeSnippetTab, setActiveSnippetTab] = useState<SnippetTab>('python');
   const [environmentFilter, setEnvironmentFilter] = useState<'all' | 'live' | 'test'>('all');
+
+  const handleOpenPaywall = (amt: number = 25) => {
+    setPaywallSelectedAmt(amt);
+    setIsPaywallOpen(true);
+  };
 
   // Key Rolling / Zero-Downtime Rotation State
   const [rollingKey, setRollingKey] = useState<any | null>(null);
@@ -534,32 +540,34 @@ const { text } = await generateText({
             </div>
           )}
 
-          {/* Community Free Compute Pool Status Banner */}
-          <div className="glass-panel rounded-3xl p-6 border border-cyan-500/30 bg-gradient-to-r from-cyan-500/10 via-indigo-500/5 to-black/40 space-y-3 relative overflow-hidden">
+          {/* Community Free Compute Pool Status Banner & VIP Fast-Lane Trigger */}
+          <div className="glass-panel rounded-3xl p-6 border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-black/40 space-y-3 relative overflow-hidden shadow-xl">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
                   <Gift className="w-5 h-5" />
                 </div>
                 <div className="space-y-1">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono text-[10px] font-bold">
-                    <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>$30.00 / MO FREE COMPUTE GRANT ACTIVE • SHARED INGESTION SHARD</span>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[10px] font-bold border border-amber-500/30">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>50%–100% INSTANT MATCH BONUS • $30 FREE GRANT ACTIVE</span>
                   </div>
-                  <h2 className="text-base font-bold text-white">$30 Monthly Free Compute Allowance</h2>
+                  <h2 className="text-base font-bold text-white">Unlock Production VIP Lanes &amp; Claim 50% Match</h2>
                   <p className="text-xs text-zinc-300 max-w-xl">
-                    Every key is instantly active in the <strong>Shared Community Compute Pool</strong> with shared model ingestion. Free tier daily capacity resets every midnight at <strong>00:00 UTC</strong>. Need dedicated GPU priority and 5,000 RPM? Top up compute wallet anytime.
+                    Every key includes $30 free compute. Activate a <strong>Production VIP Tier ($25+)</strong> to unlock <strong>sub-15ms VIP priority routing</strong>, <strong>600 RPM concurrency</strong>, and a <strong>50%–100% Instant Deposit Match</strong>. 100% refundable anytime.
                   </p>
                 </div>
               </div>
 
-              <Link
-                href="/billing"
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 text-black font-black text-xs font-mono uppercase tracking-wider shadow-lg shadow-cyan-500/20 flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+              <button
+                type="button"
+                onClick={() => setIsPaywallOpen(true)}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs font-mono uppercase tracking-wider shadow-lg shadow-amber-500/25 flex items-center gap-1.5 transition-all cursor-pointer shrink-0 hover:scale-[1.02] active:scale-98"
               >
-                <Zap className="w-3.5 h-3.5" />
-                <span>Upgrade to Dedicated Priority ($10+)</span>
-              </Link>
+                <Zap className="w-3.5 h-3.5 text-black" />
+                <span>Activate VIP Tier (+50% Match)</span>
+                <ArrowRight className="w-3.5 h-3.5 text-black" />
+              </button>
             </div>
           </div>
 
@@ -746,6 +754,73 @@ const { text } = await generateText({
               <pre className="p-4 sm:p-5 text-zinc-300 overflow-x-auto leading-relaxed">
                 <code>{snippets[activeSnippetTab].code}</code>
               </pre>
+            </div>
+          </div>
+
+          {/* Downward Funnel Tier Upgrade Strip */}
+          <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-amber-500/30 bg-gradient-to-b from-amber-500/5 via-black/40 to-black/60 space-y-4 shadow-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                  <h3 className="text-base font-black text-white">Downward Funnel Tier Unlocks</h3>
+                  <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[10px] font-bold">
+                    UP TO 100% MATCH
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-400">
+                  Higher deposit tiers unlock dedicated priority routing lanes, elevated concurrency burst passes, and bigger match grants.
+                </p>
+              </div>
+
+              <span className="text-[11px] text-zinc-400 font-mono bg-white/5 px-3 py-1 rounded-full border border-white/10 self-start sm:self-auto">
+                100% Refundable Anytime
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+              {[
+                { amount: 25, label: 'Starter Builder', badge: '50% Match', credit: '$37.50', rpm: '120 RPM', perk: '75% Prompt Caching' },
+                { amount: 50, label: 'Growth VIP', badge: '60% Match • Popular', credit: '$80.00', rpm: '300 RPM', perk: 'Sub-15ms VIP Fast-Lane', popular: true },
+                { amount: 100, label: 'Scale Fleet', badge: '75% Match', credit: '$175.00', rpm: '600 RPM', perk: 'Concurrency Burst Pass' },
+                { amount: 250, label: 'Enterprise Sovereign', badge: '100% Double Match', credit: '$500.00', rpm: 'Unlimited', perk: 'Custom VPC Lane' }
+              ].map((tier) => (
+                <div
+                  key={tier.amount}
+                  className={`rounded-2xl p-4 border flex flex-col justify-between space-y-3 transition-all ${
+                    tier.popular
+                      ? 'bg-amber-500/15 border-amber-400/60 shadow-lg shadow-amber-500/10 scale-[1.01]'
+                      : 'bg-black/40 border-white/10 hover:border-white/20'
+                  }`}
+                >
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono font-bold uppercase text-amber-300">
+                        {tier.badge}
+                      </span>
+                      <span className="text-[10px] font-mono text-zinc-400 bg-white/5 px-2 py-0.5 rounded">
+                        {tier.rpm}
+                      </span>
+                    </div>
+                    <div className="text-lg font-black text-white">${tier.amount} <span className="text-xs font-mono text-emerald-300 font-bold">→ {tier.credit} Credit</span></div>
+                    <div className="text-xs font-semibold text-zinc-300">{tier.label}</div>
+                    <p className="text-[11px] text-zinc-400">{tier.perk}</p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleOpenPaywall(tier.amount)}
+                    className={`w-full py-2 px-3 rounded-xl font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      tier.popular
+                        ? 'bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black shadow-md shadow-amber-500/20'
+                        : 'bg-white/10 hover:bg-white/20 text-white border border-white/10'
+                    }`}
+                  >
+                    <span>Unlock ${tier.amount} Tier</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -965,6 +1040,7 @@ const { text } = await generateText({
           onClose={() => setIsPaywallOpen(false)}
           onSuccess={handlePaywallSuccess}
           keyLabel={newKeyName || 'Developer API Key'}
+          initialAmount={paywallSelectedAmt}
         />
       </ErrorBoundary>
     </div>

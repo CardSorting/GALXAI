@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxCommunityPoolGovernor } from '@/core/governor/GalxCommunityPoolGovernor';
+import { GalxLumiQoSPoolGovernor } from '@/core/governor/GalxLumiQoSPoolGovernor';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -30,6 +31,9 @@ export async function GET(req: NextRequest) {
     const dailyMetrics = governor.getDailyPoolMetrics();
     const userUsage = governor.getUserMonthlyUsage(userId);
 
+    const lumiGovernor = GalxLumiQoSPoolGovernor.getInstance();
+    const lumiMetrics = lumiGovernor.getPoolMetrics();
+
     const isPaid = (auth.apiKey?.computePool === 'priority_dedicated');
 
     return NextResponse.json({
@@ -48,6 +52,18 @@ export async function GET(req: NextRequest) {
         isExhausted: dailyMetrics.isExhausted,
         resetsAt: new Date(dailyMetrics.resetsAtMs).toISOString(),
         resetsInSeconds: dailyMetrics.resetsInSeconds
+      },
+      lumiQosPool: {
+        poolName: lumiMetrics.poolName,
+        activeStreams: lumiMetrics.totalActiveStreams,
+        maxConcurrency: lumiMetrics.maxConcurrencyLimit,
+        concurrencyUtilizationPct: lumiMetrics.concurrencyUtilizationPct,
+        congestionState: lumiMetrics.congestionState,
+        reservedVipFloorPct: lumiMetrics.reservedVipFloorPct,
+        totalRequestsServed5h: lumiMetrics.totalRequestsServed5h,
+        totalRequestsThrottled5h: lumiMetrics.totalRequestsThrottled5h,
+        isSheddingLoad: lumiMetrics.isSheddingLoad,
+        resetsInSeconds: lumiMetrics.resetsInSeconds
       },
       dedicatedPriority: {
         active: isPaid,
