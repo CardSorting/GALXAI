@@ -162,6 +162,16 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/gateway",
+        destination: "/keys",
+        permanent: true,
+      },
+      {
+        source: "/gateway/:path*",
+        destination: "/keys",
+        permanent: true,
+      },
+      {
         source: "/vault",
         destination: "/keys",
         permanent: true,

@@ -33,7 +33,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/gateway`,
+      url: `${baseUrl}/keys`,
       lastModified: currentDate,
       changeFrequency: 'daily',
       priority: 0.98,
@@ -205,12 +205,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: currentDate,
       changeFrequency: 'monthly',
       priority: 0.75,
-    },
-    {
-      url: `${baseUrl}/keys`,
-      lastModified: currentDate,
-      changeFrequency: 'always',
-      priority: 0.7,
     },
     {
       url: `${baseUrl}/keys/new`,

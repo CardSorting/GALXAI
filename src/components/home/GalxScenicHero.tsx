@@ -338,7 +338,7 @@ export function GalxScenicHero() {
               <Link href="/models" className="hover:text-cyan-400 transition-colors">
                 Models
               </Link>
-              <Link href="/gateway" className="hover:text-cyan-400 transition-colors">
+              <Link href="/keys" className="hover:text-cyan-400 transition-colors">
                 Gateway API
               </Link>
               <Link href="/pricing" className="hover:text-cyan-400 transition-colors">

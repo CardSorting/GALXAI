@@ -34,9 +34,9 @@ function BaseMobileBottomNav() {
       exact: true,
     },
     {
-      label: 'Gateway',
-      href: '/gateway',
-      icon: Zap,
+      label: 'API Keys',
+      href: '/keys',
+      icon: Key,
       exact: true,
     },
     {

@@ -218,10 +218,10 @@ function SignUpContent() {
                     API Keys
                   </Link>
                   <Link
-                    href="/gateway"
+                    href="/chat"
                     className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-cyan-300 transition-all text-center"
                   >
-                    Gateway
+                    AI Chat
                   </Link>
                 </div>
 
