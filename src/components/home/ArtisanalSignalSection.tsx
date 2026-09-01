@@ -29,6 +29,7 @@ import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 interface BespokeSpotlightCardProps {
   children: React.ReactNode;
   className?: string;
+  innerClassName?: string;
   glowColor?: 'cyan' | 'indigo' | 'amber' | 'emerald';
   tilt?: boolean;
 }
@@ -36,6 +37,7 @@ interface BespokeSpotlightCardProps {
 export function BespokeSpotlightCard({
   children,
   className = '',
+  innerClassName = '',
   glowColor = 'cyan',
   tilt = true,
 }: BespokeSpotlightCardProps) {
@@ -115,8 +117,8 @@ export function BespokeSpotlightCard({
         }}
       />
 
-      {/* Layer 3: Children Content */}
-      <div className="relative z-20 h-full w-full">{children}</div>
+      {/* Layer 3: Children Content (Protected Layout Container) */}
+      <div className={`relative z-20 h-full w-full ${innerClassName}`}>{children}</div>
     </div>
   );
 }
@@ -470,7 +472,8 @@ export function ArtisanalSignalSection() {
         <BespokeSpotlightCard
           glowColor="cyan"
           tilt={true}
-          className="w-full max-w-4xl mx-auto bg-[#060911]/95 border border-white/15 p-4 sm:p-7 shadow-2xl backdrop-blur-2xl text-left space-y-6"
+          className="w-full max-w-4xl mx-auto bg-[#060911]/95 border border-white/15 shadow-2xl backdrop-blur-2xl text-left"
+          innerClassName="p-4 sm:p-7 space-y-6"
         >
           
           {/* Top Multi-Mode Interactive Switcher */}
@@ -947,12 +950,13 @@ export function ArtisanalSignalSection() {
           <span className="text-xs text-zinc-500 font-mono hidden sm:inline">2 Existential Flaws Solved</span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
           {/* Card 1: The Plumbing Trap */}
           <BespokeSpotlightCard
             glowColor="cyan"
             tilt={true}
-            className="p-6 sm:p-8 bg-[#0b0f1a]/85 border border-white/10 backdrop-blur-xl shadow-2xl flex flex-col justify-between space-y-6"
+            className="bg-[#0b0f1a]/85 border border-white/10 backdrop-blur-xl shadow-2xl h-full flex flex-col"
+            innerClassName="p-6 sm:p-8 flex flex-col justify-between space-y-6 h-full"
           >
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-mono font-semibold">
@@ -1003,7 +1007,8 @@ export function ArtisanalSignalSection() {
           <BespokeSpotlightCard
             glowColor="amber"
             tilt={true}
-            className="p-6 sm:p-8 bg-[#0b0f1a]/85 border border-white/10 backdrop-blur-xl shadow-2xl flex flex-col justify-between space-y-6"
+            className="bg-[#0b0f1a]/85 border border-white/10 backdrop-blur-xl shadow-2xl h-full flex flex-col"
+            innerClassName="p-6 sm:p-8 flex flex-col justify-between space-y-6 h-full"
           >
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-mono font-semibold">
@@ -1057,7 +1062,7 @@ export function ArtisanalSignalSection() {
       {/* 3. THREE WAYS TO USE IT (BESPOKE INTERACTIVE WORKBENCH)                    */}
       {/* ========================================================================= */}
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
           <div className="space-y-1">
             <span className="text-xs font-mono font-bold tracking-widest text-indigo-400 uppercase">
               02 • Architecture in Practice
@@ -1068,36 +1073,36 @@ export function ArtisanalSignalSection() {
           </div>
 
           {/* Interactive Navigation Pills */}
-          <div className="flex items-center p-1 rounded-2xl bg-[#0a0d17] border border-white/15 text-xs font-mono self-start sm:self-auto">
+          <div className="flex items-center p-1 rounded-2xl bg-[#0a0d17] border border-white/15 text-xs font-mono self-start sm:self-auto shadow-inner">
             <button
               onClick={() => setActiveModeTab('ui')}
-              className={`px-3.5 py-1.5 rounded-xl transition-all font-semibold cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl transition-all font-semibold cursor-pointer hover:scale-[1.03] active:scale-[0.97] ${
                 activeModeTab === 'ui'
                   ? 'bg-cyan-500 text-black font-bold shadow-md shadow-cyan-500/20'
                   : 'text-zinc-400 hover:text-white'
               }`}
             >
-              1. New App (UI)
+              1. New App (UI Components)
             </button>
             <button
               onClick={() => setActiveModeTab('patch')}
-              className={`px-3.5 py-1.5 rounded-xl transition-all font-semibold cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl transition-all font-semibold cursor-pointer hover:scale-[1.03] active:scale-[0.97] ${
                 activeModeTab === 'patch'
                   ? 'bg-indigo-500 text-white font-bold shadow-md shadow-indigo-500/20'
                   : 'text-zinc-400 hover:text-white'
               }`}
             >
-              2. Existing App (1-Line)
+              2. Existing App (1-Line Patch)
             </button>
             <button
               onClick={() => setActiveModeTab('agents')}
-              className={`px-3.5 py-1.5 rounded-xl transition-all font-semibold cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl transition-all font-semibold cursor-pointer hover:scale-[1.03] active:scale-[0.97] ${
                 activeModeTab === 'agents'
                   ? 'bg-amber-500 text-black font-bold shadow-md shadow-amber-500/20'
                   : 'text-zinc-400 hover:text-white'
               }`}
             >
-              3. AI Agents (Cursor)
+              3. AI Agents (Cursor / Windsurf)
             </button>
           </div>
         </div>
@@ -1107,7 +1112,8 @@ export function ArtisanalSignalSection() {
           <BespokeSpotlightCard
             glowColor="cyan"
             tilt={true}
-            className="p-6 sm:p-10 bg-[#090d19]/90 border border-cyan-500/30 backdrop-blur-2xl shadow-2xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center animate-in fade-in duration-300"
+            className="bg-[#090d19]/90 border border-cyan-500/30 backdrop-blur-2xl shadow-2xl animate-in fade-in duration-300"
+            innerClassName="p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
           >
             <div className="lg:col-span-6 space-y-5">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 text-xs font-mono font-bold">
@@ -1122,39 +1128,39 @@ export function ArtisanalSignalSection() {
               </p>
 
               {/* Demo Switcher Sub-tabs */}
-              <div className="flex items-center gap-2 pt-2">
+              <div className="flex items-center gap-2 pt-1">
                 <button
                   onClick={() => setActiveUiDemo('image')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer hover:scale-[1.05] active:scale-[0.95] ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer hover:scale-[1.04] active:scale-[0.96] ${
                     activeUiDemo === 'image'
-                      ? 'bg-white/15 text-cyan-300 border border-cyan-500/40 font-bold'
-                      : 'bg-white/5 text-zinc-400 hover:text-white'
+                      ? 'bg-white/15 text-cyan-300 border border-cyan-500/40 font-bold shadow-md shadow-cyan-500/10'
+                      : 'bg-white/5 text-zinc-400 hover:text-white border border-transparent'
                   }`}
                 >
                   &lt;GalxImage /&gt;
                 </button>
                 <button
                   onClick={() => setActiveUiDemo('chat')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer hover:scale-[1.05] active:scale-[0.95] ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer hover:scale-[1.04] active:scale-[0.96] ${
                     activeUiDemo === 'chat'
-                      ? 'bg-white/15 text-cyan-300 border border-cyan-500/40 font-bold'
-                      : 'bg-white/5 text-zinc-400 hover:text-white'
+                      ? 'bg-white/15 text-cyan-300 border border-cyan-500/40 font-bold shadow-md shadow-cyan-500/10'
+                      : 'bg-white/5 text-zinc-400 hover:text-white border border-transparent'
                   }`}
                 >
                   &lt;GalxChat /&gt;
                 </button>
               </div>
 
-              <div className="flex items-center gap-3 pt-2 text-xs font-mono text-zinc-400">
-                <div className="flex items-center gap-1 text-emerald-400">
+              <div className="flex items-center gap-4 pt-2 text-xs font-mono text-zinc-400">
+                <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
                   <Check className="w-3.5 h-3.5" />
-                  <span>No API routes</span>
+                  <span>Zero API routes</span>
                 </div>
-                <div className="flex items-center gap-1 text-emerald-400">
+                <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
                   <Check className="w-3.5 h-3.5" />
-                  <span>No key leaks</span>
+                  <span>Zero key leaks</span>
                 </div>
-                <div className="flex items-center gap-1 text-emerald-400">
+                <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
                   <Check className="w-3.5 h-3.5" />
                   <span>30s Setup</span>
                 </div>
@@ -1203,7 +1209,7 @@ export function ArtisanalSignalSection() {
                     {'      '}className=<span className="text-emerald-300">&quot;w-full h-80 rounded-2xl&quot;</span>{'\n'}
                     {'    '}/&gt;{'\n'}
                     {'  '});{'\n'}
-                    &#123;
+                    &#125;
                   </code>
                 ) : (
                   <code>
@@ -1218,7 +1224,7 @@ export function ArtisanalSignalSection() {
                     {'      '}className=<span className="text-emerald-300">&quot;h-[450px] w-full&quot;</span>{'\n'}
                     {'    '}/&gt;{'\n'}
                     {'  '});{'\n'}
-                    &#123;
+                    &#125;
                   </code>
                 )}
               </pre>
@@ -1231,7 +1237,8 @@ export function ArtisanalSignalSection() {
           <BespokeSpotlightCard
             glowColor="indigo"
             tilt={true}
-            className="p-6 sm:p-10 bg-[#090d19]/90 border border-indigo-500/30 backdrop-blur-2xl shadow-2xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center animate-in fade-in duration-300"
+            className="bg-[#090d19]/90 border border-indigo-500/30 backdrop-blur-2xl shadow-2xl animate-in fade-in duration-300"
+            innerClassName="p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
           >
             <div className="lg:col-span-6 space-y-5">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-300 text-xs font-mono font-bold">
@@ -1245,16 +1252,16 @@ export function ArtisanalSignalSection() {
                 Keep your existing codebase 100% untouched. Add a single import at the top of your app to automatically route all OpenAI calls through GALXAI with wholesale pricing, Anycast edge failover, and prompt caching.
               </p>
 
-              <div className="flex items-center gap-3 pt-2 text-xs font-mono text-zinc-400">
-                <div className="flex items-center gap-1 text-emerald-400">
+              <div className="flex items-center gap-4 pt-2 text-xs font-mono text-zinc-400">
+                <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
                   <Check className="w-3.5 h-3.5" />
                   <span>0 code rewrite</span>
                 </div>
-                <div className="flex items-center gap-1 text-emerald-400">
+                <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
                   <Check className="w-3.5 h-3.5" />
                   <span>100% OpenAI compatible</span>
                 </div>
-                <div className="flex items-center gap-1 text-emerald-400">
+                <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
                   <Check className="w-3.5 h-3.5" />
                   <span>Instant discount</span>
                 </div>
@@ -1301,7 +1308,8 @@ export function ArtisanalSignalSection() {
           <BespokeSpotlightCard
             glowColor="amber"
             tilt={true}
-            className="p-6 sm:p-10 bg-[#090d19]/90 border border-amber-500/30 backdrop-blur-2xl shadow-2xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center animate-in fade-in duration-300"
+            className="bg-[#090d19]/90 border border-amber-500/30 backdrop-blur-2xl shadow-2xl animate-in fade-in duration-300"
+            innerClassName="p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
           >
             <div className="lg:col-span-6 space-y-5">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-300 text-xs font-mono font-bold">
@@ -1315,16 +1323,16 @@ export function ArtisanalSignalSection() {
                 When AI coding assistants write code for you, they frequently hallucinate messy backend proxies and prompt users for API keys. Run 1 command to write exact rules into `.cursorrules` and `AGENTS.md`.
               </p>
 
-              <div className="flex items-center gap-3 pt-2 text-xs font-mono text-zinc-400">
-                <div className="flex items-center gap-1 text-emerald-400">
+              <div className="flex items-center gap-4 pt-2 text-xs font-mono text-zinc-400">
+                <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
                   <Check className="w-3.5 h-3.5" />
                   <span>Auto .cursorrules</span>
                 </div>
-                <div className="flex items-center gap-1 text-emerald-400">
+                <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
                   <Check className="w-3.5 h-3.5" />
                   <span>Auto CLAUDE.md</span>
                 </div>
-                <div className="flex items-center gap-1 text-emerald-400">
+                <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
                   <Check className="w-3.5 h-3.5" />
                   <span>Zero hallucinated proxies</span>
                 </div>
@@ -1429,7 +1437,8 @@ export function ArtisanalSignalSection() {
       <BespokeSpotlightCard
         glowColor="cyan"
         tilt={true}
-        className="p-8 sm:p-14 bg-gradient-to-b from-[#0e1424] via-[#090d19] to-[#06080f] border border-cyan-500/30 text-center space-y-6 shadow-2xl"
+        className="bg-gradient-to-b from-[#0e1424] via-[#090d19] to-[#06080f] border border-cyan-500/30 shadow-2xl"
+        innerClassName="p-8 sm:p-14 text-center space-y-6"
       >
         <div className="relative z-10 space-y-4 max-w-2xl mx-auto">
           <h3 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
