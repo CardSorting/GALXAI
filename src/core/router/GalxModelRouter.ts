@@ -184,8 +184,14 @@ export class GalxModelRouter {
         (options.request as any).shardId ||
         undefined;
 
+      if (attempt > 1) {
+        // Full decorrelated jitter backoff to desynchronize retry stampedes across workers
+        const backoffMs = Math.floor(Math.random() * 800) + (attempt * 250);
+        await new Promise((resolve) => setTimeout(resolve, backoffMs));
+      }
+
       // 3. Acquire atomic execution lease with Compliance Shard Gating (HIPAA BAA, EU Residency, ZDR)
-      const acqResult = this.pool.acquireLease({
+      let acqResult = this.pool.acquireLease({
         userId,
         jobId: requestId,
         provider,
@@ -197,8 +203,15 @@ export class GalxModelRouter {
         dataResidency: privacyPolicy.dataResidency,
         zdrRequired: privacyPolicy.zdrEnabled,
         targetAccountId,
-        targetShardId
+        targetShardId,
+        queueIfExhausted: true,
+        maxQueueWaitMs: 4000
       });
+
+      // Handle admission queue wait if pool was temporarily saturated
+      if (acqResult.status === 'queued' && acqResult.queuedPromise) {
+        acqResult = await acqResult.queuedPromise;
+      }
 
       if (!acqResult.lease) {
         throw new Error(
@@ -246,8 +259,13 @@ export class GalxModelRouter {
 
         rawTokenSecret = decrypted.apiKey || decrypted.accessToken;
 
-        // 5. Dispatch to Provider Adapter with store: false
-        let adapterResult = await OpenAIAdapter.executeChatCompletion(sanitizedRequest, decrypted, modelSpec);
+        // 5. Dispatch to Provider Adapter with TTFT deadline budgets
+        let adapterResult = await OpenAIAdapter.executeChatCompletion(sanitizedRequest, decrypted, modelSpec, {
+          deadline: {
+            ttftTimeoutMs: modelSpec.supportsReasoning ? 30_000 : 15_000,
+            intraChunkTimeoutMs: 8_000
+          }
+        });
 
         // Reactive 401 Unauthorized Recovery on OAuth Shards
         if (
@@ -268,7 +286,11 @@ export class GalxModelRouter {
                   provider
                 );
                 // Retry once with refreshed token
-                adapterResult = await OpenAIAdapter.executeChatCompletion(sanitizedRequest, decrypted, modelSpec);
+                adapterResult = await OpenAIAdapter.executeChatCompletion(sanitizedRequest, decrypted, modelSpec, {
+                  deadline: {
+                    ttftTimeoutMs: modelSpec.supportsReasoning ? 30_000 : 15_000
+                  }
+                });
               }
             }
           } catch {}
@@ -283,12 +305,16 @@ export class GalxModelRouter {
           const sanitizedErr = GalxModelRouter.sanitizeUpstreamError(errorBody);
           this.pool.releaseLease(
             lease.leaseId,
-            0,
-            false,
-            adapterResult.headers,
-            `HTTP ${response.status}: ${sanitizedErr}`,
-            Date.now(),
-            latencyMs
+            {
+              tokensConsumed: 0,
+              success: false,
+              upstreamHeaders: adapterResult.headers,
+              errorReason: `HTTP ${response.status}: ${sanitizedErr}`,
+              nowMs: Date.now(),
+              latencyMs,
+              statusCode: response.status,
+              modelUsed: modelSpec.id
+            }
           );
 
           this.metrics.recordSample({
@@ -302,7 +328,7 @@ export class GalxModelRouter {
             statusCode: response.status
           });
 
-          if (response.status === 429 || response.status >= 500) {
+          if (response.status === 429 || response.status >= 500 || response.status === 404 || response.status === 400) {
             lastError = new Error(`Compute origin error (${response.status}): ${sanitizedErr}`);
             continue;
           }

@@ -5,13 +5,62 @@
 
 export type ProviderType = 'openai';
 export type ShardIsolationMode = 'private' | 'pooled';
-export type CredentialStatus = 'healthy' | 'cooldown' | 'exhausted' | 'dead' | 'paused' | 'revoked';
+export type CredentialStatus =
+  | 'healthy'
+  | 'warming_up'
+  | 'half_open'
+  | 'cooldown'
+  | 'exhausted'
+  | 'dead'
+  | 'paused'
+  | 'revoked'
+  | 'soft_draining'
+  | 'quarantined';
 export type GalxRotationStrategy =
   | 'adaptive_headroom'
   | 'smooth_weighted_round_robin'
   | 'least_utilized'
   | 'priority_failover';
 export type AuthType = 'oauth' | 'api_key';
+
+export interface SlidingWindowQuotaState {
+  readonly windowDurationMs: number; // e.g. 5 * 3600 * 1000 (5 hours) or 3600000 (1 hour)
+  readonly maxRequestsPerWindow: number; // e.g. 5 or 40
+  readonly usedRequestsInWindow: number;
+  readonly windowStartTimestampMs: number;
+  readonly requestHistoryTimestampsMs: number[];
+  readonly dynamicDiscoveredCap?: number;
+  readonly lastExhaustionResetAtMs?: number;
+}
+
+export type FailureClassificationCategory =
+  | 'rolling_window_exhausted'
+  | 'tpm_rpm_rate_limited'
+  | 'billing_depleted'
+  | 'model_incompatible'
+  | 'auth_terminal'
+  | 'origin_overloaded'
+  | 'socket_timeout'
+  | 'transient_5xx'
+  | 'unknown';
+
+export interface DeadlineConfig {
+  readonly connectTimeoutMs?: number;
+  readonly ttftTimeoutMs?: number;
+  readonly intraChunkTimeoutMs?: number;
+}
+
+export interface HedgingOptions {
+  readonly enabled?: boolean;
+  readonly triggerDelayMs?: number;
+  readonly maxHedgedAttempts?: number;
+}
+
+export interface AdmissionQueueConfig {
+  readonly maxQueueDepth?: number;
+  readonly maxWaitTimeoutMs?: number;
+  readonly priorityBoost?: boolean;
+}
 
 export interface TokenBucketState {
   readonly maxTokens: number;
@@ -330,6 +379,14 @@ export interface GalxShardAccount {
   readonly accountId?: string;
   readonly cooldownUntilMs?: number;
   readonly cooldownUntilTimestampMs?: number;
+  readonly slidingWindowQuota?: SlidingWindowQuotaState;
+  readonly supportedModels?: string[];
+  readonly unsupportedModels?: string[];
+  readonly flappingCount?: number;
+  readonly lastFlappedAtMs?: number;
+  readonly outOfBandUsageDetectedAtMs?: number;
+  readonly warmupStartedAtMs?: number;
+  readonly adaptiveInFlightLimit?: number;
   readonly createdAtMs: number;
   readonly updatedAtMs: number;
 }
@@ -372,6 +429,8 @@ export interface ShardAcquisitionRequest {
   readonly zdrRequired?: boolean;
   readonly targetAccountId?: string;
   readonly targetShardId?: string;
+  readonly queueIfExhausted?: boolean;
+  readonly maxQueueWaitMs?: number;
 }
 
 export interface ShardAcquisitionResult {
@@ -384,7 +443,12 @@ export interface ShardAcquisitionResult {
     | 'success'
     | 'pool_exhausted'
     | 'privacy_policy_mismatch'
-    | 'no_compliant_shards';
+    | 'no_compliant_shards'
+    | 'queued'
+    | 'queue_timeout';
+  readonly queuedPromise?: Promise<ShardAcquisitionResult>;
+  readonly estimatedWaitMs?: number;
+  readonly earliestPoolResetMs?: number;
 }
 
 export interface CircuitEvaluationResult {
@@ -392,6 +456,9 @@ export interface CircuitEvaluationResult {
   readonly canAttempt: boolean;
   readonly cooldownMs?: number;
   readonly canaryMultiplier?: number;
+  readonly isCanaryCandidate?: boolean;
+  readonly remainingWindowRequests?: number;
+  readonly windowResetMs?: number;
 }
 
 export interface CircuitFailureClassification {
@@ -399,6 +466,9 @@ export interface CircuitFailureClassification {
   readonly cooldownMs?: number;
   readonly reason: string;
   readonly isPermanent?: boolean;
+  readonly category?: FailureClassificationCategory;
+  readonly resetAtTimestampMs?: number;
+  readonly retryAfterSeconds?: number;
 }
 
 export interface PoolStats {

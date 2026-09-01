@@ -14,7 +14,17 @@ export type Json =
 export type GalxProviderType = 'openai';
 export type GalxAuthType = 'api_key' | 'oauth';
 export type GalxShardMode = 'pooled' | 'private';
-export type GalxCredentialStatus = 'healthy' | 'cooldown' | 'exhausted' | 'dead' | 'paused' | 'revoked';
+export type GalxCredentialStatus =
+  | 'healthy'
+  | 'warming_up'
+  | 'half_open'
+  | 'cooldown'
+  | 'exhausted'
+  | 'soft_draining'
+  | 'dead'
+  | 'quarantined'
+  | 'paused'
+  | 'revoked';
 export type GalxRotationStrategy = 'adaptive_headroom' | 'smooth_weighted_round_robin' | 'least_utilized' | 'priority_failover';
 export type GalxQueueState = 'RUNNING' | 'PAUSED' | 'DISABLED' | 'DRAINING';
 export type GalxTaskStatus =

@@ -103,3 +103,36 @@ To prevent concurrent stream leaks across distributed worker nodes, requests acq
 - **Stream Completion**: `fn_settle_seat_stream_completion_composite_v2` writes actual token consumption and marks the lease as settled.
 - **Fail-Safe Expiration**: In-flight stream disconnects automatically release their slot upon lease TTL expiration (`180s`), preventing orphaned locks.
 
+---
+
+## 7. Shard Dual-Window Quota Calculus & Sliding Window Request Logs (ADR 0087)
+
+For upstream provider shards with discrete rolling limits (e.g., 5 requests per 5 hours or 40 requests per 3 hours):
+- **Hybrid Calculus**: The gateway evaluates both continuous token bucket refill (for TPM/RPM) and discrete sliding window timestamps:
+  ```typescript
+  const cutoff = nowMs - windowDurationMs;
+  const activeTimestamps = requestHistoryTimestampsMs.filter(ts => ts > cutoff);
+  const remaining = Math.max(0, maxRequestsPerWindow - activeTimestamps.length);
+  ```
+- **Out-of-Band Zero-Trust Resync**: When an upstream 429 reveals external out-of-band usage, `syncSlidingWindowFromReset()` recalculates timestamps against the authoritative reset header and immediately triggers zero-delay shard failover.
+- **Natural Language Reset Parsing**: Automatically extracts reset durations from error bodies (e.g., `"resets in 4 hours 12 minutes"`, `"5h30m"`, `"resets at 3:45 PM"`).
+
+---
+
+## 8. Anti-Stampede Bounded Admission Queue / Waiting Room (ADR 0089)
+
+When the entire provider fleet is momentarily saturated or in brief cooldown:
+- **Earliest-Reset Forecasting**: The gateway calculates $t_{\text{earliestReset}} = \min_{s} (t_{\text{cooldown}, s}, t_{\text{windowReset}, s})$.
+- **Waiting Room Enqueueing**: If $t_{\text{earliestReset}} - t_{\text{now}} \le \text{maxQueueWaitMs}$ (default 4,000ms), incoming requests enter a bounded in-memory priority queue (`admissionQueue`), resolving smoothly as soon as a slot opens.
+- **Reflexive Event-Driven Draining**: Whenever any active request releases its lease or commits tokens, `drainAdmissionQueue()` executes immediately to satisfy queued requests with zero polling delay.
+
+---
+
+## 9. Adaptive In-Flight Concurrency Limiting (AIMD)
+
+To prevent slow-poisoning / tarpitting when an upstream provider experiences severe server latency degradation:
+- **Fast Shards ($\text{EWMA} < 400\text{ms}$)**: Concurrency ceiling boosted up to $\min(25, \text{base} + 4)$.
+- **Moderately Degraded ($\text{EWMA} > 1200\text{ms}$)**: Concurrency capped at $\max(3, \lfloor\text{base} \times 0.7\rfloor)$.
+- **Severely Degraded ($\text{EWMA} > 2000\text{ms}$)**: Concurrency choked to $\max(2, \lfloor\text{base} \times 0.4\rfloor)$.
+
+

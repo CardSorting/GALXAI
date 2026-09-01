@@ -75,6 +75,27 @@ graph TD
 - **Fail-Closed Fallback**: If an extracted digest contains any unsupported entity, number, or identifier, the system safely falls back to the original unmodified source text with zero data corruption.
 - **100% Verified Pass Rate**: In regression testing across 180 enterprise industry clusters, BroccoliDB achieves 180 verified compactions and 0 fallbacks.
 
+### 3.6 6-State Enterprise Circuit Breaker & Single-Canary Slotting (`GalxCircuitBreaker`, ADR 0088)
+- **State Machine**: Evaluates accounts across `healthy`, `warming_up`, `half_open`, `cooldown`, `exhausted`, `quarantined`, and `dead`.
+- **Strict Single-Canary Slotting**: Only exactly 1 in-flight probe is admitted to test half-open shards; concurrent requests bypass to alternate healthy shards.
+- **Slow-Start Quadratic Warmup**: Prevents post-cooldown herd spikes by scaling traffic as $\text{Weight} \times (t/30\text{s})^2$.
+- **Per-Shard Model Capability Matrix**: Dissects 404/400 `model_not_found` errors to blacklist unsupported models per shard without disabling other models.
+
+### 3.7 Anti-Stampede Bounded Admission Queue (`GalxCredentialPool`, ADR 0089)
+- **Waiting Room Enqueueing**: When the fleet is briefly saturated, calculates earliest reset time ($t_{\text{earliestReset}}$) and holds requests in a bounded queue ($\le 4\text{s}$).
+- **Reflexive Event-Driven Drain**: Releasing any lease immediately pulses the admission queue to dispatch waiting requests.
+- **AIMD Concurrency Limiter**: Dynamically adjusts in-flight concurrency limits based on EWMA latency to prevent slow-poisoning tarpits.
+
+### 3.8 Zero-Egress Write-Behind Micro-Batch Buffer (`GalxShardSyncBuffer`, ADR 0090)
+- **Debounced Micro-Batches**: Coalesces health probes, latency percentiles, and circuit state transitions in L1 memory, flushing in 2.5s / 100-item micro-batches to Supabase PostgreSQL.
+- **98% Egress Reduction**: Eliminates synchronous database roundtrips on the hot inference path.
+
+### 3.9 Dual-Window Quota & Zero-Trust Resync (`ContinuousTokenBucketRateGovernor`, ADR 0087)
+- **Sliding Request Log**: Enforces discrete 5 req/5 hr or 40 req/3 hr rolling windows alongside token bucket refilling.
+- **NLP Error Body Dissection**: Automatically extracts durations like `"resets in 4 hours 12 minutes"` to set authoritative cooldowns.
+- **Out-of-Band Usage Resync**: Out-of-band 429 errors trigger zero-delay local window resynchronization and instant failover.
+
+
 
 ---
 

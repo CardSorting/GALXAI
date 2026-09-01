@@ -1,18 +1,27 @@
-import type { TokenBucketState, UpstreamRateLimitHeaders } from '../contracts/GalxContracts';
+import type {
+  TokenBucketState,
+  SlidingWindowQuotaState
+} from '../contracts/GalxContracts';
 
 /**
- * Enterprise Continuous Mathematical Token-Bucket Rate Governor.
+ * Enterprise Dual-Window Mathematical Rate Governor for GALXAI.
  *
  * Implements:
- * 1. Exact continuous fractional token and request replenishment calculus with microsecond clock precision.
- * 2. Clock-skew immunity against backward NTP synchronization adjustments.
- * 3. 2-Phase Soft Token Reservation to prevent concurrent over-commitment across parallel worker threads.
- * 4. Authoritative bidirectional reconciliation against upstream OpenAI & xAI rate-limit response headers.
- * 5. Robust vendor duration & timestamp normalizer (supports "6m0s", "1.25s", "150ms", ISO dates, etc.).
+ * 1. Token Bucket calculus: Continuous fractional token & request replenishment with microsecond precision.
+ * 2. Sliding-Window Log calculus: Exact discrete request window modeling (e.g. 5 requests / 5 hours,
+ *    40 requests / 3 hours) with rolling timestamp log and circular pruning.
+ * 3. Out-of-band quota resynchronization.
+ * 4. Natural language duration & time extractor ("4 hours 12 minutes", "resets at 3:45 PM", ISO 8601, epochs).
+ * 5. Authoritative upstream rate-limit header reconciliation.
  */
 export class ContinuousTokenBucketRateGovernor {
   /**
-   * Parses vendor duration string or timestamp into exact milliseconds.
+   * Deep natural language duration & timestamp parser.
+   * Handles:
+   * - Natural text: "4 hours 12 minutes", "5h30m", "in 45 seconds", "try again in 280s"
+   * - Time references: "resets at 3:45 PM", "resets at 16:30:00"
+   * - Numeric strings & pure seconds / millisecond epochs
+   * - ISO 8601 dates & HTTP-date strings
    */
   public static parseDurationToMs(value: string | number | undefined, nowMs = Date.now()): number | undefined {
     if (value === undefined || value === null) return undefined;
@@ -23,29 +32,56 @@ export class ContinuousTokenBucketRateGovernor {
       return Math.max(0, value * 1000);
     }
 
-    const str = String(value).trim();
-    if (!str) return undefined;
+    const rawStr = String(value).trim();
+    if (!rawStr) return undefined;
 
-    // Pure number
-    if (/^\d+(\.\d+)?$/.test(str)) {
-      const num = parseFloat(str);
+    // Pure number string
+    if (/^\d+(\.\d+)?$/.test(rawStr)) {
+      const num = parseFloat(rawStr);
       if (num > 100_000_000_000) {
         return Math.max(0, num - nowMs);
       }
       return Math.max(0, num * 1000);
     }
 
-    // Units: h, m, s, ms
+    const str = rawStr.toLowerCase();
+
+    // Check for "resets at HH:MM(:SS) (AM|PM)?" or "at HH:MM"
+    const timeMatch = str.match(/(?:at|resets\s+at)\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(am|pm)?/i);
+    if (timeMatch) {
+      let hours = parseInt(timeMatch[1], 10);
+      const minutes = parseInt(timeMatch[2], 10);
+      const seconds = timeMatch[3] ? parseInt(timeMatch[3], 10) : 0;
+      const meridiem = timeMatch[4] ? timeMatch[4].toLowerCase() : null;
+
+      if (meridiem === 'pm' && hours < 12) hours += 12;
+      if (meridiem === 'am' && hours === 12) hours = 0;
+
+      const targetDate = new Date(nowMs);
+      targetDate.setHours(hours, minutes, seconds, 0);
+
+      // If target time is earlier today, assume it's tomorrow
+      if (targetDate.getTime() <= nowMs) {
+        targetDate.setDate(targetDate.getDate() + 1);
+      }
+
+      return Math.max(0, targetDate.getTime() - nowMs);
+    }
+
+    // Units parsing: days, hours, minutes/mins, seconds/secs, ms
     let totalMs = 0;
     let matched = false;
 
-    const hours = str.match(/(\d+(?:\.\d+)?)\s*h/i);
+    const days = str.match(/(\d+(?:\.\d+)?)\s*(?:d|days?)/i);
+    if (days) { totalMs += parseFloat(days[1]) * 86400000; matched = true; }
+
+    const hours = str.match(/(\d+(?:\.\d+)?)\s*(?:h|hrs?|hours?)/i);
     if (hours) { totalMs += parseFloat(hours[1]) * 3600000; matched = true; }
 
-    const mins = str.match(/(\d+(?:\.\d+)?)\s*m(?!s)/i);
+    const mins = str.match(/(\d+(?:\.\d+)?)\s*(?:m|mins?|minutes?)(?!s)/i);
     if (mins) { totalMs += parseFloat(mins[1]) * 60000; matched = true; }
 
-    const secs = str.match(/(\d+(?:\.\d+)?)\s*s/i);
+    const secs = str.match(/(\d+(?:\.\d+)?)\s*(?:s|secs?|seconds?)/i);
     if (secs) { totalMs += parseFloat(secs[1]) * 1000; matched = true; }
 
     const ms = str.match(/(\d+(?:\.\d+)?)\s*ms/i);
@@ -54,7 +90,7 @@ export class ContinuousTokenBucketRateGovernor {
     if (matched) return totalMs;
 
     // HTTP-date / ISO date
-    const parsedDate = Date.parse(str);
+    const parsedDate = Date.parse(rawStr);
     if (!isNaN(parsedDate) && parsedDate > nowMs) {
       return parsedDate - nowMs;
     }
@@ -79,6 +115,121 @@ export class ContinuousTokenBucketRateGovernor {
       remainingRequests: maxRequests,
       lastRefillTimestampMs: nowMs,
       reservedTokens: 0
+    };
+  }
+
+  /**
+   * Creates a default sliding window quota state (e.g. 5 requests per 5 hours).
+   */
+  createDefaultSlidingWindow(
+    windowDurationMs = 5 * 3600 * 1000, // 5 hours
+    maxRequestsPerWindow = 5,
+    nowMs = Date.now()
+  ): SlidingWindowQuotaState {
+    return {
+      windowDurationMs,
+      maxRequestsPerWindow,
+      usedRequestsInWindow: 0,
+      windowStartTimestampMs: nowMs,
+      requestHistoryTimestampsMs: []
+    };
+  }
+
+  /**
+   * Cleans expired request timestamps outside the active rolling window [nowMs - windowDurationMs, nowMs].
+   */
+  cleanExpiredSlidingWindowTimestamps(
+    quota: SlidingWindowQuotaState,
+    nowMs = Date.now()
+  ): SlidingWindowQuotaState {
+    const windowDuration = quota.windowDurationMs || 5 * 3600 * 1000;
+    const cutoffTimestamp = nowMs - windowDuration;
+    const history = quota.requestHistoryTimestampsMs || [];
+
+    const activeTimestamps = history.filter((ts) => ts > cutoffTimestamp);
+
+    return {
+      ...quota,
+      requestHistoryTimestampsMs: activeTimestamps,
+      usedRequestsInWindow: activeTimestamps.length,
+      windowStartTimestampMs: activeTimestamps.length > 0 ? Math.min(...activeTimestamps) : nowMs
+    };
+  }
+
+  /**
+   * Evaluates if a sliding window quota has available capacity.
+   */
+  canConsumeSlidingWindow(
+    quota: SlidingWindowQuotaState,
+    requiredRequests = 1,
+    nowMs = Date.now()
+  ): { canConsume: boolean; remainingRequests: number; resetInMs: number } {
+    const cleaned = this.cleanExpiredSlidingWindowTimestamps(quota, nowMs);
+    const maxAllowed = cleaned.dynamicDiscoveredCap ?? cleaned.maxRequestsPerWindow;
+    const remaining = Math.max(0, maxAllowed - cleaned.usedRequestsInWindow);
+
+    let resetInMs = 0;
+    if (cleaned.requestHistoryTimestampsMs.length > 0) {
+      const oldestActive = cleaned.requestHistoryTimestampsMs[0];
+      const windowExpiresAt = oldestActive + cleaned.windowDurationMs;
+      resetInMs = Math.max(0, windowExpiresAt - nowMs);
+    }
+
+    return {
+      canConsume: remaining >= requiredRequests,
+      remainingRequests: remaining,
+      resetInMs
+    };
+  }
+
+  /**
+   * Atomically records request consumption in the sliding window log.
+   */
+  recordSlidingWindowConsumption(
+    quota: SlidingWindowQuotaState,
+    requestsConsumed = 1,
+    nowMs = Date.now()
+  ): SlidingWindowQuotaState {
+    const cleaned = this.cleanExpiredSlidingWindowTimestamps(quota, nowMs);
+    const newTimestamps = [...cleaned.requestHistoryTimestampsMs];
+    for (let i = 0; i < requestsConsumed; i++) {
+      newTimestamps.push(nowMs);
+    }
+
+    return {
+      ...cleaned,
+      requestHistoryTimestampsMs: newTimestamps,
+      usedRequestsInWindow: newTimestamps.length
+    };
+  }
+
+  /**
+   * Out-of-Band Sync: When an external 429 occurs, syncs the sliding window to full exhaustion
+   * until the authoritative upstream reset timestamp.
+   */
+  syncSlidingWindowFromReset(
+    quota: SlidingWindowQuotaState,
+    resetAtTimestampMs: number,
+    discoveredCap?: number,
+    nowMs = Date.now()
+  ): SlidingWindowQuotaState {
+    const duration = quota.windowDurationMs || 5 * 3600 * 1000;
+    const impliedOldestTimestamp = resetAtTimestampMs - duration;
+    const maxCap = discoveredCap ?? quota.maxRequestsPerWindow;
+
+    // Synthesize timestamps filling the window
+    const syntheticTimestamps: number[] = [];
+    for (let i = 0; i < maxCap; i++) {
+      syntheticTimestamps.push(impliedOldestTimestamp + (i * 1000));
+    }
+
+    return {
+      ...quota,
+      maxRequestsPerWindow: maxCap,
+      dynamicDiscoveredCap: discoveredCap,
+      usedRequestsInWindow: maxCap,
+      requestHistoryTimestampsMs: syntheticTimestamps,
+      lastExhaustionResetAtMs: resetAtTimestampMs
     };
   }
 
@@ -283,3 +434,4 @@ export class ContinuousTokenBucketRateGovernor {
     };
   }
 }
+

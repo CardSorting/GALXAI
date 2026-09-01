@@ -3,8 +3,15 @@ import type {
   ImageGenerationRequest,
   ImageGenerationResponse,
   DecryptedGalxSecret,
-  ModelSpecItem
+  ModelSpecItem,
+  DeadlineConfig
 } from '../../contracts/GalxContracts';
+
+export interface ExecuteOptions {
+  signal?: AbortSignal;
+  deadline?: DeadlineConfig;
+  timeoutMs?: number;
+}
 
 export class OpenAIAdapter {
   private static readonly BASE_URL = 'https://api.openai.com/v1';
@@ -22,12 +29,13 @@ export class OpenAIAdapter {
   }
 
   /**
-   * Executes synchronous or streaming chat completion against OpenAI endpoint.
+   * Executes synchronous or streaming chat completion against OpenAI endpoint with deadline budgets and abort support.
    */
   static async executeChatCompletion(
     req: ChatCompletionRequest,
     secret: DecryptedGalxSecret,
-    modelSpec: ModelSpecItem
+    modelSpec: ModelSpecItem,
+    options?: ExecuteOptions
   ): Promise<{ response: Response; headers: Record<string, string> }> {
     const token = secret.apiKey || secret.accessToken;
     if (!token) {
@@ -65,18 +73,56 @@ export class OpenAIAdapter {
     if (req.prompt_cache_options !== undefined) body.prompt_cache_options = req.prompt_cache_options;
     if (req.safety_identifier !== undefined) body.safety_identifier = req.safety_identifier;
 
-    const response = await fetch(`${this.BASE_URL}/chat/completions`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body)
-    });
+    // Build abort controller with deadline budget
+    const defaultTtftTimeout = modelSpec.supportsReasoning ? 30_000 : 15_000;
+    const timeoutMs = options?.timeoutMs ?? options?.deadline?.ttftTimeoutMs ?? defaultTtftTimeout;
 
-    const responseHeaders: Record<string, string> = {};
-    response.headers.forEach((v, k) => {
-      responseHeaders[k.toLowerCase()] = v;
-    });
+    const controller = new AbortController();
+    let timeoutId: NodeJS.Timeout | null = null;
 
-    return { response, headers: responseHeaders };
+    if (timeoutMs > 0 && timeoutMs < Infinity) {
+      timeoutId = setTimeout(() => {
+        controller.abort(new Error(`Upstream TTFT deadline exceeded (${timeoutMs}ms)`));
+      }, timeoutMs);
+      if (timeoutId.unref) timeoutId.unref();
+    }
+
+    // Link user/parent abort signal if present
+    if (options?.signal) {
+      if (options.signal.aborted) {
+        if (timeoutId) clearTimeout(timeoutId);
+        controller.abort(options.signal.reason);
+      } else {
+        options.signal.addEventListener('abort', () => {
+          if (timeoutId) clearTimeout(timeoutId);
+          controller.abort(options.signal!.reason);
+        }, { once: true });
+      }
+    }
+
+    try {
+      const response = await fetch(`${this.BASE_URL}/chat/completions`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+        signal: controller.signal
+      });
+
+      if (timeoutId) clearTimeout(timeoutId);
+
+      const responseHeaders: Record<string, string> = {};
+      response.headers.forEach((v, k) => {
+        responseHeaders[k.toLowerCase()] = v;
+      });
+
+      return { response, headers: responseHeaders };
+    } catch (err: any) {
+      if (timeoutId) clearTimeout(timeoutId);
+      if (err.name === 'AbortError' || controller.signal.aborted) {
+        throw new Error(`Upstream connection aborted/timed out after ${timeoutMs}ms`);
+      }
+      throw err;
+    }
   }
 
   /**
@@ -86,7 +132,8 @@ export class OpenAIAdapter {
     req: ImageGenerationRequest,
     secret: DecryptedGalxSecret,
     modelSpec: ModelSpecItem,
-    shardId: string
+    shardId: string,
+    options?: ExecuteOptions
   ): Promise<ImageGenerationResponse> {
     const token = secret.apiKey || secret.accessToken;
     if (!token) {
@@ -112,24 +159,44 @@ export class OpenAIAdapter {
       response_format: req.response_format || 'url'
     };
 
-    const response = await fetch(`${this.BASE_URL}/images/generations`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body)
-    });
+    const controller = new AbortController();
+    const timeoutMs = options?.timeoutMs || 45_000;
+    const timeoutId = setTimeout(() => {
+      controller.abort(new Error(`Image generation timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+    if (timeoutId.unref) timeoutId.unref();
 
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`OpenAI Image Generation error (${response.status}): ${errText}`);
+    if (options?.signal) {
+      options.signal.addEventListener('abort', () => controller.abort(options.signal!.reason), { once: true });
     }
 
-    const result = await response.json() as any;
+    try {
+      const response = await fetch(`${this.BASE_URL}/images/generations`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+        signal: controller.signal
+      });
 
-    return {
-      created: result.created || Math.floor(Date.now() / 1000),
-      data: result.data || [],
-      modelUsed: modelSpec.id,
-      shardId
-    };
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`OpenAI Image Generation error (${response.status}): ${errText}`);
+      }
+
+      const result = await response.json() as any;
+
+      return {
+        created: result.created || Math.floor(Date.now() / 1000),
+        data: result.data || [],
+        modelUsed: modelSpec.id,
+        shardId
+      };
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      throw err;
+    }
   }
 }
+
