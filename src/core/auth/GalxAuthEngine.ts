@@ -953,6 +953,29 @@ export class GalxAuthEngine {
           };
         }
 
+        // IP CIDR Allowlist Verification
+        if (foundKey.ipWhitelist && foundKey.ipWhitelist.length > 0) {
+          let clientIp = '';
+          if (req && 'headers' in req && req.headers) {
+            if (typeof (req.headers as any).get === 'function') {
+              const h = req.headers as Headers;
+              clientIp = h.get('cf-connecting-ip') || h.get('x-real-ip') || h.get('x-forwarded-for') || '';
+            } else if (typeof req.headers === 'object') {
+              const h = req.headers as any;
+              clientIp = h['cf-connecting-ip'] || h['x-real-ip'] || h['x-forwarded-for'] || '';
+            }
+          }
+          if (clientIp && !GalxCryptoVault.isIpAllowed(clientIp, foundKey.ipWhitelist)) {
+            return {
+              authenticated: false,
+              userId: foundKey.userId,
+              authType: 'developer_key',
+              isPriorityUser: false,
+              error: 'IP_ADDRESS_NOT_IN_KEY_ALLOWLIST'
+            };
+          }
+        }
+
         this.persistence.apiKeyRepo.incrementUsage(foundKey.id, 1, 0, 0).catch(() => {});
         return {
           authenticated: true,

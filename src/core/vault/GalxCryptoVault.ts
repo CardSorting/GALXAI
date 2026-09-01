@@ -220,6 +220,39 @@ export class GalxCryptoVault {
   }
 
   /**
+   * Validates whether an incoming IP address satisfies an allowlist of CIDR ranges / exact IPs.
+   */
+  static isIpAllowed(clientIp?: string, allowlist?: string[]): boolean {
+    if (!allowlist || allowlist.length === 0 || allowlist.includes('*') || allowlist.includes('0.0.0.0/0')) {
+      return true;
+    }
+    if (!clientIp) return false;
+    const cleanIp = clientIp.split(',')[0].trim();
+
+    for (const rule of allowlist) {
+      const trimmedRule = rule.trim();
+      if (trimmedRule === cleanIp || trimmedRule === '0.0.0.0/0' || trimmedRule === '*') return true;
+
+      // IPv4 CIDR matching (e.g. 192.168.1.0/24 or 10.0.0.0/8)
+      if (trimmedRule.includes('/') && cleanIp.includes('.')) {
+        try {
+          const [range, bitsStr] = trimmedRule.split('/');
+          const bits = parseInt(bitsStr, 10);
+          if (bits >= 0 && bits <= 32) {
+            const ipToNum = (ip: string) => ip.split('.').reduce((acc, oct) => ((acc << 8) + parseInt(oct, 10)) >>> 0, 0) >>> 0;
+            const mask = bits === 0 ? 0 : (~0 << (32 - bits)) >>> 0;
+            if ((ipToNum(cleanIp) & mask) === (ipToNum(range) & mask)) {
+              return true;
+            }
+          }
+        } catch {}
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Generates a tamper-evident client environment fingerprint (DPoP / Subnet + User-Agent binding).
    */
   static generateClientFingerprint(ipAddress?: string, userAgent?: string): string {

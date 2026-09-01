@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
@@ -15,41 +15,112 @@ import {
   Key,
   AlertTriangle,
   Radio,
-  Cpu
+  Cpu,
+  Layers,
+  Save
 } from 'lucide-react';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
+import { resilientFetch } from '@/lib/resilience/ResilientClient';
 
 export default function KeyPermissionsPage() {
-  const [selectedKey, setSelectedKey] = useState('galx_live_d819');
+  const [keys, setKeys] = useState<any[]>([]);
+  const [selectedKeyId, setSelectedKeyId] = useState('');
   const [ipAllowlist, setIpAllowlist] = useState('0.0.0.0/0');
-  const [allowedModels, setAllowedModels] = useState<string[]>(['gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna']);
-  const [maxTokensPerRequest, setMaxTokensPerRequest] = useState(8192);
-  const [keyTtl, setKeyTtl] = useState('never');
+  const [allowedScopes, setAllowedScopes] = useState<string[]>(['*']);
+  const [keyTtlDays, setKeyTtlDays] = useState<number>(0);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const availableModels = [
-    { id: 'gpt-5.6-sol', label: 'OpenAI GPT-5.6 Sol (Coding & Reasoning)' },
-    { id: 'gpt-5.6-terra', label: 'OpenAI GPT-5.6 Terra (Balanced Frontier)' },
-    { id: 'gpt-5.6-luna', label: 'OpenAI GPT-5.6 Luna (Sub-second Velocity)' },
-    { id: 'openai-gpt-image-2', label: 'OpenAI GPT-Image-2 (4K Visual Synthesis)' },
-    { id: 'openai-gpt-image-1.5', label: 'OpenAI GPT-Image-1.5 (Fast Visual Generation)' },
-    { id: 'openai-gpt-image-1', label: 'OpenAI GPT-Image-1 (Foundation Diffusion)' }
+  const availableScopes = [
+    { id: '*', label: 'Full Root Access (*)', desc: 'Unrestricted completions, models, images, and embeddings' },
+    { id: 'chat:*', label: 'Chat & Completions (chat:*)', desc: 'Allows chat completions and streaming responses' },
+    { id: 'models:read', label: 'Models Read (models:read)', desc: 'Allows querying model catalogs and context limits' },
+    { id: 'images:generate', label: 'Image Synthesis (images:generate)', desc: 'Allows GPT-Image generation calls' },
+    { id: 'embeddings:*', label: 'Embeddings (embeddings:*)', desc: 'Allows vector embeddings generation' }
   ];
 
-  const handleToggleModel = (modelId: string) => {
-    setAllowedModels(prev =>
-      prev.includes(modelId) ? prev.filter(m => m !== modelId) : [...prev, modelId]
-    );
+  const fetchKeys = async () => {
+    try {
+      const res = await resilientFetch<{ keys: any[] }>('/api/keys', { enableCacheFallback: true });
+      const activeKeys = res.data?.keys?.filter(k => !k.revoked) || [];
+      setKeys(activeKeys);
+      if (activeKeys.length > 0 && !selectedKeyId) {
+        setSelectedKeyId(activeKeys[0].id);
+        loadKeySettings(activeKeys[0]);
+      }
+    } catch {}
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  useEffect(() => {
+    fetchKeys();
+  }, []);
+
+  const loadKeySettings = (key: any) => {
+    if (!key) return;
+    setIpAllowlist(Array.isArray(key.ipWhitelist) && key.ipWhitelist.length > 0 ? key.ipWhitelist.join(', ') : '0.0.0.0/0');
+    setAllowedScopes(Array.isArray(key.scopes) && key.scopes.length > 0 ? key.scopes : ['*']);
+    if (key.expiresAt) {
+      const diffDays = Math.ceil((key.expiresAt - Date.now()) / (86400 * 1000));
+      setKeyTtlDays(diffDays > 0 ? diffDays : 0);
+    } else {
+      setKeyTtlDays(0);
+    }
+  };
+
+  const handleSelectKey = (id: string) => {
+    setSelectedKeyId(id);
+    const found = keys.find(k => k.id === id);
+    if (found) loadKeySettings(found);
+  };
+
+  const handleToggleScope = (scopeId: string) => {
+    if (scopeId === '*') {
+      setAllowedScopes(['*']);
+      return;
+    }
+    setAllowedScopes(prev => {
+      const withoutAll = prev.filter(s => s !== '*');
+      if (withoutAll.includes(scopeId)) {
+        const next = withoutAll.filter(s => s !== scopeId);
+        return next.length > 0 ? next : ['*'];
+      }
+      return [...withoutAll, scopeId];
+    });
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
+    if (!selectedKeyId) return;
+
+    setIsSaving(true);
+    try {
+      const parsedIps = ipAllowlist
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      const res = await resilientFetch(`/api/keys/${selectedKeyId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ipWhitelist: parsedIps.length > 0 ? parsedIps : ['0.0.0.0/0'],
+          scopes: allowedScopes,
+          expiresInDays: keyTtlDays
+        })
+      });
+
+      if (res.data?.success) {
+        setSavedSuccess(true);
+        fetchKeys();
+        setTimeout(() => setSavedSuccess(false), 3000);
+      }
+    } catch {} finally {
+      setIsSaving(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#07090e]">
       <Navigation />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
@@ -62,15 +133,15 @@ export default function KeyPermissionsPage() {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white">API Key Security & Scoped Permissions</h1>
+            <h1 className="text-2xl sm:text-3xl font-black text-white">API Key Security &amp; Scoped Permissions</h1>
             <p className="text-xs text-zinc-400">
-              Lock down API keys with IP CIDR allowlists, restricted model access policies, max token guardrails, and auto-expiry TTLs.
+              Lock down API keys with IP CIDR allowlists, granular capability scopes, and automatic expiry TTLs.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-mono text-xs font-bold flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5" />
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
               <span>STRICT POLICY ENFORCEMENT</span>
             </span>
           </div>
@@ -80,150 +151,156 @@ export default function KeyPermissionsPage() {
 
         <AuthRequiredGate
           title="Sign In to Configure Key Permissions"
-          description="IP CIDR allowlists, restricted model access policies, and max token guardrails are private to your workspace."
+          description="IP CIDR allowlists, scoped capability policies, and auto-expiry guardrails are private to your workspace."
           checkoutAmount={25}
         >
           {savedSuccess && (
-          <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-xs text-emerald-300 font-mono flex items-center gap-2 animate-in fade-in duration-200">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>Security policies and CIDR allowlists updated successfully!</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSave} className="space-y-6">
-          {/* Key Selector */}
-          <div className="glass-panel rounded-3xl p-6 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-0.5">
-              <span className="text-xs text-zinc-400 font-mono uppercase">Select Target API Key to Govern:</span>
-              <h3 className="text-base font-bold text-white">Configuring Scoped Security Policies</h3>
+            <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-xs text-emerald-300 font-mono flex items-center gap-2 animate-in fade-in duration-200">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Security policies and CIDR allowlists updated successfully!</span>
             </div>
+          )}
 
-            <select
-              value={selectedKey}
-              onChange={(e) => setSelectedKey(e.target.value)}
-              className="py-2.5 px-4 rounded-xl bg-black/60 border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-amber-500"
-            >
-              <option value="galx_live_d819">galx_live_d819 (Cursor IDE Coding Agent)</option>
-              <option value="galx_live_p401">galx_live_p401 (Production API Backend)</option>
-              <option value="galx_live_lc99">galx_live_lc99 (Agent Swarm / LangChain)</option>
-            </select>
-          </div>
-
-          {/* Security Rules Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* IP Allowlist */}
-            <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-cyan-400" />
-                  IP CIDR Allowlist
-                </h3>
-                <p className="text-xs text-zinc-400">
-                  Restrict request ingress to specific server IP addresses or VPC CIDR subnets.
-                </p>
-              </div>
-
-              <div className="space-y-2 font-mono text-xs">
-                <input
-                  type="text"
-                  required
-                  placeholder="0.0.0.0/0 (Global) or 54.210.0.0/16, 192.168.1.1/32"
-                  value={ipAllowlist}
-                  onChange={(e) => setIpAllowlist(e.target.value)}
-                  className="w-full py-2.5 px-3 rounded-xl bg-black/50 border border-white/10 text-white focus:outline-none focus:border-amber-500 font-mono text-xs"
-                />
-                <span className="text-[11px] text-zinc-500 block font-sans">
-                  Requests originating outside this CIDR range will be rejected with HTTP 403 Forbidden.
-                </span>
-              </div>
+          {keys.length === 0 ? (
+            <div className="text-center py-16 px-4 rounded-3xl bg-black/30 border border-dashed border-white/10 space-y-3">
+              <Key className="w-8 h-8 text-zinc-500 mx-auto" />
+              <p className="text-xs text-zinc-400">No active keys found. Mint an API key to configure security policies.</p>
+              <Link href="/keys" className="inline-block px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">
+                Mint Your First Key
+              </Link>
             </div>
-
-            {/* Token Guardrails & TTL */}
-            <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-amber-400" />
-                  Token Guardrails & Key Expiration
-                </h3>
-                <p className="text-xs text-zinc-400">Prevent runaway generation loops and configure automatic key TTL.</p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
-                <div className="space-y-1">
-                  <label className="text-zinc-400 uppercase text-[10px]">Max Tokens Per Request</label>
-                  <select
-                    value={maxTokensPerRequest}
-                    onChange={(e) => setMaxTokensPerRequest(Number(e.target.value))}
-                    className="w-full py-2.5 px-3 rounded-xl bg-black/50 border border-white/10 text-white focus:outline-none focus:border-amber-500"
-                  >
-                    <option value={2048}>2,048 Tokens (Short Snippets)</option>
-                    <option value={4096}>4,096 Tokens (Standard Completion)</option>
-                    <option value={8192}>8,192 Tokens (Large Refactors)</option>
-                    <option value={32768}>32,768 Tokens (Full Codebase Files)</option>
-                  </select>
+          ) : (
+            <form onSubmit={handleSave} className="space-y-6">
+              {/* Key Selector */}
+              <div className="glass-panel rounded-3xl p-6 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <span className="text-xs text-zinc-400 font-mono uppercase">Select Target API Key to Govern:</span>
+                  <h3 className="text-base font-bold text-white">Configuring Scoped Security Policies</h3>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-zinc-400 uppercase text-[10px]">Key Auto-Expiry (TTL)</label>
-                  <select
-                    value={keyTtl}
-                    onChange={(e) => setKeyTtl(e.target.value)}
-                    className="w-full py-2.5 px-3 rounded-xl bg-black/50 border border-white/10 text-white focus:outline-none focus:border-amber-500"
-                  >
-                    <option value="never">Never Expires (Production Default)</option>
-                    <option value="24h">24 Hours (Temporary CI/CD)</option>
-                    <option value="7d">7 Days (Sprint / Testing)</option>
-                    <option value="30d">30 Days (Monthly Rotation)</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Model Access Whitelist */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
-            <div className="space-y-1">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Cpu className="w-4 h-4 text-emerald-400" />
-                Allowed Frontier Models Scoping
-              </h3>
-              <p className="text-xs text-zinc-400">
-                Select which models this API key is permitted to call. Unselected models will be blocked at the gateway level.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              {availableModels.map((model) => (
-                <label
-                  key={model.id}
-                  onClick={() => handleToggleModel(model.id)}
-                  className={`p-4 rounded-2xl border flex items-center gap-3 cursor-pointer transition-all ${
-                    allowedModels.includes(model.id)
-                      ? 'bg-amber-500/10 border-amber-500/30 text-white'
-                      : 'bg-black/30 border-white/5 text-zinc-400 hover:text-zinc-200'
-                  }`}
+                <select
+                  value={selectedKeyId}
+                  onChange={(e) => handleSelectKey(e.target.value)}
+                  className="py-2.5 px-4 rounded-xl bg-black/60 border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-cyan-500"
                 >
-                  <input
-                    type="checkbox"
-                    checked={allowedModels.includes(model.id)}
-                    onChange={() => {}}
-                    className="rounded bg-black/50 border-white/10 text-amber-400 focus:ring-0"
-                  />
-                  <div className="font-mono text-xs font-bold">{model.label}</div>
-                </label>
-              ))}
-            </div>
+                  {keys.map((k) => (
+                    <option key={k.id} value={k.id}>
+                      {k.keyPrefix}... • {k.name} ({k.environment ? k.environment.toUpperCase() : 'LIVE'})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="flex justify-end pt-4 border-t border-white/5">
-              <button
-                type="submit"
-                className="px-8 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase tracking-wider font-mono shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
-              >
-                Save Security Policies
-              </button>
-            </div>
-          </div>
-        </form>
+              {/* Security Rules Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* IP Allowlist */}
+                <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
+                  <div className="space-y-1">
+                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-cyan-400" />
+                      IP CIDR Allowlist
+                    </h3>
+                    <p className="text-xs text-zinc-400">
+                      Restrict request ingress to specific server IP addresses or VPC CIDR subnets.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 font-mono text-xs">
+                    <input
+                      type="text"
+                      required
+                      placeholder="0.0.0.0/0 (Global) or 54.210.0.0/16, 192.168.1.1/32"
+                      value={ipAllowlist}
+                      onChange={(e) => setIpAllowlist(e.target.value)}
+                      className="w-full py-2.5 px-3 rounded-xl bg-black/50 border border-white/10 text-white focus:outline-none focus:border-cyan-500 font-mono text-xs"
+                    />
+                    <span className="text-[11px] text-zinc-500 block font-sans">
+                      Requests originating outside this CIDR range will be rejected with HTTP 403 Forbidden.
+                    </span>
+                  </div>
+                </div>
+
+                {/* Key Expiration / TTL */}
+                <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
+                  <div className="space-y-1">
+                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                      <Lock className="w-4 h-4 text-amber-400" />
+                      Automatic Key Expiration (TTL)
+                    </h3>
+                    <p className="text-xs text-zinc-400">Enforce periodic key rotation policies for SOC2/ISO-27001 compliance.</p>
+                  </div>
+
+                  <div className="space-y-2 font-mono text-xs">
+                    <select
+                      value={keyTtlDays}
+                      onChange={(e) => setKeyTtlDays(Number(e.target.value))}
+                      className="w-full py-2.5 px-3 rounded-xl bg-black/50 border border-white/10 text-white focus:outline-none focus:border-amber-500"
+                    >
+                      <option value={0}>Never Expires (Production Default)</option>
+                      <option value={1}>1 Day (Temporary CI/CD)</option>
+                      <option value={7}>7 Days (Sprint / Testing)</option>
+                      <option value={30}>30 Days (Monthly Rotation)</option>
+                      <option value={90}>90 Days (Quarterly Audit)</option>
+                      <option value={365}>365 Days (Annual Certificate)</option>
+                    </select>
+                    <span className="text-[11px] text-zinc-500 block font-sans">
+                      Keys are automatically rendered invalid once their expiration timestamp elapses.
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Scopes & Permissions Selector */}
+              <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
+                <div className="space-y-1">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-indigo-400" />
+                    Granular Capability Scopes
+                  </h3>
+                  <p className="text-xs text-zinc-400">Limit this key's operational authority across platform services.</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
+                  {availableScopes.map((s) => {
+                    const isChecked = allowedScopes.includes(s.id) || (allowedScopes.includes('*') && s.id !== '*');
+                    return (
+                      <div
+                        key={s.id}
+                        onClick={() => handleToggleScope(s.id)}
+                        className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 ${
+                          allowedScopes.includes(s.id)
+                            ? 'bg-indigo-500/15 border-indigo-500/40 text-white'
+                            : 'bg-black/40 border-white/10 text-zinc-400 hover:text-white'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={allowedScopes.includes(s.id)}
+                          onChange={() => {}}
+                          className="mt-1 accent-indigo-500"
+                        />
+                        <div className="space-y-0.5">
+                          <div className="font-bold text-xs">{s.label}</div>
+                          <div className="text-[11px] text-zinc-500 font-sans">{s.desc}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="px-6 py-3 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/20 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                >
+                  <Save className="w-4 h-4 text-black" />
+                  <span>{isSaving ? 'Saving Policies...' : 'Save Security Policies'}</span>
+                </button>
+              </div>
+            </form>
+          )}
         </AuthRequiredGate>
       </main>
     </div>
