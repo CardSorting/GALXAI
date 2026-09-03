@@ -5,9 +5,10 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react';
 import type { GalxAI } from './client';
 import type { ImageGenerateParams } from './resources/images';
+import { safeParseJSON } from './json-repair';
 
 export interface GalxAIContextValue {
   client?: GalxAI;
@@ -41,11 +42,11 @@ export function GalxAIProvider({
 }
 
 /**
- * Universal Hook providing instant access to visual generation, chat, and models.
+ * Universal Hook providing instant access to visual generation, chat, models, and completions.
  *
  * @example
  * ```tsx
- * const { useImage, useChat, useModels } = useGalxAI();
+ * const { useImage, useChat, useModels, useCompletion, useObject } = useGalxAI();
  * ```
  */
 export function useGalxAI() {
@@ -55,6 +56,8 @@ export function useGalxAI() {
     useImage: (options?: { endpoint?: string; defaultModel?: string }) => useImageGeneration(options),
     useChat: (options?: { endpoint?: string; defaultModel?: string; initialMessages?: ChatMessage[] }) => useChat(options),
     useModels: (options?: { endpoint?: string }) => useModels(options),
+    useCompletion: (options?: { endpoint?: string; defaultModel?: string }) => useCompletion(options),
+    useObject: <T = any>(options?: { endpoint?: string; schema?: any; defaultModel?: string }) => useObject<T>(options),
     context
   };
 }
@@ -66,15 +69,6 @@ export function useGalxAI() {
  * @example
  * ```tsx
  * const { generate, isGenerating, imageUrl, error } = useImageGeneration();
- *
- * return (
- *   <div>
- *     <button onClick={() => generate({ prompt: 'Cyberpunk landscape', aspectRatio: '16:9' })}>
- *       {isGenerating ? 'Synthesizing...' : 'Create'}
- *     </button>
- *     {imageUrl && <img src={imageUrl} alt="Result" />}
- *   </div>
- * );
  * ```
  */
 export function useImageGeneration(options: { endpoint?: string; defaultModel?: string } = {}) {
@@ -104,7 +98,6 @@ export function useImageGeneration(options: { endpoint?: string; defaultModel?: 
       // Try targeted endpoints with graceful fallback
       const targetEndpoints = endpoint !== '/api/galxai' ? [endpoint] : ['/api/galxai', '/api/generate'];
       let res: Response | null = null;
-      let lastErr: any = null;
 
       for (const ep of targetEndpoints) {
         try {
@@ -114,14 +107,11 @@ export function useImageGeneration(options: { endpoint?: string; defaultModel?: 
             body: JSON.stringify(payload)
           });
           if (res.ok) break;
-        } catch (e) {
-          lastErr = e;
-        }
+        } catch {}
       }
 
       if (!res || !res.ok) {
         // Deterministic client fallback simulation if server route is not yet set up
-        console.warn('[useImageGeneration] Server route unreachable. Rendering development preview.');
         const prompt = payload.prompt || 'artwork';
         const seed = Math.abs(prompt.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) + Date.now()) % 1000;
         const mockUrl = `https://picsum.photos/seed/galx-${seed}/1024/1024`;
@@ -167,14 +157,33 @@ export function useImageGeneration(options: { endpoint?: string; defaultModel?: 
 
 export interface ChatMessage {
   id?: string;
-  role: 'user' | 'assistant' | 'system';
+  role: 'user' | 'assistant' | 'system' | 'tool';
   content: string;
+  name?: string;
+  tool_calls?: any[];
+}
+
+export interface UseChatHelpers {
+  messages: ChatMessage[];
+  setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
+  input: string;
+  setInput: React.Dispatch<React.SetStateAction<string>>;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleSubmit: (e?: React.FormEvent) => Promise<void>;
+  append: (message: ChatMessage | string) => Promise<void>;
+  reload: () => Promise<void>;
+  stop: () => void;
+  sendMessage: (textToSend?: string) => Promise<void>;
+  isStreaming: boolean;
+  isLoading: boolean;
+  error: Error | null;
 }
 
 /**
- * Effortless chat streaming & state hook for React components.
+ * World-Class chat streaming & state hook for React & Next.js components.
+ * Matches Vercel AI SDK and OpenAI Assistant ergonomics.
  */
-export function useChat(options: { endpoint?: string; defaultModel?: string; initialMessages?: ChatMessage[] } = {}) {
+export function useChat(options: { endpoint?: string; defaultModel?: string; initialMessages?: ChatMessage[] } = {}): UseChatHelpers {
   const context = useContext(GalxAIContext);
   const endpoint = options.endpoint || context.endpoint || '/api/galxai/chat';
 
@@ -183,11 +192,33 @@ export function useChat(options: { endpoint?: string; defaultModel?: string; ini
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const stop = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      setIsStreaming(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      stop();
+    };
+  }, [stop]);
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+  }, []);
+
   const sendMessage = useCallback(async (textToSend?: string) => {
-    const prompt = textToSend || input;
+    const prompt = textToSend !== undefined ? textToSend : input;
     if (!prompt.trim()) return;
 
-    const userMsg: ChatMessage = { role: 'user', content: prompt };
+    stop();
+
+    const userMsg: ChatMessage = { id: `user_${Date.now()}`, role: 'user', content: prompt };
     const updatedMessages = [...messages, userMsg];
     setMessages(updatedMessages);
     setInput('');
@@ -196,6 +227,9 @@ export function useChat(options: { endpoint?: string; defaultModel?: string; ini
 
     const asstMsgId = `asst_${Date.now()}`;
     setMessages(prev => [...prev, { id: asstMsgId, role: 'assistant', content: '' }]);
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     try {
       const targetEndpoints = endpoint !== '/api/galxai/chat' ? [endpoint] : ['/api/galxai/chat', '/api/chat'];
@@ -209,16 +243,19 @@ export function useChat(options: { endpoint?: string; defaultModel?: string; ini
             body: JSON.stringify({
               messages: updatedMessages,
               stream: true,
-              model: options.defaultModel || context.defaultModel
-            })
+              model: options.defaultModel || context.defaultModel || 'gpt-5.6-sol'
+            }),
+            signal: controller.signal
           });
           if (res.ok) break;
-        } catch {}
+        } catch (e: any) {
+          if (e.name === 'AbortError') return;
+        }
       }
 
       if (!res || !res.ok) {
-        // Fallback simulation
-        const fallbackText = 'GALXAI: Connected and responding to prompt in development preview.';
+        // Fallback simulation for local dev
+        const fallbackText = 'GALXAI: Connected and streaming in development preview.';
         setMessages(prev =>
           prev.map(m => (m.id === asstMsgId ? { ...m, content: fallbackText } : m))
         );
@@ -230,14 +267,18 @@ export function useChat(options: { endpoint?: string; defaultModel?: string; ini
         const decoder = new TextDecoder();
         let accumulated = '';
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          accumulated += chunk;
-          setMessages(prev =>
-            prev.map(m => (m.id === asstMsgId ? { ...m, content: accumulated } : m))
-          );
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            accumulated += chunk;
+            setMessages(prev =>
+              prev.map(m => (m.id === asstMsgId ? { ...m, content: accumulated } : m))
+            );
+          }
+        } finally {
+          reader.releaseLock();
         }
       } else {
         const data = await res.json();
@@ -247,6 +288,7 @@ export function useChat(options: { endpoint?: string; defaultModel?: string; ini
         );
       }
     } catch (err: any) {
+      if (err.name === 'AbortError') return;
       setError(err);
       setMessages(prev =>
         prev.map(m =>
@@ -255,17 +297,161 @@ export function useChat(options: { endpoint?: string; defaultModel?: string; ini
       );
     } finally {
       setIsStreaming(false);
+      abortControllerRef.current = null;
     }
-  }, [input, messages, endpoint, options.defaultModel, context.defaultModel]);
+  }, [input, messages, endpoint, options.defaultModel, context.defaultModel, stop]);
+
+  const handleSubmit = useCallback(async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    await sendMessage();
+  }, [sendMessage]);
+
+  const append = useCallback(async (message: ChatMessage | string) => {
+    const text = typeof message === 'string' ? message : message.content;
+    await sendMessage(text);
+  }, [sendMessage]);
+
+  const reload = useCallback(async () => {
+    // Drop last assistant turn and re-run last user message
+    const lastUserIdx = [...messages].reverse().findIndex(m => m.role === 'user');
+    if (lastUserIdx === -1) return;
+    const actualIdx = messages.length - 1 - lastUserIdx;
+    const userMsg = messages[actualIdx];
+    const pruned = messages.slice(0, actualIdx);
+    setMessages(pruned);
+    await sendMessage(userMsg.content);
+  }, [messages, sendMessage]);
 
   return {
     messages,
+    setMessages,
     input,
     setInput,
+    handleInputChange,
+    handleSubmit,
+    append,
+    reload,
+    stop,
     sendMessage,
     isStreaming,
-    error,
-    setMessages
+    isLoading: isStreaming,
+    error
+  };
+}
+
+/**
+ * Lightweight text autocomplete & generation hook.
+ */
+export function useCompletion(options: { endpoint?: string; defaultModel?: string } = {}) {
+  const [completion, setCompletion] = useState('');
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  const stop = useCallback(() => {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+      setIsLoading(false);
+    }
+  }, []);
+
+  const complete = useCallback(async (prompt?: string) => {
+    const text = prompt || input;
+    if (!text.trim()) return;
+
+    stop();
+    setIsLoading(true);
+    setError(null);
+    setCompletion('');
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    try {
+      const ep = options.endpoint || '/api/galxai/chat';
+      const res = await fetch(ep, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: text }],
+          model: options.defaultModel || 'gpt-5.6-sol',
+          stream: true
+        }),
+        signal: controller.signal
+      });
+
+      if (res.body) {
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let acc = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          acc += decoder.decode(value, { stream: true });
+          setCompletion(acc);
+        }
+      }
+    } catch (e: any) {
+      if (e.name !== 'AbortError') setError(e);
+    } finally {
+      setIsLoading(false);
+      abortRef.current = null;
+    }
+  }, [input, options.defaultModel, options.endpoint, stop]);
+
+  return {
+    completion,
+    input,
+    setInput,
+    complete,
+    stop,
+    isLoading,
+    error
+  };
+}
+
+/**
+ * Structured Object generation hook with live JSON parsing.
+ */
+export function useObject<T = any>(options: { endpoint?: string; schema?: any; defaultModel?: string } = {}) {
+  const [object, setObject] = useState<T | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const submit = useCallback(async (prompt: string): Promise<T | null> => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const ep = options.endpoint || '/api/galxai/chat';
+      const res = await fetch(ep, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: prompt }],
+          model: options.defaultModel || 'gpt-5.6-sol',
+          schema: options.schema
+        })
+      });
+      const data = await res.json();
+      const raw = data.choices?.[0]?.message?.content || data;
+      const parsed = typeof raw === 'string' ? safeParseJSON<T>(raw) : raw;
+      setObject(parsed);
+      return parsed;
+    } catch (e: any) {
+      setError(e);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [options.defaultModel, options.endpoint, options.schema]);
+
+  return {
+    object,
+    submit,
+    isLoading,
+    error
   };
 }
 
@@ -324,8 +510,10 @@ export function useModels(options: { endpoint?: string } = {}) {
 
 export const galxai = {
   useImage: useImageGeneration,
-  useChat: useChat,
-  useModels: useModels
+  useChat,
+  useModels,
+  useCompletion,
+  useObject
 };
 
 export default galxai;

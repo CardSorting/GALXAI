@@ -22,7 +22,7 @@ export class WorkflowsResource {
   /**
    * Creates a multi-step sequential DAG pipeline where intermediate outputs are automatically piped downstream.
    */
-  public async create(params: WorkflowCreateParams): Promise<AsyncTaskHandle<any>> {
+  public async create(params: WorkflowCreateParams, options?: import('../types').RequestOptions): Promise<AsyncTaskHandle<any>> {
     const queue = params.queueId || 'agent-swarms';
 
     const pipelineSteps: TaskPipelineStep[] = params.steps.map(s => {
@@ -85,7 +85,8 @@ export class WorkflowsResource {
         idempotencyKey: params.idempotencyKey,
         target: initialTarget,
         pipelineSteps
-      }
+      },
+      ...options
     });
 
     const client = this.client;

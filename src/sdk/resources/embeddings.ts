@@ -43,7 +43,7 @@ export class EmbeddingsResource {
    * console.log(response.data[0].embedding);
    * ```
    */
-  public async create(params: EmbeddingCreateRequest): Promise<EmbeddingCreateResponse> {
+  public async create(params: EmbeddingCreateRequest, options?: import('../types').RequestOptions): Promise<EmbeddingCreateResponse> {
     return this.client.request<EmbeddingCreateResponse>('/v1/embeddings', {
       method: 'POST',
       body: {
@@ -51,7 +51,8 @@ export class EmbeddingsResource {
         input: params.input,
         dimensions: params.dimensions,
         user: params.user
-      }
+      },
+      ...options
     });
   }
 }

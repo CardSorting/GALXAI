@@ -2,11 +2,16 @@
  * GALXAI Developer SDK: Models Resource
  */
 
-import type { ModelInfo, CostEstimateRequest, CostEstimateResult } from '../types';
+import type { ModelInfo, CostEstimateRequest, CostEstimateResult, RequestOptions } from '../types';
 import type { GalxAIClientCore } from '../client';
 import { ModelCatalog } from '../../core/router/ModelCatalog';
 import { TokenCostCalculator } from '../../core/pricing/TokenCostCalculator';
 import type { DbQueryOptions, DbAggregateQuery } from '../../core/broccolidb/broccolidb.contracts';
+
+export type ModelsListResponse = ModelInfo[] & {
+  data: ModelInfo[];
+  [Symbol.asyncIterator](): AsyncIterator<ModelInfo>;
+};
 
 export class ModelsResource {
   private readonly client: GalxAIClientCore;
@@ -17,10 +22,11 @@ export class ModelsResource {
 
   /**
    * Lists all available AI models supported by the gateway.
+   * Supports array indexing, `.data` property, and `for await` iteration matching OpenAI SDK.
    */
-  public async list(): Promise<ModelInfo[]> {
-    const res = await this.client.request<{ data: Array<{ id: string; object: string; created: number; owned_by: string }> }>('/v1/models');
-    return res.data.map(m => {
+  public async list(options?: RequestOptions): Promise<ModelsListResponse> {
+    const res = await this.client.request<{ data: Array<{ id: string; object: string; created: number; owned_by: string }> }>('/v1/models', options);
+    const mapped: ModelInfo[] = res.data.map(m => {
       const spec = ModelCatalog.resolveModel(m.id);
       return {
         id: spec.id,
@@ -39,6 +45,44 @@ export class ModelsResource {
         }
       };
     });
+
+    const result = Object.assign(mapped, {
+      data: mapped,
+      async *[Symbol.asyncIterator]() {
+        for (const item of mapped) {
+          yield item;
+        }
+      }
+    });
+
+    return result as ModelsListResponse;
+  }
+
+  /**
+   * Retrieves detailed specifications for a specific model.
+   */
+  public async retrieve(modelId: string, options?: RequestOptions): Promise<ModelInfo> {
+    const list = await this.list(options);
+    const found = list.find(m => m.id === modelId);
+    if (found) return found;
+
+    const spec = ModelCatalog.resolveModel(modelId);
+    return {
+      id: spec.id,
+      name: spec.name,
+      provider: spec.provider,
+      contextWindow: spec.contextWindowTokens,
+      maxOutputTokens: spec.maxOutputTokens,
+      costPer1kInputTokens: spec.inputPricePer1M / 1000,
+      costPer1kOutputTokens: spec.outputPricePer1M / 1000,
+      costPer1kCachedInputTokens: (spec.cachedInputPricePer1M ?? spec.inputPricePer1M) / 1000,
+      capabilities: {
+        streaming: spec.supportsStreaming,
+        reasoning: spec.supportsReasoning,
+        vision: spec.supportsVision,
+        imageGeneration: spec.category === 'image'
+      }
+    };
   }
 
   /**

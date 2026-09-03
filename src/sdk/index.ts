@@ -25,7 +25,15 @@ export { CompactionResource } from './resources/compaction';
 
 // DX & Ergonomic Extensions
 export { ChatCompletionBuilder } from './builder';
-export { StructuredOutputExtractor, type JSONSchemaDefinition, type StructuredChatParams } from './structured';
+export { ChatCompletionStream } from './stream';
+export { repairJSON, safeParseJSON } from './json-repair';
+export {
+  StructuredOutputExtractor,
+  zodResponseFormat,
+  zodToJsonSchema,
+  type JSONSchemaDefinition,
+  type StructuredChatParams
+} from './structured';
 export {
   StreamAdapters,
   toTextStream,
@@ -38,7 +46,14 @@ export { MultiModalHelper, type MultiModalImageInput, type ForgivingImageSource 
 export { BatchEvaluator, batch, type BatchMapOptions, type BatchResultItem } from './batch';
 
 // Agent Runtime & Plugins
-export { AgentRuntime, type AgentConfig, type AgentToolDefinition, type AgentExecutionResult, type ForgivingToolInput } from './agent';
+export {
+  AgentRuntime,
+  type AgentConfig,
+  type AgentToolDefinition,
+  type AgentExecutionResult,
+  type AgentStreamEvent,
+  type ForgivingToolInput
+} from './agent';
 export {
   MiddlewarePipeline,
   type GalxPlugin,
@@ -99,9 +114,12 @@ export {
   useImageGeneration,
   useChat,
   useModels,
+  useCompletion,
+  useObject,
   type GalxAIProviderProps,
   type GalxAIContextValue,
-  type ChatMessage
+  type ChatMessage,
+  type UseChatHelpers
 } from './react';
 
 // Default export & Top-Level Zero-Config Helpers

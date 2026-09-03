@@ -1,23 +1,32 @@
 /**
  * GALXAI Developer SDK: Stateful Conversation Thread Manager
- * Automates multi-turn context retention, system prompt pinning, auto-truncation, and streaming replies.
+ * Automates multi-turn context retention, branch forking, session persistence, and auto-truncation.
  */
 
 import type { ChatMessage } from '../core/contracts/GalxContracts';
 import { TokenOptimizer } from './tokens';
 import type { GalxAI } from './client';
+import type { RequestOptions } from './types';
 
 export interface ThreadOptions {
   model?: string;
   system?: string;
   systemPrompt?: string;
   maxTokens?: number;
+  messages?: ChatMessage[];
+}
+
+export interface ThreadExportState {
+  model: string;
+  systemPrompt?: string;
+  maxTokens: number;
+  messages: ChatMessage[];
 }
 
 export class ConversationThread {
   private readonly client: GalxAI;
-  private readonly model: string;
-  private readonly systemPrompt?: string;
+  private model: string;
+  private systemPrompt?: string;
   private readonly maxTokens: number;
   private messages: ChatMessage[] = [];
 
@@ -27,9 +36,33 @@ export class ConversationThread {
     this.systemPrompt = options.system || options.systemPrompt;
     this.maxTokens = options.maxTokens ?? 100_000;
 
-    if (this.systemPrompt) {
+    if (options.messages && options.messages.length > 0) {
+      this.messages = [...options.messages];
+    } else if (this.systemPrompt) {
       this.messages.push({ role: 'system', content: this.systemPrompt });
     }
+  }
+
+  /**
+   * Sets or overrides the system prompt instructions.
+   */
+  public system(content: string): this {
+    this.systemPrompt = content;
+    const existingSysIdx = this.messages.findIndex(m => m.role === 'system');
+    if (existingSysIdx !== -1) {
+      this.messages[existingSysIdx] = { role: 'system', content };
+    } else {
+      this.messages.unshift({ role: 'system', content });
+    }
+    return this;
+  }
+
+  /**
+   * Appends a developer/system message to the thread.
+   */
+  public developer(content: string): this {
+    this.messages.push({ role: 'developer', content } as any);
+    return this;
   }
 
   /**
@@ -51,7 +84,7 @@ export class ConversationThread {
   /**
    * Sends the thread to the model and returns the assistant's reply string.
    */
-  public async reply(userInput?: string): Promise<string> {
+  public async reply(userInput?: string, options?: RequestOptions): Promise<string> {
     if (userInput) {
       this.user(userInput);
     }
@@ -61,7 +94,7 @@ export class ConversationThread {
       model: this.model,
       messages: truncated,
       stream: false
-    });
+    }, options);
 
     const replyText = res.choices[0]?.message?.content || '';
     this.assistant(replyText);
@@ -69,9 +102,16 @@ export class ConversationThread {
   }
 
   /**
+   * Fluent alias for `reply(userInput)`.
+   */
+  public async run(userInput?: string, options?: RequestOptions): Promise<string> {
+    return this.reply(userInput, options);
+  }
+
+  /**
    * Streams the assistant's reply and appends it to the thread history once finished.
    */
-  public async *streamReply(userInput?: string): AsyncIterable<string> {
+  public async *streamReply(userInput?: string, options?: RequestOptions): AsyncIterable<string> {
     if (userInput) {
       this.user(userInput);
     }
@@ -81,11 +121,11 @@ export class ConversationThread {
       model: this.model,
       messages: truncated,
       stream: true
-    });
+    }, options);
 
     let accumulated = '';
     for await (const chunk of stream) {
-      const delta = chunk.choices[0]?.delta?.content;
+      const delta = chunk.choices?.[0]?.delta?.content;
       if (delta) {
         accumulated += delta;
         yield delta;
@@ -93,6 +133,54 @@ export class ConversationThread {
     }
 
     this.assistant(accumulated);
+  }
+
+  /**
+   * Fluent alias for `streamReply(userInput)`.
+   */
+  public async *stream(userInput?: string, options?: RequestOptions): AsyncIterable<string> {
+    yield* this.streamReply(userInput, options);
+  }
+
+  /**
+   * Clones this thread at its current state into a new isolated branch.
+   */
+  public fork(modelOverride?: string): ConversationThread {
+    return new ConversationThread(this.client, {
+      model: modelOverride || this.model,
+      system: this.systemPrompt,
+      maxTokens: this.maxTokens,
+      messages: [...this.messages]
+    });
+  }
+
+  /**
+   * Calculates total estimated tokens currently stored in thread history.
+   */
+  public totalTokens(): number {
+    return TokenOptimizer.estimateMessagesTokens(this.messages);
+  }
+
+  /**
+   * Exports thread history and state for persistence to database, sessionStorage, or Redis.
+   */
+  public export(): ThreadExportState {
+    return {
+      model: this.model,
+      systemPrompt: this.systemPrompt,
+      maxTokens: this.maxTokens,
+      messages: [...this.messages]
+    };
+  }
+
+  /**
+   * Imports a previously exported thread state snapshot.
+   */
+  public import(state: ThreadExportState): this {
+    this.model = state.model || this.model;
+    this.systemPrompt = state.systemPrompt;
+    this.messages = [...(state.messages || [])];
+    return this;
   }
 
   /**

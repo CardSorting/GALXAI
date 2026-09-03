@@ -6,14 +6,17 @@ import {
   GalxError,
   APIError,
   AuthenticationError,
+  PaymentRequiredError,
   PermissionDeniedError,
   NotFoundError,
   RateLimitError,
   APIConnectionError,
   APITimeoutError,
-  InternalServerError
+  InternalServerError,
+  UserAbortError,
+  parseRetryAfter
 } from './errors';
-import type { ClientOptions } from './types';
+import type { ClientOptions, RequestOptions, APIResponse } from './types';
 import { ChatResource } from './resources/chat';
 import { ImagesResource } from './resources/images';
 import { ModelsResource } from './resources/models';
@@ -25,14 +28,10 @@ import type { GalxQueueEvent } from '../core/contracts/GalxContracts';
 
 import { MiddlewarePipeline, type GalxPlugin } from './middleware';
 import { ConversationThread, type ThreadOptions } from './thread';
+import { safeParseJSON, repairJSON } from './json-repair';
+import { ChatCompletionStream } from './stream';
 
-export interface RequestOptions {
-  method?: string;
-  headers?: Record<string, string>;
-  body?: any;
-  timeoutMs?: number;
-  maxRetries?: number;
-}
+export { type RequestOptions, type APIResponse, type ClientOptions } from './types';
 
 export class GalxAIClientCore {
   readonly apiKey: string;
@@ -121,13 +120,13 @@ export class GalxAIClientCore {
   }
 
   /**
-   * Executes a standard JSON HTTP request with retries, typed error handling, and middleware interceptors.
+   * Executes a standard JSON HTTP request with retries, typed error handling, caller AbortSignal linking, and middleware interceptors.
    */
   public async request<T = any>(path: string, options: RequestOptions = {}): Promise<T> {
     const url = `${this.baseURL}${path.startsWith('/') ? path : `/${path}`}`;
     const method = options.method || 'GET';
-    const timeoutMs = options.timeoutMs ?? this.timeoutMs;
-    const maxRetries = options.maxRetries ?? this.maxRetries;
+    const timeoutMs = options.timeoutMs ?? options.timeout ?? this.timeoutMs;
+    const maxRetries = options.maxRetries ?? options.max_retries ?? this.maxRetries;
     const startTime = Date.now();
 
     const headers: Record<string, string> = {
@@ -139,6 +138,11 @@ export class GalxAIClientCore {
 
     if (this.apiKey) {
       headers['Authorization'] = `Bearer ${this.apiKey}`;
+    }
+
+    const idempotencyKey = options.idempotencyKey || options.idempotency_key;
+    if (idempotencyKey) {
+      headers['Idempotency-Key'] = idempotencyKey;
     }
 
     // Middleware onRequest Hook
@@ -167,6 +171,18 @@ export class GalxAIClientCore {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
 
+      const onCallerAbort = () => {
+        controller.abort();
+      };
+
+      if (options.signal) {
+        if (options.signal.aborted) {
+          clearTimeout(timer);
+          throw new UserAbortError();
+        }
+        options.signal.addEventListener('abort', onCallerAbort, { once: true });
+      }
+
       try {
         const fetchFn = this.customFetch || fetch;
         const res = await fetchFn(url, {
@@ -177,6 +193,9 @@ export class GalxAIClientCore {
         });
 
         clearTimeout(timer);
+        if (options.signal) {
+          options.signal.removeEventListener('abort', onCallerAbort);
+        }
 
         if (!res.ok) {
           await this.handleErrorResponse(res, attempt, maxRetries);
@@ -204,6 +223,9 @@ export class GalxAIClientCore {
 
       } catch (err: any) {
         clearTimeout(timer);
+        if (options.signal) {
+          options.signal.removeEventListener('abort', onCallerAbort);
+        }
 
         // Middleware onError Hook
         await this.middleware.executeOnError({
@@ -212,6 +234,10 @@ export class GalxAIClientCore {
           error: err,
           durationMs: Date.now() - startTime
         });
+
+        if (options.signal?.aborted) {
+          throw new UserAbortError();
+        }
 
         if (err.name === 'AbortError') {
           throw new APITimeoutError(timeoutMs);
@@ -222,7 +248,8 @@ export class GalxAIClientCore {
         }
 
         if (attempt <= maxRetries) {
-          const backoff = Math.floor(Math.pow(2, attempt) * 200 + Math.random() * 100);
+          const baseBackoff = Math.min(10000, Math.pow(2, attempt) * 200);
+          const backoff = Math.floor(Math.random() * baseBackoff + 100);
           await new Promise(r => setTimeout(r, backoff));
           continue;
         }
@@ -232,6 +259,86 @@ export class GalxAIClientCore {
     }
   }
 
+  /**
+   * Executes a request and returns the parsed data along with raw HTTP Response, status, and headers.
+   */
+  public async requestWithResponse<T = any>(path: string, options: RequestOptions = {}): Promise<APIResponse<T>> {
+    const url = `${this.baseURL}${path.startsWith('/') ? path : `/${path}`}`;
+    const method = options.method || 'GET';
+    const timeoutMs = options.timeoutMs ?? options.timeout ?? this.timeoutMs;
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'User-Agent': 'GALXAI-NodeSDK/1.0.0',
+      ...this.defaultHeaders,
+      ...(options.headers || {})
+    };
+
+    if (this.apiKey) {
+      headers['Authorization'] = `Bearer ${this.apiKey}`;
+    }
+
+    const idempotencyKey = options.idempotencyKey || options.idempotency_key;
+    if (idempotencyKey) {
+      headers['Idempotency-Key'] = idempotencyKey;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    const onCallerAbort = () => controller.abort();
+    if (options.signal) {
+      if (options.signal.aborted) {
+        clearTimeout(timer);
+        throw new UserAbortError();
+      }
+      options.signal.addEventListener('abort', onCallerAbort, { once: true });
+    }
+
+    try {
+      const fetchFn = this.customFetch || fetch;
+      const res = await fetchFn(url, {
+        method,
+        headers,
+        body: options.body ? JSON.stringify(options.body) : undefined,
+        signal: controller.signal
+      });
+
+      clearTimeout(timer);
+      if (options.signal) {
+        options.signal.removeEventListener('abort', onCallerAbort);
+      }
+
+      if (!res.ok) {
+        let errorData: any = {};
+        try {
+          errorData = await res.json();
+        } catch {
+          try {
+            errorData = { error: { message: await res.text() } };
+          } catch {}
+        }
+        throw APIError.fromResponse(res.status, errorData, res.headers);
+      }
+
+      const data = await res.json();
+      return {
+        data: data as T,
+        response: res,
+        status: res.status,
+        headers: res.headers
+      };
+    } catch (err: any) {
+      clearTimeout(timer);
+      if (options.signal) {
+        options.signal.removeEventListener('abort', onCallerAbort);
+      }
+      if (options.signal?.aborted) throw new UserAbortError();
+      if (err.name === 'AbortError') throw new APITimeoutError(timeoutMs);
+      if (err instanceof GalxError) throw err;
+      throw new APIConnectionError(`Failed to connect to ${url}: ${err.message}`, err);
+    }
+  }
 
   /**
    * Handles non-2xx HTTP responses, throwing typed errors or waiting for backoff.
@@ -246,39 +353,18 @@ export class GalxAIClientCore {
       } catch {}
     }
 
-    const message = errorData?.error?.message || errorData?.message || `HTTP ${res.status} ${res.statusText}`;
-
-    // Retryable status codes (429, 500, 502, 503, 504)
-    if ([429, 500, 502, 503, 504].includes(res.status) && attempt <= maxRetries) {
-      let retryAfter = 0;
-      const retryHeader = res.headers.get('retry-after');
-      if (retryHeader) {
-        retryAfter = parseInt(retryHeader, 10) * 1000;
-      }
-      const backoffMs = retryAfter > 0 ? retryAfter : Math.floor(Math.pow(2, attempt) * 300 + Math.random() * 200);
+    // Retryable status codes (408, 429, 500, 502, 503, 504)
+    if ([408, 429, 500, 502, 503, 504].includes(res.status) && attempt <= maxRetries) {
+      const retryHeader = res.headers.get('retry-after') || res.headers.get('retry-after-ms');
+      const parsedSeconds = parseRetryAfter(retryHeader);
+      const retryAfterMs = parsedSeconds !== undefined ? parsedSeconds * 1000 : 0;
+      const baseBackoff = Math.min(10000, Math.pow(2, attempt) * 200);
+      const backoffMs = retryAfterMs > 0 ? retryAfterMs : Math.floor(Math.random() * baseBackoff + 100);
       await new Promise(r => setTimeout(r, backoffMs));
       return;
     }
 
-    if (res.status === 401) {
-      throw new AuthenticationError(message);
-    }
-    if (res.status === 403) {
-      throw new PermissionDeniedError(message);
-    }
-    if (res.status === 404) {
-      throw new NotFoundError(message);
-    }
-    if (res.status === 429) {
-      const retryHeader = res.headers.get('retry-after');
-      const retrySec = retryHeader ? parseInt(retryHeader, 10) : undefined;
-      throw new RateLimitError(message, retrySec);
-    }
-    if (res.status >= 500) {
-      throw new InternalServerError(message, res.status);
-    }
-
-    throw new APIError(message, res.status, errorData?.error?.code, errorData);
+    throw APIError.fromResponse(res.status, errorData, res.headers);
   }
 
   private handleMockResponse<T>(path: string, options: RequestOptions): T {
@@ -341,11 +427,16 @@ export class GalxAIClientCore {
       headers['Authorization'] = `Bearer ${this.apiKey}`;
     }
 
+    if (options.signal?.aborted) {
+      throw new UserAbortError();
+    }
+
     const fetchFn = this.customFetch || fetch;
     const res = await fetchFn(url, {
       method: options.method || 'POST',
       headers,
-      body: options.body ? JSON.stringify(options.body) : undefined
+      body: options.body ? JSON.stringify(options.body) : undefined,
+      signal: options.signal ?? undefined
     });
 
     if (!res.ok) {
@@ -360,39 +451,45 @@ export class GalxAIClientCore {
     const decoder = new TextDecoder();
     let buffer = '';
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() || '';
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
 
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith(':')) continue;
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed.startsWith(':')) continue;
 
-        if (trimmed.startsWith('data: ')) {
-          const jsonStr = trimmed.substring(6).trim();
-          if (jsonStr === '[DONE]') return;
-          try {
-            const parsed = JSON.parse(jsonStr);
-            yield parsed as T;
-          } catch {}
+          if (trimmed.startsWith('data: ')) {
+            const jsonStr = trimmed.substring(6).trim();
+            if (jsonStr === '[DONE]') return;
+            try {
+              const parsed = JSON.parse(jsonStr);
+              yield parsed as T;
+            } catch {}
+          }
         }
       }
+    } finally {
+      reader.releaseLock();
+      await reader.cancel().catch(() => {});
     }
   }
 
   /**
    * Parses typed event bus events from an SSE stream.
    */
-  public async *requestEventStream(path: string): AsyncIterable<GalxQueueEvent> {
+  public async *requestEventStream(path: string, options: RequestOptions = {}): AsyncIterable<GalxQueueEvent> {
     const url = `${this.baseURL}${path.startsWith('/') ? path : `/${path}`}`;
     const headers: Record<string, string> = {
       'Accept': 'text/event-stream',
       'User-Agent': 'GALXAI-NodeSDK/1.0.0',
-      ...this.defaultHeaders
+      ...this.defaultHeaders,
+      ...(options.headers || {})
     };
 
     if (this.apiKey) {
@@ -400,7 +497,11 @@ export class GalxAIClientCore {
     }
 
     const fetchFn = this.customFetch || fetch;
-    const res = await fetchFn(url, { method: 'GET', headers });
+    const res = await fetchFn(url, {
+      method: 'GET',
+      headers,
+      signal: options.signal ?? undefined
+    });
 
     if (!res.ok) {
       await this.handleErrorResponse(res, 1, 0);
@@ -414,26 +515,31 @@ export class GalxAIClientCore {
     const decoder = new TextDecoder();
     let buffer = '';
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() || '';
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
 
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith(':')) continue;
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed.startsWith(':')) continue;
 
-        if (trimmed.startsWith('data: ')) {
-          const jsonStr = trimmed.substring(6).trim();
-          try {
-            const parsed = JSON.parse(jsonStr);
-            yield parsed as GalxQueueEvent;
-          } catch {}
+          if (trimmed.startsWith('data: ')) {
+            const jsonStr = trimmed.substring(6).trim();
+            try {
+              const parsed = JSON.parse(jsonStr);
+              yield parsed as GalxQueueEvent;
+            } catch {}
+          }
         }
       }
+    } finally {
+      reader.releaseLock();
+      await reader.cancel().catch(() => {});
     }
   }
 }
@@ -466,7 +572,7 @@ export class GalxAI {
       temperature?: number;
       stream?: boolean;
       system?: string | any[];
-    }) => Promise<any>;
+    }, options?: RequestOptions) => Promise<any>;
   };
   readonly images: ImagesResource;
   readonly models: ModelsResource;
@@ -490,19 +596,31 @@ export class GalxAI {
     return this.core.request<T>(path, options);
   }
 
+  public requestWithResponse<T = any>(path: string, options?: RequestOptions): Promise<APIResponse<T>> {
+    return this.core.requestWithResponse<T>(path, options);
+  }
+
   constructor(options: string | ClientOptions = {}) {
     this.core = new GalxAIClientCore(options);
     this.auth = new AuthResource(this.core);
     this.chat = new ChatResource(this.core);
     this.messages = {
-      create: async (params) => {
+      create: async (params, reqOptions) => {
         const mappedModel = params.model || 'gpt-5.6-sol';
+        if (params.stream) {
+          return this.core.requestStream('/v1/messages', {
+            method: 'POST',
+            body: { ...params, model: mappedModel },
+            ...reqOptions
+          });
+        }
         return this.core.request('/v1/messages', {
           method: 'POST',
           body: {
             ...params,
             model: mappedModel
-          }
+          },
+          ...reqOptions
         });
       }
     };
@@ -572,7 +690,7 @@ export class GalxAI {
       background?: boolean;
       priority?: number;
       type?: 'chat' | 'image' | 'workflow';
-    } = {}
+    } & RequestOptions = {}
   ): Promise<string | import('./types').AsyncTaskHandle<any>> {
     if (options.background) {
       return this.jobs.submit({
@@ -580,7 +698,7 @@ export class GalxAI {
         model: options.model,
         type: options.type,
         priority: options.priority
-      });
+      }, options);
     }
 
     const messages: Array<{ role: 'system' | 'user'; content: string }> = [];
@@ -592,7 +710,7 @@ export class GalxAI {
     const completion = await this.chat.completions.create({
       model: options.model || 'gpt-5.6-sol',
       messages
-    });
+    }, options);
 
     return completion.choices[0]?.message?.content || '';
   }
@@ -607,12 +725,12 @@ export class GalxAI {
    */
   public async generateImage(
     promptOrParams: string | import('./resources/images').ImageGenerateParams,
-    options: Omit<import('./resources/images').ImageGenerateParams, 'prompt'> = {}
+    options: Omit<import('./resources/images').ImageGenerateParams, 'prompt'> & RequestOptions = {}
   ) {
     const params = typeof promptOrParams === 'string'
       ? { prompt: promptOrParams, ...options }
       : promptOrParams;
-    const res = await this.images.generate(params);
+    const res = await this.images.generate(params, options);
     return res.data[0];
   }
 
@@ -620,11 +738,6 @@ export class GalxAI {
 
   /**
    * Formats a query and result into a clean, markdown-structured context block for autonomous agents.
-   *
-   * @example
-   * ```typescript
-   * const ctx = galx.toAgentContext('Analyze Q3 data', result);
-   * ```
    */
   public toAgentContext(prompt: string, result: any, metadata: { id?: string; model?: string } = {}): string {
     const formattedResult = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
@@ -654,7 +767,7 @@ ${formattedResult}
       model?: string;
       system?: string;
       temperature?: number;
-    } = {}
+    } & RequestOptions = {}
   ): AsyncIterable<string> {
     const messages: Array<{ role: 'system' | 'user'; content: string }> = [];
     if (options.system) {
@@ -667,7 +780,7 @@ ${formattedResult}
       messages,
       temperature: options.temperature,
       stream: true
-    });
+    }, options);
 
     for await (const chunk of streamResponse as any) {
       const content = chunk.choices?.[0]?.delta?.content;
@@ -678,7 +791,7 @@ ${formattedResult}
   }
 
   /**
-   * Ultra-flat structured JSON extractor with guaranteed schema conformity.
+   * Ultra-flat structured JSON extractor with guaranteed schema conformity and automatic JSON repair.
    *
    * @example
    * ```typescript
@@ -692,18 +805,18 @@ ${formattedResult}
   public async extract<T = any>(
     input: string,
     schema: Record<string, any>,
-    options: { model?: string } = {}
+    options: { model?: string } & RequestOptions = {}
   ): Promise<T> {
     const schemaStr = JSON.stringify(schema, null, 2);
     const systemPrompt = `You are a precise data extractor. Extract the requested fields from the input text and return ONLY valid JSON matching this schema:\n${schemaStr}\nDo not output markdown code blocks or explanations, only valid parseable JSON.`;
 
     const raw = await this.run(input, {
       model: options.model || 'gpt-5.6-sol',
-      system: systemPrompt
+      system: systemPrompt,
+      ...options
     });
 
-    const clean = (raw as string).replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
-    return JSON.parse(clean);
+    return safeParseJSON<T>(raw as string);
   }
 
   /**
@@ -729,18 +842,18 @@ ${formattedResult}
   /**
    * Ultra-forgiving chat execution accepting string or message array.
    */
-  public async generate(prompt: string, options: { model?: string; system?: string; temperature?: number } = {}) {
+  public async generate(prompt: string, options: { model?: string; system?: string; temperature?: number } & RequestOptions = {}) {
     return this.run(prompt, options);
   }
 
   /**
    * Universal vector embeddings helper.
    */
-  public async embed(input: string | string[], options: { model?: string } = {}) {
+  public async embed(input: string | string[], options: { model?: string } & RequestOptions = {}) {
     return this.embeddings.create({
       input,
       model: options.model || 'text-embedding-3-small'
-    });
+    }, options);
   }
 
   /**

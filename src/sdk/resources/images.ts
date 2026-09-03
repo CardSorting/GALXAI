@@ -87,22 +87,27 @@ export class ImagesResource {
   /**
    * Generates images synchronously.
    */
-  public async generate(params: ImageGenerateParams): Promise<ImageGenerationResponse> {
+  public async generate(params: ImageGenerateParams, options?: import('../types').RequestOptions): Promise<ImageGenerationResponse> {
     const payload = this.normalizeParams(params);
     return this.client.request<ImageGenerationResponse>('/v1/images/generations', {
       method: 'POST',
-      body: payload
+      body: payload,
+      ...options
     });
   }
 
   /**
    * Enqueues an asynchronous visual synthesis task into the dedicated GPU rate-managed queue.
    */
-  public async generateAsync(params: ImageGenerationAsyncParams & ImageGenerateParams): Promise<AsyncTaskHandle<ImageGenerationResponse>> {
+  public async generateAsync(
+    params: ImageGenerationAsyncParams & ImageGenerateParams,
+    options?: import('../types').RequestOptions
+  ): Promise<AsyncTaskHandle<ImageGenerationResponse>> {
     const queue = params.queue || 'image-gen';
     const headers: Record<string, string> = {
       'X-Galx-Async': 'true',
-      'X-Galx-Queue': queue
+      'X-Galx-Queue': queue,
+      ...(options?.headers || {})
     };
 
     if (params.groupId) headers['X-Galx-Group-Id'] = params.groupId;
@@ -123,7 +128,8 @@ export class ImagesResource {
     }>('/v1/images/generations', {
       method: 'POST',
       headers,
-      body: payload
+      body: payload,
+      ...options
     });
 
     const client = this.client;

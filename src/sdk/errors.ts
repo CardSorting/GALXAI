@@ -1,75 +1,148 @@
 /**
  * GALXAI Developer SDK: Error Hierarchy
- * Granular, typed error classes matching industry standards for AI Gateway APIs.
- * Includes actionable troubleshooting guidance (`suggestedFix`).
+ * Granular, typed error classes matching industry standards for AI Gateway APIs (OpenAI, Anthropic, Stripe).
+ * Includes actionable troubleshooting guidance (`suggestedFix`), HTTP response headers, and request IDs.
  */
 
 export class GalxError extends Error {
   readonly statusCode?: number;
+  readonly status?: number;
   readonly code?: string;
   readonly type?: string;
   readonly param?: string;
   readonly suggestedFix?: string;
   readonly errorDetails?: any;
+  readonly headers?: Headers | Record<string, string>;
+  readonly requestId?: string;
 
-  constructor(message: string, statusCode?: number, code?: string, errorDetails?: any, suggestedFix?: string) {
+  constructor(
+    message: string,
+    statusCode?: number,
+    code?: string,
+    errorDetails?: any,
+    suggestedFix?: string,
+    headers?: Headers | Record<string, string>
+  ) {
     super(message);
     this.name = 'GalxError';
     this.statusCode = statusCode;
+    this.status = statusCode;
     this.code = code;
     this.errorDetails = errorDetails;
     this.suggestedFix = suggestedFix;
+    this.headers = headers;
+
+    if (headers) {
+      if (typeof (headers as any).get === 'function') {
+        this.requestId = (headers as Headers).get('x-request-id') || (headers as Headers).get('cf-ray') || undefined;
+      } else {
+        this.requestId = (headers as Record<string, string>)['x-request-id'] || (headers as Record<string, string>)['cf-ray'] || undefined;
+      }
+    }
+
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }
 
 export class APIError extends GalxError {
-  constructor(message: string, statusCode?: number, code?: string, errorDetails?: any, suggestedFix?: string) {
-    super(message, statusCode, code, errorDetails, suggestedFix);
+  constructor(
+    message: string,
+    statusCode?: number,
+    code?: string,
+    errorDetails?: any,
+    suggestedFix?: string,
+    headers?: Headers | Record<string, string>
+  ) {
+    super(message, statusCode, code, errorDetails, suggestedFix, headers);
     this.name = 'APIError';
   }
 
-  public static fromResponse(statusCode: number, data: any): APIError {
+  public static fromResponse(statusCode: number, data: any, headers?: Headers | Record<string, string>): APIError {
     const message = data?.error?.message || data?.message || `HTTP ${statusCode} API Error`;
     const code = data?.error?.code || data?.code || 'api_error';
     const suggestedFix = data?.error?.suggested_fix || data?.suggestedFix;
 
+    let retryAfter: number | undefined;
+    if (headers) {
+      const retryHeader = typeof (headers as any).get === 'function'
+        ? (headers as Headers).get('retry-after') || (headers as Headers).get('retry-after-ms')
+        : (headers as Record<string, string>)['retry-after'] || (headers as Record<string, string>)['retry-after-ms'];
+      retryAfter = parseRetryAfter(retryHeader);
+    }
+
     switch (statusCode) {
+      case 400:
+        return new BadRequestError(message, data?.error?.param, suggestedFix, headers);
       case 401:
-        return new AuthenticationError(message, suggestedFix);
+        return new AuthenticationError(message, suggestedFix, headers);
+      case 402:
+        return new PaymentRequiredError(message, suggestedFix, headers);
       case 403:
-        return new PermissionDeniedError(message, suggestedFix);
+        return new PermissionDeniedError(message, suggestedFix, headers);
       case 404:
-        return new NotFoundError(message, suggestedFix);
+        return new NotFoundError(message, suggestedFix, headers);
+      case 409:
+        return new ConflictError(message, suggestedFix, headers);
+      case 422:
+        return new UnprocessableEntityError(message, data?.error?.param, suggestedFix, headers);
       case 429:
-        return new RateLimitError(message, data?.retry_after, suggestedFix);
+        return new RateLimitError(message, retryAfter ?? data?.retry_after, suggestedFix, headers);
+      case 502:
+        return new BadGatewayError(message, suggestedFix, headers);
+      case 503:
+        return new ServiceUnavailableError(message, suggestedFix, headers);
       case 504:
-        return new APITimeoutError(60000, message);
+        return new GatewayTimeoutError(message, suggestedFix, headers);
       default:
         if (statusCode >= 500) {
-          return new InternalServerError(message, statusCode, suggestedFix);
+          return new InternalServerError(message, statusCode, suggestedFix, headers);
         }
-        return new APIError(message, statusCode, code, data, suggestedFix);
+        return new APIError(message, statusCode, code, data, suggestedFix, headers);
     }
+  }
+}
+
+export class BadRequestError extends APIError {
+  constructor(
+    message = 'Invalid request parameters',
+    param?: string,
+    suggestedFix = 'Verify request payload matches the schema for this endpoint',
+    headers?: Headers | Record<string, string>
+  ) {
+    super(message, 400, 'bad_request', { param }, suggestedFix, headers);
+    this.name = 'BadRequestError';
   }
 }
 
 export class AuthenticationError extends APIError {
   constructor(
     message = 'Invalid or missing GALXAI Gateway API Key (Bearer galx_live_...)',
-    suggestedFix = 'Ensure Authorization header contains Bearer <key> or pass apiKey to new GalxAI()'
+    suggestedFix = 'Ensure Authorization header contains Bearer <key> or pass apiKey to new GalxAI()',
+    headers?: Headers | Record<string, string>
   ) {
-    super(message, 401, 'invalid_api_key', undefined, suggestedFix);
+    super(message, 401, 'invalid_api_key', undefined, suggestedFix, headers);
     this.name = 'AuthenticationError';
+  }
+}
+
+export class PaymentRequiredError extends APIError {
+  constructor(
+    message = 'Insufficient funds, quota exhausted, or payment required',
+    suggestedFix = 'Fund your balance or upgrade spend caps at https://galx.ai/billing',
+    headers?: Headers | Record<string, string>
+  ) {
+    super(message, 402, 'payment_required', undefined, suggestedFix, headers);
+    this.name = 'PaymentRequiredError';
   }
 }
 
 export class PermissionDeniedError extends APIError {
   constructor(
     message = 'Insufficient permissions for this operation',
-    suggestedFix = 'Verify key permissions or rotate gateway key in GALXAI Dashboard /keys'
+    suggestedFix = 'Verify key permissions or rotate gateway key in GALXAI Dashboard /keys',
+    headers?: Headers | Record<string, string>
   ) {
-    super(message, 403, 'permission_denied', undefined, suggestedFix);
+    super(message, 403, 'permission_denied', undefined, suggestedFix, headers);
     this.name = 'PermissionDeniedError';
   }
 }
@@ -77,10 +150,34 @@ export class PermissionDeniedError extends APIError {
 export class NotFoundError extends APIError {
   constructor(
     message = 'Requested resource not found',
-    suggestedFix = 'Check the model ID or endpoint URI. Try "gpt-5.6-sol" for flagship coding.'
+    suggestedFix = 'Check the model ID or endpoint URI. Try "gpt-5.6-sol" for flagship coding.',
+    headers?: Headers | Record<string, string>
   ) {
-    super(message, 404, 'resource_not_found', undefined, suggestedFix);
+    super(message, 404, 'resource_not_found', undefined, suggestedFix, headers);
     this.name = 'NotFoundError';
+  }
+}
+
+export class ConflictError extends APIError {
+  constructor(
+    message = 'Resource conflict or concurrent state modification',
+    suggestedFix = 'Retry with an updated resource version or use a unique idempotency key',
+    headers?: Headers | Record<string, string>
+  ) {
+    super(message, 409, 'conflict', undefined, suggestedFix, headers);
+    this.name = 'ConflictError';
+  }
+}
+
+export class UnprocessableEntityError extends APIError {
+  constructor(
+    message = 'Unprocessable entity or schema validation failure',
+    param?: string,
+    suggestedFix = 'Ensure values strictly conform to the expected format and constraints',
+    headers?: Headers | Record<string, string>
+  ) {
+    super(message, 422, 'unprocessable_entity', { param }, suggestedFix, headers);
+    this.name = 'UnprocessableEntityError';
   }
 }
 
@@ -90,11 +187,57 @@ export class RateLimitError extends APIError {
   constructor(
     message = 'Rate limit exceeded for provider/tenant quota',
     retryAfterSeconds?: number,
-    suggestedFix = 'Requests are automatically smoothed. Wait for the backoff window or upgrade quota.'
+    suggestedFix = 'Requests are automatically smoothed. Wait for the backoff window or upgrade quota.',
+    headers?: Headers | Record<string, string>
   ) {
-    super(message, 429, 'rate_limit_exceeded', undefined, suggestedFix);
+    super(message, 429, 'rate_limit_exceeded', { retryAfterSeconds }, suggestedFix, headers);
     this.name = 'RateLimitError';
     this.retryAfterSeconds = retryAfterSeconds;
+  }
+}
+
+export class InternalServerError extends APIError {
+  constructor(
+    message = 'GALXAI gateway internal error',
+    statusCode = 500,
+    suggestedFix = 'Automatic gateway failover was engaged. Retry request momentarily.',
+    headers?: Headers | Record<string, string>
+  ) {
+    super(message, statusCode, 'internal_server_error', undefined, suggestedFix, headers);
+    this.name = 'InternalServerError';
+  }
+}
+
+export class BadGatewayError extends APIError {
+  constructor(
+    message = 'Upstream provider or model cluster unreachable',
+    suggestedFix = 'GALXAI auto-fallback is routing to alternative providers. Retry momentarily.',
+    headers?: Headers | Record<string, string>
+  ) {
+    super(message, 502, 'bad_gateway', undefined, suggestedFix, headers);
+    this.name = 'BadGatewayError';
+  }
+}
+
+export class ServiceUnavailableError extends APIError {
+  constructor(
+    message = 'Gateway is temporarily overloaded or undergoing maintenance',
+    suggestedFix = 'Wait briefly before retrying; exponential backoff will automatically mitigate.',
+    headers?: Headers | Record<string, string>
+  ) {
+    super(message, 503, 'service_unavailable', undefined, suggestedFix, headers);
+    this.name = 'ServiceUnavailableError';
+  }
+}
+
+export class GatewayTimeoutError extends APIError {
+  constructor(
+    message = 'Upstream provider timed out waiting for generation response',
+    suggestedFix = 'Consider using async background task queue for long-running prompts.',
+    headers?: Headers | Record<string, string>
+  ) {
+    super(message, 504, 'gateway_timeout', undefined, suggestedFix, headers);
+    this.name = 'GatewayTimeoutError';
   }
 }
 
@@ -123,13 +266,36 @@ export class APITimeoutError extends GalxError {
   }
 }
 
-export class InternalServerError extends APIError {
+export class UserAbortError extends GalxError {
   constructor(
-    message = 'GALXAI gateway internal error',
-    statusCode = 500,
-    suggestedFix = 'Automatic gateway failover was engaged. Retry request momentarily.'
+    message = 'Request was explicitly aborted by caller AbortSignal',
+    suggestedFix = 'Ensure your AbortController is not triggered prematurely'
   ) {
-    super(message, statusCode, 'internal_server_error', undefined, suggestedFix);
-    this.name = 'InternalServerError';
+    super(message, 499, 'client_aborted', undefined, suggestedFix);
+    this.name = 'UserAbortError';
   }
+}
+
+/**
+ * Parses RFC 7231 / RFC 9110 Retry-After header.
+ * Supports decimal/integer seconds, millisecond headers, and HTTP dates.
+ */
+export function parseRetryAfter(headerVal: string | null | undefined): number | undefined {
+  if (!headerVal) return undefined;
+  const trimmed = headerVal.trim();
+
+  // If integer / numeric seconds
+  const numeric = parseFloat(trimmed);
+  if (!isNaN(numeric) && /^\d+(\.\d+)?$/.test(trimmed)) {
+    return Math.max(0, Math.ceil(numeric));
+  }
+
+  // If HTTP Date (e.g. "Wed, 21 Oct 2026 07:28:00 GMT")
+  const dateMs = Date.parse(trimmed);
+  if (!isNaN(dateMs)) {
+    const diffSec = Math.ceil((dateMs - Date.now()) / 1000);
+    return Math.max(0, diffSec);
+  }
+
+  return undefined;
 }

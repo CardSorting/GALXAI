@@ -38,7 +38,7 @@ export class JobsResource {
    * const result = await job.result();
    * ```
    */
-  public async submit(params: SubmitJobParams): Promise<AsyncTaskHandle<any>> {
+  public async submit(params: SubmitJobParams, options?: import('../types').RequestOptions): Promise<AsyncTaskHandle<any>> {
     const jobType = params.type || (params.imageUrl || (params.prompt && params.model?.includes('image')) ? 'image' : 'chat');
     let targetQueue = 'default';
     let targetPayload: any = null;
@@ -84,7 +84,8 @@ export class JobsResource {
         tag: params.tag,
         idempotencyKey: params.idempotencyKey,
         target: targetPayload
-      }
+      },
+      ...options
     });
 
     const client = this.client;

@@ -80,11 +80,56 @@ export interface ClientOptions {
   mock?: boolean;
 
   /**
+   * Allow client initialization in browser environments without warnings.
+   */
+  dangerouslyAllowBrowser?: boolean;
+
+  /**
+   * Enable lightweight OpenTelemetry and client performance metrics.
+   */
+  telemetry?: boolean;
+
+  /**
    * Optional prompt compaction policy for completions initiated by this client.
    * Defaults to false (safe raw passthrough, byte-for-byte fidelity). Set to true to opt into experimental multi-turn history compaction.
    */
   compactPrompts?: boolean;
   compact_prompts?: boolean;
+}
+
+export interface RequestOptions {
+  /** HTTP method override (e.g. 'GET', 'POST', 'DELETE') */
+  method?: string;
+  /** Per-request custom HTTP headers */
+  headers?: Record<string, string>;
+  /** Request body payload */
+  body?: any;
+  /** Per-request timeout in milliseconds */
+  timeoutMs?: number;
+  timeout?: number;
+  /** Per-request max retry attempts */
+  maxRetries?: number;
+  max_retries?: number;
+  /** AbortSignal to cancel this request */
+  signal?: AbortSignal | null;
+  /** Idempotency key for 24h safe deduplication */
+  idempotencyKey?: string;
+  idempotency_key?: string;
+}
+
+export interface APIResponse<T = any> {
+  data: T;
+  response: Response;
+  status: number;
+  headers: Headers;
+}
+
+export interface StreamEventMap {
+  chunk: (chunk: any) => void;
+  content: (delta: string, snapshot: string) => void;
+  tool_call: (toolCall: any) => void;
+  error: (err: any) => void;
+  end: () => void;
 }
 
 export interface ChatCompletionCreateParams extends ChatCompletionRequest {

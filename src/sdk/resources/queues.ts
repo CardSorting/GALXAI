@@ -25,16 +25,16 @@ export class QueuesResource {
   /**
    * Lists all task queues with live telemetry stats.
    */
-  public async list(): Promise<GalxTaskQueueConfig[]> {
-    const res = await this.client.request<{ queues: GalxTaskQueueConfig[] }>('/api/queues');
+  public async list(options?: import('../types').RequestOptions): Promise<GalxTaskQueueConfig[]> {
+    const res = await this.client.request<{ queues: GalxTaskQueueConfig[] }>('/api/queues', options);
     return res.queues;
   }
 
   /**
    * Fetches real-time telemetry and health statistics for a named queue.
    */
-  public async getStats(queueId: string): Promise<QueueTelemetryStats> {
-    const res = await this.client.request<{ stats: QueueTelemetryStats }>(`/api/queues/${queueId}`);
+  public async getStats(queueId: string, options?: import('../types').RequestOptions): Promise<QueueTelemetryStats> {
+    const res = await this.client.request<{ stats: QueueTelemetryStats }>(`/api/queues/${queueId}`, options);
     return res.stats;
   }
 

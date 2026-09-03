@@ -39,6 +39,58 @@
       "types": "./src/sdk/ui/index.ts",
       "default": "./src/sdk/ui/index.ts"
     },
+    "./openai": {
+      "types": "./src/sdk/openai.ts",
+      "default": "./src/sdk/openai.ts"
+    },
+    "./anthropic": {
+      "types": "./src/sdk/anthropic.ts",
+      "default": "./src/sdk/anthropic.ts"
+    },
+    "./ai": {
+      "types": "./src/sdk/ai.ts",
+      "default": "./src/sdk/ai.ts"
+    },
+    "./stream": {
+      "types": "./src/sdk/stream.ts",
+      "default": "./src/sdk/stream.ts"
+    },
+    "./structured": {
+      "types": "./src/sdk/structured.ts",
+      "default": "./src/sdk/structured.ts"
+    },
+    "./agent": {
+      "types": "./src/sdk/agent.ts",
+      "default": "./src/sdk/agent.ts"
+    },
+    "./builder": {
+      "types": "./src/sdk/builder.ts",
+      "default": "./src/sdk/builder.ts"
+    },
+    "./thread": {
+      "types": "./src/sdk/thread.ts",
+      "default": "./src/sdk/thread.ts"
+    },
+    "./errors": {
+      "types": "./src/sdk/errors.ts",
+      "default": "./src/sdk/errors.ts"
+    },
+    "./types": {
+      "types": "./src/sdk/types.ts",
+      "default": "./src/sdk/types.ts"
+    },
+    "./tokens": {
+      "types": "./src/sdk/tokens.ts",
+      "default": "./src/sdk/tokens.ts"
+    },
+    "./adapters": {
+      "types": "./src/sdk/adapters.ts",
+      "default": "./src/sdk/adapters.ts"
+    },
+    "./json-repair": {
+      "types": "./src/sdk/json-repair.ts",
+      "default": "./src/sdk/json-repair.ts"
+    },
     "./patch": {
       "types": "./src/sdk/patch.ts",
       "default": "./src/sdk/patch.ts"

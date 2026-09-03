@@ -6,20 +6,21 @@ import type {
   ChatCompletionResponse,
   ChatCompletionChunk,
   GalxTask,
-  TaskProgressInfo
+  TaskProgressInfo,
+  ChatCompletionRequest
 } from '../../core/contracts/GalxContracts';
 import type {
   ChatCompletionCreateParams,
   ChatCompletionAsyncParams,
-  AsyncTaskHandle
+  AsyncTaskHandle,
+  RequestOptions
 } from '../types';
 import type { GalxAIClientCore } from '../client';
 
 import { ModelResilience } from '../resilience';
 import { ChatCompletionBuilder } from '../builder';
 import { StructuredOutputExtractor, type StructuredChatParams } from '../structured';
-import type { ChatCompletionRequest } from '../../core/contracts/GalxContracts';
-
+import { ChatCompletionStream } from '../stream';
 
 export class ChatResource {
   readonly completions: CompletionsResource;
@@ -46,11 +47,31 @@ export class ChatResource {
   }
 
   /**
-   * Extracts strongly-typed structured JSON output validated against a JSON Schema.
+   * First-class streaming runner with event emitter (`.on('content')`), snapshot accumulation, and Web adapters.
+   *
+   * @example
+   * ```typescript
+   * const stream = galx.chat.stream({
+   *   model: 'gpt-5.6-sol',
+   *   messages: [{ role: 'user', content: 'Explain raft consensus' }]
+   * });
+   * stream.on('content', (delta) => process.stdout.write(delta));
+   * const finalMsg = await stream.finalChatCompletion();
+   * ```
    */
-  public structured<T = any>(params: StructuredChatParams<T>): Promise<T> {
+  public stream(
+    params: Omit<ChatCompletionCreateParams, 'stream'>,
+    options?: RequestOptions
+  ): ChatCompletionStream {
+    return this.completions.stream(params, options);
+  }
+
+  /**
+   * Extracts strongly-typed structured JSON output validated against a JSON Schema or Zod Schema.
+   */
+  public structured<T = any>(params: StructuredChatParams<T>, options?: RequestOptions): Promise<T> {
     const extractor = new StructuredOutputExtractor(this.completions);
-    return extractor.extract<T>(params);
+    return extractor.extract<T>(params, options);
   }
 
   /**
@@ -74,13 +95,39 @@ export class ChatResource {
   }
 }
 
-
-
 export class CompletionsResource {
   private readonly client: GalxAIClientCore;
 
   constructor(client: GalxAIClientCore) {
     this.client = client;
+  }
+
+  /**
+   * First-class streaming runner with event listeners and accumulation helpers.
+   *
+   * @example
+   * ```typescript
+   * const stream = galx.chat.completions.stream({
+   *   model: 'gpt-5.6-sol',
+   *   messages: [{ role: 'user', content: 'Explain quantum gravity' }]
+   * });
+   * stream.on('content', (delta, snapshot) => console.log(delta));
+   * const fullText = await stream.finalText();
+   * ```
+   */
+  public stream(
+    params: Omit<ChatCompletionCreateParams, 'stream'>,
+    options?: RequestOptions
+  ): ChatCompletionStream {
+    const controller = new AbortController();
+    const rawStream = this.client.requestStream<ChatCompletionChunk>('/v1/chat/completions', {
+      method: 'POST',
+      body: { ...params, stream: true },
+      ...options,
+      signal: options?.signal || controller.signal
+    });
+
+    return new ChatCompletionStream(rawStream, controller);
   }
 
   /**
@@ -95,24 +142,29 @@ export class CompletionsResource {
    * ```
    */
   public async create(
-    params: ChatCompletionCreateParams & { stream: true }
+    params: ChatCompletionCreateParams & { stream: true },
+    options?: RequestOptions
   ): Promise<AsyncIterable<ChatCompletionChunk>>;
   public async create(
-    params: ChatCompletionCreateParams & { stream?: false }
+    params: ChatCompletionCreateParams & { stream?: false },
+    options?: RequestOptions
   ): Promise<ChatCompletionResponse>;
   public async create(
-    params: ChatCompletionCreateParams
+    params: ChatCompletionCreateParams,
+    options?: RequestOptions
   ): Promise<ChatCompletionResponse | AsyncIterable<ChatCompletionChunk>> {
     if (params.stream) {
       return this.client.requestStream<ChatCompletionChunk>('/v1/chat/completions', {
         method: 'POST',
-        body: params
+        body: params,
+        ...options
       });
     }
 
     return this.client.request<ChatCompletionResponse>('/v1/chat/completions', {
       method: 'POST',
-      body: params
+      body: params,
+      ...options
     });
   }
 
@@ -132,11 +184,15 @@ export class CompletionsResource {
    * const result = await task.result();
    * ```
    */
-  public async createAsync(params: ChatCompletionAsyncParams): Promise<AsyncTaskHandle<ChatCompletionResponse>> {
+  public async createAsync(
+    params: ChatCompletionAsyncParams,
+    options?: RequestOptions
+  ): Promise<AsyncTaskHandle<ChatCompletionResponse>> {
     const queue = params.queue || 'llm-batch';
     const headers: Record<string, string> = {
       'X-Galx-Async': 'true',
-      'X-Galx-Queue': queue
+      'X-Galx-Queue': queue,
+      ...(options?.headers || {})
     };
 
     if (params.groupId) headers['X-Galx-Group-Id'] = params.groupId;
@@ -163,7 +219,8 @@ export class CompletionsResource {
         response_format: params.response_format,
         tools: params.tools,
         tool_choice: params.tool_choice
-      }
+      },
+      ...options
     });
 
     return this.createTaskHandle<ChatCompletionResponse>(response.id, queue, response.task_url);

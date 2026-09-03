@@ -41,7 +41,7 @@ export function patchAI(options: { baseURL?: string; apiKey?: string } = {}) {
     // Rewrite URL to GALXAI Wholesale Gateway
     const parsed = new URL(urlStr);
     const targetPath = parsed.pathname;
-    const rewrittenUrl = `${galxBase}${targetPath.startsWith('/v1') ? targetPath.replace(/^\/v1/, '') : targetPath}`;
+    const rewrittenUrl = `${galxBase}${targetPath.startsWith('/v1') ? targetPath.replace(/^\/v1/, '') : targetPath}${parsed.search || ''}`;
 
     const headers = new Headers(init?.headers || (typeof input === 'object' && 'headers' in input ? (input as any).headers : {}));
     if (galxKey) {
