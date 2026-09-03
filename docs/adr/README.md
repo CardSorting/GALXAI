@@ -111,6 +111,7 @@ This directory contains the formal Architectural Decision Records (ADRs) that go
 | **[ADR 0101](0101-persona-image-forced-rls-and-ownership-reassignment-defense.md)** | Persona & Image Forced RLS with Ownership Reassignment Armor | **Media & Persona Armor** | `Accepted` | Enforces `FORCE ROW LEVEL SECURITY` on personas and image generations, introduces `fn_prevent_tenant_ownership_reassignment` trigger, and adds `fn_is_tenant_resource_owner`. |
 | **[ADR 0102](0102-chat-messages-access-validation-and-tasks-crud-rls.md)** | Chat Messages Access Validation & Tasks CRUD RLS Armor | **Parent/Child Resource Armor** | `Accepted` | Deploys `fn_can_access_conversation` validator closing cross-tenant message injection, prevents message reassignment, and implements full CRUD RLS for `galx_tasks`. |
 | **[ADR 0103](0103-chat-memory-and-billing-forced-rls-and-ownership-armor.md)** | Chat Memory & Billing Forced RLS with Ownership Armor | **Operational Data Armor** | `Accepted` | Applies `FORCE ROW LEVEL SECURITY` across chat rolling memory, graph edges, episodes, and Stripe billing tables with ownership reassignment triggers. |
+| **[ADR 0104](0104-least-privilege-dac-grants-for-authenticated-tenant-role.md)** | Least-Privilege DAC Table Grants for Authenticated Tenant Role | **DAC Authorization & Role Hardening** | `Accepted` | Grants least-privilege DAC permissions to authenticated role across user tables, revokes dangerous mutations, and harmonizes table privileges with kernel RLS. |
 
 
 ---
