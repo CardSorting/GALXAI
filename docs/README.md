@@ -19,6 +19,7 @@ Welcome to the comprehensive technical documentation and operational guides for 
 
 ## 🎯 Developer Guides & Integrations
 
+- **[Universal Developer Client SDK Guide](DEVELOPER_CLIENT_SDK.md)**: Exhaustive manual for the edge-native TypeScript SDK, touchless 1-line APIs, visual synthesis, streaming diagnostics, BroccoliDB substrate, and offline replay testing.
 - **[Quickstart Integration Guide](QUICKSTART.md)**: 30-second drop-in guides for Python, TypeScript, Cursor, Windsurf, Claude Code CLI, and cURL.
 - **[Universal API Reference](API_REFERENCE.md)**: Complete REST API specifications for `/v1/chat/completions`, `/v1/messages`, `/v1/embeddings`, `/api/auth/ingest`, and `/api/ingest`.
 - **[Standardized OAuth & Ingestion Architecture](STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md)**: Detailed specification of two-tier identity isolation, Supabase SSR callback, and RFC 9530 transport security.

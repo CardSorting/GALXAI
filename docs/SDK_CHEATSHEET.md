@@ -65,50 +65,65 @@ const openai = new OpenAI(); // Automatically routed to GALXAI Wholesale Gateway
 
 ---
 
-## 🚀 3. Top-Level 1-Line Helpers & Stateful Threads (`@galxai/sdk`)
+## 🚀 3. Touchless 1-Line Developer API (`galx`)
+
+> **Full Documentation Guide**: See [docs/DEVELOPER_CLIENT_SDK.md](DEVELOPER_CLIENT_SDK.md) for the complete, exhaustive reference.
 
 ```typescript
-import { run, galx, batch, thread, fallback, race, extract, embed, estimateTokens } from '@galxai/sdk';
+import { galx } from 'galxai';
 
-// 1. Ultra-fast 1-line execution
-const answer = await run('Explain quantum mechanics in simple terms');
+// 1. Touchless Visual Synthesis with prompt auto-sensing (16:9 + HD) & direct saving
+const img = await galx.image('A cinematic landscape of the Himalayas in 4k');
+console.log(img.url); // Direct property (no data[0].url digging)
+await img.save('./himalayas.png');
 
-// 2. Tagged template literal
-const summary = await galx`Summarize the key takeaways for ${topic}`;
+// 2. Real-time progressive diffusion streaming
+for await (const progress of galx.image.stream('A neon cyber samurai')) {
+  console.log(`Denoising: ${progress.percentage}%`);
+}
 
-// 3. Stateful multi-turn conversation thread with auto-truncation
-const conv = thread({ model: 'gpt-5.6-sol', system: 'You are a staff engineer.' });
-const reply1 = await conv.reply('What is an LSM Tree?');
-const reply2 = await conv.reply('How does it differ from a B-Tree?');
+// 3. Touchless image inpainting & variations
+const edited = await galx.image.edit('./portrait.png', 'Add cybernetic sunglasses');
+const variation = await galx.image.variation('./logo.png');
 
-// 4. 100x high-throughput concurrent batch mapper
-const summaries = await batch(
-  ['Doc 1 text...', 'Doc 2 text...'],
-  (doc) => `Summarize: ${doc}`,
-  { concurrency: 10 }
-);
+// 4. Touchless model resolution & inspection (zero hardcoded strings)
+const defaultModel = await galx.model();            // Resolves 'gpt-5.6-sol'
+const isAvailable  = await galx.model.has('gpt-5.6-sol');
+const allNames     = await galx.model.names();
+const visionModels = await galx.model.search('vision');
 
-// 5. Automatic multi-model fallback cascade
-const result = await fallback(['gpt-5.6-sol', 'x-ai/grok-4.6', 'gpt-5.6-terra'], 'High priority task');
+// 5. Side-by-side pricing matrix & optimal model recommendation
+const comparison   = await galx.model.compare('gpt-5.6-sol', 'gpt-5.6-terra');
+const optimal      = await galx.model.optimal({ minContextWindow: 128000, reasoningRequired: true });
 
-// 6. Multi-model race (fastest engine wins)
-const fastestReply = await race(['gpt-5.6-luna', 'gpt-5.6-sol'], 'Speed-critical query');
+// 6. Touchless 1-line text completion with string coercion
+const answer = await galx.complete('Explain quantum computing in 1 sentence');
+console.log(answer.text); // or `${answer}`
 
-// 7. Structured schema extraction
-const user = await extract('Jane Doe, 29, Engineer in SF', {
-  name: 'string',
-  age: 'number',
-  city: 'string'
+// 7. Touchless 1-line token streaming
+for await (const chunk of galx.stream('Write a haiku about clean code')) {
+  process.stdout.write(chunk.choices[0]?.delta?.content || '');
+}
+
+// 8. Real-time streaming throughput diagnostics (TTFT & TPS)
+const stream = galx.chat.completions.stream({
+  model: 'gpt-5.6-sol',
+  messages: [{ role: 'user', content: 'Explain thermodynamics' }]
 });
+stream.pipeThrough(token => token.toUpperCase());
+await stream;
+console.log(`TTFT: ${stream.metrics.timeToFirstTokenMs}ms | TPS: ${stream.metrics.tokensPerSecond}`);
 
-// 8. Vector embeddings (1536-dim)
-const embedding = await embed('Zero-egress edge routing');
-console.log(embedding.data[0].embedding.length); // 1536
+// 9. Semantic vector caching with sub-0.05ms retrieval
+// Queries with similar semantics return from BroccoliPromptCache instantly
+const res1 = await galx.complete('Reverse linked list in Python');
+const res2 = await galx.complete('How to reverse Python linked list?'); // Retrieved in 0.04ms
 
-// 9. BroccoliDB Data Compaction (70% - 98% Token Reduction)
-import { compact } from '@galxai/sdk';
-const compacted = compact('PROPOUNDING PARTY: Plaintiff Acme...', 'Interrogatory');
-console.log(compacted.compactedPrompt, `Saved ${compacted.tokensSaved} tokens`);
+// 10. Checkpoints & Deterministic Offline Replay Harness
+const cp = await galx.checkpoints.create('pre-experiment');
+galx.replay.startRecording('agent_flow');
+// run test suite...
+galx.replay.stopRecording();
 ```
 
 ---

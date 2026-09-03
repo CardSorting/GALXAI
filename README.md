@@ -222,6 +222,7 @@ npm run db:test
 - 🥦 **[BroccoliDB Compaction Onboarding Guide](docs/BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md)**: 19 streaming modes, 180 domain compactors, and the Epistemic Measurement Machinery.
 - 📊 **[Empirical Benchmarks & Inference Boundary](docs/BENCHMARKS.md)**: Head-to-head provider boundary tests on OpenAI models with $/success accounting.
 - ⚡ **[Quickstart Guide](docs/QUICKSTART.md)**: 30-second integrations for Next.js, React, Node, and Python.
+- 🌌 **[Universal Developer Client SDK Guide](docs/DEVELOPER_CLIENT_SDK.md)**: Exhaustive manual for the edge-native TypeScript SDK, touchless 1-line APIs, visual synthesis, streaming diagnostics, BroccoliDB substrate, and offline replay testing.
 - 💻 **[SDK Cheatsheet](docs/SDK_CHEATSHEET.md)**: Drop-in code snippets for every major framework.
 - ❓ **[Frequently Asked Questions (FAQs)](docs/FAQS.md)**: Zero-hesitation philosophy, model routing, and BroccoliDB economics.
 - 🔧 **[Troubleshooting & Operational Playbook](docs/TROUBLESHOOTING.md)**: Error codes, remediation steps, and verification commands.
