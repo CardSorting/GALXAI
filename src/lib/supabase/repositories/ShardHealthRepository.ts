@@ -5,6 +5,7 @@
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
+import { executePostgresQuery } from '../../db/postgres';
 import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
 import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-natural-query';
 import type { DbQueryOptions, DbAggregateQuery, DbAggregateResult } from '../../../core/broccolidb/broccolidb.contracts';
@@ -56,6 +57,23 @@ export class ShardHealthRepository {
       this.probeTable.put(id, { ...p, id, timestampMs: p.timestampMs || now });
     }
 
+    // 1. Direct PostgreSQL Connection Pool Query with Circuit Breaker (<1.5ms)
+    const poolRes = await executePostgresQuery<{ fn_report_shard_health_cf: any }>(
+      'SELECT fn_report_shard_health_cf($1::jsonb);',
+      [JSON.stringify(probes)]
+    );
+    if (poolRes && poolRes.rows && poolRes.rows[0]) {
+      const res = poolRes.rows[0].fn_report_shard_health_cf;
+      if (res) {
+        return {
+          success: res.success,
+          probesIngested: res.probesIngested,
+          statusTransitions: res.statusTransitions || []
+        };
+      }
+    }
+
+    // 2. Supabase PostgREST RPC Fallback
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();

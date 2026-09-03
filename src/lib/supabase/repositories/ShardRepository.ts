@@ -208,6 +208,15 @@ export class ShardRepository {
       });
     }
 
+    const res = await executePostgresQuery(
+      `UPDATE galx_shard_accounts
+       SET status = $2::galx_credential_status, cooldown_until_ms = $3, updated_at_ms = $4, updated_at = NOW()
+       WHERE id = $1;`,
+      [shardId, status, cooldownUntilMs || null, Date.now()]
+    );
+
+    if (res) return;
+
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -221,6 +230,49 @@ export class ShardRepository {
           .eq('id', shardId);
       } catch {
         // Fallback
+      }
+    }
+  }
+
+  async updateShardStatusBatch(
+    transitions: Array<{ shardId: string; status: CredentialStatus; cooldownUntilMs?: number }>
+  ): Promise<void> {
+    if (transitions.length === 0) return;
+    const now = Date.now();
+    for (const t of transitions) {
+      const shard = this.inMemoryShards.get(t.shardId);
+      if (shard) {
+        this.inMemoryShards.set(t.shardId, {
+          ...shard,
+          status: t.status,
+          cooldownUntilMs: t.cooldownUntilMs,
+          cooldownUntilTimestampMs: t.cooldownUntilMs,
+          updatedAtMs: now
+        });
+      }
+    }
+
+    const ids = transitions.map(t => t.shardId);
+    const statuses = transitions.map(t => t.status);
+    const cooldowns = transitions.map(t => t.cooldownUntilMs || 0);
+
+    const res = await executePostgresQuery(
+      `UPDATE galx_shard_accounts AS s
+       SET
+         status = c.status::galx_credential_status,
+         cooldown_until_ms = NULLIF(c.cooldown_ms, 0),
+         updated_at_ms = $4,
+         updated_at = NOW()
+       FROM UNNEST($1::text[], $2::text[], $3::bigint[]) AS c(id, status, cooldown_ms)
+       WHERE s.id = c.id;`,
+      [ids, statuses, cooldowns, now]
+    );
+
+    if (res) return;
+
+    if (isSupabaseConfigured()) {
+      for (const t of transitions) {
+        await this.updateShardStatus(t.shardId, t.status, t.cooldownUntilMs);
       }
     }
   }

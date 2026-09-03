@@ -102,12 +102,10 @@ export class GalxShardSyncBuffer {
         await ShardHealthRepository.getInstance().reportHealthProbesBatch(probesToFlush).catch(() => {});
       }
 
-      // 2. Batch update state transitions in PostgreSQL
+      // 2. Batch update state transitions in PostgreSQL via single atomic UNNEST query
       if (transitionsToFlush.length > 0) {
         const shardRepo = ShardRepository.getInstance();
-        for (const t of transitionsToFlush) {
-          await shardRepo.updateShardStatus(t.shardId, t.status, t.cooldownUntilMs).catch(() => {});
-        }
+        await shardRepo.updateShardStatusBatch(transitionsToFlush).catch(() => {});
       }
 
       this.isFlushing = false;
