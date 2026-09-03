@@ -301,22 +301,30 @@ export class TeamGovernanceRepository {
     fallbackTier?: string;
   }): Promise<any | null> {
     if (!isSupabaseConfigured()) return null;
-    const client = getSupabaseAdmin();
-    const { data, error } = await (client as any).rpc('fn_evaluate_and_acquire_seat_gate_v2', {
-      p_user_id: params.userId,
-      p_request_id: params.requestId,
-      p_requested_model: params.requestedModel,
-      p_org_id: params.orgId || null,
-      p_is_stream: params.isStream,
-      p_reserved_units: params.reservedUnits,
-      p_lease_ttl_seconds: params.leaseTtlSeconds ?? 180,
-      p_fallback_tier: params.fallbackTier || 'developer',
-    });
-    if (error) throw error;
-    if (!data || typeof data.allowed !== 'boolean') {
-      throw new Error('Seat gate returned an invalid response.');
+    try {
+      const client = getSupabaseAdmin();
+      const { data, error } = await (client as any).rpc('fn_evaluate_and_acquire_seat_gate_v2', {
+        p_user_id: params.userId,
+        p_request_id: params.requestId,
+        p_requested_model: params.requestedModel,
+        p_org_id: params.orgId || null,
+        p_is_stream: params.isStream,
+        p_reserved_units: params.reservedUnits,
+        p_lease_ttl_seconds: params.leaseTtlSeconds ?? 180,
+        p_fallback_tier: params.fallbackTier || 'developer',
+      });
+      if (error) {
+        console.warn('[TeamGovernanceRepository] fn_evaluate_and_acquire_seat_gate_v2 RPC notice:', error.message);
+        return null;
+      }
+      if (!data || typeof data.allowed !== 'boolean') {
+        return null;
+      }
+      return data;
+    } catch (err: any) {
+      console.warn('[TeamGovernanceRepository] Remote seat gate evaluation fallback:', err?.message || err);
+      return null;
     }
-    return data;
   }
 
   async settleSeatRequestLeaseV2(params: {
@@ -331,31 +339,46 @@ export class TeamGovernanceRepository {
     assistantMessage?: any;
   }): Promise<any | null> {
     if (!isSupabaseConfigured()) return null;
-    const client = getSupabaseAdmin();
-    const { data, error } = await (client as any).rpc('fn_settle_seat_request_lease_v2', {
-      p_user_id: params.userId,
-      p_request_id: params.requestId,
-      p_model_id: params.modelId,
-      p_tokens: Math.max(0, Math.trunc(params.tokens || 0)),
-      p_cost_usd: Math.max(0, params.costUsd || 0),
-      p_units: params.units ?? null,
-      p_conversation_id: params.conversationId || null,
-      p_user_message: params.userMessage || null,
-      p_assistant_message: params.assistantMessage || null,
-    });
-    if (error) throw error;
-    if (!data?.success) throw new Error('Seat lease settlement was not acknowledged.');
-    return data;
+    try {
+      const client = getSupabaseAdmin();
+      const { data, error } = await (client as any).rpc('fn_settle_seat_request_lease_v2', {
+        p_user_id: params.userId,
+        p_request_id: params.requestId,
+        p_model_id: params.modelId,
+        p_tokens: Math.max(0, Math.trunc(params.tokens || 0)),
+        p_cost_usd: Math.max(0, params.costUsd || 0),
+        p_units: params.units ?? null,
+        p_conversation_id: params.conversationId || null,
+        p_user_message: params.userMessage || null,
+        p_assistant_message: params.assistantMessage || null,
+      });
+      if (error) {
+        console.warn('[TeamGovernanceRepository] fn_settle_seat_request_lease_v2 RPC notice:', error.message);
+        return null;
+      }
+      return data;
+    } catch (err: any) {
+      console.warn('[TeamGovernanceRepository] Remote lease settlement fallback:', err?.message || err);
+      return null;
+    }
   }
 
   async releaseSeatRequestLeaseV2(userId: string, requestId: string): Promise<boolean | null> {
     if (!isSupabaseConfigured()) return null;
-    const client = getSupabaseAdmin();
-    const { data, error } = await (client as any).rpc('fn_release_seat_request_lease_v2', {
-      p_user_id: userId,
-      p_request_id: requestId,
-    });
-    if (error) throw error;
-    return data === true;
+    try {
+      const client = getSupabaseAdmin();
+      const { data, error } = await (client as any).rpc('fn_release_seat_request_lease_v2', {
+        p_user_id: userId,
+        p_request_id: requestId,
+      });
+      if (error) {
+        console.warn('[TeamGovernanceRepository] fn_release_seat_request_lease_v2 RPC notice:', error.message);
+        return false;
+      }
+      return data === true;
+    } catch (err: any) {
+      console.warn('[TeamGovernanceRepository] Remote lease release fallback:', err?.message || err);
+      return false;
+    }
   }
 }

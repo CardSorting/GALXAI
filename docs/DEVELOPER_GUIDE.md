@@ -27,8 +27,10 @@ This guide covers the internal codebase structure, architectural layers, how to 
 │   ├── ROUTING_ALGORITHMS.md         # Mathematical derivations of P-AHT, SWRR, WLC
 │   ├── SECURITY.md                   # Envelope cryptography, transport hardening & threat model
 │   ├── DEVELOPER_GUIDE.md            # Contributing guide and adapter development
+│   ├── INFERENCE_PIPELINE_VERIFICATION.md # Sovereign Inference Pipeline & Verification Guide
 │   └── TROUBLESHOOTING.md            # Error classification and operational playbooks
 ├── scripts/
+│   ├── test-inference-pipeline.ts    # Real end-to-end inference pipeline test & project generator
 │   ├── manage-migrations.ts          # Migration executor and status manager
 │   ├── push-migrations-direct.ts     # Direct Supabase migration push script (npm run db:push)
 │   ├── verify-supabase-integrity.ts  # Paranoid PostgreSQL linter (npm run db:verify)

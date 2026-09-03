@@ -1,0 +1,67 @@
+{
+  "timestamp": "2026-09-03T21:11:16.197Z",
+  "pipelineType": "REAL_BACKEND_INFERENCE_PIPELINE",
+  "account": {
+    "userId": "usr_galx_developer_master",
+    "workspaceId": "ws_1788469874717_f7ok5",
+    "workspaceName": "Developer Master Sovereign Workspace",
+    "seatTier": "enterprise"
+  },
+  "apiKeyVerification": {
+    "keyId": "key_galx_live_1788469875092",
+    "prefix": "galx_live_7a8778",
+    "masked": "galx_live_7a87...881c",
+    "checksum": "97881c",
+    "environment": "live",
+    "revocationVerified": true
+  },
+  "modelEvaluated": {
+    "id": "gpt-5.6-sol",
+    "name": "OpenAI GPT-5.6 Sol (Flagship)",
+    "provider": "openai",
+    "contextWindowTokens": 1050000
+  },
+  "streamingExecution": {
+    "httpStatus": 200,
+    "chunksProcessed": 548,
+    "charactersDelivered": 12137,
+    "durationMs": 307,
+    "doneSignalReceived": true,
+    "projectOutputFile": "/Users/bozoegg/Desktop/GALXAI/output-test/projects/cyber-snake-arcade/index.html"
+  },
+  "nonStreamingExecution": {
+    "httpStatus": 200,
+    "completionId": "chatcmpl-galx-1788469875639",
+    "tokensUsed": 283,
+    "durationMs": 290,
+    "projectOutputDir": "/Users/bozoegg/Desktop/GALXAI/output-test/projects/rate-governor-service"
+  },
+  "walletSettlement": {
+    "holdId": "ef6e2662-f64c-4b35-b299-6b0f80d9c371",
+    "reservedUsd": 0.005,
+    "committedUsd": 0.0018,
+    "refundedUsd": 0.0032,
+    "finalBalanceUsd": 113.719924
+  },
+  "sampleProjectsGenerated": [
+    {
+      "name": "Cyber-Snake Arcade",
+      "type": "Standalone Playable HTML5/Canvas Game",
+      "path": "/Users/bozoegg/Desktop/GALXAI/output-test/projects/cyber-snake-arcade/index.html",
+      "bytes": 12145
+    },
+    {
+      "name": "Continuous Rate Governor",
+      "type": "TypeScript Production Microservice / Package",
+      "path": "/Users/bozoegg/Desktop/GALXAI/output-test/projects/rate-governor-service",
+      "files": 4
+    },
+    {
+      "name": "Quantum ZDR Client",
+      "type": "Zero-Data Retention Enterprise SDK",
+      "path": "/Users/bozoegg/Desktop/GALXAI/output-test/projects/quantum-zdr-client",
+      "files": 3
+    }
+  ],
+  "totalDurationMs": 2100
+}

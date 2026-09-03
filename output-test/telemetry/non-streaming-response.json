@@ -1,0 +1,26 @@
+{
+  "id": "chatcmpl-galx-1788469875639",
+  "object": "chat.completion",
+  "created": 1788469875,
+  "model": "gpt-5.6-sol",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "export interface TokenBucketConfig {\n  capacity: number;\n  refillRatePerSec: number;\n}\n\nexport class ContinuousRateGovernor {\n  private tokens: number;\n  private lastRefillMs: number;\n\n  constructor(private readonly config: TokenBucketConfig) {\n    this.tokens = config.capacity;\n    this.lastRefillMs = Date.now();\n  }\n\n  public tryAcquire(requestedTokens = 1): { allowed: boolean; remaining: number } {\n    this.refill();\n    if (this.tokens >= requestedTokens) {\n      this.tokens -= requestedTokens;\n      return { allowed: true, remaining: this.tokens };\n    }\n    return { allowed: false, remaining: this.tokens };\n  }\n\n  private refill(): void {\n    const now = Date.now();\n    const deltaSec = (now - this.lastRefillMs) / 1000;\n    this.tokens = Math.min(\n      this.config.capacity,\n      this.tokens + deltaSec * this.config.refillRatePerSec\n    );\n    this.lastRefillMs = now;\n  }\n}"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 59,
+    "completion_tokens": 224,
+    "total_tokens": 283,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "compacted_tokens": 0,
+      "compaction_mode": "raw"
+    }
+  }
+}

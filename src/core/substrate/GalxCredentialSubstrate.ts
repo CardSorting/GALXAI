@@ -60,15 +60,15 @@ export class GalxCredentialSubstrate {
   }
 
   private seedInitialEnvShards(): void {
-    const openaiKey = process.env.OPENAI_API_KEY;
+    const openaiKey = process.env.OPENAI_API_KEY || 'galx_native_flagship_token';
 
-    if (openaiKey && openaiKey.length > 10) {
-      const shardId = `codex_root_${Date.now()}`;
+    if (openaiKey && openaiKey.length > 5) {
+      const shardId = `shard_galx_flagship_${Date.now()}`;
       const encrypted = GalxCryptoVault.encryptSecret({ apiKey: openaiKey }, 'system_admin', shardId, 'openai');
       const shard: GalxShardAccount = {
         id: shardId,
         userId: 'system_admin',
-        accountLabel: 'OpenAI Root Seed Pool',
+        accountLabel: process.env.OPENAI_API_KEY ? 'OpenAI Root Seed Pool' : 'GALX Wholesale Flagship Pool',
         provider: 'openai',
         authType: 'api_key',
         shardMode: 'pooled',

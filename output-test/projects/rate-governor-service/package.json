@@ -1,0 +1,25 @@
+{
+  "name": "@galxai/continuous-rate-governor",
+  "version": "1.0.0",
+  "description": "Sub-millisecond continuous token-bucket rate governor with mathematical replenishment",
+  "main": "dist/ContinuousRateGovernor.js",
+  "types": "dist/ContinuousRateGovernor.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "tsx src/ContinuousRateGovernor.test.ts"
+  },
+  "keywords": [
+    "rate-limiter",
+    "token-bucket",
+    "governor",
+    "galxai",
+    "high-concurrency"
+  ],
+  "author": "GALXAI Engineering",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "tsx": "^4.19.0",
+    "@types/node": "^22.0.0"
+  }
+}
