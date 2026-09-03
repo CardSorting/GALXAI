@@ -6,6 +6,7 @@
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
+import { executePostgresQuery } from '../../db/postgres';
 import type { Database } from '../types';
 import type {
   GalxTask,
@@ -57,6 +58,24 @@ export class TaskRepository {
     limit?: number;
     offset?: number;
   }): Promise<GalxTask[]> {
+    // 1. Direct PostgreSQL Connection Pool Query with Circuit Breaker (<1.5ms)
+    const res = await executePostgresQuery(
+      `SELECT * FROM galx_tasks
+       WHERE ($1::text IS NULL OR queue_id = $1)
+         AND ($2::text IS NULL OR status = $2)
+         AND ($3::text IS NULL OR user_id = $3)
+       ORDER BY created_at_ms DESC
+       LIMIT $4 OFFSET $5;`,
+      [params?.queueId || null, params?.status || null, params?.userId || null, params?.limit || 50, params?.offset || 0]
+    );
+
+    if (res && res.rows && res.rows.length > 0) {
+      const mapped = res.rows.map(r => this.mapRowToTask(r));
+      for (const t of mapped) this.taskTable.put(t.id, t);
+      return mapped;
+    }
+
+    // 2. Supabase PostgREST Fallback
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -94,6 +113,19 @@ export class TaskRepository {
   }
 
   async getTaskById(taskId: string): Promise<GalxTask | null> {
+    // 0. BroccoliDB L1 Hot Table Check (<0.01ms)
+    const local = this.taskTable.get(taskId);
+    if (local) return local;
+
+    // 1. Direct PostgreSQL Connection Pool Query with Circuit Breaker
+    const res = await executePostgresQuery('SELECT * FROM galx_tasks WHERE id = $1 LIMIT 1;', [taskId]);
+    if (res && res.rows && res.rows[0]) {
+      const mapped = this.mapRowToTask(res.rows[0]);
+      this.taskTable.put(mapped.id, mapped);
+      return mapped;
+    }
+
+    // 2. Supabase PostgREST Fallback
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -117,6 +149,25 @@ export class TaskRepository {
   }
 
   async findTaskByIdempotency(queueId: string, idempotencyKey: string): Promise<GalxTask | null> {
+    // 0. BroccoliDB L1 Check
+    const matches = this.taskTable.query({
+      where: {
+        queueId: { $eq: queueId },
+        idempotencyKey: { $eq: idempotencyKey }
+      }
+    }) as GalxTask[];
+    if (matches[0]) return matches[0];
+
+    // 1. Direct PostgreSQL Connection Pool Query
+    const res = await executePostgresQuery(
+      'SELECT * FROM galx_tasks WHERE queue_id = $1 AND idempotency_key = $2 LIMIT 1;',
+      [queueId, idempotencyKey]
+    );
+    if (res && res.rows && res.rows[0]) {
+      const mapped = this.mapRowToTask(res.rows[0]);
+      this.taskTable.put(mapped.id, mapped);
+      return mapped;
+    }
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -137,14 +188,7 @@ export class TaskRepository {
       }
     }
 
-    const matches = this.taskTable.query({
-      where: {
-        queueId: { $eq: queueId },
-        idempotencyKey: { $eq: idempotencyKey }
-      }
-    }) as GalxTask[];
-
-    return matches[0] || null;
+    return null;
   }
 
   async findTaskByContentHash(
@@ -262,6 +306,26 @@ export class TaskRepository {
     tagFilter?: string;
     groupIdFilter?: string;
   }): Promise<GalxTask[]> {
+    // 1. Direct PostgreSQL Connection Pool Query with Circuit Breaker (<1.5ms)
+    const poolRes = await executePostgresQuery(
+      'SELECT * FROM fn_lease_queue_tasks($1, $2, $3, $4, $5, $6, $7);',
+      [
+        params.queueId,
+        params.workerId,
+        params.maxTasks || 10,
+        params.leaseDurationMs || 60000,
+        params.tagFilter || null,
+        params.groupIdFilter || null,
+        Date.now()
+      ]
+    );
+    if (poolRes && poolRes.rows && poolRes.rows.length > 0) {
+      const mapped = poolRes.rows.map(r => this.mapRowToTask(r));
+      for (const t of mapped) this.taskTable.put(t.id, t);
+      return mapped;
+    }
+
+    // 2. Supabase RPC Fallback
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();

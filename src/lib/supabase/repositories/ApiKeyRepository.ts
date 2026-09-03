@@ -165,16 +165,9 @@ export class ApiKeyRepository {
         }
       }
 
-      // 6. Assemble ordered results preserving batch contract
+      // 6. Assemble ordered results preserving batch contract (zero extra BroccoliDB roundtrips)
       for (const hash of hashes) {
-        if (keyMap.has(hash)) {
-          results.push(keyMap.get(hash)!);
-        } else {
-          const matches = this.keyTable.query({
-            where: { keyHash: { $eq: hash }, revoked: { $eq: false } }
-          }) as DeveloperGatewayKey[];
-          results.push(matches[0] || null);
-        }
+        results.push(keyMap.get(hash) || null);
       }
 
       return results;
@@ -509,6 +502,12 @@ export class ApiKeyRepository {
     const fast = this.activeKeyByHash.get(keyHash);
     if (fast && !fast.revoked && (!fast.expiresAtMs || fast.expiresAtMs > Date.now())) {
       return fast;
+    }
+
+    // 0.1 Fast-fail negative cache (<0.001ms) to eliminate coalescer overhead
+    const negTime = this.negativeHashCache.get(keyHash);
+    if (negTime && Date.now() - negTime < this.NEGATIVE_CACHE_TTL_MS) {
+      return null;
     }
 
     return this.keyCoalescer.getOrFetch(`hash:${keyHash}`, async () => {

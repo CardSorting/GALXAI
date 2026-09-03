@@ -11,7 +11,7 @@
  * 5. Keep-Alive: 10,000ms TCP heartbeat to eliminate silent dead-socket hangs on AWS RDS.
  */
 
-import { Pool, PoolConfig, QueryResult, QueryResultRow } from 'pg';
+import { Pool, PoolClient, PoolConfig, QueryResult, QueryResultRow } from 'pg';
 
 export type CircuitBreakerState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
 
@@ -93,6 +93,7 @@ export function getPostgresPool(): Pool | null {
       connectionString: dbUrl,
       ssl: { rejectUnauthorized: false },
       max: Number(process.env.SUPABASE_POOL_SIZE || '15'),
+      maxUses: Number(process.env.SUPABASE_POOL_MAX_USES || '7500'),
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
       statement_timeout: 6000,
@@ -113,9 +114,12 @@ export function getPostgresPool(): Pool | null {
   return globalThis.__galx_pg_pool;
 }
 
+const MAX_WAITING_POOL_CLIENTS = 25;
+
 /**
  * Safely executes a query through the PostgreSQL connection pool protected by the circuit breaker.
  * If the pool is saturated or unreachable, immediately returns null without blocking the gateway.
+ * Employs single-retry with jitter on transient network or timeout spikes.
  */
 export async function executePostgresQuery<R extends QueryResultRow = any>(
   text: string,
@@ -129,14 +133,78 @@ export async function executePostgresQuery<R extends QueryResultRow = any>(
   const pool = getPostgresPool();
   if (!pool) return null;
 
+  // Active Pool Queue Guard: Drop immediately if the connection checkout queue is backed up
+  if (pool.waitingCount > MAX_WAITING_POOL_CLIENTS) {
+    breaker.recordFailure(new Error(`Connection pool checkout queue saturated (${pool.waitingCount} > ${MAX_WAITING_POOL_CLIENTS})`));
+    return null;
+  }
+
   try {
     const result = await pool.query<R>(text, params);
     breaker.recordSuccess();
     return result;
   } catch (err: any) {
+    const isTransient = err?.code === '57P01' || err?.code === '57P03' || err?.message?.includes('timeout') || err?.message?.includes('Connection terminated');
+    if (isTransient) {
+      // Jittered backoff retry (25-50ms)
+      await new Promise((r) => setTimeout(r, 25 + Math.random() * 25));
+      try {
+        const retryResult = await pool.query<R>(text, params);
+        breaker.recordSuccess();
+        return retryResult;
+      } catch (retryErr: any) {
+        breaker.recordFailure(retryErr);
+        console.warn('[PostgresPool] Query retry error:', retryErr.message);
+        return null;
+      }
+    }
+
     breaker.recordFailure(err);
     console.warn('[PostgresPool] Query execution error:', err.message);
     return null;
+  }
+}
+
+/**
+ * Safely executes an atomic multi-statement transaction protected by the circuit breaker.
+ */
+export async function executePostgresTransaction<T>(
+  callback: (client: PoolClient) => Promise<T>
+): Promise<T | null> {
+  const breaker = getCircuitBreaker();
+  if (!breaker.canExecute()) return null;
+
+  const pool = getPostgresPool();
+  if (!pool) return null;
+
+  if (pool.waitingCount > MAX_WAITING_POOL_CLIENTS) {
+    breaker.recordFailure(new Error('Connection pool checkout queue saturated during transaction acquire'));
+    return null;
+  }
+
+  let client: PoolClient | null = null;
+  try {
+    client = await pool.connect();
+    await client.query('BEGIN;');
+    const result = await callback(client);
+    await client.query('COMMIT;');
+    breaker.recordSuccess();
+    return result;
+  } catch (err: any) {
+    if (client) {
+      try {
+        await client.query('ROLLBACK;');
+      } catch {
+        // ignore rollback error
+      }
+    }
+    breaker.recordFailure(err);
+    console.warn('[PostgresPool] Transaction error:', err.message);
+    return null;
+  } finally {
+    if (client) {
+      client.release();
+    }
   }
 }
 

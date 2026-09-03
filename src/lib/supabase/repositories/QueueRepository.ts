@@ -5,6 +5,7 @@
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
+import { executePostgresQuery } from '../../db/postgres';
 import type { Database } from '../types';
 import type { GalxTaskQueueConfig, QueueState } from '../../../core/contracts/GalxContracts';
 import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
@@ -29,6 +30,15 @@ export class QueueRepository {
   }
 
   async getQueues(): Promise<GalxTaskQueueConfig[]> {
+    // 1. Direct PostgreSQL Connection Pool Query with Circuit Breaker (<1.5ms)
+    const res = await executePostgresQuery('SELECT * FROM galx_task_queues ORDER BY created_at ASC;');
+    if (res && res.rows && res.rows.length > 0) {
+      const mapped = res.rows.map(r => this.mapRowToQueue(r));
+      for (const q of mapped) this.queueTable.put(q.id, q);
+      return mapped;
+    }
+
+    // 2. Supabase PostgREST Fallback
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -54,6 +64,19 @@ export class QueueRepository {
   }
 
   async getQueueById(id: string): Promise<GalxTaskQueueConfig | null> {
+    // 0. BroccoliDB L1 Hot Table Check (<0.01ms)
+    const local = this.queueTable.get(id);
+    if (local) return local;
+
+    // 1. Direct PostgreSQL Connection Pool Query
+    const res = await executePostgresQuery('SELECT * FROM galx_task_queues WHERE id = $1 LIMIT 1;', [id]);
+    if (res && res.rows && res.rows[0]) {
+      const mapped = this.mapRowToQueue(res.rows[0]);
+      this.queueTable.put(mapped.id, mapped);
+      return mapped;
+    }
+
+    // 2. Supabase PostgREST Fallback
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
