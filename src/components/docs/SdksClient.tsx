@@ -45,23 +45,34 @@ npx galxai "Explain continuous token caching in 10 words"
 npx galxai chat --model gpt-5.6-sol`,
     },
     galx_sdk: {
-      pkg: 'npm install @galxai/sdk',
-      code: `import { GalxAI } from "@galxai/sdk";
+      pkg: 'npm install galxai',
+      code: `import { galx } from "galxai";
 
-// Initialize native GALXAI client with auto-failover & token tracking
-const galx = new GalxAI({
-  apiKey: process.env.GALX_API_KEY || "galx_live_your_key",
-});
+// 1. Touchless Visual Synthesis with prompt auto-sensing (16:9 + HD) & disk saving
+const img = await galx.image("A cinematic landscape of the Himalayas in 4k");
+console.log(img.url); // Direct property (no data[0].url digging!)
+await img.save("./himalayas.png");
 
-const stream = await galx.chat.completions.create({
-  model: "gpt-5.6-sol",
-  messages: [{ role: "user", content: "Optimize this PostgreSQL query." }],
-  stream: true,
-});
+// 2. Real-Time Diffusion Progress Stream
+for await (const progress of galx.image.stream("A neon cyber samurai")) {
+  console.log(\`Denoising: \${progress.percentage}%\`);
+}
 
+// 3. Touchless Model Resolution & Inspection (zero hardcoded strings)
+const defaultModel = await galx.model();            // Resolves 'gpt-5.6-sol'
+const isAvailable  = await galx.model.has("gpt-5.6-sol");
+const allNames     = await galx.model.names();
+
+// 4. Touchless 1-Line Text Completion with string coercion
+const answer = await galx.complete("Explain quantum computing in 1 sentence");
+console.log(answer.text); // or \`\${answer}\`
+
+// 5. Touchless 1-Line Token Streaming with TTFT/TPS Diagnostics
+const stream = galx.stream("Write a haiku about clean code");
 for await (const chunk of stream) {
   process.stdout.write(chunk.choices[0]?.delta?.content || "");
-}`,
+}
+console.log(\`TTFT: \${stream.metrics.timeToFirstTokenMs}ms | TPS: \${stream.metrics.tokensPerSecond}\`);`,
     },
     python: {
       pkg: 'pip install openai',

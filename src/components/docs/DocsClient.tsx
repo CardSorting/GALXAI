@@ -96,7 +96,7 @@ export function DocsClient() {
     { title: 'Function Calling & Tools', desc: 'Parallel tool execution and multi-turn agent loops with 75% tool caching.', href: '/docs/function-calling', icon: Wrench, color: 'text-emerald-400' },
     { title: 'Vector Embeddings', desc: 'High-throughput vector generation for semantic search (2,048 batch size).', href: '/docs/embeddings', icon: Database, color: 'text-indigo-400' },
     { title: 'Python SDK Deep Dive', desc: 'AsyncIO gathering, Pydantic response models, and HTTPX connection pools.', href: '/docs/sdks/python', icon: Code2, color: 'text-cyan-400' },
-    { title: 'TypeScript SDK Deep Dive', desc: 'Type-safe Zod schema parsing and Vercel AI SDK integration.', href: '/docs/sdks/typescript', icon: Terminal, color: 'text-amber-300' },
+    { title: 'Universal TypeScript SDK', desc: 'Touchless 1-line APIs, auto-sensing visual synthesis, BroccoliDB substrate, and offline replay.', href: '/docs/sdks/typescript', icon: Terminal, color: 'text-amber-300', badge: 'Touchless' },
     { title: 'Cursor & IDE Setup', desc: 'Configure Cursor, Windsurf, and Continue.dev with sub-second latency.', href: '/docs/ide-setup', icon: Terminal, color: 'text-emerald-400' },
     { title: 'SSE Streaming Guide', desc: 'Low-latency token streaming with sub-15ms Time-To-First-Token.', href: '/docs/streaming', icon: Radio, color: 'text-indigo-400' },
     { title: 'Guaranteed JSON Outputs', desc: 'Constrained decoding enforcing 100% adherence to complex schemas.', href: '/docs/structured-outputs', icon: Sparkles, color: 'text-cyan-400' },
