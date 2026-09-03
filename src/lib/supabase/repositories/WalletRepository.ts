@@ -6,6 +6,7 @@
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
+import { executePostgresQuery } from '../../db/postgres';
 import type { Database, GalxWalletTransactionType } from '../types';
 import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
 import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-natural-query';
@@ -78,12 +79,31 @@ export class WalletRepository {
     async (userIds) => {
       const results: Array<WalletRecord | null> = [];
       const userMap = new Map<string, WalletRecord>();
+      const uidsArray = Array.from(userIds);
 
-      if (isSupabaseConfigured()) {
+      // 1. Direct PostgreSQL Connection Pool Query with Circuit Breaker (<1.5ms)
+      const res = await executePostgresQuery(
+        'SELECT * FROM fn_batch_get_wallets_by_users($1::text[]);',
+        [uidsArray]
+      );
+
+      if (res && res.rows && res.rows.length > 0) {
+        for (const row of res.rows) {
+          if (row && row.user_id) {
+            const mapped = this.mapRowToWallet(row);
+            userMap.set(row.user_id, mapped);
+            this.walletTable.put(row.user_id, mapped);
+          }
+        }
+      }
+
+      // 2. Supabase PostgREST RPC Fallback
+      if (userMap.size < uidsArray.length && isSupabaseConfigured()) {
         try {
           const supabase = getSupabaseAdmin();
+          const missing = uidsArray.filter(u => !userMap.has(u));
           const { data, error } = await supabase.rpc('fn_batch_get_wallets_by_users', {
-            p_user_ids: Array.from(userIds)
+            p_user_ids: missing
           });
 
           if (!error && data && Array.isArray(data)) {
@@ -100,13 +120,9 @@ export class WalletRepository {
         }
       }
 
+      // 3. Assemble results with zero extra BroccoliDB roundtrips
       for (const uid of userIds) {
-        if (userMap.has(uid)) {
-          results.push(userMap.get(uid)!);
-        } else {
-          const local = this.walletTable.query({ where: { userId: { $eq: uid } } }) as WalletRecord[];
-          results.push(local[0] || null);
-        }
+        results.push(userMap.get(uid) || this.walletTable.get(uid) || null);
       }
 
       return results;

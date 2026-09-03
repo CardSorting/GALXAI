@@ -5,6 +5,7 @@
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
+import { executePostgresQuery } from '../../db/postgres';
 import type { Database } from '../types';
 import type { GalxShardAccount, CredentialStatus, ProviderType, AuthType, ShardIsolationMode } from '../../../core/contracts/GalxContracts';
 
@@ -33,6 +34,21 @@ export class ShardRepository {
   }
 
   async getShards(userId?: string): Promise<GalxShardAccount[]> {
+    // 1. Direct PostgreSQL Connection Pool Query with Circuit Breaker (<1.5ms)
+    const res = await executePostgresQuery(
+      'SELECT * FROM galx_shard_accounts WHERE ($1::text IS NULL OR user_id = $1) ORDER BY priority DESC;',
+      [userId || null]
+    );
+    if (res && res.rows && res.rows.length > 0) {
+      const mapped = res.rows.map(r => this.mapRowToShard(r));
+      for (const s of mapped) {
+        this.inMemoryShards.set(s.id, s);
+        this.shardTable.put(s.id, s);
+      }
+      return mapped;
+    }
+
+    // 2. Supabase PostgREST Fallback
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -70,6 +86,20 @@ export class ShardRepository {
   }
 
   async getShardById(id: string): Promise<GalxShardAccount | null> {
+    // 0. In-Memory / BroccoliDB Hot Hit (<0.01ms)
+    const local = this.inMemoryShards.get(id) || this.shardTable.get(id);
+    if (local) return local;
+
+    // 1. Direct PostgreSQL Connection Pool Query with Circuit Breaker (<1.5ms)
+    const res = await executePostgresQuery('SELECT * FROM galx_shard_accounts WHERE id = $1 LIMIT 1;', [id]);
+    if (res && res.rows && res.rows[0]) {
+      const mapped = this.mapRowToShard(res.rows[0]);
+      this.inMemoryShards.set(mapped.id, mapped);
+      this.shardTable.put(mapped.id, mapped);
+      return mapped;
+    }
+
+    // 2. Supabase PostgREST Fallback
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -94,10 +124,55 @@ export class ShardRepository {
 
   async saveShard(shard: GalxShardAccount): Promise<void> {
     this.inMemoryShards.set(shard.id, shard);
+    this.shardTable.put(shard.id, shard);
+
+    const row = this.mapShardToRow(shard);
+
+    // 1. Direct PostgreSQL Connection Pool Upsert
+    const res = await executePostgresQuery(
+      `INSERT INTO galx_shard_accounts (
+        id, user_id, provider, auth_type, account_label, api_key_masked,
+        encrypted_ciphertext, encrypted_iv, encrypted_tag, key_version,
+        priority, weight, status, created_at_ms, updated_at_ms
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+      ) ON CONFLICT (id) DO UPDATE SET
+        account_label = EXCLUDED.account_label,
+        api_key_masked = EXCLUDED.api_key_masked,
+        encrypted_ciphertext = EXCLUDED.encrypted_ciphertext,
+        encrypted_iv = EXCLUDED.encrypted_iv,
+        encrypted_tag = EXCLUDED.encrypted_tag,
+        key_version = EXCLUDED.key_version,
+        priority = EXCLUDED.priority,
+        weight = EXCLUDED.weight,
+        status = EXCLUDED.status,
+        updated_at_ms = EXCLUDED.updated_at_ms,
+        updated_at = NOW();`,
+      [
+        row.id,
+        row.user_id,
+        row.provider,
+        row.auth_type || 'api_key',
+        row.account_label,
+        row.api_key_masked,
+        row.encrypted_ciphertext,
+        row.encrypted_iv,
+        row.encrypted_tag,
+        row.key_version || 'v1',
+        row.priority || 100,
+        row.weight || 1,
+        row.status || 'healthy',
+        row.created_at_ms || Date.now(),
+        Date.now()
+      ]
+    );
+
+    if (res) return;
+
+    // 2. Supabase PostgREST Fallback
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
-        const row = this.mapShardToRow(shard);
         await supabase.from('galx_shard_accounts').upsert(row, { onConflict: 'id' });
       } catch {
         // Fallback
