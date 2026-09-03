@@ -19,43 +19,41 @@ export function KeysSubNav() {
 
   const tabs = [
     {
-      name: 'Active Keys',
+      name: 'API Keys',
       href: '/keys',
       icon: Key,
       exact: true
     },
     {
-      name: 'Mint New Key',
+      name: 'New Key',
       href: '/keys/new',
-      icon: Plus,
-      badge: 'Presets'
+      icon: Plus
     },
     {
-      name: 'Live Activity & Telemetry',
+      name: 'Scopes & Policies',
+      href: '/keys/permissions',
+      icon: ShieldCheck
+    },
+    {
+      name: 'Rate Limits',
+      href: '/keys/rate-limits',
+      icon: Gauge
+    },
+    {
+      name: 'Activity & Telemetry',
       href: '/keys/activity',
       icon: Activity,
       badge: 'Live'
     },
     {
-      name: 'Security & IP Allowlists',
-      href: '/keys/permissions',
-      icon: ShieldCheck
-    },
-    {
-      name: 'Rate Limits & Quotas',
-      href: '/keys/rate-limits',
-      icon: Gauge
-    },
-    {
-      name: 'Gateway API Defaults',
+      name: 'Settings',
       href: '/settings?tab=developer',
-      icon: Sliders,
-      badge: 'Policy'
+      icon: Sliders
     }
   ];
 
   return (
-    <div className="flex items-center gap-1 sm:gap-2 p-1 rounded-2xl bg-black/40 border border-white/5 overflow-x-auto font-mono text-xs">
+    <div className="flex items-center gap-1 sm:gap-1.5 p-1 rounded-2xl bg-[#0d101c] border border-white/10 overflow-x-auto text-xs font-sans">
       {tabs.map((tab) => {
         const isActive = tab.exact ? pathname === tab.href : pathname.startsWith(tab.href);
         const Icon = tab.icon;
@@ -64,19 +62,19 @@ export function KeysSubNav() {
           <Link
             key={tab.href}
             href={tab.href}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl whitespace-nowrap transition-all ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl whitespace-nowrap transition-colors ${
               isActive
-                ? 'bg-amber-400 text-black font-bold shadow-lg shadow-amber-500/10'
-                : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                ? 'bg-indigo-600 text-white font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-white hover:bg-white/5 font-medium'
             }`}
           >
-            <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-black' : 'text-zinc-400'}`} />
+            <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-zinc-400'}`} />
             <span>{tab.name}</span>
             {tab.badge && (
               <span
-                className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
                   isActive
-                    ? 'bg-black/20 text-black'
+                    ? 'bg-white/20 text-white'
                     : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                 }`}
               >

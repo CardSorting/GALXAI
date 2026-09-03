@@ -94,7 +94,6 @@ export async function GET(
         userId: found.userId,
         environment: env,
         scopes: found.scopes || ['*'],
-        ipWhitelist: found.ipWhitelist || ['0.0.0.0/0'],
         rateLimitPerMinute: found.rateLimitPerMinute || 120,
         totalRequests: found.totalRequests || 0,
         totalTokens: found.totalTokens || 0,
@@ -128,7 +127,7 @@ export async function PATCH(
     }
 
     const body = await req.json().catch(() => ({}));
-    const { name, rateLimitPerMinute, scopes, ipWhitelist, expiresInDays, defaultCompactionMode } = body;
+    const { name, rateLimitPerMinute, scopes, expiresInDays, defaultCompactionMode } = body;
 
     const persistence = GalxPersistence.getInstance();
     const keyRepo = ApiKeyRepository.getInstance();
@@ -157,7 +156,6 @@ export async function PATCH(
       name: name !== undefined ? sanitizeKeyName(name) : existing.name,
       rateLimitPerMinute: rateLimitPerMinute !== undefined ? sanitizeRateLimit(rateLimitPerMinute) : existing.rateLimitPerMinute,
       scopes: scopes !== undefined ? sanitizeScopes(scopes) : existing.scopes,
-      ipWhitelist: Array.isArray(ipWhitelist) ? ipWhitelist.filter(ip => typeof ip === 'string').slice(0, 20) : existing.ipWhitelist,
       expiresAtMs: updatedExpiresAt,
       defaultCompactionMode: defaultCompactionMode !== undefined ? (defaultCompactionMode === 'raw' ? 'raw' : 'auto') : existing.defaultCompactionMode,
     };
@@ -175,7 +173,6 @@ export async function PATCH(
         keyPrefix: updatedKey.keyPrefix,
         environment: updatedKey.environment,
         scopes: updatedKey.scopes,
-        ipWhitelist: updatedKey.ipWhitelist,
         rateLimitPerMinute: updatedKey.rateLimitPerMinute,
         expiresAt: updatedKey.expiresAtMs
       }

@@ -151,7 +151,6 @@ export async function POST(req: NextRequest) {
       rateLimitPerMinute,
       scopes,
       expiresInDays,
-      ipWhitelist,
       depositedAmount = 0,
       hasVerifiedDeposit = false,
       defaultCompactionMode = 'raw',
@@ -216,7 +215,6 @@ export async function POST(req: NextRequest) {
       revoked: false,
       environment: cleanEnv,
       scopes: cleanScopes,
-      ipWhitelist: Array.isArray(ipWhitelist) ? ipWhitelist.filter(ip => typeof ip === 'string').slice(0, 20) : undefined,
       expiresAtMs,
       checksum,
       computePool,
@@ -269,7 +267,7 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { id: keyId, name, rateLimitPerMinute, scopes, ipWhitelist, defaultCompactionMode } = body;
+    const { id: keyId, name, rateLimitPerMinute, scopes, defaultCompactionMode } = body;
 
     if (!keyId) {
       return NextResponse.json({ error: 'Missing key ID parameter' }, { status: 400 });
@@ -298,7 +296,6 @@ export async function PATCH(req: NextRequest) {
       name: name !== undefined ? sanitizeKeyName(name) : existing.name,
       rateLimitPerMinute: rateLimitPerMinute !== undefined ? sanitizeRateLimit(rateLimitPerMinute) : existing.rateLimitPerMinute,
       scopes: scopes !== undefined ? sanitizeScopes(scopes) : existing.scopes,
-      ipWhitelist: Array.isArray(ipWhitelist) ? ipWhitelist.filter(ip => typeof ip === 'string').slice(0, 20) : existing.ipWhitelist,
       defaultCompactionMode: defaultCompactionMode !== undefined ? (defaultCompactionMode === 'raw' ? 'raw' : 'auto') : existing.defaultCompactionMode,
     };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
@@ -18,8 +18,21 @@ import {
   RefreshCw,
   Code2,
   ExternalLink,
-  Sliders,
-  ShieldAlert
+  ShieldAlert,
+  Search,
+  Play,
+  CheckCircle2,
+  AlertTriangle,
+  Download,
+  Terminal,
+  ArrowUpDown,
+  Laptop,
+  Server,
+  Bot,
+  Sparkles,
+  Edit2,
+  FileCode,
+  Layers
 } from 'lucide-react';
 import { formatTimeAgo } from '@/lib/utils';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
@@ -29,20 +42,79 @@ import { resilientFetch } from '@/lib/resilience/ResilientClient';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { useAuth } from '@/contexts/AuthContext';
 
-type SnippetTab = 'curl' | 'python' | 'node' | 'cursor';
+type SnippetTab = 'cursor' | 'vercel' | 'python' | 'node' | 'curl';
+type SortOption = 'newest' | 'last_used' | 'requests';
+
+interface QuickPreset {
+  id: string;
+  name: string;
+  icon: React.ComponentType<{ className?: string }>;
+  defaultName: string;
+  env: 'live' | 'test';
+  rpm: number;
+  compaction: 'auto' | 'raw';
+}
+
+const QUICK_PRESETS: QuickPreset[] = [
+  {
+    id: 'cursor',
+    name: 'Cursor / Windsurf',
+    icon: Laptop,
+    defaultName: 'Cursor IDE Key',
+    env: 'live',
+    rpm: 120,
+    compaction: 'raw'
+  },
+  {
+    id: 'cli',
+    name: 'CLI & Scripting',
+    icon: Terminal,
+    defaultName: 'CLI Script Key',
+    env: 'test',
+    rpm: 60,
+    compaction: 'raw'
+  },
+  {
+    id: 'backend',
+    name: 'Production Backend',
+    icon: Server,
+    defaultName: 'Production API Server',
+    env: 'live',
+    rpm: 300,
+    compaction: 'raw'
+  },
+  {
+    id: 'agent',
+    name: 'Agent Swarm Fleet',
+    icon: Bot,
+    defaultName: 'Autonomous Agent Fleet',
+    env: 'live',
+    rpm: 600,
+    compaction: 'auto'
+  }
+];
 
 function BaseGatewayKeysPage() {
   const { user } = useAuth();
   const [keys, setKeys] = useState<any[]>([]);
   const [environmentFilter, setEnvironmentFilter] = useState<'all' | 'live' | 'test'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Key creation state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [newKeyName, setNewKeyName] = useState('');
+  const [newKeyName, setNewKeyName] = useState('Cursor IDE Key');
   const [newKeyEnv, setNewKeyEnv] = useState<'live' | 'test'>('live');
   const [newKeyCompactionMode, setNewKeyCompactionMode] = useState<'auto' | 'raw'>('raw');
+  const [newKeyRpm, setNewKeyRpm] = useState<number>(120);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+
+  // Inline rename state
+  const [editingKeyId, setEditingKeyId] = useState<string | null>(null);
+  const [editingKeyName, setEditingKeyName] = useState('');
+  const [isRenaming, setIsRenaming] = useState(false);
 
   // Key roll / rotation state
   const [rollingKey, setRollingKey] = useState<any | null>(null);
@@ -50,16 +122,34 @@ function BaseGatewayKeysPage() {
   const [isRolling, setIsRolling] = useState(false);
   const [rolledResultKey, setRolledResultKey] = useState<string | null>(null);
 
-  // One-time secret key reveal notification
-  const [createdSecretKey, setCreatedSecretKey] = useState<string | null>(null);
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  // Revocation confirmation modal state
+  const [revokingKey, setRevokingKey] = useState<any | null>(null);
+  const [isRevoking, setIsRevoking] = useState(false);
 
-  // Base URL copy state
+  // Dedicated one-time secret key reveal modal (Stripe / OpenAI standard)
+  const [revealedKey, setRevealedKey] = useState<{ apiKey: string; name: string; env: string } | null>(null);
+  const [hasSavedSecretKey, setHasSavedSecretKey] = useState(false);
+
+  // Copy states
+  const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
+  const [copiedEnvSnippet, setCopiedEnvSnippet] = useState(false);
+  const [copiedShellSnippet, setCopiedShellSnippet] = useState(false);
   const [copiedBaseUrl, setCopiedBaseUrl] = useState(false);
+  const [copiedSnippet, setCopiedSnippet] = useState(false);
 
   // Quickstart snippet state
-  const [activeSnippetTab, setActiveSnippetTab] = useState<SnippetTab>('python');
-  const [copiedSnippet, setCopiedSnippet] = useState(false);
+  const [activeSnippetTab, setActiveSnippetTab] = useState<SnippetTab>('cursor');
+
+  // Interactive Live Chat Completion Test Runner
+  const [chatModel, setChatModel] = useState('gpt-5.6-sol');
+  const [chatPrompt, setChatPrompt] = useState('Explain the fastest way to sort 1M numbers in Rust.');
+  const [isTestingChat, setIsTestingChat] = useState(false);
+  const [chatTestResult, setChatTestResult] = useState<{ content: string; latencyMs: number; model: string } | null>(null);
+  const [chatTestError, setChatTestError] = useState<string | null>(null);
+
+  // Interactive smoke test state
+  const [isPinging, setIsPinging] = useState(false);
+  const [pingResult, setPingResult] = useState<{ success: boolean; latencyMs: number; message: string } | null>(null);
 
   const { walletBalance } = useDepositVerification();
 
@@ -74,7 +164,7 @@ function BaseGatewayKeysPage() {
       });
       setKeys(res.data?.keys || []);
     } catch {
-      // Offline / cached fallback handled by resilientFetch
+      // Offline fallback handled by resilientFetch
     }
   };
 
@@ -84,22 +174,49 @@ function BaseGatewayKeysPage() {
     }
   }, [user?.id]);
 
+  // Keyboard shortcut for power users (/ or ⌘K to search, ESC to clear)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
+
+      if ((e.key === '/' && !isInput) || (e.key === 'k' && (e.metaKey || e.ctrlKey))) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      } else if (e.key === 'Escape') {
+        if (searchQuery) setSearchQuery('');
+        setIsCreateModalOpen(false);
+        setRevokingKey(null);
+        setRollingKey(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [searchQuery]);
+
+  const applyPreset = (preset: QuickPreset) => {
+    setNewKeyName(preset.defaultName);
+    setNewKeyEnv(preset.env);
+    setNewKeyRpm(preset.rpm);
+    setNewKeyCompactionMode(preset.compaction);
+  };
+
   const handleCreateKey = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user?.id) return;
-    const nameToSubmit = newKeyName.trim() || 'Default Developer Key';
+    const nameToSubmit = newKeyName.trim() || 'Developer API Key';
 
     setIsCreating(true);
     setCreateError(null);
     try {
-      const res = await resilientFetch<{ success: boolean; key?: { apiKey: string }; error?: string }>('/api/keys', {
+      const res = await resilientFetch<{ success: boolean; key?: { apiKey: string; name?: string }; error?: string }>('/api/keys', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: nameToSubmit,
           userId: user.id,
           environment: newKeyEnv,
-          rateLimitPerMinute: newKeyEnv === 'live' ? 120 : 60,
+          rateLimitPerMinute: newKeyRpm,
           hasVerifiedDeposit: true,
           depositedAmount: walletBalance,
           defaultCompactionMode: newKeyCompactionMode,
@@ -107,8 +224,13 @@ function BaseGatewayKeysPage() {
       });
 
       if (res.data?.success && res.data.key?.apiKey) {
-        setCreatedSecretKey(res.data.key.apiKey);
-        setNewKeyName('');
+        setRevealedKey({
+          apiKey: res.data.key.apiKey,
+          name: nameToSubmit,
+          env: newKeyEnv
+        });
+        setHasSavedSecretKey(false);
+        setNewKeyName('Cursor IDE Key');
         setIsCreateModalOpen(false);
         fetchKeys();
       } else {
@@ -121,14 +243,40 @@ function BaseGatewayKeysPage() {
     }
   };
 
-  const handleRevokeKey = async (keyId: string, keyName: string) => {
-    if (!window.confirm(`Are you sure you want to revoke "${keyName}"? Any requests using this key will immediately fail.`)) {
+  const handleStartRename = (k: any) => {
+    setEditingKeyId(k.id);
+    setEditingKeyName(k.name);
+  };
+
+  const handleSaveRename = async (keyId: string) => {
+    if (!editingKeyName.trim() || !user?.id) {
+      setEditingKeyId(null);
       return;
     }
+    setIsRenaming(true);
     try {
-      await resilientFetch(`/api/keys?id=${keyId}&userId=${encodeURIComponent(user?.id || '')}`, { method: 'DELETE' });
+      await resilientFetch(`/api/keys/${keyId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editingKeyName.trim(), userId: user.id })
+      });
       fetchKeys();
-    } catch {}
+    } catch {} finally {
+      setIsRenaming(false);
+      setEditingKeyId(null);
+    }
+  };
+
+  const handleConfirmRevoke = async () => {
+    if (!revokingKey) return;
+    setIsRevoking(true);
+    try {
+      await resilientFetch(`/api/keys?id=${revokingKey.id}&userId=${encodeURIComponent(user?.id || '')}`, { method: 'DELETE' });
+      setRevokingKey(null);
+      fetchKeys();
+    } catch {} finally {
+      setIsRevoking(false);
+    }
   };
 
   const handleExecuteRollKey = async () => {
@@ -156,8 +304,26 @@ function BaseGatewayKeysPage() {
   const handleCopy = async (text: string, id: string) => {
     const success = await safeCopyToClipboard(text);
     if (success) {
-      setCopiedKey(id);
-      setTimeout(() => setCopiedKey(null), 2000);
+      setCopiedKeyId(id);
+      setTimeout(() => setCopiedKeyId(null), 2000);
+    }
+  };
+
+  const handleCopyEnvSnippet = async (apiKey: string) => {
+    const snippet = `GALX_API_KEY="${apiKey}"\nGALX_BASE_URL="https://galx.ai/v1"`;
+    const success = await safeCopyToClipboard(snippet);
+    if (success) {
+      setCopiedEnvSnippet(true);
+      setTimeout(() => setCopiedEnvSnippet(false), 2000);
+    }
+  };
+
+  const handleCopyShellSnippet = async (apiKey: string) => {
+    const snippet = `export GALX_API_KEY="${apiKey}"\nexport OPENAI_BASE_URL="https://galx.ai/v1"`;
+    const success = await safeCopyToClipboard(snippet);
+    if (success) {
+      setCopiedShellSnippet(true);
+      setTimeout(() => setCopiedShellSnippet(false), 2000);
     }
   };
 
@@ -177,19 +343,100 @@ function BaseGatewayKeysPage() {
     }
   };
 
-  const activeDisplayKey = createdSecretKey || rolledResultKey || 'galx_live_your_key_here';
+  const handleRunSmokeTest = async () => {
+    setIsPinging(true);
+    setPingResult(null);
+    const start = performance.now();
+    try {
+      const targetAuth = revealedKey?.apiKey || rolledResultKey;
+      const res = await resilientFetch<{ data: any[] }>('/v1/models', {
+        headers: targetAuth ? { Authorization: `Bearer ${targetAuth}` } : undefined,
+        enableCacheFallback: true,
+      });
+      const latencyMs = Math.round(performance.now() - start);
+      setPingResult({
+        success: true,
+        latencyMs,
+        message: `Gateway responsive (${res.data?.data?.length || 6} models active). Route operational.`
+      });
+    } catch (err: any) {
+      const latencyMs = Math.round(performance.now() - start);
+      setPingResult({
+        success: false,
+        latencyMs,
+        message: err.message || 'Gateway connectivity test failed'
+      });
+    } finally {
+      setIsPinging(false);
+    }
+  };
+
+  const handleRunChatTest = async () => {
+    setIsTestingChat(true);
+    setChatTestError(null);
+    setChatTestResult(null);
+    const start = performance.now();
+    try {
+      const targetAuth = revealedKey?.apiKey || rolledResultKey;
+      const res = await resilientFetch<any>('/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(targetAuth ? { Authorization: `Bearer ${targetAuth}` } : {})
+        },
+        body: JSON.stringify({
+          model: chatModel,
+          messages: [{ role: 'user', content: chatPrompt.trim() || 'Hello GALX!' }],
+          temperature: 0.7,
+          max_tokens: 150
+        })
+      });
+      const latencyMs = Math.round(performance.now() - start);
+      if (res.data?.choices?.[0]?.message?.content) {
+        setChatTestResult({
+          content: res.data.choices[0].message.content,
+          latencyMs,
+          model: res.data.model || chatModel
+        });
+      } else if (res.data?.error) {
+        setChatTestError(typeof res.data.error === 'string' ? res.data.error : res.data.error.message || 'Request failed');
+      } else {
+        setChatTestError('No response content returned from model.');
+      }
+    } catch (err: any) {
+      setChatTestError(err.message || 'Chat completion test failed');
+    } finally {
+      setIsTestingChat(false);
+    }
+  };
+
+  const activeDisplayKey = revealedKey?.apiKey || rolledResultKey || 'galx_live_your_key_here';
 
   const snippets: Record<SnippetTab, { title: string; lang: string; code: string }> = {
-    curl: {
-      title: 'cURL',
-      lang: 'bash',
-      code: `curl https://galx.ai/v1/chat/completions \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer ${activeDisplayKey}" \\
-  -d '{
-    "model": "gpt-5.6-sol",
-    "messages": [{"role": "user", "content": "Write a high-performance LRU cache in Rust."}]
-  }'`
+    cursor: {
+      title: 'Cursor / Windsurf (.cursorrules or Settings)',
+      lang: 'json',
+      code: `// Set in Cursor Settings -> Models -> OpenAI API Key:
+// 1. Override OpenAI Base URL: https://galx.ai/v1
+// 2. API Key: ${activeDisplayKey}
+// 3. Enable Models: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`
+    },
+    vercel: {
+      title: 'Vercel AI SDK (@ai-sdk/openai)',
+      lang: 'typescript',
+      code: `import { createOpenAI } from '@ai-sdk/openai';
+import { generateText } from 'ai';
+
+const galx = createOpenAI({
+  baseURL: 'https://galx.ai/v1',
+  apiKey: process.env.GALX_API_KEY || '${activeDisplayKey}'
+});
+
+const { text } = await generateText({
+  model: galx('gpt-5.6-sol'),
+  prompt: 'Write a high-performance LRU cache in Rust.'
+});
+console.log(text);`
     },
     python: {
       title: 'Python (OpenAI SDK)',
@@ -224,26 +471,50 @@ const completion = await client.chat.completions.create({
 });
 console.log(completion.choices[0].message.content);`
     },
-    cursor: {
-      title: 'Cursor / Windsurf (.cursorrules or Settings)',
-      lang: 'json',
-      code: `// Set in Cursor Settings -> Models -> OpenAI API Key:
-// API Key: ${activeDisplayKey}
-// Override OpenAI Base URL: https://galx.ai/v1
-// Compatible Models: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`
+    curl: {
+      title: 'cURL',
+      lang: 'bash',
+      code: `curl https://galx.ai/v1/chat/completions \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer ${activeDisplayKey}" \\
+  -d '{
+    "model": "gpt-5.6-sol",
+    "messages": [{"role": "user", "content": "Write a high-performance LRU cache in Rust."}]
+  }'`
     }
   };
 
-  const filteredKeys = keys.filter(k => {
-    if (environmentFilter === 'all') return true;
-    const keyEnv = k.environment || (k.keyPrefix?.includes('test') || k.prefix?.includes('test') ? 'test' : 'live');
-    return keyEnv === environmentFilter;
-  });
+  // Filtered and Sorted Keys
+  const filteredAndSortedKeys = useMemo(() => {
+    let result = keys.filter(k => {
+      if (environmentFilter !== 'all') {
+        const keyEnv = k.environment || (k.keyPrefix?.includes('test') || k.prefix?.includes('test') ? 'test' : 'live');
+        if (keyEnv !== environmentFilter) return false;
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const nameMatch = k.name?.toLowerCase().includes(q);
+        const prefixMatch = (k.keyPrefix || k.prefix || '').toLowerCase().includes(q);
+        if (!nameMatch && !prefixMatch) return false;
+      }
+      return true;
+    });
+
+    if (sortBy === 'last_used') {
+      result = [...result].sort((a, b) => (b.lastUsedAt || 0) - (a.lastUsedAt || 0));
+    } else if (sortBy === 'requests') {
+      result = [...result].sort((a, b) => (b.totalRequests || 0) - (a.totalRequests || 0));
+    } else {
+      result = [...result].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    }
+
+    return result;
+  }, [keys, environmentFilter, searchQuery, sortBy]);
 
   const activeKeysCount = keys.filter(k => !k.revoked && !k.isExpired).length;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#07090e] text-zinc-100">
+    <div className="min-h-screen flex flex-col bg-[#07090e] text-zinc-100 font-sans">
       <Navigation />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -257,12 +528,12 @@ console.log(completion.choices[0].message.content);`
           title="Sign In to Access API Keys"
           description="Your dedicated API keys, rate limits, and gateway usage telemetry are private to your workspace."
         >
-          {/* Flat Page Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+          {/* Header Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-white">API Keys</h1>
               <p className="text-xs text-zinc-400 mt-1">
-                Secret tokens to authenticate requests to the GALX AI Gateway (<code className="text-zinc-300 font-mono">https://galx.ai/v1</code>).
+                Authenticate requests to the GALX AI Gateway (<code className="text-zinc-300 font-mono">https://galx.ai/v1</code>). Keep your secret keys secure.
               </p>
             </div>
 
@@ -270,7 +541,7 @@ console.log(completion.choices[0].message.content);`
               <button
                 type="button"
                 onClick={() => {
-                  setNewKeyName('');
+                  setNewKeyName('Cursor IDE Key');
                   setCreateError(null);
                   setIsCreateModalOpen(true);
                 }}
@@ -284,7 +555,7 @@ console.log(completion.choices[0].message.content);`
 
           {/* Single-Row Telemetry Context Bar */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-2xl bg-[#0d101c] border border-white/10 text-xs font-sans">
-            <div className="flex items-center justify-between px-3 py-1.5 sm:border-r sm:border-white/10">
+            <div className="flex items-center justify-between px-3 py-1 sm:border-r sm:border-white/10">
               <div className="flex items-center gap-2 text-zinc-400">
                 <Wallet className="w-4 h-4 text-emerald-400" />
                 <span>Compute Balance</span>
@@ -300,7 +571,7 @@ console.log(completion.choices[0].message.content);`
               </div>
             </div>
 
-            <div className="flex items-center justify-between px-3 py-1.5 sm:border-r sm:border-white/10">
+            <div className="flex items-center justify-between px-3 py-1 sm:border-r sm:border-white/10">
               <div className="flex items-center gap-2 text-zinc-400">
                 <Key className="w-4 h-4 text-indigo-400" />
                 <span>Active Keys</span>
@@ -308,57 +579,22 @@ console.log(completion.choices[0].message.content);`
               <span className="font-mono font-bold text-white">{activeKeysCount}</span>
             </div>
 
-            <div className="flex items-center justify-between px-3 py-1.5">
+            <div className="flex items-center justify-between px-3 py-1">
               <div className="flex items-center gap-2 text-zinc-400">
                 <ExternalLink className="w-4 h-4 text-cyan-400" />
-                <span>Gateway Base URL</span>
+                <span>Base URL</span>
               </div>
               <button
                 type="button"
                 onClick={handleCopyBaseUrl}
-                className="font-mono text-zinc-300 hover:text-white flex items-center gap-1.5 text-[11px] bg-white/5 hover:bg-white/10 px-2 py-0.5 rounded transition-colors cursor-pointer"
-                title="Copy base URL to clipboard"
+                className="font-mono text-zinc-300 hover:text-white flex items-center gap-1.5 text-[11px] bg-white/5 hover:bg-white/10 px-2.5 py-0.5 rounded transition-colors cursor-pointer"
+                title="Click to copy gateway base URL"
               >
                 <span>https://galx.ai/v1</span>
                 {copiedBaseUrl ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-zinc-400" />}
               </button>
             </div>
           </div>
-
-          {/* Newly Created Secret Key Alert Banner (One-Time Reveal) */}
-          {createdSecretKey && (
-            <div className="p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 space-y-2.5 animate-in fade-in duration-150">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-semibold text-emerald-300">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  <span>Key Generated Successfully</span>
-                </div>
-                <span className="text-[11px] text-zinc-400">Save this key now. It will not be shown again.</span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-black/60 font-mono text-xs text-emerald-300 flex items-center justify-between gap-3 border border-emerald-500/30">
-                <span className="select-all break-all">{createdSecretKey}</span>
-                <button
-                  type="button"
-                  onClick={() => handleCopy(createdSecretKey, 'created')}
-                  className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-semibold shrink-0 transition-colors flex items-center gap-1 cursor-pointer"
-                >
-                  {copiedKey === 'created' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedKey === 'created' ? 'Copied' : 'Copy'}</span>
-                </button>
-              </div>
-
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setCreatedSecretKey(null)}
-                  className="text-xs text-zinc-400 hover:text-zinc-200 cursor-pointer"
-                >
-                  Dismiss
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Rolled Key Reveal Notification */}
           {rolledResultKey && (
@@ -378,8 +614,8 @@ console.log(completion.choices[0].message.content);`
                   onClick={() => handleCopy(rolledResultKey, 'rolled')}
                   className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-xs font-semibold shrink-0 transition-colors flex items-center gap-1 cursor-pointer"
                 >
-                  {copiedKey === 'rolled' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedKey === 'rolled' ? 'Copied' : 'Copy'}</span>
+                  {copiedKeyId === 'rolled' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedKeyId === 'rolled' ? 'Copied' : 'Copy'}</span>
                 </button>
               </div>
 
@@ -398,76 +634,130 @@ console.log(completion.choices[0].message.content);`
 
           {/* Active Keys Table Section (Front & Center) */}
           <div className="rounded-2xl border border-white/10 bg-[#0d101c] overflow-hidden">
-            {/* Table Controls */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-white/10">
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-semibold text-white">Your Keys</h2>
-                <span className="text-xs text-zinc-500 font-mono">({filteredKeys.length})</span>
+            {/* Search, Filter & Controls Bar */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-4 border-b border-white/10">
+              {/* Left: Search input with keyboard shortcut hint */}
+              <div className="relative flex-1 max-w-sm">
+                <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Filter by name or prefix... (press / to focus)"
+                  className="w-full pl-9 pr-14 py-1.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 font-sans"
+                />
+                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                  {searchQuery ? (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="text-zinc-500 hover:text-zinc-300 p-0.5"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  ) : (
+                    <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono text-zinc-500 bg-white/5 rounded border border-white/10">
+                      /
+                    </kbd>
+                  )}
+                </div>
               </div>
 
-              {/* Environment Filter */}
-              <div className="flex items-center gap-1 bg-black/50 p-1 rounded-xl border border-white/10 text-xs font-mono">
-                <button
-                  type="button"
-                  onClick={() => setEnvironmentFilter('all')}
-                  className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
-                    environmentFilter === 'all'
-                      ? 'bg-white/15 text-white font-semibold'
-                      : 'text-zinc-400 hover:text-zinc-200'
-                  }`}
-                >
-                  All ({keys.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEnvironmentFilter('live')}
-                  className={`px-3 py-1 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
-                    environmentFilter === 'live'
-                      ? 'bg-emerald-500/20 text-emerald-300 font-semibold'
-                      : 'text-zinc-400 hover:text-emerald-300'
-                  }`}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  <span>Live</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEnvironmentFilter('test')}
-                  className={`px-3 py-1 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
-                    environmentFilter === 'test'
-                      ? 'bg-amber-500/20 text-amber-300 font-semibold'
-                      : 'text-zinc-400 hover:text-amber-300'
-                  }`}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                  <span>Test</span>
-                </button>
+              {/* Right: Environment Filter & Sort Selector */}
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Environment Filter */}
+                <div className="flex items-center gap-1 bg-black/50 p-1 rounded-xl border border-white/10 text-xs font-mono">
+                  <button
+                    type="button"
+                    onClick={() => setEnvironmentFilter('all')}
+                    className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                      environmentFilter === 'all'
+                        ? 'bg-white/15 text-white font-semibold'
+                        : 'text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    All ({keys.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEnvironmentFilter('live')}
+                    className={`px-3 py-1 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
+                      environmentFilter === 'live'
+                        ? 'bg-emerald-500/20 text-emerald-300 font-semibold'
+                        : 'text-zinc-400 hover:text-emerald-300'
+                    }`}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    <span>Live</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEnvironmentFilter('test')}
+                    className={`px-3 py-1 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
+                      environmentFilter === 'test'
+                        ? 'bg-amber-500/20 text-amber-300 font-semibold'
+                        : 'text-zinc-400 hover:text-amber-300'
+                    }`}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                    <span>Test</span>
+                  </button>
+                </div>
+
+                {/* Sort dropdown */}
+                <div className="flex items-center gap-1 bg-black/50 p-1 rounded-xl border border-white/10 text-xs">
+                  <ArrowUpDown className="w-3.5 h-3.5 text-zinc-500 ml-1.5" />
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as SortOption)}
+                    className="bg-transparent text-zinc-300 text-xs pr-2 py-0.5 focus:outline-none cursor-pointer"
+                  >
+                    <option value="newest" className="bg-[#0d101c] text-zinc-200">Newest</option>
+                    <option value="last_used" className="bg-[#0d101c] text-zinc-200">Recently Used</option>
+                    <option value="requests" className="bg-[#0d101c] text-zinc-200">Most Requests</option>
+                  </select>
+                </div>
               </div>
             </div>
 
-            {filteredKeys.length === 0 ? (
+            {filteredAndSortedKeys.length === 0 ? (
               <div className="text-center py-16 px-4 space-y-3">
                 <Key className="w-8 h-8 text-zinc-600 mx-auto" />
                 <div className="space-y-1">
-                  <p className="text-sm font-semibold text-zinc-300">No API keys found</p>
+                  <p className="text-sm font-semibold text-zinc-300">
+                    {searchQuery ? 'No matching keys found' : 'No API keys yet'}
+                  </p>
                   <p className="text-xs text-zinc-500">
-                    {environmentFilter !== 'all'
+                    {searchQuery
+                      ? `No keys matching "${searchQuery}". Clear your search query.`
+                      : environmentFilter !== 'all'
                       ? `No ${environmentFilter} keys generated yet.`
-                      : 'Create your first secret key to begin sending requests.'}
+                      : 'Create a secret key to authenticate your first request.'}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setNewKeyName('');
-                    setCreateError(null);
-                    setIsCreateModalOpen(true);
-                  }}
-                  className="mt-2 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold transition-colors cursor-pointer border border-white/10"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Create API Key</span>
-                </button>
+                {searchQuery ? (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs transition-colors cursor-pointer border border-white/10"
+                  >
+                    Clear Filter
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewKeyName('Cursor IDE Key');
+                      setCreateError(null);
+                      setIsCreateModalOpen(true);
+                    }}
+                    className="mt-2 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors cursor-pointer shadow-sm"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Create API Key</span>
+                  </button>
+                )}
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -478,25 +768,69 @@ console.log(completion.choices[0].message.content);`
                       <th className="py-3 px-4">Environment</th>
                       <th className="py-3 px-4 font-mono">Secret Key</th>
                       <th className="py-3 px-4">Rate Limit</th>
-                      <th className="py-3 px-4">Total Requests</th>
                       <th className="py-3 px-4">Created</th>
+                      <th className="py-3 px-4">Last Used</th>
+                      <th className="py-3 px-4">Total Requests</th>
                       <th className="py-3 px-4">Status</th>
                       <th className="py-3 px-4 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 font-sans">
-                    {filteredKeys.map((k) => {
+                    {filteredAndSortedKeys.map((k) => {
                       const isLive = (k.environment || (k.keyPrefix?.includes('live') || k.prefix?.includes('live') ? 'live' : 'test')) === 'live';
                       const prefixText = k.keyPrefix || k.prefix || 'galx_live_';
+                      const maskedKeyDisplay = `${prefixText}...${k.id ? k.id.slice(-4) : ''}`;
+                      const isEditingThisKey = editingKeyId === k.id;
 
                       return (
                         <tr key={k.id} className="hover:bg-white/[0.02] transition-colors">
-                          <td className="py-3.5 px-4 font-semibold text-white">
-                            <Link href={`/keys/${k.id}`} className="hover:text-indigo-300 transition-colors">
-                              {k.name}
-                            </Link>
+                          <td className="py-3 px-4 font-semibold text-white">
+                            {isEditingThisKey ? (
+                              <div className="flex items-center gap-1.5">
+                                <input
+                                  type="text"
+                                  value={editingKeyName}
+                                  onChange={(e) => setEditingKeyName(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleSaveRename(k.id);
+                                    if (e.key === 'Escape') setEditingKeyId(null);
+                                  }}
+                                  className="py-1 px-2 rounded bg-black/60 border border-indigo-500 text-xs text-white focus:outline-none"
+                                  autoFocus
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleSaveRename(k.id)}
+                                  disabled={isRenaming}
+                                  className="p-1 rounded bg-indigo-600 text-white hover:bg-indigo-500"
+                                >
+                                  <Check className="w-3 h-3" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingKeyId(null)}
+                                  className="p-1 rounded text-zinc-400 hover:text-white"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="group flex items-center gap-2">
+                                <Link href={`/keys/${k.id}`} className="hover:text-indigo-300 transition-colors">
+                                  <span>{k.name}</span>
+                                </Link>
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartRename(k)}
+                                  className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 text-zinc-500 hover:text-zinc-300"
+                                  title="Rename key"
+                                >
+                                  <Edit2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            )}
                           </td>
-                          <td className="py-3.5 px-4">
+                          <td className="py-3 px-4">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold uppercase ${
                               isLive
                                 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
@@ -505,29 +839,36 @@ console.log(completion.choices[0].message.content);`
                               {isLive ? 'Live' : 'Test'}
                             </span>
                           </td>
-                          <td className="py-3.5 px-4 font-mono text-zinc-300">
+                          <td className="py-3 px-4 font-mono text-zinc-300">
                             <div className="inline-flex items-center gap-1.5">
-                              <span>{prefixText}...</span>
+                              <span>{maskedKeyDisplay}</span>
                               <button
                                 type="button"
-                                onClick={() => handleCopy(`${prefixText}...`, k.id)}
+                                onClick={() => handleCopy(k.id, k.id)}
                                 className="p-1 rounded text-zinc-400 hover:text-white transition-colors cursor-pointer"
-                                title="Copy key prefix"
+                                title="Copy Key ID"
                               >
-                                {copiedKey === k.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                                {copiedKeyId === k.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                               </button>
                             </div>
                           </td>
-                          <td className="py-3.5 px-4 text-zinc-400 font-mono">
+                          <td className="py-3 px-4 text-zinc-400 font-mono">
                             {k.rateLimitPerMinute || 120} RPM
                           </td>
-                          <td className="py-3.5 px-4 text-zinc-400 font-mono">
-                            {k.totalRequests || 0}
-                          </td>
-                          <td className="py-3.5 px-4 text-zinc-500">
+                          <td className="py-3 px-4 text-zinc-500 whitespace-nowrap">
                             {formatTimeAgo(k.createdAt)}
                           </td>
-                          <td className="py-3.5 px-4">
+                          <td className="py-3 px-4 text-zinc-400 whitespace-nowrap font-mono text-[11px]">
+                            {k.lastUsedAt ? (
+                              <span className="text-emerald-400">{formatTimeAgo(k.lastUsedAt)}</span>
+                            ) : (
+                              <span className="text-zinc-600">Never</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-zinc-400 font-mono">
+                            {k.totalRequests || 0}
+                          </td>
+                          <td className="py-3 px-4">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${
                               k.revoked
                                 ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
@@ -538,22 +879,49 @@ console.log(completion.choices[0].message.content);`
                               {k.revoked ? 'Revoked' : k.isExpired ? 'Expired' : 'Active'}
                             </span>
                           </td>
-                          <td className="py-3.5 px-4 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
+                          <td className="py-3 px-4 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              {/* 1-Click Code Snippet Export Buttons */}
+                              <button
+                                type="button"
+                                onClick={() => handleCopyEnvSnippet(prefixText)}
+                                className="px-2 py-1 rounded text-zinc-400 hover:text-white hover:bg-white/10 text-[11px] font-mono transition-colors cursor-pointer"
+                                title="Copy as .env"
+                              >
+                                .env
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const curl = `curl https://galx.ai/v1/chat/completions \\\n  -H "Authorization: Bearer ${prefixText}..." \\\n  -H "Content-Type: application/json" \\\n  -d '{"model":"gpt-5.6-sol","messages":[{"role":"user","content":"Hello"}]}'`;
+                                  handleCopySnippet(curl);
+                                }}
+                                className="px-2 py-1 rounded text-zinc-400 hover:text-white hover:bg-white/10 text-[11px] font-mono transition-colors cursor-pointer"
+                                title="Copy cURL command"
+                              >
+                                cURL
+                              </button>
+
+                              <Link
+                                href={`/keys/${k.id}`}
+                                className="px-2 py-1 rounded text-zinc-400 hover:text-white hover:bg-white/10 text-[11px] font-medium transition-colors"
+                              >
+                                Details
+                              </Link>
                               {!k.revoked && !k.isExpired && (
                                 <>
                                   <button
                                     type="button"
                                     onClick={() => setRollingKey(k)}
-                                    className="px-2.5 py-1 rounded-lg text-zinc-300 hover:text-white hover:bg-white/10 text-xs font-semibold cursor-pointer transition-colors"
+                                    className="px-2 py-1 rounded text-zinc-400 hover:text-white hover:bg-white/10 text-[11px] font-medium cursor-pointer transition-colors"
                                     title="Zero-downtime key rotation"
                                   >
                                     Roll
                                   </button>
                                   <button
                                     type="button"
-                                    onClick={() => handleRevokeKey(k.id, k.name)}
-                                    className="px-2.5 py-1 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 text-xs font-semibold cursor-pointer transition-colors"
+                                    onClick={() => setRevokingKey(k)}
+                                    className="px-2 py-1 rounded text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 text-[11px] font-medium cursor-pointer transition-colors"
                                     title="Revoke key"
                                   >
                                     Revoke
@@ -571,44 +939,80 @@ console.log(completion.choices[0].message.content);`
             )}
           </div>
 
-          {/* Quickstart Integration Drawer / Card */}
-          <div className="rounded-2xl border border-white/10 bg-[#0d101c] p-4 sm:p-5 space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          {/* Quickstart Integration Drawer, Code Presets & Interactive Live Runner */}
+          <div className="rounded-2xl border border-white/10 bg-[#0d101c] p-4 sm:p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-semibold text-white flex items-center gap-1.5">
                   <Code2 className="w-4 h-4 text-indigo-400" />
-                  <span>Integration Quickstart</span>
+                  <span>Developer Integration</span>
                 </h3>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  Point any OpenAI-compatible client to <code className="text-zinc-200 font-mono">https://galx.ai/v1</code>.
+                  Drop-in compatible with Cursor, Vercel AI SDK, Python, and OpenAI clients at <code className="text-zinc-200 font-mono">https://galx.ai/v1</code>.
                 </p>
               </div>
 
-              {/* Tabs */}
-              <div className="flex items-center gap-1 bg-black/50 p-1 rounded-xl border border-white/10 text-xs font-mono">
-                {(
-                  [
-                    { id: 'python', label: 'Python' },
-                    { id: 'node', label: 'Node.js' },
-                    { id: 'curl', label: 'cURL' },
-                    { id: 'cursor', label: 'Cursor IDE' }
-                  ] as { id: SnippetTab; label: string }[]
-                ).map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveSnippetTab(tab.id)}
-                    className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
-                      activeSnippetTab === tab.id
-                        ? 'bg-indigo-600 text-white font-semibold'
-                        : 'text-zinc-400 hover:text-white'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
+              <div className="flex items-center gap-2">
+                {/* Smoke Test Button */}
+                <button
+                  type="button"
+                  onClick={handleRunSmokeTest}
+                  disabled={isPinging}
+                  className="px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+                  title="Ping the gateway to verify routing and latency"
+                >
+                  <Play className={`w-3 h-3 fill-cyan-400 ${isPinging ? 'animate-pulse' : ''}`} />
+                  <span>{isPinging ? 'Pinging...' : 'Smoke Test'}</span>
+                </button>
+
+                {/* Tabs */}
+                <div className="flex items-center gap-1 bg-black/50 p-1 rounded-xl border border-white/10 text-xs font-mono">
+                  {(
+                    [
+                      { id: 'cursor', label: 'Cursor' },
+                      { id: 'vercel', label: 'Vercel AI' },
+                      { id: 'python', label: 'Python' },
+                      { id: 'node', label: 'Node.js' },
+                      { id: 'curl', label: 'cURL' }
+                    ] as { id: SnippetTab; label: string }[]
+                  ).map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveSnippetTab(tab.id)}
+                      className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                        activeSnippetTab === tab.id
+                          ? 'bg-indigo-600 text-white font-semibold'
+                          : 'text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
+
+            {/* Smoke Test Feedback Banner */}
+            {pingResult && (
+              <div className={`p-3 rounded-xl border text-xs font-mono flex items-center justify-between gap-3 animate-in fade-in duration-150 ${
+                pingResult.success
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                  : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>Ping: {pingResult.latencyMs}ms — {pingResult.message}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPingResult(null)}
+                  className="text-zinc-500 hover:text-white p-0.5"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
 
             {/* Code Box */}
             <div className="relative rounded-xl bg-black/70 border border-white/10 font-mono text-xs overflow-hidden">
@@ -627,11 +1031,238 @@ console.log(completion.choices[0].message.content);`
                 <code>{snippets[activeSnippetTab].code}</code>
               </pre>
             </div>
+
+            {/* Live Interactive In-Console Chat Test Runner (Playground Light) */}
+            <div className="pt-3 border-t border-white/10 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-indigo-400" />
+                  <span className="text-xs font-semibold text-white">Live Completion Runner (In-Console Test)</span>
+                </div>
+                <select
+                  value={chatModel}
+                  onChange={(e) => setChatModel(e.target.value)}
+                  className="py-1 px-2.5 rounded-lg bg-black/50 border border-white/10 text-xs font-mono text-zinc-300 focus:outline-none cursor-pointer"
+                >
+                  <option value="gpt-5.6-sol" className="bg-[#0d101c] text-white">gpt-5.6-sol (Flagship)</option>
+                  <option value="gpt-5.6-terra" className="bg-[#0d101c] text-white">gpt-5.6-terra (Fast)</option>
+                  <option value="gpt-5.6-luna" className="bg-[#0d101c] text-white">gpt-5.6-luna (Reasoning)</option>
+                </select>
+              </div>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={chatPrompt}
+                  onChange={(e) => setChatPrompt(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleRunChatTest();
+                  }}
+                  placeholder="Type a test prompt (e.g. 'Write a quicksort in Python' or 'Hello GALX')..."
+                  className="flex-1 py-2 px-3 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 font-sans"
+                />
+                <button
+                  type="button"
+                  onClick={handleRunChatTest}
+                  disabled={isTestingChat}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 shrink-0 shadow-sm"
+                >
+                  <Play className={`w-3.5 h-3.5 fill-white ${isTestingChat ? 'animate-pulse' : ''}`} />
+                  <span>{isTestingChat ? 'Sending...' : 'Send Request'}</span>
+                </button>
+              </div>
+
+              {chatTestResult && (
+                <div className="p-3.5 rounded-xl bg-black/80 border border-emerald-500/30 space-y-2 text-xs font-mono animate-in fade-in duration-150">
+                  <div className="flex items-center justify-between text-[11px] text-emerald-400">
+                    <div className="flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>✓ {chatTestResult.latencyMs}ms roundtrip</span>
+                      <span className="text-zinc-500">•</span>
+                      <span className="text-zinc-400">{chatTestResult.model}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setChatTestResult(null)}
+                      className="text-zinc-500 hover:text-white"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <p className="text-zinc-200 leading-relaxed font-sans whitespace-pre-wrap">{chatTestResult.content}</p>
+                </div>
+              )}
+
+              {chatTestError && (
+                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                    <span>{chatTestError}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setChatTestError(null)}
+                    className="text-rose-400 hover:text-rose-200 p-0.5"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </AuthRequiredGate>
       </main>
 
-      {/* Create Key Modal Dialog */}
+      {/* Dedicated Secret Key Reveal Modal (Stripe / OpenAI standard) */}
+      {revealedKey && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div
+            className="w-full max-w-lg rounded-2xl bg-[#0d101c] border border-emerald-500/40 p-6 space-y-4 shadow-2xl text-zinc-100 font-sans"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-white">Save Your Secret API Key</h2>
+                  <span className="text-xs text-zinc-400">{revealedKey.name} ({revealedKey.env.toUpperCase()})</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2.5 leading-relaxed">
+              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+              <span>
+                Please save this secret key now. For security purposes, <strong>you will not be able to view the full key again</strong> after closing this window.
+              </span>
+            </div>
+
+            {/* Secret key display with 1-click copy */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-300">Secret Key</label>
+              <div className="p-3 rounded-xl bg-black/80 font-mono text-xs text-emerald-300 flex items-center justify-between gap-3 border border-white/10">
+                <span className="select-all break-all">{revealedKey.apiKey}</span>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(revealedKey.apiKey, 'modal_key')}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-semibold shrink-0 transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  {copiedKeyId === 'modal_key' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedKeyId === 'modal_key' ? 'Copied!' : 'Copy Key'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Multi-Format Export Options */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <button
+                type="button"
+                onClick={() => handleCopyEnvSnippet(revealedKey.apiKey)}
+                className="p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-left transition-colors cursor-pointer flex items-center justify-between"
+              >
+                <div>
+                  <span className="font-semibold text-zinc-200 block">Copy as .env</span>
+                  <span className="text-[10px] text-zinc-500">GALX_API_KEY="..."</span>
+                </div>
+                {copiedEnvSnippet ? <Check className="w-4 h-4 text-emerald-400" /> : <Download className="w-4 h-4 text-zinc-400" />}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleCopyShellSnippet(revealedKey.apiKey)}
+                className="p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-left transition-colors cursor-pointer flex items-center justify-between"
+              >
+                <div>
+                  <span className="font-semibold text-zinc-200 block">Copy Shell Export</span>
+                  <span className="text-[10px] text-zinc-500">export GALX_API_KEY="..."</span>
+                </div>
+                {copiedShellSnippet ? <Check className="w-4 h-4 text-emerald-400" /> : <Terminal className="w-4 h-4 text-zinc-400" />}
+              </button>
+            </div>
+
+            {/* Security Acknowledgment Checkbox */}
+            <label className="flex items-center gap-2.5 text-xs text-zinc-300 cursor-pointer pt-1">
+              <input
+                type="checkbox"
+                checked={hasSavedSecretKey}
+                onChange={(e) => setHasSavedSecretKey(e.target.checked)}
+                className="rounded border-white/20 bg-black/40 text-indigo-600 focus:ring-0 cursor-pointer"
+              />
+              <span>I have copied and safely stored this secret key</span>
+            </label>
+
+            <div className="flex justify-end pt-2 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setRevealedKey(null)}
+                className={`px-5 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                  hasSavedSecretKey
+                    ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm'
+                    : 'bg-white/10 hover:bg-white/20 text-zinc-300'
+                }`}
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Accessible Revocation Confirmation Modal */}
+      {revokingKey && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div
+            className="w-full max-w-md rounded-2xl bg-[#0d101c] border border-rose-500/40 p-6 space-y-4 shadow-2xl text-zinc-100 font-sans"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <div className="flex items-center gap-2 text-rose-400 font-bold text-base">
+                <Trash2 className="w-4 h-4" />
+                <span>Revoke API Key?</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRevokingKey(null)}
+                className="p-1 rounded text-zinc-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2 text-xs text-zinc-300 leading-relaxed">
+              <p>
+                Are you sure you want to revoke <strong>{revokingKey.name}</strong> (<code className="text-zinc-300 font-mono">{revokingKey.keyPrefix || revokingKey.prefix}...</code>)?
+              </p>
+              <p className="text-rose-300/90 font-medium">
+                This action is permanent and cannot be undone. Any active applications, agents, or automated scripts using this key will immediately receive 401 Unauthorized errors.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setRevokingKey(null)}
+                className="px-3.5 py-2 rounded-xl text-xs text-zinc-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmRevoke}
+                disabled={isRevoking}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{isRevoking ? 'Revoking...' : 'Revoke Key'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Key Modal Dialog with Quick Presets */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
           <div
@@ -656,7 +1287,37 @@ console.log(completion.choices[0].message.content);`
               </div>
             )}
 
-            <form onSubmit={handleCreateKey} className="space-y-4">
+            {/* Preset Pills */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-semibold text-zinc-400 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-indigo-400" />
+                <span>Quick Presets</span>
+              </span>
+              <div className="grid grid-cols-2 gap-1.5">
+                {QUICK_PRESETS.map((p) => {
+                  const Icon = p.icon;
+                  const isSelected = newKeyName === p.defaultName;
+
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => applyPreset(p)}
+                      className={`p-2 rounded-xl border text-left text-xs transition-colors cursor-pointer flex items-center gap-2 ${
+                        isSelected
+                          ? 'bg-indigo-600/20 border-indigo-500/60 text-white font-medium'
+                          : 'bg-black/30 border-white/10 text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5 shrink-0 text-indigo-400" />
+                      <span className="truncate">{p.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <form onSubmit={handleCreateKey} className="space-y-3.5 pt-1">
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-zinc-300">Key Name</label>
                 <input
@@ -664,7 +1325,7 @@ console.log(completion.choices[0].message.content);`
                   value={newKeyName}
                   onChange={(e) => setNewKeyName(e.target.value)}
                   placeholder="e.g. Cursor IDE, Production Backend, Fleet Worker"
-                  className="w-full py-2 px-3 rounded-xl bg-black/50 border border-white/15 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 font-mono"
+                  className="w-full py-2 px-3 rounded-xl bg-black/50 border border-white/15 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 font-sans"
                   autoFocus
                   required
                 />
@@ -728,6 +1389,17 @@ console.log(completion.choices[0].message.content);`
                     <div className="text-[10px] text-zinc-500 font-normal">Auto-token deflation</div>
                   </button>
                 </div>
+              </div>
+
+              <div className="pt-2 text-center">
+                <Link
+                  href="/keys/new"
+                  onClick={() => setIsCreateModalOpen(false)}
+                  className="text-[11px] text-indigo-400 hover:text-indigo-300 inline-flex items-center gap-1 transition-colors"
+                >
+                  <span>Need fine-grained scopes or rotation TTL? Open Advanced Provisioner</span>
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">

@@ -5,38 +5,29 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
+import { KeysSubNav } from '@/components/dashboard/KeysSubNav';
 import {
   Key,
   Trash2,
   CheckCircle2,
-  XCircle,
-  Activity,
   Code2,
   ArrowLeft,
   Copy,
   Check,
   Zap,
-  Terminal,
-  Laptop,
   Play,
-  ShieldCheck,
-  TrendingDown,
-  Wallet,
-  ArrowRight,
-  Sparkles,
-  Sliders,
-  DollarSign,
-  Gift,
-  Server
+  X,
+  ShieldAlert,
+  Download,
+  Terminal,
+  Activity
 } from 'lucide-react';
 import { formatTimeAgo } from '@/lib/utils';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
+import { ErrorBoundary, withErrorBoundary } from '@/components/common/ErrorBoundary';
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { useAuth } from '@/contexts/AuthContext';
-import { withErrorBoundary } from '@/components/common/ErrorBoundary';
-import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
-import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 
 function BaseKeyDetailPage() {
   const { user } = useAuth();
@@ -46,13 +37,13 @@ function BaseKeyDetailPage() {
 
   const [keyData, setKeyData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeSnippetTab, setActiveSnippetTab] = useState<'python' | 'node' | 'env' | 'cursor' | 'continue' | 'curl'>('python');
+  const [activeSnippetTab, setActiveSnippetTab] = useState<'cursor' | 'vercel' | 'python' | 'node' | 'env' | 'curl'>('cursor');
   const [copiedSnippet, setCopiedSnippet] = useState(false);
   const [copiedPrefix, setCopiedPrefix] = useState(false);
-  const [isPaywallOpen, setIsPaywallOpen] = useState(false);
-  const [paywallSelectedAmt, setPaywallSelectedAmt] = useState<number>(50);
 
-  const { depositAndUnlock, walletBalance } = useDepositVerification();
+  // Revocation Modal State
+  const [isRevokeModalOpen, setIsRevokeModalOpen] = useState(false);
+  const [isRevoking, setIsRevoking] = useState(false);
 
   // Smoke test state
   const [isTesting, setIsTesting] = useState(false);
@@ -79,12 +70,16 @@ function BaseKeyDetailPage() {
     }
   }, [id, user?.id, fetchKey]);
 
-  const handleRevoke = async () => {
-    if (!keyData || !window.confirm(`Are you sure you want to revoke "${keyData.name}"? This action cannot be undone.`)) return;
+  const handleConfirmRevoke = async () => {
+    if (!keyData || !user?.id) return;
+    setIsRevoking(true);
     try {
-      await resilientFetch(`/api/keys?id=${keyData.id}&userId=${encodeURIComponent(user?.id || '')}`, { method: 'DELETE' });
+      await resilientFetch(`/api/keys?id=${keyData.id}&userId=${encodeURIComponent(user.id)}`, { method: 'DELETE' });
+      setIsRevokeModalOpen(false);
       fetchKey();
-    } catch {}
+    } catch {} finally {
+      setIsRevoking(false);
+    }
   };
 
   const handleCopyPrefix = async () => {
@@ -99,9 +94,9 @@ function BaseKeyDetailPage() {
   const getSnippets = (prefix: string) => ({
     python: `from openai import OpenAI
 
-# Drop-in replacement for OpenAI SDK (25%-40% discount)
+# Drop-in replacement for OpenAI SDK pointing to GALX AI Gateway
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="${prefix}..."  # Replace with your full secret key
 )
 
@@ -113,7 +108,7 @@ print(response.choices[0].message.content)`,
     node: `import OpenAI from 'openai';
 
 const client = new OpenAI({
-  baseURL: 'https://api.galx.ai/v1',
+  baseURL: 'https://galx.ai/v1',
   apiKey: '${prefix}...'
 });
 
@@ -123,31 +118,28 @@ const response = await client.chat.completions.create({
   stream: true
 });`,
     env: `# .env file
-OPENAI_BASE_URL="https://api.galx.ai/v1"
+OPENAI_BASE_URL="https://galx.ai/v1"
 OPENAI_API_KEY="${prefix}..."
 GALXAI_API_KEY="${prefix}..."
 DEFAULT_MODEL="gpt-5.6-sol"`,
     cursor: `// In Cursor IDE / Windsurf Settings -> Models -> OpenAI API Key:
-// 1. Set Override Base URL:
-https://api.galx.ai/v1
+// 1. Override OpenAI Base URL: https://galx.ai/v1
+// 2. API Key: ${prefix}...
+// 3. Enable Models: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`,
+    vercel: `import { createOpenAI } from '@ai-sdk/openai';
+import { generateText } from 'ai';
 
-// 2. Set API Key:
-${prefix}...
+const galx = createOpenAI({
+  baseURL: 'https://galx.ai/v1',
+  apiKey: process.env.GALX_API_KEY || '${prefix}...'
+});
 
-// 3. Available Models:
-gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, openai-gpt-image-2`,
-    continue: `{
-  "models": [
-    {
-      "title": "GALXAI GPT-5.6 Sol",
-      "provider": "openai",
-      "model": "gpt-5.6-sol",
-      "apiBase": "https://api.galx.ai/v1",
-      "apiKey": "${prefix}..."
-    }
-  ]
-}`,
-    curl: `curl https://api.galx.ai/v1/chat/completions \\
+const { text } = await generateText({
+  model: galx('gpt-5.6-sol'),
+  prompt: 'Explain algorithmic game theory.'
+});
+console.log(text);`,
+    curl: `curl https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer ${prefix}..." \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -170,20 +162,22 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, openai-gpt-image-2`,
     setIsTesting(true);
     setTestResult(null);
 
-    const start = Date.now();
+    const start = performance.now();
     try {
-      // Simulate live gateway health check
-      await new Promise(r => setTimeout(r, 80));
-      const latencyMs = Date.now() - start;
+      const res = await resilientFetch<{ data: any[] }>('/v1/models', {
+        enableCacheFallback: true
+      });
+      const latencyMs = Math.round(performance.now() - start);
       setTestResult({
         success: true,
         latencyMs,
-        message: 'Endpoint verified. Gateway active with sub-1ms routing overhead and 25%-40% discount.'
+        message: `Endpoint verified. Gateway active with ${res.data?.data?.length || 6} models operational.`
       });
     } catch (err: any) {
+      const latencyMs = Math.round(performance.now() - start);
       setTestResult({
         success: false,
-        latencyMs: 120,
+        latencyMs,
         message: err.message || 'Verification test failed'
       });
     } finally {
@@ -193,11 +187,11 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, openai-gpt-image-2`,
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-[#07090e] text-zinc-100 font-sans">
         <Navigation />
         <main className="flex-1 max-w-5xl w-full mx-auto p-8 animate-pulse space-y-6">
           <div className="h-8 w-48 bg-white/5 rounded-xl" />
-          <div className="h-64 glass-panel rounded-3xl" />
+          <div className="h-64 rounded-2xl bg-white/5" />
         </main>
       </div>
     );
@@ -205,15 +199,15 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, openai-gpt-image-2`,
 
   if (!keyData) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-[#07090e] text-zinc-100 font-sans">
         <Navigation />
         <main className="flex-1 max-w-4xl w-full mx-auto p-8 text-center space-y-4 my-auto">
           <Key className="w-12 h-12 text-zinc-600 mx-auto" />
           <h1 className="text-xl font-bold text-white">Key Not Found</h1>
-          <p className="text-xs text-zinc-400">The requested Gateway API key may have been deleted or invalid.</p>
+          <p className="text-xs text-zinc-400">The requested Gateway API key may have been revoked or does not exist.</p>
           <Link
             href="/keys"
-            className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold inline-block font-sans"
+            className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold inline-block"
           >
             Back to API Keys
           </Link>
@@ -222,21 +216,11 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, openai-gpt-image-2`,
     );
   }
 
-  const handlePaywallSuccess = async (depositAmt: number, totalCredit: number) => {
-    depositAndUnlock(depositAmt);
-    setIsPaywallOpen(false);
-    fetchKey();
-  };
-
-  const currentRpm = keyData?.rateLimitPerMinute || 120;
-  const isStarterTier = currentRpm <= 120;
-  const isGrowthTier = currentRpm > 120 && currentRpm <= 300;
-
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#07090e] text-zinc-100 font-sans">
       <Navigation />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         <Breadcrumbs
           items={[
             { label: 'API Keys', href: '/keys' },
@@ -244,220 +228,223 @@ gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, openai-gpt-image-2`,
           ]}
         />
 
+        <ErrorBoundary name="Keys Navigation">
+          <KeysSubNav />
+        </ErrorBoundary>
+
         <AuthRequiredGate
           title="Sign In to Inspect API Key Telemetry"
-          description="Detailed telemetry, token consumption metrics, and secret prefix verification are private to your workspace."
-          checkoutAmount={25}
+          description="Detailed telemetry, token consumption metrics, and key details are private to your workspace."
         >
           {/* Key Hero Header */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden space-y-6 border border-white/10">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shrink-0">
-                <Key className="w-6 h-6" />
-              </div>
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-2">
-                  <h1 className="text-xl sm:text-2xl font-black text-white">{keyData.name}</h1>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
-                    keyData.revoked ? 'bg-rose-500/10 text-rose-400 border-rose-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                  }`}>
-                    {keyData.revoked ? 'Revoked' : 'Active'}
-                  </span>
+          <div className="rounded-2xl border border-white/10 bg-[#0d101c] p-6 space-y-5">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shrink-0">
+                  <Key className="w-5 h-5" />
                 </div>
-                <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
-                  <span>Prefix: <code className="text-cyan-300 font-bold">{keyData.keyPrefix}...</code></span>
-                  <button
-                    onClick={handleCopyPrefix}
-                    className="text-zinc-500 hover:text-white transition-colors cursor-pointer"
-                    title="Copy Prefix"
-                  >
-                    {copiedPrefix ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  </button>
-                  <span>•</span>
-                  <span>Rate: <code className="text-amber-300">{keyData.rateLimitPerMinute} RPM</code></span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Link
-                href="/docs/quickstart"
-                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition-all border border-white/5"
-              >
-                <Code2 className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Integration Docs</span>
-              </Link>
-
-              {!keyData.revoked && (
-                <button
-                  onClick={handleRevoke}
-                  className="px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold transition-all cursor-pointer"
-                >
-                  Revoke Key
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-white/10 font-mono">
-            <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-              <span className="text-zinc-500 text-[10px] uppercase">Total Requests</span>
-              <div className="text-base font-bold text-white">{keyData.totalRequests || 0}</div>
-            </div>
-            <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-              <span className="text-zinc-500 text-[10px] uppercase">Rate Ceiling</span>
-              <div className="text-base font-bold text-cyan-300">{keyData.rateLimitPerMinute} RPM</div>
-            </div>
-            <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-              <span className="text-zinc-500 text-[10px] uppercase">Created</span>
-              <div className="text-xs font-bold text-zinc-300 font-sans">{formatTimeAgo(keyData.createdAt)}</div>
-            </div>
-            <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-              <span className="text-zinc-500 text-[10px] uppercase">Last Active</span>
-              <div className="text-xs font-bold text-emerald-300 font-sans">
-                {keyData.lastUsedAt ? formatTimeAgo(keyData.lastUsedAt) : 'Never'}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Contextual Throughput & VIP Upgrade Card */}
-        {!keyData.revoked && (
-          <div className="glass-panel rounded-3xl p-6 border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-black/50 space-y-4 shadow-xl">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
-                  <Gift className="w-5 h-5" />
-                </div>
-                <div className="space-y-1">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[10px] font-bold border border-amber-500/30">
-                    <Zap className="w-3 h-3 text-amber-400" />
-                    <span>
-                      {isStarterTier ? 'UPGRADE AVAILABLE: GROWTH VIP (300 RPM + 60% MATCH)' : isGrowthTier ? 'UPGRADE AVAILABLE: SCALE FLEET (600 RPM + 75% MATCH)' : 'ENTERPRISE SOVEREIGN LANE ACTIVE'}
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-lg font-bold text-white">{keyData.name}</h1>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
+                      keyData.revoked ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    }`}>
+                      {keyData.revoked ? 'Revoked' : 'Active'}
                     </span>
                   </div>
-                  <h3 className="text-base font-bold text-white">
-                    {isStarterTier ? 'Unlock Sub-15ms VIP Fast-Lane & 300 RPM' : isGrowthTier ? 'Unlock 600 RPM Concurrency Burst Pass' : 'Enterprise Concurrency Governor'}
-                  </h3>
-                  <p className="text-xs text-zinc-300 max-w-xl">
-                    {isStarterTier
-                      ? 'Elevate this key from 120 RPM to 300 RPM with sub-15ms dedicated Anycast routing and a +60% Match Bonus on your next deposit.'
-                      : 'Scale to 600 RPM with high-concurrency burst passes and automated multi-cloud failover.'}
-                  </p>
+                  <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
+                    <span>Prefix: <code className="text-zinc-200">{keyData.keyPrefix}...</code></span>
+                    <button
+                      type="button"
+                      onClick={handleCopyPrefix}
+                      className="text-zinc-500 hover:text-white transition-colors cursor-pointer"
+                      title="Copy Prefix"
+                    >
+                      {copiedPrefix ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
+                    <span>•</span>
+                    <span>Rate: <code className="text-zinc-200">{keyData.rateLimitPerMinute} RPM</code></span>
+                  </div>
                 </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/keys"
+                  className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-medium transition-colors border border-white/10"
+                >
+                  All Keys
+                </Link>
+
+                {!keyData.revoked && (
+                  <button
+                    type="button"
+                    onClick={() => setIsRevokeModalOpen(true)}
+                    className="px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-medium transition-colors cursor-pointer"
+                  >
+                    Revoke Key
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/10 font-mono text-xs">
+              <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-0.5">
+                <span className="text-zinc-500 text-[10px] uppercase">Total Requests</span>
+                <div className="text-base font-bold text-white">{keyData.totalRequests || 0}</div>
+              </div>
+              <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-0.5">
+                <span className="text-zinc-500 text-[10px] uppercase">Rate Ceiling</span>
+                <div className="text-base font-bold text-indigo-300">{keyData.rateLimitPerMinute} RPM</div>
+              </div>
+              <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-0.5">
+                <span className="text-zinc-500 text-[10px] uppercase">Created</span>
+                <div className="text-xs font-semibold text-zinc-300 font-sans">{formatTimeAgo(keyData.createdAt)}</div>
+              </div>
+              <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-0.5">
+                <span className="text-zinc-500 text-[10px] uppercase">Last Active</span>
+                <div className="text-xs font-semibold text-emerald-400 font-sans">
+                  {keyData.lastUsedAt ? formatTimeAgo(keyData.lastUsedAt) : 'Never'}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Live Key Verification / Test Bar */}
+          <div className="rounded-2xl border border-white/10 bg-[#0d101c] p-5 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-cyan-400" />
+                  <span>Gateway Health Verification</span>
+                </h3>
+                <p className="text-xs text-zinc-400">Verify routing health, latency, and endpoint connectivity for this key.</p>
               </div>
 
               <button
                 type="button"
-                onClick={() => {
-                  setPaywallSelectedAmt(isStarterTier ? 50 : 100);
-                  setIsPaywallOpen(true);
-                }}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs font-mono uppercase tracking-wider shadow-lg shadow-amber-500/25 flex items-center gap-1.5 transition-all cursor-pointer shrink-0 hover:scale-[1.02] active:scale-98"
+                onClick={handleRunTest}
+                disabled={isTesting || keyData.revoked}
+                className="px-4 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50 shrink-0"
               >
-                <Zap className="w-3.5 h-3.5 text-black" />
-                <span>Upgrade Key ({isStarterTier ? '$50 Tier' : '$100 Tier'})</span>
-                <ArrowRight className="w-3.5 h-3.5 text-black" />
+                <Play className={`w-3.5 h-3.5 fill-cyan-400 ${isTesting ? 'animate-pulse' : ''}`} />
+                <span>{isTesting ? 'Testing...' : 'Run Verification Ping'}</span>
               </button>
             </div>
-          </div>
-        )}
 
-        {/* Live Key Verification / Test Bar */}
-        <div className="glass-panel rounded-3xl p-6 space-y-4 border border-cyan-500/30 bg-cyan-500/5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-0.5">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Zap className="w-4 h-4 text-cyan-400" />
-                Live Gateway Ping & Verification
-              </h3>
-              <p className="text-xs text-zinc-400">Verify routing health, latency, and wholesale token discount status for this key.</p>
-            </div>
-
-            <button
-              onClick={handleRunTest}
-              disabled={isTesting || keyData.revoked}
-              className="px-5 py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shrink-0"
-            >
-              {isTesting ? <span>Testing...</span> : (
-                <>
-                  <Play className="w-3.5 h-3.5 fill-cyan-400" />
-                  <span>Run Verification Test</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          {testResult && (
-            <div className="p-4 rounded-2xl border font-mono text-xs animate-in fade-in duration-200 flex items-start gap-3 bg-emerald-500/10 border-emerald-500/40 text-emerald-300">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <div className="font-bold flex items-center gap-2">
-                  <span>✓ Gateway Ping: {testResult.latencyMs}ms</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30">
-                    25% Wholesale Rate Active
-                  </span>
+            {testResult && (
+              <div className={`p-3.5 rounded-xl border text-xs font-mono flex items-start gap-2.5 animate-in fade-in duration-150 ${
+                testResult.success ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+              }`}>
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <div className="font-bold flex items-center gap-2">
+                    <span>✓ Ping Latency: {testResult.latencyMs}ms</span>
+                  </div>
+                  <p className="text-zinc-300 text-[11px] font-sans">{testResult.message}</p>
                 </div>
-                <p className="text-zinc-300 text-[11px]">{testResult.message}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Multi-Format Setup Code Exporter */}
+          <div className="rounded-2xl border border-white/10 bg-[#0d101c] p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                  <Code2 className="w-4 h-4 text-indigo-400" />
+                  <span>Integration Snippets</span>
+                </h3>
+                <p className="text-xs text-zinc-400">Drop-in configuration templates for frameworks and developer tooling.</p>
+              </div>
+
+              <div className="flex items-center gap-1 p-1 rounded-xl bg-black/50 border border-white/10 text-xs font-mono">
+                {(['cursor', 'vercel', 'python', 'node', 'env', 'curl'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveSnippetTab(tab)}
+                    className={`px-3 py-1 rounded-lg capitalize transition-colors cursor-pointer ${
+                      activeSnippetTab === tab
+                        ? 'bg-indigo-600 text-white font-semibold shadow-sm'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    {tab === 'env' ? '.env' : tab === 'cursor' ? 'Cursor' : tab === 'vercel' ? 'Vercel AI' : tab}
+                  </button>
+                ))}
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Multi-Format Setup Code Exporter */}
-        <div className="glass-panel rounded-3xl p-6 space-y-4 border border-white/10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Code2 className="w-4 h-4 text-cyan-400" />
-                Integration Snippets
-              </h3>
-              <p className="text-xs text-zinc-400">Copy pre-configured code templates for your framework or tool.</p>
-            </div>
-
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-black/50 border border-white/10 text-xs font-mono">
-              {(['python', 'node', 'env', 'cursor', 'continue', 'curl'] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveSnippetTab(tab)}
-                  className={`px-3 py-1 rounded-lg capitalize transition-all cursor-pointer ${
-                    activeSnippetTab === tab
-                      ? 'bg-amber-400 text-black font-bold shadow-sm'
-                      : 'text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  {tab === 'env' ? '.env' : tab === 'cursor' ? 'Cursor IDE' : tab === 'continue' ? 'Continue.dev' : tab}
-                </button>
-              ))}
+            <div className="relative rounded-xl bg-black/70 border border-white/10 p-4 font-mono text-xs overflow-hidden">
+              <button
+                type="button"
+                onClick={handleCopySnippet}
+                className="absolute top-3 right-3 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white flex items-center gap-1.5 transition-colors text-[11px] cursor-pointer"
+              >
+                {copiedSnippet ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-zinc-400" />}
+                <span>{copiedSnippet ? 'Copied!' : 'Copy Code'}</span>
+              </button>
+              <pre className="text-zinc-300 overflow-x-auto pr-24 leading-relaxed font-mono">
+                <code>{getSnippets(keyData.keyPrefix)[activeSnippetTab]}</code>
+              </pre>
             </div>
           </div>
-
-          <div className="relative rounded-2xl bg-black/80 border border-white/10 p-4 font-mono text-xs overflow-hidden">
-            <button
-              onClick={handleCopySnippet}
-              className="absolute top-3 right-3 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white flex items-center gap-1.5 transition-all text-[11px] cursor-pointer"
-            >
-              {copiedSnippet ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedSnippet ? 'Copied Snippet!' : 'Copy Code'}</span>
-            </button>
-            <pre className="text-zinc-300 overflow-x-auto pr-24 leading-relaxed font-mono">
-              {getSnippets(keyData.keyPrefix)[activeSnippetTab]}
-            </pre>
-          </div>
-        </div>
         </AuthRequiredGate>
       </main>
 
-      {/* Paywall Blocker & Upgrade Modal */}
-      <KeyActivationPaywallModal
-        isOpen={isPaywallOpen}
-        onClose={() => setIsPaywallOpen(false)}
-        onSuccess={handlePaywallSuccess}
-        keyLabel={keyData?.name || 'Developer Gateway Key'}
-        initialAmount={paywallSelectedAmt}
-      />
+      {/* Accessible Revocation Modal */}
+      {isRevokeModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div
+            className="w-full max-w-md rounded-2xl bg-[#0d101c] border border-rose-500/40 p-6 space-y-4 shadow-2xl text-zinc-100 font-sans"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <div className="flex items-center gap-2 text-rose-400 font-bold text-base">
+                <Trash2 className="w-4 h-4" />
+                <span>Revoke API Key?</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsRevokeModalOpen(false)}
+                className="p-1 rounded text-zinc-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2 text-xs text-zinc-300 leading-relaxed">
+              <p>
+                Are you sure you want to revoke <strong>{keyData.name}</strong> (<code className="text-zinc-300 font-mono">{keyData.keyPrefix}...</code>)?
+              </p>
+              <p className="text-rose-300/90 font-medium">
+                This action is permanent and cannot be undone. Any active applications, agents, or automated scripts using this key will immediately receive 401 Unauthorized errors.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setIsRevokeModalOpen(false)}
+                className="px-3.5 py-2 rounded-xl text-xs text-zinc-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmRevoke}
+                disabled={isRevoking}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{isRevoking ? 'Revoking...' : 'Revoke Key'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
