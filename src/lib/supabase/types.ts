@@ -3247,6 +3247,12 @@ export interface Database {
         };
         Returns: void;
       };
+      fn_validate_session_active: {
+        Args: {
+          p_token_hash: string;
+        };
+        Returns: boolean;
+      };
       fn_upsert_owned_chat_messages: {
         Args: { p_conversation_id: string; p_user_id: string; p_messages: Json };
         Returns: Json;
