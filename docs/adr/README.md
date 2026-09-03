@@ -113,6 +113,7 @@ This directory contains the formal Architectural Decision Records (ADRs) that go
 | **[ADR 0103](0103-chat-memory-and-billing-forced-rls-and-ownership-armor.md)** | Chat Memory & Billing Forced RLS with Ownership Armor | **Operational Data Armor** | `Accepted` | Applies `FORCE ROW LEVEL SECURITY` across chat rolling memory, graph edges, episodes, and Stripe billing tables with ownership reassignment triggers. |
 | **[ADR 0104](0104-least-privilege-dac-grants-for-authenticated-tenant-role.md)** | Least-Privilege DAC Table Grants for Authenticated Tenant Role | **DAC Authorization & Role Hardening** | `Accepted` | Grants least-privilege DAC permissions to authenticated role across user tables, revokes dangerous mutations, and harmonizes table privileges with kernel RLS. |
 | **[ADR 0105](0105-tenant-id-constraints-and-leakproof-rls-armor.md)** | Tenant ID CHECK Constraints & LEAKPROOF RLS Optimization | **Data Integrity & Query Optimizer Armor** | `Accepted` | Adds idempotent CHECK constraints on tenant identifiers across 10 tables, designates RLS functions as LEAKPROOF, and adds session verification procedure. |
+| **[ADR 0106](0106-wallet-balance-tamper-proofing-and-billing-ledger-immutability.md)** | Wallet Balance Tamper-Proofing & Financial Ledger Immutability | **Financial & Ledger Armor** | `Accepted` | Implements engine-level balance tamper-proofing on galx_wallets, enforces FORCE RLS on wallet transactions, and attaches immutability triggers to financial ledgers. |
 
 
 ---
