@@ -188,6 +188,7 @@ export async function executePostgresTransaction<T>(
   }
 
   let client: PoolClient | null = null;
+  let hasError = false;
   try {
     client = await pool.connect();
     await client.query('BEGIN;');
@@ -196,6 +197,7 @@ export async function executePostgresTransaction<T>(
     breaker.recordSuccess();
     return result;
   } catch (err: any) {
+    hasError = true;
     if (client) {
       try {
         await client.query('ROLLBACK;');
@@ -208,9 +210,16 @@ export async function executePostgresTransaction<T>(
     return null;
   } finally {
     if (client) {
-      client.release();
+      client.release(hasError);
     }
   }
+}
+
+export interface TenantContextOptions {
+  role?: 'authenticated' | 'anon' | 'service_role';
+  email?: string;
+  metadata?: Record<string, any>;
+  statementTimeoutMs?: number;
 }
 
 /**
@@ -220,11 +229,12 @@ export async function executePostgresTransaction<T>(
  * enforced even when connecting via the superuser connection pool.
  *
  * Scoped strictly to the transaction (`is_local = true`), ensuring zero connection-state leakage
- * across pooled client checkouts.
+ * across pooled client checkouts. Discards failed client connections on error.
  */
 export async function executePostgresTransactionAsUser<T>(
   userId: string,
-  callback: (client: PoolClient) => Promise<T>
+  callback: (client: PoolClient) => Promise<T>,
+  options?: TenantContextOptions
 ): Promise<T | null> {
   if (!userId) {
     throw new Error('[PostgresPool] Cannot execute tenant transaction without an authenticated userId');
@@ -241,24 +251,47 @@ export async function executePostgresTransactionAsUser<T>(
     return null;
   }
 
+  const role = options?.role || 'authenticated';
+  const timeoutMs = Math.min(Math.max(Number(options?.statementTimeoutMs || 4000), 500), 10000);
+  const jwtClaims = JSON.stringify({
+    sub: userId,
+    role,
+    ...(options?.email ? { email: options.email } : {}),
+    ...(options?.metadata || {})
+  });
+
   let client: PoolClient | null = null;
+  let hasError = false;
   try {
     client = await pool.connect();
     await client.query('BEGIN;');
     await client.query(
-      "SELECT set_config('request.jwt.claim.sub', $1, true), set_config('request.jwt.claim.role', 'authenticated', true);",
-      [userId]
+      `SET LOCAL statement_timeout = ${timeoutMs};
+       SET LOCAL idle_in_transaction_session_timeout = 5000;
+       SELECT
+         set_config('request.jwt.claim.sub', $1, true),
+         set_config('request.jwt.claim.role', $2, true),
+         set_config('request.jwt.claim.email', $3, true),
+         set_config('request.jwt.claims', $4, true);`,
+      [userId, role, options?.email || '', jwtClaims]
     );
+
     try {
-      await client.query('SET LOCAL ROLE authenticated;');
+      if (role === 'authenticated') {
+        await client.query('SET LOCAL ROLE authenticated;');
+      } else if (role === 'anon') {
+        await client.query('SET LOCAL ROLE anon;');
+      }
     } catch {
       // In standalone environments without the 'authenticated' role, continue with session configs
     }
+
     const result = await callback(client);
     await client.query('COMMIT;');
     breaker.recordSuccess();
     return result;
   } catch (err: any) {
+    hasError = true;
     if (client) {
       try {
         await client.query('ROLLBACK;');
@@ -271,7 +304,7 @@ export async function executePostgresTransactionAsUser<T>(
     return null;
   } finally {
     if (client) {
-      client.release();
+      client.release(hasError);
     }
   }
 }
@@ -283,11 +316,16 @@ export async function executePostgresTransactionAsUser<T>(
 export async function executePostgresQueryAsUser<R extends QueryResultRow = any>(
   userId: string,
   text: string,
-  params?: any[]
+  params?: any[],
+  options?: TenantContextOptions
 ): Promise<QueryResult<R> | null> {
-  return executePostgresTransactionAsUser(userId, async (client) => {
-    return client.query<R>(text, params);
-  });
+  return executePostgresTransactionAsUser(
+    userId,
+    async (client) => {
+      return client.query<R>(text, params);
+    },
+    options
+  );
 }
 
 export function getPostgresPoolStats() {
