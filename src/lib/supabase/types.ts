@@ -3223,6 +3223,10 @@ export interface Database {
         Args: Record<PropertyKey, never>;
         Returns: string;
       };
+      fn_get_current_tenant_claims: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
       fn_set_tenant_session_context: {
         Args: {
           p_user_id: string;
