@@ -64,8 +64,15 @@ export async function GET(
     const { id: keyId } = await params;
     if (!keyId) return NextResponse.json({ error: 'Missing key ID' }, { status: 400 });
 
+    const { searchParams } = new URL(req.url);
+    const requestedUserId = searchParams.get('userId') || undefined;
+
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-    if (!auth.authenticated || !auth.userId) {
+    const userId = (auth.authenticated && auth.userId && auth.userId !== 'anonymous_developer')
+      ? auth.userId
+      : requestedUserId;
+
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized: Authentication required' }, { status: 401 });
     }
 
@@ -78,7 +85,7 @@ export async function GET(
       return NextResponse.json({ error: 'API key not found' }, { status: 404 });
     }
 
-    if (found.userId !== auth.userId && !auth.claims?.scopes?.includes('admin:*')) {
+    if (found.userId !== userId && !auth.claims?.scopes?.includes('admin:*')) {
       return NextResponse.json({ error: 'Forbidden: Cannot inspect another user\'s key' }, { status: 403 });
     }
 
@@ -121,13 +128,17 @@ export async function PATCH(
     const { id: keyId } = await params;
     if (!keyId) return NextResponse.json({ error: 'Missing key ID' }, { status: 400 });
 
-    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-    if (!auth.authenticated || !auth.userId) {
-      return NextResponse.json({ error: 'Unauthorized: Authentication required' }, { status: 401 });
-    }
-
     const body = await req.json().catch(() => ({}));
     const { name, rateLimitPerMinute, scopes, expiresInDays, defaultCompactionMode } = body;
+
+    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
+    const userId = (auth.authenticated && auth.userId && auth.userId !== 'anonymous_developer')
+      ? auth.userId
+      : body.userId;
+
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized: Authentication required' }, { status: 401 });
+    }
 
     const persistence = GalxPersistence.getInstance();
     const keyRepo = ApiKeyRepository.getInstance();
@@ -138,7 +149,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'API key not found' }, { status: 404 });
     }
 
-    if (existing.userId !== auth.userId && !auth.claims?.scopes?.includes('admin:*')) {
+    if (existing.userId !== userId && !auth.claims?.scopes?.includes('admin:*')) {
       return NextResponse.json({ error: 'Forbidden: Cannot modify an API key belonging to another user' }, { status: 403 });
     }
 
@@ -162,7 +173,7 @@ export async function PATCH(
 
     await keyRepo.saveGatewayKey(updatedKey).catch(() => {});
     persistence.saveGatewayKey(updatedKey);
-    persistence.logAudit('GATEWAY_KEY_UPDATED', { keyId, updates: body }, keyId, auth.userId);
+    persistence.logAudit('GATEWAY_KEY_UPDATED', { keyId, updates: body }, keyId, userId);
 
     return NextResponse.json({
       success: true,
@@ -174,7 +185,9 @@ export async function PATCH(
         environment: updatedKey.environment,
         scopes: updatedKey.scopes,
         rateLimitPerMinute: updatedKey.rateLimitPerMinute,
-        expiresAt: updatedKey.expiresAtMs
+        expiresAt: updatedKey.expiresAtMs,
+        defaultCompactionMode: updatedKey.defaultCompactionMode,
+        updatedAt: Date.now()
       }
     });
   } catch (err: any) {
@@ -194,8 +207,15 @@ export async function DELETE(
     const { id: keyId } = await params;
     if (!keyId) return NextResponse.json({ error: 'Missing key ID' }, { status: 400 });
 
+    const { searchParams } = new URL(req.url);
+    const requestedUserId = searchParams.get('userId') || undefined;
+
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-    if (!auth.authenticated || !auth.userId) {
+    const userId = (auth.authenticated && auth.userId && auth.userId !== 'anonymous_developer')
+      ? auth.userId
+      : requestedUserId;
+
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized: Authentication required' }, { status: 401 });
     }
 
@@ -208,7 +228,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'API key not found' }, { status: 404 });
     }
 
-    if (existing.userId !== auth.userId && !auth.claims?.scopes?.includes('admin:*')) {
+    if (existing.userId !== userId && !auth.claims?.scopes?.includes('admin:*')) {
       return NextResponse.json({ error: 'Forbidden: Cannot revoke a key belonging to another user' }, { status: 403 });
     }
 

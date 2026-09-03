@@ -253,6 +253,19 @@ function BaseNewKeyPage() {
     }
   };
 
+  const handleDownloadEnv = (apiKey: string, name: string = 'GALX AI') => {
+    const content = `# ${name} Credentials\n# Generated at: ${new Date().toISOString()}\nGALX_API_KEY="${apiKey}"\nGALX_BASE_URL="https://galx.ai/v1"\nOPENAI_BASE_URL="https://galx.ai/v1"\nOPENAI_API_KEY="${apiKey}"\n`;
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = '.env.galx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#07090e] text-zinc-100 font-sans">
       <Navigation />
@@ -582,17 +595,29 @@ function BaseNewKeyPage() {
             </div>
 
             {/* Multi-Format Export Options */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+              <button
+                type="button"
+                onClick={() => handleDownloadEnv(revealedKey.apiKey, revealedKey.name)}
+                className="p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-left transition-colors cursor-pointer flex items-center justify-between group"
+              >
+                <div>
+                  <span className="font-semibold text-zinc-200 block group-hover:text-white">Download .env</span>
+                  <span className="text-[10px] text-zinc-500">Save (.env.galx)</span>
+                </div>
+                <Download className="w-4 h-4 text-zinc-400 group-hover:text-white" />
+              </button>
+
               <button
                 type="button"
                 onClick={handleCopyEnv}
                 className="p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-left transition-colors cursor-pointer flex items-center justify-between"
               >
                 <div>
-                  <span className="font-semibold text-zinc-200 block">Copy as .env</span>
+                  <span className="font-semibold text-zinc-200 block">Copy .env</span>
                   <span className="text-[10px] text-zinc-500">GALX_API_KEY="..."</span>
                 </div>
-                {copiedEnv ? <Check className="w-4 h-4 text-emerald-400" /> : <Download className="w-4 h-4 text-zinc-400" />}
+                {copiedEnv ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-zinc-400" />}
               </button>
 
               <button
@@ -607,8 +632,8 @@ function BaseNewKeyPage() {
                 className="p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-left transition-colors cursor-pointer flex items-center justify-between"
               >
                 <div>
-                  <span className="font-semibold text-zinc-200 block">Copy Shell Export</span>
-                  <span className="text-[10px] text-zinc-500">export GALX_API_KEY="..."</span>
+                  <span className="font-semibold text-zinc-200 block">Copy Export</span>
+                  <span className="text-[10px] text-zinc-500">export GALX_API_KEY</span>
                 </div>
                 <Terminal className="w-4 h-4 text-zinc-400" />
               </button>

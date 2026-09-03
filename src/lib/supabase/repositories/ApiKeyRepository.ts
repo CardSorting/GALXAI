@@ -21,11 +21,35 @@ export class ApiKeyRepository {
       const results: Array<DeveloperGatewayKey | null> = [];
       const keyMap = new Map<string, DeveloperGatewayKey>();
 
-      if (isSupabaseConfigured()) {
+      // 1. Authoritative direct PostgreSQL connection pool batch lookup
+      const pool = getPostgresPool();
+      if (pool) {
+        try {
+          const res = await pool.query(
+            'SELECT * FROM galx_developer_keys WHERE key_hash = ANY($1::text[]) AND is_revoked = false;',
+            [Array.from(hashes)]
+          );
+          if (res.rows && res.rows.length > 0) {
+            for (const row of res.rows) {
+              if (row && row.key_hash) {
+                const mapped = this.mapRowToGatewayKey(row);
+                keyMap.set(row.key_hash, mapped);
+                this.keyTable.put(mapped.id, mapped);
+              }
+            }
+          }
+        } catch (err: any) {
+          console.warn('[ApiKeyRepository] Direct PG hash lookup fallback:', err.message);
+        }
+      }
+
+      // 2. Supabase RPC fallback
+      if (keyMap.size < hashes.length && isSupabaseConfigured()) {
         try {
           const supabase = getSupabaseAdmin();
+          const missingHashes = Array.from(hashes).filter(h => !keyMap.has(h));
           const { data, error } = await supabase.rpc('fn_batch_get_developer_keys_by_hashes', {
-            p_key_hashes: Array.from(hashes)
+            p_key_hashes: missingHashes
           });
 
           if (!error && data && Array.isArray(data)) {

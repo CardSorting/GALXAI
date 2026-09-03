@@ -287,11 +287,18 @@ function BaseGatewayKeysPage() {
       return;
     }
     setIsRenaming(true);
+    const cleanName = editingKeyName.trim();
+    setIsRenaming(true);
+    setKeys(prev => {
+      const updated = prev.map(k => k.id === keyId ? { ...k, name: cleanName } : k);
+      SafeStorage.setJSON(getStorageKey(user.id), updated);
+      return updated;
+    });
     try {
       await resilientFetch(`/api/keys/${keyId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: editingKeyName.trim(), userId: user.id })
+        body: JSON.stringify({ name: cleanName, userId: user.id })
       });
       fetchKeys();
     } catch {} finally {
@@ -319,7 +326,7 @@ function BaseGatewayKeysPage() {
   };
 
   const handleExecuteRollKey = async () => {
-    if (!rollingKey) return;
+    if (!rollingKey || !user?.id) return;
     setIsRolling(true);
     try {
       const res = await resilientFetch<{ success: boolean; key?: { apiKey: string }; message?: string }>(
@@ -327,10 +334,31 @@ function BaseGatewayKeysPage() {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ graceHours: rollingGraceHours, userId: user?.id })
+          body: JSON.stringify({ graceHours: rollingGraceHours, userId: user.id })
         }
       );
       if (res.data?.success && res.data.key?.apiKey) {
+        const returnedApiKey = res.data.key.apiKey;
+        const newKeyEntry = {
+          id: `key_${Date.now()}`,
+          keyPrefix: returnedApiKey.slice(0, 14),
+          name: rollingKey.name,
+          userId: user.id,
+          environment: rollingKey.environment || 'live',
+          scopes: rollingKey.scopes || ['*'],
+          rateLimitPerMinute: rollingKey.rateLimitPerMinute || 120,
+          totalRequests: 0,
+          totalTokens: 0,
+          createdAt: Date.now(),
+          isExpired: false,
+          revoked: false
+        };
+        setKeys(prev => {
+          const updated = [newKeyEntry, ...prev.map(k => k.id === rollingKey.id ? (rollingGraceHours <= 0 ? { ...k, revoked: true } : k) : k)];
+          SafeStorage.setJSON(getStorageKey(user.id), updated);
+          return updated;
+        });
+
         setRolledResultKey(res.data.key.apiKey);
         setRollingKey(null);
         fetchKeys();
@@ -338,6 +366,19 @@ function BaseGatewayKeysPage() {
     } catch {} finally {
       setIsRolling(false);
     }
+  };
+
+  const handleDownloadEnv = (apiKey: string, name: string = 'GALX AI') => {
+    const content = `# ${name} Credentials\n# Generated at: ${new Date().toISOString()}\nGALX_API_KEY="${apiKey}"\nGALX_BASE_URL="https://galx.ai/v1"\nOPENAI_BASE_URL="https://galx.ai/v1"\nOPENAI_API_KEY="${apiKey}"\n`;
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = '.env.galx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleCopy = async (text: string, id: string) => {
@@ -449,7 +490,8 @@ function BaseGatewayKeysPage() {
     }
   };
 
-  const activeDisplayKey = revealedKey?.apiKey || rolledResultKey || 'galx_live_your_key_here';
+  const activeKeyFound = keys.find(k => !k.revoked);
+  const activeDisplayKey = revealedKey?.apiKey || rolledResultKey || (activeKeyFound?.keyPrefix ? `${activeKeyFound.keyPrefix}...` : 'galx_live_your_key_here');
 
   const snippets: Record<SnippetTab, { title: string; lang: string; code: string }> = {
     cursor: {
@@ -1195,17 +1237,29 @@ console.log(completion.choices[0].message.content);`
             </div>
 
             {/* Multi-Format Export Options */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+              <button
+                type="button"
+                onClick={() => handleDownloadEnv(revealedKey.apiKey, revealedKey.name)}
+                className="p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-left transition-colors cursor-pointer flex items-center justify-between group"
+              >
+                <div>
+                  <span className="font-semibold text-zinc-200 block group-hover:text-white">Download .env</span>
+                  <span className="text-[10px] text-zinc-500">Save (.env.galx)</span>
+                </div>
+                <Download className="w-4 h-4 text-zinc-400 group-hover:text-white" />
+              </button>
+
               <button
                 type="button"
                 onClick={() => handleCopyEnvSnippet(revealedKey.apiKey)}
                 className="p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-left transition-colors cursor-pointer flex items-center justify-between"
               >
                 <div>
-                  <span className="font-semibold text-zinc-200 block">Copy as .env</span>
+                  <span className="font-semibold text-zinc-200 block">Copy .env</span>
                   <span className="text-[10px] text-zinc-500">GALX_API_KEY="..."</span>
                 </div>
-                {copiedEnvSnippet ? <Check className="w-4 h-4 text-emerald-400" /> : <Download className="w-4 h-4 text-zinc-400" />}
+                {copiedEnvSnippet ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-zinc-400" />}
               </button>
 
               <button
@@ -1214,8 +1268,8 @@ console.log(completion.choices[0].message.content);`
                 className="p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-left transition-colors cursor-pointer flex items-center justify-between"
               >
                 <div>
-                  <span className="font-semibold text-zinc-200 block">Copy Shell Export</span>
-                  <span className="text-[10px] text-zinc-500">export GALX_API_KEY="..."</span>
+                  <span className="font-semibold text-zinc-200 block">Copy Export</span>
+                  <span className="text-[10px] text-zinc-500">export GALX_API_KEY</span>
                 </div>
                 {copiedShellSnippet ? <Check className="w-4 h-4 text-emerald-400" /> : <Terminal className="w-4 h-4 text-zinc-400" />}
               </button>

@@ -18,6 +18,7 @@ import {
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 import { ErrorBoundary, withErrorBoundary } from '@/components/common/ErrorBoundary';
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
+import { SafeStorage } from '@/lib/resilience/SafeStorage';
 import { useAuth } from '@/contexts/AuthContext';
 
 function BaseRateLimitsPage() {
@@ -31,6 +32,8 @@ function BaseRateLimitsPage() {
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  const getStorageKey = (uid: string) => `galx_cached_developer_keys_${uid}`;
+
   const fetchKeys = async () => {
     if (!user?.id) {
       setKeys([]);
@@ -40,6 +43,9 @@ function BaseRateLimitsPage() {
       const res = await resilientFetch<{ keys: any[] }>(`/api/keys?userId=${encodeURIComponent(user.id)}`, { enableCacheFallback: true });
       const activeKeys = res.data?.keys?.filter(k => !k.revoked) || [];
       setKeys(activeKeys);
+      if (res.data?.keys) {
+        SafeStorage.setJSON(getStorageKey(user.id), res.data.keys);
+      }
       if (activeKeys.length > 0 && !selectedKeyId) {
         setSelectedKeyId(activeKeys[0].id);
         const k = activeKeys[0];
@@ -51,6 +57,15 @@ function BaseRateLimitsPage() {
 
   useEffect(() => {
     if (user?.id) {
+      const cached = SafeStorage.getJSON<any[]>(getStorageKey(user.id), []);
+      const active = cached.filter(k => !k.revoked);
+      if (active.length > 0) {
+        setKeys(active);
+        setSelectedKeyId(prev => prev || active[0].id);
+        const k = active[0];
+        setRpmLimit(k.rateLimitPerMinute || 120);
+        setTpmLimit(k.rateLimitPerMinute ? k.rateLimitPerMinute * 2000 : 250000);
+      }
       fetchKeys();
     }
   }, [user?.id]);
