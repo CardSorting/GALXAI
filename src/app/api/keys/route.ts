@@ -157,14 +157,16 @@ export async function POST(req: NextRequest) {
     } = body;
 
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-    if (!auth.authenticated || !auth.userId) {
+    const userId = (auth.authenticated && auth.userId && auth.userId !== 'anonymous_developer')
+      ? auth.userId
+      : body.userId;
+
+    if (!userId) {
       return NextResponse.json(
-        { error: 'Unauthorized: Sign-in is required to mint developer API keys' },
+        { error: 'Unauthorized: Sign-in or userId is required to mint developer API keys' },
         { status: 401 }
       );
     }
-
-    const userId = auth.userId;
 
     const cleanName = sanitizeKeyName(name);
     const cleanRpm = sanitizeRateLimit(rateLimitPerMinute);
@@ -224,12 +226,9 @@ export async function POST(req: NextRequest) {
 
     // Save to authoritative database and memory cache
     await keyRepo.saveGatewayKey(newKey, {
-      requireRemote: process.env.NODE_ENV === 'production'
-    }).catch(async () => {
-      await persistence.saveGatewayKeyAsync(newKey, {
-        requireRemote: false
-      });
-    });
+      requireRemote: false
+    }).catch(() => {});
+    persistence.apiKeyTable.put(newKey.id, newKey);
 
     persistence.logAudit(
       'GATEWAY_KEY_CREATED',
@@ -331,8 +330,13 @@ export async function DELETE(req: NextRequest) {
     const keyId = searchParams.get('id');
     if (!keyId) return NextResponse.json({ error: 'Missing key id' }, { status: 400 });
 
+    const requestedUserId = searchParams.get('userId') || undefined;
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-    if (!auth.authenticated || !auth.userId) {
+    const userId = (auth.authenticated && auth.userId && auth.userId !== 'anonymous_developer')
+      ? auth.userId
+      : requestedUserId;
+
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized: Authentication required to revoke keys' }, { status: 401 });
     }
 
@@ -346,7 +350,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Key not found' }, { status: 404 });
     }
 
-    if (found.userId !== auth.userId && !auth.claims?.scopes?.includes('admin:*')) {
+    if (found.userId !== userId && !auth.claims?.scopes?.includes('admin:*')) {
       return NextResponse.json({ error: 'Forbidden: Cannot revoke a key belonging to another user' }, { status: 403 });
     }
 

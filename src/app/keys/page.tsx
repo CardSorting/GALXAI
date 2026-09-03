@@ -40,6 +40,7 @@ import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 import { ErrorBoundary, withErrorBoundary } from '@/components/common/ErrorBoundary';
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
+import { SafeStorage } from '@/lib/resilience/SafeStorage';
 import { useAuth } from '@/contexts/AuthContext';
 
 type SnippetTab = 'cursor' | 'vercel' | 'python' | 'node' | 'curl';
@@ -153,6 +154,8 @@ function BaseGatewayKeysPage() {
 
   const { walletBalance } = useDepositVerification();
 
+  const getStorageKey = (uid: string) => `galx_cached_developer_keys_${uid}`;
+
   const fetchKeys = async () => {
     if (!user?.id) {
       setKeys([]);
@@ -162,7 +165,11 @@ function BaseGatewayKeysPage() {
       const res = await resilientFetch<{ keys: any[] }>(`/api/keys?userId=${encodeURIComponent(user.id)}`, {
         enableCacheFallback: true,
       });
-      setKeys(res.data?.keys || []);
+      const fetched = res.data?.keys;
+      if (Array.isArray(fetched)) {
+        setKeys(fetched);
+        SafeStorage.setJSON(getStorageKey(user.id), fetched);
+      }
     } catch {
       // Offline fallback handled by resilientFetch
     }
@@ -170,6 +177,10 @@ function BaseGatewayKeysPage() {
 
   useEffect(() => {
     if (user?.id) {
+      const cached = SafeStorage.getJSON<any[]>(getStorageKey(user.id), []);
+      if (Array.isArray(cached) && cached.length > 0) {
+        setKeys(cached);
+      }
       fetchKeys();
     }
   }, [user?.id]);
@@ -224,6 +235,28 @@ function BaseGatewayKeysPage() {
       });
 
       if (res.data?.success && res.data.key?.apiKey) {
+        const returnedKey = res.data.key as any;
+        const newKeyEntry = {
+          id: returnedKey.id || `key_${Date.now()}`,
+          keyPrefix: returnedKey.keyPrefix || (returnedKey.apiKey.slice(0, 14)),
+          name: returnedKey.name || nameToSubmit,
+          userId: user.id,
+          environment: returnedKey.environment || newKeyEnv,
+          scopes: returnedKey.scopes || ['*'],
+          rateLimitPerMinute: returnedKey.rateLimitPerMinute || newKeyRpm,
+          totalRequests: 0,
+          totalTokens: 0,
+          createdAt: Date.now(),
+          isExpired: false,
+          revoked: false
+        };
+
+        setKeys(prev => {
+          const updated = [newKeyEntry, ...prev.filter(k => k.id !== newKeyEntry.id)];
+          SafeStorage.setJSON(getStorageKey(user.id), updated);
+          return updated;
+        });
+
         setRevealedKey({
           apiKey: res.data.key.apiKey,
           name: nameToSubmit,
@@ -268,10 +301,16 @@ function BaseGatewayKeysPage() {
   };
 
   const handleConfirmRevoke = async () => {
-    if (!revokingKey) return;
+    if (!revokingKey || !user?.id) return;
     setIsRevoking(true);
+    const keyToRevokeId = revokingKey.id;
     try {
-      await resilientFetch(`/api/keys?id=${revokingKey.id}&userId=${encodeURIComponent(user?.id || '')}`, { method: 'DELETE' });
+      await resilientFetch(`/api/keys?id=${keyToRevokeId}&userId=${encodeURIComponent(user.id)}`, { method: 'DELETE' });
+      setKeys(prev => {
+        const updated = prev.map(k => k.id === keyToRevokeId ? { ...k, revoked: true } : k);
+        SafeStorage.setJSON(getStorageKey(user.id), updated);
+        return updated;
+      });
       setRevokingKey(null);
       fetchKeys();
     } catch {} finally {

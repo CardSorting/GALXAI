@@ -7,6 +7,7 @@ import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
+import { SafeStorage } from '@/lib/resilience/SafeStorage';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -23,6 +24,8 @@ function BaseDeveloperGatewayKeys() {
 
   const { hasVerifiedDeposit, walletBalance, depositAndUnlock } = useDepositVerification();
 
+  const getStorageKey = (uid: string) => `galx_cached_developer_keys_${uid}`;
+
   const fetchKeys = async () => {
     if (!user?.id) {
       setKeys([]);
@@ -32,7 +35,11 @@ function BaseDeveloperGatewayKeys() {
       const res = await resilientFetch<{ keys: any[] }>(`/api/keys?userId=${encodeURIComponent(user.id)}`, {
         enableCacheFallback: true,
       });
-      setKeys(res.data?.keys || []);
+      const fetched = res.data?.keys;
+      if (Array.isArray(fetched)) {
+        setKeys(fetched);
+        SafeStorage.setJSON(getStorageKey(user.id), fetched);
+      }
     } catch {
       // Ignored gracefully with cached fallback
     }
@@ -40,6 +47,10 @@ function BaseDeveloperGatewayKeys() {
 
   useEffect(() => {
     if (user?.id) {
+      const cached = SafeStorage.getJSON<any[]>(getStorageKey(user.id), []);
+      if (Array.isArray(cached) && cached.length > 0) {
+        setKeys(cached);
+      }
       fetchKeys();
     }
   }, [user?.id]);
@@ -48,7 +59,7 @@ function BaseDeveloperGatewayKeys() {
     if (!user?.id) return;
     setIsLoading(true);
     try {
-      const res = await resilientFetch<{ success: boolean; key?: { apiKey: string } }>('/api/keys', {
+      const res = await resilientFetch<{ success: boolean; key?: { id?: string; apiKey: string; keyPrefix?: string; name?: string } }>('/api/keys', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -59,6 +70,28 @@ function BaseDeveloperGatewayKeys() {
         })
       });
       if (res.data?.success && res.data.key?.apiKey) {
+        const returnedKey = res.data.key;
+        const newKeyEntry = {
+          id: returnedKey.id || `key_${Date.now()}`,
+          keyPrefix: returnedKey.keyPrefix || (returnedKey.apiKey.slice(0, 14)),
+          name: returnedKey.name || keyName.trim() || 'Developer API Key',
+          userId: user.id,
+          environment: 'live',
+          scopes: ['*'],
+          rateLimitPerMinute: 120,
+          totalRequests: 0,
+          totalTokens: 0,
+          createdAt: Date.now(),
+          isExpired: false,
+          revoked: false
+        };
+
+        setKeys(prev => {
+          const updated = [newKeyEntry, ...prev.filter(k => k.id !== newKeyEntry.id)];
+          SafeStorage.setJSON(getStorageKey(user.id), updated);
+          return updated;
+        });
+
         setCreatedSecretKey(res.data.key.apiKey);
         setNewKeyName('');
         fetchKeys();

@@ -30,6 +30,7 @@ import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 import { ErrorBoundary, withErrorBoundary } from '@/components/common/ErrorBoundary';
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
+import { SafeStorage } from '@/lib/resilience/SafeStorage';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 
@@ -200,6 +201,25 @@ function BaseNewKeyPage() {
       });
 
       if (res.data?.success && res.data.key?.apiKey) {
+        const returnedKey = res.data.key as any;
+        const newKeyEntry = {
+          id: returnedKey.id || `key_${Date.now()}`,
+          keyPrefix: returnedKey.keyPrefix || (returnedKey.apiKey.slice(0, 14)),
+          name: returnedKey.name || trimmedName,
+          userId: user.id,
+          environment: returnedKey.environment || environment,
+          scopes: returnedKey.scopes || scopes,
+          rateLimitPerMinute: returnedKey.rateLimitPerMinute || rateLimitRpm,
+          totalRequests: 0,
+          totalTokens: 0,
+          createdAt: Date.now(),
+          isExpired: false,
+          revoked: false
+        };
+        const storageKey = `galx_cached_developer_keys_${user.id}`;
+        const existing = SafeStorage.getJSON<any[]>(storageKey, []);
+        SafeStorage.setJSON(storageKey, [newKeyEntry, ...existing.filter(k => k.id !== newKeyEntry.id)]);
+
         setRevealedKey({
           apiKey: res.data.key.apiKey,
           name: trimmedName

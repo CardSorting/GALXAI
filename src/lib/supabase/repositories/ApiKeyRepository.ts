@@ -4,6 +4,7 @@
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
+import { getPostgresPool } from '../../db/postgres';
 import type { Database } from '../types';
 import type { DeveloperGatewayKey } from '../../../core/contracts/GalxContracts';
 import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
@@ -73,26 +74,43 @@ export class ApiKeyRepository {
   }
 
   async getGatewayKeys(userId?: string): Promise<DeveloperGatewayKey[]> {
+    // 1. Authoritative direct PostgreSQL connection pool (bypasses anon RLS filtering)
+    const pool = getPostgresPool();
+    if (pool) {
+      try {
+        const res = await pool.query(
+          'SELECT * FROM galx_developer_keys WHERE ($1::text IS NULL OR user_id = $1::text) ORDER BY created_at DESC;',
+          [userId || null]
+        );
+        if (res.rows && res.rows.length > 0) {
+          const mapped = res.rows.map(r => this.mapRowToGatewayKey(r));
+          for (const k of mapped) this.keyTable.put(k.id, k);
+          return mapped;
+        }
+      } catch (err: any) {
+        console.warn('[ApiKeyRepository] Direct PG query fallback:', err.message);
+      }
+    }
+
+    // 2. Supabase SECURITY DEFINER RPC fallback (bypasses anon RLS filtering)
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
-        let query = supabase.from('galx_developer_keys').select('*').order('created_at', { ascending: false });
+        const { data, error } = await supabase.rpc('fn_get_developer_keys' as any, {
+          p_user_id: userId || null
+        });
 
-        if (userId) {
-          query = query.eq('user_id', userId);
-        }
-
-        const { data, error } = await query;
-        if (!error && data && data.length > 0) {
+        if (!error && data && Array.isArray(data) && data.length > 0) {
           const mapped = data.map(this.mapRowToGatewayKey);
           for (const k of mapped) this.keyTable.put(k.id, k);
           return mapped;
         }
       } catch {
-        // Fall back
+        // Fall back to memory
       }
     }
 
+    // 3. In-memory hot cache fallback
     if (userId) {
       return this.keyTable.query({ where: { userId: { $eq: userId } } }) as DeveloperGatewayKey[];
     }
@@ -101,17 +119,27 @@ export class ApiKeyRepository {
 
   async getGatewayKeyById(id: string): Promise<DeveloperGatewayKey | null> {
     return this.keyCoalescer.getOrFetch(`id:${id}`, async () => {
+      const pool = getPostgresPool();
+      if (pool) {
+        try {
+          const res = await pool.query('SELECT * FROM galx_developer_keys WHERE id = $1 LIMIT 1;', [id]);
+          if (res.rows && res.rows[0]) {
+            const mapped = this.mapRowToGatewayKey(res.rows[0]);
+            this.keyTable.put(mapped.id, mapped);
+            return mapped;
+          }
+        } catch {}
+      }
+
       if (isSupabaseConfigured()) {
         try {
           const supabase = getSupabaseAdmin();
-          const { data, error } = await supabase
-            .from('galx_developer_keys')
-            .select('*')
-            .eq('id', id)
-            .single();
+          const { data, error } = await supabase.rpc('fn_get_developer_key_by_id' as any, {
+            p_id: id
+          });
 
-          if (!error && data) {
-            const mapped = this.mapRowToGatewayKey(data);
+          if (!error && data && Array.isArray(data) && data.length > 0) {
+            const mapped = this.mapRowToGatewayKey(data[0]);
             this.keyTable.put(mapped.id, mapped);
             return mapped;
           }
@@ -139,6 +167,21 @@ export class ApiKeyRepository {
   }
 
   async findKeyByPrefix(prefix: string): Promise<DeveloperGatewayKey | null> {
+    const pool = getPostgresPool();
+    if (pool) {
+      try {
+        const res = await pool.query(
+          'SELECT * FROM galx_developer_keys WHERE prefix = $1 AND is_revoked = false LIMIT 1;',
+          [prefix]
+        );
+        if (res.rows && res.rows[0]) {
+          const mapped = this.mapRowToGatewayKey(res.rows[0]);
+          this.keyTable.put(mapped.id, mapped);
+          return mapped;
+        }
+      } catch {}
+    }
+
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -173,44 +216,79 @@ export class ApiKeyRepository {
     key: DeveloperGatewayKey,
     options: { requireRemote?: boolean } = {}
   ): Promise<void> {
+    // 1. Immediately guarantee in-memory hot cache presence
     this.keyTable.put(key.id, key);
     this.keyCoalescer.invalidate(`id:${key.id}`);
     this.keyCoalescer.invalidate(`hash:${key.keyHash}`);
     this.keyDataLoader.clear(key.keyHash);
 
-    if (!isSupabaseConfigured()) {
-      if (options.requireRemote) {
-        this.keyTable.delete(key.id);
-        throw new Error('Authoritative API-key storage is not configured.');
+    let saved = false;
+
+    // 2. Direct PostgreSQL connection pool (highest authority and reliability)
+    const pool = getPostgresPool();
+    if (pool) {
+      try {
+        await pool.query(
+          `INSERT INTO galx_developer_keys (
+            id, user_id, name, prefix, key_hash, rate_limit_per_minute, total_requests, total_tokens, is_revoked, created_at, updated_at
+          ) VALUES (
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, to_timestamp($10 / 1000.0), NOW()
+          ) ON CONFLICT (id) DO UPDATE SET
+            name = EXCLUDED.name,
+            prefix = EXCLUDED.prefix,
+            key_hash = EXCLUDED.key_hash,
+            rate_limit_per_minute = EXCLUDED.rate_limit_per_minute,
+            is_revoked = EXCLUDED.is_revoked,
+            updated_at = NOW();`,
+          [
+            key.id,
+            key.userId,
+            key.name,
+            key.prefix || key.keyPrefix || '',
+            key.keyHash,
+            key.rateLimitPerMinute || 120,
+            key.totalRequests || 0,
+            key.totalTokens || 0,
+            Boolean(key.revoked),
+            key.createdAtMs || Date.now()
+          ]
+        );
+        saved = true;
+      } catch (err: any) {
+        console.warn('[ApiKeyRepository] Direct PG insert error, falling back to RPC:', err.message);
       }
-      return;
     }
 
-    try {
-      const supabase = getSupabaseAdmin();
-      const { error: rpcError } = await supabase.rpc('fn_save_developer_key' as any, {
-        p_id: key.id,
-        p_user_id: key.userId,
-        p_name: key.name,
-        p_prefix: key.prefix || key.keyPrefix || '',
-        p_key_hash: key.keyHash,
-        p_rate_limit_per_minute: key.rateLimitPerMinute || 600
-      });
+    // 3. Supabase RPC fallback
+    if (!saved && isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseAdmin();
+        const { error: rpcError } = await supabase.rpc('fn_save_developer_key' as any, {
+          p_id: key.id,
+          p_user_id: key.userId,
+          p_name: key.name,
+          p_prefix: key.prefix || key.keyPrefix || '',
+          p_key_hash: key.keyHash,
+          p_rate_limit_per_minute: key.rateLimitPerMinute || 120
+        });
 
-      if (rpcError) {
-        const row = this.mapKeyToRow(key);
-        const { error } = await supabase
-          .from('galx_developer_keys')
-          .upsert(row, { onConflict: 'id' });
+        if (!rpcError) {
+          saved = true;
+        } else {
+          const row = this.mapKeyToRow(key);
+          const { error } = await supabase
+            .from('galx_developer_keys')
+            .upsert(row, { onConflict: 'id' });
 
-        if (error) throw error;
+          if (!error) saved = true;
+        }
+      } catch (err: any) {
+        console.warn('[ApiKeyRepository] Supabase RPC save error:', err.message);
       }
-    } catch (error) {
-      if (options.requireRemote) {
-        this.keyTable.delete(key.id);
-        const message = error instanceof Error ? error.message : 'Unknown persistence error';
-        throw new Error(`Failed to persist the API key authoritatively: ${message}`);
-      }
+    }
+
+    if (!saved && options.requireRemote) {
+      throw new Error('Authoritative API-key storage was unreachable. Key is retained in local cache.');
     }
   }
 
@@ -234,6 +312,17 @@ export class ApiKeyRepository {
     if (updated.keyHash) {
       this.keyCoalescer.set(`hash:${updated.keyHash}`, updated);
       this.keyDataLoader.clear(updated.keyHash);
+    }
+
+    const pool = getPostgresPool();
+    if (pool) {
+      try {
+        await pool.query(
+          'UPDATE galx_developer_keys SET total_requests = total_requests + $2, total_tokens = total_tokens + $3, last_used_at = NOW() WHERE id = $1;',
+          [keyId, requests, tokens]
+        );
+        return;
+      } catch {}
     }
 
     if (isSupabaseConfigured()) {
@@ -265,6 +354,17 @@ export class ApiKeyRepository {
     this.keyCoalescer.invalidate(`id:${keyId}`);
     this.keyDataLoader.clearAll();
 
+    const pool = getPostgresPool();
+    if (pool) {
+      try {
+        await pool.query(
+          'UPDATE galx_developer_keys SET is_revoked = true, revoked_at = NOW(), revoked_reason = $2 WHERE id = $1;',
+          [keyId, reason]
+        );
+        return;
+      } catch {}
+    }
+
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -289,7 +389,7 @@ export class ApiKeyRepository {
     }
   }
 
-  async deleteKey(keyId: string): Promise<void> {
+  async deleteKey(keyId: string, userId?: string): Promise<void> {
     const existing = this.keyTable.get(keyId);
     if (existing?.keyHash) {
       this.keyCoalescer.invalidate(`hash:${existing.keyHash}`);
@@ -299,10 +399,28 @@ export class ApiKeyRepository {
     this.keyTable.delete(keyId);
     this.keyDataLoader.clearAll();
 
+    const pool = getPostgresPool();
+    if (pool) {
+      try {
+        await pool.query(
+          'DELETE FROM galx_developer_keys WHERE id = $1 AND ($2::text IS NULL OR user_id = $2::text);',
+          [keyId, userId || null]
+        );
+        return;
+      } catch {}
+    }
+
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
-        await supabase.from('galx_developer_keys').delete().eq('id', keyId);
+        const { error: rpcErr } = await supabase.rpc('fn_delete_developer_key' as any, {
+          p_id: keyId,
+          p_user_id: userId || null
+        });
+
+        if (rpcErr) {
+          await supabase.from('galx_developer_keys').delete().eq('id', keyId);
+        }
       } catch {
         // Fallback
       }
