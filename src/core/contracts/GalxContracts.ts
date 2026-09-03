@@ -516,6 +516,7 @@ export interface GatewayApiKey {
   readonly checksum?: string;
   readonly computePool?: 'shared_community' | 'priority_dedicated';
   readonly freeMonthlyGrantUsd?: number;
+  readonly defaultCompactionMode?: 'auto' | 'raw';
 }
 
 export type DeveloperGatewayKey = GatewayApiKey;
@@ -581,6 +582,11 @@ export interface ChatCompletionRequest {
   };
   safety_identifier?: string;
   privacy?: PrivacyOptions;
+  compact_prompts?: boolean;
+  enable_prompt_compaction?: boolean;
+  compaction_mode?: 'auto' | 'raw';
+  transforms?: string[];
+  extra_body?: any;
 }
 
 export interface ChatCompletionResponse {

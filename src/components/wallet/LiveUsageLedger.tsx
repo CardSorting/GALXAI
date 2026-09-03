@@ -36,6 +36,8 @@ const INITIAL_TRANSACTIONS: TransactionDetail[] = [
     savingsUsd: 0.003250,
     retailEquivalentUsd: 0.011000,
     latencyMs: 164,
+    compactionMode: 'raw',
+    compactedTokens: 0,
     keyPrefix: 'galx_live_d819',
     keyName: 'Cursor IDE / Coding Assistant',
     zdrDigest: 'sha256:7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069',
@@ -54,6 +56,8 @@ const INITIAL_TRANSACTIONS: TransactionDetail[] = [
     cachedTokens: 300,
     completionTokens: 180,
     totalTokens: 1030,
+    compactedTokens: 420,
+    compactionMode: 'auto',
     savingsUsd: 0.001480,
     retailEquivalentUsd: 0.004900,
     latencyMs: 128,
@@ -75,6 +79,8 @@ const INITIAL_TRANSACTIONS: TransactionDetail[] = [
     cachedTokens: 1800,
     completionTokens: 640,
     totalTokens: 4740,
+    compactedTokens: 1650,
+    compactionMode: 'auto',
     savingsUsd: 0.002760,
     retailEquivalentUsd: 0.007580,
     latencyMs: 142,
@@ -138,6 +144,7 @@ const INITIAL_TRANSACTIONS: TransactionDetail[] = [
 export function LiveUsageLedger() {
   const [transactions, setTransactions] = useState<TransactionDetail[]>(INITIAL_TRANSACTIONS);
   const [filterType, setFilterType] = useState<'all' | 'usage' | 'deposit' | 'grant'>('all');
+  const [compactionFilter, setCompactionFilter] = useState<'all' | 'compacted' | 'raw'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionDetail | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -201,6 +208,8 @@ export function LiveUsageLedger() {
 
   const filtered = transactions.filter(t => {
     if (filterType !== 'all' && t.type !== filterType) return false;
+    if (compactionFilter === 'compacted' && t.compactionMode !== 'auto') return false;
+    if (compactionFilter === 'raw' && t.compactionMode !== 'raw') return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       return (
@@ -248,6 +257,40 @@ export function LiveUsageLedger() {
             ))}
           </div>
 
+          {/* Compaction Filter Pills */}
+          <div className="flex items-center p-1 rounded-2xl bg-black/60 border border-white/10 text-xs">
+            <button
+              onClick={() => setCompactionFilter('all')}
+              className={`px-2.5 py-1.5 rounded-xl transition-all cursor-pointer font-bold ${
+                compactionFilter === 'all'
+                  ? 'bg-zinc-700 text-white'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setCompactionFilter('compacted')}
+              className={`px-2.5 py-1.5 rounded-xl transition-all cursor-pointer font-bold ${
+                compactionFilter === 'compacted'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              ⚡ Compacted
+            </button>
+            <button
+              onClick={() => setCompactionFilter('raw')}
+              className={`px-2.5 py-1.5 rounded-xl transition-all cursor-pointer font-bold ${
+                compactionFilter === 'raw'
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              📝 Raw Mode
+            </button>
+          </div>
+
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
@@ -274,6 +317,7 @@ export function LiveUsageLedger() {
             <thead className="bg-white/[0.02] text-zinc-400 uppercase text-[10px] font-sans font-semibold tracking-wider">
               <tr>
                 <th className="px-5 py-3.5">Activity &amp; Model</th>
+                <th className="px-5 py-3.5">Policy</th>
                 <th className="px-5 py-3.5">Token Breakdown</th>
                 <th className="px-5 py-3.5 text-right">Debit / Credit (USD)</th>
                 <th className="px-5 py-3.5 text-right">Wholesale Savings</th>
@@ -320,6 +364,21 @@ export function LiveUsageLedger() {
                           </>
                         )}
                       </div>
+                    </td>
+
+                    {/* Policy Column */}
+                    <td className="px-5 py-4">
+                      {isUsage ? (
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase font-mono ${
+                          tx.compactionMode === 'raw'
+                            ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30'
+                            : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/30'
+                        }`}>
+                          {tx.compactionMode === 'raw' ? 'RAW' : 'COMPACTED'}
+                        </span>
+                      ) : (
+                        <span className="text-zinc-600 font-mono text-[10px]">—</span>
+                      )}
                     </td>
 
                     {/* Token Breakdown */}

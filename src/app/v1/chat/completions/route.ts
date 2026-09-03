@@ -243,6 +243,33 @@ export async function POST(req: NextRequest) {
       provisionalPlan.contextWindowTokens - provisionalPlan.allocatedMaxTokens - provisionalPlan.safetyMarginTokens
     );
 
+    // Robust Multi-Strategy Compaction Policy Resolution (RAW / VERBATIM IS SAFE DEFAULT; COMPACTION IS OPT-IN)
+    const keyExplicitAuto = authResult.apiKey?.defaultCompactionMode === 'auto';
+
+    const explicitFalse =
+      rawBody.compact_prompts === false ||
+      rawBody.enable_prompt_compaction === false ||
+      rawBody.compaction_mode === 'raw' ||
+      rawBody.extra_body?.compact_prompts === false ||
+      rawBody.extra_body?.enable_prompt_compaction === false ||
+      (Array.isArray(rawBody.transforms) && rawBody.transforms.length === 0) ||
+      req.headers.get('x-galx-compact') === 'false' ||
+      req.headers.get('x-galx-compact-prompts') === 'false' ||
+      req.headers.get('x-galx-compaction-mode') === 'raw' ||
+      req.headers.get('x-compaction-mode') === 'raw' ||
+      req.headers.get('x-skip-compaction') === 'true';
+
+    const explicitTrue =
+      rawBody.compact_prompts === true ||
+      rawBody.enable_prompt_compaction === true ||
+      rawBody.compaction_mode === 'auto' ||
+      (Array.isArray(rawBody.transforms) && rawBody.transforms.length > 0) ||
+      req.headers.get('x-galx-compact') === 'true' ||
+      req.headers.get('x-galx-compact-prompts') === 'true' ||
+      req.headers.get('x-galx-compaction-mode') === 'auto';
+
+    const compactPrompts = !explicitFalse && (explicitTrue || keyExplicitAuto);
+
     // Hierarchical Rolling Context & Long-Horizon Memory Optimization
     const rollingContext = await GalxRollingContextEngine.getInstance().buildOptimalRollingContextAsync({
       messages: normalizedMessages as any,
@@ -251,7 +278,8 @@ export async function POST(req: NextRequest) {
       userId,
       workspaceId: entitlement.orgId,
       maxTokenBudget: rollingPromptBudget,
-      recentBufferTurnCount: 8
+      recentBufferTurnCount: 8,
+      enableCompaction: compactPrompts,
     });
 
     const activeMessages = rollingContext.optimizedMessages;
@@ -456,9 +484,15 @@ export async function POST(req: NextRequest) {
     headers.set('X-Galx-Seat-Weekly-Refresh-In', currentWindows.weeklyWindow.refreshIn);
     headers.set('X-Galx-Seat-Weekly-Reset', String(Math.floor(currentWindows.weeklyWindow.resetAtMs / 1000)));
     headers.set('X-Galx-Cache-Rebate-Pct', String(entitlement.promptCacheRebatePct));
+    headers.set('X-Galx-Prompt-Compaction', compactPrompts ? 'enabled' : 'disabled');
+    headers.set('X-Galx-Compaction-Mode', compactPrompts ? 'auto' : 'raw');
     headers.set('X-Galx-Rolling-Compacted', String(rollingContext.isCompacted));
     headers.set('X-Galx-Rolling-Compacted-Turns', String(rollingContext.intermediateTurnsCompacted));
     headers.set('X-Galx-Context-Tokens', String(contextPlan.estimatedPromptTokens));
+    headers.set('X-Galx-Tokens-Saved', String(rollingContext.tokensSaved));
+    headers.set('X-Galx-Prompt-Deflation-Pct', compactPrompts && rollingContext.tokensSaved > 0 
+      ? `${Math.round((rollingContext.tokensSaved / Math.max(1, contextPlan.estimatedPromptTokens + rollingContext.tokensSaved)) * 100)}%` 
+      : '0%');
 
     if (result.isStream && result.body && typeof (result.body as any).getReader === 'function') {
       headers.set('Content-Type', 'text/event-stream; charset=utf-8');
@@ -678,6 +712,15 @@ export async function POST(req: NextRequest) {
         try {
           const parsed = JSON.parse(result.body);
           nonStreamContent = parsed.choices?.[0]?.message?.content || '';
+          if (parsed.usage) {
+            parsed.usage.prompt_tokens_details = {
+              ...(parsed.usage.prompt_tokens_details || {}),
+              cached_tokens: parsed.usage.prompt_tokens_details?.cached_tokens || 0,
+              compacted_tokens: rollingContext.tokensSaved,
+              compaction_mode: compactPrompts ? 'auto' : 'raw',
+            };
+            result.body = JSON.stringify(parsed);
+          }
         } catch {}
       }
       const lastUser = normalizedMessages.filter((message) => message.role === 'user').pop();

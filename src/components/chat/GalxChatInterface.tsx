@@ -6,7 +6,7 @@ import { ChatSidebar, ChatSession } from './ChatSidebar';
 import { ChatHeader, CHAT_MODELS } from './ChatHeader';
 import { ChatMessageList } from './ChatMessageList';
 import { ChatInputArea } from './ChatInputArea';
-import { ChatSettings, DEFAULT_CHAT_SETTINGS } from './ChatSettingsModal';
+import { ChatSettings, DEFAULT_CHAT_SETTINGS, ChatSettingsModal } from './ChatSettingsModal';
 import { ChatMessage, AttachedFile } from './ChatMessageItem';
 import { CustomPersona, BUILTIN_ANIME_PERSONAS } from './PersonaContracts';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
@@ -36,7 +36,18 @@ function BaseGalxChatInterface() {
   const [seatTier, setSeatTier] = useState<any>(null);
 
   const [settings, setSettings] = useState<ChatSettings>(DEFAULT_CHAT_SETTINGS);
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  const handleTogglePromptCompaction = () => {
+    const nextVal = settings.enablePromptCompaction === false;
+    setSettings((prev) => ({ ...prev, enablePromptCompaction: nextVal }));
+    broccoliChatDb.setPromptCompaction(nextVal);
+    try {
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({ ...settings, enablePromptCompaction: nextVal }));
+      localStorage.setItem('galx_chat_settings_v1', JSON.stringify({ ...settings, enablePromptCompaction: nextVal }));
+    } catch {}
+  };
 
   // Fetch Caller's Active Seat Tier & Quota Entitlements
   const refreshSeatTier = useCallback(() => {
@@ -98,7 +109,8 @@ function BaseGalxChatInterface() {
     let initialSessions: ChatSession[] = [];
 
     try {
-      const storedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
+      const storedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY) || localStorage.getItem('galx_chat_settings_v1');
+      const bdbCompaction = broccoliChatDb.getPromptCompaction();
       if (storedSettings) {
         const parsed = JSON.parse(storedSettings);
         setSettings((prev) => ({
@@ -106,7 +118,10 @@ function BaseGalxChatInterface() {
           ...prev,
           ...parsed,
           systemPrompt: parsed.systemPrompt || DEFAULT_CHAT_SETTINGS.systemPrompt,
+          enablePromptCompaction: typeof parsed.enablePromptCompaction === 'boolean' ? parsed.enablePromptCompaction : bdbCompaction,
         }));
+      } else {
+        setSettings((prev) => ({ ...prev, enablePromptCompaction: bdbCompaction }));
       }
 
       const storedPersonas = localStorage.getItem(PERSONAS_STORAGE_KEY);
@@ -138,6 +153,11 @@ function BaseGalxChatInterface() {
     // Subscribe to BroccoliDB cross-tab privacy consent mesh
     const unsubPrivacy = broccoliChatDb.onPrivacyConsentChange((allow) => {
       setSettings((prev) => ({ ...prev, allowModelTraining: allow }));
+    });
+
+    // Subscribe to BroccoliDB cross-tab prompt compaction preference mesh
+    const unsubCompaction = broccoliChatDb.onPromptCompactionChange((enabled) => {
+      setSettings((prev) => ({ ...prev, enablePromptCompaction: enabled }));
     });
 
     // 1-Hop Atomic Cloud Synchronizer (fetches sessions, active messages & custom personas in 1 single roundtrip)
@@ -604,8 +624,12 @@ function BaseGalxChatInterface() {
         'Content-Type': 'application/json',
         'X-Galx-Client': 'web-chat',
         'X-Galx-Allow-Training': String(settings.allowModelTraining !== false),
+        'X-Galx-Compact-Prompts': String(Boolean(settings.enablePromptCompaction)),
+        'X-Galx-Compaction-Mode': settings.enablePromptCompaction ? 'auto' : 'raw',
       };
-      if (user?.token) {
+      if (settings.customApiKey?.trim()) {
+        requestHeaders['Authorization'] = `Bearer ${settings.customApiKey.trim()}`;
+      } else if (user?.token) {
         requestHeaders['Authorization'] = `Bearer ${user.token}`;
       }
 
@@ -624,6 +648,8 @@ function BaseGalxChatInterface() {
           assistant_message_id: assistantMsgId,
           persona_id: activePersona?.id,
           allow_model_training: settings.allowModelTraining !== false,
+          enable_prompt_compaction: Boolean(settings.enablePromptCompaction),
+          compact_prompts: Boolean(settings.enablePromptCompaction),
         }),
         signal: abortController.signal,
       });
@@ -703,6 +729,10 @@ function BaseGalxChatInterface() {
         const estimatedTokens = Math.round(totalWords * 1.3);
         const ttft = firstTokenTime || 14;
         const throughput = Math.round(estimatedTokens / Math.max(0.1, elapsedSec));
+        const isCompactedHeader = response.headers.get('x-galx-rolling-compacted');
+        const isCompacted = isCompactedHeader !== null ? isCompactedHeader === 'true' : settings.enablePromptCompaction !== false;
+        const compactedTurnsHeader = response.headers.get('x-galx-rolling-compacted-turns');
+        const compactedTurns = compactedTurnsHeader ? parseInt(compactedTurnsHeader, 10) : undefined;
 
         const finalizedMessages = updatedMessages.map((m) =>
           m.id === assistantMsgId
@@ -715,6 +745,8 @@ function BaseGalxChatInterface() {
                   throughputTokSec: throughput,
                   tokens: estimatedTokens,
                   cacheSavings: '75% Cached • Saved $0.0042',
+                  compacted: isCompacted,
+                  compactedTurns,
                 },
               }
             : m
@@ -825,6 +857,7 @@ function BaseGalxChatInterface() {
         onToggleArchiveSession={handleToggleArchiveSession}
         onClearPersona={handleClearPersona}
         onPrefetchSession={(id) => broccoliChatDb.prefetchSessionMessages(id)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
       {/* 2. Main Chat Area */}
@@ -849,6 +882,7 @@ function BaseGalxChatInterface() {
           onToggleArchive={handleToggleArchiveCurrentChat}
           onNewChat={() => handleNewChat(activePersona)}
           seatTier={seatTier}
+          onOpenSettings={() => setIsSettingsOpen(true)}
         />
 
         {/* Chat Messages Feed */}
@@ -874,8 +908,25 @@ function BaseGalxChatInterface() {
           onSend={() => handleSendMessage()}
           onStop={handleStopGeneration}
           selectedModelName={activePersona ? activePersona.name : selectedModelId}
+          enablePromptCompaction={settings.enablePromptCompaction !== false}
+          onTogglePromptCompaction={handleTogglePromptCompaction}
         />
       </div>
+
+      {/* In-Chat Settings & Compute Preferences Modal */}
+      <ChatSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        settings={settings}
+        onSaveSettings={(newSettings) => {
+          setSettings(newSettings);
+          broccoliChatDb.setPromptCompaction(newSettings.enablePromptCompaction !== false);
+          try {
+            localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(newSettings));
+            localStorage.setItem('galx_chat_settings_v1', JSON.stringify(newSettings));
+          } catch {}
+        }}
+      />
     </div>
   );
 }

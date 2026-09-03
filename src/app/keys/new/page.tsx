@@ -52,6 +52,7 @@ interface Preset {
   description: string;
   badge?: string;
   defaultLabel?: string;
+  defaultCompactionMode?: 'auto' | 'raw';
 }
 
 const PRESETS: Preset[] = [
@@ -62,7 +63,8 @@ const PRESETS: Preset[] = [
     rpm: 120,
     icon: Laptop,
     description: 'High-burst rate limit optimized for active background completions and codebase indexing.',
-    badge: 'Popular'
+    badge: 'Popular',
+    defaultCompactionMode: 'raw'
   },
   {
     id: 'agent',
@@ -71,7 +73,8 @@ const PRESETS: Preset[] = [
     rpm: 300,
     icon: Bot,
     description: 'Ultra-low latency connection pool with high concurrency for parallel tool calling loops.',
-    badge: 'High Throughput'
+    badge: 'High Throughput',
+    defaultCompactionMode: 'raw'
   },
   {
     id: 'production',
@@ -79,7 +82,8 @@ const PRESETS: Preset[] = [
     defaultLabel: 'Production API Backend',
     rpm: 600,
     icon: Server,
-    description: 'Full SLA enterprise endpoint with automated circuit breaker failover to fallback models.'
+    description: 'Full SLA enterprise endpoint with automated circuit breaker failover to fallback models.',
+    defaultCompactionMode: 'raw'
   },
   {
     id: 'custom',
@@ -87,7 +91,8 @@ const PRESETS: Preset[] = [
     defaultLabel: 'Custom Prototyping Key',
     rpm: 60,
     icon: Terminal,
-    description: 'Configure custom spend caps and strict query per minute throttling for cost control.'
+    description: 'Configure custom spend caps and strict query per minute throttling for cost control.',
+    defaultCompactionMode: 'raw'
   }
 ];
 
@@ -97,6 +102,7 @@ function BaseCreateKeyPage() {
   const [selectedPresetId, setSelectedPresetId] = useState<string>('cursor');
   const [name, setName] = useState('Cursor IDE / AI Editor');
   const [rateLimitPerMinute, setRateLimitPerMinute] = useState(120);
+  const [compactionMode, setCompactionMode] = useState<'auto' | 'raw'>('raw');
   const [createdSecretKey, setCreatedSecretKey] = useState<string | null>(null);
   const [activeSnippetTab, setActiveSnippetTab] = useState<'cli' | 'cursor' | 'python' | 'node' | 'env' | 'continue' | 'curl'>('cli');
   const [copiedKey, setCopiedKey] = useState(false);
@@ -118,6 +124,9 @@ function BaseCreateKeyPage() {
     setSelectedPresetId(preset.id);
     setName(preset.defaultLabel || preset.name);
     setRateLimitPerMinute(preset.rpm);
+    if (preset.defaultCompactionMode) {
+      setCompactionMode(preset.defaultCompactionMode);
+    }
   };
 
   const mintKeyRequest = async (currentBalance: number) => {
@@ -130,7 +139,8 @@ function BaseCreateKeyPage() {
           name: name.trim() || 'Default Developer Key',
           rateLimitPerMinute: Number(rateLimitPerMinute),
           hasVerifiedDeposit: true,
-          depositedAmount: currentBalance
+          depositedAmount: currentBalance,
+          defaultCompactionMode: compactionMode,
         })
       });
       const data = await res.json();
@@ -607,6 +617,60 @@ DEFAULT_MODEL="gpt-5.6-sol"`,
                   <option value={300} className="bg-zinc-900 text-white">300 RPM (High-Throughput)</option>
                   <option value={600} className="bg-zinc-900 text-white">600 RPM (Production Fleet)</option>
                 </select>
+              </div>
+
+              {/* Prompt Compaction Policy */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider font-mono">
+                  3. Default Prompt Compaction Policy
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setCompactionMode('auto')}
+                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                      compactionMode === 'auto'
+                        ? 'bg-cyan-500/10 border-cyan-500/50 shadow-lg shadow-cyan-500/10'
+                        : 'bg-black/30 border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <Zap className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>⚡ Compacted (Default)</span>
+                      </span>
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300">
+                        -64% Tokens
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400">
+                      Deflates repetitive conversation history and redundant turns for lower latency and cost.
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setCompactionMode('raw')}
+                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                      compactionMode === 'raw'
+                        ? 'bg-amber-500/10 border-amber-500/50 shadow-lg shadow-amber-500/10'
+                        : 'bg-black/30 border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <FileCode className="w-3.5 h-3.5 text-amber-400" />
+                        <span>📝 Raw Passthrough</span>
+                      </span>
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">
+                        100% Verbatim
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400">
+                      Recommended for Cursor, Windsurf, AST code diffing, and exact byte-for-byte fidelity.
+                    </p>
+                  </button>
+                </div>
               </div>
 
               {/* Value / Trust Points */}

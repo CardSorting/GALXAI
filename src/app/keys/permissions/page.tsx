@@ -17,7 +17,9 @@ import {
   Radio,
   Cpu,
   Layers,
-  Save
+  Save,
+  Zap,
+  FileCode
 } from 'lucide-react';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
@@ -28,6 +30,7 @@ export default function KeyPermissionsPage() {
   const [ipAllowlist, setIpAllowlist] = useState('0.0.0.0/0');
   const [allowedScopes, setAllowedScopes] = useState<string[]>(['*']);
   const [keyTtlDays, setKeyTtlDays] = useState<number>(0);
+  const [compactionMode, setCompactionMode] = useState<'auto' | 'raw'>('raw');
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -65,6 +68,7 @@ export default function KeyPermissionsPage() {
     } else {
       setKeyTtlDays(0);
     }
+    setCompactionMode(key.defaultCompactionMode === 'raw' ? 'raw' : 'auto');
   };
 
   const handleSelectKey = (id: string) => {
@@ -105,7 +109,8 @@ export default function KeyPermissionsPage() {
         body: JSON.stringify({
           ipWhitelist: parsedIps.length > 0 ? parsedIps : ['0.0.0.0/0'],
           scopes: allowedScopes,
-          expiresInDays: keyTtlDays
+          expiresInDays: keyTtlDays,
+          defaultCompactionMode: compactionMode,
         })
       });
 
@@ -246,6 +251,65 @@ export default function KeyPermissionsPage() {
                     <span className="text-[11px] text-zinc-500 block font-sans">
                       Keys are automatically rendered invalid once their expiration timestamp elapses.
                     </span>
+                  </div>
+                </div>
+
+                {/* Default Prompt Compaction Policy */}
+                <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10 sm:col-span-2">
+                  <div className="space-y-1">
+                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-cyan-400" />
+                      Default Gateway Prompt Policy
+                    </h3>
+                    <p className="text-xs text-zinc-400">Configure how requests minted with this key are preprocessed by default.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setCompactionMode('auto')}
+                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                        compactionMode === 'auto'
+                          ? 'bg-cyan-500/10 border-cyan-500/50 shadow-lg shadow-cyan-500/10'
+                          : 'bg-black/30 border-white/10 hover:border-white/20'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <Zap className="w-3.5 h-3.5 text-cyan-400" />
+                          <span>⚡ Compacted (Default)</span>
+                        </span>
+                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300">
+                          -64% Tokens
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400">
+                        Deflates repetitive conversation history and redundant turns for lower latency and cost.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setCompactionMode('raw')}
+                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                        compactionMode === 'raw'
+                          ? 'bg-amber-500/10 border-amber-500/50 shadow-lg shadow-amber-500/10'
+                          : 'bg-black/30 border-white/10 hover:border-white/20'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <FileCode className="w-3.5 h-3.5 text-amber-400" />
+                          <span>📝 Raw Passthrough</span>
+                        </span>
+                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">
+                          100% Verbatim
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400">
+                        Recommended for Cursor, Windsurf, AST code diffing, and exact byte-for-byte fidelity.
+                      </p>
+                    </button>
                   </div>
                 </div>
               </div>

@@ -597,16 +597,42 @@ export class GalxEdgeGateway {
     const modelSpec = ModelCatalog.resolveModel(governanceDecision.effectiveModel);
     body.model = modelSpec.id;
 
-    // Apply Context Compaction (Deflate O(N^2) History Bloat)
-    const compaction = ContextCompactor.compact(body.messages as any);
-    if (compaction.wasCompacted) {
-      body.messages = compaction.compactedMessages as any;
-    }
+    const explicitFalse =
+      body.compact_prompts === false ||
+      body.enable_prompt_compaction === false ||
+      body.compaction_mode === 'raw' ||
+      body.extra_body?.compact_prompts === false ||
+      body.extra_body?.enable_prompt_compaction === false ||
+      (Array.isArray(body.transforms) && body.transforms.length === 0) ||
+      request.headers.get('x-galx-compact') === 'false' ||
+      request.headers.get('x-galx-compact-prompts') === 'false' ||
+      request.headers.get('x-galx-compaction-mode') === 'raw' ||
+      request.headers.get('x-compaction-mode') === 'raw' ||
+      request.headers.get('x-skip-compaction') === 'true';
 
-    // Apply Output Verbosity Optimization (Slash Conversational Fluff)
-    const verbosity = OutputVerbosityOptimizer.optimizeRequest(body.messages as any, { isApiCall: true });
-    if (verbosity.result.wasOptimized) {
-      body.messages = verbosity.optimizedMessages as any;
+    const explicitTrue =
+      body.compact_prompts === true ||
+      body.enable_prompt_compaction === true ||
+      body.compaction_mode === 'auto' ||
+      (Array.isArray(body.transforms) && body.transforms.length > 0) ||
+      request.headers.get('x-galx-compact') === 'true' ||
+      request.headers.get('x-galx-compact-prompts') === 'true' ||
+      request.headers.get('x-galx-compaction-mode') === 'auto';
+
+    const compactPrompts = !explicitFalse && explicitTrue;
+
+    if (compactPrompts) {
+      // Apply Context Compaction (Deflate O(N^2) History Bloat)
+      const compaction = ContextCompactor.compact(body.messages as any);
+      if (compaction.wasCompacted) {
+        body.messages = compaction.compactedMessages as any;
+      }
+
+      // Apply Output Verbosity Optimization (Slash Conversational Fluff)
+      const verbosity = OutputVerbosityOptimizer.optimizeRequest(body.messages as any, { isApiCall: true });
+      if (verbosity.result.wasOptimized) {
+        body.messages = verbosity.optimizedMessages as any;
+      }
     }
 
     // Ingest into Unified BroccoliDB AI Spend Substrate (CAS Vault, WAL, Lease, CDC)

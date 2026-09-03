@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Sliders, Sparkles, RotateCcw, Check, Clock, Calendar, Gauge, Shield, ExternalLink } from 'lucide-react';
+import { X, Sliders, Sparkles, RotateCcw, Check, Clock, Calendar, Gauge, Shield, ExternalLink, Minimize2, FileText, Key, Eye, EyeOff } from 'lucide-react';
 import type { SeatTierPublicSummary } from '@/core/subscription/GalxSeatTierEngine';
 import { GALX_DEFAULT_SYSTEM_PROMPT } from '@/core/prompt/GalxDefaultSystemPrompt';
 
@@ -14,6 +14,7 @@ export interface ChatSettings {
   enablePromptCaching: boolean;
   webSearchEnabled: boolean;
   allowModelTraining?: boolean;
+  enablePromptCompaction?: boolean;
 }
 
 export const DEFAULT_CHAT_SETTINGS: ChatSettings = {
@@ -25,6 +26,7 @@ export const DEFAULT_CHAT_SETTINGS: ChatSettings = {
   enablePromptCaching: true,
   webSearchEnabled: false,
   allowModelTraining: true,
+  enablePromptCompaction: false,
 };
 
 interface ChatSettingsModalProps {
@@ -38,6 +40,7 @@ export function ChatSettingsModal({ isOpen, onClose, settings, onSaveSettings }:
   const [localSettings, setLocalSettings] = useState<ChatSettings>(settings);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [tierData, setTierData] = useState<SeatTierPublicSummary | null>(null);
+  const [showApiKey, setShowApiKey] = useState(false);
   const [loadingTier, setLoadingTier] = useState(false);
 
   useEffect(() => {
@@ -297,6 +300,95 @@ export function ChatSettingsModal({ isOpen, onClose, settings, onSaveSettings }:
             <div className="flex items-center gap-2 pt-1 border-t border-white/5 text-[10px] text-zinc-400 font-mono">
               <Shield className="w-3 h-3 text-emerald-400 shrink-0" />
               <span>In-flight PII redaction active • Direct API keys are always 100% private</span>
+            </div>
+          </div>
+
+          {/* Prompt Compaction & Transformation (Optional Raw Prompt Mode) */}
+          <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#0c1220] to-[#080d18] border border-white/10 space-y-2.5 shadow-lg">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-white text-xs tracking-tight">Prompt Compaction & Transformation</span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase ${
+                      localSettings.enablePromptCompaction
+                        ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                        : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                    }`}
+                  >
+                    {localSettings.enablePromptCompaction ? 'Opt-In (Compacted)' : 'Raw (Default - Untransformed)'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-zinc-400 leading-relaxed">
+                  By default, all user prompts are sent 100% byte-for-byte verbatim to the model without alteration. Turn on to test experimental multi-turn history deflation and token savings.
+                </p>
+              </div>
+
+              {/* Compaction Switch Toggle */}
+              <button
+                type="button"
+                role="switch"
+                aria-checked={Boolean(localSettings.enablePromptCompaction)}
+                onClick={() =>
+                  setLocalSettings({
+                    ...localSettings,
+                    enablePromptCompaction: !localSettings.enablePromptCompaction,
+                  })
+                }
+                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  localSettings.enablePromptCompaction ? 'bg-cyan-500' : 'bg-zinc-700'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    localSettings.enablePromptCompaction ? 'translate-x-4' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 pt-1 border-t border-white/5 text-[10px] text-zinc-400 font-mono">
+              <Minimize2 className="w-3 h-3 text-cyan-400 shrink-0" />
+              <span>BroccoliDB Adaptive Compaction • 100% byte-for-byte fidelity when disabled</span>
+            </div>
+          </div>
+
+          {/* Developer API Key (BYOK) */}
+          <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#0c1220] to-[#080d18] border border-white/10 space-y-2.5 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Key className="w-4 h-4 text-cyan-400" />
+                <span className="font-bold text-white text-xs tracking-tight">Developer API Key (BYOK)</span>
+              </div>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-bold">
+                Optional
+              </span>
+            </div>
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
+              Use your own provider key or custom Gateway bearer token. Stored locally in your browser and never logged.
+            </p>
+            <div className="relative">
+              <input
+                type={showApiKey ? 'text' : 'password'}
+                value={localSettings.customApiKey || ''}
+                onChange={(e) => setLocalSettings({ ...localSettings, customApiKey: e.target.value })}
+                placeholder="sk-live-... or custom provider token"
+                className="w-full py-2.5 pl-3.5 pr-10 rounded-xl bg-black/50 border border-white/10 text-xs font-mono text-white placeholder:text-zinc-600 focus:outline-none focus:border-cyan-500/50"
+              />
+              <button
+                type="button"
+                onClick={() => setShowApiKey(!showApiKey)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 cursor-pointer"
+                title={showApiKey ? 'Hide Key' : 'Show Key'}
+              >
+                {showApiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+            <div className="flex items-center justify-between text-[10px] text-zinc-500 font-mono pt-0.5">
+              <span>Default: Uses active GALXAI seat quota</span>
+              <a href="/keys" className="text-cyan-400 hover:text-cyan-300 hover:underline">
+                Manage Gateway Keys →
+              </a>
             </div>
           </div>
         </div>

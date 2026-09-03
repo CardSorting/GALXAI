@@ -32,6 +32,8 @@ export interface TransactionDetail {
   promptTokens?: number;
   completionTokens?: number;
   cachedTokens?: number;
+  compactedTokens?: number;
+  compactionMode?: 'auto' | 'raw';
   totalTokens?: number;
   savingsUsd?: number;
   retailEquivalentUsd?: number;
@@ -173,6 +175,39 @@ function BaseTransactionDetailModal({ transaction, onClose }: TransactionDetailM
                 <span className="text-[10px] text-cyan-400 uppercase">Total Tokens</span>
                 <div className="font-bold text-cyan-300 text-sm">{totalTokens.toLocaleString()}</div>
                 <div className="text-[10px] text-zinc-500">Combined stream</div>
+              </div>
+            </div>
+
+            {/* Prompt Compaction & Transformation Policy */}
+            <div className="p-3.5 rounded-2xl bg-black/40 border border-white/10 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs uppercase font-bold text-zinc-400 flex items-center gap-1.5">
+                  <Zap className="w-3.5 h-3.5 text-cyan-400" />
+                  Prompt Compaction Policy
+                </span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase font-mono ${
+                  transaction.compactionMode === 'raw'
+                    ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30'
+                    : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/30'
+                }`}>
+                  {transaction.compactionMode === 'raw' ? '📝 Raw Mode (Verbatim)' : '⚡ Compacted (Active)'}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono">
+                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                  <span className="text-[10px] text-zinc-500 block">Compacted Tokens:</span>
+                  <span className="text-cyan-300 font-bold">{(transaction.compactedTokens || 0).toLocaleString()} tok</span>
+                </div>
+                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                  <span className="text-[10px] text-zinc-500 block">OpenAI Details:</span>
+                  <span className="text-zinc-300 text-[10px]">prompt_tokens_details</span>
+                </div>
+                <div className="p-2 rounded-xl bg-black/50 border border-white/5">
+                  <span className="text-[10px] text-zinc-500 block">Byte-for-Byte Fidelity:</span>
+                  <span className={transaction.compactionMode === 'raw' ? 'text-amber-400 font-bold' : 'text-zinc-400'}>
+                    {transaction.compactionMode === 'raw' ? '100% Guaranteed' : 'Lossless Deflated'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>

@@ -105,6 +105,12 @@ export class GalxAIClientCore {
       this.defaultHeaders['OpenAI-Account'] = accountId;
     }
 
+    const compactPrompts = opts.compactPrompts ?? opts.compact_prompts;
+    if (typeof compactPrompts === 'boolean') {
+      this.defaultHeaders['X-Galx-Compact-Prompts'] = String(compactPrompts);
+      this.defaultHeaders['X-Galx-Compaction-Mode'] = compactPrompts ? 'auto' : 'raw';
+    }
+
     this.customFetch = opts.fetch;
     this.middleware = new MiddlewarePipeline();
   }

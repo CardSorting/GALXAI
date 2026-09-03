@@ -19,9 +19,10 @@ const BROCCOLI_ETAG_KEY = 'galx_broccolidb_etag_v3';
 const LEGACY_SESSIONS_KEY = 'galx_chat_sessions_v2';
 const LEGACY_MSG_KEY_PREFIX = 'galx_chat_msg_';
 const BROCCOLI_PRIVACY_CONSENT_KEY = 'galx_privacy_consent_v1';
+const BROCCOLI_COMPACTION_PREFERENCE_KEY = 'galx_prompt_compaction_v1';
 
 export interface ChatMeshSyncEvent {
-  type: 'SESSION_UPSERT' | 'SESSION_DELETE' | 'MESSAGES_SAVE' | 'FORCE_SYNC' | 'PRIVACY_CONSENT_CHANGE';
+  type: 'SESSION_UPSERT' | 'SESSION_DELETE' | 'MESSAGES_SAVE' | 'FORCE_SYNC' | 'PRIVACY_CONSENT_CHANGE' | 'COMPACTION_PREFERENCE_CHANGE';
   payload?: any;
   tabId: string;
 }
@@ -32,6 +33,7 @@ export class BroccoliChatDatabase {
   private readonly messagesTable: BroccoliDbTable<ChatMessage & { sessionId: string }>;
   private readonly listeners = new Set<(sessions: ChatSession[]) => void>();
   private readonly privacyListeners = new Set<(allowModelTraining: boolean) => void>();
+  private readonly compactionListeners = new Set<(enabled: boolean) => void>();
   private readonly prefetchedSessions = new Set<string>();
   private isHydrated = false;
   private syncInProgress = false;
@@ -105,6 +107,10 @@ export class BroccoliChatDatabase {
         } else if (type === 'PRIVACY_CONSENT_CHANGE' && typeof payload?.allowModelTraining === 'boolean') {
           for (const listener of this.privacyListeners) {
             try { listener(payload.allowModelTraining); } catch {}
+          }
+        } else if (type === 'COMPACTION_PREFERENCE_CHANGE' && typeof payload?.enabled === 'boolean') {
+          for (const listener of this.compactionListeners) {
+            try { listener(payload.enabled); } catch {}
           }
         }
       };
@@ -644,6 +650,45 @@ export class BroccoliChatDatabase {
   public onPrivacyConsentChange(listener: (allowModelTraining: boolean) => void): () => void {
     this.privacyListeners.add(listener);
     return () => this.privacyListeners.delete(listener);
+  }
+
+  /**
+   * Sets the user's prompt compaction / transformation preference and broadcasts across tabs in <0.1ms.
+   */
+  public setPromptCompaction(enabled: boolean): void {
+    try {
+      SafeStorage.setJSON(BROCCOLI_COMPACTION_PREFERENCE_KEY, {
+        enabled,
+        updatedAt: Date.now(),
+      });
+      this.broadcastMutation('COMPACTION_PREFERENCE_CHANGE', { enabled });
+      for (const listener of this.compactionListeners) {
+        try { listener(enabled); } catch {}
+      }
+    } catch {}
+  }
+
+  /**
+   * Retrieves current prompt compaction preference (defaults to false for safety, verbatim prompts, and production stability).
+   */
+  public getPromptCompaction(): boolean {
+    try {
+      const stored = SafeStorage.getJSON<{ enabled: boolean }>(BROCCOLI_COMPACTION_PREFERENCE_KEY, {
+        enabled: false,
+      });
+      if (stored && typeof stored.enabled === 'boolean') {
+        return stored.enabled;
+      }
+    } catch {}
+    return false;
+  }
+
+  /**
+   * Subscribes to cross-tab prompt compaction preference modifications.
+   */
+  public onPromptCompactionChange(listener: (enabled: boolean) => void): () => void {
+    this.compactionListeners.add(listener);
+    return () => this.compactionListeners.delete(listener);
   }
 
   /**

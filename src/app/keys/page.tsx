@@ -53,13 +53,14 @@ interface QuickPreset {
   defaultLabel: string;
   rpm: number;
   icon: React.ComponentType<{ className?: string }>;
+  defaultCompactionMode?: 'auto' | 'raw';
 }
 
 const QUICK_PRESETS: QuickPreset[] = [
-  { id: 'cursor', name: 'Cursor / Windsurf', defaultLabel: 'Cursor IDE Key', rpm: 120, icon: Laptop },
-  { id: 'backend', name: 'Production Backend', defaultLabel: 'Production API Backend', rpm: 300, icon: Server },
-  { id: 'agent', name: 'Agent Swarm Fleet', defaultLabel: 'Autonomous Agent Fleet', rpm: 600, icon: Bot },
-  { id: 'cli', name: 'Local CLI / Scripts', defaultLabel: 'CLI & Notebook Key', rpm: 60, icon: Terminal }
+  { id: 'cursor', name: 'Cursor / Windsurf', defaultLabel: 'Cursor IDE Key', rpm: 120, icon: Laptop, defaultCompactionMode: 'raw' },
+  { id: 'backend', name: 'Production Backend', defaultLabel: 'Production API Backend', rpm: 300, icon: Server, defaultCompactionMode: 'raw' },
+  { id: 'agent', name: 'Agent Swarm Fleet', defaultLabel: 'Autonomous Agent Fleet', rpm: 600, icon: Bot, defaultCompactionMode: 'raw' },
+  { id: 'cli', name: 'Local CLI / Scripts', defaultLabel: 'CLI & Notebook Key', rpm: 60, icon: Terminal, defaultCompactionMode: 'raw' }
 ];
 
 type SnippetTab = 'curl' | 'python' | 'ts_sdk' | 'openai_sdk' | 'anthropic_sdk' | 'cursor' | 'litellm' | 'vercel_ai';
@@ -78,6 +79,8 @@ function BaseGatewayKeysPage() {
   const [paywallSelectedAmt, setPaywallSelectedAmt] = useState<number>(25);
   const [activeSnippetTab, setActiveSnippetTab] = useState<SnippetTab>('python');
   const [environmentFilter, setEnvironmentFilter] = useState<'all' | 'live' | 'test'>('all');
+  const [snippetCompaction, setSnippetCompaction] = useState<boolean>(false);
+  const [newKeyCompactionMode, setNewKeyCompactionMode] = useState<'auto' | 'raw'>('raw');
 
   const handleOpenPaywall = (amt: number = 25) => {
     setPaywallSelectedAmt(amt);
@@ -114,7 +117,8 @@ function BaseGatewayKeysPage() {
     balanceAmount: number,
     rpm: number = selectedRpm,
     env: 'live' | 'test' = newKeyEnv,
-    expiresDays: number = selectedExpiresInDays
+    expiresDays: number = selectedExpiresInDays,
+    compactionMode: 'auto' | 'raw' = newKeyCompactionMode
   ) => {
     setIsLoading(true);
     try {
@@ -127,7 +131,8 @@ function BaseGatewayKeysPage() {
           rateLimitPerMinute: rpm,
           expiresInDays: expiresDays > 0 ? expiresDays : undefined,
           hasVerifiedDeposit: true,
-          depositedAmount: balanceAmount
+          depositedAmount: balanceAmount,
+          defaultCompactionMode: compactionMode,
         })
       });
       if (res.data?.success && res.data.key?.apiKey) {
@@ -145,7 +150,7 @@ function BaseGatewayKeysPage() {
     if (!newKeyName.trim()) return;
 
     // Direct 1-click key creation with $30 Free Compute Grant
-    await createKeyDirectly(newKeyName, walletBalance, selectedRpm, newKeyEnv, selectedExpiresInDays);
+    await createKeyDirectly(newKeyName, walletBalance, selectedRpm, newKeyEnv, selectedExpiresInDays, newKeyCompactionMode);
   };
 
   const handlePaywallSuccess = async (depositAmt: number, totalCredit: number) => {
@@ -208,6 +213,10 @@ function BaseGatewayKeysPage() {
   const applyQuickPreset = (preset: QuickPreset) => {
     setNewKeyName(preset.defaultLabel);
     setSelectedRpm(preset.rpm);
+    if (preset.defaultCompactionMode) {
+      setNewKeyCompactionMode(preset.defaultCompactionMode);
+      setSnippetCompaction(preset.defaultCompactionMode === 'auto');
+    }
   };
 
   const runGatewaySmokeTest = async () => {
@@ -244,7 +253,8 @@ function BaseGatewayKeysPage() {
     python: {
       title: 'Python OpenAI SDK',
       lang: 'python',
-      code: `from openai import OpenAI
+      code: snippetCompaction
+        ? `from openai import OpenAI
 
 # Zero friction: drop in GALXAI base_url into standard OpenAI client
 client = OpenAI(
@@ -263,11 +273,32 @@ response = client.chat.completions.create(
 )
 
 print(response.choices[0].message.content)`
+        : `from openai import OpenAI
+
+# Raw Prompt Mode: Pass verbatim prompts without transformation
+client = OpenAI(
+    base_url="https://galx.ai/v1",
+    api_key="${activeDisplayKey}",
+    default_headers={"X-Galx-Compact-Prompts": "false"}
+)
+
+response = client.chat.completions.create(
+    model="gpt-5.6-sol",
+    messages=[
+        {"role": "system", "content": "You are an elite coding assistant."},
+        {"role": "user", "content": "Write a high-performance Rust LRU cache."}
+    ],
+    extra_body={"compact_prompts": False},
+    temperature=0.7
+)
+
+print(response.choices[0].message.content)`
     },
     openai_sdk: {
       title: 'Node.js OpenAI SDK',
       lang: 'typescript',
-      code: `import OpenAI from 'openai';
+      code: snippetCompaction
+        ? `import OpenAI from 'openai';
 
 const openai = new OpenAI({
   baseURL: 'https://galx.ai/v1',
@@ -280,6 +311,23 @@ const completion = await openai.chat.completions.create({
 });
 
 console.log(completion.choices[0].message.content);`
+        : `import OpenAI from 'openai';
+
+// Raw Prompt Mode: Transmits 100% byte-for-byte untransformed prompts
+const openai = new OpenAI({
+  baseURL: 'https://galx.ai/v1',
+  apiKey: '${activeDisplayKey}',
+  defaultHeaders: { 'X-Galx-Compact-Prompts': 'false' }
+});
+
+const completion = await openai.chat.completions.create({
+  model: 'gpt-5.6-sol',
+  messages: [{ role: 'user', content: 'Generate a distributed task queue in Go.' }],
+  // @ts-ignore custom gateway body override
+  compact_prompts: false
+});
+
+console.log(completion.choices[0].message.content);`
     },
     anthropic_sdk: {
       title: 'Anthropic SDK / Claude Code',
@@ -289,7 +337,7 @@ console.log(completion.choices[0].message.content);`
 // Universal Anthropic SDK Drop-in compatibility (/v1/messages)
 const anthropic = new Anthropic({
   baseURL: 'https://galx.ai',
-  apiKey: '${activeDisplayKey}'
+  apiKey: '${activeDisplayKey}'${!snippetCompaction ? `,\n  defaultHeaders: { 'X-Galx-Compact-Prompts': 'false' }` : ''}
 });
 
 const message = await anthropic.messages.create({
@@ -303,7 +351,8 @@ console.log(message.content[0]);`
     ts_sdk: {
       title: '@galxai/sdk Direct',
       lang: 'typescript',
-      code: `import { GalxAIClient } from '@galxai/sdk';
+      code: snippetCompaction
+        ? `import { GalxAIClient } from '@galxai/sdk';
 
 const galx = new GalxAIClient('${activeDisplayKey}');
 
@@ -316,11 +365,21 @@ const parsed = await galx.extract('Dr. Sarah Chen, 34, Neurologist at Stanford',
   age: { type: 'number' },
   institution: { type: 'string' }
 });`
+        : `import { GalxAIClient } from '@galxai/sdk';
+
+// Raw Prompt Mode: Disable compaction across client requests
+const galx = new GalxAIClient({
+  apiKey: '${activeDisplayKey}',
+  compactPrompts: false
+});
+
+const answer = await galx.run('Explain quantum key distribution simply.');`
     },
     curl: {
       title: 'cURL Terminal',
       lang: 'bash',
-      code: `curl -X POST https://galx.ai/v1/chat/completions \\
+      code: snippetCompaction
+        ? `curl -X POST https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer ${activeDisplayKey}" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -329,11 +388,23 @@ const parsed = await galx.extract('Dr. Sarah Chen, 34, Neurologist at Stanford',
       {"role": "user", "content": "Hello GALXAI!"}
     ]
   }'`
+        : `curl -X POST https://galx.ai/v1/chat/completions \\
+  -H "Authorization: Bearer ${activeDisplayKey}" \\
+  -H "Content-Type: application/json" \\
+  -H "X-Galx-Compact-Prompts: false" \\
+  -d '{
+    "model": "sol",
+    "compact_prompts": false,
+    "messages": [
+      {"role": "user", "content": "Hello GALXAI!"}
+    ]
+  }'`
     },
     cursor: {
       title: 'Cursor & Windsurf IDE',
       lang: 'json',
-      code: `// Add to .cursor/settings.json or Cursor Models configuration:
+      code: snippetCompaction
+        ? `// Add to .cursor/settings.json or Cursor Models configuration:
 {
   "openai.baseUrl": "https://galx.ai/v1",
   "openai.apiKey": "${activeDisplayKey}",
@@ -344,11 +415,25 @@ const parsed = await galx.extract('Dr. Sarah Chen, 34, Neurologist at Stanford',
     "openai-gpt-image-2"
   ]
 }`
+        : `// Add to .cursor/settings.json or Cursor Models configuration:
+{
+  "openai.baseUrl": "https://galx.ai/v1",
+  "openai.apiKey": "${activeDisplayKey}",
+  "openai.customHeaders": {
+    "X-Galx-Compact-Prompts": "false"
+  },
+  "models": [
+    "gpt-5.6-sol",
+    "gpt-5.6-terra",
+    "gpt-5.6-luna"
+  ]
+}`
     },
     litellm: {
       title: 'LiteLLM Proxy Config',
       lang: 'yaml',
-      code: `model_list:
+      code: snippetCompaction
+        ? `model_list:
   - model_name: gpt-5.6-sol
     litellm_params:
       model: openai/gpt-5.6-sol
@@ -359,6 +444,14 @@ const parsed = await galx.extract('Dr. Sarah Chen, 34, Neurologist at Stanford',
       model: openai/gpt-5.6-terra
       api_base: https://galx.ai/v1
       api_key: ${activeDisplayKey}`
+        : `model_list:
+  - model_name: gpt-5.6-sol
+    litellm_params:
+      model: openai/gpt-5.6-sol
+      api_base: https://galx.ai/v1
+      api_key: ${activeDisplayKey}
+      extra_headers:
+        X-Galx-Compact-Prompts: "false"`
     },
     vercel_ai: {
       title: 'Vercel AI SDK',
@@ -368,7 +461,7 @@ import { generateText } from 'ai';
 
 const galxai = createOpenAI({
   baseURL: 'https://galx.ai/v1',
-  apiKey: '${activeDisplayKey}'
+  apiKey: '${activeDisplayKey}'${!snippetCompaction ? `,\n  headers: { 'X-Galx-Compact-Prompts': 'false' }` : ''}
 });
 
 const { text } = await generateText({
@@ -650,7 +743,7 @@ const { text } = await generateText({
                   />
 
                   {/* Environment Selector */}
-                  <div className="flex rounded-xl bg-black/40 p-1 border border-white/10 text-xs font-mono">
+                  <div className="flex items-center gap-1.5 p-1 bg-black/40 rounded-xl border border-white/10 text-xs font-mono">
                     <button
                       type="button"
                       onClick={() => setNewKeyEnv('live')}
@@ -660,7 +753,7 @@ const { text } = await generateText({
                           : 'text-zinc-400 hover:text-white'
                       }`}
                     >
-                      Live Key
+                      Live
                     </button>
                     <button
                       type="button"
@@ -671,7 +764,35 @@ const { text } = await generateText({
                           : 'text-zinc-400 hover:text-white'
                       }`}
                     >
-                      Test Key
+                      Test
+                    </button>
+                  </div>
+
+                  {/* Compaction Mode Preset Selector */}
+                  <div className="flex items-center gap-1.5 p-1 bg-black/40 rounded-xl border border-white/10 text-xs font-mono">
+                    <button
+                      type="button"
+                      onClick={() => setNewKeyCompactionMode('raw')}
+                      className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                        newKeyCompactionMode === 'raw'
+                          ? 'bg-amber-400 text-black shadow-sm'
+                          : 'text-zinc-400 hover:text-white'
+                      }`}
+                      title="Raw: 100% byte-for-byte fidelity (Safe Default)"
+                    >
+                      📝 Raw (Default)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewKeyCompactionMode('auto')}
+                      className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                        newKeyCompactionMode === 'auto'
+                          ? 'bg-cyan-500 text-black shadow-sm'
+                          : 'text-zinc-400 hover:text-white'
+                      }`}
+                      title="Compacted: Deflates repetitive history and whitespace"
+                    >
+                      ⚡ Compacted
                     </button>
                   </div>
 
@@ -729,6 +850,35 @@ const { text } = await generateText({
                     {tab.label}
                   </button>
                 ))}
+              </div>
+
+              {/* Developer Gateway Compaction Toggle */}
+              <div className="flex items-center gap-1.5 p-1 bg-black/60 rounded-xl border border-white/10 text-xs font-mono">
+                <span className="text-[10px] text-zinc-400 pl-2 hidden sm:inline">Prompt Policy:</span>
+                <button
+                  type="button"
+                  onClick={() => setSnippetCompaction(false)}
+                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-bold text-[11px] ${
+                    !snippetCompaction
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm shadow-amber-500/10'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                  title="Raw Mode: Transmits 100% byte-for-byte untransformed prompts (Default)"
+                >
+                  📝 Raw (Default)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSnippetCompaction(true)}
+                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-bold text-[11px] ${
+                    snippetCompaction
+                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm shadow-cyan-500/10'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                  title="Compacted Mode: Multi-turn compaction & token deflation"
+                >
+                  ⚡ Compacted (Opt-In)
+                </button>
               </div>
             </div>
 
@@ -881,6 +1031,7 @@ const { text } = await generateText({
                     <tr className="border-b border-white/10 text-zinc-400 font-bold uppercase text-[10px]">
                       <th className="py-3 px-4 font-sans">Name / Label</th>
                       <th className="py-3 px-4 font-sans">Env</th>
+                      <th className="py-3 px-4 font-sans">Policy</th>
                       <th className="py-3 px-4 font-sans">Key Prefix</th>
                       <th className="py-3 px-4 font-sans">Rate Limit</th>
                       <th className="py-3 px-4 font-sans">Total Requests</th>
@@ -892,6 +1043,7 @@ const { text } = await generateText({
                   <tbody className="divide-y divide-white/5">
                     {filteredKeys.map((k) => {
                       const isLive = (k.environment || (k.keyPrefix?.includes('live') || k.prefix?.includes('live') ? 'live' : 'test')) === 'live';
+                      const isRaw = k.defaultCompactionMode === 'raw';
                       return (
                         <tr key={k.id} className="hover:bg-white/[0.02] transition-colors">
                           <td className="py-3.5 px-4 font-bold text-white">{k.name}</td>
@@ -902,6 +1054,15 @@ const { text } = await generateText({
                                 : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
                             }`}>
                               {isLive ? 'LIVE' : 'TEST'}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase font-mono ${
+                              isRaw
+                                ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30'
+                                : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/30'
+                            }`}>
+                              {isRaw ? 'RAW' : 'COMPACTED'}
                             </span>
                           </td>
                           <td className="py-3.5 px-4 font-mono text-cyan-300">{k.keyPrefix || k.prefix}...</td>

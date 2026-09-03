@@ -677,6 +677,7 @@ export class GalxRollingContextEngine {
     workspaceId?: string;
     maxTokenBudget?: number;
     recentBufferTurnCount?: number;
+    enableCompaction?: boolean;
   }): Promise<RollingContextResult> {
     let hydratedFromL2 = false;
     if (params.conversationId && params.userId) {
@@ -684,12 +685,17 @@ export class GalxRollingContextEngine {
       const queryText = latestUser
         ? (typeof latestUser.content === 'string' ? latestUser.content : this.safeStringify(latestUser.content))
         : undefined;
-      hydratedFromL2 = await this.hydrateDurableContext({
-        conversationId: params.conversationId,
-        userId: params.userId,
-        workspaceId: params.workspaceId,
-        queryText,
-      });
+      try {
+        hydratedFromL2 = await this.hydrateDurableContext({
+          conversationId: params.conversationId,
+          userId: params.userId,
+          workspaceId: params.workspaceId,
+          queryText,
+        });
+      } catch (hydrateErr) {
+        console.warn('[GalxRollingContextEngine] Durable context hydration fallback to L1:', hydrateErr);
+        hydratedFromL2 = false;
+      }
     }
 
     const result = this.buildOptimalRollingContext(params);
@@ -872,6 +878,7 @@ export class GalxRollingContextEngine {
     workspaceId?: string;
     maxTokenBudget?: number;
     recentBufferTurnCount?: number;
+    enableCompaction?: boolean;
   }): RollingContextResult {
     const {
       messages,
@@ -880,7 +887,8 @@ export class GalxRollingContextEngine {
       userId = 'anonymous_user',
       workspaceId,
       maxTokenBudget = 800_000,
-      recentBufferTurnCount = 8
+      recentBufferTurnCount = 8,
+      enableCompaction = false,
     } = params;
 
     const safeMessages = Array.isArray(messages)
@@ -948,11 +956,40 @@ export class GalxRollingContextEngine {
       trustedPrefixMessages[lastIndex] = this.markExplicitCacheBreakpoint(trustedPrefixMessages[lastIndex]);
     }
 
+    // When compaction is explicitly disabled, preserve raw prompt fidelity verbatim
+    if (enableCompaction === false) {
+      const finalRawMessages = trustedPrefixMessages.length > 0
+        ? [
+            ...trustedPrefixMessages,
+            ...safeMessages.slice(trustedPrefixMessages.length),
+          ]
+        : safeMessages;
+
+      return {
+        optimizedMessages: finalRawMessages,
+        rawTokenEstimate,
+        optimizedTokenEstimate: rawTokenEstimate,
+        tokensSaved: 0,
+        intermediateTurnsCompacted: 0,
+        isCompacted: false,
+        stableCacheHash: this.computeSha256(this.safeStringify(trustedPrefixMessages)),
+        cacheAnchorPrefixLength: trustedPrefixMessages.length,
+        budgetExceeded: rawTokenEstimate > effectiveBudget,
+      };
+    }
+
     const shouldCompact = nonSystemMessages.length > safeRecentCount || rawTokenEstimate > 8_000;
 
     if (!shouldCompact && !ownedExistingMemory && activeWorkspaceAnchors.length === 0) {
+      const finalRawMessages = trustedPrefixMessages.length > 0
+        ? [
+            ...trustedPrefixMessages,
+            ...safeMessages.slice(trustedPrefixMessages.length),
+          ]
+        : safeMessages;
+
       return {
-        optimizedMessages: safeMessages,
+        optimizedMessages: finalRawMessages,
         rawTokenEstimate,
         optimizedTokenEstimate: rawTokenEstimate,
         tokensSaved: 0,

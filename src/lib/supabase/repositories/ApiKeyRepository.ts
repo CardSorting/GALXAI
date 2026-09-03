@@ -328,7 +328,8 @@ export class ApiKeyRepository {
       ipWhitelist: Array.isArray(data.ip_whitelist) ? data.ip_whitelist : undefined,
       expiresAtMs: data.expires_at ? new Date(data.expires_at).getTime() : undefined,
       description: data.description || undefined,
-      checksum: data.checksum || undefined
+      checksum: data.checksum || undefined,
+      defaultCompactionMode: data.default_compaction_mode || data.defaultCompactionMode || 'auto',
     };
   }
 
@@ -347,7 +348,8 @@ export class ApiKeyRepository {
       created_at: new Date(key.createdAtMs).toISOString(),
       ...(key.environment ? { environment: key.environment } : {}),
       ...(key.scopes ? { scopes: key.scopes } : {}),
-      ...(key.expiresAtMs ? { expires_at: new Date(key.expiresAtMs).toISOString() } : {})
+      ...(key.expiresAtMs ? { expires_at: new Date(key.expiresAtMs).toISOString() } : {}),
+      ...(key.defaultCompactionMode ? { default_compaction_mode: key.defaultCompactionMode } : {}),
     };
   }
 }

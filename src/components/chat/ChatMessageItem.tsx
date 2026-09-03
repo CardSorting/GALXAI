@@ -22,7 +22,10 @@ import {
   ShieldCheck,
   Flame,
   Code2,
-  Bot
+  Bot,
+  Sliders,
+  Eye,
+  Minimize2
 } from 'lucide-react';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
@@ -64,6 +67,8 @@ export interface ChatMessage {
     throughputTokSec?: number;
     tokens?: number;
     cacheSavings?: string;
+    compacted?: boolean;
+    compactedTurns?: number;
   };
 }
 
@@ -284,6 +289,27 @@ export function ChatMessageItem({
                 <Coins className="w-2.5 h-2.5 text-amber-400" />
                 <span>{message.metrics.cacheSavings || '75% Continuous Cache'}</span>
               </span>
+              {message.metrics.compacted !== undefined && (
+                <span
+                  className={`px-2 py-0.5 rounded-md flex items-center gap-1 ${
+                    message.metrics.compacted
+                      ? 'bg-cyan-500/10 border border-cyan-500/20 text-cyan-300'
+                      : 'bg-amber-500/10 border border-amber-500/20 text-amber-300'
+                  }`}
+                  title={
+                    message.metrics.compacted
+                      ? `Context Compaction Active: ${message.metrics.compactedTurns ?? 'prior'} intermediate turns compressed.`
+                      : 'Raw Prompt Mode: Untransformed prompt delivered verbatim.'
+                  }
+                >
+                  <Minimize2 className="w-2.5 h-2.5" />
+                  <span>
+                    {message.metrics.compacted
+                      ? `Compacted${message.metrics.compactedTurns ? ` (-${message.metrics.compactedTurns} turns)` : ''}`
+                      : 'Raw Prompt'}
+                  </span>
+                </span>
+              )}
             </div>
           )}
 

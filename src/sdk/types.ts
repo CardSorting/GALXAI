@@ -78,6 +78,13 @@ export interface ClientOptions {
    * Can also be enabled via process.env.GALXAI_MOCK=true.
    */
   mock?: boolean;
+
+  /**
+   * Optional prompt compaction policy for completions initiated by this client.
+   * Defaults to false (safe raw passthrough, byte-for-byte fidelity). Set to true to opt into experimental multi-turn history compaction.
+   */
+  compactPrompts?: boolean;
+  compact_prompts?: boolean;
 }
 
 export interface ChatCompletionCreateParams extends ChatCompletionRequest {

@@ -14,6 +14,7 @@ import {
   FileText,
   Upload,
   Image as ImageIcon,
+  Minimize2,
 } from 'lucide-react';
 import { AttachedFile } from './ChatMessageItem';
 
@@ -31,6 +32,8 @@ interface ChatInputAreaProps {
   selectedModelName?: string;
   onOpenCharacterHub?: () => void;
   onOpenImageStudio?: () => void;
+  enablePromptCompaction?: boolean;
+  onTogglePromptCompaction?: () => void;
 }
 
 export function ChatInputArea({
@@ -43,6 +46,8 @@ export function ChatInputArea({
   onStop,
   onOpenCharacterHub,
   onOpenImageStudio,
+  enablePromptCompaction,
+  onTogglePromptCompaction,
 }: ChatInputAreaProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -395,9 +400,55 @@ export function ChatInputArea({
                       <Sparkles className="w-4 h-4 text-cyan-400" />
                       <span>Insert System Directive</span>
                     </button>
+
+                    {onTogglePromptCompaction && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowToolsMenu(false);
+                          onTogglePromptCompaction();
+                        }}
+                        className="w-full p-2 rounded-xl hover:bg-white/5 text-left text-xs text-zinc-300 hover:text-white flex items-center justify-between cursor-pointer border-t border-white/5 pt-2 mt-1"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Minimize2 className="w-4 h-4 text-cyan-400" />
+                          <span>Prompt Compaction</span>
+                        </div>
+                        <span
+                          className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border ${
+                            Boolean(enablePromptCompaction)
+                              ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+                              : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                          }`}
+                        >
+                          {Boolean(enablePromptCompaction) ? 'ON' : 'RAW'}
+                        </span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
+
+              {/* Prompt Compaction / Raw Mode Pill Toggle */}
+              {onTogglePromptCompaction && (
+                <button
+                  type="button"
+                  onClick={onTogglePromptCompaction}
+                  className={`px-2.5 py-1 rounded-xl text-[11px] font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
+                    Boolean(enablePromptCompaction)
+                      ? 'bg-cyan-500/15 border-cyan-500/35 text-cyan-300 hover:bg-cyan-500/25 shadow-sm shadow-cyan-500/10'
+                      : 'bg-amber-500/15 border-amber-500/35 text-amber-300 hover:bg-amber-500/25 shadow-sm shadow-amber-500/10'
+                  }`}
+                  title={
+                    Boolean(enablePromptCompaction)
+                      ? 'Prompt Compaction: ON (Context is compressed to save tokens). Click to switch to Raw Prompt mode.'
+                      : 'Prompt Compaction: OFF (Untransformed prompts passed verbatim to model). Click to enable compaction.'
+                  }
+                >
+                  <Minimize2 className={`w-3.5 h-3.5 ${Boolean(enablePromptCompaction) ? 'text-cyan-400' : 'text-amber-400'}`} />
+                  <span>{Boolean(enablePromptCompaction) ? '⚡ Compacted' : '📝 Raw Prompt (Default)'}</span>
+                </button>
+              )}
 
               {/* Character / Line Metrics when typing */}
               {input.length > 50 && (

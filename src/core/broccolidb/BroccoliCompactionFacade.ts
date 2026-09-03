@@ -973,6 +973,8 @@ export class BroccoliCompactionFacade {
     text: string;
     taskType?: string;
     tokenBudget?: number;
+    bypass?: boolean;
+    enableCompaction?: boolean;
   }): {
     decision: 'BYPASS_IDENTITY' | 'COMPACT_GOVERNANCE' | 'COMPACT_INCIDENT' | 'COMPACT_DOCUMENT' | 'COMPACT_DOMAIN';
     selectedRepresentation: string;
@@ -983,6 +985,18 @@ export class BroccoliCompactionFacade {
   } {
     const rawText = options.text || '';
     const rawTokens = Math.round(rawText.length / 4);
+
+    // 0. Explicit User Bypass: When compaction is disabled, return verbatim raw representation
+    if (options.bypass === true || options.enableCompaction === false) {
+      return {
+        decision: 'BYPASS_IDENTITY',
+        selectedRepresentation: rawText,
+        originalTokens: rawTokens,
+        outputTokens: rawTokens,
+        reductionPercentage: 0.0,
+        reason: 'User explicit raw prompt mode: compaction and transformation bypassed.'
+      };
+    }
 
     // 1. Adaptive Density Gate: Small, dense contexts (< 200 tokens) are passed through verbatim
     // To avoid negative compression and preserve 100% action safety on clean prompts

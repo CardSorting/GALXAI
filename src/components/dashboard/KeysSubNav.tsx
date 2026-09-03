@@ -45,6 +45,12 @@ export function KeysSubNav() {
       name: 'Rate Limits & Quotas',
       href: '/keys/rate-limits',
       icon: Gauge
+    },
+    {
+      name: 'Gateway API Defaults',
+      href: '/settings?tab=developer',
+      icon: Sliders,
+      badge: 'Policy'
     }
   ];
 

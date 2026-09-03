@@ -128,6 +128,32 @@ export async function POST(req: NextRequest) {
       provisionalPlan.contextWindowTokens - provisionalPlan.allocatedMaxTokens - provisionalPlan.safetyMarginTokens
     );
 
+    const keyExplicitAuto = authResult.apiKey?.defaultCompactionMode === 'auto';
+
+    const explicitFalse =
+      rawBody.compact_prompts === false ||
+      rawBody.enable_prompt_compaction === false ||
+      rawBody.compaction_mode === 'raw' ||
+      rawBody.extra_body?.compact_prompts === false ||
+      rawBody.extra_body?.enable_prompt_compaction === false ||
+      (Array.isArray(rawBody.transforms) && rawBody.transforms.length === 0) ||
+      req.headers.get('x-galx-compact') === 'false' ||
+      req.headers.get('x-galx-compact-prompts') === 'false' ||
+      req.headers.get('x-galx-compaction-mode') === 'raw' ||
+      req.headers.get('x-compaction-mode') === 'raw' ||
+      req.headers.get('x-skip-compaction') === 'true';
+
+    const explicitTrue =
+      rawBody.compact_prompts === true ||
+      rawBody.enable_prompt_compaction === true ||
+      rawBody.compaction_mode === 'auto' ||
+      (Array.isArray(rawBody.transforms) && rawBody.transforms.length > 0) ||
+      req.headers.get('x-galx-compact') === 'true' ||
+      req.headers.get('x-galx-compact-prompts') === 'true' ||
+      req.headers.get('x-galx-compaction-mode') === 'auto';
+
+    const compactPrompts = !explicitFalse && (explicitTrue || keyExplicitAuto);
+
     // Apply Hierarchical Rolling Context
     const rollingContext = await GalxRollingContextEngine.getInstance().buildOptimalRollingContextAsync({
       messages: normalizedMessages as any,
@@ -136,7 +162,8 @@ export async function POST(req: NextRequest) {
       userId,
       workspaceId: entitlement.orgId,
       maxTokenBudget: rollingPromptBudget,
-      recentBufferTurnCount: 8
+      recentBufferTurnCount: 8,
+      enableCompaction: compactPrompts,
     });
 
     const activeMessages = rollingContext.optimizedMessages;
@@ -405,7 +432,15 @@ export async function POST(req: NextRequest) {
           'X-Galx-Seat-5Hour-Remaining-Pct': String(currentWindows.fiveHourWindow.percentRemaining),
           'X-Galx-Seat-5Hour-Refresh-In': currentWindows.fiveHourWindow.refreshIn,
           'X-Galx-Seat-Weekly-Remaining-Pct': String(currentWindows.weeklyWindow.percentRemaining),
-          'X-Galx-Seat-Weekly-Refresh-In': currentWindows.weeklyWindow.refreshIn
+          'X-Galx-Seat-Weekly-Refresh-In': currentWindows.weeklyWindow.refreshIn,
+          'X-Galx-Prompt-Compaction': compactPrompts ? 'enabled' : 'disabled',
+          'X-Galx-Compaction-Mode': compactPrompts ? 'auto' : 'raw',
+          'X-Galx-Rolling-Compacted': String(rollingContext.isCompacted),
+          'X-Galx-Rolling-Compacted-Turns': String(rollingContext.intermediateTurnsCompacted),
+          'X-Galx-Tokens-Saved': String(rollingContext.tokensSaved),
+          'X-Galx-Prompt-Deflation-Pct': compactPrompts && rollingContext.tokensSaved > 0 
+            ? `${Math.round((rollingContext.tokensSaved / Math.max(1, contextPlan.estimatedPromptTokens + rollingContext.tokensSaved)) * 100)}%` 
+            : '0%',
         }
       });
     }
@@ -502,7 +537,15 @@ export async function POST(req: NextRequest) {
         'X-Galx-Seat-5Hour-Remaining-Pct': String(currentWindows.fiveHourWindow.percentRemaining),
         'X-Galx-Seat-5Hour-Refresh-In': currentWindows.fiveHourWindow.refreshIn,
         'X-Galx-Seat-Weekly-Remaining-Pct': String(currentWindows.weeklyWindow.percentRemaining),
-        'X-Galx-Seat-Weekly-Refresh-In': currentWindows.weeklyWindow.refreshIn
+        'X-Galx-Seat-Weekly-Refresh-In': currentWindows.weeklyWindow.refreshIn,
+        'X-Galx-Prompt-Compaction': compactPrompts ? 'enabled' : 'disabled',
+        'X-Galx-Compaction-Mode': compactPrompts ? 'auto' : 'raw',
+        'X-Galx-Rolling-Compacted': String(rollingContext.isCompacted),
+        'X-Galx-Rolling-Compacted-Turns': String(rollingContext.intermediateTurnsCompacted),
+        'X-Galx-Tokens-Saved': String(rollingContext.tokensSaved),
+        'X-Galx-Prompt-Deflation-Pct': compactPrompts && rollingContext.tokensSaved > 0 
+          ? `${Math.round((rollingContext.tokensSaved / Math.max(1, contextPlan.estimatedPromptTokens + rollingContext.tokensSaved)) * 100)}%` 
+          : '0%',
       }
     });
   } catch (err: any) {

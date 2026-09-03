@@ -154,7 +154,8 @@ export async function POST(req: NextRequest) {
       expiresInDays,
       ipWhitelist,
       depositedAmount = 0,
-      hasVerifiedDeposit = false
+      hasVerifiedDeposit = false,
+      defaultCompactionMode = 'raw',
     } = body;
 
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
@@ -171,6 +172,7 @@ export async function POST(req: NextRequest) {
     const cleanRpm = sanitizeRateLimit(rateLimitPerMinute);
     const cleanScopes = sanitizeScopes(scopes);
     const cleanEnv: 'live' | 'test' = environment === 'test' ? 'test' : 'live';
+    const cleanCompactionMode: 'auto' | 'raw' = defaultCompactionMode === 'auto' ? 'auto' : 'raw';
 
     let expiresAtMs: number | undefined = undefined;
     if (expiresInDays && Number(expiresInDays) > 0) {
@@ -219,7 +221,8 @@ export async function POST(req: NextRequest) {
       expiresAtMs,
       checksum,
       computePool,
-      freeMonthlyGrantUsd: 30.00
+      freeMonthlyGrantUsd: 30.00,
+      defaultCompactionMode: cleanCompactionMode,
     };
 
     // Save to authoritative database and memory cache
@@ -267,7 +270,7 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { id: keyId, name, rateLimitPerMinute, scopes, ipWhitelist } = body;
+    const { id: keyId, name, rateLimitPerMinute, scopes, ipWhitelist, defaultCompactionMode } = body;
 
     if (!keyId) {
       return NextResponse.json({ error: 'Missing key ID parameter' }, { status: 400 });
@@ -296,7 +299,8 @@ export async function PATCH(req: NextRequest) {
       name: name !== undefined ? sanitizeKeyName(name) : existing.name,
       rateLimitPerMinute: rateLimitPerMinute !== undefined ? sanitizeRateLimit(rateLimitPerMinute) : existing.rateLimitPerMinute,
       scopes: scopes !== undefined ? sanitizeScopes(scopes) : existing.scopes,
-      ipWhitelist: Array.isArray(ipWhitelist) ? ipWhitelist.filter(ip => typeof ip === 'string').slice(0, 20) : existing.ipWhitelist
+      ipWhitelist: Array.isArray(ipWhitelist) ? ipWhitelist.filter(ip => typeof ip === 'string').slice(0, 20) : existing.ipWhitelist,
+      defaultCompactionMode: defaultCompactionMode !== undefined ? (defaultCompactionMode === 'raw' ? 'raw' : 'auto') : existing.defaultCompactionMode,
     };
 
     await keyRepo.saveGatewayKey(updatedKey).catch(() => {});
@@ -312,7 +316,8 @@ export async function PATCH(req: NextRequest) {
         keyPrefix: updatedKey.keyPrefix,
         environment: updatedKey.environment,
         scopes: updatedKey.scopes,
-        rateLimitPerMinute: updatedKey.rateLimitPerMinute
+        rateLimitPerMinute: updatedKey.rateLimitPerMinute,
+        defaultCompactionMode: updatedKey.defaultCompactionMode,
       }
     });
   } catch (err: any) {

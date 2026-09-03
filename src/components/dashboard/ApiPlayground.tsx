@@ -160,6 +160,7 @@ function BaseApiPlayground() {
   const [codeTab, setCodeTab] = useState<'python' | 'ts' | 'anthropic' | 'ollama' | 'sdk' | 'curl' | 'cursor'>('python');
   const [apiKeyInput, setApiKeyInput] = useState<string>('');
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
+  const [compactionMode, setCompactionMode] = useState<'auto' | 'raw'>('raw');
   const [metrics, setMetrics] = useState<{ ttftMs: number; throughputTokSec: number; tokens: number }>({
     ttftMs: 14,
     throughputTokSec: 152,
@@ -202,12 +203,17 @@ function BaseApiPlayground() {
         headers['Authorization'] = `Bearer ${user.token}`;
       }
 
+      if (compactionMode === 'raw') {
+        headers['X-Galx-Compact-Prompts'] = 'false';
+      }
+
       const res = await fetch('/v1/chat/completions', {
         method: 'POST',
         headers,
         body: JSON.stringify({
           model: resolvedModel.id,
           messages: [{ role: 'user', content: prompt }],
+          compact_prompts: compactionMode === 'auto',
           stream: true
         })
       });
@@ -326,7 +332,7 @@ for await (const chunk of stream) {
 // Direct Drop-in for Anthropic SDK / Claude Code
 const anthropic = new Anthropic({
   baseURL: "https://galx.ai",
-  apiKey: "${apiKeyInput || 'galx_live_your_gateway_key'}",
+  apiKey: "${apiKeyInput || 'galx_live_your_gateway_key'}"${compactionMode === 'raw' ? `,\n  defaultHeaders: { "X-Galx-Compact-Prompts": "false" }` : ''}
 });
 
 const response = await anthropic.messages.create({
@@ -355,7 +361,10 @@ for await (const chunk of stream(${JSON.stringify(prompt)}, { model: "${resolved
 }
 
 // 2. Class client with auto-failover:
-const galx = new GalxAI("${apiKeyInput || 'galx_live_your_gateway_key'}");
+const galx = new GalxAI({
+  apiKey: "${apiKeyInput || 'galx_live_your_gateway_key'}",
+  compactPrompts: ${compactionMode === 'auto'}
+});
 const res = await galx.chat.completions.create({
   model: "${resolvedModel.id}",
   messages: [{ role: "user", content: ${JSON.stringify(prompt)} }]
@@ -363,9 +372,10 @@ const res = await galx.chat.completions.create({
 
     curl: `curl https://galx.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer ${apiKeyInput || 'galx_live_your_gateway_key'}" \\
+  -H "Authorization: Bearer ${apiKeyInput || 'galx_live_your_gateway_key'}" \\${compactionMode === 'raw' ? `\n  -H "X-Galx-Compact-Prompts: false" \\` : ''}
   -d '{
     "model": "${resolvedModel.id}",
+    "compact_prompts": ${compactionMode === 'auto'},
     "messages": [{"role": "user", "content": ${JSON.stringify(prompt)}}],
     "stream": true
   }'`,
@@ -373,7 +383,7 @@ const res = await galx.chat.completions.create({
     cursor: `// In Cursor IDE / Windsurf Settings -> Models:
 // 1. Add Model: ${resolvedModel.id}
 // 2. Set Base URL: https://galx.ai/v1
-// 3. API Key: ${apiKeyInput || 'galx_live_your_gateway_key'}`
+// 3. API Key: ${apiKeyInput || 'galx_live_your_gateway_key'}${compactionMode === 'raw' ? `\n// 4. Custom Headers: { "X-Galx-Compact-Prompts": "false" }` : ''}`
   };
 
   const handleCopyCode = async () => {
@@ -563,13 +573,50 @@ const res = await galx.chat.completions.create({
             </div>
 
             {/* Live Metrics Pill */}
-            <div className="flex items-center gap-3 text-[11px] font-mono text-zinc-400">
+            <div className="flex items-center gap-2 text-[11px] font-mono text-zinc-400">
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                compactionMode === 'raw'
+                  ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                  : 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30'
+              }`}>
+                {compactionMode === 'raw' ? '📝 Raw Passthrough' : '⚡ Compacted'}
+              </span>
               <span className="flex items-center gap-1 text-emerald-400">
                 <Activity className="w-3 h-3" />
                 <span>{metrics.ttftMs}ms TTFT</span>
               </span>
-              <span className="text-zinc-500">|</span>
-              <span className="text-amber-300">{metrics.throughputTokSec} tok/s</span>
+              <span className="text-zinc-300">{metrics.throughputTokSec} tok/s</span>
+            </div>
+          </div>
+
+          {/* Sandbox Compaction Policy Toggle Bar */}
+          <div className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5 font-mono text-xs">
+            <span className="text-[11px] text-zinc-400">Compaction Engine:</span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setCompactionMode('raw')}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-bold text-[11px] ${
+                  compactionMode === 'raw'
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+                title="100% byte-for-byte prompt passthrough without alteration (Default)"
+              >
+                📝 Raw Passthrough (Default)
+              </button>
+              <button
+                type="button"
+                onClick={() => setCompactionMode('auto')}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-bold text-[11px] ${
+                  compactionMode === 'auto'
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+                title="Token deflation and multi-turn history compaction (Opt-In)"
+              >
+                ⚡ Compacted (Opt-In)
+              </button>
             </div>
           </div>
 
