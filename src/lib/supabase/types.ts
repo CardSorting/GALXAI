@@ -3227,6 +3227,12 @@ export interface Database {
         Args: Record<PropertyKey, never>;
         Returns: Json;
       };
+      fn_is_tenant_resource_owner: {
+        Args: {
+          p_owner_user_id: string;
+        };
+        Returns: boolean;
+      };
       fn_set_tenant_session_context: {
         Args: {
           p_user_id: string;
