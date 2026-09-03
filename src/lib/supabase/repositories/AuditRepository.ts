@@ -6,6 +6,7 @@
 
 import * as crypto from 'node:crypto';
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
+import { executePostgresQuery } from '../../db/postgres';
 import type { Database } from '../types';
 import type { AuditIntegrityVerificationResult } from '../../../core/contracts/GalxContracts';
 import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
@@ -105,6 +106,36 @@ export class AuditRepository {
       this.inMemoryLogs.splice(2000);
     }
 
+    // 1. Direct PostgreSQL Connection Pool Insertion (<1.5ms)
+    const poolRes = await executePostgresQuery(
+      `INSERT INTO galx_audit_logs (
+        id, workspace_id, user_id, shard_id, action, resource_type, resource_id,
+        metadata, ip_address, user_agent, timestamp_ms, created_at
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW()
+      );`,
+      [
+        id,
+        params.workspaceId || null,
+        params.userId || null,
+        params.shardId || null,
+        params.action,
+        params.resourceType || null,
+        params.resourceId || null,
+        JSON.stringify({
+          ...(params.metadata || {}),
+          _prevHash: prevHash,
+          _currentHash: currentHash
+        }),
+        params.ipAddress || null,
+        params.userAgent || null,
+        now
+      ]
+    );
+
+    if (poolRes) return id;
+
+    // 2. Supabase PostgREST Fallback
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -204,6 +235,22 @@ export class AuditRepository {
       this.inMemoryLogs.splice(2000);
     }
 
+    // 1. Direct PostgreSQL Connection Pool Execution with Circuit Breaker (<1.5ms)
+    const poolRes = await executePostgresQuery<{ fn_batch_record_audit_events: any }>(
+      'SELECT fn_batch_record_audit_events($1::jsonb);',
+      [JSON.stringify(dbPayload)]
+    );
+    if (poolRes && poolRes.rows && poolRes.rows[0]) {
+      const data = poolRes.rows[0].fn_batch_record_audit_events;
+      if (data && data.success) {
+        return {
+          success: true,
+          insertedCount: Number(data.inserted_events_count || events.length)
+        };
+      }
+    }
+
+    // 2. Supabase PostgREST RPC Fallback
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();

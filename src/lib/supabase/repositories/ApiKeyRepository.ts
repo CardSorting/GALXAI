@@ -373,7 +373,7 @@ export class ApiKeyRepository {
     // 1. Return from BroccoliDB hot cache if within soft polling window
     if (localWm && now - localWm.checkedAtMs < this.WATERMARK_MIN_INTERVAL_MS && !options.forceRefresh) {
       const localKeys = this.queryLocalKeys(userId);
-      if (localKeys.length > 0) return localKeys;
+      if (localKeys.length === localWm.count) return localKeys;
     }
 
     // 2. Micro-Watermark Check (Index-Only Scan, ~0.8ms, ~30 bytes)
@@ -599,14 +599,15 @@ export class ApiKeyRepository {
     // 2. Direct PostgreSQL connection pool protected by circuit breaker
     const res = await executePostgresQuery(
       `INSERT INTO galx_developer_keys (
-        id, user_id, name, prefix, key_hash, rate_limit_per_minute, total_requests, total_tokens, is_revoked, created_at, updated_at
+        id, user_id, name, prefix, key_hash, rate_limit_per_minute, total_requests, total_tokens, allowed_ips, is_revoked, created_at, updated_at
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, to_timestamp($10 / 1000.0), NOW()
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, to_timestamp($11 / 1000.0), NOW()
       ) ON CONFLICT (id) DO UPDATE SET
         name = EXCLUDED.name,
         prefix = EXCLUDED.prefix,
         key_hash = EXCLUDED.key_hash,
         rate_limit_per_minute = EXCLUDED.rate_limit_per_minute,
+        allowed_ips = EXCLUDED.allowed_ips,
         is_revoked = EXCLUDED.is_revoked,
         updated_at = NOW();`,
       [
@@ -618,6 +619,7 @@ export class ApiKeyRepository {
         key.rateLimitPerMinute || 120,
         key.totalRequests || 0,
         key.totalTokens || 0,
+        key.ipWhitelist || null,
         Boolean(key.revoked),
         key.createdAtMs || Date.now()
       ]
@@ -852,7 +854,7 @@ export class ApiKeyRepository {
       revoked: Boolean(data.is_revoked),
       environment: data.environment || (data.prefix?.includes('test') ? 'test' : 'live'),
       scopes: Array.isArray(data.scopes) ? data.scopes : ['*'],
-      ipWhitelist: Array.isArray(data.ip_whitelist) ? data.ip_whitelist : undefined,
+      ipWhitelist: Array.isArray(data.allowed_ips) ? data.allowed_ips : (Array.isArray(data.ip_whitelist) ? data.ip_whitelist : undefined),
       expiresAtMs: data.expires_at ? new Date(data.expires_at).getTime() : undefined,
       description: data.description || undefined,
       checksum: data.checksum || undefined,
@@ -875,6 +877,7 @@ export class ApiKeyRepository {
       created_at: new Date(key.createdAtMs).toISOString(),
       ...(key.environment ? { environment: key.environment } : {}),
       ...(key.scopes ? { scopes: key.scopes } : {}),
+      ...(key.ipWhitelist ? { allowed_ips: key.ipWhitelist } : {}),
       ...(key.expiresAtMs ? { expires_at: new Date(key.expiresAtMs).toISOString() } : {}),
       ...(key.defaultCompactionMode ? { default_compaction_mode: key.defaultCompactionMode } : {}),
     };
