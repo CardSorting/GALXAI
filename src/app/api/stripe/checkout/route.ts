@@ -40,7 +40,14 @@ export async function POST(req: NextRequest) {
 
     // Resolve developer workspace identity
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-    const userId = auth.authenticated ? auth.userId : (body.userId || 'user_demo');
+    const userId = auth.authenticated ? auth.userId : body.userId;
+
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: 'Sign-in is required to initiate checkout' },
+        { status: 401 }
+      );
+    }
 
     const stripeEngine = StripeEngine.getInstance();
     const result = await stripeEngine.createCheckoutSession({

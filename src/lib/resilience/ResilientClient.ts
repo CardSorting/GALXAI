@@ -251,6 +251,14 @@ async function executeResilientFetch<T = any>(
       if (!headers.has('Accept')) {
         headers.set('Accept', 'application/json, text/plain, */*');
       }
+      if (!headers.has('Authorization')) {
+        const customUser = SafeStorage.getJSON<any>('galx_custom_auth_user', null);
+        if (customUser?.token) {
+          headers.set('Authorization', `Bearer ${customUser.token}`);
+        } else if (customUser?.id) {
+          headers.set('x-galx-session', customUser.id);
+        }
+      }
 
       const res = await fetch(url, {
         ...fetchOptions,

@@ -23,8 +23,10 @@ import {
 } from 'lucide-react';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function KeyPermissionsPage() {
+  const { user } = useAuth();
   const [keys, setKeys] = useState<any[]>([]);
   const [selectedKeyId, setSelectedKeyId] = useState('');
   const [ipAllowlist, setIpAllowlist] = useState('0.0.0.0/0');
@@ -43,8 +45,12 @@ export default function KeyPermissionsPage() {
   ];
 
   const fetchKeys = async () => {
+    if (!user?.id) {
+      setKeys([]);
+      return;
+    }
     try {
-      const res = await resilientFetch<{ keys: any[] }>('/api/keys', { enableCacheFallback: true });
+      const res = await resilientFetch<{ keys: any[] }>(`/api/keys?userId=${encodeURIComponent(user.id)}`, { enableCacheFallback: true });
       const activeKeys = res.data?.keys?.filter(k => !k.revoked) || [];
       setKeys(activeKeys);
       if (activeKeys.length > 0 && !selectedKeyId) {
@@ -55,8 +61,10 @@ export default function KeyPermissionsPage() {
   };
 
   useEffect(() => {
-    fetchKeys();
-  }, []);
+    if (user?.id) {
+      fetchKeys();
+    }
+  }, [user?.id]);
 
   const loadKeySettings = (key: any) => {
     if (!key) return;
@@ -107,6 +115,7 @@ export default function KeyPermissionsPage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          userId: user?.id,
           ipWhitelist: parsedIps.length > 0 ? parsedIps : ['0.0.0.0/0'],
           scopes: allowedScopes,
           expiresInDays: keyTtlDays,

@@ -24,7 +24,14 @@ export async function GET(req: NextRequest) {
     const requestedUserId = searchParams.get('userId') || undefined;
 
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-    const targetUserId = auth.authenticated ? auth.userId : (requestedUserId || 'user_demo');
+    const targetUserId = auth.authenticated ? auth.userId : requestedUserId;
+
+    if (!targetUserId) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Authentication required to inspect wallet summary' },
+        { status: 401 }
+      );
+    }
 
     // Prevent unauthorized inspection of another developer's compute wallet
     if (requestedUserId && auth.authenticated && requestedUserId !== auth.userId && !auth.claims?.scopes?.includes('admin:*')) {

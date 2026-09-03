@@ -11,163 +11,122 @@ import {
   Trash2,
   Copy,
   Check,
-  ShieldAlert,
-  Sparkles,
   X,
-  Code2,
   Wallet,
-  Coins,
   ArrowRight,
-  TrendingDown,
-  ExternalLink,
-  Sliders,
-  DollarSign,
-  Gift,
-  Terminal,
-  Zap,
-  Activity,
-  Laptop,
-  Server,
-  Bot,
-  Layers,
-  Cpu,
   ShieldCheck,
   RefreshCw,
-  Clock,
-  Shield,
-  Filter,
-  AlertTriangle
+  Code2,
+  ExternalLink,
+  Sliders,
+  ShieldAlert
 } from 'lucide-react';
 import { formatTimeAgo } from '@/lib/utils';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
-import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
-import { TrustSeals } from '@/components/common/TrustSeals';
 import { ErrorBoundary, withErrorBoundary } from '@/components/common/ErrorBoundary';
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
+import { useAuth } from '@/contexts/AuthContext';
 
-interface QuickPreset {
-  id: string;
-  name: string;
-  defaultLabel: string;
-  rpm: number;
-  icon: React.ComponentType<{ className?: string }>;
-  defaultCompactionMode?: 'auto' | 'raw';
-}
-
-const QUICK_PRESETS: QuickPreset[] = [
-  { id: 'cursor', name: 'Cursor / Windsurf', defaultLabel: 'Cursor IDE Key', rpm: 120, icon: Laptop, defaultCompactionMode: 'raw' },
-  { id: 'backend', name: 'Production Backend', defaultLabel: 'Production API Backend', rpm: 300, icon: Server, defaultCompactionMode: 'raw' },
-  { id: 'agent', name: 'Agent Swarm Fleet', defaultLabel: 'Autonomous Agent Fleet', rpm: 600, icon: Bot, defaultCompactionMode: 'raw' },
-  { id: 'cli', name: 'Local CLI / Scripts', defaultLabel: 'CLI & Notebook Key', rpm: 60, icon: Terminal, defaultCompactionMode: 'raw' }
-];
-
-type SnippetTab = 'curl' | 'python' | 'ts_sdk' | 'openai_sdk' | 'anthropic_sdk' | 'cursor' | 'litellm' | 'vercel_ai';
+type SnippetTab = 'curl' | 'python' | 'node' | 'cursor';
 
 function BaseGatewayKeysPage() {
+  const { user } = useAuth();
   const [keys, setKeys] = useState<any[]>([]);
-  const [newKeyName, setNewKeyName] = useState('Cursor IDE Key');
-  const [newKeyEnv, setNewKeyEnv] = useState<'live' | 'test'>('live');
-  const [selectedRpm, setSelectedRpm] = useState<number>(120);
-  const [selectedExpiresInDays, setSelectedExpiresInDays] = useState<number>(0);
-  const [createdSecretKey, setCreatedSecretKey] = useState<string | null>(null);
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  const [copiedSnippet, setCopiedSnippet] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isPaywallOpen, setIsPaywallOpen] = useState(false);
-  const [paywallSelectedAmt, setPaywallSelectedAmt] = useState<number>(25);
-  const [activeSnippetTab, setActiveSnippetTab] = useState<SnippetTab>('python');
   const [environmentFilter, setEnvironmentFilter] = useState<'all' | 'live' | 'test'>('all');
-  const [snippetCompaction, setSnippetCompaction] = useState<boolean>(false);
+
+  // Key creation state
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newKeyName, setNewKeyName] = useState('');
+  const [newKeyEnv, setNewKeyEnv] = useState<'live' | 'test'>('live');
   const [newKeyCompactionMode, setNewKeyCompactionMode] = useState<'auto' | 'raw'>('raw');
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
-  const handleOpenPaywall = (amt: number = 25) => {
-    setPaywallSelectedAmt(amt);
-    setIsPaywallOpen(true);
-  };
-
-  // Key Rolling / Zero-Downtime Rotation State
+  // Key roll / rotation state
   const [rollingKey, setRollingKey] = useState<any | null>(null);
   const [rollingGraceHours, setRollingGraceHours] = useState<number>(24);
   const [isRolling, setIsRolling] = useState(false);
   const [rolledResultKey, setRolledResultKey] = useState<string | null>(null);
 
-  // Live Gateway Smoke Test & Ping
-  const [isPinging, setIsPinging] = useState(false);
-  const [pingResult, setPingResult] = useState<{ success: boolean; latencyMs: number; modelCount?: number; message?: string } | null>(null);
+  // One-time secret key reveal notification
+  const [createdSecretKey, setCreatedSecretKey] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  const { hasVerifiedDeposit, walletBalance, depositAndUnlock } = useDepositVerification();
+  // Base URL copy state
+  const [copiedBaseUrl, setCopiedBaseUrl] = useState(false);
+
+  // Quickstart snippet state
+  const [activeSnippetTab, setActiveSnippetTab] = useState<SnippetTab>('python');
+  const [copiedSnippet, setCopiedSnippet] = useState(false);
+
+  const { walletBalance } = useDepositVerification();
 
   const fetchKeys = async () => {
+    if (!user?.id) {
+      setKeys([]);
+      return;
+    }
     try {
-      const res = await resilientFetch<{ keys: any[] }>('/api/keys', {
+      const res = await resilientFetch<{ keys: any[] }>(`/api/keys?userId=${encodeURIComponent(user.id)}`, {
         enableCacheFallback: true,
       });
       setKeys(res.data?.keys || []);
-    } catch {}
-  };
-
-  useEffect(() => {
-    fetchKeys();
-  }, []);
-
-  const createKeyDirectly = async (
-    keyName: string,
-    balanceAmount: number,
-    rpm: number = selectedRpm,
-    env: 'live' | 'test' = newKeyEnv,
-    expiresDays: number = selectedExpiresInDays,
-    compactionMode: 'auto' | 'raw' = newKeyCompactionMode
-  ) => {
-    setIsLoading(true);
-    try {
-      const res = await resilientFetch<{ success: boolean; key?: { apiKey: string } }>('/api/keys', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: keyName.trim() || 'Developer API Key',
-          environment: env,
-          rateLimitPerMinute: rpm,
-          expiresInDays: expiresDays > 0 ? expiresDays : undefined,
-          hasVerifiedDeposit: true,
-          depositedAmount: balanceAmount,
-          defaultCompactionMode: compactionMode,
-        })
-      });
-      if (res.data?.success && res.data.key?.apiKey) {
-        setCreatedSecretKey(res.data.key.apiKey);
-        setNewKeyName('');
-        fetchKeys();
-      }
-    } catch {} finally {
-      setIsLoading(false);
+    } catch {
+      // Offline / cached fallback handled by resilientFetch
     }
   };
 
-  const handleCreateKey = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!newKeyName.trim()) return;
+  useEffect(() => {
+    if (user?.id) {
+      fetchKeys();
+    }
+  }, [user?.id]);
 
-    // Direct 1-click key creation with $30 Free Compute Grant
-    await createKeyDirectly(newKeyName, walletBalance, selectedRpm, newKeyEnv, selectedExpiresInDays, newKeyCompactionMode);
-  };
+  const handleCreateKey = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user?.id) return;
+    const nameToSubmit = newKeyName.trim() || 'Default Developer Key';
 
-  const handlePaywallSuccess = async (depositAmt: number, totalCredit: number) => {
-    const { totalCredited } = depositAndUnlock(depositAmt);
-    setIsPaywallOpen(false);
-    await createKeyDirectly(
-      newKeyName || 'Developer API Key (Priority)',
-      walletBalance + totalCredited,
-      selectedRpm,
-      newKeyEnv,
-      selectedExpiresInDays
-    );
-  };
-
-  const handleRevokeKey = async (keyId: string) => {
+    setIsCreating(true);
+    setCreateError(null);
     try {
-      await resilientFetch(`/api/keys?id=${keyId}`, { method: 'DELETE' });
+      const res = await resilientFetch<{ success: boolean; key?: { apiKey: string }; error?: string }>('/api/keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: nameToSubmit,
+          userId: user.id,
+          environment: newKeyEnv,
+          rateLimitPerMinute: newKeyEnv === 'live' ? 120 : 60,
+          hasVerifiedDeposit: true,
+          depositedAmount: walletBalance,
+          defaultCompactionMode: newKeyCompactionMode,
+        })
+      });
+
+      if (res.data?.success && res.data.key?.apiKey) {
+        setCreatedSecretKey(res.data.key.apiKey);
+        setNewKeyName('');
+        setIsCreateModalOpen(false);
+        fetchKeys();
+      } else {
+        setCreateError(res.data?.error || 'Failed to generate key.');
+      }
+    } catch (err: any) {
+      setCreateError(err.message || 'An unexpected error occurred.');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleRevokeKey = async (keyId: string, keyName: string) => {
+    if (!window.confirm(`Are you sure you want to revoke "${keyName}"? Any requests using this key will immediately fail.`)) {
+      return;
+    }
+    try {
+      await resilientFetch(`/api/keys?id=${keyId}&userId=${encodeURIComponent(user?.id || '')}`, { method: 'DELETE' });
       fetchKeys();
     } catch {}
   };
@@ -181,7 +140,7 @@ function BaseGatewayKeysPage() {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ gracePeriodHours: rollingGraceHours })
+          body: JSON.stringify({ graceHours: rollingGraceHours, userId: user?.id })
         }
       );
       if (res.data?.success && res.data.key?.apiKey) {
@@ -202,6 +161,14 @@ function BaseGatewayKeysPage() {
     }
   };
 
+  const handleCopyBaseUrl = async () => {
+    const success = await safeCopyToClipboard('https://galx.ai/v1');
+    if (success) {
+      setCopiedBaseUrl(true);
+      setTimeout(() => setCopiedBaseUrl(false), 2000);
+    }
+  };
+
   const handleCopySnippet = async (snippet: string) => {
     const success = await safeCopyToClipboard(snippet);
     if (success) {
@@ -210,264 +177,60 @@ function BaseGatewayKeysPage() {
     }
   };
 
-  const applyQuickPreset = (preset: QuickPreset) => {
-    setNewKeyName(preset.defaultLabel);
-    setSelectedRpm(preset.rpm);
-    if (preset.defaultCompactionMode) {
-      setNewKeyCompactionMode(preset.defaultCompactionMode);
-      setSnippetCompaction(preset.defaultCompactionMode === 'auto');
-    }
-  };
-
-  const runGatewaySmokeTest = async () => {
-    setIsPinging(true);
-    setPingResult(null);
-    const start = performance.now();
-    try {
-      const res = await resilientFetch<{ data: any[] }>('/v1/models', {
-        headers: createdSecretKey ? { Authorization: `Bearer ${createdSecretKey}` } : undefined,
-        enableCacheFallback: true,
-      });
-      const latencyMs = Math.round(performance.now() - start);
-      setPingResult({
-        success: true,
-        latencyMs,
-        modelCount: res.data?.data?.length || 6,
-        message: 'Zero-hesitation gateway operational across OpenAI Codex & GPT flagship models.'
-      });
-    } catch (err: any) {
-      const latencyMs = Math.round(performance.now() - start);
-      setPingResult({
-        success: false,
-        latencyMs,
-        message: err.message || 'Gateway smoke test failed'
-      });
-    } finally {
-      setIsPinging(false);
-    }
-  };
-
-  const activeDisplayKey = createdSecretKey || rolledResultKey || 'galx_live_89f02c918e90a42701bf4e';
+  const activeDisplayKey = createdSecretKey || rolledResultKey || 'galx_live_your_key_here';
 
   const snippets: Record<SnippetTab, { title: string; lang: string; code: string }> = {
+    curl: {
+      title: 'cURL',
+      lang: 'bash',
+      code: `curl https://galx.ai/v1/chat/completions \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer ${activeDisplayKey}" \\
+  -d '{
+    "model": "gpt-5.6-sol",
+    "messages": [{"role": "user", "content": "Write a high-performance LRU cache in Rust."}]
+  }'`
+    },
     python: {
-      title: 'Python OpenAI SDK',
+      title: 'Python (OpenAI SDK)',
       lang: 'python',
-      code: snippetCompaction
-        ? `from openai import OpenAI
+      code: `from openai import OpenAI
 
-# Zero friction: drop in GALXAI base_url into standard OpenAI client
+# Drop-in replacement: point base_url to GALX AI Gateway
 client = OpenAI(
     base_url="https://galx.ai/v1",
     api_key="${activeDisplayKey}"
 )
 
-# Accepts any mental model alias: "sol", "gpt-5", "terra", "luna"
-response = client.chat.completions.create(
-    model="gpt-5.6-sol", # or simply "sol"
-    messages=[
-        {"role": "system", "content": "You are an elite coding assistant."},
-        {"role": "user", "content": "Write a high-performance Rust LRU cache."}
-    ],
-    temperature=0.7
-)
-
-print(response.choices[0].message.content)`
-        : `from openai import OpenAI
-
-# Raw Prompt Mode: Pass verbatim prompts without transformation
-client = OpenAI(
-    base_url="https://galx.ai/v1",
-    api_key="${activeDisplayKey}",
-    default_headers={"X-Galx-Compact-Prompts": "false"}
-)
-
 response = client.chat.completions.create(
     model="gpt-5.6-sol",
-    messages=[
-        {"role": "system", "content": "You are an elite coding assistant."},
-        {"role": "user", "content": "Write a high-performance Rust LRU cache."}
-    ],
-    extra_body={"compact_prompts": False},
-    temperature=0.7
+    messages=[{"role": "user", "content": "Write a high-performance LRU cache in Rust."}]
 )
-
 print(response.choices[0].message.content)`
     },
-    openai_sdk: {
-      title: 'Node.js OpenAI SDK',
+    node: {
+      title: 'Node.js / TypeScript',
       lang: 'typescript',
-      code: snippetCompaction
-        ? `import OpenAI from 'openai';
+      code: `import OpenAI from 'openai';
 
-const openai = new OpenAI({
+const client = new OpenAI({
   baseURL: 'https://galx.ai/v1',
   apiKey: '${activeDisplayKey}'
 });
 
-const completion = await openai.chat.completions.create({
-  model: 'gpt-5.6-sol', // Universal alias resolution
-  messages: [{ role: 'user', content: 'Generate a distributed task queue in Go.' }]
-});
-
-console.log(completion.choices[0].message.content);`
-        : `import OpenAI from 'openai';
-
-// Raw Prompt Mode: Transmits 100% byte-for-byte untransformed prompts
-const openai = new OpenAI({
-  baseURL: 'https://galx.ai/v1',
-  apiKey: '${activeDisplayKey}',
-  defaultHeaders: { 'X-Galx-Compact-Prompts': 'false' }
-});
-
-const completion = await openai.chat.completions.create({
+const completion = await client.chat.completions.create({
   model: 'gpt-5.6-sol',
-  messages: [{ role: 'user', content: 'Generate a distributed task queue in Go.' }],
-  // @ts-ignore custom gateway body override
-  compact_prompts: false
+  messages: [{ role: 'user', content: 'Write a high-performance LRU cache in Rust.' }]
 });
-
 console.log(completion.choices[0].message.content);`
-    },
-    anthropic_sdk: {
-      title: 'Anthropic SDK / Claude Code',
-      lang: 'typescript',
-      code: `import Anthropic from '@anthropic-ai/sdk';
-
-// Universal Anthropic SDK Drop-in compatibility (/v1/messages)
-const anthropic = new Anthropic({
-  baseURL: 'https://galx.ai',
-  apiKey: '${activeDisplayKey}'${!snippetCompaction ? `,\n  defaultHeaders: { 'X-Galx-Compact-Prompts': 'false' }` : ''}
-});
-
-const message = await anthropic.messages.create({
-  model: 'claude-3-7-sonnet',
-  max_tokens: 2048,
-  messages: [{ role: 'user', content: 'Audit this smart contract for reentrancy.' }]
-});
-
-console.log(message.content[0]);`
-    },
-    ts_sdk: {
-      title: '@galxai/sdk Direct',
-      lang: 'typescript',
-      code: snippetCompaction
-        ? `import { GalxAIClient } from '@galxai/sdk';
-
-const galx = new GalxAIClient('${activeDisplayKey}');
-
-// 1-line prompt execution
-const answer = await galx.run('Explain quantum key distribution simply.');
-
-// Flat structured extraction
-const parsed = await galx.extract('Dr. Sarah Chen, 34, Neurologist at Stanford', {
-  name: { type: 'string' },
-  age: { type: 'number' },
-  institution: { type: 'string' }
-});`
-        : `import { GalxAIClient } from '@galxai/sdk';
-
-// Raw Prompt Mode: Disable compaction across client requests
-const galx = new GalxAIClient({
-  apiKey: '${activeDisplayKey}',
-  compactPrompts: false
-});
-
-const answer = await galx.run('Explain quantum key distribution simply.');`
-    },
-    curl: {
-      title: 'cURL Terminal',
-      lang: 'bash',
-      code: snippetCompaction
-        ? `curl -X POST https://galx.ai/v1/chat/completions \\
-  -H "Authorization: Bearer ${activeDisplayKey}" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "model": "sol",
-    "messages": [
-      {"role": "user", "content": "Hello GALXAI!"}
-    ]
-  }'`
-        : `curl -X POST https://galx.ai/v1/chat/completions \\
-  -H "Authorization: Bearer ${activeDisplayKey}" \\
-  -H "Content-Type: application/json" \\
-  -H "X-Galx-Compact-Prompts: false" \\
-  -d '{
-    "model": "sol",
-    "compact_prompts": false,
-    "messages": [
-      {"role": "user", "content": "Hello GALXAI!"}
-    ]
-  }'`
     },
     cursor: {
-      title: 'Cursor & Windsurf IDE',
+      title: 'Cursor / Windsurf (.cursorrules or Settings)',
       lang: 'json',
-      code: snippetCompaction
-        ? `// Add to .cursor/settings.json or Cursor Models configuration:
-{
-  "openai.baseUrl": "https://galx.ai/v1",
-  "openai.apiKey": "${activeDisplayKey}",
-  "models": [
-    "gpt-5.6-sol",
-    "gpt-5.6-terra",
-    "gpt-5.6-luna",
-    "openai-gpt-image-2"
-  ]
-}`
-        : `// Add to .cursor/settings.json or Cursor Models configuration:
-{
-  "openai.baseUrl": "https://galx.ai/v1",
-  "openai.apiKey": "${activeDisplayKey}",
-  "openai.customHeaders": {
-    "X-Galx-Compact-Prompts": "false"
-  },
-  "models": [
-    "gpt-5.6-sol",
-    "gpt-5.6-terra",
-    "gpt-5.6-luna"
-  ]
-}`
-    },
-    litellm: {
-      title: 'LiteLLM Proxy Config',
-      lang: 'yaml',
-      code: snippetCompaction
-        ? `model_list:
-  - model_name: gpt-5.6-sol
-    litellm_params:
-      model: openai/gpt-5.6-sol
-      api_base: https://galx.ai/v1
-      api_key: ${activeDisplayKey}
-  - model_name: gpt-5.6-terra
-    litellm_params:
-      model: openai/gpt-5.6-terra
-      api_base: https://galx.ai/v1
-      api_key: ${activeDisplayKey}`
-        : `model_list:
-  - model_name: gpt-5.6-sol
-    litellm_params:
-      model: openai/gpt-5.6-sol
-      api_base: https://galx.ai/v1
-      api_key: ${activeDisplayKey}
-      extra_headers:
-        X-Galx-Compact-Prompts: "false"`
-    },
-    vercel_ai: {
-      title: 'Vercel AI SDK',
-      lang: 'typescript',
-      code: `import { createOpenAI } from '@ai-sdk/openai';
-import { generateText } from 'ai';
-
-const galxai = createOpenAI({
-  baseURL: 'https://galx.ai/v1',
-  apiKey: '${activeDisplayKey}'${!snippetCompaction ? `,\n  headers: { 'X-Galx-Compact-Prompts': 'false' }` : ''}
-});
-
-const { text } = await generateText({
-  model: galxai('gpt-5.6-sol'),
-  prompt: 'Design an enterprise zero-trust telemetry pipeline.'
-});`
+      code: `// Set in Cursor Settings -> Models -> OpenAI API Key:
+// API Key: ${activeDisplayKey}
+// Override OpenAI Base URL: https://galx.ai/v1
+// Compatible Models: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`
     }
   };
 
@@ -477,12 +240,14 @@ const { text } = await generateText({
     return keyEnv === environmentFilter;
   });
 
+  const activeKeysCount = keys.filter(k => !k.revoked && !k.isExpired).length;
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#07090e]">
+    <div className="min-h-screen flex flex-col bg-[#07090e] text-zinc-100">
       <Navigation />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
-        <Breadcrumbs items={[{ label: 'Developer Universal API Keys' }]} />
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <Breadcrumbs items={[{ label: 'API Keys' }]} />
 
         <ErrorBoundary name="Keys Navigation">
           <KeysSubNav />
@@ -490,142 +255,104 @@ const { text } = await generateText({
 
         <AuthRequiredGate
           title="Sign In to Access API Keys"
-          description="Your dedicated API keys, per-key rate limit configurations, and live consumption metrics are private to your workspace."
-          checkoutAmount={25}
+          description="Your dedicated API keys, rate limits, and gateway usage telemetry are private to your workspace."
         >
-          {/* Page Hero with Wallet Summary */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-            <div className="lg:col-span-8 glass-panel rounded-3xl p-6 sm:p-8 flex flex-col justify-between space-y-4 border border-white/10 bg-gradient-to-br from-zinc-950/20 via-black/40 to-cyan-950/20">
-              <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold">
-                  <Key className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>WHOLESALE CLEARINGHOUSE &amp; 429 BURST PASS</span>
-                </div>
-                <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">Developer Universal API Keys</h1>
-                <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-2xl">
-                  Unified <code className="text-cyan-300 font-mono font-bold">galx_live_...</code> and <code className="text-amber-300 font-mono font-bold">galx_test_...</code> client tokens with embedded checksums. Drop-in compatible with Cursor, Windsurf, Claude Code, OpenAI SDK, and LangChain. Unlocks <strong>25%–40% wholesale savings</strong>, <strong>75% prompt caching</strong>, and <strong>429 rate limit immunity</strong>.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <Link
-                  href="/keys/new"
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 flex items-center gap-1.5 transition-all cursor-pointer"
-                >
-                  <Plus className="w-4 h-4 text-black" />
-                  <span>Advanced Key Wizard ($30 Free Grant)</span>
-                </Link>
-
-                <button
-                  type="button"
-                  onClick={runGatewaySmokeTest}
-                  disabled={isPinging}
-                  className="px-4 py-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
-                >
-                  <Zap className={`w-3.5 h-3.5 text-indigo-400 ${isPinging ? 'animate-pulse' : ''}`} />
-                  <span>{isPinging ? 'Pinging Gateway...' : 'Live Smoke Test (0ms)'}</span>
-                </button>
-
-                <Link
-                  href="/docs/quickstart"
-                  className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-semibold flex items-center gap-1.5 transition-all"
-                >
-                  <Code2 className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Quickstart Docs</span>
-                </Link>
-              </div>
+          {/* Flat Page Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-white">API Keys</h1>
+              <p className="text-xs text-zinc-400 mt-1">
+                Secret tokens to authenticate requests to the GALX AI Gateway (<code className="text-zinc-300 font-mono">https://galx.ai/v1</code>).
+              </p>
             </div>
 
-            {/* Wallet Balance Widget */}
-            <div className="lg:col-span-4 glass-panel rounded-3xl p-6 flex flex-col justify-between space-y-4 border border-emerald-500/30 bg-emerald-500/5 shadow-xl">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono text-zinc-400 uppercase font-bold flex items-center gap-1.5">
-                    <Wallet className="w-3.5 h-3.5 text-emerald-400" />
-                    Compute Wallet
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold">
-                    $30 Grant Active
-                  </span>
-                </div>
-                <div className="text-3xl font-black text-white font-mono">${walletBalance.toFixed(2)} <span className="text-xs text-zinc-400 font-sans">USD</span></div>
-                <p className="text-[11px] text-zinc-400">All active keys draw from this shared compute balance with microsecond metering.</p>
-              </div>
-
-              <Link
-                href="/billing"
-                className="w-full py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer font-mono"
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setNewKeyName('');
+                  setCreateError(null);
+                  setIsCreateModalOpen(true);
+                }}
+                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
               >
-                <span>Manage Wallet &amp; Top Up</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+                <Plus className="w-4 h-4" />
+                <span>Create New Key</span>
+              </button>
             </div>
           </div>
 
-          {/* Live Smoke Test Result Banner */}
-          {pingResult && (
-            <div className={`glass-panel rounded-2xl p-4 border flex items-center justify-between gap-4 transition-all ${
-              pingResult.success ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-rose-500/40 bg-rose-500/10'
-            }`}>
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                  pingResult.success ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
-                }`}>
-                  {pingResult.success ? <Check className="w-4 h-4" /> : <ShieldAlert className="w-4 h-4" />}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold text-white uppercase">
-                      {pingResult.success ? 'Gateway Verified Online' : 'Gateway Connectivity Warning'}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-md bg-black/40 text-[10px] font-mono text-cyan-300 font-bold border border-white/10">
-                      {pingResult.latencyMs}ms RTT
-                    </span>
-                    {pingResult.modelCount && (
-                      <span className="px-2 py-0.5 rounded-md bg-black/40 text-[10px] font-mono text-emerald-300 font-bold border border-white/10">
-                        {pingResult.modelCount} Models Ready
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-zinc-300">{pingResult.message}</p>
-                </div>
+          {/* Single-Row Telemetry Context Bar */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-2xl bg-[#0d101c] border border-white/10 text-xs font-sans">
+            <div className="flex items-center justify-between px-3 py-1.5 sm:border-r sm:border-white/10">
+              <div className="flex items-center gap-2 text-zinc-400">
+                <Wallet className="w-4 h-4 text-emerald-400" />
+                <span>Compute Balance</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-bold text-white">${walletBalance.toFixed(2)}</span>
+                <Link
+                  href="/billing"
+                  className="text-[11px] text-indigo-400 hover:text-indigo-300 transition-colors"
+                >
+                  Manage
+                </Link>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between px-3 py-1.5 sm:border-r sm:border-white/10">
+              <div className="flex items-center gap-2 text-zinc-400">
+                <Key className="w-4 h-4 text-indigo-400" />
+                <span>Active Keys</span>
+              </div>
+              <span className="font-mono font-bold text-white">{activeKeysCount}</span>
+            </div>
+
+            <div className="flex items-center justify-between px-3 py-1.5">
+              <div className="flex items-center gap-2 text-zinc-400">
+                <ExternalLink className="w-4 h-4 text-cyan-400" />
+                <span>Gateway Base URL</span>
               </div>
               <button
-                onClick={() => setPingResult(null)}
-                className="p-1 text-zinc-400 hover:text-white transition-colors"
+                type="button"
+                onClick={handleCopyBaseUrl}
+                className="font-mono text-zinc-300 hover:text-white flex items-center gap-1.5 text-[11px] bg-white/5 hover:bg-white/10 px-2 py-0.5 rounded transition-colors cursor-pointer"
+                title="Copy base URL to clipboard"
               >
-                <X className="w-4 h-4" />
+                <span>https://galx.ai/v1</span>
+                {copiedBaseUrl ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-zinc-400" />}
               </button>
             </div>
-          )}
+          </div>
 
-          {/* Rolled Key Reveal Notification */}
-          {rolledResultKey && (
-            <div className="p-5 rounded-3xl bg-gradient-to-r from-cyan-950/40 via-indigo-950/40 to-black/80 border border-cyan-500/40 space-y-3 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+          {/* Newly Created Secret Key Alert Banner (One-Time Reveal) */}
+          {createdSecretKey && (
+            <div className="p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 space-y-2.5 animate-in fade-in duration-150">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-bold text-cyan-300 uppercase">
-                  <RefreshCw className="w-4 h-4 text-cyan-400 animate-spin-slow" />
-                  <span>Key Rotated Successfully (Zero-Downtime Roll)</span>
+                <div className="flex items-center gap-2 text-xs font-semibold text-emerald-300">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <span>Key Generated Successfully</span>
                 </div>
-                <span className="text-[10px] font-mono text-zinc-400">Copy now • Revealed once</span>
+                <span className="text-[11px] text-zinc-400">Save this key now. It will not be shown again.</span>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-black/80 font-mono text-xs text-cyan-300 flex items-center justify-between gap-3 border border-cyan-500/40 break-all">
-                <span className="select-all font-bold">{rolledResultKey}</span>
+              <div className="p-3 rounded-xl bg-black/60 font-mono text-xs text-emerald-300 flex items-center justify-between gap-3 border border-emerald-500/30">
+                <span className="select-all break-all">{createdSecretKey}</span>
                 <button
-                  onClick={() => handleCopy(rolledResultKey, 'rolled')}
-                  className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 shrink-0 transition-all cursor-pointer flex items-center gap-1 text-xs font-bold font-sans"
+                  type="button"
+                  onClick={() => handleCopy(createdSecretKey, 'created')}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-semibold shrink-0 transition-colors flex items-center gap-1 cursor-pointer"
                 >
-                  {copiedKey === 'rolled' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedKey === 'rolled' ? 'Copied' : 'Copy Key'}</span>
+                  {copiedKey === 'created' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedKey === 'created' ? 'Copied' : 'Copy'}</span>
                 </button>
               </div>
 
-              <div className="text-[11px] text-zinc-400 flex items-center justify-between">
-                <span>Update your environment variables. Your previous key remains functional until its grace period ends.</span>
+              <div className="flex justify-end">
                 <button
-                  onClick={() => setRolledResultKey(null)}
-                  className="text-cyan-400 hover:text-cyan-300 text-xs underline cursor-pointer"
+                  type="button"
+                  onClick={() => setCreatedSecretKey(null)}
+                  className="text-xs text-zinc-400 hover:text-zinc-200 cursor-pointer"
                 >
                   Dismiss
                 </button>
@@ -633,372 +360,70 @@ const { text } = await generateText({
             </div>
           )}
 
-          {/* Community Free Compute Pool Status Banner & VIP Fast-Lane Trigger */}
-          <div className="glass-panel rounded-3xl p-6 border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-black/40 space-y-3 relative overflow-hidden shadow-xl">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
-                  <Gift className="w-5 h-5" />
+          {/* Rolled Key Reveal Notification */}
+          {rolledResultKey && (
+            <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-500/40 space-y-2.5 animate-in fade-in duration-150">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-semibold text-cyan-300">
+                  <RefreshCw className="w-4 h-4 text-cyan-400" />
+                  <span>Key Rotated (Zero-Downtime Roll)</span>
                 </div>
-                <div className="space-y-1">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[10px] font-bold border border-amber-500/30">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    <span>50%–100% INSTANT MATCH BONUS • $30 FREE GRANT ACTIVE</span>
-                  </div>
-                  <h2 className="text-base font-bold text-white">Unlock Production VIP Lanes &amp; Claim 50% Match</h2>
-                  <p className="text-xs text-zinc-300 max-w-xl">
-                    Every key includes $30 free compute. Activate a <strong>Production VIP Tier ($25+)</strong> to unlock <strong>sub-15ms VIP priority routing</strong>, <strong>600 RPM concurrency</strong>, and a <strong>50%–100% Instant Deposit Match</strong>. 100% refundable anytime.
-                  </p>
-                </div>
+                <span className="text-[11px] text-zinc-400">Copy now • Revealed once</span>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setIsPaywallOpen(true)}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs font-mono uppercase tracking-wider shadow-lg shadow-amber-500/25 flex items-center gap-1.5 transition-all cursor-pointer shrink-0 hover:scale-[1.02] active:scale-98"
-              >
-                <Zap className="w-3.5 h-3.5 text-black" />
-                <span>Activate VIP Tier (+50% Match)</span>
-                <ArrowRight className="w-3.5 h-3.5 text-black" />
-              </button>
-            </div>
-          </div>
-
-          {/* Quick 1-Click Key Generator with Mental Model Presets & Environment Selection */}
-          <div className="glass-panel rounded-3xl p-6 space-y-5 border border-white/10">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="space-y-1">
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  <Plus className="w-4 h-4 text-indigo-400" />
-                  <span>Instant 1-Click Key Generator</span>
-                </h2>
-                <p className="text-xs text-zinc-400">Zero hesitation. Choose a mental model preset or enter a custom identifier.</p>
-              </div>
-
-              {/* Quick Preset Chips */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                {QUICK_PRESETS.map((preset) => {
-                  const Icon = preset.icon;
-                  const isSelected = newKeyName === preset.defaultLabel;
-                  return (
-                    <button
-                      key={preset.id}
-                      type="button"
-                      onClick={() => applyQuickPreset(preset)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
-                        isSelected
-                          ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/30'
-                          : 'bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border border-white/5'
-                      }`}
-                    >
-                      <Icon className="w-3 h-3" />
-                      <span>{preset.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {createdSecretKey ? (
-              <div className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/40 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-300 uppercase">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                    <span>Your Secret API Key is Ready</span>
-                  </div>
-                  <span className="text-[10px] font-mono text-zinc-400">Copy now • Stored hashed with SHA-256</span>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-black/70 font-mono text-xs text-emerald-300 flex items-center justify-between gap-3 border border-emerald-500/30 break-all">
-                  <span className="select-all font-bold">{createdSecretKey}</span>
-                  <button
-                    onClick={() => handleCopy(createdSecretKey, 'banner')}
-                    className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 shrink-0 transition-all cursor-pointer flex items-center gap-1 text-xs font-bold font-sans"
-                  >
-                    {copiedKey === 'banner' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedKey === 'banner' ? 'Copied' : 'Copy Key'}</span>
-                  </button>
-                </div>
-
-                <div className="text-[11px] text-zinc-400 flex items-center justify-between">
-                  <span>Tested &amp; ready to use in any OpenAI, Anthropic, or LangChain SDK instance below.</span>
-                  <button
-                    onClick={() => setCreatedSecretKey(null)}
-                    className="text-zinc-500 hover:text-zinc-300 text-xs underline cursor-pointer"
-                  >
-                    Done
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleCreateKey} className="space-y-3">
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    type="text"
-                    value={newKeyName}
-                    onChange={(e) => setNewKeyName(e.target.value)}
-                    placeholder="e.g. Cursor IDE, Production Agent Fleet, CLI Tool"
-                    className="flex-1 py-3 px-4 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 font-mono"
-                    required
-                  />
-
-                  {/* Environment Selector */}
-                  <div className="flex items-center gap-1.5 p-1 bg-black/40 rounded-xl border border-white/10 text-xs font-mono">
-                    <button
-                      type="button"
-                      onClick={() => setNewKeyEnv('live')}
-                      className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                        newKeyEnv === 'live'
-                          ? 'bg-emerald-500 text-black shadow-sm'
-                          : 'text-zinc-400 hover:text-white'
-                      }`}
-                    >
-                      Live
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setNewKeyEnv('test')}
-                      className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                        newKeyEnv === 'test'
-                          ? 'bg-amber-400 text-black shadow-sm'
-                          : 'text-zinc-400 hover:text-white'
-                      }`}
-                    >
-                      Test
-                    </button>
-                  </div>
-
-                  {/* Compaction Mode Preset Selector */}
-                  <div className="flex items-center gap-1.5 p-1 bg-black/40 rounded-xl border border-white/10 text-xs font-mono">
-                    <button
-                      type="button"
-                      onClick={() => setNewKeyCompactionMode('raw')}
-                      className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                        newKeyCompactionMode === 'raw'
-                          ? 'bg-amber-400 text-black shadow-sm'
-                          : 'text-zinc-400 hover:text-white'
-                      }`}
-                      title="Raw: 100% byte-for-byte fidelity (Safe Default)"
-                    >
-                      📝 Raw (Default)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setNewKeyCompactionMode('auto')}
-                      className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                        newKeyCompactionMode === 'auto'
-                          ? 'bg-cyan-500 text-black shadow-sm'
-                          : 'text-zinc-400 hover:text-white'
-                      }`}
-                      title="Compacted: Deflates repetitive history and whitespace"
-                    >
-                      ⚡ Compacted
-                    </button>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="px-6 py-3 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    <Plus className="w-4 h-4 text-black" />
-                    <span>{isLoading ? 'Generating...' : 'Create Key in 1-Click'}</span>
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-
-          {/* Interactive Multi-Mental-Model Code Snippets & Drop-in Matrix */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-white/10 bg-black/40">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 font-mono text-[10px] font-bold border border-cyan-500/30">
-                  <Sparkles className="w-3 h-3 text-cyan-400" />
-                  <span>DROP-IN REPLACEMENT ANYWHERE</span>
-                </div>
-                <h2 className="text-lg font-black text-white">How to Connect from Any Mental Model</h2>
-                <p className="text-xs text-zinc-400">
-                  Simply point your favorite SDK, agent framework, or IDE to <code className="text-cyan-300 font-mono">https://galx.ai/v1</code>.
-                </p>
-              </div>
-
-              {/* Code Snippet Tab Bar */}
-              <div className="flex flex-wrap items-center gap-1 bg-black/50 p-1.5 rounded-2xl border border-white/10">
-                {(
-                  [
-                    { id: 'python', label: 'Python' },
-                    { id: 'openai_sdk', label: 'OpenAI (Node)' },
-                    { id: 'anthropic_sdk', label: 'Anthropic' },
-                    { id: 'ts_sdk', label: '@galxai/sdk' },
-                    { id: 'curl', label: 'cURL' },
-                    { id: 'cursor', label: 'Cursor IDE' },
-                    { id: 'litellm', label: 'LiteLLM' },
-                    { id: 'vercel_ai', label: 'Vercel AI' }
-                  ] as { id: SnippetTab; label: string }[]
-                ).map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveSnippetTab(tab.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
-                      activeSnippetTab === tab.id
-                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                        : 'text-zinc-400 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Developer Gateway Compaction Toggle */}
-              <div className="flex items-center gap-1.5 p-1 bg-black/60 rounded-xl border border-white/10 text-xs font-mono">
-                <span className="text-[10px] text-zinc-400 pl-2 hidden sm:inline">Prompt Policy:</span>
+              <div className="p-3 rounded-xl bg-black/60 font-mono text-xs text-cyan-300 flex items-center justify-between gap-3 border border-cyan-500/30">
+                <span className="select-all break-all">{rolledResultKey}</span>
                 <button
                   type="button"
-                  onClick={() => setSnippetCompaction(false)}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-bold text-[11px] ${
-                    !snippetCompaction
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm shadow-amber-500/10'
-                      : 'text-zinc-400 hover:text-white'
-                  }`}
-                  title="Raw Mode: Transmits 100% byte-for-byte untransformed prompts (Default)"
+                  onClick={() => handleCopy(rolledResultKey, 'rolled')}
+                  className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-xs font-semibold shrink-0 transition-colors flex items-center gap-1 cursor-pointer"
                 >
-                  📝 Raw (Default)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSnippetCompaction(true)}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-bold text-[11px] ${
-                    snippetCompaction
-                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm shadow-cyan-500/10'
-                      : 'text-zinc-400 hover:text-white'
-                  }`}
-                  title="Compacted Mode: Multi-turn compaction & token deflation"
-                >
-                  ⚡ Compacted (Opt-In)
-                </button>
-              </div>
-            </div>
-
-            {/* Code Display Area */}
-            <div className="relative rounded-2xl bg-black/80 border border-white/10 overflow-hidden font-mono text-xs">
-              <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10 bg-white/[0.02]">
-                <div className="flex items-center gap-2 text-zinc-400 text-[11px]">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/70" />
-                  <span className="ml-2 text-zinc-400 font-semibold">{snippets[activeSnippetTab].title}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleCopySnippet(snippets[activeSnippetTab].code)}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 flex items-center gap-1.5 text-[11px] font-sans font-bold cursor-pointer transition-all border border-white/5"
-                >
-                  {copiedSnippet ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-cyan-400" />}
-                  <span>{copiedSnippet ? 'Copied to Clipboard' : 'Copy Code'}</span>
+                  {copiedKey === 'rolled' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedKey === 'rolled' ? 'Copied' : 'Copy'}</span>
                 </button>
               </div>
 
-              <pre className="p-4 sm:p-5 text-zinc-300 overflow-x-auto leading-relaxed">
-                <code>{snippets[activeSnippetTab].code}</code>
-              </pre>
-            </div>
-          </div>
-
-          {/* Downward Funnel Tier Upgrade Strip */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-amber-500/30 bg-gradient-to-b from-amber-500/5 via-black/40 to-black/60 space-y-4 shadow-xl">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                  <h3 className="text-base font-black text-white">Downward Funnel Tier Unlocks</h3>
-                  <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[10px] font-bold">
-                    UP TO 100% MATCH
-                  </span>
-                </div>
-                <p className="text-xs text-zinc-400">
-                  Higher deposit tiers unlock dedicated priority routing lanes, elevated concurrency burst passes, and bigger match grants.
-                </p>
-              </div>
-
-              <span className="text-[11px] text-zinc-400 font-mono bg-white/5 px-3 py-1 rounded-full border border-white/10 self-start sm:self-auto">
-                100% Refundable Anytime
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
-              {[
-                { amount: 25, label: 'Starter Builder', badge: '50% Match', credit: '$37.50', rpm: '120 RPM', perk: '75% Prompt Caching' },
-                { amount: 50, label: 'Growth VIP', badge: '60% Match • Popular', credit: '$80.00', rpm: '300 RPM', perk: 'Sub-15ms VIP Fast-Lane', popular: true },
-                { amount: 100, label: 'Scale Fleet', badge: '75% Match', credit: '$175.00', rpm: '600 RPM', perk: 'Concurrency Burst Pass' },
-                { amount: 250, label: 'Enterprise Sovereign', badge: '100% Double Match', credit: '$500.00', rpm: 'Unlimited', perk: 'Custom VPC Lane' }
-              ].map((tier) => (
-                <div
-                  key={tier.amount}
-                  className={`rounded-2xl p-4 border flex flex-col justify-between space-y-3 transition-all ${
-                    tier.popular
-                      ? 'bg-amber-500/15 border-amber-400/60 shadow-lg shadow-amber-500/10 scale-[1.01]'
-                      : 'bg-black/40 border-white/10 hover:border-white/20'
-                  }`}
-                >
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono font-bold uppercase text-amber-300">
-                        {tier.badge}
-                      </span>
-                      <span className="text-[10px] font-mono text-zinc-400 bg-white/5 px-2 py-0.5 rounded">
-                        {tier.rpm}
-                      </span>
-                    </div>
-                    <div className="text-lg font-black text-white">${tier.amount} <span className="text-xs font-mono text-emerald-300 font-bold">→ {tier.credit} Credit</span></div>
-                    <div className="text-xs font-semibold text-zinc-300">{tier.label}</div>
-                    <p className="text-[11px] text-zinc-400">{tier.perk}</p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handleOpenPaywall(tier.amount)}
-                    className={`w-full py-2 px-3 rounded-xl font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                      tier.popular
-                        ? 'bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black shadow-md shadow-amber-500/20'
-                        : 'bg-white/10 hover:bg-white/20 text-white border border-white/10'
-                    }`}
-                  >
-                    <span>Unlock ${tier.amount} Tier</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Active Keys Table with Environment Tabs & Actions */}
-          <div className="glass-panel rounded-3xl p-6 space-y-4 border border-white/10">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="space-y-0.5">
-                <h2 className="text-base font-bold text-white">Active Gateway Keys ({filteredKeys.filter(k => !k.revoked && !k.isExpired).length})</h2>
-                <span className="text-xs text-zinc-400 font-mono">Shared Wallet Auto-Deduction • Dual Environment Isolation</span>
-              </div>
-
-              {/* Environment Filter Pills */}
-              <div className="flex items-center gap-1 bg-black/60 p-1 rounded-xl border border-white/10 text-xs font-mono">
+              <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                <span>Your previous key remains valid until the migration grace period expires.</span>
                 <button
+                  type="button"
+                  onClick={() => setRolledResultKey(null)}
+                  className="text-cyan-400 hover:text-cyan-300 cursor-pointer"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Active Keys Table Section (Front & Center) */}
+          <div className="rounded-2xl border border-white/10 bg-[#0d101c] overflow-hidden">
+            {/* Table Controls */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-semibold text-white">Your Keys</h2>
+                <span className="text-xs text-zinc-500 font-mono">({filteredKeys.length})</span>
+              </div>
+
+              {/* Environment Filter */}
+              <div className="flex items-center gap-1 bg-black/50 p-1 rounded-xl border border-white/10 text-xs font-mono">
+                <button
+                  type="button"
                   onClick={() => setEnvironmentFilter('all')}
-                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer font-bold ${
+                  className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
                     environmentFilter === 'all'
-                      ? 'bg-white/20 text-white'
-                      : 'text-zinc-400 hover:text-white'
+                      ? 'bg-white/15 text-white font-semibold'
+                      : 'text-zinc-400 hover:text-zinc-200'
                   }`}
                 >
                   All ({keys.length})
                 </button>
                 <button
+                  type="button"
                   onClick={() => setEnvironmentFilter('live')}
-                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer font-bold flex items-center gap-1.5 ${
+                  className={`px-3 py-1 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
                     environmentFilter === 'live'
-                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                      ? 'bg-emerald-500/20 text-emerald-300 font-semibold'
                       : 'text-zinc-400 hover:text-emerald-300'
                   }`}
                 >
@@ -1006,10 +431,11 @@ const { text } = await generateText({
                   <span>Live</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => setEnvironmentFilter('test')}
-                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer font-bold flex items-center gap-1.5 ${
+                  className={`px-3 py-1 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
                     environmentFilter === 'test'
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                      ? 'bg-amber-500/20 text-amber-300 font-semibold'
                       : 'text-zinc-400 hover:text-amber-300'
                   }`}
                 >
@@ -1020,85 +446,117 @@ const { text } = await generateText({
             </div>
 
             {filteredKeys.length === 0 ? (
-              <div className="text-center py-12 px-4 rounded-2xl bg-black/30 border border-dashed border-white/10 space-y-2">
-                <Key className="w-8 h-8 text-zinc-500 mx-auto" />
-                <p className="text-xs text-zinc-400">No {environmentFilter !== 'all' ? environmentFilter : ''} gateway keys generated yet. Use the 1-click generator above to mint your first key.</p>
+              <div className="text-center py-16 px-4 space-y-3">
+                <Key className="w-8 h-8 text-zinc-600 mx-auto" />
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-zinc-300">No API keys found</p>
+                  <p className="text-xs text-zinc-500">
+                    {environmentFilter !== 'all'
+                      ? `No ${environmentFilter} keys generated yet.`
+                      : 'Create your first secret key to begin sending requests.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewKeyName('');
+                    setCreateError(null);
+                    setIsCreateModalOpen(true);
+                  }}
+                  className="mt-2 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold transition-colors cursor-pointer border border-white/10"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Create API Key</span>
+                </button>
               </div>
             ) : (
-              <div className="overflow-x-auto rounded-2xl border border-white/5 bg-black/20">
-                <table className="w-full text-left text-xs font-mono">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-white/10 text-zinc-400 font-bold uppercase text-[10px]">
-                      <th className="py-3 px-4 font-sans">Name / Label</th>
-                      <th className="py-3 px-4 font-sans">Env</th>
-                      <th className="py-3 px-4 font-sans">Policy</th>
-                      <th className="py-3 px-4 font-sans">Key Prefix</th>
-                      <th className="py-3 px-4 font-sans">Rate Limit</th>
-                      <th className="py-3 px-4 font-sans">Total Requests</th>
-                      <th className="py-3 px-4 font-sans">Created</th>
-                      <th className="py-3 px-4 font-sans">Status</th>
-                      <th className="py-3 px-4 text-right font-sans">Actions</th>
+                    <tr className="border-b border-white/10 text-zinc-400 font-semibold text-[11px] bg-white/[0.02]">
+                      <th className="py-3 px-4">Name</th>
+                      <th className="py-3 px-4">Environment</th>
+                      <th className="py-3 px-4 font-mono">Secret Key</th>
+                      <th className="py-3 px-4">Rate Limit</th>
+                      <th className="py-3 px-4">Total Requests</th>
+                      <th className="py-3 px-4">Created</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className="divide-y divide-white/5 font-sans">
                     {filteredKeys.map((k) => {
                       const isLive = (k.environment || (k.keyPrefix?.includes('live') || k.prefix?.includes('live') ? 'live' : 'test')) === 'live';
-                      const isRaw = k.defaultCompactionMode === 'raw';
+                      const prefixText = k.keyPrefix || k.prefix || 'galx_live_';
+
                       return (
                         <tr key={k.id} className="hover:bg-white/[0.02] transition-colors">
-                          <td className="py-3.5 px-4 font-bold text-white">{k.name}</td>
+                          <td className="py-3.5 px-4 font-semibold text-white">
+                            <Link href={`/keys/${k.id}`} className="hover:text-indigo-300 transition-colors">
+                              {k.name}
+                            </Link>
+                          </td>
                           <td className="py-3.5 px-4">
-                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase font-mono ${
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold uppercase ${
                               isLive
-                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
                             }`}>
-                              {isLive ? 'LIVE' : 'TEST'}
+                              {isLive ? 'Live' : 'Test'}
                             </span>
                           </td>
-                          <td className="py-3.5 px-4">
-                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase font-mono ${
-                              isRaw
-                                ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30'
-                                : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/30'
-                            }`}>
-                              {isRaw ? 'RAW' : 'COMPACTED'}
-                            </span>
+                          <td className="py-3.5 px-4 font-mono text-zinc-300">
+                            <div className="inline-flex items-center gap-1.5">
+                              <span>{prefixText}...</span>
+                              <button
+                                type="button"
+                                onClick={() => handleCopy(`${prefixText}...`, k.id)}
+                                className="p-1 rounded text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                                title="Copy key prefix"
+                              >
+                                {copiedKey === k.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                              </button>
+                            </div>
                           </td>
-                          <td className="py-3.5 px-4 font-mono text-cyan-300">{k.keyPrefix || k.prefix}...</td>
-                          <td className="py-3.5 px-4 text-zinc-400">{k.rateLimitPerMinute || 120} RPM</td>
-                          <td className="py-3.5 px-4 text-zinc-300 font-mono">{k.totalRequests || 0}</td>
-                          <td className="py-3.5 px-4 text-zinc-500 font-sans">{formatTimeAgo(k.createdAt)}</td>
+                          <td className="py-3.5 px-4 text-zinc-400 font-mono">
+                            {k.rateLimitPerMinute || 120} RPM
+                          </td>
+                          <td className="py-3.5 px-4 text-zinc-400 font-mono">
+                            {k.totalRequests || 0}
+                          </td>
+                          <td className="py-3.5 px-4 text-zinc-500">
+                            {formatTimeAgo(k.createdAt)}
+                          </td>
                           <td className="py-3.5 px-4">
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${
                               k.revoked
-                                ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                                ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
                                 : k.isExpired
-                                ? 'bg-zinc-800 text-zinc-400 border-zinc-700'
-                                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                ? 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                                : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                             }`}>
                               {k.revoked ? 'Revoked' : k.isExpired ? 'Expired' : 'Active'}
                             </span>
                           </td>
                           <td className="py-3.5 px-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
+                            <div className="flex items-center justify-end gap-1.5">
                               {!k.revoked && !k.isExpired && (
                                 <>
                                   <button
+                                    type="button"
                                     onClick={() => setRollingKey(k)}
-                                    className="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold cursor-pointer transition-all font-sans flex items-center gap-1"
+                                    className="px-2.5 py-1 rounded-lg text-zinc-300 hover:text-white hover:bg-white/10 text-xs font-semibold cursor-pointer transition-colors"
                                     title="Zero-downtime key rotation"
                                   >
-                                    <RefreshCw className="w-3 h-3" />
-                                    <span>Roll</span>
+                                    Roll
                                   </button>
-
                                   <button
-                                    onClick={() => handleRevokeKey(k.id)}
-                                    className="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold cursor-pointer transition-all font-sans flex items-center gap-1"
+                                    type="button"
+                                    onClick={() => handleRevokeKey(k.id, k.name)}
+                                    className="px-2.5 py-1 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 text-xs font-semibold cursor-pointer transition-colors"
+                                    title="Revoke key"
                                   >
-                                    <Trash2 className="w-3 h-3" />
-                                    <span>Revoke</span>
+                                    Revoke
                                   </button>
                                 </>
                               )}
@@ -1112,24 +570,199 @@ const { text } = await generateText({
               </div>
             )}
           </div>
-        </AuthRequiredGate>
 
-        {/* Consumer-Grade Trust Seals */}
-        <ErrorBoundary name="Trust Seals">
-          <TrustSeals />
-        </ErrorBoundary>
+          {/* Quickstart Integration Drawer / Card */}
+          <div className="rounded-2xl border border-white/10 bg-[#0d101c] p-4 sm:p-5 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-semibold text-white flex items-center gap-1.5">
+                  <Code2 className="w-4 h-4 text-indigo-400" />
+                  <span>Integration Quickstart</span>
+                </h3>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Point any OpenAI-compatible client to <code className="text-zinc-200 font-mono">https://galx.ai/v1</code>.
+                </p>
+              </div>
+
+              {/* Tabs */}
+              <div className="flex items-center gap-1 bg-black/50 p-1 rounded-xl border border-white/10 text-xs font-mono">
+                {(
+                  [
+                    { id: 'python', label: 'Python' },
+                    { id: 'node', label: 'Node.js' },
+                    { id: 'curl', label: 'cURL' },
+                    { id: 'cursor', label: 'Cursor IDE' }
+                  ] as { id: SnippetTab; label: string }[]
+                ).map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveSnippetTab(tab.id)}
+                    className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                      activeSnippetTab === tab.id
+                        ? 'bg-indigo-600 text-white font-semibold'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Code Box */}
+            <div className="relative rounded-xl bg-black/70 border border-white/10 font-mono text-xs overflow-hidden">
+              <div className="flex items-center justify-between px-3.5 py-2 border-b border-white/10 bg-white/[0.02]">
+                <span className="text-[11px] text-zinc-400">{snippets[activeSnippetTab].title}</span>
+                <button
+                  type="button"
+                  onClick={() => handleCopySnippet(snippets[activeSnippetTab].code)}
+                  className="px-2.5 py-1 rounded text-zinc-300 hover:text-white hover:bg-white/10 text-[11px] font-sans font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                >
+                  {copiedSnippet ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-zinc-400" />}
+                  <span>{copiedSnippet ? 'Copied' : 'Copy'}</span>
+                </button>
+              </div>
+              <pre className="p-4 text-zinc-300 overflow-x-auto leading-relaxed">
+                <code>{snippets[activeSnippetTab].code}</code>
+              </pre>
+            </div>
+          </div>
+        </AuthRequiredGate>
       </main>
+
+      {/* Create Key Modal Dialog */}
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div
+            className="w-full max-w-md rounded-2xl bg-[#0d101c] border border-white/15 p-6 space-y-4 shadow-2xl text-zinc-100 font-sans"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <h2 className="text-base font-bold text-white">Create New Secret Key</h2>
+              <button
+                type="button"
+                onClick={() => setIsCreateModalOpen(false)}
+                className="p-1 rounded text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {createError && (
+              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 shrink-0" />
+                <span>{createError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateKey} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-zinc-300">Key Name</label>
+                <input
+                  type="text"
+                  value={newKeyName}
+                  onChange={(e) => setNewKeyName(e.target.value)}
+                  placeholder="e.g. Cursor IDE, Production Backend, Fleet Worker"
+                  className="w-full py-2 px-3 rounded-xl bg-black/50 border border-white/15 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 font-mono"
+                  autoFocus
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-zinc-300">Environment</label>
+                <div className="grid grid-cols-2 gap-2 font-mono text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setNewKeyEnv('live')}
+                    className={`py-2 px-3 rounded-xl border font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                      newKeyEnv === 'live'
+                        ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
+                        : 'bg-black/30 border-white/10 text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    <span>Live (Production)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewKeyEnv('test')}
+                    className={`py-2 px-3 rounded-xl border font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                      newKeyEnv === 'test'
+                        ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
+                        : 'bg-black/30 border-white/10 text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                    <span>Test (Sandbox)</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-zinc-300">Prompt Policy</label>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setNewKeyCompactionMode('raw')}
+                    className={`py-2 px-3 rounded-xl border text-left transition-colors cursor-pointer ${
+                      newKeyCompactionMode === 'raw'
+                        ? 'bg-indigo-600/20 border-indigo-500/50 text-white font-semibold'
+                        : 'bg-black/30 border-white/10 text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    <div>Raw (Default)</div>
+                    <div className="text-[10px] text-zinc-500 font-normal">100% byte fidelity</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewKeyCompactionMode('auto')}
+                    className={`py-2 px-3 rounded-xl border text-left transition-colors cursor-pointer ${
+                      newKeyCompactionMode === 'auto'
+                        ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-200 font-semibold'
+                        : 'bg-black/30 border-white/10 text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    <div>Compacted</div>
+                    <div className="text-[10px] text-zinc-500 font-normal">Auto-token deflation</div>
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateModalOpen(false)}
+                  className="px-3.5 py-2 rounded-xl text-xs text-zinc-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCreating}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>{isCreating ? 'Creating...' : 'Create Secret Key'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Key Roll / Zero-Downtime Rotation Modal */}
       {rollingKey && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-md rounded-3xl bg-[#0b0e18] border border-white/20 p-6 space-y-5 shadow-2xl">
-            <div className="flex items-center justify-between">
+          <div className="w-full max-w-md rounded-2xl bg-[#0d101c] border border-white/15 p-6 space-y-4 shadow-2xl text-zinc-100 font-sans">
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
               <div className="flex items-center gap-2 text-white font-bold text-base">
                 <RefreshCw className="w-4 h-4 text-cyan-400" />
-                <span>Zero-Downtime Key Rotation</span>
+                <span>Rotate API Key</span>
               </div>
               <button
+                type="button"
                 onClick={() => setRollingKey(null)}
                 className="p-1 text-zinc-400 hover:text-white"
               >
@@ -1137,19 +770,19 @@ const { text } = await generateText({
               </button>
             </div>
 
-            <div className="space-y-2 text-xs text-zinc-300 font-sans">
+            <div className="space-y-2 text-xs text-zinc-300">
               <p>
                 Rolling <strong>{rollingKey.name}</strong> (<code className="text-cyan-300 font-mono">{rollingKey.keyPrefix || rollingKey.prefix}...</code>).
               </p>
               <p className="text-zinc-400">
-                A new key will be minted with identical rate limits and scopes. Select a migration grace period for the previous key so running processes are not disrupted.
+                A new key will be minted with identical scopes and rate limits. The current key will remain active during the migration grace period.
               </p>
             </div>
 
             {/* Grace Period Selector */}
-            <div className="space-y-1.5 font-mono text-xs">
-              <span className="text-[11px] text-zinc-400 font-sans font-semibold">Migration Grace Period:</span>
-              <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1.5 text-xs">
+              <span className="text-zinc-400 font-semibold">Migration Grace Period:</span>
+              <div className="grid grid-cols-2 gap-2 font-mono">
                 {[
                   { hours: 0, label: 'Instant Revoke' },
                   { hours: 1, label: '1 Hour' },
@@ -1160,10 +793,10 @@ const { text } = await generateText({
                     key={g.hours}
                     type="button"
                     onClick={() => setRollingGraceHours(g.hours)}
-                    className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer text-left ${
+                    className={`py-2 px-3 rounded-xl border text-xs transition-colors cursor-pointer text-left ${
                       rollingGraceHours === g.hours
-                        ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-200'
-                        : 'bg-black/40 border-white/10 text-zinc-400 hover:text-white'
+                        ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-200 font-semibold'
+                        : 'bg-black/30 border-white/10 text-zinc-400 hover:text-white'
                     }`}
                   >
                     {g.label}
@@ -1172,11 +805,11 @@ const { text } = await generateText({
               </div>
             </div>
 
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
               <button
                 type="button"
                 onClick={() => setRollingKey(null)}
-                className="flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-bold font-sans transition-all cursor-pointer"
+                className="px-3.5 py-2 rounded-xl text-xs text-zinc-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -1184,26 +817,15 @@ const { text } = await generateText({
                 type="button"
                 onClick={handleExecuteRollKey}
                 disabled={isRolling}
-                className="flex-1 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-black font-sans uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isRolling ? 'animate-spin' : ''}`} />
-                <span>{isRolling ? 'Rolling...' : 'Confirm Roll'}</span>
+                <span>{isRolling ? 'Rotating...' : 'Confirm Roll'}</span>
               </button>
             </div>
           </div>
         </div>
       )}
-
-      {/* Paywall Blocker Modal */}
-      <ErrorBoundary name="Paywall Modal">
-        <KeyActivationPaywallModal
-          isOpen={isPaywallOpen}
-          onClose={() => setIsPaywallOpen(false)}
-          onSuccess={handlePaywallSuccess}
-          keyLabel={newKeyName || 'Developer API Key'}
-          initialAmount={paywallSelectedAmt}
-        />
-      </ErrorBoundary>
     </div>
   );
 }

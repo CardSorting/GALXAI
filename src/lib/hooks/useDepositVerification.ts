@@ -45,8 +45,16 @@ export function useDepositVerification() {
         setHasVerifiedDeposit(false);
         setWalletBalance(storedBalance ? parseFloat(storedBalance) : DEFAULT_INITIAL_BALANCE);
       } else {
-        // First-time visit: grant $30 free compute immediately
-        resilientFetch<{ keys: any[] }>('/api/keys', { enableCacheFallback: true })
+        // First-time visit: grant initial compute grant
+        const customUser = SafeStorage.getJSON<any>('galx_custom_auth_user', null);
+        if (!customUser?.id) {
+          setHasVerifiedDeposit(false);
+          setWalletBalance(DEFAULT_INITIAL_BALANCE);
+          setIsLoaded(true);
+          return;
+        }
+
+        resilientFetch<{ keys: any[] }>(`/api/keys?userId=${encodeURIComponent(customUser.id)}`, { enableCacheFallback: true })
           .then(({ data }) => {
             if (data?.keys && data.keys.length > 0) {
               const hasPaidKey = data.keys.some((k: any) => k.computePool === 'priority_dedicated');

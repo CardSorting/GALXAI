@@ -26,7 +26,7 @@ interface ChatAuthModalProps {
 }
 
 export function ChatAuthModal({ isOpen, onClose, initialMode = 'signin' }: ChatAuthModalProps) {
-  const { user, isAuthenticated, signInWithPassword, signUp, signInWithOAuth, signInWithDemo } = useAuth();
+  const { user, isAuthenticated, signInWithPassword, signUp, signInWithOAuth } = useAuth();
 
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
   const [email, setEmail] = useState('');
@@ -111,21 +111,6 @@ export function ChatAuthModal({ isOpen, onClose, initialMode = 'signin' }: ChatA
     } catch (err: any) {
       setError(err.message || `Failed to sign in with ${provider}.`);
       setOauthLoading(null);
-    }
-  };
-
-  const handleDemo = () => {
-    setLoading(true);
-    try {
-      signInWithDemo({ role: 'dev', name: 'Developer Account' });
-      setSuccessMessage('Welcome to GALX Developer Account!');
-      setTimeout(() => {
-        onClose();
-      }, 700);
-    } catch (err: any) {
-      setError('Failed to initialize session.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -350,21 +335,6 @@ export function ChatAuthModal({ isOpen, onClose, initialMode = 'signin' }: ChatA
             )}
           </button>
         </form>
-
-        {/* Direct Developer Access Shortcut */}
-        <div className="pt-4 mt-4 border-t border-white/10 flex items-center justify-between text-xs relative z-10">
-          <div className="flex items-center gap-1.5 text-zinc-400 text-[11px]">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Developer access:</span>
-          </div>
-          <button
-            type="button"
-            onClick={handleDemo}
-            className="py-1 px-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[11px] font-bold text-cyan-300 hover:text-cyan-200 transition-colors cursor-pointer"
-          >
-            Solo Developer Access
-          </button>
-        </div>
       </div>
     </div>
   );

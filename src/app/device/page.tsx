@@ -18,7 +18,7 @@ import {
 function DeviceContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, signInWithDemo } = useAuth();
+  const { user } = useAuth();
 
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -163,27 +163,13 @@ function DeviceContent() {
                 You must be logged in so the CLI token can be mapped to your developer account and compute wallet.
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 font-mono">
-                <button
-                  type="button"
-                  onClick={() => {
-                    signInWithDemo({
-                      role: 'dev',
-                      name: 'Terminal Developer',
-                      email: 'terminal.dev@galx.ai'
-                    });
-                  }}
-                  className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-bold text-xs uppercase flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                >
-                  <Sparkles className="w-3.5 h-3.5 fill-black" />
-                  <span>1-Click Sandbox</span>
-                </button>
-
+              <div className="pt-2 font-mono">
                 <Link
                   href={`/auth/signin?next=${encodeURIComponent(code ? `/device?code=${code}` : '/device')}`}
-                  className="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white font-bold text-xs text-center flex items-center justify-center transition-all cursor-pointer"
+                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-bold text-xs uppercase text-center flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-amber-500/20"
                 >
-                  Sign In with Email
+                  <ArrowRight className="w-3.5 h-3.5" />
+                  <span>Sign In to Authorize CLI</span>
                 </Link>
               </div>
             </div>

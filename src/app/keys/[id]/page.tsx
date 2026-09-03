@@ -33,11 +33,13 @@ import { formatTimeAgo } from '@/lib/utils';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
+import { useAuth } from '@/contexts/AuthContext';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 
 function BaseKeyDetailPage() {
+  const { user } = useAuth();
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
@@ -57,9 +59,10 @@ function BaseKeyDetailPage() {
   const [testResult, setTestResult] = useState<{ success: boolean; latencyMs: number; message: string } | null>(null);
 
   const fetchKey = React.useCallback(async () => {
+    if (!user?.id) return;
     setIsLoading(true);
     try {
-      const res = await resilientFetch<{ key: any }>(`/api/keys/${id}`, { enableCacheFallback: true });
+      const res = await resilientFetch<{ key: any }>(`/api/keys/${id}?userId=${encodeURIComponent(user.id)}`, { enableCacheFallback: true });
       if (res.data?.key) {
         setKeyData(res.data.key);
       }
@@ -68,18 +71,18 @@ function BaseKeyDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [id]);
+  }, [id, user?.id]);
 
   useEffect(() => {
-    if (id) {
+    if (id && user?.id) {
       fetchKey();
     }
-  }, [id, fetchKey]);
+  }, [id, user?.id, fetchKey]);
 
   const handleRevoke = async () => {
     if (!keyData || !window.confirm(`Are you sure you want to revoke "${keyData.name}"? This action cannot be undone.`)) return;
     try {
-      await resilientFetch(`/api/keys?id=${keyData.id}`, { method: 'DELETE' });
+      await resilientFetch(`/api/keys?id=${keyData.id}&userId=${encodeURIComponent(user?.id || '')}`, { method: 'DELETE' });
       fetchKey();
     } catch {}
   };

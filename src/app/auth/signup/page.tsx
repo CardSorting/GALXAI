@@ -22,7 +22,7 @@ import {
 function SignUpContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user, signUp, signInWithDemo, signInWithOAuth, logout } = useAuth();
+  const { user, signUp, signInWithOAuth, logout } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState('');
@@ -95,25 +95,7 @@ function SignUpContent() {
     }
   };
 
-  const handleDemoSignIn = () => {
-    setLoading(true);
-    setError(null);
-    try {
-      signInWithDemo({
-        email: emailInput.trim() || 'developer@galx.ai',
-        name: fullName.trim() || 'GALX Engineer',
-        role: 'dev',
-      });
-      setSuccessMessage('Signed in as Sandbox Developer! Redirecting...');
-      setTimeout(() => {
-        router.push(returnUrl);
-      }, 400);
-    } catch (err: any) {
-      setError(err.message || 'Demo sign in failed.');
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const handleOAuth = async (provider: 'github' | 'google') => {
     setOauthLoading(provider);

@@ -130,13 +130,19 @@ function BaseCreateKeyPage() {
   };
 
   const mintKeyRequest = async (currentBalance: number) => {
+    if (!user?.id) return;
     setIsLoading(true);
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (user?.token) {
+        headers['Authorization'] = `Bearer ${user.token}`;
+      }
       const res = await fetch('/api/keys', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           name: name.trim() || 'Default Developer Key',
+          userId: user.id,
           rateLimitPerMinute: Number(rateLimitPerMinute),
           hasVerifiedDeposit: true,
           depositedAmount: currentBalance,

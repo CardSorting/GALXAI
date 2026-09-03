@@ -90,17 +90,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
 
   useEffect(() => {
-    // 1. Check for custom / demo session in SafeStorage
+    // 1. Check for custom session in SafeStorage (purge legacy demo_sandbox sessions)
     const savedCustom = SafeStorage.getJSON<AuthUser | null>(CUSTOM_AUTH_KEY, null);
     if (savedCustom) {
-      setCustomUser(savedCustom);
-      persistCustomSession(savedCustom);
+      if (savedCustom.provider === 'demo_sandbox' || savedCustom.id?.startsWith('dev_demo_')) {
+        SafeStorage.removeItem(CUSTOM_AUTH_KEY);
+        persistCustomSession(null);
+      } else {
+        setCustomUser(savedCustom);
+        persistCustomSession(savedCustom);
+      }
     }
 
     // 2. Initial user & session load from Supabase client
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setSupabaseUser(session?.user ?? null);
+      if (session?.user) {
+        const mapped = mapSupabaseUser(session.user, session);
+        persistCustomSession(mapped);
+      }
       setIsLoading(false);
     }).catch(() => {
       setIsLoading(false);
@@ -110,6 +119,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setSupabaseUser(session?.user ?? null);
+      if (session?.user) {
+        const mapped = mapSupabaseUser(session.user, session);
+        persistCustomSession(mapped);
+      }
       setIsLoading(false);
     });
 
@@ -231,25 +244,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signInWithDemo = (params?: DemoUserParams) => {
-    const isEnterprise = params?.role === 'enterprise';
-    const isLead = params?.role === 'lead';
-    const name = params?.name || (isEnterprise ? 'Elena Rostova (Enterprise Admin)' : isLead ? 'Alexander Chen (Lead Engineer)' : 'Devon Vance (Staff AI Architect)');
-    const email = params?.email || (isEnterprise ? 'elena@enterprise-fleet.com' : 'alexander.chen@acme.ai');
-
-    const demoUser: AuthUser = {
-      id: `dev_demo_${Date.now()}`,
-      email,
-      name,
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
-      provider: 'demo_sandbox',
-      role: params?.role || 'lead',
-      company: isEnterprise ? 'Enterprise Fleet AI' : 'Acme AI Corp',
-      token: `demo_session_bearer_${Date.now()}`
-    };
-
-    setCustomUser(demoUser);
-    persistCustomSession(demoUser);
+  const signInWithDemo = () => {
+    router.push('/auth/signin');
   };
 
   const signInWithProviderKey = async ({ apiKey, provider = 'openai' }: { apiKey: string; provider?: string }) => {

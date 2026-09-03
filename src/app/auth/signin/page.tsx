@@ -23,7 +23,7 @@ import {
 function SignInContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user, signInWithPassword, signInWithDemo, signInWithOAuth, logout } = useAuth();
+  const { user, signInWithPassword, signInWithOAuth, logout } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [emailInput, setEmailInput] = useState('');
@@ -93,25 +93,7 @@ function SignInContent() {
     }
   };
 
-  const handleDemoSignIn = () => {
-    setLoading(true);
-    setError(null);
-    try {
-      signInWithDemo({
-        email: emailInput.trim() || 'developer@galx.ai',
-        name: emailInput ? emailInput.split('@')[0] : 'GALX Engineer',
-        role: 'dev',
-      });
-      setSuccessMessage('Signed in as Sandbox Developer! Redirecting...');
-      setTimeout(() => {
-        router.push(returnUrl);
-      }, 400);
-    } catch (err: any) {
-      setError(err.message || 'Demo sign in failed.');
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const handleOAuth = async (provider: 'github' | 'google') => {
     setOauthLoading(provider);
@@ -282,17 +264,6 @@ function SignInContent() {
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
-
-                  {canQuickCreate && (
-                    <button
-                      type="button"
-                      onClick={handleDemoSignIn}
-                      className="w-full py-2 px-3 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Sign in as Instant Sandbox User</span>
-                    </button>
-                  )}
                 </div>
               )}
 

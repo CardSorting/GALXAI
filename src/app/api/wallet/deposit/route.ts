@@ -36,7 +36,13 @@ export async function POST(req: NextRequest) {
     }
 
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-    const userId = auth.authenticated ? auth.userId : 'user_demo';
+    if (!auth.authenticated || !auth.userId) {
+      return NextResponse.json(
+        { success: false, error: 'Sign-in required to deposit funds' },
+        { status: 401 }
+      );
+    }
+    const userId = auth.userId;
 
     // 50% Match Grant Incentivization Strategy
     // Minimum $10 unlocks $5 grant ($15 total); $100+ unlocks 50% match

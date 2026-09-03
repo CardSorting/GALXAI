@@ -145,9 +145,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    let {
+    const {
       name,
-      userId = 'user_demo',
       environment = 'live',
       rateLimitPerMinute,
       scopes,
@@ -159,14 +158,14 @@ export async function POST(req: NextRequest) {
     } = body;
 
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-    if (auth.authenticated) {
-      userId = auth.userId;
-    } else if (process.env.NODE_ENV === 'production' && (!userId || userId === 'user_demo')) {
+    if (!auth.authenticated || !auth.userId) {
       return NextResponse.json(
         { error: 'Unauthorized: Sign-in is required to mint developer API keys' },
         { status: 401 }
       );
     }
+
+    const userId = auth.userId;
 
     const cleanName = sanitizeKeyName(name);
     const cleanRpm = sanitizeRateLimit(rateLimitPerMinute);

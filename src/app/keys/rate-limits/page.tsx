@@ -22,10 +22,12 @@ import {
 } from 'lucide-react';
 import { AuthRequiredGate } from '@/components/auth/AuthRequiredGate';
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
+import { useAuth } from '@/contexts/AuthContext';
 import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywallModal';
 import { useDepositVerification } from '@/lib/hooks/useDepositVerification';
 
 export default function RateLimitsPage() {
+  const { user } = useAuth();
   const [keys, setKeys] = useState<any[]>([]);
   const [selectedKeyId, setSelectedKeyId] = useState('');
   const [rpmLimit, setRpmLimit] = useState(120);
@@ -40,8 +42,12 @@ export default function RateLimitsPage() {
   const { depositAndUnlock } = useDepositVerification();
 
   const fetchKeys = async () => {
+    if (!user?.id) {
+      setKeys([]);
+      return;
+    }
     try {
-      const res = await resilientFetch<{ keys: any[] }>('/api/keys', { enableCacheFallback: true });
+      const res = await resilientFetch<{ keys: any[] }>(`/api/keys?userId=${encodeURIComponent(user.id)}`, { enableCacheFallback: true });
       const activeKeys = res.data?.keys?.filter(k => !k.revoked) || [];
       setKeys(activeKeys);
       if (activeKeys.length > 0 && !selectedKeyId) {
@@ -52,8 +58,10 @@ export default function RateLimitsPage() {
   };
 
   useEffect(() => {
-    fetchKeys();
-  }, []);
+    if (user?.id) {
+      fetchKeys();
+    }
+  }, [user?.id]);
 
   const handleSelectKey = (id: string) => {
     setSelectedKeyId(id);
@@ -72,7 +80,7 @@ export default function RateLimitsPage() {
       const res = await resilientFetch(`/api/keys/${selectedKeyId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rateLimitPerMinute: rpmLimit })
+        body: JSON.stringify({ rateLimitPerMinute: rpmLimit, userId: user?.id })
       });
       if (res.data?.success) {
         setSavedSuccess(true);

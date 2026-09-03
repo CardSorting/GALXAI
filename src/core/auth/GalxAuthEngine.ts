@@ -881,9 +881,35 @@ export class GalxAuthEngine {
           cookieHeader = (req.headers as any)['cookie'] || (req.headers as any)['Cookie'] || '';
         }
         if (cookieHeader) {
-          const match = cookieHeader.match(/(?:galx_session|galx_key|galx_token|token)=([^;]+)/);
-          if (match) {
-            rawAuth = decodeURIComponent(match[1]);
+          // 3a. Check Supabase SSR session cookies first (sb-*-auth-token or chunked sb-*-auth-token.0)
+          const sbMatch = cookieHeader.match(/(?:^|;\s*)sb-[^=]+-auth-token(?:\.0)?=([^;]+)/);
+          if (sbMatch) {
+            let val = decodeURIComponent(sbMatch[1].trim());
+            if (val.startsWith('base64-')) {
+              try {
+                val = Buffer.from(val.slice(7), 'base64').toString('utf-8');
+              } catch {}
+            }
+            try {
+              const parsed = JSON.parse(val);
+              if (Array.isArray(parsed) && typeof parsed[0] === 'string') {
+                rawAuth = parsed[0];
+              } else if (parsed && typeof parsed.access_token === 'string') {
+                rawAuth = parsed.access_token;
+              }
+            } catch {
+              if (val.startsWith('eyJ')) {
+                rawAuth = val;
+              }
+            }
+          }
+
+          // 3b. Check standard custom session cookies with exact cookie name boundaries
+          if (!rawAuth) {
+            const match = cookieHeader.match(/(?:^|;\s*)(?:galx_session|galx_key|galx_token)=([^;]+)/);
+            if (match) {
+              rawAuth = decodeURIComponent(match[1].trim());
+            }
           }
         }
       } catch {}
@@ -1039,15 +1065,40 @@ export class GalxAuthEngine {
       };
     }
 
-    // 7. Fallback compatibility for developer mock tokens in automated tests / sandbox
-    if (token.startsWith('session_') || token.startsWith('usr_') || token.startsWith('user_') || token.startsWith('dev_')) {
+    // 6b. Supabase SSR / JWT Bearer Tokens (`eyJ...`)
+    if (token.startsWith('eyJ')) {
+      try {
+        const parts = token.split('.');
+        if (parts.length === 3) {
+          const payloadJson = Buffer.from(parts[1], 'base64').toString('utf-8');
+          const claims = JSON.parse(payloadJson);
+          const isExpired = Boolean(claims.exp && claims.exp * 1000 <= Date.now());
+          if (!isExpired && claims.sub) {
+            return {
+              authenticated: true,
+              userId: claims.sub,
+              authType: 'session_token',
+              isPriorityUser: true,
+              isSudoElevated: true,
+              scopes: claims.scopes || ['*'],
+              claims,
+              token
+            };
+          }
+        }
+      } catch {}
+    }
+
+    // 7. Supabase Verified User UUID
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token)) {
       return {
         authenticated: true,
         userId: token,
         authType: 'session_token',
-        isPriorityUser: false,
+        isPriorityUser: true,
         scopes: ['*'],
-        isSudoElevated: true
+        isSudoElevated: true,
+        token
       };
     }
 

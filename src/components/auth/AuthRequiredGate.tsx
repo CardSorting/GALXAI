@@ -33,10 +33,9 @@ function BaseAuthRequiredGate({
   showCheckoutButton = false,
   children
 }: AuthRequiredGateProps) {
-  const { user, isLoading, signInWithDemo, signInWithOAuth } = useAuth();
+  const { user, isLoading, signInWithOAuth } = useAuth();
   const pathname = usePathname() || '/';
   const [oauthLoading, setOauthLoading] = useState<string | null>(null);
-  const [isDemoSigningIn, setIsDemoSigningIn] = useState(false);
 
   if (isLoading) {
     return (
@@ -56,18 +55,6 @@ function BaseAuthRequiredGate({
   }
 
   if (!user) {
-    const handleQuickDemo = () => {
-      setIsDemoSigningIn(true);
-      setTimeout(() => {
-        signInWithDemo({
-          role: 'dev',
-          name: 'Developer Sandbox',
-          email: 'developer@galx.ai'
-        });
-        setIsDemoSigningIn(false);
-      }, 300);
-    };
-
     const handleOAuth = async (provider: 'github' | 'google') => {
       setOauthLoading(provider);
       try {
@@ -102,26 +89,7 @@ function BaseAuthRequiredGate({
           </p>
         </div>
 
-        {/* 1-Click Instant Sandbox Button */}
-        <div className="max-w-md mx-auto space-y-2.5">
-          <button
-            type="button"
-            onClick={handleQuickDemo}
-            disabled={isDemoSigningIn}
-            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider font-mono shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.99]"
-          >
-            {isDemoSigningIn ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin text-black" />
-                <span>Launching Sandbox Session...</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-4 h-4 fill-black" />
-                <span>Launch Sandbox Session (1-Click)</span>
-              </>
-            )}
-          </button>
+        <div className="max-w-md mx-auto space-y-3">
 
           {/* Social OAuth Buttons */}
           <div className="grid grid-cols-2 gap-2">

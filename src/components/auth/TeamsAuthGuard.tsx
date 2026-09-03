@@ -27,14 +27,13 @@ interface TeamsAuthGuardProps {
 }
 
 export function TeamsAuthGuard({ children }: TeamsAuthGuardProps) {
-  const { user, isLoading, signInWithDemo, signInWithOAuth, signInWithSSO } = useAuth();
+  const { user, isLoading, signInWithOAuth, signInWithSSO } = useAuth();
   const currentPath = usePathname() || '/teams/seats';
   const targetPath = currentPath === '/teams' ? '/teams/seats' : currentPath;
   const [ssoDomain, setSsoDomain] = useState('');
   const [ssoLoading, setSsoLoading] = useState(false);
   const [ssoError, setSsoError] = useState<string | null>(null);
   const [oauthLoading, setOauthLoading] = useState<string | null>(null);
-  const [isDemoSigningIn, setIsDemoSigningIn] = useState(false);
 
   // 1. Sleek Loading State while verifying session
   if (isLoading) {
@@ -65,18 +64,6 @@ export function TeamsAuthGuard({ children }: TeamsAuthGuardProps) {
 
   // 2. Unauthenticated Gate: Enterprise Workspace Gateway
   if (!user) {
-    const handleQuickDemo = () => {
-      setIsDemoSigningIn(true);
-      setTimeout(() => {
-        signInWithDemo({
-          role: 'lead',
-          name: 'Alexander Chen (Lead Engineer)',
-          email: 'alexander.chen@acme.ai'
-        });
-        setIsDemoSigningIn(false);
-      }, 350);
-    };
-
     const handleOAuthLogin = async (provider: 'github' | 'google') => {
       setOauthLoading(provider);
       try {
@@ -173,30 +160,10 @@ export function TeamsAuthGuard({ children }: TeamsAuthGuardProps) {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-xs font-mono font-bold text-zinc-300">
                     <Sparkles className="w-4 h-4 text-amber-400" />
-                    <span>INSTANT SANDBOX &amp; ACCOUNTS</span>
+                    <span>DEVELOPER &amp; TEAM SIGN IN</span>
                   </div>
-
-                  {/* 1-Click Demo Sandbox Access */}
-                  <button
-                    type="button"
-                    onClick={handleQuickDemo}
-                    disabled={isDemoSigningIn}
-                    className="w-full p-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.99] font-mono"
-                  >
-                    {isDemoSigningIn ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin text-black" />
-                        <span>Launching Demo Workspace...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4 fill-black" />
-                        <span>Launch Sandbox Workspace (Demo Admin)</span>
-                      </>
-                    )}
-                  </button>
-                  <p className="text-[11px] text-zinc-400 text-center font-sans">
-                    Instantly loads a full Acme AI Corp workspace with active seats, sliders, and invites.
+                  <p className="text-xs text-zinc-400 font-sans leading-relaxed">
+                    Sign in with your verified GitHub or Google account to access and manage your workspace.
                   </p>
                 </div>
 

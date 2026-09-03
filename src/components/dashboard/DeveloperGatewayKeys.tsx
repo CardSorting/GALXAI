@@ -8,8 +8,10 @@ import { KeyActivationPaywallModal } from '@/components/keys/KeyActivationPaywal
 import { resilientFetch } from '@/lib/resilience/ResilientClient';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
+import { useAuth } from '@/contexts/AuthContext';
 
 function BaseDeveloperGatewayKeys() {
+  const { user } = useAuth();
   const [keys, setKeys] = useState<any[]>([]);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
@@ -22,8 +24,12 @@ function BaseDeveloperGatewayKeys() {
   const { hasVerifiedDeposit, walletBalance, depositAndUnlock } = useDepositVerification();
 
   const fetchKeys = async () => {
+    if (!user?.id) {
+      setKeys([]);
+      return;
+    }
     try {
-      const res = await resilientFetch<{ keys: any[] }>('/api/keys', {
+      const res = await resilientFetch<{ keys: any[] }>(`/api/keys?userId=${encodeURIComponent(user.id)}`, {
         enableCacheFallback: true,
       });
       setKeys(res.data?.keys || []);
@@ -33,10 +39,13 @@ function BaseDeveloperGatewayKeys() {
   };
 
   useEffect(() => {
-    fetchKeys();
-  }, []);
+    if (user?.id) {
+      fetchKeys();
+    }
+  }, [user?.id]);
 
   const createKeyDirectly = async (keyName: string, balance: number) => {
+    if (!user?.id) return;
     setIsLoading(true);
     try {
       const res = await resilientFetch<{ success: boolean; key?: { apiKey: string } }>('/api/keys', {
@@ -44,6 +53,7 @@ function BaseDeveloperGatewayKeys() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: keyName.trim() || 'Developer API Key',
+          userId: user.id,
           hasVerifiedDeposit: true,
           depositedAmount: balance
         })
@@ -75,7 +85,7 @@ function BaseDeveloperGatewayKeys() {
 
   const handleRevokeKey = async (keyId: string) => {
     try {
-      await resilientFetch(`/api/keys?id=${keyId}`, { method: 'DELETE' });
+      await resilientFetch(`/api/keys?id=${keyId}&userId=${encodeURIComponent(user?.id || '')}`, { method: 'DELETE' });
       fetchKeys();
     } catch {
       // Ignored gracefully
