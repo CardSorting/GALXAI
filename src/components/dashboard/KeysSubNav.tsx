@@ -53,7 +53,7 @@ export function KeysSubNav() {
   ];
 
   return (
-    <div className="flex items-center gap-1 sm:gap-1.5 p-1 rounded-2xl bg-[#0d101c] border border-white/10 overflow-x-auto text-xs font-sans">
+    <div className="flex items-center gap-1 p-0.5 rounded-lg bg-white/[0.02] border border-white/[0.08] overflow-x-auto text-xs font-sans">
       {tabs.map((tab) => {
         const isActive = tab.exact ? pathname === tab.href : pathname.startsWith(tab.href);
         const Icon = tab.icon;
@@ -62,19 +62,19 @@ export function KeysSubNav() {
           <Link
             key={tab.href}
             href={tab.href}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl whitespace-nowrap transition-colors ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md whitespace-nowrap transition-colors ${
               isActive
-                ? 'bg-indigo-600 text-white font-semibold shadow-sm'
-                : 'text-zinc-400 hover:text-white hover:bg-white/5 font-medium'
+                ? 'bg-indigo-600/25 text-indigo-200 border border-indigo-500/40 font-semibold'
+                : 'text-zinc-400 hover:text-white hover:bg-white/[0.04] font-medium'
             }`}
           >
-            <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-zinc-400'}`} />
+            <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-indigo-300' : 'text-zinc-400'}`} />
             <span>{tab.name}</span>
             {tab.badge && (
               <span
-                className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                className={`text-[9px] px-1.5 py-0.2 rounded-full font-mono font-bold leading-none ${
                   isActive
-                    ? 'bg-white/20 text-white'
+                    ? 'bg-indigo-400/20 text-indigo-200'
                     : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                 }`}
               >

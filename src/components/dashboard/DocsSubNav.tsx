@@ -61,8 +61,8 @@ export function DocsSubNav() {
   const pathname = usePathname();
 
   return (
-    <div className="flex items-center justify-between gap-3 p-1.5 rounded-2xl bg-black/40 border border-white/5 font-mono text-xs overflow-x-auto">
-      <div className="flex items-center gap-1 overflow-x-auto py-0.5">
+    <div className="flex items-center justify-between gap-2 p-0.5 rounded-lg bg-white/[0.02] border border-white/[0.08] font-mono text-xs overflow-x-auto">
+      <div className="flex items-center gap-0.5 overflow-x-auto">
         {ALL_DOCS_ITEMS.map((tab) => {
           const isActive = tab.exact ? pathname === tab.href : pathname.startsWith(tab.href);
           const Icon = tab.icon;
@@ -71,19 +71,19 @@ export function DocsSubNav() {
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl whitespace-nowrap text-xs transition-all ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md whitespace-nowrap text-xs transition-colors ${
                 isActive
-                  ? 'bg-amber-400 text-black font-bold shadow-md shadow-amber-500/10'
-                  : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-amber-400 text-zinc-950 font-semibold'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
               }`}
             >
-              <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-black' : 'text-zinc-400'}`} />
+              <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-zinc-950' : 'text-zinc-400'}`} />
               <span>{tab.name}</span>
               {tab.badge && (
                 <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                  className={`text-[9px] px-1 py-0.2 rounded-full font-bold leading-none ${
                     isActive
-                      ? 'bg-black/20 text-black'
+                      ? 'bg-black/20 text-zinc-950'
                       : 'bg-white/10 text-zinc-300'
                   }`}
                 >
