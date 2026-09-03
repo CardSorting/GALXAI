@@ -232,7 +232,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden: Cannot revoke a key belonging to another user' }, { status: 403 });
     }
 
-    await keyRepo.revokeKey(keyId, 'User requested revocation via REST API');
+    const targetUserId = auth.claims?.scopes?.includes('admin:*') ? undefined : userId;
+    await keyRepo.revokeKey(keyId, 'User requested revocation via REST API', targetUserId);
     persistence.saveGatewayKey({ ...existing, revoked: true });
     persistence.logAudit('GATEWAY_KEY_REVOKED', { keyId }, keyId, existing.userId);
 

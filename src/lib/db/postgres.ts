@@ -100,9 +100,14 @@ export function getPostgresPool(): Pool | null {
       query_timeout: 6000,
       keepAlive: true,
       keepAliveInitialDelayMillis: 10000,
+      application_name: 'galxai-gateway-pool',
     };
 
     const pool = new Pool(config);
+
+    pool.on('connect', (client) => {
+      client.query('SET search_path = public;').catch(() => {});
+    });
 
     pool.on('error', (err) => {
       console.warn('[PostgresPool] Handled idle client disconnect/error:', err.message);

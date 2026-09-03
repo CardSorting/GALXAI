@@ -461,22 +461,29 @@ export class ApiKeyRepository {
     return this.queryLocalKeys(userId);
   }
 
-  async getGatewayKeyById(id: string): Promise<DeveloperGatewayKey | null> {
+  async getGatewayKeyById(id: string, userId?: string): Promise<DeveloperGatewayKey | null> {
     // 0. L0 Fast Pointer check (<10ns)
     const fast = this.activeKeyById.get(id);
-    if (fast && !fast.revoked) return fast;
+    if (fast && !fast.revoked) {
+      if (userId && fast.userId !== userId) return null;
+      return fast;
+    }
 
     return this.keyCoalescer.getOrFetch(`id:${id}`, async () => {
       // 1. Check BroccoliDB L1 cache
       const cached = this.keyTable.get(id);
       const cacheTime = this.keyCacheTimestamps.get(id) || 0;
       if (cached && Date.now() - cacheTime < this.CACHE_TTL_MS) {
+        if (userId && cached.userId !== userId) return null;
         this.setFastCache(cached);
         return cached;
       }
 
-      // 2. Direct PostgreSQL query via circuit-breaker protected pool
-      const res = await executePostgresQuery('SELECT * FROM galx_developer_keys WHERE id = $1 LIMIT 1;', [id]);
+      // 2. Direct PostgreSQL query via circuit-breaker protected pool with tenant isolation
+      const res = await executePostgresQuery(
+        'SELECT * FROM galx_developer_keys WHERE id = $1 AND ($2::text IS NULL OR user_id = $2::text) LIMIT 1;',
+        [id, userId || null]
+      );
       if (res && res.rows && res.rows[0]) {
         const mapped = this.mapRowToGatewayKey(res.rows[0]);
         this.keyTable.put(mapped.id, mapped);
@@ -495,6 +502,7 @@ export class ApiKeyRepository {
 
           if (!error && data && Array.isArray(data) && data.length > 0) {
             const mapped = this.mapRowToGatewayKey(data[0]);
+            if (userId && mapped.userId !== userId) return null;
             this.keyTable.put(mapped.id, mapped);
             this.keyCacheTimestamps.set(mapped.id, Date.now());
             this.setFastCache(mapped);
@@ -505,7 +513,9 @@ export class ApiKeyRepository {
         }
       }
 
-      return cached || this.keyTable.get(id) || null;
+      const fallback = cached || this.keyTable.get(id) || null;
+      if (fallback && userId && fallback.userId !== userId) return null;
+      return fallback;
     });
   }
 
@@ -751,9 +761,12 @@ export class ApiKeyRepository {
     this.isFlushing = false;
   }
 
-  async revokeKey(keyId: string, reason: string = 'User requested revocation'): Promise<void> {
+  async revokeKey(keyId: string, reason: string = 'User requested revocation', userId?: string): Promise<void> {
     const existing = this.activeKeyById.get(keyId) || this.keyTable.get(keyId);
     if (existing) {
+      if (userId && existing.userId !== userId) {
+        throw new Error('Forbidden: Cannot revoke an API key belonging to another user');
+      }
       const revokedKey = { ...existing, revoked: true };
       this.keyTable.put(keyId, revokedKey);
       this.removeFastCache(keyId, existing.keyHash);
@@ -769,8 +782,8 @@ export class ApiKeyRepository {
     this.tokenHashCache.clear();
 
     const res = await executePostgresQuery(
-      'UPDATE galx_developer_keys SET is_revoked = true, revoked_at = NOW(), revoked_reason = $2, updated_at = NOW() WHERE id = $1;',
-      [keyId, reason]
+      'UPDATE galx_developer_keys SET is_revoked = true, revoked_at = NOW(), revoked_reason = $2, updated_at = NOW() WHERE id = $1 AND ($3::text IS NULL OR user_id = $3::text);',
+      [keyId, reason, userId || null]
     );
 
     if (res) return;
@@ -784,7 +797,7 @@ export class ApiKeyRepository {
         });
 
         if (rpcErr) {
-          await supabase
+          let query = supabase
             .from('galx_developer_keys')
             .update({
               is_revoked: true,
@@ -793,6 +806,12 @@ export class ApiKeyRepository {
               updated_at: new Date().toISOString()
             })
             .eq('id', keyId);
+
+          if (userId) {
+            query = query.eq('user_id', userId);
+          }
+
+          await query;
         }
       } catch {
         // Fallback
