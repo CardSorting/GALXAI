@@ -3219,6 +3219,18 @@ export interface Database {
       [_ in never]: never;
     };
     Functions: {
+      fn_assert_tenant_context: {
+        Args: Record<PropertyKey, never>;
+        Returns: string;
+      };
+      fn_set_tenant_session_context: {
+        Args: {
+          p_user_id: string;
+          p_role?: string;
+          p_email?: string;
+        };
+        Returns: void;
+      };
       fn_upsert_owned_chat_messages: {
         Args: { p_conversation_id: string; p_user_id: string; p_messages: Json };
         Returns: Json;
