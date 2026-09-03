@@ -13,6 +13,13 @@ import type {
 type StreamEventListener<T = any> = (data: T) => void;
 type ContentEventListener = (delta: string, snapshot: string) => void;
 
+export interface StreamMetrics {
+  timeToFirstTokenMs?: number;
+  tokensPerSecond?: number;
+  totalDurationMs: number;
+  totalTokens: number;
+}
+
 export class ChatCompletionStream implements AsyncIterable<ChatCompletionChunk>, PromiseLike<ChatCompletionResponse> {
   private readonly sourceStream: AsyncIterable<ChatCompletionChunk>;
   private readonly abortController?: AbortController;
@@ -21,6 +28,12 @@ export class ChatCompletionStream implements AsyncIterable<ChatCompletionChunk>,
   private chunks: ChatCompletionChunk[] = [];
   private toolCalls: Map<number, { id?: string; type: string; function: { name: string; arguments: string } }> = new Map();
   private finalResponsePromise?: Promise<ChatCompletionResponse>;
+
+  private readonly startTimeMs = Date.now();
+  private firstTokenTimeMs?: number;
+  private endTimeMs?: number;
+  private tokenCount = 0;
+  private transformFn?: (delta: string) => string;
 
   private readonly listeners: {
     chunk: Set<StreamEventListener<ChatCompletionChunk>>;
@@ -43,6 +56,36 @@ export class ChatCompletionStream implements AsyncIterable<ChatCompletionChunk>,
   constructor(sourceStream: AsyncIterable<ChatCompletionChunk>, abortController?: AbortController) {
     this.sourceStream = sourceStream;
     this.abortController = abortController;
+  }
+
+  /**
+   * Diagnostics: retrieves real-time streaming metrics including TTFT and tokens-per-second.
+   */
+  public get metrics(): StreamMetrics {
+    const now = this.endTimeMs || Date.now();
+    const duration = Math.max(1, now - this.startTimeMs);
+    const ttft = this.firstTokenTimeMs ? this.firstTokenTimeMs - this.startTimeMs : undefined;
+    const tps = this.tokenCount > 0 ? Number(((this.tokenCount / (duration / 1000))).toFixed(1)) : 0;
+
+    return {
+      timeToFirstTokenMs: ttft,
+      tokensPerSecond: tps,
+      totalDurationMs: duration,
+      totalTokens: this.tokenCount
+    };
+  }
+
+  /**
+   * Chains a transformer function to modify streaming text deltas in flight before emitting.
+   */
+  public pipeThrough(transform: (delta: string) => string): this {
+    const prevTransform = this.transformFn;
+    if (prevTransform) {
+      this.transformFn = (d) => transform(prevTransform(d));
+    } else {
+      this.transformFn = transform;
+    }
+    return this;
   }
 
   /**
@@ -103,10 +146,12 @@ export class ChatCompletionStream implements AsyncIterable<ChatCompletionChunk>,
       for await (const chunk of this.sourceStream) {
         this.processChunk(chunk);
       }
+      this.endTimeMs = Date.now();
       this.isDone = true;
       this.listeners.end.forEach(fn => fn());
       return this.buildFinalResponse();
     } catch (err: any) {
+      this.endTimeMs = Date.now();
       this.listeners.error.forEach(fn => fn(err));
       throw err;
     }
@@ -118,10 +163,17 @@ export class ChatCompletionStream implements AsyncIterable<ChatCompletionChunk>,
 
     const choice = chunk.choices?.[0];
     if (choice?.delta) {
-      const deltaText = choice.delta.content;
+      let deltaText = choice.delta.content;
       if (deltaText) {
+        if (!this.firstTokenTimeMs) {
+          this.firstTokenTimeMs = Date.now();
+        }
+        this.tokenCount++;
+        if (this.transformFn) {
+          deltaText = this.transformFn(deltaText);
+        }
         this.accumulatedText += deltaText;
-        this.listeners.content.forEach(fn => fn(deltaText, this.accumulatedText));
+        this.listeners.content.forEach(fn => fn(deltaText!, this.accumulatedText));
       }
 
       const tcDeltas = (choice.delta as any).tool_calls;

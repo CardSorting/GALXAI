@@ -6,26 +6,59 @@
 export { GalxAI, GalxAIClient, Client, Galx } from './client';
 export * from './errors';
 export * from './types';
+import type { RequestOptions } from './types';
 
 // Core Resources
 export { AuthResource } from './resources/auth';
 export { OAuthExchangeError } from '../core/auth/GalxOAuthManager';
 export { ChatResource, CompletionsResource } from './resources/chat';
-export { ImagesResource } from './resources/images';
-export { ModelsResource } from './resources/models';
+export {
+  ImagesResource,
+  ImageHistoryResource,
+  wrapImageResponse,
+  type EnhancedImageResponse,
+  type ImageGenerateParams,
+  type ImageEditParams,
+  type ImageVariationParams,
+  type ImageProgressEvent,
+  type GeneratedImageRecord
+} from './resources/images';
+export {
+  ModelsResource,
+  type ModelsListParams,
+  type ModelComparisonResult,
+  type ModelSearchCriteria
+} from './resources/models';
 export { EmbeddingsResource, type EmbeddingCreateRequest, type EmbeddingCreateResponse } from './resources/embeddings';
 export { JobsResource, type SubmitJobParams } from './resources/jobs';
 export { QueuesResource } from './resources/queues';
 export { WorkflowsResource } from './resources/workflows';
-export { WebhooksResource } from './resources/webhooks';
+export { WebhooksResource, SignatureVerificationError, type GalxWebhookEvent, type WebhookHandlerOptions } from './resources/webhooks';
 export { PrivacyResource, PrivacyProfiles } from './resources/privacy';
 export { ComplianceResource } from './resources/compliance';
 export { DatabaseResource } from './resources/database';
 export { CompactionResource } from './resources/compaction';
+export { ModerationsResource, type ModerationCreateParams, type ModerationCreateResponse, type ModerationResult } from './resources/moderations';
+export { BatchesResource, type Batch, type BatchCreateParams, type BatchHandle, type BatchItemInput } from './resources/batches';
+export { CheckpointsResource, type CheckpointDiffResult } from './resources/checkpoints';
+export { WalResource, type WalVerificationReport } from './resources/wal';
+export { PromptsResource, type PromptTemplateRecord, type PromptCreateParams } from './resources/prompts';
+export { ReplayHarness, type ReplayRecord } from './replay';
+
+// Auto-Paging & Telemetry
+export { Page, CursorPage, createCursorPage, type PageParams, type PageResponseData } from './pagination';
+export { TelemetryResource, createTelemetryPlugin, type GenAISpanRecord } from './telemetry';
+export { BudgetGovernor, BudgetExceededError, type BudgetConfig, type BudgetStats } from './budget';
+
+// In-Memory Caching, Vectors, Resilience & Agent Memory
+export { BroccoliPromptCache, createCachePlugin, type CacheConfig, type CacheStats, type CacheEntry } from './cache';
+export { VectorResource, type ScopedVectorIndex, type VectorRecord, type VectorQueryResult, type VectorQueryOptions, type VectorInput } from './vector';
+export { CircuitBreaker, createCircuitBreakerPlugin, CircuitBreakerOpenError, type CircuitState, type CircuitBreakerConfig, type CircuitAttemptRecord } from './circuit-breaker';
+export { AgentMemoryStore, type MemoryFact, type RememberOptions, type RecallResult } from './memory';
 
 // DX & Ergonomic Extensions
-export { ChatCompletionBuilder } from './builder';
-export { ChatCompletionStream } from './stream';
+export { ChatCompletionBuilder, promptTemplate, PromptTemplate } from './builder';
+export { ChatCompletionStream, type StreamMetrics } from './stream';
 export { repairJSON, safeParseJSON } from './json-repair';
 export {
   StructuredOutputExtractor,
@@ -42,7 +75,7 @@ export {
   toSSEResponse,
   type StreamInput
 } from './adapters';
-export { MultiModalHelper, type MultiModalImageInput, type ForgivingImageSource } from './multimodal';
+export { MultiModalHelper, toFile, UploadableFile, type MultiModalImageInput, type ForgivingImageSource, type Uploadable } from './multimodal';
 export { BatchEvaluator, batch, type BatchMapOptions, type BatchResultItem } from './batch';
 
 // Agent Runtime & Plugins
@@ -199,12 +232,22 @@ export async function chat(
  */
 export async function generateImage(
   promptOrParams: string | import('./resources/images').ImageGenerateParams,
-  options?: Omit<import('./resources/images').ImageGenerateParams, 'prompt'>
+  options?: RequestOptions
 ) {
   return getClient().generateImage(promptOrParams, options);
 }
 
 export const image = generateImage;
+
+/**
+ * Ultra-effortless text completion.
+ */
+export async function complete(
+  promptOrMessages: string | import('../core/contracts/GalxContracts').ChatMessage[],
+  options?: RequestOptions & { model?: string; temperature?: number; max_tokens?: number }
+) {
+  return getClient().complete(promptOrMessages, options);
+}
 
 /**
  * Ultra-effortless models listing.
@@ -225,7 +268,7 @@ export async function listModels() {
  * ```
  */
 export async function* stream(prompt: string, options?: { model?: string; system?: string; temperature?: number }) {
-  yield* getClient().stream(prompt, options);
+  yield* getClient().streamText(prompt, options);
 }
 
 /**

@@ -16,15 +16,27 @@ import {
   UserAbortError,
   parseRetryAfter
 } from './errors';
-import type { ClientOptions, RequestOptions, APIResponse } from './types';
+import type { ClientOptions, RequestOptions, APIResponse, ModelInfo } from './types';
 import { ChatResource } from './resources/chat';
-import { ImagesResource } from './resources/images';
-import { ModelsResource } from './resources/models';
+import { ImagesResource, type EnhancedImageResponse, type ImageGenerateParams, type ImageProgressEvent } from './resources/images';
+import { ModelsResource, type ModelsListParams, type ModelComparisonResult, type ModelSearchCriteria, type ModelInfoPage } from './resources/models';
 import { EmbeddingsResource } from './resources/embeddings';
 import { QueuesResource } from './resources/queues';
 import { WorkflowsResource } from './resources/workflows';
 import { WebhooksResource } from './resources/webhooks';
-import type { GalxQueueEvent } from '../core/contracts/GalxContracts';
+import { ModerationsResource } from './resources/moderations';
+import { BatchesResource } from './resources/batches';
+import { TelemetryResource, createTelemetryPlugin } from './telemetry';
+import { BudgetGovernor, type BudgetConfig } from './budget';
+import { toFile, type Uploadable, UploadableFile } from './multimodal';
+import { BroccoliPromptCache, createCachePlugin } from './cache';
+import { VectorResource } from './vector';
+import { CircuitBreaker, createCircuitBreakerPlugin } from './circuit-breaker';
+import { CheckpointsResource } from './resources/checkpoints';
+import { WalResource } from './resources/wal';
+import { PromptsResource } from './resources/prompts';
+import { ReplayHarness } from './replay';
+import type { GalxQueueEvent, ChatMessage, ChatCompletionResponse } from '../core/contracts/GalxContracts';
 
 import { MiddlewarePipeline, type GalxPlugin } from './middleware';
 import { ConversationThread, type ThreadOptions } from './thread';
@@ -41,6 +53,10 @@ export class GalxAIClientCore {
   readonly defaultHeaders: Record<string, string>;
   readonly customFetch?: typeof fetch;
   readonly middleware: MiddlewarePipeline;
+  readonly telemetry: TelemetryResource;
+  readonly cache: BroccoliPromptCache;
+  readonly circuitBreaker: CircuitBreaker;
+  readonly options: ClientOptions;
 
   readonly isDebug: boolean;
   readonly isMock: boolean;
@@ -104,6 +120,18 @@ export class GalxAIClientCore {
       this.defaultHeaders['OpenAI-Account'] = accountId;
     }
 
+    const org = opts.organization || (typeof process !== 'undefined' ? process.env?.GALXAI_ORG_ID || process.env?.OPENAI_ORG_ID : undefined);
+    if (org) {
+      this.defaultHeaders['X-Galx-Organization'] = org;
+      this.defaultHeaders['OpenAI-Organization'] = org;
+    }
+
+    const project = opts.project || (typeof process !== 'undefined' ? process.env?.GALXAI_PROJECT_ID || process.env?.OPENAI_PROJECT_ID : undefined);
+    if (project) {
+      this.defaultHeaders['X-Galx-Project'] = project;
+      this.defaultHeaders['OpenAI-Project'] = project;
+    }
+
     const compactPrompts = opts.compactPrompts ?? opts.compact_prompts;
     if (typeof compactPrompts === 'boolean') {
       this.defaultHeaders['X-Galx-Compact-Prompts'] = String(compactPrompts);
@@ -111,7 +139,21 @@ export class GalxAIClientCore {
     }
 
     this.customFetch = opts.fetch;
+    this.options = opts;
+    this.telemetry = new TelemetryResource(opts.telemetry !== false);
+    this.cache = new BroccoliPromptCache(typeof opts.cache === 'object' ? opts.cache : undefined);
+    this.circuitBreaker = new CircuitBreaker(typeof opts.circuitBreaker === 'object' ? opts.circuitBreaker : undefined);
     this.middleware = new MiddlewarePipeline();
+
+    if (opts.circuitBreaker) {
+      this.middleware.use(this.circuitBreaker.toPlugin());
+    }
+
+    if (opts.cache) {
+      this.middleware.use(this.cache.toPlugin());
+    }
+
+    this.middleware.use(createTelemetryPlugin(this.telemetry));
   }
 
   public use(plugin: GalxPlugin): this {
@@ -414,6 +456,26 @@ export class GalxAIClientCore {
    * Parses token stream chunks from a streaming SSE endpoint.
    */
   public async *requestStream<T = any>(path: string, options: RequestOptions = {}): AsyncIterable<T> {
+    if (this.isMock) {
+      const mockTokens = ['GALXAI', ' Mock', ' Stream', ' Engine', ' Active'];
+      for (let i = 0; i < mockTokens.length; i++) {
+        yield {
+          id: `chatcmpl_mock_${Date.now()}`,
+          object: 'chat.completion.chunk',
+          created: Math.floor(Date.now() / 1000),
+          model: (options.body as any)?.model || 'gpt-5.6-sol',
+          choices: [
+            {
+              index: 0,
+              delta: { content: mockTokens[i] },
+              finish_reason: i === mockTokens.length - 1 ? 'stop' : null
+            }
+          ]
+        } as T;
+      }
+      return;
+    }
+
     const url = `${this.baseURL}${path.startsWith('/') ? path : `/${path}`}`;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -585,6 +647,16 @@ export class GalxAI {
   readonly compliance: ComplianceResource;
   readonly db: DatabaseResource;
   readonly compaction: CompactionResource;
+  readonly moderations: ModerationsResource;
+  readonly batches: BatchesResource;
+  readonly telemetry: TelemetryResource;
+  readonly cache: BroccoliPromptCache;
+  readonly vector: VectorResource;
+  readonly circuitBreaker: CircuitBreaker;
+  readonly checkpoints: CheckpointsResource;
+  readonly wal: WalResource;
+  readonly prompts: PromptsResource;
+  readonly replay: ReplayHarness;
   readonly adapters: StreamAdapters;
   readonly batch: BatchEvaluator;
   readonly multimodal: typeof MultiModalHelper;
@@ -626,7 +698,8 @@ export class GalxAI {
     };
     this.images = new ImagesResource(this.core);
     this.models = new ModelsResource(this.core);
-    this.embeddings = new EmbeddingsResource(this.core);
+    this.vector = new VectorResource();
+    this.embeddings = new EmbeddingsResource(this.core, this.vector);
     this.jobs = new JobsResource(this.core);
     this.queues = new QueuesResource(this.core);
     this.workflows = new WorkflowsResource(this.core);
@@ -634,11 +707,222 @@ export class GalxAI {
     this.privacy = new PrivacyResource();
     this.compliance = new ComplianceResource();
     this.db = new DatabaseResource();
+    this.checkpoints = new CheckpointsResource();
+    this.wal = new WalResource();
+    this.prompts = new PromptsResource();
+    this.replay = new ReplayHarness();
+    this.core.use(this.replay.toPlugin());
     this.compaction = new CompactionResource(this.core);
+    this.moderations = new ModerationsResource(this.core);
+    this.batches = new BatchesResource(this.core);
+    this.telemetry = this.core.telemetry;
+    this.cache = this.core.cache;
+    this.circuitBreaker = this.core.circuitBreaker;
     this.adapters = new StreamAdapters();
     this.batch = new BatchEvaluator();
     this.multimodal = MultiModalHelper;
     this.tokens = TokenOptimizer;
+  }
+
+  /**
+   * Executes a comprehensive system diagnostics probe across BroccoliDB storage, prompt caching,
+   * circuit breaker state, and telemetry.
+   */
+  public async health(): Promise<{
+    timestamp: number;
+    healthy: boolean;
+    database: any;
+    cache: any;
+    circuitBreaker: { globalState: string };
+    telemetry: { totalSpansRecorded: number };
+  }> {
+    const dbHealth = await this.db.health();
+    const cacheStats = this.cache.stats();
+    const cbState = this.circuitBreaker.getState();
+    const spans = this.telemetry.getRecentSpans();
+
+    return {
+      timestamp: Date.now(),
+      healthy: dbHealth.status === 'HEALTHY',
+      database: dbHealth,
+      cache: cacheStats,
+      circuitBreaker: {
+        globalState: cbState
+      },
+      telemetry: {
+        totalSpansRecorded: spans.length
+      }
+    };
+  }
+
+  /**
+   * Returns a scoped client instance with an active financial and token safety budget governor.
+   */
+  public withBudget(config: BudgetConfig): GalxAI & { budget: BudgetGovernor } {
+    const governor = new BudgetGovernor(config);
+    const scoped = new GalxAI(this.core.options);
+    scoped.use(governor.toPlugin());
+    return Object.assign(scoped, { budget: governor });
+  }
+
+  /**
+   * Normalizes Buffers, Blobs, Streams, data URLs, or file paths for multimodal uploads.
+   */
+  public toFile(input: Uploadable, filename?: string, options?: { type?: string }): Promise<UploadableFile> {
+    return toFile(input, filename, options);
+  }
+
+  /**
+   * Captures an atomic double-buffered state checkpoint across all in-memory BroccoliDB tables.
+   */
+  public async checkpoint(label?: string) {
+    return this.db.checkpoint(label);
+  }
+
+  /**
+   * Atomically rolls back database state to a prior checkpoint.
+   */
+  public async rollback(checkpointId: string): Promise<boolean> {
+    return this.db.rollback(checkpointId);
+  }
+
+  /**
+   * Touchless 1-line visual synthesis shortcut.
+   * Accepts a natural language prompt string or a full configuration object.
+   *
+   * @example
+   * ```typescript
+   * const img = await galx.image('A cinematic landscape of the Himalayas in 4k');
+   * console.log(img.url);
+   * await img.save('./himalayas.png');
+   * ```
+   */
+  public get image(): {
+    (promptOrParams: string | ImageGenerateParams, options?: RequestOptions): Promise<EnhancedImageResponse>;
+    stream(promptOrParams: string | ImageGenerateParams, options?: RequestOptions): AsyncIterable<ImageProgressEvent> & { result(): Promise<EnhancedImageResponse> };
+    edit(image: Uploadable, prompt: string, options?: RequestOptions): Promise<EnhancedImageResponse>;
+    variation(image: Uploadable, options?: RequestOptions): Promise<EnhancedImageResponse>;
+    history: ImagesResource['history'];
+  } {
+    const self = this;
+    const fn = (promptOrParams: string | ImageGenerateParams, options?: RequestOptions) => {
+      return self.images.generate(promptOrParams, options);
+    };
+
+    fn.stream = (promptOrParams: string | ImageGenerateParams, options?: RequestOptions) => {
+      return self.images.stream(promptOrParams, options);
+    };
+
+    fn.edit = (image: Uploadable, prompt: string, options?: RequestOptions) => {
+      return self.images.edit({ image, prompt }, options);
+    };
+
+    fn.variation = (image: Uploadable, options?: RequestOptions) => {
+      return self.images.createVariation({ image }, options);
+    };
+
+    fn.history = self.images.history;
+
+    return fn;
+  }
+
+  /**
+   * Touchless 1-line model resolution and inspection shortcut.
+   *
+   * @example
+   * ```typescript
+   * const defaultModel = await galx.model();
+   * const gptModel = await galx.model('gpt-5.6-sol');
+   * const allIds = await galx.model.names();
+   * ```
+   */
+  public get model(): {
+    (modelId?: string, options?: RequestOptions): Promise<ModelInfo>;
+    list(options?: ModelsListParams): Promise<ModelInfoPage>;
+    names(options?: RequestOptions): Promise<string[]>;
+    search(query: string, options?: RequestOptions): Promise<ModelInfo[]>;
+    compare(modelA: string, modelB: string): Promise<ModelComparisonResult>;
+    optimal(criteria?: ModelSearchCriteria): Promise<ModelInfo[]>;
+  } {
+    const self = this;
+    const fn = (modelId?: string, options?: RequestOptions) => {
+      return modelId ? self.models.retrieve(modelId, options) : self.models.default(options);
+    };
+
+    fn.list = (opts?: ModelsListParams) => self.models.list(opts);
+    fn.names = (opts?: RequestOptions) => self.models.names(opts);
+    fn.search = (q: string, opts?: RequestOptions) => self.models.search(q, opts);
+    fn.compare = (a: string, b: string) => self.models.compare(a, b);
+    fn.optimal = (c?: ModelSearchCriteria) => self.models.optimal(c);
+
+    return fn;
+  }
+
+  /**
+   * Touchless 1-line text completion.
+   * Automatically wraps string prompt, applies the flagship frontier reasoning model,
+   * and returns a string-coercible response with `.text`.
+   *
+   * @example
+   * ```typescript
+   * const res = await galx.complete('Explain quantum computing in 1 sentence');
+   * console.log(res.text);
+   * console.log(`${res}`);
+   * ```
+   */
+  public async complete(
+    promptOrMessages: string | ChatMessage[],
+    options?: RequestOptions & { model?: string; temperature?: number; max_tokens?: number }
+  ): Promise<ChatCompletionResponse & { text: string; toString(): string }> {
+    const messages: ChatMessage[] = typeof promptOrMessages === 'string'
+      ? [{ role: 'user', content: promptOrMessages }]
+      : promptOrMessages;
+
+    const model = options?.model || 'gpt-5.6-sol';
+
+    const response = await this.chat.completions.create({
+      model,
+      messages,
+      temperature: options?.temperature,
+      max_tokens: options?.max_tokens
+    }, options);
+
+    const primaryText = response.choices?.[0]?.message?.content || '';
+
+    return Object.assign(response, {
+      text: primaryText,
+      toString() {
+        return primaryText;
+      }
+    });
+  }
+
+  /**
+   * Touchless 1-line chat completion stream.
+   * Automatically converts prompt strings into messages and starts streaming.
+   *
+   * @example
+   * ```typescript
+   * for await (const chunk of galx.stream('Write a haiku about code')) {
+   *   process.stdout.write(chunk.choices[0]?.delta?.content || '');
+   * }
+   * ```
+   */
+  public stream(
+    promptOrMessages: string | ChatMessage[],
+    options?: RequestOptions & { model?: string; temperature?: number }
+  ): ChatCompletionStream {
+    const messages: ChatMessage[] = typeof promptOrMessages === 'string'
+      ? [{ role: 'user', content: promptOrMessages }]
+      : promptOrMessages;
+
+    const model = options?.model || 'gpt-5.6-sol';
+
+    return this.chat.completions.stream({
+      model,
+      messages,
+      temperature: options?.temperature
+    }, options);
   }
 
   /**
@@ -723,18 +1007,12 @@ export class GalxAI {
    * const image = await galx.image('A futuristic floating city at dusk', { aspectRatio: '16:9' });
    * ```
    */
-  public async generateImage(
+  public generateImage(
     promptOrParams: string | import('./resources/images').ImageGenerateParams,
-    options: Omit<import('./resources/images').ImageGenerateParams, 'prompt'> & RequestOptions = {}
-  ) {
-    const params = typeof promptOrParams === 'string'
-      ? { prompt: promptOrParams, ...options }
-      : promptOrParams;
-    const res = await this.images.generate(params, options);
-    return res.data[0];
+    options?: RequestOptions
+  ): Promise<EnhancedImageResponse> {
+    return this.images.generate(promptOrParams, options);
   }
-
-  public readonly image = this.generateImage.bind(this);
 
   /**
    * Formats a query and result into a clean, markdown-structured context block for autonomous agents.
@@ -752,16 +1030,16 @@ ${formattedResult}
   }
 
   /**
-   * Ultra-flat text streaming generator.
+   * Ultra-flat text streaming generator yielding plain string deltas.
    *
    * @example
    * ```typescript
-   * for await (const chunk of galx.stream('Explain quantum gravity')) {
-   *   process.stdout.write(chunk);
+   * for await (const textDelta of galx.streamText('Explain quantum gravity')) {
+   *   process.stdout.write(textDelta);
    * }
    * ```
    */
-  public async *stream(
+  public async *streamText(
     prompt: string,
     options: {
       model?: string;

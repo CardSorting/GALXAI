@@ -95,6 +95,26 @@ export interface ClientOptions {
    */
   compactPrompts?: boolean;
   compact_prompts?: boolean;
+
+  /**
+   * Organization identifier for multi-tenant billing and RBAC.
+   */
+  organization?: string;
+
+  /**
+   * Project identifier for multi-tenant workspace isolation.
+   */
+  project?: string;
+
+  /**
+   * Enable BroccoliDB L1 semantic prompt caching (<0.05ms local cache hit).
+   */
+  cache?: boolean | any;
+
+  /**
+   * Enable adaptive circuit breaker to fail fast during upstream outages.
+   */
+  circuitBreaker?: boolean | any;
 }
 
 export interface RequestOptions {

@@ -95,6 +95,58 @@
       "types": "./src/sdk/patch.ts",
       "default": "./src/sdk/patch.ts"
     },
+    "./pagination": {
+      "types": "./src/sdk/pagination.ts",
+      "default": "./src/sdk/pagination.ts"
+    },
+    "./telemetry": {
+      "types": "./src/sdk/telemetry.ts",
+      "default": "./src/sdk/telemetry.ts"
+    },
+    "./budget": {
+      "types": "./src/sdk/budget.ts",
+      "default": "./src/sdk/budget.ts"
+    },
+    "./moderations": {
+      "types": "./src/sdk/resources/moderations.ts",
+      "default": "./src/sdk/resources/moderations.ts"
+    },
+    "./batches": {
+      "types": "./src/sdk/resources/batches.ts",
+      "default": "./src/sdk/resources/batches.ts"
+    },
+    "./cache": {
+      "types": "./src/sdk/cache.ts",
+      "default": "./src/sdk/cache.ts"
+    },
+    "./vector": {
+      "types": "./src/sdk/vector.ts",
+      "default": "./src/sdk/vector.ts"
+    },
+    "./circuit-breaker": {
+      "types": "./src/sdk/circuit-breaker.ts",
+      "default": "./src/sdk/circuit-breaker.ts"
+    },
+    "./memory": {
+      "types": "./src/sdk/memory.ts",
+      "default": "./src/sdk/memory.ts"
+    },
+    "./checkpoints": {
+      "types": "./src/sdk/resources/checkpoints.ts",
+      "default": "./src/sdk/resources/checkpoints.ts"
+    },
+    "./wal": {
+      "types": "./src/sdk/resources/wal.ts",
+      "default": "./src/sdk/resources/wal.ts"
+    },
+    "./prompts": {
+      "types": "./src/sdk/resources/prompts.ts",
+      "default": "./src/sdk/resources/prompts.ts"
+    },
+    "./replay": {
+      "types": "./src/sdk/replay.ts",
+      "default": "./src/sdk/replay.ts"
+    },
     "./state": {
       "types": "./src/sdk/state.ts",
       "default": "./src/sdk/state.ts"

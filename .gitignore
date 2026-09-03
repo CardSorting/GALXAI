@@ -58,6 +58,7 @@ supabase/.branches/
 # ------------------------------------------------------------------------------
 .data/
 .galxai_cache/
+.broccolidb/
 *.db
 *.sqlite
 *.sqlite3

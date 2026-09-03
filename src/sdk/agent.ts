@@ -35,6 +35,8 @@ export type ForgivingToolInput =
       };
     };
 
+import { AgentMemoryStore } from './memory';
+
 export interface AgentConfig {
   model?: string;
   systemPrompt?: string;
@@ -43,6 +45,8 @@ export interface AgentConfig {
   temperature?: number;
   parallelToolExecution?: boolean;
   onStep?: (step: { stepNumber: number; toolCalls?: any[]; output?: string }) => void;
+  /** Long-term associative memory store backed by BroccoliDB */
+  memory?: AgentMemoryStore;
 }
 
 export interface AgentExecutionResult {
@@ -86,9 +90,11 @@ interface NormalizedTool {
 export class AgentRuntime {
   private readonly completions: CompletionsResource;
   private readonly config: AgentConfig;
+  public readonly memory: AgentMemoryStore;
 
   constructor(completions: CompletionsResource, config: AgentConfig = {}) {
     this.completions = completions;
+    this.memory = config.memory || new AgentMemoryStore();
     this.config = {
       model: 'gpt-5.6-sol',
       maxSteps: 10,

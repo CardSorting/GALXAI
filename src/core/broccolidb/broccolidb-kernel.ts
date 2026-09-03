@@ -329,6 +329,10 @@ export class BroccoliDatabaseKernel implements IBroccoliDatabaseKernel {
     return Array.from(this.checkpoints.values()).sort((a, b) => b.timestamp - a.timestamp);
   }
 
+  getWal(): BroccoliWriteAheadLog {
+    return this.wal;
+  }
+
   async storeBlob(content: Buffer | string): Promise<string> {
     return this.cas.store(content);
   }
@@ -594,6 +598,7 @@ export class BroccoliDatabaseKernel implements IBroccoliDatabaseKernel {
   }
 
   private async atomicWriteJson(filePath: string, value: unknown): Promise<void> {
+    await fs.mkdir(path.dirname(filePath), { recursive: true });
     const tmpPath = `${filePath}.tmp.${crypto.randomUUID()}`;
     const handle = await fs.open(tmpPath, "wx");
     try {

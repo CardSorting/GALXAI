@@ -169,6 +169,53 @@ export class CompletionsResource {
   }
 
   /**
+   * Resilient multi-model fallback cascade.
+   * Attempts primary model; if rate-limited (429) or failing (500/503), automatically
+   * routes to the next model in `fallbackModels`.
+   *
+   * @example
+   * ```typescript
+   * const response = await galx.chat.completions.createWithFallback({
+   *   model: 'gpt-5.6-terra',
+   *   fallbackModels: ['gpt-5.6-sol', 'gpt-5.6-nova'],
+   *   messages: [{ role: 'user', content: 'Generate quarterly analysis' }]
+   * });
+   * console.log(response._executedModel, response._fallbacksTriggered);
+   * ```
+   */
+  public async createWithFallback(
+    params: ChatCompletionCreateParams & { fallbackModels: string[]; stream?: false },
+    options?: RequestOptions
+  ): Promise<ChatCompletionResponse & { _executedModel: string; _fallbacksTriggered: number }> {
+    const models = [params.model, ...(params.fallbackModels || [])];
+    let lastError: any;
+    let fallbacksTriggered = 0;
+
+    for (let i = 0; i < models.length; i++) {
+      const model = models[i];
+      try {
+        const res = (await this.create(
+          { ...params, model, stream: false },
+          options
+        )) as ChatCompletionResponse;
+
+        return {
+          ...res,
+          _executedModel: model,
+          _fallbacksTriggered: fallbacksTriggered
+        };
+      } catch (err: any) {
+        lastError = err;
+        fallbacksTriggered++;
+        if (i === models.length - 1) {
+          throw err;
+        }
+      }
+    }
+    throw lastError;
+  }
+
+  /**
    * Enqueues an asynchronous chat completion workload into the background task queue substrate.
    * Returns an `AsyncTaskHandle` for real-time progress streaming, result polling, or cancellation.
    *
