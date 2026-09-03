@@ -109,6 +109,7 @@ This directory contains the formal Architectural Decision Records (ADRs) that go
 | **[ADR 0099](0099-forced-rls-and-declarative-session-context-procedures.md)** | Forced RLS & Declarative Session Context Procedures | **Database Schema & Kernel RLS** | `Accepted` | Applies `FORCE ROW LEVEL SECURITY` across core tenant tables, introduces complete CRUD write policies for authenticated keys, and implements `fn_set_tenant_session_context` procedures. |
 | **[ADR 0100](0100-audit-immutability-and-kernel-tenant-binding-triggers.md)** | Audit Immutability Triggers & Kernel Tenant-Binding Enforcement | **Schema Defense-in-Depth** | `Accepted` | Enforces audit log immutability via BEFORE UPDATE/DELETE triggers, auto-binds authenticated tenant identity on INSERT, and optimizes RLS with InitPlan caching. |
 | **[ADR 0101](0101-persona-image-forced-rls-and-ownership-reassignment-defense.md)** | Persona & Image Forced RLS with Ownership Reassignment Armor | **Media & Persona Armor** | `Accepted` | Enforces `FORCE ROW LEVEL SECURITY` on personas and image generations, introduces `fn_prevent_tenant_ownership_reassignment` trigger, and adds `fn_is_tenant_resource_owner`. |
+| **[ADR 0102](0102-chat-messages-access-validation-and-tasks-crud-rls.md)** | Chat Messages Access Validation & Tasks CRUD RLS Armor | **Parent/Child Resource Armor** | `Accepted` | Deploys `fn_can_access_conversation` validator closing cross-tenant message injection, prevents message reassignment, and implements full CRUD RLS for `galx_tasks`. |
 
 
 ---
