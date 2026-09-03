@@ -183,20 +183,30 @@ export class GalxCryptoVault {
   static validateKeyFormat(token: string): { valid: boolean; environment?: 'live' | 'test' } {
     if (!token || typeof token !== 'string') return { valid: false };
     const clean = token.replace(/^(Bearer|Token)\s+/i, '').trim();
+
+    // 1. Strict modern format verification with embedded SHA-256 checksum
     const match = clean.match(/^galx_(live|test)_([0-9a-f]{48})_([0-9a-f]{6})$/i);
-    if (!match) {
-      // Legacy prefix compatibility support (e.g. galx_live_48hex or sk-...)
-      if (clean.startsWith('galx_live_') || clean.startsWith('galx_test_') || clean.startsWith('sk-galx-') || clean.startsWith('sk-')) {
-        return { valid: true, environment: clean.includes('test') ? 'test' : 'live' };
+    if (match) {
+      const [, env, hex, providedChecksum] = match;
+      const computedChecksum = crypto.createHash('sha256').update(`${env}_${hex}`).digest('hex').substring(0, 6);
+      if (computedChecksum.toLowerCase() !== providedChecksum.toLowerCase()) {
+        return { valid: false };
       }
+      return { valid: true, environment: env as 'live' | 'test' };
+    }
+
+    // 2. Reject any modern-structured key (galx_<env>_<48chars>_<checksum>) that failed hex or checksum
+    const parts = clean.split('_');
+    if (parts.length === 4 && (parts[1] === 'live' || parts[1] === 'test') && parts[2]?.length === 48) {
       return { valid: false };
     }
-    const [, env, hex, providedChecksum] = match;
-    const computedChecksum = crypto.createHash('sha256').update(`${env}_${hex}`).digest('hex').substring(0, 6);
-    if (computedChecksum.toLowerCase() !== providedChecksum.toLowerCase()) {
-      return { valid: false };
+
+    // 3. Legacy prefix compatibility support (e.g. galx_live_master_developer_key_001 or sk-...)
+    if (clean.startsWith('galx_live_') || clean.startsWith('galx_test_') || clean.startsWith('sk-galx-') || clean.startsWith('sk-')) {
+      return { valid: true, environment: clean.includes('test') ? 'test' : 'live' };
     }
-    return { valid: true, environment: env as 'live' | 'test' };
+
+    return { valid: false };
   }
 
   /**
