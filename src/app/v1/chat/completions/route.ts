@@ -63,15 +63,22 @@ export async function POST(req: NextRequest) {
     const authResult = await authEngine.resolveAuthIdentity(req);
 
     if (!authResult.authenticated || !authResult.userId) {
+      const isRateLimited = authResult.error === 'RATE_LIMIT_EXCEEDED';
       return NextResponse.json(
         {
           error: {
             message: authResult.error || 'Authentication required. Provide a valid bearer token or API key.',
-            type: 'invalid_request_error',
-            code: 'invalid_api_key',
+            type: isRateLimited ? 'rate_limit_error' : 'invalid_request_error',
+            code: isRateLimited ? 'rate_limit_exceeded' : 'invalid_api_key',
           },
         },
-        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
+        {
+          status: isRateLimited ? 429 : 401,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            ...(authResult.rateLimitResetMs ? { 'Retry-After': String(Math.ceil(authResult.rateLimitResetMs / 1000)) } : {})
+          }
+        }
       );
     }
 

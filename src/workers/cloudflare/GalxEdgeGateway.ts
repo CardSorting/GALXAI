@@ -276,12 +276,28 @@ export class GalxEdgeGateway {
     );
   }
 
+  private static readonly edgeAuthCache = new Map<string, { result: GatewayAuthenticationResult; cachedAt: number }>();
+  private static readonly EDGE_AUTH_CACHE_TTL_MS = 15000;
+  private static readonly EDGE_NEG_CACHE_TTL_MS = 10000;
+
   /**
    * Authenticates the SHA-256 digest of a gateway key against the authoritative
    * Supabase record. Production never falls back to prefix/shape validation.
+   * Employs edge in-memory caching and negative caching to protect Supabase from stampedes.
    */
   private async authenticateGatewayKey(rawKey: string): Promise<GatewayAuthenticationResult> {
     const keyHash = await this.sha256(rawKey);
+    const now = Date.now();
+
+    // 1. Edge In-Memory Cache & Negative Cache Check (<0.01ms)
+    const cached = GalxEdgeGateway.edgeAuthCache.get(keyHash);
+    if (cached) {
+      const ttl = cached.result.ok ? GalxEdgeGateway.EDGE_AUTH_CACHE_TTL_MS : GalxEdgeGateway.EDGE_NEG_CACHE_TTL_MS;
+      if (now - cached.cachedAt < ttl) {
+        return cached.result;
+      }
+    }
+
     const isLocalFormatOnly =
       this.env.GATEWAY_AUTH_MODE === 'format-only' &&
       (this.env.ENVIRONMENT === 'test' || this.env.ENVIRONMENT === 'development');
@@ -346,26 +362,30 @@ export class GalxEdgeGateway {
       const row = rows[0];
 
       if (!row) {
-        return {
+        const failureResult: GatewayAuthenticationResult = {
           ok: false,
           status: 401,
           code: 'invalid_api_key',
           message: 'The supplied gateway key is invalid or revoked.'
         };
+        GalxEdgeGateway.edgeAuthCache.set(keyHash, { result: failureResult, cachedAt: now });
+        return failureResult;
       }
 
       const spendCapUsd = row.spend_cap_usd === null ? undefined : Number(row.spend_cap_usd);
       const currentSpendUsd = Number(row.current_spend_usd || 0);
       if (spendCapUsd !== undefined && currentSpendUsd >= spendCapUsd) {
-        return {
+        const cappedResult: GatewayAuthenticationResult = {
           ok: false,
           status: 402,
           code: 'spend_cap_exceeded',
           message: 'This gateway key has reached its configured spend cap.'
         };
+        GalxEdgeGateway.edgeAuthCache.set(keyHash, { result: cappedResult, cachedAt: now });
+        return cappedResult;
       }
 
-      return {
+      const successResult: GatewayAuthenticationResult = {
         ok: true,
         key: {
           id: row.id,
@@ -377,6 +397,8 @@ export class GalxEdgeGateway {
           currentSpendUsd
         }
       };
+      GalxEdgeGateway.edgeAuthCache.set(keyHash, { result: successResult, cachedAt: now });
+      return successResult;
     } catch {
       return {
         ok: false,
