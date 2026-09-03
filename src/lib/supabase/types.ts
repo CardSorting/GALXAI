@@ -3253,6 +3253,10 @@ export interface Database {
         };
         Returns: boolean;
       };
+      fn_prevent_wallet_balance_tampering: {
+        Args: Record<PropertyKey, never>;
+        Returns: unknown;
+      };
       fn_upsert_owned_chat_messages: {
         Args: { p_conversation_id: string; p_user_id: string; p_messages: Json };
         Returns: Json;
