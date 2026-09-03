@@ -3223,6 +3223,12 @@ export interface Database {
         Args: Record<PropertyKey, never>;
         Returns: string;
       };
+      fn_can_access_conversation: {
+        Args: {
+          p_conversation_id: string;
+        };
+        Returns: boolean;
+      };
       fn_get_current_tenant_claims: {
         Args: Record<PropertyKey, never>;
         Returns: Json;
