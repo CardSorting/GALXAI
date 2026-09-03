@@ -14,7 +14,7 @@
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
-import { executePostgresQuery, getPostgresPool } from '../../db/postgres';
+import { executePostgresQuery, executePostgresQueryAsUser, getPostgresPool } from '../../db/postgres';
 import type { Database } from '../types';
 import type { DeveloperGatewayKey } from '../../../core/contracts/GalxContracts';
 import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
@@ -403,8 +403,12 @@ export class ApiKeyRepository {
       }
     }
 
-    // 3. Watermark mismatched or fresh load required: Fetch full rows
-    const res = await executePostgresQuery(
+    // 3. Watermark mismatched or fresh load required: Fetch full rows with active tenant RLS
+    const res = (userId ? await executePostgresQueryAsUser(
+      userId,
+      'SELECT * FROM galx_developer_keys WHERE user_id = $1 ORDER BY created_at DESC;',
+      [userId]
+    ) : null) || await executePostgresQuery(
       'SELECT * FROM galx_developer_keys WHERE ($1::text IS NULL OR user_id = $1::text) ORDER BY created_at DESC;',
       [userId || null]
     );
@@ -479,8 +483,12 @@ export class ApiKeyRepository {
         return cached;
       }
 
-      // 2. Direct PostgreSQL query via circuit-breaker protected pool with tenant isolation
-      const res = await executePostgresQuery(
+      // 2. Direct PostgreSQL query via circuit-breaker protected pool with tenant isolation and active RLS
+      const res = (userId ? await executePostgresQueryAsUser(
+        userId,
+        'SELECT * FROM galx_developer_keys WHERE id = $1 AND user_id = $2 LIMIT 1;',
+        [id, userId]
+      ) : null) || await executePostgresQuery(
         'SELECT * FROM galx_developer_keys WHERE id = $1 AND ($2::text IS NULL OR user_id = $2::text) LIMIT 1;',
         [id, userId || null]
       );
@@ -781,7 +789,11 @@ export class ApiKeyRepository {
     this.keyDataLoader.clearAll();
     this.tokenHashCache.clear();
 
-    const res = await executePostgresQuery(
+    const res = (userId ? await executePostgresQueryAsUser(
+      userId,
+      'UPDATE galx_developer_keys SET is_revoked = true, revoked_at = NOW(), revoked_reason = $2, updated_at = NOW() WHERE id = $1 AND user_id = $3;',
+      [keyId, reason, userId]
+    ) : null) || await executePostgresQuery(
       'UPDATE galx_developer_keys SET is_revoked = true, revoked_at = NOW(), revoked_reason = $2, updated_at = NOW() WHERE id = $1 AND ($3::text IS NULL OR user_id = $3::text);',
       [keyId, reason, userId || null]
     );

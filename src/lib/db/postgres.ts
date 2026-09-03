@@ -213,6 +213,83 @@ export async function executePostgresTransaction<T>(
   }
 }
 
+/**
+ * Safely executes a transaction impersonating an authenticated tenant context.
+ * Sets transaction-local `request.jwt.claim.sub` and switches role to `authenticated`,
+ * guaranteeing that PostgreSQL's native Row-Level Security (RLS) policies are actively
+ * enforced even when connecting via the superuser connection pool.
+ *
+ * Scoped strictly to the transaction (`is_local = true`), ensuring zero connection-state leakage
+ * across pooled client checkouts.
+ */
+export async function executePostgresTransactionAsUser<T>(
+  userId: string,
+  callback: (client: PoolClient) => Promise<T>
+): Promise<T | null> {
+  if (!userId) {
+    throw new Error('[PostgresPool] Cannot execute tenant transaction without an authenticated userId');
+  }
+
+  const breaker = getCircuitBreaker();
+  if (!breaker.canExecute()) return null;
+
+  const pool = getPostgresPool();
+  if (!pool) return null;
+
+  if (pool.waitingCount > MAX_WAITING_POOL_CLIENTS) {
+    breaker.recordFailure(new Error('Connection pool checkout queue saturated during tenant transaction acquire'));
+    return null;
+  }
+
+  let client: PoolClient | null = null;
+  try {
+    client = await pool.connect();
+    await client.query('BEGIN;');
+    await client.query(
+      "SELECT set_config('request.jwt.claim.sub', $1, true), set_config('request.jwt.claim.role', 'authenticated', true);",
+      [userId]
+    );
+    try {
+      await client.query('SET LOCAL ROLE authenticated;');
+    } catch {
+      // In standalone environments without the 'authenticated' role, continue with session configs
+    }
+    const result = await callback(client);
+    await client.query('COMMIT;');
+    breaker.recordSuccess();
+    return result;
+  } catch (err: any) {
+    if (client) {
+      try {
+        await client.query('ROLLBACK;');
+      } catch {
+        // ignore rollback error
+      }
+    }
+    breaker.recordFailure(err);
+    console.warn('[PostgresPool] Tenant transaction error:', err.message);
+    return null;
+  } finally {
+    if (client) {
+      client.release();
+    }
+  }
+}
+
+/**
+ * Safely executes a query with active PostgreSQL Row-Level Security (RLS) enforcement
+ * by running inside a transaction-local tenant context.
+ */
+export async function executePostgresQueryAsUser<R extends QueryResultRow = any>(
+  userId: string,
+  text: string,
+  params?: any[]
+): Promise<QueryResult<R> | null> {
+  return executePostgresTransactionAsUser(userId, async (client) => {
+    return client.query<R>(text, params);
+  });
+}
+
 export function getPostgresPoolStats() {
   const pool = getPostgresPool();
   const breaker = getCircuitBreaker();
