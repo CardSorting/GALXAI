@@ -806,6 +806,8 @@ export interface AuthIdentityResult {
   readonly session?: GalxUserSession;
   readonly token?: string;
   readonly error?: string;
+  readonly rateLimitRemaining?: number;
+  readonly rateLimitResetMs?: number;
 }
 
 export interface OAuthUrlDetails {
