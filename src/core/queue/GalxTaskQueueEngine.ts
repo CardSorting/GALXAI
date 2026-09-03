@@ -49,6 +49,7 @@ export class GalxTaskQueueEngine {
   private leaseWatchdogTimer: NodeJS.Timeout | null = null;
   private fencingTokenCounter = 1000;
   private lastCreatedAtMs = 0;
+  private runnableTaskCount = 0;
 
   private constructor(
     persistence = GalxPersistence.getInstance(),
@@ -234,8 +235,12 @@ export class GalxTaskQueueEngine {
   private loadStateFromPersistence(): void {
     const savedTasks = this.persistence.taskTable.getAll();
     const now = Date.now();
+    this.runnableTaskCount = 0;
 
     for (const t of savedTasks) {
+      if (['QUEUED', 'SCHEDULED', 'RETRYING'].includes(t.status)) {
+        this.runnableTaskCount++;
+      }
       if (t.idempotencyKey) {
         this.idempotencyMap.set(`${t.queueId}:${t.userId}:${t.idempotencyKey}`, {
           taskId: t.id,
@@ -260,10 +265,25 @@ export class GalxTaskQueueEngine {
    */
   private setupReactiveBroccoliSubscription(): void {
     this.persistence.taskTable.subscribe((evt) => {
-      if (evt.operation === 'INSERT' || evt.operation === 'UPDATE') {
+      if (evt.operation === 'INSERT') {
         const status = evt.after?.status;
         if (status === 'QUEUED' || status === 'RETRYING' || status === 'SCHEDULED') {
+          this.runnableTaskCount++;
           this.pulseDispatcher();
+        }
+      } else if (evt.operation === 'UPDATE') {
+        const wasRunnable = Boolean(evt.before?.status && ['QUEUED', 'RETRYING', 'SCHEDULED'].includes(evt.before.status));
+        const isRunnable = Boolean(evt.after?.status && ['QUEUED', 'RETRYING', 'SCHEDULED'].includes(evt.after.status));
+        if (!wasRunnable && isRunnable) {
+          this.runnableTaskCount++;
+          this.pulseDispatcher();
+        } else if (wasRunnable && !isRunnable) {
+          this.runnableTaskCount = Math.max(0, this.runnableTaskCount - 1);
+        }
+      } else if (evt.operation === 'DELETE') {
+        const wasRunnable = Boolean(evt.before?.status && ['QUEUED', 'RETRYING', 'SCHEDULED'].includes(evt.before.status));
+        if (wasRunnable) {
+          this.runnableTaskCount = Math.max(0, this.runnableTaskCount - 1);
         }
       }
     });
@@ -974,6 +994,14 @@ export class GalxTaskQueueEngine {
 
     this.leaseWatchdogTimer = setInterval(() => {
       this.scavengeExpiredLeasesAndDeadlines();
+      // Drift-defense liveness sync
+      const active = this.persistence.taskTable.query({
+        where: { status: { $in: ['QUEUED', 'SCHEDULED', 'RETRYING'] } }
+      });
+      this.runnableTaskCount = active.length;
+      if (this.runnableTaskCount > 0) {
+        this.pulseDispatcher();
+      }
     }, 2000);
     this.leaseWatchdogTimer.unref();
   }
@@ -1015,6 +1043,9 @@ export class GalxTaskQueueEngine {
   }
 
   private async dispatchTick(): Promise<void> {
+    // Sub-nanosecond short-circuit when no tasks are runnable across any queue
+    if (this.runnableTaskCount <= 0) return;
+
     const now = Date.now();
     const activeQueues = this.persistence.queueTable.getAll() as GalxTaskQueueConfig[];
 

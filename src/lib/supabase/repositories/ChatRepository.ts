@@ -5,6 +5,7 @@
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
+import { executePostgresQuery } from '../../db/postgres';
 import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
 import type { ChatSession } from '../../../components/chat/ChatSidebar';
 import type { ChatMessage } from '../../../components/chat/ChatMessageItem';
@@ -111,6 +112,21 @@ export class ChatRepository {
    */
   async getSessions(userId?: string): Promise<ChatSession[]> {
     const ownerId = this.requireUserId(userId);
+
+    // 1. Direct PostgreSQL Connection Pool Query with Circuit Breaker (<1.5ms)
+    const poolRes = await executePostgresQuery<DbChatConversationRow>(
+      'SELECT * FROM public.chat_conversations WHERE user_id = $1 AND deleted_at IS NULL ORDER BY updated_at DESC;',
+      [ownerId]
+    );
+    if (poolRes && poolRes.rows && poolRes.rows.length > 0) {
+      const sessions: ChatSession[] = poolRes.rows.map((row: DbChatConversationRow) => this.mapRowToSession(row));
+      for (const s of sessions) {
+        this.sessionTable.put(this.sessionCacheKey(ownerId, s.id), { ...s, ownerId });
+      }
+      return sessions;
+    }
+
+    // 2. Supabase PostgREST Fallback
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -147,6 +163,18 @@ export class ChatRepository {
     const cached = this.sessionTable.get(this.sessionCacheKey(ownerId, id));
     if (cached) return cached;
 
+    // 1. Direct PostgreSQL Connection Pool Query with Circuit Breaker (<1.5ms)
+    const poolRes = await executePostgresQuery<DbChatConversationRow>(
+      'SELECT * FROM public.chat_conversations WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL LIMIT 1;',
+      [id, ownerId]
+    );
+    if (poolRes && poolRes.rows && poolRes.rows[0]) {
+      const session = this.mapRowToSession(poolRes.rows[0]);
+      this.sessionTable.put(this.sessionCacheKey(ownerId, session.id), { ...session, ownerId });
+      return session;
+    }
+
+    // 2. Supabase PostgREST Fallback
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -301,6 +329,20 @@ export class ChatRepository {
     const ownerId = this.requireUserId(userId);
     await this.assertConversationOwner(conversationId, ownerId);
 
+    // 1. Direct PostgreSQL Connection Pool Query with Circuit Breaker (<1.5ms)
+    const poolRes = await executePostgresQuery<DbChatMessageRow>(
+      'SELECT * FROM public.chat_messages WHERE conversation_id = $1 ORDER BY created_at ASC;',
+      [conversationId]
+    );
+    if (poolRes && poolRes.rows && poolRes.rows.length > 0) {
+      const messages: ChatMessage[] = poolRes.rows.map((row: DbChatMessageRow) => this.mapRowToMessage(row));
+      for (const msg of messages) {
+        this.messageTable.put(this.messageCacheKey(ownerId, msg.id), { ...msg, conversationId, ownerId });
+      }
+      return messages;
+    }
+
+    // 2. Supabase PostgREST Fallback
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();

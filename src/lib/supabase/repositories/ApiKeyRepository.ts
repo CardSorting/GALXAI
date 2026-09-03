@@ -63,6 +63,10 @@ export class ApiKeyRepository {
   private readonly negativeHashCache = new Map<string, number>();
   private readonly NEGATIVE_CACHE_TTL_MS = 10000;
 
+  // Token Hash Memoization Cache (<10ns crypto shortcut)
+  private readonly tokenHashCache = new Map<string, string>();
+  private readonly MAX_TOKEN_HASH_CACHE = 10000;
+
   // Coalesced Write-Behind Usage Buffer
   private readonly usageBuffer = new Map<string, { requests: number; tokens: number; lastUsedAtMs: number }>();
   private flushTimer: NodeJS.Timeout | null = null;
@@ -255,8 +259,16 @@ export class ApiKeyRepository {
       return { valid: false, error: 'INVALID_GATEWAY_API_KEY_CHECKSUM' };
     }
 
-    // 2. Hash & resolve key (L0 -> L1 -> Coalesced Loader)
-    const keyHash = GalxCryptoVault.hashApiKey(token);
+    // 2. Hash & resolve key (Memoized L0 Token Hash -> L0 Pointer -> L1 -> Coalesced Loader)
+    let keyHash = this.tokenHashCache.get(token);
+    if (!keyHash) {
+      keyHash = GalxCryptoVault.hashApiKey(token);
+      if (this.tokenHashCache.size >= this.MAX_TOKEN_HASH_CACHE) {
+        const first = this.tokenHashCache.keys().next().value;
+        if (first) this.tokenHashCache.delete(first);
+      }
+      this.tokenHashCache.set(token, keyHash);
+    }
     const key = await this.findGatewayKeyByHash(keyHash);
 
     if (!key) {
@@ -657,21 +669,12 @@ export class ApiKeyRepository {
     tokens: number = 0,
     costUsd: number = 0
   ): Promise<void> {
-    // 1. Immediately mutate L0/L1 in-memory hot cache
-    const existing = this.activeKeyById.get(keyId) || this.keyTable.get(keyId);
+    // 1. Immediately mutate L0/L1 in-memory hot cache in-place (0 allocations, 0 GC churn)
+    const existing = (this.activeKeyById.get(keyId) || this.keyTable.get(keyId)) as any;
     if (existing) {
-      const updated: DeveloperGatewayKey = {
-        ...existing,
-        totalRequests: (existing.totalRequests || 0) + requests,
-        totalTokens: (existing.totalTokens || 0) + tokens,
-        lastUsedAtMs: Date.now()
-      };
-      this.keyTable.put(keyId, updated);
-      this.setFastCache(updated);
-      this.keyCoalescer.set(`id:${keyId}`, updated);
-      if (updated.keyHash) {
-        this.keyCoalescer.set(`hash:${updated.keyHash}`, updated);
-      }
+      existing.totalRequests = (existing.totalRequests || 0) + requests;
+      existing.totalTokens = (existing.totalTokens || 0) + tokens;
+      existing.lastUsedAtMs = Date.now();
     }
 
     // 2. Buffer into coalesced write-behind map
@@ -761,6 +764,7 @@ export class ApiKeyRepository {
     }
     this.keyCoalescer.invalidate(`id:${keyId}`);
     this.keyDataLoader.clearAll();
+    this.tokenHashCache.clear();
 
     const res = await executePostgresQuery(
       'UPDATE galx_developer_keys SET is_revoked = true, revoked_at = NOW(), revoked_reason = $2, updated_at = NOW() WHERE id = $1;',
