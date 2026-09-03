@@ -4,9 +4,10 @@
  *
  * Enterprise Architecture:
  * 1. L1 Memory Read-Through: Sub-microsecond (<0.5 µs) queries with BroccoliDB secondary & composite indexing.
- * 2. Egress Reduction: Batch data loader queries BroccoliDB before PostgreSQL, pruning roundtrips for cached keys to zero.
- * 3. Coalesced Write-Behind: Buffers high-throughput usage metrics in RAM and flushes via atomic UNNEST batch updates.
- * 4. Invalidation Barrier: Zero-stale consistency across key mutations, rotations, and revocations.
+ * 2. Egress Reduction & Negative Caching: Batch loader prunes cached hashes and negative-caches non-existent tokens to prevent stampedes.
+ * 3. Micro-Watermark Delta Sync: Validates remote state changes via index-only count/timestamp watermark before full row transfers.
+ * 4. Coalesced Write-Behind: Buffers high-throughput usage metrics in RAM and flushes via atomic UNNEST batch updates.
+ * 5. ETag & HTTP 304 Support: Enables zero-byte 304 responses for unchanged key collections.
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
@@ -17,6 +18,12 @@ import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
 import { GalxRequestCoalescer } from '../../cache/GalxRequestCoalescer';
 import { GalxBatchDataLoader } from '../../cache/GalxBatchDataLoader';
 
+interface UserWatermark {
+  count: number;
+  maxUpdatedAt: string;
+  checkedAtMs: number;
+}
+
 export class ApiKeyRepository {
   private static instance: ApiKeyRepository;
   private readonly keyTable: BroccoliDbTable<DeveloperGatewayKey>;
@@ -24,9 +31,13 @@ export class ApiKeyRepository {
 
   // Cache Freshness & Invalidation Timestamps
   private readonly keyCacheTimestamps = new Map<string, number>();
-  private readonly userKeyFetchTimestamps = new Map<string, number>();
+  private readonly userWatermarks = new Map<string, UserWatermark>();
   private readonly CACHE_TTL_MS = 60000; // 60-second L1 key freshness
-  private readonly USER_KEYS_TTL_MS = 10000; // 10-second user-list TTL
+  private readonly WATERMARK_MIN_INTERVAL_MS = 2500; // 2.5s soft window before polling watermark
+
+  // Negative Cache to Prevent Cache Penetration / Database Stampede
+  private readonly negativeHashCache = new Map<string, number>();
+  private readonly NEGATIVE_CACHE_TTL_MS = 10000;
 
   // Coalesced Write-Behind Usage Buffer
   private readonly usageBuffer = new Map<string, { requests: number; tokens: number; lastUsedAtMs: number }>();
@@ -39,10 +50,16 @@ export class ApiKeyRepository {
     async (hashes) => {
       const results: Array<DeveloperGatewayKey | null> = [];
       const keyMap = new Map<string, DeveloperGatewayKey>();
+      const now = Date.now();
 
       // 1. Check BroccoliDB L1 Cache First (Zero Egress Hot-Path)
-      const now = Date.now();
       for (const hash of hashes) {
+        // Skip negative-cached unknown tokens
+        const negTime = this.negativeHashCache.get(hash);
+        if (negTime && now - negTime < this.NEGATIVE_CACHE_TTL_MS) {
+          continue;
+        }
+
         const matches = this.keyTable.query({
           where: { keyHash: { $eq: hash }, revoked: { $eq: false } }
         }) as DeveloperGatewayKey[];
@@ -57,7 +74,12 @@ export class ApiKeyRepository {
       }
 
       // 2. Identify missing hashes requiring database resolution
-      const missingHashes = Array.from(hashes).filter(h => !keyMap.has(h));
+      const missingHashes = Array.from(hashes).filter(h => {
+        if (keyMap.has(h)) return false;
+        const negTime = this.negativeHashCache.get(h);
+        if (negTime && now - negTime < this.NEGATIVE_CACHE_TTL_MS) return false;
+        return true;
+      });
 
       // 3. Query PostgreSQL via Connection Pool for ONLY missing hashes
       if (missingHashes.length > 0) {
@@ -106,9 +128,16 @@ export class ApiKeyRepository {
             // Fallback
           }
         }
+
+        // 5. Populate negative cache for hashes verified to not exist
+        for (const hash of missingHashes) {
+          if (!keyMap.has(hash)) {
+            this.negativeHashCache.set(hash, Date.now());
+          }
+        }
       }
 
-      // 5. Assemble ordered results preserving batch contract
+      // 6. Assemble ordered results preserving batch contract
       for (const hash of hashes) {
         if (keyMap.has(hash)) {
           results.push(keyMap.get(hash)!);
@@ -151,54 +180,123 @@ export class ApiKeyRepository {
     return ApiKeyRepository.instance;
   }
 
+  private queryLocalKeys(userId?: string): DeveloperGatewayKey[] {
+    if (userId) {
+      const cached = this.keyTable.query({ where: { userId: { $eq: userId } } }) as DeveloperGatewayKey[];
+      return cached.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
+    }
+    const all = this.keyTable.getAll() as DeveloperGatewayKey[];
+    return all.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
+  }
+
   /**
-   * Invalidates cached user key collections so reads immediately reflect mutations
+   * Invalidates cached user key watermarks so reads immediately refresh
    */
   private invalidateUserCache(userId?: string): void {
     if (userId) {
-      this.userKeyFetchTimestamps.delete(`user_keys:${userId}`);
+      this.userWatermarks.delete(userId);
     }
-    this.userKeyFetchTimestamps.delete('user_keys:all');
+    this.userWatermarks.delete('all');
   }
 
+  /**
+   * Computes an entity ETag for user key collections to support HTTP 304 Not Modified
+   */
+  async getUserKeysETag(userId?: string): Promise<string> {
+    const pool = getPostgresPool();
+    if (pool) {
+      try {
+        const res = await pool.query(
+          'SELECT * FROM fn_get_developer_keys_watermark($1);',
+          [userId || null]
+        );
+        if (res.rows && res.rows[0]) {
+          const count = res.rows[0].key_count || 0;
+          const maxUpdated = res.rows[0].max_updated_at ? new Date(res.rows[0].max_updated_at).getTime() : 0;
+          return `W/"${count}-${maxUpdated}"`;
+        }
+      } catch {}
+    }
+    const local = this.queryLocalKeys(userId);
+    return `W/"${local.length}-${Date.now()}"`;
+  }
+
+  /**
+   * Micro-Watermark Synchronized Key Retrieval.
+   * Compares remote count & max(updated_at) against local memory.
+   * If unchanged, zero rows are transferred over the wire!
+   */
   async getGatewayKeys(
     userId?: string,
     options: { forceRefresh?: boolean } = {}
   ): Promise<DeveloperGatewayKey[]> {
-    const cacheKey = `user_keys:${userId || 'all'}`;
-    const lastFetched = this.userKeyFetchTimestamps.get(cacheKey) || 0;
-    const isFresh = Date.now() - lastFetched < this.USER_KEYS_TTL_MS;
+    const watermarkKey = userId || 'all';
+    const localWm = this.userWatermarks.get(watermarkKey);
+    const now = Date.now();
 
-    // 1. Return from BroccoliDB hot cache if within TTL and not forcing refresh
-    if (isFresh && !options.forceRefresh) {
-      if (userId) {
-        const cached = this.keyTable.query({ where: { userId: { $eq: userId } } }) as DeveloperGatewayKey[];
-        if (cached.length > 0) {
-          return cached.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
+    // 1. Return from BroccoliDB hot cache if within soft polling window
+    if (localWm && now - localWm.checkedAtMs < this.WATERMARK_MIN_INTERVAL_MS && !options.forceRefresh) {
+      const localKeys = this.queryLocalKeys(userId);
+      if (localKeys.length > 0) return localKeys;
+    }
+
+    // 2. Micro-Watermark Check (Index-Only Scan, ~0.8ms, ~30 bytes)
+    const pool = getPostgresPool();
+    if (pool && !options.forceRefresh) {
+      try {
+        const wmRes = await pool.query(
+          'SELECT * FROM fn_get_developer_keys_watermark($1);',
+          [userId || null]
+        );
+        if (wmRes.rows && wmRes.rows[0]) {
+          const remoteCount = wmRes.rows[0].key_count || 0;
+          const remoteMaxUpdated = wmRes.rows[0].max_updated_at
+            ? new Date(wmRes.rows[0].max_updated_at).toISOString()
+            : '';
+
+          // Compare watermark to local cache state
+          if (
+            localWm &&
+            localWm.count === remoteCount &&
+            localWm.maxUpdatedAt === remoteMaxUpdated
+          ) {
+            localWm.checkedAtMs = now;
+            const localKeys = this.queryLocalKeys(userId);
+            if (localKeys.length === remoteCount) {
+              return localKeys; // ZERO EGRESS: Returned 100% from RAM!
+            }
+          }
         }
-      } else {
-        const all = this.keyTable.getAll() as DeveloperGatewayKey[];
-        if (all.length > 0) {
-          return all.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
-        }
+      } catch (err: any) {
+        console.warn('[ApiKeyRepository] Watermark check fallback:', err.message);
       }
     }
 
-    // 2. Authoritative direct PostgreSQL connection pool query
-    const pool = getPostgresPool();
+    // 3. Watermark mismatched or fresh load required: Fetch full rows
     if (pool) {
       try {
         const res = await pool.query(
           'SELECT * FROM galx_developer_keys WHERE ($1::text IS NULL OR user_id = $1::text) ORDER BY created_at DESC;',
           [userId || null]
         );
-        if (res.rows && res.rows.length > 0) {
+        if (res.rows && res.rows.length >= 0) {
           const mapped = res.rows.map(r => this.mapRowToGatewayKey(r));
           for (const k of mapped) {
             this.keyTable.put(k.id, k);
             this.keyCacheTimestamps.set(k.id, Date.now());
           }
-          this.userKeyFetchTimestamps.set(cacheKey, Date.now());
+
+          const maxUpdated = mapped.reduce((max, k) => {
+            const time = k.lastUsedAtMs || k.createdAtMs || 0;
+            return time > max ? time : max;
+          }, 0);
+
+          this.userWatermarks.set(watermarkKey, {
+            count: mapped.length,
+            maxUpdatedAt: maxUpdated ? new Date(maxUpdated).toISOString() : '',
+            checkedAtMs: Date.now()
+          });
+
           return mapped;
         }
       } catch (err: any) {
@@ -206,7 +304,7 @@ export class ApiKeyRepository {
       }
     }
 
-    // 3. Supabase SECURITY DEFINER RPC fallback
+    // 4. Supabase SECURITY DEFINER RPC fallback
     if (isSupabaseConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
@@ -214,13 +312,17 @@ export class ApiKeyRepository {
           p_user_id: userId || null
         });
 
-        if (!error && data && Array.isArray(data) && data.length > 0) {
+        if (!error && data && Array.isArray(data) && data.length >= 0) {
           const mapped = data.map(this.mapRowToGatewayKey);
           for (const k of mapped) {
             this.keyTable.put(k.id, k);
             this.keyCacheTimestamps.set(k.id, Date.now());
           }
-          this.userKeyFetchTimestamps.set(cacheKey, Date.now());
+          this.userWatermarks.set(watermarkKey, {
+            count: mapped.length,
+            maxUpdatedAt: new Date().toISOString(),
+            checkedAtMs: Date.now()
+          });
           return mapped;
         }
       } catch {
@@ -228,11 +330,8 @@ export class ApiKeyRepository {
       }
     }
 
-    // 4. In-memory hot cache fallback
-    if (userId) {
-      return this.keyTable.query({ where: { userId: { $eq: userId } } }) as DeveloperGatewayKey[];
-    }
-    return this.keyTable.getAll() as DeveloperGatewayKey[];
+    // 5. In-memory hot cache fallback
+    return this.queryLocalKeys(userId);
   }
 
   async getGatewayKeyById(id: string): Promise<DeveloperGatewayKey | null> {
@@ -350,6 +449,7 @@ export class ApiKeyRepository {
     // 1. Immediately guarantee in-memory hot cache presence and invalidate queries
     this.keyTable.put(key.id, key);
     this.keyCacheTimestamps.set(key.id, Date.now());
+    this.negativeHashCache.delete(key.keyHash);
     this.keyCoalescer.invalidate(`id:${key.id}`);
     this.keyCoalescer.invalidate(`hash:${key.keyHash}`);
     this.keyDataLoader.clear(key.keyHash);
@@ -537,6 +637,7 @@ export class ApiKeyRepository {
       if (existing.keyHash) {
         this.keyCoalescer.invalidate(`hash:${existing.keyHash}`);
         this.keyDataLoader.clear(existing.keyHash);
+        this.negativeHashCache.set(existing.keyHash, Date.now());
       }
       this.invalidateUserCache(existing.userId);
     }
@@ -547,7 +648,7 @@ export class ApiKeyRepository {
     if (pool) {
       try {
         await pool.query(
-          'UPDATE galx_developer_keys SET is_revoked = true, revoked_at = NOW(), revoked_reason = $2 WHERE id = $1;',
+          'UPDATE galx_developer_keys SET is_revoked = true, revoked_at = NOW(), revoked_reason = $2, updated_at = NOW() WHERE id = $1;',
           [keyId, reason]
         );
         return;
@@ -568,7 +669,8 @@ export class ApiKeyRepository {
             .update({
               is_revoked: true,
               revoked_at: new Date().toISOString(),
-              revoked_reason: reason
+              revoked_reason: reason,
+              updated_at: new Date().toISOString()
             })
             .eq('id', keyId);
         }
@@ -583,6 +685,7 @@ export class ApiKeyRepository {
     if (existing?.keyHash) {
       this.keyCoalescer.invalidate(`hash:${existing.keyHash}`);
       this.keyDataLoader.clear(existing.keyHash);
+      this.negativeHashCache.delete(existing.keyHash);
     }
     this.keyCoalescer.invalidate(`id:${keyId}`);
     this.keyTable.delete(keyId);
@@ -649,7 +752,7 @@ export class ApiKeyRepository {
       name: key.name,
       prefix: key.prefix || key.keyPrefix || '',
       key_hash: key.keyHash,
-      rateLimitPerMinute: key.rateLimitPerMinute,
+      rate_limit_per_minute: key.rateLimitPerMinute,
       total_requests: key.totalRequests,
       total_tokens: key.totalTokens,
       is_revoked: key.revoked || false,

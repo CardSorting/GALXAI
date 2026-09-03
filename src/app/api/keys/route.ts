@@ -93,8 +93,22 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Attempt authoritative database retrieval with hot-cache fallback
+    // ETag & HTTP 304 Not Modified validation for zero-egress delta syncing
+    const ifNoneMatch = req.headers.get('if-none-match');
     const keyRepo = ApiKeyRepository.getInstance();
+    const etag = await keyRepo.getUserKeysETag(targetUserId);
+
+    if (ifNoneMatch && ifNoneMatch === etag) {
+      return new NextResponse(null, {
+        status: 304,
+        headers: {
+          'ETag': etag,
+          'Cache-Control': 'private, no-cache'
+        }
+      });
+    }
+
+    // Attempt authoritative database retrieval with hot-cache fallback
     let keys = await keyRepo.getGatewayKeys(targetUserId);
 
     if (!keys || keys.length === 0) {
@@ -132,6 +146,11 @@ export async function GET(req: NextRequest) {
       keys: sanitizedKeys,
       total: sanitizedKeys.length,
       activeCount: sanitizedKeys.filter(k => !k.revoked && !k.isExpired).length
+    }, {
+      headers: {
+        'ETag': etag,
+        'Cache-Control': 'private, no-cache'
+      }
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
