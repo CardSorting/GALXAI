@@ -115,6 +115,7 @@ This directory contains the formal Architectural Decision Records (ADRs) that go
 | **[ADR 0105](0105-tenant-id-constraints-and-leakproof-rls-armor.md)** | Tenant ID CHECK Constraints & LEAKPROOF RLS Optimization | **Data Integrity & Query Optimizer Armor** | `Accepted` | Adds idempotent CHECK constraints on tenant identifiers across 10 tables, designates RLS functions as LEAKPROOF, and adds session verification procedure. |
 | **[ADR 0106](0106-wallet-balance-tamper-proofing-and-billing-ledger-immutability.md)** | Wallet Balance Tamper-Proofing & Financial Ledger Immutability | **Financial & Ledger Armor** | `Accepted` | Implements engine-level balance tamper-proofing on galx_wallets, enforces FORCE RLS on wallet transactions, and attaches immutability triggers to financial ledgers. |
 | **[ADR 0107](0107-api-credit-handling-and-quota-pool-armor.md)** | API Credit Handling & Quota Pool Armor | **API Credits & QoS Quotas** | `Accepted` | Hardens inference credit holds with CHECK constraints and ownership reassignment triggers, optimizes quota RLS with InitPlan subqueries, and grants procedure execution rights. |
+| **[ADR 0108](0108-workspaces-and-team-billing-spend-armor.md)** | Workspaces & Team Billing Spend Armor | **Enterprise Spend & Multi-Tenancy Armor** | `Accepted` | Enforces spend tamper-proofing triggers on workspaces and cost centers, guarantees governance audit immutability, and deploys workspace membership RLS. |
 
 
 ---
