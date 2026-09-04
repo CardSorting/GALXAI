@@ -1,7 +1,9 @@
 # ADR 0107: API Credit Handling & Quota Pool Armor
 
 ## Status
-Accepted
+Superseded by ADR 0117
+
+This ADR describes an abandoned migration branch that was never applied to the authoritative database. Credit and quota state is now read-only to the service role and mutates only through adjudicating capabilities.
 
 ## Context
 Following the hardening of compute credit balances and financial ledger immutability (ADR 0106), the real-time API credit inference lifecycle required structural defense:
@@ -10,7 +12,7 @@ Following the hardening of compute credit balances and financial ledger immutabi
 3. **Missing Procedure Execution Privileges**: Credit slicing procedures (`fn_lease_wallet_credit_slice`, `fn_reconcile_wallet_credit_slice`) and hold management functions required explicit execution grants for authenticated transactions.
 
 ## Decision
-Under the Supabase Paranoid Governance framework (AOP-DB Protocol) and the Principle of Least Privilege, implemented migration [`20260903201833_galxai_api_credit_handling_and_quota_pool_armor.sql`](file:///Users/bozoegg/Desktop/GALXAI/supabase/migrations/20260903201833_galxai_api_credit_handling_and_quota_pool_armor.sql) and paired rollback:
+Under the Supabase Paranoid Governance framework (AOP-DB Protocol) and the Principle of Least Privilege, this ADR proposed the now-retired migration `20260903201833_galxai_api_credit_handling_and_quota_pool_armor.sql` and paired rollback:
 
 1. **Idempotent CHECK Constraint on Credit Holds**:
    - Deployed `chk_wallet_holds_user_id_valid` on `public.galx_wallet_holds` enforcing non-empty, non-whitespace identifiers $\le 128$ characters.

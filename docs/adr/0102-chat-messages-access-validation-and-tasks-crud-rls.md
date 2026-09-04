@@ -1,7 +1,9 @@
 # ADR 0102: Chat Messages Access Validation & Tasks CRUD RLS Armor
 
 ## Status
-Accepted
+Superseded by ADR 0117
+
+This ADR describes an abandoned migration branch that was never applied to the authoritative database. Its guest-conversation predicate was unsafe; chat and task mutations now cross an authenticated server boundary.
 
 ## Context
 Following the activation of transaction-scoped connection pooling (ADRs 0097–0101), an audit of child resource relationships revealed two critical security vulnerabilities:
@@ -10,7 +12,7 @@ Following the activation of transaction-scoped connection pooling (ADRs 0097–0
 3. **Cross-Conversation Message Reassignment**: A malicious update could execute `UPDATE chat_messages SET conversation_id = 'other_conv_id'`, moving private messages between tenant chat sessions.
 
 ## Decision
-Under the Supabase Paranoid Governance framework (AOP-DB Protocol), implemented migration [`20260903194939_galxai_chat_messages_and_tasks_hardened_rls.sql`](file:///Users/bozoegg/Desktop/GALXAI/supabase/migrations/20260903194939_galxai_chat_messages_and_tasks_hardened_rls.sql) and paired rollback:
+Under the Supabase Paranoid Governance framework (AOP-DB Protocol), this ADR proposed the now-retired migration `20260903194939_galxai_chat_messages_and_tasks_hardened_rls.sql` and paired rollback:
 
 1. **`fn_can_access_conversation` Access Validator**:
    - Deployed a `STABLE SECURITY DEFINER` function with `search_path = public, pg_temp`:

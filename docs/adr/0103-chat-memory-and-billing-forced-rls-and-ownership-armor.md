@@ -1,7 +1,9 @@
 # ADR 0103: Chat Memory & Billing Forced RLS with Ownership Armor
 
 ## Status
-Accepted
+Superseded by ADR 0117
+
+This ADR describes an abandoned migration branch that was never applied to the authoritative database. ADR 0117 retains forced RLS while making chat memory and billing state backend-only.
 
 ## Context
 Following the hardening of developer keys, conversation sessions, messages, and background tasks (ADRs 0097–0102), the remaining multi-tenant operational data layer required structural parity:
@@ -10,7 +12,7 @@ Following the hardening of developer keys, conversation sessions, messages, and 
 3. **Linear Per-Row Evaluation Overhead**: `galx_chat_rolling_memory` evaluated `auth.uid()::text = user_id` on every candidate row, rather than leveraging cached InitPlan subqueries.
 
 ## Decision
-Under the Supabase Paranoid Governance framework (AOP-DB Protocol), implemented migration [`20260903195655_galxai_chat_memory_and_billing_forced_rls_armor.sql`](file:///Users/bozoegg/Desktop/GALXAI/supabase/migrations/20260903195655_galxai_chat_memory_and_billing_forced_rls_armor.sql) and paired rollback:
+Under the Supabase Paranoid Governance framework (AOP-DB Protocol), this ADR proposed the now-retired migration `20260903195655_galxai_chat_memory_and_billing_forced_rls_armor.sql` and paired rollback:
 
 1. **`FORCE ROW LEVEL SECURITY` on Memory & Billing**:
    - Enforced `ALTER TABLE ... FORCE ROW LEVEL SECURITY;` on:

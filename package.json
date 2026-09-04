@@ -242,6 +242,7 @@
     "db:test": "node --env-file-if-exists=.env.local --import tsx scripts/test-supabase-integration.ts",
     "db:push": "node --env-file-if-exists=.env.local --import tsx scripts/push-migrations-direct.ts",
     "db:status": "node --env-file-if-exists=.env.local --import tsx scripts/manage-migrations.ts --status",
+    "db:audit:tenant-authority": "node --env-file-if-exists=.env.local --import tsx scripts/audit-tenant-authority-live.ts",
     "db:migrate": "node --env-file-if-exists=.env.local --import tsx scripts/manage-migrations.ts --apply",
     "db:dry-run": "tsx scripts/manage-migrations.ts --dry-run",
     "vercel:verify": "tsx scripts/verify-vercel-readiness.ts",

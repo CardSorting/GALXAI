@@ -1,7 +1,9 @@
 # ADR 0105: Tenant ID CHECK Constraints & LEAKPROOF RLS Optimization
 
 ## Status
-Accepted
+Superseded by ADR 0117
+
+This ADR describes an abandoned migration branch that was never applied to the authoritative database. Its unverified `LEAKPROOF` markings and revocation-absence session check were rejected by ADR 0117.
 
 ## Context
 Following the hardening of connection pool socket disposal, forced RLS, kernel tenant ownership binding, and least-privilege DAC grants (ADRs 0098–0104), two subtle database attack vectors remained:
@@ -10,7 +12,7 @@ Following the hardening of connection pool socket disposal, forced RLS, kernel t
 3. **In-Flight Session Verification**: Connection-pooled clients executing long transactions require a lightweight, engine-level assertion that the active authentication token has not been revoked in `galx_token_revocation_log`.
 
 ## Decision
-Under the Supabase Paranoid Governance framework (AOP-DB Protocol) and PostgreSQL Best Practices ([`schema-constraints.md`](file:///Users/bozoegg/Desktop/GALXAI/.agents/skills/supabase-postgres-best-practices/references/schema-constraints.md)), implemented migration [`20260903200417_galxai_tenant_id_constraints_and_leakproof_rls_armor.sql`](file:///Users/bozoegg/Desktop/GALXAI/supabase/migrations/20260903200417_galxai_tenant_id_constraints_and_leakproof_rls_armor.sql) and paired rollback:
+Under the Supabase Paranoid Governance framework (AOP-DB Protocol) and PostgreSQL Best Practices, this ADR proposed the now-retired migration `20260903200417_galxai_tenant_id_constraints_and_leakproof_rls_armor.sql` and paired rollback:
 
 1. **Idempotent CHECK Constraints on Tenant Identifiers**:
    - Deployed non-blocking `DO $$ ... IF NOT EXISTS (SELECT 1 FROM pg_constraint ...) $$` constraints across 10 core tenant tables:

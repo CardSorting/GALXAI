@@ -3297,52 +3297,6 @@ export interface Database {
       [_ in never]: never;
     };
     Functions: {
-      fn_assert_tenant_context: {
-        Args: Record<PropertyKey, never>;
-        Returns: string;
-      };
-      fn_can_access_conversation: {
-        Args: {
-          p_conversation_id: string;
-        };
-        Returns: boolean;
-      };
-      fn_get_current_tenant_claims: {
-        Args: Record<PropertyKey, never>;
-        Returns: Json;
-      };
-      fn_is_tenant_resource_owner: {
-        Args: {
-          p_owner_user_id: string;
-        };
-        Returns: boolean;
-      };
-      fn_set_tenant_session_context: {
-        Args: {
-          p_user_id: string;
-          p_role?: string;
-          p_email?: string;
-        };
-        Returns: void;
-      };
-      fn_validate_session_active: {
-        Args: {
-          p_token_hash: string;
-        };
-        Returns: boolean;
-      };
-      fn_prevent_wallet_balance_tampering: {
-        Args: Record<PropertyKey, never>;
-        Returns: unknown;
-      };
-      fn_prevent_workspace_spend_tampering: {
-        Args: Record<PropertyKey, never>;
-        Returns: unknown;
-      };
-      fn_prevent_cost_center_spend_tampering: {
-        Args: Record<PropertyKey, never>;
-        Returns: unknown;
-      };
       fn_upsert_owned_chat_messages: {
         Args: { p_conversation_id: string; p_user_id: string; p_messages: Json };
         Returns: Json;

@@ -1,7 +1,9 @@
 # ADR 0106: Wallet Balance Tamper-Proofing & Financial Ledger Immutability
 
 ## Status
-Accepted
+Superseded by ADR 0117
+
+This ADR describes an abandoned migration branch that was never applied to the authoritative database. ADR 0117 keeps the useful append-only wallet ledger invariant and removes direct client financial authority.
 
 ## Context
 Under direct connection pooling and transaction-level tenant impersonation (`executePostgresTransactionAsUser`, `SET LOCAL ROLE authenticated`), tenants execute SQL with the privileges of their authenticated database role.
@@ -11,7 +13,7 @@ While DAC grants allowed `SELECT, UPDATE ON public.galx_wallets`, two critical f
 3. **Stripe Webhook Event Mutability**: `public.galx_stripe_events` and `public.galx_stripe_invoices` lacked engine triggers guaranteeing append-only immutability.
 
 ## Decision
-Under the Supabase Paranoid Governance framework (AOP-DB Protocol) and the Principle of Least Privilege, implemented migration [`20260903200831_galxai_wallets_and_billing_ledger_tamper_proofing.sql`](file:///Users/bozoegg/Desktop/GALXAI/supabase/migrations/20260903200831_galxai_wallets_and_billing_ledger_tamper_proofing.sql) and paired rollback:
+Under the Supabase Paranoid Governance framework (AOP-DB Protocol) and the Principle of Least Privilege, this ADR proposed the now-retired migration `20260903200831_galxai_wallets_and_billing_ledger_tamper_proofing.sql` and paired rollback:
 
 1. **Wallet Balance Tamper-Proofing Trigger**:
    - Implemented `public.fn_prevent_wallet_balance_tampering()` as a `BEFORE UPDATE` trigger on `public.galx_wallets`.

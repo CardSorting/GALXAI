@@ -1,7 +1,9 @@
 # ADR 0108: Workspaces & Team Billing Spend Armor
 
 ## Status
-Accepted
+Superseded by ADR 0117
+
+This ADR describes an abandoned migration branch that was never applied to the authoritative database. ADR 0117 replaces recursive membership policies and client grants with server-mediated workspace authority.
 
 ## Context
 Following the hardening of compute balances, financial transaction ledgers, and API inference credit holds (ADRs 0106–0107), the enterprise organizational spending hierarchy required structural defense:
@@ -11,7 +13,7 @@ Following the hardening of compute balances, financial transaction ledgers, and 
 4. **Missing DAC Table Grants**: `authenticated` role lacked `SELECT` permissions on organization, workspace, cost center, and invitation tables under `SET LOCAL ROLE authenticated`.
 
 ## Decision
-Under the Supabase Paranoid Governance framework (AOP-DB Protocol) and the Principle of Least Privilege, implemented migration [`20260903202157_galxai_workspaces_and_team_billing_spend_armor.sql`](file:///Users/bozoegg/Desktop/GALXAI/supabase/migrations/20260903202157_galxai_workspaces_and_team_billing_spend_armor.sql) and paired rollback:
+Under the Supabase Paranoid Governance framework (AOP-DB Protocol) and the Principle of Least Privilege, this ADR proposed the now-retired migration `20260903202157_galxai_workspaces_and_team_billing_spend_armor.sql` and paired rollback:
 
 1. **`FORCE ROW LEVEL SECURITY` on Workspaces & Members**:
    - Enforced on `public.galx_workspaces` and `public.galx_workspace_members`.

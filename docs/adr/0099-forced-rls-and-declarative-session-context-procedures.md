@@ -1,7 +1,9 @@
 # ADR 0099: Forced RLS & Declarative Session Context Procedures
 
 ## Status
-Accepted
+Superseded by ADR 0117
+
+This ADR describes an abandoned migration branch that was never applied to the authoritative database. Do not implement its client-callable session-context setter; use the server-mediated authority boundary in ADR 0117.
 
 ## Context
 Standard PostgreSQL `ALTER TABLE ... ENABLE ROW LEVEL SECURITY;` only enforces RLS on roles that do not own the table. When direct connection pools connect via `DATABASE_URL` as the table owner (`postgres`), queries bypass RLS by default. While transaction-scoped role switching (`SET LOCAL ROLE authenticated;`) enforces RLS dynamically, the schema itself lacked declarative enforcement at the table definition level.
@@ -11,7 +13,7 @@ Additionally:
 2. Direct connection poolers needed atomic, parameterized stored procedures in PostgreSQL to set and assert transaction-local JWT claims (`request.jwt.claim.sub`, `request.jwt.claims`) without repetitive SQL boilerplate.
 
 ## Decision
-Under the Supabase Paranoid Governance framework (AOP-DB Protocol), implemented migration [`20260903193143_galxai_connection_pool_forced_rls_and_session_impersonation.sql`](file:///Users/bozoegg/Desktop/GALXAI/supabase/migrations/20260903193143_galxai_connection_pool_forced_rls_and_session_impersonation.sql) and paired rollback:
+Under the Supabase Paranoid Governance framework (AOP-DB Protocol), this ADR proposed the now-retired migration `20260903193143_galxai_connection_pool_forced_rls_and_session_impersonation.sql` and paired rollback:
 
 1. **`FORCE ROW LEVEL SECURITY` Activation**:
    - Enforced `ALTER TABLE ... FORCE ROW LEVEL SECURITY;` across all core multi-tenant substrates:
@@ -36,7 +38,7 @@ Under the Supabase Paranoid Governance framework (AOP-DB Protocol), implemented 
    - **`fn_set_tenant_session_context(p_user_id, p_role, p_email)`**: Sets `request.jwt.claim.sub`, `request.jwt.claim.role`, `request.jwt.claim.email`, and `request.jwt.claims` in a single atomic procedure call.
 
 4. **Deterministic Rollback**:
-   - Authored [`supabase/rollbacks/20260903193143_galxai_connection_pool_forced_rls_and_session_impersonation.down.sql`](file:///Users/bozoegg/Desktop/GALXAI/supabase/rollbacks/20260903193143_galxai_connection_pool_forced_rls_and_session_impersonation.down.sql) enabling 1-click schema reversion.
+   - Proposed `20260903193143_galxai_connection_pool_forced_rls_and_session_impersonation.down.sql`; it was retired with the unapplied branch.
 
 ## Consequences
 - **Positive**: Complete database-level assurance that superuser and pooled connections cannot circumvent tenant isolation.

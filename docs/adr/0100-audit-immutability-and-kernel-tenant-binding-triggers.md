@@ -1,7 +1,9 @@
 # ADR 0100: Audit Immutability Triggers & Kernel Tenant-Binding Enforcement
 
 ## Status
-Accepted
+Superseded by ADR 0117
+
+This ADR describes an abandoned migration branch that was never applied to the authoritative database. ADR 0117 preserves append-only audit enforcement without client impersonation helpers or public-schema definer routines.
 
 ## Context
 While connection poolers enforce Row-Level Security through transaction-local role switching and `FORCE ROW LEVEL SECURITY` (ADR 0097, ADR 0099), application-level logic remains vulnerable to subtle failure modes:
@@ -10,7 +12,7 @@ While connection poolers enforce Row-Level Security through transaction-local ro
 3. **Per-Row RLS Function Evaluation Overhead**: Calling `auth.uid()` directly inside RLS policies evaluates the function for every candidate row. Under large result sets, this causes severe query latency degradation. Wrapping in `(SELECT auth.uid()::text)` enables PostgreSQL to plan it as a one-time cached InitPlan.
 
 ## Decision
-Under the Supabase Paranoid Governance framework (AOP-DB Protocol), implemented migration [`20260903194014_galxai_kernel_tenant_enforcement_and_audit_immutability.sql`](file:///Users/bozoegg/Desktop/GALXAI/supabase/migrations/20260903194014_galxai_kernel_tenant_enforcement_and_audit_immutability.sql) and paired rollback:
+Under the Supabase Paranoid Governance framework (AOP-DB Protocol), this ADR proposed the now-retired migration `20260903194014_galxai_kernel_tenant_enforcement_and_audit_immutability.sql` and paired rollback:
 
 1. **Engine-Level Audit Immutability**:
    - Deployed `public.fn_prevent_audit_log_mutation()` as a `BEFORE UPDATE OR DELETE` trigger on `public.galx_audit_logs`.

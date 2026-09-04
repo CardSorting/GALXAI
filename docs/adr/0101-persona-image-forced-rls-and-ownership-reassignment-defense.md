@@ -1,7 +1,9 @@
 # ADR 0101: Persona & Image Forced RLS with Ownership Reassignment Armor
 
 ## Status
-Accepted
+Superseded by ADR 0117
+
+This ADR describes an abandoned migration branch that was never applied to the authoritative database. ADR 0117 replaces direct browser mutation with server-mediated persona and image authority.
 
 ## Context
 Following the activation of transaction-scoped connection pooling (ADRs 0097–0100), two critical threat vectors remained unaddressed in the media and persona domains:
@@ -9,7 +11,7 @@ Following the activation of transaction-scoped connection pooling (ADRs 0097–0
 2. **Ownership Reassignment Hijacking**: In multi-tenant database systems, a user updating an owned record could execute `UPDATE <table> SET user_id = 'victim_id' WHERE id = 'xyz'`. If an RLS `UPDATE` policy only verifies `USING (user_id = auth.uid())` without a strict immutable `WITH CHECK`, or if executed via backend administrative procedures, the record ownership is transferred or orphaned.
 
 ## Decision
-Under the Supabase Paranoid Governance framework (AOP-DB Protocol), implemented migration [`20260903194428_galxai_persona_and_ownership_reassignment_armor.sql`](file:///Users/bozoegg/Desktop/GALXAI/supabase/migrations/20260903194428_galxai_persona_and_ownership_reassignment_armor.sql) and paired rollback:
+Under the Supabase Paranoid Governance framework (AOP-DB Protocol), this ADR proposed the now-retired migration `20260903194428_galxai_persona_and_ownership_reassignment_armor.sql` and paired rollback:
 
 1. **`FORCE ROW LEVEL SECURITY` on Personas & Media**:
    - Executed `ALTER TABLE public.custom_personas FORCE ROW LEVEL SECURITY;`

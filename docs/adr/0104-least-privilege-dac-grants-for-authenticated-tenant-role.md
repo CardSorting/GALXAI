@@ -1,7 +1,9 @@
 # ADR 0104: Least-Privilege DAC Table Grants for Authenticated Tenant Role
 
 ## Status
-Accepted
+Superseded by ADR 0117
+
+This ADR describes an abandoned migration branch that was never applied to the authoritative database. Its broad client DML grants conflict with the current server-side repository boundary and must not be applied.
 
 ## Context
 When application connection pools execute queries under transaction-scoped tenant impersonation (`executePostgresTransactionAsUser`, `SET LOCAL ROLE authenticated;`), PostgreSQL evaluates authorization across two independent security boundaries:
@@ -11,7 +13,7 @@ When application connection pools execute queries under transaction-scoped tenan
 In prior migrations (e.g. migration V53), blanket `REVOKE ALL ON TABLE ... FROM anon, authenticated;` was executed on core chat and context tables. Consequently, when connection pools downgraded from superuser to the `authenticated` role to enforce RLS, PostgreSQL immediately aborted queries with `permission denied for table ...` before RLS policies could even be evaluated.
 
 ## Decision
-Under the Supabase Paranoid Governance framework (AOP-DB Protocol) and the Principle of Least Privilege ([`security-privileges.md`](file:///Users/bozoegg/Desktop/GALXAI/.agents/skills/supabase-postgres-best-practices/references/security-privileges.md)), implemented migration [`20260903200000_galxai_least_privilege_dac_grants_for_authenticated_tenant_role.sql`](file:///Users/bozoegg/Desktop/GALXAI/supabase/migrations/20260903200000_galxai_least_privilege_dac_grants_for_authenticated_tenant_role.sql) and paired rollback:
+Under the Supabase Paranoid Governance framework (AOP-DB Protocol) and the Principle of Least Privilege, this ADR proposed the now-retired migration `20260903200000_galxai_least_privilege_dac_grants_for_authenticated_tenant_role.sql` and paired rollback:
 
 1. **Schema & Sequence Access**:
    - `GRANT USAGE ON SCHEMA public TO authenticated, anon;`
