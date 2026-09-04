@@ -117,8 +117,10 @@ All architectural components in GALXAI are governed by formal Architectural Deci
 | **[ADR 0109](adr/0109-sovereign-backend-inference-pipeline-and-native-flagship-pool.md)** | Sovereign Backend Inference Pipeline & Native Flagship Pool | Eliminates synthetic mocks, decouples client authentication from third-party keys, and pre-seeds native wholesale flagship pool. |
 | **[ADR 0110](adr/0110-e2e-inference-verification-suite-and-artifact-telemetry.md)** | End-to-End Inference Verification Suite & Artifact Telemetry | 8-phase automated verification engine generating playable games, microservices, ZDR SDKs, wallet holds, and revocation defenses in output-test/. |
 | **[ADR 0111](adr/0111-cloudflare-edge-swrr-fleet-session-sticky-prompt-caching-and-codex-concurrency-isolation.md)** | Cloudflare Edge SWRR Fleet, Session-Sticky Prompt Caching & Codex Concurrency Isolation | SWRR soft-draining quota derating, 90%+ prompt cache preservation, and isolated CODEX_HOME preventing SQLite contention. |
-| **[ADR 0112](adr/0112-galxai-authoritative-shard-fleet-pool-native-codex-websocket-wire-and-sliding-window-failover.md)** | GALXAI Authoritative Shard Fleet Pool, Native Codex WebSocket Wire & Sliding-Window 429 Failover | Solves missing_scope: model.request, centralizes multi-account pool in GALXAI (.galx-shards.json), intra-chunk activity timer, and zero-downtime 429 failover. |
+| **[ADR 0112](adr/0112-galxai-authoritative-shard-fleet-pool-native-codex-websocket-wire-and-sliding-window-failover.md)** | GALXAI Shard Fleet Pool, Native Codex WebSocket Wire & Sliding-Window 429 Failover | Establishes multi-account routing, intra-chunk activity timers, and 429 failover; its local-file persistence decision is superseded by ADR 0115. |
 | **[ADR 0113](adr/0113-unpredictable-2-3-minute-inference-mlfq-itl-watchdog-and-resumable-streams.md)** | Unpredictable 2–3 Minute Inference Engine: 3-Tier MLFQ, ITL Watchdog, Anti-Zombie Leash & Resumable Streams | 3-Tier MLFQ fleet partitioning (Interactive 25% / Deep 65% / Scavenger 10%), ITL watchdog with sub-50ms shadow shard handover, Anti-Zombie Leash with transactional wallet refunds, and BroccoliDB durable token buffering for Last-Event-ID SSE resumable streams. |
+| **[ADR 0114](adr/0114-uncertain-execution-authority-kernel-and-transactional-journal.md)** | Uncertain Execution Authority Kernel & Transactional Journal | Separates authoritative execution transitions, authorized work delivery, journal observations, and live transport projections. |
+| **[ADR 0115](adr/0115-postgresql-authoritative-shard-registry-and-secret-free-projections.md)** | PostgreSQL-Authoritative Shard Registry & Secret-Free Projections | Makes Supabase PostgreSQL the sole credential authority with fail-closed mutations, forced RLS, service-only fenced lease RPCs, retired legacy authorities, and replaceable BroccoliDB routing projections. |
 
 ---
 
@@ -405,7 +407,7 @@ flowchart TD
 
 ---
 
-## 🌐 Authoritative Multi-Account Shard Fleet Pool & Native Codex WebSocket Wire (ADR 0111–0112)
+## 🌐 Authoritative Multi-Account Shard Fleet Pool & Native Codex WebSocket Wire (ADR 0111–0115)
 
 Scaling frontier reasoning models (`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `o3`) across autonomous developer swarms couples local sovereign fleet governance with direct native WebSocket wire protocols:
 
@@ -422,8 +424,8 @@ flowchart TD
 
     subgraph ShardAuthority["GALXAI Authoritative Shard Fleet Pool (/Users/bozoegg/Desktop/GALXAI)"]
         Substrate["GalxCredentialSubstrate (AES-256-GCM + AAD Binding)"]
-        Cache[".galx-shards.json (Encrypted POSIX 0o600 Local Disk Cache)"]
-        PostgresShard["Supabase PostgreSQL (galx_shard_accounts)"]
+        PostgresShard["Supabase PostgreSQL<br>galx_shard_accounts + transactional journal"]
+        Cache["BroccoliDB L1<br>replaceable bounded-staleness projection"]
         SWRR["Smooth Weighted Round-Robin (40 req / 3 hr Window)"]
         Fencing["Monotonic Fencing Tokens (#1, #2, #3...)"]
         Failover["Instant 429 Quota Exhaustion Failover"]
@@ -436,8 +438,9 @@ flowchart TD
 
     NextIngress --> Auth --> Seat --> Hold --> Compactor
     Compactor --> Substrate
-    Substrate <--> Cache
-    Substrate <--> PostgresShard
+    Substrate -->|awaited mutations| PostgresShard
+    PostgresShard -->|LIST + revisioned projection refresh| Cache
+    Cache --> Substrate
     Substrate --> SWRR --> Fencing --> Failover
     Failover --> DirectWS
     Failover -.-> Relay
@@ -445,10 +448,10 @@ flowchart TD
 
 ### Core Architecture Invariants:
 1. **Scope-Compliant WebSocket Wire**: Resolves the `missing_scope: model.request` failure by bypassing HTTP `api.openai.com/v1/chat/completions` and connecting directly to `wss://chatgpt.com/backend-api/codex/responses`.
-2. **GALXAI Pool Primacy**: The shard fleet in `/Users/bozoegg/Desktop/GALXAI` is the authoritative single source of truth, eliminating single-account host dependencies.
+2. **PostgreSQL Authority**: Supabase PostgreSQL is the authoritative shard registry; the GALXAI process holds only a replaceable, bounded-staleness routing projection.
 3. **Sliding-Window 429 Failover**: SWRR rotates across active accounts ($N_{\text{cap}} = 40 \text{ req} / 3 \text{ hr}$), instantly isolating 429-exhausted shards and leasing the next healthy account with zero client drops.
 4. **Intra-Chunk Activity Reset**: Resets activity timeouts on every incoming delta chunk (`response.output_text.delta`), ensuring multi-thousand-token code generation completes reliably.
-5. **Unified Fleet CLI**: `npx tsx scripts/manage-shards.ts` enables `--list`, `--import`, `--add`, `--test`, `--cycle`, `--sync-edge`, and `--remove` directly from the command line.
+5. **Unified Fleet CLI**: `scripts/manage-shards.ts` supports explicit import, add, test, cycle, doctor, quarantine, and revocation workflows. Raw-token edge synchronization is intentionally unsupported.
 
 ---
 

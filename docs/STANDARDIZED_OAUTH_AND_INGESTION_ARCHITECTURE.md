@@ -76,24 +76,23 @@ sequenceDiagram
     autonumber
     actor CLI as LUMI CLI Agent
     participant IngestGateway as GALXAI Gateway (/api/auth/ingest)
-    participant BroccoliDB as Hybrid BroccoliDB Table
-    participant EdgeFleet as Cloudflare Edge Worker (lumi-edge-worker)
+    participant PostgreSQL as Supabase PostgreSQL Authority
+    participant Journal as Secret-Free Registry Journal
+    participant BroccoliDB as BroccoliDB Routing Projection
 
     CLI->>CLI: 1. Exchange OAuth Code (127.0.0.1:1455)
     CLI->>CLI: 2. Calculate Content-Digest & Idempotency Key
     CLI->>IngestGateway: 3. POST /api/auth/ingest (Digest, Nonce, Timestamp)
     IngestGateway->>IngestGateway: 4. Constant-Time Digest Verification
-    IngestGateway->>BroccoliDB: 5. Provision Substrate Shard Account
-    IngestGateway->>EdgeFleet: 6. Automated Sync: POST /v1/tokens/ingest (TOKEN_POOL_KV)
-    IngestGateway-->>CLI: 7. HTTP 200 { success: true, user: { shardId, token } }
-    CLI->>CLI: 8. Vault Shard in Memory & Write Atomic POSIX File
+    IngestGateway->>PostgreSQL: 5. Encrypt + upsert authoritative shard
+    PostgreSQL->>Journal: 6. Append secret-free fact in same transaction
+    PostgreSQL-->>BroccoliDB: 7. Refresh replaceable routing projection
+    IngestGateway-->>CLI: 8. HTTP 200 after durable commit
 ```
 
-### Automated Edge Fleet Synchronization (`GalxAuthEngine.syncShardToEdgeFleet`)
-Whenever a provider credential is authenticated or refreshed in GALXAI:
-1. `GalxAuthEngine.syncShardToEdgeFleet()` sends an authenticated payload to `https://lumi-edge-worker.notsosuper688651.workers.dev/v1/tokens/ingest`.
-2. The edge worker persists the shard metadata and OAuth tokens to Cloudflare `TOKEN_POOL_KV`.
-3. The shard is immediately incorporated into the edge **Smooth Weighted Round-Robin (SWRR)** rotation with sliding-window quota tracking worldwide.
+### Credential Authority and Edge Access
+
+Provider credentials are not synchronized to edge KV. Authentication and refresh paths await the encrypted PostgreSQL registry commit before publishing the new revision to the local routing projection. Edge and relay transports receive only the credential material required for an active server-side dispatch; a future broker may issue short-lived audience-bound leases, but long-lived refresh credentials remain in the authority store.
 
 ---
 

@@ -22,7 +22,8 @@ The GALXAI inference pipeline is designed to be completely **sovereign** and **i
        │      │
        │      ├── Authoritative Shard Fleet: /Users/bozoegg/Desktop/GALXAI
        │      │      ├── AES-256-GCM Envelope Encryption (GalxCryptoVault)
-       │      │      ├── Disk persistence: .galx-shards.json (0o600) + Supabase PostgreSQL
+       │      │      ├── Authority: forced-RLS Supabase PostgreSQL + secret-free transactional journal
+       │      │      ├── Projection: replaceable BroccoliDB L1 with bounded single-flight refresh
        │      │      ├── SWRR 40 req / 3 hr quota rotation with monotonic fencing tokens (#1, #2...)
        │      │      └── Instant 429 quota exhaustion isolation & failover to next healthy shard
        │      │
@@ -45,7 +46,7 @@ The GALXAI inference pipeline is designed to be completely **sovereign** and **i
 2. **Zero Fallback Mandate**:
    - Synthetic offline mocks and simulated generators are strictly eliminated from the production routing pipeline. If upstream fails, the error surfaces transparently for forensic diagnosis.
 3. **Authoritative Central Shard Pool**:
-   - Accounts originate from and are governed by the pool in `/Users/bozoegg/Desktop/GALXAI`, surviving restarts via `.galx-shards.json`.
+   - Accounts are governed by `public.galx_shard_accounts` in Supabase PostgreSQL. Workers rebuild their routing projections from the database after restarts; no local JSON credential cache participates in recovery.
 4. **Native WebSocket Scope Compliance**:
    - Solves `missing_scope: model.request` by executing ChatGPT session tokens over `wss://chatgpt.com/backend-api/codex/responses` rather than unsupported HTTP edge forwarding to `api.openai.com`.
 5. **Intra-Chunk Activity Hardening**:

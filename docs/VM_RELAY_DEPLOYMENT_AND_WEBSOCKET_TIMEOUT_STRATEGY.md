@@ -134,7 +134,7 @@ for (const validKey of this.config.apiKeys) {
 
 ### 2. Hardware-Grade AES-256-GCM Envelope Decryption
 
-When loading account credentials from `.galx-shards.json`, encrypted shard payloads are decrypted on-the-fly using the master secret derived via HKDF-SHA256, cryptographically bound to Authenticated Associated Data (AAD):
+When loading the bounded routing projection from the PostgreSQL shard authority, encrypted payloads are decrypted on-the-fly using the master secret derived via HKDF-SHA256, cryptographically bound to Authenticated Associated Data (AAD):
 
 $$\text{Key} = \text{HKDF-SHA256}\left(\text{Secret}, \, \text{salt}=\text{"galx-vault-salt-2026"}, \, \text{info}=\text{"galx-shard-isolation-v1"}\right)$$
 $$\text{AAD} = \text{tenantUid} \,\|\, \text{shardId} \,\|\, \text{provider}$$
@@ -635,7 +635,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/app/galxai/.galx-shards.json /var/log/galxai-relay /app/galxai/.broccolidb
+ReadWritePaths=/var/log/galxai-relay /app/galxai/.broccolidb
 
 # File descriptor ceilings
 LimitNOFILE=1048576

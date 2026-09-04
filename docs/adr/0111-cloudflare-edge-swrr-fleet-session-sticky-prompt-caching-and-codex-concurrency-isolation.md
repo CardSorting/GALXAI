@@ -1,7 +1,7 @@
 # ADR 0111: Cloudflare Edge SWRR Fleet, Session-Sticky Prompt Caching & Codex Concurrency Isolation
 
 ## Metadata
-* **Status**: Accepted
+* **Status**: Superseded in part by ADR 0115
 * **Date**: 2026-09-03
 * **Authors**: @galxai-architects
 * **Subsystem**: `src/core/router/adapters/OpenAIAdapter`, `src/core/auth/GalxAuthEngine`, `LUMI-NEW/src/worker.ts`, `LUMI-NEW/src/agents/extensions/credential/smooth-weighted-pool.ts`
@@ -26,11 +26,11 @@ We established a multi-layer edge fleet and concurrency isolation architecture:
 
 ### 1. Cloudflare Edge Worker Multi-Token Fleet (`LUMI-GALX`)
 - **Repository Remote**: `https://github.com/CardSorting/LUMI-GALX.git`.
-- **Edge Deployment**: Production Cloudflare Worker deployed to `https://lumi-edge-worker.notsosuper688651.workers.dev` backed by Cloudflare KV namespace `TOKEN_POOL_KV` (`id: 4dcb6b86fc2d41ba95a96844f7a87efa`).
+- **Historical Edge Deployment**: The Worker used a KV token pool. ADR 0115 prohibits that store from receiving new long-lived credentials.
 - **Endpoints**:
   - `GET /health`: Health status, edge PoP Ray ID, active fleet counts.
-  - `GET /v1/tokens/status`: Real-time telemetry on all registered tokens, current/effective weights, and sliding-window limits.
-  - `POST /v1/tokens/ingest`: Dynamic runtime enrollment of tokens with KV global persistence.
+  - `GET /v1/tokens/status`: Legacy telemetry endpoint; it must not expose identities or be treated as authority.
+  - `POST /v1/tokens/ingest`: Deprecated for long-lived credentials by ADR 0115.
   - `POST /v1/chat/completions`: Full SSE streaming proxy with SWRR shard selection, automatic 401 token refresh, and retry failover.
 
 ### 2. Smooth Weighted Round-Robin (SWRR) with Soft-Draining Quota Derating
@@ -47,11 +47,9 @@ $$E_i = \max\left(0, \left\lfloor W_i \times \left(1 - \left(\frac{|H_i|}{N_{\te
 - **Cache TTL**: 15 minutes of inactivity.
 - **Benefit**: Preserves OpenAI upstream KV prompt cache locality, achieving **97.2%+ prompt cache hit rates** and reducing TTFT from $>12\text{s}$ down to $<3.8\text{s}$.
 
-### 4. Automated Shard-to-Edge Synchronization
-- In `GalxAuthEngine.ts`, added static `syncShardToEdgeFleet()` invoked automatically upon:
-  - CLI shard ingestion (`authenticateProviderUser`)
-  - Background token refresh (`refreshProviderShardTokens`)
-- Edge Worker self-enrolls new shards on first contact when receiving `x-galx-shard-id` headers.
+### 4. Shard-to-Edge Synchronization (Superseded)
+
+ADR 0115 removes automatic long-lived token copies to edge KV. Edge transports may consume bounded, audience-specific dispatch authority in a future broker design; the encrypted PostgreSQL registry remains the sole credential authority.
 
 ### 5. Authentic Desktop Header Cloaking & Residential Anycast Transport
 - Upstream requests dispatched from the Cloudflare Edge Worker inject authentic desktop CLI metadata:
@@ -91,10 +89,10 @@ $$E_i = \max\left(0, \left\lfloor W_i \times \left(1 - \left(\frac{|H_i|}{N_{\te
 - **Maximized Prompt Caching**: Session-sticky routing preserves upstream KV caches, delivering 90%+ cache discounts.
 - **Zero SQLite Stalls**: Total elimination of database lock contention enables concurrent CLI sessions and automated background tests.
 - **Zero-Fallback Real Inference**: Enables 100% real wire execution (`no fallback, if it fails it fails`) with verified end-to-end telemetry.
-- **Automated Fleet Ingestion**: Developer logins in GALXAI instantly synchronize to the worldwide Cloudflare edge fleet.
+- **Credential Custody Update**: Developer logins commit to the PostgreSQL registry and do not duplicate long-lived tokens to edge KV (ADR 0115).
 
 ### Negative / Trade-offs
-- Edge KV replication has eventual consistency (~100ms globally), handled gracefully by the local V8 isolate state in the active edge PoP.
+- Historical edge KV credential replication was eventually consistent and created a competing secret store; ADR 0115 retires that custody model.
 
 ---
 

@@ -1,7 +1,7 @@
 # ADR 0112: GALXAI Authoritative Shard Fleet Pool, Native Codex WebSocket Wire & Sliding-Window 429 Failover
 
 ## Metadata
-* **Status**: Accepted
+* **Status**: Superseded in part by ADR 0115
 * **Date**: 2026-09-03
 * **Authors**: @galxai-architects
 * **Subsystem**: `src/core/substrate/GalxCredentialSubstrate`, `src/core/pool/GalxCredentialPool`, `src/core/router/adapters/OpenAIAdapter`, `scripts/manage-shards.ts`, `LUMI-NEW/src/relay/relay-server.ts`
@@ -49,8 +49,8 @@ We established a comprehensive authoritative architecture anchored inside the wo
 ### 1. GALXAI Authoritative Shard Fleet Pool (`/Users/bozoegg/Desktop/GALXAI`)
 The central pool inside GALXAI (`src/core/substrate/GalxCredentialSubstrate.ts`, `src/core/pool/GalxCredentialPool.ts`, `src/lib/supabase/repositories/ShardRepository.ts`) is established as the sole source of truth for all account credentials across the fleet:
 - **AES-256-GCM Envelope Encryption**: All credentials and refresh tokens are encrypted at rest with tenant-authenticated AAD binding (`GalxCryptoVault`).
-- **Encrypted Local Persistence**: The fleet persists locally to `.galx-shards.json` with strict POSIX permissions (`mode: 0o600`), surviving process restarts and daemon restarts without external dependencies.
-- **Durable Database Mirroring**: Automatically mirrors active shard records to Supabase PostgreSQL table `galx_shard_accounts` for cluster-wide visibility.
+- **Authoritative Persistence (superseded by ADR 0115)**: Supabase PostgreSQL `galx_shard_accounts` is the sole durable registry. BroccoliDB is a replaceable in-memory projection; local JSON is prohibited.
+- **Transactional Observation**: Accepted registry changes append secret-free facts to `galx_shard_registry_events` in the same transaction.
 - **Stale Account Eviction**: Automatically purges mock/dummy seeds (`shard_galx_flagship_...`) when live accounts are enrolled, and isolates invalidated accounts (`refresh_token_invalidated`).
 
 ### 2. Multi-Account Smooth Weighted Round-Robin (SWRR) & Sliding-Window Quotas
@@ -94,8 +94,8 @@ npx tsx scripts/manage-shards.ts --list
 # 2. Bulk import accounts from ~/.lumi/config.json or ~/.codex/auth.json
 npx tsx scripts/manage-shards.ts --import
 
-# 3. Add an individual account with explicit token and account ID
-npx tsx scripts/manage-shards.ts --add --token <jwt> --account <id> --email dev@galx.ai
+# 3. Add an individual account without exposing the token in process arguments
+GALX_SHARD_ACCESS_TOKEN=... GALX_SHARD_ACCOUNT_ID=... npm run shards -- --add
 
 # 4. Live wire health probe over wss://chatgpt.com/backend-api/codex/responses
 npx tsx scripts/manage-shards.ts --test
@@ -103,8 +103,8 @@ npx tsx scripts/manage-shards.ts --test
 # 5. Verify multi-shard SWRR cycling across N consecutive leases
 npx tsx scripts/manage-shards.ts --cycle 4
 
-# 6. Synchronize fleet tokens to Cloudflare KV or headless relays
-npx tsx scripts/manage-shards.ts --sync-edge
+# 6. Verify forced RLS, service-only RPCs, and journal hygiene
+npm run shards:verify-authority
 
 # 7. Evict a stale or decommissioned shard
 npx tsx scripts/manage-shards.ts --remove <shard_id>
@@ -112,7 +112,7 @@ npx tsx scripts/manage-shards.ts --remove <shard_id>
 
 ### 6. 24/7 Autonomous Headless Relay Strategy
 For continuous 24/7 operations where the host desktop is asleep or for deployment to cloud serverless environments (Vercel, Cloudflare, ECS):
-- **Relay Container (`LUMI-NEW/src/relay/relay-server.ts`)**: A lightweight containerized Node.js service ingests the GALXAI shard pool from `.galx-shards.json` or Supabase.
+- **Relay Container (`LUMI-NEW/src/relay/relay-server.ts`)**: A lightweight containerized Node.js service consumes an authorized projection of the Supabase-backed GALXAI shard pool.
 - **Persistent WebSocket Pool**: Maintains warm WebSocket connections to `wss://chatgpt.com/backend-api/codex/responses`.
 - **OpenAI-Compatible Ingress**: Exposes standard `POST /v1/chat/completions` (SSE streaming and JSON), translating REST requests to the underlying Codex WebSocket wire.
 - **Residential Header & Proxy Cloaking**: Dispatches through residential proxies or Cloudflare Tunnels (`cloudflared`), eliminating datacenter IP blacklisting.

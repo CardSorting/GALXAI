@@ -18,7 +18,7 @@ We established a strict production standard: **Zero Fallbacks / 100% Real Wire E
    - Restored standard execution pathways through [`OpenAIAdapter.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/core/router/adapters/OpenAIAdapter.ts).
 
 2. **Native Wholesale Flagship Credential Substrate & JIT Ingestion**:
-   - In [`GalxCredentialSubstrate.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/core/substrate/GalxCredentialSubstrate.ts) and [`GalxAuthEngine.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/core/auth/GalxAuthEngine.ts), authenticated provider shards (e.g. from `~/.codex/auth.json`) are dynamically ingested into the live pool and automatically synchronized to the Cloudflare Edge Worker fleet (`syncShardToEdgeFleet()`).
+   - In [`GalxCredentialSubstrate.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/core/substrate/GalxCredentialSubstrate.ts) and [`GalxAuthEngine.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/core/auth/GalxAuthEngine.ts), authenticated provider shards are explicitly ingested into the encrypted Supabase PostgreSQL registry. ADR 0115 supersedes automatic long-lived credential synchronization to edge KV.
    - Router leases acquire live healthy shards with real OAuth tokens and active rate limits.
 
 3. **Decoupled Architecture & Real Upstream Protocol Execution**:

@@ -256,21 +256,21 @@ vars = { ENVIRONMENT = "staging", SUPABASE_URL = "https://your-staging-project.s
 
 ---
 
-## 5.5. Live Production Edge Gateway: `LUMI-GALX` Fleet (`lumi-edge-worker`)
+## 5.5. Live Production Edge Gateway: `LUMI-GALX` Transport (`lumi-edge-worker`)
 
 The production multi-token gateway is deployed as a standalone Cloudflare Worker servicing frontier model traffic:
 
 - **Upstream Repository Remote**: `https://github.com/CardSorting/LUMI-GALX.git`
 - **Live Worker URL**: `https://lumi-edge-worker.notsosuper688651.workers.dev`
-- **Cloudflare KV Namespace**: `TOKEN_POOL_KV` (`id: 4dcb6b86fc2d41ba95a96844f7a87efa`)
+- **Credential Authority**: Supabase PostgreSQL in GALXAI. Long-lived provider credentials must not be persisted in edge KV (ADR 0115).
 
 ### Core Operational Endpoints
 | Route | Method | Purpose |
 | :--- | :--- | :--- |
 | `/health` | `GET` | PoP Ray ID (`cf-ray`), edge health status, and registered/active fleet counts |
-| `/v1/tokens/status` | `GET` | Real-time JSON telemetry on all registered tokens, weights, and sliding-window limits |
-| `/v1/tokens/ingest` | `POST` | Dynamic runtime token enrollment with global KV persistence |
-| `/v1/tokens/remove/:id` | `DELETE` | Dynamic runtime token revocation from edge fleet |
+| `/v1/tokens/status` | `GET` | Legacy endpoint; must not expose credential identities or imply authority |
+| `/v1/tokens/ingest` | `POST` | Deprecated and forbidden for long-lived credentials |
+| `/v1/tokens/remove/:id` | `DELETE` | Deprecated; authoritative revocation occurs in PostgreSQL |
 | `/v1/chat/completions` | `POST` | SWRR-balanced SSE streaming proxy to upstream OpenAI Responses API |
 
 ### Key Edge Routing Invariants
@@ -281,8 +281,8 @@ The production multi-token gateway is deployed as a standalone Cloudflare Worker
    - Anchors conversations (`X-Galx-Session-Id`) to the same shard for up to 15 minutes, delivering **90%+ KV prompt cache hit rates** and reducing TTFT from $>12\text{s}$ down to $<3.8\text{s}$.
 3. **Desktop Header Cloaking**:
    - Injects authentic `User-Agent: Codex-CLI/0.147.0 (darwin; arm64)` metadata, defeating upstream WAF bot fingerprinting.
-4. **JIT Self-Enrollment & Single-Flight Token Refresh**:
-   - Auto-registers incoming shards from `x-galx-shard-id` headers and executes automatic OAuth token refresh on HTTP 401.
+4. **No Edge Credential Enrollment**:
+   - Edge transports may receive bounded dispatch authority in a future broker design, but cannot self-enroll or durably refresh long-lived provider credentials.
 
 ---
 
@@ -353,6 +353,5 @@ jobs:
 | **Dual Rolling Seat Telemetry & Cache Hash** | `curl -i -N -X POST https://api.galx.ai/v1/chat/completions -H "Authorization: Bearer galx_live_..." -H "Content-Type: application/json" -d '{"model":"gpt-5.6-sol","messages":[{"role":"user","content":"Hi"}]}'` | `HTTP 200` with headers `x-galx-seat-5h-limit-remaining`, `x-galx-seat-weekly-limit-remaining`, and `x-galx-stable-cache-hash` |
 | **Chat Delta Sync & Ownership** | `curl -i "https://api.galx.ai/api/chat/sync?conversationId=...&since=..." -H "Authorization: Bearer galx_live_..."` | `HTTP 200` with ETag and delta messages (ADR 0072) |
 | **Scheduled Worker Queue** | `npx wrangler tail` | Scheduled cron event executing `processBatch('default', 25)` without uncaught exceptions |
-
 
 

@@ -53,8 +53,8 @@ flowchart TD
 
     subgraph ShardFleet["Authoritative Shard Fleet Pool (/Users/bozoegg/Desktop/GALXAI)"]
         Substrate["GalxCredentialSubstrate<br>AES-256-GCM Envelope Encryption (AAD Binding)"]
-        LocalDisk[".galx-shards.json (POSIX 0o600 Encrypted Cache)"]
-        SupaDB["Supabase PostgreSQL: galx_shard_accounts"]
+        SupaDB["Supabase PostgreSQL<br>galx_shard_accounts + secret-free journal"]
+        Projection["BroccoliDB L1<br>replaceable bounded-staleness projection"]
         SWRR["Smooth Weighted Round-Robin (SWRR) Scheduler<br>40 requests / 3 hours sliding window"]
         Quarantine["Automatic 429 Isolation & Cooldown Quarantine"]
     end
@@ -68,8 +68,9 @@ flowchart TD
 
     Client --> Gateway
     Gateway --> Substrate
-    Substrate <--> LocalDisk
-    Substrate <--> SupaDB
+    Substrate -->|awaited control-plane mutations| SupaDB
+    SupaDB -->|LIST + revision refresh| Projection
+    Projection --> Substrate
     Substrate --> SWRR
     SWRR --> Quarantine
 
@@ -87,9 +88,10 @@ Rather than locking execution to a single account file on a developer's machine 
 1. **Cryptographic Security**:
    - Every account (`GalxShardAccount`) is sealed with AES-256-GCM authenticated envelope encryption using tenant-specific AAD signatures (`GalxCryptoVault`).
    - Plaintext access tokens and refresh tokens exist in memory only during active execution flights and are zeroed out after disposal.
-2. **Encrypted Persistence**:
-   - Maintained in `.galx-shards.json` with strict POSIX permissions (`0o600`).
-   - Mirrored durably to Supabase PostgreSQL table `galx_shard_accounts`.
+2. **Authoritative Encrypted Persistence**:
+   - Supabase PostgreSQL table `galx_shard_accounts` is the only durable credential registry.
+   - BroccoliDB is a replaceable in-memory routing projection. Local JSON and edge KV are not credential authorities.
+   - Every accepted registry change appends a secret-free journal fact in the same transaction.
 3. **Stale Token Eviction**:
    - Dummy mock seeds (`shard_galx_flagship_...`) are purged automatically upon live fleet enrollment.
    - Tokens reporting `refresh_token_invalidated` are quarantined to prevent lease pollution.
@@ -144,25 +146,26 @@ Maintainers administer the GALXAI fleet using `scripts/manage-shards.ts`:
 
 ```bash
 # 1. Inspect fleet health, accounts, and 3-hour quotas
-npx tsx scripts/manage-shards.ts --list
+npm run shards:list
 
 # 2. Bulk import accounts from ~/.lumi/config.json or ~/.codex/auth.json
-npx tsx scripts/manage-shards.ts --import
+npm run shards:import
 
-# 3. Add an individual account with explicit token and account ID
-npx tsx scripts/manage-shards.ts --add --token <jwt> --account <id> --email dev@galx.ai
+# 3. Add an account after the secret manager injects
+#    GALX_SHARD_ACCESS_TOKEN and GALX_SHARD_ACCOUNT_ID
+npm run shards -- --add
 
 # 4. Live wire health probe over wss://chatgpt.com/backend-api/codex/responses
-npx tsx scripts/manage-shards.ts --test
+npm run shards:test
 
 # 5. Verify multi-shard SWRR cycling across N consecutive leases
-npx tsx scripts/manage-shards.ts --cycle 4
+npm run shards:cycle
 
-# 6. Synchronize fleet tokens to Cloudflare KV or headless relays
-npx tsx scripts/manage-shards.ts --sync-edge
+# 6. Verify the PostgreSQL authority boundary and journal hygiene
+npm run shards:verify-authority
 
 # 7. Evict a stale or decommissioned shard
-npx tsx scripts/manage-shards.ts --remove <shard_id>
+npm run shards -- --remove <shard_id>
 ```
 
 ---
@@ -172,7 +175,7 @@ npx tsx scripts/manage-shards.ts --remove <shard_id>
 For production environments where developer host machines are not running or when executing from cloud serverless platforms (Vercel, Cloudflare, ECS):
 
 - **Relay Server Microservice (`LUMI-NEW/src/relay/relay-server.ts`)**:
-  - Ingests the GALXAI shard pool from `.galx-shards.json` or Supabase PostgreSQL.
+  - Reads the GALXAI shard projection from Supabase PostgreSQL; no local credential file is accepted as authority.
   - Maintains persistent WebSocket pools to `wss://chatgpt.com/backend-api/codex/responses`.
   - Exposes standard OpenAI-compatible endpoints (`POST /v1/chat/completions`) with full SSE streaming.
   - Deployed in lightweight Docker containers with residential Anycast proxying to bypass datacenter IP restrictions.
