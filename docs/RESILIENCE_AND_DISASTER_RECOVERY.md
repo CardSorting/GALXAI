@@ -182,3 +182,85 @@ flowchart TD
 2. **Atomic Tool Turn-Pair Inseparability**: Turn pairs are kept strictly together across sliding-window compaction boundaries, eliminating provider HTTP 400 validation failures.
 3. **Single-Hop Composite Settlement**: Consolidates balance validation, lease acquisition, token incrementing, and lease release into single PL/pgSQL atomic CTEs.
 
+---
+
+## 7. Unpredictable Inference Resilience: 2–3 Minute Frontier Reasoning (ADR 0113)
+
+Frontier reasoning models (`gpt-5.6-sol`, `o3`, `o3-pro`) exhibit **2–3 minute unpredictable durations** with TTFT jitter of 800ms–45s and silent ITL throttle gaps. The following subsystems extend the core disaster recovery architecture to handle this class of failure:
+
+### 7.1 Streaming ITL Watchdog — Slow Poison Detection
+
+The `StreamingItlWatchdog` detects two silent failure modes invisible to static timeouts:
+
+| Failure Mode | Detection Signal | Action |
+| :--- | :--- | :--- |
+| **TTFT Deadlock** (no first token) | > 45,000ms since request | Trigger shadow shard handover |
+| **ITL Slow Poison** (silence between tokens) | > 8,000ms ITL gap | Mark shard `stall`, escalate |
+| **Repeated ITL violations** | ≥ 3 consecutive gaps | Hard abort + circuit-break shard |
+
+These cover the "slow poison" case where the provider maintains an open connection but silently throttles token emission — an undetectable failure mode in static timeout monitors.
+
+### 7.2 Shadow Shard Standby — Sub-50ms Hot Handover
+
+The `ShadowShardStandby` maintains N pre-warmed backup shards in a hot standby pool:
+
+```
+Primary Shard Stall (ITL violation)
+    → ShadowShardStandby.handover()  [< 50ms]
+    → Route in-progress job to pre-warmed standby
+    → Resume token stream without client disconnect
+```
+
+Mirrors Netflix's Active-Active pair model and AWS ALB target group drain patterns. Ensures 2–3 minute completions survive provider-side shard stalls without full restart.
+
+### 7.3 Anti-Zombie Leash — Zero Quota Waste on Disconnect
+
+The `AntiZombieLeash` monitors `request.signal` for client WebSocket disconnect:
+
+```
+Client disconnects (request.signal.aborted = true)
+    → AbortController.abort()              [< 1ms]
+    → Upstream WebSocket stream cancelled
+    → BroccoliDB transactional wallet refund
+    → Telemetry: zombie_leash_activated { jobId, tokensConsumed, refunded }
+```
+
+**Invariant**: At 100,000 req/sec with ~20% abandonment rate, without the Anti-Zombie Leash, ~20,000 req/sec would burn upstream quota on dead callers. With the leash: **0 zombie executions**.
+
+### 7.4 BroccoliDB Resumable Job Engine — Last-Event-ID Stream Recovery
+
+The `BroccoliResumableJobEngine` decouples 2–3 minute inference from the HTTP request lifecycle, bypassing Cloudflare's 100s execution timeout:
+
+```
+POST /v1/chat/completions   →  HTTP 202 Accepted { jobId: "job_..." }
+GET  /v1/jobs/:id/stream    →  SSE (Last-Event-ID: N resumable)
+GET  /v1/jobs/:id           →  { status, progress, etaMs, queuePos }
+POST /v1/jobs/:id/cancel    →  { cancelled, refunded }
+```
+
+**Recovery Flow**: If the client's SSE connection drops mid-generation at token seqNo=1,847:
+1. Client reconnects: `GET /v1/jobs/:id/stream` with `Last-Event-ID: 1847`
+2. Engine replays buffered tokens from seqNo=1,848 onwards
+3. No inference re-run required — compute cost preserved
+
+**Storage**: `job_tokens` BroccoliDB table (indexed by `jobId + seqNo`), retained 10 minutes post-completion, then archived to `galx_job_token_archive` in PostgreSQL.
+
+### 7.5 3-Tier MLFQ — Class-Isolated Disaster Recovery
+
+Under sustained 100,000 req/sec load, the `MultiLevelFleetSlicer` partitions fleet capacity so that a Class 2 (Scavenger) disaster does not cascade to Class 0 (Interactive):
+
+| Scenario | Class 0 Impact | Class 1 Impact | Class 2 Impact |
+| :--- | :--- | :--- | :--- |
+| **Class 2 flood (batch OOM)** | **Zero** — hard 25% reservation | Moderate — may consume idle Class 2 quota | Shed at 90% fleet util |
+| **Class 1 shard stall** | **Zero** — shadow handover only on Class 1 | Degraded (shadow shard covers) | Unaffected |
+| **Primary DC outage** | Failover via Cloudflare Anycast | Failover via SWRR next healthy shard | Batch paused until DR restored |
+
+See [ADR 0113](adr/0113-unpredictable-2-3-minute-inference-mlfq-itl-watchdog-and-resumable-streams.md) for the full specification and 16-invariant verification suite.
+
+```bash
+# Verify all unpredictable inference resilience invariants (INV 9–16)
+npx tsx simulations/high-concurrency-10k-fairness/index.test.ts
+
+# Simulate 2–3 minute inference under 100,000 req/sec
+npm run sim:unpredictable
+```

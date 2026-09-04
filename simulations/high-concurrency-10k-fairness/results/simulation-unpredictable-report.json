@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-09-04T09:06:07.452Z",
+  "benchmark": "100k-unpredictable-2-3-min-inference",
+  "totalRequests": 100000,
+  "durationMs": 56,
+  "fastTrack": {
+    "completed": 249,
+    "p50Ms": 50,
+    "p99Ms": 50
+  },
+  "deepTrack": {
+    "completed": 540
+  },
+  "relaxedTrack": {
+    "completed": 84
+  },
+  "antiZombie": {
+    "activeMonitoredJobs": 0,
+    "totalAborted": 146,
+    "totalGpuSecondsRescued": 15519,
+    "totalTokensAvoided": 340608,
+    "totalTokensRefunded": 340608,
+    "totalGracePeriodsStarted": 0,
+    "totalReattachedDuringGrace": 0
+  },
+  "shadowStandby": {
+    "totalShadowShards": 3,
+    "warmHandoverCount": 24,
+    "avgHandoverLatencyMs": 0.002
+  },
+  "resumableTokens": {
+    "activeStreams": 1019,
+    "attachedDuplicates": 3,
+    "totalReconnections": 0,
+    "totalTokensServedFromBuffer": 0
+  },
+  "hybridStore": {
+    "totalTasksIndexed": 1019,
+    "activeEnqueued": 1019,
+    "completedTasks": 0,
+    "idempotencyEntries": 0,
+    "dlqEntries": 0,
+    "shardRecords": 0,
+    "bufferedTokenChunks": 2591
+  }
+}

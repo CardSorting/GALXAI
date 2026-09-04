@@ -431,6 +431,10 @@ export interface ShardAcquisitionRequest {
   readonly targetShardId?: string;
   readonly queueIfExhausted?: boolean;
   readonly maxQueueWaitMs?: number;
+  readonly signal?: AbortSignal;
+  readonly idempotencyKey?: string;
+  readonly tenantId?: string;
+  readonly deadlineMs?: number;
 }
 
 export interface ShardAcquisitionResult {
@@ -445,7 +449,9 @@ export interface ShardAcquisitionResult {
     | 'privacy_policy_mismatch'
     | 'no_compliant_shards'
     | 'queued'
-    | 'queue_timeout';
+    | 'queue_timeout'
+    | 'cancelled'
+    | 'shed_overflow';
   readonly queuedPromise?: Promise<ShardAcquisitionResult>;
   readonly estimatedWaitMs?: number;
   readonly earliestPoolResetMs?: number;
@@ -586,8 +592,11 @@ export interface ChatCompletionRequest {
   enable_prompt_compaction?: boolean;
   compaction_mode?: 'auto' | 'raw';
   transforms?: string[];
+  reasoning_effort?: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | 'auto';
   extra_body?: any;
 }
+
+export type ReasoningEffortLevel = 'none' | 'low' | 'medium' | 'high' | 'xhigh' | 'auto';
 
 export interface ChatCompletionResponse {
   id: string;

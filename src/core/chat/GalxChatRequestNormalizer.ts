@@ -1,4 +1,5 @@
 import type { RollingContextMessage } from '../router/GalxRollingContextEngine';
+import type { ReasoningEffortLevel } from '../contracts/GalxContracts';
 
 export const MAX_CHAT_BODY_BYTES = 16 * 1024 * 1024;
 export const MAX_CHAT_MESSAGES = 10_000;
@@ -244,4 +245,67 @@ export function optionalFiniteNumber(
     );
   }
   return parsed;
+}
+
+export const ALLOWED_REASONING_EFFORTS = new Set<ReasoningEffortLevel>([
+  'none',
+  'low',
+  'medium',
+  'high',
+  'xhigh',
+  'auto',
+]);
+
+export function normalizeReasoningEffort(value: unknown): ReasoningEffortLevel | undefined {
+  if (value === undefined || value === null || value === '') return undefined;
+  if (typeof value !== 'string') {
+    throw new ChatRequestValidationError(
+      'reasoning_effort must be a string (none, low, medium, high, xhigh, auto).',
+      'invalid_reasoning_effort'
+    );
+  }
+  const normalized = value.trim().toLowerCase() as ReasoningEffortLevel;
+  if (!ALLOWED_REASONING_EFFORTS.has(normalized)) {
+    throw new ChatRequestValidationError(
+      `reasoning_effort must be one of: ${Array.from(ALLOWED_REASONING_EFFORTS).join(', ')}. Received: "${value}"`,
+      'invalid_reasoning_effort'
+    );
+  }
+  return normalized;
+}
+
+export function resolveAdaptiveReasoningEffort(options: {
+  explicitEffort?: ReasoningEffortLevel;
+  messages?: RollingContextMessage[];
+  isStream?: boolean;
+}): ReasoningEffortLevel {
+  if (options.explicitEffort && options.explicitEffort !== 'auto') {
+    return options.explicitEffort;
+  }
+
+  // Inspect prompt content for task-adaptive reasoning tiering
+  const promptSample = (options.messages || [])
+    .map((m) => (typeof m.content === 'string' ? m.content : ''))
+    .join(' ')
+    .toLowerCase();
+
+  // Fast UI / Interactive / Game generation tasks favor 'low' for instant 3-6s TTFT
+  const isFastUiTask =
+    promptSample.includes('canvas') ||
+    promptSample.includes('html') ||
+    promptSample.includes('game') ||
+    promptSample.includes('snake') ||
+    promptSample.includes('ui component') ||
+    promptSample.includes('interactive') ||
+    promptSample.includes('fast response') ||
+    promptSample.includes('ping') ||
+    promptSample.includes('hello');
+
+  if (isFastUiTask) {
+    return 'low';
+  }
+
+  // Balanced default for general architecture, backend algorithms, and code synthesis
+  // Never default to 'xhigh' (which generates 16,000+ hidden reasoning tokens causing 60-second freezes)
+  return 'medium';
 }

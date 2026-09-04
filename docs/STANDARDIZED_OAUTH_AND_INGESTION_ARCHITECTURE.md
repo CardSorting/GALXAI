@@ -69,7 +69,7 @@ The backend ingestion endpoint (`POST /api/auth/ingest` and `/api/ingest`) provi
 
 ---
 
-## 3. CLI Agent Synchronization Flow (`LUMI-NEW`)
+## 3. CLI Agent Synchronization & Edge Fleet Sync (`LUMI-GALX`)
 
 ```mermaid
 sequenceDiagram
@@ -77,22 +77,29 @@ sequenceDiagram
     actor CLI as LUMI CLI Agent
     participant IngestGateway as GALXAI Gateway (/api/auth/ingest)
     participant BroccoliDB as Hybrid BroccoliDB Table
-    participant Vault as AES-256-GCM Vault
+    participant EdgeFleet as Cloudflare Edge Worker (lumi-edge-worker)
 
     CLI->>CLI: 1. Exchange OAuth Code (127.0.0.1:1455)
     CLI->>CLI: 2. Calculate Content-Digest & Idempotency Key
     CLI->>IngestGateway: 3. POST /api/auth/ingest (Digest, Nonce, Timestamp)
     IngestGateway->>IngestGateway: 4. Constant-Time Digest Verification
-    IngestGateway->>Vault: 5. Envelope Encrypt Tokens with AAD
-    Vault->>BroccoliDB: 6. Provision Substrate Shard Account
+    IngestGateway->>BroccoliDB: 5. Provision Substrate Shard Account
+    IngestGateway->>EdgeFleet: 6. Automated Sync: POST /v1/tokens/ingest (TOKEN_POOL_KV)
     IngestGateway-->>CLI: 7. HTTP 200 { success: true, user: { shardId, token } }
     CLI->>CLI: 8. Vault Shard in Memory & Write Atomic POSIX File
 ```
+
+### Automated Edge Fleet Synchronization (`GalxAuthEngine.syncShardToEdgeFleet`)
+Whenever a provider credential is authenticated or refreshed in GALXAI:
+1. `GalxAuthEngine.syncShardToEdgeFleet()` sends an authenticated payload to `https://lumi-edge-worker.notsosuper688651.workers.dev/v1/tokens/ingest`.
+2. The edge worker persists the shard metadata and OAuth tokens to Cloudflare `TOKEN_POOL_KV`.
+3. The shard is immediately incorporated into the edge **Smooth Weighted Round-Robin (SWRR)** rotation with sliding-window quota tracking worldwide.
 
 ---
 
 ## 4. Verification & Testing
 
 Both environments maintain comprehensive test suites:
+- **`GALXAI` Real Inference Pipeline (100% Wire Execution)**: `npm run test:inference`
 - **`GALXAI` (217 Distributed Tests)**: `npm run test:router`
-- **`LUMI-NEW` (10 Enterprise Resilience Suites)**: `node --import tsx scripts/validate-codex-oauth-resilience.ts`
+- **`LUMI-GALX` Edge Multi-Token Pool Verification**: `npm run check` in `/Users/bozoegg/Desktop/LUMI-NEW`

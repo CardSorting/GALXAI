@@ -191,10 +191,56 @@ $ npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 
 ---
 
+---
+
+### 9. Upstream Provider Wire & Multi-Account Shard Diagnostics (ADR 0111–0112)
+
+#### A. `missing_scope: model.request` (HTTP 401)
+- **Error Response**:
+  ```json
+  {
+    "error": {
+      "message": "You have insufficient permissions for this operation. Missing scopes: model.request.",
+      "code": "missing_scope"
+    }
+  }
+  ```
+- **Root Cause**: An upstream ChatGPT OAuth session token (Client ID `app_EMoamEEZ73f0CkXaXp7hrann`) was forwarded to `https://api.openai.com/v1/chat/completions`. ChatGPT session tokens only have `openid profile email offline_access` scopes and are rejected by OpenAI's standard REST API.
+- **Remedy**:
+  - Do NOT forward ChatGPT session tokens to `api.openai.com/v1/chat/completions`.
+  - The router automatically executes these credentials over native WebSocket: `wss://chatgpt.com/backend-api/codex/responses`.
+  - Test live WebSocket connectivity using `npx tsx scripts/manage-shards.ts --test`.
+
+#### B. `refresh_token_invalidated`
+- **Root Cause**: An OAuth refresh token was revoked by OpenAI or superseded by an out-of-band re-authentication.
+- **Remedy**:
+  - Run `npx tsx scripts/manage-shards.ts --list` to inspect all active and invalid shards.
+  - Remove stale shards: `npx tsx scripts/manage-shards.ts --remove <shard_id>`.
+  - Ingest fresh tokens: `npx tsx scripts/manage-shards.ts --add --token <jwt> --account <id> --email dev@galx.ai`.
+
+#### C. `all_shards_cooldown` or 429 Quota Saturation
+- **Root Cause**: All enrolled accounts in the pool have consumed their 40 requests within the current 3-hour sliding window.
+- **Behavior**: When a shard hits 429, `GalxCredentialPool` isolates it to `cooldown/exhausted` and fails over instantly to the next healthy shard with monotonic fencing tokens (`#1, #2...`).
+- **Remedy**:
+  - Check remaining quota per shard: `npx tsx scripts/manage-shards.ts --list`.
+  - Add more shards to the pool: `npx tsx scripts/manage-shards.ts --import` or `--add`.
+  - Verify rotation and failover: `npx tsx scripts/manage-shards.ts --cycle 4`.
+
+#### D. Premature Timeouts During Multi-Thousand-Token Code Synthesis
+- **Root Cause**: Complex reasoning tasks (such as generating multi-file TypeScript microservices or HTML5 games) stream delta tokens over WebSocket for 40–80+ seconds. Static TTFT timers will kill the socket mid-stream.
+- **Remedy**:
+  - In `OpenAIAdapter.ts`, the `refreshChunkTimer` automatically resets the activity timer upon every incoming delta chunk (`response.output_text.delta`).
+  - Configure custom deadlines via `options.deadline.intraChunkTimeoutMs` (defaults to 45,000ms per chunk).
+
+---
+
 ## 🧪 Verification Commands Matrix
 
 | Verification Suite | Target Validation Scope | Execution Command |
 | :--- | :--- | :--- |
+| **Real Inference Pipeline** | 8-phase end-to-end live wire execution (Streaming SSE, Non-streaming synthesis, Wallet hold, Key revocation) | `npx tsx scripts/test-inference-pipeline.ts --fast` |
+| **Fleet Shard Prober** | Live wire health probe across `wss://chatgpt.com/backend-api/codex/responses` (200 OK ~1.2s) | `npx tsx scripts/manage-shards.ts --test` |
+| **Fleet Multi-Shard Cycle** | SWRR lease rotation and monotonic fencing token verification across pooled shards | `npx tsx scripts/manage-shards.ts --cycle 4` |
 | **Maintainer Onboarding** | 8-Point Workstation Diagnostic (Node, Vault, Safety, Docs, Git Hooks) | `npm run onboard` |
 | **Institutional Entropy Benchmark** | 7-Tier Progressive Entropy Gradient & 7 Adversarial Traps (ADR 0066/0067) | `npm run bench:entropy` |
 | **Inference Boundary Benchmark** | Head-to-head empirical testing on OpenAI models (`gpt-4o`, `gpt-4o-mini`, `o3-mini`) | `npm run bench:inference-boundary` |

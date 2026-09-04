@@ -285,7 +285,85 @@ npm run test:broccolidb:api && npm run bench:inference-boundary
 - **Tests 45–50**: Phase 3 DAG Dependencies, SSE EventBus, Content Deduplication, Dynamic Priority Aging, Deadlines, Draining Mode.
 - **Tests 51–177**: SOC 2 Compliance, ZDR v10.0 Memory Zeroization, BroccoliDB AST & L1 Tables, Multi-Index Range Scans, and Developer SDK Ergonomics.
 - **Edge Tests 1–46**: Edge Gateway, SSE Streaming, Failover, KV Cache, R2 CDN, Durable Objects, and Queue Worker Cron Fleet.
+- **High-Concurrency Tests 1–16**: MLFQ Class 0 Reservation, ITL Watchdog, Shadow Shard Handover, Anti-Zombie Leash, Resumable Last-Event-ID, Token-Aware DRR, Auto-Demotion, ETA EWMA. See [`simulations/high-concurrency-10k-fairness/index.test.ts`](../simulations/high-concurrency-10k-fairness/index.test.ts).
 
+---
 
+## 13. Unpredictable Inference Hardening Extension (ADR 0113)
 
+The queue substrate is extended with a **7-module unpredictable inference hardening stack** for frontier reasoning models exhibiting 2–3 minute per-request durations:
 
+### 13.1 3-Tier Multi-Level Feedback Queue (MLFQ)
+
+| Class | Fleet Capacity | Target | Deadline |
+| :--- | :--- | :--- | :--- |
+| **Class 0 — Interactive Fast Track** | 25% hard-reserved | IDE/Cursor, `developer` tier | ≤ 10s |
+| **Class 1 — Deep Reasoning Track** | 65% allocated | Enterprise long-form reasoning | 30–90s |
+| **Class 2 — Relaxed Scavenger** | 10% + idle (<90% fleet) | Free-tier batch, background | 2–3 min |
+
+**Auto-Demotion**: Class 0 requests drifting beyond 10s are transparently migrated to Class 1 without dropping the client connection, freeing fast-track capacity for true interactive workloads.
+
+### 13.2 Token-Aware DRR Virtual Sizer
+
+Prevents large batch jobs from monopolizing DRR queue credits. Virtual weight formula:
+```
+weight = min(estimatedOutputTokens / 1000, 10.0)
+quantumDebit = baseQuantum × weight
+```
+A 50,000-token reasoning job costs 50× the DRR credits of a 1,000-token IDE completion.
+
+### 13.3 Calibrated ETA Engine
+
+EWMA-based per-class latency estimation (α=0.15) reported as:
+- `X-Galx-Eta-Ms`: Estimated remaining inference duration
+- `X-Galx-Queue-Position`: Current position in class queue
+
+Used by client SDKs for progress bars, retry backoff, and user-facing wait indicators.
+
+### 13.4 Streaming ITL Watchdog
+
+| Signal | Threshold | Action |
+| :--- | :--- | :--- |
+| **TTFT Timeout** | 45,000ms | Trigger shadow shard handover |
+| **ITL Gap** (silence between tokens) | 8,000ms | Mark shard `stall`, escalate |
+| **Consecutive ITL violations** | ≥ 3 | Hard abort + circuit-break shard |
+
+### 13.5 Shadow Shard Standby
+
+Pre-warmed backup shards maintain hot standby connections enabling sub-50ms handover when a primary shard stalls mid-generation. Mirrors Netflix Active-Active failover patterns.
+
+### 13.6 Anti-Zombie Leash
+
+```
+client disconnect (request.signal.aborted)
+    → AbortController.abort() — cancels upstream WebSocket
+    → BroccoliDB transactional wallet refund
+    → emit zombie_leash_activated telemetry
+```
+
+Eliminates 100% of zombie upstream quota burns on abandoned sessions.
+
+### 13.7 BroccoliDB Resumable Job Engine
+
+Decouples 2–3 minute inference from the HTTP request lifecycle:
+
+```
+POST /v1/chat/completions  →  HTTP 202 { jobId: "job_..." }
+GET  /v1/jobs/:id/stream   →  SSE stream (Last-Event-ID resumable)
+GET  /v1/jobs/:id          →  { status, progress, etaMs, queuePos }
+POST /v1/jobs/:id/cancel   →  { cancelled, refunded }
+```
+
+- Token chunks buffered in `job_tokens` BroccoliDB table (indexed by `jobId + seqNo`)
+- `GET /v1/jobs/:id/stream?Last-Event-ID=N` replays from exact sequence number
+- Bypasses Cloudflare's 100s execution timeout entirely via HTTP 202 + SSE decoupling
+
+See [ADR 0113](adr/0113-unpredictable-2-3-minute-inference-mlfq-itl-watchdog-and-resumable-streams.md) for the complete specification.
+
+```bash
+# Run all 16 enterprise invariants (includes MLFQ + ITL + Zombie + Resume tests)
+npx tsx simulations/high-concurrency-10k-fairness/index.test.ts
+
+# Run the 2–3 minute unpredictable inference simulation
+npm run sim:unpredictable
+```

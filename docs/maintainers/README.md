@@ -76,7 +76,10 @@ npm run test:router
 # 10. Cloudflare Edge Mesh 46-Point Test Suite
 npm run worker:test
 
-# 11. Strict TypeScript Typecheck
+# 11. Real End-to-End Inference Pipeline (100% Wire Execution & Sample Project Generation)
+npm run test:inference
+
+# 12. Strict TypeScript Typecheck
 npx tsc --noEmit
 ```
 

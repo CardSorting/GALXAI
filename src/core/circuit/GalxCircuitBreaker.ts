@@ -338,7 +338,14 @@ export class GalxCircuitBreaker {
     const authoritativeCooldownMs = parsedBodyDuration ?? parsedHeaderDuration;
 
     // 5. Rolling Window Exhaustion (5/hr or 40/3hr limit reached)
-    if (rawError.includes('usage limit reached') || rawError.includes('try again in') || rawError.includes('resets in') || rawError.includes('limit reached')) {
+    if (
+      rawError.includes('usage limit') ||
+      rawError.includes('hit your usage limit') ||
+      rawError.includes('usage limit reached') ||
+      rawError.includes('try again in') ||
+      rawError.includes('resets in') ||
+      rawError.includes('limit reached')
+    ) {
       const cooldownMs = authoritativeCooldownMs ? Math.max(15_000, authoritativeCooldownMs) : 180_000;
       return {
         newStatus: 'exhausted',
@@ -366,8 +373,12 @@ export class GalxCircuitBreaker {
     // 7. Standard 429 Rate Limit (TPM / RPM)
     if (statusCode === 429 || rawError.includes('rate limit')) {
       const baseMs = authoritativeCooldownMs ? Math.max(5000, authoritativeCooldownMs) : 30_000;
-      // Full decorrelated jitter: random between base/2 and base*1.5
-      const jitter = Math.floor(Math.random() * (baseMs * 0.4)) - (baseMs * 0.2);
+      // Never retry before an authoritative Retry-After/reset duration. Apply
+      // only positive jitter in that case; locally inferred cooldowns can use
+      // symmetric jitter to disperse an otherwise synchronized fleet.
+      const jitter = authoritativeCooldownMs
+        ? Math.floor(Math.random() * (baseMs * 0.05))
+        : Math.floor(Math.random() * (baseMs * 0.4)) - (baseMs * 0.2);
       const cooldownMs = Math.max(10_000, Math.round(baseMs + jitter));
 
       return {
@@ -419,4 +430,3 @@ export class GalxCircuitBreaker {
     return this.dissectUpstreamError(statusCode, errorReason, headers, nowMs, account);
   }
 }
-

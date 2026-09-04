@@ -216,7 +216,9 @@ npm run db:test
 ## 📚 Documentation & Guides
 
 - 🛡️ **[Maintainers Knowledge Base (20 Manuals)](docs/maintainers/README.md)**: Deep internal architectural blueprints, 30-day onboarding ramp, subsystem matrices, CI specs, outage failovers, and on-call runbooks.
-- 🏛️ **[Architecture Decision Records (72 ADRs)](docs/adr/README.md)**: Deep technical specifications from ADR 0001 to ADR 0072 (including Dual Rolling Windows, Hybrid 5-Level Pyramid, and Exact-Owner Chat Persistence).
+- 🏛️ **[Architecture Decision Records (112 ADRs)](docs/adr/README.md)**: Deep technical specifications from ADR 0001 to ADR 0112 (including Authoritative Multi-Account Shard Fleet Pool, Native Codex WebSocket Wire, Dual Rolling Windows, and Hybrid 5-Level Pyramid).
+- 🚀 **[Real Inference Pipeline & Automated Verification](docs/INFERENCE_PIPELINE_VERIFICATION.md)**: Zero-fallback real inference pipeline (`POST /v1/chat/completions`), 8-phase verification harness, generated sample codebases, and wallet holds.
+- 🌌 **[LUMI: Stellar Pass & Multi-Account Fleet Substrate](docs/LUMI.md)**: $10/mo developer pass, authoritative central shard pool, native Codex WebSocket wire, 40 req / 3 hr sliding-window quotas, and 24/7 autonomous relay containers.
 - 📋 **[Senior Engineering Review: Chat & Rolling Context](docs/SENIOR_ENGINEERING_REVIEW_CHAT_AND_ROLLING_CONTEXT.md)**: Architectural review of Hybrid BroccoliDB (L1) + PostgreSQL (L2) rolling memory, dynamic 1.05M context governor, dual rolling seat quotas, and V44-V53 migrations.
 - 🤝 **[Contributing Guide](CONTRIBUTING.md)**: Development workflow, Conventional Commits, and automated git hooks (`npm run hooks:install`).
 - 🥦 **[BroccoliDB Compaction Onboarding Guide](docs/BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md)**: 19 streaming modes, 180 domain compactors, and the Epistemic Measurement Machinery.

@@ -21,6 +21,7 @@ interface QueuedAdmissionRequest {
   resolve: (res: ShardAcquisitionResult) => void;
   reject: (err: any) => void;
   timeoutTimer: NodeJS.Timeout;
+  isDone?: boolean;
 }
 
 /**
@@ -200,20 +201,47 @@ export class GalxCredentialPool {
 
   /**
    * Reflexively drains waiting admission requests when capacity opens.
+   * Enforces Anti-Aging and Caller Cancellation Invariants:
+   * 1. If caller aborted or deadline elapsed, drop without acquiring a lease (Zero Zombie Leases).
+   * 2. When a lease is successfully acquired, resolve caller immediately.
    */
   public drainAdmissionQueue(nowMs = Date.now()): void {
     if (this.admissionQueue.length === 0) return;
 
+    const remaining: QueuedAdmissionRequest[] = [];
+
     for (let i = 0; i < this.admissionQueue.length; i++) {
       const item = this.admissionQueue[i];
+      if (item.isDone) continue;
+
+      const maxWait = item.req.deadlineMs ?? item.req.maxQueueWaitMs ?? 4000;
+      const sojournMs = nowMs - item.enqueuedAtMs;
+
+      // Anti-Aging Invariant: Never dispatch an expired or aborted caller to an upstream shard
+      if (sojournMs > maxWait || item.req.signal?.aborted) {
+        clearTimeout(item.timeoutTimer);
+        item.isDone = true;
+        item.resolve({
+          status: item.req.signal?.aborted ? 'cancelled' : 'queue_timeout',
+          reason: item.req.signal?.aborted
+            ? 'Request aborted by client signal while waiting in admission queue'
+            : `Admission queue deadline exceeded (${sojournMs}ms > ${maxWait}ms)`
+        });
+        continue;
+      }
+
       const result = this.acquireLeaseDirect(item.req, nowMs);
       if (result.lease) {
         clearTimeout(item.timeoutTimer);
-        this.admissionQueue.splice(i, 1);
-        i--;
+        item.isDone = true;
         item.resolve(result);
+      } else {
+        remaining.push(item);
       }
     }
+
+    this.admissionQueue.length = 0;
+    this.admissionQueue.push(...remaining);
   }
 
   /**
@@ -221,13 +249,21 @@ export class GalxCredentialPool {
    * Supports bounded admission queuing if the pool is momentarily saturated.
    */
   acquireLease(req: ShardAcquisitionRequest, nowMs = req.nowMs || Date.now()): ShardAcquisitionResult {
+    // Fast fail if caller already aborted
+    if (req.signal?.aborted) {
+      return {
+        status: 'cancelled',
+        reason: 'Client context aborted before lease acquisition'
+      };
+    }
+
     const directResult = this.acquireLeaseDirect(req, nowMs);
     if (directResult.lease || req.queueIfExhausted === false) {
       return directResult;
     }
 
     // Anti-Stampede Bounded Admission Queueing
-    const maxWaitMs = req.maxQueueWaitMs ?? 4000;
+    const maxWaitMs = req.deadlineMs ?? req.maxQueueWaitMs ?? 4000;
     const earliestResetMs = this.getEarliestPoolResetTimeMs(req.provider, nowMs);
     const resetDeltaMs = earliestResetMs - nowMs;
 
@@ -241,10 +277,15 @@ export class GalxCredentialPool {
         rejectPromise = reject;
       });
 
+      let itemRef: QueuedAdmissionRequest;
+
       const timeoutTimer = setTimeout(() => {
-        const idx = this.admissionQueue.findIndex((q) => q.id === id);
-        if (idx !== -1) {
-          this.admissionQueue.splice(idx, 1);
+        if (itemRef && !itemRef.isDone) {
+          itemRef.isDone = true;
+          const idx = this.admissionQueue.findIndex((q) => q.id === id);
+          if (idx !== -1) {
+            this.admissionQueue.splice(idx, 1);
+          }
           resolvePromise({
             status: 'queue_timeout',
             reason: `Admission queue deadline exceeded (${maxWaitMs}ms wait)`
@@ -254,14 +295,39 @@ export class GalxCredentialPool {
 
       if (timeoutTimer.unref) timeoutTimer.unref();
 
-      this.admissionQueue.push({
+      itemRef = {
         id,
         req,
         enqueuedAtMs: nowMs,
         resolve: resolvePromise,
         reject: rejectPromise,
-        timeoutTimer
-      });
+        timeoutTimer,
+        isDone: false
+      };
+
+      // Caller AbortSignal Listener for immediate cleanup
+      if (req.signal) {
+        req.signal.addEventListener(
+          'abort',
+          () => {
+            if (!itemRef.isDone) {
+              itemRef.isDone = true;
+              clearTimeout(timeoutTimer);
+              const idx = this.admissionQueue.findIndex((q) => q.id === id);
+              if (idx !== -1) {
+                this.admissionQueue.splice(idx, 1);
+              }
+              resolvePromise({
+                status: 'cancelled',
+                reason: 'Client aborted request while waiting in admission queue'
+              });
+            }
+          },
+          { once: true }
+        );
+      }
+
+      this.admissionQueue.push(itemRef);
 
       return {
         status: 'queued',
@@ -541,6 +607,18 @@ export class GalxCredentialPool {
       }
       const tenantDispersionFactor = Math.pow(0.88, tenantLeasesOnShard);
 
+      // 9. Prefer credentials with enough lifetime to complete uncertain work.
+      // This is deliberately a bounded routing preference, not an authority or
+      // terminality decision: expiring credentials remain eligible for short work.
+      let expiryMultiplier = 1.0;
+      if (acc.expiresAtMs !== undefined) {
+        const remainingLifetimeMs = acc.expiresAtMs - nowMs;
+        if (remainingLifetimeMs <= 0) expiryMultiplier = 0.1;
+        else if (remainingLifetimeMs <= 5 * 60_000) expiryMultiplier = 0.85;
+        else if (remainingLifetimeMs >= 60 * 60_000) expiryMultiplier = 1.05;
+        else expiryMultiplier = 0.95;
+      }
+
       const score =
         (Math.pow(tokenHeadroomRatio, 1.2) *
           concurrencyHeadroom *
@@ -550,7 +628,8 @@ export class GalxCredentialPool {
           dynamicWeight *
           priorityBoost *
           slidingWindowFactor *
-          tenantDispersionFactor) +
+          tenantDispersionFactor *
+          expiryMultiplier) +
         microJitter;
 
       if (score > bestScore) {
@@ -922,4 +1001,3 @@ export class GalxCredentialPool {
     return this.leaseTable.query(parsed.queryOptions) as (ShardLease & { id: string })[];
   }
 }
-

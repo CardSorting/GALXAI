@@ -97,6 +97,11 @@ Across production workloads, **40% to 70% of gross AI spend is pure operational 
    * Head-to-head empirical testing apparatus (`npm run bench:inference-boundary`) measuring actual billed OpenAI dollars across `gpt-4o`, `gpt-4o-mini`, and `o3-mini` with Randomized Branch-Blinded A/B evaluation. Full specifications in ADRs 0056–0067.
 8. **Unframed Developer Observation & Behavioral Protocol** ([docs/playbooks/08-unframed-developer-observation-protocol.md](docs/playbooks/08-unframed-developer-observation-protocol.md)):
    * 8-vector qualitative observation framework testing spontaneous developer adoption and induced mental models with zero-framing trials.
+9. **Authoritative Shard Fleet Pool & Real Inference Pipeline** ([src/core/substrate/GalxCredentialSubstrate.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/substrate/GalxCredentialSubstrate.ts), [src/core/router/adapters/OpenAIAdapter.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/router/adapters/OpenAIAdapter.ts), [scripts/manage-shards.ts](file:///Users/bozoegg/Desktop/GALXAI/scripts/manage-shards.ts)):
+   * Central pool anchored in `/Users/bozoegg/Desktop/GALXAI` with AES-256-GCM envelope encryption and POSIX 0o600 encrypted disk cache (`.galx-shards.json`).
+   * SWRR 40 req / 3 hr quota cycling with monotonic fencing tokens and instant 429 failover.
+   * Direct Native Codex WebSocket transport (`wss://chatgpt.com/backend-api/codex/responses`), solving `missing_scope: model.request` across all frontier reasoning models.
+   * Intra-chunk activity timers (`refreshChunkTimer`) allowing multi-thousand-token code syntheses (Cyber-Snake Arcade, Continuous Rate Governor) to complete without false timeouts. Full specs in ADRs 0109–0112.
 
 
 

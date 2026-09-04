@@ -14,6 +14,7 @@ import type { DbQueryOptions, DbAggregateQuery, DbAggregateResult } from '../../
 import { calculateComputeCredit } from '../../stripe/config';
 import { GalxRequestCoalescer } from '../../cache/GalxRequestCoalescer';
 import { GalxBatchDataLoader } from '../../cache/GalxBatchDataLoader';
+import { randomUUID } from 'node:crypto';
 
 export interface WalletRecord {
   id: string;
@@ -256,7 +257,7 @@ export class WalletRepository {
           if (res.success) {
             this.walletCoalescer.invalidate(params.userId);
             this.walletDataLoader.clear(params.userId);
-            return {
+            const result = {
               success: true,
               depositAmount: Number(res.deposit_amount),
               matchGrant: Number(res.match_grant),
@@ -264,6 +265,8 @@ export class WalletRepository {
               newBalance: Number(res.new_balance),
               proofOfDepositVerified: res.proof_of_deposit_verified
             };
+            this.projectSuccessfulDeposit(params, result);
+            return result;
           }
         }
       } catch {
@@ -744,7 +747,7 @@ export class WalletRepository {
           if (res.success) {
             this.walletCoalescer.invalidate(params.userId);
             this.walletDataLoader.clear(params.userId);
-            return {
+            const result = {
               success: true,
               reason: res.reason,
               transactionId: res.transaction_id,
@@ -753,6 +756,8 @@ export class WalletRepository {
               newBalance: Number(res.new_balance),
               triggerAutoReload: res.trigger_auto_reload
             };
+            this.projectSuccessfulDraw(params, result);
+            return result;
           }
         }
       } catch {
@@ -1022,6 +1027,14 @@ export class WalletRepository {
 
         if (!error && data && data.length > 0) {
           const mapped = data.map(this.mapRowToTransaction);
+          const projections = this.txTable.query({
+            where: { userId: { $eq: userId } }
+          }) as WalletTransactionRecord[];
+          for (const transaction of projections) {
+            if (transaction.metadata?.projectedFromAuthoritativeRpc === true) {
+              this.txTable.delete(transaction.id);
+            }
+          }
           for (const tx of mapped) this.txTable.put(tx.id, tx);
           return mapped;
         }
@@ -1043,6 +1056,95 @@ export class WalletRepository {
 
   public aggregateTransactions(query: DbAggregateQuery): DbAggregateResult {
     return this.txTable.aggregate(query);
+  }
+
+  private projectSuccessfulDeposit(
+    params: { userId: string; depositAmountUsd: number; paymentRef?: string },
+    result: {
+      depositAmount: number;
+      matchGrant: number;
+      totalCredit: number;
+      newBalance: number;
+      proofOfDepositVerified: boolean;
+    }
+  ): void {
+    const wallet = this.walletTable.get(params.userId);
+    if (!wallet) return;
+
+    wallet.balanceUsd = result.newBalance;
+    wallet.depositedTotalUsd = Number((wallet.depositedTotalUsd + result.depositAmount).toFixed(6));
+    wallet.promotionalMatchUsd = Number((wallet.promotionalMatchUsd + result.matchGrant).toFixed(6));
+    wallet.proofOfDepositVerified = result.proofOfDepositVerified;
+    wallet.verifiedAt = wallet.verifiedAt || new Date().toISOString();
+    wallet.updatedAt = new Date().toISOString();
+    this.walletTable.put(params.userId, wallet);
+
+    const transactionId = `tx_projection_${randomUUID()}`;
+    this.txTable.put(transactionId, {
+      id: transactionId,
+      walletId: wallet.id,
+      userId: params.userId,
+      transactionType: 'deposit',
+      amountUsd: result.totalCredit,
+      balanceAfterUsd: result.newBalance,
+      description: `Compute deposit: $${result.depositAmount.toFixed(2)} USD + $${result.matchGrant.toFixed(2)} grant/match`,
+      apiKeyId: null,
+      shardId: null,
+      model: null,
+      promptTokens: 0,
+      completionTokens: 0,
+      cachedTokens: 0,
+      metadata: { paymentRef: params.paymentRef, projectedFromAuthoritativeRpc: true },
+      createdAt: new Date().toISOString()
+    });
+  }
+
+  private projectSuccessfulDraw(
+    params: {
+      userId: string;
+      costUsd: number;
+      description: string;
+      apiKeyId?: string;
+      shardId?: string;
+      model?: string;
+      promptTokens?: number;
+      completionTokens?: number;
+      cachedTokens?: number;
+      metadata?: Record<string, any>;
+    },
+    result: {
+      transactionId?: string;
+      newBalance?: number;
+      costUsd?: number;
+    }
+  ): void {
+    const wallet = this.walletTable.get(params.userId);
+    if (!wallet || result.newBalance === undefined) return;
+
+    const costUsd = result.costUsd ?? params.costUsd;
+    wallet.balanceUsd = result.newBalance;
+    wallet.lifetimeSpentUsd = Number((wallet.lifetimeSpentUsd + costUsd).toFixed(6));
+    wallet.updatedAt = new Date().toISOString();
+    this.walletTable.put(params.userId, wallet);
+
+    const transactionId = result.transactionId || `tx_projection_${randomUUID()}`;
+    this.txTable.put(transactionId, {
+      id: transactionId,
+      walletId: wallet.id,
+      userId: params.userId,
+      transactionType: 'usage_draw',
+      amountUsd: -costUsd,
+      balanceAfterUsd: result.newBalance,
+      description: params.description,
+      apiKeyId: params.apiKeyId || null,
+      shardId: params.shardId || null,
+      model: params.model || null,
+      promptTokens: params.promptTokens || 0,
+      completionTokens: params.completionTokens || 0,
+      cachedTokens: params.cachedTokens || 0,
+      metadata: { ...(params.metadata || {}), projectedFromAuthoritativeRpc: true },
+      createdAt: new Date().toISOString()
+    });
   }
 
   private async verifyDepositFallback(params: {

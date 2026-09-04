@@ -16,8 +16,10 @@ import {
   ChatRequestValidationError,
   normalizeChatMessages,
   normalizeConversationId,
+  normalizeReasoningEffort,
   optionalFiniteNumber,
   parseChatJsonBody,
+  resolveAdaptiveReasoningEffort,
 } from '@/core/chat/GalxChatRequestNormalizer';
 
 export const dynamic = 'force-dynamic';
@@ -312,6 +314,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const rawReasoningEffort =
+      rawBody.reasoning_effort ||
+      rawBody.reasoningEffort ||
+      req.headers.get('x-galx-reasoning-effort') ||
+      req.nextUrl?.searchParams?.get('reasoning_effort');
+    const normalizedReasoningEffort = normalizeReasoningEffort(rawReasoningEffort);
+    const effectiveReasoningEffort = resolveAdaptiveReasoningEffort({
+      explicitEffort: normalizedReasoningEffort,
+      messages: activeMessages as any,
+      isStream,
+    });
+
     const body: ChatCompletionRequest = {
       model: contextPlan.modelId,
       messages: activeMessages as any,
@@ -330,7 +344,8 @@ export async function POST(req: NextRequest) {
       prompt_cache_options: contextPlan.promptCacheOptimized
         ? { mode: 'implicit', ttl: '30m' }
         : undefined,
-      privacy: rawBody.privacy
+      privacy: rawBody.privacy,
+      reasoning_effort: effectiveReasoningEffort,
     };
 
     const isAsync = req.headers.get('x-galx-async') === 'true' || req.headers.get('prefer') === 'respond-async';
@@ -500,6 +515,7 @@ export async function POST(req: NextRequest) {
     headers.set('X-Galx-Prompt-Deflation-Pct', compactPrompts && rollingContext.tokensSaved > 0 
       ? `${Math.round((rollingContext.tokensSaved / Math.max(1, contextPlan.estimatedPromptTokens + rollingContext.tokensSaved)) * 100)}%` 
       : '0%');
+    headers.set('X-Galx-Reasoning-Effort', effectiveReasoningEffort);
 
     if (result.isStream && result.body && typeof (result.body as any).getReader === 'function') {
       headers.set('Content-Type', 'text/event-stream; charset=utf-8');
@@ -775,27 +791,54 @@ export async function POST(req: NextRequest) {
         { status: error.status, headers: { 'Access-Control-Allow-Origin': '*' } }
       );
     }
-    const rawMessage = error.message || 'Internal Router Error';
+    let rawMessage = error.message || 'Internal Router Error';
+    const jsonMatch = rawMessage.match(/\{.*"message"\s*:\s*"([^"]+)".*\}/);
+    if (jsonMatch && jsonMatch[1]) {
+      rawMessage = jsonMatch[1];
+    }
     const message = GalxModelRouter.sanitizeUpstreamError(rawMessage);
-    const isRateLimited = message.includes('saturated') || message.includes('reached maximum simultaneous') || message.toLowerCase().includes('rate limit');
+    const isRateLimited =
+      message.includes('saturated') ||
+      message.includes('reached maximum simultaneous') ||
+      message.toLowerCase().includes('rate limit') ||
+      message.toLowerCase().includes('usage limit') ||
+      message.includes('(429)') ||
+      rawMessage.includes('429');
+    const isAuthError =
+      message.includes('401') ||
+      message.includes('Unauthorized') ||
+      message.toLowerCase().includes('unauthorized') ||
+      message.toLowerCase().includes('authentication in header') ||
+      rawMessage.includes('401');
     const isUnavailable = message.includes('No healthy') || message.includes('in cooldown') || message.includes('overloaded') || message.includes('temporarily constrained');
     const isBadRequest = rawMessage.includes('Unsupported model') || rawMessage.includes('Missing required');
 
-    const status = isRateLimited ? 429 : isUnavailable ? 503 : isBadRequest ? 400 : 500;
-    const errorType = isRateLimited
+    const status = isAuthError ? 401 : isRateLimited ? 429 : isUnavailable ? 503 : isBadRequest ? 400 : 500;
+    const errorType = isAuthError
+      ? 'authentication_error'
+      : isRateLimited
       ? 'rate_limit_error'
       : isUnavailable
       ? 'service_unavailable_error'
       : isBadRequest
       ? 'invalid_request_error'
       : 'api_error';
+    const isUsageLimit = message.toLowerCase().includes('usage limit');
 
     return NextResponse.json(
       {
         error: {
           message,
           type: errorType,
-          code: isRateLimited ? 'rate_limit_exceeded' : isUnavailable ? 'compute_capacity_unavailable' : 'router_dispatch_failed'
+          code: isAuthError
+            ? 'upstream_auth_failed'
+            : isUsageLimit
+            ? 'usage_limit_exceeded'
+            : isRateLimited
+            ? 'rate_limit_exceeded'
+            : isUnavailable
+            ? 'compute_capacity_unavailable'
+            : 'router_dispatch_failed'
         }
       },
       {

@@ -1,23 +1,23 @@
 {
-  "timestamp": "2026-08-25T05:41:14.579Z",
+  "timestamp": "2026-09-03T21:47:08.388Z",
   "requestPrompt": "Write a complete, self-contained, playable Retro-Modern Snake Game in a single HTML file with embedded CSS and JavaScript.\nInclude:\n- Smooth grid movement on HTML5 Canvas with neon glow effects\n- Score, high score tracking with localStorage\n- Responsive arrow keys + WASD controls + touch swipe controls for mobile\n- Audio synthesized sound effects using Web Audio API (beeps for eat, crash, powerups)\n- Pause menu (Spacebar / Esc) and game over restart screen\n- Polished dark cyberpunk glassmorphism UI with retro arcade fonts.",
   "model": {
     "id": "gpt-5.6-sol",
-    "name": "OpenAI Codex GPT-5.6 Sol (Flagship SOTA)",
+    "name": "OpenAI GPT-5.6 Sol (Flagship)",
     "upstreamId": "gpt-5.6-sol",
-    "contextWindowTokens": 900000,
-    "wholesaleDiscount": "25%"
+    "contextWindowTokens": 1050000,
+    "wholesaleDiscount": "0%"
   },
   "quotaPoolExecutionProof": {
-    "leaseId": "lease_1787636474578_8b48f071",
-    "shardId": "pool_shard_tier5_alpha",
-    "shardLabel": "OpenAI Tier-5 Wholesale Reservoir Alpha",
+    "leaseId": "lease_1788472028387_a51b7326",
+    "shardId": "shard_galx_flagship_1788472028336",
+    "shardLabel": "GALX Wholesale Flagship Pool",
     "fencingToken": 2,
     "estimatedTokens": 4000,
     "actualTokensConsumed": 1850,
     "latencyMs": 0,
-    "remainingTokensBefore": 1000000,
-    "remainingTokensAfter": 998150,
+    "remainingTokensBefore": 500000,
+    "remainingTokensAfter": 498150,
     "activeLeasesInFleet": 0,
     "rotationStrategy": "adaptive_headroom"
   },

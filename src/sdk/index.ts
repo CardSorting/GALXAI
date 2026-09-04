@@ -55,6 +55,39 @@ export { BroccoliPromptCache, createCachePlugin, type CacheConfig, type CacheSta
 export { VectorResource, type ScopedVectorIndex, type VectorRecord, type VectorQueryResult, type VectorQueryOptions, type VectorInput } from './vector';
 export { CircuitBreaker, createCircuitBreakerPlugin, CircuitBreakerOpenError, type CircuitState, type CircuitBreakerConfig, type CircuitAttemptRecord } from './circuit-breaker';
 export { AgentMemoryStore, type MemoryFact, type RememberOptions, type RecallResult } from './memory';
+export {
+  BroccoliExecutionLedger,
+  ExecutionSupervisor,
+  ExecutionJournalProjector,
+  ExecutionWorkProjector,
+  ExecutionObservationProjector,
+  ExecutionQueueProjector,
+  ExecutionEventProjector,
+  ExecutionLedgerConflictError,
+  DEFAULT_EXECUTION_POLICY,
+  isTerminalExecutionStatus,
+  type ExecutionStatus,
+  type ExecutionActorType,
+  type ExecutionActor,
+  type ExecutionLeaseContext,
+  type ActiveExecutionLease,
+  type ExecutionPolicy,
+  type ExecutionBudgetState,
+  type ExecutionBudgetReservation,
+  type ExecutionState,
+  type ExecutionDecisionKind,
+  type ExecutionDecision,
+  type ExecutionJournalChannel,
+  type ExecutionJournalEntry,
+  type ExecutionLedgerRecord,
+  type ExecutionProposal,
+  type CreateExecutionInput,
+  type ProjectionCursorRecord,
+  type AuthorizedExecutionIntent,
+  type AuthorizedIntentQueue,
+  type ExecutionLiveEvent,
+  type ExecutionEventSink,
+} from './execution';
 
 // DX & Ergonomic Extensions
 export { ChatCompletionBuilder, promptTemplate, PromptTemplate } from './builder';

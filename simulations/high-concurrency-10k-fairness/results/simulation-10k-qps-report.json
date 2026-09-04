@@ -1,0 +1,166 @@
+{
+  "timestamp": "2026-09-04T05:57:30.062Z",
+  "totalSubmitted": 10000,
+  "industrialMetrics": {
+    "totalSubmitted": 10000,
+    "admitted": 315,
+    "coalesced": 640,
+    "idempotentHits": 0,
+    "deduplicatedTasks": 0,
+    "shedOverflow": 9045,
+    "droppedAged": 0,
+    "completedSuccess": 315,
+    "hedgedDispatches": 32,
+    "hedgedWon": 32,
+    "dlqRouted": 0,
+    "groupIdSequenced": 0,
+    "zombieUpstreamExecutions": 0,
+    "p50QueueLatencyMs": 55,
+    "p90QueueLatencyMs": 100,
+    "p99QueueLatencyMs": 104,
+    "p999QueueLatencyMs": 109,
+    "throughputQps": 315,
+    "tenantStats": {
+      "tenant_noisy_abuser": {
+        "submitted": 7000,
+        "completed": 77,
+        "shed": 6849,
+        "aged": 0,
+        "successRate": 0.011
+      },
+      "tenant_enterprise_core": {
+        "submitted": 1800,
+        "completed": 100,
+        "shed": 1297,
+        "aged": 0,
+        "successRate": 0.05555555555555555
+      },
+      "tenant_interactive_dev": {
+        "submitted": 900,
+        "completed": 94,
+        "shed": 649,
+        "aged": 0,
+        "successRate": 0.10444444444444445
+      },
+      "tenant_free_tier": {
+        "submitted": 300,
+        "completed": 44,
+        "shed": 250,
+        "aged": 0,
+        "successRate": 0.14666666666666667
+      }
+    },
+    "cloudRunStats": {
+      "totalInstances": 15,
+      "peakInFlight": 12,
+      "outlierEjections": 0
+    },
+    "adaptiveConcurrency": {
+      "initialLimit": 150,
+      "finalLimit": 84,
+      "minRttObservedMs": 43,
+      "smoothedRttMs": 57
+    },
+    "hybridStoreStats": {
+      "totalTasksIndexed": 955,
+      "activeEnqueued": 640,
+      "completedTasks": 315,
+      "idempotencyEntries": 0,
+      "dlqEntries": 0,
+      "shardRecords": 0,
+      "bufferedTokenChunks": 0
+    }
+  },
+  "v1Metrics": {
+    "totalSubmitted": 10000,
+    "admitted": 1,
+    "coalesced": 950,
+    "shedOverflow": 9049,
+    "droppedAged": 0,
+    "completedSuccess": 1,
+    "zombieUpstreamExecutions": 0,
+    "p50QueueLatencyMs": 0,
+    "p90QueueLatencyMs": 0,
+    "p99QueueLatencyMs": 0,
+    "throughputQps": 1,
+    "tenantStats": {
+      "tenant_noisy_abuser": {
+        "submitted": 7000,
+        "completed": 1,
+        "shed": 6850,
+        "aged": 0,
+        "successRate": 0.00014285714285714287
+      },
+      "tenant_enterprise_core": {
+        "submitted": 1800,
+        "completed": 0,
+        "shed": 1299,
+        "aged": 0,
+        "successRate": 0
+      },
+      "tenant_interactive_dev": {
+        "submitted": 900,
+        "completed": 0,
+        "shed": 650,
+        "aged": 0,
+        "successRate": 0
+      },
+      "tenant_free_tier": {
+        "submitted": 300,
+        "completed": 0,
+        "shed": 250,
+        "aged": 0,
+        "successRate": 0
+      }
+    }
+  },
+  "naiveMetrics": {
+    "totalSubmitted": 3500,
+    "admitted": 3500,
+    "coalesced": 0,
+    "shedOverflow": 0,
+    "droppedAged": 54,
+    "completedSuccess": 3458,
+    "zombieUpstreamExecutions": 42,
+    "p50QueueLatencyMs": 696,
+    "p90QueueLatencyMs": 1289,
+    "p99QueueLatencyMs": 1422,
+    "throughputQps": 3458,
+    "tenantStats": {
+      "tenant_noisy_abuser": {
+        "submitted": 2451,
+        "completed": 2451,
+        "shed": 0,
+        "aged": 0,
+        "successRate": 1
+      },
+      "tenant_enterprise_core": {
+        "submitted": 640,
+        "completed": 640,
+        "shed": 0,
+        "aged": 0,
+        "successRate": 1
+      },
+      "tenant_interactive_dev": {
+        "submitted": 319,
+        "completed": 277,
+        "shed": 0,
+        "aged": 54,
+        "successRate": 0.8683385579937304
+      },
+      "tenant_free_tier": {
+        "submitted": 90,
+        "completed": 90,
+        "shed": 0,
+        "aged": 0,
+        "successRate": 1
+      }
+    }
+  },
+  "conclusions": {
+    "zeroZombieUpstream": true,
+    "interactiveDevProtected": true,
+    "enterprisePrioritized": true,
+    "adaptiveConcurrencyActive": true
+  }
+}

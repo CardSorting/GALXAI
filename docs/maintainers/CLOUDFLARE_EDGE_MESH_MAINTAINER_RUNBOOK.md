@@ -95,6 +95,44 @@ The Cloudflare Edge Gateway intercepts upstream model completions and attaches s
 - `x-galx-stable-cache-hash`: SHA-256 stable prefix cache hash locking in $>98\%$ prompt caching.
 - `x-galx-rolling-memory-compacted`: Boolean indicating multi-turn memory pyramid compaction.
 
+## 7. LUMI-GALX Multi-Token Edge Fleet Operations (`lumi-edge-worker`)
+
+The production multi-token gateway is maintained in the `LUMI-GALX` repository (`https://github.com/CardSorting/LUMI-GALX.git`):
+
+- **Live URL**: `https://lumi-edge-worker.notsosuper688651.workers.dev`
+- **Cloudflare KV Namespace**: `TOKEN_POOL_KV` (`id: 4dcb6b86fc2d41ba95a96844f7a87efa`)
+
+### 1. Inspecting Live Fleet Health & Token Allocations
+```bash
+# Health check (PoP Ray ID, total and active tokens)
+curl -sS https://lumi-edge-worker.notsosuper688651.workers.dev/health | jq .
+
+# Detailed fleet status (token IDs, effective weights, sliding-window limits)
+curl -sS https://lumi-edge-worker.notsosuper688651.workers.dev/v1/tokens/status | jq .
+```
+
+### 2. Live Log Streaming (`wrangler tail`)
+```bash
+cd /Users/bozoegg/Desktop/LUMI-NEW
+npx wrangler tail lumi-edge-worker
+```
+
+### 3. Ingesting Shards into KV
+```bash
+# Ingest active tokens from ~/.codex/auth.json
+npm run token:add -- --from-codex-auth --worker-url https://lumi-edge-worker.notsosuper688651.workers.dev
+
+# Or run interactive OAuth PKCE login
+npm run login
+```
+
+### 4. Deploying Updates to the Edge Worker
+```bash
+cd /Users/bozoegg/Desktop/LUMI-NEW
+npm run check
+npx wrangler deploy
+```
+
 ---
 
-*For full Cloudflare architectural strategy, see [CLOUDFLARE_STRATEGY.md](../CLOUDFLARE_STRATEGY.md).* 🥦🌐🚀
+*For full Cloudflare architectural strategy, see [CLOUDFLARE_STRATEGY.md](../CLOUDFLARE_STRATEGY.md), [ADR 0111](../adr/0111-cloudflare-edge-swrr-fleet-session-sticky-prompt-caching-and-codex-concurrency-isolation.md), and [ADR 0112](../adr/0112-galxai-authoritative-shard-fleet-pool-native-codex-websocket-wire-and-sliding-window-failover.md).* 🥦🌐🚀

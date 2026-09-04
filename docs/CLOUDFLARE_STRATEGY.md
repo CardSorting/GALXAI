@@ -89,6 +89,7 @@ flowchart TD
 - **Domain**: `api.galx.ai`
 - **Mechanism**: Utilizes the native Web Streams API (`TransformStream`) in Cloudflare Workers to proxy upstream SSE chunks from OpenAI/xAI directly to clients without buffering full responses in RAM.
 - **Economic Advantage**: Eliminates standard cloud egress fees ($0.09–$0.12/GB), allowing GALXAI to offer wholesale pricing with up to 36% discount margins sustainably.
+- **Dual-Transport Invariant**: Standard wholesale provider keys (`OPENAI_API_KEY`, `XAI_API_KEY`) stream directly through `GalxEdgeGateway`. Conversely, pooled ChatGPT session OAuth tokens (which lack `model.request` on `api.openai.com/v1/chat/completions`) are managed by the Authoritative GALXAI Shard Pool and dispatched via direct native WebSocket (`wss://chatgpt.com/backend-api/codex/responses`) or autonomous relay containers (see ADR 0112).
 
 ### Pillar 2: Zero-Overhead Database Connectivity (Cloudflare Hyperdrive)
 - **Problem Solved**: Serverless V8 isolates opening direct TCP connections to PostgreSQL can cause connection storms and add 80–150ms handshake overhead per request.
@@ -252,6 +253,36 @@ crons = ["* * * * *"]
 name = "galxai-edge-gateway-staging"
 vars = { ENVIRONMENT = "staging", SUPABASE_URL = "https://your-staging-project.supabase.co" }
 ```
+
+---
+
+## 5.5. Live Production Edge Gateway: `LUMI-GALX` Fleet (`lumi-edge-worker`)
+
+The production multi-token gateway is deployed as a standalone Cloudflare Worker servicing frontier model traffic:
+
+- **Upstream Repository Remote**: `https://github.com/CardSorting/LUMI-GALX.git`
+- **Live Worker URL**: `https://lumi-edge-worker.notsosuper688651.workers.dev`
+- **Cloudflare KV Namespace**: `TOKEN_POOL_KV` (`id: 4dcb6b86fc2d41ba95a96844f7a87efa`)
+
+### Core Operational Endpoints
+| Route | Method | Purpose |
+| :--- | :--- | :--- |
+| `/health` | `GET` | PoP Ray ID (`cf-ray`), edge health status, and registered/active fleet counts |
+| `/v1/tokens/status` | `GET` | Real-time JSON telemetry on all registered tokens, weights, and sliding-window limits |
+| `/v1/tokens/ingest` | `POST` | Dynamic runtime token enrollment with global KV persistence |
+| `/v1/tokens/remove/:id` | `DELETE` | Dynamic runtime token revocation from edge fleet |
+| `/v1/chat/completions` | `POST` | SWRR-balanced SSE streaming proxy to upstream OpenAI Responses API |
+
+### Key Edge Routing Invariants
+1. **Smooth Weighted Round-Robin (SWRR)**:
+   - Interleaves traffic mathematically across multiple developer accounts without burst clumping.
+   - Derates effective weights via a 4th-degree polynomial curve as accounts approach their sliding-window limits (40 req / 3 hr).
+2. **Session-Sticky Prompt Cache Preservation**:
+   - Anchors conversations (`X-Galx-Session-Id`) to the same shard for up to 15 minutes, delivering **90%+ KV prompt cache hit rates** and reducing TTFT from $>12\text{s}$ down to $<3.8\text{s}$.
+3. **Desktop Header Cloaking**:
+   - Injects authentic `User-Agent: Codex-CLI/0.147.0 (darwin; arm64)` metadata, defeating upstream WAF bot fingerprinting.
+4. **JIT Self-Enrollment & Single-Flight Token Refresh**:
+   - Auto-registers incoming shards from `x-galx-shard-id` headers and executes automatic OAuth token refresh on HTTP 401.
 
 ---
 

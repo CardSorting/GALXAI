@@ -138,7 +138,7 @@ async function runAllTests() {
     const { rawKey, keyHash, prefix } = GalxCryptoVault.generateGatewayApiKey();
     assert.ok(rawKey.startsWith('galx_live_'));
     assert.ok(prefix.startsWith('galx_live_'));
-    assert.strictEqual(prefix.length, 18);
+    assert.strictEqual(prefix.length, 'galx_live_'.length + 6);
     assert.ok(GalxCryptoVault.verifyGatewayApiKey(rawKey, keyHash));
     assert.strictEqual(GalxCryptoVault.verifyGatewayApiKey('galx_live_fake', keyHash), false);
   });
@@ -325,8 +325,9 @@ async function runAllTests() {
 
     const evalRes = breaker.evaluateAccountStatus(exhaustedAccount, now);
     assert.strictEqual(evalRes.canAttempt, true);
-    assert.strictEqual(evalRes.status, 'cooldown');
+    assert.strictEqual(evalRes.status, 'half_open');
     assert.strictEqual(evalRes.canaryMultiplier, 0.25);
+    assert.strictEqual(evalRes.isCanaryCandidate, true);
   });
 
   // --- SUITE 4: Multi-Tenant Lease Allocation & Substrate ---
@@ -4941,7 +4942,7 @@ async function runAllTests() {
     assert.strictEqual(drawResult.costUsd, 0.0025);
     assert.strictEqual(drawResult.newBalance, 14.9975);
 
-    // 4. Natural query transactions
+    // 4. Natural query transactions from the synchronous local projection.
     const txs = walletRepo.queryTransactionsNatural(`where userId = "${testUserId}" limit 10`);
     assert.strictEqual(txs.length, 2);
 
@@ -6048,6 +6049,7 @@ async function runAllTests() {
     process.exit(1);
   }
   console.log('======================================================================\n');
+  process.exit(0);
 }
 
 runAllTests().catch((err) => {

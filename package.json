@@ -63,6 +63,14 @@
       "types": "./src/sdk/agent.ts",
       "default": "./src/sdk/agent.ts"
     },
+    "./execution": {
+      "types": "./src/sdk/execution.ts",
+      "default": "./src/sdk/execution.ts"
+    },
+    "./execution/durable": {
+      "types": "./src/sdk/execution-durable.ts",
+      "default": "./src/sdk/execution-durable.ts"
+    },
     "./builder": {
       "types": "./src/sdk/builder.ts",
       "default": "./src/sdk/builder.ts"
@@ -165,15 +173,11 @@
     "dissect:payloads": "node --import tsx scripts/dissect-payloads-and-causal-analysis.ts",
     "bench:180-domains": "node --import tsx scripts/test-broccolidb-150-domain-suite.ts",
     "bench:entropy": "node --import tsx scripts/bench-institutional-entropy-matrix.ts",
-
-
-
     "predev": "kill $(lsof -ti:3000) 2>/dev/null || true",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-
     "lint:design": "npx -y impeccable detect src",
     "design:health": "tsx scripts/verify-design-health.ts",
     "design:hints": "tsx scripts/verify-design-health.ts --hints",
@@ -219,6 +223,15 @@
     "test:snake": "tsx tests/quota-pooling/test-snake-request.ts",
     "test:image": "tsx tests/quota-pooling/test-image-model-request.ts",
     "test:inference": "tsx scripts/test-inference-pipeline.ts",
+    "shards": "tsx scripts/manage-shards.ts",
+    "shards:list": "tsx scripts/manage-shards.ts --list",
+    "shards:test": "tsx scripts/manage-shards.ts --test",
+    "shards:import": "tsx scripts/manage-shards.ts --import",
+    "shards:cycle": "tsx scripts/manage-shards.ts --cycle 4",
+    "sim:10k": "tsx simulations/high-concurrency-10k-fairness/simulate-10k-qps.ts",
+    "sim:100k": "tsx simulations/high-concurrency-10k-fairness/simulate-100k-qps.ts",
+    "sim:unpredictable": "tsx simulations/high-concurrency-10k-fairness/simulate-unpredictable-inference.ts",
+    "test:10k": "tsx simulations/high-concurrency-10k-fairness/index.test.ts",
     "db:verify": "tsx scripts/verify-supabase-integrity.ts",
     "db:test": "tsx scripts/test-supabase-integration.ts",
     "db:push": "tsx scripts/push-migrations-direct.ts",
@@ -237,6 +250,7 @@
   },
   "dependencies": {
     "@eslint/eslintrc": "^3",
+    "@openai/codex-sdk": "^0.147.0",
     "@stripe/stripe-js": "^9.14.0",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
@@ -263,6 +277,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260823.1",
+    "@types/ws": "^8.18.1",
     "wrangler": "^4.125.0"
   }
 }

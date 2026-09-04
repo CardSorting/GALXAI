@@ -514,22 +514,18 @@ npm run db:verify
 # 14. Cloudflare Edge Mesh Verification Suite (46 edge tests)
 npm run worker:test
 
-# 15. SDK -> Cloudflare Edge Live Smoke Test
+# 15. Real End-to-End Inference Pipeline (100% Wire Execution & Output Generation)
+npm run test:inference
+
+# 16. SDK -> Cloudflare Edge Live Smoke Test
 npx tsx scripts/test-sdk-edge.ts
 
-# 16. TypeScript Type-Check & ESLint 9 Flat Config
+# 17. TypeScript Type-Check & ESLint 9 Flat Config
 npm run lint
 
-# 17. Full Production Build (300 SSG Pages)
+# 18. Full Production Build (300 SSG Pages)
 npm run build
 
 ```
 
 When contributing code changes, ensure all test suites pass with 0 errors.
-
-
-
-
-
-
-

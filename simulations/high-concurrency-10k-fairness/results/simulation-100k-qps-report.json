@@ -1,0 +1,84 @@
+{
+  "timestamp": "2026-09-04T05:59:24.767Z",
+  "benchmark": "100k-qps-extreme-industrial",
+  "totalSubmitted": 100000,
+  "durationMs": 302,
+  "metrics": {
+    "totalSubmitted": 100000,
+    "admitted": 414,
+    "coalesced": 700,
+    "idempotentHits": 11,
+    "deduplicatedTasks": 14,
+    "shedOverflow": 98861,
+    "droppedAged": 0,
+    "completedSuccess": 414,
+    "hedgedDispatches": 122,
+    "hedgedWon": 122,
+    "dlqRouted": 0,
+    "groupIdSequenced": 32,
+    "zombieUpstreamExecutions": 0,
+    "p50QueueLatencyMs": 107,
+    "p90QueueLatencyMs": 181,
+    "p99QueueLatencyMs": 202,
+    "p999QueueLatencyMs": 205,
+    "throughputQps": 414,
+    "tenantStats": {
+      "tenant_noisy_abuser": {
+        "submitted": 70000,
+        "completed": 94,
+        "shed": 69845,
+        "aged": 0,
+        "successRate": 0.0013428571428571428
+      },
+      "tenant_enterprise_core": {
+        "submitted": 18000,
+        "completed": 149,
+        "shed": 17378,
+        "aged": 0,
+        "successRate": 0.008277777777777778
+      },
+      "tenant_interactive_dev": {
+        "submitted": 9000,
+        "completed": 127,
+        "shed": 8689,
+        "aged": 0,
+        "successRate": 0.01411111111111111
+      },
+      "tenant_free_tier": {
+        "submitted": 3000,
+        "completed": 44,
+        "shed": 2949,
+        "aged": 0,
+        "successRate": 0.014666666666666666
+      }
+    },
+    "cloudRunStats": {
+      "totalInstances": 25,
+      "peakInFlight": 5,
+      "outlierEjections": 0
+    },
+    "adaptiveConcurrency": {
+      "initialLimit": 150,
+      "finalLimit": 100,
+      "minRttObservedMs": 42,
+      "smoothedRttMs": 57
+    },
+    "hybridStoreStats": {
+      "totalTasksIndexed": 1125,
+      "activeEnqueued": 711,
+      "completedTasks": 414,
+      "idempotencyEntries": 0,
+      "dlqEntries": 0,
+      "shardRecords": 0,
+      "bufferedTokenChunks": 0
+    }
+  },
+  "invariants": {
+    "zeroZombieUpstream": true,
+    "nanoShedActive": true,
+    "interactiveDevProtected": true,
+    "hedgedReductionActive": true,
+    "sqsFifoSequencingActive": true,
+    "broccoliHybridActive": true
+  }
+}

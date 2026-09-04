@@ -58,6 +58,7 @@ supabase/.branches/
 # ------------------------------------------------------------------------------
 .data/
 .galxai_cache/
+.galx-shards.json
 .broccolidb/
 *.db
 *.sqlite

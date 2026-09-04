@@ -113,6 +113,9 @@ export class GalxModelRouter {
       .replace(/(?:shard|codex|lease|acc)_[a-zA-Z0-9_-]+/gi, '[gateway-route]')
       .replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, '[redacted-ip]');
 
+    if (sanitized.toLowerCase().includes('usage limit') || sanitized.toLowerCase().includes('resets at') || sanitized.toLowerCase().includes('try again at')) {
+      return sanitized;
+    }
     if (sanitized.includes('429') || sanitized.toLowerCase().includes('rate limit')) {
       return 'Capacity allocation currently saturated. Automatic retry buffer activated.';
     }
@@ -214,6 +217,9 @@ export class GalxModelRouter {
       }
 
       if (!acqResult.lease) {
+        if (lastError) {
+          throw lastError;
+        }
         throw new Error(
           acqResult.reason || `No healthy ${provider} shard credentials currently available matching privacy policy`
         );
@@ -328,7 +334,7 @@ export class GalxModelRouter {
             statusCode: response.status
           });
 
-          if (response.status === 429 || response.status >= 500 || response.status === 404 || response.status === 400) {
+          if (response.status === 429 || response.status === 401 || response.status >= 500 || response.status === 404 || response.status === 400) {
             lastError = new Error(`Compute origin error (${response.status}): ${sanitizedErr}`);
             continue;
           }
