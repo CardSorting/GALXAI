@@ -11,7 +11,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import { fileURLToPath } from 'url';
-import { getSupabaseAdmin, isSupabaseConfigured } from '../src/lib/supabase/client';
+import { getSupabaseConfig } from '../src/lib/supabase/config';
+import { closePostgresPool, executePostgresQuery } from '../src/lib/db/postgres';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -61,21 +62,54 @@ class MigrationManager {
     });
   }
 
-  public printStatus(): void {
+  public async printStatus(): Promise<void> {
+    const config = getSupabaseConfig();
+    const appliedVersions = new Set<string>();
+    let connected = false;
+    let credentialStatus = 'DATABASE_URL not configured';
+
+    if (config.databaseUrl) {
+      const result = await executePostgresQuery<{ version: string }>(
+        `SELECT version
+         FROM supabase_migrations.schema_migrations
+         ORDER BY version ASC;`
+      );
+      if (result) {
+        connected = true;
+        credentialStatus = 'connected through pooled PostgreSQL';
+        for (const row of result.rows) appliedVersions.add(row.version);
+      } else {
+        credentialStatus = 'configured but connection failed';
+      }
+    }
+
     console.log('======================================================================');
     console.log('   🏛️  GALXAI SUPABASE MIGRATION STATUS & AUDIT TRAIL               ');
     console.log('======================================================================\n');
-    console.log(`Database credentials: ${isSupabaseConfigured() ? 'configured (applied state not queried)' : 'not configured'}`);
+    console.log(`Database credentials: ${credentialStatus}`);
     console.log(`Total Discovered Migrations: ${this.migrations.length}\n`);
 
-    console.log('| Version        | Migration Name                        | Checksum (SHA-256) | Rollback Parity |');
-    console.log('| :------------- | :------------------------------------ | :----------------- | :-------------- |');
+    console.log('| Version        | Migration Name                        | Database | Checksum (SHA-256) | Rollback Parity |');
+    console.log('| :------------- | :------------------------------------ | :------- | :----------------- | :-------------- |');
 
     for (const m of this.migrations) {
       const hasDown = fs.existsSync(m.downPath);
       const shortHash = m.checksum.substring(0, 12);
       const statusIcon = hasDown ? '✓ OK (.down.sql)' : '✗ MISSING';
-      console.log(`| ${m.version} | ${m.name.padEnd(37, ' ')} | ${shortHash}...       | ${statusIcon.padEnd(15, ' ')} |`);
+      const databaseState = !connected
+        ? 'unknown'
+        : appliedVersions.has(m.version) ? 'applied' : 'pending';
+      console.log(`| ${m.version} | ${m.name.padEnd(37, ' ')} | ${databaseState.padEnd(7, ' ')} | ${shortHash}...       | ${statusIcon.padEnd(15, ' ')} |`);
+    }
+
+    if (connected) {
+      const localVersions = new Set(this.migrations.map(m => m.version));
+      const pending = this.migrations.filter(m => !appliedVersions.has(m.version));
+      const remoteOnly = [...appliedVersions].filter(version => !localVersions.has(version));
+      console.log(`\nApplied: ${appliedVersions.size} | Pending: ${pending.length} | Remote-only: ${remoteOnly.length}`);
+      if (remoteOnly.length > 0) {
+        console.log(`Remote-only versions: ${remoteOnly.join(', ')}`);
+      }
     }
     console.log('\n======================================================================\n');
   }
@@ -177,7 +211,7 @@ async function main() {
   const manager = new MigrationManager();
 
   if (args.includes('--status')) {
-    manager.printStatus();
+    await manager.printStatus();
   } else if (args.includes('--dry-run')) {
     await manager.applyMigrations(true);
   } else if (args.includes('--apply')) {
@@ -187,11 +221,15 @@ async function main() {
     const name = args[nameIndex] || 'new_feature';
     manager.generateTemplate(name);
   } else {
-    manager.printStatus();
+    await manager.printStatus();
   }
 }
 
-main().catch(err => {
-  console.error('Fatal error in migration manager:', err);
-  process.exit(1);
-});
+main()
+  .catch(err => {
+    console.error('Fatal error in migration manager:', err);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await closePostgresPool();
+  });

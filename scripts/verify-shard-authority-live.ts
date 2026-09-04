@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import pg from 'pg';
+import { getPostgresSslConfig } from '../src/lib/db/postgres';
 
 interface RoutineGrantRow {
   proname: string;
@@ -36,7 +37,7 @@ async function main(): Promise<void> {
 
   const client = new pg.Client({
     connectionString: databaseUrl,
-    ssl: { rejectUnauthorized: false },
+    ssl: getPostgresSslConfig(),
     connectionTimeoutMillis: 10_000
   });
   await client.connect();

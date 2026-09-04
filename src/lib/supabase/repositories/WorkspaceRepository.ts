@@ -5,6 +5,7 @@
  */
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
+import { executePostgresQuery } from '../../db/postgres';
 import type { Database, GalxWorkspaceRole } from '../types';
 import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
 import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-natural-query';
@@ -144,6 +145,29 @@ export class WorkspaceRepository {
       updatedAt: new Date().toISOString()
     };
     this.memberTable.put(member.id, member);
+
+    const directResult = await executePostgresQuery<{ result: {
+      success?: boolean;
+      workspace?: Database['public']['Tables']['galx_workspaces']['Row'];
+    } }>(
+      `SELECT public.fn_create_workspace(
+        $1::varchar, $2::varchar, $3::varchar, $4::varchar, $5::numeric, $6::jsonb
+      ) AS result;`,
+      [
+        params.slug,
+        params.name,
+        params.ownerUserId,
+        params.tier || 'standard',
+        params.monthlySpendCapUsd || 1000.0,
+        JSON.stringify(params.metadata || {}),
+      ]
+    );
+    const directWorkspace = directResult?.rows[0]?.result?.workspace;
+    if (directResult?.rows[0]?.result?.success && directWorkspace) {
+      const mapped = this.mapWorkspaceRow(directWorkspace);
+      this.workspaceTable.put(mapped.id, mapped);
+      return mapped;
+    }
 
     if (isSupabaseConfigured()) {
       try {

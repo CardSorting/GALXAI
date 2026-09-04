@@ -25,9 +25,14 @@ import {
   SessionRepository,
   galxDb,
   getSupabaseConfig,
-  isSupabaseConfigured,
+  isSupabaseAdminConfigured,
   getSupabaseAdmin
 } from '../src/lib/supabase';
+import {
+  closePostgresPool,
+  executePostgresQuery,
+  isPostgresPoolHealthy,
+} from '../src/lib/db/postgres';
 
 import { GalxCryptoVault } from '../src/core/vault/GalxCryptoVault';
 import { GalxPersistence } from '../src/lib/storage/GalxPersistence';
@@ -48,6 +53,25 @@ import { GalxBurstSmoother } from '../src/lib/cache/GalxBurstSmoother';
 import { GalxCreditSlicer } from '../src/lib/cache/GalxCreditSlicer';
 import { GalxGatewayMesh } from '../src/lib/cache/GalxGatewayMesh';
 import { GalxMultiQueryPipeliner } from '../src/lib/cache/GalxMultiQueryPipeliner';
+
+async function invokeLiveRpc<T>(
+  functionName: string,
+  namedArgs: Record<string, unknown>,
+  sql: string,
+  params: unknown[]
+): Promise<T> {
+  if (isSupabaseAdminConfigured()) {
+    const { data, error } = await getSupabaseAdmin().rpc(functionName as any, namedArgs as any);
+    if (error) throw new Error(`${functionName} Data API invocation failed: ${error.code || error.message}`);
+    return data as T;
+  }
+
+  const result = await executePostgresQuery<{ data: T }>(sql, params);
+  if (!result?.rows[0]) {
+    throw new Error(`${functionName} PostgreSQL invocation returned no result.`);
+  }
+  return result.rows[0].data;
+}
 
 async function runTests() {
   console.log('======================================================================');
@@ -75,6 +99,19 @@ async function runTests() {
       config.poolSize > 0 && config.requestTimeoutMs > 0,
       'Supabase Config: Resolves valid connection pooling and timeout constants'
     );
+    assert(
+      Boolean(config.databaseUrl),
+      'Supabase Config: Loads DATABASE_URL from the server-only environment'
+    );
+    assert(
+      await isPostgresPoolHealthy(),
+      'Supabase PostgreSQL: Connects through the configured transaction pooler'
+    );
+    if (config.supabaseServiceRoleKey && !isSupabaseAdminConfigured()) {
+      console.warn(
+        '  [!] SUPABASE_SERVICE_ROLE_KEY is not an admin credential; privileged checks will use PostgreSQL authority.'
+      );
+    }
 
     // 2. Workspace Repository
     const wsRepo = WorkspaceRepository.getInstance();
@@ -138,7 +175,7 @@ async function runTests() {
       encryptedPayload: encryptedSecret,
       shardMode: 'pooled',
       priority: 90,
-      weight: 100,
+      weight: 10,
       status: 'healthy',
       tokenBucket: {
         maxTokens: 10000000,
@@ -1081,15 +1118,18 @@ async function runTests() {
     );
 
     // 61. Distributed Probabilistic Recompute Locks (Migration 32)
-    if (isSupabaseConfigured()) {
-      const supabase = getSupabaseAdmin();
-      const { data: lockData, error: lockErr } = await supabase.rpc('fn_batch_probabilistic_recompute_lock', {
+    {
+      const lockData = await invokeLiveRpc<any>('fn_batch_probabilistic_recompute_lock', {
         p_keys: ['cache_key_alpha', 'cache_key_beta'],
         p_worker_id: 'cf_edge_worker_99',
         p_ttl_ms: 5000
-      });
+      }, 'SELECT public.fn_batch_probabilistic_recompute_lock($1::varchar[], $2::varchar, $3::integer) AS data;', [
+        ['cache_key_alpha', 'cache_key_beta'],
+        'cf_edge_worker_99',
+        5000,
+      ]);
       assert(
-        Boolean(!lockErr && lockData && (lockData as any).success === true && (lockData as any).acquired_keys?.length >= 1),
+        Boolean(lockData?.success === true && lockData.acquired_keys?.length >= 1),
         'DistributedLock: Acquires distributed recompute locks for coordinated XFetch recomputation'
       );
     }
@@ -1163,45 +1203,48 @@ async function runTests() {
     );
 
     // 65. Workspace: 1-Hop Composite State Hydration (Migration 34)
-    if (isSupabaseConfigured()) {
-      const supabase = getSupabaseAdmin();
-      const { data: wsState, error: wsErr } = await supabase.rpc('fn_get_workspace_composite_state', {
+    {
+      const wsState = await invokeLiveRpc<any>('fn_get_workspace_composite_state', {
         p_workspace_id: ws.id
-      });
+      }, 'SELECT public.fn_get_workspace_composite_state($1::uuid) AS data;', [ws.id]);
       assert(
-        Boolean(!wsErr && wsState && (wsState as any).success === true && Array.isArray((wsState as any).environments)),
+        Boolean(wsState?.success === true && Array.isArray(wsState.environments)),
         'Workspace: 1-hop composite state query aggregates workspace, environments, keys, budget alerts, and audits'
       );
     }
 
     // 66. Stripe: 1-Hop Bulk Deposit Fulfillment Batch (Migration 34)
-    if (isSupabaseConfigured()) {
-      const supabase = getSupabaseAdmin();
+    {
       const bulkDepositUser1 = `usr_bulk_dep1_${Date.now()}`;
       const bulkDepositUser2 = `usr_bulk_dep2_${Date.now()}`;
-      const { data: bulkDepData, error: bulkDepErr } = await supabase.rpc('fn_bulk_verify_deposit_and_match', {
-        p_deposits: [
-          { user_id: bulkDepositUser1, deposit_amount_usd: 20, payment_ref: 'bulk_dep_1' },
-          { user_id: bulkDepositUser2, deposit_amount_usd: 50, payment_ref: 'bulk_dep_2' }
-        ]
-      });
+      const deposits = [
+        { user_id: bulkDepositUser1, deposit_amount_usd: 20, payment_ref: 'bulk_dep_1' },
+        { user_id: bulkDepositUser2, deposit_amount_usd: 50, payment_ref: 'bulk_dep_2' }
+      ];
+      const bulkDepData = await invokeLiveRpc<any>('fn_bulk_verify_deposit_and_match', {
+        p_deposits: deposits
+      }, 'SELECT public.fn_bulk_verify_deposit_and_match($1::jsonb) AS data;', [JSON.stringify(deposits)]);
       assert(
-        Boolean(!bulkDepErr && bulkDepData && (bulkDepData as any).processed_deposits_count === 2 && (bulkDepData as any).total_credit_granted_usd === 105),
+        Boolean(bulkDepData?.processed_deposits_count === 2 && bulkDepData.total_credit_granted_usd === 105),
         'Stripe: 1-hop bulk deposit fulfillment processes multiple deposits with 50% match'
       );
     }
 
     // 67. Model Routing: 1-Hop Atomic Policy Routing Evaluation (Migration 34)
-    if (isSupabaseConfigured()) {
-      const supabase = getSupabaseAdmin();
-      const { data: routeData, error: routeErr } = await supabase.rpc('fn_route_model_atomic_eval', {
+    {
+      const routeData = await invokeLiveRpc<any>('fn_route_model_atomic_eval', {
         p_workspace_id: ws.id,
         p_requested_model: 'grok-beta',
         p_prompt_preview: 'Hello world',
         p_max_cost: 0.10
-      });
+      }, 'SELECT public.fn_route_model_atomic_eval($1::uuid, $2::varchar, $3::text, $4::numeric) AS data;', [
+        ws.id,
+        'grok-beta',
+        'Hello world',
+        0.10,
+      ]);
       assert(
-        Boolean(!routeErr && routeData && (routeData as any).success === true && (routeData as any).selected_provider === 'xai-grok'),
+        Boolean(routeData?.success === true && routeData.selected_provider === 'xai-grok'),
         'Model Routing: 1-hop atomic policy routing selects provider and logs evidence in 1 RPC'
       );
     }
@@ -1219,101 +1262,110 @@ async function runTests() {
     );
 
     // 69. Token Verification: 1-Hop Multi-Token Lookup (Migration 35)
-    if (isSupabaseConfigured()) {
-      const supabase = getSupabaseAdmin();
-      const { data: tokData, error: tokErr } = await supabase.rpc('fn_batch_verify_tokens', {
+    {
+      const tokData = await invokeLiveRpc<any>('fn_batch_verify_tokens', {
         p_token_hashes: [preflightKeyHash]
-      });
+      }, 'SELECT public.fn_batch_verify_tokens($1::varchar[]) AS data;', [[preflightKeyHash]]);
       assert(
-        Boolean(!tokErr && tokData && (tokData as any).success === true && (tokData as any).verified_count >= 1),
+        Boolean(tokData?.success === true && tokData.verified_count >= 1),
         'Token Verification: 1-hop multi-token lookup checks API keys and sessions simultaneously'
       );
     }
 
     // 70. Merkle Proofs: 1-Hop Windowed Merkle Chain Proof (Migration 35)
-    if (isSupabaseConfigured()) {
-      const supabase = getSupabaseAdmin();
+    {
       const walRes = await walletRepo.getWallet(preflightUser);
       if (walRes) {
-        const { data: merkleData, error: merkleErr } = await supabase.rpc('fn_verify_merkle_chain_window', {
+        const merkleData = await invokeLiveRpc<any>('fn_verify_merkle_chain_window', {
           p_wallet_id: walRes.id,
           p_limit: 50
-        });
+        }, 'SELECT public.fn_verify_merkle_chain_window($1::uuid, $2::integer) AS data;', [walRes.id, 50]);
         assert(
-          Boolean(!merkleErr && merkleData && (merkleData as any).success === true && (merkleData as any).chain_valid === true),
+          Boolean(merkleData?.success === true && merkleData.chain_valid === true),
           'Merkle Proofs: 1-hop windowed Merkle chain integrity verification executes natively in PostgreSQL'
         );
       }
     }
 
     // 71. Organization: 1-Hop Full Hierarchy State Hydration (Migration 36)
-    if (isSupabaseConfigured()) {
-      const supabase = getSupabaseAdmin();
+    {
       const testOrgId = `org_test_${Date.now()}`;
-      await supabase.rpc('fn_create_organization' as any, {
+      await invokeLiveRpc<any>('fn_create_organization', {
         p_id: testOrgId,
         p_name: 'Enterprise Apex Org',
         p_slug: `apex-org-${Date.now()}`,
         p_tier: 'enterprise',
         p_seat_capacity: 100,
         p_billing_email: 'finance@apex-org.io'
-      });
-      const { data: orgData, error: orgErr } = await supabase.rpc('fn_get_organization_full_hierarchy_state', {
+      }, 'SELECT public.fn_create_organization($1::varchar, $2::varchar, $3::varchar, $4::varchar, $5::integer, $6::varchar) AS data;', [
+        testOrgId,
+        'Enterprise Apex Org',
+        `apex-org-${Date.now()}`,
+        'enterprise',
+        100,
+        'finance@apex-org.io',
+      ]);
+      const orgData = await invokeLiveRpc<any>('fn_get_organization_full_hierarchy_state', {
         p_org_id: testOrgId
-      });
+      }, 'SELECT public.fn_get_organization_full_hierarchy_state($1::varchar) AS data;', [testOrgId]);
       assert(
-        Boolean(!orgErr && orgData && (orgData as any).success === true && (orgData as any).organization?.id === testOrgId),
+        Boolean(orgData?.success === true && orgData.organization?.id === testOrgId),
         'Organization: 1-hop full hierarchy state hydration returns complete org graph'
       );
     }
 
     // 72. Multi-RPC Dispatcher: Executes Heterogenous RPCs in 1 JSON Transaction (Migration 36)
-    if (isSupabaseConfigured()) {
-      const supabase = getSupabaseAdmin();
-      const { data: multiData, error: multiErr } = await supabase.rpc('fn_batch_multi_rpc_dispatch', {
-        p_calls: [
-          { id: 'c1', procedure: 'get_wallet', args: { user_id: preflightUser } },
-          { id: 'c2', procedure: 'route_model', args: { requested_model: 'claude-3-5-sonnet' } }
-        ]
-      });
+    {
+      const calls = [
+        { id: 'c1', procedure: 'get_wallet', args: { user_id: preflightUser } },
+        { id: 'c2', procedure: 'route_model', args: { requested_model: 'claude-3-5-sonnet' } }
+      ];
+      const multiData = await invokeLiveRpc<any>('fn_batch_multi_rpc_dispatch', {
+        p_calls: calls
+      }, 'SELECT public.fn_batch_multi_rpc_dispatch($1::jsonb) AS data;', [JSON.stringify(calls)]);
       assert(
-        Boolean(!multiErr && multiData && (multiData as any).success === true && (multiData as any).total_calls_executed === 2),
+        Boolean(multiData?.success === true && multiData.total_calls_executed === 2),
         'Multi-RPC Dispatcher: Executes heterogenous RPCs in 1 single JSON roundtrip'
       );
     }
 
     // 73. Atomic Merkle Leaf Append: C-Native SHA-256 Digest (Migration 37)
-    if (isSupabaseConfigured()) {
-      const supabase = getSupabaseAdmin();
+    {
       const walRes = await walletRepo.getWallet(preflightUser);
       if (walRes) {
-        const { data: leafData, error: leafErr } = await supabase.rpc('fn_atomic_merkle_leaf_append', {
+        const leafData = await invokeLiveRpc<any>('fn_atomic_merkle_leaf_append', {
           p_wallet_id: walRes.id,
           p_user_id: preflightUser,
           p_tx_type: 'deposit',
           p_amount: 5.0,
           p_desc: 'C-native Merkle Leaf Test Append'
-        });
+        }, 'SELECT public.fn_atomic_merkle_leaf_append($1::uuid, $2::varchar, $3::varchar, $4::numeric, $5::text) AS data;', [
+          walRes.id,
+          preflightUser,
+          'deposit',
+          5.0,
+          'C-native Merkle Leaf Test Append',
+        ]);
         assert(
-          Boolean(!leafErr && leafData && (leafData as any).success === true && (leafData as any).ledger_hash?.length === 64),
+          Boolean(leafData?.success === true && leafData.ledger_hash?.length === 64),
           'Merkle Leaf: Appends cryptographic Merkle leaf with C-native SHA-256 parent chaining in 1 RPC'
         );
       }
     }
 
     // 74. Synthetic Canary SLO Error Budget Rollup (Migration 37)
-    if (isSupabaseConfigured()) {
-      const supabase = getSupabaseAdmin();
-      const { data: canaryData, error: canaryErr } = await supabase.rpc('fn_ingest_canary_probe_and_eval_slo', {
-        p_probe_data: {
-          target_url: 'https://api.galxai.internal/healthz',
-          status_code: 200,
-          latency_ms: 35,
-          region: 'us-west-2'
-        }
-      });
+    {
+      const probeData = {
+        target_url: 'https://api.galxai.internal/healthz',
+        status_code: 200,
+        latency_ms: 35,
+        region: 'us-west-2'
+      };
+      const canaryData = await invokeLiveRpc<any>('fn_ingest_canary_probe_and_eval_slo', {
+        p_probe_data: probeData
+      }, 'SELECT public.fn_ingest_canary_probe_and_eval_slo($1::jsonb) AS data;', [JSON.stringify(probeData)]);
       assert(
-        Boolean(!canaryErr && canaryData && (canaryData as any).success === true && (canaryData as any).is_success === true),
+        Boolean(canaryData?.success === true && canaryData.is_success === true),
         'Synthetic Canary: 1-hop probe ingestion and SLO error budget evaluation'
       );
     }
@@ -1326,8 +1378,10 @@ async function runTests() {
     console.log('======================================================================\n');
   } catch (err: any) {
     console.error('\nTest suite encountered fatal error:', err);
-    process.exit(1);
+    process.exitCode = 1;
+  } finally {
+    await closePostgresPool();
   }
 }
 
-runTests();
+void runTests();

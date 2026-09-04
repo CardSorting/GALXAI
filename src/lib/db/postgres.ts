@@ -13,6 +13,32 @@
 
 import { Pool, PoolClient, PoolConfig, QueryResult, QueryResultRow } from 'pg';
 
+export type PostgresSslMode = 'require' | 'verify-full';
+
+/**
+ * Builds the TLS policy shared by runtime pools and migration tooling.
+ * `require` encrypts transport; `verify-full` also authenticates the Supabase
+ * endpoint and requires the project CA certificate from Database Settings.
+ */
+export function getPostgresSslConfig(): PoolConfig['ssl'] {
+  const mode = (process.env.SUPABASE_DB_SSL_MODE || 'require') as PostgresSslMode;
+  if (mode !== 'require' && mode !== 'verify-full') {
+    throw new Error('SUPABASE_DB_SSL_MODE must be either require or verify-full.');
+  }
+
+  const ca = process.env.SUPABASE_DB_CA_CERT?.replace(/\\n/g, '\n').trim();
+  if (mode === 'verify-full' && !ca) {
+    throw new Error(
+      'SUPABASE_DB_CA_CERT is required when SUPABASE_DB_SSL_MODE=verify-full.'
+    );
+  }
+
+  return {
+    rejectUnauthorized: mode === 'verify-full',
+    ...(ca ? { ca } : {})
+  };
+}
+
 export type CircuitBreakerState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
 
 interface CircuitBreakerStatus {
@@ -91,7 +117,7 @@ export function getPostgresPool(): Pool | null {
   if (!globalThis.__galx_pg_pool) {
     const config: PoolConfig = {
       connectionString: dbUrl,
-      ssl: { rejectUnauthorized: false },
+      ssl: getPostgresSslConfig(),
       max: Number(process.env.SUPABASE_POOL_SIZE || '15'),
       maxUses: Number(process.env.SUPABASE_POOL_MAX_USES || '7500'),
       idleTimeoutMillis: 30000,

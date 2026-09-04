@@ -5,7 +5,7 @@
  * Backed by BroccoliDB L1 reactive tables with secondary indexing, natural query parsing, and aggregation.
  */
 
-import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
+import { getSupabaseAdmin, isSupabaseAdminConfigured, isSupabaseConfigured } from '../client';
 import { executePostgresQuery } from '../../db/postgres';
 import type { Database, GalxWalletTransactionType } from '../types';
 import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
@@ -83,13 +83,14 @@ export class WalletRepository {
       const uidsArray = Array.from(userIds);
 
       // 1. Direct PostgreSQL Connection Pool Query with Circuit Breaker (<1.5ms)
-      const res = await executePostgresQuery(
-        'SELECT * FROM fn_batch_get_wallets_by_users($1::text[]);',
+      const res = await executePostgresQuery<{ result: any[] }>(
+        'SELECT public.fn_batch_get_wallets_by_users($1::varchar[]) AS result;',
         [uidsArray]
       );
 
-      if (res && res.rows && res.rows.length > 0) {
-        for (const row of res.rows) {
+      const authoritativeRows = res?.rows[0]?.result;
+      if (Array.isArray(authoritativeRows)) {
+        for (const row of authoritativeRows) {
           if (row && row.user_id) {
             const mapped = this.mapRowToWallet(row);
             userMap.set(row.user_id, mapped);
@@ -99,7 +100,7 @@ export class WalletRepository {
       }
 
       // 2. Supabase PostgREST RPC Fallback
-      if (userMap.size < uidsArray.length && isSupabaseConfigured()) {
+      if (userMap.size < uidsArray.length && isSupabaseAdminConfigured()) {
         try {
           const supabase = getSupabaseAdmin();
           const missing = uidsArray.filter(u => !userMap.has(u));
@@ -243,7 +244,40 @@ export class WalletRepository {
     this.walletCoalescer.invalidate(params.userId);
     this.walletDataLoader.clear(params.userId);
 
-    if (isSupabaseConfigured()) {
+    const mapDepositResult = (res: any) => {
+      const result = {
+        success: true,
+        depositAmount: Number(res.deposit_amount),
+        matchGrant: Number(res.match_grant),
+        totalCredit: Number(res.total_credit),
+        newBalance: Number(res.new_balance),
+        proofOfDepositVerified: Boolean(res.proof_of_deposit_verified)
+      };
+      this.walletCoalescer.invalidate(params.userId);
+      this.walletDataLoader.clear(params.userId);
+      this.projectSuccessfulDeposit(params, result);
+      return result;
+    };
+
+    const direct = await executePostgresQuery<{ result: any }>(
+      `SELECT public.fn_verify_deposit_and_match(
+        $1::varchar, $2::numeric, $3::varchar
+      ) AS result;`,
+      [params.userId, params.depositAmountUsd, params.paymentRef || null]
+    );
+    const directResult = direct?.rows[0]?.result;
+    if (directResult?.success) {
+      return mapDepositResult(directResult);
+    }
+    if (process.env.DATABASE_URL) {
+      throw new Error(
+        `Authoritative deposit verification failed${
+          directResult?.error ? `: ${String(directResult.error)}` : ''
+        }.`
+      );
+    }
+
+    if (isSupabaseAdminConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
         const { data, error } = await supabase.rpc('fn_verify_deposit_and_match', {
@@ -255,18 +289,7 @@ export class WalletRepository {
         if (!error && data) {
           const res = data as any;
           if (res.success) {
-            this.walletCoalescer.invalidate(params.userId);
-            this.walletDataLoader.clear(params.userId);
-            const result = {
-              success: true,
-              depositAmount: Number(res.deposit_amount),
-              matchGrant: Number(res.match_grant),
-              totalCredit: Number(res.total_credit),
-              newBalance: Number(res.new_balance),
-              proofOfDepositVerified: res.proof_of_deposit_verified
-            };
-            this.projectSuccessfulDeposit(params, result);
-            return result;
+            return mapDepositResult(res);
           }
         }
       } catch {
@@ -411,7 +434,50 @@ export class WalletRepository {
     newBalance?: number;
     expiresAt?: string;
   }> {
-    if (isSupabaseConfigured()) {
+    const mapHoldResult = async (res: any) => {
+      this.walletCoalescer.invalidate(params.userId);
+      this.walletDataLoader.clear(params.userId);
+      const wallet = await this.getWallet(params.userId);
+      if (wallet) {
+        this.walletTable.put(params.userId, {
+          ...wallet,
+          balanceUsd: Number(res.new_balance),
+          updatedAt: new Date().toISOString()
+        });
+      }
+      return {
+        success: true,
+        holdId: String(res.hold_id),
+        reservedUsd: Number(res.reserved_usd),
+        previousBalance: Number(res.previous_balance),
+        newBalance: Number(res.new_balance),
+        expiresAt: String(res.expires_at)
+      };
+    };
+
+    const direct = await executePostgresQuery<{ result: any }>(
+      `SELECT public.fn_reserve_wallet_hold(
+        $1::varchar, $2::numeric, $3::bigint, $4::jsonb
+      ) AS result;`,
+      [
+        params.userId,
+        params.estimatedCostUsd,
+        params.holdTtlMs || 120000,
+        JSON.stringify(params.metadata || {})
+      ]
+    );
+    const directResult = direct?.rows[0]?.result;
+    if (directResult?.success) {
+      return mapHoldResult(directResult);
+    }
+    if (directResult && !directResult.success) {
+      return { success: false, reason: String(directResult.reason || 'AUTHORITY_REJECTED') };
+    }
+    if (process.env.DATABASE_URL) {
+      throw new Error('Authoritative wallet hold reservation was unavailable.');
+    }
+
+    if (isSupabaseAdminConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
         const { data, error } = await supabase.rpc('fn_reserve_wallet_hold', {
@@ -424,22 +490,7 @@ export class WalletRepository {
         if (!error && data) {
           const res = data as any;
           if (res.success) {
-            const wallet = await this.getWallet(params.userId);
-            if (wallet) {
-              this.walletTable.put(params.userId, {
-                ...wallet,
-                balanceUsd: Number(res.new_balance),
-                updatedAt: new Date().toISOString()
-              });
-            }
-            return {
-              success: true,
-              holdId: String(res.hold_id),
-              reservedUsd: Number(res.reserved_usd),
-              previousBalance: Number(res.previous_balance),
-              newBalance: Number(res.new_balance),
-              expiresAt: String(res.expires_at)
-            };
+            return mapHoldResult(res);
           }
           return { success: false, reason: res.reason };
         }
@@ -509,7 +560,43 @@ export class WalletRepository {
     refundedDeltaUsd?: number;
     newBalance?: number;
   }> {
-    if (isSupabaseConfigured()) {
+    const mapCommitResult = (res: any) => ({
+      success: true,
+      transactionId: String(res.transaction_id),
+      holdId: String(res.hold_id),
+      actualCostUsd: Number(res.actual_cost_usd),
+      refundedDeltaUsd: Number(res.refunded_delta_usd),
+      newBalance: Number(res.new_balance)
+    });
+
+    const direct = await executePostgresQuery<{ result: any }>(
+      `SELECT public.fn_commit_wallet_hold(
+        $1::uuid, $2::numeric, $3::text, $4::varchar,
+        $5::bigint, $6::bigint, $7::bigint, $8::jsonb
+      ) AS result;`,
+      [
+        params.holdId,
+        params.actualCostUsd,
+        params.description || 'Inference stream settlement',
+        params.model || null,
+        params.promptTokens || 0,
+        params.completionTokens || 0,
+        params.cachedTokens || 0,
+        JSON.stringify(params.metadata || {})
+      ]
+    );
+    const directResult = direct?.rows[0]?.result;
+    if (directResult?.success) {
+      return mapCommitResult(directResult);
+    }
+    if (directResult && !directResult.success) {
+      return { success: false, reason: String(directResult.reason || 'AUTHORITY_REJECTED') };
+    }
+    if (process.env.DATABASE_URL) {
+      throw new Error('Authoritative wallet hold settlement was unavailable.');
+    }
+
+    if (isSupabaseAdminConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
         const { data, error } = await supabase.rpc('fn_commit_wallet_hold', {
@@ -526,14 +613,7 @@ export class WalletRepository {
         if (!error && data) {
           const res = data as any;
           if (res.success) {
-            return {
-              success: true,
-              transactionId: String(res.transaction_id),
-              holdId: String(res.hold_id),
-              actualCostUsd: Number(res.actual_cost_usd),
-              refundedDeltaUsd: Number(res.refunded_delta_usd),
-              newBalance: Number(res.new_balance)
-            };
+            return mapCommitResult(res);
           }
           return { success: false, reason: res.reason };
         }
@@ -665,20 +745,32 @@ export class WalletRepository {
     auditedBlocks: number;
     latestChainHash?: string;
   }> {
-    if (isSupabaseConfigured()) {
+    const mapIntegrityResult = (res: any) => ({
+      valid: Boolean(res.valid),
+      error: res.error ? String(res.error) : undefined,
+      auditedBlocks: Number(res.audited_blocks || 0),
+      latestChainHash: res.latest_chain_hash ? String(res.latest_chain_hash) : undefined
+    });
+
+    const direct = await executePostgresQuery<{ result: any }>(
+      'SELECT public.fn_verify_wallet_ledger_integrity($1::varchar) AS result;',
+      [userId]
+    );
+    if (direct?.rows[0]?.result) {
+      return mapIntegrityResult(direct.rows[0].result);
+    }
+    if (process.env.DATABASE_URL) {
+      throw new Error('Authoritative wallet ledger verification was unavailable.');
+    }
+
+    if (isSupabaseAdminConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
         const { data, error } = await supabase.rpc('fn_verify_wallet_ledger_integrity', {
           p_user_id: userId
         });
         if (!error && data) {
-          const res = data as any;
-          return {
-            valid: Boolean(res.valid),
-            error: res.error,
-            auditedBlocks: Number(res.audited_blocks || 0),
-            latestChainHash: res.latest_chain_hash
-          };
+          return mapIntegrityResult(data);
         }
       } catch {
         // Fallback
@@ -726,7 +818,58 @@ export class WalletRepository {
     this.walletCoalescer.invalidate(params.userId);
     this.walletDataLoader.clear(params.userId);
 
-    if (isSupabaseConfigured()) {
+    const mapDrawResult = (res: any) => {
+      const result = {
+        success: true,
+        reason: res.reason,
+        transactionId: res.transaction_id,
+        previousBalance: Number(res.previous_balance),
+        costUsd: Number(res.cost_usd),
+        newBalance: Number(res.new_balance),
+        triggerAutoReload: Boolean(res.trigger_auto_reload)
+      };
+      this.walletCoalescer.invalidate(params.userId);
+      this.walletDataLoader.clear(params.userId);
+      this.projectSuccessfulDraw(params, result);
+      return result;
+    };
+
+    const direct = await executePostgresQuery<{ result: any }>(
+      `SELECT public.fn_draw_wallet_tokens(
+        $1::varchar, $2::numeric, $3::text, $4::varchar, $5::varchar,
+        $6::varchar, $7::bigint, $8::bigint, $9::bigint, $10::jsonb
+      ) AS result;`,
+      [
+        params.userId,
+        params.costUsd,
+        params.description,
+        params.apiKeyId || null,
+        params.shardId || null,
+        params.model || null,
+        params.promptTokens || 0,
+        params.completionTokens || 0,
+        params.cachedTokens || 0,
+        JSON.stringify(params.metadata || {})
+      ]
+    );
+    const directResult = direct?.rows[0]?.result;
+    if (directResult?.success) {
+      return mapDrawResult(directResult);
+    }
+    if (directResult && !directResult.success) {
+      return {
+        success: false,
+        reason: String(directResult.reason || 'AUTHORITY_REJECTED'),
+        previousBalance: Number(directResult.current_balance ?? directResult.balance ?? 0),
+        costUsd: params.costUsd,
+        newBalance: Number(directResult.current_balance ?? directResult.balance ?? 0)
+      };
+    }
+    if (process.env.DATABASE_URL) {
+      throw new Error('Authoritative wallet debit was unavailable.');
+    }
+
+    if (isSupabaseAdminConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
         const { data, error } = await supabase.rpc('fn_draw_wallet_tokens', {
@@ -745,19 +888,7 @@ export class WalletRepository {
         if (!error && data) {
           const res = data as any;
           if (res.success) {
-            this.walletCoalescer.invalidate(params.userId);
-            this.walletDataLoader.clear(params.userId);
-            const result = {
-              success: true,
-              reason: res.reason,
-              transactionId: res.transaction_id,
-              previousBalance: Number(res.previous_balance),
-              costUsd: Number(res.cost_usd),
-              newBalance: Number(res.new_balance),
-              triggerAutoReload: res.trigger_auto_reload
-            };
-            this.projectSuccessfulDraw(params, result);
-            return result;
+            return mapDrawResult(res);
           }
         }
       } catch {

@@ -2,6 +2,7 @@ import { Client } from 'pg';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+import { getPostgresSslConfig } from '../src/lib/db/postgres';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,7 +39,7 @@ async function connectToDatabase(): Promise<Client> {
       console.log(`[Connecting] Attempting ${masked}...`);
       const client = new Client({
         connectionString: connStr,
-        ssl: { rejectUnauthorized: false },
+        ssl: getPostgresSslConfig(),
         connectionTimeoutMillis: 10000,
       });
       await client.connect();
@@ -55,15 +56,25 @@ async function run() {
   const client = await connectToDatabase();
 
   try {
+    const dryRun = process.argv.includes('--dry-run');
+    const force = process.argv.includes('--force');
+    const verIndex = process.argv.indexOf('--version');
+    const targetVersion = verIndex !== -1 ? process.argv[verIndex + 1] : null;
+    if (verIndex !== -1 && (!targetVersion || !/^\d{14}$/.test(targetVersion))) {
+      throw new Error('--version requires an exact 14-digit migration version.');
+    }
+
     // 1. Ensure supabase_migrations schema and table exist
-    await client.query(`CREATE SCHEMA IF NOT EXISTS supabase_migrations;`);
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS supabase_migrations.schema_migrations (
-        version VARCHAR(255) PRIMARY KEY,
-        statements TEXT[],
-        name VARCHAR(255)
-      );
-    `);
+    if (!dryRun) {
+      await client.query(`CREATE SCHEMA IF NOT EXISTS supabase_migrations;`);
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS supabase_migrations.schema_migrations (
+          version VARCHAR(255) PRIMARY KEY,
+          statements TEXT[],
+          name VARCHAR(255)
+        );
+      `);
+    }
 
     // 2. Fetch applied migrations
     const { rows: appliedRows } = await client.query<{ version: string }>(
@@ -80,9 +91,8 @@ async function run() {
 
     console.log(`[Migrations] Found ${files.length} total local migration files.`);
 
-    const force = process.argv.includes('--force');
-    const verIndex = process.argv.indexOf('--version');
-    const targetVersion = verIndex !== -1 ? process.argv[verIndex + 1] : null;
+    let matchedTarget = targetVersion === null;
+    let processedCount = 0;
 
     for (const file of files) {
       const match = file.match(/^(\d+)_(.+)\.sql$/);
@@ -94,8 +104,9 @@ async function run() {
       if (targetVersion && version !== targetVersion) {
         continue;
       }
+      matchedTarget = true;
 
-      if (appliedVersions.has(version) && !force && !targetVersion) {
+      if (appliedVersions.has(version) && !force) {
         console.log(`[Skip] Migration already recorded: ${file} (v${version})`);
         continue;
       }
@@ -110,6 +121,12 @@ async function run() {
       await client.query('BEGIN;');
       try {
         await client.query(sql);
+        if (dryRun) {
+          await client.query('ROLLBACK;');
+          processedCount++;
+          console.log(`[Dry Run] Validated and rolled back: ${file}`);
+          continue;
+        }
         await client.query(
           `INSERT INTO supabase_migrations.schema_migrations (version, name, statements) 
            VALUES ($1, $2, $3)
@@ -117,6 +134,7 @@ async function run() {
           [version, name, [sql]]
         );
         await client.query('COMMIT;');
+        processedCount++;
         console.log(`[Success] Applied and recorded: ${file}`);
       } catch (err: any) {
         await client.query('ROLLBACK;');
@@ -125,8 +143,16 @@ async function run() {
       }
     }
 
+    if (!matchedTarget) {
+      throw new Error(`Migration version ${targetVersion} was not found in ${MIGRATIONS_DIR}.`);
+    }
+
     console.log(`\n==================================================`);
-    console.log(`✨ ALL MIGRATIONS PUSHED TO SUPABASE SUCCESSFULLY!`);
+    console.log(
+      dryRun
+        ? `VALIDATED ${processedCount} MIGRATION(S); ALL CHANGES ROLLED BACK.`
+        : `APPLIED ${processedCount} MIGRATION(S) TO SUPABASE SUCCESSFULLY.`
+    );
     console.log(`==================================================`);
 
     // Query tables in public schema to verify

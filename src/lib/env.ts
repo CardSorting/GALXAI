@@ -68,7 +68,7 @@ export function getServerEnv(): ServerEnv {
   return {
     ...clientEnv,
     DATABASE_URL: process.env.DATABASE_URL,
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || clientEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     GALX_VAULT_MASTER_SECRET: vaultSecret,
     GALX_VAULT_KEY: vaultSecret,
     GALX_VAULT_ACTIVE_KEY_VERSION: process.env.GALX_VAULT_ACTIVE_KEY_VERSION || 'v1',

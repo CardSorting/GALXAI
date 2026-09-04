@@ -1,6 +1,7 @@
 import pg from 'pg';
 import { GalxCryptoVault } from '../src/core/vault/GalxCryptoVault';
 import type { ProviderType } from '../src/core/contracts/GalxContracts';
+import { getPostgresSslConfig } from '../src/lib/db/postgres';
 
 interface EncryptedShardRow {
   id: string;
@@ -33,7 +34,7 @@ async function main(): Promise<void> {
 
   const client = new pg.Client({
     connectionString: databaseUrl,
-    ssl: { rejectUnauthorized: false },
+    ssl: getPostgresSslConfig(),
     connectionTimeoutMillis: 10_000
   });
   await client.connect();
