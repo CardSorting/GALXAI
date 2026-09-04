@@ -5,6 +5,7 @@
  */
 
 import { QoSPoolRepository } from '../src/lib/supabase/repositories/QoSPoolRepository';
+import { closePostgresPool } from '../src/lib/db/postgres';
 
 async function testQoSPoolRepository() {
   console.log('======================================================================');
@@ -62,7 +63,9 @@ async function testQoSPoolRepository() {
   console.log('======================================================================\n');
 }
 
-testQoSPoolRepository().catch(err => {
-  console.error('\n❌ Repository Test Failed:', err);
-  process.exit(1);
-});
+testQoSPoolRepository()
+  .catch(err => {
+    console.error('\n❌ Repository Test Failed:', err);
+    process.exitCode = 1;
+  })
+  .finally(() => closePostgresPool());

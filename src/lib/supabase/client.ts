@@ -51,10 +51,13 @@ export function getSupabaseAdmin(): SupabaseClient<Database> {
   }
 
   const config = getSupabaseConfig();
-  const configured = isSupabaseConfigured();
-  const key = config.supabaseServiceRoleKey || config.supabaseAnonKey || 'sb_local_dev_service_role';
+  if (!config.hasAdminCredential) {
+    throw new Error(
+      'Supabase admin client requires SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_SECRET_KEY); a publishable key is never elevated to admin authority.'
+    );
+  }
 
-  adminClientInstance = createClient<Database>(config.supabaseUrl, key, {
+  adminClientInstance = createClient<Database>(config.supabaseUrl, config.supabaseServiceRoleKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
@@ -64,11 +67,7 @@ export function getSupabaseAdmin(): SupabaseClient<Database> {
       headers: {
         'x-client-info': 'galxai-backend-substrate/3.0.0'
       },
-      fetch: !configured
-        ? (async () => {
-            throw new Error('Supabase not configured in local environment; using memory cache.');
-          }) as unknown as typeof fetch
-        : createGovernedFetch()
+      fetch: createGovernedFetch()
     }
   });
 
@@ -80,8 +79,8 @@ export function getSupabaseAdmin(): SupabaseClient<Database> {
  */
 export function getSupabaseClient(accessToken?: string): SupabaseClient<Database> {
   const config = getSupabaseConfig();
-  const configured = isSupabaseConfigured();
-  const key = config.supabaseAnonKey || config.supabaseServiceRoleKey || 'sb_local_dev_anon_key';
+  const configured = config.hasDataApiCredential;
+  const key = config.supabaseAnonKey;
 
   if (!accessToken && defaultClientInstance) {
     return defaultClientInstance;
@@ -117,12 +116,12 @@ export function getSupabaseClient(accessToken?: string): SupabaseClient<Database
  * Validates if valid Supabase connection environment variables are present.
  */
 export function isSupabaseConfigured(): boolean {
-  const config = getSupabaseConfig();
-  return Boolean(
-    config.supabaseUrl &&
-    (config.supabaseServiceRoleKey || config.supabaseAnonKey) &&
-    !config.supabaseUrl.includes('galxai-gateway.supabase.co')
-  );
+  return getSupabaseConfig().isConfigured;
+}
+
+/** Returns true only when privileged PostgREST calls can be authenticated safely. */
+export function isSupabaseAdminConfigured(): boolean {
+  return getSupabaseConfig().hasAdminCredential;
 }
 
 /**

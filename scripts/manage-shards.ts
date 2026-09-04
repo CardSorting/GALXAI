@@ -3,19 +3,20 @@
  *
  * Sourced directly from the shard pool of /Users/bozoegg/Desktop/GALXAI.
  * Manages multi-account ChatGPT / OpenAI shards, Smooth Weighted Round-Robin (SWRR)
- * distribution, 40 req / 3 hr quota monitoring, live WebSocket wire testing, and fleet sync.
+ * distribution, 40 req / 3 hr quota monitoring, and live WebSocket wire testing.
  *
  * Usage:
  *   npx tsx scripts/manage-shards.ts --list
  *   npx tsx scripts/manage-shards.ts --import
- *   npx tsx scripts/manage-shards.ts --add --token <jwt> --account <accountId> [--refresh <rt>] [--email <email>]
+ *   GALX_SHARD_ACCESS_TOKEN=... GALX_SHARD_ACCOUNT_ID=... npm run shards -- --add
  *   npx tsx scripts/manage-shards.ts --test
  *   npx tsx scripts/manage-shards.ts --cycle [count]
- *   npx tsx scripts/manage-shards.ts --sync-edge
- *   npx tsx scripts/manage-shards.ts --remove <shardId>
+ *   npm run shards:doctor
+ *   npm run shards -- --quarantine-legacy
  */
 
 import * as fs from 'node:fs';
+import * as crypto from 'node:crypto';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { GalxPersistence } from '../src/lib/storage/GalxPersistence';
@@ -23,10 +24,12 @@ import { GalxCredentialSubstrate } from '../src/core/substrate/GalxCredentialSub
 import { GalxCredentialPool } from '../src/core/pool/GalxCredentialPool';
 import { GalxCryptoVault } from '../src/core/vault/GalxCryptoVault';
 import { OpenAIAdapter } from '../src/core/router/adapters/OpenAIAdapter';
+import { getSupabaseConfig } from '../src/lib/supabase/config';
+import { closePostgresPool } from '../src/lib/db/postgres';
 import type { GalxShardAccount } from '../src/core/contracts/GalxContracts';
 
 interface CliArgs {
-  action: 'list' | 'import' | 'add' | 'test' | 'cycle' | 'sync-edge' | 'remove';
+  action: 'list' | 'import' | 'add' | 'test' | 'cycle' | 'remove' | 'doctor' | 'quarantine-legacy';
   token?: string;
   refresh?: string;
   account?: string;
@@ -39,7 +42,13 @@ interface CliArgs {
 
 function parseArgs(): CliArgs {
   const argv = process.argv.slice(2);
-  const args: CliArgs = { action: 'list' };
+  const args: CliArgs = {
+    action: 'list',
+    token: process.env.GALX_SHARD_ACCESS_TOKEN,
+    refresh: process.env.GALX_SHARD_REFRESH_TOKEN,
+    account: process.env.GALX_SHARD_ACCOUNT_ID,
+    email: process.env.GALX_SHARD_EMAIL
+  };
 
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -55,15 +64,27 @@ function parseArgs(): CliArgs {
         args.cycleCount = 6;
       }
     }
-    else if (a === '--sync-edge') args.action = 'sync-edge';
+    else if (a === '--sync-edge') {
+      throw new Error(
+        '--sync-edge was removed: long-lived provider credentials must not be duplicated into edge KV. Use the PostgreSQL authority.'
+      );
+    }
+    else if (a === '--doctor') args.action = 'doctor';
+    else if (a === '--quarantine-legacy') args.action = 'quarantine-legacy';
     else if (a === '--remove' || a === '-r') {
       args.action = 'remove';
       if (argv[i + 1]) args.shardId = argv[++i];
     }
-    else if (a === '--token' && argv[i + 1]) args.token = argv[++i];
-    else if (a === '--refresh' && argv[i + 1]) args.refresh = argv[++i];
-    else if (a === '--account' && argv[i + 1]) args.account = argv[++i];
-    else if (a === '--email' && argv[i + 1]) args.email = argv[++i];
+    else if (a === '--token' || a === '--refresh') {
+      throw new Error(
+        `${a} is intentionally unsupported because command-line secrets leak through shell history and process listings. Use GALX_SHARD_ACCESS_TOKEN/GALX_SHARD_REFRESH_TOKEN.`
+      );
+    }
+    else if (a === '--account' || a === '--email') {
+      throw new Error(
+        `${a} is intentionally unsupported because provider identity data leaks through shell history and process listings. Use GALX_SHARD_ACCOUNT_ID/GALX_SHARD_EMAIL.`
+      );
+    }
     else if (a === '--priority' && argv[i + 1]) args.priority = Number(argv[++i]);
     else if (a === '--weight' && argv[i + 1]) args.weight = Number(argv[++i]);
     else if (a === '--shard-id' && argv[i + 1]) args.shardId = argv[++i];
@@ -72,17 +93,17 @@ function parseArgs(): CliArgs {
   return args;
 }
 
-function getSubstrate(): GalxCredentialSubstrate {
+async function getSubstrate(): Promise<GalxCredentialSubstrate> {
   const persistence = GalxPersistence.getInstance();
   const substrate = new GalxCredentialSubstrate(persistence);
-  substrate.initialize();
+  await substrate.ready();
   return substrate;
 }
 
 async function listShards(substrate: GalxCredentialSubstrate) {
   const shards = substrate.listAccounts();
   console.log('\n========================================================================================================');
-  console.log('               🛸  GALXAI SHARD FLEET POOL (/Users/bozoegg/Desktop/GALXAI)                             ');
+  console.log('               🛸  GALXAI SHARD FLEET POOL (SUPABASE POSTGRESQL AUTHORITY)                            ');
   console.log('========================================================================================================');
   console.log(`Total Shards Registered: ${shards.length}\n`);
 
@@ -95,7 +116,7 @@ async function listShards(substrate: GalxCredentialSubstrate) {
   console.log(
     '#'.padEnd(4) +
     'SHARD ID'.padEnd(30) +
-    'ACCOUNT ID'.padEnd(40) +
+    'ACCOUNT FINGERPRINT'.padEnd(40) +
     'STATUS'.padEnd(12) +
     'PRIO/WT'.padEnd(10) +
     'SERVED'.padEnd(10) +
@@ -104,14 +125,18 @@ async function listShards(substrate: GalxCredentialSubstrate) {
   console.log(''.padEnd(115, '-'));
 
   shards.forEach((s, idx) => {
-    const quota = s.slidingWindowQuota
+    const hasSlidingQuota = Number.isFinite(s.slidingWindowQuota?.maxRequestsPerWindow);
+    const quota = hasSlidingQuota
       ? `${s.slidingWindowQuota.maxRequestsPerWindow - (s.slidingWindowQuota.requestHistoryTimestampsMs?.length || s.slidingWindowQuota.usedRequestsInWindow || 0)}/${s.slidingWindowQuota.maxRequestsPerWindow} (3h)`
       : `${s.tokenBucket.remainingRequests}/${s.tokenBucket.maxRequests}`;
+    const accountFingerprint = s.accountId
+      ? `sha256:${crypto.createHash('sha256').update(s.accountId).digest('hex').slice(0, 12)}`
+      : 'not-projected';
 
     console.log(
       `[${idx + 1}]`.padEnd(4) +
       s.id.slice(0, 28).padEnd(30) +
-      (s.accountId || 'unknown').slice(0, 38).padEnd(40) +
+      accountFingerprint.padEnd(40) +
       s.status.toUpperCase().padEnd(12) +
       `${s.priority}/${s.weight}`.padEnd(10) +
       String(s.stats?.totalRequestsServed || 0).padEnd(10) +
@@ -123,25 +148,34 @@ async function listShards(substrate: GalxCredentialSubstrate) {
 
 async function importFleet(substrate: GalxCredentialSubstrate) {
   console.log('\n[+] Scanning multi-account credential sources to enroll into GALXAI shard pool...');
-  const added = substrate.seedMultiAccountFleet();
+  const added = await substrate.seedMultiAccountFleet();
   console.log(`[✓] Successfully ingested and encrypted ${added} accounts into GALXAI shard pool!`);
   await listShards(substrate);
 }
 
 async function addSingleShard(substrate: GalxCredentialSubstrate, args: CliArgs) {
   if (!args.token || !args.account) {
-    console.error('[-] Error: --token and --account are required to add a shard.');
+    console.error('[-] Error: GALX_SHARD_ACCESS_TOKEN and GALX_SHARD_ACCOUNT_ID are required to add a shard.');
     process.exit(1);
   }
 
-  const shardId = args.shardId || `codex_sh_${args.account.slice(0, 8)}_${Date.now().toString(36)}`;
+  const shardIdSecret = process.env.GALX_SHARD_ID_SECRET || process.env.GALX_VAULT_MASTER_SECRET;
+  if (!shardIdSecret) {
+    throw new Error('GALX_SHARD_ID_SECRET or GALX_VAULT_MASTER_SECRET is required for stable shard IDs');
+  }
+  const shardId = `codex_sh_${crypto
+    .createHmac('sha256', shardIdSecret)
+    .update(`openai:${args.account}`)
+    .digest('hex')
+    .slice(0, 24)}`;
+  const accountFingerprint = crypto.createHash('sha256').update(args.account).digest('hex').slice(0, 12);
   const encrypted = GalxCryptoVault.encryptSecret(
     {
       accessToken: args.token,
       refreshToken: args.refresh,
       accountId: args.account,
       email: args.email || 'operator@galx.ai',
-      name: `ChatGPT Shard (${args.account.slice(0, 8)})`
+      name: 'Operator-Managed OpenAI OAuth Shard'
     },
     'system_admin',
     shardId,
@@ -151,7 +185,7 @@ async function addSingleShard(substrate: GalxCredentialSubstrate, args: CliArgs)
   const shard: GalxShardAccount = {
     id: shardId,
     userId: 'system_admin',
-    accountLabel: `ChatGPT Fleet Shard (${args.account.slice(0, 8)})`,
+    accountLabel: 'Operator-Managed OpenAI OAuth Shard',
     provider: 'openai',
     authType: 'oauth',
     shardMode: 'pooled',
@@ -160,7 +194,7 @@ async function addSingleShard(substrate: GalxCredentialSubstrate, args: CliArgs)
     weight: args.weight || 1,
     fencingToken: 1,
     accountId: args.account,
-    apiKeyMasked: `oauth_${args.account.slice(0, 8)}...`,
+    apiKeyMasked: 'oauth_********',
     encryptedSecrets: encrypted,
     encryptedPayload: encrypted,
     privacyCapabilities: {
@@ -195,8 +229,8 @@ async function addSingleShard(substrate: GalxCredentialSubstrate, args: CliArgs)
     updatedAtMs: Date.now()
   };
 
-  substrate.addAccount(shard);
-  console.log(`[✓] Successfully enrolled shard ${shardId} (Account: ${args.account}) into GALXAI pool!`);
+  await substrate.addAccountAsync({ ...shard, registrySource: 'operator_import' }, { requireRemote: true });
+  console.log(`[✓] Successfully enrolled shard ${shardId} (account sha256:${accountFingerprint}) into GALXAI pool!`);
 }
 
 async function testShards(substrate: GalxCredentialSubstrate) {
@@ -215,7 +249,10 @@ async function testShards(substrate: GalxCredentialSubstrate) {
     const enc = shard.encryptedPayload || shard.encryptedSecrets;
     const dec = GalxCryptoVault.decryptSecret(enc!, shard.userId, shard.id, shard.provider);
 
-    process.stdout.write(`[Probe ${i + 1}/${shards.length}] Shard: ${shard.id} (${shard.accountId})... `);
+    const accountFingerprint = shard.accountId
+      ? crypto.createHash('sha256').update(shard.accountId).digest('hex').slice(0, 12)
+      : 'not-projected';
+    process.stdout.write(`[Probe ${i + 1}/${shards.length}] Shard: ${shard.id} (account sha256:${accountFingerprint})... `);
     const startMs = Date.now();
 
     try {
@@ -265,9 +302,12 @@ async function cycleFleet(substrate: GalxCredentialSubstrate, count: number) {
     }
 
     const lease = acq.lease;
+    const accountFingerprint = lease.account.accountId
+      ? crypto.createHash('sha256').update(lease.account.accountId).digest('hex').slice(0, 12)
+      : 'not-projected';
     console.log(
       `[Turn ${String(i).padStart(2)}] Leased Shard: ${lease.shardId.padEnd(30)} ` +
-      `Account: ${(lease.account.accountId || 'unknown').slice(0, 36).padEnd(38)} ` +
+      `Account: sha256:${accountFingerprint.padEnd(30)} ` +
       `Fencing: #${lease.fencingToken}`
     );
 
@@ -283,63 +323,156 @@ async function cycleFleet(substrate: GalxCredentialSubstrate, count: number) {
   console.log('\n========================================================================================================\n');
 }
 
-async function syncEdge(substrate: GalxCredentialSubstrate) {
-  const edgeWorkerUrl =
-    process.env.LUMI_EDGE_WORKER_URL ||
-    process.env.EDGE_RELAY_URL ||
-    'https://lumi-edge-worker.notsosuper688651.workers.dev';
-
-  const shards = substrate.listAccounts();
-  console.log(`\n[+] Syncing ${shards.length} shards from GALXAI pool to Edge Worker at ${edgeWorkerUrl}...`);
-
-  let synced = 0;
-  for (const s of shards) {
-    const enc = s.encryptedPayload || s.encryptedSecrets;
-    const dec = GalxCryptoVault.decryptSecret(enc!, s.userId, s.id, s.provider);
-
-    try {
-      const res = await fetch(`${edgeWorkerUrl.replace(/\/+$/, '')}/v1/tokens/ingest`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: s.id,
-          accessToken: dec.accessToken,
-          refreshToken: dec.refreshToken,
-          accountId: dec.accountId,
-          email: dec.email,
-          weight: s.weight,
-          priority: s.priority,
-          maxRequestsPerWindow: 40,
-          windowDurationHours: 3
-        })
-      });
-
-      if (res.ok) {
-        console.log(`  [✓] Pushed ${s.id} (${s.accountId})`);
-        synced++;
-      } else {
-        console.log(`  [!] Failed ${s.id}: HTTP ${res.status}`);
-      }
-    } catch (e: any) {
-      console.log(`  [!] Error ${s.id}: ${e.message}`);
-    }
-  }
-
-  console.log(`[✓] Completed: ${synced}/${shards.length} shards synchronized with Edge Worker.\n`);
-}
-
 async function removeShard(substrate: GalxCredentialSubstrate, shardId?: string) {
   if (!shardId) {
     console.error('[-] Error: Shard ID required to remove.');
     process.exit(1);
   }
-  const ok = substrate.deleteAccount(shardId);
-  console.log(ok ? `[✓] Shard ${shardId} removed.` : `[-] Shard ${shardId} not found.`);
+  const ok = await substrate.retractAccountAsync(shardId, 'system_admin');
+  console.log(ok ? `[✓] Shard ${shardId} revoked.` : `[-] Shard ${shardId} not found.`);
+}
+
+interface ShardAuthorityAudit {
+  total: number;
+  active: number;
+  decryptFailures: number;
+  fallbackSeeds: number;
+  obviousSynthetic: number;
+  duplicateCredentials: number;
+  stableIds: number;
+  activeNonStableIds: number;
+  localJsonCachePresent: boolean;
+  adminDataApiFallbackConfigured: boolean;
+  keyVersions: Record<string, number>;
+  quarantineIds: Set<string>;
+}
+
+async function auditShardAuthority(): Promise<ShardAuthorityAudit> {
+  const persistence = GalxPersistence.getInstance();
+  const shards = await persistence.getShardsAsync(undefined, { requireRemote: true });
+  const groups = new Map<string, GalxShardAccount[]>();
+  const fallbackIds = new Set<string>();
+  const syntheticIds = new Set<string>();
+  const undecryptableIds = new Set<string>();
+  const keyVersions: Record<string, number> = {};
+  const shardIdSecret = process.env.GALX_SHARD_ID_SECRET || process.env.GALX_VAULT_MASTER_SECRET;
+
+  if (!shardIdSecret) throw new Error('Shard authority audit requires GALX_SHARD_ID_SECRET or GALX_VAULT_MASTER_SECRET');
+
+  for (const shard of shards) {
+    const keyVersion = (shard.encryptedPayload || shard.encryptedSecrets)?.keyVersion || 'unknown';
+    keyVersions[keyVersion] = (keyVersions[keyVersion] || 0) + 1;
+    if (shard.permissionRetracted || shard.status === 'revoked') continue;
+    if (shard.id.startsWith('shard_galx_flagship_')) fallbackIds.add(shard.id);
+    const encrypted = shard.encryptedPayload || shard.encryptedSecrets;
+    if (!encrypted) {
+      undecryptableIds.add(shard.id);
+      continue;
+    }
+
+    try {
+      const secret = GalxCryptoVault.decryptSecret(encrypted, shard.userId, shard.id, shard.provider);
+      const secretValues = [secret.apiKey, secret.accessToken, secret.refreshToken]
+        .filter(Boolean)
+        .map(String);
+      if (
+        /(^|[_-])(test|mock|dummy|placeholder)([_-]|$)/i.test(secret.accountId || '') ||
+        secretValues.some(value => /test|mock|dummy|placeholder|native[_-]flagship/i.test(value))
+      ) {
+        syntheticIds.add(shard.id);
+      }
+      if (secret.accountId) {
+        const credentialKey = crypto
+          .createHmac('sha256', shardIdSecret)
+          .update(`${shard.provider}:${secret.accountId}`)
+          .digest('hex');
+        const group = groups.get(credentialKey) || [];
+        group.push(shard);
+        groups.set(credentialKey, group);
+      }
+    } catch {
+      undecryptableIds.add(shard.id);
+    }
+  }
+
+  const duplicateIds = new Set<string>();
+  for (const group of groups.values()) {
+    if (group.length < 2) continue;
+    const keeper = [...group].sort((left, right) => {
+      const leftStable = left.id.startsWith('codex_sh_') ? 1 : 0;
+      const rightStable = right.id.startsWith('codex_sh_') ? 1 : 0;
+      return rightStable - leftStable || right.updatedAtMs - left.updatedAtMs;
+    })[0];
+    for (const shard of group) {
+      if (shard.id !== keeper.id) duplicateIds.add(shard.id);
+    }
+  }
+
+  const quarantineIds = new Set([
+    ...fallbackIds,
+    ...syntheticIds,
+    ...undecryptableIds,
+    ...duplicateIds
+  ]);
+
+  return {
+    total: shards.length,
+    active: shards.filter(shard => !shard.permissionRetracted && shard.status !== 'revoked').length,
+    decryptFailures: undecryptableIds.size,
+    fallbackSeeds: fallbackIds.size,
+    obviousSynthetic: syntheticIds.size,
+    duplicateCredentials: duplicateIds.size,
+    stableIds: shards.filter(shard => shard.id.startsWith('codex_sh_')).length,
+    activeNonStableIds: shards.filter(shard =>
+      !shard.permissionRetracted && shard.status !== 'revoked' && !shard.id.startsWith('codex_sh_')
+    ).length,
+    localJsonCachePresent: fs.existsSync(path.join(process.cwd(), '.galx-shards.json')),
+    adminDataApiFallbackConfigured: getSupabaseConfig().hasAdminCredential,
+    keyVersions,
+    quarantineIds
+  };
+}
+
+async function doctorShards(applyQuarantine: boolean): Promise<void> {
+  const audit = await auditShardAuthority();
+  console.log('\nGALXAI Shard Authority Doctor');
+  console.log(JSON.stringify({
+    authority: 'supabase-postgresql',
+    total: audit.total,
+    active: audit.active,
+    stableIds: audit.stableIds,
+    activeNonStableIds: audit.activeNonStableIds,
+    duplicateCredentials: audit.duplicateCredentials,
+    fallbackSeeds: audit.fallbackSeeds,
+    obviousSynthetic: audit.obviousSynthetic,
+    decryptFailures: audit.decryptFailures,
+    localJsonCachePresent: audit.localJsonCachePresent,
+    adminDataApiFallbackConfigured: audit.adminDataApiFallbackConfigured,
+    keyVersions: audit.keyVersions,
+    recommendedQuarantineCount: audit.quarantineIds.size
+  }, null, 2));
+
+  if (!applyQuarantine || audit.quarantineIds.size === 0) return;
+
+  const persistence = GalxPersistence.getInstance();
+  const shards = await persistence.getShardsAsync(undefined, { requireRemote: true });
+  let quarantined = 0;
+  for (const shard of shards) {
+    if (!audit.quarantineIds.has(shard.id)) continue;
+    await persistence.saveShardAsync({
+      ...shard,
+      status: 'revoked',
+      permissionRetracted: true,
+      updatedAtMs: Date.now()
+    }, { requireRemote: true });
+    quarantined++;
+  }
+  console.log(`Quarantined ${quarantined} legacy/synthetic/duplicate shard records via reversible revocation.`);
 }
 
 async function main() {
   const args = parseArgs();
-  const substrate = getSubstrate();
+  const substrate = await getSubstrate();
 
   switch (args.action) {
     case 'list':
@@ -357,13 +490,21 @@ async function main() {
     case 'cycle':
       await cycleFleet(substrate, args.cycleCount || 6);
       break;
-    case 'sync-edge':
-      await syncEdge(substrate);
-      break;
     case 'remove':
       await removeShard(substrate, args.shardId);
+      break;
+    case 'doctor':
+      await doctorShards(false);
+      break;
+    case 'quarantine-legacy':
+      await doctorShards(true);
       break;
   }
 }
 
-main().catch(console.error);
+main()
+  .catch((error: unknown) => {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  })
+  .finally(() => closePostgresPool().catch(() => undefined));

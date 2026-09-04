@@ -149,6 +149,7 @@ export class GalxModelRouter {
     modelUsed: string;
     provider: ProviderType;
   }> {
+    await this.substrate.ensureFreshFromAuthority();
     const { userId, requestId, isPriorityUser, headers: incomingHeaders } = options;
     const modelSpec = ModelCatalog.resolveModel(options.request.model);
     if (!modelSpec) {
@@ -194,13 +195,18 @@ export class GalxModelRouter {
       }
 
       // 3. Acquire atomic execution lease with Compliance Shard Gating (HIPAA BAA, EU Residency, ZDR)
-      let acqResult = this.pool.acquireLease({
+      const leaseAttemptId = crypto
+        .createHash('sha256')
+        .update(`${requestId}:chat:${attempt}`)
+        .digest('hex');
+      let acqResult = await this.pool.acquireLeaseAuthoritatively({
         userId,
-        jobId: requestId,
+        jobId: leaseAttemptId,
         provider,
         targetModel: modelSpec.id,
         isPriorityUser,
         estimatedTokens,
+        leaseTtlMs: 120_000,
         privacyProfile: privacyPolicy.profile,
         hipaaRequired: privacyPolicy.hipaaEnabled,
         dataResidency: privacyPolicy.dataResidency,
@@ -309,7 +315,7 @@ export class GalxModelRouter {
         if (!response.ok) {
           const errorBody = await response.text();
           const sanitizedErr = GalxModelRouter.sanitizeUpstreamError(errorBody);
-          this.pool.releaseLease(
+          await this.pool.releaseLeaseAuthoritatively(
             lease.leaseId,
             {
               tokensConsumed: 0,
@@ -467,14 +473,17 @@ export class GalxModelRouter {
         responseHeaders.set('X-Galx-Cost-USD', costBreakdown.totalCostUsd.toFixed(6));
         responseHeaders.set('X-Galx-Savings-USD', costBreakdown.totalSavingsUsd.toFixed(6));
 
-        this.pool.releaseLease(
+        await this.pool.releaseLeaseAuthoritatively(
           lease.leaseId,
-          tokensUsed,
-          true,
-          adapterResult.headers,
-          undefined,
-          Date.now(),
-          latencyMs
+          {
+            tokensConsumed: tokensUsed,
+            success: true,
+            upstreamHeaders: adapterResult.headers,
+            nowMs: Date.now(),
+            latencyMs,
+            statusCode: response.status,
+            modelUsed: modelSpec.id
+          }
         );
 
         this.metrics.recordSample({
@@ -499,7 +508,13 @@ export class GalxModelRouter {
         };
       } catch (err: any) {
         lastError = err;
-        this.pool.releaseLease(lease.leaseId, 0, false, undefined, err.message || 'Execution error');
+        await this.pool.releaseLeaseAuthoritatively(lease.leaseId, {
+          tokensConsumed: 0,
+          success: false,
+          errorReason: err.message || 'Execution error'
+        }).catch((releaseError: unknown) => {
+          lastError = releaseError instanceof Error ? releaseError : err;
+        });
       } finally {
         // 9. Ephemeral RAM Scrubbing - Overwrite plaintext key and token maps
         if (rawTokenSecret) {
@@ -550,7 +565,17 @@ export class GalxModelRouter {
         })
       : null;
 
-    let leaseReleased = false;
+    let leaseReleasePromise: Promise<void> | null = null;
+    let leaseRenewalTimer: ReturnType<typeof setInterval> | null = null;
+    let leaseRenewalInFlight = false;
+    let leaseRenewalError: Error | null = null;
+
+    const stopLeaseRenewal = (): void => {
+      if (leaseRenewalTimer) {
+        clearInterval(leaseRenewalTimer);
+        leaseRenewalTimer = null;
+      }
+    };
 
     // Attach initial baseline ZDR compliance & TTFT stream acceleration headers
     if (responseHeaders) {
@@ -567,9 +592,10 @@ export class GalxModelRouter {
       if (privacyPolicy?.gpcOptOut) responseHeaders.set('X-Galx-GPC-Applied', 'true');
     }
 
-    const releaseOnce = (success: boolean, errReason?: string) => {
-      if (leaseReleased) return;
-      leaseReleased = true;
+    const releaseOnce = (success: boolean, errReason?: string): Promise<void> => {
+      if (leaseReleasePromise) return leaseReleasePromise;
+      leaseReleasePromise = (async () => {
+      stopLeaseRenewal();
       const totalDurationMs = requestStartMs ? Date.now() - requestStartMs : 300;
       
       // Ephemerally zeroize lease credentials
@@ -619,14 +645,18 @@ export class GalxModelRouter {
         } catch {}
       }
 
-      routerPool.releaseLease(
+      await routerPool.releaseLeaseAuthoritatively(
         lease.leaseId,
-        estimatedTokens,
-        success,
-        upstreamHeaders,
-        errReason,
-        Date.now(),
-        totalDurationMs
+        {
+          tokensConsumed: estimatedTokens,
+          success,
+          upstreamHeaders,
+          errorReason: errReason,
+          nowMs: Date.now(),
+          latencyMs: totalDurationMs,
+          statusCode: success ? 200 : 499,
+          modelUsed: modelId
+        }
       );
       routerMetrics.recordSample({
         timestampMs: Date.now(),
@@ -638,6 +668,8 @@ export class GalxModelRouter {
         shardId: lease.shardId,
         statusCode: success ? 200 : 499
       });
+      })();
+      return leaseReleasePromise;
     };
 
     const reader = upstreamBody.getReader();
@@ -650,10 +682,29 @@ export class GalxModelRouter {
         // and unblocks upstream reverse proxy buffers (Cloudflare / Nginx / Vercel Edge).
         const earlyPing = encoder.encode(': open\n\n');
         controller.enqueue(earlyPing);
+
+        // Renewable, fenced ownership for streams whose duration is unknowable
+        // at dispatch time. A failed renewal cancels the upstream stream; work
+        // must never continue after the authority lease can no longer be proven.
+        leaseRenewalTimer = setInterval(() => {
+          if (leaseRenewalInFlight || leaseReleasePromise) return;
+          leaseRenewalInFlight = true;
+          routerPool.extendLeaseAuthoritatively(lease.leaseId, 120_000)
+            .catch((error: unknown) => {
+              leaseRenewalError = error instanceof Error ? error : new Error(String(error));
+              return reader.cancel(leaseRenewalError).catch(() => undefined);
+            })
+            .finally(() => {
+              leaseRenewalInFlight = false;
+            });
+        }, 30_000);
+        leaseRenewalTimer.unref?.();
       },
       async pull(controller) {
         try {
+          if (leaseRenewalError) throw leaseRenewalError;
           const { value, done } = await reader.read();
+          if (leaseRenewalError) throw leaseRenewalError;
           if (done) {
             if (piiTransformer) {
               const tail = piiTransformer.flush();
@@ -663,7 +714,7 @@ export class GalxModelRouter {
                 controller.enqueue(tailBytes);
               }
             }
-            releaseOnce(true);
+            await releaseOnce(true);
             controller.close();
             return;
           }
@@ -685,18 +736,20 @@ export class GalxModelRouter {
             }
           }
         } catch (err: any) {
-          releaseOnce(false, err.message || 'Stream error');
+          stopLeaseRenewal();
+          await releaseOnce(false, err.message || 'Stream error').catch(() => undefined);
           controller.error(err);
         }
       },
       async cancel(reason) {
+        stopLeaseRenewal();
         try {
           await reader.cancel(reason);
         } catch {}
         if (piiTransformer) {
           piiTransformer.zeroize();
         }
-        releaseOnce(false, `Client aborted stream: ${String(reason || 'disconnect')}`);
+        await releaseOnce(false, `Client aborted stream: ${String(reason || 'disconnect')}`).catch(() => undefined);
       }
     });
   }
@@ -705,6 +758,7 @@ export class GalxModelRouter {
    * Dispatches visual synthesis request with HIPAA/ZDR/GDPR compliance and ephemeral zeroization.
    */
   async routeImageGeneration(options: RouteImageOptions): Promise<ImageGenerationResponse> {
+    await this.substrate.ensureFreshFromAuthority();
     const { userId, requestId, isPriorityUser, headers: incomingHeaders } = options;
     const modelSpec = ModelCatalog.resolveModel(options.request.model || 'openai-gpt-image-2');
     if (!modelSpec) {
@@ -730,13 +784,18 @@ export class GalxModelRouter {
       (options.request as any).shardId ||
       undefined;
 
-    const acqResult = this.pool.acquireLease({
+    const leaseAttemptId = crypto
+      .createHash('sha256')
+      .update(`${requestId}:image:1`)
+      .digest('hex');
+    const acqResult = await this.pool.acquireLeaseAuthoritatively({
       userId,
-      jobId: requestId,
+      jobId: leaseAttemptId,
       provider,
       targetModel: modelSpec.id,
       isPriorityUser,
       estimatedTokens: sanitizedRequest.quality === 'hd' ? 200 : 100,
+      leaseTtlMs: 120_000,
       privacyProfile: privacyPolicy.profile,
       hipaaRequired: privacyPolicy.hipaaEnabled,
       dataResidency: privacyPolicy.dataResidency,
@@ -856,7 +915,14 @@ export class GalxModelRouter {
         } catch {}
       }
 
-      this.pool.releaseLease(lease.leaseId, 100, true, undefined, undefined, Date.now(), latencyMs);
+      await this.pool.releaseLeaseAuthoritatively(lease.leaseId, {
+        tokensConsumed: 100,
+        success: true,
+        nowMs: Date.now(),
+        latencyMs,
+        statusCode: 200,
+        modelUsed: modelSpec.id
+      });
 
       this.metrics.recordSample({
         timestampMs: Date.now(),
@@ -875,7 +941,15 @@ export class GalxModelRouter {
     } catch (err: any) {
       const latencyMs = Date.now() - startMs;
       const sanitizedErr = GalxModelRouter.sanitizeUpstreamError(err.message || 'Image generation error');
-      this.pool.releaseLease(lease.leaseId, 0, false, undefined, sanitizedErr);
+      await this.pool.releaseLeaseAuthoritatively(lease.leaseId, {
+        tokensConsumed: 0,
+        success: false,
+        errorReason: sanitizedErr,
+        nowMs: Date.now(),
+        latencyMs,
+        statusCode: 500,
+        modelUsed: modelSpec.id
+      }).catch(() => undefined);
       this.metrics.recordSample({
         timestampMs: Date.now(),
         latencyMs,

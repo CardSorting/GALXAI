@@ -6,6 +6,7 @@
  */
 
 import * as crypto from 'node:crypto';
+import { resolveSigningKey } from '../security/GalxSigningKey';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import type {
   DataResidencyRegion,
@@ -383,7 +384,7 @@ export class GalxZDRProtocol {
     const now = Date.now();
     const dataResidency = params.dataResidency || 'global';
     const rawPayload = `${params.sessionId}:${params.digestSha256}:${params.bytesProcessed}:${params.profile}:${dataResidency}:${now}`;
-    const signature = crypto.createHmac('sha256', process.env.GALX_VAULT_MASTER_SECRET || 'galx-zdr-attestation-secret-key-2026')
+    const signature = crypto.createHmac('sha256', resolveSigningKey('zdr-attestation'))
       .update(rawPayload)
       .digest('hex');
 
@@ -416,7 +417,7 @@ export class GalxZDRProtocol {
     const dataResidency = params.dataResidency || 'global';
     const ticketId = `zkat_${crypto.randomBytes(8).toString('hex')}`;
     const payload = `${ticketId}:${params.sessionId}:${params.promptSha256}:${params.completionSha256}:${params.bytesProcessed}:${params.shardId}:${params.profile}:${dataResidency}:${now}`;
-    const signature = crypto.createHmac('sha256', process.env.GALX_VAULT_MASTER_SECRET || 'galx-zdr-attestation-secret-key-2026')
+    const signature = crypto.createHmac('sha256', resolveSigningKey('zdr-attestation'))
       .update(payload)
       .digest('hex');
 
@@ -442,7 +443,7 @@ export class GalxZDRProtocol {
     if (!proof || !proof.signature || !proof.digestSha256) return false;
     try {
       const rawPayload = `${proof.sessionId}:${proof.digestSha256}:${proof.bytesProcessed}:${proof.profile}:${proof.dataResidency}:${proof.timestampMs}`;
-      const expectedSig = crypto.createHmac('sha256', process.env.GALX_VAULT_MASTER_SECRET || 'galx-zdr-attestation-secret-key-2026')
+      const expectedSig = crypto.createHmac('sha256', resolveSigningKey('zdr-attestation'))
         .update(rawPayload)
         .digest('hex');
 

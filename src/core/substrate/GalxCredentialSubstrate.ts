@@ -1,3 +1,4 @@
+import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -9,15 +10,18 @@ import { BroccoliNaturalQueryParser } from '../broccolidb/broccolidb-natural-que
 import type { DbAggregateQuery, DbAggregateResult } from '../broccolidb/broccolidb.contracts';
 
 /**
- * Dual-Tier In-Memory Cache & Persistence Substrate for BYOQ Shards + BroccoliDB Hot Table.
- * Provides sub-millisecond in-memory cache lookup for queue workers while maintaining
- * persistent synchronization.
+ * PostgreSQL-authoritative credential registry with a BroccoliDB read projection.
+ * The in-memory table accelerates routing but never substitutes for a confirmed
+ * control-plane mutation.
  */
 export class GalxCredentialSubstrate {
   public readonly accountTable: BroccoliDbTable<GalxShardAccount>;
   private readonly persistence: GalxPersistence;
   private readonly retractListeners: Array<(shardId: string) => void> = [];
-  private initialized = false;
+  private readonly initializationPromise: Promise<void>;
+  private initializationError: Error | null = null;
+  private lastAuthorityRefreshAtMs = 0;
+  private authorityRefreshPromise: Promise<number> | null = null;
 
   constructor(persistence?: GalxPersistence) {
     this.persistence = persistence || GalxPersistence.getInstance();
@@ -34,85 +38,106 @@ export class GalxCredentialSubstrate {
     this.accountTable.createSortedIndex('expiresAtMs');
     this.accountTable.createSortedIndex('createdAtMs');
 
-    this.initialize();
-  }
-
-  private readonly diskCachePath = path.join(process.cwd(), '.galx-shards.json');
-
-  private saveShardsToDisk(): void {
-    try {
-      const allShards = this.accountTable.getAll() as GalxShardAccount[];
-      fs.writeFileSync(this.diskCachePath, JSON.stringify(allShards, null, 2), { mode: 0o600 });
-    } catch {}
-  }
-
-  private loadShardsFromDisk(): boolean {
-    if (!fs.existsSync(this.diskCachePath)) return false;
-    try {
-      const raw = fs.readFileSync(this.diskCachePath, 'utf-8');
-      const shards = JSON.parse(raw);
-      if (Array.isArray(shards) && shards.length > 0) {
-        for (const s of shards) {
-          if (!s.permissionRetracted && s.status !== 'revoked') {
-            this.accountTable.put(s.id, s);
-          }
-        }
-        return true;
-      }
-    } catch {}
-    return false;
+    this.initializationPromise = this.initializeFromAuthority().catch((error: unknown) => {
+      this.initializationError = error instanceof Error ? error : new Error(String(error));
+    });
   }
 
   /**
-   * Initializes the in-memory cache from persistence and fleet pool sources.
+   * Starts initialization for legacy callers. Use `await ready()` at every
+   * production entrypoint that can route or mutate shard state.
    */
   public initialize(): void {
-    if (this.initialized) return;
+    // Constructor-owned promise intentionally performs the work once.
+  }
 
-    try {
-      const persistedShards = this.persistence.getShards();
-      let hasRealShards = false;
-      for (const shard of persistedShards) {
+  private async initializeFromAuthority(): Promise<void> {
+    const authorityConfigured = this.persistence.isShardAuthorityConfigured();
+    const persistedShards = authorityConfigured
+      ? await this.persistence.getShardsAsync(undefined, { requireRemote: true })
+      : this.persistence.getShards();
+
+    this.accountTable.clear();
+    for (const shard of persistedShards) {
+      if (!shard.permissionRetracted && shard.status !== 'revoked') {
+        this.accountTable.put(shard.id, shard);
+      }
+    }
+    this.lastAuthorityRefreshAtMs = Date.now();
+  }
+
+  public async ready(): Promise<void> {
+    await this.initializationPromise;
+    if (this.initializationError) throw this.initializationError;
+  }
+
+  private resolveMutationOptions(
+    options: { requireRemote?: boolean }
+  ): { requireRemote?: boolean } {
+    const explicitTestProjection =
+      process.env.NODE_ENV === 'test' &&
+      process.env.GALX_ALLOW_EPHEMERAL_SHARDS_FOR_TESTS === 'true';
+    return explicitTestProjection ? { requireRemote: false } : options;
+  }
+
+  public async refreshFromAuthority(): Promise<number> {
+    await this.ready();
+    if (this.authorityRefreshPromise) return this.authorityRefreshPromise;
+
+    this.authorityRefreshPromise = (async () => {
+      const shards = await this.persistence.getShardsAsync(undefined, { requireRemote: true });
+      this.accountTable.clear();
+      for (const shard of shards) {
         if (!shard.permissionRetracted && shard.status !== 'revoked') {
           this.accountTable.put(shard.id, shard);
-          if (!shard.id.startsWith('shard_galx_flagship_')) {
-            hasRealShards = true;
-          }
         }
       }
+      this.lastAuthorityRefreshAtMs = Date.now();
+      return this.accountTable.count();
+    })();
 
-      // Check local disk cache if memory table is still empty
-      if (!hasRealShards && this.loadShardsFromDisk()) {
-        hasRealShards = true;
-      }
-
-      // If no real shards exist in the substrate, automatically ingest the multi-account fleet
-      if (!hasRealShards) {
-        this.seedMultiAccountFleet();
-      }
-
-      // If still empty and environment variables are present, pre-seed default developer shard
-      if (this.accountTable.count() === 0) {
-        this.seedInitialEnvShards();
-      }
-
-      this.initialized = true;
-    } catch {
-      this.initialized = true;
+    try {
+      return await this.authorityRefreshPromise;
+    } finally {
+      this.authorityRefreshPromise = null;
     }
+  }
+
+  /**
+   * Refreshes the process-local routing projection at a bounded staleness
+   * interval. Concurrent requests share one database LIST operation.
+   */
+  public async ensureFreshFromAuthority(maxStalenessMs?: number): Promise<void> {
+    await this.ready();
+    if (!this.persistence.isShardAuthorityConfigured()) return;
+
+    const configuredMaxStaleness = Number.parseInt(
+      process.env.GALX_SHARD_PROJECTION_MAX_STALENESS_MS || '5000',
+      10
+    );
+    const boundedMaxStaleness = Math.min(
+      60_000,
+      Math.max(250, (maxStalenessMs ?? configuredMaxStaleness) || 5000)
+    );
+    if (Date.now() - this.lastAuthorityRefreshAtMs < boundedMaxStaleness) return;
+    await this.refreshFromAuthority();
   }
 
   /**
    * Ingests multi-account shards into GALXAI's pool from discovered credential sources.
    */
-  public seedMultiAccountFleet(): number {
+  public async seedMultiAccountFleet(): Promise<number> {
+    await this.ready();
+    const shardIdSecret = process.env.GALX_SHARD_ID_SECRET || process.env.GALX_VAULT_MASTER_SECRET;
+    if (!shardIdSecret) {
+      throw new Error('GALX_SHARD_ID_SECRET or GALX_VAULT_MASTER_SECRET is required for stable, non-reversible shard identifiers');
+    }
     const candidatePaths = [
       path.join(os.homedir(), '.lumi', 'config.json'),
       path.join(os.homedir(), '.codex', 'auth.json'),
     ];
 
     const discoveredAccounts: Array<{
-      id?: string;
       accessToken: string;
       refreshToken?: string;
       accountId: string;
@@ -141,7 +166,6 @@ export class GalxCredentialSubstrate {
             if (token && accId && !seenAccountIds.has(accId)) {
               seenAccountIds.add(accId);
               discoveredAccounts.push({
-                id: (item as any).id,
                 accessToken: token,
                 refreshToken: (item as any).refresh_token || (item as any).refreshToken,
                 accountId: accId,
@@ -174,10 +198,12 @@ export class GalxCredentialSubstrate {
 
     let addedCount = 0;
     for (const acc of discoveredAccounts) {
-      const shardId = acc.id || `codex_sh_${acc.accountId.slice(0, 8)}_${Date.now().toString(36)}`;
-
-      // If already enrolled, continue
-      if (this.accountTable.get(shardId)) continue;
+      const stableAccountHash = crypto
+        .createHmac('sha256', shardIdSecret)
+        .update(`openai:${acc.accountId}`)
+        .digest('hex')
+        .slice(0, 24);
+      const shardId = `codex_sh_${stableAccountHash}`;
 
       const encrypted = GalxCryptoVault.encryptSecret(
         {
@@ -185,7 +211,7 @@ export class GalxCredentialSubstrate {
           refreshToken: acc.refreshToken,
           accountId: acc.accountId,
           email: acc.email,
-          name: `ChatGPT Shard (${acc.accountId.slice(0, 8)})`
+          name: 'Imported OpenAI OAuth Shard'
         },
         'system_admin',
         shardId,
@@ -195,7 +221,7 @@ export class GalxCredentialSubstrate {
       const shard: GalxShardAccount = {
         id: shardId,
         userId: 'system_admin',
-        accountLabel: `ChatGPT Fleet Shard (${acc.accountId.slice(0, 8)})`,
+        accountLabel: 'Imported OpenAI OAuth Shard',
         provider: 'openai',
         authType: 'oauth',
         shardMode: 'pooled',
@@ -204,7 +230,7 @@ export class GalxCredentialSubstrate {
         weight: acc.weight || 1,
         fencingToken: 1,
         accountId: acc.accountId,
-        apiKeyMasked: `oauth_${acc.accountId.slice(0, 8)}...`,
+        apiKeyMasked: 'oauth_********',
         encryptedSecrets: encrypted,
         encryptedPayload: encrypted,
         privacyCapabilities: {
@@ -235,72 +261,19 @@ export class GalxCredentialSubstrate {
           consecutiveFailures: 0
         },
         permissionRetracted: false,
+        registrySource: 'operator_import',
         createdAtMs: Date.now(),
         updatedAtMs: Date.now()
       };
 
-      this.addAccount(shard);
+      const existing = this.accountTable.get(shardId);
+      await (existing
+        ? this.updateAccountAsync({ ...existing, ...shard, createdAtMs: existing.createdAtMs }, { requireRemote: true })
+        : this.addAccountAsync(shard, { requireRemote: true }));
       addedCount++;
     }
 
-    // Clean up fallback dummy seed if real shards were enrolled
-    if (addedCount > 0) {
-      const allShards = this.accountTable.getAll() as GalxShardAccount[];
-      for (const s of allShards) {
-        if (s.id.startsWith('shard_galx_flagship_')) {
-          this.deleteAccount(s.id);
-        }
-      }
-    }
-
     return addedCount;
-  }
-
-  private seedInitialEnvShards(): void {
-    const openaiKey = process.env.OPENAI_API_KEY || 'galx_native_flagship_token';
-
-    if (openaiKey && openaiKey.length > 5) {
-      const shardId = `shard_galx_flagship_${Date.now()}`;
-      const encrypted = GalxCryptoVault.encryptSecret({ apiKey: openaiKey }, 'system_admin', shardId, 'openai');
-      const shard: GalxShardAccount = {
-        id: shardId,
-        userId: 'system_admin',
-        accountLabel: process.env.OPENAI_API_KEY ? 'OpenAI Root Seed Pool' : 'GALX Wholesale Flagship Pool',
-        provider: 'openai',
-        authType: 'api_key',
-        shardMode: 'pooled',
-        status: 'healthy',
-        priority: 10,
-        weight: 1,
-        fencingToken: 1,
-        apiKeyMasked: GalxCryptoVault.maskApiKey(openaiKey),
-        encryptedSecrets: encrypted,
-        privacyCapabilities: {
-          hipaaCompliant: true,
-          zdrCertified: true,
-          dataResidency: 'global',
-          baaSigned: true,
-          piiFiltering: true
-        },
-        tokenBucket: {
-          maxTokens: 500000,
-          remainingTokens: 500000,
-          refillRatePerMinute: 500000,
-          maxRequests: 1000,
-          remainingRequests: 1000,
-          lastRefillTimestampMs: Date.now()
-        },
-        stats: {
-          totalRequestsServed: 0,
-          totalTokensConsumed: 0,
-          consecutiveFailures: 0
-        },
-        permissionRetracted: false,
-        createdAtMs: Date.now(),
-        updatedAtMs: Date.now()
-      };
-      this.addAccount(shard);
-    }
   }
 
   /**
@@ -317,11 +290,34 @@ export class GalxCredentialSubstrate {
     };
     this.accountTable.put(account.id, normalized);
     this.persistence.saveShard(normalized);
-    this.saveShardsToDisk();
     this.persistence.logAudit('SHARD_REGISTERED', {
       accountLabel: normalized.accountLabel,
       provider: normalized.provider,
       shardMode: normalized.shardMode
+    }, normalized.id, normalized.userId);
+  }
+
+  /**
+   * Commits registration to PostgreSQL before publishing it to the routing cache.
+   * Production enrollment paths must use this method.
+   */
+  public async addAccountAsync(
+    account: GalxShardAccount,
+    options: { requireRemote?: boolean } = { requireRemote: true }
+  ): Promise<void> {
+    await this.ready();
+    const normalized: GalxShardAccount = {
+      ...account,
+      permissionRetracted: account.permissionRetracted ?? false
+    };
+    const authorityOptions = this.resolveMutationOptions(options);
+    const durableAccount = await this.persistence.saveShardAsync(normalized, authorityOptions);
+    this.accountTable.put(durableAccount.id, durableAccount);
+    this.persistence.logAudit('SHARD_REGISTERED', {
+      accountLabel: normalized.accountLabel,
+      provider: normalized.provider,
+      shardMode: normalized.shardMode,
+      authority: authorityOptions.requireRemote === false ? 'ephemeral-test' : 'postgresql'
     }, normalized.id, normalized.userId);
   }
 
@@ -332,7 +328,22 @@ export class GalxCredentialSubstrate {
     };
     this.accountTable.put(account.id, normalized);
     this.persistence.saveShard(normalized);
-    this.saveShardsToDisk();
+  }
+
+  public async updateAccountAsync(
+    account: GalxShardAccount,
+    options: { requireRemote?: boolean } = { requireRemote: true }
+  ): Promise<void> {
+    await this.ready();
+    const normalized: GalxShardAccount = {
+      ...account,
+      permissionRetracted: account.permissionRetracted ?? false
+    };
+    const durableAccount = await this.persistence.saveShardAsync(
+      normalized,
+      this.resolveMutationOptions(options)
+    );
+    this.accountTable.put(durableAccount.id, durableAccount);
   }
 
   public retractAccount(accountId: string, userId: string): boolean {
@@ -360,7 +371,31 @@ export class GalxCredentialSubstrate {
         timestamp: Date.now()
       }, accountId, userId);
     }
-    this.saveShardsToDisk();
+    return true;
+  }
+
+  public async retractAccountAsync(accountId: string, userId: string): Promise<boolean> {
+    await this.ready();
+    const existing = this.accountTable.get(accountId);
+    if (!existing) return false;
+    const revokedShard: GalxShardAccount = {
+      ...existing,
+      status: 'revoked',
+      permissionRetracted: true,
+      updatedAtMs: Date.now()
+    };
+    const authorityOptions = this.resolveMutationOptions({ requireRemote: true });
+    await this.persistence.saveShardAsync(revokedShard, authorityOptions);
+    this.accountTable.delete(accountId);
+    for (const listener of this.retractListeners) {
+      try {
+        listener(accountId);
+      } catch {}
+    }
+    this.persistence.logAudit('PERMISSION_RETRACTED', {
+      timestamp: Date.now(),
+      authority: authorityOptions.requireRemote === false ? 'ephemeral-test' : 'postgresql'
+    }, accountId, userId);
     return true;
   }
 
@@ -372,8 +407,23 @@ export class GalxCredentialSubstrate {
       } catch {}
     }
     this.persistence.deleteShard(accountId);
-    this.saveShardsToDisk();
     return true;
+  }
+
+  public async deleteAccountAsync(accountId: string): Promise<boolean> {
+    await this.ready();
+    const existed = Boolean(this.accountTable.get(accountId));
+    await this.persistence.deleteShardAsync(
+      accountId,
+      this.resolveMutationOptions({ requireRemote: true })
+    );
+    this.accountTable.delete(accountId);
+    for (const listener of this.retractListeners) {
+      try {
+        listener(accountId);
+      } catch {}
+    }
+    return existed;
   }
 
   public getAccount(accountId: string): GalxShardAccount | undefined {

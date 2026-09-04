@@ -14,6 +14,7 @@
  */
 
 import crypto from 'node:crypto';
+import { resolveSigningKey } from '../security/GalxSigningKey';
 import { BroccoliDbTable } from '../broccolidb/broccolidb-table';
 import type {
   FrontierTaxonomyLabel,
@@ -41,7 +42,7 @@ export class BroccoliDataLabelingClassifier {
   public readonly clusterCentroidTable: BroccoliDbTable<ClusterCentroid>;
 
   private readonly minHashPermutations: Array<{ a: number; b: number }> = [];
-  private readonly hmacSecretKey: string = process.env.GALX_VAULT_MASTER_SECRET || 'galxai-provenance-default-key';
+  private readonly hmacSecretKey: Buffer = resolveSigningKey('training-provenance');
 
   private constructor() {
     this.classificationCacheTable = new BroccoliDbTable<FrontierTaxonomyLabel>('broccolidb_taxonomy_cache');

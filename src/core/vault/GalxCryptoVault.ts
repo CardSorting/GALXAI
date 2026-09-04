@@ -19,9 +19,29 @@ export class GalxVaultDecryptionError extends Error {
   }
 }
 
-// Master Keyring with HKDF-SHA256 Derivation
-export const PRIMARY_KEY_VERSION = 'v1';
-export const RAW_MASTER_SEED = process.env.GALX_VAULT_MASTER_SECRET || process.env.GALX_VAULT_KEY || 'galx-super-secure-master-secret-key-32b-min!';
+// Versioned key slots support deploy -> rewrap -> prune rotation. The legacy
+// master variables are treated as the v1 slot for backwards compatibility.
+const SUPPORTED_KEY_VERSIONS = ['v1', 'v2'] as const;
+export const PRIMARY_KEY_VERSION = process.env.GALX_VAULT_ACTIVE_KEY_VERSION || 'v1';
+let ephemeralDevelopmentSeed: string | undefined;
+
+if (!SUPPORTED_KEY_VERSIONS.includes(PRIMARY_KEY_VERSION as any)) {
+  throw new Error(`Unsupported GALX_VAULT_ACTIVE_KEY_VERSION '${PRIMARY_KEY_VERSION}'`);
+}
+
+function resolveVersionSeed(version: string): string | undefined {
+  const explicit = process.env[`GALX_VAULT_KEY_${version.toUpperCase()}`];
+  if (explicit) return explicit;
+
+  const legacy = process.env.GALX_VAULT_MASTER_SECRET || process.env.GALX_VAULT_KEY;
+  if (legacy && version === 'v1') return legacy;
+
+  // A process connected to durable authority must never synthesize a key slot:
+  // ciphertext produced with it would become unrecoverable after restart.
+  if (process.env.NODE_ENV === 'production' || process.env.DATABASE_URL) return undefined;
+  ephemeralDevelopmentSeed ||= crypto.randomBytes(48).toString('base64url');
+  return ephemeralDevelopmentSeed;
+}
 
 
 function deriveVersionedKey(seed: string, version: string): Buffer {
@@ -36,10 +56,16 @@ function deriveVersionedKey(seed: string, version: string): Buffer {
   );
 }
 
-const KEYRING: Map<string, Buffer> = new Map([
-  ['v1', deriveVersionedKey(RAW_MASTER_SEED, 'v1')],
-  ['v2', deriveVersionedKey(RAW_MASTER_SEED, 'v2')]
-]);
+const KEYRING: Map<string, Buffer> = new Map();
+for (const version of SUPPORTED_KEY_VERSIONS) {
+  const seed = resolveVersionSeed(version);
+  if (seed) KEYRING.set(version, deriveVersionedKey(seed, version));
+}
+if (!KEYRING.has(PRIMARY_KEY_VERSION)) {
+  throw new Error(
+    `GALX vault active key '${PRIMARY_KEY_VERSION}' is unavailable. Configure GALX_VAULT_KEY_${PRIMARY_KEY_VERSION.toUpperCase()} in the deployment secret manager.`
+  );
+}
 
 export class GalxCryptoVault {
   /**
@@ -488,7 +514,7 @@ export class GalxCryptoVault {
       ttlMs?: number;
       version?: 'v1' | 'v2';
     },
-    secretSeed = RAW_MASTER_SEED
+    secretSeed?: string
   ): {
     token: string;
     tokenHash: string;
@@ -517,7 +543,10 @@ export class GalxCryptoVault {
       };
 
       const payloadB64 = Buffer.from(JSON.stringify(claims), 'utf-8').toString('base64url');
-      const signingKey = deriveVersionedKey(secretSeed, 'v1');
+      const signingKey = secretSeed
+        ? deriveVersionedKey(secretSeed, 'v1')
+        : KEYRING.get('v1');
+      if (!signingKey) throw new Error('Vault v1 key slot is unavailable');
       const signature = crypto.createHmac('sha256', signingKey).update(payloadB64).digest('hex');
 
       const token = `galx_sess_${payloadB64}.${signature}`;
@@ -539,7 +568,7 @@ export class GalxCryptoVault {
    */
   static verifySessionToken(
     token: string,
-    secretSeed = RAW_MASTER_SEED
+    secretSeed?: string
   ): {
     valid: boolean;
     claims?: AuthSessionClaims;
@@ -609,7 +638,10 @@ export class GalxCryptoVault {
       }
 
       let isSignatureValid = false;
-      for (const [, key] of KEYRING.entries()) {
+      const verificationKeys = secretSeed
+        ? [deriveVersionedKey(secretSeed, 'v1'), ...KEYRING.values()]
+        : [...KEYRING.values()];
+      for (const key of verificationKeys) {
         try {
           const expectedSig = crypto.createHmac('sha256', key).update(payloadB64).digest('hex');
           const sigBuf = Buffer.from(signatureHex, 'hex');
@@ -758,6 +790,3 @@ export class GalxCryptoVault {
     };
   }
 }
-
-
-

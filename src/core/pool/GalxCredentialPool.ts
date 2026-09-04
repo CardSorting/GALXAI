@@ -13,6 +13,7 @@ import { GalxCircuitBreaker } from '../circuit/GalxCircuitBreaker';
 import { BroccoliDbTable } from '../broccolidb/broccolidb-table';
 import { BroccoliNaturalQueryParser } from '../broccolidb/broccolidb-natural-query';
 import { GalxShardSyncBuffer } from './GalxShardSyncBuffer';
+import { ShardRepository } from '../../lib/supabase/repositories/ShardRepository';
 
 interface QueuedAdmissionRequest {
   id: string;
@@ -52,17 +53,20 @@ export class GalxCredentialPool {
   // Anti-Stampede Bounded Admission Queue (Waiting Room)
   private readonly admissionQueue: QueuedAdmissionRequest[] = [];
   private readonly syncBuffer = GalxShardSyncBuffer.getInstance();
+  private readonly shardRepository: ShardRepository;
 
   constructor(
     substrate: GalxCredentialSubstrate,
     rateGovernor = new ContinuousTokenBucketRateGovernor(),
     circuitBreaker = new GalxCircuitBreaker(),
-    strategy: GalxRotationStrategy = 'adaptive_headroom'
+    strategy: GalxRotationStrategy = 'adaptive_headroom',
+    shardRepository?: ShardRepository
   ) {
     this.substrate = substrate;
     this.rateGovernor = rateGovernor;
     this.circuitBreaker = circuitBreaker;
     this.strategy = strategy;
+    this.shardRepository = shardRepository || ShardRepository.getInstance();
 
     this.leaseTable = new BroccoliDbTable<ShardLease & { id: string }>('pool_leases');
     this.leaseTable.createIndex('shardId');
@@ -338,6 +342,206 @@ export class GalxCredentialPool {
     }
 
     return directResult;
+  }
+
+  /**
+   * Production work-ownership boundary. Local scoring selects a candidate, but
+   * the lease is not returned to a dispatcher until PostgreSQL has fenced it.
+   * The synchronous acquireLease method remains simulation-only.
+   */
+  async acquireLeaseAuthoritatively(
+    req: ShardAcquisitionRequest,
+    nowMs = req.nowMs || Date.now()
+  ): Promise<ShardAcquisitionResult> {
+    if (this.shardRepository.isAuthorityConfigured() && !(req.idempotencyKey || req.jobId)) {
+      return {
+        status: 'invalid_request',
+        reason: 'Authoritative shard acquisition requires an idempotencyKey or jobId'
+      };
+    }
+    const candidate = this.acquireLease(req, nowMs);
+    if (candidate.status === 'queued' && candidate.queuedPromise) {
+      return {
+        ...candidate,
+        queuedPromise: candidate.queuedPromise.then(result =>
+          this.confirmAuthoritativeLease(result, req, Date.now())
+        )
+      };
+    }
+    return this.confirmAuthoritativeLease(candidate, req, nowMs);
+  }
+
+  private async confirmAuthoritativeLease(
+    candidate: ShardAcquisitionResult,
+    req: ShardAcquisitionRequest,
+    nowMs: number
+  ): Promise<ShardAcquisitionResult> {
+    const localLease = candidate.lease;
+    if (!localLease || !this.shardRepository.isAuthorityConfigured()) return candidate;
+
+    const decision = await this.shardRepository.acquireLease({
+      shardId: localLease.shardId,
+      userId: req.userId,
+      estimatedTokens: localLease.estimatedTokens,
+      leaseTtlMs: Math.max(1000, localLease.expiresAtMs - localLease.acquiredAtMs),
+      jobId: req.idempotencyKey || req.jobId!
+    });
+
+    if (!decision.success || !decision.leaseId || decision.fencingToken === undefined) {
+      this.discardLocalLease(localLease.leaseId, nowMs);
+      const reason = decision.reason || 'PostgreSQL rejected shard work ownership';
+      const status: ShardAcquisitionResult['status'] = reason.startsWith('AUTHORITY_UNAVAILABLE')
+        ? 'authority_unavailable'
+        : reason.includes('NOT_HEALTHY') || reason.includes('PERMISSION_RETRACTED') || reason.includes('CREDENTIAL_EXPIRED')
+          ? 'no_healthy_shards'
+          : reason.includes('QUOTA') || reason.includes('CONCURRENCY') || reason.includes('COOLDOWN')
+            ? 'all_shards_cooldown'
+            : 'pool_exhausted';
+      return {
+        status,
+        reason
+      };
+    }
+
+    const authoritativeAccount: GalxShardAccount = {
+      ...localLease.account,
+      fencingToken: decision.fencingToken,
+      tokenBucket: {
+        ...localLease.account.tokenBucket,
+        remainingTokens: Number.isFinite(decision.remainingTokens)
+          ? decision.remainingTokens!
+          : localLease.account.tokenBucket.remainingTokens,
+        reservedTokens: Number.isFinite(decision.reservedTokens)
+          ? decision.reservedTokens!
+          : localLease.account.tokenBucket.reservedTokens,
+        remainingRequests: Number.isFinite(decision.remainingRequests)
+          ? decision.remainingRequests!
+          : localLease.account.tokenBucket.remainingRequests,
+        lastRefillTimestampMs: nowMs
+      },
+      updatedAtMs: nowMs
+    };
+    const authoritativeLease: ShardLease = {
+      ...localLease,
+      leaseId: decision.leaseId,
+      fencingToken: decision.fencingToken,
+      expiresAtMs: decision.expiresAtMs || localLease.expiresAtMs,
+      account: authoritativeAccount
+    };
+
+    this.activeLeases.delete(localLease.leaseId);
+    this.leaseTable.delete(localLease.leaseId);
+    this.activeLeases.set(authoritativeLease.leaseId, authoritativeLease);
+    this.leaseTable.put(authoritativeLease.leaseId, {
+      ...authoritativeLease,
+      id: authoritativeLease.leaseId
+    });
+    this.substrate.updateAccount(authoritativeAccount);
+    return { status: 'success', lease: authoritativeLease };
+  }
+
+  /** Renews a production lease in PostgreSQL before extending its local projection. */
+  async extendLeaseAuthoritatively(leaseId: string, extensionMs = 120_000): Promise<number> {
+    const lease = this.activeLeases.get(leaseId);
+    if (!lease) throw new Error('Cannot renew an unknown shard lease');
+
+    if (this.shardRepository.isAuthorityConfigured()) {
+      const decision = await this.shardRepository.extendLease({
+        leaseId,
+        fencingToken: lease.fencingToken,
+        extensionMs
+      });
+      if (!decision.success || !decision.expiresAtMs) {
+        throw new Error(decision.reason || 'PostgreSQL rejected shard lease renewal');
+      }
+      lease.expiresAtMs = decision.expiresAtMs;
+      return lease.expiresAtMs;
+    }
+
+    lease.expiresAtMs = Math.max(lease.expiresAtMs, Date.now() + extensionMs);
+    return lease.expiresAtMs;
+  }
+
+  private discardLocalLease(leaseId: string, nowMs: number): void {
+    const lease = this.activeLeases.get(leaseId);
+    if (!lease) return;
+
+    this.activeLeases.delete(leaseId);
+    this.leaseTable.delete(leaseId);
+    this.circuitBreaker.releaseCanarySlot(lease.shardId);
+
+    const shardInFlight = this.inFlightCounts.get(lease.shardId) || 0;
+    if (shardInFlight <= 1) this.inFlightCounts.delete(lease.shardId);
+    else this.inFlightCounts.set(lease.shardId, shardInFlight - 1);
+
+    const tenantInFlight = this.tenantInFlightCounts.get(lease.userId) || 0;
+    if (tenantInFlight <= 1) this.tenantInFlightCounts.delete(lease.userId);
+    else this.tenantInFlightCounts.set(lease.userId, tenantInFlight - 1);
+
+    const account = this.substrate.getAccount(lease.shardId);
+    if (account) {
+      const recoveredBucket = this.rateGovernor.commit(
+        account.tokenBucket,
+        0,
+        lease.estimatedTokens,
+        0,
+        nowMs
+      );
+      let recoveredSlidingWindow = account.slidingWindowQuota;
+      if (recoveredSlidingWindow) {
+        const history = [...recoveredSlidingWindow.requestHistoryTimestampsMs];
+        const provisionalIndex = history.lastIndexOf(lease.acquiredAtMs);
+        if (provisionalIndex >= 0) history.splice(provisionalIndex, 1);
+        recoveredSlidingWindow = {
+          ...recoveredSlidingWindow,
+          requestHistoryTimestampsMs: history,
+          usedRequestsInWindow: history.length
+        };
+      }
+      this.substrate.updateAccount({
+        ...account,
+        tokenBucket: recoveredBucket,
+        slidingWindowQuota: recoveredSlidingWindow,
+        updatedAtMs: nowMs
+      });
+    }
+  }
+
+  /**
+   * Commits authoritative quota/accounting state before retiring the local
+   * projection lease. Repeated calls are safe because the database release RPC
+   * returns the original committed decision.
+   */
+  async releaseLeaseAuthoritatively(
+    leaseId: string,
+    options: {
+      tokensConsumed?: number;
+      tokensUsed?: number;
+      success?: boolean;
+      upstreamHeaders?: Record<string, string | number | undefined>;
+      errorReason?: string;
+      nowMs?: number;
+      latencyMs?: number;
+      statusCode?: number;
+      modelUsed?: string;
+    } = {}
+  ): Promise<boolean> {
+    const lease = this.activeLeases.get(leaseId);
+    if (!lease) return false;
+
+    if (this.shardRepository.isAuthorityConfigured()) {
+      const decision = await this.shardRepository.releaseLease({
+        leaseId,
+        actualTokens: options.tokensConsumed ?? options.tokensUsed ?? 0,
+        latencyMs: options.latencyMs,
+        success: options.success !== false
+      });
+      if (!decision.success) {
+        throw new Error(decision.reason || 'PostgreSQL rejected shard lease reconciliation');
+      }
+    }
+
+    return this.releaseLease(leaseId, options);
   }
 
   /**
@@ -741,8 +945,8 @@ export class GalxCredentialPool {
   }
 
   /**
-   * Releases an execution lease upon request completion, committing tokens, updating EWMA latency,
-   * promoting canary shards to slow-start warmup, notifying circuit breaker, and enqueuing to GalxShardSyncBuffer.
+   * Simulation/local projection release. Production dispatchers must call
+   * releaseLeaseAuthoritatively so PostgreSQL commits ownership and quota first.
    */
   releaseLease(
     leaseId: string,

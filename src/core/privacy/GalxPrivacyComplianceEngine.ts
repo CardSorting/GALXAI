@@ -350,8 +350,13 @@ export class GalxPrivacyComplianceEngine {
 
     // 2. Retract and wipe all shards
     let shardsDeleted = 0;
+    const allowEphemeralTestProjection =
+      process.env.NODE_ENV === 'test' &&
+      process.env.GALX_ALLOW_EPHEMERAL_SHARDS_FOR_TESTS === 'true';
     for (const shard of shards) {
-      this.persistence.deleteShard(shard.id);
+      await this.persistence.deleteShardAsync(shard.id, {
+        requireRemote: !allowEphemeralTestProjection
+      });
       shardsDeleted++;
     }
 
@@ -363,9 +368,16 @@ export class GalxPrivacyComplianceEngine {
     }
 
     const purgedAt = new Date().toISOString();
+    const proofSecret =
+      process.env.GALX_AUDIT_SIGNING_SECRET ||
+      process.env.GALX_VAULT_MASTER_SECRET ||
+      (allowEphemeralTestProjection ? 'test-only-ephemeral-erasure-proof' : undefined);
+    if (!proofSecret) {
+      throw new Error('GALX_AUDIT_SIGNING_SECRET is required to attest a production erasure');
+    }
     const cryptographicProof = crypto
-      .createHash('sha256')
-      .update(`${userId}:ERASED:${purgedAt}:${process.env.GALX_VAULT_MASTER_SECRET || 'galx-purge-proof'}`)
+      .createHmac('sha256', proofSecret)
+      .update(`${userId}:ERASED:${purgedAt}`)
       .digest('hex');
 
     // 4. Record tamper-evident anonymized audit log

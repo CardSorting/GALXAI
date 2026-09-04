@@ -155,9 +155,17 @@ export class GalxPersistence {
     return this.shardTable.getAll() as GalxShardAccount[];
   }
 
-  public async getShardsAsync(userId?: string): Promise<GalxShardAccount[]> {
-    const shards = await this.shardRepo.getShards(userId);
+  public isShardAuthorityConfigured(): boolean {
+    return this.shardRepo.isAuthorityConfigured();
+  }
+
+  public async getShardsAsync(
+    userId?: string,
+    options: { requireRemote?: boolean } = {}
+  ): Promise<GalxShardAccount[]> {
+    const shards = await this.shardRepo.getShards(userId, options);
     if (!userId) {
+      this.shardTable.clear();
       for (const s of shards) {
         this.shardTable.put(s.id, s);
       }
@@ -166,23 +174,31 @@ export class GalxPersistence {
   }
 
   public saveShard(shard: GalxShardAccount): void {
+    // Explicit cache-only projection for synchronous simulation/hot-path callers.
+    // Authoritative registrations and credential changes must use saveShardAsync.
     this.shardTable.put(shard.id, shard);
-    this.shardRepo.saveShard(shard).catch(() => {});
   }
 
-  public async saveShardAsync(shard: GalxShardAccount): Promise<void> {
-    this.shardTable.put(shard.id, shard);
-    await this.shardRepo.saveShard(shard);
+  public async saveShardAsync(
+    shard: GalxShardAccount,
+    options: { requireRemote?: boolean } = { requireRemote: true }
+  ): Promise<GalxShardAccount> {
+    const durableShard = await this.shardRepo.saveShard(shard, options);
+    this.shardTable.put(durableShard.id, durableShard);
+    return durableShard;
   }
 
   public deleteShard(shardId: string): void {
+    // Cache-only counterpart to deleteShardAsync; never claims durable deletion.
     this.shardTable.delete(shardId);
-    this.shardRepo.deleteShard(shardId).catch(() => {});
   }
 
-  public async deleteShardAsync(shardId: string): Promise<void> {
+  public async deleteShardAsync(
+    shardId: string,
+    options: { requireRemote?: boolean } = { requireRemote: true }
+  ): Promise<void> {
+    await this.shardRepo.deleteShard(shardId, options);
     this.shardTable.delete(shardId);
-    await this.shardRepo.deleteShard(shardId);
   }
 
   public queryShardsNatural(naturalQuery: string): GalxShardAccount[] {

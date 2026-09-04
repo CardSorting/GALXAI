@@ -416,6 +416,21 @@ export interface Database {
           fencing_token: number;
           permission_retracted: boolean;
           cooldown_until_ms: number | null;
+          credential_expires_at_ms: number | null;
+          privacy_capabilities: Json;
+          sliding_window_quota: Json;
+          supported_models: string[] | null;
+          unsupported_models: string[] | null;
+          registry_source: string;
+          registry_revision: number;
+          tier_pool: string;
+          max_concurrency_ceiling: number;
+          active_in_flight_count: number;
+          ewma_latency_p95_ms: number;
+          hydraulic_headroom_score: number;
+          circuit_state: string;
+          token_refill_remainder: number;
+          request_refill_remainder: number;
           created_at_ms: number;
           updated_at_ms: number;
           created_at: string;
@@ -453,6 +468,21 @@ export interface Database {
           fencing_token?: number;
           permission_retracted?: boolean;
           cooldown_until_ms?: number | null;
+          credential_expires_at_ms?: number | null;
+          privacy_capabilities?: Json;
+          sliding_window_quota?: Json;
+          supported_models?: string[] | null;
+          unsupported_models?: string[] | null;
+          registry_source?: string;
+          registry_revision?: number;
+          tier_pool?: string;
+          max_concurrency_ceiling?: number;
+          active_in_flight_count?: number;
+          ewma_latency_p95_ms?: number;
+          hydraulic_headroom_score?: number;
+          circuit_state?: string;
+          token_refill_remainder?: number;
+          request_refill_remainder?: number;
           created_at_ms: number;
           updated_at_ms: number;
           created_at?: string;
@@ -490,10 +520,58 @@ export interface Database {
           fencing_token?: number;
           permission_retracted?: boolean;
           cooldown_until_ms?: number | null;
+          credential_expires_at_ms?: number | null;
+          privacy_capabilities?: Json;
+          sliding_window_quota?: Json;
+          supported_models?: string[] | null;
+          unsupported_models?: string[] | null;
+          registry_source?: string;
+          registry_revision?: number;
+          tier_pool?: string;
+          max_concurrency_ceiling?: number;
+          active_in_flight_count?: number;
+          ewma_latency_p95_ms?: number;
+          hydraulic_headroom_score?: number;
+          circuit_state?: string;
+          token_refill_remainder?: number;
+          request_refill_remainder?: number;
           created_at_ms?: number;
           updated_at_ms?: number;
           created_at?: string;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      galx_shard_registry_events: {
+        Row: {
+          journal_offset: number;
+          event_id: string;
+          shard_id: string;
+          registry_revision: number;
+          event_type: string;
+          actor_id: string;
+          projection: Json;
+          occurred_at: string;
+        };
+        Insert: {
+          journal_offset?: never;
+          event_id?: string;
+          shard_id: string;
+          registry_revision: number;
+          event_type: string;
+          actor_id?: string;
+          projection?: Json;
+          occurred_at?: string;
+        };
+        Update: {
+          journal_offset?: never;
+          event_id?: never;
+          shard_id?: never;
+          registry_revision?: never;
+          event_type?: never;
+          actor_id?: never;
+          projection?: never;
+          occurred_at?: never;
         };
         Relationships: [];
       };
@@ -3671,7 +3749,35 @@ export interface Database {
         };
         Returns: Json;
       };
+      fn_gateway_preflight_composite_mesh_v2: {
+        Args: {
+          p_key_hash: string;
+          p_requested_model: string;
+          p_estimated_cost?: number;
+          p_worker_id?: string;
+          p_request_id?: string;
+          p_estimated_tokens?: number;
+        };
+        Returns: Json;
+      };
       fn_gateway_postflight_composite_mesh: {
+        Args: {
+          p_user_id: string;
+          p_workspace_id?: string;
+          p_shard_id?: string;
+          p_lease_id?: string;
+          p_actual_cost: number;
+          p_model: string;
+          p_prompt_tokens?: number;
+          p_completion_tokens?: number;
+          p_cached_tokens?: number;
+          p_latency_ms?: number;
+          p_status_code?: number;
+          p_client_ip?: string;
+        };
+        Returns: Json;
+      };
+      fn_gateway_postflight_composite_mesh_v2: {
         Args: {
           p_user_id: string;
           p_workspace_id?: string;
@@ -3785,6 +3891,15 @@ export interface Database {
         };
         Returns: Json;
       };
+      fn_extend_shard_lease: {
+        Args: {
+          p_lease_id: string;
+          p_fencing_token: number;
+          p_extension_ms?: number;
+          p_now_ms?: number;
+        };
+        Returns: Json;
+      };
       fn_release_shard_lease: {
         Args: {
           p_lease_id: string;
@@ -3800,6 +3915,12 @@ export interface Database {
           p_now_ms?: number;
         };
         Returns: number;
+      };
+      fn_upsert_shard_registry: {
+        Args: {
+          p_row: Json;
+        };
+        Returns: Json;
       };
       fn_vector_search: {
         Args: {

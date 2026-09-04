@@ -5,6 +5,7 @@
  */
 
 import * as crypto from 'node:crypto';
+import { hasConfiguredSigningKey } from '../security/GalxSigningKey';
 import type { SOC2DriftReport, SOC2ControlDriftItem } from '../contracts/GalxContracts';
 import { GalxSOC2AuditEngine } from './GalxSOC2AuditEngine';
 import { GalxPersistence } from '../../lib/storage/GalxPersistence';
@@ -46,7 +47,7 @@ export class GalxSOC2DriftDetector {
           driftReason = 'Audit log SHA-256 hash chain tampering detected';
         }
       } else if (ctrl.controlId === 'CC6.7') {
-        const hasMasterSecret = Boolean(process.env.GALX_VAULT_MASTER_SECRET || 'galx-vault-master-secret-2026');
+        const hasMasterSecret = hasConfiguredSigningKey();
         if (!hasMasterSecret) {
           isCompliant = false;
           driftReason = 'KMS Master Encryption Secret missing from environment';

@@ -27,6 +27,8 @@ export class GalxShardSyncBuffer {
   private readonly maxBatchSize = 100;
   private readonly flushIntervalMs = 2500;
   private isFlushing = false;
+  private totalFlushFailures = 0;
+  private lastFlushErrorAtMs?: number;
 
   private constructor() {
     this.startPeriodicFlush();
@@ -69,6 +71,22 @@ export class GalxShardSyncBuffer {
     };
   }
 
+  public getHealth(): {
+    isFlushing: boolean;
+    pendingProbes: number;
+    pendingTransitions: number;
+    totalFlushFailures: number;
+    lastFlushErrorAtMs?: number;
+  } {
+    return {
+      isFlushing: this.isFlushing,
+      pendingProbes: this.pendingHealthProbes.length,
+      pendingTransitions: this.pendingStateTransitions.length,
+      totalFlushFailures: this.totalFlushFailures,
+      lastFlushErrorAtMs: this.lastFlushErrorAtMs
+    };
+  }
+
   private startPeriodicFlush(): void {
     if (typeof setInterval !== 'undefined') {
       this.flushTimer = setInterval(() => {
@@ -99,13 +117,13 @@ export class GalxShardSyncBuffer {
     try {
       // 1. Batch flush health probes to PostgreSQL via stored procedure
       if (probesToFlush.length > 0) {
-        await ShardHealthRepository.getInstance().reportHealthProbesBatch(probesToFlush).catch(() => {});
+        await ShardHealthRepository.getInstance().reportHealthProbesBatch(probesToFlush);
       }
 
       // 2. Batch update state transitions in PostgreSQL via single atomic UNNEST query
       if (transitionsToFlush.length > 0) {
         const shardRepo = ShardRepository.getInstance();
-        await shardRepo.updateShardStatusBatch(transitionsToFlush).catch(() => {});
+        await shardRepo.updateShardStatusBatch(transitionsToFlush);
       }
 
       this.isFlushing = false;
@@ -117,6 +135,8 @@ export class GalxShardSyncBuffer {
       // On network failure, re-queue items with cap to prevent memory leak
       this.pendingHealthProbes.unshift(...probesToFlush.slice(-200));
       this.pendingStateTransitions.unshift(...transitionsToFlush.slice(-50));
+      this.totalFlushFailures++;
+      this.lastFlushErrorAtMs = Date.now();
       this.isFlushing = false;
       return { probesFlushed: 0, transitionsFlushed: 0 };
     }

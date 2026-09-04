@@ -13,6 +13,12 @@ import * as os from 'node:os';
 import * as fs from 'node:fs/promises';
 import { GalxCryptoVault } from '../src/core/vault/GalxCryptoVault';
 
+// Production mutations fail closed without PostgreSQL. This suite explicitly
+// opts into the memory-only simulation surface and verifies it separately.
+process.env.NODE_ENV = 'test';
+process.env.GALX_ALLOW_EPHEMERAL_SHARDS_FOR_TESTS = 'true';
+process.env.GALX_AUDIT_SIGNING_SECRET ||= 'test-only-router-signing-key';
+
 import { ContinuousTokenBucketRateGovernor } from '../src/core/governor/ContinuousTokenBucketRateGovernor';
 import { GalxCircuitBreaker } from '../src/core/circuit/GalxCircuitBreaker';
 import { GalxCredentialSubstrate } from '../src/core/substrate/GalxCredentialSubstrate';
@@ -266,7 +272,8 @@ async function runAllTests() {
 
     const fail1 = breaker.classifyFailure(dummyAccount, 'HTTP 429 Too Many Requests');
     assert.strictEqual(fail1.newStatus, 'cooldown');
-    assert.ok(fail1.cooldownMs && fail1.cooldownMs >= 27000 && fail1.cooldownMs <= 35000);
+    // Inferred 429 cooldown uses symmetric ±20% jitter around 30 seconds.
+    assert.ok(fail1.cooldownMs && fail1.cooldownMs >= 24000 && fail1.cooldownMs <= 36000);
 
     const fail5 = breaker.classifyFailure({
       ...dummyAccount,

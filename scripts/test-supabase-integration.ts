@@ -172,7 +172,8 @@ async function runTests() {
       shardId,
       userId: tenantUid,
       estimatedTokens: 4000,
-      leaseTtlMs: 60000
+      leaseTtlMs: 60000,
+      jobId: `integration_${shardId}`
     });
     assert(
       lease.success === true && typeof lease.fencingToken === 'number' && lease.fencingToken > 1,
@@ -1116,14 +1117,27 @@ async function runTests() {
       revoked: false
     });
 
-    const ticket = await gatewayMesh.executePreflight(preflightKeyHash, 'gpt-4o', 0.10);
+    const gatewayRequestId = `gateway-test-${Date.now()}`;
+    const ticket = await gatewayMesh.executePreflight(
+      preflightKeyHash,
+      'gpt-4o',
+      0.10,
+      'integration_test',
+      { requestId: gatewayRequestId, estimatedTokens: 200 }
+    );
     assert(
       ticket.userId === preflightUser && ticket.currentBalanceUsd >= 10.0 && ticket.model === 'gpt-4o',
       'GalxGatewayMesh: 1-hop atomic preflight resolves key, workspace, wallet, and shard lease in 1 RPC'
     );
 
     // 63. GalxGatewayMesh: Hot Caller Preflight in BroccoliDB L1 (0ms)
-    const hotTicket = await gatewayMesh.executePreflight(preflightKeyHash, 'gpt-4o', 0.10);
+    const hotTicket = await gatewayMesh.executePreflight(
+      preflightKeyHash,
+      'gpt-4o',
+      0.10,
+      'integration_test',
+      { requestId: gatewayRequestId, estimatedTokens: 200 }
+    );
     assert(
       hotTicket.ticketId === ticket.ticketId && gatewayMesh.getStats().preflightL1Hits >= 1,
       'GalxGatewayMesh: Hot caller preflight returns instantly from BroccoliDB L1 table (0ms)'

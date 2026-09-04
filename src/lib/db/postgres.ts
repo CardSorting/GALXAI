@@ -105,10 +105,6 @@ export function getPostgresPool(): Pool | null {
 
     const pool = new Pool(config);
 
-    pool.on('connect', (client) => {
-      client.query('SET search_path = public;').catch(() => {});
-    });
-
     pool.on('error', (err) => {
       console.warn('[PostgresPool] Handled idle client disconnect/error:', err.message);
     });
@@ -117,6 +113,13 @@ export function getPostgresPool(): Pool | null {
   }
 
   return globalThis.__galx_pg_pool;
+}
+
+/** Closes the process-global pool for short-lived CLI and verification tools. */
+export async function closePostgresPool(): Promise<void> {
+  const pool = globalThis.__galx_pg_pool;
+  globalThis.__galx_pg_pool = undefined;
+  if (pool) await pool.end();
 }
 
 const MAX_WAITING_POOL_CLIENTS = 25;

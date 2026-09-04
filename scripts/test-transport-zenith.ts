@@ -8,6 +8,9 @@ import { GalxGatewayMesh } from '../src/lib/cache/GalxGatewayMesh';
 import { GalxZeroCopyStreamPump } from '../src/core/transport/GalxZeroCopyStreamPump';
 import { vectorizedSyncEngine } from '../src/core/sync/GalxVectorizedSyncEngine';
 
+process.env.NODE_ENV = 'test';
+process.env.GALX_ALLOW_EPHEMERAL_SHARDS_FOR_TESTS = 'true';
+
 async function testTransportZenith() {
   console.log('======================================================================');
   console.log('   🧪  TESTING TRANSPORT HARDENING & ZERO-COPY STREAM PUMP           ');
@@ -18,14 +21,30 @@ async function testTransportZenith() {
 
   // 1. First Call: 1-Hop Gateway Resolution
   console.log('1. Testing First-Hop Universal Gateway Preflight...');
-  const preflight1 = await gateway.executeUniversalQoSPreflight(testKeyHash, 'gpt-5.6-luna');
+  const qosRequestId = 'transport-zenith-request-1';
+  const preflight1 = await gateway.executeUniversalQoSPreflight(
+    testKeyHash,
+    'gpt-5.6-luna',
+    undefined,
+    undefined,
+    { requestId: qosRequestId }
+  );
   console.log('   ✓ First Hop Preflight Result:', preflight1);
 
   // 2. Second Call: 0ms L1 BroccoliDB Snapshot Hit
   console.log('\n2. Testing 0ms L1 BroccoliDB Snapshot Hot Path (<0.5µs)...');
   const start = performance.now();
-  const preflight2 = await gateway.executeUniversalQoSPreflight(testKeyHash, 'gpt-5.6-luna');
+  const preflight2 = await gateway.executeUniversalQoSPreflight(
+    testKeyHash,
+    'gpt-5.6-luna',
+    undefined,
+    undefined,
+    { requestId: qosRequestId }
+  );
   const elapsedMicros = (performance.now() - start) * 1000;
+  if (preflight2.lease_id !== preflight1.lease_id || !preflight2.cached_l1) {
+    throw new Error('request-scoped QoS retry did not replay the same lease decision');
+  }
   console.log(`   ✓ L1 Hot Path Hit in ${elapsedMicros.toFixed(2)} µs:`, preflight2);
 
   // 3. Test Zero-Copy SSE Stream Pump Pipeline

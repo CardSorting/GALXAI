@@ -91,7 +91,6 @@ export class GalxAuthEngine {
 
     const effectiveProvider: ProviderType = 'openai';
     const uid = `openai_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`;
-    const shardId = `codex_${uid.substring(0, 10)}_${Date.now()}`;
     const familyId = `fam_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
     const fingerprint = GalxCryptoVault.generateClientFingerprint(ipAddress, userAgent);
     const oauthManager = GalxOAuthManager.getInstance();
@@ -162,6 +161,22 @@ export class GalxAuthEngine {
     // =========================================================================
     // 3. Vault credential with AES-256-GCM Envelope Encryption & AAD Binding
     // =========================================================================
+    const allowEphemeralTestIdentity =
+      process.env.NODE_ENV === 'test' &&
+      process.env.GALX_ALLOW_EPHEMERAL_SHARDS_FOR_TESTS === 'true';
+    const shardIdSecret =
+      process.env.GALX_SHARD_ID_SECRET ||
+      process.env.GALX_VAULT_MASTER_SECRET ||
+      (allowEphemeralTestIdentity ? 'test-only-ephemeral-shard-identity' : undefined);
+    if (!shardIdSecret) {
+      throw new Error('GALX_SHARD_ID_SECRET is required for stable, non-reversible shard identifiers');
+    }
+    const shardIdentity = accountId || rawTokenSecret!;
+    const shardId = `codex_sh_${crypto
+      .createHmac('sha256', shardIdSecret)
+      .update(`${effectiveProvider}:${shardIdentity}`)
+      .digest('hex')
+      .slice(0, 24)}`;
     const encrypted = GalxCryptoVault.encryptSecret(
       {
         apiKey: authType === 'api_key' ? rawTokenSecret : undefined,
@@ -206,28 +221,16 @@ export class GalxAuthEngine {
         consecutiveFailures: 0
       },
       permissionRetracted: false,
+      registrySource: authType === 'oauth' ? 'oauth' : 'api',
       expiresAtMs,
       accountId,
       createdAtMs: Date.now(),
       updatedAtMs: Date.now()
     };
 
-    galxRouter.substrate.addAccount(shard);
+    await galxRouter.substrate.addAccountAsync(shard, { requireRemote: true });
 
-    // 5a. Automatically Synchronize Ingested Shard with Cloudflare Edge Worker Fleet (LUMI-NEW)
-    if (effectiveProvider === 'openai' && rawTokenSecret) {
-      GalxAuthEngine.syncShardToEdgeFleet(
-        shardId,
-        rawTokenSecret,
-        refreshToken,
-        accountId,
-        email,
-        shard.weight,
-        shard.priority
-      );
-    }
-
-    // 5b. Persist OAuth Provider Identity in OAuthRepository (Sovereign Identity Linking)
+    // 5a. Persist OAuth Provider Identity in OAuthRepository (Sovereign Identity Linking)
     if (authType === 'oauth' || accessToken) {
       try {
         const oauthRepo = OAuthRepository.getInstance();
@@ -385,21 +388,8 @@ export class GalxAuthEngine {
         updatedAtMs: Date.now()
       };
 
-      galxRouter.substrate.updateAccount(updatedShard);
+      await galxRouter.substrate.updateAccountAsync(updatedShard, { requireRemote: true });
       this.persistence.logAudit('OAUTH_TOKEN_ROTATED', { provider: shard.provider, expiresAtMs: refreshed.expiresAtMs }, shardId, shard.userId);
-
-      // Automatically sync refreshed tokens to Cloudflare Edge Worker Fleet
-      if (shard.provider === 'openai') {
-        GalxAuthEngine.syncShardToEdgeFleet(
-          shardId,
-          refreshed.accessToken,
-          refreshed.refreshToken || decrypted.refreshToken,
-          refreshed.accountId || decrypted.accountId,
-          (shard as any).email,
-          shard.weight,
-          shard.priority
-        );
-      }
 
       // Update identity record in OAuthRepository
       try {
@@ -683,7 +673,7 @@ export class GalxAuthEngine {
             encryptedPayload: newSecrets,
             updatedAtMs: Date.now()
           };
-          galxRouter.substrate.addAccount(updatedShard);
+          await galxRouter.substrate.updateAccountAsync(updatedShard, { requireRemote: true });
           reencrypted++;
         }
       } catch {
@@ -1115,44 +1105,6 @@ export class GalxAuthEngine {
       isPriorityUser: false,
       error: 'UNRECOGNIZED_AUTH_SCHEME'
     };
-  }
-
-  /**
-   * Synchronizes an ingested or refreshed provider credential shard with the Cloudflare Edge Worker Fleet.
-   */
-  public static syncShardToEdgeFleet(
-    shardId: string,
-    rawSecret: string,
-    refreshToken?: string,
-    accountId?: string,
-    email?: string,
-    weight = 1,
-    priority = 10
-  ): void {
-    const edgeWorkerUrl =
-      process.env.LUMI_EDGE_WORKER_URL ||
-      process.env.EDGE_RELAY_URL ||
-      'https://lumi-edge-worker.notsosuper688651.workers.dev';
-
-    if (!edgeWorkerUrl || !rawSecret || rawSecret.startsWith('galx_')) return;
-
-    fetch(`${edgeWorkerUrl.replace(/\/+$/, '')}/v1/tokens/ingest`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: shardId,
-        accessToken: rawSecret,
-        refreshToken,
-        accountId,
-        email,
-        weight,
-        priority,
-        maxRequestsPerWindow: 40,
-        windowDurationHours: 3
-      })
-    }).catch(() => {
-      // Non-blocking fire-and-forget sync
-    });
   }
 
   public queryRiskEvaluationsNatural(naturalQuery: string): (SessionRiskEvaluation & { id: string; userId?: string; sessionId?: string; timestampMs: number })[] {

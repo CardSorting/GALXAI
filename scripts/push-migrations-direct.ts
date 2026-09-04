@@ -8,20 +8,28 @@ const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, '..');
 const MIGRATIONS_DIR = path.resolve(ROOT_DIR, 'supabase/migrations');
 
-const PASSWORD = process.env.SUPABASE_DB_PASSWORD || 'rsxBB8eiDLVv8nJR';
-const PROJECT_REF = 'mazhcjisettrzbqhorvp';
+const PASSWORD = process.env.SUPABASE_DB_PASSWORD;
+const PROJECT_REF = process.env.SUPABASE_PROJECT_REF;
+
+if (!process.env.DATABASE_URL && (!PASSWORD || !PROJECT_REF)) {
+  throw new Error(
+    'Database credentials are not configured. Set DATABASE_URL, or both SUPABASE_DB_PASSWORD and SUPABASE_PROJECT_REF.'
+  );
+}
 
 // Candidate connection strings for Supabase Oregon (us-west-2)
-const CANDIDATE_URLS = [
-  // Session Pooler (port 5432)
-  `postgresql://postgres.${PROJECT_REF}:${PASSWORD}@aws-0-us-west-2.pooler.supabase.com:5432/postgres`,
-  // Transaction Pooler (port 6543)
-  `postgresql://postgres.${PROJECT_REF}:${PASSWORD}@aws-0-us-west-2.pooler.supabase.com:6543/postgres`,
-  // Direct (if reachable)
-  `postgresql://postgres:${PASSWORD}@db.${PROJECT_REF}.supabase.co:5432/postgres`,
-  // Pooler us-west-1
-  `postgresql://postgres.${PROJECT_REF}:${PASSWORD}@aws-0-us-west-1.pooler.supabase.com:5432/postgres`,
-];
+const CANDIDATE_URLS: string[] = process.env.DATABASE_URL
+  ? [process.env.DATABASE_URL]
+  : [
+      // Session Pooler (port 5432)
+      `postgresql://postgres.${PROJECT_REF!}:${PASSWORD!}@aws-0-us-west-2.pooler.supabase.com:5432/postgres`,
+      // Transaction Pooler (port 6543)
+      `postgresql://postgres.${PROJECT_REF!}:${PASSWORD!}@aws-0-us-west-2.pooler.supabase.com:6543/postgres`,
+      // Direct (if reachable)
+      `postgresql://postgres:${PASSWORD!}@db.${PROJECT_REF!}.supabase.co:5432/postgres`,
+      // Pooler us-west-1
+      `postgresql://postgres.${PROJECT_REF!}:${PASSWORD!}@aws-0-us-west-1.pooler.supabase.com:5432/postgres`,
+    ];
 
 async function connectToDatabase(): Promise<Client> {
   for (const connStr of CANDIDATE_URLS) {

@@ -387,6 +387,9 @@ export interface GalxShardAccount {
   readonly outOfBandUsageDetectedAtMs?: number;
   readonly warmupStartedAtMs?: number;
   readonly adaptiveInFlightLimit?: number;
+  /** Monotonic PostgreSQL control-plane version; never synthesized by a transport. */
+  readonly registryRevision?: number;
+  readonly registrySource?: 'api' | 'oauth' | 'operator_import' | 'environment_bootstrap' | 'legacy_migration';
   readonly createdAtMs: number;
   readonly updatedAtMs: number;
 }
@@ -451,7 +454,9 @@ export interface ShardAcquisitionResult {
     | 'queued'
     | 'queue_timeout'
     | 'cancelled'
-    | 'shed_overflow';
+    | 'shed_overflow'
+    | 'invalid_request'
+    | 'authority_unavailable';
   readonly queuedPromise?: Promise<ShardAcquisitionResult>;
   readonly estimatedWaitMs?: number;
   readonly earliestPoolResetMs?: number;
@@ -1219,7 +1224,4 @@ export interface MemorySlab {
 }
 
 export * from './GalxQueueContracts';
-
-
-
 

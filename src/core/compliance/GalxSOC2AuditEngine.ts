@@ -9,6 +9,7 @@
  */
 
 import * as crypto from 'node:crypto';
+import { resolveSigningKey } from '../security/GalxSigningKey';
 import type {
   SOC2ControlMapping,
   SOC2PostureReport,
@@ -400,7 +401,7 @@ export class GalxSOC2AuditEngine {
       .digest('hex');
 
     const rawProof = `${dossierId}:${tenantId}:${now}:${auditChain.valid}:${auditChain.verifiedEntries}:${zdrAttestationDigestSha256}`;
-    const dossierSignatureSha256 = crypto.createHmac('sha256', process.env.GALX_VAULT_MASTER_SECRET || 'galx-soc2-attestation-master-2026')
+    const dossierSignatureSha256 = crypto.createHmac('sha256', resolveSigningKey('soc2-evidence'))
       .update(rawProof)
       .digest('hex');
 
