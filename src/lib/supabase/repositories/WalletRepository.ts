@@ -1001,17 +1001,37 @@ export class WalletRepository {
       }
     }
 
-    // Local fallback
-    return this.drawTokensCoalescedBatch(items.map(i => ({
-      userId: i.userId,
-      totalCostUsd: i.costUsd,
-      requestCount: 1,
-      totalPromptTokens: i.promptTokens || 0,
-      totalCompletionTokens: i.completionTokens || 0,
-      totalCachedTokens: i.cachedTokens || 0,
-      model: i.model,
-      description: i.description
-    })));
+    // Local fallback must preserve the database procedure's per-user
+    // coalescing semantics rather than reporting one processed user per item.
+    const byUser = new Map<string, {
+      userId: string;
+      totalCostUsd: number;
+      requestCount: number;
+      totalPromptTokens: number;
+      totalCompletionTokens: number;
+      totalCachedTokens: number;
+      model?: string;
+      description?: string;
+    }>();
+    for (const item of items) {
+      const aggregate = byUser.get(item.userId) || {
+        userId: item.userId,
+        totalCostUsd: 0,
+        requestCount: 0,
+        totalPromptTokens: 0,
+        totalCompletionTokens: 0,
+        totalCachedTokens: 0,
+        model: item.model,
+        description: item.description
+      };
+      aggregate.totalCostUsd += item.costUsd;
+      aggregate.requestCount++;
+      aggregate.totalPromptTokens += item.promptTokens || 0;
+      aggregate.totalCompletionTokens += item.completionTokens || 0;
+      aggregate.totalCachedTokens += item.cachedTokens || 0;
+      byUser.set(item.userId, aggregate);
+    }
+    return this.drawTokensCoalescedBatch([...byUser.values()]);
   }
 
   async getTransactions(userId: string, limit = 50): Promise<WalletTransactionRecord[]> {
