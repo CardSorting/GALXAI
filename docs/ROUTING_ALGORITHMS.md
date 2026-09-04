@@ -84,7 +84,7 @@ $$E_i = \max\left(0, \left\lfloor W_i \times \left(1 - \left(\frac{|H_i|}{N_{\te
 - **Zero-Downtime HTTP 429 Failover**: When any shard returns HTTP 429 or reaches quota limits, `GalxCredentialPool` isolates the shard into `cooldown/exhausted` and immediately leases the next healthy shard with monotonic fencing tokens (`#1, #2...`), preserving active client requests with zero dropped frames.
 
 ### 2.2. Session-Sticky Prompt Cache Preservation
-- Requests bearing an `X-Galx-Session-Id` or `conversation_id` anchor to the credential shard that processed their prior turns.
+- Requests bearing an explicit `X-Galx-Session-Id` or `conversation_id` may prefer the credential shard that processed prior turns for cache locality. This is a routing projection only: the reusable credential, socket, and client never own conversation state (ADR 0116).
 - Maintained for 15 minutes of inactivity.
 - **Impact**: Preserves OpenAI upstream KV prompt cache locality, achieving **97.2%+ cache hit rates** and reducing TTFT from $>12\text{s}$ down to $<3.8\text{s}$.
 
@@ -186,5 +186,4 @@ flowchart TD
 2. **Institutional Invariant Isolation (ADR 0066)**: When corporate noise is detected, it strips obsolete governance artifacts while elevating active cryptographic (`RS256`), memory (`zeroizeBuffer`), and runtime (`edge`) invariants (`npm run bench:entropy`).
 3. **Fail-Closed Provenance Gate (`BroccoliCompactionSafety`)**: Verifies all output numbers, dates, BICs, percentages, and IDs against the original input. If any discrepancy exists, fails closed to unmodified source text.
 4. **Hydraulic Quota Benefit**: Downstream P-AHT computes soft reservation tokens against the *compacted* token count, saving up to $85.9\%$ of reserved shard headroom.
-
 

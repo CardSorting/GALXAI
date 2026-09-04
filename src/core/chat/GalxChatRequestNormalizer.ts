@@ -5,6 +5,15 @@ export const MAX_CHAT_BODY_BYTES = 16 * 1024 * 1024;
 export const MAX_CHAT_MESSAGES = 10_000;
 export const MAX_CONVERSATION_ID_LENGTH = 64;
 
+export type ChatSessionMode = 'new' | 'continue' | 'stateless';
+
+export interface ResolvedChatIdentity {
+  conversationId?: string;
+  turnId: string;
+  mode: ChatSessionMode;
+  modeWasExplicit: boolean;
+}
+
 const ALLOWED_ROLES = new Set(['system', 'developer', 'user', 'assistant', 'tool']);
 const RESOURCE_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/;
 
@@ -214,6 +223,119 @@ export function normalizeChatMessages(body: Record<string, any>): RollingContext
 
 export function normalizeConversationId(value: unknown): string | undefined {
   return normalizeChatResourceId(value, 'conversation_id');
+}
+
+export function createChatResourceId(prefix: 'session' | 'agent' | 'turn' = 'session'): string {
+  const randomUuid = globalThis.crypto?.randomUUID?.();
+  if (!randomUuid) {
+    throw new Error('A cryptographically secure randomUUID implementation is required.');
+  }
+  return `${prefix}_${randomUuid}`;
+}
+
+export function normalizeChatSessionMode(value: unknown): ChatSessionMode | undefined {
+  if (value === undefined || value === null || value === '') return undefined;
+  if (typeof value !== 'string') {
+    throw new ChatRequestValidationError(
+      'session_mode must be one of: new, continue, stateless.',
+      'invalid_session_mode'
+    );
+  }
+  const mode = value.trim().toLowerCase();
+  if (mode !== 'new' && mode !== 'continue' && mode !== 'stateless') {
+    throw new ChatRequestValidationError(
+      'session_mode must be one of: new, continue, stateless.',
+      'invalid_session_mode'
+    );
+  }
+  return mode;
+}
+
+/**
+ * Resolves logical conversation identity independently of the HTTP connection or
+ * provider credential. A shared transport client may carry many isolated sessions.
+ */
+export function resolveChatIdentity(params: {
+  body: Record<string, any>;
+  headers?: Pick<Headers, 'get'>;
+}): ResolvedChatIdentity {
+  const { body, headers } = params;
+  const snakeConversationId = normalizeConversationId(body.conversation_id);
+  const camelConversationId = normalizeConversationId(body.conversationId);
+  if (snakeConversationId && camelConversationId && snakeConversationId !== camelConversationId) {
+    throw new ChatRequestValidationError(
+      'conversation_id and conversationId must identify the same conversation.',
+      'conflicting_conversation_id'
+    );
+  }
+  const bodyConversationId = snakeConversationId || camelConversationId;
+  const headerConversationId = normalizeConversationId(headers?.get('x-galx-session-id'));
+  if (bodyConversationId && headerConversationId && bodyConversationId !== headerConversationId) {
+    throw new ChatRequestValidationError(
+      'conversation_id and X-Galx-Session-Id must identify the same conversation.',
+      'conflicting_conversation_id'
+    );
+  }
+
+  const snakeMode = normalizeChatSessionMode(body.session_mode);
+  const camelMode = normalizeChatSessionMode(body.sessionMode);
+  if (snakeMode && camelMode && snakeMode !== camelMode) {
+    throw new ChatRequestValidationError(
+      'session_mode and sessionMode must match.',
+      'conflicting_session_mode'
+    );
+  }
+  const bodyMode = snakeMode || camelMode;
+  const headerMode = normalizeChatSessionMode(headers?.get('x-galx-session-mode'));
+  if (bodyMode && headerMode && bodyMode !== headerMode) {
+    throw new ChatRequestValidationError(
+      'session_mode and X-Galx-Session-Mode must match.',
+      'conflicting_session_mode'
+    );
+  }
+
+  const requestedConversationId = bodyConversationId || headerConversationId;
+  const modeWasExplicit = Boolean(bodyMode || headerMode);
+  const mode = bodyMode || headerMode || (requestedConversationId ? 'continue' : 'stateless');
+
+  if (mode === 'continue' && !requestedConversationId) {
+    throw new ChatRequestValidationError(
+      'conversation_id is required when session_mode is continue.',
+      'missing_conversation_id'
+    );
+  }
+  if (mode === 'stateless' && requestedConversationId) {
+    throw new ChatRequestValidationError(
+      'conversation_id cannot be combined with session_mode stateless.',
+      'conflicting_conversation_mode'
+    );
+  }
+
+  const snakeTurnId = normalizeChatResourceId(body.turn_id, 'turn_id');
+  const camelTurnId = normalizeChatResourceId(body.turnId, 'turn_id');
+  if (snakeTurnId && camelTurnId && snakeTurnId !== camelTurnId) {
+    throw new ChatRequestValidationError(
+      'turn_id and turnId must match.',
+      'conflicting_turn_id'
+    );
+  }
+  const bodyTurnId = snakeTurnId || camelTurnId;
+  const headerTurnId = normalizeChatResourceId(headers?.get('x-galx-turn-id'), 'turn_id');
+  if (bodyTurnId && headerTurnId && bodyTurnId !== headerTurnId) {
+    throw new ChatRequestValidationError(
+      'turn_id and X-Galx-Turn-Id must match.',
+      'conflicting_turn_id'
+    );
+  }
+
+  return {
+    conversationId: mode === 'new'
+      ? (requestedConversationId || createChatResourceId('session'))
+      : requestedConversationId,
+    turnId: bodyTurnId || headerTurnId || createChatResourceId('turn'),
+    mode,
+    modeWasExplicit,
+  };
 }
 
 export function normalizeChatResourceId(value: unknown, field: string): string | undefined {

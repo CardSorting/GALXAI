@@ -6,6 +6,7 @@ import {
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import {
   ChatRequestValidationError,
+  createChatResourceId,
   normalizeChatResourceId,
   parseChatJsonBody,
 } from '@/core/chat/GalxChatRequestNormalizer';
@@ -59,12 +60,16 @@ export async function POST(req: NextRequest) {
     }
 
     const body = (await parseChatJsonBody(req)) as Partial<ChatSession> & { action?: string };
-    const sessionId = normalizeChatResourceId(body.id, 'session_id');
-    if (!sessionId) {
-      return NextResponse.json({ error: 'Missing session ID' }, { status: 400 });
-    }
+    const requestedSessionId = normalizeChatResourceId(body.id, 'session_id');
+    const sessionId = requestedSessionId || createChatResourceId('session');
     if (body.action && !['toggle-pin', 'toggle-archive'].includes(body.action)) {
       throw new ChatRequestValidationError('Unsupported session action.', 'invalid_session_action');
+    }
+    if (body.action && !requestedSessionId) {
+      throw new ChatRequestValidationError(
+        'session_id is required for session actions.',
+        'missing_session_id'
+      );
     }
 
     const repo = ChatRepository.getInstance();
@@ -95,7 +100,7 @@ export async function POST(req: NextRequest) {
     };
 
     const saved = await repo.saveSession(session, authResult.userId);
-    return NextResponse.json({ success: true, session: saved }, { status: 200 });
+    return NextResponse.json({ success: true, session: saved }, { status: requestedSessionId ? 200 : 201 });
   } catch (error) {
     return routeError(error, 'Failed to save session.');
   }

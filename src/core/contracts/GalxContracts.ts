@@ -570,6 +570,14 @@ export interface ChatMessage {
 export interface ChatCompletionRequest {
   model: string;
   messages: ChatMessage[];
+  /** GALX logical conversation identity; independent of socket and credential identity. */
+  conversation_id?: string;
+  /** Explicit lifecycle intent for the logical conversation. */
+  session_mode?: 'new' | 'continue' | 'stateless';
+  /** Idempotent identity for one user-visible turn. */
+  turn_id?: string;
+  user_message_id?: string;
+  assistant_message_id?: string;
   system?: string | any[];
   prompt?: string | string[];
   temperature?: number;
@@ -629,6 +637,9 @@ export interface ChatCompletionResponse {
   shardId?: string;
   modelUsed?: string;
   provider?: ProviderType;
+  conversation_id?: string;
+  turn_id?: string;
+  session_mode?: 'new' | 'continue' | 'stateless';
   privacyProof?: {
     profile: PrivacyProfileType;
     zdrVerified: boolean;
@@ -1224,4 +1235,3 @@ export interface MemorySlab {
 }
 
 export * from './GalxQueueContracts';
-

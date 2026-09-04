@@ -303,6 +303,21 @@ const agent = galx.agent({
 const agentResult = await agent.run('What is Nvidia stock price?');
 console.log(agentResult.text);
 
+// One client/runtime can safely multiplex independent durable sessions.
+const alice = agent.startSession();
+const bob = agent.startSession();
+await Promise.all([
+  alice.run('Remember that my deployment is in us-east-1.'),
+  bob.run('Remember that my deployment is in eu-west-1.'),
+]);
+await alice.run('Which region did I choose?'); // only Alice's session history
+
+// Persist alice.export(), then resume it in another process:
+const resumed = agent.resumeSession(alice.export());
+
+// A bare run is intentionally stateless and zero-retention.
+await agent.run('Classify this one-off input.');
+
 // 8. Pluggable Middleware: Live Dollar Budgeting & In-Memory LRU Caching
 import { createCostTrackerPlugin, createLRUCachePlugin } from '@/sdk';
 

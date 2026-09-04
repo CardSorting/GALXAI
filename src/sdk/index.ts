@@ -114,7 +114,11 @@ export { BatchEvaluator, batch, type BatchMapOptions, type BatchResultItem } fro
 // Agent Runtime & Plugins
 export {
   AgentRuntime,
+  AgentSession,
   type AgentConfig,
+  type AgentRunOptions,
+  type AgentSessionOptions,
+  type AgentSessionState,
   type AgentToolDefinition,
   type AgentExecutionResult,
   type AgentStreamEvent,
@@ -138,7 +142,7 @@ export { OpenAI } from './openai';
 export { Anthropic } from './anthropic';
 export { createGalxAI, galxai, GalxAIModelWrapper } from './ai';
 export { ChatGalxAI } from './langchain';
-export { ConversationThread, type ThreadOptions } from './thread';
+export { ConversationThread, type ThreadOptions, type ThreadExportState } from './thread';
 
 // Next.js 1-Line Route Adapters
 export {
@@ -185,7 +189,8 @@ export {
   type GalxAIProviderProps,
   type GalxAIContextValue,
   type ChatMessage,
-  type UseChatHelpers
+  type UseChatHelpers,
+  type UseChatOptions
 } from './react';
 
 // Default export & Top-Level Zero-Config Helpers

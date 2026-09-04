@@ -27,6 +27,13 @@ export interface ChatMeshSyncEvent {
   tabId: string;
 }
 
+export class ChatSessionSyncError extends Error {
+  constructor(public readonly sessionId: string) {
+    super(`Chat session ${sessionId} could not be synchronized with its durable authority.`);
+    this.name = 'ChatSessionSyncError';
+  }
+}
+
 export class BroccoliChatDatabase {
   private static instance: BroccoliChatDatabase;
   private readonly sessionsTable: BroccoliDbTable<ChatSession>;
@@ -37,15 +44,17 @@ export class BroccoliChatDatabase {
   private readonly prefetchedSessions = new Set<string>();
   private isHydrated = false;
   private syncInProgress = false;
-  private lastKnownEtag: string | null = null;
+  private readonly lastKnownEtags = new Map<string, string>();
   private tabId = `tab_${Math.random().toString(36).substring(2, 9)}`;
   private meshChannel: BroadcastChannel | null = null;
   private inFlightSyncPromises = new Map<string, Promise<any>>();
 
-  private pendingSyncSession: ChatSession | null = null;
+  private pendingSyncSessions = new Map<string, ChatSession>();
   private pendingSyncMessages = new Map<string, ChatMessage[]>();
   private pendingDeletes = new Set<string>();
   private flushTimer: NodeJS.Timeout | null = null;
+  private flushInFlight: Promise<void> | null = null;
+  private syncRetryAttempt = 0;
 
   private constructor() {
     this.sessionsTable = new BroccoliDbTable<ChatSession>('client_chat_sessions');
@@ -149,7 +158,8 @@ export class BroccoliChatDatabase {
     if (this.isHydrated) return;
 
     try {
-      this.lastKnownEtag = SafeStorage.getItem(BROCCOLI_ETAG_KEY);
+      const rootEtag = SafeStorage.getItem(BROCCOLI_ETAG_KEY);
+      if (rootEtag) this.lastKnownEtags.set('__root_sync__', rootEtag);
 
       // 1. Try loading v3 BroccoliDB snapshot
       let storedSessions = SafeStorage.getJSON<ChatSession[] | null>(BROCCOLI_SESSIONS_KEY, null);
@@ -266,7 +276,8 @@ export class BroccoliChatDatabase {
   }
 
   /**
-   * Immediate atomic flush of all pending mutations via 1 single POST /api/chat/sync roundtrip
+   * Flushes each logical session as its own write bundle. A shared browser client
+   * may have many dirty sessions, but messages must never cross those boundaries.
    */
   public async flushPendingSync(): Promise<void> {
     if (this.flushTimer) {
@@ -274,41 +285,111 @@ export class BroccoliChatDatabase {
       this.flushTimer = null;
     }
 
-    if (!this.pendingSyncSession && this.pendingSyncMessages.size === 0 && this.pendingDeletes.size === 0) {
+    if (this.flushInFlight) {
+      await this.flushInFlight;
+      if (this.pendingSyncSessions.size > 0 || this.pendingSyncMessages.size > 0 || this.pendingDeletes.size > 0) {
+        return this.flushPendingSync();
+      }
       return;
     }
 
-    const sessionToSync = this.pendingSyncSession;
-    const deletesToSync = Array.from(this.pendingDeletes);
-    const messagesToSync: ChatMessage[] = [];
-    this.pendingSyncMessages.forEach((msgs) => messagesToSync.push(...msgs));
+    if (this.pendingSyncSessions.size === 0 && this.pendingSyncMessages.size === 0 && this.pendingDeletes.size === 0) {
+      return;
+    }
 
-    // Clear queue before network request
-    this.pendingSyncSession = null;
+    const sessionsToSync = new Map(this.pendingSyncSessions);
+    const messagesToSync = new Map(this.pendingSyncMessages);
+    const deletesToSync = new Set(this.pendingDeletes);
+
+    // New writes arriving while this batch is in flight remain queued for the next batch.
+    this.pendingSyncSessions.clear();
     this.pendingSyncMessages.clear();
     this.pendingDeletes.clear();
 
-    try {
-      for (const delId of deletesToSync) {
-        fetch('/api/chat/sync', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ deleteSessionId: delId }),
-        }).catch(() => {});
+    const flushBatch = async () => {
+      let shouldRetry = false;
+
+      for (const sessionId of deletesToSync) {
+        try {
+          const response = await fetch('/api/chat/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ deleteSessionId: sessionId }),
+          });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        } catch (err) {
+          console.warn(`[BroccoliChatDatabase] Delete sync failed for ${sessionId}:`, err);
+          // A later re-creation of this ID supersedes the failed delete.
+          if (!this.pendingSyncSessions.has(sessionId)) this.pendingDeletes.add(sessionId);
+          shouldRetry = true;
+        }
       }
 
-      if (sessionToSync || messagesToSync.length > 0) {
-        await fetch('/api/chat/sync', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            session: sessionToSync || undefined,
-            messages: messagesToSync.length > 0 ? messagesToSync : undefined,
-          }),
-        });
+      const sessionIds = new Set([...sessionsToSync.keys(), ...messagesToSync.keys()]);
+      for (const sessionId of sessionIds) {
+        if (deletesToSync.has(sessionId)) continue;
+        const session = sessionsToSync.get(sessionId) || this.getSession(sessionId);
+        const messages = messagesToSync.get(sessionId);
+
+        if (!session) {
+          console.warn(`[BroccoliChatDatabase] Refusing to sync orphaned messages for ${sessionId}.`);
+          if (messages && !this.pendingSyncMessages.has(sessionId)) {
+            this.pendingSyncMessages.set(sessionId, messages);
+          }
+          // Preserve locally, but do not hot-loop. A later session upsert or online
+          // recovery pulse will make this bundle eligible again.
+          continue;
+        }
+
+        try {
+          const response = await fetch('/api/chat/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              session,
+              messages: messages && messages.length > 0 ? messages : undefined,
+            }),
+          });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        } catch (err) {
+          console.warn(`[BroccoliChatDatabase] Session sync failed for ${sessionId}:`, err);
+          if (!this.pendingDeletes.has(sessionId)) {
+            if (!this.pendingSyncSessions.has(sessionId)) this.pendingSyncSessions.set(sessionId, session);
+            if (messages && !this.pendingSyncMessages.has(sessionId)) {
+              this.pendingSyncMessages.set(sessionId, messages);
+            }
+          }
+          shouldRetry = true;
+        }
       }
-    } catch (err) {
-      console.warn('[BroccoliChatDatabase] Flush sync error:', err);
+
+      if (shouldRetry) {
+        this.syncRetryAttempt = Math.min(this.syncRetryAttempt + 1, 8);
+        const exponentialDelay = Math.min(30_000, 500 * (2 ** this.syncRetryAttempt));
+        const jitteredDelay = Math.round(exponentialDelay * (0.8 + Math.random() * 0.4));
+        this.scheduleFlush(jitteredDelay);
+      } else {
+        this.syncRetryAttempt = 0;
+      }
+    };
+
+    this.flushInFlight = flushBatch();
+    try {
+      await this.flushInFlight;
+    } finally {
+      this.flushInFlight = null;
+    }
+  }
+
+  /** Ensures a session exists durably before inference is allowed to reference it. */
+  public async ensureSessionSynced(sessionId: string): Promise<void> {
+    const session = this.getSession(sessionId);
+    if (!session) throw new Error(`Cannot sync unknown chat session: ${sessionId}`);
+    this.pendingDeletes.delete(sessionId);
+    this.pendingSyncSessions.set(sessionId, session);
+    await this.flushPendingSync();
+    if (this.pendingSyncSessions.has(sessionId) || this.pendingSyncMessages.has(sessionId)) {
+      throw new ChatSessionSyncError(sessionId);
     }
   }
 
@@ -331,7 +412,8 @@ export class BroccoliChatDatabase {
     this.broadcastMutation('SESSION_UPSERT', updated);
 
     if (syncCloud) {
-      this.pendingSyncSession = updated;
+      this.pendingDeletes.delete(updated.id);
+      this.pendingSyncSessions.set(updated.id, updated);
       this.scheduleFlush(250);
     }
 
@@ -406,6 +488,8 @@ export class BroccoliChatDatabase {
     this.broadcastMutation('SESSION_DELETE', { id });
 
     // Optimistic background sync delete
+    this.pendingSyncSessions.delete(id);
+    this.pendingSyncMessages.delete(id);
     this.pendingDeletes.add(id);
     this.scheduleFlush(50);
   }
@@ -475,7 +559,7 @@ export class BroccoliChatDatabase {
     // Queue for coalesced write-behind cloud flush
     if (syncCloud && typeof window !== 'undefined' && messages.length > 0) {
       this.pendingSyncMessages.set(sessionId, messages);
-      if (session) this.pendingSyncSession = session;
+      if (session) this.pendingSyncSessions.set(sessionId, session);
       this.scheduleFlush(300);
     }
   }
@@ -501,6 +585,7 @@ export class BroccoliChatDatabase {
     activeSessionId?: string
   ): Promise<{
     sessions: ChatSession[];
+    activeSessionId?: string;
     activeMessages?: ChatMessage[];
     personas?: CustomPersona[];
     notModified?: boolean;
@@ -522,25 +607,28 @@ export class BroccoliChatDatabase {
           : '/api/chat/sync';
 
         const headers: Record<string, string> = {};
-        if (this.lastKnownEtag) {
-          headers['If-None-Match'] = this.lastKnownEtag;
+        const knownEtag = this.lastKnownEtags.get(cacheKey);
+        if (knownEtag) {
+          headers['If-None-Match'] = knownEtag;
         }
 
         const res = await fetch(url, { headers });
 
         // Fast-path: 304 Not Modified -> Zero bytes transferred, instant 0ms sync!
         if (res.status === 304) {
-          return { sessions: this.getSessions(), notModified: true };
+          return { sessions: this.getSessions(), activeSessionId, notModified: true };
         }
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const newEtag = res.headers.get('ETag');
         if (newEtag) {
-          this.lastKnownEtag = newEtag;
-          try {
-            SafeStorage.setItem(BROCCOLI_ETAG_KEY, newEtag);
-          } catch {}
+          this.lastKnownEtags.set(cacheKey, newEtag);
+          if (cacheKey === '__root_sync__') {
+            try {
+              SafeStorage.setItem(BROCCOLI_ETAG_KEY, newEtag);
+            } catch {}
+          }
         }
 
         const data = await res.json();
@@ -583,7 +671,12 @@ export class BroccoliChatDatabase {
 
           let resolvedActiveMessages: ChatMessage[] | undefined = undefined;
           // Hydrate active messages in the same single roundtrip!
-          if (data.activeSessionId && Array.isArray(data.messages) && data.messages.length > 0) {
+          if (
+            data.activeSessionId &&
+            (!activeSessionId || data.activeSessionId === activeSessionId) &&
+            Array.isArray(data.messages) &&
+            data.messages.length > 0
+          ) {
             for (const m of data.messages) {
               this.messagesTable.put(m.id, { ...m, sessionId: data.activeSessionId });
             }
@@ -595,6 +688,7 @@ export class BroccoliChatDatabase {
 
           return {
             sessions: this.getSessions(),
+            activeSessionId: data.activeSessionId,
             activeMessages: resolvedActiveMessages,
             personas: Array.isArray(data.personas) ? data.personas : undefined,
           };

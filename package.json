@@ -212,6 +212,8 @@
     "test:stripe": "tsx scripts/test-stripe-integration.ts",
     "test:router": "tsx scripts/validate-galxai-router.ts",
     "test:chat:hardening": "node --import tsx scripts/test-chat-context-hardening.ts",
+    "test:sessions": "node --import tsx scripts/test-agent-session-isolation.ts",
+    "test:chat:sync-isolation": "node --import tsx scripts/test-chat-sync-session-isolation.ts",
     "test:governance": "node --import tsx scripts/validate-spend-governance.ts",
     "test:broccolidb:hardening": "node --import tsx scripts/test-broccolidb-production-hardening.ts",
     "test:broccolidb:backend-invariants": "node --import tsx scripts/test-broccolidb-backend-invariants.ts",

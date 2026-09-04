@@ -265,7 +265,12 @@ export class CompletionsResource {
         max_tokens: params.max_tokens,
         response_format: params.response_format,
         tools: params.tools,
-        tool_choice: params.tool_choice
+        tool_choice: params.tool_choice,
+        conversation_id: params.conversation_id,
+        session_mode: params.session_mode,
+        turn_id: params.turn_id,
+        user_message_id: params.user_message_id,
+        assistant_message_id: params.assistant_message_id,
       },
       ...options
     });

@@ -252,7 +252,19 @@ const result = await agent.run('What is Nvidia stock price and what is its trend
 console.log(result.text);                // Final synthesized answer
 console.log(result.toolCallsExecuted);   // Array of executed tool invocations and results
 console.log(result.stepsCount);          // Number of round-trip execution steps
+
+// Reuse the same client and runtime without sharing logical context.
+const research = agent.startSession();
+const support = agent.startSession();
+await research.run('Investigate the quarterly report.');
+await support.run('Diagnose ticket 1042.');
+
+console.log(research.sessionId);          // Durable, opaque conversation identity
+const snapshot = research.export();
+const resumed = agent.resumeSession(snapshot.id, { messages: snapshot.messages });
 ```
+
+`agent.run()` without session options remains stateless. Use `startSession()` for a new durable context and `resumeSession(id)` only for an existing owner-scoped context. A session serializes its own turns but unrelated sessions can execute concurrently through one shared `GalxAI` client.
 
 ---
 
@@ -835,7 +847,6 @@ console.log(`5-Hour Limit: ${telemetry.fiveHourRemainingPct}% (resets in ${telem
 console.log(`Weekly Limit: ${telemetry.weeklyRemainingPct}% (resets in ${telemetry.weeklyRefreshText})`);
 console.log(`Active Concurrent Streams: ${telemetry.activeConcurrentStreams} / ${telemetry.concurrencyLimit}`);
 ```
-
 
 
 

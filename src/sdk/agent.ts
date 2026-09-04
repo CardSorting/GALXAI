@@ -10,6 +10,7 @@ import type { CompletionsResource } from './resources/chat';
 import { APIError } from './errors';
 import { safeParseJSON } from './json-repair';
 import { zodToJsonSchema } from './structured';
+import { createChatResourceId, type ChatSessionMode } from '../core/chat/GalxChatRequestNormalizer';
 
 export interface AgentToolDefinition<TParams = any, TResult = any> {
   description?: string;
@@ -50,6 +51,10 @@ export interface AgentConfig {
 }
 
 export interface AgentExecutionResult {
+  /** Logical session identity when this run belongs to a durable session. */
+  conversationId?: string;
+  /** Identity of the user-level agent turn (model substeps derive from it). */
+  turnId: string;
   text: string;
   stepsCount: number;
   toolCallsExecuted: Array<{
@@ -65,6 +70,23 @@ export interface AgentExecutionResult {
     completionTokens: number;
     totalTokens: number;
   };
+}
+
+export interface AgentRunOptions {
+  conversationId?: string;
+  sessionId?: string;
+  turnId?: string;
+  sessionMode?: ChatSessionMode;
+}
+
+export interface AgentSessionOptions {
+  id?: string;
+  messages?: ChatMessage[];
+}
+
+export interface AgentSessionState {
+  id: string;
+  messages: ChatMessage[];
 }
 
 export type AgentStreamEvent =
@@ -102,6 +124,62 @@ export class AgentRuntime {
       parallelToolExecution: true,
       ...config
     };
+  }
+
+  private initializeMessages(userInput: string | ChatMessage[]): ChatMessage[] {
+    const messages = typeof userInput === 'string'
+      ? [{ role: 'user' as const, content: userInput }]
+      : [...userInput];
+
+    if (this.config.systemPrompt && !messages.some((message) => message.role === 'system')) {
+      messages.unshift({ role: 'system', content: this.config.systemPrompt });
+    }
+    return messages;
+  }
+
+  private resolveRunIdentity(options: AgentRunOptions): {
+    conversationId?: string;
+    sessionMode: ChatSessionMode;
+    turnId: string;
+  } {
+    let conversationId = options.conversationId || options.sessionId;
+    const sessionMode = options.sessionMode || (conversationId ? 'continue' : 'stateless');
+    if (sessionMode === 'new' && !conversationId) conversationId = createChatResourceId('agent');
+    if (sessionMode === 'continue' && !conversationId) {
+      throw new Error('conversationId is required when sessionMode is continue.');
+    }
+    if (sessionMode === 'stateless' && conversationId) {
+      throw new Error('conversationId cannot be combined with stateless agent execution.');
+    }
+    return {
+      conversationId,
+      sessionMode,
+      turnId: options.turnId || createChatResourceId('turn'),
+    };
+  }
+
+  /** Starts a new isolated session while reusing this runtime and HTTP client. */
+  public startSession(options: AgentSessionOptions = {}): AgentSession {
+    return new AgentSession(this, {
+      id: options.id || createChatResourceId('agent'),
+      messages: options.messages,
+    }, 'new');
+  }
+
+  /** Resumes a known session from its exported history snapshot. */
+  public resumeSession(state: AgentSessionState): AgentSession;
+  public resumeSession(id: string, options: { messages: ChatMessage[] }): AgentSession;
+  public resumeSession(
+    idOrState: string | AgentSessionState,
+    options?: { messages: ChatMessage[] }
+  ): AgentSession {
+    const state = typeof idOrState === 'string'
+      ? { id: idOrState, messages: options?.messages }
+      : idOrState;
+    if (!state.messages) {
+      throw new Error('Resuming an agent session requires its exported message history.');
+    }
+    return new AgentSession(this, { id: state.id, messages: state.messages }, 'continue');
   }
 
   /**
@@ -208,18 +286,12 @@ export class AgentRuntime {
   /**
    * Runs the autonomous agent tool loop on a given user prompt.
    */
-  public async run(userInput: string | ChatMessage[]): Promise<AgentExecutionResult> {
-    const messages: ChatMessage[] = [];
-
-    if (this.config.systemPrompt) {
-      messages.push({ role: 'system', content: this.config.systemPrompt });
-    }
-
-    if (typeof userInput === 'string') {
-      messages.push({ role: 'user', content: userInput });
-    } else {
-      messages.push(...userInput);
-    }
+  public async run(
+    userInput: string | ChatMessage[],
+    options: AgentRunOptions = {}
+  ): Promise<AgentExecutionResult> {
+    const messages = this.initializeMessages(userInput);
+    const identity = this.resolveRunIdentity(options);
 
     const toolMap = this.normalizeTools();
     const formattedTools = Array.from(toolMap.values()).map(t => ({
@@ -245,7 +317,14 @@ export class AgentRuntime {
         messages,
         temperature: this.config.temperature,
         tools: formattedTools.length > 0 ? formattedTools : undefined,
-        tool_choice: formattedTools.length > 0 ? 'auto' : undefined
+        tool_choice: formattedTools.length > 0 ? 'auto' : undefined,
+        conversation_id: identity.conversationId,
+        session_mode: stepNumber === 1 ? identity.sessionMode : (identity.conversationId ? 'continue' : 'stateless'),
+        turn_id: stepNumber === 1
+          ? identity.turnId
+          : `${identity.turnId.slice(0, 52)}:s${stepNumber}`,
+        user_message_id: identity.turnId,
+        assistant_message_id: `${identity.turnId.slice(0, 52)}:a`,
       });
 
       if (res.usage) {
@@ -347,6 +426,8 @@ export class AgentRuntime {
       this.config.onStep?.({ stepNumber, output: finalContent });
 
       return {
+        conversationId: identity.conversationId,
+        turnId: identity.turnId,
         text: finalContent,
         stepsCount: stepNumber,
         toolCallsExecuted,
@@ -366,18 +447,12 @@ export class AgentRuntime {
   /**
    * Runs the autonomous agent and yields real-time streaming events (tokens, tool calls, and results).
    */
-  public async *stream(userInput: string | ChatMessage[]): AsyncIterable<AgentStreamEvent> {
-    const messages: ChatMessage[] = [];
-
-    if (this.config.systemPrompt) {
-      messages.push({ role: 'system', content: this.config.systemPrompt });
-    }
-
-    if (typeof userInput === 'string') {
-      messages.push({ role: 'user', content: userInput });
-    } else {
-      messages.push(...userInput);
-    }
+  public async *stream(
+    userInput: string | ChatMessage[],
+    options: AgentRunOptions = {}
+  ): AsyncIterable<AgentStreamEvent> {
+    const messages = this.initializeMessages(userInput);
+    const identity = this.resolveRunIdentity(options);
 
     const toolMap = this.normalizeTools();
     const formattedTools = Array.from(toolMap.values()).map(t => ({
@@ -403,7 +478,14 @@ export class AgentRuntime {
         messages,
         temperature: this.config.temperature,
         tools: formattedTools.length > 0 ? formattedTools : undefined,
-        tool_choice: formattedTools.length > 0 ? 'auto' : undefined
+        tool_choice: formattedTools.length > 0 ? 'auto' : undefined,
+        conversation_id: identity.conversationId,
+        session_mode: stepNumber === 1 ? identity.sessionMode : (identity.conversationId ? 'continue' : 'stateless'),
+        turn_id: stepNumber === 1
+          ? identity.turnId
+          : `${identity.turnId.slice(0, 52)}:s${stepNumber}`,
+        user_message_id: identity.turnId,
+        assistant_message_id: `${identity.turnId.slice(0, 52)}:a`,
       });
 
       for await (const chunk of stream) {
@@ -492,6 +574,8 @@ export class AgentRuntime {
       yield {
         type: 'finish',
         result: {
+          conversationId: identity.conversationId,
+          turnId: identity.turnId,
           text: finalContent,
           stepsCount: stepNumber,
           toolCallsExecuted,
@@ -509,5 +593,88 @@ export class AgentRuntime {
     }
 
     throw new APIError(`Agent exceeded maximum execution steps (${maxSteps}) without reaching a final answer`, 400, 'max_steps_exceeded');
+  }
+}
+
+/**
+ * A logical agent session. Multiple instances safely multiplex one AgentRuntime;
+ * history and mutation authority never live on the shared transport client.
+ */
+export class AgentSession {
+  private id: string;
+  private messages: ChatMessage[];
+  private nextMode: Extract<ChatSessionMode, 'new' | 'continue'>;
+  private activeTurn = false;
+
+  constructor(
+    private readonly runtime: AgentRuntime,
+    options: Required<Pick<AgentSessionOptions, 'id'>> & Omit<AgentSessionOptions, 'id'>,
+    mode: Extract<ChatSessionMode, 'new' | 'continue'>
+  ) {
+    this.id = options.id;
+    this.messages = [...(options.messages || [])];
+    this.nextMode = mode;
+  }
+
+  public get sessionId(): string {
+    return this.id;
+  }
+
+  public getHistory(): ChatMessage[] {
+    return [...this.messages];
+  }
+
+  private appendInput(input: string | ChatMessage[]): ChatMessage[] {
+    return typeof input === 'string'
+      ? [...this.messages, { role: 'user', content: input }]
+      : [...this.messages, ...input];
+  }
+
+  public async run(input: string | ChatMessage[]): Promise<AgentExecutionResult> {
+    if (this.activeTurn) throw new Error(`Agent session ${this.id} already has an active turn.`);
+    this.activeTurn = true;
+    try {
+      const result = await this.runtime.run(this.appendInput(input), {
+        conversationId: this.id,
+        sessionMode: this.nextMode,
+      });
+      this.messages = [...result.messages];
+      this.nextMode = 'continue';
+      return result;
+    } finally {
+      this.activeTurn = false;
+    }
+  }
+
+  public async *stream(input: string | ChatMessage[]): AsyncIterable<AgentStreamEvent> {
+    if (this.activeTurn) throw new Error(`Agent session ${this.id} already has an active turn.`);
+    this.activeTurn = true;
+    try {
+      for await (const event of this.runtime.stream(this.appendInput(input), {
+        conversationId: this.id,
+        sessionMode: this.nextMode,
+      })) {
+        if (event.type === 'finish') {
+          this.messages = [...event.result.messages];
+          this.nextMode = 'continue';
+        }
+        yield event;
+      }
+    } finally {
+      this.activeTurn = false;
+    }
+  }
+
+  public export(): AgentSessionState {
+    return { id: this.id, messages: [...this.messages] };
+  }
+
+  /** Clears context by rotating identity; old durable history cannot bleed back in. */
+  public clear(): this {
+    if (this.activeTurn) throw new Error(`Cannot clear agent session ${this.id} during an active turn.`);
+    this.id = createChatResourceId('agent');
+    this.messages = [];
+    this.nextMode = 'new';
+    return this;
   }
 }

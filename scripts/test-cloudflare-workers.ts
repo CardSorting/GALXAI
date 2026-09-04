@@ -111,7 +111,10 @@ async function runAllTests() {
     },
     body: JSON.stringify({
       model: 'gpt-5.6-sol',
-      messages: [{ role: 'user', content: 'Hello edge!' }]
+      messages: [{ role: 'user', content: 'Hello edge!' }],
+      conversation_id: 'edge_session_a',
+      session_mode: 'new',
+      turn_id: 'edge_turn_a',
     })
   });
   const nonStreamResp = await gateway.handleRequest(nonStreamReq);
@@ -120,6 +123,25 @@ async function runAllTests() {
   assert(nonStreamJson.choices[0].message.role === 'assistant', 'Response has assistant message');
   assert(nonStreamJson.usage.total_tokens > 0, 'Response includes token usage statistics');
   assert(nonStreamResp.headers.get('x-galx-simulated') === 'true', 'Local synthetic response is explicitly labeled');
+  assert(nonStreamJson.conversation_id === 'edge_session_a', 'Edge responses preserve logical conversation identity');
+  assert(nonStreamJson.turn_id === 'edge_turn_a', 'Edge responses preserve turn identity');
+  assert(nonStreamResp.headers.get('x-galx-session-mode') === 'new', 'Edge exposes the resolved session lifecycle mode');
+  assert(nonStreamResp.headers.get('x-galx-session-authority') === 'client-context', 'Direct edge execution does not claim durable session authority');
+
+  const conflictingSessionResp = await gateway.handleRequest(new Request('https://api.galx.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer galx_live_test_key_123',
+      'content-type': 'application/json',
+      'x-galx-session-id': 'edge_session_b',
+    },
+    body: JSON.stringify({
+      model: 'gpt-5.6-sol',
+      messages: [{ role: 'user', content: 'Conflict' }],
+      conversation_id: 'edge_session_a',
+    }),
+  }));
+  assert(conflictingSessionResp.status === 400, 'Edge rejects conflicting body and header session identities');
 
   const unsupportedModelResp = await gateway.handleRequest(new Request('https://api.galx.ai/v1/chat/completions', {
     method: 'POST',

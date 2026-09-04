@@ -9,6 +9,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 import type { GalxAI } from './client';
 import type { ImageGenerateParams } from './resources/images';
 import { safeParseJSON } from './json-repair';
+import { createChatResourceId } from '../core/chat/GalxChatRequestNormalizer';
 
 export interface GalxAIContextValue {
   client?: GalxAI;
@@ -54,7 +55,7 @@ export function useGalxAI() {
 
   return {
     useImage: (options?: { endpoint?: string; defaultModel?: string }) => useImageGeneration(options),
-    useChat: (options?: { endpoint?: string; defaultModel?: string; initialMessages?: ChatMessage[] }) => useChat(options),
+    useChat: (options?: UseChatOptions) => useChat(options),
     useModels: (options?: { endpoint?: string }) => useModels(options),
     useCompletion: (options?: { endpoint?: string; defaultModel?: string }) => useCompletion(options),
     useObject: <T = any>(options?: { endpoint?: string; schema?: any; defaultModel?: string }) => useObject<T>(options),
@@ -164,6 +165,8 @@ export interface ChatMessage {
 }
 
 export interface UseChatHelpers {
+  /** Stable logical conversation identity, independent of the shared provider/client. */
+  id: string;
   messages: ChatMessage[];
   setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
   input: string;
@@ -177,13 +180,23 @@ export interface UseChatHelpers {
   isStreaming: boolean;
   isLoading: boolean;
   error: Error | null;
+  /** Clears local context and rotates to a cryptographically new logical session. */
+  newSession: () => string;
+}
+
+export interface UseChatOptions {
+  endpoint?: string;
+  defaultModel?: string;
+  initialMessages?: ChatMessage[];
+  /** Resume this session; omit to start a new one. */
+  id?: string;
 }
 
 /**
  * World-Class chat streaming & state hook for React & Next.js components.
  * Matches Vercel AI SDK and OpenAI Assistant ergonomics.
  */
-export function useChat(options: { endpoint?: string; defaultModel?: string; initialMessages?: ChatMessage[] } = {}): UseChatHelpers {
+export function useChat(options: UseChatOptions = {}): UseChatHelpers {
   const context = useContext(GalxAIContext);
   const endpoint = options.endpoint || context.endpoint || '/api/galxai/chat';
 
@@ -191,8 +204,11 @@ export function useChat(options: { endpoint?: string; defaultModel?: string; ini
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [sessionId, setSessionId] = useState(() => options.id || createChatResourceId('session'));
 
   const abortControllerRef = useRef<AbortController | null>(null);
+  const sessionModeRef = useRef<'new' | 'continue'>(options.id ? 'continue' : 'new');
+  const requestGenerationRef = useRef(0);
 
   const stop = useCallback(() => {
     if (abortControllerRef.current) {
@@ -201,6 +217,18 @@ export function useChat(options: { endpoint?: string; defaultModel?: string; ini
       setIsStreaming(false);
     }
   }, []);
+
+  const newSession = useCallback(() => {
+    stop();
+    requestGenerationRef.current += 1;
+    const nextId = createChatResourceId('session');
+    sessionModeRef.current = 'new';
+    setSessionId(nextId);
+    setMessages([]);
+    setInput('');
+    setError(null);
+    return nextId;
+  }, [stop]);
 
   useEffect(() => {
     return () => {
@@ -217,6 +245,7 @@ export function useChat(options: { endpoint?: string; defaultModel?: string; ini
     if (!prompt.trim()) return;
 
     stop();
+    const requestGeneration = ++requestGenerationRef.current;
 
     const userMsg: ChatMessage = { id: `user_${Date.now()}`, role: 'user', content: prompt };
     const updatedMessages = [...messages, userMsg];
@@ -233,6 +262,7 @@ export function useChat(options: { endpoint?: string; defaultModel?: string; ini
 
     try {
       const targetEndpoints = endpoint !== '/api/galxai/chat' ? [endpoint] : ['/api/galxai/chat', '/api/chat'];
+      const turnId = createChatResourceId('turn');
       let res: Response | null = null;
 
       for (const ep of targetEndpoints) {
@@ -243,7 +273,12 @@ export function useChat(options: { endpoint?: string; defaultModel?: string; ini
             body: JSON.stringify({
               messages: updatedMessages,
               stream: true,
-              model: options.defaultModel || context.defaultModel || 'gpt-5.6-sol'
+              model: options.defaultModel || context.defaultModel || 'gpt-5.6-sol',
+              conversation_id: sessionId,
+              session_mode: sessionModeRef.current,
+              turn_id: turnId,
+              user_message_id: userMsg.id,
+              assistant_message_id: asstMsgId,
             }),
             signal: controller.signal
           });
@@ -256,26 +291,58 @@ export function useChat(options: { endpoint?: string; defaultModel?: string; ini
       if (!res || !res.ok) {
         // Fallback simulation for local dev
         const fallbackText = 'GALXAI: Connected and streaming in development preview.';
-        setMessages(prev =>
-          prev.map(m => (m.id === asstMsgId ? { ...m, content: fallbackText } : m))
-        );
+        if (requestGenerationRef.current === requestGeneration) {
+          setMessages(prev =>
+            prev.map(m => (m.id === asstMsgId ? { ...m, content: fallbackText } : m))
+          );
+        }
         return;
       }
 
-      if (res.headers.get('content-type')?.includes('text/plain') && res.body) {
+      // Session creation is acknowledged before either JSON or stream response bodies.
+      sessionModeRef.current = 'continue';
+
+      const responseType = res.headers.get('content-type') || '';
+      if (
+        res.body &&
+        (responseType.includes('text/plain') ||
+          responseType.includes('application/x-ndjson') ||
+          responseType.includes('text/event-stream'))
+      ) {
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
         let accumulated = '';
+        let buffer = '';
 
         try {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
             const chunk = decoder.decode(value, { stream: true });
-            accumulated += chunk;
-            setMessages(prev =>
-              prev.map(m => (m.id === asstMsgId ? { ...m, content: accumulated } : m))
-            );
+            if (responseType.includes('text/plain')) {
+              accumulated += chunk;
+            } else {
+              buffer += chunk;
+              const lines = buffer.split('\n');
+              buffer = lines.pop() || '';
+              for (const rawLine of lines) {
+                const line = rawLine.trim();
+                if (!line) continue;
+                const payload = line.startsWith('data:') ? line.slice(5).trim() : line;
+                if (!payload || payload === '[DONE]') continue;
+                try {
+                  const event = JSON.parse(payload);
+                  accumulated += event.message?.content || event.response || event.choices?.[0]?.delta?.content || '';
+                } catch {
+                  // Ignore non-data keepalive/comments without corrupting accumulated text.
+                }
+              }
+            }
+            if (requestGenerationRef.current === requestGeneration) {
+              setMessages(prev =>
+                prev.map(m => (m.id === asstMsgId ? { ...m, content: accumulated } : m))
+              );
+            }
           }
         } finally {
           reader.releaseLock();
@@ -283,23 +350,29 @@ export function useChat(options: { endpoint?: string; defaultModel?: string; ini
       } else {
         const data = await res.json();
         const reply = data.choices?.[0]?.message?.content || data.reply || '';
-        setMessages(prev =>
-          prev.map(m => (m.id === asstMsgId ? { ...m, content: reply } : m))
-        );
+        if (requestGenerationRef.current === requestGeneration) {
+          setMessages(prev =>
+            prev.map(m => (m.id === asstMsgId ? { ...m, content: reply } : m))
+          );
+        }
       }
     } catch (err: any) {
       if (err.name === 'AbortError') return;
-      setError(err);
-      setMessages(prev =>
-        prev.map(m =>
-          m.id === asstMsgId ? { ...m, content: `Error: ${err.message || 'Failed to complete'}` } : m
-        )
-      );
+      if (requestGenerationRef.current === requestGeneration) {
+        setError(err);
+        setMessages(prev =>
+          prev.map(m =>
+            m.id === asstMsgId ? { ...m, content: `Error: ${err.message || 'Failed to complete'}` } : m
+          )
+        );
+      }
     } finally {
-      setIsStreaming(false);
-      abortControllerRef.current = null;
+      if (requestGenerationRef.current === requestGeneration) {
+        setIsStreaming(false);
+        abortControllerRef.current = null;
+      }
     }
-  }, [input, messages, endpoint, options.defaultModel, context.defaultModel, stop]);
+  }, [input, messages, endpoint, options.defaultModel, context.defaultModel, sessionId, stop]);
 
   const handleSubmit = useCallback(async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -323,6 +396,7 @@ export function useChat(options: { endpoint?: string; defaultModel?: string; ini
   }, [messages, sendMessage]);
 
   return {
+    id: sessionId,
     messages,
     setMessages,
     input,
@@ -335,7 +409,8 @@ export function useChat(options: { endpoint?: string; defaultModel?: string; ini
     sendMessage,
     isStreaming,
     isLoading: isStreaming,
-    error
+    error,
+    newSession,
   };
 }
 

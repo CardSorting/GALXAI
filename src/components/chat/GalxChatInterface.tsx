@@ -10,7 +10,11 @@ import { ChatSettings, DEFAULT_CHAT_SETTINGS, ChatSettingsModal } from './ChatSe
 import { ChatMessage, AttachedFile } from './ChatMessageItem';
 import { CustomPersona, BUILTIN_ANIME_PERSONAS } from './PersonaContracts';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
-import { broccoliChatDb } from '@/core/broccolidb/BroccoliChatDatabase';
+import {
+  broccoliChatDb,
+  ChatSessionSyncError,
+} from '@/core/broccolidb/BroccoliChatDatabase';
+import { createChatResourceId } from '@/core/chat/GalxChatRequestNormalizer';
 import { useAuth } from '@/contexts/AuthContext';
 
 const SETTINGS_STORAGE_KEY = 'galx_chat_settings_v2';
@@ -38,6 +42,14 @@ function BaseGalxChatInterface() {
   const [settings, setSettings] = useState<ChatSettings>(DEFAULT_CHAT_SETTINGS);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const activeSessionIdRef = useRef<string | null>(null);
+  const sessionLoadVersionRef = useRef(0);
+
+  const activateSession = useCallback((sessionId: string | null) => {
+    activeSessionIdRef.current = sessionId;
+    sessionLoadVersionRef.current += 1;
+    setActiveSessionId(sessionId);
+  }, []);
 
   const handleTogglePromptCompaction = () => {
     const nextVal = settings.enablePromptCompaction === false;
@@ -88,10 +100,10 @@ function BaseGalxChatInterface() {
     }
 
     const sessionParam = searchParams.get('session');
-    if (sessionParam) {
-      setActiveSessionId(sessionParam);
+    if (sessionParam && sessionParam !== activeSessionIdRef.current) {
+      activateSession(sessionParam);
     }
-  }, [searchParams, personas]);
+  }, [searchParams, personas, activateSession]);
 
   // Responsive sidebar initial state: collapse on mobile
   useEffect(() => {
@@ -136,8 +148,8 @@ function BaseGalxChatInterface() {
       // Fast L1 hydration from BroccoliDB
       initialSessions = broccoliChatDb.getSessions();
       setSessions(initialSessions);
-      if (initialSessions.length > 0) {
-        setActiveSessionId(initialSessions[0].id);
+      if (initialSessions.length > 0 && !activeSessionIdRef.current) {
+        activateSession(initialSessions[0].id);
         if (initialSessions[0].personaId) {
           const foundP = BUILTIN_ANIME_PERSONAS.find((p) => p.id === initialSessions[0].personaId);
           if (foundP) setActivePersona(foundP);
@@ -161,12 +173,17 @@ function BaseGalxChatInterface() {
     });
 
     // 1-Hop Atomic Cloud Synchronizer (fetches sessions, active messages & custom personas in 1 single roundtrip)
-    const initialTargetId = initialSessions.length > 0 ? initialSessions[0].id : undefined;
+    const initialTargetId = activeSessionIdRef.current || (initialSessions.length > 0 ? initialSessions[0].id : undefined);
     broccoliChatDb.syncWithCloud(initialTargetId).then((result) => {
-      if (result.sessions && result.sessions.length > 0 && !activeSessionId) {
-        setActiveSessionId(result.sessions[0].id);
+      if (result.sessions && result.sessions.length > 0 && !activeSessionIdRef.current) {
+        activateSession(result.sessions[0].id);
       }
-      if (result.activeMessages && result.activeMessages.length > 0) {
+      if (
+        result.activeSessionId &&
+        result.activeSessionId === activeSessionIdRef.current &&
+        result.activeMessages &&
+        result.activeMessages.length > 0
+      ) {
         setMessages(result.activeMessages);
       }
       if (result.personas && result.personas.length > 0) {
@@ -179,16 +196,23 @@ function BaseGalxChatInterface() {
 
     return () => {
       unsubscribe();
+      unsubPrivacy();
+      unsubCompaction();
     };
-  }, []);
+  }, [activateSession]);
 
   // 2. Load Messages for Active Session from BroccoliDB + 1-Hop Sync
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!activeSessionId) {
+      activeSessionIdRef.current = null;
       setMessages([]);
       return;
     }
+
+    activeSessionIdRef.current = activeSessionId;
+    const loadVersion = ++sessionLoadVersionRef.current;
+    const targetSessionId = activeSessionId;
 
     try {
       const stored = broccoliChatDb.getMessages(activeSessionId);
@@ -214,8 +238,14 @@ function BaseGalxChatInterface() {
 
       // Optimistic background cloud sync for active conversation messages via 1-hop sync
       if (!isTempChat) {
-        broccoliChatDb.syncWithCloud(activeSessionId).then((res) => {
-          if (res.activeMessages && res.activeMessages.length > 0) {
+        broccoliChatDb.syncWithCloud(targetSessionId).then((res) => {
+          if (
+            sessionLoadVersionRef.current === loadVersion &&
+            activeSessionIdRef.current === targetSessionId &&
+            res.activeSessionId === targetSessionId &&
+            res.activeMessages &&
+            res.activeMessages.length > 0
+          ) {
             setMessages(res.activeMessages);
           }
         });
@@ -260,7 +290,7 @@ function BaseGalxChatInterface() {
       }
 
       const targetPersona = personaOverride !== undefined ? personaOverride : activePersona;
-      const newId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const newId = createChatResourceId('session');
       const newSession: ChatSession = {
         id: newId,
         title: targetPersona ? `Chat with ${targetPersona.name}` : 'New conversation',
@@ -278,7 +308,7 @@ function BaseGalxChatInterface() {
 
       const updated = [newSession, ...sessions.filter((s) => s.id !== newId)];
       setSessions(updated);
-      setActiveSessionId(newId);
+      activateSession(newId);
 
       if (targetPersona) {
         setSelectedModelId(targetPersona.baseModelId);
@@ -299,8 +329,15 @@ function BaseGalxChatInterface() {
       }
       setInput('');
     },
-    [isStreaming, activePersona, selectedModelId, isTempChat, sessions]
+    [isStreaming, activePersona, selectedModelId, isTempChat, sessions, activateSession]
   );
+
+  const handleSelectSession = useCallback((sessionId: string) => {
+    if (abortControllerRef.current) abortControllerRef.current.abort();
+    setIsStreaming(false);
+    setStreamingMessageId(undefined);
+    activateSession(sessionId);
+  }, [activateSession]);
 
   // Global Keyboard Shortcuts (⌘B / Ctrl+B for Sidebar, ⌘N for New Chat)
   useEffect(() => {
@@ -340,14 +377,14 @@ function BaseGalxChatInterface() {
 
       if (activeSessionId === id) {
         if (updated.length > 0) {
-          setActiveSessionId(updated[0].id);
+          activateSession(updated[0].id);
         } else {
-          setActiveSessionId(null);
+          activateSession(null);
           setMessages([]);
         }
       }
     },
-    [activeSessionId]
+    [activeSessionId, activateSession]
   );
 
   // Rename Session
@@ -377,21 +414,21 @@ function BaseGalxChatInterface() {
 
       if (activeSessionId === id) {
         if (updated.length > 0) {
-          setActiveSessionId(updated[0].id);
+          activateSession(updated[0].id);
         } else {
-          setActiveSessionId(null);
+          activateSession(null);
           setMessages([]);
         }
       }
     },
-    [activeSessionId]
+    [activeSessionId, activateSession]
   );
 
   // Toggle Pin Current Active Chat
   const handleTogglePinCurrentChat = useCallback(() => {
     let targetId = activeSessionId;
     if (!targetId) {
-      targetId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      targetId = createChatResourceId('session');
       const newSession: ChatSession = {
         id: targetId,
         title: activePersona ? `Chat with ${activePersona.name}` : 'New conversation',
@@ -404,11 +441,11 @@ function BaseGalxChatInterface() {
       if (!isTempChat) {
         broccoliChatDb.saveSession(newSession, true);
       }
-      setActiveSessionId(targetId);
+      activateSession(targetId);
       return;
     }
     handleTogglePinSession(targetId);
-  }, [activeSessionId, activePersona, selectedModelId, isTempChat, handleTogglePinSession]);
+  }, [activeSessionId, activePersona, selectedModelId, isTempChat, handleTogglePinSession, activateSession]);
 
   // Toggle Archive / Delete Current Active Chat
   const handleToggleArchiveCurrentChat = useCallback(() => {
@@ -545,7 +582,7 @@ function BaseGalxChatInterface() {
     // Ensure active session
     let currentSessionId = activeSessionId;
     if (!currentSessionId) {
-      currentSessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      currentSessionId = createChatResourceId('session');
       const newSession: ChatSession = {
         id: currentSessionId,
         title: defaultTitle,
@@ -555,7 +592,7 @@ function BaseGalxChatInterface() {
         personaId: activePersona?.id,
       };
       saveSessions([newSession, ...sessions]);
-      setActiveSessionId(currentSessionId);
+      activateSession(currentSessionId);
     } else {
       const session = sessions.find((s) => s.id === currentSessionId);
       if (session && (session.title === 'New conversation' || session.title.startsWith('Chat with'))) {
@@ -618,8 +655,15 @@ function BaseGalxChatInterface() {
 
     let accumulatedContent = '';
     let firstTokenTime: number | null = null;
+    const turnId = createChatResourceId('turn');
 
     try {
+      if (!isTempChat) {
+        // Establish the authoritative session before the inference route receives a
+        // continuation. This closes the local write-behind/create race.
+        await broccoliChatDb.ensureSessionSynced(currentSessionId);
+      }
+
       const requestHeaders: Record<string, string> = {
         'Content-Type': 'application/json',
         'X-Galx-Client': 'web-chat',
@@ -644,6 +688,8 @@ function BaseGalxChatInterface() {
           temperature: settings.temperature,
           max_tokens: settings.maxTokens,
           conversation_id: !isTempChat ? currentSessionId : undefined,
+          session_mode: isTempChat ? 'stateless' : 'continue',
+          turn_id: turnId,
           user_message_id: userMessage.id,
           assistant_message_id: assistantMsgId,
           persona_id: activePersona?.id,
@@ -674,7 +720,7 @@ function BaseGalxChatInterface() {
               }
             : m
         );
-        setMessages(finalizedMessages);
+        if (activeSessionIdRef.current === currentSessionId) setMessages(finalizedMessages);
         broccoliChatDb.saveMessages(currentSessionId, finalizedMessages, false);
         setIsStreaming(false);
         setStreamingMessageId(undefined);
@@ -752,7 +798,7 @@ function BaseGalxChatInterface() {
             : m
         );
 
-        setMessages(finalizedMessages);
+        if (activeSessionIdRef.current === currentSessionId) setMessages(finalizedMessages);
         // Instant local BroccoliDB save with zero redundant network save (stream tap already persisted)
         broccoliChatDb.saveMessages(currentSessionId, finalizedMessages, false);
         setIsStreaming(false);
@@ -762,6 +808,19 @@ function BaseGalxChatInterface() {
       }
     } catch (e: any) {
       if (e.name === 'AbortError') {
+        setIsStreaming(false);
+        setStreamingMessageId(undefined);
+        return;
+      }
+      if (e instanceof ChatSessionSyncError) {
+        const notice = '⚠️ **Session Sync Notice**: This conversation could not be saved securely, so the request was not sent. Check your connection and retry.';
+        const finalizedMessages = updatedMessages.map((message) =>
+          message.id === assistantMsgId
+            ? { ...message, content: notice, alternativeContents: [notice], thinkingContent: undefined }
+            : message
+        );
+        if (activeSessionIdRef.current === currentSessionId) setMessages(finalizedMessages);
+        broccoliChatDb.saveMessages(currentSessionId, finalizedMessages, false);
         setIsStreaming(false);
         setStreamingMessageId(undefined);
         return;
@@ -849,7 +908,7 @@ function BaseGalxChatInterface() {
         sessions={sessions}
         activeSessionId={activeSessionId}
         activePersona={activePersona}
-        onSelectSession={setActiveSessionId}
+        onSelectSession={handleSelectSession}
         onNewChat={() => handleNewChat(activePersona)}
         onDeleteSession={handleDeleteSession}
         onRenameSession={handleRenameSession}

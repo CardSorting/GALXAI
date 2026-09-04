@@ -7,8 +7,13 @@ import type { ChatMessage } from '../core/contracts/GalxContracts';
 import { TokenOptimizer } from './tokens';
 import type { GalxAI } from './client';
 import type { RequestOptions } from './types';
+import { createChatResourceId, type ChatSessionMode } from '../core/chat/GalxChatRequestNormalizer';
 
 export interface ThreadOptions {
+  /** Durable logical identity. Omit to start a new isolated conversation. */
+  id?: string;
+  sessionId?: string;
+  conversationId?: string;
   model?: string;
   system?: string;
   systemPrompt?: string;
@@ -17,6 +22,8 @@ export interface ThreadOptions {
 }
 
 export interface ThreadExportState {
+  /** Optional only for backwards compatibility with pre-session SDK snapshots. */
+  id?: string;
   model: string;
   systemPrompt?: string;
   maxTokens: number;
@@ -25,6 +32,9 @@ export interface ThreadExportState {
 
 export class ConversationThread {
   private readonly client: GalxAI;
+  private id: string;
+  private nextSessionMode: ChatSessionMode;
+  private activeTurn = false;
   private model: string;
   private systemPrompt?: string;
   private readonly maxTokens: number;
@@ -32,6 +42,9 @@ export class ConversationThread {
 
   constructor(client: GalxAI, options: ThreadOptions = {}) {
     this.client = client;
+    const suppliedId = options.id || options.sessionId || options.conversationId;
+    this.id = suppliedId || createChatResourceId('session');
+    this.nextSessionMode = suppliedId ? 'continue' : 'new';
     this.model = options.model || 'gpt-5.6-sol';
     this.systemPrompt = options.system || options.systemPrompt;
     this.maxTokens = options.maxTokens ?? 100_000;
@@ -41,6 +54,11 @@ export class ConversationThread {
     } else if (this.systemPrompt) {
       this.messages.push({ role: 'system', content: this.systemPrompt });
     }
+  }
+
+  /** Stable logical identity; it is deliberately independent of the shared client. */
+  public get sessionId(): string {
+    return this.id;
   }
 
   /**
@@ -85,20 +103,35 @@ export class ConversationThread {
    * Sends the thread to the model and returns the assistant's reply string.
    */
   public async reply(userInput?: string, options?: RequestOptions): Promise<string> {
+    if (this.activeTurn) {
+      throw new Error(`Conversation ${this.id} already has an active turn.`);
+    }
+    this.activeTurn = true;
     if (userInput) {
       this.user(userInput);
     }
 
-    const truncated = TokenOptimizer.truncateToFit(this.messages, this.maxTokens);
-    const res = await this.client.chat.completions.create({
-      model: this.model,
-      messages: truncated,
-      stream: false
-    }, options);
+    try {
+      const truncated = TokenOptimizer.truncateToFit(this.messages, this.maxTokens);
+      const turnId = createChatResourceId('turn');
+      const res = await this.client.chat.completions.create({
+        model: this.model,
+        messages: truncated,
+        stream: false,
+        conversation_id: this.id,
+        session_mode: this.nextSessionMode,
+        turn_id: turnId,
+        user_message_id: turnId,
+        assistant_message_id: `${turnId.slice(0, 52)}:a`,
+      }, options);
 
-    const replyText = res.choices[0]?.message?.content || '';
-    this.assistant(replyText);
-    return replyText;
+      const replyText = res.choices[0]?.message?.content || '';
+      this.assistant(replyText);
+      this.nextSessionMode = 'continue';
+      return replyText;
+    } finally {
+      this.activeTurn = false;
+    }
   }
 
   /**
@@ -112,27 +145,43 @@ export class ConversationThread {
    * Streams the assistant's reply and appends it to the thread history once finished.
    */
   public async *streamReply(userInput?: string, options?: RequestOptions): AsyncIterable<string> {
+    if (this.activeTurn) {
+      throw new Error(`Conversation ${this.id} already has an active turn.`);
+    }
+    this.activeTurn = true;
     if (userInput) {
       this.user(userInput);
     }
 
-    const truncated = TokenOptimizer.truncateToFit(this.messages, this.maxTokens);
-    const stream = await this.client.chat.completions.create({
-      model: this.model,
-      messages: truncated,
-      stream: true
-    }, options);
+    try {
+      const truncated = TokenOptimizer.truncateToFit(this.messages, this.maxTokens);
+      const turnId = createChatResourceId('turn');
+      const stream = await this.client.chat.completions.create({
+        model: this.model,
+        messages: truncated,
+        stream: true,
+        conversation_id: this.id,
+        session_mode: this.nextSessionMode,
+        turn_id: turnId,
+        user_message_id: turnId,
+        assistant_message_id: `${turnId.slice(0, 52)}:a`,
+      }, options);
 
-    let accumulated = '';
-    for await (const chunk of stream) {
-      const delta = chunk.choices?.[0]?.delta?.content;
-      if (delta) {
-        accumulated += delta;
-        yield delta;
+      // The server establishes a `new` session before opening the provider stream.
+      this.nextSessionMode = 'continue';
+      let accumulated = '';
+      for await (const chunk of stream) {
+        const delta = chunk.choices?.[0]?.delta?.content;
+        if (delta) {
+          accumulated += delta;
+          yield delta;
+        }
       }
-    }
 
-    this.assistant(accumulated);
+      this.assistant(accumulated);
+    } finally {
+      this.activeTurn = false;
+    }
   }
 
   /**
@@ -166,6 +215,7 @@ export class ConversationThread {
    */
   public export(): ThreadExportState {
     return {
+      id: this.id,
       model: this.model,
       systemPrompt: this.systemPrompt,
       maxTokens: this.maxTokens,
@@ -177,6 +227,9 @@ export class ConversationThread {
    * Imports a previously exported thread state snapshot.
    */
   public import(state: ThreadExportState): this {
+    if (this.activeTurn) throw new Error(`Cannot import state while conversation ${this.id} is active.`);
+    this.id = state.id || createChatResourceId('session');
+    this.nextSessionMode = state.id ? 'continue' : 'new';
     this.model = state.model || this.model;
     this.systemPrompt = state.systemPrompt;
     this.messages = [...(state.messages || [])];
@@ -194,6 +247,9 @@ export class ConversationThread {
    * Resets thread history while preserving the system prompt.
    */
   public clear(): this {
+    if (this.activeTurn) throw new Error(`Cannot clear conversation ${this.id} while a turn is active.`);
+    this.id = createChatResourceId('session');
+    this.nextSessionMode = 'new';
     this.messages = this.systemPrompt ? [{ role: 'system', content: this.systemPrompt }] : [];
     return this;
   }

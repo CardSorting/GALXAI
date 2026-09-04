@@ -6,14 +6,19 @@ import { GalxSeatTierEngine } from '@/core/subscription/GalxSeatTierEngine';
 import { GalxRollingContextEngine } from '@/core/router/GalxRollingContextEngine';
 import { GalxElasticContextGovernor } from '@/core/governor/GalxElasticContextGovernor';
 import { GalxTrainingStreamEngine } from '@/core/training/GalxTrainingStreamEngine';
+import {
+  ChatRepository,
+  ChatRepositoryAccessError,
+} from '@/lib/supabase/repositories/ChatRepository';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
 import type { ChatCompletionRequest } from '@/core/contracts/GalxContracts';
 import {
   ChatRequestValidationError,
   normalizeChatMessages,
-  normalizeConversationId,
+  normalizeChatResourceId,
   optionalFiniteNumber,
   parseChatJsonBody,
+  resolveChatIdentity,
 } from '@/core/chat/GalxChatRequestNormalizer';
 
 export const runtime = 'nodejs';
@@ -34,7 +39,8 @@ export async function OPTIONS() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-api-key, Idempotency-Key'
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-api-key, Idempotency-Key, X-Galx-Session-Id, X-Galx-Session-Mode, X-Galx-Turn-Id',
+      'Access-Control-Expose-Headers': 'X-Galx-Conversation-Id, X-Galx-Session-Mode, X-Galx-Turn-Id',
     }
   });
 }
@@ -107,15 +113,59 @@ export async function POST(req: NextRequest) {
     }
     const isStream = rawBody.stream !== false; // Ollama defaults stream to true
     const normalizedMessages = normalizeChatMessages(rawBody);
+    const chatIdentity = resolveChatIdentity({ body: rawBody, headers: req.headers });
+    const conversationId = chatIdentity.conversationId;
+    if (!authResult.authenticated && chatIdentity.mode !== 'stateless') {
+      throw new ChatRequestValidationError(
+        'Authentication is required for durable chat sessions.',
+        'authentication_required',
+        401
+      );
+    }
+    if (conversationId && chatIdentity.mode === 'new') {
+      const repo = ChatRepository.getInstance();
+      const existing = await repo.getSession(conversationId, userId);
+      if (!existing) {
+        const firstUserText = normalizedMessages.find((message) => message.role === 'user')?.content;
+        const titleSource = typeof firstUserText === 'string' ? firstUserText.trim() : '';
+        const now = Date.now();
+        try {
+          await repo.saveSession({
+            id: conversationId,
+            title: titleSource ? titleSource.slice(0, 200) : 'New conversation',
+            createdAt: now,
+            updatedAt: now,
+            modelId: requestedModel,
+            isPinned: false,
+            isArchived: false,
+          }, userId);
+        } catch (error) {
+          if (error instanceof ChatRepositoryAccessError) {
+            throw new ChatRequestValidationError(
+              'The requested conversation ID is unavailable.',
+              'conversation_id_unavailable',
+              409
+            );
+          }
+          throw error;
+        }
+      }
+    } else if (conversationId && chatIdentity.mode === 'continue') {
+      const existing = await ChatRepository.getInstance().getSession(conversationId, userId);
+      if (!existing) {
+        throw new ChatRequestValidationError(
+          'The requested conversation does not exist or is not accessible.',
+          'conversation_not_found',
+          404
+        );
+      }
+    }
     const requestedMaxTokens = optionalFiniteNumber(
       rawBody.options?.num_predict,
       'num_predict',
       { min: 1, max: 128_000, integer: true }
     );
     const temperature = optionalFiniteNumber(rawBody.options?.temperature, 'temperature', { min: 0, max: 2 }) ?? 0.7;
-    const conversationId = authResult.authenticated
-      ? normalizeConversationId(rawBody.conversation_id || rawBody.conversationId || req.headers.get('x-galx-session-id'))
-      : undefined;
     const contextGovernor = GalxElasticContextGovernor.getInstance();
     const provisionalPlan = contextGovernor.resolveElasticContext({
       modelId: modelSpec.id,
@@ -195,6 +245,11 @@ export async function POST(req: NextRequest) {
       prompt_cache_options: contextPlan.promptCacheOptimized
         ? { mode: 'implicit', ttl: '30m' }
         : undefined,
+      conversation_id: conversationId,
+      session_mode: chatIdentity.mode,
+      turn_id: chatIdentity.turnId,
+      user_message_id: normalizeChatResourceId(rawBody.user_message_id, 'user_message_id'),
+      assistant_message_id: normalizeChatResourceId(rawBody.assistant_message_id, 'assistant_message_id'),
     };
 
     const rawIdempotencyKey = req.headers.get('idempotency-key')?.trim();
@@ -204,9 +259,8 @@ export async function POST(req: NextRequest) {
         'invalid_idempotency_key'
       );
     }
-    const requestId = rawIdempotencyKey
-      ? `ollama_${crypto.createHash('sha256').update(`${userId}:${rawIdempotencyKey}`).digest('hex').slice(0, 48)}`
-      : `ollama_chat_${crypto.randomUUID()}`;
+    const requestIdentity = rawIdempotencyKey || `${conversationId || 'stateless'}:${chatIdentity.turnId}`;
+    const requestId = `ollama_${crypto.createHash('sha256').update(`${userId}:${requestIdentity}`).digest('hex').slice(0, 48)}`;
     if (authResult.authenticated) {
       const distributedGate = await seatEngine.evaluateAndAcquireDistributedGate({
         userId,
@@ -330,6 +384,9 @@ export async function POST(req: NextRequest) {
             },
             done: true,
             done_reason: 'stop',
+            conversation_id: conversationId,
+            turn_id: chatIdentity.turnId,
+            session_mode: chatIdentity.mode,
             total_duration: Math.round((performance.now() - routeStartedAt) * 1_000_000),
             load_duration: 0,
             prompt_eval_count: contextPlan.estimatedPromptTokens,
@@ -351,7 +408,7 @@ export async function POST(req: NextRequest) {
                 tokens: contextPlan.estimatedPromptTokens + Math.ceil(accumulatedContent.length / 4),
                 conversationId,
                 userMessage: conversationId && userContent !== undefined ? {
-                  id: persistedMessageId(rawBody.user_message_id, 'msg_u'),
+                  id: persistedMessageId(chatRequest.user_message_id, 'msg_u'),
                   role: 'user',
                   content: userContent,
                   alternative_contents: [userContent],
@@ -359,7 +416,7 @@ export async function POST(req: NextRequest) {
                   created_at: new Date(Date.now() - 1000).toISOString(),
                 } : undefined,
                 assistantMessage: conversationId ? {
-                  id: persistedMessageId(rawBody.assistant_message_id, 'msg_a'),
+                  id: persistedMessageId(chatRequest.assistant_message_id, 'msg_a'),
                   role: 'assistant',
                   content: accumulatedContent,
                   alternative_contents: [accumulatedContent],
@@ -425,7 +482,13 @@ export async function POST(req: NextRequest) {
           'Cache-Control': 'no-cache, no-transform',
           'Connection': 'keep-alive',
           'X-Accel-Buffering': 'no',
-          'X-Galx-Data-Policy': 'chat-model-improvement-opt-out-governed',
+          'X-Galx-Data-Policy': conversationId
+            ? 'owner-scoped-durable-conversation'
+            : 'chat-model-improvement-opt-out-governed',
+          'X-Galx-Conversation-Id': conversationId || '',
+          'X-Galx-Session-Mode': chatIdentity.mode,
+          'X-Galx-Turn-Id': chatIdentity.turnId,
+          'Access-Control-Expose-Headers': 'X-Galx-Conversation-Id, X-Galx-Session-Mode, X-Galx-Turn-Id',
           'X-Galx-Model-Resolved': modelSpec.id,
           'X-Galx-Seat-Tier': entitlement.tier,
           'X-Galx-Seat-Role': entitlement.role,
@@ -463,7 +526,7 @@ export async function POST(req: NextRequest) {
           tokens: parsed.usage?.total_tokens || contextPlan.estimatedPromptTokens + Math.ceil(contentText.length / 4),
           conversationId,
           userMessage: conversationId && userContent !== undefined ? {
-            id: persistedMessageId(rawBody.user_message_id, 'msg_u'),
+            id: persistedMessageId(chatRequest.user_message_id, 'msg_u'),
             role: 'user',
             content: userContent,
             alternative_contents: [userContent],
@@ -471,7 +534,7 @@ export async function POST(req: NextRequest) {
             created_at: new Date(Date.now() - 1000).toISOString(),
           } : undefined,
           assistantMessage: conversationId ? {
-            id: persistedMessageId(rawBody.assistant_message_id, 'msg_a'),
+            id: persistedMessageId(chatRequest.assistant_message_id, 'msg_a'),
             role: 'assistant',
             content: contentText,
             alternative_contents: [contentText],
@@ -523,6 +586,9 @@ export async function POST(req: NextRequest) {
       },
       done: true,
       done_reason: 'stop',
+      conversation_id: conversationId,
+      turn_id: chatIdentity.turnId,
+      session_mode: chatIdentity.mode,
       total_duration: Math.round((performance.now() - routeStartedAt) * 1_000_000),
       load_duration: 0,
       prompt_eval_count: parsed.usage?.prompt_tokens || contextPlan.estimatedPromptTokens,
@@ -530,7 +596,13 @@ export async function POST(req: NextRequest) {
     }, {
       headers: {
         'Access-Control-Allow-Origin': '*',
-        'X-Galx-Data-Policy': 'chat-model-improvement-opt-out-governed',
+        'X-Galx-Data-Policy': conversationId
+          ? 'owner-scoped-durable-conversation'
+          : 'chat-model-improvement-opt-out-governed',
+        'X-Galx-Conversation-Id': conversationId || '',
+        'X-Galx-Session-Mode': chatIdentity.mode,
+        'X-Galx-Turn-Id': chatIdentity.turnId,
+        'Access-Control-Expose-Headers': 'X-Galx-Conversation-Id, X-Galx-Session-Mode, X-Galx-Turn-Id',
         'X-Galx-Model-Resolved': modelSpec.id,
         'X-Galx-Seat-Tier': entitlement.tier,
         'X-Galx-Seat-Role': entitlement.role,

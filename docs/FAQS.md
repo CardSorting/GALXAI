@@ -49,7 +49,9 @@ Yes, 100%. You can either update `baseURL` to `https://galx.ai/v1` or use our de
 Yes. Set `export OLLAMA_HOST="https://galx.ai"` and `export OLLAMA_API_KEY="galx_live_..."`. GALXAI natively implements `/api/generate`, `/api/chat`, `/api/tags`, `/api/version`, and `/api/show`.
 
 #### 9. How do Stateful Conversation Threads work?
-Using `const thread = galx.thread({ model: 'gpt-5.6-sol', system: '...' })`, the SDK automatically manages conversation turns, pins system instructions, and uses `TokenOptimizer.truncateToFit()` to intelligently prune oldest non-system turns when approaching context limits.
+Using `const thread = galx.thread({ model: 'gpt-5.6-sol', system: '...' })`, the SDK creates a cryptographically identified logical session, manages its turns, pins system instructions, and uses `TokenOptimizer.truncateToFit()` near context limits. The `GalxAI` client itself is never the session: create multiple threads on one client for isolation, export `thread.sessionId` with its snapshot to resume it later, and call `thread.clear()` to rotate to a genuinely new durable identity.
+
+For autonomous agents, use `const session = agent.startSession()` and later `agent.resumeSession(session.export())`. A bare `agent.run()` is stateless by default.
 
 ---
 
@@ -141,6 +143,4 @@ Unlike rigid monthly cliffs or static token throttles, GALXAI uses human-centric
 
 #### 25. How does GALXAI prevent LLM provider crashes when compacting conversations with tool calls (ADR 0070)?
 OpenAI and Anthropic APIs strictly mandate that every `tool` execution result message must be preceded immediately by an `assistant` message containing matching `tool_calls`. GALXAI's `GalxRollingContextEngine` enforces **Atomic Tool Turn-Pair Inseparability** (`ensureAtomicTurnPairs`), dynamically shifting compaction boundaries leftward so tool call triggers and responses are never severed.
-
-
 

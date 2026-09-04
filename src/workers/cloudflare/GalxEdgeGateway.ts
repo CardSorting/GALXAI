@@ -13,6 +13,10 @@ import {
 import { ContextCompactor } from '../../core/optimization/ContextCompactor';
 import { OutputVerbosityOptimizer } from '../../core/optimization/OutputVerbosityOptimizer';
 import { BroccoliSpendSubstrate } from '../../core/broccolidb/BroccoliSpendSubstrate';
+import {
+  ChatRequestValidationError,
+  resolveChatIdentity,
+} from '../../core/chat/GalxChatRequestNormalizer';
 
 export interface CloudflareEnv {
   ENVIRONMENT?: string;
@@ -71,6 +75,9 @@ export class GalxEdgeGateway {
             'x-galx-key',
             'x-galx-client',
             'x-galx-session',
+            'x-galx-session-id',
+            'x-galx-session-mode',
+            'x-galx-turn-id',
             'x-galx-workspace',
             'x-galx-project',
             'x-galx-department',
@@ -434,6 +441,7 @@ export class GalxEdgeGateway {
       'x-galx-governance-reasons': decision.reasonCodes.join(','),
       'x-galx-estimated-max-cost-usd': decision.estimatedMaximumCostUsd.toFixed(6),
       'Access-Control-Expose-Headers': [
+        headers['Access-Control-Expose-Headers'],
         'x-galx-governance-mode',
         'x-galx-governance-action',
         'x-galx-model-requested',
@@ -442,7 +450,7 @@ export class GalxEdgeGateway {
         'x-galx-governance-reasons',
         'x-galx-estimated-max-cost-usd',
         'x-galx-route-evidence-id'
-      ].join(', '),
+      ].filter(Boolean).join(', '),
       ...(decision.recommendedModel ? { 'x-galx-model-recommended': decision.recommendedModel } : {}),
       ...(decision.routeEvidenceId ? { 'x-galx-route-evidence-id': decision.routeEvidenceId } : {})
     };
@@ -560,6 +568,28 @@ export class GalxEdgeGateway {
     const isStream = rawBody.stream === true || rawBody.stream === 'true' || rawBody.stream === 1;
     const maxTokens = rawBody.max_tokens ?? rawBody.max_completion_tokens ?? 2048;
 
+    const identityHeaders = new Headers(request.headers);
+    const legacySessionId = request.headers.get('x-galx-session');
+    if (legacySessionId && !identityHeaders.has('x-galx-session-id')) {
+      identityHeaders.set('x-galx-session-id', legacySessionId);
+    }
+    let chatIdentity;
+    try {
+      chatIdentity = resolveChatIdentity({ body: rawBody, headers: identityHeaders });
+    } catch (error) {
+      if (error instanceof ChatRequestValidationError) {
+        return this.errorResponse(error.status, error.code, error.message);
+      }
+      throw error;
+    }
+    const identityResponseHeaders = {
+      'x-galx-conversation-id': chatIdentity.conversationId || '',
+      'x-galx-session-mode': chatIdentity.mode,
+      'x-galx-turn-id': chatIdentity.turnId,
+      'x-galx-session-authority': 'client-context',
+      'Access-Control-Expose-Headers': 'X-Galx-Conversation-Id, X-Galx-Session-Mode, X-Galx-Turn-Id, X-Galx-Session-Authority',
+    };
+
     const body: ChatCompletionRequest = {
       model: requestedModelSpec.id,
       messages: normalizedMessages as any,
@@ -572,7 +602,10 @@ export class GalxEdgeGateway {
       response_format: rawBody.response_format,
       tools: Array.isArray(rawBody.tools) ? rawBody.tools : undefined,
       tool_choice: rawBody.tool_choice,
-      user: rawBody.user
+      user: rawBody.user,
+      conversation_id: chatIdentity.conversationId,
+      session_mode: chatIdentity.mode,
+      turn_id: chatIdentity.turnId,
     };
 
     const configuredPolicy = GalxSpendGovernanceEngine.parsePolicy(
@@ -588,7 +621,7 @@ export class GalxEdgeGateway {
         costCenter: request.headers.get('x-galx-cost-center') || undefined,
         environment: request.headers.get('x-galx-environment') || undefined,
         workload: request.headers.get('x-galx-workload') || undefined,
-        sessionId: request.headers.get('x-galx-session') || undefined
+        sessionId: body.conversation_id || undefined
       },
       {
         ...configuredPolicy,
@@ -677,6 +710,15 @@ export class GalxEdgeGateway {
     // 3. Upstream OpenAI Pass-Through if OPENAI_API_KEY is configured and provider is openai
     if (this.env.OPENAI_API_KEY && modelSpec.provider === 'openai') {
       try {
+        // GALX identities govern local policy/correlation and are not provider API fields.
+        const {
+          conversation_id: _conversationId,
+          session_mode: _sessionMode,
+          turn_id: _turnId,
+          user_message_id: _userMessageId,
+          assistant_message_id: _assistantMessageId,
+          ...providerBody
+        } = body;
         const upstreamResp = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -684,7 +726,7 @@ export class GalxEdgeGateway {
             Authorization: `Bearer ${this.env.OPENAI_API_KEY}`
           },
           body: JSON.stringify({
-            ...body,
+            ...providerBody,
             model: modelSpec.upstreamId || 'gpt-4o'
           })
         });
@@ -697,6 +739,7 @@ export class GalxEdgeGateway {
               'cache-control': 'no-cache, no-transform',
               connection: 'keep-alive',
               'Access-Control-Allow-Origin': '*',
+              ...identityResponseHeaders,
               'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge',
               'x-galx-model-resolved': modelSpec.id
             }, governanceDecision)
@@ -708,6 +751,7 @@ export class GalxEdgeGateway {
           headers: this.withGovernanceHeaders({
             'content-type': upstreamResp.headers.get('content-type') || 'application/json',
             'Access-Control-Allow-Origin': '*',
+            ...identityResponseHeaders,
             'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge',
             'x-galx-model-resolved': modelSpec.id
           }, governanceDecision)
@@ -761,7 +805,10 @@ export class GalxEdgeGateway {
             created: timestamp,
             model: body.model,
             choices: [{ index: 0, delta: {}, finish_reason: 'stop' }],
-            usage: { prompt_tokens: 15, completion_tokens: 20, total_tokens: 35 }
+            usage: { prompt_tokens: 15, completion_tokens: 20, total_tokens: 35 },
+            conversation_id: chatIdentity.conversationId,
+            turn_id: chatIdentity.turnId,
+            session_mode: chatIdentity.mode,
           };
           await writer.write(encoder.encode(`data: ${JSON.stringify(chunk2)}\n\n`));
           await writer.write(encoder.encode('data: [DONE]\n\n'));
@@ -777,6 +824,7 @@ export class GalxEdgeGateway {
           'cache-control': 'no-cache, no-transform',
           connection: 'keep-alive',
           'Access-Control-Allow-Origin': '*',
+          ...identityResponseHeaders,
           'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge',
           'x-galx-simulated': 'true'
         }, governanceDecision)
@@ -803,7 +851,10 @@ export class GalxEdgeGateway {
         prompt_tokens: 25,
         completion_tokens: 30,
         total_tokens: 55
-      }
+      },
+      conversation_id: chatIdentity.conversationId,
+      turn_id: chatIdentity.turnId,
+      session_mode: chatIdentity.mode,
     };
 
     return new Response(JSON.stringify(responsePayload), {
@@ -811,6 +862,7 @@ export class GalxEdgeGateway {
       headers: this.withGovernanceHeaders({
         'content-type': 'application/json',
         'Access-Control-Allow-Origin': '*',
+        ...identityResponseHeaders,
         'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge',
         'x-galx-simulated': 'true'
       }, governanceDecision)

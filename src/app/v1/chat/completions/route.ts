@@ -8,17 +8,21 @@ import { GalxLumiQoSPoolGovernor } from '@/core/governor/GalxLumiQoSPoolGovernor
 import { GalxElasticContextGovernor } from '@/core/governor/GalxElasticContextGovernor';
 import { GalxRollingContextEngine } from '@/core/router/GalxRollingContextEngine';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
-import { ChatRepository } from '@/lib/supabase/repositories/ChatRepository';
+import {
+  ChatRepository,
+  ChatRepositoryAccessError,
+} from '@/lib/supabase/repositories/ChatRepository';
 import { GalxTrainingStreamEngine } from '@/core/training/GalxTrainingStreamEngine';
 import { vectorizedSyncEngine } from '@/core/sync/GalxVectorizedSyncEngine';
 import type { ChatCompletionRequest } from '@/core/contracts/GalxContracts';
 import {
   ChatRequestValidationError,
   normalizeChatMessages,
-  normalizeConversationId,
+  normalizeChatResourceId,
   normalizeReasoningEffort,
   optionalFiniteNumber,
   parseChatJsonBody,
+  resolveChatIdentity,
   resolveAdaptiveReasoningEffort,
 } from '@/core/chat/GalxChatRequestNormalizer';
 
@@ -42,7 +46,8 @@ export async function OPTIONS() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Galx-Async, X-Galx-Queue, X-Galx-Webhook-Url, X-Galx-Priority, X-Galx-Delay-Ms, Idempotency-Key, Prefer',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Galx-Async, X-Galx-Queue, X-Galx-Webhook-Url, X-Galx-Priority, X-Galx-Delay-Ms, X-Galx-Session-Id, X-Galx-Session-Mode, X-Galx-Turn-Id, Idempotency-Key, Prefer',
+      'Access-Control-Expose-Headers': 'X-Galx-Request-Id, X-Galx-Conversation-Id, X-Galx-Session-Mode, X-Galx-Turn-Id',
       'Access-Control-Max-Age': '86400'
     }
   });
@@ -207,6 +212,50 @@ export async function POST(req: NextRequest) {
     }
 
     const normalizedMessages = normalizeChatMessages(rawBody);
+    const chatIdentity = resolveChatIdentity({ body: rawBody, headers: req.headers });
+    const conversationId = chatIdentity.conversationId;
+    const isWebChatClient = req.headers.get('x-galx-client') === 'web-chat';
+
+    // Conversation identity is authoritative and user-scoped. The inference client and
+    // credential shard are reusable transports; neither is allowed to imply continuity.
+    if (conversationId && chatIdentity.mode === 'new') {
+      const repo = ChatRepository.getInstance();
+      const existing = await repo.getSession(conversationId, userId);
+      if (!existing) {
+        const firstUserText = normalizedMessages.find((message) => message.role === 'user')?.content;
+        const titleSource = typeof firstUserText === 'string' ? firstUserText.trim() : '';
+        const now = Date.now();
+        try {
+          await repo.saveSession({
+            id: conversationId,
+            title: titleSource ? titleSource.slice(0, 200) : 'New conversation',
+            createdAt: now,
+            updatedAt: now,
+            modelId: requestedModel,
+            isPinned: false,
+            isArchived: false,
+          }, userId);
+        } catch (error) {
+          if (error instanceof ChatRepositoryAccessError) {
+            throw new ChatRequestValidationError(
+              'The requested conversation ID is unavailable.',
+              'conversation_id_unavailable',
+              409
+            );
+          }
+          throw error;
+        }
+      }
+    } else if (conversationId && chatIdentity.mode === 'continue') {
+      const existing = await ChatRepository.getInstance().getSession(conversationId, userId);
+      if (!existing) {
+        throw new ChatRequestValidationError(
+          'The requested conversation does not exist or is not accessible. Start a new session before continuing it.',
+          'conversation_not_found',
+          404
+        );
+      }
+    }
 
     // B. Parameter Forgiveness & Alias Resolution
     const requestedMaxTokens = optionalFiniteNumber(
@@ -235,10 +284,6 @@ export async function POST(req: NextRequest) {
         function: fn
       }));
     }
-
-    const conversationId = normalizeConversationId(
-      rawBody.conversation_id || rawBody.conversationId || req.headers.get('x-galx-session-id')
-    );
 
     const contextGovernor = GalxElasticContextGovernor.getInstance();
     const provisionalPlan = contextGovernor.resolveElasticContext({
@@ -346,6 +391,11 @@ export async function POST(req: NextRequest) {
         : undefined,
       privacy: rawBody.privacy,
       reasoning_effort: effectiveReasoningEffort,
+      conversation_id: conversationId,
+      session_mode: chatIdentity.mode,
+      turn_id: chatIdentity.turnId,
+      user_message_id: normalizeChatResourceId(rawBody.user_message_id, 'user_message_id'),
+      assistant_message_id: normalizeChatResourceId(rawBody.assistant_message_id, 'assistant_message_id'),
     };
 
     const isAsync = req.headers.get('x-galx-async') === 'true' || req.headers.get('prefer') === 'respond-async';
@@ -357,9 +407,8 @@ export async function POST(req: NextRequest) {
       );
     }
     const idempotencyKey = rawIdempotencyKey || undefined;
-    const requestId = idempotencyKey
-      ? `req_${crypto.createHash('sha256').update(`${userId}:${idempotencyKey}`).digest('hex').slice(0, 48)}`
-      : `req_${crypto.randomUUID()}`;
+    const requestIdentity = idempotencyKey || `${conversationId || 'stateless'}:${chatIdentity.turnId}`;
+    const requestId = `req_${crypto.createHash('sha256').update(`${userId}:${requestIdentity}`).digest('hex').slice(0, 48)}`;
 
     // 3. The database lease is authoritative across server instances. The process-local
     // slot remains an offline development fallback when Supabase is not configured.
@@ -441,7 +490,7 @@ export async function POST(req: NextRequest) {
       const { task, deduplicated } = queueEngine.createTask({
         queueId: targetQueue,
         userId,
-        idempotencyKey,
+        idempotencyKey: idempotencyKey || chatIdentity.turnId,
         priority,
         delayMs,
         target: {
@@ -461,6 +510,9 @@ export async function POST(req: NextRequest) {
           queue: task.queueId,
           created: Math.floor(task.createdAtMs / 1000),
           model: body.model,
+          conversation_id: conversationId,
+          turn_id: chatIdentity.turnId,
+          session_mode: chatIdentity.mode,
           task_url: `/api/queues/${task.queueId}/tasks/${task.id}`,
           deduplicated
         },
@@ -471,7 +523,10 @@ export async function POST(req: NextRequest) {
             'Location': `/api/queues/${task.queueId}/tasks/${task.id}`,
             'X-Galx-Task-Id': task.id,
             'X-Galx-Queue-Id': task.queueId,
-            'X-Galx-Seat-Tier': entitlement.tier
+            'X-Galx-Seat-Tier': entitlement.tier,
+            'X-Galx-Conversation-Id': conversationId || '',
+            'X-Galx-Session-Mode': chatIdentity.mode,
+            'X-Galx-Turn-Id': chatIdentity.turnId,
           }
         }
       );
@@ -487,13 +542,21 @@ export async function POST(req: NextRequest) {
     });
 
     // 5. Return formatted response with CORS headers, TTFT streaming optimization & ZDR Attestation
-    const isWebChatClient = req.headers.get('x-galx-client') === 'web-chat';
     const isApiCall = authResult.authType === 'developer_key' || !isWebChatClient;
 
     const headers = new Headers(result.headers);
     headers.set('Access-Control-Allow-Origin', '*');
     headers.set('X-Galx-Request-Id', requestId);
-    headers.set('X-Galx-Data-Policy', isApiCall ? 'api-private-zero-retention' : 'chat-model-improvement-opt-out-governed');
+    headers.set('X-Galx-Conversation-Id', conversationId || '');
+    headers.set('X-Galx-Session-Mode', chatIdentity.mode);
+    headers.set('X-Galx-Turn-Id', chatIdentity.turnId);
+    headers.set('Access-Control-Expose-Headers', 'X-Galx-Request-Id, X-Galx-Conversation-Id, X-Galx-Session-Mode, X-Galx-Turn-Id');
+    headers.set(
+      'X-Galx-Data-Policy',
+      conversationId
+        ? 'owner-scoped-durable-conversation'
+        : (isApiCall ? 'api-private-zero-retention' : 'chat-model-improvement-opt-out-governed')
+    );
     const currentWindows = seatEngine.calculateRollingWindows(userId, entitlement.tier);
     headers.set('X-Galx-Model', result.modelUsed);
     headers.set('X-Galx-Router', 'apex-v2');
@@ -569,7 +632,7 @@ export async function POST(req: NextRequest) {
                 tokens: contextPlan.estimatedPromptTokens + Math.ceil((accumulatedContent.length + accumulatedThinking.length) / 4),
                 conversationId,
                 userMessage: conversationId && userContent !== undefined ? {
-                  id: persistedMessageId(rawBody.user_message_id, 'msg_u'),
+                  id: persistedMessageId(body.user_message_id, 'msg_u'),
                   role: 'user',
                   content: userContent,
                   alternative_contents: [userContent],
@@ -577,7 +640,7 @@ export async function POST(req: NextRequest) {
                   created_at: new Date(Date.now() - 1000).toISOString(),
                 } : undefined,
                 assistantMessage: conversationId ? {
-                  id: persistedMessageId(rawBody.assistant_message_id, 'msg_a'),
+                  id: persistedMessageId(body.assistant_message_id, 'msg_a'),
                   role: 'assistant',
                   content: accumulatedContent,
                   alternative_contents: [accumulatedContent],
@@ -596,13 +659,13 @@ export async function POST(req: NextRequest) {
                 conversationId,
                 userMessage: userContent !== undefined
                   ? {
-                      id: persistedMessageId(rawBody.user_message_id, 'msg_u'),
+                      id: persistedMessageId(body.user_message_id, 'msg_u'),
                       content: userContent,
                       role: 'user',
                     }
                   : undefined,
                 assistantMessage: {
-                  id: persistedMessageId(rawBody.assistant_message_id, 'msg_a'),
+                  id: persistedMessageId(body.assistant_message_id, 'msg_a'),
                   content: accumulatedContent,
                   thinkingContent: accumulatedThinking || undefined,
                   modelId: result.modelUsed,
@@ -696,7 +759,7 @@ export async function POST(req: NextRequest) {
             tokens: usageTokens,
             conversationId,
             userMessage: conversationId && userContent !== undefined ? {
-              id: persistedMessageId(rawBody.user_message_id, 'msg_u'),
+              id: persistedMessageId(body.user_message_id, 'msg_u'),
               role: 'user',
               content: userContent,
               alternative_contents: [userContent],
@@ -704,7 +767,7 @@ export async function POST(req: NextRequest) {
               created_at: new Date(Date.now() - 1000).toISOString(),
             } : undefined,
             assistantMessage: conversationId ? {
-              id: persistedMessageId(rawBody.assistant_message_id, 'msg_a'),
+              id: persistedMessageId(body.assistant_message_id, 'msg_a'),
               role: 'assistant',
               content: responseContent,
               alternative_contents: [responseContent],
@@ -734,6 +797,9 @@ export async function POST(req: NextRequest) {
       if (typeof result.body === 'string') {
         try {
           const parsed = JSON.parse(result.body);
+          parsed.conversation_id = conversationId;
+          parsed.turn_id = chatIdentity.turnId;
+          parsed.session_mode = chatIdentity.mode;
           nonStreamContent = parsed.choices?.[0]?.message?.content || '';
           if (parsed.usage) {
             parsed.usage.prompt_tokens_details = {
@@ -742,8 +808,8 @@ export async function POST(req: NextRequest) {
               compacted_tokens: rollingContext.tokensSaved,
               compaction_mode: compactPrompts ? 'auto' : 'raw',
             };
-            result.body = JSON.stringify(parsed);
           }
+          result.body = JSON.stringify(parsed);
         } catch {}
       }
       const lastUser = normalizedMessages.filter((message) => message.role === 'user').pop();

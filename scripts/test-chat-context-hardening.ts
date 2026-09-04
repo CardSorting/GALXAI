@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {
   ChatRequestValidationError,
+  resolveChatIdentity,
   normalizeChatMessages,
   normalizeChatResourceId,
 } from '../src/core/chat/GalxChatRequestNormalizer';
@@ -55,6 +56,40 @@ expectValidationError(
 );
 check(normalizeChatResourceId('conversation_1:a', 'session_id') === 'conversation_1:a', 'Safe resource IDs should pass.');
 expectValidationError(() => normalizeChatResourceId('../escape', 'session_id'), 'invalid_session_id');
+
+const statelessIdentity = resolveChatIdentity({ body: {} });
+check(statelessIdentity.mode === 'stateless', 'Requests without identity must be explicitly stateless.');
+check(!statelessIdentity.conversationId, 'Stateless requests must not inherit a client-level conversation.');
+const newIdentity = resolveChatIdentity({ body: { session_mode: 'new' } });
+check(newIdentity.mode === 'new' && newIdentity.conversationId?.startsWith('session_'), 'New mode must issue a secure session ID.');
+const continuedIdentity = resolveChatIdentity({
+  body: { conversation_id: 'conversation_1', session_mode: 'continue', turn_id: 'turn_1' },
+});
+check(continuedIdentity.conversationId === 'conversation_1', 'Continue mode must preserve explicit conversation identity.');
+check(continuedIdentity.turnId === 'turn_1', 'Explicit turn identity must survive normalization.');
+expectValidationError(
+  () => resolveChatIdentity({ body: { session_mode: 'continue' } }),
+  'missing_conversation_id'
+);
+expectValidationError(
+  () => resolveChatIdentity({
+    body: { conversation_id: 'conversation_a' },
+    headers: new Headers({ 'X-Galx-Session-Id': 'conversation_b' }),
+  }),
+  'conflicting_conversation_id'
+);
+expectValidationError(
+  () => resolveChatIdentity({
+    body: { conversation_id: 'conversation_a', conversationId: 'conversation_b' },
+  }),
+  'conflicting_conversation_id'
+);
+expectValidationError(
+  () => resolveChatIdentity({
+    body: { session_mode: 'new', sessionMode: 'stateless' },
+  }),
+  'conflicting_session_mode'
+);
 
 const stored = normalizeStoredChatMessages([
   { id: 'msg_1', role: 'user', content: 'hello', createdAt: 1 },
