@@ -22,7 +22,7 @@ const BASE_SECURITY_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, X-Forwarded-For, X-Client-Version, X-Request-Timestamp, X-Request-Nonce, Digest, X-Digest-SHA256, Signature, Signature-Input, Idempotency-Key, X-Correlation-Id',
-  'Access-Control-Expose-Headers': 'X-Correlation-Id, Idempotent-Replay, Server-Timing, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-Security-Audit',
+  'Access-Control-Expose-Headers': 'X-Correlation-Id, Idempotent-Replay, Server-Timing, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-Security-Audit, X-Galx-Shard-Id, X-Galx-Shard-Mode',
   'Access-Control-Max-Age': '86400',
 };
 
@@ -316,6 +316,50 @@ export async function POST(req: NextRequest) {
           rateHeaders
         );
       }
+
+      const sigMatch = signatureHeader.match(/sig1=:([^:]+):/);
+      if (sigMatch) {
+        const providedSig = sigMatch[1];
+        const sharedSecret = process.env.GALX_TRANSPORT_SECRET || 'galx_transport_substrate_salt';
+        const urlObj = new URL(req.url);
+        const method = req.method.toUpperCase();
+        const path = urlObj.pathname;
+        const authority = req.headers.get('host') || urlObj.host;
+        const contentType = 'application/json';
+        const digest = req.headers.get('digest') || '';
+        const timestamp = req.headers.get('x-request-timestamp') || '';
+        const nonce = req.headers.get('x-request-nonce') || '';
+
+        // Extract signature-params dictionary string
+        const paramsMatch = signatureInputHeader.match(/sig1=(.+)/);
+        const sigParams = paramsMatch ? paramsMatch[1] : signatureInputHeader;
+
+        const signingBase = [
+          `"@method": ${method}`,
+          `"@path": ${path}`,
+          `"@authority": ${authority}`,
+          `"content-type": ${contentType}`,
+          `"digest": ${digest}`,
+          `"x-request-timestamp": ${timestamp}`,
+          `"x-request-nonce": ${nonce}`,
+          `"@signature-params": ${sigParams}`,
+        ].join('\n');
+
+        const calculatedSig = crypto.createHmac('sha256', sharedSecret).update(signingBase).digest('base64');
+
+        const isSignatureMatch =
+          providedSig.length === calculatedSig.length &&
+          crypto.timingSafeEqual(Buffer.from(providedSig), Buffer.from(calculatedSig));
+
+        if (!isSignatureMatch) {
+          return problemResponse(
+            401,
+            'SIGNATURE_VERIFICATION_FAILED',
+            'RFC 9421 HTTP Message Signature verification failed',
+            rateHeaders
+          );
+        }
+      }
     }
 
     // 10. Idempotency Key Check
@@ -326,9 +370,16 @@ export async function POST(req: NextRequest) {
       if (cached && Date.now() < cached.expiresAtMs) {
         if (cached.bodyHash === bodyHash) {
           // Exact idempotent replay
+          const cachedShardId = cached.response?.user?.shardId;
+          const cachedShardMode = cached.response?.user?.shardMode;
           return NextResponse.json(cached.response, {
             status: cached.status,
-            headers: buildHeaders({ ...rateHeaders, 'Idempotent-Replay': 'true' }),
+            headers: buildHeaders({
+              ...rateHeaders,
+              'Idempotent-Replay': 'true',
+              ...(cachedShardId ? { 'X-Galx-Shard-Id': cachedShardId } : {}),
+              ...(cachedShardMode ? { 'X-Galx-Shard-Mode': cachedShardMode } : {}),
+            }),
           });
         }
       }
@@ -423,7 +474,16 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json(result, { status: 200, headers: buildHeaders(rateHeaders) });
+    const shardId = result.user?.shardId;
+    const shardMode = result.user?.shardMode || mode;
+    return NextResponse.json(result, {
+      status: 200,
+      headers: buildHeaders({
+        ...rateHeaders,
+        ...(shardId ? { 'X-Galx-Shard-Id': shardId } : {}),
+        ...(shardMode ? { 'X-Galx-Shard-Mode': shardMode } : {}),
+      }),
+    });
   } catch (err: any) {
     const isClientError =
       err.message?.includes('MISSING_PROVIDER_CREDENTIALS') ||
