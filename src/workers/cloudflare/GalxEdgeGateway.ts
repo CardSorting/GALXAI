@@ -1,7 +1,13 @@
 /**
  * GALXAI: Cloudflare Edge Universal Gateway
- * Zero-Egress edge routing for chat completions, images, and embeddings.
+ * Zero-Egress edge routing for chat completions, images, and embeddings for standard wholesale API keys.
  * Pipes upstream SSE chunks directly to clients with zero intermediate database egress.
+ *
+ * ARCHITECTURAL BOUNDARY:
+ * Governs standard wholesale REST API keys (OPENAI_API_KEY, XAI_API_KEY) and R2 multimodal assets.
+ * Does NOT govern ChatGPT Codex WebSocket sessions. Per ADR 0112 and ADR 0115, Codex WebSocket
+ * inference is governed authoritatively by the dedicated Always-On VM Relay (LUMI-NEW/src/relay/relay-server.ts)
+ * or local direct native WebSocket wire.
  */
 
 import { ModelCatalog } from '../../core/router/ModelCatalog';

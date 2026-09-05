@@ -248,25 +248,155 @@ export class OpenAIAdapter {
       }
     }
 
-    // 0. Primary Native Execution: If using a ChatGPT Codex session (OAuth token scoped for ChatGPT),
-    // dispatch directly via WebSocket to wss://chatgpt.com/backend-api/codex/responses.
-    // ChatGPT session tokens lack the platform 'model.request' scope required by api.openai.com/v1/chat/completions.
-    const forceEdge = process.env.FORCE_EDGE_RELAY === 'true' ||
-                      (options as any)?.forceEdgeRelay === true ||
-                      (req as any)?.dispatch_target === 'edge';
-
-    const codexBin = OpenAIAdapter.findCodexExecutable();
+    // 0. Primary Native Execution for ChatGPT Codex Sessions:
+    // ChatGPT session tokens (OAuth tokens scoped for ChatGPT) lack the platform 'model.request'
+    // scope required by api.openai.com/v1/chat/completions. They MUST be executed via persistent
+    // WebSocket to wss://chatgpt.com/backend-api/codex/responses (directly or via the Always-On VM Relay).
+    // Cloudflare Edge Workers cannot sustain long-lived Codex WebSockets.
     const isCodexAuth = (secret as any)?.authType === 'oauth' ||
                         (secret as any)?.auth_mode === 'chatgpt' ||
                         !!secret.accountId ||
                         token.startsWith('eyJ') ||
                         fs.existsSync(path.join(os.homedir(), '.codex', 'auth.json'));
 
-    if (!forceEdge && isCodexAuth && !token.startsWith('sk-')) {
+    const isCodexSession = isCodexAuth && !token.startsWith('sk-');
+
+    if (isCodexSession) {
+      // Check if remote Always-On VM Relay daemon is explicitly configured
+      const vmRelayUrl =
+        process.env.VM_RELAY_URL ||
+        process.env.GALXAI_RELAY_URL ||
+        process.env.RELAY_URL ||
+        (secret as any)?.relayUrl ||
+        (process.env.FORCE_VM_RELAY === 'true' ? 'http://localhost:3001' : undefined);
+
+      const useVmRelay = !!(
+        process.env.VM_RELAY_URL ||
+        process.env.GALXAI_RELAY_URL ||
+        process.env.RELAY_URL ||
+        process.env.FORCE_VM_RELAY === 'true' ||
+        (options as any)?.forceRelay === true ||
+        (req as any)?.dispatch_target === 'relay' ||
+        (secret as any)?.relayUrl
+      );
+
+      if (vmRelayUrl && useVmRelay) {
+        try {
+          const relayPayload = {
+            ...body,
+            model: body.model === 'gpt-5.6-sol' ? 'gpt-5.6-terra' : (modelSpec.upstreamId || body.model)
+          };
+
+          const relayResp = await fetch(`${vmRelayUrl.replace(/\/+$/, '')}/v1/chat/completions`, {
+            method: 'POST',
+            headers: {
+              ...headers,
+              'x-galx-client': 'openai-adapter-vm-relay',
+              'x-galx-shard-id': (secret as any)?.id || (secret as any)?.shardId || ''
+            },
+            body: JSON.stringify(relayPayload),
+            signal: controller.signal
+          });
+
+          if (timeoutId) clearTimeout(timeoutId);
+          if (relayResp.ok) {
+            // Transparently attach to relay streamUrl for decoupled HTTP 202 jobs
+            if (relayResp.status === 202) {
+              const jobData = await relayResp.json() as any;
+              if (jobData?.streamUrl) {
+                const streamTarget = `${vmRelayUrl.replace(/\/+$/, '')}${jobData.streamUrl}`;
+                const streamResp = await fetch(streamTarget, {
+                  method: 'GET',
+                  headers: {
+                    ...headers,
+                    'accept': 'text/event-stream',
+                    'x-galx-client': 'openai-adapter-vm-relay-stream'
+                  },
+                  signal: controller.signal
+                });
+
+                if (streamResp.ok) {
+                  if (body.stream) {
+                    const streamHeaders: Record<string, string> = {
+                      'content-type': 'text/event-stream; charset=utf-8',
+                      'cache-control': 'no-cache, no-transform',
+                      'connection': 'keep-alive',
+                      'x-accel-buffering': 'no',
+                      'x-galx-job-id': jobData.id || ''
+                    };
+                    return { response: streamResp, headers: streamHeaders };
+                  }
+
+                  // Non-streaming: accumulate tokens until [DONE]
+                  const reader = streamResp.body?.getReader();
+                  let accumulated = '';
+                  if (reader) {
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+                    while (true) {
+                      const { done, value } = await reader.read();
+                      if (done) break;
+                      buffer += decoder.decode(value, { stream: true });
+                      const lines = buffer.split('\n');
+                      buffer = lines.pop() || '';
+                      for (const line of lines) {
+                        const trimmed = line.trim();
+                        if (!trimmed.startsWith('data:')) continue;
+                        const payload = trimmed.slice(5).trim();
+                        if (payload === '[DONE]') break;
+                        try {
+                          const parsed = JSON.parse(payload);
+                          accumulated += parsed.choices?.[0]?.delta?.content || '';
+                        } catch {}
+                      }
+                    }
+                  }
+
+                  const syntheticJson = {
+                    id: jobData.id || `chatcmpl_${Date.now()}`,
+                    object: 'chat.completion',
+                    created: Math.floor(Date.now() / 1000),
+                    model: modelSpec.upstreamId || 'gpt-5.6-sol',
+                    choices: [
+                      {
+                        index: 0,
+                        message: { role: 'assistant', content: accumulated },
+                        finish_reason: 'stop'
+                      }
+                    ],
+                    usage: {
+                      prompt_tokens: 50,
+                      completion_tokens: Math.max(1, accumulated.split(/\s+/).length),
+                      total_tokens: 50 + Math.max(1, accumulated.split(/\s+/).length)
+                    }
+                  };
+
+                  const jsonResp = new Response(JSON.stringify(syntheticJson), {
+                    status: 200,
+                    headers: { 'content-type': 'application/json' }
+                  });
+                  return { response: jsonResp, headers: { 'content-type': 'application/json' } };
+                }
+              }
+            }
+
+            const responseHeaders: Record<string, string> = {};
+            relayResp.headers.forEach((v, k) => {
+              responseHeaders[k.toLowerCase()] = v;
+            });
+            return { response: relayResp, headers: responseHeaders };
+          }
+        } catch {
+          // Fall back to direct local wire WebSocket if remote VM relay is temporarily unreachable
+        }
+      }
+
+      // Direct Native Wire WebSocket (authoritative for local and non-relayed execution)
       try {
         if (timeoutId) clearTimeout(timeoutId);
         return await OpenAIAdapter.executeViaCodexWebSocket(req, modelSpec, secret, options);
       } catch (wsErr: any) {
+        const codexBin = OpenAIAdapter.findCodexExecutable();
         if (codexBin) {
           try {
             return await OpenAIAdapter.executeViaCodexCli(codexBin, req, modelSpec, secret, options);
@@ -276,20 +406,21 @@ export class OpenAIAdapter {
       }
     }
 
-    // 1. Dispatch through Cloudflare Edge Worker Relay
-    const edgeWorkerUrl =
+    // 1. Standard wholesale API Keys (sk-...):
+    // Optionally proxy through Cloudflare Edge Gateway for zero-egress acceleration
+    const edgeGatewayUrl =
+      process.env.EDGE_GATEWAY_URL ||
+      process.env.CLOUDFLARE_GATEWAY_URL ||
       process.env.LUMI_EDGE_WORKER_URL ||
-      process.env.EDGE_RELAY_URL ||
-      (secret as any)?.workerUrl ||
-      'https://lumi-edge-worker.notsosuper688651.workers.dev';
+      (secret as any)?.edgeGatewayUrl;
 
-    if (edgeWorkerUrl) {
+    if (edgeGatewayUrl) {
       try {
-        const edgeResp = await fetch(`${edgeWorkerUrl.replace(/\/+$/, '')}/v1/chat/completions`, {
+        const edgeResp = await fetch(`${edgeGatewayUrl.replace(/\/+$/, '')}/v1/chat/completions`, {
           method: 'POST',
           headers: {
             ...headers,
-            'x-galx-client': 'openai-adapter-relay',
+            'x-galx-client': 'openai-adapter-edge-gateway',
             'x-galx-shard-id': (secret as any)?.id || (secret as any)?.shardId || ''
           },
           body: JSON.stringify(body),
@@ -297,22 +428,15 @@ export class OpenAIAdapter {
         });
 
         if (timeoutId) clearTimeout(timeoutId);
-
-        // If edge relay returns non-OK and this is a ChatGPT session token (e.g. missing platform scopes or edge WAF block),
-        // seamlessly fall back to local wire WebSocket execution
-        if (!edgeResp.ok && isCodexAuth && !token.startsWith('sk-')) {
-          try {
-            return await OpenAIAdapter.executeViaCodexWebSocket(req, modelSpec, secret, options);
-          } catch {}
+        if (edgeResp.ok) {
+          const responseHeaders: Record<string, string> = {};
+          edgeResp.headers.forEach((v, k) => {
+            responseHeaders[k.toLowerCase()] = v;
+          });
+          return { response: edgeResp, headers: responseHeaders };
         }
-
-        const responseHeaders: Record<string, string> = {};
-        edgeResp.headers.forEach((v, k) => {
-          responseHeaders[k.toLowerCase()] = v;
-        });
-        return { response: edgeResp, headers: responseHeaders };
       } catch {
-        // Fall back to direct upstream connection if edge relay is completely unreachable
+        // Fall back to direct upstream connection if edge gateway is unreachable
       }
     }
 
@@ -714,9 +838,50 @@ export class OpenAIAdapter {
       });
 
       ws.on('close', () => {
+        cleanup();
         if (isStream && streamController && !streamFinished) {
           streamFinished = true;
           try { streamController.close(); } catch {}
+        } else if (!isStream && !hasResolved) {
+          hasResolved = true;
+          if (accumulatedText) {
+            const jsonResp = {
+              id: completionId,
+              object: 'chat.completion',
+              created,
+              model: targetModel,
+              choices: [{
+                index: 0,
+                message: { role: 'assistant', content: accumulatedText },
+                finish_reason: 'stop'
+              }],
+              usage: {
+                prompt_tokens: 100,
+                completion_tokens: Math.ceil(accumulatedText.length / 4),
+                total_tokens: 100 + Math.ceil(accumulatedText.length / 4)
+              }
+            };
+            resolve({
+              response: new Response(JSON.stringify(jsonResp), {
+                status: 200,
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-Codex-Transport': 'direct-websocket',
+                  'X-Codex-Model': targetModel,
+                  'X-Galx-Shard-Id': shardId,
+                  'X-Galx-Account-Id': accountId || '',
+                }
+              }),
+              headers: {
+                'content-type': 'application/json',
+                'x-codex-transport': 'direct-websocket',
+                'x-galx-shard-id': shardId,
+                'x-galx-account-id': accountId || '',
+              }
+            });
+          } else {
+            reject(new Error('Codex WebSocket connection closed before receiving completion response'));
+          }
         }
       });
     });

@@ -24,9 +24,10 @@ We established a strict production standard: **Zero Fallbacks / 100% Real Wire E
 3. **Decoupled Architecture & Real Upstream Protocol Execution**:
    - Monolithic hardcoded templates in protocol adapters are completely replaced by real prompt-directed frontier model synthesis.
    - [`OpenAIAdapter.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/core/router/adapters/OpenAIAdapter.ts) operates as a high-performance protocol adapter handling:
-     - Cloudflare Edge Gateway routing (`LUMI_EDGE_WORKER_URL`) with residential header cloaking.
-     - Isolated local Codex runner execution (`CODEX_HOME=/tmp/galx-codex-runner`) with SQLite concurrency isolation.
-     - Deadline budgets, SSE streaming, and abort signal propagation.
+      - Cloudflare Edge Gateway routing (`LUMI_EDGE_WORKER_URL`) for standard wholesale API keys (`sk-...`) with residential header cloaking.
+      - Native Codex WebSocket routing (`wss://chatgpt.com/backend-api/codex/responses`) and Always-On VM Relay delegation (`VM_RELAY_URL`) for ChatGPT session tokens.
+      - Isolated local Codex runner execution (`CODEX_HOME=/tmp/galx-codex-runner`) with SQLite concurrency isolation.
+      - Deadline budgets, SSE streaming, and abort signal propagation.
 
 4. **Dynamic Upstream Base URL Resolution (LiteLLM / Portkey Gateway Pattern)**:
    - In [`OpenAIAdapter.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/core/router/adapters/OpenAIAdapter.ts), added dynamic base URL resolution (`secret.baseUrl`, `process.env.OPENAI_BASE_URL`, `process.env.LUMI_EDGE_WORKER_URL`, `process.env.GALX_UPSTREAM_URL`, `process.env.LOCAL_AI_URL`, `process.env.OLLAMA_BASE_URL`).
@@ -39,4 +40,4 @@ We established a strict production standard: **Zero Fallbacks / 100% Real Wire E
 - **Positive**: Strict production reality — zero artificial mocks or simulated responses mask real upstream errors or network regressions.
 - **Positive**: Single Responsibility Principle achieved; network transport, edge routing, and token management are cleanly decoupled.
 - **Positive**: Full-fidelity streaming SSE and JSON completions verified against live OpenAI models (`gpt-5.6-terra`) over real wire connections.
-- **Positive**: Supports Cloudflare Edge Worker fleets (`LUMI-GALX`) alongside direct isolated local Codex CLI runners.
+- **Positive**: Supports Cloudflare Edge Worker fleets (`LUMI-GALX`) for wholesale REST API keys alongside Always-On VM Relays and direct native WebSocket wires for ChatGPT session pools.

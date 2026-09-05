@@ -15,10 +15,17 @@ GALXAI employs an enterprise multi-tier deployment architecture designed for hig
        │   - Next.js 15 App Router       │     │   - Global Edge Mesh Gateway    │
        │   - Serverless APIs & OG Edge   │     │   - Zero-Egress Token Streaming │
        │   - Multi-Region (sfo1, iad1)   │     │   - R2 CDN (assets.galx.ai)     │
-       └────────────────┬────────────────┘     └────────────────┬────────────────┘
-                        │                                       │
-                        └───────────────────┬───────────────────┘
-                                            ▼
+       └───────┬───────────────────┬─────┘     └────────────────┬────────────────┘
+               │                   │ (VM_RELAY_URL)             │
+               │                   ▼                            │
+               │       ┌───────────────────────┐                │
+               │       │ Cloudflare Tunnel / VM│                │
+               │       │  - Always-On Relay    │                │
+               │       │  - Persistent Codex WS│                │
+               │       └───────────┬───────────┘                │
+               │                   │                            │
+               └───────────────────┼────────────────────────────┘
+                                   ▼
                        ┌─────────────────────────────────────────┐
                        │           Supabase PostgreSQL           │
                        │   - Transaction Pooler (Port 6543)      │
@@ -35,6 +42,7 @@ GALXAI employs an enterprise multi-tier deployment architecture designed for hig
 | :--- | :--- | :--- | :--- |
 | **Vercel** | Next.js 15 Web, Serverless APIs, OG Images | **[Vercel Guide](VERCEL_DEPLOYMENT.md)** | `npm run deploy:check`<br>`npx vercel --prod` |
 | **Cloudflare** | Edge Gateway, Model Router, R2 CDN (`assets.galx.ai`) | **[Cloudflare Guide](CLOUDFLARE_STRATEGY.md)** | `npm run worker:deploy`<br>`npm run worker:test` |
+| **Always-On VM Relay** | Persistent Codex WebSockets (`chatgpt.com`), Decoupled HTTP 202 Ingress, PM2 / Tunnel | **[VM Relay Guide](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md)** | `pm2 start ecosystem.config.cjs`<br>`cloudflared tunnel --url http://localhost:3001` |
 | **Docker / K8s** | Self-Hosted Gateway Container, Standalone Node runner | *(Detailed below)* | `docker build -t galxai .`<br>`docker compose up -d` |
 
 ---
@@ -52,6 +60,7 @@ GALXAI employs an enterprise multi-tier deployment architecture designed for hig
 | `GALX_VAULT_ACTIVE_KEY_VERSION` | All | **Yes** | Active cryptographic key version (`v1`). |
 | `NEXT_PUBLIC_GALX_EDGE_URL` | All | Optional | Cloudflare edge gateway URL (`https://api.galx.ai`). |
 | `PUBLIC_ASSETS_URL` | All | Optional | Multimodal R2 CDN URL (`https://assets.galx.ai`). |
+| `VM_RELAY_URL` | Vercel, Dev | **Recommended** | Cloudflare Tunnel or VM host URL for persistent Codex WebSockets (`https://<hash>.trycloudflare.com` or `https://relay.galxai.com`). |
 
 ---
 

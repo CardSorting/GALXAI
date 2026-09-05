@@ -34,9 +34,9 @@ import type { DeveloperGatewayKey } from '../src/core/contracts/GalxContracts';
 function parseFlags() {
   const isConcurrent = process.argv.includes('--concurrent');
   const isFast = process.argv.includes('--fast');
-  const isEdge = process.argv.includes('--edge');
-  if (isEdge) {
-    process.env.FORCE_EDGE_RELAY = 'true';
+  const isRelay = process.argv.includes('--relay') || process.argv.includes('--edge');
+  if (isRelay) {
+    process.env.FORCE_VM_RELAY = 'true';
   }
   let reasoningEffort = 'low';
   const effortArg = process.argv.find(a => a.startsWith('--reasoning-effort='));
@@ -48,7 +48,7 @@ function parseFlags() {
       reasoningEffort = process.argv[idx + 1];
     }
   }
-  return { isConcurrent, isFast, isEdge, reasoningEffort };
+  return { isConcurrent, isFast, isRelay, reasoningEffort };
 }
 
 // Parse CLI flags or use default output-test directory
@@ -66,7 +66,7 @@ function resolveOutputDir(): string {
 
 async function run() {
   const outputDir = resolveOutputDir();
-  const { isConcurrent, isFast, isEdge, reasoningEffort } = parseFlags();
+  const { isConcurrent, isFast, isRelay, reasoningEffort } = parseFlags();
   const projectsDir = path.join(outputDir, 'projects');
   const telemetryDir = path.join(outputDir, 'telemetry');
   const startTime = Date.now();
@@ -76,7 +76,7 @@ async function run() {
   console.log('======================================================================\n');
   console.log(`  📂 Target Output Directory: ${outputDir}`);
   console.log(`  ⚙️  Reasoning Level        : ${reasoningEffort.toUpperCase()}`);
-  console.log(`  🌐 Dispatch Target        : ${isEdge ? 'Cloudflare Edge LUMI Worker (https://lumi-edge-worker.notsosuper688651.workers.dev)' : 'Host Native Codex CLI'}`);
+  console.log(`  🌐 Dispatch Target        : ${isRelay ? 'Always-On VM Relay (LUMI-NEW/src/relay/relay-server.ts)' : 'Native Codex WebSocket Wire'}`);
   console.log(`  ⚡ Concurrency Mode       : ${isConcurrent ? 'ENABLED (Parallel P3 + P4)' : 'Sequential'}`);
   console.log(`  🏃 Fast Mode              : ${isFast ? 'ENABLED (Concise Prompts <15s)' : 'Full Synthesis'}`);
 
@@ -702,12 +702,12 @@ run().catch((err) => {
       status: 'FAILED',
       timestamp: new Date().toISOString(),
       error: err?.message || String(err),
-      strategy: 'Cloudflare Anycast Edge Worker Relay (lumi-edge-worker)',
-      edgeWorkerUrl: 'https://lumi-edge-worker.notsosuper688651.workers.dev',
+      strategy: 'Authoritative Codex Wire / Always-On VM Relay',
+      relayUrl: process.env.VM_RELAY_URL || 'http://localhost:3001',
       upstreamDiagnosis: {
         rawError: err?.message,
         code: err?.message?.includes('token_revoked') ? 'token_revoked' : 'upstream_error',
-        recommendation: 'Run `npm run login` in LUMI-NEW or `npm run token:add` to register a fresh token into the edge pool.'
+        recommendation: 'Run `npx tsx scripts/manage-shards.ts --import` or `npm run shards:add` to register a fresh token into the shard fleet.'
       }
     };
 
@@ -720,7 +720,7 @@ run().catch((err) => {
 
 - **Execution Status**: ❌ FAILED (Upstream Verification)
 - **Timestamp**: ${failureReport.timestamp}
-- **Strategy**: Cloudflare Anycast Edge Worker Relay (\`https://lumi-edge-worker.notsosuper688651.workers.dev\`)
+- **Strategy**: Authoritative Codex Wire / Always-On VM Relay
 - **Upstream Response**: Pure Wire Dispatch (Zero Mock / Zero Fallback)
 
 ## Error Details
@@ -729,10 +729,9 @@ ${err?.message || err}
 \`\`\`
 
 ## Diagnosis
-The pipeline successfully routed through GALX backend $\\to$ Cloudflare Edge Worker $\\to$ \`https://api.openai.com/v1/chat/completions\`.
-The upstream OpenAI endpoint confirmed that the current OAuth token is revoked (\`token_revoked\`).
-
-To authenticate a fresh account:
+The pipeline routed through the authoritative Codex WebSocket wire / VM Relay.
+If the upstream OpenAI endpoint reported that the OAuth token is revoked (\`token_revoked\`),
+authenticate a fresh account using:
 \`\`\`bash
 cd /Users/bozoegg/Desktop/LUMI-NEW
 npm run login

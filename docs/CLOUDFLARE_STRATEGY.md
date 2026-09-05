@@ -271,7 +271,8 @@ The production multi-token gateway is deployed as a standalone Cloudflare Worker
 | `/v1/tokens/status` | `GET` | Legacy endpoint; must not expose credential identities or imply authority |
 | `/v1/tokens/ingest` | `POST` | Deprecated and forbidden for long-lived credentials |
 | `/v1/tokens/remove/:id` | `DELETE` | Deprecated; authoritative revocation occurs in PostgreSQL |
-| `/v1/chat/completions` | `POST` | SWRR-balanced SSE streaming proxy to upstream OpenAI Responses API |
+| `/v1/debug/probe-ws` | `POST` | Retired (`HTTP 410 Gone`); directs operators to the VM Relay or CLI test |
+| `/v1/chat/completions` | `POST` | SWRR-balanced SSE streaming proxy for standard wholesale provider keys (`sk-...`) |
 
 ### Key Edge Routing Invariants
 1. **Smooth Weighted Round-Robin (SWRR)**:
@@ -283,6 +284,9 @@ The production multi-token gateway is deployed as a standalone Cloudflare Worker
    - Injects authentic `User-Agent: Codex-CLI/0.147.0 (darwin; arm64)` metadata, defeating upstream WAF bot fingerprinting.
 4. **No Edge Credential Enrollment**:
    - Edge transports may receive bounded dispatch authority in a future broker design, but cannot self-enroll or durably refresh long-lived provider credentials.
+5. **Transport Boundary (Wholesale HTTP vs. Codex WebSocket)**:
+   - The Cloudflare Edge Worker proxies standard wholesale API keys (`OPENAI_API_KEY`, `XAI_API_KEY`) over HTTP/SSE.
+   - **Codex WebSockets Are Prohibited on Edge Workers**: ChatGPT Codex session tokens (`isChatGptSession`) cannot be proxied through Cloudflare Workers due to V8 isolate wall-clock limits (30–100s) and Cloudflare WAF datacenter IP blocks on `chatgpt.com`. Requests with ChatGPT session tokens return `HTTP 400 (use_vm_relay_required)` and must be routed through the dedicated Always-On VM Relay (`LUMI-NEW/src/relay/relay-server.ts`).
 
 ---
 

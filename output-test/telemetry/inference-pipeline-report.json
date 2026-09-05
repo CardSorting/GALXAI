@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-09-04T00:31:33.717Z",
+  "timestamp": "2026-09-05T06:02:17.000Z",
   "pipelineType": "REAL_BACKEND_INFERENCE_PIPELINE",
   "account": {
     "userId": "usr_galx_developer_master",
-    "workspaceId": "ws_1788481799113_h1ksf",
+    "workspaceId": "ws_1788587971523_urfv3",
     "workspaceName": "Developer Master Sovereign Workspace",
     "seatTier": "enterprise"
   },
   "apiKeyVerification": {
-    "keyId": "key_galx_live_1788481799459",
-    "prefix": "galx_live_0dd986",
-    "masked": "galx_live_0dd9...59b7",
-    "checksum": "fc59b7",
+    "keyId": "key_galx_live_1788587971969",
+    "prefix": "galx_live_6672bd",
+    "masked": "galx_live_6672...9a0f",
+    "checksum": "259a0f",
     "environment": "live",
     "revocationVerified": true
   },
@@ -23,32 +23,32 @@
   },
   "streamingExecution": {
     "httpStatus": 200,
-    "chunksProcessed": 848,
-    "charactersDelivered": 2385,
-    "durationMs": 18946,
+    "chunksProcessed": 904,
+    "charactersDelivered": 2512,
+    "durationMs": 64233,
     "doneSignalReceived": true,
     "projectOutputFile": "/Users/bozoegg/Desktop/GALXAI/output-test/projects/cyber-snake-arcade/index.html"
   },
   "nonStreamingExecution": {
     "httpStatus": 200,
-    "completionId": "chatcmpl_codex_ws_mtm7wbdw",
-    "tokensUsed": 2129,
-    "durationMs": 74692,
+    "completionId": "job_mtnz4xls_95569ff4",
+    "tokensUsed": 1075,
+    "durationMs": 100604,
     "projectOutputDir": "/Users/bozoegg/Desktop/GALXAI/output-test/projects/rate-governor-service"
   },
   "walletSettlement": {
-    "holdId": "2f58a516-2da6-40ff-9767-6f8bf6842b82",
+    "holdId": "683bf58e-2313-4bf5-a700-b98681267fd1",
     "reservedUsd": 0.005,
     "committedUsd": 0.0018,
     "refundedUsd": 0.0032,
-    "finalBalanceUsd": 107.132684
+    "finalBalanceUsd": 105.25724
   },
   "sampleProjectsGenerated": [
     {
       "name": "Cyber-Snake Arcade",
       "type": "Standalone Playable HTML5/Canvas Game",
       "path": "/Users/bozoegg/Desktop/GALXAI/output-test/projects/cyber-snake-arcade/index.html",
-      "bytes": 2373
+      "bytes": 2502
     },
     {
       "name": "Continuous Rate Governor",
@@ -63,5 +63,5 @@
       "files": 3
     }
   ],
-  "totalDurationMs": 94751
+  "totalDurationMs": 165479
 }

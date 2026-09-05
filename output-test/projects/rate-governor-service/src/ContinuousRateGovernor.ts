@@ -1,218 +1,209 @@
-/**
- * Continuous token-bucket rate governor.
- *
- * - Uses a monotonic nanosecond clock when available (Node.js hrtime.bigint()).
- * - Refills continuously; it does not use intervals, timers, or polling.
- * - `tryAcquire()` is synchronous and O(1).
- * - Suitable for one JavaScript isolate/event loop. It is not shared across
- *   processes or Worker threads without an external shared coordinator.
- *
- * Compile target: ES2020 or newer (BigInt support required).
- */
+// token-bucket-rate-governor.ts
+//
+// Requires TypeScript target ES2020 or newer because it uses bigint.
+//
+// This is an in-process token bucket. Calls to tryAcquire are atomic within one
+// JavaScript event loop because the method contains no await/yield points.
 
 export interface MonotonicClock {
-  /** Returns monotonically increasing time in nanoseconds. */
+  /** Monotonic time in nanoseconds. */
   nowNs(): bigint;
 }
 
 export interface TokenBucketOptions {
   /**
-   * Maximum number of tokens the bucket can hold.
+   * Maximum number of tokens that may be retained.
    * Must be finite and > 0.
    */
   capacity: number;
 
   /**
    * Continuous refill rate in tokens per second.
-   * Must be finite and > 0.
+   * Must be finite and >= 0.
    */
   refillRatePerSecond: number;
 
   /**
-   * Initial token count. Defaults to `capacity`.
-   * Must be finite and within [0, capacity].
+   * Tokens initially present in the bucket.
+   * Defaults to capacity.
    */
   initialTokens?: number;
 
   /**
-   * Optional monotonic clock. Defaults to Node's process.hrtime.bigint()
-   * when available, otherwise performance.now().
+   * Injectable for deterministic tests or platform-specific clocks.
+   * Defaults to process.hrtime.bigint() in Node.js and performance.now() in
+   * browsers/workers.
    */
   clock?: MonotonicClock;
 }
 
 const NS_PER_SECOND = 1_000_000_000n;
+const NS_PER_SECOND_NUMBER = 1_000_000_000;
 
 /**
- * Returns the best monotonic clock available in the current runtime.
+ * Creates the highest-resolution monotonic clock available on the runtime.
  *
- * Node.js: process.hrtime.bigint() -- nanosecond resolution.
- * Browser: performance.now()       -- usually microsecond/sub-millisecond resolution.
+ * Node.js: process.hrtime.bigint() -- nanosecond-resolution monotonic source.
+ * Browser: performance.now() -- monotonic, usually microsecond or better,
+ * although browser privacy settings may intentionally reduce its resolution.
  */
-export function defaultMonotonicClock(): MonotonicClock {
-  const runtime = globalThis as typeof globalThis & {
-    process?: {
-      hrtime?: {
-        bigint?: () => bigint;
+export function createDefaultMonotonicClock(): MonotonicClock {
+  const nodeProcess = (
+    globalThis as unknown as {
+      process?: {
+        hrtime?: {
+          bigint?: () => bigint;
+        };
       };
-    };
-    performance?: {
-      now: () => number;
-    };
-  };
+    }
+  ).process;
 
-  const hrtimeBigint = runtime.process?.hrtime?.bigint;
-  if (typeof hrtimeBigint === "function") {
+  const hrtime = nodeProcess?.hrtime;
+  if (typeof hrtime?.bigint === "function") {
     return {
-      nowNs: () => hrtimeBigint(),
+      nowNs: () => hrtime.bigint!(),
     };
   }
 
-  const performanceNow = runtime.performance?.now;
-  if (typeof performanceNow === "function") {
+  const browserPerformance = (
+    globalThis as unknown as {
+      performance?: {
+        now?: () => number;
+      };
+    }
+  ).performance;
+
+  if (typeof browserPerformance?.now === "function") {
     return {
-      // performance.now() is in milliseconds. Convert to nanoseconds.
-      // Actual resolution remains browser/runtime dependent.
-      nowNs: () => BigInt(Math.floor(performanceNow() * 1_000_000)),
+      nowNs: () => {
+        const milliseconds = browserPerformance.now!();
+
+        if (!Number.isFinite(milliseconds)) {
+          throw new Error("performance.now() returned a non-finite value");
+        }
+
+        // Convert milliseconds to nanoseconds. This preserves sub-millisecond
+        // precision when the underlying browser clock provides it.
+        return BigInt(Math.round(milliseconds * 1_000_000));
+      },
     };
   }
 
   throw new Error(
-    "No monotonic clock is available. Supply TokenBucketOptions.clock explicitly.",
+    "No monotonic high-resolution clock is available. Supply TokenBucketOptions.clock.",
   );
 }
 
 /**
- * A continuous token-bucket rate governor.
+ * A lazily-refilled, continuous token-bucket rate governor.
  *
- * Example:
- *
- * ```ts
- * const governor = new ContinuousTokenBucket({
- *   capacity: 100,
- *   refillRatePerSecond: 25,
- * });
- *
- * if (governor.tryAcquire(1)) {
- *   // Allowed.
- * } else {
- *   // Rate limited.
- * }
- * ```
+ * Refill is computed from monotonic elapsed time on every operation; no timer,
+ * interval, background task, or event-loop scheduling is involved.
  */
-export class ContinuousTokenBucket {
-  readonly capacity: number;
-  readonly refillRatePerSecond: number;
+export class ContinuousTokenBucketRateGovernor {
+  public readonly capacity: number;
+  public readonly refillRatePerSecond: number;
 
   private readonly clock: MonotonicClock;
-
-  /**
-   * Floating-point tokens are intentional: continuous refill permits
-   * fractional tokens.
-   */
-  private tokens: number;
-
-  /**
-   * Kahan compensation preserves very small refill increments that would
-   * otherwise be repeatedly lost when the bucket contains large values.
-   */
-  private refillCompensation = 0;
-
+  private _availableTokens: number;
   private lastRefillNs: bigint;
 
-  constructor(options: TokenBucketOptions) {
-    validatePositiveFinite("capacity", options.capacity);
-    validatePositiveFinite("refillRatePerSecond", options.refillRatePerSecond);
+  public constructor(options: TokenBucketOptions) {
+    assertFinitePositive("capacity", options.capacity);
+    assertFiniteNonNegative(
+      "refillRatePerSecond",
+      options.refillRatePerSecond,
+    );
 
     const initialTokens = options.initialTokens ?? options.capacity;
-    if (!Number.isFinite(initialTokens) || initialTokens < 0) {
-      throw new RangeError(
-        `initialTokens must be finite and >= 0; received ${initialTokens}`,
-      );
-    }
+    assertFiniteNonNegative("initialTokens", initialTokens);
 
     if (initialTokens > options.capacity) {
       throw new RangeError(
-        `initialTokens (${initialTokens}) cannot exceed capacity (${options.capacity})`,
+        `initialTokens (${initialTokens}) must not exceed capacity (${options.capacity})`,
       );
     }
 
     this.capacity = options.capacity;
     this.refillRatePerSecond = options.refillRatePerSecond;
-    this.clock = options.clock ?? defaultMonotonicClock();
-    this.tokens = initialTokens;
-    this.lastRefillNs = this.clock.nowNs();
+    this.clock = options.clock ?? createDefaultMonotonicClock();
+    this._availableTokens = initialTokens;
+    this.lastRefillNs = this.readClock();
   }
 
   /**
-   * Attempts to consume `tokens`.
+   * Attempts to consume `tokens` immediately.
    *
-   * Returns true and debits the bucket if sufficient tokens are available.
-   * Returns false without debiting otherwise.
+   * Returns true and deducts tokens when enough capacity is available.
+   * Returns false without deducting anything otherwise.
    *
-   * `tokens === 0` is valid and always succeeds.
+   * A request for zero tokens succeeds. Negative, NaN, and infinite requests
+   * throw RangeError.
    *
-   * @throws RangeError for negative, NaN, or infinite token requests.
+   * Requests larger than capacity can never succeed.
    */
-  tryAcquire(tokens: number): boolean {
-    validateNonNegativeFinite("tokens", tokens);
+  public tryAcquire(tokens: number): boolean {
+    assertFiniteNonNegative("tokens", tokens);
 
-    this.refill();
+    this.refill(this.readClock());
 
-    if (tokens > this.tokens) {
+    if (tokens === 0) {
+      return true;
+    }
+
+    if (tokens > this.capacity || tokens > this._availableTokens) {
       return false;
     }
 
-    this.addTokens(-tokens);
+    this._availableTokens -= tokens;
+
+    // Avoid exposing -0 due to unusual floating-point inputs/operations.
+    if (this._availableTokens <= 0) {
+      this._availableTokens = 0;
+    }
+
     return true;
   }
 
   /**
-   * Returns the currently available token count after applying elapsed refill.
+   * Returns currently available tokens after applying elapsed continuous refill.
    *
-   * This method mutates only internal time/accounting state; it does not
-   * consume tokens.
+   * Reading this property updates internal refill state, just as tryAcquire does.
    */
-  availableTokens(): number {
-    this.refill();
-    return this.tokens;
+  public get availableTokens(): number {
+    this.refill(this.readClock());
+    return this._availableTokens;
   }
 
   /**
-   * Returns the estimated time until `tokens` can be acquired.
+   * Returns the number of milliseconds until `tokens` could be acquired,
+   * assuming no other caller consumes tokens first.
    *
    * Returns:
-   * - 0 when the request could succeed now.
-   * - Infinity when the requested amount exceeds bucket capacity and can
-   *   therefore never be acquired in one request.
+   * - 0 if enough tokens are currently available
+   * - Infinity if the request exceeds capacity or refill rate is zero
    */
-  retryAfterMs(tokens: number): number {
-    validateNonNegativeFinite("tokens", tokens);
+  public retryAfterMs(tokens: number): number {
+    assertFiniteNonNegative("tokens", tokens);
 
-    this.refill();
+    this.refill(this.readClock());
 
-    if (tokens <= this.tokens) {
+    if (tokens <= this._availableTokens) {
       return 0;
     }
 
-    if (tokens > this.capacity) {
+    if (tokens > this.capacity || this.refillRatePerSecond === 0) {
       return Infinity;
     }
 
-    return ((tokens - this.tokens) / this.refillRatePerSecond) * 1_000;
+    return (
+      ((tokens - this._availableTokens) / this.refillRatePerSecond) * 1_000
+    );
   }
 
-  /**
-   * Refills based on elapsed monotonic time.
-   *
-   * No background timer is necessary: refill is calculated precisely when the
-   * governor is queried.
-   */
-  private refill(): void {
-    const nowNs = this.clock.nowNs();
-
-    // A monotonic clock should not move backwards, but clamping makes the
-    // governor safe against a faulty/injected clock.
+  private refill(nowNs: bigint): void {
+    // A true monotonic clock should never move backwards. Clamp backward clock
+    // movement defensively: it must never mint tokens.
     if (nowNs <= this.lastRefillNs) {
       return;
     }
@@ -220,89 +211,106 @@ export class ContinuousTokenBucket {
     const elapsedNs = nowNs - this.lastRefillNs;
     this.lastRefillNs = nowNs;
 
-    if (this.tokens >= this.capacity) {
-      this.tokens = this.capacity;
-      this.refillCompensation = 0;
+    if (
+      this._availableTokens >= this.capacity ||
+      this.refillRatePerSecond === 0
+    ) {
       return;
     }
 
-    const elapsedSeconds = nanosecondsToSeconds(elapsedNs);
-    const replenished = elapsedSeconds * this.refillRatePerSecond;
+    /*
+     * Split bigint nanoseconds into whole seconds + residual nanoseconds.
+     * This avoids converting an absolute nanosecond timestamp to number, which
+     * would lose precision after sufficiently long process uptime.
+     */
+    const wholeSeconds = elapsedNs / NS_PER_SECOND;
+    const residualNs = elapsedNs % NS_PER_SECOND;
 
-    if (replenished <= 0) {
+    const elapsedSeconds =
+      Number(wholeSeconds) + Number(residualNs) / NS_PER_SECOND_NUMBER;
+
+    const addedTokens = this.refillRatePerSecond * elapsedSeconds;
+
+    // Infinity can occur only for extraordinarily large elapsed intervals.
+    // Saturating to capacity is correct for a bounded bucket.
+    if (
+      !Number.isFinite(addedTokens) ||
+      addedTokens >= this.capacity - this._availableTokens
+    ) {
+      this._availableTokens = this.capacity;
       return;
     }
 
-    const missing = this.capacity - this.tokens;
+    this._availableTokens += addedTokens;
 
-    // Avoid unnecessary floating-point accumulation when this elapsed period
-    // definitely fills the bucket.
-    if (replenished >= missing || !Number.isFinite(replenished)) {
-      this.tokens = this.capacity;
-      this.refillCompensation = 0;
-      return;
-    }
-
-    this.addTokens(replenished);
-
-    if (this.tokens >= this.capacity) {
-      this.tokens = this.capacity;
-      this.refillCompensation = 0;
+    // Guard against floating-point roundoff.
+    if (this._availableTokens > this.capacity) {
+      this._availableTokens = this.capacity;
     }
   }
 
-  /**
-   * Kahan compensated summation for tiny continuous refill increments.
-   */
-  private addTokens(delta: number): void {
-    const adjusted = delta - this.refillCompensation;
-    const next = this.tokens + adjusted;
-    this.refillCompensation = (next - this.tokens) - adjusted;
-    this.tokens = next;
+  private readClock(): bigint {
+    const now = this.clock.nowNs();
+
+    if (typeof now !== "bigint") {
+      throw new TypeError("MonotonicClock.nowNs() must return a bigint");
+    }
+
+    return now;
   }
 }
 
-function validatePositiveFinite(name: string, value: number): void {
-  if (!Number.isFinite(value) || value <= 0) {
-    throw new RangeError(`${name} must be finite and > 0; received ${value}`);
+function assertFinitePositive(name: string, value: number): void {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+    throw new RangeError(`${name} must be a finite number greater than zero`);
   }
 }
 
-function validateNonNegativeFinite(name: string, value: number): void {
-  if (!Number.isFinite(value) || value < 0) {
-    throw new RangeError(`${name} must be finite and >= 0; received ${value}`);
+function assertFiniteNonNegative(name: string, value: number): void {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    throw new RangeError(
+      `${name} must be a finite number greater than or equal to zero`,
+    );
   }
-}
-
-/**
- * Converts bigint nanoseconds to seconds without first converting the entire
- * nanosecond value to Number, preserving useful precision for long uptimes.
- */
-function nanosecondsToSeconds(nanoseconds: bigint): number {
-  const wholeSeconds = nanoseconds / NS_PER_SECOND;
-  const remainderNs = nanoseconds % NS_PER_SECOND;
-
-  return Number(wholeSeconds) + Number(remainderNs) / 1_000_000_000;
 }
 ```
 
-Example with a deterministic test clock:
+Example:
+
+```ts
+const governor = new ContinuousTokenBucketRateGovernor({
+  capacity: 100,
+  refillRatePerSecond: 25,
+});
+
+// true, bucket now has 90 tokens
+console.log(governor.tryAcquire(10));
+
+// true/false depending on elapsed monotonic time and other acquisitions
+console.log(governor.tryAcquire(95));
+
+console.log(governor.availableTokens);
+console.log(governor.retryAfterMs(50));
+```
+
+For deterministic tests:
 
 ```ts
 let now = 0n;
 
-const bucket = new ContinuousTokenBucket({
+const governor = new ContinuousTokenBucketRateGovernor({
   capacity: 10,
   refillRatePerSecond: 2,
-  initialTokens: 0,
   clock: { nowNs: () => now },
 });
 
-console.log(bucket.tryAcquire(1)); // false
+console.log(governor.tryAcquire(10)); // true
+console.log(governor.tryAcquire(1));  // false
 
-now += 500_000_000n; // 0.5 seconds => 1 token at 2 tokens/sec
-console.log(bucket.tryAcquire(1)); // true
+now += 500_000_000n; // 0.5 seconds => 1 token
+console.log(governor.tryAcquire(1));  // true
+```
 
-console.log(bucket.availableTokens()); // 0
+This governor is process-local. It does not provide a globally shared distributed limit across Node processes, containers, browser tabs, or machines. A distributed rate limit requires an atomic shared-state operation, such as a Redis Lua script, a strongly consistent datastore transaction, or a dedicated rate-limiting service.
 
 export { ContinuousTokenBucket as ContinuousRateGovernor };

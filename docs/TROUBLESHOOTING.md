@@ -207,11 +207,32 @@ $ npx tsx scripts/verify-zero-hesitation-ergonomics.ts
   ```
 - **Root Cause**: An upstream ChatGPT OAuth session token (Client ID `app_EMoamEEZ73f0CkXaXp7hrann`) was forwarded to `https://api.openai.com/v1/chat/completions`. ChatGPT session tokens only have `openid profile email offline_access` scopes and are rejected by OpenAI's standard REST API.
 - **Remedy**:
-  - Do NOT forward ChatGPT session tokens to `api.openai.com/v1/chat/completions`.
-  - The router automatically executes these credentials over native WebSocket: `wss://chatgpt.com/backend-api/codex/responses`.
+  - Do NOT forward ChatGPT session tokens to `api.openai.com/v1/chat/completions` or to the Cloudflare Edge Worker.
+  - The router automatically executes these credentials over native WebSocket: `wss://chatgpt.com/backend-api/codex/responses` or routes them to the Always-On VM Relay (`LUMI-NEW/src/relay/relay-server.ts`).
   - Test live WebSocket connectivity using `npx tsx scripts/manage-shards.ts --test`.
 
-#### B. `refresh_token_invalidated`
+#### B. `use_vm_relay_required` (HTTP 400 from Edge Worker)
+- **Error Response**:
+  ```json
+  {
+    "error": {
+      "message": "ChatGPT OAuth session tokens must use the Always-On VM Relay or native WebSocket, not Cloudflare Edge Worker isolates.",
+      "code": "use_vm_relay_required"
+    }
+  }
+  ```
+- **Root Cause**: A client sent a ChatGPT OAuth session token (`app_EMoamEEZ73f0CkXaXp7hrann`) to the Cloudflare Edge Worker (`lumi-edge-worker`). Edge Workers enforce a 30s–100s V8 wall-clock limit and cannot sustain persistent bidirectional Codex WebSockets.
+- **Remedy**:
+  - Direct ChatGPT OAuth requests to the Always-On VM Relay daemon (`VM_RELAY_URL=https://<hash>.trycloudflare.com` on Vercel/remote, or `http://localhost:3001` locally) or use direct local WebSocket wire.
+  - Reserve Cloudflare Edge Worker URLs (`LUMI_EDGE_WORKER_URL`, `EDGE_GATEWAY_URL`) strictly for standard wholesale API keys (`sk-...`).
+
+#### C. `HTTP 410 Gone` on `/v1/debug/probe-ws`
+- **Root Cause**: `/v1/debug/probe-ws` on the Cloudflare Edge Worker has been retired because edge worker WebSocket proxying was decommissioned.
+- **Remedy**:
+  - Use `npx tsx scripts/manage-shards.ts --test` for local/CLI wire verification.
+  - Inspect the VM Relay health via `curl -sS http://localhost:3001/health | jq .` (or through the active tunnel: `curl -sS https://<hash>.trycloudflare.com/health | jq .`).
+
+#### D. `refresh_token_invalidated`
 - **Root Cause**: An OAuth refresh token was revoked by OpenAI or superseded by an out-of-band re-authentication.
 - **Remedy**:
   - Run `npx tsx scripts/manage-shards.ts --list` to inspect all active and invalid shards.
@@ -238,7 +259,7 @@ $ npx tsx scripts/verify-zero-hesitation-ergonomics.ts
 
 | Verification Suite | Target Validation Scope | Execution Command |
 | :--- | :--- | :--- |
-| **Real Inference Pipeline** | 8-phase end-to-end live wire execution (Streaming SSE, Non-streaming synthesis, Wallet hold, Key revocation) | `npx tsx scripts/test-inference-pipeline.ts --fast` |
+| **Real Inference Pipeline** | 8-phase end-to-end live wire execution (Direct or via Always-On Relay & Cloudflare Tunnel) | `npx tsx scripts/test-inference-pipeline.ts --fast`<br>`npx tsx scripts/test-inference-pipeline.ts --relay --fast` |
 | **Fleet Shard Prober** | Live wire health probe across `wss://chatgpt.com/backend-api/codex/responses` (200 OK ~1.2s) | `npx tsx scripts/manage-shards.ts --test` |
 | **Fleet Multi-Shard Cycle** | SWRR lease rotation and monotonic fencing token verification across pooled shards | `npx tsx scripts/manage-shards.ts --cycle 4` |
 | **Maintainer Onboarding** | 8-Point Workstation Diagnostic (Node, Vault, Safety, Docs, Git Hooks) | `npm run onboard` |

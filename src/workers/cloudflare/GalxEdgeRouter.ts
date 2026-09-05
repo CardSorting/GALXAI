@@ -2,6 +2,11 @@
  * GALXAI: Zero-Egress In-Flight Edge Model Router & Provider Failover
  * Intercepts upstream 429 / 5xx / timeout errors in <10ms and transparently fails over to secondary
  * provider shards without dropping client streams or triggering redundant database roundtrips.
+ *
+ * ARCHITECTURAL BOUNDARY:
+ * Governs standard wholesale HTTP API provider shards (OpenAI, xAI). Codex WebSocket sessions
+ * require persistent bidirectional connections governed authoritatively by the dedicated Always-On
+ * VM Relay (LUMI-NEW/src/relay/relay-server.ts).
  */
 
 import type { ChatCompletionRequest, CredentialStatus } from '../../core/contracts/GalxContracts';

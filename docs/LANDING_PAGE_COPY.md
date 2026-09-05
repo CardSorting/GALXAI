@@ -84,5 +84,5 @@ Instantly streamline operations:
 Get your live API key in 10 seconds. Includes $10 free compute credit. No credit card required.
 
 ### Actions
-- **[Get API Key ($10 Free Credit)](http://localhost:3001/auth/signup?next=/keys)**
-- **[Read Documentation](http://localhost:3001/docs)**
+- **[Get API Key ($10 Free Credit)](/auth/signup?next=/keys)**
+- **[Read Documentation](/docs)**

@@ -19,16 +19,31 @@ This guide details the complete process for deploying the **GALXAI Next.js 15 We
   │   - Next.js 15 Frontend │     │   - Edge Gateway        │
   │   - Serverless APIs     │     │   - Model Router        │
   │   - OG Image Generator  │     │   - R2 CDN (Assets)     │
-  └────────────┬────────────┘     └────────────┬────────────┘
-               │                               │
-               └───────────────┬───────────────┘
-                               ▼
-               ┌───────────────────────────────┐
-               │      Supabase PostgreSQL      │
-               │   - Auth & Session Vault      │
-               │   - BYOQ Credential Shards    │
-               │   - Task Queues & Telemetry   │
-               └───────────────────────────────┘
+  └───────┬───────────┬─────┘     └────────────┬────────────┘
+          │           │                        │
+          │           │ (VM_RELAY_URL Egress)  │
+          │           ▼                        │
+          │   ┌─────────────────────────┐      │
+          │   │  Cloudflare Tunnel Ingress     │
+          │   │  (https://*.trycloudflare.com) │
+          │   └───────────┬─────────────┘      │
+          │               │                    │
+          │               ▼                    │
+          │   ┌─────────────────────────┐      │
+          │   │  Always-On VM Relay     │      │
+          │   │  (Node.js / PM2 Daemon) │      │
+          │   │  - Persistent Codex WSS │      │
+          │   │  - BroccoliDB Streaming │      │
+          │   └─────────────────────────┘      │
+          │                                    │
+          └───────────────┬────────────────────┘
+                          ▼
+          ┌───────────────────────────────┐
+          │      Supabase PostgreSQL      │
+          │   - Auth & Session Vault      │
+          │   - BYOQ Credential Shards    │
+          │   - Task Queues & Telemetry   │
+          └───────────────────────────────┘
 ```
 
 ---
@@ -77,6 +92,7 @@ Configure the following environment variables in the **Vercel Project Settings >
 | `GALX_VAULT_ACTIVE_KEY_VERSION` | Production, Preview, Dev | **Yes** | Current active key version (`v1`). |
 | `NEXT_PUBLIC_GALX_EDGE_URL` | Production, Preview, Dev | Optional | URL of Cloudflare Edge API gateway (`https://api.galx.ai`). |
 | `PUBLIC_ASSETS_URL` | Production, Preview, Dev | Optional | URL of R2 multimodal assets CDN (`https://assets.galx.ai`). |
+| `VM_RELAY_URL` | Production, Preview, Dev | **Recommended** | Cloudflare Tunnel or VM endpoint for Always-On Codex WebSocket relay (`https://<hash>.trycloudflare.com` or `https://relay.galx.ai`). Enables multi-minute reasoning models on Vercel without serverless execution timeout kills. |
 | `OPENAI_API_KEY` | Production, Preview, Dev | Optional | Root fallback API key for OpenAI models. |
 | `XAI_API_KEY` | Production, Preview, Dev | Optional | Root fallback API key for xAI/Grok models. |
 | `SUPABASE_POOL_SIZE` | Production, Preview, Dev | Optional | Serverless pg connection pool size (Default: `20`). |
@@ -119,6 +135,32 @@ Configure the following environment variables in the **Vercel Project Settings >
    ```bash
    npm run vercel:deploy:prod
    ```
+
+---
+
+### 4.5. Connecting Vercel to the Always-On VM Relay (Cloudflare Tunnel Ingress)
+
+Vercel serverless lambdas have strict execution wall-clock limits (15s–60s on Hobby/Pro, 300s on Enterprise). Frontier reasoning models (`gpt-5.6-sol`, `gpt-5.6-terra`, `o3`) require persistent, bidirectional WebSocket channels to `wss://chatgpt.com/backend-api/codex/responses` that run for 120–180 seconds.
+
+To enable Vercel to serve frontier models without timeouts or datacenter IP blocks:
+
+1. **Run the Relay Daemon locally or on a cloud VM**:
+   ```bash
+   cd /Users/bozoegg/Desktop/LUMI-NEW
+   pm2 start ecosystem.config.cjs
+   ```
+2. **Expose the Relay via Cloudflare Tunnel**:
+   ```bash
+   cloudflared tunnel --url http://localhost:3001
+   # Outputs: https://<ephemeral-id>.trycloudflare.com
+   ```
+3. **Set the Environment Variable in Vercel**:
+   ```bash
+   npx vercel env add VM_RELAY_URL production
+   # Enter value: https://<ephemeral-id>.trycloudflare.com
+   ```
+4. **Transparent Decoupled Execution**:
+   When a user requests `gpt-5.6-sol`, `OpenAIAdapter.ts` forwards the request to `VM_RELAY_URL`. The relay enqueues the task, returns `HTTP 202 Accepted` with `Location: /v1/jobs/:id/stream`, and `OpenAIAdapter.ts` transparently attaches to the stream, piping SSE chunks back to the client while the persistent WebSocket connection remains cleanly anchored to the relay.
 
 ---
 

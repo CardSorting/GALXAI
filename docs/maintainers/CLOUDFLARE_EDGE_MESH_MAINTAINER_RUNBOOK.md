@@ -128,6 +128,29 @@ npm run check
 npx wrangler deploy
 ```
 
+### 5. Transport Demarcation: Edge Worker vs. Always-On VM Relay
+
+| Concern | Cloudflare Edge Worker (`lumi-edge-worker`) | Always-On VM Relay (`galxai-relay.service`) |
+| :--- | :--- | :--- |
+| **Primary Scope** | Wholesale REST API keys (`sk-...`), KV rate limiting, R2 CDN assets | Persistent bidirectional Codex WebSockets (`chatgpt.com`) |
+| **Execution Bounds** | 30s–100s V8 isolate CPU/wall-time limit | Indefinite wall time (300s configurable ceiling) |
+| **Upstream Transport** | Outbound HTTP `fetch()` | Native Node.js `ws` socket with TCP ping/pong ACK tracking |
+| **Target Endpoints** | `api.openai.com`, `api.x.ai` | `wss://chatgpt.com/backend-api/codex/responses` |
+| **WAF Defense** | Subject to Cloudflare-to-Cloudflare datacenter IP blocks | Residential egress proxies, Cloudflare Tunnel (`cloudflared`) |
+| **ChatGPT Sessions** | **Rejected** (`HTTP 400 use_vm_relay_required`) | **Authoritative Gateway** (`POST /v1/chat/completions`) |
+
+Maintainers must NOT attempt to route ChatGPT OAuth session tokens through the Cloudflare Edge Worker. Run or inspect the VM Relay daemon instead:
+```bash
+# Verify local VM Relay health (Host Mac)
+curl -s http://localhost:3001/health | jq .
+
+# Or verify via active Cloudflare Tunnel (Remote / Vercel Staging)
+curl -s https://<hash>.trycloudflare.com/health | jq .
+
+# Probe live upstream Codex WebSocket wire from VM Relay CLI
+cd /Users/bozoegg/Desktop/GALXAI && npx tsx scripts/manage-shards.ts --test
+```
+
 ---
 
-*For full Cloudflare architectural strategy, see [CLOUDFLARE_STRATEGY.md](../CLOUDFLARE_STRATEGY.md), [ADR 0111](../adr/0111-cloudflare-edge-swrr-fleet-session-sticky-prompt-caching-and-codex-concurrency-isolation.md), [ADR 0112](../adr/0112-galxai-authoritative-shard-fleet-pool-native-codex-websocket-wire-and-sliding-window-failover.md), and [ADR 0115](../adr/0115-postgresql-authoritative-shard-registry-and-secret-free-projections.md).* 🥦🌐🚀
+*For full Cloudflare architectural strategy, see [CLOUDFLARE_STRATEGY.md](../CLOUDFLARE_STRATEGY.md), [ADR 0111](../adr/0111-cloudflare-edge-swrr-fleet-session-sticky-prompt-caching-and-codex-concurrency-isolation.md), [ADR 0112](../adr/0112-galxai-authoritative-shard-fleet-pool-native-codex-websocket-wire-and-sliding-window-failover.md), [ADR 0115](../adr/0115-postgresql-authoritative-shard-registry-and-secret-free-projections.md), and [ADR 0120](../adr/0120-zero-cost-host-mac-cloudflare-tunnel-relay-ingress-and-protocol-hardening.md).* 🥦🌐🚀

@@ -1,7 +1,7 @@
 # ADR 0110: End-to-End Inference Verification Suite & Artifact Telemetry
 
 ## Status
-Accepted
+Accepted (Phase 1.5 Edge Token Sync superseded by ADR 0115 & VM Relay Strategy)
 
 ## Context
 Deploying enterprise inference gateways requires rigorous verification that cannot be satisfied by isolated unit tests alone. The entire inference pipeline spans multiple independent subsystems:
@@ -19,10 +19,10 @@ We implemented a standardized automated verification engine in [`scripts/test-in
 - **Phase 1: Seeded Account & Workspace Substrate**:
   - Initializes `usr_galx_developer_master` and binds to `Developer Master Sovereign Workspace`.
   - Verifies compute wallet balance using `WalletRepository.createOrGetWallet()` and pre-funds via `verifyDepositAndApplyMatch()`.
-- **Phase 1.5: Ingestion of Codex Shard & Fleet Edge Sync**:
+- **Phase 1.5: Ingestion of Codex Shard & Authority Registry**:
   - Reads active OAuth credentials directly from `~/.codex/auth.json`.
   - Registers the shard in GALX credential pool (`codex_openai_mtm_...`).
-  - Automatically synchronizes shard tokens to the live Cloudflare Edge Worker fleet (`https://lumi-edge-worker.notsosuper688651.workers.dev`).
+  - *(Superseded: In earlier iterations, shard tokens were copied to edge KV. ADR 0115 establishes Supabase PostgreSQL as the sole credential authority, and persistent Codex WebSockets are governed exclusively by the Always-On VM Relay or direct native WebSocket).*
 - **Phase 2: Backend GALX API Key Minting**:
   - Mints an authentic gateway key via `GalxCryptoVault.generateGatewayKey()` with embedded SHA-256 checksum (`prefix`, `keyHash`, `checksum`).
   - Registers the key in both BroccoliDB L1 table and PostgreSQL `galx_developer_keys`.

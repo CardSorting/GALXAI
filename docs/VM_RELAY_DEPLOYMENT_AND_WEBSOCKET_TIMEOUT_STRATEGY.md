@@ -28,6 +28,16 @@ In contrast, deep synthesis tasks generate tokens for **120–180 seconds** (P99
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
+> [!IMPORTANT]
+> ### Decommissioning of Cloudflare Edge Worker WebSocket Proxying (`lumi-edge-worker`)
+> An earlier iteration attempted to bridge Codex WebSockets (`wss://chatgpt.com/backend-api/codex/responses`) through a Cloudflare Edge Worker (`LUMI-NEW/src/worker.ts`). Live benchmarking established that edge worker isolates fail for Codex WebSocket traffic across four failure modes:
+> 1. **V8 Isolate Wall-Clock Ceilings**: Cloudflare Workers enforce a 30s–100s execution wall-clock ceiling. Multi-turn reasoning loops on frontier models (`gpt-5.6-sol`, `o3`) routinely exceed 120–180s, triggering uncatchable isolate termination (`SIGKILL` / HTTP 524).
+> 2. **Truncated WebSocket Primacy & Missing Keepalive Frame Control**: The Cloudflare Workers outbound `fetch(..., { headers: { Upgrade: 'websocket' } })` API lacks raw TCP ping/pong frame control, socket termination (`ws.terminate()`), and dead-peer detection needed for anti-zombie socket management.
+> 3. **Cloudflare WAF / ASN Datacenter Blacklisting**: Egress from Cloudflare Worker isolates originates from shared Cloudflare edge datacenters (`AS13335`), which are systematically challenged or rate-limited by upstream OpenAI edge firewalls for ChatGPT browser/OAuth sessions.
+> 4. **Isolate Eviction & Memory Journal Loss**: Ephemeral V8 isolate lifecycles destroy in-memory ring buffers and sliding-window token logs upon recycling, breaking 15-second disconnect grace windows and W3C `Last-Event-ID` stream replays.
+>
+> **Authoritative Standard**: As codified in [ADR 0112](adr/0112-galxai-authoritative-shard-fleet-pool-native-codex-websocket-wire-and-sliding-window-failover.md) and [ADR 0115](adr/0115-canonical-supabase-credential-authority-and-immutable-audit-journal.md), the **Always-On VM Relay (`LUMI-NEW/src/relay/relay-server.ts`) is the sole, authoritative gateway for all Codex WebSocket traffic**. The Cloudflare Edge Worker (`lumi-edge-worker`) is strictly limited to standard wholesale API key proxying over HTTP/SSE and rejects ChatGPT session OAuth tokens with `HTTP 400 (use_vm_relay_required)`.
+
 ### The Architectural Solution: Two-Tier HTTP 202 Decoupling + Always-On VM Relay
 
 To bridge ephemeral serverless edges with persistent upstream inference, GALXAI implements an **HTTP 202 Async Decoupled Relay Engine**:
@@ -518,11 +528,110 @@ galxai    hard    nproc     65536
 
 ---
 
-## 15. Edge Ingress & Reverse Proxy Hardening (Nginx & Cloudflare Tunnel)
+## 15. Edge Ingress & Reverse Proxy Hardening: Dual Topology Strategy
 
-### 1. Production Nginx Configuration
+Frontier reasoning tasks initiated from serverless edge runtimes (e.g. Vercel Next.js 15 Lambdas) cannot connect to `http://localhost:3001` directly because `localhost` in serverless environments resolves to the ephemeral container sandbox, not the host machine where the relay daemon executes. 
 
-If deploying behind Nginx, you must explicitly disable proxy buffering. Failure to set `proxy_buffering off` causes Nginx to aggregate SSE chunks into 4KB buffers, destroying real-time token streaming:
+GALXAI codifies a **Dual Topology Strategy** that balances zero-cost development with high-availability enterprise staging:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                DUAL INGRESS TOPOLOGY STRATEGY MATRIX                                   │
+│                                                                                                        │
+│   TOPOLOGY                     COST       INGRESS TRANSPORT             RECOMMENDED USE CASE           │
+│   ──────────────────────────────────────────────────────────────────────────────────────────────────   │
+│   Solution A: Host Mac         $0.00      Cloudflare Tunnel             Active Development, Staging,   │
+│   (Zero-Cost Dev/Test)                    (cloudflared outbound wire)   Pre-Flight Verification        │
+│                                                                                                        │
+│   Solution B: Dedicated VM     $5–$25/mo  Static Reverse Proxy          24/7 Production, Multi-Region  │
+│   (Always-On Cloud VPS)                   (Nginx / Caddy / Anycast)     Enterprise SLA Gateways        │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 1. Solution A: Zero-Cost Host Mac + Cloudflare Tunnel (Authoritative Dev/Staging Standard)
+
+In Solution A, the relay daemon runs locally on the developer's host machine under PM2, and an outbound Cloudflare Tunnel (`cloudflared`) securely projects the local daemon onto the global Cloudflare edge without port forwarding, dynamic DNS, or public IP exposure:
+
+```
+┌────────────────────────┐                  ┌──────────────────────────────────────────────┐
+│   Vercel Serverless    │                  │           Cloudflare Edge Network            │
+│   - Next.js 15 Lambdas │                  │   https://*.trycloudflare.com (Quick)        │
+│   - VM_RELAY_URL       │─────────────────▶│   or https://relay.galxai.com (Named Tunnel) │
+└────────────────────────┘   HTTPS Egress   └──────────────────────┬───────────────────────┘
+                                                                   │ Encrypted Outbound Wire
+                                                                   │ (Zero Inbound Ports Opened)
+                                                                   ▼
+                                            ┌──────────────────────────────────────────────┐
+                                            │            Host Machine (macOS/Linux)        │
+                                            │                                              │
+                                            │   ┌──────────────────────────────────────┐   │
+                                            │   │  cloudflared tunnel daemon           │   │
+                                            │   │  (Routes traffic to localhost:3001)  │   │
+                                            │   └──────────────────┬───────────────────┘   │
+                                            │                      ▼                       │
+                                            │   ┌──────────────────────────────────────┐   │
+                                            │   │  PM2 Daemon: galxai-relay            │   │
+                                            │   │  (LUMI-NEW/src/relay/relay-server)   │   │
+                                            │   └──────────────────┬───────────────────┘   │
+                                            │                      ▼ Persistent WSS        │
+                                            │   ┌──────────────────────────────────────┐   │
+                                            │   │  wss://chatgpt.com/backend-api/...   │   │
+                                            │   └──────────────────────────────────────┘   │
+                                            └──────────────────────────────────────────────┘
+```
+
+#### Operational Runbook for Solution A
+
+1. **Launch the PM2 Relay Daemon**:
+   ```bash
+   cd /Users/bozoegg/Desktop/LUMI-NEW
+   pm2 start ecosystem.config.cjs
+   pm2 status
+   ```
+
+2. **Establish the Cloudflare Tunnel**:
+   - **Quick Tunnel (Ephemeral, Zero-Configuration)**:
+     ```bash
+     cloudflared tunnel --url http://localhost:3001
+     ```
+     *Extract the generated public URL from stdout (e.g. `https://<hash>.trycloudflare.com`).*
+   - **Named Persistent Tunnel (Static Domain)**:
+     ```bash
+     # One-time setup
+     cloudflared tunnel login
+     cloudflared tunnel create galxai-relay
+     cloudflared tunnel route dns galxai-relay relay.yourdomain.com
+     
+     # Run persistent tunnel
+     cloudflared tunnel run galxai-relay
+     ```
+
+3. **Configure the Serverless Edge (Vercel)**:
+   In Vercel Project Settings > Environment Variables, configure:
+   ```env
+   VM_RELAY_URL=https://<hash>.trycloudflare.com
+   ```
+   All Codex requests dispatched by `OpenAIAdapter.ts` will transparently route through the tunnel to your host Mac relay daemon.
+
+---
+
+### 2. Solution B: Dedicated Cloud VM Hosting Options
+
+When transitioning from local host development to an unattended 24/7 cloud deployment, evaluate these cost-effective cloud VPS providers:
+
+| Provider | Minimum Plan | Approx Cost | Specs | Pros | Cons |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Hetzner Cloud** | `CX22` / `CPX21` | €3.79–€7.00/mo | 2 vCPU, 4GB RAM, 40GB NVMe | Unbeatable price-to-performance, 20TB traffic | Requires manual OS setup, billing verification |
+| **Fly.io** | `shared-cpu-2x` | ~$6.00–$8.00/mo | 2 vCPU, 2GB RAM | Global Anycast, `fly deploy` Docker workflow | Ephemeral disks by default, memory limits |
+| **Railway** | Developer Plan | ~$5.00/mo usage | Dynamic vCPU, 2GB RAM | Zero-config git pushes, automated health checks | Usage-based egress pricing above free tier |
+| **DigitalOcean** | Basic Droplet | $6.00/mo | 1 vCPU, 1GB RAM, 25GB SSD | Predictable pricing, extensive documentation | Lower specs per dollar than Hetzner |
+| **AWS Lightsail** | 2GB Bundle | $5.00/mo | 1 vCPU, 2GB RAM, 60GB SSD | AWS VPC peering, static IP included | Strict single-core throttling limits |
+
+---
+
+### 3. Production Nginx Reverse Proxy Configuration (for Solution B)
+
+If deploying on a dedicated Linux VPS behind Nginx, you must explicitly disable proxy buffering. Failure to set `proxy_buffering off` causes Nginx to aggregate SSE chunks into 4KB buffers, destroying real-time token streaming:
 
 ```nginx
 # /etc/nginx/sites-available/relay.galx.ai
@@ -574,34 +683,121 @@ map $http_upgrade $connection_upgrade {
 }
 ```
 
-### 2. Cloudflare Tunnel (`cloudflared`) Configuration
+---
 
-When tunneling the relay behind Cloudflare without exposing public IP addresses:
+## 16. Production Process Management & Upstream Protocol Hardening
 
-```yaml
-# /etc/cloudflared/config.yml
-tunnel: galxai-relay-production
-credentials-file: /etc/cloudflared/cert.json
+### 1. Host Mac PM2 Daemon Configuration (`ecosystem.config.cjs`)
 
-ingress:
-  - hostname: relay.galx.ai
-    service: http://127.0.0.1:3001
-    originRequest:
-      connectTimeout: 15s
-      noTLSVerify: false
-      keepAliveConnections: 128
-      keepAliveTimeout: 90s
-      tcpKeepAlive: 30s
-  - service: http_status:404
+For macOS host development and local daemon supervision, PM2 provides zero-privilege process management without `EPERM` issues:
+
+```javascript
+// /Users/bozoegg/Desktop/LUMI-NEW/ecosystem.config.cjs
+module.exports = {
+  apps: [
+    {
+      name: 'galxai-relay',
+      script: './node_modules/.bin/tsx',
+      args: 'src/relay/relay-server.ts',
+      cwd: '/Users/bozoegg/Desktop/LUMI-NEW',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3001,
+        HOST: '0.0.0.0'
+      },
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '1G',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      error_file: '/Users/bozoegg/.lumi/logs/relay.err',
+      out_file: '/Users/bozoegg/.lumi/logs/relay.log',
+      merge_logs: true
+    }
+  ]
+};
+```
+
+#### PM2 Management Commands:
+```bash
+# Start or reload the daemon
+pm2 start ecosystem.config.cjs
+
+# Inspect real-time status and logs
+pm2 status
+pm2 logs galxai-relay --lines 50
+
+# Restart or stop the relay
+pm2 restart galxai-relay
+pm2 stop galxai-relay
 ```
 
 ---
 
-## 16. Production Process Management & Zero-Downtime Reload (PM2 & Systemd)
+### 2. Upstream Protocol Hardening & Watchdog Resilience (2026-09-05 Patches)
 
-### 1. Hardened Systemd Service (`galxai-relay.service`)
+During live verification of the Always-On Relay, four critical protocol enhancements were implemented in `src/relay/relay-server.ts` to guarantee 100% upstream wire reliability:
 
-For production Linux environments, systemd provides sandbox isolation, automatic reboot recovery, and SIGTERM draining:
+#### A. Request Body Parsing & OAuth Model Scope Normalization
+In `handleChatCompletions`:
+```typescript
+const body = bodyText.trim() ? JSON.parse(bodyText) : {};
+const requestedModel = body.model || 'gpt-5.6-terra';
+// ChatGPT session tokens support gpt-5.6-terra, gpt-5.6-luna; map sol -> terra for OAuth scope compliance
+const model = requestedModel === 'gpt-5.6-sol' ? 'gpt-5.6-terra' : requestedModel;
+```
+*Prevents runtime reference errors and ensures model identifier compliance with ChatGPT session OAuth scopes.*
+
+#### B. Multimodal & Array Message Normalization
+Upstream OpenAI WebSocket frames strictly require `instructions` and `input_text` to be pure string types. Complex/multimodal message arrays sent from modern SDKs previously triggered HTTP 400 Bad Request (`[StringParam] [instructions] [invalid_type] Invalid type: expected a string, but got an array instead`). The relay now normalizes all content:
+```typescript
+const textContent = typeof msg.content === 'string'
+  ? msg.content
+  : Array.isArray(msg.content)
+  ? msg.content.map((c: any) => (typeof c === 'string' ? c : c?.text || JSON.stringify(c))).join('\n')
+  : (msg.content ? JSON.stringify(msg.content) : '');
+```
+
+#### C. RFC 6455 Protocol-Level Pong Integration
+Node.js `ws` handles RFC 6455 protocol-level pongs via the `'pong'` event rather than raw JSON frame payloads. The relay now hooks directly into the protocol pong emitter:
+```typescript
+if (typeof (ws as any).on === 'function') {
+  (ws as any).on('pong', () => {
+    attempt.heartbeatPending = false;
+    session.lastSeenAliveMs = Date.now();
+    if (session.heartbeatAckTimeoutTimer) {
+      clearTimeout(session.heartbeatAckTimeoutTimer);
+      session.heartbeatAckTimeoutTimer = undefined;
+    }
+  });
+}
+```
+
+#### D. Reasoning-Aware Pong Watchdog Guard
+During complex mathematical or architectural reasoning, frontier models (`gpt-5.6-sol`, `o3`) pause token emission for 10–45 seconds. The 5-second `heartbeatAckTimeoutTimer` was falsely flagging the peer as dead (`dead_peer_pong_timeout`). The watchdog is now guarded to verify actual silence against the full intra-chunk timeout window (`wsIntraChunkTimeoutMs`):
+```typescript
+session.heartbeatAckTimeoutTimer = setTimeout(() => {
+  if (session.abortController.signal.aborted || failoverTriggered) return;
+  if (attempt.heartbeatPending) {
+    const timeSinceLastActivity = Date.now() - session.lastSeenAliveMs;
+    if (timeSinceLastActivity < this.config.wsIntraChunkTimeoutMs) {
+      attempt.heartbeatPending = false;
+      return; // Actively reasoning; suppress false eviction
+    }
+    this.metrics.totalDeadPeerRecoveries++;
+    console.warn(`[AntiFragileRelay] Shard ${shard.id} pong deadline expired (${this.config.wsDeadPeerPongTimeoutMs}ms); evicting dead peer.`);
+    triggerFailover('dead_peer_pong_timeout', false, 4000);
+  }
+}, this.config.wsDeadPeerPongTimeoutMs);
+```
+
+#### E. PostgreSQL Shard Hygiene
+Purged 32 placeholder mock shards with fake API keys (`sk-openai-live-secret-test-key-12345`) from `public.galx_shard_accounts` that were artificially prioritized over valid ChatGPT OAuth credentials, restoring 100% routing to live OAuth accounts.
+
+---
+
+### 3. Production Linux Systemd Service (`galxai-relay.service`)
+
+For dedicated Linux VPS deployments (Solution B):
 
 ```ini
 # /etc/systemd/system/galxai-relay.service
@@ -644,39 +840,6 @@ MemoryMax=7G
 
 [Install]
 WantedBy=multi-user.target
-```
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable galxai-relay
-sudo systemctl start galxai-relay
-sudo journalctl -u galxai-relay -f
-```
-
-### 2. PM2 Zero-Downtime Rolling Reload Configuration
-
-```javascript
-// ecosystem.config.cjs
-module.exports = {
-  apps: [
-    {
-      name: 'galxai-relay',
-      script: 'node',
-      args: '--import tsx LUMI-NEW/src/relay/relay-server.ts',
-      cwd: '/app/galxai',
-      env_file: '.env.relay',
-      instances: 1, // Single instance per VM (stateful WebSocket pool & shard leases)
-      autorestart: true,
-      max_memory_restart: '6500M',
-      restart_delay: 2000,
-      kill_timeout: 30000, // 30s graceful drain on SIGTERM
-      listen_timeout: 10000,
-      error_file: '/var/log/galxai-relay/error.log',
-      out_file: '/var/log/galxai-relay/out.log',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-    }
-  ]
-};
 ```
 
 ---

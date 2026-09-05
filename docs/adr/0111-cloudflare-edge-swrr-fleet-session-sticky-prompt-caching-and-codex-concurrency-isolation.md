@@ -96,12 +96,12 @@ ADR 0115 removes automatic long-lived token copies to edge KV. Edge transports m
 
 ---
 
-## 4. Architectural Amendment & Scope Clarification (See ADR 0112)
+## 4. Architectural Amendment & Scope Clarification (See ADR 0112 & ADR 0115)
 
-Subsequent live testing revealed that ChatGPT session tokens (Client ID `app_EMoamEEZ73f0CkXaXp7hrann`) carry only `openid profile email offline_access` scopes and fail with `missing_scope: model.request` when forwarded over HTTP to `https://api.openai.com/v1/chat/completions`.
+Subsequent live testing revealed that ChatGPT session tokens (Client ID `app_EMoamEEZ73f0CkXaXp7hrann`) carry only `openid profile email offline_access` scopes and fail with `missing_scope: model.request` when forwarded over HTTP to `https://api.openai.com/v1/chat/completions`. Furthermore, attempts to bridge persistent Codex WebSockets (`wss://chatgpt.com/backend-api/codex/responses`) inside Cloudflare Edge Workers were decommissioned due to V8 isolate wall-clock ceilings (100s) and lack of raw TCP frame/keepalive control.
 
 Consequently, transport responsibility is bifurcated:
-- **Cloudflare Edge Gateway (`api.galx.ai`)**: Governs developer API key ingress, rate limiting, R2 asset acceleration, and wholesale standard OpenAI API keys.
-- **GALXAI Authoritative Shard Pool & Native WebSocket Wire**: Authoritatively holds and governs the multi-account ChatGPT session fleet in `/Users/bozoegg/Desktop/GALXAI`, routing traffic directly via native WebSocket (`wss://chatgpt.com/backend-api/codex/responses`) or autonomous relay containers.
+- **Cloudflare Edge Gateway (`api.galx.ai` / `lumi-edge-worker`)**: Governs developer API key ingress, rate limiting, R2 asset acceleration, and standard wholesale provider keys (`OPENAI_API_KEY`, `XAI_API_KEY`) over HTTP/SSE. Explicitly rejects ChatGPT session OAuth tokens (`HTTP 400 use_vm_relay_required`).
+- **GALXAI Authoritative Shard Pool & Always-On VM Relay (`LUMI-NEW/src/relay/relay-server.ts`)**: Authoritatively holds and governs the multi-account ChatGPT session fleet in `/Users/bozoegg/Desktop/GALXAI`, routing traffic directly via native WebSocket (`wss://chatgpt.com/backend-api/codex/responses`) or the Always-On VM Relay daemon with BroccoliDB state journaling and W3C `Last-Event-ID` resume.
 
-Full specifications are formalized in **[ADR 0112: GALXAI Authoritative Shard Fleet Pool, Native Codex WebSocket Wire & Sliding-Window 429 Failover](0112-galxai-authoritative-shard-fleet-pool-native-codex-websocket-wire-and-sliding-window-failover.md)**.
+Full specifications are formalized in **[ADR 0112: GALXAI Authoritative Shard Fleet Pool, Native Codex WebSocket Wire & Sliding-Window 429 Failover](0112-galxai-authoritative-shard-fleet-pool-native-codex-websocket-wire-and-sliding-window-failover.md)** and **[VM Relay Deployment & WebSocket Timeout Strategy](../VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md)**.

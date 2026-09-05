@@ -442,7 +442,7 @@ flowchart TD
 
     subgraph TransportExecution["Real Wire Execution (Zero Fallbacks)"]
         DirectWS["OpenAIAdapter: Native Codex WebSocket<br>wss://chatgpt.com/backend-api/codex/responses<br>• ChatGPT-Account-Id & X-Galx-Shard-Id<br>• Intra-Chunk Activity Timer (refreshChunkTimer)"]
-        Relay["Autonomous Headless Relay Microservice<br>LUMI-NEW/src/relay/relay-server.ts<br>• 24/7 Persistent Headless WebSockets<br>• Residential Header & Anycast Proxying"]
+        Relay["Always-On Relay Daemon<br>LUMI-NEW/src/relay/relay-server.ts<br>• 24/7 Persistent Codex WebSockets<br>• Cloudflare Tunnel Ingress & PM2 Supervision<br>• Decoupled HTTP 202 Ingress (ADR 0120)"]
     end
 
     NextIngress --> Auth --> Seat --> Hold --> Compactor
