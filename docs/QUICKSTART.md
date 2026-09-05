@@ -8,7 +8,7 @@ Add AI capabilities to your project in under 30 seconds with **wholesale rates (
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│ 1. React / Next.js -> Drop in <GalxImage /> & <GalxChat />
+│ 1. React / Next.js -> Use the SDK or <GalxImage />
 │ 2. Existing Code   -> Add `import 'galxai/patch'`
 │ 3. AI Coding Agent -> Run `npx galxai skills`
 └────────────────────────────────────────────────────────┘
@@ -49,24 +49,7 @@ export function Hero() {
 }
 ```
 
-### B. Streaming Chat Box (`<GalxChat />`)
-A complete multi-turn streaming chat interface in one line of JSX:
-
-```tsx
-import { GalxChat } from 'galxai/ui';
-
-export function ChatAssistant() {
-  return (
-    <GalxChat
-      model="gpt-5.6-sol"
-      placeholder="Ask anything..."
-      className="h-[500px]"
-    />
-  );
-}
-```
-
-### C. Direct Next.js 15 Server Action
+### B. Direct Next.js 15 Server Action
 Invoke AI functions directly from your client components with **zero route files**:
 
 ```tsx
@@ -231,6 +214,5 @@ console.log(`5-Hour Refresh Status: ${telemetry.fiveHourRefreshText}`); // "full
 console.log(`Weekly Limit Remaining: ${telemetry.weeklyLimitRemainingPct}%`);
 console.log(`Weekly Refresh Status: ${telemetry.weeklyRefreshText}`); // "fully refresh in 3 days"
 ```
-
 
 

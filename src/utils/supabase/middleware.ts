@@ -71,7 +71,6 @@ function applySecurityHeaders(response: NextResponse, pathname: string): NextRes
   // Standard enterprise defense-in-depth headers
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('X-Frame-Options', 'SAMEORIGIN');
-  response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
@@ -105,14 +104,17 @@ export const updateSession = async (request: NextRequest) => {
   const method = request.method;
   const pathname = request.nextUrl.pathname;
 
-  // 1. Sub-millisecond Edge CORS preflight termination (zero serverless lambda cold-starts)
-  if (method === 'OPTIONS') {
+  // Public API-key endpoints may be called cross-origin. First-party /api routes
+  // remain same-origin and reach their route-specific policy instead of inheriting
+  // a credentialed wildcard CORS response.
+  if (method === 'OPTIONS' && pathname.startsWith('/v1/')) {
     return new NextResponse(null, {
       status: 204,
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
-        'Access-Control-Allow-Headers': 'Authorization, Content-Type, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version, x-galx-key, x-api-key, dpop',
+        'Access-Control-Allow-Headers': 'Authorization, Content-Type, Accept, X-Galx-Async, X-Galx-Queue, X-Galx-Webhook-Url, X-Galx-Priority, X-Galx-Delay-Ms, X-Galx-Session-Id, X-Galx-Session-Mode, X-Galx-Turn-Id, X-Galx-Protocol-Version, X-Deployment-Id, Idempotency-Key, Prefer, baggage, sentry-trace',
+        'Access-Control-Expose-Headers': 'X-Galx-Request-Id, X-Galx-Conversation-Id, X-Galx-Session-Mode, X-Galx-Turn-Id, X-Galx-Protocol-Version',
         'Access-Control-Max-Age': '86400',
         'X-Edge-FastPath': 'cors-preflight',
         'Server-Timing': 'edge-cors;dur=0.1'

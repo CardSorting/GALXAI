@@ -1,4 +1,4 @@
-import type { ChatMessage } from '../../components/chat/ChatMessageItem';
+import type { PersistedChatMessage as ChatMessage } from './GalxChatPersistenceContracts';
 import {
   ChatRequestValidationError,
   normalizeChatResourceId,

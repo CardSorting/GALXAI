@@ -26,7 +26,7 @@ The developer runs their monthly token volume through the [GALXAI ROI Calculator
 
 ### Step 2: Instant $5 Free Compute Trial
 - Developers claim an instant live API key funded with a **$5.00 Free Introductory Compute Grant**.
-- They test latency in the [GALXAI Playground](https://galx.ai/playground) or terminal (`npx galxai "Hello"`).
+- They choose a model in the [GALXAI model catalog](https://galx.ai/models), create a trial key, and verify latency from their terminal (`npx galxai "Hello"`) or the bounded API request inspector. The activation goal is a working external integration, not continued use of a hosted prompt surface.
 
 ### Step 3: The 1-Line Drop-In Patch
 No prompt rewrites. No SDK migration. Add one line at application startup:

@@ -8,6 +8,8 @@
 * **Impact**: context isolation, idempotency, persistence, developer ergonomics
 * **Migrations**: None; existing owner-scoped `chat_conversations` and `chat_messages` remain authoritative
 
+ADR 0119 later retired the hosted browser chat UI. The session identity, persistence, synchronization, and SDK isolation contracts in this ADR remain accepted infrastructure for explicit durable inference sessions.
+
 ## 1. Context
 
 GALXAI correctly reused a single authenticated API client, connection pool, and model gateway for many requests. Some call paths then treated that shared client or the currently selected browser state as if it were a conversation. This confused transport reuse with logical continuity.
@@ -64,7 +66,7 @@ The BroccoliDB projection maintains pending session records and message snapshot
 
 ETags are scoped by projection query, since `/api/chat/sync?activeSessionId=A` and `...=B` have different representations. Async hydration results include their resolved `activeSessionId` and are applied only if that session is still active and the load generation is current. Switching sessions aborts the old stream.
 
-Before the web chat sends `session_mode=continue`, it flushes the owning session so the server never observes a continuation before its authoritative parent exists.
+Before a downstream browser client sends `session_mode=continue`, it flushes the owning session so the server never observes a continuation before its authoritative parent exists. ADR 0119 retires GALXAI's hosted chat UI without changing this integration contract.
 
 ## 3. Invariants
 

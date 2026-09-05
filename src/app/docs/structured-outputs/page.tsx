@@ -4,15 +4,15 @@ import { constructMetadata } from '@/lib/seo/metadata';
 import { JsonLd, createTechArticleSchema, createBreadcrumbSchema } from '@/lib/seo/jsonld';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Guaranteed Structured JSON Outputs Guide — Zod & Pydantic',
-  description: 'Enforce 100% adherence to complex JSON Schemas, Pydantic models, and Zod definitions with zero missing keys, zero syntax errors, and zero hallucinations.',
+  title: 'Structured Outputs with JSON Schema',
+  description: 'Request schema-constrained JSON, validate it with Zod or Pydantic, and handle validation failures.',
   canonicalPath: '/docs/structured-outputs',
   keywords: [
     'Structured Outputs OpenAI',
     'Zod Schema Enforcement LLM',
     'Pydantic AI Response Format',
     'JSON Schema Constrained Decoding',
-    'Guaranteed JSON Parsing AI',
+    'JSON Schema Validation',
   ],
 });
 
@@ -21,8 +21,8 @@ export default function StructuredOutputsDocsPage() {
     '@context': 'https://schema.org',
     '@graph': [
       createTechArticleSchema({
-        headline: 'Guaranteed Structured JSON Outputs Guide',
-        description: 'Complete tutorial on constrained decoding with Zod, Pydantic, and strict JSON schemas on GALXAI.',
+        headline: 'GALXAI Structured Outputs Guide',
+        description: 'Request and validate schema-constrained outputs with Zod, Pydantic, and JSON Schema.',
         path: '/docs/structured-outputs',
       }),
       createBreadcrumbSchema([

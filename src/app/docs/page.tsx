@@ -4,8 +4,8 @@ import { constructMetadata } from '@/lib/seo/metadata';
 import { JsonLd, createTechArticleSchema, createBreadcrumbSchema } from '@/lib/seo/jsonld';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Developer Documentation & Universal API Quickstart Center',
-  description: 'Complete documentation for the GALXAI Universal AI Gateway. Learn how to connect in 30 seconds using Python, TypeScript, Cursor IDE, Windsurf, or cURL with 25%–40% wholesale savings.',
+  title: 'Developer Documentation',
+  description: 'Choose a model, create an API key, and integrate GALXAI through an OpenAI-compatible API, SDK, IDE, or agent.',
   canonicalPath: '/docs',
   keywords: [
     'AI Gateway Documentation',
@@ -23,8 +23,8 @@ export default function DocsPage() {
     '@context': 'https://schema.org',
     '@graph': [
       createTechArticleSchema({
-        headline: 'GALXAI Universal AI Gateway Developer Documentation',
-        description: 'Complete documentation, SDK recipes, and quickstart guides for connecting to the GALXAI model router.',
+        headline: 'GALXAI Developer Documentation',
+        description: 'Implementation guides and API references for connecting to the GALXAI inference platform.',
         path: '/docs',
       }),
       createBreadcrumbSchema([

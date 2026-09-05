@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { AlertTriangle, ArrowRight, ShieldCheck, Terminal, Bug, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Terminal, Bug, CheckCircle2 } from 'lucide-react';
 import { ERROR_TROUBLESHOOT_DATA } from '@/lib/data/errorsData';
 import { constructMetadata } from '@/lib/seo/metadata';
 import { JsonLd, createTopicHubGraph } from '@/lib/seo/jsonld';
@@ -42,7 +42,7 @@ export default function ErrorCodesHubPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#07080d] text-zinc-100 flex flex-col font-sans selection:bg-cyan-500/30">
+    <div className="min-h-screen bg-[#07080d] text-white flex flex-col font-sans selection:bg-cyan-500/30">
       <JsonLd data={hubSchema} />
       <Navigation />
 
@@ -55,17 +55,12 @@ export default function ErrorCodesHubPage() {
           ]}
         />
 
-        {/* Header & Hero */}
-        <header className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono font-bold tracking-wide">
-            <AlertTriangle className="w-4 h-4 text-rose-400" />
-            <span>DEVELOPER TROUBLESHOOTING DIRECTORY</span>
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight">
-            Error Codes &amp; <span className="bg-gradient-to-r from-rose-400 via-pink-400 to-amber-400 bg-clip-text text-transparent">Resolution Runbooks</span>
+        <header className="mb-10 max-w-3xl space-y-4">
+          <h1 className="text-4xl font-semibold tracking-[-0.03em] text-white sm:text-5xl">
+            Error resolution
           </h1>
-          <p className="text-base sm:text-lg text-zinc-400 leading-relaxed">
-            Step-by-step diagnostics, root-cause analyses, and mitigation code patterns for resolving HTTP status errors and upstream model timeouts.
+          <p className="text-base leading-7 text-zinc-400">
+            Diagnose API status errors, timeouts, and invalid requests.
           </p>
         </header>
 

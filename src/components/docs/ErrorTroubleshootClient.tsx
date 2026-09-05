@@ -20,9 +20,6 @@ import {
   ChevronUp,
   Terminal,
 } from 'lucide-react';
-import { ShareButton } from '@/components/common/ShareButton';
-import { TrustSeals } from '@/components/common/TrustSeals';
-import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import type { ErrorTroubleshootItem } from '@/lib/data/errorsData';
 import { ERROR_TROUBLESHOOT_DATA } from '@/lib/data/errorsData';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
@@ -65,12 +62,6 @@ export function ErrorTroubleshootClient({ errorItem }: ErrorTroubleshootClientPr
               <AlertTriangle className="w-3.5 h-3.5" />
               <span>HTTP {errorItem.httpStatus} • {errorItem.badge}</span>
             </div>
-            <ShareButton
-              variant="pill"
-              label="Share Fix"
-              title={errorItem.title}
-              description={errorItem.description}
-            />
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
@@ -199,11 +190,9 @@ export function ErrorTroubleshootClient({ errorItem }: ErrorTroubleshootClientPr
         </section>
 
         {/* Consumer-Grade Trust Seals */}
-        <TrustSeals />
       </main>
 
       {/* Floating Conversion Dock */}
-      <FloatingConversionDock />
     </div>
   );
 }

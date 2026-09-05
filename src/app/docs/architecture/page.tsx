@@ -10,14 +10,11 @@ import {
   Zap,
   Bot,
 } from 'lucide-react';
-import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
-import { TrustSeals } from '@/components/common/TrustSeals';
-import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import { constructMetadata } from '@/lib/seo/metadata';
 import { JsonLd, createTechArticleSchema, createBreadcrumbSchema } from '@/lib/seo/jsonld';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Rate Governor & Failover Architecture — Sub-15ms Substrate',
+  title: 'Routing, Rate Governance, and Failover Architecture',
   description: 'Deep architectural dive into continuous token-bucket calculus, 4-state circuit breaker FSM, TASD swarm dispersion, and HKDF-SHA256 authenticated envelope encryption.',
   canonicalPath: '/docs/architecture',
   keywords: [
@@ -73,13 +70,13 @@ export default function ArchitectureDocPage() {
           </h1>
 
           <p className="text-sm text-zinc-300 max-w-2xl leading-relaxed">
-            A comprehensive technical specification of GALXAI&apos;s sub-15ms router substrate: token-bucket rate calculus, 2-phase reservation settlement, 4-state circuit breakers, and AES-256-GCM envelope vault.
+            The request path from authenticated ingress through rate governance, routing, provider execution, metering, and response delivery.
           </p>
 
           <DocsSubNav />
         </div>
 
-        {/* Section 1: Sub-15ms Anycast Ingestion */}
+        {/* Anycast ingestion */}
         <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -97,8 +94,8 @@ export default function ArchitectureDocPage() {
 
           <div className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-zinc-300 border border-white/5 space-y-2 overflow-x-auto">
             <div className="text-zinc-500">// Edge Ingestion Pipeline</div>
-            <div>1. Client Request → Anycast DNS Routing (&lt;10ms)</div>
-            <div>2. Edge Worker: SHA-256 Key Verification via In-Memory Bloom Filter (&lt;0.8ms)</div>
+            <div>1. Client Request → Anycast DNS Routing</div>
+            <div>2. Edge Worker → Key Verification and Admission</div>
             <div>3. Prompt Prefix Match: RAM Cache Hash Lookup (&lt;0.4ms)</div>
             <div>4. SSE Streaming Tunnel: Zero-Copy Token Passthrough</div>
           </div>
@@ -185,7 +182,7 @@ export default function ArchitectureDocPage() {
               <h2 className="text-lg font-bold text-white font-mono">4. 4-State Circuit Breaker &amp; Canary Warming</h2>
             </div>
             <span className="px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-300 text-[10px] font-mono font-bold">
-              Sub-15ms Failover
+              Circuit-breaker failover
             </span>
           </div>
 
@@ -239,14 +236,11 @@ export default function ArchitectureDocPage() {
         </section>
 
         {/* Founding Cohort Rate Lock Ribbon */}
-        <RateLockRibbon />
 
         {/* Consumer-Grade Trust Seals */}
-        <TrustSeals />
       </main>
 
       {/* Floating Conversion Dock */}
-      <FloatingConversionDock />
     </div>
   );
 }

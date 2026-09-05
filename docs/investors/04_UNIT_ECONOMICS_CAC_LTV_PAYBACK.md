@@ -98,4 +98,4 @@ Cohort Month 24: $18,400 (184% NDR - Enterprise accounts federating all internal
 
 ### Churn Containment:
 - **Zero Lock-In Paradox**: Because switching to GALXAI requires zero code changes (`import 'galxai/patch'` or `base_url`), onboarding friction is near zero.
-- **Embedded Declarative Lock-In**: Once frontend components (`<GalxImage />`, `<GalxChat />`, Next.js Server Actions) are deployed into production repositories, switching costs increase naturally while developer satisfaction remains high.
+- **Infrastructure Integration Depth**: Once routing policies, telemetry, budgets, and Server Actions are deployed into production repositories, switching costs increase naturally while developer satisfaction remains high.

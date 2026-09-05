@@ -25,9 +25,17 @@ import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
+type ModelCategory = 'all' | 'llm' | 'image';
+
+const MODEL_CATEGORY_TABS: ReadonlyArray<{ id: ModelCategory; label: string }> = [
+  { id: 'all', label: 'All models' },
+  { id: 'llm', label: 'Language & reasoning' },
+  { id: 'image', label: 'Image generation' },
+];
+
 export function ModelsClient() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<'all' | 'llm' | 'image'>('all');
+  const [activeCategory, setActiveCategory] = useState<ModelCategory>('all');
   const [selectedTierMultiplier, setSelectedTierMultiplier] = useState(1.0);
   const [tierLabel, setTierLabel] = useState('Standard Rates');
   const [copiedModelId, setCopiedModelId] = useState<string | null>(null);
@@ -48,6 +56,23 @@ export function ModelsClient() {
     await safeCopyToClipboard(id);
     setCopiedModelId(id);
     setTimeout(() => setCopiedModelId(null), 2000);
+  };
+
+  const handleCategoryKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    currentIndex: number,
+  ) => {
+    let nextIndex: number | undefined;
+    if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % MODEL_CATEGORY_TABS.length;
+    if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + MODEL_CATEGORY_TABS.length) % MODEL_CATEGORY_TABS.length;
+    if (event.key === 'Home') nextIndex = 0;
+    if (event.key === 'End') nextIndex = MODEL_CATEGORY_TABS.length - 1;
+    if (nextIndex === undefined) return;
+
+    event.preventDefault();
+    const nextCategory = MODEL_CATEGORY_TABS[nextIndex].id;
+    setActiveCategory(nextCategory);
+    document.getElementById(`model-tab-${nextCategory}`)?.focus();
   };
 
   return (
@@ -110,37 +135,38 @@ export function ModelsClient() {
           </div>
 
           {/* Category Filter */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-white/5 text-xs font-semibold self-stretch lg:self-auto justify-center">
-            <button
-              onClick={() => setActiveCategory('all')}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                activeCategory === 'all'
-                  ? 'bg-indigo-600/40 text-indigo-300 border border-indigo-500/40 font-bold shadow-sm'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              All ({FRONTEND_VISIBLE_MODELS.length})
-            </button>
-            <button
-              onClick={() => setActiveCategory('llm')}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                activeCategory === 'llm'
-                  ? 'bg-indigo-600/40 text-indigo-300 border border-indigo-500/40 font-bold shadow-sm'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              LLM & Reasoning ({FRONTEND_VISIBLE_MODELS.filter(m => m.category === 'llm').length})
-            </button>
-            <button
-              onClick={() => setActiveCategory('image')}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                activeCategory === 'image'
-                  ? 'bg-indigo-600/40 text-indigo-300 border border-indigo-500/40 font-bold shadow-sm'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              Visual Synthesis ({FRONTEND_VISIBLE_MODELS.filter(m => m.category === 'image').length})
-            </button>
+          <div
+            role="tablist"
+            aria-label="Model types"
+            className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-white/5 text-xs font-semibold self-stretch lg:self-auto justify-center overflow-x-auto"
+          >
+            {MODEL_CATEGORY_TABS.map((tab, tabIndex) => {
+              const count = tab.id === 'all'
+                ? FRONTEND_VISIBLE_MODELS.length
+                : FRONTEND_VISIBLE_MODELS.filter((model) => model.category === tab.id).length;
+              const selected = activeCategory === tab.id;
+
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  id={`model-tab-${tab.id}`}
+                  aria-selected={selected}
+                  aria-controls="model-catalog-grid"
+                  tabIndex={selected ? 0 : -1}
+                  onClick={() => setActiveCategory(tab.id)}
+                  onKeyDown={(event) => handleCategoryKeyDown(event, tabIndex)}
+                  className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07090e] ${
+                    selected
+                      ? 'bg-indigo-600/40 text-indigo-200 border border-indigo-500/40 font-bold shadow-sm'
+                      : 'text-zinc-300 hover:text-white hover:bg-white/5 border border-transparent'
+                  }`}
+                >
+                  {tab.label} ({count})
+                </button>
+              );
+            })}
           </div>
 
           {/* Live Volume Tier Selector */}
@@ -165,7 +191,13 @@ export function ModelsClient() {
         </div>
 
         {/* Models Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          id="model-catalog-grid"
+          role="tabpanel"
+          aria-labelledby={`model-tab-${activeCategory}`}
+          aria-live="polite"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
           {filteredModels.map((model) => {
             const isImage = model.category === 'image';
             const detailHref = `/models/${model.id.replace('/', '-')}`;
@@ -190,9 +222,11 @@ export function ModelsClient() {
                             {model.id}
                           </Link>
                           <button
+                            type="button"
                             onClick={() => handleCopyModel(model.id)}
                             title="Copy Model ID"
-                            className="p-1 rounded-md bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-white transition-all cursor-pointer"
+                            aria-label={`Copy ${model.id} model ID`}
+                            className="p-1 rounded-md bg-white/5 hover:bg-white/15 text-zinc-300 hover:text-white transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
                           >
                             {copiedModelId === model.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                           </button>
@@ -264,6 +298,19 @@ export function ModelsClient() {
               </div>
             );
           })}
+          {filteredModels.length === 0 && (
+            <div className="md:col-span-2 lg:col-span-3 rounded-2xl border border-white/10 bg-black/20 px-6 py-12 text-center">
+              <h2 className="text-base font-bold text-white">No models match that search</h2>
+              <p className="mt-2 text-sm text-zinc-300">Try a model name, provider, or clear the search field.</p>
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="mt-5 rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+              >
+                Clear search
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Consumer Trust Seals */}

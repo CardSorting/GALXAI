@@ -63,6 +63,10 @@
       "types": "./src/sdk/agent.ts",
       "default": "./src/sdk/agent.ts"
     },
+    "./browser-agent": {
+      "types": "./src/sdk/browser-agent.ts",
+      "default": "./src/sdk/browser-agent.ts"
+    },
     "./execution": {
       "types": "./src/sdk/execution.ts",
       "default": "./src/sdk/execution.ts"
@@ -177,7 +181,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint src next.config.ts",
     "lint:design": "npx -y impeccable detect src",
     "design:health": "tsx scripts/verify-design-health.ts",
     "design:hints": "tsx scripts/verify-design-health.ts --hints",
@@ -213,7 +217,7 @@
     "test:router": "tsx scripts/validate-galxai-router.ts",
     "test:chat:hardening": "node --import tsx scripts/test-chat-context-hardening.ts",
     "test:sessions": "node --import tsx scripts/test-agent-session-isolation.ts",
-    "test:chat:sync-isolation": "node --import tsx scripts/test-chat-sync-session-isolation.ts",
+    "test:browser-agent": "node --import tsx scripts/test-browser-agent-client.ts",
     "test:governance": "node --import tsx scripts/validate-spend-governance.ts",
     "test:broccolidb:hardening": "node --import tsx scripts/test-broccolidb-production-hardening.ts",
     "test:broccolidb:backend-invariants": "node --import tsx scripts/test-broccolidb-backend-invariants.ts",
@@ -245,11 +249,11 @@
     "db:audit:tenant-authority": "node --env-file-if-exists=.env.local --import tsx scripts/audit-tenant-authority-live.ts",
     "db:migrate": "node --env-file-if-exists=.env.local --import tsx scripts/manage-migrations.ts --apply",
     "db:dry-run": "tsx scripts/manage-migrations.ts --dry-run",
-    "vercel:verify": "tsx scripts/verify-vercel-readiness.ts",
+    "vercel:verify": "node --import tsx scripts/verify-vercel-readiness.ts",
     "vault:populate": "tsx scripts/populate-vault-secrets.ts",
     "deploy:check": "npm run vercel:verify && npm run design:health && npm run lint && npm run build",
     "playbook": "tsx scripts/run-lifecycle-playbook.ts",
-    "vercel:smoke": "tsx scripts/verify-deployment-smoke.ts",
+    "vercel:smoke": "node --import tsx scripts/verify-deployment-smoke.ts",
     "vercel:env:sync": "tsx scripts/sync-vercel-env.ts",
     "vercel:env:print": "tsx scripts/sync-vercel-env.ts --print-cli",
     "vercel:deploy": "vercel",

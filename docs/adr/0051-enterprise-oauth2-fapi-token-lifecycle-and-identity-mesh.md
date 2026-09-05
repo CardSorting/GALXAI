@@ -21,7 +21,7 @@ We designed and implemented an enterprise-grade, zero-trust **OAuth 2.0 / 2.1, O
 1. **Forensic Purge of Synthetic Fallback Keys**:
    - Strictly requires real provider authentication via RFC 7636 PKCE OAuth or validated developer keys.
    - Rejects unauthenticated requests with structured `MISSING_PROVIDER_CREDENTIALS` error payloads.
-   - Isolates unauthenticated playground traffic into transient, zero-persistence `guest` sandboxes without polluting the credential pool.
+   - Rejects unauthenticated diagnostic requests with structured errors rather than creating synthetic credentials or a guest content experience. ADR 0119 limits any hosted request inspector to platform diagnostics.
 
 2. **RFC 7636 PKCE & Anti-Replay State Nonce Engine**:
    - Generates high-entropy S256 code challenge pairs (`code_verifier` with 32-byte cryptographically secure random bytes).

@@ -683,7 +683,7 @@ The SDK provides an ambient connection layer requiring **zero route files**, **z
 
 ### A. Declarative React UI Primitives (`@galxai/sdk/ui`)
 ```tsx
-import { GalxImage, GalxChat } from '@galxai/sdk/ui';
+import { GalxImage } from '@galxai/sdk/ui';
 
 // 1. Self-hydrating, interactive visual synthesis:
 export function Hero() {
@@ -695,11 +695,6 @@ export function Hero() {
       className="w-full h-96 rounded-2xl"
     />
   );
-}
-
-// 2. Turnkey streaming chat widget:
-export function SupportDrawer() {
-  return <GalxChat model="gpt-5.6-sol" placeholder="How can we assist?" />;
 }
 ```
 
@@ -847,7 +842,6 @@ console.log(`5-Hour Limit: ${telemetry.fiveHourRemainingPct}% (resets in ${telem
 console.log(`Weekly Limit: ${telemetry.weeklyRemainingPct}% (resets in ${telemetry.weeklyRefreshText})`);
 console.log(`Active Concurrent Streams: ${telemetry.activeConcurrentStreams} / ${telemetry.concurrencyLimit}`);
 ```
-
 
 
 

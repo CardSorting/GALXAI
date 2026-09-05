@@ -5,7 +5,7 @@ import { JsonLd, createTechArticleSchema, createBreadcrumbSchema } from '@/lib/s
 
 export const metadata: Metadata = constructMetadata({
   title: 'AI Agents & Autonomous Swarms Hub — CrewAI, LangGraph & AutoGen',
-  description: 'High-concurrency infrastructure engineered for autonomous AI agents and swarm fleets. Sub-15ms failover, 75% tool definition caching, and 1,200 RPM throughput governor.',
+  description: 'Integrate agent frameworks with isolated sessions, bounded concurrency, tool calling, and streamed inference.',
   canonicalPath: '/docs/agents',
   keywords: [
     'AI Agents Gateway',
@@ -24,7 +24,7 @@ export default function AgentsDocsPage() {
     '@graph': [
       createTechArticleSchema({
         headline: 'AI Agents & Autonomous Swarms Integration Guide',
-        description: 'Complete guide for connecting CrewAI, LangGraph, AutoGen, and Vercel AI SDK to GALXAI with 75% prompt caching and sub-15ms failover.',
+        description: 'Connect CrewAI, LangGraph, AutoGen, and Vercel AI SDK to GALXAI inference APIs.',
         path: '/docs/agents',
         keywords: ['AI Agents', 'CrewAI', 'LangGraph', 'AutoGen'],
       }),

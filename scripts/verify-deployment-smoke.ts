@@ -260,13 +260,13 @@ async function runSmokeTests() {
   try {
     const res = await fetchRoute(`${targetUrl}/api/health`);
     const hasNosniff = res.headers['x-content-type-options'] === 'nosniff';
-    const hasXss = Boolean(res.headers['x-xss-protection']);
-    if (hasNosniff || hasXss) {
+    const hasCsp = Boolean(res.headers['content-security-policy']);
+    if (hasNosniff && hasCsp) {
       results.push({
         name: 'Perimeter Security Headers',
         url: `${targetUrl}/api/health`,
         status: 'PASS',
-        details: `X-Content-Type-Options & Security Headers verified`,
+        details: `X-Content-Type-Options and Content-Security-Policy verified`,
         latencyMs: res.latencyMs,
       });
     } else {
@@ -466,6 +466,46 @@ async function runSmokeTests() {
     results.push({
       name: 'Model Spec Endpoint & Edge SWR (/v1/models/[id])',
       url: `${targetUrl}/v1/models/gpt-5.6-sol`,
+      status: 'FAIL',
+      details: formatError(err),
+      latencyMs: 0,
+    });
+  }
+
+  // Test 13: Versioned browser agent bootstrap (no secret-bearing payload)
+  try {
+    const res = await fetchRoute(`${targetUrl}/api/client/bootstrap`);
+    const json = JSON.parse(res.body);
+    const serialized = JSON.stringify(json).toLowerCase();
+    const hasSecretField = serialized.includes('api_key') || serialized.includes('client_secret') || serialized.includes('access_token');
+    if (
+      res.statusCode === 200 &&
+      json.protocolVersion === '2026-09-04' &&
+      json.agent?.transport === 'sse' &&
+      json.security?.sameOrigin === true &&
+      json.security?.providerKeysAcceptedInBrowser === false &&
+      !hasSecretField
+    ) {
+      results.push({
+        name: 'Versioned Browser Agent Bootstrap',
+        url: `${targetUrl}/api/client/bootstrap`,
+        status: 'PASS',
+        details: `Protocol ${json.protocolVersion} | same-origin SSE | secret-free payload`,
+        latencyMs: res.latencyMs,
+      });
+    } else {
+      results.push({
+        name: 'Versioned Browser Agent Bootstrap',
+        url: `${targetUrl}/api/client/bootstrap`,
+        status: 'FAIL',
+        details: `HTTP ${res.statusCode} | invalid or secret-bearing bootstrap contract`,
+        latencyMs: res.latencyMs,
+      });
+    }
+  } catch (err: any) {
+    results.push({
+      name: 'Versioned Browser Agent Bootstrap',
+      url: `${targetUrl}/api/client/bootstrap`,
       status: 'FAIL',
       details: formatError(err),
       latencyMs: 0,

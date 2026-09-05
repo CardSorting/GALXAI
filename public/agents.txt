@@ -17,7 +17,6 @@ CRITICAL AGENT RULES:
 
 3. DECLARATIVE UI OVER IMPERATIVE CODE:
    - In React / Next.js views, use `<GalxImage prompt="..." aspectRatio="16:9" />` from `galxai/ui`.
-   - In chat views, use `<GalxChat model="gpt-5.6-sol" />` from `galxai/ui`.
 
 4. ZERO-MIGRATION LEGACY MIGRATION:
    - When migrating an existing OpenAI / Anthropic codebase, simply add `import 'galxai/patch'` at the entry point (`layout.tsx` or `index.ts`).
@@ -33,14 +32,11 @@ CODE PATTERNS CHEATSHEET:
 
 Pattern A: Declarative JSX (Fastest UI Delivery)
 ------------------------------------------------
-import { GalxImage, GalxChat } from 'galxai/ui';
+import { GalxImage } from 'galxai/ui';
 
 export function Studio() {
   return (
-    <div>
-      <GalxImage prompt="Cyberpunk skyline" aspectRatio="16:9" interactive />
-      <GalxChat model="gpt-5.6-sol" placeholder="Ask anything..." />
-    </div>
+    <GalxImage prompt="Cyberpunk skyline" aspectRatio="16:9" interactive />
   );
 }
 

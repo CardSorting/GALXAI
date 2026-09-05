@@ -8,7 +8,7 @@ This guide covers the internal codebase structure, architectural layers, how to 
 
 ```text
 ├── docs/                             # Comprehensive Architecture & API Documentation
-│   ├── adr/                          # Architecture Decision Records (0001-0072)
+│   ├── adr/                          # Architecture Decision Records (0001-0119)
 │   ├── maintainers/                  # Internal Maintainer Knowledge Base (20 Manuals)
 │   ├── playbooks/                    # Operational Lifecycle Playbooks (Stages 1-8)
 │   ├── ARCHITECTURE.md               # System overview, lifecycle, and security model
@@ -46,19 +46,20 @@ This guide covers the internal codebase structure, architectural layers, how to 
 │   └── validate-galxai-router.ts     # Forensic verification test runner (217 tests)
 ├── src/
 │   ├── app/                          # Next.js App Router
-│   │   ├── api/                      # Gateway admin, chat sync, sessions, personas, & pool API routes
+│   │   ├── api/                      # Gateway admin, explicit session sync, ingestion, and pool APIs
 │   │   ├── v1/                       # OpenAI & Anthropic-compatible public API routes
 │   │   │   ├── chat/completions/     # OpenAI chat completions (with dynamic 1M context)
 │   │   │   ├── messages/             # Anthropic Claude messages
 │   │   │   ├── embeddings/           # OpenAI vector embeddings
 │   │   │   ├── images/generations/   # Multi-modal image generation
 │   │   │   └── models/               # Model discovery
-│   │   ├── characters/               # Custom character creator and persona hub
-│   │   ├── studio/                   # Multi-modal AI 4K image generation studio
-│   │   ├── gateway/                  # Gateway management and API keys
+│   │   ├── auth/                     # Authentication flows; successful auth defaults to /models
+│   │   ├── models/                   # Canonical model catalog, cards, comparison, and routing
+│   │   ├── keys/                     # Gateway API-key management
+│   │   ├── playground/               # Stateless API request diagnostic; never a chat destination
 │   │   └── settings/                 # Seat quota and rolling window settings
 │   ├── sdk/                          # Zero-dependency Universal SDK (TypeScript / Python)
-│   ├── components/                   # React UI Components (ChatInterface, Sidebar, InputArea, Header)
+│   ├── components/                   # Control-plane navigation, model, billing, telemetry, and docs UI
 │   ├── core/                         # Pure TypeScript Gateway Engine (zero React dependencies)
 │   │   ├── broccolidb/               # BroccoliDB In-Memory Reactive Tables & Compaction Mesh
 │   │   ├── chat/                     # Request Normalizer & Persistence Validator
@@ -81,6 +82,8 @@ This guide covers the internal codebase structure, architectural layers, how to 
 │   └── lib/                          # Storage helpers and utility functions
 └── README.md                         # Project overview and quickstart
 ```
+
+The hosted application boundary is defined in [Product Surface Strategy](PRODUCT_SURFACE_STRATEGY.md) and ADR 0119. Protocol and SDK names containing `chat` remain valid inference contracts; they are not permission to add a first-party browser chat, persona, sharing, or image-studio surface.
 
 ---
 

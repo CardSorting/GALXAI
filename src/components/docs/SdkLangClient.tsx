@@ -18,9 +18,6 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import { ShareButton } from '@/components/common/ShareButton';
-import { TrustSeals } from '@/components/common/TrustSeals';
-import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import type { SdkLangGuide } from '@/lib/data/sdksData';
 import { SDK_LANG_GUIDES } from '@/lib/data/sdksData';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
@@ -64,12 +61,6 @@ export function SdkLangClient({ guide }: SdkLangClientProps) {
               <Code2 className="w-3.5 h-3.5" />
               <span>{guide.badge}</span>
             </div>
-            <ShareButton
-              variant="pill"
-              label="Share SDK Guide"
-              title={guide.title}
-              description={guide.description}
-            />
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
@@ -234,11 +225,9 @@ export function SdkLangClient({ guide }: SdkLangClientProps) {
         </section>
 
         {/* Consumer-Grade Trust Seals */}
-        <TrustSeals />
       </main>
 
       {/* Floating Conversion Dock */}
-      <FloatingConversionDock />
     </div>
   );
 }

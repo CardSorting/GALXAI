@@ -1,9 +1,9 @@
 # ADR 0101: Persona & Image Forced RLS with Ownership Reassignment Armor
 
 ## Status
-Superseded by ADR 0117
+Superseded by ADR 0117 and retired by ADR 0119
 
-This ADR describes an abandoned migration branch that was never applied to the authoritative database. ADR 0117 replaces direct browser mutation with server-mediated persona and image authority.
+This ADR describes an abandoned migration branch that was never applied to the authoritative database. ADR 0117 replaced direct browser mutation with server-mediated authority; ADR 0119 subsequently retired the client features and removed both relations from the public schema.
 
 ## Context
 Following the activation of transaction-scoped connection pooling (ADRs 0097–0100), two critical threat vectors remained unaddressed in the media and persona domains:

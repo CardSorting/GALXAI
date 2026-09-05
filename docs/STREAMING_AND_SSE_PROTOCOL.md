@@ -2,6 +2,8 @@
 
 GALXAI implements high-performance, zero-allocation Server-Sent Events (SSE) streaming compliant with OpenAI, Anthropic, Ollama, and Vercel AI SDK standards (RFC 8895).
 
+This is a transport specification for downstream integrations. The word `chat` identifies compatible wire schemas; GALXAI does not host a chat application.
+
 ---
 
 ## 1. Protocol Specifications
@@ -36,10 +38,16 @@ data: {"id":"chatcmpl-01","object":"chat.completion.chunk","created":1700000000,
 data: [DONE]
 ```
 
-### B. Browser Address Bar Direct Stream (`GET /v1/chat/completions`)
-```text
-https://galx.ai/v1/chat/completions?prompt=Explain+gravity&model=sol&stream=true&api_key=galx_live_...
+### B. Compatibility GET Stream (`GET /v1/chat/completions`)
+```bash
+curl -N --get 'https://galx.ai/v1/chat/completions' \
+  --data-urlencode 'prompt=Explain gravity' \
+  --data-urlencode 'model=sol' \
+  --data-urlencode 'stream=true' \
+  -H 'Authorization: Bearer galx_live_...'
 ```
+
+Prefer authenticated `POST` requests in production. GET streaming remains a diagnostic compatibility path, not a browser conversation interface.
 
 ### C. Ollama Streaming NDJSON Protocol (`/api/generate` & `/api/chat`)
 ```http
@@ -250,7 +258,6 @@ When an interactive chat streaming session begins:
    - Upon stream completion, the gateway dispatches `fn_settle_seat_stream_completion_composite_v2`, recording the actual token draw, marking the seat lease as settled, and asynchronously updating L1 BroccoliDB RAM and L2 PostgreSQL tables.
 4. **Auto-Reclaiming TTL**:
    - If the client terminates the connection prematurely, the seat lease automatically expires, freeing up the concurrent stream slot without database locking.
-
 
 
 

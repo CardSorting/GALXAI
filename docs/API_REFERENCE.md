@@ -2,6 +2,8 @@
 
 This document outlines the complete REST API specification for GALXAI endpoints, detailing all supported protocols, universal ingestion parameters, multi-header authentication methods, and edge gateway routes.
 
+These endpoints are integration contracts for applications, agents, IDEs, CLIs, and developer tooling. GALXAI does not provide a hosted chat or image-studio destination; see [Product Surface Strategy](PRODUCT_SURFACE_STRATEGY.md).
+
 ---
 
 ## 🔑 Authentication
@@ -31,9 +33,9 @@ GALXAI implements **Multi-Header & Query Parameter Ingestion** to absorb any dev
 
 ---
 
-## 💬 Chat Completions (`POST /v1/chat/completions` & `GET /v1/chat/completions`)
+## Chat Completions Protocol (`POST /v1/chat/completions` & `GET /v1/chat/completions`)
 
-Universal OpenAI-compatible chat completion endpoint with automatic quota cycling, reasoning support, and browser query execution.
+Universal OpenAI-compatible inference endpoint with automatic quota cycling, reasoning support, and compatibility query ingestion.
 
 ### POST Request Body
 ```json
@@ -66,10 +68,15 @@ Universal OpenAI-compatible chat completion endpoint with automatic quota cyclin
 - `x-galx-seat-5h-refresh`: Formatted natural duration string to full 5-hour refresh (e.g. `4 hours, 17 minutes`).
 - `x-galx-seat-weekly-refresh`: Formatted natural duration string to full weekly refresh (e.g. `3 days`).
 
-### Browser Address Bar Direct Query (`GET /v1/chat/completions`)
-```text
-https://galx.ai/v1/chat/completions?prompt=Explain+Raft+consensus&model=sol&api_key=galx_live_...
+### Compatibility GET Query (`GET /v1/chat/completions`)
+```bash
+curl --get 'https://galx.ai/v1/chat/completions' \
+  --data-urlencode 'prompt=Explain Raft consensus' \
+  --data-urlencode 'model=sol' \
+  -H 'Authorization: Bearer galx_live_...'
 ```
+
+Use `POST` with an authorization header for production integrations. The GET form exists for protocol compatibility and diagnostics; it is not a hosted browser chat surface. Avoid credentials in URLs because URLs can be retained by browser history, proxies, and access logs.
 
 
 ### Supported Flagship Models & Aliases
@@ -474,6 +481,5 @@ When passing `mode: "select_representation"` or setting `x-galx-compact: true` o
 - **Max Text Character Length**: 2,000,000 characters
 - **Max Batch Item Count**: 10,000 items
 - **Incident Token Budget**: 1,024 to 128,000 tokens
-
 
 

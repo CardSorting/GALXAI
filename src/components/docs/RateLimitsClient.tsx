@@ -10,11 +10,6 @@ import {
   Zap,
   Activity,
 } from 'lucide-react';
-import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
-import { TrustSeals } from '@/components/common/TrustSeals';
-import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
-import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
-import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export function RateLimitsClient() {
   const [tokens, setTokens] = useState<number>(8500);
@@ -68,7 +63,6 @@ export function RateLimitsClient() {
         <DocsSubNav />
 
         {/* Founding Cohort Rate Lock Ribbon */}
-        <RateLockRibbon />
 
         {/* Interactive Continuous Governor Visualizer */}
         <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-amber-500/30 bg-amber-500/5">
@@ -164,13 +158,9 @@ bucket.currentTokens = Math.min(bucket.maxCapacity, bucket.currentTokens + fract
         </div>
 
         {/* Consumer-Grade Trust Seals */}
-        <TrustSeals />
       </main>
 
       {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
-      <FloatingConversionDock />
-      <LiveActivityToast />
-      <ExitIntentModal />
     </div>
   );
 }

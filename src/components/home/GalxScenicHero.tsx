@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { GalxGalaxyLogo } from '@/components/brand/GalxGalaxyLogo';
 import { ArtisanalSignalSection } from '@/components/home/ArtisanalSignalSection';
+import { DEFAULT_POST_AUTH_PATH } from '@/lib/auth/redirects';
 
 export function GalxScenicHero() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export function GalxScenicHero() {
     setError(null);
     try {
       await signInWithOAuth(provider, {
-        redirectTo: `${window.location.origin}/auth/callback?next=/chat`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(DEFAULT_POST_AUTH_PATH)}`,
       });
     } catch (err: any) {
       setError(err.message || `Failed to authenticate with ${provider}.`);
@@ -72,7 +73,7 @@ export function GalxScenicHero() {
         if (signInErr) throw signInErr;
       }
 
-      router.push('/chat');
+      router.replace(DEFAULT_POST_AUTH_PATH);
     } catch (err: any) {
       setError(err.message || 'Authentication failed. Please try again.');
     } finally {
@@ -81,7 +82,7 @@ export function GalxScenicHero() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#07090e] text-zinc-100 flex flex-col justify-between selection:bg-cyan-500 selection:text-black">
+    <div className="w-full min-h-screen bg-[#07090e] text-white flex flex-col justify-between selection:bg-cyan-500 selection:text-black">
       {/* Top Header / Navigation */}
       <header className="w-full px-4 sm:px-8 py-4 sm:py-5 flex items-center justify-between z-20">
         {/* Brand Logo: Galaxy Style Emblem + galx.ai */}
@@ -97,22 +98,22 @@ export function GalxScenicHero() {
         <div className="flex items-center gap-2 sm:gap-3">
           {user ? (
             <Link
-              href="/chat"
+              href={DEFAULT_POST_AUTH_PATH}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-cyan-500/20 transition-all group"
             >
-              <span>Launch Chat</span>
+              <span>Open Gateway</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           ) : (
             <>
               <Link
-                href="/auth/signup?next=/chat"
+                href={`/auth/signup?next=${encodeURIComponent(DEFAULT_POST_AUTH_PATH)}`}
                 className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-white text-black hover:bg-zinc-200 text-xs sm:text-sm font-bold shadow-md transition-all cursor-pointer"
               >
                 Enter the Galaxy
               </Link>
               <Link
-                href="/auth/signin?next=/chat"
+                href={`/auth/signin?next=${encodeURIComponent(DEFAULT_POST_AUTH_PATH)}`}
                 className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/10 text-white text-xs sm:text-sm font-semibold transition-all cursor-pointer"
               >
                 Login
@@ -151,11 +152,11 @@ export function GalxScenicHero() {
             <div className="w-full max-w-[420px] bg-white text-zinc-900 rounded-[28px] p-6 sm:p-8 shadow-2xl shadow-black/80 flex flex-col justify-between space-y-4 sm:space-y-5 animate-in fade-in zoom-in-95 duration-300">
               {/* Card Title & Single-Line Value Prop */}
               <div className="space-y-1.5">
-                <h1 className="text-2xl sm:text-[28px] font-black tracking-tight text-zinc-900 leading-tight">
+                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-900 leading-tight">
                   Get access to Frontier AI
                 </h1>
                 <p className="text-xs sm:text-sm text-zinc-500 font-medium leading-relaxed">
-                  Chat, code, and create with OpenAI Codex &amp; GPT-5.6 reasoning models.
+                  Route, observe, and optimize OpenAI Codex &amp; GPT-5.6 inference.
                 </p>
               </div>
 
@@ -300,7 +301,7 @@ export function GalxScenicHero() {
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     ) : (
                       <>
-                        <span>{authMode === 'signup' ? 'Create Account & Launch Chat' : 'Sign In & Launch Chat'}</span>
+                        <span>{authMode === 'signup' ? 'Create Account & Open Gateway' : 'Sign In & Open Gateway'}</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </>
                     )}
@@ -344,8 +345,8 @@ export function GalxScenicHero() {
               <Link href="/pricing" className="hover:text-cyan-400 transition-colors">
                 Pricing
               </Link>
-              <Link href="/characters" className="hover:text-cyan-400 transition-colors">
-                Companions
+              <Link href="/telemetry" className="hover:text-cyan-400 transition-colors">
+                Telemetry
               </Link>
               <span className="hidden sm:inline text-zinc-700 select-none">|</span>
               <Link href="/about" className="hover:text-white transition-colors text-zinc-400">

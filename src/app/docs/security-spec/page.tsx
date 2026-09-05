@@ -4,8 +4,8 @@ import { constructMetadata } from '@/lib/seo/metadata';
 import { JsonLd, createTechArticleSchema, createBreadcrumbSchema } from '@/lib/seo/jsonld';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Security & Zero-Retention Specifications — Cryptographic ZDR Spec',
-  description: 'Technical specifications on AES-256-GCM authenticated encryption, ephemeral RAM transit, and cryptographic memory zeroization upon HTTP stream completion.',
+  title: 'Security and Retention',
+  description: 'Credential custody, stateless inference, explicit durable sessions, and tenant authority in GALXAI.',
   canonicalPath: '/docs/security-spec',
   keywords: [
     'Zero Data Retention AI',
@@ -21,8 +21,8 @@ export default function SecuritySpecDocsPage() {
     '@context': 'https://schema.org',
     '@graph': [
       createTechArticleSchema({
-        headline: 'Security & Zero-Data-Retention (ZDR) Specifications',
-        description: 'Complete cryptographic verification and ephemeral RAM pipeline security specifications.',
+        headline: 'GALXAI Security and Retention',
+        description: 'Credential custody, stateless inference, explicit durable sessions, and tenant authority.',
         path: '/docs/security-spec',
       }),
       createBreadcrumbSchema([

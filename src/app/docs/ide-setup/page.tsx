@@ -5,7 +5,7 @@ import { JsonLd, createHowToSchema, createTechArticleSchema, createBreadcrumbSch
 
 export const metadata: Metadata = constructMetadata({
   title: 'Cursor, Windsurf & Continue.dev IDE Setup — 30-Second Guide',
-  description: 'Learn how to configure Cursor IDE, Windsurf, Claude Code CLI, Continue.dev, and Cline with GALXAI for 25%–40% wholesale token savings and sub-15ms latency.',
+  description: 'Configure Cursor, Windsurf, Claude Code, Continue.dev, and Cline with a GALXAI API key, base URL, and current model ID.',
   canonicalPath: '/docs/ide-setup',
   keywords: [
     'Cursor OpenAI Base URL',

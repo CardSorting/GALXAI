@@ -18,8 +18,6 @@ if (migrationArgIndex >= 0 && !migrationPath) {
 const TARGET_TABLES = [
   'chat_conversations',
   'chat_messages',
-  'custom_personas',
-  'image_generations',
   'galx_audit_logs',
   'galx_budget_alerts',
   'galx_chat_context_episodes',

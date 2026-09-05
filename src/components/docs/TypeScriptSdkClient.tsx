@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { DocsSubNav } from '@/components/dashboard/DocsSubNav';
@@ -230,13 +231,13 @@ console.log(message.content[0].text);`
           </div>
 
           <div className="flex items-center gap-3">
-            <a
+            <Link
               href="/docs/sdks"
               className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-zinc-300 hover:text-white border border-white/10 transition-colors flex items-center gap-1.5"
             >
               All SDKs
               <ArrowRight className="w-3.5 h-3.5" />
-            </a>
+            </Link>
           </div>
         </div>
 

@@ -27,7 +27,7 @@ from openai import OpenAI
 client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY")
 )`,
-      after: `# GALXAI Universal Gateway (25%-40% Wholesale Margin)
+      after: `# GALXAI OpenAI-compatible gateway
 from openai import OpenAI
 
 client = OpenAI(
@@ -43,7 +43,7 @@ OPENAI_API_KEY="galx_live_your_gateway_key"`,
 Override Base URL: [empty / default]
 API Key: sk-proj-...
 Models: gpt-4o, claude-3-5-sonnet`,
-      after: `// GALXAI Sub-15ms Cursor Settings Override:
+      after: `// GALXAI Cursor settings override:
 Override Base URL: https://api.galx.ai/v1
 API Key: galx_live_your_gateway_key
 Models: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`,
@@ -83,7 +83,7 @@ const result = streamText({
   model: openai("gpt-4o"),
   prompt: "Build a responsive header",
 });`,
-      after: `// GALXAI Provider Instance (25%-40% Wholesale Savings)
+      after: `// GALXAI provider instance
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
 
@@ -107,7 +107,7 @@ llm = ChatOpenAI(
     model="gpt-4o",
     api_key="sk-proj-..."
 )`,
-      after: `# LangChain via GALXAI with 75% Prompt Caching Pass-Through
+      after: `# LangChain via GALXAI
 from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(
@@ -145,7 +145,7 @@ LITELLM_API_KEY="galx_live_your_gateway_key"`,
 from llama_index.llms.openai import OpenAI
 
 llm = OpenAI(model="gpt-4o")`,
-      after: `# LlamaIndex Routed via GALXAI (75% Caching on RAG Contexts)
+      after: `# LlamaIndex routed via GALXAI
 from llama_index.llms.openai import OpenAI
 
 llm = OpenAI(
@@ -252,7 +252,7 @@ HEADER: Authorization: Bearer galx_live_your_gateway_key`,
           <div className="glass-panel rounded-3xl p-6 space-y-3 border border-emerald-500/30 bg-emerald-500/5 font-mono text-xs">
             <div className="flex items-center justify-between text-emerald-400 font-bold">
               <span>AFTER: Routed via GALXAI</span>
-              <span className="text-[10px] uppercase font-sans">25%–40% Wholesale Margin</span>
+              <span className="text-[10px] uppercase font-sans">OpenAI-compatible endpoint</span>
             </div>
             <pre className="p-4 rounded-2xl bg-black/60 border border-white/5 text-cyan-300 overflow-x-auto">
               <code>{activeSnippet.after}</code>

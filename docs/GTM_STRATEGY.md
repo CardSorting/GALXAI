@@ -32,7 +32,7 @@ mindmap
       No $100k enterprise commitments
     4. Zero-Hesitation DX
       npx galxai terminal instant prompt
-      Browser URL execution
+      OpenAI-compatible API execution
       Raw text cURL with zero 400 errors
 ```
 
@@ -120,10 +120,8 @@ For the complete technical specification of the organic growth substrate, see [`
 
 GALXAI executes a differentiated two-tier enterprise go-to-market motion:
 
-1. **Bottom-Up Developer Wedge**: 1-line auto-patch (`import 'galxai/patch'`), drop-in React components (`<GalxChat />`, `<GalxImage />`), and zero-install CLI (`npx galxai`) accelerating time-to-first-dollar.
+1. **Bottom-Up Developer Wedge**: 1-line auto-patch (`import 'galxai/patch'`), native SDKs, and zero-install CLI (`npx galxai`) accelerating time-to-first-dollar.
 2. **Top-Down Spend Governance Wedge**: The **Spend Forensic Control Tower (`/audit`)** and **BroccoliDB Representation Transformation Substrate**:
    - Dissects runaway agent loops, high-frequency telemetry noise, and cache-busting prefixes.
    - Transforms high-redundancy payloads into dense, task-relevant representations before model inference.
    - Delivers a verifiable **$2.89\times - 3.32\times$ cost efficiency multiplier** backed by empirical provider-boundary receipts (`npm run bench:inference-boundary`).
-
-

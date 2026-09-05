@@ -12,12 +12,7 @@ import {
   Zap,
   Filter,
 } from 'lucide-react';
-import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
-import { TrustSeals } from '@/components/common/TrustSeals';
-import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
-import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
-import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 interface Recipe {
   id: string;
@@ -34,7 +29,7 @@ const RECIPES: Recipe[] = [
     title: 'Autonomous Multi-Agent Coding Swarm (LangGraph & CrewAI)',
     category: 'Agent Orchestration',
     badge: 'LangGraph',
-    description: 'Coordinate a Planner, Coder, and Code Reviewer agent swarm communicating over sub-15ms streaming channels.',
+    description: 'Coordinate planner, coder, and reviewer roles with isolated sessions and streamed results.',
     code: `from openai import OpenAI
 from typing import Dict, List
 
@@ -70,11 +65,11 @@ code = run_agent_turn(
 print("Generated Production Microservice:\\n", code)`,
   },
   {
-    id: 'rag_900k',
-    title: 'Massive Repository RAG Ingestion (GPT-5.6 Sol - 900K Context)',
+    id: 'rag_large_context',
+    title: 'Large-Context Repository RAG Ingestion',
     category: 'Information Retrieval',
-    badge: '900K Context',
-    description: 'Ingest and reason across 900,000 tokens of raw source code in a single prompt without chunk fragmentation.',
+    badge: 'Large Context',
+    description: 'Ingest and reason across a large source repository while respecting the selected model context limit.',
     code: `from openai import OpenAI
 
 client = OpenAI(
@@ -82,12 +77,12 @@ client = OpenAI(
     api_key="galx_live_your_gateway_key"
 )
 
-# Load entire repository into 900,000 token context window
+# Load repository context within the selected model limit
 with open("combined_codebase.txt", "r") as f:
     entire_repo_text = f.read()
 
 response = client.chat.completions.create(
-    model="gpt-5.6-sol", # 900,000 token context window
+    model="gpt-5.6-sol",
     messages=[
         {"role": "system", "content": "You have full visibility into the entire enterprise codebase."},
         {"role": "user", "content": f"Repo Context:\\n{entire_repo_text}\\n\\nFind all potential SQL injection vulnerabilities across all controllers."}
@@ -206,7 +201,7 @@ export function CookbookClient() {
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase font-mono tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 fill-black" />
-              <span>Claim Key ($5 Credit)</span>
+              <span>Create API Key</span>
             </Link>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white">Production AI Cookbooks &amp; Reference Recipes</h1>
@@ -218,7 +213,6 @@ export function CookbookClient() {
         <DocsSubNav />
 
         {/* Founding Cohort Rate Lock Ribbon */}
-        <RateLockRibbon />
 
         {/* Category Filters */}
         <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
@@ -282,13 +276,9 @@ export function CookbookClient() {
         </div>
 
         {/* Consumer-Grade Trust Seals */}
-        <TrustSeals />
       </main>
 
       {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
-      <FloatingConversionDock />
-      <LiveActivityToast />
-      <ExitIntentModal />
     </div>
   );
 }

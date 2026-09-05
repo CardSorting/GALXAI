@@ -7,10 +7,10 @@
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
 import { executePostgresQuery } from '../../db/postgres';
 import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
-import type { ChatSession } from '../../../components/chat/ChatSidebar';
-import type { ChatMessage } from '../../../components/chat/ChatMessageItem';
-import type { CustomPersona } from '../../../components/chat/PersonaContracts';
-import { PersonaRepository } from './PersonaRepository';
+import type {
+  PersistedChatMessage as ChatMessage,
+  PersistedChatSession as ChatSession,
+} from '../../../core/chat/GalxChatPersistenceContracts';
 
 export interface DbChatConversationRow {
   id: string;
@@ -426,7 +426,6 @@ export class ChatRepository {
     activeSessionId?: string;
     messages?: ChatMessage[];
     multiSessionMessages?: Record<string, ChatMessage[]>;
-    personas?: CustomPersona[];
   }> {
     const ownerId = this.requireUserId(userId);
     if (isSupabaseConfigured()) {
@@ -500,30 +499,6 @@ export class ChatRepository {
             }
           }
 
-          const personas: CustomPersona[] = Array.isArray(data.personas)
-            ? data.personas.map((p: any) => ({
-                id: p.id,
-                name: p.name,
-                tagline: p.tagline || '',
-                description: p.description || '',
-                nickname: p.name,
-                handle: `@${p.name.toLowerCase().replace(/[^a-z0-9_]/g, '')}`,
-                animeArchetype: p.category || 'Anime AI Companion',
-                avatarIcon: 'Sparkles',
-                avatarGradient: 'from-purple-600 to-pink-600',
-                greetingMessage: p.greetingMessage || 'Hello!',
-                systemPrompt: p.systemPrompt || '',
-                baseModelId: p.baseModelId || 'gpt-5.6-sol',
-                conversationStarters: [],
-                capabilities: { webSearch: true, deepReasoning: true },
-                isPublic: Boolean(p.isPublic),
-                isBuiltIn: Boolean(p.isBuiltIn),
-                chatCount: p.interactionCount || 0,
-                rating: 4.9,
-                createdAt: Number(p.createdAt) || Date.now(),
-              }))
-            : [];
-
           for (const s of sessions) {
             this.sessionTable.put(this.sessionCacheKey(ownerId, s.id), { ...s, ownerId });
           }
@@ -545,7 +520,6 @@ export class ChatRepository {
             activeSessionId: resolvedActiveId,
             messages,
             multiSessionMessages,
-            personas,
           };
         }
       } catch (err) {
@@ -561,7 +535,6 @@ export class ChatRepository {
       sessions: bootstrap.sessions,
       activeSessionId: bootstrap.activeSessionId,
       messages: bootstrap.messages,
-      personas: bootstrap.personas,
     };
   }
 
@@ -572,7 +545,7 @@ export class ChatRepository {
   async getChatCompositeBootstrap(
     userId?: string,
     activeSessionId?: string
-  ): Promise<{ sessions: ChatSession[]; activeSessionId?: string; messages: ChatMessage[]; personas?: CustomPersona[] }> {
+  ): Promise<{ sessions: ChatSession[]; activeSessionId?: string; messages: ChatMessage[] }> {
     const ownerId = this.requireUserId(userId);
     if (isSupabaseConfigured()) {
       try {
@@ -623,8 +596,7 @@ export class ChatRepository {
             }
           }
 
-          const personas = await PersonaRepository.getInstance().getAllPublicPersonas();
-          return { sessions, activeSessionId: resolvedActiveId, messages, personas };
+          return { sessions, activeSessionId: resolvedActiveId, messages };
         }
       } catch (err) {
         console.warn('[ChatRepository] fn_get_chat_composite_bootstrap RPC fallback:', err);
@@ -635,8 +607,7 @@ export class ChatRepository {
     const sessions = await this.getSessions(ownerId);
     const resolvedActiveId = activeSessionId || (sessions.length > 0 ? sessions[0].id : undefined);
     const messages = resolvedActiveId ? await this.getMessages(resolvedActiveId, ownerId) : [];
-    const personas = await PersonaRepository.getInstance().getAllPublicPersonas();
-    return { sessions, activeSessionId: resolvedActiveId, messages, personas };
+    return { sessions, activeSessionId: resolvedActiveId, messages };
   }
 
   /**

@@ -13,12 +13,7 @@ import {
   Check,
   Zap,
 } from 'lucide-react';
-import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
-import { TrustSeals } from '@/components/common/TrustSeals';
-import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
-import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
-import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export function FunctionCallingClient() {
   const [activeTab, setActiveTab] = useState<'python' | 'ts' | 'vercel' | 'langchain'>('python');
@@ -35,7 +30,7 @@ client = OpenAI(
     api_key="galx_live_your_gateway_key"
 )
 
-# 1. Define Tools Schema (Cached with 75% rebate)
+# 1. Define a stable tool schema
 tools = [
     {
         "type": "function",
@@ -218,19 +213,18 @@ print(response.tool_calls)`,
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase font-mono tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 fill-black" />
-              <span>Claim Key ($5 Credit)</span>
+              <span>Create API Key</span>
             </Link>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white">Function Calling &amp; Agentic Tools Guide</h1>
           <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl font-sans">
-            Connect external databases, REST APIs, and custom code execution sandboxes with parallel tool calling, 75% tool schema prompt caching, and zero latency overhead.
+            Send tool definitions to the model, execute approved functions in your application, and return tool results for the next inference turn.
           </p>
         </div>
 
         <DocsSubNav />
 
         {/* Founding Cohort Rate Lock Ribbon */}
-        <RateLockRibbon />
 
         {/* Benefits Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
@@ -248,8 +242,8 @@ print(response.tool_calls)`,
 
           <div className="glass-panel p-5 rounded-3xl space-y-1 border border-white/10">
             <span className="text-zinc-500 text-[10px] uppercase font-sans">Prompt Caching</span>
-            <div className="text-2xl font-black text-white">75% Tool Discount</div>
-            <div className="text-[11px] text-zinc-400 font-sans">Static tool schemas cached automatically</div>
+            <div className="text-2xl font-black text-white">Stable Prefixes</div>
+            <div className="text-[11px] text-zinc-400 font-sans">Inspect usage to confirm cached tool schemas</div>
           </div>
         </div>
 
@@ -296,15 +290,11 @@ print(response.tool_calls)`,
         </div>
 
         {/* Consumer-Grade Trust Seals */}
-        <TrustSeals />
 
         <DocsFeedback docTitle="Function Calling &amp; Agentic Tools Guide" />
       </main>
 
       {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
-      <FloatingConversionDock />
-      <LiveActivityToast />
-      <ExitIntentModal />
     </div>
   );
 }

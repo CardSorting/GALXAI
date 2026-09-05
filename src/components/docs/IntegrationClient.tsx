@@ -21,9 +21,6 @@ import {
   Laptop,
   Flame,
 } from 'lucide-react';
-import { ShareButton } from '@/components/common/ShareButton';
-import { TrustSeals } from '@/components/common/TrustSeals';
-import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import type { IntegrationGuide } from '@/lib/data/integrationsData';
 import { INTEGRATION_GUIDES } from '@/lib/data/integrationsData';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
@@ -66,12 +63,6 @@ export function IntegrationClient({ guide }: IntegrationClientProps) {
               <Laptop className="w-3.5 h-3.5" />
               <span>{guide.badge}</span>
             </div>
-            <ShareButton
-              variant="pill"
-              label="Share Guide"
-              title={guide.title}
-              description={guide.description}
-            />
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
@@ -88,9 +79,9 @@ export function IntegrationClient({ guide }: IntegrationClientProps) {
               <span>Setup Time: ~30 Seconds</span>
             </span>
             <span>•</span>
-            <span className="text-amber-300 font-bold">25%–40% Wholesale Pass</span>
+            <span className="text-amber-300 font-bold">One API key</span>
             <span>•</span>
-            <span className="text-cyan-300 font-bold">75% Prompt Caching Rebate</span>
+            <span className="text-cyan-300 font-bold">Model-specific cache rates</span>
           </div>
         </section>
 
@@ -254,11 +245,9 @@ export function IntegrationClient({ guide }: IntegrationClientProps) {
         </section>
 
         {/* Consumer-Grade Trust Seals */}
-        <TrustSeals />
       </main>
 
       {/* Floating Conversion Dock */}
-      <FloatingConversionDock />
     </div>
   );
 }

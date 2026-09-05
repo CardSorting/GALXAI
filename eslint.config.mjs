@@ -13,7 +13,9 @@ const eslintConfig = [
   {
     ignores: [
       ".next/**",
+      ".vercel/**",
       "node_modules/**",
+      "output-test/**",
       ".wrangler/**",
       "worker-configuration.d.ts",
       "docs/**",
@@ -21,7 +23,9 @@ const eslintConfig = [
       "supabase/**",
       ".agents/**",
       ".broccolidb/**",
-      ".impeccable/**"
+      ".impeccable/**",
+      ".github/skills/**",
+      "next-env.d.ts"
     ],
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
@@ -41,4 +45,3 @@ const eslintConfig = [
 ];
 
 export default eslintConfig;
-

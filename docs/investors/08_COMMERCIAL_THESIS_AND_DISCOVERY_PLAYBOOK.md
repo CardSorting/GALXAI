@@ -63,7 +63,7 @@ Every monthly statement and dashboard widget explicitly highlights:
 ```
 
 #### 3. Free-Tier Gateway with Zero Lock-In
-Developers start with $5 in free credits, test with `import 'galxai/patch'` or drop-in `<GalxImage />` / `<GalxChat />`, and experience the performance without requiring procurement sign-off.
+Developers start with $5 in free credits, test with `import 'galxai/patch'` or an OpenAI-compatible SDK, and experience the performance without requiring procurement sign-off.
 
 ---
 
@@ -76,7 +76,7 @@ Developers start with $5 in free credits, test with `import 'galxai/patch'` or d
 | **Existing Cost in Engineering Hours** | 1–2 Senior Devs ($300k–$400k/yr) building proxies, caching layers, and failover | 20–40 hours per client build wiring backend routes & auth | 3–6 months of platform team time building internal AI gateway |
 | **Biggest Infrastructure Footgun** | Launch delay from rate limits (429s) and runaway prompt size costs | Client key leakage and non-technical clients failing to provision API keys | Rogue teams using expensive frontier models for basic classification tasks |
 | **Why In-House / Alternatives Fail** | Self-hosted LiteLLM/Portkey breaks on edge runtimes and requires on-call maintenance | Asking clients to manage their own OpenAI accounts causes massive onboarding friction | AWS Bedrock / Azure AI charge full retail and take 6+ months for enterprise procurement |
-| **The GalX Hook** | *"Get 30%+ savings, auto-failover, and sub-15ms edge routing without hiring an infra engineer."* | *"Drop `<GalxChat />` into your frontend with zero backend proxy routes. Client billing made clean."* | *"One-line drop-in (`import 'galxai/patch'`) with instant team spend caps and compliance auditing."* |
+| **The GalX Hook** | *"Get 30%+ savings, auto-failover, and sub-15ms edge routing without hiring an infra engineer."* | *"Keep your product UI while GALXAI handles inference routing, failover, and billing."* | *"One-line drop-in (`import 'galxai/patch'`) with instant team spend caps and compliance auditing."* |
 
 ---
 
@@ -108,7 +108,7 @@ Use this script during discovery conversations with engineering leaders to quant
 * **Response**: *"Token aggregation is just one of the mechanisms we use under the hood. The actual product is the infrastructure layer that compresses your time-to-first-dollar. We give you zero-boilerplate React components, automatic edge failover, and prompt caching so your team can ship in hours instead of spending months building custom inference plumbing."*
 
 ### Objection 2: *"Why wouldn't we just use LiteLLM or OpenRouter?"*
-* **Response**: *"OpenRouter and LiteLLM are traditional API proxies. They don't give you drop-in UI components (`<GalxChat />`, `<GalxImage />`), zero-route Server Actions, or automatic IDE agent directives (`npx galxai skills`). Furthermore, self-hosting proxies means your team has to manage infrastructure and handle on-call rotations when routing rules fail."*
+* **Response**: *"OpenRouter and LiteLLM are traditional API proxies. GALXAI adds zero-route Server Actions, spend governance, and automatic IDE agent directives (`npx galxai skills`). Self-hosting proxies also means your team manages infrastructure and handles routing failures."*
 
 ### Objection 3: *"We already have direct OpenAI enterprise credits."*
 * **Response**: *"That's great! You can bring your own enterprise OpenAI keys directly into our sovereign Shard Vaults. You still get our sub-15ms edge routing, automated 429 failover, 75% prompt caching optimization, and zero-boilerplate frontend components across all OpenAI models."*

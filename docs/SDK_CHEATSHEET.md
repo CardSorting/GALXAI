@@ -37,14 +37,11 @@ npx galxai chat
 
 ```tsx
 // 1. Declarative React UI (No API routes, no state code)
-import { GalxImage, GalxChat } from '@galxai/sdk/ui';
+import { GalxImage } from '@galxai/sdk/ui';
 
 export function Studio() {
   return (
-    <>
-      <GalxImage prompt="Cyberpunk skyline" aspectRatio="16:9" interactive />
-      <GalxChat model="gpt-5.6-sol" placeholder="Ask questions..." />
-    </>
+    <GalxImage prompt="Cyberpunk skyline" aspectRatio="16:9" interactive />
   );
 }
 
@@ -378,5 +375,4 @@ for await (const chunk of stream) {
 console.log('Stable Cache Hash:', stream.headers['x-galx-stable-cache-hash']);
 console.log('Seat Remaining:', stream.headers['x-galx-seat-5h-limit-remaining']);
 ```
-
 

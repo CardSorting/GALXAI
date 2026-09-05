@@ -6,13 +6,9 @@ import { usePathname } from 'next/navigation';
 import {
   Zap,
   Flame,
-  Smile,
-  BookOpen,
   Wallet,
   Key,
-  Users2,
   Coins,
-  MessageSquare
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
@@ -22,15 +18,15 @@ function BaseMobileBottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
 
-  if (pathname === '/' || pathname === '/chat') {
+  if (pathname === '/') {
     return null;
   }
 
   const tabs = [
     {
-      label: 'Chat',
-      href: '/chat',
-      icon: MessageSquare,
+      label: 'Playground',
+      href: '/playground',
+      icon: Zap,
       exact: true,
     },
     {

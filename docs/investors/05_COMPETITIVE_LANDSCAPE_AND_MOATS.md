@@ -40,7 +40,7 @@ The market for AI developer infrastructure is divided into two distinct failure 
 | **Wholesale Token Discount** | **25%–40% Instant** | Retail + Platform Spread | Retail Pass-Through | Retail + SaaS Fee | No (Direct Billing) | 0% (Full List Price) |
 | **BroccoliDB Payload Compaction** | **Yes (61%–95% input reduction)** | No | No | No | No | No |
 | **Prompt Cache Pass-Through** | **100% (75% Rebate)** | Partial | Inconsistent | Metadata Tracking Only | Manual Configuration | 50%–75% (Conditional) |
-| **Declarative React UI Components** | **Yes (`<GalxImage />`, `<GalxChat />`)** | No (API Only) | No (Edge Worker Only) | No (SDK Wrapper Only) | No (Proxy Only) | No |
+| **OpenAI-Compatible Inference Gateway** | **Yes** | Yes | Yes | Yes | Yes | Varies |
 | **Zero-Route Server Actions** | **Yes (`galxai/actions`)** | No | No | No | No | No |
 | **AI Agent Directives (`npx skills`)**| **Yes (.cursorrules, CLAUDE.md)** | No | No | No | No | No |
 | **Zero-Migration Auto-Patcher** | **Yes (`import 'galxai/patch'`)** | No (Requires Base URL Refactor)| No | No | No | No |
@@ -67,7 +67,7 @@ flowchart TD
 * **Price Elasticity**: Higher volume unlocks lower upstream clearing costs, enabling GALXAI to widen its gross margin while simultaneously lowering prices for developers. A single AI startup spending $20k/month cannot negotiate Tier-5 bulk commitments independently.
 
 ### Moat 2: Declarative Frontend Component Lock-In
-* **Product Stickiness**: Traditional API routers are easily swapped by changing an environment variable. GALXAI embeds declarative JSX components (`<GalxImage />`, `<GalxChat />`, Next.js Server Actions) directly into the customer's React component tree.
+* **Product Stickiness**: GALXAI combines routing, spend governance, caching, failover, and telemetry behind one OpenAI-compatible endpoint.
 * **High Switching Cost**: Replacing GALXAI requires rewriting frontend UI state management, loading skeletons, streaming handlers, aspect ratio adapters, and backend RPC endpoints.
 
 ### Moat 3: Standardized AI Agent Directives Ecosystem

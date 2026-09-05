@@ -1,7 +1,9 @@
 # ADR 0055: Ambient Declarative AI Substrate, Zero-Route Direct Actions & Runtime Auto-Patcher
 
 ## Status
-**Accepted** (2026-08-26)
+**Partially Superseded by ADR 0119** (2026-09-04)
+
+The SDK, Server Actions, middleware, and auto-patcher remain accepted. The first-party `<GalxChat>` browser widget and hosted image studio were retired so GALXAI stays focused on inference infrastructure rather than application-layer creation UI. `<GalxImage />` remains an optional SDK primitive for downstream products, not a GALXAI-hosted studio.
 
 ## Context & Problem Statement
 Integrating AI generation into modern web and backend applications has historically required extensive glue code:
@@ -27,7 +29,6 @@ Tier 6: Universal Polymorphic Client  -> galxai.image(), galxai.chat()
 
 ### 1. Declarative React UI Primitives (`galxai/ui`)
 - **`<GalxImage>`**: Self-hydrating, responsive image component with aspect ratio preservation, automatic route discovery, progressive glowing blur placeholder, and interactive hover remixing.
-- **`<GalxChat>`**: Turnkey streaming chat UI widget with automatic message state tracking, auto-scroll, and error recovery.
 
 ### 2. Zero-Route Next.js Server Actions (`galxai/actions`)
 - Uses React 19 `'use server'` RPC semantics.

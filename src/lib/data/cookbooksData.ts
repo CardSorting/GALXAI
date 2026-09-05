@@ -534,14 +534,14 @@ print(ask_with_cache("How do I configure Anycast proxy endpoints?"))`,
     category: 'Frontend & UI',
     badge: 'Zero-Proxy Velocity',
     title: 'Building Production AI Features with Zero-Proxy React Primitives',
-    headline: 'Ship Chat, Image & Voice AI in React Without Backend Proxies',
+    headline: 'Ship Image, Reasoning & Voice AI in React Without Backend Proxies',
     description:
-      'Learn how to use GALXAI declarative React components (<GalxChat />, <GalxImage />, <GalxReasoningStream />, <GalxAudio />) with zero backend fetch boilerplate and server-only API key security.',
+      'Learn how to use GALXAI declarative React components (<GalxImage />, <GalxReasoningStream />, <GalxAudio />) with zero backend fetch boilerplate and server-only API key security.',
     difficulty: 'Beginner',
     timeToComplete: 'PT3M',
     prerequisites: ['Next.js 14/15 or React 18/19', 'galxai package'],
     primaryLanguage: 'TypeScript',
-    codeSnippet: `import { GalxChat, GalxImage, GalxReasoningStream, GalxAudio } from 'galxai/ui';
+    codeSnippet: `import { GalxImage, GalxReasoningStream, GalxAudio } from 'galxai/ui';
 
 export default function AIStudioPage() {
   return (
@@ -559,13 +559,7 @@ export default function AIStudioPage() {
         aspectRatio="16:9"
       />
 
-      {/* 3. Drop-in Streaming Chat */}
-      <GalxChat
-        model="gpt-5.6-terra"
-        placeholder="Ask a question..."
-      />
-
-      {/* 4. Declarative Voice Playback */}
+      {/* 3. Declarative Voice Playback */}
       <GalxAudio
         text="GALXAI compresses time-to-first-dollar by eliminating custom backend proxies."
         voice="alloy"
@@ -580,7 +574,7 @@ export default function AIStudioPage() {
       },
       {
         name: 'Import Declarative Primitives',
-        description: 'Import <GalxChat />, <GalxImage />, <GalxReasoningStream />, or <GalxAudio />.',
+        description: 'Import <GalxImage />, <GalxReasoningStream />, or <GalxAudio />.',
       },
       {
         name: 'Render Components in JSX',
@@ -660,5 +654,4 @@ runClassificationTask("My credit card was charged twice on invoice #9201")
     ],
   },
 ];
-
 

@@ -13,12 +13,7 @@ import {
   Copy,
   Check,
 } from 'lucide-react';
-import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
-import { TrustSeals } from '@/components/common/TrustSeals';
-import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
-import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
-import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export function AgentsClient() {
   const [activeTab, setActiveTab] = useState<'crewai' | 'langgraph' | 'autogen' | 'vercel'>('crewai');
@@ -41,7 +36,7 @@ galx_llm = LLM(
 # 1. Define Autonomous Researcher Agent
 researcher = Agent(
     role="Frontier AI Architect",
-    goal="Analyze sub-15ms gateway latency benchmarks",
+    goal="Analyze observed gateway latency measurements",
     backstory="You are an expert infrastructure researcher specializing in high-throughput LLM routing.",
     llm=galx_llm,
     verbose=True
@@ -67,10 +62,10 @@ from langgraph.prebuilt import create_react_agent
 from langchain_core.tools import tool
 
 @tool
-def calculate_cache_savings(input_tokens: int, requests: int) -> float:
-    """Calculate 75% prompt cache savings in dollars."""
-    uncached = (input_tokens * requests * 1.875) / 1000000
-    cached = (input_tokens * requests * 0.46875) / 1000000
+def calculate_cache_savings(input_tokens: int, requests: int, input_rate: float, cached_rate: float) -> float:
+    """Estimate savings using rates read from the current model catalog."""
+    uncached = (input_tokens * requests * input_rate) / 1000000
+    cached = (input_tokens * requests * cached_rate) / 1000000
     return uncached - cached
 
 # Initialize LangChain LLM connected to GALXAI
@@ -173,38 +168,37 @@ export async function runAgentWorkflow(task: string) {
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase font-mono tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 fill-black" />
-              <span>Claim Key ($5 Credit)</span>
+              <span>Create API Key</span>
             </Link>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white">AI Agents &amp; Autonomous Swarms Hub</h1>
           <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl font-sans">
-            High-concurrency infrastructure engineered specifically for agent swarms, parallel tool-calling loops, and multi-agent reasoning graphs with sub-15ms failover.
+            Use isolated sessions, bounded concurrency, and explicit tool contracts when routing agent workloads through GALXAI.
           </p>
         </div>
 
         <DocsSubNav />
 
         {/* Founding Cohort Rate Lock Ribbon */}
-        <RateLockRibbon />
 
         {/* Core Agent Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
           <div className="glass-panel p-5 rounded-3xl space-y-1 border border-indigo-500/30 bg-indigo-500/5">
-            <span className="text-indigo-400 text-[10px] uppercase font-sans font-semibold">Failover Speed</span>
-            <div className="text-2xl font-black text-zinc-100">&lt; 15 ms Failover</div>
-            <div className="text-[11px] text-indigo-400 font-sans">Zero agent crashes on upstream outages</div>
+            <span className="text-indigo-400 text-[10px] uppercase font-sans font-semibold">Session Boundary</span>
+            <div className="text-2xl font-black text-zinc-100">Isolated</div>
+            <div className="text-[11px] text-indigo-400 font-sans">One explicit identity per agent session</div>
           </div>
 
           <div className="glass-panel p-5 rounded-3xl space-y-1 border border-emerald-500/30 bg-emerald-500/5">
             <span className="text-emerald-400 text-[10px] uppercase font-sans font-semibold">Agent Tool Caching</span>
-            <div className="text-2xl font-black text-emerald-300">75% Prefix Cache</div>
-            <div className="text-[11px] text-emerald-400 font-sans">Massive savings on repetitive agent tools</div>
+            <div className="text-2xl font-black text-emerald-300">Prefix Cache</div>
+            <div className="text-[11px] text-emerald-400 font-sans">Confirm cached tokens from response usage</div>
           </div>
 
           <div className="glass-panel p-5 rounded-3xl space-y-1 border border-cyan-500/30 bg-cyan-500/5">
-            <span className="text-cyan-400 text-[10px] uppercase font-sans font-semibold">Concurrency Ceiling</span>
-            <div className="text-2xl font-black text-cyan-300">1,200 RPM</div>
-            <div className="text-[11px] text-cyan-400 font-sans">Smooth multi-worker parallel execution</div>
+            <span className="text-cyan-400 text-[10px] uppercase font-sans font-semibold">Concurrency</span>
+            <div className="text-2xl font-black text-cyan-300">Plan-Aware</div>
+            <div className="text-[11px] text-cyan-400 font-sans">Read current limits from response metadata</div>
           </div>
         </div>
 
@@ -268,7 +262,7 @@ export async function runAgentWorkflow(task: string) {
             </div>
 
             <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2">
-              <div className="text-white font-bold text-sm">2. Sub-15ms Dynamic Route Switching</div>
+              <div className="text-white font-bold text-sm">2. Dynamic Route Switching</div>
               <p className="text-zinc-400 leading-relaxed">
                 If an upstream provider experiences transient packet loss during a multi-step agent workflow, GALXAI dynamically switches channels in under 15ms so your agent never crashes mid-turn.
               </p>
@@ -277,15 +271,11 @@ export async function runAgentWorkflow(task: string) {
         </div>
 
         {/* Consumer-Grade Trust Seals */}
-        <TrustSeals />
 
         <DocsFeedback docTitle="AI Agents &amp; Autonomous Swarms Hub" />
       </main>
 
       {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
-      <FloatingConversionDock />
-      <LiveActivityToast />
-      <ExitIntentModal />
     </div>
   );
 }

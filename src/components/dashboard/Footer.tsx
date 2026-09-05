@@ -24,18 +24,12 @@ function BaseFooter() {
     return () => unsubscribe();
   }, []);
 
-  const isChatOrStudioOrPersona =
+  const usesFocusedAppShell =
     !pathname ||
     pathname === '/' ||
-    pathname.startsWith('/chat') ||
-    pathname.startsWith('/studio') ||
-    pathname.startsWith('/characters') ||
-    pathname.startsWith('/persona') ||
-    pathname.startsWith('/personas') ||
-    pathname.startsWith('/settings') ||
-    pathname.startsWith('/share');
+    pathname.startsWith('/settings');
 
-  if (isChatOrStudioOrPersona) {
+  if (usesFocusedAppShell) {
     return null;
   }
   const footerNavigation = {
@@ -337,4 +331,3 @@ export const Footer = withErrorBoundary(BaseFooter, {
   name: 'Global Footer',
   fallback: <FooterFallback />
 });
-

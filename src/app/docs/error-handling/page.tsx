@@ -4,15 +4,15 @@ import { constructMetadata } from '@/lib/seo/metadata';
 import { JsonLd, createTechArticleSchema, createBreadcrumbSchema } from '@/lib/seo/jsonld';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Error Handling & Sub-15ms Failover Guide — Status Codes & Retries',
-  description: 'Understand standard HTTP status codes, exponential backoff with full jitter, and automated multi-region circuit breaker recovery for resilient zero-stall AI execution.',
+  title: 'Error Handling, Retries, and Failover',
+  description: 'Classify API errors, retry transient failures with jitter, and preserve idempotency across failover.',
   canonicalPath: '/docs/error-handling',
   keywords: [
     'AI API Error Handling',
     'OpenAI 429 Rate Limit Recovery',
     'Circuit Breaker AI Gateway',
     'Exponential Backoff Jitter Python',
-    'Sub-15ms AI Failover',
+    'AI Gateway Failover',
   ],
 });
 
@@ -21,7 +21,7 @@ export default function ErrorHandlingDocsPage() {
     '@context': 'https://schema.org',
     '@graph': [
       createTechArticleSchema({
-        headline: 'Error Handling & Sub-15ms Circuit Breaker Failover Guide',
+        headline: 'GALXAI Error Handling, Retries, and Failover',
         description: 'Complete guide for error codes, automated retries with jitter, and circuit breaker architecture.',
         path: '/docs/error-handling',
       }),

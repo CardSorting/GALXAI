@@ -1,5 +1,12 @@
 name: Vercel Pre-Deployment & Integrity Check
 
+permissions:
+  contents: read
+
+concurrency:
+  group: vercel-preflight-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
@@ -19,10 +26,10 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install Dependencies
@@ -34,8 +41,12 @@ jobs:
           NEXT_PUBLIC_APP_URL: https://galx.ai
           NEXT_PUBLIC_SUPABASE_URL: https://mazhcjisettrzbqhorvp.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_9eyEPgM-hF00Va7TLE90yA_LV4iGcoE
-          GALX_VAULT_MASTER_SECRET: galxai-apex-vault-master-secret-key-32b
-          GALX_VAULT_ACTIVE_KEY_VERSION: v1
+
+      - name: Verify browser agent deployment contract
+        run: npm run test:browser-agent
+
+      - name: Verify logical agent session isolation
+        run: npm run test:sessions
 
       - name: ESLint & Style Checks
         run: npm run lint
@@ -49,5 +60,3 @@ jobs:
           NEXT_PUBLIC_APP_URL: https://galx.ai
           NEXT_PUBLIC_SUPABASE_URL: https://mazhcjisettrzbqhorvp.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_9eyEPgM-hF00Va7TLE90yA_LV4iGcoE
-          GALX_VAULT_MASTER_SECRET: galxai-apex-vault-master-secret-key-32b
-          GALX_VAULT_ACTIVE_KEY_VERSION: v1

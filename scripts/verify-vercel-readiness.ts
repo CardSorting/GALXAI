@@ -76,19 +76,14 @@ async function verifyVercelReadiness() {
         logWarn('Framework in vercel.json is not explicitly "nextjs".');
         warnings++;
       }
-      if (Array.isArray(vercelConfig.headers) && vercelConfig.headers.length >= 4) {
-        logPass(`Security & CORS headers configured (${vercelConfig.headers.length} rulesets including static cache).`);
-      } else if (Array.isArray(vercelConfig.headers) && vercelConfig.headers.length >= 3) {
-        logPass(`Security & CORS headers configured (${vercelConfig.headers.length} rulesets).`);
+      if (!vercelConfig.headers && !vercelConfig.crons) {
+        logPass('Platform config is minimal; response policy remains single-sourced in Next.js routes/config.');
       } else {
-        logWarn('Incomplete security or CORS headers in vercel.json.');
+        logWarn('vercel.json duplicates application response policy or schedules a synthetic health cron.');
         warnings++;
       }
-      if (Array.isArray(vercelConfig.crons) && vercelConfig.crons.length > 0) {
-        logPass(`Automated Health/Readiness Cron scheduled (${vercelConfig.crons[0].schedule} on ${vercelConfig.crons[0].path}).`);
-      }
       if (Array.isArray(vercelConfig.regions)) {
-        logPass(`Multi-region serverless placement configured: ${vercelConfig.regions.join(', ')}.`);
+        logPass(`Serverless placement configured near the authoritative database: ${vercelConfig.regions.join(', ')}.`);
       }
       if (vercelConfig.cleanUrls === true) {
         logPass('Clean URLs enabled.');
@@ -134,8 +129,8 @@ async function verifyVercelReadiness() {
   }
 
   if (!activeSecret) {
-    activeSecret = 'galxai-apex-vault-master-secret-key-32b';
-    logWarn('No explicit GALX_VAULT_MASTER_SECRET found; using apex fallback for pre-flight test.');
+    activeSecret = crypto.randomBytes(32).toString('base64url');
+    logWarn('No deployment vault secret is present; using an ephemeral random key for the local cipher self-test only.');
     warnings++;
   } else {
     logPass(`Active vault master secret detected (${activeSecret.length} chars).`);
@@ -306,8 +301,13 @@ async function verifyVercelReadiness() {
   const nextConfigPath = path.join(process.cwd(), 'next.config.ts');
   if (fs.existsSync(nextConfigPath)) {
     const nextConfigContent = fs.readFileSync(nextConfigPath, 'utf8');
-    if (nextConfigContent.includes('removeConsole') && nextConfigContent.includes('immutable')) {
-      logPass('next.config.ts apex optimized: removeConsole production stripping, immutable cache headers & package tree-shaking.');
+    if (
+      nextConfigContent.includes('removeConsole') &&
+      nextConfigContent.includes('immutable') &&
+      nextConfigContent.includes('Content-Security-Policy') &&
+      nextConfigContent.includes('Cross-Origin-Resource-Policy')
+    ) {
+      logPass('next.config.ts enforces CSP, origin isolation, production log stripping, and immutable static caching.');
     } else if (nextConfigContent.includes('poweredByHeader: false') && nextConfigContent.includes('optimizePackageImports')) {
       logPass('next.config.ts hardened: package import optimization, HSTS, and poweredByHeader obfuscation active.');
     } else {

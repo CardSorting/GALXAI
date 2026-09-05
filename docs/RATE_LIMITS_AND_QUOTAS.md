@@ -94,7 +94,7 @@ In addition to token credit limits, organization seats and interactive chat user
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Developer** | 30 units | 200 units | 16,384 tokens | `gpt-5.6-sol` | 20 streams |
 | **Small Business** | 100 units | 1,000 units | 32,768 tokens | `gpt-5.6-sol`, `gpt-5.6-terra`, `claude-3-7-sonnet` | 50 streams |
-| **Enterprise Fleet** | 350 units | 5,000 units | 65,536 tokens | All models + Deep Reasoning + Image Studio | 200 streams |
+| **Enterprise Fleet** | 350 units | 5,000 units | 65,536 tokens | All models + Deep Reasoning + Image API | 200 streams |
 | **Apex Sovereign** | 1,500 units | 25,000 units | 128,000 tokens | All models + Sovereign Custom Enclaves | 500 streams |
 
 ### 6.3. Distributed Expiring Request Leases (`galx_seat_request_leases`)
@@ -134,5 +134,4 @@ To prevent slow-poisoning / tarpitting when an upstream provider experiences sev
 - **Fast Shards ($\text{EWMA} < 400\text{ms}$)**: Concurrency ceiling boosted up to $\min(25, \text{base} + 4)$.
 - **Moderately Degraded ($\text{EWMA} > 1200\text{ms}$)**: Concurrency capped at $\max(3, \lfloor\text{base} \times 0.7\rfloor)$.
 - **Severely Degraded ($\text{EWMA} > 2000\text{ms}$)**: Concurrency choked to $\max(2, \lfloor\text{base} \times 0.4\rfloor)$.
-
 

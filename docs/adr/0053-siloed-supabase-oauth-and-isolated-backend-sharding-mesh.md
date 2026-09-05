@@ -1,7 +1,9 @@
 # 0053. Siloed Supabase OAuth Platform Authentication & Isolated Backend Substrate Sharding Mesh
 
 Date: 2026-08-24
-Status: Accepted
+Status: Accepted; post-auth destination clarified by ADR 0119
+
+> **Current scope:** The identity separation remains authoritative. ADR 0119 changes the successful authentication default to the `/models` catalog and prohibits a hosted chat or image-generation destination.
 
 ## Context
 GALXAI previously merged provider credential ingestion with frontend user authentication, creating unnecessary cognitive load and architectural coupling between frontend end-users and the underlying Substrate sharding engine. Frontend users signing in to manage workspace settings, telemetry, and API keys were exposed to complex sharding concepts (`shardMode`, `pooled vs private`, raw tokens).
@@ -27,7 +29,7 @@ flowchart TD
         User["Developer / Platform User"] --> ConnectUI["/auth/connect"]
         ConnectUI -->|1-Click GitHub / Google / Magic Link| SupabaseClient["createClient() (@supabase/ssr)"]
         SupabaseClient --> CallbackRoute["/auth/callback (exchangeCodeForSession)"]
-        CallbackRoute --> App["/playground / /dashboard"]
+        CallbackRoute --> App["/models model catalog"]
     end
 
     subgraph BackendInfrastructure ["Autonomous Backend Substrate (Sharding Service)"]

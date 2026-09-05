@@ -14,7 +14,7 @@
 
 ### Pillar 2: Zero Egress Fees & Zero DevOps Plumbing
 - **What it solves**: Cloud providers charge punitive egress fees and force engineering teams into 4-week custom backend proxy buildouts.
-- **The GALXAI Difference**: $0 egress/ingress data transfer fees combined with 1-line React primitives (`<GalxImage />`, `<GalxChat />`) and 1-line patches (`import 'galxai/patch'`). Zero server maintenance, zero API key leaks.
+- **The GALXAI Difference**: $0 egress/ingress data transfer fees combined with OpenAI-compatible inference, native SDKs, and 1-line patches (`import 'galxai/patch'`). Zero server maintenance, zero API key leaks.
 
 ### Pillar 3: Multi-Tiered Continuous Prompt Caching & Wholesale Margins
 - **What it solves**: High-volume power users destroy app gross margins under retail list prices.

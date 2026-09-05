@@ -333,7 +333,7 @@ export const JOB_ROLES: JobRole[] = [
       'Day 90: Build developer telemetry sandbox with zero-layout-shift real-time charting.',
     ],
     responsibilities: [
-      'Own and advance the core user experience across the GALX Chat interface, prompt playground, and real-time observability telemetry.',
+      'Own and advance the core user experience across the inference playground, gateway controls, and real-time observability telemetry.',
       'Architect resilient client-side state management with sub-millisecond local caching and offline recovery.',
       'Build rich interactive animations, streaming markdown parsers, and custom audio/image multimodal interfaces.',
       'Ensure WCAG AAA accessibility, bulletproof responsive layouts, and zero-layout-shift UI performance.',

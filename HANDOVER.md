@@ -20,7 +20,7 @@ During customer and investor discovery, a fundamental commercial realization eme
 
 ### The Current Dual-Pillar Positioning
 GALXAI is positioned as the **AI Consumption & Spend Governance Layer**:
-* **Pillar 1 (For Developers & Founders)**: **Accelerated Time-to-First-Dollar** (Drop-in React primitives `<GalxChat />`, `<GalxImage />`, and 1-line auto-patch `import 'galxai/patch'`).
+* **Pillar 1 (For Developers & Founders)**: **Accelerated Time-to-First-Dollar** (OpenAI-compatible inference, native SDKs, and 1-line auto-patch `import 'galxai/patch'`).
 * **Pillar 2 (For Engineering Leadership & CFOs)**: **Autonomous Spend Governance & Forensic Control** (Reverse-auditing live traffic to detect frontier model misallocation, cache collisions, and runaway agent loops at `/audit`).
 
 ---
@@ -51,7 +51,7 @@ Across production workloads, **40% to 70% of gross AI spend is pure operational 
 ```
                                   INCOMING TRAFFIC
                   ┌──────────────────────────────────────────────┐
-                  │ 1. Declarative UI (<GalxChat />, <GalxImage>) │
+                  │ 1. Native SDKs and Server Actions             │
                   │ 2. 1-Line Gateway (OPENAI_BASE_URL)          │
                   │ 3. SDK Patch (import 'galxai/patch')         │
                   └──────────────────────┬───────────────────────┘
@@ -84,7 +84,7 @@ Across production workloads, **40% to 70% of gross AI spend is pure operational 
 3. **Quality Equivalence & Tier Cascading Eval Harness** ([src/core/evals/TierCascadingEvalHarness.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/evals/TierCascadingEvalHarness.ts)):
    * Statistical benchmark harness (`scripts/run-tier-cascading-evals.ts`) measuring 95% Wilson confidence intervals ($\Delta \ge -0.005$) to prove zero quality degradation when cascading from Sol to Luna/Terra.
 4. **Declarative UI Component Suite** ([src/sdk/ui/](file:///Users/bozoegg/Desktop/GALXAI/src/sdk/ui/)):
-   * `<GalxChat />`, `<GalxImage />`, and `<GalxReasoningStream />` React primitives with zero-proxy server-side security.
+   * Optional `<GalxImage />` and `<GalxReasoningStream />` primitives for downstream applications with zero-proxy server-side security. These are integration artifacts, not GALXAI-hosted destination clients.
 5. **Model Catalog & Router** ([src/core/router/ModelCatalog.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/router/ModelCatalog.ts)):
    * Strictly configured for OpenAI flagship suite (`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, and GPT-Image suites).
 6. **Investor Diligence Room** ([docs/investors/](file:///Users/bozoegg/Desktop/GALXAI/docs/investors/)):
@@ -115,7 +115,9 @@ We want your candid assessment on the following critical strategic and engineeri
 
 ### ❓ Question 1: The Gateway vs SDK Abstraction Dilemma
 * **Current Strategy**: We support both (1-line gateway URL proxy + drop-in React components).
-* **The Debate**: Should GalX double down primarily on the **Network Proxy / Gateway Layer** (competing with Cloudflare AI Gateway, Portkey, Helicone) OR should we focus heavily on the **Application / React Component Layer** (`<GalxChat />`, `<GalxImage />`) where developers get instant UI zero-proxy velocity?
+* **Product Direction**: GalX is the **Network Proxy / Gateway Layer** (competing with Cloudflare AI Gateway, Portkey, and Helicone). It does not ship or maintain a first-party browser chat application or image studio.
+* **Activation Decision**: Successful authentication defaults to `/models`, where canonical model cards and workload-type tabs lead into specifications, API keys, and integration guidance. Explicit protected-route return paths remain respected.
+* **Storage Decision**: Client-only persona and image-history data was purged and removed from the public Supabase schema. Chat/session persistence remains because it implements an inference continuity contract, not a hosted chat product.
 * *What is the stronger moat?*
 
 ### ❓ Question 2: Autonomous Model Cascading vs Quality Paranoia
@@ -144,8 +146,8 @@ npm run dev
 # 2. Key live routes to inspect:
 # - http://localhost:3000/calculator (TCO & Velocity Simulator)
 # - http://localhost:3000/audit      (Spend Forensic & Governance Control Tower)
-# - http://localhost:3000/models     (OpenAI Model Arena)
-# - http://localhost:3000/playground (API Testing Shell)
+# - http://localhost:3000/models     (Canonical Model Catalog & Post-Auth Landing)
+# - http://localhost:3000/playground (Stateless API Request Inspector)
 
 # 3. Verify TypeScript build
 npx tsc --noEmit

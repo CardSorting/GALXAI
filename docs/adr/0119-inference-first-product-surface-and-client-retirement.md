@@ -1,0 +1,106 @@
+# ADR 0119: Inference-First Product Surface and First-Party Client Retirement
+
+## Metadata
+
+* **Status**: Accepted
+* **Date**: 2026-09-04
+* **Subsystem**: product surface, authentication, model catalog, Supabase lifecycle
+* **Impact**: product positioning, frontend maintenance, post-auth activation, database surface area
+* **Migration**: `20260905011334_retire_browser_client_tables.sql`
+
+## 1. Context
+
+GALXAI is an inference platform: its durable value is model discovery, authenticated API access, routing, metering, reliability, and spend governance. A first-party browser chat application and image studio introduced a conflicting product model. Users could reasonably interpret GALXAI as another destination chat or creative application, while maintainers inherited conversation presentation, composer behavior, sharing, personas, generated-image history, and studio interaction state.
+
+That surface duplicated work that belongs in downstream products. It also coupled browser features to `custom_personas` and `image_generations`, expanded the public Supabase schema, and pulled roadmap attention away from the inference boundary.
+
+The desired first authenticated action is therefore model selection, not content generation. A developer should see the available model fleet, choose a workload class, inspect the exact model ID and economics, and continue to API-key or integration setup.
+
+## 2. Decision
+
+### 2.1 Product boundary
+
+GALXAI will not ship or maintain a first-party browser chat application or image-generation studio. The following application routes and their supporting presentation components are retired:
+
+* `/chat`, `/share`, and `/characters`;
+* `/studio`;
+* the homepage procedural image-studio interaction;
+* the first-party persona CRUD endpoint and repository;
+* the exported `<GalxChat />` application widget.
+
+Optional SDK primitives that developers embed in their own products are not first-party destination applications. They may remain when they preserve server-side credential custody and call the public inference contracts.
+
+The existing `/playground` is classified narrowly as a stateless API request diagnostic. It may expose request JSON, response envelopes, headers, latency, and copyable integration snippets, but it must not add conversation history, personas, sharing, image libraries, creative project state, or synthetic output represented as successful inference. It should evolve toward the product name **API Request Inspector**. The destination test is behavioral, not route- or component-name based.
+
+### 2.2 Inference contracts remain
+
+The retirement is a presentation decision, not a model-capability deletion. GALXAI retains:
+
+* `POST /v1/chat/completions` and compatible message/inference handling;
+* `POST /v1/images/generations`;
+* `GET /v1/models` and model detail discovery;
+* logical session identity, rolling context, and `chat_conversations` / `chat_messages` for callers that explicitly opt into durable inference sessions;
+* the versioned browser-agent transport SDK as an integration library, without a GALXAI-hosted chat destination.
+
+Transport names such as `chat`, `messages`, and `conversation` describe wire compatibility and context semantics. They do not authorize a consumer chat product.
+
+### 2.3 Post-auth activation
+
+`/models` is the default successful authentication destination for password login, signup, email confirmation, OAuth callback, and the homepage authentication flow. Explicit return destinations continue to win for user-initiated protected workflows.
+
+The catalog renders the canonical `FRONTEND_VISIBLE_MODELS` array as cards and exposes model-type tabs for all models, language/reasoning models, and image-generation models. The selector includes counts, keyboard navigation, accessible tab semantics, search, and an empty-result recovery action. Model cards lead to specifications or API-key deployment rather than opening an inference composer.
+
+### 2.4 Database retirement
+
+The client-only `public.custom_personas` and `public.image_generations` relations are cleared and removed from the public/Data API schema. The applied migration:
+
+1. removes persona projection from `fn_get_chat_delta_sync`;
+2. drops the persona foreign key without removing generic `persona_id` compatibility metadata;
+3. deletes the eight legacy persona rows and the already-empty image history;
+4. revokes all table privileges; and
+5. moves empty tombstones to `private.retired_custom_personas` and `private.retired_image_generations`.
+
+The private empty tombstones satisfy the repository's staged expand/contract rule and provide a schema-only rollback path for one release. Deleted client data is not recreated by rollback. Direct `DROP TABLE`, `TRUNCATE`, and `CASCADE` remain prohibited in forward migrations.
+
+## 3. Invariants
+
+1. GALXAI-hosted web pages may discover, configure, meter, govern, and document inference; they must not become destination chat or image-creation applications.
+2. Removing a first-party client must not remove its compatible inference endpoint.
+3. Session persistence exists for explicit inference continuity, not to justify restoring a browser chat UI.
+4. The default post-auth destination is the canonical model catalog.
+5. A model card ends in specifications, API credentials, or integration guidance—not an embedded composer.
+6. Client-only persistence must not remain exposed through the public Supabase schema after its product surface is retired.
+7. Historical ADRs remain evidence of prior decisions, but this ADR governs the current product boundary.
+
+## 4. Consequences
+
+### Positive
+
+* The primary product reads as an inference and governance platform immediately after login.
+* Frontend maintenance no longer includes message composition, chat presentation, sharing, persona creation, studio generation state, or image-history UX.
+* Supabase loses two public client-only relations and the chat sync payload becomes smaller.
+* Chat and image inference remain compatible for SDK, REST, IDE, and downstream application consumers.
+
+### Trade-offs
+
+* GALXAI no longer provides an in-browser destination for casually trying a conversation or generating an image.
+* Activation now depends on model-card clarity and a strong path from model choice to API-key creation and documentation.
+* The private tombstones remain for one staged-retirement interval; a later contract decision may remove them under the database governance protocol.
+
+## 5. Verification
+
+* `npm run build` proves the retired application routes are absent and `/models` remains generated.
+* `npx tsc --noEmit` validates authentication and model-catalog contracts.
+* `npm run lint` validates the changed frontend surface.
+* `npm run db:verify` validates migration and rollback parity.
+* `npm run db:test` validates the live Supabase integration suite.
+* `npm run test:chat:hardening` verifies preserved context and inference-session handling.
+* Live catalog checks verify both retired relations are absent from `public`, both private tombstones contain zero rows, and chat sync no longer references `custom_personas`.
+
+## 6. Supersession and references
+
+* Partially supersedes ADR 0055 by retiring the hosted chat widget while retaining SDK and server-action integrations.
+* Supersedes the persona/image table scope inherited through ADR 0101 and reconciled by ADR 0117; ADR 0117 remains authoritative for surviving tenant-owned tables.
+* Partially supersedes ADR 0118: its versioned same-origin transport library remains, but there is no first-party browser agent/chat application.
+* Clarifies ADR 0116: logical session identity and persistence remain infrastructure contracts independent of any browser chat UI.
+* [Product Surface Strategy](../PRODUCT_SURFACE_STRATEGY.md) translates this decision into navigation, copy, roadmap, and activation rules.

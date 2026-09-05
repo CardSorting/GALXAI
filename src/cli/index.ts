@@ -20,7 +20,7 @@ async function main() {
   $ npx galxai skills                        Generate .cursor/rules, CLAUDE.md, AGENTS.md directives
   $ npx galxai setup                         Auto-configure project environment (.env.local) & templates
   $ npx galxai doctor                        Perform full connectivity, API key & Next.js health audit
-  $ npx galxai add <component>               Eject UI component (image, chat) into your components directory
+  $ npx galxai add <component>               Eject an image UI component into your components directory
   $ npx galxai tiers                         List all compute tiers, match bonuses & RPM quotas
   $ npx galxai stripe sync                   Provision & push all compute tiers & prices to Stripe
   $ npx galxai checkout [amount]             Generate 1-click Stripe Checkout session URL
@@ -67,7 +67,6 @@ async function main() {
 
 3. DECLARATIVE UI OVER IMPERATIVE CODE:
    - In React / Next.js views, use \`<GalxImage prompt="..." aspectRatio="16:9" />\` from \`galxai/ui\`.
-   - In chat views, use \`<GalxChat model="gpt-5.6-sol" />\` from \`galxai/ui\`.
 
 4. ZERO-MIGRATION LEGACY MIGRATION:
    - When migrating an existing OpenAI / Anthropic codebase, simply add \`import 'galxai/patch'\` at the entry point (\`layout.tsx\` or \`index.ts\`).
@@ -175,8 +174,8 @@ ${agentMarkdown}
     const path = await import('path');
     const comp = args[1]?.toLowerCase();
 
-    if (!comp || (comp !== 'image' && comp !== 'chat' && comp !== 'studio')) {
-      console.log(`\n\x1b[31mUsage:\x1b[0m npx galxai add <image | chat | studio>\n`);
+    if (!comp || (comp !== 'image' && comp !== 'studio')) {
+      console.log(`\n\x1b[31mUsage:\x1b[0m npx galxai add <image | studio>\n`);
       process.exit(1);
     }
 
@@ -189,10 +188,6 @@ ${agentMarkdown}
       const srcCode = `// Declarative GalxImage Component\n'use client';\nexport { GalxImage, type GalxImageProps } from 'galxai/ui';\n`;
       fs.writeFileSync(path.resolve(targetDir, 'GalxImage.tsx'), srcCode);
       console.log(`\n\x1b[32m✔\x1b[0m Added \x1b[1msrc/components/ui/GalxImage.tsx\x1b[0m\n`);
-    } else if (comp === 'chat') {
-      const srcCode = `// Declarative GalxChat Component\n'use client';\nexport { GalxChat, type GalxChatProps } from 'galxai/ui';\n`;
-      fs.writeFileSync(path.resolve(targetDir, 'GalxChat.tsx'), srcCode);
-      console.log(`\n\x1b[32m✔\x1b[0m Added \x1b[1msrc/components/ui/GalxChat.tsx\x1b[0m\n`);
     }
 
     process.exit(0);

@@ -1,190 +1,89 @@
-'use client';
-
-import React, { useState } from 'react';
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { DocsSubNav } from '@/components/dashboard/DocsSubNav';
-import { Cpu, Copy, Check, Zap } from 'lucide-react';
-import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
-import { TrustSeals } from '@/components/common/TrustSeals';
-import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
-import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
-import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
-import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
+
+const ENDPOINTS = [
+  ['POST', '/v1/chat/completions', 'OpenAI-compatible text and reasoning inference. Supports SSE.'],
+  ['POST', '/v1/messages', 'Anthropic Messages-compatible inference.'],
+  ['POST', '/v1/images/generations', 'Image generation for downstream applications.'],
+  ['POST', '/v1/embeddings', 'Vector embeddings for retrieval and search.'],
+  ['GET', '/v1/models', 'Available model IDs and capabilities.'],
+] as const;
 
 export function ApiReferenceClient() {
-  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
-
-  const endpoints = [
-    {
-      method: 'POST',
-      path: '/v1/chat/completions',
-      desc: 'Creates a model response for the given chat conversation with sub-15ms TTFT (supports SSE streaming).',
-      headers: ['Authorization: Bearer galx_live_...', 'Content-Type: application/json'],
-      body: '{\n  "model": "gpt-5.6-sol",\n  "messages": [\n    {"role": "user", "content": "Hello!"}\n  ],\n  "stream": true\n}',
-      curl: `curl https://api.galx.ai/v1/chat/completions \\
+  const defaultModel = FRONTEND_VISIBLE_MODELS.find((model) => model.category === 'llm')?.id ?? 'gpt-5.6-sol';
+  const request = `curl https://api.galx.ai/v1/chat/completions \\
+  -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer galx_live_your_key_here" \\
   -d '{
-    "model": "gpt-5.6-sol",
-    "messages": [{"role": "user", "content": "Hello!"}],
+    "model": "${defaultModel}",
+    "messages": [{"role": "user", "content": "Hello"}],
     "stream": true
-  }'`,
-    },
-    {
-      method: 'POST',
-      path: '/v1/messages',
-      desc: 'Anthropic Messages API compatible endpoint for seamless drop-in routing.',
-      headers: ['x-api-key: galx_live_...', 'anthropic-version: 2023-06-01', 'Content-Type: application/json'],
-      body: '{\n  "model": "claude-3-5-sonnet",\n  "max_tokens": 1024,\n  "messages": [\n    {"role": "user", "content": "Hello Anthropic format!"}\n  ]\n}',
-      curl: `curl https://api.galx.ai/v1/messages \\
-  -H "x-api-key: galx_live_your_key_here" \\
-  -H "anthropic-version: 2023-06-01" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "model": "claude-3-5-sonnet",
-    "max_tokens": 1024,
-    "messages": [{"role": "user", "content": "Hello Anthropic format!"}]
-  }'`,
-    },
-    {
-      method: 'POST',
-      path: '/v1/embeddings',
-      desc: 'Generates high-dimensional vector representations for semantic search and RAG retrieval.',
-      headers: ['Authorization: Bearer galx_live_...', 'Content-Type: application/json'],
-      body: '{\n  "model": "text-embedding-3-small",\n  "input": "Sub-15ms vector embeddings at scale"\n}',
-      curl: `curl https://api.galx.ai/v1/embeddings \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer galx_live_your_key_here" \\
-  -d '{
-    "model": "text-embedding-3-small",
-    "input": "Sub-15ms vector embeddings at scale"
-  }'`,
-    },
-    {
-      method: 'GET',
-      path: '/v1/models',
-      desc: 'Lists all available frontier AI models, max token context windows, and wholesale pricing tiers.',
-      headers: ['Authorization: Bearer galx_live_...'],
-      body: 'N/A',
-      curl: `curl https://api.galx.ai/v1/models \\
-  -H "Authorization: Bearer galx_live_your_key_here"`,
-    },
-    {
-      method: 'POST',
-      path: '/v1/images/generations',
-      desc: 'Generates high-definition visual assets given a text prompt using GPT-Image-2.',
-      headers: ['Authorization: Bearer galx_live_...', 'Content-Type: application/json'],
-      body: '{\n  "model": "openai-gpt-image-2",\n  "prompt": "Architectural schematic of futuristic AI datacenter",\n  "size": "1024x1024"\n}',
-      curl: `curl https://api.galx.ai/v1/images/generations \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer galx_live_your_key_here" \\
-  -d '{
-    "model": "openai-gpt-image-2",
-    "prompt": "Architectural schematic of futuristic AI datacenter",
-    "size": "1024x1024"
-  }'`,
-    },
-  ];
-
-  const handleCopy = async (idx: number, text: string) => {
-    await safeCopyToClipboard(text);
-    setCopiedIdx(idx);
-    setTimeout(() => setCopiedIdx(null), 2000);
-  };
+  }'`;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-[#07080d] text-white">
       <Navigation />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
-        <Breadcrumbs
-          items={[
-            { label: 'Docs', href: '/docs' },
-            { label: 'REST API & SSE Reference' },
-          ]}
-        />
+      <main id="main-content" className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
+        <Breadcrumbs items={[{ label: 'Docs', href: '/docs' }, { label: 'API reference' }]} />
 
-        {/* Hero Header */}
-        <div className="glass-panel rounded-3xl p-6 sm:p-10 space-y-4 border border-white/10 relative overflow-hidden">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-mono font-bold">
-              <Cpu className="w-3.5 h-3.5" />
-              <span>OPENAPI &amp; REST REFERENCE</span>
-            </div>
-            <Link
-              href="/playground"
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs font-mono uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center gap-2"
-            >
-              <Zap className="w-3.5 h-3.5 fill-black" />
-              <span>Live API Sandbox →</span>
-            </Link>
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-white">OpenAPI REST &amp; SSE Endpoint Reference</h1>
-          <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl font-sans">
-            GALXAI exposes standard OpenAI &amp; Anthropic-compatible endpoints with support for JSON request bodies, Server-Sent Events (SSE), and Bearer authentication with 0ms deterministic ambiguity resolution.
+        <header className="max-w-3xl pb-8 pt-6">
+          <h1 className="text-3xl font-semibold tracking-[-0.03em] sm:text-5xl">API reference</h1>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-zinc-300">
+            Send JSON to <code className="text-cyan-300">https://api.galx.ai/v1</code> with a Bearer key. Protocol names such as `chat` describe wire compatibility, not a hosted client.
           </p>
-        </div>
+          <Link href="/keys/new" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-indigo-200 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300">
+            Create API key
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        </header>
 
         <DocsSubNav />
 
-        {/* Founding Cohort Rate Lock Ribbon */}
-        <RateLockRibbon />
-
-        <div className="space-y-6">
-          {endpoints.map((ep, idx) => (
-            <section key={ep.path} className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className={`px-3 py-1 rounded-xl text-xs font-mono font-black ${ep.method === 'POST' ? 'bg-amber-400 text-black' : 'bg-cyan-500 text-black'}`}>
-                    {ep.method}
-                  </span>
-                  <code className="text-base font-mono font-bold text-white">{ep.path}</code>
-                </div>
-
-                <button
-                  onClick={() => handleCopy(idx, ep.curl)}
-                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-zinc-300 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer border border-white/5 shrink-0"
-                >
-                  {copiedIdx === idx ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedIdx === idx ? 'Copied cURL' : 'Copy cURL Request'}</span>
-                </button>
+        <section aria-labelledby="endpoints" className="mt-10">
+          <h2 id="endpoints" className="text-xl font-semibold">Endpoints</h2>
+          <div className="mt-3 divide-y divide-white/10 border-y border-white/10">
+            {ENDPOINTS.map(([method, path, description]) => (
+              <div key={`${method}-${path}`} className="grid gap-2 py-4 sm:grid-cols-[4rem_15rem_1fr] sm:items-baseline">
+                <span className="w-fit rounded bg-white/10 px-2 py-1 font-mono text-xs font-semibold text-zinc-200">{method}</span>
+                <code className="text-sm text-cyan-300">{path}</code>
+                <p className="text-sm leading-6 text-zinc-400">{description}</p>
               </div>
+            ))}
+          </div>
+        </section>
 
-              <p className="text-xs text-zinc-300 font-sans leading-relaxed">
-                {ep.desc}
-              </p>
+        <section aria-labelledby="authentication" className="mt-10 grid gap-5 md:grid-cols-[14rem_1fr]">
+          <div>
+            <h2 id="authentication" className="text-xl font-semibold">Authentication</h2>
+            <p className="mt-2 text-sm leading-6 text-zinc-400">Keep keys server-side and send them in the request header.</p>
+          </div>
+          <pre className="overflow-x-auto rounded-xl bg-black/40 p-4 text-sm leading-6 text-cyan-200 ring-1 ring-white/10">
+            <code>Authorization: Bearer galx_live_...</code>
+          </pre>
+        </section>
 
-              <div className="space-y-2">
-                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Required Headers:</span>
-                <div className="flex flex-wrap gap-2">
-                  {ep.headers.map((h, i) => (
-                    <code key={i} className="text-xs font-mono bg-black/60 px-3 py-1.5 rounded-xl border border-white/5 text-zinc-300">
-                      {h}
-                    </code>
-                  ))}
-                </div>
-              </div>
+        <section aria-labelledby="example-request" className="mt-10 grid gap-5 md:grid-cols-[14rem_1fr]">
+          <div>
+            <h2 id="example-request" className="text-xl font-semibold">Streaming request</h2>
+            <p className="mt-2 text-sm leading-6 text-zinc-400">Set <code>stream</code> to false for one JSON response.</p>
+          </div>
+          <pre className="overflow-x-auto rounded-xl bg-black/40 p-4 text-sm leading-6 text-cyan-200 ring-1 ring-white/10">
+            <code>{request}</code>
+          </pre>
+        </section>
 
-              <div className="space-y-2">
-                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">cURL Snippet:</span>
-                <pre className="p-4 rounded-2xl bg-black/60 font-mono text-xs text-cyan-300 border border-white/5 overflow-x-auto">
-                  <code>{ep.curl}</code>
-                </pre>
-              </div>
-            </section>
-          ))}
-        </div>
-
-        {/* Consumer-Grade Trust Seals */}
-        <TrustSeals />
+        <nav aria-label="Related API documentation" className="mt-10 flex flex-wrap gap-x-6 gap-y-3 border-t border-white/10 pt-6 text-sm">
+          <Link href="/docs/streaming" className="text-zinc-300 hover:text-white">Streaming</Link>
+          <Link href="/docs/error-handling" className="text-zinc-300 hover:text-white">Errors</Link>
+          <Link href="/docs/rate-limits" className="text-zinc-300 hover:text-white">Rate limits</Link>
+          <Link href="/docs/security-spec" className="text-zinc-300 hover:text-white">Security</Link>
+        </nav>
       </main>
-
-      {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
-      <FloatingConversionDock />
-      <LiveActivityToast />
-      <ExitIntentModal />
     </div>
   );
 }

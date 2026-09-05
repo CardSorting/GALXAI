@@ -10,20 +10,42 @@ const securityHeaders = [
     value: "SAMEORIGIN",
   },
   {
-    key: "X-XSS-Protection",
-    value: "1; mode=block",
-  },
-  {
     key: "Referrer-Policy",
     value: "strict-origin-when-cross-origin",
   },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), payment=*",
+    value: "camera=(), microphone=(), geolocation=(), payment=(self)",
   },
   {
     key: "Strict-Transport-Security",
     value: "max-age=63072000; includeSubDomains; preload",
+  },
+  {
+    key: "Cross-Origin-Opener-Policy",
+    value: "same-origin-allow-popups",
+  },
+  {
+    key: "Cross-Origin-Resource-Policy",
+    value: "same-site",
+  },
+  {
+    key: "Content-Security-Policy",
+    value: [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+      "frame-ancestors 'self'",
+      "form-action 'self' https://checkout.stripe.com",
+      "script-src 'self' 'unsafe-inline' https://js.stripe.com https://vercel.live",
+      "style-src 'self' 'unsafe-inline'",
+      "font-src 'self' data:",
+      "img-src 'self' data: blob: https:",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.galx.ai https://api.stripe.com https://*.vercel-insights.com",
+      "frame-src https://js.stripe.com https://hooks.stripe.com https://vercel.live",
+      "worker-src 'self' blob:",
+      "upgrade-insecure-requests",
+    ].join("; "),
   },
 ];
 
@@ -42,7 +64,8 @@ const nextConfig: NextConfig = {
   },
   logging: {
     fetches: {
-      fullUrl: true,
+      // Avoid copying query-string identifiers or signed URLs into production logs.
+      fullUrl: process.env.NODE_ENV !== "production",
     },
   },
   compiler: {
@@ -122,30 +145,6 @@ const nextConfig: NextConfig = {
           {
             key: "Access-Control-Allow-Origin",
             value: "*",
-          },
-        ],
-      },
-      {
-        source: "/api/:path*",
-        headers: [
-          { key: "Access-Control-Allow-Credentials", value: "true" },
-          { key: "Access-Control-Allow-Origin", value: "*" },
-          { key: "Access-Control-Allow-Methods", value: "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
-          {
-            key: "Access-Control-Allow-Headers",
-            value: "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, x-galx-key, x-api-key, dpop, baggage, sentry-trace",
-          },
-        ],
-      },
-      {
-        source: "/v1/:path*",
-        headers: [
-          { key: "Access-Control-Allow-Credentials", value: "true" },
-          { key: "Access-Control-Allow-Origin", value: "*" },
-          { key: "Access-Control-Allow-Methods", value: "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
-          {
-            key: "Access-Control-Allow-Headers",
-            value: "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, x-galx-key, x-api-key, dpop, baggage, sentry-trace",
           },
         ],
       },

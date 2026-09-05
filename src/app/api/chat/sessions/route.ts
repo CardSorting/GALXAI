@@ -10,7 +10,7 @@ import {
   normalizeChatResourceId,
   parseChatJsonBody,
 } from '@/core/chat/GalxChatRequestNormalizer';
-import type { ChatSession } from '@/components/chat/ChatSidebar';
+import type { PersistedChatSession as ChatSession } from '@/core/chat/GalxChatPersistenceContracts';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';

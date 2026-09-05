@@ -488,5 +488,4 @@ Complete this authoritative 7-point checklist when onboarding to a new developme
 - [ ] **7. Governance & Contribution Standards**:
   - Review [MAINTAINERS.md](file:///Users/bozoegg/Desktop/GALXAI/MAINTAINERS.md) for PR review gates and emergency protocols.
   - Review [CONTRIBUTING.md](file:///Users/bozoegg/Desktop/GALXAI/CONTRIBUTING.md) for conventional commits and ADR workflows.
-- [ ] **8. Launch Development Server**: Run `npm run dev` and navigate to `http://localhost:3000` to verify the dashboard and interactive API playground.
-
+- [ ] **8. Launch Development Server**: Run `npm run dev`, authenticate, and verify that the default journey reaches the `/models` catalog. Treat `/playground` only as a stateless API request diagnostic; it must not expose chat history or creative-studio behavior.

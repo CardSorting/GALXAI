@@ -12,12 +12,7 @@ import {
   CheckCircle2,
   Zap,
 } from 'lucide-react';
-import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
-import { TrustSeals } from '@/components/common/TrustSeals';
-import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
-import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
-import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export function StructuredOutputsClient() {
   const [activeTab, setActiveTab] = useState<'pydantic' | 'zod' | 'vercel' | 'raw'>('pydantic');
@@ -41,12 +36,12 @@ class ProductCatalog(BaseModel):
     key_features: List[str] = Field(description="Top 3 core capabilities")
     enterprise_ready: bool
 
-# Guaranteed 100% Schema Compliance with 0 hallucinations
+# Validate a schema-constrained response
 completion = client.beta.chat.completions.parse(
     model="gpt-5.6-sol",
     messages=[
         {"role": "system", "content": "Extract structured product catalog specifications."},
-        {"role": "user", "content": "Acme AI Gateway costs $25/mo with sub-15ms TTFT, prompt caching, and zero data retention for enterprise scale."}
+        {"role": "user", "content": "Acme AI Gateway supports streaming, prompt caching, and stateless inference."}
     ],
     response_format=ProductCatalog
 )
@@ -159,7 +154,7 @@ export async function POST(req: Request) {
           items={[
             { label: 'Docs', href: '/docs' },
             { label: 'API & Cookbooks', href: '/docs/api-reference' },
-            { label: 'Guaranteed Structured Outputs' },
+            { label: 'Structured Outputs' },
           ]}
         />
 
@@ -168,7 +163,7 @@ export async function POST(req: Request) {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>100% SCHEMA ADHERENCE GUARANTEE</span>
+              <span>SCHEMA-CONSTRAINED RESPONSES</span>
             </div>
             <Link
               href="/keys/new"
@@ -178,22 +173,21 @@ export async function POST(req: Request) {
               <span>Get Live Key</span>
             </Link>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-white">Guaranteed Structured JSON Outputs Guide</h1>
+          <h1 className="text-3xl sm:text-4xl font-black text-white">Structured JSON Outputs</h1>
           <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl font-sans">
-            Enforce 100% adherence to complex JSON Schemas, Pydantic models, and Zod definitions with zero missing keys, zero syntax errors, and zero hallucinations.
+            Supply a JSON Schema, validate the returned payload in your application, and handle refusal or validation failures explicitly.
           </p>
         </div>
 
         <DocsSubNav />
 
         {/* Founding Cohort Rate Lock Ribbon */}
-        <RateLockRibbon />
 
         {/* Benefits Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
           <div className="glass-panel p-5 rounded-3xl space-y-1 border border-emerald-500/30 bg-emerald-500/5">
             <span className="text-emerald-400 text-[10px] uppercase font-sans font-semibold">Schema Adherence</span>
-            <div className="text-2xl font-black text-emerald-300">100.0% Guaranteed</div>
+            <div className="text-2xl font-black text-emerald-300">Constrained</div>
             <div className="text-[11px] text-emerald-400 font-sans">Constrained decoding at token generation</div>
           </div>
 
@@ -205,8 +199,8 @@ export async function POST(req: Request) {
 
           <div className="glass-panel p-5 rounded-3xl space-y-1 border border-white/10">
             <span className="text-zinc-500 text-[10px] uppercase font-sans">Output Integrity</span>
-            <div className="text-2xl font-black text-white">Zero Missing Keys</div>
-            <div className="text-[11px] text-zinc-400 font-sans">Strict JSON syntax guaranteed</div>
+            <div className="text-2xl font-black text-white">Validate Output</div>
+            <div className="text-[11px] text-zinc-400 font-sans">Handle schema and refusal errors</div>
           </div>
         </div>
 
@@ -253,13 +247,9 @@ export async function POST(req: Request) {
         </div>
 
         {/* Consumer-Grade Trust Seals */}
-        <TrustSeals />
       </main>
 
       {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
-      <FloatingConversionDock />
-      <LiveActivityToast />
-      <ExitIntentModal />
     </div>
   );
 }

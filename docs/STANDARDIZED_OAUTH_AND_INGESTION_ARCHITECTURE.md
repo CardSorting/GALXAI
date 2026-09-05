@@ -28,7 +28,7 @@ await signInWithOAuth('github'); // Or 'google'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/playground';
+  const next = searchParams.get('next') ?? '/models';
 
   if (code) {
     const cookieStore = await cookies();
@@ -42,6 +42,8 @@ export async function GET(request: Request) {
   return NextResponse.redirect(`${origin}/auth/connect?error=auth_failed`);
 }
 ```
+
+`/models` is the activation default established by ADR 0119. Explicit protected-route return destinations may be honored after validation; authentication must not default to a chat, image-generation, or other content-composition surface.
 
 ---
 

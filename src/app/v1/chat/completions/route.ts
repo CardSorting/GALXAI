@@ -29,7 +29,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 export const runtime = 'nodejs';
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const PERSISTED_MESSAGE_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$/;
 
@@ -46,8 +46,8 @@ export async function OPTIONS() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Galx-Async, X-Galx-Queue, X-Galx-Webhook-Url, X-Galx-Priority, X-Galx-Delay-Ms, X-Galx-Session-Id, X-Galx-Session-Mode, X-Galx-Turn-Id, Idempotency-Key, Prefer',
-      'Access-Control-Expose-Headers': 'X-Galx-Request-Id, X-Galx-Conversation-Id, X-Galx-Session-Mode, X-Galx-Turn-Id',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Galx-Async, X-Galx-Queue, X-Galx-Webhook-Url, X-Galx-Priority, X-Galx-Delay-Ms, X-Galx-Session-Id, X-Galx-Session-Mode, X-Galx-Turn-Id, X-Galx-Protocol-Version, X-Deployment-Id, Idempotency-Key, Prefer',
+      'Access-Control-Expose-Headers': 'X-Galx-Request-Id, X-Galx-Conversation-Id, X-Galx-Session-Mode, X-Galx-Turn-Id, X-Galx-Protocol-Version',
       'Access-Control-Max-Age': '86400'
     }
   });
@@ -550,7 +550,8 @@ export async function POST(req: NextRequest) {
     headers.set('X-Galx-Conversation-Id', conversationId || '');
     headers.set('X-Galx-Session-Mode', chatIdentity.mode);
     headers.set('X-Galx-Turn-Id', chatIdentity.turnId);
-    headers.set('Access-Control-Expose-Headers', 'X-Galx-Request-Id, X-Galx-Conversation-Id, X-Galx-Session-Mode, X-Galx-Turn-Id');
+    headers.set('X-Galx-Protocol-Version', '2026-09-04');
+    headers.set('Access-Control-Expose-Headers', 'X-Galx-Request-Id, X-Galx-Conversation-Id, X-Galx-Session-Mode, X-Galx-Turn-Id, X-Galx-Protocol-Version');
     headers.set(
       'X-Galx-Data-Policy',
       conversationId

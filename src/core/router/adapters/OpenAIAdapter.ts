@@ -447,7 +447,6 @@ export class OpenAIAdapter {
     secret?: DecryptedGalxSecret,
     options?: ExecuteOptions
   ): Promise<{ response: Response; headers: Record<string, string> }> {
-    // @ts-ignore - Optional dependency for direct local WebSocket execution
     const wsModule = await import('ws');
     const WebSocket = (wsModule as any).default || wsModule;
 

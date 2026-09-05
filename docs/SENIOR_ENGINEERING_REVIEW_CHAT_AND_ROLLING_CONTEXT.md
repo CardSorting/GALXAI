@@ -5,6 +5,8 @@
 **Classification:** Core System Architecture & Database Ledger  
 **Status:** Implemented, Tested (100% Test Pass Rate), and Live on Supabase  
 
+> **Product-boundary note (ADR 0119):** “Chat” in this document names the OpenAI-compatible inference protocol and optional durable context model. GALXAI no longer hosts a browser chat application; the context substrate remains for explicit API/SDK session continuity.
+
 ---
 
 ## 1. Executive Summary
@@ -99,10 +101,9 @@ All 10 migrations were written following paranoid governance invariants, applied
   - Developer: Up to **128k tokens context** and **16k output tokens**.
 - **Page Density Estimator**: Calculates document density (~2,200 chars / page) for high-velocity multi-page ingestion.
 
-### 4.3. UI & Frontend Telemetry
-- **[ChatInputArea.tsx](file:///Users/bozoegg/Desktop/GALXAI/src/components/chat/ChatInputArea.tsx)**: Displays live document density badge (`"⚡ High-Velocity Context: ~1,001 pages (578,992 tokens) • Dynamic 1M Window Ready"`).
-- **[ChatMessageList.tsx](file:///Users/bozoegg/Desktop/GALXAI/src/components/chat/ChatMessageList.tsx)**: Displays clean ambient rolling memory indicator (`"⚡ Rolling Memory Active: 14 earlier turns preserved in frontier context"`).
-- **[ChatHeader.tsx](file:///Users/bozoegg/Desktop/GALXAI/src/components/chat/ChatHeader.tsx) & [ChatSettingsModal.tsx](file:///Users/bozoegg/Desktop/GALXAI/src/components/chat/ChatSettingsModal.tsx)**: Live 5-Hour (`91%`) and Weekly (`55%`) limit cards with real-time countdown clocks.
+### 4.3. Browser UI Retirement
+
+The first-party conversation interface was retired so GALXAI remains focused on inference infrastructure. The rolling-context, quota, and persistence engines continue to serve authenticated API and SDK traffic.
 
 ---
 

@@ -62,8 +62,14 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 - **OpenAI & Anthropic Compatibility**: All public endpoints must conform to standard provider schemas (`RFC 8895` SSE streaming).
 - **Sub-15ms Wire Latency**: Use zero-copy binary streaming and unbuffered headers (`X-Accel-Buffering: no`).
 
-### Layer 3: Developer SDK & UI Components (`src/sdk/`)
-- **Zero-Proxy Server Directives**: Frontend components must use server actions (`'use server'`) or middleware interceptors to protect user API keys.
+### Layer 3: Developer SDK & Integrations (`src/sdk/`)
+- **Downstream Ownership**: SDK primitives, server actions, and middleware help developers build their own applications while keeping provider credentials server-side.
+- **No Destination Client**: Do not add a GALXAI-hosted chat, persona, sharing, image-studio, or generated-content library through the SDK or web application.
+
+### Layer 4: Web Control Plane (`src/app/` & `src/components/`)
+- **Model-First Activation**: Successful authentication defaults to `/models`; model selection should lead to specifications, credentials, or integration guidance.
+- **Platform Scope**: Hosted UI is limited to discovery, configuration, billing, telemetry, routing, governance, documentation, and bounded API diagnostics.
+- **Decision Test**: Apply [Product Surface Strategy](docs/PRODUCT_SURFACE_STRATEGY.md) before proposing a web feature.
 
 ---
 
@@ -88,6 +94,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
    - Title your PR using [Conventional Commits](#5-commit-message-conventions).
    - Describe the problem solved, architectural implications, and verification commands executed.
    - Link any related issues or ADRs.
+   - For web-product changes, state how the proposal passes the Product Surface Strategy decision test.
 
 ---
 
@@ -123,7 +130,7 @@ docs(playbooks): add Stage 8 unframed observation protocol
 
 ## 6. Architecture Decision Records (ADRs)
 
-If your contribution introduces a new architectural subsystem, alters public API contracts, or changes routing/compaction invariants, **you must author an Architecture Decision Record (ADR)** in `docs/adr/`.
+If your contribution introduces a new architectural subsystem, alters public API contracts, changes routing/compaction invariants, or revisits the hosted-product boundary, **you must author an Architecture Decision Record (ADR)** in `docs/adr/`. A proposal for conversation history, creative projects, sharing, or client-only persistence must explicitly revisit ADR 0119.
 
 Follow the template in [`docs/adr/README.md`](docs/adr/README.md).
 

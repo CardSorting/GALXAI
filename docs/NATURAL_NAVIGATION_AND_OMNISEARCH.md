@@ -56,7 +56,7 @@ GALXAI implements pre-normalized Soundex phonetic matching and acronym mappings 
 | `faq` | `/faq` | Zero data retention & security answers |
 | `sdk` | `/docs` | Developer documentation & SDK cheatsheets |
 | `api` | `/keys` | Zero-markup developer token manager |
-| `ui` | `/playground` | Interactive prompt sandbox & model tester |
+| `ui` | `/playground` | Stateless API request inspector and model diagnostic |
 | `tax` | `/billing/invoices` | Business VAT/tax invoices & PDF downloads |
 | `sub` | `/queues` | Asynchronous background requests & worker tasks |
 
@@ -125,7 +125,7 @@ When a user selects an Action result (e.g. `> curl` or `> python`), the action s
 | `g k` | **API Keys** (`/keys`) | Manage zero-markup developer tokens |
 | `g b` | **Billing** (`/billing`) | Compute wallet, invoices, and deposits |
 | `g q` | **Queues** (`/queues`) | Async background tasks & live results |
-| `g p` | **Playground** (`/playground`) | Interactive prompt & token tester |
+| `g p` | **API Inspector** (`/playground`) | Stateless request, response, headers, and latency diagnostic |
 | `g t` | **Tools** (`/tools/prompt-compressor`) | Interactive BroccoliDB prompt compressor & simulators |
 | `g d` | **Documentation** (`/docs`) | Developer guides and SDK cheatsheets |
 | `g s` | **Status** (`/status`) | Real-time multi-region SLA health |

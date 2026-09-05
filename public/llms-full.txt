@@ -6,8 +6,10 @@ GALXAI (https://galx.ai) is an enterprise-grade AI model clearinghouse, multi-ac
 - **75% Compound Prompt Caching**: 100% pass-through of provider prefix caching rebates on prompts exceeding 1,024 tokens.
 - **Zero Rate-Limit Stalls (429 Shield)**: Predictive Adaptive Hydraulic Headroom (P-AHT) and continuous token governance across distributed enterprise shards.
 - **Sub-15ms Anycast TTFT**: Global edge TLS termination points across North America, Europe, and Asia-Pacific.
-- **Zero Data Retention (ZDR)**: Ephemeral volatile RAM streaming chunk buffers. Prompts and completions are never stored to disk or used for training.
+- **Zero Data Retention (ZDR)**: Stateless calls use ephemeral volatile RAM streaming buffers and are not stored as conversation history or used for training. Explicit owner-scoped durable sessions are retained only when a caller opts into continuity.
 - **Zero Platform Seat Surcharges**: $0/month seat fees for unlimited developers, teams, and cost-center workspaces.
+
+GALXAI is the inference and governance layer, not a destination chat or image-generation application. Its hosted web product centers model discovery, credentials, routing, telemetry, billing, and governance; authenticated users default to `/models`. Downstream applications own conversation and creative workflows.
 
 ## 2. Global API Endpoints & Authentication
 - **Base URL**: `https://api.galx.ai/v1`

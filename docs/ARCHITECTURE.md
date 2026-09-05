@@ -6,11 +6,12 @@ This document provides a comprehensive technical breakdown of the GALXAI univers
 
 ## 🏗️ System Overview
 
-GALXAI sits between downstream client applications (chat interfaces, agentic swarms, SDKs, IDEs) and upstream foundation model providers (OpenAI, xAI Grok). It abstracts distributed, sharded API credentials into a unified compute layer with continuous capacity management and transparent failover.
+GALXAI sits between downstream client applications (chat interfaces, creative tools, agentic swarms, SDKs, and IDEs) and upstream foundation model providers (OpenAI, xAI Grok). GALXAI itself is the inference and governance layer, not one of those destination applications. Its web control plane exposes model discovery, API configuration, billing, telemetry, and governance.
 
 ```mermaid
 flowchart TD
-    Client[Client Application / SDK / Agent Swarm] -->|Bearer galx_live_... / galx_sess_...| Gateway[GALXAI Universal Gateway]
+    ControlPlane[GALXAI Web Control Plane<br/>/models · keys · billing · telemetry · governance] -->|configuration and discovery| Gateway[GALXAI Universal Gateway]
+    Client[Downstream Application / SDK / Agent Swarm] -->|Bearer galx_live_... / galx_sess_...| Gateway
     
     subgraph Gateway Ingress & Privacy
         Auth[API Key & Session Authenticator] --> Risk[Behavioral Risk Evaluator]
@@ -36,6 +37,12 @@ flowchart TD
         ZDR -->|Zero Data Retention Stream| Grok[xAI Grok Fleet: grok-4.6, grok-4.5, grok-image]
     end
 ```
+
+### Hosted product boundary
+
+The web control plane does not host chat or image-generation composers. `/chat`, `/share`, `/characters`, and `/studio` are retired. Successful authentication defaults to the `/models` catalog, whose cards and model-type tabs lead developers toward specifications, credentials, and integration guidance. OpenAI-compatible chat and image endpoints remain gateway contracts, and owner-scoped chat tables remain available for callers that explicitly select durable inference sessions.
+
+Client-only `custom_personas` and `image_generations` data was purged by migration `20260905011334_retire_browser_client_tables.sql`. The empty relations were revoked and moved from `public` to private retired tombstones under the staged database contract protocol. See ADR 0119.
 
 ---
 
@@ -103,7 +110,7 @@ All architectural components in GALXAI are governed by formal Architectural Deci
 | **[ADR 0052](adr/0052-enterprise-oauth21-rtr-fapi-backchannel-and-vacuum-mesh.md)** | Enterprise OAuth 2.1 Refresh Token Rotation (RTR), Token Family Theft Containment, OIDC Back-Channel Logout & Substrate Vacuum Mesh | RFC 6819 Token Family theft containment cascades, 30s grace window replay tolerance, OpenID Connect Back-Channel Logout 1.0, and sub-millisecond PostgreSQL substrate vacuum stored procedures. |
 | **[ADR 0053](adr/0053-siloed-supabase-oauth-and-isolated-backend-sharding-mesh.md)** | Siloed Supabase OAuth Platform Authentication & Isolated Backend Substrate Sharding Mesh | Complete decoupling of frontend platform identity (standard Supabase OAuth with `@supabase/ssr`) from backend Substrate sharding infrastructure. |
 | **[ADR 0054](adr/0054-apex-transport-hardening-rfc9530-rfc9421-idempotency-and-anti-replay.md)** | Apex Transport Layer Hardening: RFC 9530 Digests, RFC 9421 Signatures, IETF Idempotency, and Anti-Replay Nonces | Constant-time SHA-256 digest validation, RFC 9421 message signatures, 24h Idempotency-Key caching, sliding-window rate limiting, and geo-velocity anomaly sensing. |
-| **[ADR 0055](adr/0055-ambient-declarative-ai-substrate-zero-route-and-auto-patcher.md)** | Ambient Declarative AI Substrate, Zero-Route Direct Actions & Runtime Auto-Patcher | 6-Tier connection architecture: Declarative JSX components (`<GalxImage>`, `<GalxChat>`), React 19 Server Actions (`galxai/actions`), Edge Middleware Interceptors, Runtime Auto-Patcher (`galxai/patch`), and NL2API Intent Engine. |
+| **[ADR 0055](adr/0055-ambient-declarative-ai-substrate-zero-route-and-auto-patcher.md)** | Ambient Declarative AI Substrate, Zero-Route Direct Actions & Runtime Auto-Patcher | Downstream integration architecture spanning media JSX primitives, React 19 Server Actions (`galxai/actions`), Edge Middleware Interceptors, Runtime Auto-Patcher (`galxai/patch`), and NL2API Intent Engine. |
 | **[ADR 0056](adr/0056-broccolidb-85-buffer-deduplication-and-streaming-pipeline-substrate.md)** | BroccoliDB 85-Buffer Algorithmic DeDuplication & High-Velocity Streaming Substrate | 85 specialized deduplication buffers across 17 tiers achieving 70%–99% spend reduction, sub-5ns execution, and lock-free 1.74M ops/sec stream ingestion. |
 | **[ADR 0057](adr/0057-broccolidb-mega-incident-cascader-and-pyramid-compaction-substrate.md)** | Mega-Incident Stream Cascading & Mega-Document Hierarchical Pyramid Compactor | 4-Stage streaming anomaly cascader (2,000+ pages in 57ms, 98.9% spend cut) and 3-Layer hierarchical pyramid compactor (300+ pages in 14ms, 97.9% spend cut). |
 | **[ADR 0058](adr/0058-broccolidb-180-domain-industry-cluster-compactor-substrate.md)** | BroccoliDB 180-Domain Enterprise Industry Cluster Compaction Substrate | 180 production enterprise domain compactors across 21 industry clusters with 100% test coverage and standardized protocol schemas (HL7, FHIR, SWIFT, WITSML). |
@@ -121,6 +128,7 @@ All architectural components in GALXAI are governed by formal Architectural Deci
 | **[ADR 0113](adr/0113-unpredictable-2-3-minute-inference-mlfq-itl-watchdog-and-resumable-streams.md)** | Unpredictable 2–3 Minute Inference Engine: 3-Tier MLFQ, ITL Watchdog, Anti-Zombie Leash & Resumable Streams | 3-Tier MLFQ fleet partitioning (Interactive 25% / Deep 65% / Scavenger 10%), ITL watchdog with sub-50ms shadow shard handover, Anti-Zombie Leash with transactional wallet refunds, and BroccoliDB durable token buffering for Last-Event-ID SSE resumable streams. |
 | **[ADR 0114](adr/0114-uncertain-execution-authority-kernel-and-transactional-journal.md)** | Uncertain Execution Authority Kernel & Transactional Journal | Separates authoritative execution transitions, authorized work delivery, journal observations, and live transport projections. |
 | **[ADR 0115](adr/0115-postgresql-authoritative-shard-registry-and-secret-free-projections.md)** | PostgreSQL-Authoritative Shard Registry & Secret-Free Projections | Makes Supabase PostgreSQL the sole credential authority with fail-closed mutations, forced RLS, service-only fenced lease RPCs, retired legacy authorities, and replaceable BroccoliDB routing projections. |
+| **[ADR 0119](adr/0119-inference-first-product-surface-and-client-retirement.md)** | Inference-First Product Surface and First-Party Client Retirement | Retires hosted chat/image clients, preserves inference APIs and explicit durable sessions, makes `/models` the default post-auth surface, and removes client-only tables from public Supabase authority. |
 
 ---
 
@@ -188,7 +196,8 @@ flowchart TD
         User["Developer / Platform User"] --> ConnectUI["/auth/connect"]
         ConnectUI -->|1-Click GitHub / Google / Magic Link| SupabaseSSR["@supabase/ssr (createBrowserClient)"]
         SupabaseSSR --> SSRCallback["/auth/callback (exchangeCodeForSession)"]
-        SSRCallback --> Dashboard["Developer Workspace / Keys / Billing"]
+        SSRCallback --> ModelCatalog["/models: canonical cards + model-type tabs"]
+        ModelCatalog --> Dashboard["Developer Workspace / Keys / Billing / Telemetry"]
     end
 
     subgraph Tier2 ["Tier 2: Backend Autonomous Sharding (Substrate Subsystem)"]

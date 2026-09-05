@@ -33,7 +33,7 @@ export default function MigrationGuidePage() {
       },
       {
         name: 'Run Immediate Inference',
-        text: 'Execute your completions as usual with 25%–40% wholesale margin and 75% prompt caching.',
+        text: 'Execute a test request and verify the returned model, usage, and streaming behavior.',
       },
     ],
   });

@@ -1,6 +1,6 @@
 # ADR 0072: Exact-Owner Chat Persistence and Delta Sync Mesh
 
-**Status:** Accepted & Implemented  
+**Status:** Accepted & Implemented; client/persona scope narrowed by ADR 0119
 **Date:** 2026-08-29  
 **Deciders:** Principal Architecture & Sovereign Infrastructure Team  
 **Consulted:** Frontend Engineering, Security Engineering, Database Core  
@@ -8,9 +8,11 @@
 
 ---
 
+> **Current scope:** The owner-scoped conversation, message, and delta-sync contracts remain available to downstream clients that explicitly request durable inference sessions. ADR 0119 retired GALXAI's hosted chat UI and removed persona hydration from the sync projection.
+
 ## 1. Context and Problem Statement
 
-Multi-device conversational interfaces and agentic web workspaces require continuous synchronization of chat sessions, messages, reasoning chains, and custom character personas. 
+Multi-device conversational interfaces and agentic workspaces can require continuous synchronization of chat sessions, messages, and reasoning chains. The original implementation also synchronized custom character personas; that client-only projection is now retired.
 
 In traditional architectures, this is handled by naive polling (`SELECT * FROM messages`) or fragmented multi-endpoint writes (`POST /sessions`, `POST /messages`, `POST /personas`). This design has three critical vulnerabilities:
 1. **Broken Ownership Boundaries & IDOR**: Malicious users could supply conversation identifiers belonging to other tenants to associate, overwrite, or extract unowned chat transcripts.
@@ -34,7 +36,7 @@ We implemented **PostgreSQL Migration V53** (`20260829000053_galxai_chat_context
 
 ```mermaid
 flowchart TD
-    Client[Client UI / Edge Hook] --> Router[Next.js App Router /api/chat/sync]
+    Client[Downstream Client / Edge Hook] --> Router[Next.js App Router /api/chat/sync]
     
     subgraph Atomic_Postgres_Procedures [PostgreSQL Migration V53 Core Procedures]
         Bootstrap[fn_get_chat_composite_bootstrap: 1-Hop Hydration]
@@ -47,7 +49,7 @@ flowchart TD
     
     Router --> DeltaSync
     DeltaSync -->|ETag Match| Fast304[Return notModified: true, 0ms Egress]
-    DeltaSync -->|Cache Invalidation| Hydrate[Hydrate Top 5 Active Sessions + Personas]
+    DeltaSync -->|Cache Invalidation| Hydrate[Hydrate Top 5 Active Sessions]
     Router --> Bundle
     Bundle --> OwnerUpsert
 ```
@@ -61,7 +63,7 @@ flowchart TD
 2. **`fn_get_chat_delta_sync(p_user_id, p_client_etag, p_since_epoch, p_active_session_id)`**:
    - Computes an MD5 signature over conversation counts, maximum `updated_at`, message counts, and maximum `created_at`.
    - Returns `{ notModified: true, etag }` if signatures match.
-   - On cache miss, hydrates the active session, top 5 multi-session message maps, and accessible custom personas in 1 query.
+   - On cache miss, hydrates the active session and top 5 multi-session message maps in 1 query. The former persona projection was retired by ADR 0119.
 3. **`fn_sync_chat_bundle(p_session, p_messages, p_user_id, p_delete_session_id)`**:
    - Combines session creation, title renaming, batch message upserting, or session deletion into a single atomic transaction.
 4. **`galx_delete_chat_conversation(p_id, p_user_id, p_hard_delete)`**:

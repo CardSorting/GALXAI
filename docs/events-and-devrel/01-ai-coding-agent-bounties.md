@@ -11,7 +11,7 @@ Harness the rapidly growing ecosystem of AI coding agents (Cursor, Claude Code, 
 |---|---|:---:|
 | **Track 1: IDE Agent Directives** | Create and test optimized `.cursor/rules`, `CLAUDE.md`, or Windsurf rules for popular fullstack frameworks. | **$100.00 Compute Grant + Merkle Proof Badge** |
 | **Track 2: Open Source Framework Shims** | Build drop-in adapters for LangChain, LlamaIndex, LiteLLM, or AutoGen connecting to GALXAI. | **$250.00 Compute Grant + Listed in Docs** |
-| **Track 3: Production Starter Repos** | Publish a complete, open-source Next.js 15 template with `<GalxImage />` and `<GalxChat />` on GitHub. | **$500.00 Compute Grant + Featured on Homepage** |
+| **Track 3: Production Starter Repos** | Publish a complete, open-source Next.js 15 inference template using the GALXAI gateway on GitHub. | **$500.00 Compute Grant + Featured on Homepage** |
 
 ---
 

@@ -22,6 +22,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
+import { DEFAULT_POST_AUTH_PATH } from '@/lib/auth/redirects';
 
 // =============================================================================
 // BESPOKE 3D TILT & DUAL-LAYER SPOTLIGHT CARD PRIMITIVE
@@ -126,8 +127,7 @@ export function BespokeSpotlightCard({
 export function ArtisanalSignalSection() {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [activeModeTab, setActiveModeTab] = useState<'ui' | 'patch' | 'agents'>('ui');
-  const [activeUiDemo, setActiveUiDemo] = useState<'image' | 'chat'>('image');
-  const [sandboxMode, setSandboxMode] = useState<'terminal' | 'image' | 'roi' | 'speed' | 'enclave'>('terminal');
+  const [sandboxMode, setSandboxMode] = useState<'terminal' | 'roi' | 'speed' | 'enclave'>('terminal');
 
   // ===========================================================================
   // 5. SIMULATED SOVEREIGN PRIVATE ENCLAVE & ZERO DATA RETENTION STATE
@@ -242,139 +242,7 @@ export function ArtisanalSignalSection() {
   };
 
   // ===========================================================================
-  // 2. SIMULATED CANVAS LATENT DIFFUSION RESOLVER
-  // ===========================================================================
-  const [imageRatio, setImageRatio] = useState<'16:9' | '1:1' | '9:16'>('16:9');
-  const [imagePrompt, setImagePrompt] = useState('Cyberpunk neon metropolis at dusk');
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const [renderStep, setRenderStep] = useState(100);
-  const [imageSeed, setImageSeed] = useState(8492);
-  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
-
-  // Procedural canvas renderer to simulate latent diffusion
-  const renderProceduralCanvas = React.useCallback((seedNum: number, progress: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const w = canvas.width;
-    const h = canvas.height;
-
-    // 1. Dark base
-    ctx.fillStyle = '#06080f';
-    ctx.fillRect(0, 0, w, h);
-
-    // 2. Background gradient horizon
-    const horizonY = h * 0.62;
-    const grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, '#090d1f');
-    grad.addColorStop(0.5, '#1e1035');
-    grad.addColorStop(0.7, '#070b18');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, w, horizonY);
-
-    // 3. Neon City Skyline / Synth Waveform
-    const buildingsCount = 28;
-    for (let i = 0; i < buildingsCount; i++) {
-      const bWidth = w / buildingsCount + 4;
-      const bX = i * (w / buildingsCount);
-      const randHeight = Math.sin((i + seedNum) * 12.3) * 0.5 + 0.5;
-      const bHeight = randHeight * (h * 0.45) * (progress / 100);
-      const bY = horizonY - bHeight;
-
-      // Building gradient
-      const bGrad = ctx.createLinearGradient(bX, bY, bX + bWidth, horizonY);
-      bGrad.addColorStop(0, i % 2 === 0 ? 'rgba(6, 182, 212, 0.85)' : 'rgba(139, 92, 246, 0.85)');
-      bGrad.addColorStop(1, 'rgba(10, 15, 30, 0.95)');
-      ctx.fillStyle = bGrad;
-      ctx.fillRect(bX, bY, bWidth - 1, bHeight);
-
-      // Window grid lights if progress > 60%
-      if (progress > 60) {
-        ctx.fillStyle = i % 3 === 0 ? '#38bdf8' : '#f43f5e';
-        for (let wy = bY + 6; wy < horizonY - 4; wy += 8) {
-          if (Math.sin(wy + i) > 0.1) {
-            ctx.fillRect(bX + 4, wy, 2, 2);
-          }
-        }
-      }
-    }
-
-    // 4. Glowing sun / moon orb
-    const sunRadius = 36 * (progress / 100);
-    const sunGrad = ctx.createRadialGradient(w * 0.5, horizonY * 0.5, 2, w * 0.5, horizonY * 0.5, sunRadius);
-    sunGrad.addColorStop(0, '#f59e0b');
-    sunGrad.addColorStop(0.6, '#ec4899');
-    sunGrad.addColorStop(1, 'rgba(236, 72, 153, 0)');
-    ctx.fillStyle = sunGrad;
-    ctx.beginPath();
-    ctx.arc(w * 0.5, horizonY * 0.5, sunRadius, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 5. Reflective grid plane
-    ctx.strokeStyle = 'rgba(6, 182, 212, 0.25)';
-    ctx.lineWidth = 1;
-    for (let gy = horizonY; gy < h; gy += 10) {
-      ctx.beginPath();
-      ctx.moveTo(0, gy);
-      ctx.lineTo(w, gy);
-      ctx.stroke();
-    }
-
-    // 6. Perspective grid lines
-    for (let gx = -w; gx < w * 2; gx += 40) {
-      ctx.beginPath();
-      ctx.moveTo(w * 0.5, horizonY);
-      ctx.lineTo(gx, h);
-      ctx.stroke();
-    }
-
-    // 7. Latent noise overlay if diffusing
-    if (progress < 100) {
-      const imgData = ctx.getImageData(0, 0, w, h);
-      const data = imgData.data;
-      const noiseIntensity = (100 - progress) * 2;
-      for (let p = 0; p < data.length; p += 4) {
-        if (Math.random() < 0.2) {
-          const noise = (Math.random() - 0.5) * noiseIntensity;
-          data[p] = Math.min(255, Math.max(0, data[p] + noise));
-          data[p + 1] = Math.min(255, Math.max(0, data[p + 1] + noise));
-          data[p + 2] = Math.min(255, Math.max(0, data[p + 2] + noise));
-        }
-      }
-      ctx.putImageData(imgData, 0, 0);
-    }
-  }, []);
-
-  // Initial draw
-  React.useEffect(() => {
-    renderProceduralCanvas(imageSeed, 100);
-  }, [renderProceduralCanvas, imageSeed, sandboxMode]);
-
-  const triggerSimulatedDiffusion = () => {
-    setIsGeneratingImage(true);
-    setRenderStep(5);
-    const newSeed = Math.floor(Math.random() * 99999);
-    setImageSeed(newSeed);
-
-    let curr = 5;
-    const interval = setInterval(() => {
-      curr += 7;
-      setRenderStep(curr);
-      renderProceduralCanvas(newSeed, curr);
-
-      if (curr >= 100) {
-        clearInterval(interval);
-        setIsGeneratingImage(false);
-        setRenderStep(100);
-        renderProceduralCanvas(newSeed, 100);
-      }
-    }, 45);
-  };
-
-  // ===========================================================================
-  // 3. SIMULATED LIVE UNIT MARGIN & FINANCIAL CALCULATOR
+  // 2. SIMULATED LIVE UNIT MARGIN & FINANCIAL CALCULATOR
   // ===========================================================================
   const [activeUsers, setActiveUsers] = useState<number>(2500);
   const [promptsPerDay, setPromptsPerDay] = useState<number>(15);
@@ -393,7 +261,7 @@ export function ArtisanalSignalSection() {
   const grossMarginBoost = Math.round((cashSavedMonthly / (retailMonthlyCost || 1)) * 100);
 
   // ===========================================================================
-  // 4. SIMULATED 30-SECOND INTEGRATION SPEED RACE
+  // 3. SIMULATED 30-SECOND INTEGRATION SPEED RACE
   // ===========================================================================
   const [raceRunning, setRaceRunning] = useState(false);
   const [raceProgressGalx, setRaceProgressGalx] = useState(100);
@@ -402,7 +270,7 @@ export function ArtisanalSignalSection() {
 
   const RACE_STEPS = [
     { time: '00:05s', text: '1. Add API key in .env.local' },
-    { time: '00:15s', text: '2. Drop <GalxImage /> or <GalxChat /> into React' },
+    { time: '00:15s', text: '2. Point the OpenAI SDK at GALXAI' },
     { time: '00:25s', text: '3. Zero backend proxies, zero client secret leaks' },
     { time: '00:30s', text: '4. Shipped to production & profitable on user #1' },
   ];
@@ -472,7 +340,7 @@ export function ArtisanalSignalSection() {
         {/* Dynamic Kinetic Headline */}
         <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.06]">
           Ship AI in 30 seconds.{' '}
-          <span className="bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent drop-shadow-sm">
+          <span className="text-cyan-300">
             Keep the money you make.
           </span>
         </h2>
@@ -523,16 +391,6 @@ export function ArtisanalSignalSection() {
                 1. Terminal CLI
               </button>
               <button
-                onClick={() => setSandboxMode('image')}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold hover:scale-[1.03] active:scale-[0.97] ${
-                  sandboxMode === 'image'
-                    ? 'bg-indigo-500 text-white font-bold shadow-md shadow-indigo-500/20'
-                    : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                2. &lt;GalxImage /&gt;
-              </button>
-              <button
                 onClick={() => setSandboxMode('roi')}
                 className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold hover:scale-[1.03] active:scale-[0.97] ${
                   sandboxMode === 'roi'
@@ -540,7 +398,7 @@ export function ArtisanalSignalSection() {
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                3. Profit Math
+                2. Profit Math
               </button>
               <button
                 onClick={() => setSandboxMode('speed')}
@@ -550,7 +408,7 @@ export function ArtisanalSignalSection() {
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                4. 30s Speed Race
+                3. 30s Speed Race
               </button>
               <button
                 onClick={() => setSandboxMode('enclave')}
@@ -560,7 +418,7 @@ export function ArtisanalSignalSection() {
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                5. Private Enclave
+                4. Private Enclave
               </button>
             </div>
           </div>
@@ -596,7 +454,7 @@ export function ArtisanalSignalSection() {
                   <button
                     onClick={() => setStreamSpeed(streamSpeed === 'normal' ? 'turbo' : 'normal')}
                     className={`px-2 py-0.5 rounded border transition-colors cursor-pointer hover:scale-[1.03] active:scale-[0.97] ${
-                      streamSpeed === 'turbo' ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-bold' : 'bg-white/5 text-zinc-400 border-white/5'
+                      streamSpeed === 'turbo' ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-bold' : 'bg-white/5 text-white/70 border-white/5'
                     }`}
                   >
                     Speed: {streamSpeed === 'turbo' ? '⚡ Turbo (10x)' : '1x Realtime'}
@@ -679,79 +537,6 @@ export function ArtisanalSignalSection() {
                       ({CLI_PRESETS[activePresetIndex].retail} retail)
                     </span>
                   </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ===================================================================== */}
-          {/* TAB 2: INTERACTIVE ZERO-PROXY IMAGE STUDIO (LIVE PROCEDURAL CANVAS)   */}
-          {/* ===================================================================== */}
-          {sandboxMode === 'image' && (
-            <div className="space-y-4 animate-in fade-in duration-200 font-sans">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-black/40 p-3 rounded-2xl border border-white/10">
-                <div className="flex-1 w-full">
-                  <input
-                    type="text"
-                    value={imagePrompt}
-                    onChange={(e) => setImagePrompt(e.target.value)}
-                    placeholder="Enter image prompt..."
-                    className="w-full bg-transparent text-white font-medium text-xs sm:text-sm focus:outline-none font-sans"
-                  />
-                </div>
-
-                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                  <div className="flex rounded-xl bg-white/5 p-0.5 text-xs font-mono">
-                    {(['16:9', '1:1', '9:16'] as const).map((r) => (
-                      <button
-                        key={r}
-                        onClick={() => setImageRatio(r)}
-                        className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer hover:scale-[1.05] active:scale-[0.95] ${
-                          imageRatio === r ? 'bg-indigo-500 text-white font-bold' : 'text-zinc-400'
-                        }`}
-                      >
-                        {r}
-                      </button>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={triggerSimulatedDiffusion}
-                    disabled={isGeneratingImage}
-                    className="px-4 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer hover:scale-[1.03] active:scale-[0.97] disabled:opacity-50"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>{isGeneratingImage ? `Diffusing (${renderStep}%)...` : 'Remix & Render'}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Real Procedural Diffusion Canvas Stage */}
-              <div className="relative rounded-2xl overflow-hidden bg-black border border-indigo-500/30 h-56 sm:h-64 flex items-center justify-center text-center group shadow-2xl">
-                <canvas
-                  ref={canvasRef}
-                  width={640}
-                  height={320}
-                  className="w-full h-full object-cover transition-opacity duration-300"
-                />
-
-                {/* Overlay status HUD */}
-                <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-center justify-between text-xs font-mono">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/40 flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" />
-                      Zero-Proxy Latent Stream
-                    </span>
-                    <span className="text-zinc-400 text-[11px] hidden sm:inline font-sans truncate max-w-xs">
-                      &quot;{imagePrompt}&quot;
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-[10px] text-zinc-400">
-                    <span>Seed: #{imageSeed}</span>
-                    <span>Ratio: {imageRatio}</span>
-                    <span className="text-emerald-400 font-bold">$0.0120 (-40% vs $0.0400)</span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -1084,7 +869,7 @@ export function ArtisanalSignalSection() {
             </div>
 
             <Link
-              href="/auth/signup?next=/chat"
+              href={`/auth/signup?next=${encodeURIComponent(DEFAULT_POST_AUTH_PATH)}`}
               className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-500 hover:from-cyan-300 hover:to-indigo-400 text-black font-black text-xs uppercase tracking-wider shadow-xl shadow-cyan-500/25 flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-[0.97] transition-all cursor-pointer font-mono"
             >
               <span>Start Building Free ($10 Credit)</span>
@@ -1131,16 +916,16 @@ export function ArtisanalSignalSection() {
 
               {/* Contrast Split */}
               <div className="space-y-3 pt-2 text-xs sm:text-sm">
-                <div className="p-3.5 rounded-2xl bg-rose-950/20 border border-rose-500/20 text-zinc-300 space-y-1">
+                <div className="p-3.5 rounded-2xl bg-rose-950/20 border border-rose-500/20 text-rose-100 space-y-1">
                   <div className="flex items-center gap-2 text-rose-400 font-bold text-xs uppercase tracking-wide">
                     <span>❌ The Old Way</span>
                   </div>
-                  <p className="text-zinc-400 leading-relaxed font-sans text-xs">
+                  <p className="text-rose-100/75 leading-relaxed font-sans text-xs">
                     Spend 4 weeks writing custom API proxy routes, handling secret browser leaks, chunking streaming WebSockets, and building loading states.
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 text-zinc-200 space-y-1 shadow-inner">
+                <div className="p-3.5 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 text-emerald-100 space-y-1 shadow-inner">
                   <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wide">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                     <span>👉 With GALXAI</span>
@@ -1183,7 +968,7 @@ export function ArtisanalSignalSection() {
 
               {/* Contrast Split */}
               <div className="space-y-3 pt-2 text-xs sm:text-sm">
-                <div className="p-3.5 rounded-2xl bg-rose-950/20 border border-rose-500/20 text-zinc-300 space-y-1">
+                <div className="p-3.5 rounded-2xl bg-rose-950/20 border border-rose-500/20 text-rose-100 space-y-1">
                   <div className="flex items-center gap-2 text-rose-400 font-bold text-xs uppercase tracking-wide">
                     <span>❌ The Retail Trap</span>
                   </div>
@@ -1192,7 +977,7 @@ export function ArtisanalSignalSection() {
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 text-zinc-200 space-y-1 shadow-inner">
+                <div className="p-3.5 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 text-emerald-100 space-y-1 shadow-inner">
                   <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wide">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                     <span>👉 With GALXAI</span>
@@ -1400,32 +1185,8 @@ export function ArtisanalSignalSection() {
                 Drop AI directly into your frontend in one line.
               </h4>
               <p className="text-zinc-400 text-sm sm:text-base leading-relaxed font-sans">
-                Drop complete, interactive AI image generators or streaming chat widgets straight into your Next.js or React pages. It handles loading states, secret injection, and error recovery automatically.
+                Drop an interactive AI image generator into your Next.js or React pages. It handles loading states, secret injection, and error recovery automatically.
               </p>
-
-              {/* Demo Switcher Sub-tabs */}
-              <div className="flex items-center gap-2 pt-1">
-                <button
-                  onClick={() => setActiveUiDemo('image')}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer hover:scale-[1.04] active:scale-[0.96] ${
-                    activeUiDemo === 'image'
-                      ? 'bg-white/15 text-cyan-300 border border-cyan-500/40 font-bold shadow-md shadow-cyan-500/10'
-                      : 'bg-white/5 text-zinc-400 hover:text-white border border-transparent'
-                  }`}
-                >
-                  &lt;GalxImage /&gt;
-                </button>
-                <button
-                  onClick={() => setActiveUiDemo('chat')}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer hover:scale-[1.04] active:scale-[0.96] ${
-                    activeUiDemo === 'chat'
-                      ? 'bg-white/15 text-cyan-300 border border-cyan-500/40 font-bold shadow-md shadow-cyan-500/10'
-                      : 'bg-white/5 text-zinc-400 hover:text-white border border-transparent'
-                  }`}
-                >
-                  &lt;GalxChat /&gt;
-                </button>
-              </div>
 
               <div className="flex items-center gap-4 pt-2 text-xs font-mono text-zinc-400">
                 <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
@@ -1451,15 +1212,13 @@ export function ArtisanalSignalSection() {
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                   <span className="text-zinc-500 text-[11px] pl-2 font-mono">
-                    {activeUiDemo === 'image' ? 'StudioBanner.tsx' : 'AssistantDrawer.tsx'}
+                    StudioBanner.tsx
                   </span>
                 </div>
                 <button
                   onClick={() =>
                     handleCopy(
-                      activeUiDemo === 'image'
-                        ? `import { GalxImage } from 'galxai/ui';\n\nexport function Banner() {\n  return (\n    <GalxImage\n      prompt="Cyberpunk skyline at dusk"\n      aspectRatio="16:9"\n      interactive\n    />\n  );\n}`
-                        : `import { GalxChat } from 'galxai/ui';\n\nexport function Copilot() {\n  return (\n    <GalxChat\n      model="gpt-5.6-sol"\n      placeholder="Ask questions..."\n    />\n  );\n}`,
+                      `import { GalxImage } from 'galxai/ui';\n\nexport function Banner() {\n  return (\n    <GalxImage\n      prompt="Cyberpunk skyline at dusk"\n      aspectRatio="16:9"\n      interactive\n    />\n  );\n}`,
                       'code-ui'
                     )
                   }
@@ -1471,38 +1230,21 @@ export function ArtisanalSignalSection() {
               </div>
 
               <pre className="text-cyan-200 overflow-x-auto leading-relaxed text-xs">
-                {activeUiDemo === 'image' ? (
-                  <code>
-                    <span className="text-purple-400">import</span> &#123;{' '}
-                    <span className="text-amber-300 font-bold">GalxImage</span> &#125;{' '}
-                    <span className="text-purple-400">from</span> <span className="text-emerald-300">&apos;galxai/ui&apos;</span>;{'\n\n'}
-                    <span className="text-purple-400">export function</span> <span className="text-cyan-400">Banner</span>() &#123;{'\n'}
-                    {'  '}<span className="text-purple-400">return</span> ({'\n'}
-                    {'    '}&lt;<span className="text-amber-300 font-bold">GalxImage</span>{'\n'}
-                    {'      '}prompt=<span className="text-emerald-300">&quot;Cyberpunk skyline at dusk&quot;</span>{'\n'}
-                    {'      '}aspectRatio=<span className="text-emerald-300">&quot;16:9&quot;</span>{'\n'}
-                    {'      '}interactive{'\n'}
-                    {'      '}className=<span className="text-emerald-300">&quot;w-full h-80 rounded-2xl&quot;</span>{'\n'}
-                    {'    '}/&gt;{'\n'}
-                    {'  '});{'\n'}
-                    &#125;
-                  </code>
-                ) : (
-                  <code>
-                    <span className="text-purple-400">import</span> &#123;{' '}
-                    <span className="text-amber-300 font-bold">GalxChat</span> &#125;{' '}
-                    <span className="text-purple-400">from</span> <span className="text-emerald-300">&apos;galxai/ui&apos;</span>;{'\n\n'}
-                    <span className="text-purple-400">export function</span> <span className="text-cyan-400">Copilot</span>() &#123;{'\n'}
-                    {'  '}<span className="text-purple-400">return</span> ({'\n'}
-                    {'    '}&lt;<span className="text-amber-300 font-bold">GalxChat</span>{'\n'}
-                    {'      '}model=<span className="text-emerald-300">&quot;gpt-5.6-sol&quot;</span>{'\n'}
-                    {'      '}placeholder=<span className="text-emerald-300">&quot;Ask questions...&quot;</span>{'\n'}
-                    {'      '}className=<span className="text-emerald-300">&quot;h-[450px] w-full&quot;</span>{'\n'}
-                    {'    '}/&gt;{'\n'}
-                    {'  '});{'\n'}
-                    &#125;
-                  </code>
-                )}
+                <code>
+                  <span className="text-purple-400">import</span> &#123;{' '}
+                  <span className="text-amber-300 font-bold">GalxImage</span> &#125;{' '}
+                  <span className="text-purple-400">from</span> <span className="text-emerald-300">&apos;galxai/ui&apos;</span>;{'\n\n'}
+                  <span className="text-purple-400">export function</span> <span className="text-cyan-400">Banner</span>() &#123;{'\n'}
+                  {'  '}<span className="text-purple-400">return</span> ({'\n'}
+                  {'    '}&lt;<span className="text-amber-300 font-bold">GalxImage</span>{'\n'}
+                  {'      '}prompt=<span className="text-emerald-300">&quot;Cyberpunk skyline at dusk&quot;</span>{'\n'}
+                  {'      '}aspectRatio=<span className="text-emerald-300">&quot;16:9&quot;</span>{'\n'}
+                  {'      '}interactive{'\n'}
+                  {'      '}className=<span className="text-emerald-300">&quot;w-full h-80 rounded-2xl&quot;</span>{'\n'}
+                  {'    '}/&gt;{'\n'}
+                  {'  '});{'\n'}
+                  &#125;
+                </code>
               </pre>
             </div>
           </BespokeSpotlightCard>
@@ -1730,7 +1472,7 @@ export function ArtisanalSignalSection() {
         <div className="relative z-10 space-y-4 max-w-2xl mx-auto">
           <h3 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
             Stop building plumbing.{' '}
-            <span className="bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">
+            <span className="text-cyan-300">
               Start making money.
             </span>
           </h3>
@@ -1740,7 +1482,7 @@ export function ArtisanalSignalSection() {
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
-              href="/auth/signup?next=/chat"
+              href="/auth/signup?next=/keys"
               className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-white hover:bg-zinc-200 text-black font-black text-xs sm:text-sm uppercase tracking-wider shadow-xl hover:scale-[1.04] active:scale-[0.96] transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <KeyRound className="w-4 h-4 text-black" />

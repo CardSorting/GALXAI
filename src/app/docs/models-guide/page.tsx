@@ -4,14 +4,14 @@ import { constructMetadata } from '@/lib/seo/metadata';
 import { JsonLd, createTechArticleSchema, createBreadcrumbSchema } from '@/lib/seo/jsonld';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Frontier AI Model Capability & Selection Guide — OpenAI Codex & GPT-5.6',
-  description: 'Comparative benchmark capabilities, context windows, and workload recommendations across supported OpenAI frontier engines with 0ms ambiguity resolution.',
+  title: 'Model Selection Guide',
+  description: 'Choose a GALXAI model using the live catalog of capabilities, context limits, and rates.',
   canonicalPath: '/docs/models-guide',
   keywords: [
     'AI Model Selection Guide',
     'GPT-5.6 Sol Specs',
-    'GPT-5.6 900K Context Guide',
-    'Best Coding LLM Guide',
+    'GPT-5.6 Context Guide',
+    'Coding Model Guide',
     'AI Model Benchmark Comparison',
   ],
 });
@@ -21,8 +21,8 @@ export default function ModelsGuideDocsPage() {
     '@context': 'https://schema.org',
     '@graph': [
       createTechArticleSchema({
-        headline: 'Frontier AI Model Capability & Selection Guide',
-        description: 'Comparative benchmark analysis and workload recommendations across all supported models.',
+        headline: 'GALXAI Model Selection Guide',
+        description: 'Capabilities, limits, rates, and workload guidance sourced from the live model catalog.',
         path: '/docs/models-guide',
       }),
       createBreadcrumbSchema([

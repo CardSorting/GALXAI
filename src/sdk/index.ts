@@ -143,6 +143,19 @@ export { Anthropic } from './anthropic';
 export { createGalxAI, galxai, GalxAIModelWrapper } from './ai';
 export { ChatGalxAI } from './langchain';
 export { ConversationThread, type ThreadOptions, type ThreadExportState } from './thread';
+export {
+  GALX_AGENT_PROTOCOL_VERSION,
+  GalxBrowserAgentClient,
+  GalxBrowserAgentSession,
+  GalxBrowserAgentError,
+  parseGalxSseStream,
+  type GalxAgentBootstrap,
+  type GalxBrowserAgentClientOptions,
+  type GalxBrowserAgentEvent,
+  type GalxBrowserAgentMessage,
+  type GalxBrowserAgentSessionOptions,
+  type GalxBrowserAgentTurnInput,
+} from './browser-agent';
 
 // Next.js 1-Line Route Adapters
 export {

@@ -4,10 +4,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
-  Sparkles,
   RotateCcw,
   Check,
-  Zap,
   Lock,
   Palette,
   Globe,
@@ -18,20 +16,12 @@ import {
   LogOut,
   LogIn,
   Layers,
-  Eye,
   Type,
-  Database,
   ChevronRight,
-  ExternalLink,
-  Minimize2,
   Terminal,
-  Key,
   Copy,
-  EyeOff,
   Cpu,
-  Code2,
 } from 'lucide-react';
-import { broccoliChatDb } from '@/core/broccolidb/BroccoliChatDatabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
@@ -42,18 +32,10 @@ import {
   CodeFontFamily,
 } from '@/contexts/AppearanceContext';
 import { SUPPORTED_LANGUAGES, SupportedLanguage } from '@/lib/i18n/translations';
-import { ChatSettings, DEFAULT_CHAT_SETTINGS } from '@/components/chat/ChatSettingsModal';
-import { ChatAuthModal } from '@/components/chat/ChatAuthModal';
-
-const SETTINGS_STORAGE_KEY = 'galx_chat_settings_v1';
-const SETTINGS_STORAGE_KEY_V2 = 'galx_chat_settings_v2';
-
 type SettingsTab =
   | 'appearance'
   | 'language'
-  | 'model'
   | 'seats'
-  | 'privacy'
   | 'developer';
 
 interface ThemeOption {
@@ -133,41 +115,17 @@ export default function SettingsPage() {
   } = useAppearance();
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('appearance');
-  const [chatSettings, setChatSettings] = useState<ChatSettings>(DEFAULT_CHAT_SETTINGS);
-  const [savedSuccess, setSavedSuccess] = useState(false);
   const [languageSearch, setLanguageSearch] = useState('');
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [showDeveloperApiKey, setShowDeveloperApiKey] = useState(false);
   const [copiedEndpoint, setCopiedEndpoint] = useState(false);
 
   useEffect(() => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const tabParam = urlParams.get('tab') as SettingsTab | null;
-      if (tabParam && ['appearance', 'language', 'model', 'seats', 'privacy', 'developer'].includes(tabParam)) {
+      if (tabParam && ['appearance', 'language', 'seats', 'developer'].includes(tabParam)) {
         setActiveTab(tabParam);
       }
     } catch {}
-
-    try {
-      const stored = localStorage.getItem(SETTINGS_STORAGE_KEY_V2) || localStorage.getItem(SETTINGS_STORAGE_KEY);
-      const bdbCompaction = broccoliChatDb.getPromptCompaction();
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setChatSettings({
-          ...DEFAULT_CHAT_SETTINGS,
-          ...parsed,
-          enablePromptCompaction: typeof parsed.enablePromptCompaction === 'boolean' ? parsed.enablePromptCompaction : bdbCompaction,
-        });
-      } else {
-        setChatSettings((prev) => ({ ...prev, enablePromptCompaction: bdbCompaction }));
-      }
-    } catch {}
-
-    const unsubCompaction = broccoliChatDb.onPromptCompactionChange((enabled) => {
-      setChatSettings((prev) => ({ ...prev, enablePromptCompaction: enabled }));
-    });
-    return () => unsubCompaction();
   }, []);
 
   const filteredLanguages = useMemo(() => {
@@ -184,21 +142,8 @@ export default function SettingsPage() {
     });
   }, [languageSearch]);
 
-  const handleSaveAll = () => {
-    try {
-      localStorage.setItem(SETTINGS_STORAGE_KEY_V2, JSON.stringify(chatSettings));
-      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(chatSettings));
-      broccoliChatDb.setPromptCompaction(Boolean(chatSettings.enablePromptCompaction));
-      setSavedSuccess(true);
-      setTimeout(() => setSavedSuccess(false), 2000);
-    } catch {}
-  };
-
   const handleResetAll = () => {
     resetAppearance();
-    setChatSettings(DEFAULT_CHAT_SETTINGS);
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 1500);
   };
 
   const navItems = [
@@ -216,22 +161,10 @@ export default function SettingsPage() {
       badge: langDetails.nativeName,
     },
     {
-      id: 'model' as SettingsTab,
-      label: 'AI Model',
-      icon: Zap,
-      gated: !isAuthenticated,
-    },
-    {
       id: 'seats' as SettingsTab,
       label: 'Seat & Limits',
       icon: Shield,
       gated: !isAuthenticated,
-    },
-    {
-      id: 'privacy' as SettingsTab,
-      label: 'Privacy',
-      icon: Database,
-      gated: false,
     },
     {
       id: 'developer' as SettingsTab,
@@ -248,11 +181,11 @@ export default function SettingsPage() {
       <header className="sticky top-0 z-40 bg-[#07090e]/90 backdrop-blur-xl border-b border-white/10 px-4 sm:px-8 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
-            href="/chat"
+            href="/keys"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-all text-xs font-semibold"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back to Chat</span>
+            <span className="hidden sm:inline">Back to API Keys</span>
           </Link>
           <h1 className="text-base font-bold text-white tracking-tight">Settings</h1>
         </div>
@@ -267,24 +200,14 @@ export default function SettingsPage() {
             <span className="hidden sm:inline">Reset</span>
           </button>
 
-          {isAuthenticated ? (
-            <button
-              type="button"
-              onClick={handleSaveAll}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs shadow-md shadow-cyan-500/20 transition-all cursor-pointer"
-            >
-              {savedSuccess ? <Check className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
-              <span>{savedSuccess ? 'Saved' : 'Save'}</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setAuthModalOpen(true)}
+          {!isAuthenticated && (
+            <Link
+              href="/auth/signin?next=/settings"
               className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs shadow-md shadow-cyan-500/20 transition-all cursor-pointer"
             >
               <LogIn className="w-3.5 h-3.5" />
               <span>Sign In</span>
-            </button>
+            </Link>
           )}
         </div>
       </header>
@@ -322,13 +245,12 @@ export default function SettingsPage() {
                     <User className="w-4 h-4 text-zinc-400" />
                     <span className="text-xs text-zinc-300 font-medium">Not Signed In</span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setAuthModalOpen(true)}
+                  <Link
+                    href="/auth/signin?next=/settings"
                     className="text-xs text-cyan-400 hover:text-cyan-300 font-bold"
                   >
                     Sign In
-                  </button>
+                  </Link>
                 </div>
               )}
             </div>
@@ -636,127 +558,15 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                {/* Prompt Compaction & Transformation Gateway Policy */}
-                <div className="p-5 rounded-2xl bg-[#0c101c] border border-white/10 space-y-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-white text-xs tracking-tight">Default Prompt Compaction & Transformation</span>
-                        <span
-                          className={`text-[9px] font-mono px-2 py-0.5 rounded-full border font-bold ${
-                            chatSettings.enablePromptCompaction
-                              ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
-                              : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                          }`}
-                        >
-                          {chatSettings.enablePromptCompaction ? 'Compacted (Opt-In)' : 'Raw Prompt Passthrough (Default)'}
-                        </span>
-                      </div>
+                <div className="p-5 rounded-2xl bg-[#0c101c] border border-white/10 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Shield className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div className="min-w-0 space-y-1.5">
+                      <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300">Server-managed provider credentials</h2>
                       <p className="text-xs text-zinc-400 leading-relaxed">
-                        Control how the Gateway handles incoming prompts. By default, the Gateway transmits all prompts 100% byte-for-byte verbatim without alteration. Turn on to test multi-turn history deflation.
+                        The deployed browser client never persists upstream keys. Add provider credentials through the encrypted shard vault and use scoped GALXAI gateway keys only from trusted server environments.
                       </p>
                     </div>
-
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={Boolean(chatSettings.enablePromptCompaction)}
-                      onClick={() => {
-                        const updated = {
-                          ...chatSettings,
-                          enablePromptCompaction: !chatSettings.enablePromptCompaction,
-                        };
-                        setChatSettings(updated);
-                        broccoliChatDb.setPromptCompaction(Boolean(updated.enablePromptCompaction));
-                        try {
-                          localStorage.setItem(SETTINGS_STORAGE_KEY_V2, JSON.stringify(updated));
-                          localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(updated));
-                        } catch {}
-                      }}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                        chatSettings.enablePromptCompaction ? 'bg-cyan-500' : 'bg-zinc-700'
-                      }`}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                          chatSettings.enablePromptCompaction ? 'translate-x-5' : 'translate-x-0'
-                        }`}
-                      />
-                    </button>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-2 text-xs font-mono">
-                    <div className="text-[11px] font-sans font-semibold text-zinc-300">HTTP Header & Payload Overrides</div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-zinc-400">
-                      <div className="p-2 rounded-lg bg-black/50 border border-white/5">
-                        <span className="text-zinc-500 block text-[10px]">Header Override:</span>
-                        <code className="text-cyan-300">X-Galx-Compact-Prompts: false</code>
-                      </div>
-                      <div className="p-2 rounded-lg bg-black/50 border border-white/5">
-                        <span className="text-zinc-500 block text-[10px]">JSON Body Override:</span>
-                        <code className="text-cyan-300">{`"compact_prompts": false`}</code>
-                      </div>
-                    </div>
-
-                    {/* Industry Drop-in Compatibility Standards */}
-                    <div className="pt-2 border-t border-white/5 space-y-2">
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">Industry Drop-in Compatibility Standards:</span>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] font-mono">
-                        <div className="p-2 rounded-lg bg-black/50 border border-white/5 space-y-1">
-                          <span className="text-zinc-500 block text-[10px]">OpenRouter Standard</span>
-                          <code className="text-emerald-400 block text-[10px]">{`"transforms": []`}</code>
-                          <span className="text-[9px] text-zinc-500 font-sans">100% Raw passthrough</span>
-                        </div>
-                        <div className="p-2 rounded-lg bg-black/50 border border-white/5 space-y-1">
-                          <span className="text-zinc-500 block text-[10px]">Python extra_body</span>
-                          <code className="text-emerald-400 block text-[10px]">{`extra_body={"compact_prompts": False}`}</code>
-                          <span className="text-[9px] text-zinc-500 font-sans">OpenAI Python SDK</span>
-                        </div>
-                        <div className="p-2 rounded-lg bg-black/50 border border-white/5 space-y-1">
-                          <span className="text-zinc-500 block text-[10px]">Cursor / Windsurf</span>
-                          <code className="text-emerald-400 block text-[10px]">{`"openai.customHeaders"`}</code>
-                          <span className="text-[9px] text-zinc-500 font-sans">AST byte fidelity</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Custom API Key (BYOK) */}
-                <div className="p-5 rounded-2xl bg-[#0c101c] border border-white/10 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Key className="w-4 h-4 text-cyan-400" />
-                      <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300">Custom Upstream API Key (BYOK)</h2>
-                    </div>
-                    <span className="text-[10px] font-mono text-zinc-500">Stored in SafeStorage</span>
-                  </div>
-                  <p className="text-xs text-zinc-400">
-                    Provide a custom API key to route requests using your own provider account without consuming platform seat limits.
-                  </p>
-                  <div className="relative">
-                    <input
-                      type={showDeveloperApiKey ? 'text' : 'password'}
-                      value={chatSettings.customApiKey || ''}
-                      onChange={(e) => {
-                        const updated = { ...chatSettings, customApiKey: e.target.value };
-                        setChatSettings(updated);
-                        try {
-                          localStorage.setItem(SETTINGS_STORAGE_KEY_V2, JSON.stringify(updated));
-                          localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(updated));
-                        } catch {}
-                      }}
-                      placeholder="sk-live-... or custom provider key"
-                      className="w-full py-2.5 pl-3.5 pr-10 rounded-xl bg-black/50 border border-white/10 text-xs font-mono text-white placeholder:text-zinc-600 focus:outline-none focus:border-cyan-500/50"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowDeveloperApiKey(!showDeveloperApiKey)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 cursor-pointer"
-                      title={showDeveloperApiKey ? 'Hide Key' : 'Show Key'}
-                    >
-                      {showDeveloperApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
                   </div>
                 </div>
 
@@ -782,7 +592,7 @@ export default function SettingsPage() {
             )}
 
             {/* 3. GATED TABS (WHEN NOT LOGGED IN) */}
-            {!isAuthenticated && activeTab !== 'appearance' && activeTab !== 'language' && activeTab !== 'privacy' && activeTab !== 'developer' && (
+            {!isAuthenticated && activeTab === 'seats' && (
               <div className="p-8 rounded-2xl bg-[#0c101c] border border-white/10 text-center space-y-4 animate-in fade-in duration-150">
                 <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 mx-auto">
                   <Lock className="w-5 h-5" />
@@ -790,131 +600,15 @@ export default function SettingsPage() {
                 <div>
                   <h2 className="text-sm font-bold text-white">Sign In Required</h2>
                   <p className="text-xs text-zinc-400 mt-1">
-                    Sign in to customize AI model parameters, system prompts, and seat limits.
+                    Sign in to manage seats and account limits.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setAuthModalOpen(true)}
+                <Link
+                  href="/auth/signin?next=/settings?tab=seats"
                   className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs cursor-pointer shadow-md shadow-cyan-500/20"
                 >
                   Sign In
-                </button>
-              </div>
-            )}
-
-            {/* 4. AI MODEL TAB (AUTHENTICATED) */}
-            {isAuthenticated && activeTab === 'model' && (
-              <div className="p-5 rounded-2xl bg-[#0c101c] border border-white/10 space-y-5 animate-in fade-in duration-150">
-                <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Model Parameters</h2>
-
-                <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs font-semibold text-zinc-200">
-                      <span>Temperature</span>
-                      <span className="font-mono text-cyan-400">{chatSettings.temperature}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="1.5"
-                      step="0.05"
-                      value={chatSettings.temperature}
-                      onChange={(e) =>
-                        setChatSettings({ ...chatSettings, temperature: parseFloat(e.target.value) })
-                      }
-                      className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs font-semibold text-zinc-200">
-                      <span>Max Output Tokens</span>
-                      <span className="font-mono text-cyan-400">{chatSettings.maxTokens}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="512"
-                      max="8192"
-                      step="256"
-                      value={chatSettings.maxTokens}
-                      onChange={(e) =>
-                        setChatSettings({ ...chatSettings, maxTokens: parseInt(e.target.value, 10) })
-                      }
-                      className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <span className="text-xs font-semibold text-zinc-200">Reasoning Depth</span>
-                    <div className="grid grid-cols-3 gap-2">
-                      {(['low', 'medium', 'high'] as const).map((effort) => (
-                        <button
-                          key={effort}
-                          type="button"
-                          onClick={() => setChatSettings({ ...chatSettings, reasoningEffort: effort })}
-                          className={`py-2 px-3 rounded-xl border text-xs font-bold capitalize transition-all cursor-pointer ${
-                            chatSettings.reasoningEffort === effort
-                              ? 'border-cyan-400 bg-cyan-500/15 text-cyan-300'
-                              : 'border-white/10 bg-black/30 text-zinc-400 hover:text-white'
-                          }`}
-                        >
-                          {effort}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Prompt Compaction & Transformation Preference */}
-                  <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="space-y-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-white text-xs tracking-tight">Prompt Compaction & Transformation</span>
-                          <span
-                            className={`text-[9px] font-mono px-2 py-0.5 rounded-full border font-bold ${
-                              chatSettings.enablePromptCompaction
-                                ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
-                                : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                            }`}
-                          >
-                            {chatSettings.enablePromptCompaction ? 'Active (Opt-In)' : 'Raw (Default - Untransformed)'}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-zinc-400 leading-relaxed">
-                          By default, all prompts are passed verbatim without alteration. Turn on to compress multi-turn conversational history.
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={Boolean(chatSettings.enablePromptCompaction)}
-                        onClick={() => {
-                          const updated = {
-                            ...chatSettings,
-                            enablePromptCompaction: !chatSettings.enablePromptCompaction,
-                          };
-                          setChatSettings(updated);
-                          broccoliChatDb.setPromptCompaction(Boolean(updated.enablePromptCompaction));
-                          try {
-                            localStorage.setItem(SETTINGS_STORAGE_KEY_V2, JSON.stringify(updated));
-                            localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(updated));
-                          } catch {}
-                        }}
-                        className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          chatSettings.enablePromptCompaction ? 'bg-cyan-500' : 'bg-zinc-700'
-                        }`}
-                      >
-                        <span
-                          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                            chatSettings.enablePromptCompaction ? 'translate-x-4' : 'translate-x-0'
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                </Link>
               </div>
             )}
 
@@ -948,126 +642,9 @@ export default function SettingsPage() {
                 </div>
               </div>
             )}
-
-            {/* 7. PRIVACY TAB */}
-            {activeTab === 'privacy' && (
-              <div className="p-5 rounded-2xl bg-[#0c101c] border border-white/10 space-y-5 animate-in fade-in duration-150">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Privacy & Data Controls</h2>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-bold">
-                    Zero-Storage Training Pipeline
-                  </span>
-                </div>
-
-                {/* Improve the Model For Everyone Card */}
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-[#0e1424] via-[#090d16] to-[#120e24] border border-white/10 space-y-4 shadow-xl">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-1.5 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-white text-sm tracking-tight">Improve the model for everyone</span>
-                        <span
-                          className={`text-[10px] font-mono px-2 py-0.5 rounded-full border font-bold ${
-                            chatSettings.allowModelTraining !== false
-                              ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
-                              : 'bg-zinc-500/15 text-zinc-400 border-white/10'
-                          }`}
-                        >
-                          {chatSettings.allowModelTraining !== false ? 'Data Sharing: Active' : 'Data Sharing: Opted Out'}
-                        </span>
-                      </div>
-                      <p className="text-xs text-zinc-300 leading-relaxed">
-                        Allow your content to be used to train our models, which makes GALX better for you and everyone who uses it. We take steps to protect your privacy.{' '}
-                        <a
-                          href="https://help.openai.com/en/articles/5722486"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-cyan-400 hover:text-cyan-300 hover:underline inline-flex items-center gap-0.5 font-medium"
-                        >
-                          <span>Learn more</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </p>
-                    </div>
-
-                    {/* Opt-Out Switch Toggle */}
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={chatSettings.allowModelTraining !== false}
-                      onClick={() => {
-                        const updated = {
-                          ...chatSettings,
-                          allowModelTraining: chatSettings.allowModelTraining === false,
-                        };
-                        setChatSettings(updated);
-                        try {
-                          localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(updated));
-                        } catch {}
-                      }}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                        chatSettings.allowModelTraining !== false ? 'bg-cyan-500' : 'bg-zinc-700'
-                      }`}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                          chatSettings.allowModelTraining !== false ? 'translate-x-5' : 'translate-x-0'
-                        }`}
-                      />
-                    </button>
-                  </div>
-
-                  {/* Privacy Safeguards Details Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-white/5 text-xs">
-                    <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1">
-                      <p className="text-[10px] text-emerald-400 font-bold font-mono">Developer API Routes</p>
-                      <p className="font-bold text-white text-[11px]">100% Always Private</p>
-                      <p className="text-[10px] text-zinc-400 leading-normal">
-                        Direct API calls with API keys are never stored or used for model training under strict ZDR.
-                      </p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1">
-                      <p className="text-[10px] text-cyan-400 font-bold font-mono">In-Flight Scrubbing</p>
-                      <p className="font-bold text-white text-[11px]">Automated PII Redaction</p>
-                      <p className="text-[10px] text-zinc-400 leading-normal">
-                        Names, emails, phone numbers, and credentials are removed in volatile RAM before ingestion.
-                      </p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1">
-                      <p className="text-[10px] text-purple-400 font-bold font-mono">Zero Database Cost</p>
-                      <p className="font-bold text-white text-[11px]">No Session Hoarding</p>
-                      <p className="text-[10px] text-zinc-400 leading-normal">
-                        Training signals stream into a volatile buffer without storing bloated multi-turn chat sessions.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Local Storage & Browser State Card */}
-                <div className="flex items-center justify-between p-3.5 rounded-xl bg-black/30 border border-white/5">
-                  <div>
-                    <p className="text-xs font-bold text-white">Browser Offline Cache</p>
-                    <p className="text-[10px] text-zinc-400">Clear offline cache and reset saved local state</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      try {
-                        localStorage.clear();
-                        window.location.reload();
-                      } catch {}
-                    }}
-                    className="px-3 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 font-bold text-xs cursor-pointer hover:bg-rose-500/30 transition-all"
-                  >
-                    Clear Cache
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </main>
-
-      <ChatAuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </div>
   );
 }

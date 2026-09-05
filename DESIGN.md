@@ -172,7 +172,7 @@ GALXAI employs a high-density, mission-critical cyberpunk command center aesthet
 
 ## Layout
 
-- **High-Density Grid**: Efficient dashboard layouts utilizing sticky navigation rails, split-screen playground editors, and responsive multi-column telemetry cards.
+- **High-Density Grid**: Efficient control-plane layouts utilizing sticky navigation rails, model catalog grids, request-inspection panels, and responsive multi-column telemetry cards.
 - **Scannability First**: Visual hierarchy prioritized with clear section boundaries, distinct cards, and whitespace rhythm (tight groupings within components, generous padding between sections).
 
 ## Elevation & Depth
@@ -190,7 +190,7 @@ GALXAI employs a high-density, mission-critical cyberpunk command center aesthet
 
 ## Components
 
-- **Playground Shell**: Split editor featuring tabbed prompt inputs, real-time token calculation, streaming response pane, and parameter sliders (temperature, top_p).
+- **API Request Inspector**: A bounded, single-request diagnostic with request JSON, response envelope, headers, latency, and copyable integration snippets. It must not grow conversation history, personas, sharing, creative projects, or generated-content libraries.
 - **Shard Vault Card**: Provider status indicator (OpenAI, Anthropic, Gemini), active token count, endpoint health ping, and key revocation actions.
 - **Ledger Bar**: Real-time balance chip, deposit match incentive tag, and instant Stripe/Crypto top-up trigger.
 

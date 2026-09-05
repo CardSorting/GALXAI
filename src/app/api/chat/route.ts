@@ -22,8 +22,8 @@ import {
 } from '@/core/chat/GalxChatRequestNormalizer';
 
 export const runtime = 'nodejs';
+export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
-export const maxDuration = 60;
 
 const PERSISTED_MESSAGE_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$/;
 

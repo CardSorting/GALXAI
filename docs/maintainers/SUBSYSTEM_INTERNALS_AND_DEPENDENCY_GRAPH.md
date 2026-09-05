@@ -10,7 +10,8 @@
 ```mermaid
 flowchart TD
     subgraph ClientPerimeter["Client Perimeter & Ingress"]
-        SDK["@galxai/sdk & UI Components"]
+        ControlPlane["GALXAI Web Control Plane<br/>model catalog · keys · billing · governance"]
+        SDK["Downstream @galxai/sdk integrations"]
         CLI["npx galxai CLI"]
         GatewayAPI["POST /v1/chat/completions"]
     end
@@ -62,12 +63,9 @@ flowchart TD
         PgPool["Supabase Transaction Pooler (Port 6543)"]
         Postgres["PostgreSQL 16 (RLS, Double-Entry Ledgers, 53 Migrations)"]
         BroccoliL1["BroccoliDB In-Memory RAM Tables (<0.08ms)"]
-        BroccoliChat["BroccoliChatDatabase (Hybrid L1/L2 Mesh)"]
-        
+
         RollingEngine --> BroccoliL1
-        RollingEngine --> BroccoliChat
         SeatEngine --> Postgres
-        BroccoliChat --> Postgres
     end
 
     ClientPerimeter --> EdgeLayer
@@ -113,6 +111,8 @@ To prevent ungrounded bypass bugs and accidental leakages of generated compactor
 1. **Rule 1**: Public code MUST import from `@/core/broccolidb` (which exports `BroccoliCompactionFacade` and `BroccoliCompactionSafety`).
 2. **Rule 2**: Individual generated domain compactors (`BroccoliInterrogatoryCompactor`, `BroccoliPathologyCompactor`, etc.) are **private internal implementation details**. Never export them from the master barrel.
 3. **Rule 3**: `src/core/` must NEVER import React, Next.js routing, or browser DOM types.
+4. **Rule 4**: GALXAI-hosted UI stops at discovery, configuration, metering, and governance. Chat and image-generation composers belong to downstream applications; compatible inference APIs and SDK contracts remain platform scope.
+5. **Rule 5**: Default authentication completion resolves to `/models`. Explicit protected-route return paths may override it, but no auth flow may default to a retired client surface.
 
 ---
 

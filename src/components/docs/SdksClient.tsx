@@ -11,12 +11,7 @@ import {
   Check,
   Zap,
 } from 'lucide-react';
-import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
-import { TrustSeals } from '@/components/common/TrustSeals';
-import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
-import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
-import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export function SdksClient() {
   const [activeTab, setActiveTab] = useState<'cli' | 'galx_sdk' | 'python' | 'ts' | 'vercel' | 'langchain' | 'llamaindex' | 'rust' | 'go' | 'curl'>('cli');
@@ -84,7 +79,7 @@ client = OpenAI(
     api_key="galx_live_your_gateway_key"
 )
 
-# Stream responses with sub-15ms TTFT & 75% prompt caching
+# Stream an OpenAI-compatible response
 response = client.chat.completions.create(
     model="gpt-5.6-sol",  # or "gpt-5.6-terra", "gpt-5.6-luna"
     messages=[{"role": "user", "content": "Refactor this async pipeline in Python."}],
@@ -292,19 +287,18 @@ func main() {
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase font-mono tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 fill-black" />
-              <span>Claim Key ($5 Credit)</span>
+              <span>Create API Key</span>
             </Link>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white">SDKs &amp; Client Libraries</h1>
           <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl font-sans">
-            GALXAI is 100% compliant with standard OpenAI client protocols. Zero custom dependencies needed—simply set your <code className="text-cyan-300 font-mono">baseURL</code> to <code className="text-amber-300 font-mono">https://api.galx.ai/v1</code>.
+            Use an OpenAI-compatible client by setting <code className="text-cyan-300 font-mono">baseURL</code> to <code className="text-amber-300 font-mono">https://api.galx.ai/v1</code> and supplying a server-side GALXAI key.
           </p>
         </div>
 
         <DocsSubNav />
 
         {/* Founding Cohort Rate Lock Ribbon */}
-        <RateLockRibbon />
 
         {/* Tabbed Framework Switcher */}
         <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-white/10">
@@ -351,13 +345,9 @@ func main() {
         </div>
 
         {/* Consumer-Grade Trust Seals */}
-        <TrustSeals />
       </main>
 
       {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
-      <FloatingConversionDock />
-      <LiveActivityToast />
-      <ExitIntentModal />
     </div>
   );
 }

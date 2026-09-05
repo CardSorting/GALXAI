@@ -90,7 +90,7 @@ We are not another disposable "AI SaaS" application. We are the **mission-critic
 ### Phase 2: Commercial Launch & Net Spend Interception (2027 — Year 1)
 * **ARR Target**: **$1.50M ARR** | **1,800 Active Production Apps** | **42% Gross Margin**
 * **Deployment**: Roll out Net Spend Invoicing to venture-backed startups and growth SaaS apps, delivering instant Day 1 cash savings (-38%).
-* **Ecosystem**: Launch drop-in frontend component library (`<GalxImage />`, `<GalxChat />`) eliminating 4 weeks ($150k+) of custom backend proxy engineering.
+* **Ecosystem**: Launch native SDKs and OpenAI-compatible gateway tooling that eliminate custom inference proxy engineering.
 
 ### Phase 3: Rapid Scale & Compaction Margins (2028 — Year 2)
 * **ARR Target**: **$7.20M ARR** | **7,500 Active Production Apps** | **50% Gross Margin**

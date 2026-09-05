@@ -48,7 +48,7 @@ If you are preparing for or reviewing a **10-to-20 minute executive meeting**, s
 1. **Massive Market Wave**: The global AI market is shifting from training models to **running AI in production**—a **$1.3 Trillion market by 2030 (38.2% CAGR)**.
 2. **Costco Wholesale Pricing for Compute**: We buy AI capacity in massive bulk and pass 25%–40% wholesale discounts directly to companies.
 3. **Stripe-Level Developer Simplicity**:
-   - **Drop-In UI**: `<GalxImage />` and `<GalxChat />` eliminate backend proxy routes.
+   - **Drop-In Inference**: OpenAI-compatible SDKs and Server Actions eliminate custom proxy infrastructure.
    - **Zero-Migration Auto-Patch**: `import 'galxai/patch'` upgrades existing OpenAI apps in 1 line.
    - **AI Coding Agent Directives**: `npx galxai skills` embeds GALXAI into Cursor, Claude Code, and Windsurf workflows by default.
 4. **Smart Context Fluff Trimming (BroccoliDB)**:

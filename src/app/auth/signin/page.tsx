@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { DEFAULT_POST_AUTH_PATH } from '@/lib/auth/redirects';
 import {
   CheckCircle2,
   ArrowRight,
@@ -35,7 +36,7 @@ function SignInContent() {
   const [canQuickCreate, setCanQuickCreate] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const returnUrl = searchParams.get('next') || searchParams.get('returnUrl') || searchParams.get('redirect') || '/chat';
+  const returnUrl = searchParams.get('next') || searchParams.get('returnUrl') || searchParams.get('redirect') || DEFAULT_POST_AUTH_PATH;
 
   useEffect(() => {
     const errorParam = searchParams.get('error');
@@ -84,7 +85,7 @@ function SignInContent() {
 
       setSuccessMessage('Successfully signed in! Redirecting...');
       setTimeout(() => {
-        router.push(returnUrl);
+        router.replace(returnUrl);
       }, 500);
     } catch (err: any) {
       setError(err.message || 'Authentication failed. Please verify your credentials.');
@@ -109,14 +110,14 @@ function SignInContent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-[#07090e] text-zinc-100 selection:bg-cyan-500 selection:text-black relative">
+    <div className="min-h-screen flex flex-col justify-between bg-[#07090e] text-white selection:bg-cyan-500 selection:text-black relative">
       {/* Top Navbar */}
       <header className="sticky top-0 z-30 w-full backdrop-blur-xl bg-[#07090e]/80 border-b border-white/10 px-4 sm:px-6 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link
             href="/"
             className="flex items-center gap-2.5 group cursor-pointer"
-            title="Return to GALX AI Chat"
+            title="Return to GALX AI"
           >
             <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-indigo-600 flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
               <Zap className="w-4 h-4 text-white fill-white" />
@@ -129,10 +130,10 @@ function SignInContent() {
 
           <div className="flex items-center gap-3 text-xs">
             <Link
-              href="/chat"
+              href={DEFAULT_POST_AUTH_PATH}
               className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-colors"
             >
-              ← Back to Chat
+              Browse Models
             </Link>
           </div>
         </div>
@@ -162,7 +163,7 @@ function SignInContent() {
               </div>
 
               <div className="space-y-3 pt-2">
-                {returnUrl && returnUrl !== '/chat' && returnUrl !== '/' ? (
+                {returnUrl && returnUrl !== DEFAULT_POST_AUTH_PATH && returnUrl !== '/' ? (
                   <Link
                     href={returnUrl}
                     className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 group cursor-pointer font-mono"
@@ -172,10 +173,10 @@ function SignInContent() {
                   </Link>
                 ) : (
                   <Link
-                    href="/chat"
+                    href={DEFAULT_POST_AUTH_PATH}
                     className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-cyan-400 via-indigo-400 to-cyan-500 hover:from-cyan-300 hover:to-indigo-300 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2 group cursor-pointer"
                   >
-                    <span>Launch GALX AI Chat</span>
+                    <span>Browse Available Models</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                   </Link>
                 )}
@@ -200,10 +201,10 @@ function SignInContent() {
                     API Keys
                   </Link>
                   <Link
-                    href="/chat"
+                    href="/keys"
                     className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-cyan-300 transition-all text-center"
                   >
-                    AI Chat
+                    Telemetry
                   </Link>
                 </div>
 
@@ -229,7 +230,7 @@ function SignInContent() {
                   Welcome to GALX AI
                 </h1>
                 <p className="text-xs text-zinc-400">
-                  Sign in to save chats, create anime companions, and access 4K image studio.
+                  Sign in to manage API keys, billing, telemetry, and image workloads.
                 </p>
               </div>
 

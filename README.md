@@ -18,9 +18,9 @@ Building AI features normally means paying a steep "infrastructure tuition": wri
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ 1. The Declarative UI Way (Zero Backend Routes)                            │
-│    Drop native React components (<GalxImage />, <GalxChat />) directly     │
-│    into your frontend. No fetch code. No loading state boilerplate.         │
+│ 1. The Native SDK Way (OpenAI-Compatible Inference)                        │
+│    Point the OpenAI SDK at GALXAI for routing, caching, and failover.       │
+│    Keep application UI and inference infrastructure cleanly separated.      │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ 2. The 1-Line Drop-In Way (For Existing OpenAI Codebases)                  │
 │    Add `import 'galxai/patch'` at the top of your app.                      │
@@ -31,6 +31,12 @@ Building AI features normally means paying a steep "infrastructure tuition": wri
 │    build everything properly without creating fragile proxy routes.         │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+### Product surface boundary
+
+GALXAI is an inference platform, not a hosted chat or image-studio application. After authentication, developers land on `/models` to choose from the canonical model fleet by workload type, inspect model IDs and economics, and continue to API-key or integration setup. Chat and image generation remain available through the OpenAI-compatible APIs and SDKs for applications that developers build and own.
+
+See the [Product Surface Strategy](docs/PRODUCT_SURFACE_STRATEGY.md) for the hosted-surface boundary, diagnostic rules, activation journey, and roadmap decision test.
 
 ---
 
@@ -65,31 +71,14 @@ export function HeroBanner() {
 }
 ```
 
-#### Option B: Turnkey Streaming Chat (`<GalxChat />`)
-A complete, streaming multi-turn chat widget in one line of JSX:
-
-```tsx
-import { GalxChat } from 'galxai/ui';
-
-export function AssistantModal() {
-  return (
-    <GalxChat
-      model="gpt-5.6-sol"
-      placeholder="Ask questions or synthesize ideas..."
-      className="h-[500px] w-full"
-    />
-  );
-}
-```
-
-#### Option C: Direct Server Action (Zero API routes required)
+#### Option B: Direct Server Action (Zero API routes required)
 If you prefer calling functions directly inside Next.js 15:
 
 ```tsx
 'use client';
 import { generateImageAction } from 'galxai/actions';
 
-export function StudioButton() {
+export function GenerateArtworkButton() {
   return (
     <button onClick={async () => {
       const res = await generateImageAction('Cyberpunk bee mascot', { aspectRatio: '1:1' });
@@ -206,7 +195,7 @@ npm run db:test
 | **Long-Horizon Memory** | Monolithic lossy summaries | **Hybrid 5-Level Pyramid in RAM (<0.08ms)** |
 | **Seat Quota Model** | Static monthly cliffs | **Dual Sliding Windows (5-Hour & Weekly Meters)** |
 | **Prompt Caching** | Often absorbed by provider | **100% Pass-Through (75% Rebate)** |
-| **Frontend Setup** | Requires manual API proxies | **Drop-in React Components (`<GalxImage />`, `<GalxChat />`)** |
+| **Integration Setup** | Requires manual routing infrastructure | **OpenAI-compatible endpoint and native SDKs** |
 | **API Key Security** | Vulnerable to client leaks | **Server-Only `.env.local` injection** |
 | **AI Agent Directives** | Agents hallucinate boilerplate | **1-Line `npx galxai skills` setup** |
 | **Rate Limit Stalls** | 429 errors during traffic spikes | **Automatic Sub-1ms Anycast Failover** |
@@ -216,7 +205,7 @@ npm run db:test
 ## 📚 Documentation & Guides
 
 - 🛡️ **[Maintainers Knowledge Base (20 Manuals)](docs/maintainers/README.md)**: Deep internal architectural blueprints, 30-day onboarding ramp, subsystem matrices, CI specs, outage failovers, and on-call runbooks.
-- 🏛️ **[Architecture Decision Records (112 ADRs)](docs/adr/README.md)**: Deep technical specifications from ADR 0001 to ADR 0112 (including Authoritative Multi-Account Shard Fleet Pool, Native Codex WebSocket Wire, Dual Rolling Windows, and Hybrid 5-Level Pyramid).
+- 🏛️ **[Architecture Decision Records (119 ADRs)](docs/adr/README.md)**: Deep technical specifications from ADR 0001 to ADR 0119, including the inference-first product boundary, authoritative shard fleet, native Codex wire, dual rolling windows, and hybrid context pyramid.
 - 🚀 **[Real Inference Pipeline & Automated Verification](docs/INFERENCE_PIPELINE_VERIFICATION.md)**: Zero-fallback real inference pipeline (`POST /v1/chat/completions`), 8-phase verification harness, generated sample codebases, and wallet holds.
 - 🌌 **[LUMI: Stellar Pass & Multi-Account Fleet Substrate](docs/LUMI.md)**: $10/mo developer pass, authoritative central shard pool, native Codex WebSocket wire, 40 req / 3 hr sliding-window quotas, and 24/7 autonomous relay containers.
 - 📋 **[Senior Engineering Review: Chat & Rolling Context](docs/SENIOR_ENGINEERING_REVIEW_CHAT_AND_ROLLING_CONTEXT.md)**: Architectural review of Hybrid BroccoliDB (L1) + PostgreSQL (L2) rolling memory, dynamic 1.05M context governor, dual rolling seat quotas, and V44-V53 migrations.
@@ -228,6 +217,3 @@ npm run db:test
 - 💻 **[SDK Cheatsheet](docs/SDK_CHEATSHEET.md)**: Drop-in code snippets for every major framework.
 - ❓ **[Frequently Asked Questions (FAQs)](docs/FAQS.md)**: Zero-hesitation philosophy, model routing, and BroccoliDB economics.
 - 🔧 **[Troubleshooting & Operational Playbook](docs/TROUBLESHOOTING.md)**: Error codes, remediation steps, and verification commands.
-
-
-

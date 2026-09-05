@@ -32,7 +32,7 @@ export default function CalculatorPage() {
   const calculatorFaqs = [
     {
       q: 'How does GALXAI compress Time-to-First-Dollar for AI applications?',
-      a: 'Building production AI traditionally requires 3–6 weeks of engineering time spent writing backend proxy routes, managing client-side API key security, handling 429 rate-limit retries, and building complex loading states. GALXAI eliminates this with drop-in React components (<GalxChat />, <GalxImage />), zero-route Server Actions, and automatic 1-line OpenAI SDK patching (import "galxai/patch").',
+      a: 'Building production AI traditionally requires 3–6 weeks of engineering time spent writing routing infrastructure, managing API key security, and handling 429 rate-limit retries. GALXAI eliminates this with an OpenAI-compatible gateway, native SDKs, zero-route Server Actions, and automatic 1-line OpenAI SDK patching (import "galxai/patch").',
     },
     {
       q: 'What is "Avoided Engineering Tuition"?',

@@ -14,12 +14,7 @@ import {
   Copy,
   Check,
 } from 'lucide-react';
-import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
-import { TrustSeals } from '@/components/common/TrustSeals';
-import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
-import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
-import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 const ERROR_CODES = [
   {
@@ -45,7 +40,7 @@ const ERROR_CODES = [
   {
     code: '429 Rate Limit Exceeded',
     meaning: 'Per-key RPM or TPM capacity ceiling reached',
-    action: 'Client SDKs with exponential backoff & full jitter automatically recover in <50ms.',
+    action: 'Retry with exponential backoff and full jitter, respecting the returned limit metadata.',
   },
   {
     code: '503 Service Unavailable',
@@ -146,26 +141,25 @@ curl --retry 5 \\
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
               <RefreshCw className="w-3.5 h-3.5" />
-              <span>SUB-15MS AUTOMATED CIRCUIT BREAKER FAILOVER</span>
+              <span>ERRORS, RETRIES, AND FAILOVER</span>
             </div>
             <Link
               href="/keys/new"
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase font-mono tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 fill-black" />
-              <span>Claim Key ($5 Credit)</span>
+              <span>Create API Key</span>
             </Link>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-white">Error Handling &amp; Sub-15ms Failover Guide</h1>
+          <h1 className="text-3xl sm:text-4xl font-black text-white">Error Handling and Failover</h1>
           <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl font-sans">
-            Understand standard HTTP status codes, exponential backoff with full jitter, and automated multi-region circuit breaker recovery for resilient zero-stall execution.
+            Classify errors, retry transient failures with jitter, and preserve idempotency across failover.
           </p>
         </div>
 
         <DocsSubNav />
 
         {/* Founding Cohort Rate Lock Ribbon */}
-        <RateLockRibbon />
 
         {/* Status Codes Table */}
         <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-white/10">
@@ -245,15 +239,11 @@ curl --retry 5 \\
         </div>
 
         {/* Consumer-Grade Trust Seals */}
-        <TrustSeals />
 
-        <DocsFeedback docTitle="Error Handling &amp; Sub-15ms Failover Guide" />
+        <DocsFeedback docTitle="Error Handling and Failover" />
       </main>
 
       {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
-      <FloatingConversionDock />
-      <LiveActivityToast />
-      <ExitIntentModal />
     </div>
   );
 }

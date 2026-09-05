@@ -24,11 +24,8 @@ GALXAI automatically resolves shorthand nicknames, intent aliases, and legacy pr
 #### 4. Can I use the zero-install CLI without installing anything?
 Yes. Simply run `npx galxai "Your prompt here"`. It streams completions to stdout immediately, provides formatted model tables (`npx galxai models`), measures edge ping latency (`npx galxai ping`), and estimates BPE token counts and wholesale dollar savings (`npx galxai tokens "..."`).
 
-#### 5. Can I test completions directly in my web browser?
-Yes. The gateway natively supports HTTP `GET` queries:
-```text
-https://galx.ai/v1/chat/completions?prompt=Hello+GALXAI&model=sol&api_key=galx_live_...
-```
+#### 5. Where should I test an integration?
+Start in the `/models` catalog, create an API key, and send a request from your application, terminal, IDE, or SDK. GALXAI may expose a bounded API request inspector for wire-level diagnostics, but it does not provide a hosted chat application or retain a browser conversation timeline.
 
 #### 6. How does GALXAI handle declarative aspect ratios?
 When generating images via `POST /v1/images/generations`, GALXAI automatically converts `aspect_ratio: "16:9"` to `1792x1024`, `9:16` to `1024x1792`, `4:3` to `1024x768`, `3:2` to `1536x1024`, and `1:1` to `1024x1024`.
@@ -49,7 +46,7 @@ Yes, 100%. You can either update `baseURL` to `https://galx.ai/v1` or use our de
 Yes. Set `export OLLAMA_HOST="https://galx.ai"` and `export OLLAMA_API_KEY="galx_live_..."`. GALXAI natively implements `/api/generate`, `/api/chat`, `/api/tags`, `/api/version`, and `/api/show`.
 
 #### 9. How do Stateful Conversation Threads work?
-Using `const thread = galx.thread({ model: 'gpt-5.6-sol', system: '...' })`, the SDK creates a cryptographically identified logical session, manages its turns, pins system instructions, and uses `TokenOptimizer.truncateToFit()` near context limits. The `GalxAI` client itself is never the session: create multiple threads on one client for isolation, export `thread.sessionId` with its snapshot to resume it later, and call `thread.clear()` to rotate to a genuinely new durable identity.
+Stateful threads are a downstream SDK capability, not a GALXAI-hosted chat feature. Using `const thread = galx.thread({ model: 'gpt-5.6-sol', system: '...' })`, an application creates a cryptographically identified logical session, manages its turns, pins system instructions, and uses `TokenOptimizer.truncateToFit()` near context limits. The `GalxAI` client itself is never the session: create multiple threads on one client for isolation, export `thread.sessionId` with its snapshot to resume it later, and call `thread.clear()` to rotate to a genuinely new durable identity.
 
 For autonomous agents, use `const session = agent.startSession()` and later `agent.resumeSession(session.export())`. A bare `agent.run()` is stateless by default.
 
@@ -71,7 +68,7 @@ GALXAI operates a prepaid compute wallet. Every new account receives an initial 
 ## 🔒 Security, Privacy & Compliance
 
 #### 13. Does GALXAI store or log prompts?
-No. GALXAI enforces a strict **Zero Data Retention Policy (ZDR v10.0)**. Prompts and streaming chunks are processed purely in ephemeral memory buffers with 2-pass cryptographic zeroization (`0xAA` -> `0x00`) and are never logged to disk, stored in databases, or used for model training.
+Stateless inference is processed under the **Zero Data Retention Policy (ZDR v10.0)** and is not converted into durable chat history. A downstream caller may explicitly opt into an owner-scoped durable session; in that mode, the conversation and messages are retained for continuity and the response discloses the persistence mode. GALXAI does not use either mode to maintain a hosted chat application or train models.
 
 #### 14. How does GALXAI handle uptime and failover?
 GALXAI provides **high availability infrastructure** backed by sub-15ms automated failover, 4-state circuit breakers, and 300+ global edge Points of Presence ($0 egress bandwidth on Cloudflare R2 `assets.galx.ai`).
@@ -143,4 +140,3 @@ Unlike rigid monthly cliffs or static token throttles, GALXAI uses human-centric
 
 #### 25. How does GALXAI prevent LLM provider crashes when compacting conversations with tool calls (ADR 0070)?
 OpenAI and Anthropic APIs strictly mandate that every `tool` execution result message must be preceded immediately by an `assistant` message containing matching `tool_calls`. GALXAI's `GalxRollingContextEngine` enforces **Atomic Tool Turn-Pair Inseparability** (`ensureAtomicTurnPairs`), dynamically shifting compaction boundaries leftward so tool call triggers and responses are never severed.
-

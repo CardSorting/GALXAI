@@ -36,7 +36,6 @@ CRITICAL AGENT RULES:
 
 3. DECLARATIVE UI OVER IMPERATIVE CODE:
    - In React / Next.js views, use <GalxImage prompt="..." aspectRatio="16:9" /> from 'galxai/ui'.
-   - In chat views, use <GalxChat model="gpt-5.6-sol" /> from 'galxai/ui'.
 
 4. ZERO-MIGRATION LEGACY MIGRATION:
    - For existing OpenAI / Anthropic code, add import 'galxai/patch' to automatically reroute traffic to GALXAI Wholesale Gateway.
@@ -351,7 +350,7 @@ ${header}
             <button
               onClick={() => copyToClipboard(
                 activeCodeTab === 'action' ? `'use client';\nimport { generateImageAction } from 'galxai/actions';\n\nexport function Studio() {\n  return (\n    <button onClick={async () => {\n      const res = await generateImageAction('Cyberpunk Tokyo', { aspectRatio: '16:9' });\n      console.log(res.data[0].url);\n    }}>\n      Generate Image\n    </button>\n  );\n}` :
-                activeCodeTab === 'ui' ? `import { GalxImage, GalxChat } from 'galxai/ui';\n\nexport function Studio() {\n  return (\n    <div className="space-y-6">\n      <GalxImage prompt="Cyberpunk metropolis" aspectRatio="16:9" interactive />\n      <GalxChat model="gpt-5.6-sol" placeholder="Ask anything..." />\n    </div>\n  );\n}` :
+                activeCodeTab === 'ui' ? `import { GalxImage } from 'galxai/ui';\n\nexport function Studio() {\n  return (\n    <GalxImage prompt="Cyberpunk metropolis" aspectRatio="16:9" interactive />\n  );\n}` :
                 activeCodeTab === 'patch' ? `// Put in your layout.tsx or index.ts:\nimport 'galxai/patch';\n\n// Existing OpenAI code is transparently rerouted to GALXAI with wholesale pricing:\nimport OpenAI from 'openai';\nconst openai = new OpenAI();` :
                 generatedDirectives,
                 activeCodeTab
@@ -377,27 +376,17 @@ export function Studio() {
     </button>
   );
 }`}
-              {activeCodeTab === 'ui' && `// Declarative JSX UI Primitives (Zero State Management Code)
-import { GalxImage, GalxChat } from 'galxai/ui';
+              {activeCodeTab === 'ui' && `// Declarative Image UI Primitive (Zero State Management Code)
+import { GalxImage } from 'galxai/ui';
 
 export function Studio() {
   return (
-    <div className="space-y-6">
-      {/* Self-hydrating visual creation with hover remixing & progressive glowing placeholder */}
-      <GalxImage
-        prompt="Cyberpunk metropolis at dusk"
-        aspectRatio="16:9"
-        interactive
-        className="w-full h-96 rounded-2xl shadow-2xl"
-      />
-
-      {/* Complete streaming multi-turn chat widget */}
-      <GalxChat
-        model="gpt-5.6-sol"
-        placeholder="Ask questions or synthesize ideas..."
-        className="h-[500px]"
-      />
-    </div>
+    <GalxImage
+      prompt="Cyberpunk metropolis at dusk"
+      aspectRatio="16:9"
+      interactive
+      className="w-full h-96 rounded-2xl shadow-2xl"
+    />
   );
 }`}
               {activeCodeTab === 'patch' && `// Zero-Migration OpenAI Drop-In (Zero Code Changes)

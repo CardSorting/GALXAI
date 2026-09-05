@@ -22,11 +22,12 @@
 
 As a maintainer of GALXAI, you are responsible for maintaining a **zero-downtime, sub-15ms AI compute clearinghouse, spend governance control plane, and representation transformation substrate**.
 
-### The 4 Pillars of Maintainership:
+### The 5 Pillars of Maintainership:
 1. **Paranoid Invariant Defense**: Code quality is not subjective. Every change must satisfy deterministic mechanical invariants (Zero Destructive DDL, Fail-Closed Factual Provenance, Zero-GC Critical Loops, Zero-Copy SSE Streams).
 2. **Empirical Receipt Truth**: We do not guess or approximate token savings. All performance claims must be backed by reproducible provider-boundary usage and dollar receipts under Randomized Branch-Blinded evaluation (`npm run bench:inference-boundary`).
 3. **Zero-Hesitation Ergonomics**: Developer experience is sacred. The gateway must resolve intents, aliases, shorthands, and missing parameters without throwing unhelpful 400 errors (`scripts/verify-zero-hesitation-ergonomics.ts`).
 4. **Evidence-Gated Governance**: Spend interventions and model cascades must follow the verified operational sequence: $\text{Observe} \to \text{Attribute} \to \text{Explain} \to \text{Recommend} \to \text{Shadow} \to \text{Approve} \to \text{Canary} \to \text{Enforce} \to \text{Verify}$.
+5. **Inference-First Product Discipline**: The hosted web product discovers, configures, meters, and governs inference. It does not ship destination chat or image-studio clients. Preserve compatible inference APIs and downstream SDK integrations while keeping `/models` as the default post-auth activation surface (ADR 0119).
 
 ---
 
@@ -152,7 +153,7 @@ sequenceDiagram
 
 ### 🗓️ Week 2 → Month 1: Autonomous Maintenance Mastery
 - Master all 8 Operational Lifecycle Playbooks in [`docs/playbooks/`](docs/playbooks/).
-- Review and uphold all 65 Architecture Decision Records in [`docs/adr/`](docs/adr/).
+- Review and uphold all accepted Architecture Decision Records in [`docs/adr/`](docs/adr/).
 - Conduct unframed behavioral developer observation sessions ([Stage 8 Playbook](docs/playbooks/08-unframed-developer-observation-protocol.md)).
 
 ---
@@ -173,10 +174,12 @@ src/
 │   └── vault/                          # AES-256-GCM Envelope Encryption with AAD
 ├── app/                                # Next.js 15 App Router & API Gateways
 │   ├── api/audit/broccolidb/compact/   # Production Compaction REST Endpoint
+│   ├── auth/                           # Authentication and callback flows; defaults to /models
+│   ├── models/                         # Canonical model-card catalog and type tabs
 │   ├── v1/chat/completions/            # OpenAI Streaming Inference Gateway
 │   └── audit/                          # Spend Forensic Control Tower Dashboard
 ├── sdk/                                # Universal Developer SDK (@galxai/sdk)
-│   └── ui/                             # Drop-in React 19 UI Primitives (<GalxChat />)
+│   └── ui/                             # Optional downstream React 19 media primitives
 └── lib/                                # Shared Helpers & Storage Substrates
 ```
 
@@ -197,9 +200,12 @@ Before merging ANY pull request into `main`, verify the **5-Gate PR Checklist**:
 │ 3    │ **Hardening Safety** │ `npm run test:broccolidb:hardening` must pass 100%│
 │ 4    │ **Boundary Bench**   │ `npm run bench:inference-boundary` must pass.     │
 │ 5    │ **ADR Required**     │ Any new architectural mode or contract requires   │
-│      │                      │ a corresponding markdown ADR in `docs/adr/`.      │
+│      │                      │ a corresponding markdown ADR in `docs/adr/`; web  │
+│      │                      │ features must also pass the product-surface test. │
 └──────┴──────────────────────┴───────────────────────────────────────────────────┘
 ```
+
+For web-product changes, apply the five questions in [Product Surface Strategy](docs/PRODUCT_SURFACE_STRATEGY.md). Any feature that introduces conversation history, creative projects, sharing, or client-only persistence must be rejected or supported by an ADR that explicitly revisits ADR 0119.
 
 ---
 

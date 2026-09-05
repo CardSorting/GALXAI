@@ -4,8 +4,10 @@ import {
   ChatRepositoryAccessError,
 } from '@/lib/supabase/repositories/ChatRepository';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
-import type { ChatSession } from '@/components/chat/ChatSidebar';
-import type { ChatMessage } from '@/components/chat/ChatMessageItem';
+import type {
+  PersistedChatMessage as ChatMessage,
+  PersistedChatSession as ChatSession,
+} from '@/core/chat/GalxChatPersistenceContracts';
 import {
   ChatRequestValidationError,
   normalizeChatResourceId,
@@ -75,7 +77,6 @@ export async function GET(req: NextRequest) {
         activeSessionId: delta.activeSessionId,
         messages: delta.messages || [],
         multiSessionMessages: delta.multiSessionMessages || {},
-        personas: delta.personas || [],
       },
       {
         headers: {

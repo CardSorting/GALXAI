@@ -5,7 +5,7 @@ import { JsonLd, createTechArticleSchema, createBreadcrumbSchema } from '@/lib/s
 
 export const metadata: Metadata = constructMetadata({
   title: 'SDKs & Client Libraries — Python, TypeScript, Rust, Go & CLI',
-  description: '1-line connection recipes for Python, TypeScript, Vercel AI SDK, LangChain, LlamaIndex, Rust, and Go with 25%–40% wholesale savings and sub-15ms latency.',
+  description: 'Connection recipes for Python, TypeScript, Vercel AI SDK, LangChain, LlamaIndex, Rust, Go, and CLI clients.',
   canonicalPath: '/docs/sdks',
   keywords: [
     'AI SDKs',

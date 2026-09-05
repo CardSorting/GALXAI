@@ -18,6 +18,7 @@ Whenever an API returns a rigid `400 Bad Request`, `405 Method Not Allowed`, or 
 2. **Absorb All Conventions**: Support snake_case, camelCase, JSON, raw text strings, query parameters, multi-header auth, and array/single-item polymorphisms.
 3. **Safe Default Fallbacks**: When parameters or model IDs are missing or unrecognized, default to flagship `gpt-5.6-sol`.
 4. **Full Protocol Parity**: Support OpenAI, Anthropic, Ollama, and Vercel AI SDK simultaneously on the same gateway endpoints.
+5. **Product-Boundary Discipline**: Absorb external client conventions at the gateway without turning the GALXAI web control plane into the client application. Hosted chat, personas, sharing, and image studios remain out of scope under ADR 0119.
 
 ---
 
@@ -32,7 +33,7 @@ The following matrix documents how the gateway absorbs each ecosystem's mental m
 | **Ollama CLI / OpenWebUI** | `curl https://galx.ai/api/generate -d '{"model":"sol","prompt":"..."}'` | `POST /api/generate`, `POST /api/chat` | Extracts `prompt`/`input`/`text`, streams NDJSON chunks with `done: true` tail chunk. |
 | **Vercel AI SDK** | `streamText({ model: galxai("gpt-5.6-sol"), messages })` | SDK Provider Shim / SSE | `toDataStreamResponse()` / `toTextStreamResponse()` stream adapters. |
 | **LangChain / LlamaIndex** | `ChatGalxAI.invoke(input)` / `GalxLLM.complete(prompt)` | SDK Integration Shim | Polymorphic message normalization (`human`, `system`, `ai`, `string`, `object`). |
-| **Browser URL / cURL Query** | `GET https://galx.ai/v1/chat/completions?prompt=Hello&model=sol` | `GET /v1/chat/completions`, `GET /api/generate` | Synthesizes chat completion payload directly from URL query parameters. |
+| **Compatibility GET / cURL Query** | `curl --get https://galx.ai/v1/chat/completions --data-urlencode prompt=Hello` | `GET /v1/chat/completions`, `GET /api/generate` | Synthesizes a completion payload for diagnostics and legacy clients; this does not imply a hosted browser chat. |
 | **Raw Terminal cURL** | `curl -X POST https://galx.ai/v1/chat/completions -d "Explain gravity"` | `POST /v1/chat/completions` | Catches JSON parse failures and absorbs raw string payload directly as user message. |
 | **Midjourney / Flux Images** | `POST /v1/images/generations -d '{"prompt":"...", "aspect_ratio":"16:9"}'` | `POST /v1/images/generations` | Normalizes `aspect_ratio: "16:9"` $\to$ `size: "1792x1024"`, maps `flux`/`midjourney` $\to$ `openai-gpt-image-2`. |
 | **Zero-Install CLI** | `npx galxai "Explain quantum computing"` | Terminal Binary (`bin/galxai.mjs`) | Instant command execution with direct streaming to terminal stdout. |
@@ -106,4 +107,4 @@ If developers report unexpected errors when connecting third-party tools:
 | Client receives `400 Bad Request` on image generation | Unhandled aspect ratio or parameter name | Inspect payload size and aspect_ratio | Verify `aspectRatioMap` in `src/app/v1/images/generations/route.ts`. |
 | Client receives `400 orphaned_tool_message` | Client pruned assistant tool trigger | Inspect turn history | Verify `ensureAtomicTurnPairs` in `GalxRollingContextEngine.ts`. |
 | New IDE/CLI client reports unrecognized model | Model name contains new version tag (e.g. `:preview`) | `node bin/galxai.mjs resolve <new-name>` | Add suffix pattern to `cleanAlias` in `ModelCatalog.ts`. |
-| Browser direct URL query returns blank | Missing query parameter parser | `curl "https://galx.ai/v1/chat/completions?prompt=hi"` | Verify `GET` handler in `src/app/v1/chat/completions/route.ts`. |
+| Compatibility GET query returns blank | Missing query parameter parser | `curl --get "https://galx.ai/v1/chat/completions" --data-urlencode "prompt=hi"` | Verify `GET` handler in `src/app/v1/chat/completions/route.ts`. |

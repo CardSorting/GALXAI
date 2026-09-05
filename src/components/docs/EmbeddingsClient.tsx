@@ -13,12 +13,7 @@ import {
   Zap,
   Database,
 } from 'lucide-react';
-import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
-import { TrustSeals } from '@/components/common/TrustSeals';
-import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
-import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
-import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export function EmbeddingsClient() {
   const [activeTab, setActiveTab] = useState<'python' | 'ts' | 'pgvector' | 'langchain'>('python');
@@ -69,7 +64,7 @@ const client = new OpenAI({
 
 const response = await client.embeddings.create({
   model: "text-embedding-3-small",
-  input: ["Vector search indexing", "Sub-15ms Time-To-First-Token"],
+  input: ["Vector search indexing", "Observed inference latency"],
   dimensions: 1536,
 });
 
@@ -110,8 +105,8 @@ embeddings = OpenAIEmbeddings(
 )
 
 texts = [
-    "GALXAI provides 75% prompt caching discounts automatically.",
-    "Zero data retention guarantees absolute data privacy."
+    "GALXAI exposes model-specific cache usage and rates.",
+    "Stateless and durable inference have explicit retention modes."
 ]
 
 vectorstore = FAISS.from_texts(texts, embedding=embeddings)
@@ -151,7 +146,7 @@ print(results[0].page_content)`,
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase font-mono tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 fill-black" />
-              <span>Claim Key ($5 Credit)</span>
+              <span>Create API Key</span>
             </Link>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white">Vector Embeddings &amp; Semantic Search Guide</h1>
@@ -163,7 +158,6 @@ print(results[0].page_content)`,
         <DocsSubNav />
 
         {/* Founding Cohort Rate Lock Ribbon */}
-        <RateLockRibbon />
 
         {/* Benefits Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
@@ -182,7 +176,7 @@ print(results[0].page_content)`,
           <div className="glass-panel p-5 rounded-3xl space-y-1 border border-white/10">
             <span className="text-zinc-500 text-[10px] uppercase font-sans">Cost Efficiency</span>
             <div className="text-2xl font-black text-white">$0.020 / M</div>
-            <div className="text-[11px] text-zinc-400 font-sans">25% wholesale discount applied</div>
+            <div className="text-[11px] text-zinc-400 font-sans">Check the live model catalog for current rates</div>
           </div>
         </div>
 
@@ -229,15 +223,11 @@ print(results[0].page_content)`,
         </div>
 
         {/* Consumer-Grade Trust Seals */}
-        <TrustSeals />
 
         <DocsFeedback docTitle="Vector Embeddings &amp; Semantic Search Guide" />
       </main>
 
       {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
-      <FloatingConversionDock />
-      <LiveActivityToast />
-      <ExitIntentModal />
     </div>
   );
 }

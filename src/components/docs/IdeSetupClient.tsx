@@ -12,12 +12,7 @@ import {
   Check,
   Zap,
 } from 'lucide-react';
-import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
-import { TrustSeals } from '@/components/common/TrustSeals';
-import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
-import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
-import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 
 export function IdeSetupClient() {
   const [activeTab, setActiveTab] = useState<'cursor' | 'windsurf' | 'claude_code' | 'continue' | 'cline'>('cursor');
@@ -68,7 +63,7 @@ API Key: galx_live_your_gateway_key
       instructions: [
         'Set ANTHROPIC_BASE_URL to point to GALXAI Wholesale Clearinghouse.',
         'Set ANTHROPIC_API_KEY to your galx_live_... bearer key.',
-        'Run claude in any project directory with 25%–40% wholesale savings and 429 immunity.',
+        'Run Claude Code in a project and verify the selected model and endpoint.',
       ],
       snippet: `# In your shell (~/.zshrc or ~/.bashrc):
 export ANTHROPIC_BASE_URL="https://api.galx.ai/v1"
@@ -82,7 +77,7 @@ claude "Refactor this module with full test coverage"`,
       instructions: [
         'Open your ~/.continue/config.json configuration file.',
         'Add the GALXAI model definitions under the "models" array.',
-        'Save the file. Continue will immediately pick up sub-15ms completions.',
+        'Save the file and send a test request from Continue.',
       ],
       snippet: `{
   "models": [
@@ -152,19 +147,18 @@ Max Output: 16384`,
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase font-mono tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 fill-black" />
-              <span>Claim Key ($5 Credit)</span>
+              <span>Create API Key</span>
             </Link>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white">Cursor, Windsurf &amp; Continue.dev Setup</h1>
           <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl font-sans">
-            Route your coding completions, multi-file edits, and agent loops through GALXAI with sub-15ms router latency, 75% prompt caching discounts, and 25%–40% wholesale compute savings.
+            Point supported coding tools at the GALXAI endpoint, select a current model ID, and verify one authenticated request.
           </p>
         </div>
 
         <DocsSubNav />
 
         {/* Founding Cohort Rate Lock Ribbon */}
-        <RateLockRibbon />
 
         {/* Interactive IDE Tabs */}
         <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-white/10">
@@ -217,13 +211,9 @@ Max Output: 16384`,
         </div>
 
         {/* Consumer-Grade Trust Seals */}
-        <TrustSeals />
       </main>
 
       {/* Floating Conversion Dock, Live Activity Toast & Exit Intent Modal */}
-      <FloatingConversionDock />
-      <LiveActivityToast />
-      <ExitIntentModal />
     </div>
   );
 }

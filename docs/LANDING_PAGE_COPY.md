@@ -54,7 +54,7 @@ Eliminate the obstacles in your AI workflows. No custom API routes, zero data tr
 
 ### 3. Optimize Workflow & Governance
 Instantly streamline operations:
-- **Way 1: New Apps (UI Primitives)** — Drop `<GalxImage />` or `<GalxChat />` directly into Next.js.
+- **Way 1: Native SDKs** — Point OpenAI-compatible clients at the GALXAI gateway.
 - **Way 2: Existing Apps (1-Line Patch)** — Add `import 'galxai/patch'` to automatically discount your existing OpenAI SDK calls.
 - **Way 3: AI Coding Agents (Cursor / Windsurf)** — Run `npx galxai skills` to pre-wire `.cursorrules` and `AGENTS.md` so assistants never hallucinate messy proxies.
 
@@ -84,5 +84,5 @@ Instantly streamline operations:
 Get your live API key in 10 seconds. Includes $10 free compute credit. No credit card required.
 
 ### Actions
-- **[Get API Key ($10 Free Credit)](http://localhost:3001/auth/signup?next=/chat)**
+- **[Get API Key ($10 Free Credit)](http://localhost:3001/auth/signup?next=/keys)**
 - **[Read Documentation](http://localhost:3001/docs)**

@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Blocks, ArrowRight, ShieldCheck, Laptop, Terminal, Sparkles } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Laptop, Terminal, Sparkles } from 'lucide-react';
 import { INTEGRATION_GUIDES } from '@/lib/data/integrationsData';
 import { constructMetadata } from '@/lib/seo/metadata';
 import { JsonLd, createTopicHubGraph } from '@/lib/seo/jsonld';
@@ -43,7 +43,7 @@ export default function IntegrationsHubPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#07080d] text-zinc-100 flex flex-col font-sans selection:bg-cyan-500/30">
+    <div className="min-h-screen bg-[#07080d] text-white flex flex-col font-sans selection:bg-cyan-500/30">
       <JsonLd data={hubSchema} />
       <Navigation />
 
@@ -56,17 +56,12 @@ export default function IntegrationsHubPage() {
           ]}
         />
 
-        {/* Header & Hero */}
-        <header className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-bold tracking-wide">
-            <Blocks className="w-4 h-4 text-cyan-400" />
-            <span>UNIVERSAL WIRE COMPATIBILITY</span>
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight">
-            Framework &amp; IDE <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">Integrations</span>
+        <header className="mb-10 max-w-3xl space-y-4">
+          <h1 className="text-4xl font-semibold tracking-[-0.03em] text-white sm:text-5xl">
+            Integrations
           </h1>
-          <p className="text-base sm:text-lg text-zinc-400 leading-relaxed">
-            Zero-code drop-in connection guides for your favorite developer environments, agent orchestrators, and AI SDKs.
+          <p className="text-base leading-7 text-zinc-400">
+            Configure supported SDKs, IDEs, and agent frameworks with a GALXAI base URL and API key.
           </p>
         </header>
 

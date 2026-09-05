@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
+import { DEFAULT_POST_AUTH_PATH } from '@/lib/auth/redirects';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,7 +14,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') || searchParams.get('redirect') || searchParams.get('returnUrl') || '/chat';
+  const next = searchParams.get('next') || searchParams.get('redirect') || searchParams.get('returnUrl') || DEFAULT_POST_AUTH_PATH;
   const errorParam = searchParams.get('error');
   const errorDesc = searchParams.get('error_description');
 

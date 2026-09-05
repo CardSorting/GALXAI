@@ -4,8 +4,8 @@ import { constructMetadata } from '@/lib/seo/metadata';
 import { JsonLd, createTechArticleSchema, createBreadcrumbSchema } from '@/lib/seo/jsonld';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Server-Sent Events (SSE) Streaming Guide — Sub-15ms TTFT',
-  description: 'Stream tokens in real time over standard HTTP/1.1 and HTTP/2 connections with sub-15ms Time-To-First-Token (TTFT) and continuous keep-alive heartbeats.',
+  title: 'Streaming Responses with SSE',
+  description: 'Consume OpenAI-compatible server-sent events, handle disconnects, and measure observed latency.',
   canonicalPath: '/docs/streaming',
   keywords: [
     'SSE AI Streaming',
@@ -22,7 +22,7 @@ export default function StreamingDocsPage() {
     '@context': 'https://schema.org',
     '@graph': [
       createTechArticleSchema({
-        headline: 'Server-Sent Events (SSE) Streaming Guide: Sub-15ms TTFT',
+        headline: 'GALXAI Server-Sent Events Streaming Guide',
         description: 'Complete guide for real-time token streaming with Python, TypeScript, and cURL over SSE.',
         path: '/docs/streaming',
       }),

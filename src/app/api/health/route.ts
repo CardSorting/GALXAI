@@ -46,6 +46,9 @@ export async function GET() {
       multimodal_vision: true,
       dag_workflows: true,
       async_queues: true,
+      browser_agent_protocol: '2026-09-04',
+      logical_session_multiplexing: true,
+      deployment_skew_pinning: process.env.VERCEL_SKEW_PROTECTION_ENABLED === '1',
       zdr_privacy_shield: true,
       soc2_type_ii_compliant: true
     },
