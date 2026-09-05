@@ -3292,11 +3292,122 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['galx_seat_request_leases']['Insert']>;
         Relationships: [];
       };
+      user_image_library: {
+        Row: {
+          id: string;
+          user_id: string;
+          session_id: string;
+          status: 'queued' | 'generating' | 'completed' | 'failed';
+          prompt: string;
+          revised_prompt: string | null;
+          model: string;
+          aspect_ratio: string;
+          dimensions: string;
+          quality: string;
+          public_url: string;
+          r2_key: string;
+          content_type: string;
+          size_bytes: number;
+          sha256: string;
+          lqip: string | null;
+          seed: string | null;
+          latency_ms: number;
+          cost_usd: number;
+          is_favorite: boolean;
+          tags: string[];
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          user_id: string;
+          session_id?: string;
+          status?: 'queued' | 'generating' | 'completed' | 'failed';
+          prompt: string;
+          revised_prompt?: string | null;
+          model: string;
+          aspect_ratio?: string;
+          dimensions?: string;
+          quality?: string;
+          public_url: string;
+          r2_key: string;
+          content_type?: string;
+          size_bytes?: number;
+          sha256: string;
+          lqip?: string | null;
+          seed?: string | null;
+          latency_ms?: number;
+          cost_usd?: number;
+          is_favorite?: boolean;
+          tags?: string[];
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['user_image_library']['Insert']>;
+        Relationships: [];
+      };
+      image_library_gc_outbox: {
+        Row: {
+          r2_key: string;
+          user_id: string;
+          asset_id: string;
+          enqueued_at: string;
+          attempts: number;
+          last_error: string | null;
+        };
+        Insert: {
+          r2_key: string;
+          user_id: string;
+          asset_id: string;
+          enqueued_at?: string;
+          attempts?: number;
+          last_error?: string | null;
+        };
+        Update: Partial<Database['public']['Tables']['image_library_gc_outbox']['Insert']>;
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
+      fn_batch_upsert_image_library: {
+        Args: { p_records: Json };
+        Returns: number;
+      };
+      fn_ack_image_library_gc: {
+        Args: { p_r2_keys: string[] };
+        Returns: number;
+      };
+      fn_batch_mutate_image_library: {
+        Args: {
+          p_user_id: string;
+          p_asset_ids: string[];
+          p_action: 'favorite' | 'delete';
+          p_is_favorite?: boolean;
+        };
+        Returns: Json;
+      };
+      fn_get_user_image_library_stats: {
+        Args: { p_user_id: string };
+        Returns: Json;
+      };
+      fn_query_user_image_library: {
+        Args: {
+          p_user_id: string;
+          p_limit?: number;
+          p_cursor_created_at?: string;
+          p_cursor_id?: string;
+          p_session_id?: string;
+          p_aspect_ratio?: string;
+          p_is_favorite?: boolean;
+          p_search?: string;
+          p_sort?: 'newest' | 'oldest';
+        };
+        Returns: Json;
+      };
       fn_upsert_owned_chat_messages: {
         Args: { p_conversation_id: string; p_user_id: string; p_messages: Json };
         Returns: Json;

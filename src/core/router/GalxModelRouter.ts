@@ -944,6 +944,7 @@ export class GalxModelRouter {
         'default';
 
       const r2Adapter = GalxR2AssetAdapter.getInstance();
+      const mirroredImages = [];
       for (const item of result.data) {
         try {
           let imageSource: Buffer | string | undefined;
@@ -964,6 +965,7 @@ export class GalxModelRouter {
               model: modelSpec.id,
               size: sanitizedRequest.size || '1024x1024',
               quality: sanitizedRequest.quality || 'standard',
+              deferManifestUpdate: true,
               metadata: {
                 prompt: sanitizedRequest.prompt || '',
                 revisedPrompt: item.revised_prompt || '',
@@ -973,6 +975,7 @@ export class GalxModelRouter {
                 requestId,
               },
             });
+            mirroredImages.push(uploaded);
 
             item.asset_id = uploaded.assetId;
             item.r2_key = uploaded.key;
@@ -993,6 +996,16 @@ export class GalxModelRouter {
         } catch (r2Err: any) {
           console.warn(`[GalxModelRouter] Failed to mirror image to R2: ${r2Err.message}`);
         }
+      }
+
+      // One manifest read/write for the whole generation response instead of one per image.
+      if (mirroredImages.length > 0) {
+        await r2Adapter.updateSessionManifestBatch(userId, effectiveSessionId, mirroredImages)
+          .catch((manifestErr: any) => console.warn(`[GalxModelRouter] Batched image manifest update failed: ${manifestErr.message}`));
+        // Drain once for the entire generation so short-lived/serverless runtimes do not
+        // depend on a timer to persist gallery metadata.
+        await r2Adapter.flushImageLibraryBuffer()
+          .catch((flushErr: any) => console.warn(`[GalxModelRouter] Batched image library flush deferred: ${flushErr.message}`));
       }
 
       // Completely scrub shardId from client-facing visual synthesis response

@@ -15,6 +15,7 @@
 import * as crypto from 'node:crypto';
 import { BroccoliDbTable } from '../../core/broccolidb/broccolidb-table';
 import { BroccoliNaturalQueryParser } from '../../core/broccolidb/broccolidb-natural-query';
+import { BroccoliImageLibraryBuffer } from '../../core/broccolidb/BroccoliImageLibraryBuffer';
 import type { DbAggregateQuery, DbAggregateResult } from '../../core/broccolidb/broccolidb.contracts';
 import { GalxUnifiedR2StorageManager, buildUserSessionImagePath } from '../../core/storage/GalxUnifiedR2StorageManager';
 
@@ -43,6 +44,8 @@ export interface UserSessionImageParams {
   size?: string;
   quality?: string;
   metadata?: Record<string, string>;
+  /** Coalesce manifest writes when the caller uploads several images in one generation. */
+  deferManifestUpdate?: boolean;
 }
 
 export interface UserSessionImageResult extends R2UploadResult {
@@ -127,6 +130,25 @@ export class GalxR2AssetAdapter {
   }
 
   /**
+   * Derives normalized aspect ratio string from dimensions (e.g. "1792x1024" -> "16:9").
+   */
+  private extractAspectRatio(dimensions?: string): string {
+    if (!dimensions || !dimensions.includes('x')) return '1:1';
+    const [w, h] = dimensions.split('x').map(n => parseInt(n, 10));
+    if (isNaN(w) || isNaN(h) || w <= 0 || h <= 0) return '1:1';
+    if ((w === 1792 && h === 1024) || (w === 1920 && h === 1080) || (w === 1280 && h === 720)) return '16:9';
+    if ((w === 1024 && h === 1792) || (w === 1080 && h === 1920) || (w === 720 && h === 1280)) return '9:16';
+    if (w === h) return '1:1';
+    if ((w === 1200 && h === 800) || (w === 1500 && h === 1000)) return '3:2';
+    if ((w === 800 && h === 1200) || (w === 1000 && h === 1500)) return '2:3';
+    if ((w === 1024 && h === 768) || (w === 800 && h === 600)) return '4:3';
+    if ((w === 768 && h === 1024) || (w === 600 && h === 800)) return '3:4';
+    const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
+    const divisor = gcd(w, h);
+    return `${w / divisor}:${h / divisor}`;
+  }
+
+  /**
    * Resolves raw payload into Buffer and content-type.
    */
   private async resolveDataPayload(data: Buffer | Uint8Array | string, fallbackContentType = 'image/png'): Promise<{ buffer: Buffer; contentType: string }> {
@@ -173,7 +195,10 @@ export class GalxR2AssetAdapter {
   async uploadUserSessionImage(params: UserSessionImageParams): Promise<UserSessionImageResult> {
     const { buffer, contentType } = await this.resolveDataPayload(params.data, params.contentType || 'image/png');
     const ext = contentType.includes('webp') ? 'webp' : contentType.includes('jpeg') || contentType.includes('jpg') ? 'jpg' : 'png';
-    const userId = (params.userId || 'anonymous_user').trim();
+    const userId = params.userId.trim();
+    if (!userId || userId === 'anonymous' || userId === 'anonymous_user') {
+      throw new Error('Authenticated userId is required for user image library persistence');
+    }
     const sessionId = (params.sessionId || 'default').trim();
     const imageId = params.imageId || `img_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
 
@@ -242,11 +267,47 @@ export class GalxR2AssetAdapter {
 
     this.assetTable.put(imageId, result);
 
-    // Synchronously update session manifest in R2 so caller can immediately inspect it
+    // Enqueue into BroccoliImageLibraryBuffer for micro-batched persistence to PostgreSQL & R2 master catalog
     try {
-      await this.updateSessionManifest(userId, sessionId, result);
-    } catch (manifestErr: any) {
-      console.warn(`[GalxR2AssetAdapter] Session manifest update non-fatal error: ${manifestErr.message}`);
+      const libraryBuffer = BroccoliImageLibraryBuffer.getInstance();
+      const aspectRatio = this.extractAspectRatio(params.size);
+      libraryBuffer.enqueueRecord({
+        id: imageId,
+        userId,
+        sessionId,
+        status: 'completed',
+        prompt: params.prompt || 'Visual synthesis',
+        revisedPrompt: params.revisedPrompt || null,
+        model: params.model || 'openai-gpt-image-2',
+        aspectRatio,
+        dimensions: params.size || '1024x1024',
+        quality: params.quality || 'standard',
+        publicUrl: r2Result.publicUrl,
+        r2Key: key,
+        contentType,
+        sizeBytes: r2Result.sizeBytes,
+        sha256: r2Result.sha256,
+        lqip,
+        seed: params.metadata?.seed || null,
+        latencyMs: params.metadata?.latency_ms ? parseInt(params.metadata.latency_ms, 10) : 0,
+        costUsd: params.metadata?.cost_usd ? parseFloat(params.metadata.cost_usd) : 0,
+        isFavorite: false,
+        tags: params.metadata?.tags ? params.metadata.tags.split(',') : [],
+        metadata: params.metadata || {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+    } catch (bufErr: any) {
+      console.warn(`[GalxR2AssetAdapter] BroccoliImageLibraryBuffer enqueue warning: ${bufErr.message}`);
+    }
+
+    // Synchronously update session manifest in R2 so caller can immediately inspect it
+    if (!params.deferManifestUpdate) {
+      try {
+        await this.updateSessionManifestBatch(userId, sessionId, [result]);
+      } catch (manifestErr: any) {
+        console.warn(`[GalxR2AssetAdapter] Session manifest update non-fatal error: ${manifestErr.message}`);
+      }
     }
 
     return result;
@@ -418,7 +479,8 @@ export class GalxR2AssetAdapter {
   /**
    * Appends or updates the session visual manifest in R2.
    */
-  private async updateSessionManifest(userId: string, sessionId: string, newImage: UserSessionImageResult): Promise<void> {
+  async updateSessionManifestBatch(userId: string, sessionId: string, newImages: UserSessionImageResult[]): Promise<void> {
+    if (newImages.length === 0) return;
     const manifestKey = `users/${userId.replace(/[^a-zA-Z0-9_-]/g, '_')}/sessions/${sessionId.replace(/[^a-zA-Z0-9_-]/g, '_')}/manifest.json`;
     let manifest: SessionImageManifest;
 
@@ -437,19 +499,21 @@ export class GalxR2AssetAdapter {
       };
     }
 
-    manifest.totalImages += 1;
-    manifest.totalBytes += newImage.sizeBytes;
+    const existingIds = new Set(manifest.images.map((image) => image.assetId));
+    const uniqueNewImages = newImages.filter((image) => !existingIds.has(image.assetId));
+    manifest.totalImages += uniqueNewImages.length;
+    manifest.totalBytes += uniqueNewImages.reduce((total, image) => total + image.sizeBytes, 0);
     manifest.updatedAtMs = Date.now();
-    manifest.images.unshift({
-      assetId: newImage.assetId,
-      key: newImage.key,
-      url: newImage.publicUrl,
-      prompt: newImage.prompt,
-      model: newImage.model,
-      size: newImage.size,
-      sizeBytes: newImage.sizeBytes,
-      createdAtMs: newImage.uploadedAtMs
-    });
+    manifest.images.unshift(...uniqueNewImages.map((image) => ({
+      assetId: image.assetId,
+      key: image.key,
+      url: image.publicUrl,
+      prompt: image.prompt,
+      model: image.model,
+      size: image.size,
+      sizeBytes: image.sizeBytes,
+      createdAtMs: image.uploadedAtMs
+    })));
 
     // Keep manifest bounded to latest 100 images per session
     if (manifest.images.length > 100) {
@@ -459,7 +523,7 @@ export class GalxR2AssetAdapter {
     await this.r2Manager.putObject({
       bucket: 'images',
       key: manifestKey,
-      data: Buffer.from(JSON.stringify(manifest, null, 2), 'utf-8'),
+      data: Buffer.from(JSON.stringify(manifest), 'utf-8'),
       contentType: 'application/json',
       cacheControl: 'no-cache'
     });
@@ -480,6 +544,11 @@ export class GalxR2AssetAdapter {
     return this.r2Manager.getPresignedDownloadUrl('images', key, expiresInSeconds);
   }
 
+  /** Drains the coalesced image metadata batch at the request boundary. */
+  async flushImageLibraryBuffer(): Promise<number> {
+    return BroccoliImageLibraryBuffer.getInstance().flushSync();
+  }
+
   public queryNatural(naturalQuery: string): UserSessionImageResult[] {
     const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'r2_assets');
     return this.assetTable.query(parsed.queryOptions) as UserSessionImageResult[];
@@ -491,4 +560,3 @@ export class GalxR2AssetAdapter {
 }
 
 export const galxR2Assets = GalxR2AssetAdapter.getInstance();
-

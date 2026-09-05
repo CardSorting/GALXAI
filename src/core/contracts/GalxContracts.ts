@@ -1250,4 +1250,57 @@ export interface MemorySlab {
   release(): void;
 }
 
+export interface ImageGenerationRecord {
+  readonly id: string;
+  readonly userId: string;
+  readonly sessionId: string;
+  readonly status: 'queued' | 'generating' | 'completed' | 'failed';
+  readonly prompt: string;
+  readonly revisedPrompt?: string | null;
+  readonly model: string;
+  readonly aspectRatio: string;
+  readonly dimensions: string;
+  readonly quality: string;
+  readonly publicUrl: string;
+  readonly r2Key: string;
+  readonly contentType: string;
+  readonly sizeBytes: number;
+  readonly sha256: string;
+  readonly lqip?: string | null;
+  readonly seed?: string | null;
+  readonly latencyMs?: number;
+  readonly costUsd?: number;
+  readonly isFavorite: boolean;
+  readonly tags: string[];
+  readonly metadata?: Record<string, unknown>;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export interface ImageLibraryStats {
+  readonly totalImages: number;
+  readonly totalBytes: number;
+  readonly favoriteCount: number;
+  readonly sessionCount: number;
+  readonly aspectRatios: Record<string, number>;
+}
+
+export interface ImageLibraryFilterOptions {
+  readonly sessionId?: string;
+  readonly aspectRatio?: string;
+  readonly isFavorite?: boolean;
+  readonly search?: string;
+  readonly sort?: 'newest' | 'oldest';
+  readonly limit?: number;
+  readonly cursor?: string;
+}
+
+export interface ImageLibraryPage {
+  readonly records: ImageGenerationRecord[];
+  readonly totalCount: number;
+  readonly stats: ImageLibraryStats;
+  readonly availableSessions: Array<{ sessionId: string; count: number }>;
+  readonly nextCursor: string | null;
+}
+
 export * from './GalxQueueContracts';
