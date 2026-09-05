@@ -9,14 +9,17 @@ export const dynamic = 'force-dynamic';
 /**
  * Standard Supabase SSR OAuth Callback Route Handler.
  * Exchanges authorization code for Supabase session and sets secure auth cookies.
- * Completely siloed from backend routing and Substrate services.
+ * Supports Google & GitHub OAuth PKCE exchange, sanitization, and Edge session hydration.
  */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') || searchParams.get('redirect') || searchParams.get('returnUrl') || DEFAULT_POST_AUTH_PATH;
+  const rawNext = searchParams.get('next') || searchParams.get('redirect') || searchParams.get('returnUrl') || DEFAULT_POST_AUTH_PATH;
   const errorParam = searchParams.get('error');
   const errorDesc = searchParams.get('error_description');
+
+  // Sanitize next destination: prevent open redirects or protocol injection
+  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : DEFAULT_POST_AUTH_PATH;
 
   // Handle upstream OAuth provider denial or cancellation
   if (errorParam) {
@@ -30,9 +33,33 @@ export async function GET(request: Request) {
   if (code) {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error) {
+    if (!error && data?.session) {
+      // Sync local fast-path session cookies for Edge middleware compatibility
+      const isHttps = origin.startsWith('https:');
+      const maxAge = 2592000; // 30 days
+      const userRole = data.user?.user_metadata?.role || 'developer';
+
+      try {
+        cookieStore.set('galx_session', data.session.access_token || data.user?.id || 'active', {
+          path: '/',
+          maxAge,
+          sameSite: 'lax',
+          secure: isHttps,
+          httpOnly: false,
+        });
+        cookieStore.set('galx_user_role', userRole, {
+          path: '/',
+          maxAge,
+          sameSite: 'lax',
+          secure: isHttps,
+          httpOnly: false,
+        });
+      } catch {
+        // Fallback if cookieStore write encounters a restricted context
+      }
+
       const isLocalEnv = process.env.NODE_ENV === 'development';
       const forwardedHost = request.headers.get('x-forwarded-host');
 
@@ -44,8 +71,17 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}${next}`);
       }
     }
+
+    if (error) {
+      console.error('[OAuth Callback] Code exchange error:', error.message);
+      const errParams = new URLSearchParams({
+        error: 'auth_exchange_failed',
+        error_description: error.message
+      });
+      return NextResponse.redirect(`${origin}/auth/signin?${errParams.toString()}`);
+    }
   }
 
   // Return the user to the sign in page with an exchange failure notice
-  return NextResponse.redirect(`${origin}/auth/signin?error=auth_exchange_failed`);
+  return NextResponse.redirect(`${origin}/auth/signin?error=no_auth_code_provided`);
 }

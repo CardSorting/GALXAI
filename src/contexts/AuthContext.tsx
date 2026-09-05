@@ -29,7 +29,7 @@ interface AuthContextType {
   supabaseUser: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  signInWithOAuth: (provider: Provider, options?: { redirectTo?: string }) => Promise<void>;
+  signInWithOAuth: (provider: Provider, options?: { redirectTo?: string; queryParams?: Record<string, string>; scopes?: string }) => Promise<void>;
   signInWithPassword: (credentials: { email: string; password: string }) => Promise<{ error: Error | null; data?: any }>;
   signUp: (credentials: { email: string; password: string; name?: string }) => Promise<{ error: Error | null; data?: any }>;
   signInWithOtp: (credentials: { email: string; options?: { emailRedirectTo?: string } }) => Promise<{ error: Error | null }>;
@@ -108,6 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSupabaseUser(session?.user ?? null);
       if (session?.user) {
         const mapped = mapSupabaseUser(session.user, session);
+        setCustomUser(mapped);
         persistCustomSession(mapped);
       }
       setIsLoading(false);
@@ -121,6 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSupabaseUser(session?.user ?? null);
       if (session?.user) {
         const mapped = mapSupabaseUser(session.user, session);
+        setCustomUser(mapped);
         persistCustomSession(mapped);
       }
       setIsLoading(false);
@@ -131,7 +133,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [supabase]);
 
-  const signInWithOAuth = async (provider: Provider, options?: { redirectTo?: string }) => {
+  const signInWithOAuth = async (
+    provider: Provider,
+    options?: { redirectTo?: string; queryParams?: Record<string, string>; scopes?: string }
+  ) => {
     setIsLoading(true);
     try {
       const origin = typeof window !== 'undefined' ? window.location.origin : '';
@@ -140,6 +145,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         provider,
         options: {
           redirectTo,
+          queryParams: options?.queryParams,
+          scopes: options?.scopes,
         },
       });
       if (error) throw error;

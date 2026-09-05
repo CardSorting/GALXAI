@@ -31,6 +31,10 @@ const OPTIONAL_VARS = [
   'OPENAI_API_KEY',
   'XAI_API_KEY',
   'GALX_API_KEY',
+  'GITHUB_CLIENT_ID',
+  'GITHUB_CLIENT_SECRET',
+  'GOOGLE_CLIENT_ID',
+  'GOOGLE_CLIENT_SECRET',
 ];
 
 function parseEnvFile(filePath: string): Record<string, string> {
