@@ -49,6 +49,38 @@ export class OpenAIAdapter {
   }
 
   /**
+   * Resolves the authoritative local or remote VM relay URL, respecting zero-collision port allocation.
+   */
+  private static getResolvedRelayUrl(): string {
+    if (process.env.VM_RELAY_URL) return process.env.VM_RELAY_URL;
+    if (process.env.GALXAI_RELAY_URL) return process.env.GALXAI_RELAY_URL;
+    if (process.env.RELAY_URL) return process.env.RELAY_URL;
+    try {
+      const portFile = path.resolve(process.cwd(), '.relay', 'relay-port.json');
+      if (fs.existsSync(portFile)) {
+        const data = JSON.parse(fs.readFileSync(portFile, 'utf-8'));
+        if (data.port) return `http://127.0.0.1:${data.port}`;
+      }
+    } catch {}
+    return 'http://127.0.0.1:3001';
+  }
+
+  /**
+   * Lazily activates local relay daemon if offline during local development (Ollama pattern).
+   */
+  private static async tryAutoStartLocalRelay(url: string): Promise<boolean> {
+    if (typeof window !== 'undefined') return false;
+    if (process.env.NODE_ENV === 'production' && !process.env.FORCE_VM_RELAY) return false;
+    if (!url.includes('localhost') && !url.includes('127.0.0.1')) return false;
+    try {
+      const { GalxRelaySupervisor } = await import('../../relay/GalxRelaySupervisor.js');
+      return await GalxRelaySupervisor.ensureRunning({ waitTimeoutMs: 3500 });
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * Dispatches chat completion via @openai/codex-sdk for Codex OAuth shards.
    */
   private static async executeViaCodexSdk(
@@ -268,7 +300,7 @@ export class OpenAIAdapter {
         process.env.GALXAI_RELAY_URL ||
         process.env.RELAY_URL ||
         (secret as any)?.relayUrl ||
-        (process.env.FORCE_VM_RELAY === 'true' ? 'http://localhost:3001' : undefined);
+        (process.env.FORCE_VM_RELAY === 'true' ? OpenAIAdapter.getResolvedRelayUrl() : undefined);
 
       const useVmRelay = !!(
         process.env.VM_RELAY_URL ||
@@ -287,19 +319,38 @@ export class OpenAIAdapter {
             model: body.model === 'gpt-5.6-sol' ? 'gpt-5.6-terra' : (modelSpec.upstreamId || body.model)
           };
 
-          const relayResp = await fetch(`${vmRelayUrl.replace(/\/+$/, '')}/v1/chat/completions`, {
-            method: 'POST',
-            headers: {
-              ...headers,
-              'x-galx-client': 'openai-adapter-vm-relay',
-              'x-galx-shard-id': (secret as any)?.id || (secret as any)?.shardId || ''
-            },
-            body: JSON.stringify(relayPayload),
-            signal: controller.signal
-          });
+          let relayResp: Response | null = null;
+          try {
+            relayResp = await fetch(`${vmRelayUrl.replace(/\/+$/, '')}/v1/chat/completions`, {
+              method: 'POST',
+              headers: {
+                ...headers,
+                'x-galx-client': 'openai-adapter-vm-relay',
+                'x-galx-shard-id': (secret as any)?.id || (secret as any)?.shardId || ''
+              },
+              body: JSON.stringify(relayPayload),
+              signal: controller.signal
+            });
+          } catch (fetchErr) {
+            const autoStarted = await OpenAIAdapter.tryAutoStartLocalRelay(vmRelayUrl);
+            if (autoStarted) {
+              relayResp = await fetch(`${vmRelayUrl.replace(/\/+$/, '')}/v1/chat/completions`, {
+                method: 'POST',
+                headers: {
+                  ...headers,
+                  'x-galx-client': 'openai-adapter-vm-relay-retry',
+                  'x-galx-shard-id': (secret as any)?.id || (secret as any)?.shardId || ''
+                },
+                body: JSON.stringify(relayPayload),
+                signal: controller.signal
+              });
+            } else {
+              throw fetchErr;
+            }
+          }
 
           if (timeoutId) clearTimeout(timeoutId);
-          if (relayResp.ok) {
+          if (relayResp && relayResp.ok) {
             // Transparently attach to relay streamUrl for decoupled HTTP 202 jobs
             if (relayResp.status === 202) {
               const jobData = await relayResp.json() as any;
@@ -495,7 +546,7 @@ export class OpenAIAdapter {
         process.env.GALXAI_RELAY_URL ||
         process.env.RELAY_URL ||
         (secret as any)?.relayUrl ||
-        'http://localhost:3001';
+        OpenAIAdapter.getResolvedRelayUrl();
 
       const useVmRelay = !!(
         process.env.VM_RELAY_URL ||
@@ -511,29 +562,47 @@ export class OpenAIAdapter {
       // Attempt synthesis through Always-On VM Relay
       if (vmRelayUrl && useVmRelay) {
         try {
-          const relayResp = await fetch(`${vmRelayUrl.replace(/\/+$/, '')}/v1/images/generations`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-              'x-galx-client': 'openai-adapter-vm-relay-image',
-              'x-galx-shard-id': shardId,
-              ...(req.sessionId ? { 'x-galx-session-id': req.sessionId } : {}),
-              ...(req.idempotencyKey ? { 'idempotency-key': req.idempotencyKey } : {})
-            },
-            body: JSON.stringify({
-              prompt: req.prompt,
-              model: modelSpec.upstreamId || modelSpec.id,
-              size: req.size || '1024x1024',
-              quality: req.quality || 'standard',
-              n: req.n || 1,
-              response_format: req.response_format || 'url',
-              sessionId: req.sessionId
-            }),
-            signal: options?.signal
+          const imageHeaders = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'x-galx-client': 'openai-adapter-vm-relay-image',
+            'x-galx-shard-id': shardId,
+            ...(req.sessionId ? { 'x-galx-session-id': req.sessionId } : {}),
+            ...(req.idempotencyKey ? { 'idempotency-key': req.idempotencyKey } : {})
+          };
+          const imageBody = JSON.stringify({
+            prompt: req.prompt,
+            model: modelSpec.upstreamId || modelSpec.id,
+            size: req.size || '1024x1024',
+            quality: req.quality || 'standard',
+            n: req.n || 1,
+            response_format: req.response_format || 'url',
+            sessionId: req.sessionId
           });
 
-          if (relayResp.ok) {
+          let relayResp: Response | null = null;
+          try {
+            relayResp = await fetch(`${vmRelayUrl.replace(/\/+$/, '')}/v1/images/generations`, {
+              method: 'POST',
+              headers: imageHeaders,
+              body: imageBody,
+              signal: options?.signal
+            });
+          } catch (fetchErr) {
+            const autoStarted = await OpenAIAdapter.tryAutoStartLocalRelay(vmRelayUrl);
+            if (autoStarted) {
+              relayResp = await fetch(`${vmRelayUrl.replace(/\/+$/, '')}/v1/images/generations`, {
+                method: 'POST',
+                headers: imageHeaders,
+                body: imageBody,
+                signal: options?.signal
+              });
+            } else {
+              throw fetchErr;
+            }
+          }
+
+          if (relayResp && relayResp.ok) {
             const result = await relayResp.json() as any;
             return {
               created: result.created || Math.floor(Date.now() / 1000),
@@ -542,7 +611,7 @@ export class OpenAIAdapter {
               shardId
             };
           }
-          console.warn(`[OpenAIAdapter] VM Relay returned status ${relayResp.status}, falling back to direct Codex WebSocket wire`);
+          console.warn(`[OpenAIAdapter] VM Relay returned status ${relayResp?.status}, falling back to direct Codex WebSocket wire`);
         } catch (relayErr: any) {
           console.warn(`[OpenAIAdapter] VM Relay image dispatch failed (${relayErr.message}), falling back to direct Codex WebSocket wire`);
         }

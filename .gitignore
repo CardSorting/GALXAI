@@ -61,6 +61,7 @@ supabase/.branches/
 # Legacy credential cache is forbidden; keep ignored as defense against accidental recommit.
 .galx-shards.json
 .broccolidb/
+.relay/
 *.db
 *.sqlite
 *.sqlite3

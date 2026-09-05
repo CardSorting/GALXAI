@@ -1,0 +1,56 @@
+# ==============================================================================
+# GALXAI Zenith Local Relay // Portable Isolated Docker Image
+# ==============================================================================
+# Multi-stage build producing an ultra-lightweight (~50MB) self-contained container.
+# Binds strictly to 127.0.0.1 on the host for zero-leakage loopback security.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Stage 1: Build Standalone Executable Bundle
+# ------------------------------------------------------------------------------
+FROM node:22-alpine AS builder
+WORKDIR /build
+
+COPY package.json ./
+COPY src/relay/relay-server.ts ./src/relay/relay-server.ts
+COPY src/core/broccolidb ./src/core/broccolidb
+
+# Bundle into single zero-dependency ESM binary using esbuild
+RUN npx --yes esbuild src/relay/relay-server.ts \
+    --bundle \
+    --platform=node \
+    --target=node22 \
+    --format=esm \
+    --outfile=dist/relay.mjs \
+    --packages=external
+
+# ------------------------------------------------------------------------------
+# Stage 2: Ultra-Lean Minimal Production Runner
+# ------------------------------------------------------------------------------
+FROM node:22-alpine AS runner
+WORKDIR /app
+
+# Install wget for container healthcheck probe
+RUN apk add --no-cache wget
+
+# Set environment
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3001
+ENV RELAY_STATE_SNAPSHOT_PATH=/app/.broccolidb/relay-snapshot.json
+
+# Copy compiled standalone engine and webapp dashboard
+COPY --from=builder /build/dist/relay.mjs ./dist/relay.mjs
+COPY src/relay/dashboard.html ./src/relay/dashboard.html
+COPY src/relay/dashboard.html ./dashboard.html
+
+# State and configuration mount directory
+RUN mkdir -p /app/.broccolidb /root/.codex
+
+EXPOSE 3001
+
+HEALTHCHECK --interval=10s --timeout=3s --start-period=3s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:3001/health || exit 1
+
+# Start hardened relay server
+CMD ["node", "dist/relay.mjs"]

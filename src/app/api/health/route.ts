@@ -62,11 +62,38 @@ export async function GET() {
       edgeGatewayUrl: process.env.NEXT_PUBLIC_GALX_EDGE_URL || 'https://api.galx.ai',
       assetsCdnUrl: process.env.PUBLIC_ASSETS_URL || 'https://assets.galx.ai'
     },
+    relay: await (async () => {
+      const relayUrl = process.env.VM_RELAY_URL || 'http://localhost:3001';
+      const start = Date.now();
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 600);
+        const res = await fetch(`${relayUrl.replace(/\/+$/, '')}/health`, { signal: controller.signal });
+        clearTimeout(timer);
+        if (res.ok) {
+          const data = await res.json() as any;
+          return {
+            status: 'operational',
+            url: relayUrl,
+            rttMs: Date.now() - start,
+            version: data.version,
+            shards: data.shards,
+            jobs: data.jobs,
+            memory: data.memory
+          };
+        }
+      } catch {}
+      return {
+        status: 'offline',
+        url: relayUrl
+      };
+    })(),
     services: {
       gateway: 'operational',
       queueEngine: 'operational',
       privacyShield: 'operational',
-      kmsVault: 'operational'
+      kmsVault: 'operational',
+      vmRelay: (process.env.VM_RELAY_URL || 'http://localhost:3001')
     }
   }, {
     headers: {

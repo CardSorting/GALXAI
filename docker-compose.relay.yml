@@ -1,0 +1,47 @@
+# ==============================================================================
+# GALXAI Zenith Local Relay // Isolated Local-Only Docker Compose
+# ==============================================================================
+# Strict Safeguard Guarantees:
+# 1. Local Loopback Only: Binds exclusively to 127.0.0.1 (never 0.0.0.0).
+# 2. Polite Neighbor Protocol: Memory capped at 512MB and CPU at 1.0 core.
+# 3. Read-Only Credentials: ~/.codex mounted with :ro flag for zero-tamper security.
+# 4. State Persistence: .broccolidb mounted for crash recovery & idempotent resumes.
+# ==============================================================================
+
+services:
+  galxai-relay:
+    build:
+      context: .
+      dockerfile: Dockerfile.relay
+    image: galxai-relay:latest
+    container_name: galxai-relay
+    restart: unless-stopped
+    ports:
+      # STRICT LOCAL-ONLY BINDING: 127.0.0.1 prevents any external/LAN exposure
+      - "127.0.0.1:${GALXAI_RELAY_PORT:-3001}:3001"
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=3001
+      - CODEX_WS_ENDPOINT=${CODEX_WS_ENDPOINT:-wss://chatgpt.com/backend-api/codex/responses}
+      - GALX_VAULT_MASTER_SECRET=${GALX_VAULT_MASTER_SECRET:-}
+      - GALX_VAULT_KEY=${GALX_VAULT_KEY:-}
+      - RELAY_STATE_SNAPSHOT_PATH=/app/.broccolidb/relay-snapshot.json
+    volumes:
+      # Read-only host credentials mount (ChatGPT / Codex session tokens)
+      - ${HOME}/.codex:/root/.codex:ro
+      # Persistent BroccoliDB snapshots for Last-Event-ID streaming resume
+      - ./.broccolidb:/app/.broccolidb
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          memory: 64M
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3001/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 3s

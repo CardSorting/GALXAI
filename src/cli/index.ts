@@ -17,6 +17,7 @@ async function main() {
 \x1b[1m\x1b[36m🌌 GALXAI Zero-Hesitation Developer CLI & Agent Directives Engine\x1b[0m
 
 \x1b[1mUSAGE:\x1b[0m
+  $ npx galxai relay [start|status|monitor]   Manage & monitor Always-On inference relay
   $ npx galxai skills                        Generate .cursor/rules, CLAUDE.md, AGENTS.md directives
   $ npx galxai setup                         Auto-configure project environment (.env.local) & templates
   $ npx galxai doctor                        Perform full connectivity, API key & Next.js health audit
@@ -34,6 +35,9 @@ async function main() {
   $ npx galxai chat                          Start interactive terminal REPL chat
 
 \x1b[1mEXAMPLES:\x1b[0m
+  $ npx galxai relay status
+  $ npx galxai relay monitor
+  $ npx galxai relay test
   $ npx galxai tiers
   $ npx galxai stripe sync
   $ npx galxai checkout 50
@@ -42,6 +46,12 @@ async function main() {
   $ npx galxai image "Cyberpunk city at midnight" --ratio 16:9
   $ npx galxai "Refactor Express to Next.js"
     `);
+    process.exit(0);
+  }
+
+  if (command === 'relay') {
+    const { handleRelayCommand } = await import('./commands/relay.js');
+    await handleRelayCommand(args.slice(1));
     process.exit(0);
   }
 
@@ -163,6 +173,31 @@ ${agentMarkdown}
       console.log(`  \x1b[32m✔\x1b[0m Gateway reachability: \x1b[32mOK\x1b[0m (${Date.now() - start}ms)`);
     } catch {
       console.log(`  \x1b[33m▲\x1b[0m Gateway in offline preview simulation mode`);
+    }
+
+    // 4. Local Always-On Relay & Ingress Audit
+    const { GalxRelaySupervisor } = await import('../core/relay/GalxRelaySupervisor.js');
+    const { GalxTunnelSupervisor } = await import('../core/relay/GalxTunnelSupervisor.js');
+    const relayStatus = await GalxRelaySupervisor.getStatus();
+
+    if (relayStatus.isOnline) {
+      console.log(`  \x1b[32m✔\x1b[0m Local Always-On Relay: \x1b[32mONLINE\x1b[0m (Port ${relayStatus.port}, PID ${relayStatus.pid}, ${relayStatus.rttMs}ms)`);
+      if (relayStatus.shards) {
+        console.log(`    └─ Shards: \x1b[1m${relayStatus.shards.active}\x1b[0m active / ${relayStatus.shards.total} total`);
+      }
+      if (relayStatus.memory) {
+        console.log(`    └─ Memory: \x1b[1m${relayStatus.memory.rssMb}\x1b[0m MB RSS / ${relayStatus.memory.heapUsedMb} MB Heap`);
+      }
+    } else {
+      console.log(`  \x1b[33m▲\x1b[0m Local Always-On Relay: \x1b[33mOFFLINE\x1b[0m (Port 3001)`);
+      console.log(`    └─ Run \x1b[36mnpx galxai relay start\x1b[0m to enable high-concurrency frontier reasoning`);
+    }
+
+    const tunnelState = GalxTunnelSupervisor.getTunnelState();
+    if (tunnelState && tunnelState.isAlive && tunnelState.tunnelUrl) {
+      console.log(`  \x1b[32m✔\x1b[0m Cloudflare Ingress Tunnel: \x1b[32mACTIVE\x1b[0m (${tunnelState.tunnelUrl})`);
+    } else {
+      console.log(`  \x1b[90m○\x1b[0m Cloudflare Ingress Tunnel: Inactive (Run \x1b[36mnpx galxai relay tunnel start\x1b[90m for Vercel/external access)\x1b[0m`);
     }
 
     console.log(`\n\x1b[1m\x1b[32m✔ Health Audit Complete.\x1b[0m\n`);
