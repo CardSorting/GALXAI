@@ -16,7 +16,8 @@ import {
   Coins,
   ChevronDown,
   CreditCard,
-  Settings
+  Settings,
+  Image as ImageIcon
 } from 'lucide-react';
 import { CommandMenu } from '@/components/common/CommandMenu';
 import { LanguageBadge } from '@/components/common/LanguageBadge';
@@ -29,6 +30,7 @@ import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 const NAV_LINKS = [
   { name: 'Models', href: '/models', icon: Cpu },
+  { name: 'Images', href: '/library', icon: ImageIcon },
   { name: 'Docs', href: '/docs', icon: BookOpen },
   { name: 'Pricing', href: '/pricing', icon: DollarSign },
   { name: 'API Keys', href: '/keys', icon: Key },
@@ -203,16 +205,25 @@ function BaseNavigation() {
                       <p className="text-xs font-semibold text-white truncate">{user.name || 'Developer'}</p>
                       <p className="text-[10px] text-zinc-400 font-mono truncate">{user.email || 'Sandbox User'}</p>
                       <div className="flex items-center gap-1.5 pt-1">
-                        <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
                           {user.role || 'Developer'}
                         </span>
                         {walletBalance !== undefined && (
-                          <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                             ${walletBalance.toFixed(2)}
                           </span>
                         )}
                       </div>
                     </div>
+
+                    <Link
+                      href="/library"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded text-xs text-zinc-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+                    >
+                      <ImageIcon className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Image Library</span>
+                    </Link>
 
                     <Link
                       href="/teams/seats"
@@ -410,4 +421,3 @@ export const Navigation = withErrorBoundary(BaseNavigation, {
   name: 'Global Navigation Header',
   fallback: <NavigationFallback />
 });
-

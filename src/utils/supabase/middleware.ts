@@ -76,6 +76,8 @@ function applySecurityHeaders(response: NextResponse, pathname: string): NextRes
 
   // Route security classification & zero-cache enforcement for private workspace surfaces
   const isProtectedPath = 
+    pathname === '/library' ||
+    pathname.startsWith('/library/') ||
     pathname.startsWith('/teams') ||
     pathname.startsWith('/billing') ||
     pathname.startsWith('/keys') ||
@@ -103,6 +105,7 @@ function applySecurityHeaders(response: NextResponse, pathname: string): NextRes
 export const updateSession = async (request: NextRequest) => {
   const method = request.method;
   const pathname = request.nextUrl.pathname;
+  const isLibraryPath = pathname === '/library' || pathname.startsWith('/library/');
 
   // Public API-key endpoints may be called cross-origin. First-party /api routes
   // remain same-origin and reach their route-specific policy instead of inheriting
@@ -136,6 +139,14 @@ export const updateSession = async (request: NextRequest) => {
   const hasAuthCookie = allCookies.some(c => (c.name.startsWith('sb-') || c.name === 'galx_session') && c.value);
 
   if (!hasAuthCookie) {
+    if (isLibraryPath) {
+      const signInUrl = request.nextUrl.clone();
+      signInUrl.pathname = '/auth/signin';
+      signInUrl.search = '';
+      signInUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`);
+      return applySecurityHeaders(NextResponse.redirect(signInUrl), pathname);
+    }
+
     const unauthResponse = NextResponse.next({ request });
     unauthResponse.headers.set('X-Edge-FastPath', 'public-pass');
     unauthResponse.headers.set('Timing-Allow-Origin', '*');
