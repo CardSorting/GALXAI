@@ -129,7 +129,177 @@ graph LR
   };
 }
 
-export function getCodeRecipes(model: ModelSpecItem) {
+export function getCodeRecipes(model: ModelSpecItem, customApiKey?: string) {
+  const apiKey = customApiKey?.trim() || 'galx_live_your_gateway_key';
+  const isImage = model.category === 'image';
+
+  if (isImage) {
+    return {
+      cli: `# 1. Run zero-install image generation in terminal:
+npx galxai image --model "${model.id}" "Cyberpunk futuristic architecture, isometric blueprint, 8k"`,
+
+      curl: `curl https://api.galx.ai/v1/images/generations \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer ${apiKey}" \\
+  -d '{
+    "model": "${model.id}",
+    "prompt": "Cyberpunk futuristic architecture, isometric blueprint, 8k",
+    "size": "1024x1024",
+    "n": 1
+  }'`,
+
+      python: `from openai import OpenAI
+
+# Initialize client pointing to GALXAI Universal Gateway
+client = OpenAI(
+    base_url="https://api.galx.ai/v1",
+    api_key="${apiKey}"
+)
+
+response = client.images.generate(
+    model="${model.id}",
+    prompt="Cyberpunk futuristic architecture, isometric blueprint, 8k",
+    size="1024x1024",
+    n=1
+)
+
+print(response.data[0].url)`,
+
+      node: `import OpenAI from "openai";
+
+// Drop-in replacement for OpenAI SDK
+const openai = new OpenAI({
+  baseURL: "https://api.galx.ai/v1",
+  apiKey: "${apiKey}",
+});
+
+async function main() {
+  const response = await openai.images.generate({
+    model: "${model.id}",
+    prompt: "Cyberpunk futuristic architecture, isometric blueprint, 8k",
+    size: "1024x1024",
+    n: 1,
+  });
+
+  console.log(response.data[0]?.url);
+}
+
+main();`,
+
+      vercel: `import { createOpenAI } from "@ai-sdk/openai";
+import { experimental_generateImage as generateImage } from "ai";
+
+// Initialize Vercel AI SDK pointing to GALXAI Universal Router
+const galxai = createOpenAI({
+  baseURL: "https://api.galx.ai/v1",
+  apiKey: "${apiKey}",
+});
+
+export async function POST(req: Request) {
+  const { prompt } = await req.json();
+
+  const { image } = await generateImage({
+    model: galxai.image("${model.id}"),
+    prompt: prompt || "Cyberpunk futuristic architecture, isometric blueprint, 8k",
+    aspectRatio: "1:1",
+  });
+
+  return Response.json({ image: image.base64 });
+}`,
+
+      langchain: `# OpenAI Image Generation via GALXAI Universal Gateway
+import requests
+
+response = requests.post(
+    "https://api.galx.ai/v1/images/generations",
+    headers={"Authorization": f"Bearer ${apiKey}"},
+    json={
+        "model": "${model.id}",
+        "prompt": "Cyberpunk futuristic architecture, isometric blueprint, 8k",
+        "size": "1024x1024"
+    }
+)
+
+data = response.json()
+print(data["data"][0]["url"])`,
+
+      go: `package main
+
+import (
+	"context"
+	"fmt"
+
+	openai "github.com/sashabaranov/go-openai"
+)
+
+func main() {
+	config := openai.DefaultConfig("${apiKey}")
+	config.BaseURL = "https://api.galx.ai/v1"
+
+	client := openai.NewClientWithConfig(config)
+	ctx := context.Background()
+
+	req := openai.ImageRequest{
+		Prompt:         "Cyberpunk futuristic architecture, isometric blueprint, 8k",
+		Model:          "${model.id}",
+		Size:           openai.CreateImageSize1024x1024,
+		ResponseFormat: openai.CreateImageResponseFormatURL,
+		N:              1,
+	}
+
+	resp, err := client.CreateImage(ctx, req)
+	if err != nil {
+		fmt.Printf("Image generation error: %v\\n", err)
+		return
+	}
+
+	fmt.Println(resp.Data[0].URL)
+}`,
+
+      rust: `use async_openai::{
+    config::OpenAIConfig,
+    types::{CreateImageRequestArgs, ImageSize, ImageResponseFormat},
+    Client,
+};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config = OpenAIConfig::new()
+        .with_api_base("https://api.galx.ai/v1")
+        .with_api_key("${apiKey}");
+
+    let client = Client::with_config(config);
+
+    let request = CreateImageRequestArgs::default()
+        .model("${model.id}")
+        .prompt("Cyberpunk futuristic architecture, isometric blueprint, 8k")
+        .n(1)
+        .size(ImageSize::S1024x1024)
+        .response_format(ImageResponseFormat::Url)
+        .build()?;
+
+    let response = client.images().create(request).await?;
+    println!("Image URL: {}", response.data[0].url);
+
+    Ok(())
+}`,
+
+      cursor: `// In your Cursor / Windsurf Settings -> Models:
+// Toggle "Override OpenAI Base URL"
+Base URL: https://api.galx.ai/v1
+API Key:  ${apiKey}
+
+// Add custom model identifier:
+Model:    ${model.id}
+
+// In .cursorrules at your repo root:
+{
+  "model": "${model.id}",
+  "baseURL": "https://api.galx.ai/v1"
+}`
+    };
+  }
+
   return {
     cli: `# 1. Run zero-install streaming prompt in terminal:
 npx galxai --model "${model.id}" "Write a high-performance LRU cache in TypeScript"
@@ -137,9 +307,9 @@ npx galxai --model "${model.id}" "Write a high-performance LRU cache in TypeScri
 # 2. Or start an interactive chat session:
 npx galxai chat --model "${model.id}"`,
 
-    curl: `curl https://galx.ai/v1/chat/completions \\
+    curl: `curl https://api.galx.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer galx_live_your_gateway_key" \\
+  -H "Authorization: Bearer ${apiKey}" \\
   -d '{
     "model": "${model.id}",
     "messages": [
@@ -153,10 +323,10 @@ npx galxai chat --model "${model.id}"`,
     python: `from openai import OpenAI
 
 # Initialize client pointing to GALXAI Universal Gateway
-# Automatically unlocks wholesale pricing & 75% prompt caching
+# Automatically unlocks wholesale pricing & up to 90% prompt caching
 client = OpenAI(
-    base_url="https://galx.ai/v1",
-    api_key="galx_live_your_gateway_key"
+    base_url="https://api.galx.ai/v1",
+    api_key="${apiKey}"
 )
 
 response = client.chat.completions.create(
@@ -177,8 +347,8 @@ for chunk in response:
 
 // Drop-in replacement for OpenAI SDK
 const openai = new OpenAI({
-  baseURL: "https://galx.ai/v1",
-  apiKey: "galx_live_your_gateway_key",
+  baseURL: "https://api.galx.ai/v1",
+  apiKey: "${apiKey}",
 });
 
 async function main() {
@@ -203,8 +373,8 @@ import { streamText } from "ai";
 
 // Initialize Vercel AI SDK pointing to GALXAI Universal Router
 const galxai = createOpenAI({
-  baseURL: "https://galx.ai/v1",
-  apiKey: process.env.GALXAI_API_KEY,
+  baseURL: "https://api.galx.ai/v1",
+  apiKey: "${apiKey}",
 });
 
 export async function POST(req: Request) {
@@ -224,8 +394,8 @@ from langchain_core.messages import HumanMessage, SystemMessage
 # Initialize LangChain with GALXAI Universal Gateway
 llm = ChatOpenAI(
     model="${model.id}",
-    openai_api_base="https://galx.ai/v1",
-    openai_api_key="galx_live_your_gateway_key",
+    openai_api_base="https://api.galx.ai/v1",
+    openai_api_key="${apiKey}",
     temperature=0.2,
     streaming=True
 )
@@ -245,14 +415,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 
 	openai "github.com/sashabaranov/go-openai"
 )
 
 func main() {
-	config := openai.DefaultConfig("galx_live_your_gateway_key")
-	config.BaseURL = "https://galx.ai/v1"
+	config := openai.DefaultConfig("${apiKey}")
+	config.BaseURL = "https://api.galx.ai/v1"
 
 	client := openai.NewClientWithConfig(config)
 	ctx := context.Background()
@@ -298,8 +467,8 @@ use futures::StreamExt;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = OpenAIConfig::new()
-        .with_api_base("https://galx.ai/v1")
-        .with_api_key("galx_live_your_gateway_key");
+        .with_api_base("https://api.galx.ai/v1")
+        .with_api_key("${apiKey}");
 
     let client = Client::with_config(config);
 
@@ -340,8 +509,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     cursor: `// In your Cursor / Windsurf Settings -> Models:
 // Toggle "Override OpenAI Base URL"
-Base URL: https://galx.ai/v1
-API Key:  galx_live_your_gateway_key
+Base URL: https://api.galx.ai/v1
+API Key:  ${apiKey}
 
 // Add custom model identifier:
 Model:    ${model.id}
@@ -349,7 +518,7 @@ Model:    ${model.id}
 // In .cursorrules at your repo root:
 {
   "model": "${model.id}",
-  "baseURL": "https://galx.ai/v1",
+  "baseURL": "https://api.galx.ai/v1",
   "promptCaching": true
 }`
   };

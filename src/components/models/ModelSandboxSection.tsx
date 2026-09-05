@@ -107,8 +107,8 @@ export function ModelSandboxSection({ model }: ModelSandboxSectionProps) {
 content-type: text/event-stream; charset=utf-8
 x-galx-model: ${model.id}
 x-galx-transit-latency-ms: ${streamMetrics.ttftMs || 12.4}
-x-galx-prompt-cache: HIT (75% discount applied)
-x-galx-effective-discount: -${model.discountPercentage ?? 25}%
+x-galx-prompt-cache: HIT (up to 90% pass-through applied)
+x-galx-routing: sub-15ms anycast edge
 x-galx-zero-retention: active
 server: cloudflare-anycast-edge`;
 
@@ -228,7 +228,11 @@ server: cloudflare-anycast-edge`;
             </span>
             <span className="flex items-center gap-1">
               <Coins className="w-3.5 h-3.5 text-emerald-400" />
-              Discount: <strong className="text-emerald-300">-{model.discountPercentage ?? 25}%</strong>
+              {model.discountPercentage && model.discountPercentage > 0 ? (
+                <span>Discount: <strong className="text-emerald-300">-{model.discountPercentage}%</strong></span>
+              ) : (
+                <span>Cache: <strong className="text-emerald-300">90% Pass-Through</strong></span>
+              )}
             </span>
           </div>
         </div>
@@ -271,23 +275,23 @@ server: cloudflare-anycast-edge`;
             <div className="space-y-4 font-sans text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono">
                 <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-1">
-                  <span className="text-zinc-500 text-[10px] uppercase">Standard Upstream Cost</span>
-                  <div className="text-base font-bold text-zinc-400 line-through">
-                    ${streamMetrics.retailCost || '0.00084'} USD
+                  <span className="text-zinc-400 text-[10px] uppercase">Standard Input Rate</span>
+                  <div className="text-base font-bold text-zinc-200">
+                    ${model.inputPricePer1M.toFixed(2)} / 1M
                   </div>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-1">
-                  <span className="text-zinc-500 text-[10px] uppercase">GALXAI Wholesale Cost</span>
+                  <span className="text-zinc-400 text-[10px] uppercase">Prompt Cache Hit Rate</span>
                   <div className="text-base font-bold text-emerald-300">
-                    ${streamMetrics.liveCost || '0.00042'} USD
+                    ${(model.cachedInputPricePer1M ?? model.inputPricePer1M * 0.1).toFixed(2)} / 1M
                   </div>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 space-y-1">
-                  <span className="text-emerald-400 text-[10px] uppercase font-bold">Net Single Call Savings</span>
+                  <span className="text-emerald-300 text-[10px] uppercase font-bold">Cache Pass-Through</span>
                   <div className="text-base font-bold text-emerald-300">
-                    -50% Below Retail
+                    -90% Compound Rebate
                   </div>
                 </div>
               </div>
@@ -295,7 +299,7 @@ server: cloudflare-anycast-edge`;
               <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-200 text-xs flex items-center gap-2">
                 <Info className="w-4 h-4 text-cyan-400 shrink-0" />
                 <span>
-                  75% Prompt Caching applied automatically on matching system instructions. Zero manual configuration required.
+                  Prompt caching pass-through is applied automatically on matching system instructions and repeated contexts. Zero manual configuration required.
                 </span>
               </div>
             </div>

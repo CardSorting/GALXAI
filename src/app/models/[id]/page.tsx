@@ -5,9 +5,6 @@ import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { FRONTEND_VISIBLE_MODELS, ModelCatalog } from '@/core/router/ModelCatalog';
 import { ModelCardClient } from '@/components/models/ModelCardClient';
-import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
-import { LiveActivityToast } from '@/components/dashboard/LiveActivityToast';
-import { ExitIntentModal } from '@/components/dashboard/ExitIntentModal';
 import { constructMetadata } from '@/lib/seo/metadata';
 import {
   JsonLd,
@@ -186,11 +183,6 @@ print(response.choices[0].message.content)`;
         {/* Rich Interactive Client Experience */}
         <ModelCardClient model={model} siblingModels={siblingModels} />
       </main>
-
-      {/* Conversion Dock, Live Activity Toast & Exit Intent Modal */}
-      <FloatingConversionDock />
-      <LiveActivityToast />
-      <ExitIntentModal />
     </div>
   );
 }

@@ -369,7 +369,7 @@ function BaseGatewayKeysPage() {
   };
 
   const handleDownloadEnv = (apiKey: string, name: string = 'GALX AI') => {
-    const content = `# ${name} Credentials\n# Generated at: ${new Date().toISOString()}\nGALX_API_KEY="${apiKey}"\nGALX_BASE_URL="https://galx.ai/v1"\nOPENAI_BASE_URL="https://galx.ai/v1"\nOPENAI_API_KEY="${apiKey}"\n`;
+    const content = `# ${name} Credentials\n# Generated at: ${new Date().toISOString()}\nGALX_API_KEY="${apiKey}"\nGALX_BASE_URL="https://api.galx.ai/v1"\nOPENAI_BASE_URL="https://api.galx.ai/v1"\nOPENAI_API_KEY="${apiKey}"\n`;
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -390,7 +390,7 @@ function BaseGatewayKeysPage() {
   };
 
   const handleCopyEnvSnippet = async (apiKey: string) => {
-    const snippet = `GALX_API_KEY="${apiKey}"\nGALX_BASE_URL="https://galx.ai/v1"`;
+    const snippet = `GALX_API_KEY="${apiKey}"\nGALX_BASE_URL="https://api.galx.ai/v1"`;
     const success = await safeCopyToClipboard(snippet);
     if (success) {
       setCopiedEnvSnippet(true);
@@ -399,7 +399,7 @@ function BaseGatewayKeysPage() {
   };
 
   const handleCopyShellSnippet = async (apiKey: string) => {
-    const snippet = `export GALX_API_KEY="${apiKey}"\nexport OPENAI_BASE_URL="https://galx.ai/v1"`;
+    const snippet = `export GALX_API_KEY="${apiKey}"\nexport OPENAI_BASE_URL="https://api.galx.ai/v1"`;
     const success = await safeCopyToClipboard(snippet);
     if (success) {
       setCopiedShellSnippet(true);
@@ -408,7 +408,7 @@ function BaseGatewayKeysPage() {
   };
 
   const handleCopyBaseUrl = async () => {
-    const success = await safeCopyToClipboard('https://galx.ai/v1');
+    const success = await safeCopyToClipboard('https://api.galx.ai/v1');
     if (success) {
       setCopiedBaseUrl(true);
       setTimeout(() => setCopiedBaseUrl(false), 2000);
@@ -498,7 +498,7 @@ function BaseGatewayKeysPage() {
       title: 'Cursor / Windsurf (.cursorrules or Settings)',
       lang: 'json',
       code: `// Set in Cursor Settings -> Models -> OpenAI API Key:
-// 1. Override OpenAI Base URL: https://galx.ai/v1
+// 1. Override OpenAI Base URL: https://api.galx.ai/v1
 // 2. API Key: ${activeDisplayKey}
 // 3. Enable Models: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`
     },
@@ -509,7 +509,7 @@ function BaseGatewayKeysPage() {
 import { generateText } from 'ai';
 
 const galx = createOpenAI({
-  baseURL: 'https://galx.ai/v1',
+  baseURL: 'https://api.galx.ai/v1',
   apiKey: process.env.GALX_API_KEY || '${activeDisplayKey}'
 });
 
@@ -526,7 +526,7 @@ console.log(text);`
 
 # Drop-in replacement: point base_url to GALX AI Gateway
 client = OpenAI(
-    base_url="https://galx.ai/v1",
+    base_url="https://api.galx.ai/v1",
     api_key="${activeDisplayKey}"
 )
 
@@ -542,7 +542,7 @@ print(response.choices[0].message.content)`
       code: `import OpenAI from 'openai';
 
 const client = new OpenAI({
-  baseURL: 'https://galx.ai/v1',
+  baseURL: 'https://api.galx.ai/v1',
   apiKey: '${activeDisplayKey}'
 });
 
@@ -555,7 +555,7 @@ console.log(completion.choices[0].message.content);`
     curl: {
       title: 'cURL',
       lang: 'bash',
-      code: `curl https://galx.ai/v1/chat/completions \\
+      code: `curl https://api.galx.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer ${activeDisplayKey}" \\
   -d '{
@@ -593,6 +593,8 @@ console.log(completion.choices[0].message.content);`
   }, [keys, environmentFilter, searchQuery, sortBy]);
 
   const activeKeysCount = keys.filter(k => !k.revoked && !k.isExpired).length;
+  const liveKeysCount = keys.filter(k => (k.environment === 'live' || (!k.environment && !k.keyPrefix?.includes('test')))).length;
+  const testKeysCount = keys.filter(k => (k.environment === 'test' || k.keyPrefix?.includes('test'))).length;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#07090e] text-zinc-100 font-sans">
@@ -614,7 +616,7 @@ console.log(completion.choices[0].message.content);`
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-white">API Keys</h1>
               <p className="text-xs text-zinc-400 mt-1">
-                Authenticate requests to the GALX AI Gateway (<code className="text-zinc-300 font-mono">https://galx.ai/v1</code>). Keep your secret keys secure.
+                Authenticate requests to the GALX AI Gateway (<code className="text-zinc-300 font-mono">https://api.galx.ai/v1</code>). Keep your secret keys secure.
               </p>
             </div>
 
@@ -671,7 +673,7 @@ console.log(completion.choices[0].message.content);`
                 className="font-mono text-zinc-300 hover:text-white flex items-center gap-1.5 text-[11px] bg-white/5 hover:bg-white/10 px-2.5 py-0.5 rounded transition-colors cursor-pointer"
                 title="Click to copy gateway base URL"
               >
-                <span>https://galx.ai/v1</span>
+                <span>https://api.galx.ai/v1</span>
                 {copiedBaseUrl ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-zinc-400" />}
               </button>
             </div>
@@ -770,7 +772,7 @@ console.log(completion.choices[0].message.content);`
                     }`}
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    <span>Live</span>
+                    <span>Live ({liveKeysCount})</span>
                   </button>
                   <button
                     type="button"
@@ -782,7 +784,7 @@ console.log(completion.choices[0].message.content);`
                     }`}
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                    <span>Test</span>
+                    <span>Test ({testKeysCount})</span>
                   </button>
                 </div>
 
@@ -974,7 +976,7 @@ console.log(completion.choices[0].message.content);`
                               <button
                                 type="button"
                                 onClick={() => {
-                                  const curl = `curl https://galx.ai/v1/chat/completions \\\n  -H "Authorization: Bearer ${prefixText}..." \\\n  -H "Content-Type: application/json" \\\n  -d '{"model":"gpt-5.6-sol","messages":[{"role":"user","content":"Hello"}]}'`;
+                                  const curl = `curl https://api.galx.ai/v1/chat/completions \\\n  -H "Authorization: Bearer ${prefixText}..." \\\n  -H "Content-Type: application/json" \\\n  -d '{"model":"gpt-5.6-sol","messages":[{"role":"user","content":"Hello"}]}'`;
                                   handleCopySnippet(curl);
                                 }}
                                 className="px-2 py-1 rounded text-zinc-400 hover:text-white hover:bg-white/10 text-[11px] font-mono transition-colors cursor-pointer"
@@ -1029,7 +1031,7 @@ console.log(completion.choices[0].message.content);`
                   <span>Developer Integration</span>
                 </h3>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  Drop-in compatible with Cursor, Vercel AI SDK, Python, and OpenAI clients at <code className="text-zinc-200 font-mono">https://galx.ai/v1</code>.
+                  Drop-in compatible with Cursor, Vercel AI SDK, Python, and OpenAI clients at <code className="text-zinc-200 font-mono">https://api.galx.ai/v1</code>.
                 </p>
               </div>
 
@@ -1384,7 +1386,7 @@ console.log(completion.choices[0].message.content);`
             <div className="space-y-1.5">
               <span className="text-[11px] font-semibold text-zinc-400 flex items-center gap-1">
                 <Sparkles className="w-3 h-3 text-indigo-400" />
-                <span>Quick Presets</span>
+                <span>Quick Name Suggestions</span>
               </span>
               <div className="grid grid-cols-2 gap-1.5">
                 {QUICK_PRESETS.map((p) => {
@@ -1422,6 +1424,18 @@ console.log(completion.choices[0].message.content);`
                   autoFocus
                   required
                 />
+              </div>
+
+              {/* Permissions scope callout */}
+              <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between text-xs">
+                <div>
+                  <span className="text-zinc-300 font-medium block text-xs">Default Permissions</span>
+                  <span className="text-[10px] text-zinc-500">Access to all models & completion routes</span>
+                </div>
+                <span className="inline-flex items-center gap-1 font-mono text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
+                  <Check className="w-3 h-3" />
+                  Full Access (*)
+                </span>
               </div>
 
               <div className="space-y-1.5">
@@ -1484,13 +1498,13 @@ console.log(completion.choices[0].message.content);`
                 </div>
               </div>
 
-              <div className="pt-2 text-center">
+              <div className="pt-1 text-center">
                 <Link
                   href="/keys/new"
                   onClick={() => setIsCreateModalOpen(false)}
                   className="text-[11px] text-indigo-400 hover:text-indigo-300 inline-flex items-center gap-1 transition-colors"
                 >
-                  <span>Need fine-grained scopes or rotation TTL? Open Advanced Provisioner</span>
+                  <span>Need restricted scopes or rotation TTL? Open Advanced Provisioner</span>
                   <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>

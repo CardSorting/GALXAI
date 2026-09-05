@@ -5,8 +5,8 @@ import { constructMetadata } from '@/lib/seo/metadata';
 import { JsonLd, createModelItemListSchema, createBreadcrumbSchema } from '@/lib/seo/jsonld';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'Supported Frontier AI Models & Wholesale Rates',
-  description: 'Explore flagship AI models including OpenAI Codex GPT-5.6 Sol, Terra, Luna, and GPT-Image suite. Get 25%–40% wholesale pricing, 75% prompt caching, and sub-15ms Anycast routing.',
+  title: 'Frontier AI Models & Architecture Specs | OpenAI-Compatible API Gateway',
+  description: 'Explore flagship AI models including OpenAI Codex GPT-5.6 Sol, Terra, Luna, and GPT-Image suite. Access via a 100% OpenAI-compatible endpoint with automatic prompt caching and sub-15ms Anycast routing.',
   canonicalPath: '/models',
   keywords: [
     'AI Model Catalog',

@@ -7,10 +7,7 @@ import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import {
   GitCompare,
   Zap,
-  Rocket,
-  Flame,
   CheckCircle2,
-  XCircle,
   Copy,
   Check,
   ArrowRight,
@@ -19,6 +16,8 @@ import {
   HelpCircle,
   ChevronDown,
   ChevronUp,
+  Terminal,
+  Calculator,
 } from 'lucide-react';
 import { ShareButton } from '@/components/common/ShareButton';
 import { TrustSeals } from '@/components/common/TrustSeals';
@@ -34,9 +33,10 @@ interface ModelVsClientProps {
 }
 
 export function ModelVsClient({ matchup, modelA, modelB }: ModelVsClientProps) {
-  const [activeCodeTab, setActiveCodeTab] = useState<'python' | 'ts'>('python');
+  const [activeCodeTab, setActiveCodeTab] = useState<'python' | 'ts' | 'curl'>('python');
   const [copiedSnippet, setCopiedSnippet] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [monthlyTokensMillions, setMonthlyTokensMillions] = useState<number>(50);
 
   const [prompt, setPrompt] = useState<string>(
     'Analyze the computational trade-offs between dynamic Anycast model routing and direct single-origin API dispatch.'
@@ -44,6 +44,31 @@ export function ModelVsClient({ matchup, modelA, modelB }: ModelVsClientProps) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [outputA, setOutputA] = useState('');
   const [outputB, setOutputB] = useState('');
+
+  // Cost calculator calculations (assumes 70% input, 30% output, 50% cached input)
+  const inputMillions = monthlyTokensMillions * 0.7;
+  const outputMillions = monthlyTokensMillions * 0.3;
+  const cachedInputMillions = inputMillions * 0.5;
+  const freshInputMillions = inputMillions * 0.5;
+
+  const cachedRateA = modelA.cachedInputPricePer1M ?? modelA.inputPricePer1M * 0.1;
+  const cachedRateB = modelB.cachedInputPricePer1M ?? modelB.inputPricePer1M * 0.1;
+
+  const costA = Math.round(
+    freshInputMillions * modelA.inputPricePer1M +
+      cachedInputMillions * cachedRateA +
+      outputMillions * modelA.outputPricePer1M
+  );
+
+  const costB = Math.round(
+    freshInputMillions * modelB.inputPricePer1M +
+      cachedInputMillions * cachedRateB +
+      outputMillions * modelB.outputPricePer1M
+  );
+
+  const costDelta = Math.abs(costA - costB);
+  const cheaperModel = costA <= costB ? modelA : modelB;
+  const pricierModel = costA <= costB ? modelB : modelA;
 
   const pythonSnippet = `from openai import OpenAI
 
@@ -55,13 +80,13 @@ client = OpenAI(
 # Route to ${modelA.name}
 resp_a = client.chat.completions.create(
     model="${modelA.id}",
-    messages=[{"role": "user", "content": "Execute on ${modelA.name}"}]
+    messages=[{"role": "user", "content": "Execute task on ${modelA.name}"}]
 )
 
-# Or seamlessly route to ${modelB.name} (Same 1-line client)
+# Or seamlessly route to ${modelB.name} (Same client instance)
 resp_b = client.chat.completions.create(
     model="${modelB.id}",
-    messages=[{"role": "user", "content": "Execute on ${modelB.name}"}]
+    messages=[{"role": "user", "content": "Execute task on ${modelB.name}"}]
 )`;
 
   const tsSnippet = `import OpenAI from "openai";
@@ -74,17 +99,25 @@ const client = new OpenAI({
 // Run ${modelA.name}
 const resA = await client.chat.completions.create({
   model: "${modelA.id}",
-  messages: [{ role: "user", content: "Hello ${modelA.name}" }],
+  messages: [{ role: "user", content: "Execute task on ${modelA.name}" }],
 });
 
 // Run ${modelB.name}
 const resB = await client.chat.completions.create({
   model: "${modelB.id}",
-  messages: [{ role: "user", content: "Hello ${modelB.name}" }],
+  messages: [{ role: "user", content: "Execute task on ${modelB.name}" }],
 });`;
 
+  const curlSnippet = `curl https://api.galx.ai/v1/chat/completions \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer $GALXAI_API_KEY" \\
+  -d '{
+    "model": "${modelA.id}",
+    "messages": [{"role": "user", "content": "Evaluate architectural strategy"}]
+  }'`;
+
   const handleCopyCode = async () => {
-    const code = activeCodeTab === 'python' ? pythonSnippet : tsSnippet;
+    const code = activeCodeTab === 'python' ? pythonSnippet : activeCodeTab === 'ts' ? tsSnippet : curlSnippet;
     const ok = await safeCopyToClipboard(code);
     if (ok) {
       setCopiedSnippet(true);
@@ -101,8 +134,8 @@ const resB = await client.chat.completions.create({
     setOutputA('');
     setOutputB('');
 
-    const textA = `[${modelA.name} Output]\nAnycast model routing terminates client TCP/TLS handshakes at the edge in <14ms TTFT. By distributing global traffic across enterprise high-availability infrastructure, it eliminates 429 rate limit stalls and guarantees 75% prompt caching pass-through on prefixes exceeding 1,024 tokens.`;
-    const textB = `[${modelB.name} Output]\nDirect origin dispatch suffers from geographical RTT penalties (120ms+ cross-continental) and strict Tier rate limits. Routing through the GALXAI gateway provides 25%–40% wholesale savings and automatic active failover with zero data retention.`;
+    const textA = `[${modelA.name} Output]\nAnycast model routing terminates client TCP/TLS handshakes at the edge in <14ms TTFT. By distributing global traffic across enterprise high-availability infrastructure, it eliminates 429 rate limit stalls and guarantees up to 90% prompt caching pass-through on prefixes exceeding 1,024 tokens.`;
+    const textB = `[${modelB.name} Output]\nDirect origin dispatch suffers from geographical round-trip penalties (120ms+ cross-continental) and strict isolated tier rate limits. Routing through the GALXAI gateway unifies multi-cloud quotas, sub-15ms regional failover, and verified zero data retention guarantees.`;
 
     const wordsA = textA.split(' ');
     const wordsB = textB.split(' ');
@@ -131,7 +164,7 @@ const resB = await client.chat.completions.create({
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#07080d] text-zinc-100">
       <Navigation />
 
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-10">
@@ -143,10 +176,10 @@ const resB = await client.chat.completions.create({
           ]}
         />
 
-        {/* Hero Section with AEO Inverted Pyramid Heading */}
-        <section id="matchup-hero" className="glass-panel rounded-3xl p-6 sm:p-10 space-y-4 border border-amber-500/20 relative overflow-hidden">
+        {/* Hero Section */}
+        <section id="matchup-hero" className="glass-panel rounded-3xl p-6 sm:p-10 space-y-4 border border-white/10 relative overflow-hidden bg-gradient-to-b from-[#0e1322] via-[#090c16] to-[#07080d]">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-bold">
               <GitCompare className="w-3.5 h-3.5" />
               <span>HEAD-TO-HEAD FRONTIER MODEL BENCHMARK</span>
             </div>
@@ -167,21 +200,21 @@ const resB = await client.chat.completions.create({
 
           {/* Quick Dual Model Badges */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 font-mono text-xs">
-            <div className="p-4 rounded-2xl bg-black/50 border border-amber-500/30 space-y-1.5">
+            <div className="p-4 rounded-2xl bg-black/50 border border-amber-500/30 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-white text-sm">{modelA.name}</span>
-                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold">
-                  -${modelA.discountPercentage ?? 25}% Wholesale
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 text-[10px] font-bold border border-amber-500/30">
+                  ${modelA.inputPricePer1M.toFixed(2)}/1M in • ${(modelA.contextWindowTokens / 1000).toLocaleString()}K ctx
                 </span>
               </div>
               <p className="text-[11px] text-zinc-400 font-sans">{modelA.description}</p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-black/50 border border-cyan-500/30 space-y-1.5">
+            <div className="p-4 rounded-2xl bg-black/50 border border-cyan-500/30 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-white text-sm">{modelB.name}</span>
-                <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-bold">
-                  -${modelB.discountPercentage ?? 25}% Wholesale
+                <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 text-[10px] font-bold border border-cyan-500/30">
+                  ${modelB.inputPricePer1M.toFixed(2)}/1M in • ${(modelB.contextWindowTokens / 1000).toLocaleString()}K ctx
                 </span>
               </div>
               <p className="text-[11px] text-zinc-400 font-sans">{modelB.description}</p>
@@ -189,7 +222,7 @@ const resB = await client.chat.completions.create({
           </div>
         </section>
 
-        {/* AEO Executive Verdict Box */}
+        {/* Executive Verdict Box */}
         <section id="aeo-verdict" className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4 border border-emerald-500/30 bg-emerald-500/5">
           <div className="flex items-center gap-2 text-emerald-400 font-mono font-bold text-xs uppercase">
             <Zap className="w-4 h-4" />
@@ -250,12 +283,12 @@ const resB = await client.chat.completions.create({
                 <td className="py-3.5 px-4 text-emerald-300 font-bold">${modelB.inputPricePer1M.toFixed(2)}</td>
               </tr>
               <tr>
-                <td className="py-3.5 px-4 font-sans font-bold text-zinc-400">75% Cached Prompt Rate</td>
+                <td className="py-3.5 px-4 font-sans font-bold text-zinc-400">Cached Prompt Rate / 1M</td>
                 <td className="py-3.5 px-4 text-cyan-300 font-bold">
-                  ${(modelA.cachedInputPricePer1M ?? modelA.inputPricePer1M * 0.25).toFixed(2)}
+                  ${(modelA.cachedInputPricePer1M ?? modelA.inputPricePer1M * 0.1).toFixed(2)} (-90%)
                 </td>
                 <td className="py-3.5 px-4 text-cyan-300 font-bold">
-                  ${(modelB.cachedInputPricePer1M ?? modelB.inputPricePer1M * 0.25).toFixed(2)}
+                  ${(modelB.cachedInputPricePer1M ?? modelB.inputPricePer1M * 0.1).toFixed(2)} (-90%)
                 </td>
               </tr>
               <tr>
@@ -264,34 +297,113 @@ const resB = await client.chat.completions.create({
                 <td className="py-3.5 px-4 text-zinc-300">${modelB.outputPricePer1M.toFixed(2)}</td>
               </tr>
               <tr>
-                <td className="py-3.5 px-4 font-sans font-bold text-zinc-400">Provider &amp; Wire Parity</td>
-                <td className="py-3.5 px-4 text-zinc-400 uppercase text-[10px]">{modelA.provider} (OpenAI SDK Drop-in)</td>
-                <td className="py-3.5 px-4 text-zinc-400 uppercase text-[10px]">{modelB.provider} (OpenAI SDK Drop-in)</td>
+                <td className="py-3.5 px-4 font-sans font-bold text-zinc-400">Wire Parity</td>
+                <td className="py-3.5 px-4 text-zinc-400 uppercase text-[10px]">100% OpenAI SDK Drop-in</td>
+                <td className="py-3.5 px-4 text-zinc-400 uppercase text-[10px]">100% OpenAI SDK Drop-in</td>
               </tr>
             </tbody>
           </table>
         </section>
 
+        {/* Interactive Volume Cost Delta Calculator */}
+        <section id="cost-delta-calculator" className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-white/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
+                <Calculator className="w-3.5 h-3.5" />
+                <span>MONTHLY PRODUCTION TOKEN VOLUME CALCULATOR</span>
+              </div>
+              <h2 className="text-xl font-black text-white">Compare Operational Spend at Scale</h2>
+              <p className="text-xs text-zinc-400">
+                Estimate monthly billing differences based on your expected token throughput (50% cache hit ratio assumed).
+              </p>
+            </div>
+
+            <div className="flex items-center gap-1.5 font-mono text-xs">
+              {[10, 50, 200, 500].map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setMonthlyTokensMillions(preset)}
+                  className={`px-3 py-1.5 rounded-xl border transition-colors cursor-pointer ${
+                    monthlyTokensMillions === preset
+                      ? 'bg-cyan-500/20 text-cyan-300 font-bold border-cyan-500/40'
+                      : 'bg-white/5 text-zinc-400 hover:text-white border-white/5'
+                  }`}
+                >
+                  {preset}M
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
+            {/* Model A Cost Card */}
+            <div className="p-5 rounded-2xl bg-black/50 border border-amber-500/30 space-y-3">
+              <span className="text-[10px] text-zinc-500 uppercase block">{modelA.name}</span>
+              <div className="text-2xl font-black text-white font-sans">${costA.toLocaleString()} <span className="text-xs text-zinc-400 font-normal">/ mo</span></div>
+              <div className="text-[11px] text-zinc-400 space-y-1 pt-1 border-t border-white/5">
+                <div>Input Fresh: ${Math.round(freshInputMillions * modelA.inputPricePer1M).toLocaleString()}</div>
+                <div>Cached (RAM): ${Math.round(cachedInputMillions * cachedRateA).toLocaleString()}</div>
+                <div>Output Tokens: ${Math.round(outputMillions * modelA.outputPricePer1M).toLocaleString()}</div>
+              </div>
+            </div>
+
+            {/* Model B Cost Card */}
+            <div className="p-5 rounded-2xl bg-black/50 border border-cyan-500/30 space-y-3">
+              <span className="text-[10px] text-zinc-500 uppercase block">{modelB.name}</span>
+              <div className="text-2xl font-black text-white font-sans">${costB.toLocaleString()} <span className="text-xs text-zinc-400 font-normal">/ mo</span></div>
+              <div className="text-[11px] text-zinc-400 space-y-1 pt-1 border-t border-white/5">
+                <div>Input Fresh: ${Math.round(freshInputMillions * modelB.inputPricePer1M).toLocaleString()}</div>
+                <div>Cached (RAM): ${Math.round(cachedInputMillions * cachedRateB).toLocaleString()}</div>
+                <div>Output Tokens: ${Math.round(outputMillions * modelB.outputPricePer1M).toLocaleString()}</div>
+              </div>
+            </div>
+
+            {/* Savings Delta Card */}
+            <div className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-3 flex flex-col justify-between">
+              <div className="space-y-1">
+                <span className="text-[10px] text-emerald-300 uppercase font-bold block">Monthly Delta Advantage</span>
+                <div className="text-2xl font-black text-emerald-400 font-sans">
+                  ${costDelta.toLocaleString()} <span className="text-xs text-emerald-300/80 font-normal">/ mo</span>
+                </div>
+                <p className="text-[11px] text-zinc-300 font-sans pt-1">
+                  Using <strong className="text-white">{cheaperModel.name}</strong> over {pricierModel.name} saves approximately ${costDelta.toLocaleString()} each month at {monthlyTokensMillions}M tokens volume.
+                </p>
+              </div>
+
+              <Link
+                href="/keys/new"
+                className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs flex items-center justify-center gap-1.5 transition-colors font-sans shadow-md"
+              >
+                <span>Deploy {cheaperModel.id}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* Interactive Side-by-Side Dual Streaming Arena */}
-        <section id="dual-arena" className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-indigo-500/20 bg-[#0c0e17]/90 shadow-2xl">
+        <section id="dual-arena" className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-white/10 bg-[#0c0e17]/90 shadow-2xl">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-1">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold">
-                <Flame className="w-3.5 h-3.5" />
+                <Zap className="w-3.5 h-3.5 text-amber-400" />
                 <span>INTERACTIVE LIVE SPEED &amp; INTELLIGENCE ARENA</span>
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-white">Compare Streaming Concurrently</h2>
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-zinc-300">
                 Execute a live completion across both engines with zero delay to compare latency and output style.
               </p>
             </div>
 
             <button
+              type="button"
               onClick={handleRunArena}
               className={`px-5 py-2.5 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shrink-0 font-mono ${
                 isStreaming
                   ? 'bg-rose-500 hover:bg-rose-400 text-white'
-                  : 'bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black shadow-amber-500/20'
+                  : 'bg-cyan-500 hover:bg-cyan-400 text-black shadow-cyan-500/20'
               }`}
             >
               <Zap className="w-4 h-4 fill-black" />
@@ -336,24 +448,36 @@ const resB = await client.chat.completions.create({
             <div className="flex items-center gap-2">
               <div className="flex rounded-xl bg-black/50 p-1 border border-white/10 font-mono text-xs">
                 <button
+                  type="button"
                   onClick={() => setActiveCodeTab('python')}
-                  className={`px-3 py-1 rounded-lg transition-all ${
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
                     activeCodeTab === 'python' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400 hover:text-zinc-200'
                   }`}
                 >
                   Python
                 </button>
                 <button
+                  type="button"
                   onClick={() => setActiveCodeTab('ts')}
-                  className={`px-3 py-1 rounded-lg transition-all ${
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
                     activeCodeTab === 'ts' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400 hover:text-zinc-200'
                   }`}
                 >
                   TypeScript
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveCodeTab('curl')}
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                    activeCodeTab === 'curl' ? 'bg-white/10 text-white font-medium' : 'text-zinc-400 hover:text-zinc-200'
+                  }`}
+                >
+                  cURL
+                </button>
               </div>
 
               <button
+                type="button"
                 onClick={handleCopyCode}
                 className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 font-mono text-xs flex items-center gap-1.5 transition-all cursor-pointer"
               >
@@ -364,7 +488,7 @@ const resB = await client.chat.completions.create({
           </div>
 
           <pre className="p-4 rounded-2xl bg-black/80 border border-white/10 text-zinc-300 font-mono text-xs overflow-x-auto leading-relaxed">
-            {activeCodeTab === 'python' ? pythonSnippet : tsSnippet}
+            {activeCodeTab === 'python' ? pythonSnippet : activeCodeTab === 'ts' ? tsSnippet : curlSnippet}
           </pre>
         </section>
 
@@ -384,6 +508,7 @@ const resB = await client.chat.completions.create({
               return (
                 <div key={idx} className="rounded-2xl bg-black/40 border border-white/10 overflow-hidden">
                   <button
+                    type="button"
                     onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
                     className="w-full p-4 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-white/[0.02] transition-colors"
                   >
