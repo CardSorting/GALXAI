@@ -86,14 +86,19 @@ The touchless APIs eliminate 90% of boilerplate: no configuration objects, no ma
 
 ### 1. Touchless Visual Synthesis (`galx.image`)
 
-Generate, stream, edit, and save images with single function calls:
+Generate, stream, edit, and save images with single function calls, enriched with permanent zero-egress R2 CDN URLs and instant SVG LQIP blur placeholders:
 
 ```typescript
 import { galx } from 'galxai';
 
-// 1. One-line generation with built-in file saving
-const img = await galx.image('A cinematic landscape of the Himalayas in 4k');
-console.log(img.url);  // Direct shortcut (no data[0].url digging!)
+// 1. One-line generation with session partitioning & built-in file saving
+const img = await galx.image('A cinematic landscape of the Himalayas in 4k', {
+  sessionId: 'session_himalayas_01',
+  aspectRatio: '16:9'
+});
+console.log(img.url);     // Direct public CDN URL: "https://assets.galx.ai/..."
+console.log(img.r2_url);  // Permanent Cloudflare R2 bucket reference
+console.log(img.lqip);    // Instant dynamic SVG Data-URI blur placeholder
 await img.save('./himalayas.png');
 
 // 2. One-line diffusion progress stream
@@ -229,6 +234,83 @@ const landscapes = galx.images.history.queryNatural('where prompt contains lands
 
 // List recent generations
 const recent = galx.images.history.list({ limit: 10, sortOrder: 'desc' });
+```
+
+### Cloudflare R2 User & Session Media Partitioning
+
+Visual assets are saved to deterministic S3-compatible paths: `users/{userId}/sessions/{sessionId}/images/{imageId}.png`, backed by Cloudflare R2 zero-egress public CDN caching (`https://assets.galx.ai/...`):
+
+```typescript
+const result = await galx.images.generate({
+  model: 'openai-gpt-image-2',
+  prompt: 'A futuristic bioluminescent botanical garden',
+  aspectRatio: '16:9',
+  sessionId: 'session_research_88',
+});
+
+console.log(result.data[0].r2_url);     // Permanent CDN URL
+console.log(result.data[0].lqip);       // Vectorized SVG Blur Data URI (<300 bytes)
+console.log(result.data[0].asset_id);   // e.g. "img_1788620541677_b68da3a9"
+```
+
+### Session Media Gallery & Manifest Inspection
+
+Retrieve the aggregate session manifest (`manifest.json`) and chronological image list:
+
+```typescript
+// Fetch full session media collection
+const gallery = await galx.images.sessions.get('session_research_88');
+
+console.log(`Total Generated: ${gallery.manifest.totalImages}`);
+console.log(`Total Bytes: ${(gallery.manifest.totalBytes / 1024 / 1024).toFixed(2)} MB`);
+
+// Map over images in session
+for (const asset of gallery.data) {
+  console.log(`Asset: ${asset.assetId} -> ${asset.publicUrl}`);
+}
+```
+
+### Atomic Cascade Session Purge
+
+Purge all visual assets and the session manifest across Cloudflare R2 in a single roundtrip:
+
+```typescript
+// Cascade-delete session media
+const purgeResult = await galx.images.sessions.delete('session_research_88');
+console.log(`Purged ${purgeResult.deleted_count} assets from R2.`);
+```
+
+### Frontend Progressive Blur-Up Pattern
+
+Use the inline `lqip` to display an instant, beautiful preview while the full lossless master loads:
+
+```tsx
+export function ProgressiveImage({ src, lqip, alt }: { src: string; lqip: string; alt: string }) {
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-zinc-950">
+      {/* Dynamic SVG LQIP */}
+      <img
+        src={lqip}
+        alt=""
+        aria-hidden="true"
+        className={`absolute inset-0 w-full h-full object-cover filter blur-xl scale-105 transition-opacity duration-700 ${
+          loaded ? 'opacity-0' : 'opacity-100'
+        }`}
+      />
+      {/* Full-resolution Master PNG */}
+      <img
+        src={src}
+        alt={alt}
+        onLoad={() => setLoaded(true)}
+        className={`relative w-full h-full object-cover transition-opacity duration-700 ${
+          loaded ? 'opacity-100' : 'opacity-0'
+        }`}
+      />
+    </div>
+  );
+}
 ```
 
 ---

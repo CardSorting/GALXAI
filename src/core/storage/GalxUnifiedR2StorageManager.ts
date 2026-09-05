@@ -30,6 +30,7 @@ import { BroccoliTelemetryEngine } from '../telemetry/BroccoliTelemetryEngine';
 export type R2KnownBucket =
   | 'training'
   | 'assets'
+  | 'images'
   | 'user_webapps'
   | 'dreambees'
   | 'sticker'
@@ -158,6 +159,11 @@ export class GalxUnifiedR2StorageManager {
       bucketName: process.env.R2_ASSETS_BUCKET_NAME || 'galxai-assets',
       publicDomain: process.env.PUBLIC_ASSETS_URL || 'https://assets.galx.ai',
       workerBindingName: 'ASSET_BUCKET',
+    },
+    images: {
+      bucketName: process.env.R2_IMAGES_BUCKET_NAME || process.env.R2_ASSETS_BUCKET_NAME || 'galxai-assets',
+      publicDomain: process.env.PUBLIC_IMAGES_URL || process.env.PUBLIC_ASSETS_URL || 'https://assets.galx.ai',
+      workerBindingName: 'IMAGE_BUCKET',
     },
     user_webapps: {
       bucketName: process.env.R2_WEBAPPS_BUCKET_NAME || 'galx-user-webapps',
@@ -600,6 +606,17 @@ export class GalxUnifiedR2StorageManager {
       if (fs.existsSync(p)) fs.unlinkSync(p);
     }
     return { deleted: keys, errors: [] };
+  }
+
+  /**
+   * Cascade multi-object deletion by key prefix (e.g., purges all session image assets in one batch).
+   */
+  public async deletePrefix(bucket: R2KnownBucket, prefix: string): Promise<{ deleted: string[]; errors: string[] }> {
+    if (!prefix) return { deleted: [], errors: [] };
+    const listRes = await this.listObjects({ bucket, prefix, maxKeys: 1000 });
+    const keys = listRes.objects.map((o) => o.key);
+    if (keys.length === 0) return { deleted: [], errors: [] };
+    return this.deleteObjects(bucket, keys);
   }
 
   /**
@@ -1674,3 +1691,23 @@ export class GalxUnifiedR2StorageManager {
 }
 
 export const galxUnifiedR2 = GalxUnifiedR2StorageManager.getInstance();
+
+/**
+ * Generates a deterministic, chronological S3/R2 object key partitioned by user and session.
+ * e.g. users/{userId}/sessions/{sessionId}/images/{imageId}.png
+ */
+export function buildUserSessionImagePath(params: {
+  userId: string;
+  sessionId?: string;
+  imageId?: string;
+  extension?: string;
+}): string {
+  const cleanUserId = (params.userId || 'anonymous_user').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const ext = (params.extension || 'png').replace(/^\./, '');
+  const imageId = params.imageId || `img_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+  if (params.sessionId) {
+    const cleanSessionId = params.sessionId.replace(/[^a-zA-Z0-9_-]/g, '_');
+    return `users/${cleanUserId}/sessions/${cleanSessionId}/images/${imageId}.${ext}`;
+  }
+  return `users/${cleanUserId}/images/${imageId}.${ext}`;
+}

@@ -480,8 +480,91 @@ export class OpenAIAdapter {
       throw new Error('Missing OpenAI API key or OAuth access token');
     }
 
-    const baseUrl = this.resolveBaseUrl(secret);
+    const isCodexAuth = (secret as any)?.authType === 'oauth' ||
+                        (secret as any)?.auth_mode === 'chatgpt' ||
+                        !!secret.accountId ||
+                        token.startsWith('eyJ') ||
+                        fs.existsSync(path.join(os.homedir(), '.codex', 'auth.json'));
 
+    const isCodexSession = isCodexAuth && !token.startsWith('sk-');
+
+    // 1. ChatGPT OAuth Sessions: Must dispatch via Always-On VM Relay or native Codex WebSocket
+    if (isCodexSession) {
+      const vmRelayUrl =
+        process.env.VM_RELAY_URL ||
+        process.env.GALXAI_RELAY_URL ||
+        process.env.RELAY_URL ||
+        (secret as any)?.relayUrl ||
+        'http://localhost:3001';
+
+      const useVmRelay = !!(
+        process.env.VM_RELAY_URL ||
+        process.env.GALXAI_RELAY_URL ||
+        process.env.RELAY_URL ||
+        process.env.FORCE_VM_RELAY === 'true' ||
+        (options as any)?.forceRelay === true ||
+        (req as any)?.dispatch_target === 'relay' ||
+        (secret as any)?.relayUrl ||
+        true // Prefer relay for image synthesis in local/node environment
+      );
+
+      // Attempt synthesis through Always-On VM Relay
+      if (vmRelayUrl && useVmRelay) {
+        try {
+          const relayResp = await fetch(`${vmRelayUrl.replace(/\/+$/, '')}/v1/images/generations`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'x-galx-client': 'openai-adapter-vm-relay-image',
+              'x-galx-shard-id': shardId,
+              ...(req.sessionId ? { 'x-galx-session-id': req.sessionId } : {}),
+              ...(req.idempotencyKey ? { 'idempotency-key': req.idempotencyKey } : {})
+            },
+            body: JSON.stringify({
+              prompt: req.prompt,
+              model: modelSpec.upstreamId || modelSpec.id,
+              size: req.size || '1024x1024',
+              quality: req.quality || 'standard',
+              n: req.n || 1,
+              response_format: req.response_format || 'url',
+              sessionId: req.sessionId
+            }),
+            signal: options?.signal
+          });
+
+          if (relayResp.ok) {
+            const result = await relayResp.json() as any;
+            return {
+              created: result.created || Math.floor(Date.now() / 1000),
+              data: result.data || [],
+              modelUsed: modelSpec.id,
+              shardId
+            };
+          }
+          console.warn(`[OpenAIAdapter] VM Relay returned status ${relayResp.status}, falling back to direct Codex WebSocket wire`);
+        } catch (relayErr: any) {
+          console.warn(`[OpenAIAdapter] VM Relay image dispatch failed (${relayErr.message}), falling back to direct Codex WebSocket wire`);
+        }
+      }
+
+      // Fallback: Direct Codex WebSocket wire synthesis
+      const directResult = await this.executeImageViaCodexWebSocket(req.prompt, secret, modelSpec, options);
+      return {
+        created: Math.floor(Date.now() / 1000),
+        data: [
+          {
+            b64_json: directResult.b64_json,
+            revised_prompt: directResult.revised_prompt || req.prompt
+          }
+        ],
+        modelUsed: modelSpec.id,
+        shardId
+      };
+    }
+
+    // 2. Standard OpenAI Platform API Key (REST endpoint)
+    const baseUrl = this.resolveBaseUrl(secret);
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
@@ -500,6 +583,7 @@ export class OpenAIAdapter {
 
     if (req.quality) body.quality = req.quality;
     if ((req as any).style) body.style = (req as any).style;
+    if (req.response_format) body.response_format = req.response_format;
 
     const timeoutMs = options?.timeoutMs ?? 60_000;
     const controller = new AbortController();
@@ -535,6 +619,155 @@ export class OpenAIAdapter {
       clearTimeout(timeoutId);
       throw err;
     }
+  }
+
+  /**
+   * Executes image generation directly over native WebSocket wire to wss://chatgpt.com/backend-api/codex/responses
+   * with tools: [{ type: 'image_generation' }].
+   */
+  public static async executeImageViaCodexWebSocket(
+    prompt: string,
+    secret: DecryptedGalxSecret,
+    _modelSpec: ModelSpecItem,
+    options?: ExecuteOptions
+  ): Promise<{ b64_json: string; revised_prompt?: string }> {
+    const wsModule = await import('ws');
+    const WebSocket = (wsModule as any).default || wsModule;
+
+    const shardId = (secret as any)?.id || (secret as any)?.shardId || '';
+    let token = secret?.accessToken || secret?.apiKey;
+    let accountId = secret?.accountId;
+
+    if (!token || token.startsWith('galx_')) {
+      const authPath = path.join(os.homedir(), '.codex', 'auth.json');
+      if (fs.existsSync(authPath)) {
+        try {
+          const authData = JSON.parse(fs.readFileSync(authPath, 'utf-8'));
+          const tokens = authData.tokens || authData;
+          token = tokens.access_token || token;
+          accountId = tokens.account_id || authData.account_id || accountId;
+        } catch {}
+      }
+    }
+
+    if (!token) {
+      throw new Error('No valid Codex access token found for image WebSocket execution');
+    }
+
+    const wsUrl = 'wss://chatgpt.com/backend-api/codex/responses';
+    const wsHeaders: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+      'User-Agent': 'Codex-CLI/0.150.1 (darwin; arm64)',
+      'X-Codex-Originator': 'codex_cli',
+      'OpenAI-Beta': 'responses_websockets=2026-02-06',
+      'X-OpenAI-Product-Sku': 'codex',
+    };
+    if (accountId) wsHeaders['ChatGPT-Account-Id'] = accountId;
+    if (shardId) wsHeaders['X-Galx-Shard-Id'] = shardId;
+
+    return new Promise((resolve, reject) => {
+      let ws: any;
+      let settled = false;
+      let pingInterval: any = null;
+
+      const timeoutMs = options?.timeoutMs || 90_000;
+      const timeoutId = setTimeout(() => {
+        finishError(new Error(`Direct Codex WebSocket image synthesis timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
+
+      const cleanup = () => {
+        clearTimeout(timeoutId);
+        if (pingInterval) clearInterval(pingInterval);
+        if (ws) {
+          try {
+            if (typeof ws.terminate === 'function') ws.terminate();
+            else if (typeof ws.close === 'function') ws.close();
+          } catch {}
+        }
+      };
+
+      const finishSuccess = (b64: string, revised?: string) => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        resolve({ b64_json: b64, revised_prompt: revised });
+      };
+
+      const finishError = (err: Error) => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        reject(err);
+      };
+
+      try {
+        ws = new WebSocket(wsUrl, { headers: wsHeaders });
+      } catch (err) {
+        return finishError(err as Error);
+      }
+
+      ws.on('open', () => {
+        pingInterval = setInterval(() => {
+          try { if (typeof ws.ping === 'function') ws.ping(); } catch {}
+        }, 15000);
+
+        const payload = {
+          type: 'response.create',
+          model: 'gpt-5.6-terra',
+          input: [
+            {
+              type: 'message',
+              role: 'user',
+              content: [{ type: 'input_text', text: prompt }],
+            },
+          ],
+          tools: [{ type: 'image_generation' }],
+        };
+
+        try {
+          ws.send(JSON.stringify(payload));
+        } catch (err) {
+          finishError(err as Error);
+        }
+      });
+
+      let b64Result = '';
+      let revisedPrompt = '';
+
+      ws.on('message', (data: any) => {
+        try {
+          const raw = typeof data === 'string' ? data : data?.toString?.('utf-8');
+          if (!raw) return;
+          const frame = JSON.parse(raw);
+
+          if (frame.type === 'response.output_item.done' && frame.item?.type === 'image_generation_call') {
+            if (frame.item.result) b64Result = frame.item.result;
+            if (frame.item.revised_prompt) revisedPrompt = frame.item.revised_prompt;
+          }
+
+          if (frame.type === 'response.completed' || frame.type === 'response.done') {
+            if (b64Result) {
+              finishSuccess(b64Result, revisedPrompt);
+            } else {
+              finishError(new Error('Codex WebSocket completed without returning image data'));
+            }
+          }
+
+          if (frame.type === 'error' || (frame.type === 'response.failed' && frame.response?.error)) {
+            const msg = frame.error?.message || frame.response?.error?.message || JSON.stringify(frame);
+            finishError(new Error(`Codex WebSocket error: ${msg}`));
+          }
+        } catch {}
+      });
+
+      ws.on('error', (err: any) => finishError(err instanceof Error ? err : new Error(String(err))));
+      ws.on('close', (code: number, reason: string) => {
+        if (!settled) {
+          if (b64Result) finishSuccess(b64Result, revisedPrompt);
+          else finishError(new Error(`Codex WebSocket closed prematurely (code: ${code}, reason: ${reason || 'unknown'})`));
+        }
+      });
+    });
   }
 
   /**

@@ -77,6 +77,19 @@ export async function POST(req: NextRequest) {
     const resolvedModelSpec = ModelCatalog.resolveModel(requestedModel);
     const resolvedModelId = resolvedModelSpec.category === 'image' ? resolvedModelSpec.id : 'openai-gpt-image-2';
 
+    const sessionId =
+      req.headers.get('x-galx-session-id') ||
+      req.headers.get('x-session-id') ||
+      rawBody.session_id ||
+      rawBody.sessionId ||
+      'default';
+
+    const idempotencyKey =
+      req.headers.get('idempotency-key') ||
+      rawBody.idempotency_key ||
+      rawBody.idempotencyKey ||
+      undefined;
+
     const body: ImageGenerationRequest = {
       prompt: resolvedPrompt,
       model: resolvedModelId,
@@ -84,7 +97,9 @@ export async function POST(req: NextRequest) {
       size: resolvedSize,
       quality: rawBody.quality || 'standard',
       response_format: rawBody.response_format || rawBody.responseFormat || rawBody.format || 'url',
-      user: rawBody.user
+      user: rawBody.user,
+      sessionId,
+      idempotencyKey
     };
 
     // Asynchronous Queue Processing

@@ -29,43 +29,96 @@ GALXAI_API_KEY=galx_live_your_key_here
 
 ---
 
-## 🖼️ 2. React & Next.js (Zero-Boilerplate)
+## 🖼️ 2. React & Next.js Visual Synthesis (Progressive Blur-Up & Session Partitioning)
 
-### A. Declarative Image Generator (`<GalxImage />`)
-Renders an image with automatic aspect ratios, loading placeholders, and live hover remixing:
+GALXAI serves images directly from Cloudflare R2 (`https://assets.galx.ai/...`) partitioned by user and session, accompanied by an inline, dynamic SVG Data-URI blur placeholder (`lqip`) to guarantee zero layout shift and instant visual feedback.
+
+### A. Next.js 15 Client Component with Progressive Blur-Up (`ImageCard.tsx`)
 
 ```tsx
-import { GalxImage } from 'galxai/ui';
+'use client';
 
-export function Hero() {
+import { useState } from 'react';
+
+export function ImageCard({ prompt, sessionId = 'session_quickstart' }: { prompt: string; sessionId?: string }) {
+  const [data, setData] = useState<{ url: string; lqip: string } | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  async function handleGenerate() {
+    setLoading(true);
+    setLoaded(false);
+    try {
+      const res = await fetch('https://api.galx.ai/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_GALXAI_KEY || 'galx_live_...'}`,
+          'x-galx-session-id': sessionId,
+        },
+        body: JSON.stringify({
+          model: 'openai-gpt-image-2',
+          prompt,
+          aspect_ratio: '16:9',
+          sessionId,
+        }),
+      });
+      const json = await res.json();
+      setData(json.data[0]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <GalxImage
-      prompt="Cyberpunk metropolis at dusk"
-      aspectRatio="16:9"
-      interactive
-      className="w-full h-96 rounded-2xl shadow-xl"
-    />
+    <div className="space-y-3">
+      <button
+        onClick={handleGenerate}
+        disabled={loading}
+        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm rounded-lg font-medium transition-colors"
+      >
+        {loading ? 'Synthesizing...' : 'Synthesize Scene'}
+      </button>
+
+      {data && (
+        <div className="relative aspect-[16/9] w-full max-w-xl rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800">
+          {/* 1. Dynamic SVG LQIP Blur Placeholder */}
+          <img
+            src={data.lqip}
+            alt=""
+            aria-hidden="true"
+            className={`absolute inset-0 w-full h-full object-cover filter blur-lg scale-105 transition-opacity duration-500 ${
+              loaded ? 'opacity-0' : 'opacity-100'
+            }`}
+          />
+
+          {/* 2. Permanent R2 CDN Master Image */}
+          <img
+            src={data.url}
+            alt={prompt}
+            onLoad={() => setLoaded(true)}
+            className={`relative w-full h-full object-cover transition-opacity duration-500 z-10 ${
+              loaded ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+        </div>
+      )}
+    </div>
   );
 }
 ```
 
-### B. Direct Next.js 15 Server Action
-Invoke AI functions directly from your client components with **zero route files**:
+### B. Session Media Gallery Query (`GET /v1/images/sessions/:sessionId`)
 
-```tsx
-'use client';
-import { generateImageAction } from 'galxai/actions';
+Fetch all images created in a session alongside the auto-updating `manifest.json`:
 
-export function Button() {
-  return (
-    <button onClick={async () => {
-      const res = await generateImageAction('Neon avatar', { aspectRatio: '1:1' });
-      console.log(res.data[0].url);
-    }}>
-      Synthesize
-    </button>
-  );
-}
+```typescript
+const res = await fetch(`https://api.galx.ai/v1/images/sessions/${sessionId}`, {
+  headers: { 'Authorization': `Bearer ${process.env.GALXAI_API_KEY}` }
+});
+const { data, manifest } = await res.json();
+console.log(`Total images: ${manifest.totalImages}, Size: ${manifest.totalBytes} bytes`);
+// data[0].publicUrl -> "https://assets.galx.ai/users/.../images/...png"
 ```
 
 ---

@@ -129,6 +129,8 @@ All architectural components in GALXAI are governed by formal Architectural Deci
 | **[ADR 0114](adr/0114-uncertain-execution-authority-kernel-and-transactional-journal.md)** | Uncertain Execution Authority Kernel & Transactional Journal | Separates authoritative execution transitions, authorized work delivery, journal observations, and live transport projections. |
 | **[ADR 0115](adr/0115-postgresql-authoritative-shard-registry-and-secret-free-projections.md)** | PostgreSQL-Authoritative Shard Registry & Secret-Free Projections | Makes Supabase PostgreSQL the sole credential authority with fail-closed mutations, forced RLS, service-only fenced lease RPCs, retired legacy authorities, and replaceable BroccoliDB routing projections. |
 | **[ADR 0119](adr/0119-inference-first-product-surface-and-client-retirement.md)** | Inference-First Product Surface and First-Party Client Retirement | Retires hosted chat/image clients, preserves inference APIs and explicit durable sessions, makes `/models` the default post-auth surface, and removes client-only tables from public Supabase authority. |
+| **[ADR 0120](adr/0120-zero-cost-host-mac-cloudflare-tunnel-relay-ingress-and-protocol-hardening.md)** | Zero-Cost Host Mac Cloudflare Tunnel Relay Ingress & Protocol Hardening | Bridges Vercel serverless lambdas to host Mac relay daemon via Cloudflare Tunnel at $0 cost; hardens upstream Codex WebSocket wire protocol with multimodal normalization and reasoning-safe pong watchdog. |
+| **[ADR 0121](adr/0121-user-and-session-r2-partitioning-manifest-lifecycle-and-relay-image-synthesis.md)** | User and Session R2 Chronological Partitioning, Visual Manifest Lifecycle, and Always-On Relay Live Wire Image Synthesis | Implements deterministic S3/R2 object layout (`users/{userId}/sessions/{sessionId}/images/{imageId}.png`), session manifest tracking (`manifest.json`), dynamic SVG Data-URI LQIP placeholders, atomic cascade session purging, and Always-On VM Relay Codex WebSocket visual synthesis. |
 
 ---
 
@@ -539,3 +541,84 @@ npx tsx simulations/high-concurrency-10k-fairness/index.test.ts
 # Run the 2–3 minute unpredictable inference simulation
 npm run sim:unpredictable
 ```
+
+---
+
+## 🎨 Deterministic User/Session R2 Partitioning, Visual Manifest Lifecycle & Relay Image Synthesis (ADR 0121)
+
+Visual synthesis outputs in modern AI architectures are monolithic binary assets (1 MB – 4 MB lossless PNGs) rather than small incremental text tokens. To prevent runaway edge memory consumption, eliminate Cumulative Layout Shift (CLS), and enable seamless multi-turn session media management, GALXAI formalizes **ADR 0121**:
+
+```mermaid
+flowchart TD
+    subgraph Client ["Frontend Client / Autonomous Agent"]
+        Browser["React / Next.js Client Component"]
+        Agent["Autonomous Coding Agent"]
+    end
+
+    subgraph Gateway ["GALXAI Edge Gateway (Next.js 15 App Router)"]
+        ImgRoute["POST /v1/images/generations\nx-galx-session-id: sess_01"]
+        GalleryRoute["GET /v1/images/sessions/:sessionId"]
+        DeleteRoute["DELETE /v1/images/sessions/:sessionId"]
+        ModelRouter["GalxModelRouter & OpenAIAdapter"]
+    end
+
+    subgraph VMRelay ["Always-On Host VM Relay (PM2 Daemon :3001)"]
+        RelayWS["Native Codex WebSocket Client\nwss://chatgpt.com/backend-api/codex/responses"]
+        ToolGen["tool: image_generation\nWatchdog Pong Supervision"]
+    end
+
+    subgraph CloudflareSubstrate ["Cloudflare Zero-Egress Storage Substrate"]
+        R2Adapter["GalxR2AssetAdapter\nSVG LQIP Generator (<300 bytes)"]
+        R2Bucket["R2 Image Bucket (galxai-images)\nusers/{userId}/sessions/{sessionId}/images/"]
+        ManifestFile["Session Manifest (manifest.json)\nAtomic Counters & Aggregates"]
+        CDN["Cloudflare Global CDN Edge\nhttps://assets.galx.ai/..."]
+    end
+
+    Browser -->|Generate Request| ImgRoute
+    Agent -->|Generate Request| ImgRoute
+    ImgRoute --> ModelRouter
+    ModelRouter -->|Bearer session token| RelayWS
+    RelayWS --> ToolGen
+    ToolGen -->|Base64 PNG payload| ModelRouter
+    ModelRouter --> R2Adapter
+    R2Adapter -->|PutObject lossless PNG| R2Bucket
+    R2Adapter -->|Atomic update| ManifestFile
+    R2Adapter -->|Generate SVG Data URI| ImgRoute
+    ImgRoute -->|JSON with r2_url & lqip| Browser
+
+    Browser -->|Inspect Gallery| GalleryRoute
+    GalleryRoute --> ManifestFile
+    GalleryRoute --> R2Bucket
+
+    Browser -->|Cascade Purge| DeleteRoute
+    DeleteRoute -->|Batch Delete Prefix| R2Bucket
+
+    Browser -->|Stream Master PNG (Cache Hit)| CDN
+
+    style Client fill:#0f172a,stroke:#3b82f6,stroke-width:1px
+    style Gateway fill:#0f172a,stroke:#6366f1,stroke-width:1px
+    style VMRelay fill:#0f172a,stroke:#10b981,stroke-width:1px
+    style CloudflareSubstrate fill:#0f172a,stroke:#f59e0b,stroke-width:1px
+```
+
+### Deterministic Object Storage Layout
+
+All visual media are written to deterministic S3-compatible key hierarchies under the authoritative `galxai-images` bucket:
+
+```text
+users/{userId}/sessions/{sessionId}/
+├── manifest.json                                      # Atomic JSON manifest (totalImages, totalBytes, timestamps)
+└── images/
+    ├── img_1788620541677_b68da3a9.png                 # Lossless PNG render (1.0 MB - 4.0 MB)
+    └── img_1788620632639_33086f7b.png
+```
+
+### Core Architecture Invariants (INV 17–20)
+
+| Invariant | Guarantee |
+| :--- | :--- |
+| **INV-17**: Chronological Deterministic Partitioning | All synthesized images are partitioned under `users/{userId}/sessions/{sessionId}/images/` with millisecond timestamp prefixes and random entropy suffixes, preventing collisions and cross-tenant leakage. |
+| **INV-18**: Dynamic Low-Quality Image Placeholder (LQIP) | Every visual synthesis response embeds an inline SVG Data-URI (`lqip`) utilizing Gaussian blur SVG filters, ensuring zero Cumulative Layout Shift (CLS) and instant perceived visual feedback. |
+| **INV-19**: Synchronous Manifest Durability | Every successful image upload atomically commits an updated `manifest.json` tracking aggregate session image count, aggregate byte footprint, and timestamps. |
+| **INV-20**: Atomic Session Cascade Purge | `DELETE /v1/images/sessions/:sessionId` executes a single-roundtrip prefix purge across Cloudflare R2, guaranteeing zero orphaned binary blobs upon session cleanup. |
+

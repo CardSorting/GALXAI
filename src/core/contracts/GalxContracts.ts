@@ -678,6 +678,8 @@ export interface ImageGenerationRequest {
   aspect_ratio?: string;
   response_format?: 'url' | 'b64_json';
   user?: string;
+  sessionId?: string;
+  idempotencyKey?: string;
   privacy?: PrivacyOptions;
 }
 
@@ -687,9 +689,23 @@ export interface ImageGenerationResponse {
     url?: string;
     b64_json?: string;
     revised_prompt?: string;
+    asset_id?: string;
+    r2_url?: string;
+    r2_key?: string;
+    user_id?: string;
+    session_id?: string;
+    content_type?: string;
+    size_bytes?: number;
+    sha256?: string;
+    lqip?: string;
   }>;
   modelUsed: string;
   shardId?: string;
+  telemetry?: {
+    latencyMs: number;
+    cached?: boolean;
+    storageMode?: 'cloudflare_r2' | 'local_fallback';
+  };
 }
 
 export interface UpstreamRateLimitHeaders {

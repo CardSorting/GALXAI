@@ -164,7 +164,12 @@ Returns model architecture, context length, parameters, and template definitions
 
 ## 🎨 Visual Synthesis & Image Generation (`POST /v1/images/generations`)
 
-Visual synthesis endpoint routing across OpenAI GPT-Image engines (`openai-gpt-image-2`, `openai-gpt-image-1.5`, `openai-gpt-image-1`) with declarative aspect ratio absorption.
+Enterprise visual synthesis endpoint routing across OpenAI GPT-Image engines (`openai-gpt-image-2`, `openai-gpt-image-1.5`, `openai-gpt-image-1`, `dall-e-3`) with declarative aspect ratio absorption, deterministic Cloudflare R2 user/session partitioning, and Always-On VM Relay live wire synthesis.
+
+### Request Headers
+- `Authorization: Bearer <galx_api_key>` (Standard developer key or session token)
+- `x-galx-session-id: <sessionId>` (Optional: binds generation to an interactive chat/agent session)
+- `Idempotency-Key: <key>` (Optional: prevents duplicate GPU draws within 5-minute window)
 
 ### Request Body
 ```json
@@ -172,7 +177,9 @@ Visual synthesis endpoint routing across OpenAI GPT-Image engines (`openai-gpt-i
   "model": "openai-gpt-image-2",
   "prompt": "Cybernetic space station overlooking a nebula in 8k octane render",
   "aspect_ratio": "16:9",
-  "response_format": "url"
+  "quality": "hd",
+  "response_format": "url",
+  "sessionId": "sess_exploration_01"
 }
 ```
 
@@ -183,7 +190,104 @@ Visual synthesis endpoint routing across OpenAI GPT-Image engines (`openai-gpt-i
 - `3:2` $\to$ `1536x1024`
 - `1:1` $\to$ `1024x1024`
 
-*(Assets are cached in Cloudflare R2 and served via `https://assets.galx.ai` with $0 egress bandwidth fees).*
+### Enriched Response Schema
+```json
+{
+  "created": 1788620312,
+  "data": [
+    {
+      "url": "https://assets.galx.ai/users/usr_123/sessions/sess_exploration_01/images/img_1788620312701_a883c58d.png",
+      "r2_url": "https://assets.galx.ai/users/usr_123/sessions/sess_exploration_01/images/img_1788620312701_a883c58d.png",
+      "r2_key": "users/usr_123/sessions/sess_exploration_01/images/img_1788620312701_a883c58d.png",
+      "asset_id": "img_1788620312701_a883c58d",
+      "user_id": "usr_123",
+      "session_id": "sess_exploration_01",
+      "content_type": "image/png",
+      "size_bytes": 2641455,
+      "sha256": "33086f7ba7e48b11c7509...",
+      "lqip": "data:image/svg+xml;utf8,%3Csvg...",
+      "revised_prompt": "Cinematic wide-angle view of a monolithic cybernetic space station..."
+    }
+  ],
+  "modelUsed": "openai-gpt-image-2"
+}
+```
+
+### Frontend Client Request Pattern (Fetch / Next.js / React)
+
+```typescript
+// Call from browser, Next.js Client Component, or SPA:
+const response = await fetch('https://api.galx.ai/v1/images/generations', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${process.env.NEXT_PUBLIC_GALXAI_KEY}`,
+    'x-galx-session-id': 'session_interactive_01',
+    'Idempotency-Key': crypto.randomUUID(),
+  },
+  body: JSON.stringify({
+    model: 'openai-gpt-image-2',
+    prompt: 'A cyberpunk city street in rain with neon reflections',
+    aspect_ratio: '16:9',
+    sessionId: 'session_interactive_01',
+  }),
+});
+
+const { data } = await response.json();
+// data[0].url      -> "https://assets.galx.ai/users/.../images/...png" (Lossless PNG)
+// data[0].r2_url   -> Permanent CDN object URL
+// data[0].lqip     -> "data:image/svg+xml;utf8,..." (Dynamic SVG Blur Placeholder for instant blur-up)
+// data[0].asset_id -> "img_1788620541677_b68da3a9"
+```
+
+---
+
+## 🖼️ Session Visual Gallery & Lifecycle (`/v1/images/sessions/*`)
+
+### 1. List Session Visual Assets (`GET /v1/images/sessions/:sessionId`)
+Retrieves all images and the real-time summary manifest (`manifest.json`) generated during a specific agent or conversational session.
+
+**Response**:
+```json
+{
+  "object": "list",
+  "session_id": "sess_exploration_01",
+  "user_id": "usr_123",
+  "manifest": {
+    "sessionId": "sess_exploration_01",
+    "userId": "usr_123",
+    "totalImages": 2,
+    "totalBytes": 3523052,
+    "createdAtMs": 1788620541677,
+    "updatedAtMs": 1788620632639
+  },
+  "total": 2,
+  "data": [
+    {
+      "assetId": "img_1788620312701_a883c58d",
+      "key": "users/usr_123/sessions/sess_exploration_01/images/img_1788620312701_a883c58d.png",
+      "publicUrl": "https://assets.galx.ai/users/usr_123/sessions/sess_exploration_01/images/img_1788620312701_a883c58d.png",
+      "sizeBytes": 2641455,
+      "contentType": "image/png",
+      "lqipDataUri": "data:image/svg+xml;utf8,%3Csvg..."
+    }
+  ]
+}
+```
+
+### 2. Atomic Cascade Session Purge (`DELETE /v1/images/sessions/:sessionId`)
+Performs a single-roundtrip batch multi-delete across Cloudflare R2 and evicts in-memory BroccoliDB indices for the entire session prefix (`users/{userId}/sessions/{sessionId}/`).
+
+**Response**:
+```json
+{
+  "object": "session.deleted",
+  "session_id": "sess_exploration_01",
+  "user_id": "usr_123",
+  "deleted_count": 3,
+  "status": "ok"
+}
+```
 
 ---
 

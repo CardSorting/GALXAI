@@ -218,6 +218,7 @@
     "stripe:trigger:invoice": "stripe trigger invoice.payment_succeeded",
     "test:stripe": "tsx scripts/test-stripe-integration.ts",
     "test:router": "tsx scripts/validate-galxai-router.ts",
+    "test:relay:image": "tsx --env-file=.env.local scripts/test-relay-image-generation.ts",
     "test:chat:hardening": "node --import tsx scripts/test-chat-context-hardening.ts",
     "test:sessions": "node --import tsx scripts/test-agent-session-isolation.ts",
     "test:browser-agent": "node --import tsx scripts/test-browser-agent-client.ts",

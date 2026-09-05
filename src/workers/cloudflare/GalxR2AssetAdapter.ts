@@ -4,12 +4,19 @@
  * Directly uploads large visual synthesis (DALL-E / FLUX / Imagen), audio generations,
  * and user webapp builds to Cloudflare R2 (bucket: `galxai-assets`), storing compact
  * URI references in BroccoliDB & PostgreSQL.
+ *
+ * Enhanced with:
+ * - User and Session Partitioned R2 namespaces (`users/{userId}/sessions/{sessionId}/images/{imageId}.png`)
+ * - Lightweight LQIP (Low-Quality Image Placeholder) generation for zero-layout-shift UI
+ * - O(1) Session Visual Summary Manifests (`manifest.json`)
+ * - Atomic cascade session purge via S3 batch deletion
  */
 
+import * as crypto from 'node:crypto';
 import { BroccoliDbTable } from '../../core/broccolidb/broccolidb-table';
 import { BroccoliNaturalQueryParser } from '../../core/broccolidb/broccolidb-natural-query';
 import type { DbAggregateQuery, DbAggregateResult } from '../../core/broccolidb/broccolidb.contracts';
-import { GalxUnifiedR2StorageManager } from '../../core/storage/GalxUnifiedR2StorageManager';
+import { GalxUnifiedR2StorageManager, buildUserSessionImagePath } from '../../core/storage/GalxUnifiedR2StorageManager';
 
 export interface R2UploadResult {
   assetId: string;
@@ -20,16 +27,65 @@ export interface R2UploadResult {
   bucket: string;
   key: string;
   uploadedAtMs: number;
+  userId?: string;
+  sessionId?: string;
+}
+
+export interface UserSessionImageParams {
+  userId: string;
+  sessionId?: string;
+  imageId?: string;
+  data: Buffer | Uint8Array | string; // Buffer, Uint8Array, base64 string, data URL, or remote http(s) URL
+  contentType?: string;
+  prompt?: string;
+  revisedPrompt?: string;
+  model?: string;
+  size?: string;
+  quality?: string;
+  metadata?: Record<string, string>;
+}
+
+export interface UserSessionImageResult extends R2UploadResult {
+  userId: string;
+  sessionId: string;
+  prompt?: string;
+  revisedPrompt?: string;
+  model?: string;
+  size?: string;
+  quality?: string;
+  lqipDataUri?: string;
+}
+
+export interface SessionImageManifest {
+  sessionId: string;
+  userId: string;
+  totalImages: number;
+  totalBytes: number;
+  createdAtMs: number;
+  updatedAtMs: number;
+  images: Array<{
+    assetId: string;
+    key: string;
+    url: string;
+    prompt?: string;
+    model?: string;
+    size?: string;
+    sizeBytes: number;
+    createdAtMs: number;
+  }>;
 }
 
 export class GalxR2AssetAdapter {
   private static instance: GalxR2AssetAdapter;
-  public readonly assetTable: BroccoliDbTable<R2UploadResult>;
+  public readonly assetTable: BroccoliDbTable<UserSessionImageResult>;
   private readonly r2Manager: GalxUnifiedR2StorageManager;
 
   private constructor() {
-    this.assetTable = new BroccoliDbTable<R2UploadResult>('r2_assets');
+    this.assetTable = new BroccoliDbTable<UserSessionImageResult>('r2_assets');
     this.assetTable.createIndex('contentType');
+    this.assetTable.createIndex('userId');
+    this.assetTable.createIndex('sessionId');
+    this.assetTable.createCompositeIndex(['userId', 'sessionId']);
     this.assetTable.createSortedIndex('sizeBytes');
     this.assetTable.createSortedIndex('uploadedAtMs');
     this.r2Manager = GalxUnifiedR2StorageManager.getInstance();
@@ -43,7 +99,161 @@ export class GalxR2AssetAdapter {
   }
 
   /**
-   * Stores a multimodal image, audio buffer, or binary asset into Cloudflare R2 (`galxai-assets`).
+   * Generates a lightweight SVG Data-URI Low Quality Image Placeholder (LQIP).
+   */
+  private generateLqipPlaceholder(dimensions?: string, prompt?: string): string {
+    let width = 1024;
+    let height = 1024;
+    if (dimensions && dimensions.includes('x')) {
+      const parts = dimensions.split('x').map(p => parseInt(p, 10));
+      if (!isNaN(parts[0]) && !isNaN(parts[1])) {
+        width = parts[0];
+        height = parts[1];
+      }
+    }
+    const hash = crypto.createHash('md5').update(prompt || 'galxai').digest('hex');
+    const color1 = `#${hash.slice(0, 6)}`;
+    const color2 = `#${hash.slice(6, 12)}`;
+
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">` +
+      `<defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">` +
+      `<stop offset="0%" stop-color="${color1}" stop-opacity="0.3"/>` +
+      `<stop offset="100%" stop-color="${color2}" stop-opacity="0.6"/>` +
+      `</linearGradient></defs>` +
+      `<rect width="${width}" height="${height}" fill="url(#g)"/>` +
+      `</svg>`;
+
+    return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  }
+
+  /**
+   * Resolves raw payload into Buffer and content-type.
+   */
+  private async resolveDataPayload(data: Buffer | Uint8Array | string, fallbackContentType = 'image/png'): Promise<{ buffer: Buffer; contentType: string }> {
+    if (Buffer.isBuffer(data)) {
+      return { buffer: data, contentType: fallbackContentType };
+    }
+    if (data instanceof Uint8Array) {
+      return { buffer: Buffer.from(data), contentType: fallbackContentType };
+    }
+    if (typeof data === 'string') {
+      // Remote HTTP/HTTPS URL
+      if (data.startsWith('http://') || data.startsWith('https://')) {
+        const resp = await fetch(data, { signal: AbortSignal.timeout(15000) });
+        if (!resp.ok) {
+          throw new Error(`Failed to fetch image from remote URL (${resp.status}): ${data}`);
+        }
+        const ab = await resp.arrayBuffer();
+        const detectedType = resp.headers.get('content-type') || fallbackContentType;
+        return { buffer: Buffer.from(ab), contentType: detectedType };
+      }
+      // Data URI: data:image/png;base64,...
+      if (data.startsWith('data:')) {
+        const matches = data.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+        if (matches && matches[2]) {
+          return {
+            buffer: Buffer.from(matches[2], 'base64'),
+            contentType: matches[1] || fallbackContentType
+          };
+        }
+      }
+      // Pure base64 string
+      return {
+        buffer: Buffer.from(data, 'base64'),
+        contentType: fallbackContentType
+      };
+    }
+    throw new Error('Unsupported image data payload format');
+  }
+
+  /**
+   * Stores a visual synthesis generation partitioned by user and session into Cloudflare R2 (`galxai-assets`).
+   * Path: users/{userId}/sessions/{sessionId}/images/{imageId}.png
+   */
+  async uploadUserSessionImage(params: UserSessionImageParams): Promise<UserSessionImageResult> {
+    const { buffer, contentType } = await this.resolveDataPayload(params.data, params.contentType || 'image/png');
+    const ext = contentType.includes('webp') ? 'webp' : contentType.includes('jpeg') || contentType.includes('jpg') ? 'jpg' : 'png';
+    const userId = (params.userId || 'anonymous_user').trim();
+    const sessionId = (params.sessionId || 'default').trim();
+    const imageId = params.imageId || `img_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+
+    const key = buildUserSessionImagePath({
+      userId,
+      sessionId,
+      imageId,
+      extension: ext
+    });
+
+    const sanitizeHeaderValue = (str: string): string => {
+      return str.replace(/[^\x00-\x7F]/g, (char) => {
+        if (char === '’' || char === '‘') return "'";
+        if (char === '“' || char === '”') return '"';
+        if (char === '—' || char === '–') return '-';
+        if (char === '…') return '...';
+        return '';
+      }).slice(0, 1024);
+    };
+
+    const metadata: Record<string, string> = {
+      ...params.metadata,
+      'user_id': userId,
+      'session_id': sessionId,
+      'image_id': imageId,
+      'prompt': sanitizeHeaderValue(params.prompt || ''),
+      'model': params.model || 'openai-gpt-image-2',
+      'dimensions': params.size || '1024x1024',
+      'quality': params.quality || 'standard',
+      'created_at_ms': String(Date.now())
+    };
+
+    if (params.revisedPrompt) {
+      metadata['revised_prompt'] = sanitizeHeaderValue(params.revisedPrompt);
+    }
+
+    const r2Result = await this.r2Manager.putObject({
+      bucket: 'images',
+      key,
+      data: buffer,
+      contentType,
+      metadata,
+      cacheControl: 'public, max-age=31536000, immutable'
+    });
+
+    const lqip = this.generateLqipPlaceholder(params.size, params.prompt);
+
+    const result: UserSessionImageResult = {
+      assetId: imageId,
+      userId,
+      sessionId,
+      publicUrl: r2Result.publicUrl,
+      sizeBytes: r2Result.sizeBytes,
+      contentType,
+      sha256: r2Result.sha256,
+      bucket: r2Result.bucket,
+      key,
+      uploadedAtMs: Date.now(),
+      prompt: params.prompt,
+      revisedPrompt: params.revisedPrompt,
+      model: params.model,
+      size: params.size,
+      quality: params.quality,
+      lqipDataUri: lqip
+    };
+
+    this.assetTable.put(imageId, result);
+
+    // Synchronously update session manifest in R2 so caller can immediately inspect it
+    try {
+      await this.updateSessionManifest(userId, sessionId, result);
+    } catch (manifestErr: any) {
+      console.warn(`[GalxR2AssetAdapter] Session manifest update non-fatal error: ${manifestErr.message}`);
+    }
+
+    return result;
+  }
+
+  /**
+   * Legacy uploadAsset adapter mapping for backward compatibility.
    */
   async uploadAsset(params: {
     data: Buffer | Uint8Array | string;
@@ -56,19 +266,24 @@ export class GalxR2AssetAdapter {
     const folder = params.folder || 'generations';
     const key = params.customKey || `${folder}/${assetId}.${params.contentType.split('/')[1] || 'bin'}`;
 
+    const { buffer, contentType } = await this.resolveDataPayload(params.data, params.contentType);
+
     const r2Result = await this.r2Manager.putObject({
       bucket: 'assets',
       key,
-      data: params.data,
-      contentType: params.contentType,
+      data: buffer,
+      contentType,
       metadata: params.metadata,
+      cacheControl: 'public, max-age=31536000, immutable'
     });
 
-    const result: R2UploadResult = {
+    const result: UserSessionImageResult = {
       assetId,
+      userId: 'legacy_anonymous',
+      sessionId: 'default',
       publicUrl: r2Result.publicUrl,
       sizeBytes: r2Result.sizeBytes,
-      contentType: params.contentType,
+      contentType,
       sha256: r2Result.sha256,
       bucket: r2Result.bucket,
       key,
@@ -82,15 +297,179 @@ export class GalxR2AssetAdapter {
   /**
    * Retrieves asset metadata from the fast in-memory BroccoliDB index.
    */
-  getAsset(assetId: string): R2UploadResult | null {
+  getAsset(assetId: string): UserSessionImageResult | null {
     return this.assetTable.get(assetId) || null;
+  }
+
+  /**
+   * Lists all images generated in a specific user session.
+   */
+  async listSessionImages(userId: string, sessionId: string): Promise<UserSessionImageResult[]> {
+    const cleanUserId = userId.trim();
+    const cleanSessionId = sessionId.trim();
+
+    // Query in-memory BroccoliDB index
+    const records = this.assetTable.getAll().filter(
+      (a) => a.userId === cleanUserId && a.sessionId === cleanSessionId
+    );
+    if (records.length > 0) {
+      return records.sort((a, b) => b.uploadedAtMs - a.uploadedAtMs);
+    }
+
+    // Fall back to querying R2 prefix
+    const prefix = `users/${cleanUserId.replace(/[^a-zA-Z0-9_-]/g, '_')}/sessions/${cleanSessionId.replace(/[^a-zA-Z0-9_-]/g, '_')}/images/`;
+    const listed = await this.r2Manager.listObjects({ bucket: 'images', prefix, maxKeys: 100 });
+    const { publicDomain, bucketName } = this.r2Manager.resolveBucket('images');
+
+    return listed.objects.map((obj) => ({
+      assetId: obj.key.split('/').pop()?.replace(/\.[^.]+$/, '') || obj.key,
+      userId: cleanUserId,
+      sessionId: cleanSessionId,
+      publicUrl: `${publicDomain}/${obj.key}`,
+      sizeBytes: obj.sizeBytes,
+      contentType: obj.key.endsWith('.webp') ? 'image/webp' : 'image/png',
+      sha256: obj.etag.replace(/"/g, ''),
+      bucket: bucketName,
+      key: obj.key,
+      uploadedAtMs: new Date(obj.lastModified).getTime()
+    }));
+  }
+
+  /**
+   * Lists all images belonging to a user across sessions.
+   */
+  async listUserImages(userId: string, options?: { limit?: number; continuationToken?: string }): Promise<{ images: UserSessionImageResult[]; nextContinuationToken?: string }> {
+    const cleanUserId = userId.trim();
+    const limit = options?.limit || 50;
+
+    const inMemory = this.assetTable.getAll()
+      .filter((a) => a.userId === cleanUserId)
+      .sort((a, b) => b.uploadedAtMs - a.uploadedAtMs)
+      .slice(0, limit);
+
+    if (inMemory.length > 0) {
+      return { images: inMemory };
+    }
+
+    const prefix = `users/${cleanUserId.replace(/[^a-zA-Z0-9_-]/g, '_')}/`;
+    const listed = await this.r2Manager.listObjects({
+      bucket: 'images',
+      prefix,
+      maxKeys: limit,
+      continuationToken: options?.continuationToken
+    });
+    const { publicDomain, bucketName } = this.r2Manager.resolveBucket('images');
+
+    const mapped = listed.objects
+      .filter(o => !o.key.endsWith('manifest.json'))
+      .map((obj) => ({
+        assetId: obj.key.split('/').pop()?.replace(/\.[^.]+$/, '') || obj.key,
+        userId: cleanUserId,
+        sessionId: obj.key.split('/')[3] || 'default',
+        publicUrl: `${publicDomain}/${obj.key}`,
+        sizeBytes: obj.sizeBytes,
+        contentType: obj.key.endsWith('.webp') ? 'image/webp' : 'image/png',
+        sha256: obj.etag.replace(/"/g, ''),
+        bucket: bucketName,
+        key: obj.key,
+        uploadedAtMs: new Date(obj.lastModified).getTime()
+      }));
+
+    return {
+      images: mapped,
+      nextContinuationToken: listed.nextContinuationToken
+    };
+  }
+
+  /**
+   * Cascade deletes all image assets and metadata for a user session from R2 and BroccoliDB.
+   */
+  async deleteSessionImages(userId: string, sessionId: string): Promise<{ deletedCount: number }> {
+    const cleanUserId = userId.trim();
+    const cleanSessionId = sessionId.trim();
+    const prefix = `users/${cleanUserId.replace(/[^a-zA-Z0-9_-]/g, '_')}/sessions/${cleanSessionId.replace(/[^a-zA-Z0-9_-]/g, '_')}/`;
+
+    const res = await this.r2Manager.deletePrefix('images', prefix);
+
+    // Evict from in-memory BroccoliDB index
+    const records = this.assetTable.getAll().filter(
+      (a) => a.userId === cleanUserId && a.sessionId === cleanSessionId
+    );
+    for (const r of records) {
+      this.assetTable.delete(r.assetId);
+    }
+
+    return { deletedCount: res.deleted.length };
+  }
+
+  /**
+   * Reads the session visual manifest from R2.
+   */
+  async getSessionManifest(userId: string, sessionId: string): Promise<SessionImageManifest | null> {
+    const key = `users/${userId.replace(/[^a-zA-Z0-9_-]/g, '_')}/sessions/${sessionId.replace(/[^a-zA-Z0-9_-]/g, '_')}/manifest.json`;
+    try {
+      const obj = await this.r2Manager.getObject('images', key);
+      return JSON.parse(obj.data.toString('utf-8')) as SessionImageManifest;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Appends or updates the session visual manifest in R2.
+   */
+  private async updateSessionManifest(userId: string, sessionId: string, newImage: UserSessionImageResult): Promise<void> {
+    const manifestKey = `users/${userId.replace(/[^a-zA-Z0-9_-]/g, '_')}/sessions/${sessionId.replace(/[^a-zA-Z0-9_-]/g, '_')}/manifest.json`;
+    let manifest: SessionImageManifest;
+
+    try {
+      const existing = await this.r2Manager.getObject('images', manifestKey);
+      manifest = JSON.parse(existing.data.toString('utf-8'));
+    } catch {
+      manifest = {
+        sessionId,
+        userId,
+        totalImages: 0,
+        totalBytes: 0,
+        createdAtMs: Date.now(),
+        updatedAtMs: Date.now(),
+        images: []
+      };
+    }
+
+    manifest.totalImages += 1;
+    manifest.totalBytes += newImage.sizeBytes;
+    manifest.updatedAtMs = Date.now();
+    manifest.images.unshift({
+      assetId: newImage.assetId,
+      key: newImage.key,
+      url: newImage.publicUrl,
+      prompt: newImage.prompt,
+      model: newImage.model,
+      size: newImage.size,
+      sizeBytes: newImage.sizeBytes,
+      createdAtMs: newImage.uploadedAtMs
+    });
+
+    // Keep manifest bounded to latest 100 images per session
+    if (manifest.images.length > 100) {
+      manifest.images = manifest.images.slice(0, 100);
+    }
+
+    await this.r2Manager.putObject({
+      bucket: 'images',
+      key: manifestKey,
+      data: Buffer.from(JSON.stringify(manifest, null, 2), 'utf-8'),
+      contentType: 'application/json',
+      cacheControl: 'no-cache'
+    });
   }
 
   /**
    * Retrieves raw asset data from Cloudflare R2.
    */
   async getAssetBuffer(key: string): Promise<Buffer> {
-    const res = await this.r2Manager.getObject('assets', key);
+    const res = await this.r2Manager.getObject('images', key);
     return res.data;
   }
 
@@ -98,12 +477,12 @@ export class GalxR2AssetAdapter {
    * Generates a presigned download URL for direct browser streaming.
    */
   getPresignedAssetUrl(key: string, expiresInSeconds = 3600): string {
-    return this.r2Manager.getPresignedDownloadUrl('assets', key, expiresInSeconds);
+    return this.r2Manager.getPresignedDownloadUrl('images', key, expiresInSeconds);
   }
 
-  public queryNatural(naturalQuery: string): R2UploadResult[] {
+  public queryNatural(naturalQuery: string): UserSessionImageResult[] {
     const parsed = BroccoliNaturalQueryParser.parse(naturalQuery, 'r2_assets');
-    return this.assetTable.query(parsed.queryOptions) as R2UploadResult[];
+    return this.assetTable.query(parsed.queryOptions) as UserSessionImageResult[];
   }
 
   public aggregate(query: DbAggregateQuery): DbAggregateResult {
@@ -112,3 +491,4 @@ export class GalxR2AssetAdapter {
 }
 
 export const galxR2Assets = GalxR2AssetAdapter.getInstance();
+

@@ -1101,6 +1101,48 @@ Invariant 20 verifies stale revision and lease rejection, holder-bound and never
 
 ---
 
+## 🎨 Live Wire Visual Synthesis Engine (`POST /v1/images/generations`)
+
+Frontier multimodal generation models executed over ChatGPT OAuth sessions require a dedicated visual synthesis gateway. Standard OpenAI Platform endpoints (`https://api.openai.com/v1/images/generations`) reject ChatGPT session tokens with `401 Unauthorized: Missing scopes: api.model.images.request`.
+
+The Always-On VM Relay (`src/relay/relay-server.ts`) bridges this boundary by dispatching requests over the live Codex WebSocket wire:
+
+### Ingress Endpoints
+- `POST /v1/images/generations`
+- `POST /images/generations`
+
+### Wire Lifecycle Protocol
+1. **Zero-Trust Auth & Rate Governance**: Validates timing-safe API keys and checks continuous token-bucket limits.
+2. **Authoritative Shard Lease**: Leases healthy shard from `relay_shards` table (SWRR quota tracking).
+3. **Dual Dispatch**:
+   - **ChatGPT OAuth Shards**: Establishes persistent WebSocket connection to `wss://chatgpt.com/backend-api/codex/responses` with headers `Authorization: Bearer <token>` and `ChatGPT-Account-Id`.
+   - **OpenAI Platform Keys (`sk-...`)**: Dispatches over HTTPS to `https://api.openai.com/v1/images/generations`.
+4. **WebSocket Tool Invocation**:
+   ```json
+   {
+     "type": "response.create",
+     "model": "gpt-5.6-terra",
+     "input": [
+       {
+         "type": "message",
+         "role": "user",
+         "content": [{ "type": "input_text", "text": "Prompt text here" }]
+       }
+     ],
+     "tools": [{ "type": "image_generation" }]
+   }
+   ```
+5. **Diffusion State Monitoring & Extraction**:
+   - Sends periodic 15s WebSocket ping frames to keep connection hot.
+   - Observes neural diffusion progression: `response.image_generation_call.generating`.
+   - Captures `response.output_item.done` containing `item.result` (lossless master PNG base64 string) and `item.revised_prompt`.
+6. **Standard OpenAI Response**: Returns standard `{ created, data: [{ b64_json, revised_prompt }], model }` schema.
+
+### Downstream CDN Mirroring & R2 Session Partitioning
+Downstream orchestrators (`GalxModelRouter.ts`) intercept the multi-megabyte base64 string, stream it into Cloudflare R2 partitioned under `users/{userId}/sessions/{sessionId}/images/{imageId}.png`, update the session manifest (`manifest.json`), and enrich the client response with a permanent CDN URL (`https://assets.galx.ai/...`) and lightweight SVG Data-URI Low-Quality Image Placeholder (LQIP).
+
+---
+
 ## Quick Reference: Operational Cheat Sheet
 
 ```bash

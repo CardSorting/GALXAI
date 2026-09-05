@@ -23,6 +23,7 @@ import { GalxPrivacyComplianceEngine } from '../privacy/GalxPrivacyComplianceEng
 import { GalxZDRProtocol } from '../privacy/GalxZDRProtocol';
 import { GalxAuthEngine } from '../auth/GalxAuthEngine';
 import { GalxSeatTierEngine } from '../subscription/GalxSeatTierEngine';
+import { GalxR2AssetAdapter } from '../../workers/cloudflare/GalxR2AssetAdapter';
 
 export interface RouteChatOptions {
   request: ChatCompletionRequest;
@@ -934,6 +935,65 @@ export class GalxModelRouter {
         shardId: lease.shardId,
         statusCode: 200
       });
+
+      // Mirror & ingest raw image payloads to Cloudflare R2 partitioned by user and session
+      const effectiveSessionId =
+        sanitizedRequest.sessionId ||
+        this.extractHeaderValue(incomingHeaders, 'x-galx-session-id') ||
+        this.extractHeaderValue(incomingHeaders, 'x-session-id') ||
+        'default';
+
+      const r2Adapter = GalxR2AssetAdapter.getInstance();
+      for (const item of result.data) {
+        try {
+          let imageSource: Buffer | string | undefined;
+          if (item.b64_json) {
+            imageSource = Buffer.from(item.b64_json, 'base64');
+          } else if (item.url && !item.url.startsWith('https://assets.galx.ai')) {
+            imageSource = item.url;
+          }
+
+          if (imageSource) {
+            const uploaded = await r2Adapter.uploadUserSessionImage({
+              userId: userId || 'anonymous',
+              sessionId: effectiveSessionId,
+              data: imageSource,
+              contentType: 'image/png',
+              prompt: sanitizedRequest.prompt || '',
+              revisedPrompt: item.revised_prompt,
+              model: modelSpec.id,
+              size: sanitizedRequest.size || '1024x1024',
+              quality: sanitizedRequest.quality || 'standard',
+              metadata: {
+                prompt: sanitizedRequest.prompt || '',
+                revisedPrompt: item.revised_prompt || '',
+                model: modelSpec.id,
+                dimensions: sanitizedRequest.size || '1024x1024',
+                quality: sanitizedRequest.quality || 'standard',
+                requestId,
+              },
+            });
+
+            item.asset_id = uploaded.assetId;
+            item.r2_key = uploaded.key;
+            item.r2_url = uploaded.publicUrl;
+            item.user_id = userId || 'anonymous';
+            item.session_id = effectiveSessionId;
+            item.content_type = 'image/png';
+            item.size_bytes = uploaded.sizeBytes;
+            item.sha256 = uploaded.sha256;
+            item.lqip = uploaded.lqipDataUri;
+
+            // Default to permanent CDN URL unless caller specifically required b64_json
+            if (sanitizedRequest.response_format !== 'b64_json') {
+              item.url = uploaded.publicUrl;
+              delete item.b64_json;
+            }
+          }
+        } catch (r2Err: any) {
+          console.warn(`[GalxModelRouter] Failed to mirror image to R2: ${r2Err.message}`);
+        }
+      }
 
       // Completely scrub shardId from client-facing visual synthesis response
       const { shardId: _scrubbedShard, ...publicResult } = result;

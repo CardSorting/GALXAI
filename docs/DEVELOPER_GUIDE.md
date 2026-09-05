@@ -349,12 +349,20 @@ const models = await galxDb.cache.getOrFetch('models:catalog', async () => {
   return ['gpt-5.6-sol', 'x-ai/grok-4.5'];
 }, { ttlMs: 60000 });
 
-// Zero-Egress Cloudflare R2 Multimodal Asset Ingestion
-const asset = await galxDb.assets.uploadAsset({
+// Zero-Egress Cloudflare R2 Multimodal User & Session Asset Ingestion with Progressive LQIP
+const asset = await galxDb.assets.uploadUserSessionImage({
+  userId: 'usr_dev_123',
+  sessionId: 'sess_canvas_01',
   data: Buffer.from('...image_bytes...'),
   contentType: 'image/png',
-  folder: 'dalle_generations'
+  prompt: 'Cinematic wide-angle view of a cybernetic space station',
+  revisedPrompt: 'A highly detailed rendering of a modular orbital outpost...',
+  model: 'openai-gpt-image-2',
+  aspectRatio: '16:9',
+  size: '1792x1024'
 });
+// asset.publicUrl -> "https://assets.galx.ai/users/usr_dev_123/sessions/sess_canvas_01/images/img_1788620541677_b68da3a9.png"
+// asset.lqipDataUri -> "data:image/svg+xml;utf8,%3Csvg..." (Dynamic SVG blur placeholder)
 
 // Cloudflare Durable Object Multi-Agent Swarm Coordinator
 const swarm = galxDb.createSwarmCoordinator('swarm_777', 'Market Research');
@@ -403,6 +411,488 @@ galx.use(createPrivacyShieldPlugin({
 const posture = galx.compliance.getPostureReport();
 const evidenceDossier = galx.compliance.getEvidenceDossier();
 console.log(`SOC2 Posture Score: ${posture.overallPostureScore}% (Signed: ${evidenceDossier.cryptographicSignatureSha256})`);
+```
+
+---
+
+## 🎨 Frontend Visual Synthesis & Session Media Management
+
+Visual synthesis in GALXAI is built for high-velocity frontend integration. Unlike text completions that stream tiny text chunks, image synthesis yields multi-megabyte lossless assets (1 MB to 4 MB). To eliminate blank screens, layout thrashing, and high bandwidth costs, GALXAI implements:
+1. **Always-On VM Relay Execution**: Routes prompts across native ChatGPT Codex WebSockets without failing on REST scope restrictions.
+2. **Zero-Egress Cloudflare R2 Session Partitioning**: Automatically mirrors base64 payloads to `https://assets.galx.ai/users/{userId}/sessions/{sessionId}/images/{imageId}.png`.
+3. **Dynamic Low-Quality Image Placeholders (LQIP)**: Returns inline, vectorized SVG blur data URIs (`lqip`) directly in the JSON response for instant client rendering.
+4. **Session Visual Manifests**: Maintains atomic `manifest.json` aggregations per session for sub-millisecond gallery loading.
+5. **Atomic Cascade Purge**: Enables one-click cleanup of all session visual assets across R2.
+
+---
+
+### 1. Production-Grade React 19 / Next.js 15 Client Component (`GalxImageGenerator.tsx`)
+
+This component demonstrates progressive LQIP blur-up, session binding, aspect-ratio container preservation (zero Cumulative Layout Shift), retry handling, and download shortcuts:
+
+```tsx
+'use client';
+
+import React, { useState } from 'react';
+
+interface GenerationResult {
+  url: string;
+  r2_url: string;
+  lqip: string;
+  asset_id: string;
+  revised_prompt?: string;
+}
+
+interface ImageGeneratorProps {
+  sessionId?: string;
+  defaultAspectRatio?: '16:9' | '9:16' | '1:1' | '4:3' | '3:2';
+  onGenerated?: (result: GenerationResult) => void;
+}
+
+export function GalxImageGenerator({
+  sessionId = 'session_default',
+  defaultAspectRatio = '16:9',
+  onGenerated,
+}: ImageGeneratorProps) {
+  const [prompt, setPrompt] = useState('');
+  const [aspectRatio, setAspectRatio] = useState(defaultAspectRatio);
+  const [loading, setLoading] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [result, setResult] = useState<GenerationResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Derive CSS aspect ratio to eliminate layout shift
+  const aspectClass = {
+    '16:9': 'aspect-[16/9]',
+    '9:16': 'aspect-[9/16]',
+    '1:1': 'aspect-square',
+    '4:3': 'aspect-[4/3]',
+    '3:2': 'aspect-[3/2]',
+  }[aspectRatio];
+
+  async function handleGenerate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!prompt.trim() || loading) return;
+
+    setLoading(true);
+    setError(null);
+    setImageLoaded(false);
+
+    try {
+      const response = await fetch('/api/images/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-galx-session-id': sessionId,
+        },
+        body: JSON.stringify({
+          prompt,
+          aspect_ratio: aspectRatio,
+          model: 'openai-gpt-image-2',
+          sessionId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errPayload = await response.json().catch(() => ({}));
+        throw new Error(errPayload.error?.message || `HTTP ${response.status}: Failed to generate`);
+      }
+
+      const json = await response.json();
+      const generated = json.data[0];
+      setResult(generated);
+      onGenerated?.(generated);
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="w-full max-w-3xl mx-auto p-6 rounded-2xl bg-zinc-900 border border-zinc-800 text-zinc-100 shadow-2xl">
+      <form onSubmit={handleGenerate} className="space-y-4">
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+            Visual Synthesis Prompt
+          </label>
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Describe your scene in rich detail (e.g. Cyberpunk metropolis at dusk with neon reflections)..."
+            rows={3}
+            className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors text-sm placeholder-zinc-500 resize-none"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-zinc-400 font-medium">Aspect Ratio:</span>
+            {(['16:9', '9:16', '1:1', '4:3', '3:2'] as const).map((ratio) => (
+              <button
+                key={ratio}
+                type="button"
+                onClick={() => setAspectRatio(ratio)}
+                className={`px-2.5 py-1 text-xs rounded-lg font-mono transition-all ${
+                  aspectRatio === ratio
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                }`}
+              >
+                {ratio}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading || !prompt.trim()}
+            className="px-6 py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium text-sm transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
+          >
+            {loading ? 'Synthesizing...' : 'Generate Image'}
+          </button>
+        </div>
+      </form>
+
+      {error && (
+        <div className="mt-4 p-3.5 rounded-xl bg-red-950/50 border border-red-800/50 text-red-200 text-sm">
+          {error}
+        </div>
+      )}
+
+      {/* Visual Canvas with Progressive LQIP Blur-Up */}
+      {(loading || result) && (
+        <div className={`relative mt-6 w-full ${aspectClass} rounded-xl overflow-hidden bg-zinc-950 border border-zinc-800 transition-all`}>
+          {loading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/80 backdrop-blur-sm z-20">
+              <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-3" />
+              <p className="text-xs text-zinc-400 font-mono tracking-wide animate-pulse">
+                Synthesizing via Always-On Relay & R2 CDN...
+              </p>
+            </div>
+          )}
+
+          {result && (
+            <>
+              {/* Layer 1: Instant SVG LQIP Blur Placeholder */}
+              <img
+                src={result.lqip}
+                alt="Loading preview"
+                aria-hidden="true"
+                className={`absolute inset-0 w-full h-full object-cover filter blur-xl scale-105 transition-opacity duration-700 ${
+                  imageLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                }`}
+              />
+
+              {/* Layer 2: Sharp R2 CDN Master Image */}
+              <img
+                src={result.r2_url || result.url}
+                alt={result.revised_prompt || prompt}
+                onLoad={() => setImageLoaded(true)}
+                className={`relative w-full h-full object-cover transition-opacity duration-700 z-10 ${
+                  imageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+
+              {/* Overlay Metadata & Action Bar */}
+              {imageLoaded && (
+                <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-20 flex items-center justify-between text-xs text-zinc-200">
+                  <span className="font-mono text-[11px] truncate max-w-md">
+                    {result.asset_id}
+                  </span>
+                  <a
+                    href={result.r2_url || result.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    download
+                    className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur text-white transition-colors"
+                  >
+                    Open Lossless PNG ↗
+                  </a>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+### 2. Next.js 15 Backend Route Handler (`app/api/images/generate/route.ts`)
+
+Proxy client requests safely while preserving session context and adding idempotency:
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const sessionId = req.headers.get('x-galx-session-id') || body.sessionId || 'session_default';
+    const idempotencyKey = req.headers.get('idempotency-key') || crypto.randomUUID();
+
+    // Call GALXAI Visual Synthesis Gateway
+    const response = await fetch('https://api.galx.ai/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GALXAI_API_KEY}`,
+        'x-galx-session-id': sessionId,
+        'Idempotency-Key': idempotencyKey,
+      },
+      body: JSON.stringify({
+        model: body.model || 'openai-gpt-image-2',
+        prompt: body.prompt,
+        aspect_ratio: body.aspect_ratio || '16:9',
+        quality: body.quality || 'hd',
+        sessionId,
+      }),
+    });
+
+    const data = await response.json();
+    return NextResponse.json(data, { status: response.status });
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: { message: error.message || 'Internal Server Error' } },
+      { status: 500 }
+    );
+  }
+}
+```
+
+---
+
+### 3. Next.js 15 Server Action Alternative (`actions/generate-image.ts`)
+
+If you prefer Server Actions over Route Handlers:
+
+```typescript
+'use server';
+
+export async function generateImageAction(formData: {
+  prompt: string;
+  aspectRatio?: '16:9' | '9:16' | '1:1' | '4:3' | '3:2';
+  sessionId?: string;
+}) {
+  const apiKey = process.env.GALXAI_API_KEY;
+  if (!apiKey) throw new Error('Missing GALXAI_API_KEY');
+
+  const sessionId = formData.sessionId || 'session_default';
+
+  const res = await fetch('https://api.galx.ai/v1/images/generations', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'x-galx-session-id': sessionId,
+      'Idempotency-Key': crypto.randomUUID(),
+    },
+    body: JSON.stringify({
+      model: 'openai-gpt-image-2',
+      prompt: formData.prompt,
+      aspect_ratio: formData.aspectRatio || '16:9',
+      quality: 'hd',
+      sessionId,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${res.status}`);
+  }
+
+  return res.json();
+}
+```
+
+---
+
+### 4. Official OpenAI SDK Drop-In (Browser or Server)
+
+If your application already uses the standard `openai` npm package:
+
+```typescript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  baseURL: 'https://api.galx.ai/v1',
+  apiKey: process.env.GALXAI_API_KEY,
+  defaultHeaders: {
+    'x-galx-session-id': 'session_interactive_42',
+  },
+});
+
+// Standard OpenAI visual synthesis call:
+const response = await client.images.generate({
+  model: 'openai-gpt-image-2',
+  prompt: 'A hyperrealistic mechanical clockwork humming bird',
+  // @ts-ignore - GALXAI accepts declarative aspect_ratio or standard size
+  aspect_ratio: '16:9',
+  quality: 'hd',
+});
+
+// Access permanent R2 CDN URL & instant LQIP blur placeholder:
+const image = response.data[0];
+console.log('CDN URL:', image.url);
+console.log('Permanent R2:', (image as any).r2_url);
+console.log('SVG LQIP:', (image as any).lqip);
+```
+
+---
+
+### 5. Session Visual Gallery React Component (`GalxSessionGallery.tsx`)
+
+Display all visual media generated during a multi-turn conversation or agent task:
+
+```tsx
+'use client';
+
+import React, { useEffect, useState } from 'react';
+
+interface SessionImageItem {
+  assetId: string;
+  key: string;
+  publicUrl: string;
+  sizeBytes: number;
+  contentType: string;
+  lqipDataUri?: string;
+  createdAtMs?: number;
+}
+
+interface SessionManifest {
+  sessionId: string;
+  userId: string;
+  totalImages: number;
+  totalBytes: number;
+  createdAtMs: number;
+  updatedAtMs: number;
+}
+
+export function GalxSessionGallery({ sessionId }: { sessionId: string }) {
+  const [images, setImages] = useState<SessionImageItem[]>([]);
+  const [manifest, setManifest] = useState<SessionManifest | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  async function loadGallery() {
+    setLoading(true);
+    try {
+      const res = await fetch(`/v1/images/sessions/${sessionId}`);
+      if (res.ok) {
+        const json = await res.json();
+        setImages(json.data || []);
+        setManifest(json.manifest || null);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (sessionId) loadGallery();
+  }, [sessionId]);
+
+  if (loading) {
+    return <div className="p-4 text-xs font-mono text-zinc-500 animate-pulse">Loading session gallery...</div>;
+  }
+
+  if (images.length === 0) {
+    return <div className="p-4 text-xs text-zinc-500">No images generated in this session yet.</div>;
+  }
+
+  const totalMb = manifest ? (manifest.totalBytes / (1024 * 1024)).toFixed(2) : '0';
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between text-xs text-zinc-400 border-b border-zinc-800 pb-2">
+        <span>Session Gallery ({manifest?.totalImages || images.length} assets · {totalMb} MB)</span>
+        <button onClick={loadGallery} className="hover:text-zinc-200">Refresh ↻</button>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        {images.map((img) => (
+          <div key={img.assetId} className="group relative aspect-square rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800">
+            {img.lqipDataUri && (
+              <img
+                src={img.lqipDataUri}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover filter blur-sm scale-105"
+              />
+            )}
+            <img
+              src={img.publicUrl}
+              alt=""
+              loading="lazy"
+              className="relative w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 z-10"
+            />
+            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-20">
+              <a
+                href={img.publicUrl}
+                target="_blank"
+                rel="noreferrer"
+                download
+                className="px-2.5 py-1 text-xs bg-white/20 hover:bg-white/30 rounded-lg text-white"
+              >
+                Download
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+### 6. Atomic Cascade Purge Component (`PurgeSessionMediaButton.tsx`)
+
+Delete all session assets from Cloudflare R2 with instant feedback:
+
+```tsx
+'use client';
+
+import React, { useState } from 'react';
+
+export function PurgeSessionMediaButton({
+  sessionId,
+  onPurged,
+}: {
+  sessionId: string;
+  onPurged?: () => void;
+}) {
+  const [purging, setPurging] = useState(false);
+
+  async function handlePurge() {
+    if (!confirm('Are you sure you want to permanently delete all images in this session?')) return;
+
+    setPurging(true);
+    try {
+      const res = await fetch(`/v1/images/sessions/${sessionId}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        onPurged?.();
+      }
+    } finally {
+      setPurging(false);
+    }
+  }
+
+  return (
+    <button
+      onClick={handlePurge}
+      disabled={purging}
+      className="px-3 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 border border-red-800/40 text-red-300 text-xs font-medium transition-colors disabled:opacity-50"
+    >
+      {purging ? 'Purging...' : 'Purge Session Media'}
+    </button>
+  );
+}
 ```
 
 ---

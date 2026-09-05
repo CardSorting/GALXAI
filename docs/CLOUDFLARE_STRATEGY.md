@@ -97,8 +97,11 @@ flowchart TD
 
 ### Pillar 3: Zero-Egress Multimodal Storage (Cloudflare R2 + CDN)
 - **Domain**: `assets.galx.ai`
-- **Mechanism**: Large visual generation outputs (`openai-gpt-image-2`, `openai-gpt-image-1.5`) and synthesized audio buffers are streamed straight to Cloudflare R2 via `GalxR2AssetAdapter`.
-- **Database Optimization**: Supabase PostgreSQL only stores compact metadata URIs (e.g. `https://assets.galx.ai/generations/asset_123.webp`), keeping database size minimal.
+- **Chronological User & Session Partitioning**: Large visual generation outputs (`openai-gpt-image-2`, `openai-gpt-image-1.5`) and synthesized audio buffers are streamed straight to Cloudflare R2 partitioned under `users/{userId}/sessions/{sessionId}/images/{imageId}.png` via `GalxR2AssetAdapter`.
+- **Session Manifest Tracking**: Real-time summary manifests (`manifest.json`) are maintained in R2 per session, tracking cumulative byte counts, asset lists, and model lineage without database scan overhead.
+- **Low-Quality Image Placeholders (LQIP)**: Dynamic SVG Data-URI placeholders are generated at upload time, embedded in responses to eliminate Cumulative Layout Shift (CLS).
+- **Atomic Cascade Purge**: When an agent session or conversational workspace is deleted, `DELETE /v1/images/sessions/:sessionId` invokes R2's batch multi-delete API (`deleteObjects`) to purge the entire folder prefix in a single round-trip, preventing orphaned storage bloat.
+- **Database Optimization**: Supabase PostgreSQL and BroccoliDB only store compact metadata records and CDN URLs (e.g. `https://assets.galx.ai/users/.../images/...png`), keeping database size minimal while serving assets with $0 egress bandwidth fees globally.
 
 ### Pillar 4: Edge Caching & Distributed Rate Limiting (Cloudflare KV + Cache API)
 - **Components**: `RATE_LIMIT_KV` & `EDGE_CACHE`
@@ -351,7 +354,9 @@ jobs:
 | **Zero-Egress SSE Stream** | `curl -N -X POST https://api.galx.ai/v1/chat/completions -H "Authorization: Bearer galx_live_..." -H "Content-Type: application/json" -d '{"model":"gpt-5.6-sol","messages":[{"role":"user","content":"Ping"}],"stream":true}'` | Immediate chunked SSE streaming (`data: {...}`) with $<25\text{ms}$ TTFT |
 | **Browser Direct GET Query** | `curl -i "https://api.galx.ai/v1/chat/completions?prompt=Ping&model=sol&api_key=galx_live_..."` | `HTTP 200` with JSON completion or SSE stream |
 | **Ollama Native Protocol** | `curl -i -X POST https://api.galx.ai/api/generate -H "Authorization: Bearer galx_live_..." -d '{"model":"sol","prompt":"Ping"}'` | `HTTP 200` with streaming NDJSON chunks and `done: true` |
-| **R2 Asset CDN** | `curl -i https://assets.galx.ai/generations/test.webp` | `HTTP 200` with `CF-Cache-Status: HIT` |
+| **R2 Session Image CDN** | `curl -i https://assets.galx.ai/users/user_showcase/sessions/session_gallery/images/img_1788620541677_b68da3a9.png` | `HTTP 200` with `CF-Cache-Status: HIT` and lossless PNG headers |
+| **Session Visual Manifest** | `curl -i https://api.galx.ai/v1/images/sessions/session_gallery -H "Authorization: Bearer galx_live_..."` | `HTTP 200` with session metadata and `manifest.json` |
+| **Session Media Purge** | `curl -X DELETE https://api.galx.ai/v1/images/sessions/session_gallery -H "Authorization: Bearer galx_live_..."` | `HTTP 200` with cascade delete summary (`deleted_count: N`) |
 | **BroccoliDB Edge Compaction** | `curl -X POST https://api.galx.ai/api/audit/broccolidb/compact -H "Authorization: Bearer galx_live_..." -H "Content-Type: application/json" -d '{"mode":"log_stream","logs":["..."]}'` | `HTTP 200` with compacted text and token savings metadata |
 | **Representation Selection & Density Gate** | `curl -X POST https://api.galx.ai/api/audit/broccolidb/compact -H "Authorization: Bearer galx_live_..." -H "Content-Type: application/json" -d '{"mode":"select_representation","text":"...","taskType":"architecture_invariants"}'` | `HTTP 200` with `decision: "BYPASS_IDENTITY"` (for $<200$ tokens) or action-safe invariant extraction (ADR 0066/0067) |
 | **Dual Rolling Seat Telemetry & Cache Hash** | `curl -i -N -X POST https://api.galx.ai/v1/chat/completions -H "Authorization: Bearer galx_live_..." -H "Content-Type: application/json" -d '{"model":"gpt-5.6-sol","messages":[{"role":"user","content":"Hi"}]}'` | `HTTP 200` with headers `x-galx-seat-5h-limit-remaining`, `x-galx-seat-weekly-limit-remaining`, and `x-galx-stable-cache-hash` |
