@@ -83,6 +83,9 @@ export interface RelayConfig {
   drainTimeoutMs: number;              // Graceful shutdown drain deadline (30s)
   idempotencyTtlMs: number;            // Prompt deduplication TTL (120s)
   snapshotIntervalMs: number;          // Periodic disk checkpoint interval (60s)
+  // Dynamic Sliding Window Quota Governance
+  quotaWindowMaxCalls: number;         // Max requests allowed in sliding window (default: 100)
+  quotaWindowDurationMs: number;       // Duration of rolling window (default: 3h / 10800000ms)
 }
 
 const DEFAULT_CONFIG: RelayConfig = {
@@ -121,6 +124,8 @@ const DEFAULT_CONFIG: RelayConfig = {
   drainTimeoutMs: parseInt(process.env.DRAIN_TIMEOUT_MS || '30000', 10),
   idempotencyTtlMs: parseInt(process.env.IDEMPOTENCY_TTL_MS || '120000', 10),
   snapshotIntervalMs: parseInt(process.env.SNAPSHOT_INTERVAL_MS || '60000', 10),
+  quotaWindowMaxCalls: parseInt(process.env.RELAY_QUOTA_WINDOW_MAX || '100', 10),
+  quotaWindowDurationMs: parseInt(process.env.RELAY_QUOTA_WINDOW_MS || String(3 * 60 * 60 * 1000), 10),
 };
 
 // ============================================================================
@@ -971,7 +976,7 @@ export class GalxaiRelayServer extends EventEmitter {
 
   private acquireHealthyShard(excludeShardId?: string): ShardRecord | null {
     const now = Date.now();
-    const threeHoursAgo = now - 3 * 3600 * 1000;
+    const windowCutoff = now - this.config.quotaWindowDurationMs;
     const allShards = this.shardsTable.getAll();
 
     let candidate: ShardRecord | null = null;
@@ -990,8 +995,8 @@ export class GalxaiRelayServer extends EventEmitter {
       }
       if (currentStatus !== 'active') continue;
 
-      const activeTimestamps = (shard.slidingWindowTimestamps || []).filter((t: number) => t > threeHoursAgo);
-      if (activeTimestamps.length >= 40) {
+      const activeTimestamps = (shard.slidingWindowTimestamps || []).filter((t: number) => t > windowCutoff);
+      if (activeTimestamps.length >= this.config.quotaWindowMaxCalls) {
         this.shardsTable.put(shard.id, { ...shard, status: 'exhausted', slidingWindowTimestamps: activeTimestamps });
         continue;
       }
@@ -2733,14 +2738,31 @@ export class GalxaiRelayServer extends EventEmitter {
       avgTtftMs: Math.round(this.metrics.totalReasoningChunksReceived > 0 ? 320 : 0),
       uptimeSec: Math.floor((Date.now() - this.metrics.startTimeMs) / 1000),
       memory: process.memoryUsage(),
-      shards: allShards.map((s) => ({
-        id: s.id,
-        accountId: s.accountId,
-        status: s.status,
-        inFlight: s.inFlight || 0,
-        consecutiveFailures: s.consecutiveFailures || 0,
-        slidingWindowUsage: s.slidingWindowTimestamps ? s.slidingWindowTimestamps.length : 0,
-      })),
+      shards: allShards.map((s) => {
+        const now = Date.now();
+        const windowDurationMs = this.config.quotaWindowDurationMs;
+        const cutoff = now - windowDurationMs;
+        const activeTimestamps = (s.slidingWindowTimestamps || []).filter((t: number) => t > cutoff);
+        const oldest = activeTimestamps.length > 0 ? Math.min(...activeTimestamps) : null;
+        const newest = activeTimestamps.length > 0 ? Math.max(...activeTimestamps) : null;
+        const nextResetMs = oldest ? Math.max(0, (oldest + windowDurationMs) - now) : null;
+
+        return {
+          id: s.id,
+          accountId: s.accountId,
+          status: s.status,
+          inFlight: s.inFlight || 0,
+          consecutiveFailures: s.consecutiveFailures || 0,
+          slidingWindowUsage: activeTimestamps.length,
+          slidingWindowCap: this.config.quotaWindowMaxCalls,
+          slidingWindowTimestamps: activeTimestamps,
+          oldestTimestampMs: oldest,
+          newestTimestampMs: newest,
+          nextResetMs,
+          windowDurationMs,
+          lastUsedAtMs: s.lastUsedAtMs || 0,
+        };
+      }),
       database: {
         jobs: this.jobsTable.count(),
         tokens: this.tokensTable.count(),

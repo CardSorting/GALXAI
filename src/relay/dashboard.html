@@ -447,6 +447,136 @@
       transition: all 0.2s;
     }
 
+    /* Dynamic Sliding Window Quota Styles */
+    .quota-container {
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      margin-top: 0.35rem;
+      box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .quota-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .quota-tier-badge {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.25);
+      color: var(--accent-cyan);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .quota-metric-row {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap: 0.5rem;
+      padding: 0.2rem 0;
+    }
+
+    .quota-metric-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .quota-metric-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .quota-metric-val {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .quota-recovery-ticker {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      padding: 0.4rem 0.6rem;
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-sm);
+    }
+
+    .quota-timeline {
+      margin-top: 0.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .quota-timeline-toggle {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0;
+      transition: color 0.2s;
+    }
+
+    .quota-timeline-toggle:hover {
+      color: var(--accent-emerald);
+    }
+
+    .quota-calls-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      padding: 0.45rem 0.6rem;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      max-height: 130px;
+      overflow-y: auto;
+    }
+
+    .quota-call-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      padding: 0.25rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .quota-call-item:last-child {
+      border-bottom: none;
+    }
+
+    .progress-bar-fill.bar-amber {
+      background: linear-gradient(90deg, #f59e0b, #f97316);
+    }
+
+    .progress-bar-fill.bar-rose {
+      background: linear-gradient(90deg, #f43f5e, #e11d48);
+    }
+
     /* Shard Fleet Grid */
     .shards-grid {
       display: grid;
@@ -1242,9 +1372,15 @@
           document.getElementById('fleet-stat-count').textContent = `${shards.length} Active Shard${shards.length === 1 ? '' : 's'}`;
         }
 
+        // Save current shards data globally for high-frequency countdown ticker
+        window.currentShardsData = shards;
+
         // Update Overview Primary Shard Meta
         if (shards.length > 0) {
           const s0 = shards[0];
+          const s0Cap = s0.slidingWindowCap || 100;
+          const s0Usage = s0.slidingWindowUsage || 0;
+          const s0Rem = Math.max(0, s0Cap - s0Usage);
           if (document.getElementById('overview-primary-shard')) {
             document.getElementById('overview-primary-shard').textContent = s0.id;
           }
@@ -1252,7 +1388,10 @@
             document.getElementById('overview-primary-account').textContent = s0.accountId || 'acc_default';
           }
           if (document.getElementById('overview-cb-status')) {
-            document.getElementById('overview-cb-status').textContent = `${s0.consecutiveFailures || 0}/3 Failures (${s0.consecutiveFailures > 0 ? 'Tripped' : 'Closed / Healthy'})`;
+            document.getElementById('overview-cb-status').innerHTML = `
+              <span>Quota: <strong>${s0Usage}/${s0Cap}</strong> calls (${s0Rem} free)</span> • 
+              <span style="color: var(--accent-emerald);">${s0.consecutiveFailures || 0}/3 Failures (Closed)</span>
+            `;
           }
         }
 
@@ -1262,11 +1401,68 @@
           shardsContainer.innerHTML = '<div style="color: var(--text-muted); padding: 1rem;">No shards currently enrolled.</div>';
         } else {
           shardsContainer.innerHTML = shards.map(s => {
+            const cap = s.slidingWindowCap || 100;
             const usage = s.slidingWindowUsage || 0;
-            const remaining = Math.max(0, 100 - usage);
-            const usagePct = Math.min(100, (usage / 100) * 100);
+            const remaining = Math.max(0, cap - usage);
+            const usagePct = Math.min(100, (usage / cap) * 100);
+            const headroomPct = ((remaining / cap) * 100).toFixed(0);
+            const velocity = (usage / 3).toFixed(1);
             const cbState = s.consecutiveFailures > 0 ? `${s.consecutiveFailures}/3 (Tripped)` : '0/3 (Closed / Healthy)';
             const cbColor = s.consecutiveFailures > 0 ? 'var(--accent-amber)' : 'var(--accent-emerald)';
+
+            // Dynamic Progress Bar Color
+            let barColorClass = '';
+            if (usagePct >= 80) barColorClass = 'bar-rose';
+            else if (usagePct >= 50) barColorClass = 'bar-amber';
+
+            // Next Slot Recovery Countdown Calculation
+            let countdownStr = 'All slots available (Idle)';
+            let resetTargetStr = '100% capacity ready';
+            let recoveryDotColor = 'var(--accent-emerald)';
+            let recoveryTextColor = 'var(--accent-emerald)';
+
+            const now = Date.now();
+            const dur = s.windowDurationMs || 10800000;
+            const activeTimestamps = (s.slidingWindowTimestamps || []).filter(t => t > (now - dur));
+
+            if (activeTimestamps.length > 0) {
+              const oldest = Math.min(...activeTimestamps);
+              const remMs = Math.max(0, (oldest + dur) - now);
+              const totalSec = Math.floor(remMs / 1000);
+              const h = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+              const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+              const sec = String(totalSec % 60).padStart(2, '0');
+              countdownStr = `${h}h ${m}m ${sec}s`;
+              recoveryDotColor = 'var(--accent-cyan)';
+              recoveryTextColor = 'var(--accent-cyan)';
+              const targetDate = new Date(oldest + dur);
+              resetTargetStr = `Frees at ${targetDate.toLocaleTimeString()}`;
+            }
+
+            // Calls List in Rolling Window
+            const callsListVisible = window[`callsListVisible_${s.id}`] ? '' : 'style="display: none;"';
+            const toggleIcon = window[`callsListVisible_${s.id}`] ? '▴' : '▾';
+
+            let callsItemsHtml = '';
+            if (activeTimestamps.length === 0) {
+              callsItemsHtml = '<div style="color: var(--text-muted); font-size: 0.7rem; padding: 0.2rem 0;">No active calls in rolling 3-hour window.</div>';
+            } else {
+              callsItemsHtml = activeTimestamps.map((t, idx) => {
+                const ageSec = Math.floor((now - t) / 1000);
+                const ageStr = ageSec < 60 ? `${ageSec}s ago` : `${Math.floor(ageSec / 60)}m ago`;
+                const remMs = Math.max(0, (t + dur) - now);
+                const remMin = Math.ceil(remMs / 60000);
+                const remStr = remMin > 60 ? `${Math.floor(remMin / 60)}h ${remMin % 60}m` : `${remMin}m`;
+                const freeTime = new Date(t + dur).toLocaleTimeString();
+                return `
+                  <div class="quota-call-item">
+                    <span>#${idx + 1} • ${new Date(t).toLocaleTimeString()} <span style="color: var(--text-muted);">(${ageStr})</span></span>
+                    <span style="color: var(--accent-cyan);">Expires in ${remStr} (${freeTime})</span>
+                  </div>
+                `;
+              }).join('');
+            }
+
             const cachedDiag = shardProbeState[s.id]?.html || `
               <span style="color: var(--accent-emerald); display: flex; align-items: center; gap: 0.4rem;">
                 <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-emerald);"></span>
@@ -1312,13 +1508,58 @@
                   </tr>
                 </table>
 
-                <div style="display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.25rem;">
-                  <div style="font-size: 0.75rem; display: flex; justify-content: space-between; color: var(--text-secondary);">
-                    <span>3-Hour Quota Window:</span>
-                    <span><strong style="color: var(--text-primary);">${usage}</strong> / 100 calls (${remaining} remaining)</span>
+                <!-- Dynamic Sliding Window Quota Module -->
+                <div class="quota-container" id="quota-box-${s.id}">
+                  <div class="quota-header">
+                    <div style="display: flex; align-items: center; gap: 0.4rem;">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                      </svg>
+                      <span style="font-weight: 600; font-size: 0.785rem; color: #fff;">3-Hour Rolling Quota Window</span>
+                    </div>
+                    <span class="quota-tier-badge" id="quota-tier-${s.id}">CAP: ${cap} CALLS</span>
                   </div>
-                  <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" style="width: ${Math.max(2, usagePct)}%;"></div>
+
+                  <!-- Usage vs Headroom Metric Row -->
+                  <div class="quota-metric-row">
+                    <div class="quota-metric-item">
+                      <span class="quota-metric-label">Window Usage</span>
+                      <span class="quota-metric-val" id="quota-val-used-${s.id}"><strong style="color: #fff; font-size: 1rem;">${usage}</strong> <span style="font-size: 0.72rem; color: var(--text-muted);">/ ${cap}</span></span>
+                    </div>
+                    <div class="quota-metric-item">
+                      <span class="quota-metric-label">Headroom</span>
+                      <span class="quota-metric-val" style="color: var(--accent-emerald);" id="quota-val-avail-${s.id}">${remaining} calls <span style="font-size: 0.72rem; color: var(--text-secondary);">(${headroomPct}%)</span></span>
+                    </div>
+                    <div class="quota-metric-item">
+                      <span class="quota-metric-label">Burn Velocity</span>
+                      <span class="quota-metric-val" style="color: var(--accent-cyan);" id="quota-val-velocity-${s.id}">${velocity} req/h</span>
+                    </div>
+                  </div>
+
+                  <!-- Animated Multi-Color Gradient Progress Bar -->
+                  <div class="progress-bar-bg" style="height: 7px;">
+                    <div class="progress-bar-fill ${barColorClass}" id="quota-bar-${s.id}" style="width: ${Math.max(2, usagePct)}%;"></div>
+                  </div>
+
+                  <!-- Real-Time Slot Recovery Countdown -->
+                  <div class="quota-recovery-ticker" id="quota-recovery-${s.id}">
+                    <div style="display: flex; align-items: center; gap: 0.4rem;">
+                      <span class="pulse-dot" style="width: 6px; height: 6px; background: ${recoveryDotColor}; box-shadow: 0 0 6px ${recoveryDotColor};"></span>
+                      <span style="color: var(--text-muted);">Next Slot Recovery:</span>
+                      <strong style="color: ${recoveryTextColor}; font-family: var(--font-mono);" id="quota-ticker-time-${s.id}">${countdownStr}</strong>
+                    </div>
+                    <span style="font-size: 0.7rem; color: var(--text-muted);" id="quota-ticker-target-${s.id}">${resetTargetStr}</span>
+                  </div>
+
+                  <!-- Interactive Call Timeline & Roll-off Log -->
+                  <div class="quota-timeline">
+                    <button class="quota-timeline-toggle" onclick="toggleCallsList('${s.id}')">
+                      <span>${toggleIcon} Inspect Sliding Window History (${activeTimestamps.length} call${activeTimestamps.length === 1 ? '' : 's'})</span>
+                    </button>
+                    <div class="quota-calls-list" id="calls-list-${s.id}" ${callsListVisible}>
+                      ${callsItemsHtml}
+                    </div>
                   </div>
                 </div>
 
@@ -1541,6 +1782,60 @@
         loadTelemetry();
       }
     }
+
+    // Toggle calls list visibility
+    function toggleCallsList(shardId) {
+      window[`callsListVisible_${shardId}`] = !window[`callsListVisible_${shardId}`];
+      const listEl = document.getElementById(`calls-list-${shardId}`);
+      if (listEl) {
+        listEl.style.display = window[`callsListVisible_${shardId}`] ? 'flex' : 'none';
+      }
+      const shard = window.currentShardsData?.find(s => s.id === shardId);
+      const count = (shard?.slidingWindowTimestamps || []).length;
+      const toggleSpan = listEl?.previousElementSibling?.querySelector('span');
+      if (toggleSpan) {
+        const icon = window[`callsListVisible_${shardId}`] ? '▴' : '▾';
+        toggleSpan.textContent = `${icon} Inspect Sliding Window History (${count} call${count === 1 ? '' : 's'})`;
+      }
+    }
+
+    // High-frequency live countdown ticker (ticks every 1s for real-time recovery countdown)
+    setInterval(() => {
+      if (!window.currentShardsData) return;
+
+      const now = Date.now();
+      window.currentShardsData.forEach(s => {
+        const dur = s.windowDurationMs || 10800000;
+        const activeTimestamps = (s.slidingWindowTimestamps || []).filter(t => t > (now - dur));
+        const tickerEl = document.getElementById(`quota-ticker-time-${s.id}`);
+        const targetEl = document.getElementById(`quota-ticker-target-${s.id}`);
+
+        if (activeTimestamps.length === 0) {
+          if (tickerEl) {
+            tickerEl.textContent = 'All slots available (Idle)';
+            tickerEl.style.color = 'var(--accent-emerald)';
+          }
+          if (targetEl) targetEl.textContent = '100% capacity ready';
+          return;
+        }
+
+        const oldest = Math.min(...activeTimestamps);
+        const remMs = Math.max(0, (oldest + dur) - now);
+        const totalSec = Math.floor(remMs / 1000);
+        const h = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+        const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+        const sec = String(totalSec % 60).padStart(2, '0');
+
+        if (tickerEl) {
+          tickerEl.textContent = `${h}h ${m}m ${sec}s`;
+          tickerEl.style.color = 'var(--accent-cyan)';
+        }
+        if (targetEl) {
+          const targetDate = new Date(oldest + dur);
+          targetEl.textContent = `Frees at ${targetDate.toLocaleTimeString()}`;
+        }
+      });
+    }, 1000);
 
     // Auto-poll telemetry every 2.5 seconds
     setInterval(loadTelemetry, 2500);
