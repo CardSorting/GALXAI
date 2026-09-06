@@ -789,4 +789,68 @@ export class GalxCryptoVault {
       updatedAtMs: Date.now()
     };
   }
+
+  /**
+   * Seals an internal shard ID into an opaque, zero-knowledge session affinity ticket.
+   * Mirrors AWS ALB / Cloudflare / Envoy opaque session tokens (aff_v1_...).
+   * Emits authenticated AES-256-GCM ciphertext so internal shard topology is never exposed on the wire.
+   */
+  static sealAffinityTicket(shardId: string, ttlMs = 86400_000): string {
+    const keyVersion = PRIMARY_KEY_VERSION;
+    const key = KEYRING.get(keyVersion);
+    if (!key) {
+      throw new Error(`Vault keyring missing primary slot '${keyVersion}'`);
+    }
+    const expiresAt = Date.now() + ttlMs;
+    const plaintext = JSON.stringify({ s: shardId, exp: expiresAt });
+    const iv = crypto.randomBytes(12);
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+    cipher.setAAD(Buffer.from(`galx-affinity-${keyVersion}`, 'utf-8'));
+    const ciphertext = Buffer.concat([cipher.update(plaintext, 'utf-8'), cipher.final()]);
+    const authTag = cipher.getAuthTag();
+
+    const packed = Buffer.concat([iv, authTag, ciphertext]);
+    return `aff_${keyVersion}_${packed.toString('base64url')}`;
+  }
+
+  /**
+   * Decrypts and verifies an opaque session affinity ticket.
+   * Returns internal shardId if valid and unexpired; returns undefined otherwise.
+   */
+  static unsealAffinityTicket(ticket: string): string | undefined {
+    if (!ticket || typeof ticket !== 'string' || !ticket.startsWith('aff_')) {
+      return undefined;
+    }
+    try {
+      const prefix = 'aff_';
+      const secondUnderscoreIdx = ticket.indexOf('_', prefix.length);
+      if (secondUnderscoreIdx === -1) return undefined;
+      const version = ticket.slice(prefix.length, secondUnderscoreIdx);
+      const rawPayload = ticket.slice(secondUnderscoreIdx + 1);
+      const key = KEYRING.get(version);
+      if (!key) return undefined;
+
+      const packed = Buffer.from(rawPayload, 'base64url');
+      if (packed.length < 28) return undefined; // 12 iv + 16 tag + min 1 byte ciphertext
+
+      const iv = packed.subarray(0, 12);
+      const authTag = packed.subarray(12, 28);
+      const ciphertext = packed.subarray(28);
+
+      const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+      decipher.setAAD(Buffer.from(`galx-affinity-${version}`, 'utf-8'));
+      decipher.setAuthTag(authTag);
+
+      const decryptedStr = Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString('utf-8');
+      const parsed = JSON.parse(decryptedStr);
+
+      if (!parsed.s || typeof parsed.exp !== 'number' || Date.now() > parsed.exp) {
+        return undefined;
+      }
+      return parsed.s;
+    } catch {
+      return undefined;
+    }
+  }
 }
+

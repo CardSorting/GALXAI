@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
+import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
 import type { ChatCompletionRequest } from '@/core/contracts/GalxContracts';
 
@@ -14,7 +15,8 @@ export async function OPTIONS() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-api-key',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-api-key, x-galx-session-affinity, X-Galx-Session-Affinity',
+      'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, X-Galx-Model-Resolved, X-Galx-Router, Retry-After',
       'Access-Control-Max-Age': '86400'
     }
   });
@@ -62,6 +64,18 @@ export async function POST(req: NextRequest) {
     const parsed = typeof result.body === 'string' ? JSON.parse(result.body) : {};
     const textOutput = parsed.choices?.[0]?.message?.content || '';
 
+    const resHeaders: Record<string, string> = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, X-Galx-Model-Resolved, X-Galx-Router, Retry-After',
+      'X-Galx-Model-Resolved': modelSpec.id,
+      'X-Galx-Router': 'apex-v2'
+    };
+    if (result.shardId) {
+      const affinityTicket = GalxCryptoVault.sealAffinityTicket(result.shardId);
+      resHeaders['X-Galx-Session-Affinity'] = affinityTicket;
+      resHeaders['Set-Cookie'] = `galx_session_affinity=${encodeURIComponent(affinityTicket)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=86400`;
+    }
+
     return NextResponse.json({
       id: `cmpl-${Date.now()}`,
       object: 'text_completion',
@@ -81,14 +95,46 @@ export async function POST(req: NextRequest) {
         total_tokens: (parsed.usage?.prompt_tokens || 20) + (parsed.usage?.completion_tokens || 50)
       }
     }, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'X-Galx-Model-Resolved': modelSpec.id,
-        'X-Galx-Router': 'apex-v2'
-      }
+      headers: resHeaders
     });
   } catch (err: any) {
-    const safeError = GalxModelRouter.sanitizeUpstreamError(err.message || 'Internal completion error');
+    const rawMessage = err?.message || 'Internal completion error';
+    const safeError = GalxModelRouter.sanitizeUpstreamError(rawMessage);
+    const isRateOrCapacity =
+      err.status === 429 ||
+      err.code === 'capacity_constrained' ||
+      rawMessage.includes('capacity_constrained') ||
+      rawMessage.includes('temporarily constrained') ||
+      rawMessage.includes('temporarily saturated') ||
+      rawMessage.includes('rate limit') ||
+      rawMessage.includes('pool_exhausted') ||
+      rawMessage.includes('429');
+
+    if (isRateOrCapacity) {
+      return NextResponse.json(
+        {
+          error: {
+            message: safeError,
+            type: 'rate_limit_error',
+            code: 'capacity_constrained'
+          }
+        },
+        {
+          status: 429,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Expose-Headers': 'Retry-After, RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, X-RateLimit-Reset, X-Galx-Request-Id, X-Galx-Router, X-Galx-Session-Affinity',
+            'Retry-After': '2',
+            'RateLimit-Limit': '60',
+            'RateLimit-Remaining': '0',
+            'RateLimit-Reset': '2',
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': String(Math.floor(Date.now() / 1000) + 2)
+          }
+        }
+      );
+    }
+
     return NextResponse.json(
       { error: { message: safeError, type: 'api_error' } },
       { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }

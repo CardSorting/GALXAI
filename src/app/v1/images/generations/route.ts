@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
+import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
 import { GalxSeatTierEngine } from '@/core/subscription/GalxSeatTierEngine';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
@@ -16,7 +17,8 @@ export async function OPTIONS() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Galx-Async, X-Galx-Queue, X-Galx-Webhook-Url, X-Galx-Priority, X-Galx-Delay-Ms, Idempotency-Key, Prefer'
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Galx-Async, X-Galx-Queue, X-Galx-Webhook-Url, X-Galx-Priority, X-Galx-Delay-Ms, Idempotency-Key, Prefer, X-Galx-Session-Affinity, x-galx-session-affinity',
+      'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, Retry-After'
     }
   });
 }
@@ -163,25 +165,43 @@ export async function POST(req: NextRequest) {
 
     const currentWindows = seatEngine.calculateRollingWindows(userId, entitlement.tier);
 
+    const resHeaders: Record<string, string> = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, Retry-After',
+      'X-Galx-ZDR-Verified': 'true',
+      'X-Galx-ZDR-Retention': '0s',
+      'X-Galx-AI-Generated': 'true',
+      'X-Galx-Seat-Tier': entitlement.tier,
+      'X-Galx-Seat-Role': entitlement.role,
+      'X-Galx-Seat-5Hour-Remaining-Pct': String(currentWindows.fiveHourWindow.percentRemaining),
+      'X-Galx-Seat-5Hour-Refresh-In': currentWindows.fiveHourWindow.refreshIn,
+      'X-Galx-Seat-Weekly-Remaining-Pct': String(currentWindows.weeklyWindow.percentRemaining),
+      'X-Galx-Seat-Weekly-Refresh-In': currentWindows.weeklyWindow.refreshIn
+    };
+    if (result.shardId) {
+      const affinityTicket = GalxCryptoVault.sealAffinityTicket(result.shardId);
+      resHeaders['X-Galx-Session-Affinity'] = affinityTicket;
+      resHeaders['Set-Cookie'] = `galx_session_affinity=${encodeURIComponent(affinityTicket)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=86400`;
+    }
+
     return NextResponse.json(result, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'X-Galx-ZDR-Verified': 'true',
-        'X-Galx-ZDR-Retention': '0s',
-        'X-Galx-AI-Generated': 'true',
-        'X-Galx-Seat-Tier': entitlement.tier,
-        'X-Galx-Seat-Role': entitlement.role,
-        'X-Galx-Seat-5Hour-Remaining-Pct': String(currentWindows.fiveHourWindow.percentRemaining),
-        'X-Galx-Seat-5Hour-Refresh-In': currentWindows.fiveHourWindow.refreshIn,
-        'X-Galx-Seat-Weekly-Remaining-Pct': String(currentWindows.weeklyWindow.percentRemaining),
-        'X-Galx-Seat-Weekly-Refresh-In': currentWindows.weeklyWindow.refreshIn
-      }
+      headers: resHeaders
     });
   } catch (error: any) {
     const rawMessage = error.message || 'Image Generation Failed';
     const message = GalxModelRouter.sanitizeUpstreamError(rawMessage);
-    const isRateLimited = rawMessage.includes('maximum simultaneous') || rawMessage.includes('Rate limit');
-    const isUnavailable = rawMessage.includes('No healthy') || rawMessage.includes('in cooldown') || rawMessage.includes('saturated');
+    const isRateLimited =
+      rawMessage.includes('maximum simultaneous') ||
+      rawMessage.includes('Rate limit') ||
+      rawMessage.includes('capacity_constrained') ||
+      rawMessage.includes('temporarily constrained') ||
+      rawMessage.includes('shards available') ||
+      rawMessage.includes('pool_exhausted');
+    const isUnavailable =
+      rawMessage.includes('No healthy') ||
+      rawMessage.includes('in cooldown') ||
+      rawMessage.includes('saturated') ||
+      rawMessage.includes('all_shards_cooldown');
     const isBadRequest = rawMessage.includes('Unsupported image model') || rawMessage.includes('Missing required');
 
     const status = isRateLimited ? 429 : isUnavailable ? 503 : isBadRequest ? 400 : 500;
@@ -198,14 +218,24 @@ export async function POST(req: NextRequest) {
         error: {
           message,
           type: errorType,
-          code: isRateLimited ? 'rate_limit_exceeded' : isUnavailable ? 'capacity_saturated' : 'image_generation_failed'
+          code: isRateLimited ? 'capacity_constrained' : isUnavailable ? 'capacity_saturated' : 'image_generation_failed'
         }
       },
       {
         status,
         headers: {
           'Access-Control-Allow-Origin': '*',
-          ...(isRateLimited ? { 'Retry-After': '1' } : {})
+          'Access-Control-Expose-Headers': 'Retry-After, RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, X-RateLimit-Reset, X-Galx-Request-Id, X-Galx-Router, X-Galx-Session-Affinity',
+          ...(isRateLimited
+            ? {
+                'Retry-After': '2',
+                'RateLimit-Limit': '60',
+                'RateLimit-Remaining': '0',
+                'RateLimit-Reset': '2',
+                'X-RateLimit-Remaining': '0',
+                'X-RateLimit-Reset': String(Math.floor(Date.now() / 1000) + 2)
+              }
+            : {})
         }
       }
     );

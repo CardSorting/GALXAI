@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxModelRouter } from '@/core/router/GalxModelRouter';
+import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
 import { OAuthRepository } from '@/lib/supabase/repositories/OAuthRepository';
 import type { ProviderType } from '@/core/contracts/GalxContracts';
 
@@ -13,7 +14,7 @@ export async function OPTIONS() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, X-Galx-Session-Affinity',
       'Access-Control-Max-Age': '86400'
     }
   });
@@ -36,7 +37,20 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json().catch(() => ({}));
-    let connectionId = body.connectionId || body.connection_id || body.shardId || auth.session?.shardId;
+    const cookieHeader = req.headers.get('cookie');
+    const cookieTicket = cookieHeader?.match(/(?:galx_session_affinity|galx_session_affinity_cors|x-galx-session-affinity|AWSALB)=([^;,\s]+)/i)?.[1];
+    const affinityTicket =
+      body.sessionAffinity ||
+      body.session_affinity ||
+      req.headers.get('x-galx-session-affinity') ||
+      req.headers.get('x-session-affinity') ||
+      (cookieTicket ? decodeURIComponent(cookieTicket) : undefined);
+    let connectionId =
+      (affinityTicket ? GalxCryptoVault.unsealAffinityTicket(affinityTicket) : undefined) ||
+      body.connectionId ||
+      body.connection_id ||
+      body.shardId ||
+      auth.session?.shardId;
 
     if (!connectionId) {
       const provider = ((body.provider as string) || auth.claims?.provider || 'openai') as ProviderType;
@@ -62,15 +76,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const freshTicket = connectionId ? GalxCryptoVault.sealAffinityTicket(connectionId) : undefined;
+
     return NextResponse.json({
       success: true,
       refreshed: true,
+      ...(freshTicket ? { sessionAffinity: freshTicket } : {}),
       message: 'Provider connection refreshed successfully'
     }, {
       headers: {
         'Access-Control-Allow-Origin': '*',
+        'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity',
         'Cache-Control': 'no-store',
-        'Pragma': 'no-cache'
+        'Pragma': 'no-cache',
+        ...(freshTicket ? {
+          'X-Galx-Session-Affinity': freshTicket,
+          'Set-Cookie': `galx_session_affinity=${encodeURIComponent(freshTicket)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=86400`
+        } : {})
       }
     });
   } catch (err: any) {

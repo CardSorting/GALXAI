@@ -356,7 +356,7 @@ export class GalxCredentialPool {
     if (this.shardRepository.isAuthorityConfigured() && !(req.idempotencyKey || req.jobId)) {
       return {
         status: 'invalid_request',
-        reason: 'Authoritative shard acquisition requires an idempotencyKey or jobId'
+        reason: 'Authoritative route acquisition requires an idempotencyKey or jobId'
       };
     }
     const candidate = this.acquireLease(req, nowMs);
@@ -389,7 +389,7 @@ export class GalxCredentialPool {
 
     if (!decision.success || !decision.leaseId || decision.fencingToken === undefined) {
       this.discardLocalLease(localLease.leaseId, nowMs);
-      const reason = decision.reason || 'PostgreSQL rejected shard work ownership';
+      const reason = decision.reason || 'Distributed capacity coordinator rejected route work ownership';
       const status: ShardAcquisitionResult['status'] = reason.startsWith('AUTHORITY_UNAVAILABLE')
         ? 'authority_unavailable'
         : reason.includes('NOT_HEALTHY') || reason.includes('PERMISSION_RETRACTED') || reason.includes('CREDENTIAL_EXPIRED')
@@ -443,7 +443,7 @@ export class GalxCredentialPool {
   /** Renews a production lease in PostgreSQL before extending its local projection. */
   async extendLeaseAuthoritatively(leaseId: string, extensionMs = 120_000): Promise<number> {
     const lease = this.activeLeases.get(leaseId);
-    if (!lease) throw new Error('Cannot renew an unknown shard lease');
+    if (!lease) throw new Error('Cannot renew an unknown route execution lease');
 
     if (this.shardRepository.isAuthorityConfigured()) {
       const decision = await this.shardRepository.extendLease({
@@ -452,7 +452,7 @@ export class GalxCredentialPool {
         extensionMs
       });
       if (!decision.success || !decision.expiresAtMs) {
-        throw new Error(decision.reason || 'PostgreSQL rejected shard lease renewal');
+        throw new Error(decision.reason || 'Distributed capacity coordinator rejected route lease renewal');
       }
       lease.expiresAtMs = decision.expiresAtMs;
       return lease.expiresAtMs;
@@ -537,7 +537,7 @@ export class GalxCredentialPool {
         success: options.success !== false
       });
       if (!decision.success) {
-        throw new Error(decision.reason || 'PostgreSQL rejected shard lease reconciliation');
+        throw new Error(decision.reason || 'Distributed capacity coordinator rejected route lease reconciliation');
       }
     }
 
@@ -568,7 +568,7 @@ export class GalxCredentialPool {
 
     if (availableAccounts.length === 0) {
       return {
-        reason: `No active credential shards available for provider '${req.provider}'${req.targetAccountId ? ` matching account '${req.targetAccountId}'` : ''}${req.targetShardId ? ` matching shard '${req.targetShardId}'` : ''}`,
+        reason: `Compute capacity is temporarily constrained for provider '${req.provider}'. Automatic failover active. Please retry shortly.`,
         status: 'pool_exhausted'
       };
     }
@@ -595,7 +595,7 @@ export class GalxCredentialPool {
 
     if (complianceEligibleAccounts.length === 0) {
       return {
-        reason: `No active ${req.provider} shards meet the required privacy compliance criteria (HIPAA BAA: ${isHipaaReq}, EU Residency: ${isEuReq}, ZDR: ${isZdrReq})`,
+        reason: `No active compute routes meet the required privacy compliance criteria (HIPAA BAA: ${isHipaaReq}, EU Residency: ${isEuReq}, ZDR: ${isZdrReq})`,
         status: 'no_compliant_shards'
       };
     }
@@ -620,7 +620,7 @@ export class GalxCredentialPool {
 
     if (candidateAccounts.length === 0) {
       return {
-        reason: `All compliant shards for provider '${req.provider}' are in cooldown, quota-exhausted, or saturated at maximum capacity`,
+        reason: `Compute capacity for provider '${req.provider}' is temporarily saturated. Automatic failover active.`,
         status: 'all_shards_cooldown',
         earliestPoolResetMs: this.getEarliestPoolResetTimeMs(req.provider, nowMs)
       };
@@ -662,7 +662,7 @@ export class GalxCredentialPool {
         const remainingCandidates = finalCandidates.filter(c => c.id !== selectedAccount.id);
         if (remainingCandidates.length === 0) {
           return {
-            reason: `Shard ${selectedAccount.id} is currently under half-open single-canary verification`,
+            reason: 'Compute route is currently undergoing health verification',
             status: 'all_shards_cooldown'
           };
         }

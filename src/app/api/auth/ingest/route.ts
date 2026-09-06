@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as crypto from 'node:crypto';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
+import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
 import type { ProviderType, ShardIsolationMode } from '@/core/contracts/GalxContracts';
 
 export const runtime = 'nodejs';
@@ -22,7 +23,7 @@ const BASE_SECURITY_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, X-Forwarded-For, X-Client-Version, X-Request-Timestamp, X-Request-Nonce, Digest, X-Digest-SHA256, Signature, Signature-Input, Idempotency-Key, X-Correlation-Id',
-  'Access-Control-Expose-Headers': 'X-Correlation-Id, Idempotent-Replay, Server-Timing, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-Security-Audit, X-Galx-Shard-Id, X-Galx-Shard-Mode',
+  'Access-Control-Expose-Headers': 'X-Correlation-Id, Idempotent-Replay, Server-Timing, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-Security-Audit, X-Galx-Session-Affinity',
   'Access-Control-Max-Age': '86400',
 };
 
@@ -370,15 +371,16 @@ export async function POST(req: NextRequest) {
       if (cached && Date.now() < cached.expiresAtMs) {
         if (cached.bodyHash === bodyHash) {
           // Exact idempotent replay
-          const cachedShardId = cached.response?.user?.shardId;
-          const cachedShardMode = cached.response?.user?.shardMode;
+          const cachedAffinity = cached.response?.user?.sessionAffinity || (cached.response?.user?.shardId ? GalxCryptoVault.sealAffinityTicket(cached.response.user.shardId) : undefined);
           return NextResponse.json(cached.response, {
             status: cached.status,
             headers: buildHeaders({
               ...rateHeaders,
               'Idempotent-Replay': 'true',
-              ...(cachedShardId ? { 'X-Galx-Shard-Id': cachedShardId } : {}),
-              ...(cachedShardMode ? { 'X-Galx-Shard-Mode': cachedShardMode } : {}),
+              ...(cachedAffinity ? { 
+                'X-Galx-Session-Affinity': cachedAffinity,
+                'Set-Cookie': `galx_session_affinity=${encodeURIComponent(cachedAffinity)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=86400`,
+              } : {}),
             }),
           });
         }
@@ -464,24 +466,37 @@ export async function POST(req: NextRequest) {
       userAgent,
     });
 
+    const shardId = result.user?.shardId;
+    const affinityTicket = shardId ? GalxCryptoVault.sealAffinityTicket(shardId) : undefined;
+
+    // Zero-Exposure Payload Sanitization: Strip internal shard topology from the public wire payload
+    const { shardId: _internalShardId, shardMode: _internalShardMode, ...cleanUser } = (result.user || {}) as any;
+    const publicResult = {
+      ...result,
+      user: {
+        ...cleanUser,
+        ...(affinityTicket ? { sessionAffinity: affinityTicket } : {}),
+      },
+    };
+
     // 15. Save to Idempotency Cache if requested
     if (idempotencyKey) {
       idempotencyCache.set(idempotencyKey, {
         bodyHash,
-        response: result,
+        response: publicResult,
         status: 200,
         expiresAtMs: Date.now() + IDEMPOTENCY_TTL_MS,
       });
     }
 
-    const shardId = result.user?.shardId;
-    const shardMode = result.user?.shardMode || mode;
-    return NextResponse.json(result, {
+    return NextResponse.json(publicResult, {
       status: 200,
       headers: buildHeaders({
         ...rateHeaders,
-        ...(shardId ? { 'X-Galx-Shard-Id': shardId } : {}),
-        ...(shardMode ? { 'X-Galx-Shard-Mode': shardMode } : {}),
+        ...(affinityTicket ? { 
+          'X-Galx-Session-Affinity': affinityTicket,
+          'Set-Cookie': `galx_session_affinity=${encodeURIComponent(affinityTicket)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=86400`,
+        } : {}),
       }),
     });
   } catch (err: any) {

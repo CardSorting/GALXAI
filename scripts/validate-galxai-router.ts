@@ -6048,6 +6048,130 @@ async function runAllTests() {
     }
   });
 
+  await test('Router Shard Affinity Fallback: Gracefully falls back when targeted affinity shard is not found', async () => {
+    const substrate = new GalxCredentialSubstrate();
+    const governor = new ContinuousTokenBucketRateGovernor();
+    const pool = new GalxCredentialPool(substrate, governor);
+    const enc = GalxCryptoVault.encryptSecret({ apiKey: 'sk-test' }, 'u_test', 'shard_live_fallback', 'openai');
+    const liveShard: GalxShardAccount = {
+      id: 'shard_live_fallback',
+      userId: 'u_test',
+      accountLabel: 'Live Shard',
+      provider: 'openai',
+      authType: 'api_key',
+      shardMode: 'pooled',
+      status: 'healthy',
+      priority: 10,
+      weight: 1,
+      fencingToken: 1,
+      apiKeyMasked: 'sk-test****',
+      encryptedSecrets: enc,
+      encryptedPayload: enc,
+      tokenBucket: governor.createDefaultBucket(),
+      stats: { totalRequestsServed: 0, totalTokensConsumed: 0, consecutiveFailures: 0 },
+      createdAtMs: Date.now(),
+      updatedAtMs: Date.now()
+    };
+    substrate.addAccount(liveShard);
+
+    // Targeted query for missing shard returns pool_exhausted
+    const failRes = pool.acquireLease({
+      userId: 'u_client',
+      jobId: 'job_strict_fail',
+      provider: 'openai',
+      targetShardId: 'shard_missing'
+    });
+    assert.strictEqual(failRes.lease, undefined);
+    assert.strictEqual(failRes.status, 'pool_exhausted');
+
+    // General pool acquisition succeeds
+    const fallbackRes = pool.acquireLease({
+      userId: 'u_client',
+      jobId: 'job_fallback_ok',
+      provider: 'openai',
+      targetShardId: undefined
+    });
+    assert.ok(fallbackRes.lease);
+    assert.notStrictEqual(fallbackRes.lease.shardId, 'shard_missing');
+    pool.releaseLease(fallbackRes.lease.leaseId, 100, true);
+  });
+
+  await test('Zero Shard Exposure: Cryptographic Session Affinity Tickets (seal & unseal)', async () => {
+    const { GalxCryptoVault } = await import('../src/core/vault/GalxCryptoVault');
+    const shardId = 'shard_1788618242838_oai';
+    const ticket = GalxCryptoVault.sealAffinityTicket(shardId, 60_000);
+    assert.ok(ticket.startsWith('aff_v1_'));
+    assert.strictEqual(ticket.includes(shardId), false, 'Opaque ticket must never leak plaintext shard ID');
+
+    const unsealed = GalxCryptoVault.unsealAffinityTicket(ticket);
+    assert.strictEqual(unsealed, shardId);
+
+    // Tampered ticket must fail gracefully
+    const tampered = ticket.slice(0, -4) + 'AAAA';
+    assert.strictEqual(GalxCryptoVault.unsealAffinityTicket(tampered), undefined);
+
+    // Expired ticket must return undefined
+    const expiredTicket = GalxCryptoVault.sealAffinityTicket(shardId, -1000);
+    assert.strictEqual(GalxCryptoVault.unsealAffinityTicket(expiredTicket), undefined);
+  });
+
+  await test('Zero Shard Exposure: Deep Error Sanitization scrubs internal infrastructure topology', async () => {
+    const { GalxModelRouter } = await import('../src/core/router/GalxModelRouter');
+    const rawLeak1 = "500 No active credential shards available for provider 'openai' matching shard '[gateway-route]'";
+    const sanitized1 = GalxModelRouter.sanitizeUpstreamError(rawLeak1);
+    assert.strictEqual(sanitized1.includes('shard'), false, 'Sanitized error must not contain "shard"');
+    assert.strictEqual(sanitized1.includes('matching shard'), false);
+    assert.strictEqual(sanitized1, 'Compute capacity is temporarily constrained for this model. Automatic failover active. Please retry shortly.');
+
+    const rawLeak2 = "pool_exhausted: All compliant shards for provider 'openai' are in cooldown";
+    const sanitized2 = GalxModelRouter.sanitizeUpstreamError(rawLeak2);
+    assert.strictEqual(sanitized2.includes('shards'), false);
+    assert.strictEqual(sanitized2, 'Compute capacity is temporarily constrained for this model. Automatic failover active. Please retry shortly.');
+  });
+
+  await test('Zero Shard Exposure: /api/auth/ingest emits X-Galx-Session-Affinity and zero raw shard headers', async () => {
+    const { POST } = await import('../src/app/api/auth/ingest/route');
+    const req = new Request('http://localhost:3000/api/auth/ingest', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        apiKey: 'sk-proj-test-verification-key-12345678901234567890',
+        mode: 'pooled',
+      }),
+    });
+
+    const res = await POST(req as any);
+    assert.strictEqual(res.status, 200);
+    // Wire headers must not contain raw shard headers
+    assert.strictEqual(res.headers.get('x-galx-shard-id'), null);
+    assert.strictEqual(res.headers.get('x-galx-shard-mode'), null);
+    // Must expose session affinity ticket
+    const affinity = res.headers.get('x-galx-session-affinity');
+    assert.ok(affinity);
+    assert.ok(affinity.startsWith('aff_v1_'));
+
+    // Wire JSON body must not contain internal shard topology
+    const body = (await res.json()) as any;
+    assert.strictEqual(body.user?.shardId, undefined, 'Wire JSON body must never expose shardId');
+    assert.strictEqual(body.user?.shardMode, undefined, 'Wire JSON body must never expose shardMode');
+    assert.ok(body.user?.sessionAffinity, 'Wire JSON body must include sessionAffinity');
+    assert.ok(body.user?.sessionAffinity.startsWith('aff_v1_'), 'sessionAffinity must be a valid sealed aff_v1_ ticket');
+  });
+
+  await test('Zero Shard Exposure: Secondary endpoints (/v1/messages, /v1/completions) map capacity errors to 429', async () => {
+    const { GalxModelRouter } = await import('../src/core/router/GalxModelRouter');
+    const capacityErr = new Error("No active credential shards available for provider 'openai' matching shard '[gateway-route]'");
+    const sanitized = GalxModelRouter.sanitizeUpstreamError(capacityErr.message);
+
+    // Verify sanitized error contains zero internal topology words
+    assert.strictEqual(sanitized.includes('shard'), false);
+    assert.strictEqual(sanitized.includes('shards'), false);
+    assert.strictEqual(sanitized.includes('[gateway-route]'), false);
+    assert.strictEqual(sanitized, 'Compute capacity is temporarily constrained for this model. Automatic failover active. Please retry shortly.');
+  });
+
   console.log('\n======================================================================');
   if (testsFailed === 0) {
     console.log(`   ALL ${testsPassed}/${testsPassed} FORENSIC VERIFICATION TESTS PASSED SUCCESSFULLY! `);

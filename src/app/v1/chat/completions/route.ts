@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
+import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxSeatTierEngine } from '@/core/subscription/GalxSeatTierEngine';
 import { GalxCommunityPoolGovernor } from '@/core/governor/GalxCommunityPoolGovernor';
@@ -551,7 +552,12 @@ export async function POST(req: NextRequest) {
     headers.set('X-Galx-Session-Mode', chatIdentity.mode);
     headers.set('X-Galx-Turn-Id', chatIdentity.turnId);
     headers.set('X-Galx-Protocol-Version', '2026-09-04');
-    headers.set('Access-Control-Expose-Headers', 'X-Galx-Request-Id, X-Galx-Conversation-Id, X-Galx-Session-Mode, X-Galx-Turn-Id, X-Galx-Protocol-Version');
+    headers.set('Access-Control-Expose-Headers', 'X-Galx-Request-Id, X-Galx-Conversation-Id, X-Galx-Session-Mode, X-Galx-Turn-Id, X-Galx-Protocol-Version, X-Galx-Session-Affinity');
+    if (result.shardId) {
+      const affinityTicket = GalxCryptoVault.sealAffinityTicket(result.shardId);
+      headers.set('X-Galx-Session-Affinity', affinityTicket);
+      headers.set('Set-Cookie', `galx_session_affinity=${encodeURIComponent(affinityTicket)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=86400`);
+    }
     headers.set(
       'X-Galx-Data-Policy',
       conversationId
@@ -877,19 +883,40 @@ export async function POST(req: NextRequest) {
       message.toLowerCase().includes('unauthorized') ||
       message.toLowerCase().includes('authentication in header') ||
       rawMessage.includes('401');
-    const isUnavailable = message.includes('No healthy') || message.includes('in cooldown') || message.includes('overloaded') || message.includes('temporarily constrained');
+    const isCapacityConstrained =
+      message.includes('temporarily constrained') ||
+      rawMessage.includes('pool_exhausted') ||
+      rawMessage.includes('shards available') ||
+      rawMessage.includes('credential shards') ||
+      rawMessage.includes('all_shards_cooldown') ||
+      rawMessage.includes('matching shard') ||
+      message.includes('in cooldown');
+    const isUnavailable =
+      message.includes('No healthy') ||
+      message.includes('overloaded') ||
+      rawMessage.includes('compute_capacity_unavailable');
     const isBadRequest = rawMessage.includes('Unsupported model') || rawMessage.includes('Missing required');
 
-    const status = isAuthError ? 401 : isRateLimited ? 429 : isUnavailable ? 503 : isBadRequest ? 400 : 500;
+    const status = isAuthError
+      ? 401
+      : (isRateLimited || isCapacityConstrained)
+      ? 429
+      : isUnavailable
+      ? 503
+      : isBadRequest
+      ? 400
+      : 500;
+
     const errorType = isAuthError
       ? 'authentication_error'
-      : isRateLimited
+      : (isRateLimited || isCapacityConstrained)
       ? 'rate_limit_error'
       : isUnavailable
       ? 'service_unavailable_error'
       : isBadRequest
       ? 'invalid_request_error'
       : 'api_error';
+
     const isUsageLimit = message.toLowerCase().includes('usage limit');
 
     return NextResponse.json(
@@ -901,6 +928,8 @@ export async function POST(req: NextRequest) {
             ? 'upstream_auth_failed'
             : isUsageLimit
             ? 'usage_limit_exceeded'
+            : isCapacityConstrained
+            ? 'capacity_constrained'
             : isRateLimited
             ? 'rate_limit_exceeded'
             : isUnavailable
@@ -912,7 +941,17 @@ export async function POST(req: NextRequest) {
         status,
         headers: {
           'Access-Control-Allow-Origin': '*',
-          ...(isRateLimited ? { 'Retry-After': '1' } : {})
+          'Access-Control-Expose-Headers': 'Retry-After, RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, X-RateLimit-Reset, X-Galx-Request-Id, X-Galx-Router, X-Galx-Session-Affinity',
+          ...(isRateLimited || isCapacityConstrained
+            ? {
+                'Retry-After': '2',
+                'RateLimit-Limit': '60',
+                'RateLimit-Remaining': '0',
+                'RateLimit-Reset': '2',
+                'X-RateLimit-Remaining': '0',
+                'X-RateLimit-Reset': String(Math.floor(Date.now() / 1000) + 2)
+              }
+            : {})
         }
       }
     );

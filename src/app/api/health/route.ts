@@ -77,7 +77,7 @@ export async function GET() {
             url: relayUrl,
             rttMs: Date.now() - start,
             version: data.version,
-            shards: data.shards,
+            activeRoutes: typeof data.shards === 'number' ? data.shards : (Array.isArray(data.shards) ? data.shards.length : (data.activeRoutes ?? data.routes)),
             jobs: data.jobs,
             memory: data.memory
           };

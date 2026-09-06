@@ -24,6 +24,7 @@ import { GalxZDRProtocol } from '../privacy/GalxZDRProtocol';
 import { GalxAuthEngine } from '../auth/GalxAuthEngine';
 import { GalxSeatTierEngine } from '../subscription/GalxSeatTierEngine';
 import { GalxR2AssetAdapter } from '../../workers/cloudflare/GalxR2AssetAdapter';
+import { BroccoliConsistentHashRing } from '../broccolidb/broccolidb-consistent-hash-ring';
 
 export interface RouteChatOptions {
   request: ChatCompletionRequest;
@@ -114,6 +115,22 @@ export class GalxModelRouter {
       .replace(/(?:shard|codex|lease|acc)_[a-zA-Z0-9_-]+/gi, '[gateway-route]')
       .replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, '[redacted-ip]');
 
+    // Scrub internal shard / pooling / capacity terminology
+    if (
+      sanitized.toLowerCase().includes('credential shard') ||
+      sanitized.toLowerCase().includes('matching shard') ||
+      sanitized.toLowerCase().includes('active credential') ||
+      sanitized.toLowerCase().includes('pool_exhausted') ||
+      sanitized.toLowerCase().includes('router_dispatch_failed') ||
+      sanitized.toLowerCase().includes('all compliant shards') ||
+      sanitized.toLowerCase().includes('no healthy') ||
+      sanitized.toLowerCase().includes('capacity is temporarily constrained') ||
+      sanitized.toLowerCase().includes('temporarily saturated') ||
+      sanitized.toLowerCase().includes('shards available')
+    ) {
+      return 'Compute capacity is temporarily constrained for this model. Automatic failover active. Please retry shortly.';
+    }
+
     if (sanitized.toLowerCase().includes('usage limit') || sanitized.toLowerCase().includes('resets at') || sanitized.toLowerCase().includes('try again at')) {
       return sanitized;
     }
@@ -124,7 +141,71 @@ export class GalxModelRouter {
       return 'Compute origin is temporarily overloaded. Please back off and retry.';
     }
 
+    // Clean any remaining internal routing artifacts or infrastructure terminology
+    sanitized = sanitized
+      .replace(/\[gateway-route\]/g, 'route')
+      .replace(/\bmatching shard\b/gi, 'matching route')
+      .replace(/\b(?:credential shards?|compliant shards?)\b/gi, 'compute capacity')
+      .replace(/\b(?:shard|shards)\b/gi, 'route')
+      .replace(/\s+/g, ' ')
+      .trim();
+
     return sanitized;
+  }
+
+  /**
+   * Resolves session affinity:
+   * 1. If an opaque session affinity ticket (aff_v1_...) is present, decrypts and validates it.
+   * 2. Server-side consistent hashing across available shards using (conversationId || userId) for prompt cache locality.
+   * 3. Fallback to legacy shard header if present (internal tests/ops).
+   */
+  private resolveAffinityShard(
+    provider: ProviderType,
+    incomingHeaders?: Headers | Record<string, string | null | undefined>,
+    conversationId?: string,
+    userId?: string
+  ): string | undefined {
+    // 1. Check opaque ticket header or cookie (mirrors AWSALB / cf-ray)
+    let affinityTicket =
+      this.extractHeaderValue(incomingHeaders, 'x-galx-session-affinity') ||
+      this.extractHeaderValue(incomingHeaders, 'x-session-affinity');
+
+    if (!affinityTicket) {
+      const cookieHeader = this.extractHeaderValue(incomingHeaders, 'cookie');
+      if (cookieHeader) {
+        const match = cookieHeader.match(/(?:galx_session_affinity|x-galx-session-affinity|AWSALB)=([^;,\s]+)/i);
+        if (match && match[1]) {
+          affinityTicket = decodeURIComponent(match[1]);
+        }
+      }
+    }
+
+    if (affinityTicket) {
+      const unsealed = GalxCryptoVault.unsealAffinityTicket(affinityTicket);
+      if (unsealed) {
+        return unsealed;
+      }
+    }
+
+    // 2. Server-Side Consistent Hash Ring for Prompt Cache Locality
+    // Deterministically maps conversationId or userId across available healthy shards
+    const routingKey = conversationId || (userId && userId !== 'anonymous' ? userId : undefined);
+    if (routingKey) {
+      const accounts = this.substrate.listAccounts(undefined, provider);
+      if (accounts.length > 0) {
+        const ring = new BroccoliConsistentHashRing(64);
+        for (const acc of accounts) {
+          ring.addNode({ nodeId: acc.id, weight: 1.0 });
+        }
+        const mappedNode = ring.getNode(routingKey);
+        if (mappedNode) {
+          return mappedNode.nodeId;
+        }
+      }
+    }
+
+    // 3. Fallback to legacy shard header if present (internal tests/ops)
+    return this.extractHeaderValue(incomingHeaders, 'x-galx-shard-id') || undefined;
   }
 
   /**
@@ -167,6 +248,11 @@ export class GalxModelRouter {
       privacyPolicy
     );
 
+    const conversationId =
+      this.extractHeaderValue(incomingHeaders, 'x-galx-conversation-id') ||
+      (options.request as any).conversationId ||
+      undefined;
+
     const maxRetries = 3;
     let lastError: any = null;
 
@@ -185,9 +271,10 @@ export class GalxModelRouter {
         undefined;
 
       const targetShardId =
-        this.extractHeaderValue(incomingHeaders, 'x-galx-shard-id') ||
         (options.request as any).shardId ||
-        undefined;
+        this.resolveAffinityShard(provider, incomingHeaders, conversationId, userId);
+
+      const isStrictShard = this.extractHeaderValue(incomingHeaders, 'x-galx-strict-shard') === 'true';
 
       if (attempt > 1) {
         // Full decorrelated jitter backoff to desynchronize retry stampedes across workers
@@ -223,13 +310,40 @@ export class GalxModelRouter {
         acqResult = await acqResult.queuedPromise;
       }
 
+      // Gracefully fall back to any available healthy shard in the pool if affinity shard is unavailable
+      if (!acqResult.lease && targetShardId && !isStrictShard) {
+        console.warn(`[GalxModelRouter] Targeted affinity route unavailable. Gracefully falling back to available pool routes for provider '${provider}'...`);
+        acqResult = await this.pool.acquireLeaseAuthoritatively({
+          userId,
+          jobId: `${leaseAttemptId}:fallback`,
+          provider,
+          targetModel: modelSpec.id,
+          isPriorityUser,
+          estimatedTokens,
+          leaseTtlMs: 120_000,
+          privacyProfile: privacyPolicy.profile,
+          hipaaRequired: privacyPolicy.hipaaEnabled,
+          dataResidency: privacyPolicy.dataResidency,
+          zdrRequired: privacyPolicy.zdrEnabled,
+          targetAccountId,
+          targetShardId: undefined,
+          queueIfExhausted: true,
+          maxQueueWaitMs: 4000
+        });
+
+        if (acqResult.status === 'queued' && acqResult.queuedPromise) {
+          acqResult = await acqResult.queuedPromise;
+        }
+      }
+
       if (!acqResult.lease) {
         if (lastError) {
           throw lastError;
         }
-        throw new Error(
-          acqResult.reason || `No healthy ${provider} shard credentials currently available matching privacy policy`
+        const cleanMsg = GalxModelRouter.sanitizeUpstreamError(
+          acqResult.reason || `Compute capacity is temporarily constrained for this model.`
         );
+        throw new Error(cleanMsg);
       }
 
       const lease = acqResult.lease;
@@ -366,6 +480,9 @@ export class GalxModelRouter {
         responseHeaders.set('x-galx-routing-latency-ms', String(latencyMs));
         responseHeaders.set('x-galx-model', modelSpec.id);
         responseHeaders.set('x-galx-request-id', requestId);
+        const affinityTicket = GalxCryptoVault.sealAffinityTicket(lease.shardId);
+        responseHeaders.set('X-Galx-Session-Affinity', affinityTicket);
+        responseHeaders.set('Set-Cookie', `galx_session_affinity=${encodeURIComponent(affinityTicket)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=86400`);
 
         // 7. Handle Streaming Response with On-the-Fly SHA-256 Rolling Digest Hasher
         if (isStream && response.body) {
@@ -738,8 +855,9 @@ export class GalxModelRouter {
           }
         } catch (err: any) {
           stopLeaseRenewal();
-          await releaseOnce(false, err.message || 'Stream error').catch(() => undefined);
-          controller.error(err);
+          const cleanErrMsg = GalxModelRouter.sanitizeUpstreamError(err?.message || 'Stream error');
+          await releaseOnce(false, cleanErrMsg).catch(() => undefined);
+          controller.error(new Error(cleanErrMsg));
         }
       },
       async cancel(reason) {
@@ -781,15 +899,16 @@ export class GalxModelRouter {
       undefined;
 
     const targetShardId =
-      this.extractHeaderValue(incomingHeaders, 'x-galx-shard-id') ||
       (options.request as any).shardId ||
-      undefined;
+      this.resolveAffinityShard(provider, incomingHeaders, undefined, userId);
+
+    const isStrictShard = this.extractHeaderValue(incomingHeaders, 'x-galx-strict-shard') === 'true';
 
     const leaseAttemptId = crypto
       .createHash('sha256')
       .update(`${requestId}:image:1`)
       .digest('hex');
-    const acqResult = await this.pool.acquireLeaseAuthoritatively({
+    let acqResult = await this.pool.acquireLeaseAuthoritatively({
       userId,
       jobId: leaseAttemptId,
       provider,
@@ -805,10 +924,30 @@ export class GalxModelRouter {
       targetShardId
     });
 
+    if (!acqResult.lease && targetShardId && !isStrictShard) {
+      console.warn(`[GalxModelRouter] Targeted affinity route unavailable. Falling back to general pool for provider '${provider}'...`);
+      acqResult = await this.pool.acquireLeaseAuthoritatively({
+        userId,
+        jobId: `${leaseAttemptId}:fallback`,
+        provider,
+        targetModel: modelSpec.id,
+        isPriorityUser,
+        estimatedTokens: sanitizedRequest.quality === 'hd' ? 200 : 100,
+        leaseTtlMs: 120_000,
+        privacyProfile: privacyPolicy.profile,
+        hipaaRequired: privacyPolicy.hipaaEnabled,
+        dataResidency: privacyPolicy.dataResidency,
+        zdrRequired: privacyPolicy.zdrEnabled,
+        targetAccountId,
+        targetShardId: undefined
+      });
+    }
+
     if (!acqResult.lease) {
-      throw new Error(
-        acqResult.reason || `No healthy ${provider} shard credentials available in the pool matching privacy policy`
+      const cleanMsg = GalxModelRouter.sanitizeUpstreamError(
+        acqResult.reason || `Compute capacity is temporarily constrained for this model.`
       );
+      throw new Error(cleanMsg);
     }
 
     const lease = acqResult.lease;
