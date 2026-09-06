@@ -32,6 +32,9 @@ services:
       - ${HOME}/.codex:/root/.codex:ro
       # Persistent BroccoliDB snapshots for Last-Event-ID streaming resume
       - ./.broccolidb:/app/.broccolidb
+      # Live dashboard HTML mount for zero-rebuild UI synchronicity
+      - ./src/relay/dashboard.html:/app/dashboard.html:ro
+      - ./src/relay/dashboard.html:/app/src/relay/dashboard.html:ro
     deploy:
       resources:
         limits:
