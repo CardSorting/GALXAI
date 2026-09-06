@@ -577,6 +577,168 @@
       background: linear-gradient(90deg, #f43f5e, #e11d48);
     }
 
+    .quota-drip-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(6, 182, 212, 0.06);
+      border: 1px solid rgba(6, 182, 212, 0.18);
+      border-radius: var(--radius-sm);
+      padding: 0.45rem 0.65rem;
+      font-size: 0.73rem;
+    }
+
+    .quota-burst-badge {
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(168, 85, 247, 0.12);
+      color: var(--accent-purple);
+      border: 1px solid rgba(168, 85, 247, 0.28);
+      font-weight: 600;
+    }
+
+    /* Toast Notification */
+    #dashboard-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(6, 182, 212, 0.45);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+      color: #ffffff;
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(10px);
+    }
+
+    #dashboard-toast.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    #dashboard-toast.toast-error {
+      border-color: rgba(244, 63, 94, 0.6);
+    }
+
+    /* Dynamic Quota Strategy Hub */
+    .quota-strategy-hub {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.07) 0%, rgba(16, 185, 129, 0.04) 100%);
+      border: 1px solid rgba(6, 182, 212, 0.22);
+      border-radius: var(--radius-md);
+      padding: 1.15rem 1.4rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .quota-strategy-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .mode-selector-group {
+      display: flex;
+      background: rgba(0, 0, 0, 0.45);
+      padding: 3px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 3px;
+    }
+
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+    }
+
+    .mode-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .mode-btn.active {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.28) 0%, rgba(16, 185, 129, 0.22) 100%);
+      color: #ffffff;
+      border: 1px solid rgba(6, 182, 212, 0.45);
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(6, 182, 212, 0.2);
+    }
+
+    .mode-cap-sub {
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      opacity: 0.75;
+    }
+
+    .quota-strategy-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) auto;
+      gap: 1rem;
+      align-items: center;
+      padding-top: 0.6rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .strategy-metric-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .strategy-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .strategy-val {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .strategy-sub {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+    }
+
+    .strategy-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-left: 0.5rem;
+    }
+
     /* Shard Fleet Grid */
     .shards-grid {
       display: grid;
@@ -1036,6 +1198,69 @@
           </div>
         </div>
 
+        <!-- Dynamic Quota Strategy & Fleet Expansion Hub -->
+        <div class="quota-strategy-hub">
+          <div class="quota-strategy-top">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <div class="pulse-dot" style="background: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-cyan);"></div>
+              <div>
+                <div style="font-weight: 700; font-size: 0.92rem; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+                  Dynamic Quota Governance & Scaling Strategy
+                  <span class="badge badge-active" id="hub-active-mode-badge" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); border-color: rgba(6, 182, 212, 0.3);">BALANCED (100 BASE)</span>
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">
+                  Continuous Token Bucket Refill • Elastic Burst Overdraft • Upstream Latency Self-Tuning
+                </div>
+              </div>
+            </div>
+            
+            <!-- Mode Switcher Pills -->
+            <div class="mode-selector-group">
+              <button class="mode-btn" id="mode-btn-conservative" onclick="setQuotaMode('conservative')">
+                <span>🛡️ Strict</span> <span class="mode-cap-sub">40/3h</span>
+              </button>
+              <button class="mode-btn active" id="mode-btn-balanced" onclick="setQuotaMode('balanced')">
+                <span>⚖️ Balanced</span> <span class="mode-cap-sub">100/3h</span>
+              </button>
+              <button class="mode-btn" id="mode-btn-turbo" onclick="setQuotaMode('turbo')">
+                <span>⚡ Turbo</span> <span class="mode-cap-sub">250/3h</span>
+              </button>
+              <button class="mode-btn" id="mode-btn-adaptive" onclick="setQuotaMode('adaptive')">
+                <span>🤖 Adaptive</span> <span class="mode-cap-sub">Auto</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic Metrics Strip -->
+          <div class="quota-strategy-metrics">
+            <div class="strategy-metric-card">
+              <span class="strategy-label">Continuous Drip Rate</span>
+              <span class="strategy-val" id="strat-drip-rate" style="color: var(--accent-emerald);">1 token / 108s</span>
+              <span class="strategy-sub" id="strat-next-drip">Next credit in 01:48</span>
+            </div>
+            <div class="strategy-metric-card">
+              <span class="strategy-label">Elastic Burst Reserve</span>
+              <span class="strategy-val" id="strat-burst-val" style="color: var(--accent-cyan);">+20 Overdraft</span>
+              <span class="strategy-sub">Zero-rejection buffer</span>
+            </div>
+            <div class="strategy-metric-card">
+              <span class="strategy-label">Adaptive Velocity</span>
+              <span class="strategy-val" id="strat-velocity-val" style="color: var(--text-primary);">0.3 req/h</span>
+              <span class="strategy-sub" id="strat-runway-val" style="color: var(--accent-emerald);">Runway: >3h safe</span>
+            </div>
+            <div class="strategy-metric-card">
+              <span class="strategy-label">Fleet Pool Aggregation</span>
+              <span class="strategy-val" id="strat-fleet-cap" style="color: var(--accent-purple);">100 calls total</span>
+              <span class="strategy-sub" id="strat-shards-scale">1 Active Shard</span>
+            </div>
+            <div class="strategy-actions">
+              <button class="btn btn-sm" onclick="resetQuotaWindow()" title="Clear sliding window history for testing">
+                🔄 Reset Window
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="shards-grid" id="shards-container">
           <!-- Shard cards injected dynamically -->
         </div>
@@ -1342,6 +1567,71 @@
       await probeShard('shard_local_auth');
     }
 
+    // Toast Notification System
+    function showToast(message, isError = false) {
+      let toast = document.getElementById('dashboard-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'dashboard-toast';
+        document.body.appendChild(toast);
+      }
+      toast.className = isError ? 'visible toast-error' : 'visible';
+      toast.innerHTML = `
+        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${isError ? 'var(--accent-rose)' : 'var(--accent-cyan)'}; box-shadow: 0 0 8px ${isError ? 'var(--accent-rose)' : 'var(--accent-cyan)'};"></span>
+        <span>${message}</span>
+      `;
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.classList.remove('visible');
+      }, 3200);
+    }
+
+    // Dynamic Quota Mode Switching
+    async function setQuotaMode(mode) {
+      try {
+        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+        const targetBtn = document.getElementById(`mode-btn-${mode}`);
+        if (targetBtn) targetBtn.classList.add('active');
+
+        const badgeEl = document.getElementById('hub-active-mode-badge');
+        if (badgeEl) badgeEl.textContent = `${mode.toUpperCase()} (Switching...)`;
+
+        const res = await fetch('/api/quota/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode }),
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const result = await res.json();
+        showToast(result.message || `Quota profile switched to ${mode.toUpperCase()}`);
+        await loadTelemetry();
+      } catch (err) {
+        showToast(`Failed to switch quota mode: ${err.message}`, true);
+        await loadTelemetry();
+      }
+    }
+
+    // Reset Quota Rolling Window
+    async function resetQuotaWindow(shardId) {
+      const targetLabel = shardId ? `shard ${shardId}` : 'ALL enrolled shards';
+      if (!confirm(`Reset 3-hour sliding window quota for ${targetLabel}?`)) return;
+      try {
+        const res = await fetch('/api/quota/reset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(shardId ? { shardId } : {}),
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        showToast(data.message || 'Quota window reset successfully');
+        await loadTelemetry();
+      } catch (err) {
+        showToast(`Failed to reset quota: ${err.message}`, true);
+      }
+    }
+
     // Telemetry loader
     async function loadTelemetry() {
       try {
@@ -1372,8 +1662,64 @@
           document.getElementById('fleet-stat-count').textContent = `${shards.length} Active Shard${shards.length === 1 ? '' : 's'}`;
         }
 
-        // Save current shards data globally for high-frequency countdown ticker
+        // Save current data globally for high-frequency countdown ticker
         window.currentShardsData = shards;
+
+        // Synchronize Dynamic Quota Strategy Hub
+        if (data.quotaEngine) {
+          window.currentQuotaEngine = data.quotaEngine;
+          const qe = data.quotaEngine;
+
+          // Mode buttons active state
+          document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+          const activeBtn = document.getElementById(`mode-btn-${qe.mode}`);
+          if (activeBtn) activeBtn.classList.add('active');
+
+          // Active Mode Badge
+          const badgeEl = document.getElementById('hub-active-mode-badge');
+          if (badgeEl) {
+            const multStr = qe.mode === 'adaptive' ? ` • ${(qe.adaptiveMultiplier || 1).toFixed(2)}x` : '';
+            badgeEl.textContent = `${qe.mode.toUpperCase()} (${qe.effectiveCap} BASE${multStr})`;
+          }
+
+          // Drip Rate & Burst
+          const dripEl = document.getElementById('strat-drip-rate');
+          if (dripEl) dripEl.textContent = `1 token / ${qe.dripIntervalSec}s`;
+
+          const burstEl = document.getElementById('strat-burst-val');
+          if (burstEl) burstEl.textContent = `+${qe.elasticBurstAllowance} Overdraft`;
+
+          const fleetCapEl = document.getElementById('strat-fleet-cap');
+          if (fleetCapEl) fleetCapEl.textContent = `${qe.fleetTotalCap} calls total`;
+
+          const shardsScaleEl = document.getElementById('strat-shards-scale');
+          if (shardsScaleEl) shardsScaleEl.textContent = `${shards.length} Active Shard${shards.length === 1 ? '' : 's'}`;
+
+          // Velocity & Runway Calculation
+          let totalUsage = 0;
+          let totalRemaining = 0;
+          shards.forEach(s => {
+            const cap = s.slidingWindowCap || qe.effectiveCap;
+            const usage = s.slidingWindowUsage || 0;
+            totalUsage += usage;
+            totalRemaining += Math.max(0, cap - usage);
+          });
+          const totalVelocity = (totalUsage / 3).toFixed(1);
+          const velEl = document.getElementById('strat-velocity-val');
+          if (velEl) velEl.textContent = `${totalVelocity} req/h`;
+
+          const runwayEl = document.getElementById('strat-runway-val');
+          if (runwayEl) {
+            if (parseFloat(totalVelocity) > 0) {
+              const hoursLeft = (totalRemaining / parseFloat(totalVelocity)).toFixed(1);
+              runwayEl.textContent = `Runway: ~${hoursLeft}h remaining`;
+              runwayEl.style.color = parseFloat(hoursLeft) > 2 ? 'var(--accent-emerald)' : 'var(--accent-amber)';
+            } else {
+              runwayEl.textContent = 'Runway: >3h safe';
+              runwayEl.style.color = 'var(--accent-emerald)';
+            }
+          }
+        }
 
         // Update Overview Primary Shard Meta
         if (shards.length > 0) {
@@ -1471,6 +1817,10 @@
               <span style="color: var(--text-muted); font-size: 0.7rem;">Auto-monitored</span>
             `;
 
+            const dripTokensVal = typeof s.availableDripTokens === 'number' ? s.availableDripTokens.toFixed(1) : cap;
+            const burstAllowance = s.burstAllowance || 30;
+            const burstUsed = s.burstUsed || 0;
+
             return `
               <div class="shard-card" id="shard-card-${s.id}">
                 <div class="shard-title-row">
@@ -1521,6 +1871,17 @@
                     <span class="quota-tier-badge" id="quota-tier-${s.id}">CAP: ${cap} CALLS</span>
                   </div>
 
+                  <!-- Continuous Drip Refill Strip -->
+                  <div class="quota-drip-strip">
+                    <span style="display: flex; align-items: center; gap: 0.35rem;">
+                      <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--accent-cyan); box-shadow: 0 0 6px var(--accent-cyan);"></span>
+                      <strong style="color: #fff;" id="shard-drip-tokens-${s.id}">${dripTokensVal}</strong> / ${cap} Drip Tokens Ready
+                    </span>
+                    <span style="color: var(--accent-cyan); font-family: var(--font-mono); font-size: 0.7rem;" id="shard-drip-countdown-${s.id}">
+                      Refilling (+1) in ${s.nextDripSec || 0}s
+                    </span>
+                  </div>
+
                   <!-- Usage vs Headroom Metric Row -->
                   <div class="quota-metric-row">
                     <div class="quota-metric-item">
@@ -1540,6 +1901,12 @@
                   <!-- Animated Multi-Color Gradient Progress Bar -->
                   <div class="progress-bar-bg" style="height: 7px;">
                     <div class="progress-bar-fill ${barColorClass}" id="quota-bar-${s.id}" style="width: ${Math.max(2, usagePct)}%;"></div>
+                  </div>
+
+                  <!-- Elastic Burst Overdraft Status Strip -->
+                  <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; padding: 0.2rem 0.1rem;">
+                    <span style="color: var(--text-muted);">Burst Overdraft Reserve:</span>
+                    <span class="quota-burst-badge">+${burstAllowance} Allowance (${burstUsed} overdraft used)</span>
                   </div>
 
                   <!-- Real-Time Slot Recovery Countdown -->
@@ -1580,7 +1947,10 @@
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
                     </svg>
-                    Stream Ping Test
+                    Stream Ping
+                  </button>
+                  <button class="btn btn-sm" style="flex: 0.8;" onclick="resetQuotaWindow('${s.id}')" title="Reset quota window for this shard">
+                    🔄 Reset
                   </button>
                 </div>
               </div>
@@ -1799,12 +2169,33 @@
       }
     }
 
-    // High-frequency live countdown ticker (ticks every 1s for real-time recovery countdown)
+    // High-frequency live countdown ticker (ticks every 1s for real-time recovery countdown & continuous drip)
     setInterval(() => {
+      const now = Date.now();
+
+      // Tick Strategy Hub Continuous Drip Timer
+      if (window.currentQuotaEngine) {
+        const qe = window.currentQuotaEngine;
+        const dripSec = qe.dripIntervalSec || 108;
+        const secRemaining = Math.max(1, dripSec - (Math.floor(now / 1000) % dripSec));
+        const m = String(Math.floor(secRemaining / 60)).padStart(2, '0');
+        const s = String(secRemaining % 60).padStart(2, '0');
+        const nextEl = document.getElementById('strat-next-drip');
+        if (nextEl) nextEl.textContent = `Next credit in ${m}:${s}`;
+      }
+
       if (!window.currentShardsData) return;
 
-      const now = Date.now();
       window.currentShardsData.forEach(s => {
+        // Continuous Drip countdown per shard
+        const shardDripEl = document.getElementById(`shard-drip-countdown-${s.id}`);
+        if (shardDripEl) {
+          const dripSec = s.dripIntervalSec || 108;
+          const secRemaining = Math.max(1, dripSec - (Math.floor(now / 1000) % dripSec));
+          shardDripEl.textContent = `Refilling (+1) in ${secRemaining}s`;
+        }
+
+        // Sliding window oldest call expiration ticker
         const dur = s.windowDurationMs || 10800000;
         const activeTimestamps = (s.slidingWindowTimestamps || []).filter(t => t > (now - dur));
         const tickerEl = document.getElementById(`quota-ticker-time-${s.id}`);

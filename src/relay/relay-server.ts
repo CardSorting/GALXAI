@@ -169,6 +169,52 @@ export interface IdempotencyRecord extends Record<string, unknown> {
   createdAtMs: number;
 }
 
+export type QuotaMode = 'conservative' | 'balanced' | 'turbo' | 'adaptive';
+
+export interface QuotaProfileConfig {
+  mode: QuotaMode;
+  maxCalls: number;
+  windowDurationMs: number;
+  dripRefillSec: number;
+  elasticBurstAllowance: number;
+  adaptiveBackoffOn429: boolean;
+}
+
+export const QUOTA_PRESETS: Record<QuotaMode, QuotaProfileConfig> = {
+  conservative: {
+    mode: 'conservative',
+    maxCalls: 40,
+    windowDurationMs: 3 * 3600 * 1000,
+    dripRefillSec: 270, // 1 token every 4.5m
+    elasticBurstAllowance: 5,
+    adaptiveBackoffOn429: true,
+  },
+  balanced: {
+    mode: 'balanced',
+    maxCalls: 100,
+    windowDurationMs: 3 * 3600 * 1000,
+    dripRefillSec: 108, // 1 token every 1.8m
+    elasticBurstAllowance: 20,
+    adaptiveBackoffOn429: true,
+  },
+  turbo: {
+    mode: 'turbo',
+    maxCalls: 250,
+    windowDurationMs: 3 * 3600 * 1000,
+    dripRefillSec: 43.2, // 1 token every 43.2s
+    elasticBurstAllowance: 50,
+    adaptiveBackoffOn429: true,
+  },
+  adaptive: {
+    mode: 'adaptive',
+    maxCalls: 100,
+    windowDurationMs: 3 * 3600 * 1000,
+    dripRefillSec: 108,
+    elasticBurstAllowance: 30,
+    adaptiveBackoffOn429: true,
+  },
+};
+
 export interface ShardRecord extends Record<string, unknown> {
   id: string; // shardId
   accountId: string;
@@ -178,6 +224,8 @@ export interface ShardRecord extends Record<string, unknown> {
   lastUsedAtMs: number;
   inFlight: number;
   slidingWindowTimestamps: number[];
+  availableDripTokens?: number;
+  lastDripRefillMs?: number;
 }
 
 interface TransientJobSession {
@@ -676,6 +724,10 @@ export class GalxaiRelayServer extends EventEmitter {
   // Multi-Tenant Rate Governor (Token Bucket)
   private readonly tenantBuckets = new Map<string, { tokens: number; lastRefillMs: number }>();
 
+  // Dynamic Shard Quota & Continuous Drip Engine
+  private currentQuotaProfile: QuotaProfileConfig = { ...QUOTA_PRESETS.balanced };
+  private adaptiveMultiplier: number = 1.0;
+
   // Ephemeral In-Flight Sessions
   private readonly sessions = new Map<string, TransientJobSession>();
   private isDraining = false;
@@ -976,13 +1028,15 @@ export class GalxaiRelayServer extends EventEmitter {
 
   private acquireHealthyShard(excludeShardId?: string): ShardRecord | null {
     const now = Date.now();
-    const windowCutoff = now - this.config.quotaWindowDurationMs;
+    const effectiveCap = Math.round(this.currentQuotaProfile.maxCalls * this.adaptiveMultiplier);
+    const windowDuration = this.currentQuotaProfile.windowDurationMs;
+    const windowCutoff = now - windowDuration;
     const allShards = this.shardsTable.getAll();
 
     let candidate: ShardRecord | null = null;
     let minScore = Infinity;
 
-    // Phase 1: Search active healthy shards (excluding failed shard if possible)
+    // Phase 1: Search active healthy shards
     for (const shard of allShards) {
       if (excludeShardId && shard.id === excludeShardId && allShards.length > 1) {
         continue;
@@ -995,17 +1049,45 @@ export class GalxaiRelayServer extends EventEmitter {
       }
       if (currentStatus !== 'active') continue;
 
+      // Continuous Leaky Bucket / Token Drip Refill Calculation
+      const dripIntervalSec = (windowDuration / 1000) / effectiveCap;
+      const lastDrip = shard.lastDripRefillMs || shard.lastUsedAtMs || now;
+      const elapsedDripSec = Math.max(0, (now - lastDrip) / 1000);
+      const refilledTokens = elapsedDripSec / dripIntervalSec;
+      const currentDripTokens = Math.min(
+        effectiveCap,
+        (shard.availableDripTokens ?? effectiveCap) + refilledTokens
+      );
+
       const activeTimestamps = (shard.slidingWindowTimestamps || []).filter((t: number) => t > windowCutoff);
-      if (activeTimestamps.length >= this.config.quotaWindowMaxCalls) {
-        this.shardsTable.put(shard.id, { ...shard, status: 'exhausted', slidingWindowTimestamps: activeTimestamps });
+      const totalCapacityWithBurst = effectiveCap + this.currentQuotaProfile.elasticBurstAllowance;
+
+      // Saturated check (including elastic burst reserve)
+      if (activeTimestamps.length >= totalCapacityWithBurst) {
+        this.shardsTable.put(shard.id, {
+          ...shard,
+          status: 'exhausted',
+          slidingWindowTimestamps: activeTimestamps,
+          availableDripTokens: currentDripTokens,
+          lastDripRefillMs: now,
+        });
         continue;
       }
 
-      // Smooth Weighted Round-Robin (SWRR) Score: inFlight * 100 + windowUsage
-      const score = shard.inFlight * 100 + activeTimestamps.length;
+      // Smooth Weighted Round-Robin (SWRR) Score:
+      // In-flight concurrency (x100) + active usage - available continuous drip tokens (x10) + burst penalty
+      const burstPenalty = activeTimestamps.length >= effectiveCap ? 300 : 0;
+      const score = (shard.inFlight * 100) + activeTimestamps.length - Math.round(currentDripTokens * 10) + burstPenalty;
+
       if (score < minScore) {
         minScore = score;
-        candidate = { ...shard, status: currentStatus, slidingWindowTimestamps: activeTimestamps };
+        candidate = {
+          ...shard,
+          status: currentStatus,
+          slidingWindowTimestamps: activeTimestamps,
+          availableDripTokens: currentDripTokens,
+          lastDripRefillMs: now,
+        };
       }
     }
 
@@ -1030,11 +1112,14 @@ export class GalxaiRelayServer extends EventEmitter {
     }
 
     if (candidate) {
+      const remainingDrip = Math.max(0, (candidate.availableDripTokens ?? effectiveCap) - 1.0);
       const updated: ShardRecord = {
         ...candidate,
         inFlight: candidate.inFlight + 1,
         lastUsedAtMs: now,
         slidingWindowTimestamps: [...candidate.slidingWindowTimestamps, now],
+        availableDripTokens: remainingDrip,
+        lastDripRefillMs: now,
       };
       this.shardsTable.put(candidate.id, updated);
       return updated;
@@ -1068,6 +1153,50 @@ export class GalxaiRelayServer extends EventEmitter {
         consecutiveFailures: 0, // Reset failure count on clean completion
       });
     }
+  }
+
+  private getRateLimitHeaders(): Record<string, string> {
+    const allShards = this.shardsTable.getAll();
+    const effectiveCap = Math.round(
+      this.currentQuotaProfile.maxCalls * (this.currentQuotaProfile.mode === 'adaptive' ? this.adaptiveMultiplier : 1)
+    );
+    const now = Date.now();
+    const windowDurMs = this.currentQuotaProfile.windowDurationMs;
+
+    let totalUsage = 0;
+    let oldestActiveTimestamp: number | null = null;
+    let totalDripTokens = 0;
+
+    for (const s of allShards) {
+      const active = (s.slidingWindowTimestamps || []).filter((t: number) => t > (now - windowDurMs));
+      totalUsage += active.length;
+      totalDripTokens += (s.availableDripTokens ?? effectiveCap);
+      for (const t of active) {
+        if (oldestActiveTimestamp === null || t < oldestActiveTimestamp) {
+          oldestActiveTimestamp = t;
+        }
+      }
+    }
+
+    const fleetCap = Math.max(effectiveCap, effectiveCap * allShards.length);
+    const remaining = Math.max(0, fleetCap - totalUsage);
+    const burstAllowanceTotal = this.currentQuotaProfile.elasticBurstAllowance * Math.max(1, allShards.length);
+    const burstRemaining = Math.max(0, (fleetCap + burstAllowanceTotal) - totalUsage);
+
+    const resetSec = oldestActiveTimestamp
+      ? Math.max(1, Math.ceil(((oldestActiveTimestamp + windowDurMs) - now) / 1000))
+      : Math.round(this.currentQuotaProfile.dripRefillSec);
+
+    return {
+      'X-RateLimit-Limit': String(fleetCap),
+      'X-RateLimit-Remaining': String(remaining),
+      'X-RateLimit-Reset': String(resetSec),
+      'X-RateLimit-Burst-Remaining': String(burstRemaining),
+      'X-RateLimit-Policy': `${effectiveCap};w=${Math.round(windowDurMs / 1000)};burst=${this.currentQuotaProfile.elasticBurstAllowance}`,
+      'X-RateLimit-Mode': this.currentQuotaProfile.mode,
+      'X-RateLimit-Drip-Interval': String(Math.round(this.currentQuotaProfile.dripRefillSec)),
+      'X-RateLimit-Adaptive-Multiplier': this.adaptiveMultiplier.toFixed(2),
+    };
   }
 
   // --------------------------------------------------------------------------
@@ -1109,6 +1238,21 @@ export class GalxaiRelayServer extends EventEmitter {
       return;
     }
 
+    if (pathname === '/api/quota/profile' && method === 'POST') {
+      await this.handleSetQuotaProfile(req, res);
+      return;
+    }
+
+    if (pathname === '/api/quota/reset' && method === 'POST') {
+      await this.handleResetQuota(req, res);
+      return;
+    }
+
+    if (pathname === '/api/quota/status' && method === 'GET') {
+      this.handleQuotaStatus(res);
+      return;
+    }
+
     // Zero-Trust Authorization Gate
     if (!this.verifyAuthorization(req)) {
       res.writeHead(401, { 'Content-Type': 'application/json' });
@@ -1122,6 +1266,7 @@ export class GalxaiRelayServer extends EventEmitter {
       res.writeHead(429, {
         'Content-Type': 'application/json',
         'Retry-After': '1',
+        ...this.getRateLimitHeaders(),
       });
       res.end(JSON.stringify({ error: { message: 'Rate limit exceeded. Please retry in 1s.', code: 'rate_limited' } }));
       return;
@@ -1228,6 +1373,7 @@ export class GalxaiRelayServer extends EventEmitter {
               'X-Galx-Job-Id': existingJob.id,
               'X-Galx-Queue-Position': '0',
               'X-Galx-Eta-Ms': '150000',
+              ...this.getRateLimitHeaders(),
             });
             res.end(JSON.stringify({
               id: existingJob.id,
@@ -1301,6 +1447,7 @@ export class GalxaiRelayServer extends EventEmitter {
           'X-Galx-Job-Id': jobId,
           'X-Galx-Queue-Position': '0',
           'X-Galx-Eta-Ms': '150000',
+          ...this.getRateLimitHeaders(),
         });
         res.end(JSON.stringify({
           id: jobId,
@@ -1439,6 +1586,7 @@ export class GalxaiRelayServer extends EventEmitter {
           res.writeHead(200, {
             'Content-Type': 'application/json',
             'X-Galx-Shard-Id': shard.id,
+            ...this.getRateLimitHeaders(),
           });
           res.end(JSON.stringify(responseData));
         } catch (err: any) {
@@ -2254,6 +2402,9 @@ export class GalxaiRelayServer extends EventEmitter {
     if (this.jobQueue.markComplete(event.jobId)) {
       this.metrics.totalJobsCompleted++;
       this.releaseShard(event.shardId);
+      if (this.currentQuotaProfile.mode === 'adaptive') {
+        this.adaptiveMultiplier = Math.min(2.5, Math.round((this.adaptiveMultiplier + 0.02) * 100) / 100);
+      }
     }
   }
 
@@ -2272,6 +2423,9 @@ export class GalxaiRelayServer extends EventEmitter {
 
     if (event.isQuotaError) {
       this.metrics.totalShardCooldownEjections++;
+      if (this.currentQuotaProfile.mode === 'adaptive') {
+        this.adaptiveMultiplier = Math.max(0.6, Math.round((this.adaptiveMultiplier - 0.2) * 100) / 100);
+      }
       const shard = this.shardsTable.get(event.shardId);
       if (shard) {
         this.shardsTable.put(event.shardId, {
@@ -2727,6 +2881,11 @@ export class GalxaiRelayServer extends EventEmitter {
     );
     const recentJobs = this.jobsTable.getAll().slice(-20);
 
+    const now = Date.now();
+    const effectiveCap = Math.round(this.currentQuotaProfile.maxCalls * this.adaptiveMultiplier);
+    const windowDurationMs = this.currentQuotaProfile.windowDurationMs;
+    const dripIntervalSec = (windowDurationMs / 1000) / effectiveCap;
+
     const stats = {
       status: 'ok',
       service: 'galxai-relay',
@@ -2738,14 +2897,29 @@ export class GalxaiRelayServer extends EventEmitter {
       avgTtftMs: Math.round(this.metrics.totalReasoningChunksReceived > 0 ? 320 : 0),
       uptimeSec: Math.floor((Date.now() - this.metrics.startTimeMs) / 1000),
       memory: process.memoryUsage(),
+      quotaEngine: {
+        mode: this.currentQuotaProfile.mode,
+        baseCap: this.currentQuotaProfile.maxCalls,
+        effectiveCap,
+        windowDurationMs,
+        dripIntervalSec: Math.round(dripIntervalSec * 10) / 10,
+        elasticBurstAllowance: this.currentQuotaProfile.elasticBurstAllowance,
+        adaptiveMultiplier: Math.round(this.adaptiveMultiplier * 100) / 100,
+        fleetTotalCap: allShards.length * effectiveCap,
+      },
       shards: allShards.map((s) => {
-        const now = Date.now();
-        const windowDurationMs = this.config.quotaWindowDurationMs;
         const cutoff = now - windowDurationMs;
         const activeTimestamps = (s.slidingWindowTimestamps || []).filter((t: number) => t > cutoff);
         const oldest = activeTimestamps.length > 0 ? Math.min(...activeTimestamps) : null;
         const newest = activeTimestamps.length > 0 ? Math.max(...activeTimestamps) : null;
         const nextResetMs = oldest ? Math.max(0, (oldest + windowDurationMs) - now) : null;
+
+        const lastDrip = s.lastDripRefillMs || s.lastUsedAtMs || now;
+        const elapsedDripSec = Math.max(0, (now - lastDrip) / 1000);
+        const refilledTokens = elapsedDripSec / dripIntervalSec;
+        const currentDripTokens = Math.min(effectiveCap, (s.availableDripTokens ?? effectiveCap) + refilledTokens);
+        const nextDripSec = Math.max(0, Math.round(dripIntervalSec - (elapsedDripSec % dripIntervalSec)));
+        const burstUsed = Math.max(0, activeTimestamps.length - effectiveCap);
 
         return {
           id: s.id,
@@ -2754,12 +2928,17 @@ export class GalxaiRelayServer extends EventEmitter {
           inFlight: s.inFlight || 0,
           consecutiveFailures: s.consecutiveFailures || 0,
           slidingWindowUsage: activeTimestamps.length,
-          slidingWindowCap: this.config.quotaWindowMaxCalls,
+          slidingWindowCap: effectiveCap,
           slidingWindowTimestamps: activeTimestamps,
           oldestTimestampMs: oldest,
           newestTimestampMs: newest,
           nextResetMs,
           windowDurationMs,
+          availableDripTokens: Math.round(currentDripTokens * 10) / 10,
+          dripIntervalSec: Math.round(dripIntervalSec * 10) / 10,
+          nextDripSec,
+          burstUsed,
+          burstAllowance: this.currentQuotaProfile.elasticBurstAllowance,
           lastUsedAtMs: s.lastUsedAtMs || 0,
         };
       }),
@@ -2784,6 +2963,112 @@ export class GalxaiRelayServer extends EventEmitter {
       'Access-Control-Allow-Origin': '*',
     });
     res.end(JSON.stringify(stats));
+  }
+
+  private async handleSetQuotaProfile(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    try {
+      let bodyText = '';
+      await new Promise<void>((resolve, reject) => {
+        req.on('data', (chunk) => { bodyText += chunk; });
+        req.on('end', () => resolve());
+        req.on('error', reject);
+      });
+
+      const data = bodyText.trim() ? JSON.parse(bodyText) : {};
+      const requestedMode = data.mode as QuotaMode;
+
+      if (requestedMode && QUOTA_PRESETS[requestedMode]) {
+        this.currentQuotaProfile = { ...QUOTA_PRESETS[requestedMode] };
+      }
+
+      if (typeof data.customCap === 'number' && data.customCap > 0) {
+        this.currentQuotaProfile.maxCalls = Math.min(2000, Math.max(10, Math.round(data.customCap)));
+        this.currentQuotaProfile.dripRefillSec = (this.currentQuotaProfile.windowDurationMs / 1000) / this.currentQuotaProfile.maxCalls;
+      }
+
+      if (typeof data.customWindowMin === 'number' && data.customWindowMin > 0) {
+        this.currentQuotaProfile.windowDurationMs = data.customWindowMin * 60 * 1000;
+        this.currentQuotaProfile.dripRefillSec = (this.currentQuotaProfile.windowDurationMs / 1000) / this.currentQuotaProfile.maxCalls;
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify({
+        status: 'ok',
+        profile: this.currentQuotaProfile,
+        effectiveCap: Math.round(this.currentQuotaProfile.maxCalls * this.adaptiveMultiplier),
+        message: `Quota profile updated to ${this.currentQuotaProfile.mode.toUpperCase()}`,
+      }));
+    } catch (err: any) {
+      res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify({ error: { message: `Failed to set quota profile: ${err.message}` } }));
+    }
+  }
+
+  private async handleResetQuota(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    try {
+      let bodyText = '';
+      await new Promise<void>((resolve, reject) => {
+        req.on('data', (chunk) => { bodyText += chunk; });
+        req.on('end', () => resolve());
+        req.on('error', reject);
+      });
+
+      const data = bodyText.trim() ? JSON.parse(bodyText) : {};
+      const shardId = data.shardId;
+
+      const allShards = this.shardsTable.getAll();
+      let resetCount = 0;
+
+      for (const shard of allShards) {
+        if (!shardId || shard.id === shardId) {
+          this.shardsTable.put(shard.id, {
+            ...shard,
+            slidingWindowTimestamps: [],
+            status: 'active',
+            consecutiveFailures: 0,
+            availableDripTokens: this.currentQuotaProfile.maxCalls,
+            lastDripRefillMs: Date.now(),
+          });
+          resetCount++;
+        }
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify({
+        status: 'ok',
+        resetCount,
+        message: `Reset quota for ${resetCount} shard(s)`,
+      }));
+    } catch (err: any) {
+      res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify({ error: { message: `Failed to reset quota: ${err.message}` } }));
+    }
+  }
+
+  private handleQuotaStatus(res: http.ServerResponse): void {
+    const allShards = this.shardsTable.getAll();
+    const now = Date.now();
+    const effectiveCap = Math.round(this.currentQuotaProfile.maxCalls * this.adaptiveMultiplier);
+
+    const payload = {
+      profile: this.currentQuotaProfile,
+      adaptiveMultiplier: this.adaptiveMultiplier,
+      effectiveCap,
+      fleetAggregateCap: allShards.length * effectiveCap,
+      shards: allShards.map((s) => {
+        const activeTimestamps = (s.slidingWindowTimestamps || []).filter((t: number) => t > (now - this.currentQuotaProfile.windowDurationMs));
+        return {
+          id: s.id,
+          status: s.status,
+          usage: activeTimestamps.length,
+          headroom: Math.max(0, effectiveCap - activeTimestamps.length),
+          availableDripTokens: s.availableDripTokens ?? effectiveCap,
+        };
+      }),
+    };
+
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+    res.end(JSON.stringify(payload));
   }
 
   // --------------------------------------------------------------------------
