@@ -182,6 +182,11 @@ export async function POST(req: NextRequest) {
       'X-Galx-Seat-Weekly-Remaining-Pct': String(currentWindows.weeklyWindow.percentRemaining),
       'X-Galx-Seat-Weekly-Refresh-In': currentWindows.weeklyWindow.refreshIn
     };
+    if (result.execution) {
+      resHeaders['X-Galx-Execution-Model'] = result.execution.executionModel;
+      resHeaders['X-Galx-Routing-Mode'] = result.execution.routingMode;
+      resHeaders['Access-Control-Expose-Headers'] += ', X-Galx-Execution-Model, X-Galx-Routing-Mode';
+    }
     if (result.shardId) {
       const affinityTicket = GalxCryptoVault.sealAffinityTicket(result.shardId);
       resHeaders['X-Galx-Session-Affinity'] = affinityTicket;

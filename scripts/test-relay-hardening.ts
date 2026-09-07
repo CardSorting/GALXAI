@@ -60,7 +60,7 @@ test('bounded replay returns an explicit conflict instead of silently omitting e
 });
 test('concurrent image idempotency prevents duplicate dispatch and conflicting cached reuse',async()=>{
  const f=await fixture();let calls=0,complete:()=>void=()=>{};
- f.internals.synthesizeImageWithFailover=async()=>{calls++;await new Promise<void>(r=>complete=r);return {result:{b64_json:'test'},shardId:'shard-0'}};
+ f.internals.synthesizeImageWithFailover=async()=>{calls++;await new Promise<void>(r=>complete=r);return {result:{b64_json:'test'},shardId:'shard-0',execution:{executionModel:'gpt-5.6-terra',routingMode:'exact'}}};
  const submitImage=(prompt:string)=>fetch(f.base+'/v1/images/generations',{method:'POST',headers:{'Content-Type':'application/json','Idempotency-Key':'image-key'},body:JSON.stringify({prompt})});
  try{const first=submitImage('same');await until(()=>calls===1);const pending=await submitImage('same');assert.equal(pending.status,409);assert.equal(pending.headers.get('retry-after'),'2');assert.equal(calls,1);complete();assert.equal((await first).status,200);assert.equal((await submitImage('same')).status,200);assert.equal(calls,1);assert.equal((await submitImage('different')).status,409);
  }finally{complete();await f.close()}
@@ -83,7 +83,7 @@ test('cancelled recovery probes do not count as successful provider recovery',as
 });
 test('overload rejects new inference before provider dispatch while telemetry remains reachable',async()=>{
  const f=await fixture({maxConcurrentRequests:1});let complete:()=>void=()=>{};
- f.internals.synthesizeImageWithFailover=async()=>{await new Promise<void>(r=>complete=r);return {result:{b64_json:'test'},shardId:'shard-0'}};
+ f.internals.synthesizeImageWithFailover=async()=>{await new Promise<void>(r=>complete=r);return {result:{b64_json:'test'},shardId:'shard-0',execution:{executionModel:'gpt-5.6-terra',routingMode:'exact'}}};
  try{const active=fetch(f.base+'/v1/images/generations',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:'test'})});await until(()=>f.internals.imageControllers.size===1);
  const denied=await submit(f.base);assert.equal(denied.status,503);assert.equal((await denied.json()).error.code,'relay_overloaded');assert.equal(denied.headers.get('retry-after'),'2');assert.equal(f.internals.jobsTable.count(),0);
  assert.equal((await fetch(f.base+'/health/ready')).status,503);assert.equal((await fetch(f.base+'/health/live')).status,200);assert.equal((await fetch(f.base+'/api/telemetry')).status,200);
@@ -98,7 +98,7 @@ test('readiness fails during drain; unfinished HTTP bodies cannot hold shutdown 
 });
 test('image work can finish during grace rather than being aborted when drain begins',async()=>{
  const f=await fixture({drainTimeoutMs:500});let complete:()=>void=()=>{};
- f.internals.synthesizeImageWithFailover=async()=>{await new Promise<void>(r=>complete=r);return {result:{b64_json:'test'},shardId:'shard-0'}};
+ f.internals.synthesizeImageWithFailover=async()=>{await new Promise<void>(r=>complete=r);return {result:{b64_json:'test'},shardId:'shard-0',execution:{executionModel:'gpt-5.6-terra',routingMode:'exact'}}};
  try{const request=fetch(f.base+'/v1/images/generations',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:'test'})});await until(()=>f.internals.imageControllers.size===1);const stopped=f.relay.stop();complete();assert.equal((await request).status,200);await stopped;
  }finally{complete();await f.close()}
 });

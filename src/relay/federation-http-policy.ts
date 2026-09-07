@@ -14,7 +14,7 @@ export function relayRequestHeaders(headers: IncomingHttpHeaders): Record<string
 }
 export function relayResponseHeaders(headers: Headers): Record<string, string> {
   const result: Record<string, string> = {};
-  for (const name of ['retry-after', 'x-should-retry', 'x-galx-trace-id', 'x-galx-task-id', 'x-galx-idempotency-hit',
+  for (const name of ['retry-after', 'x-should-retry', 'x-galx-trace-id', 'x-galx-task-id', 'x-galx-idempotency-hit', 'x-galx-execution-model', 'x-galx-routing-mode',
     'x-ratelimit-limit', 'x-ratelimit-remaining', 'x-ratelimit-reset']) {
     const value = headers.get(name);
     if (value && value.length <= 256 && /^[\x20-\x7e]+$/.test(value)) result[name] = value;

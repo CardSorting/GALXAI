@@ -165,3 +165,37 @@ test('invalid credential draining does not block healthy shard reconciliation; s
     assert.equal(lifecycle.capabilities.eligible('A').length, 0);
   } finally { release(); clearTimeout(timeout); }
 });
+
+test('registry projection supports API-key and OAuth credentials without inventing OAuth identity', async () => {
+  const { desiredShard } = await import('../src/relay/desired-shards.js');
+  const row = { id: 'a', provider: 'openai', status: 'healthy' };
+  const api = desiredShard(row, { apiKey: 'sk-fixture' })!;
+  assert.equal(api.accessToken, 'sk-fixture'); assert(api.accountId.startsWith('acc_'));
+  assert.equal(api.credentialRevision, desiredShard(row, { accessToken: 'sk-fixture' })!.credentialRevision);
+  assert.notEqual(api.credentialRevision, desiredShard(row, { apiKey: 'sk-rotated' })!.credentialRevision);
+  assert.throws(() => desiredShard(row, { accessToken: 'oauth' }), /account identity/);
+  assert.throws(() => desiredShard(row, null), /Cannot decrypt/);
+  assert.equal(desiredShard({ ...row, permission_retracted: true }, null), undefined);
+  const jwt = `header.${Buffer.from(JSON.stringify({ exp: 100 })).toString('base64url')}.signature`;
+  assert.equal(desiredShard({ ...row, credential_expires_at_ms: 200000 }, { accessToken: jwt, accountId: 'account' })!.expiresAtMs, 100000);
+});
+
+test('opt-in image alias requires fresh execution capability and bounded verified tool evidence', async () => {
+  const { imageExecution, CODEX_IMAGE_ALIAS } = await import('../src/relay/image-compatibility.js');
+  assert.equal(imageExecution('gpt-image-2', false, false).routingMode, 'exact');
+  assert.equal(imageExecution('gpt-image-2', true, true).routingMode, 'exact');
+  assert.equal(imageExecution('gpt-image-1', false, true).routingMode, 'exact');
+  assert.equal(imageExecution('gpt-image-2', false, true).executionModel, 'gpt-5.6-terra');
+  let now = 1000000; const r = new CapabilityRegistry(() => now);
+  r.register('a','relay-a','g','openai'); r.publishInventory(r.beginRefresh('a')!,['gpt-5.6-terra']); r.heartbeat('a',{});
+  const model = `image:${CODEX_IMAGE_ALIAS.requestedModel}`;
+  assert.equal(r.select(model),undefined);
+  r.observe(r.beginObservation('a',model)!,model,'AVAILABLE','verified',true);
+  assert(r.select(model)); assert.equal(r.get('a')!.models.find(m=>m.model===model)!.routingMode,'codex_image_tool_alias');
+  now += 60000; r.publishInventory(r.beginRefresh('a')!,['gpt-5.6-terra']); r.heartbeat('a',{});
+  assert(r.select(model));
+  r.publishInventory(r.beginRefresh('a')!,[]); assert.equal(r.select(model),undefined);
+  now += 3600001; r.publishInventory(r.beginRefresh('a')!,['gpt-5.6-terra']); r.heartbeat('a',{}); assert.equal(r.select(model),undefined);
+  r.observe(r.beginObservation('a',model)!,model,'AVAILABLE','reverified',true);
+  r.publishInventory(r.beginRefresh('a')!,['gpt-5.6-terra']); assert(r.select(model));
+});

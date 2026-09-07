@@ -484,7 +484,9 @@ export class OpenAIAdapter {
               !result.data.every((item: any) => typeof item.b64_json === 'string' && item.b64_json.length > 0)) {
             throw new RelayDispatchError('invalid_image_response');
           }
-          return { created: result.created || Math.floor(Date.now() / 1000), data: result.data, modelUsed: modelSpec.id, shardId };
+          return { created: result.created || Math.floor(Date.now() / 1000), data: result.data, modelUsed: modelSpec.id, shardId,
+            ...(result.execution?.routingMode === 'codex_image_tool_alias' && result.execution?.executionModel === 'gpt-5.6-terra'
+              ? { execution: { requestedModel: modelSpec.id, executionModel: 'gpt-5.6-terra', routingMode: 'codex_image_tool_alias' as const, tool: 'image_generation', imageModelSelection: 'provider_managed' } } : {}) };
         } catch (error) {
           if (error instanceof RelayDispatchError) throw error;
           throw new RelayDispatchError(controller.signal.aborted ? 'image_deadline_or_cancelled' : 'image_transport_failed');

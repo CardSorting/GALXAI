@@ -95,3 +95,33 @@ Docker ownership reads inspect up to 64 containers per command and time out afte
 Successful requests cannot erase a concurrent authoritative model denial. A newer inventory or worker generation fences older observations, and equal-revision health replays cannot clear a local failure. Generic route errors, throttling, and transport failures remain insufficient evidence of model permission loss.
 
 These choices follow the explicit caller intent and bounded retry principles described in [AWS's idempotent API guidance](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/), while retaining GALX's exact-model routing and one-worker-per-shard lifecycle. The synthetic tests validate correctness and bounded scheduling; they are not a production throughput benchmark or DreamBees end-to-end image verification.
+
+## Explicit Codex image-tool compatibility alias
+
+`RELAY_CODEX_IMAGE_TOOL_ALIAS=true` opts OAuth workers into this compatibility contract:
+
+| Requested image ID | Execution | Image model selection |
+| --- | --- | --- |
+| Public `openai-gpt-image-2` / relay `gpt-image-2` | `gpt-5.6-terra` with `image_generation` | Provider-managed; **not a guarantee of exact GPT-Image-2** |
+
+This is an intentional alias, not a fallback after an error. It applies only to that ID and OAuth shards. API-key workers continue to request the exact image model. Other image model IDs are not remapped. [OpenAI's image guide](https://developers.openai.com/api/docs/guides/image-generation) distinguishes the mainline model calling the image tool from the tool's own image-model selection.
+
+The execution model must be present in fresh authenticated inventory, and a real image probe must succeed before the alias enters routing. A chat-model listing alone never grants image eligibility. Alias evidence expires after one hour; active image successes renew it. Idle enabled workers make one paid startup verification and then at most one successful re-verification per 50 minutes, using spare capacity. Failed verification backs off 10, 20, then 40 minutes. This maintenance can consume upstream image quota; enable the flag only for fleets intended to serve this compatibility route. Expired evidence fails closed until successful verification. A negative model observation removes eligibility without destroying an otherwise useful worker.
+
+Worker and public gateway responses expose `execution.requestedModel`, `execution.executionModel`, `execution.routingMode`, `execution.tool`, and `execution.imageModelSelection`, with `X-Galx-Execution-Model` and `X-Galx-Routing-Mode` headers. Capability records expose the alias mode and dependency; signed job identity and model-specific scheduling remain unchanged. Configuration changes require worker replacement; they are not silently applied to existing containers.
+
+## Supervised macOS deployment
+
+`node --import tsx scripts/install-federation-service.ts` generates and validates a launchd plist under the ignored controller state directory. Set `RELAY_CODEX_IMAGE_TOOL_ALIAS=true` explicitly for the compatibility route. After draining and stopping the legacy container, run the same command with `--install` to install and bootstrap `com.galxai.federation.production` on loopback port 3001. It uses the repository's `.env.local`; the plist contains no credentials. The installer refuses to overwrite an existing installed service.
+
+The registry projector accepts both encrypted OAuth `accessToken` and API-key `apiKey` records. An API-key credential gets a stable internal account identity derived from its key. Malformed or unreadable active credentials still fail closed. Upstream 401 responses retire the corresponding worker until its credential revision changes; registry records are not deleted by the controller.
+
+To verify DreamBees through its actual client, load its server environment and run:
+
+```sh
+DREAMBEES_ROOT=/path/to/DreamBees-Rooms \
+DREAMBEES_IMAGE_OUTPUT=/tmp/dreambees-verified.png \
+node --env-file=/path/to/DreamBees-Rooms/.env.local --import tsx scripts/verify-dreambees-image.ts
+```
+
+This makes one real image request with the client's own retry policy, validates its PNG using DreamBees' image validator, and logs only status, request ID, execution metadata, elapsed time, byte count, and SHA-256. Visually inspect the saved artifact before declaring verification complete.

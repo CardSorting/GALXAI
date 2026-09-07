@@ -44,6 +44,7 @@ import { RelayTelemetry } from './telemetry.js';
 import { EventEmitter } from 'node:events';
 import WebSocket from 'ws';
 import { classifyUpstreamError, cooldownDeadline, parseProviderLimits, retryDeadline, type ProviderLimit } from './quota-policy.js';
+import { CODEX_IMAGE_ALIAS, IMAGE_TOOL_EVIDENCE_TTL_MS, imageExecution } from './image-compatibility.js';
 import { CapabilityRegistry, classifyCapabilityFailure } from './capability-registry.js';
 import { CapabilityDiscoveryError, discoverOpenAIModels, type DiscoveryShard } from './capability-discovery.js';
 import { registryConfig, readShardRegistry, decryptRegistryShard } from './shard-registry.js';
@@ -63,6 +64,7 @@ export interface RelayConfig {
   capabilityDiscovery?: (shard: DiscoveryShard, signal: AbortSignal) => Promise<string[]>;
   capabilityRefreshMs: number;
   capabilityTtlMs: number;
+  codexImageToolAlias: boolean;
   port: number;
   maxConcurrentRequests: number;
   maxRssBytes: number;
@@ -127,6 +129,7 @@ const DEFAULT_CONFIG: RelayConfig = {
   assignedShard: assignedShardFromEnvironment(),
   capabilityRefreshMs: Number(process.env.CAPABILITY_REFRESH_INTERVAL_MS || 60000),
   capabilityTtlMs: Number(process.env.CAPABILITY_TTL_MS || 120000),
+  codexImageToolAlias: process.env.RELAY_CODEX_IMAGE_TOOL_ALIAS === 'true',
   port: parseInt(process.env.PORT || '3001', 10),
   maxConcurrentRequests: Number(process.env.RELAY_MAX_CONCURRENT_REQUESTS || 64),
   maxRssBytes: Number(process.env.RELAY_MAX_RSS_MB || 384) * 1024 * 1024,
@@ -798,6 +801,9 @@ export class GalxaiRelayServer extends EventEmitter {
   private shardCursor = 0;
   private readonly capabilities: CapabilityRegistry;
   private capabilityRefresh?: Promise<void>;
+  private nextImageProbeAt = 0;
+  private imageProbeFailures = 0;
+  private imageCapabilityProbe?: Promise<unknown>;
   private capabilityTimer?: NodeJS.Timeout;
   private capabilityError?: string;
   private readonly capabilityControllers = new Set<AbortController>();
@@ -1184,6 +1190,7 @@ export class GalxaiRelayServer extends EventEmitter {
           const models = await (this.config.capabilityDiscovery ?? ((shard, signal) => discoverOpenAIModels(shard, signal, fetch, process.env.RELAY_CAPABILITY_INVENTORY_URL)))(shard, controller.signal);
           this.capabilities.publishInventory(ticket, models);
           this.capabilityError = undefined;
+          this.maybeRefreshImageAlias(shard);
         } catch (error) {
           this.capabilityError = error instanceof CapabilityDiscoveryError ? error.code : 'inventory_unavailable';
           if (error instanceof CapabilityDiscoveryError && error.code === 'invalid_credential') {
@@ -1194,6 +1201,51 @@ export class GalxaiRelayServer extends EventEmitter {
       }
     })();
     try { await this.capabilityRefresh; } finally { this.capabilityRefresh = undefined; }
+  }
+
+  private maybeRefreshImageAlias(shard: ShardRecord): void {
+    if (!this.config.codexImageToolAlias || shard.accessToken.startsWith('sk-') || this.imageCapabilityProbe || this.isDraining || Date.now() < this.nextImageProbeAt) return;
+    if (this.shardReadyAt(shard) > Date.now() || shard.inFlight >= this.config.shardConcurrency || this.imageControllers.size) return;
+    const record = this.capabilities.get(shard.id);
+    if (!record?.models.some(m => m.model === CODEX_IMAGE_ALIAS.executionModel && m.state === 'AVAILABLE' && m.expiresAtMs > Date.now())) return;
+    const alias = record.models.find(m => m.model === `image:${CODEX_IMAGE_ALIAS.requestedModel}`);
+    if (alias?.state === 'AVAILABLE' && alias.expiresAtMs > Date.now() + 600000) return;
+    // One paid verification at startup, then at most once per 50 minutes when idle.
+    // Real successful image requests renew the evidence and avoid extra probes.
+    this.nextImageProbeAt = Date.now() + 600000;
+    this.imageCapabilityProbe = this.verifyImageCapability(CODEX_IMAGE_ALIAS.requestedModel, 'A small blue ceramic bee on a plain cream background. No text.')
+      .catch(() => { this.imageProbeFailures = Math.min(3, this.imageProbeFailures + 1); this.nextImageProbeAt = Date.now() + Math.min(3600000, 600000 * 2 ** (this.imageProbeFailures - 1)); })
+      .finally(() => { this.imageCapabilityProbe = undefined; });
+  }
+
+  private async verifyImageCapability(model: string, prompt: string) {
+    const shard = this.shardsTable.getAll()[0];
+    if (this.isDraining || !shard || this.shardReadyAt(shard) > Date.now() || shard.inFlight >= this.config.shardConcurrency || this.imageControllers.size) throw new RequestError(503, 'probe_busy', 'Shard is not ready for an image probe.');
+    const execution = imageExecution(model, shard.accessToken.startsWith('sk-'), this.config.codexImageToolAlias);
+    const alias = execution.routingMode === 'codex_image_tool_alias';
+    if (alias && !this.capabilities.eligibleShardIds(execution.executionModel).includes(shard.id)) throw new RequestError(503, 'model_temporarily_unavailable', 'The compatibility execution model is unavailable.');
+    const ticket = this.capabilities.beginObservation(shard.id, `image:${model}`)!;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 90000);
+    this.imageControllers.add(controller);
+    this.shardsTable.put(shard.id, { ...shard, inFlight: shard.inFlight + 1 });
+    try {
+      const result = shard.accessToken.startsWith('sk-')
+        ? await this.synthesizeImageViaOpenAiRest(prompt, {model}, shard.accessToken, controller.signal)
+        : await this.synthesizeImageViaCodex(prompt, execution.executionModel, shard, undefined, controller.signal);
+      const bytes = Buffer.from(result.b64_json, 'base64');
+      const valid = bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))
+        || (bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255)
+        || (bytes.toString('ascii',0,4) === 'RIFF' && bytes.toString('ascii',8,12) === 'WEBP');
+      if (!valid || bytes.length < 32) throw new RequestError(502, 'invalid_image', 'The upstream did not return a valid image payload.');
+      const published = this.capabilities.observe(ticket, `image:${model}`, 'AVAILABLE', alias ? 'verified_codex_image_tool' : undefined, alias);
+      if (alias && published) { this.imageProbeFailures = 0; this.nextImageProbeAt = Date.now() + 3000000; }
+      return { verified: published, model, bytes: bytes.length, expiresInMs: alias ? IMAGE_TOOL_EVIDENCE_TTL_MS : this.config.capabilityTtlMs, ...execution };
+    } catch (error: any) {
+      const negative = classifyCapabilityFailure(error.upstream);
+      if (negative) this.capabilities.observe(ticket, `image:${model}`, negative.state, negative.reason, alias);
+      throw error;
+    } finally { clearTimeout(timeout); this.imageControllers.delete(controller); this.releaseShard(shard.id); }
   }
 
   private updateCapabilityHealth() {
@@ -1466,30 +1518,9 @@ export class GalxaiRelayServer extends EventEmitter {
         validateModelRequest(body, true);
         if (!body.model) throw new RequestError(400, 'model_required', 'Specify the exact image execution model.');
         if (this.isDraining) throw new RequestError(503, 'server_draining', 'Relay is draining.');
-        const shard = this.shardsTable.getAll()[0];
-        if (!shard || this.shardReadyAt(shard) > Date.now() || shard.inFlight >= this.config.shardConcurrency || this.imageControllers.size) throw new RequestError(503, 'probe_busy', 'Shard is not ready for an image probe.');
-        const ticket = this.capabilities.beginObservation(shard.id, `image:${body.model}`)!;
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 90000);
-        this.imageControllers.add(controller);
-        this.shardsTable.put(shard.id, { ...shard, inFlight: shard.inFlight + 1 });
-        try {
-          const result = shard.accessToken.startsWith('sk-')
-            ? await this.synthesizeImageViaOpenAiRest(body.prompt, body, shard.accessToken, controller.signal)
-            : await this.synthesizeImageViaCodex(body.prompt, body.model, shard, undefined, controller.signal);
-          const bytes = Buffer.from(result.b64_json, 'base64');
-          const validImage = bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))
-            || (bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255)
-            || (bytes.toString('ascii',0,4) === 'RIFF' && bytes.toString('ascii',8,12) === 'WEBP');
-          if (!validImage || bytes.length < 32) throw new RequestError(502, 'invalid_image', 'The upstream did not return a valid image payload.');
-          const published = this.capabilities.observe(ticket, `image:${body.model}`, 'AVAILABLE');
-          res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-          res.end(JSON.stringify({ verified: published, model: body.model, bytes: bytes.length, expiresInMs: this.config.capabilityTtlMs }));
-        } catch (error: any) {
-          const negative = classifyCapabilityFailure(error.upstream);
-          if (negative) this.capabilities.observe(ticket, `image:${body.model}`, negative.state, negative.reason);
-          throw error;
-        } finally { clearTimeout(timeout); this.imageControllers.delete(controller); this.releaseShard(shard.id); }
+        const result = await this.verifyImageCapability(body.model, body.prompt);
+        res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+        res.end(JSON.stringify(result));
       } catch (error) {
         const failure = error instanceof RequestError ? error : new RequestError(502, 'image_probe_failed', 'Image capability verification failed.');
         res.writeHead(failure.status, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: { code: failure.code, message: failure.message } }));
@@ -1859,6 +1890,7 @@ export class GalxaiRelayServer extends EventEmitter {
               },
             ],
             model: requestedModel,
+            execution: dispatched.execution,
           };
 
           if (idempotencyKey) {
@@ -1874,6 +1906,8 @@ export class GalxaiRelayServer extends EventEmitter {
           res.writeHead(200, {
             'Content-Type': 'application/json',
             'X-Galx-Shard-Id': shardId,
+            'X-Galx-Execution-Model': dispatched.execution.executionModel,
+            'X-Galx-Routing-Mode': dispatched.execution.routingMode,
             ...this.getRateLimitHeaders(),
           });
           res.end(JSON.stringify(responseData));
@@ -1915,15 +1949,17 @@ export class GalxaiRelayServer extends EventEmitter {
       attempted.add(shard.id);
       const capabilityTicket = this.capabilities.beginObservation(shard.id, `image:${body.model || model}`);
       this.telemetry.attempt(traceId, shard.id, shard.accessToken.startsWith('sk-') ? 'http' : 'websocket');
+      this.telemetry.model(traceId, model, imageExecution(model, shard.accessToken.startsWith('sk-'), this.config.codexImageToolAlias).executionModel);
       if (shard.accessToken.startsWith('sk-')) this.telemetry.model(traceId, body.model, body.model || 'dall-e-3');
       try {
         const result = shard.accessToken.startsWith('sk-')
           ? await this.synthesizeImageViaOpenAiRest(prompt, body, shard.accessToken, signal)
-          : await this.synthesizeImageViaCodex(prompt, model, shard, traceId, signal);
-        if (capabilityTicket) this.capabilities.observe(capabilityTicket, `image:${body.model || model}`, 'AVAILABLE');
+          : await this.synthesizeImageViaCodex(prompt, imageExecution(model, false, this.config.codexImageToolAlias).executionModel, shard, traceId, signal);
+        const execution = imageExecution(model, shard.accessToken.startsWith('sk-'), this.config.codexImageToolAlias);
+        if (capabilityTicket) this.capabilities.observe(capabilityTicket, `image:${body.model || model}`, 'AVAILABLE', undefined, execution.routingMode === 'codex_image_tool_alias');
         this.releaseShard(shard.id, true);
         this.retryBudget.success();
-        return { result, shardId: shard.id };
+        return { result, shardId: shard.id, execution };
       } catch (error: any) {
         if (signal.aborted) { this.releaseShard(shard.id); throw signal.reason; }
         const negative = classifyCapabilityFailure(error.upstream);

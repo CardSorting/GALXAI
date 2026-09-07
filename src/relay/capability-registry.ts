@@ -1,3 +1,4 @@
+import { CODEX_IMAGE_ALIAS, IMAGE_TOOL_EVIDENCE_TTL_MS } from './image-compatibility.js';
 export type CapabilityState = 'UNKNOWN' | 'AVAILABLE' | 'TEMPORARILY_UNAVAILABLE' | 'NOT_AUTHORIZED' | 'DEGRADED';
 export type RelayLifecycle = 'STARTING' | 'DISCOVERING_CAPABILITIES' | 'HEALTHY' | 'CAPABILITY_EMPTY' | 'DRAINING' | 'UNAVAILABLE';
 export interface ModelCapability {
@@ -10,6 +11,8 @@ export interface ModelCapability {
   inventoryVersion?: number;
   version?: number;
   reason?: string;
+  executionModel?: string;
+  routingMode?: 'codex_image_tool_alias';
   restoreAfterMs?: number;
 }
 export interface RelayCapabilityRecord {
@@ -115,9 +118,10 @@ export class CapabilityRegistry {
       capabilityEmptySinceMs: usable ? undefined : old.capabilityEmptySinceMs ?? now });
     return true;
   }
-  observe(ticket: CapabilityRefreshTicket, model: string, state: CapabilityState, reason?: string): boolean {
+  observe(ticket: CapabilityRefreshTicket, model: string, state: CapabilityState, reason?: string, compatibilityAlias = false): boolean {
     const old = this.shards.get(ticket.shardId);
     if (!old || old.generation !== ticket.generation || !validModelId(model)) return false;
+    if (compatibilityAlias && model !== `image:${CODEX_IMAGE_ALIAS.requestedModel}`) return false;
     const prior = old.models.find(m => m.model === model);
     const changed = ticket.modelVersion !== undefined ? ticket.modelVersion !== (prior?.version ?? 0) : old.revision !== ticket.revision;
     // A concurrent success cannot suppress a denial within the same inventory epoch.
@@ -129,7 +133,8 @@ export class CapabilityRegistry {
     // A successful older in-flight response must not erase a newer negative observation.
     if (state === 'AVAILABLE' && (prior?.restoreAfterMs ?? 0) > now) return false;
     const models: ModelCapability[] = [...old.models.filter(m => m.model !== model), { model, state,
-      observedAtMs: now, expiresAtMs: now + this.ttlMs, source: 'response', version: old.revision + 1, inventoryBacked: prior?.inventoryBacked, inventoryVersion: prior?.inventoryVersion, reason,
+      observedAtMs: now, expiresAtMs: now + (compatibilityAlias && state === 'AVAILABLE' ? IMAGE_TOOL_EVIDENCE_TTL_MS : this.ttlMs), source: 'response',
+      ...(compatibilityAlias ? { executionModel: CODEX_IMAGE_ALIAS.executionModel, routingMode: CODEX_IMAGE_ALIAS.routingMode } : {}), version: old.revision + 1, inventoryBacked: compatibilityAlias ? false : prior?.inventoryBacked, inventoryVersion: prior?.inventoryVersion, reason,
       restoreAfterMs: state === 'AVAILABLE' ? undefined : now + this.stabilizationMs }];
     const usable = models.some(m => m.state === 'AVAILABLE' && m.expiresAtMs > now);
     this.write({ ...old, models, revision: old.revision + 1,
@@ -149,7 +154,7 @@ export class CapabilityRegistry {
       || [record.latencyMs, record.recentErrors, record.queueDepth].some(n => !Number.isFinite(n) || n < 0)) return false;
     if (!Array.isArray(record.models) || record.models.length > 2000 || record.models.some(m => !m || !validModelId(m.model)
       || !['UNKNOWN', 'AVAILABLE', 'TEMPORARILY_UNAVAILABLE', 'NOT_AUTHORIZED', 'DEGRADED'].includes(m.state)
-      || !Number.isFinite(m.observedAtMs) || m.observedAtMs > this.now() + 10000 || !Number.isFinite(m.expiresAtMs) || m.expiresAtMs > this.now() + this.ttlMs + 10000)) return false;
+      || !Number.isFinite(m.observedAtMs) || m.observedAtMs > this.now() + 10000 || !Number.isFinite(m.expiresAtMs) || m.expiresAtMs > this.now() + (m.model === `image:${CODEX_IMAGE_ALIAS.requestedModel}` && m.source === 'response' && m.routingMode === CODEX_IMAGE_ALIAS.routingMode && m.executionModel === CODEX_IMAGE_ALIAS.executionModel ? IMAGE_TOOL_EVIDENCE_TTL_MS : this.ttlMs) + 10000)) return false;
     if (!Number.isFinite(record.activeStreams) || record.activeStreams < 0 || !Number.isFinite(record.capacity) || record.capacity < 1) return false;
     this.write(structuredClone(record));
     return true;
@@ -168,7 +173,8 @@ export class CapabilityRegistry {
       const shard = this.shards.get(id)!;
       const capability = shard.models.find(m => m.model === model);
       return shard.lifecycle === 'HEALTHY' && shard.health === 'healthy' && shard.heartbeatExpiresAtMs > now
-        && capability?.state === 'AVAILABLE' && capability.expiresAtMs > now ? [shard] : [];
+        && capability?.state === 'AVAILABLE' && capability.expiresAtMs > now
+        && (!capability.executionModel || shard.models.some(m => m.model === capability.executionModel && m.state === 'AVAILABLE' && m.expiresAtMs > now)) ? [shard] : [];
     });
   }
   eligible(model: string): RelayCapabilityRecord[] { return this.eligibleRecords(model).map(s => structuredClone(s)); }

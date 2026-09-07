@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { createHash, randomBytes } from 'node:crypto';
+import { randomBytes } from 'node:crypto';
+import { desiredShard } from '../src/relay/desired-shards.js';
 import { readShardRegistry, decryptRegistryShard } from '../src/relay/shard-registry.js';
 import { DockerShardDriver } from '../src/relay/docker-shard-driver.js';
 import { RelayFederationLifecycle, type DesiredShard } from '../src/relay/federation-lifecycle.js';
@@ -42,20 +43,12 @@ try {
     const rows = await readShardRegistry();
     const shards: DesiredShard[] = [];
     for (const row of rows) {
-      if (row.provider !== 'openai' || row.permission_retracted || !['active', 'healthy', 'warming_up', 'half_open', 'cooldown', 'exhausted', 'rate_limited'].includes(row.status)) continue;
-      const credential = decryptRegistryShard(row);
-      // An unreadable credential is missing authority, not a deletion event.
-      if (!credential?.accessToken || !credential?.accountId) throw new Error('Cannot decrypt an active shard credential');
-      const expiries = [Number(row.credential_expires_at_ms), Number(credential.expiresAtMs)].filter(n => Number.isFinite(n) && n > 0);
-      try { const exp = JSON.parse(Buffer.from(credential.accessToken.split('.')[1], 'base64url').toString()).exp; if (typeof exp === 'number' && Number.isFinite(exp)) expiries.push(exp * 1000); } catch {}
-      shards.push({ id: row.id, provider: row.provider, accountId: credential.accountId, accessToken: credential.accessToken,
-        credentialRevision: createHash('sha256').update(JSON.stringify([credential.accessToken, credential.accountId])).digest('hex'),
-        cooldownUntilMs: Number(row.cooldown_until_ms) || undefined,
-        expiresAtMs: expiries.length ? Math.min(...expiries) : undefined });
+      const shard = desiredShard(row, decryptRegistryShard(row));
+      if (shard) shards.push(shard);
     }
     return shards;
   };
-  lifecycle = new RelayFederationLifecycle(read, new DockerShardDriver({ namespace, secret, image: process.env.RELAY_FEDERATION_IMAGE || 'galxai-relay:vnext' }));
+  lifecycle = new RelayFederationLifecycle(read, new DockerShardDriver({ namespace, secret, codexImageToolAlias: process.env.RELAY_CODEX_IMAGE_TOOL_ALIAS === 'true', image: process.env.RELAY_FEDERATION_IMAGE || 'galxai-relay:vnext' }));
   server = new RelayFederationServer(lifecycle, { secret, apiKeys: (process.env.RELAY_API_KEYS || '').split(',').filter(Boolean),
     adminKeys: (process.env.RELAY_ADMIN_API_KEYS || '').split(',').filter(Boolean), port: Number(process.env.RELAY_FEDERATION_PORT || 3301) });
   await lifecycle.reconcile();

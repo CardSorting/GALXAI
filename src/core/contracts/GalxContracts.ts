@@ -688,6 +688,7 @@ export interface ImageGenerationRequest {
 }
 
 export interface ImageGenerationResponse {
+  execution?: { requestedModel: string; executionModel: string; routingMode: 'exact' | 'codex_image_tool_alias'; tool?: string; imageModelSelection: string };
   created: number;
   data: Array<{
     url?: string;

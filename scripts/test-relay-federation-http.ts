@@ -66,3 +66,34 @@ test('real HTTP federation preserves exact models, tenant ownership and active s
     assert.equal((await fetch(base+'/federation')).status,200);
   } finally { await front.stop();await lifecycle.stop();for(const socket of ws.clients)socket.terminate();await new Promise<void>(resolve=>ws.close(()=>resolve()));await new Promise<void>(resolve=>upstream.close(()=>resolve()));fs.rmSync(directory,{recursive:true,force:true}); }
 });
+
+test('image alias is verified before admission and reports its real execution contract', async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(),'galx-image-alias-'));
+  const upstream = http.createServer(); const ws = new WebSocketServer({server:upstream});
+  const frames: any[] = [];
+  const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  ws.on('connection', socket => socket.on('message', raw => {
+    const frame = JSON.parse(raw.toString()); frames.push(frame);
+    assert.equal(frame.model,'gpt-5.6-terra'); assert.equal(frame.tools[0].type,'image_generation');
+    socket.send(JSON.stringify({type:'response.output_item.done',item:{type:'image_generation_call',result:png}}));
+    socket.send(JSON.stringify({type:'response.completed'}));
+  }));
+  await new Promise<void>(r=>upstream.listen(0,'127.0.0.1',r));
+  const relay = new GalxaiRelayServer({port:0,host:'127.0.0.1',assignedShard:{id:'a',accountId:'a',accessToken:'oauth-fixture'},assignedShardId:'a',relayId:'relay-a',generation:'one',
+    apiKeys:['client'],adminApiKeys:['admin'],registryEnabled:false,discoverHostCredentials:false,codexImageToolAlias:true,
+    stateSnapshotPath:path.join(directory,'state.json'),shardsJsonPath:path.join(directory,'absent'),drainTimeoutMs:20,
+    capabilityDiscovery:async()=>['gpt-5.6-terra'],wsEndpoint:`ws://127.0.0.1:${(upstream.address() as any).port}`});
+  try {
+    await relay.start(); const internals=relay as any;
+    await until(()=>!!internals.capabilities.select('image:gpt-image-2'));
+    assert.equal(frames.length,1); // Exactly one discovery probe.
+    await internals.refreshCapabilities(); assert.equal(frames.length,1);
+    const base=`http://127.0.0.1:${internals.server.address().port}`;
+    const response=await fetch(base+'/v1/images/generations',{method:'POST',headers:{Authorization:'Bearer client','Content-Type':'application/json'},body:JSON.stringify({model:'gpt-image-2',prompt:'test'})});
+    assert.equal(response.status,200); assert.equal(response.headers.get('x-galx-routing-mode'),'codex_image_tool_alias');
+    const result=await response.json(); assert.equal(result.data[0].b64_json,png);assert.equal(result.execution.executionModel,'gpt-5.6-terra');assert.equal(result.execution.imageModelSelection,'provider_managed');
+    assert.equal(frames.length,2);
+    const denied=await fetch(base+'/v1/images/generations',{method:'POST',headers:{Authorization:'Bearer client','Content-Type':'application/json'},body:JSON.stringify({model:'gpt-image-1',prompt:'test'})});
+    assert.equal(denied.status,503); assert.equal(frames.length,2);
+  } finally { await relay.stop();for(const socket of ws.clients)socket.terminate();await new Promise<void>(r=>ws.close(()=>r()));await new Promise<void>(r=>upstream.close(()=>r()));fs.rmSync(directory,{recursive:true,force:true}); }
+});

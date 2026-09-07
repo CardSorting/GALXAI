@@ -9,6 +9,7 @@ export interface DockerShardDriverOptions {
   namespace: string;
   image: string;
   secret: string;
+  codexImageToolAlias?: boolean;
   /** Explicit test upstream overrides; never supplied by an API request. */
   wsEndpoint?: string;
   inventoryUrl?: string;
@@ -63,6 +64,7 @@ export class DockerShardDriver implements RelayDriver {
     const env = { ...process.env,
       RELAY_SHARD_ID: shard.id, RELAY_ID: id, RELAY_GENERATION: generation,
       RELAY_ASSIGNED_SHARD: JSON.stringify({ id: shard.id, accountId: shard.accountId, accessToken: shard.accessToken, expiresAtMs: shard.expiresAtMs, cooldownUntilMs: shard.cooldownUntilMs, status: (shard.cooldownUntilMs ?? 0) > Date.now() ? 'cooldown' : 'active' }),
+      RELAY_CODEX_IMAGE_TOOL_ALIAS: this.options.codexImageToolAlias ? 'true' : 'false',
       RELAY_API_KEYS: keys.inferenceKey, RELAY_ADMIN_API_KEYS: keys.adminKey,
       ...(this.options.wsEndpoint ? { CODEX_WS_ENDPOINT: this.options.wsEndpoint } : {}),
       ...(this.options.inventoryUrl ? { RELAY_CAPABILITY_INVENTORY_URL: this.options.inventoryUrl } : {}) };
@@ -74,7 +76,7 @@ export class DockerShardDriver implements RelayDriver {
       '--tmpfs', '/tmp:rw,noexec,nosuid,size=16m,uid=1000,gid=1000',
       '--mount', `type=volume,source=${id}-state,target=/app/.broccolidb`];
     // Values travel through the subprocess environment, not command-line arguments.
-    for (const name of ['RELAY_SHARD_ID', 'RELAY_ID', 'RELAY_GENERATION', 'RELAY_ASSIGNED_SHARD', 'RELAY_API_KEYS', 'RELAY_ADMIN_API_KEYS',
+    for (const name of ['RELAY_SHARD_ID', 'RELAY_ID', 'RELAY_GENERATION', 'RELAY_ASSIGNED_SHARD', 'RELAY_CODEX_IMAGE_TOOL_ALIAS', 'RELAY_API_KEYS', 'RELAY_ADMIN_API_KEYS',
       ...(this.options.wsEndpoint ? ['CODEX_WS_ENDPOINT'] : []), ...(this.options.inventoryUrl ? ['RELAY_CAPABILITY_INVENTORY_URL'] : [])]) args.push('-e', name);
     args.push(this.options.image);
     await this.docker(args, env);
