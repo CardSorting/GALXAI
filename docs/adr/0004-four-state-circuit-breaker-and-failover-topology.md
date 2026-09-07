@@ -1,5 +1,7 @@
 # ADR 0004: 4-State Circuit Breaker & Half-Open Canary Traffic Warming
 
+> Current scope (2026-09-07): This historical platform circuit-breaker decision is not the standalone relay state machine. See ADR 0088 for later platform work and [ADR 0122](0122-isolated-authenticated-relay-and-bounded-recovery.md) for current relay rejection, cooldown, single-probe recovery, and finite retries.
+
 ## Status
 **Accepted** (Implemented and Verified)
 

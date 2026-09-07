@@ -1,5 +1,7 @@
 # 🚀 GALXAI Quickstart: The 30-Second Guide
 
+> Runtime boundary: this guide describes the product/application API. The standalone relay has a separate [API contract](RELAY_API_REFERENCE.md), inference and administrator keys, and an HTTP 202 chat job workflow. Its local deployment is covered by the [relay runbook](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md). Product keys, relay keys, and upstream provider credentials are distinct.
+
 Add AI capabilities to your project in under 30 seconds with **wholesale rates (25%–40% off)**, **zero backend proxy wiring**, and **zero user-facing API key modals**.
 
 ---

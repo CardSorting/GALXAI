@@ -1,5 +1,7 @@
 # 51. Enterprise OAuth 2.0 / 2.1, FAPI Standards, Token Lifecycle & Identity Mesh
 
+> Current scope (2026-09-07): Provider OAuth lifecycle capabilities described here must not be assumed on every inference path. The standalone relay does not automatically refresh rejected upstream credentials: it disables the current credential locally and requires identifiable rotation. See [ADR 0122](0122-isolated-authenticated-relay-and-bounded-recovery.md).
+
 Date: 2026-08-24
 Status: Accepted
 

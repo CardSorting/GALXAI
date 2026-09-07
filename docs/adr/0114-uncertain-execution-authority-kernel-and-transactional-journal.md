@@ -1,5 +1,7 @@
 # ADR 0114: Uncertain Execution Authority Kernel and Transactional Journal
 
+> Current scope (2026-09-07): The authority kernel described here is a separate execution subsystem. The standalone relay does not dispatch tools through it, grant model output local execution authority, or use its journal as relay job state. Its current boundary is [ADR 0122](0122-isolated-authenticated-relay-and-bounded-recovery.md); ADR 0113 scheduling remains simulation scope.
+
 ## Metadata
 
 * **Status**: Accepted

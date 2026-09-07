@@ -9,6 +9,12 @@
 * **Impact**: credential custody, multi-worker consistency, revocation, auditability
 * **Migrations**: `20260904150000` through `20260904210000`
 
+## Current implementation scope (2026-09-07)
+
+The durable lease requirements below describe the platform pool's database-backed dispatch path. The standalone `src/relay/relay-server.ts` reads the PostgreSQL credential registry but does **not** acquire a database lease for each upstream attempt. Its shard slots, retry budget, and observed provider-auth rejection are process-local. An upstream rejection does not automatically revoke the registry row or propagate to another relay replica. [ADR 0122](0122-isolated-authenticated-relay-and-bounded-recovery.md) defines that deployed relay boundary.
+
+“Secret-free” refers to credential projections/journals excluding provider secrets. Relay job checkpoints can still contain unfinished prompt/messages; it is not a zero-retention promise. The Docker deployment disables personal credential discovery and stores relay state in a dedicated named volume.
+
 ## 1. Context
 
 The shard fleet was previously persisted to `.galx-shards.json` and mirrored to PostgreSQL with fire-and-forget writes. That design created two competing realities: a process could route from a stale local file after a remote revocation, and a failed database write could still appear successful locally. A repository-embedded fallback encryption secret also made historical local ciphertext recoverable by anyone with source access. Automatic edge synchronization created a third credential store by copying long-lived provider tokens into edge KV.
@@ -74,9 +80,9 @@ This mirrors the useful part of Kubernetes LIST/watch and Envoy xDS semantics wi
 
 The database lease procedures are backend-only. `PUBLIC`, `anon`, and `authenticated` have no execute privilege; only the backend service role may call them. Repository-level lease acquisition, release, and scavenging never fall back to process-local authority when PostgreSQL is configured. This preserves fencing semantics under database partitions.
 
-The high-speed pool still scores candidates and maintains per-process scheduling telemetry, but that selection is only a proposal. PostgreSQL locks the shard row and independently checks health, revocation, cooldown, credential expiry, continuously refilled token/request capacity, durable provider rolling-window history, and the global concurrency ceiling before it recognizes work ownership. Fractional refill carry is stored explicitly so frequent checks cannot erase sub-unit credit. Production chat and image dispatchers await that decision before receiving a usable lease and await idempotent reconciliation before retiring it locally.
+The high-speed pool still scores candidates and maintains per-process scheduling telemetry, but that selection is only a proposal. PostgreSQL locks the shard row and independently checks health, revocation, cooldown, credential expiry, continuously refilled token/request capacity, durable provider rolling-window history, and the global concurrency ceiling before it recognizes work ownership. Fractional refill carry is stored explicitly so frequent checks cannot erase sub-unit credit. Platform pool chat and image dispatchers on this database-backed path await that decision before receiving a usable lease and await idempotent reconciliation before retiring it locally.
 
-Every production acquisition requires an idempotency key. Lease procedures use a consistent shard-before-lease lock order to avoid acquisition/release/scavenger deadlocks. Long-lived streams renew their lease by heartbeat; renewal requires the current fencing token and transport is cancelled if authority can no longer be proven. Synchronous pool methods remain available only for simulations and operator diagnostics; they must never be described as cross-worker ownership.
+Every acquisition through this database-backed lease path requires an idempotency key. Lease procedures use a consistent shard-before-lease lock order to avoid acquisition/release/scavenger deadlocks. Long-lived streams renew their lease by heartbeat; renewal requires the current fencing token and transport is cancelled if authority can no longer be proven. Synchronous pool methods remain available only for simulations and operator diagnostics; they must never be described as cross-worker ownership.
 
 The service-role Data API fallback uses a database-owned registry upsert function. Its conflict path updates only control-plane fields and cannot overwrite live reservation, usage, concurrency, or fencing counters from a stale worker projection.
 

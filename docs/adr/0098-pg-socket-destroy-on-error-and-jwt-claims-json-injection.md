@@ -11,7 +11,7 @@ When running transactions over pooled connections with session context impersona
 
 ## Decision
 1. **Forced Socket Destruction on Failure (`client.release(hasError)`)**:
-   - In [`src/lib/db/postgres.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/db/postgres.ts), modified both `executePostgresTransaction` and `executePostgresTransactionAsUser` to track `hasError`.
+   - In [`src/lib/db/postgres.ts`](../../src/lib/db/postgres.ts), modified both `executePostgresTransaction` and `executePostgresTransactionAsUser` to track `hasError`.
    - In the `finally` block, executes `client.release(hasError)`. In `pg` (`node-postgres`), passing a truthy error flag instructs the connection pool to **immediately destroy the TCP socket** rather than recycling it.
 2. **Full JWT Claims JSON Injection**:
    - Injected both scalar and JSON claims into the transaction session:

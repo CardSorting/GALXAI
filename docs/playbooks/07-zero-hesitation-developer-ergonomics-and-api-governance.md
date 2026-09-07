@@ -44,15 +44,15 @@ The following matrix documents how the gateway absorbs each ecosystem's mental m
 
 ### SOP 01: Adding a New Model Alias to the Catalog
 When upstream providers release new models or common nicknames emerge in the developer community:
-1. Open [`src/core/router/ModelCatalog.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/core/router/ModelCatalog.ts).
+1. Open [`src/core/router/ModelCatalog.ts`](../../src/core/router/ModelCatalog.ts).
 2. Locate the `UNIVERSAL_SYNONYMS` table in `ModelCatalog.resolveModel()`.
 3. Add the new aliases mapped to their target canonical ID (e.g. `'claude-3-7-sonnet': 'gpt-5.6-sol'`).
-4. Add corresponding test cases in [`scripts/verify-zero-hesitation-ergonomics.ts`](file:///Users/bozoegg/Desktop/GALXAI/scripts/verify-zero-hesitation-ergonomics.ts).
+4. Add corresponding test cases in [`scripts/verify-zero-hesitation-ergonomics.ts`](../../scripts/verify-zero-hesitation-ergonomics.ts).
 5. Run verification suite: `npx tsx scripts/verify-zero-hesitation-ergonomics.ts`.
 
 ### SOP 02: Maintaining Cloudflare Edge Route Parity
 Whenever a new HTTP route or ingestion behavior is added to Next.js App Router:
-1. Open [`src/workers/cloudflare/GalxEdgeGateway.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/workers/cloudflare/GalxEdgeGateway.ts).
+1. Open [`src/workers/cloudflare/GalxEdgeGateway.ts`](../../src/workers/cloudflare/GalxEdgeGateway.ts).
 2. Ensure path dispatching (`url.pathname`) and method allowances (`POST`, `GET`) match the App Router route behavior.
 3. Test edge worker routing: `npm run worker:test`.
 

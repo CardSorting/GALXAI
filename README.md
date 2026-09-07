@@ -1,12 +1,11 @@
 # 🌌 GALXAI: The AI Consumption & Acceleration Layer
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/CardSorting/GALXAI)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
-[![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 
-> **The fastest path from AI prototype to first dollar.**  
-> Compress engineering time, eliminate fragile backend proxies, and get **25%–40% wholesale pricing** on OpenAI models (GPT-5.6 Sol, Terra, Luna & GPT-Image Suites) with **75% prompt caching pass-through**.
+GALXAI provides inference APIs, SDK integrations, model discovery, and operational controls for applications and agents. The application, Cloudflare Worker, and standalone relay are separate runtimes with distinct deployment and authentication boundaries.
+
+The relay runs inference inside an isolated container; user tools execute in the consuming agent runtime. See [Architecture](docs/ARCHITECTURE.md), [relay setup and deployment](docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md), and [ADR 0122](docs/adr/0122-isolated-authenticated-relay-and-bounded-recovery.md) for the current strategy and verified scope.
 
 ---
 
@@ -24,7 +23,7 @@ Building AI features normally means paying a steep "infrastructure tuition": wri
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ 2. The 1-Line Drop-In Way (For Existing OpenAI Codebases)                  │
 │    Add `import 'galxai/patch'` at the top of your app.                      │
-│    All existing OpenAI calls automatically get wholesale pricing & caching. │
+│    Existing OpenAI calls use the configured GALXAI integration. │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ 3. The AI Coding Agent Way (For Cursor, Claude Code, Windsurf, Devin)       │
 │    Run `npx galxai skills`. Your AI assistant immediately knows how to      │
@@ -187,35 +186,18 @@ npm run db:test
 
 ---
 
-## 📊 Why Developers Choose GALXAI
+## Documentation
 
-| Feature | Raw OpenAI / Retail | GALXAI |
-| :--- | :--- | :--- |
-| **Pricing** | Full Retail List Price | **25%–40% Wholesale Discount** |
-| **Context Window Envelope** | Static / Clamped | **Dynamic 1.05M Frontier Sizing (Zero Clamps)** |
-| **Prompt Representation** | Full uncompressed payload | **BroccoliDB Adaptive Selection ($C \to \{\text{ID}(C), T(C)\}$)** |
-| **Long-Horizon Memory** | Monolithic lossy summaries | **Hybrid 5-Level Pyramid in RAM (<0.08ms)** |
-| **Seat Quota Model** | Static monthly cliffs | **Dual Sliding Windows (5-Hour & Weekly Meters)** |
-| **Prompt Caching** | Often absorbed by provider | **100% Pass-Through (75% Rebate)** |
-| **Integration Setup** | Requires manual routing infrastructure | **OpenAI-compatible endpoint and native SDKs** |
-| **API Key Security** | Vulnerable to client leaks | **Server-Only `.env.local` injection** |
-| **AI Agent Directives** | Agents hallucinate boilerplate | **1-Line `npx galxai skills` setup** |
-| **Rate Limit Stalls** | 429 errors during traffic spikes | **Automatic Sub-1ms Anycast Failover** |
+- [Documentation catalog](docs/README.md)
+- [Architecture and runtime boundaries](docs/ARCHITECTURE.md)
+- [Architecture decision records](docs/adr/README.md)
+- [Relay setup, deployment, and rollback](docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md)
+- [Standalone relay API](docs/RELAY_API_REFERENCE.md)
+- [Product API reference](docs/API_REFERENCE.md)
+- [External agent integration](docs/LUMI.md)
+- [Inference verification](docs/INFERENCE_PIPELINE_VERIFICATION.md)
+- [Maintainer guides](docs/maintainers/README.md)
+- [Quickstart](docs/QUICKSTART.md)
+- [Contributing](CONTRIBUTING.md)
 
----
-
-## 📚 Documentation & Guides
-
-- 🛡️ **[Maintainers Knowledge Base (20 Manuals)](docs/maintainers/README.md)**: Deep internal architectural blueprints, 30-day onboarding ramp, subsystem matrices, CI specs, outage failovers, and on-call runbooks.
-- 🏛️ **[Architecture Decision Records (119 ADRs)](docs/adr/README.md)**: Deep technical specifications from ADR 0001 to ADR 0119, including the inference-first product boundary, authoritative shard fleet, native Codex wire, dual rolling windows, and hybrid context pyramid.
-- 🚀 **[Real Inference Pipeline & Automated Verification](docs/INFERENCE_PIPELINE_VERIFICATION.md)**: Zero-fallback real inference pipeline (`POST /v1/chat/completions`), 8-phase verification harness, generated sample codebases, and wallet holds.
-- 🌌 **[LUMI: Stellar Pass & Multi-Account Fleet Substrate](docs/LUMI.md)**: $10/mo developer pass, authoritative central shard pool, native Codex WebSocket wire, 40 req / 3 hr sliding-window quotas, and 24/7 autonomous relay containers.
-- 📋 **[Senior Engineering Review: Chat & Rolling Context](docs/SENIOR_ENGINEERING_REVIEW_CHAT_AND_ROLLING_CONTEXT.md)**: Architectural review of Hybrid BroccoliDB (L1) + PostgreSQL (L2) rolling memory, dynamic 1.05M context governor, dual rolling seat quotas, and V44-V53 migrations.
-- 🤝 **[Contributing Guide](CONTRIBUTING.md)**: Development workflow, Conventional Commits, and automated git hooks (`npm run hooks:install`).
-- 🥦 **[BroccoliDB Compaction Onboarding Guide](docs/BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md)**: 19 streaming modes, 180 domain compactors, and the Epistemic Measurement Machinery.
-- 📊 **[Empirical Benchmarks & Inference Boundary](docs/BENCHMARKS.md)**: Head-to-head provider boundary tests on OpenAI models with $/success accounting.
-- ⚡ **[Quickstart Guide](docs/QUICKSTART.md)**: 30-second integrations for Next.js, React, Node, and Python.
-- 🌌 **[Universal Developer Client SDK Guide](docs/DEVELOPER_CLIENT_SDK.md)**: Exhaustive manual for the edge-native TypeScript SDK, touchless 1-line APIs, visual synthesis, streaming diagnostics, BroccoliDB substrate, and offline replay testing.
-- 💻 **[SDK Cheatsheet](docs/SDK_CHEATSHEET.md)**: Drop-in code snippets for every major framework.
-- ❓ **[Frequently Asked Questions (FAQs)](docs/FAQS.md)**: Zero-hesitation philosophy, model routing, and BroccoliDB economics.
-- 🔧 **[Troubleshooting & Operational Playbook](docs/TROUBLESHOOTING.md)**: Error codes, remediation steps, and verification commands.
+Pricing, provider capacity, and latency depend on the configured service and workload. Benchmark results are scoped observations, not universal production guarantees.

@@ -30,7 +30,7 @@
 | **Deployment Speed** | 3–4 weeks building custom backend proxies & key vaults | **30 Seconds**: 1-line declarative UI or 1-line OpenAI patch |
 | **Token Economics** | 100% retail list price; prompt cache retained by provider | **30%–40% Wholesale** + 100% prompt cache pass-through |
 | **Data Transfer Fees** | Penalizing bandwidth egress/ingress taxes | **$0.00 Egress / Ingress Transfer Fees** across all POPs |
-| **Network & Latency** | Centralized region hops (120ms–250ms TTFT) | **Global Anycast BGP Edge Routing** (sub-15ms TTFT) |
+| **Network & Latency** | Centralized region hops (120ms–250ms TTFT) | **Global Anycast BGP Edge Routing** (latency depends on the deployed path and provider) |
 | **AI Coding Agent Rules** | Assistant hallucinates leaky backend endpoints | **1-Command Directive (`npx galxai skills`)** for Cursor / Windsurf |
 
 ---
@@ -38,7 +38,7 @@
 ## 3. High-Signal Feature Breakdown
 
 ### 1. Increase Performance
-Maximize the speed and throughput of your AI applications with Anycast edge routing and sub-15ms First Token Latency (TTFT) across global POPs.
+Maximize the speed and throughput of your AI applications with Anycast edge routing and first-output telemetry on the deployed inference path.
 
 ### 2. Remove Bottlenecks
 Eliminate the DevOps overhead of maintaining custom API routes, Docker proxy containers, token bucket limiters, and browser secret key rotation.

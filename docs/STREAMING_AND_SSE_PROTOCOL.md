@@ -1,6 +1,8 @@
 # ⚡ Universal Streaming & SSE Protocols
 
-GALXAI implements high-performance, zero-allocation Server-Sent Events (SSE) streaming compliant with OpenAI, Anthropic, Ollama, and Vercel AI SDK standards (RFC 8895).
+> Scope: examples below describe application compatibility endpoints. The standalone relay uses a separate [HTTP 202 job and SSE contract](RELAY_API_REFERENCE.md), bounded in-memory replay, and explicit restart failure. It has no local tool executor or refund ledger. Full tool/multimodal parameter parity is not established. Provider timing is not guaranteed by early response headers.
+
+GALXAI exposes streaming compatibility paths for downstream integrations. Validate each endpoint and client against the implemented schema; emitting SSE does not establish complete provider API compatibility.
 
 This is a transport specification for downstream integrations. The word `chat` identifies compatible wire schemas; GALXAI does not host a chat application.
 
@@ -139,7 +141,7 @@ for await (const chunk of conv.streamReply('Explain Raft consensus Leader Electi
 
 ## 5. Low-Latency Streaming & TCP Packet Boundary Reassembly
 
-### A. Sub-15ms Unbuffered Stream Headers
+### A. Early Stream Headers
 All streaming gateways inject zero-buffering headers to bypass reverse-proxy chunk queues:
 ```http
 Cache-Control: no-cache, no-transform

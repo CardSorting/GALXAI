@@ -13,7 +13,7 @@ Deploying enterprise inference gateways requires rigorous verification that cann
 6. **Physical Deliverable Verification**: Ensuring that inference outputs produce working, standalone software artifacts rather than truncated text.
 
 ## Decision
-We implemented a standardized automated verification engine in [`scripts/test-inference-pipeline.ts`](file:///Users/bozoegg/Desktop/GALXAI/scripts/test-inference-pipeline.ts) executing strictly against real wire endpoints with direct output emission into [`output-test/`](file:///Users/bozoegg/Desktop/GALXAI/output-test/):
+We implemented a standardized automated verification engine in [`scripts/test-inference-pipeline.ts`](../../scripts/test-inference-pipeline.ts) executing strictly against real wire endpoints with direct output emission into [`output-test/`](../../output-test):
 
 ### 1. The Multi-Phase Lifecycle Architecture
 - **Phase 1: Seeded Account & Workspace Substrate**:

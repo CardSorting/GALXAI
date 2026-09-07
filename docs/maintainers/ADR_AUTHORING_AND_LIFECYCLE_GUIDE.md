@@ -60,7 +60,7 @@ Create new ADR files in `docs/adr/NNNN-slug-title.md` where `NNNN` is a zero-pad
 ---
 
 ## 2. Decision Drivers
-* Driver 1 (e.g. Sub-15ms wire TTFT budget)
+* Driver 1 (e.g. a measured request deadline and bounded retry budget)
 * Driver 2 (e.g. 100% fail-closed anti-hallucination guarantee)
 * Driver 3 (e.g. Zero-copy SSE memory efficiency)
 
@@ -118,3 +118,9 @@ Before marking an ADR as **`Accepted`**, the reviewing Core Architect must confi
 ---
 
 *For the complete index of accepted decisions, see [Architecture Decision Records (0001–0065)](../adr/README.md).* 🥦🏛️
+
+## Runtime truth and supersession
+
+When a decision changes runtime behavior, update the affected deployment runbook, API reference, security guide, troubleshooting guide, and catalogs in the same change. Remove obsolete commands and unsupported guarantees from active instructions; source control retains their history. State which component implements the decision, which paths remain separate, what was actually verified, and when.
+
+For relay changes, ADR 0122 and the relay runbook are the current baseline. Do not transfer platform database-lease guarantees, experimental scheduler results, or application billing behavior into the standalone relay contract. Preserve downstream tool-use capability while documenting that the relay grants no local tool execution authority.

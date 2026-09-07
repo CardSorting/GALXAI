@@ -141,6 +141,6 @@ GALXAI implements seven foundational pillars across its core gateway, edge worke
 - **Unrivaled DX**: Developers can test the gateway via terminal one-liners (`npx galxai "..."`), browser URLs (`/v1/chat/completions?prompt=...`), or standard cURL requests.
 
 ### Verification Strategy
-- Automated unit and integration test suite: [`scripts/verify-zero-hesitation-ergonomics.ts`](file:///Users/bozoegg/Desktop/GALXAI/scripts/verify-zero-hesitation-ergonomics.ts) containing **98 automated tests** passing at 100%.
+- Automated unit and integration test suite: [`scripts/verify-zero-hesitation-ergonomics.ts`](../../scripts/verify-zero-hesitation-ergonomics.ts) containing **98 automated tests** passing at 100%.
 - TypeScript compiler verification: `npx tsc --noEmit` passing with **0 errors**.
 - Next.js production build: `next build` verifying all 121 application routes.

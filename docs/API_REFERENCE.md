@@ -1,5 +1,7 @@
 # 📖 GALXAI Universal API Reference
 
+> Runtime boundary: this guide describes the product/application API. The standalone relay has a separate [API contract](RELAY_API_REFERENCE.md), inference and administrator keys, and an HTTP 202 chat job workflow. Its local deployment is covered by the [relay runbook](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md). Product keys, relay keys, and upstream provider credentials are distinct.
+
 This document outlines the complete REST API specification for GALXAI endpoints, detailing all supported protocols, universal ingestion parameters, multi-header authentication methods, and edge gateway routes.
 
 These endpoints are integration contracts for applications, agents, IDEs, CLIs, and developer tooling. GALXAI does not provide a hosted chat or image-studio destination; see [Product Surface Strategy](PRODUCT_SURFACE_STRATEGY.md).
@@ -28,7 +30,7 @@ GALXAI implements **Multi-Header & Query Parameter Ingestion** to absorb any dev
 | Environment | Ingress Base URL | Regional Coverage |
 | :--- | :--- | :--- |
 | **Application API** | `https://galx.ai/v1` | Application model router |
-| **Ollama Local Dev Proxy** | `https://galx.ai` (`OLLAMA_HOST`) | Sub-15ms Anycast Edge Routing |
+| **Ollama Local Dev Proxy** | `https://galx.ai` (`OLLAMA_HOST`) | Configured gateway routing |
 | **Multimodal R2 Media CDN** | `https://assets.galx.ai` | Global Anycast Storage CDN |
 
 ---
@@ -164,7 +166,7 @@ Returns model architecture, context length, parameters, and template definitions
 
 ## 🎨 Visual Synthesis & Image Generation (`POST /v1/images/generations`)
 
-Enterprise visual synthesis endpoint routing across OpenAI GPT-Image engines (`openai-gpt-image-2`, `openai-gpt-image-1.5`, `openai-gpt-image-1`, `dall-e-3`) with declarative aspect ratio absorption, deterministic Cloudflare R2 user/session partitioning, and Always-On VM Relay live wire synthesis.
+Application image-generation endpoint. Routing depends on the configured adapter and model. The application can delegate inference to the standalone relay and manage R2 user/session assets separately; a base64 relay result does not establish a successful R2 upload. Examples below are illustrative, not live deployment evidence.
 
 ### Request Headers
 - `Authorization: Bearer <galx_api_key>` (Standard developer key or session token)
@@ -245,7 +247,7 @@ const { data } = await response.json();
 ## 🖼️ Session Visual Gallery & Lifecycle (`/v1/images/sessions/*`)
 
 ### 1. List Session Visual Assets (`GET /v1/images/sessions/:sessionId`)
-Retrieves all images and the real-time summary manifest (`manifest.json`) generated during a specific agent or conversational session.
+Retrieves the session manifest and its retained image entries. The manifest is a bounded latest-100 read-modify-write index, not a complete or transactionally updated image history.
 
 **Response**:
 ```json
@@ -275,8 +277,8 @@ Retrieves all images and the real-time summary manifest (`manifest.json`) genera
 }
 ```
 
-### 2. Atomic Cascade Session Purge (`DELETE /v1/images/sessions/:sessionId`)
-Performs a single-roundtrip batch multi-delete across Cloudflare R2 and evicts in-memory BroccoliDB indices for the entire session prefix (`users/{userId}/sessions/{sessionId}/`).
+### 2. Session Prefix Purge (`DELETE /v1/images/sessions/:sessionId`)
+Deletes objects under the session prefix (`users/{userId}/sessions/{sessionId}/`) using listing and batch deletion, with application index cleanup. This is a multi-operation, nontransactional workflow; partial failure is possible. Session manifests use read-modify-write and retain a bounded latest 100 entries, so they are not a complete immutable history. See [ADR 0121](adr/0121-user-and-session-r2-partitioning-manifest-lifecycle-and-relay-image-synthesis.md).
 
 **Response**:
 ```json

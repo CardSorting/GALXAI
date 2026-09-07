@@ -93,7 +93,7 @@ You do not need to rename your model strings in existing codebases. The GALXAI r
 | :--- | :--- | :--- |
 | `gpt-4o`, `gpt-4`, `chatgpt-4o`, `coding`, `sol` | **`gpt-5.6-sol`** | Flagship SOTA coding & logic, 900K context, **25% OFF** |
 | `o1`, `o1-preview`, `o3`, `o3-mini`, `deepseek-r1` | **`gpt-5.6-terra`** | Frontier reasoning & chain-of-thought, **25% OFF** |
-| `gpt-4o-mini`, `gemini-2.0-flash`, `fast`, `luna` | **`gpt-5.6-luna`** | Sub-15ms completions, $0.95/1M in, **36% OFF** |
+| `gpt-4o-mini`, `gemini-2.0-flash`, `fast`, `luna` | **`gpt-5.6-luna`** | Check the current catalog for configured pricing and measured latency |
 | `claude-3-7-sonnet`, `claude-3-5-sonnet` | **`gpt-5.6-sol`** (or native messages endpoint) | SOTA reasoning, full `/v1/messages` SSE streaming |
 | `grok-3`, `grok-2`, `xai-grok`, `grok` | **`x-ai/grok-4.6`** | 1M context multimodal reasoning, **30% OFF** |
 | `dall-e-3`, `dalle-3`, `midjourney`, `flux` | **`openai-gpt-image-2`** | 4K synthesis, aspect ratio support, **25% OFF** ($0 egress R2) |

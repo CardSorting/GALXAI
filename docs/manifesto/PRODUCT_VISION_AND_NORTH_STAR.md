@@ -43,7 +43,7 @@ In 2026, the entire software world is transitioning to autonomous AI agents, but
 
 **GALXAI is the AWS of AI.** 
 
-We are not another disposable "AI SaaS" application. We are the **mission-critical infrastructure substrate** that intercepts, compacts, routes, and discounts every token flowing from application to model lab—delivering deterministic quality, sub-15ms edge latency, and guaranteed +50% to +68% profit margins on Day 1.
+We are not another disposable "AI SaaS" application. We are the **mission-critical infrastructure substrate** that intercepts, compacts, routes, and discounts every token flowing from application to model lab—delivering deterministic quality, measured request behavior and workload-dependent economics.
 
 ---
 

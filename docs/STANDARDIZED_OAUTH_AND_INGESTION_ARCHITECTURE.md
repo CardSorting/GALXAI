@@ -103,4 +103,4 @@ Provider credentials are not synchronized to edge KV. Authentication and refresh
 Both environments maintain comprehensive test suites:
 - **`GALXAI` Real Inference Pipeline (100% Wire Execution)**: `npm run test:inference`
 - **`GALXAI` (217 Distributed Tests)**: `npm run test:router`
-- **`LUMI-GALX` Edge Multi-Token Pool Verification**: `npm run check` in `/Users/bozoegg/Desktop/LUMI-NEW`
+- External client repositories require their own checks; they are not part of this relay deployment. Use [relay verification](INFERENCE_PIPELINE_VERIFICATION.md) for this repository.

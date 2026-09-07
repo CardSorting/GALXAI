@@ -1,55 +1,21 @@
-# ⚡ Maintainer Playbook: Upstream Provider Outage & Degradation Response
+# Upstream outage and credential recovery
 
-> **Target Audience**: SRE On-Call Engineers, Platform Maintainers, and Incident Commanders.  
-> **Scenario**: Upstream model provider (OpenAI / xAI) experiences partial or complete outage, high error rates (HTTP 500/503), or rate limit collapse.
+Identify the runtime first: the standalone relay and platform router have different state and recovery contracts. Use [routing](../ROUTING_ALGORITHMS.md) and [troubleshooting](../TROUBLESHOOTING.md) to locate the failing path.
 
----
+## Standalone relay
 
-## 1. Automated Circuit Breaker & Fallover Mechanics
+1. Open administrator-authorized fleet and request telemetry. Correlate the trace/job ID and distinguish HTTP acceptance from final outcome.
+2. Separate expired/inactive registry credentials, observed upstream authentication rejection, provider quota cooldown, local slot saturation, registry unavailability, and uncertain transport failure.
+3. Rotate a rejected credential through the authoritative registry. The relay does not refresh provider credentials automatically. Its observed rejection is local and does not automatically revoke a row or notify another replica.
+4. Honor provider cooldown and the single recovery probe. Do not repeatedly restart or resubmit requests to bypass cooldown, retry credits, or the request deadline.
+5. Confirm recovery with a short authorized inference, not just health/readiness. Record the observation date and routed shard without exposing tokens or prompts.
 
-When an upstream model shard degrades:
+Retries and failover are finite. Cancellation and job status remain available during registry failure. Restarted unfinished jobs fail explicitly; they are not automatically rerun, and cancellation does not create a refund transaction. A failed output stream may include partial output and must not be presented as an exactly-once completion.
 
-```mermaid
-flowchart TD
-    Request[Incoming Request] --> Router[GalxModelRouter]
-    Router --> CheckShard{Target Shard State?}
-    
-    CheckShard -->|CLOSED (Healthy)| SendPrimary[Dispatch to Primary Shard]
-    CheckShard -->|DEGRADED / OPEN| FallbackCheck{Fallback Shard Available?}
-    
-    FallbackCheck -->|YES| RoutePeer[Route to Secondary Tier-5 Shard]
-    FallbackCheck -->|NO (Provider-Wide Outage)| CrossModel{Cross-Model Fallback Configured?}
-    
-    CrossModel -->|YES| RouteAlternative[Route to Equivalent Grok / Anthropic Engine]
-    CrossModel -->|NO| ReturnDegraded[Emit Structured 503 with Upstream Status Context]
-```
+## Platform and client boundaries
 
----
+The database-backed platform pool has its own lease and governor policy. Inspect that path's logs and lease state rather than applying the relay's local scheduler assumptions. Cross-model/provider fallback must be explicitly supported by the selected adapter and product contract; never silently promise an equivalent result.
 
-## 2. Emergency Operational Commands
+Bound SDK/client retries as well as server retries. Compaction is not a guaranteed outage workaround or fixed multiplier of provider capacity. External agent tool actions remain the responsibility of their execution runtime.
 
-### 1. Force Shard Fleet Health Check:
-```bash
-npm run playbook -- --stage=traffic
-```
-
-### 2. Inspect Active Circuit Breaker States:
-```bash
-npx tsx scripts/validate-galxai-router.ts
-```
-
-### 3. Enable Maximum Client-Side Compaction Headers:
-Instruct clients to set `x-galx-compact: true` and `x-galx-compaction-mode: domain` to reduce token consumption across surviving shards by up to $85.93\%$, multiplying effective TPM capacity by $3.3\times$.
-
----
-
-## 3. Post-Outage Recovery & Shard Health Restoration
-
-Once the upstream provider resolves their incident:
-1. `GalxCircuitBreaker` will automatically transition from `OPEN` $\to$ `HALF-OPEN`.
-2. Canary probe requests ($3$ consecutive successful responses) restore the shard to `CLOSED`.
-3. P-AHT recalculates available headroom and smoothly ramps traffic back to normal levels.
-
----
-
-*Zero-hesitation resilience under upstream failure.* 🥦⚡🛡️
+Use the [fleet runbook](RELAY_QUOTA_AND_FLEET.md), [regression checks](RELAY_HARDENING.md), and [deployment runbook](../VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md).

@@ -426,20 +426,20 @@ npx tsc --noEmit
 
 | File | Purpose |
 | :--- | :--- |
-| [src/core/broccolidb/BroccoliCompactionFacade.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/BroccoliCompactionFacade.ts) | **The Public Door**: Unified entry point supporting 19 modes and `selectRepresentation` with Adaptive Density Bypass. |
-| [src/core/broccolidb/BroccoliArchitectureInvariantCompactor.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/BroccoliArchitectureInvariantCompactor.ts) | **The Invariant Sentinel**: Filters institutional noise and deprecated ADRs while preserving active code constraints. |
-| [src/core/broccolidb/BroccoliCompactionSafety.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/BroccoliCompactionSafety.ts) | **The Guard**: Fail-closed factual provenance verification. |
-| [src/core/broccolidb/eval/BroccoliInferenceBoundaryBenchmarker.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/eval/BroccoliInferenceBoundaryBenchmarker.ts) | **The Benchmarker**: Empirical OpenAI boundary measurement harness. |
-| [src/core/broccolidb/eval/OpenAiTaskSuite.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/eval/OpenAiTaskSuite.ts) | **The Task Suite**: 4 representative workloads (Coding, Research, DevOps, Telemetry). |
-| [src/core/broccolidb/eval/ProviderRateCards.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/eval/ProviderRateCards.ts) | **Rate Card Registry**: Official published rate cards & prompt-cache discount models. |
-| [src/core/broccolidb/BroccoliDomainSpendOptimizer.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/BroccoliDomainSpendOptimizer.ts) | **The Dispatcher**: 180-domain classifier and compactor dispatcher. |
-| [src/core/broccolidb/BroccoliHighVelocityPipeline.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/BroccoliHighVelocityPipeline.ts) | **The Turbo**: 180-domain Aho-Corasick router, Drain log clustering, eBPF, & TSDB downsampler. |
-| [src/core/broccolidb/BroccoliMegaIncidentStreamCascader.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/BroccoliMegaIncidentStreamCascader.ts) | **The Incident Slicer**: 2,000+ page log storm reducer. |
-| [src/core/broccolidb/BroccoliMegaDocumentPyramidCompactor.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/broccolidb/BroccoliMegaDocumentPyramidCompactor.ts) | **The Document Pyramid**: 300+ page contract summarizer. |
-| [src/app/api/audit/broccolidb/compact/route.ts](file:///Users/bozoegg/Desktop/GALXAI/src/app/api/audit/broccolidb/compact/route.ts) | **The API Route**: Authenticated REST endpoint supporting all 19 modes. |
-| [scripts/bench-institutional-entropy-matrix.ts](file:///Users/bozoegg/Desktop/GALXAI/scripts/bench-institutional-entropy-matrix.ts) | **Entropy Benchmark**: `npm run bench:entropy` (7-tier progressive gradient). |
-| [scripts/scaffold-compactor.ts](file:///Users/bozoegg/Desktop/GALXAI/scripts/scaffold-compactor.ts) | **Maintainer Scaffolder**: `npm run scaffold:compactor`. |
-| [docs/adr/0066-institutional-entropy-resistance-and-epistemic-compression.md](file:///Users/bozoegg/Desktop/GALXAI/docs/adr/0066-institutional-entropy-resistance-and-epistemic-compression.md) | **ADR 0066**: Institutional Entropy Resistance & Epistemic Representation Compression. |
-| [docs/adr/0067-representation-selection-and-adaptive-density-bypass.md](file:///Users/bozoegg/Desktop/GALXAI/docs/adr/0067-representation-selection-and-adaptive-density-bypass.md) | **ADR 0067**: Adaptive Representation Selection & Density Bypass Substrate. |
+| [src/core/broccolidb/BroccoliCompactionFacade.ts](../src/core/broccolidb/BroccoliCompactionFacade.ts) | **The Public Door**: Unified entry point supporting 19 modes and `selectRepresentation` with Adaptive Density Bypass. |
+| [src/core/broccolidb/BroccoliArchitectureInvariantCompactor.ts](../src/core/broccolidb/BroccoliArchitectureInvariantCompactor.ts) | **The Invariant Sentinel**: Filters institutional noise and deprecated ADRs while preserving active code constraints. |
+| [src/core/broccolidb/BroccoliCompactionSafety.ts](../src/core/broccolidb/BroccoliCompactionSafety.ts) | **The Guard**: Fail-closed factual provenance verification. |
+| [src/core/broccolidb/eval/BroccoliInferenceBoundaryBenchmarker.ts](../src/core/broccolidb/eval/BroccoliInferenceBoundaryBenchmarker.ts) | **The Benchmarker**: Empirical OpenAI boundary measurement harness. |
+| [src/core/broccolidb/eval/OpenAiTaskSuite.ts](../src/core/broccolidb/eval/OpenAiTaskSuite.ts) | **The Task Suite**: 4 representative workloads (Coding, Research, DevOps, Telemetry). |
+| [src/core/broccolidb/eval/ProviderRateCards.ts](../src/core/broccolidb/eval/ProviderRateCards.ts) | **Rate Card Registry**: Official published rate cards & prompt-cache discount models. |
+| [src/core/broccolidb/BroccoliDomainSpendOptimizer.ts](../src/core/broccolidb/BroccoliDomainSpendOptimizer.ts) | **The Dispatcher**: 180-domain classifier and compactor dispatcher. |
+| [src/core/broccolidb/BroccoliHighVelocityPipeline.ts](../src/core/broccolidb/BroccoliHighVelocityPipeline.ts) | **The Turbo**: 180-domain Aho-Corasick router, Drain log clustering, eBPF, & TSDB downsampler. |
+| [src/core/broccolidb/BroccoliMegaIncidentStreamCascader.ts](../src/core/broccolidb/BroccoliMegaIncidentStreamCascader.ts) | **The Incident Slicer**: 2,000+ page log storm reducer. |
+| [src/core/broccolidb/BroccoliMegaDocumentPyramidCompactor.ts](../src/core/broccolidb/BroccoliMegaDocumentPyramidCompactor.ts) | **The Document Pyramid**: 300+ page contract summarizer. |
+| [src/app/api/audit/broccolidb/compact/route.ts](../src/app/api/audit/broccolidb/compact/route.ts) | **The API Route**: Authenticated REST endpoint supporting all 19 modes. |
+| [scripts/bench-institutional-entropy-matrix.ts](../scripts/bench-institutional-entropy-matrix.ts) | **Entropy Benchmark**: `npm run bench:entropy` (7-tier progressive gradient). |
+| [scripts/scaffold-compactor.ts](../scripts/scaffold-compactor.ts) | **Maintainer Scaffolder**: `npm run scaffold:compactor`. |
+| [docs/adr/0066-institutional-entropy-resistance-and-epistemic-compression.md](adr/0066-institutional-entropy-resistance-and-epistemic-compression.md) | **ADR 0066**: Institutional Entropy Resistance & Epistemic Representation Compression. |
+| [docs/adr/0067-representation-selection-and-adaptive-density-bypass.md](adr/0067-representation-selection-and-adaptive-density-bypass.md) | **ADR 0067**: Adaptive Representation Selection & Density Bypass Substrate. |
 
 

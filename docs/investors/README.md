@@ -36,7 +36,7 @@ If you are preparing for or reviewing a **10-to-20 minute executive meeting**, s
 | **[04. Unit Economics: CAC, LTV, Margins & Payback](04_UNIT_ECONOMICS_CAC_LTV_PAYBACK.md)** | Blended CAC ($185), LTV ($5,350), Gross Margins (42% $\to$ 68%), and 138% Net Dollar Retention (NDR). | **Unit Economics** |
 | **[05. Competitive Landscape & Strategic Moats](05_COMPETITIVE_LANDSCAPE_AND_MOATS.md)** | 2x2 positioning matrix, feature teardown vs OpenRouter / Cloudflare / Portkey, and 4 defensible moats. | **Competitive Moats** |
 | **[06. 5-Year Financial Projections & Operating Model](06_FINANCIAL_PROJECTIONS_AND_MODEL.md)** | 5-year P&L forecast ($1.2M ARR $\to$ $85M ARR), headcount ramp, OpEx breakdown, and Rule of 40 index. | **Financial Model** |
-| **[07. Technical Due Diligence & Architecture Proof](07_TECHNICAL_DILIGENCE_AND_PATENTS.md)** | Technical audit FAQs for Partner CTOs, sub-15ms wire TTFT proof, ZDR v10 privacy, and test suite backing. | **Technical Diligence**|
+| **[07. Technical Due Diligence & Architecture Proof](07_TECHNICAL_DILIGENCE_AND_PATENTS.md)** | Technical audit FAQs for Partner CTOs, runtime boundaries, retention limits, and dated verification evidence. | **Technical Diligence**|
 | **[08. Commercial Thesis & Customer Discovery Playbook](08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md)** | ICP segmentation matrix, procurement psychology ($100k vs $900k paradox), and 10-question discovery script. | **Commercial Discovery** |
 | **[09. Enterprise Spend Governance & Control Plane](09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md)** | "Why is our AI bill so high and how do we make it stop?" 7 waste root causes, Day 1 reverse-audit, and 3-tier remediation. | **Spend Governance** |
 | **[10. Enterprise Pilot Agreement & Proposal](10_ENTERPRISE_PILOT_PROPOSAL_AND_AGREEMENT.md)** | 30-Day Zero-Risk Reverse-Audit pilot contract terms, Net Spend Interception invoicing, and SLA exit criteria. | **Commercial Pilot** |
@@ -53,7 +53,7 @@ If you are preparing for or reviewing a **10-to-20 minute executive meeting**, s
    - **AI Coding Agent Directives**: `npx galxai skills` embeds GALXAI into Cursor, Claude Code, and Windsurf workflows by default.
 4. **Smart Context Fluff Trimming (BroccoliDB)**:
    - Slashes input token costs by **60%–90%** with 100% verified action safety across 180 domain tests and 0 errors.
-   - Sub-15ms wire response times across our global edge network.
+   - Request timing measured on the actual deployed path; no universal latency guarantee.
 5. **Top-Tier Unit Economics**: Blended CAC of **$185**, payback period of **2.1 months**, and **138% Net Dollar Retention**.
 
 ---

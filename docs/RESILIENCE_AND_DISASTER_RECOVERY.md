@@ -1,266 +1,39 @@
-# GALXAI Resilience, Disaster Recovery & SLA Uptime Strategy
+# Resilience and recovery boundaries
 
-This document provides a comprehensive operational overview of GALXAI's **99.99% Perceived SLA Uptime**, **BroccoliDB In-Memory Substrate**, **Dual-Slot Disaster Recovery (RPO = 0, RTO < 5ms)**, and **Multi-Tier Failover Architecture**.
+Reviewed 2026-09-07. Recovery behavior belongs to a specific component. An outbox, platform ledger, simulation scheduler, and the standalone relay do not share one recovery guarantee.
 
----
+## Relay failures
 
-## 1. High-Level Architectural Topology
+| Failure | Implemented response | Limit |
+| --- | --- | --- |
+| Expired credential | Exclude from selection using registry/decoded token expiry | Expiry decoding does not authenticate a token |
+| Upstream authentication rejection | Disable local credential and attempt immediate checkpoint | Not broadcast to independent relays |
+| Provider quota feedback | Account cooldown, bounded alternate selection | Other accounts can also be unavailable |
+| Repeated transport failure | Local cooldown and bounded recovery | Transport/provider cause can remain uncertain |
+| Retry count or budget exhausted | Terminal job failure | Caller must decide whether to submit a new request |
+| Request wall deadline | Abort transport and release local capacity | Remote provider may already have done work |
+| Registry unavailable/stale | Stop new credential selection | Status/cancel remain independent of registry refresh |
+| Downstream disconnect | Bounded grace and retained-memory replay | Replay cannot survive process loss |
+| Slow subscriber | Bounded queue and drain deadline | Subscriber may lose its connection |
+| Shutdown | Reject new work, drain, then abort remaining work | A single host still has a cutover window |
+| Restart | Recover eligible checkpoint state; fail interrupted jobs | No live sockets or output buffers are checkpointed |
 
-```mermaid
-graph TD
-    Client[Web UI / SDK / CLI] --> ResilientClient[Resilient Client & In-Flight Coalescer]
-    ResilientClient --> L1[BroccoliDB L1 In-Memory Cache]
-    ResilientClient --> L2[SafeStorage L2 Multi-Tier Mirror]
-    
-    subgraph Client-Side Memory & Resilience Enclave
-        L1 --> CacheTable[(BroccoliDbTable: Cache)]
-        ResilientClient --> OutboxEngine[BroccoliOutboxEngine RPO=0]
-        OutboxEngine --> OutboxTable[(BroccoliDbTable: Outbox Mutations)]
-        ResilientClient --> SLAEngine[SlaHealthEngine]
-        SLAEngine --> SLATable[(BroccoliDbTable: SLA Probes)]
-        ResilientClient --> CircuitTable[(BroccoliDbTable: Circuits)]
-        ResilientClient --> IncidentTable[(BroccoliDbTable: Incident Logs)]
-    end
+The relay owns no wallet refund transaction. Cancellation fields explicitly report financial settlement as not managed by the relay. Image idempotency and chat deduplication are principal-scoped, TTL-limited local behavior, not provider-side exactly-once execution.
 
-    subgraph Dual-Slot Double-Buffered Snapshot Enclave
-        SnapshotEngine[BroccoliSnapshotEngine RTO<5ms]
-        SnapshotEngine --> SlotA[Storage Slot A: galx_snap_a]
-        SnapshotEngine --> SlotB[Storage Slot B: galx_snap_b]
-        SnapshotEngine --> ActivePtr[Active Slot Pointer]
-    end
+## Storage and restore
 
-    subgraph Multi-Region Gateway Ingress
-        OutboxEngine -- Reconnect / Healthy --> EdgeRouter[Cloudflare Anycast Worker /api.galx.ai]
-        EdgeRouter --> AppRouter[Next.js 15 Multi-Region SFO1 / IAD1]
-        AppRouter --> Pool[Pooled Shard Quota Fleet]
-    end
-```
+The named checkpoint volume is private service state. It contains no provider tokens but may contain unfinished prompts/messages. Access controls and retention apply. Preserve it before image changes, migrate it deliberately from earlier bind-mounted layouts, and never share it between concurrently writing relay instances.
 
----
+PostgreSQL registry backup/restore, vault-root custody, application wallets, and execution journals have separate recovery requirements. Database-backed pool leases must not be confused with the relay's local scheduler. Do not claim zero recovery-point loss for periodic relay checkpoints or instant recovery time without a measured restore exercise.
 
-## 2. Recovery Objectives (RPO & RTO)
+## Availability strategy
 
-| Metric | Target | Mechanism | Verification |
-| :--- | :--- | :--- | :--- |
-| **RPO (Recovery Point Objective)** | **0 seconds** (Zero Mutation Loss) | Append-only `BroccoliDbTable<OutboxMutation>` with in-memory CRC checksums & persistent write-through to `SafeStorage`. | Unplugging network during mutation keeps action queued; reconnect auto-drains queue. |
-| **RTO (Recovery Time Objective)** | **< 5 milliseconds** | In-memory dual-slot double-buffered state hydration on boot. | `BroccoliSnapshotEngine.restoreSnapshot()` executes in <5ms synchronously. |
-| **Perceived SLA Uptime** | **99.99% Uptime** | Sub-microsecond L1 cache serving stale data when offline; graceful error boundary fault absorption. | Zero white screens; automatic retry countdowns on component failure. |
+The verified relay is a single container on one host. Host sleep, Docker failure, networking loss, or a provider outage can interrupt it. A tunnel exposes a route but does not remove those dependencies. Multiple relays require coordinated concurrency, rejection propagation, checkpoint strategy, and traffic routing before they form a supported high-availability deployment.
 
----
+## Experiments
 
-## 3. Resilience Subsystems
+The class-based scheduling and standby-handover experiments in [ADR 0113](adr/0113-unpredictable-2-3-minute-inference-mlfq-itl-watchdog-and-resumable-streams.md) are not the deployed relay. Synthetic throughput and scheduler assertions are not live-provider latency, loss, or availability guarantees.
 
-### 3.1 Zero-Loss Mutation Outbox Engine (`BroccoliOutboxEngine`)
-- **Queue Structure**: Mutations are queued in priority order (1 highest to 10 lowest) with monotonic timestamps and frame checksums.
-- **Idempotency Guarantee**: Every mutation is assigned a unique `Idempotency-Key` and `x-idempotency-key` header, ensuring replayed actions are deduplicated upstream.
-- **Cross-Tab Synchronization**: Uses `BroadcastChannel('galx_outbox_sync_channel')` so opening multiple tabs stays synchronized in real time.
-- **Background Drainer**: Drains the queue automatically upon `window.online` or `SlaHealthEngine` health recovery events.
+## Operations
 
-### 3.2 Dual-Slot Atomic Snapshot Engine (`BroccoliSnapshotEngine`)
-- **Double-Buffered Writes**: Alternates writes between Slot A and Slot B with FNV-1a checksum validation, flipping the active pointer only upon confirmed write-through integrity.
-- **Self-Healing Rollback**: If a tab crash or storage interruption occurs during write, boot hydration falls back to the alternate slot with zero corruption.
-- **Lifecycle Integration**: Snapshots trigger automatically on `visibilitychange` (`hidden`), `beforeunload`, and periodic 30-second heartbeats.
-
-### 3.3 Resilient Client & In-Flight Coalescer (`ResilientClient`)
-- **In-Flight Coalescing**: Deduplicates concurrent identical requests into a single network execution to eliminate thundering-herd spikes.
-- **Full Decorrelated Jitter**: Implements exponential backoff with full jitter honoring `Retry-After` headers.
-- **HTML Error Page Parsing**: Gracefully captures HTML error pages (e.g. 502/504 Bad Gateway) without throwing JSON parse syntax errors.
-
-### 3.4 Live SLA Health Engine & Incident Logs (`SlaHealthEngine` & `BroccoliResilienceSubstrate`)
-- **Synthetic Edge Latency Probes**: Measures real-time p50, p90, and p99 edge response times.
-- **Incident Response Table**: In-memory `BroccoliDbTable<IncidentLogEntry>` records operational events, impact assessments, root causes, and automated mitigation strategies.
-
-### 3.5 Fail-Closed Provenance & Safety Gate (`BroccoliCompactionSafety`)
-- **Zero-Hallucination Resilience**: All 180 domain and 19 streaming mode representation transformations pass through cryptographic and factual verification.
-- **Fail-Closed Fallback**: If an extracted digest contains any unsupported entity, number, or identifier, the system safely falls back to the original unmodified source text with zero data corruption.
-- **100% Verified Pass Rate**: In regression testing across 180 enterprise industry clusters, BroccoliDB achieves 180 verified compactions and 0 fallbacks.
-
-### 3.6 6-State Enterprise Circuit Breaker & Single-Canary Slotting (`GalxCircuitBreaker`, ADR 0088)
-- **State Machine**: Evaluates accounts across `healthy`, `warming_up`, `half_open`, `cooldown`, `exhausted`, `quarantined`, and `dead`.
-- **Strict Single-Canary Slotting**: Only exactly 1 in-flight probe is admitted to test half-open shards; concurrent requests bypass to alternate healthy shards.
-- **Slow-Start Quadratic Warmup**: Prevents post-cooldown herd spikes by scaling traffic as $\text{Weight} \times (t/30\text{s})^2$.
-- **Per-Shard Model Capability Matrix**: Dissects 404/400 `model_not_found` errors to blacklist unsupported models per shard without disabling other models.
-
-### 3.7 Anti-Stampede Bounded Admission Queue (`GalxCredentialPool`, ADR 0089)
-- **Waiting Room Enqueueing**: When the fleet is briefly saturated, calculates earliest reset time ($t_{\text{earliestReset}}$) and holds requests in a bounded queue ($\le 4\text{s}$).
-- **Reflexive Event-Driven Drain**: Releasing any lease immediately pulses the admission queue to dispatch waiting requests.
-- **AIMD Concurrency Limiter**: Dynamically adjusts in-flight concurrency limits based on EWMA latency to prevent slow-poisoning tarpits.
-
-### 3.8 Zero-Egress Write-Behind Micro-Batch Buffer (`GalxShardSyncBuffer`, ADR 0090)
-- **Debounced Micro-Batches**: Coalesces health probes, latency percentiles, and circuit state transitions in L1 memory, flushing in 2.5s / 100-item micro-batches to Supabase PostgreSQL.
-- **98% Egress Reduction**: Eliminates synchronous database roundtrips on the hot inference path.
-
-### 3.9 Dual-Window Quota & Zero-Trust Resync (`ContinuousTokenBucketRateGovernor`, ADR 0087)
-- **Sliding Request Log**: Enforces discrete 5 req/5 hr or 40 req/3 hr rolling windows alongside token bucket refilling.
-- **NLP Error Body Dissection**: Automatically extracts durations like `"resets in 4 hours 12 minutes"` to set authoritative cooldowns.
-- **Out-of-Band Usage Resync**: Out-of-band 429 errors trigger zero-delay local window resynchronization and instant failover.
-
-
-
----
-
-## 4. Developer & Operational Usage
-
-### Resilient Fetch Query
-```typescript
-import { resilientFetch } from "@/lib/resilience/ResilientClient";
-
-// Resilient GET with BroccoliDB L1 cache & L2 SafeStorage fallback
-const { data, fromCache, status } = await resilientFetch<MyDataType>(
-  "/api/models",
-  {
-    enableCacheFallback: true,
-    cacheTtlMs: 60000,
-    maxRetries: 3,
-    timeoutMs: 8000,
-  }
-);
-```
-
-### Outbox Mutation with Guaranteed Offline Delivery
-```typescript
-import { resilientFetch } from "@/lib/resilience/ResilientClient";
-
-// Automatically enqueues into BroccoliDB Outbox if offline
-const { data, status } = await resilientFetch("/api/keys", {
-  method: "POST",
-  body: JSON.stringify({ name: "Production Gateway Key" }),
-  enableOutboxOfflineFallback: true,
-});
-```
-
-### Subscribing to Outbox State
-```typescript
-import { BroccoliOutboxEngine } from "@/lib/resilience/BroccoliOutboxEngine";
-
-const unsubscribe = BroccoliOutboxEngine.subscribe((pendingMutations) => {
-  console.log(`Pending offline actions: ${pendingMutations.length}`);
-});
-```
-
----
-
-## 5. Epistemic Resilience & Fail-Closed Compaction Safety (ADR 0066 & 0067)
-
-Beyond network and infrastructure failures, GALXAI guarantees **Epistemic Resilience** against noisy enterprise inputs and contradictory corporate documentation:
-
-```mermaid
-flowchart TD
-    Candidate[Candidate Compacted Prompt] --> SafetyGate{BroccoliCompactionSafety: Fact Grounding}
-    Raw[Raw Source Input] --> SafetyGate
-    
-    SafetyGate -->|All Numbers & Dates Match| Verified[Deliver Compacted Representation]
-    SafetyGate -->|Discrepancy Detected| Fallback[Safe Fallback to Raw Source Text]
-    
-    Verified --> Upstream[Upstream Foundation Model]
-    Fallback --> Upstream
-```
-
-### Epistemic Resilience Guarantees:
-1. **Zero Hallucination Fail-Closed Fallback**: If an extracted representation contains any date, numeric measurement, or identifier not present in the raw input, the engine instantly drops the candidate and falls back to raw source text with zero data corruption.
-2. **Adaptive Density Gate ($\text{ID}(C)$)**: If incoming context is clean or $<200$ tokens, the engine skips compaction entirely, eliminating negative token dilation.
-3. **Institutional Entropy Resistance (ADR 0066)**: In noisy enterprise environments with 72 formal ADRs and superseded guidance, isolates active code invariants and defends **$100\%$ Action Safety** across 7 adversarial corporate traps (`npm run bench:entropy`).
-
----
-
-## 6. Dual Rolling Window Concurrency Resilience & Expiring Leases (ADR 0068)
-
-For interactive multi-turn streaming and agent sessions, GALXAI enforces distributed concurrency resilience to protect both user experience and database poolers:
-
-```mermaid
-flowchart TD
-    Req[Incoming Chat Request] --> Gate["fn_evaluate_and_acquire_seat_gate_v2<br>(Single-Hop Evaluation)"]
-    Gate -->|Within 5h & Weekly Quotas| Lease["Create Expiring Request Lease<br>(TTL: 180s in galx_seat_request_leases)"]
-    Gate -->|Over Quota| SoftReject["HTTP 429<br>(Natural language countdown)"]
-    Lease --> Stream[Stream SSE Response]
-    Stream -->|Complete| Settle["fn_settle_seat_stream_completion_composite_v2<br>(Release Lease & Deduct Tokens)"]
-    Stream -->|Aborted / Network Drop| AutoExpire["Automatic TTL Expiration<br>(Zero Concurrency Slot Leaks)"]
-```
-
-### Key Concurrency Invariants:
-1. **Idempotent Expiring Leases**: Leases automatically expire after 180s if client network drops mid-stream, preventing permanent locking of concurrency slots.
-2. **Atomic Tool Turn-Pair Inseparability**: Turn pairs are kept strictly together across sliding-window compaction boundaries, eliminating provider HTTP 400 validation failures.
-3. **Single-Hop Composite Settlement**: Consolidates balance validation, lease acquisition, token incrementing, and lease release into single PL/pgSQL atomic CTEs.
-
----
-
-## 7. Unpredictable Inference Resilience: 2–3 Minute Frontier Reasoning (ADR 0113)
-
-Frontier reasoning models (`gpt-5.6-sol`, `o3`, `o3-pro`) exhibit **2–3 minute unpredictable durations** with TTFT jitter of 800ms–45s and silent ITL throttle gaps. The following subsystems extend the core disaster recovery architecture to handle this class of failure:
-
-### 7.1 Streaming ITL Watchdog — Slow Poison Detection
-
-The `StreamingItlWatchdog` detects two silent failure modes invisible to static timeouts:
-
-| Failure Mode | Detection Signal | Action |
-| :--- | :--- | :--- |
-| **TTFT Deadlock** (no first token) | > 45,000ms since request | Trigger shadow shard handover |
-| **ITL Slow Poison** (silence between tokens) | > 8,000ms ITL gap | Mark shard `stall`, escalate |
-| **Repeated ITL violations** | ≥ 3 consecutive gaps | Hard abort + circuit-break shard |
-
-These cover the "slow poison" case where the provider maintains an open connection but silently throttles token emission — an undetectable failure mode in static timeout monitors.
-
-### 7.2 Shadow Shard Standby — Sub-50ms Hot Handover
-
-The `ShadowShardStandby` maintains N pre-warmed backup shards in a hot standby pool:
-
-```
-Primary Shard Stall (ITL violation)
-    → ShadowShardStandby.handover()  [< 50ms]
-    → Route in-progress job to pre-warmed standby
-    → Resume token stream without client disconnect
-```
-
-Mirrors Netflix's Active-Active pair model and AWS ALB target group drain patterns. Ensures 2–3 minute completions survive provider-side shard stalls without full restart.
-
-### 7.3 Anti-Zombie Leash — Zero Quota Waste on Disconnect
-
-The `AntiZombieLeash` monitors `request.signal` for client WebSocket disconnect:
-
-```
-Client disconnects (request.signal.aborted = true)
-    → AbortController.abort()              [< 1ms]
-    → Upstream WebSocket stream cancelled
-    → BroccoliDB transactional wallet refund
-    → Telemetry: zombie_leash_activated { jobId, tokensConsumed, refunded }
-```
-
-**Invariant**: At 100,000 req/sec with ~20% abandonment rate, without the Anti-Zombie Leash, ~20,000 req/sec would burn upstream quota on dead callers. With the leash: **0 zombie executions**.
-
-### 7.4 BroccoliDB Resumable Job Engine — Last-Event-ID Stream Recovery
-
-The `BroccoliResumableJobEngine` decouples 2–3 minute inference from the HTTP request lifecycle, bypassing Cloudflare's 100s execution timeout:
-
-```
-POST /v1/chat/completions   →  HTTP 202 Accepted { jobId: "job_..." }
-GET  /v1/jobs/:id/stream    →  SSE (Last-Event-ID: N resumable)
-GET  /v1/jobs/:id           →  { status, progress, etaMs, queuePos }
-POST /v1/jobs/:id/cancel    →  { cancelled, refunded }
-```
-
-**Recovery Flow**: If the client's SSE connection drops mid-generation at token seqNo=1,847:
-1. Client reconnects: `GET /v1/jobs/:id/stream` with `Last-Event-ID: 1847`
-2. Engine replays buffered tokens from seqNo=1,848 onwards
-3. No inference re-run required — compute cost preserved
-
-**Storage**: `job_tokens` BroccoliDB table (indexed by `jobId + seqNo`), retained 10 minutes post-completion, then archived to `galx_job_token_archive` in PostgreSQL.
-
-### 7.5 3-Tier MLFQ — Class-Isolated Disaster Recovery
-
-Under sustained 100,000 req/sec load, the `MultiLevelFleetSlicer` partitions fleet capacity so that a Class 2 (Scavenger) disaster does not cascade to Class 0 (Interactive):
-
-| Scenario | Class 0 Impact | Class 1 Impact | Class 2 Impact |
-| :--- | :--- | :--- | :--- |
-| **Class 2 flood (batch OOM)** | **Zero** — hard 25% reservation | Moderate — may consume idle Class 2 quota | Shed at 90% fleet util |
-| **Class 1 shard stall** | **Zero** — shadow handover only on Class 1 | Degraded (shadow shard covers) | Unaffected |
-| **Primary DC outage** | Failover via Cloudflare Anycast | Failover via SWRR next healthy shard | Batch paused until DR restored |
-
-See [ADR 0113](adr/0113-unpredictable-2-3-minute-inference-mlfq-itl-watchdog-and-resumable-streams.md) for the full specification and 16-invariant verification suite.
-
-```bash
-# Verify all unpredictable inference resilience invariants (INV 9–16)
-npx tsx simulations/high-concurrency-10k-fairness/index.test.ts
-
-# Simulate 2–3 minute inference under 100,000 req/sec
-npm run sim:unpredictable
-```
+Use the [deployment and rollback runbook](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md), [relay API](RELAY_API_REFERENCE.md), and [telemetry guide](maintainers/RELAY_TELEMETRY.md). Preserve the trace, failure code, and partial-output status during incidents without publishing request content or credentials. Retry only after understanding whether the failed operation could already have produced an externally visible result.

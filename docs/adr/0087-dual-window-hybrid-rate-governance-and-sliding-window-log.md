@@ -1,10 +1,12 @@
 # ADR 0087: Dual-Window Hybrid Rate Governance, Sliding Request Logs & Zero-Trust Resynchronization
 
+> Current scope (2026-09-07): This record describes platform governor policy. The standalone relay defaults to adaptive quota with no local call cap and a three-hour observation window; it does not infer a provider allowance. See [ADR 0122](0122-isolated-authenticated-relay-and-bounded-recovery.md).
+
 ## Status
 Accepted
 
 ## Context
-Upstream foundation model providers enforce heterogeneous, non-standard rate limits. While standard API keys follow Continuous Token Bucket limits (TPM/RPM), pooled accounts, trial tiers, and specialized models (such as GPT-5.6 or Claude 3.7 reasoning tiers) frequently operate on discrete rolling sliding windows (e.g. 5 requests per 5 hours, or 40 requests per 3 hours). Furthermore, shards are subject to out-of-band credit consumption by external developers or automated jobs outside the gateway, causing unexpected 429 rate limit errors when local gateway counters believe capacity is still available.
+Upstream foundation model providers enforce heterogeneous, non-standard rate limits. While standard API keys follow Continuous Token Bucket limits (TPM/RPM), pooled accounts, trial tiers, and specialized models (such as GPT-5.6 or Claude 3.7 reasoning tiers) frequently operate on discrete rolling sliding windows (configured per provider/account; historical examples are not current entitlements). Furthermore, shards are subject to out-of-band credit consumption by external developers or automated jobs outside the gateway, causing unexpected 429 rate limit errors when local gateway counters believe capacity is still available.
 
 ## Decision
 1. **Dual-Window Hybrid Calculus (`ContinuousTokenBucketRateGovernor.ts`)**:

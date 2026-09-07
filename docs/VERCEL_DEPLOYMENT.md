@@ -1,201 +1,25 @@
-# GALXAI: Vercel Production Deployment Guide
+# Application deployment and relay connectivity
 
-This guide details the complete process for deploying the **GALXAI Next.js 15 Web Platform** to **Vercel** with maximum performance, enterprise security headers, and zero-downtime integration with Supabase and Cloudflare Edge infrastructure.
+The Next.js application, Cloudflare Worker, and Node relay are separate deployments. This guide covers the repository's application setup boundary; it does not assert that a remote Vercel deployment was verified during the local relay rollout.
 
----
+## Application configuration
 
-## 1. Architectural Topology
+Use [package.json](../package.json), [.env.example](../.env.example), and the deployment project configuration as the source for build scripts and environment names. Configure application identity, database access, vault secrets, and any enabled provider/storage integrations in the target environment. Keep privileged keys server-side. Do not generate or rotate vault roots merely to deploy an application that must read existing credentials.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                       Client Browser                        │
-└──────────────┬───────────────────────────────┬──────────────┘
-               │                               │
-       (Web UI & SSR)                     (API Requests)
-               │                               │
-               ▼                               ▼
-  ┌─────────────────────────┐     ┌─────────────────────────┐
-  │   Vercel Deployment     │     │   Cloudflare Workers    │
-  │   - Next.js 15 Frontend │     │   - Edge Gateway        │
-  │   - Serverless APIs     │     │   - Model Router        │
-  │   - OG Image Generator  │     │   - R2 CDN (Assets)     │
-  └───────┬───────────┬─────┘     └────────────┬────────────┘
-          │           │                        │
-          │           │ (VM_RELAY_URL Egress)  │
-          │           ▼                        │
-          │   ┌─────────────────────────┐      │
-          │   │  Cloudflare Tunnel Ingress     │
-          │   │  (https://*.trycloudflare.com) │
-          │   └───────────┬─────────────┘      │
-          │               │                    │
-          │               ▼                    │
-          │   ┌─────────────────────────┐      │
-          │   │  Always-On VM Relay     │      │
-          │   │  (Node.js / PM2 Daemon) │      │
-          │   │  - Persistent Codex WSS │      │
-          │   │  - BroccoliDB Streaming │      │
-          │   └─────────────────────────┘      │
-          │                                    │
-          └───────────────┬────────────────────┘
-                          ▼
-          ┌───────────────────────────────┐
-          │      Supabase PostgreSQL      │
-          │   - Auth & Session Vault      │
-          │   - BYOQ Credential Shards    │
-          │   - Task Queues & Telemetry   │
-          └───────────────────────────────┘
-```
+Use the application's existing preview/deployment workflow. Inspect the relevant package script before executing it: inference benchmarks can call paid providers, environment synchronization mutates remote configuration, and vault population is not a read-only check. Validate the build and the endpoints changed by the release; record results with the deployed version.
 
----
+## Relay connection
 
-## 2. Automated Pre-Deployment Verification Gate
+Set `VM_RELAY_URL` to an origin reachable from the deployed application and `VM_RELAY_API_KEY` to an inference key accepted by that relay. These are server-side settings. Do not use a provider credential or relay administrator key as the application's inference key. The adapter falls back to the first `RELAY_API_KEYS` entry when `VM_RELAY_API_KEY` is absent, but an explicit dedicated key avoids configuration ambiguity.
 
-GALXAI features an automated **8-Phase Pre-Flight Audit Engine** and CI verification gate. Run the full pre-deployment check before initiating a deployment:
+The verified relay runs from this repository through Docker Compose on `127.0.0.1:3001`. A remote application cannot reach it by setting its own relay URL to `localhost`. Public ingress requires a separately configured and tested tunnel or proxy, suitable authentication, TLS, and streaming behavior. An ephemeral development URL is not a stable production dependency.
 
-```bash
-# 1. Maintainer Workstation 8-Point Onboarding Diagnostic (<5s)
-npm run onboard
+The adapter submits chat work, receives HTTP 202, and attaches to the job stream. Moving upstream work to the relay does not remove the application's own execution or streaming limits. Inspect the actual deployment's limits and validate a representative long-running request. The adapter also retains direct-provider/SDK/CLI fallback paths; a successful request alone does not prove it used the relay.
 
-# 2. Adversarial Institutional Entropy & Action Safety Benchmark (7-Tier Gradient)
-npm run bench:entropy
+## Verification and rollback
 
-# 3. OpenAI Empirical Inference Boundary Benchmark (Randomized Branch-Blinded)
-npm run bench:inference-boundary
+Check the application's authentication and product API contract, then verify a request with correlated relay telemetry. Confirm that an invalid relay key fails, cancellation terminates appropriately, and terminal failures are surfaced without endless client retries. Test from the deployed application's network, not only the operator's laptop.
 
-# 4. Run the complete pre-deployment audit & build gate (8 Phases + ESLint + Next.js Build)
-npm run deploy:check
+The 2026-09-07 relay rollout verified the local container and a short chat/SSE request. Remote application connectivity, public tunnel ingress, and live image storage were not part of that verification. Keep application rollback separate from relay image rollback and database migration strategy.
 
-# 5. Synchronize or inspect Vercel environment variables
-npm run vercel:env:print
-
-# 6. Populate or rotate cryptographic vault master secrets
-npm run vault:populate
-```
-
-
----
-
-## 3. Environment Variables Specification
-
-Configure the following environment variables in the **Vercel Project Settings > Environment Variables**:
-
-| Variable Name | Environment | Required | Description |
-| :--- | :--- | :--- | :--- |
-| `NEXT_PUBLIC_APP_URL` | Production, Preview | **Yes** | Canonical web URL (e.g. `https://galx.ai` or `https://<project>.vercel.app`). |
-| `NEXT_PUBLIC_SUPABASE_URL` | Production, Preview, Dev | **Yes** | Supabase project HTTPS endpoint (e.g. `https://<id>.supabase.co`). |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Production, Preview, Dev | **Yes** | Supabase anonymous / publishable key safe for client-side queries. |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Production, Preview, Dev | **Yes** | Alias for Supabase publishable key. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Production, Preview, Dev | **Yes** | Supabase admin secret key for serverless endpoints. *(Keep Secret)* |
-| `DATABASE_URL` | Production, Preview, Dev | **Yes** | PostgreSQL connection pooler URI (`aws-0-us-east-1.pooler.supabase.com:6543`). |
-| `GALX_VAULT_MASTER_SECRET` | Production, Preview, Dev | **Yes** | 32-byte cryptographic secret for BYOQ HKDF key derivation and AES-256-GCM. |
-| `GALX_VAULT_KEY` | Production, Preview, Dev | **Yes** | Alias for master encryption secret. |
-| `GALX_VAULT_ACTIVE_KEY_VERSION` | Production, Preview, Dev | **Yes** | Current active key version (`v1`). |
-| `NEXT_PUBLIC_GALX_EDGE_URL` | Production, Preview, Dev | Optional | URL of Cloudflare Edge API gateway (`https://api.galx.ai`). |
-| `PUBLIC_ASSETS_URL` | Production, Preview, Dev | Optional | URL of R2 multimodal assets CDN (`https://assets.galx.ai`). |
-| `VM_RELAY_URL` | Production, Preview, Dev | **Recommended** | Cloudflare Tunnel or VM endpoint for Always-On Codex WebSocket relay (`https://<hash>.trycloudflare.com` or `https://relay.galx.ai`). Enables multi-minute reasoning models on Vercel without serverless execution timeout kills. |
-| `OPENAI_API_KEY` | Production, Preview, Dev | Optional | Root fallback API key for OpenAI models. |
-| `XAI_API_KEY` | Production, Preview, Dev | Optional | Root fallback API key for xAI/Grok models. |
-| `SUPABASE_POOL_SIZE` | Production, Preview, Dev | Optional | Serverless pg connection pool size (Default: `20`). |
-| `SUPABASE_TIMEOUT_MS` | Production, Preview, Dev | Optional | Database request timeout in milliseconds (Default: `15000`). |
-
----
-
-## 4. Deployment Methods
-
-### Method A: Deploy via Vercel Git Integration (Recommended)
-
-1. Push your repository to **GitHub**, **GitLab**, or **Bitbucket**.
-2. Go to [vercel.com/new](https://vercel.com/new).
-3. Import the `GALXAI` repository.
-4. Set the framework to **Next.js** (automatically detected).
-5. In the **Environment Variables** accordion, paste the variables listed above.
-6. Click **Deploy**.
-
----
-
-### Method B: Deploy via Vercel CLI (or npm shortcuts)
-
-1. **Authenticate Vercel CLI**:
-   ```bash
-   npx vercel login
-   ```
-
-2. **Synchronize Environment Variables**:
-   ```bash
-   npm run vercel:env:print   # Inspect masked variables
-   npm run vercel:env:sync    # Push variables to Vercel
-   ```
-
-3. **Deploy Preview build**:
-   ```bash
-   npm run vercel:deploy
-   ```
-
-4. **Deploy Production build**:
-   ```bash
-   npm run vercel:deploy:prod
-   ```
-
----
-
-### 4.5. Connecting Vercel to the Always-On VM Relay (Cloudflare Tunnel Ingress)
-
-Vercel serverless lambdas have strict execution wall-clock limits (15s–60s on Hobby/Pro, 300s on Enterprise). Frontier reasoning models (`gpt-5.6-sol`, `gpt-5.6-terra`, `o3`) require persistent, bidirectional WebSocket channels to `wss://chatgpt.com/backend-api/codex/responses` that run for 120–180 seconds.
-
-To enable Vercel to serve frontier models without timeouts or datacenter IP blocks:
-
-1. **Run the Relay Daemon locally or on a cloud VM**:
-   ```bash
-   cd /Users/bozoegg/Desktop/LUMI-NEW
-   pm2 start ecosystem.config.cjs
-   ```
-2. **Expose the Relay via Cloudflare Tunnel**:
-   ```bash
-   cloudflared tunnel --url http://localhost:3001
-   # Outputs: https://<ephemeral-id>.trycloudflare.com
-   ```
-3. **Set the Environment Variable in Vercel**:
-   ```bash
-   npx vercel env add VM_RELAY_URL production
-   # Enter value: https://<ephemeral-id>.trycloudflare.com
-   ```
-4. **Transparent Decoupled Execution**:
-   When a user requests `gpt-5.6-sol`, `OpenAIAdapter.ts` forwards the request to `VM_RELAY_URL`. The relay enqueues the task, returns `HTTP 202 Accepted` with `Location: /v1/jobs/:id/stream`, and `OpenAIAdapter.ts` transparently attaches to the stream, piping SSE chunks back to the client while the persistent WebSocket connection remains cleanly anchored to the relay.
-
----
-
-## 5. Custom Domain & DNS Setup (Cloudflare + Vercel)
-
-If using Cloudflare DNS to proxy traffic to Vercel:
-
-1. In **Vercel Project Settings > Domains**, add your domain (e.g. `galx.ai` and `www.galx.ai`).
-2. In **Cloudflare Dashboard > DNS**:
-   - **Apex Record (`@`)**: Add `A` record pointing to `76.76.21.21` (or CNAME flattening).
-   - **Subdomain (`www`)**: Add `CNAME` pointing to `cname.vercel-dns.com`.
-3. **Cloudflare SSL/TLS Settings**:
-   - Set SSL mode to **Full (Strict)**.
-   - Ensure WebSocket support is enabled under **Network > WebSockets**.
-
----
-
-## 6. Post-Deployment Verification & Live Smoke Test
- 
-Run the automated live smoke test suite against your live Vercel deployment URL:
- 
-```bash
-# Test against production or preview URL
-npm run vercel:smoke -- --url=https://galx.ai
-```
- 
-The automated smoke suite validates:
-- [x] **Health Check & Telemetry**: Validates `/api/health` HTTP 200, version, and model catalog.
-- [x] **Static Prerendering**: Verifies homepage HTML structure and page bundle delivery.
-- [x] **Edge OpenGraph Generator**: Checks `/opengraph-image` dynamic image generation.
-- [x] **Robots.txt & Sitemap**: Validates crawler directives and XML sitemap format.
-- [x] **Perimeter Security Headers**: Confirms `X-Content-Type-Options`, `X-Frame-Options`, HSTS, and `Referrer-Policy`.
-- [x] **OpenAI Models Catalog**: Validates `/v1/models` list and SWR edge cache headers.
-- [x] **CORS Preflight**: Validates `OPTIONS /api/health` 204 handler.
-- [x] **OpenSearch XML**: Checks browser URL bar search discovery at `/opensearch.xml`.
-- [x] **Model RSS/Atom Feed**: Verifies XML syndicate feed at `/feed.xml`.
-- [x] **RFC 9116 Vulnerability Disclosure**: Verifies `/.well-known/security.txt`.
-- [x] **Individual Model Spec & SWR Caching**: Tests `/v1/models/[id]` edge response and headers.
+See [deployment overview](DEPLOYMENT.md), [relay setup and rollback](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md), [API base URLs](API_BASE_URL.md), and [Cloudflare strategy](CLOUDFLARE_STRATEGY.md).

@@ -40,4 +40,4 @@ import 'galxai/patch'; // Transparently redirects all OpenAI SDK calls to GALXAI
 1. **Pre-Flight Connectivity Audit**: Run `npx galxai doctor` on the customer's staging environment.
 2. **Shard Vault Credential Generation**: Issue dedicated AES-256-GCM encrypted API keys.
 3. **50% Deposit Match Incentive**: Customer deposits $100.00 ➔ GALXAI instantly matches with an extra $50.00 compute credit ($150.00 balance).
-4. **Live Latency & Error Telemetry Check**: Confirm sub-15ms edge routing overhead.
+4. **Live Latency & Error Telemetry Check**: Measure routing and first-output latency on the actual deployment; record the workload and result.

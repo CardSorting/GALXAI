@@ -12,7 +12,7 @@ Consequently, PostgREST's automatic client-side Row-Level Security (`auth.uid()`
 Adopted the **Two-Lock Defense Architecture** popularized by enterprise multi-tenant systems (Prisma Accelerate, Hasura, PostGraphile, Supabase SSR direct poolers):
 
 1. **Transaction-Scoped Tenant Impersonation (`executePostgresTransactionAsUser`)**:
-   - In [`src/lib/db/postgres.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/db/postgres.ts), introduced `executePostgresTransactionAsUser` and `executePostgresQueryAsUser`.
+   - In [`src/lib/db/postgres.ts`](../../src/lib/db/postgres.ts), introduced `executePostgresTransactionAsUser` and `executePostgresQueryAsUser`.
    - Before executing tenant queries, opens a transaction and asserts:
      ```sql
      BEGIN;

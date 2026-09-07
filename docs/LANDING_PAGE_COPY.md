@@ -47,7 +47,7 @@ GALXAI fixes both: **1 line of code to add private, secure Frontier GPT models t
 ## 3. Solutions Designed for Private, Secure & Efficient AI Workflows
 
 ### 1. Increase Performance
-Maximize the speed and efficiency of your AI projects with sub-15ms Anycast edge routing and multi-tier prompt caching supporting Frontier GPT Models (`GPT-5.6 Sol`, `Terra`, and `Luna`).
+Maximize the speed and efficiency of your AI projects with configured gateway routing and multi-tier prompt caching supporting Frontier GPT Models (`GPT-5.6 Sol`, `Terra`, and `Luna`).
 
 ### 2. Remove Bottlenecks
 Eliminate the obstacles in your AI workflows. No custom API routes, zero data transfer egress fees, and automated error recovery keep your projects running smoothly.

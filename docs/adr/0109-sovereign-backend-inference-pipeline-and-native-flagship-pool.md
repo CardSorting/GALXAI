@@ -15,26 +15,26 @@ We established a strict production standard: **Zero Fallbacks / 100% Real Wire E
 1. **Purge of Synthetic Mock & Offline Fallback Engines**:
    - Completely eliminated `GalxSyntheticInferenceEngine`, mock token interceptors, and offline fallback generators from production routing paths.
    - All client and test inference requests execute strictly against real upstream infrastructure over the wire (via Cloudflare Edge Worker gateway or isolated local Codex runner).
-   - Restored standard execution pathways through [`OpenAIAdapter.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/core/router/adapters/OpenAIAdapter.ts).
+   - Restored standard execution pathways through [`OpenAIAdapter.ts`](../../src/core/router/adapters/OpenAIAdapter.ts).
 
 2. **Native Wholesale Flagship Credential Substrate & JIT Ingestion**:
-   - In [`GalxCredentialSubstrate.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/core/substrate/GalxCredentialSubstrate.ts) and [`GalxAuthEngine.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/core/auth/GalxAuthEngine.ts), authenticated provider shards are explicitly ingested into the encrypted Supabase PostgreSQL registry. ADR 0115 supersedes automatic long-lived credential synchronization to edge KV.
+   - In [`GalxCredentialSubstrate.ts`](../../src/core/substrate/GalxCredentialSubstrate.ts) and [`GalxAuthEngine.ts`](../../src/core/auth/GalxAuthEngine.ts), authenticated provider shards are explicitly ingested into the encrypted Supabase PostgreSQL registry. ADR 0115 supersedes automatic long-lived credential synchronization to edge KV.
    - Router leases acquire live healthy shards with real OAuth tokens and active rate limits.
 
 3. **Decoupled Architecture & Real Upstream Protocol Execution**:
    - Monolithic hardcoded templates in protocol adapters are completely replaced by real prompt-directed frontier model synthesis.
-   - [`OpenAIAdapter.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/core/router/adapters/OpenAIAdapter.ts) operates as a high-performance protocol adapter handling:
+   - [`OpenAIAdapter.ts`](../../src/core/router/adapters/OpenAIAdapter.ts) operates as a high-performance protocol adapter handling:
       - Cloudflare Edge Gateway routing (`LUMI_EDGE_WORKER_URL`) for standard wholesale API keys (`sk-...`) with residential header cloaking.
       - Native Codex WebSocket routing (`wss://chatgpt.com/backend-api/codex/responses`) and Always-On VM Relay delegation (`VM_RELAY_URL`) for ChatGPT session tokens.
       - Isolated local Codex runner execution (`CODEX_HOME=/tmp/galx-codex-runner`) with SQLite concurrency isolation.
       - Deadline budgets, SSE streaming, and abort signal propagation.
 
 4. **Dynamic Upstream Base URL Resolution (LiteLLM / Portkey Gateway Pattern)**:
-   - In [`OpenAIAdapter.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/core/router/adapters/OpenAIAdapter.ts), added dynamic base URL resolution (`secret.baseUrl`, `process.env.OPENAI_BASE_URL`, `process.env.LUMI_EDGE_WORKER_URL`, `process.env.GALX_UPSTREAM_URL`, `process.env.LOCAL_AI_URL`, `process.env.OLLAMA_BASE_URL`).
+   - In [`OpenAIAdapter.ts`](../../src/core/router/adapters/OpenAIAdapter.ts), added dynamic base URL resolution (`secret.baseUrl`, `process.env.OPENAI_BASE_URL`, `process.env.LUMI_EDGE_WORKER_URL`, `process.env.GALX_UPSTREAM_URL`, `process.env.LOCAL_AI_URL`, `process.env.OLLAMA_BASE_URL`).
    - Enables seamless pass-through to Cloudflare Edge gateways, local model engines (vLLM, Ollama), and custom enterprise proxies.
 
 5. **Distributed Seat Gate Resilience**:
-   - In [`TeamGovernanceRepository.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/supabase/repositories/TeamGovernanceRepository.ts), hardened RPC calls (`fn_evaluate_and_acquire_seat_gate_v2`, `fn_settle_seat_request_lease_v2`, `fn_release_seat_request_lease_v2`) with try-catch resilience and fallback to local process-bounded slot leases when running in isolated test environments.
+   - In [`TeamGovernanceRepository.ts`](../../src/lib/supabase/repositories/TeamGovernanceRepository.ts), hardened RPC calls (`fn_evaluate_and_acquire_seat_gate_v2`, `fn_settle_seat_request_lease_v2`, `fn_release_seat_request_lease_v2`) with try-catch resilience and fallback to local process-bounded slot leases when running in isolated test environments.
 
 ## Consequences
 - **Positive**: Strict production reality — zero artificial mocks or simulated responses mask real upstream errors or network regressions.

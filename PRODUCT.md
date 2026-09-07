@@ -8,33 +8,31 @@ web
 
 ## Overview
 
-GALXAI is the enterprise-grade AI Consumption & Acceleration Layer. It provides developers and engineering teams with OpenAI-compatible APIs, SDK integrations, zero-proxy Server Actions, and a unified Anycast gateway for routing, load balancing, cost optimization, and failover across OpenAI Codex & GPT flagship models (`gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, and GPT-Image suites).
+GALXAI is an inference platform and governance control plane for model discovery, API access, routing, metering, reliability, and spend operations. Developers build and own the end-user applications and agent runtimes that consume its APIs.
 
 ## Primary Users & Jobs to Be Done
 
-1. **Founders & Product Leads**: Need to compress **time-to-first-dollar** by shipping production AI features in minutes without spending weeks building custom backend proxies or learning inference edge cases.
-2. **VP of Engineering & Lead Architects**: Need to answer *"Why is our AI bill so high, and how do we make it stop?"* via real-time reverse-audit forensic attribution, automatic tier cascading, and runaway agent circuit breakers.
-3. **AI Engineers & Developers**: Need OpenAI-compatible inference APIs, native SDKs, 1-line OpenAI SDK interception (`import 'galxai/patch'`), and deterministic agent directives (`npx galxai skills`).
-4. **Finance & Operations Leads**: Need autonomous spend governance, net retail bill reductions (25%–40% wholesale discount + 75% prompt caching rebate), deposit match incentives, and double-entry immutable ledger accounting.
+- Developers integrate inference into their applications and agents using API keys, compatible endpoints, and SDKs.
+- Engineering operators diagnose rejected credentials, exhausted capacity, slow requests, and provider failures without guessing from an aggregate health indicator.
+- Finance and operations teams inspect usage and billing through the platform's accounting surfaces. Provider pricing, discounts, and caching savings depend on the actual model, request, and commercial configuration.
 
 ## Core Capabilities
 
-- **Time-to-First-Dollar Primitives**: Native SDKs and Next.js 15 Server Actions that eliminate client-side key leakage without requiring custom backend API proxies.
-- **Enterprise Spend Forensic & Governance (/audit)**: Reverse-audit live OpenAI traffic to identify frontier model misallocations, prefix cache collisions, and uncapped CI/CD test burns.
-- **Unified Gateway Routing**: OpenAI-compatible REST & streaming endpoints with sub-15ms edge routing overhead via Cloudflare Workers.
-- **Autonomous Spend Remediation & Caching**: 100% pass-through of 75% prompt caching savings, dynamic prefix cache alignment, and intelligent tier cascading (`sol` $\to$ `terra` $\to$ `luna`).
-- **Shard Vault Management**: Zero-trust sovereign API credential vaulting, health monitoring, and quota pooling.
-- **Developer Request Tools & Diagnostics**: API request construction, latency benchmarking, token counters, and code generation for cURL, Python, and Node.js integrations.
-- **Wallet & Billing Ledger**: Prepaid credit system with double-entry immutability, automated top-ups, and net invoice spend reduction.
+The repository contains the Next.js application, SDK integrations, model routing and credential registry, billing and governance modules, Cloudflare Worker implementation, and a standalone Node relay. These have separate deployment and authorization boundaries; the presence of a module is not evidence that it is enabled in production.
+
+The relay supplies inference transport with credential eligibility checks, bounded retries, cancellation, request telemetry, and an operator dashboard. It runs in an isolated Docker container in the verified local deployment. It does not execute user tools on the operator's device. Tool use remains a downstream agent capability; compatibility must be evaluated against the implemented request and response contract.
 
 ## Constraints & Invariants
 
-- **Product Surface Boundary**: GALXAI hosts model discovery, API configuration, billing, telemetry, and governance—not a destination chat application or image studio. Downstream developers own their end-user creation experiences.
-- **Post-Auth Activation**: Successful login defaults to `/models`, where the canonical model array is presented as cards with model-type tabs. Explicit protected-route return destinations remain intact.
-- **Capability Preservation**: Removing hosted client UI must not remove `/v1/chat/completions`, `/v1/images/generations`, `/v1/models`, SDK inference, or explicit durable-session handling.
+- The hosted product centers on models, API configuration, billing, telemetry, and governance. Destination chat and image studios belong to downstream applications.
+- Successful authentication defaults to `/models`; explicit protected-route return destinations remain intact.
+- Retiring hosted creation UI must preserve inference APIs and SDK capabilities.
+- Model interpretation does not grant permission to execute on the relay host. Isolation is an operating-system/container boundary, not a prompt instruction or blanket prohibition of tool-call content.
+- Provider rejection, credential expiry, quota cooldown, transport uncertainty, and local saturation must have distinct operator explanations. Unknown provider quota must remain unknown.
+- Recovery is bounded. Acceptance is not completion; reconnection is not an exactly-once execution guarantee. Cancellation does not imply a relay-managed refund.
+- Do not present unmeasured latency, fixed provider quotas, universal savings, compliance certification, or whole-stack containment as implemented guarantees.
+- Use a readable, compact dark operator interface with clear hierarchy, accessible status labels, and useful empty and failure states.
 
-The operational product taxonomy, diagnostic-sandbox boundary, copy rules, roadmap test, and activation measures are maintained in [Product Surface Strategy](docs/PRODUCT_SURFACE_STRATEGY.md). ADR 0119 remains the architectural authority.
+## Current strategy and evidence
 
-- **Performance**: Sub-50ms TTFB for cached/routed calls, optimized for edge runtimes.
-- **Security**: Default-deny RLS in Supabase, zero plaintext API secret storage in client state, strict CSP.
-- **Aesthetic**: Premium high-density dark interface tailored for technical operators without frivolous visual noise or AI-generated gimmicks.
+[Product Surface Strategy](docs/PRODUCT_SURFACE_STRATEGY.md) and [ADR 0119](docs/adr/0119-inference-first-product-surface-and-client-retirement.md) define the product boundary. [ADR 0122](docs/adr/0122-isolated-authenticated-relay-and-bounded-recovery.md) defines relay isolation and bounded recovery. [Architecture](docs/ARCHITECTURE.md) describes the separate runtime paths; the [relay deployment runbook](docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md) records the dated deployment evidence and remaining limitations.

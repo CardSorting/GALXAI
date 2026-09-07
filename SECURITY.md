@@ -1,6 +1,6 @@
 # 🔒 Security Policy & Vulnerability Reporting
 
-GALXAI takes the security and cryptographic integrity of our clearinghouse, memory enclaves, and multi-tenant vaults extremely seriously.
+GALXAI takes the security and cryptographic integrity of our inference platform, relay, and credential vaults extremely seriously.
 
 ---
 
@@ -44,12 +44,10 @@ Instead, please report security vulnerabilities through one of the following sec
 
 ---
 
-## 🏛️ Cryptographic Invariants Enforced in Codebase
+## Implementation and scope
 
-All contributions to the GALXAI codebase are held to the following cryptographic invariants:
-1. **AES-256-GCM Envelope Encryption** with 96-bit random IVs and 128-bit authentication tags.
-2. **Authenticated Associated Data (AAD)** binding `${tenantUid}:${shardId}:${provider}` to prevent cross-tenant shard transplantation.
-3. **Active Memory Zeroization (`zeroizeBuffer`)**: Deterministic 2-pass RAM scrubbing (`0xAA` $\to$ `0x00`) in `finally` blocks for all decrypted credentials.
-4. **Fail-Closed Factual Grounding (`BroccoliCompactionSafety`)**: All representation compaction routines verify numbers, currencies, dates, and identifiers against raw source text.
+The [technical security guide](docs/SECURITY.md) documents application, registry, and relay boundaries. The [relay security policy](docs/relay-security.md) covers key roles, browser origins, container isolation, and retained state.
 
-Thank you for helping keep GALXAI and the AI developer community secure! 🥦🔒
+Credential encryption and AAD binding are implemented in the registry vault path. Buffer clearing is best effort in a garbage-collected runtime; do not interpret it as guaranteed erasure of every string, process copy, or checkpoint. Relay job checkpoints can contain request content. Container isolation applies to the relay process, not every application adapter or external agent runtime.
+
+See [ADR 0115](docs/adr/0115-postgresql-authoritative-shard-registry-and-secret-free-projections.md) and [ADR 0122](docs/adr/0122-isolated-authenticated-relay-and-bounded-recovery.md) for current decisions and limitations.

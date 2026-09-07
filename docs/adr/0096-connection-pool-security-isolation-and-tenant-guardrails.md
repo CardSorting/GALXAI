@@ -13,7 +13,7 @@ When connecting directly to PostgreSQL via `DATABASE_URL` using connection poole
      - **In-Memory Guard**: Checks `key.userId === userId` before returning or mutating L0/L1 hot cache pointers.
      - **SQL Isolation Guard**: Appends `AND ($3::text IS NULL OR user_id = $3::text)` to prevent unauthorized updates at the database level.
 2. **Schema Search-Path Hijacking Defense**:
-   - In [`src/lib/db/postgres.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/db/postgres.ts), registered a client connection listener:
+   - In [`src/lib/db/postgres.ts`](../../src/lib/db/postgres.ts), registered a client connection listener:
      ```ts
      pool.on('connect', (client) => {
        client.query('SET search_path = public;').catch(() => {});

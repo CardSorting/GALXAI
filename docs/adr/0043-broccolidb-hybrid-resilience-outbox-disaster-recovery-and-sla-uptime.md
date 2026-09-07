@@ -57,7 +57,7 @@ graph TD
 ## 3. Core Architectural Pillars
 
 ### Pillar 1: Zero-Loss Mutation Outbox Engine (RPO = 0)
-**Location**: [`src/lib/resilience/BroccoliOutboxEngine.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/resilience/BroccoliOutboxEngine.ts)
+**Location**: [`src/lib/resilience/BroccoliOutboxEngine.ts`](../../src/lib/resilience/BroccoliOutboxEngine.ts)
 - **Append-Only Memory Queue**: All state-mutating requests (POST/PUT/PATCH/DELETE) failing due to network drops are enqueued into `BroccoliDbTable<OutboxMutation>`.
 - **Cryptographic Frame Checksums**: Each outbox entry is signed with an in-flight checksum (`hash(id + url + idempotencyKey + timestamp + payload)`).
 - **Persistent SafeStorage L2 Backing**: Every enqueue writes through to `SafeStorage` with quota management.
@@ -65,21 +65,21 @@ graph TD
 - **Cross-Tab Synchronization**: Propagates enqueued and resolved mutations across all browser tabs via `BroadcastChannel('galx_outbox_sync_channel')`.
 
 ### Pillar 2: Dual-Slot Atomic Snapshot Engine (RTO < 5ms)
-**Location**: [`src/lib/resilience/BroccoliSnapshotEngine.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/resilience/BroccoliSnapshotEngine.ts)
+**Location**: [`src/lib/resilience/BroccoliSnapshotEngine.ts`](../../src/lib/resilience/BroccoliSnapshotEngine.ts)
 - **Double-Buffered Serialization**: Periodically serializes BroccoliDB tables (`cache`, `slaProbes`, `circuits`, `incidents`, `outbox`, `recentNav`) alternating between Slot A (`galx_broccolidb_snap_a_v2`) and Slot B (`galx_broccolidb_snap_b_v2`).
 - **Atomic Pointer Swap**: Flips `galx_broccolidb_active_slot_v2` only after verifying round-trip checksum integrity on the inactive slot.
 - **Self-Healing Rollback**: If a browser process terminates mid-write, boot hydration detects checksum mismatch on the active slot and automatically rolls back to the intact alternate slot in <5ms.
 - **Lifecycle Event Binding**: Persists snapshots automatically on `visibilitychange` (`hidden`), `beforeunload`, and 30-second background heartbeats.
 
 ### Pillar 3: Resilient Client Network Layer & In-Flight Coalescer
-**Location**: [`src/lib/resilience/ResilientClient.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/resilience/ResilientClient.ts)
+**Location**: [`src/lib/resilience/ResilientClient.ts`](../../src/lib/resilience/ResilientClient.ts)
 - **L1 BroccoliDB Response Cache**: Sub-microsecond response lookups for read queries.
 - **In-Flight Coalescing**: Deduplicates concurrent identical requests into a single network execution to prevent thundering-herd spikes.
 - **Decorrelated Full Jitter Backoff**: Implements exponential backoff with full decorrelated jitter (RFC 8900) honoring upstream `Retry-After` headers.
 - **HTML Error Page Decoding Safeguard**: Safely captures non-JSON Cloudflare / Vercel 502/504 HTML pages without throwing JSON parse syntax errors.
 
 ### Pillar 4: Live SLA Health Engine & In-Memory Incident Logs
-**Location**: [`src/lib/resilience/SlaHealthEngine.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/resilience/SlaHealthEngine.ts) & [`src/lib/resilience/BroccoliResilienceSubstrate.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/resilience/BroccoliResilienceSubstrate.ts)
+**Location**: [`src/lib/resilience/SlaHealthEngine.ts`](../../src/lib/resilience/SlaHealthEngine.ts) & [`src/lib/resilience/BroccoliResilienceSubstrate.ts`](../../src/lib/resilience/BroccoliResilienceSubstrate.ts)
 - **Synthetic Edge Probes**: Continuous measurement of p50, p90, and p99 edge latencies against the 99.99% Enterprise Uptime SLA target.
 - **Incident Response Table**: `BroccoliDbTable<IncidentLogEntry>` records operational events, impact assessments, root causes, and automated mitigation strategies for non-technical transparency.
 

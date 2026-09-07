@@ -79,7 +79,7 @@ All 10 migrations were written following paranoid governance invariants, applied
 
 ## 4. Key Engine & Codebase Components
 
-### 4.1. `GalxRollingContextEngine` ([src/core/router/GalxRollingContextEngine.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/router/GalxRollingContextEngine.ts))
+### 4.1. `GalxRollingContextEngine` ([src/core/router/GalxRollingContextEngine.ts](../src/core/router/GalxRollingContextEngine.ts))
 - **L1 BroccoliDB Tables in RAM**:
   - `galx_chat_rolling_memory_l1`: Sub-millisecond conversation block lookup.
   - `galx_chat_doc_chunks_l1`: Document chunk index with SHA-256 deduplication.
@@ -94,7 +94,7 @@ All 10 migrations were written following paranoid governance invariants, applied
 - **Deterministic Stable Prefix Hashing**:
   - Generates SHA-256 hashes across static prefix components to lock in $>98\%$ prompt cache reuse.
 
-### 4.2. `GalxElasticContextGovernor` ([src/core/governor/GalxElasticContextGovernor.ts](file:///Users/bozoegg/Desktop/GALXAI/src/core/governor/GalxElasticContextGovernor.ts))
+### 4.2. `GalxElasticContextGovernor` ([src/core/governor/GalxElasticContextGovernor.ts](../src/core/governor/GalxElasticContextGovernor.ts))
 - **Dynamic Context Sizing**: Eliminates hardcoded clamps. Sizing is governed by the user's tier headroom and model frontier capability:
   - Flagship Enterprise: Up to **1,050,000 tokens context** and **64k–128k output tokens**.
   - Small Business: Up to **512k tokens context** and **32k output tokens**.

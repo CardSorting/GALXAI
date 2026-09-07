@@ -1,111 +1,79 @@
-# 📚 GALXAI Documentation & Architecture Sitemap
+# GALXAI documentation
 
-Welcome to the technical documentation and operational guides for **GALXAI**, an inference platform and governance control plane for model discovery, API access, routing, metering, reliability, and spend operations.
+GALXAI is an inference platform and governance control plane. Developers own their end-user applications and agent runtimes. Start with the [product strategy](PRODUCT_SURFACE_STRATEGY.md), [architecture](ARCHITECTURE.md), and [API base URL guide](API_BASE_URL.md).
 
-GALXAI does not ship a destination chat application or image-generation studio. Those experiences belong to downstream products; the compatible inference APIs remain platform contracts. Start with the **[Product Surface Strategy](PRODUCT_SURFACE_STRATEGY.md)** and **[ADR 0119](adr/0119-inference-first-product-surface-and-client-retirement.md)** when making product, navigation, or roadmap decisions.
+## Current relay strategy and operations
 
----
+- [ADR 0122: isolation, authentication, and bounded recovery](adr/0122-isolated-authenticated-relay-and-bounded-recovery.md)
+- [Deployment, setup, verification, and rollback](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md)
+- [Standalone relay API](RELAY_API_REFERENCE.md)
+- [Security boundary](relay-security.md)
+- [Fleet and quota operations](maintainers/RELAY_QUOTA_AND_FLEET.md)
+- [Hardening and regression checks](maintainers/RELAY_HARDENING.md)
+- [Troubleshooting](TROUBLESHOOTING.md)
 
-## 🏛️ Institutional Investor & Venture Diligence Data Room
+These guides distinguish the relay from the application and Worker. The relay performs inference without executing user tools on the operator's device. It does not promise unlimited retries, exactly-once recovery, global replica coordination, or a provider quota that has not been reported.
 
-- **[Investor Data Room & Investment Memo Index](investors/README.md)**: Institutional diligence room for venture partners, angels, and financial auditors.
-  - **[01. Executive Summary & Investment Memo](investors/01_EXECUTIVE_SUMMARY_AND_MEMO.md)**: 1-pager covering company thesis, traction, financial highlights, and round terms.
-  - **[02. Pitch Deck Slide-by-Slide Specification](investors/02_PITCH_DECK_SLIDE_BY_SLIDE.md)**: 12-slide institutional pitch deck narrative.
-  - **[03. Market Sizing: TAM, SAM & SOM Analysis](investors/03_MARKET_SIZING_TAM_SAM_SOM.md)**: Econometric top-down ($1.3T TAM) and bottom-up ($1.31B SOM) sizing.
-  - **[04. Unit Economics: CAC, LTV, Margins & Payback](investors/04_UNIT_ECONOMICS_CAC_LTV_PAYBACK.md)**: Blended CAC ($185), LTV ($5,350), Gross Margins (42% $\to$ 68%), and 138% NDR.
-  - **[05. Competitive Landscape & Strategic Moats](investors/05_COMPETITIVE_LANDSCAPE_AND_MOATS.md)**: 2x2 positioning matrix, feature teardown, and 4 defensible moats.
-  - **[06. 5-Year Financial Projections & Operating Model](investors/06_FINANCIAL_PROJECTIONS_AND_MODEL.md)**: 5-year P&L forecast ($1.2M $\to$ $85M ARR) and headcount ramp.
-  - **[07. Technical Due Diligence & Architecture Proof](investors/07_TECHNICAL_DILIGENCE_AND_PATENTS.md)**: Architecture audit FAQs for Partner CTOs, sub-15ms wire proof, and ZDR privacy.
+## Collections
 
----
+- [Architecture decisions](adr/README.md)
+- [Maintainer guides](maintainers/README.md)
+- [Investor materials](investors/README.md) — commercial theses and projections require their own dated evidence; they are not deployment guarantees.
 
-## 🎯 Developer Guides & Integrations
+## Reference catalog
 
-- **[Universal Developer Client SDK Guide](DEVELOPER_CLIENT_SDK.md)**: Exhaustive manual for the edge-native TypeScript SDK, touchless 1-line APIs, visual synthesis, streaming diagnostics, BroccoliDB substrate, and offline replay testing.
-- **[Product Surface Strategy](PRODUCT_SURFACE_STRATEGY.md)**: Authoritative product-layer taxonomy, authenticated journey, diagnostic sandbox boundary, copy rules, roadmap decision test, and activation metrics.
-- **[Quickstart Integration Guide](QUICKSTART.md)**: 30-second drop-in guides for Python, TypeScript, Cursor, Windsurf, Claude Code CLI, and cURL.
-- **[Universal API Reference](API_REFERENCE.md)**: Complete REST API specifications for `/v1/chat/completions`, `/v1/messages`, `/v1/embeddings`, `/api/auth/ingest`, and `/api/ingest`.
-- **[Standardized OAuth & Ingestion Architecture](STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md)**: Detailed specification of two-tier identity isolation, Supabase SSR callback, and RFC 9530 transport security.
-- **[Flagship Model Catalog & Wholesale Rates](MODEL_CATALOG.md)**: Specifications, context windows, and wholesale pricing for GPT-5.6 Sol, Terra, Luna, and xAI Grok 4.6.
-- **[Pricing, Rebates & Economic Arbitrage](PRICING_AND_DISCOUNT_STRATEGY.md)**: Detailed breakdown of the 4-pillar discount architecture (25%–40% wholesale discount, 75% prompt caching rebate).
-- **[Multi-Ecosystem SDK Cheatsheet](SDK_CHEATSHEET.md)**: Drop-in code snippets for OpenAI, Anthropic, Vercel AI SDK, LangChain, and LlamaIndex.
-- **[Universal Migration Guide](MIGRATION_GUIDE.md)**: Step-by-step zero-code-change migration instructions from raw OpenAI, Anthropic, or OpenRouter setups.
-- **[BroccoliDB Compaction Onboarding Guide](BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md)**: Master engineer onboarding guide covering the 19-mode safe facade, 180 domain industry clusters, fail-closed safety gate, and the Epistemic Machinery for inference boundary benchmarking.
-- **[BroccoliDB Deduplication & Compaction Engine Specification](BROCCOLIDB_DEDUPLICATION_ENGINE_SPECIFICATION.md)**: 85-buffer algorithmic deduplication, sub-microsecond vector batching, Drain log clustering, eBPF syscalls, and TSDB metric telemetry.
-- **[BroccoliDB Research, Philosophy & Formal Theory Suite](broccolidb/README.md)**:
-  - **[01. Philosophy of BroccoliDB](broccolidb/01_PHILOSOPHY_THE_AGGRESSIVE_VEGETABLE.md)**: The representation layer, compute-prepper fallacy, botanical isomorphism, and the aggressive vegetable.
-  - **[02. Technical Whitepaper](broccolidb/02_WHITEPAPER_REPRESENTATION_SELECTION.md)**: Task-conditioned representation selection under epistemic and information-theoretic constraints.
-  - **[03. Stakeholder & Maintainer Brief](broccolidb/03_STAKEHOLDER_AND_ONBOARDING_BRIEF.md)**: Commercial pitch vs. diligence room, 30-second elevator explanation, and 3 golden invariants.
-  - **[04. Formal Mathematical Proof](broccolidb/04_FORMAL_MATHEMATICAL_PROOF.md)**: Academically rigorous proofs for Risk Monotonicity, Identity Optimality, Bounded Action Degradation, Institutional Entropy Resistance, and Category-Theoretic Functors.
-  - **[05. Formal TLA+ & State-Machine Specification](broccolidb/05_FORMAL_TLA_STATE_MACHINE_SPECIFICATION.md)**: TLA+ specification module, temporal logic invariants ($\Box \text{InvariantSafety}$), and WAL crash recovery engine.
-  - **[06. Architectural Audit & Empirical Evaluation Report](broccolidb/06_ARCHITECTURAL_AUDIT_AND_EMPIRICAL_EVALUATION.md)**: Exhaustive 420-file code audit, ISO/IEC 25010 assessment, chaos fault injection matrix, and frontier LLM benchmarks.
-  - **[07. Lean 4 Formal Verification Blueprint](broccolidb/07_LEAN4_FORMAL_VERIFICATION_BLUEPRINT.md)**: Machine-checked inductive types, Galois connection soundness, identity bypass proofs, and tactic automation.
-  - **[08. Compiler IR Lowering & Program Slicing](broccolidb/08_COMPILER_IR_LOWERING_AND_PROGRAM_SLICING.md)**: LLVM SSA intermediate representations, dominator trees, Weiser's backward slicing, and invariant hoisting.
-  - **[09. RFC-BROCCOLIDB-0001 Protocol Specification](broccolidb/09_RFC_BROCCOLIDB_0001_TASK_CONDITIONED_REPRESENTATION_SELECTION_PROTOCOL.md)**: Formal RFC 2119 / IETF-style protocol standard (TCRSP/1.0), wire formats, headers, and ZDR v10.0.
-  - **[10. Frontier Post-Training Cognitive Labeling Substrate](broccolidb/10_FRONTIER_POST_TRAINING_COGNITIVE_LABELING_SUBSTRATE.md)**: Zero-dependency 4-stage post-training pipeline (Collection, Cleaning, Schema, Provenance), 75+ multi-axis cognitive vectors (MLA, FP8, EAGLE-2, Medusa, DualPipe, DPO Debiasing), and autonomous R2 Merkle sync.
-- **[Frequently Asked Questions (FAQs)](FAQS.md)**: Clear answers covering zero-hesitation ergonomics, prompt caching, billing, security, and uptime SLAs.
+The catalog preserves discoverability without repeating historical performance, pricing, or compliance claims. Current runtime behavior comes from the applicable source and operational guide; benchmark and review documents describe their stated scope and date.
 
----
-
-## 🏛️ System Architecture & Substrates
-
-- **[System Architecture Specification](ARCHITECTURE.md)**: System topology, two-tier siloed identity, in-memory reactive BroccoliDB layer, ZDR v10.0 privacy, and circuit breaker FSM.
-- **[Performance Benchmarks & Empirical Inference Boundary](BENCHMARKS.md)**: Head-to-head empirical OpenAI benchmarks (`gpt-4o`, `gpt-4o-mini`, `o3-mini`), 180-domain cluster results, and Cloudflare Edge mesh latency metrics.
-- **[Forensic Payload Dissection & Causal Analysis](FORENSIC_PAYLOAD_DISSECTION_AND_CAUSAL_ANALYSIS.md)**: "Opening the Sausage": Byte-by-byte before/after payload transformations, information entropy, and causal mechanisms behind input compaction.
-- **[Security Posture & Cryptographic Vault](SECURITY.md)**: AES-256-GCM envelope vault, HKDF key derivation, RFC 9530 constant-time digests, and anti-replay nonces.
-- **[Enterprise OAuth 2.0 / 2.1 & Token Lifecycle](OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md)**: RFC 6819 Refresh Token Rotation (RTR), Token Family Theft Containment, DPoP, and OIDC Back-Channel Logout.
-- **[Provider-as-Auth Technical Specification](PROVIDER_AS_AUTH_SPECIFICATION.md)**: Backend credential vaulting, Substrate tenant sharding, and upstream provider identity roots.
-- **[Natural Navigation & OmniSearch](NATURAL_NAVIGATION_AND_OMNISEARCH.md)**: BroccoliOmniSearch natural language routing, phonetic tolerance, and self-healing breadcrumbs.
-- **[Cloudflare Strategy & Edge Gateway](CLOUDFLARE_STRATEGY.md)**: Zero-egress Cloudflare Workers edge mesh, R2 CDN media acceleration, and custom domains.
-- **[Go-To-Market (GTM) Strategy](GTM_STRATEGY.md)**: Developer JTBD framework, market whitespace, and growth loops.
-- **[Mathematical Routing Algorithms](ROUTING_ALGORITHMS.md)**: Mathematical derivations of Predictive Adaptive Headroom (P-AHT), Smooth Weighted Round-Robin (SWRR), and TASD swarm dispersion.
-- **[Streaming & SSE Protocol Specification](STREAMING_AND_SSE_PROTOCOL.md)**: Sub-15ms TTFT streaming protocols, Keep-Alive ping intervals, and zero-copy buffers.
-- **[Asynchronous Queues & CloudTasks](QUEUE_SPECIFICATION.md)**: Background queue architecture, token-bucket pacing, and DLQ topologies.
-- **[Senior Engineering Review: Chat & Rolling Context](SENIOR_ENGINEERING_REVIEW_CHAT_AND_ROLLING_CONTEXT.md)**: Deep architectural review of Hybrid BroccoliDB (L1) + PostgreSQL (L2) rolling memory, dynamic 1.05M context governor, dual rolling seat quotas, and V44-V53 migrations.
-- **[GALXAI Foundation Model Training Suite (`docs/training/`)](training/README.md)**: Authoritative 7-document post-training suite for **`GALX-Flash-8B`** targeting GLM-5.3 Flash & GPT-4o-mini performance parity:
-  - **[01. Strategy & Target Goal](training/01_STRATEGY_AND_TARGET_GOAL.md)**: GLM-5.3 Flash parity thesis, Qwen3-8B-Base backbone, IndexShare sparse attention ($2.9\times$ FLOPs reduction), and $0 egress R2 flywheel.
-  - **[02. Timeframe & Sprint Milestones](training/02_TIMEFRAME_AND_SPRINT_MILESTONES.md)**: 16-Day 7-Phase chronological execution schedule with quantitative Go/No-Go gates.
-  - **[03. Dataset & Curriculum Specification](training/03_DATASET_AND_CURRICULUM_SPECIFICATION.md)**: 4-Tier curriculum mix ($\ge 200\text{K}$ samples, $\ge 150\text{M}$ tokens), CoT distillation, PII scrubbing, and SHA-256 Merkle proofs.
-  - **[04. Hardware & Infrastructure Setup](training/04_HARDWARE_AND_INFRASTRUCTURE_SETUP.md)**: 8x H100 SXM5 GPU cluster provisioning (Lambda / RunPod), Slime Docker code verifiers, and R2 SigV4 streaming.
-  - **[05. Training Recipes & Hyperparameters](training/05_TRAINING_RECIPES_AND_HYPERPARAMETERS.md)**: Axolotl SFT, Slime Asynchronous RL, and Length-Debiased DPO configuration recipes.
-  - **[06. Operational Execution Runbook](training/06_OPERATIONAL_EXECUTION_RUNBOOK.md)**: Operator checklist, pre-flight probes, shard compaction, live loss tracking, and emergency rollback playbooks.
-  - **[07. Evaluation & Deployment Gate](training/07_EVALUATION_AND_DEPLOYMENT_GATE.md)**: HumanEval, GSM8K, MATH-500 benchmarks, INT4 AWQ/GGUF quantization, and vLLM 5% canary release.
-- **[Architecture Decision Records (ADRs)](adr/README.md)**: 119 formal architectural specifications through ADR 0119, including the current inference-first product boundary, post-auth model activation, and first-party client retirement decision.
-- **[LUMI: Stellar Pass & Multi-Account Fleet Substrate](LUMI.md)**: Comprehensive guide for the $10/mo flat-rate pass, authoritative central shard pool, native Codex WebSocket wire, 40 req / 3 hr sliding-window quotas, and 24/7 autonomous relay containers.
-- **[Real Inference Pipeline & Automated Verification Guide](INFERENCE_PIPELINE_VERIFICATION.md)**: Exhaustive manual for the sovereign zero-fallback inference pipeline (`POST /v1/chat/completions`), 8-phase verification harness, generated sample codebases, wallet settlement holds, and key revocation defenses.
-- **[Operational SRE Playbooks](playbooks/README.md)**: 9 lifecycle runbooks for deployment, incident remediation, secret rotation, unframed developer observation trials, and continuous learning / model post-training.
-- **[Maintainer Knowledge Base & Internal Manual](maintainers/README.md)**: Onboarding Day 1–30 roadmap, subsystem dependency DAG, and debugging runbooks.
-- **[Production Infrastructure & Deployment Guide](DEPLOYMENT.md)**: Multi-target deployment topology across Vercel, Cloudflare Edge, Docker, and Kubernetes.
-
-
-- **[Vercel Production Deployment & Hardening Guide](VERCEL_DEPLOYMENT.md)**: Complete guide for Next.js 15 deployment on Vercel, 8-phase pre-flight verification, environment sync, and 12-point automated live smoke testing.
-- **[Programmatic SEO (pSEO), AEO & GEO Strategy](PSEO_AND_AEO_STRATEGY.md)**: Comprehensive architectural strategy covering 13 interactive developer tools, 14 programmatic content hubs, Schema.org `@graph` ontology, and machine-readable `llms.txt` standards.
-- **[Interactive Developer Tools Suite](../src/app/tools)**: Suite of 13 interactive browser tools including Enterprise LLM ROI & Token Budget Calculator, AI Token Streaming & Speed Benchmark Simulator, 1M Context Window Visualizer, Prompt Caching Estimator, BPE Token Counter, and Model Cost Comparator.
-- **[AEO Engineering Glossary Hub](../src/app/glossary)**: 14 dedicated programmatic glossary term portals (`/glossary/[slug]`) with Schema.org `DefinedTermSet` and Wikidata entity mapping.
-- **[Incident Postmortems Hub](../src/app/postmortems)**: Verifiable real-world incident postmortems, root cause analyses, and multi-origin failover architectures.
-
----
-
-## 🧪 Verification & Audit
-
-Run the automated test suites to verify platform resilience, security, and developer ergonomics:
-
-```bash
-# 1. BroccoliDB Empirical Inference Boundary Benchmark (OpenAI Models)
-npm run bench:inference-boundary
-
-# 2. Compaction Facade & HTTP REST API Gateway Suite (19 modes)
-npm run test:broccolidb:api
-
-# 3. BroccoliDB Production Hardening & Zero-Hallucination Regressions
-npm run test:broccolidb:hardening
-
-# 4. Master 180-Domain Compactor Cluster (100% Verified)
-node --import tsx scripts/test-broccolidb-150-domain-suite.ts
-
-# 5. Universal Router, Privacy, SOC2, BroccoliDB & Ingestion Transport Suite (217 tests)
-npm run test:router
-
-# 6. Universal Zero-Hesitation Ergonomics & Mental Model Suite (98 tests)
-npx tsx scripts/verify-zero-hesitation-ergonomics.ts
-```
+- [API base URL](API_BASE_URL.md)
+- [📖 GALXAI Universal API Reference](API_REFERENCE.md)
+- [GALXAI architecture](ARCHITECTURE.md)
+- [📊 GALXAI Performance Benchmarks & Stress Analysis](BENCHMARKS.md)
+- [🥦 BroccoliDB Compaction Engine: Engineer Onboarding & Architecture Guide](BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md)
+- [BroccoliDB Algorithmic DeDuplication & High-Velocity Compaction Engine Specification](BROCCOLIDB_DEDUPLICATION_ENGINE_SPECIFICATION.md)
+- [Cloudflare implementation and deployment boundaries](CLOUDFLARE_STRATEGY.md)
+- [Deployment boundaries](DEPLOYMENT.md)
+- [🌌 GALXAI Universal Developer Client SDK](DEVELOPER_CLIENT_SDK.md)
+- [GALXAI Developer Gateway Key Architecture & Zero-Egress Substrate](DEVELOPER_GATEWAY_KEY_ARCHITECTURE.md)
+- [🛠️ GALXAI Developer & Contributing Guide](DEVELOPER_GUIDE.md)
+- [GALXAI: Private & Secure AI Workflows for Frontier GPT Models](ENTERPRISE_PRIVATE_AI_COPY.md)
+- [Frequently asked questions](FAQS.md)
+- [🔬 Forensic Payload Dissection: Representation Transformation before Inference](FORENSIC_PAYLOAD_DISSECTION_AND_CAUSAL_ANALYSIS.md)
+- [GALXAI Governance Control Plane Review](GOVERNANCE_CONTROL_PLANE_REVIEW.md)
+- [🚀 GALXAI: Go-To-Market (GTM) & Positioning Strategy](GTM_STRATEGY.md)
+- [Inference pipeline verification](INFERENCE_PIPELINE_VERIFICATION.md)
+- [GALXAI Landing Page Copy — High-Signal & Zero Technical Jargon](LANDING_PAGE_COPY.md)
+- [Agent clients and the GALXAI relay](LUMI.md)
+- [🔄 Universal Migration Guide: Seamless Transition to GALXAI](MIGRATION_GUIDE.md)
+- [🧠 GALXAI Universal Model Catalog & Modality Specification](MODEL_CATALOG.md)
+- [GALXAI Natural Navigation, OmniSearch & Low-Latency Substrate Guide](NATURAL_NAVIGATION_AND_OMNISEARCH.md)
+- [GALXAI Enterprise OAuth 2.0 / 2.1, FAPI & Token Lifecycle Specification](OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md)
+- [💰 GALXAI Pricing & Multi-Tiered Discount Strategy](PRICING_AND_DISCOUNT_STRATEGY.md)
+- [GALXAI Product Surface Strategy](PRODUCT_SURFACE_STRATEGY.md)
+- [GALXAI: Provider-as-Auth Technical Specification](PROVIDER_AS_AUTH_SPECIFICATION.md)
+- [🌐 GALXAI: Programmatic SEO (pSEO), Answer Engine (AEO) & Generative Optimization (GEO) Strategy](PSEO_AND_AEO_STRATEGY.md)
+- [Application queues and relay jobs](QUEUE_SPECIFICATION.md)
+- [🚀 GALXAI Quickstart: The 30-Second Guide](QUICKSTART.md)
+- [Rate limits, concurrency, and provider quota](RATE_LIMITS_AND_QUOTAS.md)
+- [🧠 Frontier Reasoning Models Developer Guide](REASONING_MODELS_GUIDE.md)
+- [Standalone relay API](RELAY_API_REFERENCE.md)
+- [Resilience and recovery boundaries](RESILIENCE_AND_DISASTER_RECOVERY.md)
+- [Routing and shard selection](ROUTING_ALGORITHMS.md)
+- [💻 GALXAI Multi-Ecosystem SDK & CLI Cheatsheet](SDK_CHEATSHEET.md)
+- [⚡ GALXAI Universal Developer SDK: Specification & Architecture Reference](SDK_SPECIFICATION.md)
+- [Security boundaries and threat model](SECURITY.md)
+- [GALXAI: Security Posture & Threat Model](SECURITY_POSTURE_AND_THREAT_MODEL.md)
+- [GALXAI SENIOR ENGINEERING REVIEW: Sovereign Seat Quotas, Dynamic Elastic Context, and Hybrid Rolling Memory Mesh](SENIOR_ENGINEERING_REVIEW_CHAT_AND_ROLLING_CONTEXT.md)
+- [Standardized OAuth & Ingestion Architecture Specification](STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md)
+- [⚡ Universal Streaming & SSE Protocols](STREAMING_AND_SSE_PROTOCOL.md)
+- [⚙️ Structured Outputs, Tool Calling & Agent Runtimes](STRUCTURED_OUTPUTS_AND_TOOLS.md)
+- [🛡️ GALXAI: Paranoid Supabase PostgreSQL Architecture & AI Agent Governance Specification](SUPABASE_PARANOID_ARCHITECTURE_SPEC.md)
+- [🗺️ GALXAI: System Architecture Topology & Maintenance Onboarding Runbook](SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md)
+- [Telemetry and observability](TELEMETRY_AND_OBSERVABILITY.md)
+- [🚀 GALX-Flash-8B: Training Roadmap, Strategy & Execution Plan](TRAINING_ROADMAP_AND_EXECUTION_PLAN.md)
+- [Troubleshooting](TROUBLESHOOTING.md)
+- [GALXAI: Vercel Production Deployment Guide](VERCEL_DEPLOYMENT.md)
+- [Relay deployment and recovery runbook](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md)
+- [💳 GALXAI Developer Compute Wallet & Micro-Billing Architecture](WALLET_AND_BILLING_STRATEGY.md)
+- [investor_recap](investor_recap.md)
+- [landingpage](landingpage.md)
+- [Relay access, containment, and recovery](relay-security.md)

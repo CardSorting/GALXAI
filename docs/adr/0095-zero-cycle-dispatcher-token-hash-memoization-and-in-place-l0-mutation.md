@@ -12,19 +12,19 @@ Under enterprise agent workloads generating tens of thousands of requests per se
 
 ## Decision
 1. **Reactive Zero-Cycle Queue Dispatcher**:
-   - In [`GalxTaskQueueEngine.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/core/queue/GalxTaskQueueEngine.ts), introduced `runnableTaskCount`.
+   - In [`GalxTaskQueueEngine.ts`](../../src/core/queue/GalxTaskQueueEngine.ts), introduced `runnableTaskCount`.
    - Subscribed directly to BroccoliDB table mutation feeds (`INSERT`, `UPDATE`, `DELETE`) to maintain the exact count of runnable tasks (`QUEUED`, `SCHEDULED`, `RETRYING`).
    - In `dispatchTick()`, evaluated `if (this.runnableTaskCount <= 0) return;`, dropping idle CPU cycle consumption to **<1 nanosecond**.
    - Added self-healing drift defense inside the 2000ms watchdog loop to ensure the counter never permanently desynchronizes.
 2. **Token Hash Memoization Cache (`<10ns`)**:
-   - In [`ApiKeyRepository.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/supabase/repositories/ApiKeyRepository.ts), introduced an in-memory `tokenHashCache` (LRU up to 10,000 entries).
+   - In [`ApiKeyRepository.ts`](../../src/lib/supabase/repositories/ApiKeyRepository.ts), introduced an in-memory `tokenHashCache` (LRU up to 10,000 entries).
    - Subsequent requests with the same bearer token bypass SHA-256 digest computation entirely, returning the cached hash in **<10 nanoseconds**.
    - Immediately cleared on key revocation.
 3. **Zero-Allocation In-Place L0 Mutation**:
    - In `incrementUsage`, mutated usage counters (`totalRequests`, `totalTokens`, `lastUsedAtMs`) directly in-place on the memory reference pointer.
    - Preserves pointer identity across `activeKeyById`, `activeKeyByHash`, and `keyTable` while completely eliminating object allocation and GC pressure.
 4. **Direct Connection Pool Execution for Chat Substrates**:
-   - In [`ChatRepository.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/supabase/repositories/ChatRepository.ts), upgraded `getSessions`, `getSession`, and `getMessages` to execute via `executePostgresQuery`, dropping session retrieval and thread loading from **~40ms to <1.5ms**.
+   - In [`ChatRepository.ts`](../../src/lib/supabase/repositories/ChatRepository.ts), upgraded `getSessions`, `getSession`, and `getMessages` to execute via `executePostgresQuery`, dropping session retrieval and thread loading from **~40ms to <1.5ms**.
 
 ## Consequences
 - **Positive**: Zero CPU cycle burn when task queues are idle.

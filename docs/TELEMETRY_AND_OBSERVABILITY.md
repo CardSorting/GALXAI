@@ -1,153 +1,35 @@
-# 📊 Telemetry, Metrics & Observability Guide
+# Telemetry and observability
 
-GALXAI features enterprise-grade in-memory ring-buffer metrics, streaming latency histograms, and Prometheus/Datadog-compatible endpoints.
+Reviewed 2026-09-07. The relay operator surface and the application pool telemetry are separate interfaces. Authenticate against the component being inspected; do not expose fleet-wide operator data to end users.
 
----
+## Relay interfaces
 
-## 1. Real-Time Telemetry Endpoints
+- `/dashboard`: fleet, quota, request, and recovery controls.
+- `/telemetry`: bounded request traces with filtering and phase inspection.
+- `/api/dashboard/stats` and `/api/telemetry`: administrator-only JSON snapshots.
+- `/metrics`: administrator-only Prometheus exposition.
+- `/health`, `/health/live`, `/health/ready`: public aggregate process/admission signals.
 
-### Snapshot Metrics (`GET /api/pool/telemetry`)
-Returns live sliding-window percentile latency ($P_{50}, P_{90}, P_{99}$), RPM, TPM, error rates, and per-provider/model breakdowns.
+Use an administrator key in the UI's memory-only access form. API consumers use a configured administrator credential; do not embed it in a scrape URL. Inference keys are insufficient for fleet telemetry. See [relay access](relay-security.md) for default role assignment and exact-origin policy.
 
-```bash
-curl http://localhost:3000/api/pool/telemetry
+## Measurement semantics
+
+A chat's HTTP 202 acknowledgement and provider completion are separate events. Output counters are chunks, not tokenizer token counts. First-output time is measured at the relay, not at the end user's display. Reasoning and keepalives are not visible-answer output. Phase durations can include network, registry, scheduling, and retry waits; they do not isolate provider compute time.
+
+Use opaque `X-Galx-Task-Id` values for correlation. External agent tools and complete task runtime are outside relay telemetry. Parallel calls overlap, so summing durations is not wall time. Explicit provider error frames are stronger evidence than transport timeouts; uncertain failures stay uncertain.
+
+The dashboard avoids overlapping polls, backs off during connection failures, pauses background-tab polling, and stops automatic authorization retries. It identifies stale snapshots, timed recovery, full slots, registry pauses, and credentials requiring replacement. A green process or eligible account is not proof of successful future inference.
+
+## Data scope
+
+`src/relay/telemetry.ts` maintains bounded, sanitized trace records without prompt/response content or authorization headers. Relay job/checkpoint storage is separate and can contain unfinished request content. Do not describe the whole service as zero-data-retention because the telemetry view is sanitized.
+
+The [maintainer telemetry guide](maintainers/RELAY_TELEMETRY.md) describes trace interpretation. The [relay API](RELAY_API_REFERENCE.md) defines status and recovery fields. Application pool, wallet, context, and edge metrics need their own source verification; their names and guarantees are not inferred from the relay's Prometheus endpoint.
+
+## Verification
+
+```sh
+node --import tsx --test scripts/test-relay-telemetry.ts scripts/test-relay-hardening.ts scripts/test-relay-adaptive-quota.ts
 ```
 
-### JSON Response Schema
-```json
-{
-  "metrics": {
-    "totalRequests": 5420,
-    "totalTokens": 10840000,
-    "successfulRequests": 5412,
-    "failedRequests": 8,
-    "errorRatePercentage": 0.15,
-    "requestsPerMinute": 142,
-    "tokensPerMinute": 284000,
-    "latency": {
-      "p50Ms": 240,
-      "p90Ms": 480,
-      "p99Ms": 890,
-      "averageMs": 275,
-      "minMs": 85,
-      "maxMs": 1420
-    },
-    "providerBreakdown": {
-      "openai": { "requests": 3600, "tokens": 7200000, "avgLatencyMs": 260, "errorRate": 0.1 },
-      "xai-grok": { "requests": 1820, "tokens": 3640000, "avgLatencyMs": 310, "errorRate": 0.2 }
-    },
-    "modelBreakdown": {
-      "gpt-5.6-sol": { "requests": 2100, "tokens": 5200000, "avgLatencyMs": 340 },
-      "x-ai/grok-4.5": { "requests": 1820, "tokens": 3640000, "avgLatencyMs": 310 }
-    }
-  }
-}
-```
-
----
-
-## 2. Prometheus Scraping & Export
-
-You can configure Prometheus to poll GALXAI's statistics endpoint:
-
-```yaml
-# prometheus.yml
-scrape_configs:
-  - job_name: 'galxai-gateway'
-    scrape_interval: 10s
-    metrics_path: '/api/pool/telemetry'
-    static_configs:
-      - targets: ['localhost:3000']
-```
-
----
-
-## 3. Grafana Dashboard Integration
-
-Key dashboard panels to configure:
-1. **P99 / P90 / P50 Fleet Latency Graph** (`metrics.latency.p99Ms`, `p90Ms`, `p50Ms`).
-2. **Tokens Per Minute Throughput Gauge** (`metrics.tokensPerMinute`).
-3. **Active Shard Health Gauge** (`healthyShards` vs `cooldownShards` from `/api/pool/stats`).
-4. **Error Rate Percentage Alert** (Trigger when `errorRatePercentage > 1.0%`).
-
----
-
-## 4. Cloudflare Edge PoP Telemetry & Live Tail Stream
-
-To stream live real-time execution logs, request latencies, and `cf-ray` identifiers across Cloudflare's 300+ global Points of Presence:
-
-```bash
-# Stream live production edge gateway telemetry
-npm run worker:tail
-
-# Stream live staging telemetry
-npx wrangler tail --env staging
-```
-
-Each log line provides:
-- **`cf-ray`**: Unique edge request tracing token
-- **`x-galx-cache`**: SWR Cache status (`HIT` or `MISS`)
-- **`edgePoP`**: Physical Cloudflare airport data center code (e.g. `SJC`, `IAD`, `LHR`, `FRA`)
-- **`duration`**: Edge isolate execution duration in milliseconds
-
----
-
-## 5. BroccoliDB Compaction & Inference Boundary Metrics
-
-GALXAI exposes real-time telemetry on input context compression and provider-boundary financial economics:
-
-```json
-{
-  "broccolidb": {
-    "totalCompactionEvents": 18450,
-    "grossInputTokensCompressed": 48200000,
-    "grossInputTokensSaved": 37400000,
-    "aggregateCompressionRatio": 0.776,
-    "averageCompactionLatencyMs": 0.45,
-    "fidelityStatus": {
-      "verified": 18450,
-      "fallback": 0
-    },
-    "estimatedDollarsSavedUSD": 93.50,
-    "modeBreakdown": {
-      "domain": { "events": 8200, "savedTokens": 16400000 },
-      "ebpf_stream": { "events": 4100, "savedTokens": 14760000 },
-      "log_stream": { "events": 3200, "savedTokens": 4160000 },
-      "k8s_watch_stream": { "events": 1800, "savedTokens": 1540000 },
-      "incident": { "events": 1150, "savedTokens": 540000 }
-    }
-  }
-}
-```
-
-### Prometheus Metrics Definitions:
-- `galxai_broccolidb_events_total{mode="...", status="verified|fallback"}`
-- `galxai_broccolidb_tokens_saved_total{mode="..."}`
-- `galxai_broccolidb_compression_ratio{mode="..."}`
-- `galxai_broccolidb_latency_ms_bucket{le="..."}`
-- `galxai_broccolidb_dollars_saved_usd_total{model="..."}`
-
----
-
-## 6. Dual Rolling Window Seat Telemetry & Prompt Cache Observability
-
-GALXAI injects rich observability headers on all streaming and REST responses:
-
-```http
-x-galx-seat-tier: enterprise
-x-galx-seat-5h-limit-remaining: 90%
-x-galx-seat-5h-reset-in: 4 hours, 17 minutes
-x-galx-seat-weekly-limit-remaining: 55%
-x-galx-seat-weekly-reset-in: 3 days
-x-galx-stable-cache-hash: a7f8c9b2e14d3390f0e81c...
-x-galx-rolling-memory-compacted: true
-x-galx-compaction-ratio: 0.776
-```
-
-### Key Seat Observability Prometheus Metrics:
-- `galx_seat_5h_limit_remaining_pct{user_id="...", tier="..."}`: Real-time sliding 5-hour burst headroom.
-- `galx_seat_weekly_limit_remaining_pct{user_id="...", tier="..."}`: Real-time sliding 7-day capacity headroom.
-- `galx_seat_active_leases_total{user_id="..."}`: Number of currently leased in-flight streams.
-- `galx_chat_rolling_memory_hits_total{source="l1_broccolidb|l2_postgres"}`: Memory lookup hits.
-
-
+These tests establish behavior under their fixtures. Production availability, provider quota, historical performance, and alert delivery require environment-specific observations.

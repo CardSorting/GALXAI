@@ -46,5 +46,5 @@ This PR reduces monthly OpenAI API expenses by **~45%** with **zero code modific
 **Benefits**:
 - 25%–40% wholesale discount on GPT-5.6 / GPT-4o models.
 - 100% prompt cache pass-through (75% cache rebate).
-- Sub-15ms Anycast edge failover across 300+ PoPs.
+- Bounded inference recovery with request-level telemetry; validate the actual deployment and workload.
 ```

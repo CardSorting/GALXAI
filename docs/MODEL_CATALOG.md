@@ -10,7 +10,7 @@ GALXAI exclusively routes traffic across modern flagship LLMs, reasoning engines
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **`gpt-5.6-sol`** | Flagship SOTA: Coding, deep mathematics, multi-file architecture | $900,000$ | $128,000$ | **$3.75** | **$15.00** | **$1.25** | **25% OFF** |
 | **`gpt-5.6-terra`** | Balanced Frontier: High-throughput reasoning & general intelligence | $900,000$ | $64,000$ | **$2.25** | **$9.00** | **$0.75** | **25% OFF** |
-| **`gpt-5.6-luna`** | High-Velocity: Sub-15ms completions, intent routing, autocomplete | $900,000$ | $32,000$ | **$0.95** | **$3.80** | **$0.30** | **36% OFF** |
+| **`gpt-5.6-luna`** | High-Velocity: Intent routing and autocomplete; measure latency for the workload | $900,000$ | $32,000$ | **$0.95** | **$3.80** | **$0.30** | **36% OFF** |
 | **`x-ai/grok-4.6`** | 1M Frontier: Multimodal vision, realtime analysis, tool calling | $1,000,000$ | $128,000$ | **$2.10** | **$8.40** | **$0.70** | **30% OFF** |
 | **`x-ai/grok-4.5`** | 500K Frontier: Visual data extraction, code generation & analysis | $500,000$ | $32,768$ | **$1.80** | **$7.20** | **$0.60** | **28% OFF** |
 

@@ -16,7 +16,7 @@ Above 1000px the workspace places the table beside detail, with a 1.35:1 column 
 - Selecting a request highlights its row and writes `#trace=<id>` to the URL. Detail persists independently of table filtering. Missing or expired selections have an explicit retention message.
 - Task IDs act as search controls. An exact task-ID search shows all retained calls for that task, their observed elapsed span and summed request time, independently of the other table filters. Parallel calls can overlap.
 - Detail supports copying the trace ID and exporting its telemetry JSON. Attached requests offer an original-request link; an evicted original produces a message directing the operator to its job ID in logs.
-- Automatic refresh runs every three seconds while visible and unpaused, with no overlapping fetches and an eight-second timeout. Pause stops subsequent automatic refreshes; manual Refresh remains available. Failures preserve the prior snapshot and show a notice. HTTP 401 opens the API-access disclosure. Entered keys stay in page memory.
+- Automatic refresh runs every three seconds while visible and unpaused, with no overlapping fetches and an eight-second timeout. Pause stops subsequent automatic refreshes; manual Refresh remains available. Failures preserve the prior snapshot and show a notice. HTTP 401 or 403 stops automatic polling and prompts for administrator access. Transient failures back off up to 30 seconds; entering a valid key allows refresh to resume. Entered keys stay in page memory.
 - Initial loading, empty retention, no filter matches, in-progress work, cancellation, recovered retries and terminal failures have distinct copy. Missing measurements display an em dash.
 
 ## Data truth

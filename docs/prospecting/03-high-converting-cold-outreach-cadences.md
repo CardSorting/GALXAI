@@ -29,7 +29,7 @@ At GALXAI, we aggregate compute demand to offer direct wholesale pricing (25%–
 Best part: It's a 1-line drop-in with zero prompt changes:
 import 'galxai/patch';
 
-Would you be open to a free $100 introductory compute key to test our sub-15ms edge latency on your staging environment?
+Would you be open to a free $100 introductory compute key to measure inference latency on your staging environment?
 
 Best,
 [AgentName]

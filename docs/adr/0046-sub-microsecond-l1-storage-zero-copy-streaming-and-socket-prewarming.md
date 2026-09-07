@@ -48,10 +48,9 @@ We implement a comprehensive, multi-layer networking, socket lifecycle, and in-m
 +----------------------------------------------------------------------------------------------------+
 ```
 
-### 1. Persistent Upstream Socket Pre-Warming
-- Both [`OpenAIAdapter`](file:///Users/bozoegg/Desktop/GALXAI/src/core/router/adapters/OpenAIAdapter.ts) and [`GrokAdapter`](file:///Users/bozoegg/Desktop/GALXAI/src/core/router/adapters/GrokAdapter.ts) expose static `prewarmConnection()` methods.
-- Invoked proactively inside the [`GalxModelRouter`](file:///Users/bozoegg/Desktop/GALXAI/src/core/router/GalxModelRouter.ts) constructor on server bootstrap, establishing warm keep-alive TCP/TLS sockets to `api.openai.com` and `api.x.ai`.
-- Incoming user inference calls reuse active sockets with **0ms connection setup lag**.
+### 1. Adapter prewarming scope
+
+[OpenAIAdapter](../../src/core/router/adapters/OpenAIAdapter.ts) exposes `prewarmConnection()`. This is an application adapter facility, not a guarantee of an already-connected upstream for every request. There is no separate `GrokAdapter.ts` in the current repository. The standalone relay opens provider WebSockets per attempt; its connection deadlines and bounded recovery are specified by [ADR 0122](0122-isolated-authenticated-relay-and-bounded-recovery.md). Do not infer zero connection cost or a warm relay socket pool from this record.
 
 ### 2. Early SSE Keep-Alive Ping (`: open\n\n`) for <2ms TTFB
 - The streaming response pipeline emits an immediate SSE comment frame (`: open\n\n`) inside `ReadableStream.start()`.
@@ -63,19 +62,19 @@ We implement a comprehensive, multi-layer networking, socket lifecycle, and in-m
 - Bypasses intermediate `TextDecoder.decode()` $\to$ `TextEncoder.encode()` cycles, eliminating memory reallocations and shaving 2–5ms of CPU latency per chunk.
 
 ### 4. SafeStorage L1 In-Memory Fast-Path (<0.02ms)
-- [`SafeStorage`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/resilience/SafeStorage.ts) maintains an in-memory `Map<string, string>` mirror cache synchronized with `BroadcastChannel` cross-tab events.
+- [`SafeStorage`](../../src/lib/resilience/SafeStorage.ts) maintains an in-memory `Map<string, string>` mirror cache synchronized with `BroadcastChannel` cross-tab events.
 - Storage reads execute in **<0.02ms** directly from memory, eliminating synchronous browser DOM storage access stalls.
 
 ### 5. Speculative Multi-Candidate Pre-Warming & Mobile Touch Acceleration
-- In [`CommandMenu.tsx`](file:///Users/bozoegg/Desktop/GALXAI/src/components/common/CommandMenu.tsx), the search loop concurrently pre-warms the top 3 candidate search results and their BroccoliDB L1 cache entries.
-- In [`Navigation.tsx`](file:///Users/bozoegg/Desktop/GALXAI/src/components/dashboard/Navigation.tsx) and [`MobileBottomNav.tsx`](file:///Users/bozoegg/Desktop/GALXAI/src/components/dashboard/MobileBottomNav.tsx), `onTouchStart` and `onPointerDown` prefetch triggers prime route chunks **100–300ms before click events** on mobile touchscreens.
+- In [`CommandMenu.tsx`](../../src/components/common/CommandMenu.tsx), the search loop concurrently pre-warms the top 3 candidate search results and their BroccoliDB L1 cache entries.
+- In [`Navigation.tsx`](../../src/components/dashboard/Navigation.tsx) and [`MobileBottomNav.tsx`](../../src/components/dashboard/MobileBottomNav.tsx), `onTouchStart` and `onPointerDown` prefetch triggers prime route chunks **100–300ms before click events** on mobile touchscreens.
 
 ### 6. Canonical Query Parameter Normalization for Request Coalescing
-- In [`ResilientClient.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/resilience/ResilientClient.ts), `normalizeUrlForCoalescing` alphabetically sorts URL search parameters before computing the single-flight deduplication key.
+- In [`ResilientClient.ts`](../../src/lib/resilience/ResilientClient.ts), `normalizeUrlForCoalescing` alphabetically sorts URL search parameters before computing the single-flight deduplication key.
 - Equivalent queries with differing parameter ordering collapse into the exact same physical network flight.
 
 ### 7. Sub-Nanosecond Model Alias Memoization (`fastPathCache <5ns`)
-- In [`ModelCatalog.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/core/router/ModelCatalog.ts), a dedicated `fastPathCache: Map<string, ModelSpecItem>` memoizes resolved model IDs and developer aliases.
+- In [`ModelCatalog.ts`](../../src/core/router/ModelCatalog.ts), a dedicated `fastPathCache: Map<string, ModelSpecItem>` memoizes resolved model IDs and developer aliases.
 - Drops recurring model ID resolution time (`gpt-5.6-sol`, `gpt-4o`, `grok-4.6`, `claude-3-7-sonnet`) from ~5µs down to **< 5ns**.
 
 ---

@@ -76,7 +76,7 @@ Developers start with $5 in free credits, test with `import 'galxai/patch'` or a
 | **Existing Cost in Engineering Hours** | 1–2 Senior Devs ($300k–$400k/yr) building proxies, caching layers, and failover | 20–40 hours per client build wiring backend routes & auth | 3–6 months of platform team time building internal AI gateway |
 | **Biggest Infrastructure Footgun** | Launch delay from rate limits (429s) and runaway prompt size costs | Client key leakage and non-technical clients failing to provision API keys | Rogue teams using expensive frontier models for basic classification tasks |
 | **Why In-House / Alternatives Fail** | Self-hosted LiteLLM/Portkey breaks on edge runtimes and requires on-call maintenance | Asking clients to manage their own OpenAI accounts causes massive onboarding friction | AWS Bedrock / Azure AI charge full retail and take 6+ months for enterprise procurement |
-| **The GalX Hook** | *"Get 30%+ savings, auto-failover, and sub-15ms edge routing without hiring an infra engineer."* | *"Keep your product UI while GALXAI handles inference routing, failover, and billing."* | *"One-line drop-in (`import 'galxai/patch'`) with instant team spend caps and compliance auditing."* |
+| **The GalX Hook** | *"Get 30%+ savings, auto-failover, and managed inference routing with observable failures."* | *"Keep your product UI while GALXAI handles inference routing, failover, and billing."* | *"One-line drop-in (`import 'galxai/patch'`) with instant team spend caps and compliance auditing."* |
 
 ---
 
@@ -111,4 +111,4 @@ Use this script during discovery conversations with engineering leaders to quant
 * **Response**: *"OpenRouter and LiteLLM are traditional API proxies. GALXAI adds zero-route Server Actions, spend governance, and automatic IDE agent directives (`npx galxai skills`). Self-hosting proxies also means your team manages infrastructure and handles routing failures."*
 
 ### Objection 3: *"We already have direct OpenAI enterprise credits."*
-* **Response**: *"That's great! You can bring your own enterprise OpenAI keys directly into our sovereign Shard Vaults. You still get our sub-15ms edge routing, automated 429 failover, 75% prompt caching optimization, and zero-boilerplate frontend components across all OpenAI models."*
+* **Response**: *"That's great! You can bring your own enterprise OpenAI keys directly into our sovereign Shard Vaults. You still get our inference routing, bounded failure handling, and workload-dependent caching, and zero-boilerplate frontend components across all OpenAI models."*

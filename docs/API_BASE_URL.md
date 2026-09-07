@@ -1,5 +1,7 @@
 # API base URL
 
+> Runtime boundary: this guide describes the product/application API. The standalone relay has a separate [API contract](RELAY_API_REFERENCE.md), inference and administrator keys, and an HTTP 202 chat job workflow. Its local deployment is covered by the [relay runbook](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md). Product keys, relay keys, and upstream provider credentials are distinct.
+
 Use `https://galx.ai/v1` for customer API requests and SDK setup.
 
 ```python

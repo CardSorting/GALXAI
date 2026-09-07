@@ -58,7 +58,7 @@ graph TD
 ## 3. Core Architectural Pillars
 
 ### Pillar 1: Single-Flight Request Coalescing & Batch Prefetching
-**Location**: [`src/lib/resilience/ResilientClient.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/resilience/ResilientClient.ts) & [`src/workers/cloudflare/GalxEdgeCache.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/workers/cloudflare/GalxEdgeCache.ts)
+**Location**: [`src/lib/resilience/ResilientClient.ts`](../../src/lib/resilience/ResilientClient.ts) & [`src/workers/cloudflare/GalxEdgeCache.ts`](../../src/workers/cloudflare/GalxEdgeCache.ts)
 - **Lock-Free Mutex Coalescing**: Tracks in-flight read promises via `inFlightRequests` and `inFlightFetches`. When concurrent components request identical URLs/keys simultaneously, only **1 physical HTTP/database request** is dispatched to the network.
 - **Batch Prefetching (`batchPrefetchQueries`)**: Concurrently pre-warms BroccoliDB L1 cache entries across multiple routes in parallel.
 - **Predictive Route Pre-Warming**: Connects `onMouseEnter` and `onFocus` handlers on primary navigation links (`Navigation.tsx`) to `BroccoliOmniSearch.prefetchRoute()`, priming Next.js route chunks and L1 cache entries prior to user click.
@@ -66,7 +66,7 @@ graph TD
 ---
 
 ### Pillar 2: Soundex Phonetic Hashing & Acronym Absorption
-**Location**: [`src/lib/resilience/BroccoliOmniSearch.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/resilience/BroccoliOmniSearch.ts)
+**Location**: [`src/lib/resilience/BroccoliOmniSearch.ts`](../../src/lib/resilience/BroccoliOmniSearch.ts)
 - **Phonetic Pre-Normalization**: Maps phonetic sound-alike prefixes (`PH` $\rightarrow$ `F`, `K` $\rightarrow$ `C`, `KN` $\rightarrow$ `N`, `WR` $\rightarrow$ `R`) prior to 4-character Soundex calculation.
 - **Soundex Code Scoring**: Phonetic approximations (`"modlz"`, `"bylling"`, `"kredits"`, `"curser"`) match corresponding keywords (`"models"`, `"billing"`, `"credits"`, `"cursor"`) with zero network roundtrips in **<0.05ms**.
 - **Fuzzy Acronym Mapping**: Maps domain acronyms (`"gpt"`, `"ide"`, `"zdr"`, `"sla"`, `"faq"`, `"sdk"`, `"api"`, `"tax"`, `"sub"`) directly to canonical destinations.
@@ -74,7 +74,7 @@ graph TD
 ---
 
 ### Pillar 3: Sub-15ms TTFT Streaming & SSE Line Buffer Reassembly
-**Location**: [`src/core/router/GalxModelRouter.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/core/router/GalxModelRouter.ts) & [`src/components/dashboard/ApiPlayground.tsx`](file:///Users/bozoegg/Desktop/GALXAI/src/components/dashboard/ApiPlayground.tsx)
+**Location**: [`src/core/router/GalxModelRouter.ts`](../../src/core/router/GalxModelRouter.ts) & [`src/components/dashboard/ApiPlayground.tsx`](../../src/components/dashboard/ApiPlayground.tsx)
 - **Zero-Buffering Response Headers**: All streaming inference routes (`/v1/chat/completions`, `/api/chat`, `/api/generate`) inject:
   - `Cache-Control: no-cache, no-transform`
   - `X-Accel-Buffering: no`
@@ -84,7 +84,7 @@ graph TD
 ---
 
 ### Pillar 4: Raycast/Linear-Style 1-Click History Clear & Category Prefixes
-**Location**: [`src/components/common/CommandMenu.tsx`](file:///Users/bozoegg/Desktop/GALXAI/src/components/common/CommandMenu.tsx) & [`src/lib/resilience/BroccoliOmniSearch.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/resilience/BroccoliOmniSearch.ts)
+**Location**: [`src/components/common/CommandMenu.tsx`](../../src/components/common/CommandMenu.tsx) & [`src/lib/resilience/BroccoliOmniSearch.ts`](../../src/lib/resilience/BroccoliOmniSearch.ts)
 - **Category Prefix Filters**:
   - `> `: Actions & Developer Tools
   - `@ `: Models & Inference Engines

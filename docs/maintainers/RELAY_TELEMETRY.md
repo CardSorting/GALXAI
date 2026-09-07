@@ -18,7 +18,7 @@ Send `X-Galx-Task-Id: task-123` on related requests and search for the ID. Click
 ## Measurement and storage contract
 
 - `X-Galx-Trace-Id` is returned on chat and image POST requests, including rejected requests. CORS exposes it and allows the task header.
-- `GET /api/telemetry` returns the bounded trace snapshot and process RSS, uptime and event-loop p99 delay since process start. It uses the relay's configured API-key authorization and `Cache-Control: no-store`. It does not require registry availability.
+- `GET /api/telemetry` returns the bounded trace snapshot and process RSS, uptime and event-loop p99 delay since process start. It requires relay administrator-key authorization and `Cache-Control: no-store`. It does not require registry availability.
 - Duration uses a monotonic clock, from relay receipt to job completion/failure/cancellation. Wall timestamps only support ordering and retention. HTTP acknowledgement status is recorded separately.
 - First output is the first output chunk accepted for forwarding by the relay. Reasoning and keepalives do not count. It is not a client-observed timestamp. Chunks are not tokenizer counts; image calls have no text-first-output measurement.
 - Per-attempt output gaps exclude reconnect/retry delays. Provider phases include network time. REST image calls expose a combined provider/network phase rather than invented connection timings.

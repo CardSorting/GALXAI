@@ -45,7 +45,7 @@ graph TD
 ## 3. Core Architectural Pillars
 
 ### Pillar 1: Plain-English Intent Matching & BroccoliOmniSearch
-**Location**: [`src/lib/resilience/BroccoliOmniSearch.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/resilience/BroccoliOmniSearch.ts)
+**Location**: [`src/lib/resilience/BroccoliOmniSearch.ts`](../../src/lib/resilience/BroccoliOmniSearch.ts)
 - **Natural Intent Vocabulary**: Indexes routes with conversational intent phrases rather than only technical keywords:
   - *"how do i buy credits"* $\rightarrow$ `/billing`
   - *"cheapest model"* $\rightarrow$ `/models`
@@ -57,18 +57,18 @@ graph TD
 - **Recent Workflow Memory**: In-memory `BroccoliDbTable<RecentNavItem>` tracks user visits with timestamps, surfaced instantly when the search query is blank.
 
 ### Pillar 2: 404 Smart Search Recovery
-**Location**: [`src/components/common/NotFoundSearchHelper.tsx`](file:///Users/bozoegg/Desktop/GALXAI/src/components/common/NotFoundSearchHelper.tsx) & [`src/app/not-found.tsx`](file:///Users/bozoegg/Desktop/GALXAI/src/app/not-found.tsx)
+**Location**: [`src/components/common/NotFoundSearchHelper.tsx`](../../src/components/common/NotFoundSearchHelper.tsx) & [`src/app/not-found.tsx`](../../src/app/not-found.tsx)
 - Replaces static 404 dead ends with an interactive smart search bar powered by `BroccoliOmniSearch`.
 - Provides instant 1-click suggested destinations as the user types.
 
 ### Pillar 3: Subtree Fault Isolation & Plain-Language Error Boundaries
-**Location**: [`src/components/common/ErrorBoundary.tsx`](file:///Users/bozoegg/Desktop/GALXAI/src/components/common/ErrorBoundary.tsx) & [`src/components/common/RouteErrorBoundaryCard.tsx`](file:///Users/bozoegg/Desktop/GALXAI/src/components/common/RouteErrorBoundaryCard.tsx)
+**Location**: [`src/components/common/ErrorBoundary.tsx`](../../src/components/common/ErrorBoundary.tsx) & [`src/components/common/RouteErrorBoundaryCard.tsx`](../../src/components/common/RouteErrorBoundaryCard.tsx)
 - **Subtree Fault Absorption**: Prevents isolated widget failures (e.g. calculator widgets or third-party charts) from crashing entire pages.
 - **Plain-Language Reassurance**: Informs users clearly: *"A temporary issue occurred in this section. Your account, wallet, and surrounding services are working normally."*
 - **Auto-Retry & Sanitized Diagnostics**: Automated retry countdown with auto-reset on network reconnection and 1-click sanitized diagnostic reports (redacting API keys and Bearer tokens).
 
 ### Pillar 4: Universal Fallback Clipboard Shield
-**Location**: [`src/lib/resilience/safeClipboard.ts`](file:///Users/bozoegg/Desktop/GALXAI/src/lib/resilience/safeClipboard.ts)
+**Location**: [`src/lib/resilience/safeClipboard.ts`](../../src/lib/resilience/safeClipboard.ts)
 - Wraps all clipboard write operations with a silent fallback to `document.execCommand('copy')` via a hidden textarea when `navigator.clipboard` is restricted by browser security policies.
 
 ---

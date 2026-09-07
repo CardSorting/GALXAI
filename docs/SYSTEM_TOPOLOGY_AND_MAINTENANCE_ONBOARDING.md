@@ -64,7 +64,7 @@ flowchart TD
     subgraph CloudflareRuntime["3. High-Throughput Edge Mesh (Cloudflare Workers: 300+ PoPs)"]
         EdgeGateway["GalxEdgeGateway (api.galx.ai)"]
         RateLimitKV["Sliding-Window Token Bucket (RATE_LIMIT_KV)"]
-        EdgeRouter["GalxEdgeRouter & Sub-15ms Failover"]
+        EdgeRouter["GalxEdgeRouter & bounded recovery"]
         EdgeCache["GalxEdgeCache (Stale-While-Revalidate)"]
         DOState["GalxSwarmCoordinatorDO (Durable Objects)"]
         BatchBuffer["GalxEdgeBatchBuffer (Micro-Batching)"]
@@ -453,7 +453,7 @@ npm run vercel:smoke -- --url=https://galx.ai
    - In-flight requests automatically fail over to healthy secondary providers (e.g. `x-ai/grok-4.6` or `x-ai/grok-4.5`).
 3. **Operator Verification**:
    - Access the live telemetry console at `/status`.
-   - Verify that traffic seamlessly shifted to fallback providers.
+   - Verify the selected fallback path and record terminal failures, repeated attempts, and any partial output.
    - If needed, enable global fallback header override: `X-Galx-Allow-Fallback: true`.
 
 ---
@@ -486,6 +486,6 @@ Complete this authoritative 7-point checklist when onboarding to a new developme
   - Run `npm run vercel:verify` (All 8 pre-flight phases must pass).
   - Run `npx tsc --noEmit` (0 TypeScript errors).
 - [ ] **7. Governance & Contribution Standards**:
-  - Review [MAINTAINERS.md](file:///Users/bozoegg/Desktop/GALXAI/MAINTAINERS.md) for PR review gates and emergency protocols.
-  - Review [CONTRIBUTING.md](file:///Users/bozoegg/Desktop/GALXAI/CONTRIBUTING.md) for conventional commits and ADR workflows.
+  - Review [MAINTAINERS.md](../MAINTAINERS.md) for PR review gates and emergency protocols.
+  - Review [CONTRIBUTING.md](../CONTRIBUTING.md) for conventional commits and ADR workflows.
 - [ ] **8. Launch Development Server**: Run `npm run dev`, authenticate, and verify that the default journey reaches the `/models` catalog. Treat `/playground` only as a stateless API request diagnostic; it must not expose chat history or creative-studio behavior.
