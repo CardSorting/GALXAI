@@ -26,7 +26,7 @@ export function EmbeddingsClient() {
 import numpy as np
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -58,7 +58,7 @@ for i, doc_vec in enumerate(embeddings):
       code: `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY || "galx_live_your_gateway_key",
 });
 
@@ -100,7 +100,7 @@ from langchain_community.vectorstores import FAISS
 
 embeddings = OpenAIEmbeddings(
     model="text-embedding-3-small",
-    openai_api_base="https://api.galx.ai/v1",
+    openai_api_base="https://galx.ai/v1",
     openai_api_key="galx_live_your_gateway_key"
 )
 

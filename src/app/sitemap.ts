@@ -1,12 +1,10 @@
+import { DOC_NAV } from '@/lib/docs/content';
 import type { MetadataRoute } from 'next';
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
 import { CURATED_MATCHUPS } from '@/lib/data/comparisonData';
-import { INTEGRATION_GUIDES } from '@/lib/data/integrationsData';
 import { SOLUTION_GUIDES } from '@/lib/data/solutionsData';
 import { COMPETITOR_ALTERNATIVES } from '@/lib/data/alternativesData';
-import { ERROR_TROUBLESHOOT_DATA } from '@/lib/data/errorsData';
-import { SDK_LANG_GUIDES } from '@/lib/data/sdksData';
 import { MIGRATION_GUIDES_DATA } from '@/lib/data/migrationData';
 import { COOKBOOK_RECIPES_DATA } from '@/lib/data/cookbooksData';
 import { PROVIDERS_DATA } from '@/lib/data/providersData';
@@ -240,146 +238,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
 
   // 2. Comprehensive Documentation Suite Routes
-  const docRoutes: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/docs`,
-      lastModified: currentDate,
-      changeFrequency: 'daily',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/docs/quickstart`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.88,
-    },
-    {
-      url: `${baseUrl}/docs/simple`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.88,
-    },
-    {
-      url: `${baseUrl}/docs/agents`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.88,
-    },
-    {
-      url: `${baseUrl}/docs/models-guide`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.85,
-    },
-    {
-      url: `${baseUrl}/docs/ide-setup`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.85,
-    },
-    {
-      url: `${baseUrl}/docs/sdks`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.82,
-    },
-    {
-      url: `${baseUrl}/docs/sdks/python`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.82,
-    },
-    {
-      url: `${baseUrl}/docs/sdks/typescript`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.82,
-    },
-    {
-      url: `${baseUrl}/docs/migration`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.82,
-    },
-    {
-      url: `${baseUrl}/docs/cookbook`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.82,
-    },
-    {
-      url: `${baseUrl}/docs/api-reference`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.82,
-    },
-    {
-      url: `${baseUrl}/docs/prompt-caching`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/docs/streaming`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/docs/structured-outputs`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/docs/function-calling`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/docs/embeddings`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.78,
-    },
-    {
-      url: `${baseUrl}/docs/rate-limits`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.78,
-    },
-    {
-      url: `${baseUrl}/docs/error-handling`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.78,
-    },
-    {
-      url: `${baseUrl}/docs/architecture`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.78,
-    },
-    {
-      url: `${baseUrl}/docs/errors`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.88,
-    },
-    {
-      url: `${baseUrl}/docs/integrations`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.88,
-    },
-    {
-      url: `${baseUrl}/docs/security-spec`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.78,
-    },
-  ];
+  const docRoutes: MetadataRoute.Sitemap = DOC_NAV.map(item => ({ url: `${baseUrl}${item.href}`, lastModified: currentDate, changeFrequency: 'weekly', priority: 0.85 }));
 
   // 3. Dynamic Model Profile Pages
   const modelRoutes: MetadataRoute.Sitemap = FRONTEND_VISIBLE_MODELS.map((m) => ({
@@ -398,12 +257,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // 5. Dynamic Integration Solution Guides (pSEO)
-  const integrationRoutes: MetadataRoute.Sitemap = INTEGRATION_GUIDES.map((g) => ({
-    url: `${baseUrl}/docs/integrations/${g.slug}`,
-    lastModified: currentDate,
-    changeFrequency: 'weekly',
-    priority: 0.88,
-  }));
 
   // 6. Dynamic Use-Case Solution Landing Pages (pSEO)
   const solutionRoutes: MetadataRoute.Sitemap = SOLUTION_GUIDES.map((s) => ({
@@ -422,20 +275,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // 8. Dynamic Error Troubleshooting Guides (pSEO)
-  const errorRoutes: MetadataRoute.Sitemap = ERROR_TROUBLESHOOT_DATA.map((e) => ({
-    url: `${baseUrl}/docs/errors/${e.code}`,
-    lastModified: currentDate,
-    changeFrequency: 'weekly',
-    priority: 0.87,
-  }));
 
   // 9. Dynamic Multi-Language SDK Guides (pSEO)
-  const sdkRoutes: MetadataRoute.Sitemap = SDK_LANG_GUIDES.map((s) => ({
-    url: `${baseUrl}/docs/sdks/${s.slug}`,
-    lastModified: currentDate,
-    changeFrequency: 'weekly',
-    priority: 0.88,
-  }));
 
   // 10. Dynamic Cloud Migration Guides (pSEO)
   const migrationRoutes: MetadataRoute.Sitemap = MIGRATION_GUIDES_DATA.map((m) => ({
@@ -622,20 +463,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // 23. Billing, Enterprise & Business Support Pages
-  const businessRoutes: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/billing`,
-      lastModified: currentDate,
-      changeFrequency: 'daily',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/billing/enterprise`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.75,
-    },
-  ];
+
 
   // 24. Dynamic Glossary DefinedTerm Landing Portals (pSEO & AEO)
   const glossaryTermRoutes: MetadataRoute.Sitemap = GLOSSARY_TERMS.map((t) => ({
@@ -650,11 +478,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...docRoutes,
     ...modelRoutes,
     ...matchupRoutes,
-    ...integrationRoutes,
     ...solutionRoutes,
     ...alternativeRoutes,
-    ...errorRoutes,
-    ...sdkRoutes,
     ...migrationRoutes,
     ...toolRoutes,
     ...cookbookRoutes,
@@ -668,7 +493,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...postmortemRoutes,
     ...industryRoutes,
     ...complianceRoutes,
-    ...businessRoutes,
     ...glossaryTermRoutes,
   ];
 }

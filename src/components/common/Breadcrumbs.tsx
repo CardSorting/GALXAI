@@ -33,7 +33,7 @@ export function Breadcrumbs({ items, workspaceContext, includeJsonLd = false }: 
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: baseUrl
+        item: `${baseUrl}/models`
       },
       ...items.map((item, idx) => ({
         '@type': 'ListItem',
@@ -82,7 +82,7 @@ export function Breadcrumbs({ items, workspaceContext, includeJsonLd = false }: 
         )}
 
         <Link
-          href="/"
+          href="/models"
           className="flex items-center gap-1 px-2 py-1 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-all shrink-0 font-mono"
         >
           <Home className="w-3.5 h-3.5 text-zinc-400" />

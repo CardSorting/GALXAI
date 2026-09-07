@@ -75,7 +75,7 @@ console.log(\`TTFT: \${stream.metrics.timeToFirstTokenMs}ms | TPS: \${stream.met
 
 # 1-Line Drop-in replacement for OpenAI SDK
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -95,7 +95,7 @@ for chunk in response:
       code: `import OpenAI from "openai";
 
 const openai = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY || "galx_live_your_gateway_key",
 });
 
@@ -116,7 +116,7 @@ import { streamText } from "ai";
 
 // Configure custom baseURL for @ai-sdk/openai
 const galxai = openai({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -137,7 +137,7 @@ export async function POST(req: Request) {
 
 llm = ChatOpenAI(
     model="gpt-5.6-sol",
-    openai_api_base="https://api.galx.ai/v1",
+    openai_api_base="https://galx.ai/v1",
     openai_api_key="galx_live_your_gateway_key",
     temperature=0.2
 )
@@ -152,7 +152,7 @@ from llama_index.core import Settings
 
 Settings.llm = OpenAI(
     model="gpt-5.6-sol",
-    api_base="https://api.galx.ai/v1",
+    api_base="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -171,7 +171,7 @@ use futures::StreamExt;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = OpenAIConfig::new()
-        .with_api_base("https://api.galx.ai/v1")
+        .with_api_base("https://galx.ai/v1")
         .with_api_key("galx_live_your_gateway_key");
 
     let client = Client::with_config(config);
@@ -215,7 +215,7 @@ import (
 
 func main() {
 	config := openai.DefaultConfig("galx_live_your_gateway_key")
-	config.BaseURL = "https://api.galx.ai/v1"
+	config.BaseURL = "https://galx.ai/v1"
 
 	client := openai.NewClientWithConfig(config)
 	resp, err := client.CreateChatCompletion(
@@ -241,7 +241,7 @@ func main() {
     },
     curl: {
       pkg: 'Native cURL / Any HTTP Client',
-      code: `curl -X POST https://api.galx.ai/v1/chat/completions \\
+      code: `curl -X POST https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer galx_live_your_gateway_key" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -292,7 +292,7 @@ func main() {
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white">SDKs &amp; Client Libraries</h1>
           <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl font-sans">
-            Use an OpenAI-compatible client by setting <code className="text-cyan-300 font-mono">baseURL</code> to <code className="text-amber-300 font-mono">https://api.galx.ai/v1</code> and supplying a server-side GALXAI key.
+            Use an OpenAI-compatible client by setting <code className="text-cyan-300 font-mono">baseURL</code> to <code className="text-amber-300 font-mono">https://galx.ai/v1</code> and supplying a server-side GALXAI key.
           </p>
         </div>
 

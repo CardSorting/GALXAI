@@ -26,7 +26,7 @@ from pydantic import BaseModel, Field
 from typing import List
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -56,7 +56,7 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY || "galx_live_your_gateway_key",
 });
 
@@ -86,7 +86,7 @@ import { generateObject } from "ai";
 import { z } from "zod";
 
 const galxai = openai({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -109,7 +109,7 @@ export async function POST(req: Request) {
     },
     raw: {
       title: 'Raw REST API JSON Schema (cURL)',
-      code: `curl https://api.galx.ai/v1/chat/completions \\
+      code: `curl https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer galx_live_your_gateway_key" \\
   -H "Content-Type: application/json" \\
   -d '{

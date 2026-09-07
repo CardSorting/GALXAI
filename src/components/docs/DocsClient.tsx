@@ -93,7 +93,7 @@ export function DocsClient() {
             <pre className="overflow-x-auto rounded-xl bg-black/40 p-4 text-sm leading-6 text-cyan-200 ring-1 ring-white/10">
               <code>{`export GALXAI_API_KEY="galx_live_..."
 
-curl https://api.galx.ai/v1/chat/completions \\
+curl https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"model":"${DEFAULT_MODEL_ID}","messages":[{"role":"user","content":"Hello"}]}'`}</code>

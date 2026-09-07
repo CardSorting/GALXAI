@@ -5,8 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Zap,
-  Flame,
-  ArrowRight,
   Lock
 } from 'lucide-react';
 import { LanguageBadge } from '@/components/common/LanguageBadge';
@@ -27,7 +25,7 @@ function BaseFooter() {
   const usesFocusedAppShell =
     !pathname ||
     pathname === '/' ||
-    pathname.startsWith('/settings');
+    pathname.startsWith('/settings') || pathname === '/billing' || pathname === '/pricing' || pathname === '/docs' || pathname.startsWith('/docs/');
 
   if (usesFocusedAppShell) {
     return null;
@@ -96,11 +94,8 @@ function BaseFooter() {
       { name: 'Cost Center & Squad Budgets', href: '/teams/cost-centers' },
       { name: 'Security & 2FA Policies', href: '/teams/security' },
       { name: 'Enterprise Fleet & Net-30', href: '/solutions/enterprise', badge: '40% OFF' },
-      { name: 'Business Tax Invoices', href: '/billing/invoices', badge: 'PDF' },
-      { name: 'Inference Expense Reports', href: '/billing/expenses' },
-      { name: 'Auto-Top Up Safeguards', href: '/billing/auto-reload', badge: 'Zero-Downtime' },
-      { name: 'Budget Alerts & Webhooks', href: '/billing/budget-alerts' },
-      { name: 'SOC2 Tamper-Evident Audit', href: '/billing/audit-logs' },
+      { name: 'Invoices and payments', href: '/billing#payments' },
+      { name: 'Transaction history', href: '/billing#history' },
     ],
     pricingAndTrust: [
       { name: 'Wholesale Pricing & Tiers', href: '/pricing', badge: '25%-40% OFF' },
@@ -110,10 +105,10 @@ function BaseFooter() {
       { name: 'Automotive & Robotics AI', href: '/industries/automotive-and-robotics', badge: 'Edge' },
       { name: 'Education & EdTech AI', href: '/industries/education-and-edtech', badge: 'FERPA' },
       { name: 'Healthcare & Life Sciences', href: '/industries/healthcare-and-lifesciences', badge: 'HIPAA/BAA' },
-      { name: 'Active-Active Failover SLA', href: '/reliability/preventing-outages-during-openai-downtime', badge: '99.99%' },
+      { name: 'Failover Architecture', href: '/reliability/preventing-outages-during-openai-downtime' },
       { name: 'EU AI Act Compliance', href: '/security/eu-ai-act', badge: 'Compliant' },
       { name: 'OpenRouter vs GALXAI', href: '/alternatives/openrouter' },
-      { name: '75% Prompt Caching Pass', href: '/pricing#caching' },
+      { name: 'Model usage rates', href: '/pricing#rates' },
       { name: 'Enterprise Compliance & DPA', href: '/compliance', badge: 'HIPAA/GDPR' },
       { name: 'Frequently Asked Questions', href: '/faq' },
       { name: 'Zero-Retention Privacy Policy', href: '/faq' },
@@ -123,36 +118,6 @@ function BaseFooter() {
 
   return (
     <footer className="w-full border-t border-white/10 bg-[#07080d]/90 backdrop-blur-xl relative z-20 mt-20">
-      {/* Top Value / Conversion Strip */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 border-b border-white/5">
-        <div className="glass-panel rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-emerald-500/20 bg-emerald-500/5">
-          <div className="space-y-1 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
-              <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-              <span>50% INSTANT COMPUTE MATCH ON DEPOSITS</span>
-            </div>
-            <h3 className="text-lg sm:text-xl font-bold text-white">Cut your OpenAI inference bills by 25%–40% today</h3>
-            <p className="text-xs text-zinc-400">100% drop-in OpenAI SDK compatibility. Zero code refactoring. Active failover resilience.</p>
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            <Link
-              href="/keys/new"
-              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all cursor-pointer font-mono"
-            >
-              <span>Claim $5 Key + 50% Match</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/billing/enterprise"
-              className="px-4 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-xs font-semibold border border-white/10 transition-all"
-            >
-              <span>Enterprise Volume (40%)</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-
       {/* Main 5-Column Navigation Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-12">

@@ -31,10 +31,10 @@ client = OpenAI(
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",  # <- ONLY 1 LINE CHANGE NEEDED!
+    base_url="https://galx.ai/v1",  # <- ONLY 1 LINE CHANGE NEEDED!
     api_key="galx_live_your_gateway_key"
 )`,
-      env: `OPENAI_BASE_URL="https://api.galx.ai/v1"
+      env: `OPENAI_BASE_URL="https://galx.ai/v1"
 OPENAI_API_KEY="galx_live_your_gateway_key"`,
     },
     cursor: {
@@ -44,12 +44,12 @@ Override Base URL: [empty / default]
 API Key: sk-proj-...
 Models: gpt-4o, claude-3-5-sonnet`,
       after: `// GALXAI Cursor settings override:
-Override Base URL: https://api.galx.ai/v1
+Override Base URL: https://galx.ai/v1
 API Key: galx_live_your_gateway_key
 Models: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`,
       env: `// In .cursorrules or .vscode/settings.json:
 {
-  "openai.baseUrl": "https://api.galx.ai/v1",
+  "openai.baseUrl": "https://galx.ai/v1",
   "openai.apiKey": "galx_live_your_gateway_key",
   "openai.model": "gpt-5.6-sol"
 }`,
@@ -67,10 +67,10 @@ client = OpenAI(
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )`,
-      env: `OPENAI_BASE_URL="https://api.galx.ai/v1"
+      env: `OPENAI_BASE_URL="https://galx.ai/v1"
 OPENAI_API_KEY="galx_live_your_gateway_key"`,
     },
     vercel: {
@@ -88,7 +88,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
 
 const galxai = createOpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -112,10 +112,10 @@ from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(
     model="gpt-5.6-sol",
-    openai_api_base="https://api.galx.ai/v1",
+    openai_api_base="https://galx.ai/v1",
     openai_api_key="galx_live_your_gateway_key"
 )`,
-      env: `OPENAI_API_BASE="https://api.galx.ai/v1"
+      env: `OPENAI_API_BASE="https://galx.ai/v1"
 OPENAI_API_KEY="galx_live_your_gateway_key"`,
     },
     litellm: {
@@ -132,11 +132,11 @@ import litellm
 
 response = litellm.completion(
     model="openai/gpt-5.6-sol",
-    api_base="https://api.galx.ai/v1",
+    api_base="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key",
     messages=[{"role": "user", "content": "Hello!"}]
 )`,
-      env: `LITELLM_API_BASE="https://api.galx.ai/v1"
+      env: `LITELLM_API_BASE="https://galx.ai/v1"
 LITELLM_API_KEY="galx_live_your_gateway_key"`,
     },
     llamaindex: {
@@ -150,10 +150,10 @@ from llama_index.llms.openai import OpenAI
 
 llm = OpenAI(
     model="gpt-5.6-sol",
-    api_base="https://api.galx.ai/v1",
+    api_base="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )`,
-      env: `OPENAI_API_BASE="https://api.galx.ai/v1"
+      env: `OPENAI_API_BASE="https://galx.ai/v1"
 OPENAI_API_KEY="galx_live_your_gateway_key"`,
     },
     make: {
@@ -162,10 +162,10 @@ OPENAI_API_KEY="galx_live_your_gateway_key"`,
 Endpoint: https://api.openai.com/v1/chat/completions
 Headers:  Authorization: Bearer sk-proj-...`,
       after: `// GALXAI High-Throughput Wholesale Endpoint
-Endpoint: https://api.galx.ai/v1/chat/completions
+Endpoint: https://galx.ai/v1/chat/completions
 Headers:  Authorization: Bearer galx_live_your_gateway_key
 Payload:  { "model": "gpt-5.6-sol", "messages": [...] }`,
-      env: `URL: https://api.galx.ai/v1/chat/completions
+      env: `URL: https://galx.ai/v1/chat/completions
 HEADER: Authorization: Bearer galx_live_your_gateway_key`,
     },
   };

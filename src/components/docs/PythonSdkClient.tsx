@@ -21,7 +21,7 @@ export function PythonSdkClient() {
 from openai import AsyncOpenAI
 
 client = AsyncOpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -50,7 +50,7 @@ class ArchitectureReview(BaseModel):
     score: int = Field(description="System health score from 1 to 100")
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -73,7 +73,7 @@ http_client = httpx.Client(
 )
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key",
     http_client=http_client
 )`,

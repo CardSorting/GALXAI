@@ -26,7 +26,7 @@ export function FunctionCallingClient() {
 import json
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -82,7 +82,7 @@ if tool_calls:
       code: `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY || "galx_live_your_gateway_key",
 });
 
@@ -137,7 +137,7 @@ import { generateText, tool } from "ai";
 import { z } from "zod";
 
 const galxai = openai({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -172,7 +172,7 @@ def multiply(a: int, b: int) -> int:
 
 llm = ChatOpenAI(
     model="gpt-5.6-sol",
-    openai_api_base="https://api.galx.ai/v1",
+    openai_api_base="https://galx.ai/v1",
     openai_api_key="galx_live_your_gateway_key"
 )
 

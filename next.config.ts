@@ -37,7 +37,8 @@ const securityHeaders = [
       "object-src 'none'",
       "frame-ancestors 'self'",
       "form-action 'self' https://checkout.stripe.com",
-      "script-src 'self' 'unsafe-inline' https://js.stripe.com https://vercel.live",
+      // Next.js development bundles use eval; production keeps it disabled.
+      `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''} https://js.stripe.com https://vercel.live`,
       "style-src 'self' 'unsafe-inline'",
       "font-src 'self' data:",
       "img-src 'self' data: blob: https:",
@@ -160,6 +161,12 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      {
+        source: "/settings",
+        has: [{ type: "query", key: "tab", value: "developer" }],
+        destination: "/keys",
+        permanent: false,
+      },
       {
         source: "/gateway",
         destination: "/keys",

@@ -70,12 +70,12 @@ const PLATFORM_PAGES: PlatformPage[] = [
     description: 'Submit background AI tasks and stream live results'
   },
   {
-    label: 'Plain-English Beginner Guide',
-    href: '/docs/simple',
+    label: 'API quickstart',
+    href: '/docs',
     icon: Sparkles,
     category: 'Getting Started',
     keywords: ['beginner', 'simple', 'easy', 'plain english', 'guide', 'start', 'how to', 'tutorial', 'no-code'],
-    description: 'Zero technical jargon walkthrough for new users'
+    description: 'Send a request or copy setup instructions for your agent'
   },
   {
     label: 'Developer API Keys',
@@ -134,8 +134,8 @@ const PLATFORM_PAGES: PlatformPage[] = [
     description: 'Side-by-side benchmark comparison of OpenAI GPT models'
   },
   {
-    label: 'Cursor & Windsurf IDE Setup',
-    href: '/docs/ide-setup',
+    label: 'SDK and IDE integrations',
+    href: '/docs/sdks#ide',
     icon: Terminal,
     category: 'Solutions',
     keywords: ['cursor', 'windsurf', 'vscode', 'ide', 'code editor', 'setup', 'copilot'],
@@ -247,7 +247,7 @@ const PLATFORM_PAGES: PlatformPage[] = [
   },
   {
     label: 'Business Tax Invoices & Receipts',
-    href: '/billing/invoices',
+    href: '/billing#payments',
     icon: FileText,
     category: 'Finance',
     keywords: ['invoices', 'receipts', 'tax', 'pdf', 'bills', 'accounting'],

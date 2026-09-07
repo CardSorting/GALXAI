@@ -24,18 +24,18 @@ export function IdeSetupClient() {
       instructions: [
         'Open Cursor Settings (Cmd + Shift + J on Mac or Ctrl + Shift + J on Windows).',
         'Navigate to Models > OpenAI API Key.',
-        'Toggle "Override OpenAI Base URL" and enter https://api.galx.ai/v1.',
+        'Toggle "Override OpenAI Base URL" and enter https://galx.ai/v1.',
         'Paste your API key (galx_live_...).',
         'Add model names: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna.',
       ],
       snippet: `// In Cursor Settings -> Models:
-Override Base URL: https://api.galx.ai/v1
+Override Base URL: https://galx.ai/v1
 API Key: galx_live_your_gateway_key
 
 // In your project root as .cursorrules:
 {
   "default_model": "gpt-5.6-sol",
-  "base_url": "https://api.galx.ai/v1",
+  "base_url": "https://galx.ai/v1",
   "caching": true,
   "reasoning_effort": "high"
 }`,
@@ -45,14 +45,14 @@ API Key: galx_live_your_gateway_key
       instructions: [
         'Open Windsurf Settings > AI Providers.',
         'Select OpenAI Compatible Provider.',
-        'Set Endpoint URL: https://api.galx.ai/v1/chat/completions.',
+        'Set Endpoint URL: https://galx.ai/v1/chat/completions.',
         'Set API Key: galx_live_your_gateway_key.',
         'Set Preferred Model: gpt-5.6-sol.',
       ],
       snippet: `// .windsurfrules in your project root:
 {
   "provider": "openai-compatible",
-  "api_base": "https://api.galx.ai/v1",
+  "api_base": "https://galx.ai/v1",
   "model": "gpt-5.6-sol",
   "temperature": 0.2,
   "max_tokens": 8192
@@ -66,7 +66,7 @@ API Key: galx_live_your_gateway_key
         'Run Claude Code in a project and verify the selected model and endpoint.',
       ],
       snippet: `# In your shell (~/.zshrc or ~/.bashrc):
-export ANTHROPIC_BASE_URL="https://api.galx.ai/v1"
+export ANTHROPIC_BASE_URL="https://galx.ai/v1"
 export ANTHROPIC_API_KEY="galx_live_your_gateway_key"
 
 # Run Claude Code CLI directly:
@@ -85,14 +85,14 @@ claude "Refactor this module with full test coverage"`,
       "title": "GALXAI GPT-5.6 Sol (Flagship)",
       "provider": "openai",
       "model": "gpt-5.6-sol",
-      "apiBase": "https://api.galx.ai/v1",
+      "apiBase": "https://galx.ai/v1",
       "apiKey": "galx_live_your_gateway_key"
     },
     {
       "title": "GALXAI GPT-5.6 Terra (Balanced)",
       "provider": "openai",
       "model": "gpt-5.6-terra",
-      "apiBase": "https://api.galx.ai/v1",
+      "apiBase": "https://galx.ai/v1",
       "apiKey": "galx_live_your_gateway_key"
     }
   ]
@@ -103,13 +103,13 @@ claude "Refactor this module with full test coverage"`,
       instructions: [
         'Open Cline extension settings in VS Code.',
         'Select API Provider: "OpenAI Compatible".',
-        'Enter Base URL: https://api.galx.ai/v1.',
+        'Enter Base URL: https://galx.ai/v1.',
         'Enter API Key: galx_live_your_gateway_key.',
         'Enter Model ID: gpt-5.6-sol.',
       ],
       snippet: `// Cline Provider Settings:
 API Provider: OpenAI Compatible
-Base URL: https://api.galx.ai/v1
+Base URL: https://galx.ai/v1
 API Key: galx_live_your_gateway_key
 Model ID: gpt-5.6-sol
 Context Window: 200000

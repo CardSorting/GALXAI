@@ -22,7 +22,7 @@ function BaseFloatingActionDock() {
   const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
-    if (pathname === '/') return;
+    if ((pathname === '/' || pathname === '/billing' || pathname === '/pricing' || pathname === '/docs' || pathname?.startsWith('/docs/'))) return;
 
     let ticking = false;
     const handleScroll = () => {
@@ -40,7 +40,7 @@ function BaseFloatingActionDock() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [pathname]);
 
-  if (pathname === '/') {
+  if ((pathname === '/' || pathname === '/billing' || pathname === '/pricing' || pathname === '/docs' || pathname?.startsWith('/docs/'))) {
     return null;
   }
 

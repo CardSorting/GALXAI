@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { DocsSubNav } from '@/components/dashboard/DocsSubNav';
@@ -46,13 +45,6 @@ export function RateLimitsClient() {
               <Gauge className="w-3.5 h-3.5" />
               <span>CONTINUOUS TOKEN REPLENISHMENT</span>
             </div>
-            <Link
-              href="/keys/rate-limits"
-              className="px-4 py-2.5 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer"
-            >
-              <Gauge className="w-3.5 h-3.5" />
-              <span>Manage Key Quotas →</span>
-            </Link>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white">Rate Limits &amp; Concurrency Governor Guide</h1>
           <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-3xl font-sans">

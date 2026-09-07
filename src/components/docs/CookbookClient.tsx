@@ -34,7 +34,7 @@ const RECIPES: Recipe[] = [
 from typing import Dict, List
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -73,7 +73,7 @@ print("Generated Production Microservice:\\n", code)`,
     code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -102,7 +102,7 @@ print(response.choices[0].message.content)`,
 from openai import AsyncOpenAI
 
 client = AsyncOpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key",
     max_retries=5
 )
@@ -137,7 +137,7 @@ asyncio.run(main())`,
 import re
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key",
     default_headers={"X-GALXAI-ZDR": "enforce-zero-retention"}
 )

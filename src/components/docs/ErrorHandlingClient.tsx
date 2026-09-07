@@ -62,7 +62,7 @@ import random
 
 # Built-in automatic retry handles transient 429 & 503 backoff seamlessly
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key",
     max_retries=5,       # Automatic exponential retry on 429/500/503
     timeout=30.0         # 30-second failover safety window
@@ -82,7 +82,7 @@ except Exception as e:
       code: `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY || "galx_live_your_gateway_key",
   maxRetries: 5, // Built-in exponential backoff
   timeout: 30000,
@@ -107,7 +107,7 @@ curl --retry 5 \\
      --retry-delay 1 \\
      --retry-max-time 60 \\
      --retry-all-errors \\
-     -X POST https://api.galx.ai/v1/chat/completions \\
+     -X POST https://galx.ai/v1/chat/completions \\
      -H "Authorization: Bearer galx_live_your_gateway_key" \\
      -H "Content-Type: application/json" \\
      -d '{

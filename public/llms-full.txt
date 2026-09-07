@@ -1,7 +1,7 @@
 # GALXAI — Enterprise Universal AI Gateway & High-Throughput Model Router Full Specification
 
 ## 1. Executive Summary & Value Proposition
-GALXAI (https://galx.ai) is an enterprise-grade AI model clearinghouse, multi-account liquidity pool, and sub-15ms Anycast API gateway. It provides a single drop-in OpenAI-compatible endpoint (`https://api.galx.ai/v1`) for OpenAI GPT-5.6 (Sol, Terra, Luna) and visual synthesis engines with:
+GALXAI (https://galx.ai) is an enterprise-grade AI model clearinghouse, multi-account liquidity pool, and sub-15ms Anycast API gateway. It provides a single drop-in OpenAI-compatible endpoint (`https://galx.ai/v1`) for OpenAI GPT-5.6 (Sol, Terra, Luna) and visual synthesis engines with:
 - **25% to 40% Wholesale Token Discounts**: Direct pass-through wholesale rates below upstream retail pricing.
 - **75% Compound Prompt Caching**: 100% pass-through of provider prefix caching rebates on prompts exceeding 1,024 tokens.
 - **Zero Rate-Limit Stalls (429 Shield)**: Predictive Adaptive Hydraulic Headroom (P-AHT) and continuous token governance across distributed enterprise shards.
@@ -12,7 +12,7 @@ GALXAI (https://galx.ai) is an enterprise-grade AI model clearinghouse, multi-ac
 GALXAI is the inference and governance layer, not a destination chat or image-generation application. Its hosted web product centers model discovery, credentials, routing, telemetry, billing, and governance; authenticated users default to `/models`. Downstream applications own conversation and creative workflows.
 
 ## 2. Global API Endpoints & Authentication
-- **Base URL**: `https://api.galx.ai/v1`
+- **Base URL**: `https://galx.ai/v1`
 - **Authentication**: `Authorization: Bearer galx_live_...`
 - **REST Endpoints Supported**:
   - `POST /v1/chat/completions` (OpenAI Wire-Compatible Chat & Streaming)
@@ -37,7 +37,7 @@ GALXAI is the inference and governance layer, not a destination chat or image-ge
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -53,7 +53,7 @@ print(response.choices[0].message.content)
 import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -66,14 +66,14 @@ const completion = await client.chat.completions.create({
 ### Cursor & Windsurf IDE Setup
 1. Open Cursor / Windsurf Settings > Models > OpenAI API.
 2. Enter API Key: `galx_live_...`
-3. Enable "Override OpenAI Base URL" and enter: `https://api.galx.ai/v1`
+3. Enable "Override OpenAI Base URL" and enter: `https://galx.ai/v1`
 4. Add Model names: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `openai-gpt-image-2`.
 
 ### Claude Code CLI Setup
 ```bash
-export OPENAI_BASE_URL="https://api.galx.ai/v1"
+export OPENAI_BASE_URL="https://galx.ai/v1"
 export OPENAI_API_KEY="galx_live_your_gateway_key"
-claude --openai-base-url="https://api.galx.ai/v1" --model="gpt-5.6-sol"
+claude --openai-base-url="https://galx.ai/v1" --model="gpt-5.6-sol"
 ```
 
 ### LangChain & LlamaIndex Setup
@@ -82,7 +82,7 @@ from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(
     model="gpt-5.6-sol",
-    openai_api_base="https://api.galx.ai/v1",
+    openai_api_base="https://galx.ai/v1",
     openai_api_key="galx_live_your_gateway_key"
 )
 ```
@@ -92,7 +92,7 @@ llm = ChatOpenAI(
 import { createOpenAI } from '@ai-sdk/openai';
 
 const galxai = createOpenAI({
-  baseURL: 'https://api.galx.ai/v1',
+  baseURL: 'https://galx.ai/v1',
   apiKey: process.env.GALXAI_API_KEY,
 });
 ```

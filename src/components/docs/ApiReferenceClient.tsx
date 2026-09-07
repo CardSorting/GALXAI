@@ -15,7 +15,7 @@ const ENDPOINTS = [
 
 export function ApiReferenceClient() {
   const defaultModel = FRONTEND_VISIBLE_MODELS.find((model) => model.category === 'llm')?.id ?? 'gpt-5.6-sol';
-  const request = `curl https://api.galx.ai/v1/chat/completions \\
+  const request = `curl https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -34,7 +34,7 @@ export function ApiReferenceClient() {
         <header className="max-w-3xl pb-8 pt-6">
           <h1 className="text-3xl font-semibold tracking-[-0.03em] sm:text-5xl">API reference</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-zinc-300">
-            Send JSON to <code className="text-cyan-300">https://api.galx.ai/v1</code> with a Bearer key. Protocol names such as `chat` describe wire compatibility, not a hosted client.
+            Send JSON to <code className="text-cyan-300">https://galx.ai/v1</code> with a Bearer key. Protocol names such as `chat` describe wire compatibility, not a hosted client.
           </p>
           <Link href="/keys/new" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-indigo-200 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300">
             Create API key
