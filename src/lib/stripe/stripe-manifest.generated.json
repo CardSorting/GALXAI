@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-29T00:27:47.449Z",
+  "timestamp": "2026-09-07T05:43:27.673Z",
   "isLiveOrTest": "live",
   "productsProvisioned": 5,
   "pricesProvisioned": 5,
@@ -42,6 +42,5 @@
     }
   },
   "portalConfigId": "bpc_1SfRJBIA2zQnWbn5wccY9XgR",
-  "webhookSecret": "whsec_UpsRFuPsTOK0dWhLQHkxj579XY6gM8tu",
-  "webhookEndpointId": "we_1U9a7eIA2zQnWbn5LqRUImfH"
+  "webhookEndpointId": "we_1UCvKoIA2zQnWbn5HaBkRV3p"
 }

@@ -23,7 +23,6 @@ interface ProvisioningReport {
   pricesProvisioned: number;
   portalConfigId?: string;
   webhookEndpointId?: string;
-  webhookSecret?: string;
   taxConfigured: boolean;
   catalog: Record<string, {
     productId: string;
@@ -88,7 +87,6 @@ async function runMasterStripeProvisioner() {
 
     report.portalConfigId = 'bpc_mock_portal_galxai_dev';
     report.webhookEndpointId = 'we_mock_webhook_galxai_dev';
-    report.webhookSecret = 'whsec_mock_00000000000000000000000000000000';
     report.taxConfigured = true;
 
     saveArtifacts(report);
@@ -281,8 +279,10 @@ async function runMasterStripeProvisioner() {
         });
         console.log(`  ✓ Created Webhook Endpoint: ${endpoint.id} -> ${target.url}`);
         if (endpoint.secret) {
-          report.webhookSecret = endpoint.secret;
-          console.log(`  ✓ Received Webhook Secret: ${endpoint.secret.substring(0, 10)}...`);
+          const secretPath = path.resolve(process.cwd(), '.env.stripe-webhooks.local');
+          fs.appendFileSync(secretPath, `${endpoint.id}=${endpoint.secret}\n`, { mode: 0o600 });
+          fs.chmodSync(secretPath, 0o600);
+          console.log('  ✓ Signing credential saved to .env.stripe-webhooks.local; configure it in server secrets.');
         }
       } else {
         endpoint = await stripe.webhookEndpoints.update(endpoint.id, {

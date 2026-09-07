@@ -105,7 +105,7 @@ export const SEED_WEBHOOKS: WebhookEndpoint[] = [
     name: 'Slack #finance-alerts Webhook',
     url: 'https://hooks.slack.com/services/T0123/B0456/7890abcdef',
     events: ['billing.threshold.90', 'billing.auto_reload.success', 'key.created'],
-    secret: 'whsec_9a8b7c6d5e4f3a2b1c0d',
+    secret: 'Configured on server',
     status: 'active',
     lastDelivery: 'Today at 04:15 UTC (200 OK)'
   },
@@ -114,7 +114,7 @@ export const SEED_WEBHOOKS: WebhookEndpoint[] = [
     name: 'Datadog SIEM Security Audit Pipeline',
     url: 'https://http-intake.logs.datadoghq.com/api/v2/logs',
     events: ['key.deleted', 'budget.cap.exceeded', 'auth.failure'],
-    secret: 'whsec_dd8192a73c091f82b',
+    secret: 'Configured on server',
     status: 'active',
     lastDelivery: 'Yesterday at 22:45 UTC (200 OK)'
   }
