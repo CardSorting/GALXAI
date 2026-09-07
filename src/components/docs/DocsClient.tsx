@@ -73,7 +73,7 @@ export function DocsClient() {
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
             <Link
-              href="/keys/new"
+              href="/keys"
               className="inline-flex items-center gap-2 rounded-lg border border-white/15 px-4 py-2.5 text-sm font-semibold text-zinc-100 transition-colors hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"
             >
               <KeyRound className="h-4 w-4" aria-hidden="true" />

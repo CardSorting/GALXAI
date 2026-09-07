@@ -85,14 +85,7 @@ const PLATFORM_PAGES: PlatformPage[] = [
     keywords: ['api keys', 'keys', 'tokens', 'secret', 'create key', 'credentials', 'auth'],
     description: 'Generate and manage universal gateway API access keys'
   },
-  {
-    label: 'Create New Gateway API Key',
-    href: '/keys/new',
-    icon: Key,
-    category: 'Actions',
-    keywords: ['new key', 'generate key', 'make key', 'add key'],
-    description: 'Instantly generate an OpenAI-compatible API key'
-  },
+
   {
     label: 'Wallet & Compute Balance',
     href: '/billing',

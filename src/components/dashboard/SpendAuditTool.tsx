@@ -222,7 +222,7 @@ function BaseSpendAuditTool() {
         </div>
 
         <Link
-          href="/keys/new"
+          href="/keys"
           className="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/25 cursor-pointer"
         >
           <span>Claim My ${monthlySaved.toFixed(0)} Monthly Savings (Claim Key)</span>

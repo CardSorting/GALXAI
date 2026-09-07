@@ -441,7 +441,7 @@ console.log(res.choices[0].message.content);`;
                 </Link>
 
                 <Link
-                  href="/keys/new"
+                  href="/keys"
                   className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold font-mono flex items-center gap-1.5 shadow-md shadow-cyan-500/20 transition-all"
                 >
                   <Zap className="w-3.5 h-3.5 fill-black" />

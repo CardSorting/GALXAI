@@ -25,6 +25,15 @@
         ],
         "createdAt": "2026-08-29T18:24:43.352Z",
         "reason": "False positive: backend repository data mapping contains no visual palette or UI styling."
+      },
+      {
+        "rule": "gray-on-color",
+        "value": "*",
+        "files": [
+          "src/components/billing/TopUpForm.tsx"
+        ],
+        "createdAt": "2026-09-07T04:43:42.528Z",
+        "reason": "Codex reviewed the rendered desktop and mobile buttons: the selected branch pairs indigo-100 text with indigo fill; the unselected branch uses near-white zinc-100 on the neutral page. The scanner combines mutually exclusive class branches."
       }
     ]
   },

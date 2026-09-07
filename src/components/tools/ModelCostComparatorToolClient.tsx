@@ -322,7 +322,7 @@ print(response.choices[0].message.content)`;
             </div>
 
             <Link
-              href="/keys/new"
+              href="/keys"
               className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 text-black font-mono text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-500/20 cursor-pointer mt-4"
             >
               <Zap className="w-4 h-4 fill-black" />

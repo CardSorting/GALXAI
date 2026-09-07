@@ -180,7 +180,7 @@ Claim Grant: https://galx.ai/grants`;
           {/* Top Actions */}
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Link
-              href="/keys/new"
+              href="/keys"
               className="px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-xl shadow-amber-500/25 flex items-center gap-2 hover:scale-[1.02] transition-all cursor-pointer font-mono"
             >
               <Zap className="w-4 h-4 fill-black" />
@@ -280,7 +280,7 @@ Claim Grant: https://galx.ai/grants`;
                   </div>
 
                   <Link
-                    href={tier.id === 'enterprise' ? '/billing/enterprise' : '/keys/new'}
+                    href={tier.id === 'enterprise' ? '/billing/enterprise' : '/keys'}
                     className={`w-full py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 font-mono transition-all ${
                       isSelected
                         ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-black shadow-lg shadow-amber-500/20'

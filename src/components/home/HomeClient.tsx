@@ -110,7 +110,7 @@ export function HomeClient() {
             </div>
 
             <Link
-              href="/keys/new"
+              href="/keys"
               className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center gap-1.5 hover:scale-[1.02] active:scale-98 transition-all cursor-pointer shrink-0"
             >
               <Key className="w-3.5 h-3.5 text-black" />
@@ -338,7 +338,7 @@ export function HomeClient() {
             </div>
 
             <Link
-              href="/keys/new"
+              href="/keys"
               className="px-5 py-2.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-md shadow-emerald-500/25 shrink-0 whitespace-nowrap font-mono cursor-pointer"
             >
               <span>Claim Key ($5 Credit)</span>

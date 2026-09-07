@@ -373,7 +373,7 @@ const resB = await client.chat.completions.create({
               </div>
 
               <Link
-                href="/keys/new"
+                href="/keys"
                 className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs flex items-center justify-center gap-1.5 transition-colors font-sans shadow-md"
               >
                 <span>Deploy {cheaperModel.id}</span>

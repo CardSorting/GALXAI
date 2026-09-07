@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { TopUpForm } from './TopUpForm';
+import { CheckoutStatus } from './CheckoutStatus';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import type { BillingData } from '@/lib/billing/account';
@@ -17,20 +19,18 @@ export function BillingClient() {
   const { user, isLoading } = useAuth();
   if (isLoading) return <p role="status" className="py-8 text-sm text-zinc-400">Loading account…</p>;
   if (!user) return <div className="space-y-4 py-8"><p className="text-sm text-zinc-400">Sign in to view your balance, transactions, and invoices.</p><Link href="/auth/signin?next=%2Fbilling" className={link}>Sign in</Link></div>;
-  return <AccountBilling key={user.id} token={user.token} email={user.email || 'Signed-in account'} />;
+  return <AccountBilling key={user.id} accountId={user.id} token={user.token} email={user.email || 'Signed-in account'} />;
 }
 
-function AccountBilling({ token, email }: { token?: string; email: string }) {
+function AccountBilling({ token, email, accountId }: { token?: string; email: string; accountId: string }) {
   const [data, setData] = useState<BillingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
-  const [errorAction, setErrorAction] = useState<'checkout' | 'portal'>('checkout');
   const [busy, setBusy] = useState('');
-  const [amount, setAmount] = useState('25');
   const [filter, setFilter] = useState('all');
-  const [returnMessage, setReturnMessage] = useState('');
+  const [paymentPending, setPaymentPending] = useState(false);
   const version = useRef(0);
   const active = useRef(true);
   const load = useCallback(async (cursor?: string) => {
@@ -50,25 +50,23 @@ function AccountBilling({ token, email }: { token?: string; email: string }) {
   }, [token, filter]);
   useEffect(() => { active.current = true; void load(); return () => { active.current = false; };  }, [load]);
   useEffect(() => {
-    const checkout = new URLSearchParams(window.location.search).get('checkout');
-    setReturnMessage(checkout === 'returned' ? 'Back from checkout. Your balance updates after payment confirmation. Refresh if it is still pending.' : checkout === 'canceled' ? 'Checkout canceled. No credit was added by this page.' : '');
     const refresh = () => { void load(); };
     window.addEventListener('focus', refresh);
     return () => window.removeEventListener('focus', refresh);
   }, [load]);
 
-  async function paymentAction(action: 'checkout' | 'portal') {
-    setBusy(action); setActionError(''); setErrorAction(action);
+  async function paymentAction(action: 'portal') {
+    setBusy(action); setActionError('');
     try {
-      const response = await fetch(`/api/stripe/${action}`, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify(action === 'checkout' ? { amount: Number(amount) } : {}) });
+      const response = await fetch(`/api/stripe/${action}`, { method: 'POST', credentials: 'same-origin', signal: AbortSignal.timeout(30000), headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: '{}' });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || 'Could not open payments. Try again.');
       const target = new URL(result.url);
-      if (result.isSimulated || target.protocol !== 'https:' || target.hostname !== (action === 'checkout' ? 'checkout.stripe.com' : 'billing.stripe.com')) throw new Error('Could not open a secure payment page. Try again.');
+      if (target.protocol !== 'https:' || target.hostname !== 'billing.stripe.com' || target.port || target.username || target.password) throw new Error('Could not open a secure payment page. Try again.');
       if (active.current) window.location.assign(target.href);
     } catch (e) { if (active.current) { setActionError((e as Error).message); setBusy(''); } }
   }
-  const validAmount = amount.trim() !== '' && Number.isFinite(Number(amount)) && Number(amount) >= 1 && Number(amount) <= 10000 && Math.abs(Number(amount) * 100 - Math.round(Number(amount) * 100)) < 0.000001;
+
   function exportHistory() {
     if (!data) return;
     const url = URL.createObjectURL(new Blob([billingCsv(data.transactions)], { type: 'text/csv;charset=utf-8' }));
@@ -76,7 +74,7 @@ function AccountBilling({ token, email }: { token?: string; email: string }) {
   }
   return <div className="space-y-8 pt-6">
     <div className="flex flex-wrap items-center justify-between gap-3"><p className="break-all text-sm text-zinc-400">{email}</p><button type="button" className={button} disabled={loading || loadingMore} onClick={() => { void load(); window.dispatchEvent(new Event('galx_wallet_update')); }}>Refresh</button></div>
-    {returnMessage && <p role="status" className="text-sm leading-6 text-zinc-300">{returnMessage}</p>}
+    <CheckoutStatus accountId={accountId} token={token} onConfirmed={() => { void load(); }} onPending={setPaymentPending} />
     {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
     {loading && <p role="status" className="text-sm text-zinc-400">Loading billing…</p>}
     {data && <>
@@ -87,12 +85,8 @@ function AccountBilling({ token, email }: { token?: string; email: string }) {
           <div><dt className="text-sm text-zinc-400">Usage this month · UTC</dt><dd className="mt-2 text-2xl tabular-nums">{money(data.summary.currentMonthSpendUsd)}</dd></div>
           <div><dt className="text-sm text-zinc-400">Total deposited</dt><dd className="mt-2 text-2xl tabular-nums">{money(data.summary.depositedTotalUsd)}</dd></div>
         </dl>
-        <form className="mt-6 flex flex-wrap items-end gap-3" onSubmit={event => { event.preventDefault(); if (validAmount && !busy) void paymentAction('checkout'); }}>
-          <label className="text-sm text-zinc-400">Top-up amount (USD)<input className={`${control} mt-2 block w-40`} type="number" min="1" max="10000" step="0.01" required value={amount} onChange={event => setAmount(event.target.value)} /></label>
-          <button type="submit" disabled={!validAmount || Boolean(busy) || !data.paymentsAvailable} className="rounded-md border border-indigo-400/40 bg-indigo-500/20 px-4 py-2 text-sm font-medium text-indigo-100 hover:bg-indigo-500/30 focus-visible:outline-indigo-300 disabled:opacity-50">{busy === 'checkout' ? 'Opening checkout…' : 'Continue to checkout'}</button>
-        </form>
-        <p className="mt-3 text-xs leading-6 text-zinc-400">{data.paymentsAvailable ? 'Review the amount and credit terms in Stripe before paying. Credit is added after payment confirmation.' : 'Online payments are currently unavailable. Please try again later.'}</p>
-        {actionError && errorAction === 'checkout' && <p role="alert" className="mt-3 text-sm text-red-300">{actionError}</p>}
+        {data.summary.paymentDebtUsd > 0 && <p className="mt-4 text-sm text-amber-200">{money(data.summary.paymentDebtUsd)} outstanding from a payment adjustment. Your next top-up covers this first.</p>}
+        {!paymentPending && <TopUpForm accountId={accountId} token={token} available={data.paymentsAvailable} />}
       </section>
       <section id="history" className="scroll-mt-24">
         <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-semibold">Transactions</h2><div className="flex flex-wrap gap-2">
@@ -114,7 +108,7 @@ function AccountBilling({ token, email }: { token?: string; email: string }) {
       <section id="payments" className="scroll-mt-24 border-t border-white/10 pt-8">
         <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-semibold">Invoices and payments</h2><button type="button" className={button} disabled={Boolean(busy) || !data.hasCustomer || !data.paymentsAvailable} onClick={() => void paymentAction('portal')}>{busy === 'portal' ? 'Opening settings…' : 'Manage payment settings'}</button></div>
         <p className="mt-2 text-sm leading-6 text-zinc-400">{data.hasCustomer ? 'Manage payment methods, billing details, and invoice history in Stripe.' : 'Your payment profile becomes available after your first top-up.'}</p>
-        {actionError && errorAction === 'portal' && <p role="alert" className="mt-3 text-sm text-red-300">{actionError}</p>}
+        {actionError && <p role="alert" className="mt-3 text-sm text-red-300">{actionError}</p>}
         {data.summary.autoReloadEnabled && <p className="mt-3 text-sm text-zinc-300">Auto-reload is enabled on this account. Contact <a className={link} href="mailto:support@galx.ai">support</a> to change it.</p>}
         {!data.invoices.length ? <p className="py-6 text-sm text-zinc-400">No invoices recorded yet.</p> : <div className="mt-4 divide-y divide-white/10">{data.invoices.map(invoice => <div key={invoice.id} className="flex flex-wrap items-center justify-between gap-3 py-4 text-sm"><div><p>{date(invoice.createdAt)} UTC</p><p className="mt-1 text-xs text-zinc-400">{invoice.id} · {invoice.status}</p></div><div className="flex items-center gap-4"><span className="tabular-nums">{money(invoice.status === 'paid' ? invoice.amountPaidUsd : invoice.amountDueUsd)}</span>{invoice.url && <a href={invoice.url} target="_blank" rel="noopener noreferrer" className={link} aria-label={`View invoice ${invoice.id}`}>View invoice</a>}</div></div>)}<p className="pt-3 text-xs text-zinc-400">Up to 20 recent invoices. Open payment settings for older invoices.</p></div>}
       </section>

@@ -146,7 +146,7 @@ export default function AboutPage() {
             <p className="text-xs text-zinc-400">Generate an instant API key in 10 seconds with $5 free test credit.</p>
           </div>
           <Link
-            href="/keys/new"
+            href="/keys"
             className="px-6 py-3 rounded-2xl bg-cyan-400 text-black font-bold text-xs font-mono flex items-center gap-2 hover:bg-cyan-300 transition-all shrink-0 cursor-pointer shadow-lg shadow-cyan-500/20"
           >
             <span>Get Instant API Key</span>

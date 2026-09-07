@@ -25,7 +25,7 @@ function BaseFooter() {
   const usesFocusedAppShell =
     !pathname ||
     pathname === '/' ||
-    pathname.startsWith('/settings') || pathname === '/billing' || pathname === '/pricing' || pathname === '/docs' || pathname.startsWith('/docs/');
+    pathname.startsWith('/settings') || pathname === '/keys/top-up' || pathname === '/billing' || pathname === '/pricing' || pathname === '/docs' || pathname.startsWith('/docs/');
 
   if (usesFocusedAppShell) {
     return null;

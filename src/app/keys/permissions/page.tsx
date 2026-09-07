@@ -179,7 +179,7 @@ function BaseKeyPermissionsPage() {
               <Key className="w-8 h-8 text-zinc-600 mx-auto" />
               <p className="text-sm font-semibold text-zinc-300">No active keys found</p>
               <p className="text-xs text-zinc-500">Create an API key to configure scoped capabilities and auto-rotation.</p>
-              <Link href="/keys/new" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-colors">
+              <Link href="/keys" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-colors">
                 Create API Key
               </Link>
             </div>

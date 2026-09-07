@@ -423,7 +423,7 @@ OPENAI_API_KEY=galx_live_your_key_here`,
             </div>
 
             <Link
-              href="/keys/new"
+              href="/keys"
               className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-md shadow-cyan-500/20 font-mono cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 fill-black" />

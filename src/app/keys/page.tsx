@@ -1451,7 +1451,7 @@ console.log(completion.choices[0].message.content);`
 
               <div className="pt-1 text-center">
                 <Link
-                  href="/keys/new"
+                  href="/keys"
                   onClick={() => setIsCreateModalOpen(false)}
                   className="text-[11px] text-indigo-400 hover:text-indigo-300 inline-flex items-center gap-1 transition-colors"
                 >

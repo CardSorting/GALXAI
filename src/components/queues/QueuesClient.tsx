@@ -277,7 +277,7 @@ console.log(response.choices[0].message.content);`;
                   </button>
 
                   <Link
-                    href="/keys/new"
+                    href="/keys"
                     className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-md shadow-amber-500/20 whitespace-nowrap cursor-pointer"
                   >
                     <Key className="w-3.5 h-3.5 fill-black" />

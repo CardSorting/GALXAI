@@ -60,7 +60,7 @@ Integrate GALXAI into the existing application. Inspect its language, framework,
 - Example chat model: ${DOC_MODEL}
 - Model catalog: GET ${GALX_API_BASE_URL}/models
 - Chat endpoint: POST ${GALX_API_BASE_URL}/chat/completions
-- Create a key: https://galx.ai/keys/new
+- Create a key: https://galx.ai/keys
 
 ## Implementation
 1. Keep GALXAI_API_KEY on the server. Never put it in browser code, NEXT_PUBLIC variables, logs, commits, or this conversation. If it is missing, ask the user to configure it in their environment or secret manager.
@@ -89,7 +89,7 @@ export const DOC_PAGES: Record<DocId, DocPage> = {
     path: '/docs', title: 'Make your first request', description: 'One key, one base URL, one request. Or copy the setup brief and let your coding agent do it.',
     sections: [
       { id: 'credentials', title: '1. Create a key', body: ['Create an API key. The full secret is shown once. Set it in your terminal before running the examples, or in your app’s server environment.'],
-        links: [{ href: '/keys/new', label: 'Create API key' }],
+        links: [{ href: '/keys', label: 'Create API key' }],
         code: [{ label: 'Terminal', source: `# Replace the placeholder locally.
 export GALXAI_API_KEY='your_key_here'
 export OPENAI_BASE_URL='${GALX_API_BASE_URL}'` }],

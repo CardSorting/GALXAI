@@ -4,7 +4,7 @@ import { getStripeConfig } from '@/lib/stripe/config';
 import { AccountIdentityError, requireAccountIdentity } from '@/lib/auth/accountIdentity';
 import { getPostgresPool } from '@/lib/db/postgres';
 import { BillingError } from '@/lib/billing/account';
-import { checkPaymentOrigin, hostedPaymentUrl } from '@/lib/billing/payment';
+import { checkPaymentOrigin, hostedPaymentUrl, paymentOrigin } from '@/lib/billing/payment';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     if (!customer || customer.startsWith('cus_mock_')) throw new BillingError('No payment profile yet. Complete a top-up first.', 404);
     const stripe = StripeEngine.getInstance().getClient();
     if (!stripe) throw new Error('Payments unavailable');
-    const session = await stripe.billingPortal.sessions.create({ customer, return_url: `${new URL(config.appUrl).origin}/billing` });
+    const session = await stripe.billingPortal.sessions.create({ customer, return_url: `${paymentOrigin(config.appUrl)}/billing` });
     return NextResponse.json({ success: true, url: hostedPaymentUrl(session.url, 'billing.stripe.com') }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {
     const known = error instanceof BillingError || error instanceof AccountIdentityError;

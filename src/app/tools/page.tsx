@@ -276,7 +276,7 @@ export default function ToolsHubPage() {
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <Link
-            href="/keys/new"
+            href="/keys"
             className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs font-mono uppercase tracking-wider shadow-lg shadow-cyan-500/20 flex items-center gap-2 transition-all cursor-pointer"
           >
             <span>Create Free API Key</span>

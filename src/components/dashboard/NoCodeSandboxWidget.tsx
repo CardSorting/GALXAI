@@ -365,7 +365,7 @@ function BaseNoCodeSandboxWidget() {
           </label>
 
           <Link
-            href="/keys/new"
+            href="/keys"
             className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 hover:text-amber-200 transition-colors font-mono group"
           >
             <span>Claim $5 Free API Key</span>

@@ -67,7 +67,7 @@ export function RateLockRibbon({
           </div>
 
           <Link
-            href="/keys/new"
+            href="/keys"
             className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/30 hover:scale-[1.02] active:scale-98 cursor-pointer"
           >
             <Lock className="w-4 h-4 text-black" />

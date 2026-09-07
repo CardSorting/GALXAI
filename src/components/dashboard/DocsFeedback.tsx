@@ -104,7 +104,7 @@ export function DocsFeedback({ docTitle }: { docTitle: string }) {
         </div>
 
         <Link
-          href="/keys/new"
+          href="/keys"
           className="text-amber-300 font-bold hover:underline flex items-center gap-1"
         >
           <span>Mint API Key →</span>

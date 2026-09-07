@@ -18,7 +18,7 @@ function BaseMobileBottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
 
-  if (pathname === '/' || pathname === '/billing' || pathname === '/pricing' || pathname === '/docs' || pathname.startsWith('/docs/')) {
+  if (pathname === '/' || pathname === '/keys/top-up' || pathname === '/billing' || pathname === '/pricing' || pathname === '/docs' || pathname.startsWith('/docs/')) {
     return null;
   }
 

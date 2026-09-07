@@ -185,15 +185,7 @@ const BASE_CATALOG_ITEMS: CatalogItem[] = [
     keywords: ['keys', 'api key', 'create key', 'bearer', 'token', 'secret', 'credentials', 'access', 'auth'],
     intentPhrases: ['create api key', 'get new key', 'how do i connect cursor', 'api credentials', 'view my keys', 'manage tokens'],
   },
-  {
-    title: 'Claim Instant API Key ($5 Free)',
-    description: '1-click API key creation with $5 complimentary starter compute balance.',
-    category: 'Actions & Tools',
-    href: '/keys/new',
-    badge: '+$5 Free Credit',
-    keywords: ['new key', 'free credits', 'starter grant', 'sign up', 'claim $5', 'generate token'],
-    intentPhrases: ['claim free credits', 'make a new key', 'generate bearer token', 'create secret key', 'get started with credits'],
-  },
+
   {
     title: 'Developer Wallet & Wholesale Billing',
     description: 'Top up compute balance, configure auto-reload, view transparent invoices, and export CSVs.',

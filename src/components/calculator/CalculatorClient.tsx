@@ -704,7 +704,7 @@ Simulate live: https://galx.ai/calculator
               </button>
 
               <Link
-                href="/keys/new"
+                href="/keys"
                 className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-mono text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-500/20 cursor-pointer"
               >
                 <Zap className="w-4 h-4 fill-black" />

@@ -1546,7 +1546,7 @@ console.log(res.choices[0].message.content);`;
                   </button>
 
                   <Link
-                    href="/keys/new"
+                    href="/keys"
                     className="py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors flex items-center justify-center gap-1"
                   >
                     <Zap className="w-3.5 h-3.5 text-amber-400" />
@@ -1634,7 +1634,7 @@ console.log(res.choices[0].message.content);`;
             </Link>
 
             <Link
-              href="/keys/new"
+              href="/keys"
               className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
             >
               <span>Create API Key</span>

@@ -212,7 +212,7 @@ response = client.chat.completions.create(
                   2
                 </div>
                 <Link
-                  href="/keys/new"
+                  href="/keys"
                   className="text-[10px] font-mono text-amber-400 hover:text-amber-300 uppercase flex items-center gap-1 font-bold"
                 >
                   <span>New Key ($5)</span>

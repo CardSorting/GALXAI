@@ -148,7 +148,7 @@ export default function HowItWorksPage() {
           </div>
 
           <Link
-            href="/keys/new"
+            href="/keys"
             className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs font-mono uppercase tracking-wider transition-all shadow-md flex items-center gap-1.5 self-start sm:self-auto shrink-0"
           >
             <Zap className="w-3.5 h-3.5 fill-black" />

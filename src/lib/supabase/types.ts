@@ -911,6 +911,7 @@ export interface Database {
           workspace_id: string | null;
           user_id: string;
           balance_usd: number;
+          payment_debt_usd: number;
           introductory_grant_usd: number;
           deposited_total_usd: number;
           promotional_match_usd: number;

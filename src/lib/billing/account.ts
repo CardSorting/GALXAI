@@ -4,17 +4,17 @@ type Db = Pick<PoolClient, 'query'>;
 export class BillingError extends Error { constructor(message: string, public status = 400) { super(message); } }
 export interface BillingTransaction { id: string; type: string; description: string; amountUsd: number; balanceAfterUsd: number; createdAt: string }
 export interface BillingInvoice { id: string; amountDueUsd: number; amountPaidUsd: number; status: string; url: string | null; createdAt: string }
-export interface BillingSummary { balanceUsd: number; depositedTotalUsd: number; lifetimeSpentUsd: number; currentMonthSpendUsd: number; proofOfDepositVerified: boolean; autoReloadEnabled: boolean }
+export interface BillingSummary { balanceUsd: number; paymentDebtUsd: number; depositedTotalUsd: number; lifetimeSpentUsd: number; currentMonthSpendUsd: number; proofOfDepositVerified: boolean; autoReloadEnabled: boolean }
 export interface BillingData { summary: BillingSummary; transactions: BillingTransaction[]; nextCursor: string | null; invoices: BillingInvoice[]; hasCustomer: boolean; paymentsAvailable: boolean }
 
 export async function readBillingSummary(db: Db, userId: string): Promise<BillingSummary> {
-  const { rows } = await db.query(`SELECT w.balance_usd, w.deposited_total_usd, w.lifetime_spent_usd, w.proof_of_deposit_verified, w.auto_reload_enabled,
+  const { rows } = await db.query(`SELECT w.balance_usd, w.payment_debt_usd, w.deposited_total_usd, w.lifetime_spent_usd, w.proof_of_deposit_verified, w.auto_reload_enabled,
     (SELECT coalesce(-sum(t.amount_usd), 0) FROM galx_wallet_transactions t
       WHERE t.user_id = $1 AND t.wallet_id = w.id AND t.transaction_type = 'usage_draw'
       AND t.created_at >= date_trunc('month', NOW() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC') AS month_spend
     FROM galx_wallets w WHERE w.user_id = $1`, [userId]);
   const row = rows[0];
-  return { balanceUsd: Number(row?.balance_usd ?? 0), depositedTotalUsd: Number(row?.deposited_total_usd ?? 0),
+  return { balanceUsd: Number(row?.balance_usd ?? 0), paymentDebtUsd: Number(row?.payment_debt_usd ?? 0), depositedTotalUsd: Number(row?.deposited_total_usd ?? 0),
     lifetimeSpentUsd: Number(row?.lifetime_spent_usd ?? 0), currentMonthSpendUsd: Number(row?.month_spend ?? 0),
     proofOfDepositVerified: row?.proof_of_deposit_verified === true, autoReloadEnabled: row?.auto_reload_enabled === true };
 }

@@ -288,7 +288,7 @@ function BaseSimpleModelPicker() {
             </div>
 
             <Link
-              href="/keys/new"
+              href="/keys"
               className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 cursor-pointer font-mono"
             >
               <span>Deploy Key for This Model ($5 Free)</span>

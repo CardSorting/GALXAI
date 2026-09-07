@@ -168,6 +168,12 @@ export class WalletRepository {
     });
   }
 
+  invalidateAccount(userId: string) {
+    this.walletCoalescer.invalidate(userId);
+    this.walletDataLoader.clear(userId);
+    this.walletTable.delete(userId);
+  }
+
   async getWalletsBatch(userIds: string[]): Promise<Array<WalletRecord | null>> {
     return this.walletDataLoader.loadMany(userIds);
   }

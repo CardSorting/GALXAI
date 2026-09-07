@@ -277,7 +277,7 @@ export function ApiKeyCheckerToolClient() {
               <p className="text-[11px] text-zinc-400 font-sans">Provision an active key with $5 in free compute credits in 10 seconds.</p>
             </div>
             <Link
-              href="/keys/new"
+              href="/keys"
               className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-mono text-xs font-bold flex items-center gap-1.5 transition-all border border-white/10 cursor-pointer shrink-0"
             >
               <span>Mint Active Key →</span>

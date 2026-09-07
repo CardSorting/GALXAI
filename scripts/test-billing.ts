@@ -16,6 +16,7 @@ try {
     for (const table of tables) { const start = sql.indexOf(`CREATE TABLE IF NOT EXISTS ${table} (`); await db.query(sql.slice(start, sql.indexOf('\n);', start) + 3)); }
   }
   const ownerWallet = '00000000-0000-0000-0000-000000000001';
+  await db.query('ALTER TABLE galx_wallets ADD COLUMN payment_debt_usd numeric(14,6) NOT NULL DEFAULT 0');
   const otherWallet = '00000000-0000-0000-0000-000000000002';
   await db.query('INSERT INTO galx_wallets (id,user_id,balance_usd,deposited_total_usd,lifetime_spent_usd) VALUES ($1,$2,0,25,25),($3,$4,999,999,0)', [ownerWallet,'owner',otherWallet,'other']);
   await db.query(`INSERT INTO galx_wallet_transactions (wallet_id,user_id,transaction_type,amount_usd,balance_after_usd,description,created_at) VALUES

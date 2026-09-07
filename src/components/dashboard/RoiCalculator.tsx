@@ -86,7 +86,7 @@ Founding Builder Deposit Match Grant: +$${matchGrantBonus} USD in Free Inference
 Active Volume Tier: ${tierName} (+${tierExtraPct}% Volume Rebate)
 Prompt Caching Pass-Through: ${cachedPromptPct}% Context (75% Rebate)
 Latency & Health: Sub-15ms Anycast Failover Routing
-Switch in 30 Seconds: https://galx.ai/keys/new`;
+Switch in 30 Seconds: https://galx.ai/keys`;
 
     const success = await safeCopyToClipboard(auditText);
     if (success) {
@@ -269,7 +269,7 @@ Switch in 30 Seconds: https://galx.ai/keys/new`;
             {/* Action Buttons */}
             <div className="space-y-2 pt-1">
               <Link
-                href="/keys/new"
+                href="/keys"
                 className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 font-mono cursor-pointer"
               >
                 <Key className="w-4 h-4 text-black" />

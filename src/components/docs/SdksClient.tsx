@@ -283,7 +283,7 @@ func main() {
               <span>OFFICIAL 8-FRAMEWORK SDK GUIDE</span>
             </div>
             <Link
-              href="/keys/new"
+              href="/keys"
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase font-mono tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 fill-black" />

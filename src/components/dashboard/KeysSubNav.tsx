@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Key,
-  Plus,
   Activity,
   ShieldCheck,
-  Users2
+  Users2,
+  Wallet
 } from 'lucide-react';
 
 export function KeysSubNav() {
@@ -21,11 +21,7 @@ export function KeysSubNav() {
       icon: Key,
       exact: true
     },
-    {
-      name: 'New Key',
-      href: '/keys/new',
-      icon: Plus
-    },
+    { name: 'Top up', href: '/keys/top-up', icon: Wallet },
     {
       name: 'Scopes & Policies',
       href: '/keys/permissions',
@@ -44,7 +40,7 @@ export function KeysSubNav() {
   ];
 
   return (
-    <div className="flex items-center gap-1 p-0.5 rounded-lg bg-white/[0.02] border border-white/[0.08] overflow-x-auto text-xs font-sans">
+    <nav aria-label="API keys" className="flex items-center gap-1 p-0.5 rounded-lg bg-white/[0.02] border border-white/[0.08] overflow-x-auto text-xs font-sans">
       {tabs.map((tab) => {
         const isActive = tab.exact ? pathname === tab.href : pathname.startsWith(tab.href);
         const Icon = tab.icon;
@@ -53,6 +49,7 @@ export function KeysSubNav() {
           <Link
             key={tab.href}
             href={tab.href}
+            aria-current={isActive ? 'page' : undefined}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md whitespace-nowrap transition-colors ${
               isActive
                 ? 'bg-indigo-600/25 text-indigo-200 border border-indigo-500/40 font-semibold'
@@ -65,6 +62,6 @@ export function KeysSubNav() {
           </Link>
         );
       })}
-    </div>
+    </nav>
   );
 }

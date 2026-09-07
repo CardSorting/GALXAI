@@ -45,7 +45,7 @@ export function PricingClient() {
                   <li>{plan.computeCredit === null ? 'Pay for model usage as you go' : `$${plan.computeCredit} in monthly compute credits`}</li>
                 </ul>
                 {plan.id === 'developer' ? (
-                  <Link href="/keys/new" className="w-fit sm:justify-self-end rounded-md border border-indigo-400/40 bg-indigo-500/20 px-4 py-2.5 text-sm font-medium text-indigo-100 hover:bg-indigo-500/30 focus-visible:outline-indigo-300">Create API key</Link>
+                  <Link href="/keys" className="w-fit sm:justify-self-end rounded-md border border-indigo-400/40 bg-indigo-500/20 px-4 py-2.5 text-sm font-medium text-indigo-100 hover:bg-indigo-500/30 focus-visible:outline-indigo-300">Create API key</Link>
                 ) : (
                   <a href={`${supportHref}%20-%20${plan.name}`} className="w-fit sm:justify-self-end rounded-md border border-white/15 px-4 py-2.5 text-sm text-zinc-200 hover:bg-white/5 focus-visible:outline-indigo-300">Ask about {plan.name}</a>
                 )}

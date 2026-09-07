@@ -281,7 +281,7 @@ function BaseWorkloadEstimator() {
           </div>
 
           <Link
-            href="/keys/new"
+            href="/keys"
             className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-lg shadow-amber-500/25 shrink-0 cursor-pointer"
           >
             <span>Lock In These Rates (Claim Key)</span>

@@ -14,6 +14,7 @@ import * as path from 'node:path';
 import Stripe from 'stripe';
 import { STRIPE_PRODUCT_TIERS, StripeProductTier } from '../src/lib/stripe/products';
 import { getStripeConfig } from '../src/lib/stripe/config';
+import { BILLING_WEBHOOK_EVENTS } from '../src/lib/billing/webhookEvents';
 
 interface ProvisioningReport {
   timestamp: string;
@@ -250,16 +251,9 @@ async function runMasterStripeProvisioner() {
   ];
 
   const desiredEvents: Stripe.WebhookEndpointCreateParams.EnabledEvent[] = [
-    'checkout.session.completed',
-    'checkout.session.async_payment_succeeded',
-    'checkout.session.async_payment_failed',
-    'checkout.session.expired',
+    ...BILLING_WEBHOOK_EVENTS,
     'payment_intent.succeeded',
     'payment_intent.payment_failed',
-    'invoice.payment_succeeded',
-    'invoice.paid',
-    'invoice.payment_failed',
-    'charge.refunded',
     'charge.dispute.created',
     'charge.dispute.closed',
     'customer.subscription.created',

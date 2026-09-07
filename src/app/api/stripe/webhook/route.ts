@@ -1,94 +1,66 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type Stripe from 'stripe';
 import { StripeEngine } from '@/lib/stripe/stripe';
-
+import { getStripeConfig } from '@/lib/stripe/config';
+import { getPostgresPool } from '@/lib/db/postgres';
+import { fulfillStripeEvent } from '@/lib/billing/fulfillment';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-/**
- * OPTIONS /api/stripe/webhook
- * Standard preflight handler with CORS permissive headers.
- */
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, GET, HEAD, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Stripe-Signature, Authorization, X-Requested-With',
-      'Access-Control-Max-Age': '86400',
-    },
-  });
-}
-
-/**
- * GET /api/stripe/webhook
- * Health and endpoint diagnostic check for Stripe and monitoring uptime pings.
- */
-export async function GET() {
-  return NextResponse.json({
-    status: 'healthy',
-    endpoint: '/api/stripe/webhook',
-    service: 'GALXAI Stripe Webhook Receiver',
-    timestamp: new Date().toISOString(),
-  });
-}
-
-/**
- * HEAD /api/stripe/webhook
- * Lightweight probe response.
- */
-export async function HEAD() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-}
-
 export async function POST(req: NextRequest) {
+  const config = getStripeConfig();
+  if (!config.isConfigured || !config.webhookSecrets.length) return NextResponse.json({ error: 'Webhook unavailable' }, { status: 503 });
   const signature = req.headers.get('stripe-signature');
-
-  if (!signature) {
-    return NextResponse.json(
-      { error: 'Missing Stripe-Signature header' },
-      { status: 400 }
-    );
-  }
-
+  if (!signature) return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
   try {
-    const rawBody = await req.text();
-    const stripeEngine = StripeEngine.getInstance();
-
-    // 1. Constant-time cryptographic signature verification with 300s anti-replay window
-    const verification = stripeEngine.verifyWebhookSignature(rawBody, signature);
-
-    if (!verification.isValid || !verification.event) {
-      return NextResponse.json(
-        { error: verification.error || 'Invalid signature' },
-        { status: 400 }
-      );
+    const reader = req.body?.getReader();
+    if (!reader) return NextResponse.json({ error: 'Missing body' }, { status: 400 });
+    const chunks: Uint8Array[] = []; let size = 0;
+    while (true) {
+      const { value, done } = await reader.read(); if (done) break;
+      size += value.byteLength;
+      if (size > 1_048_576) { await reader.cancel(); return NextResponse.json({ error: 'Body too large' }, { status: 413 }); }
+      chunks.push(value);
     }
-
-    // 2. Authoritative event processing & double-entry financial fulfillment
-    const result = await stripeEngine.handleWebhookEvent(verification.event, rawBody);
-
-    if (!result.received && result.status === 'FAILED') {
-      return NextResponse.json(
-        { error: result.message || 'Webhook fulfillment failed' },
-        { status: 500 }
-      );
+    const rawBody = Buffer.concat(chunks).toString('utf8');
+    const engine = StripeEngine.getInstance();
+    const verification = engine.verifyWebhookSignature(rawBody, signature);
+    if (!verification.isValid || !verification.event || verification.event.livemode !== config.secretKey.includes('_live_')) return NextResponse.json({ error: 'Invalid webhook' }, { status: 400 });
+    const event = verification.event;
+    const stripe = engine.getClient()!;
+    if (['charge.dispute.funds_withdrawn','charge.dispute.funds_reinstated'].includes(event.type)) {
+      const dispute = event.data.object as Stripe.Dispute;
+      const chargeId = typeof dispute.charge === 'string' ? dispute.charge : dispute.charge.id;
+      const charge = await stripe.charges.retrieve(chargeId);
+      event.data.object = Object.assign({}, dispute, { payment_intent: charge.payment_intent, customer: charge.customer });
     }
-
-    return NextResponse.json({
-      received: true,
-      status: result.status,
-      message: result.message
-    });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Webhook processing error' },
-      { status: 500 }
-    );
+    // Read current successful refunds, including paginated partial refunds.
+    // A pending or failed refund must not remove a customer's credit.
+    if (['charge.refunded','refund.updated','refund.created','refund.failed'].includes(event.type)) {
+      const object = event.data.object as Stripe.Charge | Stripe.Refund;
+      const chargeId = object.object === 'charge' ? object.id : typeof object.charge === 'string' ? object.charge : object.charge?.id;
+      if (chargeId) {
+        const charge = await stripe.charges.retrieve(chargeId);
+        let refunded = 0;
+        const refundsSnapshot = [];
+        for await (const refund of stripe.refunds.list({ charge: chargeId, limit: 100 })) {
+          refundsSnapshot.push({ id: refund.id, amount: refund.amount, status: refund.status });
+          if (refund.status === 'succeeded') refunded += refund.amount;
+        }
+        event.type = 'charge.refunded';
+        event.data.object = Object.assign({}, charge, { amount_refunded: refunded, refundsSnapshot });
+      }
+    }
+    const pool = getPostgresPool();
+    if (!pool) throw new Error('Storage unavailable');
+    const result = await fulfillStripeEvent(pool, event, rawBody);
+    if (result.changedUser) {
+      const { WalletRepository } = await import('@/lib/supabase/repositories/WalletRepository');
+      WalletRepository.getInstance().invalidateAccount(result.changedUser);
+    }
+    return NextResponse.json({ received: true });
+  } catch (error) {
+    console.error('[billing] Webhook failed; delivery will retry', { code: (error as { code?: string }).code || 'fulfillment_failed' });
+    return NextResponse.json({ error: 'Unable to record payment. Retry delivery.' }, { status: 503 });
   }
 }

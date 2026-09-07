@@ -1384,4 +1384,7 @@ async function runTests() {
   }
 }
 
-void runTests();
+// Financial regression tests use an isolated local schema and simulated Stripe.
+// This mode never runs the broad integration suite against configured accounts.
+if (process.argv.includes('--billing')) void import('./test-stripe-integration');
+else void runTests();

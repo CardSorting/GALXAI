@@ -195,7 +195,7 @@ function BaseModelMatchmaker() {
 
         <div className="flex sm:flex-col items-center gap-2 shrink-0 w-full sm:w-auto">
           <Link
-            href="/keys/new"
+            href="/keys"
             className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-amber-500/20 whitespace-nowrap"
           >
             <Zap className="w-3.5 h-3.5 fill-current" />

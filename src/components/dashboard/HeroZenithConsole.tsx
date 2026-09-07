@@ -948,7 +948,7 @@ const res = await client.chat.completions.create({
           </div>
 
           <Link
-            href="/keys/new"
+            href="/keys"
             className="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 hover:underline shrink-0"
           >
             <span>Claim Free $5 Key &rarr;</span>

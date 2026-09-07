@@ -285,7 +285,7 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
                 </Link>
 
                 <Link
-                  href="/keys/new"
+                  href="/keys"
                   className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-colors border border-white/10 flex items-center gap-1.5 cursor-pointer"
                 >
                   <Key className="w-3.5 h-3.5" />
@@ -659,7 +659,7 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
           </Link>
 
           <Link
-            href="/keys/new"
+            href="/keys"
             className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
           >
             <span>Create API Key</span>

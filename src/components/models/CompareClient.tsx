@@ -599,7 +599,7 @@ export function CompareClient() {
                         Model Specs
                       </Link>
                       <Link
-                        href="/keys/new"
+                        href="/keys"
                         className="flex-1 px-3 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-sans font-bold text-xs flex items-center justify-center gap-1 shadow-md shadow-cyan-500/20 transition-all"
                       >
                         <Zap className="w-3.5 h-3.5 fill-black" />
@@ -853,7 +853,7 @@ export function CompareClient() {
             </div>
 
             <Link
-              href="/keys/new"
+              href="/keys"
               className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-black text-xs uppercase font-mono tracking-wider shadow-md flex items-center gap-1.5 shrink-0 self-start sm:self-auto cursor-pointer transition-all"
             >
               <Zap className="w-4 h-4 fill-black" />

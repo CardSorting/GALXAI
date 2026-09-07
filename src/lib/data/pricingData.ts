@@ -121,7 +121,7 @@ export const SEAT_TIERS: SeatTier[] = [
       { title: 'Net-30 Invoicing & BAA / HIPAA', description: 'Consolidated invoice terms and signed agreements', included: false },
     ],
     ctaText: 'Start Building Free',
-    ctaHref: '/keys/new',
+    ctaHref: '/keys',
   },
   {
     id: 'small-business',

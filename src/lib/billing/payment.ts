@@ -9,10 +9,40 @@ export function depositAmount(value: unknown) {
 export function checkPaymentOrigin(req: NextRequest) {
   const origin = req.headers.get('origin');
   if (origin && origin !== req.nextUrl.origin) throw new BillingError('Open billing on this site to continue.', 403);
+  if (req.headers.get('sec-fetch-site') === 'cross-site') throw new BillingError('Open billing on this site to continue.', 403);
+  if (!req.headers.get('content-type')?.startsWith('application/json')) throw new BillingError('Expected a JSON request.', 415);
+  if (Number(req.headers.get('content-length') || 0) > 4096) throw new BillingError('Request too large.', 413);
+}
+
+export function paymentOrigin(value: string) {
+  const url = new URL(value);
+  if (url.username || url.password || (url.protocol !== 'https:' && !(process.env.NODE_ENV !== 'production' && url.protocol === 'http:' && ['localhost','127.0.0.1'].includes(url.hostname)))) throw new BillingError('Payments are unavailable. Please try again later.', 503);
+  return url.origin;
 }
 export function hostedPaymentUrl(value: unknown, host: 'checkout.stripe.com' | 'billing.stripe.com') {
   if (typeof value !== 'string') throw new BillingError('Payment service did not return a valid link.', 503);
   const url = new URL(value);
-  if (url.protocol !== 'https:' || url.hostname !== host || url.username || url.password) throw new BillingError('Payment service did not return a valid link.', 503);
+  if (url.protocol !== 'https:' || url.hostname !== host || url.port || url.username || url.password) throw new BillingError('Payment service did not return a valid link.', 503);
   return url.href;
+}
+
+export async function readPaymentBody(req: NextRequest) {
+  const reader = req.body?.getReader();
+  if (!reader) throw new BillingError('Missing payment request.');
+  const chunks: Uint8Array[] = []; let size = 0;
+  while (true) {
+    const { value, done } = await reader.read(); if (done) break;
+    size += value.byteLength;
+    if (size > 4096) { await reader.cancel(); throw new BillingError('Request too large.', 413); }
+    chunks.push(value);
+  }
+  try {
+    const value = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error();
+    return value as Record<string, unknown>;
+  } catch { throw new BillingError('Invalid payment request.'); }
+}
+
+export function checkoutReturnPath(surface: unknown) {
+  return surface === 'keys' ? '/keys/top-up' : '/billing';
 }

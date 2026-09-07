@@ -108,13 +108,13 @@ export function getStripeConfig() {
     .filter((s): s is string => Boolean(s && typeof s === 'string'))
     .flatMap(s => s.split(','))
     .map(s => s.trim())
-    .filter(s => s.length > 0 && !s.includes('your_stripe_webhook_secret'));
+    .filter(s => /^whsec_[A-Za-z0-9]+$/.test(s) && !/placeholder|your_stripe/i.test(s));
 
   const webhookSecret = webhookSecrets[0] || process.env.STRIPE_WEBHOOK_SECRET || '';
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://galx.ai';
 
   const isConfigured = Boolean(
-    secretKey &&
+    /^(sk|rk)_(live|test)_[A-Za-z0-9]+$/.test(secretKey) &&
     !secretKey.includes('MockStripeSecretKey') &&
     !secretKey.includes('your_stripe_secret_key')
   );
