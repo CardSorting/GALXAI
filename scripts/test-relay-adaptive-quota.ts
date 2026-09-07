@@ -201,6 +201,7 @@ test('successful streams replay real output and image requests fail over on quot
       const image = JSON.stringify(message).includes('image_generation');
       const account = String(req.headers['chatgpt-account-id']);
       if (image) {
+        assert.equal(message.stream, true, 'Image synthesis must use streaming upstream execution');
         accounts.push(account);
         if (accounts.length === 1) {
           socket.send(JSON.stringify({ type: 'response.failed', response: { error: { code: 'usage_limit_reached', retry_after_seconds: 90 } } }));

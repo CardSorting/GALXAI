@@ -1,3 +1,4 @@
+import { RelayDispatchError } from '@/core/router/adapters/RelayChatTransport';
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -9,7 +10,7 @@ import type { ImageGenerationRequest } from '@/core/contracts/GalxContracts';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export const maxDuration = 60;
+export const maxDuration = 180;
 
 export async function OPTIONS() {
   return new NextResponse(null, {
@@ -198,6 +199,7 @@ export async function POST(req: NextRequest) {
       rawMessage.includes('shards available') ||
       rawMessage.includes('pool_exhausted');
     const isUnavailable =
+      error instanceof RelayDispatchError ||
       rawMessage.includes('No healthy') ||
       rawMessage.includes('in cooldown') ||
       rawMessage.includes('saturated') ||
@@ -218,7 +220,7 @@ export async function POST(req: NextRequest) {
         error: {
           message,
           type: errorType,
-          code: isRateLimited ? 'capacity_constrained' : isUnavailable ? 'capacity_saturated' : 'image_generation_failed'
+          code: error instanceof RelayDispatchError ? error.code : isRateLimited ? 'capacity_constrained' : isUnavailable ? 'capacity_saturated' : 'image_generation_failed'
         }
       },
       {

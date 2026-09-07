@@ -1175,6 +1175,7 @@ export class GalxModelRouter {
         shardId: lease.shardId,
         statusCode: 500
       });
+      if (err instanceof RelayDispatchError) throw err;
       throw new Error(sanitizedErr);
     } finally {
       if (rawTokenSecret) {

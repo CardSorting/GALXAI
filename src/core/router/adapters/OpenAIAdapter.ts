@@ -440,75 +440,54 @@ export class OpenAIAdapter {
         (secret as any)?.relayUrl ||
         OpenAIAdapter.getResolvedRelayUrl();
 
-      const useVmRelay = !!(
-        process.env.VM_RELAY_URL ||
-        process.env.GALXAI_RELAY_URL ||
-        process.env.RELAY_URL ||
-        process.env.FORCE_VM_RELAY === 'true' ||
-        (options as any)?.forceRelay === true ||
-        (req as any)?.dispatch_target === 'relay' ||
-        (secret as any)?.relayUrl ||
-        true // Prefer relay for image synthesis in local/node environment
-      );
-
-      // Attempt synthesis through Always-On VM Relay
-      if (vmRelayUrl && useVmRelay) {
+      // A configured relay owns this request; never replay an ambiguous failure.
+      if (vmRelayUrl) {
+        const relayKey = process.env.VM_RELAY_API_KEY || process.env.RELAY_API_KEYS?.split(',')[0]?.trim();
+        if (!relayKey) throw new RelayDispatchError('missing_relay_key');
+        const controller = new AbortController();
+        const abort = () => controller.abort(options?.signal?.reason);
+        if (options?.signal?.aborted) abort();
+        else options?.signal?.addEventListener('abort', abort, { once: true });
+        const timeout = setTimeout(() => controller.abort(), options?.timeoutMs ?? 105_000);
         try {
-          const relayKey = process.env.VM_RELAY_API_KEY || process.env.RELAY_API_KEYS?.split(',')[0]?.trim();
-          const imageHeaders = {
-            'Content-Type': 'application/json',
-            ...(relayKey ? { Authorization: `Bearer ${relayKey}` } : {}),
-            'x-galx-client': 'openai-adapter-vm-relay-image',
-            'x-galx-shard-id': shardId,
-            ...(req.sessionId ? { 'x-galx-session-id': req.sessionId } : {}),
-            ...(req.idempotencyKey ? { 'idempotency-key': req.idempotencyKey } : {})
-          };
-          const imageBody = JSON.stringify({
-            prompt: req.prompt,
-            model: modelSpec.upstreamId || modelSpec.id,
-            size: req.size || '1024x1024',
-            quality: req.quality || 'standard',
-            n: req.n || 1,
-            response_format: req.response_format || 'url',
-            sessionId: req.sessionId
+          const response = await fetch(`${vmRelayUrl.replace(/\/+$/, '')}/v1/images/generations`, {
+            method: 'POST',
+            redirect: 'error',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${relayKey}`,
+              'x-galx-client': 'openai-adapter-vm-relay-image',
+              'x-galx-shard-id': shardId,
+              ...(req.sessionId ? { 'x-galx-session-id': req.sessionId } : {}),
+              ...(req.idempotencyKey ? { 'idempotency-key': req.idempotencyKey } : {})
+            },
+            body: JSON.stringify({
+              prompt: req.prompt,
+              model: modelSpec.upstreamId || modelSpec.id,
+              size: req.size || '1024x1024',
+              quality: req.quality || 'standard',
+              n: req.n || 1,
+              response_format: req.response_format || 'url',
+              sessionId: req.sessionId
+            }),
+            signal: controller.signal
           });
-
-          let relayResp: Response | null = null;
-          try {
-            relayResp = await fetch(`${vmRelayUrl.replace(/\/+$/, '')}/v1/images/generations`, {
-              method: 'POST',
-              headers: imageHeaders,
-              body: imageBody,
-              signal: options?.signal
-            });
-          } catch (fetchErr) {
-            const autoStarted = await OpenAIAdapter.tryAutoStartLocalRelay(vmRelayUrl);
-            if (autoStarted) {
-              relayResp = await fetch(`${vmRelayUrl.replace(/\/+$/, '')}/v1/images/generations`, {
-                method: 'POST',
-                headers: imageHeaders,
-                body: imageBody,
-                signal: options?.signal
-              });
-            } else {
-              throw fetchErr;
-            }
+          if (!response.ok) throw new RelayDispatchError(`image_http_${response.status}`);
+          const result = await response.json();
+          if (!Array.isArray(result.data) || !result.data.length ||
+              !result.data.every((item: any) => typeof item.b64_json === 'string' && item.b64_json.length > 0)) {
+            throw new RelayDispatchError('invalid_image_response');
           }
-
-          if (relayResp && relayResp.ok) {
-            const result = await relayResp.json() as any;
-            return {
-              created: result.created || Math.floor(Date.now() / 1000),
-              data: result.data || [],
-              modelUsed: modelSpec.id,
-              shardId
-            };
-          }
-          console.warn(`[OpenAIAdapter] VM Relay returned status ${relayResp?.status}, falling back to direct Codex WebSocket wire`);
-        } catch (relayErr: any) {
-          console.warn(`[OpenAIAdapter] VM Relay image dispatch failed (${relayErr.message}), falling back to direct Codex WebSocket wire`);
+          return { created: result.created || Math.floor(Date.now() / 1000), data: result.data, modelUsed: modelSpec.id, shardId };
+        } catch (error) {
+          if (error instanceof RelayDispatchError) throw error;
+          throw new RelayDispatchError(controller.signal.aborted ? 'image_deadline_or_cancelled' : 'image_transport_failed');
+        } finally {
+          clearTimeout(timeout);
+          options?.signal?.removeEventListener('abort', abort);
         }
       }
+      if (process.env.VERCEL) throw new RelayDispatchError('missing_relay_url');
 
       // Fallback: Direct Codex WebSocket wire synthesis
       const directResult = await this.executeImageViaCodexWebSocket(req.prompt, secret, modelSpec, options);
@@ -676,6 +655,7 @@ export class OpenAIAdapter {
         const payload = {
           type: 'response.create',
           model: 'gpt-5.6-terra',
+          stream: true,
           input: [
             {
               type: 'message',

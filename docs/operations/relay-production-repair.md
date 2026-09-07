@@ -78,3 +78,22 @@ Application rollback should retain the corrected URL and key.
 
 References: [Cloudflare named tunnel setup](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/get-started/create-remote-tunnel-api/)
 and [Quick Tunnel limitations](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/trycloudflare/).
+
+## Image follow-up
+
+Image synthesis retained the old silent direct-WebSocket fallback, unlike chat.
+The public image handler also had a 60-second execution ceiling while the relay
+allowed up to 90 seconds for visual synthesis. Relay telemetry showed intermittent
+provider failures after 20–31 seconds despite successful authentication; a direct
+baseline request also succeeded in 37.5 seconds. Credentials alone therefore did
+not explain these failures.
+
+Image WebSocket requests now explicitly enable streaming, matching chat. The
+updated relay returned a real image in 25 seconds. The application gives relay
+image requests a bounded 105-second deadline and a 180-second route execution
+budget, and returns sanitized HTTP 503 on relay failure instead of silently
+replaying synthesis directly. Empty image responses are rejected. Redirects are
+refused to keep the inference credential on the configured origin. Cancellation
+and timer cleanup are retained. These changes do not guarantee the provider will
+never return a timeout; they prevent masking upstream failures and premature
+termination by the former 60-second application limit.

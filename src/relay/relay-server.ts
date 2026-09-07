@@ -1890,6 +1890,7 @@ export class GalxaiRelayServer extends EventEmitter {
         const initPayload = {
           type: 'response.create',
           model: model || 'gpt-5.6-terra',
+          stream: true,
           input: [
             {
               type: 'message',

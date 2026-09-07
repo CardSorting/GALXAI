@@ -97,3 +97,43 @@ test('configured relay errors never invoke direct WebSocket or CLI fallback', as
     if (previousKey === undefined) delete process.env.VM_RELAY_API_KEY; else process.env.VM_RELAY_API_KEY = previousKey;
   }
 });
+
+test('image relay errors and deadlines never replay synthesis; valid images are preserved', async () => {
+  const previousUrl = process.env.VM_RELAY_URL, previousKey = process.env.VM_RELAY_API_KEY;
+  const originalFetch = globalThis.fetch;
+  const adapter = OpenAIAdapter as any;
+  const originalDirect = adapter.executeImageViaCodexWebSocket;
+  let directCalls = 0;
+  process.env.VM_RELAY_URL = 'https://relay.test';
+  process.env.VM_RELAY_API_KEY = 'relay-test-key';
+  adapter.executeImageViaCodexWebSocket = async () => { directCalls++; throw new Error('Unexpected replay'); };
+  const execute = () => OpenAIAdapter.executeImageGeneration({ prompt: 'test' } as any,
+    { accessToken: 'provider-token', accountId: 'account' } as any,
+    { id: 'image-model', upstreamId: 'gpt-image-2' } as any, 'shard', { timeoutMs: 20 });
+  try {
+    for (const status of [401, 502, 503, 504]) {
+      globalThis.fetch = async (_input, init) => {
+        assert.equal(new Headers(init?.headers).get('authorization'), 'Bearer relay-test-key');
+        assert.equal(init?.redirect, 'error');
+        return Response.json({ error: 'provider secret must stay private' }, { status });
+      };
+      await assert.rejects(execute(), RelayDispatchError);
+    }
+    globalThis.fetch = async () => Response.json({ data: [] });
+    await assert.rejects(execute(), RelayDispatchError);
+    globalThis.fetch = async (_input, init) => new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener('abort', () => reject(new Error('aborted')), { once: true });
+    });
+    await assert.rejects(execute(), RelayDispatchError);
+    globalThis.fetch = async () => Response.json({ created: 42, data: [{ b64_json: 'dGVzdA==' }] });
+    const image = await execute();
+    assert.equal(image.data[0].b64_json, 'dGVzdA==');
+    assert.equal(image.created, 42);
+    assert.equal(directCalls, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+    adapter.executeImageViaCodexWebSocket = originalDirect;
+    if (previousUrl === undefined) delete process.env.VM_RELAY_URL; else process.env.VM_RELAY_URL = previousUrl;
+    if (previousKey === undefined) delete process.env.VM_RELAY_API_KEY; else process.env.VM_RELAY_API_KEY = previousKey;
+  }
+});
