@@ -264,6 +264,8 @@
     "test:10k": "tsx simulations/high-concurrency-10k-fairness/index.test.ts",
     "db:verify": "tsx scripts/verify-supabase-integrity.ts",
     "db:test": "node --env-file-if-exists=.env.local --import tsx scripts/test-supabase-integration.ts",
+    "test:wallet-lifecycle": "node --import tsx scripts/test-wallet-lifecycle.ts",
+    "db:verify-function-security": "node --env-file-if-exists=.env.local --import tsx scripts/verify-function-security.ts",
     "db:push": "node --env-file-if-exists=.env.local --import tsx scripts/push-migrations-direct.ts",
     "db:status": "node --env-file-if-exists=.env.local --import tsx scripts/manage-migrations.ts --status",
     "db:audit:tenant-authority": "node --env-file-if-exists=.env.local --import tsx scripts/audit-tenant-authority-live.ts",

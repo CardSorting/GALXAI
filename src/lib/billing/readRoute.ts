@@ -3,6 +3,7 @@ import { AccountIdentityError, requireAccountIdentity } from '@/lib/auth/account
 import { getPostgresPool } from '@/lib/db/postgres';
 import { BillingError } from './account';
 import type { PoolClient } from 'pg';
+import { ensureWallet } from './wallet';
 
 export async function billingReadRoute(req: NextRequest, read: (db: PoolClient, userId: string) => Promise<unknown>) {
   let db;
@@ -12,6 +13,8 @@ export async function billingReadRoute(req: NextRequest, read: (db: PoolClient, 
     const pool = getPostgresPool();
     if (!pool) throw new Error('Storage unavailable');
     db = await pool.connect();
+    // Repair legacy/provider accounts before taking the read-only snapshot.
+    await ensureWallet(db, actor.id);
     await db.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
     await db.query("SET LOCAL statement_timeout = '10s'");
     const data = await read(db, actor.id);

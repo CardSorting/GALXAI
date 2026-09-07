@@ -6,7 +6,8 @@
  */
 
 import { getSupabaseAdmin, isSupabaseAdminConfigured, isSupabaseConfigured } from '../client';
-import { executePostgresQuery } from '../../db/postgres';
+import { executePostgresQuery, getPostgresPool } from '../../db/postgres';
+import { ensureWallet } from '../../billing/wallet';
 import type { Database, GalxWalletTransactionType } from '../types';
 import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
 import { BroccoliNaturalQueryParser } from '../../../core/broccolidb/broccolidb-natural-query';
@@ -89,6 +90,7 @@ export class WalletRepository {
       );
 
       const authoritativeRows = res?.rows[0]?.result;
+      let authoritativeRead = Array.isArray(authoritativeRows);
       if (Array.isArray(authoritativeRows)) {
         for (const row of authoritativeRows) {
           if (row && row.user_id) {
@@ -100,7 +102,7 @@ export class WalletRepository {
       }
 
       // 2. Supabase PostgREST RPC Fallback
-      if (userMap.size < uidsArray.length && isSupabaseAdminConfigured()) {
+      if (!authoritativeRead && isSupabaseAdminConfigured()) {
         try {
           const supabase = getSupabaseAdmin();
           const missing = uidsArray.filter(u => !userMap.has(u));
@@ -109,6 +111,7 @@ export class WalletRepository {
           });
 
           if (!error && data && Array.isArray(data)) {
+            authoritativeRead = true;
             for (const row of data as any[]) {
               if (row && row.user_id) {
                 const mapped = this.mapRowToWallet(row);
@@ -122,9 +125,12 @@ export class WalletRepository {
         }
       }
 
-      // 3. Assemble results with zero extra BroccoliDB roundtrips
+      if (!authoritativeRead) throw new Error('Wallet storage unavailable');
+
+      // A database miss is a miss, never a fabricated or stale local wallet.
       for (const uid of userIds) {
-        results.push(userMap.get(uid) || this.walletTable.get(uid) || null);
+        if (!userMap.has(uid)) this.walletTable.delete(uid);
+        results.push(userMap.get(uid) || null);
       }
 
       return results;
@@ -179,56 +185,13 @@ export class WalletRepository {
   }
 
   async createOrGetWallet(userId: string): Promise<WalletRecord> {
-    const existing = await this.getWallet(userId);
-    if (existing) return existing;
-
-    const newRecord: WalletRecord = {
-      id: `wallet_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-      userId,
-      workspaceId: null,
-      balanceUsd: 0,
-      introductoryGrantUsd: 5.0,
-      depositedTotalUsd: 0,
-      promotionalMatchUsd: 0,
-      lifetimeSpentUsd: 0,
-      autoReloadEnabled: false,
-      autoReloadThresholdUsd: 10.0,
-      autoReloadAmountUsd: 25.0,
-      autoReloadPaymentMethodId: null,
-      proofOfDepositVerified: false,
-      verifiedAt: null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    this.walletTable.put(userId, newRecord);
-
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        const { data, error } = await supabase
-          .from('galx_wallets')
-          .insert({
-            user_id: userId,
-            balance_usd: 0,
-            introductory_grant_usd: 5.0,
-            deposited_total_usd: 0,
-            promotional_match_usd: 0,
-            proof_of_deposit_verified: false
-          })
-          .select()
-          .single();
-
-        if (!error && data) {
-          const mapped = this.mapRowToWallet(data);
-          this.walletTable.put(userId, mapped);
-          return mapped;
-        }
-      } catch {
-        // Fallback
-      }
-    }
-
-    return newRecord;
+    const pool = getPostgresPool();
+    if (!pool) throw new Error('Wallet storage unavailable');
+    const row = await ensureWallet(pool, userId);
+    this.invalidateAccount(userId);
+    const wallet = this.mapRowToWallet(row);
+    this.walletTable.put(userId, wallet);
+    return wallet;
   }
 
   /**
@@ -1438,9 +1401,9 @@ export class WalletRepository {
       autoReloadAmountUsd: Number(data.auto_reload_amount_usd),
       autoReloadPaymentMethodId: data.auto_reload_payment_method_id,
       proofOfDepositVerified: data.proof_of_deposit_verified,
-      verifiedAt: data.verified_at,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at
+      verifiedAt: data.verified_at ? new Date(data.verified_at).toISOString() : null,
+      createdAt: new Date(data.created_at).toISOString(),
+      updatedAt: new Date(data.updated_at).toISOString()
     };
   }
 
