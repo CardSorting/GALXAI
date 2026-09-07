@@ -73,7 +73,7 @@ export class OpenAIAdapter {
     if (process.env.NODE_ENV === 'production' && !process.env.FORCE_VM_RELAY) return false;
     if (!url.includes('localhost') && !url.includes('127.0.0.1')) return false;
     try {
-      const { GalxRelaySupervisor } = await import('../../relay/GalxRelaySupervisor.js');
+      const { GalxRelaySupervisor } = await import('../../relay/GalxRelaySupervisor');
       return await GalxRelaySupervisor.ensureRunning({ waitTimeoutMs: 3500 });
     } catch {
       return false;

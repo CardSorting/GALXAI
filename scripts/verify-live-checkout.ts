@@ -15,6 +15,12 @@ try {
     const userId = `billing_release_probe_${randomUUID()}`;
     const result = await createAccountCheckout(pool,stripe,{userId,email:'billing-release-probe@example.invalid',amount:1,requestId:randomUUID(),surface:'keys',origin:'https://galx.ai'});
     writeFileSync(path,JSON.stringify({userId,...result}),{mode:0o600});
+    const checkout = await stripe.checkout.sessions.retrieve(result.sessionId);
+    const customer = typeof checkout.customer === 'string' ? checkout.customer : checkout.customer?.id;
+    assert(customer);
+    const portal = await stripe.billingPortal.sessions.create({ customer, return_url: 'https://galx.ai/billing' });
+    assert.equal(new URL(portal.url).hostname,'billing.stripe.com');
+    console.log('Real Stripe checkout and customer portal sessions created successfully.');
     console.log('Created an unpaid $1 checkout for an isolated release probe. No payment was submitted.');
   } else if (process.argv.includes('--expire')) {
     const state = JSON.parse(readFileSync(path,'utf8'));
