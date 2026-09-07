@@ -325,7 +325,7 @@ export class OpenAIAdapter {
           key: process.env.VM_RELAY_API_KEY || process.env.RELAY_API_KEYS?.split(',')[0]?.trim(),
           payload: {
             ...body,
-            model: body.model === 'gpt-5.6-sol' ? 'gpt-5.6-terra' : (modelSpec.upstreamId || body.model),
+            model: modelSpec.upstreamId || body.model,
             ...((req as any).reasoning_effort ? { reasoning_effort: (req as any).reasoning_effort } : {})
           },
           signal: options?.signal,
@@ -777,7 +777,7 @@ export class OpenAIAdapter {
       throw new Error('No valid Codex access token found for WebSocket execution');
     }
 
-    const targetModel = modelSpec.id === 'gpt-5.6-sol' ? 'gpt-5.6-terra' : (modelSpec.upstreamId || modelSpec.id);
+    const targetModel = modelSpec.upstreamId || modelSpec.id;
     const reasoningEffort = (req as any).reasoning_effort || (req as any).reasoningEffort || 'low';
 
     const inputList: Array<{ type: string; role: string; content: Array<{ type: string; text: string }> }> = [];
@@ -1080,7 +1080,7 @@ export class OpenAIAdapter {
     options?: ExecuteOptions
   ): Promise<{ response: Response; headers: Record<string, string> }> {
     // On free ChatGPT accounts, OpenAI supports gpt-5.6-terra, gpt-5.6-luna, gpt-5.5, gpt-5.4-mini
-    const model = modelSpec.id === 'gpt-5.6-sol' ? 'gpt-5.6-terra' : (modelSpec.upstreamId || modelSpec.id);
+    const model = modelSpec.upstreamId || modelSpec.id;
 
     const formattedPrompt = [
       'CRITICAL: You are acting as an API text-completion model. You MUST NOT call any tools, execute shell commands, or invoke skills.',

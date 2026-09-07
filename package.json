@@ -283,7 +283,10 @@
     "vercel:env:sync": "tsx scripts/sync-vercel-env.ts",
     "vercel:env:print": "tsx scripts/sync-vercel-env.ts --print-cli",
     "vercel:deploy": "vercel",
-    "vercel:deploy:prod": "vercel --prod"
+    "vercel:deploy:prod": "vercel --prod",
+    "relay:federation": "node --env-file-if-exists=.env.local --import tsx scripts/run-relay-federation.ts",
+    "test:relay:capabilities": "node --import tsx --test scripts/test-relay-capabilities.ts scripts/test-relay-federation-http.ts scripts/test-relay-hardening.ts scripts/test-relay-adaptive-quota.ts scripts/test-relay-telemetry.ts",
+    "test:relay:docker": "node --import tsx scripts/test-relay-federation-docker.ts"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3",

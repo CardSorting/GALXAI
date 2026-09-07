@@ -1,3 +1,4 @@
+import { classifyCapabilityFailure } from './capability-registry.js';
 /** Provider feedback is evidence; a local observation window is not a quota. */
 export interface ProviderLimit {
   name: string;
@@ -19,7 +20,7 @@ export function classifyUpstreamError(frame: any, now = Date.now()) {
   const code = String(error.code ?? frame?.status ?? frame?.status_code ?? 'unknown');
   const description = `${code} ${frame?.status ?? frame?.status_code ?? ''} ${error.type ?? ''} ${error.message ?? ''}`.toLowerCase();
   const status = Number(frame?.status ?? frame?.status_code ?? (/^\d{3}$/.test(code) ? code : NaN));
-  const requestRejected = /\b(invalid_request(?:_error)?|invalid_argument|context_length(?:_exceeded)?|model_not_found|unsupported_parameter|model_permission_denied)\b/.test(description);
+  const requestRejected = !!classifyCapabilityFailure(frame) || /\b(invalid_request(?:_error)?|invalid_argument|context_length(?:_exceeded)?|model_not_found|unsupported_parameter|model_permission_denied)\b/.test(description);
   const unauthorized = !requestRejected && (status === 401 || /\b(invalid_api_key|token_expired|invalid_token|token_revoked|account_deactivated|session_expired|session_revoked|authentication_error)\b/.test(description));
   const quota = !requestRejected && (status === 429 || /\b(rate[ _-]?limit(?:ed|_exceeded)?|insufficient_quota|usage_limit(?:_reached)?|too many requests)\b/.test(description));
   const reset = Number(error.resets_at ?? error.reset_at ?? frame?.resets_at);

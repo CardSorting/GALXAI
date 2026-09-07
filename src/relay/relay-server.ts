@@ -44,6 +44,8 @@ import { RelayTelemetry } from './telemetry.js';
 import { EventEmitter } from 'node:events';
 import WebSocket from 'ws';
 import { classifyUpstreamError, cooldownDeadline, parseProviderLimits, retryDeadline, type ProviderLimit } from './quota-policy.js';
+import { CapabilityRegistry, classifyCapabilityFailure } from './capability-registry.js';
+import { CapabilityDiscoveryError, discoverOpenAIModels, type DiscoveryShard } from './capability-discovery.js';
 import { registryConfig, readShardRegistry, decryptRegistryShard } from './shard-registry.js';
 import { BroccoliDbTable } from '../core/broccolidb/broccolidb-table.js';
 
@@ -52,6 +54,15 @@ import { BroccoliDbTable } from '../core/broccolidb/broccolidb-table.js';
 // ============================================================================
 
 export interface RelayConfig {
+  assignedShardId?: string;
+  relayId?: string;
+  generation?: string;
+  assignedShard?: DiscoveryShard;
+  /** Test harness compatibility only; forbidden in production. */
+  testOnlyMultiShard?: boolean;
+  capabilityDiscovery?: (shard: DiscoveryShard, signal: AbortSignal) => Promise<string[]>;
+  capabilityRefreshMs: number;
+  capabilityTtlMs: number;
   port: number;
   maxConcurrentRequests: number;
   maxRssBytes: number;
@@ -103,7 +114,19 @@ export interface RelayConfig {
   quotaWindowDurationMs: number;       // Duration of rolling window (default: 3h / 10800000ms)
 }
 
+function assignedShardFromEnvironment(): DiscoveryShard | undefined {
+  if (!process.env.RELAY_ASSIGNED_SHARD) return;
+  try { return JSON.parse(process.env.RELAY_ASSIGNED_SHARD); }
+  catch { throw new Error('Invalid assigned shard configuration'); }
+}
+
 const DEFAULT_CONFIG: RelayConfig = {
+  assignedShardId: process.env.RELAY_SHARD_ID,
+  relayId: process.env.RELAY_ID,
+  generation: process.env.RELAY_GENERATION,
+  assignedShard: assignedShardFromEnvironment(),
+  capabilityRefreshMs: Number(process.env.CAPABILITY_REFRESH_INTERVAL_MS || 60000),
+  capabilityTtlMs: Number(process.env.CAPABILITY_TTL_MS || 120000),
   port: parseInt(process.env.PORT || '3001', 10),
   maxConcurrentRequests: Number(process.env.RELAY_MAX_CONCURRENT_REQUESTS || 64),
   maxRssBytes: Number(process.env.RELAY_MAX_RSS_MB || 384) * 1024 * 1024,
@@ -773,6 +796,11 @@ export class GalxaiRelayServer extends EventEmitter {
   // Dynamic Shard Quota & Continuous Drip Engine
   private currentQuotaProfile: QuotaProfileConfig = { ...QUOTA_PRESETS.adaptive };
   private shardCursor = 0;
+  private readonly capabilities: CapabilityRegistry;
+  private capabilityRefresh?: Promise<void>;
+  private capabilityTimer?: NodeJS.Timeout;
+  private capabilityError?: string;
+  private readonly capabilityControllers = new Set<AbortController>();
   private registryRefresh?: Promise<void>;
   private registryRefreshedAtMs = 0;
   private registryError: string | null = null;
@@ -824,6 +852,17 @@ export class GalxaiRelayServer extends EventEmitter {
   constructor(config: Partial<RelayConfig> = {}) {
     super();
     this.config = { ...DEFAULT_CONFIG, ...config };
+    if (this.config.testOnlyMultiShard && process.env.NODE_ENV === 'production') throw new Error('Production relays must own exactly one shard');
+    if (this.config.assignedShard) {
+      if (!this.config.assignedShardId || this.config.assignedShard.id !== this.config.assignedShardId
+        || !this.config.assignedShard.accessToken || !this.config.assignedShard.accountId) throw new Error('Assigned shard identity mismatch');
+      this.config.registryEnabled = false;
+      this.config.discoverHostCredentials = false;
+    }
+    if (!Number.isSafeInteger(this.config.capabilityRefreshMs) || this.config.capabilityRefreshMs < 1000
+      || this.config.capabilityRefreshMs > this.config.capabilityTtlMs) throw new Error('Invalid capability refresh interval');
+    this.capabilities = new CapabilityRegistry(Date.now, this.config.capabilityTtlMs);
+    this.config.generation ??= crypto.randomUUID();
     for (const name of ['apiKeys', 'adminApiKeys'] as const) {
       if (this.config[name]?.some(key => typeof key !== 'string' || !key.trim())) throw new TypeError(`${name} must contain nonempty keys`);
     }
@@ -1002,6 +1041,8 @@ export class GalxaiRelayServer extends EventEmitter {
   // --------------------------------------------------------------------------
 
   private installFleet(items: Array<Partial<ShardRecord> & { accessToken: string; accountId: string }>): void {
+    if (!this.config.testOnlyMultiShard && items.length > 1) throw new Error('One active shard requires one relay container');
+    if (this.config.assignedShardId && items.some(s => s.id !== this.config.assignedShardId)) throw new Error('Relay cannot enroll another shard');
     const previous = this.shardsTable.getAll();
     const seen = new Set<string>();
     const next: ShardRecord[] = [];
@@ -1042,11 +1083,16 @@ export class GalxaiRelayServer extends EventEmitter {
         slidingWindowTimestamps: state?.slidingWindowTimestamps ?? [],
       });
     }
+    for (const old of previous) if (!next.some(s => s.id === old.id && s.credentialFingerprint === old.credentialFingerprint)) this.capabilities.remove(old.id);
     this.shardsTable.clear();
-    for (const shard of next) this.shardsTable.put(shard.id, shard);
+    for (const shard of next) {
+      this.shardsTable.put(shard.id, shard);
+      this.capabilities.register(shard.id, this.config.relayId || `relay-${shard.id}`, this.config.generation!, 'openai', this.config.shardConcurrency);
+    }
   }
 
   private loadShardFleet(): void {
+    if (this.config.assignedShard) { this.installFleet([{ ...this.config.assignedShard }]); return; }
     if (this.config.registryEnabled) return;
     const items: Array<Partial<ShardRecord> & { accessToken: string; accountId: string }> = [];
     const add = (item: any, source: string) => {
@@ -1124,6 +1170,55 @@ export class GalxaiRelayServer extends EventEmitter {
     return this.registryRefresh;
   }
 
+  private async refreshCapabilities(): Promise<void> {
+    if (this.capabilityRefresh) return this.capabilityRefresh;
+    this.capabilityRefresh = (async () => {
+      for (const shard of this.shardsTable.getAll()) {
+        if (this.isDraining || shard.status === 'disabled') continue;
+        const ticket = this.capabilities.beginRefresh(shard.id);
+        if (!ticket) continue;
+        const controller = new AbortController();
+        this.capabilityControllers.add(controller);
+        const timeout = setTimeout(() => controller.abort(), 10000);
+        try {
+          const models = await (this.config.capabilityDiscovery ?? ((shard, signal) => discoverOpenAIModels(shard, signal, fetch, process.env.RELAY_CAPABILITY_INVENTORY_URL)))(shard, controller.signal);
+          this.capabilities.publishInventory(ticket, models);
+          this.capabilityError = undefined;
+        } catch (error) {
+          this.capabilityError = error instanceof CapabilityDiscoveryError ? error.code : 'inventory_unavailable';
+          if (error instanceof CapabilityDiscoveryError && error.code === 'invalid_credential') {
+            this.recordShardFailure(shard.id, true);
+            this.capabilities.heartbeat(shard.id, { health: 'unavailable' });
+          }
+        } finally { clearTimeout(timeout); this.capabilityControllers.delete(controller); }
+      }
+    })();
+    try { await this.capabilityRefresh; } finally { this.capabilityRefresh = undefined; }
+  }
+
+  private capabilitySnapshot() {
+    for (const shard of this.shardsTable.getAll()) this.capabilities.heartbeat(shard.id, {
+      activeStreams: shard.inFlight, capacity: this.config.shardConcurrency, recentErrors: shard.consecutiveFailures,
+      health: this.isDraining || this.shardReadyAt(shard) > Date.now() ? 'unavailable' : 'healthy',
+      queueDepth: this.jobsTable.getAll().filter(j => j.status === 'queued').length,
+    });
+    return { ...this.capabilities.snapshot(), error: this.capabilityError };
+  }
+
+  private rejectModelCapacity(res: http.ServerResponse, model: string): void {
+    this.capabilitySnapshot();
+    const eligible = this.capabilities.eligible(model);
+    const code = eligible.length ? 'model_capacity_exhausted' : 'model_temporarily_unavailable';
+    const now = Date.now();
+    const deadlines = this.shardsTable.getAll().filter(s => this.capabilities.get(s.id)?.models.some(m => m.model === model && m.state === 'AVAILABLE' && m.expiresAtMs > now))
+      .map(s => this.shardReadyAt(s, now)).filter(Number.isFinite);
+    const retryAfter = deadlines.length ? Math.max(5, Math.ceil((Math.min(...deadlines) - now) / 1000)) : 5;
+    res.writeHead(503, { 'Content-Type': 'application/json', 'Retry-After': String(retryAfter), 'X-Should-Retry': 'true', 'Cache-Control': 'no-store' });
+    res.end(JSON.stringify({ error: { code, model, message: eligible.length
+      ? `All eligible relays for ${model} are busy. Retry after ${retryAfter} seconds.`
+      : `No healthy relay currently has verified access to ${model}. No substitute model was used.` } }));
+  }
+
   private tuneSocket(ws: any): void {
     try {
       const sock = ws._socket || ws.socket || (ws._client && ws._client._socket);
@@ -1175,10 +1270,13 @@ export class GalxaiRelayServer extends EventEmitter {
     return deadlines.length ? Math.max(1, Math.ceil((Math.min(...deadlines) - now) / 1000)) : null;
   }
 
-  private acquireHealthyShard(exclude?: string | Set<string>): ShardRecord | null {
+  private acquireHealthyShard(exclude?: string | Set<string>, model?: string): ShardRecord | null {
+    if (!model) return null;
+    this.capabilitySnapshot();
+    const eligibleIds = new Set(this.capabilities.eligible(model).map(s => s.shardId));
     const now = Date.now();
     if (this.config.registryEnabled && (this.registryError || now - this.registryRefreshedAtMs > 5000)) return null;
-    const all = this.shardsTable.getAll();
+    const all = [...eligibleIds].map(id => this.shardsTable.get(id)!).filter(Boolean);
     let candidate: ShardRecord | null = null;
     let selectedIndex = 0;
     for (let step = 0; step < all.length; step++) {
@@ -1357,6 +1455,47 @@ export class GalxaiRelayServer extends EventEmitter {
       res.end(JSON.stringify({ error: { code: 'management_rate_limited', message: 'Too many management requests. Retry after one second.' } })); return;
     }
     if (pathname === '/metrics') { this.handleMetrics(res); return; }
+    if (pathname === '/api/capabilities/probe-image' && method === 'POST') {
+      try {
+        const body = await readJsonBody(req, 16384, this.config.httpBodyTimeoutMs);
+        validateModelRequest(body, true);
+        if (!body.model) throw new RequestError(400, 'model_required', 'Specify the exact image execution model.');
+        if (this.isDraining) throw new RequestError(503, 'server_draining', 'Relay is draining.');
+        const shard = this.shardsTable.getAll()[0];
+        if (!shard || this.shardReadyAt(shard) > Date.now() || shard.inFlight >= this.config.shardConcurrency || this.imageControllers.size) throw new RequestError(503, 'probe_busy', 'Shard is not ready for an image probe.');
+        const ticket = this.capabilities.beginObservation(shard.id, `image:${body.model}`)!;
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 90000);
+        this.imageControllers.add(controller);
+        this.shardsTable.put(shard.id, { ...shard, inFlight: shard.inFlight + 1 });
+        try {
+          const result = shard.accessToken.startsWith('sk-')
+            ? await this.synthesizeImageViaOpenAiRest(body.prompt, body, shard.accessToken, controller.signal)
+            : await this.synthesizeImageViaCodex(body.prompt, body.model, shard, undefined, controller.signal);
+          const bytes = Buffer.from(result.b64_json, 'base64');
+          const validImage = bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))
+            || (bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255)
+            || (bytes.toString('ascii',0,4) === 'RIFF' && bytes.toString('ascii',8,12) === 'WEBP');
+          if (!validImage || bytes.length < 32) throw new RequestError(502, 'invalid_image', 'The upstream did not return a valid image payload.');
+          const published = this.capabilities.observe(ticket, `image:${body.model}`, 'AVAILABLE');
+          res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+          res.end(JSON.stringify({ verified: published, model: body.model, bytes: bytes.length, expiresInMs: this.config.capabilityTtlMs }));
+        } catch (error: any) {
+          const negative = classifyCapabilityFailure(error.upstream);
+          if (negative) this.capabilities.observe(ticket, `image:${body.model}`, negative.state, negative.reason);
+          throw error;
+        } finally { clearTimeout(timeout); this.imageControllers.delete(controller); this.releaseShard(shard.id); }
+      } catch (error) {
+        const failure = error instanceof RequestError ? error : new RequestError(502, 'image_probe_failed', 'Image capability verification failed.');
+        res.writeHead(failure.status, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: { code: failure.code, message: failure.message } }));
+      }
+      return;
+    }
+    if (pathname === '/api/capabilities' && method === 'GET') {
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      res.end(JSON.stringify(this.capabilitySnapshot()));
+      return;
+    }
     if (pathname === '/api/telemetry' && method === 'GET') {
       res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
       res.end(JSON.stringify({ ...this.telemetry.snapshot(), server: { admission: this.admissionState(), uptimeSec: process.uptime(), rssBytes: process.memoryUsage().rss, retryBudget: this.retryBudget.snapshot(), eventLoopP99Ms: this.eventLoopDelay.count ? this.eventLoopDelay.percentile(99) / 1e6 : null } }));
@@ -1426,7 +1565,9 @@ export class GalxaiRelayServer extends EventEmitter {
     }
 
     // Multi-Tenant Rate Limiting Gate
-    const tenantId = this.principals.get(req) || req.socket.remoteAddress || 'tenant_default';
+    const delegatedTenant = req.headers['x-galx-tenant'];
+    const tenantId = this.config.assignedShard && this.principals.has(req) && typeof delegatedTenant === 'string' && /^[a-f0-9]{64}$/.test(delegatedTenant)
+      ? delegatedTenant : this.principals.get(req) || req.socket.remoteAddress || 'tenant_default';
     if (!this.checkTenantRateLimit(tenantId)) {
       const traceId = this.requestTraces.get(req);
       if (traceId) this.telemetry.finish(traceId, 'failed', 'relay_rate_limited', 'relay');
@@ -1501,8 +1642,7 @@ export class GalxaiRelayServer extends EventEmitter {
         if (this.isDraining) throw new RequestError(503, 'server_draining', 'Relay is restarting. Submit the request again after it is ready.');
         validateModelRequest(body, false);
         const requestedModel = body.model || 'gpt-5.6-terra';
-        // ChatGPT session tokens support gpt-5.6-terra, gpt-5.6-luna; map sol -> terra for OAuth scope compliance
-        const model = requestedModel === 'gpt-5.6-sol' ? 'gpt-5.6-terra' : requestedModel;
+        const model = requestedModel;
         this.telemetry.model(this.requestTraces.get(req), requestedModel, model);
         const messages = body.messages || [{ role: 'user', content: 'Hello' }];
         const prompt = messages[messages.length - 1]?.content || '';
@@ -1548,10 +1688,9 @@ export class GalxaiRelayServer extends EventEmitter {
           }
         }
 
-        if (!this.shardsTable.getAll().some(s => this.shardReadyAt(s) <= Date.now() && !s.probeInFlight && s.inFlight < this.config.shardConcurrency)) {
-          const traceId = this.requestTraces.get(req);
-          if (traceId) this.telemetry.finish(traceId, 'failed', 'all_shards_unavailable');
-          this.rejectUnavailableFleet(res);
+        this.capabilitySnapshot();
+        if (!this.capabilities.select(model)) {
+          this.rejectModelCapacity(res, model);
           return;
         }
 
@@ -1660,10 +1799,8 @@ export class GalxaiRelayServer extends EventEmitter {
         }
 
         const requestedModel = body.model || 'gpt-5.6-terra';
-        // Map any DALL-E / GPT-Image alias to gpt-5.6-terra for Codex OAuth backend compatibility
-        const model = (requestedModel === 'gpt-5.6-sol' || requestedModel.startsWith('dall-e') || requestedModel.startsWith('gpt-image'))
-          ? 'gpt-5.6-terra'
-          : requestedModel;
+        const model = requestedModel;
+        const imageCapability = `image:${requestedModel}`;
 
         const suppliedKey = req.headers['idempotency-key'] || body.idempotency_key;
         if (suppliedKey && (typeof suppliedKey !== 'string' || suppliedKey.length > 128)) throw new RequestError(400, 'invalid_request', 'Idempotency-Key must have at most 128 characters.');
@@ -1685,6 +1822,9 @@ export class GalxaiRelayServer extends EventEmitter {
             return;
           }
         }
+
+        this.capabilitySnapshot();
+        if (!this.capabilities.select(imageCapability)) { this.rejectModelCapacity(res, imageCapability); return; }
 
         const traceId = this.requestTraces.get(req);
         this.telemetry.model(traceId, requestedModel, model);
@@ -1765,20 +1905,24 @@ export class GalxaiRelayServer extends EventEmitter {
       signal.throwIfAborted();
       await this.refreshShardRegistry();
       signal.throwIfAborted();
-      const shard = this.acquireHealthyShard(attempted);
+      const shard = this.acquireHealthyShard(attempted, `image:${body.model || model}`);
       if (!shard) throw new Error('all_shards_unavailable');
       attempted.add(shard.id);
+      const capabilityTicket = this.capabilities.beginObservation(shard.id, `image:${body.model || model}`);
       this.telemetry.attempt(traceId, shard.id, shard.accessToken.startsWith('sk-') ? 'http' : 'websocket');
       if (shard.accessToken.startsWith('sk-')) this.telemetry.model(traceId, body.model, body.model || 'dall-e-3');
       try {
         const result = shard.accessToken.startsWith('sk-')
           ? await this.synthesizeImageViaOpenAiRest(prompt, body, shard.accessToken, signal)
           : await this.synthesizeImageViaCodex(prompt, model, shard, traceId, signal);
+        if (capabilityTicket) this.capabilities.observe(capabilityTicket, `image:${body.model || model}`, 'AVAILABLE');
         this.releaseShard(shard.id, true);
         this.retryBudget.success();
         return { result, shardId: shard.id };
       } catch (error: any) {
         if (signal.aborted) { this.releaseShard(shard.id); throw signal.reason; }
+        const negative = classifyCapabilityFailure(error.upstream);
+        if (negative && capabilityTicket) this.capabilities.observe(capabilityTicket, `image:${body.model || model}`, negative.state, negative.reason);
         const failure = classifyUpstreamError(error.upstream ?? { message: error.message });
         error.telemetryReason = error.upstream ? `upstream_error_${failure.code}` : error.message;
         this.telemetry.failedAttempt(traceId, error.telemetryReason);
@@ -2149,7 +2293,7 @@ export class GalxaiRelayServer extends EventEmitter {
     }
     if (session.abortController.signal.aborted || this.sessions.get(jobId) !== session) return;
     // Acquire healthy shard (exclude every previously attempted account)
-    const shard = this.acquireHealthyShard(session.attemptedShardIds);
+    const shard = this.acquireHealthyShard(session.attemptedShardIds, queuedJob.model);
     if (!shard) {
       if (this.jobQueue.markFailed(jobId, 'all_shards_exhausted')) this.metrics.totalJobsFailed++;
       return;
@@ -2183,6 +2327,7 @@ export class GalxaiRelayServer extends EventEmitter {
     const session = this.sessions.get(job.id);
     if (!session || session.abortController.signal.aborted || session.activeAttemptId !== attempt.id) return;
 
+    const capabilityTicket = this.capabilities.beginObservation(shard.id, job.model);
     this.telemetry.attempt(job.id, shard.id);
     const WebSocketClass = WebSocket;
     if (!WebSocketClass) {
@@ -2289,7 +2434,7 @@ export class GalxaiRelayServer extends EventEmitter {
       ws.on('unexpected-response', (_request: unknown, response: http.IncomingMessage) => {
         response.resume();
         triggerFailover(`upstream_http_${response.statusCode}`, response.statusCode === 429, 1006,
-          retryDeadline(response.headers['retry-after']), response.statusCode === 401 || response.statusCode === 403, ![400, 404, 405, 413, 422].includes(response.statusCode || 0));
+          retryDeadline(response.headers['retry-after']), response.statusCode === 401, ![400, 404, 405, 413, 422].includes(response.statusCode || 0));
       });
       this.tuneSocket(ws);
     } catch (err: any) {
@@ -2545,7 +2690,8 @@ export class GalxaiRelayServer extends EventEmitter {
         }
 
         // Completion Arrival (response.completed or response.done)
-        if (data.type === 'response.completed' || data.type === 'response.done') {
+        if ((data.type === 'response.completed' || data.type === 'response.done') && data.response?.status !== 'failed') {
+          if (capabilityTicket) this.capabilities.observe(capabilityTicket, job.model, 'AVAILABLE');
           attempt.completionObserved = true;
           cleanupTimers();
           if (session.wallTimer) clearTimeout(session.wallTimer);
@@ -2559,7 +2705,9 @@ export class GalxaiRelayServer extends EventEmitter {
         }
 
         // Upstream Error Frame (429 Rate Limit / 5xx Overloaded)
-        if (data.type === 'error' || data.type === 'response.failed') {
+        if (data.type === 'error' || data.type === 'response.failed' || data.response?.status === 'failed') {
+          const negative = classifyCapabilityFailure(data);
+          if (negative && capabilityTicket) this.capabilities.observe(capabilityTicket, job.model, negative.state, negative.reason);
           const failure = classifyUpstreamError(data);
           triggerFailover(`upstream_error_${failure.code}`, failure.quota, 1006, failure.deadline, failure.unauthorized, failure.retryable);
           return;
@@ -2734,7 +2882,7 @@ export class GalxaiRelayServer extends EventEmitter {
     // A cancellation or deadline may have finished the job while refresh awaited I/O.
     if (session.abortController.signal.aborted || this.sessions.get(jobId) !== session) return;
     // 1. Acquire alternative healthy shard
-    const newShard = this.acquireHealthyShard(session.attemptedShardIds);
+    const newShard = this.acquireHealthyShard(session.attemptedShardIds, currentJob.model);
     if (!newShard) {
       console.warn(`[AntiFragileRelay] In-flight failover failed: No alternate healthy shards available.`);
       if (session.downstreamFailoverKeepaliveTimer) {
@@ -2982,7 +3130,10 @@ export class GalxaiRelayServer extends EventEmitter {
     const allShards = this.shardsTable.getAll();
 
     const admission = this.admissionState();
+    const capability = this.capabilitySnapshot();
+    if (readiness && !capability.models.some(m => m.eligibleShardCount > 0)) { admission.accepting = false; admission.reason = 'model_temporarily_unavailable'; }
     const healthData = {
+      capability,
       status: readiness && !admission.accepting ? 'not_ready' : 'ok',
       admission,
       service: 'galxai-relay',
@@ -3354,6 +3505,14 @@ export class GalxaiRelayServer extends EventEmitter {
   public async start(): Promise<void> {
     this.eventLoopDelay.enable();
     await this.refreshShardRegistry(true);
+    await this.refreshCapabilities();
+    const schedule = () => {
+      if (this.isDraining) return;
+      this.capabilityTimer = setTimeout(async () => { await this.refreshCapabilities(); schedule(); },
+        Math.max(1000, Math.floor(this.config.capabilityRefreshMs * (0.8 + Math.random() * 0.2))));
+      this.capabilityTimer.unref?.();
+    };
+    schedule();
     return new Promise<void>((resolve, reject) => {
       const onError = (error: Error) => {
         this.eventLoopDelay.disable();
@@ -3377,6 +3536,9 @@ export class GalxaiRelayServer extends EventEmitter {
 
   private async drainAndStop(): Promise<void> {
     this.isDraining = true;
+    if (this.capabilityTimer) clearInterval(this.capabilityTimer);
+    for (const controller of this.capabilityControllers) controller.abort();
+    for (const shard of this.shardsTable.getAll()) this.capabilities.drain(shard.id);
     this.eventLoopDelay.disable();
     if (this.snapshotIntervalTimer) clearInterval(this.snapshotIntervalTimer);
     console.log('[BroccoliDB Relay] Entering graceful drain mode...');

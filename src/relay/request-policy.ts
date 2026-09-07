@@ -30,6 +30,7 @@ export function readJsonBody(req: IncomingMessage, maxBytes: number, timeoutMs: 
 export function validateModelRequest(body: Record<string, any>, image = false) {
   const invalid = (message: string): never => { throw new RequestError(400, 'invalid_request', message); };
   if (body.model !== undefined && (typeof body.model !== 'string' || !/^[\w.:-]{1,96}$/.test(body.model))) invalid('model must be a model identifier of 1–96 characters.');
+  if (typeof body.model === 'string' && body.model.startsWith('image:')) invalid('Use the model identifier without the internal image: capability prefix.');
   if (image) {
     if (typeof body.prompt !== 'string' || !body.prompt.trim()) invalid('prompt must be a nonempty string.');
     if (body.idempotency_key !== undefined && (typeof body.idempotency_key !== 'string' || body.idempotency_key.length > 128)) invalid('idempotency_key must be a string of at most 128 characters.');

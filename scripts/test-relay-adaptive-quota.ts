@@ -1,3 +1,4 @@
+import { installTestCapabilities, testModels } from './relay-test-capabilities.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import fs from 'node:fs';
@@ -11,11 +12,11 @@ import { classifyUpstreamError, cooldownDeadline, retryDeadline } from '../src/r
 function fixture(count = 4, extra: Record<string, unknown> = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'relay-quota-'));
   const credentials = Array.from({ length: count }, (_, i) => ({ id: `shard_${i}`, accountId: `account-${i}`, accessToken: `test-secret-${i}` }));
-  const relay = new GalxaiRelayServer({ port: 0, host: '127.0.0.1', registryEnabled: false,
+  const relay = new GalxaiRelayServer({ testOnlyMultiShard: true, capabilityDiscovery: async () => testModels, port: 0, host: '127.0.0.1', registryEnabled: false,
     discoverHostCredentials: false, shardsJsonPath: path.join(dir, 'absent.json'),
     stateSnapshotPath: path.join(dir, 'snapshot.json'), retryBaseDelayMs: 1, retryMaxDelayMs: 2,
     drainTimeoutMs: 20, ...extra });
-  const internals = relay as any;
+  const internals = relay as any; installTestCapabilities(internals);
   internals.installFleet(credentials);
   return { relay, internals, credentials, dir, cleanup: async () => {
     for (const session of internals.sessions.values()) {
@@ -49,7 +50,7 @@ test('uncapped default routes 1,200 calls fairly across all four unique accounts
     assert.equal(f.internals.shardsTable.count(), 4);
     const counts = new Map<string, number>();
     for (let i = 0; i < 1200; i++) {
-      const shard = f.internals.acquireHealthyShard();
+      const shard = f.internals.acquireHealthyShard(undefined, 'test-model');
       assert.ok(shard);
       counts.set(shard.id, (counts.get(shard.id) || 0) + 1);
       f.internals.releaseShard(shard.id);
@@ -66,17 +67,17 @@ test('exhausted pool cannot be forced open, and recovery admits one probe', asyn
   let now = realNow();
   Date.now = () => now;
   try {
-    f.internals.acquireHealthyShard();
+    f.internals.acquireHealthyShard(undefined, 'test-model');
     f.internals.recordQuotaFailure('shard_0', now + 120_000);
-    for (let i = 0; i < 100; i++) assert.equal(f.internals.acquireHealthyShard(), null);
+    for (let i = 0; i < 100; i++) assert.equal(f.internals.acquireHealthyShard(undefined, 'test-model'), null);
     assert.equal(f.internals.fleetRetryAfter(), 120);
     now += 120_001;
-    assert.ok(f.internals.acquireHealthyShard());
-    assert.equal(f.internals.acquireHealthyShard(), null);
+    assert.ok(f.internals.acquireHealthyShard(undefined, 'test-model'));
+    assert.equal(f.internals.acquireHealthyShard(undefined, 'test-model'), null);
     f.internals.recordQuotaFailure('shard_0');
     assert.equal(f.internals.fleetRetryAfter(), 120);
     now += 120_001;
-    assert.ok(f.internals.acquireHealthyShard());
+    assert.ok(f.internals.acquireHealthyShard(undefined, 'test-model'));
     f.internals.releaseShard('shard_0', true);
     assert.equal(f.internals.shardsTable.get('shard_0').quotaFailures, 0);
   } finally { Date.now = realNow; await f.cleanup(); }
@@ -85,13 +86,13 @@ test('exhausted pool cannot be forced open, and recovery admits one probe', asyn
 test('sync preserves cooldown and in-flight state, prefers fresh credentials, and snapshots contain no credentials', async () => {
   const f = fixture(1);
   try {
-    f.internals.acquireHealthyShard();
+    f.internals.acquireHealthyShard(undefined, 'test-model');
     f.internals.recordQuotaFailure('shard_0', Date.now() + 180_000, false);
     f.internals.installFleet([{ ...f.credentials[0], id: 'new-registry-row', accessToken: 'rotated-test-secret', expiresAtMs: Date.now() + 600_000 }, ...f.credentials]);
     const shard = f.internals.shardsTable.get('shard_0');
     assert.equal(shard.accessToken, 'rotated-test-secret');
     assert.equal(shard.inFlight, 1);
-    assert.equal(f.internals.acquireHealthyShard(), null);
+    assert.equal(f.internals.acquireHealthyShard(undefined, 'test-model'), null);
     f.internals.saveStateSnapshot();
     const snapshot = fs.readFileSync(path.join(f.dir, 'snapshot.json'), 'utf8');
     assert.ok(!snapshot.includes('rotated-test-secret'));
@@ -105,19 +106,19 @@ test('sync preserves cooldown and in-flight state, prefers fresh credentials, an
 test('explicit local limits, concurrent slots, excluded attempts, and reported request balance are honored', async () => {
   const f = fixture(1, { quotaWindowMaxCalls: 2, shardConcurrency: 1 });
   try {
-    assert.equal(f.internals.acquireHealthyShard(new Set(['shard_0'])), null);
-    assert.ok(f.internals.acquireHealthyShard());
-    assert.equal(f.internals.acquireHealthyShard(), null);
+    assert.equal(f.internals.acquireHealthyShard(new Set(['shard_0']), 'test-model'), null);
+    assert.ok(f.internals.acquireHealthyShard(undefined, 'test-model'));
+    assert.equal(f.internals.acquireHealthyShard(undefined, 'test-model'), null);
     f.internals.releaseShard('shard_0');
-    assert.ok(f.internals.acquireHealthyShard());
+    assert.ok(f.internals.acquireHealthyShard(undefined, 'test-model'));
     f.internals.releaseShard('shard_0');
-    assert.equal(f.internals.acquireHealthyShard(), null);
+    assert.equal(f.internals.acquireHealthyShard(undefined, 'test-model'), null);
     f.internals.currentQuotaProfile.maxCalls = 0;
     const shard = f.internals.shardsTable.get('shard_0');
     f.internals.shardsTable.put(shard.id, { ...shard, providerLimits: [{ name: 'requests', remaining: 1, limit: 80, resetAtMs: Date.now() + 60_000 }] });
-    assert.ok(f.internals.acquireHealthyShard());
+    assert.ok(f.internals.acquireHealthyShard(undefined, 'test-model'));
     f.internals.releaseShard('shard_0');
-    assert.equal(f.internals.acquireHealthyShard(), null);
+    assert.equal(f.internals.acquireHealthyShard(undefined, 'test-model'), null);
   } finally { await f.cleanup(); }
 });
 
@@ -246,7 +247,7 @@ test('JWT expiry overrides stale registry metadata and excludes the credential',
   try {
     const token = `header.${Buffer.from(JSON.stringify({ exp: Math.floor(Date.now() / 1000) - 60 })).toString('base64url')}.signature`;
     f.internals.installFleet([{ ...f.credentials[0], accessToken: token, expiresAtMs: Date.now() + 3600000 }]);
-    assert.equal(f.internals.acquireHealthyShard(), null);
+    assert.equal(f.internals.acquireHealthyShard(undefined, 'test-model'), null);
     assert.equal(f.internals.shardStats(f.internals.shardsTable.get('shard_0')).availabilityReason, 'credential_expired');
   } finally { await f.cleanup(); }
 });
@@ -254,11 +255,11 @@ test('JWT expiry overrides stale registry metadata and excludes the credential',
 test('credential rejection survives concurrent quota and transport failures and restart; rotation recovers', async () => {
   const f = fixture(1);
   try {
-    f.internals.acquireHealthyShard();
+    f.internals.acquireHealthyShard(undefined, 'test-model');
     f.internals.recordShardFailure('shard_0', true);
     f.internals.recordQuotaFailure('shard_0');
     f.internals.recordShardFailure('shard_0');
-    assert.equal(f.internals.acquireHealthyShard(), null);
+    assert.equal(f.internals.acquireHealthyShard(undefined, 'test-model'), null);
     f.internals.saveStateSnapshot();
     const snapshot = fs.readFileSync(path.join(f.dir, 'snapshot.json'), 'utf8');
     assert.ok(!snapshot.includes(f.credentials[0].accessToken));

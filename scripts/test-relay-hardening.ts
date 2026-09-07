@@ -1,3 +1,4 @@
+import { installTestCapabilities, testModels } from './relay-test-capabilities.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { PassThrough } from 'node:stream';
@@ -12,8 +13,8 @@ import { RetryBudget, readJsonBody } from '../src/relay/request-policy.js';
 async function fixture(extra: Record<string, unknown> = {}) {
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'relay-hardening-'));
  const ws=new WebSocketServer({port:0,host:'127.0.0.1'});await new Promise<void>(r=>ws.once('listening',r));
- const relay=new GalxaiRelayServer({port:0,host:'127.0.0.1',registryEnabled:false,discoverHostCredentials:false,shardsJsonPath:path.join(dir,'absent'),stateSnapshotPath:path.join(dir,'snapshot'),wsEndpoint:`ws://127.0.0.1:${(ws.address() as any).port}`,drainTimeoutMs:10,retryBaseDelayMs:1,retryMaxDelayMs:2,...extra});
- const internals=relay as any;internals.installFleet([0,1,2].map(i=>({id:`shard-${i}`,accountId:`account-${i}`,accessToken:`secret-${i}`})));await relay.start();
+ const relay=new GalxaiRelayServer({ testOnlyMultiShard: true, capabilityDiscovery: async () => testModels,port:0,host:'127.0.0.1',registryEnabled:false,discoverHostCredentials:false,shardsJsonPath:path.join(dir,'absent'),stateSnapshotPath:path.join(dir,'snapshot'),wsEndpoint:`ws://127.0.0.1:${(ws.address() as any).port}`,drainTimeoutMs:10,retryBaseDelayMs:1,retryMaxDelayMs:2,...extra});
+ const internals=relay as any;installTestCapabilities(internals);internals.installFleet([0,1,2].map(i=>({id:`shard-${i}`,accountId:`account-${i}`,accessToken:`secret-${i}`})));await relay.start();
  return {relay,internals,ws,base:`http://127.0.0.1:${internals.server.address().port}`,close:async()=>{await relay.stop();for(const c of ws.clients)c.terminate();await new Promise<void>(r=>ws.close(()=>r()));fs.rmSync(dir,{recursive:true,force:true})}};
 }
 async function until(predicate:()=>boolean){const deadline=Date.now()+2000;while(!predicate()){assert(Date.now()<deadline,'state did not settle');await new Promise(r=>setTimeout(r,5))}}
@@ -77,7 +78,7 @@ test('cancellation during backoff cannot release another job capacity on the fai
 });
 test('cancelled recovery probes do not count as successful provider recovery',async()=>{
  const f=await fixture();try{const shard=f.internals.shardsTable.get('shard-0');f.internals.shardsTable.put(shard.id,{...shard,quotaFailures:2,cooldownUntilMs:Date.now()-1});
- const acquired=f.internals.acquireHealthyShard();assert.equal(acquired.id,shard.id);f.internals.releaseShard(shard.id);assert.equal(f.internals.shardsTable.get(shard.id).quotaFailures,2);
+ const acquired=f.internals.acquireHealthyShard(undefined, 'test-model');assert.equal(acquired.id,shard.id);f.internals.releaseShard(shard.id);assert.equal(f.internals.shardsTable.get(shard.id).quotaFailures,2);
  }finally{await f.close()}
 });
 test('overload rejects new inference before provider dispatch while telemetry remains reachable',async()=>{
@@ -128,10 +129,10 @@ test('cancellation is idempotent and never represents a refund transaction',asyn
 
 test('retry configuration rejects unbounded counts and timer overflow', () => {
  for (const maxUpstreamRetries of [Infinity, NaN, -1, 1.5, 33]) {
-  assert.throws(() => new GalxaiRelayServer({ maxUpstreamRetries }), /maxUpstreamRetries/);
+  assert.throws(() => new GalxaiRelayServer({ testOnlyMultiShard: true, capabilityDiscovery: async () => testModels, maxUpstreamRetries }), /maxUpstreamRetries/);
  }
  for (const retryMaxDelayMs of [Infinity, NaN, 2147483648]) {
-  assert.throws(() => new GalxaiRelayServer({ retryMaxDelayMs }), /retryMaxDelayMs/);
+  assert.throws(() => new GalxaiRelayServer({ testOnlyMultiShard: true, capabilityDiscovery: async () => testModels, retryMaxDelayMs }), /retryMaxDelayMs/);
  }
 });
 
@@ -245,8 +246,8 @@ test('management bodies have size limits, validation and read deadlines', async 
 });
 
 test('network listeners require credentials and dedicated admin keys stay separate', async () => {
- assert.throws(() => new GalxaiRelayServer({ host: '0.0.0.0', apiKeys: [], adminApiKeys: [] }), /require RELAY_API_KEYS/);
- assert.throws(() => new GalxaiRelayServer({ apiKeys: [''] }), /nonempty keys/);
+ assert.throws(() => new GalxaiRelayServer({ testOnlyMultiShard: true, capabilityDiscovery: async () => testModels, host: '0.0.0.0', apiKeys: [], adminApiKeys: [] }), /require RELAY_API_KEYS/);
+ assert.throws(() => new GalxaiRelayServer({ testOnlyMultiShard: true, capabilityDiscovery: async () => testModels, apiKeys: [''] }), /nonempty keys/);
  const f = await fixture({ apiKeys: ['client-key'], adminApiKeys: ['operator-key'] });
  try {
   assert.equal((await fetch(f.base + '/metrics', { headers: { Authorization: 'Bearer client-key' } })).status, 403);
