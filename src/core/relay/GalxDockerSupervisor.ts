@@ -30,6 +30,12 @@ export class GalxDockerSupervisor {
   private static composeFile = path.resolve(process.cwd(), 'docker-compose.relay.yml');
   private static dockerfile = path.resolve(process.cwd(), 'Dockerfile.relay');
 
+  private static composeCommand(): string {
+    const quote = (value: string) => "'" + value.replace(/'/g, "'\\''") + "'";
+    const envFile = path.resolve(process.cwd(), '.env.local');
+    return `docker compose${fs.existsSync(envFile) ? ` --env-file ${quote(envFile)}` : ''} -f ${quote(this.composeFile)}`;
+  }
+
   /**
    * Checks if Docker CLI is installed and the Docker daemon is responding.
    */
@@ -109,7 +115,7 @@ export class GalxDockerSupervisor {
     try {
       console.log(`[GalxDockerSupervisor] Building Docker image galxai-relay:latest...`);
       const { stdout, stderr } = await execAsync(
-        `docker compose -f "${this.composeFile}" build`,
+        `${this.composeCommand()} build`,
         { timeout: 180000 }
       );
       return { success: true, output: stdout || stderr };
@@ -159,7 +165,7 @@ export class GalxDockerSupervisor {
 
     // Launch Docker container with GALXAI_RELAY_PORT
     const buildFlag = options.forceBuild ? '--build ' : '';
-    const cmd = `GALXAI_RELAY_PORT=${targetPort} docker compose -f "${this.composeFile}" up ${buildFlag}-d`;
+    const cmd = `${this.composeCommand()} up ${buildFlag}-d`;
 
     console.log(`[GalxDockerSupervisor] Executing: ${cmd}`);
     await execAsync(cmd, { env: { ...process.env, GALXAI_RELAY_PORT: String(targetPort) } });
@@ -185,7 +191,7 @@ export class GalxDockerSupervisor {
   public static async down(): Promise<{ success: boolean; output: string }> {
     try {
       const { stdout, stderr } = await execAsync(
-        `docker compose -f "${this.composeFile}" down`,
+        `${this.composeCommand()} down`,
         { timeout: 30000 }
       );
       return { success: true, output: stdout || stderr };
@@ -200,7 +206,7 @@ export class GalxDockerSupervisor {
   public static async logs(tail = 50): Promise<string> {
     try {
       const { stdout, stderr } = await execAsync(
-        `docker compose -f "${this.composeFile}" logs --tail ${tail}`,
+        `${this.composeCommand()} logs --tail ${tail}`,
         { timeout: 10000 }
       );
       return stdout || stderr;

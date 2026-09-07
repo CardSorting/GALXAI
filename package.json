@@ -250,6 +250,7 @@
     "test:inference": "tsx scripts/test-inference-pipeline.ts",
     "shards": "node --env-file-if-exists=.env.local --import tsx scripts/manage-shards.ts",
     "shards:list": "node --env-file-if-exists=.env.local --import tsx scripts/manage-shards.ts --list",
+    "shards:clear-expired": "node --env-file-if-exists=.env.local --import tsx scripts/clear-expired-credentials.ts",
     "shards:test": "node --env-file-if-exists=.env.local --import tsx scripts/manage-shards.ts --test",
     "shards:import": "node --env-file-if-exists=.env.local --import tsx scripts/manage-shards.ts --import",
     "shards:cycle": "node --env-file-if-exists=.env.local --import tsx scripts/manage-shards.ts --cycle 4",
@@ -303,7 +304,8 @@
     "tailwind-merge": "^3.0.1",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.19.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "ws": "8.21.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260823.1",

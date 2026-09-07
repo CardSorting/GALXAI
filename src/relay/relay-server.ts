@@ -31,12 +31,20 @@
  */
 
 import * as http from 'node:http';
+import type { Socket } from 'node:net';
 import * as url from 'node:url';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 import * as crypto from 'node:crypto';
+import { setTimeout as delay } from 'node:timers/promises';
+import { monitorEventLoopDelay } from 'node:perf_hooks';
+import { readJsonBody, validateModelRequest, RequestError, RetryBudget } from './request-policy.js';
+import { RelayTelemetry } from './telemetry.js';
 import { EventEmitter } from 'node:events';
+import WebSocket from 'ws';
+import { classifyUpstreamError, cooldownDeadline, parseProviderLimits, retryDeadline, type ProviderLimit } from './quota-policy.js';
+import { registryConfig, readShardRegistry, decryptRegistryShard } from './shard-registry.js';
 import { BroccoliDbTable } from '../core/broccolidb/broccolidb-table.js';
 
 // ============================================================================
@@ -45,11 +53,16 @@ import { BroccoliDbTable } from '../core/broccolidb/broccolidb-table.js';
 
 export interface RelayConfig {
   port: number;
+  maxConcurrentRequests: number;
+  maxRssBytes: number;
   host: string;
   wsEndpoint: string;
   shardsJsonPath?: string;
   stateSnapshotPath: string;
   masterSecret?: string;
+  shardConcurrency: number;
+  discoverHostCredentials: boolean;
+  registryEnabled: boolean;
   apiKeys?: string[];
   maxPayloadBytes: number;
   httpBodyTimeoutMs: number;
@@ -84,18 +97,23 @@ export interface RelayConfig {
   idempotencyTtlMs: number;            // Prompt deduplication TTL (120s)
   snapshotIntervalMs: number;          // Periodic disk checkpoint interval (60s)
   // Dynamic Sliding Window Quota Governance
-  quotaWindowMaxCalls: number;         // Max requests allowed in sliding window (default: 100)
+  quotaWindowMaxCalls: number;         // Optional operator limit; 0 means no local call cap
   quotaWindowDurationMs: number;       // Duration of rolling window (default: 3h / 10800000ms)
 }
 
 const DEFAULT_CONFIG: RelayConfig = {
   port: parseInt(process.env.PORT || '3001', 10),
+  maxConcurrentRequests: Number(process.env.RELAY_MAX_CONCURRENT_REQUESTS || 64),
+  maxRssBytes: Number(process.env.RELAY_MAX_RSS_MB || 384) * 1024 * 1024,
   host: process.env.HOST || '127.0.0.1',
   wsEndpoint: process.env.CODEX_WS_ENDPOINT || 'wss://chatgpt.com/backend-api/codex/responses',
   shardsJsonPath: process.env.GALX_SHARDS_JSON_PATH || path.join(process.cwd(), '.galx-shards.json'),
   stateSnapshotPath: process.env.RELAY_STATE_SNAPSHOT_PATH || path.join(process.cwd(), '.broccolidb', 'relay-snapshot.json'),
   masterSecret: process.env.GALX_VAULT_MASTER_SECRET || process.env.GALX_VAULT_KEY,
   apiKeys: process.env.RELAY_API_KEYS ? process.env.RELAY_API_KEYS.split(',').map((k) => k.trim()) : undefined,
+  shardConcurrency: Number(process.env.RELAY_SHARD_CONCURRENCY || 4),
+  discoverHostCredentials: true,
+  registryEnabled: Boolean(registryConfig().databaseUrl || registryConfig().url || registryConfig().key),
   maxPayloadBytes: parseInt(process.env.MAX_PAYLOAD_BYTES || '2097152', 10), // 2 MB
   httpBodyTimeoutMs: parseInt(process.env.HTTP_BODY_TIMEOUT_MS || '10000', 10), // 10s
   tenantRateLimitPerSec: parseFloat(process.env.TENANT_RATE_LIMIT_PER_SEC || '50.0'),
@@ -124,7 +142,7 @@ const DEFAULT_CONFIG: RelayConfig = {
   drainTimeoutMs: parseInt(process.env.DRAIN_TIMEOUT_MS || '30000', 10),
   idempotencyTtlMs: parseInt(process.env.IDEMPOTENCY_TTL_MS || '120000', 10),
   snapshotIntervalMs: parseInt(process.env.SNAPSHOT_INTERVAL_MS || '60000', 10),
-  quotaWindowMaxCalls: parseInt(process.env.RELAY_QUOTA_WINDOW_MAX || '100', 10),
+  quotaWindowMaxCalls: parseInt(process.env.RELAY_QUOTA_WINDOW_MAX || '0', 10),
   quotaWindowDurationMs: parseInt(process.env.RELAY_QUOTA_WINDOW_MS || String(3 * 60 * 60 * 1000), 10),
 };
 
@@ -137,6 +155,7 @@ export interface JobRecord extends Record<string, unknown> {
   model: string;
   prompt: string;
   promptHash: string;
+  traceId?: string;
   tenantId: string;
   status: 'queued' | 'running' | 'streaming' | 'completed' | 'failed' | 'cancelled';
   createdAtMs: number;
@@ -207,10 +226,10 @@ export const QUOTA_PRESETS: Record<QuotaMode, QuotaProfileConfig> = {
   },
   adaptive: {
     mode: 'adaptive',
-    maxCalls: 100,
+    maxCalls: 0,
     windowDurationMs: 3 * 3600 * 1000,
-    dripRefillSec: 108,
-    elasticBurstAllowance: 30,
+    dripRefillSec: 0,
+    elasticBurstAllowance: 0,
     adaptiveBackoffOn429: true,
   },
 };
@@ -219,13 +238,19 @@ export interface ShardRecord extends Record<string, unknown> {
   id: string; // shardId
   accountId: string;
   accessToken: string;
-  status: 'active' | 'exhausted' | 'cooldown';
+  status: 'active' | 'exhausted' | 'cooldown' | 'disabled';
   consecutiveFailures: number;
   lastUsedAtMs: number;
   inFlight: number;
   slidingWindowTimestamps: number[];
   availableDripTokens?: number;
   lastDripRefillMs?: number;
+  cooldownUntilMs?: number;
+  quotaFailures?: number;
+  probeInFlight?: boolean;
+  providerLimits?: ProviderLimit[];
+  source?: string;
+  expiresAtMs?: number;
 }
 
 interface TransientJobSession {
@@ -234,6 +259,7 @@ interface TransientJobSession {
   upstreamWs?: any;
   connectTimer?: NodeJS.Timeout;
   ttftTimer?: NodeJS.Timeout;
+  retryTimer?: NodeJS.Timeout;
   intraChunkTimer?: NodeJS.Timeout;
   wallTimer?: NodeJS.Timeout;
   wsPingTimer?: NodeJS.Timeout;
@@ -246,6 +272,7 @@ interface TransientJobSession {
   lastSeenAliveMs: number;
   activeTtftDeadlineMs: number;
   currentShardId?: string;
+  attemptedShardIds: Set<string>;
   activeAttemptId: number;
 }
 
@@ -265,7 +292,7 @@ type JobBusEvent =
   | { type: 'job:token'; jobId: string; token: JobTokenRecord }
   | { type: 'job:reasoning'; jobId: string; text: string }
   | { type: 'job:keepalive'; jobId: string; text: string }
-  | { type: 'job:transport_drop'; jobId: string; attemptId: number; shardId: string; reason: string; isQuotaError?: boolean }
+  | { type: 'job:transport_drop'; jobId: string; attemptId: number; shardId: string; reason: string; isQuotaError?: boolean; retryAtMs?: number; unauthorized?: boolean; retryable?: boolean }
   | { type: 'job:done'; jobId: string }
   | { type: 'job:error'; jobId: string; reason: string }
   | { type: 'job:cancelled'; jobId: string; reason?: string }
@@ -308,6 +335,8 @@ class JobEventBus extends EventEmitter {
       busMaxListenersPerJob: config.busMaxListenersPerJob,
       maxPendingFramesPerSubscriber: config.maxPendingFramesPerSubscriber,
       subscriberDrainTimeoutMs: config.subscriberDrainTimeoutMs,
+      maxBufferedTokensPerJob: config.maxBufferedTokensPerJob,
+      jobTokenRetentionMs: config.jobTokenRetentionMs,
     })) {
       if (!Number.isSafeInteger(value) || value <= 0) {
         throw new TypeError(`${name} must be a positive safe integer`);
@@ -395,6 +424,9 @@ class JobEventBus extends EventEmitter {
   private dispatch(event: JobBusEvent): void {
     if (event.type === 'job:token') {
       this.tokensTable.put(event.token.id, event.token, { ttlMs: this.config.jobTokenRetentionMs });
+      if (event.token.seqNo > this.config.maxBufferedTokensPerJob) {
+        this.tokensTable.delete(`${event.jobId}_${event.token.seqNo - this.config.maxBufferedTokensPerJob}`);
+      }
       this.fanOut(event.jobId, this.formatToken(event.jobId, event.token));
       return;
     }
@@ -538,6 +570,7 @@ class JobQueue {
   constructor(
     jobsTable: BroccoliDbTable<JobRecord>,
     bus: JobEventBus,
+    private readonly retentionMs = 600000,
   ) {
     this.jobsTable = jobsTable;
     this.bus = bus;
@@ -549,7 +582,7 @@ class JobQueue {
   }
 
   public restore(job: JobRecord): JobRecord {
-    return this.jobsTable.put(job.id, job);
+    return this.jobsTable.put(job.id, job, this.isTerminal(job.status) ? { ttlMs: this.retentionMs } : undefined);
   }
 
   public acquireForDispatch(jobId: string, shardId: string, retryCount: number): JobRecord | undefined {
@@ -616,7 +649,7 @@ class JobQueue {
       status,
       error: reason,
       completedAtMs: Date.now(),
-    });
+    }, { ttlMs: this.retentionMs });
     if (status === 'completed') this.bus.publish({ type: 'job:done', jobId });
     if (status === 'failed') this.bus.publish({ type: 'job:error', jobId, reason: reason ?? 'unknown_failure' });
     if (status === 'cancelled') this.bus.publish({ type: 'job:cancelled', jobId, reason });
@@ -712,6 +745,13 @@ function decryptShardPayload(
 export class GalxaiRelayServer extends EventEmitter {
   private config: RelayConfig;
   private server: http.Server;
+  private readonly telemetry = new RelayTelemetry();
+  private readonly eventLoopDelay = monitorEventLoopDelay({ resolution: 20 });
+  private readonly retryBudget = new RetryBudget();
+  private readonly pendingImages = new Map<string, string>();
+  private readonly imageControllers = new Set<AbortController>();
+  private readonly principals = new WeakMap<http.IncomingMessage, string>();
+  private readonly requestTraces = new WeakMap<http.IncomingMessage, string>();
 
   // BroccoliDB Zenith-Tier Tables
   private readonly jobsTable: BroccoliDbTable<JobRecord>;
@@ -725,12 +765,20 @@ export class GalxaiRelayServer extends EventEmitter {
   private readonly tenantBuckets = new Map<string, { tokens: number; lastRefillMs: number }>();
 
   // Dynamic Shard Quota & Continuous Drip Engine
-  private currentQuotaProfile: QuotaProfileConfig = { ...QUOTA_PRESETS.balanced };
-  private adaptiveMultiplier: number = 1.0;
+  private currentQuotaProfile: QuotaProfileConfig = { ...QUOTA_PRESETS.adaptive };
+  private shardCursor = 0;
+  private registryRefresh?: Promise<void>;
+  private registryRefreshedAtMs = 0;
+  private registryError: string | null = null;
+  private registryCounts = { total: 0, skipped: 0 };
+  private recoveredShardState = new Map<string, Partial<ShardRecord>>();
 
   // Ephemeral In-Flight Sessions
   private readonly sessions = new Map<string, TransientJobSession>();
   private isDraining = false;
+  private admittedRequests = 0;
+  private stopping?: Promise<void>;
+  private readonly sockets = new Set<Socket>();
   private snapshotIntervalTimer?: NodeJS.Timeout;
 
   // Prometheus Telemetry Counters
@@ -770,14 +818,35 @@ export class GalxaiRelayServer extends EventEmitter {
   constructor(config: Partial<RelayConfig> = {}) {
     super();
     this.config = { ...DEFAULT_CONFIG, ...config };
+    for (const name of ['maxConcurrentRequests', 'maxRssBytes', 'jobMaxWallTimeMs', 'httpBodyTimeoutMs'] as const) {
+      if (!Number.isSafeInteger(this.config[name]) || this.config[name] <= 0) throw new TypeError(`${name} must be a positive safe integer`);
+    }
     if (!Number.isSafeInteger(this.config.drainTimeoutMs) || this.config.drainTimeoutMs <= 0) {
       throw new TypeError('drainTimeoutMs must be a positive safe integer');
     }
-    this.server = http.createServer((req, res) => this.handleHttpRequest(req, res));
+    if (!Number.isSafeInteger(this.config.shardConcurrency) || this.config.shardConcurrency < 1) throw new TypeError('shardConcurrency must be positive');
+    if (!Number.isSafeInteger(this.config.quotaWindowMaxCalls) || this.config.quotaWindowMaxCalls < 0) throw new TypeError('quotaWindowMaxCalls must be nonnegative');
+    if (!Number.isSafeInteger(this.config.quotaWindowDurationMs) || this.config.quotaWindowDurationMs <= 0) throw new TypeError('quotaWindowDurationMs must be positive');
+    this.currentQuotaProfile = {
+      ...QUOTA_PRESETS.adaptive,
+      maxCalls: this.config.quotaWindowMaxCalls,
+      windowDurationMs: this.config.quotaWindowDurationMs,
+    };
+    this.server = http.createServer((req, res) => {
+      void this.handleHttpRequest(req, res).catch(() => {
+        if (!res.headersSent) res.writeHead(500, { 'Content-Type': 'application/json' });
+        if (!res.writableEnded) res.end(JSON.stringify({ error: { code: 'internal_error', message: 'Relay request failed. Inspect its trace ID.' } }));
+      });
+    });
     this.server.keepAliveTimeout = 300000; // 5 minutes keepalive for deep reasoning
     this.server.headersTimeout = 305000;   // 5 min + 5s buffer
     this.server.requestTimeout = 0;        // Never timeout active reasoning sockets
     this.server.maxHeadersCount = 200;
+
+    this.server.on('connection', socket => {
+      this.sockets.add(socket);
+      socket.once('close', () => this.sockets.delete(socket));
+    });
 
     this.server.on('error', (err: any) => {
       console.error('[BroccoliDB Relay] Server socket error:', err.message);
@@ -812,13 +881,21 @@ export class GalxaiRelayServer extends EventEmitter {
       () => { this.metrics.totalBusEventsEmitted++; },
       () => { this.metrics.totalSlowSubscriberDrains++; },
     );
-    this.jobQueue = new JobQueue(this.jobsTable, this.jobBus);
+    this.jobQueue = new JobQueue(this.jobsTable, this.jobBus, this.config.jobTokenRetentionMs);
     this.jobBus.onEvent('job:transport_token', (event) => this.handleTransportToken(event));
     this.jobBus.onEvent('job:transport_completed', (event) => this.handleTransportCompleted(event));
     this.jobBus.onEvent('job:transport_drop', (event) => this.handleTransportDrop(event));
 
     // Subscribe to BroccoliDB CDC Stream for Reactive Job Lifecycle Logging
     this.jobsTable.subscribe((change) => {
+      if (change.after && ['completed', 'failed', 'cancelled'].includes(change.after.status)) {
+        this.telemetry.finish(change.after.id, change.after.status as 'completed' | 'failed' | 'cancelled', change.after.error);
+        const session = this.sessions.get(change.after.id);
+        if (session) {
+          for (const [key, timer] of Object.entries(session)) if (key.endsWith('Timer')) clearTimeout(timer as NodeJS.Timeout);
+          this.sessions.delete(change.after.id);
+        }
+      }
       if (change.operation === 'UPDATE' && change.after?.status === 'completed') {
         this.emit('job:completed', change.after);
       }
@@ -858,6 +935,7 @@ export class GalxaiRelayServer extends EventEmitter {
     for (const validKey of this.config.apiKeys) {
       const validBuffer = Buffer.from(validKey, 'utf-8');
       if (providedBuffer.length === validBuffer.length && crypto.timingSafeEqual(providedBuffer, validBuffer)) {
+        this.principals.set(req, crypto.createHash('sha256').update(validKey).digest('hex'));
         return true;
       }
     }
@@ -895,102 +973,115 @@ export class GalxaiRelayServer extends EventEmitter {
   // SHARD FLEET MANAGEMENT (Governed by BroccoliDB + Vault Decryption)
   // --------------------------------------------------------------------------
 
-  private loadShardFleet(): void {
-    if (process.env.OPENAI_ACCESS_TOKEN || process.env.CODEX_ACCESS_TOKEN) {
-      const token = (process.env.OPENAI_ACCESS_TOKEN || process.env.CODEX_ACCESS_TOKEN)!;
-      const accountId = process.env.CHATGPT_ACCOUNT_ID || 'acc_env_direct';
-      this.shardsTable.put('shard_env_primary', {
-        id: 'shard_env_primary',
-        accountId,
-        accessToken: token,
-        status: 'active',
-        consecutiveFailures: 0,
-        lastUsedAtMs: 0,
-        inFlight: 0,
-        slidingWindowTimestamps: [],
+  private installFleet(items: Array<Partial<ShardRecord> & { accessToken: string; accountId: string }>): void {
+    const previous = this.shardsTable.getAll();
+    const seen = new Set<string>();
+    const next: ShardRecord[] = [];
+    // Prefer the newest credential for each account over expired duplicate rows.
+    for (const item of [...items].sort((a, b) => (b.expiresAtMs ?? 0) - (a.expiresAtMs ?? 0))) {
+      // Account identity survives token rotation and copies in multiple sources.
+      const identity = item.accountId.startsWith('acc_')
+        ? crypto.createHash('sha256').update(item.accessToken).digest('hex') : item.accountId;
+      if (seen.has(identity)) continue;
+      seen.add(identity);
+      const id = item.id || `shard_${crypto.createHash('sha256').update(identity).digest('hex').slice(0, 16)}`;
+      const old = previous.find(s => s.id === id || (s.accountId === item.accountId && !s.accountId.startsWith('acc_')) || s.accessToken === item.accessToken);
+      const state = old ?? this.recoveredShardState.get(id);
+      const rotated = old && old.accessToken !== item.accessToken;
+      next.push({
+        id: old?.id ?? id, accountId: item.accountId, accessToken: item.accessToken,
+        source: item.source, expiresAtMs: item.expiresAtMs,
+        status: state?.status === 'disabled' && rotated ? 'active' : state?.status ?? item.status ?? 'active',
+        consecutiveFailures: state?.consecutiveFailures ?? 0,
+        quotaFailures: state?.quotaFailures ?? 0,
+        lastUsedAtMs: state?.lastUsedAtMs ?? 0,
+        inFlight: old?.inFlight ?? 0,
+        probeInFlight: old?.probeInFlight ?? false,
+        cooldownUntilMs: Math.max(state?.cooldownUntilMs ?? 0, item.cooldownUntilMs ?? 0),
+        providerLimits: state?.providerLimits ?? [],
+        slidingWindowTimestamps: state?.slidingWindowTimestamps ?? [],
       });
-      return;
     }
+    this.shardsTable.clear();
+    for (const shard of next) this.shardsTable.put(shard.id, shard);
+  }
 
-    const paths = [
-      this.config.shardsJsonPath,
-      path.join(process.cwd(), '.galx-shards.json'),
+  private loadShardFleet(): void {
+    if (this.config.registryEnabled) return;
+    const items: Array<Partial<ShardRecord> & { accessToken: string; accountId: string }> = [];
+    const add = (item: any, source: string) => {
+      if (!item || item.permissionRetracted || ['revoked', 'disabled', 'expired'].includes(item.status)) return;
+      if (item.provider && item.provider !== 'openai') return;
+      let secret = item.tokens ?? item;
+      const enc = item.encryptedPayload || item.encryptedSecrets;
+      if (enc && this.config.masterSecret) secret = decryptShardPayload(enc, this.config.masterSecret, item.userId, item.id, item.provider) ?? {};
+      const accessToken = secret.accessToken || secret.access_token || secret.token;
+      if (typeof accessToken !== 'string' || !accessToken) return;
+      let accountId = secret.accountId || secret.account_id || item.accountId || item.account_id;
+      try { accountId ||= JSON.parse(Buffer.from(accessToken.split('.')[1], 'base64url').toString())['https://api.openai.com/auth']?.chatgpt_account_id; } catch {}
+      let expiresAtMs = Number(secret.expiresAtMs || item.expiresAtMs) || undefined;
+      try { expiresAtMs ||= JSON.parse(Buffer.from(accessToken.split('.')[1], 'base64url').toString()).exp * 1000 || undefined; } catch {}
+      items.push({ id: item.id, accessToken, accountId: accountId || 'acc_unknown', source, expiresAtMs });
+    };
+    if (this.config.discoverHostCredentials) {
+      add({ accessToken: process.env.OPENAI_ACCESS_TOKEN || process.env.CODEX_ACCESS_TOKEN, accountId: process.env.CHATGPT_ACCOUNT_ID }, 'environment');
+    }
+    const paths = [this.config.shardsJsonPath, ...(this.config.discoverHostCredentials ? [
       path.join(os.homedir(), '.codex', 'auth.json'),
       path.join(os.homedir(), '.lumi', 'config.json'),
-    ].filter(Boolean) as string[];
+      path.join(os.homedir(), '.dietcode', 'config.json'),
+    ] : [])].filter(Boolean) as string[];
+    for (const filename of new Set(paths)) {
+      if (!fs.existsSync(filename)) continue;
+      try {
+        const data = JSON.parse(fs.readFileSync(filename, 'utf8'));
+        const source = path.basename(path.dirname(filename)) + '/' + path.basename(filename);
+        if (Array.isArray(data)) data.forEach(item => add(item, source));
+        else {
+          add(data, source);
+          if (data.codexOAuth) add(data.codexOAuth, source);
+          if (data.codexOAuthPool) Object.values(data.codexOAuthPool).forEach(item => add(item, source));
+          if (Array.isArray(data.shards)) data.shards.forEach((item: any) => add(item, source));
+        }
+      } catch { console.warn('[Relay:Shards] Could not read a configured credential file'); }
+    }
+    this.installFleet(items);
+    console.log(`[Relay:Shards] Loaded ${this.shardsTable.count()} unique account(s).`);
+  }
 
-    for (const p of paths) {
-      if (fs.existsSync(p)) {
-        try {
-          const raw = fs.readFileSync(p, 'utf-8');
-          const data = JSON.parse(raw);
-          if (Array.isArray(data)) {
-            for (const item of data) {
-              let token = item.accessToken || item.token;
-              let accountId = item.accountId || item.account_id || 'acc_default';
-
-              // If shard contains an encrypted payload, decrypt using Master Secret
-              if (!token && (item.encryptedPayload || item.encryptedSecrets) && this.config.masterSecret) {
-                const enc = item.encryptedPayload || item.encryptedSecrets;
-                const dec = decryptShardPayload(
-                  enc,
-                  this.config.masterSecret,
-                  item.userId || 'usr_galx_master',
-                  item.id,
-                  item.provider || 'openai'
-                );
-                if (dec) {
-                  token = dec.accessToken || dec.apiKey;
-                  accountId = dec.accountId || accountId;
-                }
-              }
-
-              if (token) {
-                const id = item.id || `shard_${Math.random().toString(36).slice(2, 8)}`;
-                this.shardsTable.put(id, {
-                  id,
-                  accountId,
-                  accessToken: token,
-                  status: item.status === 'exhausted' ? 'exhausted' : 'active',
-                  consecutiveFailures: 0,
-                  lastUsedAtMs: item.lastUsedAtMs || 0,
-                  inFlight: 0,
-                  slidingWindowTimestamps: item.slidingWindowTimestamps || [],
-                });
-              }
-            }
-          } else if (data.tokens || data.access_token) {
-            const token = data.tokens?.access_token || data.access_token;
-            const accountId = data.tokens?.account_id || data.account_id || 'acc_default';
-            if (token) {
-              this.shardsTable.put('shard_local_auth', {
-                id: 'shard_local_auth',
-                accountId,
-                accessToken: token,
-                status: 'active',
-                consecutiveFailures: 0,
-                lastUsedAtMs: 0,
-                inFlight: 0,
-                slidingWindowTimestamps: [],
-              });
-            }
-          }
-        } catch {}
+  private async refreshShardRegistry(force = false): Promise<void> {
+    if (!this.config.registryEnabled) return;
+    if (this.registryRefresh) return this.registryRefresh;
+    if (!force && Date.now() - this.registryRefreshedAtMs < 5000) {
+      if (this.registryError) throw new Error(this.registryError);
+      return;
+    }
+    this.registryRefresh = (async () => {
+      try {
+        const rows = await readShardRegistry();
+        const items: Array<Partial<ShardRecord> & { accessToken: string; accountId: string }> = [];
+        for (const row of rows) {
+          if (row.provider !== 'openai' || row.permission_retracted || !['active', 'healthy', 'warming_up', 'half_open', 'cooldown', 'exhausted', 'rate_limited'].includes(row.status)) continue;
+          const secret = decryptRegistryShard(row);
+          if (!secret?.accessToken || !secret?.accountId) continue;
+          items.push({ id: row.id, accessToken: secret.accessToken, accountId: secret.accountId,
+            source: 'PostgreSQL registry', expiresAtMs: Number(row.credential_expires_at_ms) || Number(secret.expiresAtMs) || undefined,
+            cooldownUntilMs: Number(row.cooldown_until_ms) || 0,
+            status: Number(row.cooldown_until_ms) > Date.now() ? 'cooldown' : 'active',
+          });
+        }
+        this.installFleet(items);
+        this.registryCounts = { total: rows.length, skipped: rows.length - items.length };
+        this.registryError = null;
+      } catch (error) {
+        this.registryError = error instanceof Error ? error.message : 'Shard registry unavailable';
+        throw error;
+      } finally {
+        this.registryRefreshedAtMs = Date.now();
+        this.registryRefresh = undefined;
       }
-    }
-
-    if (this.shardsTable.count() === 0) {
-      this.shardsTable.put('shard_dev_fallback', {
-        id: 'shard_dev_fallback',
-        accountId: 'acc_dev_fallback',
-        accessToken: 'mock_dev_token',
-        status: 'active',
-        consecutiveFailures: 0,
-        lastUsedAtMs: 0,
-        inFlight: 0,
-        slidingWindowTimestamps: [],
-      });
-    }
+    })();
+    return this.registryRefresh;
   }
 
   private tuneSocket(ws: any): void {
@@ -1017,6 +1108,8 @@ export class GalxaiRelayServer extends EventEmitter {
       ws.onclose = null;
       if (typeof ws.removeAllListeners === 'function') {
         ws.removeAllListeners();
+        // terminate() can emit an asynchronous error while the handshake closes.
+        ws.on('error', () => {});
       }
       if (typeof ws.terminate === 'function') {
         ws.terminate();
@@ -1026,191 +1119,145 @@ export class GalxaiRelayServer extends EventEmitter {
     } catch {}
   }
 
-  private acquireHealthyShard(excludeShardId?: string): ShardRecord | null {
-    const now = Date.now();
-    const effectiveCap = Math.round(this.currentQuotaProfile.maxCalls * this.adaptiveMultiplier);
-    const windowDuration = this.currentQuotaProfile.windowDurationMs;
-    const windowCutoff = now - windowDuration;
-    const allShards = this.shardsTable.getAll();
-
-    let candidate: ShardRecord | null = null;
-    let minScore = Infinity;
-
-    // Phase 1: Search active healthy shards
-    for (const shard of allShards) {
-      if (excludeShardId && shard.id === excludeShardId && allShards.length > 1) {
-        continue;
-      }
-
-      let currentStatus = shard.status;
-      // Circuit Breaker: Auto-recover from cooldown after 60s
-      if (currentStatus === 'cooldown' && now - shard.lastUsedAtMs > 60_000) {
-        currentStatus = 'active';
-      }
-      if (currentStatus !== 'active') continue;
-
-      // Continuous Leaky Bucket / Token Drip Refill Calculation
-      const dripIntervalSec = (windowDuration / 1000) / effectiveCap;
-      const lastDrip = shard.lastDripRefillMs || shard.lastUsedAtMs || now;
-      const elapsedDripSec = Math.max(0, (now - lastDrip) / 1000);
-      const refilledTokens = elapsedDripSec / dripIntervalSec;
-      const currentDripTokens = Math.min(
-        effectiveCap,
-        (shard.availableDripTokens ?? effectiveCap) + refilledTokens
-      );
-
-      const activeTimestamps = (shard.slidingWindowTimestamps || []).filter((t: number) => t > windowCutoff);
-      const totalCapacityWithBurst = effectiveCap + this.currentQuotaProfile.elasticBurstAllowance;
-
-      // Saturated check (including elastic burst reserve)
-      if (activeTimestamps.length >= totalCapacityWithBurst) {
-        this.shardsTable.put(shard.id, {
-          ...shard,
-          status: 'exhausted',
-          slidingWindowTimestamps: activeTimestamps,
-          availableDripTokens: currentDripTokens,
-          lastDripRefillMs: now,
-        });
-        continue;
-      }
-
-      // Smooth Weighted Round-Robin (SWRR) Score:
-      // In-flight concurrency (x100) + active usage - available continuous drip tokens (x10) + burst penalty
-      const burstPenalty = activeTimestamps.length >= effectiveCap ? 300 : 0;
-      const score = (shard.inFlight * 100) + activeTimestamps.length - Math.round(currentDripTokens * 10) + burstPenalty;
-
-      if (score < minScore) {
-        minScore = score;
-        candidate = {
-          ...shard,
-          status: currentStatus,
-          slidingWindowTimestamps: activeTimestamps,
-          availableDripTokens: currentDripTokens,
-          lastDripRefillMs: now,
-        };
-      }
-    }
-
-    // Phase 2: Half-Open Circuit Breaker Probe if all shards are exhausted/cooling down
-    if (!candidate && allShards.length > 0) {
-      let oldestCooldownShard: ShardRecord | null = null;
-      let oldestCooldownTime = Infinity;
-
-      for (const shard of allShards) {
-        if (shard.status === 'cooldown' || shard.status === 'exhausted') {
-          if (shard.lastUsedAtMs < oldestCooldownTime) {
-            oldestCooldownTime = shard.lastUsedAtMs;
-            oldestCooldownShard = shard;
-          }
-        }
-      }
-
-      if (oldestCooldownShard) {
-        console.warn(`[CircuitBreaker:Half-Open] All shards cooling down; selecting oldest candidate ${oldestCooldownShard.id} as probe`);
-        candidate = { ...oldestCooldownShard, status: 'active', consecutiveFailures: 1 };
-      }
-    }
-
-    if (candidate) {
-      const remainingDrip = Math.max(0, (candidate.availableDripTokens ?? effectiveCap) - 1.0);
-      const updated: ShardRecord = {
-        ...candidate,
-        inFlight: candidate.inFlight + 1,
-        lastUsedAtMs: now,
-        slidingWindowTimestamps: [...candidate.slidingWindowTimestamps, now],
-        availableDripTokens: remainingDrip,
-        lastDripRefillMs: now,
-      };
-      this.shardsTable.put(candidate.id, updated);
-      return updated;
-    }
-    return null;
+  private shardReadyAt(shard: ShardRecord, now = Date.now()): number {
+    if (shard.status === 'disabled' || (shard.expiresAtMs && shard.expiresAtMs <= now)) return Infinity;
+    let deadline = shard.cooldownUntilMs ?? 0;
+    if (shard.status === 'cooldown' && !deadline) deadline = shard.lastUsedAtMs + 60_000;
+    const cap = this.currentQuotaProfile.maxCalls;
+    const usage = shard.slidingWindowTimestamps.filter(t => t > now - this.currentQuotaProfile.windowDurationMs);
+    if (cap > 0 && usage.length >= cap) deadline = Math.max(deadline, usage[usage.length - cap] + this.currentQuotaProfile.windowDurationMs);
+    return deadline;
   }
 
-  private recordShardFailure(shardId: string): void {
+  private fleetRetryAfter(): number | null {
+    const now = Date.now();
+    const deadlines = this.shardsTable.getAll().map(s => this.shardReadyAt(s, now)).filter(Number.isFinite);
+    return deadlines.length ? Math.max(1, Math.ceil((Math.min(...deadlines) - now) / 1000)) : null;
+  }
+
+  private acquireHealthyShard(exclude?: string | Set<string>): ShardRecord | null {
+    const now = Date.now();
+    if (this.config.registryEnabled && (this.registryError || now - this.registryRefreshedAtMs > 5000)) return null;
+    const all = this.shardsTable.getAll();
+    let candidate: ShardRecord | null = null;
+    let selectedIndex = 0;
+    for (let step = 0; step < all.length; step++) {
+      const index = (this.shardCursor + step) % all.length;
+      const shard = all[index];
+      if (typeof exclude === 'string' ? shard.id === exclude : exclude?.has(shard.id)) continue;
+      if (this.shardReadyAt(shard, now) > now || shard.probeInFlight || shard.inFlight >= this.config.shardConcurrency) continue;
+      // After a cooldown, admit exactly one probe only when previous work drained.
+      if ((shard.quotaFailures || shard.consecutiveFailures >= 3) && shard.inFlight > 0) continue;
+      if (!candidate || shard.inFlight < candidate.inFlight) { candidate = shard; selectedIndex = index; }
+    }
+    if (!candidate) return null;
+    this.shardCursor = (selectedIndex + 1) % all.length;
+    const probe = Boolean(candidate.quotaFailures || candidate.consecutiveFailures >= 3);
+    const updated: ShardRecord = {
+      ...candidate, status: 'active', probeInFlight: probe,
+      inFlight: candidate.inFlight + 1, lastUsedAtMs: now,
+      slidingWindowTimestamps: [...candidate.slidingWindowTimestamps.filter(t => t > now - this.currentQuotaProfile.windowDurationMs), now],
+      providerLimits: (candidate.providerLimits ?? []).filter(l => !l.resetAtMs || l.resetAtMs > now).map(l => ({
+        ...l, remaining: /request/i.test(l.name) ? Math.max(0, l.remaining - 1) : l.remaining,
+      })),
+    };
+    const depleted = (updated.providerLimits ?? []).filter(l => l.remaining === 0);
+    if (depleted.length) {
+      updated.cooldownUntilMs = Math.max(updated.cooldownUntilMs ?? 0, ...depleted.map(l => l.resetAtMs ?? now + 60_000));
+      updated.status = 'cooldown';
+      updated.quotaFailures = Math.max(1, updated.quotaFailures ?? 0);
+    }
+    this.shardsTable.put(updated.id, updated);
+    return updated;
+  }
+
+  private recordQuotaFailure(shardId: string, providerDeadline?: number, release = true): void {
     const shard = this.shardsTable.get(shardId);
     if (!shard) return;
-
-    const failures = shard.consecutiveFailures + 1;
-    // Circuit Breaker Trips on 3 consecutive failures
-    const shouldTrip = failures >= 3;
-
-    this.shardsTable.put(shardId, {
-      ...shard,
-      inFlight: Math.max(0, shard.inFlight - 1),
-      consecutiveFailures: failures,
-      status: shouldTrip ? 'cooldown' : shard.status,
-      lastUsedAtMs: Date.now(),
+    const failures = (shard.quotaFailures ?? 0) + 1;
+    this.shardsTable.put(shardId, { ...shard,
+      status: 'cooldown', quotaFailures: failures, probeInFlight: false,
+      inFlight: Math.max(0, shard.inFlight - (release ? 1 : 0)),
+      cooldownUntilMs: Math.max(shard.cooldownUntilMs ?? 0, cooldownDeadline(failures, Date.now(), providerDeadline)),
     });
   }
 
-  private releaseShard(shardId: string): void {
+  private recordShardFailure(shardId: string, unauthorized = false): void {
     const shard = this.shardsTable.get(shardId);
-    if (shard && shard.inFlight > 0) {
-      this.shardsTable.put(shardId, {
-        ...shard,
-        inFlight: Math.max(0, shard.inFlight - 1),
-        consecutiveFailures: 0, // Reset failure count on clean completion
-      });
-    }
+    if (!shard) return;
+    const failures = shard.consecutiveFailures + 1;
+    this.shardsTable.put(shardId, { ...shard,
+      inFlight: Math.max(0, shard.inFlight - 1), probeInFlight: false,
+      consecutiveFailures: failures,
+      status: unauthorized ? 'disabled' : failures >= 3 ? 'cooldown' : shard.status,
+      cooldownUntilMs: failures >= 3 ? Math.max(shard.cooldownUntilMs ?? 0, cooldownDeadline(failures - 2, Date.now())) : shard.cooldownUntilMs,
+    });
+  }
+
+  private releaseShard(shardId: string, succeeded = false): void {
+    const shard = this.shardsTable.get(shardId);
+    if (shard && shard.inFlight > 0) this.shardsTable.put(shardId, { ...shard,
+      inFlight: shard.inFlight - 1, probeInFlight: false,
+      ...(succeeded && (shard.cooldownUntilMs ?? 0) <= Date.now() ? { consecutiveFailures: 0, quotaFailures: 0, status: shard.status === 'disabled' ? 'disabled' as const : 'active' as const } : {}),
+    });
   }
 
   private getRateLimitHeaders(): Record<string, string> {
-    const allShards = this.shardsTable.getAll();
-    const effectiveCap = Math.round(
-      this.currentQuotaProfile.maxCalls * (this.currentQuotaProfile.mode === 'adaptive' ? this.adaptiveMultiplier : 1)
-    );
-    const now = Date.now();
-    const windowDurMs = this.currentQuotaProfile.windowDurationMs;
-
-    let totalUsage = 0;
-    let oldestActiveTimestamp: number | null = null;
-    let totalDripTokens = 0;
-
-    for (const s of allShards) {
-      const active = (s.slidingWindowTimestamps || []).filter((t: number) => t > (now - windowDurMs));
-      totalUsage += active.length;
-      totalDripTokens += (s.availableDripTokens ?? effectiveCap);
-      for (const t of active) {
-        if (oldestActiveTimestamp === null || t < oldestActiveTimestamp) {
-          oldestActiveTimestamp = t;
-        }
-      }
-    }
-
-    const fleetCap = Math.max(effectiveCap, effectiveCap * allShards.length);
-    const remaining = Math.max(0, fleetCap - totalUsage);
-    const burstAllowanceTotal = this.currentQuotaProfile.elasticBurstAllowance * Math.max(1, allShards.length);
-    const burstRemaining = Math.max(0, (fleetCap + burstAllowanceTotal) - totalUsage);
-
-    const resetSec = oldestActiveTimestamp
-      ? Math.max(1, Math.ceil(((oldestActiveTimestamp + windowDurMs) - now) / 1000))
-      : Math.round(this.currentQuotaProfile.dripRefillSec);
-
+    const cap = this.currentQuotaProfile.maxCalls;
     return {
-      'X-RateLimit-Limit': String(fleetCap),
-      'X-RateLimit-Remaining': String(remaining),
-      'X-RateLimit-Reset': String(resetSec),
-      'X-RateLimit-Burst-Remaining': String(burstRemaining),
-      'X-RateLimit-Policy': `${effectiveCap};w=${Math.round(windowDurMs / 1000)};burst=${this.currentQuotaProfile.elasticBurstAllowance}`,
       'X-RateLimit-Mode': this.currentQuotaProfile.mode,
-      'X-RateLimit-Drip-Interval': String(Math.round(this.currentQuotaProfile.dripRefillSec)),
-      'X-RateLimit-Adaptive-Multiplier': this.adaptiveMultiplier.toFixed(2),
+      'X-RateLimit-Policy': cap > 0 ? `${cap};w=${this.currentQuotaProfile.windowDurationMs / 1000}` : 'provider-feedback;local-cap=none',
+      ...(cap > 0 ? { 'X-RateLimit-Limit': String(cap * this.shardsTable.count()) } : {}),
     };
+  }
+
+  private rejectUnavailableFleet(res: http.ServerResponse): void {
+    const retry = this.fleetRetryAfter();
+    res.writeHead(503, { 'Content-Type': 'application/json', ...(retry === null ? {} : { 'Retry-After': String(retry) }), ...this.getRateLimitHeaders() });
+    res.end(JSON.stringify({ error: {
+      code: 'all_shards_unavailable',
+      message: retry === null ? 'No usable credentials. Refresh or enroll an account.' : `No shard is ready. Retry after ${retry}s.`,
+      retry_after_seconds: retry,
+    } }));
   }
 
   // --------------------------------------------------------------------------
   // HTTP INGRESS ROUTER
   // --------------------------------------------------------------------------
 
+  private admissionState() {
+    const rssBytes = process.memoryUsage().rss;
+    const reason = this.isDraining ? 'server_draining'
+      : rssBytes >= this.config.maxRssBytes ? 'relay_memory_pressure'
+      : this.admittedRequests >= this.config.maxConcurrentRequests ? 'relay_overloaded' : null;
+    return { accepting: reason === null, reason, activeRequests: this.admittedRequests,
+      maxConcurrentRequests: this.config.maxConcurrentRequests, rssBytes, maxRssBytes: this.config.maxRssBytes };
+  }
+
   private async handleHttpRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
     const parsedUrl = url.parse(req.url || '', true);
     const pathname = parsedUrl.pathname || '';
     const method = req.method?.toUpperCase() || 'GET';
 
+    const isInference = method === 'POST' && /^\/(v1\/)?(chat\/completions|images\/generations)$/.test(pathname);
+    if (isInference) {
+      const traceId = this.telemetry.start(pathname.includes('images') ? 'Image generation' : 'Chat completion', req.headers['x-galx-task-id']);
+      this.requestTraces.set(req, traceId);
+      res.setHeader('X-Galx-Trace-Id', traceId);
+      res.once('finish', () => {
+        this.telemetry.http(traceId, res.statusCode);
+        if (res.statusCode !== 202) this.telemetry.finish(traceId, res.statusCode < 400 ? 'completed' : 'failed',
+          res.statusCode >= 400 ? `http_${res.statusCode}` : undefined,
+          [400, 401, 408, 409, 413, 422].includes(res.statusCode) ? 'client' : 'relay');
+      });
+      res.once('close', () => {
+        if (!res.writableFinished) this.telemetry.finish(traceId, 'cancelled', 'client_disconnect', 'client');
+      });
+    }
+    res.setHeader('Access-Control-Expose-Headers', 'X-Galx-Trace-Id, X-Galx-Job-Id, Retry-After, Location, Operation-Location');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Last-Event-ID, X-Requested-With, X-Tenant-Id, X-Galx-Api-Key');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Last-Event-ID, X-Requested-With, X-Tenant-Id, X-Galx-Api-Key, X-Galx-Task-Id, Idempotency-Key');
 
     if (method === 'OPTIONS') {
       res.writeHead(204);
@@ -1219,7 +1266,7 @@ export class GalxaiRelayServer extends EventEmitter {
     }
 
     if (pathname === '/health' || pathname === '/health/ready' || pathname === '/health/live') {
-      this.handleHealth(res);
+      this.handleHealth(res, pathname === '/health/ready');
       return;
     }
 
@@ -1228,9 +1275,51 @@ export class GalxaiRelayServer extends EventEmitter {
       return;
     }
 
+    if (pathname === '/telemetry' || pathname === '/telemetry/') {
+      this.handleDashboard(res, 'telemetry.html');
+      return;
+    }
+
     if (pathname === '/' || pathname === '/dashboard' || pathname === '/dashboard/') {
       this.handleDashboard(res);
       return;
+    }
+
+    if (!this.verifyAuthorization(req)) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: { code: 'unauthorized', message: 'Invalid or missing API key' } }));
+      return;
+    }
+    if (pathname === '/api/telemetry' && method === 'GET') {
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      res.end(JSON.stringify({ ...this.telemetry.snapshot(), server: { admission: this.admissionState(), uptimeSec: process.uptime(), rssBytes: process.memoryUsage().rss, retryBudget: this.retryBudget.snapshot(), eventLoopP99Ms: this.eventLoopDelay.count ? this.eventLoopDelay.percentile(99) / 1e6 : null } }));
+      return;
+    }
+    if (isInference) {
+      const admission = this.admissionState();
+      if (!admission.accepting) {
+        const traceId = this.requestTraces.get(req);
+        if (traceId) this.telemetry.finish(traceId, 'failed', admission.reason!, 'relay');
+        res.writeHead(503, { 'Content-Type': 'application/json', 'Retry-After': '2', 'Connection': 'close' });
+        res.end(JSON.stringify({ error: { code: admission.reason, message: admission.reason === 'server_draining'
+          ? 'Relay is restarting. Retry after 2 seconds.'
+          : 'Relay is at capacity. Retry after 2 seconds; no provider request was started.' } }));
+        return;
+      }
+      this.admittedRequests++;
+      let released = false;
+      const release = () => { if (!released) { released = true; this.admittedRequests--; } };
+      res.once('finish', release); res.once('close', release);
+    }
+    try { await this.refreshShardRegistry(); }
+    catch {
+      if (!pathname.startsWith('/api/')) {
+        const traceId = this.requestTraces.get(req);
+        if (traceId) this.telemetry.finish(traceId, 'failed', 'shard_registry_unavailable');
+        res.writeHead(503, { 'Content-Type': 'application/json', 'Retry-After': '5' });
+        res.end(JSON.stringify({ error: { code: 'shard_registry_unavailable', message: 'Shard registry unavailable. Retry after 5s.' } }));
+        return;
+      }
     }
 
     if (pathname === '/api/dashboard/stats') {
@@ -1253,16 +1342,26 @@ export class GalxaiRelayServer extends EventEmitter {
       return;
     }
 
-    // Zero-Trust Authorization Gate
-    if (!this.verifyAuthorization(req)) {
-      res.writeHead(401, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: { message: 'Unauthorized: Invalid or missing API key', code: 'unauthorized' } }));
+    if (pathname === '/api/shards/sync' && method === 'POST') {
+      await this.handleSyncShards(req, res);
+      return;
+    }
+
+    if (pathname === '/api/shards/enroll' && method === 'POST') {
+      await this.handleEnrollShard(req, res);
+      return;
+    }
+
+    if (pathname === '/api/shards' && method === 'GET') {
+      this.handleListShards(res);
       return;
     }
 
     // Multi-Tenant Rate Limiting Gate
-    const tenantId = (req.headers['x-tenant-id'] as string) || req.socket.remoteAddress || 'tenant_default';
+    const tenantId = this.principals.get(req) || req.socket.remoteAddress || 'tenant_default';
     if (!this.checkTenantRateLimit(tenantId)) {
+      const traceId = this.requestTraces.get(req);
+      if (traceId) this.telemetry.finish(traceId, 'failed', 'relay_rate_limited', 'relay');
       res.writeHead(429, {
         'Content-Type': 'application/json',
         'Retry-After': '1',
@@ -1273,6 +1372,8 @@ export class GalxaiRelayServer extends EventEmitter {
     }
 
     if (this.isDraining && method === 'POST') {
+      const traceId = this.requestTraces.get(req);
+      if (traceId) this.telemetry.finish(traceId, 'failed', 'server_draining');
       res.writeHead(503, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: { message: 'Relay server is draining for reload', code: 'server_draining' } }));
       return;
@@ -1288,6 +1389,15 @@ export class GalxaiRelayServer extends EventEmitter {
       return;
     }
 
+    const ownedJobRoute = pathname.match(/^\/v1\/jobs\/([^/]+)(?:\/(?:stream|cancel))?$/);
+    if (ownedJobRoute) {
+      const job = this.jobsTable.get(ownedJobRoute[1]);
+      if (!job || job.tenantId !== tenantId) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: { code: 'job_not_found', message: 'Job not found or no longer retained.' } }));
+        return;
+      }
+    }
     const streamMatch = pathname.match(/^\/v1\/jobs\/([^/]+)\/stream$/);
     if (method === 'GET' && streamMatch) {
       const jobId = streamMatch[1];
@@ -1318,61 +1428,38 @@ export class GalxaiRelayServer extends EventEmitter {
   // --------------------------------------------------------------------------
 
   private async handleChatCompletions(req: http.IncomingMessage, res: http.ServerResponse, tenantId: string): Promise<void> {
-    let bodyText = '';
-    let totalBytes = 0;
-    let bodyExceeded = false;
-
-    // Slowloris & Body Read Timeout (10s)
-    const bodyTimeout = setTimeout(() => {
-      if (!res.writableEnded) {
-        res.writeHead(408, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: { message: 'Request body read timeout', code: 'request_timeout' } }));
-      }
-      req.destroy();
-    }, this.config.httpBodyTimeoutMs);
-
-    req.on('data', (chunk) => {
-      totalBytes += chunk.length;
-      if (totalBytes > this.config.maxPayloadBytes) {
-        bodyExceeded = true;
-        clearTimeout(bodyTimeout);
-        res.writeHead(413, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: { message: 'Payload Too Large: Maximum allowed body is 2 MB', code: 'payload_too_large' } }));
-        req.destroy();
-        return;
-      }
-      bodyText += chunk;
-    });
-
-    req.on('end', () => {
-      clearTimeout(bodyTimeout);
-      if (bodyExceeded) return;
-
-      try {
-        const body = bodyText.trim() ? JSON.parse(bodyText) : {};
+    try {
+        const body = await readJsonBody(req, this.config.maxPayloadBytes, this.config.httpBodyTimeoutMs);
+        if (this.isDraining) throw new RequestError(503, 'server_draining', 'Relay is restarting. Submit the request again after it is ready.');
+        validateModelRequest(body, false);
         const requestedModel = body.model || 'gpt-5.6-terra';
         // ChatGPT session tokens support gpt-5.6-terra, gpt-5.6-luna; map sol -> terra for OAuth scope compliance
         const model = requestedModel === 'gpt-5.6-sol' ? 'gpt-5.6-terra' : requestedModel;
+        this.telemetry.model(this.requestTraces.get(req), requestedModel, model);
         const messages = body.messages || [{ role: 'user', content: 'Hello' }];
         const prompt = messages[messages.length - 1]?.content || '';
         const reasoningEffort = body.reasoning_effort || body.reasoningEffort || 'medium';
 
         // Atomic Idempotent Stream Attachment via BroccoliDB
-        const promptHash = crypto.createHash('sha256').update(`${model}:${JSON.stringify(messages)}`).digest('hex');
+        const promptHash = crypto.createHash('sha256').update(JSON.stringify([tenantId, model, reasoningEffort, body.max_tokens ?? 3500, messages])).digest('hex');
         const existingIdempotency = this.idempotencyTable.get(promptHash);
 
         if (existingIdempotency) {
           const existingJob = this.jobsTable.get(existingIdempotency.jobId);
           if (existingJob && (existingJob.status === 'queued' || existingJob.status === 'running' || existingJob.status === 'streaming')) {
             this.metrics.totalAttachedDuplicates++;
+            const duplicateTrace = this.requestTraces.get(req);
+            if (duplicateTrace) {
+              this.telemetry.attach(duplicateTrace, existingJob.id);
+            }
             const streamUrl = `/v1/jobs/${existingJob.id}/stream`;
             res.writeHead(202, {
               'Content-Type': 'application/json',
               'Location': streamUrl,
               'X-Attached-Stream': 'true',
               'X-Galx-Job-Id': existingJob.id,
-              'X-Galx-Queue-Position': '0',
-              'X-Galx-Eta-Ms': '150000',
+              'Operation-Location': `/v1/jobs/${existingJob.id}`,
+              'Retry-After': '2',
               ...this.getRateLimitHeaders(),
             });
             res.end(JSON.stringify({
@@ -1382,12 +1469,22 @@ export class GalxaiRelayServer extends EventEmitter {
               model: existingJob.model,
               streamUrl,
               isAttachedDuplicate: true,
-              queuePosition: 0,
-              estimatedWaitSec: 150,
+              statusUrl: `/v1/jobs/${existingJob.id}`,
+              traceId: this.requestTraces.get(req),
+              pollAfterMs: 2000,
+              queuePosition: null,
+              estimatedWaitSec: null,
               createdAt: Math.floor(existingJob.createdAtMs / 1000),
             }));
             return;
           }
+        }
+
+        if (!this.shardsTable.getAll().some(s => this.shardReadyAt(s) <= Date.now() && !s.probeInFlight && s.inFlight < this.config.shardConcurrency)) {
+          const traceId = this.requestTraces.get(req);
+          if (traceId) this.telemetry.finish(traceId, 'failed', 'all_shards_unavailable');
+          this.rejectUnavailableFleet(res);
+          return;
         }
 
         // Register Fresh Job in BroccoliDB
@@ -1407,6 +1504,8 @@ export class GalxaiRelayServer extends EventEmitter {
           estimatedTokens: body.max_tokens || 3500,
         };
 
+        const traceId = this.requestTraces.get(req);
+        if (traceId) { jobRecord.traceId = traceId; this.telemetry.bind(traceId, jobId); this.telemetry.phase(traceId, 'Shard selection', 'relay'); }
         this.jobQueue.enqueue(jobRecord);
         this.idempotencyTable.put(promptHash, { id: promptHash, jobId, createdAtMs: Date.now() }, { ttlMs: this.config.idempotencyTtlMs });
 
@@ -1419,6 +1518,7 @@ export class GalxaiRelayServer extends EventEmitter {
           lastSeenAliveMs: Date.now(),
           activeTtftDeadlineMs: this.config.wsTtftTimeoutMs,
           activeAttemptId: 0,
+          attemptedShardIds: new Set(),
         };
 
         // Layer 6: Absolute Wall Clock Ceiling (300s) attached to session across failovers
@@ -1445,8 +1545,8 @@ export class GalxaiRelayServer extends EventEmitter {
           'Content-Type': 'application/json',
           'Location': streamUrl,
           'X-Galx-Job-Id': jobId,
-          'X-Galx-Queue-Position': '0',
-          'X-Galx-Eta-Ms': '150000',
+          'Operation-Location': `/v1/jobs/${jobId}`,
+          'Retry-After': '2',
           ...this.getRateLimitHeaders(),
         });
         res.end(JSON.stringify({
@@ -1456,15 +1556,19 @@ export class GalxaiRelayServer extends EventEmitter {
           model,
           streamUrl,
           isAttachedDuplicate: false,
-          queuePosition: 0,
-          estimatedWaitSec: 150,
+          statusUrl: `/v1/jobs/${jobId}`,
+          traceId: this.requestTraces.get(req),
+          pollAfterMs: 2000,
+          queuePosition: null,
+          estimatedWaitSec: null,
           createdAt: Math.floor(jobRecord.createdAtMs / 1000),
         }));
-      } catch (err: any) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: { message: err.message, code: 'invalid_request' } }));
+      } catch (err: unknown) {
+        if (res.writableEnded || res.destroyed) return;
+        const failure = err instanceof RequestError ? err : new RequestError(500, 'internal_error', 'Relay could not process this request. Use the trace ID to investigate.');
+        res.writeHead(failure.status, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: { message: failure.message, code: failure.code } }));
       }
-    });
   }
 
   // --------------------------------------------------------------------------
@@ -1474,39 +1578,12 @@ export class GalxaiRelayServer extends EventEmitter {
   private async handleImageGenerations(
     req: http.IncomingMessage,
     res: http.ServerResponse,
-    _tenantId: string
+    tenantId: string
   ): Promise<void> {
-    let bodyText = '';
-    let totalBytes = 0;
-    let bodyExceeded = false;
-
-    const bodyTimeout = setTimeout(() => {
-      if (!res.writableEnded) {
-        res.writeHead(408, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: { message: 'Request body read timeout', code: 'request_timeout' } }));
-      }
-      req.destroy();
-    }, this.config.httpBodyTimeoutMs);
-
-    req.on('data', (chunk) => {
-      totalBytes += chunk.length;
-      if (totalBytes > this.config.maxPayloadBytes) {
-        bodyExceeded = true;
-        clearTimeout(bodyTimeout);
-        res.writeHead(413, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: { message: 'Payload Too Large: Maximum allowed body is 2 MB', code: 'payload_too_large' } }));
-        req.destroy();
-        return;
-      }
-      bodyText += chunk;
-    });
-
-    req.on('end', async () => {
-      clearTimeout(bodyTimeout);
-      if (bodyExceeded) return;
-
-      try {
-        const body = bodyText.trim() ? JSON.parse(bodyText) : {};
+    try {
+        const body = await readJsonBody(req, this.config.maxPayloadBytes, this.config.httpBodyTimeoutMs);
+        if (this.isDraining) throw new RequestError(503, 'server_draining', 'Relay is restarting. Submit the request again after it is ready.');
+        validateModelRequest(body, true);
         const prompt = typeof body.prompt === 'string' ? body.prompt.trim() : '';
         if (!prompt) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -1520,9 +1597,17 @@ export class GalxaiRelayServer extends EventEmitter {
           ? 'gpt-5.6-terra'
           : requestedModel;
 
-        const idempotencyKey = (req.headers['idempotency-key'] as string) || body.idempotency_key;
+        const suppliedKey = req.headers['idempotency-key'] || body.idempotency_key;
+        if (suppliedKey && (typeof suppliedKey !== 'string' || suppliedKey.length > 128)) throw new RequestError(400, 'invalid_request', 'Idempotency-Key must have at most 128 characters.');
+        const imageFingerprint = crypto.createHash('sha256').update(JSON.stringify([prompt, requestedModel, body.size, body.quality, body.n, body.response_format])).digest('hex');
+        const idempotencyKey = suppliedKey ? crypto.createHash('sha256').update(JSON.stringify(['image', tenantId, suppliedKey])).digest('hex') : undefined;
         if (idempotencyKey) {
           const cached = this.idempotencyTable.get(idempotencyKey);
+          if (cached && (cached as any).imageFingerprint !== imageFingerprint) throw new RequestError(409, 'idempotency_conflict', 'This idempotency key was used with different image parameters. Use a new key.');
+          if (this.pendingImages.has(idempotencyKey)) {
+            res.setHeader('Retry-After', '2');
+            throw new RequestError(409, 'image_request_in_progress', 'An image request with this key is already in progress. Retry with the same key after 2 seconds.');
+          }
           if (cached && (cached as any).imageResponse) {
             res.writeHead(200, {
               'Content-Type': 'application/json',
@@ -1533,35 +1618,24 @@ export class GalxaiRelayServer extends EventEmitter {
           }
         }
 
+        const traceId = this.requestTraces.get(req);
+        this.telemetry.model(traceId, requestedModel, model);
         this.metrics.totalImageJobsSubmitted++;
 
-        // Acquire authoritative healthy shard from SWRR pool
-        const shard = this.acquireHealthyShard();
-        if (!shard) {
-          this.metrics.totalImageJobsFailed++;
-          res.writeHead(503, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({
-            error: {
-              message: 'All shards are currently exhausted or cooling down. Please retry shortly.',
-              code: 'all_shards_exhausted',
-            },
-          }));
-          return;
-        }
-
+        if (idempotencyKey) this.pendingImages.set(idempotencyKey, imageFingerprint);
+        let shardId: string;
+        const controller = new AbortController();
+        this.imageControllers.add(controller);
+        const deadline = setTimeout(() => controller.abort(new Error('image_wall_time_exceeded')), this.config.jobMaxWallTimeMs);
+        const onClose = () => { if (!res.writableFinished) controller.abort(new Error('client_disconnect')); };
+        res.once('close', onClose);
         try {
-          let synthesisResult: { b64_json: string; revised_prompt?: string };
-
-          // Dual Dispatch: If shard has standard OpenAI API key (sk-...), dispatch to OpenAI REST
-          if (shard.accessToken.startsWith('sk-') && !shard.accountId.startsWith('acc_')) {
-            synthesisResult = await this.synthesizeImageViaOpenAiRest(prompt, body, shard.accessToken);
-          } else {
-            // Live Wire Codex WebSocket Synthesis (ChatGPT Plus/Pro OAuth Tokens)
-            synthesisResult = await this.synthesizeImageViaCodex(prompt, model, shard);
-          }
-
-          this.releaseShard(shard.id);
+          const dispatched = await this.synthesizeImageWithFailover(prompt, body, model, traceId, controller.signal);
+          const synthesisResult = dispatched.result;
+          shardId = dispatched.shardId;
+          if (res.destroyed || controller.signal.aborted) return;
           this.metrics.totalImageJobsCompleted++;
+          if (traceId) this.telemetry.finish(traceId, 'completed');
 
           const responseData = {
             created: Math.floor(Date.now() / 1000),
@@ -1580,40 +1654,89 @@ export class GalxaiRelayServer extends EventEmitter {
               jobId: `img_${Date.now()}`,
               createdAtMs: Date.now(),
               imageResponse: responseData,
+              imageFingerprint,
             } as any, { ttlMs: this.config.idempotencyTtlMs });
           }
 
           res.writeHead(200, {
             'Content-Type': 'application/json',
-            'X-Galx-Shard-Id': shard.id,
+            'X-Galx-Shard-Id': shardId,
             ...this.getRateLimitHeaders(),
           });
           res.end(JSON.stringify(responseData));
         } catch (err: any) {
-          this.recordShardFailure(shard.id);
           this.metrics.totalImageJobsFailed++;
+          if (traceId) this.telemetry.finish(traceId, 'failed', controller.signal.aborted ? String(controller.signal.reason?.message || 'image_wall_time_exceeded') : err.telemetryReason || err.message);
+          if (res.destroyed || res.writableEnded) return;
+          if (err.message === 'all_shards_unavailable') { this.rejectUnavailableFleet(res); return; }
           res.writeHead(502, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({
             error: {
-              message: `Image synthesis failed: ${err.message || 'Upstream synthesis error'}`,
+              message: 'Image generation failed. Inspect the trace for provider, connection or deadline evidence.',
               code: 'upstream_image_synthesis_failed',
             },
           }));
+        } finally {
+          clearTimeout(deadline);
+          res.off('close', onClose);
+          this.imageControllers.delete(controller);
+          if (idempotencyKey) this.pendingImages.delete(idempotencyKey);
         }
-      } catch (err: any) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: { message: err.message, code: 'invalid_request' } }));
+      } catch (err: unknown) {
+        if (res.writableEnded || res.destroyed) return;
+        const failure = err instanceof RequestError ? err : new RequestError(500, 'internal_error', 'Relay could not process this request. Use the trace ID to investigate.');
+        res.writeHead(failure.status, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: { message: failure.message, code: failure.code } }));
       }
-    });
+  }
+
+  private async synthesizeImageWithFailover(prompt: string, body: Record<string, unknown>, model: string, traceId?: string, signal: AbortSignal = AbortSignal.timeout(this.config.jobMaxWallTimeMs)) {
+    const attempted = new Set<string>();
+    let lastError: unknown;
+    for (let attempt = 0; attempt <= this.config.maxUpstreamRetries; attempt++) {
+      signal.throwIfAborted();
+      await this.refreshShardRegistry();
+      signal.throwIfAborted();
+      const shard = this.acquireHealthyShard(attempted);
+      if (!shard) throw new Error('all_shards_unavailable');
+      attempted.add(shard.id);
+      this.telemetry.attempt(traceId, shard.id, shard.accessToken.startsWith('sk-') ? 'http' : 'websocket');
+      if (shard.accessToken.startsWith('sk-')) this.telemetry.model(traceId, body.model, body.model || 'dall-e-3');
+      try {
+        const result = shard.accessToken.startsWith('sk-')
+          ? await this.synthesizeImageViaOpenAiRest(prompt, body, shard.accessToken, signal)
+          : await this.synthesizeImageViaCodex(prompt, model, shard, traceId, signal);
+        this.releaseShard(shard.id, true);
+        this.retryBudget.success();
+        return { result, shardId: shard.id };
+      } catch (error: any) {
+        if (signal.aborted) { this.releaseShard(shard.id); throw signal.reason; }
+        const failure = classifyUpstreamError(error.upstream ?? { message: error.message });
+        error.telemetryReason = error.upstream ? `upstream_error_${failure.code}` : error.message;
+        this.telemetry.failedAttempt(traceId, error.telemetryReason);
+        if (!failure.retryable) { this.releaseShard(shard.id); throw error; }
+        if (failure.quota) this.recordQuotaFailure(shard.id, failure.deadline);
+        else this.recordShardFailure(shard.id, failure.unauthorized);
+        lastError = error;
+        if (attempt < this.config.maxUpstreamRetries) {
+          if (!this.retryBudget.take()) throw new Error('relay_retry_budget_exhausted');
+          const backoff = Math.floor(Math.random() * (Math.min(this.config.retryMaxDelayMs, this.config.retryBaseDelayMs * 2 ** attempt) + 1));
+          await delay(backoff, undefined, { signal });
+        }
+      }
+    }
+    throw lastError;
   }
 
   private synthesizeImageViaCodex(
     prompt: string,
     model: string,
-    shard: ShardRecord
+    shard: ShardRecord,
+    traceId?: string,
+    signal?: AbortSignal
   ): Promise<{ b64_json: string; revised_prompt?: string }> {
     return new Promise((resolve, reject) => {
-      const WebSocketClass = (globalThis as any).WebSocket;
+      const WebSocketClass = WebSocket;
       if (!WebSocketClass) {
         return reject(new Error('WebSocket runtime is missing in environment'));
       }
@@ -1635,7 +1758,9 @@ export class GalxaiRelayServer extends EventEmitter {
       let b64Result = '';
       let revisedPrompt = '';
 
+      const onAbort = () => finishError(signal?.reason || new Error('image_cancelled'));
       const cleanup = () => {
+        signal?.removeEventListener('abort', onAbort);
         if (pingInterval) {
           clearInterval(pingInterval);
           pingInterval = null;
@@ -1663,6 +1788,9 @@ export class GalxaiRelayServer extends EventEmitter {
         reject(err);
       };
 
+      if (signal?.aborted) { onAbort(); return; }
+      signal?.addEventListener('abort', onAbort, { once: true });
+
       // Watchdog timeout (90s ceiling for neural visual synthesis)
       watchdogTimer = setTimeout(() => {
         finishError(new Error('Upstream visual synthesis timed out after 90s'));
@@ -1670,12 +1798,19 @@ export class GalxaiRelayServer extends EventEmitter {
 
       try {
         ws = new WebSocketClass(this.config.wsEndpoint, { headers: wsHeaders });
+        ws.on('unexpected-response', (_request: unknown, response: http.IncomingMessage) => {
+          response.resume();
+          finishError(Object.assign(new Error(`Upstream HTTP ${response.statusCode}`), {
+            upstream: { status: response.statusCode, headers: { 'retry-after': response.headers['retry-after'] } },
+          }));
+        });
         this.tuneSocket(ws);
       } catch (err: any) {
         return finishError(err);
       }
 
       ws.onopen = () => {
+        this.telemetry.phase(traceId, 'Generate image (includes network)', 'provider');
         pingInterval = setInterval(() => {
           try {
             if (typeof ws.ping === 'function') {
@@ -1739,7 +1874,7 @@ export class GalxaiRelayServer extends EventEmitter {
 
           if (frame.type === 'error' || (frame.type === 'response.failed' && frame.response?.error)) {
             const errorMsg = frame.error?.message || frame.response?.error?.message || JSON.stringify(frame);
-            finishError(new Error(`Codex WebSocket error: ${errorMsg}`));
+            finishError(Object.assign(new Error(`Codex WebSocket error: ${errorMsg}`), { upstream: frame }));
           }
         } catch (err: any) {
           // Ignore partial non-JSON frames
@@ -1765,9 +1900,11 @@ export class GalxaiRelayServer extends EventEmitter {
   private async synthesizeImageViaOpenAiRest(
     prompt: string,
     body: Record<string, unknown>,
-    apiKey: string
+    apiKey: string,
+    signal: AbortSignal = AbortSignal.timeout(this.config.jobMaxWallTimeMs)
   ): Promise<{ b64_json: string; revised_prompt?: string }> {
     const resp = await fetch('https://api.openai.com/v1/images/generations', {
+      signal,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1785,7 +1922,7 @@ export class GalxaiRelayServer extends EventEmitter {
 
     if (!resp.ok) {
       const errText = await resp.text();
-      throw new Error(`OpenAI REST returned ${resp.status}: ${errText}`);
+      throw Object.assign(new Error(`OpenAI REST returned ${resp.status}: ${errText}`), { upstream: { status: resp.status, headers: { 'retry-after': resp.headers.get('retry-after') } } });
     }
 
     const data = await resp.json() as any;
@@ -1819,12 +1956,19 @@ export class GalxaiRelayServer extends EventEmitter {
 
     const session = this.sessions.get(jobId);
 
-    if (job.isDetached && session?.graceTimer) {
-      clearTimeout(session.graceTimer);
-      session.graceTimer = undefined;
-      this.jobQueue.setDetached(jobId, false);
-      this.metrics.totalGraceReconnectionsWon++;
-      this.metrics.totalReconnections++;
+    const lastEventIdHeader = req.headers['last-event-id'];
+    const cursor = lastEventIdHeader ?? query['last_event_id'] ?? '0';
+    const lastSeqNo = Number(cursor);
+    if (typeof cursor !== 'string' || !/^\d+$/.test(cursor) || !Number.isSafeInteger(lastSeqNo) || lastSeqNo > job.seqCounter) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: { code: 'invalid_replay_cursor', message: 'Last-Event-ID must be a nonnegative sequence number already emitted by this job.' } }));
+      return;
+    }
+    const firstRetained = this.tokensTable.query({ where: { jobId }, sortBy: 'seqNo', sortOrder: 'asc', limit: 1 })[0];
+    if (lastSeqNo < job.seqCounter && (!firstRetained || lastSeqNo < firstRetained.seqNo - 1)) {
+      res.writeHead(409, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: { code: 'replay_window_expired', message: 'Earlier output is no longer retained. Start a new request; replaying this cursor would omit output.' } }));
+      return;
     }
 
     res.writeHead(200, {
@@ -1835,10 +1979,6 @@ export class GalxaiRelayServer extends EventEmitter {
       'X-Galx-Transport': 'broccolidb-resumable-sse-bus',
     });
 
-    const lastEventIdHeader = req.headers['last-event-id'];
-    const lastEventIdQuery = query['last_event_id'] as string;
-    const lastSeqNo = parseInt((lastEventIdHeader || lastEventIdQuery || '0') as string, 10) || 0;
-
     let unsubscribe: () => void;
     try {
       unsubscribe = this.jobBus.subscribe(jobId, res);
@@ -1847,6 +1987,14 @@ export class GalxaiRelayServer extends EventEmitter {
       res.end();
       return;
     }
+    if (job.isDetached && session?.graceTimer) {
+      clearTimeout(session.graceTimer);
+      session.graceTimer = undefined;
+      this.jobQueue.setDetached(jobId, false);
+      this.metrics.totalGraceReconnectionsWon++;
+      this.metrics.totalReconnections++;
+    }
+
     this.jobBus.replay(jobId, res, lastSeqNo, () => this.metrics.totalTokensServedFromBuffer++);
 
     if (job.status === 'completed') {
@@ -1902,8 +2050,9 @@ export class GalxaiRelayServer extends EventEmitter {
                 }
                 session.abortController.abort(new Error('Client disconnect grace window expired'));
                 this.safeCloseSocket(session.upstreamWs);
-                if (currentJob.shardId) {
-                  this.releaseShard(currentJob.shardId);
+                if (session.currentShardId) {
+                  this.releaseShard(session.currentShardId);
+                  session.currentShardId = undefined;
                 }
               }
             }, this.config.clientDisconnectGraceMs);
@@ -1924,14 +2073,19 @@ export class GalxaiRelayServer extends EventEmitter {
     const queuedJob = this.jobsTable.get(jobId);
     if (!queuedJob) return;
 
-    // Acquire healthy shard (exclude previously failed shard if possible)
-    const shard = this.acquireHealthyShard(session.currentShardId);
+    try { await this.refreshShardRegistry(); } catch {
+      if (this.jobQueue.markFailed(jobId, 'shard_registry_unavailable')) this.metrics.totalJobsFailed++;
+      return;
+    }
+    // Acquire healthy shard (exclude every previously attempted account)
+    const shard = this.acquireHealthyShard(session.attemptedShardIds);
     if (!shard) {
       if (this.jobQueue.markFailed(jobId, 'all_shards_exhausted')) this.metrics.totalJobsFailed++;
       return;
     }
 
     session.currentShardId = shard.id;
+    session.attemptedShardIds.add(shard.id);
     session.lastSeenAliveMs = Date.now();
     const job = this.jobQueue.acquireForDispatch(jobId, shard.id, session.retryCount);
     if (!job) {
@@ -1958,7 +2112,8 @@ export class GalxaiRelayServer extends EventEmitter {
     const session = this.sessions.get(job.id);
     if (!session || session.abortController.signal.aborted || session.activeAttemptId !== attempt.id) return;
 
-    const WebSocketClass = (globalThis as any).WebSocket;
+    this.telemetry.attempt(job.id, shard.id);
+    const WebSocketClass = WebSocket;
     if (!WebSocketClass) {
       if (session.downstreamFailoverKeepaliveTimer) {
         clearInterval(session.downstreamFailoverKeepaliveTimer);
@@ -1984,7 +2139,7 @@ export class GalxaiRelayServer extends EventEmitter {
         ? msg.content.map((c: any) => (typeof c === 'string' ? c : c?.text || JSON.stringify(c))).join('\n')
         : (msg.content ? JSON.stringify(msg.content) : '');
 
-      if (msg.role === 'system') {
+      if (msg.role === 'system' || msg.role === 'developer') {
         instructions = instructions ? `${instructions}\n\n${textContent}` : textContent;
       } else {
         inputList.push({
@@ -2035,7 +2190,7 @@ export class GalxaiRelayServer extends EventEmitter {
     // Transport failure publication. Retry and terminal policy runs from the
     // bus consumer after this WebSocket callback has returned.
     let failoverTriggered = false;
-    const triggerFailover = (reason: string, isQuotaError = false, closeCode = 1006) => {
+    const triggerFailover = (reason: string, isQuotaError = false, closeCode = 1006, retryAtMs?: number, unauthorized = false, retryable = true) => {
       if (failoverTriggered) return;
       failoverTriggered = true;
 
@@ -2047,7 +2202,7 @@ export class GalxaiRelayServer extends EventEmitter {
         attemptId: attempt.id,
         shardId: shard.id,
         reason,
-        isQuotaError,
+        isQuotaError, retryAtMs, unauthorized, retryable,
       });
     };
 
@@ -2058,8 +2213,13 @@ export class GalxaiRelayServer extends EventEmitter {
 
     let ws: any;
     try {
-      ws = new WebSocketClass(this.config.wsEndpoint, { headers: wsHeaders });
+      ws = new WebSocketClass(this.config.wsEndpoint, { headers: wsHeaders, maxPayload: this.config.maxPayloadBytes });
       session.upstreamWs = ws;
+      ws.on('unexpected-response', (_request: unknown, response: http.IncomingMessage) => {
+        response.resume();
+        triggerFailover(`upstream_http_${response.statusCode}`, response.statusCode === 429, 1006,
+          retryDeadline(response.headers['retry-after']), response.statusCode === 401 || response.statusCode === 403, ![400, 404, 405, 413, 422].includes(response.statusCode || 0));
+      });
       this.tuneSocket(ws);
     } catch (err: any) {
       triggerFailover(`ws_init_error: ${err.message}`);
@@ -2089,6 +2249,7 @@ export class GalxaiRelayServer extends EventEmitter {
       if (session.connectTimer) clearTimeout(session.connectTimer);
       this.tuneSocket(ws);
       session.lastSeenAliveMs = Date.now();
+      this.telemetry.phase(job.id, 'Wait for first output', 'provider');
       attempt.heartbeatPending = false;
 
       // Handle RFC 6455 protocol-level pongs from Node.js 'ws'
@@ -2224,23 +2385,13 @@ export class GalxaiRelayServer extends EventEmitter {
 
         // Proactive Rate-Limit Handling via OpenAI Responses Wire Frames
         if (data.type === 'rate_limits.updated' && Array.isArray(data.rate_limits)) {
-          for (const limit of data.rate_limits) {
-            if (limit.remaining === 0) {
-              this.metrics.totalProactiveRateLimitCooldowns++;
-              console.warn(`[AntiFragileRelay] Proactive rate-limit trigger on shard ${shard.id} (${limit.name} remaining=0). Cooling down shard proactively...`);
-              const currentShard = this.shardsTable.get(shard.id);
-              if (currentShard) {
-                this.shardsTable.put(shard.id, {
-                  ...currentShard,
-                  status: 'cooldown',
-                  lastUsedAtMs: Date.now(),
-                });
-              }
-              break;
-            }
-          }
-          if (!attempt.hasReceivedFirstToken) {
-            resetTtftTimer(this.config.reasoningActivityExtensionMs);
+          const limits = parseProviderLimits(data.rate_limits);
+          const current = this.shardsTable.get(shard.id);
+          if (current) this.shardsTable.put(shard.id, { ...current, providerLimits: limits });
+          const exhausted = limits.filter(l => l.remaining === 0);
+          if (exhausted.length) {
+            this.metrics.totalProactiveRateLimitCooldowns++;
+            this.recordQuotaFailure(shard.id, Math.max(...exhausted.map(l => l.resetAtMs ?? 0)), false);
           }
           return;
         }
@@ -2337,10 +2488,9 @@ export class GalxaiRelayServer extends EventEmitter {
         }
 
         // Upstream Error Frame (429 Rate Limit / 5xx Overloaded)
-        if (data.type === 'error') {
-          const isQuotaOrRateLimit = data.code === 429 || data.message?.includes('rate_limit') || data.message?.includes('quota');
-          console.warn(`[AntiFragileRelay] Upstream returned error frame on shard ${shard.id}:`, JSON.stringify(data));
-          triggerFailover(`upstream_error_${data.code || 'generic'}`, isQuotaOrRateLimit);
+        if (data.type === 'error' || data.type === 'response.failed') {
+          const failure = classifyUpstreamError(data);
+          triggerFailover(`upstream_error_${failure.code}`, failure.quota, 1006, failure.deadline, failure.unauthorized, failure.retryable);
           return;
         }
       } catch (err: any) {
@@ -2366,7 +2516,7 @@ export class GalxaiRelayServer extends EventEmitter {
         currentJob.status !== 'cancelled' &&
         currentJob.status !== 'failed'
       ) {
-        const isQuota = event?.code === 4029 || event?.code === 1008;
+        const isQuota = event?.code === 4029 || /quota|rate.?limit/.test(event?.reason || '');
         triggerFailover(`ws_abnormal_closure_${event?.code || 'unknown'}`, isQuota);
       } else {
         cleanupTimers();
@@ -2384,6 +2534,7 @@ export class GalxaiRelayServer extends EventEmitter {
     if (!session || session.abortController.signal.aborted || session.activeAttemptId !== event.attemptId) return;
     const allocation = this.jobQueue.recordToken(event.jobId);
     if (!allocation) return;
+    this.telemetry.output(event.jobId);
     const token: JobTokenRecord = {
       id: `${event.jobId}_${allocation.seqNo}`,
       jobId: event.jobId,
@@ -2401,10 +2552,11 @@ export class GalxaiRelayServer extends EventEmitter {
     if (!session || session.activeAttemptId !== event.attemptId) return;
     if (this.jobQueue.markComplete(event.jobId)) {
       this.metrics.totalJobsCompleted++;
-      this.releaseShard(event.shardId);
-      if (this.currentQuotaProfile.mode === 'adaptive') {
-        this.adaptiveMultiplier = Math.min(2.5, Math.round((this.adaptiveMultiplier + 0.02) * 100) / 100);
-      }
+      this.retryBudget.success();
+      this.releaseShard(event.shardId, true);
+      session.currentShardId = undefined;
+      this.safeCloseSocket(session.upstreamWs);
+      session.upstreamWs = undefined;
     }
   }
 
@@ -2421,22 +2573,21 @@ export class GalxaiRelayServer extends EventEmitter {
       return;
     }
 
+    // This attempt returns its capacity once. A later cancellation during
+    // retry backoff must not release another job's slot on the same shard.
+    if (session.currentShardId !== event.shardId) return;
+    session.currentShardId = undefined;
+    this.telemetry.failedAttempt(event.jobId, event.reason);
+    if (event.retryable === false) {
+      this.releaseShard(event.shardId);
+      if (this.jobQueue.markFailed(event.jobId, event.reason)) this.metrics.totalJobsFailed++;
+      return;
+    }
     if (event.isQuotaError) {
       this.metrics.totalShardCooldownEjections++;
-      if (this.currentQuotaProfile.mode === 'adaptive') {
-        this.adaptiveMultiplier = Math.max(0.6, Math.round((this.adaptiveMultiplier - 0.2) * 100) / 100);
-      }
-      const shard = this.shardsTable.get(event.shardId);
-      if (shard) {
-        this.shardsTable.put(event.shardId, {
-          ...shard,
-          inFlight: Math.max(0, shard.inFlight - 1),
-          status: 'cooldown',
-          lastUsedAtMs: Date.now(),
-        });
-      }
+      this.recordQuotaFailure(event.shardId, event.retryAtMs);
     } else {
-      this.recordShardFailure(event.shardId);
+      this.recordShardFailure(event.shardId, event.unauthorized);
     }
 
     if (session.retryCount >= this.config.maxUpstreamRetries) {
@@ -2446,16 +2597,19 @@ export class GalxaiRelayServer extends EventEmitter {
       return;
     }
 
+    if (!this.retryBudget.take()) {
+      if (this.jobQueue.markFailed(event.jobId, 'relay_retry_budget_exhausted')) this.metrics.totalJobsFailed++;
+      return;
+    }
     session.retryCount++;
     this.metrics.totalUpstreamRetries++;
     const baseDelay = this.config.retryBaseDelayMs * Math.pow(2, session.retryCount - 1);
-    const jitter = Math.floor(Math.random() * baseDelay);
-    const backoffMs = Math.min(this.config.retryMaxDelayMs, baseDelay + jitter);
+    const backoffMs = Math.floor(Math.random() * (Math.min(this.config.retryMaxDelayMs, baseDelay) + 1));
     console.warn(
       `[AntiFragileRelay] Upstream failure (${event.reason}) on shard ${event.shardId}. ` +
       `Scheduling queue-owned recovery ${session.retryCount}/${this.config.maxUpstreamRetries} in ${backoffMs}ms...`,
     );
-    setTimeout(() => {
+    session.retryTimer = setTimeout(() => {
       if (!session.abortController.signal.aborted && session.activeAttemptId === event.attemptId) {
         void this.performInFlightFailover(event.jobId, event.reason, event.shardId);
       }
@@ -2498,8 +2652,9 @@ export class GalxaiRelayServer extends EventEmitter {
       this.jobBus.publish({ type: 'job:keepalive', jobId, text: ': transit_failover_in_progress\n\n' });
     }, 1000);
 
+    try { await this.refreshShardRegistry(); } catch {}
     // 1. Acquire alternative healthy shard
-    const newShard = this.acquireHealthyShard(failedShardId);
+    const newShard = this.acquireHealthyShard(session.attemptedShardIds);
     if (!newShard) {
       console.warn(`[AntiFragileRelay] In-flight failover failed: No alternate healthy shards available.`);
       if (session.downstreamFailoverKeepaliveTimer) {
@@ -2512,6 +2667,7 @@ export class GalxaiRelayServer extends EventEmitter {
       return;
     }
 
+    session.attemptedShardIds.add(newShard.id);
     this.metrics.totalMidStreamFailoversWon++;
     console.log(`[AntiFragileRelay] Seamless failover engaged for job ${jobId}: ${failedShardId} -> ${newShard.id} (Tokens emitted so far: ${currentJob.seqCounter})`);
 
@@ -2583,12 +2739,17 @@ export class GalxaiRelayServer extends EventEmitter {
       return;
     }
 
-    res.writeHead(200, { 'Content-Type': 'application/json' });
+    const terminal = ['completed', 'failed', 'cancelled'].includes(job.status);
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...(!terminal ? { 'Retry-After': '2' } : {}) });
     res.end(JSON.stringify({
       id: job.id,
       model: job.model,
       status: job.status,
-      tokensGenerated: job.seqCounter,
+      outputChunks: job.seqCounter,
+      tokensGenerated: null,
+      traceId: job.traceId ?? null,
+      terminal,
+      pollAfterMs: terminal ? null : 2000,
       createdAt: Math.floor(job.createdAtMs / 1000),
       durationMs: ((job.completedAtMs as number) || Date.now()) - job.createdAtMs,
       streamUrl: `/v1/jobs/${job.id}/stream`,
@@ -2620,16 +2781,20 @@ export class GalxaiRelayServer extends EventEmitter {
       this.safeCloseSocket(session.upstreamWs);
     }
 
-    if (cancelled && job.shardId) {
-      this.releaseShard(job.shardId);
+    if (cancelled && session?.currentShardId) {
+      this.releaseShard(session.currentShardId);
+      session.currentShardId = undefined;
     }
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       id: job.id,
       status: cancelled ? 'cancelled' : this.jobsTable.get(jobId)?.status,
-      tokensGenerated: job.seqCounter,
-      refunded: cancelled,
+      outputChunks: job.seqCounter,
+      tokensGenerated: null,
+      cancellationApplied: cancelled,
+      refunded: null,
+      refundStatus: 'not_managed_by_relay',
     }));
   }
 
@@ -2651,12 +2816,17 @@ export class GalxaiRelayServer extends EventEmitter {
       const snapshot = {
         timestampMs: Date.now(),
         jobs: activeJobs,
-        shards: this.shardsTable.getAll(),
+        shards: this.shardsTable.getAll().map(s => ({
+          id: s.id, status: s.status, cooldownUntilMs: s.cooldownUntilMs,
+          consecutiveFailures: s.consecutiveFailures, quotaFailures: s.quotaFailures,
+          providerLimits: s.providerLimits, lastUsedAtMs: s.lastUsedAtMs,
+          slidingWindowTimestamps: s.slidingWindowTimestamps,
+        })),
         metrics: this.metrics,
       };
 
       const tmpPath = `${this.config.stateSnapshotPath}.tmp`;
-      fs.writeFileSync(tmpPath, JSON.stringify(snapshot, null, 2), 'utf-8');
+      fs.writeFileSync(tmpPath, JSON.stringify(snapshot, null, 2), { encoding: 'utf-8', mode: 0o600 });
       fs.renameSync(tmpPath, this.config.stateSnapshotPath); // Atomic POSIX rename
     } catch (err: any) {
       console.error('[BroccoliDB Relay] Snapshot checkpoint failed:', err.message);
@@ -2670,13 +2840,27 @@ export class GalxaiRelayServer extends EventEmitter {
       const raw = fs.readFileSync(this.config.stateSnapshotPath, 'utf-8');
       const snap = JSON.parse(raw);
 
-      if (Array.isArray(snap.jobs)) {
+      for (const state of Array.isArray(snap.shards) ? snap.shards : []) {
+        // Legacy local exhaustion without provider evidence is not a real quota.
+        this.recoveredShardState.set(state.id, {
+          status: state.status === 'disabled' ? 'disabled' : state.cooldownUntilMs > Date.now() ? 'cooldown' : 'active',
+          cooldownUntilMs: state.cooldownUntilMs, quotaFailures: state.quotaFailures,
+          consecutiveFailures: state.consecutiveFailures, lastUsedAtMs: state.lastUsedAtMs,
+          providerLimits: state.providerLimits,
+          slidingWindowTimestamps: (state.slidingWindowTimestamps ?? []).filter((t: number) => Number.isFinite(t)).sort((a: number, b: number) => a - b),
+        });
+      }
+      if (Array.isArray(snap.jobs) && Number.isFinite(snap.timestampMs) && Date.now() - snap.timestampMs < this.config.jobTokenRetentionMs) {
         for (const job of snap.jobs) {
-          // Recover crashed jobs as reconnectable
+          if (!job || typeof job.id !== 'string' || typeof job.tenantId !== 'string') continue;
+          // Transports and output buffers are not checkpointed. Never advertise
+          // a resumable stream or silently repeat provider work after a crash.
           this.jobQueue.restore({
             ...job,
-            isDetached: true,
-            error: 'server_restarted_reconnectable',
+            isDetached: false,
+            status: 'failed',
+            completedAtMs: Date.now(),
+            error: 'relay_restarted_start_new_request',
           });
         }
         console.log(`[BroccoliDB Relay] Recovered ${snap.jobs.length} in-flight jobs from checkpoint snapshot.`);
@@ -2695,15 +2879,17 @@ export class GalxaiRelayServer extends EventEmitter {
   // HEALTH & OBSERVABILITY
   // --------------------------------------------------------------------------
 
-  private handleHealth(res: http.ServerResponse): void {
+  private handleHealth(res: http.ServerResponse, readiness = false): void {
     const mem = process.memoryUsage();
     const activeJobs = this.jobsTable.getAll().filter(
       (record) => record.status === 'running' || record.status === 'streaming'
     );
     const allShards = this.shardsTable.getAll();
 
+    const admission = this.admissionState();
     const healthData = {
-      status: 'ok',
+      status: readiness && !admission.accepting ? 'not_ready' : 'ok',
+      admission,
       service: 'galxai-relay',
       signature: 'galxai-zenith-relay',
       port: this.config.port,
@@ -2713,9 +2899,10 @@ export class GalxaiRelayServer extends EventEmitter {
       uptimeSec: Math.floor((Date.now() - this.metrics.startTimeMs) / 1000),
       shards: {
         total: allShards.length,
-        active: allShards.filter((s) => s.status === 'active').length,
-        exhausted: allShards.filter((s) => s.status === 'exhausted').length,
-        cooldown: allShards.filter((s) => s.status === 'cooldown').length,
+        active: allShards.filter((s) => this.shardStats(s).status === 'active').length,
+        exhausted: allShards.filter((s) => this.shardStats(s).status === 'cooldown').length,
+        cooldown: allShards.filter((s) => this.shardStats(s).status === 'cooldown').length,
+        disabled: allShards.filter((s) => this.shardStats(s).status === 'disabled').length,
       },
       jobs: {
         active: activeJobs.length,
@@ -2752,7 +2939,7 @@ export class GalxaiRelayServer extends EventEmitter {
       },
     };
 
-    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.writeHead(readiness && !admission.accepting ? 503 : 200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
     res.end(JSON.stringify(healthData, null, 2));
   }
 
@@ -2843,15 +3030,12 @@ export class GalxaiRelayServer extends EventEmitter {
     res.end(lines.join('\n') + '\n');
   }
 
-  private handleDashboard(res: http.ServerResponse): void {
+  private handleDashboard(res: http.ServerResponse, filename = 'dashboard.html'): void {
     try {
       const candidatePaths = [
-        path.join(process.cwd(), 'src', 'relay', 'dashboard.html'),
-        path.join(process.cwd(), 'dashboard.html'),
-        '/app/src/relay/dashboard.html',
-        '/app/dashboard.html',
-        '/Users/bozoegg/Desktop/GALXAI/src/relay/dashboard.html',
-        '/Users/bozoegg/Desktop/LUMI-NEW/src/relay/dashboard.html',
+        path.join(process.cwd(), 'src', 'relay', filename),
+        path.join(process.cwd(), filename),
+        path.join('/app/src/relay', filename),
       ];
 
       for (const p of candidatePaths) {
@@ -2879,13 +3063,13 @@ export class GalxaiRelayServer extends EventEmitter {
     const activeJobs = this.jobsTable.getAll().filter(
       (j) => j.status === 'running' || j.status === 'streaming'
     );
-    const recentJobs = this.jobsTable.getAll().slice(-20);
+    const recentJobs = [...this.jobsTable.getAll()].sort((a, b) => b.createdAtMs - a.createdAtMs).slice(0, 20);
 
     const now = Date.now();
-    const effectiveCap = Math.round(this.currentQuotaProfile.maxCalls * this.adaptiveMultiplier);
+    const effectiveCap = this.currentQuotaProfile.maxCalls || null;
     const windowDurationMs = this.currentQuotaProfile.windowDurationMs;
-    const dripIntervalSec = (windowDurationMs / 1000) / effectiveCap;
 
+    const firstOutputs = this.telemetry.snapshot().traces.flatMap(t => t.firstOutputMs === undefined ? [] : [t.firstOutputMs]);
     const stats = {
       status: 'ok',
       service: 'galxai-relay',
@@ -2894,54 +3078,20 @@ export class GalxaiRelayServer extends EventEmitter {
       host: this.config.host,
       activeStreams: activeJobs.length,
       totalRequests: this.metrics.totalJobsCompleted + this.metrics.totalImageJobsCompleted,
-      avgTtftMs: Math.round(this.metrics.totalReasoningChunksReceived > 0 ? 320 : 0),
+      avgTtftMs: firstOutputs.length ? Math.round(firstOutputs.reduce((a, b) => a + b, 0) / firstOutputs.length) : null,
       uptimeSec: Math.floor((Date.now() - this.metrics.startTimeMs) / 1000),
       memory: process.memoryUsage(),
+      registry: { source: this.config.registryEnabled ? 'PostgreSQL registry' : 'local credentials',
+        error: this.registryError, ...this.registryCounts },
       quotaEngine: {
-        mode: this.currentQuotaProfile.mode,
-        baseCap: this.currentQuotaProfile.maxCalls,
-        effectiveCap,
-        windowDurationMs,
-        dripIntervalSec: Math.round(dripIntervalSec * 10) / 10,
-        elasticBurstAllowance: this.currentQuotaProfile.elasticBurstAllowance,
-        adaptiveMultiplier: Math.round(this.adaptiveMultiplier * 100) / 100,
-        fleetTotalCap: allShards.length * effectiveCap,
+        mode: this.currentQuotaProfile.mode, baseCap: effectiveCap, effectiveCap,
+        uncapped: effectiveCap === null, windowDurationMs,
+        fleetTotalCap: effectiveCap === null ? null : allShards.length * effectiveCap,
+        maxUpstreamRetries: this.config.maxUpstreamRetries,
+        shardConcurrency: this.config.shardConcurrency,
+        retryAfterSec: this.fleetRetryAfter(),
       },
-      shards: allShards.map((s) => {
-        const cutoff = now - windowDurationMs;
-        const activeTimestamps = (s.slidingWindowTimestamps || []).filter((t: number) => t > cutoff);
-        const oldest = activeTimestamps.length > 0 ? Math.min(...activeTimestamps) : null;
-        const newest = activeTimestamps.length > 0 ? Math.max(...activeTimestamps) : null;
-        const nextResetMs = oldest ? Math.max(0, (oldest + windowDurationMs) - now) : null;
-
-        const lastDrip = s.lastDripRefillMs || s.lastUsedAtMs || now;
-        const elapsedDripSec = Math.max(0, (now - lastDrip) / 1000);
-        const refilledTokens = elapsedDripSec / dripIntervalSec;
-        const currentDripTokens = Math.min(effectiveCap, (s.availableDripTokens ?? effectiveCap) + refilledTokens);
-        const nextDripSec = Math.max(0, Math.round(dripIntervalSec - (elapsedDripSec % dripIntervalSec)));
-        const burstUsed = Math.max(0, activeTimestamps.length - effectiveCap);
-
-        return {
-          id: s.id,
-          accountId: s.accountId,
-          status: s.status,
-          inFlight: s.inFlight || 0,
-          consecutiveFailures: s.consecutiveFailures || 0,
-          slidingWindowUsage: activeTimestamps.length,
-          slidingWindowCap: effectiveCap,
-          slidingWindowTimestamps: activeTimestamps,
-          oldestTimestampMs: oldest,
-          newestTimestampMs: newest,
-          nextResetMs,
-          windowDurationMs,
-          availableDripTokens: Math.round(currentDripTokens * 10) / 10,
-          dripIntervalSec: Math.round(dripIntervalSec * 10) / 10,
-          nextDripSec,
-          burstUsed,
-          burstAllowance: this.currentQuotaProfile.elasticBurstAllowance,
-          lastUsedAtMs: s.lastUsedAtMs || 0,
-        };
-      }),
+      shards: allShards.map(s => this.shardStats(s, now)),
       database: {
         jobs: this.jobsTable.count(),
         tokens: this.tokensTable.count(),
@@ -2952,7 +3102,8 @@ export class GalxaiRelayServer extends EventEmitter {
         id: j.id,
         model: j.model,
         status: j.status,
-        tokensStreamed: j.tokensStreamed || 0,
+        outputChunks: j.seqCounter,
+        tokensStreamed: null,
         createdAtMs: j.createdAtMs,
       })),
     };
@@ -2963,6 +3114,28 @@ export class GalxaiRelayServer extends EventEmitter {
       'Access-Control-Allow-Origin': '*',
     });
     res.end(JSON.stringify(stats));
+  }
+
+  private shardStats(s: ShardRecord, now = Date.now()) {
+    const cap = this.currentQuotaProfile.maxCalls || null;
+    const duration = this.currentQuotaProfile.windowDurationMs;
+    const timestamps = s.slidingWindowTimestamps.filter(t => t > now - duration);
+    const readyAt = this.shardReadyAt(s, now);
+    const limits = (s.providerLimits ?? []).filter(l => !l.resetAtMs || l.resetAtMs > now);
+    return {
+      id: s.id, accountId: s.accountId, source: s.source,
+      status: !Number.isFinite(readyAt) ? 'disabled' : readyAt > now ? 'cooldown' : s.probeInFlight ? 'probing' : 'active',
+      inFlight: s.inFlight, maxConcurrency: this.config.shardConcurrency,
+      consecutiveFailures: s.consecutiveFailures, quotaFailures: s.quotaFailures ?? 0,
+      slidingWindowUsage: timestamps.length, slidingWindowCap: cap,
+      slidingWindowTimestamps: timestamps.slice(-100), historyTruncated: timestamps.length > 100,
+      windowDurationMs: duration, lastUsedAtMs: s.lastUsedAtMs,
+      cooldownUntilMs: Number.isFinite(readyAt) ? readyAt : null,
+      retryAfterSec: Number.isFinite(readyAt) ? Math.max(0, Math.ceil((readyAt - now) / 1000)) : null,
+      providerLimits: limits,
+      quotaKnown: limits.length > 0,
+      headroom: cap === null ? null : Math.max(0, cap - timestamps.length),
+    };
   }
 
   private async handleSetQuotaProfile(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
@@ -2977,25 +3150,25 @@ export class GalxaiRelayServer extends EventEmitter {
       const data = bodyText.trim() ? JSON.parse(bodyText) : {};
       const requestedMode = data.mode as QuotaMode;
 
-      if (requestedMode && QUOTA_PRESETS[requestedMode]) {
-        this.currentQuotaProfile = { ...QUOTA_PRESETS[requestedMode] };
+      if (requestedMode && !Object.hasOwn(QUOTA_PRESETS, requestedMode)) throw new Error('Unknown quota mode');
+      const next = { ...(requestedMode ? QUOTA_PRESETS[requestedMode] : this.currentQuotaProfile) };
+      if (data.customCap !== undefined) {
+        if (!Number.isSafeInteger(data.customCap) || data.customCap < 0) throw new Error('customCap must be a nonnegative integer; 0 removes the local cap');
+        next.maxCalls = data.customCap;
       }
-
-      if (typeof data.customCap === 'number' && data.customCap > 0) {
-        this.currentQuotaProfile.maxCalls = Math.min(2000, Math.max(10, Math.round(data.customCap)));
-        this.currentQuotaProfile.dripRefillSec = (this.currentQuotaProfile.windowDurationMs / 1000) / this.currentQuotaProfile.maxCalls;
+      if (data.customWindowMin !== undefined) {
+        if (!Number.isFinite(data.customWindowMin) || data.customWindowMin <= 0 || data.customWindowMin > 10080) throw new Error('customWindowMin must be between 0 and 10080');
+        next.windowDurationMs = data.customWindowMin * 60_000;
       }
-
-      if (typeof data.customWindowMin === 'number' && data.customWindowMin > 0) {
-        this.currentQuotaProfile.windowDurationMs = data.customWindowMin * 60 * 1000;
-        this.currentQuotaProfile.dripRefillSec = (this.currentQuotaProfile.windowDurationMs / 1000) / this.currentQuotaProfile.maxCalls;
-      }
+      next.dripRefillSec = 0;
+      next.elasticBurstAllowance = 0;
+      this.currentQuotaProfile = next;
 
       res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
       res.end(JSON.stringify({
         status: 'ok',
         profile: this.currentQuotaProfile,
-        effectiveCap: Math.round(this.currentQuotaProfile.maxCalls * this.adaptiveMultiplier),
+        effectiveCap: this.currentQuotaProfile.maxCalls || null,
         message: `Quota profile updated to ${this.currentQuotaProfile.mode.toUpperCase()}`,
       }));
     } catch (err: any) {
@@ -3024,10 +3197,7 @@ export class GalxaiRelayServer extends EventEmitter {
           this.shardsTable.put(shard.id, {
             ...shard,
             slidingWindowTimestamps: [],
-            status: 'active',
-            consecutiveFailures: 0,
-            availableDripTokens: this.currentQuotaProfile.maxCalls,
-            lastDripRefillMs: Date.now(),
+            // Only clear local history; provider cooldowns and disabled credentials remain.
           });
           resetCount++;
         }
@@ -3037,7 +3207,7 @@ export class GalxaiRelayServer extends EventEmitter {
       res.end(JSON.stringify({
         status: 'ok',
         resetCount,
-        message: `Reset quota for ${resetCount} shard(s)`,
+        message: `Cleared local history for ${resetCount} shard(s); provider cooldowns remain`,
       }));
     } catch (err: any) {
       res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
@@ -3046,36 +3216,53 @@ export class GalxaiRelayServer extends EventEmitter {
   }
 
   private handleQuotaStatus(res: http.ServerResponse): void {
-    const allShards = this.shardsTable.getAll();
-    const now = Date.now();
-    const effectiveCap = Math.round(this.currentQuotaProfile.maxCalls * this.adaptiveMultiplier);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ profile: this.currentQuotaProfile,
+      effectiveCap: this.currentQuotaProfile.maxCalls || null,
+      shards: this.shardsTable.getAll().map(s => this.shardStats(s)),
+    }));
+  }
 
-    const payload = {
-      profile: this.currentQuotaProfile,
-      adaptiveMultiplier: this.adaptiveMultiplier,
-      effectiveCap,
-      fleetAggregateCap: allShards.length * effectiveCap,
-      shards: allShards.map((s) => {
-        const activeTimestamps = (s.slidingWindowTimestamps || []).filter((t: number) => t > (now - this.currentQuotaProfile.windowDurationMs));
-        return {
-          id: s.id,
-          status: s.status,
-          usage: activeTimestamps.length,
-          headroom: Math.max(0, effectiveCap - activeTimestamps.length),
-          availableDripTokens: s.availableDripTokens ?? effectiveCap,
-        };
-      }),
-    };
+  private async handleSyncShards(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    try {
+      if (this.config.registryEnabled) await this.refreshShardRegistry(true);
+      else this.loadShardFleet();
+      const allShards = this.shardsTable.getAll();
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify({
+        status: 'ok',
+        enrolledCount: allShards.length,
+        shards: allShards.map((s) => ({ id: s.id, accountId: s.accountId, status: s.status })),
+        message: `Successfully synchronized ${allShards.length} shards in the fleet pool.`,
+      }));
+    } catch (err: any) {
+      res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify({ error: { message: `Failed to sync shards: ${err.message}` } }));
+    }
+  }
 
-    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-    res.end(JSON.stringify(payload));
+  private async handleEnrollShard(_req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    res.writeHead(409, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: { code: 'registry_enrollment_required',
+      message: 'Enroll credentials with npm run shards:import, then sync the relay fleet.',
+    } }));
+  }
+
+  private handleListShards(res: http.ServerResponse): void {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok', totalCount: this.shardsTable.count(),
+      registry: { source: this.config.registryEnabled ? 'PostgreSQL registry' : 'local credentials', error: this.registryError, ...this.registryCounts },
+      shards: this.shardsTable.getAll().map(s => this.shardStats(s)),
+    }));
   }
 
   // --------------------------------------------------------------------------
   // LIFECYCLE CONTROLS (START & GRACEFUL DRAIN)
   // --------------------------------------------------------------------------
 
-  public start(): Promise<void> {
+  public async start(): Promise<void> {
+    this.eventLoopDelay.enable();
+    await this.refreshShardRegistry(true);
     return new Promise((resolve) => {
       this.server.listen(this.config.port, this.config.host, () => {
         console.log(`[BroccoliDB Relay] Listening on http://${this.config.host}:${this.config.port}`);
@@ -3085,38 +3272,42 @@ export class GalxaiRelayServer extends EventEmitter {
     });
   }
 
-  public async stop(): Promise<void> {
-    console.log('[BroccoliDB Relay] Entering graceful drain mode...');
-    this.isDraining = true;
-    if (this.snapshotIntervalTimer) clearInterval(this.snapshotIntervalTimer);
+  public stop(): Promise<void> {
+    this.stopping ??= this.drainAndStop();
+    return this.stopping;
+  }
 
-    const drained = await this.waitForQueueDrain(this.config.drainTimeoutMs);
-    if (!drained) {
-      console.warn('[BroccoliDB Relay] Drain deadline expired; terminating remaining active jobs.');
+  private async drainAndStop(): Promise<void> {
+    this.isDraining = true;
+    this.eventLoopDelay.disable();
+    if (this.snapshotIntervalTimer) clearInterval(this.snapshotIntervalTimer);
+    console.log('[BroccoliDB Relay] Entering graceful drain mode...');
+    const forceClose = () => {
+      for (const controller of this.imageControllers) controller.abort(new Error('server_draining'));
       for (const [jobId, session] of this.sessions) {
-        const job = this.jobsTable.get(jobId);
-        if (!job || (job.status !== 'queued' && job.status !== 'running' && job.status !== 'streaming')) continue;
+        const shardId = session.currentShardId;
+        session.currentShardId = undefined;
         if (this.jobQueue.markFailed(jobId, 'relay_drain_timeout')) this.metrics.totalJobsFailed++;
-        if (session.downstreamFailoverKeepaliveTimer) {
-          clearInterval(session.downstreamFailoverKeepaliveTimer);
-          session.downstreamFailoverKeepaliveTimer = undefined;
-        }
         session.abortController.abort(new Error('Relay drain timeout'));
         this.safeCloseSocket(session.upstreamWs);
-        if (session.currentShardId) this.releaseShard(session.currentShardId);
+        if (shardId) this.releaseShard(shardId);
       }
-    }
-    await this.jobBus.whenIdle();
-
-    // Save final state snapshot before exit
-    this.saveStateSnapshot();
-
-    return new Promise((resolve) => {
-      this.server.close(() => {
-        console.log('[BroccoliDB Relay] HTTP listener closed cleanly.');
-        resolve();
+      for (const socket of this.sockets) socket.destroy();
+    };
+    const deadline = setTimeout(forceClose, this.config.drainTimeoutMs);
+    try {
+      const drained = await this.waitForQueueDrain(this.config.drainTimeoutMs);
+      if (!drained) forceClose();
+      await this.jobBus.whenIdle();
+      this.saveStateSnapshot();
+      await new Promise<void>(resolve => {
+        this.server.close(() => resolve());
+        this.server.closeIdleConnections();
       });
-    });
+    } finally {
+      clearTimeout(deadline);
+      console.log('[BroccoliDB Relay] HTTP listener closed cleanly.');
+    }
   }
 
   private waitForQueueDrain(timeoutMs: number): Promise<boolean> {
@@ -3126,16 +3317,19 @@ export class GalxaiRelayServer extends EventEmitter {
         if (settled) return;
         settled = true;
         clearTimeout(timer);
+        clearInterval(check);
         this.jobBus.removeListener('relay:drained', onDrained);
         resolve(drained);
       };
-      const onDrained = () => finish(true);
+      const empty = () => this.jobQueue.activeCount() === 0 && this.imageControllers.size === 0 && this.admittedRequests === 0;
+      const onDrained = () => { if (empty()) finish(true); };
       this.jobBus.once('relay:drained', onDrained);
       const timer = setTimeout(() => finish(false), timeoutMs);
+      const check = setInterval(onDrained, 10);
 
       // Subscribe before checking to avoid losing the final transition between
       // an empty-state check and listener installation.
-      if (this.jobQueue.activeCount() === 0) finish(true);
+      if (empty()) finish(true);
     });
   }
 }

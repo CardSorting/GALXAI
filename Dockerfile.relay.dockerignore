@@ -1,0 +1,8 @@
+**
+!package.json
+!src/
+!src/relay/
+!src/relay/**
+!src/core/
+!src/core/broccolidb/
+!src/core/broccolidb/**

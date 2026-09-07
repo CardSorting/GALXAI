@@ -26,6 +26,17 @@ services:
       - CODEX_WS_ENDPOINT=${CODEX_WS_ENDPOINT:-wss://chatgpt.com/backend-api/codex/responses}
       - GALX_VAULT_MASTER_SECRET=${GALX_VAULT_MASTER_SECRET:-}
       - GALX_VAULT_KEY=${GALX_VAULT_KEY:-}
+      - GALX_VAULT_KEY_V1=${GALX_VAULT_KEY_V1:-}
+      - GALX_VAULT_KEY_V2=${GALX_VAULT_KEY_V2:-}
+      - SUPABASE_URL=${SUPABASE_URL:-${NEXT_PUBLIC_SUPABASE_URL:-}}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY:-}
+      - SUPABASE_SECRET_KEY=${SUPABASE_SECRET_KEY:-}
+      - DATABASE_URL=${DATABASE_URL:-}
+      - RELAY_QUOTA_WINDOW_MAX=${RELAY_QUOTA_WINDOW_MAX:-0}
+      - RELAY_MAX_CONCURRENT_REQUESTS=${RELAY_MAX_CONCURRENT_REQUESTS:-64}
+      - RELAY_MAX_RSS_MB=${RELAY_MAX_RSS_MB:-384}
+      - RELAY_SHARD_CONCURRENCY=${RELAY_SHARD_CONCURRENCY:-4}
+      - RELAY_API_KEYS=${RELAY_API_KEYS:-}
       - RELAY_STATE_SNAPSHOT_PATH=/app/.broccolidb/relay-snapshot.json
     volumes:
       # Read-only host credentials mount (ChatGPT / Codex session tokens)
@@ -33,6 +44,7 @@ services:
       # Persistent BroccoliDB snapshots for Last-Event-ID streaming resume
       - ./.broccolidb:/app/.broccolidb
       # Live dashboard HTML mount for zero-rebuild UI synchronicity
+      - ./src/relay/telemetry.html:/app/src/relay/telemetry.html:ro
       - ./src/relay/dashboard.html:/app/dashboard.html:ro
       - ./src/relay/dashboard.html:/app/src/relay/dashboard.html:ro
     deploy:
