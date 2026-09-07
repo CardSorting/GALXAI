@@ -265,7 +265,7 @@ async function runMasterStripeProvisioner() {
     const existingEndpoints = await stripe.webhookEndpoints.list({ limit: 20 });
 
     for (const target of targetEndpoints) {
-      let endpoint = existingEndpoints.data.find(ep => ep.url === target.url);
+      let endpoint = existingEndpoints.data.find(ep => ep.url === target.url && ep.status === 'enabled');
 
       if (!endpoint) {
         endpoint = await stripe.webhookEndpoints.create({

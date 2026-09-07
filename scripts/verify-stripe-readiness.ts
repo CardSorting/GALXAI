@@ -15,9 +15,12 @@ try {
   const endpoints = await stripe.webhookEndpoints.list({ limit: 100 });
   const required = BILLING_WEBHOOK_EVENTS;
   const enabled = endpoints.data.filter(endpoint => endpoint.status === 'enabled' && [`${origin}/api/stripe/webhook`,`${origin}/api/internal/credits/stripe`].includes(endpoint.url));
-  const covered = new Set(enabled.flatMap(endpoint => endpoint.enabled_events));
-  const missing = required.filter(type => !covered.has('*') && !covered.has(type as never));
+  const endpointCoverage = enabled.map(endpoint => ({
+    url: endpoint.url,
+    missingEvents: required.filter(type => !endpoint.enabled_events.includes('*') && !endpoint.enabled_events.includes(type)),
+  }));
+  const missing = [...new Set(endpointCoverage.flatMap(endpoint => endpoint.missingEvents))];
   console.log(JSON.stringify({ mode: config.secretKey.includes('_live_') ? 'live' : 'test', configuredOrigin: origin, chargesEnabled: account.charges_enabled, billingPortalConfigured: true,
     enabledBillingEndpoints: enabled.map(endpoint => ({ url: endpoint.url, apiVersion: endpoint.api_version, allEvents: endpoint.enabled_events.includes('*') })), missingEvents: missing }, null, 2));
-  if (!enabled.length || missing.length) throw new Error('Billing webhook configuration needs an update before deployment');
+  if (new Set(enabled.map(endpoint => endpoint.url)).size !== 2 || missing.length) throw new Error('Both billing endpoints must subscribe to every required event');
 } catch (e) { console.error('Stripe readiness:', (e as { code?: string }).code || (e as Error).message); process.exitCode = 1; }
