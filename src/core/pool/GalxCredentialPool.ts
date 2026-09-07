@@ -37,11 +37,25 @@ interface QueuedAdmissionRequest {
  * 6. Out-of-Band Quota Resynchronization & Model Capability Routing.
  * 7. Asynchronous Write-Behind Egress Buffering (GalxShardSyncBuffer) for Supabase PostgreSQL.
  */
+type LeaseReleaseOptions = {
+  tokensConsumed?: number;
+  tokensUsed?: number;
+  success?: boolean;
+  healthImpact?: 'provider' | 'neutral';
+  upstreamHeaders?: Record<string, string | number | undefined>;
+  errorReason?: string;
+  nowMs?: number;
+  latencyMs?: number;
+  statusCode?: number;
+  modelUsed?: string;
+};
+
 export class GalxCredentialPool {
   private readonly substrate: GalxCredentialSubstrate;
   private readonly rateGovernor: ContinuousTokenBucketRateGovernor;
   private readonly circuitBreaker: GalxCircuitBreaker;
   private strategy: GalxRotationStrategy;
+  private readonly settlingLeases = new Map<string, Promise<boolean>>();
   private readonly activeLeases = new Map<string, ShardLease>();
   public readonly leaseTable: BroccoliDbTable<ShardLease & { id: string }>;
   private readonly inFlightCounts = new Map<string, number>();
@@ -517,19 +531,20 @@ export class GalxCredentialPool {
    */
   async releaseLeaseAuthoritatively(
     leaseId: string,
-    options: {
-      tokensConsumed?: number;
-      tokensUsed?: number;
-      success?: boolean;
-      healthImpact?: 'provider' | 'neutral';
-      upstreamHeaders?: Record<string, string | number | undefined>;
-      errorReason?: string;
-      nowMs?: number;
-      latencyMs?: number;
-      statusCode?: number;
-      modelUsed?: string;
-    } = {}
+    options: LeaseReleaseOptions = {}
   ): Promise<boolean> {
+    const existing = this.settlingLeases.get(leaseId);
+    if (existing) return existing;
+    const settlement = this.settleLeaseAuthoritatively(leaseId, options);
+    this.settlingLeases.set(leaseId, settlement);
+    try {
+      return await settlement;
+    } finally {
+      this.settlingLeases.delete(leaseId);
+    }
+  }
+
+  private async settleLeaseAuthoritatively(leaseId: string, options: LeaseReleaseOptions): Promise<boolean> {
     const lease = this.activeLeases.get(leaseId);
     if (!lease) return false;
 
@@ -537,7 +552,8 @@ export class GalxCredentialPool {
       options.statusCode ?? 500, options.errorReason || '', options.upstreamHeaders,
       options.nowMs ?? Date.now(), this.substrate.getAccount(lease.shardId)
     ) : undefined;
-    const neutral = options.healthImpact === 'neutral' || failure?.affectsHealth === false;
+    const neutral = options.healthImpact === 'neutral' || failure?.affectsHealth === false
+      || lease.expiresAtMs <= (options.nowMs ?? Date.now());
     if (neutral) options = { ...options, healthImpact: 'neutral' };
 
     if (this.shardRepository.isAuthorityConfigured()) {
@@ -1047,10 +1063,6 @@ export class GalxCredentialPool {
       return true;
     }
 
-    if (lease.fencingToken < (currentAccount.fencingToken || 0) - 100) {
-      return false;
-    }
-
     // Asynchronously log health probe to Write-Behind Buffer (Zero Database Egress Delay)
     this.syncBuffer.enqueueProbe({
       shardId: lease.shardId,
@@ -1066,7 +1078,9 @@ export class GalxCredentialPool {
       actualStatusCode, actualError || '', actualHeaders, actualNowMs, currentAccount
     );
     neutralHealth ||= failure?.affectsHealth === false;
-    if (failure?.category === 'model_incompatible' && actualModelUsed) {
+    if (failure?.category === 'model_incompatible' && actualModelUsed
+      && lease.expiresAtMs > actualNowMs && lease.fencingToken === currentAccount.fencingToken
+      && lease.account.registryRevision === currentAccount.registryRevision) {
       this.circuitBreaker.blacklistModelForShard(lease.shardId, actualModelUsed);
     }
     // Release reservations and count usage, but don't turn a caller/relay problem
@@ -1079,7 +1093,8 @@ export class GalxCredentialPool {
       return true;
     }
     const currentCooldown = currentAccount.cooldownUntilTimestampMs || currentAccount.cooldownUntilMs || 0;
-    const stateChanged = (lease.account.registryRevision !== undefined && currentAccount.registryRevision !== lease.account.registryRevision)
+    const stateChanged = lease.expiresAtMs <= actualNowMs
+      || (lease.account.registryRevision !== undefined && currentAccount.registryRevision !== lease.account.registryRevision)
       || lease.fencingToken !== currentAccount.fencingToken
       || currentCooldown > lease.acquiredAtMs
       || ['paused', 'dead', 'quarantined'].includes(currentAccount.status);

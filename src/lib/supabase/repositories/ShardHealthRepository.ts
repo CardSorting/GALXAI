@@ -4,6 +4,7 @@
  * Backed by BroccoliDB L1 reactive table with secondary indexing and statistical aggregation.
  */
 
+import { randomUUID } from 'node:crypto';
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
 import { executePostgresQuery } from '../../db/postgres';
 import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
@@ -23,6 +24,7 @@ export interface ShardHealthProbe {
 
 export class ShardHealthRepository {
   private static instance: ShardHealthRepository;
+  private readonly retainedProbeIds = new Map<string, true>();
   public readonly probeTable: BroccoliDbTable<ShardHealthProbe>;
 
   private constructor() {
@@ -52,9 +54,16 @@ export class ShardHealthRepository {
     }
 
     const now = Date.now();
+    probes = probes.map(p => ({ ...p, id: p.id || randomUUID(), timestampMs: p.timestampMs || now }));
     for (const p of probes) {
-      const id = p.id || `probe_${now}_${Math.random().toString(36).substring(2, 7)}`;
+      const id = p.id!;
       this.probeTable.put(id, { ...p, id, timestampMs: p.timestampMs || now });
+      this.retainedProbeIds.set(id, true);
+      while (this.retainedProbeIds.size > 2000) {
+        const oldest = this.retainedProbeIds.keys().next().value!;
+        this.retainedProbeIds.delete(oldest);
+        this.probeTable.delete(oldest);
+      }
     }
 
     // 1. Direct PostgreSQL Connection Pool Query with Circuit Breaker (<1.5ms)
@@ -95,8 +104,8 @@ export class ShardHealthRepository {
     }
 
     return {
-      success: true,
-      probesIngested: probes.length,
+      success: !process.env.DATABASE_URL && !isSupabaseConfigured(),
+      probesIngested: !process.env.DATABASE_URL && !isSupabaseConfigured() ? probes.length : 0,
       statusTransitions: []
     };
   }

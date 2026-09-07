@@ -10,8 +10,9 @@ function fixture() {
   const transitions: any[] = [];
   const pool: any = Object.create(GalxCredentialPool.prototype);
   Object.assign(pool, {
+    settlingLeases: new Map(),
     activeLeases: new Map([['lease', { leaseId: 'lease', shardId: 's', userId: 'u', fencingToken: 2,
-      estimatedTokens: 10, acquiredAtMs: now, account: { ...account } }]]),
+      estimatedTokens: 10, acquiredAtMs: now, expiresAtMs: now + 120000, account: { ...account } }]]),
     leaseTable: { delete() {} }, inFlightCounts: new Map([['s', 1]]), tenantInFlightCounts: new Map([['u', 1]]),
     circuitBreaker: new GalxCircuitBreaker(),
     substrate: { getAccount: () => account, updateAccount: (value: any) => { account = value; } },
@@ -56,4 +57,27 @@ abandoned.pool.activeLeases.get('lease').expiresAtMs = now - 1;
 assert.equal(abandoned.pool.circuitBreaker.acquireCanarySlot('s'), true);
 assert.equal(abandoned.pool.scavengeExpiredLeases(now), 1);
 assert.equal(abandoned.pool.circuitBreaker.acquireCanarySlot('s'), true, 'expired probe must not leave a permanent local canary lock');
+const expired = fixture();
+expired.pool.activeLeases.get('lease').expiresAtMs = now - 1;
+await expired.pool.releaseLeaseAuthoritatively('lease', { success: false, statusCode: 429, nowMs: now });
+assert.equal(expired.captured.length, 1, 'expired callback cannot publish health evidence');
+assert.equal(expired.captured[0].success, null);
+assert.equal(expired.transitions.length, 0);
+const concurrent = fixture();
+const originalRelease = concurrent.pool.shardRepository.releaseLease;
+let finish!: () => void;
+const gate = new Promise<void>(resolve => { finish = resolve; });
+concurrent.pool.shardRepository.releaseLease = async (options: any) => { await gate; return originalRelease(options); };
+const releases = Array.from({ length: 100 }, () => concurrent.pool.releaseLeaseAuthoritatively('lease', { success: true }));
+finish();
+assert((await Promise.all(releases)).every(Boolean));
+assert.equal(concurrent.captured.length, 1, '100 concurrent callbacks share one authoritative settlement');
+assert.equal(concurrent.pool.settlingLeases.size, 0);
+const retry = fixture();
+const workingRelease = retry.pool.shardRepository.releaseLease;
+retry.pool.shardRepository.releaseLease = async () => { throw new Error('temporary failure'); };
+await assert.rejects(retry.pool.releaseLeaseAuthoritatively('lease'), /temporary failure/);
+assert.equal(retry.pool.settlingLeases.size, 0, 'failed settlement must remain retryable');
+retry.pool.shardRepository.releaseLease = workingRelease;
+assert(await retry.pool.releaseLeaseAuthoritatively('lease'));
 console.log('PASS: neutral failures settle once, release reservations and preserve health; stale successes cannot overwrite newer state.');

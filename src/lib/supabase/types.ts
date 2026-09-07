@@ -1632,7 +1632,8 @@ export interface Database {
           status_code: number;
           is_success: boolean;
           error_message: string | null;
-          recorded_at: string;
+          probe_timestamp_ms: number;
+          created_at: string;
         };
         Insert: {
           id?: string;
@@ -1642,7 +1643,8 @@ export interface Database {
           status_code: number;
           is_success: boolean;
           error_message?: string | null;
-          recorded_at?: string;
+          probe_timestamp_ms?: number;
+          created_at?: string;
         };
         Update: {
           id?: string;
@@ -1652,7 +1654,8 @@ export interface Database {
           status_code?: number;
           is_success?: boolean;
           error_message?: string | null;
-          recorded_at?: string;
+          probe_timestamp_ms?: number;
+          created_at?: string;
         };
         Relationships: [];
       };

@@ -2,13 +2,13 @@
  * GALXAI: Asynchronous Write-Behind Micro-Batch Egress Buffer for Shard Telemetry & State
  *
  * Coalesces high-frequency L1 BroccoliDB mutations (health probes, latency samples,
- * circuit transitions, and token draw metrics) into debounced micro-batches,
- * cutting PostgreSQL network hops and egress overhead by up to 98%.
+ * circuit transitions, and token draw metrics) into bounded micro-batches.
  */
 
+import { randomUUID } from 'node:crypto';
 import { ShardHealthRepository, type ShardHealthProbe } from '../../lib/supabase/repositories/ShardHealthRepository';
 import { ShardRepository } from '../../lib/supabase/repositories/ShardRepository';
-import type { CredentialStatus, GalxShardAccount } from '../contracts/GalxContracts';
+import type { CredentialStatus } from '../contracts/GalxContracts';
 import { coalesceHealthTransitions } from './LeaseHealthTransition';
 
 export interface ShardStateTransitionBatchItem {
@@ -24,13 +24,21 @@ export class GalxShardSyncBuffer {
   private static instance: GalxShardSyncBuffer;
 
   private pendingHealthProbes: ShardHealthProbe[] = [];
-  private pendingStateTransitions: ShardStateTransitionBatchItem[] = [];
+  private pendingStateTransitions = new Map<string, ShardStateTransitionBatchItem>();
   private flushTimer: NodeJS.Timeout | null = null;
   private readonly maxBatchSize = 100;
   private readonly flushIntervalMs = 2500;
   private isFlushing = false;
   private totalFlushFailures = 0;
   private lastFlushErrorAtMs?: number;
+  private nextHealthFlushAtMs = 0;
+  private nextProbeFlushAtMs = 0;
+  private healthFailures = 0;
+  private probeFailures = 0;
+  private droppedProbes = 0;
+  private droppedTransitions = 0;
+  private readonly maxPendingProbes = 1000;
+  private readonly maxPendingTransitions = 500;
 
   private constructor() {
     this.startPeriodicFlush();
@@ -47,29 +55,49 @@ export class GalxShardSyncBuffer {
    * Enqueues a health probe asynchronously with zero database roundtrips.
    */
   public enqueueProbe(probe: ShardHealthProbe): void {
+    const timestamp = probe.timestampMs ?? Date.now();
+    if (!probe.shardId || !probe.workerId || !Number.isFinite(probe.latencyMs)
+      || probe.latencyMs < 0 || probe.latencyMs > 600000
+      || !Number.isInteger(probe.statusCode) || probe.statusCode < 100 || probe.statusCode > 599
+      || !Number.isFinite(timestamp) || Math.abs(Date.now() - timestamp) > 240000) {
+      this.droppedProbes++;
+      return;
+    }
     this.pendingHealthProbes.push({
       ...probe,
-      timestampMs: probe.timestampMs || Date.now()
+      id: probe.id || randomUUID(),
+      timestampMs: timestamp
     });
-    if (this.pendingHealthProbes.length >= this.maxBatchSize) {
-      this.flushNow();
+    if (this.pendingHealthProbes.length > this.maxPendingProbes) {
+      this.droppedProbes += this.pendingHealthProbes.length - this.maxPendingProbes;
+      this.pendingHealthProbes.splice(0, this.pendingHealthProbes.length - this.maxPendingProbes);
     }
+    if (this.pendingHealthProbes.length >= this.maxBatchSize) void this.flushNow();
   }
 
   /**
    * Enqueues a shard status transition for asynchronous debounced write-behind.
    */
   public enqueueStateTransition(transition: ShardStateTransitionBatchItem): void {
-    this.pendingStateTransitions.push(transition);
-    if (this.pendingStateTransitions.length >= this.maxBatchSize) {
-      this.flushNow();
+    this.mergeTransition(transition);
+    if (this.pendingStateTransitions.size >= this.maxBatchSize) void this.flushNow();
+  }
+
+  private mergeTransition(transition: ShardStateTransitionBatchItem): void {
+    const previous = this.pendingStateTransitions.get(transition.shardId);
+    const selected = coalesceHealthTransitions(previous ? [previous, transition] : [transition])[0];
+    if (!selected) return;
+    this.pendingStateTransitions.set(selected.shardId, selected);
+    if (this.pendingStateTransitions.size > this.maxPendingTransitions) {
+      this.pendingStateTransitions.delete(this.pendingStateTransitions.keys().next().value!);
+      this.droppedTransitions++;
     }
   }
 
   public getPendingCount(): { probes: number; transitions: number } {
     return {
       probes: this.pendingHealthProbes.length,
-      transitions: this.pendingStateTransitions.length
+      transitions: this.pendingStateTransitions.size
     };
   }
 
@@ -79,13 +107,21 @@ export class GalxShardSyncBuffer {
     pendingTransitions: number;
     totalFlushFailures: number;
     lastFlushErrorAtMs?: number;
+    nextHealthFlushAtMs: number;
+    nextProbeFlushAtMs: number;
+    droppedProbes: number;
+    droppedTransitions: number;
   } {
     return {
       isFlushing: this.isFlushing,
       pendingProbes: this.pendingHealthProbes.length,
-      pendingTransitions: this.pendingStateTransitions.length,
+      pendingTransitions: this.pendingStateTransitions.size,
       totalFlushFailures: this.totalFlushFailures,
-      lastFlushErrorAtMs: this.lastFlushErrorAtMs
+      lastFlushErrorAtMs: this.lastFlushErrorAtMs,
+      nextHealthFlushAtMs: this.nextHealthFlushAtMs,
+      nextProbeFlushAtMs: this.nextProbeFlushAtMs,
+      droppedProbes: this.droppedProbes,
+      droppedTransitions: this.droppedTransitions
     };
   }
 
@@ -100,45 +136,63 @@ export class GalxShardSyncBuffer {
     }
   }
 
-  /**
-   * Flushes all pending health probes and state transitions in an atomic micro-batch.
-   */
+  /** Independent bounded batches: telemetry failure cannot replay committed health state. */
   public async flushNow(): Promise<{ probesFlushed: number; transitionsFlushed: number }> {
     if (this.isFlushing) return { probesFlushed: 0, transitionsFlushed: 0 };
-    if (this.pendingHealthProbes.length === 0 && this.pendingStateTransitions.length === 0) {
+    if (!this.pendingHealthProbes.length && !this.pendingStateTransitions.size) {
       return { probesFlushed: 0, transitionsFlushed: 0 };
     }
-
     this.isFlushing = true;
-    const probesToFlush = [...this.pendingHealthProbes];
-    const transitionsToFlush = coalesceHealthTransitions(this.pendingStateTransitions);
-
-    this.pendingHealthProbes = [];
-    this.pendingStateTransitions = [];
-
+    // Discard stale best-effort telemetry before the server's five-minute limit.
+    const fresh = this.pendingHealthProbes.filter(p => Math.abs(Date.now() - p.timestampMs!) <= 240000);
+    this.droppedProbes += this.pendingHealthProbes.length - fresh.length;
+    this.pendingHealthProbes = fresh;
+    const probes = Date.now() >= this.nextProbeFlushAtMs ? this.pendingHealthProbes.splice(0, this.maxBatchSize) : [];
+    const transitions = Date.now() >= this.nextHealthFlushAtMs ? [...this.pendingStateTransitions.values()].slice(0, this.maxBatchSize) : [];
+    for (const transition of transitions) this.pendingStateTransitions.delete(transition.shardId);
     try {
-      // Control state must not depend on an unrelated telemetry sink being up.
-      if (transitionsToFlush.length > 0) {
-        const shardRepo = ShardRepository.getInstance();
-        await shardRepo.applyLeaseHealthTransitions(transitionsToFlush);
+      const [health, telemetry] = await Promise.allSettled([
+        (async () => {
+          if (transitions.length) await ShardRepository.getInstance().applyLeaseHealthTransitions(transitions);
+        })(),
+        (async () => {
+          if (probes.length) {
+            const result = await ShardHealthRepository.getInstance().reportHealthProbesBatch(probes);
+            if (!result.success) throw new Error('Health probe ingestion unavailable');
+          }
+        })()
+      ]);
+      if (health.status === 'rejected') {
+        // Merge old failures into current observations; never replace newer work.
+        for (const transition of transitions) this.mergeTransition(transition);
       }
-      if (probesToFlush.length > 0) {
-        await ShardHealthRepository.getInstance().reportHealthProbesBatch(probesToFlush);
+      if (telemetry.status === 'rejected') {
+        const combined = [...probes, ...this.pendingHealthProbes];
+        this.droppedProbes += Math.max(0, combined.length - this.maxPendingProbes);
+        this.pendingHealthProbes = combined.slice(-this.maxPendingProbes);
       }
-
+      const retryAt = (failures: number) => Date.now()
+        + Math.min(30_000, 1000 * 2 ** Math.min(5, failures - 1)) + Math.floor(Math.random() * 250);
+      if (health.status === 'rejected') {
+        this.nextHealthFlushAtMs = retryAt(++this.healthFailures);
+      } else if (transitions.length) {
+        this.healthFailures = 0;
+        this.nextHealthFlushAtMs = 0;
+      }
+      if (telemetry.status === 'rejected') {
+        this.nextProbeFlushAtMs = retryAt(++this.probeFailures);
+      } else if (probes.length) {
+        this.probeFailures = 0;
+        this.nextProbeFlushAtMs = 0;
+      }
+      if (health.status === 'rejected' || telemetry.status === 'rejected') {
+        this.totalFlushFailures++;
+        this.lastFlushErrorAtMs = Date.now();
+      }
+      return { probesFlushed: telemetry.status === 'fulfilled' ? probes.length : 0,
+        transitionsFlushed: health.status === 'fulfilled' ? transitions.length : 0 };
+    } finally {
       this.isFlushing = false;
-      return {
-        probesFlushed: probesToFlush.length,
-        transitionsFlushed: transitionsToFlush.length
-      };
-    } catch {
-      // On network failure, re-queue items with cap to prevent memory leak
-      this.pendingHealthProbes.unshift(...probesToFlush.slice(-200));
-      this.pendingStateTransitions.unshift(...transitionsToFlush.slice(-50));
-      this.totalFlushFailures++;
-      this.lastFlushErrorAtMs = Date.now();
-      this.isFlushing = false;
-      return { probesFlushed: 0, transitionsFlushed: 0 };
     }
   }
 
