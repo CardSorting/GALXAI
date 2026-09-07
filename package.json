@@ -265,6 +265,7 @@
     "db:verify": "tsx scripts/verify-supabase-integrity.ts",
     "db:test": "node --env-file-if-exists=.env.local --import tsx scripts/test-supabase-integration.ts",
     "test:wallet-lifecycle": "node --import tsx scripts/test-wallet-lifecycle.ts",
+    "test:relay-chat": "node --import tsx --test scripts/test-relay-chat-transport.ts scripts/test-relay-client-auth.ts",
     "db:verify-function-security": "node --env-file-if-exists=.env.local --import tsx scripts/verify-function-security.ts",
     "db:push": "node --env-file-if-exists=.env.local --import tsx scripts/push-migrations-direct.ts",
     "db:status": "node --env-file-if-exists=.env.local --import tsx scripts/manage-migrations.ts --status",

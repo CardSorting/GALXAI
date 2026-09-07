@@ -17,6 +17,7 @@ import { ModelCatalog } from './ModelCatalog';
 import { TokenCostCalculator } from '../pricing/TokenCostCalculator';
 import { GalxEdgeBatchBuffer } from '../../workers/cloudflare/GalxEdgeBatchBuffer';
 import { OpenAIAdapter } from './adapters/OpenAIAdapter';
+import { RelayDispatchError } from './adapters/RelayChatTransport';
 import { GalxPreflightValidator } from '../validator/GalxPreflightValidator';
 import { GalxMetricsEngine } from '../telemetry/GalxMetricsEngine';
 import { GalxPrivacyComplianceEngine } from '../privacy/GalxPrivacyComplianceEngine';
@@ -633,6 +634,8 @@ export class GalxModelRouter {
         }).catch((releaseError: unknown) => {
           lastError = releaseError instanceof Error ? releaseError : err;
         });
+        // A shared relay outage cannot be repaired by replaying on other shards.
+        if (err instanceof RelayDispatchError) throw err;
       } finally {
         // 9. Ephemeral RAM Scrubbing - Overwrite plaintext key and token maps
         if (rawTokenSecret) {

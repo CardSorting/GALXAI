@@ -13,7 +13,7 @@ flowchart LR
   R --> V[Private Docker checkpoint volume]
 ```
 
-The current host container is `galxai-relay`. No public tunnel or remote app deployment was verified during this rollout. A host outage, sleep, Docker outage, or lost upstream connection can interrupt inference. The repository's tunnel supervisor is an optional ingress mechanism, not an availability guarantee or an authentication substitute.
+The current host container is `galxai-relay`. The permanent `relay.galx.ai` ingress uses the named Cloudflare tunnel and restartable connector described in [the production relay repair](operations/relay-production-repair.md). A host outage, sleep, Docker outage, or lost upstream connection can interrupt inference. The hostname is stable; the host remains a single availability dependency.
 
 ## Configuration
 

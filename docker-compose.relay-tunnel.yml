@@ -1,0 +1,25 @@
+# The relay stack must already exist on galxai_default.
+# Connector token lives only in ignored, mode-0600 .relay/production-tunnel.env.
+services:
+  tunnel:
+    image: cloudflare/cloudflared:2026.8.3@sha256:51c9cefcb4569df44e1ad403ab1d3d8065aa8e84339bcfc6aee75502e1140339
+    container_name: galxai-relay-tunnel
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "run"]
+    env_file: .relay/production-tunnel.env
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 0.5
+    networks: [relay]
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+networks:
+  relay:
+    external: true
+    name: galxai_default

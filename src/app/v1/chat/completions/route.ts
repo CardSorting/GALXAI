@@ -891,10 +891,12 @@ export async function POST(req: NextRequest) {
       rawMessage.includes('all_shards_cooldown') ||
       rawMessage.includes('matching shard') ||
       message.includes('in cooldown');
+    const isRelayUnavailable = rawMessage.includes('Inference relay unavailable');
     const isUnavailable =
       message.includes('No healthy') ||
       message.includes('overloaded') ||
-      rawMessage.includes('compute_capacity_unavailable');
+      rawMessage.includes('compute_capacity_unavailable') ||
+      isRelayUnavailable;
     const isBadRequest = rawMessage.includes('Unsupported model') || rawMessage.includes('Missing required');
 
     const status = isAuthError
@@ -924,7 +926,9 @@ export async function POST(req: NextRequest) {
         error: {
           message,
           type: errorType,
-          code: isAuthError
+          code: isRelayUnavailable
+            ? 'relay_unavailable'
+            : isAuthError
             ? 'upstream_auth_failed'
             : isUsageLimit
             ? 'usage_limit_exceeded'

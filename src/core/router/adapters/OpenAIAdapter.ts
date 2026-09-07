@@ -1,3 +1,4 @@
+import { executeRelayChat, RelayDispatchError } from './RelayChatTransport';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -312,136 +313,25 @@ export class OpenAIAdapter {
         (secret as any)?.relayUrl
       );
 
+      if (process.env.VERCEL && !vmRelayUrl) {
+        if (timeoutId) clearTimeout(timeoutId);
+        throw new RelayDispatchError('missing_production_relay');
+      }
+
       if (vmRelayUrl && useVmRelay) {
-        try {
-          const relayKey = process.env.VM_RELAY_API_KEY || process.env.RELAY_API_KEYS?.split(',')[0]?.trim();
-          const relayHeaders = { 'Content-Type': 'application/json', ...(relayKey ? { Authorization: `Bearer ${relayKey}` } : {}) };
-          const relayPayload = {
+        if (timeoutId) clearTimeout(timeoutId);
+        return executeRelayChat({
+          url: vmRelayUrl,
+          key: process.env.VM_RELAY_API_KEY || process.env.RELAY_API_KEYS?.split(',')[0]?.trim(),
+          payload: {
             ...body,
-            model: body.model === 'gpt-5.6-sol' ? 'gpt-5.6-terra' : (modelSpec.upstreamId || body.model)
-          };
-
-          let relayResp: Response | null = null;
-          try {
-            relayResp = await fetch(`${vmRelayUrl.replace(/\/+$/, '')}/v1/chat/completions`, {
-              method: 'POST',
-              headers: {
-                ...relayHeaders,
-                'x-galx-client': 'openai-adapter-vm-relay',
-                'x-galx-shard-id': (secret as any)?.id || (secret as any)?.shardId || ''
-              },
-              body: JSON.stringify(relayPayload),
-              signal: controller.signal
-            });
-          } catch (fetchErr) {
-            const autoStarted = await OpenAIAdapter.tryAutoStartLocalRelay(vmRelayUrl);
-            if (autoStarted) {
-              relayResp = await fetch(`${vmRelayUrl.replace(/\/+$/, '')}/v1/chat/completions`, {
-                method: 'POST',
-                headers: {
-                  ...relayHeaders,
-                  'x-galx-client': 'openai-adapter-vm-relay-retry',
-                  'x-galx-shard-id': (secret as any)?.id || (secret as any)?.shardId || ''
-                },
-                body: JSON.stringify(relayPayload),
-                signal: controller.signal
-              });
-            } else {
-              throw fetchErr;
-            }
-          }
-
-          if (timeoutId) clearTimeout(timeoutId);
-          if (relayResp && relayResp.ok) {
-            // Transparently attach to relay streamUrl for decoupled HTTP 202 jobs
-            if (relayResp.status === 202) {
-              const jobData = await relayResp.json() as any;
-              if (jobData?.streamUrl) {
-                const streamTarget = `${vmRelayUrl.replace(/\/+$/, '')}${jobData.streamUrl}`;
-                const streamResp = await fetch(streamTarget, {
-                  method: 'GET',
-                  headers: {
-                    ...relayHeaders,
-                    'accept': 'text/event-stream',
-                    'x-galx-client': 'openai-adapter-vm-relay-stream'
-                  },
-                  signal: controller.signal
-                });
-
-                if (streamResp.ok) {
-                  if (body.stream) {
-                    const streamHeaders: Record<string, string> = {
-                      'content-type': 'text/event-stream; charset=utf-8',
-                      'cache-control': 'no-cache, no-transform',
-                      'connection': 'keep-alive',
-                      'x-accel-buffering': 'no',
-                      'x-galx-job-id': jobData.id || ''
-                    };
-                    return { response: streamResp, headers: streamHeaders };
-                  }
-
-                  // Non-streaming: accumulate tokens until [DONE]
-                  const reader = streamResp.body?.getReader();
-                  let accumulated = '';
-                  if (reader) {
-                    const decoder = new TextDecoder();
-                    let buffer = '';
-                    while (true) {
-                      const { done, value } = await reader.read();
-                      if (done) break;
-                      buffer += decoder.decode(value, { stream: true });
-                      const lines = buffer.split('\n');
-                      buffer = lines.pop() || '';
-                      for (const line of lines) {
-                        const trimmed = line.trim();
-                        if (!trimmed.startsWith('data:')) continue;
-                        const payload = trimmed.slice(5).trim();
-                        if (payload === '[DONE]') break;
-                        try {
-                          const parsed = JSON.parse(payload);
-                          accumulated += parsed.choices?.[0]?.delta?.content || '';
-                        } catch {}
-                      }
-                    }
-                  }
-
-                  const syntheticJson = {
-                    id: jobData.id || `chatcmpl_${Date.now()}`,
-                    object: 'chat.completion',
-                    created: Math.floor(Date.now() / 1000),
-                    model: modelSpec.upstreamId || 'gpt-5.6-sol',
-                    choices: [
-                      {
-                        index: 0,
-                        message: { role: 'assistant', content: accumulated },
-                        finish_reason: 'stop'
-                      }
-                    ],
-                    usage: {
-                      prompt_tokens: 50,
-                      completion_tokens: Math.max(1, accumulated.split(/\s+/).length),
-                      total_tokens: 50 + Math.max(1, accumulated.split(/\s+/).length)
-                    }
-                  };
-
-                  const jsonResp = new Response(JSON.stringify(syntheticJson), {
-                    status: 200,
-                    headers: { 'content-type': 'application/json' }
-                  });
-                  return { response: jsonResp, headers: { 'content-type': 'application/json' } };
-                }
-              }
-            }
-
-            const responseHeaders: Record<string, string> = {};
-            relayResp.headers.forEach((v, k) => {
-              responseHeaders[k.toLowerCase()] = v;
-            });
-            return { response: relayResp, headers: responseHeaders };
-          }
-        } catch {
-          // Fall back to direct local wire WebSocket if remote VM relay is temporarily unreachable
-        }
+            model: body.model === 'gpt-5.6-sol' ? 'gpt-5.6-terra' : (modelSpec.upstreamId || body.model),
+            ...((req as any).reasoning_effort ? { reasoning_effort: (req as any).reasoning_effort } : {})
+          },
+          signal: options?.signal,
+          ttftTimeoutMs: timeoutMs,
+          idleTimeoutMs: options?.deadline?.intraChunkTimeoutMs
+        });
       }
 
       // Direct Native Wire WebSocket (authoritative for local and non-relayed execution)
