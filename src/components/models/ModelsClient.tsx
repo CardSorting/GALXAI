@@ -116,7 +116,7 @@ const CODE_EXAMPLES: Record<CodeLanguage, { label: string; code: string }> = {
 
 // Point official OpenAI client to GALXAI Anycast Gateway
 const openai = new OpenAI({
-  baseURL: 'https://api.galx.ai/v1',
+  baseURL: 'https://galx.ai/v1',
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -137,7 +137,7 @@ import os
 
 # Standard OpenAI SDK with GALXAI baseURL
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key=os.environ.get("GALXAI_API_KEY")
 )
 
@@ -153,7 +153,7 @@ print(response.choices[0].message.content)`,
   },
   curl: {
     label: 'cURL',
-    code: `curl https://api.galx.ai/v1/chat/completions \\
+    code: `curl https://galx.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -d '{
@@ -303,12 +303,12 @@ export function ModelsClient() {
 
   const getModelCurl = (model: ModelSpecItem) => {
     if (model.category === 'image') {
-      return `curl https://api.galx.ai/v1/images/generations \\
+      return `curl https://galx.ai/v1/images/generations \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -d '{"model": "${model.id}", "prompt": "Architectural edge gateway layout", "size": "1024x1024"}'`;
     }
-    return `curl https://api.galx.ai/v1/chat/completions \\
+    return `curl https://galx.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -d '{"model": "${model.id}", "messages": [{"role": "user", "content": "Hello from Anycast gateway"}]}'`;
@@ -318,13 +318,13 @@ export function ModelsClient() {
     if (model.category === 'image') {
       return `from openai import OpenAI
 
-client = OpenAI(base_url="https://api.galx.ai/v1", api_key="galx_live_your_key")
+client = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_your_key")
 res = client.images.generate(model="${model.id}", prompt="Modern UI interface", size="1024x1024")
 print(res.data[0].url)`;
     }
     return `from openai import OpenAI
 
-client = OpenAI(base_url="https://api.galx.ai/v1", api_key="galx_live_your_key")
+client = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_your_key")
 res = client.chat.completions.create(model="${model.id}", messages=[{"role": "user", "content": "Hello"}])
 print(res.choices[0].message.content)`;
   };
@@ -333,13 +333,13 @@ print(res.choices[0].message.content)`;
     if (model.category === 'image') {
       return `import OpenAI from "openai";
 
-const client = new OpenAI({ baseURL: "https://api.galx.ai/v1", apiKey: process.env.GALXAI_API_KEY });
+const client = new OpenAI({ baseURL: "https://galx.ai/v1", apiKey: process.env.GALXAI_API_KEY });
 const res = await client.images.generate({ model: "${model.id}", prompt: "Modern UI interface", size: "1024x1024" });
 console.log(res.data[0].url);`;
     }
     return `import OpenAI from "openai";
 
-const client = new OpenAI({ baseURL: "https://api.galx.ai/v1", apiKey: process.env.GALXAI_API_KEY });
+const client = new OpenAI({ baseURL: "https://galx.ai/v1", apiKey: process.env.GALXAI_API_KEY });
 const res = await client.chat.completions.create({ model: "${model.id}", messages: [{ role: "user", content: "Hello" }] });
 console.log(res.choices[0].message.content);`;
   };
@@ -504,10 +504,10 @@ console.log(res.choices[0].message.content);`;
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-black/60 border border-white/15 text-xs font-mono">
                   <span className="text-zinc-400">Base URL:</span>
-                  <span className="text-cyan-300 font-bold">https://api.galx.ai/v1</span>
+                  <span className="text-cyan-300 font-bold">https://galx.ai/v1</span>
                   <button
                     type="button"
-                    onClick={() => handleCopy('https://api.galx.ai/v1', 'base-url')}
+                    onClick={() => handleCopy('https://galx.ai/v1', 'base-url')}
                     title="Copy Base URL"
                     className="ml-1 p-1 rounded-md hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer"
                   >
@@ -1398,7 +1398,7 @@ console.log(res.choices[0].message.content);`;
 
                   <button
                     type="button"
-                    onClick={() => handleCopy('https://api.galx.ai/v1', 'drawer-base')}
+                    onClick={() => handleCopy('https://galx.ai/v1', 'drawer-base')}
                     className="px-3 py-1.5 rounded-xl bg-black/60 border border-white/10 hover:border-white/20 text-zinc-300 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
                     {copiedKey === 'drawer-base' ? (
@@ -1409,7 +1409,7 @@ console.log(res.choices[0].message.content);`;
                     ) : (
                       <>
                         <Server className="w-3.5 h-3.5 text-cyan-400" />
-                        <span className="text-cyan-300">https://api.galx.ai/v1</span>
+                        <span className="text-cyan-300">https://galx.ai/v1</span>
                       </>
                     )}
                   </button>

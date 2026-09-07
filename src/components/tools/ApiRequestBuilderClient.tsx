@@ -54,7 +54,7 @@ export function ApiRequestBuilderClient() {
 
     switch (selectedLang) {
       case 'curl':
-        return `curl -X POST https://api.galx.ai/v1/chat/completions \\
+        return `curl -X POST https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer \$GALXAI_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -72,7 +72,7 @@ export function ApiRequestBuilderClient() {
         return `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -99,7 +99,7 @@ ${
         return `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -137,7 +137,7 @@ import (
 
 func main() {
 	config := openai.DefaultConfig("galx_live_your_gateway_key")
-	config.BaseURL = "https://api.galx.ai/v1"
+	config.BaseURL = "https://galx.ai/v1"
 	client := openai.NewClientWithConfig(config)
 
 	resp, err := client.CreateChatCompletion(
@@ -164,7 +164,7 @@ func main() {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = OpenAIConfig::new()
-        .with_api_base("https://api.galx.ai/v1")
+        .with_api_base("https://galx.ai/v1")
         .with_api_key("galx_live_your_gateway_key");
 
     let client = Client::with_config(config);
@@ -189,7 +189,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 client = OpenAI::Client.new(
   access_token: "galx_live_your_gateway_key",
-  uri_base: "https://api.galx.ai/v1"
+  uri_base: "https://galx.ai/v1"
 )
 
 response = client.chat(
@@ -211,7 +211,7 @@ puts response.dig("choices", 0, "message", "content")`;
 require_once 'vendor/autoload.php';
 
 $client = OpenAI::factory()
-    ->withBaseUri('https://api.galx.ai/v1')
+    ->withBaseUri('https://galx.ai/v1')
     ->withApiKey('galx_live_your_gateway_key')
     ->make();
 
@@ -269,7 +269,7 @@ echo $result->choices[0]->message->content;`;
   const toolFaqs = [
     {
       q: 'Are all generated snippets 100% wire-compatible with official SDKs?',
-      a: 'Yes. Every code snippet uses official client libraries with standard baseURL overrides pointing to "https://api.galx.ai/v1".',
+      a: 'Yes. Every code snippet uses official client libraries with standard baseURL overrides pointing to "https://galx.ai/v1".',
     },
     {
       q: 'Does streaming SSE work across all supported programming languages?',

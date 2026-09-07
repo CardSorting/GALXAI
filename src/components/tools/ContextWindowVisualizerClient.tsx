@@ -84,7 +84,7 @@ export function ContextWindowVisualizerClient() {
 
 # Ingest massive ${tokenCount.toLocaleString()} token context into ${activeProfile.name}
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 

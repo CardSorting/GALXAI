@@ -48,7 +48,7 @@ export const ERROR_TROUBLESHOOT_DATA: ErrorTroubleshootItem[] = [
 
 # Solve 429 Rate Limits Instantly: Swap Base URL to GALXAI 429 Shield
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",  # Pooled enterprise capacity
+    base_url="https://galx.ai/v1",  # Pooled enterprise capacity
     api_key="galx_live_your_gateway_key"
 )
 
@@ -94,7 +94,7 @@ response = client.chat.completions.create(
       code: `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
   timeout: 60000, // 60s client timeout
 });
@@ -139,7 +139,7 @@ const stream = await client.chat.completions.create({
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -181,7 +181,7 @@ response = client.chat.completions.create(
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -240,7 +240,7 @@ response = client.chat.completions.create(
 
 # Fresh Instant GALXAI Key (Active in <10 seconds)
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_new_key"
 )
 
@@ -282,7 +282,7 @@ print("Connected successfully! Models:", [m.id for m in models.data])`,
 
 # Automated Multi-Cluster Failover Protection
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -326,7 +326,7 @@ response = client.chat.completions.create(
 
 # Zero-Downtime Outage Bypass
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -369,7 +369,7 @@ response = client.chat.completions.create(
       code: `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -413,7 +413,7 @@ const completion = await client.chat.completions.create({
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 

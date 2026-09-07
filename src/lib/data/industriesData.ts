@@ -51,7 +51,7 @@ export const INDUSTRIES_DATA: IndustryItem[] = [
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -104,7 +104,7 @@ class FinancialMetrics(BaseModel):
     guidance_outlook: str
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -148,7 +148,7 @@ print(completion.choices[0].message.parsed)`,
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -194,7 +194,7 @@ print(response.choices[0].message.content)`,
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -240,7 +240,7 @@ for chunk in stream:
     codeExample: {
       language: 'bash',
       title: 'Verify Sovereign CONUS Header',
-      code: `curl -sI https://api.galx.ai/v1/models \\
+      code: `curl -sI https://galx.ai/v1/models \\
   -H "Authorization: Bearer \$GALXAI_API_KEY" | grep "x-galxai-jurisdiction: US-CONUS"`,
     },
     faqs: [
@@ -275,7 +275,7 @@ for chunk in stream:
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -321,7 +321,7 @@ print(response.choices[0].message.content)`,
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -366,7 +366,7 @@ response = client.chat.completions.create(
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 

@@ -108,11 +108,11 @@ export function ModelCreatorView({ model, triggerCopy, copiedKey }: ModelCreator
       steps: [
         'Open Settings -> Models -> Add Model',
         `Enter Model Name: ${model.id}`,
-        'Override Base URL: https://api.galx.ai/v1',
+        'Override Base URL: https://galx.ai/v1',
         'Paste your GALXAI API key into the API Key field',
       ],
       code: `// Cursor / Windsurf Settings:
-Base URL: https://api.galx.ai/v1
+Base URL: https://galx.ai/v1
 API Key: galx_live_your_key_here
 Model Name: ${model.id}`,
     },
@@ -121,11 +121,11 @@ Model Name: ${model.id}`,
       desc: 'Autonomous terminal coding agent',
       steps: [
         'Set environment variable in your ~/.zshrc or ~/.bashrc:',
-        'export OPENAI_BASE_URL="https://api.galx.ai/v1"',
+        'export OPENAI_BASE_URL="https://galx.ai/v1"',
         'export OPENAI_API_KEY="galx_live_your_key_here"',
         `Run: claude --model ${model.id}`,
       ],
-      code: `export OPENAI_BASE_URL="https://api.galx.ai/v1"
+      code: `export OPENAI_BASE_URL="https://galx.ai/v1"
 export OPENAI_API_KEY="galx_live_your_key_here"
 claude --model ${model.id}`,
     },
@@ -134,11 +134,11 @@ claude --model ${model.id}`,
       desc: 'ChatGPT-style personal chat interface',
       steps: [
         'Open App Settings -> Connections / Model Provider -> OpenAI API',
-        'Set API Base URL: https://api.galx.ai/v1',
+        'Set API Base URL: https://galx.ai/v1',
         'Set API Key: galx_live_your_key_here',
         `Select model ${model.id} and start chatting`,
       ],
-      code: `Base URL: https://api.galx.ai/v1
+      code: `Base URL: https://galx.ai/v1
 API Key: galx_live_your_key_here
 Model: ${model.id}`,
     },
@@ -148,11 +148,11 @@ Model: ${model.id}`,
       steps: [
         'Add an OpenAI "Create a Chat Completion" module',
         'Create New Connection -> Advanced Settings',
-        'Base URL: https://api.galx.ai/v1',
+        'Base URL: https://galx.ai/v1',
         'API Key: galx_live_your_key_here',
       ],
       code: `Connection Type: OpenAI Compatible
-Base URL: https://api.galx.ai/v1
+Base URL: https://galx.ai/v1
 API Key: galx_live_your_key_here
 Model: ${model.id}`,
     },
@@ -160,11 +160,11 @@ Model: ${model.id}`,
       name: 'Bolt.new / Next.js',
       desc: 'Web app generator & prompt-to-app builders',
       steps: [
-        'Set environment variable OPENAI_BASE_URL to https://api.galx.ai/v1',
+        'Set environment variable OPENAI_BASE_URL to https://galx.ai/v1',
         'Set OPENAI_API_KEY to your GALXAI key',
         `Specify ${model.id} in your system prompt or client config`,
       ],
-      code: `OPENAI_BASE_URL=https://api.galx.ai/v1
+      code: `OPENAI_BASE_URL=https://galx.ai/v1
 OPENAI_API_KEY=galx_live_your_key_here`,
     },
   };
@@ -475,7 +475,7 @@ OPENAI_API_KEY=galx_live_your_key_here`,
             <div className="flex items-center gap-2 text-xs font-mono">
               <button
                 type="button"
-                onClick={() => triggerCopy('https://api.galx.ai/v1', 'nocode-base-url')}
+                onClick={() => triggerCopy('https://galx.ai/v1', 'nocode-base-url')}
                 className="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-cyan-300 hover:text-white flex items-center gap-1 transition-colors cursor-pointer text-[10px]"
               >
                 {copiedKey === 'nocode-base-url' ? (

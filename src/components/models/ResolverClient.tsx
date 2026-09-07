@@ -68,7 +68,7 @@ export function ResolverClient() {
 
   const getCurlSnippet = (modelId: string, isImage: boolean) => {
     if (isImage) {
-      return `curl https://api.galx.ai/v1/images/generations \\
+      return `curl https://galx.ai/v1/images/generations \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -d '{
@@ -78,7 +78,7 @@ export function ResolverClient() {
     "quality": "standard"
   }'`;
     }
-    return `curl https://api.galx.ai/v1/chat/completions \\
+    return `curl https://galx.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -d '{
@@ -96,7 +96,7 @@ export function ResolverClient() {
       return `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -110,7 +110,7 @@ print(result.data[0].url)`;
     return `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -130,7 +130,7 @@ print(response.choices[0].message.content)`;
       return `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -144,7 +144,7 @@ console.log(res.data[0].url);`;
     return `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 

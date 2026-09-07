@@ -44,6 +44,7 @@ function BaseKeyDetailPage() {
   // Revocation Modal State
   const [isRevokeModalOpen, setIsRevokeModalOpen] = useState(false);
   const [isRevoking, setIsRevoking] = useState(false);
+  const [revokeError, setRevokeError] = useState<string | null>(null);
 
   // Smoke test state
   const [isTesting, setIsTesting] = useState(false);
@@ -53,7 +54,7 @@ function BaseKeyDetailPage() {
     if (!user?.id) return;
     setIsLoading(true);
     try {
-      const res = await resilientFetch<{ key: any }>(`/api/keys/${id}?userId=${encodeURIComponent(user.id)}`, { enableCacheFallback: true });
+      const res = await resilientFetch<{ key: any }>(`/api/keys/${id}?userId=${encodeURIComponent(user.id)}`, { enableCacheFallback: false, cache: 'no-store' });
       if (res.data?.key) {
         setKeyData(res.data.key);
       }
@@ -73,11 +74,16 @@ function BaseKeyDetailPage() {
   const handleConfirmRevoke = async () => {
     if (!keyData || !user?.id) return;
     setIsRevoking(true);
+    setRevokeError(null);
     try {
-      await resilientFetch(`/api/keys?id=${keyData.id}&userId=${encodeURIComponent(user.id)}`, { method: 'DELETE' });
+      const res = await resilientFetch<{ success: boolean }>(`/api/keys?id=${encodeURIComponent(keyData.id)}&userId=${encodeURIComponent(user.id)}`, { method: 'DELETE', enableCacheFallback: false });
+      if (!res.data?.success || res.fromCache) throw new Error('Revocation was not confirmed');
+      setKeyData((previous: any) => ({ ...previous, revoked: true }));
       setIsRevokeModalOpen(false);
       fetchKey();
-    } catch {} finally {
+    } catch {
+      setRevokeError('Could not revoke this key. Try again.');
+    } finally {
       setIsRevoking(false);
     }
   };
@@ -165,7 +171,7 @@ console.log(text);`,
     const start = performance.now();
     try {
       const res = await resilientFetch<{ data: any[] }>('/v1/models', {
-        enableCacheFallback: true
+        enableCacheFallback: false, cache: 'no-store'
       });
       const latencyMs = Math.round(performance.now() - start);
       setTestResult({
@@ -415,6 +421,7 @@ console.log(text);`,
               </button>
             </div>
 
+            {revokeError && <p role="alert" className="text-xs text-rose-300">{revokeError}</p>}
             <div className="space-y-2 text-xs text-zinc-300 leading-relaxed">
               <p>
                 Are you sure you want to revoke <strong>{keyData.name}</strong> (<code className="text-zinc-300 font-mono">{keyData.keyPrefix}...</code>)?

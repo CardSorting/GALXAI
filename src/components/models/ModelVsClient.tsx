@@ -73,7 +73,7 @@ export function ModelVsClient({ matchup, modelA, modelB }: ModelVsClientProps) {
   const pythonSnippet = `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -92,7 +92,7 @@ resp_b = client.chat.completions.create(
   const tsSnippet = `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -108,7 +108,7 @@ const resB = await client.chat.completions.create({
   messages: [{ role: "user", content: "Execute task on ${modelB.name}" }],
 });`;
 
-  const curlSnippet = `curl https://api.galx.ai/v1/chat/completions \\
+  const curlSnippet = `curl https://galx.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -d '{

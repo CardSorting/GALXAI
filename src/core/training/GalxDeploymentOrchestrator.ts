@@ -80,7 +80,7 @@ export default {
     const isCanary = Math.random() < 0.05;
     const targetEndpoint = isCanary
       ? "https://inference.galx.ai/v1/chat/completions" // GALX-Flash-8B
-      : "https://api.galx.ai/v1/chat/completions";       // Primary Production
+      : "https://galx.ai/v1/chat/completions";       // Primary Production
 
     const startTime = Date.now();
     try {
@@ -92,7 +92,7 @@ export default {
 
       if (!response.ok && isCanary) {
         // Automatic Circuit Breaker Failover to Primary
-        return fetch("https://api.galx.ai/v1/chat/completions", {
+        return fetch("https://galx.ai/v1/chat/completions", {
           method: request.method,
           headers: request.headers,
           body: request.body,
@@ -103,7 +103,7 @@ export default {
     } catch (err) {
       if (isCanary) {
         // Transparent Fallback
-        return fetch("https://api.galx.ai/v1/chat/completions", {
+        return fetch("https://galx.ai/v1/chat/completions", {
           method: request.method,
           headers: request.headers,
           body: request.body,

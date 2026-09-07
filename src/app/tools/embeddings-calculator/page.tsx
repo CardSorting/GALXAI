@@ -76,7 +76,7 @@ export default function EmbeddingsCalculatorPage() {
   const codeSchema = createSoftwareSourceCodeSchema({
     name: 'Python Batched Embeddings Client',
     programmingLanguage: 'Python',
-    codeSample: 'from openai import OpenAI\nclient = OpenAI(base_url="https://api.galx.ai/v1", api_key="galx_live_key")\nresp = client.embeddings.create(model="text-embedding-3-small", input=["doc 1", "doc 2"])',
+    codeSample: 'from openai import OpenAI\nclient = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_key")\nresp = client.embeddings.create(model="text-embedding-3-small", input=["doc 1", "doc 2"])',
     targetUrl: 'https://galx.ai/tools/embeddings-calculator#embedding-code-snippet',
   });
 

@@ -1,3 +1,5 @@
+import { GALX_API_BASE_URL } from './base-url';
+
 /**
  * GALXAI Autonomous Zero-Migration Interceptor (Auto-Patcher)
  * Automatically redirects existing OpenAI, Anthropic, and Replicate HTTP traffic to GALXAI Wholesale Gateway.
@@ -27,7 +29,7 @@ export function patchAI(options: { baseURL?: string; apiKey?: string } = {}) {
   }
 
   const originalFetch = globalThis.fetch;
-  const galxBase = (options.baseURL || process.env.GALXAI_BASE_URL || 'https://galx.ai/v1').replace(/\/$/, '');
+  const galxBase = (options.baseURL || process.env.GALXAI_BASE_URL || GALX_API_BASE_URL).replace(/\/$/, '');
   const galxKey = options.apiKey || process.env.GALXAI_API_KEY || process.env.GALX_API_KEY;
 
   globalThis.fetch = async function patchedFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {

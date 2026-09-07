@@ -39,7 +39,7 @@ export const COOKBOOK_RECIPES_DATA: CookbookRecipeItem[] = [
 export const runtime = "edge";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -80,7 +80,7 @@ export async function POST(req: Request) {
       },
       {
         name: 'Instantiate OpenAI Client with GALXAI Base URL',
-        description: 'Provide baseURL="https://api.galx.ai/v1" and set runtime="edge".',
+        description: 'Provide baseURL="https://galx.ai/v1" and set runtime="edge".',
       },
       {
         name: 'Stream Response Chunks',
@@ -116,7 +116,7 @@ class CustomerExtraction(BaseModel):
     estimated_arr_usd: float = Field(description="Projected annual contract value")
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -196,7 +196,7 @@ tools = [
 ]
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -249,7 +249,7 @@ from langchain_openai import ChatOpenAI
 # Shared Gateway LLM with 429 Shield Pooling
 llm = ChatOpenAI(
     model="gpt-5.6-sol",
-    openai_api_base="https://api.galx.ai/v1",
+    openai_api_base="https://galx.ai/v1",
     openai_api_key="galx_live_your_gateway_key"
 )
 
@@ -286,7 +286,7 @@ print(result)`,
       },
       {
         name: 'Initialize Gateway LLM',
-        description: 'Point ChatOpenAI to "https://api.galx.ai/v1".',
+        description: 'Point ChatOpenAI to "https://galx.ai/v1".',
       },
       {
         name: 'Launch Concurrent Swarm',
@@ -315,7 +315,7 @@ print(result)`,
     codeSnippet: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -377,7 +377,7 @@ print(query_knowledge_base("Summarize ESG initiatives."))`,
     codeSnippet: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -423,7 +423,7 @@ print(f"Generated Asset: {image_url}")`,
     codeSnippet: `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -484,7 +484,7 @@ console.log(result);`,
 import numpy as np
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 

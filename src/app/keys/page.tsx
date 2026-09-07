@@ -126,6 +126,7 @@ function BaseGatewayKeysPage() {
   // Revocation confirmation modal state
   const [revokingKey, setRevokingKey] = useState<any | null>(null);
   const [isRevoking, setIsRevoking] = useState(false);
+  const [revokeError, setRevokeError] = useState<string | null>(null);
 
   // Dedicated one-time secret key reveal modal (Stripe / OpenAI standard)
   const [revealedKey, setRevealedKey] = useState<{ apiKey: string; name: string; env: string } | null>(null);
@@ -163,7 +164,8 @@ function BaseGatewayKeysPage() {
     }
     try {
       const res = await resilientFetch<{ keys: any[] }>(`/api/keys?userId=${encodeURIComponent(user.id)}`, {
-        enableCacheFallback: true,
+        enableCacheFallback: false,
+        cache: 'no-store',
       });
       const fetched = res.data?.keys;
       if (Array.isArray(fetched)) {
@@ -310,9 +312,11 @@ function BaseGatewayKeysPage() {
   const handleConfirmRevoke = async () => {
     if (!revokingKey || !user?.id) return;
     setIsRevoking(true);
+    setRevokeError(null);
     const keyToRevokeId = revokingKey.id;
     try {
-      await resilientFetch(`/api/keys?id=${keyToRevokeId}&userId=${encodeURIComponent(user.id)}`, { method: 'DELETE' });
+      const res = await resilientFetch<{ success: boolean }>(`/api/keys?id=${encodeURIComponent(keyToRevokeId)}&userId=${encodeURIComponent(user.id)}`, { method: 'DELETE', enableCacheFallback: false });
+      if (!res.data?.success || res.fromCache) throw new Error('Revocation was not confirmed. Try again.');
       setKeys(prev => {
         const updated = prev.map(k => k.id === keyToRevokeId ? { ...k, revoked: true } : k);
         SafeStorage.setJSON(getStorageKey(user.id), updated);
@@ -320,7 +324,9 @@ function BaseGatewayKeysPage() {
       });
       setRevokingKey(null);
       fetchKeys();
-    } catch {} finally {
+    } catch {
+      setRevokeError('Could not revoke this key. Try again.');
+    } finally {
       setIsRevoking(false);
     }
   };
@@ -329,7 +335,7 @@ function BaseGatewayKeysPage() {
     if (!rollingKey || !user?.id) return;
     setIsRolling(true);
     try {
-      const res = await resilientFetch<{ success: boolean; key?: { apiKey: string }; message?: string }>(
+      const res = await resilientFetch<{ success: boolean; key?: { id: string; apiKey: string }; message?: string }>(
         `/api/keys/${rollingKey.id}/roll`,
         {
           method: 'POST',
@@ -340,7 +346,7 @@ function BaseGatewayKeysPage() {
       if (res.data?.success && res.data.key?.apiKey) {
         const returnedApiKey = res.data.key.apiKey;
         const newKeyEntry = {
-          id: `key_${Date.now()}`,
+          id: res.data.key.id,
           keyPrefix: returnedApiKey.slice(0, 14),
           name: rollingKey.name,
           userId: user.id,
@@ -369,7 +375,7 @@ function BaseGatewayKeysPage() {
   };
 
   const handleDownloadEnv = (apiKey: string, name: string = 'GALX AI') => {
-    const content = `# ${name} Credentials\n# Generated at: ${new Date().toISOString()}\nGALX_API_KEY="${apiKey}"\nGALX_BASE_URL="https://api.galx.ai/v1"\nOPENAI_BASE_URL="https://api.galx.ai/v1"\nOPENAI_API_KEY="${apiKey}"\n`;
+    const content = `# ${name} Credentials\n# Generated at: ${new Date().toISOString()}\nGALX_API_KEY="${apiKey}"\nGALX_BASE_URL="https://galx.ai/v1"\nOPENAI_BASE_URL="https://galx.ai/v1"\nOPENAI_API_KEY="${apiKey}"\n`;
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -390,7 +396,7 @@ function BaseGatewayKeysPage() {
   };
 
   const handleCopyEnvSnippet = async (apiKey: string) => {
-    const snippet = `GALX_API_KEY="${apiKey}"\nGALX_BASE_URL="https://api.galx.ai/v1"`;
+    const snippet = `GALX_API_KEY="${apiKey}"\nGALX_BASE_URL="https://galx.ai/v1"`;
     const success = await safeCopyToClipboard(snippet);
     if (success) {
       setCopiedEnvSnippet(true);
@@ -399,7 +405,7 @@ function BaseGatewayKeysPage() {
   };
 
   const handleCopyShellSnippet = async (apiKey: string) => {
-    const snippet = `export GALX_API_KEY="${apiKey}"\nexport OPENAI_BASE_URL="https://api.galx.ai/v1"`;
+    const snippet = `export GALX_API_KEY="${apiKey}"\nexport OPENAI_BASE_URL="https://galx.ai/v1"`;
     const success = await safeCopyToClipboard(snippet);
     if (success) {
       setCopiedShellSnippet(true);
@@ -408,7 +414,7 @@ function BaseGatewayKeysPage() {
   };
 
   const handleCopyBaseUrl = async () => {
-    const success = await safeCopyToClipboard('https://api.galx.ai/v1');
+    const success = await safeCopyToClipboard('https://galx.ai/v1');
     if (success) {
       setCopiedBaseUrl(true);
       setTimeout(() => setCopiedBaseUrl(false), 2000);
@@ -498,7 +504,7 @@ function BaseGatewayKeysPage() {
       title: 'Cursor / Windsurf (.cursorrules or Settings)',
       lang: 'json',
       code: `// Set in Cursor Settings -> Models -> OpenAI API Key:
-// 1. Override OpenAI Base URL: https://api.galx.ai/v1
+// 1. Override OpenAI Base URL: https://galx.ai/v1
 // 2. API Key: ${activeDisplayKey}
 // 3. Enable Models: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna`
     },
@@ -509,7 +515,7 @@ function BaseGatewayKeysPage() {
 import { generateText } from 'ai';
 
 const galx = createOpenAI({
-  baseURL: 'https://api.galx.ai/v1',
+  baseURL: 'https://galx.ai/v1',
   apiKey: process.env.GALX_API_KEY || '${activeDisplayKey}'
 });
 
@@ -526,7 +532,7 @@ console.log(text);`
 
 # Drop-in replacement: point base_url to GALX AI Gateway
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="${activeDisplayKey}"
 )
 
@@ -542,7 +548,7 @@ print(response.choices[0].message.content)`
       code: `import OpenAI from 'openai';
 
 const client = new OpenAI({
-  baseURL: 'https://api.galx.ai/v1',
+  baseURL: 'https://galx.ai/v1',
   apiKey: '${activeDisplayKey}'
 });
 
@@ -555,7 +561,7 @@ console.log(completion.choices[0].message.content);`
     curl: {
       title: 'cURL',
       lang: 'bash',
-      code: `curl https://api.galx.ai/v1/chat/completions \\
+      code: `curl https://galx.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer ${activeDisplayKey}" \\
   -d '{
@@ -616,7 +622,7 @@ console.log(completion.choices[0].message.content);`
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-white">API Keys</h1>
               <p className="text-xs text-zinc-400 mt-1">
-                Authenticate requests to the GALX AI Gateway (<code className="text-zinc-300 font-mono">https://api.galx.ai/v1</code>). Keep your secret keys secure.
+                Manage access to your API.
               </p>
             </div>
 
@@ -631,7 +637,7 @@ console.log(completion.choices[0].message.content);`
                 className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
               >
                 <Plus className="w-4 h-4" />
-                <span>Create New Key</span>
+                <span>Create key</span>
               </button>
             </div>
           </div>
@@ -673,7 +679,7 @@ console.log(completion.choices[0].message.content);`
                 className="font-mono text-zinc-300 hover:text-white flex items-center gap-1.5 text-[11px] bg-white/5 hover:bg-white/10 px-2.5 py-0.5 rounded transition-colors cursor-pointer"
                 title="Click to copy gateway base URL"
               >
-                <span>https://api.galx.ai/v1</span>
+                <span>https://galx.ai/v1</span>
                 {copiedBaseUrl ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-zinc-400" />}
               </button>
             </div>
@@ -727,7 +733,8 @@ console.log(completion.choices[0].message.content);`
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter by name or prefix... (press / to focus)"
+                  aria-label="Search keys"
+                  placeholder="Search keys"
                   className="w-full pl-9 pr-14 py-1.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 font-sans"
                 />
                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -847,13 +854,8 @@ console.log(completion.choices[0].message.content);`
                 <table className="w-full text-left text-xs">
                   <thead>
                     <tr className="border-b border-white/10 text-zinc-400 font-semibold text-[11px] bg-white/[0.02]">
-                      <th className="py-3 px-4">Name</th>
-                      <th className="py-3 px-4">Environment</th>
-                      <th className="py-3 px-4 font-mono">Secret Key</th>
-                      <th className="py-3 px-4">Rate Limit</th>
-                      <th className="py-3 px-4">Created</th>
+                      <th className="py-3 px-4">Key</th>
                       <th className="py-3 px-4">Last Used</th>
-                      <th className="py-3 px-4">Total Requests</th>
                       <th className="py-3 px-4">Status</th>
                       <th className="py-3 px-4 text-right">Actions</th>
                     </tr>
@@ -862,7 +864,7 @@ console.log(completion.choices[0].message.content);`
                     {filteredAndSortedKeys.map((k) => {
                       const isLive = (k.environment || (k.keyPrefix?.includes('live') || k.prefix?.includes('live') ? 'live' : 'test')) === 'live';
                       const prefixText = k.keyPrefix || k.prefix || 'galx_live_';
-                      const maskedKeyDisplay = `${prefixText}...${k.id ? k.id.slice(-4) : ''}`;
+                      const maskedKeyDisplay = `${prefixText}…`;
                       const isEditingThisKey = editingKeyId === k.id;
 
                       return (
@@ -905,41 +907,17 @@ console.log(completion.choices[0].message.content);`
                                 <button
                                   type="button"
                                   onClick={() => handleStartRename(k)}
-                                  className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 text-zinc-500 hover:text-zinc-300"
+                                  className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 transition-opacity p-0.5 text-zinc-500 hover:text-zinc-300"
                                   title="Rename key"
                                 >
                                   <Edit2 className="w-3 h-3" />
                                 </button>
                               </div>
                             )}
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold uppercase ${
-                              isLive
-                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                            }`}>
-                              {isLive ? 'Live' : 'Test'}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 font-mono text-zinc-300">
-                            <div className="inline-flex items-center gap-1.5">
-                              <span>{maskedKeyDisplay}</span>
-                              <button
-                                type="button"
-                                onClick={() => handleCopy(k.id, k.id)}
-                                className="p-1 rounded text-zinc-400 hover:text-white transition-colors cursor-pointer"
-                                title="Copy Key ID"
-                              >
-                                {copiedKeyId === k.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                              </button>
+                            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-normal text-zinc-400">
+                              <span>{isLive ? 'Live' : 'Test'}</span>
+                              <code className="break-all">{maskedKeyDisplay}</code>
                             </div>
-                          </td>
-                          <td className="py-3 px-4 text-zinc-400 font-mono">
-                            {k.rateLimitPerMinute || 120} RPM
-                          </td>
-                          <td className="py-3 px-4 text-zinc-500 whitespace-nowrap">
-                            {formatTimeAgo(k.createdAt)}
                           </td>
                           <td className="py-3 px-4 text-zinc-400 whitespace-nowrap font-mono text-[11px]">
                             {k.lastUsedAt ? (
@@ -947,9 +925,6 @@ console.log(completion.choices[0].message.content);`
                             ) : (
                               <span className="text-zinc-600">Never</span>
                             )}
-                          </td>
-                          <td className="py-3 px-4 text-zinc-400 font-mono">
-                            {k.totalRequests || 0}
                           </td>
                           <td className="py-3 px-4">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${
@@ -964,33 +939,7 @@ console.log(completion.choices[0].message.content);`
                           </td>
                           <td className="py-3 px-4 text-right">
                             <div className="flex items-center justify-end gap-1">
-                              {/* 1-Click Code Snippet Export Buttons */}
-                              <button
-                                type="button"
-                                onClick={() => handleCopyEnvSnippet(prefixText)}
-                                className="px-2 py-1 rounded text-zinc-400 hover:text-white hover:bg-white/10 text-[11px] font-mono transition-colors cursor-pointer"
-                                title="Copy as .env"
-                              >
-                                .env
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const curl = `curl https://api.galx.ai/v1/chat/completions \\\n  -H "Authorization: Bearer ${prefixText}..." \\\n  -H "Content-Type: application/json" \\\n  -d '{"model":"gpt-5.6-sol","messages":[{"role":"user","content":"Hello"}]}'`;
-                                  handleCopySnippet(curl);
-                                }}
-                                className="px-2 py-1 rounded text-zinc-400 hover:text-white hover:bg-white/10 text-[11px] font-mono transition-colors cursor-pointer"
-                                title="Copy cURL command"
-                              >
-                                cURL
-                              </button>
-
-                              <Link
-                                href={`/keys/${k.id}`}
-                                className="px-2 py-1 rounded text-zinc-400 hover:text-white hover:bg-white/10 text-[11px] font-medium transition-colors"
-                              >
-                                Details
-                              </Link>
+                              <Link href={`/keys/${k.id}`} className="px-2 py-2 text-zinc-300 hover:text-white">Details</Link>
                               {!k.revoked && !k.isExpired && (
                                 <>
                                   <button
@@ -999,11 +948,11 @@ console.log(completion.choices[0].message.content);`
                                     className="px-2 py-1 rounded text-zinc-400 hover:text-white hover:bg-white/10 text-[11px] font-medium cursor-pointer transition-colors"
                                     title="Zero-downtime key rotation"
                                   >
-                                    Roll
+                                    Rotate
                                   </button>
                                   <button
                                     type="button"
-                                    onClick={() => setRevokingKey(k)}
+                                    onClick={() => { setRevokeError(null); setRevokingKey(k); }}
                                     className="px-2 py-1 rounded text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 text-[11px] font-medium cursor-pointer transition-colors"
                                     title="Revoke key"
                                   >
@@ -1031,7 +980,7 @@ console.log(completion.choices[0].message.content);`
                   <span>Developer Integration</span>
                 </h3>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  Drop-in compatible with Cursor, Vercel AI SDK, Python, and OpenAI clients at <code className="text-zinc-200 font-mono">https://api.galx.ai/v1</code>.
+                  Drop-in compatible with Cursor, Vercel AI SDK, Python, and OpenAI clients at <code className="text-zinc-200 font-mono">https://galx.ai/v1</code>.
                 </p>
               </div>
 
@@ -1331,13 +1280,15 @@ console.log(completion.choices[0].message.content);`
                 Are you sure you want to revoke <strong>{revokingKey.name}</strong> (<code className="text-zinc-300 font-mono">{revokingKey.keyPrefix || revokingKey.prefix}...</code>)?
               </p>
               <p className="text-rose-300/90 font-medium">
-                This action is permanent and cannot be undone. Any active applications, agents, or automated scripts using this key will immediately receive 401 Unauthorized errors.
+                Apps using this key will lose access. This cannot be undone.
               </p>
             </div>
 
+            {revokeError && <p role="alert" className="text-xs text-rose-300">{revokeError}</p>}
             <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
               <button
                 type="button"
+                disabled={isRevoking}
                 onClick={() => setRevokingKey(null)}
                 className="px-3.5 py-2 rounded-xl text-xs text-zinc-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
               >

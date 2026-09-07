@@ -18,9 +18,6 @@ import {
   Layers,
   Type,
   ChevronRight,
-  Terminal,
-  Copy,
-  Cpu,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -35,8 +32,7 @@ import { SUPPORTED_LANGUAGES, SupportedLanguage } from '@/lib/i18n/translations'
 type SettingsTab =
   | 'appearance'
   | 'language'
-  | 'seats'
-  | 'developer';
+  | 'seats';
 
 interface ThemeOption {
   id: ThemePreset;
@@ -116,13 +112,12 @@ export default function SettingsPage() {
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('appearance');
   const [languageSearch, setLanguageSearch] = useState('');
-  const [copiedEndpoint, setCopiedEndpoint] = useState(false);
 
   useEffect(() => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const tabParam = urlParams.get('tab') as SettingsTab | null;
-      if (tabParam && ['appearance', 'language', 'seats', 'developer'].includes(tabParam)) {
+      if (tabParam && ['appearance', 'language', 'seats'].includes(tabParam)) {
         setActiveTab(tabParam);
       }
     } catch {}
@@ -165,13 +160,6 @@ export default function SettingsPage() {
       label: 'Seat & Limits',
       icon: Shield,
       gated: !isAuthenticated,
-    },
-    {
-      id: 'developer' as SettingsTab,
-      label: 'Developer & API',
-      icon: Terminal,
-      gated: false,
-      badge: 'v1 Gateway',
     },
   ];
 
@@ -512,81 +500,6 @@ export default function SettingsPage() {
                       );
                     })}
                   </div>
-                </div>
-              </div>
-            )}
-
-            {/* 6. DEVELOPER & API SETTINGS TAB */}
-            {activeTab === 'developer' && (
-              <div className="space-y-5 animate-in fade-in duration-150">
-                {/* Gateway API Endpoint Header */}
-                <div className="p-5 rounded-2xl bg-[#0c101c] border border-white/10 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
-                        <Terminal className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h2 className="text-sm font-bold text-white">Edge Gateway API Settings</h2>
-                        <p className="text-xs text-zinc-400">OpenAI & Anthropic SDK drop-in replacement with sub-15ms TTFT</p>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      <span>Online • 99.99% SLA</span>
-                    </span>
-                  </div>
-
-                  {/* Gateway Base URL with 1-click copy */}
-                  <div className="space-y-1.5 font-mono text-xs">
-                    <label className="text-[11px] font-sans font-semibold text-zinc-300">Base URL Endpoint</label>
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-black/60 border border-white/10 text-cyan-300">
-                      <span className="select-all font-bold">https://galx.ai/v1</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          try { navigator.clipboard.writeText('https://galx.ai/v1'); } catch {}
-                          setCopiedEndpoint(true);
-                          setTimeout(() => setCopiedEndpoint(false), 2000);
-                        }}
-                        className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white flex items-center gap-1 text-[11px] transition-all cursor-pointer"
-                      >
-                        {copiedEndpoint ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                        <span>{copiedEndpoint ? 'Copied' : 'Copy'}</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-5 rounded-2xl bg-[#0c101c] border border-white/10 space-y-3">
-                  <div className="flex items-start gap-3">
-                    <Shield className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <div className="min-w-0 space-y-1.5">
-                      <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300">Server-managed provider credentials</h2>
-                      <p className="text-xs text-zinc-400 leading-relaxed">
-                        The deployed browser client never persists upstream keys. Add provider credentials through the encrypted shard vault and use scoped GALXAI gateway keys only from trusted server environments.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Production Gateway Keys Link Tile */}
-                <div className="p-5 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-black border border-indigo-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                      <Cpu className="w-4 h-4 text-indigo-400" />
-                      <span>Production Gateway Keys & Telemetry</span>
-                    </h3>
-                    <p className="text-xs text-zinc-400">
-                      Mint scoped production keys, configure IP allowlists, manage 600 RPM limits, and view real-time latency logs.
-                    </p>
-                  </div>
-                  <Link
-                    href="/keys"
-                    className="px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs font-mono whitespace-nowrap transition-all shadow-md shadow-indigo-500/20 flex items-center gap-1.5 shrink-0"
-                  >
-                    <span>Manage Keys →</span>
-                  </Link>
                 </div>
               </div>
             )}

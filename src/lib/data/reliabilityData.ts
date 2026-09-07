@@ -49,7 +49,7 @@ export const RELIABILITY_DATA: ReliabilityItem[] = [
 
 # Automatically routes across active clusters with built-in retry backoff
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key",
     max_retries=3,
     timeout=20.0
@@ -97,7 +97,7 @@ print(response.choices[0].message.content)`,
 from openai import AsyncOpenAI
 
 client = AsyncOpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -143,7 +143,7 @@ print(f"Successfully executed {len(results)} concurrent tasks.")`,
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key",
     timeout=300.0 # 5-minute timeout for massive contexts
 )
@@ -200,7 +200,7 @@ class PipelineRecord(BaseModel):
     confidence_score: float
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -244,7 +244,7 @@ print("Validated Record:", record)`,
       language: 'bash',
       title: 'BGP Route & Latency Verification',
       code: `curl -w "\\nConnected PoP: %{remote_ip} | Edge Connect: %{time_connect}s | TTFT: %{time_starttransfer}s\\n" \\
-  -X POST https://api.galx.ai/v1/chat/completions \\
+  -X POST https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer \$GALXAI_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"model": "gpt-5.6-luna", "messages": [{"role": "user", "content": "ping"}], "stream": true}'`,

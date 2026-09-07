@@ -2,6 +2,7 @@
  * GALXAI Developer SDK: Main Client Core
  */
 
+import { GALX_API_BASE_URL } from './base-url';
 import {
   GalxError,
   APIError,
@@ -103,11 +104,9 @@ export class GalxAIClientCore {
           process.env?.GALX_BASE_URL ||
           process.env?.NEXT_PUBLIC_GALXAI_BASE_URL ||
           process.env?.NEXT_PUBLIC_GALX_BASE_URL ||
-          process.env?.NEXT_PUBLIC_GALX_EDGE_URL ||
-          process.env?.GALX_EDGE_URL ||
           process.env?.OPENAI_BASE_URL
         : '') ||
-      'https://galx.ai/v1';
+      GALX_API_BASE_URL;
 
     this.baseURL = rawBaseUrl.replace(/\/+$/, '');
     this.timeoutMs = opts.timeoutMs ?? opts.timeout ?? opts.timeout_ms ?? 60000;

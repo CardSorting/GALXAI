@@ -42,6 +42,8 @@ See the [Product Surface Strategy](docs/PRODUCT_SURFACE_STRATEGY.md) for the hos
 
 ## ⚡ 30-Second Quickstart
 
+Use **`https://galx.ai/v1`** as the API base URL. The `api.galx.ai` Cloudflare Worker is a separate deployment, not an interchangeable alias. See [API base URL](docs/API_BASE_URL.md).
+
 ### Step 1: Add your key in `.env.local`
 You only put the API key on your server. Your users will **never** be asked for an API key:
 ```bash

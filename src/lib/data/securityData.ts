@@ -43,7 +43,7 @@ export const SECURITY_SPECIFICATIONS_DATA: SecuritySpecificationItem[] = [
       code: `import requests
 
 headers = {"Authorization": f"Bearer {GALXAI_API_KEY}"}
-resp = requests.get("https://api.galx.ai/billing/invoices/latest", headers=headers)
+resp = requests.get("https://galx.ai/billing/invoices/latest", headers=headers)
 print("PCI-Isolated Invoice Hash:", resp.json().get("audit_hash"))`,
     },
     faqs: [
@@ -74,7 +74,7 @@ print("PCI-Isolated Invoice Hash:", resp.json().get("audit_hash"))`,
       title: 'EU AI Act Compliance Headers Verification',
       code: `import requests
 
-resp = requests.post("https://api.galx.ai/v1/chat/completions", headers={
+resp = requests.post("https://galx.ai/v1/chat/completions", headers={
     "Authorization": f"Bearer {GALXAI_API_KEY}",
     "Content-Type": "application/json"
 }, json={"model": "gpt-5.6-sol", "messages": [{"role": "user", "content": "Risk assessment"}]})
@@ -107,7 +107,7 @@ print("EU Compliance Attestation:", resp.headers.get("x-galxai-eu-act-compliance
     systemVerificationSnippet: {
       language: 'bash',
       title: 'Verify CONUS Routing Region',
-      code: `curl -sI https://api.galx.ai/v1/models \\
+      code: `curl -sI https://galx.ai/v1/models \\
   -H "Authorization: Bearer \$GALXAI_API_KEY" | grep "x-galxai-region"`,
     },
     faqs: [
@@ -138,7 +138,7 @@ print("EU Compliance Attestation:", resp.headers.get("x-galxai-eu-act-compliance
       title: 'Verify CPRA Zero-Sale Status',
       code: `import requests
 
-resp = requests.get("https://api.galx.ai/compliance/cpra-statement")
+resp = requests.get("https://galx.ai/compliance/cpra-statement")
 print("Do Not Sell Policy Status:", resp.json().get("policy_status"))`,
     },
     faqs: [
@@ -167,7 +167,7 @@ print("Do Not Sell Policy Status:", resp.json().get("policy_status"))`,
     systemVerificationSnippet: {
       language: 'bash',
       title: 'Inspect RFC 9116 Security Policy',
-      code: `curl -s https://api.galx.ai/.well-known/security.txt`,
+      code: `curl -s https://galx.ai/.well-known/security.txt`,
     },
     faqs: [
       {
@@ -195,7 +195,7 @@ print("Do Not Sell Policy Status:", resp.json().get("policy_status"))`,
     systemVerificationSnippet: {
       language: 'bash',
       title: 'Verify API Private Zero-Retention Policy Header',
-      code: `curl -I https://api.galx.ai/v1/chat/completions \\
+      code: `curl -I https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"model":"gpt-5.6-sol","messages":[{"role":"user","content":"Ping"}]}' | grep -i "x-galx-data-policy"`,

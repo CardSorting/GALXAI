@@ -156,8 +156,8 @@ export function CompareClient() {
   // Generate Model Matrix JSON Spec (AWS Bedrock / OpenAPI router format)
   const generateJsonSpec = () => {
     const data = {
-      $schema: 'https://api.galx.ai/v1/schemas/comparison-matrix.json',
-      gateway: 'https://api.galx.ai/v1',
+      $schema: 'https://galx.ai/v1/schemas/comparison-matrix.json',
+      gateway: 'https://galx.ai/v1',
       models: comparedModels.map((m) => ({
         id: m.id,
         name: m.name,
@@ -976,7 +976,7 @@ function SideBySideArena({ availableModels }: { availableModels: ModelSpecItem[]
     }
   };
 
-  const getCurl = (modelId: string) => `curl https://api.galx.ai/v1/chat/completions \\
+  const getCurl = (modelId: string) => `curl https://galx.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -d '{
@@ -1368,7 +1368,7 @@ function MultiModelRoutingBoilerplate({ models }: { models: ModelSpecItem[] }) {
   const failoverCode = `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -1392,7 +1392,7 @@ export async function executeWithFailover(messages: Array<{ role: string; conten
   const canaryCode = `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -1415,7 +1415,7 @@ export async function executeCanaryAB(messages: Array<{ role: string; content: s
   const tieredCode = `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 

@@ -8,10 +8,7 @@ import {
   Plus,
   Activity,
   ShieldCheck,
-  Sliders,
-  Terminal,
-  Gauge,
-  Lock
+  Users2
 } from 'lucide-react';
 
 export function KeysSubNav() {
@@ -35,20 +32,14 @@ export function KeysSubNav() {
       icon: ShieldCheck
     },
     {
-      name: 'Rate Limits',
-      href: '/keys/rate-limits',
-      icon: Gauge
-    },
-    {
-      name: 'Activity & Telemetry',
+      name: 'Activity',
       href: '/keys/activity',
-      icon: Activity,
-      badge: 'Live'
+      icon: Activity
     },
     {
-      name: 'Settings',
-      href: '/settings?tab=developer',
-      icon: Sliders
+      name: 'Team members',
+      href: '/teams/seats',
+      icon: Users2
     }
   ];
 
@@ -70,17 +61,7 @@ export function KeysSubNav() {
           >
             <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-indigo-300' : 'text-zinc-400'}`} />
             <span>{tab.name}</span>
-            {tab.badge && (
-              <span
-                className={`text-[9px] px-1.5 py-0.2 rounded-full font-mono font-bold leading-none ${
-                  isActive
-                    ? 'bg-indigo-400/20 text-indigo-200'
-                    : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                }`}
-              >
-                {tab.badge}
-              </span>
-            )}
+
           </Link>
         );
       })}

@@ -54,7 +54,7 @@ export const ARCHITECTURE_WHITEPAPERS_DATA: ArchitectureWhitepaperItem[] = [
       language: 'bash',
       title: 'Verify Edge Anycast Response Time',
       code: `curl -w "\\nTLS: %{time_appconnect}s | TTFT: %{time_starttransfer}s | Total: %{time_total}s\\n" \\
-  -X POST https://api.galx.ai/v1/chat/completions \\
+  -X POST https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer \$GALXAI_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"model": "gpt-5.6-luna", "messages": [{"role": "user", "content": "ping"}], "stream": true}'`,
@@ -98,7 +98,7 @@ export const ARCHITECTURE_WHITEPAPERS_DATA: ArchitectureWhitepaperItem[] = [
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -153,7 +153,7 @@ headers = {
     "X-Security-Policy": "Strict-ZDR"
 }
 
-resp = requests.post("https://api.galx.ai/v1/chat/completions", headers=headers, json={
+resp = requests.post("https://galx.ai/v1/chat/completions", headers=headers, json={
     "model": "gpt-5.6-sol",
     "messages": [{"role": "user", "content": "Sensitive financial payload"}]
 })
@@ -198,7 +198,7 @@ print("ZDR Enclave Header:", resp.headers.get("x-galxai-zdr-verified"))`,
 from openai import AsyncOpenAI
 
 client = AsyncOpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -254,7 +254,7 @@ class FlightRecord(BaseModel):
     is_on_time: bool
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -306,7 +306,7 @@ print(response.choices[0].message.parsed)`,
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -354,7 +354,7 @@ asyncio.run(asyncio.gather(*[send_burst(i) for i in range(100)]))`,
     codeVerificationSnippet: {
       language: 'bash',
       title: 'Verify Wholesale Balance Deduction',
-      code: `curl -s https://api.galx.ai/v1/billing/balance \\
+      code: `curl -s https://galx.ai/v1/billing/balance \\
   -H "Authorization: Bearer \$GALXAI_API_KEY"`,
     },
     faqs: [

@@ -69,7 +69,7 @@ response = client.chat.completions.create(
 
 # Clean 1-Line Standard OpenAI Setup with 40% Savings
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -86,7 +86,7 @@ response = client.chat.completions.create(
       },
       {
         step: 'Step 2: Set Base URL to GALXAI Anycast Edge',
-        desc: 'Set base_url="https://api.galx.ai/v1" and supply your live developer key.',
+        desc: 'Set base_url="https://galx.ai/v1" and supply your live developer key.',
       },
       {
         step: 'Step 3: Replace Deployment Names with Model IDs',
@@ -144,7 +144,7 @@ response = bedrock.invoke_model(
 
 # Clean Standard SDK (1-Line Initialization)
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -160,7 +160,7 @@ response = client.chat.completions.create(
       },
       {
         step: 'Step 2: Configure API Key',
-        desc: 'Set OPENAI_API_BASE="https://api.galx.ai/v1" and your GALXAI live key in environment variables.',
+        desc: 'Set OPENAI_API_BASE="https://galx.ai/v1" and your GALXAI live key in environment variables.',
       },
     ],
     faqs: [
@@ -201,7 +201,7 @@ response = model.generate_content("Hello")`,
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -217,7 +217,7 @@ response = client.chat.completions.create(
       },
       {
         step: 'Step 2: Point Base URL',
-        desc: 'Set baseURL to "https://api.galx.ai/v1".',
+        desc: 'Set baseURL to "https://galx.ai/v1".',
       },
     ],
     faqs: [
@@ -258,7 +258,7 @@ response = client.chat.completions.create(
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -271,7 +271,7 @@ response = client.chat.completions.create(
     migrationSteps: [
       {
         step: 'Step 1: Set OpenAI Base URL',
-        desc: 'Set baseURL="https://api.galx.ai/v1".',
+        desc: 'Set baseURL="https://galx.ai/v1".',
       },
       {
         step: 'Step 2: Choose Velocity or Reasoning',
@@ -316,7 +316,7 @@ output = replicate.run(
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -330,7 +330,7 @@ response = client.images.generate(
     migrationSteps: [
       {
         step: 'Step 1: Point to OpenAI Images Endpoint',
-        desc: 'Use standard client.images.generate with base_url="https://api.galx.ai/v1".',
+        desc: 'Use standard client.images.generate with base_url="https://galx.ai/v1".',
       },
       {
         step: 'Step 2: Benefit from Wholesale Rates',
@@ -351,7 +351,7 @@ response = client.images.generate(
     title: 'Migrate from Direct OpenAI API to GALXAI — Save 25% to 40% on AI Tokens',
     headline: '1-Line Migration from Direct OpenAI API to GALXAI Wholesale',
     description:
-      'Keep your exact OpenAI Python or TypeScript SDK code. Just change base_url to "https://api.galx.ai/v1" and enjoy instant 25%–40% wholesale savings and 429 failover protection.',
+      'Keep your exact OpenAI Python or TypeScript SDK code. Just change base_url to "https://galx.ai/v1" and enjoy instant 25%–40% wholesale savings and 429 failover protection.',
     estimatedCostReductionPct: 35,
     keyPainPointsSolved: [
       '25% to 40% direct wholesale discount on identical model weights',
@@ -381,7 +381,7 @@ response = client.chat.completions.create(
 
 # 1-Line Base URL Swap: 25%–40% Wholesale Savings
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -393,7 +393,7 @@ response = client.chat.completions.create(
     migrationSteps: [
       {
         step: 'Step 1: Set Base URL',
-        desc: 'Add base_url="https://api.galx.ai/v1" to your OpenAI client constructor.',
+        desc: 'Add base_url="https://galx.ai/v1" to your OpenAI client constructor.',
       },
       {
         step: 'Step 2: Update API Key',
@@ -438,14 +438,14 @@ const client = new OpenAI({
 
 // Unified OpenAI Wholesale Gateway
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });`,
     },
     migrationSteps: [
       {
         step: 'Step 1: Point Endpoint',
-        desc: 'Change baseURL to "https://api.galx.ai/v1".',
+        desc: 'Change baseURL to "https://galx.ai/v1".',
       },
       {
         step: 'Step 2: Authenticate',
@@ -490,14 +490,14 @@ client = OpenAI(
 
 # 0% markup wholesale Anycast gateway
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )`,
     },
     migrationSteps: [
       {
         step: 'Step 1: Update Base URL',
-        desc: 'Set base_url="https://api.galx.ai/v1".',
+        desc: 'Set base_url="https://galx.ai/v1".',
       },
       {
         step: 'Step 2: Start Saving',

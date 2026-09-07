@@ -78,7 +78,7 @@ export default function ContextWindowVisualizerPage() {
   const codeSchema = createSoftwareSourceCodeSchema({
     name: 'Python 1M Context Ingestion Snippet',
     programmingLanguage: 'Python',
-    codeSample: 'from openai import OpenAI\nclient = OpenAI(base_url="https://api.galx.ai/v1", api_key="galx_live_...")\nresponse = client.chat.completions.create(model="x-ai/grok-4.6", messages=[{"role": "user", "content": "Analyze 1M token context"}])',
+    codeSample: 'from openai import OpenAI\nclient = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_...")\nresponse = client.chat.completions.create(model="x-ai/grok-4.6", messages=[{"role": "user", "content": "Analyze 1M token context"}])',
     targetUrl: 'https://galx.ai/tools/context-window-visualizer#code-snippet',
   });
 

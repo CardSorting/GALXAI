@@ -53,7 +53,7 @@ export const POSTMORTEMS_DATA: PostmortemItem[] = [
 
 # GALXAI automatically abstracts origin failover across clusters
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -95,7 +95,7 @@ print(completion.choices[0].message.content)`,
     runbookCodeSnippet: {
       language: 'bash',
       title: 'Verify Edge Anycast Response & Threat Scrubbing',
-      code: `curl -sI https://api.galx.ai/v1/models \\
+      code: `curl -sI https://galx.ai/v1/models \\
   -H "Authorization: Bearer \$GALXAI_API_KEY" | grep "x-galxai-protection: ACTIVE"`,
     },
     faqs: [
@@ -131,7 +131,7 @@ print(completion.choices[0].message.content)`,
       code: `import httpx
 
 response = httpx.get(
-    "https://api.galx.ai/v1/models",
+    "https://galx.ai/v1/models",
     headers={"Authorization": "Bearer galx_live_your_key"}
 )
 print("Routed PoP:", response.headers.get("x-galxai-pop"))
@@ -208,7 +208,7 @@ def create_optimal_cached_payload(system_rules: str, dynamic_context: str):
 from openai import AsyncOpenAI
 
 client = AsyncOpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -258,7 +258,7 @@ async def fetch_batch(prompts: list):
 
 # GALXAI abstracts multi-region cloud routing under a single endpoint
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -272,7 +272,7 @@ print(response.choices[0].message.content)`,
     faqs: [
       {
         q: 'Do developers need to configure multiple regional endpoints?',
-        a: 'No. GALXAI Anycast handles global routing and failover automatically through the universal https://api.galx.ai/v1 gateway URL.',
+        a: 'No. GALXAI Anycast handles global routing and failover automatically through the universal https://galx.ai/v1 gateway URL.',
       },
     ],
   },
@@ -300,7 +300,7 @@ print(response.choices[0].message.content)`,
     runbookCodeSnippet: {
       language: 'bash',
       title: 'Verify Gateway Anti-DDoS Header Signature',
-      code: `curl -s -I https://api.galx.ai/v1/chat/completions \\
+      code: `curl -s -I https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer \$GALXAI_API_KEY" | grep "x-galx-edge-pop"`,
     },
     faqs: [

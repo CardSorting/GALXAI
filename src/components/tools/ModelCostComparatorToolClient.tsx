@@ -110,7 +110,7 @@ export function ModelCostComparatorToolClient() {
 
 # Initialize GALXAI with wholesale pricing & 75% prompt caching
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 

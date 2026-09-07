@@ -66,7 +66,7 @@ export function ModelDeveloperView({ model, triggerCopy, copiedKey }: ModelDevel
 
 # GALXAI Universal Gateway (Sub-15ms Anycast)
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",  # 👈 ONLY CHANGE
+    base_url="https://galx.ai/v1",  # 👈 ONLY CHANGE
     api_key="${effectiveKey}"
 )
 
@@ -79,7 +79,7 @@ response = client.images.generate(
 
 # GALXAI Universal Gateway (Sub-15ms Anycast)
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",  # 👈 ONLY CHANGE
+    base_url="https://galx.ai/v1",  # 👈 ONLY CHANGE
     api_key="${effectiveKey}"
 )
 
@@ -94,7 +94,7 @@ response = client.chat.completions.create(
           created: 1725540000,
           data: [
             {
-              url: 'https://api.galx.ai/v1/artifacts/img_sample_9842.png',
+              url: 'https://galx.ai/v1/artifacts/img_sample_9842.png',
               revised_prompt: 'Cyberpunk futuristic architecture, isometric blueprint, 8k',
             },
           ],
@@ -171,10 +171,10 @@ response = client.chat.completions.create(
 
             <div className="space-y-1.5 pt-2">
               <div className="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-black/70 border border-white/10 text-xs font-mono">
-                <span className="text-cyan-300 truncate">https://api.galx.ai/v1</span>
+                <span className="text-cyan-300 truncate">https://galx.ai/v1</span>
                 <button
                   type="button"
-                  onClick={() => triggerCopy('https://api.galx.ai/v1', 'step-base-url')}
+                  onClick={() => triggerCopy('https://galx.ai/v1', 'step-base-url')}
                   title="Copy Base URL"
                   className="ml-2 p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer"
                 >
@@ -272,10 +272,10 @@ response = client.chat.completions.create(
             <div className="space-y-1.5 pt-2">
               <button
                 type="button"
-                onClick={() => triggerCopy('baseURL="https://api.galx.ai/v1"', 'step-baseurl-param')}
+                onClick={() => triggerCopy('baseURL="https://galx.ai/v1"', 'step-baseurl-param')}
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-xs font-mono text-emerald-200 hover:bg-emerald-900/40 transition-colors cursor-pointer text-left"
               >
-                <span className="truncate">baseURL=&quot;https://api.galx.ai/v1&quot;</span>
+                <span className="truncate">baseURL=&quot;https://galx.ai/v1&quot;</span>
                 {copiedKey === 'step-baseurl-param' ? (
                   <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 ml-1" />
                 ) : (
@@ -294,7 +294,7 @@ response = client.chat.completions.create(
           <div className="flex items-center gap-2 text-zinc-400">
             <Terminal className="w-4 h-4 text-cyan-400 shrink-0" />
             <span className="text-[11px] text-zinc-300 truncate">
-              export OPENAI_BASE_URL=&quot;https://api.galx.ai/v1&quot; &amp;&amp; export OPENAI_API_KEY=&quot;{effectiveKey}&quot;
+              export OPENAI_BASE_URL=&quot;https://galx.ai/v1&quot; &amp;&amp; export OPENAI_API_KEY=&quot;{effectiveKey}&quot;
             </span>
           </div>
 
@@ -302,7 +302,7 @@ response = client.chat.completions.create(
             type="button"
             onClick={() =>
               triggerCopy(
-                `export OPENAI_BASE_URL="https://api.galx.ai/v1"\nexport OPENAI_API_KEY="${effectiveKey}"`,
+                `export OPENAI_BASE_URL="https://galx.ai/v1"\nexport OPENAI_API_KEY="${effectiveKey}"`,
                 'shell-export'
               )
             }
@@ -403,7 +403,7 @@ response = client.chat.completions.create(
 
 # GALXAI Wholesale Gateway (Sub-15ms Anycast)
 client = OpenAI(
-`}<span className="bg-emerald-500/30 text-emerald-200 px-1 py-0.5 rounded font-bold">{`    base_url="https://api.galx.ai/v1",  # 👈 ONLY CHANGE`}</span>{`
+`}<span className="bg-emerald-500/30 text-emerald-200 px-1 py-0.5 rounded font-bold">{`    base_url="https://galx.ai/v1",  # 👈 ONLY CHANGE`}</span>{`
     api_key="${effectiveKey}"
 )
 

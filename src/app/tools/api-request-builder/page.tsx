@@ -32,7 +32,7 @@ export default function ApiRequestBuilderPage() {
   const toolFaqs = [
     {
       q: 'Are all generated snippets 100% wire-compatible with official SDKs?',
-      a: 'Yes. Every code snippet uses official client libraries with standard baseURL overrides pointing to "https://api.galx.ai/v1".',
+      a: 'Yes. Every code snippet uses official client libraries with standard baseURL overrides pointing to "https://galx.ai/v1".',
     },
     {
       q: 'Does streaming SSE work across all supported programming languages?',
@@ -76,7 +76,7 @@ export default function ApiRequestBuilderPage() {
   const codeSchema = createSoftwareSourceCodeSchema({
     name: 'Python OpenAI Client Quickstart',
     programmingLanguage: 'Python',
-    codeSample: 'from openai import OpenAI\nclient = OpenAI(base_url="https://api.galx.ai/v1", api_key="galx_live_key")',
+    codeSample: 'from openai import OpenAI\nclient = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_key")',
     targetUrl: 'https://galx.ai/tools/api-request-builder#code-output',
   });
 

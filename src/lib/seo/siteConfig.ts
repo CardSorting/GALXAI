@@ -11,7 +11,7 @@ export const SITE_CONFIG = {
   description:
     'One unified OpenAI-compatible API for OpenAI frontier models. Sub-millisecond Anycast routing, automatic failover, and rate-limit pooling across OpenAI Codex and GPT-5.6 with 25%–40% wholesale savings.',
   url: process.env.NEXT_PUBLIC_APP_URL || 'https://galx.ai',
-  apiUrl: 'https://api.galx.ai/v1',
+  apiUrl: 'https://galx.ai/v1',
   ogImage: '/og-image.png',
   twitterHandle: '@galxai',
   foundingDate: '2024-01-15',

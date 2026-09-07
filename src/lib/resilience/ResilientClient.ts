@@ -343,7 +343,7 @@ async function executeResilientFetch<T = any>(
 
   // If network failed but cache fallback is available in L1 or L2, return stale cached data
   const l1Stale = substrate.getCachedResponse<T>(cacheKey, method);
-  if (l1Stale) {
+  if (enableCacheFallback && isReadMethod && l1Stale) {
     console.warn(`🛡️ [GALXAI Resilient Client] Serving BroccoliDB L1 stale cache fallback for: ${url}`);
     return { data: l1Stale.data, status: 200, fromCache: true };
   }

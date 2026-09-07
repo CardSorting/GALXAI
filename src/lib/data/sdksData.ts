@@ -37,7 +37,7 @@ import (
 
 func main() {
 	config := openai.DefaultConfig("galx_live_your_gateway_key")
-	config.BaseURL = "https://api.galx.ai/v1"
+	config.BaseURL = "https://galx.ai/v1"
 
 	client := openai.NewClientWithConfig(config)
 	resp, err := client.CreateChatCompletion(
@@ -68,7 +68,7 @@ stream, err := client.CreateChatCompletionStream(
     faqs: [
       {
         q: 'Does sashabaranov/go-openai support custom BaseURL?',
-        a: 'Yes, setting config.BaseURL = "https://api.galx.ai/v1" allows 100% transparent routing with zero SDK modifications.',
+        a: 'Yes, setting config.BaseURL = "https://galx.ai/v1" allows 100% transparent routing with zero SDK modifications.',
       },
     ],
   },
@@ -91,7 +91,7 @@ stream, err := client.CreateChatCompletionStream(
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = OpenAIConfig::new()
-        .with_api_base("https://api.galx.ai/v1")
+        .with_api_base("https://galx.ai/v1")
         .with_api_key("galx_live_your_gateway_key");
 
     let client = Client::with_config(config);
@@ -116,7 +116,7 @@ while let Some(result) = stream.next().await {
     faqs: [
       {
         q: 'Is async-openai compatible with GALXAI Anycast proxies?',
-        a: 'Yes, async-openai supports with_api_base("https://api.galx.ai/v1") with complete request and SSE streaming parity.',
+        a: 'Yes, async-openai supports with_api_base("https://galx.ai/v1") with complete request and SSE streaming parity.',
       },
     ],
   },
@@ -130,7 +130,7 @@ while let Some(result) = stream.next().await {
       'Execute direct HTTP/2 POST requests and consume Server-Sent Events (SSE) streams in bash, CI/CD pipelines, or custom runtime environments.',
     packageManager: 'curl',
     installCommand: '# Pre-installed on all Unix & macOS environments',
-    codeSnippet: `curl https://api.galx.ai/v1/chat/completions \\
+    codeSnippet: `curl https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer galx_live_your_gateway_key" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -140,7 +140,7 @@ while let Some(result) = stream.next().await {
     ]
   }'`,
     streamingSnippet: `# Stream Server-Sent Events (SSE) in terminal
-curl -N https://api.galx.ai/v1/chat/completions \\
+curl -N https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer galx_live_your_gateway_key" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -169,7 +169,7 @@ curl -N https://api.galx.ai/v1/chat/completions \\
 
 client = OpenAI::Client.new(
   access_token: "galx_live_your_gateway_key",
-  uri_base: "https://api.galx.ai"
+  uri_base: "https://galx.ai"
 )
 
 response = client.chat(
@@ -190,7 +190,7 @@ client.chat(
     faqs: [
       {
         q: 'How do I configure the Base URL in ruby-openai?',
-        a: 'Set uri_base: "https://api.galx.ai" when instantiating OpenAI::Client.',
+        a: 'Set uri_base: "https://galx.ai" when instantiating OpenAI::Client.',
       },
     ],
   },
@@ -208,7 +208,7 @@ client.chat(
 require 'vendor/autoload.php';
 
 $client = OpenAI::factory()
-    ->withBaseUri('https://api.galx.ai/v1')
+    ->withBaseUri('https://galx.ai/v1')
     ->withApiKey('galx_live_your_gateway_key')
     ->make();
 
@@ -232,7 +232,7 @@ foreach ($stream as $response) {
     faqs: [
       {
         q: 'How do I set the custom Base URL in openai-php/client?',
-        a: 'Use ->withBaseUri("https://api.galx.ai/v1") during client factory initialization.',
+        a: 'Use ->withBaseUri("https://galx.ai/v1") during client factory initialization.',
       },
     ],
   },
@@ -251,7 +251,7 @@ using OpenAI.Chat;
 
 // Initialize OpenAI Client pointing to GALXAI Universal Gateway
 var clientOptions = new OpenAIClientOptions {
-    Endpoint = new Uri("https://api.galx.ai/v1")
+    Endpoint = new Uri("https://galx.ai/v1")
 };
 var client = new ChatClient("gpt-5.6-sol", "galx_live_your_gateway_key", clientOptions);
 
@@ -268,7 +268,7 @@ await foreach (StreamingChatCompletionUpdate update in client.CompleteChatStream
     faqs: [
       {
         q: 'How do I configure the custom endpoint in the official C# OpenAI library?',
-        a: 'Set Endpoint = new Uri("https://api.galx.ai/v1") inside OpenAIClientOptions when instantiating the client.',
+        a: 'Set Endpoint = new Uri("https://galx.ai/v1") inside OpenAIClientOptions when instantiating the client.',
       },
     ],
   },
@@ -287,7 +287,7 @@ await foreach (StreamingChatCompletionUpdate update in client.CompleteChatStream
 public class GalxAiQuickstart {
     public static void main(String[] args) {
         OpenAiChatModel model = OpenAiChatModel.builder()
-            .baseUrl("https://api.galx.ai/v1")
+            .baseUrl("https://galx.ai/v1")
             .apiKey("galx_live_your_gateway_key")
             .modelName("gpt-5.6-sol")
             .build();
@@ -298,14 +298,14 @@ public class GalxAiQuickstart {
 }`,
     streamingSnippet: `// LangChain4j Streaming in Java
 OpenAiStreamingChatModel streamingModel = OpenAiStreamingChatModel.builder()
-    .baseUrl("https://api.galx.ai/v1")
+    .baseUrl("https://galx.ai/v1")
     .apiKey("galx_live_your_gateway_key")
     .modelName("gpt-5.6-luna")
     .build();`,
     faqs: [
       {
         q: 'Can I use Spring AI with GALXAI?',
-        a: 'Yes. Set spring.ai.openai.base-url=https://api.galx.ai/v1 and supply your GALXAI live key in application.properties.',
+        a: 'Yes. Set spring.ai.openai.base-url=https://galx.ai/v1 and supply your GALXAI live key in application.properties.',
       },
     ],
   },
@@ -328,7 +328,7 @@ OpenAiStreamingChatModel streamingModel = OpenAiStreamingChatModel.builder()
       ],
       %{
         api_key: "galx_live_your_gateway_key",
-        api_url: "https://api.galx.ai/v1"
+        api_url: "https://galx.ai/v1"
       }
     )
   end
@@ -341,7 +341,7 @@ OpenAI.chat_completion_stream(
     faqs: [
       {
         q: 'Is GALXAI compatible with Elixir OpenAI wrappers?',
-        a: 'Yes. Simply override api_url to "https://api.galx.ai/v1" in config/config.exs.',
+        a: 'Yes. Simply override api_url to "https://galx.ai/v1" in config/config.exs.',
       },
     ],
   },

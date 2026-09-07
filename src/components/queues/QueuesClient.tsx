@@ -80,7 +80,7 @@ function getPythonAgentSnippet(task: GalxTask): string {
   return `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_..."
 )
 
@@ -181,7 +181,7 @@ function BaseRequestsAndResultsCanvas() {
     return `import { OpenAI } from 'openai';
 
 const client = new OpenAI({
-  baseURL: 'https://api.galx.ai/v1',
+  baseURL: 'https://galx.ai/v1',
   apiKey: 'galx_live_...'
 });
 
@@ -195,7 +195,7 @@ console.log(response.choices[0].message.content);`;
 
   const getCurlSnippet = (task: GalxTask): string => {
     const p = getPromptText(task);
-    return `curl -X POST https://api.galx.ai/v1/chat/completions \\
+    return `curl -X POST https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer $GALX_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -495,7 +495,7 @@ console.log(response.choices[0].message.content);`;
                         {activeCodeTab === 'python' && (selectedTask ? getPythonAgentSnippet(selectedTask) : `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_..."
 )
 
@@ -507,7 +507,7 @@ print(response.choices[0].message.content)`)}
                         {activeCodeTab === 'ts' && (selectedTask ? getTSAgentSnippet(selectedTask) : `import { OpenAI } from 'openai';
 
 const client = new OpenAI({
-  baseURL: 'https://api.galx.ai/v1',
+  baseURL: 'https://galx.ai/v1',
   apiKey: 'galx_live_...'
 });
 
@@ -516,7 +516,7 @@ const response = await client.chat.completions.create({
   messages: [{ role: 'user', content: 'Hello from TypeScript!' }]
 });
 console.log(response.choices[0].message.content);`)}
-                        {activeCodeTab === 'curl' && (selectedTask ? getCurlSnippet(selectedTask) : `curl -X POST https://api.galx.ai/v1/chat/completions \\
+                        {activeCodeTab === 'curl' && (selectedTask ? getCurlSnippet(selectedTask) : `curl -X POST https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer $GALX_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -529,10 +529,10 @@ console.log(response.choices[0].message.content);`)}
                     <button
                       onClick={() => {
                         const code = activeCodeTab === 'python'
-                          ? (selectedTask ? getPythonAgentSnippet(selectedTask) : `from openai import OpenAI\n\nclient = OpenAI(base_url="https://api.galx.ai/v1", api_key="galx_live_...")\nresponse = client.chat.completions.create(model="gpt-5.6-sol", messages=[{"role": "user", "content": "Hello!"}])\nprint(response.choices[0].message.content)`)
+                          ? (selectedTask ? getPythonAgentSnippet(selectedTask) : `from openai import OpenAI\n\nclient = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_...")\nresponse = client.chat.completions.create(model="gpt-5.6-sol", messages=[{"role": "user", "content": "Hello!"}])\nprint(response.choices[0].message.content)`)
                           : activeCodeTab === 'ts'
-                          ? (selectedTask ? getTSAgentSnippet(selectedTask) : `import { OpenAI } from 'openai';\nconst client = new OpenAI({ baseURL: 'https://api.galx.ai/v1', apiKey: 'galx_live_...' });\nconst response = await client.chat.completions.create({ model: 'gpt-5.6-sol', messages: [{ role: 'user', content: 'Hello!' }] });`)
-                          : (selectedTask ? getCurlSnippet(selectedTask) : `curl -X POST https://api.galx.ai/v1/chat/completions -H "Authorization: Bearer $GALX_API_KEY" -H "Content-Type: application/json" -d '{"model":"gpt-5.6-sol","messages":[{"role":"user","content":"Hello!"}]}'`);
+                          ? (selectedTask ? getTSAgentSnippet(selectedTask) : `import { OpenAI } from 'openai';\nconst client = new OpenAI({ baseURL: 'https://galx.ai/v1', apiKey: 'galx_live_...' });\nconst response = await client.chat.completions.create({ model: 'gpt-5.6-sol', messages: [{ role: 'user', content: 'Hello!' }] });`)
+                          : (selectedTask ? getCurlSnippet(selectedTask) : `curl -X POST https://galx.ai/v1/chat/completions -H "Authorization: Bearer $GALX_API_KEY" -H "Content-Type: application/json" -d '{"model":"gpt-5.6-sol","messages":[{"role":"user","content":"Hello!"}]}'`);
                         handleCopy(code, 'bottom-code-snippet', 'Snippet Copied');
                       }}
                       className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-zinc-300 text-[10px] font-mono flex items-center gap-1 transition-all cursor-pointer"

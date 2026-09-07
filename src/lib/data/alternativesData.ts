@@ -67,7 +67,7 @@ export const COMPETITOR_ALTERNATIVES: CompetitorAlternative[] = [
     migrationSteps: [
       {
         step: 'Step 1: Replace Base URL',
-        desc: 'Change your OpenAI client baseURL from "https://openrouter.ai/api/v1" to "https://api.galx.ai/v1".',
+        desc: 'Change your OpenAI client baseURL from "https://openrouter.ai/api/v1" to "https://galx.ai/v1".',
       },
       {
         step: 'Step 2: Supply GALXAI Live Key',
@@ -84,7 +84,7 @@ export const COMPETITOR_ALTERNATIVES: CompetitorAlternative[] = [
 
 # 1-Line Migration from OpenRouter to GALXAI (0% Markup)
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",  # Formerly https://openrouter.ai/api/v1
+    base_url="https://galx.ai/v1",  # Formerly https://openrouter.ai/api/v1
     api_key="galx_live_your_gateway_key"
 )
 
@@ -139,7 +139,7 @@ response = client.chat.completions.create(
     migrationSteps: [
       {
         step: 'Step 1: Point to GALXAI Anycast Edge',
-        desc: 'Set base_url="https://api.galx.ai/v1" in your existing OpenAI SDK configuration.',
+        desc: 'Set base_url="https://galx.ai/v1" in your existing OpenAI SDK configuration.',
       },
       {
         step: 'Step 2: Generate API Key',
@@ -156,7 +156,7 @@ response = client.chat.completions.create(
 
 # Direct OpenAI SDK with 25%–40% Wholesale Savings
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",  # 25% wholesale discount endpoint
+    base_url="https://galx.ai/v1",  # 25% wholesale discount endpoint
     api_key="galx_live_your_gateway_key"
 )
 
@@ -207,7 +207,7 @@ response = client.chat.completions.create(
     migrationSteps: [
       {
         step: 'Step 1: Set Base URL',
-        desc: 'Replace baseURL with "https://api.galx.ai/v1".',
+        desc: 'Replace baseURL with "https://galx.ai/v1".',
       },
       {
         step: 'Step 2: Update Model Parameter',
@@ -219,7 +219,7 @@ response = client.chat.completions.create(
       code: `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -269,7 +269,7 @@ const res = await client.chat.completions.create({
       },
       {
         step: 'Step 2: Point Client',
-        desc: 'Set baseURL to "https://api.galx.ai/v1".',
+        desc: 'Set baseURL to "https://galx.ai/v1".',
       },
     ],
     codeSnippet: {
@@ -277,7 +277,7 @@ const res = await client.chat.completions.create({
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -323,7 +323,7 @@ response = client.chat.completions.create(
     migrationSteps: [
       {
         step: 'Step 1: Replace Base URL',
-        desc: 'Update baseURL from "https://api.portkey.ai/v1" to "https://api.galx.ai/v1".',
+        desc: 'Update baseURL from "https://api.portkey.ai/v1" to "https://galx.ai/v1".',
       },
       {
         step: 'Step 2: Authenticate with Live Key',
@@ -335,7 +335,7 @@ response = client.chat.completions.create(
       code: `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -381,7 +381,7 @@ const response = await client.chat.completions.create({
     migrationSteps: [
       {
         step: 'Step 1: Update API Base',
-        desc: 'Set baseURL to "https://api.galx.ai/v1".',
+        desc: 'Set baseURL to "https://galx.ai/v1".',
       },
       {
         step: 'Step 2: Stream Live Responses',
@@ -393,7 +393,7 @@ const response = await client.chat.completions.create({
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -440,7 +440,7 @@ print(response.choices[0].message.content)`,
     migrationSteps: [
       {
         step: 'Step 1: Point Endpoint',
-        desc: 'Change LiteLLM localhost/proxy URL to "https://api.galx.ai/v1".',
+        desc: 'Change LiteLLM localhost/proxy URL to "https://galx.ai/v1".',
       },
       {
         step: 'Step 2: Tear Down Containers',
@@ -453,7 +453,7 @@ print(response.choices[0].message.content)`,
 
 // Replace self-hosted LiteLLM instance with managed GALXAI
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -503,7 +503,7 @@ const completion = await client.chat.completions.create({
       },
       {
         step: 'Step 2: Swap Client Initialization',
-        desc: 'Use the standard OpenAI SDK pointing to "https://api.galx.ai/v1".',
+        desc: 'Use the standard OpenAI SDK pointing to "https://galx.ai/v1".',
       },
     ],
     codeSnippet: {
@@ -512,7 +512,7 @@ const completion = await client.chat.completions.create({
 
 # No AWS SDK or SigV4 credentials needed
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -558,7 +558,7 @@ response = client.chat.completions.create(
     migrationSteps: [
       {
         step: 'Step 1: Point Base URL',
-        desc: 'Set baseURL to "https://api.galx.ai/v1".',
+        desc: 'Set baseURL to "https://galx.ai/v1".',
       },
       {
         step: 'Step 2: Enjoy Wholesale Rates',
@@ -570,7 +570,7 @@ response = client.chat.completions.create(
       code: `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -616,7 +616,7 @@ const res = await client.chat.completions.create({
     migrationSteps: [
       {
         step: 'Step 1: Update Endpoint',
-        desc: 'Set baseURL to "https://api.galx.ai/v1".',
+        desc: 'Set baseURL to "https://galx.ai/v1".',
       },
       {
         step: 'Step 2: Select SOTA Model',
@@ -628,7 +628,7 @@ const res = await client.chat.completions.create({
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -674,7 +674,7 @@ response = client.chat.completions.create(
     migrationSteps: [
       {
         step: 'Step 1: Set Base URL',
-        desc: 'Point baseURL to "https://api.galx.ai/v1".',
+        desc: 'Point baseURL to "https://galx.ai/v1".',
       },
       {
         step: 'Step 2: Stream Output',
@@ -686,7 +686,7 @@ response = client.chat.completions.create(
       code: `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 

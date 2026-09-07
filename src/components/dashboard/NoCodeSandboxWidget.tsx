@@ -38,19 +38,19 @@ const TOOL_CONFIGS: Record<string, ToolConfig> = {
     name: 'Cursor & Windsurf IDE',
     desc: 'In Cursor Settings > Models > Override Base URL:',
     icon: Laptop,
-    getCode: (model) => `Base URL: https://api.galx.ai/v1\nAPI Key: galx_live_your_key_here\nModel: ${model}`
+    getCode: (model) => `Base URL: https://galx.ai/v1\nAPI Key: galx_live_your_key_here\nModel: ${model}`
   },
   chat_app: {
     name: 'LibreChat / TypingMind / OpenWebUI',
     desc: 'In App Settings > OpenAI API Configuration:',
     icon: MessageSquare,
-    getCode: (model) => `API Base URL: https://api.galx.ai/v1\nAPI Key: galx_live_your_key_here\nCustom Model: ${model}`
+    getCode: (model) => `API Base URL: https://galx.ai/v1\nAPI Key: galx_live_your_key_here\nCustom Model: ${model}`
   },
   make: {
     name: 'Make.com & Zapier No-Code',
     desc: 'In HTTP / Webhook module headers:',
     icon: Bot,
-    getCode: () => `URL: https://api.galx.ai/v1/chat/completions\nAuthorization: Bearer galx_live_your_key_here\nContent-Type: application/json`
+    getCode: () => `URL: https://galx.ai/v1/chat/completions\nAuthorization: Bearer galx_live_your_key_here\nContent-Type: application/json`
   },
   python: {
     name: 'Python / Node.js 1-Line Drop-in',
@@ -59,7 +59,7 @@ const TOOL_CONFIGS: Record<string, ToolConfig> = {
     getCode: (model) => `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_key_here"
 )
 
@@ -110,7 +110,7 @@ const SIM_MODELS: SimModel[] = [
 • **Sub-15ms Gateway Overhead**: Edge routing proxies with instant TCP connection pooling.
 • **High-Throughput Global Gateway**: Zero queueing, jitter-free streaming, and no 429 stalls.
 • **ZDR-100 Privacy Guarantee**: Ephemeral in-memory handling with cryptographic zero-retention.
-• **Drop-in Compatible**: Point your baseURL to api.galx.ai/v1 with your live key.`
+• **Drop-in Compatible**: Point your baseURL to https://galx.ai/v1 with your live key.`
   }
 ];
 

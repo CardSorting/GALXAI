@@ -61,7 +61,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     shortDefinition:
       'A network architecture that routes client inference requests to the topologically nearest healthy gateway node using shared BGP IP addresses.',
     fullDefinition:
-      'Anycast routing advertises the same public IP address (api.galx.ai) from hundreds of edge points of presence across North America, Europe, and Asia. Requests terminate at the lowest-latency edge proxy, which proxies the request to upstream inference clusters over dedicated fiber backbones.',
+      'Anycast routing advertises the same public IP address (galx.ai) from hundreds of edge points of presence across North America, Europe, and Asia. Requests terminate at the lowest-latency edge proxy, which proxies the request to upstream inference clusters over dedicated fiber backbones.',
     technicalContext:
       'Provides automated DDoS mitigation, sub-15ms edge termination, and instantaneous sub-5ms failover in case of upstream network partitions.',
     wikidataUri: 'https://www.wikidata.org/wiki/Q483247',
@@ -100,7 +100,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     shortDefinition:
       '100% protocol and schema parity with the official OpenAI REST API specifications, allowing 1-line baseURL substitution with zero client refactoring.',
     fullDefinition:
-      'GALXAI implements complete request and response schema parity for /v1/chat/completions, /v1/embeddings, /v1/models, and /v1/images/generations. Developers swap baseURL="https://api.galx.ai/v1" in standard Python, TypeScript, LangChain, or Cursor IDE setups with zero code changes.',
+      'GALXAI implements complete request and response schema parity for /v1/chat/completions, /v1/embeddings, /v1/models, and /v1/images/generations. Developers swap baseURL="https://galx.ai/v1" in standard Python, TypeScript, LangChain, or Cursor IDE setups with zero code changes.',
     technicalContext:
       'Supports JSON Schema strict mode, parallel tool calling, streaming delta chunks, and logprobs.',
     wikidataUri: 'https://www.wikidata.org/wiki/Q28935449',

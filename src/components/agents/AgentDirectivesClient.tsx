@@ -31,7 +31,7 @@ CRITICAL AGENT RULES:
      : selectedFramework === 'react'
      ? '- Use React hooks with automatic endpoint discovery: import { useImageGeneration } from "galxai/react".'
      : selectedFramework === 'python'
-     ? '- Use OpenAI Python SDK drop-in: OpenAI(base_url="https://api.galx.ai/v1", api_key=os.environ["GALXAI_API_KEY"]).'
+     ? '- Use OpenAI Python SDK drop-in: OpenAI(base_url="https://galx.ai/v1", api_key=os.environ["GALXAI_API_KEY"]).'
      : '- Use Express middleware: app.post("/api/generate", createExpressImageHandler()) from "galxai/express".'}
 
 3. DECLARATIVE UI OVER IMPERATIVE CODE:

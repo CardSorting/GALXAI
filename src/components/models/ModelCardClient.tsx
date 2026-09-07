@@ -80,7 +80,7 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
       (1000 / 1_000_000) * model.outputPricePer1M;
 
   const heroCurlSnippet = isImage
-    ? `curl -X POST https://api.galx.ai/v1/images/generations \\
+    ? `curl -X POST https://galx.ai/v1/images/generations \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -88,7 +88,7 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
     "prompt": "Futuristic cloud architecture blueprint, dark neon",
     "size": "1024x1024"
   }'`
-    : `curl -X POST https://api.galx.ai/v1/chat/completions \\
+    : `curl -X POST https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -228,10 +228,10 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
 
                 <div className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 border border-white/15 text-xs font-mono">
                   <span className="text-zinc-500">Base URL:</span>
-                  <span className="text-cyan-300 font-medium">https://api.galx.ai/v1</span>
+                  <span className="text-cyan-300 font-medium">https://galx.ai/v1</span>
                   <button
                     type="button"
-                    onClick={() => triggerCopy('https://api.galx.ai/v1', 'hero-base-url')}
+                    onClick={() => triggerCopy('https://galx.ai/v1', 'hero-base-url')}
                     title="Copy Base URL"
                     className="ml-1 p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer"
                   >

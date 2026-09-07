@@ -786,37 +786,24 @@ export class ApiKeyRepository {
       [keyId, reason, userId || null]
     );
 
-    if (res) return;
+    if (res && res.rowCount === 1) return;
 
     if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        const { error: rpcErr } = await supabase.rpc('fn_revoke_developer_key' as any, {
-          p_id: keyId,
-          p_reason: reason
-        });
-
-        if (rpcErr) {
-          let query = supabase
-            .from('galx_developer_keys')
-            .update({
-              is_revoked: true,
-              revoked_at: new Date().toISOString(),
-              revoked_reason: reason,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', keyId);
-
-          if (userId) {
-            query = query.eq('user_id', userId);
-          }
-
-          await query;
-        }
-      } catch {
-        // Fallback
-      }
+      let query = getSupabaseAdmin()
+        .from('galx_developer_keys')
+        .update({
+          is_revoked: true,
+          revoked_at: new Date().toISOString(),
+          revoked_reason: reason,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', keyId);
+      if (userId) query = query.eq('user_id', userId);
+      const { data, error } = await query.select('id');
+      if (!error && data?.length === 1) return;
     }
+
+    throw new Error('Could not persist API key revocation. Please retry.');
   }
 
   async deleteKey(keyId: string, userId?: string): Promise<void> {

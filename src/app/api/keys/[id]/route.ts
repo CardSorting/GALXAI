@@ -234,7 +234,7 @@ export async function DELETE(
 
     const targetUserId = auth.claims?.scopes?.includes('admin:*') ? undefined : userId;
     await keyRepo.revokeKey(keyId, 'User requested revocation via REST API', targetUserId);
-    persistence.saveGatewayKey({ ...existing, revoked: true });
+    persistence.apiKeyTable.put(keyId, { ...existing, revoked: true });
     persistence.logAudit('GATEWAY_KEY_REVOKED', { keyId }, keyId, existing.userId);
 
     return NextResponse.json({ success: true, message: `Key ${keyId} revoked successfully` });

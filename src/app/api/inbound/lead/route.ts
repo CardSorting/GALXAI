@@ -132,7 +132,7 @@ export async function POST(req: NextRequest) {
       leadId: newLead.leadId,
       provisionedKey: newLead.provisionedKey,
       grantAmountUsd: newLead.grantAmountUsd,
-      endpointUrl: 'https://api.galx.ai/v1',
+      endpointUrl: 'https://galx.ai/v1',
       message: `Inbound lead captured! Live $${grantAmountUsd} compute key provisioned and routed to GTM Board.`,
       sha256Hash: newLead.sha256Hash,
     });

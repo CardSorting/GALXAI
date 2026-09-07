@@ -110,7 +110,7 @@ export default async function ModelDetailPage({ params }: ModelDetailPageProps) 
     },
     {
       q: `How do I connect ${model.name} to the OpenAI Python SDK or Cursor IDE?`,
-      a: `Set the OpenAI base_url to "https://api.galx.ai/v1", supply your GALXAI API key ("galx_live_..."), and specify model="${model.id}". It functions as a 100% wire-compatible 1-line drop-in replacement.`,
+      a: `Set the OpenAI base_url to "https://galx.ai/v1", supply your GALXAI API key ("galx_live_..."), and specify model="${model.id}". It functions as a 100% wire-compatible 1-line drop-in replacement.`,
     },
     {
       q: `What is the context window and completion limit for ${model.name}?`,
@@ -121,7 +121,7 @@ export default async function ModelDetailPage({ params }: ModelDetailPageProps) 
   const codeSnippet = `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -142,7 +142,7 @@ print(response.choices[0].message.content)`;
         totalTime: 'PT30S',
         steps: [
           { name: 'Generate API Key', text: 'Obtain a free live developer key with $5 compute credits.' },
-          { name: 'Set Base URL', text: 'Set baseURL="https://api.galx.ai/v1" in OpenAI client settings.' },
+          { name: 'Set Base URL', text: 'Set baseURL="https://galx.ai/v1" in OpenAI client settings.' },
           { name: 'Request Inference', text: `Execute completion requests specifying model="${model.id}".` },
         ],
       }),

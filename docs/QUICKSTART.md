@@ -49,7 +49,7 @@ export function ImageCard({ prompt, sessionId = 'session_quickstart' }: { prompt
     setLoading(true);
     setLoaded(false);
     try {
-      const res = await fetch('https://api.galx.ai/v1/images/generations', {
+      const res = await fetch('https://galx.ai/v1/images/generations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ export function ImageCard({ prompt, sessionId = 'session_quickstart' }: { prompt
 Fetch all images created in a session alongside the auto-updating `manifest.json`:
 
 ```typescript
-const res = await fetch(`https://api.galx.ai/v1/images/sessions/${sessionId}`, {
+const res = await fetch(`https://galx.ai/v1/images/sessions/${sessionId}`, {
   headers: { 'Authorization': `Bearer ${process.env.GALXAI_API_KEY}` }
 });
 const { data, manifest } = await res.json();

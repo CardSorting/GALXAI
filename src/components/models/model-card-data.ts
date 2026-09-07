@@ -138,7 +138,7 @@ export function getCodeRecipes(model: ModelSpecItem, customApiKey?: string) {
       cli: `# 1. Run zero-install image generation in terminal:
 npx galxai image --model "${model.id}" "Cyberpunk futuristic architecture, isometric blueprint, 8k"`,
 
-      curl: `curl https://api.galx.ai/v1/images/generations \\
+      curl: `curl https://galx.ai/v1/images/generations \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer ${apiKey}" \\
   -d '{
@@ -152,7 +152,7 @@ npx galxai image --model "${model.id}" "Cyberpunk futuristic architecture, isome
 
 # Initialize client pointing to GALXAI Universal Gateway
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="${apiKey}"
 )
 
@@ -169,7 +169,7 @@ print(response.data[0].url)`,
 
 // Drop-in replacement for OpenAI SDK
 const openai = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: "${apiKey}",
 });
 
@@ -191,7 +191,7 @@ import { experimental_generateImage as generateImage } from "ai";
 
 // Initialize Vercel AI SDK pointing to GALXAI Universal Router
 const galxai = createOpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: "${apiKey}",
 });
 
@@ -211,7 +211,7 @@ export async function POST(req: Request) {
 import requests
 
 response = requests.post(
-    "https://api.galx.ai/v1/images/generations",
+    "https://galx.ai/v1/images/generations",
     headers={"Authorization": f"Bearer ${apiKey}"},
     json={
         "model": "${model.id}",
@@ -234,7 +234,7 @@ import (
 
 func main() {
 	config := openai.DefaultConfig("${apiKey}")
-	config.BaseURL = "https://api.galx.ai/v1"
+	config.BaseURL = "https://galx.ai/v1"
 
 	client := openai.NewClientWithConfig(config)
 	ctx := context.Background()
@@ -265,7 +265,7 @@ func main() {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = OpenAIConfig::new()
-        .with_api_base("https://api.galx.ai/v1")
+        .with_api_base("https://galx.ai/v1")
         .with_api_key("${apiKey}");
 
     let client = Client::with_config(config);
@@ -286,7 +286,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
       cursor: `// In your Cursor / Windsurf Settings -> Models:
 // Toggle "Override OpenAI Base URL"
-Base URL: https://api.galx.ai/v1
+Base URL: https://galx.ai/v1
 API Key:  ${apiKey}
 
 // Add custom model identifier:
@@ -295,7 +295,7 @@ Model:    ${model.id}
 // In .cursorrules at your repo root:
 {
   "model": "${model.id}",
-  "baseURL": "https://api.galx.ai/v1"
+  "baseURL": "https://galx.ai/v1"
 }`
     };
   }
@@ -307,7 +307,7 @@ npx galxai --model "${model.id}" "Write a high-performance LRU cache in TypeScri
 # 2. Or start an interactive chat session:
 npx galxai chat --model "${model.id}"`,
 
-    curl: `curl https://api.galx.ai/v1/chat/completions \\
+    curl: `curl https://galx.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer ${apiKey}" \\
   -d '{
@@ -325,7 +325,7 @@ npx galxai chat --model "${model.id}"`,
 # Initialize client pointing to GALXAI Universal Gateway
 # Automatically unlocks wholesale pricing & up to 90% prompt caching
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="${apiKey}"
 )
 
@@ -347,7 +347,7 @@ for chunk in response:
 
 // Drop-in replacement for OpenAI SDK
 const openai = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: "${apiKey}",
 });
 
@@ -373,7 +373,7 @@ import { streamText } from "ai";
 
 // Initialize Vercel AI SDK pointing to GALXAI Universal Router
 const galxai = createOpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: "${apiKey}",
 });
 
@@ -394,7 +394,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 # Initialize LangChain with GALXAI Universal Gateway
 llm = ChatOpenAI(
     model="${model.id}",
-    openai_api_base="https://api.galx.ai/v1",
+    openai_api_base="https://galx.ai/v1",
     openai_api_key="${apiKey}",
     temperature=0.2,
     streaming=True
@@ -421,7 +421,7 @@ import (
 
 func main() {
 	config := openai.DefaultConfig("${apiKey}")
-	config.BaseURL = "https://api.galx.ai/v1"
+	config.BaseURL = "https://galx.ai/v1"
 
 	client := openai.NewClientWithConfig(config)
 	ctx := context.Background()
@@ -467,7 +467,7 @@ use futures::StreamExt;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = OpenAIConfig::new()
-        .with_api_base("https://api.galx.ai/v1")
+        .with_api_base("https://galx.ai/v1")
         .with_api_key("${apiKey}");
 
     let client = Client::with_config(config);
@@ -509,7 +509,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     cursor: `// In your Cursor / Windsurf Settings -> Models:
 // Toggle "Override OpenAI Base URL"
-Base URL: https://api.galx.ai/v1
+Base URL: https://galx.ai/v1
 API Key:  ${apiKey}
 
 // Add custom model identifier:
@@ -518,7 +518,7 @@ Model:    ${model.id}
 // In .cursorrules at your repo root:
 {
   "model": "${model.id}",
-  "baseURL": "https://api.galx.ai/v1",
+  "baseURL": "https://galx.ai/v1",
   "promptCaching": true
 }`
   };

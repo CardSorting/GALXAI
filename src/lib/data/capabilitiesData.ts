@@ -48,7 +48,7 @@ export const CAPABILITIES_DATA: CapabilityItem[] = [
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -98,7 +98,7 @@ response = client.chat.completions.create(
 
 # Zero-Retention Gateway Client
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -141,7 +141,7 @@ response = client.chat.completions.create(
       code: `import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.galx.ai/v1",
+  baseURL: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
 });
 
@@ -192,7 +192,7 @@ class FinancialAuditSchema(BaseModel):
     is_compliant: bool
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -234,7 +234,7 @@ completion = client.beta.chat.completions.parse(
       language: 'bash',
       code: `# Verify sub-15ms edge TLS termination from anywhere in the world
 curl -w "TTFB: %{time_starttransfer}s | Total: %{time_total}s\\n" \\
-  -X POST https://api.galx.ai/v1/chat/completions \\
+  -X POST https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer \$GALXAI_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"model": "gpt-5.6-luna", "messages": [{"role": "user", "content": "ping"}]}'`,
@@ -271,7 +271,7 @@ curl -w "TTFB: %{time_starttransfer}s | Total: %{time_total}s\\n" \\
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -313,7 +313,7 @@ response = client.chat.completions.create(
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -355,7 +355,7 @@ response = client.chat.completions.create(
       code: `from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 

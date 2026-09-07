@@ -76,7 +76,7 @@ export default function ModelCostComparatorPage() {
   const codeSchema = createSoftwareSourceCodeSchema({
     name: 'Wholesale Model Invocation Code',
     programmingLanguage: 'Python',
-    codeSample: 'from openai import OpenAI\nclient = OpenAI(base_url="https://api.galx.ai/v1", api_key="galx_live_key")\nres = client.chat.completions.create(model="gpt-5.6-sol", messages=[{"role":"user","content":"Hello"}])',
+    codeSample: 'from openai import OpenAI\nclient = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_key")\nres = client.chat.completions.create(model="gpt-5.6-sol", messages=[{"role":"user","content":"Hello"}])',
     targetUrl: 'https://galx.ai/tools/model-cost-comparator#comparator-code-snippet',
   });
 

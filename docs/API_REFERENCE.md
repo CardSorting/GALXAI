@@ -27,7 +27,7 @@ GALXAI implements **Multi-Header & Query Parameter Ingestion** to absorb any dev
 
 | Environment | Ingress Base URL | Regional Coverage |
 | :--- | :--- | :--- |
-| **Production Global Ingress** | `https://galx.ai/v1` (or `https://api.galx.ai/v1`) | 300+ Global Edge PoPs ($0 Egress) |
+| **Application API** | `https://galx.ai/v1` | Application model router |
 | **Ollama Local Dev Proxy** | `https://galx.ai` (`OLLAMA_HOST`) | Sub-15ms Anycast Edge Routing |
 | **Multimodal R2 Media CDN** | `https://assets.galx.ai` | Global Anycast Storage CDN |
 
@@ -217,7 +217,7 @@ Enterprise visual synthesis endpoint routing across OpenAI GPT-Image engines (`o
 
 ```typescript
 // Call from browser, Next.js Client Component, or SPA:
-const response = await fetch('https://api.galx.ai/v1/images/generations', {
+const response = await fetch('https://galx.ai/v1/images/generations', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',

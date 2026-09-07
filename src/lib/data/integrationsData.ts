@@ -39,13 +39,13 @@ export const INTEGRATION_GUIDES: IntegrationGuide[] = [
     description:
       'Configure Cursor to route completions and agent edits through the GALXAI Universal Gateway for 25%–40% wholesale savings, 75% prompt caching, and zero rate-limit stalls.',
     timeToSetup: 'PT30S',
-    envSnippet: `OPENAI_API_BASE=https://api.galx.ai/v1
+    envSnippet: `OPENAI_API_BASE=https://galx.ai/v1
 OPENAI_API_KEY=galx_live_your_gateway_key`,
     configSnippet: {
       filename: 'settings.json (Cursor Settings > Models)',
       language: 'json',
       code: `{
-  "cursor.openaiBaseUrl": "https://api.galx.ai/v1",
+  "cursor.openaiBaseUrl": "https://galx.ai/v1",
   "cursor.openaiApiKey": "galx_live_your_gateway_key",
   "cursor.customModels": [
     "gpt-5.6-sol",
@@ -58,7 +58,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
     codeExample: {
       language: 'Bash',
       code: `# Test Cursor Connection in Terminal
-curl https://api.galx.ai/v1/chat/completions \\
+curl https://galx.ai/v1/chat/completions \\
   -H "Authorization: Bearer galx_live_your_gateway_key" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -73,7 +73,7 @@ curl https://api.galx.ai/v1/chat/completions \\
       },
       {
         name: 'Configure OpenAI API Key & Base URL',
-        description: 'Toggle "Override OpenAI Base URL" to ON and enter "https://api.galx.ai/v1". Paste your GALXAI live key ("galx_live_...").',
+        description: 'Toggle "Override OpenAI Base URL" to ON and enter "https://galx.ai/v1". Paste your GALXAI live key ("galx_live_...").',
       },
       {
         name: 'Add Model Names',
@@ -101,7 +101,7 @@ curl https://api.galx.ai/v1/chat/completions \\
     description:
       'Set up Windsurf cascade flows and inline suggestions with wholesale AI token rates and automated failover across GPT-5.6 models.',
     timeToSetup: 'PT30S',
-    envSnippet: `WINDSURF_API_BASE=https://api.galx.ai/v1
+    envSnippet: `WINDSURF_API_BASE=https://galx.ai/v1
 WINDSURF_API_KEY=galx_live_your_gateway_key`,
     configSnippet: {
       filename: 'windsurf_config.json',
@@ -110,7 +110,7 @@ WINDSURF_API_KEY=galx_live_your_gateway_key`,
   "custom_providers": [
     {
       "name": "GALXAI Wholesale Gateway",
-      "base_url": "https://api.galx.ai/v1",
+      "base_url": "https://galx.ai/v1",
       "api_key": "galx_live_your_gateway_key",
       "models": ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"]
     }
@@ -120,7 +120,7 @@ WINDSURF_API_KEY=galx_live_your_gateway_key`,
     codeExample: {
       language: 'Bash',
       code: `# Verify Windsurf Gateway Endpoint
-curl https://api.galx.ai/v1/models \\
+curl https://galx.ai/v1/models \\
   -H "Authorization: Bearer galx_live_your_gateway_key"`,
     },
     steps: [
@@ -130,7 +130,7 @@ curl https://api.galx.ai/v1/models \\
       },
       {
         name: 'Set Custom Endpoint',
-        description: 'Set the Endpoint URL to "https://api.galx.ai/v1" and input your live GALXAI key.',
+        description: 'Set the Endpoint URL to "https://galx.ai/v1" and input your live GALXAI key.',
       },
       {
         name: 'Select Default Model',
@@ -154,7 +154,7 @@ curl https://api.galx.ai/v1/models \\
     description:
       'Seamlessly route generateText and streamText in Next.js App Router through GALXAI using @ai-sdk/openai with 25%–40% wholesale discounts.',
     timeToSetup: 'PT45S',
-    envSnippet: `OPENAI_BASE_URL="https://api.galx.ai/v1"
+    envSnippet: `OPENAI_BASE_URL="https://galx.ai/v1"
 OPENAI_API_KEY="galx_live_your_gateway_key"`,
     configSnippet: {
       filename: 'src/lib/ai.ts',
@@ -162,7 +162,7 @@ OPENAI_API_KEY="galx_live_your_gateway_key"`,
       code: `import { createOpenAI } from '@ai-sdk/openai';
 
 export const galxai = createOpenAI({
-  baseURL: 'https://api.galx.ai/v1',
+  baseURL: 'https://galx.ai/v1',
   apiKey: process.env.OPENAI_API_KEY,
 });
 
@@ -191,7 +191,7 @@ export async function POST(req: Request) {
       },
       {
         name: 'Instantiate createOpenAI Client',
-        description: 'Provide baseURL="https://api.galx.ai/v1" and your GALXAI API key to createOpenAI.',
+        description: 'Provide baseURL="https://galx.ai/v1" and your GALXAI API key to createOpenAI.',
       },
       {
         name: 'Execute streamText / generateObject',
@@ -215,7 +215,7 @@ export async function POST(req: Request) {
     description:
       'Route ChatOpenAI and LangGraph multi-agent workflows through GALXAI with wholesale pricing and parallel tool calling support.',
     timeToSetup: 'PT45S',
-    envSnippet: `OPENAI_API_BASE=https://api.galx.ai/v1
+    envSnippet: `OPENAI_API_BASE=https://galx.ai/v1
 OPENAI_API_KEY=galx_live_your_gateway_key`,
     configSnippet: {
       filename: 'agent.py',
@@ -224,7 +224,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
 
 llm = ChatOpenAI(
     model="gpt-5.6-sol",
-    openai_api_base="https://api.galx.ai/v1",
+    openai_api_base="https://galx.ai/v1",
     openai_api_key="galx_live_your_gateway_key",
     temperature=0.2
 )
@@ -244,7 +244,7 @@ prompt = ChatPromptTemplate.from_messages([
 
 llm = ChatOpenAI(
     model="gpt-5.6-sol",
-    openai_api_base="https://api.galx.ai/v1",
+    openai_api_base="https://galx.ai/v1",
     openai_api_key="galx_live_your_gateway_key"
 )
 
@@ -258,7 +258,7 @@ result = chain.invoke({"input": "Optimize this SQL query"})`,
       },
       {
         name: 'Set openai_api_base Parameter',
-        description: 'Pass openai_api_base="https://api.galx.ai/v1" and your GALXAI live API key to ChatOpenAI.',
+        description: 'Pass openai_api_base="https://galx.ai/v1" and your GALXAI live API key to ChatOpenAI.',
       },
       {
         name: 'Run Multi-Agent Graph',
@@ -282,7 +282,7 @@ result = chain.invoke({"input": "Optimize this SQL query"})`,
     description:
       'Power high-volume RAG pipelines, vector querying, and document synthesis with GALXAI wholesale rates and zero data retention.',
     timeToSetup: 'PT45S',
-    envSnippet: `OPENAI_API_BASE=https://api.galx.ai/v1
+    envSnippet: `OPENAI_API_BASE=https://galx.ai/v1
 OPENAI_API_KEY=galx_live_your_gateway_key`,
     configSnippet: {
       filename: 'rag_pipeline.py',
@@ -292,7 +292,7 @@ from llama_index.core import Settings
 
 Settings.llm = OpenAI(
     model="gpt-5.6-sol",
-    api_base="https://api.galx.ai/v1",
+    api_base="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -306,7 +306,7 @@ from llama_index.core import Settings
 
 Settings.llm = OpenAI(
     model="gpt-5.6-sol",
-    api_base="https://api.galx.ai/v1",
+    api_base="https://galx.ai/v1",
     api_key="galx_live_your_gateway_key"
 )
 
@@ -322,7 +322,7 @@ response = query_engine.query("Summarize the quarterly financial report")`,
       },
       {
         name: 'Configure Settings.llm',
-        description: 'Set api_base="https://api.galx.ai/v1" and supply your live developer key.',
+        description: 'Set api_base="https://galx.ai/v1" and supply your live developer key.',
       },
       {
         name: 'Execute Vector Queries',
@@ -346,7 +346,7 @@ response = query_engine.query("Summarize the quarterly financial report")`,
     description:
       'Deploy autonomous multi-agent swarms with high concurrency, pooled 429 rate limit protection, and 75% prompt caching on agent system prompts.',
     timeToSetup: 'PT45S',
-    envSnippet: `OPENAI_API_BASE=https://api.galx.ai/v1
+    envSnippet: `OPENAI_API_BASE=https://galx.ai/v1
 OPENAI_API_KEY=galx_live_your_gateway_key`,
     configSnippet: {
       filename: 'crew.py',
@@ -356,7 +356,7 @@ from langchain_openai import ChatOpenAI
 
 gateway_llm = ChatOpenAI(
     model="gpt-5.6-sol",
-    openai_api_base="https://api.galx.ai/v1",
+    openai_api_base="https://galx.ai/v1",
     openai_api_key="galx_live_your_gateway_key"
 )
 
@@ -389,7 +389,7 @@ print(result)`,
       },
       {
         name: 'Define Gateway LLM Instance',
-        description: 'Instantiate ChatOpenAI pointing to "https://api.galx.ai/v1" with your GALXAI key.',
+        description: 'Instantiate ChatOpenAI pointing to "https://galx.ai/v1" with your GALXAI key.',
       },
       {
         name: 'Execute Swarm Loops',
@@ -413,18 +413,18 @@ print(result)`,
     description:
       'Power your terminal-based autonomous coding agent with 25%–40% wholesale savings, 75% prompt caching, and zero rate-limit stalls on deep multi-file refactors.',
     timeToSetup: 'PT30S',
-    envSnippet: `ANTHROPIC_BASE_URL=https://api.galx.ai/v1
+    envSnippet: `ANTHROPIC_BASE_URL=https://galx.ai/v1
 ANTHROPIC_API_KEY=galx_live_your_gateway_key`,
     configSnippet: {
       filename: '.env',
       language: 'bash',
-      code: `export OPENAI_BASE_URL="https://api.galx.ai/v1"
+      code: `export OPENAI_BASE_URL="https://galx.ai/v1"
 export OPENAI_API_KEY="galx_live_your_gateway_key"`,
     },
     codeExample: {
       language: 'Bash',
       code: `# Launch Claude Code pointing to GALXAI wholesale clearinghouse
-claude --openai-base-url="https://api.galx.ai/v1" --model="gpt-5.6-sol"`,
+claude --openai-base-url="https://galx.ai/v1" --model="gpt-5.6-sol"`,
     },
     steps: [
       {
@@ -433,7 +433,7 @@ claude --openai-base-url="https://api.galx.ai/v1" --model="gpt-5.6-sol"`,
       },
       {
         name: 'Export Gateway Environment',
-        description: 'Set OPENAI_BASE_URL="https://api.galx.ai/v1" in your shell configuration.',
+        description: 'Set OPENAI_BASE_URL="https://galx.ai/v1" in your shell configuration.',
       },
       {
         name: 'Launch Agent Sessions',
@@ -457,14 +457,14 @@ claude --openai-base-url="https://api.galx.ai/v1" --model="gpt-5.6-sol"`,
     description:
       'Build visual AI workflows, RAG agents, and assistants in Dify with sub-15ms Anycast latency, 75% prompt caching, and wholesale token pricing.',
     timeToSetup: 'PT45S',
-    envSnippet: `OPENAI_API_BASE=https://api.galx.ai/v1
+    envSnippet: `OPENAI_API_BASE=https://galx.ai/v1
 OPENAI_API_KEY=galx_live_your_gateway_key`,
     configSnippet: {
       filename: 'dify_provider_config.json',
       language: 'json',
       code: `{
   "provider": "openai",
-  "api_base": "https://api.galx.ai/v1",
+  "api_base": "https://galx.ai/v1",
   "api_key": "galx_live_your_gateway_key",
   "models": ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"]
 }`,
@@ -472,7 +472,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
     codeExample: {
       language: 'TypeScript',
       code: `// Dify Custom Tool Execution via GALXAI
-const response = await fetch("https://api.galx.ai/v1/chat/completions", {
+const response = await fetch("https://galx.ai/v1/chat/completions", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -491,7 +491,7 @@ const response = await fetch("https://api.galx.ai/v1/chat/completions", {
       },
       {
         name: 'Configure Base URL',
-        description: 'Set Server URL to "https://api.galx.ai/v1" and enter your GALXAI key.',
+        description: 'Set Server URL to "https://galx.ai/v1" and enter your GALXAI key.',
       },
       {
         name: 'Add Model Identifiers',
@@ -515,12 +515,12 @@ const response = await fetch("https://api.galx.ai/v1/chat/completions", {
     description:
       'Connect visual Flowise chains, tool agents, and LangChain nodes directly to GALXAI wholesale models with zero code modifications.',
     timeToSetup: 'PT30S',
-    envSnippet: `OPENAI_API_BASE=https://api.galx.ai/v1
+    envSnippet: `OPENAI_API_BASE=https://galx.ai/v1
 OPENAI_API_KEY=galx_live_your_gateway_key`,
     configSnippet: {
       filename: '.env',
       language: 'bash',
-      code: `OPENAI_API_BASE="https://api.galx.ai/v1"
+      code: `OPENAI_API_BASE="https://galx.ai/v1"
 OPENAI_API_KEY="galx_live_your_gateway_key"`,
     },
     codeExample: {
@@ -528,7 +528,7 @@ OPENAI_API_KEY="galx_live_your_gateway_key"`,
       code: `// Flowise Chat Node Configuration
 const chatNode = {
   modelName: "gpt-5.6-sol",
-  basePath: "https://api.galx.ai/v1",
+  basePath: "https://galx.ai/v1",
   openAIApiKey: process.env.GALXAI_API_KEY,
   temperature: 0.2
 };`,
@@ -540,7 +540,7 @@ const chatNode = {
       },
       {
         name: 'Set Base Path Parameter',
-        description: 'Expand Additional Parameters and set BasePath to "https://api.galx.ai/v1".',
+        description: 'Expand Additional Parameters and set BasePath to "https://galx.ai/v1".',
       },
       {
         name: 'Test Flow Execution',
@@ -564,7 +564,7 @@ const chatNode = {
     description:
       'Supercharge your self-hosted Open WebUI instance with OpenAI GPT-5.6, 75% prompt caching, and wholesale billing.',
     timeToSetup: 'PT30S',
-    envSnippet: `OPENAI_API_BASE_URL=https://api.galx.ai/v1
+    envSnippet: `OPENAI_API_BASE_URL=https://galx.ai/v1
 OPENAI_API_KEY=galx_live_your_gateway_key`,
     configSnippet: {
       filename: 'docker-compose.yml',
@@ -573,7 +573,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
   open-webui:
     image: ghcr.io/open-webui/open-webui:main
     environment:
-      - OPENAI_API_BASE_URL=https://api.galx.ai/v1
+      - OPENAI_API_BASE_URL=https://galx.ai/v1
       - OPENAI_API_KEY=galx_live_your_gateway_key
     ports:
       - "3000:8080"`,
@@ -581,14 +581,14 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
     codeExample: {
       language: 'Bash',
       code: `docker run -d -p 3000:8080 \\
-  -e OPENAI_API_BASE_URL="https://api.galx.ai/v1" \\
+  -e OPENAI_API_BASE_URL="https://galx.ai/v1" \\
   -e OPENAI_API_KEY="galx_live_your_gateway_key" \\
   --name open-webui ghcr.io/open-webui/open-webui:main`,
     },
     steps: [
       {
         name: 'Configure Environment',
-        description: 'Set OPENAI_API_BASE_URL="https://api.galx.ai/v1" and OPENAI_API_KEY in Open WebUI settings.',
+        description: 'Set OPENAI_API_BASE_URL="https://galx.ai/v1" and OPENAI_API_KEY in Open WebUI settings.',
       },
       {
         name: 'Sync Model List',
@@ -616,7 +616,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
     description:
       'Integrate the popular open-source VSCode and JetBrains coding assistant with GALXAI for sub-12ms inline autocomplete and deep chat refactoring.',
     timeToSetup: 'PT30S',
-    envSnippet: `OPENAI_API_BASE=https://api.galx.ai/v1
+    envSnippet: `OPENAI_API_BASE=https://galx.ai/v1
 OPENAI_API_KEY=galx_live_your_gateway_key`,
     configSnippet: {
       filename: '~/.continue/config.json',
@@ -627,14 +627,14 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
       "title": "GPT-5.6 Sol (Wholesale)",
       "provider": "openai",
       "model": "gpt-5.6-sol",
-      "apiBase": "https://api.galx.ai/v1",
+      "apiBase": "https://galx.ai/v1",
       "apiKey": "galx_live_your_gateway_key"
     },
     {
       "title": "GPT-5.6 Terra (Balanced)",
       "provider": "openai",
       "model": "gpt-5.6-terra",
-      "apiBase": "https://api.galx.ai/v1",
+      "apiBase": "https://galx.ai/v1",
       "apiKey": "galx_live_your_gateway_key"
     }
   ],
@@ -642,7 +642,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
     "title": "GPT-5.6 Luna Autocomplete",
     "provider": "openai",
     "model": "gpt-5.6-luna",
-    "apiBase": "https://api.galx.ai/v1",
+    "apiBase": "https://galx.ai/v1",
     "apiKey": "galx_live_your_gateway_key"
   }
 }`,
@@ -654,7 +654,7 @@ const config = {
   tabAutocompleteModel: {
     provider: "openai",
     model: "gpt-5.6-luna",
-    apiBase: "https://api.galx.ai/v1",
+    apiBase: "https://galx.ai/v1",
     apiKey: process.env.GALXAI_API_KEY,
   }
 };`,
@@ -666,7 +666,7 @@ const config = {
       },
       {
         name: 'Add GALXAI Models',
-        description: 'Insert the GALXAI model definitions with apiBase="https://api.galx.ai/v1".',
+        description: 'Insert the GALXAI model definitions with apiBase="https://galx.ai/v1".',
       },
       {
         name: 'Enjoy Wholesale Coding',
@@ -690,14 +690,14 @@ const config = {
     description:
       'Prevent 429 rate limit stalls and slash high-volume token costs by 25%–40% when running Cline multi-file autonomous coding tasks.',
     timeToSetup: 'PT30S',
-    envSnippet: `OPENAI_API_BASE=https://api.galx.ai/v1
+    envSnippet: `OPENAI_API_BASE=https://galx.ai/v1
 OPENAI_API_KEY=galx_live_your_gateway_key`,
     configSnippet: {
       filename: 'cline_settings.json',
       language: 'json',
       code: `{
   "apiProvider": "openai-compatible",
-  "baseUrl": "https://api.galx.ai/v1",
+  "baseUrl": "https://galx.ai/v1",
   "apiKey": "galx_live_your_gateway_key",
   "modelId": "gpt-5.6-sol"
 }`,
@@ -707,7 +707,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
       code: `// Cline Provider Configuration
 const clineSettings = {
   apiProvider: "openai-compatible",
-  baseUrl: "https://api.galx.ai/v1",
+  baseUrl: "https://galx.ai/v1",
   apiKey: process.env.GALXAI_API_KEY,
   modelId: "gpt-5.6-sol"
 };`,
@@ -719,7 +719,7 @@ const clineSettings = {
       },
       {
         name: 'Select OpenAI Compatible Provider',
-        description: 'Set Base URL to "https://api.galx.ai/v1" and supply your live key.',
+        description: 'Set Base URL to "https://galx.ai/v1" and supply your live key.',
       },
       {
         name: 'Start Autonomous Tasks',

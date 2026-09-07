@@ -271,7 +271,7 @@ export default function ToolsHubPage() {
           </div>
           <h3 className="text-xl font-bold text-white">Ready to connect directly to the wholesale AI gateway?</h3>
           <p className="text-xs sm:text-sm text-zinc-400 max-w-xl">
-            Switch your OpenAI base URL to <code className="text-cyan-300 font-mono">https://api.galx.ai/v1</code> for instant 25%–40% token savings, automatic failover, and zero rate limit stalls.
+            Switch your OpenAI base URL to <code className="text-cyan-300 font-mono">https://galx.ai/v1</code> for instant 25%–40% token savings, automatic failover, and zero rate limit stalls.
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">

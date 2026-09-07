@@ -298,7 +298,7 @@ function BaseNewKeyPage() {
 
   const handleCopyEnv = async () => {
     if (!revealedKey) return;
-    const snippet = `OPENAI_BASE_URL="https://api.galx.ai/v1"\nOPENAI_API_KEY="${revealedKey.apiKey}"`;
+    const snippet = `OPENAI_BASE_URL="https://galx.ai/v1"\nOPENAI_API_KEY="${revealedKey.apiKey}"`;
     const success = await safeCopyToClipboard(snippet);
     if (success) {
       setCopiedEnv(true);
@@ -307,7 +307,7 @@ function BaseNewKeyPage() {
   };
 
   const handleDownloadEnv = (apiKey: string, keyName: string = 'GALX AI') => {
-    const content = `# ${keyName} Credentials\n# Generated at: ${new Date().toISOString()}\nOPENAI_BASE_URL="https://api.galx.ai/v1"\nOPENAI_API_KEY="${apiKey}"\nGALX_BASE_URL="https://api.galx.ai/v1"\nGALX_API_KEY="${apiKey}"\n`;
+    const content = `# ${keyName} Credentials\n# Generated at: ${new Date().toISOString()}\nOPENAI_BASE_URL="https://galx.ai/v1"\nOPENAI_API_KEY="${apiKey}"\nGALX_BASE_URL="https://galx.ai/v1"\nGALX_API_KEY="${apiKey}"\n`;
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -322,7 +322,7 @@ function BaseNewKeyPage() {
   const handleCopyCursorJson = async () => {
     if (!revealedKey) return;
     const config = {
-      "cursor.openaiBaseUrl": "https://api.galx.ai/v1",
+      "cursor.openaiBaseUrl": "https://galx.ai/v1",
       "cursor.apiKey": revealedKey.apiKey,
       "cursor.model": "gpt-5.6-sol"
     };
@@ -349,7 +349,7 @@ function BaseNewKeyPage() {
 
 // 100% Wire Parity: Point official OpenAI SDK to GALXAI Gateway
 const openai = new OpenAI({
-  baseURL: 'https://api.galx.ai/v1',
+  baseURL: 'https://galx.ai/v1',
   apiKey: process.env.GALXAI_API_KEY || '${targetKeyPlaceholder}', // ${name}
 });
 
@@ -363,7 +363,7 @@ import os
 
 # Point official OpenAI client to GALXAI Anycast Gateway
 client = OpenAI(
-    base_url="https://api.galx.ai/v1",
+    base_url="https://galx.ai/v1",
     api_key=os.environ.get("GALXAI_API_KEY", "${targetKeyPlaceholder}") # ${name}
 )
 
@@ -372,7 +372,7 @@ response = client.chat.completions.create(
     messages=[{"role": "user", "content": "Design a high-performance LRU cache in Rust"}]
 )
 print(response.choices[0].message.content)`,
-    curl: `curl https://api.galx.ai/v1/chat/completions \\
+    curl: `curl https://galx.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer \${GALXAI_API_KEY:-"${targetKeyPlaceholder}"}" \\
   -d '{
@@ -381,12 +381,12 @@ print(response.choices[0].message.content)`,
   }'`,
     cursor: `// Cursor Settings -> Models -> OpenAI API Key:
 // 1. Toggle "Override OpenAI Base URL" to ON
-// 2. Base URL: https://api.galx.ai/v1
+// 2. Base URL: https://galx.ai/v1
 // 3. API Key:  <paste your ${environment.toUpperCase()} key (${targetKeyPlaceholder})>
 // 4. Model:    gpt-5.6-sol (or gpt-5.6-terra)`,
     windsurf: `// Windsurf Settings (or ~/.codeium/windsurf/memories/global_rules.md):
 {
-  "openai_base_url": "https://api.galx.ai/v1",
+  "openai_base_url": "https://galx.ai/v1",
   "openai_api_key": "${targetKeyPlaceholder}",
   "default_model": "gpt-5.6-sol"
 }`,
@@ -963,7 +963,7 @@ print(response.choices[0].message.content)`,
                 type="button"
                 onClick={async () => {
                   if (!revealedKey) return;
-                  const snippet = `export OPENAI_BASE_URL="https://api.galx.ai/v1"\nexport OPENAI_API_KEY="${revealedKey.apiKey}"`;
+                  const snippet = `export OPENAI_BASE_URL="https://galx.ai/v1"\nexport OPENAI_API_KEY="${revealedKey.apiKey}"`;
                   await safeCopyToClipboard(snippet);
                   setCopiedEnv(true);
                   setTimeout(() => setCopiedEnv(false), 2000);

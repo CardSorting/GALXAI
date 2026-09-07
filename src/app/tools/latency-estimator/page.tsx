@@ -77,7 +77,7 @@ export default function LatencyEstimatorPage() {
   const codeSchema = createSoftwareSourceCodeSchema({
     name: 'Python TTFT Benchmark Script',
     programmingLanguage: 'Python',
-    codeSample: 'from openai import OpenAI\nimport time\nclient = OpenAI(base_url="https://api.galx.ai/v1", api_key="galx_live_...")\nt0 = time.perf_counter()\nstream = client.chat.completions.create(model="gpt-5.6-luna", messages=[{"role": "user", "content": "Benchmark"}], stream=True)',
+    codeSample: 'from openai import OpenAI\nimport time\nclient = OpenAI(base_url="https://galx.ai/v1", api_key="galx_live_...")\nt0 = time.perf_counter()\nstream = client.chat.completions.create(model="gpt-5.6-luna", messages=[{"role": "user", "content": "Benchmark"}], stream=True)',
     targetUrl: 'https://galx.ai/tools/latency-estimator#code-snippet',
   });
 
