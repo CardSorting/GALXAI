@@ -64,3 +64,34 @@ On the assigned worker, an administrator can POST `/api/capabilities/probe-image
 7. For rollback, pause ingress, drain and stop vNext workers, restore the saved shared relay image/configuration and original ingress, then verify downstream requests again. Do not run both topologies with the same credentials during rollback.
 
 The existing `docker-compose.relay.yml` describes the legacy shared deployment and is not a vNext fleet launcher. Rebuilding that deployment with the new worker without this migration will fail its one-shard guard. No tunnel change or production cutover is performed by this implementation's tests.
+
+
+## Parent and subagent request contract
+
+Give each logical operation its own `Idempotency-Key`, and reuse that key only with the same payload when recovering its acknowledgement. `X-Galx-Task-Id` correlates a parent or child operation; it does not grant tenant authority. The controller supplies trusted tenant identity and a fresh `X-Request-Id`. The chat and image adapter options accept `taskId`, `idempotencyKey`, and `idempotencyScope`.
+
+| Response | Caller action |
+| --- | --- |
+| `202` | Save the signed `id`, `statusUrl`, and `streamUrl`. Poll or reconnect to those URLs; do not submit another job. `Operation-Location` is the status URL and `Location` is the stream URL. |
+| `409 request_in_progress` | Retry the same request with the same key after `Retry-After` to retrieve its acknowledgement. Admission may still be pending. |
+| `409 idempotency_conflict` | The key belongs to different parameters. Reconcile the original operation; use a new key only for intentionally different work. |
+| `409 result_not_retained` | Work finished but exceeded the response cache budget. Do not repeat synthesis to retrieve it. |
+| `relay_admission_unknown` or `idempotency_scope_changed` | Execution is uncertain. Inspect any existing job or operator trace; do not blindly replay. |
+| `job_transport_unavailable` | Retry the existing job URL using `Retry-After`; admission already happened. |
+| `503` before admission | Honor `Retry-After` and `X-Should-Retry`. Capacity is specific to the requested model. |
+
+The adapters preserve HTTP status, the safe error code, execution state, retry delay, request ID, and retry scope in `RelayDispatchError`. They do not automatically replay failures or expose raw provider error messages.
+
+The controller's explicit-key receipts are **process-local**, tenant- and route-scoped, retained for ten minutes from admission. They hold at most 1,000 live keys and 32 MiB of response/capture bytes, with an 8 MiB per-response cap. A full key window rejects new keyed work instead of evicting live deduplication evidence. Large images still stream, but their bytes may not be retained for replay. Completed receipts remain retrievable after model capability loss. These are bounded retry semantics, not durable exactly-once execution.
+
+Save the `X-Galx-Idempotency-Scope` response header and send it with a retry when available. A changed controller scope rejects the retry explicitly. Without that precondition, a controller restart or expired receipt may permit new execution under the same key. Recovery across an acknowledgement lost before receiving any scope requires external operation tracking; a stable key alone is insufficient. Signed job links remain generation-bound and never attach to a replacement worker.
+
+## Throughput and failure isolation
+
+The controller polls at most 32 jobs per batch, at most two per worker generation, with four concurrent calls and per-job backoff from two to sixteen seconds. Selected work rotates to the tail. Worker status/cancel/stream traffic uses a separate tenant rate bucket from inference admission. Stale generation reservations do not consume replacement-worker capacity.
+
+Docker ownership reads inspect up to 64 containers per command and time out after five seconds. Capability and acknowledgement bodies have explicit size limits. Registry reads and container listing overlap; startup/discovery and retirement are bounded to three concurrent operations. A draining invalid shard does not stall healthy shard reconciliation. Shutdown rejects new admissions immediately, allows accepted HTTP work up to thirty seconds, aborts remaining front-door I/O, and attempts every owned worker removal even if one fails.
+
+Successful requests cannot erase a concurrent authoritative model denial. A newer inventory or worker generation fences older observations, and equal-revision health replays cannot clear a local failure. Generic route errors, throttling, and transport failures remain insufficient evidence of model permission loss.
+
+These choices follow the explicit caller intent and bounded retry principles described in [AWS's idempotent API guidance](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/), while retaining GALX's exact-model routing and one-worker-per-shard lifecycle. The synthetic tests validate correctness and bounded scheduling; they are not a production throughput benchmark or DreamBees end-to-end image verification.

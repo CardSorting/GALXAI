@@ -120,3 +120,48 @@ test('registry cooldown blocks new admission without deleting otherwise useful w
   await lifecycle.reconcile();assert.equal(lifecycle.capabilities.select('A'),undefined);assert(lifecycle.handle('a'));
   now+=60001;await lifecycle.reconcile();assert(lifecycle.capabilities.select('A'));
 });
+
+test('a concurrent success cannot hide a model denial, while rediscovery fences older failures',()=>{
+  const {registry:r}=fixture();const denied=r.beginObservation('a','B')!;
+  r.observe(r.beginObservation('a','B')!,'B','AVAILABLE');
+  assert(r.observe(denied,'B','NOT_AUTHORIZED'));assert.equal(r.get('a')!.models.find(m=>m.model==='B')!.state,'NOT_AUTHORIZED');
+  const old=r.beginObservation('a','A')!;r.publishInventory(r.beginRefresh('a')!,['A']);
+  r.observe(r.beginObservation('a','A')!,'A','AVAILABLE');assert.equal(r.observe(old,'A','NOT_AUTHORIZED'),false);
+});
+test('replayed equal-revision health cannot clear a local failure observation',()=>{
+  const {registry:r}=fixture();const old=r.get('a')!;r.heartbeat('a',{health:'unavailable'},0,false);
+  assert.equal(r.receive(old),false);assert.equal(r.get('a')!.health,'unavailable');
+});
+
+
+test('invalid credential draining does not block healthy shard reconciliation; shutdown attempts every removal', async () => {
+  const desired: DesiredShard[] = ['a', 'b', 'c'].map(id => ({ id, provider: 'openai', credentialRevision: 'v1', accessToken: 'fake', accountId: id }));
+  const handles = desired.map(s => ({ id: `relay-${s.id}`, shardId: s.id, generation: s.id, credentialRevision: 'v1', endpoint: 'http://127.0.0.1:1', inferenceKey: 'fake', adminKey: 'fake' }));
+  let release!: () => void;
+  const drain = new Promise<void>(resolve => { release = resolve; });
+  const removed: string[] = [];
+  const lifecycle = new RelayFederationLifecycle(async () => desired, {
+    list: async () => handles,
+    start: async () => { throw Error('unexpected start'); },
+    inspect: async h => {
+      if (h.shardId === 'a') return { invalidCredential: true };
+      const r = new CapabilityRegistry(); r.register(h.shardId, h.id, h.generation, 'openai');
+      r.publishInventory(r.beginRefresh(h.shardId)!, ['A']); r.heartbeat(h.shardId, {});
+      return { record: r.get(h.shardId) };
+    },
+    remove: async h => { removed.push(h.shardId); if (h.shardId === 'a') await drain; if (h.shardId === 'b') throw Error('fixture removal failure'); }
+  });
+  const timeout = setTimeout(release, 1000);
+  try {
+    await lifecycle.reconcile();
+    assert.deepEqual(removed, ['a']);
+    assert.deepEqual(lifecycle.capabilities.eligible('A').map(s => s.shardId).sort(), ['b', 'c']);
+    // The first drain is still pending while useful shards are already routable.
+    assert(lifecycle.handle('a'));
+    release();
+    const stop = lifecycle.stop(); assert.equal(lifecycle.stop(), stop);
+    await assert.rejects(stop, /Failed to drain 1 owned relays/);
+    assert.deepEqual(removed.sort(), ['a', 'b', 'c']);
+    assert.equal(lifecycle.capabilities.eligible('A').length, 0);
+  } finally { release(); clearTimeout(timeout); }
+});

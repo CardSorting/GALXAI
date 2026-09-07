@@ -21,12 +21,19 @@ let timer: NodeJS.Timeout | undefined;
 let server: RelayFederationServer | undefined;
 let lifecycle: RelayFederationLifecycle | undefined;
 let stopping = false;
-async function stop() {
-  if (stopping) return; stopping = true;
+let shutdown: Promise<void> | undefined;
+function stop(): Promise<void> {
+  if (shutdown) return shutdown;
+  stopping = true;
   if (timer) clearInterval(timer);
-  try { await server?.stop(); await lifecycle?.stop(); }
-  finally { fs.closeSync(lockFd); fs.unlinkSync(lock); }
+  shutdown = (async () => {
+    try { try { await server?.stop(); } finally { await lifecycle?.stop(); } }
+    finally { fs.closeSync(lockFd); fs.unlinkSync(lock); }
+  })();
+  return shutdown;
 }
+process.once('SIGTERM', () => { void stop().catch(() => { console.error('Federation shutdown incomplete'); process.exitCode = 1; }); });
+process.once('SIGINT', () => { void stop().catch(() => { console.error('Federation shutdown incomplete'); process.exitCode = 1; }); });
 try {
   const secretPath = path.join(directory, 'signing-secret');
   if (!fs.existsSync(secretPath)) fs.writeFileSync(secretPath, randomBytes(32).toString('hex'), { flag: 'wx', mode: 0o600 });
@@ -52,8 +59,9 @@ try {
   server = new RelayFederationServer(lifecycle, { secret, apiKeys: (process.env.RELAY_API_KEYS || '').split(',').filter(Boolean),
     adminKeys: (process.env.RELAY_ADMIN_API_KEYS || '').split(',').filter(Boolean), port: Number(process.env.RELAY_FEDERATION_PORT || 3301) });
   await lifecycle.reconcile();
+  if (stopping) throw new Error('Federation startup interrupted');
   await server.start();
+  if (stopping) throw new Error('Federation startup interrupted');
   timer = setInterval(() => { void lifecycle!.reconcile(); }, 2000);
   console.log(`Federation ${namespace} listening on loopback port ${process.env.RELAY_FEDERATION_PORT || 3301}`);
-  process.once('SIGTERM', () => { void stop(); }); process.once('SIGINT', () => { void stop(); });
 } catch (error) { await stop(); throw error; }

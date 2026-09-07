@@ -1196,17 +1196,22 @@ export class GalxaiRelayServer extends EventEmitter {
     try { await this.capabilityRefresh; } finally { this.capabilityRefresh = undefined; }
   }
 
-  private capabilitySnapshot() {
+  private updateCapabilityHealth() {
+    const queueDepth = this.jobsTable.getAll().filter(j => j.status === 'queued').length;
     for (const shard of this.shardsTable.getAll()) this.capabilities.heartbeat(shard.id, {
       activeStreams: shard.inFlight, capacity: this.config.shardConcurrency, recentErrors: shard.consecutiveFailures,
       health: this.isDraining || this.shardReadyAt(shard) > Date.now() ? 'unavailable' : 'healthy',
-      queueDepth: this.jobsTable.getAll().filter(j => j.status === 'queued').length,
+      queueDepth,
     });
+  }
+
+  private capabilitySnapshot() {
+    this.updateCapabilityHealth();
     return { ...this.capabilities.snapshot(), error: this.capabilityError };
   }
 
   private rejectModelCapacity(res: http.ServerResponse, model: string): void {
-    this.capabilitySnapshot();
+    this.updateCapabilityHealth();
     const eligible = this.capabilities.eligible(model);
     const code = eligible.length ? 'model_capacity_exhausted' : 'model_temporarily_unavailable';
     const now = Date.now();
@@ -1272,8 +1277,8 @@ export class GalxaiRelayServer extends EventEmitter {
 
   private acquireHealthyShard(exclude?: string | Set<string>, model?: string): ShardRecord | null {
     if (!model) return null;
-    this.capabilitySnapshot();
-    const eligibleIds = new Set(this.capabilities.eligible(model).map(s => s.shardId));
+    this.updateCapabilityHealth();
+    const eligibleIds = new Set(this.capabilities.eligibleShardIds(model));
     const now = Date.now();
     if (this.config.registryEnabled && (this.registryError || now - this.registryRefreshedAtMs > 5000)) return null;
     const all = [...eligibleIds].map(id => this.shardsTable.get(id)!).filter(Boolean);
@@ -1568,7 +1573,7 @@ export class GalxaiRelayServer extends EventEmitter {
     const delegatedTenant = req.headers['x-galx-tenant'];
     const tenantId = this.config.assignedShard && this.principals.has(req) && typeof delegatedTenant === 'string' && /^[a-f0-9]{64}$/.test(delegatedTenant)
       ? delegatedTenant : this.principals.get(req) || req.socket.remoteAddress || 'tenant_default';
-    if (!this.checkTenantRateLimit(tenantId)) {
+    if (!this.checkTenantRateLimit(pathname.startsWith('/v1/jobs/') ? `control:${tenantId}` : tenantId)) {
       const traceId = this.requestTraces.get(req);
       if (traceId) this.telemetry.finish(traceId, 'failed', 'relay_rate_limited', 'relay');
       res.writeHead(429, {
@@ -1688,7 +1693,7 @@ export class GalxaiRelayServer extends EventEmitter {
           }
         }
 
-        this.capabilitySnapshot();
+        this.updateCapabilityHealth();
         if (!this.capabilities.select(model)) {
           this.rejectModelCapacity(res, model);
           return;
@@ -1823,7 +1828,7 @@ export class GalxaiRelayServer extends EventEmitter {
           }
         }
 
-        this.capabilitySnapshot();
+        this.updateCapabilityHealth();
         if (!this.capabilities.select(imageCapability)) { this.rejectModelCapacity(res, imageCapability); return; }
 
         const traceId = this.requestTraces.get(req);

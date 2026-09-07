@@ -157,3 +157,35 @@ test('image relay errors and deadlines never replay synthesis; valid images are 
     if (previousKey === undefined) delete process.env.VM_RELAY_API_KEY; else process.env.VM_RELAY_API_KEY = previousKey;
   }
 });
+
+
+test('relay failures preserve retry authority and task identity without replay or raw provider text', async () => {
+  const original = globalThis.fetch;
+  let calls = 0;
+  try {
+    globalThis.fetch = async (_input, init) => {
+      calls++;
+      const headers = new Headers(init?.headers);
+      assert.equal(headers.get('x-galx-task-id'), 'parent.child');
+      assert.equal(headers.get('idempotency-key'), 'step-1');
+      assert.equal(headers.get('x-galx-idempotency-scope'), 'scope-1');
+      return Response.json({ error: { code: 'relay_admission_unknown', execution_state: 'unknown', message: 'private provider detail' } }, {
+        status: 502, headers: { 'Retry-After': '137', 'X-Should-Retry': 'false', 'X-Request-Id': 'request-1', 'X-Galx-Idempotency-Scope': 'scope-1' }
+      });
+    };
+    await assert.rejects(executeRelayChat({ ...options, taskId: 'parent.child', idempotencyKey: 'step-1', idempotencyScope: 'scope-1' }), (error: any) => {
+      assert(error instanceof RelayDispatchError);
+      assert.equal(error.reason, 'relay_http_502');
+      assert.equal(error.status, 502);
+      assert.equal(error.upstreamCode, 'relay_admission_unknown');
+      assert.equal(error.executionState, 'unknown');
+      assert.equal(error.shouldRetry, false);
+      assert.equal(error.retryAfterMs, 137000);
+      assert.equal(error.requestId, 'request-1');
+      assert.equal(error.idempotencyScope, 'scope-1');
+      assert(!error.message.includes('private provider'));
+      return true;
+    });
+    assert.equal(calls, 1);
+  } finally { globalThis.fetch = original; }
+});

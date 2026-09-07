@@ -1,4 +1,4 @@
-import { executeRelayChat, RelayDispatchError } from './RelayChatTransport';
+import { executeRelayChat, RelayDispatchError, relayFailure } from './RelayChatTransport';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -14,6 +14,9 @@ import type {
 } from '../../contracts/GalxContracts';
 
 export interface ExecuteOptions {
+  taskId?: string;
+  idempotencyKey?: string;
+  idempotencyScope?: string;
   signal?: AbortSignal;
   deadline?: DeadlineConfig;
   timeoutMs?: number;
@@ -321,6 +324,7 @@ export class OpenAIAdapter {
       if (vmRelayUrl && useVmRelay) {
         if (timeoutId) clearTimeout(timeoutId);
         return executeRelayChat({
+          taskId: options?.taskId, idempotencyKey: options?.idempotencyKey, idempotencyScope: options?.idempotencyScope,
           url: vmRelayUrl,
           key: process.env.VM_RELAY_API_KEY || process.env.RELAY_API_KEYS?.split(',')[0]?.trim(),
           payload: {
@@ -459,7 +463,9 @@ export class OpenAIAdapter {
               'x-galx-client': 'openai-adapter-vm-relay-image',
               'x-galx-shard-id': shardId,
               ...(req.sessionId ? { 'x-galx-session-id': req.sessionId } : {}),
-              ...(req.idempotencyKey ? { 'idempotency-key': req.idempotencyKey } : {})
+              ...((options?.idempotencyKey || req.idempotencyKey) ? { 'idempotency-key': options?.idempotencyKey || req.idempotencyKey! } : {}),
+              ...(options?.taskId ? { 'x-galx-task-id': options.taskId } : {}),
+              ...(options?.idempotencyScope ? { 'x-galx-idempotency-scope': options.idempotencyScope } : {})
             },
             body: JSON.stringify({
               prompt: req.prompt,
@@ -472,7 +478,7 @@ export class OpenAIAdapter {
             }),
             signal: controller.signal
           });
-          if (!response.ok) throw new RelayDispatchError(`image_http_${response.status}`);
+          if (!response.ok) throw await relayFailure(response, `image_http_${response.status}`);
           const result = await response.json();
           if (!Array.isArray(result.data) || !result.data.length ||
               !result.data.every((item: any) => typeof item.b64_json === 'string' && item.b64_json.length > 0)) {

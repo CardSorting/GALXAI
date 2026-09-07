@@ -1,12 +1,26 @@
-export class RelayDispatchError extends Error {
+export interface RelayFailureDetails {
+  status?: number; upstreamCode?: string; retryAfterMs?: number; shouldRetry?: boolean;
+  executionState?: 'unknown' | 'accepted' | 'not_accepted'; requestId?: string; idempotencyScope?: string;
+}
+export class RelayDispatchError extends Error implements RelayFailureDetails {
+  readonly status?: number; readonly upstreamCode?: string; readonly retryAfterMs?: number; readonly shouldRetry?: boolean;
+  readonly executionState?: 'unknown' | 'accepted' | 'not_accepted'; readonly requestId?: string; readonly idempotencyScope?: string;
   readonly code = 'relay_unavailable';
-  constructor(readonly reason: string) {
-    super('Inference relay unavailable. Please retry shortly.');
+  constructor(readonly reason: string, details: RelayFailureDetails = {}) {
+    super(details.shouldRetry === false || details.executionState === 'unknown'
+      ? 'Execution may have started. Check the existing request before submitting new work.'
+      : details.executionState === 'accepted'
+        ? 'The request was accepted. Reconnect using its existing job URL.'
+        : 'Inference relay unavailable. Please retry shortly.');
     this.name = 'RelayDispatchError';
+    Object.assign(this, details);
   }
 }
 
-interface RelayChatOptions {
+export interface RelayChatOptions {
+  taskId?: string;
+  idempotencyKey?: string;
+  idempotencyScope?: string;
   url: string;
   key?: string;
   payload: Record<string, any>;
@@ -14,6 +28,28 @@ interface RelayChatOptions {
   ttftTimeoutMs: number;
   idleTimeoutMs?: number;
   wallTimeoutMs?: number;
+}
+
+
+/** Preserve actionable error evidence without replaying or exposing raw provider messages. */
+export async function relayFailure(response: Response, reason: string): Promise<RelayDispatchError> {
+  const retry = response.headers.get('retry-after');
+  const retryAfterMs = retry === null ? undefined : Number.isFinite(Number(retry)) ? Math.max(0, Number(retry) * 1000) : Math.max(0, Date.parse(retry) - Date.now());
+  let body: any;
+  const reader = response.body?.getReader();
+  if (reader) try {
+    const decoder = new TextDecoder(); let text = '', size = 0;
+    while (true) { const { value, done } = await reader.read(); if (done) break; size += value.byteLength; if (size > 8192) break; text += decoder.decode(value, { stream: true }); }
+    if (size <= 8192) body = JSON.parse(text + decoder.decode());
+  } catch { /* HTTP status and headers remain useful even when the body is unavailable. */ }
+  finally { await reader.cancel().catch(() => {}); }
+  const code = body?.error?.code, state = body?.error?.execution_state;
+  return new RelayDispatchError(reason, { status: response.status,
+    upstreamCode: typeof code === 'string' && /^[\w.-]{1,128}$/.test(code) ? code : undefined,
+    retryAfterMs: Number.isFinite(retryAfterMs) ? retryAfterMs : undefined,
+    shouldRetry: response.headers.get('x-should-retry') === 'true' ? true : response.headers.get('x-should-retry') === 'false' ? false : undefined,
+    executionState: ['unknown', 'accepted', 'not_accepted'].includes(state) ? state : undefined,
+    requestId: response.headers.get('x-request-id') ?? undefined, idempotencyScope: response.headers.get('x-galx-idempotency-scope') ?? undefined });
 }
 
 /** The configured relay is authoritative. Never replay accepted jobs elsewhere. */
@@ -33,12 +69,14 @@ export async function executeRelayChat(options: RelayChatOptions) {
   arm(options.ttftTimeoutMs, 'first_output_timeout');
   const wall = setTimeout(() => controller.abort(new RelayDispatchError('request_deadline')), options.wallTimeoutMs ?? 120000);
   const cleanup = () => { clearTimeout(timer); clearTimeout(wall); options.signal?.removeEventListener('abort', abort); };
-  const headers = { Authorization: `Bearer ${options.key}`, 'Content-Type': 'application/json' };
+  const headers = { Authorization: `Bearer ${options.key}`, 'Content-Type': 'application/json',
+    ...(options.taskId ? { 'X-Galx-Task-Id': options.taskId } : {}),
+    ...(options.idempotencyKey ? { 'Idempotency-Key': options.idempotencyKey } : {}),
+    ...(options.idempotencyScope ? { 'X-Galx-Idempotency-Scope': options.idempotencyScope } : {}) };
   const request = async (url: URL, init?: RequestInit) => {
     const response = await fetch(url, { ...init, headers, signal: controller.signal, redirect: 'error' });
     if (!response.ok) {
-      await response.body?.cancel();
-      throw new RelayDispatchError(`relay_http_${response.status}`);
+      throw await relayFailure(response, `relay_http_${response.status}`);
     }
     return response;
   };

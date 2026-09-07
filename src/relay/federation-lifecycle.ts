@@ -48,9 +48,8 @@ export class RelayFederationLifecycle {
     let desired: DesiredShard[];
     let running: RelayHandle[];
     try {
-      desired = await this.readShards();
+      [desired, running] = await Promise.all([this.readShards(), this.driver.list()]);
       if (new Set(desired.map(s => s.id)).size !== desired.length) throw new Error('Duplicate shard ownership in registry');
-      running = await this.driver.list();
       this.registryReadAt = this.now();
       this.lastError = undefined;
     } catch {
@@ -65,14 +64,7 @@ export class RelayFederationLifecycle {
       if (handle.running === false || !shard || shard.credentialRevision !== handle.credentialRevision || retained.has(handle.shardId)
         || this.invalid.get(handle.shardId) === shard.credentialRevision) {
         this.capabilities.remove(handle.shardId, handle.generation);
-        // Keep job affinity during drain, but immediately withdraw new admission.
-        this.relays.set(handle.shardId, handle);
-        if (!this.draining.has(handle.shardId) && this.draining.size < 3) {
-          const draining = this.driver.remove(handle).then(() => {
-            if (this.relays.get(handle.shardId)?.generation === handle.generation) this.relays.delete(handle.shardId);
-          }).catch(() => { this.lastError = 'relay_drain_failed'; }).finally(() => { this.draining.delete(handle.shardId); });
-          this.draining.set(handle.shardId, draining);
-        }
+        this.retire(handle);
       } else retained.set(handle.shardId, handle);
     }
     for (const [id, handle] of this.relays) if (!running.some(r => r.shardId === id && r.generation === handle.generation) && !this.draining.has(id)) {
@@ -97,8 +89,7 @@ export class RelayFederationLifecycle {
           if (state.invalidCredential) {
             this.invalid.set(shard.id, shard.credentialRevision);
             this.capabilities.remove(shard.id);
-            this.relays.delete(shard.id);
-            await this.driver.remove(handle);
+            this.retire(handle);
           } else if (state.record) {
             this.capabilities.receive(state.record); // Ignore stale snapshots; the existing heartbeat expires independently.
             if ((shard.cooldownUntilMs ?? 0) > this.now()) this.capabilities.heartbeat(shard.id, { health: 'unavailable' }, 0, false);
@@ -111,20 +102,39 @@ export class RelayFederationLifecycle {
       }
     }));
   }
+  private retire(handle: RelayHandle): void {
+    // Keep existing job affinity; draining never blocks unrelated shard reconciliation.
+    this.relays.set(handle.shardId, handle);
+    if (this.draining.has(handle.shardId) || this.draining.size >= 3) return;
+    const draining = this.driver.remove(handle).then(() => {
+      if (this.relays.get(handle.shardId)?.generation === handle.generation) this.relays.delete(handle.shardId);
+    }).catch(() => { this.lastError = 'relay_drain_failed'; }).finally(() => { this.draining.delete(handle.shardId); });
+    this.draining.set(handle.shardId, draining);
+  }
   routable(): boolean { return !this.stopping && this.registryReadAt > 0 && this.now() - this.registryReadAt < this.registryTtlMs; }
   handle(shardId: string): RelayHandle | undefined { return this.relays.get(shardId); }
   snapshot() { const snapshot = this.capabilities.snapshot();
     if (!this.routable()) snapshot.models = snapshot.models.map(m => ({ ...m, eligibleShardCount: 0, state: 'UNAVAILABLE', redundancy: 'NONE', shardIds: [], activeStreams: 0, capacity: 0 }));
     return { ...snapshot, registryFresh: this.routable(), lastError: this.lastError,
     invalidShards: [...this.invalid.keys()], registryReadAtMs: this.registryReadAt }; }
-  async stop(): Promise<void> {
+  private shutdown?: Promise<void>;
+  stop(): Promise<void> {
+    if (this.shutdown) return this.shutdown;
     this.stopping = true;
-    await this.reconciliation;
-    await Promise.all(this.draining.values());
-    for (const [id, relay] of this.relays) {
-      this.capabilities.remove(id);
-      await this.driver.remove(relay);
-    }
-    this.relays.clear();
+    this.shutdown = (async () => {
+      await this.reconciliation;
+      await Promise.all(this.draining.values());
+      const remaining = [...this.relays.entries()]; let cursor = 0;
+      const failures: unknown[] = [];
+      for (const [id] of remaining) this.capabilities.remove(id);
+      await Promise.all(Array.from({ length: Math.min(3, remaining.length) }, async () => {
+        while (cursor < remaining.length) {
+          const [id, relay] = remaining[cursor++];
+          try { await this.driver.remove(relay); this.relays.delete(id); } catch (error) { failures.push(error); }
+        }
+      }));
+      if (failures.length) throw new Error(`Failed to drain ${failures.length} owned relays`);
+    })();
+    return this.shutdown;
   }
 }

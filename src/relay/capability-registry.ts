@@ -7,6 +7,7 @@ export interface ModelCapability {
   expiresAtMs: number;
   source: 'inventory' | 'response';
   inventoryBacked?: boolean;
+  inventoryVersion?: number;
   version?: number;
   reason?: string;
   restoreAfterMs?: number;
@@ -31,7 +32,7 @@ export interface RelayCapabilityRecord {
   healthRevision: number;
   heartbeatObservedAtMs: number;
 }
-export interface CapabilityRefreshTicket { shardId: string; generation: string; revision: number; modelVersion?: number; modelVersions?: Record<string, number>; refreshSequence?: number; }
+export interface CapabilityRefreshTicket { shardId: string; generation: string; revision: number; modelVersion?: number; inventoryVersion?: number; modelVersions?: Record<string, number>; refreshSequence?: number; }
 export const validModelId = (model: unknown): model is string => typeof model === 'string' && /^[\w.:-]{1,102}$/.test(model);
 
 /** One writer per relay generation. The reverse index contains evidence, never catalog guesses. */
@@ -86,7 +87,8 @@ export class CapabilityRegistry {
   }
   beginObservation(shardId: string, model: string): CapabilityRefreshTicket | undefined {
     const shard = this.shards.get(shardId);
-    return shard && { shardId, generation: shard.generation, revision: shard.revision, modelVersion: shard.models.find(m => m.model === model)?.version ?? 0 };
+    return shard && { shardId, generation: shard.generation, revision: shard.revision, modelVersion: shard.models.find(m => m.model === model)?.version ?? 0,
+      inventoryVersion: shard.models.find(m => m.model === model)?.inventoryVersion ?? 0 };
   }
   publishInventory(ticket: CapabilityRefreshTicket, models: string[]): boolean {
     const old = this.shards.get(ticket.shardId);
@@ -104,7 +106,7 @@ export class CapabilityRegistry {
       if (!available.has(model) && prior?.source === 'response' && !prior.inventoryBacked && prior.expiresAtMs > now) return prior;
       if (available.has(model) && (prior?.restoreAfterMs ?? 0) > now) return prior!;
       return { model, state: available.has(model) ? 'AVAILABLE' : 'NOT_AUTHORIZED', observedAtMs: now,
-        expiresAtMs: now + this.ttlMs, source: 'inventory', inventoryBacked: true, version: old.revision + 1 };
+        expiresAtMs: now + this.ttlMs, source: 'inventory', inventoryBacked: true, inventoryVersion: old.revision + 1, version: old.revision + 1 };
     });
     if (ticket.refreshSequence !== undefined) this.acceptedRefresh.set(ticket.shardId, ticket.refreshSequence);
     const usable = next.some(m => m.state === 'AVAILABLE' && m.expiresAtMs > now);
@@ -116,14 +118,18 @@ export class CapabilityRegistry {
   observe(ticket: CapabilityRefreshTicket, model: string, state: CapabilityState, reason?: string): boolean {
     const old = this.shards.get(ticket.shardId);
     if (!old || old.generation !== ticket.generation || !validModelId(model)) return false;
-    if (ticket.modelVersion !== undefined ? ticket.modelVersion !== (old.models.find(m => m.model === model)?.version ?? 0)
-      : old.revision !== ticket.revision) return false;
-    const now = this.now();
     const prior = old.models.find(m => m.model === model);
+    const changed = ticket.modelVersion !== undefined ? ticket.modelVersion !== (prior?.version ?? 0) : old.revision !== ticket.revision;
+    // A concurrent success cannot suppress a denial within the same inventory epoch.
+    // Rediscovery and replacement generations remain authoritative fences for old failures.
+    const concurrentDenial = ['NOT_AUTHORIZED', 'TEMPORARILY_UNAVAILABLE'].includes(state) && prior?.source === 'response'
+      && prior.state === 'AVAILABLE' && ticket.inventoryVersion !== undefined && ticket.inventoryVersion === (prior.inventoryVersion ?? 0);
+    if (changed && !concurrentDenial) return false;
+    const now = this.now();
     // A successful older in-flight response must not erase a newer negative observation.
     if (state === 'AVAILABLE' && (prior?.restoreAfterMs ?? 0) > now) return false;
     const models: ModelCapability[] = [...old.models.filter(m => m.model !== model), { model, state,
-      observedAtMs: now, expiresAtMs: now + this.ttlMs, source: 'response', version: old.revision + 1, inventoryBacked: prior?.inventoryBacked, reason,
+      observedAtMs: now, expiresAtMs: now + this.ttlMs, source: 'response', version: old.revision + 1, inventoryBacked: prior?.inventoryBacked, inventoryVersion: prior?.inventoryVersion, reason,
       restoreAfterMs: state === 'AVAILABLE' ? undefined : now + this.stabilizationMs }];
     const usable = models.some(m => m.state === 'AVAILABLE' && m.expiresAtMs > now);
     this.write({ ...old, models, revision: old.revision + 1,
@@ -135,7 +141,7 @@ export class CapabilityRegistry {
   receive(record: RelayCapabilityRecord): boolean {
     const old = this.shards.get(record.shardId);
     if (!old || old.relayId !== record.relayId || old.generation !== record.generation || record.revision < old.revision
-      || record.healthRevision < old.healthRevision) return false;
+      || record.healthRevision <= old.healthRevision) return false;
     if (!Number.isSafeInteger(record.revision) || record.revision < 0 || !Number.isSafeInteger(record.healthRevision) || record.healthRevision < 0
       || !['HEALTHY', 'CAPABILITY_EMPTY', 'DISCOVERING_CAPABILITIES', 'STARTING', 'DRAINING', 'UNAVAILABLE'].includes(record.lifecycle)
       || !['healthy', 'degraded', 'unavailable'].includes(record.health) || !Number.isFinite(record.heartbeatObservedAtMs) || record.heartbeatObservedAtMs > this.now() + 10000 || !Number.isFinite(record.heartbeatExpiresAtMs)
@@ -156,21 +162,27 @@ export class CapabilityRegistry {
     const old = this.shards.get(shardId);
     if (old) this.shards.set(shardId, { ...old, lifecycle: 'DRAINING', revision: old.revision + 1 });
   }
-  eligible(model: string): RelayCapabilityRecord[] {
+  private eligibleRecords(model: string): RelayCapabilityRecord[] {
     const now = this.now();
     return [...(this.byModel.get(model) ?? [])].flatMap(id => {
       const shard = this.shards.get(id)!;
       const capability = shard.models.find(m => m.model === model);
       return shard.lifecycle === 'HEALTHY' && shard.health === 'healthy' && shard.heartbeatExpiresAtMs > now
-        && capability?.state === 'AVAILABLE' && capability.expiresAtMs > now ? [structuredClone(shard)] : [];
+        && capability?.state === 'AVAILABLE' && capability.expiresAtMs > now ? [shard] : [];
     });
   }
+  eligible(model: string): RelayCapabilityRecord[] { return this.eligibleRecords(model).map(s => structuredClone(s)); }
+  eligibleLoad(model: string): Array<Omit<RelayCapabilityRecord, 'models'>> {
+    return this.eligibleRecords(model).map(({ models: _models, ...load }) => load);
+  }
+  eligibleShardIds(model: string): string[] { return this.eligibleRecords(model).map(s => s.shardId); }
   select(model: string, reserved: ReadonlyMap<string, number> = new Map()): RelayCapabilityRecord | undefined {
-    return this.eligible(model).filter(s => Math.max(s.activeStreams + s.queueDepth, reserved.get(s.shardId) ?? 0) < s.capacity)
+    const selected = this.eligibleRecords(model).filter(s => Math.max(s.activeStreams + s.queueDepth, reserved.get(s.shardId) ?? 0) < s.capacity)
       .sort((a, b) => a.recentErrors - b.recentErrors
         || Math.max(a.activeStreams, reserved.get(a.shardId) ?? 0) - Math.max(b.activeStreams, reserved.get(b.shardId) ?? 0)
         || a.latencyMs - b.latencyMs || a.queueDepth - b.queueDepth || b.capacity - a.capacity
         || a.shardId.localeCompare(b.shardId))[0];
+    return selected && structuredClone(selected);
   }
   get(shardId: string): RelayCapabilityRecord | undefined {
     const value = this.shards.get(shardId);
@@ -179,7 +191,7 @@ export class CapabilityRegistry {
   expect(models: string[]): void { for (const model of models) if (validModelId(model)) this.expectedModels.add(model); }
   snapshot() {
     return { shards: [...this.shards.values()].map(s => structuredClone(s)), models: [...this.expectedModels].sort().map(model => {
-      const eligible = this.eligible(model);
+      const eligible = this.eligibleRecords(model);
       return { model, eligibleShardCount: eligible.length, state: eligible.length === 0 ? 'UNAVAILABLE' : eligible.length === 1 ? 'FRAGILE' : 'HEALTHY',
         redundancy: eligible.length < 2 ? 'NONE' : 'AVAILABLE', shardIds: eligible.map(s => s.shardId),
         activeStreams: eligible.reduce((sum, s) => sum + s.activeStreams, 0), capacity: eligible.reduce((sum, s) => sum + s.capacity, 0) };

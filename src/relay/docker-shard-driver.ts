@@ -1,6 +1,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { createHash, createHmac, randomUUID } from 'node:crypto';
+import { readRelayJson } from './federation-http-policy.js';
 import type { DesiredShard, RelayDriver, RelayHandle } from './federation-lifecycle.js';
 
 const execute = promisify(execFile);
@@ -18,7 +19,7 @@ export class DockerShardDriver implements RelayDriver {
     if (!/^[a-z0-9-]{1,32}$/.test(options.namespace) || !options.image || options.secret.length < 32) throw new Error('Invalid federation driver configuration');
   }
   private async docker(args: string[], env?: NodeJS.ProcessEnv): Promise<string> {
-    try { return (await execute('docker', args, { timeout: 60000, maxBuffer: 4 * 1024 * 1024, env: env ?? process.env })).stdout.trim(); }
+    try { return (await execute('docker', args, { timeout: ['ps', 'inspect'].includes(args[0]) ? 5000 : 60000, maxBuffer: 4 * 1024 * 1024, env: env ?? process.env })).stdout.trim(); }
     catch { throw new Error(`Docker ${args[0]} failed`); } // Never include credential-bearing environment or raw inspect output.
   }
   private keys(id: string, generation: string) {
@@ -26,10 +27,11 @@ export class DockerShardDriver implements RelayDriver {
     return { inferenceKey: key('inference'), adminKey: key('admin') };
   }
   private name(shardId: string) { return `galx-shard-${createHash('sha256').update(shardId).digest('hex').slice(0, 20)}`; }
-  private async inspectContainer(id: string): Promise<RelayHandle> {
-    // Request only non-secret fields; never dump Config.Env.
-    const output = await this.docker(['inspect', id, '--format', '{{json .Config.Labels}}\n{{json .NetworkSettings.Ports}}\n{{.State.Running}}\n{{.State.StartedAt}}']);
-    const [rawLabels, rawPorts, running, startedAt] = output.split('\n');
+  private readonly inspectFormat = '{{json .Name}}\t{{json .Config.Labels}}\t{{json .NetworkSettings.Ports}}\t{{.State.Running}}\t{{.State.StartedAt}}';
+  private parseContainer(output: string): RelayHandle {
+    // Only non-secret fields; Config.Env never leaves Docker.
+    const [rawName, rawLabels, rawPorts, running, startedAt] = output.split('\t');
+    const id = String(JSON.parse(rawName)).replace(/^\//, '');
     const labels = JSON.parse(rawLabels);
     if (labels[this.label] !== this.options.namespace) throw new Error('Refusing foreign container ownership');
     const bindings = JSON.parse(rawPorts)?.['3001/tcp'];
@@ -42,11 +44,15 @@ export class DockerShardDriver implements RelayDriver {
     return { id, shardId, generation, credentialRevision: labels['io.galx.credential-revision'],
       running: running === 'true', endpoint: `http://127.0.0.1:${port || 1}`, ...this.keys(id, containerGeneration) };
   }
+  private async inspectContainer(id: string): Promise<RelayHandle> {
+    return this.parseContainer(await this.docker(['inspect', id, '--format', this.inspectFormat]));
+  }
   async list(): Promise<RelayHandle[]> {
     const names = (await this.docker(['ps', '-a', '--filter', `label=${this.label}=${this.options.namespace}`, '--format', '{{.Names}}'])).split('\n').filter(Boolean);
     const result: RelayHandle[] = [];
-    for (const name of names) {
-      result.push(await this.inspectContainer(name));
+    for (let offset = 0; offset < names.length; offset += 64) {
+      const output = await this.docker(['inspect', '--format', this.inspectFormat, ...names.slice(offset, offset + 64)]);
+      result.push(...output.split('\n').filter(Boolean).map(line => this.parseContainer(line)));
     }
     return result;
   }
@@ -84,7 +90,7 @@ export class DockerShardDriver implements RelayDriver {
     const response = await fetch(`${relay.endpoint}/api/capabilities`, { headers: { Authorization: `Bearer ${relay.adminKey}` },
       redirect: 'error', signal: AbortSignal.timeout(3000) });
     if (!response.ok) return {};
-    const body = await response.json();
+    const body = await readRelayJson(response, 2 * 1024 * 1024);
     if (!Array.isArray(body.shards) || body.shards.length !== 1) return {};
     const record = body.shards[0];
     if (record.shardId !== relay.shardId || record.relayId !== relay.id || record.generation !== relay.generation.split('@')[0]) return {};
