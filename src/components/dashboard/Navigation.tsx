@@ -34,13 +34,14 @@ const NAV_LINKS = [
   { name: 'Docs', href: '/docs', icon: BookOpen },
   { name: 'Pricing', href: '/pricing', icon: DollarSign },
   { name: 'API Keys', href: '/keys', icon: Key },
+  { name: 'Teams', href: '/teams/seats', icon: Users2 },
 ];
 
 function BaseNavigation() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { t } = useLanguage();
-  const { walletBalance } = useDepositVerification();
+  const { walletBalance, isLoaded: walletLoaded } = useDepositVerification();
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -132,7 +133,7 @@ function BaseNavigation() {
             <nav
               role="navigation"
               aria-label="Primary Navigation"
-              className="hidden md:flex items-center gap-1"
+              className="hidden lg:flex items-center gap-1"
             >
               {NAV_LINKS.map((link) => {
                 const cleanHref = link.href.split('#')[0];
@@ -173,7 +174,7 @@ function BaseNavigation() {
             </button>
 
             {/* Live Wallet Balance Pill */}
-            {walletBalance > 0 && (
+            {user && walletLoaded && (
               <Link
                 href="/billing"
                 className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-medium transition-colors cursor-pointer"
@@ -208,7 +209,7 @@ function BaseNavigation() {
                         <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
                           {user.role || 'Developer'}
                         </span>
-                        {walletBalance !== undefined && (
+                        {walletLoaded && (
                           <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                             ${walletBalance.toFixed(2)}
                           </span>
@@ -291,7 +292,7 @@ function BaseNavigation() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-expanded={mobileMenuOpen}
               aria-label={mobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
-              className="md:hidden p-1.5 rounded text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400"
+              className="lg:hidden p-1.5 rounded text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400"
             >
               {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
@@ -303,7 +304,7 @@ function BaseNavigation() {
           <div
             role="region"
             aria-label="Mobile Navigation Menu"
-            className="md:hidden pt-2 pb-3 border-t border-white/[0.08] space-y-2 max-w-7xl mx-auto max-h-[calc(100vh-3.5rem)] overflow-y-auto animate-in fade-in duration-100"
+            className="lg:hidden pt-2 pb-3 border-t border-white/[0.08] space-y-2 max-w-7xl mx-auto max-h-[calc(100vh-3.5rem)] overflow-y-auto animate-in fade-in duration-100"
           >
             {/* User Profile Card on Mobile */}
             {user ? (

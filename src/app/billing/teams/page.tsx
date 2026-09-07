@@ -1,5 +1,2 @@
 import { redirect } from 'next/navigation';
-
-export default function BillingTeamsRedirect() {
-  redirect('/teams/cost-centers');
-}
+export default function Page() { redirect('/teams/seats'); }

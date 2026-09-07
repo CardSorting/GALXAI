@@ -1,38 +1,5 @@
 'use client';
-
-import React, { useEffect } from 'react';
-import { RouteErrorBoundaryCard } from '@/components/common/RouteErrorBoundaryCard';
 import { Navigation } from '@/components/dashboard/Navigation';
-import { Wallet } from 'lucide-react';
-
-export default function BillingError({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
-  useEffect(() => {
-    console.error('💥 [GALXAI Billing Error Boundary Caught]:', error);
-  }, [error]);
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Navigation />
-      <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex items-center justify-center">
-        <RouteErrorBoundaryCard
-          error={error}
-          reset={reset}
-          title="Billing Ledger Sync Interrupted"
-          subtitle="The billing telemetry feed encountered a temporary synchronization issue. Your prepaid balance and ongoing inference requests remain secure."
-          badge="COMPUTE WALLET SAFEGUARD"
-          icon={Wallet}
-          accentColor="amber"
-          primaryLinkHref="/keys"
-          primaryLinkLabel="View API Keys"
-          autoRetrySeconds={6}
-        />
-      </main>
-    </div>
-  );
+export default function BillingError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  return <div className="min-h-screen bg-[#090b10]"><Navigation /><main className="mx-auto max-w-5xl space-y-4 px-4 py-10 sm:px-6 lg:px-8"><h1 className="text-2xl font-semibold">Could not load billing</h1><p className="text-sm text-zinc-400">Please try again to load your account records.</p><button type="button" onClick={reset} className="rounded-md border border-white/15 px-3 py-2 text-sm hover:bg-white/5">Try again</button></main></div>;
 }

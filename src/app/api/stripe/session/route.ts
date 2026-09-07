@@ -1,44 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { StripeEngine } from '@/lib/stripe/stripe';
-
+import { NextRequest } from 'next/server';
+import { billingReadRoute } from '@/lib/billing/readRoute';
+import { BillingError } from '@/lib/billing/account';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-      'Access-Control-Max-Age': '86400'
-    }
+export function GET(req: NextRequest) {
+  return billingReadRoute(req, async (db, userId) => {
+    const id = req.nextUrl.searchParams.get('session_id');
+    if (!id || id.length > 255 || id.startsWith('cs_mock_')) throw new BillingError('Invalid checkout session.');
+    const { rows } = await db.query(`SELECT session_id, status, payment_status, amount_usd FROM galx_stripe_checkout_sessions WHERE session_id = $1 AND user_id = $2`, [id, userId]);
+    const session = rows[0];
+    if (!session) throw new BillingError('Checkout session not found.', 404);
+    return { success: true, session: { sessionId: session.session_id, status: session.status, paymentStatus: session.payment_status,
+      verified: session.payment_status === 'paid', amountTotalUsd: Number(session.amount_usd) } };
   });
-}
-
-export async function GET(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const sessionId = searchParams.get('session_id');
-
-    if (!sessionId) {
-      return NextResponse.json(
-        { success: false, error: 'Missing session_id parameter' },
-        { status: 400 }
-      );
-    }
-
-    const stripeEngine = StripeEngine.getInstance();
-    const session = await stripeEngine.getCheckoutSessionStatus(sessionId);
-
-    return NextResponse.json({
-      success: true,
-      session
-    });
-  } catch (error: any) {
-    return NextResponse.json(
-      { success: false, error: error.message || 'Failed to retrieve session status' },
-      { status: 500 }
-    );
-  }
 }

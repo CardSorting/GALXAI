@@ -1,83 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { StripeEngine } from '@/lib/stripe/stripe';
-import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
-
+import { getStripeConfig } from '@/lib/stripe/config';
+import { AccountIdentityError, requireAccountIdentity } from '@/lib/auth/accountIdentity';
+import { getPostgresPool } from '@/lib/db/postgres';
+import { BillingError } from '@/lib/billing/account';
+import { checkPaymentOrigin, depositAmount, hostedPaymentUrl } from '@/lib/billing/payment';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-      'Access-Control-Max-Age': '86400'
-    }
-  });
-}
-
 export async function POST(req: NextRequest) {
   try {
+    checkPaymentOrigin(req);
+    const actor = await requireAccountIdentity(req);
     const body = await req.json().catch(() => ({}));
-    const {
-      amount = 50,
-      email,
-      companyName,
-      promoCode,
-      autoReload = true,
-      successUrl,
-      cancelUrl
-    } = body;
-
-    const depositAmount = Number(amount);
-    if (isNaN(depositAmount) || depositAmount <= 0) {
-      return NextResponse.json(
-        { success: false, error: 'Deposit amount must be greater than $0.00' },
-        { status: 400 }
-      );
-    }
-
-    // Resolve developer workspace identity
-    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-    const userId = auth.authenticated ? auth.userId : body.userId;
-
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: 'Sign-in is required to initiate checkout' },
-        { status: 401 }
-      );
-    }
-
-    const stripeEngine = StripeEngine.getInstance();
-    const result = await stripeEngine.createCheckoutSession({
-      userId,
-      depositAmount,
-      customerEmail: email || (auth.claims?.email as string) || undefined,
-      companyName,
-      promoCode,
-      autoReload,
-      successUrl,
-      cancelUrl
-    });
-
-    if (!result.success) {
-      return NextResponse.json(
-        { success: false, error: result.error || 'Failed to initiate checkout session' },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      sessionId: result.sessionId,
-      url: result.url,
-      isSimulated: result.isSimulated || false
-    });
-  } catch (error: any) {
-    return NextResponse.json(
-      { success: false, error: error.message || 'Internal checkout processing error' },
-      { status: 500 }
-    );
+    const amount = depositAmount(body.amount ?? body.depositAmount);
+    const config = getStripeConfig();
+    if (!config.isConfigured || !config.webhookSecrets.length) throw new BillingError('Payments are unavailable. Please try again later.', 503);
+    const pool = getPostgresPool();
+    if (!pool) throw new Error('Storage unavailable');
+    // Do not start checkout when the authoritative billing storage is unavailable.
+    await pool.query('SELECT id FROM galx_wallets WHERE user_id = $1', [actor.id]);
+    const origin = new URL(config.appUrl).origin;
+    const result = await StripeEngine.getInstance().createCheckoutSession({ userId: actor.id, customerEmail: actor.email, depositAmount: amount, autoReload: false,
+      successUrl: `${origin}/billing?checkout=returned`, cancelUrl: `${origin}/billing?checkout=canceled` });
+    if (!result.success || result.isSimulated) throw new BillingError('Could not start checkout. Please try again.', 503);
+    return NextResponse.json({ success: true, url: hostedPaymentUrl(result.url, 'checkout.stripe.com') }, { headers: { 'Cache-Control': 'private, no-store' } });
+  } catch (error) {
+    const known = error instanceof BillingError || error instanceof AccountIdentityError;
+    return NextResponse.json({ success: false, error: known ? error.message : 'Checkout is unavailable. Please try again.' }, { status: known ? error.status : 503, headers: { 'Cache-Control': 'private, no-store' } });
   }
 }
