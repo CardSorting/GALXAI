@@ -21,10 +21,7 @@ const TERMINAL_AUTH_ERRORS: readonly string[] = [
   'billing_not_active',
   'quota_exceeded_permanent',
   'permission_revoked',
-  '401 unauthorized',
-  '401',
-  '403 forbidden',
-  '403'
+  'authentication_error'
 ];
 
 const MODEL_INCOMPATIBLE_ERRORS: readonly string[] = [
@@ -44,8 +41,7 @@ const BILLING_EXHAUSTION_ERRORS: readonly string[] = [
   'billing_hard_limit_reached',
   'account_payment_past_due',
   'unpaid_invoice',
-  'payment_required',
-  '402'
+  'payment_required'
 ];
 
 /**
@@ -75,7 +71,7 @@ export class GalxCircuitBreaker {
     if (!errorReason) return false;
     const lower = errorReason.toLowerCase();
     for (const term of TERMINAL_AUTH_ERRORS) {
-      if (lower.includes(term)) {
+      if (new RegExp(`(^|[^a-z0-9_])${term}([^a-z0-9_]|$)`, 'i').test(lower)) {
         return true;
       }
     }
@@ -295,125 +291,74 @@ export class GalxCircuitBreaker {
     account?: GalxShardAccount
   ): CircuitFailureClassification {
     const rawError = (errorBody || '').toLowerCase();
-    const retryAfterHeader = headers?.['retry-after'] ?? headers?.['x-ratelimit-reset-requests'] ?? headers?.['x-ratelimit-reset-tokens'];
-
-    // 1. Permanent Auth Termination (401 / 403 Invalid API Key / Revocation)
+    const neutral = (category: 'request_rejected' | 'cancelled' | 'model_incompatible', reason: string): CircuitFailureClassification => ({
+      newStatus: account?.status || 'healthy', affectsHealth: false, isPermanent: false, category, reason
+    });
+    // Validate the scope of rejection before deciding an entire credential is bad.
+    if (statusCode === 499 || /\b(client_disconnect|client_cancelled|request_cancelled|aborterror)\b/.test(rawError)) {
+      return neutral('cancelled', 'Request cancelled; provider health unchanged.');
+    }
+    if (MODEL_INCOMPATIBLE_ERRORS.some(phrase => rawError.includes(phrase))) {
+      return neutral('model_incompatible', 'This model or parameter is unavailable for the request.');
+    }
     if (statusCode === 401 || this.isTerminalAuthError(rawError)) {
-      return {
-        newStatus: 'dead',
-        isPermanent: true,
-        category: 'auth_terminal',
-        reason: `Permanent authentication failure detected: ${errorBody.slice(0, 120)}`
-      };
+      return { newStatus: 'dead', isPermanent: true, category: 'auth_terminal', reason: 'Provider rejected the credential.' };
+    }
+    if (statusCode === 402 || BILLING_EXHAUSTION_ERRORS.some(phrase => rawError.includes(phrase))) {
+      return { newStatus: 'quarantined', isPermanent: false, category: 'billing_depleted', cooldownMs: 86_400_000,
+        reason: 'Provider billing capacity is unavailable.' };
+    }
+    if (statusCode >= 400 && statusCode < 500 && ![408, 429].includes(statusCode)) {
+      return neutral('request_rejected', 'Request rejected; provider health unchanged.');
     }
 
-    // 2. Model Incompatibility (404 / 400 Unsupported Model)
-    for (const phrase of MODEL_INCOMPATIBLE_ERRORS) {
-      if (rawError.includes(phrase)) {
-        return {
-          newStatus: account?.status || 'healthy', // Do not break the shard for other models!
-          isPermanent: false,
-          category: 'model_incompatible',
-          reason: `Model not supported on shard: ${errorBody.slice(0, 120)}`
-        };
-      }
+    const normalizedHeaders = Object.fromEntries(Object.entries(headers || {}).map(([key, value]) => [key.toLowerCase(), value]));
+    // Explicit headers are authoritative. Never parse arbitrary IDs as durations.
+    const headerDurations = ['retry-after', 'x-ratelimit-reset-requests', 'x-ratelimit-reset-tokens']
+      .map(key => {
+        const value = normalizedHeaders[key];
+        if (value === undefined) return undefined;
+        const text = String(value).trim();
+        if (/^\d+(?:\.\d+)?$/.test(text)) return Number(text) * 1000;
+        // Parse HTTP-date before natural units ("07 Sep" is not "7 seconds").
+        if (/^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), .* GMT$/.test(text)) {
+          const date = Date.parse(text);
+          return Number.isFinite(date) ? Math.max(0, date - nowMs) : undefined;
+        }
+        if (key !== 'retry-after' && /^(?:\d+(?:\.\d+)?(?:ms|s|m|h|d))+$/.test(text)) {
+          return ContinuousTokenBucketRateGovernor.parseDurationToMs(text, nowMs);
+        }
+        return undefined;
+      })
+      .filter((value): value is number => value !== undefined && Number.isFinite(value) && value >= 0);
+    const bodyDuration = /(?:try again|retry|resets?) (?:in|after|at)\b/i.test(errorBody)
+      ? ContinuousTokenBucketRateGovernor.parseDurationToMs(errorBody, nowMs) : undefined;
+    const authoritativeCooldownMs = headerDurations.length ? Math.max(...headerDurations)
+      : bodyDuration !== undefined && Number.isFinite(bodyDuration) ? bodyDuration : undefined;
+    const withJitter = (base: number) => Math.ceil(base + Math.random() * Math.min(2000, base * 0.1));
+
+    if (statusCode === 429 || /\b(rate[ _-]?limit(?:ed|_exceeded)?|usage_limit_reached|usage limit reached|too many requests)\b/.test(rawError)) {
+      const rolling = /\b(usage limit|usage_limit(?:_reached)?|rolling.window|current quota)\b/.test(rawError);
+      const cooldownMs = withJitter(Math.max(1000, authoritativeCooldownMs ?? (rolling ? 180_000 : 30_000)));
+      return { newStatus: rolling ? 'exhausted' : 'cooldown', cooldownMs, isPermanent: false,
+        category: rolling ? 'rolling_window_exhausted' : 'tpm_rpm_rate_limited', resetAtTimestampMs: nowMs + cooldownMs,
+        reason: `Provider capacity is limited; retry after ${Math.ceil(cooldownMs / 1000)} seconds.` };
     }
 
-    // 3. Billing Depletion (402 Payment Required / Insufficient Quota Hard Stop)
-    for (const phrase of BILLING_EXHAUSTION_ERRORS) {
-      if (statusCode === 402 || rawError.includes(phrase)) {
-        return {
-          newStatus: 'quarantined',
-          isPermanent: false,
-          category: 'billing_depleted',
-          cooldownMs: 86_400_000, // 24 hours quarantine until top-up
-          reason: `Account billing limit exhausted: ${errorBody.slice(0, 120)}`
-        };
-      }
+    const previousFailureAt = account?.stats?.lastUsedTimestampMs || 0;
+    const consecutive = (nowMs - previousFailureAt <= 60_000 ? account?.stats?.consecutiveFailures || 0 : 0) + 1;
+    const recovering = ['half_open', 'cooldown', 'exhausted'].includes(account?.status || '');
+    // A single unconfirmed 5xx/timeout should not eject an otherwise healthy account.
+    // Explicit provider backoff and a failed half-open probe still open immediately.
+    const shouldOpen = recovering || consecutive >= 3 || authoritativeCooldownMs !== undefined;
+    if (!shouldOpen) {
+      return { newStatus: account?.status || 'healthy', category: 'transient_5xx', isPermanent: false,
+        reason: 'Transient provider failure observed; waiting for corroborating failures.' };
     }
-
-    // 4. Extract explicit natural duration from message body or headers (e.g. "resets in 4 hours 12 minutes", "resets at 3:45 PM")
-    const parsedBodyDuration = ContinuousTokenBucketRateGovernor.parseDurationToMs(errorBody, nowMs);
-    const parsedHeaderDuration = ContinuousTokenBucketRateGovernor.parseDurationToMs(retryAfterHeader, nowMs);
-    const authoritativeCooldownMs = parsedBodyDuration ?? parsedHeaderDuration;
-
-    // 5. Rolling Window Exhaustion (5/hr or 40/3hr limit reached)
-    if (
-      rawError.includes('usage limit') ||
-      rawError.includes('hit your usage limit') ||
-      rawError.includes('usage limit reached') ||
-      rawError.includes('try again in') ||
-      rawError.includes('resets in') ||
-      rawError.includes('limit reached')
-    ) {
-      const cooldownMs = authoritativeCooldownMs ? Math.max(15_000, authoritativeCooldownMs) : 180_000;
-      return {
-        newStatus: 'exhausted',
-        cooldownMs,
-        isPermanent: false,
-        category: 'rolling_window_exhausted',
-        resetAtTimestampMs: nowMs + cooldownMs,
-        reason: `Sliding window quota exhausted: backing off for ${Math.round(cooldownMs / 1000)}s`
-      };
-    }
-
-    // 6. Dense Failures (>5 consecutive non-terminal errors)
-    const consecutive = (account?.stats?.consecutiveFailures || 0) + 1;
-    if (consecutive >= 5) {
-      const cooldownMs = 300_000; // 5 minutes
-      return {
-        newStatus: 'exhausted',
-        cooldownMs,
-        isPermanent: false,
-        category: 'transient_5xx',
-        reason: `High error density (${consecutive} consecutive failures): freezing shard for 5m`
-      };
-    }
-
-    // 7. Standard 429 Rate Limit (TPM / RPM)
-    if (statusCode === 429 || rawError.includes('rate limit')) {
-      const baseMs = authoritativeCooldownMs ? Math.max(5000, authoritativeCooldownMs) : 30_000;
-      // Never retry before an authoritative Retry-After/reset duration. Apply
-      // only positive jitter in that case; locally inferred cooldowns can use
-      // symmetric jitter to disperse an otherwise synchronized fleet.
-      const jitter = authoritativeCooldownMs
-        ? Math.floor(Math.random() * (baseMs * 0.05))
-        : Math.floor(Math.random() * (baseMs * 0.4)) - (baseMs * 0.2);
-      const cooldownMs = Math.max(10_000, Math.round(baseMs + jitter));
-
-      return {
-        newStatus: 'cooldown',
-        cooldownMs,
-        isPermanent: false,
-        category: 'tpm_rpm_rate_limited',
-        resetAtTimestampMs: nowMs + cooldownMs,
-        reason: `Rate limit (HTTP 429): backing off for ${Math.round(cooldownMs / 1000)}s`
-      };
-    }
-
-    // 8. Origin Overload (503 / 502 / 504 / Overloaded)
-    if (statusCode >= 500 || rawError.includes('overloaded') || rawError.includes('bad gateway')) {
-      const baseMs = authoritativeCooldownMs ? Math.max(3000, authoritativeCooldownMs) : 15_000;
-      const jitter = Math.floor(Math.random() * 4000) - 2000;
-      const cooldownMs = Math.max(5000, baseMs + jitter);
-
-      return {
-        newStatus: 'cooldown',
-        cooldownMs,
-        isPermanent: false,
-        category: 'origin_overloaded',
-        reason: `Compute origin temporary overload (HTTP ${statusCode}): backing off for ${Math.round(cooldownMs / 1000)}s`
-      };
-    }
-
-    // Fallback classification
-    return {
-      newStatus: 'cooldown',
-      cooldownMs: 15_000,
-      isPermanent: false,
-      category: 'unknown',
-      reason: `Gateway request failed (${statusCode}): ${errorBody.slice(0, 100)}`
-    };
+    const cooldownMs = withJitter(Math.max(1000, authoritativeCooldownMs ?? Math.min(300_000, 15_000 * 2 ** Math.min(4, consecutive - 1))));
+    return { newStatus: 'cooldown', cooldownMs, category: statusCode === 408 ? 'socket_timeout' : 'origin_overloaded',
+      isPermanent: false, resetAtTimestampMs: nowMs + cooldownMs,
+      reason: `Provider temporarily unavailable; retry after ${Math.ceil(cooldownMs / 1000)} seconds.` };
   }
 
   /**
@@ -426,7 +371,8 @@ export class GalxCircuitBreaker {
     retryAfterHeader?: string | number
   ): CircuitFailureClassification {
     const headers = retryAfterHeader !== undefined ? { 'retry-after': retryAfterHeader } : undefined;
-    const statusCode = errorReason.includes('429') ? 429 : errorReason.includes('401') ? 401 : errorReason.includes('403') ? 403 : errorReason.includes('503') ? 503 : 500;
+    const explicitStatus = errorReason.match(/(?:HTTP\s+|status(?: code)?[\s:=]+|error\s*\()(\d{3})\b/i);
+    const statusCode = explicitStatus ? Number(explicitStatus[1]) : 500;
     return this.dissectUpstreamError(statusCode, errorReason, headers, nowMs, account);
   }
 }

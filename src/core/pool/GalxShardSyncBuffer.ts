@@ -9,12 +9,14 @@
 import { ShardHealthRepository, type ShardHealthProbe } from '../../lib/supabase/repositories/ShardHealthRepository';
 import { ShardRepository } from '../../lib/supabase/repositories/ShardRepository';
 import type { CredentialStatus, GalxShardAccount } from '../contracts/GalxContracts';
+import { coalesceHealthTransitions } from './LeaseHealthTransition';
 
 export interface ShardStateTransitionBatchItem {
   shardId: string;
   status: CredentialStatus;
   cooldownUntilMs?: number;
   fencingToken?: number;
+  expectedRegistryRevision?: number;
   timestampMs: number;
 }
 
@@ -109,21 +111,19 @@ export class GalxShardSyncBuffer {
 
     this.isFlushing = true;
     const probesToFlush = [...this.pendingHealthProbes];
-    const transitionsToFlush = [...this.pendingStateTransitions];
+    const transitionsToFlush = coalesceHealthTransitions(this.pendingStateTransitions);
 
     this.pendingHealthProbes = [];
     this.pendingStateTransitions = [];
 
     try {
-      // 1. Batch flush health probes to PostgreSQL via stored procedure
-      if (probesToFlush.length > 0) {
-        await ShardHealthRepository.getInstance().reportHealthProbesBatch(probesToFlush);
-      }
-
-      // 2. Batch update state transitions in PostgreSQL via single atomic UNNEST query
+      // Control state must not depend on an unrelated telemetry sink being up.
       if (transitionsToFlush.length > 0) {
         const shardRepo = ShardRepository.getInstance();
-        await shardRepo.updateShardStatusBatch(transitionsToFlush);
+        await shardRepo.applyLeaseHealthTransitions(transitionsToFlush);
+      }
+      if (probesToFlush.length > 0) {
+        await ShardHealthRepository.getInstance().reportHealthProbesBatch(probesToFlush);
       }
 
       this.isFlushing = false;

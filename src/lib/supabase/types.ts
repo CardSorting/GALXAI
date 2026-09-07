@@ -583,6 +583,7 @@ export interface Database {
           user_id: string;
           job_id: string | null;
           fencing_token: number;
+          health_revision?: number | null;
           estimated_tokens: number;
           committed_tokens: number | null;
           acquired_at_ms: number;
@@ -599,6 +600,7 @@ export interface Database {
           user_id: string;
           job_id?: string | null;
           fencing_token: number;
+          health_revision?: number | null;
           estimated_tokens?: number;
           committed_tokens?: number | null;
           acquired_at_ms: number;
@@ -615,6 +617,7 @@ export interface Database {
           user_id?: string;
           job_id?: string | null;
           fencing_token?: number;
+          health_revision?: number | null;
           estimated_tokens?: number;
           committed_tokens?: number | null;
           acquired_at_ms?: number;
@@ -3971,7 +3974,8 @@ export interface Database {
           p_lease_id: string;
           p_actual_tokens?: number;
           p_latency_ms?: number;
-          p_success?: boolean;
+          /** null settles usage without making a provider health judgment. */
+          p_success?: boolean | null;
           p_now_ms?: number;
         };
         Returns: Json;

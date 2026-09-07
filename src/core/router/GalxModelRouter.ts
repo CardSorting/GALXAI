@@ -18,6 +18,7 @@ import { TokenCostCalculator } from '../pricing/TokenCostCalculator';
 import { GalxEdgeBatchBuffer } from '../../workers/cloudflare/GalxEdgeBatchBuffer';
 import { OpenAIAdapter } from './adapters/OpenAIAdapter';
 import { RelayDispatchError } from './adapters/RelayChatTransport';
+import { ImageCapacityError } from './ImageCapacityError';
 import { GalxPreflightValidator } from '../validator/GalxPreflightValidator';
 import { GalxMetricsEngine } from '../telemetry/GalxMetricsEngine';
 import { GalxPrivacyComplianceEngine } from '../privacy/GalxPrivacyComplianceEngine';
@@ -41,6 +42,7 @@ export interface RouteImageOptions {
   requestId: string;
   isPriorityUser?: boolean;
   headers?: Headers | Record<string, string | null | undefined>;
+  signal?: AbortSignal;
 }
 
 /**
@@ -98,6 +100,11 @@ export class GalxModelRouter {
   public static sanitizeUpstreamError(rawMessage: string): string {
     if (!rawMessage || typeof rawMessage !== 'string') {
       return 'Gateway request failed. Please retry.';
+    }
+
+    // Classify capacity codes before the identifier scrubber consumes SHARD_*.
+    if (/^SHARD_(?:NOT_HEALTHY|COOLDOWN|CONCURRENCY_EXHAUSTED|REQUEST_QUOTA_EXHAUSTED|TOKEN_QUOTA_EXHAUSTED|SLIDING_WINDOW_EXHAUSTED)$/.test(rawMessage)) {
+      return 'No healthy compute capacity is currently available. Please retry shortly.';
     }
 
     let sanitized = rawMessage
@@ -630,7 +637,8 @@ export class GalxModelRouter {
         await this.pool.releaseLeaseAuthoritatively(lease.leaseId, {
           tokensConsumed: 0,
           success: false,
-          errorReason: err.message || 'Execution error'
+          errorReason: err.message || 'Execution error',
+          healthImpact: err instanceof RelayDispatchError ? 'neutral' : 'provider'
         }).catch((releaseError: unknown) => {
           lastError = releaseError instanceof Error ? releaseError : err;
         });
@@ -881,7 +889,7 @@ export class GalxModelRouter {
    */
   async routeImageGeneration(options: RouteImageOptions): Promise<ImageGenerationResponse> {
     await this.substrate.ensureFreshFromAuthority();
-    const { userId, requestId, isPriorityUser, headers: incomingHeaders } = options;
+    const { userId, requestId, isPriorityUser, headers: incomingHeaders, signal } = options;
     const modelSpec = ModelCatalog.resolveModel(options.request.model || 'openai-gpt-image-2');
     if (!modelSpec) {
       throw new Error(`Unsupported image model: '${options.request.model}'`);
@@ -919,6 +927,8 @@ export class GalxModelRouter {
       isPriorityUser,
       estimatedTokens: sanitizedRequest.quality === 'hd' ? 200 : 100,
       leaseTtlMs: 120_000,
+      queueIfExhausted: false,
+      signal,
       privacyProfile: privacyPolicy.profile,
       hipaaRequired: privacyPolicy.hipaaEnabled,
       dataResidency: privacyPolicy.dataResidency,
@@ -937,6 +947,8 @@ export class GalxModelRouter {
         isPriorityUser,
         estimatedTokens: sanitizedRequest.quality === 'hd' ? 200 : 100,
         leaseTtlMs: 120_000,
+        queueIfExhausted: false,
+        signal,
         privacyProfile: privacyPolicy.profile,
         hipaaRequired: privacyPolicy.hipaaEnabled,
         dataResidency: privacyPolicy.dataResidency,
@@ -947,10 +959,9 @@ export class GalxModelRouter {
     }
 
     if (!acqResult.lease) {
-      const cleanMsg = GalxModelRouter.sanitizeUpstreamError(
-        acqResult.reason || `Compute capacity is temporarily constrained for this model.`
-      );
-      throw new Error(cleanMsg);
+      // Admission failures are availability failures, not synthesis failures.
+      // Do not expose authority codes (which may be scrubbed to just "route").
+      throw new ImageCapacityError(acqResult.earliestPoolResetMs);
     }
 
     const lease = acqResult.lease;
@@ -994,7 +1005,7 @@ export class GalxModelRouter {
 
       let result: ImageGenerationResponse;
       try {
-        result = await OpenAIAdapter.executeImageGeneration(sanitizedRequest, decrypted, modelSpec, lease.shardId);
+        result = await OpenAIAdapter.executeImageGeneration(sanitizedRequest, decrypted, modelSpec, lease.shardId, { signal });
       } catch (execErr: any) {
         // Reactive 401 Recovery
         if (
@@ -1013,7 +1024,7 @@ export class GalxModelRouter {
                 lease.account.id,
                 provider
               );
-              result = await OpenAIAdapter.executeImageGeneration(sanitizedRequest, decrypted, modelSpec, lease.shardId);
+              result = await OpenAIAdapter.executeImageGeneration(sanitizedRequest, decrypted, modelSpec, lease.shardId, { signal });
             } else {
               throw execErr;
             }
@@ -1156,13 +1167,16 @@ export class GalxModelRouter {
     } catch (err: any) {
       const latencyMs = Date.now() - startMs;
       const sanitizedErr = GalxModelRouter.sanitizeUpstreamError(err.message || 'Image generation error');
+      const upstreamStatus = Number.isInteger(err.status) ? err.status : 500;
       await this.pool.releaseLeaseAuthoritatively(lease.leaseId, {
         tokensConsumed: 0,
         success: false,
-        errorReason: sanitizedErr,
+        errorReason: err.message || sanitizedErr,
+        healthImpact: err instanceof RelayDispatchError || signal?.aborted ? 'neutral' : 'provider',
+        upstreamHeaders: err.upstreamHeaders,
         nowMs: Date.now(),
         latencyMs,
-        statusCode: 500,
+        statusCode: upstreamStatus,
         modelUsed: modelSpec.id
       }).catch(() => undefined);
       this.metrics.recordSample({
@@ -1173,7 +1187,7 @@ export class GalxModelRouter {
         provider,
         model: modelSpec.id,
         shardId: lease.shardId,
-        statusCode: 500
+        statusCode: upstreamStatus
       });
       if (err instanceof RelayDispatchError) throw err;
       throw new Error(sanitizedErr);

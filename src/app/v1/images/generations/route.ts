@@ -1,4 +1,5 @@
 import { RelayDispatchError } from '@/core/router/adapters/RelayChatTransport';
+import { ImageCapacityError } from '@/core/router/ImageCapacityError';
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -29,6 +30,7 @@ export async function OPTIONS() {
  * Governed seamlessly by sovereign Seat Subscription Tiers with zero frontend key leakage.
  */
 export async function POST(req: NextRequest) {
+  const requestId = `img_${crypto.randomUUID()}`;
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
@@ -154,21 +156,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const requestId = `img_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-
     const result = await galxRouter.routeImageGeneration({
       request: body,
       userId,
       requestId,
       isPriorityUser,
-      headers: req.headers
+      headers: req.headers,
+      signal: req.signal
     });
 
     const currentWindows = seatEngine.calculateRollingWindows(userId, entitlement.tier);
 
     const resHeaders: Record<string, string> = {
+      'X-Request-Id': requestId,
+      'X-Galx-Request-Id': requestId,
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, Retry-After',
+      'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, Retry-After, X-Request-Id, X-Galx-Request-Id',
       'X-Galx-ZDR-Verified': 'true',
       'X-Galx-ZDR-Retention': '0s',
       'X-Galx-AI-Generated': 'true',
@@ -189,6 +192,19 @@ export async function POST(req: NextRequest) {
       headers: resHeaders
     });
   } catch (error: any) {
+    if (error instanceof ImageCapacityError) {
+      return NextResponse.json({ error: {
+        message: error.message, type: 'service_unavailable_error', code: error.code,
+        request_id: requestId, retry_after_seconds: error.retryAfterSeconds
+      } }, { status: error.status, headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Expose-Headers': 'Retry-After, X-Request-Id, X-Galx-Request-Id',
+        'Retry-After': String(error.retryAfterSeconds),
+        'X-Should-Retry': 'true',
+        'X-Request-Id': requestId,
+        'X-Galx-Request-Id': requestId
+      } });
+    }
     const rawMessage = error.message || 'Image Generation Failed';
     const message = GalxModelRouter.sanitizeUpstreamError(rawMessage);
     const isRateLimited =
@@ -226,16 +242,16 @@ export async function POST(req: NextRequest) {
       {
         status,
         headers: {
+          // A timeout after dispatch may already have generated an image.
+          // Do not let an SDK's default 5xx retries duplicate that work.
+          'X-Should-Retry': 'false',
+          'X-Request-Id': requestId,
+          'X-Galx-Request-Id': requestId,
           'Access-Control-Allow-Origin': '*',
-          'Access-Control-Expose-Headers': 'Retry-After, RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, X-RateLimit-Reset, X-Galx-Request-Id, X-Galx-Router, X-Galx-Session-Affinity',
+          'Access-Control-Expose-Headers': 'Retry-After, X-Request-Id, X-Galx-Request-Id, X-Galx-Session-Affinity',
           ...(isRateLimited
             ? {
-                'Retry-After': '2',
-                'RateLimit-Limit': '60',
-                'RateLimit-Remaining': '0',
-                'RateLimit-Reset': '2',
-                'X-RateLimit-Remaining': '0',
-                'X-RateLimit-Reset': String(Math.floor(Date.now() / 1000) + 2)
+                'Retry-After': '5'
               }
             : {})
         }

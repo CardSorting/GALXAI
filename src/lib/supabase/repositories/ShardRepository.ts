@@ -11,6 +11,7 @@ import type { GalxShardAccount, CredentialStatus, ProviderType, AuthType, ShardI
 
 import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
 import { GalxCryptoVault } from '../../../core/vault/GalxCryptoVault';
+import { APPLY_LEASE_HEALTH_TRANSITIONS_SQL, coalesceHealthTransitions, persistedHealthStatus, type LeaseHealthTransition } from '../../../core/pool/LeaseHealthTransition';
 
 export class ShardAuthorityUnavailableError extends Error {
   constructor(operation: string, causes: string[] = []) {
@@ -368,6 +369,32 @@ export class ShardRepository {
     for (const t of transitions) this.cacheShardStatus(t.shardId, t.status, t.cooldownUntilMs);
   }
 
+  /** Automatic observations must not use the unconditional operator status API. */
+  async applyLeaseHealthTransitions(items: LeaseHealthTransition[]): Promise<void> {
+    const transitions = coalesceHealthTransitions(items);
+    if (!transitions.length) return;
+    const direct = await executePostgresQuery(APPLY_LEASE_HEALTH_TRANSITIONS_SQL, [
+      transitions.map(t => t.shardId), transitions.map(t => persistedHealthStatus(t.status)),
+      transitions.map(t => t.cooldownUntilMs || 0), transitions.map(t => t.fencingToken),
+      transitions.map(t => t.expectedRegistryRevision)
+    ]);
+    if (direct) return; // A stale observation is a successful no-op, not a retry.
+    if (isSupabaseAdminConfigured()) {
+      for (const t of transitions) {
+        const { error } = await getSupabaseAdmin().from('galx_shard_accounts').update({
+          status: persistedHealthStatus(t.status) as CredentialStatus,
+          cooldown_until_ms: t.cooldownUntilMs || null,
+          updated_at_ms: Date.now()
+        }).eq('id', t.shardId).eq('registry_revision', t.expectedRegistryRevision!)
+          .eq('fencing_token', t.fencingToken!).eq('permission_retracted', false)
+          .not('status', 'in', '(paused,revoked,dead)');
+        if (error) throw new ShardAuthorityUnavailableError('apply fenced health observation', [error.code]);
+      }
+      return;
+    }
+    if (this.isAuthorityConfigured()) throw new ShardAuthorityUnavailableError('apply fenced health observations');
+  }
+
   async acquireLease(params: {
     shardId: string;
     userId: string;
@@ -379,6 +406,8 @@ export class ShardRepository {
     leaseId?: string;
     fencingToken?: number;
     reason?: string;
+    retryAtMs?: number;
+    healthRevision?: number;
     expiresAtMs?: number;
     remainingTokens?: number;
     reservedTokens?: number;
@@ -394,7 +423,7 @@ export class ShardRepository {
         `SELECT public.fn_acquire_shard_lease(
           $1::varchar, $2::varchar, $3::bigint, $4::bigint, $5::varchar, $6::bigint
         ) AS result;`,
-        [params.shardId, params.userId, estimatedTokens, leaseTtlMs, params.jobId, now]
+        [params.shardId, params.userId, estimatedTokens, leaseTtlMs, params.jobId, null]
       );
       const result = this.parseProcedureResult(direct?.rows[0]?.result);
       if (result) {
@@ -403,12 +432,13 @@ export class ShardRepository {
               success: true,
               leaseId: result.lease_id,
               fencingToken: Number(result.fencing_token),
+              healthRevision: Number(result.health_revision) || undefined,
               expiresAtMs: Number(result.expires_at_ms),
               remainingTokens: Number(result.remaining_tokens),
               reservedTokens: Number(result.reserved_tokens),
               remainingRequests: Number(result.remaining_requests)
             }
-          : { success: false, reason: result.reason || 'LEASE_REJECTED' };
+          : { success: false, reason: result.reason || 'LEASE_REJECTED', retryAtMs: Number(result.retry_at_ms) || undefined };
       }
       failures.push('pooled SQL lease acquisition failed');
     }
@@ -421,8 +451,7 @@ export class ShardRepository {
           p_user_id: params.userId,
           p_estimated_tokens: estimatedTokens,
           p_lease_ttl_ms: leaseTtlMs,
-          p_job_id: params.jobId,
-          p_now_ms: now
+          p_job_id: params.jobId
         });
         if (error) throw error;
         const result = this.parseProcedureResult(data);
@@ -432,12 +461,13 @@ export class ShardRepository {
               success: true,
               leaseId: result.lease_id,
               fencingToken: Number(result.fencing_token),
+              healthRevision: Number(result.health_revision) || undefined,
               expiresAtMs: Number(result.expires_at_ms),
               remainingTokens: Number(result.remaining_tokens),
               reservedTokens: Number(result.reserved_tokens),
               remainingRequests: Number(result.remaining_requests)
             }
-          : { success: false, reason: result.reason || 'LEASE_REJECTED' };
+          : { success: false, reason: result.reason || 'LEASE_REJECTED', retryAtMs: Number(result.retry_at_ms) || undefined };
       } catch (error: any) {
         failures.push(`admin API lease acquisition failed: ${error?.code || error?.name || 'unknown'}`);
       }
@@ -512,7 +542,7 @@ export class ShardRepository {
     leaseId: string;
     actualTokens?: number;
     latencyMs?: number;
-    success?: boolean;
+    success?: boolean | null;
   }): Promise<{ success: boolean; committedTokens?: number; reason?: string }> {
     const now = Date.now();
     const failures: string[] = [];
@@ -526,8 +556,8 @@ export class ShardRepository {
           params.leaseId,
           params.actualTokens ?? null,
           params.latencyMs ?? null,
-          params.success !== false,
-          now
+          params.success === undefined ? true : params.success,
+          null
         ]
       );
       const result = this.parseProcedureResult(direct?.rows[0]?.result);
@@ -546,8 +576,7 @@ export class ShardRepository {
           p_lease_id: params.leaseId,
           p_actual_tokens: params.actualTokens ?? undefined,
           p_latency_ms: params.latencyMs ?? undefined,
-          p_success: params.success !== false,
-          p_now_ms: now
+          p_success: params.success === undefined ? true : params.success
         });
         if (error) throw error;
         const result = this.parseProcedureResult(data);
@@ -667,7 +696,7 @@ export class ShardRepository {
     leaseId: string;
     actualTokens?: number;
     latencyMs?: number;
-    success?: boolean;
+    success?: boolean | null;
   }): Promise<{ success: boolean; committedTokens?: number; reason?: string }> {
     const lease = this.inMemoryLeases.get(params.leaseId);
     if (lease) {

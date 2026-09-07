@@ -174,6 +174,7 @@ export class GalxCredentialPool {
         const current = this.inFlightCounts.get(lease.shardId) || 0;
         if (current <= 1) {
           this.inFlightCounts.delete(lease.shardId);
+          this.circuitBreaker.releaseCanarySlot(lease.shardId);
         } else {
           this.inFlightCounts.set(lease.shardId, current - 1);
         }
@@ -399,13 +400,15 @@ export class GalxCredentialPool {
             : 'pool_exhausted';
       return {
         status,
-        reason
+        reason,
+        earliestPoolResetMs: decision.retryAtMs
       };
     }
 
     const authoritativeAccount: GalxShardAccount = {
       ...localLease.account,
       fencingToken: decision.fencingToken,
+      registryRevision: decision.healthRevision,
       tokenBucket: {
         ...localLease.account.tokenBucket,
         remainingTokens: Number.isFinite(decision.remainingTokens)
@@ -518,6 +521,7 @@ export class GalxCredentialPool {
       tokensConsumed?: number;
       tokensUsed?: number;
       success?: boolean;
+      healthImpact?: 'provider' | 'neutral';
       upstreamHeaders?: Record<string, string | number | undefined>;
       errorReason?: string;
       nowMs?: number;
@@ -529,12 +533,32 @@ export class GalxCredentialPool {
     const lease = this.activeLeases.get(leaseId);
     if (!lease) return false;
 
+    const failure = options.success === false ? this.circuitBreaker.dissectUpstreamError(
+      options.statusCode ?? 500, options.errorReason || '', options.upstreamHeaders,
+      options.nowMs ?? Date.now(), this.substrate.getAccount(lease.shardId)
+    ) : undefined;
+    const neutral = options.healthImpact === 'neutral' || failure?.affectsHealth === false;
+    if (neutral) options = { ...options, healthImpact: 'neutral' };
+
     if (this.shardRepository.isAuthorityConfigured()) {
+      // Persist explicit provider backoff before settlement. Otherwise a failed
+      // probe's fallback backoff could advance the revision and discard a longer
+      // provider Retry-After queued for write-behind.
+      if (!neutral && failure && (failure.cooldownMs !== undefined || failure.isPermanent)) {
+        await this.shardRepository.applyLeaseHealthTransitions([{
+          shardId: lease.shardId,
+          status: failure.newStatus,
+          cooldownUntilMs: failure.cooldownMs === undefined ? undefined : (options.nowMs ?? Date.now()) + failure.cooldownMs,
+          fencingToken: lease.fencingToken,
+          expectedRegistryRevision: lease.account.registryRevision,
+          timestampMs: options.nowMs ?? Date.now()
+        }]);
+      }
       const decision = await this.shardRepository.releaseLease({
         leaseId,
         actualTokens: options.tokensConsumed ?? options.tokensUsed ?? 0,
         latencyMs: options.latencyMs,
-        success: options.success !== false
+        success: neutral ? null : options.success !== false
       });
       if (!decision.success) {
         throw new Error(decision.reason || 'Distributed capacity coordinator rejected route lease reconciliation');
@@ -954,6 +978,7 @@ export class GalxCredentialPool {
       tokensConsumed?: number;
       tokensUsed?: number;
       success?: boolean;
+      healthImpact?: 'provider' | 'neutral';
       upstreamHeaders?: Record<string, string | number | undefined>;
       errorReason?: string;
       nowMs?: number;
@@ -975,6 +1000,7 @@ export class GalxCredentialPool {
     let actualLatency = latencyMs;
     let actualStatusCode = success ? 200 : 500;
     let actualModelUsed: string | undefined;
+    let neutralHealth = false;
 
     if (typeof tokensUsedOrOptions === 'object' && tokensUsedOrOptions !== null) {
       actualTokensUsed = tokensUsedOrOptions.tokensConsumed ?? tokensUsedOrOptions.tokensUsed ?? 0;
@@ -985,6 +1011,7 @@ export class GalxCredentialPool {
       actualLatency = tokensUsedOrOptions.latencyMs ?? latencyMs;
       actualStatusCode = tokensUsedOrOptions.statusCode ?? (actualSuccess ? 200 : 500);
       actualModelUsed = tokensUsedOrOptions.modelUsed;
+      neutralHealth = tokensUsedOrOptions.healthImpact === 'neutral';
     } else if (typeof tokensUsedOrOptions === 'number') {
       actualTokensUsed = tokensUsedOrOptions;
     }
@@ -1035,6 +1062,35 @@ export class GalxCredentialPool {
       timestampMs: actualNowMs
     });
 
+    const failure = actualSuccess ? undefined : this.circuitBreaker.dissectUpstreamError(
+      actualStatusCode, actualError || '', actualHeaders, actualNowMs, currentAccount
+    );
+    neutralHealth ||= failure?.affectsHealth === false;
+    if (failure?.category === 'model_incompatible' && actualModelUsed) {
+      this.circuitBreaker.blacklistModelForShard(lease.shardId, actualModelUsed);
+    }
+    // Release reservations and count usage, but don't turn a caller/relay problem
+    // into evidence that this provider credential needs a cooldown.
+    if (neutralHealth) {
+      this.substrate.updateAccount({ ...currentAccount,
+        tokenBucket: this.rateGovernor.commit(currentAccount.tokenBucket, actualTokensUsed, lease.estimatedTokens, 1, actualNowMs)
+      });
+      this.drainAdmissionQueue(actualNowMs);
+      return true;
+    }
+    const currentCooldown = currentAccount.cooldownUntilTimestampMs || currentAccount.cooldownUntilMs || 0;
+    const stateChanged = (lease.account.registryRevision !== undefined && currentAccount.registryRevision !== lease.account.registryRevision)
+      || lease.fencingToken !== currentAccount.fencingToken
+      || currentCooldown > lease.acquiredAtMs
+      || ['paused', 'dead', 'quarantined'].includes(currentAccount.status);
+    if (stateChanged) {
+      this.substrate.updateAccount({ ...currentAccount,
+        tokenBucket: this.rateGovernor.commit(currentAccount.tokenBucket, actualTokensUsed, lease.estimatedTokens, 1, actualNowMs)
+      });
+      this.drainAdmissionQueue(actualNowMs);
+      return true;
+    }
+
     if (actualSuccess) {
       let bucket = this.rateGovernor.commit(
         currentAccount.tokenBucket,
@@ -1076,6 +1132,7 @@ export class GalxCredentialPool {
           lastLatencyMs: actualLatency
         },
         cooldownUntilTimestampMs: undefined,
+        cooldownUntilMs: undefined,
         updatedAtMs: actualNowMs
       };
       this.substrate.updateAccount(updated);
@@ -1084,7 +1141,9 @@ export class GalxCredentialPool {
         this.syncBuffer.enqueueStateTransition({
           shardId: updated.id,
           status: newStatus,
-          timestampMs: actualNowMs
+          timestampMs: actualNowMs,
+          fencingToken: lease.fencingToken,
+          expectedRegistryRevision: lease.account.registryRevision
         });
       }
     } else {
@@ -1096,13 +1155,7 @@ export class GalxCredentialPool {
         actualNowMs
       );
 
-      const classification = this.circuitBreaker.dissectUpstreamError(
-        actualStatusCode,
-        actualError || 'Unknown error',
-        actualHeaders,
-        actualNowMs,
-        currentAccount
-      );
+      const classification = failure!;
 
       // Model Incompatibility: register blacklist without breaking shard for other models
       if (classification.category === 'model_incompatible' && actualModelUsed) {
@@ -1139,6 +1192,7 @@ export class GalxCredentialPool {
           lastUsedTimestampMs: actualNowMs
         },
         cooldownUntilTimestampMs: cooldownUntil,
+        cooldownUntilMs: cooldownUntil,
         updatedAtMs: actualNowMs
       };
       this.substrate.updateAccount(updated);
@@ -1147,7 +1201,9 @@ export class GalxCredentialPool {
         shardId: updated.id,
         status: classification.newStatus,
         cooldownUntilMs: cooldownUntil,
-        timestampMs: actualNowMs
+        timestampMs: actualNowMs,
+        fencingToken: lease.fencingToken,
+        expectedRegistryRevision: lease.account.registryRevision
       });
     }
 

@@ -18,13 +18,15 @@ export function classifyUpstreamError(frame: any, now = Date.now()) {
   const error = frame?.error ?? frame?.response?.error ?? frame ?? {};
   const code = String(error.code ?? frame?.status ?? frame?.status_code ?? 'unknown');
   const description = `${code} ${frame?.status ?? frame?.status_code ?? ''} ${error.type ?? ''} ${error.message ?? ''}`.toLowerCase();
-  const quota = /429|rate.?limit|quota|usage_limit|too many requests/.test(description);
-  const unauthorized = /401|403|invalid_api_key|token_expired|invalid_token|token_revoked|deactivated|session_expired|session_revoked|authentication_error|credentials?.{0,20}(revoked|expired)|token.{0,20}(revoked|expired)/.test(description);
+  const status = Number(frame?.status ?? frame?.status_code ?? (/^\d{3}$/.test(code) ? code : NaN));
+  const requestRejected = /\b(invalid_request(?:_error)?|invalid_argument|context_length(?:_exceeded)?|model_not_found|unsupported_parameter|model_permission_denied)\b/.test(description);
+  const unauthorized = !requestRejected && (status === 401 || /\b(invalid_api_key|token_expired|invalid_token|token_revoked|account_deactivated|session_expired|session_revoked|authentication_error)\b/.test(description));
+  const quota = !requestRejected && (status === 429 || /\b(rate[ _-]?limit(?:ed|_exceeded)?|insufficient_quota|usage_limit(?:_reached)?|too many requests)\b/.test(description));
   const reset = Number(error.resets_at ?? error.reset_at ?? frame?.resets_at);
   const deadline = Number.isFinite(reset) && reset > 0
     ? Math.max(now + 1000, reset < 1e12 ? reset * 1000 : reset)
     : retryDeadline(error.retry_after_seconds ?? error.retry_after ?? frame?.retry_after ?? frame?.headers?.['retry-after'], now);
-  const permanent = /invalid_request|invalid_argument|context_length|model_not_found|unsupported_parameter/.test(description) || /^(400|404|405|413|422)$/.test(code);
+  const permanent = requestRejected || (status >= 400 && status < 500 && ![401, 408, 429].includes(status));
   return { code, quota: quota && !unauthorized, unauthorized, deadline, retryable: quota || unauthorized || !permanent };
 }
 

@@ -48,6 +48,9 @@ jobs:
       - name: Verify logical agent session isolation
         run: npm run test:sessions
 
+      - name: Verify cooldown recovery and image retry contract
+        run: npm run test:cooldown
+
       - name: ESLint & Style Checks
         run: npm run lint
 

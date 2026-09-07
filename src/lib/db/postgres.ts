@@ -49,7 +49,17 @@ interface CircuitBreakerStatus {
   openUntil: number;
 }
 
-class PostgresCircuitBreaker {
+/** SQL/data errors are not evidence that the database transport is unavailable. */
+export function isDatabaseAvailabilityError(error: any): boolean {
+  const code = String(error?.code || '');
+  if (/^08/.test(code) || ['57P01', '57P02', '57P03', '53300', '53400', 'ECONNREFUSED', 'ECONNRESET', 'ETIMEDOUT', 'EPIPE', 'ENOTFOUND', 'EAI_AGAIN'].includes(code)) return true;
+  const message = String(error?.message || '');
+  if (code === '57014') return /statement timeout/i.test(message);
+  if (/^[0-9A-Z]{5}$/.test(code)) return false;
+  return /connection (?:terminated|closed|timeout)|timeout (?:expired|exceeded)|query read timeout|checkout queue saturated/i.test(message);
+}
+
+export class PostgresCircuitBreaker {
   private state: CircuitBreakerState = 'CLOSED';
   private failures = 0;
   private lastFailureTime = 0;
@@ -78,6 +88,7 @@ class PostgresCircuitBreaker {
   }
 
   recordFailure(error: any): void {
+    if (!isDatabaseAvailabilityError(error)) return;
     this.failures++;
     this.lastFailureTime = Date.now();
     if (this.failures >= this.FAILURE_THRESHOLD || this.state === 'HALF_OPEN') {

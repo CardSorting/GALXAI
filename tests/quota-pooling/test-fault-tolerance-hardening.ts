@@ -111,7 +111,9 @@ async function runAll() {
     );
     assert.strictEqual(classification.newStatus, 'exhausted');
     assert.strictEqual(classification.category, 'rolling_window_exhausted');
-    assert.strictEqual(classification.cooldownMs, (4 * 3600 + 15 * 60) * 1000);
+    const resetMs = (4 * 3600 + 15 * 60) * 1000;
+    assert.ok(classification.cooldownMs! >= resetMs, 'jitter must never retry before the provider reset');
+    assert.ok(classification.cooldownMs! <= resetMs + 2000, 'positive jitter stays bounded');
   });
 
   // -------------------------------------------------------------------------

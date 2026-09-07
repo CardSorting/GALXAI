@@ -3,6 +3,26 @@ import { test } from 'node:test';
 import { executeRelayChat, RelayDispatchError } from '../src/core/router/adapters/RelayChatTransport';
 import { OpenAIAdapter } from '../src/core/router/adapters/OpenAIAdapter';
 
+test('REST image errors retain status/backoff and caller cancellation remains health-neutral', async () => {
+  const original = globalThis.fetch;
+  const execute = (signal?: AbortSignal) => OpenAIAdapter.executeImageGeneration(
+    { prompt: 'test' } as any, { apiKey: 'sk-test-fixture' } as any,
+    { id: 'image', upstreamId: 'image' } as any, 'fixture', { signal, timeoutMs: 100 });
+  try {
+    globalThis.fetch = async () => new Response('Invalid request 401234', { status: 400, headers: { 'Retry-After': '120' } });
+    await assert.rejects(execute(), (error: any) => error.status === 400 && error.upstreamHeaders['retry-after'] === '120');
+    globalThis.fetch = async (_input, init) => new Response(new ReadableStream({
+      start(controller) {
+        init?.signal?.addEventListener('abort', () => controller.error(init.signal!.reason), { once: true });
+      }
+    }));
+    const caller = new AbortController();
+    const pending = execute(caller.signal);
+    caller.abort();
+    await assert.rejects(pending, (error: any) => error.status === 499);
+  } finally { globalThis.fetch = original; }
+});
+
 const options = { url: 'https://relay.test', key: 'relay-test-key', payload: { model: 'test-model', stream: false }, ttftTimeoutMs: 1000 };
 const delta = (text: string) => `data: ${JSON.stringify({ choices: [{ delta: { content: text }, finish_reason: null }] })}\n\n`;
 async function fixture(body: string | null, run: () => Promise<void>, admissionStatus = 202, streamUrl = '/v1/jobs/test/stream') {

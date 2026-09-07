@@ -528,6 +528,9 @@ export class OpenAIAdapter {
 
     const timeoutMs = options?.timeoutMs ?? 60_000;
     const controller = new AbortController();
+    const abort = () => controller.abort(options?.signal?.reason);
+    if (options?.signal?.aborted) abort();
+    else options?.signal?.addEventListener('abort', abort, { once: true });
     const timeoutId = setTimeout(() => {
       controller.abort(new Error(`Image generation timed out after ${timeoutMs}ms`));
     }, timeoutMs);
@@ -541,11 +544,12 @@ export class OpenAIAdapter {
         signal: controller.signal
       });
 
-      clearTimeout(timeoutId);
-
       if (!response.ok) {
         const errText = await response.text();
-        throw new Error(`OpenAI Image Generation error (${response.status}): ${errText}`);
+        throw Object.assign(new Error(`OpenAI Image Generation error (${response.status}): ${errText}`), {
+          status: response.status,
+          upstreamHeaders: { 'retry-after': response.headers.get('retry-after') ?? undefined }
+        });
       }
 
       const result = await response.json() as any;
@@ -557,8 +561,11 @@ export class OpenAIAdapter {
         shardId
       };
     } catch (err: any) {
-      clearTimeout(timeoutId);
+      if (options?.signal?.aborted) throw Object.assign(new Error('Request cancelled'), { status: 499 });
       throw err;
+    } finally {
+      clearTimeout(timeoutId);
+      options?.signal?.removeEventListener('abort', abort);
     }
   }
 

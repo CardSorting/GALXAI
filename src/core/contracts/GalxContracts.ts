@@ -34,6 +34,8 @@ export interface SlidingWindowQuotaState {
 }
 
 export type FailureClassificationCategory =
+  | 'request_rejected'
+  | 'cancelled'
   | 'rolling_window_exhausted'
   | 'tpm_rpm_rate_limited'
   | 'billing_depleted'
@@ -473,6 +475,8 @@ export interface CircuitEvaluationResult {
 }
 
 export interface CircuitFailureClassification {
+  /** False when a failed request says nothing about provider/account health. */
+  readonly affectsHealth?: boolean;
   readonly newStatus: CredentialStatus;
   readonly cooldownMs?: number;
   readonly reason: string;
