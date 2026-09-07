@@ -78,7 +78,7 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
   {
     id: 'openai-gpt-image-2',
     upstreamId: 'gpt-image-2',
-    name: 'OpenAI Codex GPT-Image-2 (Ultra 4K SOTA)',
+    name: 'GPT Image 2 / Codex Image Tool',
     provider: 'openai',
     category: 'image',
     contextWindowTokens: 128_000,
@@ -91,7 +91,7 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsVision: true,
     supportsReasoning: false,
     supportsStreaming: false,
-    description: 'Flagship 4K high-definition image generation, complex text layout rendering, and composition.'
+    description: 'GPT Image 2 through the Image API. On an explicitly enabled OAuth relay, this ID is a Codex image-tool compatibility alias with provider-managed image model selection; responses identify the execution mode.'
   },
   {
     id: 'openai-gpt-image-1.5',

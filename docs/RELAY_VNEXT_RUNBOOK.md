@@ -1,6 +1,6 @@
 # Capability-aware relay vNext
 
-vNext consists of one host controller/front door and one isolated Docker worker per active OpenAI shard. The controller is infrastructure; it is not a relay owning multiple shards. The existing shared production relay has not been replaced.
+vNext consists of one host controller/front door and one isolated Docker worker per active OpenAI shard. The controller is infrastructure; it is not a relay owning multiple shards. Production now uses this topology; see the rollout evidence in ADR 0127. The stopped legacy container is retained for rollback.
 
 ## Validate the implementation
 
@@ -63,7 +63,7 @@ On the assigned worker, an administrator can POST `/api/capabilities/probe-image
 6. Verify the actual downstream chat and image clients end-to-end. Only enable paid Hive after its requested image model produces a valid image through that public path.
 7. For rollback, pause ingress, drain and stop vNext workers, restore the saved shared relay image/configuration and original ingress, then verify downstream requests again. Do not run both topologies with the same credentials during rollback.
 
-The existing `docker-compose.relay.yml` describes the legacy shared deployment and is not a vNext fleet launcher. Rebuilding that deployment with the new worker without this migration will fail its one-shard guard. No tunnel change or production cutover is performed by this implementation's tests.
+The existing `docker-compose.relay.yml` describes the legacy shared deployment and is not a vNext fleet launcher. Rebuilding that deployment with the new worker without this migration will fail its one-shard guard. The synthetic tests do not change the production tunnel or perform a cutover. The separately performed production cutover is recorded in ADR 0127.
 
 
 ## Parent and subagent request contract
@@ -105,6 +105,8 @@ These choices follow the explicit caller intent and bounded retry principles des
 | Public `openai-gpt-image-2` / relay `gpt-image-2` | `gpt-5.6-terra` with `image_generation` | Provider-managed; **not a guarantee of exact GPT-Image-2** |
 
 This is an intentional alias, not a fallback after an error. It applies only to that ID and OAuth shards. API-key workers continue to request the exact image model. Other image model IDs are not remapped. [OpenAI's image guide](https://developers.openai.com/api/docs/guides/image-generation) distinguishes the mainline model calling the image tool from the tool's own image-model selection.
+
+The generic tool route does not guarantee exact Image API `size` or `quality` rendering parameters; returned image dimensions can differ.
 
 The execution model must be present in fresh authenticated inventory, and a real image probe must succeed before the alias enters routing. A chat-model listing alone never grants image eligibility. Alias evidence expires after one hour; active image successes renew it. Idle enabled workers make one paid startup verification and then at most one successful re-verification per 50 minutes, using spare capacity. Failed verification backs off 10, 20, then 40 minutes. This maintenance can consume upstream image quota; enable the flag only for fleets intended to serve this compatibility route. Expired evidence fails closed until successful verification. A negative model observation removes eligibility without destroying an otherwise useful worker.
 
