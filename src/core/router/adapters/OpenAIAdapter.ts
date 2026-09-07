@@ -314,6 +314,8 @@ export class OpenAIAdapter {
 
       if (vmRelayUrl && useVmRelay) {
         try {
+          const relayKey = process.env.VM_RELAY_API_KEY || process.env.RELAY_API_KEYS?.split(',')[0]?.trim();
+          const relayHeaders = { 'Content-Type': 'application/json', ...(relayKey ? { Authorization: `Bearer ${relayKey}` } : {}) };
           const relayPayload = {
             ...body,
             model: body.model === 'gpt-5.6-sol' ? 'gpt-5.6-terra' : (modelSpec.upstreamId || body.model)
@@ -324,7 +326,7 @@ export class OpenAIAdapter {
             relayResp = await fetch(`${vmRelayUrl.replace(/\/+$/, '')}/v1/chat/completions`, {
               method: 'POST',
               headers: {
-                ...headers,
+                ...relayHeaders,
                 'x-galx-client': 'openai-adapter-vm-relay',
                 'x-galx-shard-id': (secret as any)?.id || (secret as any)?.shardId || ''
               },
@@ -337,7 +339,7 @@ export class OpenAIAdapter {
               relayResp = await fetch(`${vmRelayUrl.replace(/\/+$/, '')}/v1/chat/completions`, {
                 method: 'POST',
                 headers: {
-                  ...headers,
+                  ...relayHeaders,
                   'x-galx-client': 'openai-adapter-vm-relay-retry',
                   'x-galx-shard-id': (secret as any)?.id || (secret as any)?.shardId || ''
                 },
@@ -359,7 +361,7 @@ export class OpenAIAdapter {
                 const streamResp = await fetch(streamTarget, {
                   method: 'GET',
                   headers: {
-                    ...headers,
+                    ...relayHeaders,
                     'accept': 'text/event-stream',
                     'x-galx-client': 'openai-adapter-vm-relay-stream'
                   },
@@ -562,9 +564,10 @@ export class OpenAIAdapter {
       // Attempt synthesis through Always-On VM Relay
       if (vmRelayUrl && useVmRelay) {
         try {
+          const relayKey = process.env.VM_RELAY_API_KEY || process.env.RELAY_API_KEYS?.split(',')[0]?.trim();
           const imageHeaders = {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            ...(relayKey ? { Authorization: `Bearer ${relayKey}` } : {}),
             'x-galx-client': 'openai-adapter-vm-relay-image',
             'x-galx-shard-id': shardId,
             ...(req.sessionId ? { 'x-galx-session-id': req.sessionId } : {}),

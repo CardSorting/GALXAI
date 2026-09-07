@@ -19,13 +19,13 @@ export function classifyUpstreamError(frame: any, now = Date.now()) {
   const code = String(error.code ?? frame?.status ?? frame?.status_code ?? 'unknown');
   const description = `${code} ${frame?.status ?? frame?.status_code ?? ''} ${error.type ?? ''} ${error.message ?? ''}`.toLowerCase();
   const quota = /429|rate.?limit|quota|usage_limit|too many requests/.test(description);
-  const unauthorized = /401|403|invalid_api_key|token_expired|invalid_token|token_revoked|deactivated/.test(description);
+  const unauthorized = /401|403|invalid_api_key|token_expired|invalid_token|token_revoked|deactivated|session_expired|session_revoked|authentication_error|credentials?.{0,20}(revoked|expired)|token.{0,20}(revoked|expired)/.test(description);
   const reset = Number(error.resets_at ?? error.reset_at ?? frame?.resets_at);
   const deadline = Number.isFinite(reset) && reset > 0
     ? Math.max(now + 1000, reset < 1e12 ? reset * 1000 : reset)
     : retryDeadline(error.retry_after_seconds ?? error.retry_after ?? frame?.retry_after ?? frame?.headers?.['retry-after'], now);
   const permanent = /invalid_request|invalid_argument|context_length|model_not_found|unsupported_parameter/.test(description) || /^(400|404|405|413|422)$/.test(code);
-  return { code, quota, unauthorized, deadline, retryable: quota || unauthorized || !permanent };
+  return { code, quota: quota && !unauthorized, unauthorized, deadline, retryable: quota || unauthorized || !permanent };
 }
 
 export function cooldownDeadline(failures: number, now: number, providerDeadline?: number): number {

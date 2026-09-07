@@ -59,8 +59,8 @@ async function refresh(){
     if(!r.ok){
       const retry=r.headers.get('retry-after');
       if(retry)retryAfter=Math.max(0,Number.isFinite(Number(retry))?Number(retry)*1000:Date.parse(retry)-Date.now())||0;
-      if(r.status===401){authBlocked=true;$('auth').open=true;}
-      throw Error(r.status===401?'Authentication required. Enter your key in Relay API access below; automatic retries are paused.':`Telemetry unavailable (HTTP ${r.status}). The last snapshot may be stale. Retry manually or wait for automatic recovery.`);
+      if(r.status===401 || r.status===403){authBlocked=true;$('auth').open=true;}
+      throw Error((r.status===401 || r.status===403)?'Administrator authentication required. Enter your administrator key in Relay API access below; automatic retries are paused.':`Telemetry unavailable (HTTP ${r.status}). The last snapshot may be stale. Retry manually or wait for automatic recovery.`);
     }
     const snapshot=await r.json();
     if(!Array.isArray(snapshot.traces)||!Number.isFinite(snapshot.capturedAt))throw Error('Unexpected telemetry response. Check that this page and relay are on the same version.');

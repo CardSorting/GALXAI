@@ -64,6 +64,8 @@ export interface RelayConfig {
   discoverHostCredentials: boolean;
   registryEnabled: boolean;
   apiKeys?: string[];
+  adminApiKeys?: string[];
+  allowedOrigins?: string[];
   maxPayloadBytes: number;
   httpBodyTimeoutMs: number;
   // Multi-Tenant Rate Governance
@@ -111,8 +113,10 @@ const DEFAULT_CONFIG: RelayConfig = {
   stateSnapshotPath: process.env.RELAY_STATE_SNAPSHOT_PATH || path.join(process.cwd(), '.broccolidb', 'relay-snapshot.json'),
   masterSecret: process.env.GALX_VAULT_MASTER_SECRET || process.env.GALX_VAULT_KEY,
   apiKeys: process.env.RELAY_API_KEYS ? process.env.RELAY_API_KEYS.split(',').map((k) => k.trim()) : undefined,
+  adminApiKeys: process.env.RELAY_ADMIN_API_KEYS ? process.env.RELAY_ADMIN_API_KEYS.split(',').map(k => k.trim()) : undefined,
+  allowedOrigins: process.env.RELAY_ALLOWED_ORIGINS?.split(',').map(origin => origin.trim()).filter(Boolean),
   shardConcurrency: Number(process.env.RELAY_SHARD_CONCURRENCY || 4),
-  discoverHostCredentials: true,
+  discoverHostCredentials: process.env.RELAY_DISCOVER_HOST_CREDENTIALS === 'true',
   registryEnabled: Boolean(registryConfig().databaseUrl || registryConfig().url || registryConfig().key),
   maxPayloadBytes: parseInt(process.env.MAX_PAYLOAD_BYTES || '2097152', 10), // 2 MB
   httpBodyTimeoutMs: parseInt(process.env.HTTP_BODY_TIMEOUT_MS || '10000', 10), // 10s
@@ -251,6 +255,7 @@ export interface ShardRecord extends Record<string, unknown> {
   providerLimits?: ProviderLimit[];
   source?: string;
   expiresAtMs?: number;
+  credentialFingerprint?: string;
 }
 
 interface TransientJobSession {
@@ -269,6 +274,7 @@ interface TransientJobSession {
   ewmaItlMs: number;
   consecutiveItlStalls: number;
   retryCount: number;
+  retryAtMs?: number;
   lastSeenAliveMs: number;
   activeTtftDeadlineMs: number;
   currentShardId?: string;
@@ -818,9 +824,30 @@ export class GalxaiRelayServer extends EventEmitter {
   constructor(config: Partial<RelayConfig> = {}) {
     super();
     this.config = { ...DEFAULT_CONFIG, ...config };
-    for (const name of ['maxConcurrentRequests', 'maxRssBytes', 'jobMaxWallTimeMs', 'httpBodyTimeoutMs'] as const) {
+    for (const name of ['apiKeys', 'adminApiKeys'] as const) {
+      if (this.config[name]?.some(key => typeof key !== 'string' || !key.trim())) throw new TypeError(`${name} must contain nonempty keys`);
+    }
+    // Existing single-key installations retain admin access; additional keys are inference-only.
+    this.config.adminApiKeys ??= this.config.apiKeys?.slice(0, 1);
+    if (!['127.0.0.1', '::1', 'localhost'].includes(this.config.host) && !this.config.apiKeys?.length && !this.config.adminApiKeys?.length) {
+      throw new TypeError('Non-loopback relay listeners require RELAY_API_KEYS or RELAY_ADMIN_API_KEYS');
+    }
+    for (const origin of this.config.allowedOrigins ?? []) {
+      const parsed = new URL(origin);
+      if (!['http:', 'https:'].includes(parsed.protocol) || parsed.origin !== origin) throw new TypeError('allowedOrigins must contain exact HTTP(S) origins');
+    }
+    for (const name of ['maxConcurrentRequests', 'maxRssBytes', 'jobMaxWallTimeMs', 'httpBodyTimeoutMs', 'maxPayloadBytes'] as const) {
       if (!Number.isSafeInteger(this.config[name]) || this.config[name] <= 0) throw new TypeError(`${name} must be a positive safe integer`);
     }
+    if (!Number.isSafeInteger(this.config.maxUpstreamRetries) || this.config.maxUpstreamRetries < 0 || this.config.maxUpstreamRetries > 32) {
+      throw new TypeError('maxUpstreamRetries must be an integer between 0 and 32');
+    }
+    for (const name of ['retryBaseDelayMs', 'retryMaxDelayMs', 'wsConnectTimeoutMs', 'wsTtftTimeoutMs', 'wsIntraChunkTimeoutMs', 'jobMaxWallTimeMs'] as const) {
+      if (!Number.isSafeInteger(this.config[name]) || this.config[name] < 1 || this.config[name] > 2147483647) {
+        throw new TypeError(`${name} must be an integer between 1 and 2147483647 milliseconds`);
+      }
+    }
+    if (this.config.retryBaseDelayMs > this.config.retryMaxDelayMs) throw new TypeError('retryBaseDelayMs must not exceed retryMaxDelayMs');
     if (!Number.isSafeInteger(this.config.drainTimeoutMs) || this.config.drainTimeoutMs <= 0) {
       throw new TypeError('drainTimeoutMs must be a positive safe integer');
     }
@@ -910,8 +937,9 @@ export class GalxaiRelayServer extends EventEmitter {
   // ZERO-TRUST SECURITY: AUTHENTICATION & RATE GOVERNANCE
   // --------------------------------------------------------------------------
 
-  private verifyAuthorization(req: http.IncomingMessage): boolean {
-    if (!this.config.apiKeys || this.config.apiKeys.length === 0) {
+  private verifyAuthorization(req: http.IncomingMessage, admin = false): boolean {
+    const keys = admin ? this.config.adminApiKeys ?? [] : [...(this.config.apiKeys ?? []), ...(this.config.adminApiKeys ?? [])];
+    if (!this.config.apiKeys?.length && !this.config.adminApiKeys?.length) {
       return true; // Open access in dev/local mode
     }
 
@@ -932,7 +960,7 @@ export class GalxaiRelayServer extends EventEmitter {
 
     // Timing-Safe Constant-Time Verification against configured keys
     const providedBuffer = Buffer.from(providedToken, 'utf-8');
-    for (const validKey of this.config.apiKeys) {
+    for (const validKey of keys) {
       const validBuffer = Buffer.from(validKey, 'utf-8');
       if (providedBuffer.length === validBuffer.length && crypto.timingSafeEqual(providedBuffer, validBuffer)) {
         this.principals.set(req, crypto.createHash('sha256').update(validKey).digest('hex'));
@@ -977,6 +1005,16 @@ export class GalxaiRelayServer extends EventEmitter {
     const previous = this.shardsTable.getAll();
     const seen = new Set<string>();
     const next: ShardRecord[] = [];
+    // Decode expiry only as an exclusion hint; upstream still authenticates tokens.
+    items = items.map(item => {
+      let tokenExpiry: number | undefined;
+      try {
+        const exp = JSON.parse(Buffer.from(item.accessToken.split('.')[1], 'base64url').toString()).exp;
+        if (typeof exp === 'number' && Number.isFinite(exp)) tokenExpiry = exp * 1000;
+      } catch {}
+      const expiries = [item.expiresAtMs, tokenExpiry].filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
+      return { ...item, expiresAtMs: expiries.length ? Math.min(...expiries) : undefined };
+    });
     // Prefer the newest credential for each account over expired duplicate rows.
     for (const item of [...items].sort((a, b) => (b.expiresAtMs ?? 0) - (a.expiresAtMs ?? 0))) {
       // Account identity survives token rotation and copies in multiple sources.
@@ -987,10 +1025,12 @@ export class GalxaiRelayServer extends EventEmitter {
       const id = item.id || `shard_${crypto.createHash('sha256').update(identity).digest('hex').slice(0, 16)}`;
       const old = previous.find(s => s.id === id || (s.accountId === item.accountId && !s.accountId.startsWith('acc_')) || s.accessToken === item.accessToken);
       const state = old ?? this.recoveredShardState.get(id);
-      const rotated = old && old.accessToken !== item.accessToken;
+      const credentialFingerprint = crypto.createHash('sha256').update(item.accessToken).digest('hex');
+      const rotated = old ? old.accessToken !== item.accessToken
+        : Boolean(state?.credentialFingerprint && state.credentialFingerprint !== credentialFingerprint);
       next.push({
         id: old?.id ?? id, accountId: item.accountId, accessToken: item.accessToken,
-        source: item.source, expiresAtMs: item.expiresAtMs,
+        source: item.source, expiresAtMs: item.expiresAtMs, credentialFingerprint,
         status: state?.status === 'disabled' && rotated ? 'active' : state?.status ?? item.status ?? 'active',
         consecutiveFailures: state?.consecutiveFailures ?? 0,
         quotaFailures: state?.quotaFailures ?? 0,
@@ -1176,7 +1216,7 @@ export class GalxaiRelayServer extends EventEmitter {
     if (!shard) return;
     const failures = (shard.quotaFailures ?? 0) + 1;
     this.shardsTable.put(shardId, { ...shard,
-      status: 'cooldown', quotaFailures: failures, probeInFlight: false,
+      status: shard.status === 'disabled' ? 'disabled' : 'cooldown', quotaFailures: failures, probeInFlight: false,
       inFlight: Math.max(0, shard.inFlight - (release ? 1 : 0)),
       cooldownUntilMs: Math.max(shard.cooldownUntilMs ?? 0, cooldownDeadline(failures, Date.now(), providerDeadline)),
     });
@@ -1189,9 +1229,10 @@ export class GalxaiRelayServer extends EventEmitter {
     this.shardsTable.put(shardId, { ...shard,
       inFlight: Math.max(0, shard.inFlight - 1), probeInFlight: false,
       consecutiveFailures: failures,
-      status: unauthorized ? 'disabled' : failures >= 3 ? 'cooldown' : shard.status,
+      status: unauthorized || shard.status === 'disabled' ? 'disabled' : failures >= 3 ? 'cooldown' : shard.status,
       cooldownUntilMs: failures >= 3 ? Math.max(shard.cooldownUntilMs ?? 0, cooldownDeadline(failures - 2, Date.now())) : shard.cooldownUntilMs,
     });
+    if (unauthorized) this.saveStateSnapshot();
   }
 
   private releaseShard(shardId: string, succeeded = false): void {
@@ -1255,7 +1296,29 @@ export class GalxaiRelayServer extends EventEmitter {
       });
     }
     res.setHeader('Access-Control-Expose-Headers', 'X-Galx-Trace-Id, X-Galx-Job-Id, Retry-After, Location, Operation-Location');
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Content-Security-Policy', "frame-ancestors 'none'; base-uri 'none'; object-src 'none'");
+    res.setHeader('Vary', 'Origin');
+    const authenticatedMode = Boolean(this.config.apiKeys?.length || this.config.adminApiKeys?.length);
+    let host: URL;
+    try { host = new URL(`http://${req.headers.host}`); } catch {
+      res.writeHead(400); res.end('Invalid Host header'); return;
+    }
+    if (!authenticatedMode && !['localhost', '127.0.0.1', '[::1]'].includes(host.hostname)) {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: { code: 'untrusted_host', message: 'Local unauthenticated access requires a loopback hostname.' } })); return;
+    }
+    const origin = req.headers.origin;
+    const sameOrigin = origin === `http://${host.host}` || origin === `https://${host.host}`;
+    const allowedOrigin = typeof origin === 'string' && (sameOrigin || (authenticatedMode && this.config.allowedOrigins?.includes(origin)));
+    if ((origin && !allowedOrigin) || (!origin && req.headers['sec-fetch-site'] === 'cross-site')) {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: { code: 'origin_not_allowed', message: 'This browser origin is not allowed to access the relay.' } })); return;
+    }
+    if (origin && allowedOrigin) res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Last-Event-ID, X-Requested-With, X-Tenant-Id, X-Galx-Api-Key, X-Galx-Task-Id, Idempotency-Key');
 
@@ -1267,11 +1330,6 @@ export class GalxaiRelayServer extends EventEmitter {
 
     if (pathname === '/health' || pathname === '/health/ready' || pathname === '/health/live') {
       this.handleHealth(res, pathname === '/health/ready');
-      return;
-    }
-
-    if (pathname === '/metrics') {
-      this.handleMetrics(res);
       return;
     }
 
@@ -1290,12 +1348,21 @@ export class GalxaiRelayServer extends EventEmitter {
       res.end(JSON.stringify({ error: { code: 'unauthorized', message: 'Invalid or missing API key' } }));
       return;
     }
+    if ((pathname.startsWith('/api/') || pathname === '/metrics') && !this.verifyAuthorization(req, true)) {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: { code: 'admin_access_required', message: 'Use a relay administrator key for fleet controls and telemetry.' } })); return;
+    }
+    if (pathname.startsWith('/api/') && !this.checkTenantRateLimit(`admin:${this.principals.get(req) ?? req.socket.remoteAddress}`)) {
+      res.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': '1' });
+      res.end(JSON.stringify({ error: { code: 'management_rate_limited', message: 'Too many management requests. Retry after one second.' } })); return;
+    }
+    if (pathname === '/metrics') { this.handleMetrics(res); return; }
     if (pathname === '/api/telemetry' && method === 'GET') {
       res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
       res.end(JSON.stringify({ ...this.telemetry.snapshot(), server: { admission: this.admissionState(), uptimeSec: process.uptime(), rssBytes: process.memoryUsage().rss, retryBudget: this.retryBudget.snapshot(), eventLoopP99Ms: this.eventLoopDelay.count ? this.eventLoopDelay.percentile(99) / 1e6 : null } }));
       return;
     }
-    if (isInference) {
+    if (isInference || (method === 'POST' && pathname.startsWith('/api/'))) {
       const admission = this.admissionState();
       if (!admission.accepting) {
         const traceId = this.requestTraces.get(req);
@@ -1311,7 +1378,8 @@ export class GalxaiRelayServer extends EventEmitter {
       const release = () => { if (!released) { released = true; this.admittedRequests--; } };
       res.once('finish', release); res.once('close', release);
     }
-    try { await this.refreshShardRegistry(); }
+    // Job controls must remain available when credential discovery is down.
+    try { if (isInference || pathname.startsWith('/api/')) await this.refreshShardRegistry(); }
     catch {
       if (!pathname.startsWith('/api/')) {
         const traceId = this.requestTraces.get(req);
@@ -1371,7 +1439,7 @@ export class GalxaiRelayServer extends EventEmitter {
       return;
     }
 
-    if (this.isDraining && method === 'POST') {
+    if (this.isDraining && isInference) {
       const traceId = this.requestTraces.get(req);
       if (traceId) this.telemetry.finish(traceId, 'failed', 'server_draining');
       res.writeHead(503, { 'Content-Type': 'application/json' });
@@ -1797,7 +1865,7 @@ export class GalxaiRelayServer extends EventEmitter {
       }, 90_000);
 
       try {
-        ws = new WebSocketClass(this.config.wsEndpoint, { headers: wsHeaders });
+        ws = new WebSocketClass(this.config.wsEndpoint, { headers: wsHeaders, maxPayload: this.config.maxPayloadBytes, followRedirects: false });
         ws.on('unexpected-response', (_request: unknown, response: http.IncomingMessage) => {
           response.resume();
           finishError(Object.assign(new Error(`Upstream HTTP ${response.statusCode}`), {
@@ -1906,6 +1974,7 @@ export class GalxaiRelayServer extends EventEmitter {
     const resp = await fetch('https://api.openai.com/v1/images/generations', {
       signal,
       method: 'POST',
+      redirect: 'error',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
@@ -2077,6 +2146,7 @@ export class GalxaiRelayServer extends EventEmitter {
       if (this.jobQueue.markFailed(jobId, 'shard_registry_unavailable')) this.metrics.totalJobsFailed++;
       return;
     }
+    if (session.abortController.signal.aborted || this.sessions.get(jobId) !== session) return;
     // Acquire healthy shard (exclude every previously attempted account)
     const shard = this.acquireHealthyShard(session.attemptedShardIds);
     if (!shard) {
@@ -2213,7 +2283,7 @@ export class GalxaiRelayServer extends EventEmitter {
 
     let ws: any;
     try {
-      ws = new WebSocketClass(this.config.wsEndpoint, { headers: wsHeaders, maxPayload: this.config.maxPayloadBytes });
+      ws = new WebSocketClass(this.config.wsEndpoint, { headers: wsHeaders, maxPayload: this.config.maxPayloadBytes, followRedirects: false });
       session.upstreamWs = ws;
       ws.on('unexpected-response', (_request: unknown, response: http.IncomingMessage) => {
         response.resume();
@@ -2609,9 +2679,13 @@ export class GalxaiRelayServer extends EventEmitter {
       `[AntiFragileRelay] Upstream failure (${event.reason}) on shard ${event.shardId}. ` +
       `Scheduling queue-owned recovery ${session.retryCount}/${this.config.maxUpstreamRetries} in ${backoffMs}ms...`,
     );
+    session.retryAtMs = Date.now() + backoffMs;
     session.retryTimer = setTimeout(() => {
+      session.retryAtMs = undefined;
       if (!session.abortController.signal.aborted && session.activeAttemptId === event.attemptId) {
-        void this.performInFlightFailover(event.jobId, event.reason, event.shardId);
+        void this.performInFlightFailover(event.jobId, event.reason, event.shardId).catch(() => {
+          if (this.jobQueue.markFailed(event.jobId, 'relay_recovery_failed')) this.metrics.totalJobsFailed++;
+        });
       }
     }, backoffMs);
   }
@@ -2652,7 +2726,12 @@ export class GalxaiRelayServer extends EventEmitter {
       this.jobBus.publish({ type: 'job:keepalive', jobId, text: ': transit_failover_in_progress\n\n' });
     }, 1000);
 
-    try { await this.refreshShardRegistry(); } catch {}
+    try { await this.refreshShardRegistry(); } catch {
+      if (this.jobQueue.markFailed(jobId, 'shard_registry_unavailable')) this.metrics.totalJobsFailed++;
+      return;
+    }
+    // A cancellation or deadline may have finished the job while refresh awaited I/O.
+    if (session.abortController.signal.aborted || this.sessions.get(jobId) !== session) return;
     // 1. Acquire alternative healthy shard
     const newShard = this.acquireHealthyShard(session.attemptedShardIds);
     if (!newShard) {
@@ -2731,6 +2810,19 @@ export class GalxaiRelayServer extends EventEmitter {
   // CLEAN CANCEL & JOB STATUS
   // --------------------------------------------------------------------------
 
+  private jobRecovery(job: JobRecord) {
+    const session = this.sessions.get(job.id);
+    const terminal = ['completed', 'failed', 'cancelled'].includes(job.status);
+    return {
+      state: terminal ? 'stopped' : session?.retryAtMs !== undefined ? 'backoff' : 'running',
+      retriesUsed: session?.retryCount ?? job.failoverCount ?? 0,
+      maxRetries: this.config.maxUpstreamRetries,
+      nextRetryAtMs: terminal ? null : session?.retryAtMs ?? null,
+      deadlineAtMs: job.createdAtMs + this.config.jobMaxWallTimeMs,
+      automaticRetry: !terminal && session?.retryAtMs !== undefined,
+    };
+  }
+
   private handleJobStatus(jobId: string, res: http.ServerResponse): void {
     const job = this.jobsTable.get(jobId);
     if (!job) {
@@ -2749,6 +2841,7 @@ export class GalxaiRelayServer extends EventEmitter {
       tokensGenerated: null,
       traceId: job.traceId ?? null,
       terminal,
+      recovery: this.jobRecovery(job),
       pollAfterMs: terminal ? null : 2000,
       createdAt: Math.floor(job.createdAtMs / 1000),
       durationMs: ((job.completedAtMs as number) || Date.now()) - job.createdAtMs,
@@ -2817,7 +2910,7 @@ export class GalxaiRelayServer extends EventEmitter {
         timestampMs: Date.now(),
         jobs: activeJobs,
         shards: this.shardsTable.getAll().map(s => ({
-          id: s.id, status: s.status, cooldownUntilMs: s.cooldownUntilMs,
+          id: s.id, credentialFingerprint: s.credentialFingerprint, status: s.status, cooldownUntilMs: s.cooldownUntilMs,
           consecutiveFailures: s.consecutiveFailures, quotaFailures: s.quotaFailures,
           providerLimits: s.providerLimits, lastUsedAtMs: s.lastUsedAtMs,
           slidingWindowTimestamps: s.slidingWindowTimestamps,
@@ -2843,6 +2936,7 @@ export class GalxaiRelayServer extends EventEmitter {
       for (const state of Array.isArray(snap.shards) ? snap.shards : []) {
         // Legacy local exhaustion without provider evidence is not a real quota.
         this.recoveredShardState.set(state.id, {
+          credentialFingerprint: state.credentialFingerprint,
           status: state.status === 'disabled' ? 'disabled' : state.cooldownUntilMs > Date.now() ? 'cooldown' : 'active',
           cooldownUntilMs: state.cooldownUntilMs, quotaFailures: state.quotaFailures,
           consecutiveFailures: state.consecutiveFailures, lastUsedAtMs: state.lastUsedAtMs,
@@ -2924,7 +3018,7 @@ export class GalxaiRelayServer extends EventEmitter {
         totalSlowSubscriberDrains: this.metrics.totalSlowSubscriberDrains,
       },
       security: {
-        authEnabled: !!(this.config.apiKeys && this.config.apiKeys.length > 0),
+        authEnabled: Boolean(this.config.apiKeys?.length || this.config.adminApiKeys?.length),
         rateGovernorActive: true,
         maxPayloadBytes: this.config.maxPayloadBytes,
       },
@@ -3074,6 +3168,7 @@ export class GalxaiRelayServer extends EventEmitter {
       status: 'ok',
       service: 'galxai-relay',
       signature: 'galxai-zenith-relay',
+      security: { authenticationRequired: Boolean(this.config.apiKeys?.length || this.config.adminApiKeys?.length), administratorAccess: true },
       port: this.config.port,
       host: this.config.host,
       activeStreams: activeJobs.length,
@@ -3102,6 +3197,8 @@ export class GalxaiRelayServer extends EventEmitter {
         id: j.id,
         model: j.model,
         status: j.status,
+        recovery: this.jobRecovery(j),
+        error: j.error ?? null,
         outputChunks: j.seqCounter,
         tokensStreamed: null,
         createdAtMs: j.createdAtMs,
@@ -3111,7 +3208,6 @@ export class GalxaiRelayServer extends EventEmitter {
     res.writeHead(200, {
       'Content-Type': 'application/json',
       'Cache-Control': 'no-cache',
-      'Access-Control-Allow-Origin': '*',
     });
     res.end(JSON.stringify(stats));
   }
@@ -3124,6 +3220,14 @@ export class GalxaiRelayServer extends EventEmitter {
     const limits = (s.providerLimits ?? []).filter(l => !l.resetAtMs || l.resetAtMs > now);
     return {
       id: s.id, accountId: s.accountId, source: s.source,
+      expiresAtMs: s.expiresAtMs ?? null,
+      availabilityReason: s.expiresAtMs !== undefined && s.expiresAtMs <= now ? 'credential_expired'
+        : s.status === 'disabled' ? 'credential_rejected'
+        : this.config.registryEnabled && (this.registryError || now - this.registryRefreshedAtMs > 5000) ? 'registry_unavailable'
+        : readyAt > now ? 'cooldown' : s.probeInFlight ? 'probing'
+        : s.inFlight >= this.config.shardConcurrency ? 'at_capacity' : 'ready',
+      eligible: Number.isFinite(readyAt) && readyAt <= now && !s.probeInFlight && s.inFlight < this.config.shardConcurrency
+        && !(this.config.registryEnabled && (this.registryError || now - this.registryRefreshedAtMs > 5000)),
       status: !Number.isFinite(readyAt) ? 'disabled' : readyAt > now ? 'cooldown' : s.probeInFlight ? 'probing' : 'active',
       inFlight: s.inFlight, maxConcurrency: this.config.shardConcurrency,
       consecutiveFailures: s.consecutiveFailures, quotaFailures: s.quotaFailures ?? 0,
@@ -3140,14 +3244,7 @@ export class GalxaiRelayServer extends EventEmitter {
 
   private async handleSetQuotaProfile(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
     try {
-      let bodyText = '';
-      await new Promise<void>((resolve, reject) => {
-        req.on('data', (chunk) => { bodyText += chunk; });
-        req.on('end', () => resolve());
-        req.on('error', reject);
-      });
-
-      const data = bodyText.trim() ? JSON.parse(bodyText) : {};
+      const data = await readJsonBody(req, Math.min(this.config.maxPayloadBytes, 16384), this.config.httpBodyTimeoutMs);
       const requestedMode = data.mode as QuotaMode;
 
       if (requestedMode && !Object.hasOwn(QUOTA_PRESETS, requestedMode)) throw new Error('Unknown quota mode');
@@ -3164,7 +3261,7 @@ export class GalxaiRelayServer extends EventEmitter {
       next.elasticBurstAllowance = 0;
       this.currentQuotaProfile = next;
 
-      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         status: 'ok',
         profile: this.currentQuotaProfile,
@@ -3172,21 +3269,14 @@ export class GalxaiRelayServer extends EventEmitter {
         message: `Quota profile updated to ${this.currentQuotaProfile.mode.toUpperCase()}`,
       }));
     } catch (err: any) {
-      res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-      res.end(JSON.stringify({ error: { message: `Failed to set quota profile: ${err.message}` } }));
+      res.writeHead(err instanceof RequestError ? err.status : 400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: { code: err instanceof RequestError ? err.code : 'invalid_quota_profile', message: err.message } }));
     }
   }
 
   private async handleResetQuota(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
     try {
-      let bodyText = '';
-      await new Promise<void>((resolve, reject) => {
-        req.on('data', (chunk) => { bodyText += chunk; });
-        req.on('end', () => resolve());
-        req.on('error', reject);
-      });
-
-      const data = bodyText.trim() ? JSON.parse(bodyText) : {};
+      const data = await readJsonBody(req, Math.min(this.config.maxPayloadBytes, 16384), this.config.httpBodyTimeoutMs);
       const shardId = data.shardId;
 
       const allShards = this.shardsTable.getAll();
@@ -3203,15 +3293,15 @@ export class GalxaiRelayServer extends EventEmitter {
         }
       }
 
-      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         status: 'ok',
         resetCount,
         message: `Cleared local history for ${resetCount} shard(s); provider cooldowns remain`,
       }));
     } catch (err: any) {
-      res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-      res.end(JSON.stringify({ error: { message: `Failed to reset quota: ${err.message}` } }));
+      res.writeHead(err instanceof RequestError ? err.status : 400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: { code: err instanceof RequestError ? err.code : 'invalid_quota_reset', message: err.message } }));
     }
   }
 
@@ -3228,7 +3318,7 @@ export class GalxaiRelayServer extends EventEmitter {
       if (this.config.registryEnabled) await this.refreshShardRegistry(true);
       else this.loadShardFleet();
       const allShards = this.shardsTable.getAll();
-      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         status: 'ok',
         enrolledCount: allShards.length,
@@ -3236,7 +3326,7 @@ export class GalxaiRelayServer extends EventEmitter {
         message: `Successfully synchronized ${allShards.length} shards in the fleet pool.`,
       }));
     } catch (err: any) {
-      res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: { message: `Failed to sync shards: ${err.message}` } }));
     }
   }
@@ -3263,8 +3353,15 @@ export class GalxaiRelayServer extends EventEmitter {
   public async start(): Promise<void> {
     this.eventLoopDelay.enable();
     await this.refreshShardRegistry(true);
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve, reject) => {
+      const onError = (error: Error) => {
+        this.eventLoopDelay.disable();
+        if (this.snapshotIntervalTimer) clearInterval(this.snapshotIntervalTimer);
+        reject(error);
+      };
+      this.server.once('error', onError);
       this.server.listen(this.config.port, this.config.host, () => {
+        this.server.off('error', onError);
         console.log(`[BroccoliDB Relay] Listening on http://${this.config.host}:${this.config.port}`);
         console.log(`[BroccoliDB Relay] Shards enrolled: ${this.shardsTable.count()} | Target WS: ${this.config.wsEndpoint}`);
         resolve();

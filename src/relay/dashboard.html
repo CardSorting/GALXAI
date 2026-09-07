@@ -1020,6 +1020,16 @@
 
   <!-- Main Workspace -->
   <main>
+    <details id="relay-access" style="margin-block: 1rem;">
+      <summary>Relay administrator access</summary>
+      <form id="relay-access-form" style="display: flex; flex-wrap: wrap; align-items: end; gap: 0.75rem; padding-block: 1rem;">
+        <label for="relay-access-key">Administrator key<br><input id="relay-access-key" type="password" autocomplete="off" spellcheck="false" maxlength="4096" aria-describedby="relay-access-help" style="font: inherit; font-size: 1rem; max-width: 100%;"></label>
+        <button class="btn" type="submit">Connect</button>
+        <button class="btn" id="relay-access-lock" type="button">Lock this page</button>
+      </form>
+      <p id="relay-access-help">The key stays in this page’s memory. Reload or lock the page to clear it. Inference keys cannot manage the fleet.</p>
+    </details>
+    <p id="telemetry-freshness" role="status" aria-live="polite">Connecting to relay…</p>
 
     <!-- Top Navigation Tabs -->
     <nav class="tab-bar">
@@ -1457,19 +1467,19 @@
     async function probeAllShards() {
       await loadTelemetry();
       const shards = window.currentShardsData || [];
-      showToast(`${shards.filter(s => s.status === 'active').length} ready, ${shards.filter(s => s.status === 'cooldown').length} cooling down, ${shards.filter(s => s.status === 'disabled').length} need credentials. Availability check only.`);
+      showToast(`${shards.filter(s => s.eligible ?? s.status === 'active').length} ready, ${shards.filter(s => s.status === 'cooldown').length} cooling down, ${shards.filter(s => s.status === 'disabled').length} need credentials. Availability check only.`);
     }
 
     async function testShardStream() {
       try {
-        const response = await fetch('/v1/chat/completions', {
+        const response = await relayFetch('/v1/chat/completions', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ model: 'gpt-5.6-terra', messages: [{ role: 'user', content: 'Say OK' }] }),
         });
         const job = await response.json();
         if (!response.ok) throw new Error(job.error?.message || `HTTP ${response.status}`);
         if (!job.streamUrl) throw new Error('Relay did not return a stream URL');
-        const stream = await fetch(job.streamUrl, { signal: AbortSignal.timeout(90000) });
+        const stream = await relayFetch(job.streamUrl, { signal: AbortSignal.timeout(90000) });
         if (!stream.ok) throw new Error(`Stream HTTP ${stream.status}`);
         const reader = stream.body.getReader();
         const decoder = new TextDecoder();
@@ -1506,7 +1516,7 @@
 
     async function syncShardFleet() {
       try {
-        const response = await fetch('/api/shards/sync', { method: 'POST' });
+        const response = await relayFetch('/api/shards/sync', { method: 'POST' });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error?.message || 'Fleet sync failed');
         showToast(`Loaded ${data.enrolledCount} unique accounts`);
@@ -1544,7 +1554,7 @@
         const badgeEl = document.getElementById('hub-active-mode-badge');
         if (badgeEl) badgeEl.textContent = `${mode.toUpperCase()} (Switching...)`;
 
-        const res = await fetch('/api/quota/profile', {
+        const res = await relayFetch('/api/quota/profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ mode }),
@@ -1565,7 +1575,7 @@
       const targetLabel = shardId ? `shard ${shardId}` : 'ALL enrolled shards';
       if (!confirm(`Clear local usage history for ${targetLabel}? Provider cooldowns will remain.`)) return;
       try {
-        const res = await fetch('/api/quota/reset', {
+        const res = await relayFetch('/api/quota/reset', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(shardId ? { shardId } : {}),
@@ -1580,12 +1590,59 @@
       }
     }
 
+    function recoveryExplanation(reason = '') {
+      if (/registry/.test(reason)) return 'Credential registry unavailable. Restore its connection before starting a new request.';
+      if (/retry_budget/.test(reason)) return 'Relay recovery capacity is exhausted. Wait before starting a new request.';
+      if (/wall_time/.test(reason)) return 'The request reached its time limit. Review any partial output before trying again.';
+      if (/all_shards/.test(reason)) return 'No eligible accounts remain for this request. Check account availability below.';
+      if (/retries_exhausted/.test(reason)) return 'The retry limit was reached. Check the request trace before trying again.';
+      return 'Open the request trace for details before trying again.';
+    }
+
+    let relayApiKey = '';
+    let relayAuthBlocked = false;
+    async function relayFetch(resource, options = {}) {
+      const target = new URL(resource, location.href);
+      if (target.origin !== location.origin) throw new Error('Relay requests must stay on this origin.');
+      const headers = new Headers(options.headers);
+      const requestKey = relayApiKey;
+      if (requestKey) headers.set('Authorization', `Bearer ${requestKey}`);
+      const response = await fetch(target, { ...options, headers, redirect: 'error' });
+      if (response.status === 401 || response.status === 403) {
+        if (requestKey === relayApiKey) relayAuthBlocked = true;
+        document.getElementById('relay-access').open = true;
+        throw new Error(response.status === 403 ? 'Administrator access required. Enter an administrator key to continue.' : 'Authentication required. Enter your relay administrator key to continue.');
+      }
+      return response;
+    }
+    document.getElementById('relay-access-form').addEventListener('submit', event => {
+      event.preventDefault();
+      relayApiKey = document.getElementById('relay-access-key').value.trim();
+      document.getElementById('relay-access-key').value = '';
+      relayAuthBlocked = false;
+      loadTelemetry();
+    });
+    document.getElementById('relay-access-lock').addEventListener('click', () => {
+      relayApiKey = '';
+      location.reload();
+    });
+
     // Telemetry loader
+    let telemetryPending = false;
+    let telemetryLastUpdated = null;
+    let telemetryFailures = 0;
     async function loadTelemetry() {
+      if (telemetryPending) return;
+      telemetryPending = true;
+      const refreshButton = document.getElementById('btn-refresh-stats');
+      refreshButton.disabled = true;
       try {
-        const res = await fetch('/api/dashboard/stats');
+        const res = await relayFetch('/api/dashboard/stats', { signal: AbortSignal.timeout(8000), cache: 'no-store' });
         if (!res.ok) throw new Error(`Telemetry unavailable (HTTP ${res.status})`);
         const data = await res.json();
+        telemetryFailures = 0;
+        telemetryLastUpdated = new Date();
+        document.getElementById('telemetry-freshness').textContent = 'Live · Updated ' + telemetryLastUpdated.toLocaleTimeString();
 
         // Update HUD
         document.getElementById('hud-active-streams').textContent = data.activeStreams || 0;
@@ -1607,7 +1664,7 @@
           document.getElementById('btn-shard-count').textContent = shards.length;
         }
         if (document.getElementById('fleet-stat-count')) {
-          document.getElementById('fleet-stat-count').textContent = `${shards.filter(s => s.status === 'active').length} ready / ${shards.length} accounts`;
+          document.getElementById('fleet-stat-count').textContent = `${shards.filter(s => s.eligible ?? s.status === 'active').length} ready / ${shards.length} accounts`;
         }
 
         // Save current data globally for high-frequency countdown ticker
@@ -1617,7 +1674,7 @@
         window.currentQuotaEngine = qe;
         document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.toggle('active', btn.id === `mode-btn-${qe.mode}`));
         document.getElementById('hub-active-mode-badge').textContent = qe.effectiveCap == null ? 'No local call cap' : `Local cap: ${qe.effectiveCap} calls`;
-        const ready = shards.filter(s => s.status === 'active').length;
+        const ready = shards.filter(s => s.eligible ?? s.status === 'active').length;
         const known = shards.filter(s => s.quotaKnown).length;
         document.getElementById('overview-fleet-health').textContent = `${ready} / ${shards.length} ready`;
         document.getElementById('fleet-stat-health').textContent = registryAvailable(data) ? `${ready} ready` : 'Registry unavailable';
@@ -1645,11 +1702,16 @@
           const windowHours = (s.windowDurationMs || 10800000) / 3600000;
           const limits = s.providerLimits || [];
           const quotaText = limits.length ? limits.map(l => `${l.remaining}${l.limit == null ? '' : ` / ${l.limit}`} ${escapeHtml(l.name)}`).join(' · ') : 'Unknown — provider has not reported a quota';
-          const recovery = s.status === 'disabled' ? 'Refresh credentials to resume' : s.status === 'probing' ? 'Recovery probe in progress' : s.retryAfterSec > 0 ? `Retry in ${s.retryAfterSec}s` : 'Ready for requests';
+          const recovery = s.availabilityReason === 'credential_expired' ? 'Credential expired. Sign in again, import credentials, then sync the fleet.'
+            : s.status === 'disabled' ? 'Provider rejected this credential. Sign in again, import credentials, then sync the fleet.'
+            : s.availabilityReason === 'registry_unavailable' ? 'Routing paused until the registry refreshes.'
+            : s.availabilityReason === 'at_capacity' ? 'All request slots are in use.'
+            : s.status === 'probing' ? 'Recovery probe in progress' : s.retryAfterSec > 0 ? `Retry in ${s.retryAfterSec}s` : 'Eligible for requests; provider access is checked on use.';
+          const statusLabel = s.status === 'disabled' ? 'Sign-in required' : s.availabilityReason === 'at_capacity' ? 'Busy' : s.availabilityReason === 'registry_unavailable' ? 'Paused' : s.status;
           const visible = window[`callsListVisible_${s.id}`];
           const history = (s.slidingWindowTimestamps || []).slice().reverse().map(t => `<div class="quota-call-item"><span>${new Date(t).toLocaleTimeString()}</span><span>${Math.max(0, Math.floor((Date.now() - t) / 60000))}m ago</span></div>`).join('');
           return `<div class="shard-card" id="shard-card-${id}">
-            <div class="shard-title-row"><span class="shard-id">${id}</span><span class="badge badge-${escapeHtml(s.status)}">${escapeHtml(s.status.toUpperCase())}</span></div>
+            <div class="shard-title-row"><span class="shard-id">${id}</span><span class="badge badge-${escapeHtml(s.status)}">${escapeHtml(statusLabel.toUpperCase())}</span></div>
             <table class="shard-details-table">
               <tr><td>Account</td><td>${escapeHtml(s.accountId)}</td></tr>
               <tr><td>Credential source</td><td>${escapeHtml(s.source || 'Configured credentials')}</td></tr>
@@ -1695,7 +1757,7 @@
             <tr>
               <td style="font-family: var(--font-mono); color: #ffffff;">${escapeHtml(j.id)}</td>
               <td><span class="badge badge-active">${escapeHtml(j.model)}</span></td>
-              <td>${escapeHtml(j.status)}</td>
+              <td>${escapeHtml(j.status)}${j.recovery?.state === 'backoff' ? `<br><small>Retry ${j.recovery.retriesUsed} of ${j.recovery.maxRetries} in ${Math.max(0, Math.ceil((j.recovery.nextRetryAtMs - Date.now()) / 1000))}s · Cancel to stop</small>` : j.status === 'failed' ? `<br><small>Automatic retries stopped. ${escapeHtml(recoveryExplanation(j.error))}</small>` : ''}</td>
               <td>${Number(j.outputChunks) || 0}</td>
               <td>${new Date(j.createdAtMs).toLocaleTimeString()}</td>
               <td>
@@ -1706,7 +1768,11 @@
         }
 
       } catch (err) {
-        console.warn('Failed to load telemetry stats:', err);
+        telemetryFailures = Math.min(4, telemetryFailures + 1);
+        document.getElementById('telemetry-freshness').textContent = relayAuthBlocked ? `${err.message} Automatic refresh is paused.` : `Connection lost. ${telemetryLastUpdated ? 'Showing data from ' + telemetryLastUpdated.toLocaleTimeString() + '.' : 'No relay data available.'} Reconnecting automatically; use Refresh to check now.`;
+      } finally {
+        telemetryPending = false;
+        refreshButton.disabled = false;
       }
     }
 
@@ -1724,7 +1790,7 @@
         if (button.dataset.cancelJob === jobId) { button.disabled = true; button.textContent = 'Cancelling…'; }
       });
       try {
-        const response = await fetch(`/v1/jobs/${encodeURIComponent(jobId)}/cancel`, { method: 'POST', signal: AbortSignal.timeout(8000) });
+        const response = await relayFetch(`/v1/jobs/${encodeURIComponent(jobId)}/cancel`, { method: 'POST', signal: AbortSignal.timeout(8000) });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error?.message || `Cancellation failed (HTTP ${response.status}).`);
         showToast(result.cancellationApplied ? 'Request cancelled. Billing is managed separately.' : `Request is ${result.status || 'already finished'}; no cancellation was applied.`);
@@ -1758,7 +1824,7 @@
       let tokenCount = 0;
 
       try {
-        const response = await fetch('/v1/chat/completions', {
+        const response = await relayFetch('/v1/chat/completions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1840,7 +1906,7 @@
       const startTime = Date.now();
 
       try {
-        const response = await fetch('/v1/images/generations', {
+        const response = await relayFetch('/v1/images/generations', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1915,9 +1981,12 @@
       });
     }, 1000);
 
-    // Auto-poll telemetry every 2.5 seconds
-    setInterval(loadTelemetry, 2500);
-    loadTelemetry();
+    // One poll at a time; reduce outage traffic and pause in background tabs.
+    async function pollTelemetry() {
+      if (!document.hidden && !relayAuthBlocked) await loadTelemetry();
+      setTimeout(pollTelemetry, Math.min(30000, 2500 * 2 ** telemetryFailures));
+    }
+    pollTelemetry();
     checkInitialHash();
   </script>
 </body>

@@ -125,3 +125,131 @@ test('async operation contract exposes status polling and reports chunks without
 test('cancellation is idempotent and never represents a refund transaction',async()=>{
  const f=await fixture();try{const job=await(await submit(f.base)).json();const cancel=()=>fetch(f.base+`/v1/jobs/${job.id}/cancel`,{method:'POST'});const first=await(await cancel()).json(),again=await(await cancel()).json();assert.equal(first.cancellationApplied,true);assert.equal(again.cancellationApplied,false);for(const result of [first,again]){assert.equal(result.status,'cancelled');assert.equal(result.refunded,null);assert.equal(result.refundStatus,'not_managed_by_relay');assert.equal(result.tokensGenerated,null);assert.equal(result.outputChunks,0)}}finally{await f.close()}
 });
+
+test('retry configuration rejects unbounded counts and timer overflow', () => {
+ for (const maxUpstreamRetries of [Infinity, NaN, -1, 1.5, 33]) {
+  assert.throws(() => new GalxaiRelayServer({ maxUpstreamRetries }), /maxUpstreamRetries/);
+ }
+ for (const retryMaxDelayMs of [Infinity, NaN, 2147483648]) {
+  assert.throws(() => new GalxaiRelayServer({ retryMaxDelayMs }), /retryMaxDelayMs/);
+ }
+});
+
+test('cancellation while failover awaits registry cannot acquire replacement capacity', async () => {
+ const f = await fixture();
+ let completeRefresh!: () => void;
+ try {
+  const job = await (await submit(f.base)).json();
+  await until(() => !!f.internals.sessions.get(job.id)?.currentShardId);
+  f.internals.installFleet([
+   { id: 'shard-0', accountId: 'account-0', accessToken: 'secret-0' },
+   { id: 'replacement', accountId: 'replacement-account', accessToken: 'fake-replacement' },
+  ]);
+  f.internals.refreshShardRegistry = () => new Promise<void>(resolve => { completeRefresh = resolve; });
+  const recovery = f.internals.performInFlightFailover(job.id, 'test_transport_drop', 'shard-0');
+  await until(() => !!completeRefresh);
+  await fetch(f.base + `/v1/jobs/${job.id}/cancel`, { method: 'POST' });
+  completeRefresh();
+  await recovery;
+  assert.equal(f.internals.shardsTable.get('replacement').inFlight, 0);
+  assert.equal(f.internals.shardsTable.get('replacement').slidingWindowTimestamps.length, 0);
+  assert.equal(f.internals.sessions.has(job.id), false);
+ } finally { completeRefresh?.(); await f.close(); }
+});
+
+test('zero retries stops after first provider failure and exposes terminal recovery', async () => {
+ const f = await fixture({ maxUpstreamRetries: 0 });
+ let connections = 0;
+ f.ws.on('connection', socket => { connections++; socket.on('message', () => socket.send(JSON.stringify({ type: 'error', error: { code: 'server_error' } }))); });
+ try {
+  const job = await (await submit(f.base)).json();
+  await until(() => f.internals.jobsTable.get(job.id)?.status === 'failed');
+  const status = await (await fetch(f.base + `/v1/jobs/${job.id}`)).json();
+  assert.equal(connections, 1);
+  assert.equal(status.recovery.state, 'stopped');
+  assert.equal(status.recovery.automaticRetry, false);
+  assert.equal(status.recovery.nextRetryAtMs, null);
+  assert.equal(f.internals.sessions.size, 0);
+  assert(f.internals.shardsTable.getAll().every((shard: any) => shard.inFlight === 0));
+ } finally { await f.close(); }
+});
+
+test('administrator boundaries protect metrics, telemetry and fleet mutations', async () => {
+ const f = await fixture({ apiKeys: ['admin-key', 'inference-key'] });
+ try {
+  for (const route of ['/metrics', '/api/telemetry', '/api/dashboard/stats', '/api/shards']) {
+   assert.equal((await fetch(f.base + route)).status, 401);
+   assert.equal((await fetch(f.base + route, { headers: { Authorization: 'Bearer inference-key' } })).status, 403);
+   assert.equal((await fetch(f.base + route, { headers: { Authorization: 'Bearer admin-key' } })).status, 200);
+  }
+  const mutation = await fetch(f.base + '/api/quota/profile', { method: 'POST', headers: { Authorization: 'Bearer inference-key', 'Content-Type': 'application/json' }, body: JSON.stringify({ customCap: 1 }) });
+  assert.equal(mutation.status, 403);
+  assert.equal(f.internals.currentQuotaProfile.maxCalls, 0);
+  assert.equal((await submit(f.base, 'inference-key')).status, 202);
+ } finally { await f.close(); }
+});
+
+test('local relay rejects cross-origin writes and DNS-rebinding hostnames', async () => {
+ const f = await fixture();
+ try {
+  for (const origin of ['https://untrusted.example', 'null']) {
+   const r = await fetch(f.base + '/api/quota/profile', { method: 'POST', headers: { Origin: origin, 'Content-Type': 'text/plain' }, body: '{"customCap":1}' });
+   assert.equal(r.status, 403);
+   assert.equal(r.headers.get('access-control-allow-origin'), null);
+  }
+  const http = await import('node:http');
+  const reboundStatus = await new Promise<number>((resolve, reject) => {
+   http.get(f.base + '/api/shards', { headers: { Host: 'rebound.example' } }, res => { res.resume(); resolve(res.statusCode!); }).on('error', reject);
+  });
+  assert.equal(reboundStatus, 403);
+  const same = await fetch(f.base + '/api/shards', { headers: { Origin: f.base } });
+  assert.equal(same.status, 200);
+  assert.equal(same.headers.get('access-control-allow-origin'), f.base);
+  assert.equal(same.headers.get('x-frame-options'), 'DENY');
+  assert.equal(same.headers.get('cache-control'), 'no-store');
+  assert.equal(f.internals.currentQuotaProfile.maxCalls, 0);
+ } finally { await f.close(); }
+});
+
+test('explicit browser allowlist still requires an authenticated API request', async () => {
+ const f = await fixture({ apiKeys: ['admin-key'], allowedOrigins: ['https://app.example'] });
+ try {
+  const headers = { Origin: 'https://app.example' };
+  assert.equal((await fetch(f.base + '/api/shards', { headers })).status, 401);
+  const r = await fetch(f.base + '/api/shards', { headers: { ...headers, Authorization: 'Bearer admin-key' } });
+  assert.equal(r.status, 200);
+  assert.equal(r.headers.get('access-control-allow-origin'), 'https://app.example');
+  assert.equal((await fetch(f.base + '/api/shards', { headers: { Origin: 'https://app.example.attacker.test', Authorization: 'Bearer admin-key' } })).status, 403);
+ } finally { await f.close(); }
+});
+
+test('management bodies have size limits, validation and read deadlines', async () => {
+ const f = await fixture({ httpBodyTimeoutMs: 30 });
+ try {
+  for (const route of ['/api/quota/profile', '/api/quota/reset']) {
+   const r = await fetch(f.base + route, { method: 'POST', body: JSON.stringify({ extra: 'x'.repeat(17000) }) });
+   assert.equal(r.status, 413);
+   assert.equal((await r.json()).error.code, 'payload_too_large');
+   assert.equal((await fetch(f.base + route, { method: 'POST', body: '[]' })).status, 400);
+  }
+  const http = await import('node:http');
+  const status = await new Promise<number>((resolve, reject) => {
+   const req = http.request(f.base + '/api/quota/profile', { method: 'POST' }, res => {
+    res.resume(); req.end(); resolve(res.statusCode!);
+   });
+   req.on('error', reject); req.write('{');
+  });
+  assert.equal(status, 408);
+  assert.equal(f.internals.currentQuotaProfile.maxCalls, 0);
+ } finally { await f.close(); }
+});
+
+test('network listeners require credentials and dedicated admin keys stay separate', async () => {
+ assert.throws(() => new GalxaiRelayServer({ host: '0.0.0.0', apiKeys: [], adminApiKeys: [] }), /require RELAY_API_KEYS/);
+ assert.throws(() => new GalxaiRelayServer({ apiKeys: [''] }), /nonempty keys/);
+ const f = await fixture({ apiKeys: ['client-key'], adminApiKeys: ['operator-key'] });
+ try {
+  assert.equal((await fetch(f.base + '/metrics', { headers: { Authorization: 'Bearer client-key' } })).status, 403);
+  assert.equal((await fetch(f.base + '/metrics', { headers: { Authorization: 'Bearer operator-key' } })).status, 200);
+ } finally { await f.close(); }
+});

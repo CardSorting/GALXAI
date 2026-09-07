@@ -17,9 +17,10 @@ function assert(condition: boolean, message: string): void {
   console.log(`\x1b[32m✔\x1b[0m ${message}`);
 }
 
-async function fetchHttp(url: string, timeoutMs = 3000): Promise<{ status: number; text: string; json?: any }> {
+async function fetchHttp(url: string, timeoutMs = 3000, authenticated = false): Promise<{ status: number; text: string; json?: any }> {
   return new Promise((resolve, reject) => {
-    const req = http.get(url, { timeout: timeoutMs }, (res) => {
+    const apiKey = process.env.RELAY_ADMIN_API_KEYS?.split(',')[0]?.trim() || process.env.RELAY_API_KEYS?.split(',')[0]?.trim();
+    const req = http.get(url, { timeout: timeoutMs, headers: authenticated && apiKey ? { Authorization: `Bearer ${apiKey}` } : {} }, (res) => {
       let data = '';
       res.on('data', (chunk) => (data += chunk));
       res.on('end', () => {
@@ -63,11 +64,11 @@ async function runDockerTests(): Promise<void> {
     'Compose specifies 1.0 CPU resource ceiling'
   );
   assert(
-    composeContent.includes('.codex:/root/.codex:ro'),
-    'Credentials mounted with read-only (:ro) flag'
+    !composeContent.includes('.codex:') && composeContent.includes('read_only: true') && composeContent.includes('cap_drop: [ALL]'),
+    'No personal credentials mounted; root filesystem is read-only and capabilities are dropped'
   );
   assert(
-    composeContent.includes('.broccolidb:/app/.broccolidb'),
+    composeContent.includes('relay-state:/app/.broccolidb'),
     'BroccoliDB state directory mounted for persistent checkpointing'
   );
 
@@ -111,7 +112,9 @@ async function runDockerTests(): Promise<void> {
   assert(dashboardRes.text.includes('Chat SSE Streamer'), 'GET / contains interactive chat streamer UI');
   assert(dashboardRes.text.includes('Image Studio'), 'GET / contains image studio playground UI');
 
-  const statsRes = await fetchHttp(`http://127.0.0.1:${status.port}/api/dashboard/stats`);
+  const denied = await fetchHttp(`http://127.0.0.1:${status.port}/api/dashboard/stats`);
+  assert(denied.status === 401, 'Unauthenticated operational data is denied');
+  const statsRes = await fetchHttp(`http://127.0.0.1:${status.port}/api/dashboard/stats`, 15000, true);
   assert(statsRes.status === 200, 'GET /api/dashboard/stats returned HTTP 200 OK');
   assert(statsRes.json?.status === 'ok', 'Stats API returns status ok');
   assert(statsRes.json?.service === 'galxai-relay', 'Stats API returns service galxai-relay');

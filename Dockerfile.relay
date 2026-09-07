@@ -47,7 +47,8 @@ COPY src/relay/dashboard.html ./dashboard.html
 COPY src/relay/telemetry.html ./src/relay/telemetry.html
 
 # State and configuration mount directory
-RUN mkdir -p /app/.broccolidb /root/.codex
+RUN mkdir -p /app/.broccolidb && chown node:node /app/.broccolidb
+USER node
 
 EXPOSE 3001
 

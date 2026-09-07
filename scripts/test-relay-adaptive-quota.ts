@@ -239,3 +239,42 @@ test('successful streams replay real output and image requests fail over on quot
     await new Promise<void>(resolve => upstream.close(() => resolve()));
   }
 });
+
+test('JWT expiry overrides stale registry metadata and excludes the credential', async () => {
+  const f = fixture(1);
+  try {
+    const token = `header.${Buffer.from(JSON.stringify({ exp: Math.floor(Date.now() / 1000) - 60 })).toString('base64url')}.signature`;
+    f.internals.installFleet([{ ...f.credentials[0], accessToken: token, expiresAtMs: Date.now() + 3600000 }]);
+    assert.equal(f.internals.acquireHealthyShard(), null);
+    assert.equal(f.internals.shardStats(f.internals.shardsTable.get('shard_0')).availabilityReason, 'credential_expired');
+  } finally { await f.cleanup(); }
+});
+
+test('credential rejection survives concurrent quota and transport failures and restart; rotation recovers', async () => {
+  const f = fixture(1);
+  try {
+    f.internals.acquireHealthyShard();
+    f.internals.recordShardFailure('shard_0', true);
+    f.internals.recordQuotaFailure('shard_0');
+    f.internals.recordShardFailure('shard_0');
+    assert.equal(f.internals.acquireHealthyShard(), null);
+    f.internals.saveStateSnapshot();
+    const snapshot = fs.readFileSync(path.join(f.dir, 'snapshot.json'), 'utf8');
+    assert.ok(!snapshot.includes(f.credentials[0].accessToken));
+    f.internals.shardsTable.clear();
+    f.internals.recoverStateSnapshot();
+    f.internals.installFleet(f.credentials);
+    assert.equal(f.internals.shardsTable.get('shard_0').status, 'disabled');
+    f.internals.shardsTable.clear();
+    f.internals.installFleet([{ ...f.credentials[0], accessToken: 'replacement-secret' }]);
+    assert.notEqual(f.internals.shardsTable.get('shard_0').status, 'disabled');
+  } finally { await f.cleanup(); }
+});
+
+test('session revocation takes precedence over incidental quota wording', () => {
+  const result = classifyUpstreamError({ type: 'response.failed', response: { error: {
+    code: 'session_revoked', message: 'Sign in again; quota cannot be checked',
+  } } });
+  assert.equal(result.unauthorized, true);
+  assert.equal(result.quota, false);
+});

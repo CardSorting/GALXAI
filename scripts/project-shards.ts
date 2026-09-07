@@ -3,7 +3,7 @@ import { pathToFileURL } from 'node:url';
 
 export async function projectShardsToBroccoli(): Promise<number> {
   const relayUrl = process.env.VM_RELAY_URL || 'http://127.0.0.1:3001';
-  const apiKey = process.env.RELAY_API_KEYS?.split(',')[0]?.trim();
+  const apiKey = process.env.RELAY_ADMIN_API_KEYS?.split(',')[0]?.trim() || process.env.RELAY_API_KEYS?.split(',')[0]?.trim();
   const response = await fetch(new URL('/api/shards/sync', relayUrl), {
     method: 'POST', headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
     signal: AbortSignal.timeout(15_000),
