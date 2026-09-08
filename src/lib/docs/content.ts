@@ -152,7 +152,7 @@ if (typeof result.summary !== "string") throw new Error("Invalid summary");` }] 
     },
   },
 }]` }], steps: ['Read message.tool_calls and validate the function name and JSON arguments.', 'Run only functions your application permits.', 'Append the assistant tool-call message, then a tool message with the matching tool_call_id and string content.', 'Send the updated messages to get the final answer.'] },
-      { id: 'images', title: 'Generate an image', body: ['Codex Image Generation uses the legacy openai-gpt-image-2 ID. On OAuth relays, OpenAI selects the underlying image model; the alias does not guarantee Image 2 or Image 2.5, exact dimensions, or quality settings. Native API-key routes explicitly request gpt-image-2. Inspect routingMode, executionModel, and imageModelSelection in the response. Handle the returned response format instead of assuming it always contains a public URL.'], code: [{ label: 'cURL', source: `curl --fail-with-body ${GALX_API_BASE_URL}/images/generations \\
+      { id: 'images', title: 'Generate an image', body: ['Generate an image with Codex Image Generation using the openai-gpt-image-2 model ID. Describe the subject, composition, and style in your prompt. Handle the returned response format instead of assuming it always contains a public URL.'], code: [{ label: 'cURL', source: `curl --fail-with-body ${GALX_API_BASE_URL}/images/generations \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"model":"openai-gpt-image-2","prompt":"A blue ceramic cup on a table","n":1}'` }], links: [{ href: '/models', label: 'Image models' }] },

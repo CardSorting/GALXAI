@@ -95,7 +95,7 @@ export async function listModelsAction() {
     return {
       success: true,
       data: [
-        { id: 'openai-gpt-image-2', name: 'Codex Image Generation', description: 'Image generation with a provider-selected model on OAuth relays' },
+        { id: 'openai-gpt-image-2', name: 'Codex Image Generation', description: 'Generate images from text prompts' },
         { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', description: 'Flagship reasoning & text generation' }
       ]
     };

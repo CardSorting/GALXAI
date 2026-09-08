@@ -327,8 +327,8 @@ print(response.data[0].url)`,
     },
     faqs: [
       {
-        q: 'Which image model does Codex Image Generation use?',
-        a: 'On OAuth relays, OpenAI selects the underlying image model. The legacy openai-gpt-image-2 ID does not guarantee a specific image model version. Native API-key routes request gpt-image-2 explicitly.',
+        q: 'How do I use Codex Image Generation?',
+        a: 'Send a text prompt to /v1/images/generations using the openai-gpt-image-2 model ID. Describe the subject, composition, and style you want.',
       },
     ],
   },

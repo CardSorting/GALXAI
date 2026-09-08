@@ -406,7 +406,7 @@ export function GalxScenicHero() {
                 <li>
                   <Link href="/models/openai-gpt-image-2" className="hover:text-cyan-300 transition-colors block">
                     <span className="text-zinc-200 font-semibold block">Codex Image Generation</span>
-                    <span className="text-[10px] text-zinc-500 font-sans">Provider-selected model</span>
+                    <span className="text-[10px] text-zinc-500 font-sans">Text-to-image generation</span>
                   </Link>
                 </li>
                 <li className="pt-1">

@@ -82,7 +82,7 @@ const MODEL_METADATA: Record<string, ModelCuratedMetadata> = {
   },
   'openai-gpt-image-2': {
     roleBadge: 'Codex Image Generation',
-    speedTier: 'Provider-selected image model',
+    speedTier: 'Text-to-image generation',
     bestFor: [
       'Commercial advertising & visual assets',
       'Complex typography & textual layout',

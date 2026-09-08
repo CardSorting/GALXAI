@@ -71,8 +71,8 @@ export const PROVIDERS_DATA: ProviderPortalItem[] = [
       {
         id: 'openai-gpt-image-2',
         name: 'Codex Image Generation',
-        role: 'Provider-selected image model',
-        context: 'Dimensions depend on route',
+        role: 'Text-to-image generation',
+        context: 'Image generation',
         inputPrice: '$0.032/img',
         outputPrice: 'Image output',
         discount: '-20% Off',

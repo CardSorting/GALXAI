@@ -91,7 +91,7 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsVision: true,
     supportsReasoning: false,
     supportsStreaming: false,
-    description: 'Codex image generation with an OpenAI-selected image model on enabled OAuth relays. The legacy openai-gpt-image-2 ID is a compatibility alias, not a guarantee of Image 2 or Image 2.5. Native API-key routes request gpt-image-2 explicitly; responses identify the execution mode.'
+    description: 'Generate images from text prompts for illustrations, product concepts, and marketing assets.'
   },
 ];
 

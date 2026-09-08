@@ -103,7 +103,7 @@ export async function GET() {
       '/images/generations': {
         post: {
           summary: 'Create Image Generation',
-          description: 'Generate images using Codex Image Generation. OAuth routes use a provider-selected image model; the legacy model ID does not guarantee a specific image model version.',
+          description: 'Generate images from text prompts using Codex Image Generation.',
           operationId: 'createImage',
           security: [{ BearerAuth: [] }],
         },
