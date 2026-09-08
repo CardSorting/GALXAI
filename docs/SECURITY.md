@@ -1,48 +1,38 @@
-# Security boundaries and threat model
+# Security boundaries
 
-Reviewed 2026-09-07 against the repository. This document describes implemented boundaries and explicit limits; it is not a compliance certification or a guarantee against every attack. Vulnerability reporting remains in [the root security policy](../SECURITY.md).
+<!-- docs-scope: current-guide -->
+> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-## Trust boundaries
+This guide describes the current federation boundary, not a compliance certification. Vulnerability reporting remains in the [root security policy](../SECURITY.md).
 
-| Boundary | Authority | What does not grant authority |
-| --- | --- | --- |
-| Product end user to application | Application authentication and tenant authorization | User-supplied owner IDs or prompt claims |
-| Application/client to relay | Configured relay inference key | Provider OAuth token, task ID, `X-Tenant-Id` |
-| Operator to relay controls | Configured administrator key | Merely holding an inference key |
-| Relay to provider | Decrypted backend registry credential | Model output, client endpoint/permission suggestions |
-| Registry mutation and platform leasing | Backend services and database policies/RPCs | A cached projection or local scheduling counter |
-| Agent inference to tool execution | The executing application's deterministic controls | A confident model response or tool-call description |
+| Boundary | Authority |
+| --- | --- |
+| User to application | Application authentication and tenant authorization |
+| Application to controller | Configured inference credential and trusted tenant mapping |
+| Operator to controller | Separate administrator credential |
+| Controller to worker | Scoped internal inference/admin credentials and authenticated delegation |
+| Worker to provider | Its one assigned upstream credential |
+| Registry and account health | Backend database policies, current leases, credential revisions |
+| Agent to tools | Consuming runtime's explicit execution controls |
 
-A shared app-to-relay key is one relay principal. The application remains responsible for distinguishing its end users. Relay administrator access does not bypass per-key job ownership.
+Task IDs, prompts, model output, and caller-supplied tenant headers grant no authority. Signed job identity binds tenant and worker generation. Administrator access does not bypass job ownership.
 
-## Relay containment
+## Containment and custody
 
-The deployed container uses UID/GID 1000, a read-only root filesystem, dropped Linux capabilities, no privilege escalation, resource limits, bounded temporary storage, and a private checkpoint volume. No home, personal Codex credential, repository, or Docker socket mounts are provided. Host credential discovery is off by default.
+Each shard worker is a non-root isolated container with a read-only root, dropped capabilities, resource limits, bounded temporary storage, and a private checkpoint volume. Workers receive no database/vault keys, repository, host home, or Docker socket mounts. They hold their assigned provider credential in memory and configuration.
 
-Inference and output remain available to user applications. The relay has no local model-selected tool executor; tool-call content is not the host security boundary. Existing protocol handling does not establish complete tool-protocol compatibility. Application adapters and SDK runtimes contain separate paths and require separate execution-boundary review. Running Node directly on the host does not inherit container isolation.
+The host controller holds registry decryption and Docker authority. Its host-process boundary is different from worker isolation. Protect the supervisor, persistent signing secret, lock, and ignored configuration directory. Single-host ownership does not provide multi-host consensus. Container settings do not establish an egress firewall or isolate application-side tools.
 
-Docker settings do not impose an egress firewall, remove the need for TLS, sandbox every app-side tool, or eliminate the consequences of a runtime compromise. The relay still holds backend registry/vault credentials in its process environment and decrypted provider material in memory while operating. Stronger brokered credential scoping is follow-up work.
+## Request and observation controls
 
-## Access and request controls
+Controller operational data requires administrator access. The dashboard shell is public; its key remains in page memory. Browser clients use an application backend. Input sizes, read deadlines, concurrency, receipts, polling, and shutdown are bounded.
 
-Non-loopback listeners require keys. Dedicated administrator keys protect `/api/*` and `/metrics`; absent an explicit administrator list, only the first inference key has those privileges. Dashboard HTML and aggregate health are public, while operational snapshots require administrator access.
+Health is changed only under current authority. Stale generation/inventory/health observations cannot restore routing. Telemetry is observation-only. Capability denial removes that pair; it does not authorize deleting the account or cancelling otherwise valid streams.
 
-Exact browser origins, loopback Host validation in unauthenticated mode, non-cacheable API data, no-referrer, no-sniff, and frame denial reduce exposure. Dashboard keys stay in page memory. Origin policy is independent of authentication and is not a substitute for it.
+The explicit image alias is disclosed in responses and capability metadata. Model compatibility does not imply exact model selection, provider entitlement, or permission to replay ambiguous work.
 
-Requests have body limits, read deadlines, validation, admission checks, and rate buckets. Quota-management bodies use the smaller of 16 KiB and the general request bound. Retries are finite and resource-limited; cancellation is checked after asynchronous registry waits. These controls limit failure amplification, not all denial-of-service possibilities.
+## Retention
 
-## Credential custody and recovery
+Sanitized telemetry is separate from job/checkpoint storage, which may contain unfinished request content. Bounded receipts may contain response bytes. Provider retention, application assets, and consuming agent storage are separate policies. Do not claim universal zero retention, zero knowledge, HIPAA compliance, or SOC 2 certification from these mechanisms.
 
-PostgreSQL is the durable shard registry. Backend decryption binds encrypted credentials to their configured identifiers/provider through authenticated encryption. Vault roots and database service credentials must remain server-side and match the active records. Repository encryption mechanisms do not imply a hardware enclave or guaranteed JavaScript heap erasure.
-
-The relay refreshes a local registry projection and excludes unusable credentials. JWT expiry decoding is an exclusion hint, not signature verification. Upstream rejection disables the local credential and attempts a checkpoint. Replacement fingerprints support recovery, but this local state is not a cross-replica revocation bus or a database lease.
-
-The platform's database-backed lease procedures have their own authority rules in [ADR 0115](adr/0115-postgresql-authoritative-shard-registry-and-secret-free-projections.md). Verify the actual database grants/migrations before relying on them in an environment. This documentation update performs no database migration or privilege change.
-
-## Retention and evidence
-
-Sanitized telemetry excludes request/response content and authorization headers. Relay checkpoints omit provider tokens, but unfinished job records can include prompts/messages. Memory buffers, snapshots, application storage, logs, and external provider retention are separate concerns. Do not describe the full system as zero retention, zero knowledge, HIPAA-compliant, or SOC 2 certified based on an internal feature name or source module.
-
-The 2026-09-07 relay rollout verified authentication, registry access, expired-account exclusion, chat/SSE, and runtime isolation. It did not establish remote ingress, cross-replica security, complete tool compatibility, or provider entitlements. Keep keys, account identifiers, prompts, and raw runtime environment dumps out of documentation and incident reports.
-
-[Relay security](relay-security.md) · [Deployment](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md) · [Verification](INFERENCE_PIPELINE_VERIFICATION.md)
+Keep credentials, raw runtime environments, prompts, and private operational identifiers out of logs and shared incident reports. For implementation scope and dated deployment evidence, use the [contract](FEDERATION_STRATEGY.md), [runbook](RELAY_VNEXT_RUNBOOK.md), and [ADR catalog](adr/README.md).

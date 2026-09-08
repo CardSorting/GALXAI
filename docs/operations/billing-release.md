@@ -1,5 +1,8 @@
 # Billing recovery release
 
+<!-- docs-scope: operational-record -->
+> **Reading scope:** Scoped operational procedure or dated incident evidence. Its component authority remains separate from federation lifecycle, capability routing, and admission recovery. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## Production rollout completed — 2026-09-07 UTC
 
 Live at **https://galx.ai**. Vercel deployment `dpl_DX5NNRcALssk1AuuqNh4ET9mWB3f` (`galxai-2rahqyxx5-cardsortings-projects.vercel.app`) was built from application commit `172c69f` and promoted successfully.

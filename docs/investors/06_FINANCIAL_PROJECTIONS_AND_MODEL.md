@@ -1,4 +1,8 @@
 # 📊 GALXAI 5-Year Financial Projections & Operating Model
+
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## Forward Forecast from 2026 Private Testing to Full-Scale Commercialization
 
 A quantitative 5-year financial forecast detailing revenue growth, gross margin expansion, headcount ramp, operating expenses, and cash flow milestones.

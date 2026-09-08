@@ -1,5 +1,10 @@
 # ⚙️ Structured Outputs, Tool Calling & Agent Runtimes
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
+> Application/SDK scope: these interfaces do not replace the [federation contract](FEDERATION_STRATEGY.md). Model eligibility precedes load; no implicit model substitution occurs in the federation. The [Codex image alias](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility) is opt-in, verified, and provider-managed. Use the [recovery table](RELAY_API_REFERENCE.md#request-recovery) for accepted or uncertain work. Server credentials must never enter browser bundles.
+
 GALXAI natively supports strict JSON Schema enforcement, parallel tool calling, and zero-boilerplate autonomous agent execution across reasoning flagships (`gpt-5.6-sol`, `gpt-5.6-terra`, `x-ai/grok-4.6`).
 
 ---

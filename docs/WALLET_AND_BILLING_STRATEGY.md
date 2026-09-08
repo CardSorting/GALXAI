@@ -1,5 +1,8 @@
 # 💳 GALXAI Developer Compute Wallet & Micro-Billing Architecture
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 GALXAI implements a high-precision, low-friction prepaid and auto-reload compute wallet designed for autonomous agent fleets, enterprise development teams, and independent developers.
 
 ---

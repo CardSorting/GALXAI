@@ -1,5 +1,8 @@
 # 🎓 Maintainer Onboarding Knowledge Check & Self-Assessment
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 > **Target Audience**: New Maintainers completing their Week 1 Onboarding Ramp.  
 > **Goal**: Self-evaluate comprehension of GALXAI's core architectural paradigms, invariants, and operational runbooks.
 

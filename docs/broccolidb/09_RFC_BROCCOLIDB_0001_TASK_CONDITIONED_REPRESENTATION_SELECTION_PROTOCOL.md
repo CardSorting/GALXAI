@@ -1,4 +1,8 @@
 # RFC-BROCCOLIDB-0001: Task-Conditioned Representation Selection Protocol (TCRSP/1.0)
+
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## Formal Protocol Specification, Invariant Wire Formats, and Fail-Closed Conformance
 
 **Network Working Group**  

@@ -1,5 +1,8 @@
 # 🥦 A Formal Theory of Task-Conditioned Representation Selection, Invariant Preservation, and Bounded Action Degradation
 
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 **Subsystem**: `src/core/broccolidb`, `eval/`, `src/lib/resilience`  
 **Classification**: Mathematical Foundations, Information Theory, Category Theory, Abstract Interpretation & Formal Verification  
 **Status**: Authoritative Theoretical Specification & Peer-Review Reference Treatise  

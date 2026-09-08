@@ -1,5 +1,10 @@
 # ⚡ GALXAI Universal Developer SDK: Specification & Architecture Reference
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
+> Application/SDK scope: these interfaces do not replace the [federation contract](FEDERATION_STRATEGY.md). Model eligibility precedes load; no implicit model substitution occurs in the federation. The [Codex image alias](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility) is opt-in, verified, and provider-managed. Use the [recovery table](RELAY_API_REFERENCE.md#request-recovery) for accepted or uncertain work. Server credentials must never enter browser bundles.
+
 **Package**: `@galxai/sdk` (TypeScript / JavaScript) & `galxai` (Python)  
 **Version**: `1.0.0`  
 **Compliance Standards**: OpenAI API 1.x, Vercel AI SDK 3.x, Anthropic SDK, Google Cloud Tasks v2  
@@ -328,7 +333,9 @@ galx.use({
 
 ## 7. Multi-Model Resilience Topologies (`fallbackCascade` & `race`)
 
-### Fallback Cascades (Zero-Downtime Provider Outage Failover)
+A cascade or race is explicit caller authorization for multiple model attempts and potentially additional billable work. It is not federation failover or safe recovery from uncertain admission. Preserve original job identity before starting replacement work.
+
+### Explicit fallback cascades
 ```typescript
 const response = await galx.chat.fallbackCascade(
   ['gpt-5.6-sol', 'x-ai/grok-4.5', 'gpt-5.6-luna'],

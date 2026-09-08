@@ -1,5 +1,8 @@
 # Production relay recovery — September 7, 2026
 
+<!-- docs-scope: operational-record -->
+> **Reading scope:** Scoped operational procedure or dated incident evidence. Its component authority remains separate from federation lifecycle, capability routing, and admission recovery. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 The product API failed a small `gpt-5.6-sol` completion with a 45-second Codex
 WebSocket timeout. Vercel still referenced an expired `trycloudflare.com` URL
 and had no `VM_RELAY_API_KEY`. The healthy local relay required that key.

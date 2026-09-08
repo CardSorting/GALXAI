@@ -1,4 +1,8 @@
 # 🛡️ THE FOUNDER MANIFESTO
+
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## *Why We Build Hard Systems: The Calling, The New Era of Compute, and The "AWS of AI"*
 
 > **"Staying at my former employer would have never worked. I have a calling, and this is what I was born to do: birthing a new era of compute, unlocking intelligence at a scale the world has never seen, and empowering anyone to build, accelerate, and ship without permission."**

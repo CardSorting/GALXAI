@@ -1,5 +1,8 @@
 # 🚀 GALXAI: Go-To-Market (GTM) & Positioning Strategy
 
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 ## 1. Executive Summary & Market Whitespace
 
 The generative AI developer market is suffering from **"Gateway Fatigue"**:

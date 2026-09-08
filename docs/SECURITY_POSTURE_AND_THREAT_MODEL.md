@@ -1,5 +1,8 @@
 # GALXAI: Security Posture & Threat Model
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 ## 1. Threat Modeling Overview
 
 GALXAI serves as a high-performance compute pooling gateway and execution substrate for distributed AI workloads. This document details the threat vectors analyzed, mitigation architectures implemented, and the forensic posture grading rubric.

@@ -1,4 +1,8 @@
 # 🏛️ GALXAI Institutional & Strategic Diligence Room
+
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## Flattening and Easing the Path to the First Dollar Made with AI
 
 Welcome to the **GALXAI Product, Strategy & Diligence Room**. This repository contains all plain-language executive summaries, interactive pitch decks, market sizing models, competitive teardowns, and technical architecture proofs.

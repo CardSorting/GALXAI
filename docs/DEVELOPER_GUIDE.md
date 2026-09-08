@@ -1,5 +1,10 @@
 # 🛠️ GALXAI Developer & Contributing Guide
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
+> Application/SDK scope: these interfaces do not replace the [federation contract](FEDERATION_STRATEGY.md). Model eligibility precedes load; no implicit model substitution occurs in the federation. The [Codex image alias](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility) is opt-in, verified, and provider-managed. Use the [recovery table](RELAY_API_REFERENCE.md#request-recovery) for accepted or uncertain work. Server credentials must never enter browser bundles.
+
 This guide covers the internal codebase structure, architectural layers, how to add new model adapters, and testing standards.
 
 ---
@@ -330,7 +335,7 @@ galx.use(createCostTrackerPlugin({
   onBudgetExceeded: (usd) => console.warn(`Budget ceiling of $${usd} exceeded!`)
 }));
 
-// 9. Multi-Model Fallback Cascade (Auto-Failover on 429/5xx)
+// 9. Multi-Model Fallback Cascade (Explicit application policy; review execution state before another attempt)
 const fallbackRes = await galx.chat.fallbackCascade(
   ['gpt-5.6-sol', 'x-ai/grok-4.5', 'gpt-5.6-luna'],
   { messages: [{ role: 'user', content: 'Mission critical prompt' }] }
@@ -418,11 +423,11 @@ console.log(`SOC2 Posture Score: ${posture.overallPostureScore}% (Signed: ${evid
 ## 🎨 Frontend Visual Synthesis & Session Media Management
 
 Visual synthesis in GALXAI is built for high-velocity frontend integration. Unlike text completions that stream tiny text chunks, image synthesis yields multi-megabyte lossless assets (1 MB to 4 MB). To eliminate blank screens, layout thrashing, and high bandwidth costs, GALXAI implements:
-1. **Always-On VM Relay Execution**: Routes prompts across native ChatGPT Codex WebSockets without failing on REST scope restrictions.
+1. **Verified capability routing**: Routes only through eligible workers. The explicit OAuth Codex image-tool alias uses provider-managed image selection and can be unavailable; inspect execution metadata.
 2. **Zero-Egress Cloudflare R2 Session Partitioning**: Automatically mirrors base64 payloads to `https://assets.galx.ai/users/{userId}/sessions/{sessionId}/images/{imageId}.png`.
 3. **Dynamic Low-Quality Image Placeholders (LQIP)**: Returns inline, vectorized SVG blur data URIs (`lqip`) directly in the JSON response for instant client rendering.
-4. **Session Visual Manifests**: Maintains atomic `manifest.json` aggregations per session for sub-millisecond gallery loading.
-5. **Atomic Cascade Purge**: Enables one-click cleanup of all session visual assets across R2.
+4. **Session Visual Manifests**: Maintains a bounded session manifest; concurrent writes are not transactional and latency is not guaranteed.
+5. **Session cleanup**: Deletes selected application assets; multi-object deletion is not an atomic transaction.
 
 ---
 
@@ -567,7 +572,7 @@ export function GalxImageGenerator({
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/80 backdrop-blur-sm z-20">
               <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-3" />
               <p className="text-xs text-zinc-400 font-mono tracking-wide animate-pulse">
-                Synthesizing via Always-On Relay & R2 CDN...
+                Generating your image...
               </p>
             </div>
           )}

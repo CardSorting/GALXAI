@@ -1,3 +1,8 @@
+# landingpage
+
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 The Expert
 Neocloud
 Cloud-based solutions to accelerate your Private AI training and inference workloads.

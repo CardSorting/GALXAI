@@ -1,5 +1,8 @@
 # 🎯 GALXAI Commercial Thesis & Customer Discovery Playbook
 
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 > **Strategic Context**: This playbook captures the commercial breakthrough documented in `context.md`—transitioning from a commodity "cheap token seller" to an **Enterprise AI Consumption & Acceleration Layer** that compresses *time-to-first-dollar*, eliminates engineering infrastructure mistakes, and provides autonomous cost governance.
 
 ---

@@ -1,5 +1,8 @@
 # 🥦 BroccoliDB Core Documentation & Research Suite
 
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 Welcome to the backend engineering, theoretical foundations, and operational documentation suite for **BroccoliDB**, the deterministic representation-selection and context-compaction layer inside GALXAI.
 
 ---

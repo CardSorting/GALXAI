@@ -1,4 +1,8 @@
 # 🛡️ GALXAI Competitive Landscape & Strategic Defensibility
+
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## Unfair Advantages, Deep Moats & Competitor Teardown
 
 **Audience**: Institutional Due Diligence Teams, Partner CTOs & Venture Partners  

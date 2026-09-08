@@ -1,6 +1,11 @@
 # ADR 0114: Uncertain Execution Authority Kernel and Transactional Journal
 
-> Current scope (2026-09-07): The authority kernel described here is a separate execution subsystem. The standalone relay does not dispatch tools through it, grant model output local execution authority, or use its journal as relay job state. Its current boundary is [ADR 0122](0122-isolated-authenticated-relay-and-bounded-recovery.md); ADR 0113 scheduling remains simulation scope.
+<!-- docs-scope: decision-record -->
+> **Reading scope:** Decision history with topic-specific precedence. Original status and measurements are dated; consult the current contract before operating the relay. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
+> Decision scope: Historical decision record. Its original status and measurements describe its own scope. For current relay ownership, capability routing, retry authority, and deployment, ADRs [0126](0126-capability-aware-shard-relay-federation.md) and [0127](0127-codex-image-tool-alias-production-cutover.md) take precedence. Shared-relay selection, implicit model fallback, and simulation performance do not define the current federation. Unrelated subsystem decisions are not superseded by this note.
+
+> Earlier scope note (2026-09-07, before ADRs 0126–0127): The authority kernel described here is a separate execution subsystem. The standalone relay does not dispatch tools through it, grant model output local execution authority, or use its journal as relay job state. Its current boundary is [ADR 0122](0122-isolated-authenticated-relay-and-bounded-recovery.md); ADR 0113 scheduling remains simulation scope.
 
 ## Metadata
 

@@ -1,5 +1,8 @@
 # Technical diligence: implementation and evidence
 
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 Reviewed 2026-09-07. This document identifies inspectable implementation and its limits. It is not a certification, patent opinion, uptime guarantee, or universal performance benchmark.
 
 ## Architecture

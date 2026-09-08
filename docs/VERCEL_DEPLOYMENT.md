@@ -1,6 +1,9 @@
 # Application deployment and relay connectivity
 
-The Next.js application, Cloudflare Worker, and Node relay are separate deployments. This guide covers the repository's application setup boundary; it does not assert that a remote Vercel deployment was verified during the local relay rollout.
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
+The Next.js application, Cloudflare Worker, and Node relay are separate deployments. This guide covers application setup. ADR 0127 records the September 7 gateway promotion and actual DreamBees image verification; recheck the target release before making a current deployment claim.
 
 ## Application configuration
 
@@ -12,14 +15,14 @@ Use the application's existing preview/deployment workflow. Inspect the relevant
 
 Set `VM_RELAY_URL` to an origin reachable from the deployed application and `VM_RELAY_API_KEY` to an inference key accepted by that relay. These are server-side settings. Do not use a provider credential or relay administrator key as the application's inference key. The adapter falls back to the first `RELAY_API_KEYS` entry when `VM_RELAY_API_KEY` is absent, but an explicit dedicated key avoids configuration ambiguity.
 
-The verified relay runs from this repository through Docker Compose on `127.0.0.1:3001`. A remote application cannot reach it by setting its own relay URL to `localhost`. Public ingress requires a separately configured and tested tunnel or proxy, suitable authentication, TLS, and streaming behavior. An ephemeral development URL is not a stable production dependency.
+The supervised federation controller listens on `127.0.0.1:3001` and manages one Docker worker per active shard. The shared Compose layout is legacy. A remote application cannot reach it by setting its own relay URL to `localhost`. Public ingress requires a separately configured and tested tunnel or proxy, suitable authentication, TLS, and streaming behavior. An ephemeral development URL is not a stable production dependency.
 
-The adapter submits chat work, receives HTTP 202, and attaches to the job stream. Moving upstream work to the relay does not remove the application's own execution or streaming limits. Inspect the actual deployment's limits and validate a representative long-running request. The adapter also retains direct-provider/SDK/CLI fallback paths; a successful request alone does not prove it used the relay.
+The adapter submits chat work, receives HTTP 202, and attaches to the job stream. Moving upstream work to the relay does not remove the application's own execution or streaming limits. Inspect the actual deployment's limits and validate a representative long-running request. Direct-provider/SDK/CLI paths are separate configurations. A configured relay error does not authorize automatic fallback or replay; inspect execution metadata and correlated traces.
 
 ## Verification and rollback
 
 Check the application's authentication and product API contract, then verify a request with correlated relay telemetry. Confirm that an invalid relay key fails, cancellation terminates appropriately, and terminal failures are surfaced without endless client retries. Test from the deployed application's network, not only the operator's laptop.
 
-The 2026-09-07 relay rollout verified the local container and a short chat/SSE request. Remote application connectivity, public tunnel ingress, and live image storage were not part of that verification. Keep application rollback separate from relay image rollback and database migration strategy.
+[ADR 0127](adr/0127-codex-image-tool-alias-production-cutover.md) records the later September 7 production gateway/tunnel cutover and successful actual-client DreamBees image verification. Application asset persistence remains a separate verification boundary. Keep application rollback separate from relay image rollback and database migration strategy.
 
-See [deployment overview](DEPLOYMENT.md), [relay setup and rollback](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md), [API base URLs](API_BASE_URL.md), and [Cloudflare strategy](CLOUDFLARE_STRATEGY.md).
+See [deployment overview](DEPLOYMENT.md), [relay setup and rollback](RELAY_VNEXT_RUNBOOK.md), [API base URLs](API_BASE_URL.md), and [Cloudflare strategy](CLOUDFLARE_STRATEGY.md).

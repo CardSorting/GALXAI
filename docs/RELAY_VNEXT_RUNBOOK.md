@@ -1,5 +1,8 @@
 # Capability-aware relay vNext
 
+<!-- docs-scope: current-guide -->
+> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 vNext consists of one host controller/front door and one isolated Docker worker per active OpenAI shard. The controller is infrastructure; it is not a relay owning multiple shards. Production now uses this topology; see the rollout evidence in ADR 0127. The stopped legacy container is retained for rollback.
 
 ## Validate the implementation
@@ -51,7 +54,7 @@ Empty capabilities do not delete a worker, including after 120 seconds. An inval
 
 Model inventory is not proof of an image tool. Image operation records use an internal `image:<model>` key in the registry; API callers send the model ID without that prefix. A model can therefore be healthy for chat and unavailable for images.
 
-On the assigned worker, an administrator can POST `/api/capabilities/probe-image` with an exact `model` and a small `prompt`. This performs a real upstream generation and can incur usage. It publishes availability only after receiving an image payload and passing the observation fence. It does not guess another model or grant aliases. Do not schedule paid probes blindly; establish an upstream-advertised tool inventory or choose a measured verification cadence. No production probe is run by the synthetic test suite.
+On the assigned worker, an administrator can POST `/api/capabilities/probe-image` with an exact `model` and a small `prompt`. This performs a real upstream generation and can incur usage. It publishes availability only after receiving an image payload and passing the observation fence. It does not guess another model or grant arbitrary aliases. The explicitly enabled Codex alias has the bounded paid verification cadence described below; other probes require an intentional verification action. No production probe is run by the synthetic test suite.
 
 ## Production cutover checklist
 
@@ -60,7 +63,7 @@ On the assigned worker, an administrator can POST `/api/capabilities/probe-image
 3. Stop new admissions to the legacy shared relay and drain its active streams. Stop the shared container before assigning its shards to vNext.
 4. Start the controller under the host's process supervisor with the persistent signing secret and registry access. Confirm one worker per active shard and correct model pools. Never run two controllers for the same namespace; multi-host deployment needs a distributed ownership lease first.
 5. Route the existing authenticated ingress to the controller's loopback front door through the host's established tunnel setup. The controller is not directly Internet-exposed.
-6. Verify the actual downstream chat and image clients end-to-end. Only enable paid Hive after its requested image model produces a valid image through that public path.
+6. Verify the actual downstream chat and image clients end-to-end. Image verification is a prerequisite for paid Hive activation, which remains a separate authorized billing/entitlement action. Verify and disclose the chosen native or compatibility route through the actual public client.
 7. For rollback, pause ingress, drain and stop vNext workers, restore the saved shared relay image/configuration and original ingress, then verify downstream requests again. Do not run both topologies with the same credentials during rollback.
 
 The existing `docker-compose.relay.yml` describes the legacy shared deployment and is not a vNext fleet launcher. Rebuilding that deployment with the new worker without this migration will fail its one-shard guard. The synthetic tests do not change the production tunnel or perform a cutover. The separately performed production cutover is recorded in ADR 0127.

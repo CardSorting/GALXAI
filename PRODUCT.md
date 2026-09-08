@@ -18,9 +18,9 @@ GALXAI is an inference platform and governance control plane for model discovery
 
 ## Core Capabilities
 
-The repository contains the Next.js application, SDK integrations, model routing and credential registry, billing and governance modules, Cloudflare Worker implementation, and a standalone Node relay. These have separate deployment and authorization boundaries; the presence of a module is not evidence that it is enabled in production.
+The repository contains the Next.js application, SDK integrations, model routing and credential registry, billing and governance modules, Cloudflare Worker implementation, and a capability-aware relay federation. These have separate deployment and authorization boundaries; the presence of a module is not evidence that it is enabled in production.
 
-The relay supplies inference transport with credential eligibility checks, bounded retries, cancellation, request telemetry, and an operator dashboard. It runs in an isolated Docker container in the verified local deployment. It does not execute user tools on the operator's device. Tool use remains a downstream agent capability; compatibility must be evaluated against the implemented request and response contract.
+The relay supplies inference transport with credential eligibility checks, bounded retries, cancellation, request telemetry, and an operator dashboard. Each active shard owns an isolated Docker worker, managed by a supervised host controller. Fresh model capability precedes load selection. It does not execute user tools on the operator's device. Tool use remains a downstream agent capability; compatibility must be evaluated against the implemented request and response contract.
 
 ## Constraints & Invariants
 
@@ -35,4 +35,4 @@ The relay supplies inference transport with credential eligibility checks, bound
 
 ## Current strategy and evidence
 
-[Product Surface Strategy](docs/PRODUCT_SURFACE_STRATEGY.md) and [ADR 0119](docs/adr/0119-inference-first-product-surface-and-client-retirement.md) define the product boundary. [ADR 0122](docs/adr/0122-isolated-authenticated-relay-and-bounded-recovery.md) defines relay isolation and bounded recovery. [Architecture](docs/ARCHITECTURE.md) describes the separate runtime paths; the [relay deployment runbook](docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md) records the dated deployment evidence and remaining limitations.
+[Product Surface Strategy](docs/PRODUCT_SURFACE_STRATEGY.md) and [ADR 0119](docs/adr/0119-inference-first-product-surface-and-client-retirement.md) define the product boundary. The [federation contract](docs/FEDERATION_STRATEGY.md) defines current lifecycle, routing, explicit image compatibility, and bounded recovery. [Architecture](docs/ARCHITECTURE.md) describes the separate runtime paths; the [relay deployment runbook](docs/RELAY_VNEXT_RUNBOOK.md) records the dated deployment evidence and remaining limitations.

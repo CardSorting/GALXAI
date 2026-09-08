@@ -1,5 +1,8 @@
 # GALXAI Landing Page Copy — High-Signal & Zero Technical Jargon
 
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 ## Core Positioning Statement
 > **Ship AI in 30 seconds. Keep the money you make.**
 > Cloud-based solutions to accelerate your Private AI training and inference workflows for Frontier GPT Models. 100% Zero Data Retention, zero egress fees, wholesale pricing, and zero DevOps plumbing.

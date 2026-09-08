@@ -1,5 +1,8 @@
 # 🤝 Enterprise Proof-of-Concept & Wholesale Volume Discount Schedule
 
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## 1. Enterprise Volume Discount Tiers
 
 For high-volume engineering teams spending **>$5,000/month**, GALXAI offers tiered sovereign volume pricing, dedicated Shard Vaults, and custom edge SLAs:

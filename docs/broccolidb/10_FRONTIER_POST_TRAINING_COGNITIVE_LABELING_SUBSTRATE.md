@@ -1,5 +1,8 @@
 # 🥦 BroccoliDB Document 10: Frontier Post-Training Cognitive Labeling & 4-Stage Substrate
 
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## 1. Executive Summary
 
 This specification formalizes the **Zero-Dependency Post-Training Cognitive Labeling Substrate** (`BroccoliDataLabelingClassifier`) operating entirely within volatile BroccoliDB RAM tables. It captures prompt-completion interactions, extracts over 75 multi-axis reasoning and hardware vectors, enforces a strict 4-stage data engineering pipeline, and autonomously streams compressed, Merkle-cataloged dataset shards to Cloudflare R2 with $0 egress fees.

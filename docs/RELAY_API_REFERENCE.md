@@ -1,62 +1,60 @@
-# Standalone relay API
+# Federation relay API
 
-Reviewed 2026-09-07 against `src/relay/relay-server.ts`. This is the local transport API, not the product API documented in [API_REFERENCE.md](API_REFERENCE.md). The app adapter translates the relay's asynchronous chat contract for its callers.
+<!-- docs-scope: current-guide -->
+> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-## Authentication and ownership
+This reference describes the controller front door at `https://relay.galx.ai`. Product clients use `https://galx.ai/v1` and application credentials. Worker administration is a separate private interface. See the [federation contract](FEDERATION_STRATEGY.md).
 
-Send `Authorization: Bearer <relay-key>` or `X-Galx-Api-Key`. Do not send provider credentials. Inference keys submit work and access jobs owned by the same authenticated key. Administrator keys additionally access `/api/*` and `/metrics`; they do not bypass job ownership. Invalid/missing keys receive 401 and valid inference-only keys receive 403 on administrator routes. Local no-key mode is limited as described in [relay security](relay-security.md).
+## Controller routes
 
-Browser origins must pass the origin policy independently of key authentication. Health and dashboard HTML are public; operational data is not. Opaque `X-Galx-Task-Id` values correlate telemetry, not authorization.
-
-## Routes
-
-| Method and path | Access | Contract |
+| Method and path | Access | Meaning |
 | --- | --- | --- |
-| `GET /health`, `/health/live`, `/health/ready` | Public | Process/admission status, not provider authentication |
-| `GET /`, `/dashboard`, `/telemetry` | Public shell | Operator UI; enter administrator key for data |
-| `GET /metrics` | Administrator | Prometheus exposition |
-| `POST /v1/chat/completions` or `/chat/completions` | Inference | HTTP 202 asynchronous job acknowledgement |
-| `GET /v1/jobs/:id` | Job owner | Status, output chunk count, trace, terminal/recovery fields |
-| `GET /v1/jobs/:id/stream` | Job owner | SSE output/replay within memory retention |
-| `POST /v1/jobs/:id/cancel` | Job owner | Idempotent cancellation, no financial transaction |
-| `POST /v1/images/generations` or `/images/generations` | Inference | Synchronous JSON with base64 image data |
-| `GET /api/dashboard/stats`, `/api/telemetry`, `/api/shards`, `/api/quota/status` | Administrator | Operational snapshots |
-| `POST /api/shards/sync` | Administrator | Refresh fleet projection; does not enroll a new token |
-| `POST /api/shards/enroll` | Administrator | 409 with registry enrollment instructions |
-| `POST /api/quota/profile` | Administrator | Validated mode/custom local cap/window |
-| `POST /api/quota/reset` | Administrator | Clears local request history only; send a JSON object |
+| `GET /health` | Public | Process liveness only |
+| `GET /federation`, `/federation.js` | Public shell | Capability dashboard; data requires administrator authentication |
+| `GET /health/ready` | Administrator | Whether some model capacity is routable; not requested-model readiness |
+| `GET /api/capabilities` | Administrator | Shards, evidence freshness, model pools, ownership, and capacity |
+| `GET /v1/models` | Inference | Eligible chat model IDs; image capabilities are inspected separately |
+| `POST /v1/chat/completions` | Inference | Explicit-model chat admission; retain returned job URLs |
+| `POST /v1/images/generations` | Inference | Explicit-model image generation |
+| `GET /v1/jobs/:id` | Owning principal | Existing signed job status |
+| `GET /v1/jobs/:id/stream` | Owning principal | Existing signed job stream |
+| `POST /v1/jobs/:id/cancel` | Owning principal | Cancel existing job |
 
-## Chat lifecycle
+Use configured bearer inference/admin keys. Authentication, tenant delegation, and job ownership are enforced separately; task IDs and caller-supplied tenant headers do not grant authority. The controller is a server-to-server front door; browsers use an application backend. Invalid controller administrator authentication returns 401; worker privilege errors have their own contract.
 
-Submit a JSON object with `model` and nonempty `messages`; supported roles are `system`, `developer`, `user`, and `assistant`. The relay validates model identifiers, reasoning effort, and token limits. Message arrays are normalized for the upstream wire. The code accepts some fields it does not forward; this is not full OpenAI tool, multimodal, or parameter compatibility. Tool-call content does not grant execution authority: there is no local tool executor.
+## Request identity and bounds
 
-A successful initial response is 202 with `id`, `streamUrl`, `statusUrl`, `traceId`, and polling guidance. It also provides `Location`, `Operation-Location`, and `Retry-After`. Follow the returned stream or status URL with the same inference credential. `estimatedWaitSec` and `queuePosition` are null, not predicted completion times.
+Every new inference request names the exact model. The controller bounds JSON intake to 2 MiB and ten seconds. Provide `Idempotency-Key` per logical operation and preserve it with the same payload when recovering an acknowledgement. `X-Galx-Task-Id` is correlation only. The controller assigns a fresh request ID.
 
-Status includes `terminal`, `pollAfterMs`, `outputChunks`, `error`, and `recovery` (`state`, retry counters, next retry time, and deadline). Terminal jobs stop automatic recovery and omit retry polling guidance. The `recovery.retriesUsed` fallback after session removal derives from recorded failovers; it is not a durable complete attempt ledger.
+Receipts are tenant- and route-scoped, process-local, and retained for ten minutes from admission: at most 1,000 live keys, 32 MiB aggregate capture/response storage, and 8 MiB per response. Live keys are not evicted to admit new work. A large image can stream successfully without being retained for replay. Completed receipts can be retrieved after model capability loss.
 
-SSE deltas are output chunks, not tokenizer counts. Completion uses `[DONE]`; failures use an error event and cancellation uses a cancelled event. A transport ending without successful completion is not a successful answer. `Last-Event-ID` replays retained chunks only. Invalid cursors return 400; expired replay windows return 409; unknown or unauthorized jobs return 404. Restart does not restore replay buffers.
+Preserve the response `X-Galx-Idempotency-Scope` and send it on retries. A changed scope rejects the request; absent this precondition, restart or receipt expiry can permit new execution with the same key. This is not durable exactly-once execution.
 
-Chat deduplication is based on the relay's principal-scoped request hash and configured TTL. Do not describe it as provider-side exactly-once execution or assume every product API idempotency parameter is supported.
+## Request recovery
 
-Cancellation returns `cancellationApplied`, `refunded: null`, and `refundStatus: not_managed_by_relay`. A repeated cancellation does not apply a second cancellation. Cancellation does not prove the provider stopped computation before receiving the close.
+| Response | Execution meaning | Next action |
+| --- | --- | --- |
+| `202` | Accepted | Save `id`, `statusUrl`, `streamUrl`; `Operation-Location` is status and `Location` is stream |
+| `409 request_in_progress` | Admission/result pending | Retry the same key and payload after `Retry-After` |
+| `409 idempotency_conflict` | Key already represents different parameters | Reconcile original operation; do not treat as a retry |
+| `409 result_not_retained` | Finished, response unavailable for replay | Do not repeat synthesis to retrieve bytes |
+| `409 idempotency_scope_changed` | Prior execution uncertain across scope change | Inspect original job/trace before new work |
+| `502 relay_admission_unknown` | Acknowledgement lost; execution uncertain | No blind replay; conservative capacity hold is bounded |
+| `502 job_transport_unavailable` | Job already accepted | Retry its existing URL using retry guidance |
+| `410 relay_generation_gone` | Original worker generation unavailable | Reconcile original execution; never attach to replacement worker |
+| `503 model_temporarily_unavailable` | No eligible shard for requested capability | Honor retry headers; inspect that model pool |
+| `503 model_capacity_exhausted` | Eligible pool saturated | Honor retry headers; unrelated capacity is irrelevant |
 
-## Images
+Read `X-Should-Retry`, `Retry-After`, and execution state together. The adapters preserve status, safe upstream code, retry delay, execution state, request ID, and scope in `RelayDispatchError`; configured relay errors do not trigger automatic direct-provider fallback. A `5xx` alone does not establish safe replay.
 
-The relay selects an eligible account. OAuth-backed image synthesis uses the provider's `image_generation` tool; platform API keys use the configured implementation's image REST path. Successful output is base64 JSON. Image requests use a wall deadline, cancellation, bounded failover, and principal-scoped idempotency. Concurrent reuse of an image key returns 409; successful retained results can be reused; a conflicting completed request returns 409. Failures are not cached.
+Signed job URLs bind tenant and worker generation. Capability loss does not terminate accepted streams. Reconnection uses bounded retained events; missing events, EOF, or provider failure are not successful completion. Cancellation does not itself establish billing/refund settlement.
 
-The application router, outside this relay, may upload images to R2 and return URLs or session metadata. The relay does not provide image-library listing/deletion endpoints. See [ADR 0121](adr/0121-user-and-session-r2-partitioning-manifest-lifecycle-and-relay-image-synthesis.md).
+## Image compatibility
 
-## Operational failures
+Public `openai-gpt-image-2` maps to relay `gpt-image-2`. With the explicit OAuth alias enabled and verified, execution uses `gpt-5.6-terra` plus `image_generation`; the provider chooses the image model. Exact GPT-Image-2, dimensions, and quality are not guaranteed on this route. Native API-key requests remain exact. No other image ID is remapped.
 
-| Signal | Meaning and response |
-| --- | --- |
-| `origin_not_allowed`, `untrusted_host` | Browser/Host boundary rejected the request; fix trusted configuration |
-| 401 / 403 `admin_access_required` | Supply a valid relay key; administrator routes require administrator privilege |
-| `payload_too_large`, `request_timeout` | Reduce body size or complete intake within the deadline |
-| `relay_overloaded`, `relay_memory_pressure`, `server_draining` | No new work admitted; honor retry guidance |
-| `shard_registry_unavailable` | Restore registry connectivity; local credential fallback is disabled in registry mode |
-| `all_shards_unavailable` | No eligible account; inspect credentials, cooldowns, and slots |
-| `relay_retry_budget_exhausted`, `retries_exhausted_*` | Automatic request recovery has stopped |
-| `job_wall_time_exceeded`, `relay_restarted_start_new_request` | Terminal deadline/restart failure; inspect partial output before resubmitting |
+Inspect the `execution` metadata and `X-Galx-Execution-Model` / `X-Galx-Routing-Mode` headers. See [verification and refresh rules](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility). A valid image response does not establish an application asset upload.
 
-Provider limits may be unknown. No local cap does not mean unlimited provider quota. `Retry-After` is retry guidance, not a reservation or guarantee that another attempt will succeed.
+## Private worker interfaces
+
+Workers expose additional local health, dashboard, telemetry, metrics, and capability-probe routes. These are not all forwarded by the controller. In particular, worker `/metrics`, `/api/telemetry`, and `POST /api/capabilities/probe-image` are private administration surfaces, not public federation routes. Image probes perform real inference and can incur usage. Use the [runbook](RELAY_VNEXT_RUNBOOK.md) for worker inspection and deployment configuration.

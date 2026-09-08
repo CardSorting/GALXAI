@@ -1,5 +1,8 @@
 # 🛡️ GALXAI: Paranoid Supabase PostgreSQL Architecture & AI Agent Governance Specification
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 This specification formalizes the authoritative database architecture, threat model, paranoid containment invariants, and the **AI Agent Database Operating Protocol (AOP-DB)** for GALXAI.
 
 It is specifically engineered for an operational reality where a **Senior System Architect (who does not write SQL)** relies on **AI Autonomous Assistants** as the sole database operators to maintain, evolve, optimize, and secure the Supabase PostgreSQL substrate long term without human SQL review.
@@ -195,7 +198,7 @@ The agent MUST output the impact statement in the following format before writin
 
 ## 🔗 6. Related Architecture Decision Records (ADRs)
 
-- **[ADR 0017: Atomic Transactional Settlement & Double-Entry Ledger](adr/0017-atomic-transactional-settlement-and-double-entry-ledger.md)**
+- **[Wallet lifecycle procedure](operations/wallet-lifecycle.md)**
 - **[ADR 0035: Paranoid Supabase PostgreSQL Architecture](adr/0035-paranoid-supabase-postgresql-and-ai-agent-governance.md)**
 - **[ADR 0037: Zero-Egress Cloudflare Edge Gateway, R2 CDN & Custom Domain Substrate](adr/0037-zero-egress-cloudflare-edge-gateway-and-r2-cdn-substrate.md)**
 - **[ADR 0038: Distributed Edge KV Rate Governance & Stale-While-Revalidate Model Catalog Caching](adr/0038-distributed-edge-kv-rate-governance-and-swr-catalog-caching.md)**
@@ -213,4 +216,3 @@ The agent MUST output the impact statement in the following format before writin
 ## 🎯 7. Conclusion & Guarantee
 
 By decoupling high-level architectural intent from low-level SQL mechanics through **strict mechanical guardrails**, the Senior Architect can fearlessly steer the platform while AI agents safely manage the database with zero risk of catastrophic downtime, privilege escalation, or data loss.
-

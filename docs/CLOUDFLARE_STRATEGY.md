@@ -1,5 +1,8 @@
 # Cloudflare implementation and deployment boundaries
 
+<!-- docs-scope: current-guide -->
+> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 Reviewed against repository configuration on 2026-09-07. Cloudflare components and the local relay have independent lifecycles. Configuration checked into source is not proof of an active remote deployment.
 
 ## Worker
@@ -8,13 +11,11 @@ Reviewed against repository configuration on 2026-09-07. Cloudflare components a
 
 The application API at `https://galx.ai/v1` is a separate contract. The Worker is not an interchangeable DNS alias for the application or the Node relay. Its provider REST paths use Worker configuration; do not assume it shares the relay's PostgreSQL projection, job protocol, or process-local retry state.
 
-## Relay and optional ingress
+## Federation ingress
 
-The standalone relay lives in [src/relay](../src/relay), builds with [Dockerfile.relay](../Dockerfile.relay), and runs through [docker-compose.relay.yml](../docker-compose.relay.yml). The verified deployment binds `127.0.0.1:3001`. Its container isolation, keys, recovery limits, and health semantics are defined by [ADR 0122](adr/0122-isolated-authenticated-relay-and-bounded-recovery.md).
+The relay topology is a supervised host controller and one isolated worker per shard. The current [runbook](RELAY_VNEXT_RUNBOOK.md) replaces the legacy shared Compose deployment. Ingress targets the controller, not an arbitrary worker.
 
-A public tunnel or reverse proxy is optional additional infrastructure. It must preserve authentication, streaming, cancellation, and origin policy. The local Docker rollout did not verify a public tunnel, Worker deployment, or application-to-relay path from a remote host. An application on another machine cannot reach this relay through its own `localhost`.
-
-This topology is a repository implementation decision, not a claim that Cloudflare universally cannot support a particular upstream protocol. Do not attribute unverified failures to provider network blocking or platform runtime limits.
+[ADR 0127](adr/0127-codex-image-tool-alias-production-cutover.md) records the September 7 public tunnel cutover to `http://host.docker.internal:3001` and successful DreamBees image verification. This is dated deployment evidence, not a current reachability assertion. Preserve authentication, streaming, cancellation, and ownership during a new ingress change.
 
 ## Image storage
 

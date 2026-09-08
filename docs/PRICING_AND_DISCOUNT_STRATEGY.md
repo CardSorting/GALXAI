@@ -1,5 +1,8 @@
 # 💰 GALXAI Pricing & Multi-Tiered Discount Strategy
 
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 GALXAI delivers market-leading pricing by combining **direct wholesale volume clearing**, **75% prompt caching pass-through**, **progressive volume rebates**, and **off-peak dynamic yield balancing**.
 
 ---

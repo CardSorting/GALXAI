@@ -1,5 +1,8 @@
 # 🪝 Maintainer Guide: Git Workflows, Hooks & Conventional Commits
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 > **Target Audience**: All Maintainers, Contributors, and Autonomous AI Agents.  
 > **Standard**: Conventional Commits 1.0.0 with trunk-based development and linear git history.
 

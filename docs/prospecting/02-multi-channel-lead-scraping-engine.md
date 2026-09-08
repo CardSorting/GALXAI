@@ -1,5 +1,8 @@
 # 📡 High-Velocity Multi-Channel Lead Scraping Engine
 
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## 1. Autonomous Prospecting Architecture
 The GTM Board continuously monitors 4 high-yield channels to identify active engineering teams with high monthly LLM token burn:
 

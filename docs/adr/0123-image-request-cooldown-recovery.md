@@ -1,5 +1,10 @@
 # Image requests recover after an expired account cooldown
 
+<!-- docs-scope: decision-record -->
+> **Reading scope:** Decision history with topic-specific precedence. Original status and measurements are dated; consult the current contract before operating the relay. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
+> Decision scope: Database health/lease authority remains scoped to this record. Federation worker lifecycle and image compatibility are separately governed by ADRs [0126](0126-capability-aware-shard-relay-federation.md) and [0127](0127-codex-image-tool-alias-production-cutover.md). Incident/deployment observations below are dated evidence, not live availability.
+
 Date: 2026-09-07
 
 ## Incident

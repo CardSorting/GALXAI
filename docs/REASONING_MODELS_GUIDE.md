@@ -1,5 +1,8 @@
 # 🧠 Frontier Reasoning Models Developer Guide
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 A comprehensive technical guide for developing with GALXAI's flagship reasoning engines: `gpt-5.6-sol`, `gpt-5.6-terra`, and `x-ai/grok-4.6`.
 
 ---

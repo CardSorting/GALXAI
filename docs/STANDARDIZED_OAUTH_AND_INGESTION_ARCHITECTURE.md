@@ -1,5 +1,8 @@
 # Standardized OAuth & Ingestion Architecture Specification
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 ## Overview
 
 GALXAI implements a strict two-tier authentication and ingestion topology:

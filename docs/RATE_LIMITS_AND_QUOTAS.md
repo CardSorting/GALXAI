@@ -1,31 +1,23 @@
-# Rate limits, concurrency, and provider quota
+# Rate limits, concurrency, and quota
 
-Reviewed on 2026-09-07. Limits belong to distinct layers. A platform plan, a relay admission limit, a shard slot, and an upstream provider quota measure different things.
+<!-- docs-scope: current-guide -->
+> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-| Layer | Authority and scope |
+Capacity belongs to an eligible model pool. A fleet can have idle relays while a scarce model is saturated. See [routing](ROUTING_ALGORITHMS.md) and the [runbook configuration table](RELAY_VNEXT_RUNBOOK.md#configuration-and-bounds).
+
+| Signal | Meaning |
 | --- | --- |
-| Product API and account policy | Application authentication, configured plan/governor, and billing policy |
-| Platform pool lease | PostgreSQL authority on the database-backed pool path; see ADR 0115 |
-| Worker ingress | The deployed Worker's configured admission implementation; not the standalone relay |
-| Relay HTTP admission | Process-local active HTTP admissions, default 64; asynchronous chat releases admission on acceptance |
-| Relay shard concurrency | Process-local provider attempts, default four slots per shard |
-| Relay local usage cap | Optional operator cap; adaptive mode has no local cap by default |
-| Provider quota | Provider-reported capacity or rejection; unknown until reported |
+| Model eligibility | Fresh evidence that the shard can serve this operation |
+| Local concurrency | Worker execution slots, including admission reservations |
+| Provider quota/backoff | Upstream-reported restrictions and deadlines |
+| Credential cooldown | Attributable health decision under the owning authority |
+| Application entitlement | Product key, tier, and billing authorization |
+| Model redundancy | Number of healthy eligible shards; one is fragile |
 
-## Relay behavior
+Do not infer provider allowance from a local usage window. Do not clear cooldowns because local slots are empty. A generic 429 or timeout does not prove missing model permission. An expired explicit database cooldown allows a serialized recovery probe, not unlimited admissions.
 
-The relay observes local calls over a three-hour window without inventing an upstream allowance. “No local cap” does not mean unlimited provider capacity. Expired and inactive shards cannot supply headroom. “Ready for requests” describes local eligibility, not a completed upstream credential validation.
+The controller rejects unavailable/saturated pools explicitly. Callers honor execution state, `Retry-After`, and `X-Should-Retry`; they do not automatically replay ambiguous failures. Live receipt capacity is bounded and rejects new keyed work rather than evicting active deduplication evidence.
 
-Quota rejection uses a provider deadline when available. Otherwise cooldown starts at 60 seconds, doubles with repeated failures, and caps at 30 minutes. One recovery probe prevents a burst at cooldown expiry. Authentication rejection disables that credential locally until rotation; it must not be treated as a transient quota problem.
+Image-alias probes consume quota and spare capacity. Successful image evidence has a bounded lifetime; failure backoff prevents probe storms. Disabling the alias requires configuration rollout, not a manual capability assertion.
 
-Retries default to three, with jittered backoff from 500 ms capped at 5 seconds. A shared process budget starts at 20 and replenishes over time and on success. A five-minute default request wall limit and transport deadlines also bound work. These defaults are configurable; the [deployment runbook](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md) is the complete operational reference.
-
-## Operator and client guidance
-
-Use the relay dashboard to distinguish local saturation, provider cooldown, expired credentials, rejected credentials, and stale registry data. Administrator keys protect operational data. An inference key does not grant fleet administration.
-
-Use bounded client retries with backoff and honor the endpoint's response. Do not place an unbounded SDK retry loop around the relay's own retries. Cancellation reports that refund handling is outside the relay; inspect application billing separately.
-
-The [continuous token governor](../src/core/governor/ContinuousTokenBucketRateGovernor.ts) and platform lease configuration define their own limits. Do not copy historical example RPM/TPM values, subscription allowances, or simulation throughput into customer entitlements.
-
-See [fleet runbook](maintainers/RELAY_QUOTA_AND_FLEET.md) and [relay API](RELAY_API_REFERENCE.md).
+Worker status/control traffic has a separate tenant bucket from inference. Bounded polling, Docker inspection, reconciliation, and shutdown prevent one slow shard from becoming a fleet-wide blocker. Current numeric limits live in the runbook and source; synthetic concurrency checks are not production throughput guarantees.

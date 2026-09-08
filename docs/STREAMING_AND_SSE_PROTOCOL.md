@@ -1,6 +1,11 @@
 # ⚡ Universal Streaming & SSE Protocols
 
-> Scope: examples below describe application compatibility endpoints. The standalone relay uses a separate [HTTP 202 job and SSE contract](RELAY_API_REFERENCE.md), bounded in-memory replay, and explicit restart failure. It has no local tool executor or refund ledger. Full tool/multimodal parameter parity is not established. Provider timing is not guaranteed by early response headers.
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
+> Application/SDK scope: these interfaces do not replace the [federation contract](FEDERATION_STRATEGY.md). Model eligibility precedes load; no implicit model substitution occurs in the federation. The [Codex image alias](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility) is opt-in, verified, and provider-managed. Use the [recovery table](RELAY_API_REFERENCE.md#request-recovery) for accepted or uncertain work. Server credentials must never enter browser bundles.
+
+> Scope: examples below describe application compatibility endpoints. The federation relay uses a separate [HTTP 202 job and SSE contract](RELAY_API_REFERENCE.md), bounded in-memory replay, and explicit restart failure. It has no local tool executor or refund ledger. Full tool/multimodal parameter parity is not established. Provider timing is not guaranteed by early response headers.
 
 GALXAI exposes streaming compatibility paths for downstream integrations. Validate each endpoint and client against the implemented schema; emitting SSE does not establish complete provider API compatibility.
 

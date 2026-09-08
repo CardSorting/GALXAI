@@ -1,5 +1,10 @@
 # ADR 0127: Explicit Codex image-tool alias and production federation cutover
 
+<!-- docs-scope: decision-record -->
+> **Reading scope:** Decision history with topic-specific precedence. Original status and measurements are dated; consult the current contract before operating the relay. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
+> Decision scope: Current explicit image-alias decision and dated production evidence. The successful DreamBees image observation does not itself enable paid Hive or guarantee present availability. Use the [current contract](../FEDERATION_STRATEGY.md) and [runbook](../RELAY_VNEXT_RUNBOOK.md) for operations.
+
 Date: 2026-09-07. Status: deployed and verified.
 
 ## Decision

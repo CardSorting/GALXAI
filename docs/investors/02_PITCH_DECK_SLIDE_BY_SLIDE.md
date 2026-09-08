@@ -1,4 +1,8 @@
 # 📊 GALXAI Pitch Deck: 8-Slide Crisis & Traction Specification
+
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## "We Flatten and Ease the Path to the First Dollar Made with AI"
 
 **The Crisis**: *"Tokenmaxxing" economics are spiraling out of hand*. Developers and model providers stuff 100k context windows and loop autonomous agents, burning millions of tokens per task. Startups charge $20/mo while users burn $45 in API bills. Enterprise compute bills explode 10x overnight. CFOs are desperate for the bleeding to stop.  

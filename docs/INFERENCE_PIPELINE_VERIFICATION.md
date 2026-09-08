@@ -1,31 +1,29 @@
-# Inference pipeline verification
+# Inference verification
 
-Reviewed 2026-09-07. Verify each boundary independently; a module test is not a live deployment test.
+<!-- docs-scope: current-guide -->
+> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-## Boundaries
+Verify each boundary independently: application authorization, configured app-to-controller transport, credential projection, capability discovery, eligible admission, worker execution, returned payload, and any application storage. See the [contract](FEDERATION_STRATEGY.md).
 
-1. Application authorization and routing: `src/app/v1`, `GalxModelRouter`, provider adapters.
-2. App-to-relay authentication: `OpenAIAdapter` sends the relay inference key for chat, stream attachment, and images, without provider credentials in those relay requests.
-3. Registry projection: `src/relay/shard-registry.ts` reads configured encrypted authority and fails closed when required refresh fails.
-4. Relay transport: bounded HTTP intake, local shard selection, provider attempts, asynchronous chat status/SSE, and synchronous image output.
-5. Operator access: separate administrator keys, origin rules, bounded telemetry, and explicit recovery states.
-6. Runtime containment: deployed non-root/read-only container and actual mount/resource settings.
-7. Application/external execution and storage: separate code paths requiring separate verification.
-
-## Repeatable checks
+## Local regression checks
 
 ```sh
-node --import tsx --test scripts/test-relay-hardening.ts scripts/test-relay-adaptive-quota.ts scripts/test-relay-client-auth.ts scripts/test-relay-telemetry.ts
+npm run test:relay:capabilities
+npm run test:cooldown
 npx tsc --noEmit
-node --env-file=.env.local --import tsx scripts/test-relay-docker.ts
+npm run lint
 ```
 
-Mock transport tests need local sockets. The Docker suite checks a running deployment and may start the container if absent. Live image tests use provider/storage resources and are not implied by passing chat tests.
+For worker lifecycle changes, build the worker image and run the isolated synthetic Docker canary as described in the [runbook](RELAY_VNEXT_RUNBOOK.md#validate-the-implementation). It uses synthetic credentials. Do not substitute the legacy shared-container deployment test.
 
-A live chat smoke test must authenticate, receive 202, attach with the same principal, and observe completed output without an SSE failure. Check 401/403 separation and actual registry eligibility. A liveness probe, successful TCP connection, or job acknowledgement alone is insufficient.
+Required scenarios include heterogeneous pools, loss/recovery without restart, shard removal, stale health across restart, concurrent denial/discovery, noisy failures, model-specific saturation, signed job affinity, receipt replay after capability loss, and uncertain admission. Test counts are recorded with each run rather than treated as permanent gates.
 
-## Dated evidence
+## Live verification
 
-The 2026-09-07 rollout used a separate canary and repeated inference/SSE after production cutover. Registry loading and expired-account exclusion passed. Runtime inspection confirmed UID 1000, read-only root files, dropped capabilities, and only a named checkpoint volume. The prior image and checkpoint were retained for rollback. TypeScript and the relay/client/Docker checks passed as recorded in the [runbook](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md).
+Confirm the actual deployed revision, worker image, ownership, and ingress. A health check, matching credential aliases, inventory listing, or HTTP 202 does not prove successful inference.
 
-The current document intentionally does not publish account IDs, generated artifacts, token values, timing promises, or a permanent assertion count. Re-run checks against the target image. Simulation results do not establish production throughput or exactly-once recovery.
+For chat, authenticate with the intended key and observe completed output without an SSE failure. For images, use the actual downstream client and its retry policy, require valid bytes, decode the image, inspect execution metadata, and visually inspect the artifact. Live probes can incur usage; synthetic tests do not run them.
+
+The runbook documents `scripts/verify-dreambees-image.ts`. [ADR 0127](adr/0127-codex-image-tool-alias-production-cutover.md) records a successful public DreamBees image result on September 7, 2026, including request ID, dimensions, hash, and compatibility metadata. Its separate chat entitlement rejection was not a chat success. Paid Hive remained disabled.
+
+Record failures and limits alongside successes. A docs-only change requires documentation validation, not another paid production image generation.

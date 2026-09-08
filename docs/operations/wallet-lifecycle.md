@@ -1,5 +1,8 @@
 # Wallet lifecycle repair — September 7, 2026
 
+<!-- docs-scope: operational-record -->
+> **Reading scope:** Scoped operational procedure or dated incident evidence. Its component authority remains separate from federation lifecycle, capability routing, and admission recovery. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 The live database had four Auth users and only one wallet. Migration
 `20260907190322_wallet_account_lifecycle` is applied: all four users now have
 wallets and the admin account's $30,000 balance was preserved.

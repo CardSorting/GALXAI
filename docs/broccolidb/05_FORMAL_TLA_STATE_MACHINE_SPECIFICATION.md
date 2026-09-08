@@ -1,4 +1,8 @@
 # 🥦 Formal TLA+ & State-Machine Specification of the BroccoliDB Substrate
+
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## Rigorous Protocol Specification, WAL Recovery Engine, and Temporal Invariants
 
 **Subsystem**: `src/core/broccolidb/`, `broccolidb-wal.ts`, `broccolidb-table.ts`  

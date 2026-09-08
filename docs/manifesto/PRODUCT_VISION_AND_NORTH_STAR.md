@@ -1,4 +1,8 @@
 # 🌟 PRODUCT VISION & THE NORTH STAR
+
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## *GALXAI: Birthing a New Era of Compute & The AWS of the Autonomous Age*
 
 > **The North Star**: *"Birth a new era of sovereign compute, unlocking human and artificial intelligence at a global scale by giving every builder the power to construct, deploy, and scale autonomous software with mathematical profitability from the very first dollar."*

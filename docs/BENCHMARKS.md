@@ -1,5 +1,8 @@
 # 📊 GALXAI Performance Benchmarks & Stress Analysis
 
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 This document details empirical benchmarks, stress-test methodology, and concurrency resilience metrics of the GALXAI universal quota gateway and zero-hesitation developer substrate.
 
 ---

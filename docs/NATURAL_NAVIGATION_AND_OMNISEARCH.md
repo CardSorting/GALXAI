@@ -1,5 +1,8 @@
 # GALXAI Natural Navigation, OmniSearch & Low-Latency Substrate Guide
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 This document outlines the **Hybrid BroccoliDB Semantic Substrate**, **Soundex & Levenshtein Typo Tolerance**, **Natural Language Intent Engine**, **Single-Flight Request Coalescing**, **Predictive Route Pre-Warming**, **Sub-15ms Time-To-First-Token (TTFT) Streaming Substrate**, **404 Smart Search Recovery**, and **Zero-Hesitation Ergonomics** built into GALXAI for non-technical and power users alike.
 
 ---

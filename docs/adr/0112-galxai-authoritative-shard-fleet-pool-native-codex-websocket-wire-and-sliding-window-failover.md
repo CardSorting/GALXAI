@@ -1,5 +1,10 @@
 # ADR 0112: Registry-backed provider routing and relay transport
 
+<!-- docs-scope: decision-record -->
+> **Reading scope:** Decision history with topic-specific precedence. Original status and measurements are dated; consult the current contract before operating the relay. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
+> Decision scope: Historical decision record. Its original status and measurements describe its own scope. For current relay ownership, capability routing, retry authority, and deployment, ADRs [0126](0126-capability-aware-shard-relay-federation.md) and [0127](0127-codex-image-tool-alias-production-cutover.md) take precedence. Shared-relay selection, implicit model fallback, and simulation performance do not define the current federation. Unrelated subsystem decisions are not superseded by this note.
+
 - Status: Superseded for relay behavior by ADR 0122; registry authority is specified by ADR 0115
 - Original decision date: 2026-09-03
 - Reconciled with implementation: 2026-09-07
@@ -20,4 +25,4 @@ Expired/rejected credentials are excluded. Quota failures cool down the affected
 
 This record no longer specifies a fixed provider request allowance, guaranteed uninterrupted output, a fixed failover latency, permanently warm sockets, proxy cloaking, or operation while the host is unavailable. It does not establish full OpenAI API compatibility or global relay concurrency.
 
-[ADR 0122](0122-isolated-authenticated-relay-and-bounded-recovery.md) is the current relay decision. [ADR 0115](0115-postgresql-authoritative-shard-registry-and-secret-free-projections.md) governs registry custody and platform lease procedures. [Relay runbook](../VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md) contains actual deployment and verification steps.
+[ADR 0122](0122-isolated-authenticated-relay-and-bounded-recovery.md) was the prior relay baseline; the current relay contract is established by ADRs 0126–0127 above. [ADR 0115](0115-postgresql-authoritative-shard-registry-and-secret-free-projections.md) governs registry custody and platform lease procedures. [Relay runbook](../VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md) contains actual deployment and verification steps.

@@ -1,4 +1,8 @@
 # 🛸 GALXAI Apex Synthetic Curation & Training Strategy Substrate
+
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## Comprehensive Architecture, 7-Phase Execution Lifecycle & Technical Blueprint
 
 ---

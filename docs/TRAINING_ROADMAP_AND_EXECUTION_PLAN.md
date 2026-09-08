@@ -1,4 +1,8 @@
 # 🚀 GALX-Flash-8B: Training Roadmap, Strategy & Execution Plan
+
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 ## Targeting GLM-5.3 Flash & GPT-4o-mini Parity at Compact 8B Scale
 
 ---

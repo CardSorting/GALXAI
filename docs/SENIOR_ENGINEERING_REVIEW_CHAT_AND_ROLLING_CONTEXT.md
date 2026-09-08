@@ -1,5 +1,8 @@
 # GALXAI SENIOR ENGINEERING REVIEW: Sovereign Seat Quotas, Dynamic Elastic Context, and Hybrid Rolling Memory Mesh
 
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 **Document Version:** 5.3.0-Apex Hardened  
 **Target Reviewer:** Senior Staff & Principal Infrastructure Engineers  
 **Classification:** Core System Architecture & Database Ledger  

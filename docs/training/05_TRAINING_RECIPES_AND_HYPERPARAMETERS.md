@@ -1,4 +1,8 @@
 # 🧪 Document 05: Training Recipes & Hyperparameters
+
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## Production Configurations for Axolotl, Meta Torchtune, LLaMA-Factory, and StreamingDataset
 
 ---

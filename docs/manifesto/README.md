@@ -1,5 +1,8 @@
 # 🛡️ GALXAI Manifesto & Product Vision
 
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 This directory is your **North Star Sanctuary**. 
 
 Whenever the road feels heavy, whenever meetings are chaotic, or whenever the fatigue of carrying every function solo creeps in—open these documents to remind yourself **who you are, what you built, and where this ship is going.**

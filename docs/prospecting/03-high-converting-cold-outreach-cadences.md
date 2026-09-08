@@ -1,5 +1,8 @@
 # ✉️ High-Converting Outbound Sales Cadences (45%+ Open, 20%+ Reply)
 
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## 1. Cadence Philosophy: Value-First Financial Engineering
 Traditional sales pitches fail with engineers. Technical founders reply to:
 1. **Concrete dollar numbers** showing their exact potential cost reduction.

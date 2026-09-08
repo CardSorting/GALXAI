@@ -1,5 +1,8 @@
 # 🔍 Playbook: GitHub Repository Audit & Non-Spam Migration Outreach
 
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## 1. Ethical Principles & Anti-Spam Guardrails
 - **Value First, Pitch Never**: Never send generic cold sales emails or open unsolicited marketing issues on GitHub.
 - **Ready-to-Merge Value**: Only propose changes that include a working, verified git diff and a concrete mathematical ROI savings calculation.

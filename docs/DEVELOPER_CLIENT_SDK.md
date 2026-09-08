@@ -1,7 +1,12 @@
 # 🌌 GALXAI Universal Developer Client SDK
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
+> Application/SDK scope: these interfaces do not replace the [federation contract](FEDERATION_STRATEGY.md). Model eligibility precedes load; no implicit model substitution occurs in the federation. The [Codex image alias](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility) is opt-in, verified, and provider-managed. Use the [recovery table](RELAY_API_REFERENCE.md#request-recovery) for accepted or uncertain work. Server credentials must never enter browser bundles.
+
 > **Version**: 1.0.0  
-> **Runtime Footprint**: 100% Edge-Native, Zero External Dependencies  
+> **Runtime Footprint**: Runtime support depends on the imported module and its dependencies
 > **Compatibility**: Node.js 18+, Next.js 14/15, Cloudflare Workers, Bun, Deno, Vercel Edge
 
 The **GALXAI Universal Developer Client SDK** provides an enterprise-grade execution layer mirroring the familiar DX patterns of **Stripe**, **OpenAI**, **Anthropic**, **Vercel AI SDK**, and **Pinecone**, unified directly upon GALXAI's proprietary **BroccoliDB** high-performance in-memory database engine.

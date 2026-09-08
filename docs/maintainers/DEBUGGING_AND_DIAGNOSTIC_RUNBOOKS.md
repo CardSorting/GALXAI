@@ -1,5 +1,8 @@
 # 🔧 Maintainer Debugging & Diagnostic Runbooks
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 > **Target Audience**: SRE On-Call Engineers, Core Maintainers, and Incident Responders.  
 > **Purpose**: Fast-triage decision trees, log analysis recipes, and emergency remediation runbooks for platform maintainers.
 
@@ -80,7 +83,7 @@ A tenant's request volume exceeded the available soft reservation capacity in th
    npm run playbook -- --stage=traffic
    ```
 2. **Verify Circuit Breaker Auto-Failover**:
-   Check if the circuit breaker transitioned the failing shard to `COOLDOWN` and routed traffic to secondary fallback shards.
+   Inspect the owning circuit breaker and attributable cooldown evidence. In federation routing, only healthy shards with the same fresh requested capability are eligible; a relay error does not authorize model substitution or replay of uncertain work.
 3. **Enable Aggressive Input Compaction**:
    Ensure incoming client requests set the header `x-galx-compact: true` to compress input prompt volume by up to $85.93\%$, preserving $3.3\times$ TPM headroom.
 

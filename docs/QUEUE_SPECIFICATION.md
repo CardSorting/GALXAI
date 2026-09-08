@@ -1,27 +1,20 @@
 # Application queues and relay jobs
 
-Reviewed against the repository on 2026-09-07. There are two distinct systems: the application task queue and the standalone relay's asynchronous inference jobs. Their state, authorization, retry policies, and durability are not interchangeable.
+<!-- docs-scope: current-guide -->
+> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-## Application queue implementation
+The federation has no global waiting queue that lends unrelated model capacity. Admission is specific to the requested capability pool. See the [routing contract](FEDERATION_STRATEGY.md#eligibility-before-load).
 
-[GalxTaskQueueEngine](../src/core/queue/GalxTaskQueueEngine.ts) implements task scheduling, dispatch, retry/backoff, worker lease operations, pipeline execution, and callbacks. [GalxQueueContracts](../src/core/contracts/GalxQueueContracts.ts) defines task/configuration types; [GalxQueueClient](../src/core/queue/GalxQueueClient.ts) and [GalxQueueEventBus](../src/core/queue/GalxQueueEventBus.ts) provide client and event interfaces.
+## Accepted relay work
 
-The route tree in [src/app/api/queues](../src/app/api/queues) exposes task creation, retrieval, streaming, progress, acknowledgement, failure, retry, redrive, and cancellation operations. Consult each handler for authorization and validation. An endpoint's existence does not imply that its corresponding hosted UI remains part of the product strategy.
+A chat `202` returns signed job identity, status, and stream URLs. Keep those URLs and attach to the original worker generation. Existing worker jobs retain model identity. Capability removal prevents new work but does not cancel accepted jobs.
 
-Queue configuration includes attempt limits, retry duration, minimum/maximum backoff, doubling limits, and jitter. Defaults and queue-specific overrides live in the engine; these are not the relay's retry defaults. Worker lease and fencing behavior must be evaluated against the actual persistence implementation and deployment topology. A process counter alone is not a distributed fencing authority.
+Parent agents assign one key per logical operation and preserve the same payload when recovering acknowledgement. Children have independent operation keys and bounded concurrency; task IDs are correlation only. An unknown acknowledgement must not become another queued synthesis attempt.
 
-This implementation is not a certification of compatibility with Google Cloud Tasks, Cloud Run, EventBridge, or SQS. Historical simulation timing and scheduling results are not a production SLA.
+Receipts are bounded process-local acknowledgement recovery, not a durable distributed queue. A controller restart or expired receipt can remove deduplication evidence. See the [recovery table](RELAY_API_REFERENCE.md#request-recovery) for scope preconditions and accepted/unknown outcomes.
 
-## Standalone relay jobs
+## Throughput isolation
 
-Chat submission returns HTTP 202 with job status and stream locations. Inference-key ownership controls subsequent job operations. HTTP acceptance releases request admission; upstream work continues under separate shard concurrency and deadline limits.
+Status polling has per-worker limits, a bounded concurrent batch, fair rotation, and per-job backoff. Worker control/status requests use a separate rate bucket from inference admission. Reservations are generation-scoped, so stale jobs do not consume replacement-worker capacity.
 
-Relay retries are bounded by request count, a shared process budget, wall-clock limits, and transport timeouts. SSE replay is bounded in memory. Checkpoints exclude provider tokens but can contain unfinished request content; handle the state volume accordingly. After restart, unfinished work terminates with `relay_restarted_start_new_request` rather than being dispatched automatically.
-
-Cancellation attempts to stop active relay work. It reports `refunded: null` and `refundStatus: not_managed_by_relay`; financial reconciliation belongs to the application. The relay does not run an MLFQ worker scheduler, spawn a shadow executor, or promise exactly-once continuation.
-
-## Integration rule
-
-Keep client retries finite and distinguish accepted, running, completed, failed, and cancelled states. Avoid stacking unbounded client resubmission around queue or relay retries. Agent tool execution belongs to the consuming runtime; neither a job identifier nor model output grants authority on the relay host.
-
-See [relay API](RELAY_API_REFERENCE.md), [ADR 0122](adr/0122-isolated-authenticated-relay-and-bounded-recovery.md), [resilience guide](RESILIENCE_AND_DISASTER_RECOVERY.md), and [product strategy](PRODUCT_SURFACE_STRATEGY.md).
+Application task tables, SDK queues, edge coordinators, and billing leases are separate systems. Their scheduling, persistence, retries, cancellation, and settlement guarantees do not transfer to relay jobs. Any future federation queue must retain model tags, tenant identity, deadline, bounded storage, and original execution authority; it must not silently substitute models.

@@ -1,5 +1,8 @@
 # 📈 GALXAI Market Sizing: TAM, SAM & SOM Analysis
 
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 An econometrically backed, top-down and bottom-up market sizing for GALXAI across the global AI compute, inference routing, and developer infrastructure landscape.
 
 ---

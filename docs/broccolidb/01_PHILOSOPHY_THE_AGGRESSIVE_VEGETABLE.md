@@ -1,4 +1,8 @@
 # 🥦 The Philosophy of BroccoliDB
+
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## The Representation Layer, The Compute-Prepper Fallacy, and The Aggressively Self-Auditing Vegetable
 
 > *"If BroccoliDB were AGI, the first thing it would do is open its own ADRs and discover that its WAL recovery protocol is underspecified."*

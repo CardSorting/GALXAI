@@ -1,5 +1,8 @@
 # 🚀 Maintainer Guide: Release Engineering, Versioning & Canary Rollout
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 > **Target Audience**: Release Engineers, Core Maintainers, and DevOps Leads.  
 > **Standard**: Semantic Versioning 2.0.0 (SemVer) with Conventional Commits and automated canary gates.
 

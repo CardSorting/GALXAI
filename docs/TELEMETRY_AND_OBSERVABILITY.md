@@ -1,35 +1,26 @@
 # Telemetry and observability
 
-Reviewed 2026-09-07. The relay operator surface and the application pool telemetry are separate interfaces. Authenticate against the component being inspected; do not expose fleet-wide operator data to end users.
+<!-- docs-scope: current-guide -->
+> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-## Relay interfaces
+Inspect model availability separately from relay health and execution state. The [federation contract](FEDERATION_STRATEGY.md) defines these dimensions.
 
-- `/dashboard`: fleet, quota, request, and recovery controls.
-- `/telemetry`: bounded request traces with filtering and phase inspection.
-- `/api/dashboard/stats` and `/api/telemetry`: administrator-only JSON snapshots.
-- `/metrics`: administrator-only Prometheus exposition.
-- `/health`, `/health/live`, `/health/ready`: public aggregate process/admission signals.
+## Controller view
 
-Use an administrator key in the UI's memory-only access form. API consumers use a configured administrator credential; do not embed it in a scrape URL. Inference keys are insufficient for fleet telemetry. See [relay access](relay-security.md) for default role assignment and exact-origin policy.
+`/federation` is a public shell with administrator-authenticated data from `/api/capabilities`. It exposes model eligible counts, redundancy, shard/relay ownership, evidence states and freshness, streams, and capacity. Zero eligible shards is unavailable, one is fragile, and two or more is healthy redundancy. None of these labels is a latency SLA.
 
-## Measurement semantics
+`/health` reports process liveness. Administrator `/health/ready` reports some routable capacity, not availability of every model. `/v1/models` lists eligible chat IDs; inspect image operation evidence separately.
 
-A chat's HTTP 202 acknowledgement and provider completion are separate events. Output counters are chunks, not tokenizer token counts. First-output time is measured at the relay, not at the end user's display. Reasoning and keepalives are not visible-answer output. Phase durations can include network, registry, scheduling, and retry waits; they do not isolate provider compute time.
+## Worker view
 
-Use opaque `X-Galx-Task-Id` values for correlation. External agent tools and complete task runtime are outside relay telemetry. Parallel calls overlap, so summing durations is not wall time. Explicit provider error frames are stronger evidence than transport timeouts; uncertain failures stay uncertain.
+Private worker telemetry, dashboards, and `/metrics` remain separate routes. The controller does not forward every worker endpoint. Authenticate against the specific component; do not publish administrator keys or operational snapshots to application users.
 
-The dashboard avoids overlapping polls, backs off during connection failures, pauses background-tab polling, and stops automatic authorization retries. It identifies stale snapshots, timed recovery, full slots, registry pauses, and credentials requiring replacement. A green process or eligible account is not proof of successful future inference.
+Trace request ID, task ID, requested model, execution model/routing mode, admission outcome, worker generation, and phase timings. A 202 is not completion. Output chunk counts are not tokenizer token counts. Relay first-output timing is not the user's display latency, and overlapping subagent durations cannot be summed into wall time.
 
-## Data scope
+## Staleness and retention
 
-`src/relay/telemetry.ts` maintains bounded, sanitized trace records without prompt/response content or authorization headers. Relay job/checkpoint storage is separate and can contain unfinished request content. Do not describe the whole service as zero-data-retention because the telemetry view is sanitized.
+Label retained snapshots stale after failed refresh and clear privileged data on disconnect. Keep administrator keys in page memory. Show the affected model and next safe action; do not imply that a green process fixes unavailable capability.
 
-The [maintainer telemetry guide](maintainers/RELAY_TELEMETRY.md) describes trace interpretation. The [relay API](RELAY_API_REFERENCE.md) defines status and recovery fields. Application pool, wallet, context, and edge metrics need their own source verification; their names and guarantees are not inferred from the relay's Prometheus endpoint.
+Telemetry is observation-only and must not mutate authoritative account health. Sanitized trace storage excludes authorization and prompt/response content; job/checkpoint storage is a separate retention surface. Do not infer system-wide zero retention from sanitized telemetry.
 
-## Verification
-
-```sh
-node --import tsx --test scripts/test-relay-telemetry.ts scripts/test-relay-hardening.ts scripts/test-relay-adaptive-quota.ts
-```
-
-These tests establish behavior under their fixtures. Production availability, provider quota, historical performance, and alert delivery require environment-specific observations.
+Record live verification with environment, revision, date, and request ID. Historical samples and synthetic tests do not prove current availability or capacity. See [verification](INFERENCE_PIPELINE_VERIFICATION.md) and [troubleshooting](TROUBLESHOOTING.md).

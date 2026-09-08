@@ -5,7 +5,9 @@
 
 GALXAI provides inference APIs, SDK integrations, model discovery, and operational controls for applications and agents. The application, Cloudflare Worker, and standalone relay are separate runtimes with distinct deployment and authentication boundaries.
 
-The relay runs inference inside an isolated container; user tools execute in the consuming agent runtime. See [Architecture](docs/ARCHITECTURE.md), [relay setup and deployment](docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md), and [ADR 0122](docs/adr/0122-isolated-authenticated-relay-and-bounded-recovery.md) for the current strategy and verified scope.
+The relay federation preserves **one active shard = one isolated relay container**. It checks fresh model capability before balancing load. See the [current contract](docs/FEDERATION_STRATEGY.md), [operator runbook](docs/RELAY_VNEXT_RUNBOOK.md), and [complete documentation catalog](docs/CATALOG.md).
+
+The existing generic Codex image-tool route is an explicit, verified compatibility alias for `openai-gpt-image-2` on enabled OAuth workers. It uses provider-managed image selection and does not guarantee exact GPT-Image-2 or exact output dimensions. Native API-key execution remains exact. [ADR 0127](docs/adr/0127-codex-image-tool-alias-production-cutover.md) records the production cutover and actual DreamBees image verification; paid Hive remained disabled.
 
 ---
 
@@ -18,7 +20,7 @@ Building AI features normally means paying a steep "infrastructure tuition": wri
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ 1. The Native SDK Way (OpenAI-Compatible Inference)                        │
-│    Point the OpenAI SDK at GALXAI for routing, caching, and failover.       │
+│    Point the OpenAI SDK at GALXAI for explicit-model inference and application integration.       │
 │    Keep application UI and inference infrastructure cleanly separated.      │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ 2. The 1-Line Drop-In Way (For Existing OpenAI Codebases)                  │

@@ -1,3 +1,8 @@
+# investor_recap
+
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 😂 Ahhh okay, that makes much more sense. I made it sound like you spent your entire birthday in a dark room surrounded by whiteboards labeled LATENCY??? 💀
 
 You enjoyed your birthday, then the weird call kept scratching at your brain in the background for ~5½ hours.

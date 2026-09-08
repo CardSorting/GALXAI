@@ -1,6 +1,11 @@
 # ADR 0004: 4-State Circuit Breaker & Half-Open Canary Traffic Warming
 
-> Current scope (2026-09-07): This historical platform circuit-breaker decision is not the standalone relay state machine. See ADR 0088 for later platform work and [ADR 0122](0122-isolated-authenticated-relay-and-bounded-recovery.md) for current relay rejection, cooldown, single-probe recovery, and finite retries.
+<!-- docs-scope: decision-record -->
+> **Reading scope:** Decision history with topic-specific precedence. Original status and measurements are dated; consult the current contract before operating the relay. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
+> Decision scope: Historical decision record. Its original status and measurements describe its own scope. For current relay ownership, capability routing, retry authority, and deployment, ADRs [0126](0126-capability-aware-shard-relay-federation.md) and [0127](0127-codex-image-tool-alias-production-cutover.md) take precedence. Shared-relay selection, implicit model fallback, and simulation performance do not define the current federation. Unrelated subsystem decisions are not superseded by this note.
+
+> Earlier scope note (2026-09-07, before ADRs 0126–0127): This historical platform circuit-breaker decision is not the standalone relay state machine. See ADR 0088 for later platform work and [ADR 0122](0122-isolated-authenticated-relay-and-bounded-recovery.md) for current relay rejection, cooldown, single-probe recovery, and finite retries.
 
 ## Status
 **Accepted** (Implemented and Verified)

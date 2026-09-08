@@ -1,4 +1,8 @@
 # 🥦 BroccoliDB Stakeholder Brief & Maintainer Onboarding
+
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## The Commercial Reality, The Research Receipts, and The Zero-BS Field Guide
 
 **Audience**: Internal Stakeholders, Engineering Leads, Product Partners, Diligence Auditors, and New Maintainers  

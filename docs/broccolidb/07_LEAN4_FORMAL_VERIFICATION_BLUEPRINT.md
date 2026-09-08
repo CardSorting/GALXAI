@@ -1,4 +1,8 @@
 # 🥦 Lean 4 Formal Verification Blueprint for BroccoliDB
+
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## Machine-Checked Proofs & Inductive Type Theory Specification
 
 **Subsystem**: `src/core/broccolidb`, `eval/`  

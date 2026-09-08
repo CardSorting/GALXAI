@@ -1,5 +1,10 @@
 # 💻 GALXAI Multi-Ecosystem SDK & CLI Cheatsheet
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
+> Application/SDK scope: these interfaces do not replace the [federation contract](FEDERATION_STRATEGY.md). Model eligibility precedes load; no implicit model substitution occurs in the federation. The [Codex image alias](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility) is opt-in, verified, and provider-managed. Use the [recovery table](RELAY_API_REFERENCE.md#request-recovery) for accepted or uncertain work. Server credentials must never enter browser bundles.
+
 Complete drop-in code snippets for connecting any major AI framework, SDK, CLI, or programming language to GALXAI.
 
 ---
@@ -127,7 +132,7 @@ galx.replay.stopRecording();
 
 ## 🔄 3. 1:1 Framework-Native Drop-In Compatibility Shims
 
-### 1. OpenAI Node.js / TypeScript SDK (100% Drop-In)
+### 1. OpenAI Node.js / TypeScript SDK (Compatibility integration)
 ```typescript
 import OpenAI from '@galxai/sdk/openai';
 
@@ -144,7 +149,7 @@ for await (const chunk of stream) {
 }
 ```
 
-### 2. Anthropic SDK & Claude Code (100% Drop-In)
+### 2. Anthropic SDK & Claude Code (Compatibility integration)
 ```typescript
 import Anthropic from '@galxai/sdk/anthropic';
 

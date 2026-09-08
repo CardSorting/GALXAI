@@ -1,5 +1,8 @@
 # Frequently asked questions
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 Reviewed 2026-09-07. See [architecture](ARCHITECTURE.md) for component ownership and [API base URLs](API_BASE_URL.md) before choosing an endpoint.
 
 ## Is the relay the product API?

@@ -1,96 +1,28 @@
-# 🤖 Maintainer Guide: AI Agent Pair Programming & Autonomous Governance
+# Parent and subagent execution guide
 
-> **Target Audience**: Human System Architects & Autonomous AI Coding Agents (Antigravity, Claude Code, Cursor, Windsurf).  
-> **Core Principle**: *"AI agents operate as tireless system maintainers, governed by deterministic mechanical containment harnesses."*
+<!-- docs-scope: current-guide -->
+> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
 
----
+Make familiar developer inputs easy to use while keeping execution authority explicit. The [federation contract](../FEDERATION_STRATEGY.md#parent-and-subagent-execution) defines runtime behavior; this guide defines how maintainers organize work.
 
-## 1. The Human-AI Maintainer Operating Model
+## Parent flow
 
-In the GALXAI development reality:
-1. **The Human Maintainer / Senior Architect**: Directs high-level architectural strategy, specifies invariants, evaluates business models, and observes real developer behaviors.
-2. **The AI Autonomous Assistant**: Acts as the primary hands-on-keyboard operator—authoring compactors, generating migration scripts, running benchmarks, maintaining TypeScript strictness, and writing ADRs.
+The parent owns the requested outcome, scope, verification, and final integration. Resolve reversible implementation details from repository evidence and existing authorization. Ask only when missing information changes correctness or authorization; continue independent useful work while it is pending.
 
-```mermaid
-flowchart TD
-    Architect[Human Senior Architect] -->|High-Level Intent & Invariants| Agent[Autonomous AI Coding Agent]
-    
-    subgraph Mechanical Containment Harness
-        Agent --> CodeGen[Generate TypeScript & SQL Code]
-        CodeGen --> TypeCheck[1. Strict TypeScript Compile: tsc --noEmit]
-        CodeGen --> FacadeCheck[2. Compaction Facade API Suite: 7/7 Pass]
-        CodeGen --> HardeningCheck[3. Fail-Closed Hardening Regressions]
-        CodeGen --> BenchCheck[4. Empirical Inference Boundary: A/B Blinded]
-        CodeGen --> ADRSync[5. Architectural Decision Record Sync]
-    end
+When delegation is authorized, assign bounded independent tasks with a concrete output, owned files, applicable constraints, and completion criteria. Keep dependency-sensitive edits with one owner. Do not multiply agents merely to produce overlapping audits. Parent and child operations retain separate IDs and traceable results.
 
-    TypeCheck & FacadeCheck & HardeningCheck & BenchCheck & ADRSync --> Verify{All 5 Gates Pass?}
-    
-    Verify -->|YES (Deterministic Green)| Merge[Safe Commit & Release]
-    Verify -->|NO (Violation Detected)| SelfHeal[Agent Self-Heals & Fixes Code]
-    SelfHeal --> Mechanical Containment Harness
-```
+## Execution identity
 
----
+Use one idempotency key per logical inference operation, stable payload on retry, and a task ID for correlation. A task ID is not a tenant credential. Save signed job URLs, request IDs, execution state, and receipt scope before fan-out or recovery.
 
-## 2. The 5 Autonomous Agent Containment Commandments
+A child reports whether work was accepted, completed, failed, or uncertain. The parent reconciles accepted/uncertain work before dispatching a replacement. Never turn a lost acknowledgement into parallel duplicate synthesis. Bounded process-local receipts are not a durable workflow engine.
 
-When an AI agent modifies the GALXAI codebase, it must adhere strictly to these 5 mechanical rules:
+## Throughput
 
-### Commandment 1: Never Bypass `BroccoliCompactionSafety`
-- **Rule**: Never disable or weaken the factual provenance checker.
-- **Rule**: If a compactor fails factual grounding on an extracted entity, it MUST fail closed to the unmodified raw text with `fidelityStatus: 'fallback'`.
+Batch independent reads and I/O with explicit concurrency and deadlines. Serialize mutations that share authority. Keep status/cancel traffic available while inference is saturated. Model-specific pools and bounded polling protect unrelated work; raising every concurrency limit does not create upstream capacity.
 
-### Commandment 2: Zero Destructive DDL without 3-Phase Expand/Contract
-- **Rule**: AI agents are strictly forbidden from writing `DROP TABLE`, `DROP COLUMN`, or `TRUNCATE` in SQL migrations.
-- **Rule**: All database changes must follow the Expand/Contract protocol across separate migration files (`.up.sql` and `.down.sql`).
+Return concise findings with evidence and the next safe action. Avoid unexplained retry loops, repeated approval questions for already-authorized work, and implementation jargon in product-facing errors. Preserve user intent when accepting familiar request shapes; do not silently substitute a model or grant tool authority.
 
-### Commandment 3: Never Hardcode API Keys or Master Seeds
-- **Rule**: Plaintext API keys must never be committed to git or embedded in client components.
-- **Rule**: Master cryptographic seeds must always be sourced from `process.env.GALX_VAULT_MASTER_SECRET`.
+## Completion
 
-### Commandment 4: No Bare Generated Compactor Exports
-- **Rule**: All 180 domain compactors must remain private internal modules behind `BroccoliCompactionFacade`.
-- **Rule**: Only supported facade boundaries and safety types may be exported from `src/core/broccolidb/index.ts`.
-
-### Commandment 5: Epistemic Empirical Provenance
-- **Rule**: Never manufacture or assert hardcoded synthetic token savings without running the empirical measurement suite (`npm run bench:inference-boundary`).
-- **Rule**: All benchmark outputs must reflect actual provider-boundary tokens, latency, and dollars.
-
-### Commandment 6: Invariant Tool Turn-Pair Inseparability
-- **Rule**: Never sever an `assistant` message containing `tool_calls` from its subsequent `tool` execution outputs across sliding-window compaction boundaries.
-- **Rule**: Always execute `GalxRollingContextEngine.ensureAtomicTurnPairs` to prevent upstream HTTP 400 validation crashes.
-
-### Commandment 7: Idempotent Concurrency & Lease TTLs
-- **Rule**: All multi-worker concurrency reservations in `galx_seat_request_leases` must be protected by explicit TTLs (`180s`) and released upon stream conclusion or failure.
-- **Rule**: Single-hop composite procedures (`fn_evaluate_and_acquire_seat_gate_v2`, `fn_settle_seat_stream_completion_composite_v2`) must execute atomically without unindexed scans.
-
----
-
-## 3. Recommended AI Agent Prompts for Common Maintenance Tasks
-
-### Task 1: Adding a New Domain Compactor
-```text
-Implement a new BroccoliDB domain compactor for [Domain Name].
-Requirements:
-1. Create src/core/broccolidb/Broccoli[Domain]Compactor.ts.
-2. Ensure regex patterns strictly hoist operative facts, numbers, dates, and codes.
-3. Wire the compactor into BroccoliDomainSpendOptimizer.ts.
-4. Verify using npm run bench:180-domains and npm run test:broccolidb:api.
-5. Author ADR NNNN in docs/adr/.
-```
-
-### Task 2: Running a Complete Pre-Flight Verification
-```text
-Run the full maintainer pre-flight verification pass:
-1. npm run onboard
-2. npm run bench:inference-boundary
-3. npm run test:broccolidb:api
-4. npm run test:broccolidb:hardening
-5. npx tsc --noEmit
-Report the scorecard and confirm 0 errors.
-```
-
----
-
-*Harness AI velocity with deterministic mathematical safety.* 🥦🤖🛡️
+Integrate bounded changes, review the diff, run relevant checks, and record material limits. Documentation-only changes use documentation checks. Live inference, deployment, and financial changes require their actual authorized scope; a passing mock is not production evidence. Use the [ADR lifecycle](ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) when the contract changes.

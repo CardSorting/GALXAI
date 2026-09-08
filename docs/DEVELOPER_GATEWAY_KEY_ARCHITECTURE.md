@@ -1,5 +1,8 @@
 # GALXAI Developer Gateway Key Architecture & Zero-Egress Substrate
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 ## Executive Summary
 This document specifies the enterprise architecture for API key minting, authentication, zero-downtime rotation, and state synchronization across the GALX AI platform (`https://galx.ai/v1`). It details how the hybrid combination of **BroccoliDB L0/L1 Hot Cache**, **Direct PostgreSQL Connection Pooling**, **Micro-Watermark Delta Sync**, and **Autonomous Circuit Breaking** achieves sub-microsecond resolution latencies while cutting database egress and roundtrips by more than 95%.
 

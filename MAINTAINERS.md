@@ -1,5 +1,7 @@
 # 🛡️ GALXAI Maintainers Guide & Governance Manual
 
+> Current relay authority: [federation contract](docs/FEDERATION_STRATEGY.md), [runbook](docs/RELAY_VNEXT_RUNBOOK.md), and [ADR catalog](docs/adr/README.md). One active shard owns one worker; model capability precedes load; retries preserve execution authority. Use [parent/subagent guidance](docs/maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md) and `python3 scripts/verify-docs.py` for documentation changes. Older subsystem targets below are not federation SLAs.
+
 > **Authoritative Specification & Operational Manual for Repository Maintainers**  
 > **Target Audience**: Core System Architects, Subsystem Maintainers, On-Call Operators, and Technical Reviewers.
 
@@ -20,7 +22,7 @@
 
 ## 1. Maintainer Philosophy & Core Invariants
 
-As a maintainer of GALXAI, you are responsible for maintaining a **zero-downtime, sub-15ms AI compute clearinghouse, spend governance control plane, and representation transformation substrate**.
+As a maintainer of GALXAI, you are responsible for maintaining an inference platform with explicit availability, authority, and recovery boundaries.
 
 ### The 5 Pillars of Maintainership:
 1. **Paranoid Invariant Defense**: Code quality is not subjective. Every change must satisfy deterministic mechanical invariants (Zero Destructive DDL, Fail-Closed Factual Provenance, Zero-GC Critical Loops, Zero-Copy SSE Streams).

@@ -1,5 +1,8 @@
 # 🎯 Playbook: Onboarding the First 10 High-Spend AI Startups
 
+<!-- docs-scope: commercial-draft -->
+> **Reading scope:** Commercial or product planning material. Claims, prices, forecasts, and examples require separate dated validation; they are not deployment guarantees, certifications, or SLAs. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## 1. Objective & Target Profile
 Onboard 10 production AI engineering teams currently spending **$2,000–$50,000/month** on OpenAI/Anthropic APIs by delivering an immediate **25%–40% net cost reduction** with zero architectural changes.
 

@@ -1,4 +1,8 @@
 # 🥦 BroccoliDB Architectural Audit & Empirical Evaluation Report
+
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## Exhaustive Codebase Inspection, Invariant Conformance, and Empirical Performance Metrics
 
 **Audit Team**: Senior Engineering Convergence Group, Security Architecture & Systems Verification Lab  

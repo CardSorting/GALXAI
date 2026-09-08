@@ -1,5 +1,10 @@
 # ADR 0126: Capability-aware 1:1 shard relay federation
 
+<!-- docs-scope: decision-record -->
+> **Reading scope:** Decision history with topic-specific precedence. Original status and measurements are dated; consult the current contract before operating the relay. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
+> Decision scope: Current lifecycle foundation. [ADR 0127](0127-codex-image-tool-alias-production-cutover.md) supersedes the pending-production boundary and adds one explicit verified Codex image-tool alias, including its paid probe cadence. The original canary evidence and no-automatic-probe statement below describe this decision before that extension.
+
 Date: 2026-09-07
 Status: Implemented and canary-tested; production topology cutover pending.
 

@@ -1,5 +1,8 @@
 # BroccoliDB Algorithmic DeDuplication & High-Velocity Compaction Engine Specification
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 > **Production qualification:** Use `BroccoliCompactionFacade` as the authoritative public entry point to ensure all compactions pass through fail-closed factual provenance verification (`BroccoliCompactionSafety`). Following our zero-hallucination hardening pass, the master 180-domain regression suite achieves **180 verified compactions and 0 safe fallbacks (100% Pass Rate)** with **77.6% aggregate spend savings**.
 
 ## 1. Executive Summary

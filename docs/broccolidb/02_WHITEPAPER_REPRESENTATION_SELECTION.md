@@ -1,4 +1,8 @@
 # 🥦 Task-Conditioned Representation Selection Under Epistemic and Information-Theoretic Constraints
+
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## A Technical Whitepaper on the BroccoliDB Architecture
 
 **Authors**: Senior Engineering Convergence Team & Core Substrate Group  

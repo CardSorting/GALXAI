@@ -1,5 +1,8 @@
 # 📊 Maintainer Guide: Performance Benchmarking & Service Level Objectives (SLOs)
 
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 > **Target Audience**: Performance Engineers, SREs, and Platform Maintainers.  
 > **Mission**: Quantitatively defend sub-millisecond execution, high compression efficiency, and zero memory leaks.
 

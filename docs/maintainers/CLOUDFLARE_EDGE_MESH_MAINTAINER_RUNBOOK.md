@@ -1,5 +1,8 @@
 # Cloudflare maintainer runbook
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## Source of truth
 
 The Worker name and entrypoint are in [wrangler.toml](../../wrangler.toml): `galxai-edge-gateway` and `src/workers/cloudflare/index.ts`. Read that configuration and the invoked modules before changing bindings or choosing a deployment command. Do not use an old sibling-repository relay setup or infer live resources from checked-in IDs.
@@ -8,7 +11,7 @@ The Worker name and entrypoint are in [wrangler.toml](../../wrangler.toml): `gal
 
 - The Next.js application owns the product API at `https://galx.ai/v1`.
 - The configured Worker route under `api.galx.ai` is a separate deployment and contract.
-- The standalone relay is built from this repository and deployed with Docker Compose. Its verified local listener is `127.0.0.1:3001`.
+- The federation uses a supervised host controller on loopback port 3001 and one Docker worker per active shard. Use the [vNext runbook](../RELAY_VNEXT_RUNBOOK.md); the shared Compose layout is legacy.
 - R2 storage is an application integration; image generation by the relay does not verify the gallery lifecycle.
 
 The relay rollout on 2026-09-07 verified local container isolation, authentication, and a short inference stream. It did not deploy the Worker or verify public ingress. See the [relay runbook](../VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md) for exact evidence and rollback steps.

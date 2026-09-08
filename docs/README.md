@@ -1,79 +1,27 @@
-# GALXAI documentation
+# GALX documentation
 
-GALXAI is an inference platform and governance control plane. Developers own their end-user applications and agent runtimes. Start with the [product strategy](PRODUCT_SURFACE_STRATEGY.md), [architecture](ARCHITECTURE.md), and [API base URL guide](API_BASE_URL.md).
+<!-- docs-scope: current-guide -->
+> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-## Current relay strategy and operations
+Start with the [federation contract](FEDERATION_STRATEGY.md): one active shard owns one relay container, and fresh model capability precedes load selection. The documented Codex image-tool route is an explicit verified compatibility alias with provider-managed image selection.
 
-- [ADR 0122: isolation, authentication, and bounded recovery](adr/0122-isolated-authenticated-relay-and-bounded-recovery.md)
-- [Deployment, setup, verification, and rollback](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md)
-- [Standalone relay API](RELAY_API_REFERENCE.md)
-- [Security boundary](relay-security.md)
-- [Fleet and quota operations](maintainers/RELAY_QUOTA_AND_FLEET.md)
-- [Hardening and regression checks](maintainers/RELAY_HARDENING.md)
-- [Troubleshooting](TROUBLESHOOTING.md)
+## Find the next action
 
-These guides distinguish the relay from the application and Worker. The relay performs inference without executing user tools on the operator's device. It does not promise unlimited retries, exactly-once recovery, global replica coordination, or a provider quota that has not been reported.
+| Task | Guide |
+| --- | --- |
+| Integrate an application | [Quickstart](QUICKSTART.md), [API boundaries](API_BASE_URL.md), [model availability](MODEL_CATALOG.md) |
+| Understand ownership and routing | [Architecture](ARCHITECTURE.md), [routing](ROUTING_ALGORITHMS.md) |
+| Recover an accepted or uncertain request | [Relay API](RELAY_API_REFERENCE.md#request-recovery), [troubleshooting](TROUBLESHOOTING.md) |
+| Deploy or roll back | [vNext runbook](RELAY_VNEXT_RUNBOOK.md), [deployment boundaries](DEPLOYMENT.md) |
+| Inspect model pools | [Observability](TELEMETRY_AND_OBSERVABILITY.md), [fleet operations](maintainers/RELAY_QUOTA_AND_FLEET.md) |
+| Organize parent/subagent work | [Maintainer execution guide](maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md) |
+| Verify behavior | [Inference verification](INFERENCE_PIPELINE_VERIFICATION.md), [hardening](maintainers/RELAY_HARDENING.md) |
+| Review authority and custody | [Security](SECURITY.md), [ADR catalog](adr/README.md) |
 
-## Collections
+## Reading scope
 
-- [Architecture decisions](adr/README.md)
-- [Maintainer guides](maintainers/README.md)
-- [Investor materials](investors/README.md) — commercial theses and projections require their own dated evidence; they are not deployment guarantees.
+The [complete catalog](CATALOG.md) indexes every Markdown document, including subsystem references, historical decisions, research, commercial drafts, and operational evidence. Current guides define the active relay contract. Domain specifications do not transfer their guarantees to other components. Research and commercial targets are not runtime guarantees or SLAs.
 
-## Reference catalog
+ADRs preserve dated decisions and verification. ADR 0127 records the successful September 7 production cutover and DreamBees actual-client image verification; paid Hive remained disabled. Use live authenticated capability evidence for current availability.
 
-The catalog preserves discoverability without repeating historical performance, pricing, or compliance claims. Current runtime behavior comes from the applicable source and operational guide; benchmark and review documents describe their stated scope and date.
-
-- [API base URL](API_BASE_URL.md)
-- [📖 GALXAI Universal API Reference](API_REFERENCE.md)
-- [GALXAI architecture](ARCHITECTURE.md)
-- [📊 GALXAI Performance Benchmarks & Stress Analysis](BENCHMARKS.md)
-- [🥦 BroccoliDB Compaction Engine: Engineer Onboarding & Architecture Guide](BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md)
-- [BroccoliDB Algorithmic DeDuplication & High-Velocity Compaction Engine Specification](BROCCOLIDB_DEDUPLICATION_ENGINE_SPECIFICATION.md)
-- [Cloudflare implementation and deployment boundaries](CLOUDFLARE_STRATEGY.md)
-- [Deployment boundaries](DEPLOYMENT.md)
-- [🌌 GALXAI Universal Developer Client SDK](DEVELOPER_CLIENT_SDK.md)
-- [GALXAI Developer Gateway Key Architecture & Zero-Egress Substrate](DEVELOPER_GATEWAY_KEY_ARCHITECTURE.md)
-- [🛠️ GALXAI Developer & Contributing Guide](DEVELOPER_GUIDE.md)
-- [GALXAI: Private & Secure AI Workflows for Frontier GPT Models](ENTERPRISE_PRIVATE_AI_COPY.md)
-- [Frequently asked questions](FAQS.md)
-- [🔬 Forensic Payload Dissection: Representation Transformation before Inference](FORENSIC_PAYLOAD_DISSECTION_AND_CAUSAL_ANALYSIS.md)
-- [GALXAI Governance Control Plane Review](GOVERNANCE_CONTROL_PLANE_REVIEW.md)
-- [🚀 GALXAI: Go-To-Market (GTM) & Positioning Strategy](GTM_STRATEGY.md)
-- [Inference pipeline verification](INFERENCE_PIPELINE_VERIFICATION.md)
-- [GALXAI Landing Page Copy — High-Signal & Zero Technical Jargon](LANDING_PAGE_COPY.md)
-- [Agent clients and the GALXAI relay](LUMI.md)
-- [🔄 Universal Migration Guide: Seamless Transition to GALXAI](MIGRATION_GUIDE.md)
-- [🧠 GALXAI Universal Model Catalog & Modality Specification](MODEL_CATALOG.md)
-- [GALXAI Natural Navigation, OmniSearch & Low-Latency Substrate Guide](NATURAL_NAVIGATION_AND_OMNISEARCH.md)
-- [GALXAI Enterprise OAuth 2.0 / 2.1, FAPI & Token Lifecycle Specification](OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md)
-- [💰 GALXAI Pricing & Multi-Tiered Discount Strategy](PRICING_AND_DISCOUNT_STRATEGY.md)
-- [GALXAI Product Surface Strategy](PRODUCT_SURFACE_STRATEGY.md)
-- [GALXAI: Provider-as-Auth Technical Specification](PROVIDER_AS_AUTH_SPECIFICATION.md)
-- [🌐 GALXAI: Programmatic SEO (pSEO), Answer Engine (AEO) & Generative Optimization (GEO) Strategy](PSEO_AND_AEO_STRATEGY.md)
-- [Application queues and relay jobs](QUEUE_SPECIFICATION.md)
-- [🚀 GALXAI Quickstart: The 30-Second Guide](QUICKSTART.md)
-- [Rate limits, concurrency, and provider quota](RATE_LIMITS_AND_QUOTAS.md)
-- [🧠 Frontier Reasoning Models Developer Guide](REASONING_MODELS_GUIDE.md)
-- [Standalone relay API](RELAY_API_REFERENCE.md)
-- [Resilience and recovery boundaries](RESILIENCE_AND_DISASTER_RECOVERY.md)
-- [Routing and shard selection](ROUTING_ALGORITHMS.md)
-- [💻 GALXAI Multi-Ecosystem SDK & CLI Cheatsheet](SDK_CHEATSHEET.md)
-- [⚡ GALXAI Universal Developer SDK: Specification & Architecture Reference](SDK_SPECIFICATION.md)
-- [Security boundaries and threat model](SECURITY.md)
-- [GALXAI: Security Posture & Threat Model](SECURITY_POSTURE_AND_THREAT_MODEL.md)
-- [GALXAI SENIOR ENGINEERING REVIEW: Sovereign Seat Quotas, Dynamic Elastic Context, and Hybrid Rolling Memory Mesh](SENIOR_ENGINEERING_REVIEW_CHAT_AND_ROLLING_CONTEXT.md)
-- [Standardized OAuth & Ingestion Architecture Specification](STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md)
-- [⚡ Universal Streaming & SSE Protocols](STREAMING_AND_SSE_PROTOCOL.md)
-- [⚙️ Structured Outputs, Tool Calling & Agent Runtimes](STRUCTURED_OUTPUTS_AND_TOOLS.md)
-- [🛡️ GALXAI: Paranoid Supabase PostgreSQL Architecture & AI Agent Governance Specification](SUPABASE_PARANOID_ARCHITECTURE_SPEC.md)
-- [🗺️ GALXAI: System Architecture Topology & Maintenance Onboarding Runbook](SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md)
-- [Telemetry and observability](TELEMETRY_AND_OBSERVABILITY.md)
-- [🚀 GALX-Flash-8B: Training Roadmap, Strategy & Execution Plan](TRAINING_ROADMAP_AND_EXECUTION_PLAN.md)
-- [Troubleshooting](TROUBLESHOOTING.md)
-- [GALXAI: Vercel Production Deployment Guide](VERCEL_DEPLOYMENT.md)
-- [Relay deployment and recovery runbook](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md)
-- [💳 GALXAI Developer Compute Wallet & Micro-Billing Architecture](WALLET_AND_BILLING_STRATEGY.md)
-- [investor_recap](investor_recap.md)
-- [landingpage](landingpage.md)
-- [Relay access, containment, and recovery](relay-security.md)
+Documentation changes must update scope and navigation and pass `python3 scripts/verify-docs.py`. Shared defaults belong in the runbook/source, not duplicated across dozens of guides.

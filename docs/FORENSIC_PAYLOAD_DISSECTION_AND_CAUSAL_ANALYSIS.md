@@ -1,5 +1,8 @@
 # 🔬 Forensic Payload Dissection: Representation Transformation before Inference
 
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 > **Target Audience**: Senior Staff Architects, Systems Engineers, and Machine Learning Researchers  
 > **Topic**: Exact Before-and-After Context Transformations, Information Entropy, and Structural Mechanisms behind BroccoliDB Input Compaction  
 > **Execution Tool**: `npx tsx scripts/dissect-payloads-and-causal-analysis.ts`

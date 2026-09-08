@@ -1,27 +1,31 @@
-# Routing and shard selection
+# Capability-first routing
 
-Reviewed against the repository on 2026-09-07. Routing behavior depends on the entrypoint; the platform pool, Cloudflare Worker, and standalone relay are not interchangeable implementations.
+<!-- docs-scope: current-guide -->
+> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-## Application and platform pool
+The [federation contract](FEDERATION_STRATEGY.md) is authoritative. Model eligibility precedes load selection; shards are heterogeneous.
 
-[GalxModelRouter](../src/core/router/GalxModelRouter.ts) and [ModelCatalog](../src/core/router/ModelCatalog.ts) resolve application model requests. [OpenAIAdapter](../src/core/router/adapters/OpenAIAdapter.ts) includes relay and direct-provider/SDK/CLI paths. A relay deployment does not remove those other paths or sandbox the application process.
+## Selection
 
-The platform pool scores candidate credentials and uses its PostgreSQL lease authority where configured. Candidate scoring is not ownership: the database-backed path must acquire and reconcile a lease. See [ADR 0115](adr/0115-postgresql-authoritative-shard-registry-and-secret-free-projections.md) for registry and lease scope. Algorithm names and local simulations do not prove cross-worker ownership or a production latency target.
+1. Require an explicit model and distinguish chat from image operations.
+2. Read that capability's reverse index; do not scan or borrow unrelated pools.
+3. Require fresh available evidence, valid ownership, eligible credential state, and healthy non-draining relay state.
+4. Apply dependencies, including fresh execution-model access for the verified Codex image alias.
+5. Compare recent upstream errors, active streams, latency, queue depth, and remaining capacity among eligible candidates.
+6. Reserve the selected worker's capacity while admission is acknowledged and until fresh health accounts for the job.
 
-## Standalone relay
+An empty eligible pool produces `model_temporarily_unavailable`; a full eligible pool produces `model_capacity_exhausted`. Both use HTTP 503. There is no silent model substitution, federation-wide overflow queue, or machine-learning scheduler.
 
-[relay-server.ts](../src/relay/relay-server.ts) refreshes the configured registry projection before selection, coalescing refreshes over a five-second interval. Registry failure prevents new selection. Expired or inactive credentials are excluded. Eligible shards are selected by least in-flight work, rotating ties, with four concurrent slots per shard by default.
+## Changes during traffic
 
-The relay does not acquire a PostgreSQL lease for each provider attempt. Its concurrency reservations, retry budget, and provider-rejection state are process-local. Multiple replicas therefore require additional coordination before they can advertise a shared global limit.
+Authenticated inventory refreshes and authoritative provider observations update the index. A denied model disappears from new routing without destroying the worker. Empty inventory remains alive for rediscovery. Active streams and generation-bound job URLs retain their existing lifecycle.
 
-Upstream authentication rejection disables the current credential locally and checkpoints its fingerprint. A changed credential can recover through rotation. Quota failures enter a bounded cooldown and permit one recovery probe; transport failures use bounded retry and backoff. Concurrent failures cannot overwrite a disabled credential with a merely cooling-down state.
+Generic route errors, throttling, and transport failures do not prove absent model permission. A restoration hold limits flapping; newer inventory and per-model observation versions fence stale successes and failures. Worker process restarts invalidate old health even when Docker container identity stays the same.
 
-Adaptive quota mode has no local request cap by default. A three-hour observation window reports local activity; it is not a promise of provider entitlement. Operators can configure a cap explicitly. Unknown provider capacity stays unknown.
+## Capacity and fairness
 
-## Recovery and client behavior
+Reservations are generation-scoped. An unknown acknowledgement retains a conservative bounded reservation instead of replaying synthesis. Completed receipt retrieval precedes eligibility checks. Bounded per-worker job polling and independent control traffic protect unrelated pools from a busy shard.
 
-A request has finite retry count, shared process retry budget, wall-clock deadline, and transport timeouts. Retrying after partial output is best effort and may repeat provider work. Per-attempt WebSockets are not a warm socket pool. After restart, unfinished jobs fail explicitly rather than resending prompts automatically.
+Application SDK `fallbackCascade` and `race` are explicit multi-model policies with separate execution/cost implications. They do not change this federation contract or make ambiguous retries safe.
 
-Clients must distinguish HTTP acceptance from completion, honor terminal failures, and bound their own retries. Tool execution belongs to the client's runtime; the relay does not execute tools on the operator's device.
-
-See [relay API](RELAY_API_REFERENCE.md), [operational defaults](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md), and [ADR 0122](adr/0122-isolated-authenticated-relay-and-bounded-recovery.md). Earlier MLFQ, seamless recovery, and fixed-quota relay descriptions are superseded by that decision.
+See [rate limits](RATE_LIMITS_AND_QUOTAS.md), [queues](QUEUE_SPECIFICATION.md), and the [runbook](RELAY_VNEXT_RUNBOOK.md) for effective bounds.

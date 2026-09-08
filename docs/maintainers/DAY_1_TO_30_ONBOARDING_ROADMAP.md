@@ -1,5 +1,8 @@
 # 🗓️ Maintainer Day 1 to Day 30 Onboarding Roadmap
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 > **Target Audience**: New Core Maintainers, Subsystem Engineers, and Distributed Systems Architects.  
 > **Goal**: Rapidly ramp from zero to confident, autonomous contributor and on-call maintainer within 30 days.
 

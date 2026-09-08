@@ -1,4 +1,8 @@
 # 🚀 GALXAI Foundation Model Training Suite: Master Directory
+
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## Complete Technical Blueprint & Operational Manual for `GALX-Flash-8B`
 
 > **Strategic Objective**: Train and deploy **GALX-Flash-8B**—a high-density, compact foundation model delivering **GLM-5.3 Flash & GPT-4o-mini level reasoning, coding, and mathematical performance** at $>140\text{ tokens/sec}$ on consumer hardware with **$0 bandwidth egress cost** via the GALXAI Cloudflare R2 continuous learning pipeline.

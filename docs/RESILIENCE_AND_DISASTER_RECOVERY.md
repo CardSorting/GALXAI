@@ -1,39 +1,31 @@
-# Resilience and recovery boundaries
+# Resilience and recovery
 
-Reviewed 2026-09-07. Recovery behavior belongs to a specific component. An outbox, platform ledger, simulation scheduler, and the standalone relay do not share one recovery guarantee.
+<!-- docs-scope: current-guide -->
+> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-## Relay failures
+Recovery follows the authority that owns the failed operation. The [federation contract](FEDERATION_STRATEGY.md) separates capability, shard lifecycle, admission, and database health.
 
-| Failure | Implemented response | Limit |
+| Failure | Effect | Recovery |
 | --- | --- | --- |
-| Expired credential | Exclude from selection using registry/decoded token expiry | Expiry decoding does not authenticate a token |
-| Upstream authentication rejection | Disable local credential and attempt immediate checkpoint | Not broadcast to independent relays |
-| Provider quota feedback | Account cooldown, bounded alternate selection | Other accounts can also be unavailable |
-| Repeated transport failure | Local cooldown and bounded recovery | Transport/provider cause can remain uncertain |
-| Retry count or budget exhausted | Terminal job failure | Caller must decide whether to submit a new request |
-| Request wall deadline | Abort transport and release local capacity | Remote provider may already have done work |
-| Registry unavailable/stale | Stop new credential selection | Status/cancel remain independent of registry refresh |
-| Downstream disconnect | Bounded grace and retained-memory replay | Replay cannot survive process loss |
-| Slow subscriber | Bounded queue and drain deadline | Subscriber may lose its connection |
-| Shutdown | Reject new work, drain, then abort remaining work | A single host still has a cutover window |
-| Restart | Recover eligible checkpoint state; fail interrupted jobs | No live sockets or output buffers are checkpointed |
+| Explicit model denial | Remove only that shard/model from new routing | Fresh authoritative rediscovery after stabilization |
+| Empty capability inventory | Keep worker in `CAPABILITY_EMPTY` | Continue bounded discovery; no automatic restart |
+| Generic route error, timeout, or throttling | Does not prove model permission loss | Classify attributable failure and preserve backoff |
+| Invalid/deleted/expired credential | Remove mappings, drain/retire worker | Valid credential revision and normal reconciliation |
+| Stale health or discovery result | Cannot overwrite newer authority | Discard stale observation; await fresh evidence |
+| Lost admission acknowledgement | Execution uncertain | Reconcile receipt/job/trace; no blind replay |
+| Existing job transport failure | Accepted work remains authoritative | Retry original signed URL |
+| Worker replacement | Old job generation unavailable | Report explicit loss; never attach to new worker |
+| Controller restart | Process-local receipts lost | Use scope precondition and external operation tracking |
+| Model pool saturation | Only that capability lacks capacity | Honor retry guidance; do not borrow unrelated shards |
 
-The relay owns no wallet refund transaction. Cancellation fields explicitly report financial settlement as not managed by the relay. Image idempotency and chat deduplication are principal-scoped, TTL-limited local behavior, not provider-side exactly-once execution.
+Accepted streams survive capability removal unless their actual execution fails. SSE replay and checkpoints are bounded; they are not durable execution logs. A partial stream, disconnected socket, or cancellation does not prove completed work or refund eligibility.
 
-## Storage and restore
+Database cooldown recovery uses current lease authority and a serialized probe after an explicit deadline. Observation-only telemetry cannot clear cooldowns. Local connection pressure does not justify declaring the whole database unavailable or replaying ambiguous SQL.
 
-The named checkpoint volume is private service state. It contains no provider tokens but may contain unfinished prompts/messages. Access controls and retention apply. Preserve it before image changes, migrate it deliberately from earlier bind-mounted layouts, and never share it between concurrently writing relay instances.
+## Incident flow
 
-PostgreSQL registry backup/restore, vault-root custody, application wallets, and execution journals have separate recovery requirements. Database-backed pool leases must not be confused with the relay's local scheduler. Do not claim zero recovery-point loss for periodic relay checkpoints or instant recovery time without a measured restore exercise.
+Identify component, requested capability, request/task ID, execution state, worker generation, and evidence timestamps. Inspect model-specific eligibility before changing capacity. Keep healthy pools serving while invalid workers drain. Record sanitized facts and uncertainty; do not reset health to make a dashboard green.
 
-## Availability strategy
+Use [deployment rollback](RELAY_VNEXT_RUNBOOK.md) only after stopping admissions and draining the active topology. Preserve signed-job state and checkpoint volumes. Never operate legacy and vNext workers against the same shard simultaneously. Multi-host failover is not implemented by the single-host controller lock.
 
-The verified relay is a single container on one host. Host sleep, Docker failure, networking loss, or a provider outage can interrupt it. A tunnel exposes a route but does not remove those dependencies. Multiple relays require coordinated concurrency, rejection propagation, checkpoint strategy, and traffic routing before they form a supported high-availability deployment.
-
-## Experiments
-
-The class-based scheduling and standby-handover experiments in [ADR 0113](adr/0113-unpredictable-2-3-minute-inference-mlfq-itl-watchdog-and-resumable-streams.md) are not the deployed relay. Synthetic throughput and scheduler assertions are not live-provider latency, loss, or availability guarantees.
-
-## Operations
-
-Use the [deployment and rollback runbook](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md), [relay API](RELAY_API_REFERENCE.md), and [telemetry guide](maintainers/RELAY_TELEMETRY.md). Preserve the trace, failure code, and partial-output status during incidents without publishing request content or credentials. Retry only after understanding whether the failed operation could already have produced an externally visible result.
+Synthetic tests establish failure isolation under fixtures. Dated production evidence belongs in an ADR; it is not a throughput SLA. Application assets, financial settlement, and external agent tools each require their own recovery procedure.

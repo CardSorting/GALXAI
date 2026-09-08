@@ -1,4 +1,8 @@
 # 🎯 Document 01: Strategy & Target Goal
+
+<!-- docs-scope: research-reference -->
+> **Reading scope:** Research, evaluation, or planning reference within its stated domain. Results and proposed mechanisms do not establish current federation behavior or production performance. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 ## GALX-Flash-8B: Achieving GLM-5.3 Flash & GPT-4o-mini Parity at 8B Scale
 
 ---

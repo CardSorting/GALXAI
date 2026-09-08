@@ -1,15 +1,13 @@
 # Current implementation context
 
-Updated 2026-09-07. This is orientation, not an independent architecture specification.
+Orientation updated September 7, 2026. The [federation contract](docs/FEDERATION_STRATEGY.md) governs current relay behavior; the [documentation catalog](docs/CATALOG.md) distinguishes current guides from historical/domain material.
 
-- Product surface: inference API, model discovery, and API playground. User applications retain their own agent/tool runtimes.
-- Current architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-- Current relay decision: [ADR 0122](docs/adr/0122-isolated-authenticated-relay-and-bounded-recovery.md).
-- Durable credential authority: PostgreSQL registry; standalone relay scheduling/retry state remains process-local.
-- Verified relay: this repository's `galxai-relay` container on loopback port 3001, non-root/read-only, no host personal/source mounts, private checkpoint volume.
-- Keys: app inference uses `VM_RELAY_API_KEY`; fleet/telemetry uses administrator keys. Provider tokens are not relay API keys.
-- Recovery: finite attempts, retry budget, deadlines, expiry/rejection exclusion, bounded memory replay, explicit terminal failure. No relay wallet refunds or automatic crash replay.
-- Execution boundary: inference output does not authorize local tools. Existing relay tool handling remains; complete tool-protocol support and wider app-side execution containment are not established.
-- Deployment evidence: canary and live chat/SSE, authentication, registry, isolation, client-auth and Docker checks passed on 2026-09-07. Remote app/ingress deployment was not part of that verification.
+- One active shard owns one isolated relay container; a supervised host controller manages ownership and capability-aware admission.
+- Model/operation eligibility and freshness precede health/load selection. Capability loss removes new eligibility without destroying otherwise useful workers.
+- The explicit OAuth `gpt-image-2` compatibility alias uses `gpt-5.6-terra` plus `image_generation`, requires verification, and discloses provider-managed image selection. Native API-key execution remains exact.
+- Stale generation, inventory, health, and lease observations cannot clear newer failures. Database telemetry is observation-only.
+- Receipts are bounded and process-local. Signed job URLs remain tenant/generation-bound; uncertain execution is reconciled before replay.
+- Parent/child task IDs are correlation, not execution authority. Inference output does not authorize tools.
+- ADR 0127 records production cutover and successful actual-client DreamBees image verification on September 7. Every observed pool had one eligible shard; paid Hive remained disabled.
 
-Follow the [relay runbook](docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md) for setup/cutover/rollback. Keep secrets in ignored restricted environment files or deployment secrets, never documentation. Use source and current test results over old performance claims or simulation assumptions.
+Use the [vNext runbook](docs/RELAY_VNEXT_RUNBOOK.md) for deployment. Recheck live state before making a new operational claim; source on disk and historical verification do not prove the current deployed revision.

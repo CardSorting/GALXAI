@@ -1,6 +1,11 @@
 # 📖 GALXAI Universal API Reference
 
-> Runtime boundary: this guide describes the product/application API. The standalone relay has a separate [API contract](RELAY_API_REFERENCE.md), inference and administrator keys, and an HTTP 202 chat job workflow. Its local deployment is covered by the [relay runbook](VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md). Product keys, relay keys, and upstream provider credentials are distinct.
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
+> Application/SDK scope: these interfaces do not replace the [federation contract](FEDERATION_STRATEGY.md). Model eligibility precedes load; no implicit model substitution occurs in the federation. The [Codex image alias](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility) is opt-in, verified, and provider-managed. Use the [recovery table](RELAY_API_REFERENCE.md#request-recovery) for accepted or uncertain work. Server credentials must never enter browser bundles.
+
+> Runtime boundary: this guide describes the product/application API. The federation relay has a separate [API contract](RELAY_API_REFERENCE.md), inference and administrator keys, and an HTTP 202 chat job workflow. Its local deployment is covered by the [relay runbook](RELAY_VNEXT_RUNBOOK.md). Product keys, relay keys, and upstream provider credentials are distinct.
 
 This document outlines the complete REST API specification for GALXAI endpoints, detailing all supported protocols, universal ingestion parameters, multi-header authentication methods, and edge gateway routes.
 
@@ -92,7 +97,7 @@ Use `POST` with an authorization header for production integrations. The GET for
 
 ## 🤖 Anthropic Messages API (`POST /v1/messages`)
 
-100% Drop-in compatibility for `@anthropic-ai/sdk` and Claude Code CLI.
+Compatibility endpoints for `@anthropic-ai/sdk` and Claude Code CLI.
 
 ### Request Body
 ```json
@@ -166,12 +171,12 @@ Returns model architecture, context length, parameters, and template definitions
 
 ## 🎨 Visual Synthesis & Image Generation (`POST /v1/images/generations`)
 
-Application image-generation endpoint. Routing depends on the configured adapter and model. The application can delegate inference to the standalone relay and manage R2 user/session assets separately; a base64 relay result does not establish a successful R2 upload. Examples below are illustrative, not live deployment evidence.
+Application image-generation endpoint. Routing depends on the configured adapter and model. The application can delegate inference to the federation relay and manage R2 user/session assets separately; a base64 relay result does not establish a successful R2 upload. Examples below are illustrative, not live deployment evidence.
 
 ### Request Headers
 - `Authorization: Bearer <galx_api_key>` (Standard developer key or session token)
 - `x-galx-session-id: <sessionId>` (Optional: binds generation to an interactive chat/agent session)
-- `Idempotency-Key: <key>` (Optional: prevents duplicate GPU draws within 5-minute window)
+- `Idempotency-Key: <key>` (Optional operation identity; retain the same payload and inspect execution state/scope before retrying. This is not a durable exactly-once guarantee.)
 
 ### Request Body
 ```json
@@ -185,7 +190,9 @@ Application image-generation endpoint. Routing depends on the configured adapter
 }
 ```
 
-### Aspect Ratio Mapping
+### Requested aspect ratio mapping
+
+These are requested application parameters, not output guarantees on the Codex image-tool compatibility route. Validate returned dimensions and inspect `execution` metadata. Native API-key model support is separate.
 - `16:9` $\to$ `1792x1024`
 - `9:16` $\to$ `1024x1792`
 - `4:3` $\to$ `1024x768`
@@ -215,15 +222,15 @@ Application image-generation endpoint. Routing depends on the configured adapter
 }
 ```
 
-### Frontend Client Request Pattern (Fetch / Next.js / React)
+### Server-side request pattern
 
 ```typescript
-// Call from browser, Next.js Client Component, or SPA:
+// Server-side only. Browser components call your authenticated application backend:
 const response = await fetch('https://galx.ai/v1/images/generations', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${process.env.NEXT_PUBLIC_GALXAI_KEY}`,
+    'Authorization': `Bearer ${process.env.GALXAI_API_KEY}`,
     'x-galx-session-id': 'session_interactive_01',
     'Idempotency-Key': crypto.randomUUID(),
   },

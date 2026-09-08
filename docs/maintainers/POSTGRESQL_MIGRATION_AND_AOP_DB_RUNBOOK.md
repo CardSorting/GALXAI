@@ -1,5 +1,8 @@
 # 🗄️ Maintainer Runbook: PostgreSQL Migrations & AOP-DB Protocol
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 > **Target Audience**: AI Database Operators, SREs, and Database Maintainers.  
 > **Core Law**: *"Zero destructive DDL without 3-Phase Expand/Contract Protocol. Default-deny RLS on 100% of tables."*
 

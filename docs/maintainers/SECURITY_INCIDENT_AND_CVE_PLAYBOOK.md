@@ -1,5 +1,8 @@
 # 🚨 Maintainer Playbook: Security Incidents, Key Compromise & CVE Governance
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 > **Target Audience**: Security Response Team (SRT), Core Maintainers, and Incident Commanders.  
 > **Standard**: Incident Command System (ICS) with 24-hour response SLAs and private GitHub Security Advisories.
 

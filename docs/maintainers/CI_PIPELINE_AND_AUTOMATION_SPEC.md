@@ -1,5 +1,8 @@
 # 🤖 Maintainer Specification: CI Pipeline, Automation & Invariant Gates
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+
 > **Target Audience**: DevOps Engineers, Release Managers, and Core Maintainers.  
 > **Mission**: Formal specification of the Continuous Integration (CI) and Deployment automation pipelines defending GALXAI.
 

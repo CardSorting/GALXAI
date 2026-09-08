@@ -1,5 +1,8 @@
 # GALXAI Enterprise OAuth 2.0 / 2.1, FAPI & Token Lifecycle Specification
 
+<!-- docs-scope: domain-reference -->
+> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+
 ## 1. Executive Summary & Architectural Overview
 
 GALXAI operates as an enterprise-grade AI proxy gateway, cryptographic credential vault, and high-performance model orchestration mesh. To enable seamless multi-tenant developer access to upstream frontier model providers (OpenAI Codex, xAI Grok, Anthropic), the platform implements an authoritative, zero-trust **OAuth 2.0 / 2.1, OpenID Connect 1.0, and Financial-grade API (FAPI) Token Lifecycle Substrate**.
