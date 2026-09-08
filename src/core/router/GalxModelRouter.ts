@@ -890,7 +890,7 @@ export class GalxModelRouter {
   async routeImageGeneration(options: RouteImageOptions): Promise<ImageGenerationResponse> {
     await this.substrate.ensureFreshFromAuthority();
     const { userId, requestId, isPriorityUser, headers: incomingHeaders, signal } = options;
-    const modelSpec = ModelCatalog.resolveModel(options.request.model || 'openai-gpt-image-2');
+    const modelSpec = ModelCatalog.resolveModel(options.request.model || 'openai-gpt-image-latest');
     if (!modelSpec) {
       throw new Error(`Unsupported image model: '${options.request.model}'`);
     }

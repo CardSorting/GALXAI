@@ -91,7 +91,7 @@ export default async function Image() {
 
         {/* Model tags */}
         <div style={{ display: 'flex', gap: '14px' }}>
-          {['gpt-5.6-sol (900K Context)', 'gpt-5.6-terra (Balanced)', 'gpt-5.6-luna (Fast)', 'openai-gpt-image-2 (Vision)'].map((m, i) => (
+          {['gpt-5.6-sol (900K Context)', 'gpt-5.6-terra (Balanced)', 'gpt-5.6-luna (Fast)', 'openai-gpt-image-latest (Vision)'].map((m, i) => (
             <div
               key={i}
               style={{

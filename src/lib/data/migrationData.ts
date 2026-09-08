@@ -297,7 +297,7 @@ response = client.chat.completions.create(
     keyPainPointsSolved: [
       'Eliminates cold-start container spin-up delays (0ms cold start on GALXAI)',
       'Replaces unpredictable per-second hardware billing with deterministic token rates',
-      'Native /v1/images/generations endpoint for Codex Image Generation',
+      'Native /v1/images/generations endpoint for OpenAI Image Generation',
     ],
     beforeCode: {
       language: 'python',
@@ -322,7 +322,7 @@ client = OpenAI(
 
 # Instant wholesale image synthesis (0ms cold start)
 response = client.images.generate(
-    model="openai-gpt-image-2",
+    model="openai-gpt-image-latest",
     prompt="A cinematic landscape",
     size="1024x1024"
 )`,
@@ -334,7 +334,7 @@ response = client.images.generate(
       },
       {
         step: 'Step 2: Benefit from Wholesale Rates',
-        desc: 'Pay $0.032/image for Codex Image Generation (-20% wholesale discount).',
+        desc: 'Pay $0.032/image for OpenAI Image Generation (-20% wholesale discount).',
       },
     ],
     faqs: [

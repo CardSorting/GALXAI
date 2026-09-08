@@ -62,7 +62,7 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
       'gpt-5.6-sol': 1,
       'gpt-5.6-terra': 2,
       'gpt-5.6-luna': 3,
-      'openai-gpt-image-2': 1,
+      'openai-gpt-image-latest': 1,
     };
 
     return unique.sort((a, b) => (orderMap[a.id] ?? 99) - (orderMap[b.id] ?? 99));
@@ -144,7 +144,7 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
                     : 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30'
                 }`}
               >
-                OpenAI Codex Fleet
+                OpenAI
               </span>
 
               <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-300 text-xs font-mono">

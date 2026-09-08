@@ -103,7 +103,7 @@ export async function GET() {
       '/images/generations': {
         post: {
           summary: 'Create Image Generation',
-          description: 'Generate images from text prompts using Codex Image Generation.',
+          description: 'Generate images from text prompts using OpenAI Image Generation.',
           operationId: 'createImage',
           security: [{ BearerAuth: [] }],
         },

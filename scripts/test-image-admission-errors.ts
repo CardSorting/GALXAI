@@ -15,7 +15,7 @@ for (const reason of ['SHARD_NOT_HEALTHY', 'SHARD_COOLDOWN', 'SHARD_CONCURRENCY_
     return { status: 'no_healthy_shards', reason };
   } };
   await assert.rejects(router.routeImageGeneration({
-    request: { model: 'openai-gpt-image-2', prompt: 'test' }, userId: 'test', requestId: 'test',
+    request: { model: 'openai-gpt-image-latest', prompt: 'test' }, userId: 'test', requestId: 'test',
   }), (error: Error) => {
     assert(error instanceof ImageCapacityError);
     assert.equal(error.status, 503);

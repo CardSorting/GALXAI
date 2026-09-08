@@ -66,8 +66,8 @@ export const BENCHMARKS_DATA: ModelBenchmarkItem[] = [
     architectureTier: 'Frontier Reasoning',
   },
   {
-    modelId: 'openai-gpt-image-2',
-    name: 'Codex Image Generation',
+    modelId: 'openai-gpt-image-latest',
+    name: 'OpenAI Image Generation',
     provider: 'OpenAI',
     category: 'Image Synthesis',
     avgTtftMs: 420.0,

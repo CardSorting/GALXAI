@@ -404,7 +404,7 @@ export function CompareClient() {
                         </div>
                         <div className="min-w-0">
                           <div className="font-bold text-white text-xs truncate">{m.id}</div>
-                          <span className="text-[10px] text-zinc-500 font-mono uppercase">{m.provider === 'openai' ? 'OpenAI Codex' : 'GALXAI SOTA'}</span>
+                          <span className="text-[10px] text-zinc-500 font-mono uppercase">{m.provider === 'openai' ? 'OpenAI' : 'GALXAI SOTA'}</span>
                         </div>
                       </div>
 

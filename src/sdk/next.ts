@@ -100,7 +100,7 @@ export function createImageRoute(options: RouteHandlerOptions = {}) {
 
       const params: ImageGenerateParams = {
         prompt,
-        model: body.model || options.defaultModel || 'openai-gpt-image-2',
+        model: body.model || options.defaultModel || 'openai-gpt-image-latest',
         aspectRatio: body.aspectRatio || body.aspect_ratio || '1:1',
         size: body.size,
         quality: body.quality || 'standard',
@@ -135,7 +135,7 @@ export function createImageRoute(options: RouteHandlerOptions = {}) {
           JSON.stringify({
             created: Math.floor(Date.now() / 1000),
             data: [{ url: `https://picsum.photos/seed/galx-${seed}/1024/1024`, revised_prompt: prompt }],
-            modelUsed: body.model || 'openai-gpt-image-2',
+            modelUsed: body.model || 'openai-gpt-image-latest',
             shardId: 'galx_fallback'
           }),
           { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -234,7 +234,7 @@ export function createModelsRoute(options: RouteHandlerOptions = {}) {
       return new Response(
         JSON.stringify({
           data: [
-            { id: 'openai-gpt-image-2', name: 'Codex Image Generation', description: 'Generate images from text prompts' },
+            { id: 'openai-gpt-image-latest', name: 'OpenAI Image Generation', description: 'Generate images from text prompts' },
             { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', description: 'Flagship reasoning & text generation' }
           ]
         }),

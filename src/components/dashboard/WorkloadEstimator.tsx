@@ -96,7 +96,7 @@ const WORKLOAD_PRESETS: WorkloadPreset[] = [
     minVolume: 100,
     maxVolume: 10000,
     step: 100,
-    modelName: 'Codex Image Generation',
+    modelName: 'OpenAI Image Generation',
     upstreamCostPerUnit: 0.040,
     galxCostPerUnit: 0.020
   }

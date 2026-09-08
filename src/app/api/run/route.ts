@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
         taskKind: 'image_generation',
         imagePayload: {
           prompt,
-          model: 'openai-gpt-image-2'
+          model: 'openai-gpt-image-latest'
         }
       };
     }

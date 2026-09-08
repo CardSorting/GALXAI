@@ -129,7 +129,7 @@ export class GalxQueueClient {
   public enqueueImage(options: EnqueueImageOptions): { task: GalxTask; deduplicated: boolean } {
     const imagePayload: ImageGenerationRequest = {
       prompt: options.prompt,
-      model: options.model || 'openai-gpt-image-2',
+      model: options.model || 'openai-gpt-image-latest',
       size: options.size,
       quality: options.quality
     };

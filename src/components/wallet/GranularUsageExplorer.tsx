@@ -116,8 +116,8 @@ export function GranularUsageExplorer() {
       color: 'bg-indigo-400 text-indigo-400 border-indigo-400/30'
     },
     {
-      modelId: 'openai-gpt-image-2',
-      name: 'Codex Image Generation',
+      modelId: 'openai-gpt-image-latest',
+      name: 'OpenAI Image Generation',
       category: 'Frontier Visual Synthesis',
       promptTokens: 4_000,
       cachedTokens: 0,

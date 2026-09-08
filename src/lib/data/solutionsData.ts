@@ -286,18 +286,18 @@ for batch_chunk in dataset_chunks:
   {
     slug: 'visual-synthesis',
     name: 'Enterprise Visual Studio & Image Generation',
-    badge: 'Codex Image Generation',
-    title: 'Enterprise Visual Synthesis API with Codex Image Generation',
+    badge: 'OpenAI Image Generation',
+    title: 'Enterprise Visual Synthesis API with OpenAI Image Generation',
     headline: 'Enterprise Image Generation API with Wholesale Rates',
     description:
       'Generate ultra-high-definition marketing graphics, UI mockups, and photorealistic renders at 25% below direct list prices using standard OpenAI /v1/images endpoints.',
     targetWorkload: 'Marketing creative generation, photorealistic product rendering, typography generation.',
-    primaryModelId: 'openai-gpt-image-2',
+    primaryModelId: 'openai-gpt-image-latest',
     estimatedSavingsPct: 25,
     keyBenefits: [
       {
         title: 'Photorealistic Text & Typography',
-        description: 'Codex Image Generation renders sharp, accurate embedded text and brand typography.',
+        description: 'OpenAI Image Generation renders sharp, accurate embedded text and brand typography.',
       },
       {
         title: '1-Line OpenAI Images Parity',
@@ -305,7 +305,7 @@ for batch_chunk in dataset_chunks:
       },
       {
         title: 'Instant Wholesale Pricing',
-        description: 'Pay $0.032/image for Codex Image Generation (List $0.040) with zero monthly seat surcharges.',
+        description: 'Pay $0.032/image for OpenAI Image Generation (List $0.040) with zero monthly seat surcharges.',
       },
     ],
     codeSnippet: {
@@ -318,7 +318,7 @@ client = OpenAI(
 )
 
 response = client.images.generate(
-    model="openai-gpt-image-2",
+    model="openai-gpt-image-latest",
     prompt="Futuristic holographic control panel with crisp glowing text 'GALXAI CORE ONLINE'",
     size="1024x1024",
     quality="hd"
@@ -327,8 +327,8 @@ print(response.data[0].url)`,
     },
     faqs: [
       {
-        q: 'How do I use Codex Image Generation?',
-        a: 'Send a text prompt to /v1/images/generations using the openai-gpt-image-2 model ID. Describe the subject, composition, and style you want.',
+        q: 'How do I use OpenAI Image Generation?',
+        a: 'Send a text prompt to /v1/images/generations using the openai-gpt-image-latest model ID. Describe the subject, composition, and style you want.',
       },
     ],
   },

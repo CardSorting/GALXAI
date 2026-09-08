@@ -145,7 +145,7 @@ print(response.choices[0].message.content)`;
     },
     {
       q: 'Can I switch between OpenAI models and visual models using the same API key?',
-      a: 'Yes. A single GALXAI API key unlocks unified routing across GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, Codex Image Generation, and Vector Embeddings.',
+      a: 'Yes. A single GALXAI API key unlocks unified routing across GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, OpenAI Image Generation, and Vector Embeddings.',
     },
   ];
 

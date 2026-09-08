@@ -262,13 +262,13 @@ export const WORKLOAD_BENCHMARKS_DATA: WorkloadBenchmarkItem[] = [
       'Benchmark comparisons evaluating generation latency, prompt adherence, typography clarity, and resolution across image synthesis endpoints.',
     targetUseCases: ['Dynamic In-App Graphic Generation', 'Marketing Studio Assets', 'UI Design Prototyping'],
     aeoDirectAnswer:
-      'Codex Image Generation leads visual synthesis benchmarks with crisp typography, sub-500ms dispatch latency, and $0.032 wholesale image pricing.',
-    topRankedWinner: 'Codex Image Generation',
+      'OpenAI Image Generation leads visual synthesis benchmarks with crisp typography, sub-500ms dispatch latency, and $0.032 wholesale image pricing.',
+    topRankedWinner: 'OpenAI Image Generation',
     rankedModels: [
       {
         rank: 1,
-        modelId: 'openai-gpt-image-2',
-        name: 'Codex Image Generation',
+        modelId: 'openai-gpt-image-latest',
+        name: 'OpenAI Image Generation',
         provider: 'OpenAI',
         primaryScore: '98.2% Typography',
         secondaryScore: '$0.032 / img',

@@ -80,7 +80,7 @@ const CATEGORIES: SimpleCategory[] = [
     label: 'Photorealistic 4K Visual Studio',
     sublabel: 'Best for Ad Creatives, Product Mockups & Banners',
     icon: ImageIcon,
-    recommendedModelId: 'openai-gpt-image-2',
+    recommendedModelId: 'openai-gpt-image-latest',
     plainUseCases: [
       'Studio-quality 4K product photography and renders',
       'High-converting social media ad visual assets',
@@ -94,7 +94,7 @@ const CATEGORIES: SimpleCategory[] = [
     label: 'Photorealistic Visuals & Art',
     sublabel: 'Best for Social Assets, Concept Art & UI Graphics',
     icon: Sparkles,
-    recommendedModelId: 'openai-gpt-image-2',
+    recommendedModelId: 'openai-gpt-image-latest',
     plainUseCases: [
       'Photorealistic social media graphics and lifestyle assets',
       'Rapid concept art and editorial illustrations',

@@ -33,7 +33,7 @@ export function GalxAIProvider({
   children,
   client,
   endpoint,
-  defaultModel = 'openai-gpt-image-2'
+  defaultModel = 'openai-gpt-image-latest'
 }: GalxAIProviderProps) {
   return (
     <GalxAIContext.Provider value={{ client, endpoint, defaultModel }}>
@@ -119,7 +119,7 @@ export function useImageGeneration(options: { endpoint?: string; defaultModel?: 
         const mockResult = {
           created: Math.floor(Date.now() / 1000),
           data: [{ url: mockUrl, revised_prompt: prompt }],
-          modelUsed: payload.model || 'openai-gpt-image-2',
+          modelUsed: payload.model || 'openai-gpt-image-latest',
         };
         setResult(mockResult);
         setImageUrl(mockUrl);
@@ -563,7 +563,7 @@ export function useModels(options: { endpoint?: string } = {}) {
         // Fallback models
         if (isMounted) {
           setModels([
-            { id: 'openai-gpt-image-2', name: 'Codex Image Generation', description: 'Generate images from text prompts' },
+            { id: 'openai-gpt-image-latest', name: 'OpenAI Image Generation', description: 'Generate images from text prompts' },
             { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', description: 'Flagship reasoning & text generation' }
           ]);
         }

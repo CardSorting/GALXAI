@@ -51,7 +51,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
     "gpt-5.6-sol",
     "gpt-5.6-terra",
     "gpt-5.6-luna",
-    "openai-gpt-image-2"
+    "openai-gpt-image-latest"
   ]
 }`,
     },
@@ -77,7 +77,7 @@ curl https://galx.ai/v1/chat/completions \\
       },
       {
         name: 'Add Model Names',
-        description: 'Add "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", and "openai-gpt-image-2" to the active model list.',
+        description: 'Add "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", and "openai-gpt-image-latest" to the active model list.',
       },
     ],
     faqs: [
@@ -602,7 +602,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
     faqs: [
       {
         q: 'Does Open WebUI support vision models via GALXAI?',
-        a: 'Yes. Use a vision-capable text model for image analysis; Codex Image Generation is the image creation route.',
+        a: 'Yes. Use a vision-capable text model for image analysis; OpenAI Image Generation is the image creation route.',
       },
     ],
   },

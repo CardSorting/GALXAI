@@ -415,13 +415,13 @@ export class GalxAIClientCore {
       return {
         created: Math.floor(Date.now() / 1000),
         data: [{ url: `https://picsum.photos/seed/galx-mock-${seed}/1024/1024`, revised_prompt: prompt }],
-        modelUsed: options.body?.model || 'openai-gpt-image-2'
+        modelUsed: options.body?.model || 'openai-gpt-image-latest'
       } as T;
     }
     if (path.includes('/models')) {
       return {
         data: [
-          { id: 'openai-gpt-image-2', name: 'Codex Image Generation', description: 'Generate images from text prompts' },
+          { id: 'openai-gpt-image-latest', name: 'OpenAI Image Generation', description: 'Generate images from text prompts' },
           { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', description: 'Flagship reasoning & text generation' },
           { id: 'gpt-5.6-terra', name: 'GPT-5.6 Terra', description: 'Deep analytical research engine' },
           { id: 'gpt-5.6-luna', name: 'GPT-5.6 Luna', description: 'Fast code & multi-agent executor' }

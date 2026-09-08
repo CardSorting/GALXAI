@@ -71,7 +71,7 @@ export function inferIntent(input: string): InferredIntent {
     return {
       type: 'image',
       prompt: cleanPrompt,
-      model: 'openai-gpt-image-2',
+      model: 'openai-gpt-image-latest',
       aspectRatio,
       quality: isHD ? 'hd' : 'standard'
     };

@@ -80,8 +80,8 @@ const MODEL_METADATA: Record<string, ModelCuratedMetadata> = {
     ],
     cacheDiscountPercent: 90,
   },
-  'openai-gpt-image-2': {
-    roleBadge: 'Codex Image Generation',
+  'openai-gpt-image-latest': {
+    roleBadge: 'OpenAI Image Generation',
     speedTier: 'Text-to-image generation',
     bestFor: [
       'Commercial advertising & visual assets',
@@ -830,7 +830,7 @@ console.log(res.choices[0].message.content);`;
                           </div>
                           <div>
                             <span className="text-[10px] font-mono text-zinc-400 uppercase block tracking-wider">
-                              {model.provider === 'openai' ? 'OpenAI Codex' : 'Frontier Engine'}
+                              {model.provider === 'openai' ? 'OpenAI' : 'Frontier Engine'}
                             </span>
                             <div className="flex items-center gap-1.5">
                               <Link

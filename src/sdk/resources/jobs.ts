@@ -50,7 +50,7 @@ export class JobsResource {
         taskKind: 'image_generation',
         imagePayload: {
           prompt: params.prompt || '',
-          model: params.model || 'openai-gpt-image-2'
+          model: params.model || 'openai-gpt-image-latest'
         }
       };
     } else if (jobType === 'webhook' && params.webhookUrl) {

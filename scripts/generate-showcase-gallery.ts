@@ -76,7 +76,7 @@ async function main() {
   const routerResult = await galxRouter.routeImageGeneration({
     request: {
       prompt: prompt2,
-      model: 'openai-gpt-image-2',
+      model: 'openai-gpt-image-latest',
       size: '1024x1024',
       quality: 'hd',
       response_format: 'b64_json',

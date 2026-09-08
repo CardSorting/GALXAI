@@ -7,7 +7,7 @@ import type { DbQueryOptions, DbAggregateQuery } from '../broccolidb/broccolidb.
 /**
  * Exclusive Model Catalog for GALXAI.
  * Houses only the requested flagship modern generation LLMs & visual synthesis engines:
- * - OpenAI Codex & GPT-5.6 Suite: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `openai-gpt-image-2`
+ * - OpenAI Codex & GPT-5.6 Suite: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `openai-gpt-image-latest`
  *
  * Text-model rates are the OpenAI public API rates, verified 2026-08-27.
  * Any negotiated GALXAI rebate must be applied as an explicit billing contract,
@@ -76,9 +76,9 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
 
   // --- 2. OpenAI Visual Synthesis & Image Generation Suite ---
   {
-    id: 'openai-gpt-image-2',
+    id: 'openai-gpt-image-latest',
     upstreamId: 'gpt-image-2',
-    name: 'Codex Image Generation',
+    name: 'OpenAI Image Generation',
     provider: 'openai',
     category: 'image',
     contextWindowTokens: 128_000,
@@ -321,39 +321,41 @@ export class ModelCatalog {
       'xai/grok-4.5': 'gpt-5.6-terra',
 
       // Visual / Image Synthesis variations
-      'image': 'openai-gpt-image-2',
-      'images': 'openai-gpt-image-2',
-      'generate-image': 'openai-gpt-image-2',
-      'image-generation': 'openai-gpt-image-2',
-      'gpt-image': 'openai-gpt-image-2',
-      'gpt-image-2': 'openai-gpt-image-2',
-      'gpt-image-2.0': 'openai-gpt-image-2',
-      'gptimage2': 'openai-gpt-image-2',
-      '4k-image': 'openai-gpt-image-2',
-      'gpt-image-1.5': 'openai-gpt-image-2',
-      'gpt-image-1-5': 'openai-gpt-image-2',
-      'photoreal': 'openai-gpt-image-2',
-      'gpt-image-1': 'openai-gpt-image-2',
-      'gpt4o-image': 'openai-gpt-image-2',
-      'gpt-4o-image': 'openai-gpt-image-2',
-      'dalle': 'openai-gpt-image-2',
-      'dalle-3': 'openai-gpt-image-2',
-      'dalle3': 'openai-gpt-image-2',
-      'dall-e': 'openai-gpt-image-2',
-      'dall-e-3': 'openai-gpt-image-2',
-      'dalle-2': 'openai-gpt-image-2',
-      'dall-e-2': 'openai-gpt-image-2',
-      'grok-image': 'openai-gpt-image-2',
-      'grok-imagine': 'openai-gpt-image-2',
-      'imagine': 'openai-gpt-image-2',
-      'imagine-1': 'openai-gpt-image-2',
-      'grok-2-image': 'openai-gpt-image-2',
-      'grok-image-2': 'openai-gpt-image-2',
-      'midjourney': 'openai-gpt-image-2',
-      'flux': 'openai-gpt-image-2',
-      'flux-pro': 'openai-gpt-image-2',
-      'flux-schnell': 'openai-gpt-image-2',
-      'stable-diffusion': 'openai-gpt-image-2'
+      'image': 'openai-gpt-image-latest',
+      'images': 'openai-gpt-image-latest',
+      'generate-image': 'openai-gpt-image-latest',
+      'image-generation': 'openai-gpt-image-latest',
+      'gpt-image': 'openai-gpt-image-latest',
+      'openai-gpt-image-2': 'openai-gpt-image-latest',
+      'gpt-image-latest': 'openai-gpt-image-latest',
+      'gpt-image-2': 'openai-gpt-image-latest',
+      'gpt-image-2.0': 'openai-gpt-image-latest',
+      'gptimage2': 'openai-gpt-image-latest',
+      '4k-image': 'openai-gpt-image-latest',
+      'gpt-image-1.5': 'openai-gpt-image-latest',
+      'gpt-image-1-5': 'openai-gpt-image-latest',
+      'photoreal': 'openai-gpt-image-latest',
+      'gpt-image-1': 'openai-gpt-image-latest',
+      'gpt4o-image': 'openai-gpt-image-latest',
+      'gpt-4o-image': 'openai-gpt-image-latest',
+      'dalle': 'openai-gpt-image-latest',
+      'dalle-3': 'openai-gpt-image-latest',
+      'dalle3': 'openai-gpt-image-latest',
+      'dall-e': 'openai-gpt-image-latest',
+      'dall-e-3': 'openai-gpt-image-latest',
+      'dalle-2': 'openai-gpt-image-latest',
+      'dall-e-2': 'openai-gpt-image-latest',
+      'grok-image': 'openai-gpt-image-latest',
+      'grok-imagine': 'openai-gpt-image-latest',
+      'imagine': 'openai-gpt-image-latest',
+      'imagine-1': 'openai-gpt-image-latest',
+      'grok-2-image': 'openai-gpt-image-latest',
+      'grok-image-2': 'openai-gpt-image-latest',
+      'midjourney': 'openai-gpt-image-latest',
+      'flux': 'openai-gpt-image-latest',
+      'flux-pro': 'openai-gpt-image-latest',
+      'flux-schnell': 'openai-gpt-image-latest',
+      'stable-diffusion': 'openai-gpt-image-latest'
     };
 
     if (aliases[normalized] && this.catalog.has(aliases[normalized])) {
@@ -386,7 +388,7 @@ export class ModelCatalog {
 
     // 8. Intent Category Detection: If developer requested an image term, route to that category
     if (normalized.includes('image') || normalized.includes('draw') || normalized.includes('photo') || normalized.includes('art') || normalized.includes('dall')) {
-      return this.catalog.get('openai-gpt-image-2') || EXCLUSIVE_MODEL_CATALOG.find(m => m.category === 'image')!;
+      return this.catalog.get('openai-gpt-image-latest') || EXCLUSIVE_MODEL_CATALOG.find(m => m.category === 'image')!;
     }
 
     // 9. Zero-hesitation ultimate fallback: default flagship LLM

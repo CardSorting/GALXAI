@@ -13,7 +13,7 @@ export const metadata: Metadata = constructMetadata({
     'GPT-5.6 Sol Pricing',
     'GPT-5.6 Terra Specs',
     'GPT-5.6 Luna Benchmarks',
-    'Codex Image Generation API',
+    'OpenAI Image Generation API',
     'Wholesale AI Inference',
     'Prompt Caching LLM',
     'OpenAI SDK Compatible Models',

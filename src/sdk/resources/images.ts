@@ -242,7 +242,7 @@ export class ImagesResource {
 
     return {
       prompt: params.prompt,
-      model: params.model || 'openai-gpt-image-2',
+      model: params.model || 'openai-gpt-image-latest',
       size: size || '1024x1024',
       aspectRatio: ratio || '1:1',
       quality: quality || 'standard',
@@ -315,9 +315,9 @@ export class ImagesResource {
       const res: ImageGenerationResponse = {
         created: Math.floor(Date.now() / 1000),
         data: [{ url: `https://images.galxai.dev/mock_edit_${Date.now()}.png` }],
-        modelUsed: params.model || 'openai-gpt-image-2'
+        modelUsed: params.model || 'openai-gpt-image-latest'
       };
-      this.history.record(params.prompt, params.model || 'openai-gpt-image-2', params.size || '1024x1024', [res.data[0].url!]);
+      this.history.record(params.prompt, params.model || 'openai-gpt-image-latest', params.size || '1024x1024', [res.data[0].url!]);
       return wrapImageResponse(res);
     }
 
@@ -337,7 +337,7 @@ export class ImagesResource {
       ...options
     });
 
-    this.history.record(params.prompt, params.model || 'openai-gpt-image-2', params.size || '1024x1024', res.data.map(d => d.url!));
+    this.history.record(params.prompt, params.model || 'openai-gpt-image-latest', params.size || '1024x1024', res.data.map(d => d.url!));
     return wrapImageResponse(res);
   }
 
@@ -362,9 +362,9 @@ export class ImagesResource {
         data: Array.from({ length: params.n || 1 }).map((_, i) => ({
           url: `https://images.galxai.dev/mock_variation_${Date.now()}_${i}.png`
         })),
-        modelUsed: params.model || 'openai-gpt-image-2'
+        modelUsed: params.model || 'openai-gpt-image-latest'
       };
-      this.history.record('variation', params.model || 'openai-gpt-image-2', params.size || '1024x1024', res.data.map(d => d.url!));
+      this.history.record('variation', params.model || 'openai-gpt-image-latest', params.size || '1024x1024', res.data.map(d => d.url!));
       return wrapImageResponse(res);
     }
 
@@ -380,7 +380,7 @@ export class ImagesResource {
       ...options
     });
 
-    this.history.record('variation', params.model || 'openai-gpt-image-2', params.size || '1024x1024', res.data.map(d => d.url!));
+    this.history.record('variation', params.model || 'openai-gpt-image-latest', params.size || '1024x1024', res.data.map(d => d.url!));
     return wrapImageResponse(res);
   }
 

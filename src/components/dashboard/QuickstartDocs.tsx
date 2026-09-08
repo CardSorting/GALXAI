@@ -37,7 +37,7 @@ npx galxai chat`,
     "gpt-5.6-sol",
     "gpt-5.6-terra",
     "gpt-5.6-luna",
-    "openai-gpt-image-2"
+    "openai-gpt-image-latest"
   ]
 }`,
 

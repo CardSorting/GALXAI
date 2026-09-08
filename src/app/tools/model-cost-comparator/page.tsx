@@ -40,7 +40,7 @@ export default function ModelCostComparatorPage() {
     },
     {
       q: 'Can I switch between OpenAI and xAI models using the same API key?',
-      a: 'Yes. A single GALXAI API key unlocks unified routing across GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, Grok 4.6 (1M context), and Codex Image Generation.',
+      a: 'Yes. A single GALXAI API key unlocks unified routing across GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna, Grok 4.6 (1M context), and OpenAI Image Generation.',
     },
   ];
 

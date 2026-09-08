@@ -78,9 +78,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Resolve model alias
-    const requestedModel = rawBody.model || 'openai-gpt-image-2';
+    const requestedModel = rawBody.model || 'openai-gpt-image-latest';
     const resolvedModelSpec = ModelCatalog.resolveModel(requestedModel);
-    const resolvedModelId = resolvedModelSpec.category === 'image' ? resolvedModelSpec.id : 'openai-gpt-image-2';
+    const resolvedModelId = resolvedModelSpec.category === 'image' ? resolvedModelSpec.id : 'openai-gpt-image-latest';
 
     const sessionId =
       req.headers.get('x-galx-session-id') ||

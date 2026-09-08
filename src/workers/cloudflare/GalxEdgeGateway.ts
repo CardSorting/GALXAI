@@ -876,7 +876,7 @@ export class GalxEdgeGateway {
   }
 
   private async handleListModels(): Promise<Response> {
-    const cacheKey = 'models:catalog:list:v2';
+    const cacheKey = 'models:catalog:list:v3';
     if (this.env.EDGE_CACHE) {
       try {
         const cached = await this.env.EDGE_CACHE.get(cacheKey);
@@ -897,7 +897,7 @@ export class GalxEdgeGateway {
       { id: 'gpt-5.6-sol', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' },
       { id: 'gpt-5.6-terra', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' },
       { id: 'gpt-5.6-luna', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' },
-      { id: 'openai-gpt-image-2', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' },
+      { id: 'openai-gpt-image-latest', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' },
     ];
 
     const payload = JSON.stringify({ object: 'list', data: models });
@@ -1045,7 +1045,7 @@ export class GalxEdgeGateway {
 
     if (this.env.OPENAI_API_KEY) {
       try {
-        const modelSpec = ModelCatalog.resolveModel(body.model || 'openai-gpt-image-2');
+        const modelSpec = ModelCatalog.resolveModel(body.model || 'openai-gpt-image-latest');
         const upstreamResponse = await fetch('https://api.openai.com/v1/images/generations', {
           method: 'POST',
           headers: {
@@ -1080,7 +1080,7 @@ export class GalxEdgeGateway {
     }
 
     const prompt = body.prompt || 'Synthesized generation';
-    const model = body.model || 'openai-gpt-image-2';
+    const model = body.model || 'openai-gpt-image-latest';
     const n = Math.min(body.n || 1, 4);
     const publicBase = this.env.PUBLIC_ASSETS_URL || 'https://pub-9aab2b19ca7947c59240e3869c544e20.r2.dev';
 

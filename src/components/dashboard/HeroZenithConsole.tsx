@@ -77,8 +77,8 @@ const HERO_MODELS: ModelPreset[] = [
     accentColor: 'from-emerald-400 to-teal-500'
   },
   {
-    id: 'openai-gpt-image-2',
-    name: 'Codex Image Generation',
+    id: 'openai-gpt-image-latest',
+    name: 'OpenAI Image Generation',
     provider: 'Visual',
     retailPrice: 0.08,
     wholesalePrice: 0.06,

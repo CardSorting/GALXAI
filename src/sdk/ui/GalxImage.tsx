@@ -24,7 +24,7 @@ export interface GalxImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageEl
 
 export function GalxImage({
   prompt,
-  model = 'openai-gpt-image-2',
+  model = 'openai-gpt-image-latest',
   aspectRatio = '1:1',
   quality = 'standard',
   seed,

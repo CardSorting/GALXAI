@@ -47,7 +47,7 @@ export function createExpressImageHandler(options: ExpressAdapterOptions = {}) {
 
       const params: ImageGenerateParams = {
         prompt,
-        model: model || options.defaultModel || 'openai-gpt-image-2',
+        model: model || options.defaultModel || 'openai-gpt-image-latest',
         aspectRatio: aspectRatio || '1:1',
         size,
         quality: quality || 'standard',

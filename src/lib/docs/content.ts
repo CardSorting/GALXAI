@@ -152,10 +152,10 @@ if (typeof result.summary !== "string") throw new Error("Invalid summary");` }] 
     },
   },
 }]` }], steps: ['Read message.tool_calls and validate the function name and JSON arguments.', 'Run only functions your application permits.', 'Append the assistant tool-call message, then a tool message with the matching tool_call_id and string content.', 'Send the updated messages to get the final answer.'] },
-      { id: 'images', title: 'Generate an image', body: ['Generate an image with Codex Image Generation using the openai-gpt-image-2 model ID. Describe the subject, composition, and style in your prompt. Handle the returned response format instead of assuming it always contains a public URL.'], code: [{ label: 'cURL', source: `curl --fail-with-body ${GALX_API_BASE_URL}/images/generations \\
+      { id: 'images', title: 'Generate an image', body: ['Generate an image with OpenAI Image Generation using the openai-gpt-image-latest model ID. Describe the subject, composition, and style in your prompt. Handle the returned response format instead of assuming it always contains a public URL.'], code: [{ label: 'cURL', source: `curl --fail-with-body ${GALX_API_BASE_URL}/images/generations \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
   -H "Content-Type: application/json" \\
-  -d '{"model":"openai-gpt-image-2","prompt":"A blue ceramic cup on a table","n":1}'` }], links: [{ href: '/models', label: 'Image models' }] },
+  -d '{"model":"openai-gpt-image-latest","prompt":"A blue ceramic cup on a table","n":1}'` }], links: [{ href: '/models', label: 'Image models' }] },
       { id: 'prompt-caching', title: 'Keep reusable context stable', body: ['Put shared instructions before changing user input. Reuse the exact prefix when possible. Cache behavior and reported usage depend on the model and provider; do not assume every repeated request is cached.'] },
       { id: 'agents', title: 'Keep agent sessions separate', body: ['Keep each user or agent’s message history separate. Pass only the history for that conversation. If using explicit session identifiers, do not reuse them across users.'], links: [{ href: '/docs#agent-setup', label: 'Copy setup for your coding agent' }] },
     ],

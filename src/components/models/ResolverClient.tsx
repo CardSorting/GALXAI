@@ -41,7 +41,7 @@ const PRESET_GROUPS: PresetGroup[] = [
   },
   {
     group: 'Visual & Multimodal',
-    items: ['image', 'dalle-3', 'openai-gpt-image-2'],
+    items: ['image', 'dalle-3', 'openai-gpt-image-latest'],
   },
   {
     group: 'Namespaced & Legacy Aliases',

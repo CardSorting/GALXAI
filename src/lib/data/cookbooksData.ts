@@ -365,9 +365,9 @@ print(query_knowledge_base("Summarize ESG initiatives."))`,
   {
     slug: 'image-generation-gpt-image-2',
     category: 'Visual Synthesis',
-    badge: 'Codex Image Generation',
-    title: 'Generating Images with Codex Image Generation',
-    headline: 'Generate Images with Codex Image Generation on GALXAI',
+    badge: 'OpenAI Image Generation',
+    title: 'Generating Images with OpenAI Image Generation',
+    headline: 'Generate Images with OpenAI Image Generation on GALXAI',
     description:
       'Create photorealistic images with readable typography, UI mockups, and marketing assets at 20% below retail list prices.',
     difficulty: 'Beginner',
@@ -383,7 +383,7 @@ client = OpenAI(
 
 # Generate image with crisp typography and complex composition
 response = client.images.generate(
-    model="openai-gpt-image-2",
+    model="openai-gpt-image-latest",
     prompt="Sleek glassmorphism developer dashboard with glowing neon telemetry graph and title 'GALXAI ANYCAST READY'",
     size="1024x1024",
     quality="hd"
@@ -394,7 +394,7 @@ print(f"Generated Asset: {image_url}")`,
     steps: [
       {
         name: 'Call client.images.generate',
-        description: 'Specify model="openai-gpt-image-2" with your visual prompt.',
+        description: 'Specify model="openai-gpt-image-latest" with your visual prompt.',
       },
       {
         name: 'Receive HD Asset URL',
@@ -403,8 +403,8 @@ print(f"Generated Asset: {image_url}")`,
     ],
     faqs: [
       {
-        q: 'What is the cost per image for Codex Image Generation on GALXAI?',
-        a: 'Codex Image Generation costs $0.032/image (20% wholesale discount vs $0.040 direct list price).',
+        q: 'What is the cost per image for OpenAI Image Generation on GALXAI?',
+        a: 'OpenAI Image Generation costs $0.032/image (20% wholesale discount vs $0.040 direct list price).',
       },
     ],
   },

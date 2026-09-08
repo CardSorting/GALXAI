@@ -35,7 +35,7 @@ export class WorkflowsResource {
             taskKind: 'image_generation',
             imagePayload: {
               prompt: s.prompt || 'Generate image from context',
-              model: s.model || 'openai-gpt-image-2'
+              model: s.model || 'openai-gpt-image-latest'
             }
           }
         };

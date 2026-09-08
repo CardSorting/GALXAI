@@ -225,7 +225,7 @@ export class GalxR2AssetAdapter {
       'session_id': sessionId,
       'image_id': imageId,
       'prompt': sanitizeHeaderValue(params.prompt || ''),
-      'model': params.model || 'openai-gpt-image-2',
+      'model': params.model || 'openai-gpt-image-latest',
       'dimensions': params.size || '1024x1024',
       'quality': params.quality || 'standard',
       'created_at_ms': String(Date.now())
@@ -278,7 +278,7 @@ export class GalxR2AssetAdapter {
         status: 'completed',
         prompt: params.prompt || 'Visual synthesis',
         revisedPrompt: params.revisedPrompt || null,
-        model: params.model || 'openai-gpt-image-2',
+        model: params.model || 'openai-gpt-image-latest',
         aspectRatio,
         dimensions: params.size || '1024x1024',
         quality: params.quality || 'standard',

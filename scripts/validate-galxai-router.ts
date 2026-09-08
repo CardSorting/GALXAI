@@ -577,23 +577,23 @@ async function runAllTests() {
   });
 
   await test('Model Catalog: Correctly maps exclusive visual synthesis models', () => {
-    const gptImg = ModelCatalog.resolveModel('openai-gpt-image-2');
-    assert.strictEqual(gptImg?.id, 'openai-gpt-image-2');
+    const gptImg = ModelCatalog.resolveModel('openai-gpt-image-latest');
+    assert.strictEqual(gptImg?.id, 'openai-gpt-image-latest');
     assert.strictEqual(gptImg?.category, 'image');
 
     assert.deepStrictEqual(
       ModelCatalog.listAll().filter(model => model.category === 'image').map(model => model.id),
-      ['openai-gpt-image-2']
+      ['openai-gpt-image-latest']
     );
-    for (const legacyId of ['openai-gpt-image-1.5', 'openai-gpt-image-1', 'gpt-image-1.5', 'gpt-image-1', 'dall-e-2', 'photoreal']) {
-      assert.strictEqual(ModelCatalog.resolveModel(legacyId).id, 'openai-gpt-image-2');
+    for (const legacyId of ['openai-gpt-image-2', 'gpt-image-latest', 'openai-gpt-image-1.5', 'openai-gpt-image-1', 'gpt-image-1.5', 'gpt-image-1', 'dall-e-2', 'photoreal']) {
+      assert.strictEqual(ModelCatalog.resolveModel(legacyId).id, 'openai-gpt-image-latest');
     }
 
     const grokImg = ModelCatalog.resolveModel('xai-grok-image');
-    assert.strictEqual(grokImg?.id, 'openai-gpt-image-2');
+    assert.strictEqual(grokImg?.id, 'openai-gpt-image-latest');
 
     const dalle = ModelCatalog.resolveModel('dalle-3');
-    assert.strictEqual(dalle?.id, 'openai-gpt-image-2');
+    assert.strictEqual(dalle?.id, 'openai-gpt-image-latest');
   });
 
   // --- SUITE 6: Preflight Key Format & Upstream Target Validation ---

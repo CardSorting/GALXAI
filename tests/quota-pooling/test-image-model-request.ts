@@ -1,7 +1,7 @@
 /**
  * GALXAI: OpenAI Codex GPT-Image-2 (Ultra 4K SOTA) Pool Verification
  * Dispatches visual synthesis and image generation via `galxRouter.pool`
- * using `openai-gpt-image-2` with 25% wholesale discount and atomic lease management.
+ * using `openai-gpt-image-latest` with 25% wholesale discount and atomic lease management.
  */
 
 import * as fs from 'node:fs';
@@ -78,7 +78,7 @@ async function requestImageModelFromPool() {
   console.log(`[Pool Fleet] ${accounts.length} active OpenAI shards available in pool`);
 
   // 2. Resolve Model Catalog Spec
-  const modelSpec = ModelCatalog.resolveModel('openai-gpt-image-2');
+  const modelSpec = ModelCatalog.resolveModel('openai-gpt-image-latest');
   const retailCost = modelSpec.listPricePer1MInput ?? 0.080;
   const wholesaleCost = modelSpec.inputPricePer1M ?? 0.060;
 
@@ -179,12 +179,12 @@ async function requestImageModelFromPool() {
       activeLeasesInFleet: galxRouter.pool.getInFlightCount(shard.id),
       rotationStrategy: galxRouter.pool.getStrategy()
     },
-    outputTelemetryFile: path.join(outputDir, 'openai-gpt-image-2-generation.json'),
+    outputTelemetryFile: path.join(outputDir, 'openai-gpt-image-latest-generation.json'),
     outputShowcaseHtml: path.join(outputDir, 'image-model-showcase.html')
   };
 
   fs.writeFileSync(
-    path.join(outputDir, 'openai-gpt-image-2-generation.json'),
+    path.join(outputDir, 'openai-gpt-image-latest-generation.json'),
     JSON.stringify(telemetryProof, null, 2),
     'utf-8'
   );
@@ -353,7 +353,7 @@ async function requestImageModelFromPool() {
 
   console.log('======================================================================');
   console.log('   🎉 OPENAI GPT-IMAGE-2 SYNTHESIS VERIFIED & PROOF RECORDED!');
-  console.log(`   📄 Telemetry JSON:  ${path.join(outputDir, 'openai-gpt-image-2-generation.json')}`);
+  console.log(`   📄 Telemetry JSON:  ${path.join(outputDir, 'openai-gpt-image-latest-generation.json')}`);
   console.log(`   🖼️ Showcase HTML:   ${path.join(outputDir, 'image-model-showcase.html')}`);
   console.log('======================================================================\n');
 }

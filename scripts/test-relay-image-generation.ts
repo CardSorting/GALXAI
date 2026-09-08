@@ -60,7 +60,7 @@ async function main() {
       data: TEST_PNG_BUFFER,
       contentType: 'image/png',
       prompt: 'Test synthetic circuit blueprint',
-      model: 'openai-gpt-image-2',
+      model: 'openai-gpt-image-latest',
       size: '1024x1024',
       quality: 'hd',
     });
@@ -156,7 +156,7 @@ async function main() {
     const routerResult = await galxRouter.routeImageGeneration({
       request: {
         prompt: 'Futuristic solar eclipse over cyberpunk city skyline, cinematic lighting',
-        model: 'openai-gpt-image-2',
+        model: 'openai-gpt-image-latest',
         size: '1024x1024',
         quality: 'standard',
         sessionId: e2eSessionId,

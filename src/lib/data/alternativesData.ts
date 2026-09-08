@@ -640,7 +640,7 @@ response = client.chat.completions.create(
     faqs: [
       {
         q: 'Can I route image generation models on GALXAI?',
-        a: 'Yes. GALXAI supports Codex Image Generation via standard /v1/images/generations requests.',
+        a: 'Yes. GALXAI supports OpenAI Image Generation via standard /v1/images/generations requests.',
       },
     ],
   },
@@ -657,7 +657,7 @@ response = client.chat.completions.create(
     feeComparison: [
       {
         feature: 'Frontier Model Support',
-        galxai: 'GPT-5.6 Sol, Terra, Luna & Codex Image Generation',
+        galxai: 'GPT-5.6 Sol, Terra, Luna & OpenAI Image Generation',
         competitor: 'Specialized Open Weights & Fine-tunes',
       },
       {

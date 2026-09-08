@@ -46,7 +46,7 @@ export async function generateImageAction(
     return {
       success: true,
       data: [{ url: `https://picsum.photos/seed/galx-action-${seed}/1024/1024`, revised_prompt: prompt }],
-      modelUsed: params.model || 'openai-gpt-image-2',
+      modelUsed: params.model || 'openai-gpt-image-latest',
       isFallback: true
     };
   }
@@ -95,7 +95,7 @@ export async function listModelsAction() {
     return {
       success: true,
       data: [
-        { id: 'openai-gpt-image-2', name: 'Codex Image Generation', description: 'Generate images from text prompts' },
+        { id: 'openai-gpt-image-latest', name: 'OpenAI Image Generation', description: 'Generate images from text prompts' },
         { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', description: 'Flagship reasoning & text generation' }
       ]
     };

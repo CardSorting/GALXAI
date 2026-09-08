@@ -258,7 +258,7 @@ async function runAllTests() {
     },
     body: JSON.stringify({
       prompt: 'A futuristic cybernetic garden',
-      model: 'openai-gpt-image-2',
+      model: 'openai-gpt-image-latest',
       n: 2
     })
   });

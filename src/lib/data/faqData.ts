@@ -46,7 +46,7 @@ export const FAQS: FAQItem[] = [
     id: 'model-fleet-coverage',
     category: 'general',
     q: 'Which AI models are available?',
-    a: 'Flagship frontier models including GPT-5.6 Sol, Terra, and Luna, Codex Image Generation, and dense vector embeddings.',
+    a: 'Flagship frontier models including GPT-5.6 Sol, Terra, and Luna, OpenAI Image Generation, and dense vector embeddings.',
   },
   {
     id: 'uptime-failover-sla',

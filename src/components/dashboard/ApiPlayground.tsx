@@ -147,7 +147,7 @@ const MENTAL_MODELS = [
   { id: 'sol', name: '⚡ SOTA Coding', model: 'gpt-5.6-sol', icon: Zap, badge: '-25%' },
   { id: 'terra', name: '🧠 Deep Logic', model: 'gpt-5.6-terra', icon: Brain, badge: '-25%' },
   { id: 'luna', name: '🚀 Fast Velocity', model: 'gpt-5.6-luna', icon: Flame, badge: '-36%' },
-  { id: 'image', name: '🎨 Visual Studio', model: 'openai-gpt-image-2', icon: ImageIcon, badge: '-25%' }
+  { id: 'image', name: '🎨 Visual Studio', model: 'openai-gpt-image-latest', icon: ImageIcon, badge: '-25%' }
 ];
 
 function BaseApiPlayground() {
