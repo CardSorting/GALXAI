@@ -11,7 +11,7 @@ export interface SolutionGuide {
   description: string;
   targetWorkload: string;
   primaryModelId: string;
-  fallbackModelId: string;
+  fallbackModelId?: string;
   estimatedSavingsPct: number;
   keyBenefits: {
     title: string;
@@ -286,19 +286,18 @@ for batch_chunk in dataset_chunks:
   {
     slug: 'visual-synthesis',
     name: 'Enterprise Visual Studio & Image Generation',
-    badge: 'GPT-Image-2 & DALL-E 3',
-    title: 'Enterprise Visual Synthesis API with GPT-Image-2 & GPT-Image-1.5',
+    badge: 'Codex Image Generation',
+    title: 'Enterprise Visual Synthesis API with Codex Image Generation',
     headline: 'Enterprise Image Generation API with Wholesale Rates',
     description:
       'Generate ultra-high-definition marketing graphics, UI mockups, and photorealistic renders at 25% below direct list prices using standard OpenAI /v1/images endpoints.',
     targetWorkload: 'Marketing creative generation, photorealistic product rendering, typography generation.',
     primaryModelId: 'openai-gpt-image-2',
-    fallbackModelId: 'openai-gpt-image-1.5',
     estimatedSavingsPct: 25,
     keyBenefits: [
       {
         title: 'Photorealistic Text & Typography',
-        description: 'GPT-Image-2 renders sharp, accurate embedded text and brand typography.',
+        description: 'Codex Image Generation renders sharp, accurate embedded text and brand typography.',
       },
       {
         title: '1-Line OpenAI Images Parity',
@@ -306,7 +305,7 @@ for batch_chunk in dataset_chunks:
       },
       {
         title: 'Instant Wholesale Pricing',
-        description: 'Pay $0.032/image for GPT-Image-2 (List $0.040) with zero monthly seat surcharges.',
+        description: 'Pay $0.032/image for Codex Image Generation (List $0.040) with zero monthly seat surcharges.',
       },
     ],
     codeSnippet: {
@@ -328,8 +327,8 @@ print(response.data[0].url)`,
     },
     faqs: [
       {
-        q: 'Does GALXAI support DALL-E 3 alongside GPT-Image-2?',
-        a: 'Yes, both OpenAI DALL-E 3 and GPT-Image-2 are available with instant wholesale discounts.',
+        q: 'Which image model does Codex Image Generation use?',
+        a: 'On OAuth relays, OpenAI selects the underlying image model. The legacy openai-gpt-image-2 ID does not guarantee a specific image model version. Native API-key routes request gpt-image-2 explicitly.',
       },
     ],
   },

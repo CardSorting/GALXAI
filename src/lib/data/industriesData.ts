@@ -175,12 +175,12 @@ print(response.choices[0].message.content)`,
     title: 'Sub-15ms AI Proxy for E-Commerce Recommendations, Search & Customer Care',
     headline: 'High-Throughput Visual AI & Recommendations for Retail',
     description:
-      'Sub-15ms edge dispatch, photorealistic GPT-Image-2 studio synthesis, and 145 tok/sec streaming customer support bots.',
+      'Sub-15ms edge dispatch, photorealistic Codex Image Generation studio synthesis, and 145 tok/sec streaming customer support bots.',
     sectorName: 'E-Commerce & Digital Retail',
     targetWorkloads: ['Visual Product Synthesis', 'Semantic Product Search & Ranking', '24/7 Omnichannel Customer Care'],
     regulatoryCompliance: ['PCI DSS Level 1', 'GDPR / CCPA Data Rights', '99.99% Uptime SLA'],
     recommendedModels: [
-      { name: 'OpenAI GPT-Image-2', modelId: 'openai-gpt-image-2', role: 'On-demand high-definition product staging' },
+      { name: 'Codex Image Generation', modelId: 'openai-gpt-image-2', role: 'On-demand high-definition product staging' },
       { name: 'OpenAI GPT-5.6 Luna', modelId: 'gpt-5.6-luna', role: '145 tok/s live customer chat resolution' },
     ],
     architectureHighlights: [
@@ -312,7 +312,7 @@ print(response.choices[0].message.content)`,
     ],
     architectureHighlights: [
       'Sub-15ms Global Anycast POPs: Terminate vehicle edge telemetry at the nearest geographical cloud node',
-      'Multimodal Visual Processing: Forward camera frames directly into GPT-Image-2 vision channels',
+      'Multimodal Visual Processing: Forward camera frames to a vision-capable text model',
       'Rate-Limit Pooling: Continuous token governance prevents vehicle telemetry disconnects under fleet scale',
     ],
     codeExample: {

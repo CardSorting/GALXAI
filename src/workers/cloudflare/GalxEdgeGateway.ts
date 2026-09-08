@@ -876,7 +876,7 @@ export class GalxEdgeGateway {
   }
 
   private async handleListModels(): Promise<Response> {
-    const cacheKey = 'models:catalog:list';
+    const cacheKey = 'models:catalog:list:v2';
     if (this.env.EDGE_CACHE) {
       try {
         const cached = await this.env.EDGE_CACHE.get(cacheKey);
@@ -898,8 +898,6 @@ export class GalxEdgeGateway {
       { id: 'gpt-5.6-terra', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' },
       { id: 'gpt-5.6-luna', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' },
       { id: 'openai-gpt-image-2', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' },
-      { id: 'openai-gpt-image-1.5', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' },
-      { id: 'openai-gpt-image-1', object: 'model', owned_by: 'openai', pricing_tier: 'provider_public' }
     ];
 
     const payload = JSON.stringify({ object: 'list', data: models });

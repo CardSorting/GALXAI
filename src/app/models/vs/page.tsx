@@ -19,7 +19,6 @@ export const metadata: Metadata = constructMetadata({
     'GPT-5.6 Sol vs Luna',
     'OpenAI Model Matchups',
     'LLM Benchmark Comparison',
-    'GPT-Image 2 vs 1.5',
     'Token Economics Matchups',
   ],
 });

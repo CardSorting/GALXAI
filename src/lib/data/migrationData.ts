@@ -297,7 +297,7 @@ response = client.chat.completions.create(
     keyPainPointsSolved: [
       'Eliminates cold-start container spin-up delays (0ms cold start on GALXAI)',
       'Replaces unpredictable per-second hardware billing with deterministic token rates',
-      'Native /v1/images/generations endpoint for GPT-Image-2 and DALL-E 3',
+      'Native /v1/images/generations endpoint for Codex Image Generation',
     ],
     beforeCode: {
       language: 'python',
@@ -334,7 +334,7 @@ response = client.images.generate(
       },
       {
         step: 'Step 2: Benefit from Wholesale Rates',
-        desc: 'Pay $0.032/image for GPT-Image-2 (-20% wholesale discount).',
+        desc: 'Pay $0.032/image for Codex Image Generation (-20% wholesale discount).',
       },
     ],
     faqs: [

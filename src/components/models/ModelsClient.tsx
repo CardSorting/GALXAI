@@ -81,30 +81,12 @@ const MODEL_METADATA: Record<string, ModelCuratedMetadata> = {
     cacheDiscountPercent: 90,
   },
   'openai-gpt-image-2': {
-    roleBadge: 'Ultra 4K SOTA Visual Studio',
-    speedTier: '4K Native Synthesis',
+    roleBadge: 'Codex Image Generation',
+    speedTier: 'Provider-selected image model',
     bestFor: [
       'Commercial advertising & visual assets',
       'Complex typography & textual layout',
       'High-dynamic-range layered composition',
-    ],
-  },
-  'openai-gpt-image-1.5': {
-    roleBadge: 'Photoreal Shaders & Texture',
-    speedTier: 'High-Fidelity Photoreal',
-    bestFor: [
-      'Photorealistic scenes & environments',
-      'Physically accurate studio lighting',
-      'Micro-texture & material rendering',
-    ],
-  },
-  'openai-gpt-image-1': {
-    roleBadge: 'Fast Iterative Prototyping',
-    speedTier: 'Rapid Iteration',
-    bestFor: [
-      'Rapid concept sketching & mockups',
-      'Low-latency graphic generation',
-      'High-volume exploratory drafts',
     ],
   },
 };
@@ -364,7 +346,7 @@ console.log(res.choices[0].message.content);`;
       if (activeCategory === 'llm') return m.category === 'llm';
       if (activeCategory === 'image') return m.category === 'image';
       if (activeCategory === 'high_context') return m.contextWindowTokens >= 500000;
-      if (activeCategory === 'low_latency') return m.id.includes('luna') || m.id.includes('image-1');
+      if (activeCategory === 'low_latency') return m.id.includes('luna');
       return true;
     });
 
@@ -692,7 +674,7 @@ console.log(res.choices[0].message.content);`;
                     ? FRONTEND_VISIBLE_MODELS.filter((m) => m.category === 'image').length
                     : tab.id === 'high_context'
                     ? FRONTEND_VISIBLE_MODELS.filter((m) => m.contextWindowTokens >= 500000).length
-                    : FRONTEND_VISIBLE_MODELS.filter((m) => m.id.includes('luna') || m.id.includes('image-1')).length;
+                    : FRONTEND_VISIBLE_MODELS.filter((m) => m.id.includes('luna')).length;
                 const isSelected = activeCategory === tab.id;
 
                 return (

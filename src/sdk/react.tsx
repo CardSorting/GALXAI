@@ -563,8 +563,7 @@ export function useModels(options: { endpoint?: string } = {}) {
         // Fallback models
         if (isMounted) {
           setModels([
-            { id: 'openai-gpt-image-2', name: 'GPT-Image-2 Studio', description: 'Flagship 4K visual synthesis' },
-            { id: 'openai-gpt-image-1.5', name: 'GPT-Image-1.5 Pro', description: 'High-speed artwork & character design' },
+            { id: 'openai-gpt-image-2', name: 'Codex Image Generation', description: 'Image generation with a provider-selected model on OAuth relays' },
             { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', description: 'Flagship reasoning & text generation' }
           ]);
         }

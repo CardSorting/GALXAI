@@ -73,7 +73,6 @@ export const SITE_CONFIG = {
     'gpt-5.6-terra',
     'gpt-5.6-luna',
     'openai-gpt-image-2',
-    'openai-gpt-image-1.5',
     'Prompt Caching Rebate',
     'Continuous Token Governor',
     'Cursor AI Base URL',

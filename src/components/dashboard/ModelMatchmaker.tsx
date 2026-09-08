@@ -106,7 +106,7 @@ const GOALS: MatchmakerGoal[] = [
     label: 'Image & Visual Studio 4K',
     desc: 'Photorealistic banners, concept art, and product mockups.',
     recommendedModelId: 'openai-gpt-image-2',
-    recommendedModelName: 'GPT-Image-2 (Photoreal 4K)',
+    recommendedModelName: 'Codex Image Generation',
     provider: 'OpenAI Visual Synthesis',
     why: 'Studio-grade HDR lighting, typography in images, and fine details.',
     context: '4K Ultra-HD Matrix',

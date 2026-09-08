@@ -365,9 +365,9 @@ print(query_knowledge_base("Summarize ESG initiatives."))`,
   {
     slug: 'image-generation-gpt-image-2',
     category: 'Visual Synthesis',
-    badge: 'GPT-Image-2 Studio',
-    title: 'Generating High-Resolution Graphics with GPT-Image-2 API',
-    headline: 'Generate Ultra-HD Visuals with GPT-Image-2 on GALXAI',
+    badge: 'Codex Image Generation',
+    title: 'Generating Images with Codex Image Generation',
+    headline: 'Generate Images with Codex Image Generation on GALXAI',
     description:
       'Create photorealistic images with readable typography, UI mockups, and marketing assets at 20% below retail list prices.',
     difficulty: 'Beginner',
@@ -403,8 +403,8 @@ print(f"Generated Asset: {image_url}")`,
     ],
     faqs: [
       {
-        q: 'What is the cost per image for GPT-Image-2 on GALXAI?',
-        a: 'GPT-Image-2 costs $0.032/image (20% wholesale discount vs $0.040 direct list price).',
+        q: 'What is the cost per image for Codex Image Generation on GALXAI?',
+        a: 'Codex Image Generation costs $0.032/image (20% wholesale discount vs $0.040 direct list price).',
       },
     ],
   },

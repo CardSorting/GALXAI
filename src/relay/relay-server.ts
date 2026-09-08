@@ -1950,7 +1950,7 @@ export class GalxaiRelayServer extends EventEmitter {
       const capabilityTicket = this.capabilities.beginObservation(shard.id, `image:${body.model || model}`);
       this.telemetry.attempt(traceId, shard.id, shard.accessToken.startsWith('sk-') ? 'http' : 'websocket');
       this.telemetry.model(traceId, model, imageExecution(model, shard.accessToken.startsWith('sk-'), this.config.codexImageToolAlias).executionModel);
-      if (shard.accessToken.startsWith('sk-')) this.telemetry.model(traceId, body.model, body.model || 'dall-e-3');
+      if (shard.accessToken.startsWith('sk-')) this.telemetry.model(traceId, body.model, body.model || 'gpt-image-2');
       try {
         const result = shard.accessToken.startsWith('sk-')
           ? await this.synthesizeImageViaOpenAiRest(prompt, body, shard.accessToken, signal)
@@ -2167,7 +2167,7 @@ export class GalxaiRelayServer extends EventEmitter {
       },
       body: JSON.stringify({
         prompt,
-        model: body.model || 'dall-e-3',
+        model: body.model || 'gpt-image-2',
         size: body.size || '1024x1024',
         quality: body.quality || 'standard',
         n: 1,

@@ -64,10 +64,10 @@ export default async function SolutionPage({ params }: SolutionPageProps) {
     EXCLUSIVE_MODEL_CATALOG.find((m) => m.id === solution.primaryModelId) ||
     null;
 
-  const fallbackModel =
+  const fallbackModel = solution.fallbackModelId ? (
     ModelCatalog.resolveModel(solution.fallbackModelId) ||
     EXCLUSIVE_MODEL_CATALOG.find((m) => m.id === solution.fallbackModelId) ||
-    null;
+    null) : null;
 
   const codeSchema = createSoftwareSourceCodeSchema({
     name: `${solution.name} Gateway Initialization`,

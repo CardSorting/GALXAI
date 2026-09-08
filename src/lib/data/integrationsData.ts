@@ -602,7 +602,7 @@ OPENAI_API_KEY=galx_live_your_gateway_key`,
     faqs: [
       {
         q: 'Does Open WebUI support vision models via GALXAI?',
-        a: 'Yes. GPT-Image-2 image analysis endpoints work seamlessly with Open WebUI image uploads.',
+        a: 'Yes. Use a vision-capable text model for image analysis; Codex Image Generation is the image creation route.',
       },
     ],
   },

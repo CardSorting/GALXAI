@@ -38,7 +38,7 @@ export const PROVIDERS_DATA: ProviderPortalItem[] = [
     description:
       'Direct Anycast routing for OpenAI Codex (GPT-5.6 Sol, Terra, Luna) and visual synthesis with 0% gateway markup, 75% prompt caching pass-through, and $5 free developer credits.',
     fleetSummary:
-      'The complete OpenAI GPT-5.6 reasoning fleet, high-velocity coding models, and GPT-Image-2 studio endpoints.',
+      'The complete OpenAI GPT-5.6 reasoning fleet, high-velocity coding models, and Codex Image Generation studio endpoints.',
     discountPct: 40,
     featuredModels: [
       {
@@ -70,11 +70,11 @@ export const PROVIDERS_DATA: ProviderPortalItem[] = [
       },
       {
         id: 'openai-gpt-image-2',
-        name: 'GPT-Image-2',
-        role: 'Photorealistic Studio HD',
-        context: '1024x1024',
+        name: 'Codex Image Generation',
+        role: 'Provider-selected image model',
+        context: 'Dimensions depend on route',
         inputPrice: '$0.032/img',
-        outputPrice: 'HD Output',
+        outputPrice: 'Image output',
         discount: '-20% Off',
       },
     ],

@@ -63,8 +63,6 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
       'gpt-5.6-terra': 2,
       'gpt-5.6-luna': 3,
       'openai-gpt-image-2': 1,
-      'openai-gpt-image-1.5': 2,
-      'openai-gpt-image-1': 3,
     };
 
     return unique.sort((a, b) => (orderMap[a.id] ?? 99) - (orderMap[b.id] ?? 99));
@@ -178,8 +176,6 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
                         ? 'Fast'
                         : sib.id.includes('image-2')
                         ? 'Pro'
-                        : sib.id.includes('image-1.5')
-                        ? 'Plus'
                         : 'Standard';
                     return (
                       <Link

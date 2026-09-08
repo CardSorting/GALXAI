@@ -78,7 +78,7 @@ const HERO_MODELS: ModelPreset[] = [
   },
   {
     id: 'openai-gpt-image-2',
-    name: 'GPT-Image-2',
+    name: 'Codex Image Generation',
     provider: 'Visual',
     retailPrice: 0.08,
     wholesalePrice: 0.06,

@@ -94,14 +94,14 @@ const CATEGORIES: SimpleCategory[] = [
     label: 'Photorealistic Visuals & Art',
     sublabel: 'Best for Social Assets, Concept Art & UI Graphics',
     icon: Sparkles,
-    recommendedModelId: 'openai-gpt-image-1.5',
+    recommendedModelId: 'openai-gpt-image-2',
     plainUseCases: [
       'Photorealistic social media graphics and lifestyle assets',
       'Rapid concept art and editorial illustrations',
       'High-detail UI/UX web layout mockups'
     ],
-    retailComparison: '$0.060 / img retail',
-    galxDiscount: 'Save 25% ($0.045 direct wholesale)'
+    retailComparison: '$0.080 / img retail',
+    galxDiscount: 'Save 25% ($0.060 direct wholesale)'
   }
 ];
 

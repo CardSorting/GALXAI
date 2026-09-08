@@ -47,9 +47,7 @@ function BaseFooter() {
       { name: 'OpenAI GPT-5.6 Sol', href: '/models/gpt-5.6-sol', note: 'Reasoning & Coding' },
       { name: 'OpenAI GPT-5.6 Terra', href: '/models/gpt-5.6-terra', note: 'Balanced Frontier' },
       { name: 'OpenAI GPT-5.6 Luna', href: '/models/gpt-5.6-luna', note: 'Sub-second Speed' },
-      { name: 'OpenAI GPT-Image-2', href: '/models/openai-gpt-image-2', note: 'Visual Engine' },
-      { name: 'OpenAI GPT-Image-1.5', href: '/models/openai-gpt-image-1.5', note: 'Photoreal SOTA' },
-      { name: 'OpenAI GPT-Image-1', href: '/models/openai-gpt-image-1', note: 'Turbo Diffusion' },
+      { name: 'Codex Image Generation', href: '/models/openai-gpt-image-2', note: 'Visual Engine' },
     ],
     developers: [
       { name: 'AI Gateway Glossary', href: '/glossary', badge: 'New' },

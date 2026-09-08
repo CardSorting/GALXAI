@@ -262,13 +262,13 @@ export const WORKLOAD_BENCHMARKS_DATA: WorkloadBenchmarkItem[] = [
       'Benchmark comparisons evaluating generation latency, prompt adherence, typography clarity, and resolution across image synthesis endpoints.',
     targetUseCases: ['Dynamic In-App Graphic Generation', 'Marketing Studio Assets', 'UI Design Prototyping'],
     aeoDirectAnswer:
-      'OpenAI GPT-Image-2 leads visual synthesis benchmarks with crisp typography, sub-500ms dispatch latency, and $0.032 wholesale image pricing.',
-    topRankedWinner: 'OpenAI GPT-Image-2',
+      'Codex Image Generation leads visual synthesis benchmarks with crisp typography, sub-500ms dispatch latency, and $0.032 wholesale image pricing.',
+    topRankedWinner: 'Codex Image Generation',
     rankedModels: [
       {
         rank: 1,
         modelId: 'openai-gpt-image-2',
-        name: 'OpenAI GPT-Image-2',
+        name: 'Codex Image Generation',
         provider: 'OpenAI',
         primaryScore: '98.2% Typography',
         secondaryScore: '$0.032 / img',
@@ -276,18 +276,6 @@ export const WORKLOAD_BENCHMARKS_DATA: WorkloadBenchmarkItem[] = [
         tokensPerSec: 0,
         inputPrice1M: 0.032,
         whyItWins: 'Crisp readable text rendering and complex photorealistic composition.',
-      },
-      {
-        rank: 2,
-        modelId: 'openai-gpt-image-1.5',
-        name: 'OpenAI GPT-Image-1.5',
-        provider: 'OpenAI',
-        primaryScore: '96.8% Photorealism',
-        secondaryScore: '$0.045 / img',
-        ttftMs: 480.0,
-        tokensPerSec: 0,
-        inputPrice1M: 0.045,
-        whyItWins: 'Accurate dynamic lighting, micro-textures, and photorealistic rendering at high throughput.',
       },
     ],
     faqs: [

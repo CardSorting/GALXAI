@@ -421,8 +421,7 @@ export class GalxAIClientCore {
     if (path.includes('/models')) {
       return {
         data: [
-          { id: 'openai-gpt-image-2', name: 'GPT-Image-2 Studio', description: 'Flagship 4K visual synthesis' },
-          { id: 'openai-gpt-image-1.5', name: 'GPT-Image-1.5 Pro', description: 'High-speed character & artwork design' },
+          { id: 'openai-gpt-image-2', name: 'Codex Image Generation', description: 'Image generation with a provider-selected model on OAuth relays' },
           { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', description: 'Flagship reasoning & text generation' },
           { id: 'gpt-5.6-terra', name: 'GPT-5.6 Terra', description: 'Deep analytical research engine' },
           { id: 'gpt-5.6-luna', name: 'GPT-5.6 Luna', description: 'Fast code & multi-agent executor' }

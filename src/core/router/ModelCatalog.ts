@@ -7,7 +7,7 @@ import type { DbQueryOptions, DbAggregateQuery } from '../broccolidb/broccolidb.
 /**
  * Exclusive Model Catalog for GALXAI.
  * Houses only the requested flagship modern generation LLMs & visual synthesis engines:
- * - OpenAI Codex & GPT-5.6 Suite: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `openai-gpt-image-2`, `openai-gpt-image-1.5`, `openai-gpt-image-1`
+ * - OpenAI Codex & GPT-5.6 Suite: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `openai-gpt-image-2`
  *
  * Text-model rates are the OpenAI public API rates, verified 2026-08-27.
  * Any negotiated GALXAI rebate must be applied as an explicit billing contract,
@@ -78,7 +78,7 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
   {
     id: 'openai-gpt-image-2',
     upstreamId: 'gpt-image-2',
-    name: 'GPT Image 2 / Codex Image Tool',
+    name: 'Codex Image Generation',
     provider: 'openai',
     category: 'image',
     contextWindowTokens: 128_000,
@@ -91,44 +91,8 @@ export const EXCLUSIVE_MODEL_CATALOG: ModelSpecItem[] = [
     supportsVision: true,
     supportsReasoning: false,
     supportsStreaming: false,
-    description: 'GPT Image 2 through the Image API. On an explicitly enabled OAuth relay, this ID is a Codex image-tool compatibility alias with provider-managed image model selection; responses identify the execution mode.'
+    description: 'Codex image generation with an OpenAI-selected image model on enabled OAuth relays. The legacy openai-gpt-image-2 ID is a compatibility alias, not a guarantee of Image 2 or Image 2.5. Native API-key routes request gpt-image-2 explicitly; responses identify the execution mode.'
   },
-  {
-    id: 'openai-gpt-image-1.5',
-    upstreamId: 'gpt-image-1.5',
-    name: 'OpenAI Codex GPT-Image-1.5 (Photoreal)',
-    provider: 'openai',
-    category: 'image',
-    contextWindowTokens: 128_000,
-    maxOutputTokens: 4_096,
-    listPricePer1MInput: 0.060,
-    listPricePer1MOutput: 0.060,
-    inputPricePer1M: 0.045, // 25% Discount
-    outputPricePer1M: 0.045,
-    discountPercentage: 25,
-    supportsVision: true,
-    supportsReasoning: false,
-    supportsStreaming: false,
-    description: 'Photorealistic image synthesis engine with enhanced lighting accuracy and micro-textures.'
-  },
-  {
-    id: 'openai-gpt-image-1',
-    upstreamId: 'gpt-image-1',
-    name: 'OpenAI Codex GPT-Image-1 (Fast Synthesis)',
-    provider: 'openai',
-    category: 'image',
-    contextWindowTokens: 128_000,
-    maxOutputTokens: 4_096,
-    listPricePer1MInput: 0.040,
-    listPricePer1MOutput: 0.040,
-    inputPricePer1M: 0.028, // 30% Discount
-    outputPricePer1M: 0.028,
-    discountPercentage: 30,
-    supportsVision: true,
-    supportsReasoning: false,
-    supportsStreaming: false,
-    description: 'Rapid image generation engine optimized for low latency iterative visual prototyping.'
-  }
 ];
 
 /**
@@ -366,10 +330,10 @@ export class ModelCatalog {
       'gpt-image-2.0': 'openai-gpt-image-2',
       'gptimage2': 'openai-gpt-image-2',
       '4k-image': 'openai-gpt-image-2',
-      'gpt-image-1.5': 'openai-gpt-image-1.5',
-      'gpt-image-1-5': 'openai-gpt-image-1.5',
-      'photoreal': 'openai-gpt-image-1.5',
-      'gpt-image-1': 'openai-gpt-image-1',
+      'gpt-image-1.5': 'openai-gpt-image-2',
+      'gpt-image-1-5': 'openai-gpt-image-2',
+      'photoreal': 'openai-gpt-image-2',
+      'gpt-image-1': 'openai-gpt-image-2',
       'gpt4o-image': 'openai-gpt-image-2',
       'gpt-4o-image': 'openai-gpt-image-2',
       'dalle': 'openai-gpt-image-2',
@@ -377,8 +341,8 @@ export class ModelCatalog {
       'dalle3': 'openai-gpt-image-2',
       'dall-e': 'openai-gpt-image-2',
       'dall-e-3': 'openai-gpt-image-2',
-      'dalle-2': 'openai-gpt-image-1',
-      'dall-e-2': 'openai-gpt-image-1',
+      'dalle-2': 'openai-gpt-image-2',
+      'dall-e-2': 'openai-gpt-image-2',
       'grok-image': 'openai-gpt-image-2',
       'grok-imagine': 'openai-gpt-image-2',
       'imagine': 'openai-gpt-image-2',

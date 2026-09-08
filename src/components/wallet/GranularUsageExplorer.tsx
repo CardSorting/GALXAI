@@ -117,7 +117,7 @@ export function GranularUsageExplorer() {
     },
     {
       modelId: 'openai-gpt-image-2',
-      name: 'OpenAI GPT-Image-2 (4K)',
+      name: 'Codex Image Generation',
       category: 'Frontier Visual Synthesis',
       promptTokens: 4_000,
       cachedTokens: 0,
