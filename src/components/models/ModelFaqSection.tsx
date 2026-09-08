@@ -10,7 +10,7 @@ import {
   ChevronDown,
   GitCompare,
 } from 'lucide-react';
-import type { ModelSpecItem } from '@/core/contracts/GalxContracts';
+import type { ModelSpecItem } from '@/core/router/PublicModelCatalog';
 import { CURATED_MATCHUPS } from '@/lib/data/comparisonData';
 
 interface ModelFaqSectionProps {
@@ -148,16 +148,16 @@ export function ModelFaqSection({ model }: { model: ModelSpecItem; siblingModels
 
   const faqItems = [
     {
-      q: `Are these official, genuine ${model.name} model weights?`,
-      a: `Yes, 100%. GALXAI routes directly to upstream enterprise clusters at OpenAI. The model weights, reasoning traces, and token generations are identical to direct API calls—just delivered with 75%–90% prompt cache pass-through and sub-15ms Anycast routing.`,
+      q: `What can I request with ${model.name}?`,
+      a: `Use the inputs and outputs documented on this model page. The public model alias is ${model.id}.`,
     },
     {
       q: 'Does GALXAI add latency to streaming completions?',
-      a: 'Zero measurable latency overhead. GALXAI operates Anycast Edge Proxies in 300+ global data centers. Responses begin streaming in < 14ms (TTFT), identical to or faster than connecting directly to single-region upstream origin servers.',
+      a: 'Response time varies with the request. Use streaming on supported text models to display content as it arrives.',
     },
     {
       q: 'How does the 75%–90% Prompt Caching discount work?',
-      a: 'Whenever your system prompts or conversation context prefixes exceed 1,024 tokens, GALXAI matches cached RAM slices. You automatically pay up to 90% less on all matching input tokens without altering any request parameters.',
+      a: 'Whenever your system prompts or conversation context prefixes exceed 1,024 tokens, GALXAI matches eligible repeated prompt content. You automatically pay up to 90% less on all matching input tokens without altering any request parameters.',
     },
     {
       q: 'Do I need to sign an enterprise contract to access this model?',

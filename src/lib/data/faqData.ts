@@ -52,6 +52,6 @@ export const FAQS: FAQItem[] = [
     id: 'uptime-failover-sla',
     category: 'developer',
     q: 'How does Anycast failover prevent 429 stalls?',
-    a: 'Multi-region edge proxies continuously monitor upstream health and apply sub-15ms automated failover across redundant pools.',
+    a: 'Check the status page for current availability. If a request fails, follow its documented error guidance.',
   },
 ];

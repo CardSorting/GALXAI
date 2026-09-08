@@ -87,7 +87,7 @@ export function ErrorTroubleshootClient({ errorItem }: ErrorTroubleshootClientPr
 
           <div className="glass-panel rounded-3xl p-6 space-y-2 border border-rose-500/20 bg-rose-500/5">
             <span className="text-[10px] font-mono uppercase font-bold text-rose-400 block">
-              Typical Upstream Error JSON
+              Public Error JSON
             </span>
             <pre className="p-3 rounded-xl bg-black/60 border border-white/5 font-mono text-[11px] text-rose-300 overflow-x-auto">
               {errorItem.sampleErrorPayload}

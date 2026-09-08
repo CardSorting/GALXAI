@@ -1,3 +1,5 @@
+import { sanitizeImageArtifact, decodeImageBase64 } from '../../lib/security/image-artifact';
+import { logImageFailure } from '../../lib/security/private-image-diagnostics';
 import * as crypto from 'node:crypto';
 import type {
   ChatCompletionRequest,
@@ -140,7 +142,7 @@ export class GalxModelRouter {
     }
 
     if (sanitized.toLowerCase().includes('usage limit') || sanitized.toLowerCase().includes('resets at') || sanitized.toLowerCase().includes('try again at')) {
-      return sanitized;
+      return 'Request could not be completed. Please retry or contact support with your request ID.';
     }
     if (sanitized.includes('429') || sanitized.toLowerCase().includes('rate limit')) {
       return 'Capacity allocation currently saturated. Automatic retry buffer activated.';
@@ -158,7 +160,7 @@ export class GalxModelRouter {
       .replace(/\s+/g, ' ')
       .trim();
 
-    return sanitized;
+    return 'Request could not be completed. Please retry or contact support with your request ID.';
   }
 
   /**
@@ -484,8 +486,6 @@ export class GalxModelRouter {
         });
 
         // Standard Apex Gateway Response Headers (Masked & Client-Safe)
-        responseHeaders.set('x-galx-router', 'apex-v2');
-        responseHeaders.set('x-galx-routing-latency-ms', String(latencyMs));
         responseHeaders.set('x-galx-model', modelSpec.id);
         responseHeaders.set('x-galx-request-id', requestId);
         const affinityTicket = GalxCryptoVault.sealAffinityTicket(lease.shardId);
@@ -1036,6 +1036,15 @@ export class GalxModelRouter {
         }
       }
 
+      // Normalize artifacts before any storage or public delivery. Fail closed on unsupported output.
+      for (const item of result.data) {
+        const clean = await sanitizeImageArtifact(decodeImageBase64(item.b64_json));
+        item.b64_json = clean.bytes.toString('base64');
+        item.content_type = clean.contentType;
+        delete item.url;
+      }
+
+
       const latencyMs = Date.now() - startMs;
       const imagesCount = sanitizedRequest.n || 1;
       const costBreakdown = TokenCostCalculator.calculateCost(modelSpec, {
@@ -1089,7 +1098,7 @@ export class GalxModelRouter {
         statusCode: 200
       });
 
-      // Mirror & ingest raw image payloads to Cloudflare R2 partitioned by user and session
+      // Mirror sanitized image payloads into private storage.
       const effectiveSessionId =
         sanitizedRequest.sessionId ||
         this.extractHeaderValue(incomingHeaders, 'x-galx-session-id') ||
@@ -1112,7 +1121,7 @@ export class GalxModelRouter {
               userId: userId || 'anonymous',
               sessionId: effectiveSessionId,
               data: imageSource,
-              contentType: 'image/png',
+              contentType: item.content_type || 'image/png',
               prompt: sanitizedRequest.prompt || '',
               revisedPrompt: item.revised_prompt,
               model: modelSpec.id,
@@ -1143,27 +1152,26 @@ export class GalxModelRouter {
             // Default to permanent CDN URL unless caller specifically required b64_json
             if (sanitizedRequest.response_format !== 'b64_json') {
               item.url = uploaded.publicUrl;
-              delete item.b64_json;
+              // Retain sanitized bytes for the HTTP normalization boundary.
             }
           }
         } catch (r2Err: any) {
-          console.warn(`[GalxModelRouter] Failed to mirror image to R2: ${r2Err.message}`);
+          logImageFailure(requestId, r2Err);
         }
       }
 
       // One manifest read/write for the whole generation response instead of one per image.
       if (mirroredImages.length > 0) {
         await r2Adapter.updateSessionManifestBatch(userId, effectiveSessionId, mirroredImages)
-          .catch((manifestErr: any) => console.warn(`[GalxModelRouter] Batched image manifest update failed: ${manifestErr.message}`));
+          .catch((manifestErr: any) => logImageFailure(requestId, manifestErr));
         // Drain once for the entire generation so short-lived/serverless runtimes do not
         // depend on a timer to persist gallery metadata.
         await r2Adapter.flushImageLibraryBuffer()
-          .catch((flushErr: any) => console.warn(`[GalxModelRouter] Batched image library flush deferred: ${flushErr.message}`));
+          .catch((flushErr: any) => logImageFailure(requestId, flushErr));
       }
 
-      // Completely scrub shardId from client-facing visual synthesis response
-      const { shardId: _scrubbedShard, ...publicResult } = result;
-      return publicResult;
+      // Return private diagnostics to the public normalization boundary.
+      return result;
     } catch (err: any) {
       const latencyMs = Date.now() - startMs;
       const sanitizedErr = GalxModelRouter.sanitizeUpstreamError(err.message || 'Image generation error');
@@ -1171,7 +1179,7 @@ export class GalxModelRouter {
       await this.pool.releaseLeaseAuthoritatively(lease.leaseId, {
         tokensConsumed: 0,
         success: false,
-        errorReason: err.message || sanitizedErr,
+        errorReason: err instanceof RelayDispatchError ? 'image_dispatch_failed' : 'image_generation_failed',
         healthImpact: err instanceof RelayDispatchError || signal?.aborted ? 'neutral' : 'provider',
         upstreamHeaders: err.upstreamHeaders,
         nowMs: Date.now(),
@@ -1190,7 +1198,7 @@ export class GalxModelRouter {
         statusCode: upstreamStatus
       });
       if (err instanceof RelayDispatchError) throw err;
-      throw new Error(sanitizedErr);
+      throw err;
     } finally {
       if (rawTokenSecret) {
         try {

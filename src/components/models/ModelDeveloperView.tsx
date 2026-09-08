@@ -17,7 +17,7 @@ import {
   ExternalLink,
   Sparkles,
 } from 'lucide-react';
-import type { ModelSpecItem } from '@/core/contracts/GalxContracts';
+import type { ModelSpecItem } from '@/core/router/PublicModelCatalog';
 import { getCodeRecipes } from './model-card-data';
 
 interface ModelDeveloperViewProps {
@@ -64,7 +64,7 @@ export function ModelDeveloperView({ model, triggerCopy, copiedKey }: ModelDevel
   const dropInDiffCode = isImage
     ? `from openai import OpenAI
 
-# GALXAI Universal Gateway (Sub-15ms Anycast)
+# GALXAI Universal Gateway (HTTPS)
 client = OpenAI(
     base_url="https://galx.ai/v1",  # 👈 ONLY CHANGE
     api_key="${effectiveKey}"
@@ -77,7 +77,7 @@ response = client.images.generate(
 )`
     : `from openai import OpenAI
 
-# GALXAI Universal Gateway (Sub-15ms Anycast)
+# GALXAI Universal Gateway (HTTPS)
 client = OpenAI(
     base_url="https://galx.ai/v1",  # 👈 ONLY CHANGE
     api_key="${effectiveKey}"
@@ -113,7 +113,7 @@ response = client.chat.completions.create(
               index: 0,
               message: {
                 role: 'assistant',
-                content: 'Execution completed with sub-15ms Anycast edge routing.',
+                content: 'Example completion.',
               },
               finish_reason: 'stop',
             },
@@ -160,12 +160,12 @@ response = client.chat.completions.create(
                   1
                 </div>
                 <span className="text-[10px] font-mono text-cyan-300/80 uppercase">
-                  &lt;15ms Anycast
+                  GALX API
                 </span>
               </div>
               <h3 className="text-sm font-bold text-white">Base URL &amp; Model ID</h3>
               <p className="text-xs text-zinc-400 leading-relaxed font-sans">
-                Point any standard OpenAI SDK or HTTP client to our universal Anycast gateway.
+                Point any standard OpenAI SDK or HTTP client to our universal GALX API.
               </p>
             </div>
 
@@ -352,7 +352,7 @@ response = client.chat.completions.create(
 {isImage
   ? `from openai import OpenAI
 
-# Direct retail connection (no edge routing)
+# Direct API example
 client = OpenAI(
     api_key=os.environ["OPENAI_API_KEY"]
 )
@@ -370,7 +370,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="${model.upstreamId}",
+    model="${model.id}",
     messages=[{"role": "user", "content": "..."}]
 )`}
             </pre>
@@ -401,7 +401,7 @@ response = client.chat.completions.create(
             <pre className="p-4 text-zinc-100 leading-relaxed overflow-x-auto selection:bg-white/20 selection:text-white">
 {`from openai import OpenAI
 
-# GALXAI Wholesale Gateway (Sub-15ms Anycast)
+# GALXAI Wholesale Gateway (HTTPS)
 client = OpenAI(
 `}<span className="bg-emerald-500/30 text-emerald-200 px-1 py-0.5 rounded font-bold">{`    base_url="https://galx.ai/v1",  # 👈 ONLY CHANGE`}</span>{`
     api_key="${effectiveKey}"

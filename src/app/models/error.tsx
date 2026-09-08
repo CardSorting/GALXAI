@@ -24,7 +24,7 @@ export default function ModelsError({
           error={error}
           reset={reset}
           title="Model Catalog Sync Interrupted"
-          subtitle="The model specification matrix could not be rendered. Upstream routing to OpenAI endpoints remains online."
+          subtitle="The model specification matrix could not be rendered. Try loading the model page again."
           badge="MODEL CATALOG GUARANTEE"
           icon={Cpu}
           accentColor="cyan"

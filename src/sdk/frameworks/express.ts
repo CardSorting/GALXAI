@@ -4,6 +4,7 @@
  */
 
 import { GalxAI } from '../client';
+import { serveImageRequest } from '../server-image';
 import type { ImageGenerateParams } from '../resources/images';
 
 export interface ExpressAdapterOptions {
@@ -38,36 +39,14 @@ export function createExpressImageHandler(options: ExpressAdapterOptions = {}) {
   const client = getClient(options);
 
   return async function expressImageHandler(req: any, res: any) {
-    try {
-      const { prompt, model, aspectRatio, size, quality, n, priority, isAsync } = req.body || {};
-
-      if (!prompt || typeof prompt !== 'string') {
-        return res.status(400).json({ error: 'Prompt is required' });
-      }
-
-      const params: ImageGenerateParams = {
-        prompt,
-        model: model || options.defaultModel || 'openai-gpt-image-latest',
-        aspectRatio: aspectRatio || '1:1',
-        size,
-        quality: quality || 'standard',
-        n: n || 1
-      };
-
-      if (isAsync || priority) {
-        const handle = await client.images.generateAsync({
-          ...params,
-          priority
-        });
-        const result = await handle.result();
-        return res.json(result);
-      }
-
-      const result = await client.images.generate(params);
-      return res.json(result);
-    } catch (err: any) {
-      return res.status(500).json({ error: err?.message || 'Generation failed' });
-    }
+    const request = new Request('https://galx.ai/v1/images/generations', {
+      method: 'POST', headers: { 'content-type': 'application/json', accept: req.get?.('accept') || '*/*' },
+      body: JSON.stringify(req.body ?? {}),
+    });
+    const response = await serveImageRequest(client, request, options.defaultModel);
+    res.status(response.status);
+    response.headers.forEach((value, key) => res.setHeader(key, value));
+    return res.send(Buffer.from(await response.arrayBuffer()));
   };
 }
 

@@ -7,7 +7,7 @@
  */
 
 import { BroccoliDbTable } from '@/core/broccolidb/broccolidb-table';
-import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/PublicModelCatalog';
 import { COOKBOOK_RECIPES_DATA } from '@/lib/data/cookbooksData';
 import { ERROR_TROUBLESHOOT_DATA } from '@/lib/data/errorsData';
 import { COMPETITOR_ALTERNATIVES } from '@/lib/data/alternativesData';

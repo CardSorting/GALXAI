@@ -21,7 +21,7 @@ import {
 import { ShareButton } from '@/components/common/ShareButton';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
-import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/PublicModelCatalog';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 export function TokenCounterToolClient() {

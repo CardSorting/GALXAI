@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ModelVsClient } from '@/components/models/ModelVsClient';
 import { CURATED_MATCHUPS, type ModelMatchup } from '@/lib/data/comparisonData';
-import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/ModelCatalog';
+import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/PublicModelCatalog';
 import { constructMetadata } from '@/lib/seo/metadata';
 import {
   JsonLd,

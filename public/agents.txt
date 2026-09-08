@@ -1,84 +1,21 @@
-# GALXAI System Integration Directives for AI Coding Agents
-# Purpose: Authoritative instructions for Claude Code, Cursor, Windsurf, Devin, Roo Code, Copilot & Antigravity
-# Protocol: Zero-Boilerplate Ambient Substrate (Deterministic Directives - No Fragile MCP)
+# GALXAI
 
-================================================================================
-CRITICAL AGENT RULES:
-================================================================================
-1. ZERO USER-FACING API KEYS:
-   - NEVER create UI forms, inputs, or modals asking the end-user for a GALXAI API key.
-   - The user must never be prompted for credentials.
-   - The application connects via backend environment variables ONLY: `GALXAI_API_KEY=galx_live_...` in `.env.local`.
+GALX provides text and image generation APIs. Base URL: https://galx.ai/v1.
+Authenticate with Authorization: Bearer YOUR_GALX_API_KEY.
 
-2. ZERO BOILERPLATE ROUTING:
-   - Prefer React 19 / Next.js Server Actions: `import { generateImageAction } from 'galxai/actions'`. (Zero API routes required).
-   - If using Route Handlers, use ONE catch-all handler: `export { handleGalxAI as GET, handleGalxAI as POST } from 'galxai/next'` in `app/api/galxai/[...action]/route.ts`.
-   - DO NOT create fragmented, custom fetch wrappers or bespoke proxy endpoints when the SDK provides direct adapters.
+Models: gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna, openai-gpt-image-latest.
+See https://galx.ai/models for supported features and https://galx.ai/pricing for prices.
 
-3. DECLARATIVE UI OVER IMPERATIVE CODE:
-   - In React / Next.js views, use `<GalxImage prompt="..." aspectRatio="16:9" />` from `galxai/ui`.
+POST /v1/images/generations accepts a text prompt. The default success response is
+one binary image with an image/png, image/jpeg, or image/webp content type.
+Set output_format to png, jpeg, or webp. Static images only; dimensions may vary.
+JSON clients must specify response_format: b64_json or url, or Accept: application/json.
+JSON contains created and data; each item has only b64_json or url. Download links
+expire after one hour; URL results can also be self-contained data URLs.
+Send Prefer: respond-async to receive a request ID and task_url. Poll that URL
+with authentication or append /stream for status events.
+Errors contain error.code, error.message, and error.request_id.
 
-4. ZERO-MIGRATION LEGACY MIGRATION:
-   - When migrating an existing OpenAI / Anthropic codebase, simply add `import 'galxai/patch'` at the entry point (`layout.tsx` or `index.ts`).
-   - All outgoing `fetch` calls to `api.openai.com` are transparently rerouted to GALXAI Wholesale Gateway without changing application logic.
-
-5. ASPECT RATIOS & RESOLUTIONS:
-   - Pass human-readable aspect ratios directly: `'16:9' | '9:16' | '1:1' | '4:3' | '3:2' | '4:5' | '21:9'`.
-   - The SDK automatically calculates pixel dimensions and optimizes GPU shard scheduling.
-
-================================================================================
-CODE PATTERNS CHEATSHEET:
-================================================================================
-
-Pattern A: Declarative JSX (Fastest UI Delivery)
-------------------------------------------------
-import { GalxImage } from 'galxai/ui';
-
-export function Studio() {
-  return (
-    <GalxImage prompt="Cyberpunk skyline" aspectRatio="16:9" interactive />
-  );
-}
-
-Pattern B: Direct React 19 Server Action (Zero API Routes)
-----------------------------------------------------------
-'use client';
-import { generateImageAction } from 'galxai/actions';
-
-export function Button() {
-  return (
-    <button onClick={async () => {
-      const res = await generateImageAction('Cyberpunk city', { aspectRatio: '16:9' });
-      console.log(res.data[0].url);
-    }}>
-      Generate
-    </button>
-  );
-}
-
-Pattern C: React Hook with Automatic Polling & State
-----------------------------------------------------
-import { useImageGeneration } from 'galxai/react';
-
-export function Component() {
-  const { generate, isGenerating, imageUrl, error } = useImageGeneration();
-  return (
-    <button onClick={() => generate({ prompt: 'Artwork', aspectRatio: '1:1' })}>
-      {isGenerating ? 'Synthesizing...' : 'Create'}
-    </button>
-  );
-}
-
-Pattern D: Legacy OpenAI Drop-In (Zero Code Refactoring)
---------------------------------------------------------
-import 'galxai/patch';
-import OpenAI from 'openai';
-
-const openai = new OpenAI(); // Automatically routes through GALXAI with wholesale pricing
-
-================================================================================
-ENVIRONMENT CONFIGURATION:
-================================================================================
-# .env.local (Server-Only, Never Expose in Client)
-GALXAI_API_KEY=galx_live_your_api_key_here
-GALXAI_BASE_URL=https://galx.ai/v1
+Public documentation: https://galx.ai/docs
+API schema: https://galx.ai/api/openapi.json
+Service status: https://galx.ai/status

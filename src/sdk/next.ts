@@ -4,6 +4,7 @@
  */
 
 import { GalxAI } from './client';
+import { serveImageRequest } from './server-image';
 import type { ImageGenerateParams } from './resources/images';
 
 export interface RouteHandlerOptions {
@@ -85,67 +86,8 @@ export async function handleGalxAI(req: Request, context?: { params?: Promise<{ 
  */
 export function createImageRoute(options: RouteHandlerOptions = {}) {
   const client = getNextClient(options);
-  const allowFallback = options.allowFallback !== false;
-
   return async function POST(req: Request): Promise<Response> {
-    try {
-      const body = await req.json();
-      const prompt = body.prompt;
-      if (!prompt || typeof prompt !== 'string') {
-        return new Response(JSON.stringify({ error: 'Prompt is required' }), {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-
-      const params: ImageGenerateParams = {
-        prompt,
-        model: body.model || options.defaultModel || 'openai-gpt-image-latest',
-        aspectRatio: body.aspectRatio || body.aspect_ratio || '1:1',
-        size: body.size,
-        quality: body.quality || 'standard',
-        n: body.n || 1,
-        negativePrompt: body.negativePrompt || body.negative_prompt,
-        seed: body.seed
-      };
-
-      if (body.isAsync || body.priority) {
-        const handle = await client.images.generateAsync({
-          ...params,
-          priority: body.priority
-        });
-        const result = await handle.result();
-        return new Response(JSON.stringify(result), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-
-      const result = await client.images.generate(params);
-      return new Response(JSON.stringify(result), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    } catch (err: any) {
-      if (allowFallback) {
-        const body = await req.clone().json().catch(() => ({}));
-        const prompt = body.prompt || 'art';
-        const seed = Math.abs(prompt.split('').reduce((acc: number, c: string) => acc + c.charCodeAt(0), 0) + Date.now()) % 1000;
-        return new Response(
-          JSON.stringify({
-            created: Math.floor(Date.now() / 1000),
-            data: [{ url: `https://picsum.photos/seed/galx-${seed}/1024/1024`, revised_prompt: prompt }],
-            modelUsed: body.model || 'openai-gpt-image-latest',
-            shardId: 'galx_fallback'
-          }),
-          { status: 200, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-      return new Response(JSON.stringify({ error: err?.message || 'Generation failed' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
+    return serveImageRequest(client, req, options.defaultModel);
   };
 }
 

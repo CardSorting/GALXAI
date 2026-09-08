@@ -4,8 +4,8 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
-import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
-import type { ModelSpecItem } from '@/core/contracts/GalxContracts';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/PublicModelCatalog';
+import type { ModelSpecItem } from '@/core/router/PublicModelCatalog';
 import {
   Search,
   Copy,
@@ -96,7 +96,7 @@ const CODE_EXAMPLES: Record<CodeLanguage, { label: string; code: string }> = {
     label: 'TypeScript (Node.js)',
     code: `import OpenAI from 'openai';
 
-// Point official OpenAI client to GALXAI Anycast Gateway
+// Point official OpenAI client to GALXAI GALX API
 const openai = new OpenAI({
   baseURL: 'https://galx.ai/v1',
   apiKey: process.env.GALXAI_API_KEY,
@@ -293,7 +293,7 @@ export function ModelsClient() {
     return `curl https://galx.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer $GALXAI_API_KEY" \\
-  -d '{"model": "${model.id}", "messages": [{"role": "user", "content": "Hello from Anycast gateway"}]}'`;
+  -d '{"model": "${model.id}", "messages": [{"role": "user", "content": "Hello from GALX API"}]}'`;
   };
 
   const getModelPython = (model: ModelSpecItem) => {
@@ -478,7 +478,7 @@ console.log(res.choices[0].message.content);`;
 
               <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-xl">
                 Direct, low-latency API access to modern reasoning, coding, and visual synthesis models.
-                Point your existing OpenAI SDK to our Anycast gateway to unlock automatic prompt caching,
+                Point your existing OpenAI SDK to our GALX API to unlock automatic prompt caching,
                 rate-limit pooling, and multi-region failover with zero code rewrites.
               </p>
 
@@ -552,7 +552,7 @@ console.log(res.choices[0].message.content);`;
                 </div>
                 <div className="flex items-center gap-1.5 p-2 rounded-lg bg-white/5 border border-white/5">
                   <Cpu className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                  <span>&lt;15ms Anycast</span>
+                  <span>GALX API</span>
                 </div>
               </div>
             </div>
@@ -1258,7 +1258,7 @@ console.log(res.choices[0].message.content);`;
             <div className="space-y-1">
               <h2 className="text-base font-bold text-white">No frontier models match &ldquo;{searchQuery}&rdquo;</h2>
               <p className="text-xs text-zinc-400 max-w-md mx-auto">
-                If you are looking for a shorthand alias (e.g. <strong className="text-white">sol</strong>, <strong className="text-white">claude</strong>, <strong className="text-white">deepseek</strong>, or <strong className="text-white">dalle</strong>), test the 0ms Universal Alias Resolver to map it directly to our Anycast gateway.
+                If you are looking for a shorthand alias (e.g. <strong className="text-white">sol</strong>, <strong className="text-white">claude</strong>, <strong className="text-white">deepseek</strong>, or <strong className="text-white">dalle</strong>), test the 0ms Universal Alias Resolver to map it directly to our GALX API.
               </p>
             </div>
 
@@ -1549,7 +1549,7 @@ console.log(res.choices[0].message.content);`;
               Gateway Architecture &amp; Guarantees
             </h2>
             <p className="text-xs text-zinc-400">
-              Enterprise routing infrastructure designed for mission-critical agent loops and automated workflows.
+              Text and image generation for automated workflows.
             </p>
           </div>
 
@@ -1590,7 +1590,7 @@ console.log(res.choices[0].message.content);`;
               </div>
               <h3 className="text-sm font-bold text-white">Multi-Region Edge Failover</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Sub-15ms Anycast routing with real-time health checks automatically bypasses upstream provider 429 stalls and regional outages.
+                Check service availability and follow the error guidance returned with each request.
               </p>
             </div>
           </div>

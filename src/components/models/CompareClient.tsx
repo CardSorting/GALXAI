@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
-import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
-import type { ModelSpecItem } from '@/core/contracts/GalxContracts';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/PublicModelCatalog';
+import type { ModelSpecItem } from '@/core/router/PublicModelCatalog';
 import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
@@ -1441,7 +1441,7 @@ export async function executeCostTiered(prompt: string, isDeepReasoning = false)
             <span>Multi-Model Production Routing Boilerplate</span>
           </h2>
           <p className="text-xs text-zinc-400">
-            Deploy both {modelA.id} and {modelB.id} together with zero infrastructure overhead using the GALXAI Anycast Gateway.
+            Deploy both {modelA.id} and {modelB.id} together with zero infrastructure overhead using the GALXAI GALX API.
           </p>
         </div>
 

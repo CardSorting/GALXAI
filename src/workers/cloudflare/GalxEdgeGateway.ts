@@ -101,8 +101,6 @@ export class GalxEdgeGateway {
       return new Response(
         JSON.stringify({
           status: 'healthy',
-          environment: this.env.ENVIRONMENT || 'production',
-          edgePoP: request.headers.get('cf-ray') || 'global-edge',
           timestamp: Date.now()
         }),
         {
@@ -114,6 +112,8 @@ export class GalxEdgeGateway {
         }
       );
     }
+
+    if (url.pathname.startsWith('/v1/images/') || url.pathname === '/images/generations') return this.handleImageGenerations(request);
 
     // 3. API Key & Session Authentication Guard with Universal Ingestion
     const queryCredentialsAllowed =
@@ -1033,83 +1033,55 @@ export class GalxEdgeGateway {
   }
 
   private async handleImageGenerations(request: Request): Promise<Response> {
-    let body: any;
+    const requestId = crypto.randomUUID();
     try {
-      body = await request.json();
+      // All image delivery uses the existing image service's normalization boundary.
+      const headers = new Headers({ 'Content-Type': 'application/json' });
+      for (const key of ['authorization', 'accept', 'prefer', 'idempotency-key', 'x-galx-async', 'x-galx-webhook-url', 'x-galx-webhook-secret']) {
+        const value = request.headers.get(key);
+        if (value) headers.set(key, value);
+      }
+      if (!headers.has('authorization') && request.headers.get('x-api-key')) headers.set('authorization', `Bearer ${request.headers.get('x-api-key')}`);
+      const inputUrl = new URL(request.url);
+      const path = inputUrl.pathname === '/images/generations' ? '/v1/images/generations' : inputUrl.pathname;
+      const response = await fetch(`https://galx.ai${path}${inputUrl.search}`, {
+        method: request.method, headers, ...(request.method === 'POST' ? { body: await request.text() } : {}), redirect: 'error', signal: request.signal,
+      });
+      if (!['image/png', 'image/jpeg', 'image/webp', 'application/json', 'text/event-stream'].includes(response.headers.get('content-type')?.split(';')[0] || '')) throw new Error('Invalid response');
+      const publicHeaders = new Headers();
+      for (const key of ['content-type', 'cache-control', 'x-content-type-options', 'x-request-id', 'retry-after', 'location', 'x-should-retry', 'access-control-allow-origin', 'access-control-expose-headers']) {
+        const value = response.headers.get(key);
+        if (value) publicHeaders.set(key, value);
+      }
+      if (!response.ok) {
+        const code = response.status === 401 ? 'unauthorized' : response.status === 429 ? 'rate_limited' : response.status === 504 ? 'timeout' : response.status === 404 ? 'not_found' : response.status === 400 ? 'invalid_request' : 'generation_failed';
+        return new Response(JSON.stringify({ error: { code, message: 'The image request could not be completed. Check your request or try again later.', request_id: requestId } }), {
+          status: response.status, headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store', 'x-request-id': requestId, 'x-should-retry': 'false' },
+        });
+      }
+      if (response.headers.get('content-type')?.includes('application/json')) {
+        const value = await response.json() as any;
+        const imageData = (input: any) => ({ created: Number(input.created) || Math.floor(Date.now() / 1000),
+          data: input.data.map((item: any) => {
+            if (typeof item.b64_json === 'string') return { b64_json: item.b64_json };
+            if (typeof item.url === 'string' && /^(https:\/\/galx\.ai\/v1\/images\/assets\/|data:image\/(png|jpeg|webp);base64,)/.test(item.url)) return { url: item.url };
+            throw new Error('Invalid image item');
+          }) });
+        const taskData = (input: any) => ({ id: typeof input.id === 'string' ? input.id : '', status: ['queued', 'generating', 'completed', 'failed', 'cancelled'].includes(input.status) ? input.status : 'failed',
+          ...(input.result?.data?.data ? { result: { data: imageData(input.result.data) } } : {}) });
+        const dto = Array.isArray(value.data) ? imageData(value)
+          : value.task ? { task: taskData(value.task) }
+          : typeof value.cancelled === 'boolean' ? { id: typeof value.id === 'string' ? value.id : '', cancelled: value.cancelled }
+          : { id: typeof value.id === 'string' ? value.id : '', status: ['queued', 'generating', 'completed', 'failed', 'cancelled'].includes(value.status) ? value.status : 'failed', ...(typeof value.task_url === 'string' ? { task_url: value.task_url } : {}) };
+        return new Response(JSON.stringify(dto), { status: response.status, headers: publicHeaders });
+      }
+      // Binary artifacts and SSE have already passed the trusted application's image boundary.
+      return new Response(response.body, { status: response.status, headers: publicHeaders });
     } catch {
-      return new Response(JSON.stringify({ error: { message: 'Invalid JSON body' } }), {
-        status: 400,
-        headers: { 'content-type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      return new Response(JSON.stringify({ error: { code: 'temporarily_unavailable', message: 'Image generation is temporarily unavailable.', request_id: requestId } }), {
+        status: 503, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Request-Id': requestId, 'X-Should-Retry': 'false' },
       });
     }
-
-    if (this.env.OPENAI_API_KEY) {
-      try {
-        const modelSpec = ModelCatalog.resolveModel(body.model || 'openai-gpt-image-latest');
-        const upstreamResponse = await fetch('https://api.openai.com/v1/images/generations', {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json',
-            Authorization: `Bearer ${this.env.OPENAI_API_KEY}`
-          },
-          body: JSON.stringify({ ...body, model: modelSpec.upstreamId })
-        });
-        return new Response(upstreamResponse.body, {
-          status: upstreamResponse.status,
-          headers: {
-            'content-type': upstreamResponse.headers.get('content-type') || 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge'
-          }
-        });
-      } catch {
-        if (!this.syntheticResponsesAllowed()) {
-          return this.errorResponse(
-            502,
-            'upstream_unavailable',
-            'The image provider could not be reached. No synthetic image was substituted.'
-          );
-        }
-      }
-    } else if (!this.syntheticResponsesAllowed()) {
-      return this.errorResponse(
-        503,
-        'upstream_not_configured',
-        'The image provider is not configured. No synthetic image was substituted.'
-      );
-    }
-
-    const prompt = body.prompt || 'Synthesized generation';
-    const model = body.model || 'openai-gpt-image-latest';
-    const n = Math.min(body.n || 1, 4);
-    const publicBase = this.env.PUBLIC_ASSETS_URL || 'https://pub-9aab2b19ca7947c59240e3869c544e20.r2.dev';
-
-    const resultData = new Array(n).fill(0).map((_, i) => {
-      const assetId = `gen_${crypto.randomUUID()}`;
-      const filename = `generations/${assetId}.webp`;
-      return {
-        url: `${publicBase}/${filename}`,
-        revised_prompt: prompt
-      };
-    });
-
-    return new Response(
-      JSON.stringify({
-        created: Math.floor(Date.now() / 1000),
-        data: resultData,
-        model,
-        edge_pop: request.headers.get('cf-ray') || 'edge'
-      }),
-      {
-        status: 200,
-        headers: {
-          'content-type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'x-galx-edge-pop': request.headers.get('cf-ray') || 'edge',
-          'x-galx-simulated': 'true'
-        }
-      }
-    );
   }
 
   private isValidKeyFormat(key: string): boolean {

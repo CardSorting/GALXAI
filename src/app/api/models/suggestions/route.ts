@@ -11,8 +11,6 @@ import { CURATED_MATCHUPS } from '@/lib/data/comparisonData';
 import { ERROR_TROUBLESHOOT_DATA } from '@/lib/data/errorsData';
 import { INTEGRATION_GUIDES } from '@/lib/data/integrationsData';
 import { SECURITY_PATTERNS_DATA } from '@/lib/data/securityPatternsData';
-import { RELIABILITY_DATA } from '@/lib/data/reliabilityData';
-import { POSTMORTEMS_DATA } from '@/lib/data/postmortemsData';
 import { INDUSTRIES_DATA } from '@/lib/data/industriesData';
 
 export const dynamic = 'force-dynamic';
@@ -116,7 +114,7 @@ export async function GET(req: Request) {
     },
     {
       title: 'Architectural Capabilities & Edge Gateway Features',
-      description: '1M Context, Zero Data Retention (ZDR), 75% Prompt Caching, and Anycast routing.',
+      description: 'Text generation, image generation, and supported API inputs.',
       url: `${SITE_CONFIG.url}/capabilities`,
       category: 'Hub',
     },
@@ -128,7 +126,7 @@ export async function GET(req: Request) {
     },
     {
       title: 'AI Reliability, Resilience Engineering & High Availability',
-      description: 'Production engineering architectures for active-active failover, circuit breakers, and 99.99% SLA.',
+      description: 'Current service availability and customer updates.',
       url: `${SITE_CONFIG.url}/reliability`,
       category: 'Hub',
     },
@@ -191,14 +189,6 @@ export async function GET(req: Request) {
       description: p.description,
       url: `${SITE_CONFIG.url}/security/patterns/${p.slug}`,
       category: 'Security',
-    })),
-
-    // 10. Postmortems
-    ...POSTMORTEMS_DATA.map((pm) => ({
-      title: pm.headline,
-      description: pm.description,
-      url: `${SITE_CONFIG.url}/postmortems/${pm.slug}`,
-      category: 'Postmortem',
     })),
 
     // 11. Industries

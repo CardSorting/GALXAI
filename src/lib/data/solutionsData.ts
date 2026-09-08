@@ -44,7 +44,7 @@ export const SOLUTION_GUIDES: SolutionGuide[] = [
       },
       {
         title: 'Zero Rate-Limit Stalls (429 Shield)',
-        description: 'Burst traffic from multi-agent worker swarms is balanced across Anycast edge routes with automated active failover.',
+        description: 'Run concurrent application requests within your plan limits.',
       },
       {
         title: 'Sub-15ms Anycast Latency',
@@ -180,7 +180,7 @@ const stream = await client.chat.completions.create({
     faqs: [
       {
         q: 'How does GALXAI guarantee sub-15ms TTFT?',
-        a: 'GALXAI maintains hot TCP/TLS connections across 300+ global Anycast edge nodes, eliminating cold connection overhead.',
+        a: 'Response time varies by workload. Measure requests from your application to assess performance.',
       },
     ],
   },
@@ -459,7 +459,7 @@ console.log(JSON.parse(response.choices[0].message.content || "{}"));`,
       },
       {
         title: '75% Shared Context Rebate',
-        description: 'Shared codebase and system instructions stay warm in Anycast cache.',
+        description: 'Eligible repeated instructions receive the caching prices shown in the model catalog.',
       },
       {
         title: 'Unified Wallet & Logs',
@@ -488,7 +488,7 @@ print(response.choices[0].message.content)`,
     faqs: [
       {
         q: 'How does GALXAI handle 429 errors from high concurrency swarms?',
-        a: 'GALXAI uses Predictive Adaptive Hydraulic Headroom (P-AHT) to shift requests across distributed enterprise accounts before rate limits are exceeded.',
+        a: 'Your plan defines usage limits. Handle HTTP 429 and follow Retry-After when supplied.',
       },
     ],
   },

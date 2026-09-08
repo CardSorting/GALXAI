@@ -1,3 +1,5 @@
+import { logImageFailure } from '@/lib/security/private-image-diagnostics';
+import { publicImageRecord } from '@/lib/security/public-image-record';
 import { NextRequest, NextResponse } from 'next/server';
 import { ImageLibraryRepository } from '@/lib/supabase/repositories/ImageLibraryRepository';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -47,12 +49,14 @@ export async function GET(req: NextRequest) {
       total: libraryResult.totalCount,
       limit: options.limit,
       nextCursor: libraryResult.nextCursor,
-      stats: libraryResult.stats,
-      availableSessions: libraryResult.availableSessions,
-      records: libraryResult.records
+      stats: { totalImages: libraryResult.stats.totalImages, totalBytes: libraryResult.stats.totalBytes,
+        favoriteCount: libraryResult.stats.favoriteCount, sessionCount: libraryResult.stats.sessionCount,
+        aspectRatios: Object.fromEntries(Object.entries(libraryResult.stats.aspectRatios).filter(([key, value]) => /^\d+:\d+$/.test(key) && typeof value === 'number')) },
+      availableSessions: libraryResult.availableSessions.map(item => ({ sessionId: item.sessionId, count: item.count })),
+      records: libraryResult.records.map(publicImageRecord)
     }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (err: unknown) {
-    console.error('[API /api/images/library] GET Error:', err);
+    logImageFailure(crypto.randomUUID(), err);
     return NextResponse.json(
       { success: false, error: 'The image library is temporarily unavailable.' },
       { status: 500 }

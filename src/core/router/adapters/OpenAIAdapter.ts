@@ -473,7 +473,7 @@ export class OpenAIAdapter {
               size: req.size || '1024x1024',
               quality: req.quality || 'standard',
               n: req.n || 1,
-              response_format: req.response_format || 'url',
+              response_format: 'b64_json',
               sessionId: req.sessionId
             }),
             signal: controller.signal
@@ -532,7 +532,7 @@ export class OpenAIAdapter {
 
     if (req.quality) body.quality = req.quality;
     if ((req as any).style) body.style = (req as any).style;
-    if (req.response_format) body.response_format = req.response_format;
+    body.response_format = 'b64_json';
 
     const timeoutMs = options?.timeoutMs ?? 60_000;
     const controller = new AbortController();

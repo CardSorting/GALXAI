@@ -566,7 +566,6 @@ export async function POST(req: NextRequest) {
     );
     const currentWindows = seatEngine.calculateRollingWindows(userId, entitlement.tier);
     headers.set('X-Galx-Model', result.modelUsed);
-    headers.set('X-Galx-Router', 'apex-v2');
     headers.set('X-Galx-Seat-Tier', entitlement.tier);
     headers.set('X-Galx-Seat-Role', entitlement.role);
     headers.set('X-Galx-Seat-5Hour-Remaining-Pct', String(currentWindows.fiveHourWindow.percentRemaining));
@@ -576,15 +575,6 @@ export async function POST(req: NextRequest) {
     headers.set('X-Galx-Seat-Weekly-Refresh-In', currentWindows.weeklyWindow.refreshIn);
     headers.set('X-Galx-Seat-Weekly-Reset', String(Math.floor(currentWindows.weeklyWindow.resetAtMs / 1000)));
     headers.set('X-Galx-Cache-Rebate-Pct', String(entitlement.promptCacheRebatePct));
-    headers.set('X-Galx-Prompt-Compaction', compactPrompts ? 'enabled' : 'disabled');
-    headers.set('X-Galx-Compaction-Mode', compactPrompts ? 'auto' : 'raw');
-    headers.set('X-Galx-Rolling-Compacted', String(rollingContext.isCompacted));
-    headers.set('X-Galx-Rolling-Compacted-Turns', String(rollingContext.intermediateTurnsCompacted));
-    headers.set('X-Galx-Context-Tokens', String(contextPlan.estimatedPromptTokens));
-    headers.set('X-Galx-Tokens-Saved', String(rollingContext.tokensSaved));
-    headers.set('X-Galx-Prompt-Deflation-Pct', compactPrompts && rollingContext.tokensSaved > 0 
-      ? `${Math.round((rollingContext.tokensSaved / Math.max(1, contextPlan.estimatedPromptTokens + rollingContext.tokensSaved)) * 100)}%` 
-      : '0%');
     headers.set('X-Galx-Reasoning-Effort', effectiveReasoningEffort);
 
     if (result.isStream && result.body && typeof (result.body as any).getReader === 'function') {

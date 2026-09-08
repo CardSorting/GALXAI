@@ -158,7 +158,7 @@ for chunk in stream:
             <span>Direct Answer: How Does Anycast Routing Reduce AI Latency?</span>
           </div>
           <p className="text-sm sm:text-base text-white leading-relaxed font-sans">
-            <strong>Time-To-First-Token (TTFT)</strong> is dominated by TCP/TLS network round-trips plus model prefill processing. Traditional origin routing forces global clients to incur 120ms–180ms cross-continental round-trips before the model begins computing. GALXAI Anycast edge nodes terminate TLS connections in <strong>&lt;15ms locally</strong>, pre-warming connections to upstream compute clusters and reducing end-to-end TTFT by <strong>40ms to 120ms per request</strong>.
+            <strong>Time-To-First-Token (TTFT)</strong> measures the time until your application receives the first text token. Actual latency varies by request. Measure your own workload to evaluate responsiveness.
           </p>
         </section>
 
@@ -370,7 +370,7 @@ for chunk in stream:
               },
               {
                 q: 'What makes GALXAI Anycast edge routing faster than direct provider APIs?',
-                a: 'GALXAI terminates TCP and TLS handshakes at distributed Anycast points-of-presence worldwide in <15ms, maintaining persistent HTTP/2 and HTTP/3 multiplexed tunnels to upstream provider clusters.',
+                a: 'Response time varies with the request and your connection. Measure your own workload to evaluate performance.',
               },
             ].map((faq, idx) => {
               const isOpen = openFaq === idx;

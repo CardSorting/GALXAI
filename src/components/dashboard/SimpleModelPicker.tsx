@@ -18,7 +18,7 @@ import {
   Layers,
   Search
 } from 'lucide-react';
-import { FRONTEND_VISIBLE_MODELS, ModelCatalog } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS, ModelCatalog } from '@/core/router/PublicModelCatalog';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface SimpleCategory {

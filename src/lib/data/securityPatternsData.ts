@@ -221,7 +221,7 @@ def redact_sensitive_pii(text: str) -> str:
     defenseMechanisms: [
       'Hard Token Limits: Enforces max_tokens bounds at the gateway layer regardless of client payload overrides',
       'Max Tool Recursion Caps: Terminates autonomous agent invocation cycles at configurable loop limits (e.g. 10)',
-      'Leaky Bucket Concurrency Balancing: Sheds computational spikes before GPU worker starvation occurs',
+      'Concurrency controls: Keep application requests within your plan limits',
       'Global Anycast DDoS Mitigation: Absorbs Layer 7 volumetric attacks exceeding 10M req/sec',
     ],
     systemDiagramMermaid: `graph TD

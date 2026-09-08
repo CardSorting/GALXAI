@@ -790,6 +790,33 @@ export class GalxCryptoVault {
     };
   }
 
+  /** Purpose-bound opaque download capability; no storage location is encoded publicly. */
+  static sealImageDownload(userId: string, assetId: string, ttlMs = 3600_000): string {
+    const version = PRIMARY_KEY_VERSION;
+    const key = KEYRING.get(version)!;
+    const iv = crypto.randomBytes(12);
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+    cipher.setAAD(Buffer.from('galx-image-download'));
+    const bytes = Buffer.concat([cipher.update(JSON.stringify({ userId, assetId, exp: Date.now() + ttlMs })), cipher.final()]);
+    return Buffer.concat([Buffer.from([SUPPORTED_KEY_VERSIONS.indexOf(version as any)]), iv, cipher.getAuthTag(), bytes]).toString('base64url');
+  }
+
+  static openImageDownload(token: string): { userId: string; assetId: string } | undefined {
+    try {
+      if (!/^[A-Za-z0-9_-]{40,2048}$/.test(token)) return undefined;
+      const bytes = Buffer.from(token, 'base64url');
+      const version = SUPPORTED_KEY_VERSIONS[bytes[0]];
+      const key = KEYRING.get(version);
+      if (!key) return undefined;
+      const decipher = crypto.createDecipheriv('aes-256-gcm', key, bytes.subarray(1, 13));
+      decipher.setAAD(Buffer.from('galx-image-download'));
+      decipher.setAuthTag(bytes.subarray(13, 29));
+      const value = JSON.parse(Buffer.concat([decipher.update(bytes.subarray(29)), decipher.final()]).toString());
+      if (typeof value.userId !== 'string' || typeof value.assetId !== 'string' || !Number.isFinite(value.exp) || value.exp <= Date.now()) return undefined;
+      return { userId: value.userId, assetId: value.assetId };
+    } catch { return undefined; }
+  }
+
   /**
    * Seals an internal shard ID into an opaque, zero-knowledge session affinity ticket.
    * Mirrors AWS ALB / Cloudflare / Envoy opaque session tokens (aff_v1_...).

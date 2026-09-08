@@ -116,7 +116,11 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/(.*)",
-        headers: securityHeaders,
+        headers: securityHeaders.filter(header => header.key !== 'Content-Security-Policy'),
+      },
+      {
+        source: "/((?!v1/|api/).*)",
+        headers: securityHeaders.filter(header => header.key === 'Content-Security-Policy'),
       },
       {
         source: "/_next/static/:path*",

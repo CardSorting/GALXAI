@@ -264,7 +264,7 @@ export async function runAgentWorkflow(task: string) {
             <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2">
               <div className="text-white font-bold text-sm">2. Dynamic Route Switching</div>
               <p className="text-zinc-400 leading-relaxed">
-                If an upstream provider experiences transient packet loss during a multi-step agent workflow, GALXAI dynamically switches channels in under 15ms so your agent never crashes mid-turn.
+                Handle request failures in your agent workflow and retain the request ID when contacting support.
               </p>
             </div>
           </div>

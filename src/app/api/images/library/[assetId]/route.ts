@@ -1,3 +1,5 @@
+import { logImageFailure } from '@/lib/security/private-image-diagnostics';
+import { publicImageRecord } from '@/lib/security/public-image-record';
 import { NextRequest, NextResponse } from 'next/server';
 import { ImageLibraryRepository } from '@/lib/supabase/repositories/ImageLibraryRepository';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -37,10 +39,10 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      record
+      record: publicImageRecord(record)
     }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (err: unknown) {
-    console.error('[API /api/images/library/[assetId]] GET Error:', err);
+    logImageFailure(crypto.randomUUID(), err);
     return NextResponse.json(
       { success: false, error: 'The image could not be loaded.' },
       { status: 500 }
@@ -81,7 +83,7 @@ export async function PATCH(
       }
       return NextResponse.json({
         success: true,
-        record: updated
+        record: publicImageRecord(updated)
       });
     }
 
@@ -90,7 +92,7 @@ export async function PATCH(
       { status: 400 }
     );
   } catch (err: unknown) {
-    console.error('[API /api/images/library/[assetId]] PATCH Error:', err);
+    logImageFailure(crypto.randomUUID(), err);
     return NextResponse.json(
       { success: false, error: 'The image could not be updated.' },
       { status: 500 }
@@ -134,7 +136,7 @@ export async function DELETE(
       deleted: true
     });
   } catch (err: unknown) {
-    console.error('[API /api/images/library/[assetId]] DELETE Error:', err);
+    logImageFailure(crypto.randomUUID(), err);
     return NextResponse.json(
       { success: false, error: 'The image could not be deleted.' },
       { status: 500 }

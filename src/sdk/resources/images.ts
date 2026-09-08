@@ -76,7 +76,9 @@ export function wrapImageResponse(raw: ImageGenerationResponse): EnhancedImageRe
   const allUrls = (raw.data || []).map(d => d.url).filter(Boolean) as string[];
 
   return {
-    ...raw,
+    created: raw.created,
+    modelUsed: 'openai-gpt-image-latest',
+    data: (raw.data || []).map(item => ({ ...(typeof item.url === 'string' ? { url: item.url } : {}), ...(typeof item.b64_json === 'string' ? { b64_json: item.b64_json } : {}) })),
     url: primaryUrl,
     urls: allUrls,
     b64: primaryB64,
@@ -436,16 +438,15 @@ export class ImagesResource {
   }
 
   /**
-   * Enqueues an asynchronous visual synthesis task into the dedicated GPU rate-managed queue.
+   * Submits an image request for asynchronous completion.
    */
   public async generateAsync(
     params: ImageGenerationAsyncParams & ImageGenerateParams,
     options?: RequestOptions
   ): Promise<AsyncTaskHandle<ImageGenerationResponse>> {
-    const queue = params.queue || 'image-gen';
+    const queue = params.queue || 'images';
     const headers: Record<string, string> = {
       'X-Galx-Async': 'true',
-      'X-Galx-Queue': queue,
       ...(options?.headers || {})
     };
 
@@ -461,7 +462,6 @@ export class ImagesResource {
 
     const response = await this.client.request<{
       id: string;
-      queue: string;
       status: string;
       task_url: string;
     }>('/v1/images/generations', {
@@ -487,14 +487,14 @@ export class ImagesResource {
         const startTime = Date.now();
 
         while (Date.now() - startTime < timeoutMs) {
-          const snapshot = await client.request<{ task: GalxTask }>(`/api/queues/${queue}/tasks/${taskId}`);
+          const snapshot = await client.request<{ task: GalxTask }>(`${taskUrl}?snapshot=true`);
           const task = snapshot.task;
 
-          if (task.status === 'COMPLETED') {
+          if (String(task.status).toLowerCase() === 'completed') {
             return task.result?.data as ImageGenerationResponse;
           }
 
-          if (task.status === 'DEAD_LETTERED' || task.status === 'CANCELLED' || task.status === 'EXPIRED') {
+          if (['failed', 'cancelled', 'expired', 'dead_lettered'].includes(String(task.status).toLowerCase())) {
             throw new Error(`Visual task '${taskId}' failed: ${task.status} (${task.lastError?.message || ''})`);
           }
 
@@ -505,23 +505,26 @@ export class ImagesResource {
       },
 
       async *streamProgress(): AsyncIterable<TaskProgressInfo> {
-        const stream = client.requestEventStream(`/api/queues/${queue}/tasks/${taskId}/stream`);
+        const stream = client.requestEventStream(`${taskUrl}/stream`);
         for await (const evt of stream) {
-          if (evt.type === 'TASK_PROGRESS' && evt.data) {
+          const snapshot = evt as unknown as { status?: string };
+          if (snapshot.status) {
+            yield { percentage: snapshot.status === 'completed' ? 100 : 0, message: snapshot.status, updatedAtMs: Date.now() };
+          } else if (evt.type === 'TASK_PROGRESS' && evt.data) {
             yield evt.data as TaskProgressInfo;
           }
         }
       },
 
       async cancel(): Promise<boolean> {
-        const res = await client.request<{ cancelled: boolean }>(`/api/queues/${queue}/tasks/${taskId}`, {
+        const res = await client.request<{ cancelled: boolean }>(taskUrl, {
           method: 'DELETE'
         });
         return res.cancelled;
       },
 
       async getSnapshot(): Promise<GalxTask> {
-        const res = await client.request<{ task: GalxTask }>(`/api/queues/${queue}/tasks/${taskId}`);
+        const res = await client.request<{ task: GalxTask }>(`${taskUrl}?snapshot=true`);
         return res.task;
       }
     };

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
-import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/PublicModelCatalog';
 
 export const runtime = 'nodejs';
 
@@ -28,10 +28,11 @@ export async function GET() {
     servers: [
       {
         url: SITE_CONFIG.apiUrl,
-        description: 'Global Anycast Low-Latency Gateway (Sub-15ms TTFT)',
+        description: 'GALX API',
       },
     ],
     paths: {
+      "/images/generations": {"post": {"summary": "Generate an image", "description": "Returns one static binary image by default. Explicit JSON requests return only created and data. Download URLs expire after one hour or are self-contained data URLs. Dimensions may vary.", "security": [{"BearerAuth": []}], "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "required": ["prompt"], "properties": {"prompt": {"type": "string", "minLength": 1, "maxLength": 32000}, "model": {"type": "string", "enum": ["openai-gpt-image-latest"]}, "response_format": {"type": "string", "enum": ["binary", "b64_json", "url"], "default": "binary"}, "output_format": {"type": "string", "enum": ["png", "jpeg", "webp"]}, "n": {"type": "integer", "minimum": 1, "maximum": 4, "description": "Binary output requires n=1."}}}}}}, "responses": {"200": {"description": "Generated image", "content": {"image/png": {"schema": {"type": "string", "format": "binary"}}, "image/jpeg": {"schema": {"type": "string", "format": "binary"}}, "image/webp": {"schema": {"type": "string", "format": "binary"}}, "application/json": {"schema": {"type": "object", "additionalProperties": false, "required": ["created", "data"], "properties": {"created": {"type": "integer"}, "data": {"type": "array", "minItems": 1, "maxItems": 4, "items": {"oneOf": [{"type": "object", "additionalProperties": false, "required": ["b64_json"], "properties": {"b64_json": {"type": "string"}}}, {"type": "object", "additionalProperties": false, "required": ["url"], "properties": {"url": {"type": "string"}}}]}}}}}}}, "400": {"description": "Request failed", "content": {"application/json": {"schema": {"type": "object", "additionalProperties": false, "required": ["error"], "properties": {"error": {"type": "object", "additionalProperties": false, "required": ["code", "message", "request_id"], "properties": {"code": {"type": "string"}, "message": {"type": "string"}, "request_id": {"type": "string"}}}}}}}}, "401": {"description": "Request failed", "content": {"application/json": {"schema": {"type": "object", "additionalProperties": false, "required": ["error"], "properties": {"error": {"type": "object", "additionalProperties": false, "required": ["code", "message", "request_id"], "properties": {"code": {"type": "string"}, "message": {"type": "string"}, "request_id": {"type": "string"}}}}}}}}, "404": {"description": "Request failed", "content": {"application/json": {"schema": {"type": "object", "additionalProperties": false, "required": ["error"], "properties": {"error": {"type": "object", "additionalProperties": false, "required": ["code", "message", "request_id"], "properties": {"code": {"type": "string"}, "message": {"type": "string"}, "request_id": {"type": "string"}}}}}}}}, "429": {"description": "Request failed", "content": {"application/json": {"schema": {"type": "object", "additionalProperties": false, "required": ["error"], "properties": {"error": {"type": "object", "additionalProperties": false, "required": ["code", "message", "request_id"], "properties": {"code": {"type": "string"}, "message": {"type": "string"}, "request_id": {"type": "string"}}}}}}}}, "502": {"description": "Request failed", "content": {"application/json": {"schema": {"type": "object", "additionalProperties": false, "required": ["error"], "properties": {"error": {"type": "object", "additionalProperties": false, "required": ["code", "message", "request_id"], "properties": {"code": {"type": "string"}, "message": {"type": "string"}, "request_id": {"type": "string"}}}}}}}}, "503": {"description": "Request failed", "content": {"application/json": {"schema": {"type": "object", "additionalProperties": false, "required": ["error"], "properties": {"error": {"type": "object", "additionalProperties": false, "required": ["code", "message", "request_id"], "properties": {"code": {"type": "string"}, "message": {"type": "string"}, "request_id": {"type": "string"}}}}}}}}, "504": {"description": "Request failed", "content": {"application/json": {"schema": {"type": "object", "additionalProperties": false, "required": ["error"], "properties": {"error": {"type": "object", "additionalProperties": false, "required": ["code", "message", "request_id"], "properties": {"code": {"type": "string"}, "message": {"type": "string"}, "request_id": {"type": "string"}}}}}}}}, "202": {"description": "Asynchronous request accepted", "content": {"application/json": {"schema": {"type": "object", "additionalProperties": false, "required": ["id", "status", "task_url"], "properties": {"id": {"type": "string"}, "status": {"type": "string"}, "task_url": {"type": "string"}}}}}}}}},
       '/chat/completions': {
         post: {
           summary: 'Create Chat Completion',
@@ -100,14 +101,7 @@ export async function GET() {
           security: [{ BearerAuth: [] }],
         },
       },
-      '/images/generations': {
-        post: {
-          summary: 'Create Image Generation',
-          description: 'Generate images from text prompts using OpenAI Image Generation.',
-          operationId: 'createImage',
-          security: [{ BearerAuth: [] }],
-        },
-      },
+
     },
     components: {
       securitySchemes: {

@@ -1,3 +1,4 @@
+import { hasInternalAccess } from '@/lib/security/internal-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
@@ -41,6 +42,8 @@ function authenticateRequest(req: NextRequest, requireAuth = false): { userId: s
  * Lists all task queues with live telemetry stats and rates.
  */
 export async function GET(req: NextRequest) {
+  if (!hasInternalAccess(req.headers)) return NextResponse.json({ error: 'Not found' }, { status: 404, headers: { 'Cache-Control': 'no-store' } });
+
   const auth = authenticateRequest(req);
   if (!auth.isAuthorized) {
     return NextResponse.json({ error: { message: 'Unauthorized Gateway API Key' } }, { status: 401 });
@@ -68,6 +71,8 @@ export async function GET(req: NextRequest) {
  * Creates or updates a named queue configuration.
  */
 export async function POST(req: NextRequest) {
+  if (!hasInternalAccess(req.headers)) return NextResponse.json({ error: 'Not found' }, { status: 404, headers: { 'Cache-Control': 'no-store' } });
+
   const auth = authenticateRequest(req, true);
   if (!auth.isAuthorized) {
     return NextResponse.json({ error: { message: 'Unauthorized Gateway API Key or Session Bearer Token required' } }, { status: 401 });

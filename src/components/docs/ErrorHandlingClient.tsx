@@ -44,8 +44,8 @@ const ERROR_CODES = [
   },
   {
     code: '503 Service Unavailable',
-    meaning: 'Upstream vendor outage during failover',
-    action: 'GALXAI circuit breaker auto-routes traffic to healthy upstream in <15ms.',
+    meaning: 'Service temporarily unavailable',
+    action: 'Try again later. Contact support with the request ID if the problem continues.',
   },
 ];
 

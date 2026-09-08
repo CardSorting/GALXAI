@@ -33,7 +33,7 @@ import {
   Settings,
   Lock
 } from 'lucide-react';
-import { FRONTEND_VISIBLE_MODELS, ModelCatalog } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS, ModelCatalog } from '@/core/router/PublicModelCatalog';
 import { BroccoliOmniSearch, OmniSearchItem } from '@/lib/resilience/BroccoliOmniSearch';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { withErrorBoundary } from './ErrorBoundary';

@@ -74,7 +74,7 @@ export function TrustSeals({ className = '', variant = 'grid' }: TrustSealsProps
           <span className="font-bold text-xs">Multi-Region Anycast</span>
         </div>
         <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
-          Sub-15ms automated failover across redundant global edge nodes.
+          Check current service availability on the status page.
         </p>
       </div>
     </div>

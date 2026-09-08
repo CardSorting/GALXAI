@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { CompareClient } from '@/components/models/CompareClient';
-import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/PublicModelCatalog';
 import { constructMetadata } from '@/lib/seo/metadata';
 import { JsonLd, createModelItemListSchema, createBreadcrumbSchema } from '@/lib/seo/jsonld';
 

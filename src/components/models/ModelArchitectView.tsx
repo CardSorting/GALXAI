@@ -9,7 +9,7 @@ import {
   ShieldCheck,
   Zap,
 } from 'lucide-react';
-import type { ModelSpecItem } from '@/core/contracts/GalxContracts';
+import type { ModelSpecItem } from '@/core/router/PublicModelCatalog';
 
 interface ModelArchitectViewProps {
   model: ModelSpecItem;

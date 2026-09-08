@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
-import { ModelCatalog } from '@/core/router/ModelCatalog';
+import { ModelCatalog } from '@/core/router/PublicModelCatalog';
 import { RateLockRibbon } from '@/components/dashboard/RateLockRibbon';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';

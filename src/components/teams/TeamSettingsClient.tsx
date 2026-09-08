@@ -200,7 +200,7 @@ export function TeamSettingsClient() {
             <h3 className="text-base font-bold font-sans">Danger Zone</h3>
           </div>
           <p className="text-xs text-zinc-300 font-sans leading-relaxed">
-            Transfer ownership of this organization or delete the entire workspace including all members, cost centers, and shard keys. This action is irreversible.
+            Transfer ownership of this organization or delete the entire workspace including all members, cost centers, and API keys. This action is irreversible.
           </p>
           <div className="flex items-center gap-3 pt-2">
             <button

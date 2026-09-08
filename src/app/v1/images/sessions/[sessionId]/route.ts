@@ -1,3 +1,4 @@
+import { imageDownloadUrl } from '@/lib/security/image-download-url';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxR2AssetAdapter } from '@/workers/cloudflare/GalxR2AssetAdapter';
@@ -35,22 +36,19 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
-    const userId = authResult.userId || req.headers.get('x-galx-user-id') || 'anonymous_developer';
+    if (!authResult.authenticated || !authResult.userId) return NextResponse.json({ error: { message: 'Unauthorized' } }, { status: 401 });
+    const userId = authResult.userId;
 
     const r2Adapter = GalxR2AssetAdapter.getInstance();
-    const [images, manifest] = await Promise.all([
-      r2Adapter.listSessionImages(userId, sessionId),
-      r2Adapter.getSessionManifest(userId, sessionId),
-    ]);
+    const images = await r2Adapter.listSessionImages(userId, sessionId);
 
     return NextResponse.json(
       {
         object: 'list',
         session_id: sessionId,
         user_id: userId,
-        manifest: manifest || null,
         total: images.length,
-        data: images,
+        data: images.map(image => ({ assetId: image.assetId, publicUrl: imageDownloadUrl(userId, image.assetId), contentType: image.contentType, sizeBytes: image.sizeBytes, sessionId: image.sessionId })),
       },
       {
         status: 200,
@@ -63,7 +61,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     );
   } catch (err: any) {
     return NextResponse.json(
-      { error: { message: err.message || 'Failed to list session images', code: 'session_list_failed' } },
+      { error: { message: 'Failed to list session images', code: 'session_list_failed' } },
       { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
     );
   }
@@ -85,7 +83,8 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
 
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
-    const userId = authResult.userId || req.headers.get('x-galx-user-id') || 'anonymous_developer';
+    if (!authResult.authenticated || !authResult.userId) return NextResponse.json({ error: { message: 'Unauthorized' } }, { status: 401 });
+    const userId = authResult.userId;
 
     const r2Adapter = GalxR2AssetAdapter.getInstance();
     const result = await r2Adapter.deleteSessionImages(userId, sessionId);
@@ -108,7 +107,7 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
     );
   } catch (err: any) {
     return NextResponse.json(
-      { error: { message: err.message || 'Failed to purge session images', code: 'session_purge_failed' } },
+      { error: { message: 'Failed to delete session images', code: 'session_purge_failed' } },
       { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
     );
   }

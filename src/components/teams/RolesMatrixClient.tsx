@@ -34,7 +34,7 @@ export function RolesMatrixClient() {
     { key: 'canTopUpWallet', label: 'Deposit Credit Top-Ups', category: 'Finance', description: 'Authorize Stripe / Crypto deposits and manage auto-reload' },
     { key: 'canConfigureSSO', label: 'Configure SAML SSO & SCIM', category: 'Security', description: 'Set up Okta / Google Workspace identity providers' },
     { key: 'canViewAuditLogs', label: 'View SOC 2 Audit Logs', category: 'Compliance', description: 'Inspect immutable cryptographic session and key access logs' },
-    { key: 'canManageVaultSecrets', label: 'Manage Shard Vault Secrets', category: 'Security', description: 'Configure upstream provider API secrets in zero-trust vault' },
+    { key: 'canManageVaultSecrets', label: 'Manage API Keys', category: 'Security', description: 'Manage authorized API credentials' },
   ];
 
   return (

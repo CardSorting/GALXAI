@@ -1,3 +1,4 @@
+import { hasInternalAccess } from '@/lib/security/internal-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import { GalxQueueEventBus } from '@/core/queue/GalxQueueEventBus';
@@ -14,6 +15,8 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ queueId: string }> }
 ) {
+  if (!hasInternalAccess(req.headers)) return NextResponse.json({ error: 'Not found' }, { status: 404, headers: { 'Cache-Control': 'no-store' } });
+
   const { queueId } = await params;
   const engine = GalxTaskQueueEngine.getInstance();
   const queue = engine.getQueue(queueId);

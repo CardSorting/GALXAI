@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/PublicModelCatalog';
 
 export const size = {
   width: 1200,
@@ -21,7 +21,7 @@ export async function generateStaticParams() {
 export default async function Image({ params }: Props) {
   const { id } = await params;
   const model = FRONTEND_VISIBLE_MODELS.find(
-    (m) => m.id === id || m.id.replace('/', '-') === id || m.upstreamId === id
+    (m) => m.id === id || m.id.replace('/', '-') === id || m.id === id
   ) || FRONTEND_VISIBLE_MODELS[0];
 
   const accentColor = '#f59e0b';
@@ -189,10 +189,10 @@ export default async function Image({ params }: Props) {
             }}
           >
             <span style={{ fontSize: '12px', color: '#a5b4fc', textTransform: 'uppercase', fontWeight: 700 }}>
-              Routing Overhead
+              API Access
             </span>
             <span style={{ fontSize: '20px', color: '#ffffff', fontWeight: 900, marginTop: '4px' }}>
-              Sub-15ms
+              HTTPS
             </span>
           </div>
         </div>

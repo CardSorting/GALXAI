@@ -22,7 +22,7 @@ import {
 import { ShareButton } from '@/components/common/ShareButton';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
-import type { ModelSpecItem } from '@/core/contracts/GalxContracts';
+import type { ModelSpecItem } from '@/core/router/PublicModelCatalog';
 import type { ModelMatchup } from '@/lib/data/comparisonData';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
@@ -39,7 +39,7 @@ export function ModelVsClient({ matchup, modelA, modelB }: ModelVsClientProps) {
   const [monthlyTokensMillions, setMonthlyTokensMillions] = useState<number>(50);
 
   const [prompt, setPrompt] = useState<string>(
-    'Analyze the computational trade-offs between dynamic Anycast model routing and direct single-origin API dispatch.'
+    'Compare two approaches to organizing a software project.'
   );
   const [isStreaming, setIsStreaming] = useState(false);
   const [outputA, setOutputA] = useState('');
@@ -134,8 +134,10 @@ const resB = await client.chat.completions.create({
     setOutputA('');
     setOutputB('');
 
-    const textA = `[${modelA.name} Output]\nAnycast model routing terminates client TCP/TLS handshakes at the edge in <14ms TTFT. By distributing global traffic across enterprise high-availability infrastructure, it eliminates 429 rate limit stalls and guarantees up to 90% prompt caching pass-through on prefixes exceeding 1,024 tokens.`;
-    const textB = `[${modelB.name} Output]\nDirect origin dispatch suffers from geographical round-trip penalties (120ms+ cross-continental) and strict isolated tier rate limits. Routing through the GALXAI gateway unifies multi-cloud quotas, sub-15ms regional failover, and verified zero data retention guarantees.`;
+    const textA = `[${modelA.name} Example]
+Organize related code into modules and document their responsibilities.`;
+    const textB = `[${modelB.name} Example]
+Group code by feature and define clear interfaces between modules.`;
 
     const wordsA = textA.split(' ');
     const wordsB = textB.split(' ');

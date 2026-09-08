@@ -465,7 +465,7 @@ const completion = await client.chat.completions.create({
     faqs: [
       {
         q: 'Can GALXAI replace custom LiteLLM routing rules?',
-        a: 'Yes. GALXAI handles automatic fallback, model resolution, rate-limit pooling, and cost management natively.',
+        a: 'Yes. GALXAI provides model selection, usage limits, and cost reporting through one API.',
       },
     ],
   },
@@ -546,7 +546,7 @@ response = client.chat.completions.create(
       },
       {
         feature: 'Rate Limit Failover',
-        galxai: 'Predictive Adaptive Hydraulic Headroom (P-AHT)',
+        galxai: 'Usage limits and request controls',
         competitor: 'Basic Fallback Endpoints',
       },
       {

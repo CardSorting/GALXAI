@@ -4,7 +4,7 @@
  */
 
 import type { ChatMessage } from '../core/contracts/GalxContracts';
-import { ModelCatalog } from '../core/router/ModelCatalog';
+import { ModelCatalog } from '../core/router/PublicModelCatalog';
 
 export class TokenOptimizer {
   /**

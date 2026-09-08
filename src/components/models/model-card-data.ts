@@ -1,4 +1,4 @@
-import type { ModelSpecItem } from '@/core/contracts/GalxContracts';
+import type { ModelSpecItem } from '@/core/router/PublicModelCatalog';
 
 export interface SandboxPresetItem {
   title: string;
@@ -111,20 +111,7 @@ export class HardenedLeaseManager {
       title: 'High-Scale Cloud Architecture',
       desc: 'Design an event-driven queue topology capable of 100K requests/sec with zero drops.',
       prompt: `Design a high-resiliency ingestion pipeline for ${model.name} capable of handling 100,000 requests/sec with automatic backpressure and 75% prompt caching pass-through.`,
-      response: `### Recommended GALXAI Edge Pipeline Topology:
-
-\`\`\`mermaid
-graph LR
-    Client([Client App / IDE]) -->|Anycast DNS <15ms| Edge([Cloudflare Edge Gateway])
-    Edge -->|Token Bucket Rate-Limit| Cache[(Prefix Cache RAM Ring)]
-    Cache -->|Cache HIT 75% Disc| FastStream([Instant SSE Transit])
-    Cache -->|Cache MISS| GatewayCore([GALXAI Low-Latency Gateway Core])
-    GatewayCore -->|Dynamic Load Balance| Upstream([OpenAI Frontier Compute Cluster])
-\`\`\`
-
-1. **Anycast Tier-1 Ingestion**: Edge proxy terminates TLS in <15ms nearest to client.
-2. **Continuous Memory Zeroization**: Prompts transit strictly in non-persisted RAM buffers.
-3. **Automated Prefix Cache Tagging**: Common system instructions yield 75% wholesale cost reduction.`
+      response: `Use a bounded work queue in your application, set request timeouts, and handle Retry-After when provided. Track request IDs and completion status. Measure throughput with your expected prompts before setting concurrency limits.`
     }
   };
 }

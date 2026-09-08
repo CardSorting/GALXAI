@@ -25,7 +25,7 @@ import {
   Image as ImageIcon,
   Compass
 } from 'lucide-react';
-import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/ModelCatalog';
+import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/PublicModelCatalog';
 import { TrustSeals } from '@/components/common/TrustSeals';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';

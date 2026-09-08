@@ -9,7 +9,7 @@ import {
   Sparkles,
   Info
 } from 'lucide-react';
-import type { ModelSpecItem } from '@/core/contracts/GalxContracts';
+import type { ModelSpecItem } from '@/core/router/PublicModelCatalog';
 import { getSandboxPresets } from './model-card-data';
 
 interface ModelSandboxSectionProps {
@@ -104,13 +104,8 @@ export function ModelSandboxSection({ model }: ModelSandboxSectionProps) {
   );
 
   const wireHeadersText = `HTTP/2 200 OK
-content-type: text/event-stream; charset=utf-8
-x-galx-model: ${model.id}
-x-galx-transit-latency-ms: ${streamMetrics.ttftMs || 12.4}
-x-galx-prompt-cache: HIT (up to 90% pass-through applied)
-x-galx-routing: sub-15ms anycast edge
-x-galx-zero-retention: active
-server: cloudflare-anycast-edge`;
+content-type: ${model.category === 'image' ? 'image/png' : 'text/event-stream'}
+cache-control: private, no-store`;
 
   return (
     <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-cyan-500/25 bg-gradient-to-b from-[#0a0d18] to-[#07080d] shadow-2xl relative overflow-hidden">

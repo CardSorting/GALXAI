@@ -3,7 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { DocsSubNav } from '@/components/dashboard/DocsSubNav';
-import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/PublicModelCatalog';
 
 const ENDPOINTS = [
   ['POST', '/v1/chat/completions', 'OpenAI-compatible text and reasoning inference. Supports SSE.'],

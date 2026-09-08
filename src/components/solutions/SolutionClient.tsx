@@ -25,7 +25,7 @@ import { TrustSeals } from '@/components/common/TrustSeals';
 import { FloatingConversionDock } from '@/components/dashboard/FloatingConversionDock';
 import type { SolutionGuide } from '@/lib/data/solutionsData';
 import { SOLUTION_GUIDES } from '@/lib/data/solutionsData';
-import type { ModelSpecItem } from '@/core/contracts/GalxContracts';
+import type { ModelSpecItem } from '@/core/router/PublicModelCatalog';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 
 interface SolutionClientProps {

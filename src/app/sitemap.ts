@@ -10,11 +10,8 @@ import { COOKBOOK_RECIPES_DATA } from '@/lib/data/cookbooksData';
 import { PROVIDERS_DATA } from '@/lib/data/providersData';
 import { CAPABILITIES_DATA } from '@/lib/data/capabilitiesData';
 import { WORKLOAD_BENCHMARKS_DATA } from '@/lib/data/workloadBenchmarksData';
-import { ARCHITECTURE_WHITEPAPERS_DATA } from '@/lib/data/architectureWhitepapersData';
 import { SECURITY_SPECIFICATIONS_DATA } from '@/lib/data/securityData';
-import { RELIABILITY_DATA } from '@/lib/data/reliabilityData';
 import { SECURITY_PATTERNS_DATA } from '@/lib/data/securityPatternsData';
-import { POSTMORTEMS_DATA } from '@/lib/data/postmortemsData';
 import { INDUSTRIES_DATA } from '@/lib/data/industriesData';
 import { GLOSSARY_TERMS } from '@/lib/data/glossaryData';
 
@@ -395,12 +392,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // 16. Dynamic Deep-Dive Architecture Whitepapers (pSEO)
-  const whitepaperRoutes: MetadataRoute.Sitemap = ARCHITECTURE_WHITEPAPERS_DATA.map((w) => ({
-    url: `${baseUrl}/architecture/${w.slug}`,
-    lastModified: currentDate,
-    changeFrequency: 'weekly',
-    priority: 0.9,
-  }));
+
 
   // 17. Dynamic Enterprise Security & Governance Whitepapers (pSEO)
   const securityRoutes: MetadataRoute.Sitemap = SECURITY_SPECIFICATIONS_DATA.map((s) => ({
@@ -419,20 +411,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // 19. Dynamic AI Reliability & Resilience Engineering Guides (pSEO)
-  const reliabilityRoutes: MetadataRoute.Sitemap = RELIABILITY_DATA.map((r) => ({
-    url: `${baseUrl}/reliability/${r.slug}`,
-    lastModified: currentDate,
-    changeFrequency: 'weekly',
-    priority: 0.9,
-  }));
+
 
   // 20. Dynamic AI Incident Postmortems (pSEO)
-  const postmortemRoutes: MetadataRoute.Sitemap = POSTMORTEMS_DATA.map((pm) => ({
-    url: `${baseUrl}/postmortems/${pm.slug}`,
-    lastModified: currentDate,
-    changeFrequency: 'weekly',
-    priority: 0.9,
-  }));
+
 
   // 21. Dynamic Vertical Industry Solutions (pSEO)
   const industryRoutes: MetadataRoute.Sitemap = INDUSTRIES_DATA.map((i) => ({
@@ -480,11 +462,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...providerRoutes,
     ...capabilityRoutes,
     ...workloadBenchmarkRoutes,
-    ...whitepaperRoutes,
     ...securityRoutes,
     ...securityPatternRoutes,
-    ...reliabilityRoutes,
-    ...postmortemRoutes,
     ...industryRoutes,
     ...complianceRoutes,
     ...glossaryTermRoutes,

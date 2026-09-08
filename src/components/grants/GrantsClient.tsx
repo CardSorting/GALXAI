@@ -65,7 +65,7 @@ export const GRANT_TIERS: GrantTier[] = [
     ],
     benefits: [
       '50% Matching Grant on deposits up to $2,500',
-      'Priority Sub-15ms Anycast Failover Shards',
+      'Priority API access',
       'Dedicated private Slack/Discord channel with core routing engineers',
       'Custom rate limit elevation (up to 1,200 RPM)',
     ],

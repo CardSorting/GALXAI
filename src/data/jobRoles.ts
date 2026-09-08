@@ -30,7 +30,7 @@ export const JOB_ROLES: JobRole[] = [
     description: 'Lead the architecture of our global Anycast routing substrate and sub-15ms edge proxy fabric handling billions of daily OpenAI GPT-5.6 tokens with zero downtime.',
     first90Days: [
       'Day 30: Deploy custom zero-copy buffer routing in Rust across 10 Anycast Edge PoPs.',
-      'Day 60: Shard active TCP connection pooling for GPT-5.6 streaming, shaving 8ms off initial TTFT.',
+      'Day 60: Improve streaming reliability and latency for GPT-5.6 requests.',
       'Day 90: Architect automated kernel-level failover when upstream region packet loss exceeds 0.2%.',
     ],
     responsibilities: [

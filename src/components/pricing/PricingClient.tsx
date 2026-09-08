@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { PricingEstimator } from './PricingEstimator';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
-import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/PublicModelCatalog';
 import { PRICING_FAQS, PRICING_PLANS } from '@/lib/data/pricingSummary';
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 

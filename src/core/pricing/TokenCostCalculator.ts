@@ -1,4 +1,4 @@
-import { EXCLUSIVE_MODEL_CATALOG, ModelSpecItem } from '../router/ModelCatalog';
+import { EXCLUSIVE_MODEL_CATALOG, ModelSpecItem } from '../router/PublicModelCatalog';
 
 export type ServiceTier = 'standard' | 'batch' | 'flex';
 

@@ -87,7 +87,6 @@ function applySecurityHeaders(response: NextResponse, pathname: string): NextRes
     pathname === '/models/routing';
 
   if (isProtectedPath) {
-    response.headers.set('X-GALX-Route-Classification', 'protected-workspace');
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
     response.headers.set('Pragma', 'no-cache');
   }
@@ -116,11 +115,9 @@ export const updateSession = async (request: NextRequest) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
-        'Access-Control-Allow-Headers': 'Authorization, Content-Type, Accept, X-Galx-Async, X-Galx-Queue, X-Galx-Webhook-Url, X-Galx-Priority, X-Galx-Delay-Ms, X-Galx-Session-Id, X-Galx-Session-Mode, X-Galx-Turn-Id, X-Galx-Protocol-Version, X-Deployment-Id, Idempotency-Key, Prefer, baggage, sentry-trace',
-        'Access-Control-Expose-Headers': 'X-Galx-Request-Id, X-Galx-Conversation-Id, X-Galx-Session-Mode, X-Galx-Turn-Id, X-Galx-Protocol-Version',
+        'Access-Control-Allow-Headers': 'Authorization, Content-Type, Accept, X-Galx-Async, X-Galx-Webhook-Url, X-Galx-Priority, X-Galx-Delay-Ms, X-Galx-Session-Id, X-Galx-Session-Mode, X-Galx-Turn-Id, Idempotency-Key, Prefer',
+        'Access-Control-Expose-Headers': 'X-Request-Id, Retry-After, Location, X-Should-Retry',
         'Access-Control-Max-Age': '86400',
-        'X-Edge-FastPath': 'cors-preflight',
-        'Server-Timing': 'edge-cors;dur=0.1'
       }
     });
   }
@@ -128,9 +125,6 @@ export const updateSession = async (request: NextRequest) => {
   // 2. Fast path: Skip blocking auth network roundtrips for API & V1 inference routes
   if (pathname.startsWith('/v1/') || pathname.startsWith('/api/')) {
     const apiResponse = NextResponse.next({ request });
-    apiResponse.headers.set('X-Edge-FastPath', 'api-bypass');
-    apiResponse.headers.set('Timing-Allow-Origin', '*');
-    apiResponse.headers.set('Server-Timing', 'edge;dur=0.1, cache;desc="L1-FastPath"');
     return applySecurityHeaders(apiResponse, pathname);
   }
 
@@ -148,9 +142,6 @@ export const updateSession = async (request: NextRequest) => {
     }
 
     const unauthResponse = NextResponse.next({ request });
-    unauthResponse.headers.set('X-Edge-FastPath', 'public-pass');
-    unauthResponse.headers.set('Timing-Allow-Origin', '*');
-    unauthResponse.headers.set('Server-Timing', 'edge;dur=0.1');
     return applySecurityHeaders(unauthResponse, pathname);
   }
 
@@ -180,9 +171,6 @@ export const updateSession = async (request: NextRequest) => {
     await supabase.auth.getUser();
   } catch {}
 
-  supabaseResponse.headers.set('X-Edge-FastPath', 'auth-verified');
-  supabaseResponse.headers.set('Timing-Allow-Origin', '*');
-  supabaseResponse.headers.set('Server-Timing', 'edge;dur=1.2, l1;desc="L1-FastPath"');
 
   return applySecurityHeaders(supabaseResponse, pathname);
 };

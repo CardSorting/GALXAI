@@ -1,3 +1,4 @@
+import { publicTaskResponse } from '../../lib/security/public-task-response';
 import * as crypto from 'node:crypto';
 import type {
   GalxTaskQueueConfig,
@@ -1523,10 +1524,10 @@ export class GalxTaskQueueEngine {
 
       task.result = {
         statusCode: res.statusCode,
-        data: responseData,
         shardId: res.shardId,
-        modelUsed: res.modelUsed,
+        data: responseData,
         provider: res.provider,
+        modelUsed: res.modelUsed,
         completedAtMs: Date.now()
       };
 
@@ -1544,7 +1545,7 @@ export class GalxTaskQueueEngine {
         this.dispatchWebhookCallback(target.webhookCompletionUrl, target.webhookHmacSecret, {
           taskId: task.id,
           status: 'COMPLETED',
-          result: task.result
+          result: (await publicTaskResponse(task)).result
         }).catch(() => {});
       }
     } else if (target.taskKind === 'image_generation' && target.imagePayload) {
@@ -1577,7 +1578,7 @@ export class GalxTaskQueueEngine {
         this.dispatchWebhookCallback(target.webhookCompletionUrl, target.webhookHmacSecret, {
           taskId: task.id,
           status: 'COMPLETED',
-          result: task.result
+          result: (await publicTaskResponse(task)).result
         }).catch(() => {});
       }
     } else {

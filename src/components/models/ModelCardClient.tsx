@@ -22,7 +22,7 @@ import {
   ChevronUp,
   CheckCircle2,
 } from 'lucide-react';
-import type { ModelSpecItem } from '@/core/contracts/GalxContracts';
+import type { ModelSpecItem } from '@/core/router/PublicModelCatalog';
 import { ShareButton } from '@/components/common/ShareButton';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
@@ -437,13 +437,13 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
           </div>
 
           <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5">
-            <span className="text-zinc-500 text-[10px] uppercase block">Anycast Edge TTFT</span>
-            <span className="text-cyan-300 font-bold text-sm">&lt; 15ms (Global Edge)</span>
+            <span className="text-zinc-500 text-[10px] uppercase block">API access</span>
+            <span className="text-cyan-300 font-bold text-sm">HTTPS</span>
           </div>
 
           <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5">
             <span className="text-zinc-500 text-[10px] uppercase block">Data Retention</span>
-            <span className="text-emerald-400 font-bold text-sm">0 Days (RAM / ZDR)</span>
+            <span className="text-emerald-400 font-bold text-sm">See privacy policy</span>
           </div>
         </div>
 
@@ -586,7 +586,7 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
             Enterprise Gateway Architecture
           </h2>
           <p className="text-xs text-zinc-400">
-            Resilient Anycast routing infrastructure designed for production AI systems and agent loops.
+            Text and image generation for your applications.
           </p>
         </div>
 
@@ -627,7 +627,7 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
             </div>
             <h3 className="text-sm font-bold text-white">Multi-Region Edge Failover</h3>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Sub-15ms Anycast edge routing with active health probing bypasses upstream 429 rate limit stalls and regional outages.
+              Check service availability and follow the error guidance returned with each request.
             </p>
           </div>
         </div>

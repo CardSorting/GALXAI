@@ -6,6 +6,7 @@
 'use server';
 
 import { GalxAI } from './client';
+import { serveImageRequest } from './server-image';
 import type { ImageGenerateParams } from './resources/images';
 
 const serverClient = new GalxAI();
@@ -36,20 +37,12 @@ export async function generateImageAction(
     ? { prompt: promptOrParams, ...options }
     : promptOrParams;
 
-  try {
-    const result = await serverClient.images.generate(params);
-    return { success: true, data: result.data, modelUsed: result.modelUsed || params.model };
-  } catch (err: any) {
-    // Graceful fallback for local development preview
-    const prompt = params.prompt || 'artwork';
-    const seed = Math.abs(prompt.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) + Date.now()) % 1000;
-    return {
-      success: true,
-      data: [{ url: `https://picsum.photos/seed/galx-action-${seed}/1024/1024`, revised_prompt: prompt }],
-      modelUsed: params.model || 'openai-gpt-image-latest',
-      isFallback: true
-    };
-  }
+  const response = await serveImageRequest(serverClient, new Request('https://galx.ai/v1/images/generations', {
+    method: 'POST', headers: { accept: 'application/json' },
+    body: JSON.stringify({ ...params, response_format: 'url' }),
+  }));
+  const result = await response.json();
+  return response.ok ? { success: true, data: result.data } : { success: false, error: result.error };
 }
 
 /**

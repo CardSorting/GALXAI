@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Navigation } from '@/components/dashboard/Navigation';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
-import { FRONTEND_VISIBLE_MODELS, ModelCatalog } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS, ModelCatalog } from '@/core/router/PublicModelCatalog';
 import { ModelCardClient } from '@/components/models/ModelCardClient';
 import { constructMetadata } from '@/lib/seo/metadata';
 import {
@@ -29,7 +29,7 @@ function resolveModelFromSlug(slug: string) {
     (m) =>
       m.id.toLowerCase() === decoded ||
       m.id.replace('/', '-').toLowerCase() === decoded ||
-      m.upstreamId.toLowerCase() === decoded
+      m.id.toLowerCase() === decoded
   );
   if (direct) return direct;
 
@@ -74,11 +74,11 @@ export async function generateMetadata({ params }: ModelDetailPageProps): Promis
 
   return constructMetadata({
     title: `${model.name} — Pricing, Specs & Sandbox`,
-    description: `Deploy ${model.name} with ${discount}% wholesale savings, 75% prompt caching, and sub-15ms Anycast routing. Input: $${model.inputPricePer1M.toFixed(2)}/1M, Output: $${model.outputPricePer1M.toFixed(2)}/1M, ${contextK}K context window. Drop-in OpenAI SDK replacement.`,
+    description: `Deploy ${model.name} with ${discount}% wholesale savings, 75% prompt caching, and the GALX API. Input: $${model.inputPricePer1M.toFixed(2)}/1M, Output: $${model.outputPricePer1M.toFixed(2)}/1M, ${contextK}K context window. Drop-in OpenAI SDK replacement.`,
     canonicalPath: `/models/${slug}`,
     keywords: [
       model.id,
-      model.upstreamId,
+      model.id,
       model.name,
       model.provider,
       'OpenAI drop-in',

@@ -1,40 +1,39 @@
-# Quickstart
+# GALXAI
 
-<!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+GALX provides text and image generation APIs, model discovery, API keys, and usage controls.
 
-Use `https://galx.ai/v1` from your application server. Store `GALXAI_API_KEY` in the server environment. Browser UI calls your backend; never put a developer credential in a `NEXT_PUBLIC_*` variable.
+Use `https://galx.ai/v1` as the API base URL. Authenticate with
+`Authorization: Bearer YOUR_GALX_API_KEY`.
 
-## Make one explicit-model request
+## Image generation
 
-```python
-import os
-from openai import OpenAI
+`POST /v1/images/generations` accepts a text `prompt` and the public model alias
+`openai-gpt-image-latest`. A successful request returns one image as binary bytes
+with its `image/png`, `image/jpeg`, or `image/webp` content type.
+Set `output_format` to `png`, `jpeg`, or `webp` to select a format.
 
-client = OpenAI(
-    base_url="https://galx.ai/v1",
-    api_key=os.environ["GALXAI_API_KEY"],
-    max_retries=0,
-)
-response = client.chat.completions.create(
-    model="gpt-5.6-terra",
-    messages=[{"role": "user", "content": "Explain capability-aware routing briefly."}],
-)
-print(response.choices[0].message.content)
-```
+For existing JSON clients, set `response_format` to `b64_json` or `url`.
+`Accept: application/json` also selects base64 JSON. JSON contains only `created`
+and `data`, with each item containing only `b64_json` or `url`. URL results are
+GALX download links valid for one hour or self-contained data URLs. Save the
+image before a download link expires. Request up to four images using JSON;
+binary responses support one image per request.
 
-The selected model must be enabled for your key and have eligible capacity. Check the [catalog and availability distinction](MODEL_CATALOG.md). `api.galx.ai` and `relay.galx.ai` are separate services, not interchangeable base URLs.
+Images are static. PNG and WebP support transparency; JPEG does not. Dimensions
+can vary from the requested size. Image metadata is not preserved.
 
-## Generate an image
+For asynchronous requests, send `Prefer: respond-async`. A `202` response contains
+`id`, `status`, and `task_url`. GET that URL with the same authentication to retrieve
+the result; pending requests return `202`. Append `/stream` for status events.
 
-The product endpoint is `POST /v1/images/generations` with an explicit model and prompt. For `openai-gpt-image-2`, inspect returned execution metadata: an enabled OAuth worker may use the documented Codex image-tool compatibility alias. Its actual image-model selection is provider-managed; exact model, dimensions, and quality are not promised. Native API-key execution remains exact.
+Errors contain only `error.code`, `error.message`, and `error.request_id`.
+Contact support with the request ID. A timeout can leave a request outcome
+uncertain; check an asynchronous request before submitting another generation.
 
-Keep generation on your backend, validate returned bytes or the application asset URL, and show failures without automatically starting another generation. See [image API details](API_REFERENCE.md) and [compatibility semantics](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility).
+## Documentation
 
-## Recover without duplicate work
-
-Assign one operation key and retain request IDs, execution state, receipt scope, and any returned job URLs. Reuse the same key and payload only according to the transport's retry guidance. A lost acknowledgement is not proof that execution failed. A model-unavailable error is not permission to select a different model.
-
-The federation adapter uses bounded process-local receipts, not durable exactly-once execution. Its [API reference](RELAY_API_REFERENCE.md) explains accepted, pending, and uncertain states. Application SDK cascades or races must be an explicit choice about alternative models and additional work.
-
-Continue with the [developer guide](DEVELOPER_GUIDE.md), [API boundaries](API_BASE_URL.md), or [operator runbook](RELAY_VNEXT_RUNBOOK.md).
+- [API documentation](https://galx.ai/docs)
+- [Models](https://galx.ai/models)
+- [API schema](https://galx.ai/api/openapi.json)
+- [Pricing](https://galx.ai/pricing)
+- [Service status](https://galx.ai/status)

@@ -286,7 +286,8 @@
     "vercel:deploy:prod": "vercel --prod",
     "relay:federation": "node --env-file-if-exists=.env.local --import tsx scripts/run-relay-federation.ts",
     "test:relay:capabilities": "node --import tsx --test scripts/test-federation-admission.ts scripts/test-relay-capabilities.ts scripts/test-relay-federation-http.ts scripts/test-relay-hardening.ts scripts/test-relay-adaptive-quota.ts scripts/test-relay-telemetry.ts",
-    "test:relay:docker": "node --import tsx scripts/test-relay-federation-docker.ts"
+    "test:relay:docker": "node --import tsx scripts/test-relay-federation-docker.ts",
+    "test:image:security": "node --import tsx --test scripts/test-image-public-http.ts scripts/test-public-information-boundary.ts scripts/test-image-retry-contract.ts"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3",
@@ -309,6 +310,7 @@
     "postcss": "^8.5.26",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "sharp": "^0.35.4",
     "stripe": "^22.5.0",
     "tailwind-merge": "^3.0.1",
     "tailwindcss": "^3.4.1",

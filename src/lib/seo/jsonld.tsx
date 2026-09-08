@@ -1,6 +1,6 @@
 import React from 'react';
 import { SITE_CONFIG } from './siteConfig';
-import type { ModelSpecItem } from '@/core/contracts/GalxContracts';
+import type { ModelSpecItem } from '@/core/router/PublicModelCatalog';
 
 /**
  * Serializes JSON-LD data with XSS character protection for script tags.
@@ -206,7 +206,7 @@ export function createSoftwareAppSchema(props?: {
       ],
     }),
     featureList: props?.featureList || [
-      'Sub-millisecond Anycast dynamic routing (<15ms TTFT)',
+      'Text and image generation through one API',
       'Zero rate limit stalls & automatic multi-account failover',
       '25% to 40% wholesale token price discounts',
       '75% prompt caching pass-through rebate',

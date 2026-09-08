@@ -1,3 +1,4 @@
+import { hasInternalAccess } from '@/lib/security/internal-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
@@ -40,6 +41,8 @@ function authenticateRequest(req: NextRequest): { userId: string; isAuthorized: 
  * GET /api/queues/[queueId]
  */
 export async function GET(req: NextRequest, { params }: { params: Promise<{ queueId: string }> }) {
+  if (!hasInternalAccess(req.headers)) return NextResponse.json({ error: 'Not found' }, { status: 404, headers: { 'Cache-Control': 'no-store' } });
+
   const { queueId } = await params;
   const auth = authenticateRequest(req);
   if (!auth.isAuthorized) {
@@ -68,6 +71,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ queu
  * Update state (e.g. pause, resume), rate limits, or retry policies.
  */
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ queueId: string }> }) {
+  if (!hasInternalAccess(req.headers)) return NextResponse.json({ error: 'Not found' }, { status: 404, headers: { 'Cache-Control': 'no-store' } });
+
   const { queueId } = await params;
   const auth = authenticateRequest(req);
   if (!auth.isAuthorized) {
@@ -113,6 +118,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ qu
  * DELETE /api/queues/[queueId]
  */
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ queueId: string }> }) {
+  if (!hasInternalAccess(req.headers)) return NextResponse.json({ error: 'Not found' }, { status: 404, headers: { 'Cache-Control': 'no-store' } });
+
   const { queueId } = await params;
   const auth = authenticateRequest(req);
   if (!auth.isAuthorized) {

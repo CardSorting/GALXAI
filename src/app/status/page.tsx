@@ -8,7 +8,7 @@ import { JsonLd, createSoftwareAppSchema, createBreadcrumbSchema } from '@/lib/s
 
 export const metadata: Metadata = constructMetadata({
   title: 'Real-Time System Status & Operational SLA Health',
-  description: 'Real-time operational status, sub-15ms router latency metrics, and upstream availability for OpenAI GPT-5.6.',
+  description: 'Current GALX service availability.',
   canonicalPath: '/status',
   keywords: [
     'GALXAI Status',
@@ -25,7 +25,7 @@ export default function StatusPage() {
     '@graph': [
       createSoftwareAppSchema({
         name: 'GALXAI Real-Time System Status',
-        description: 'Operational health, circuit breaker telemetry, and Anycast latency metrics.',
+        description: 'Current GALX service availability.',
         url: '/status',
         id: 'https://galx.ai/status#software',
         includeRating: false,

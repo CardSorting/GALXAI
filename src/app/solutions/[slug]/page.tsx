@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SolutionClient } from '@/components/solutions/SolutionClient';
 import { SOLUTION_GUIDES, type SolutionGuide } from '@/lib/data/solutionsData';
-import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/ModelCatalog';
+import { EXCLUSIVE_MODEL_CATALOG, ModelCatalog } from '@/core/router/PublicModelCatalog';
 import { constructMetadata } from '@/lib/seo/metadata';
 import {
   JsonLd,

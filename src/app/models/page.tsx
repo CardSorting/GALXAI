@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { ModelsClient } from '@/components/models/ModelsClient';
-import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/ModelCatalog';
+import { EXCLUSIVE_MODEL_CATALOG } from '@/core/router/PublicModelCatalog';
 import { constructMetadata } from '@/lib/seo/metadata';
 import { JsonLd, createModelItemListSchema, createBreadcrumbSchema } from '@/lib/seo/jsonld';
 
 export const metadata: Metadata = constructMetadata({
   title: 'Frontier AI Models & Architecture Specs | OpenAI-Compatible API Gateway',
-  description: 'Explore flagship AI models including OpenAI GPT-5.6 Sol, Terra, Luna, and GPT-Image suite. Access via a 100% OpenAI-compatible endpoint with automatic prompt caching and sub-15ms Anycast routing.',
+  description: 'Explore flagship AI models including OpenAI GPT-5.6 Sol, Terra, Luna, and GPT-Image suite. Access via a 100% OpenAI-compatible endpoint with automatic prompt caching and the GALX API.',
   canonicalPath: '/models',
   keywords: [
     'AI Model Catalog',

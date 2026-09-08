@@ -1,3 +1,4 @@
+import { logImageFailure } from '@/lib/security/private-image-diagnostics';
 import { NextRequest, NextResponse } from 'next/server';
 import { ImageLibraryRepository } from '@/lib/supabase/repositories/ImageLibraryRepository';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   } catch (err: unknown) {
-    console.error('[API /api/images/library/batch] POST Error:', err);
+    logImageFailure(crypto.randomUUID(), err);
     return NextResponse.json(
       { success: false, error: 'The image library action could not be completed.' },
       { status: 500 }

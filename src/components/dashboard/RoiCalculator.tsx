@@ -20,7 +20,7 @@ import {
   Layers,
   Cpu
 } from 'lucide-react';
-import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS } from '@/core/router/PublicModelCatalog';
 import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 

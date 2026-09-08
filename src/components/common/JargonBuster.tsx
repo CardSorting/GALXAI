@@ -19,7 +19,7 @@ export const JARGON_GLOSSARY: Record<string, JargonTerm> = {
   },
   'failover': {
     title: 'Sub-15ms Automatic Failover',
-    shortDesc: 'Instant rerouting of your prompt if one AI provider or server cluster is experiencing lag.',
+    shortDesc: 'Handling temporary request failures in your application.',
     plainEnglishAnalogy: 'Like a smart GPS that seamlessly redirects your car around a sudden highway traffic jam before you even notice slow-down.',
     category: 'Architecture'
   },

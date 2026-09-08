@@ -1,266 +1,91 @@
-import { RelayDispatchError } from '@/core/router/adapters/RelayChatTransport';
-import { ImageCapacityError } from '@/core/router/ImageCapacityError';
-import { NextRequest, NextResponse } from 'next/server';
-import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
+import { NextRequest } from 'next/server';
+import { galxRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
-import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
 import { GalxSeatTierEngine } from '@/core/subscription/GalxSeatTierEngine';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
+import { ImageCapacityError } from '@/core/router/ImageCapacityError';
+import { RelayDispatchError } from '@/core/router/adapters/RelayChatTransport';
 import type { ImageGenerationRequest } from '@/core/contracts/GalxContracts';
+import { normalizeImageOutput, type ImageResponseFormat } from '@/lib/security/normalize-image-output';
+import { imageError, imageHeaders } from '@/lib/security/public-image-http';
+import { logImageFailure } from '@/lib/security/private-image-diagnostics';
+import type { ImageFormat } from '@/lib/security/image-artifact';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 180;
 
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Galx-Async, X-Galx-Queue, X-Galx-Webhook-Url, X-Galx-Priority, X-Galx-Delay-Ms, Idempotency-Key, Prefer, X-Galx-Session-Affinity, x-galx-session-affinity',
-      'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, Retry-After'
-    }
-  });
+  return new Response(null, { status: 204, headers: {
+    'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, Prefer, Idempotency-Key, X-Galx-Async, X-Galx-Webhook-Url, X-Galx-Webhook-Secret, X-Galx-Priority, X-Galx-Delay-Ms',
+  } });
 }
 
-/**
- * Universal OpenAI/Midjourney/Stability-Compatible POST /v1/images/generations Endpoint.
- * Governed seamlessly by sovereign Seat Subscription Tiers with zero frontend key leakage.
- */
+const imageAliases = new Set(['openai-gpt-image-latest', 'gpt-image-latest', 'image', 'images',
+  'openai-gpt-image-2', 'gpt-image-2', 'gpt-image-2.0', 'openai-gpt-image-1.5', 'gpt-image-1.5',
+  'openai-gpt-image-1', 'gpt-image-1', 'dall-e-2', 'dall-e-3', 'dalle-3', 'photoreal']);
+
+/** Public image contract. Internal dispatch results must pass private normalization. */
 export async function POST(req: NextRequest) {
-  const requestId = `img_${crypto.randomUUID()}`;
+  const requestId = crypto.randomUUID();
   try {
-    const authEngine = GalxAuthEngine.getInstance();
-    const authResult = await authEngine.resolveAuthIdentity(req);
-
-    const seatEngine = GalxSeatTierEngine.getInstance();
-    const entitlement = await seatEngine.resolveUserSeatTier(authResult);
-
-    if (entitlement.isCapped) {
-      return NextResponse.json(
-        {
-          error: {
-            message: 'Monthly seat compute quota reached. Please contact your organization administrator to increase limits.',
-            type: 'rate_limit_error',
-            code: 'seat_spend_cap_exceeded',
-            tier: entitlement.tier
-          }
-        },
-        { status: 429, headers: { 'Access-Control-Allow-Origin': '*', 'Retry-After': '60' } }
-      );
-    }
-
-    const userId = authResult.userId || 'anonymous_developer';
-    const isPriorityUser = entitlement.isPriorityUser;
-
-    const rawBody = (await req.json().catch(() => ({}))) as any;
-    const promptStr = rawBody.prompt ?? rawBody.text ?? rawBody.description ?? rawBody.input ?? rawBody.image_prompt ?? '';
-    const resolvedPrompt = Array.isArray(promptStr) ? promptStr.join(' ') : String(promptStr || 'A futuristic AI landscape');
-
-    // Universal Aspect Ratio & Dimensions Normalizer
-    let resolvedSize: any = rawBody.size;
-    if (!resolvedSize) {
-      if (rawBody.aspect_ratio || rawBody.aspectRatio) {
-        const ar = String(rawBody.aspect_ratio || rawBody.aspectRatio).trim();
-        if (ar === '16:9' || ar === '16/9') resolvedSize = '1792x1024';
-        else if (ar === '9:16' || ar === '9/16') resolvedSize = '1024x1792';
-        else if (ar === '4:3' || ar === '4/3') resolvedSize = '1024x768';
-        else if (ar === '3:2' || ar === '3/2') resolvedSize = '1536x1024';
-        else if (ar === '1:1') resolvedSize = '1024x1024';
-        else resolvedSize = '1024x1024';
-      } else if (rawBody.width && rawBody.height) {
-        resolvedSize = `${rawBody.width}x${rawBody.height}`;
-      } else {
-        resolvedSize = '1024x1024';
-      }
-    }
-
-    // Resolve model alias
-    const requestedModel = rawBody.model || 'openai-gpt-image-latest';
-    const resolvedModelSpec = ModelCatalog.resolveModel(requestedModel);
-    const resolvedModelId = resolvedModelSpec.category === 'image' ? resolvedModelSpec.id : 'openai-gpt-image-latest';
-
-    const sessionId =
-      req.headers.get('x-galx-session-id') ||
-      req.headers.get('x-session-id') ||
-      rawBody.session_id ||
-      rawBody.sessionId ||
-      'default';
-
-    const idempotencyKey =
-      req.headers.get('idempotency-key') ||
-      rawBody.idempotency_key ||
-      rawBody.idempotencyKey ||
-      undefined;
-
+    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
+    if (!auth.authenticated || !auth.userId) return imageError('unauthorized', requestId);
+    let raw: Record<string, unknown>;
+    try {
+      const value = await req.json();
+      if (!value || typeof value !== 'object' || Array.isArray(value)) return imageError('invalid_request', requestId);
+      raw = value;
+    } catch { return imageError('invalid_request', requestId); }
+    const prompt = raw.prompt ?? raw.text ?? raw.description ?? raw.input ?? raw.image_prompt;
+    if (typeof prompt !== 'string' || !prompt.trim() || prompt.length > 32_000) return imageError('invalid_request', requestId);
+    const requested = raw.model ?? 'openai-gpt-image-latest';
+    if (typeof requested !== 'string' || !imageAliases.has(requested.toLowerCase())) return imageError('unsupported_input', requestId);
+    const model = ModelCatalog.resolveModel(requested);
+    const format = raw.response_format ?? raw.responseFormat ?? (req.headers.get('accept')?.includes('application/json') ? 'b64_json' : 'binary');
+    if (!['binary', 'url', 'b64_json'].includes(String(format))) return imageError('unsupported_input', requestId);
+    const outputFormat = raw.output_format;
+    if (outputFormat !== undefined && !['png', 'jpeg', 'webp'].includes(String(outputFormat))) return imageError('unsupported_input', requestId);
+    const n = raw.n ?? raw.num_images ?? raw.count ?? 1;
+    if (typeof n !== 'number' || !Number.isInteger(n) || n < 1 || n > 4 || (format === 'binary' && n !== 1)) return imageError('invalid_request', requestId);
+    if (raw.quality !== undefined && !['standard', 'hd'].includes(String(raw.quality))) return imageError('unsupported_input', requestId);
+    const ratioSizes: Record<string, string> = { '1:1': '1024x1024', '16:9': '1792x1024', '9:16': '1024x1792', '4:3': '1024x768', '3:2': '1536x1024' };
+    const size = raw.size ?? ratioSizes[String(raw.aspect_ratio ?? raw.aspectRatio ?? '1:1')];
+    if (typeof size !== 'string' || !/^\d{2,4}x\d{2,4}$/.test(size) || size.split('x').some(value => Number(value) > 8192)) return imageError('unsupported_input', requestId);
+    const seat = GalxSeatTierEngine.getInstance();
+    const entitlement = await seat.resolveUserSeatTier(auth);
+    if (entitlement.isCapped) return imageError('rate_limited', requestId, 60);
     const body: ImageGenerationRequest = {
-      prompt: resolvedPrompt,
-      model: resolvedModelId,
-      n: Number(rawBody.n || rawBody.num_images || rawBody.count || rawBody.batch_size || 1),
-      size: resolvedSize,
-      quality: rawBody.quality || 'standard',
-      response_format: rawBody.response_format || rawBody.responseFormat || rawBody.format || 'url',
-      user: rawBody.user,
-      sessionId,
-      idempotencyKey
+      prompt, model: model.id, n, size, quality: raw.quality === 'hd' ? 'hd' : 'standard',
+      response_format: 'b64_json',
+      sessionId: typeof raw.session_id === 'string' ? raw.session_id : typeof raw.sessionId === 'string' ? raw.sessionId : 'default',
+      idempotencyKey: req.headers.get('idempotency-key') || undefined,
     };
-
-    // Asynchronous Queue Processing
-    const isAsync = req.headers.get('x-galx-async') === 'true' || req.headers.get('prefer') === 'respond-async';
-    if (isAsync) {
-      const targetQueue = req.headers.get('x-galx-queue') || 'image-gen';
-      const webhookUrl = req.headers.get('x-galx-webhook-url') || undefined;
-      const idempotencyKey = req.headers.get('idempotency-key') || undefined;
-      const priorityHeader = req.headers.get('x-galx-priority');
-      const priority = priorityHeader ? parseInt(priorityHeader, 10) : 50;
-      const delayHeader = req.headers.get('x-galx-delay-ms');
-      const delayMs = delayHeader ? parseInt(delayHeader, 10) : undefined;
-
-      const queueEngine = GalxTaskQueueEngine.getInstance();
-      const { task, deduplicated } = queueEngine.createTask({
-        queueId: targetQueue,
-        userId,
-        idempotencyKey,
-        priority,
-        delayMs,
-        target: {
-          type: 'INTERNAL_MODEL',
-          taskKind: 'image_generation',
-          imagePayload: body,
-          isPriorityUser,
-          webhookCompletionUrl: webhookUrl
-        }
+    if (req.headers.get('x-galx-async') === 'true' || req.headers.get('prefer') === 'respond-async') {
+      const { task } = GalxTaskQueueEngine.getInstance().createTask({
+        id: crypto.randomUUID(), queueId: 'image-gen', userId: auth.userId, idempotencyKey: body.idempotencyKey,
+        target: { type: 'INTERNAL_MODEL', taskKind: 'image_generation', imagePayload: body,
+          isPriorityUser: entitlement.isPriorityUser, webhookCompletionUrl: req.headers.get('x-galx-webhook-url') || undefined, webhookHmacSecret: req.headers.get('x-galx-webhook-secret') || undefined },
       });
-
-      return NextResponse.json(
-        {
-          id: task.id,
-          object: 'image.generation.async',
-          status: task.status,
-          queue: task.queueId,
-          created: Math.floor(task.createdAtMs / 1000),
-          task_url: `/api/queues/${task.queueId}/tasks/${task.id}`,
-          deduplicated
-        },
-        {
-          status: 202,
-          headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Location': `/api/queues/${task.queueId}/tasks/${task.id}`,
-            'X-Galx-Task-Id': task.id,
-            'X-Galx-Queue-Id': task.queueId
-          }
-        }
-      );
+      const taskUrl = `/v1/images/requests/${encodeURIComponent(task.id)}`;
+      const headers = imageHeaders(requestId, 'application/json');
+      headers.set('Location', taskUrl);
+      return new Response(JSON.stringify({ id: task.id, status: 'queued', task_url: taskUrl }), { status: 202, headers });
     }
-
-    const result = await galxRouter.routeImageGeneration({
-      request: body,
-      userId,
-      requestId,
-      isPriorityUser,
-      headers: req.headers,
-      signal: req.signal
-    });
-
-    const currentWindows = seatEngine.calculateRollingWindows(userId, entitlement.tier);
-
-    const resHeaders: Record<string, string> = {
-      'X-Request-Id': requestId,
-      'X-Galx-Request-Id': requestId,
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Expose-Headers': 'X-Galx-Session-Affinity, Retry-After, X-Request-Id, X-Galx-Request-Id',
-      'X-Galx-ZDR-Verified': 'true',
-      'X-Galx-ZDR-Retention': '0s',
-      'X-Galx-AI-Generated': 'true',
-      'X-Galx-Seat-Tier': entitlement.tier,
-      'X-Galx-Seat-Role': entitlement.role,
-      'X-Galx-Seat-5Hour-Remaining-Pct': String(currentWindows.fiveHourWindow.percentRemaining),
-      'X-Galx-Seat-5Hour-Refresh-In': currentWindows.fiveHourWindow.refreshIn,
-      'X-Galx-Seat-Weekly-Remaining-Pct': String(currentWindows.weeklyWindow.percentRemaining),
-      'X-Galx-Seat-Weekly-Refresh-In': currentWindows.weeklyWindow.refreshIn
-    };
-    if (result.execution) {
-      resHeaders['X-Galx-Execution-Model'] = result.execution.executionModel;
-      resHeaders['X-Galx-Routing-Mode'] = result.execution.routingMode;
-      resHeaders['Access-Control-Expose-Headers'] += ', X-Galx-Execution-Model, X-Galx-Routing-Mode';
-    }
-    if (result.shardId) {
-      const affinityTicket = GalxCryptoVault.sealAffinityTicket(result.shardId);
-      resHeaders['X-Galx-Session-Affinity'] = affinityTicket;
-      resHeaders['Set-Cookie'] = `galx_session_affinity=${encodeURIComponent(affinityTicket)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=86400`;
-    }
-
-    return NextResponse.json(result, {
-      headers: resHeaders
-    });
-  } catch (error: any) {
-    if (error instanceof ImageCapacityError) {
-      return NextResponse.json({ error: {
-        message: error.message, type: 'service_unavailable_error', code: error.code,
-        request_id: requestId, retry_after_seconds: error.retryAfterSeconds
-      } }, { status: error.status, headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Expose-Headers': 'Retry-After, X-Request-Id, X-Galx-Request-Id',
-        'Retry-After': String(error.retryAfterSeconds),
-        'X-Should-Retry': 'true',
-        'X-Request-Id': requestId,
-        'X-Galx-Request-Id': requestId
-      } });
-    }
-    const rawMessage = error.message || 'Image Generation Failed';
-    const message = GalxModelRouter.sanitizeUpstreamError(rawMessage);
-    const isRateLimited =
-      rawMessage.includes('maximum simultaneous') ||
-      rawMessage.includes('Rate limit') ||
-      rawMessage.includes('capacity_constrained') ||
-      rawMessage.includes('temporarily constrained') ||
-      rawMessage.includes('shards available') ||
-      rawMessage.includes('pool_exhausted');
-    const isUnavailable =
-      error instanceof RelayDispatchError ||
-      rawMessage.includes('No healthy') ||
-      rawMessage.includes('in cooldown') ||
-      rawMessage.includes('saturated') ||
-      rawMessage.includes('all_shards_cooldown');
-    const isBadRequest = rawMessage.includes('Unsupported image model') || rawMessage.includes('Missing required');
-
-    const status = isRateLimited ? 429 : isUnavailable ? 503 : isBadRequest ? 400 : 500;
-    const errorType = isRateLimited
-      ? 'rate_limit_error'
-      : isUnavailable
-      ? 'service_unavailable_error'
-      : isBadRequest
-      ? 'invalid_request_error'
-      : 'api_error';
-
-    return NextResponse.json(
-      {
-        error: {
-          message,
-          type: errorType,
-          code: error instanceof RelayDispatchError ? error.code : isRateLimited ? 'capacity_constrained' : isUnavailable ? 'capacity_saturated' : 'image_generation_failed'
-        }
-      },
-      {
-        status,
-        headers: {
-          // A timeout after dispatch may already have generated an image.
-          // Do not let an SDK's default 5xx retries duplicate that work.
-          'X-Should-Retry': 'false',
-          'X-Request-Id': requestId,
-          'X-Galx-Request-Id': requestId,
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Expose-Headers': 'Retry-After, X-Request-Id, X-Galx-Request-Id, X-Galx-Session-Affinity',
-          ...(isRateLimited
-            ? {
-                'Retry-After': '5'
-              }
-            : {})
-        }
-      }
-    );
+    // Only explicitly supported request fields reach dispatch. No user-selected shards or internal headers.
+    const result = await galxRouter.routeImageGeneration({ request: body, userId: auth.userId,
+      requestId, isPriorityUser: entitlement.isPriorityUser, signal: req.signal });
+    return await normalizeImageOutput(result, { requestId, userId: auth.userId,
+      responseFormat: format as ImageResponseFormat, outputFormat: outputFormat as ImageFormat | undefined });
+  } catch (error) {
+    logImageFailure(requestId, error);
+    if (error instanceof ImageCapacityError) return imageError('temporarily_unavailable', requestId, error.retryAfterSeconds);
+    const failure = error as { status?: number; code?: string; reason?: string; name?: string };
+    if (failure?.status === 429) return imageError('rate_limited', requestId, 5);
+    if (failure?.name === 'AbortError' || failure?.name === 'TimeoutError' || failure?.reason === 'image_deadline_or_cancelled' || failure?.status === 504) return imageError('timeout', requestId);
+    if (error instanceof RelayDispatchError || [502, 503, 504].includes(failure?.status || 0)) return imageError('temporarily_unavailable', requestId);
+    return imageError('generation_failed', requestId);
   }
 }

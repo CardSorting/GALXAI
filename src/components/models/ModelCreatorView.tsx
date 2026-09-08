@@ -18,7 +18,7 @@ import {
   BarChart3,
   ExternalLink,
 } from 'lucide-react';
-import type { ModelSpecItem } from '@/core/contracts/GalxContracts';
+import type { ModelSpecItem } from '@/core/router/PublicModelCatalog';
 
 interface ModelCreatorViewProps {
   model: ModelSpecItem;
@@ -207,10 +207,10 @@ OPENAI_API_KEY=galx_live_your_key_here`,
           <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2">
             <div className="text-xs font-bold text-emerald-300 font-mono flex items-center gap-1.5">
               <Coins className="w-3.5 h-3.5" />
-              <span>Sub-15ms Anycast Routing</span>
+              <span>HTTPS API Access</span>
             </div>
             <p className="text-xs text-zinc-300 leading-relaxed font-sans">
-              <strong>Plain English:</strong> Global Anycast infrastructure across 330+ locations routes your requests along the fastest encrypted backbone nearest to upstream compute clusters.
+              <strong>Plain English:</strong> Send your request to the GALX API and receive the result in your application.
             </p>
           </div>
 

@@ -1,97 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
-import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
-import { GalxPersistence } from '@/lib/storage/GalxPersistence';
-
+import { NextRequest } from 'next/server';
+import { GET as imageGet, DELETE as imageDelete } from '@/app/v1/images/requests/[id]/route';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-    }
-  });
+type Context = { params: Promise<{ queueId: string; taskId: string }> };
+export async function GET(req: NextRequest, { params }: Context) {
+  const url = new URL(req.url); url.searchParams.set('snapshot', 'true');
+  return imageGet(new NextRequest(url, { headers: req.headers, signal: req.signal }), { params: Promise.resolve({ id: (await params).taskId }) });
 }
-
-function authenticateRequest(req: NextRequest): { userId: string; isAuthorized: boolean } {
-  const authHeader = req.headers.get('authorization') || '';
-  if (!authHeader.startsWith('Bearer ')) {
-    return { userId: 'anonymous_developer', isAuthorized: true };
-  }
-  const token = authHeader.substring(7).trim();
-  if (token.startsWith('galx_live_')) {
-    const hash = GalxCryptoVault.hashApiKey(token);
-    const persistence = GalxPersistence.getInstance();
-    const foundKey = persistence.getGatewayKeys().find(k => k.keyHash === hash && !k.revoked);
-    if (foundKey) {
-      return { userId: foundKey.userId, isAuthorized: true };
-    }
-    return { userId: '', isAuthorized: false };
-  }
-  return { userId: token, isAuthorized: true };
-}
-
-/**
- * GET /api/queues/[queueId]/tasks/[taskId]
- */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ queueId: string; taskId: string }> }
-) {
-  const { queueId, taskId } = await params;
-  const auth = authenticateRequest(req);
-  if (!auth.isAuthorized) {
-    return NextResponse.json({ error: { message: 'Unauthorized Gateway API Key' } }, { status: 401 });
-  }
-
-  const engine = GalxTaskQueueEngine.getInstance();
-  const task = engine.getTask(taskId);
-
-  if (!task || task.queueId !== queueId) {
-    return NextResponse.json({ error: { message: `Task '${taskId}' not found in queue '${queueId}'` } }, { status: 404 });
-  }
-
-  return NextResponse.json({ task }, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'X-Galx-Task-Status': task.status
-    }
-  });
-}
-
-/**
- * DELETE /api/queues/[queueId]/tasks/[taskId]
- * Cancels or deletes the task.
- */
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ queueId: string; taskId: string }> }
-) {
-  const { queueId, taskId } = await params;
-  const auth = authenticateRequest(req);
-  if (!auth.isAuthorized) {
-    return NextResponse.json({ error: { message: 'Unauthorized Gateway API Key' } }, { status: 401 });
-  }
-
-  const engine = GalxTaskQueueEngine.getInstance();
-  const task = engine.getTask(taskId);
-
-  if (!task || task.queueId !== queueId) {
-    return NextResponse.json({ error: { message: `Task '${taskId}' not found in queue '${queueId}'` } }, { status: 404 });
-  }
-
-  const cancelled = engine.cancelTask(taskId);
-
-  return NextResponse.json({
-    success: true,
-    taskId,
-    cancelled,
-    status: engine.getTask(taskId)?.status
-  }, {
-    headers: { 'Access-Control-Allow-Origin': '*' }
-  });
+export async function DELETE(req: NextRequest, { params }: Context) {
+  return imageDelete(req, { params: Promise.resolve({ id: (await params).taskId }) });
 }

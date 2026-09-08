@@ -138,7 +138,7 @@ export function ArtisanalSignalSection() {
   const [frontierEnclaveTier, setFrontierEnclaveTier] = useState<'sol' | 'terra' | 'luna'>('sol');
   const [isVerifyingEnclave, setIsVerifyingEnclave] = useState(false);
   const [enclaveAuditLog, setEnclaveAuditLog] = useState(
-    '🔒 [ENCLAVE READY] Single-Tenant Memory Vault Initialized • BGP Anycast Peering Active • Strict Zero Data Retention Enforced (0-Day volatile buffer)'
+    'GALX API • Text and image generation for your applications'
   );
 
   const verifyPrivateEnclave = (tier: 'sol' | 'terra' | 'luna') => {
@@ -161,7 +161,7 @@ export function ArtisanalSignalSection() {
     {
       label: 'Hello World',
       cmd: 'npx galxai "Hello"',
-      output: '⚡ GALXAI v5.6 [Anycast Edge Gateway • San Francisco POP]\n✔ BGP Edge Resolved in 4ms • Wholesale Tier-5 Applied\n✔ 100% Prompt Cache Pass-Through Active (-75% rebate)\n\n"Hello! You are connected to GPT-5.6 Sol via GALXAI with zero proxy overhead and sub-15ms edge latency. Ready to ship in 30 seconds."',
+      output: 'Example: Hello! Your application can display the generated response here.',
       ttft: '8ms',
       discount: '38% Wholesale',
       cache: '-75% Rebate',
@@ -172,7 +172,7 @@ export function ArtisanalSignalSection() {
     {
       label: 'Prompt Caching',
       cmd: 'npx galxai "Explain continuous prompt caching in 10 words"',
-      output: '⚡ GALXAI v5.6 [Anycast Edge Gateway • Frankfurt POP]\n✔ BroccoliDB Adaptive Compaction: ID(C) Dense Bypass (0.0ms)\n✔ Prefix Cache Hit 99.8% on System Prompt\n\n"Prefix caching reuses identical system prompts, slashing token costs by 75%."',
+      output: 'Example: Hello! Your application can display the generated response here.',
       ttft: '6ms',
       discount: '40% Wholesale',
       cache: '-75% Rebate',
@@ -1044,7 +1044,7 @@ export function ArtisanalSignalSection() {
             <div className="pt-3 border-t border-white/10 space-y-2 font-mono text-[11px]">
               <div className="flex items-center justify-between text-zinc-300">
                 <span className="text-zinc-500">First Token Latency:</span>
-                <span className="text-emerald-400 font-bold">sub-15ms Anycast BGP</span>
+                <span className="text-emerald-400 font-bold">GALX API</span>
               </div>
               <div className="flex items-center justify-between text-zinc-300">
                 <span className="text-zinc-500">Prefix Cache Rebate:</span>

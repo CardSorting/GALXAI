@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { hasInternalAccess } from '@/lib/security/internal-access';
+import { NextRequest, NextResponse } from 'next/server';
 import { GalxRelaySupervisor } from '@/core/relay/GalxRelaySupervisor';
 import { GalxTunnelSupervisor } from '@/core/relay/GalxTunnelSupervisor';
 
@@ -21,7 +22,8 @@ export async function OPTIONS() {
  * Dedicated Next.js API Route for Relay Telemetry & Status.
  * GET /api/relay/status
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!hasInternalAccess(req.headers)) return NextResponse.json({ error: 'Not found' }, { status: 404, headers: { 'Cache-Control': 'no-store' } });
   try {
     const status = await GalxRelaySupervisor.getStatus();
     const tunnel = GalxTunnelSupervisor.getTunnelState();
@@ -40,7 +42,7 @@ export async function GET() {
   } catch (err: any) {
     return NextResponse.json({
       isOnline: false,
-      error: err.message,
+      error: 'Service unavailable',
       timestamp: Date.now()
     }, {
       status: 500,

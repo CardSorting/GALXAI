@@ -1,3 +1,4 @@
+import { POST as generateImage } from '@/app/v1/images/generations/route';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
@@ -27,7 +28,12 @@ export async function OPTIONS() {
  */
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json().catch(() => ({}));
+    const body = await req.clone().json().catch(() => ({}));
+    if (body.type === 'image') {
+      const headers = new Headers(req.headers);
+      if (body.background) headers.set('prefer', 'respond-async');
+      return generateImage(new NextRequest(req.url, { method: 'POST', headers, body: JSON.stringify(body), signal: req.signal }));
+    }
     const prompt = body.prompt || '';
     const model = body.model || 'gpt-5.6-sol';
     const type = body.type || 'chat';

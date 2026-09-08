@@ -1,3 +1,4 @@
+import { hasInternalAccess } from '@/lib/security/internal-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
 import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
@@ -40,6 +41,8 @@ function authenticateRequest(req: NextRequest, requireAuth = true): { userId: st
  * Purges tasks from the specified queue.
  */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ queueId: string }> }) {
+  if (!hasInternalAccess(req.headers)) return NextResponse.json({ error: 'Not found' }, { status: 404, headers: { 'Cache-Control': 'no-store' } });
+
   const { queueId } = await params;
   const auth = authenticateRequest(req, true);
   if (!auth.isAuthorized) {

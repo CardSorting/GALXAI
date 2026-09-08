@@ -1,30 +1,39 @@
-# API base URL
+# GALXAI
 
-<!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+GALX provides text and image generation APIs, model discovery, API keys, and usage controls.
 
-> Application/SDK scope: these interfaces do not replace the [federation contract](FEDERATION_STRATEGY.md). Model eligibility precedes load; no implicit model substitution occurs in the federation. The [Codex image alias](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility) is opt-in, verified, and provider-managed. Use the [recovery table](RELAY_API_REFERENCE.md#request-recovery) for accepted or uncertain work. Server credentials must never enter browser bundles.
+Use `https://galx.ai/v1` as the API base URL. Authenticate with
+`Authorization: Bearer YOUR_GALX_API_KEY`.
 
-> Runtime boundary: this guide describes the product/application API. The federation relay has a separate [API contract](RELAY_API_REFERENCE.md), inference and administrator keys, and an HTTP 202 chat job workflow. Its local deployment is covered by the [relay runbook](RELAY_VNEXT_RUNBOOK.md). Product keys, relay keys, and upstream provider credentials are distinct.
+## Image generation
 
-Use `https://galx.ai/v1` for customer API requests and SDK setup.
+`POST /v1/images/generations` accepts a text `prompt` and the public model alias
+`openai-gpt-image-latest`. A successful request returns one image as binary bytes
+with its `image/png`, `image/jpeg`, or `image/webp` content type.
+Set `output_format` to `png`, `jpeg`, or `webp` to select a format.
 
-```python
-import os
-from openai import OpenAI
+For existing JSON clients, set `response_format` to `b64_json` or `url`.
+`Accept: application/json` also selects base64 JSON. JSON contains only `created`
+and `data`, with each item containing only `b64_json` or `url`. URL results are
+GALX download links valid for one hour or self-contained data URLs. Save the
+image before a download link expires. Request up to four images using JSON;
+binary responses support one image per request.
 
-client = OpenAI(base_url="https://galx.ai/v1", api_key=os.environ["GALX_API_KEY"])
-```
+Images are static. PNG and WebP support transparency; JPEG does not. Dimensions
+can vary from the requested size. Image metadata is not preserved.
 
-`https://api.galx.ai` is a separate Cloudflare Worker deployment configured in `wrangler.toml`. It runs `GalxEdgeGateway`, with its own authentication, endpoint coverage, and upstream configuration. It does not redirect or proxy to the application API. Treating the two hosts as aliases can change request behavior.
+For asynchronous requests, send `Prefer: respond-async`. A `202` response contains
+`id`, `status`, and `task_url`. GET that URL with the same authentication to retrieve
+the result; pending requests return `202`. Append `/stream` for status events.
 
-The application routes live under `src/app/v1/`. Its chat handler uses `GalxModelRouter`; the Worker has a separate provider pass-through implementation. The SDK default is defined in `src/sdk/base-url.ts`. Explicit SDK `baseURL` options and `GALXAI_BASE_URL` / `GALX_BASE_URL` overrides remain supported. Worker configuration variables `GALX_EDGE_URL` and `NEXT_PUBLIC_GALX_EDGE_URL` no longer implicitly override the SDK base URL.
+Errors contain only `error.code`, `error.message`, and `error.request_id`.
+Contact support with the request ID. A timeout can leave a request outcome
+uncertain; check an asynchronous request before submitting another generation.
 
-## Routing verification
+## Documentation
 
-Unauthenticated live checks on September 6, 2026 (America/Denver) found:
-
-- `https://galx.ai/v1/models`: HTTP 200, model catalog from the application's `/v1/models` route, with Vercel response headers.
-- `https://api.galx.ai/v1/models`: HTTP 401, API-key authentication error from the separate Cloudflare gateway.
-
-These checks establish distinct routing behavior. They do not establish authenticated inference success, uptime, or an SLA. No domain or deployment configuration was changed.
+- [API documentation](https://galx.ai/docs)
+- [Models](https://galx.ai/models)
+- [API schema](https://galx.ai/api/openapi.json)
+- [Pricing](https://galx.ai/pricing)
+- [Service status](https://galx.ai/status)

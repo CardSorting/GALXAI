@@ -87,7 +87,7 @@ const PROMPT_PRESETS = [
   { label: 'Comprehensive System Review (3,000 Tokens)', tokens: 3000 },
 ];
 
-const SAMPLE_TEXT_CORPUS = `GALXAI Anycast Edge Substrate initiates persistent HTTP/2 SSE streaming socket across 300+ global Points of Presence. TLS handshake completes in sub-5ms with hardware-accelerated HKDF ciphers. Upstream model cluster ingests prompt prefix and activates key-value (KV) attention cache slices. Generation begins immediately with zero packet buffering or proxy queuing delays. Each token payload is serialized into standard OpenAI Server-Sent Events delta frames and delivered directly to the client runtime. Multi-shard capacity balancing ensures zero HTTP 429 rate limit stalls even during extreme concurrency bursts. Cryptographic Zero Data Retention guarantees volatile memory purging upon TCP socket termination. Complete end-to-end telemetry confirms 99.994% financial uptime SLA availability across all enterprise compute workloads. `;
+const SAMPLE_TEXT_CORPUS = `Streaming delivers generated text incrementally. Read each event, collect the text deltas, and handle completion or errors. Use request IDs when contacting support. Measure latency in your application under representative workloads. `;
 
 export function StreamBenchmarkClient() {
   const [selectedModelId, setSelectedModelId] = useState<string>('gpt-5.6-luna');

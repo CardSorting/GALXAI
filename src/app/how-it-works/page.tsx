@@ -40,14 +40,14 @@ export default function HowItWorksPage() {
     {
       num: '02',
       title: 'Predictive Adaptive Hydraulic Headroom (P-AHT)',
-      desc: 'When high-concurrency requests or agent swarms spike, the router continuously models token capacity across pooled enterprise accounts. If one upstream tier approaches limits, traffic effortlessly deflects in <1ms without 429 rate limit stalls.',
+      desc: 'Your plan determines usage limits. Reduce concurrency when requests are rate limited and follow Retry-After when supplied.',
       icon: Activity,
       tag: '429 BURST IMMUNITY',
     },
     {
       num: '03',
       title: 'Continuous Prompt Caching & 75% Pass-Through',
-      desc: 'Shared system instructions, tool schemas, and document RAG prefixes (>1,024 tokens) are automatically matched against warm upstream caches, returning 75% prompt caching savings directly to your wallet.',
+      desc: 'Eligible repeated prompt content receives the caching prices shown in the model catalog.',
       icon: Zap,
       tag: '75% CACHE REBATE',
     },

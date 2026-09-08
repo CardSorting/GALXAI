@@ -111,7 +111,7 @@ export default function AboutPage() {
               </div>
               <h3 className="text-lg font-bold text-white">Predictive Failover Shield</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Our Anycast routing layer continuously monitors health across multiple upstream regions. If an upstream outage or rate-limit spike occurs, traffic shifts automatically in under 50ms.
+                Use the status page to check service availability. API errors include guidance for your next step.
               </p>
             </div>
           </div>

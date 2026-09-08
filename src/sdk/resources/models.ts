@@ -5,7 +5,7 @@
 
 import type { ModelInfo, CostEstimateRequest, CostEstimateResult, RequestOptions } from '../types';
 import type { GalxAIClientCore } from '../client';
-import { ModelCatalog, type ModelSpecItem } from '../../core/router/ModelCatalog';
+import { ModelCatalog, type ModelSpecItem } from '../../core/router/PublicModelCatalog';
 import { TokenCostCalculator } from '../../core/pricing/TokenCostCalculator';
 import type { DbQueryOptions, DbAggregateQuery } from '../../core/broccolidb/broccolidb.contracts';
 import { Page } from '../pagination';

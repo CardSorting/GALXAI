@@ -23,7 +23,7 @@ import {
   Lightbulb,
   Check
 } from 'lucide-react';
-import { FRONTEND_VISIBLE_MODELS, ModelCatalog } from '@/core/router/ModelCatalog';
+import { FRONTEND_VISIBLE_MODELS, ModelCatalog } from '@/core/router/PublicModelCatalog';
 import {
   TokenCostCalculator,
   SupportedCurrency,
