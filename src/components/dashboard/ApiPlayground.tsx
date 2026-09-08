@@ -478,7 +478,7 @@ const res = await galx.chat.completions.create({
                 type="text"
                 value={modelInput}
                 onChange={(e) => setModelInput(e.target.value)}
-                placeholder="gpt-5, sol, terra, luna, codex, fast..."
+                placeholder="gpt-5, sol, terra, luna, fast..."
                 className="w-full py-2.5 px-3 rounded-xl bg-black/60 border border-white/10 text-amber-300 font-bold focus:outline-none focus:border-amber-400/50"
               />
             </div>

@@ -112,7 +112,7 @@ function BaseAuthProviderModal({ isOpen, onClose, onSuccess }: AuthProviderModal
           </div>
           <h2 className="text-2xl font-black text-white">Provider Authentication</h2>
           <p className="text-xs text-zinc-400 max-w-xs mx-auto">
-            Connect your OpenAI Codex credentials
+            Connect your OpenAI credentials
           </p>
         </div>
 

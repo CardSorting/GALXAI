@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const title = searchParams.get('title') || 'GALXAI — Universal AI Gateway';
     const subtitle =
       searchParams.get('subtitle') ||
-      'Direct Wholesale Rates on OpenAI Codex & GPT-5.6 with 75% Prompt Caching.';
+      'Direct Wholesale Rates on OpenAI GPT-5.6 with 75% Prompt Caching.';
     const badge = searchParams.get('badge') || '25%–40% WHOLESALE PASS';
     const price = searchParams.get('price');
     const category = searchParams.get('category') || 'ENTERPRISE AI INFRASTRUCTURE';

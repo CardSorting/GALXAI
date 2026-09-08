@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     const modelBreakdowns = [
       {
         modelId: 'gpt-5.6-sol',
-        name: 'OpenAI Codex GPT-5.6 Sol',
+        name: 'OpenAI GPT-5.6 Sol',
         category: 'Flagship Reasoning & Coding',
         promptTokens: 48_000_000,
         cachedTokens: 20_000_000,
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
       },
       {
         modelId: 'gpt-5.6-terra',
-        name: 'OpenAI Codex GPT-5.6 Terra',
+        name: 'OpenAI GPT-5.6 Terra',
         category: 'Balanced Frontier Refactoring',
         promptTokens: 28_000_000,
         cachedTokens: 14_000_000,
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
       },
       {
         modelId: 'gpt-5.6-luna',
-        name: 'OpenAI Codex GPT-5.6 Luna',
+        name: 'OpenAI GPT-5.6 Luna',
         category: 'High-Velocity 140 tok/sec Synthesis',
         promptTokens: 12_000_000,
         cachedTokens: 6_000_000,

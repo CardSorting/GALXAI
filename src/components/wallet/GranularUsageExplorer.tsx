@@ -66,7 +66,7 @@ export function GranularUsageExplorer() {
   const [models, setModels] = useState<ModelUsage[]>([
     {
       modelId: 'gpt-5.6-sol',
-      name: 'OpenAI Codex GPT-5.6 Sol',
+      name: 'OpenAI GPT-5.6 Sol',
       category: 'Flagship Reasoning & Coding',
       promptTokens: 48_000_000,
       cachedTokens: 20_000_000,
@@ -83,7 +83,7 @@ export function GranularUsageExplorer() {
     },
     {
       modelId: 'gpt-5.6-terra',
-      name: 'OpenAI Codex GPT-5.6 Terra',
+      name: 'OpenAI GPT-5.6 Terra',
       category: 'Balanced Frontier Refactoring',
       promptTokens: 28_000_000,
       cachedTokens: 14_000_000,

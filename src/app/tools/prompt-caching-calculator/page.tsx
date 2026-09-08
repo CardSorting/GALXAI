@@ -14,7 +14,7 @@ import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 export const metadata: Metadata = constructMetadata({
   title: 'Prompt Caching Estimator & Token Prefix Counter — GALXAI Tools',
   description:
-    'Free interactive prompt token counter and KV cache savings analyzer. Check 1,024-token prefix caching eligibility and calculate instant 75% compound cost savings across OpenAI Codex and Grok.',
+    'Free interactive prompt token counter and KV cache savings analyzer. Check 1,024-token prefix caching eligibility and calculate instant 75% compound cost savings across OpenAI and Grok.',
   canonicalPath: '/tools/prompt-caching-calculator',
   keywords: [
     'Prompt Caching Calculator',

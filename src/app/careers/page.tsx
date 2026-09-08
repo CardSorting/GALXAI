@@ -17,7 +17,7 @@ export const metadata: Metadata = constructMetadata({
     'Distributed Systems Engineer',
     'LLM Research Jobs',
     'Remote AI Jobs',
-    'OpenAI Codex Infrastructure Careers',
+    'OpenAI Infrastructure Careers',
     'Zero Data Retention Security Careers',
   ],
 });

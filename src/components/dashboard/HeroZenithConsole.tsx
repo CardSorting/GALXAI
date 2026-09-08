@@ -46,7 +46,7 @@ const HERO_MODELS: ModelPreset[] = [
   {
     id: 'gpt-5.6-sol',
     name: 'GPT-5.6 Sol',
-    provider: 'Codex',
+    provider: 'OpenAI',
     retailPrice: 5.00,
     wholesalePrice: 3.75,
     discountPct: 25,

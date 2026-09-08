@@ -105,7 +105,7 @@ const SIM_MODELS: SimModel[] = [
     promptTokens: 380,
     completionTokens: 240,
     cachedTokens: 150,
-    sampleText: `OpenAI Codex GPT-5.6 Luna on GALXAI delivers sub-15ms Time-To-First-Token and rapid inline generation:
+    sampleText: `OpenAI GPT-5.6 Luna on GALXAI delivers sub-15ms Time-To-First-Token and rapid inline generation:
 
 • **Sub-15ms Gateway Overhead**: Edge routing proxies with instant TCP connection pooling.
 • **High-Throughput Global Gateway**: Zero queueing, jitter-free streaming, and no 429 stalls.

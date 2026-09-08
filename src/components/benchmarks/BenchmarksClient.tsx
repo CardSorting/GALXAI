@@ -130,7 +130,7 @@ export function BenchmarksClient() {
             Real-Time LLM Latency &amp; Speed Leaderboard
           </h1>
           <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-3xl font-sans">
-            Authoritative, end-to-end telemetry measuring Time-To-First-Token (TTFT), generation velocity (tokens/second), and prompt caching acceleration across OpenAI Codex models on the GALXAI Anycast edge.
+            Authoritative, end-to-end telemetry measuring Time-To-First-Token (TTFT), generation velocity (tokens/second), and prompt caching acceleration across OpenAI models on the GALXAI Anycast edge.
           </p>
 
           {/* Inverted Pyramid AEO Quick Summary */}

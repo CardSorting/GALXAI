@@ -9,12 +9,12 @@ import {
 import { FAQS } from '@/lib/data/faqData';
 
 export const metadata: Metadata = constructMetadata({
-  title: 'GALX AI — Get Access to Frontier AI & OpenAI Codex',
-  description: 'Chat, code, and create with OpenAI Codex & GPT-5.6 reasoning models.',
+  title: 'GALX AI — Get Access to Frontier AI & OpenAI',
+  description: 'Chat, code, and create with OpenAI GPT-5.6 reasoning models.',
   canonicalPath: '/',
   keywords: [
     'GALX AI',
-    'OpenAI Codex Chat',
+    'OpenAI Chat',
     'GPT-5.6 Sol',
     'GPT-5.6 Terra',
     'AI Model Router',
@@ -31,7 +31,7 @@ export default function HomePage() {
     '@graph': [
       createSoftwareAppSchema({
         name: 'GALX AI Platform',
-        description: 'Chat, code, and create with OpenAI Codex & GPT-5.6 reasoning models.',
+        description: 'Chat, code, and create with OpenAI GPT-5.6 reasoning models.',
         includeRating: true,
       }),
       createFAQPageSchema(homeFaqSnippet),

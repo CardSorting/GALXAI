@@ -14,7 +14,7 @@ export async function GET() {
       title: 'GALXAI Universal AI Gateway & Model Router API',
       version: '1.0.0',
       description:
-        'Universal OpenAI-compatible API gateway providing high-throughput access to OpenAI Codex (GPT-5.6 Sol, Terra, Luna) and visual synthesis models with 25%–40% wholesale savings, 75% prompt caching, and zero data retention.',
+        'Universal OpenAI-compatible API gateway providing high-throughput access to OpenAI (GPT-5.6 Sol, Terra, Luna) and visual synthesis models with 25%–40% wholesale savings, 75% prompt caching, and zero data retention.',
       contact: {
         name: 'GALXAI Developer Support',
         url: SITE_CONFIG.links.docs,

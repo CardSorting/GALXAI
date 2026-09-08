@@ -179,7 +179,7 @@ response = client.chat.completions.create(
     title: 'Together AI Alternative with Native GPT-5.6 & Frontier Routing',
     headline: 'Together AI Alternative for Frontier Model Routing',
     description:
-      'Access OpenAI Codex and GPT-5.6 frontier models in a unified, wire-compatible gateway with 75% prompt caching and zero data retention.',
+      'Access OpenAI GPT-5.6 frontier models in a unified, wire-compatible gateway with 75% prompt caching and zero data retention.',
     verdict:
       'While Together AI focuses heavily on open-weights inference, GALXAI specializes in enterprise wholesale access to frontier reasoning models (GPT-5.6 Sol, Terra, Luna) with Anycast low-latency routing.',
     feeComparison: [

@@ -36,7 +36,7 @@ export const PROVIDERS_DATA: ProviderPortalItem[] = [
     title: 'OpenAI API Gateway & Wholesale Token Clearinghouse — 25%–40% Off',
     headline: 'Access Official OpenAI Frontier Models at Wholesale Rates',
     description:
-      'Direct Anycast routing for OpenAI Codex (GPT-5.6 Sol, Terra, Luna) and visual synthesis with 0% gateway markup, 75% prompt caching pass-through, and $5 free developer credits.',
+      'Direct Anycast routing for OpenAI (GPT-5.6 Sol, Terra, Luna) and visual synthesis with 0% gateway markup, 75% prompt caching pass-through, and $5 free developer credits.',
     fleetSummary:
       'The complete OpenAI GPT-5.6 reasoning fleet, high-velocity coding models, and OpenAI Image Generation studio endpoints.',
     discountPct: 40,

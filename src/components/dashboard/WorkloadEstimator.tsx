@@ -81,7 +81,7 @@ const WORKLOAD_PRESETS: WorkloadPreset[] = [
     minVolume: 1,
     maxVolume: 50,
     step: 1,
-    modelName: 'GPT-5.6 Sol & Luna Codex',
+    modelName: 'GPT-5.6 Sol & Luna',
     upstreamCostPerUnit: 40.0, // $40/dev/mo on retail tokens
     galxCostPerUnit: 24.0      // $24/dev/mo on wholesale
   },

@@ -202,7 +202,7 @@ export function CareersClient() {
 
         <div className="space-y-4 text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-4xl">
           <p>
-            The intelligence landscape is undergoing a once-in-a-generation shift. Compute consumption is exploding exponentially, reasoning models like OpenAI Codex and GPT-5.6 are becoming the default engine for software creation, and developers require a zero-friction, zero-markup substrate to orchestrate autonomous agents.
+            The intelligence landscape is undergoing a once-in-a-generation shift. Compute consumption is exploding exponentially, reasoning models like OpenAI GPT-5.6 are becoming the default engine for software creation, and developers require a zero-friction, zero-markup substrate to orchestrate autonomous agents.
           </p>
           <p>
             Large corporations slow top engineers down with endless middle management, multi-week PR reviews, and political silos. At GALX AI, we maintain a small, high-density team where every single person owns foundational infrastructure that handles billions of tokens daily.

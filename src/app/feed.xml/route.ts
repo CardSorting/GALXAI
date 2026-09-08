@@ -29,7 +29,7 @@ export async function GET() {
       <title><![CDATA[LLM Context Window Capacity & Prompt Caching Visualizer]]></title>
       <link>${SITE_CONFIG.url}/tools/context-window-visualizer</link>
       <guid isPermaLink="true">${SITE_CONFIG.url}/tools/context-window-visualizer</guid>
-      <description><![CDATA[Interactive 1,000,000 token context window simulator and prompt caching calculator for OpenAI Codex GPT-5.6. Model document capacities, AST code lines, and 75% cached rebate math.]]></description>
+      <description><![CDATA[Interactive 1,000,000 token context window simulator and prompt caching calculator for OpenAI GPT-5.6. Model document capacities, AST code lines, and 75% cached rebate math.]]></description>
       <pubDate>${currentDate}</pubDate>
       <category>Developer Tools</category>
     </item>
@@ -53,7 +53,7 @@ export async function GET() {
       <title><![CDATA[AI Token Streaming & Speed Benchmark Simulator]]></title>
       <link>${SITE_CONFIG.url}/tools/stream-benchmark</link>
       <guid isPermaLink="true">${SITE_CONFIG.url}/tools/stream-benchmark</guid>
-      <description><![CDATA[Interactive real-time Server-Sent Events (SSE) token generation velocity and Time-To-First-Token (TTFT) benchmark simulator across OpenAI Codex GPT-5.6.]]></description>
+      <description><![CDATA[Interactive real-time Server-Sent Events (SSE) token generation velocity and Time-To-First-Token (TTFT) benchmark simulator across OpenAI GPT-5.6.]]></description>
       <pubDate>${currentDate}</pubDate>
       <category>Developer Tools</category>
     </item>

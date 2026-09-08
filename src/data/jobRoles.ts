@@ -27,7 +27,7 @@ export const JOB_ROLES: JobRole[] = [
     experienceLabel: 'Staff / Principal (5+ yrs)',
     urgency: 'Immediate',
     tags: ['Rust', 'eBPF', 'Tokio', 'Anycast BGP', 'Linux Kernel', 'HTTP/2'],
-    description: 'Lead the architecture of our global Anycast routing substrate and sub-15ms edge proxy fabric handling billions of daily OpenAI Codex and GPT-5.6 tokens with zero downtime.',
+    description: 'Lead the architecture of our global Anycast routing substrate and sub-15ms edge proxy fabric handling billions of daily OpenAI GPT-5.6 tokens with zero downtime.',
     first90Days: [
       'Day 30: Deploy custom zero-copy buffer routing in Rust across 10 Anycast Edge PoPs.',
       'Day 60: Shard active TCP connection pooling for GPT-5.6 streaming, shaving 8ms off initial TTFT.',
@@ -192,16 +192,16 @@ export const JOB_ROLES: JobRole[] = [
     experience: 'Senior',
     experienceLabel: 'Senior (4+ yrs)',
     urgency: 'Immediate',
-    tags: ['PyTorch', 'vLLM', 'Speculative Decoding', 'BroccoliDB', 'Codex', 'CUDA'],
+    tags: ['PyTorch', 'vLLM', 'Speculative Decoding', 'BroccoliDB', 'AI Inference', 'CUDA'],
     description: 'Pioneer advanced speculative decoding algorithms, rolling context compression, and multi-turn persona evaluation frameworks for next-generation frontier intelligence.',
     first90Days: [
-      'Day 30: Implement draft-model speculative decoding pipeline for Codex coding tasks.',
+      'Day 30: Implement draft-model speculative decoding pipeline for coding tasks.',
       'Day 60: Integrate rolling KV-cache reuse with BroccoliDB semantic indexing layer.',
       'Day 90: Publish empirical benchmark demonstrating 2.4x throughput speedup on agentic reasoning.',
     ],
     responsibilities: [
       'Research and implement high-efficiency speculative decoding and key-value cache reuse systems.',
-      'Develop automated cognitive benchmarks, hallucination detection heuristics, and Codex execution testbeds.',
+      'Develop automated cognitive benchmarks, hallucination detection heuristics, and model execution testbeds.',
       'Design hybrid vector-relational context retrieval architectures with BroccoliDB and pgvector.',
       'Publish technical deep dives and reproducible benchmarks for the AI engineering community.',
     ],

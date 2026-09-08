@@ -46,7 +46,7 @@ function BaseLiveStatusDashboard() {
 
   const services = [
     {
-      name: 'OpenAI Codex Model Router (/v1/chat/completions)',
+      name: 'OpenAI Model Router (/v1/chat/completions)',
       status: probeResult?.status === 'offline' ? 'Offline' : 'Operational',
       latency: probeResult ? `${probeResult.edgeLatencyMs}ms` : '14ms',
       uptime: 'Healthy',

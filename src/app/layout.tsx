@@ -94,7 +94,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}`,
-    description: "One unified API for OpenAI Codex and GPT-5.6 models with automated failover and 25%–40% wholesale savings.",
+    description: "One unified API for OpenAI GPT-5.6 models with automated failover and 25%–40% wholesale savings.",
     creator: SITE_CONFIG.twitterHandle,
     site: SITE_CONFIG.twitterHandle,
     images: [`${SITE_CONFIG.url}${SITE_CONFIG.ogImage}`],

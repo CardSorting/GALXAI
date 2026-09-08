@@ -112,7 +112,7 @@ export async function OPTIONS() {
 
 /**
  * Apex Multi-Provider Hardened Credential Ingestion Endpoint.
- * Ingests OAuth tokens and developer API keys for OpenAI Codex & GPT flagship fleets.
+ * Ingests OAuth tokens and developer API keys for OpenAI & GPT flagship fleets.
  * Features:
  * - Transport Layer Hardening: Constant-time Digest verification (RFC 9530), RFC 9421 HTTP Message Signatures support.
  * - Idempotency Key Protocol (IETF): Deterministic retry deduplication with 24-hour cache.

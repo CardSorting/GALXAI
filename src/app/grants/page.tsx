@@ -5,7 +5,7 @@ import { JsonLd, createGrantFinancialSchema, createBreadcrumbSchema } from '@/li
 
 export const metadata: Metadata = constructMetadata({
   title: 'AI Builder & Scale Acceleration Grants — Up to $2,500 Match',
-  description: 'Apply for up to $2,500 in 50% compute match grants for high-velocity AI builders, funded startups, and enterprise teams scaling OpenAI Codex and xAI Grok workloads.',
+  description: 'Apply for up to $2,500 in 50% compute match grants for high-velocity AI builders, funded startups, and enterprise teams scaling OpenAI and xAI Grok workloads.',
   canonicalPath: '/grants',
   keywords: [
     'AI Grants',

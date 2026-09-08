@@ -115,7 +115,7 @@ response = client.chat.completions.create(
     estimatedCostReductionPct: 35,
     keyPainPointsSolved: [
       'Eliminates AWS IAM Signature V4 request signing complexity',
-      'Direct access to official OpenAI Codex (GPT-5.6 Sol/Terra) not on Bedrock',
+      'Direct access to official OpenAI (GPT-5.6 Sol/Terra) not on Bedrock',
       'Sub-15ms Anycast TTFT vs cross-region AWS VPC latency',
       'True 0% gateway markup with 75% prompt caching pass-through',
     ],
@@ -234,7 +234,7 @@ response = client.chat.completions.create(
     title: 'Migrate from Groq to GALXAI — Access SOTA Reasoning & 900K Context',
     headline: 'Migrate from Groq to GALXAI Universal Gateway',
     description:
-      'Combine sub-15ms Anycast speed with SOTA frontier reasoning (GPT-5.6 Sol) and massive 900K token context windows on OpenAI Codex.',
+      'Combine sub-15ms Anycast speed with SOTA frontier reasoning (GPT-5.6 Sol) and massive 900K token context windows on OpenAI.',
     estimatedCostReductionPct: 25,
     keyPainPointsSolved: [
       'Expands from 8K/32K open-weights context to 900,000 token context',

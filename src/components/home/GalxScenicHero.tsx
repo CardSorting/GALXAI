@@ -156,7 +156,7 @@ export function GalxScenicHero() {
                   Get access to Frontier AI
                 </h1>
                 <p className="text-xs sm:text-sm text-zinc-500 font-medium leading-relaxed">
-                  Route, observe, and optimize OpenAI Codex &amp; GPT-5.6 inference.
+                  Route, observe, and optimize OpenAI GPT-5.6 inference.
                 </p>
               </div>
 
@@ -622,7 +622,7 @@ export function GalxScenicHero() {
             </div>
 
             <div className="flex items-center gap-3 text-zinc-600 font-mono text-[10px]">
-              <span>v5.6 Codex Engine</span>
+              <span>GPT-5.6 Engine</span>
               <span>•</span>
               <span className="text-zinc-500">Anycast BGP Edge</span>
             </div>

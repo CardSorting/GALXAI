@@ -59,7 +59,7 @@ const PLATFORM_PAGES: PlatformPage[] = [
     icon: Cpu,
     category: 'Models',
     keywords: ['models', 'gpt', 'openai', 'sol', 'terra', 'luna', 'ai', 'engines', 'intelligence'],
-    description: 'Explore and compare OpenAI Codex & GPT flagship models'
+    description: 'Explore and compare OpenAI & GPT flagship models'
   },
   {
     label: 'Requests & Live Results (Async AI)',
@@ -260,7 +260,7 @@ const PLATFORM_PAGES: PlatformPage[] = [
     icon: Sparkles,
     category: 'Tools',
     keywords: ['playground', 'try', 'test', 'demo', 'sandbox', 'chat', 'prompt', 'experiment', 'run model'],
-    description: 'Test prompts live across OpenAI Codex models with 0 config'
+    description: 'Test prompts live across OpenAI models with 0 config'
   },
   {
     label: 'Knowledge Base & Frequently Asked Questions',

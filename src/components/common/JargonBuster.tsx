@@ -67,7 +67,7 @@ export const JARGON_GLOSSARY: Record<string, JargonTerm> = {
   },
   'api-key': {
     title: 'Universal Unified API Key',
-    shortDesc: 'One single credential that connects your code to OpenAI Codex, reasoning, and image models.',
+    shortDesc: 'One single credential that connects your code to OpenAI, reasoning, and image models.',
     plainEnglishAnalogy: 'Like a master hotel keycard that opens every room and facility in the resort instead of carrying 10 separate physical keys.',
     category: 'Ergonomics'
   }
