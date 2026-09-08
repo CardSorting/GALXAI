@@ -29,7 +29,9 @@ Controller operational data requires administrator access. The dashboard shell i
 
 Health is changed only under current authority. Stale generation/inventory/health observations cannot restore routing. Telemetry is observation-only. Capability denial removes that pair; it does not authorize deleting the account or cancelling otherwise valid streams.
 
-The explicit image alias is disclosed in responses and capability metadata. Model compatibility does not imply exact model selection, provider entitlement, or permission to replay ambiguous work.
+Execution metadata belongs only in internal transport and administrator-authorized records. Public image responses contain sanitized artifacts or allowlisted JSON, with generic errors and opaque request IDs. Model aliases do not establish an exact underlying model or authorize replay of ambiguous work. See [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md) and the [image boundary guide](maintainers/image-public-boundary.md).
+
+JWT identity is verified by the authentication service; decoded claims, bare UUIDs, and developer/session identifiers are not credentials. Verification failures deny access. Browser cookie chunks are reassembled before verification. Ordinary sessions do not acquire priority or sudo from user-editable claims, and ordinary authentication never grants operational administrator access.
 
 ## Retention
 

@@ -7,6 +7,8 @@ Each document is classified below. Current guides define relay operations; domai
 
 The documentation validator checks complete coverage, scope markers, local file links, and ADR identity. It does not execute example commands or certify every historical claim. Update this catalog whenever a document is added or renamed.
 
+Internal maintainer navigation: public-facing guidance follows [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md) and the [image boundary guide](maintainers/image-public-boundary.md). Repository operational records must not be copied into site content. The September 8 changes are locally verified; deployment and origin remediation require separate evidence.
+
 ## Current guides
 
 | Document | Path |
@@ -303,3 +305,10 @@ The documentation validator checks complete coverage, scope markers, local file 
 | [🔍 Playbook: GitHub Repository Audit & Non-Spam Migration Outreach](prospecting/01-github-repository-audit-playbook.md) | `prospecting/01-github-repository-audit-playbook.md` |
 | [📡 High-Velocity Multi-Channel Lead Scraping Engine](prospecting/02-multi-channel-lead-scraping-engine.md) | `prospecting/02-multi-channel-lead-scraping-engine.md` |
 | [✉️ High-Converting Outbound Sales Cadences (45%+ Open, 20%+ Reply)](prospecting/03-high-converting-cold-outreach-cadences.md) | `prospecting/03-high-converting-cold-outreach-cadences.md` |
+
+## Public boundary decision and maintainer guidance
+
+| Document | Path |
+| --- | --- |
+| [Public image artifacts and verified identity](adr/0129-public-image-artifacts-and-verified-identity.md) | `adr/0129-public-image-artifacts-and-verified-identity.md` |
+| [Image public boundary verification](maintainers/image-public-boundary.md) | `maintainers/image-public-boundary.md` |

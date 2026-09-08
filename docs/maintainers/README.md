@@ -7,6 +7,8 @@ Use the [federation contract](../FEDERATION_STRATEGY.md) and [vNext runbook](../
 
 Start with [parent/subagent execution](AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md), [hardening checks](RELAY_HARDENING.md), and [ADR lifecycle](ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md). Keep evidence dated, I/O bounded, and shared mutations serialized.
 
+Internal maintainer navigation: public-facing guidance follows [ADR 0129](../adr/0129-public-image-artifacts-and-verified-identity.md) and the [image boundary guide](image-public-boundary.md). Repository operational records must not be copied into site content. The September 8 changes are locally verified; deployment and origin remediation require separate evidence.
+
 ## Guide catalog
 
 - [ADR authoring and lifecycle](ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md)

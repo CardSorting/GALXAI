@@ -5,6 +5,8 @@
 
 Start with the [federation contract](FEDERATION_STRATEGY.md): one active shard owns one relay container, and fresh model capability precedes load selection. The documented Codex image-tool route is an explicit verified compatibility alias with provider-managed image selection.
 
+Internal maintainer navigation: public-facing guidance follows [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md) and the [image boundary guide](maintainers/image-public-boundary.md). Repository operational records must not be copied into site content. The September 8 changes are locally verified; deployment and origin remediation require separate evidence.
+
 ## Find the next action
 
 | Task | Guide |

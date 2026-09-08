@@ -7,6 +7,8 @@
 
 Date: 2026-09-07. Status: deployed and verified.
 
+> Successor: [ADR 0129](0129-public-image-artifacts-and-verified-identity.md) supersedes public execution-metadata disclosure and defines customer documentation and verified-identity boundaries. The original body below preserves dated internal decisions and evidence; it is not permission to expose implementation details.
+
 ## Decision
 
 The operator explicitly authorized the existing generic Codex image-tool route as a documented compatibility alias. With `RELAY_CODEX_IMAGE_TOOL_ALIAS=true`, OAuth requests for relay model `gpt-image-2` (public ID `openai-gpt-image-2`) use `gpt-5.6-terra` with `image_generation`. The upstream selects the image model. This does not promise exact GPT-Image-2, nor does it apply to other requested models. Native API-key image requests remain exact.

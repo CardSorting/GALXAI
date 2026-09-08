@@ -1,5 +1,8 @@
 # Federation handover
 
+September 8 workspace update: [ADR 0129](docs/adr/0129-public-image-artifacts-and-verified-identity.md) governs public image artifacts, verified identity, and private operational evidence. The local build, 19 security checks, compiled HTTP verification, and 362-asset scan passed. These changes have not been deployed or verified against production in this session. Earlier execution-metadata disclosure is historical and must not be restored.
+
+
 Current authority: [federation contract](docs/FEDERATION_STRATEGY.md), [vNext runbook](docs/RELAY_VNEXT_RUNBOOK.md), and [ADR catalog](docs/adr/README.md). Use the [complete documentation catalog](docs/CATALOG.md) to distinguish active guides from scoped references and historical evidence.
 
 ## Dated deployed state

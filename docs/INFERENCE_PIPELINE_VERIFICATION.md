@@ -5,6 +5,10 @@
 
 Verify each boundary independently: application authorization, configured app-to-controller transport, credential projection, capability discovery, eligible admission, worker execution, returned payload, and any application storage. See the [contract](FEDERATION_STRATEGY.md).
 
+## Public image boundary
+
+Use the [image boundary guide](maintainers/image-public-boundary.md) for authorization, raw HTTP, artifact, rendered-page, and browser-asset checks. [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md) records the September 8 local verification; it does not establish production rollout. Run `npm run test:image:security` and `npm run build` for changes to this boundary.
+
 ## Local regression checks
 
 ```sh
@@ -22,7 +26,7 @@ Required scenarios include heterogeneous pools, loss/recovery without restart, s
 
 Confirm the actual deployed revision, worker image, ownership, and ingress. A health check, matching credential aliases, inventory listing, or HTTP 202 does not prove successful inference.
 
-For chat, authenticate with the intended key and observe completed output without an SSE failure. For images, use the actual downstream client and its retry policy, require valid bytes, decode the image, inspect execution metadata, and visually inspect the artifact. Live probes can incur usage; synthetic tests do not run them.
+For chat, authenticate with the intended key and observe completed output without an SSE failure. For images, use the actual downstream client and its retry policy, require valid bytes, decode the image, check metadata removal and public response allowlists, and visually inspect the artifact. Inspect execution evidence only through administrator-authorized diagnostics. Live probes can incur usage; synthetic tests do not run them.
 
 The runbook documents `scripts/verify-dreambees-image.ts`. [ADR 0127](adr/0127-codex-image-tool-alias-production-cutover.md) records a successful public DreamBees image result on September 7, 2026, including request ID, dimensions, hash, and compatibility metadata. Its separate chat entitlement rejection was not a chat success. Paid Hive remained disabled.
 

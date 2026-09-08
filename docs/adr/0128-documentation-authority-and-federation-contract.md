@@ -5,6 +5,8 @@
 
 Date: 2026-09-07. Status: Accepted; documentation refactor implemented.
 
+> Successor: [ADR 0129](0129-public-image-artifacts-and-verified-identity.md) supersedes public execution-metadata disclosure and defines customer documentation and verified-identity boundaries. The original body below preserves dated internal decisions and evidence; it is not permission to expose implementation details.
+
 ## Problem
 
 Older deployment guides described a shared relay and unverified ingress, while newer decisions established 1:1 capability-aware federation and a verified image alias. API/SDK examples mixed application and worker contracts. Repeated defaults, historical test counts, and promotional guarantees made it difficult to identify the current safe action.

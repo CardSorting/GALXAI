@@ -453,7 +453,7 @@ class BroccoliOmniSearchImpl {
       },
       {
         title: 'AI Token Streaming & Speed Benchmark Simulator',
-        description: 'Interactive real-time Server-Sent Events (SSE) token generation velocity and Time-To-First-Token (TTFT) benchmark simulator across OpenAI Codex GPT-5.6.',
+        description: 'Interactive simulator for streaming token speed and time to first token.',
         category: 'Actions & Tools',
         href: '/tools/stream-benchmark',
         badge: 'Interactive Tool',
@@ -462,7 +462,7 @@ class BroccoliOmniSearchImpl {
       },
       {
         title: '1,000,000 Token Context Window Capacity Visualizer',
-        description: 'Interactive 1,000,000 token context window simulator and prompt caching calculator for OpenAI Codex GPT-5.6.',
+        description: 'Interactive context window simulator and prompt caching calculator.',
         category: 'Actions & Tools',
         href: '/tools/context-window-visualizer',
         badge: 'Interactive Tool',

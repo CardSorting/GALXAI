@@ -61,7 +61,7 @@ This does **not** guarantee exact GPT-Image-2, exact output dimensions, or exact
 
 The alias requires both fresh execution-model inventory and a successful real image probe. Chat inventory alone cannot grant image access. Verified image evidence expires after one hour and successful image requests renew it. Enabled idle workers use spare capacity for startup verification and re-verification after 50 minutes; failures back off 10, 20, then 40 minutes. These probes consume upstream quota. Changing the flag requires worker replacement.
 
-Responses expose `execution.requestedModel`, `execution.executionModel`, `execution.routingMode`, `execution.tool`, and `execution.imageModelSelection`, plus `X-Galx-Execution-Model` and `X-Galx-Routing-Mode`. Applications can make an informed compatibility choice from this metadata. Image availability remains independently inspectable from chat availability.
+Internal transport and administrator records preserve execution identifiers and capability evidence. Public application responses must not expose these records or execution headers. [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md) governs sanitized image artifacts and allowlisted customer contracts. Image availability remains independently inspectable by administrators from chat availability.
 
 ## Parent and subagent execution
 

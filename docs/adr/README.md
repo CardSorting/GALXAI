@@ -3,7 +3,7 @@
 <!-- docs-scope: current-guide -->
 > **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
 
-Current relay authority is the [federation contract](../FEDERATION_STRATEGY.md), supported by ADR 0126 (1:1 capability routing), ADR 0127 (explicit verified image alias and production cutover), and ADR 0128 (documentation authority). ADRs 0123–0125 govern database cooldown and observation authority separately.
+Public application and identity authority is [ADR 0129](0129-public-image-artifacts-and-verified-identity.md). Internal relay authority is the [federation contract](../FEDERATION_STRATEGY.md), supported by ADR 0126 (1:1 capability routing), ADR 0127 (explicit verified image alias and production cutover), and ADR 0128 (documentation authority). ADRs 0123–0125 govern database cooldown and observation authority separately.
 
 Original statuses and evidence remain in each record. A proposed or accepted design is not proof of deployment. Older records retain unrelated subsystem decisions; their shared-relay, implicit fallback, and simulation claims do not override current federation behavior. The scope notes explain precedence without rewriting history.
 
@@ -141,3 +141,4 @@ Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) f
 | 0126 | [ADR 0126: Capability-aware 1:1 shard relay federation](0126-capability-aware-shard-relay-federation.md) | Lifecycle foundation; extended by 0127 |
 | 0127 | [ADR 0127: Explicit Codex image-tool alias and production federation cutover](0127-codex-image-tool-alias-production-cutover.md) | Image alias and dated production evidence |
 | 0128 | [ADR 0128: Documentation authority and federation contract](0128-documentation-authority-and-federation-contract.md) | Documentation authority |
+| 0129 | [ADR 0129: Public image artifacts and verified identity](0129-public-image-artifacts-and-verified-identity.md) | Implemented and locally verified; rollout unverified |

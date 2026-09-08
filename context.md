@@ -1,5 +1,8 @@
 # Current implementation context
 
+September 8 workspace update: [ADR 0129](docs/adr/0129-public-image-artifacts-and-verified-identity.md) governs public image artifacts, verified identity, and private operational evidence. The local build, 19 security checks, compiled HTTP verification, and 362-asset scan passed. These changes have not been deployed or verified against production in this session. Earlier execution-metadata disclosure is historical and must not be restored.
+
+
 Orientation updated September 7, 2026. The [federation contract](docs/FEDERATION_STRATEGY.md) governs current relay behavior; the [documentation catalog](docs/CATALOG.md) distinguishes current guides from historical/domain material.
 
 - One active shard owns one isolated relay container; a supervised host controller manages ownership and capability-aware admission.

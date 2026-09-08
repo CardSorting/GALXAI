@@ -7,6 +7,7 @@
  */
 
 import * as crypto from 'node:crypto';
+import { getSupabaseAdmin } from '../../lib/supabase/client';
 import { GalxCryptoVault, PRIMARY_KEY_VERSION } from '../vault/GalxCryptoVault';
 import { galxRouter } from '../router/GalxModelRouter';
 import { GalxPersistence } from '../../lib/storage/GalxPersistence';
@@ -898,9 +899,21 @@ export class GalxAuthEngine {
         }
         if (cookieHeader) {
           // 3a. Check Supabase SSR session cookies first (sb-*-auth-token or chunked sb-*-auth-token.0)
-          const sbMatch = cookieHeader.match(/(?:^|;\s*)sb-[^=]+-auth-token(?:\.0)?=([^;]+)/);
-          if (sbMatch) {
-            let val = decodeURIComponent(sbMatch[1].trim());
+          const cookies = new Map(cookieHeader.split(';').map(cookie => {
+            const separator = cookie.indexOf('=');
+            return [cookie.slice(0, separator).trim(), cookie.slice(separator + 1).trim()];
+          }));
+          const sessionName = [...cookies.keys()].find(name => /^sb-.+-auth-token(?:\.0)?$/.test(name));
+          if (sessionName) {
+            const baseName = sessionName.replace(/\.0$/, '');
+            let encoded = cookies.get(baseName);
+            if (encoded === undefined) {
+              encoded = '';
+              for (let index = 0; cookies.has(`${baseName}.${index}`); index++) {
+                encoded += cookies.get(`${baseName}.${index}`);
+              }
+            }
+            let val = decodeURIComponent(encoded);
             if (val.startsWith('base64-')) {
               try {
                 val = Buffer.from(val.slice(7), 'base64').toString('utf-8');
@@ -1040,62 +1053,25 @@ export class GalxAuthEngine {
       };
     }
 
-    // 6b. Supabase SSR / JWT Bearer Tokens (`eyJ...`)
+    // Only the authentication service may establish a bearer token's identity.
+    // Decoded payloads and caller-supplied user identifiers are not credentials.
     if (token.startsWith('eyJ')) {
       try {
-        const parts = token.split('.');
-        if (parts.length === 3) {
-          const payloadJson = Buffer.from(parts[1], 'base64').toString('utf-8');
-          const claims = JSON.parse(payloadJson);
-          const isExpired = Boolean(claims.exp && claims.exp * 1000 <= Date.now());
-          if (!isExpired && claims.sub) {
-            return {
-              authenticated: true,
-              userId: claims.sub,
-              authType: 'session_token',
-              isPriorityUser: true,
-              isSudoElevated: true,
-              scopes: claims.scopes || ['*'],
-              claims,
-              token
-            };
-          }
+        const { data, error } = await getSupabaseAdmin().auth.getUser(token);
+        if (!error && data.user?.id) {
+          return {
+            authenticated: true,
+            userId: data.user.id,
+            authType: 'session_token',
+            isPriorityUser: false,
+            isSudoElevated: false,
+            scopes: ['*'],
+            token
+          };
         }
-      } catch {}
-    }
-
-    // 7. Supabase Verified User UUID
-    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token)) {
-      return {
-        authenticated: true,
-        userId: token,
-        authType: 'session_token',
-        isPriorityUser: true,
-        scopes: ['*'],
-        isSudoElevated: true,
-        token
-      };
-    }
-
-    // 7b. Developer Session Identifiers and User IDs (e.g. usr_..., dev_..., openai_..., github_...)
-    if (
-      token.startsWith('usr_') ||
-      token.startsWith('user_') ||
-      token.startsWith('session_') ||
-      token.startsWith('dev_') ||
-      token.startsWith('openai_') ||
-      token.startsWith('github_')
-    ) {
-      const resolvedUserId = token.startsWith('session_') ? token.replace(/^session_/, 'usr_') : token;
-      return {
-        authenticated: true,
-        userId: resolvedUserId,
-        authType: 'session_token',
-        isPriorityUser: true,
-        scopes: ['*'],
-        isSudoElevated: true,
-        token
-      };
+      } catch {
+        // Authentication outages fail closed; never fall back to decoded claims.
+      }
     }
 
     return {

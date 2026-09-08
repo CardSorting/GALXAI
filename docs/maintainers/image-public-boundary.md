@@ -1,5 +1,9 @@
 # Image public boundary verification
 
+<!-- docs-scope: current-guide -->
+
+Authority: [ADR 0129](../adr/0129-public-image-artifacts-and-verified-identity.md).
+
 Public documentation describes capability, not implementation. The public API
 defaults to a binary image. JSON compatibility uses explicit field projection.
 This document is an internal maintainer record, not public site content.
@@ -50,16 +54,56 @@ platform response. Previously published URLs or downloaded files cannot be recal
 by changing serializers. Old asset origins and caches require a separate access and
 retention review before asserting historical disclosure has been eliminated.
 
-## Verified changeset
+## Verified workspace state — September 8, 2026
 
-- Security suite: 18 checks passed.
-- Existing admission/transport suite: 9 checks passed.
-- Production build: passed, including TypeScript validation and 275 static pages.
-- Browser asset scan: 358 JavaScript files, zero matches for tested private
-  execution identifiers, credential configuration names, or removed branding.
-- Four rendered model pages passed the same identifier checks.
-- `scripts/verify-image-public-http.ts` passed against `next start`: unauthenticated
-  image error schema, middleware/preflight headers, denied operational routes,
-  rendered model pages, machine-readable documentation and OpenAPI response.
-- Raw success and failure HTTP tests use controlled adapter/auth fixtures; no paid
-  production image generation was triggered for this verification.
+The working tree based on `6be3078` passed 19 security checks, a production build
+including TypeScript validation, and compiled HTTP verification against local
+`next start`. The HTTP verifier scanned 26 assets referenced by rendered pages;
+a separate scan covered all 362 generated JS/CSS assets with no matches for the
+tested prohibited terms. Counts describe this build only. No paid production image
+generation, deployment, or origin-access mutation ran in this session.
+
+The resolver rejects forged JWTs, raw UUIDs, and user/developer/session identifiers
+across headers, query strings, and cookies. JWT verification failures deny access;
+user-editable elevation claims are ignored. Split browser cookies are reassembled
+before verification, including when chunks arrive out of order. Existing signed
+session and gateway-key validation remains in place. Administrator authorization
+is separate from ordinary user authentication.
+
+Run the compiled HTTP check after the build completes, with the same build served
+throughout the check:
+
+```sh
+npm run test:image:security
+npm run build
+npm run start -- --hostname 127.0.0.1 --port 3419
+# In a separate terminal:
+node --import tsx scripts/verify-image-public-http.ts
+python3 scripts/verify-docs.py
+```
+
+`GALX_VERIFY_ORIGIN` selects the HTTP verification target. The verifier checks
+unauthorized requests, preflight, protected diagnostics, rendered pages, public
+schema, and linked JS/CSS. Its term scan excludes substring false positives such
+as the CodeXml icon and built-in stack-trace helpers. It is a regression check,
+not a proof that every possible disclosure is absent. Recheck the deployed revision,
+raw bodies, headers, async results, artifacts, rendered pages, and browser assets
+before claiming the live site is clean.
+
+## Operational scripts and remaining release evidence
+
+These scripts are internal operator tools, not application endpoints or build hooks.
+Their presence does not prove that they have been executed:
+
+| Script | Effect and limits |
+| --- | --- |
+| `scripts/review-image-origin.ts` | Lists stored objects and probes one historical origin URL; writes private review files under `/tmp`. A sample cannot certify every object or cache. |
+| `scripts/harden-image-origin-access.mjs` | Mutates edge response rules and bucket-origin access, blocks legacy asset hosts, and saves configuration backups under `/tmp`. It affects shared infrastructure; review the target and backups before execution. It is not transactional and does not recall downloaded files. |
+| `scripts/verify-historical-image-delivery.ts` | Reads one completed historical record and verifies its signed download, headers, and metadata removal. Requires operator credentials; does not prove coverage of all historical assets. |
+| `scripts/verify-image-production.ts` | Uses configured credentials, optionally samples a library image, and creates a production image. Consumes usage and stores a verification artifact under `/tmp`. An empty or failed library lookup is not historical-delivery evidence. |
+
+Confirm origin and cache access separately from application serialization. Preserve
+objects and internal records; do not delete history to make a boundary check pass.
+Record revision, environment, date, failures, and sample coverage for any release
+verification. Never publish credential values, signed download URLs, or private
+operational reports.

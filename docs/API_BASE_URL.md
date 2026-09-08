@@ -1,9 +1,13 @@
 # GALXAI
 
+<!-- docs-scope: current-guide -->
+
 GALX provides text and image generation APIs, model discovery, API keys, and usage controls.
 
 Use `https://galx.ai/v1` as the API base URL. Authenticate with
 `Authorization: Bearer YOUR_GALX_API_KEY`.
+A user ID is not a credential. Missing or invalid credentials return `401`;
+browser requests require a valid signed-in session.
 
 ## Image generation
 
