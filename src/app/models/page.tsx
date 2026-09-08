@@ -6,7 +6,7 @@ import { JsonLd, createModelItemListSchema, createBreadcrumbSchema } from '@/lib
 
 export const metadata: Metadata = constructMetadata({
   title: 'Frontier AI Models & Architecture Specs | OpenAI-Compatible API Gateway',
-  description: 'Explore flagship AI models including OpenAI Codex GPT-5.6 Sol, Terra, Luna, and GPT-Image suite. Access via a 100% OpenAI-compatible endpoint with automatic prompt caching and sub-15ms Anycast routing.',
+  description: 'Explore flagship AI models including OpenAI GPT-5.6 Sol, Terra, Luna, and GPT-Image suite. Access via a 100% OpenAI-compatible endpoint with automatic prompt caching and sub-15ms Anycast routing.',
   canonicalPath: '/models',
   keywords: [
     'AI Model Catalog',

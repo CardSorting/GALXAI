@@ -236,7 +236,7 @@ export function CompareClient() {
               onClick={() => setSelectedIds(['gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna'])}
               className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/5 transition-all cursor-pointer"
             >
-              <span>Codex Suite (Sol / Terra / Luna)</span>
+              <span>GPT Suite (Sol / Terra / Luna)</span>
             </button>
 
             <button

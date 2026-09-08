@@ -151,10 +151,10 @@ function BaseModelCardClient({ model, siblingModels }: ModelCardClientProps) {
                 {isImage ? 'VISUAL SYNTHESIS' : 'FRONTIER REASONING'}
               </span>
 
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
+              {!isImage && <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold">
                 <Zap className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400" />
                 <span>Up to 90% Prompt Cache Pass-Through</span>
-              </div>
+              </div>}
             </div>
 
             {/* Sibling Model Family Switcher (OpenRouter / Hugging Face Pattern) */}

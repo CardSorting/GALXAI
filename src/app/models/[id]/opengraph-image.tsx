@@ -25,7 +25,7 @@ export default async function Image({ params }: Props) {
   ) || FRONTEND_VISIBLE_MODELS[0];
 
   const accentColor = '#f59e0b';
-  const providerLabel = 'OpenAI Codex';
+  const providerLabel = 'OpenAI';
 
   return new ImageResponse(
     (
