@@ -1,26 +1,23 @@
-"""Fixed, bounded credential sources read only through the host's private Docker pipe."""
-import json, os, pathlib, stat
-root = pathlib.Path('/home/operator')
-files = []
-for source, relative in [('codex', '.codex/auth.json'), ('manual', '.config/galx-relay/config.json')]:
-    path = root / relative
-    modified_at = 9007199254740991
-    try:
-        modified_at = path.lstat().st_mtime_ns // 1000000
-        if not path.resolve().is_relative_to(root): raise ValueError('Invalid source')
-        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
-        try:
-            before = os.fstat(fd)
-            if not stat.S_ISREG(before.st_mode) or before.st_uid != 1000 or before.st_size > 131072: raise ValueError('Invalid source')
-            with os.fdopen(fd, 'rb', closefd=False) as stream: raw = stream.read(131073)
-            after = os.fstat(fd)
-            if len(raw) > 131072 or (before.st_size, before.st_mtime_ns) != (after.st_size, after.st_mtime_ns): raise ValueError('Source changed')
-            files.append({'source': source, 'modifiedAt': after.st_mtime_ns // 1000000, 'data': json.loads(raw)})
-        finally:
-            os.close(fd)
-    except FileNotFoundError:
-        pass
+"""Only the explicitly selected guest login and manual setup enter the host pipe."""
+import json, pathlib, sys
+sys.path.insert(0, '/opt/galx-desktop')
+from credential_files import read_private, selected_home
+
+def credentials(root):
+    files = []
+    try: codex_home = selected_home(root)
     except (OSError, ValueError, UnicodeError):
-        # A malformed newer file must never fall back to an older saved credential.
-        files.append({'source': source, 'modifiedAt': modified_at, 'data': None})
-print(json.dumps(files))
+        return [{'source': 'codex', 'modifiedAt': 9007199254740991, 'data': None}]
+    for source, relative in [('codex', codex_home + '/auth.json'), ('manual', '.config/galx-relay/config.json')]:
+        modified_at = 9007199254740991
+        try:
+            raw, modified_at = read_private(root, relative)
+            files.append({'source': source, 'modifiedAt': modified_at, 'data': json.loads(raw)})
+        except FileNotFoundError:
+            if source == 'codex' and codex_home != '.codex':
+                files.append({'source': source, 'modifiedAt': modified_at, 'data': None})
+        except (OSError, ValueError, UnicodeError):
+            files.append({'source': source, 'modifiedAt': modified_at, 'data': None})
+    return files
+
+if __name__ == '__main__': print(json.dumps(credentials(pathlib.Path('/home/operator'))))

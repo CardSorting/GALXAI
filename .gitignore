@@ -138,4 +138,7 @@ Thumbs.db
 .impeccable/*.local.json
 .impeccable/hook.cache.json
 
+# Python helper compilation
+__pycache__/
+
 .vercel

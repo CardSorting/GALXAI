@@ -1,3 +1,4 @@
+# The desktop image receives source only, never host accounts, journals or captures.
 **
 !package.json
 !src/
@@ -6,3 +7,5 @@
 !src/core/
 !src/core/broccolidb/
 !src/core/broccolidb/**
+**/__pycache__/
+**/*.pyc

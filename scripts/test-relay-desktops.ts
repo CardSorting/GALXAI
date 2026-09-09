@@ -466,3 +466,28 @@ test('sign-in launch requires desktop authority and a fixed linked target, never
   const response = await post({ shardId: 'fixture-shard' }, { cookie }); assert.equal(response.status, 200); assert.deepEqual(await response.json(), { opened: true });
   assert.equal(driver.calls.filter(c => c.startsWith('signin:')).length, 1);
 });
+
+test('device sign-in, cancellation and account matching retain administrator, origin and payload boundaries', async t => {
+  const { manager, driver, base, login } = await httpFixture(t, true, async () => ({ outcome: 'current' })), id = randomUUID();
+  await manager.create({ id, name: 'Device flow', relayId: 'fixture-shard' });
+  const cookie = await login(), monitor = await login('monitor');
+  driver.credentialFiles = savedLogin();
+  (manager as any).matchCredential = async () => 'fixture-match';
+  (driver as any).loginStatus = async () => ({ state: 'waiting', updatedAt: Date.now(), expiresAt: Date.now() + 60000, userCode: 'ABCD-12345', device_code: 'PRIVATE_DEVICE', pid: 1234, verificationUri: 'https://evil.example' });
+  await manager.refresh(true);
+  const post = (route: string, body: object, headers: Record<string, string>) => fetch(`${base}/api/desktops/${id}/${route}`, { method: 'POST', headers: { Origin: base, 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body) });
+  for (const route of ['signin', 'signin-cancel', 'credential-match']) {
+    for (const headers of [{}, { Authorization: 'Bearer ordinary-user' }, { cookie: monitor }]) assert.equal((await post(route, { shardId: 'fixture-shard' }, headers)).status, 401);
+    assert.equal((await post(route, { shardId: 'fixture-shard' }, { cookie, Origin: 'https://evil.example' })).status, 403);
+    assert.equal((await post(route, { shardId: 'fixture-shard', accessToken: 'PRIVATE_SUBMISSION' }, { cookie })).status, 400);
+    assert.equal((await post(route, { shardId: 'changed' }, { cookie })).status, 409);
+  }
+  assert.equal((await post('signin', { shardId: 'fixture-shard', method: 'arbitrary' }, { cookie })).status, 400);
+  assert.equal((await post('signin', { shardId: 'fixture-shard', method: 'device' }, { cookie })).status, 200);
+  assert(driver.calls.includes('signin-device:' + id));
+  assert.equal((await post('signin-cancel', { shardId: 'fixture-shard' }, { cookie })).status, 200);
+  const match = await post('credential-match', { shardId: 'fixture-shard' }, { cookie }); assert.equal(match.status, 200); assert.deepEqual(await match.json(), { shardId: 'fixture-match' });
+  assert.equal(manager.linkedShard(id), 'fixture-shard');
+  const state = await (await fetch(base + '/api/desktops/state', { headers: { cookie } })).text();
+  assert(state.includes('ABCD-12345')); assert.doesNotMatch(state, /PRIVATE_DEVICE|device_code|evil\.example|"pid"/);
+});

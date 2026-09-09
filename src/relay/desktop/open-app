@@ -4,9 +4,11 @@ case "${1:-}" in
   terminal) pattern='xfce4-terminal.Xfce4-terminal' ;;
   chrome) pattern='google-chrome.Google-chrome' ;;
   signin) pattern='GALX Sign in' ;;
+  signin-device) pattern='GALX Device sign in' ;;
+  signin-cancel) exec /opt/galx-desktop/galx-relay cancel-login ;;
   *) exit 2 ;;
 esac
-focus() { if [ "$1" = signin ]; then wmctrl -Fa "$pattern"; else wmctrl -xa "$pattern"; fi; }
+focus() { if [[ "$1" = signin* ]]; then wmctrl -Fa "$pattern"; else wmctrl -xa "$pattern"; fi; }
 if focus "$1"; then exit 0; fi
 /opt/galx-desktop/launch-app "$1" >"/tmp/launch-$1.log" 2>&1 </dev/null &
 app_pid=$!

@@ -1,17 +1,23 @@
 #!/usr/bin/python3
 """A manual relay inside this workspace. A linked administrator workspace may sync saved OAuth credentials through the host."""
-import fcntl, getpass, json, os, pathlib, secrets, signal, subprocess, sys, time, urllib.request, uuid
+import fcntl, getpass, json, os, pathlib, secrets, signal, stat, subprocess, sys, time, urllib.request, uuid
+from credential_files import read_private, save_private, selected_home
 os.umask(0o077)
 root = pathlib.Path.home() / '.config/galx-relay'
 root.mkdir(parents=True, exist_ok=True, mode=0o700)
 config_path, pid_path = root / 'config.json', root / 'process.json'
 engine = '/opt/galx-relay/relay.mjs'
 
-def save(file, data):
-    temporary = file.with_suffix('.tmp')
-    temporary.write_text(json.dumps(data, indent=2) + '\n')
-    temporary.chmod(0o600)
-    temporary.replace(file)
+save = save_private
+
+def login_environment():
+    home = pathlib.Path.home() / '.codex'
+    home.mkdir(mode=0o700, exist_ok=True)
+    info = home.lstat()
+    if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid():
+        raise ValueError('Invalid login home')
+    home.chmod(0o700)
+    return dict(os.environ, CODEX_HOME=str(home))
 
 def active():
     try:
@@ -24,12 +30,41 @@ def active():
 
 def main():
     command = sys.argv[1] if len(sys.argv) == 2 else 'help'
-    if command == 'login':
+    if command == 'login-device':
+        from device_login import run_device
+        env = login_environment()
+        print('Complete sign-in using the code on the desktop page. Ctrl+C cancels.\n')
+        success = run_device(root, env)
+        print('\nSign-in saved. Return to the desktop page for verification.' if success else '\nSign-in did not complete. Return to the desktop page to retry.')
+    elif command == 'cancel-login':
+        from device_login import cancel_device
+        cancel_device(root)
+    elif command == 'use-login':
+        guest_home = pathlib.Path.home()
+        selected = pathlib.Path(os.environ.get('CODEX_HOME') or str(guest_home / '.codex'))
+        if not selected.is_absolute(): selected = pathlib.Path.cwd() / selected
+        try: relative = str(selected.relative_to(guest_home))
+        except ValueError: sys.exit('The selected Codex home must be inside this desktop’s home directory.')
+        try:
+            import tomllib
+            try:
+                raw_config, _ = read_private(guest_home, relative + '/config.toml')
+                store = tomllib.loads(raw_config.decode('utf8')).get('cli_auth_credentials_store', 'file')
+            except FileNotFoundError: store = 'file'
+            if store != 'file': sys.exit('This login uses a keyring or in-memory store. Run galx-relay login to save a dedicated file-backed login without exporting the keyring.')
+            raw, _ = read_private(guest_home, relative + '/auth.json'); auth = json.loads(raw)
+            if not isinstance(auth, dict) or not isinstance(auth.get('tokens'), dict) or not auth['tokens'].get('access_token'): raise ValueError('Invalid login')
+        except FileNotFoundError: sys.exit('No saved login exists in the selected home. Run galx-relay login, then complete sign-in.')
+        except (OSError, ValueError, UnicodeError): sys.exit('The selected login could not be read safely. Use a regular file inside this desktop’s home, then retry.')
+        save(root / 'credential-source.json', {'codexHome': relative})
+        print('Selected this saved login for automatic verification. Tokens stay private. Check Terminal sign-in on the desktop page.')
+    elif command == 'login':
         if not sys.stdin.isatty(): sys.exit('Open sign-in from the desktop page or run galx-relay login in Terminal.')
         print('Sign in to the account assigned to this desktop’s linked shard.\nComplete sign-in in Chrome. Ctrl+C cancels this attempt.\n')
-        env = dict(os.environ, CODEX_HOME=str(pathlib.Path.home() / '.codex'))
+        env = login_environment()
         try:
             result = subprocess.run(['codex', '-c', 'cli_auth_credentials_store="file"', 'login'], env=env)
+            if result.returncode == 0: save(root / 'credential-source.json', {'codexHome': '.codex'})
             print('\nSign-in saved locally. Return to Terminal sign-in on the desktop page to check verification and worker readiness.' if result.returncode == 0 else '\nSign-in did not complete. Close this window and choose Sign in to retry.')
         except KeyboardInterrupt:
             print('\nSign-in cancelled. Return to the desktop page to check the saved sign-in.')
@@ -82,17 +117,26 @@ def main():
     elif command == 'status':
         print('Local relay: ' + ('running at http://127.0.0.1:3001' if active() else 'stopped'))
         print('Setup: ' + ('saved in this workspace' if config_path.exists() else 'not configured — run galx-relay setup'))
+        print('Login source: ' + ('default Codex home' if selected_home(pathlib.Path.home()) == '.codex' else 'selected custom Codex home'))
     elif command == 'logs':
         file = root / 'relay.log'
         if file.exists(): subprocess.run(['tail', '-n', '60', str(file)], check=True)
         else: print('No relay logs yet.')
     else:
+        print('galx-relay login-device  Sign in using a code and any browser\ngalx-relay use-login     Select the saved login in your CODEX_HOME\ngalx-relay cancel-login  Cancel the current device-code attempt\n')
         print('galx-relay login   Sign in with Codex for linked-shard verification\ngalx-relay setup   Enter credentials privately for one local relay\ngalx-relay start   Start inside this desktop\ngalx-relay status  Check local process and setup\ngalx-relay stop    Stop gracefully; keep setup\ngalx-relay logs    Show recent private logs\n\nThis manual relay is separate from the serving fleet. Closing the viewer keeps it running.\nStopping the desktop closes it; run galx-relay start after resuming.')
 
 try:
-    with open(root / ('login.lock' if sys.argv[1:] == ['login'] else 'command.lock'), 'w') as lock:
+    with open(root / ('login.lock' if sys.argv[1:] in (['login'], ['login-device']) else 'command.lock'), 'w') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         main()
-except BlockingIOError: sys.exit('This action is already running. Return to its existing Terminal window.')
+except BlockingIOError:
+    if sys.argv[1:] == ['login-device']:
+        try:
+            state = json.loads((root / 'login-state.json').read_text())
+        except (OSError, ValueError): state = {}
+        if state.get('state') not in ('starting', 'waiting'):
+            save(root / 'login-state.json', {'state': 'failed', 'updatedAt': int(time.time() * 1000)})
+    sys.exit('This action is already running. Return to its existing Terminal window.')
 except (OSError, ValueError, KeyError): sys.exit('The local relay operation failed. Check your workspace setup and retry.')
 except KeyboardInterrupt: sys.exit('\nCancelled. No setup was saved.')

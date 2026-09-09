@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { DesktopCredentialError, parseDesktopCredential } from '../src/relay/desktop-credentials.js';
-import { createDesktopCredentialRefresh } from '../src/relay/desktop-credential-refresh.js';
+import { createDesktopCredentialRefresh, createDesktopCredentialMatch } from '../src/relay/desktop-credential-refresh.js';
 import { CapabilityDiscoveryError } from '../src/relay/capability-discovery.js';
 import { encryptRegistryShard, decryptRegistryShard, replaceRegistryCredential } from '../src/relay/shard-registry.js';
 
@@ -93,6 +93,33 @@ test('a changed login source after provider validation blocks the final credenti
   const f = refreshFixture(), candidate = parseDesktopCredential([file()], now);
   await assert.rejects(createDesktopCredentialRefresh(f.deps)('shard-1', candidate, async () => false), errorCode('credential_conflict'));
   assert.equal(f.stats().checks, 1); assert.equal(f.stats().writes, 0);
+});
+
+test('write intent is required before external mutation and recovery fences the original authority', async () => {
+  const f = refreshFixture(), candidate = parseDesktopCredential([file()], now), refresh = createDesktopCredentialRefresh(f.deps);
+  let expectedRevision = '';
+  await assert.rejects(refresh('shard-1', candidate, () => true, false, { prepare: revision => {
+    expectedRevision = revision; throw new DesktopCredentialError('credential_checkpoint_unavailable');
+  } }), errorCode('credential_checkpoint_unavailable'));
+  assert.equal(f.stats().writes, 0); assert.match(expectedRevision, /^[a-f0-9]{64}$/);
+  await refresh('shard-1', candidate, () => true, false, { expectedRevision, prepare: revision => assert.equal(revision, expectedRevision) });
+  assert.equal(f.stats().writes, 1);
+  Object.assign(f.row, { encrypted_tag: 'external-change' });
+  await assert.rejects(refresh('shard-1', candidate, () => true, false, { expectedRevision, prepare: () => assert.fail('No new intent for an overwritten authority') }), errorCode('credential_superseded'));
+  assert.equal(f.stats().writes, 1);
+  f.setPrevious(candidate);
+  assert.deepEqual(await refresh('shard-1', candidate, () => true, false, { expectedRevision, prepare: () => assert.fail('Committed login needs no write') }), { outcome: 'current' });
+});
+
+test('account matching recommends only one eligible existing shard without credentials or writes', async () => {
+  const candidate = parseDesktopCredential([file()], now), eligible = { id: 'matching', provider: 'openai', status: 'healthy', permission_retracted: false };
+  let rows: any[] = [eligible];
+  const match = createDesktopCredentialMatch({ read: async () => rows, decrypt: () => ({ accountId: candidate.accountId }) });
+  assert.equal(await match(candidate), 'matching');
+  rows = [eligible, { ...eligible, id: 'duplicate' }]; await assert.rejects(match(candidate), errorCode('credential_account_ambiguous'));
+  for (const changed of [{ permission_retracted: true }, { status: 'revoked' }, { status: 'quarantined' }, { provider: 'other' }]) {
+    rows = [{ ...eligible, ...changed }]; await assert.rejects(match(candidate), errorCode('credential_account_unregistered'));
+  }
 });
 
 test('credential encryption uses the existing tenant envelope and the update touches no quota or traffic columns', async t => {

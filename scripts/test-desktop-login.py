@@ -10,7 +10,8 @@ class LoginTest(unittest.TestCase):
         binary = self.home / 'codex'
         binary.write_text('''#!/usr/bin/python3
 import json, os, pathlib, sys
-p = pathlib.Path(os.environ['CODEX_HOME']); p.mkdir(parents=True, exist_ok=True)
+p = pathlib.Path(os.environ['CODEX_HOME'])
+if not p.is_dir(): sys.exit('The configured login home must exist before invoking the CLI')
 (p / 'invocation.json').write_text(json.dumps(sys.argv[1:]))
 input('FIXTURE_WAIT\\n')
 (p / 'auth.json').write_text('{"fixture":true}')
@@ -44,6 +45,7 @@ input('FIXTURE_WAIT\\n')
     def test_success_uses_fixed_file_store_and_closes_on_enter(self):
         process, fd = self.login(); self.until(fd, 'FIXTURE_WAIT')
         self.assertEqual(json.loads((self.home / '.codex/invocation.json').read_text()), ['-c', 'cli_auth_credentials_store="file"', 'login'])
+        self.assertEqual((self.home / '.codex').stat().st_mode & 0o777, 0o700)
         os.write(fd, b'\n'); self.until(fd, 'Press Enter to close')
         self.assertTrue((self.home / '.codex/auth.json').exists())
         os.write(fd, b'\n'); self.assertEqual(process.wait(timeout=5), 0)

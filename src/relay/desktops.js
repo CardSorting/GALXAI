@@ -27,7 +27,7 @@ async function api(route, body) {
     ...(body === undefined ? {} : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }), signal: AbortSignal.timeout(body === undefined ? 15000 : 65000) });
   if (response.status === 401 || response.status === 403) { disconnect(); location.replace('/desktops'); throw Error('Your desktop session ended. Open the host launcher to reconnect.'); }
   let result; try { result = await response.json(); } catch { throw Error('The controller returned an incomplete response. Refresh to check the operation.'); }
-  if (!response.ok) throw Error(result.error?.message || 'The desktop operation could not finish. Refresh and retry.');
+  if (!response.ok) throw Object.assign(Error(result.error?.message || 'The desktop operation could not finish. Refresh and retry.'), { code: result.error?.code });
   return result;
 }
 function disconnect() {
@@ -219,6 +219,7 @@ function resetKeyboard() { keyboardValue = ' '.repeat(16); $('remote-keyboard-in
 function hideKeyboard() {
   $('keyboard-panel').hidden = true; $('keyboard').setAttribute('aria-expanded', 'false');
   $('remote-keyboard-input').blur(); $('remote-keyboard-input').value = ''; keyboardValue = ''; composing = false;
+  $('remote-composer').value = ''; $('compose-panel').open = false;
   controlKey = false; $('key-control').setAttribute('aria-pressed', 'false'); if (rfb) rfb.focusOnClick = true;
 }
 function remoteKey(key, code) {
@@ -249,7 +250,16 @@ $('remote-keyboard-input').oncompositionstart = () => { composing = true; };
 $('remote-keyboard-input').oncompositionend = () => { composing = false; keyboardInput(); };
 $('remote-keyboard-input').onkeydown = e => {
   if (e.isComposing) return;
-  if (['Enter', 'Tab', 'Escape'].includes(e.key)) { e.preventDefault(); remoteKey(remoteKeys[e.key], e.code); resetKeyboard(); }
+  if (e.key === 'Escape') { e.preventDefault(); hideKeyboard(); $('keyboard').focus(); return; }
+  if (e.key === 'Enter') { e.preventDefault(); remoteKey(remoteKeys[e.key], e.code); resetKeyboard(); }
+};
+$('send-composed').onclick = () => {
+  const input = $('remote-composer');
+  if (!connected || !rfb) { tell('Reconnect the display before sending text.'); return; }
+  if (!input.value || input.value.length > 2048) { tell('Enter up to 2,048 characters.'); return; }
+  controlKey = false; $('key-control').setAttribute('aria-pressed', 'false');
+  for (const char of input.value.replace(/\r\n?/g, '\n')) remoteKey(char === '\n' ? remoteKeys.Enter : keysyms.lookup(char.codePointAt(0)));
+  input.value = ''; input.focus(); tell('Text sent to the focused app.');
 };
 $('key-control').onclick = () => { controlKey = !controlKey; $('key-control').setAttribute('aria-pressed', String(controlKey)); $('remote-keyboard-input').focus({ preventScroll: true }); };
 for (const button of $('keyboard-panel').querySelectorAll('[data-remote-key]')) button.onclick = () => { remoteKey(remoteKeys[button.dataset.remoteKey], button.dataset.remoteKey); resetKeyboard(); $('remote-keyboard-input').focus({ preventScroll: true }); };
@@ -384,22 +394,27 @@ const credentialMessages = {
   credential_registry_unavailable: 'The credential registry could not confirm the update. Check again when it is available.',
   credential_conflict: 'The workspace or credential changed during this check. Refresh before trying again.',
   credential_superseded: 'Another sign-in updated this account. Its credential is preserved; this desktop’s older saved login will not replace it. Sign in here again when you want to update the account.',
-  credential_checkpoint_unavailable: 'The login was verified, but its sync record could not be saved. Check the controller’s storage, then retry.',
+  credential_checkpoint_unavailable: 'Sync could not save its recovery record. Check the controller’s storage, then retry. An interrupted update will be reconciled before another write.',
+  credential_account_unregistered: 'This saved account has no eligible registered shard. Enroll it separately as an administrator, then return here to link it. The current shard is unchanged.',
+  credential_account_ambiguous: 'More than one eligible shard uses this account. Review the registered shards and choose the intended link.',
   credential_not_allowed: 'The linked shard is unavailable or its permission was withdrawn. Review its registry status first.'
 };
 function renderCredentialSync(d, r) {
   const sync = d.credentialSync, pending = credentialPending.has(d.id) || sync?.busy;
   $('credential-panel').hidden = !r;
   if (!r) return;
+  renderDeviceLogin(d);
   const saved = ['updated', 'current'].includes(sync?.state), fresh = r.registryFresh && !failure;
+  const awaitingProvider = !saved && ['starting', 'waiting'].includes(d.login?.state);
   const ready = saved && sync.applied && fresh && !r.paused && r.health === 'healthy' && r.workerState === 'running' && r.eligibleModels > 0;
   const opening = credentialPending.get(d.id) === 'signin' || sync?.operation === 'signin', checking = sync?.state === 'checking' || credentialPending.get(d.id) === 'check';
   const retrying = sync?.state === 'error' && sync.enabled && sync.retryAt > Date.now();
-  $('credential-state').textContent = !sync?.available ? 'Sync unavailable' : opening ? 'Opening sign-in…' : checking ? 'Checking sign-in…' : sync.code === 'credential_superseded' ? 'Updated elsewhere' : retrying ? 'Retry scheduled' : sync.state === 'error' ? 'Needs attention' : ready ? 'Ready for work' : saved ? !fresh ? 'Sign-in saved · status delayed' : r.paused ? 'Sign-in saved · work paused' : r.cooldownUntil ? 'Sign-in saved · cooldown active' : !sync.applied ? 'Sign-in saved · worker reloading' : 'Sign-in saved · checking health' : 'Waiting for sign-in';
+  const stateLabel = !sync?.available ? 'Sync unavailable' : opening ? 'Opening sign-in…' : checking ? 'Checking sign-in…' : awaitingProvider ? 'Complete provider sign-in' : sync.code === 'credential_superseded' ? 'Updated elsewhere' : retrying ? 'Retry scheduled' : sync.state === 'error' ? 'Needs attention' : ready ? 'Ready for work' : saved ? !fresh ? 'Sign-in saved · status delayed' : r.paused ? 'Sign-in saved · work paused' : r.cooldownUntil ? 'Sign-in saved · cooldown active' : !sync.applied ? 'Sign-in saved · worker reloading' : 'Sign-in saved · checking health' : 'Waiting for sign-in';
+  if ($('credential-state').textContent !== stateLabel) $('credential-state').textContent = stateLabel;
   $('credential-state').className = sync?.state === 'error' ? 'error' : ready ? 'running' : 'muted';
-  $('credential-guidance').textContent = !sync?.available ? 'Terminal credential sync is not configured on this controller.' : sync.code ? credentialMessages[sync.code] || 'Check the saved sign-in and try again.' : ready ? 'The serving worker has loaded this login and has eligible capacity. Done closes setup; your apps and shard keep running.' : saved ? r.paused ? 'Your login is saved. The manual traffic hold remains in place. Resume new work when you are ready; Done keeps the hold.' : !fresh ? 'The login is saved, but current serving status is unconfirmed. Wait for fresh health before treating setup as ready.' : 'The login is saved. Watch shard health while the worker reloads or finishes its recovery checks. Your desktop stays open.' : 'Choose Sign in and complete the linked account’s login in this desktop’s Chrome.';
+  $('credential-guidance').textContent = !sync?.available ? 'Terminal credential sync is not configured on this controller.' : awaitingProvider ? 'Use the code and provider page below. This desktop stays open while you finish.' : sync.code ? credentialMessages[sync.code] || 'Check the saved sign-in and try again.' : ready ? 'The serving worker has loaded this login and has eligible capacity. Done closes setup; your apps and shard keep running.' : saved ? r.paused ? 'Your login is saved. The manual traffic hold remains in place. Resume new work when you are ready; Done keeps the hold.' : !fresh ? 'The login is saved, but current serving status is unconfirmed. Wait for fresh health before treating setup as ready.' : 'The login is saved. Watch shard health while the worker reloads or finishes its recovery checks. Your desktop stays open.' : 'Choose Sign in and complete the linked account’s login in this desktop’s Chrome.';
   $('credential-observed').textContent = `${sync?.source ? (sync.source === 'codex' ? 'Codex login. ' : 'Manual setup. ') : ''}${sync?.checkedAt ? `Checked ${eventTime(sync.checkedAt)}${sync.syncedAt ? ' · refreshed ' + eventTime(sync.syncedAt) : ''}. ` : ''}${!sync?.enabled ? 'Automatic sync is off. Use Check now to apply a saved login.' : !['running', 'unhealthy'].includes(d.state) ? 'Automatic checks resume when this desktop starts.' : retrying ? `Next retry ${eventTime(sync.retryAt)}. Check now retries immediately.` : saved ? 'New logins are detected automatically; saved logins are rechecked every minute.' : 'New saved logins are detected automatically. Check now rechecks this login.'}`;
-  $('credential-signin').disabled = pending || !sync?.available || !d.canConnect || !!failure;
+  $('credential-signin').disabled = pending || !sync?.available || !d.canConnect || !!failure || ['starting', 'waiting'].includes(d.login?.state);
   $('credential-signin').textContent = opening ? 'Opening…' : saved ? 'Sign in again' : 'Sign in';
   $('credential-done').hidden = !(saved && (ready || fresh && r.paused));
   $('credential-done').disabled = pending;
@@ -417,14 +432,54 @@ async function credentialAction(toggle) {
 }
 $('credential-check').onclick = () => void credentialAction(false);
 $('credential-auto').onclick = () => void credentialAction(true);
-$('credential-signin').onclick = async () => {
+async function openSignIn(method) {
   const d = current(); if (!d?.relayId || credentialPending.has(d.id)) return;
   const id = d.id; credentialPending.set(id, 'signin'); workspaceErrors.delete(id); renderRelationship();
   try {
-    await api(`${id}/signin`, { shardId: d.relayId });
-    if (selected === id) { toggleRelationship(false); rfb?.focus(); }
-    tell('Sign-in window opened. Complete the account login in this desktop’s Chrome, then inspect the shard for verification.');
+    await api(`${id}/signin`, { shardId: d.relayId, method });
+    if (method === 'browser') {
+      if (selected === id) { toggleRelationship(false); rfb?.focus(); }
+      tell('Sign-in window opened. Complete the account login in this desktop’s Chrome, then inspect the shard for verification.');
+    } else tell('Device sign-in opened. Its code will appear here when the provider responds.');
   } catch (error) { workspaceErrors.set(id, error.message); }
   finally { credentialPending.delete(id); await refresh(); render(); }
+}
+$('credential-signin').onclick = () => void openSignIn('browser');
+$('credential-device').onclick = () => void openSignIn('device');
+function renderDeviceLogin(d) {
+  const login = d.login || {}, active = ['starting', 'waiting'].includes(login.state), waiting = login.state === 'waiting' && login.expiresAt > Date.now();
+  $('credential-device').hidden = !login.available;
+  $('credential-device').disabled = active || credentialPending.has(d.id) || d.credentialSync?.busy || !d.canConnect || !!failure;
+  $('credential-match').hidden = !d.credentialSync?.canMatch || d.credentialSync?.code !== 'credential_account_mismatch';
+  $('credential-match').disabled = credentialPending.has(d.id) || !d.canConnect || !!failure;
+  $('device-challenge').hidden = !waiting;
+  $('device-cancel').hidden = !active;
+  $('device-code').value = waiting ? login.userCode : '';
+  const messages = { idle: '', starting: 'Requesting a sign-in code…', waiting: waiting ? `Waiting for you · code expires by ${eventTime(login.expiresAt)}.` : 'This code expired. Start a new sign-in.', saved: 'Provider sign-in finished. Follow the verification status above.', failed: 'Device sign-in did not finish. Close any existing sign-in window and retry, or use Sign in to continue in the desktop’s Chrome. Your provider may require device-code login to be enabled.', cancelled: 'Device sign-in cancelled. Saved credentials and current work are unchanged.', expired: 'The sign-in attempt ended or expired. Start again for a new code.', unavailable: 'Device sign-in status is unavailable. Refresh, or use the desktop’s Chrome.' };
+  const message = login.available ? messages[login.state] || '' : '';
+  if ($('device-status').textContent !== message) $('device-status').textContent = message;
+}
+$('device-copy').onclick = async () => {
+  const code = $('device-code');
+  if ($('device-challenge').hidden) return;
+  try { await navigator.clipboard.writeText(code.value); tell('Sign-in code copied.'); }
+  catch { code.focus(); code.select(); tell('Copy the selected sign-in code.'); }
+};
+$('device-cancel').onclick = async () => {
+  const d = current(); if (!d?.relayId) return;
+  try { await api(`${d.id}/signin-cancel`, { shardId: d.relayId }); tell('Cancellation requested.'); await refresh(); }
+  catch (error) { workspaceErrors.set(d.id, error.message); render(); }
+};
+$('credential-match').onclick = async () => {
+  const d = current(); if (!d || credentialPending.has(d.id)) return;
+  credentialPending.set(d.id, 'match'); renderRelationship();
+  try {
+    const result = await api(`${d.id}/credential-match`, { shardId: d.relayId || null });
+    if (selected !== d.id) return;
+    $('link-editor').open = true; $('shard-link').value = result.shardId;
+    linkMessages.set(d.id, 'Matching shard selected. Review it, then choose Save link. The current link has not changed.');
+    renderRelationship(); $('shard-link').focus();
+  } catch (error) { workspaceErrors.set(d.id, credentialMessages[error.code] || error.message); }
+  finally { credentialPending.delete(d.id); render(); }
 };
 $('credential-done').onclick = () => { toggleRelationship(false); $('relationship-toggle').focus(); tell('Setup closed. Desktop apps and shard traffic are unchanged.'); };

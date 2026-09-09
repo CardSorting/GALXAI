@@ -6,7 +6,9 @@ import { Duplex } from 'node:stream';
 import { RequestError } from './request-policy.js';
 import { createHash, randomUUID } from 'node:crypto';
 import { DesktopCredentialError, parseDesktopCredential, type DesktopCredentialFile, type CredentialSource } from './desktop-credentials.js';
-import type { RefreshDesktopCredential } from './desktop-credential-refresh.js';
+import type { RefreshDesktopCredential, MatchDesktopCredential } from './desktop-credential-refresh.js';
+import { saveDesktopJournal } from './desktop-journal.js';
+import { desktopLoginState, type DesktopLoginState } from './desktop-login-state.js';
 
 interface DesktopActivity {
   id: string; sequence: number; desktopId: string; name: string; action: string;
@@ -19,6 +21,7 @@ export interface DesktopRecord {
   desired: 'running' | 'stopped'; error?: string;
   credentialSync?: boolean;
   syncedFingerprint?: string;
+  credentialIntent?: { fingerprint: string; expectedRevision: string };
 }
 export interface DesktopContainer { id: string; containerId: string; running: boolean; healthy: boolean; unhealthy?: boolean; }
 export interface DesktopDriver {
@@ -28,10 +31,11 @@ export interface DesktopDriver {
   start(id: string): Promise<void>;
   stop(id: string): Promise<void>;
   destroy(id: string): Promise<void>;
-  launch(id: string, app: 'terminal' | 'chrome' | 'signin'): Promise<void>;
+  launch(id: string, app: 'terminal' | 'chrome' | 'signin' | 'signin-device' | 'signin-cancel'): Promise<void>;
   display(id: string, containerId: string): Promise<Duplex>;
   clipboard(id: string, text?: string): Promise<string>;
   credentials?(id: string): Promise<DesktopCredentialFile[]>;
+  loginStatus?(id: string): Promise<unknown>;
 }
 export const desktopId = (value: unknown): value is string => typeof value === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(value);
 const execute = promisify(execFile);
@@ -54,6 +58,10 @@ export class DockerDesktopDriver implements DesktopDriver {
     const result = JSON.parse(raw);
     if (!Array.isArray(result) || result.length > 2) throw new DesktopCredentialError('credential_invalid');
     return result;
+  }
+  async loginStatus(id: string): Promise<unknown> {
+    const program = fs.readFileSync(new URL('./desktop/read-login-state.py', import.meta.url), 'utf8');
+    return JSON.parse(await this.docker(['exec', '--user', '1000:1000', this.name(id), 'python3', '-c', program], 5000));
   }
   async list(): Promise<DesktopContainer[]> {
     const ids = (await this.docker(['ps', '-a', '--filter', `label=io.galx.desktop.namespace=${this.namespace}`, '--format', '{{.ID}}'])).split('\n').filter(Boolean);
@@ -105,8 +113,8 @@ export class DockerDesktopDriver implements DesktopDriver {
       await this.docker([type, 'rm', name + namePart]);
     }
   }
-  async launch(id: string, app: 'terminal' | 'chrome' | 'signin') {
-    if (!['terminal', 'chrome', 'signin'].includes(app)) throw new RequestError(400, 'invalid_app', 'Choose a supported desktop action.');
+  async launch(id: string, app: 'terminal' | 'chrome' | 'signin' | 'signin-device' | 'signin-cancel') {
+    if (!['terminal', 'chrome', 'signin', 'signin-device', 'signin-cancel'].includes(app)) throw new RequestError(400, 'invalid_app', 'Choose a supported desktop action.');
     const c = await this.owned(id); if (!c.running) throw new RequestError(409, 'desktop_stopped', 'Start this desktop first.');
     await this.docker(['exec', '--user', '1000:1000', c.containerId, '/opt/galx-desktop/open-app', app]);
   }
@@ -158,6 +166,7 @@ export class DesktopManager {
   private readonly credentialJobs = new Map<string, Promise<void>>();
   private readonly credentialJobKinds = new Map<string, 'signin' | 'check'>();
   private readonly ioJobs = new Map<string, { desktopId: string; key: string; promise: Promise<unknown> }>();
+  private readonly loginStates = new Map<string, DesktopLoginState>();
   private readonly credentialStates = new Map<string, { state: 'waiting' | 'checking' | 'updated' | 'current' | 'error'; checkedAt?: number; syncedAt?: number; source?: CredentialSource; code?: string }>();
   private readonly credentialAttempts = new Map<string, { fingerprint: string; retryAt: number; failures?: number }>();
   private readonly credentialRevisions = new Map<string, string>();
@@ -174,24 +183,33 @@ export class DesktopManager {
   readonly maxRunning = 3;
   readonly maxDesktops = 12;
   constructor(private readonly file: string, readonly driver: DesktopDriver, private readonly now = Date.now,
-    private readonly refreshCredential?: RefreshDesktopCredential) {
+    private readonly refreshCredential?: RefreshDesktopCredential, private readonly matchCredential?: MatchDesktopCredential) {
     this.activityStartedAt = now();
     fs.mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 });
     try {
       if (fs.existsSync(file)) {
         const rows = JSON.parse(fs.readFileSync(file, 'utf8'));
         if (!Array.isArray(rows) || rows.length > this.maxDesktops || rows.some(r => !desktopId(r.id) || typeof r.name !== 'string' || r.name.length > 64 || !['running', 'stopped'].includes(r.desired) || !Number.isFinite(r.createdAt) || !Number.isFinite(r.updatedAt)
-          || (r.credentialSync !== undefined && typeof r.credentialSync !== 'boolean') || (r.syncedFingerprint !== undefined && !/^[a-f0-9]{64}$/.test(r.syncedFingerprint))) || new Set(rows.map(r => r.id)).size !== rows.length) throw new Error('Invalid journal');
-        this.records = new Map(rows.map(r => [r.id, { id: r.id, name: r.name, relayId: typeof r.relayId === 'string' ? r.relayId : undefined, credentialSync: r.credentialSync !== false, syncedFingerprint: r.syncedFingerprint, desired: r.desired, createdAt: r.createdAt, updatedAt: r.updatedAt, error: r.error ? 'desktop_operation_failed' : undefined }]));
+          || (r.credentialSync !== undefined && typeof r.credentialSync !== 'boolean') || (r.syncedFingerprint !== undefined && !/^[a-f0-9]{64}$/.test(r.syncedFingerprint))
+          || (r.credentialIntent !== undefined && (!r.credentialIntent || typeof r.credentialIntent !== 'object' || Object.keys(r.credentialIntent).length !== 2 || !/^[a-f0-9]{64}$/.test(r.credentialIntent.fingerprint) || !/^[a-f0-9]{64}$/.test(r.credentialIntent.expectedRevision)))) || new Set(rows.map(r => r.id)).size !== rows.length) throw new Error('Invalid journal');
+        this.records = new Map(rows.map(r => [r.id, { id: r.id, name: r.name, relayId: typeof r.relayId === 'string' ? r.relayId : undefined, credentialSync: r.credentialSync !== false, syncedFingerprint: r.syncedFingerprint, credentialIntent: r.credentialIntent, desired: r.desired, createdAt: r.createdAt, updatedAt: r.updatedAt, error: r.error ? 'desktop_operation_failed' : undefined }]));
       }
     } catch { this.corrupt = true; }
   }
-  private save() { const temporary = this.file + '.tmp'; fs.writeFileSync(temporary, JSON.stringify([...this.records.values()]), { mode: 0o600 }); fs.renameSync(temporary, this.file); }
+  private save() { saveDesktopJournal(this.file, [...this.records.values()]); }
   refresh(force = false): Promise<void> {
     if (!force && this.now() - this.refreshedAt < 3000) return Promise.resolve();
     if (this.refreshing) return this.refreshing;
     return this.refreshing ??= (async () => {
-      try { const [containers, ready] = await Promise.all([this.driver.list(), this.driver.available()]); this.containers = new Map(containers.map(c => [c.id, c])); this.ready = ready; this.inventoryError = false; }
+      try {
+        const [containers, ready] = await Promise.all([this.driver.list(), this.driver.available()]);
+        this.containers = new Map(containers.map(c => [c.id, c])); this.ready = ready; this.inventoryError = false;
+        if (this.driver.loginStatus) await Promise.all([...this.records.keys()].map(async id => {
+          if (!this.containers.get(id)?.running) { this.loginStates.delete(id); return; }
+          try { this.loginStates.set(id, desktopLoginState(await this.driver.loginStatus!(id), this.now())); }
+          catch { this.loginStates.set(id, { state: 'unavailable' }); }
+        }));
+      }
       catch { this.inventoryError = true; }
       finally { this.refreshedAt = this.now(); }
     })().finally(() => { this.refreshing = undefined; });
@@ -209,9 +227,11 @@ export class DesktopManager {
         const c = this.containers.get(r.id), operation = this.operations.get(r.id);
         return { id: r.id, name: r.name, relayId: r.relayId, createdAt: r.createdAt, updatedAt: r.updatedAt,
           ioBusy: this.hasInput(r.id), busyApps: ['terminal', 'chrome'].filter(app => this.ioJobs.has(r.id + ':launch-' + app)),
+          login: { available: !!this.driver.loginStatus, ...(this.loginStates.get(r.id) ?? { state: 'idle' as const }) },
           state: operation ? operation.phase === 'queued' ? 'queued' : operation.action : (this.inventoryError ? 'unknown' : c?.running ? c.healthy ? 'running' : c.unhealthy ? 'unhealthy' : 'starting' : c ? 'stopped' : r.error ? 'error' : 'missing'),
           operation: operation ? { action: operation.action, phase: operation.phase, enqueuedAt: operation.enqueuedAt, startedAt: operation.startedAt } : undefined,
           credentialSync: { enabled: r.credentialSync !== false, available: !!this.refreshCredential && !!this.driver.credentials,
+            canMatch: !!this.matchCredential,
             applied: !!r.relayId && !!this.credentialRevisions.get(r.id) && applied(r.relayId, this.credentialRevisions.get(r.id)!),
             operation: this.credentialJobKinds.get(r.id),
             retryAt: Number.isFinite(this.credentialAttempts.get(r.id)?.retryAt) && (this.credentialAttempts.get(r.id)?.retryAt ?? 0) > this.now() ? this.credentialAttempts.get(r.id)!.retryAt : undefined,
@@ -228,7 +248,7 @@ export class DesktopManager {
     if (this.operations.has(id) || this.credentialJobs.has(id)) throw new RequestError(409, 'desktop_busy', 'Wait for this desktop operation to finish before changing its link.');
     if (expectedShardId !== (r.relayId ?? null)) throw new RequestError(409, 'desktop_link_changed', 'This workspace link changed. Refresh before updating it.');
     if (shardId !== null && (typeof shardId !== 'string' || !/^[\w.:-]{1,128}$/.test(shardId))) throw new RequestError(400, 'invalid_shard', 'Select a registered shard.');
-    this.records.set(id, { ...r, relayId: shardId ?? undefined, syncedFingerprint: undefined, updatedAt: this.now() });
+    this.records.set(id, { ...r, relayId: shardId ?? undefined, syncedFingerprint: undefined, credentialIntent: undefined, updatedAt: this.now() });
     try { this.save(); }
     catch { this.records.set(id, r); throw new RequestError(503, 'desktop_journal_unavailable', 'The workspace link could not be saved. Check the journal and retry.'); }
     this.credentialStates.delete(id); this.credentialAttempts.delete(id); this.credentialRevisions.delete(id);
@@ -347,7 +367,7 @@ export class DesktopManager {
   private hasInput(id: string) { return [...this.ioJobs.values()].some(job => job.desktopId === id); }
   private input<T>(id: string, key: string, run: () => Promise<T>): Promise<T> {
     this.accepting(); this.record(id);
-    const slot = id + ':' + (key.startsWith('launch-') ? key : 'clipboard');
+    const slot = id + ':' + (key.startsWith('launch-') || key === 'match-credential' || key === 'cancel-signin' ? key : 'clipboard');
     const existing = this.ioJobs.get(slot);
     if (existing) {
       if (existing.key === key) return existing.promise as Promise<T>;
@@ -363,9 +383,10 @@ export class DesktopManager {
   }
   launch(id: string, app: 'terminal' | 'chrome') { return this.input(id, 'launch-' + app, () => this.driver.launch(id, app)); }
   private accepting() { if (this.credentialClosing) throw new RequestError(503, 'desktops_unavailable', 'The controller is restarting. Reconnect shortly.'); }
-  signIn(id: string, shardId: unknown): Promise<void> {
+  signIn(id: string, shardId: unknown, method: 'browser' | 'device' = 'browser'): Promise<void> {
     this.accepting();
     const r = this.record(id);
+    if (!['browser', 'device'].includes(method)) throw new RequestError(400, 'invalid_signin', 'Choose a supported sign-in method.');
     if (!r.relayId || shardId !== r.relayId) throw new RequestError(409, 'desktop_link_changed', 'Refresh and review the linked shard.');
     if (!this.refreshCredential || !this.driver.credentials) throw new RequestError(503, 'credential_sync_unavailable', 'Terminal sign-in sync is unavailable on this controller.');
     if (this.corrupt || this.inventoryError || this.operations.has(id) || this.credentialJobs.has(id) || this.active + this.credentialJobs.size >= this.maxOperations) throw new RequestError(409, 'desktop_busy', 'Wait for the current desktop operation to finish.');
@@ -375,11 +396,27 @@ export class DesktopManager {
         await this.connection(id);
         this.accepting();
         if (this.records.get(id) !== r) throw new Error('Workspace changed');
-        await this.driver.launch(id, 'signin');
+        await this.driver.launch(id, method === 'device' ? 'signin-device' : 'signin');
         this.updateActivity(event, 'completed');
       } catch { this.updateActivity(event, 'failed', 'desktop_operation_failed'); throw new RequestError(503, 'desktop_operation_failed', 'Sign-in could not open. Refresh and try again.'); }
     })().finally(() => { this.credentialJobs.delete(id); this.credentialJobKinds.delete(id); this.drain(); });
     this.credentialJobs.set(id, job); this.credentialJobKinds.set(id, 'signin'); return job;
+  }
+  cancelSignIn(id: string, shardId: unknown) {
+    const r = this.record(id);
+    if (shardId !== r.relayId) throw new RequestError(409, 'desktop_link_changed', 'Refresh and review the linked shard.');
+    return this.input(id, 'cancel-signin', () => this.driver.launch(id, 'signin-cancel'));
+  }
+  matchSavedCredential(id: string, shardId: unknown): Promise<string> {
+    const r = this.record(id);
+    if (shardId !== (r.relayId ?? null)) throw new RequestError(409, 'desktop_link_changed', 'Refresh and review the linked shard.');
+    if (!this.matchCredential || !this.driver.credentials) throw new RequestError(503, 'credential_sync_unavailable', 'Account matching is unavailable.');
+    return this.input(id, 'match-credential', async () => {
+      const candidate = parseDesktopCredential(await this.driver.credentials!(id), this.now());
+      const matched = await this.matchCredential!(candidate);
+      if (this.records.get(id) !== r) throw new RequestError(409, 'desktop_link_changed', 'Refresh and review the linked shard.');
+      return matched;
+    });
   }
   configureCredentialSync(id: string, shardId: unknown, enabled: unknown) {
     this.accepting();
@@ -435,10 +472,18 @@ export class DesktopManager {
           if (!current()) return false;
           try { const latest = parseDesktopCredential(await this.driver.credentials!(id), this.now()); return current() && latest.fingerprint === candidate.fingerprint; }
           catch { return false; }
-        }, r.syncedFingerprint === candidate.fingerprint);
-        if (r.syncedFingerprint !== candidate.fingerprint) {
-          const previousFingerprint = r.syncedFingerprint; r.syncedFingerprint = candidate.fingerprint;
-          try { this.save(); } catch { r.syncedFingerprint = previousFingerprint; throw new DesktopCredentialError('credential_checkpoint_unavailable'); }
+        }, r.syncedFingerprint === candidate.fingerprint, {
+          expectedRevision: r.credentialIntent?.fingerprint === candidate.fingerprint ? r.credentialIntent.expectedRevision : undefined,
+          prepare: expectedRevision => {
+            const previousIntent = r.credentialIntent;
+            r.credentialIntent = { fingerprint: candidate.fingerprint, expectedRevision };
+            try { this.save(); } catch { r.credentialIntent = previousIntent; throw new DesktopCredentialError('credential_checkpoint_unavailable'); }
+          },
+        });
+        if (r.syncedFingerprint !== candidate.fingerprint || r.credentialIntent) {
+          const previousFingerprint = r.syncedFingerprint, previousIntent = r.credentialIntent;
+          r.syncedFingerprint = candidate.fingerprint; r.credentialIntent = undefined;
+          try { this.save(); } catch { r.syncedFingerprint = previousFingerprint; r.credentialIntent = previousIntent; throw new DesktopCredentialError('credential_checkpoint_unavailable'); }
         }
         this.credentialRevisions.set(id, createHash('sha256').update(JSON.stringify([candidate.accessToken, candidate.accountId])).digest('hex'));
         this.credentialAttempts.set(id, { fingerprint: candidate.fingerprint, retryAt: this.now() + 60000 });

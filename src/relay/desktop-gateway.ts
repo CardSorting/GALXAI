@@ -7,6 +7,7 @@ import WebSocket, { WebSocketServer } from 'ws';
 import { MonitorSessions } from './monitor-sessions.js';
 import { readJsonBody, RequestError } from './request-policy.js';
 import { desktopId, type DesktopManager } from './desktop-manager.js';
+import { DesktopCredentialError } from './desktop-credentials.js';
 import type { RelayFederationLifecycle } from './federation-lifecycle.js';
 
 const headers = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer',
@@ -75,11 +76,23 @@ export class DesktopGateway {
       if (body.relayId !== undefined && !this.relays().some(r => r.id === body.relayId)) throw new RequestError(400, 'invalid_relay', 'Select an existing relay or create an unlinked desktop.');
       const id = await manager.create({ id: body.id, name: body.name, relayId: body.relayId }); this.json(res, { id }, 201); return true;
     }
-    const match = name.match(/^\/api\/desktops\/([a-f0-9-]+)\/(start|stop|delete|launch|clipboard|link|traffic|credential-sync|signin)$/);
+    const match = name.match(/^\/api\/desktops\/([a-f0-9-]+)\/(start|stop|delete|launch|clipboard|link|traffic|credential-sync|signin|signin-cancel|credential-match)$/);
     if (!match || !desktopId(match[1])) throw new RequestError(404, 'desktop_not_found', 'Desktop not found.');
     if (match[2] === 'signin') {
-      if (Object.keys(body).some(key => key !== 'shardId')) throw new RequestError(400, 'invalid_signin', 'Open sign-in for the linked shard.');
-      await manager.signIn(match[1], body.shardId); this.json(res, { opened: true }); return true;
+      if (Object.keys(body).some(key => !['shardId', 'method'].includes(key)) || body.method !== undefined && !['browser', 'device'].includes(body.method)) throw new RequestError(400, 'invalid_signin', 'Open sign-in for the linked shard.');
+      await manager.signIn(match[1], body.shardId, body.method); this.json(res, { opened: true }); return true;
+    }
+    if (match[2] === 'signin-cancel' || match[2] === 'credential-match') {
+      if (Object.keys(body).some(key => key !== 'shardId')) throw new RequestError(400, 'invalid_signin', 'Use the saved sign-in for this workspace.');
+      if (match[2] === 'signin-cancel') { await manager.cancelSignIn(match[1], body.shardId); this.json(res, { requested: true }); }
+      else {
+        try { this.json(res, { shardId: await manager.matchSavedCredential(match[1], body.shardId) }); }
+        catch (error) {
+          if (error instanceof DesktopCredentialError) throw new RequestError(409, error.code, 'The saved login could not be matched. Review the account link.');
+          throw error;
+        }
+      }
+      return true;
     }
     if (match[2] === 'credential-sync') {
       if (Object.keys(body).some(key => !['shardId', 'enabled'].includes(key))) throw new RequestError(400, 'invalid_sync_setting', 'Use the saved terminal sign-in.');
