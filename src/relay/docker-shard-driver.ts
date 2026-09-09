@@ -96,8 +96,22 @@ export class DockerShardDriver implements RelayDriver {
     if (!Array.isArray(body.shards) || body.shards.length !== 1) return {};
     const record = body.shards[0];
     if (record.shardId !== relay.shardId || record.relayId !== relay.id || record.generation !== relay.generation.split('@')[0]) return {};
+    let invalidCredential = body.error === 'invalid_credential';
+    // Older workers restore a rejected credential without restoring discovery's
+    // error. Read their authenticated status before treating them as recoverable.
+    if (!invalidCredential && !body.error && record.health === 'unavailable'
+      && record.lastCapabilityRefreshMs === 0 && Array.isArray(record.models) && record.models.length === 0) {
+      const status = await fetch(`${relay.endpoint}/api/shards`, { headers: { Authorization: `Bearer ${relay.adminKey}` },
+        redirect: 'error', signal: AbortSignal.timeout(3000) });
+      if (status.ok) {
+        const fleet = await readRelayJson(status, 2 * 1024 * 1024);
+        invalidCredential = Array.isArray(fleet.shards) && fleet.shards.length === 1
+          && fleet.shards[0].id === relay.shardId && fleet.shards[0].status === 'disabled'
+          && fleet.shards[0].availabilityReason === 'credential_rejected';
+      } else await status.body?.cancel();
+    }
     // Docker's process start identity fences snapshots across in-place container restarts.
     if ((await this.inspectContainer(relay.id)).generation !== relay.generation) return {};
-    return { record: { ...record, generation: relay.generation }, invalidCredential: body.error === 'invalid_credential' };
+    return { record: { ...record, generation: relay.generation }, invalidCredential };
   }
 }

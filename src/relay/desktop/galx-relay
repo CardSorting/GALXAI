@@ -1,0 +1,87 @@
+#!/usr/bin/python3
+"""A manual relay inside this workspace. A linked administrator workspace may sync saved OAuth credentials through the host."""
+import fcntl, getpass, json, os, pathlib, secrets, signal, subprocess, sys, time, urllib.request, uuid
+os.umask(0o077)
+root = pathlib.Path.home() / '.config/galx-relay'
+root.mkdir(parents=True, exist_ok=True, mode=0o700)
+config_path, pid_path = root / 'config.json', root / 'process.json'
+engine = '/opt/galx-relay/relay.mjs'
+
+def save(file, data):
+    temporary = file.with_suffix('.tmp')
+    temporary.write_text(json.dumps(data, indent=2) + '\n')
+    temporary.chmod(0o600)
+    temporary.replace(file)
+
+def active():
+    try:
+        record = json.loads(pid_path.read_text())
+        process = pathlib.Path('/proc') / str(record['pid'])
+        if engine.encode() not in (process / 'cmdline').read_bytes().split(b'\0'): return None
+        if (process / 'stat').read_text().split(') ', 1)[1].split()[19] != record['started']: return None
+        return record['pid']
+    except (OSError, ValueError, KeyError, IndexError): return None
+
+def main():
+    command = sys.argv[1] if len(sys.argv) == 2 else 'help'
+    if command == 'setup':
+        if active(): sys.exit('Stop the local relay with galx-relay stop before changing its setup.')
+        if not sys.stdin.isatty(): sys.exit('Run setup in the desktop Terminal. Credentials are entered privately.')
+        print('Set up one local relay. If linked and automatic sync is on, the host also verifies and saves this login for the linked shard.')
+        account = input('Account ID: ').strip()
+        token = getpass.getpass('Access token (hidden): ').strip()
+        refresh = getpass.getpass('Refresh token (optional, hidden): ').strip()
+        if not account or not token or len(account) > 256 or len(token) > 32768 or len(refresh) > 32768: sys.exit('An account ID and access token are required.')
+        previous = json.loads(config_path.read_text()) if config_path.exists() else {}
+        save(config_path, {'id': previous.get('id', 'manual_' + uuid.uuid4().hex), 'accountId': account,
+            'accessToken': token, **({'refreshToken': refresh} if refresh else {}), 'apiKey': previous.get('apiKey', secrets.token_hex(32)),
+            'adminKey': previous.get('adminKey', secrets.token_hex(32))})
+        print('Saved privately. Check Terminal sign-in in the desktop page for linked-shard sync status. Run galx-relay start for a separate local relay.')
+    elif command == 'start':
+        if active(): print('Local relay is already running at http://127.0.0.1:3001'); return
+        if not config_path.exists(): sys.exit('Run galx-relay setup first.')
+        config = json.loads(config_path.read_text())
+        env = {k: v for k, v in os.environ.items() if k in ('HOME', 'PATH', 'LANG', 'TZ')}
+        env.update({'NODE_ENV': 'production', 'HOST': '127.0.0.1', 'PORT': '3001', 'RELAY_SHARD_ID': config['id'],
+            'RELAY_ID': 'desktop-' + config['id'], 'RELAY_GENERATION': str(uuid.uuid4()),
+            'RELAY_ASSIGNED_SHARD': json.dumps({k: config[k] for k in ('id', 'accountId', 'accessToken')}),
+            'RELAY_DISCOVER_HOST_CREDENTIALS': 'false', 'RELAY_API_KEYS': config['apiKey'], 'RELAY_ADMIN_API_KEYS': config['adminKey'],
+            'RELAY_STATE_SNAPSHOT_PATH': str(root / 'relay-state.json')})
+        with open(root / 'relay.log', 'ab') as output:
+            child = subprocess.Popen(['node', engine], env=env, cwd=str(pathlib.Path.home() / 'workspace'), stdin=subprocess.DEVNULL,
+                stdout=output, stderr=output, start_new_session=True, close_fds=True)
+        started = (pathlib.Path('/proc') / str(child.pid) / 'stat').read_text().split(') ', 1)[1].split()[19]
+        save(pid_path, {'pid': child.pid, 'started': started})
+        for _ in range(50):
+            if child.poll() is not None: sys.exit('Relay stopped during startup. Run galx-relay logs to inspect it.')
+            try:
+                with urllib.request.urlopen('http://127.0.0.1:3001/health', timeout=.2) as response:
+                    if response.status == 200: print('Local relay running at http://127.0.0.1:3001\nThis address belongs to this desktop. API keys remain in ~/.config/galx-relay/config.json.'); return
+            except OSError: pass
+            time.sleep(.2)
+        sys.exit('Relay is still starting. Run galx-relay status and galx-relay logs.')
+    elif command == 'stop':
+        pid = active()
+        if not pid: print('Local relay is stopped.'); return
+        os.kill(pid, signal.SIGTERM)
+        for _ in range(200):
+            if not active(): print('Local relay stopped. Setup and files are saved.'); return
+            time.sleep(.2)
+        sys.exit('Relay is still finishing work. Check galx-relay status before retrying.')
+    elif command == 'status':
+        print('Local relay: ' + ('running at http://127.0.0.1:3001' if active() else 'stopped'))
+        print('Setup: ' + ('saved in this workspace' if config_path.exists() else 'not configured — run galx-relay setup'))
+    elif command == 'logs':
+        file = root / 'relay.log'
+        if file.exists(): subprocess.run(['tail', '-n', '60', str(file)], check=True)
+        else: print('No relay logs yet.')
+    else:
+        print('galx-relay setup   Enter credentials privately for one local relay\ngalx-relay start   Start inside this desktop\ngalx-relay status  Check local process and setup\ngalx-relay stop    Stop gracefully; keep setup\ngalx-relay logs    Show recent private logs\n\nThis manual relay is separate from the serving fleet. Closing the viewer keeps it running.\nStopping the desktop closes it; run galx-relay start after resuming.')
+
+try:
+    with open(root / 'command.lock', 'w') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        main()
+except BlockingIOError: sys.exit('Another relay command is running. Wait for it to finish.')
+except (OSError, ValueError, KeyError): sys.exit('The local relay operation failed. Check your workspace setup and retry.')
+except KeyboardInterrupt: sys.exit('\nCancelled. No setup was saved.')

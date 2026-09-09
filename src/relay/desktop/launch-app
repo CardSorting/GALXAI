@@ -1,0 +1,17 @@
+#!/bin/bash
+set -euo pipefail
+if [ -f /tmp/desktop-bus ]; then
+  export DBUS_SESSION_BUS_ADDRESS
+  DBUS_SESSION_BUS_ADDRESS=$(cat /tmp/desktop-bus)
+fi
+case "${1:-}" in
+  terminal)
+    exec xfce4-terminal --disable-server --hide-menubar --title="Terminal" --geometry=100x28 --working-directory="$HOME/workspace"
+    ;;
+  chrome)
+    exec google-chrome-stable --no-first-run --no-default-browser-check --disable-dev-shm-usage \
+      --password-store=basic --use-mock-keychain --ozone-platform=x11 \
+      --window-size=1120,700 --window-position=160,64 --new-window "${2:-file:///opt/galx-desktop/welcome.html}"
+    ;;
+  *) exit 2 ;;
+esac

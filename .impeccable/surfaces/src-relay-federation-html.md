@@ -2,33 +2,39 @@
 version: 1
 slug: "src-relay-federation-html"
 primary_target: "src/relay/federation.html"
-related_targets: ["src/relay/federation.js"]
+related_targets: ["src/relay/federation.js", "src/relay/monitor-login.html", "src/relay/monitor-login.js"]
 ---
 
-# Relay federation model availability
+# Relay operations monitor
 
-## Scope and visitor mode
+## Scope and mode
 
-Operate. This standalone relay administrator surface extends the incumbent GALX dark operator interface. PRODUCT.md and DESIGN.md remain the product and visual authorities; this brief records only the federation surface.
+Operate. A private, local administrator surface using GALX's existing dark operator palette and compact tables. PRODUCT.md and DESIGN.md remain the product and visual authorities. The user requested familiar monitoring patterns and explanations of actual fleet and request behavior.
 
-## Audience, job, and action
+## Primary task and hierarchy
 
-An engineering operator connects with an administrator key, finds an exact model with limited eligible shard redundancy, and selects that model to inspect its owning shards. Model pools lead; shard inventory follows. Search matches model names or shard IDs, and the inventory additionally matches relay IDs.
+Open from the host CLI without entering an API key. Within the first viewport, determine whether new work can be accepted, how many workers are actually running, why rejected credentials remain offline, and whether telemetry is complete. Investigate through Events, Requests and Workers tabs.
 
-## Built content and behavior
+The summary distinguishes admission availability, worker occupancy (which can include background checks), retained request counts, failed executions and completed-execution median duration. Figures come from observed data and declare coverage; HTTP 202 is acceptance, never execution completion. The Workers tab count is running workers; its table also explicitly includes offline credential states.
 
-- Model rows show eligible shard count and the supplied HEALTHY, FRAGILE, or UNAVAILABLE state. One eligible shard is fragile; zero is unavailable.
-- Selecting a model reveals its eligible count, redundancy, and each reporting shard's capability state, relay health, active streams/capacity, and evidence age with Fresh or Expired text. If the selected model disappears from a newer snapshot, its former detail is replaced with an explicit message.
-- Shard inventory keeps capability lifecycle, relay health, active streams/capacity, and inventory age in separate columns. Health stays textual and does not inherit capability-state coloring.
-- The key lives in page memory and the password field clears after connection. Disconnect clears the key and displayed snapshot. Refresh runs every ten seconds while the page is visible; a manual refresh control is available after connecting.
-- Registry staleness announces that new admissions are paused. Fetch failures identify the failure and explicitly mark retained values as the last snapshot. Initial and empty model states explain whether no snapshot, no inventory, or no filter matches exist.
+## Interactions and evidence
 
-## Direction and inherited design
+- Events are newest-first timestamped markers with stable codes, severity, category, exact IDs, plain explanations and next steps. Fleet decisions include start/adoption, capability changes, persisted credential rejections, retries, drains, removal and telemetry outage/recovery. Unchanged heartbeats do not create events.
+- Requests show current or last observed phase, outcome, attempts, first output and a common-scale phase timeline. A linked HTTP-response event opens the corresponding worker trace. Stale running traces are unconfirmed, never silently marked finished. Timeline precedes collapsible identifiers; expanded details, focus and selection survive refresh.
+- Worker details explain readiness, rejection, cooldown, retry and model-specific evidence. Model availability remains available beneath the worker table; model filtering includes unavailable reported models.
+- Time windows, search, outcome/category filters, Clear filters, JSON export and per-record copy/export are native controls. Pause freezes data and the time window. Manual refresh works while paused. `/` focuses search, Escape closes detail, arrow/Home/End keys navigate tabs.
+- Desktop uses a list with adjacent details. Mobile puts selected details before the list and uses full-width search, readable selectors, bounded table scrolling and 44px-high controls. No full-page horizontal overflow at tested widths from 320 to 1440px.
+- Background collection is independent of browser polling, single-flight and bounded. The UI refreshes every three seconds while visible, labels collection gaps, and preserves the last snapshot on network failure. An empty retained window never claims zero historical traffic.
 
-The memorable interaction is model-to-shard inspection beside the model list: exact-model redundancy is legible independently of relay health. Compact dark tables, restrained semantic colors, muted supporting text, visible keyboard focus, and tabular numeric values continue the operator world. The detail panel is a single bordered surface; no raster assets ship.
+## Access and privacy
 
-The desktop composition pairs the model table and selected-model detail above the shard inventory. Below the implemented 760px breakpoint they stack. The inventory preserves a readable 640px minimum table width inside a horizontally scrollable, keyboard-focusable named region with an explicit scroll hint.
+The host launcher delegates an HttpOnly, read-only, local browser session. Administrator credentials never enter the browser. Sign-in tickets are single-use, short-lived and removed from the URL. Controller restarts expire sessions; `npm run relay:open` reconnects. Disconnect revokes access. Private HTML, JS and telemetry require the server-side session. Anonymous visitors see only the generic launcher screen. Public API credentials do not grant monitor access.
 
-## Evidence and remaining decisions
+Trace DTOs omit prompts, output, credentials, arbitrary provider messages and runtime objects. Events are local in-memory records capped at 500 / one hour and reset with the controller; remembered credential rejections are restored as explicitly labeled restart markers. Up to 500 worker traces are retained for one hour and may predate controller startup. Background capability checks are not request traces.
 
-Built sources: src/relay/federation.html and src/relay/federation.js. Desktop and mobile captures were supplied at /tmp/galx-federation-desktop.png and /tmp/galx-federation-mobile.png. The finish review reported the absent-model detail, health-color separation, and accessible mobile table fixes resolved, with disposition ship for this scope. No unresolved surface-direction decisions. This brief does not establish new global tokens or certify deployment behavior.
+## Verification
+
+114 relay, authorization, recovery, telemetry and public-response tests passed; production build, TypeScript and targeted lint passed. Chrome desktop/mobile checks cover loading, empty, errors, partial/stale data, request timelines, filters, exports, pause, retained session, keyboard navigation and revocation. Axe WCAG A/AA checks passed in overview and request-detail states. A narrow-layout grid overflow, tab-focus navigation issue and invalid metric definition-list markup were corrected during validation. Static detector completed its regex pass with no findings; its optional HTML parser modules were unavailable, so rendered browser checks supplied accessibility/contrast evidence. Private artifacts and the detailed audit are in `.relay/`.
+# Shard repair navigation — 2026-09-09
+
+Worker details now list linked repair desktops and provide a setup path into Relay Desktops. Manual traffic holds have an explicit Work paused state and pause/resume event explanations, distinct from paused monitor updates. The private desktop session controls admission; this monitor remains read-only. Desktop and serving-worker health remain separate. Relationship browser tests verified the monitor-to-desktop round trip; implementation, references and evidence are recorded in `.relay/shard-desktop-audit.md`.

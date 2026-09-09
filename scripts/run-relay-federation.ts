@@ -6,6 +6,10 @@ import { readShardRegistry, decryptRegistryShard, configureRegistryEgressGuard, 
 import { DockerShardDriver } from '../src/relay/docker-shard-driver.js';
 import { RelayFederationLifecycle, type DesiredShard } from '../src/relay/federation-lifecycle.js';
 import { RelayFederationServer } from '../src/relay/federation-server.js';
+import { FileInvalidCredentialStore } from '../src/relay/invalid-credential-store.js';
+import { FileShardMaintenanceStore } from '../src/relay/shard-maintenance-store.js';
+import { DesktopManager, DockerDesktopDriver } from '../src/relay/desktop-manager.js';
+import { createDesktopCredentialRefresh } from '../src/relay/desktop-credential-refresh.js';
 
 // Host controller only. Workers receive one assigned credential and no database or vault keys.
 const namespace = process.env.RELAY_FEDERATION_NAMESPACE || 'vnext-canary';
@@ -49,10 +53,12 @@ try {
     }
     return shards;
   };
-  lifecycle = new RelayFederationLifecycle(read, new DockerShardDriver({ namespace, secret, codexImageToolAlias: process.env.RELAY_CODEX_IMAGE_TOOL_ALIAS === 'true', image: process.env.RELAY_FEDERATION_IMAGE || 'galxai-relay:vnext' }));
+  lifecycle = new RelayFederationLifecycle(read, new DockerShardDriver({ namespace, secret, codexImageToolAlias: process.env.RELAY_CODEX_IMAGE_TOOL_ALIAS === 'true', image: process.env.RELAY_FEDERATION_IMAGE || 'galxai-relay:vnext' }),
+    Date.now, 15000, new FileInvalidCredentialStore(path.join(directory, 'invalid-credentials.json')), new FileShardMaintenanceStore(path.join(directory, 'maintenance.json')));
   server = new RelayFederationServer(lifecycle, { secret, apiKeys: (process.env.RELAY_API_KEYS || '').split(',').filter(Boolean),
     adminKeys: (process.env.RELAY_ADMIN_API_KEYS || '').split(',').filter(Boolean), port: Number(process.env.RELAY_FEDERATION_PORT || 3301),
-    egressSnapshot: getRegistryEgressSnapshot });
+    egressSnapshot: getRegistryEgressSnapshot,
+    desktops: new DesktopManager(path.join(directory, 'desktops.json'), new DockerDesktopDriver(namespace, process.env.RELAY_DESKTOP_IMAGE || 'galxai-relay-desktop:v1'), Date.now, createDesktopCredentialRefresh()) });
   await lifecycle.reconcile();
   if (stopping) throw new Error('Federation startup interrupted');
   await server.start();

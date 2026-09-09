@@ -5,7 +5,7 @@
  */
 
 import readline from 'node:readline';
-import { exec } from 'node:child_process';
+import { openRelayMonitor } from '../../core/relay/open-monitor.js';
 import { GalxRelaySupervisor, RelayStatus } from '../../core/relay/GalxRelaySupervisor.js';
 import { GalxTunnelSupervisor } from '../../core/relay/GalxTunnelSupervisor.js';
 
@@ -155,8 +155,8 @@ export async function runRelayMonitor(): Promise<void> {
       }
 
       if (key.name === 'o') {
-        exec('open http://localhost:3001/health');
-        setBanner('Opened http://localhost:3001/health in default browser', 2500);
+        try { await openRelayMonitor(GalxRelaySupervisor.getActivePort()); setBanner('Opened the HTML monitor', 2500); }
+        catch (error) { setBanner(error instanceof Error ? error.message : 'Could not open the monitor', 5000); }
         drawScreen();
       }
 

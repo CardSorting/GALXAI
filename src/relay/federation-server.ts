@@ -4,11 +4,16 @@ import { createHash, createHmac, timingSafeEqual, randomUUID } from 'node:crypto
 import { pipeline } from 'node:stream/promises';
 import { Readable, Transform } from 'node:stream';
 import { AdmissionReceipts } from './admission-receipts.js';
+import { MonitorSessions } from './monitor-sessions.js';
+import { FederationTelemetry } from './federation-telemetry.js';
+import { safeLabel } from './telemetry.js';
+import { DesktopGateway } from './desktop-gateway.js';
+import type { DesktopManager } from './desktop-manager.js';
 import { readRelayJson, relayRequestHeaders, relayResponseHeaders } from './federation-http-policy.js';
 import { readJsonBody, RequestError, validateModelRequest } from './request-policy.js';
 import type { RelayFederationLifecycle, RelayHandle } from './federation-lifecycle.js';
 
-interface Options { apiKeys: string[]; adminKeys: string[]; secret: string; host?: string; port?: number; drainTimeoutMs?: number; admissionTimeoutMs?: number; transport?: typeof fetch; egressSnapshot?: () => unknown; }
+interface Options { apiKeys: string[]; adminKeys: string[]; secret: string; host?: string; port?: number; drainTimeoutMs?: number; admissionTimeoutMs?: number; transport?: typeof fetch; egressSnapshot?: () => unknown; desktops?: DesktopManager; }
 interface Affinity { shard: string; generation: string; job: string; tenant: string; expires: number; }
 const equal = (a: string, b: string) => Buffer.byteLength(a) === Buffer.byteLength(b) && timingSafeEqual(Buffer.from(a), Buffer.from(b));
 const terminal = (status: string) => ['completed', 'failed', 'cancelled'].includes(status);
@@ -26,20 +31,29 @@ export class RelayFederationServer {
   private readonly shutdown = new AbortController();
   private readonly instanceId = randomUUID();
   private readonly receipts = new AdmissionReceipts();
+  private readonly monitor = new MonitorSessions();
+  private readonly telemetry: FederationTelemetry;
+  private readonly desktops: DesktopGateway;
+  private readonly observations = new WeakMap<IncomingMessage, { startedAt: number; code?: string; model?: string; shardId?: string }>();
   private readonly requests = new WeakMap<IncomingMessage, string>();
   private readonly timer: NodeJS.Timeout;
   constructor(readonly lifecycle: RelayFederationLifecycle, private readonly options: Options) {
     if (!options.apiKeys.length || !options.adminKeys.length || [...options.apiKeys, ...options.adminKeys].some(k => !k.trim()) || options.secret.length < 32) throw new Error('Federation requires inference, admin and signing credentials');
     for (const value of [options.drainTimeoutMs ?? 30000, options.admissionTimeoutMs ?? 15000]) if (!Number.isSafeInteger(value) || value < 1 || value > 360000) throw new Error('Invalid federation timeout');
+    this.telemetry = new FederationTelemetry(lifecycle, options.transport ?? fetch);
+    this.desktops = new DesktopGateway(options.desktops, req => this.authenticate(req, true), () => lifecycle.workspaceShards(),
+      (id, paused, generation) => lifecycle.setMaintenance(id, paused, generation));
     this.server = http.createServer((req, res) => { const requestId = randomUUID(); this.requests.set(req, requestId); res.setHeader('X-Request-Id', requestId); res.setHeader('X-Galx-Idempotency-Scope', this.instanceId); res.setHeader('X-Galx-Idempotency-Ttl', '600'); void this.route(req, res).catch(error => {
       if (res.headersSent) { res.destroy(); return; }
       const e = error instanceof RequestError ? error : new RequestError(502, 'relay_unavailable', 'The selected relay could not complete this request.');
+      const observation = this.observations.get(req); if (observation) observation.code = e.code;
       const uncertain = ['relay_admission_unknown', 'idempotency_scope_changed', 'request_in_progress', 'idempotency_conflict'].includes(e.code);
       const accepted = ['job_transport_unavailable', 'relay_generation_gone', 'result_not_retained'].includes(e.code);
       this.json(res, e.status, { error: { code: e.code, message: e.message, request_id: requestId, execution_state: uncertain ? 'unknown' : accepted ? 'accepted' : 'not_accepted' } },
         e.code === 'request_in_progress' || e.code === 'job_transport_unavailable' ? { 'retry-after': '2', 'x-should-retry': 'true' } : uncertain || accepted ? { 'x-should-retry': 'false' } : {});
     }); });
     this.server.headersTimeout = 15000;
+    this.server.on('upgrade', (req, socket, head) => { void this.desktops.upgrade(req, socket, head); });
     this.server.requestTimeout = 30000;
     this.timer = setInterval(() => { void this.poll(); }, 1000); this.timer.unref();
   }
@@ -131,11 +145,38 @@ export class RelayFederationServer {
     const forwarded = relayRequestHeaders(req.headers);
     const url = new URL(req.url ?? '/', 'http://relay.local');
     const path = url.pathname;
-    if (req.method === 'GET' && ['/federation', '/federation.js'].includes(path)) {
+    if (await this.desktops.route(req, res, url)) return;
+    if (req.method === 'GET' && ['/', '/monitor', '/dashboard'].includes(path)) {
+      res.writeHead(302, { Location: '/federation', 'Cache-Control': 'no-store' }); res.end(); return;
+    }
+    if (path.startsWith('/api/monitor/')) {
+      this.monitor.origin(req);
+      if (path === '/api/monitor/access' && req.method === 'POST') {
+        this.authenticate(req, true);
+        return this.json(res, 200, this.monitor.issue(req));
+      }
+      if (path === '/api/monitor/session' && req.method === 'POST') {
+        const body = await readJsonBody(req, 1024, 3000);
+        return this.json(res, 200, { connected: true }, { 'Set-Cookie': this.monitor.exchange(req, body.ticket) });
+      }
+      if (path === '/api/monitor/session' && req.method === 'DELETE') {
+        return this.json(res, 200, { connected: false }, { 'Set-Cookie': this.monitor.revoke(req) });
+      }
+      if (!this.monitor.authorized(req)) throw new RequestError(401, 'monitor_session_required', 'Open the monitor from the host computer to reconnect.');
+      if (path === '/api/monitor/state' && req.method === 'GET') return this.json(res, 200, this.monitorSnapshot());
+      if (path === '/api/monitor/capabilities' && req.method === 'GET') return this.json(res, 200, this.lifecycle.snapshot());
+      throw new RequestError(404, 'not_found', 'Route not found.');
+    }
+    if (req.method === 'GET' && ['/federation', '/federation.js', '/monitor-login.js'].includes(path)) {
       const script = path.endsWith('.js');
-      const content = await readFile(new URL(script ? './federation.js' : './federation.html', import.meta.url));
+      const connected = this.monitor.authorized(req);
+      if (path === '/federation.js' && !connected) throw new RequestError(401, 'monitor_session_required', 'Open the monitor to reconnect.');
+      const resource = path === '/monitor-login.js' ? './monitor-login.js' : connected
+        ? script ? './federation.js' : './federation.html' : './monitor-login.html';
+      const content = await readFile(new URL(resource, import.meta.url));
       res.writeHead(200, { 'Content-Type': script ? 'text/javascript; charset=utf-8' : 'text/html; charset=utf-8',
-        'Content-Security-Policy': "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'", 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-store' });
+        'Content-Security-Policy': "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'",
+        'Referrer-Policy': 'no-referrer', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-store' });
       res.end(content); return;
     }
     if (req.method === 'GET' && path === '/health') return this.json(res, 200, { status: 'ok' });
@@ -143,6 +184,7 @@ export class RelayFederationServer {
       this.authenticate(req, true);
       if (req.method !== 'GET') throw new RequestError(405, 'method_not_allowed', 'Use GET.');
       if (path === '/api/capabilities') return this.json(res, 200, this.lifecycle.snapshot());
+      if (path === '/api/telemetry') return this.json(res, 200, this.monitorSnapshot());
       if (path === '/api/egress' && this.options.egressSnapshot) return this.json(res, 200, this.options.egressSnapshot());
       if (path === '/health/ready') {
         const ready = !this.draining && this.lifecycle.routable() && this.lifecycle.capabilities.snapshot().models.some(m => m.eligibleShardCount > 0);
@@ -162,8 +204,21 @@ export class RelayFederationServer {
     if (req.method === 'GET' && path === '/v1/models') return this.json(res, 200, { object: 'list', data: this.lifecycle.routable() ? this.lifecycle.capabilities.snapshot().models.filter(m => m.eligibleShardCount && !m.model.startsWith('image:')).map(m => ({ id: m.model, object: 'model', owned_by: 'galx' })) : [] });
     const image = path === '/v1/images/generations';
     if (req.method !== 'POST' || (!image && path !== '/v1/chat/completions')) throw new RequestError(404, 'not_found', 'Route not found.');
+    const observation: { startedAt: number; code?: string; model?: string; shardId?: string } = { startedAt: performance.now() };
+    this.observations.set(req, observation);
+    let reported = false;
+    const report = (closed: boolean) => {
+      if (reported) return; reported = true;
+      const status = res.statusCode;
+      this.lifecycle.activity.record({ category: 'request', level: closed || status >= 500 ? 'error' : status >= 400 ? 'warning' : 'info',
+        code: closed ? 'response_interrupted' : observation.code ?? (status === 202 ? 'request_accepted' : status >= 400 ? 'request_failed' : 'response_completed'),
+        requestId: this.requests.get(req), traceId: safeLabel(res.getHeader('x-galx-trace-id')), model: observation.model, shardId: observation.shardId,
+        httpStatus: closed ? undefined : status, durationMs: Math.max(0, performance.now() - observation.startedAt) });
+    };
+    res.once('finish', () => report(false)); res.once('close', () => report(!res.writableFinished));
     if (this.draining) throw new RequestError(503, 'server_draining', 'New work is paused while accepted requests finish.');
     const body = await readJsonBody(req, 2 * 1024 * 1024, 10000); validateModelRequest(body, image);
+    observation.model = safeLabel(body.model);
     if (this.draining) throw new RequestError(503, 'server_draining', 'New work is paused while accepted requests finish.');
     if (!body.model) throw new RequestError(400, 'model_required', 'Specify the exact requested model.');
     const scope = req.headers['x-galx-idempotency-scope'];
@@ -195,6 +250,7 @@ export class RelayFederationServer {
       const relay = this.lifecycle.handle(selected.shardId);
       if (!relay || relay.generation !== selected.generation) throw new RequestError(503, 'relay_reconciling', 'Relay ownership is changing.');
       const owner = this.owner(relay);
+      observation.shardId = relay.shardId;
       this.reserve(owner);
       let retained = false;
       let acknowledged = false;
@@ -246,15 +302,19 @@ export class RelayFederationServer {
       } finally { if (!retained) this.release(owner); }
     } catch (error) { if (replay && replay.receipt.state === 'pending') this.receipts.forget(replay.id); throw error; }
   }
-  async start() { if (this.draining) throw new Error('Federation already stopped'); await new Promise<void>((resolve, reject) => { this.server.once('error', reject); this.server.listen(this.options.port ?? 3301, this.options.host ?? '127.0.0.1', resolve); }); }
+  private monitorSnapshot() { return { capturedAt: Date.now(), availability: this.lifecycle.snapshot(), fleet: this.lifecycle.monitorState(),
+    desktops: this.options.desktops?.snapshot().desktops.map(d => ({ id: d.id, name: d.name, shardId: d.relayId ?? null })) ?? [],
+    activity: this.lifecycle.activity.snapshot(), telemetry: this.telemetry.snapshot(), admission: { draining: this.draining,
+      pending: [...this.reservations.values()].reduce((a, b) => a + b, 0), trackedJobs: this.jobs.size } }; }
+  async start() { if (this.draining) throw new Error('Federation already stopped'); await new Promise<void>((resolve, reject) => { this.server.once('error', reject); this.server.listen(this.options.port ?? 3301, this.options.host ?? '127.0.0.1', resolve); }); this.telemetry.start(); }
   stop(): Promise<void> {
     if (this.stopping) return this.stopping;
-    this.draining = true; clearInterval(this.timer);
+    this.draining = true; clearInterval(this.timer); void this.telemetry.stop(); const desktopSettled = this.desktops.close();
     this.stopping = new Promise<void>(resolve => {
       const deadline = setTimeout(() => { this.shutdown.abort(); this.server.closeAllConnections(); }, this.options.drainTimeoutMs ?? 30000);
       this.server.close(() => { clearTimeout(deadline); this.shutdown.abort(); for (const hold of this.holds) clearTimeout(hold); this.holds.clear(); this.jobs.clear(); this.reservations.clear(); resolve(); });
       this.server.closeIdleConnections();
-    });
+    }).then(() => desktopSettled);
     return this.stopping;
   }
 }

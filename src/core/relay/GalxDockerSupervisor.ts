@@ -220,12 +220,7 @@ export class GalxDockerSupervisor {
    */
   public static async openDashboard(port?: number): Promise<void> {
     const resolvedPort = port || GalxRelaySupervisor.getActivePort() || 3001;
-    const url = `http://127.0.0.1:${resolvedPort}`;
-    console.log(`[GalxDockerSupervisor] Opening WebApp Control Plane: ${url}`);
-    try {
-      await execAsync(`open "${url}"`);
-    } catch (err: any) {
-      console.warn(`Could not open browser automatically: ${err.message}`);
-    }
+    const { openRelayMonitor } = await import('./open-monitor.js');
+    await openRelayMonitor(resolvedPort);
   }
 }

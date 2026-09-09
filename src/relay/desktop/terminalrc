@@ -1,0 +1,15 @@
+[Configuration]
+FontName=DejaVu Sans Mono 11
+ColorForeground=#e9edf5
+ColorBackground=#11141e
+ColorCursor=#a5b4fc
+ColorUseTheme=FALSE
+BackgroundMode=TERMINAL_BACKGROUND_SOLID
+MiscMenubarDefault=FALSE
+MiscToolbarDefault=FALSE
+MiscAlwaysShowTabs=FALSE
+MiscBell=FALSE
+ScrollingLines=10000
+ScrollingOnOutput=FALSE
+ShortcutsNoMnemonics=TRUE
+TabActivityColor=#a5b4fc

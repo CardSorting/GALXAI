@@ -13,6 +13,7 @@ import { GalxRelayWatchdog } from '../../core/relay/GalxRelayWatchdog.js';
 import { GalxLaunchAgent } from '../../core/relay/GalxLaunchAgent.js';
 import { GalxDockerSupervisor } from '../../core/relay/GalxDockerSupervisor.js';
 import { runRelayMonitor } from './relay-monitor.js';
+import { openRelayMonitor } from '../../core/relay/open-monitor.js';
 
 export async function handleRelayCommand(args: string[]): Promise<void> {
   const subCommand = args[0] || 'status';
@@ -265,6 +266,10 @@ export async function handleRelayCommand(args: string[]): Promise<void> {
       break;
     }
 
+    case 'desktops': {
+      await openRelayMonitor(GalxRelaySupervisor.getActivePort(), { destination: 'desktops' });
+      break;
+    }
     case 'open':
     case 'dashboard': {
       const port = GalxRelaySupervisor.getActivePort();
@@ -286,6 +291,7 @@ export async function handleRelayCommand(args: string[]): Promise<void> {
   $ npx galxai relay health                       Output full JSON health payload
   $ npx galxai relay test                         Run 2-second wire verification smoke test
   $ npx galxai relay open                         Open WebApp Control Plane in browser
+  $ npx galxai relay desktops                     Open isolated Terminal and Chrome desktops
   $ npx galxai relay docker [up|down|build|status|logs|open]  Manage isolated Docker container
   $ npx galxai relay tunnel [start|stop|status]   Manage Cloudflare Tunnel public ingress
   $ npx galxai relay service [install|status]     Install as persistent macOS LaunchAgent

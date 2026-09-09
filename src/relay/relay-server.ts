@@ -1262,7 +1262,12 @@ export class GalxaiRelayServer extends EventEmitter {
 
   private capabilitySnapshot() {
     this.updateCapabilityHealth();
-    return { ...this.capabilities.snapshot(), error: this.capabilityError };
+    // Rejection survives checkpoint recovery and can also originate in inference.
+    // Discovery skips disabled credentials, so its transient error is insufficient.
+    const shards = this.shardsTable.getAll();
+    const rejected = shards.length === 1 && shards[0].status === 'disabled';
+    return { ...this.capabilities.snapshot(), error: rejected ? 'invalid_credential'
+      : this.capabilityError === 'invalid_credential' ? undefined : this.capabilityError };
   }
 
   private rejectModelCapacity(res: http.ServerResponse, model: string): void {

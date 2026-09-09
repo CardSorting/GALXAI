@@ -9,7 +9,10 @@ import { AdmissionReceipts } from '../src/relay/admission-receipts.js';
 const pause = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 async function until(fn:()=>boolean) { for(let i=0;i<200;i++){if(fn())return;await pause(5);}throw Error('Timed out'); }
 async function fixture(handler:(req:http.IncomingMessage,res:http.ServerResponse,body:any)=>void, extra:Record<string,any>={}) {
-  const worker=http.createServer(async(req,res)=>{let body='';for await(const chunk of req)body+=chunk;handler(req,res,body?JSON.parse(body):{});});
+  const worker=http.createServer(async(req,res)=>{
+    if (req.url === '/api/telemetry') { assert.equal(req.headers.authorization, 'Bearer admin'); res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ capturedAt: Date.now(), traces: [] })); return; }
+    let body='';for await(const chunk of req)body+=chunk;handler(req,res,body?JSON.parse(body):{});
+  });
   await new Promise<void>(r=>worker.listen(0,'127.0.0.1',r));
   const record=new CapabilityRegistry();
   let handle:RelayHandle={id:'relay-a',shardId:'a',generation:'one',credentialRevision:'v1',endpoint:`http://127.0.0.1:${(worker.address() as any).port}`,inferenceKey:'internal',adminKey:'admin'};
@@ -53,6 +56,17 @@ test('parent status URLs, retry guidance, API-key compatibility, and task identi
     assert.equal((await fetch(f.base+'/v1/models',{headers:{Authorization:'client'}})).status,401);
     assert.equal((await fetch(f.base+'/v1/models',{headers:{'X-Galx-Api-Key':'client'}})).status,200);
   }finally{await f.close();}
+});
+test('monitor response events correlate trace IDs without treating asynchronous acceptance as completion', async () => {
+  const f = await fixture((_req, res) => answer(res));
+  try {
+    const response = await f.submit(); assert.equal(response.status, 202); await response.json();
+    const snapshot = await (await fetch(f.base + '/api/telemetry', { headers: f.headers('admin') })).json();
+    const events = snapshot.activity.events.filter((e: any) => e.category === 'request');
+    assert.equal(events.length, 1); assert.equal(events[0].code, 'request_accepted');
+    assert.equal(events[0].httpStatus, 202); assert.equal(events[0].traceId, 'trace-1'); assert.equal(events[0].shardId, 'a');
+    assert.equal(events[0].requestId, response.headers.get('x-request-id')); assert.equal(snapshot.telemetry.traces.length, 0);
+  } finally { await f.close(); }
 });
 test('explicit idempotency keys coalesce concurrent submissions and replay accepted jobs across model loss',async()=>{
   let calls=0,finish:()=>void=()=>{};
@@ -132,5 +146,22 @@ test('image keys retain identity when moving from body to the standard header', 
     const repeat = await f.submit({ model: 'A', prompt: 'image' }, { 'Idempotency-Key': 'image-key' }, '/v1/images/generations');
     assert.equal(repeat.status, 200); assert.equal(repeat.headers.get('x-galx-idempotency-hit'), 'true'); await repeat.json();
     assert.equal(calls, 1);
+  } finally { await f.close(); }
+});
+
+test('manual traffic pause preserves accepted job retrieval and idempotent replay without new dispatch', async () => {
+  let submitted = 0;
+  const f = await fixture((req, res) => {
+    if (req.url?.startsWith('/v1/jobs/')) { res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ id: 'job-1', status: 'completed' })); }
+    else { submitted++; answer(res); }
+  });
+  try {
+    const accepted = await f.submit(undefined, { 'Idempotency-Key': 'before-maintenance' }); assert.equal(accepted.status, 202); const job = await accepted.json();
+    f.lifecycle.setMaintenance('a', true, f.handle.generation); await f.lifecycle.reconcile();
+    assert.equal((await f.submit()).status, 503); assert.equal(submitted, 1);
+    const replay = await f.submit(undefined, { 'Idempotency-Key': 'before-maintenance' }); assert.equal(replay.status, 202); assert.equal((await replay.json()).id, job.id); assert.equal(submitted, 1);
+    const result = await fetch(f.base + job.statusUrl, { headers: f.headers() }); assert.equal(result.status, 200); assert.equal((await result.json()).status, 'completed');
+    assert.equal(f.lifecycle.handle('a')!.generation, f.handle.generation);
+    f.lifecycle.setMaintenance('a', false, f.handle.generation); assert.equal((await f.submit()).status, 202); assert.equal(submitted, 2);
   } finally { await f.close(); }
 });

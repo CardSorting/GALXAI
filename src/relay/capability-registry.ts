@@ -46,6 +46,8 @@ export class CapabilityRegistry {
   private readonly byModel = new Map<string, Set<string>>();
   private readonly relayOwners = new Map<string, string>();
   private readonly expectedModels = new Set<string>();
+  private readonly admissionPaused = new Set<string>();
+  setAdmissionPaused(shardId: string, paused: boolean): void { if (paused) this.admissionPaused.add(shardId); else this.admissionPaused.delete(shardId); }
   constructor(private readonly now: () => number = Date.now, readonly ttlMs = 120000, readonly stabilizationMs = 5000) {
     if (!Number.isFinite(ttlMs) || ttlMs < 1000 || ttlMs > 3600000) throw new Error('Capability TTL must be 1s–1h');
   }
@@ -172,7 +174,7 @@ export class CapabilityRegistry {
     return [...(this.byModel.get(model) ?? [])].flatMap(id => {
       const shard = this.shards.get(id)!;
       const capability = shard.models.find(m => m.model === model);
-      return shard.lifecycle === 'HEALTHY' && shard.health === 'healthy' && shard.heartbeatExpiresAtMs > now
+      return !this.admissionPaused.has(id) && shard.lifecycle === 'HEALTHY' && shard.health === 'healthy' && shard.heartbeatExpiresAtMs > now
         && capability?.state === 'AVAILABLE' && capability.expiresAtMs > now
         && (!capability.executionModel || shard.models.some(m => m.model === capability.executionModel && m.state === 'AVAILABLE' && m.expiresAtMs > now)) ? [shard] : [];
     });
