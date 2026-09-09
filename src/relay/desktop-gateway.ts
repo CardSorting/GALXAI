@@ -22,7 +22,8 @@ export class DesktopGateway {
   private readonly timer: NodeJS.Timeout;
   constructor(private readonly manager: DesktopManager | undefined, private readonly admin: (req: IncomingMessage) => unknown,
     private readonly relays: () => ReturnType<RelayFederationLifecycle['workspaceShards']>,
-    private readonly traffic: (id: string, paused: boolean, generation: unknown) => void) {
+    private readonly traffic: (id: string, paused: boolean, generation: unknown) => void,
+    private readonly applied: (id: string, revision: string) => boolean = () => false) {
     this.timer = setInterval(() => {
       for (const [ws, c] of this.clients) if (!this.sessions.authorized(c.req)) { ws.close(1008, 'Session expired'); c.upstream.destroy(); }
       void this.manager?.pollCredentialSync().catch(() => {});
@@ -66,7 +67,7 @@ export class DesktopGateway {
     }
     this.authorized(req);
     const manager = this.management();
-    if (name === '/api/desktops/state' && req.method === 'GET') { await manager.refresh(); this.json(res, { ...manager.snapshot(), relays: this.relays() }); return true; }
+    if (name === '/api/desktops/state' && req.method === 'GET') { await manager.refresh(); this.json(res, { ...manager.snapshot(this.applied), relays: this.relays() }); return true; }
     if (req.method !== 'POST') throw new RequestError(405, 'method_not_allowed', 'Use POST for desktop actions.');
     if (req.headers.origin !== this.sessions.origin(req)) throw new RequestError(403, 'origin_not_allowed', 'Use the desktop page for this action.');
     const body = await readJsonBody(req, /\/clipboard$/.test(name) ? 400000 : 2048, 3000);
@@ -74,8 +75,12 @@ export class DesktopGateway {
       if (body.relayId !== undefined && !this.relays().some(r => r.id === body.relayId)) throw new RequestError(400, 'invalid_relay', 'Select an existing relay or create an unlinked desktop.');
       const id = await manager.create({ id: body.id, name: body.name, relayId: body.relayId }); this.json(res, { id }, 201); return true;
     }
-    const match = name.match(/^\/api\/desktops\/([a-f0-9-]+)\/(start|stop|delete|launch|clipboard|link|traffic|credential-sync)$/);
+    const match = name.match(/^\/api\/desktops\/([a-f0-9-]+)\/(start|stop|delete|launch|clipboard|link|traffic|credential-sync|signin)$/);
     if (!match || !desktopId(match[1])) throw new RequestError(404, 'desktop_not_found', 'Desktop not found.');
+    if (match[2] === 'signin') {
+      if (Object.keys(body).some(key => key !== 'shardId')) throw new RequestError(400, 'invalid_signin', 'Open sign-in for the linked shard.');
+      await manager.signIn(match[1], body.shardId); this.json(res, { opened: true }); return true;
+    }
     if (match[2] === 'credential-sync') {
       if (Object.keys(body).some(key => !['shardId', 'enabled'].includes(key))) throw new RequestError(400, 'invalid_sync_setting', 'Use the saved terminal sign-in.');
       if (body.enabled !== undefined) manager.configureCredentialSync(match[1], body.shardId, body.enabled);

@@ -26,7 +26,7 @@ class Driver implements DesktopDriver {
   async start(id: string) { this.calls.push('start:' + id); if (this.fail === 'start') throw Error('PRIVATE_DAEMON_SECRET'); Object.assign(this.items.get(id)!, { running: true, healthy: true }); }
   async stop(id: string) { this.calls.push('stop:' + id); Object.assign(this.items.get(id)!, { running: false, healthy: false }); }
   async destroy(id: string) { this.calls.push('delete:' + id); if (this.fail === 'delete') throw Error('PRIVATE_DAEMON_SECRET'); this.items.delete(id); }
-  async launch(id: string, app: 'terminal' | 'chrome') { this.calls.push(app + ':' + id); }
+  async launch(id: string, app: 'terminal' | 'chrome' | 'signin') { this.calls.push(app + ':' + id); }
 }
 function fixture(t: any, refresh?: RefreshDesktopCredential) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'desktop-test-')), driver = new Driver(), file = path.join(dir, 'desktops.json');
@@ -333,4 +333,52 @@ test('credential checks require desktop administration, exact origin and linked 
   const raw = await (await fetch(base + '/api/desktops/state', { headers: { cookie } })).text(); assert(!raw.includes('PRIVATE_'));
   assert.equal((await post({ shardId: 'fixture-shard', enabled: false }, { cookie })).status, 200);
   assert.equal(manager.snapshot().desktops[0].credentialSync.enabled, false);
+});
+
+test('repairing a partial login rechecks a previously successful file and only reports the matching loaded credential', async t => {
+  let checks = 0;
+  const { manager, driver } = fixture(t, async () => { checks++; return { outcome: 'current' }; });
+  const id = randomUUID(); await manager.create({ id, name: 'Repair', relayId: 'fixture-shard' });
+  const saved = savedLogin(); driver.credentialFiles = saved;
+  await manager.syncCredential(id, 'fixture-shard', false);
+  assert.equal(manager.snapshot(() => false).desktops[0].credentialSync.applied, false);
+  let revision = '';
+  assert.equal(manager.snapshot((shard, value) => { assert.equal(shard, 'fixture-shard'); revision = value; return true; }).desktops[0].credentialSync.applied, true);
+  assert.match(revision, /^[a-f0-9]{64}$/); assert(!JSON.stringify(manager.snapshot()).includes(revision));
+  driver.credentialFiles = [{ source: 'codex', modifiedAt: Date.now(), data: null }];
+  await manager.syncCredential(id, 'fixture-shard', false); assert.equal(manager.snapshot().desktops[0].credentialSync.state, 'error');
+  driver.credentialFiles = saved; await manager.syncCredential(id, 'fixture-shard', false);
+  assert.equal(checks, 2); assert.equal(manager.snapshot().desktops[0].credentialSync.state, 'current');
+  manager.link(id, 'other-shard', 'fixture-shard'); assert.equal(manager.snapshot(() => true).desktops[0].credentialSync.applied, false);
+});
+
+test('opening sign-in preserves the display, excludes overlapping mutations and settles before shutdown', async t => {
+  const { manager, driver } = fixture(t, async () => ({ outcome: 'current' })), id = randomUUID(); await manager.create({ id, name: 'Repair', relayId: 'fixture-shard' });
+  let release!: () => void, entered!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; }), started = new Promise<void>(resolve => { entered = resolve; });
+  driver.launch = async (_id, app) => { assert.equal(app, 'signin'); entered(); await gate; };
+  const login = manager.signIn(id, 'fixture-shard'); await started;
+  assert(manager.snapshot().desktops[0].canConnect);
+  assert.throws(() => manager.signIn(id, 'fixture-shard'), /finish/);
+  assert.throws(() => manager.action(id, 'stop'), /sign-in check/);
+  let settled = false; const close = manager.settle().then(() => { settled = true; });
+  await new Promise(r => setImmediate(r)); assert(!settled);
+  assert.throws(() => manager.create({ id: randomUUID(), name: 'Too late' }), /restarting/);
+  assert.throws(() => manager.configureCredentialSync(id, 'fixture-shard', false), /restarting/);
+  release(); await login; await close;
+  assert(manager.snapshot().activity.some(e => e.action === 'opening_signin' && e.outcome === 'completed'));
+});
+
+test('sign-in launch requires desktop authority and a fixed linked target, never submitted commands', async t => {
+  const { manager, driver, base, login } = await httpFixture(t, true, async () => ({ outcome: 'current' })), id = randomUUID();
+  await manager.create({ id, name: 'Repair', relayId: 'fixture-shard' });
+  const cookie = await login(), monitor = await login('monitor');
+  const post = (body: object, headers: Record<string, string>) => fetch(base + '/api/desktops/' + id + '/signin', { method: 'POST', headers: { Origin: base, 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body) });
+  for (const headers of [{}, { Authorization: 'Bearer ordinary-user' }, { cookie: monitor }]) assert.equal((await post({ shardId: 'fixture-shard' }, headers)).status, 401);
+  assert.equal((await post({ shardId: 'fixture-shard' }, { cookie, Origin: 'https://evil.example' })).status, 403);
+  assert.equal((await post({ shardId: 'other' }, { cookie })).status, 409);
+  assert.equal((await post({ shardId: 'fixture-shard', command: 'PRIVATE_COMMAND' }, { cookie })).status, 400);
+  assert.equal(driver.calls.filter(c => c.startsWith('signin:')).length, 0);
+  const response = await post({ shardId: 'fixture-shard' }, { cookie }); assert.equal(response.status, 200); assert.deepEqual(await response.json(), { opened: true });
+  assert.equal(driver.calls.filter(c => c.startsWith('signin:')).length, 1);
 });

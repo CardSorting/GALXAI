@@ -5,6 +5,10 @@ if [ -f /tmp/desktop-bus ]; then
   DBUS_SESSION_BUS_ADDRESS=$(cat /tmp/desktop-bus)
 fi
 case "${1:-}" in
+  signin)
+    exec xfce4-terminal --disable-server --hide-menubar --title="GALX Sign in" --role=galx-sign-in \
+      --geometry=100x28 --working-directory="$HOME/workspace" --command="/opt/galx-desktop/galx-relay login"
+    ;;
   terminal)
     exec xfce4-terminal --disable-server --hide-menubar --title="Terminal" --geometry=100x28 --working-directory="$HOME/workspace"
     ;;

@@ -206,6 +206,7 @@
     "relay:logs": "node --import tsx src/cli/index.ts relay logs",
     "relay:open": "node --import tsx src/cli/index.ts relay open",
     "relay:desktops": "node --import tsx src/cli/index.ts relay desktops",
+    "test:relay:desktop-login": "python3 scripts/test-desktop-login.py",
     "relay:desktops:build": "docker build -f Dockerfile.desktop -t galxai-relay-desktop:v1 .",
     "relay:docker:up": "node --import tsx src/cli/index.ts relay docker up",
     "relay:docker:down": "node --import tsx src/cli/index.ts relay docker down",

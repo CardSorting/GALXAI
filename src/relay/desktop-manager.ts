@@ -4,7 +4,7 @@ import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
 import { Duplex } from 'node:stream';
 import { RequestError } from './request-policy.js';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { DesktopCredentialError, parseDesktopCredential, type DesktopCredentialFile, type CredentialSource } from './desktop-credentials.js';
 import type { RefreshDesktopCredential } from './desktop-credential-refresh.js';
 
@@ -27,7 +27,7 @@ export interface DesktopDriver {
   start(id: string): Promise<void>;
   stop(id: string): Promise<void>;
   destroy(id: string): Promise<void>;
-  launch(id: string, app: 'terminal' | 'chrome'): Promise<void>;
+  launch(id: string, app: 'terminal' | 'chrome' | 'signin'): Promise<void>;
   display(id: string, containerId: string): Promise<Duplex>;
   clipboard(id: string, text?: string): Promise<string>;
   credentials?(id: string): Promise<DesktopCredentialFile[]>;
@@ -104,8 +104,8 @@ export class DockerDesktopDriver implements DesktopDriver {
       await this.docker([type, 'rm', name + namePart]);
     }
   }
-  async launch(id: string, app: 'terminal' | 'chrome') {
-    if (!['terminal', 'chrome'].includes(app)) throw new RequestError(400, 'invalid_app', 'Choose Terminal or Chrome.');
+  async launch(id: string, app: 'terminal' | 'chrome' | 'signin') {
+    if (!['terminal', 'chrome', 'signin'].includes(app)) throw new RequestError(400, 'invalid_app', 'Choose a supported desktop action.');
     const c = await this.owned(id); if (!c.running) throw new RequestError(409, 'desktop_stopped', 'Start this desktop first.');
     await this.docker(['exec', '--user', '1000:1000', c.containerId, '/opt/galx-desktop/open-app', app]);
   }
@@ -157,6 +157,7 @@ export class DesktopManager {
   private readonly credentialJobs = new Map<string, Promise<void>>();
   private readonly credentialStates = new Map<string, { state: 'waiting' | 'checking' | 'updated' | 'current' | 'error'; checkedAt?: number; syncedAt?: number; source?: CredentialSource; code?: string }>();
   private readonly credentialAttempts = new Map<string, { fingerprint: string; retryAt: number }>();
+  private readonly credentialRevisions = new Map<string, string>();
   private credentialPollAt = 0;
   private credentialPolling?: Promise<void>;
   private credentialClosing = false;
@@ -191,7 +192,7 @@ export class DesktopManager {
       finally { this.refreshedAt = this.now(); }
     })().finally(() => { this.refreshing = undefined; });
   }
-  snapshot() {
+  snapshot(applied: (shardId: string, revision: string) => boolean = () => false) {
     return { available: this.ready && !this.corrupt && !this.inventoryError, imageReady: this.ready, inventoryFresh: !this.inventoryError && this.refreshedAt > 0 && this.now() - this.refreshedAt < 15000,
       journalHealthy: !this.corrupt, capturedAt: this.refreshedAt, maxRunning: this.maxRunning, maxDesktops: this.maxDesktops,
       runningCount: [...this.containers.values()].filter(c => c.running).length,
@@ -205,6 +206,7 @@ export class DesktopManager {
           state: operation ? operation.phase === 'queued' ? 'queued' : operation.action : (this.inventoryError ? 'unknown' : c?.running ? c.healthy ? 'running' : c.unhealthy ? 'unhealthy' : 'starting' : c ? 'stopped' : r.error ? 'error' : 'missing'),
           operation: operation ? { action: operation.action, phase: operation.phase, enqueuedAt: operation.enqueuedAt, startedAt: operation.startedAt } : undefined,
           credentialSync: { enabled: r.credentialSync !== false, available: !!this.refreshCredential && !!this.driver.credentials,
+            applied: !!r.relayId && !!this.credentialRevisions.get(r.id) && applied(r.relayId, this.credentialRevisions.get(r.id)!),
             ...(this.credentialStates.get(r.id) ?? { state: 'waiting' }), busy: this.credentialJobs.has(r.id) },
           error: r.error, canConnect: !operation && !this.inventoryError && !!c?.running && !!c?.healthy };
       }) };
@@ -212,6 +214,7 @@ export class DesktopManager {
   private record(id: string) { if (!desktopId(id) || !this.records.has(id)) throw new RequestError(404, 'desktop_not_found', 'Desktop not found.'); return this.records.get(id)!; }
   linkedShard(id: string) { return this.record(id).relayId; }
   link(id: string, shardId: unknown, expectedShardId: unknown): void {
+    this.accepting();
     const r = this.record(id);
     if (this.corrupt) throw new RequestError(503, 'desktop_journal_unavailable', 'Desktop records are unavailable. Restore the journal before changing links.');
     if (this.operations.has(id) || this.credentialJobs.has(id)) throw new RequestError(409, 'desktop_busy', 'Wait for this desktop operation to finish before changing its link.');
@@ -220,7 +223,7 @@ export class DesktopManager {
     this.records.set(id, { ...r, relayId: shardId ?? undefined, updatedAt: this.now() });
     try { this.save(); }
     catch { this.records.set(id, r); throw new RequestError(503, 'desktop_journal_unavailable', 'The workspace link could not be saved. Check the journal and retry.'); }
-    this.credentialStates.delete(id); this.credentialAttempts.delete(id);
+    this.credentialStates.delete(id); this.credentialAttempts.delete(id); this.credentialRevisions.delete(id);
     this.updateActivity(this.beginActivity(id, 'linking'), 'completed');
   }
   private beginActivity(id: string, action: string, name?: string): DesktopActivity {
@@ -244,6 +247,7 @@ export class DesktopManager {
     if (code) event.code = code;
   }
   private schedule<T>(id: string, key: string, action: string, run: () => Promise<T>, name?: string): Promise<T> {
+    this.accepting();
     if (this.credentialJobs.has(id)) throw new RequestError(409, 'desktop_busy', 'A sign-in check is in progress. Wait for it to finish.');
     if (this.corrupt) throw new RequestError(503, 'desktop_journal_unavailable', 'Desktop records could not be read. Restore the local desktop journal before making changes.');
     const existing = this.operations.get(id);
@@ -306,7 +310,8 @@ export class DesktopManager {
       if (this.inventoryError) throw new RequestError(503, 'desktop_inventory_unavailable', 'Docker inventory is unavailable. Refresh before making changes.');
       if (action === 'delete') {
         if (confirmation !== r.name) throw new RequestError(400, 'desktop_confirmation_required', 'Type the desktop name to permanently delete it and its files.');
-        await this.perform(id, 'deleting', async () => { await this.driver.destroy(id); this.records.delete(id); this.save(); }); return;
+        await this.perform(id, 'deleting', async () => { await this.driver.destroy(id); this.records.delete(id); this.save();
+          this.credentialStates.delete(id); this.credentialAttempts.delete(id); this.credentialRevisions.delete(id); }); return;
       }
       if (action !== 'start' && action !== 'stop') throw new RequestError(400, 'invalid_desktop_action', 'Unsupported desktop action.');
       if (action === 'start') await this.admit(() => this.capacity(id));
@@ -323,6 +328,7 @@ export class DesktopManager {
     finally { await this.refresh(true); }
   }
   async connection(id: string) {
+    this.accepting();
     this.record(id); await this.refresh(true);
     const c = this.containers.get(id);
     if (this.corrupt || this.inventoryError || this.operations.has(id) || !c?.running || !c.healthy) throw new RequestError(409, 'desktop_not_running', 'Wait for the desktop to finish starting.');
@@ -331,7 +337,27 @@ export class DesktopManager {
   async display(id: string, containerId: string) { return this.driver.display(id, containerId); }
   async clipboard(id: string, text?: string) { await this.connection(id); return this.driver.clipboard(id, text); }
   async launch(id: string, app: 'terminal' | 'chrome') { await this.connection(id); await this.driver.launch(id, app); }
+  private accepting() { if (this.credentialClosing) throw new RequestError(503, 'desktops_unavailable', 'The controller is restarting. Reconnect shortly.'); }
+  signIn(id: string, shardId: unknown): Promise<void> {
+    this.accepting();
+    const r = this.record(id);
+    if (!r.relayId || shardId !== r.relayId) throw new RequestError(409, 'desktop_link_changed', 'Refresh and review the linked shard.');
+    if (!this.refreshCredential || !this.driver.credentials) throw new RequestError(503, 'credential_sync_unavailable', 'Terminal sign-in sync is unavailable on this controller.');
+    if (this.corrupt || this.inventoryError || this.operations.has(id) || this.credentialJobs.has(id) || this.active + this.credentialJobs.size >= this.maxOperations) throw new RequestError(409, 'desktop_busy', 'Wait for the current desktop operation to finish.');
+    const event = this.beginActivity(id, 'opening_signin'); this.updateActivity(event, 'running');
+    const job = (async () => {
+      try {
+        await this.connection(id);
+        this.accepting();
+        if (this.records.get(id) !== r) throw new Error('Workspace changed');
+        await this.driver.launch(id, 'signin');
+        this.updateActivity(event, 'completed');
+      } catch { this.updateActivity(event, 'failed', 'desktop_operation_failed'); throw new RequestError(503, 'desktop_operation_failed', 'Sign-in could not open. Refresh and try again.'); }
+    })().finally(() => { this.credentialJobs.delete(id); this.drain(); });
+    this.credentialJobs.set(id, job); return job;
+  }
   configureCredentialSync(id: string, shardId: unknown, enabled: unknown) {
+    this.accepting();
     const r = this.record(id);
     if (!r.relayId || shardId !== r.relayId) throw new RequestError(409, 'desktop_link_changed', 'Refresh and review the linked shard.');
     if (typeof enabled !== 'boolean') throw new RequestError(400, 'invalid_sync_setting', 'Choose whether to sync terminal sign-ins.');
@@ -366,8 +392,10 @@ export class DesktopManager {
     const current = () => !this.credentialClosing && this.records.get(id) === r && this.containers.get(id)?.running === true;
     const job = (async () => {
       const previous = this.credentialStates.get(id); let event: DesktopActivity | undefined;
+      let parsed = false;
       try {
         const candidate = parseDesktopCredential(await this.driver.credentials!(id), this.now());
+        parsed = true;
         const attempt = this.credentialAttempts.get(id);
         if (!force && attempt?.fingerprint === candidate.fingerprint && this.now() < attempt.retryAt) return;
         if (!current()) throw new DesktopCredentialError('credential_conflict');
@@ -375,11 +403,13 @@ export class DesktopManager {
         this.credentialStates.set(id, { ...previous, state: 'checking', code: undefined, source: candidate.source });
         event = this.beginActivity(id, 'refreshing_credentials'); this.updateActivity(event, 'running');
         const result = await this.refreshCredential!(r.relayId!, candidate, current);
+        this.credentialRevisions.set(id, createHash('sha256').update(JSON.stringify([candidate.accessToken, candidate.accountId])).digest('hex'));
         this.credentialAttempts.set(id, { fingerprint: candidate.fingerprint, retryAt: Infinity });
         this.credentialStates.set(id, { state: result.outcome, checkedAt: this.now(), source: candidate.source,
           syncedAt: result.outcome === 'updated' ? this.now() : previous?.syncedAt });
         this.updateActivity(event, 'completed');
       } catch (error) {
+        if (!parsed) this.credentialAttempts.delete(id);
         const code = error instanceof DesktopCredentialError ? error.code : 'credential_check_unavailable';
         const attempt = this.credentialAttempts.get(id);
         if (attempt && !['credential_conflict', 'credential_registry_unavailable', 'credential_check_unavailable'].includes(code)) attempt.retryAt = Infinity;

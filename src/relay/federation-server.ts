@@ -42,7 +42,8 @@ export class RelayFederationServer {
     for (const value of [options.drainTimeoutMs ?? 30000, options.admissionTimeoutMs ?? 15000]) if (!Number.isSafeInteger(value) || value < 1 || value > 360000) throw new Error('Invalid federation timeout');
     this.telemetry = new FederationTelemetry(lifecycle, options.transport ?? fetch);
     this.desktops = new DesktopGateway(options.desktops, req => this.authenticate(req, true), () => lifecycle.workspaceShards(),
-      (id, paused, generation) => lifecycle.setMaintenance(id, paused, generation));
+      (id, paused, generation) => lifecycle.setMaintenance(id, paused, generation),
+      (id, revision) => lifecycle.monitorHandles().some(h => h.shardId === id && h.credentialRevision === revision));
     this.server = http.createServer((req, res) => { const requestId = randomUUID(); this.requests.set(req, requestId); res.setHeader('X-Request-Id', requestId); res.setHeader('X-Galx-Idempotency-Scope', this.instanceId); res.setHeader('X-Galx-Idempotency-Ttl', '600'); void this.route(req, res).catch(error => {
       if (res.headersSent) { res.destroy(); return; }
       const e = error instanceof RequestError ? error : new RequestError(502, 'relay_unavailable', 'The selected relay could not complete this request.');

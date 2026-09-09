@@ -91,9 +91,9 @@ function renderLibrary() {
 function renderControls() {
   const d = current(), acting = !!d && pendingActions.has(d.id), busy = !!d?.operation || acting || !!d && ['starting', 'creating', 'stopping', 'deleting', 'queued'].includes(d.state);
   $('toolstrip').hidden = !d?.canConnect; $('desktop-state').hidden = !d;
-  $('stop-desktop').hidden = !d || !['running', 'starting', 'unhealthy'].includes(d.state); $('stop-desktop').disabled = busy || !snapshot?.inventoryFresh;
+  $('stop-desktop').hidden = !d || !['running', 'starting', 'unhealthy'].includes(d.state); $('stop-desktop').disabled = busy || !!d?.credentialSync?.busy || !snapshot?.inventoryFresh;
   $('start-desktop').hidden = !d || !['stopped', 'error', 'missing'].includes(d.state); $('start-desktop').disabled = busy || !snapshot?.available;
-  $('delete-desktop').hidden = !d; $('delete-desktop').disabled = busy || !snapshot?.inventoryFresh;
+  $('delete-desktop').hidden = !d; $('delete-desktop').disabled = busy || !!d?.credentialSync?.busy || !snapshot?.inventoryFresh;
   for (const id of ['launch-terminal', 'launch-chrome', 'keyboard', 'clipboard', 'fit', 'fullscreen']) $(id).disabled = !connected || acting;
   $('create-submit').disabled = creating || !snapshot?.available || snapshot.runningCount + (snapshot.reservedCount || 0) >= snapshot.maxRunning || snapshot.desktops.length >= snapshot.maxDesktops;
   $('new-desktop').disabled = creating; $('empty-action').disabled = acting || !!d?.operation;
@@ -371,7 +371,7 @@ $('confirm-traffic').onclick = async () => {
 };
 
 
-const credentialPending = new Set();
+const credentialPending = new Map();
 const credentialMessages = {
   credential_missing: 'No saved sign-in yet. Sign in to the linked account in this desktop’s Terminal.',
   credential_invalid: 'The saved sign-in is incomplete or unsupported. Complete an OAuth login, then check again.',
@@ -379,8 +379,8 @@ const credentialMessages = {
   credential_account_mismatch: 'This login belongs to a different account. Sign in to the account already assigned to the linked shard.',
   credential_older: 'The registry already has a newer login. Complete a fresh sign-in before trying again.',
   credential_rejected: 'The provider rejected this login. Sign in again; the serving credential has been kept.',
-  credential_check_unavailable: 'The login could not be verified. Automatic sync will retry; you can also check now.',
-  credential_registry_unavailable: 'The credential registry could not confirm the update. Automatic sync will check again.',
+  credential_check_unavailable: 'The login could not be verified. Check again when the provider is available.',
+  credential_registry_unavailable: 'The credential registry could not confirm the update. Check again when it is available.',
   credential_conflict: 'The workspace or credential changed during this check. Refresh before trying again.',
   credential_not_allowed: 'The linked shard is unavailable or its permission was withdrawn. Review its registry status first.'
 };
@@ -388,10 +388,17 @@ function renderCredentialSync(d, r) {
   const sync = d.credentialSync, pending = credentialPending.has(d.id) || sync?.busy;
   $('credential-panel').hidden = !r;
   if (!r) return;
-  $('credential-state').textContent = !sync?.available ? 'Sync unavailable' : pending ? 'Checking sign-in…' : sync.state === 'error' ? 'Needs attention' : sync.state === 'updated' ? 'Refreshed credential saved' : sync.state === 'current' ? 'Saved login matches registry' : 'Waiting for sign-in';
-  $('credential-state').className = sync?.state === 'error' ? 'error' : ['updated', 'current'].includes(sync?.state) ? 'running' : 'muted';
-  $('credential-guidance').textContent = !sync?.available ? 'Terminal credential sync is not configured on this controller.' : sync.code ? credentialMessages[sync.code] || 'Check the saved sign-in and try again.' : sync.state === 'updated' ? 'The linked shard will reload its credential through normal reconciliation. Its health and any traffic hold remain visible above.' : sync.state === 'current' ? 'The login is already stored. Shard health, traffic holds and cooldowns determine when it can accept work.' : 'Sign in to the linked account in Terminal. Matching credentials are verified and saved automatically when sync is on.';
-  $('credential-observed').textContent = sync?.checkedAt ? `Checked ${eventTime(sync.checkedAt)}${sync.syncedAt ? ' · refreshed ' + eventTime(sync.syncedAt) : ''}` : 'Automatic checks about every 12 seconds while this desktop runs';
+  const saved = ['updated', 'current'].includes(sync?.state), fresh = r.registryFresh && !failure;
+  const ready = saved && sync.applied && fresh && !r.paused && r.health === 'healthy' && r.workerState === 'running' && r.eligibleModels > 0;
+  const opening = credentialPending.get(d.id) === 'signin', checking = sync?.state === 'checking' || credentialPending.get(d.id) === 'check';
+  $('credential-state').textContent = !sync?.available ? 'Sync unavailable' : opening ? 'Opening sign-in…' : checking ? 'Checking sign-in…' : sync.state === 'error' ? 'Needs attention' : ready ? 'Ready for work' : saved ? !fresh ? 'Sign-in saved · status delayed' : r.paused ? 'Sign-in saved · work paused' : r.cooldownUntil ? 'Sign-in saved · cooldown active' : !sync.applied ? 'Sign-in saved · worker reloading' : 'Sign-in saved · checking health' : 'Waiting for sign-in';
+  $('credential-state').className = sync?.state === 'error' ? 'error' : ready ? 'running' : 'muted';
+  $('credential-guidance').textContent = !sync?.available ? 'Terminal credential sync is not configured on this controller.' : sync.code ? credentialMessages[sync.code] || 'Check the saved sign-in and try again.' : ready ? 'The serving worker has loaded this login and has eligible capacity. Done closes setup; your apps and shard keep running.' : saved ? r.paused ? 'Your login is saved. The manual traffic hold remains in place. Resume new work when you are ready; Done keeps the hold.' : !fresh ? 'The login is saved, but current serving status is unconfirmed. Wait for fresh health before treating setup as ready.' : 'The login is saved. Watch shard health while the worker reloads or finishes its recovery checks. Your desktop stays open.' : 'Choose Sign in and complete the linked account’s login in this desktop’s Chrome.';
+  $('credential-observed').textContent = `${sync?.checkedAt ? `Checked ${eventTime(sync.checkedAt)}${sync.syncedAt ? ' · refreshed ' + eventTime(sync.syncedAt) : ''}. ` : ''}${!sync?.enabled ? 'Automatic sync is off. Use Check now to apply a saved login.' : !['running', 'unhealthy'].includes(d.state) ? 'Automatic checks resume when this desktop starts.' : 'Automatic checks about every 12 seconds.'}`;
+  $('credential-signin').disabled = pending || !sync?.available || !d.canConnect || !!failure;
+  $('credential-signin').textContent = opening ? 'Opening…' : saved ? 'Sign in again' : 'Sign in';
+  $('credential-done').hidden = !(saved && (ready || fresh && r.paused));
+  $('credential-done').disabled = pending;
   $('credential-check').disabled = pending || !sync?.available || !snapshot.inventoryFresh || !!d.operation || !['running', 'unhealthy'].includes(d.state);
   $('credential-check').textContent = pending ? 'Checking…' : 'Check now';
   $('credential-auto').disabled = pending || !sync?.available || !!d.operation || !snapshot.journalHealthy;
@@ -399,10 +406,21 @@ function renderCredentialSync(d, r) {
 }
 async function credentialAction(toggle) {
   const d = current(); if (!d?.relayId || credentialPending.has(d.id)) return;
-  const id = d.id; credentialPending.add(id); renderRelationship();
+  const id = d.id; credentialPending.set(id, toggle ? 'toggle' : 'check'); workspaceErrors.delete(id); renderRelationship();
   try { await api(`${id}/credential-sync`, { shardId: d.relayId, ...(toggle ? { enabled: !d.credentialSync.enabled } : {}) }); await refresh(); }
   catch (error) { workspaceErrors.set(id, error.message); }
   finally { credentialPending.delete(id); render(); }
 }
 $('credential-check').onclick = () => void credentialAction(false);
 $('credential-auto').onclick = () => void credentialAction(true);
+$('credential-signin').onclick = async () => {
+  const d = current(); if (!d?.relayId || credentialPending.has(d.id)) return;
+  const id = d.id; credentialPending.set(id, 'signin'); workspaceErrors.delete(id); renderRelationship();
+  try {
+    await api(`${id}/signin`, { shardId: d.relayId });
+    if (selected === id) { toggleRelationship(false); rfb?.focus(); }
+    tell('Sign-in window opened. Complete the account login in this desktop’s Chrome, then inspect the shard for verification.');
+  } catch (error) { workspaceErrors.set(id, error.message); }
+  finally { credentialPending.delete(id); await refresh(); render(); }
+};
+$('credential-done').onclick = () => { toggleRelationship(false); $('relationship-toggle').focus(); tell('Setup closed. Desktop apps and shard traffic are unchanged.'); };

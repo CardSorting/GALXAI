@@ -24,7 +24,18 @@ def active():
 
 def main():
     command = sys.argv[1] if len(sys.argv) == 2 else 'help'
-    if command == 'setup':
+    if command == 'login':
+        if not sys.stdin.isatty(): sys.exit('Open sign-in from the desktop page or run galx-relay login in Terminal.')
+        print('Sign in to the account assigned to this desktop’s linked shard.\nComplete sign-in in Chrome. Ctrl+C cancels this attempt.\n')
+        env = dict(os.environ, CODEX_HOME=str(pathlib.Path.home() / '.codex'))
+        try:
+            result = subprocess.run(['codex', '-c', 'cli_auth_credentials_store="file"', 'login'], env=env)
+            print('\nSign-in saved locally. Return to Terminal sign-in on the desktop page to check verification and worker readiness.' if result.returncode == 0 else '\nSign-in did not complete. Close this window and choose Sign in to retry.')
+        except KeyboardInterrupt:
+            print('\nSign-in cancelled. Return to the desktop page to check the saved sign-in.')
+        try: input('\nPress Enter to close this sign-in window. ')
+        except (EOFError, KeyboardInterrupt): pass
+    elif command == 'setup':
         if active(): sys.exit('Stop the local relay with galx-relay stop before changing its setup.')
         if not sys.stdin.isatty(): sys.exit('Run setup in the desktop Terminal. Credentials are entered privately.')
         print('Set up one local relay. If linked and automatic sync is on, the host also verifies and saves this login for the linked shard.')
@@ -76,12 +87,12 @@ def main():
         if file.exists(): subprocess.run(['tail', '-n', '60', str(file)], check=True)
         else: print('No relay logs yet.')
     else:
-        print('galx-relay setup   Enter credentials privately for one local relay\ngalx-relay start   Start inside this desktop\ngalx-relay status  Check local process and setup\ngalx-relay stop    Stop gracefully; keep setup\ngalx-relay logs    Show recent private logs\n\nThis manual relay is separate from the serving fleet. Closing the viewer keeps it running.\nStopping the desktop closes it; run galx-relay start after resuming.')
+        print('galx-relay login   Sign in with Codex for linked-shard verification\ngalx-relay setup   Enter credentials privately for one local relay\ngalx-relay start   Start inside this desktop\ngalx-relay status  Check local process and setup\ngalx-relay stop    Stop gracefully; keep setup\ngalx-relay logs    Show recent private logs\n\nThis manual relay is separate from the serving fleet. Closing the viewer keeps it running.\nStopping the desktop closes it; run galx-relay start after resuming.')
 
 try:
-    with open(root / 'command.lock', 'w') as lock:
+    with open(root / ('login.lock' if sys.argv[1:] == ['login'] else 'command.lock'), 'w') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         main()
-except BlockingIOError: sys.exit('Another relay command is running. Wait for it to finish.')
+except BlockingIOError: sys.exit('This action is already running. Return to its existing Terminal window.')
 except (OSError, ValueError, KeyError): sys.exit('The local relay operation failed. Check your workspace setup and retry.')
 except KeyboardInterrupt: sys.exit('\nCancelled. No setup was saved.')

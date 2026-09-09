@@ -1,7 +1,7 @@
 // Private administrator surface. Summaries never include guest I/O or raw engine errors.
 const $ = id => document.getElementById(id);
 const node = (tag, text) => { const element = document.createElement(tag); if (text !== undefined) element.textContent = text; return element; };
-const actions = { creating: 'Create desktop', starting: 'Start desktop', stopping: 'Stop desktop', deleting: 'Delete desktop', linking: 'Update link', refreshing_credentials: 'Refresh sign-in' };
+const actions = { creating: 'Create desktop', starting: 'Start desktop', stopping: 'Stop desktop', deleting: 'Delete desktop', linking: 'Update link', refreshing_credentials: 'Refresh sign-in', opening_signin: 'Open sign-in window' };
 const outcomes = { queued: 'Queued', running: 'In progress', completed: 'Completed', failed: 'Needs attention' };
 const guidance = {
   credential_account_mismatch: 'Sign in to the account assigned to the linked shard. The serving credential was kept.',
