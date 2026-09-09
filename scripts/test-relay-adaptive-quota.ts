@@ -192,6 +192,26 @@ test('HTTP handshake 429 is cooled down and management APIs require configured a
   } finally { await f.cleanup(); await new Promise<void>(resolve => upstream.close(() => resolve())); }
 });
 
+test('HTTP upgrade rejection distinguishes credential failure from access, server and handshake timeouts', async () => {
+  for (const status of [401, 403, 502, 0]) {
+    const upstream = http.createServer(), sockets = new Set<import('node:net').Socket>();
+    upstream.on('connection', socket => { sockets.add(socket); socket.on('close', () => sockets.delete(socket)); });
+    upstream.on('upgrade', (_request, socket) => {
+      if (status) socket.end(`HTTP/1.1 ${status} Rejected\r\nContent-Length: 0\r\n\r\n`);
+      // status=0 deliberately leaves the upgrade unanswered until the relay deadline.
+    });
+    await new Promise<void>(resolve => upstream.listen(0, '127.0.0.1', resolve));
+    const f = fixture(1, { wsEndpoint: `ws://127.0.0.1:${(upstream.address() as any).port}`, wsConnectTimeoutMs: 40 });
+    try {
+      await f.relay.start();
+      const response = await submit(f); assert.equal(response.status, 202);
+      const { id } = await response.json(); await until(() => f.internals.jobsTable.get(id)?.status === 'failed');
+      assert.equal(f.internals.capabilitySnapshot().error === 'invalid_credential', status === 401, `upgrade status ${status}`);
+      assert.equal(f.internals.shardsTable.get('shard_0').status === 'disabled', status === 401);
+    } finally { await f.cleanup(); for (const socket of sockets) socket.destroy(); await new Promise<void>(resolve => upstream.close(() => resolve())); }
+  }
+});
+
 test('successful streams replay real output while image requests do not automatically repeat synthesis', async () => {
   const upstream = http.createServer();
   const wss = new WebSocketServer({ server: upstream });

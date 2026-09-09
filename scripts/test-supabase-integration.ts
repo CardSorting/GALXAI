@@ -7,6 +7,8 @@
  * speculative streaming, keep-alive pooling, signed webhook dispatch, and shard health probes.
  */
 
+import './lib/require-isolated-integration-env.js';
+import { randomUUID } from 'node:crypto';
 import {
   WorkspaceRepository,
   ProjectRepository,
@@ -92,6 +94,7 @@ async function runTests() {
     }
   }
 
+  let fixtureShardId: string | undefined;
   try {
     // 1. Supabase Config
     const config = getSupabaseConfig();
@@ -155,8 +158,9 @@ async function runTests() {
 
     // 5. Shard Repository (AES-256-GCM encrypted ingestion)
     const shardRepo = ShardRepository.getInstance();
-    const tenantUid = 'usr_tenant_888';
-    const shardId = `shard_${Date.now()}_oai`;
+    const tenantUid = `integration_${randomUUID()}`;
+    const shardId = `integration_${randomUUID()}`;
+    fixtureShardId = shardId;
     const encryptedSecret = GalxCryptoVault.encryptSecret(
       { apiKey: 'sk-openai-live-secret-test-key-12345' },
       tenantUid,
@@ -1380,6 +1384,10 @@ async function runTests() {
     console.error('\nTest suite encountered fatal error:', err);
     process.exitCode = 1;
   } finally {
+    if (fixtureShardId) {
+      try { await ShardRepository.getInstance().deleteShard(fixtureShardId, { requireRemote: true }); }
+      catch { console.error('Integration shard cleanup failed in the isolated test database.'); process.exitCode = 1; }
+    }
     await closePostgresPool();
   }
 }

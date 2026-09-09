@@ -3,6 +3,7 @@ import type { InvalidCredentialStore } from './invalid-credential-store.js';
 import { MonitorActivity } from './monitor-activity.js';
 import type { ShardMaintenanceStore } from './shard-maintenance-store.js';
 import { RequestError } from './request-policy.js';
+import { CapabilityDiscoveryError } from './capability-discovery.js';
 
 export interface DesiredShard {
   id: string;
@@ -179,13 +180,26 @@ export class RelayFederationLifecycle {
             if ((this.desired.get(shard.id)?.cooldownUntilMs ?? 0) > this.now()) this.capabilities.heartbeat(shard.id, { health: 'unavailable' }, 0, false);
           } else this.capabilities.heartbeat(shard.id, { health: 'unavailable' }, 0, false);
           // CAPABILITY_EMPTY and failed inventory discovery do not remove a relay.
-        } catch {
+        } catch (error) {
+          if (!this.current(shard.id, shard.credentialRevision)) continue;
+          if (error instanceof CapabilityDiscoveryError && error.code === 'invalid_credential') {
+            // Cold-start validation can reject a credential before a worker exists.
+            // Persist that revision so polling and restarts cannot create a loop.
+            try {
+              this.invalidStore?.save(new Map(this.invalid).set(shard.id, shard.credentialRevision));
+              this.invalid.set(shard.id, shard.credentialRevision);
+              this.retry.delete(shard.id);
+              if (this.lastError === 'credential_rejection_journal_unavailable') this.lastError = undefined;
+              this.activity.record({ category: 'fleet', level: 'warning', code: 'credential_rejected', shardId: shard.id });
+              continue;
+            } catch { this.error('credential_rejection_journal_unavailable'); }
+          }
           const attempts = (this.retry.get(shard.id)?.attempts ?? 0) + 1;
           this.retry.set(shard.id, { revision: shard.credentialRevision, attempts,
             at: this.now() + Math.min(30_000, 1000 * 2 ** Math.min(5, attempts)) });
           this.activity.record({ category: 'fleet', level: 'warning', code: 'worker_retry_scheduled', shardId: shard.id, count: attempts, retryAt: this.retry.get(shard.id)!.at });
           this.capabilities.heartbeat(shard.id, { health: 'unavailable' }, 0, false);
-          this.lastError = 'relay_reconciliation_incomplete';
+          if (this.lastError !== 'credential_rejection_journal_unavailable') this.lastError = 'relay_reconciliation_incomplete';
         }
       }
     }));

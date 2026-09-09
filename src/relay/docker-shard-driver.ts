@@ -3,6 +3,7 @@ import { promisify } from 'node:util';
 import { createHash, createHmac, randomUUID } from 'node:crypto';
 import { readRelayJson } from './federation-http-policy.js';
 import type { DesiredShard, RelayDriver, RelayHandle } from './federation-lifecycle.js';
+import { discoverOpenAIModels } from './capability-discovery.js';
 
 const execute = promisify(execFile);
 export interface DockerShardDriverOptions {
@@ -13,6 +14,8 @@ export interface DockerShardDriverOptions {
   /** Explicit test upstream overrides; never supplied by an API request. */
   wsEndpoint?: string;
   inventoryUrl?: string;
+  /** Host-side test endpoint when Docker reaches the fixture through a different hostname. */
+  preflightInventoryUrl?: string;
 }
 export class DockerShardDriver implements RelayDriver {
   private readonly label = 'io.galx.federation';
@@ -58,6 +61,9 @@ export class DockerShardDriver implements RelayDriver {
     return result;
   }
   async start(shard: DesiredShard): Promise<RelayHandle> {
+    // Validate cold candidates before allocating a container. Existing workers
+    // continue independently while failed candidates back off or await sign-in.
+    await discoverOpenAIModels(shard, AbortSignal.timeout(10000), fetch, this.options.preflightInventoryUrl ?? this.options.inventoryUrl);
     const id = this.name(shard.id);
     const generation = randomUUID();
     const keys = this.keys(id, generation);

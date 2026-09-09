@@ -1,10 +1,5 @@
-import * as crypto from 'node:crypto';
-import * as fs from 'node:fs';
-import * as os from 'node:os';
-import * as path from 'node:path';
 import type { GalxShardAccount, ProviderType } from '../contracts/GalxContracts';
 import { GalxPersistence } from '../../lib/storage/GalxPersistence';
-import { GalxCryptoVault } from '../vault/GalxCryptoVault';
 import { BroccoliDbTable } from '../broccolidb/broccolidb-table';
 import { BroccoliNaturalQueryParser } from '../broccolidb/broccolidb-natural-query';
 import type { DbAggregateQuery, DbAggregateResult } from '../broccolidb/broccolidb.contracts';
@@ -79,12 +74,12 @@ export class GalxCredentialSubstrate {
   }
 
   private resolveMutationOptions(
-    options: { requireRemote?: boolean }
-  ): { requireRemote?: boolean } {
+    options: { requireRemote?: boolean; createOnly?: boolean }
+  ): { requireRemote?: boolean; createOnly?: boolean } {
     const explicitTestProjection =
       process.env.NODE_ENV === 'test' &&
       process.env.GALX_ALLOW_EPHEMERAL_SHARDS_FOR_TESTS === 'true';
-    return explicitTestProjection ? { requireRemote: false } : options;
+    return explicitTestProjection ? { ...options, requireRemote: false } : options;
   }
 
   public async refreshFromAuthority(): Promise<number> {
@@ -130,157 +125,9 @@ export class GalxCredentialSubstrate {
     await this.refreshFromAuthority();
   }
 
-  /**
-   * Ingests multi-account shards into GALXAI's pool from discovered credential sources.
-   */
+  /** @deprecated Ambient credential imports are disabled; enroll an explicit account. */
   public async seedMultiAccountFleet(): Promise<number> {
-    await this.ready();
-    const shardIdSecret = process.env.GALX_SHARD_ID_SECRET || process.env.GALX_VAULT_MASTER_SECRET;
-    if (!shardIdSecret) {
-      throw new Error('GALX_SHARD_ID_SECRET or GALX_VAULT_MASTER_SECRET is required for stable, non-reversible shard identifiers');
-    }
-    const candidatePaths = [
-      path.join(os.homedir(), '.lumi', 'config.json'),
-      path.join(os.homedir(), '.codex', 'auth.json'),
-    ];
-
-    const discoveredAccounts: Array<{
-      accessToken: string;
-      refreshToken?: string;
-      accountId: string;
-      email?: string;
-      weight?: number;
-      priority?: number;
-    }> = [];
-
-    const seenAccountIds = new Set<string>();
-
-    for (const p of candidatePaths) {
-      if (!fs.existsSync(p)) continue;
-      try {
-        const raw = fs.readFileSync(p, 'utf-8');
-        const data = JSON.parse(raw);
-
-        // Check codexOAuthPool array or map
-        if (data.codexOAuthPool) {
-          const list = Array.isArray(data.codexOAuthPool)
-            ? data.codexOAuthPool
-            : Object.values(data.codexOAuthPool);
-
-          for (const item of list) {
-            const accId = (item as any).accountId || (item as any).account_id;
-            const token = (item as any).access_token || (item as any).accessToken;
-            if (token && accId && !seenAccountIds.has(accId)) {
-              seenAccountIds.add(accId);
-              discoveredAccounts.push({
-                accessToken: token,
-                refreshToken: (item as any).refresh_token || (item as any).refreshToken,
-                accountId: accId,
-                email: (item as any).email || 'codex_fleet_user@galx.ai',
-                weight: Number((item as any).weight) || 1,
-                priority: Number((item as any).priority) || 10
-              });
-            }
-          }
-        }
-
-        // Check standalone tokens/codexOAuth
-        const tokens = (data.tokens && data.tokens.access_token) ? data.tokens : data.codexOAuth;
-        if (tokens?.access_token) {
-          const accId = tokens.account_id || tokens.accountId || data.account_id;
-          if (accId && !seenAccountIds.has(accId)) {
-            seenAccountIds.add(accId);
-            discoveredAccounts.push({
-              accessToken: tokens.access_token,
-              refreshToken: tokens.refresh_token,
-              accountId: accId,
-              email: tokens.email || data.email || 'codex_primary@galx.ai',
-              weight: 1,
-              priority: 10
-            });
-          }
-        }
-      } catch {}
-    }
-
-    let addedCount = 0;
-    for (const acc of discoveredAccounts) {
-      const stableAccountHash = crypto
-        .createHmac('sha256', shardIdSecret)
-        .update(`openai:${acc.accountId}`)
-        .digest('hex')
-        .slice(0, 24);
-      const shardId = `codex_sh_${stableAccountHash}`;
-
-      const encrypted = GalxCryptoVault.encryptSecret(
-        {
-          accessToken: acc.accessToken,
-          refreshToken: acc.refreshToken,
-          accountId: acc.accountId,
-          email: acc.email,
-          name: 'Imported OpenAI OAuth Shard'
-        },
-        'system_admin',
-        shardId,
-        'openai'
-      );
-
-      const shard: GalxShardAccount = {
-        id: shardId,
-        userId: 'system_admin',
-        accountLabel: 'Imported OpenAI OAuth Shard',
-        provider: 'openai',
-        authType: 'oauth',
-        shardMode: 'pooled',
-        status: 'healthy',
-        priority: acc.priority || 10,
-        weight: acc.weight || 1,
-        fencingToken: 1,
-        accountId: acc.accountId,
-        apiKeyMasked: 'oauth_********',
-        encryptedSecrets: encrypted,
-        encryptedPayload: encrypted,
-        privacyCapabilities: {
-          hipaaCompliant: true,
-          zdrCertified: true,
-          dataResidency: 'global',
-          baaSigned: true,
-          piiFiltering: true
-        },
-        tokenBucket: {
-          maxTokens: 500000,
-          remainingTokens: 500000,
-          refillRatePerMinute: 50000,
-          maxRequests: 40,
-          remainingRequests: 40,
-          lastRefillTimestampMs: Date.now()
-        },
-        slidingWindowQuota: {
-          windowDurationMs: 3 * 3600 * 1000,
-          maxRequestsPerWindow: 40,
-          usedRequestsInWindow: 0,
-          windowStartTimestampMs: Date.now(),
-          requestHistoryTimestampsMs: []
-        },
-        stats: {
-          totalRequestsServed: 0,
-          totalTokensConsumed: 0,
-          consecutiveFailures: 0
-        },
-        permissionRetracted: false,
-        registrySource: 'operator_import',
-        createdAtMs: Date.now(),
-        updatedAtMs: Date.now()
-      };
-
-      const existing = this.accountTable.get(shardId);
-      await (existing
-        ? this.updateAccountAsync({ ...existing, ...shard, createdAtMs: existing.createdAtMs }, { requireRemote: true })
-        : this.addAccountAsync(shard, { requireRemote: true }));
-      addedCount++;
-    }
-
-    return addedCount;
+    throw new Error('Automatic credential discovery is retired. Use explicit validated enrollment, then the linked desktop to refresh sign-in.');
   }
 
   /**
@@ -310,7 +157,7 @@ export class GalxCredentialSubstrate {
    */
   public async addAccountAsync(
     account: GalxShardAccount,
-    options: { requireRemote?: boolean } = { requireRemote: true }
+    options: { requireRemote?: boolean; createOnly?: boolean } = { requireRemote: true }
   ): Promise<void> {
     await this.ready();
     const normalized: GalxShardAccount = {

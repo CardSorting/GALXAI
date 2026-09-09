@@ -181,7 +181,7 @@ export class GalxPersistence {
 
   public async saveShardAsync(
     shard: GalxShardAccount,
-    options: { requireRemote?: boolean } = { requireRemote: true }
+    options: { requireRemote?: boolean; createOnly?: boolean } = { requireRemote: true }
   ): Promise<GalxShardAccount> {
     const durableShard = await this.shardRepo.saveShard(shard, options);
     this.shardTable.put(durableShard.id, durableShard);

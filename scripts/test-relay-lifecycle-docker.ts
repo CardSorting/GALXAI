@@ -12,19 +12,24 @@ import { RelayFederationLifecycle, type DesiredShard } from '../src/relay/federa
 if (process.env.GALX_DOCKER_CANARY !== '1') throw Error('Set GALX_DOCKER_CANARY=1 for the isolated Docker recovery canary');
 const namespace = 'recovery-' + Date.now().toString(36);
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), namespace));
+let rejectSynthetic = false;
 const upstream = http.createServer((req, res) => {
-  if (req.headers.authorization === 'Bearer synthetic-rejected') { res.writeHead(401); res.end(); return; }
+  if (rejectSynthetic && req.headers.authorization === 'Bearer synthetic-rejected') { res.writeHead(401); res.end(); return; }
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ models: [{ slug: 'test-model', supported_in_api: true }] }));
 });
 await new Promise<void>(resolve => upstream.listen(0, '0.0.0.0', resolve));
 const driver = new DockerShardDriver({ namespace, secret: randomBytes(32).toString('hex'),
   image: process.env.GALX_DOCKER_CANARY_IMAGE || 'galxai-relay:lifecycle-recovery',
-  inventoryUrl: 'http://host.docker.internal:' + (upstream.address() as any).port });
+  inventoryUrl: 'http://host.docker.internal:' + (upstream.address() as any).port,
+  preflightInventoryUrl: 'http://127.0.0.1:' + (upstream.address() as any).port });
 const desired: DesiredShard[] = ['healthy', 'rejected'].map(name => ({ id: namespace + '-' + name, provider: 'openai',
   accountId: name, accessToken: 'synthetic-' + name, credentialRevision: createHash('sha256').update(name).digest('hex') }));
 const journal = new FileInvalidCredentialStore(path.join(dir, 'invalid.json'));
 let lifecycle: RelayFederationLifecycle | undefined;
+const volumes = new Set<string>();
+const start = driver.start.bind(driver);
+driver.start = async shard => { const handle = await start(shard); volumes.add(handle.id + '-state'); return handle; };
 async function until(check: () => Promise<boolean>) {
   const end = Date.now() + 45000;
   do { if (await check()) return; await new Promise(resolve => setTimeout(resolve, 500)); } while (Date.now() < end);
@@ -34,6 +39,7 @@ try {
   const handles = [];
   for (const s of desired) handles.push(await driver.start(s));
   const rejected = handles[1];
+  rejectSynthetic = true; // Simulate revocation after successful enrollment.
   await until(async () => { try { return (await driver.inspect(rejected)).invalidCredential === true; } catch { return false; } });
   execFileSync('docker', ['restart', rejected.id], { timeout: 60000, stdio: 'pipe' });
   const recovered = (await driver.list()).find(h => h.shardId === rejected.shardId)!;
@@ -48,11 +54,16 @@ try {
   assert.deepEqual((await driver.list()).map(h => h.shardId), [desired[0].id]);
   await lifecycle.reconcile();
   assert.equal((await driver.list()).length, 1);
-  console.log(JSON.stringify({ passed: true, workerRestartRetainsRejection: true, rejectedWorkerRemoved: true, controllerRestartDoesNotRespawn: true }));
+  // A fresh rejected candidate is quarantined before any Docker container exists.
+  const cold = { ...desired[1], id: namespace + '-cold' }; desired.push(cold);
+  await lifecycle.reconcile(); assert.equal(journal.load().get(cold.id), cold.credentialRevision);
+  assert.equal((await driver.list()).length, 1);
+  console.log(JSON.stringify({ passed: true, workerRestartRetainsRejection: true, rejectedWorkerRemoved: true, controllerRestartDoesNotRespawn: true, coldRejectionNeverAllocated: true }));
 } finally {
   await lifecycle?.stop();
   for (const h of await driver.list()) await driver.remove(h);
   assert.equal((await driver.list()).length, 0);
+  for (const volume of volumes) execFileSync('docker', ['volume', 'rm', volume], { timeout: 10000, stdio: 'pipe' });
   await new Promise<void>(resolve => upstream.close(() => resolve()));
   fs.rmSync(dir, { recursive: true, force: true });
 }

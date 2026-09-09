@@ -7,7 +7,7 @@
  *
  * Usage:
  *   npx tsx scripts/manage-shards.ts --list
- *   npx tsx scripts/manage-shards.ts --import
+ *   --import is retired; enrollment requires an explicitly supplied, validated account.
  *   GALX_SHARD_ACCESS_TOKEN=... GALX_SHARD_ACCOUNT_ID=... npm run shards -- --add
  *   npx tsx scripts/manage-shards.ts --test
  *   npx tsx scripts/manage-shards.ts --cycle [count]
@@ -27,6 +27,7 @@ import { OpenAIAdapter } from '../src/core/router/adapters/OpenAIAdapter';
 import { getSupabaseConfig } from '../src/lib/supabase/config';
 import { closePostgresPool } from '../src/lib/db/postgres';
 import type { GalxShardAccount } from '../src/core/contracts/GalxContracts';
+import { validateOperatorCredential } from '../src/relay/operator-enrollment.js';
 
 interface CliArgs {
   action: 'list' | 'import' | 'add' | 'test' | 'cycle' | 'remove' | 'doctor' | 'quarantine-legacy';
@@ -146,13 +147,6 @@ async function listShards(substrate: GalxCredentialSubstrate) {
   console.log('========================================================================================================\n');
 }
 
-async function importFleet(substrate: GalxCredentialSubstrate) {
-  console.log('\n[+] Scanning multi-account credential sources to enroll into GALXAI shard pool...');
-  const added = await substrate.seedMultiAccountFleet();
-  console.log(`[✓] Successfully ingested and encrypted ${added} accounts into GALXAI shard pool!`);
-  await listShards(substrate);
-}
-
 async function addSingleShard(substrate: GalxCredentialSubstrate, args: CliArgs) {
   if (!args.token || !args.account) {
     console.error('[-] Error: GALX_SHARD_ACCESS_TOKEN and GALX_SHARD_ACCOUNT_ID are required to add a shard.');
@@ -168,12 +162,17 @@ async function addSingleShard(substrate: GalxCredentialSubstrate, args: CliArgs)
     .update(`openai:${args.account}`)
     .digest('hex')
     .slice(0, 24)}`;
+  // A fresh read gives useful feedback; createOnly below fences a concurrent enrollment.
+  await substrate.refreshFromAuthority();
+  if (substrate.getAccount(shardId)) throw new Error('Account already enrolled. Use its linked desktop to refresh the login.');
+  const candidate = await validateOperatorCredential({ accessToken: args.token, accountId: args.account, refreshToken: args.refresh });
   const accountFingerprint = crypto.createHash('sha256').update(args.account).digest('hex').slice(0, 12);
   const encrypted = GalxCryptoVault.encryptSecret(
     {
-      accessToken: args.token,
-      refreshToken: args.refresh,
-      accountId: args.account,
+      accessToken: candidate.accessToken,
+      refreshToken: candidate.refreshToken,
+      accountId: candidate.accountId,
+      expiresAtMs: candidate.expiresAtMs,
       email: args.email || 'operator@galx.ai',
       name: 'Operator-Managed OpenAI OAuth Shard'
     },
@@ -198,11 +197,11 @@ async function addSingleShard(substrate: GalxCredentialSubstrate, args: CliArgs)
     encryptedSecrets: encrypted,
     encryptedPayload: encrypted,
     privacyCapabilities: {
-      hipaaCompliant: true,
-      zdrCertified: true,
+      hipaaCompliant: false,
+      zdrCertified: false,
       dataResidency: 'global',
-      baaSigned: true,
-      piiFiltering: true
+      baaSigned: false,
+      piiFiltering: false
     },
     tokenBucket: {
       maxTokens: 500000,
@@ -225,11 +224,12 @@ async function addSingleShard(substrate: GalxCredentialSubstrate, args: CliArgs)
       consecutiveFailures: 0
     },
     permissionRetracted: false,
+    expiresAtMs: candidate.expiresAtMs,
     createdAtMs: Date.now(),
     updatedAtMs: Date.now()
   };
 
-  await substrate.addAccountAsync({ ...shard, registrySource: 'operator_import' }, { requireRemote: true });
+  await substrate.addAccountAsync({ ...shard, registrySource: 'operator_import' }, { requireRemote: true, createOnly: true });
   console.log(`[✓] Successfully enrolled shard ${shardId} (account sha256:${accountFingerprint}) into GALXAI pool!`);
 }
 
@@ -472,14 +472,12 @@ async function doctorShards(applyQuarantine: boolean): Promise<void> {
 
 async function main() {
   const args = parseArgs();
+  if (args.action === 'import') throw new Error('Bulk credential import is retired. Use npm run relay:desktops for sign-in and repair; use shards -- --add for explicit validated enrollment.');
   const substrate = await getSubstrate();
 
   switch (args.action) {
     case 'list':
       await listShards(substrate);
-      break;
-    case 'import':
-      await importFleet(substrate);
       break;
     case 'add':
       await addSingleShard(substrate, args);

@@ -35,7 +35,6 @@ import type { Socket } from 'node:net';
 import * as url from 'node:url';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import * as os from 'node:os';
 import * as crypto from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import { monitorEventLoopDelay } from 'node:perf_hooks';
@@ -861,6 +860,7 @@ export class GalxaiRelayServer extends EventEmitter {
   constructor(config: Partial<RelayConfig> = {}) {
     super();
     this.config = { ...DEFAULT_CONFIG, ...config };
+    if (this.config.discoverHostCredentials) throw new Error('Host credential discovery is retired. Use an explicitly assigned credential or the authoritative registry.');
     if (this.config.testOnlyMultiShard && process.env.NODE_ENV === 'production') throw new Error('Production relays must own exactly one shard');
     if (this.config.assignedShard) {
       if (!this.config.assignedShardId || this.config.assignedShard.id !== this.config.assignedShardId
@@ -1118,14 +1118,7 @@ export class GalxaiRelayServer extends EventEmitter {
       try { expiresAtMs ||= JSON.parse(Buffer.from(accessToken.split('.')[1], 'base64url').toString()).exp * 1000 || undefined; } catch {}
       items.push({ id: item.id, accessToken, accountId: accountId || 'acc_unknown', source, expiresAtMs });
     };
-    if (this.config.discoverHostCredentials) {
-      add({ accessToken: process.env.OPENAI_ACCESS_TOKEN || process.env.CODEX_ACCESS_TOKEN, accountId: process.env.CHATGPT_ACCOUNT_ID }, 'environment');
-    }
-    const paths = [this.config.shardsJsonPath, ...(this.config.discoverHostCredentials ? [
-      path.join(os.homedir(), '.codex', 'auth.json'),
-      path.join(os.homedir(), '.lumi', 'config.json'),
-      path.join(os.homedir(), '.dietcode', 'config.json'),
-    ] : [])].filter(Boolean) as string[];
+    const paths = [this.config.shardsJsonPath].filter(Boolean) as string[];
     for (const filename of new Set(paths)) {
       if (!fs.existsSync(filename)) continue;
       try {

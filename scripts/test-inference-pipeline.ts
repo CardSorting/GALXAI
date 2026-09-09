@@ -127,10 +127,10 @@ async function run() {
   // PHASE 1.5: GALXAI SHARD POOL FLEET DISCOVERY & HEALTH
   // ---------------------------------------------------------------------------
   console.log('\n--- PHASE 1.5: GALXAI SHARD POOL FLEET DISCOVERY & HEALTH ---');
-  let activeShards = galxRouter.substrate.listAccounts(undefined, 'openai');
+  await galxRouter.substrate.ready();
+  const activeShards = galxRouter.substrate.listAccounts(undefined, 'openai');
   if (activeShards.length === 0) {
-    galxRouter.substrate.seedMultiAccountFleet();
-    activeShards = galxRouter.substrate.listAccounts(undefined, 'openai');
+    throw new Error('No enrolled account is available. Complete explicit enrollment before running inference checks.');
   }
 
   console.log(`  [✓] Active Shards in GALXAI Pool: ${activeShards.length}`);

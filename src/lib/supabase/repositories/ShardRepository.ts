@@ -25,6 +25,8 @@ export class ShardAuthorityUnavailableError extends Error {
 export interface ShardAuthorityOptions {
   /** Reject instead of using the process-local projection when PostgreSQL is unavailable. */
   requireRemote?: boolean;
+  /** Enrollment cannot overwrite an existing account, even under concurrent writers. */
+  createOnly?: boolean;
 }
 
 export class ShardRepository {
@@ -200,7 +202,7 @@ export class ShardRepository {
     const res = await executePostgresQuery(
       `INSERT INTO public.galx_shard_accounts (${insertColumns.join(', ')})
        VALUES (${placeholders})
-       ON CONFLICT (id) DO UPDATE SET ${assignments}, updated_at = NOW()
+       ON CONFLICT (id) ${options.createOnly ? 'DO NOTHING' : `DO UPDATE SET ${assignments}, updated_at = NOW()`}
        RETURNING *;`,
       values
     );
@@ -210,6 +212,7 @@ export class ShardRepository {
       this.cacheShards([durableShard], false);
       return durableShard;
     }
+    if (res && options.createOnly) throw new Error('Account already enrolled. Refresh credentials through its linked desktop.');
     if (process.env.DATABASE_URL) failures.push('pooled SQL upsert failed');
 
     // 2. Privileged PostgREST fallback through a server-side, counter-safe RPC.
@@ -218,9 +221,9 @@ export class ShardRepository {
     if (isSupabaseAdminConfigured()) {
       try {
         const supabase = getSupabaseAdmin();
-        const { data, error } = await supabase.rpc('fn_upsert_shard_registry', {
-          p_row: row
-        });
+        const { data, error } = options.createOnly
+          ? await supabase.from('galx_shard_accounts').insert(row).select().single()
+          : await supabase.rpc('fn_upsert_shard_registry', { p_row: row });
         if (error) throw error;
         if (!data) throw new Error('upsert returned no durable row');
         const durableShard = this.mapRowToShard(data as any);
@@ -237,6 +240,7 @@ export class ShardRepository {
     }
 
     // Explicitly ephemeral mode is reserved for isolated tests and local simulations.
+    if (options.createOnly && this.inMemoryShards.has(shard.id)) throw new Error('Account already enrolled.');
     this.cacheShards([shard], false);
     return shard;
   }
