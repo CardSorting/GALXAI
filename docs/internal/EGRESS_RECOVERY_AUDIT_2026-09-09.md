@@ -97,8 +97,9 @@ data or statistics were purged.
 6. **Resolved in the follow-up below:** synthetic samples and fixed circuit
    counts were removed from `SlaHealthEngine.ts`. Browser connectivity is no
    longer presented as service-wide availability.
-7. CI checks were added in the local worktree. They become remote enforcement
-   only after these changes are committed and pushed.
+7. The original CI checks were committed and pushed as `352389a`. The egress
+   and dependency gates passed remotely; a separate final-build failure and its
+   follow-up remediation are recorded below.
 8. **Resolved in the follow-up below:** the separate eager constructor load and
    general repository full-list query were replaced. Its historical counter
    increased from 505 to 526 during the earlier build/restart window (not proof
@@ -292,3 +293,196 @@ Status: resolved, verified, and deployed to the canonical production site.
   The production-only npm audit returned zero vulnerabilities after the patch.
 - Audit report and test/operator scripts remain private and excluded from the
   deployment upload. No source commit or push was performed.
+
+## Follow-up: physical-request accounting and CI isolation — 2026-09-09
+
+### Evidence and findings
+
+At 06:23:54 UTC, bounded read-only diagnostics confirmed that the old controller
+full-read counter was still 52,752 and the old repository full-read counter was
+still 526. Only two explicit repository-delta verification calls existed. The
+controller delta counter was 3,161. Storage still contained zero objects; seven
+database connections were present and none was idle in a transaction. This is
+positive evidence that the original poll leak remains stopped, not an explanation
+of the historical billing total.
+
+- **P1 / performance:** controller REST synchronization charged one request permit
+  for an entire multi-page read. An operation could issue up to 64 physical page
+  requests, so the advertised request limit did not describe actual origin calls.
+- **P1 / performance:** general repository REST reads reset their response cap and
+  timeout on every page. A partial snapshot could repeatedly consume the burst
+  budget without one cumulative snapshot ceiling or a shared failure cooldown.
+- **P1 / implementation integrity:** a late success for one owner could clear a
+  concurrent origin retry delay unless recovery state was fenced by an epoch.
+- **P2 / accounting integrity:** an operation that returned without invoking its
+  response measurement callback received an unsupported full byte refund.
+- **P2 / release integrity:** GitHub Actions run `34317593035` passed the new YAML
+  security, production dependency audit, egress, controller, lint and type checks,
+  but failed its production build on missing import-time vault configuration.
+  A fully clean reproduction also exposed the independent audit-signing key
+  requirement. The CI workflow unnecessarily used the production project URL.
+
+### Changes and guardrails
+
+- Both registry REST paths now share a server-only page reader. Every physical
+  page must acquire a request permit before fetch. Existing byte/refill/request
+  policies were not loosened, and persisted controller budget state is retained.
+  Historical cumulative request counts include the old operation-based accounting;
+  new REST activity is counted per physical page from this rollout onward.
+- The whole REST snapshot shares a ten-second deadline and one cumulative payload
+  allowance (including each page's overhead). Per-page allowances can only shrink;
+  stalled bodies are cancelled by the same deadline. Unknown/failed response
+  measurements retain their reservation. SQL oversize rejection does not refund
+  the reserved read or trigger a second transport attempt.
+- Requests use explicit fields, fixed 64-row pages, exact counts, and validated
+  `Content-Range` evidence. Short pages without exact evidence still require EOF
+  confirmation; malformed ranges fail closed. There is still a final metadata
+  confirmation before publishing cached credentials or deletions. For the
+  56-record fixture, a cold controller refresh needs four requests and a warm
+  unchanged check needs two. Exact counts add server-side count work; this is
+  intentionally confined to the small, 2,048-row-bounded registry, not general
+  large-table pagination. Counts over the supported limit are rejected.
+- Successful controller REST polls are paced at least three seconds apart so
+  two-manifest polling fits the 40 physical requests/minute policy. SQL cadence
+  and the existing 15-second authority expiry are unchanged. Unusually small API
+  page caps or oversized registries may hit the strict budget and fail closed;
+  the fallback never returns a partial or unverified projection.
+- Server `Retry-After` seconds/dates are retained. General-repository failure
+  cooldown spans owner scopes, coalesced callers count as one failed operation,
+  pending page requests recheck cooldown, and pre-failure successes cannot clear
+  a newer cooldown. No stale-on-error authority or TTL extension was introduced.
+- Opaque Supabase secret keys are sent as `apikey`, not mislabelled as JWT bearer
+  tokens. Legacy service-role JWTs retain their Authorization header. Redirects
+  are rejected; requests remain on the configured HTTPS origin and owner scope.
+- CI uses reserved `.invalid` endpoints and offline preflight validation. Its
+  nondeployable build wrapper supplies separate randomly generated, process-only
+  vault and audit-signing keys; it rejects production authority, production dotenv
+  files, and Vercel deployment contexts. Runtime secret enforcement is unchanged.
+  The workflow adds the physical-request and isolated-build regression gates and
+  has a 15-minute job ceiling. No production database is needed for these gates.
+
+### Verification and remaining boundary
+
+- Thirteen new transport/CI checks pass, plus 40 egress/recovery, 34 controller/
+  authority, 19 public-response/authentication and four YAML security checks.
+- TypeScript and ESLint pass (six existing lint warnings). The regular production
+  build and a clean, credential-isolated CI build both pass, generating 275 static
+  pages. The clean build lives in a disposable directory and is never deployed.
+- Migration status: 91 applied, zero pending. Static integrity: zero fatal
+  violations and the same pre-existing wallet search-path warning. No SQL/schema,
+  RLS, data, billing, log-drain, or spend-cap setting changed. The broad live-writing
+  database test command was deliberately not used.
+- The audit skill's scoped detector reported no findings in the unchanged recovery
+  notice and footer. The earlier 15/20 notice-only UI score is not rescored as a
+  whole-site visual certification; this pass changes transport and CI, not UI.
+- The user subsequently identified Shared Pooler Egress as the spike category;
+  the focused validation is recorded below. Still needed: its daily before/after
+  usage trend to reconcile 7.4 GB. No management/billing token is configured in
+  this workspace. Usage already served cannot be erased. Keep billing protections
+  enabled; no billing setting was changed.
+- Process-local application budgets remain local, not a distributed organization
+  quota, and this patch is not a blanket cap on unrelated Database/Auth/Storage/
+  Realtime/Edge Function/log-drain paths. Existing serverless instance scaling
+  can multiply these local allowances. Do not claim the whole billing gap closed
+  without the service-level comparison or a separately designed shared budget.
+- The development-only dependency advisory chain documented above is unchanged;
+  it is not the cause of this registry read amplification.
+
+Standards checked: [Supabase egress guidance](https://supabase.com/docs/guides/platform/manage-your-usage/egress),
+[PostgREST exact counts and range semantics](https://docs.postgrest.org/en/stable/references/api/pagination_count.html),
+and [Supabase observability](https://supabase.com/docs/guides/observability).
+The changelog's new `logs` endpoint supersedes `logs.all`; this pass does not call
+either endpoint or add a recurring log query. No relevant schema/API breaking
+change is required for the implemented transport changes.
+
+### Deployment confirmation — 2026-09-09 06:45 UTC
+
+- Deployment `dpl_4utQNwoaAmmFnpsbg8dGXJ8VV4pe`
+  (`galxai-ku8g5wgcs-cardsortings-projects.vercel.app`) completed its hosted
+  production build, reached Ready, and was explicitly promoted. An independent
+  `vercel inspect galx.ai` resolved the canonical domain to this deployment.
+- The controller was gracefully restarted after two idle/freshness checks. Its
+  persistent egress budget was retained, not deleted or reset. Post-restart
+  administrator checks confirmed readiness, zero synchronization failures, and
+  rejection of unauthenticated and ordinary-user diagnostics requests.
+- Live homepage/about HTML, response headers, and 21 same-origin script assets
+  passed the scoped public-boundary scan. Expected recovery/connection guards
+  were present; tested private markers, configured secrets, and removed synthetic
+  health markers were absent. HEAD `/api/version` returned 200 with no body.
+  This does not certify every application route or every private marker.
+- All 13 transport/CI regressions passed again after promotion. The complete
+  targeted verification remains 110 passing checks across the suites above.
+- At this deployment checkpoint, the transport/CI follow-up source changes were
+  uncommitted and unpushed. The later source-recording step is documented below.
+  The earlier `352389a` commit is on the remote. The isolated CI build fix is
+  verified locally; it is not yet enforced by a new remote workflow run.
+
+## Focused follow-up: user identifies Shared Pooler Egress
+
+The user reports that the Supabase usage chart attributes the spike to **Shared
+Pooler Egress**. This is user-provided billing-category evidence, not an independently
+retrieved billing export. Supabase defines this category as results sent from its
+shared Supavisor pooler to the database client; it is not counted a second time
+as Database Egress. The configured runtime database connection was checked without
+printing its hostname, project identifier, username, or password: it uses the
+shared transaction pooler. Both previously corrected SQL read paths use that
+connection type. The attribution therefore matches the diagnosed mechanism;
+REST fallback hardening is additional protection, not the primary explanation
+for this category's historical spike.
+
+Bounded, read-only production evidence:
+
+- At 06:43:53 UTC and 06:45:06 UTC, the original controller full-read counter
+  remained **52,752 calls / 2,949,228 returned rows**. The old repository full-read
+  counter remained **526 calls / 28,019 rows**, and repository-delta calls remained
+  at two deliberate earlier verification reads. No full-read regression was
+  observed during this interval or the preceding build window.
+- At 06:44:21 UTC, the persistent controller guard reported 3,292 requests and
+  4,267,112 accounted bytes; at approximately 06:45:06 UTC, it reported 3,315
+  requests and 4,291,814 accounted bytes. That is **23 reads / 24,702 accounted
+  bytes**, including the explicit 1,024-byte allowance per request. The remaining
+  **1,150 bytes (50 bytes/read)** are application-measured unchanged-result JSON,
+  not a pooler packet capture or Supabase billable-byte measurement. The SQL
+  fallback cooldown, failure, and blocked counters were zero in both samples.
+- The comparison full projection is currently 175,207 JSON bytes, computed
+  inside PostgreSQL without downloading its records. Multiplying today's size
+  by historical calls would only be a hypothetical estimate: record sizes,
+  protocol overhead, and the statistics/billing windows can differ. It must not
+  be presented as an exact reconciliation of the 7.4 GB.
+- The broader bounded query-statistics sample still showed the old full read
+  dominating historical returned rows. Seven connections were observed, none
+  idle in a transaction. No `pg_dump`/`pg_restore` invocation was found in the
+  checked repository scripts and GitHub workflows; external jobs and other
+  hosts were not exhaustively inventoried.
+
+Operational conclusion: the observed full-download amplification through the
+shared pooler is stopped, and the replacement path is healthy in this sample.
+Keep the existing connection pool; moving the same repeated queries to a direct
+connection or REST would not remove the underlying response volume. Do not flush
+database records, caches, or query statistics to clear historical usage: those
+actions cannot reverse billed egress, and cold-cache reloads can increase reads.
+No production data, statistics, or persistent budget state was flushed.
+
+Remaining closure evidence is the **daily Shared Pooler Egress trend before and
+after the rollout**, with the same project and billing dates selected. Check that
+new daily usage falls; the accumulated 7.4 GB is not expected to fall retroactively.
+If high new usage persists, investigate other connection-string clients and
+externally scheduled exports using matching time windows. The per-process registry
+guards are not a project-wide cap on every pooler client or every SQL operation.
+
+Reference: [Supabase egress categories, accounting, and optimization guidance](https://supabase.com/docs/guides/platform/manage-your-usage/egress).
+
+### Source recording — 2026-09-09
+
+- Local commit `5fde44e` (`fix(egress): enforce transport budgets and isolate CI`)
+  records the deployed transport safeguards, their regression tests, public-boundary
+  scan extension, and isolated CI build enforcement. This documentation commit
+  separately records the findings, deployment evidence, and remaining billing
+  reconciliation boundary.
+- Commit-time verification: all 13 transport/CI tests passed again, TypeScript
+  and the repository commit hooks passed, and the 15 pending files contained no
+  matches for configured private secrets or private-key blocks. This bounded scan
+  is not a certification that every possible secret format has been detected.
+- No push was requested or performed in this source-recording step. The new CI
+  gates still require a push and a successful remote run for remote enforcement.
+  No database, billing, runtime, or deployment state changed during this step.
