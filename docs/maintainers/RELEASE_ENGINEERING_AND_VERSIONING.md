@@ -59,6 +59,7 @@ npx tsx scripts/test-chat-context-hardening.ts
 npm run db:verify
 
 # Step 7: Live Supabase 92-Test Zero-Egress Database Suite
+# Requires explicit disposable loopback GALX_INTEGRATION_DATABASE_URL, never production.
 npm run db:test
 
 # Step 8: Master 180-Domain Compactor Cluster Suite

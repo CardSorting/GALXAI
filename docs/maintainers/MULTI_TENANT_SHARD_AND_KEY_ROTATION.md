@@ -51,14 +51,13 @@ Use secret-manager-injected environment variables for one credential at a time:
 ```bash
 # GALX_SHARD_ACCESS_TOKEN and GALX_SHARD_ACCOUNT_ID must already be injected.
 # GALX_SHARD_REFRESH_TOKEN and GALX_SHARD_EMAIL are optional.
-npm run shards -- --add
-
-# Explicitly discover and import supported local provider login files.
-npm run shards:import
+node --env-file-if-exists=.env.local --import tsx scripts/manage-shards.ts --add
 
 # Reversible revocation; this does not hard-delete evidence.
-npm run shards -- --remove <opaque_shard_id>
+node --env-file-if-exists=.env.local --import tsx scripts/manage-shards.ts --remove <opaque_shard_id>
 ```
+
+New enrollment validates account/expiry and authenticated inventory before create-only persistence. Existing accounts must refresh through their linked desktop; re-enrollment cannot overwrite authority or reset counters. Bulk cache import and host discovery are retired. See [enrollment and recovery](RELAY_CREDENTIAL_ENROLLMENT.md).
 
 The CLI rejects token, refresh-token, account, and email command-line flags because argv and shell history are observable. Output uses opaque IDs or hashes and never prints provider credentials or raw account identifiers.
 
@@ -71,7 +70,7 @@ Rotation follows the familiar deploy–rewrap–prune pattern. Never change a si
 1. Generate an independent v2 root in the secret manager.
 2. Configure the current root as `GALX_VAULT_KEY_V1` and the new root as `GALX_VAULT_KEY_V2`.
 3. Keep `GALX_VAULT_ACTIVE_KEY_VERSION=v1` and deploy everywhere.
-4. Verify every worker can read v1 and has the v2 slot before rewrapping.
+4. Verify every registry-authority process can read v1 and has the v2 slot before rewrapping. Inference workers and desktops do not receive vault roots.
 
 ### Phase B — transactional rewrap
 
@@ -118,7 +117,7 @@ If `.galx-shards.json` reappears or credentials were encrypted with a compiled/s
 
 1. Stop ingestion from the affected producer.
 2. Preserve only the minimum forensic hash/metadata required by incident policy; do not attach the file to tickets or logs.
-3. Import confirmed live credentials through the PostgreSQL authority.
+3. Enroll confirmed new accounts through validated create-only authority; refresh existing accounts through the linked desktop. Do not replay the legacy cache.
 4. Run `npm run shards:doctor`, then use `--quarantine-legacy` for reversible isolation.
 5. Remove the local file and verify `legacyJsonCachePresent=false`.
 6. Rotate affected provider refresh/access credentials and any exposed database or vault root.

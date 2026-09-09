@@ -1,6 +1,6 @@
 # 🔒 Security Policy & Vulnerability Reporting
 
-GALXAI takes the security and cryptographic integrity of our inference platform, relay, and credential vaults extremely seriously.
+Report security issues privately so maintainers can investigate and coordinate a fix.
 
 ---
 
@@ -46,8 +46,6 @@ Instead, please report security vulnerabilities through one of the following sec
 
 ## Implementation and scope
 
-The [technical security guide](docs/SECURITY.md) documents application, registry, and relay boundaries. The [relay security policy](docs/relay-security.md) covers key roles, browser origins, container isolation, and retained state.
+Security reports should identify the affected feature, version or deployment, reproduction steps and user impact. Share sensitive diagnostic material only through the private reporting channels above. Do not include live credentials in a report.
 
-Credential encryption and AAD binding are implemented in the registry vault path. Buffer clearing is best effort in a garbage-collected runtime; do not interpret it as guaranteed erasure of every string, process copy, or checkpoint. Relay job checkpoints can contain request content. Container isolation applies to the relay process, not every application adapter or external agent runtime.
-
-See [ADR 0115](docs/adr/0115-postgresql-authoritative-shard-registry-and-secret-free-projections.md) and [ADR 0122](docs/adr/0122-isolated-authenticated-relay-and-bounded-recovery.md) for current decisions and limitations.
+Authentication, access control and safe output handling are distinct responsibilities. A successful sign-in does not imply permission to administer the service. Security features and test results are not compliance certification or a guarantee of universal data erasure.

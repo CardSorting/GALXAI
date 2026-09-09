@@ -1,30 +1,26 @@
 # Migrating to capability-aware GALX
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
-
-Keep your application's preferred SDK shape while making model, identity, and retry behavior explicit. Start with the [quickstart](QUICKSTART.md) and [API boundaries](API_BASE_URL.md).
+> Private integration and operations guide. Public documentation describes capabilities and customer contracts only.
 
 ## Application clients
 
-1. Set the product base URL to `https://galx.ai/v1` and keep its credential server-side.
-2. Choose an explicit public model ID and verify the key's entitlement. A catalog entry is not live shard availability.
-3. Review automatic SDK retries. For uncertain admission or accepted jobs, preserve original operation identity and use existing job URLs rather than repeating inference.
-4. Treat multi-model cascades and races as deliberate application policy. Do not assume a failed request was unexecuted or that a different model is equivalent.
-5. Verify chat, images, streaming, tools, and application asset persistence independently through the actual client.
+Use `https://galx.ai/v1` with server-held application credentials and an explicit entitled public model ID. Catalog presence is not live availability. Preserve operation identity and recovery URLs across uncertain outcomes; review SDK retries so image synthesis is not repeated automatically.
 
-## Existing generic Codex image clients
+Use canonical image capability `openai-gpt-image-latest`. Legacy application image names resolve to the same capability and cannot be treated as independent fallback providers. Do not consume internal execution fields or headers as a customer contract. Default images are sanitized binary artifacts; request explicit JSON only through the supported allowlisted contract.
 
-The supported compatibility ID is public `openai-gpt-image-2` / relay `gpt-image-2`. Enabled OAuth workers execute `gpt-5.6-terra` with `image_generation` after real image verification. Read the response execution metadata. Provider-managed image selection and output dimensions are not exact Image API guarantees.
-
-Native API-key image requests remain exact. Other IDs such as Flux, Midjourney, or DALL-E are not guaranteed equivalent models. See the [image compatibility contract](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility).
+Verify chat, image, streaming, tool behavior, asset persistence and paid workflows independently. Internal compatibility details are in [the private contract](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility).
 
 ## Operators moving from the shared relay
 
-Use the [vNext runbook](RELAY_VNEXT_RUNBOOK.md). Drain and stop the legacy shared relay before assigning its credentials to one-container-per-shard workers. `docker-compose.relay.yml` is not a federation launcher. Move ingress to the supervised controller only after ownership and capabilities are verified.
+Drain and stop shared ownership before assigning credentials to federation workers. `docker-compose.relay.yml` is a legacy launcher. Start one supervised controller with persistent signing/journal state and verify ownership and capabilities before changing ingress. Multi-host shared ownership is not implemented.
 
-Empty or changed capability sets do not require container replacement. Credential or alias-configuration changes follow the normal worker lifecycle. Multi-host ownership requires a distributed lease beyond the current single-host implementation.
+## Operators moving from bulk import
+
+Remove automatic cache seeding and enabled host discovery from setup scripts. Their retired compatibility entrypoints fail explicitly. Enroll each new account through validated create-only operator input; refresh existing accounts through linked-desktop sign-in. Do not restore upsert behavior to bypass duplicate enrollment.
+
+Use `npm run relay:open` and `npm run relay:desktops` for delegated local sessions instead of entering an API key in the page. Link desktops explicitly, use repair holds when needed and verify sync/worker readiness before resuming.
 
 ## Verification and rollback
 
-Run capability/cooldown regressions and the isolated Docker canary for runtime changes. Record deployed revisions and actual downstream results. Preserve rollback images, checkpoint volumes, and signing state. Never run both topologies with the same credentials. Successful verification does not itself authorize billing or entitlement changes.
+Run [hardening checks](maintainers/RELAY_HARDENING.md) and keep mutating tests on an explicit isolated database. Preserve private state and rollback images; review holds before stopping/replacing workers. Never run both topologies with the same credentials or repopulate rejected fixture rows. See [the runbook](RELAY_VNEXT_RUNBOOK.md) and [enrollment guide](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md).

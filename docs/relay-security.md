@@ -1,12 +1,14 @@
 # Relay access and containment
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+> Private relay policy. See [security boundaries](SECURITY.md) and [the contract](FEDERATION_STRATEGY.md).
 
-The current [security guide](SECURITY.md) defines controller, worker, application, and tool-execution trust boundaries. The [API reference](RELAY_API_REFERENCE.md) defines route authentication and job ownership.
+Only the controller holds registry/vault and Docker authority. Workers receive one assigned credential and scoped internal keys; desktops have separate guest homes/profiles without host, source, Docker socket or registry/vault mounts. Containers do not establish hardware isolation or an egress firewall.
 
-One active shard has one isolated worker. Only the host controller receives registry/vault and Docker authority; workers receive a single provider credential and scoped internal keys. Inference access does not grant administration, and task correlation does not grant tenant identity.
+Inference keys cannot administer the controller or issue browser grants. Host launchers delegate separate loopback monitor and desktop sessions through one-use tickets. Operational assets/data require server authorization. Origin, Host, forwarding-header and WebSocket checks enforce the local boundary. No browser admin-key storage.
 
-Use the administrator capability view for operational diagnosis. Worker metrics and probe routes remain private and are not implicitly forwarded by the controller. Image probes perform real upstream work. Never expose server credentials through browser bundles or URLs.
+Explicit enrollment validates and creates without overwriting an existing account. Desktop sync safely reads an owned guest file, checks the linked account and conditionally replaces current authority after durable intent. It cannot export host keyrings, enroll unknown accounts or claim success after checkpoint failure.
 
-Preserve generation fences, signed-job affinity, and receipt scope during recovery. A checkpoint, model response, or stale health snapshot cannot grant replay or local tool execution authority. Follow the [runbook](RELAY_VNEXT_RUNBOOK.md) for supervised deployment and rollback.
+Holds block new work/replacements while allowing inspection; they cannot override removed, revoked, expired or rotated authority. Rejection is revision-specific. Preserve private signing/journal state and scope cleanup by ownership.
+
+Public application responses use explicit allowlists and sanitized images. Keep internal execution metadata, topology and upstream diagnostics out of public bodies, headers, streams and assets. Guest homes and job checkpoints are sensitive retention surfaces. These controls are not compliance certification.

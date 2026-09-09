@@ -1,5 +1,8 @@
 # Private engineering audit: egress and recovery
 
+<!-- docs-scope: operational-record -->
+> Dated engineering evidence, September 9, 2026. This record describes its own audit scope; use the [federation contract](../FEDERATION_STRATEGY.md) and [session verification](../maintainers/RELAY_SESSION_VERIFICATION_20260909.md) for subsequent relay decisions and deployment boundaries.
+
 Not public documentation. Do not publish implementation diagnostics from this report.
 
 ## Scope and evidence

@@ -11,7 +11,7 @@ The Worker name and entrypoint are in [wrangler.toml](../../wrangler.toml): `gal
 
 - The Next.js application owns the product API at `https://galx.ai/v1`.
 - The configured Worker route under `api.galx.ai` is a separate deployment and contract.
-- The federation uses a supervised host controller on loopback port 3001 and one Docker worker per active shard. Use the [vNext runbook](../RELAY_VNEXT_RUNBOOK.md); the shared Compose layout is legacy.
+- The federation uses a supervised host controller on loopback port 3001 and at most one Docker worker per eligible shard. Use the [vNext runbook](../RELAY_VNEXT_RUNBOOK.md); the shared Compose layout is legacy.
 - R2 storage is an application integration; image generation by the relay does not verify the gallery lifecycle.
 
 The relay rollout on 2026-09-07 verified local container isolation, authentication, and a short inference stream. It did not deploy the Worker or verify public ingress. See the [relay runbook](../VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md) for exact evidence and rollback steps.

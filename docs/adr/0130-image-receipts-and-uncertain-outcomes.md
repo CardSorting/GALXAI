@@ -3,7 +3,7 @@
 <!-- docs-scope: decision-record -->
 
 Date: 2026-09-08. Audience: internal maintainers; do not publish as site content.
-Status: implemented and locally verified. This hardening pass is not deployed.
+Status: implemented and locally verified on September 8; deployment evidence reconciled September 9 by component below.
 
 ## Decision
 
@@ -17,9 +17,13 @@ Image response frames have a separate bounded 32 MiB limit from the 2 MiB reques
 
 ## Evidence and limits
 
-Local verification: 75 relay tests; 19 public-boundary tests plus the image queue no-retry harness; 52 DreamBees desktop/mobile browser tests; nine studio unit tests; GALX production build and compiled HTTP authorization/public-surface verification. See the DreamBees build result and workspace audit record for its production build status.
+September 8 local verification: 75 relay tests; 19 public-boundary tests plus the image queue no-retry harness; 52 DreamBees desktop/mobile browser tests; nine studio unit tests; GALX production build and compiled HTTP authorization/public-surface verification. See the DreamBees build result and workspace audit record for its production build status.
 
 Status polling does not itself reconcile lost upstream results. Durable cross-restart deduplication, artifact recovery and a complete paid-entry transaction remain separate work. Browser memory cannot survive a reload when persistent storage is unavailable. Do not enable paid entry based on a mocked browser test.
+
+## Deployment reconciliation — September 9
+
+The production controller was reloaded with later source and the worker image was rebuilt. The existing worker container/generation was retained, so an image build does not establish replacement of that instance. No new GALX application or DreamBees deployment was established by the enrollment pass. The earlier frame-fix actual-client result remains evidence for that earlier release only. See [the component matrix](../maintainers/RELAY_SESSION_VERIFICATION_20260909.md#component-deployment-boundary).
 
 ## Pattern references
 

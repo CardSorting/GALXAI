@@ -1,31 +1,30 @@
 # Federation handover
 
-September 8 workspace update: [ADR 0129](docs/adr/0129-public-image-artifacts-and-verified-identity.md) governs public image artifacts, verified identity, and private operational evidence. The local build, 19 security checks, compiled HTTP verification, and 362-asset scan passed. These changes have not been deployed or verified against production in this session. Earlier execution-metadata disclosure is historical and must not be restored.
-
-
-Current authority: [federation contract](docs/FEDERATION_STRATEGY.md), [vNext runbook](docs/RELAY_VNEXT_RUNBOOK.md), and [ADR catalog](docs/adr/README.md). Use the [complete documentation catalog](docs/CATALOG.md) to distinguish active guides from scoped references and historical evidence.
+Private handover, updated September 9, 2026. Implementation through `96ae392`; detailed evidence is in [the session record](docs/maintainers/RELAY_SESSION_VERIFICATION_20260909.md).
 
 ## Dated deployed state
 
-[ADR 0127](docs/adr/0127-codex-image-tool-alias-production-cutover.md) records the September 7, 2026 production cutover: a supervised host controller on loopback port 3001, one active worker for the usable shard, and the existing relay tunnel targeting the host controller. The legacy shared container was stopped and retained for rollback.
+The enrollment investigation identified all 11 rejected production rows as exact leaked integration fixtures. Conditional cleanup revoked 11, skipped zero and preserved rows/ciphertext/counters. After controller reload there was one desired shard, one healthy worker and zero active rejected records; five capabilities were eligible at observation.
 
-The actual DreamBees image client returned a valid, decoded and visually inspected PNG through the promoted public gateway. Execution metadata disclosed the enabled Codex image-tool compatibility alias. Exact image-model selection and dimensions were not guaranteed. Every observed pool had one eligible shard and was fragile. Paid Hive remained disabled; no billing or entitlement was changed.
+A temporary hold then explicit resume preserved the serving container and generation, existing desktop and shard link. The updated worker image was built for future allocations; the existing worker was retained. This pass did not establish a new GALX application or DreamBees follow-up deployment.
 
-These are dated observations. Check current revision, image, ingress, ownership, capability freshness, and actual client output before claiming present health.
+Earlier September 7/8 actual-client image results remain dated evidence. No new live image generation or paid-entry transaction occurred in the enrollment pass. Actual new provider sign-in still requires the operator.
 
 ## Invariants to preserve
 
-- One active shard owns one isolated worker; workers receive no database/vault keys or host/source/Docker socket mounts.
-- Model and operation eligibility precede health/load selection. Capability loss removes new eligibility without destroying useful workers or terminating accepted streams.
-- Stale generation, inventory, health, and lease observations cannot overwrite current authority. Telemetry is observation-only.
-- The explicit OAuth image alias requires verified image evidence and a fresh execution-model capability. Native API-key requests remain exact.
-- Receipts are bounded and process-local. Signed jobs retain tenant/generation affinity. Reconcile uncertain execution before replay.
-- Parent/subagent correlation does not grant execution permission. Tools remain in the consuming runtime.
+- Retain automatic worker lifecycle; retire bulk host-cache discovery and automatic account seeding.
+- Validate explicit new enrollment and save create-only. Refresh existing authority through a linked desktop.
+- Keep shard authority, serving worker and repair desktop states separate.
+- Pause blocks new admissions/replacement starts; accepted work can finish. Registry revocation, expiry and rotation still win.
+- Use delegated host-launched sessions. Ordinary inference access is not administration.
+- Keep operational details private and public images/JSON sanitized and allowlisted.
+- Preserve revision/generation fences and original operation identity; do not replay uncertain synthesis.
+- Keep mutating integration fixtures on the explicit isolated test database.
 
 ## Operations
 
-Use the runbook for supervised installation, isolated canary checks, image verification, and rollback. Do not launch the legacy shared Compose layout with new workers or run both topologies against the same credentials. Preserve signing secrets and checkpoint volumes without treating them as durable exactly-once execution.
+Open `npm run relay:open` or `npm run relay:desktops` on the controller host. Follow [desktop repair](docs/maintainers/RELAY_DESKTOPS.md), [credential recovery](docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) and [the runbook](docs/RELAY_VNEXT_RUNBOOK.md).
 
-Remaining architectural limits include single-host controller ownership, process-local receipts, bounded event replay, and separately governed application billing/storage/tool execution. More hosts require a shared ownership lease first. Do not infer throughput, uptime, or compliance guarantees from fixture tests.
+The private journal/registry protocol supports conditional recovery, not a distributed atomic transaction. Custom guest homes are supported by explicit selection; keyring-only storage uses reauthentication. Unrelated accounts require reviewed links to existing eligible authority or separate enrollment.
 
-For documentation changes, run `python3 scripts/verify-docs.py` and `git diff --check`; runtime changes require the relevant tests described in the verification guide.
+Physical phone input and guest semantic accessibility remain unverified. A device challenge is not completed account approval. Preserve these limits in future status reports.

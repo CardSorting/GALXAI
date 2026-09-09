@@ -66,6 +66,7 @@ If cross-tenant conversation or message extraction attempts are reported:
 2. **Execute Database Integrity Verification**:
    ```bash
    npm run db:verify
+   # Requires explicit disposable loopback GALX_INTEGRATION_DATABASE_URL, never production.
    npm run db:test
    ```
 3. **Audit Token Revocation**:

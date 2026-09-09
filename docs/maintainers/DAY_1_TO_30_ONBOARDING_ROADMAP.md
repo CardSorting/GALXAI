@@ -45,7 +45,7 @@
    - `npm run bench:inference-boundary` (Randomized Branch-Blinded A/B Benchmark)
    - `npx tsx scripts/test-chat-context-hardening.ts` (Chat Normalization & Context Hardening Suite)
    - `npm run db:verify` (53-Migration Paranoid Linter & Rollback Validation)
-   - `npm run db:test` (Live Supabase 92-Test Zero-Egress Database Suite)
+   - `npm run db:test` with an explicit disposable loopback `GALX_INTEGRATION_DATABASE_URL`; production configuration must fail before repository initialization. See [test isolation](RELAY_CREDENTIAL_ENROLLMENT.md#isolated-integration-tests).
    - `npm run test:broccolidb:api` (19 Compaction Modes & Facade REST API)
    - `npm run test:broccolidb:hardening` (Fail-Closed Factual Provenance Gate)
    - `npm run test:router` (218 Router, Vault & Auth Tests)

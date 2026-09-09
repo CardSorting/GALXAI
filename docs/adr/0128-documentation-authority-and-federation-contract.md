@@ -1,28 +1,30 @@
 # ADR 0128: Documentation authority and federation contract
 
 <!-- docs-scope: decision-record -->
-> **Reading scope:** Decision history with topic-specific precedence. Original status and measurements are dated; consult the current contract before operating the relay. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
 
-Date: 2026-09-07. Status: Accepted; documentation refactor implemented.
-
-> Successor: [ADR 0129](0129-public-image-artifacts-and-verified-identity.md) supersedes public execution-metadata disclosure and defines customer documentation and verified-identity boundaries. The original body below preserves dated internal decisions and evidence; it is not permission to expose implementation details.
+Date: 2026-09-07; reconciled 2026-09-09. Status: accepted and implemented.
+Audience: private maintainers. [ADR 0129](0129-public-image-artifacts-and-verified-identity.md) governs public information independently.
 
 ## Problem
 
-Older deployment guides described a shared relay and unverified ingress, while newer decisions established 1:1 capability-aware federation and a verified image alias. API/SDK examples mixed application and worker contracts. Repeated defaults, historical test counts, and promotional guarantees made it difficult to identify the current safe action.
+Shared-relay instructions, unverified performance claims, repeated defaults and stale deployment status can contradict newer lifecycle and credential decisions. A precedence banner alone does not repair actionable obsolete commands elsewhere in the same document.
 
 ## Decision
 
-Use [FEDERATION_STRATEGY.md](../FEDERATION_STRATEGY.md) as the current relay contract, the vNext runbook for operations/defaults, and the relay API reference for transport/recovery. Rewrite active guides around those boundaries. Preserve broader subsystem references, research, commercial drafts, and dated evidence with explicit scope in the complete catalog.
+The [federation contract](../FEDERATION_STRATEGY.md) defines current internal behavior; the [runbook](../RELAY_VNEXT_RUNBOOK.md) defines operations and the [API reference](../RELAY_API_REFERENCE.md) defines transport/recovery. Enrollment and desktop guides own their workflows. Public site content explains capability and customer contracts only and must not import repository operational details.
 
-Preserve ADR bodies as records of their decisions and evidence. Add topic-specific precedence notes instead of retroactively rewriting historical verification. Acceptance, implementation, verification, and deployment are separate states. ADR 0126 establishes federation; ADR 0127 explicitly extends its no-substitution rule with one opt-in verified image alias and records production cutover. ADRs 0123–0125 retain database health authority within their own scope.
+Reconcile affected guides and ADR bodies in full when strategy changes. Update status, decision, consequences, examples, failure guidance and navigation together. Remove obsolete actionable instructions instead of leaving contradictory bodies beneath a successor note. Preserve original measurements and rollout facts in explicitly dated evidence sections or operational records; do not rewrite what was actually observed in the past.
 
-Every documentation Markdown file is cataloged and carries a scope marker. A dependency-free documentation check verifies catalog coverage, ADR IDs, local file links, and the current guide boundaries. Historical relative links are repaired without treating their content as current deployment instructions.
+Record topic-specific precedence: ADRs 0123–0125 govern database health, 0126 federation ownership/capability, 0127 the explicit image alias, 0129 public boundaries, 0130 uncertain image outcomes, 0131 operator access/holds, 0132 credential handoff and 0133 enrollment/test isolation. Unrelated subsystem decisions retain their scope.
 
-## Alternatives and tradeoffs
+Every documentation Markdown file has one scope marker and a complete catalog entry. ADR IDs are contiguous and indexed. Acceptance, implementation, local verification, image build, process rollout and actual-client verification are distinct states. Avoid undated counts and blanket deployed/not-deployed statements spanning different components.
 
-Deleting old records would remove useful rationale. Leaving all documents labelled authoritative would preserve conflicting instructions. Scope-labelled history plus concise current guides keeps context and discoverability while avoiding invented runtime guarantees. Domain references are retained, not newly certified by this editorial pass.
+## Alternatives and consequences
 
-## Verification and rollout
+Deleting history would lose rationale; leaving old procedures active would create competing instructions. Complete semantic reconciliation plus dated evidence preserves both usefulness and accuracy. Domain references and research are not newly certified by a relay documentation pass.
 
-Run `python3 scripts/verify-docs.py` and `git diff --check`. This change does not run inference, change database authority, replace workers, enable paid Hive, or establish a new live availability observation. Normal repository publishing may build the application; that does not replace federation containers.
+## Validation
+
+Run `python3 scripts/verify-docs.py`, semantic searches for retired guidance and `git diff --check`. Review command existence and linked source. The validator checks coverage/navigation, not every runtime claim. Public response/auth tests, production build and scoped rendered-page/browser-asset scans establish the relevant public boundary; none proves live deployment of every origin.
+
+Documentation publication alone changes no registry authority, worker ownership, account login, paid entitlement or production service.

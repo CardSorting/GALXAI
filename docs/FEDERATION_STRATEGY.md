@@ -1,94 +1,72 @@
 # Federation contract
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
-
-This is the current relay contract. Use the [runbook](RELAY_VNEXT_RUNBOOK.md) for commands and effective defaults, the [API reference](RELAY_API_REFERENCE.md) for transport behavior, and the [ADR catalog](adr/README.md) for decision history. A dated deployment observation is evidence at that time, not a live health check.
+> Private maintainer contract, reconciled September 9, 2026. Public documentation follows [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md).
 
 ## Ownership and capability are separate
 
-**One active shard owns one active relay container.** Shards need not expose the same models. A host controller reconciles encrypted registry credentials, Docker ownership, worker health, and capabilities. The controller is infrastructure, not a shared inference worker.
+A shard is registered credential authority; an inference worker executes requests; a repair desktop is an independent operator workspace. An eligible shard can own **at most one active managed worker** on a Docker host. Registered, rejected, expired, paused or unavailable records are not a count of serving containers. A desktop link does not enroll an account or add capacity.
 
-```mermaid
-flowchart TD
-    Request[Request with explicit model and operation] --> Index[Model capability index]
-    Index --> Fresh[Fresh capability and healthy relay]
-    Fresh --> Load[Eligible pool load selection]
-    Load --> Worker[One shard / one relay container]
-    Worker --> Upstream[Assigned upstream credential]
-    Registry[Credential registry] --> Controller[Host lifecycle controller]
-    Controller --> Worker
-    Worker --> Index
-```
+The controller reads the encrypted PostgreSQL registry and reconciles owned containers. Each worker receives one assigned credential, separate internal inference/admin keys and its own checkpoint volume. Workers receive no registry access, vault root, host home or Docker socket. Deterministic shard container names, ownership labels, generation checks and an exclusive controller lock enforce single-host ownership. Multiple Docker hosts require a distributed ownership lease before sharing credentials.
 
-The application gateway at `https://galx.ai/v1`, federation at `https://relay.galx.ai`, and separately deployed Cloudflare Worker are distinct authentication and deployment boundaries. Browser clients use an application backend; server credentials stay on the server.
+**Automatic worker lifecycle remains supported. Ambient credential population is retired.** Starting a controller or creating a desktop must not scan host logins or enroll an unknown account. Use [explicit enrollment](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md); refresh an existing account through its [linked desktop](maintainers/RELAY_DESKTOPS.md).
 
 ## Eligibility before load
 
-1. Identify the explicit requested model and operation. Images use an internal `image:<model>` capability key; callers omit that prefix.
-2. Look up that capability's shards in the reverse index.
-3. Exclude unknown, expired, unavailable, degraded, draining, or otherwise ineligible workers. Apply credential cooldown and execution-model dependencies.
-4. Select within that pool using recent errors, active streams, latency, queue depth, and remaining capacity.
-5. Reserve capacity through admission and reconcile the reservation with fresh worker observations.
+Cold starts validate authenticated model inventory before Docker allocation. A 401 rejects that credential revision; transport errors, timeouts, 403 and 5xx responses do not permanently reject credentials. Inventory acceptance proves inventory access, not an inference handshake or image tool.
 
-No eligible shard returns `503 model_temporarily_unavailable`. A saturated eligible pool returns `503 model_capacity_exhausted`. Unrelated idle relays cannot serve that request. There is no federation-wide waiting queue or implicit cross-model fallback. Application SDK cascades and races are explicit caller policies, potentially involving additional billable executions; they are not federation recovery.
+A worker starts in `DISCOVERING_CAPABILITIES`. Only fresh, verified capabilities with usable health and capacity admit work. The reverse index selects within the requested model pool before considering recent errors, streams, latency, queue depth and spare capacity. An unavailable pool returns `model_temporarily_unavailable`; a saturated eligible pool returns `model_capacity_exhausted`, both HTTP 503.
+
+There is no federation-wide waiting queue or implicit cross-model fallback. A catalog entry or live process is not proof of present capability.
 
 ## Dynamic evidence and lifecycle
 
-Each shard record exposes ownership, relay generation, provider, capability states and evidence expiry, health, and load. Pair states are `UNKNOWN`, `AVAILABLE`, `TEMPORARILY_UNAVAILABLE`, `NOT_AUTHORIZED`, and `DEGRADED`; the initial routing policy admits only eligible `AVAILABLE` pairs.
+| Condition | Behavior |
+| --- | --- |
+| Fresh eligible capability | Admit within that model's capacity |
+| Unknown, stale, degraded or empty capability | Stop new admissions; retain worker for rediscovery |
+| Authoritative credential 401 | Persist revision-specific rejection; suppress repeated starts |
+| Transient discovery/start failure | Retry with bounded backoff |
+| Operator maintenance hold | Block admissions and replacement starts; preserve an existing worker, including a rejected one |
+| Credential removed, revoked, expired or changed | Retire old authority; a hold cannot override registry authority |
+| Explicit resume | Remove hold; rejection, cooldown and capability checks still apply |
 
-Workers start in `STARTING`, discover authenticated inventory in `DISCOVERING_CAPABILITIES`, then become routable. Inventory refresh is periodic, bounded, and jittered. A malformed inventory does not replace valid evidence; retained evidence still expires. A global catalog entry or a matching credential alias is not proof of access.
+Empty capability state alone never deletes a worker, including after 120 seconds. Rotation permits validation of the new revision; stale failures cannot poison it. Journal failures must not be reported as saved state.
 
-Capability loss removes new-request eligibility without restarting the container or cancelling accepted streams. An empty inventory enters `CAPABILITY_EMPTY` and remains available for rediscovery; there is no automatic destruction after a 120-second grace period. Deleted, expired, revoked, or authoritatively invalid credentials remove mappings before drain and worker retirement. Invalid credentials remain suppressed until their credential revision changes.
-
-Explicit model-denied provider responses can withdraw a pair. Generic `403`, `404`, `route`, `429`, timeouts, and `5xx` alone do not prove model permission loss. A bounded restoration hold dampens flapping. Successful fresh discovery restores access without worker replacement.
+Desktop connection, saved home, account link, sign-in and serving status are independent. Closing the viewer keeps the workspace running; stopping it preserves its home; deletion is explicit. See [desktop operations](maintainers/RELAY_DESKTOPS.md).
 
 ## Health authority and stale results
 
-Capability versions, inventory epochs, credential revisions, worker generations, and monotonically increasing health revisions fence observations. An old success cannot erase a newer denial or cooldown. An equal-revision health replay cannot clear a locally observed failure. Container identity includes process start time: restarting the same Docker container does not preserve old health authority.
+Observations are fenced by credential revision, worker generation and inventory revision. Success cannot erase a concurrent authoritative denial. Equal-revision health replay cannot clear a local failure. Generic transport errors, throttling and route failures are insufficient evidence of model permission loss.
 
-Database account cooldown recovery is a separate authority domain. Attributable failures and current lease authority govern account health; telemetry is observation-only. An expired explicit cooldown permits a serialized recovery probe, not unrestricted traffic. Local checkout saturation, caller cancellation, and unrelated query errors do not establish a database-wide outage. Ambiguous SQL outcomes do not justify automatic replay. See ADRs 0123–0125 in the [decision catalog](adr/README.md).
+The database-backed application pool retains its separate lease authority. Federation uses local reservations and signed worker jobs; it does not acquire a database lease per upstream attempt.
 
 ## Explicit Codex image-tool compatibility
 
-`RELAY_CODEX_IMAGE_TOOL_ALIAS=true` enables exactly this OAuth compatibility route:
+The canonical public capability is `openai-gpt-image-latest`. Legacy application image aliases resolve to it, not independent fallback providers. The internal protocol ID remains `gpt-image-2`.
 
-| Requested model | Execution model and tool | Image-model selection |
-| --- | --- | --- |
-| Public `openai-gpt-image-2`; relay `gpt-image-2` | `gpt-5.6-terra` with `image_generation` | Provider-managed |
+With `RELAY_CODEX_IMAGE_TOOL_ALIAS=true`, eligible OAuth workers use `gpt-5.6-terra` with `image_generation` for that internal ID. Image-model selection is provider-managed; exact GPT-Image-2 identity, dimensions and Image API quality semantics are not guaranteed. API-key workers request their exact image model. This explicit compatibility route does not authorize other substitutions.
 
-This does **not** guarantee exact GPT-Image-2, exact output dimensions, or exact Image API quality controls. Native API-key execution retains its exact requested image model. Other image IDs are not remapped, and a failed request does not trigger substitution.
+Fresh execution-model inventory and real image evidence are required. Evidence lasts one hour; generation success renews it. Idle enabled workers perform a paid startup probe and successful renewal no more frequently than every 50 minutes, with failure backoff of 10, 20, then 40 minutes and spare-capacity checks. Inventory alone never proves image support.
 
-The alias requires both fresh execution-model inventory and a successful real image probe. Chat inventory alone cannot grant image access. Verified image evidence expires after one hour and successful image requests renew it. Enabled idle workers use spare capacity for startup verification and re-verification after 50 minutes; failures back off 10, 20, then 40 minutes. These probes consume upstream quota. Changing the flag requires worker replacement.
-
-Internal transport and administrator records preserve execution identifiers and capability evidence. Public application responses must not expose these records or execution headers. [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md) governs sanitized image artifacts and allowlisted customer contracts. Image availability remains independently inspectable by administrators from chat availability.
+Internal transport and administrator records preserve execution identifiers. Public bodies, headers, errors, streams and artifacts must not expose them. Binary images are sanitized by default; explicit JSON uses an allowlisted contract. See [the image boundary guide](maintainers/image-public-boundary.md).
 
 ## Parent and subagent execution
 
-Accept familiar SDK request shapes at documented application boundaries, then preserve explicit model, tenant, and execution authority. Resolve harmless input variation without making developers learn internal shard topology. Ambiguity about whether work executed requires reconciliation, not a guessed retry.
+Each logical operation gets an idempotency key, reused only for the same payload and principal. Task IDs correlate work; they do not grant authority. Accepted jobs return signed tenant- and generation-bound recovery URLs. Status, cancellation and stream recovery target the original worker even after capability removal; they cannot attach to a replacement.
 
-The parent assigns each logical operation an `Idempotency-Key`, a deadline, and a bounded concurrency budget. Child tasks retain their own keys and correlation IDs. `X-Galx-Task-Id` aids tracing; it grants no authority. A retry preserves the original key and payload. A new key represents intentionally new work.
+Controller receipts are process-local: ten minutes, 1,000 keys, 32 MiB aggregate and 8 MiB per retained response. A full window rejects new keyed admissions rather than evicting live evidence. Preserve the returned scope; changed scope or unknown admission requires reconciliation, not blind replay. Images dispatch once. This is not durable exactly-once execution.
 
-On `202`, retain signed job URLs and use them for status, stream, and cancellation. A worker replacement never inherits an old job. On uncertain admission, inspect existing job or trace evidence. Honor execution state and retry headers instead of retrying every `5xx`. Completion receipts are retrievable even after model eligibility disappears.
-
-Receipts are process-local and bounded, not durable exactly-once execution. Preserve `X-Galx-Idempotency-Scope` and send it as a retry precondition when available. A changed scope rejects the retry; a key alone cannot establish safe replay after restart or expiry. See the [request recovery table](RELAY_API_REFERENCE.md#request-recovery).
-
-Control/status traffic has a separate worker rate bucket from inference. Reconciliation, Docker inspection, job polling, body buffering, and shutdown have explicit limits and deadlines. Fair polling and per-worker bounds prevent one busy or invalid shard from stalling unrelated healthy pools. More parallel I/O is useful only within those limits.
+See [request recovery](RELAY_API_REFERENCE.md#request-recovery) and [ADR 0130](adr/0130-image-receipts-and-uncertain-outcomes.md).
 
 ## Operational visibility
 
-| Eligible shard count for a model | Redundancy state |
-| --- | --- |
-| 0 | `UNAVAILABLE` |
-| 1 | `FRAGILE` |
-| 2 or more | `HEALTHY` |
+Run `npm run relay:open` or `npm run relay:desktops` on the controller host. The launcher delegates a browser session without exposing the admin API key. Monitor sessions are read-only; desktop sessions separately authorize actions. Anonymous pages provide generic connection guidance; operational assets and data require server authorization.
 
-These states describe redundancy, not latency or an SLA. The administrator capability view shows model pools first, then shard/relay drill-down, evidence freshness, health, streams, and capacity. Stale snapshots must be labelled; liveness must not be presented as model readiness. Error messages should name the affected operation, execution state, and next safe action without exposing credentials or raw provider errors.
+Read capability, traffic hold, worker health and desktop connection separately. Structured activity provides safe event codes, timestamps and correlation identifiers. Prompts, tokens, raw provider errors and login contents stay out of the feed. Stale or partial telemetry is labelled.
 
 ## Verification and deployment boundary
 
-The required regression scenario uses A→{A,B}, B→{B,C}, C→{A,C}: withdraw B from shard A without restarting it, remove shard B and observe model B unavailable while other pools continue, then restore B on shard A without restarting it. Also cover stale health after restart, noisy failures, concurrent discovery/denial, accepted streams after capability loss, and uncertain admission.
+[ADRs 0131–0133](adr/README.md) govern access, handoff and enrollment. [The runbook](RELAY_VNEXT_RUNBOOK.md) defines operations; [the session record](maintainers/RELAY_SESSION_VERIFICATION_20260909.md) dates verification and deployment.
 
-[ADR 0127](adr/0127-codex-image-tool-alias-production-cutover.md) records the September 7, 2026 production cutover and successful DreamBees actual-client image verification. That observation found one usable shard, so all observed pools were fragile. Paid Hive remained disabled; successful image verification did not itself change billing or entitlement. Recheck live state before making a new operational claim.
-
-The current controller is single-host. Docker unique names and ownership labels prevent duplicate workers on that engine; a multi-host fleet requires a shared ownership lease before deployment. Persistent signing secrets do not make receipt storage durable. Application billing, asset storage, and tool execution retain their own authority and recovery contracts.
+Actual provider sign-in remains an operator action. Keyring extraction, cross-store atomic transactions, physical phone input, semantic accessibility within streamed pixels and a complete paid-entry transaction are not established by synthetic tests.

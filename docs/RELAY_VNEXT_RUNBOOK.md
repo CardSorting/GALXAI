@@ -1,128 +1,54 @@
 # Capability-aware relay vNext
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
-
-vNext consists of one host controller/front door and one isolated Docker worker per active OpenAI shard. The controller is infrastructure; it is not a relay owning multiple shards. Production now uses this topology; see the rollout evidence in ADR 0127. The stopped legacy container is retained for rollback.
+> Private operating guide. Follow the [federation contract](FEDERATION_STRATEGY.md), [desktop guide](maintainers/RELAY_DESKTOPS.md) and [enrollment guide](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md). Dated results belong in the [verification record](maintainers/RELAY_SESSION_VERIFICATION_20260909.md).
 
 ## Validate the implementation
 
-```sh
-npm run test:relay:capabilities
-npm run test:cooldown
-npx tsc --noEmit
-npm run lint
-docker build -f Dockerfile.relay -t galxai-relay:vnext .
-GALX_DOCKER_CANARY=1 npm run test:relay:docker
-```
+Run the [hardening checks](maintainers/RELAY_HARDENING.md) appropriate to the change. Synthetic tests do not authenticate a real account, certify production capacity or authorize paid probes.
 
-The Docker test creates a unique ownership namespace and three synthetic shards, checks model loss, recovery, and restart fencing, then removes only its containers. It does not read real shard credentials. It needs Docker Desktop's `host.docker.internal` reachability. Its inventory server contains test data only. Checkpoint volumes are retained; they can be removed separately after the test if no longer needed.
+The broad `npm run db:test` suite requires an explicitly isolated loopback test database. It must reject inherited production configuration before repository initialization. See [test isolation](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md#isolated-integration-tests).
 
 ## Start the host controller
 
-Supply the existing database/admin-registry and vault configuration through `.env.local`. Supply separate `RELAY_API_KEYS` and `RELAY_ADMIN_API_KEYS` for the front door. Do not put secret values in shell arguments or source control.
+Provision the encrypted registry, vault keys and separate inference/admin keys privately. Enroll intended accounts explicitly. Bulk import and host-login discovery are retired.
 
 ```sh
-RELAY_FEDERATION_NAMESPACE=vnext-canary \
-RELAY_FEDERATION_PORT=3301 \
-RELAY_FEDERATION_IMAGE=galxai-relay:vnext \
 npm run relay:federation
 ```
 
-Unlike the synthetic Docker test, this command reads actual active registry credentials. **Do not run it alongside the legacy shared relay using those same shards.** For pre-cutover testing, use a separate credential registry or use the synthetic test command above.
+The launcher defaults to namespace `vnext-canary`, loopback port 3301 and image `galxai-relay:vnext`. These defaults do not isolate registry credentials: never start a second controller against credentials already owned by production. Use synthetic fixtures for a disposable canary.
 
-The default listener is loopback only. Open `http://127.0.0.1:3301/federation` and enter the administrator key to inspect capability pools. `GET /api/capabilities` and `GET /health/ready` require an administrator key. `/health` reports service liveness only. Inference uses the existing `/v1/chat/completions`, `/v1/images/generations`, and job route shapes. Every new inference request must name the exact model.
+The controller persists its signing secret, exclusive lock, rejection revisions, maintenance holds, desktop journal and egress state beneath `.relay/federation-<namespace>/`. Preserve this private directory across restarts. Recover a stale lock only after verifying the previous process stopped.
 
-The launcher stores a signing secret and controller lock under ignored `.relay/federation-<namespace>/` with restrictive permissions. Preserve the secret across controller restarts so signed job links remain verifiable. If a crash leaves the lock, verify its PID is no longer running before removing that lock. Never remove a live controller's lock. Graceful shutdown drains owned workers and retains checkpoint volumes.
+Use `npm run relay:open` and `npm run relay:desktops` on the host. The launcher delegates an authorized session; do not enter the admin key into a browser. `/health` is liveness only. `/health/ready`, `/api/capabilities` and controller `/api/telemetry` require admin authorization.
 
 ## Configuration and bounds
 
-| Setting | Default | Purpose |
-| --- | --- | --- |
-| `RELAY_FEDERATION_NAMESPACE` | `vnext-canary` | Controller ownership label and lock scope |
-| `RELAY_FEDERATION_PORT` | `3301` | Host loopback front door |
-| `RELAY_FEDERATION_IMAGE` | `galxai-relay:vnext` | Per-shard worker image |
-| `CAPABILITY_REFRESH_INTERVAL_MS` | `60000` | Worker refresh upper interval; jitter is 80–100% |
-| `CAPABILITY_TTL_MS` | `120000` | Maximum model evidence lifetime |
-| `RELAY_SHARD_CONCURRENCY` | `4` | Per-worker active stream admission |
-| `MAX_IMAGE_PAYLOAD_BYTES` | `33554432` | Worker image WebSocket response-frame limit; separate from the 2 MiB request-body limit |
+| Setting/bound | Default or behavior |
+| --- | --- |
+| `RELAY_FEDERATION_NAMESPACE` | `vnext-canary`; production uses an explicit namespace |
+| `RELAY_FEDERATION_PORT` | 3301, loopback |
+| `RELAY_FEDERATION_IMAGE` | `galxai-relay:vnext` |
+| `RELAY_DESKTOP_IMAGE` | `galxai-relay-desktop:v1` |
+| `RELAY_CODEX_IMAGE_TOOL_ALIAS` | Enabled only by explicit `true` |
+| Capability refresh / TTL | 60 seconds with 80–100% jitter / 120 seconds |
+| Cold-start inventory deadline | 10 seconds, before Docker allocation |
+| Worker shard concurrency | 4 by default |
+| Request body / image frame | 2 MiB / 32 MiB |
+| Reconciliation starts and retirements | Bounded to three concurrent operations |
 
-Worker tuning variables apply to worker configuration; the current driver uses its bounded defaults. Changing host environment variables does not silently propagate them into workers. Change driver configuration explicitly before tuning a fleet. Capability snapshots show effective capacity and evidence deadlines.
+Host environment settings are not all automatically propagated into workers. Inspect [driver configuration](../src/relay/docker-shard-driver.ts) and effective capability snapshots before tuning. An image build or config edit does not update a running container.
 
-Empty capabilities do not delete a worker, including after 120 seconds. An invalid credential is removed and suppressed until its credential revision changes. Unknown/degraded/stale/empty shards do not serve new requests. There is no cross-model fallback and no global waiting queue that can borrow another model's capacity.
+Empty capability state retains a worker for recovery. A rejected credential revision suppresses repeated cold starts. Transient failures back off. A maintenance hold blocks new work and replacement starts while retaining an existing worker; authority removal, revocation, expiry or rotation can still retire it.
 
 ## Image verification
 
-Model inventory is not proof of an image tool. Image operation records use an internal `image:<model>` key in the registry; API callers send the model ID without that prefix. A model can therefore be healthy for chat and unavailable for images.
+Inventory does not prove tool support. Internal image-operation keys use `image:<model>`; callers send the model ID without that prefix. Chat and image eligibility are independent.
 
-On the assigned worker, an administrator can POST `/api/capabilities/probe-image` with an exact `model` and a small `prompt`. This performs a real upstream generation and can incur usage. It publishes availability only after receiving an image payload and passing the observation fence. It does not guess another model or grant arbitrary aliases. The explicitly enabled Codex alias has the bounded paid verification cadence described below; other probes require an intentional verification action. No production probe is run by the synthetic test suite.
+An administrator can intentionally POST `/api/capabilities/probe-image` on the assigned worker with an exact model and small prompt. This performs real upstream generation and can incur usage. Publication requires valid image output and current observation fences. Enabled compatibility workers also have the bounded paid cadence below.
 
-## Production cutover checklist
-
-1. Keep paid Hive entry disabled. Save the current deployment image and ingress target for rollback.
-2. Validate the synthetic canary and confirm the actual shard inventory can be authenticated using the intended registry/vault configuration.
-3. Stop new admissions to the legacy shared relay and drain its active streams. Stop the shared container before assigning its shards to vNext.
-4. Start the controller under the host's process supervisor with the persistent signing secret and registry access. Confirm one worker per active shard and correct model pools. Never run two controllers for the same namespace; multi-host deployment needs a distributed ownership lease first.
-5. Route the existing authenticated ingress to the controller's loopback front door through the host's established tunnel setup. The controller is not directly Internet-exposed.
-6. Verify the actual downstream chat and image clients end-to-end. Image verification is a prerequisite for paid Hive activation, which remains a separate authorized billing/entitlement action. Verify the sanitized artifact through the actual public client. Inspect execution evidence only through administrator-authorized diagnostics.
-7. For rollback, pause ingress, drain and stop vNext workers, restore the saved shared relay image/configuration and original ingress, then verify downstream requests again. Do not run both topologies with the same credentials during rollback.
-
-The existing `docker-compose.relay.yml` describes the legacy shared deployment and is not a vNext fleet launcher. Rebuilding that deployment with the new worker without this migration will fail its one-shard guard. The synthetic tests do not change the production tunnel or perform a cutover. The separately performed production cutover is recorded in ADR 0127.
-
-
-## Parent and subagent request contract
-
-Give each logical operation its own `Idempotency-Key`, and reuse that key only with the same payload when recovering its acknowledgement. `X-Galx-Task-Id` correlates a parent or child operation; it does not grant tenant authority. The controller supplies trusted tenant identity and a fresh `X-Request-Id`. The chat and image adapter options accept `taskId`, `idempotencyKey`, and `idempotencyScope`.
-
-| Response | Caller action |
-| --- | --- |
-| `202` | Save the signed `id`, `statusUrl`, and `streamUrl`. Poll or reconnect to those URLs; do not submit another job. `Operation-Location` is the status URL and `Location` is the stream URL. |
-| `409 request_in_progress` | Retry the same request with the same key after `Retry-After` to retrieve its acknowledgement. Admission may still be pending. |
-| `409 idempotency_conflict` | The key belongs to different parameters. Reconcile the original operation; use a new key only for intentionally different work. |
-| `409 result_not_retained` | Work finished but exceeded the response cache budget. Do not repeat synthesis to retrieve it. |
-| `relay_admission_unknown` or `idempotency_scope_changed` | Execution is uncertain. Inspect any existing job or operator trace; do not blindly replay. |
-| `job_transport_unavailable` | Retry the existing job URL using `Retry-After`; admission already happened. |
-| `503` before admission | Honor `Retry-After` and `X-Should-Retry`. Capacity is specific to the requested model. |
-
-The adapters preserve HTTP status, the safe error code, execution state, retry delay, request ID, and retry scope in `RelayDispatchError`. They do not automatically replay failures or expose raw provider error messages.
-
-The controller's explicit-key receipts are **process-local**, tenant- and route-scoped, retained for ten minutes from admission. They hold at most 1,000 live keys and 32 MiB of response/capture bytes, with an 8 MiB per-response cap. A full key window rejects new keyed work instead of evicting live deduplication evidence. Large images still stream, but their bytes may not be retained for replay. Completed receipts remain retrievable after model capability loss. These are bounded retry semantics, not durable exactly-once execution.
-
-Save the `X-Galx-Idempotency-Scope` response header and send it with a retry when available. A changed controller scope rejects the retry explicitly. Without that precondition, a controller restart or expired receipt may permit new execution under the same key. Recovery across an acknowledgement lost before receiving any scope requires external operation tracking; a stable key alone is insufficient. Signed job links remain generation-bound and never attach to a replacement worker.
-
-## Throughput and failure isolation
-
-The controller polls at most 32 jobs per batch, at most two per worker generation, with four concurrent calls and per-job backoff from two to sixteen seconds. Selected work rotates to the tail. Worker status/cancel/stream traffic uses a separate tenant rate bucket from inference admission. Stale generation reservations do not consume replacement-worker capacity.
-
-Docker ownership reads inspect up to 64 containers per command and time out after five seconds. Capability and acknowledgement bodies have explicit size limits. Registry reads and container listing overlap; startup/discovery and retirement are bounded to three concurrent operations. A draining invalid shard does not stall healthy shard reconciliation. Shutdown rejects new admissions immediately, allows accepted HTTP work up to thirty seconds, aborts remaining front-door I/O, and attempts every owned worker removal even if one fails.
-
-Successful requests cannot erase a concurrent authoritative model denial. A newer inventory or worker generation fences older observations, and equal-revision health replays cannot clear a local failure. Generic route errors, throttling, and transport failures remain insufficient evidence of model permission loss.
-
-These choices follow the explicit caller intent and bounded retry principles described in [AWS's idempotent API guidance](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/), while retaining GALX's exact-model routing and one-worker-per-shard lifecycle. The synthetic tests validate correctness and bounded scheduling; they are not a production throughput benchmark or DreamBees end-to-end image verification.
-
-## Explicit Codex image-tool compatibility alias
-
-`RELAY_CODEX_IMAGE_TOOL_ALIAS=true` opts OAuth workers into this compatibility contract:
-
-| Requested image ID | Execution | Image model selection |
-| --- | --- | --- |
-| Public `openai-gpt-image-2` / relay `gpt-image-2` | `gpt-5.6-terra` with `image_generation` | Provider-managed; **not a guarantee of exact GPT-Image-2** |
-
-This is an intentional alias, not a fallback after an error. It applies only to that ID and OAuth shards. API-key workers continue to request the exact image model. Other image model IDs are not remapped. [OpenAI's image guide](https://developers.openai.com/api/docs/guides/image-generation) distinguishes the mainline model calling the image tool from the tool's own image-model selection.
-
-The generic tool route does not guarantee exact Image API `size` or `quality` rendering parameters; returned image dimensions can differ.
-
-The execution model must be present in fresh authenticated inventory, and a real image probe must succeed before the alias enters routing. A chat-model listing alone never grants image eligibility. Alias evidence expires after one hour; active image successes renew it. Idle enabled workers make one paid startup verification and then at most one successful re-verification per 50 minutes, using spare capacity. Failed verification backs off 10, 20, then 40 minutes. This maintenance can consume upstream image quota; enable the flag only for fleets intended to serve this compatibility route. Expired evidence fails closed until successful verification. A negative model observation removes eligibility without destroying an otherwise useful worker.
-
-Worker and public gateway responses expose `execution.requestedModel`, `execution.executionModel`, `execution.routingMode`, `execution.tool`, and `execution.imageModelSelection`, with `X-Galx-Execution-Model` and `X-Galx-Routing-Mode` headers. Capability records expose the alias mode and dependency; signed job identity and model-specific scheduling remain unchanged. Configuration changes require worker replacement; they are not silently applied to existing containers.
-
-## Supervised macOS deployment
-
-`node --import tsx scripts/install-federation-service.ts` generates and validates a launchd plist under the ignored controller state directory. Set `RELAY_CODEX_IMAGE_TOOL_ALIAS=true` explicitly for the compatibility route. After draining and stopping the legacy container, run the same command with `--install` to install and bootstrap `com.galxai.federation.production` on loopback port 3001. It uses the repository's `.env.local`; the plist contains no credentials. The installer refuses to overwrite an existing installed service.
-
-The registry projector accepts both encrypted OAuth `accessToken` and API-key `apiKey` records. An API-key credential gets a stable internal account identity derived from its key. Malformed or unreadable active credentials still fail closed. Upstream 401 responses retire the corresponding worker until its credential revision changes; registry records are not deleted by the controller.
-
-To verify DreamBees through its actual client, load its server environment and run:
+For actual-client verification, configure the intended DreamBees checkout and its server environment:
 
 ```sh
 DREAMBEES_ROOT=/path/to/DreamBees-Rooms \
@@ -130,16 +56,54 @@ DREAMBEES_IMAGE_OUTPUT=/tmp/dreambees-verified.png \
 node --env-file=/path/to/DreamBees-Rooms/.env.local --import tsx scripts/verify-dreambees-image.ts
 ```
 
-This makes one real image request with the client's own retry policy, validates its PNG using DreamBees' image validator, and logs only status, request ID, execution metadata, elapsed time, byte count, and SHA-256. Visually inspect the saved artifact before declaring verification complete.
+This invokes the real client. Validate bytes, decode and visually inspect the artifact; test public metadata removal and response allowlists separately. Keep output and operational evidence private. Successful delivery does not verify application asset persistence or a paid-entry transaction.
+
+## Production cutover checklist
+
+The shared-to-federation cutover was performed on September 7; it is not a pending setup step. For an existing federation deployment:
+
+1. Record source revision, configured images, running image IDs, ingress, holds and current workload.
+2. Validate the candidate and retain known-good rollback images and private state.
+3. Review existing holds. Apply a hold when an existing worker must survive controller reload; verify it before stopping the controller.
+4. Stop admissions and allow accepted work to settle. Graceful stop drains/removes unheld workers; held workers can be adopted after restart.
+5. Start one supervised controller for the namespace. Verify registry authority, ownership/generations, capabilities, desktop links and restored holds.
+6. Replace workers or desktop containers deliberately when their image/configuration must change; a controller restart alone does not upgrade them.
+7. Verify the affected downstream behavior, then explicitly resume appropriate holds. Resume does not clear rejection or cooldown.
+
+For a first migration from a shared relay, drain and stop that process before assigning its credentials to workers. `docker-compose.relay.yml` is a legacy shared launcher and cannot substitute for the federation launcher.
+
+Rollback uses the saved compatible source/image/configuration and private state after stopping competing ownership. Inspect current holds and accepted work first. Do not blindly restart a historical shared container, clear rejection journals or run two topologies with the same credentials. Billing and entitlement changes remain separate from deployment.
+
+## Parent and subagent request contract
+
+Use one idempotency key per logical operation and preserve payload, principal and returned scope. Save signed job URLs after acceptance; poll, stream or cancel that job instead of submitting new inference. `X-Galx-Task-Id` correlates parent/child work without granting authority.
+
+The [API recovery table](RELAY_API_REFERENCE.md#request-recovery) governs conflicts, uncertain admission and generation loss. Receipts last ten minutes in the controller process, with 1,000 keys, 32 MiB aggregate and 8 MiB per response. They are not durable exactly-once execution. Image synthesis is not automatically replayed after an uncertain outcome.
+
+## Throughput and failure isolation
+
+Job polling uses bounded batches, per-worker fairness and per-job backoff. Job recovery has a separate rate bucket from new inference. Reservations from stale generations do not consume replacement capacity. Docker inventory reads, telemetry bodies, starts and drains have bounds so one failed worker does not block the entire fleet.
+
+Shutdown rejects new admissions and bounds accepted front-door I/O. Maintenance holds deliberately change worker retirement behavior. Observation fencing prevents stale success, inventory or health replay from clearing a newer denial. These tests establish correctness and bounded scheduling, not a production throughput SLA.
+
+## Explicit Codex image-tool compatibility alias
+
+The canonical customer capability is `openai-gpt-image-latest`; legacy aliases are compatibility names for it. Internally, enabled OAuth workers execute `gpt-image-2` through `gpt-5.6-terra` with `image_generation`. The provider selects the image model. Native API-key execution remains exact.
+
+Fresh inventory and successful image evidence are required. Evidence expires after one hour; real success renews it. Idle enabled workers perform a paid startup probe and successful renewal no more often than every 50 minutes, with failed probes backing off 10, 20, then 40 minutes. Use spare capacity. See [the full contract](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility).
+
+Execution identifiers and diagnostics remain in internal transport and administrator records. Public gateway responses must strip them from bodies and headers and sanitize image artifacts.
+
+## Supervised macOS deployment
+
+`node --import tsx scripts/install-federation-service.ts` prepares and validates a launchd plist in the ignored state directory. Its explicit `--install` option installs the service; it refuses to overwrite an existing installed plist. The plist reads server configuration from the repository environment without embedding credentials.
+
+The September 9 deployment used `com.galxai.federation.production`, namespace `production`, loopback port 3001 and worker image tag `galxai-relay:image-frame-fix`. These are dated deployment observations; inspect the active supervisor before changing it.
 
 ## September 8 image-frame repair
 
-A synthetic image response above 2 MiB reproduced `Max payload size exceeded`: image WebSocket frames incorrectly shared the small request-body limit. Image responses now have a separate 32 MiB bound while HTTP request bodies retain 2 MiB. Legacy Image 2 and Image 1.5 application names resolve to the same canonical image capability and must not be treated as independent fallback providers. DreamBees now requests `openai-gpt-image-latest`, explicit base64 JSON, and PNG.
+A real client image larger than the former frame limit succeeded after the separate 32 MiB response-frame repair. The exact request, artifact digest and component deployment evidence are retained in [the session verification record](maintainers/RELAY_SESSION_VERIFICATION_20260909.md#september-8-image-frame-evidence).
 
-The versioned image `galxai-relay:image-frame-fix` passed 73 relay checks, 19 public security checks, the production build, and the isolated three-container canary. Use `GALX_DOCKER_CANARY_IMAGE` to test a versioned image without replacing the default tag. Production rollout retains `galxai-relay:rollback-image-frame-20260908` and `.relay/federation-production/image-frame-before.plist`. Normal drain and single-owner rules still apply.
+## Image resilience follow-up
 
-After rollout, the actual DreamBees client returned HTTP 200 in 33,343 ms with a 2,106,942-byte, 1254×1254 PNG. The artifact was fully decoded, metadata-checked, and visually inspected. Its base64 frame exceeds the former 2 MiB cap. Request ID: `f0c7302a-1d2e-432b-ac08-9784ec2c8848`; SHA-256: `59b9d411c0928732a267beefb23bdfea2f97ffe117d5de5ae1af28d477da14b4`. DreamBees Cloudflare version `4de078a7-36bb-4024-8aee-b15a9ed11d8b` contains the corrected client. The live public model catalog listed only `openai-gpt-image-latest` for images. Paid Hive configuration was unchanged; this verifies image delivery, not its full paid-game transaction.
-
-## Image resilience follow-up (2026-09-08; local only)
-
-[ADR 0130](adr/0130-image-receipts-and-uncertain-outcomes.md) records single-dispatch image execution, bounded tenant idempotency receipts, and uncertain-result recovery. Relay and application queue changes require their respective deployments; the earlier image-frame rollout does not include this follow-up. Both application production builds passed locally. Do not interpret polling or a cached receipt as durable artifact reconciliation.
+[ADR 0130](adr/0130-image-receipts-and-uncertain-outcomes.md) defines single-dispatch images and uncertain-result recovery. The September 9 controller reload and worker-image build do not prove deployment of every application or DreamBees change, nor replacement of a retained worker. Check the dated component matrix before claiming rollout.

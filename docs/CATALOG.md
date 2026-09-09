@@ -1,19 +1,20 @@
 # Complete documentation catalog
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Navigation and authority for the complete Markdown corpus. Start with the [current contract](FEDERATION_STRATEGY.md).
+> Private navigation and authority for the full Markdown corpus. Start with [the current contract](FEDERATION_STRATEGY.md).
 
-Each document is classified below. Current guides define relay operations; domain references retain their own component scope and have not been newly certified by this refactor. Decision records retain original evidence with precedence notes. Research and commercial drafts are not deployment or performance guarantees. Operational records require their own environment/date checks.
+Current guides define operations. Domain references retain component scope; research and commercial drafts are not runtime guarantees. ADR bodies reconcile decisions and status while preserving explicitly dated evidence. Operational records describe the environment and revision observed, not perpetual deployment state.
 
-The documentation validator checks complete coverage, scope markers, local file links, and ADR identity. It does not execute example commands or certify every historical claim. Update this catalog whenever a document is added or renamed.
+Public content follows [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md). Repository topology, credentials, execution mechanics and diagnostics must not be copied into site content. See [September 9 verification](maintainers/RELAY_SESSION_VERIFICATION_20260909.md) for component rollout.
 
-Internal maintainer navigation: public-facing guidance follows [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md) and the [image boundary guide](maintainers/image-public-boundary.md). Repository operational records must not be copied into site content. The September 8 changes are locally verified; deployment and origin remediation require separate evidence.
+The validator checks complete coverage, scope markers, local links and ADR identity. Semantic/source review is also required; navigation validation does not certify every historical claim. Update this catalog when files, titles or scopes change.
 
 ## Current guides
 
 | Document | Path |
 | --- | --- |
-| [API base URL](API_BASE_URL.md) | `API_BASE_URL.md` |
+| [API base URL and response contracts](API_BASE_URL.md) | `API_BASE_URL.md` |
+| [Public API reference](API_REFERENCE.md) | `API_REFERENCE.md` |
 | [GALX architecture](ARCHITECTURE.md) | `ARCHITECTURE.md` |
 | [Complete documentation catalog](CATALOG.md) | `CATALOG.md` |
 | [Cloudflare implementation and deployment boundaries](CLOUDFLARE_STRATEGY.md) | `CLOUDFLARE_STRATEGY.md` |
@@ -38,12 +39,16 @@ Internal maintainer navigation: public-facing guidance follows [ADR 0129](adr/01
 | [Architecture decision records](adr/README.md) | `adr/README.md` |
 | [ADR authoring and lifecycle](maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) | `maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md` |
 | [Parent and subagent execution guide](maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md) | `maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md` |
+| [Maintainer CLI reference](maintainers/MAINTAINER_CLI_CHEATSHEET.md) | `maintainers/MAINTAINER_CLI_CHEATSHEET.md` |
 | [Maintainer guides](maintainers/README.md) | `maintainers/README.md` |
+| [Relay credential enrollment and recovery](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) | `maintainers/RELAY_CREDENTIAL_ENROLLMENT.md` |
+| [Relay desktops and manual repair](maintainers/RELAY_DESKTOPS.md) | `maintainers/RELAY_DESKTOPS.md` |
 | [Federation hardening checks](maintainers/RELAY_HARDENING.md) | `maintainers/RELAY_HARDENING.md` |
 | [Federation fleet and quota](maintainers/RELAY_QUOTA_AND_FLEET.md) | `maintainers/RELAY_QUOTA_AND_FLEET.md` |
 | [Federation request telemetry](maintainers/RELAY_TELEMETRY.md) | `maintainers/RELAY_TELEMETRY.md` |
 | [Capability and recovery UX](maintainers/RELAY_TELEMETRY_UX.md) | `maintainers/RELAY_TELEMETRY_UX.md` |
 | [Upstream outage response](maintainers/UPSTREAM_PROVIDER_OUTAGE_AND_DEGRADATION.md) | `maintainers/UPSTREAM_PROVIDER_OUTAGE_AND_DEGRADATION.md` |
+| [Image public boundary verification](maintainers/image-public-boundary.md) | `maintainers/image-public-boundary.md` |
 | [Provisioning and preflight](playbooks/01-provisioning-and-preflight.md) | `playbooks/01-provisioning-and-preflight.md` |
 | [Deployment and release](playbooks/02-deployment-and-release.md) | `playbooks/02-deployment-and-release.md` |
 | [Traffic and model-specific scaling](playbooks/03-live-traffic-and-fleet-scaling.md) | `playbooks/03-live-traffic-and-fleet-scaling.md` |
@@ -59,7 +64,6 @@ Internal maintainer navigation: public-facing guidance follows [ADR 0129](adr/01
 
 | Document | Path |
 | --- | --- |
-| [📖 GALXAI Universal API Reference](API_REFERENCE.md) | `API_REFERENCE.md` |
 | [🥦 BroccoliDB Compaction Engine: Engineer Onboarding & Architecture Guide](BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md) | `BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md` |
 | [BroccoliDB Algorithmic DeDuplication & High-Velocity Compaction Engine Specification](BROCCOLIDB_DEDUPLICATION_ENGINE_SPECIFICATION.md) | `BROCCOLIDB_DEDUPLICATION_ENGINE_SPECIFICATION.md` |
 | [🌌 GALXAI Universal Developer Client SDK](DEVELOPER_CLIENT_SDK.md) | `DEVELOPER_CLIENT_SDK.md` |
@@ -68,14 +72,14 @@ Internal maintainer navigation: public-facing guidance follows [ADR 0129](adr/01
 | [Frequently asked questions](FAQS.md) | `FAQS.md` |
 | [Agent clients and the GALXAI relay](LUMI.md) | `LUMI.md` |
 | [GALXAI Natural Navigation, OmniSearch & Low-Latency Substrate Guide](NATURAL_NAVIGATION_AND_OMNISEARCH.md) | `NATURAL_NAVIGATION_AND_OMNISEARCH.md` |
-| [GALXAI Enterprise OAuth 2.0 / 2.1, FAPI & Token Lifecycle Specification](OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md) | `OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md` |
+| [OAuth and token lifecycle boundaries](OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md) | `OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md` |
 | [GALXAI Product Surface Strategy](PRODUCT_SURFACE_STRATEGY.md) | `PRODUCT_SURFACE_STRATEGY.md` |
-| [GALXAI: Provider-as-Auth Technical Specification](PROVIDER_AS_AUTH_SPECIFICATION.md) | `PROVIDER_AS_AUTH_SPECIFICATION.md` |
+| [Provider credentials and application identity](PROVIDER_AS_AUTH_SPECIFICATION.md) | `PROVIDER_AS_AUTH_SPECIFICATION.md` |
 | [🧠 Frontier Reasoning Models Developer Guide](REASONING_MODELS_GUIDE.md) | `REASONING_MODELS_GUIDE.md` |
 | [💻 GALXAI Multi-Ecosystem SDK & CLI Cheatsheet](SDK_CHEATSHEET.md) | `SDK_CHEATSHEET.md` |
 | [⚡ GALXAI Universal Developer SDK: Specification & Architecture Reference](SDK_SPECIFICATION.md) | `SDK_SPECIFICATION.md` |
 | [GALXAI: Security Posture & Threat Model](SECURITY_POSTURE_AND_THREAT_MODEL.md) | `SECURITY_POSTURE_AND_THREAT_MODEL.md` |
-| [Standardized OAuth & Ingestion Architecture Specification](STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md) | `STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md` |
+| [Authentication and credential ingestion boundaries](STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md) | `STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md` |
 | [⚡ Universal Streaming & SSE Protocols](STREAMING_AND_SSE_PROTOCOL.md) | `STREAMING_AND_SSE_PROTOCOL.md` |
 | [⚙️ Structured Outputs, Tool Calling & Agent Runtimes](STRUCTURED_OUTPUTS_AND_TOOLS.md) | `STRUCTURED_OUTPUTS_AND_TOOLS.md` |
 | [🛡️ GALXAI: Paranoid Supabase PostgreSQL Architecture & AI Agent Governance Specification](SUPABASE_PARANOID_ARCHITECTURE_SPEC.md) | `SUPABASE_PARANOID_ARCHITECTURE_SPEC.md` |
@@ -88,7 +92,6 @@ Internal maintainer navigation: public-facing guidance follows [ADR 0129](adr/01
 | [🔧 Maintainer Debugging & Diagnostic Runbooks](maintainers/DEBUGGING_AND_DIAGNOSTIC_RUNBOOKS.md) | `maintainers/DEBUGGING_AND_DIAGNOSTIC_RUNBOOKS.md` |
 | [🛠️ Maintainer Guide: Flaky Tests, CI Traps & Deterministic Triage](maintainers/FLAKY_TESTS_AND_CI_TRIAGE.md) | `maintainers/FLAKY_TESTS_AND_CI_TRIAGE.md` |
 | [🪝 Maintainer Guide: Git Workflows, Hooks & Conventional Commits](maintainers/GIT_WORKFLOWS_AND_HOOKS.md) | `maintainers/GIT_WORKFLOWS_AND_HOOKS.md` |
-| [⚡ GALXAI Maintainer CLI Cheatsheet & Command Reference](maintainers/MAINTAINER_CLI_CHEATSHEET.md) | `maintainers/MAINTAINER_CLI_CHEATSHEET.md` |
 | [📖 Maintainer Glossary & Architectural Lexicon](maintainers/MAINTAINER_GLOSSARY_AND_LEXICON.md) | `maintainers/MAINTAINER_GLOSSARY_AND_LEXICON.md` |
 | [🎓 Maintainer Onboarding Knowledge Check & Self-Assessment](maintainers/MAINTAINER_ONBOARDING_ASSESSMENT.md) | `maintainers/MAINTAINER_ONBOARDING_ASSESSMENT.md` |
 | [Maintainer Runbook: Shard Authority and Key Rotation](maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md) | `maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md` |
@@ -232,16 +235,23 @@ Internal maintainer navigation: public-facing guidance follows [ADR 0129](adr/01
 | [ADR 0126: Capability-aware 1:1 shard relay federation](adr/0126-capability-aware-shard-relay-federation.md) | `adr/0126-capability-aware-shard-relay-federation.md` |
 | [ADR 0127: Explicit Codex image-tool alias and production federation cutover](adr/0127-codex-image-tool-alias-production-cutover.md) | `adr/0127-codex-image-tool-alias-production-cutover.md` |
 | [ADR 0128: Documentation authority and federation contract](adr/0128-documentation-authority-and-federation-contract.md) | `adr/0128-documentation-authority-and-federation-contract.md` |
+| [ADR 0129: Public image artifacts and verified identity](adr/0129-public-image-artifacts-and-verified-identity.md) | `adr/0129-public-image-artifacts-and-verified-identity.md` |
+| [ADR 0130: Image receipts and uncertain outcomes](adr/0130-image-receipts-and-uncertain-outcomes.md) | `adr/0130-image-receipts-and-uncertain-outcomes.md` |
+| [ADR 0131: Private operator desktops and maintenance holds](adr/0131-private-operator-desktops-and-maintenance.md) | `adr/0131-private-operator-desktops-and-maintenance.md` |
+| [ADR 0132: Recoverable desktop credential handoff](adr/0132-recoverable-desktop-credential-handoff.md) | `adr/0132-recoverable-desktop-credential-handoff.md` |
+| [ADR 0133: Explicit validated enrollment and isolated integration fixtures](adr/0133-explicit-validated-enrollment-and-test-isolation.md) | `adr/0133-explicit-validated-enrollment-and-test-isolation.md` |
 
 ## Operational records
 
 | Document | Path |
 | --- | --- |
+| [Private engineering audit: egress and recovery](internal/EGRESS_RECOVERY_AUDIT_2026-09-09.md) | `internal/EGRESS_RECOVERY_AUDIT_2026-09-09.md` |
+| [Relay session verification — September 9, 2026](maintainers/RELAY_SESSION_VERIFICATION_20260909.md) | `maintainers/RELAY_SESSION_VERIFICATION_20260909.md` |
 | [Billing recovery release](operations/billing-release.md) | `operations/billing-release.md` |
 | [Production relay recovery — September 7, 2026](operations/relay-production-repair.md) | `operations/relay-production-repair.md` |
 | [Wallet lifecycle repair — September 7, 2026](operations/wallet-lifecycle.md) | `operations/wallet-lifecycle.md` |
 
-## Research and evaluation
+## Research references
 
 | Document | Path |
 | --- | --- |
@@ -272,7 +282,7 @@ Internal maintainer navigation: public-facing guidance follows [ADR 0129](adr/01
 | [🏆 Document 07: Evaluation & Deployment Gate](training/07_EVALUATION_AND_DEPLOYMENT_GATE.md) | `training/07_EVALUATION_AND_DEPLOYMENT_GATE.md` |
 | [🚀 GALXAI Foundation Model Training Suite: Master Directory](training/README.md) | `training/README.md` |
 
-## Commercial and product drafts
+## Commercial drafts
 
 | Document | Path |
 | --- | --- |
@@ -305,11 +315,3 @@ Internal maintainer navigation: public-facing guidance follows [ADR 0129](adr/01
 | [🔍 Playbook: GitHub Repository Audit & Non-Spam Migration Outreach](prospecting/01-github-repository-audit-playbook.md) | `prospecting/01-github-repository-audit-playbook.md` |
 | [📡 High-Velocity Multi-Channel Lead Scraping Engine](prospecting/02-multi-channel-lead-scraping-engine.md) | `prospecting/02-multi-channel-lead-scraping-engine.md` |
 | [✉️ High-Converting Outbound Sales Cadences (45%+ Open, 20%+ Reply)](prospecting/03-high-converting-cold-outreach-cadences.md) | `prospecting/03-high-converting-cold-outreach-cadences.md` |
-
-## Public boundary decision and maintainer guidance
-
-| Document | Path |
-| --- | --- |
-| [Public image artifacts and verified identity](adr/0129-public-image-artifacts-and-verified-identity.md) | `adr/0129-public-image-artifacts-and-verified-identity.md` |
-| [Image public boundary verification](maintainers/image-public-boundary.md) | `maintainers/image-public-boundary.md` |
-| [Image receipts and uncertain outcomes](adr/0130-image-receipts-and-uncertain-outcomes.md) | `adr/0130-image-receipts-and-uncertain-outcomes.md` |

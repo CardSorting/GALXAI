@@ -1,6 +1,6 @@
 # 🤝 Contributing to GALXAI
 
-> Current relay authority: [federation contract](docs/FEDERATION_STRATEGY.md), [runbook](docs/RELAY_VNEXT_RUNBOOK.md), and [ADR catalog](docs/adr/README.md). One active shard owns one worker; model capability precedes load; retries preserve execution authority. Use [parent/subagent guidance](docs/maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md) and `python3 scripts/verify-docs.py` for documentation changes. Older subsystem targets below are not federation SLAs.
+> Current relay authority: [federation contract](docs/FEDERATION_STRATEGY.md), [runbook](docs/RELAY_VNEXT_RUNBOOK.md), and [ADR catalog](docs/adr/README.md). An eligible shard owns at most one active managed worker; enrollment is explicit and validated, repair desktops are separate, model capability precedes load, and retries preserve execution authority. Use [parent/subagent guidance](docs/maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md) and `python3 scripts/verify-docs.py` for documentation changes. Older subsystem targets below are not federation SLAs.
 
 Thank you for your interest in contributing to GALXAI! We welcome contributions from developers, researchers, and distributed systems engineers worldwide.
 

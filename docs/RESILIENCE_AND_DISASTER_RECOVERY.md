@@ -1,31 +1,36 @@
 # Resilience and recovery
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+> Private recovery guidance. Use the [federation contract](FEDERATION_STRATEGY.md) and [runbook](RELAY_VNEXT_RUNBOOK.md).
 
-Recovery follows the authority that owns the failed operation. The [federation contract](FEDERATION_STRATEGY.md) separates capability, shard lifecycle, admission, and database health.
+| Failure | Recovery boundary |
+| --- | --- |
+| Empty/stale model evidence | Remove admission eligibility; retain worker and rediscover |
+| Credential 401 | Persist revision rejection; repair authority before starting again |
+| Inventory timeout, 403 or 5xx | Back off; do not permanently reject from this evidence alone |
+| Registry unavailable | Fail authority checks; never populate from host caches |
+| Held worker needs repair | Preserve it and accepted work; pause new admissions/replacement |
+| Revoked, removed, expired or changed authority | Retire old worker even if held |
+| Lost acknowledgement | Reconcile same receipt/job; do not repeat synthesis blindly |
+| Controller restart | Browser sessions/receipts are process-local; preserve private durable state |
+| Worker generation gone | Old signed job cannot move to replacement |
+| Credential checkpoint failure | Report explicit error; recover private intent without overwriting newer authority |
+| Desktop inventory failure | Retain record, report unavailable; do not infer deletion or recreate blindly |
 
-| Failure | Effect | Recovery |
-| --- | --- | --- |
-| Explicit model denial | Remove only that shard/model from new routing | Fresh authoritative rediscovery after stabilization |
-| Empty capability inventory | Keep worker in `CAPABILITY_EMPTY` | Continue bounded discovery; no automatic restart |
-| Generic route error, timeout, or throttling | Does not prove model permission loss | Classify attributable failure and preserve backoff |
-| Invalid/deleted/expired credential | Remove mappings, drain/retire worker | Valid credential revision and normal reconciliation |
-| Stale health or discovery result | Cannot overwrite newer authority | Discard stale observation; await fresh evidence |
-| Lost admission acknowledgement | Execution uncertain | Reconcile receipt/job/trace; no blind replay |
-| Existing job transport failure | Accepted work remains authoritative | Retry original signed URL |
-| Worker replacement | Old job generation unavailable | Report explicit loss; never attach to new worker |
-| Controller restart | Process-local receipts lost | Use scope precondition and external operation tracking |
-| Model pool saturation | Only that capability lacks capacity | Honor retry guidance; do not borrow unrelated shards |
+## Preserve before repair
 
-Accepted streams survive capability removal unless their actual execution fails. SSE replay and checkpoints are bounded; they are not durable execution logs. A partial stream, disconnected socket, or cancellation does not prove completed work or refund eligibility.
+Record the affected shard revision, worker generation, request ID and structured event privately. Pause the linked shard if preserving its worker is needed. A pause blocks new work and replacement starts; accepted work can complete. It does not override registry revocation, expiry or rotation.
 
-Database cooldown recovery uses current lease authority and a serialized probe after an explicit deadline. Observation-only telemetry cannot clear cooldowns. Local connection pressure does not justify declaring the whole database unavailable or replaying ambiguous SQL.
+Preserve the controller signing secret, rejection/maintenance journals, desktop journal, guest home volumes and worker checkpoints according to their data sensitivity. Worker checkpoints can contain unfinished prompts; guest homes can contain login credentials. A backup is sensitive even when registry tokens are encrypted.
 
-## Incident flow
+## Restore and verify
 
-Identify component, requested capability, request/task ID, execution state, worker generation, and evidence timestamps. Inspect model-specific eligibility before changing capacity. Keep healthy pools serving while invalid workers drain. Record sanitized facts and uncertainty; do not reset health to make a dashboard green.
+Establish one controller owner, restore compatible private state and reconnect through the host launcher. Graceful stop removes unheld workers, so do not assume every restart preserves container identity. Verify ownership and generation before resuming.
 
-Use [deployment rollback](RELAY_VNEXT_RUNBOOK.md) only after stopping admissions and draining the active topology. Preserve signed-job state and checkpoint volumes. Never operate legacy and vNext workers against the same shard simultaneously. Multi-host failover is not implemented by the single-host controller lock.
+Credential sync uses a durable intent and compare-and-swap: finalize an already committed replacement or retry unchanged authority, never overwrite a newer external revision. Separate journal and registry stores are not atomically committed together.
 
-Synthetic tests establish failure isolation under fixtures. Dated production evidence belongs in an ADR; it is not a throughput SLA. Application assets, financial settlement, and external agent tools each require their own recovery procedure.
+Closing a desktop viewer is safe for ongoing processes. Stop preserves home; deletion requires explicit confirmation and removes owned resources. Preview cleanup must not select production desktops by a broad name pattern.
+
+## Limits
+
+Process-local receipts do not survive controller restart, expired receipt windows can permit new execution, and missing artifacts are not recovered merely by polling. Keep uncertain outcomes explicit. Physical phone input, guest semantic accessibility and live provider sign-in require their own verification. Use the [dated record](maintainers/RELAY_SESSION_VERIFICATION_20260909.md), not old test counts, to assess deployment.

@@ -1,14 +1,41 @@
 # Federation hardening checks
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+> Private validation guide. Choose checks for the changed boundary; record revision, environment and results rather than treating historical test counts as a gate.
 
-Verify one active shard per worker and no worker database/vault/socket/home mounts. Require fresh authenticated capabilities before routing and validate model-specific overload behavior.
+## Fast regressions
 
-Cover noisy failures, authoritative denials, concurrent inventory refresh, equal health revisions, old generation health, cooldown recovery, accepted streams after capability loss, and empty capability recovery without restart. Cover signed job tenant affinity, uncertain acknowledgement, receipt scope change, and replay after capability removal.
+```sh
+npm run test:relay:capabilities
+node --import tsx --test scripts/test-relay-enrollment.ts
+node --import tsx --test scripts/test-public-information-boundary.ts scripts/test-image-public-http.ts scripts/test-relay-client-auth.ts
+npm run test:relay:desktop-login
+npx tsc --noEmit
+python3 scripts/verify-docs.py
+```
 
-Run `npm run test:relay:capabilities`, `npm run test:cooldown`, type checking, and relevant build checks for runtime changes. Run the isolated Docker canary for lifecycle changes. Record actual output and environment; do not copy historic assertion counts as a gate.
+The capability suite covers lifecycle, desktop/credential recovery, maintenance, monitor authorization, telemetry and HTTP/adaptive-quota behavior. Enrollment tests cover retired entrypoints, validation and isolation. Public-boundary tests inspect adversarial bodies, headers, errors and artifacts. Guest tests exercise CLI/source handling without a real account sign-in.
 
-Inspect bounded body reads, receipt storage, polling fairness, independent control buckets, startup/drain concurrency, and shutdown deadlines. A synthetic throughput fixture does not establish production capacity. Documentation-only changes use the documentation validator.
+## Storage and real containers
 
-See the [federation contract](../FEDERATION_STRATEGY.md), [runbook](../RELAY_VNEXT_RUNBOOK.md), [API recovery table](../RELAY_API_REFERENCE.md#request-recovery), and [observability guide](../TELEMETRY_AND_OBSERVABILITY.md).
+```sh
+node --import tsx --test scripts/test-shard-enrollment-storage.ts
+npm run test:relay:docker
+node --import tsx scripts/test-relay-lifecycle-docker.ts
+```
+
+The storage harness uses disposable PostgreSQL plus mocked REST tests. Read its prerequisites before running. The broad `npm run db:test` requires an explicit isolated loopback database and must fail under production configuration; see [test isolation](RELAY_CREDENTIAL_ENROLLMENT.md#isolated-integration-tests).
+
+Docker canaries use synthetic inventories/credentials. The federation canary removes containers but retains checkpoint volumes under its existing driver behavior. The lifecycle canary removes its containers and checkpoint volumes. Desktop previews use a scoped test manifest for retryable cleanup. Never expand cleanup to normal production workspaces.
+
+## Build and browser checks
+
+Run `npm run build` and relevant source lint. For changed guest/worker code, build the corresponding image and test that candidate explicitly. A successful build does not replace a running container.
+
+Exercise session issuance, origin/host restrictions, ordinary-key denial, anonymous asset/data denial, read-only monitor isolation, renewal/revocation, link/generation races and display backpressure. Exercise actual guest input when changing its transport. Inspect native accessibility and layout at desktop and phone widths.
+
+Scan rendered public pages and browser assets for selected private markers and inspect raw public HTTP responses/artifacts before claiming a clean public boundary. Public documentation source is [content.ts](../../src/lib/docs/content.ts); private repository docs must not be bundled there.
+
+## Acceptance limits
+
+Fixtures do not prove provider approval, current upstream compatibility, physical phone input, guest semantic accessibility or paid application completion. Real inference can incur usage and needs its own bounded verification. Record exact deployments separately from local tests; see [the session record](RELAY_SESSION_VERIFICATION_20260909.md).

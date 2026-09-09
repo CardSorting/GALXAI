@@ -39,7 +39,7 @@ This guide covers the internal codebase structure, architectural layers, how to 
 │   ├── manage-migrations.ts          # Migration executor and status manager
 │   ├── push-migrations-direct.ts     # Direct Supabase migration push script (npm run db:push)
 │   ├── verify-supabase-integrity.ts  # Paranoid PostgreSQL linter (npm run db:verify)
-│   ├── test-supabase-integration.ts  # Live Supabase 92-test zero-egress suite (npm run db:test)
+│   ├── test-supabase-integration.ts  # Isolated loopback integration suite (explicit GALX_INTEGRATION_DATABASE_URL)
 │   ├── test-chat-context-hardening.ts # Chat normalization & context hardening test
 │   ├── verify-vercel-readiness.ts    # 8-Phase Pre-Flight Audit Engine
 │   ├── sync-vercel-env.ts            # Automated Vercel Secret Synchronizer
@@ -362,7 +362,7 @@ const asset = await galxDb.assets.uploadUserSessionImage({
   contentType: 'image/png',
   prompt: 'Cinematic wide-angle view of a cybernetic space station',
   revisedPrompt: 'A highly detailed rendering of a modular orbital outpost...',
-  model: 'openai-gpt-image-2',
+  model: 'openai-gpt-image-latest',
   aspectRatio: '16:9',
   size: '1792x1024'
 });
@@ -493,7 +493,7 @@ export function GalxImageGenerator({
         body: JSON.stringify({
           prompt,
           aspect_ratio: aspectRatio,
-          model: 'openai-gpt-image-2',
+          model: 'openai-gpt-image-latest',
           sessionId,
         }),
       });
@@ -650,7 +650,7 @@ export async function POST(req: NextRequest) {
         'Idempotency-Key': idempotencyKey,
       },
       body: JSON.stringify({
-        model: body.model || 'openai-gpt-image-2',
+        model: body.model || 'openai-gpt-image-latest',
         prompt: body.prompt,
         aspect_ratio: body.aspect_ratio || '16:9',
         quality: body.quality || 'hd',
@@ -697,7 +697,7 @@ export async function generateImageAction(formData: {
       'Idempotency-Key': crypto.randomUUID(),
     },
     body: JSON.stringify({
-      model: 'openai-gpt-image-2',
+      model: 'openai-gpt-image-latest',
       prompt: formData.prompt,
       aspect_ratio: formData.aspectRatio || '16:9',
       quality: 'hd',
@@ -733,7 +733,7 @@ const client = new OpenAI({
 
 // Standard OpenAI visual synthesis call:
 const response = await client.images.generate({
-  model: 'openai-gpt-image-2',
+  model: 'openai-gpt-image-latest',
   prompt: 'A hyperrealistic mechanical clockwork humming bird',
   // @ts-ignore - GALXAI accepts declarative aspect_ratio or standard size
   aspect_ratio: '16:9',

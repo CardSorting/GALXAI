@@ -8,7 +8,7 @@ Start with the component and execution state. Product gateway keys, controller k
 ## Diagnostic order
 
 1. Check controller `/health` for reachability.
-2. Authenticate to `/federation` or `/api/capabilities` and inspect the requested model's eligible pool, evidence freshness, cooldown, and worker generation.
+2. Open `npm run relay:open` on the controller host, or use server admin authorization for `/api/capabilities`, and inspect the requested model's eligible pool, evidence freshness, cooldown, and worker generation.
 3. Distinguish unavailable capability from saturated capacity. Idle unrelated models do not resolve either condition.
 4. Find the request ID, execution state, receipt scope, and any signed job URLs.
 5. Follow the [request recovery table](RELAY_API_REFERENCE.md#request-recovery) before submitting more inference.
@@ -19,17 +19,26 @@ Start with the component and execution state. Product gateway keys, controller k
 | `model_capacity_exhausted` | Honor retry guidance for the eligible pool; inspect active streams/reservations |
 | `route`, generic 403/404, or timeout | Insufficient evidence of model permission loss; inspect sanitized upstream classification |
 | Image unavailable while chat works | Chat inventory does not verify image tools; inspect image evidence and alias dependency |
-| Unexpected image dimensions/model | Inspect disclosed compatibility execution; OAuth tool selection is provider-managed |
+| Unexpected image dimensions/model | Inspect private administrator evidence; the public capability does not promise exact provider model/dimensions |
 | `relay_admission_unknown` | Work may have executed; reconcile instead of blindly replaying |
 | `job_transport_unavailable` | Retry the original job URL, not inference admission |
 | `relay_generation_gone` | Original worker is gone; never attach old work to a replacement |
 | Stale dashboard | Retained snapshot is not routing authority; restore authenticated refresh |
 | Controller admin 401 | Use the controller administrator credential; worker admin errors are separate |
-| Browser origin rejected | Use the application backend; do not expose server credentials |
+| Browser origin rejected | Operator pages require the host launcher and local origin; product clients use their application backend |
+| Monitor asks to reconnect | Relaunch from the host; do not paste an admin key into the page |
+| Many rejected records but few workers | Inspect source/revision evidence; registry count is not serving capacity; only exact known fixtures qualify for targeted cleanup |
+| Cold start repeatedly fails | Inspect preflight classification/backoff; 401 suppresses a revision, while 403/5xx/timeouts are transient |
+| Login saved but old credential still used | Review link, safe file source, validation, checkpoint and worker-applied state separately |
+| Wrong account or updated elsewhere | Preserve current authority; review matching/link or complete the intended account sign-in |
+| Credential checkpoint error | Keep the recoverable intent; retry after storage recovery without overwriting a newer revision |
+| Healthy desktop, unavailable shard | Desktop connection is independent; inspect hold, credential and model evidence |
+| Paused shard will not replace worker | Hold intentionally blocks replacements; review authority and explicitly resume when appropriate |
+| `db:test` rejects environment | Supply a dedicated loopback test database, never disable the production guard |
 
 ## Recovery boundaries
 
-Invalid credentials require authorized replacement through the registry; changing task IDs, clearing quota counters, or manually setting healthy is not recovery. Empty capabilities alone do not require a container restart. A newer credential revision and authoritative discovery restore normal eligibility.
+Use the [linked desktop](maintainers/RELAY_DESKTOPS.md) for existing-account repair, or [validated enrollment](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) for a new account. A maintenance hold preserves an existing worker while blocking new admissions and replacements; registry removal, revocation, expiry or rotation still wins. Changing task IDs, clearing rejection/quota state or manually setting healthy is not recovery. Empty capabilities alone do not require a container restart. A newer credential revision and authoritative discovery restore normal eligibility.
 
 Database checkout saturation and query-specific errors must not become global cooldown evidence. Observation-only telemetry cannot clear or extend authoritative cooldowns. Preserve current lease and generation fences during diagnosis.
 

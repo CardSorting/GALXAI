@@ -1,12 +1,12 @@
 # Federation request telemetry
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+> Private request investigation. [Telemetry overview](../TELEMETRY_AND_OBSERVABILITY.md) defines access and retention.
 
-Use the controller capability view for topology and private worker telemetry for execution traces. `/metrics` and worker telemetry routes are not implicitly exposed by the controller.
+Start with the affected operation's opaque request ID and safe activity code. Correlate task, shard, worker generation, admission, execution and recovery phases. Do not infer completion from acceptance, an open socket or nonzero chunks.
 
-Correlate request/task IDs, requested model, execution metadata, worker generation, admission outcome, and status URLs. Separate accepted work from completed work and uncertain execution. Chunk counts are not token counts; concurrent task durations are not additive wall time.
+The controller exposes aggregated `/api/telemetry` to server-side admins and `/api/monitor/state` to delegated read-only monitor sessions. Worker traces remain bounded and private. Inspect freshness and missing workers before interpreting counts.
 
-Observe model pool redundancy and evidence expiry separately from process liveness. Keep snapshots visibly stale when disconnected. Telemetry cannot change authoritative account health and must not expose provider credentials or prompt content.
+Separate unknown admission, accepted job transport failure, expired generation and completed result not retained. Follow [request recovery](../RELAY_API_REFERENCE.md#request-recovery); changing a key to bypass a receipt can duplicate work.
 
-See the [federation contract](../FEDERATION_STRATEGY.md), [runbook](../RELAY_VNEXT_RUNBOOK.md), [API recovery table](../RELAY_API_REFERENCE.md#request-recovery), and [observability guide](../TELEMETRY_AND_OBSERVABILITY.md).
+Allowlist event fields. Exclude tokens, authorization, prompts, responses, raw provider errors, login files and guest output. Keep execution identifiers in private records. Telemetry never changes registry health or authorizes retry. See [source](../../src/relay/federation-telemetry.ts) and [hardening checks](RELAY_HARDENING.md).

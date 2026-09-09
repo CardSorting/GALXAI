@@ -14,9 +14,9 @@
 * **Impact**: credential custody, multi-worker consistency, revocation, auditability
 * **Migrations**: `20260904150000` through `20260904210000`
 
-## Current implementation scope (2026-09-07)
+## Current implementation scope (reconciled 2026-09-09)
 
-The durable lease requirements below describe the platform pool's database-backed dispatch path. The standalone `src/relay/relay-server.ts` reads the PostgreSQL credential registry but does **not** acquire a database lease for each upstream attempt. Its shard slots, retry budget, and observed provider-auth rejection are process-local. An upstream rejection does not automatically revoke the registry row or propagate to another relay replica. [ADR 0122](0122-isolated-authenticated-relay-and-bounded-recovery.md) defines that deployed relay boundary.
+The durable lease requirements below describe the platform pool's database-backed dispatch path. The standalone `src/relay/relay-server.ts` reads the PostgreSQL credential registry but does **not** acquire a database lease for each upstream attempt. The federation's slots and receipts are process-local, while rejection revisions and maintenance holds have private durable journals. Rejection does not automatically revoke a registry row or provide multi-host propagation. [ADR 0126](0126-capability-aware-shard-relay-federation.md) defines federation ownership; [ADRs 0131–0133](README.md) govern holds, desktop handoff and explicit enrollment.
 
 “Secret-free” refers to credential projections/journals excluding provider secrets. Relay job checkpoints can still contain unfinished prompt/messages; it is not a zero-retention promise. The Docker deployment disables personal credential discovery and stores relay state in a dedicated named volume.
 
@@ -54,7 +54,7 @@ Operator / OAuth callback proposes registration or rotation
 
 The governing rule is:
 
-> PostgreSQL contains accepted credential authority. BroccoliDB contains a replaceable routing projection. The journal contains secret-free observations. No raw credential is durably copied to local JSON, browser storage, logs, queues, or edge KV.
+> PostgreSQL contains accepted credential authority. BroccoliDB contains a replaceable routing projection. The journal contains secret-free observations. Registry projections must not durably copy raw credentials to local JSON, browser storage, logs, queues or edge KV. The isolated desktop's operator-owned provider CLI login file is a distinct, intentional credential source under [ADR 0132](0132-recoverable-desktop-credential-handoff.md), not a replica of the registry.
 
 ### 2.1 Credential custody
 
@@ -89,7 +89,7 @@ The high-speed pool still scores candidates and maintains per-process scheduling
 
 Every acquisition through this database-backed lease path requires an idempotency key. Lease procedures use a consistent shard-before-lease lock order to avoid acquisition/release/scavenger deadlocks. Long-lived streams renew their lease by heartbeat; renewal requires the current fencing token and transport is cancelled if authority can no longer be proven. Synchronous pool methods remain available only for simulations and operator diagnostics; they must never be described as cross-worker ownership.
 
-The service-role Data API fallback uses a database-owned registry upsert function. Its conflict path updates only control-plane fields and cannot overwrite live reservation, usage, concurrency, or fencing counters from a stale worker projection.
+Generic registry updates through the service-role Data API use a database-owned registry upsert function. New operator enrollment instead uses create-only SQL/REST persistence under ADR 0133; duplicate creation must not overwrite existing authority. The desktop bridge performs conditional credential replacement under ADR 0132. Its conflict path updates only control-plane fields and cannot overwrite live reservation, usage, concurrency, or fencing counters from a stale worker projection.
 
 Legacy tier leases and composite gateway RPCs previously formed competing authority paths. Their client/runtime grants are revoked and their tables remain owner-only forensics. Versioned gateway v2 RPCs accept a request idempotency key, serialize duplicate admissions before shard selection, and delegate to the same authoritative acquire/release functions. The L1 gateway cache is keyed by request ID; it can replay one request's decision but cannot lend the same lease to unrelated work. Wallet settlement is guarded by a unique lease receipt so ambiguous postflight retries cannot double-charge.
 
@@ -104,7 +104,7 @@ The adjacent LUMI/community compute-authority repositories follow the same failu
 | Kubernetes `resourceVersion` plus LIST/watch | monotonic `registry_revision`, replaceable worker projection, journal offset for replay |
 | Envoy xDS version/nonce ACK-NACK separation | accepted registry revision is distinct from projector delivery and acknowledgement |
 | Transactional outbox | registry row and secret-free journal fact commit atomically |
-| Stripe idempotency | stable HMAC shard ID makes repeated operator imports converge on one record |
+| Stable resource identity | HMAC shard ID identifies one account; duplicate enrollment is rejected without resetting the existing record |
 | Vault leases | renewable, fenced work leases; future edge access is short-lived and revocable, never a root-credential copy |
 | Temporal service separation | durable authority, task delivery, and worker execution remain distinct concerns |
 
@@ -121,7 +121,7 @@ The adjacent LUMI/community compute-authority repositories follow the same failu
 | Empty authoritative registry | Replace the projection with empty; do not restore local seeds |
 | Journal projector unavailable | Registry commits continue; projector resumes from `journal_offset` |
 | Slow or failed telemetry batch | Requeue within bounded memory; expose failure count and last failure time |
-| Duplicate credential import | Stable ID upsert; no duplicate logical identity |
+| Duplicate operator enrollment | Create-only conflict; preserve credentials, ownership, revocation and counters |
 | Legacy/synthetic entries | Reversible quarantine before deletion |
 
 ## 5. Security boundary
@@ -139,8 +139,8 @@ The adjacent LUMI/community compute-authority repositories follow the same failu
 ## 6. Operations
 
 ```bash
-# Explicitly import operator-owned local provider credentials into PostgreSQL
-npm run shards:import
+# Explicit validated enrollment; inject operator OAuth input privately first
+node --env-file-if-exists=.env.local --import tsx scripts/manage-shards.ts --add
 
 # Inspect counts and remediation categories without printing identities/secrets
 npm run shards:doctor
@@ -154,6 +154,8 @@ npm run shards:test-authority
 ```
 
 `--quarantine-legacy` is a reversible remediation: it sets `status = revoked` and `permission_retracted = true`. Deletion is a separate, explicit operation after retention and incident review.
+
+Bulk cache import is retired. Refresh existing accounts through the linked-desktop bridge; validation and recovery rules are in [the enrollment guide](../maintainers/RELAY_CREDENTIAL_ENROLLMENT.md). The create-only policy does not retroactively change every legacy application ingestion path.
 
 Key and incident procedures are defined in [Shard Authority and Key Rotation](../maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md), including transactional dry-run rewrap, database-password rotation, and legacy JSON response.
 

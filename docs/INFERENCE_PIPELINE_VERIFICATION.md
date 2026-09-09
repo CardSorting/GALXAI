@@ -1,33 +1,24 @@
 # Inference verification
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+> Private verification procedure. [The runbook](RELAY_VNEXT_RUNBOOK.md) and [dated session record](maintainers/RELAY_SESSION_VERIFICATION_20260909.md) separate source, fixtures and deployment.
 
-Verify each boundary independently: application authorization, configured app-to-controller transport, credential projection, capability discovery, eligible admission, worker execution, returned payload, and any application storage. See the [contract](FEDERATION_STRATEGY.md).
+## Preconditions
 
-## Public image boundary
+Use explicitly enrolled authority; the inference verification script awaits registry initialization and no longer falls back to bulk seeding. Confirm intended environment, model entitlement and worker capability before live requests. Inventory acceptance is not a successful inference handshake.
 
-Use the [image boundary guide](maintainers/image-public-boundary.md) for authorization, raw HTTP, artifact, rendered-page, and browser-asset checks. [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md) records the September 8 local verification; it does not establish production rollout. Run `npm run test:image:security` and `npm run build` for changes to this boundary.
+Run [targeted regressions](maintainers/RELAY_HARDENING.md) first. Mutating database integration requires an explicit isolated loopback test database; never inherit production configuration for synthetic account creation.
 
-## Local regression checks
+## Client verification
 
-```sh
-npm run test:relay:capabilities
-npm run test:cooldown
-npx tsc --noEmit
-npm run lint
-```
+For chat, authenticate with the intended application key and observe completed output without SSE failure. A 202, connected socket or partial chunk is not completion.
 
-For worker lifecycle changes, build the worker image and run the isolated synthetic Docker canary as described in the [runbook](RELAY_VNEXT_RUNBOOK.md#validate-the-implementation). It uses synthetic credentials. Do not substitute the legacy shared-container deployment test.
+For images, invoke the actual downstream client with its retry policy, require valid bytes, decode and visually inspect the artifact. Verify re-encoding and metadata removal plus allowlisted raw bodies, headers, errors and async retrieval. Canonical public capability is `openai-gpt-image-latest`; inspect execution evidence only through private admin diagnostics.
 
-Required scenarios include heterogeneous pools, loss/recovery without restart, shard removal, stale health across restart, concurrent denial/discovery, noisy failures, model-specific saturation, signed job affinity, receipt replay after capability loss, and uncertain admission. Test counts are recorded with each run rather than treated as permanent gates.
+Verify application upload/persistence, user authorization and any billing transaction independently. Do not infer them from a relay image response. A lost acknowledgement requires recovery of the existing operation, not automatic new synthesis.
 
-## Live verification
+## Evidence to record
 
-Confirm the actual deployed revision, worker image, ownership, and ingress. A health check, matching credential aliases, inventory listing, or HTTP 202 does not prove successful inference.
+Record date, source revision, deployed component/image IDs, request ID, status, elapsed time, byte count, format and artifact digest privately. Never record credentials or raw provider payloads. Separate local build, synthetic test, real provider challenge, completed sign-in, actual inference and production deployment.
 
-For chat, authenticate with the intended key and observe completed output without an SSE failure. For images, use the actual downstream client and its retry policy, require valid bytes, decode the image, check metadata removal and public response allowlists, and visually inspect the artifact. Inspect execution evidence only through administrator-authorized diagnostics. Live probes can incur usage; synthetic tests do not run them.
-
-The runbook documents `scripts/verify-dreambees-image.ts`. [ADR 0127](adr/0127-codex-image-tool-alias-production-cutover.md) records a successful public DreamBees image result on September 7, 2026, including request ID, dimensions, hash, and compatibility metadata. Its separate chat entitlement rejection was not a chat success. Paid Hive remained disabled.
-
-Record failures and limits alongside successes. A docs-only change requires documentation validation, not another paid production image generation.
+September 7 and 8 image observations are historical successes. September 9 verified enrollment cleanup/controller behavior and did not issue a new live image request. Use [ADR 0130](adr/0130-image-receipts-and-uncertain-outcomes.md) for uncertain-result boundaries.

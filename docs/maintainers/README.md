@@ -7,7 +7,7 @@ Use the [federation contract](../FEDERATION_STRATEGY.md) and [vNext runbook](../
 
 Start with [parent/subagent execution](AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md), [hardening checks](RELAY_HARDENING.md), and [ADR lifecycle](ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md). Keep evidence dated, I/O bounded, and shared mutations serialized.
 
-Internal maintainer navigation: public-facing guidance follows [ADR 0129](../adr/0129-public-image-artifacts-and-verified-identity.md) and the [image boundary guide](image-public-boundary.md). Repository operational records must not be copied into site content. The September 8 changes are locally verified; deployment and origin remediation require separate evidence.
+Public-facing guidance follows [ADR 0129](../adr/0129-public-image-artifacts-and-verified-identity.md) and the [image boundary guide](image-public-boundary.md). Repository operations must not be copied into site content. See [September 9 verification](RELAY_SESSION_VERIFICATION_20260909.md) for dated component rollout, and [enrollment](RELAY_CREDENTIAL_ENROLLMENT.md) / [desktops](RELAY_DESKTOPS.md) for current workflows.
 
 ## Guide catalog
 
@@ -20,12 +20,15 @@ Internal maintainer navigation: public-facing guidance follows [ADR 0129](../adr
 - [🔧 Maintainer Debugging & Diagnostic Runbooks](DEBUGGING_AND_DIAGNOSTIC_RUNBOOKS.md)
 - [🛠️ Maintainer Guide: Flaky Tests, CI Traps & Deterministic Triage](FLAKY_TESTS_AND_CI_TRIAGE.md)
 - [🪝 Maintainer Guide: Git Workflows, Hooks & Conventional Commits](GIT_WORKFLOWS_AND_HOOKS.md)
-- [⚡ GALXAI Maintainer CLI Cheatsheet & Command Reference](MAINTAINER_CLI_CHEATSHEET.md)
+- [Maintainer CLI reference](MAINTAINER_CLI_CHEATSHEET.md)
 - [📖 Maintainer Glossary & Architectural Lexicon](MAINTAINER_GLOSSARY_AND_LEXICON.md)
 - [🎓 Maintainer Onboarding Knowledge Check & Self-Assessment](MAINTAINER_ONBOARDING_ASSESSMENT.md)
 - [Maintainer Runbook: Shard Authority and Key Rotation](MULTI_TENANT_SHARD_AND_KEY_ROTATION.md)
 - [📊 Maintainer Guide: Performance Benchmarking & Service Level Objectives (SLOs)](PERFORMANCE_BENCHMARKING_AND_SLOS.md)
 - [🗄️ Maintainer Runbook: PostgreSQL Migrations & AOP-DB Protocol](POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md)
+- [Relay credential enrollment and recovery](RELAY_CREDENTIAL_ENROLLMENT.md)
+- [Relay desktops and manual repair](RELAY_DESKTOPS.md)
+- [Relay session verification — September 9](RELAY_SESSION_VERIFICATION_20260909.md)
 - [Federation hardening checks](RELAY_HARDENING.md)
 - [Federation fleet and quota](RELAY_QUOTA_AND_FLEET.md)
 - [Federation request telemetry](RELAY_TELEMETRY.md)

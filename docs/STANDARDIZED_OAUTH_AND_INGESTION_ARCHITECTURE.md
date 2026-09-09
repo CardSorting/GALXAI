@@ -1,109 +1,40 @@
-# Standardized OAuth & Ingestion Architecture Specification
+# Authentication and credential ingestion boundaries
 
 <!-- docs-scope: domain-reference -->
-> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+> Private source reference, reconciled September 9, 2026. Relay operations use [explicit enrollment](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md); this reference distinguishes other existing application paths.
 
-## Overview
+## Separate authorities
 
-GALXAI implements a strict two-tier authentication and ingestion topology:
-1. **Frontend Platform Authentication (Supabase OAuth)**: Pure, standardized developer login (GitHub, Google, Email Magic Link) managing user identity, billing, API keys, and workspace sessions via `@supabase/ssr`.
-2. **Backend Autonomous Substrate Sharding (Ingestion Gateway)**: Isolated, hardened infrastructure service ingesting upstream provider credentials (OpenAI, xAI Grok, Anthropic), executing AES-256-GCM envelope encryption, and maintaining Hybrid BroccoliDB routing tables.
+| Path | Authority and scope |
+| --- | --- |
+| Product sign-in | Verified application user/session for customer features |
+| Relay operator access | Host-held admin authorization and delegated local monitor/desktop sessions |
+| New relay account | Explicit validated create-only operator enrollment |
+| Existing relay account refresh | Linked guest file validation and conditional encrypted-registry update |
+| Legacy application ingestion | Existing HTTP handler and auth engine; separate implementation and acceptance scope |
 
----
+Product login is not provider enrollment and does not grant operational administration. A desktop is neither a user identity provider nor a serving worker.
 
-## 1. Frontend Platform Authentication
+## Supported relay workflow
 
-### Standard Next.js SSR Integration
-- **SDK**: `@supabase/ssr` / `@supabase/supabase-js`
-- **Client Factory**: `src/utils/supabase/client.ts` (`createBrowserClient`)
-- **Server Factory**: `src/utils/supabase/server.ts` (`createServerClient`)
-- **Callback Route**: `src/app/auth/callback/route.ts`
-- **Context**: `src/contexts/AuthContext.tsx`
+Use privately injected input with the operator enrollment command. Validate account consistency, expiry and authenticated inventory before encrypted create-only persistence. Duplicate creation preserves existing authority and counters. Cold allocation independently checks inventory; actual inference capability still needs worker evidence.
 
-```typescript
-// Standard 1-Click OAuth Trigger
-const { signInWithOAuth } = useAuth();
-await signInWithOAuth('github'); // Or 'google'
-```
+Existing accounts sign in through the linked desktop. File-backed credentials are watched, validated and saved through recoverable intent plus compare-and-swap. Custom guest homes are explicitly selectable; keyrings are not exported. Unknown accounts are not auto-enrolled. Bulk host-cache discovery is retired.
 
-### Route Handler (`/auth/callback`)
-```typescript
-export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/models';
+See [ADR 0132](adr/0132-recoverable-desktop-credential-handoff.md) and [ADR 0133](adr/0133-explicit-validated-enrollment-and-test-isolation.md).
 
-  if (code) {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
-    }
-  }
+## Existing HTTP ingestion is a different path
 
-  return NextResponse.redirect(`${origin}/auth/connect?error=auth_failed`);
-}
-```
+[POST /api/auth/ingest](../src/app/api/auth/ingest/route.ts) and its [alias](../src/app/api/ingest/route.ts) remain in source. They call [GalxAuthEngine](../src/core/auth/GalxAuthEngine.ts); the handler currently selects the OpenAI provider. They were not replaced by the operator CLI or the desktop bridge during this session.
 
-`/models` is the activation default established by ADR 0119. Explicit protected-route return destinations may be honored after validation; authentication must not default to a chat, image-generation, or other content-composition surface.
+The handler has its own process-local rate, nonce and idempotency caches, optional digest/signature/timestamp processing and response shaping. Those mechanisms must not be described as the operator path's admin gate, create-only conflict policy, inventory validation or durable deduplication. A supplied digest alone is not authorization. Do not claim multi-provider acceptance from historical examples.
 
----
+This route's authorization, optional transport checks, response-field projection and replay behavior require their own source-level review before relying on them for a new enrollment integration. Its continued presence does not justify re-enabling bulk import. This documentation reconciliation does not change the route.
 
-## 2. Backend Autonomous Ingestion Gateway
+## Custody and evidence
 
-The backend ingestion endpoint (`POST /api/auth/ingest` and `/api/ingest`) provides high-security transport protocols for external CLI agents (e.g. `LUMI-NEW`) and automated backend runners.
+PostgreSQL remains encrypted registry authority; in-memory routing state is replaceable. Registry events and desktop intents exclude plaintext credentials. Guest CLI files are intentional private sources, not host-cache replicas. Edge KV is not a long-lived provider-token store.
 
-### Transport Security Specification
+Public content and response contracts must not expose topology, provider authentication or execution mechanics. The [public information boundary](SECURITY.md) applies independently of this private reference.
 
-| Header | Specification | Purpose |
-| :--- | :--- | :--- |
-| `Content-Type` | `application/json` | Enforces JSON payload (rejection: 415) |
-| `Digest` | `sha-256=<base64-hash>` | RFC 9530 / RFC 3230 Wire Payload Integrity |
-| `Idempotency-Key` | `<uuid-or-hash>` | IETF Idempotent Retry Deduplication (24h Cache) |
-| `X-Request-Timestamp` | `<unix-timestamp-ms>` | Replay Prevention Skew Window (±300s) |
-| `X-Request-Nonce` | `<random-hex>` | Single-Use Nonce Cache (10-min TTL, 409 on replay) |
-| `X-Correlation-Id` | `<uuid>` | Distributed Request Tracing |
-| `CF-Threat-Score` | `<integer>` | Cloudflare Edge Bot & Threat Mitigation |
-
-### Response Headers
-- `Server-Timing`: High-resolution microsecond compute timing (`total;dur=...`).
-- `X-Correlation-Id`: Propagated request trace identifier.
-- `Idempotent-Replay`: Emitted as `true` on duplicate request replay.
-- `Cache-Control`: `no-store, no-cache, must-revalidate, private, no-transform`.
-
----
-
-## 3. CLI Agent Synchronization & Edge Fleet Sync (`LUMI-GALX`)
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor CLI as LUMI CLI Agent
-    participant IngestGateway as GALXAI Gateway (/api/auth/ingest)
-    participant PostgreSQL as Supabase PostgreSQL Authority
-    participant Journal as Secret-Free Registry Journal
-    participant BroccoliDB as BroccoliDB Routing Projection
-
-    CLI->>CLI: 1. Exchange OAuth Code (127.0.0.1:1455)
-    CLI->>CLI: 2. Calculate Content-Digest & Idempotency Key
-    CLI->>IngestGateway: 3. POST /api/auth/ingest (Digest, Nonce, Timestamp)
-    IngestGateway->>IngestGateway: 4. Constant-Time Digest Verification
-    IngestGateway->>PostgreSQL: 5. Encrypt + upsert authoritative shard
-    PostgreSQL->>Journal: 6. Append secret-free fact in same transaction
-    PostgreSQL-->>BroccoliDB: 7. Refresh replaceable routing projection
-    IngestGateway-->>CLI: 8. HTTP 200 after durable commit
-```
-
-### Credential Authority and Edge Access
-
-Provider credentials are not synchronized to edge KV. Authentication and refresh paths await the encrypted PostgreSQL registry commit before publishing the new revision to the local routing projection. Edge and relay transports receive only the credential material required for an active server-side dispatch; a future broker may issue short-lived audience-bound leases, but long-lived refresh credentials remain in the authority store.
-
----
-
-## 4. Verification & Testing
-
-Both environments maintain comprehensive test suites:
-- **`GALXAI` Real Inference Pipeline (100% Wire Execution)**: `npm run test:inference`
-- **`GALXAI` (217 Distributed Tests)**: `npm run test:router`
-- External client repositories require their own checks; they are not part of this relay deployment. Use [relay verification](INFERENCE_PIPELINE_VERIFICATION.md) for this repository.
+Use [hardening checks](maintainers/RELAY_HARDENING.md), [inference verification](INFERENCE_PIPELINE_VERIFICATION.md) and [dated deployment evidence](maintainers/RELAY_SESSION_VERIFICATION_20260909.md). Test counts, digest support and synthetic login do not establish standards certification or live provider approval.

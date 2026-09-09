@@ -13,7 +13,7 @@ The application API at `https://galx.ai/v1` is a separate contract. The Worker i
 
 ## Federation ingress
 
-The relay topology is a supervised host controller and one isolated worker per shard. The current [runbook](RELAY_VNEXT_RUNBOOK.md) replaces the legacy shared Compose deployment. Ingress targets the controller, not an arbitrary worker.
+The relay topology is a supervised host controller and at most one isolated worker per eligible shard. The current [runbook](RELAY_VNEXT_RUNBOOK.md) replaces the legacy shared Compose deployment. Ingress targets the controller, not an arbitrary worker.
 
 [ADR 0127](adr/0127-codex-image-tool-alias-production-cutover.md) records the September 7 public tunnel cutover to `http://host.docker.internal:3001` and successful DreamBees image verification. This is dated deployment evidence, not a current reachability assertion. Preserve authentication, streaming, cancellation, and ownership during a new ingress change.
 

@@ -247,7 +247,7 @@ Visual assets are saved to deterministic S3-compatible paths: `users/{userId}/se
 
 ```typescript
 const result = await galx.images.generate({
-  model: 'openai-gpt-image-2',
+  model: 'openai-gpt-image-latest',
   prompt: 'A futuristic bioluminescent botanical garden',
   aspectRatio: '16:9',
   sessionId: 'session_research_88',

@@ -98,7 +98,7 @@ The private empty tombstones satisfy the repository's staged expand/contract rul
 * `npx tsc --noEmit` validates authentication and model-catalog contracts.
 * `npm run lint` validates the changed frontend surface.
 * `npm run db:verify` validates migration and rollback parity.
-* `npm run db:test` validates the live Supabase integration suite.
+* `npm run db:test` now requires an explicitly isolated loopback database under [ADR 0133](0133-explicit-validated-enrollment-and-test-isolation.md); it is not a live production verification command.
 * `npm run test:chat:hardening` verifies preserved context and inference-session handling.
 * Live catalog checks verify both retired relations are absent from `public`, both private tombstones contain zero rows, and chat sync no longer references `custom_personas`.
 

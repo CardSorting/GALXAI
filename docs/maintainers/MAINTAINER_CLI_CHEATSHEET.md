@@ -1,116 +1,50 @@
-# ⚡ GALXAI Maintainer CLI Cheatsheet & Command Reference
+# Maintainer CLI reference
 
-<!-- docs-scope: domain-reference -->
-> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+<!-- docs-scope: current-guide -->
+> Private command navigation. [package.json](../../package.json) defines scripts; read each harness before running commands that can mutate state or call live providers.
 
-> **Quick-Reference Card for Day-to-Day Engineering & Maintenance**
+## Relay operations
 
----
+| Task | Command |
+| --- | --- |
+| HTML monitor | `npm run relay:open` |
+| Terminal HUD | `npm run relay:monitor`; press `o` to open HTML |
+| Operator desktops | `npm run relay:desktops` |
+| Build guest image | `npm run relay:desktops:build` |
+| Start host controller | `npm run relay:federation` |
+| Inspect registry categories | `npm run shards:doctor` |
+| Enroll one new account | `node --env-file-if-exists=.env.local --import tsx scripts/manage-shards.ts --add` |
+| Preview exact legacy fixture quarantine | `node --env-file-if-exists=.env.local --import tsx scripts/quarantine-fixture-shards.ts` |
 
-## 🚀 1. Onboarding & Local Workstation Setup
+The controller command reads configured authority; its canary namespace default does not make real credentials disposable. Do not start a second owner. Supply enrollment tokens through private environment injection, never argv. Bulk import is retired; refresh existing accounts through linked-desktop sign-in. Cleanup defaults to dry-run; review before explicit apply.
 
-```bash
-npm run onboard               # Fast (<5s) 7-point environment & vault validation
-npm run dev                   # Launch Next.js local development server on :3000
-npm run predev                # Clean up orphaned processes on port :3000
-```
+## Local validation
 
----
-
-## 🥦 2. BroccoliDB Compaction & Benchmarks
-
-```bash
-# 1. Empirical Inference Boundary Benchmark (OpenAI Models)
-npm run bench:inference-boundary
-
-# 2. Forensic Payload Dissection & Causal Analysis Tool
-npm run dissect:payloads
-
-# 3. BroccoliDB Compaction API Gateway Suite (19 modes, 7/7 suites)
-npm run test:broccolidb:api
-
-# 4. BroccoliDB Production Hardening & Fail-Closed Safety Regressions
-npm run test:broccolidb:hardening
-
-# 5. Master 180-Domain Compactor Cluster Suite (100% Verified)
-npm run bench:180-domains
-```
-
----
-
-## 🛡️ 3. Core Engine, Routing & Context Hardening
-
-```bash
-# 1. Chat Normalization, Tool Turn-Pairs & Dynamic 1M Context Hardening Suite (21 Tests)
-npx tsx scripts/test-chat-context-hardening.ts
-
-# 2. Universal Model Router, Vault, Privacy & SOC2 Suite (218 Tests)
-npm run test:router
-
-# 3. Universal Developer Mental Model & SDK Parity Suite (98 Tests)
-npx tsx scripts/verify-zero-hesitation-ergonomics.ts
-
-# 4. Spend Governance Attribution & Control Plane Suite
-npm run test:governance
-```
-
----
-
-## 🌐 4. Cloudflare Edge Mesh & SRE Playbooks
-
-```bash
-# 1. Cloudflare Workers Edge Mesh Verification (46 Edge Tests)
-npm run worker:test
-
-# 2. SDK -> Cloudflare Edge Live Smoke Test
-npx tsx scripts/test-sdk-edge.ts
-
-# 3. Interactive Operational Lifecycle Playbook Engine (Stages 1-8)
-npm run playbook
-npm run playbook -- --stage=preflight   # Stage 1: Pre-Flight & Vault Validation
-npm run playbook -- --stage=deploy      # Stage 2: Deployment Readiness
-npm run playbook -- --stage=traffic     # Stage 3: Live Traffic & Shard Health
-npm run playbook -- --stage=triage      # Stage 4: Incident Triage & Error Scan
-npm run playbook -- --stage=compliance  # Stage 5: Security & Audit Verification
-npm run playbook -- --stage=dr          # Stage 6: Disaster Recovery Probe
-```
-
----
-
-## 🗄️ 5. Supabase PostgreSQL & AOP-DB Protocol
-
-```bash
-# 1. Paranoid PostgreSQL Schema & RLS Auditor
-npm run db:verify
-
-# 2. Database Integration Test Suite
-npm run db:test
-
-# 3. Apply Idempotent SQL Migrations
-npm run db:push
-
-# 4. Rollback Last Applied Migration (.down.sql)
-npm run db:rollback
-```
-
----
-
-## 🚢 6. Release & Production Verification
-
-```bash
-# 1. Full Pre-Deployment Pipeline (Audit + Lint + SSG Build)
-npm run deploy:check
-
-# 2. 8-Phase Enterprise Vercel Pre-Flight Readiness Engine
-npm run vercel:verify
-
-# 3. 12-Point Post-Deployment Live Smoke Probes
-npm run vercel:smoke -- --url=https://galx.ai
-
-# 4. Strict TypeScript Typecheck
+```sh
 npx tsc --noEmit
+python3 scripts/verify-docs.py
+node --import tsx scripts/test-docs.ts
+npm run test:relay:capabilities
+npm run test:relay:desktop-login
+npm run build
 ```
 
----
+Use [hardening checks](RELAY_HARDENING.md) for enrollment, public-response, storage and Docker coverage. Local builds do not deploy application/controller/worker changes.
 
-*Keep this cheatsheet bookmarked during development.* 🥦⚡
+## Database authority
+
+| Task | Command and constraint |
+| --- | --- |
+| Static integrity audit | `npm run db:verify` |
+| Broad integration suite | `npm run db:test`; requires explicit `GALX_INTEGRATION_DATABASE_URL` for a disposable initialized loopback database |
+| Local authority boundary | `npm run shards:test-authority` |
+| Live authority verifier | `npm run shards:verify-authority`; inspect its target and behavior first |
+| Vault rewrap preview | `npm run shards:rotate-vault -- --from v1 --to v2`; apply is a separate explicit option |
+
+The broad integration guard rejects production settings and strips inherited Data API configuration before repository imports. Do not bypass it. Billing/storage harnesses have their own disposable environments. See [test isolation](RELAY_CREDENTIAL_ENROLLMENT.md#isolated-integration-tests) and [key rotation](MULTI_TENANT_SHARD_AND_KEY_ROTATION.md).
+
+Database migrations, service restarts, live provider requests, deployment and billing changes are different mutations. Use their component runbooks and existing task authorization; a command's presence in this table is not a blanket production procedure.
+
+## Other subsystems
+
+Use the [maintainer catalog](README.md) for compaction, application routing, cloud deployment, governance and database procedures. Historical test counts and benchmarks are dated results, not current command guarantees. Follow [Git workflow](GIT_WORKFLOWS_AND_HOOKS.md) and [deployment boundaries](../DEPLOYMENT.md) for release.

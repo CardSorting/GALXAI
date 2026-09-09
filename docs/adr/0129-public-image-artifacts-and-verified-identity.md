@@ -3,7 +3,7 @@
 <!-- docs-scope: decision-record -->
 
 Date: 2026-09-08. Component: application authentication, image delivery, public documentation.
-Status: implemented and locally verified; production deployment and origin remediation not verified in this session.
+Status: implemented and locally verified on September 8. The September 9 relay controller reload does not establish application deployment or origin remediation; see the [component evidence matrix](../maintainers/RELAY_SESSION_VERIFICATION_20260909.md#component-deployment-boundary).
 Audience: internal maintainers. Do not publish this record as site content.
 
 ## Problem and precedence

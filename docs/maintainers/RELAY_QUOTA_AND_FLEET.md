@@ -1,14 +1,14 @@
 # Federation fleet and quota
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+> Private fleet operations. [The contract](../FEDERATION_STRATEGY.md) is authoritative.
 
-Inspect `/api/capabilities` with the controller administrator credential. Review model eligible counts before total fleet load. A model with one shard is fragile even if other model pools are idle.
+Count registered authority, desired eligible shards, running workers and repair desktops separately. One registered row does not guarantee one serving container. A worker serves only its fresh eligible model capabilities; unrelated idle capacity cannot relieve an exhausted model pool.
 
-Credential registry state and Docker ownership determine worker lifecycle. Capability loss changes the index without restart; empty workers remain for recovery. Invalid credentials retire and remain suppressed until their credential revision changes. Do not manually clear cooldowns or delete registry rows to force readiness.
+Automatic worker reconciliation remains supported. Enrollment is explicit and validated; bulk cache population is retired. Cold-start inventory preflight occurs before Docker allocation. Revision-specific 401 rejection prevents repeated starts; transient failures back off.
 
-Provider backoff, local concurrency, database lease health, and product entitlements are separate signals. Preserve attributable evidence and deadlines. Alias verification consumes image quota and uses spare capacity; chat inventory alone cannot grant image access.
+Empty capability state retains a worker for rediscovery. Manual holds stop new admissions/replacement and preserve existing workers for intervention. Authority removal, revocation, expiry or rotation still retires old authority. Resume does not reset quota or health.
 
-Use the vNext controller to reconcile the fleet. Legacy shared-container CLI operations do not manage this topology. Multi-host scaling needs shared ownership leasing before introducing another controller.
+Provider cooldowns, local concurrency, model evidence and database-backed application lease limits are different controls. Do not clear counters or mark healthy to create capacity. Inspect active work and receipts before changing limits.
 
-See the [federation contract](../FEDERATION_STRATEGY.md), [runbook](../RELAY_VNEXT_RUNBOOK.md), [API recovery table](../RELAY_API_REFERENCE.md#request-recovery), and [observability guide](../TELEMETRY_AND_OBSERVABILITY.md).
+The September 9 fixture cleanup left one healthy worker at that observation, not a target fleet size. Use the [monitor](../TELEMETRY_AND_OBSERVABILITY.md), [enrollment guide](RELAY_CREDENTIAL_ENROLLMENT.md) and [dated evidence](RELAY_SESSION_VERIFICATION_20260909.md).

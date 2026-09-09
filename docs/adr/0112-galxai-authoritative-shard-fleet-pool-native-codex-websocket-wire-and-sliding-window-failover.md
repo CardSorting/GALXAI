@@ -5,19 +5,19 @@
 
 > Decision scope: Historical decision record. Its original status and measurements describe its own scope. For current relay ownership, capability routing, retry authority, and deployment, ADRs [0126](0126-capability-aware-shard-relay-federation.md) and [0127](0127-codex-image-tool-alias-production-cutover.md) take precedence. Shared-relay selection, implicit model fallback, and simulation performance do not define the current federation. Unrelated subsystem decisions are not superseded by this note.
 
-- Status: Superseded for relay behavior by ADR 0122; registry authority is specified by ADR 0115
+- Status: Historical relay transport decision; current lifecycle is defined by ADR 0126, access/holds by ADR 0131 and enrollment by ADR 0133. Registry authority remains ADR 0115.
 - Original decision date: 2026-09-03
-- Reconciled with implementation: 2026-09-07
+- Reconciled with implementation: 2026-09-09
 
 ## Context and retained decision
 
 Provider credential type determines the supported transport. The application adapter contains provider REST, native Codex WebSocket, and relay paths. The standalone relay resides in this repository at `src/relay/relay-server.ts`; a sibling checkout is not a deployment dependency.
 
-PostgreSQL is the durable credential registry. Backend services decrypt authorized records for provider dispatch. Device credential files are explicit import/development inputs, not the deployed relay's credential authority. The app now authenticates relay requests with a relay inference key, not a provider credential.
+PostgreSQL is the durable credential registry. Backend services decrypt authorized records for provider dispatch. Host credential discovery and bulk import are retired. Owned guest login files support the explicit existing-account bridge under ADR 0132; they are not independent registry authority. The app now authenticates relay requests with a relay inference key, not a provider credential.
 
-## Current behavior
+## Historical standalone behavior — September 7
 
-The standalone relay opens a WebSocket per chat attempt and performs its own local shard selection from a refreshed registry projection. It chooses low in-flight load with rotating tie-breaking, not the platform pool's database-fenced lease algorithm. The default three-hour request window is observational and has no local cap. Operator caps and provider-reported cooldowns are separate inputs.
+The shared standalone relay at that date opened a WebSocket per chat attempt and performs its own local shard selection from a refreshed registry projection. It chooses low in-flight load with rotating tie-breaking, not the platform pool's database-fenced lease algorithm. The default three-hour request window is observational and has no local cap. Operator caps and provider-reported cooldowns are separate inputs.
 
 Expired/rejected credentials are excluded. Quota failures cool down the affected account; transport failures can open a local circuit. Alternate-account recovery has bounded retries, a shared retry budget, and a wall deadline. No alternate account, exhausted credits, or a terminal request ends recovery. Mid-stream continuation is best effort and can fail or change the answer.
 

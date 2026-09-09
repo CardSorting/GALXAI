@@ -9,7 +9,8 @@ This guide describes the current federation boundary, not a compliance certifica
 | --- | --- |
 | User to application | Application authentication and tenant authorization |
 | Application to controller | Configured inference credential and trusted tenant mapping |
-| Operator to controller | Separate administrator credential |
+| Operator to controller | Host-held administrator credential delegates separate local monitor/desktop sessions |
+| Desktop to credential authority | Safe guest file read, validation, durable intent and revision-conditional replacement |
 | Controller to worker | Scoped internal inference/admin credentials and authenticated delegation |
 | Worker to provider | Its one assigned upstream credential |
 | Registry and account health | Backend database policies, current leases, credential revisions |
@@ -23,9 +24,13 @@ Each shard worker is a non-root isolated container with a read-only root, droppe
 
 The host controller holds registry decryption and Docker authority. Its host-process boundary is different from worker isolation. Protect the supervisor, persistent signing secret, lock, and ignored configuration directory. Single-host ownership does not provide multi-host consensus. Container settings do not establish an egress firewall or isolate application-side tools.
 
+Each repair desktop has an independent guest home, browser profile and network, with bounded resources and explicit deletion. It is a Linux container, not hardware isolation. Guest login files can contain provider credentials; custom sources must remain within the owned guest home and pass path/ownership checks. Keyrings are not exported.
+
+Explicit operator enrollment validates before create-only persistence. Bulk host-cache discovery is retired. Existing-account sync uses a flushed private intent and conditional registry update, not a distributed atomic transaction. Checkpoint failure must remain explicit. Mutating integration tests require a dedicated loopback database before repository imports and strip inherited Data API credentials.
+
 ## Request and observation controls
 
-Controller operational data requires administrator access. The dashboard shell is public; its key remains in page memory. Browser clients use an application backend. Input sizes, read deadlines, concurrency, receipts, polling, and shutdown are bounded.
+Controller operational data requires server-side administrator authority or the appropriate delegated local session. Anonymous monitor/desktop entrypoints expose generic connection guidance only; operational HTML, scripts, noVNC modules and data are authorized. Host launchers issue short-lived one-use tickets and HttpOnly sessions. Ordinary inference keys cannot issue grants. Admin keys never belong in browser storage. Foreign origins, nonlocal clients and forwarding headers are rejected; display connections are rechecked on expiry/revocation. Product browser clients use their application backend. Input sizes, read deadlines, concurrency, receipts, polling, and shutdown are bounded.
 
 Health is changed only under current authority. Stale generation/inventory/health observations cannot restore routing. Telemetry is observation-only. Capability denial removes that pair; it does not authorize deleting the account or cancelling otherwise valid streams.
 

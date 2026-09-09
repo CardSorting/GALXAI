@@ -5,7 +5,7 @@
 
 Follow the current vNext runbook. Build and validate the changed application/controller/worker components separately. Save revision, image, ingress, and rollback evidence.
 
-Drain the active topology before transferring shard ownership. Start the supervised controller, verify one worker per active shard and fresh model pools, then verify the actual public client path. A model listing, matching credential alias, or 202 acknowledgement is not successful inference.
+Review maintenance holds and accepted work before transferring shard ownership. A hold preserves an existing worker but blocks replacements; unheld workers are drained/removed during graceful controller stop. Start the supervised controller, verify at most one owned worker per eligible shard and fresh model pools, then verify the actual public client path. A model listing, matching credential alias, or 202 acknowledgement is not successful inference.
 
 Record chat and image results separately with execution metadata. Paid feature activation and entitlement changes remain separate from deployment verification. Do not use the legacy Compose file as a federation launcher.
 

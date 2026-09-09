@@ -5,7 +5,7 @@
 
 Determine whether the failure affects a model, credential, worker, controller, or provider. A generic `route`, 403/404, timeout, or 5xx is not authoritative proof of model denial. Throttling requires backoff, not forced credential destruction.
 
-Inspect eligible pools and fresh evidence. Keep healthy pools serving while invalid workers drain. Do not route to a different model merely because it has spare capacity. A successful old request cannot clear a newer denial or cooldown.
+Inspect eligible pools and fresh evidence. Keep healthy pools serving while unheld invalid workers drain. Use a linked-desktop maintenance hold to preserve inspection; holds do not override removal, revocation, expiry or rotation. A 401 rejects the credential revision; generic 403/5xx/timeouts alone do not. Do not route to a different model merely because it has spare capacity. A successful old request cannot clear a newer denial or cooldown.
 
 Reconcile accepted or uncertain operations before resubmission. Use original signed job URLs for transport recovery. Restore access through fresh discovery or an authorized credential revision, and verify the actual affected client before closing the incident.
 

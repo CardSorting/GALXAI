@@ -1,24 +1,14 @@
 # System topology and maintainer onboarding
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+> Private onboarding. Begin with [architecture](ARCHITECTURE.md), [the contract](FEDERATION_STRATEGY.md) and [current handover](../HANDOVER.md).
 
-Start with the [architecture](ARCHITECTURE.md) and [federation contract](FEDERATION_STRATEGY.md). The application gateway, federation controller, single-shard workers, database authority, Cloudflare Worker, and consuming agent runtime are separate components.
+Follow a request from product authentication and entitlement through the server adapter, model-specific controller admission, assigned worker and signed recovery URLs. Product responses expose only allowed customer fields. Internal topology and execution evidence remain private.
 
-## Follow one request
+Follow an account from explicit validated enrollment into the encrypted registry, cold preflight, worker capability discovery and model eligibility. A registered row is not guaranteed serving capacity. Bulk host-login import is retired; automatic lifecycle remains.
 
-Trace the application key and requested model into the configured relay transport. Locate the model capability index, eligible health filters, load selection, admission receipt, selected worker generation, provider operation, and completed response. For images, inspect exact versus compatibility execution metadata. For chat, distinguish admission from stream completion.
+Follow a repair through a separately authorized desktop, reviewed shard link, optional maintenance hold, operator sign-in, validated credential sync and worker readiness. Desktop connection, saved login, registry revision and traffic state are distinct. Holds preserve inspection without overriding revoked/expired authority.
 
-## Follow one shard
+Use host launchers for monitor/desktops; no browser API-key entry. Practice with synthetic canaries and a disposable database before touching production. Do not run a second controller against live credentials or include normal workspaces in preview cleanup.
 
-Trace an encrypted registry credential into the controller's desired-shard projection and one isolated container. Establish authenticated capabilities before routing. Withdraw one model without restarting the worker, then restore it by fresh discovery. Credential invalidation retires the worker; an empty capability set does not.
-
-## Follow one failure
-
-Use the [troubleshooting guide](TROUBLESHOOTING.md). Determine whether evidence belongs to model capability, credential health, database transport, local saturation, or an accepted job. Preserve generation, inventory, lease, and receipt-scope authority. Do not use stale telemetry or ambiguous execution as permission to retry.
-
-## Make and verify a change
-
-Use the [maintainer execution guide](maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md) and [verification guide](INFERENCE_PIPELINE_VERIFICATION.md). Keep independent I/O bounded and shared mutations serialized. Run the relevant fixture tests; live deployment/client claims require separate evidence.
-
-For deployment use the [vNext runbook](RELAY_VNEXT_RUNBOOK.md), not legacy shared-container commands. For broader subsystem references and historical designs use the [complete documentation catalog](CATALOG.md); their scope does not extend the current federation guarantees.
+Read [enrollment/recovery](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md), [desktop operations](maintainers/RELAY_DESKTOPS.md), [API recovery](RELAY_API_REFERENCE.md#request-recovery) and [security](SECURITY.md). Historical ADR measurements are dated evidence; [ADRs 0131–0133](adr/README.md) define the session's strategy changes.

@@ -118,7 +118,7 @@ $$;
 Before applying any migration to staging or production:
 1. [ ] Run `npm run db:verify` to execute the automated paranoia linter across all 53 migrations.
 2. [ ] Run `npm run db:push` to apply pending migrations to the Supabase pooler.
-3. [ ] Run `npm run db:test` to execute the full 92-test zero-egress database integration suite.
+3. [ ] Run `npm run db:test` only with an explicit disposable, initialized loopback `GALX_INTEGRATION_DATABASE_URL`. The production guard must fail before repository initialization; see [test isolation](RELAY_CREDENTIAL_ENROLLMENT.md#isolated-integration-tests).
 4. [ ] Verify that TypeScript types in `src/lib/supabase/types.ts` stay in lockstep.
 
 ---

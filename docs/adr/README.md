@@ -3,9 +3,9 @@
 <!-- docs-scope: current-guide -->
 > **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
 
-Public application and identity authority is [ADR 0129](0129-public-image-artifacts-and-verified-identity.md). Internal relay authority is the [federation contract](../FEDERATION_STRATEGY.md), supported by ADR 0126 (1:1 capability routing), ADR 0127 (explicit verified image alias and production cutover), and ADR 0128 (documentation authority). ADRs 0123–0125 govern database cooldown and observation authority separately.
+Public information authority is [ADR 0129](0129-public-image-artifacts-and-verified-identity.md). Internal relay authority is the [federation contract](../FEDERATION_STRATEGY.md): ADR 0126 establishes capability-aware ownership; 0127 the explicit image alias; 0128 documentation authority; 0130 uncertain image outcomes; 0131 operator sessions and holds; 0132 recoverable credential handoff; and 0133 explicit enrollment/test isolation. ADRs 0123–0125 govern database health separately.
 
-Original statuses and evidence remain in each record. A proposed or accepted design is not proof of deployment. Older records retain unrelated subsystem decisions; their shared-relay, implicit fallback, and simulation claims do not override current federation behavior. The scope notes explain precedence without rewriting history.
+Status and operational guidance are reconciled when decisions change; original measurements and rollout facts remain explicitly dated. A proposed or accepted design is not deployment evidence. Partial supersession is topic-specific. A successor banner cannot make obsolete body instructions current.
 
 Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) for new records and the [complete corpus catalog](../CATALOG.md) for guides, references, and research.
 
@@ -138,8 +138,11 @@ Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) f
 | 0123 | [Image requests recover after an expired account cooldown](0123-image-request-cooldown-recovery.md) | Database health authority and dated evidence |
 | 0124 | [Cooldowns require attributable evidence and current lease authority](0124-cooldown-evidence-and-stale-result-protection.md) | Database health authority and dated evidence |
 | 0125 | [Keep observations separate from health authority and bound recovery work](0125-observation-authority-and-bounded-database-recovery.md) | Database health authority and dated evidence |
-| 0126 | [ADR 0126: Capability-aware 1:1 shard relay federation](0126-capability-aware-shard-relay-federation.md) | Lifecycle foundation; extended by 0127 |
+| 0126 | [ADR 0126: Capability-aware 1:1 shard relay federation](0126-capability-aware-shard-relay-federation.md) | Lifecycle foundation; extended by 0127, 0131 and 0133 |
 | 0127 | [ADR 0127: Explicit Codex image-tool alias and production federation cutover](0127-codex-image-tool-alias-production-cutover.md) | Image alias and dated production evidence |
 | 0128 | [ADR 0128: Documentation authority and federation contract](0128-documentation-authority-and-federation-contract.md) | Documentation authority |
-| 0129 | [ADR 0129: Public image artifacts and verified identity](0129-public-image-artifacts-and-verified-identity.md) | Implemented and locally verified; rollout unverified |
-| 0130 | [Image receipts and uncertain outcomes](0130-image-receipts-and-uncertain-outcomes.md) | Local hardening; deployment pending |
+| 0129 | [ADR 0129: Public image artifacts and verified identity](0129-public-image-artifacts-and-verified-identity.md) | Public boundary; component deployment evidence required |
+| 0130 | [Image receipts and uncertain outcomes](0130-image-receipts-and-uncertain-outcomes.md) | Single-dispatch images; dated component rollout in record |
+| 0131 | [ADR 0131: Private operator desktops and maintenance holds](0131-private-operator-desktops-and-maintenance.md) | Private sessions, independent desktops and durable repair holds |
+| 0132 | [ADR 0132: Recoverable desktop credential handoff](0132-recoverable-desktop-credential-handoff.md) | Validated existing-account refresh with recoverable intent |
+| 0133 | [ADR 0133: Explicit validated enrollment and isolated integration fixtures](0133-explicit-validated-enrollment-and-test-isolation.md) | Retired bulk import, create-only enrollment and isolated fixtures |
