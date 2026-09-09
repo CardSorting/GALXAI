@@ -290,7 +290,8 @@
     "test:relay:capabilities": "node --import tsx --test scripts/test-federation-admission.ts scripts/test-relay-capabilities.ts scripts/test-relay-federation-http.ts scripts/test-relay-hardening.ts scripts/test-relay-adaptive-quota.ts scripts/test-relay-telemetry.ts",
     "test:relay:docker": "node --import tsx scripts/test-relay-federation-docker.ts",
     "test:image:security": "node --import tsx --test scripts/test-image-public-http.ts scripts/test-public-information-boundary.ts scripts/test-image-retry-contract.ts scripts/test-auth-identity-boundary.ts",
-    "test:yaml:security": "node --test scripts/test-yaml-security.mjs"
+    "test:yaml:security": "node --test scripts/test-yaml-security.mjs",
+    "test:egress:transport": "node --import tsx --test scripts/test-registry-api-egress.ts scripts/test-ci-build.mjs"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3",

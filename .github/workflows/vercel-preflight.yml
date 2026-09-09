@@ -21,6 +21,11 @@ jobs:
   preflight-audit:
     name: Vercel Pre-Flight Verification
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_APP_URL: https://galx.invalid
+      NEXT_PUBLIC_SUPABASE_URL: https://supabase.invalid
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_ci_fixture
 
     steps:
       - name: Checkout Source Code
@@ -42,11 +47,7 @@ jobs:
         run: npm audit --omit=dev --audit-level=high
 
       - name: Run 8-Phase Vercel Pre-Flight Audit Engine
-        run: npm run vercel:verify
-        env:
-          NEXT_PUBLIC_APP_URL: https://galx.ai
-          NEXT_PUBLIC_SUPABASE_URL: https://mazhcjisettrzbqhorvp.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_9eyEPgM-hF00Va7TLE90yA_LV4iGcoE
+        run: npm run vercel:verify -- --offline
 
       - name: Verify browser agent deployment contract
         run: npm run test:browser-agent
@@ -63,6 +64,9 @@ jobs:
       - name: Verify egress budgets and bounded replay
         run: PATH="$(pg_config --bindir):$PATH" npm run test:egress
 
+      - name: Verify physical-request budgets and isolated build credentials
+        run: npm run test:egress:transport
+
       - name: Verify controller authority during slow worker I/O
         run: node --import tsx --test scripts/test-relay-capabilities.ts
 
@@ -73,8 +77,4 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Next.js Production Build
-        run: npm run build
-        env:
-          NEXT_PUBLIC_APP_URL: https://galx.ai
-          NEXT_PUBLIC_SUPABASE_URL: https://mazhcjisettrzbqhorvp.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_9eyEPgM-hF00Va7TLE90yA_LV4iGcoE
+        run: node scripts/build-ci.mjs

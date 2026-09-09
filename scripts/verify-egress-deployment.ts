@@ -8,6 +8,7 @@ const secrets = Object.entries(process.env)
   .filter(value => value.length >= 16 && !value.startsWith('sb_publishable_'));
 const forbidden = ['RegistryEgressGuard', 'registry-egress.json', 'REGISTRY_DELTA_SQL', 'Registry synchronization budget exceeded',
   'SHARD_PROJECTION_DELTA_SQL', 'Shard authority changed; restart required', 'Shard owner scope mismatch',
+  'Registry API temporarily unavailable', 'Inconsistent registry response range', 'Shard synchronization is backing off',
   'activeCircuitsCount', 'inc_baseline_verified_operational', 'Active • All Systems Operational', ...secrets];
 async function read(url: string): Promise<string> {
   const response = await fetch(url, { signal: AbortSignal.timeout(20000), redirect: 'error' });

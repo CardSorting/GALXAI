@@ -1,7 +1,8 @@
 import * as crypto from 'node:crypto';
 import pg from 'pg';
 import { REGISTRY_DELTA_SQL, ShardRegistrySync, readRegistryApiDelta } from './shard-registry-sync.js';
-import { RegistryEgressGuard, RegistryEgressLimitError, readBoundedRegistryJson } from './registry-egress-guard.js';
+import { RegistryEgressGuard, RegistryEgressLimitError } from './registry-egress-guard.js';
+import { createRegistryApiPageReader, RegistryApiUnavailableError } from './registry-api-reader.js';
 
 let pool: pg.Pool | undefined;
 let poolDatabaseUrl: string | undefined;
@@ -69,6 +70,7 @@ let egressGuard = new RegistryEgressGuard();
 let sqlRetryAt = 0;
 let retryAt = 0;
 let failures = 0;
+let apiNextReadAt = 0;
 
 export function configureRegistryEgressGuard(stateFile: string): void {
   if (registrySync) throw new Error('Configure registry guard before synchronization starts');
@@ -89,6 +91,7 @@ export function readShardRegistry(): Promise<Record<string, any>[]> {
     retryAt = 0;
     sqlRetryAt = 0;
     failures = 0;
+    apiNextReadAt = 0;
     registryScope = scope;
     registrySync = new ShardRegistrySync(async known => {
       try {
@@ -110,50 +113,23 @@ export function readShardRegistry(): Promise<Record<string, any>[]> {
           // The admin Data API is the only fallback; never resurrect local credentials.
         }
       }
-      const delta = await egressGuard.run((allowance, charge) => readRegistryApiDelta(known, createRegistryPageReader(url, key, allowance, charge)));
+      // Two exact manifest reads per warm poll need at least three seconds to
+      // fit the physical-request budget. Concurrent readers share this wait.
+      const delay = apiNextReadAt - Date.now();
+      if (delay > 0) await new Promise(resolve => setTimeout(resolve, Math.min(delay, 3000)));
+      const delta = await readRegistryApiDelta(known, createRegistryApiPageReader(egressGuard, { url, key }));
+      apiNextReadAt = Date.now() + 3000;
       failures = 0;
       return delta;
       } catch (error) {
-        retryAt = Date.now() + Math.min(30_000, 1000 * 2 ** Math.min(5, failures++));
+        retryAt = Math.max(error instanceof RegistryApiUnavailableError ? error.retryAtMs : 0,
+          Date.now() + Math.min(30_000, 1000 * 2 ** Math.min(5, failures++)));
         throw error;
       }
     });
   }
   if (Date.now() < retryAt) return Promise.reject(new Error('Registry synchronization is backing off'));
   return registrySync.read();
-}
-
-function createRegistryPageReader(url: string | undefined, key: string | undefined, allowance: number, charge: (bytes: number) => void) {
-  let privileged = key?.startsWith('sb_secret_');
-  if (key && !privileged) {
-    try { privileged = JSON.parse(Buffer.from(key.split('.')[1], 'base64url').toString()).role === 'service_role'; } catch {}
-  }
-  if (!url || !key || !privileged) throw new Error('Shard registry requires a Supabase URL and backend admin credential');
-  const deadline = AbortSignal.timeout(10_000);
-  let remaining = allowance;
-  return async (columns: string, offset: number, ids?: string[]) => {
-    if (remaining < 1024) throw new RegistryEgressLimitError();
-    charge(1024);
-    remaining -= 1024;
-    const endpoint = new URL('/rest/v1/galx_shard_accounts', url);
-    endpoint.searchParams.set('select', columns);
-    endpoint.searchParams.set('order', 'id.asc');
-    endpoint.searchParams.set('offset', String(offset));
-    endpoint.searchParams.set('limit', '500');
-    if (ids) endpoint.searchParams.set('id', `in.(${ids.map(id => JSON.stringify(id)).join(',')})`);
-    const response = await fetch(endpoint, {
-      headers: { apikey: key, ...(key.startsWith('sb_secret_') ? {} : { Authorization: `Bearer ${key}` }) },
-      signal: deadline,
-      redirect: 'error',
-    });
-    if (!response.ok) {
-      await response.body?.cancel();
-      throw new Error(`Shard registry read failed (HTTP ${response.status})`);
-    }
-    const page = await readBoundedRegistryJson(response, remaining, bytes => { remaining -= bytes; charge(bytes); });
-    if (!Array.isArray(page)) throw new Error('Invalid shard registry response');
-    return page;
-  };
 }
 
 export function decryptRegistryShard(row: Record<string, any>): Record<string, any> | null {

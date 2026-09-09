@@ -77,7 +77,8 @@ export class ShardRegistrySync {
   }
 }
 
-export type RegistryPageReader = (columns: string, offset: number, ids?: string[]) => Promise<RegistryRow[]>;
+export interface RegistryPage { rows: RegistryRow[]; complete: boolean }
+export type RegistryPageReader = (columns: string, offset: number, ids?: string[]) => Promise<RegistryRow[] | RegistryPage>;
 const MANIFEST_COLUMNS = 'id,registry_revision,created_at';
 const restFingerprint = (row: RegistryRow) => {
   if (row.registry_revision == null || typeof row.created_at !== 'string') throw new Error('Invalid registry revision');
@@ -98,7 +99,8 @@ export async function readRegistryApiDelta(known: ReadonlyMap<string, RegistryCh
     const seen = new Set<string>();
     for (let offset = 0; ; ) {
       if (++pages > 64) throw new Error('Registry pagination limit exceeded');
-      const batch = await page(columns, offset, ids);
+      const result = await page(columns, offset, ids);
+      const batch = Array.isArray(result) ? result : result?.rows;
       if (!Array.isArray(batch) || batch.some(row => !row || typeof row.id !== 'string' || !row.id)) throw new Error('Invalid registry response');
       for (const row of batch) {
         if (seen.has(row.id)) throw new Error('Inconsistent registry pagination');
@@ -106,8 +108,9 @@ export async function readRegistryApiDelta(known: ReadonlyMap<string, RegistryCh
       }
       if (rows.length + batch.length > MAX_REGISTRY_ROWS) throw new Error('Registry row limit exceeded');
       rows.push(...batch);
-      // The API may enforce a smaller page size; only an empty page proves EOF.
-      if (!batch.length) break;
+      // A validated exact Content-Range avoids redundant empty-page requests.
+      // Without one, a short page is not EOF: the server may enforce a smaller cap.
+      if (!batch.length || (!Array.isArray(result) && result.complete === true)) break;
       offset += batch.length;
     }
     if (new Set(rows.map(row => row.id)).size !== rows.length) throw new Error('Inconsistent registry pagination');

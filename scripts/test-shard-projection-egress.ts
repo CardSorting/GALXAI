@@ -209,10 +209,10 @@ test('SQL failover cooldown preserves the budget for confirmed REST reads', asyn
       const url = new URL(String(input));
       const rows = url.searchParams.get('offset') === '0'
         ? [Object.fromEntries(url.searchParams.get('select')!.split(',').map(column => [column, source[column]]))] : [];
-      return Response.json(rows);
+      return Response.json(rows, { headers: { 'content-range': rows.length ? '0-0/1' : '*/1' } });
     },
   });
   assert.equal((await reader.read('alice'))[0].encrypted_ciphertext, 'cipher');
   assert.equal((await reader.read('alice'))[0].encrypted_ciphertext, 'cipher');
-  assert.equal(sqlReads, 1); assert.equal(httpReads, 10);
+  assert.equal(sqlReads, 1); assert.equal(httpReads, 5);
 });

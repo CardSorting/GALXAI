@@ -149,7 +149,8 @@ test('SQL-to-API failover does not download unchanged credentials again', async 
   assert.deepEqual(delta, { changed: [], removed: [] });
 });
 
-test('runtime cache is isolated by project and administrator credential; invalid authority cannot reuse it', async () => {
+test('runtime cache is isolated by project and administrator credential; invalid authority cannot reuse it', async t => {
+  let now = Date.now(); t.mock.method(Date, 'now', () => now);
   const names = ['DATABASE_URL', 'SUPABASE_URL', 'SUPABASE_SECRET_KEY', 'SUPABASE_SERVICE_ROLE_KEY'] as const;
   const saved = names.map(name => [name, process.env[name]] as const);
   const previousFetch = globalThis.fetch;
@@ -167,15 +168,17 @@ test('runtime cache is isolated by project and administrator credential; invalid
       const record = { ...row('same-id'), encrypted_ciphertext: url.hostname };
       const values = url.searchParams.get('offset') === '0'
         ? [Object.fromEntries(url.searchParams.get('select')!.split(',').map(column => [column, record[column as keyof typeof record]]))] : [];
-      return Response.json(values);
+      return Response.json(values, { headers: { 'content-range': values.length ? '0-0/1' : '*/1' } });
     };
     assert.equal((await readShardRegistry())[0].encrypted_ciphertext, 'project-a.invalid');
+    now += 6000;
     process.env.SUPABASE_URL = 'https://project-b.invalid';
     assert.equal((await readShardRegistry())[0].encrypted_ciphertext, 'project-b.invalid');
     process.env.SUPABASE_SECRET_KEY = 'publishable-not-admin';
     const priorRequests = requests;
     await assert.rejects(readShardRegistry(), /backend admin credential/);
     assert.equal(requests, priorRequests, 'invalid authority rejected before HTTP');
+    now += 6000;
     process.env.SUPABASE_SECRET_KEY = 'sb_secret_test_b';
     assert.equal((await readShardRegistry())[0].encrypted_ciphertext, 'project-b.invalid');
   } finally {

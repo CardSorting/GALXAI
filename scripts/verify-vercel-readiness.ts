@@ -200,8 +200,10 @@ async function verifyVercelReadiness() {
   if (supabaseUrl && supabaseUrl.startsWith('https://')) {
     logPass(`Supabase Endpoint valid: ${supabaseUrl}`);
     // Live reachability ping
-    const ping = await pingEndpoint(`${supabaseUrl}/auth/v1/health`);
-    if (ping.ok) {
+    const ping = process.argv.includes('--offline') ? null : await pingEndpoint(`${supabaseUrl}/auth/v1/health`);
+    if (!ping) {
+      logPass('Offline validation: no live Supabase health request performed.');
+    } else if (ping.ok) {
       logPass(`Live HTTPS Ping to Supabase reachable (${ping.latencyMs}ms, status ${ping.status}).`);
     } else {
       logWarn(`Supabase health check ping timed out or offline (${ping.latencyMs}ms).`);

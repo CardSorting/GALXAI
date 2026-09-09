@@ -2,7 +2,8 @@ import { createHash } from 'node:crypto';
 import { executePostgresQuery } from '../../db/postgres';
 import { getSupabaseConfig } from '../config';
 import type { Database } from '../types';
-import { RegistryEgressGuard, RegistryEgressLimitError, readBoundedRegistryJson } from '../../../relay/registry-egress-guard';
+import { RegistryEgressGuard, RegistryEgressLimitError } from '../../../relay/registry-egress-guard';
+import { createRegistryApiPageReader, RegistryApiUnavailableError } from '../../../relay/registry-api-reader';
 import { ShardRegistrySync, readRegistryApiDelta, type RegistryRow } from '../../../relay/shard-registry-sync';
 
 // Static server-side projection: preserve every field used by mapRowToShard,
@@ -70,6 +71,9 @@ export const SHARD_API_DELTA_OPTIONS = {
 export class ShardProjectionReader {
   private authorityScope?: string;
   private sqlRetryAtMs = 0;
+  private retryAtMs = 0;
+  private failures = 0;
+  private failureEpoch = 0;
   private readonly scopes = new Map<string, { sync: ShardRegistrySync; active: number }>();
 
   constructor(private readonly dependencies: {
@@ -92,6 +96,7 @@ export class ShardProjectionReader {
     // must restart the process, never relabel an old pool or reuse its projection.
     this.authorityScope ??= authorityScope;
     if (this.authorityScope !== authorityScope) throw new Error('Shard authority changed; restart required');
+    if (Date.now() < this.retryAtMs) throw new Error('Shard synchronization is backing off');
     const scope = JSON.stringify(userId ?? null);
     let entry = this.scopes.get(scope);
     if (!entry) {
@@ -111,6 +116,7 @@ export class ShardProjectionReader {
             if (result) charge(Buffer.byteLength(JSON.stringify(result.rows)));
             // No refund for a failed/unmeasured SQL read.
             if (!result) throw new Error('Shard SQL unavailable');
+            if (result.rows[0]?.limit_exceeded) throw new RegistryEgressLimitError();
             return result;
           }).catch(error => {
             if (error instanceof RegistryEgressLimitError) throw error;
@@ -134,24 +140,11 @@ export class ShardProjectionReader {
           }
         }
         if (!config.hasAdminCredential) throw new Error('Shard authority unavailable');
-        return readRegistryApiDelta(known, (columns, offset, ids) => guard.run(async (allowance, charge) => {
-          const url = new URL('/rest/v1/galx_shard_accounts', config.supabaseUrl);
-          url.searchParams.set('select', columns);
-          url.searchParams.set('order', 'id.asc');
-          url.searchParams.set('offset', String(offset));
-          url.searchParams.set('limit', '64');
-          if (userId !== undefined) url.searchParams.set('user_id', `eq.${userId}`);
-          if (ids) url.searchParams.set('id', `in.(${ids.map(id => JSON.stringify(id)).join(',')})`);
-          const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), 5000);
-          try {
-            const response = await (this.dependencies.fetch ?? fetch)(url, {
-              headers: { apikey: config.supabaseServiceRoleKey, Authorization: `Bearer ${config.supabaseServiceRoleKey}` },
-              signal: controller.signal, cache: 'no-store', redirect: 'error',
-            });
-            if (!response.ok) { await response.body?.cancel(); throw new Error('Shard API unavailable'); }
-            return await readBoundedRegistryJson(response, allowance, charge) as RegistryRow[];
-          } finally { clearTimeout(timer); }
+        return readRegistryApiDelta(known, createRegistryApiPageReader(guard, {
+          url: config.supabaseUrl, key: config.supabaseServiceRoleKey, userId, fetch: this.dependencies.fetch,
+          beforeRequest: () => {
+            if (Date.now() < this.retryAtMs) throw new Error('Shard synchronization is backing off');
+          },
         }), SHARD_API_DELTA_OPTIONS);
       }, SHARD_PROJECTION_COLUMNS);
       entry = { sync, active: 0 };
@@ -159,10 +152,23 @@ export class ShardProjectionReader {
     this.scopes.delete(scope);
     this.scopes.set(scope, entry);
     entry.active++;
+    const failureEpoch = this.failureEpoch;
     try {
       const rows = await entry.sync.read();
       if (userId !== undefined && rows.some(row => row.user_id !== userId)) throw new Error('Shard owner scope mismatch');
+      if (failureEpoch === this.failureEpoch) {
+        this.failures = 0;
+        this.retryAtMs = 0;
+      }
       return (rows as ShardProjectionRow[]).sort((a, b) => b.priority - a.priority || a.id.localeCompare(b.id));
+    } catch (error) {
+      // Coalesced callers must not multiply a single failed I/O's backoff.
+      if (Date.now() >= this.retryAtMs) {
+        this.failureEpoch++;
+        this.retryAtMs = Date.now() + Math.min(30_000, 1000 * 2 ** Math.min(5, this.failures++));
+      }
+      this.retryAtMs = Math.max(this.retryAtMs, error instanceof RegistryApiUnavailableError ? error.retryAtMs : 0);
+      throw error;
     } finally { entry.active--; }
   }
 }

@@ -64,9 +64,12 @@ export class RegistryEgressGuard {
     this.lastWarningAt = this.now();
     console.warn('[RegistryEgressGuard] Synchronization paused by egress limits; inspect administrator diagnostics.');
   }
-  async run<T>(operation: (allowance: number, charge: (bytes: number) => void) => Promise<T>): Promise<T> {
+  async run<T>(operation: (allowance: number, charge: (bytes: number) => void) => Promise<T>,
+    options: { maxResponseBytes?: number } = {}): Promise<T> {
     this.refill();
-    const allowance = Math.floor(Math.min(this.policy.maxResponseBytes, this.state.byteTokens - this.policy.overheadBytes));
+    const requested = options.maxResponseBytes ?? this.policy.maxResponseBytes;
+    if (!Number.isSafeInteger(requested) || requested < 0) throw new RegistryEgressLimitError();
+    const allowance = Math.floor(Math.min(this.policy.maxResponseBytes, requested, this.state.byteTokens - this.policy.overheadBytes));
     if (this.state.requestTokens < 1 || allowance < 4096) {
       this.state.blocked++;
       this.persist();
@@ -79,15 +82,16 @@ export class RegistryEgressGuard {
     this.state.requests++;
     this.state.accountedBytes += reserved;
     this.persist();
-    let bytes = 0;
+    let bytes = 0, measured = false;
     try {
       const result = await operation(allowance, amount => {
         if (!Number.isSafeInteger(amount) || amount < 0) throw new RegistryEgressLimitError();
+        measured = true;
         bytes += amount;
         if (bytes > allowance) throw new RegistryEgressLimitError();
       });
       // Refund only after a complete response. Unknown/failed reads retain the reservation.
-      const refund = allowance - bytes;
+      const refund = measured ? allowance - bytes : 0;
       this.refill();
       this.state.byteTokens = Math.min(this.policy.burstBytes, this.state.byteTokens + refund);
       this.state.accountedBytes -= refund;
@@ -108,7 +112,8 @@ export class RegistryEgressGuard {
   }
 }
 
-export async function readBoundedRegistryJson(response: Response, limit: number, charge: (bytes: number) => void): Promise<unknown> {
+export async function readBoundedRegistryJson(response: Response, limit: number, charge: (bytes: number) => void,
+  signal?: AbortSignal): Promise<unknown> {
   const declared = Number(response.headers.get('content-length'));
   if (Number.isFinite(declared) && declared > limit) {
     await response.body?.cancel();
@@ -116,11 +121,15 @@ export async function readBoundedRegistryJson(response: Response, limit: number,
   }
   const reader = response.body?.getReader();
   if (!reader) throw new Error('Missing registry response');
+  const cancel = () => { void reader.cancel().catch(() => {}); };
+  signal?.addEventListener('abort', cancel, { once: true });
   const chunks: Uint8Array[] = [];
   let bytes = 0;
   try {
     for (;;) {
+      signal?.throwIfAborted();
       const { done, value } = await reader.read();
+      signal?.throwIfAborted();
       if (done) break;
       bytes += value.byteLength;
       charge(value.byteLength);
@@ -129,6 +138,7 @@ export async function readBoundedRegistryJson(response: Response, limit: number,
     }
     return JSON.parse(Buffer.concat(chunks).toString('utf8'));
   } finally {
+    signal?.removeEventListener('abort', cancel);
     await reader.cancel().catch(() => {});
     reader.releaseLock();
   }
