@@ -14,22 +14,45 @@ import { SlaHealthEngine, SlaProbeResult } from '@/lib/resilience/SlaHealthEngin
 function BaseFooter() {
   const pathname = usePathname();
   const [slaStatus, setSlaStatus] = useState<SlaProbeResult | null>(null);
-
-  useEffect(() => {
-    const engine = SlaHealthEngine.getInstance();
-    const unsubscribe = engine.subscribe(setSlaStatus);
-    engine.probe();
-    return () => unsubscribe();
-  }, []);
-
   const usesFocusedAppShell =
     !pathname ||
     pathname === '/' ||
     pathname.startsWith('/settings') || pathname === '/keys/top-up' || pathname === '/billing' || pathname === '/pricing' || pathname === '/docs' || pathname.startsWith('/docs/');
 
+  useEffect(() => {
+    if (usesFocusedAppShell) return;
+    const engine = SlaHealthEngine.getInstance();
+    const unsubscribe = engine.subscribe(setSlaStatus);
+    const check = () => { void engine.probe().catch(() => setSlaStatus(engine.getStatus())); };
+    const update = () => setSlaStatus(engine.getStatus());
+    check();
+    document.addEventListener('visibilitychange', check);
+    window.addEventListener('online', check);
+    window.addEventListener('offline', update);
+    // Age existing evidence locally; do not create a background polling loop.
+    const timer = setInterval(update, 30_000);
+    return () => {
+      unsubscribe(); clearInterval(timer);
+      document.removeEventListener('visibilitychange', check);
+      window.removeEventListener('online', check);
+      window.removeEventListener('offline', update);
+    };
+  }, [usesFocusedAppShell]);
+
   if (usesFocusedAppShell) {
     return null;
   }
+  const connectionState = slaStatus?.status ?? 'unknown';
+  const connectionLabel = {
+    unknown: slaStatus?.checkedAtMs != null ? 'Connection check out of date' : 'Connection not checked',
+    healthy: 'Website reachable',
+    degraded: 'Connection check failed', offline: 'You’re offline',
+  }[connectionState];
+  const connectionColors = connectionState === 'healthy'
+    ? 'border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10'
+    : connectionState === 'unknown'
+      ? 'border-white/15 text-zinc-300 hover:bg-white/5'
+      : 'border-amber-500/30 text-amber-300 hover:bg-amber-500/10';
   const footerNavigation = {
     product: [
       { name: 'Frontier AI Models', href: '/models', badge: '6 SOTA' },
@@ -138,26 +161,23 @@ function BaseFooter() {
               The universal AI gateway and 429 burst shield delivering 25%–40% token savings, sub-15ms failover, and 75% prompt cache pass-through.
             </p>
 
-            <div className="pt-2">
+            <div className="pt-2 space-y-2" data-connection-status={connectionState}>
               <Link
                 href="/status"
-                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-mono transition-colors ${
-                  slaStatus?.status === 'offline'
-                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
-                    : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20'
-                }`}
+                className={`inline-flex min-h-11 max-w-full items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080d] ${connectionColors}`}
               >
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    slaStatus?.status === 'offline' ? 'bg-amber-400' : 'bg-emerald-400'
-                  } animate-pulse`}
-                />
-                <span>
-                  {slaStatus?.status === 'offline'
-                    ? 'Offline Mode (Cached)'
-                    : 'Active • All Systems Operational'}
-                </span>
+                <span aria-hidden="true" className="w-2 h-2 shrink-0 rounded-full bg-current" />
+                <span aria-live="polite" aria-atomic="true">{connectionLabel}</span>
               </Link>
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                {connectionState === 'healthy' && slaStatus?.responseLatencyMs != null && (
+                  <span className="block tabular-nums">Response: {new Intl.NumberFormat().format(slaStatus.responseLatencyMs)} ms</span>
+                )}
+                {slaStatus?.checkedAtMs != null && (
+                  <span className="block">Last check: <time dateTime={new Date(slaStatus.checkedAtMs).toISOString()}>{new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(slaStatus.checkedAtMs)}</time></span>
+                )}
+                Browser connection only. View service status for availability.
+              </p>
             </div>
           </div>
 

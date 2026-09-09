@@ -345,6 +345,11 @@ export class GalxAuthEngine {
    * Refreshes upstream OAuth provider tokens for a specific shard account using single-flight mutex.
    */
   async refreshProviderShardTokens(shardId: string): Promise<boolean> {
+    try {
+      await galxRouter.substrate.ensureFreshFromAuthority();
+    } catch {
+      return false;
+    }
     const shard = galxRouter.substrate.getAccount(shardId);
     if (!shard || shard.permissionRetracted || shard.status === 'revoked') {
       return false;
@@ -655,6 +660,7 @@ export class GalxAuthEngine {
    * Re-encrypts all vaulted credentials under a new target KMS keyring version with zero downtime.
    */
   async reencryptVaultShards(targetKeyVersion = PRIMARY_KEY_VERSION): Promise<{ total: number; reencrypted: number }> {
+    await galxRouter.substrate.ensureFreshFromAuthority();
     const shards = galxRouter.substrate.listAccounts();
     let reencrypted = 0;
 

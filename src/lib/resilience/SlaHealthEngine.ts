@@ -1,161 +1,98 @@
-/**
- * GALXAI SLA & System Health Telemetry Engine
- *
- * Continuously computes perceived SLA uptime, edge response latency, and circuit status
- * for sub-second failover monitoring against the 99.99% Enterprise Uptime SLA target.
- * Leverages BroccoliResilienceSubstrate for in-memory percentile aggregation and cross-tab sync.
- */
-
 import { BroccoliResilienceSubstrate } from './BroccoliResilienceSubstrate';
 
+/** A browser-to-website check, never service availability, an SLA, or fleet health. */
 export interface SlaProbeResult {
-  timestampMs: number;
-  edgeLatencyMs: number;
-  p90LatencyMs: number;
-  p99LatencyMs: number;
-  status: 'healthy' | 'degraded' | 'offline';
-  uptimePercentage: number;
-  activeCircuitsCount: number;
-  totalCircuitsCount: number;
-  lastChecked: string;
+  status: 'unknown' | 'healthy' | 'degraded' | 'offline';
+  responseLatencyMs: number | null;
+  checkedAtMs: number | null;
 }
+
+export const CONNECTION_CHECK_INTERVAL_MS = 60_000;
+const STALE_AFTER_MS = 120_000;
 
 export class SlaHealthEngine {
   private static instance: SlaHealthEngine | null = null;
-  private listeners = new Set<(status: SlaProbeResult) => void>();
-  private isProbing = false;
-  private substrate: BroccoliResilienceSubstrate;
+  private readonly listeners = new Set<(status: SlaProbeResult) => void>();
+  private inFlight: Promise<SlaProbeResult> | null = null;
+  private lastStartedAtMs = -Infinity;
+  private latest: SlaProbeResult | null = null;
 
-  private constructor() {
-    this.substrate = BroccoliResilienceSubstrate.getInstance();
-
-    if (typeof window !== 'undefined') {
-      // Seed historical uptime samples into BroccoliDB if empty
-      if (this.substrate.slaTable.count() === 0) {
-        const now = Date.now();
-        for (let i = 0; i < 20; i++) {
-          this.substrate.recordSlaProbe({
-            timestampMs: now - (20 - i) * 60000,
-            latencyMs: 12 + Math.floor(Math.random() * 8),
-            success: true,
-            status: 'healthy',
-            endpoint: '/api/version',
-          });
-        }
-      }
-
-      // React to cross-tab probe updates
-      this.substrate.slaTable.subscribe(() => {
-        this.notify(this.getStatus());
-      });
-    }
-  }
+  constructor(private readonly dependencies: {
+    now?: () => number;
+    monotonicNow?: () => number;
+    online?: () => boolean;
+    visible?: () => boolean;
+    fetch?: typeof fetch;
+    record?: (probe: Parameters<BroccoliResilienceSubstrate['recordSlaProbe']>[0]) => void;
+  } = {}) {}
 
   public static getInstance(): SlaHealthEngine {
-    if (!SlaHealthEngine.instance) {
-      SlaHealthEngine.instance = new SlaHealthEngine();
-    }
-    return SlaHealthEngine.instance;
+    return SlaHealthEngine.instance ??= new SlaHealthEngine();
   }
 
-  /**
-   * Run a synthetic health check probe to measure edge response time.
-   */
-  public async probe(): Promise<SlaProbeResult> {
-    if (this.isProbing) {
-      return this.getStatus();
+  private now() { return (this.dependencies.now ?? Date.now)(); }
+  private online() { return this.dependencies.online?.() ?? (typeof navigator === 'undefined' || navigator.onLine); }
+  private visible() { return this.dependencies.visible?.() ?? (typeof document !== 'undefined' && document.visibilityState === 'visible'); }
+
+  public probe(): Promise<SlaProbeResult> {
+    if (this.inFlight) return this.inFlight;
+    if (!this.online() || !this.visible() || this.now() - this.lastStartedAtMs < CONNECTION_CHECK_INTERVAL_MS) {
+      this.notify();
+      return Promise.resolve(this.getStatus());
     }
+    this.lastStartedAtMs = this.now();
+    this.inFlight = this.measure().finally(() => { this.inFlight = null; });
+    return this.inFlight;
+  }
 
-    this.isProbing = true;
-    const start = typeof performance !== 'undefined' ? performance.now() : Date.now();
-
+  private async measure(): Promise<SlaProbeResult> {
+    const monotonicNow = this.dependencies.monotonicNow ?? (() => performance.now());
+    const start = monotonicNow();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    let success = false;
+    let latencyMs: number | null = null;
     try {
-      if (typeof window !== 'undefined' && !navigator.onLine) {
-        this.substrate.recordSlaProbe({
-          timestampMs: Date.now(),
-          latencyMs: 0,
-          success: false,
-          status: 'offline',
-          endpoint: '/api/version',
-        });
-        return this.getStatus();
-      }
-
-      // Fast synthetic health check ping
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-      const res = await fetch('/api/version', {
-        method: 'GET',
-        cache: 'no-store',
-        signal: controller.signal,
+      const response = await (this.dependencies.fetch ?? fetch)('/api/version', {
+        method: 'HEAD', cache: 'no-store', redirect: 'error', signal: controller.signal,
       });
-
-      clearTimeout(timeoutId);
-      const elapsed = typeof performance !== 'undefined' ? Math.round(performance.now() - start) : 15;
-
-      const isSuccess = res.ok;
-      this.substrate.recordSlaProbe({
-        timestampMs: Date.now(),
-        latencyMs: elapsed,
-        success: isSuccess,
-        status: isSuccess ? (elapsed > 400 ? 'degraded' : 'healthy') : 'degraded',
-        endpoint: '/api/version',
-      });
+      latencyMs = Math.max(0, Math.round(monotonicNow() - start));
+      success = response.ok;
+      await response.body?.cancel();
     } catch {
-      this.substrate.recordSlaProbe({
-        timestampMs: Date.now(),
-        latencyMs: 999,
-        success: false,
-        status: 'degraded',
-        endpoint: '/api/version',
-      });
-    } finally {
-      this.isProbing = false;
-    }
-
-    const currentStatus = this.getStatus();
-    this.notify(currentStatus);
-    return currentStatus;
+      // No response time can be claimed when no response was received.
+    } finally { clearTimeout(timeout); }
+    const status = success ? 'healthy' : 'degraded';
+    this.latest = { status, responseLatencyMs: latencyMs, checkedAtMs: this.now() };
+    const record = this.dependencies.record ?? (probe => BroccoliResilienceSubstrate.getInstance().recordSlaProbe(probe));
+    try {
+      record({ timestampMs: this.latest.checkedAtMs!, latencyMs, success, status,
+        endpoint: '/api/version', measurementSource: 'browser-http-v1' });
+    } catch { /* Optional local history must not break the connection indicator. */ }
+    this.notify();
+    return this.getStatus();
   }
 
   public getStatus(): SlaProbeResult {
-    const stats = this.substrate.getSlaStats(30);
-
-    let status: 'healthy' | 'degraded' | 'offline' = 'healthy';
-
-    if (typeof window !== 'undefined' && !navigator.onLine) {
-      status = 'offline';
-    } else if (stats.uptimePercentage < 99.0 || stats.p50LatencyMs > 500) {
-      status = 'degraded';
+    // Restored/broadcast history is not a fresh measurement from this tab's network.
+    if (!this.online()) {
+      this.latest = null; // A network transition invalidates the previous measurement.
+      return { status: 'offline', responseLatencyMs: null, checkedAtMs: null };
     }
-
-    return {
-      timestampMs: Date.now(),
-      edgeLatencyMs: stats.p50LatencyMs,
-      p90LatencyMs: stats.p90LatencyMs,
-      p99LatencyMs: stats.p99LatencyMs,
-      status,
-      uptimePercentage: stats.uptimePercentage,
-      activeCircuitsCount: 12,
-      totalCircuitsCount: 12,
-      lastChecked: new Date().toLocaleTimeString(),
-    };
+    if (!this.latest || this.latest.checkedAtMs === null || this.now() < this.latest.checkedAtMs
+      || this.now() - this.latest.checkedAtMs >= STALE_AFTER_MS) {
+      return { status: 'unknown', responseLatencyMs: null, checkedAtMs: this.latest?.checkedAtMs ?? null };
+    }
+    return { ...this.latest };
   }
 
   public subscribe(callback: (status: SlaProbeResult) => void): () => void {
     this.listeners.add(callback);
     callback(this.getStatus());
-    return () => {
-      this.listeners.delete(callback);
-    };
+    return () => { this.listeners.delete(callback); };
   }
 
-  private notify(status: SlaProbeResult) {
-    this.listeners.forEach((cb) => {
-      try {
-        cb(status);
-      } catch {}
-    });
+  private notify() {
+    for (const callback of this.listeners) { try { callback(this.getStatus()); } catch {} }
   }
 }

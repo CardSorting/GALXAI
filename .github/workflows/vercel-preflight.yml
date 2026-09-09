@@ -35,6 +35,12 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Verify YAML security patch
+        run: npm run test:yaml:security
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Run 8-Phase Vercel Pre-Flight Audit Engine
         run: npm run vercel:verify
         env:
@@ -50,6 +56,15 @@ jobs:
 
       - name: Verify cooldown recovery and image retry contract
         run: npm run test:cooldown
+
+      - name: Install isolated database test tools
+        run: sudo apt-get update && sudo apt-get install -y postgresql
+
+      - name: Verify egress budgets and bounded replay
+        run: PATH="$(pg_config --bindir):$PATH" npm run test:egress
+
+      - name: Verify controller authority during slow worker I/O
+        run: node --import tsx --test scripts/test-relay-capabilities.ts
 
       - name: ESLint & Style Checks
         run: npm run lint

@@ -97,6 +97,68 @@ test('lifecycle maintains one relay per shard and never restarts on capability l
   await lifecycle.stop(); assert.equal(workers.size,0);
 });
 
+test('slow worker startup cannot stall authority refresh or resurrect a revoked generation', async () => {
+  let now = 100000, reads = 0, starts = 0;
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  let desired: DesiredShard[] = [{ id: 'slow', provider: 'openai', credentialRevision: 'v1', accessToken: 'fake', accountId: 'test' }];
+  const handle: RelayHandle = { id: 'relay-slow', shardId: 'slow', generation: 'one', credentialRevision: 'v1', endpoint: 'http://127.0.0.1:1', inferenceKey: 'fake', adminKey: 'fake' };
+  const removed: string[] = [];
+  const lifecycle = new RelayFederationLifecycle(async () => { reads++; return desired; }, {
+    list: async () => [], start: async () => { starts++; await gate; return handle; },
+    inspect: async () => { throw Error('revoked generation must not be inspected'); },
+    remove: async h => { removed.push(h.id); },
+  }, () => now);
+  const initial = lifecycle.reconcile();
+  for (let i = 0; i < 20 && starts === 0; i++) await Promise.resolve();
+  assert.equal(starts, 1);
+  now += 20000; desired = [];
+  const refreshed = lifecycle.reconcile();
+  for (let i = 0; i < 20 && reads < 2; i++) await Promise.resolve();
+  assert.equal(reads, 2, 'authority lane is not blocked by startup');
+  release(); await Promise.all([initial, refreshed]);
+  assert.equal(starts, 1); assert.deepEqual(removed, ['relay-slow']);
+  assert.equal(lifecycle.capabilities.snapshot().models.length, 0);
+  await lifecycle.stop();
+});
+
+test('failing worker starts back off without blocking healthy workers or authority reads', async () => {
+  let now = 100000, reads = 0, starts = 0;
+  const shard: DesiredShard = { id: 'bad', provider: 'openai', credentialRevision: 'v1', accessToken: 'fake', accountId: 'test' };
+  const lifecycle = new RelayFederationLifecycle(async () => { reads++; return [shard]; }, {
+    list: async () => [], start: async () => { starts++; throw Error('failed start'); }, inspect: async () => ({}), remove: async () => {},
+  }, () => now);
+  await lifecycle.reconcile(); await lifecycle.reconcile();
+  assert.equal(reads, 2); assert.equal(starts, 1);
+  now += 2000; await lifecycle.reconcile(); assert.equal(starts, 2);
+  now += 2000; await lifecycle.reconcile(); assert.equal(starts, 2);
+  await lifecycle.stop();
+});
+
+test('fresh cooldown authority fences admission before a slow inspection completes', async () => {
+  const now = 100000;
+  let shard: DesiredShard = { id: 'a', accountId: 'a', provider: 'openai', credentialRevision: 'v1', accessToken: 'fake' };
+  const handle: RelayHandle = { id: 'relay-a', shardId: 'a', generation: 'one', credentialRevision: 'v1', endpoint: 'http://127.0.0.1:1', inferenceKey: 'fake', adminKey: 'fake' };
+  const records = new CapabilityRegistry(() => now);
+  records.register('a', handle.id, handle.generation, 'openai'); records.publishInventory(records.beginRefresh('a')!, ['A']); records.heartbeat('a', {});
+  let stall = false, release!: () => void, entered!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const started = new Promise<void>(resolve => { entered = resolve; });
+  const lifecycle = new RelayFederationLifecycle(async () => [shard], {
+    list: async () => [handle], start: async () => handle, remove: async () => {},
+    inspect: async () => { if (stall) { entered(); await gate; } return { record: records.get('a') }; },
+  }, () => now);
+  await lifecycle.reconcile(); assert(lifecycle.capabilities.select('A'));
+  stall = true; const inspecting = lifecycle.reconcile(); await started;
+  shard = { ...shard, cooldownUntilMs: now + 60000 };
+  const refreshing = lifecycle.reconcile();
+  for (let i = 0; i < 20; i++) await Promise.resolve();
+  assert.equal(lifecycle.capabilities.select('A'), undefined);
+  release(); await Promise.all([inspecting, refreshing]);
+  assert.equal(lifecycle.capabilities.select('A'), undefined);
+  await lifecycle.stop();
+});
+
 test('busy model updates do not starve inventory and older inventories cannot overwrite newer discovery', () => {
   const {registry:r}=fixture(); const first=r.beginRefresh('a')!;
   r.observe(r.beginObservation('a','A')!,'A','AVAILABLE');

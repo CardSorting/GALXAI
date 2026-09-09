@@ -8,7 +8,7 @@ import { readRelayJson, relayRequestHeaders, relayResponseHeaders } from './fede
 import { readJsonBody, RequestError, validateModelRequest } from './request-policy.js';
 import type { RelayFederationLifecycle, RelayHandle } from './federation-lifecycle.js';
 
-interface Options { apiKeys: string[]; adminKeys: string[]; secret: string; host?: string; port?: number; drainTimeoutMs?: number; admissionTimeoutMs?: number; transport?: typeof fetch; }
+interface Options { apiKeys: string[]; adminKeys: string[]; secret: string; host?: string; port?: number; drainTimeoutMs?: number; admissionTimeoutMs?: number; transport?: typeof fetch; egressSnapshot?: () => unknown; }
 interface Affinity { shard: string; generation: string; job: string; tenant: string; expires: number; }
 const equal = (a: string, b: string) => Buffer.byteLength(a) === Buffer.byteLength(b) && timingSafeEqual(Buffer.from(a), Buffer.from(b));
 const terminal = (status: string) => ['completed', 'failed', 'cancelled'].includes(status);
@@ -143,6 +143,7 @@ export class RelayFederationServer {
       this.authenticate(req, true);
       if (req.method !== 'GET') throw new RequestError(405, 'method_not_allowed', 'Use GET.');
       if (path === '/api/capabilities') return this.json(res, 200, this.lifecycle.snapshot());
+      if (path === '/api/egress' && this.options.egressSnapshot) return this.json(res, 200, this.options.egressSnapshot());
       if (path === '/health/ready') {
         const ready = !this.draining && this.lifecycle.routable() && this.lifecycle.capabilities.snapshot().models.some(m => m.eligibleShardCount > 0);
         return this.json(res, ready ? 200 : 503, { ready });

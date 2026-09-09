@@ -80,8 +80,22 @@ const inFlightRequests = new Map<string, Promise<{ data: any; fromCache?: boolea
  * Safely parse JSON from a fetch response without ever throwing syntax errors on HTML/text error pages.
  */
 export async function safeJsonParse<T = any>(res: Response): Promise<{ data: T | null; rawText: string; isJson: boolean }> {
+  const reader = res.body?.getReader();
+  const decoder = new TextDecoder();
+  let rawText = '', bytes = 0;
+  if (reader) {
+    try {
+      for (;;) {
+        const part = await reader.read();
+        if (part.done) break;
+        bytes += part.value.byteLength;
+        if (bytes > 2 * 1024 * 1024) throw new GalxError('The response is too large to load. Narrow your request and try again.');
+        rawText += decoder.decode(part.value, { stream: true });
+      }
+      rawText += decoder.decode();
+    } finally { await reader.cancel().catch(() => {}); reader.releaseLock(); }
+  }
   try {
-    const rawText = await res.text();
     if (!rawText || rawText.trim() === '') {
       return { data: null, rawText: '', isJson: true };
     }
@@ -138,9 +152,8 @@ export async function resilientFetch<T = any>(
 
   if (isReadMethod) {
     inFlightRequests.set(coalescingKey, promise);
-    promise.finally(() => {
-      inFlightRequests.delete(coalescingKey);
-    });
+    const release = () => { inFlightRequests.delete(coalescingKey); };
+    void promise.then(release, release);
   }
 
   return promise;
@@ -184,8 +197,8 @@ async function executeResilientFetch<T = any>(
   options: ResilientFetchOptions = {}
 ): Promise<{ data: T; fromCache?: boolean; status: number }> {
   const {
-    timeoutMs = 12000,
-    maxRetries = 3,
+    timeoutMs: requestedTimeoutMs = 12000,
+    maxRetries: requestedMaxRetries = 3,
     baseDelayMs = 400,
     maxDelayMs = 4000,
     enableCacheFallback = true,
@@ -198,7 +211,12 @@ async function executeResilientFetch<T = any>(
   } = options;
 
   const method = (fetchOptions.method || 'GET').toUpperCase();
+  const timeoutMs = Number.isFinite(requestedTimeoutMs) ? Math.min(30000, Math.max(100, requestedTimeoutMs)) : 12000;
   const isReadMethod = method === 'GET' || method === 'HEAD';
+  const explicitKey = idempotencyKey || new Headers(fetchOptions.headers).get('Idempotency-Key') || undefined;
+  // Mutations only retry when the caller explicitly supplies stable identity.
+  const maxRetries = isReadMethod || explicitKey
+    ? Math.min(3, Math.max(0, Number.isSafeInteger(requestedMaxRetries) ? requestedMaxRetries : 0)) : 0;
   const substrate = BroccoliResilienceSubstrate.getInstance();
 
   // 1. Check BroccoliDB L1 Hot Cache
@@ -224,9 +242,10 @@ async function executeResilientFetch<T = any>(
   };
 
   let lastError: Error | null = null;
-  const requestIdempotencyKey = idempotencyKey || (isReadMethod ? undefined : `idem_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`);
+  const requestIdempotencyKey = explicitKey || (isReadMethod ? undefined : `idem_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`);
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    fetchOptions.signal?.throwIfAborted();
     const controller = new AbortController();
     let timeoutId: NodeJS.Timeout | null = null;
 
@@ -260,31 +279,54 @@ async function executeResilientFetch<T = any>(
         }
       }
 
+      // Queue only before any dispatch, when the browser is actually offline.
+      // Never convert permanent/ambiguous online failures into a fresh retry budget.
+      if (attempt === 0 && !isReadMethod && options.enableOutboxOfflineFallback
+        && typeof navigator !== 'undefined' && !navigator.onLine) {
+        let payload: unknown;
+        if (fetchOptions.body !== undefined && fetchOptions.body !== null) {
+          if (typeof fetchOptions.body !== 'string') throw new GalxError('This action cannot be saved for automatic recovery.');
+          try { payload = JSON.parse(fetchOptions.body); }
+          catch { throw new GalxError('This action cannot be saved for automatic recovery.'); }
+        }
+        try {
+          await BroccoliOutboxEngine.enqueue({ url, method: method as 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+            headers: Object.fromEntries(headers), payload, idempotencyKey: requestIdempotencyKey });
+        } catch { throw new GalxError('This action could not be saved. Keep this page open and retry when you’re online.'); }
+        if (timeoutId) clearTimeout(timeoutId);
+        return { data: { queued: true, message: 'Action saved for later. It has not been completed.' } as T,
+          status: 202, fromCache: false };
+      }
       const res = await fetch(url, {
         ...fetchOptions,
         headers,
         signal: mergedSignal,
       });
 
-      if (timeoutId) clearTimeout(timeoutId);
-
       // Handle 401 / 403 permanent auth failures
       if (res.status === 401 || res.status === 403) {
+        await res.body?.cancel();
         throw new GalxAuthError(`Authentication failure (${res.status}) on ${url}`);
+      }
+
+      if (!res.ok && res.headers.get('x-should-retry') === 'false') {
+        await res.body?.cancel();
+        throw new GalxError('This request cannot be retried automatically.', { status: res.status });
       }
 
       // Handle 429 Rate Limiting
       if (res.status === 429) {
+        await res.body?.cancel();
         const retryAfterHeader = res.headers.get('Retry-After');
-        const retryAfterSec = retryAfterHeader ? parseInt(retryAfterHeader, 10) : undefined;
-        const retryAfterMs = retryAfterSec && !isNaN(retryAfterSec) ? retryAfterSec * 1000 : undefined;
+        const retryAfterMs = retryAfterHeader && /^\d+$/.test(retryAfterHeader) ? Number(retryAfterHeader) * 1000
+          : retryAfterHeader ? Math.max(0, Date.parse(retryAfterHeader) - Date.now()) : undefined;
         throw new GalxRateLimitError(`Rate limit exceeded (429) on ${url}`, retryAfterMs);
       }
 
       // Handle 5xx Server Errors (Retryable)
       if (res.status >= 500) {
-        const { rawText } = await safeJsonParse(res);
-        throw new GalxError(`Server error (${res.status}) on ${url}: ${rawText.slice(0, 100)}`, {
+        await res.body?.cancel();
+        throw new GalxError(`Request failed (HTTP ${res.status}).`, {
           status: res.status,
           isRetryable: true,
         });
@@ -305,6 +347,7 @@ async function executeResilientFetch<T = any>(
       }
     } catch (err: any) {
       if (timeoutId) clearTimeout(timeoutId);
+      fetchOptions.signal?.throwIfAborted();
 
       if (err?.name === 'AbortError' || controller.signal.aborted) {
         lastError = new GalxTimeoutError(timeoutMs);
@@ -329,6 +372,9 @@ async function executeResilientFetch<T = any>(
       if (lastError instanceof GalxRateLimitError && lastError.retryAfterMs) {
         delayMs = Math.max(delayMs, lastError.retryAfterMs);
       }
+      // Long server cooldowns return control to the caller, never shorten the
+      // cooldown or leave a foreground request sleeping for hours.
+      if (!Number.isFinite(delayMs) || delayMs > 30_000) break;
 
       if (onRetry) {
         try {
@@ -337,10 +383,19 @@ async function executeResilientFetch<T = any>(
       }
 
       // Await jittered backoff before next attempt
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      await new Promise<void>((resolve, reject) => {
+        const done = () => { fetchOptions.signal?.removeEventListener('abort', abort); resolve(); };
+        const timer = setTimeout(done, delayMs);
+        const abort = () => { clearTimeout(timer); fetchOptions.signal?.removeEventListener('abort', abort); reject(fetchOptions.signal?.reason); };
+        fetchOptions.signal?.addEventListener('abort', abort, { once: true });
+        if (fetchOptions.signal?.aborted) abort();
+      });
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
     }
   }
 
+  if (lastError instanceof GalxError && !lastError.isRetryable) throw lastError;
   // If network failed but cache fallback is available in L1 or L2, return stale cached data
   const l1Stale = substrate.getCachedResponse<T>(cacheKey, method);
   if (enableCacheFallback && isReadMethod && l1Stale) {
@@ -354,32 +409,6 @@ async function executeResilientFetch<T = any>(
     return { data: l2CachedData, status: 200, fromCache: true };
   }
 
-  // If mutation failed offline and outbox fallback is requested, enqueue into BroccoliOutboxEngine
-  if (!isReadMethod && options.enableOutboxOfflineFallback) {
-    let payloadParsed: any = undefined;
-    if (typeof fetchOptions.body === 'string') {
-      try {
-        payloadParsed = JSON.parse(fetchOptions.body);
-      } catch {
-        payloadParsed = { raw: fetchOptions.body };
-      }
-    }
-
-    void BroccoliOutboxEngine.enqueue({
-      url,
-      method: method as any,
-      headers: (fetchOptions.headers as any) || {},
-      payload: payloadParsed,
-      idempotencyKey: requestIdempotencyKey,
-    });
-
-    console.warn(`🛡️ [GALXAI Resilient Client] Queued offline mutation into BroccoliDB Outbox for: ${url}`);
-    return {
-      data: { success: true, queued: true, outbox: true, message: 'Action saved offline and will sync automatically upon reconnection.' } as any,
-      status: 202,
-      fromCache: false,
-    };
-  }
 
   throw lastError || new GalxNetworkError('Request failed after max retry attempts');
 }

@@ -24,10 +24,11 @@ export interface CachedResponseEntry {
 export interface SlaProbeEntry {
   id: string;
   timestampMs: number;
-  latencyMs: number;
+  latencyMs: number | null;
   success: boolean;
   status: 'healthy' | 'degraded' | 'offline';
   endpoint: string;
+  measurementSource?: 'browser-http-v1';
 }
 
 export interface CircuitStateEntry {
@@ -90,9 +91,6 @@ export class BroccoliResilienceSubstrate {
     this.incidentTable.createIndex('severity');
     this.incidentTable.createSortedIndex('timestamp');
 
-    // Seed default operational history log if empty
-    this.seedDefaultIncidents();
-
     // Initialize cross-tab broadcast channel if available in browser
     if (typeof window !== 'undefined' && typeof window.BroadcastChannel !== 'undefined') {
       try {
@@ -109,23 +107,6 @@ export class BroccoliResilienceSubstrate {
       BroccoliResilienceSubstrate.instance = new BroccoliResilienceSubstrate();
     }
     return BroccoliResilienceSubstrate.instance;
-  }
-
-  private seedDefaultIncidents(): void {
-    const historicalId = 'inc_baseline_verified_operational';
-    if (!this.incidentTable.get(historicalId)) {
-      this.incidentTable.put(historicalId, {
-        id: historicalId,
-        timestamp: Date.now() - 86400000 * 3,
-        severity: 'resolved',
-        title: 'Multi-Region Edge Verification Check',
-        impact: 'Zero user disruption. Routine canary latency benchmark passed across sfo1 and iad1.',
-        rootCause: 'Scheduled quarterly routing table re-optimization.',
-        resolutionStrategy: 'Dynamic edge weights re-balanced with zero packet loss.',
-        affectedEndpoints: ['/api/v1/chat/completions', '/api/keys'],
-        resolvedAt: Date.now() - 86400000 * 3 + 120000,
-      });
-    }
   }
 
   // ==========================================
@@ -192,6 +173,7 @@ export class BroccoliResilienceSubstrate {
       success: probe.success,
       status: probe.status,
       endpoint: probe.endpoint,
+      measurementSource: probe.measurementSource,
     };
 
     this.slaTable.put(id, entry);
@@ -212,11 +194,11 @@ export class BroccoliResilienceSubstrate {
   }
 
   public getSlaStats(windowMinutes: number = 30): {
-    p50LatencyMs: number;
-    p90LatencyMs: number;
-    p99LatencyMs: number;
-    avgLatencyMs: number;
-    uptimePercentage: number;
+    p50LatencyMs: number | null;
+    p90LatencyMs: number | null;
+    p99LatencyMs: number | null;
+    avgLatencyMs: number | null;
+    successPercentage: number | null;
     totalProbes: number;
   } {
     const now = Date.now();
@@ -226,39 +208,40 @@ export class BroccoliResilienceSubstrate {
       where: { timestampMs: { $gte: cutoff } },
       sortBy: 'latencyMs',
       sortOrder: 'asc',
-    });
+    }).filter(probe => probe.measurementSource === 'browser-http-v1'
+      && Number.isFinite(probe.timestampMs) && probe.timestampMs <= now
+      && typeof probe.success === 'boolean');
 
     if (recent.length === 0) {
       return {
-        p50LatencyMs: 14,
-        p90LatencyMs: 24,
-        p99LatencyMs: 42,
-        avgLatencyMs: 16,
-        uptimePercentage: 99.99,
+        p50LatencyMs: null,
+        p90LatencyMs: null,
+        p99LatencyMs: null,
+        avgLatencyMs: null,
+        successPercentage: null,
         totalProbes: 0,
       };
     }
 
     const total = recent.length;
     const successful = recent.filter((r) => r.success).length;
-    const uptimePercentage = Number(((successful / total) * 100).toFixed(2));
-
-    const p50Index = Math.floor(total * 0.5);
-    const p90Index = Math.floor(total * 0.9);
-    const p99Index = Math.min(total - 1, Math.floor(total * 0.99));
-
-    const p50LatencyMs = recent[p50Index]?.latencyMs || 14;
-    const p90LatencyMs = recent[p90Index]?.latencyMs || 25;
-    const p99LatencyMs = recent[p99Index]?.latencyMs || 45;
-    const sum = recent.reduce((acc, cur) => acc + cur.latencyMs, 0);
-    const avgLatencyMs = Math.round(sum / total);
+    // This is the success ratio of browser checks, not platform uptime.
+    const successPercentage = Number(((successful / total) * 100).toFixed(2));
+    const latencies = recent.filter(probe => probe.success && typeof probe.latencyMs === 'number'
+      && Number.isFinite(probe.latencyMs) && probe.latencyMs >= 0).map(probe => probe.latencyMs as number);
+    const percentile = (fraction: number) => latencies.length
+      ? latencies[Math.max(0, Math.ceil(latencies.length * fraction) - 1)] : null;
+    const p50LatencyMs = percentile(0.5);
+    const p90LatencyMs = percentile(0.9);
+    const p99LatencyMs = percentile(0.99);
+    const avgLatencyMs = latencies.length ? Math.round(latencies.reduce((sum, value) => sum + value, 0) / latencies.length) : null;
 
     return {
       p50LatencyMs,
       p90LatencyMs,
       p99LatencyMs,
       avgLatencyMs,
-      uptimePercentage,
+      successPercentage,
       totalProbes: total,
     };
   }

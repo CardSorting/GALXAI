@@ -18,8 +18,8 @@ export class GalxCredentialSubstrate {
   public readonly accountTable: BroccoliDbTable<GalxShardAccount>;
   private readonly persistence: GalxPersistence;
   private readonly retractListeners: Array<(shardId: string) => void> = [];
-  private readonly initializationPromise: Promise<void>;
-  private initializationError: Error | null = null;
+  private initializationPromise: Promise<void> | null = null;
+  private initializationRetryAtMs = 0;
   private lastAuthorityRefreshAtMs = 0;
   private authorityRefreshPromise: Promise<number> | null = null;
 
@@ -38,9 +38,6 @@ export class GalxCredentialSubstrate {
     this.accountTable.createSortedIndex('expiresAtMs');
     this.accountTable.createSortedIndex('createdAtMs');
 
-    this.initializationPromise = this.initializeFromAuthority().catch((error: unknown) => {
-      this.initializationError = error instanceof Error ? error : new Error(String(error));
-    });
   }
 
   /**
@@ -48,7 +45,8 @@ export class GalxCredentialSubstrate {
    * production entrypoint that can route or mutate shard state.
    */
   public initialize(): void {
-    // Constructor-owned promise intentionally performs the work once.
+    // Explicit legacy warm-up only. Routing entrypoints still await ready().
+    void this.ready().catch(() => {});
   }
 
   private async initializeFromAuthority(): Promise<void> {
@@ -67,8 +65,17 @@ export class GalxCredentialSubstrate {
   }
 
   public async ready(): Promise<void> {
+    if (!this.initializationPromise) {
+      if (Date.now() < this.initializationRetryAtMs) {
+        throw new Error('Shard authority initialization is temporarily unavailable');
+      }
+      this.initializationPromise = this.initializeFromAuthority().catch((error: unknown) => {
+        this.initializationPromise = null;
+        this.initializationRetryAtMs = Date.now() + 5000;
+        throw error;
+      });
+    }
     await this.initializationPromise;
-    if (this.initializationError) throw this.initializationError;
   }
 
   private resolveMutationOptions(

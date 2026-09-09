@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { desiredShard } from '../src/relay/desired-shards.js';
-import { readShardRegistry, decryptRegistryShard } from '../src/relay/shard-registry.js';
+import { readShardRegistry, decryptRegistryShard, configureRegistryEgressGuard, getRegistryEgressSnapshot } from '../src/relay/shard-registry.js';
 import { DockerShardDriver } from '../src/relay/docker-shard-driver.js';
 import { RelayFederationLifecycle, type DesiredShard } from '../src/relay/federation-lifecycle.js';
 import { RelayFederationServer } from '../src/relay/federation-server.js';
@@ -36,6 +36,7 @@ function stop(): Promise<void> {
 process.once('SIGTERM', () => { void stop().catch(() => { console.error('Federation shutdown incomplete'); process.exitCode = 1; }); });
 process.once('SIGINT', () => { void stop().catch(() => { console.error('Federation shutdown incomplete'); process.exitCode = 1; }); });
 try {
+  configureRegistryEgressGuard(path.join(directory, 'registry-egress.json'));
   const secretPath = path.join(directory, 'signing-secret');
   if (!fs.existsSync(secretPath)) fs.writeFileSync(secretPath, randomBytes(32).toString('hex'), { flag: 'wx', mode: 0o600 });
   const secret = fs.readFileSync(secretPath, 'utf8');
@@ -50,7 +51,8 @@ try {
   };
   lifecycle = new RelayFederationLifecycle(read, new DockerShardDriver({ namespace, secret, codexImageToolAlias: process.env.RELAY_CODEX_IMAGE_TOOL_ALIAS === 'true', image: process.env.RELAY_FEDERATION_IMAGE || 'galxai-relay:vnext' }));
   server = new RelayFederationServer(lifecycle, { secret, apiKeys: (process.env.RELAY_API_KEYS || '').split(',').filter(Boolean),
-    adminKeys: (process.env.RELAY_ADMIN_API_KEYS || '').split(',').filter(Boolean), port: Number(process.env.RELAY_FEDERATION_PORT || 3301) });
+    adminKeys: (process.env.RELAY_ADMIN_API_KEYS || '').split(',').filter(Boolean), port: Number(process.env.RELAY_FEDERATION_PORT || 3301),
+    egressSnapshot: getRegistryEgressSnapshot });
   await lifecycle.reconcile();
   if (stopping) throw new Error('Federation startup interrupted');
   await server.start();

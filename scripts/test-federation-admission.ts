@@ -25,6 +25,23 @@ async function fixture(handler:(req:http.IncomingMessage,res:http.ServerResponse
 }
 const answer=(res:http.ServerResponse,id='job-1')=>{res.writeHead(202,{'Content-Type':'application/json','Retry-After':'3','X-Galx-Trace-Id':'trace-1'});res.end(JSON.stringify({id,status:'queued',streamUrl:`/v1/jobs/${id}/stream`,statusUrl:`/v1/jobs/${id}`}));};
 
+test('egress diagnostics require administrator authorization before collecting counters', async () => {
+  let reads = 0;
+  const f = await fixture((_req, res) => answer(res), { egressSnapshot: () => { reads++; return { accountedBytes: 100, blocked: 0 }; } });
+  try {
+    assert.equal((await fetch(f.base + '/api/egress')).status, 401);
+    assert.equal((await fetch(f.base + '/api/egress', { headers: f.headers('client') })).status, 401);
+    assert.equal(reads, 0);
+    const allowed = await fetch(f.base + '/api/egress', { headers: f.headers('admin') });
+    assert.equal(allowed.status, 200);
+    assert.equal(allowed.headers.get('cache-control'), 'no-store');
+    assert.deepEqual(await allowed.json(), { accountedBytes: 100, blocked: 0 });
+    assert.equal(reads, 1);
+    const health = await fetch(f.base + '/health');
+    assert.deepEqual(await health.json(), { status: 'ok' });
+  } finally { await f.close(); }
+});
+
 test('parent status URLs, retry guidance, API-key compatibility, and task identity survive the front door',async()=>{
   let captured:http.IncomingHttpHeaders|undefined;
   const f=await fixture((req,res)=>{captured=req.headers;if(req.url?.startsWith('/v1/jobs/')){res.writeHead(200);res.end(JSON.stringify({id:'job-1',status:'running',streamUrl:'/v1/jobs/job-1/stream',statusUrl:'/v1/jobs/job-1'}));}else answer(res);});

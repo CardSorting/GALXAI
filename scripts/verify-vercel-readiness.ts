@@ -104,7 +104,11 @@ async function verifyVercelReadiness() {
     warnings++;
   } else {
     const ignoreContent = fs.readFileSync(vercelIgnorePath, 'utf8');
-    const requiredExclusions = ['docs/', '.wrangler/', 'scripts/', 'supabase/', '.broccolidb/', '.impeccable/'];
+    if (!ignoreContent.split(/\r?\n/).some(line => ['/.relay/', '.relay/'].includes(line.trim()))) {
+      logFail('.vercelignore must exclude private relay credentials and operational state.');
+      errors++;
+    }
+    const requiredExclusions = ['docs/', '.wrangler/', 'scripts/', 'supabase/', '.broccolidb/', '.impeccable/', '.relay/'];
     const missing = requiredExclusions.filter((x) => !ignoreContent.includes(x));
     if (missing.length === 0) {
       logPass('.vercelignore excludes non-production directories (docs, wrangler, scripts, migrations, dev engines).');

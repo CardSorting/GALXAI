@@ -272,6 +272,8 @@
     "db:verify-function-security": "node --env-file-if-exists=.env.local --import tsx scripts/verify-function-security.ts",
     "db:push": "node --env-file-if-exists=.env.local --import tsx scripts/push-migrations-direct.ts",
     "db:status": "node --env-file-if-exists=.env.local --import tsx scripts/manage-migrations.ts --status",
+    "db:egress": "node --env-file-if-exists=.env.local --import tsx scripts/diagnose-supabase-egress.ts",
+    "test:egress": "node --import tsx --test scripts/test-shard-registry-egress.ts scripts/test-shard-projection-egress.ts scripts/test-registry-egress-guard.ts scripts/test-outbox-egress.ts scripts/test-client-recovery.ts scripts/test-measured-connection.ts",
     "db:audit:tenant-authority": "node --env-file-if-exists=.env.local --import tsx scripts/audit-tenant-authority-live.ts",
     "db:migrate": "node --env-file-if-exists=.env.local --import tsx scripts/manage-migrations.ts --apply",
     "db:dry-run": "tsx scripts/manage-migrations.ts --dry-run",
@@ -287,7 +289,8 @@
     "relay:federation": "node --env-file-if-exists=.env.local --import tsx scripts/run-relay-federation.ts",
     "test:relay:capabilities": "node --import tsx --test scripts/test-federation-admission.ts scripts/test-relay-capabilities.ts scripts/test-relay-federation-http.ts scripts/test-relay-hardening.ts scripts/test-relay-adaptive-quota.ts scripts/test-relay-telemetry.ts",
     "test:relay:docker": "node --import tsx scripts/test-relay-federation-docker.ts",
-    "test:image:security": "node --import tsx --test scripts/test-image-public-http.ts scripts/test-public-information-boundary.ts scripts/test-image-retry-contract.ts scripts/test-auth-identity-boundary.ts"
+    "test:image:security": "node --import tsx --test scripts/test-image-public-http.ts scripts/test-public-information-boundary.ts scripts/test-image-retry-contract.ts scripts/test-auth-identity-boundary.ts",
+    "test:yaml:security": "node --test scripts/test-yaml-security.mjs"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3",
@@ -319,6 +322,7 @@
     "ws": "8.21.0"
   },
   "overrides": {
+    "js-yaml@^4.0.0": "4.3.2",
     "next": {
       "postcss": "$postcss"
     }

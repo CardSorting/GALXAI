@@ -11,6 +11,7 @@ import type { GalxShardAccount, CredentialStatus, ProviderType, AuthType, ShardI
 
 import { BroccoliDbTable } from '../../../core/broccolidb/broccolidb-table';
 import { GalxCryptoVault } from '../../../core/vault/GalxCryptoVault';
+import { ShardProjectionReader, type ShardProjectionRow } from './ShardProjectionReader';
 import { APPLY_LEASE_HEALTH_TRANSITIONS_SQL, coalesceHealthTransitions, persistedHealthStatus, type LeaseHealthTransition } from '../../../core/pool/LeaseHealthTransition';
 
 export class ShardAuthorityUnavailableError extends Error {
@@ -31,6 +32,8 @@ export class ShardRepository {
   private readonly inMemoryShards = new Map<string, GalxShardAccount>();
   private readonly shardTable: BroccoliDbTable<GalxShardAccount>;
   private readonly inMemoryLeases = new Map<string, any>();
+  private readonly projection = new ShardProjectionReader();
+  private usedRemoteAuthority = false;
 
   constructor() {
     this.shardTable = new BroccoliDbTable<GalxShardAccount>('shards');
@@ -86,40 +89,26 @@ export class ShardRepository {
 
   async getShards(userId?: string, options: ShardAuthorityOptions = {}): Promise<GalxShardAccount[]> {
     const failures: string[] = [];
-
-    // 1. Direct PostgreSQL Connection Pool Query with Circuit Breaker (<1.5ms)
-    const res = await executePostgresQuery(
-      'SELECT * FROM public.galx_shard_accounts WHERE ($1::text IS NULL OR user_id = $1) ORDER BY priority DESC;',
-      [userId || null]
-    );
-    if (res) {
-      const mapped = res.rows.map(r => this.mapRowToShard(r));
-      this.cacheShards(mapped, !userId);
-      return mapped;
-    }
-    if (process.env.DATABASE_URL) failures.push('pooled SQL read failed');
-
-    // 2. Supabase PostgREST Fallback
-    if (isSupabaseAdminConfigured()) {
+    if (userId !== undefined && !userId.trim()) throw new ShardAuthorityUnavailableError('load owner registry');
+    if (this.isAuthorityConfigured()) {
+      this.usedRemoteAuthority = true;
       try {
-        const supabase = getSupabaseAdmin();
-        let query = supabase.from('galx_shard_accounts').select('*').order('priority', { ascending: false });
-
-        if (userId) {
-          query = query.eq('user_id', userId);
+        const mapped = (await this.projection.read(userId)).map(row => this.mapRowToShard(row));
+        if (userId !== undefined) {
+          for (const shard of this.shardTable.query({ where: { userId } })) {
+            this.inMemoryShards.delete(shard.id);
+            this.shardTable.delete(shard.id);
+          }
         }
-
-        const { data, error } = await query;
-        if (error) throw error;
-        const mapped = (data || []).map(row => this.mapRowToShard(row));
-        this.cacheShards(mapped, !userId);
+        this.cacheShards(mapped, userId === undefined);
         return mapped;
-      } catch (error: any) {
-        failures.push(`admin API read failed: ${error?.code || error?.name || 'unknown'}`);
+      } catch {
+        // A configured authority never falls back to potentially revoked local rows.
+        throw new ShardAuthorityUnavailableError('load registry');
       }
     }
 
-    if (options.requireRemote) {
+    if (options.requireRemote || this.usedRemoteAuthority) {
       if (!this.isAuthorityConfigured()) failures.push('DATABASE_URL/admin credential not configured');
       throw new ShardAuthorityUnavailableError('load registry', failures);
     }
@@ -706,7 +695,7 @@ export class ShardRepository {
     return { success: true, committedTokens: params.actualTokens || lease?.estimatedTokens || 2000 };
   }
 
-  private mapRowToShard(data: Database['public']['Tables']['galx_shard_accounts']['Row']): GalxShardAccount {
+  private mapRowToShard(data: ShardProjectionRow): GalxShardAccount {
     const payload = {
       ciphertext: data.encrypted_ciphertext,
       iv: data.encrypted_iv,

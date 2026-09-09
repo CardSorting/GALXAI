@@ -33,6 +33,9 @@ export class RelayFederationLifecycle {
   private readonly invalid = new Map<string, string>();
   private readonly draining = new Map<string, Promise<void>>();
   private reconciliation?: Promise<void>;
+  private authorityRead?: Promise<void>;
+  private desired = new Map<string, DesiredShard>();
+  private readonly retry = new Map<string, { revision: string; attempts: number; at: number }>();
   private registryReadAt = 0;
   private lastError?: string;
   private stopping = false;
@@ -40,17 +43,39 @@ export class RelayFederationLifecycle {
     private readonly now: () => number = Date.now, private readonly registryTtlMs = 15000) {
     this.capabilities = new CapabilityRegistry(now);
   }
-  reconcile(): Promise<void> {
+  async reconcile(): Promise<void> {
     if (this.stopping) return Promise.resolve();
+    // Refresh authority even while slow worker I/O is still in flight. This
+    // control lane is single-flight and revokes eligibility immediately.
+    try { await (this.authorityRead ??= this.refreshAuthority().finally(() => { this.authorityRead = undefined; })); }
+    catch { this.lastError = 'shard_registry_unavailable'; return; }
+    if (this.stopping) return;
     return this.reconciliation ??= this.runReconciliation().finally(() => { this.reconciliation = undefined; });
+  }
+  private async refreshAuthority(): Promise<void> {
+    const rows = await this.readShards();
+    if (new Set(rows.map(s => s.id)).size !== rows.length) throw new Error('Duplicate shard ownership in registry');
+    this.desired = new Map(rows.filter(s => !s.expiresAtMs || s.expiresAtMs > this.now()).map(s => [s.id, s]));
+    this.registryReadAt = this.now();
+    for (const [id, handle] of this.relays) {
+      if (!this.current(id, handle.credentialRevision)) this.capabilities.remove(id, handle.generation);
+      else if ((this.desired.get(id)?.cooldownUntilMs ?? 0) > this.now()) {
+        this.capabilities.heartbeat(id, { health: 'unavailable' }, 0, false);
+      }
+    }
+    for (const [id, backoff] of this.retry) if (!this.current(id, backoff.revision)) this.retry.delete(id);
+  }
+  private current(id: string, revision: string): boolean {
+    const shard = this.desired.get(id);
+    return !this.stopping && this.routable() && shard?.credentialRevision === revision
+      && (!shard.expiresAtMs || shard.expiresAtMs > this.now());
   }
   private async runReconciliation(): Promise<void> {
     let desired: DesiredShard[];
     let running: RelayHandle[];
     try {
-      [desired, running] = await Promise.all([this.readShards(), this.driver.list()]);
-      if (new Set(desired.map(s => s.id)).size !== desired.length) throw new Error('Duplicate shard ownership in registry');
-      this.registryReadAt = this.now();
+      running = await this.driver.list();
+      desired = [...this.desired.values()];
       this.lastError = undefined;
     } catch {
       this.lastError = 'shard_or_container_registry_unavailable';
@@ -71,31 +96,47 @@ export class RelayFederationLifecycle {
       this.capabilities.remove(id, handle.generation);
       this.relays.delete(id);
     }
-    const work = [...desiredById.values()];
+    // Existing workers get the fast lane before potentially slow cold starts.
+    const work = [...desiredById.values()].sort((a, b) => Number(retained.has(b.id)) - Number(retained.has(a.id)));
     // Bound startup/discovery I/O; a slow relay cannot serialize the whole fleet.
     let cursor = 0;
     await Promise.all(Array.from({ length: Math.min(3, work.length) }, async () => {
       while (cursor < work.length && !this.stopping) {
         const shard = work[cursor++];
+        if (!this.current(shard.id, shard.credentialRevision) || (this.retry.get(shard.id)?.at ?? 0) > this.now()) continue;
         if (this.invalid.get(shard.id) === shard.credentialRevision || this.draining.has(shard.id)
           || (!retained.has(shard.id) && running.some(r => r.shardId === shard.id))) continue;
         try {
           const handle = retained.get(shard.id) ?? await this.driver.start(shard);
+          if (!this.current(shard.id, handle.credentialRevision)) {
+            this.capabilities.remove(shard.id, handle.generation);
+            this.retire(handle);
+            continue;
+          }
           const old = this.relays.get(shard.id);
           if (old && old.generation !== handle.generation) this.capabilities.remove(shard.id, old.generation);
           this.relays.set(shard.id, handle);
           this.capabilities.register(shard.id, handle.id, handle.generation, shard.provider);
           const state = await this.driver.inspect(handle);
+          if (!this.current(shard.id, handle.credentialRevision)) {
+            this.capabilities.remove(shard.id, handle.generation);
+            this.retire(handle);
+            continue;
+          }
+          this.retry.delete(shard.id);
           if (state.invalidCredential) {
             this.invalid.set(shard.id, shard.credentialRevision);
             this.capabilities.remove(shard.id);
             this.retire(handle);
           } else if (state.record) {
             this.capabilities.receive(state.record); // Ignore stale snapshots; the existing heartbeat expires independently.
-            if ((shard.cooldownUntilMs ?? 0) > this.now()) this.capabilities.heartbeat(shard.id, { health: 'unavailable' }, 0, false);
+            if ((this.desired.get(shard.id)?.cooldownUntilMs ?? 0) > this.now()) this.capabilities.heartbeat(shard.id, { health: 'unavailable' }, 0, false);
           } else this.capabilities.heartbeat(shard.id, { health: 'unavailable' }, 0, false);
           // CAPABILITY_EMPTY and failed inventory discovery do not remove a relay.
         } catch {
+          const attempts = (this.retry.get(shard.id)?.attempts ?? 0) + 1;
+          this.retry.set(shard.id, { revision: shard.credentialRevision, attempts,
+            at: this.now() + Math.min(30_000, 1000 * 2 ** Math.min(5, attempts)) });
           this.capabilities.heartbeat(shard.id, { health: 'unavailable' }, 0, false);
           this.lastError = 'relay_reconciliation_incomplete';
         }
