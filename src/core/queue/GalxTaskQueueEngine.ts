@@ -1225,7 +1225,11 @@ export class GalxTaskQueueEngine {
       const durationMs = Date.now() - startTime;
       const errorMessage = err.message || 'Execution error';
       const statusCode = err.statusCode || (err.name === 'AbortError' ? 504 : 500);
-      const isPermanent = err.isPermanent ?? (statusCode >= 400 && statusCode < 429);
+      // Image synthesis has no upstream idempotency guarantee. An error can
+      // arrive after pixels were generated; queued work must not replay it.
+      const isImageTask = runningTask.target.type === 'INTERNAL_MODEL'
+        && runningTask.target.taskKind === 'image_generation';
+      const isPermanent = isImageTask || (err.isPermanent ?? (statusCode >= 400 && statusCode < 429));
 
       const attemptRecord: TaskAttemptRecord = {
         attemptNumber: runningTask.dispatchCount,

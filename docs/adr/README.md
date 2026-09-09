@@ -142,3 +142,4 @@ Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) f
 | 0127 | [ADR 0127: Explicit Codex image-tool alias and production federation cutover](0127-codex-image-tool-alias-production-cutover.md) | Image alias and dated production evidence |
 | 0128 | [ADR 0128: Documentation authority and federation contract](0128-documentation-authority-and-federation-contract.md) | Documentation authority |
 | 0129 | [ADR 0129: Public image artifacts and verified identity](0129-public-image-artifacts-and-verified-identity.md) | Implemented and locally verified; rollout unverified |
+| 0130 | [Image receipts and uncertain outcomes](0130-image-receipts-and-uncertain-outcomes.md) | Local hardening; deployment pending |

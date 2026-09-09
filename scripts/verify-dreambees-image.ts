@@ -6,6 +6,7 @@ const {createGatewayClient,generateGatewayImage} = await import(pathToFileURL(pa
 const {pngBytes} = await import(pathToFileURL(path.resolve(root, 'src/lib/studio/image-download.ts')).href);
 import {writeFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
+import sharp from 'sharp';
 const key=process.env.GALX_API_KEY||process.env.GALXAI_API_KEY;
 if(!key)throw Error('Missing DreamBees credential');
 const started=Date.now();let status:number|undefined,requestId:string|null=null;
@@ -14,6 +15,10 @@ const client=createGatewayClient(key,async(input,init)=>{const r=await fetch(inp
 const output=await generateGatewayImage(client,'A small blue ceramic bee on a plain cream background. One original artwork, no lettering.');
 const image=output.data?.[0];if(!image?.b64_json)throw Error('Missing inline image');
 const bytes=pngBytes(Buffer.from(image.b64_json,'base64'));
+const metadata=await sharp(bytes).metadata();
+if(metadata.format!=='png')throw Error('Expected PNG artifact');
+await sharp(bytes).raw().toBuffer();
+for(const field of ['exif','xmp','iptc','comments'])if((metadata as any)[field]!==undefined)throw Error('Unexpected image metadata');
 if (process.env.DREAMBEES_IMAGE_OUTPUT) writeFileSync(process.env.DREAMBEES_IMAGE_OUTPUT,bytes,{mode:0o600});
-console.log(JSON.stringify({verified:true,status,requestId,execution:(output as any).execution,elapsedMs:Date.now()-started,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')}));
+console.log(JSON.stringify({verified:true,status,requestId,elapsedMs:Date.now()-started,bytes:bytes.length,width:metadata.width,height:metadata.height,metadataRemoved:true,sha256:createHash('sha256').update(bytes).digest('hex')}));
 }catch(e:any){console.log(JSON.stringify({verified:false,status:e.status||status,requestId,code:e.code||e.error?.code,elapsedMs:Date.now()-started}));process.exitCode=1;}

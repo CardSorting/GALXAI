@@ -40,6 +40,7 @@ import * as crypto from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import { monitorEventLoopDelay } from 'node:perf_hooks';
 import { readJsonBody, validateModelRequest, RequestError, RetryBudget } from './request-policy.js';
+import { AdmissionReceipts } from './admission-receipts.js';
 import { RelayTelemetry } from './telemetry.js';
 import { EventEmitter } from 'node:events';
 import WebSocket from 'ws';
@@ -80,6 +81,7 @@ export interface RelayConfig {
   adminApiKeys?: string[];
   allowedOrigins?: string[];
   maxPayloadBytes: number;
+  maxImagePayloadBytes: number;
   httpBodyTimeoutMs: number;
   // Multi-Tenant Rate Governance
   tenantRateLimitPerSec: number;
@@ -145,6 +147,7 @@ const DEFAULT_CONFIG: RelayConfig = {
   discoverHostCredentials: process.env.RELAY_DISCOVER_HOST_CREDENTIALS === 'true',
   registryEnabled: Boolean(registryConfig().databaseUrl || registryConfig().url || registryConfig().key),
   maxPayloadBytes: parseInt(process.env.MAX_PAYLOAD_BYTES || '2097152', 10), // 2 MB
+  maxImagePayloadBytes: parseInt(process.env.MAX_IMAGE_PAYLOAD_BYTES || '33554432', 10), // bounded base64 image response
   httpBodyTimeoutMs: parseInt(process.env.HTTP_BODY_TIMEOUT_MS || '10000', 10), // 10s
   tenantRateLimitPerSec: parseFloat(process.env.TENANT_RATE_LIMIT_PER_SEC || '50.0'),
   tenantBurstCapacity: parseInt(process.env.TENANT_BURST_CAPACITY || '100', 10),
@@ -780,7 +783,7 @@ export class GalxaiRelayServer extends EventEmitter {
   private readonly telemetry = new RelayTelemetry();
   private readonly eventLoopDelay = monitorEventLoopDelay({ resolution: 20 });
   private readonly retryBudget = new RetryBudget();
-  private readonly pendingImages = new Map<string, string>();
+  private readonly imageReceipts = new AdmissionReceipts();
   private readonly imageControllers = new Set<AbortController>();
   private readonly principals = new WeakMap<http.IncomingMessage, string>();
   private readonly requestTraces = new WeakMap<http.IncomingMessage, string>();
@@ -881,7 +884,7 @@ export class GalxaiRelayServer extends EventEmitter {
       const parsed = new URL(origin);
       if (!['http:', 'https:'].includes(parsed.protocol) || parsed.origin !== origin) throw new TypeError('allowedOrigins must contain exact HTTP(S) origins');
     }
-    for (const name of ['maxConcurrentRequests', 'maxRssBytes', 'jobMaxWallTimeMs', 'httpBodyTimeoutMs', 'maxPayloadBytes'] as const) {
+    for (const name of ['maxConcurrentRequests', 'maxRssBytes', 'jobMaxWallTimeMs', 'httpBodyTimeoutMs', 'maxPayloadBytes', 'maxImagePayloadBytes'] as const) {
       if (!Number.isSafeInteger(this.config[name]) || this.config[name] <= 0) throw new TypeError(`${name} must be a positive safe integer`);
     }
     if (!Number.isSafeInteger(this.config.maxUpstreamRetries) || this.config.maxUpstreamRetries < 0 || this.config.maxUpstreamRetries > 32) {
@@ -1840,33 +1843,36 @@ export class GalxaiRelayServer extends EventEmitter {
 
         const suppliedKey = req.headers['idempotency-key'] || body.idempotency_key;
         if (suppliedKey && (typeof suppliedKey !== 'string' || suppliedKey.length > 128)) throw new RequestError(400, 'invalid_request', 'Idempotency-Key must have at most 128 characters.');
-        const imageFingerprint = crypto.createHash('sha256').update(JSON.stringify([prompt, requestedModel, body.size, body.quality, body.n, body.response_format])).digest('hex');
-        const idempotencyKey = suppliedKey ? crypto.createHash('sha256').update(JSON.stringify(['image', tenantId, suppliedKey])).digest('hex') : undefined;
-        if (idempotencyKey) {
-          const cached = this.idempotencyTable.get(idempotencyKey);
-          if (cached && (cached as any).imageFingerprint !== imageFingerprint) throw new RequestError(409, 'idempotency_conflict', 'This idempotency key was used with different image parameters. Use a new key.');
-          if (this.pendingImages.has(idempotencyKey)) {
+        const keyed = suppliedKey ? this.imageReceipts.begin(tenantId, 'images', suppliedKey, { ...body, prompt }) : undefined;
+        if (keyed?.existing) {
+          const receipt = keyed.receipt;
+          if (receipt.state === 'pending') {
             res.setHeader('Retry-After', '2');
-            throw new RequestError(409, 'image_request_in_progress', 'An image request with this key is already in progress. Retry with the same key after 2 seconds.');
+            throw new RequestError(409, 'image_request_in_progress', 'Check the existing image request before submitting again.');
           }
-          if (cached && (cached as any).imageResponse) {
-            res.writeHead(200, {
-              'Content-Type': 'application/json',
-              'X-Galx-Idempotency-Hit': 'true',
-            });
-            res.end(JSON.stringify((cached as any).imageResponse));
-            return;
+          if (receipt.state === 'unknown') {
+            res.setHeader('X-Should-Retry', 'false');
+            throw new RequestError(409, 'image_outcome_unknown', 'The prior image outcome is unconfirmed. Do not repeat generation.');
           }
+          if (!receipt.response) {
+            res.setHeader('X-Should-Retry', 'false');
+            throw new RequestError(409, 'result_not_retained', 'The image completed but is no longer available for replay.');
+          }
+          res.writeHead(receipt.response.status, { ...receipt.response.headers, 'X-Galx-Idempotency-Hit': 'true' });
+          res.end(receipt.response.body);
+          return;
         }
 
         this.updateCapabilityHealth();
-        if (!this.capabilities.select(imageCapability)) { this.rejectModelCapacity(res, imageCapability); return; }
+        if (!this.capabilities.select(imageCapability)) {
+          if (keyed) this.imageReceipts.forget(keyed.id);
+          this.rejectModelCapacity(res, imageCapability); return;
+        }
 
         const traceId = this.requestTraces.get(req);
         this.telemetry.model(traceId, requestedModel, model);
         this.metrics.totalImageJobsSubmitted++;
 
-        if (idempotencyKey) this.pendingImages.set(idempotencyKey, imageFingerprint);
         let shardId: string;
         const controller = new AbortController();
         this.imageControllers.add(controller);
@@ -1893,32 +1899,26 @@ export class GalxaiRelayServer extends EventEmitter {
             execution: dispatched.execution,
           };
 
-          if (idempotencyKey) {
-            this.idempotencyTable.put(idempotencyKey, {
-              id: idempotencyKey,
-              jobId: `img_${Date.now()}`,
-              createdAtMs: Date.now(),
-              imageResponse: responseData,
-              imageFingerprint,
-            } as any, { ttlMs: this.config.idempotencyTtlMs });
-          }
-
-          res.writeHead(200, {
+          const responseHeaders = {
             'Content-Type': 'application/json',
             'X-Galx-Shard-Id': shardId,
             'X-Galx-Execution-Model': dispatched.execution.executionModel,
             'X-Galx-Routing-Mode': dispatched.execution.routingMode,
             ...this.getRateLimitHeaders(),
-          });
-          res.end(JSON.stringify(responseData));
+          };
+          const responseBytes = Buffer.from(JSON.stringify(responseData));
+          if (keyed) this.imageReceipts.complete(keyed.receipt, 200, responseHeaders, responseBytes);
+          res.writeHead(200, responseHeaders);
+          res.end(responseBytes);
         } catch (err: any) {
           this.metrics.totalImageJobsFailed++;
           if (traceId) this.telemetry.finish(traceId, 'failed', controller.signal.aborted ? String(controller.signal.reason?.message || 'image_wall_time_exceeded') : err.telemetryReason || err.message);
           if (res.destroyed || res.writableEnded) return;
           if (err.message === 'all_shards_unavailable') { this.rejectUnavailableFleet(res); return; }
-          res.writeHead(502, { 'Content-Type': 'application/json' });
+          res.writeHead(502, { 'Content-Type': 'application/json', 'X-Should-Retry': 'false' });
           res.end(JSON.stringify({
             error: {
+              execution_state: 'unknown',
               message: 'Image generation failed. Inspect the trace for provider, connection or deadline evidence.',
               code: 'upstream_image_synthesis_failed',
             },
@@ -1927,7 +1927,7 @@ export class GalxaiRelayServer extends EventEmitter {
           clearTimeout(deadline);
           res.off('close', onClose);
           this.imageControllers.delete(controller);
-          if (idempotencyKey) this.pendingImages.delete(idempotencyKey);
+          if (keyed?.receipt.state === 'pending') keyed.receipt.state = 'unknown';
         }
       } catch (err: unknown) {
         if (res.writableEnded || res.destroyed) return;
@@ -1938,47 +1938,36 @@ export class GalxaiRelayServer extends EventEmitter {
   }
 
   private async synthesizeImageWithFailover(prompt: string, body: Record<string, unknown>, model: string, traceId?: string, signal: AbortSignal = AbortSignal.timeout(this.config.jobMaxWallTimeMs)) {
-    const attempted = new Set<string>();
-    let lastError: unknown;
-    for (let attempt = 0; attempt <= this.config.maxUpstreamRetries; attempt++) {
-      signal.throwIfAborted();
-      await this.refreshShardRegistry();
-      signal.throwIfAborted();
-      const shard = this.acquireHealthyShard(attempted, `image:${body.model || model}`);
-      if (!shard) throw new Error('all_shards_unavailable');
-      attempted.add(shard.id);
-      const capabilityTicket = this.capabilities.beginObservation(shard.id, `image:${body.model || model}`);
-      this.telemetry.attempt(traceId, shard.id, shard.accessToken.startsWith('sk-') ? 'http' : 'websocket');
-      this.telemetry.model(traceId, model, imageExecution(model, shard.accessToken.startsWith('sk-'), this.config.codexImageToolAlias).executionModel);
-      if (shard.accessToken.startsWith('sk-')) this.telemetry.model(traceId, body.model, body.model || 'gpt-image-2');
-      try {
-        const result = shard.accessToken.startsWith('sk-')
-          ? await this.synthesizeImageViaOpenAiRest(prompt, body, shard.accessToken, signal)
-          : await this.synthesizeImageViaCodex(prompt, imageExecution(model, false, this.config.codexImageToolAlias).executionModel, shard, traceId, signal);
-        const execution = imageExecution(model, shard.accessToken.startsWith('sk-'), this.config.codexImageToolAlias);
-        if (capabilityTicket) this.capabilities.observe(capabilityTicket, `image:${body.model || model}`, 'AVAILABLE', undefined, execution.routingMode === 'codex_image_tool_alias');
-        this.releaseShard(shard.id, true);
-        this.retryBudget.success();
-        return { result, shardId: shard.id, execution };
-      } catch (error: any) {
-        if (signal.aborted) { this.releaseShard(shard.id); throw signal.reason; }
-        const negative = classifyCapabilityFailure(error.upstream);
-        if (negative && capabilityTicket) this.capabilities.observe(capabilityTicket, `image:${body.model || model}`, negative.state, negative.reason);
-        const failure = classifyUpstreamError(error.upstream ?? { message: error.message });
-        error.telemetryReason = error.upstream ? `upstream_error_${failure.code}` : error.message;
-        this.telemetry.failedAttempt(traceId, error.telemetryReason);
-        if (!failure.retryable) { this.releaseShard(shard.id); throw error; }
-        if (failure.quota) this.recordQuotaFailure(shard.id, failure.deadline);
-        else this.recordShardFailure(shard.id, failure.unauthorized);
-        lastError = error;
-        if (attempt < this.config.maxUpstreamRetries) {
-          if (!this.retryBudget.take()) throw new Error('relay_retry_budget_exhausted');
-          const backoff = Math.floor(Math.random() * (Math.min(this.config.retryMaxDelayMs, this.config.retryBaseDelayMs * 2 ** attempt) + 1));
-          await delay(backoff, undefined, { signal });
-        }
-      }
+    signal.throwIfAborted();
+    await this.refreshShardRegistry();
+    signal.throwIfAborted();
+    const shard = this.acquireHealthyShard(new Set(), `image:${body.model || model}`);
+    if (!shard) throw new Error('all_shards_unavailable');
+    const capabilityTicket = this.capabilities.beginObservation(shard.id, `image:${body.model || model}`);
+    const execution = imageExecution(model, shard.accessToken.startsWith('sk-'), this.config.codexImageToolAlias);
+    this.telemetry.attempt(traceId, shard.id, shard.accessToken.startsWith('sk-') ? 'http' : 'websocket');
+    this.telemetry.model(traceId, model, execution.executionModel);
+    try {
+      const result = shard.accessToken.startsWith('sk-')
+        ? await this.synthesizeImageViaOpenAiRest(prompt, body, shard.accessToken, signal)
+        : await this.synthesizeImageViaCodex(prompt, execution.executionModel, shard, traceId, signal);
+      if (capabilityTicket) this.capabilities.observe(capabilityTicket, `image:${body.model || model}`, 'AVAILABLE', undefined, execution.routingMode === 'codex_image_tool_alias');
+      this.releaseShard(shard.id, true);
+      return { result, shardId: shard.id, execution };
+    } catch (error: any) {
+      if (signal.aborted) { this.releaseShard(shard.id); throw signal.reason; }
+      const negative = classifyCapabilityFailure(error.upstream);
+      if (negative && capabilityTicket) this.capabilities.observe(capabilityTicket, `image:${body.model || model}`, negative.state, negative.reason);
+      const failure = classifyUpstreamError(error.upstream ?? { message: error.message });
+      error.telemetryReason = error.upstream ? `upstream_error_${failure.code}` : error.message;
+      this.telemetry.failedAttempt(traceId, error.telemetryReason);
+      if (failure.quota) this.recordQuotaFailure(shard.id, failure.deadline);
+      else if (failure.retryable) this.recordShardFailure(shard.id, failure.unauthorized);
+      else this.releaseShard(shard.id);
+      // Synthesis is not idempotent upstream. Never create a second image after
+      // an ambiguous disconnect, even when another shard has spare capacity.
+      throw error;
     }
-    throw lastError;
   }
 
   private synthesizeImageViaCodex(
@@ -2050,7 +2039,7 @@ export class GalxaiRelayServer extends EventEmitter {
       }, 90_000);
 
       try {
-        ws = new WebSocketClass(this.config.wsEndpoint, { headers: wsHeaders, maxPayload: this.config.maxPayloadBytes, followRedirects: false });
+        ws = new WebSocketClass(this.config.wsEndpoint, { headers: wsHeaders, maxPayload: this.config.maxImagePayloadBytes, followRedirects: false });
         ws.on('unexpected-response', (_request: unknown, response: http.IncomingMessage) => {
           response.resume();
           finishError(Object.assign(new Error(`Upstream HTTP ${response.statusCode}`), {

@@ -312,3 +312,4 @@ Internal maintainer navigation: public-facing guidance follows [ADR 0129](adr/01
 | --- | --- |
 | [Public image artifacts and verified identity](adr/0129-public-image-artifacts-and-verified-identity.md) | `adr/0129-public-image-artifacts-and-verified-identity.md` |
 | [Image public boundary verification](maintainers/image-public-boundary.md) | `maintainers/image-public-boundary.md` |
+| [Image receipts and uncertain outcomes](adr/0130-image-receipts-and-uncertain-outcomes.md) | `adr/0130-image-receipts-and-uncertain-outcomes.md` |

@@ -62,7 +62,7 @@ test('concurrent image idempotency prevents duplicate dispatch and conflicting c
  const f=await fixture();let calls=0,complete:()=>void=()=>{};
  f.internals.synthesizeImageWithFailover=async()=>{calls++;await new Promise<void>(r=>complete=r);return {result:{b64_json:'test'},shardId:'shard-0',execution:{executionModel:'gpt-5.6-terra',routingMode:'exact'}}};
  const submitImage=(prompt:string)=>fetch(f.base+'/v1/images/generations',{method:'POST',headers:{'Content-Type':'application/json','Idempotency-Key':'image-key'},body:JSON.stringify({prompt})});
- try{const first=submitImage('same');await until(()=>calls===1);const pending=await submitImage('same');assert.equal(pending.status,409);assert.equal(pending.headers.get('retry-after'),'2');assert.equal(calls,1);complete();assert.equal((await first).status,200);assert.equal((await submitImage('same')).status,200);assert.equal(calls,1);assert.equal((await submitImage('different')).status,409);
+ try{const first=submitImage('same');await until(()=>calls===1);const conflicting=await submitImage('different');assert.equal(conflicting.status,409);assert.equal((await conflicting.json()).error.code,'idempotency_conflict');const pending=await submitImage('same');assert.equal(pending.status,409);assert.equal(pending.headers.get('retry-after'),'2');assert.equal(calls,1);complete();assert.equal((await first).status,200);assert.equal((await submitImage('same')).status,200);assert.equal(calls,1);assert.equal((await submitImage('different')).status,409);
  }finally{complete();await f.close()}
 });
 
@@ -252,5 +252,54 @@ test('network listeners require credentials and dedicated admin keys stay separa
  try {
   assert.equal((await fetch(f.base + '/metrics', { headers: { Authorization: 'Bearer client-key' } })).status, 403);
   assert.equal((await fetch(f.base + '/metrics', { headers: { Authorization: 'Bearer operator-key' } })).status, 200);
+ } finally { await f.close(); }
+});
+
+test('image responses larger than the request-body limit remain receivable', async () => {
+ const f = await fixture();
+ const result = Buffer.alloc(2 * 1024 * 1024, 7).toString('base64');
+ f.ws.on('connection', socket => socket.on('message', () => {
+  socket.send(JSON.stringify({type:'response.output_item.done',item:{type:'image_generation_call',result}}));
+  socket.send(JSON.stringify({type:'response.completed'}));
+ }));
+ try {
+  const image = await f.internals.synthesizeImageViaCodex('A garden', 'test-model', f.internals.shardsTable.get('shard-0'));
+  assert.equal(image.b64_json, result);
+  assert.equal(f.internals.config.maxPayloadBytes, 2 * 1024 * 1024);
+ } finally { await f.close(); }
+});
+
+test('image response size remains bounded independently of request bodies', async () => {
+ const f = await fixture({maxImagePayloadBytes:1024});
+ f.ws.on('connection', socket => socket.on('message', () => {
+  socket.send(JSON.stringify({type:'response.output_item.done',item:{type:'image_generation_call',result:'A'.repeat(2048)}}));
+ }));
+ try {
+  await assert.rejects(f.internals.synthesizeImageViaCodex('A garden', 'test-model', f.internals.shardsTable.get('shard-0')), /Max payload size exceeded/);
+ } finally { await f.close(); }
+});
+
+test('image transport failure never dispatches a second synthesis on another shard', async () => {
+ const f = await fixture({maxUpstreamRetries:3});
+ let calls = 0;
+ const failure = new Error('image transport disconnected after dispatch');
+ f.internals.synthesizeImageViaCodex = async () => { calls++; throw failure; };
+ try {
+  await assert.rejects(f.internals.synthesizeImageWithFailover('A garden', {model:'test-model'}, 'test-model'), error => error === failure);
+  assert.equal(calls, 1);
+  for (const shard of f.internals.shardsTable.getAll()) assert.equal(shard.inFlight, 0);
+ } finally { await f.close(); }
+});
+
+test('uncertain image receipts block replay and conflicting intent without retaining response bodies', async () => {
+ const f = await fixture(); let calls = 0;
+ f.internals.synthesizeImageWithFailover = async () => { calls++; throw new Error('transport disconnected'); };
+ const submit = (prompt = 'A garden') => fetch(f.base+'/v1/images/generations', {method:'POST',headers:{'Content-Type':'application/json','Idempotency-Key':'uncertain-image'},body:JSON.stringify({prompt})});
+ try {
+  const first = await submit(); assert.equal(first.status, 502); assert.equal(first.headers.get('x-should-retry'), 'false');
+  assert.equal((await first.json()).error.execution_state, 'unknown');
+  const replay = await submit(); assert.equal(replay.status, 409); assert.equal((await replay.json()).error.code, 'image_outcome_unknown');
+  const conflict = await submit('A different garden'); assert.equal(conflict.status, 409); assert.equal((await conflict.json()).error.code, 'idempotency_conflict');
+  assert.equal(calls, 1);
  } finally { await f.close(); }
 });

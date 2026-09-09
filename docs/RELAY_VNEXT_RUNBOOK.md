@@ -45,6 +45,7 @@ The launcher stores a signing secret and controller lock under ignored `.relay/f
 | `CAPABILITY_REFRESH_INTERVAL_MS` | `60000` | Worker refresh upper interval; jitter is 80–100% |
 | `CAPABILITY_TTL_MS` | `120000` | Maximum model evidence lifetime |
 | `RELAY_SHARD_CONCURRENCY` | `4` | Per-worker active stream admission |
+| `MAX_IMAGE_PAYLOAD_BYTES` | `33554432` | Worker image WebSocket response-frame limit; separate from the 2 MiB request-body limit |
 
 Worker tuning variables apply to worker configuration; the current driver uses its bounded defaults. Changing host environment variables does not silently propagate them into workers. Change driver configuration explicitly before tuning a fleet. Capability snapshots show effective capacity and evidence deadlines.
 
@@ -63,7 +64,7 @@ On the assigned worker, an administrator can POST `/api/capabilities/probe-image
 3. Stop new admissions to the legacy shared relay and drain its active streams. Stop the shared container before assigning its shards to vNext.
 4. Start the controller under the host's process supervisor with the persistent signing secret and registry access. Confirm one worker per active shard and correct model pools. Never run two controllers for the same namespace; multi-host deployment needs a distributed ownership lease first.
 5. Route the existing authenticated ingress to the controller's loopback front door through the host's established tunnel setup. The controller is not directly Internet-exposed.
-6. Verify the actual downstream chat and image clients end-to-end. Image verification is a prerequisite for paid Hive activation, which remains a separate authorized billing/entitlement action. Verify and disclose the chosen native or compatibility route through the actual public client.
+6. Verify the actual downstream chat and image clients end-to-end. Image verification is a prerequisite for paid Hive activation, which remains a separate authorized billing/entitlement action. Verify the sanitized artifact through the actual public client. Inspect execution evidence only through administrator-authorized diagnostics.
 7. For rollback, pause ingress, drain and stop vNext workers, restore the saved shared relay image/configuration and original ingress, then verify downstream requests again. Do not run both topologies with the same credentials during rollback.
 
 The existing `docker-compose.relay.yml` describes the legacy shared deployment and is not a vNext fleet launcher. Rebuilding that deployment with the new worker without this migration will fail its one-shard guard. The synthetic tests do not change the production tunnel or perform a cutover. The separately performed production cutover is recorded in ADR 0127.
@@ -130,3 +131,15 @@ node --env-file=/path/to/DreamBees-Rooms/.env.local --import tsx scripts/verify-
 ```
 
 This makes one real image request with the client's own retry policy, validates its PNG using DreamBees' image validator, and logs only status, request ID, execution metadata, elapsed time, byte count, and SHA-256. Visually inspect the saved artifact before declaring verification complete.
+
+## September 8 image-frame repair
+
+A synthetic image response above 2 MiB reproduced `Max payload size exceeded`: image WebSocket frames incorrectly shared the small request-body limit. Image responses now have a separate 32 MiB bound while HTTP request bodies retain 2 MiB. Legacy Image 2 and Image 1.5 application names resolve to the same canonical image capability and must not be treated as independent fallback providers. DreamBees now requests `openai-gpt-image-latest`, explicit base64 JSON, and PNG.
+
+The versioned image `galxai-relay:image-frame-fix` passed 73 relay checks, 19 public security checks, the production build, and the isolated three-container canary. Use `GALX_DOCKER_CANARY_IMAGE` to test a versioned image without replacing the default tag. Production rollout retains `galxai-relay:rollback-image-frame-20260908` and `.relay/federation-production/image-frame-before.plist`. Normal drain and single-owner rules still apply.
+
+After rollout, the actual DreamBees client returned HTTP 200 in 33,343 ms with a 2,106,942-byte, 1254×1254 PNG. The artifact was fully decoded, metadata-checked, and visually inspected. Its base64 frame exceeds the former 2 MiB cap. Request ID: `f0c7302a-1d2e-432b-ac08-9784ec2c8848`; SHA-256: `59b9d411c0928732a267beefb23bdfea2f97ffe117d5de5ae1af28d477da14b4`. DreamBees Cloudflare version `4de078a7-36bb-4024-8aee-b15a9ed11d8b` contains the corrected client. The live public model catalog listed only `openai-gpt-image-latest` for images. Paid Hive configuration was unchanged; this verifies image delivery, not its full paid-game transaction.
+
+## Image resilience follow-up (2026-09-08; local only)
+
+[ADR 0130](adr/0130-image-receipts-and-uncertain-outcomes.md) records single-dispatch image execution, bounded tenant idempotency receipts, and uncertain-result recovery. Relay and application queue changes require their respective deployments; the earlier image-frame rollout does not include this follow-up. Both application production builds passed locally. Do not interpret polling or a cached receipt as durable artifact reconciliation.

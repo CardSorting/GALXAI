@@ -18,7 +18,7 @@ const upstream=http.createServer((req,res)=>{
 });
 await new Promise<void>(resolve=>upstream.listen(0,'0.0.0.0',resolve));
 const secret=randomBytes(32).toString('hex');
-const driver=new DockerShardDriver({namespace,secret,image:'galxai-relay:vnext',inventoryUrl:`http://host.docker.internal:${(upstream.address() as any).port}`});
+const driver=new DockerShardDriver({namespace,secret,image:process.env.GALX_DOCKER_CANARY_IMAGE || 'galxai-relay:vnext',inventoryUrl:`http://host.docker.internal:${(upstream.address() as any).port}`});
 let desired:DesiredShard[]=['a','b','c'].map(id=>({id,accountId:id,provider:'openai',credentialRevision:'test-v1',accessToken:`test-${id}`}));
 const lifecycle=new RelayFederationLifecycle(async()=>desired,driver);
 const server=new RelayFederationServer(lifecycle,{secret,apiKeys:['test-client'],adminKeys:['test-admin'],port:0});

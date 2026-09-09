@@ -34,3 +34,19 @@ try {
   GalxSeatTierEngine.getInstance = seat;
   galxRouter.routeImageGeneration = route;
 }
+
+// Exercise the actual dispatcher decision without starting persistence workers.
+const { GalxTaskQueueEngine } = await import('../src/core/queue/GalxTaskQueueEngine');
+for (const failure of [new Error('transport disconnected'), Object.assign(new Error('retry requested'), {isPermanent:false,statusCode:503})]) {
+  const engine = Object.create(GalxTaskQueueEngine.prototype) as any;
+  const writes: any[] = []; let deadLetters = 0;
+  engine.persistence = {taskTable:{put:(_id:string,value:any)=>writes.push(value)}};
+  engine.eventBus = {emitEvent:()=>{}};
+  engine.executeInternalModelTask = async () => { throw failure; };
+  engine.routeToDeadLetter = () => { deadLetters++; };
+  engine.updateTaskProgress = () => {};
+  await engine.executeTaskOrPipeline({id:'image-receipt',userId:'owner',dispatchCount:1,attempts:[],target:{type:'INTERNAL_MODEL',taskKind:'image_generation',imagePayload:{prompt:'test'}}}, {id:'images',retryConfig:{maxAttempts:5}});
+  assert.equal(deadLetters, 1);
+  assert.equal(writes.some(task=>task.status==='RETRYING'), false);
+}
+console.log('PASS: queued image failures cannot trigger duplicate synthesis.');

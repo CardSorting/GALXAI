@@ -192,7 +192,7 @@ test('HTTP handshake 429 is cooled down and management APIs require configured a
   } finally { await f.cleanup(); await new Promise<void>(resolve => upstream.close(() => resolve())); }
 });
 
-test('successful streams replay real output and image requests fail over on quota exhaustion', async () => {
+test('successful streams replay real output while image requests do not automatically repeat synthesis', async () => {
   const upstream = http.createServer();
   const wss = new WebSocketServer({ server: upstream });
   const accounts: string[] = [];
@@ -229,10 +229,10 @@ test('successful streams replay real output and image requests fail over on quot
     assert.match(output, /\[DONE\]/);
     const image = await fetch(`${baseUrl(f)}/v1/images/generations`, { method: 'POST',
       headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: 'Mock image' }) });
-    assert.equal(image.status, 200);
-    assert.equal((await image.json()).data[0].b64_json, 'dGVzdA==');
-    assert.equal(accounts.length, 2);
-    assert.equal(new Set(accounts).size, 2);
+    assert.equal(image.status, 502);
+    assert.equal(image.headers.get('x-should-retry'), 'false');
+    assert.equal((await image.json()).error.execution_state, 'unknown');
+    assert.equal(accounts.length, 1);
     assert.ok(f.internals.shardsTable.getAll().every((s: any) => s.inFlight === 0));
   } finally {
     await f.cleanup();
