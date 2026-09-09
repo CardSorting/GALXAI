@@ -137,6 +137,10 @@ Thumbs.db
 # Impeccable local state
 .impeccable/*.local.json
 .impeccable/hook.cache.json
+/.impeccable/review/
+
+# Local LinkedIn brand assets
+/public/brand/linkedin/
 
 # Python helper compilation
 __pycache__/
