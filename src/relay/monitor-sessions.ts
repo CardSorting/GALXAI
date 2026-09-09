@@ -34,7 +34,7 @@ export class MonitorSessions {
   }
   issue(req: IncomingMessage): { ticket: string; expiresInSeconds: number } {
     const origin = this.origin(req); this.prune();
-    if (this.tickets.size >= 32 || this.sessions.size >= 32) throw new RequestError(429, 'monitor_session_limit', 'Close an existing monitor session and try again.');
+    if (this.tickets.size >= 32) throw new RequestError(429, 'monitor_session_limit', 'Too many sign-in links are pending. Wait a minute and try again.');
     const ticket = randomBytes(32).toString('hex');
     this.tickets.set(digest(ticket), { origin, expires: this.now() + 60000 });
     return { ticket, expiresInSeconds: 60 };
@@ -44,8 +44,11 @@ export class MonitorSessions {
     if (req.headers.origin !== origin || typeof ticket !== 'string' || !/^[a-f0-9]{64}$/.test(ticket)) throw new RequestError(401, 'monitor_link_invalid', 'Open a new monitor window from the host computer.');
     const grant = this.tickets.get(digest(ticket));
     if (!grant || grant.origin !== origin) throw new RequestError(401, 'monitor_link_expired', 'This sign-in link expired or was already used. Open the monitor again.');
-    if (this.sessions.size >= 32) throw new RequestError(429, 'monitor_session_limit', 'Close an existing monitor session and try again.');
+    const previous = digest(this.token(req));
+    const replaces = this.sessions.get(previous)?.origin === origin;
+    if (this.sessions.size >= 32 && !replaces) throw new RequestError(429, 'monitor_session_limit', 'Sign out of an existing browser session and try again.');
     this.tickets.delete(digest(ticket));
+    if (replaces) this.sessions.delete(previous);
     const token = randomBytes(32).toString('hex');
     this.sessions.set(digest(token), { origin, expires: this.now() + sessionSeconds * 1000 });
     return `${this.cookieName(req)}=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${sessionSeconds}`;

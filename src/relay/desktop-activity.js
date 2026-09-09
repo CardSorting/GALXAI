@@ -12,6 +12,8 @@ const guidance = {
   credential_check_unavailable: 'The sign-in check was unavailable. Automatic sync will retry.',
   credential_registry_unavailable: 'The registry could not confirm the update. Check sign-in status in the workspace.',
   credential_conflict: 'The workspace or credential changed. Refresh and check again.',
+  credential_superseded: 'Another sign-in updated the linked account. The newer credential is preserved. Open the workspace to review it.',
+  credential_checkpoint_unavailable: 'The controller could not save its sync record. Check storage and retry from the workspace.',
   credential_not_allowed: 'Review the linked shard’s registry status before refreshing its login.',
   desktop_capacity: 'Running capacity is full. Open a workspace you can stop, then try again.',
   desktop_limit: 'The saved workspace limit is reached. Delete an unused workspace before creating another.',

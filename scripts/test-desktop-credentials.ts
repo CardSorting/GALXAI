@@ -75,6 +75,26 @@ test('current login is a no-op and a rotated refresh token is saved without reta
   await createDesktopCredentialRefresh(f.deps)('shard-1', noRefresh, () => true); assert.equal(f.stats().saved.refreshToken, undefined);
 });
 
+test('authority rechecks never restore a previously applied token or refresh-token family', async () => {
+  const f = refreshFixture(), candidate = parseDesktopCredential([file()], now), refresh = createDesktopCredentialRefresh(f.deps);
+  for (const previous of [
+    { accountId: candidate.accountId, accessToken: token('account-1', now / 1000), refreshToken: 'NEW_FAMILY' },
+    { accountId: candidate.accountId, accessToken: candidate.accessToken, refreshToken: 'NEW_FAMILY' },
+  ]) {
+    f.setPrevious(previous);
+    await assert.rejects(refresh('shard-1', candidate, () => true, true), errorCode('credential_superseded'));
+  }
+  assert.equal(f.stats().writes, 0); assert.equal(f.stats().checks, 0);
+  f.setPrevious({ accountId: candidate.accountId, accessToken: candidate.accessToken, refreshToken: candidate.refreshToken });
+  assert.deepEqual(await refresh('shard-1', candidate, () => true, true), { outcome: 'current' });
+});
+
+test('a changed login source after provider validation blocks the final credential write', async () => {
+  const f = refreshFixture(), candidate = parseDesktopCredential([file()], now);
+  await assert.rejects(createDesktopCredentialRefresh(f.deps)('shard-1', candidate, async () => false), errorCode('credential_conflict'));
+  assert.equal(f.stats().checks, 1); assert.equal(f.stats().writes, 0);
+});
+
 test('credential encryption uses the existing tenant envelope and the update touches no quota or traffic columns', async t => {
   const oldSeed = process.env.GALX_VAULT_KEY_V1, oldVersion = process.env.GALX_VAULT_ACTIVE_KEY_VERSION;
   process.env.GALX_VAULT_KEY_V1 = 'fixture-vault-key'; process.env.GALX_VAULT_ACTIVE_KEY_VERSION = 'v1';

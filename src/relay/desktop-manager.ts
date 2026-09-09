@@ -18,6 +18,7 @@ export interface DesktopRecord {
   id: string; name: string; relayId?: string; createdAt: number; updatedAt: number;
   desired: 'running' | 'stopped'; error?: string;
   credentialSync?: boolean;
+  syncedFingerprint?: string;
 }
 export interface DesktopContainer { id: string; containerId: string; running: boolean; healthy: boolean; unhealthy?: boolean; }
 export interface DesktopDriver {
@@ -155,8 +156,10 @@ export class DesktopManager {
   private activityEvicted = 0;
   private readonly activityStartedAt: number;
   private readonly credentialJobs = new Map<string, Promise<void>>();
+  private readonly credentialJobKinds = new Map<string, 'signin' | 'check'>();
+  private readonly ioJobs = new Map<string, { desktopId: string; key: string; promise: Promise<unknown> }>();
   private readonly credentialStates = new Map<string, { state: 'waiting' | 'checking' | 'updated' | 'current' | 'error'; checkedAt?: number; syncedAt?: number; source?: CredentialSource; code?: string }>();
-  private readonly credentialAttempts = new Map<string, { fingerprint: string; retryAt: number }>();
+  private readonly credentialAttempts = new Map<string, { fingerprint: string; retryAt: number; failures?: number }>();
   private readonly credentialRevisions = new Map<string, string>();
   private credentialPollAt = 0;
   private credentialPolling?: Promise<void>;
@@ -177,15 +180,16 @@ export class DesktopManager {
     try {
       if (fs.existsSync(file)) {
         const rows = JSON.parse(fs.readFileSync(file, 'utf8'));
-        if (!Array.isArray(rows) || rows.length > this.maxDesktops || rows.some(r => !desktopId(r.id) || typeof r.name !== 'string' || r.name.length > 64 || !['running', 'stopped'].includes(r.desired) || !Number.isFinite(r.createdAt) || !Number.isFinite(r.updatedAt)) || new Set(rows.map(r => r.id)).size !== rows.length) throw new Error('Invalid journal');
-        this.records = new Map(rows.map(r => [r.id, { id: r.id, name: r.name, relayId: typeof r.relayId === 'string' ? r.relayId : undefined, credentialSync: r.credentialSync !== false, desired: r.desired, createdAt: r.createdAt, updatedAt: r.updatedAt, error: r.error ? 'desktop_operation_failed' : undefined }]));
+        if (!Array.isArray(rows) || rows.length > this.maxDesktops || rows.some(r => !desktopId(r.id) || typeof r.name !== 'string' || r.name.length > 64 || !['running', 'stopped'].includes(r.desired) || !Number.isFinite(r.createdAt) || !Number.isFinite(r.updatedAt)
+          || (r.credentialSync !== undefined && typeof r.credentialSync !== 'boolean') || (r.syncedFingerprint !== undefined && !/^[a-f0-9]{64}$/.test(r.syncedFingerprint))) || new Set(rows.map(r => r.id)).size !== rows.length) throw new Error('Invalid journal');
+        this.records = new Map(rows.map(r => [r.id, { id: r.id, name: r.name, relayId: typeof r.relayId === 'string' ? r.relayId : undefined, credentialSync: r.credentialSync !== false, syncedFingerprint: r.syncedFingerprint, desired: r.desired, createdAt: r.createdAt, updatedAt: r.updatedAt, error: r.error ? 'desktop_operation_failed' : undefined }]));
       }
     } catch { this.corrupt = true; }
   }
   private save() { const temporary = this.file + '.tmp'; fs.writeFileSync(temporary, JSON.stringify([...this.records.values()]), { mode: 0o600 }); fs.renameSync(temporary, this.file); }
   refresh(force = false): Promise<void> {
     if (!force && this.now() - this.refreshedAt < 3000) return Promise.resolve();
-    if (force && this.refreshing) return this.refreshing.then(() => this.refresh(true));
+    if (this.refreshing) return this.refreshing;
     return this.refreshing ??= (async () => {
       try { const [containers, ready] = await Promise.all([this.driver.list(), this.driver.available()]); this.containers = new Map(containers.map(c => [c.id, c])); this.ready = ready; this.inventoryError = false; }
       catch { this.inventoryError = true; }
@@ -198,15 +202,19 @@ export class DesktopManager {
       runningCount: [...this.containers.values()].filter(c => c.running).length,
       reservedCount: [...this.reserved].filter(id => !this.containers.get(id)?.running).length,
       activeOperations: this.active + this.credentialJobs.size, queuedOperations: this.operations.size - this.active, maxOperations: this.maxOperations,
+      activeIOOperations: this.ioJobs.size,
       activity: this.events.map(e => ({ ...e })),
       activityHistory: { startedAt: this.activityStartedAt, capacity: 100, evicted: this.activityEvicted },
       desktops: [...this.records.values()].sort((a, b) => b.createdAt - a.createdAt).map(r => {
         const c = this.containers.get(r.id), operation = this.operations.get(r.id);
         return { id: r.id, name: r.name, relayId: r.relayId, createdAt: r.createdAt, updatedAt: r.updatedAt,
+          ioBusy: this.hasInput(r.id), busyApps: ['terminal', 'chrome'].filter(app => this.ioJobs.has(r.id + ':launch-' + app)),
           state: operation ? operation.phase === 'queued' ? 'queued' : operation.action : (this.inventoryError ? 'unknown' : c?.running ? c.healthy ? 'running' : c.unhealthy ? 'unhealthy' : 'starting' : c ? 'stopped' : r.error ? 'error' : 'missing'),
           operation: operation ? { action: operation.action, phase: operation.phase, enqueuedAt: operation.enqueuedAt, startedAt: operation.startedAt } : undefined,
           credentialSync: { enabled: r.credentialSync !== false, available: !!this.refreshCredential && !!this.driver.credentials,
             applied: !!r.relayId && !!this.credentialRevisions.get(r.id) && applied(r.relayId, this.credentialRevisions.get(r.id)!),
+            operation: this.credentialJobKinds.get(r.id),
+            retryAt: Number.isFinite(this.credentialAttempts.get(r.id)?.retryAt) && (this.credentialAttempts.get(r.id)?.retryAt ?? 0) > this.now() ? this.credentialAttempts.get(r.id)!.retryAt : undefined,
             ...(this.credentialStates.get(r.id) ?? { state: 'waiting' }), busy: this.credentialJobs.has(r.id) },
           error: r.error, canConnect: !operation && !this.inventoryError && !!c?.running && !!c?.healthy };
       }) };
@@ -220,7 +228,7 @@ export class DesktopManager {
     if (this.operations.has(id) || this.credentialJobs.has(id)) throw new RequestError(409, 'desktop_busy', 'Wait for this desktop operation to finish before changing its link.');
     if (expectedShardId !== (r.relayId ?? null)) throw new RequestError(409, 'desktop_link_changed', 'This workspace link changed. Refresh before updating it.');
     if (shardId !== null && (typeof shardId !== 'string' || !/^[\w.:-]{1,128}$/.test(shardId))) throw new RequestError(400, 'invalid_shard', 'Select a registered shard.');
-    this.records.set(id, { ...r, relayId: shardId ?? undefined, updatedAt: this.now() });
+    this.records.set(id, { ...r, relayId: shardId ?? undefined, syncedFingerprint: undefined, updatedAt: this.now() });
     try { this.save(); }
     catch { this.records.set(id, r); throw new RequestError(503, 'desktop_journal_unavailable', 'The workspace link could not be saved. Check the journal and retry.'); }
     this.credentialStates.delete(id); this.credentialAttempts.delete(id); this.credentialRevisions.delete(id);
@@ -248,6 +256,7 @@ export class DesktopManager {
   }
   private schedule<T>(id: string, key: string, action: string, run: () => Promise<T>, name?: string): Promise<T> {
     this.accepting();
+    if (this.hasInput(id)) throw new RequestError(409, 'desktop_busy', 'Wait for this desktop input operation to finish.');
     if (this.credentialJobs.has(id)) throw new RequestError(409, 'desktop_busy', 'A sign-in check is in progress. Wait for it to finish.');
     if (this.corrupt) throw new RequestError(503, 'desktop_journal_unavailable', 'Desktop records could not be read. Restore the local desktop journal before making changes.');
     const existing = this.operations.get(id);
@@ -325,7 +334,7 @@ export class DesktopManager {
   private async perform(id: string, _operation: string, action: () => Promise<void>) {
     try { await action(); const r = this.records.get(id); if (r) { r.error = undefined; r.updatedAt = this.now(); this.save(); } }
     catch { const r = this.records.get(id); if (r) { r.error = 'desktop_operation_failed'; this.save(); } throw new RequestError(503, 'desktop_operation_failed', 'The operation did not finish. Your desktop record is retained. Refresh and retry.'); }
-    finally { await this.refresh(true); }
+    finally { await this.refreshing; await this.refresh(true); }
   }
   async connection(id: string) {
     this.accepting();
@@ -335,8 +344,24 @@ export class DesktopManager {
     return { containerId: c.containerId };
   }
   async display(id: string, containerId: string) { return this.driver.display(id, containerId); }
-  async clipboard(id: string, text?: string) { await this.connection(id); return this.driver.clipboard(id, text); }
-  async launch(id: string, app: 'terminal' | 'chrome') { await this.connection(id); await this.driver.launch(id, app); }
+  private hasInput(id: string) { return [...this.ioJobs.values()].some(job => job.desktopId === id); }
+  private input<T>(id: string, key: string, run: () => Promise<T>): Promise<T> {
+    this.accepting(); this.record(id);
+    const slot = id + ':' + (key.startsWith('launch-') ? key : 'clipboard');
+    const existing = this.ioJobs.get(slot);
+    if (existing) {
+      if (existing.key === key) return existing.promise as Promise<T>;
+      throw new RequestError(409, 'desktop_busy', 'Another input operation is running in this desktop. Retry shortly.');
+    }
+    if (this.ioJobs.size >= 4 || this.operations.has(id)) throw new RequestError(429, 'desktop_busy', 'Desktop input is busy. Retry shortly.');
+    const promise = (async () => { await this.connection(id); this.accepting(); return run(); })().finally(() => this.ioJobs.delete(slot));
+    this.ioJobs.set(slot, { desktopId: id, key, promise }); return promise;
+  }
+  clipboard(id: string, text?: string) {
+    if (text !== undefined && (typeof text !== 'string' || text.length > 65536)) throw new RequestError(400, 'invalid_clipboard', 'Clipboard text is limited to 65,536 characters.');
+    return this.input(id, text === undefined ? 'clipboard-read' : 'clipboard-' + createHash('sha256').update(text).digest('hex'), () => this.driver.clipboard(id, text));
+  }
+  launch(id: string, app: 'terminal' | 'chrome') { return this.input(id, 'launch-' + app, () => this.driver.launch(id, app)); }
   private accepting() { if (this.credentialClosing) throw new RequestError(503, 'desktops_unavailable', 'The controller is restarting. Reconnect shortly.'); }
   signIn(id: string, shardId: unknown): Promise<void> {
     this.accepting();
@@ -353,8 +378,8 @@ export class DesktopManager {
         await this.driver.launch(id, 'signin');
         this.updateActivity(event, 'completed');
       } catch { this.updateActivity(event, 'failed', 'desktop_operation_failed'); throw new RequestError(503, 'desktop_operation_failed', 'Sign-in could not open. Refresh and try again.'); }
-    })().finally(() => { this.credentialJobs.delete(id); this.drain(); });
-    this.credentialJobs.set(id, job); return job;
+    })().finally(() => { this.credentialJobs.delete(id); this.credentialJobKinds.delete(id); this.drain(); });
+    this.credentialJobs.set(id, job); this.credentialJobKinds.set(id, 'signin'); return job;
   }
   configureCredentialSync(id: string, shardId: unknown, enabled: unknown) {
     this.accepting();
@@ -387,7 +412,11 @@ export class DesktopManager {
     const r = this.record(id);
     if (!r.relayId || shardId !== r.relayId) throw new RequestError(409, 'desktop_link_changed', 'Refresh and review the linked shard.');
     if (!this.refreshCredential || !this.driver.credentials) throw new RequestError(503, 'credential_sync_unavailable', 'Terminal sign-in sync is unavailable on this controller.');
-    const existing = this.credentialJobs.get(id); if (existing) return existing;
+    const existing = this.credentialJobs.get(id);
+    if (existing) {
+      if (this.credentialJobKinds.get(id) === 'check') return existing;
+      throw new RequestError(409, 'desktop_busy', 'Sign-in is opening. Wait for it to open, then check the saved login.');
+    }
     if (this.credentialClosing || this.corrupt || this.inventoryError || this.operations.has(id) || this.active + this.credentialJobs.size >= this.maxOperations) return Promise.reject(new RequestError(409, 'desktop_busy', 'An operation slot is not available yet. Try again shortly.'));
     const current = () => !this.credentialClosing && this.records.get(id) === r && this.containers.get(id)?.running === true;
     const job = (async () => {
@@ -399,31 +428,45 @@ export class DesktopManager {
         const attempt = this.credentialAttempts.get(id);
         if (!force && attempt?.fingerprint === candidate.fingerprint && this.now() < attempt.retryAt) return;
         if (!current()) throw new DesktopCredentialError('credential_conflict');
-        this.credentialAttempts.set(id, { fingerprint: candidate.fingerprint, retryAt: this.now() + 30000 });
+        this.credentialAttempts.set(id, { fingerprint: candidate.fingerprint, retryAt: this.now() + 30000, failures: attempt?.fingerprint === candidate.fingerprint ? attempt.failures : 0 });
         this.credentialStates.set(id, { ...previous, state: 'checking', code: undefined, source: candidate.source });
-        event = this.beginActivity(id, 'refreshing_credentials'); this.updateActivity(event, 'running');
-        const result = await this.refreshCredential!(r.relayId!, candidate, current);
+        if (force || r.syncedFingerprint !== candidate.fingerprint || previous?.state === 'error') { event = this.beginActivity(id, 'refreshing_credentials'); this.updateActivity(event, 'running'); }
+        const result = await this.refreshCredential!(r.relayId!, candidate, async () => {
+          if (!current()) return false;
+          try { const latest = parseDesktopCredential(await this.driver.credentials!(id), this.now()); return current() && latest.fingerprint === candidate.fingerprint; }
+          catch { return false; }
+        }, r.syncedFingerprint === candidate.fingerprint);
+        if (r.syncedFingerprint !== candidate.fingerprint) {
+          const previousFingerprint = r.syncedFingerprint; r.syncedFingerprint = candidate.fingerprint;
+          try { this.save(); } catch { r.syncedFingerprint = previousFingerprint; throw new DesktopCredentialError('credential_checkpoint_unavailable'); }
+        }
         this.credentialRevisions.set(id, createHash('sha256').update(JSON.stringify([candidate.accessToken, candidate.accountId])).digest('hex'));
-        this.credentialAttempts.set(id, { fingerprint: candidate.fingerprint, retryAt: Infinity });
+        this.credentialAttempts.set(id, { fingerprint: candidate.fingerprint, retryAt: this.now() + 60000 });
         this.credentialStates.set(id, { state: result.outcome, checkedAt: this.now(), source: candidate.source,
           syncedAt: result.outcome === 'updated' ? this.now() : previous?.syncedAt });
-        this.updateActivity(event, 'completed');
+        if (event) this.updateActivity(event, 'completed');
       } catch (error) {
         if (!parsed) this.credentialAttempts.delete(id);
         const code = error instanceof DesktopCredentialError ? error.code : 'credential_check_unavailable';
         const attempt = this.credentialAttempts.get(id);
-        if (attempt && !['credential_conflict', 'credential_registry_unavailable', 'credential_check_unavailable'].includes(code)) attempt.retryAt = Infinity;
+        if (attempt) {
+          if (['credential_conflict', 'credential_registry_unavailable', 'credential_check_unavailable', 'credential_checkpoint_unavailable'].includes(code)) {
+            attempt.failures = Math.min(5, (attempt.failures ?? 0) + 1);
+            attempt.retryAt = this.now() + Math.round(Math.min(300000, 15000 * 2 ** attempt.failures) * (.8 + Math.random() * .4));
+          } else attempt.retryAt = Infinity;
+        }
         this.credentialStates.set(id, { ...previous, state: code === 'credential_missing' ? 'waiting' : 'error', code, checkedAt: this.now() });
         if (event) this.updateActivity(event, 'failed', code);
         else if (code !== 'credential_missing' && previous?.code !== code) this.updateActivity(this.beginActivity(id, 'refreshing_credentials'), 'failed', code);
       }
-    })().finally(() => { this.credentialJobs.delete(id); this.drain(); });
-    this.credentialJobs.set(id, job); return job;
+    })().finally(() => { this.credentialJobs.delete(id); this.credentialJobKinds.delete(id); this.drain(); });
+    this.credentialJobs.set(id, job); this.credentialJobKinds.set(id, 'check'); return job;
   }
   async settle() {
     this.credentialClosing = true;
     await this.credentialPolling;
     await Promise.allSettled(this.credentialJobs.values());
+    await Promise.allSettled([...this.ioJobs.values()].map(job => job.promise));
     while (this.operations.size) await Promise.allSettled([...this.operations.values()].map(job => job.promise));
   }
 }

@@ -38,7 +38,28 @@ test('monitor links are single-use, expire, bind to their origin, and produce re
   now += 12 * 60 * 60 * 1000; assert(!sessions.authorized(request({ cookie: newer })));
   const bounded = new MonitorSessions(() => now);
   for (let i = 0; i < 32; i++) bounded.issue(req);
-  assert.throws(() => bounded.issue(req), /existing monitor session/);
+  assert.throws(() => bounded.issue(req), /pending/);
+});
+
+test('browser session renewal replaces its own grant, remains bounded and cannot replay the old cookie', () => {
+  for (const purpose of ['monitor', 'desktop'] as const) {
+    const sessions = new MonitorSessions(() => 100000, purpose), req = request();
+    let cookie = '';
+    for (let i = 0; i < 50; i++) {
+      const old = cookie;
+      cookie = sessions.exchange(request({ cookie }), sessions.issue(req).ticket).split(';')[0];
+      assert(sessions.authorized(request({ cookie })));
+      if (old) assert(!sessions.authorized(request({ cookie: old })));
+    }
+    for (let i = 0; i < 31; i++) sessions.exchange(req, sessions.issue(req).ticket);
+    const ticket = sessions.issue(req).ticket;
+    assert.throws(() => sessions.exchange(req, ticket), /Sign out/);
+    const old = cookie; cookie = sessions.exchange(request({ cookie }), ticket).split(';')[0];
+    assert(sessions.authorized(request({ cookie }))); assert(!sessions.authorized(request({ cookie: old })));
+    assert.throws(() => sessions.exchange(request({ cookie }), ticket), /expired|already used/);
+    const other = new MonitorSessions(() => 100000, purpose === 'desktop' ? 'monitor' : 'desktop');
+    assert(!other.authorized(request({ cookie })));
+  }
 });
 
 test('real HTTP monitor protects HTML and diagnostics while a local admin delegates read-only access', async () => {
@@ -72,6 +93,8 @@ test('real HTTP monitor protects HTML and diagnostics while a local admin delega
     assert.deepEqual(await login.json(), { connected: true });
     const setCookie = login.headers.get('set-cookie')!; assert.match(setCookie, /HttpOnly/); assert.match(setCookie, /SameSite=Strict/); assert.match(setCookie, /Max-Age=43200/);
     const cookie = setCookie.split(';')[0];
+    const renewalPage = await fetch(base + '/federation?connect=1', { headers: { cookie } });
+    assert.equal(renewalPage.status, 200); assert((await renewalPage.text()).includes('/monitor-login.js'));
     assert.equal((await exchange()).status, 401);
     const data = await fetch(base + '/api/monitor/capabilities', { headers: { cookie } });
     assert.equal(data.status, 200); const raw = await data.text(); assert(raw.includes('PRIVATE_SHARD_CANARY')); assert(!raw.includes('PRIVATE_ADMIN_CANARY'));
@@ -116,7 +139,7 @@ test('browser launcher reads local configuration without logging or handing the 
       return Response.json({ ticket, expiresInSeconds: 60 });
     }) as typeof fetch;
     await openRelayMonitor(3301, { directory, transport, open: async url => { opened = url; } });
-    assert.equal(opened, 'http://127.0.0.1:3301/federation#login=' + ticket); assert.equal(called, 1);
+    assert.equal(opened, 'http://127.0.0.1:3301/federation?connect=1#login=' + ticket); assert.equal(called, 1);
     assert(!logs.join('').includes('PRIVATE_ADMIN_CANARY')); assert(!logs.join('').includes(ticket));
     await assert.rejects(openRelayMonitor(3301, { directory, transport, open: async () => { throw Error('sensitive ' + ticket); } }), error => !(error as Error).message.includes(ticket));
     await assert.rejects(openRelayMonitor(3301, { directory, transport: (async () => { throw Error('PRIVATE_ADMIN_CANARY'); }) as typeof fetch }), error => !(error as Error).message.includes('PRIVATE_ADMIN_CANARY'));

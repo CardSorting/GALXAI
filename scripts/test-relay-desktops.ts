@@ -11,7 +11,7 @@ import { DesktopManager, DockerDesktopDriver, type DesktopDriver, type DesktopCo
 import { RelayFederationLifecycle } from '../src/relay/federation-lifecycle.js';
 import { RelayFederationServer } from '../src/relay/federation-server.js';
 import type { RefreshDesktopCredential } from '../src/relay/desktop-credential-refresh.js';
-import type { DesktopCredentialFile } from '../src/relay/desktop-credentials.js';
+import { DesktopCredentialError, type DesktopCredentialFile } from '../src/relay/desktop-credentials.js';
 import { CapabilityRegistry } from '../src/relay/capability-registry.js';
 
 class Driver implements DesktopDriver {
@@ -295,7 +295,7 @@ function savedLogin(): DesktopCredentialFile[] {
 test('terminal credential sync preserves display access, fences link mutations, coalesces and reports safe outcomes', async t => {
   let release!: () => void, writes = 0;
   const gate = new Promise<void>(resolve => { release = resolve; });
-  const { manager, driver } = fixture(t, async (_shard, _credential, current) => { writes++; await gate; assert(current()); return { outcome: 'updated' }; });
+  const { manager, driver } = fixture(t, async (_shard, _credential, current) => { writes++; await gate; assert(await current()); return { outcome: 'updated' }; });
   const id = randomUUID(); await manager.create({ id, name: 'Repair', relayId: 'fixture-shard' }); driver.credentialFiles = savedLogin();
   const sync = manager.syncCredential(id, 'fixture-shard'); assert.equal(manager.syncCredential(id, 'fixture-shard'), sync);
   assert.throws(() => manager.link(id, null, 'fixture-shard'), /finish/);
@@ -358,6 +358,8 @@ test('opening sign-in preserves the display, excludes overlapping mutations and 
   const gate = new Promise<void>(resolve => { release = resolve; }), started = new Promise<void>(resolve => { entered = resolve; });
   driver.launch = async (_id, app) => { assert.equal(app, 'signin'); entered(); await gate; };
   const login = manager.signIn(id, 'fixture-shard'); await started;
+  assert.equal(manager.snapshot().desktops[0].credentialSync.operation, 'signin');
+  assert.throws(() => manager.syncCredential(id, 'fixture-shard'), /Sign-in is opening/);
   assert(manager.snapshot().desktops[0].canConnect);
   assert.throws(() => manager.signIn(id, 'fixture-shard'), /finish/);
   assert.throws(() => manager.action(id, 'stop'), /sign-in check/);
@@ -369,10 +371,92 @@ test('opening sign-in preserves the display, excludes overlapping mutations and 
   assert(manager.snapshot().activity.some(e => e.action === 'opening_signin' && e.outcome === 'completed'));
 });
 
+test('concurrent inventory checks share one read; foreground input coalesces while lifecycle changes are fenced', async t => {
+  const { manager, driver } = fixture(t), id = randomUUID(); await manager.create({ id, name: 'Input' });
+  let release!: () => void, reads = 0;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  driver.list = async () => { reads++; await gate; return [...driver.items.values()]; };
+  const pending = Array.from({ length: 30 }, () => manager.refresh(true));
+  release(); await Promise.all(pending); assert.equal(reads, 1);
+  let inputRelease!: () => void, entered!: () => void;
+  const inputGate = new Promise<void>(resolve => { inputRelease = resolve; }), started = new Promise<void>(resolve => { entered = resolve; });
+  driver.launch = async (_id, app) => { if (app === 'terminal') { entered(); await inputGate; } };
+  const launch = manager.launch(id, 'terminal'); assert.equal(manager.launch(id, 'terminal'), launch); await started;
+  assert(manager.snapshot().desktops[0].ioBusy); assert(manager.snapshot().desktops[0].canConnect);
+  await manager.launch(id, 'chrome'); await manager.clipboard(id, 'PRIVATE_CLIPBOARD');
+  assert.deepEqual(manager.snapshot().desktops[0].busyApps, ['terminal']);
+  assert.throws(() => manager.action(id, 'stop'), /input operation/);
+  let settled = false; const close = manager.settle().then(() => { settled = true; });
+  await new Promise(r => setImmediate(r)); assert(!settled);
+  inputRelease(); await launch; await close; assert.equal(manager.snapshot().activeIOOperations, 0);
+  assert(!JSON.stringify(manager.snapshot()).includes('PRIVATE_CLIPBOARD'));
+});
+
+test('saved credential checkpoints survive restart, recheck authority quietly and report a superseded login', async t => {
+  const f = fixture(t); let now = Date.now(), checks = 0, superseded = false;
+  const refresh: RefreshDesktopCredential = async (_id, _candidate, _current, checkOnly) => {
+    checks++; assert.equal(checkOnly, checks > 1);
+    if (superseded) throw new DesktopCredentialError('credential_superseded');
+    return { outcome: checks === 1 ? 'updated' : 'current' };
+  };
+  const manager = new DesktopManager(f.file, f.driver, () => now, refresh), id = randomUUID();
+  await manager.create({ id, name: 'Checkpoint', relayId: 'fixture-shard' }); f.driver.credentialFiles = savedLogin();
+  await manager.syncCredential(id, 'fixture-shard', false); const events = manager.snapshot().activity.length;
+  await manager.syncCredential(id, 'fixture-shard', false); assert.equal(checks, 1);
+  now += 60001; await manager.syncCredential(id, 'fixture-shard', false); assert.equal(checks, 2); assert.equal(manager.snapshot().activity.length, events);
+  const record = JSON.parse(fs.readFileSync(f.file, 'utf8'))[0]; assert.match(record.syncedFingerprint, /^[a-f0-9]{64}$/);
+  assert(!JSON.stringify(manager.snapshot()).includes(record.syncedFingerprint)); assert(!fs.readFileSync(f.file, 'utf8').includes('PRIVATE_'));
+  const restored = new DesktopManager(f.file, f.driver, () => now, refresh); await restored.refresh(true);
+  superseded = true; await restored.syncCredential(id, 'fixture-shard', false);
+  assert.equal(restored.snapshot().desktops[0].credentialSync.code, 'credential_superseded'); assert(restored.snapshot().desktops[0].canConnect);
+  await restored.syncCredential(id, 'fixture-shard', false); assert.equal(checks, 3);
+});
+
+test('credentials changed during validation are re-read before the commit guard succeeds', async t => {
+  let release!: () => void, entered!: () => void, writes = 0;
+  const gate = new Promise<void>(resolve => { release = resolve; }), started = new Promise<void>(resolve => { entered = resolve; });
+  const { manager, driver } = fixture(t, async (_id, _candidate, current) => { entered(); await gate; if (!await current()) throw new DesktopCredentialError('credential_conflict'); writes++; return { outcome: 'updated' }; });
+  const id = randomUUID(); await manager.create({ id, name: 'Guard', relayId: 'fixture-shard' }); driver.credentialFiles = savedLogin();
+  const checking = manager.syncCredential(id, 'fixture-shard'); await started;
+  driver.credentialFiles = [{ source: 'codex', modifiedAt: Date.now(), data: null }]; release(); await checking;
+  assert.equal(writes, 0); assert.equal(manager.snapshot().desktops[0].credentialSync.code, 'credential_conflict');
+});
+
+test('provider outages back off within a bound and saved-file repair still retries', async t => {
+  const f = fixture(t); let now = Date.now(), calls = 0;
+  const manager = new DesktopManager(f.file, f.driver, () => now, async () => { calls++; throw new DesktopCredentialError('credential_check_unavailable'); });
+  const id = randomUUID(); await manager.create({ id, name: 'Backoff', relayId: 'fixture-shard' }); f.driver.credentialFiles = savedLogin();
+  await manager.syncCredential(id, 'fixture-shard', false);
+  const first = manager.snapshot().desktops[0].credentialSync.retryAt!; assert(first >= now + 24000 && first <= now + 36000);
+  await manager.syncCredential(id, 'fixture-shard', false); assert.equal(calls, 1);
+  now = first + 1; await manager.syncCredential(id, 'fixture-shard', false);
+  const second = manager.snapshot().desktops[0].credentialSync.retryAt!; assert(second >= now + 48000 && second <= now + 72000);
+  await manager.syncCredential(id, 'fixture-shard', true); assert.equal(calls, 3);
+});
+
+test('foreground input has a global bound while independent apps and displays remain usable', async t => {
+  const { manager, driver } = fixture(t), a = randomUUID(), b = randomUUID();
+  await manager.create({ id: a, name: 'First' }); await manager.create({ id: b, name: 'Second' });
+  let release!: () => void, entered = 0; const gate = new Promise<void>(resolve => { release = resolve; });
+  driver.launch = async () => { entered++; await gate; };
+  driver.clipboard = async () => { entered++; await gate; return 'PRIVATE_CLIPBOARD_CANARY'; };
+  const terminal = manager.launch(a, 'terminal');
+  const jobs = [terminal, manager.launch(a, 'chrome'), manager.clipboard(a), manager.launch(b, 'terminal')];
+  assert.equal(manager.launch(a, 'terminal'), terminal);
+  assert.throws(() => manager.launch(b, 'chrome'), /busy/);
+  assert.throws(() => manager.clipboard(a, 'PRIVATE_WRITE'), /input operation/);
+  await new Promise(r => setImmediate(r)); assert.equal(entered, 4); assert.equal(manager.snapshot().activeIOOperations, 4);
+  await manager.connection(a); assert(manager.snapshot().desktops[0].canConnect);
+  assert(!/PRIVATE_|clipboard-|launch-/.test(JSON.stringify(manager.snapshot())));
+  release(); await Promise.all(jobs); assert.equal(manager.snapshot().activeIOOperations, 0);
+});
+
 test('sign-in launch requires desktop authority and a fixed linked target, never submitted commands', async t => {
   const { manager, driver, base, login } = await httpFixture(t, true, async () => ({ outcome: 'current' })), id = randomUUID();
   await manager.create({ id, name: 'Repair', relayId: 'fixture-shard' });
   const cookie = await login(), monitor = await login('monitor');
+  const renewalPage = await fetch(base + '/desktops?connect=1', { headers: { cookie } });
+  assert.equal(renewalPage.status, 200); assert((await renewalPage.text()).includes('/desktops/assets/login.js'));
   const post = (body: object, headers: Record<string, string>) => fetch(base + '/api/desktops/' + id + '/signin', { method: 'POST', headers: { Origin: base, 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body) });
   for (const headers of [{}, { Authorization: 'Bearer ordinary-user' }, { cookie: monitor }]) assert.equal((await post({ shardId: 'fixture-shard' }, headers)).status, 401);
   assert.equal((await post({ shardId: 'fixture-shard' }, { cookie, Origin: 'https://evil.example' })).status, 403);

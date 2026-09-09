@@ -170,7 +170,7 @@ export class RelayFederationServer {
     }
     if (req.method === 'GET' && ['/federation', '/federation.js', '/monitor-login.js'].includes(path)) {
       const script = path.endsWith('.js');
-      const connected = this.monitor.authorized(req);
+      const connected = this.monitor.authorized(req) && (script || url.searchParams.get('connect') !== '1');
       if (path === '/federation.js' && !connected) throw new RequestError(401, 'monitor_session_required', 'Open the monitor to reconnect.');
       const resource = path === '/monitor-login.js' ? './monitor-login.js' : connected
         ? script ? './federation.js' : './federation.html' : './monitor-login.html';

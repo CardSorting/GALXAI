@@ -66,7 +66,7 @@ function connect() {
   } catch { rfb = undefined; displayId = undefined; suspended = true; failure = 'The display could not start. Use Reconnect to try again.'; render(); }
 }
 function renderLibrary() {
-  const signature = JSON.stringify([snapshot.desktops, snapshot.runningCount, snapshot.reservedCount, selected, $('search').value, snapshot.relays.map(r => [r.id, r.name, r.health, r.paused])]);
+  const signature = JSON.stringify([snapshot.desktops.map(d => [d.id, d.name, d.relayId, d.state, d.credentialSync?.state === 'error']), [...pendingActions.keys()], snapshot.runningCount, snapshot.reservedCount, selected, $('search').value, snapshot.relays.map(r => [r.id, r.name, r.health, r.paused])]);
   if (signature === librarySignature) return; librarySignature = signature;
   const query = $('search').value.toLowerCase().trim(), focused = document.activeElement?.dataset.desktop;
   const items = snapshot.desktops.filter(d => [d.name, d.relayId || ''].some(v => v.toLowerCase().includes(query)));
@@ -79,6 +79,7 @@ function renderLibrary() {
     const linked = snapshot.relays.find(r => r.id === d.relayId);
     const meta = n('small'); meta.append(n('span', pendingActions.has(d.id) ? 'Working…' : labels[d.state] || 'Unknown', d.state));
     if (d.relayId) meta.append(n('span', ` · ${linked?.paused ? 'Work paused' : healthLabels[linked?.health] || 'Shard unknown'}`, linked?.paused ? 'unknown' : linked?.health === 'healthy' ? 'running' : linked?.health === 'rejected' ? 'error' : 'unknown'));
+    if (d.credentialSync?.state === 'error') meta.append(n('span', ' · Sign-in needs attention', 'error'));
     const text = n('span', undefined, 'text'); text.append(n('strong', d.name), meta); b.append(icon, text); b.onclick = () => choose(d.id); return b;
   }));
   if (!items.length) $('workspace-list').append(n('p', query ? 'No matching workspaces.' : 'No desktops yet. Create one to begin.', 'muted'));
@@ -89,12 +90,12 @@ function renderLibrary() {
   if (link.dataset.options !== JSON.stringify(options)) { link.replaceChildren(...options.map(r => { const o = n('option', r.name); o.value = r.id; return o; })); link.dataset.options = JSON.stringify(options); if (options.some(r => r.id === selectedRelay)) link.value = selectedRelay; }
 }
 function renderControls() {
-  const d = current(), acting = !!d && pendingActions.has(d.id), busy = !!d?.operation || acting || !!d && ['starting', 'creating', 'stopping', 'deleting', 'queued'].includes(d.state);
+  const d = current(), acting = !!d && pendingActions.has(d.id), busy = !!d?.operation || !!d?.ioBusy || acting || !!d && ['starting', 'creating', 'stopping', 'deleting', 'queued'].includes(d.state);
   $('toolstrip').hidden = !d?.canConnect; $('desktop-state').hidden = !d;
   $('stop-desktop').hidden = !d || !['running', 'starting', 'unhealthy'].includes(d.state); $('stop-desktop').disabled = busy || !!d?.credentialSync?.busy || !snapshot?.inventoryFresh;
   $('start-desktop').hidden = !d || !['stopped', 'error', 'missing'].includes(d.state); $('start-desktop').disabled = busy || !snapshot?.available;
   $('delete-desktop').hidden = !d; $('delete-desktop').disabled = busy || !!d?.credentialSync?.busy || !snapshot?.inventoryFresh;
-  for (const id of ['launch-terminal', 'launch-chrome', 'keyboard', 'clipboard', 'fit', 'fullscreen']) $(id).disabled = !connected || acting;
+  for (const id of ['launch-terminal', 'launch-chrome', 'keyboard', 'clipboard', 'fit', 'fullscreen']) $(id).disabled = !connected || acting || id.startsWith('launch-') && !!d?.busyApps?.includes(id.slice(7));
   $('create-submit').disabled = creating || !snapshot?.available || snapshot.runningCount + (snapshot.reservedCount || 0) >= snapshot.maxRunning || snapshot.desktops.length >= snapshot.maxDesktops;
   $('new-desktop').disabled = creating; $('empty-action').disabled = acting || !!d?.operation;
   $('create-capacity').textContent = snapshot?.desktops.length >= snapshot?.maxDesktops ? 'Saved workspace limit reached. Delete an unused desktop to make room.' : snapshot?.runningCount + (snapshot?.reservedCount || 0) >= snapshot?.maxRunning ? 'All running slots are occupied or reserved. Stop a workspace to free a slot; saved files remain.' : 'Starts in the background. You can keep working in another desktop.';
@@ -315,7 +316,7 @@ function renderRelationship() {
   const stale = !!failure || !r?.registryFresh;
   const summary = !d.relayId ? 'Link a shard to see its health and traffic.' : !r ? 'This shard is no longer registered. Choose a current shard.' : stale ? 'Shard status delayed · refresh before changing traffic' : `${healthLabels[r.health]} · ${r.paused ? 'New work paused' : r.eligibleModels ? `${r.eligibleModels} models eligible` : 'No new work'}${r.activeStreams === null ? '' : ` · ${r.activeStreams} active`}`;
   $('relationship-label').textContent = d.relayId ? `Shard · ${d.relayId}` : 'No linked shard'; $('relationship-summary').textContent = summary;
-  $('relationship-toggle').textContent = d.relayId ? 'Inspect shard' : 'Link shard';
+  $('relationship-toggle').textContent = d.credentialSync?.state === 'error' ? 'Review sign-in' : d.relayId ? 'Inspect shard' : 'Link shard';
   $('zen-shard').textContent = r ? `${r.paused ? 'Work paused' : stale ? 'Status delayed' : healthLabels[r.health]} · Shard` : 'Link shard';
   const select = $('shard-link'), previous = select.value, changed = linkSelection !== d.id; linkSelection = d.id;
   if (changed) $('link-editor').open = !d.relayId;
@@ -382,6 +383,8 @@ const credentialMessages = {
   credential_check_unavailable: 'The login could not be verified. Check again when the provider is available.',
   credential_registry_unavailable: 'The credential registry could not confirm the update. Check again when it is available.',
   credential_conflict: 'The workspace or credential changed during this check. Refresh before trying again.',
+  credential_superseded: 'Another sign-in updated this account. Its credential is preserved; this desktop’s older saved login will not replace it. Sign in here again when you want to update the account.',
+  credential_checkpoint_unavailable: 'The login was verified, but its sync record could not be saved. Check the controller’s storage, then retry.',
   credential_not_allowed: 'The linked shard is unavailable or its permission was withdrawn. Review its registry status first.'
 };
 function renderCredentialSync(d, r) {
@@ -390,11 +393,12 @@ function renderCredentialSync(d, r) {
   if (!r) return;
   const saved = ['updated', 'current'].includes(sync?.state), fresh = r.registryFresh && !failure;
   const ready = saved && sync.applied && fresh && !r.paused && r.health === 'healthy' && r.workerState === 'running' && r.eligibleModels > 0;
-  const opening = credentialPending.get(d.id) === 'signin', checking = sync?.state === 'checking' || credentialPending.get(d.id) === 'check';
-  $('credential-state').textContent = !sync?.available ? 'Sync unavailable' : opening ? 'Opening sign-in…' : checking ? 'Checking sign-in…' : sync.state === 'error' ? 'Needs attention' : ready ? 'Ready for work' : saved ? !fresh ? 'Sign-in saved · status delayed' : r.paused ? 'Sign-in saved · work paused' : r.cooldownUntil ? 'Sign-in saved · cooldown active' : !sync.applied ? 'Sign-in saved · worker reloading' : 'Sign-in saved · checking health' : 'Waiting for sign-in';
+  const opening = credentialPending.get(d.id) === 'signin' || sync?.operation === 'signin', checking = sync?.state === 'checking' || credentialPending.get(d.id) === 'check';
+  const retrying = sync?.state === 'error' && sync.enabled && sync.retryAt > Date.now();
+  $('credential-state').textContent = !sync?.available ? 'Sync unavailable' : opening ? 'Opening sign-in…' : checking ? 'Checking sign-in…' : sync.code === 'credential_superseded' ? 'Updated elsewhere' : retrying ? 'Retry scheduled' : sync.state === 'error' ? 'Needs attention' : ready ? 'Ready for work' : saved ? !fresh ? 'Sign-in saved · status delayed' : r.paused ? 'Sign-in saved · work paused' : r.cooldownUntil ? 'Sign-in saved · cooldown active' : !sync.applied ? 'Sign-in saved · worker reloading' : 'Sign-in saved · checking health' : 'Waiting for sign-in';
   $('credential-state').className = sync?.state === 'error' ? 'error' : ready ? 'running' : 'muted';
   $('credential-guidance').textContent = !sync?.available ? 'Terminal credential sync is not configured on this controller.' : sync.code ? credentialMessages[sync.code] || 'Check the saved sign-in and try again.' : ready ? 'The serving worker has loaded this login and has eligible capacity. Done closes setup; your apps and shard keep running.' : saved ? r.paused ? 'Your login is saved. The manual traffic hold remains in place. Resume new work when you are ready; Done keeps the hold.' : !fresh ? 'The login is saved, but current serving status is unconfirmed. Wait for fresh health before treating setup as ready.' : 'The login is saved. Watch shard health while the worker reloads or finishes its recovery checks. Your desktop stays open.' : 'Choose Sign in and complete the linked account’s login in this desktop’s Chrome.';
-  $('credential-observed').textContent = `${sync?.checkedAt ? `Checked ${eventTime(sync.checkedAt)}${sync.syncedAt ? ' · refreshed ' + eventTime(sync.syncedAt) : ''}. ` : ''}${!sync?.enabled ? 'Automatic sync is off. Use Check now to apply a saved login.' : !['running', 'unhealthy'].includes(d.state) ? 'Automatic checks resume when this desktop starts.' : 'Automatic checks about every 12 seconds.'}`;
+  $('credential-observed').textContent = `${sync?.source ? (sync.source === 'codex' ? 'Codex login. ' : 'Manual setup. ') : ''}${sync?.checkedAt ? `Checked ${eventTime(sync.checkedAt)}${sync.syncedAt ? ' · refreshed ' + eventTime(sync.syncedAt) : ''}. ` : ''}${!sync?.enabled ? 'Automatic sync is off. Use Check now to apply a saved login.' : !['running', 'unhealthy'].includes(d.state) ? 'Automatic checks resume when this desktop starts.' : retrying ? `Next retry ${eventTime(sync.retryAt)}. Check now retries immediately.` : saved ? 'New logins are detected automatically; saved logins are rechecked every minute.' : 'New saved logins are detected automatically. Check now rechecks this login.'}`;
   $('credential-signin').disabled = pending || !sync?.available || !d.canConnect || !!failure;
   $('credential-signin').textContent = opening ? 'Opening…' : saved ? 'Sign in again' : 'Sign in';
   $('credential-done').hidden = !(saved && (ready || fresh && r.paused));

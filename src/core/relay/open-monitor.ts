@@ -29,7 +29,7 @@ export async function openRelayMonitor(port: number, options: {
     ticket = (await readRelayJson(response, 1024)).ticket;
   } catch { throw new Error('Could not connect to the monitor. Check that the relay service is running and up to date.'); }
   if (typeof ticket !== 'string' || !/^[a-f0-9]{64}$/.test(ticket)) throw new Error('The monitor returned an invalid sign-in link.');
-  const url = `${base}${page}#login=${ticket}`;
+  const url = `${base}${page}?connect=1#login=${ticket}`;
   try {
     if (options.open) await options.open(url);
     else await promisify(execFile)(process.platform === 'darwin' ? 'open' : 'xdg-open', [url], { timeout: 10000 });

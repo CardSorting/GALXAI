@@ -42,7 +42,7 @@ export class DesktopGateway {
       const isPage = name === '/desktops' || name === '/desktops/';
       if (!isPage && name !== '/desktops/assets/login.js') this.authorized(req);
       let resource: URL, mime = 'text/javascript; charset=utf-8';
-      if (isPage) { resource = new URL(this.sessions.authorized(req) ? './desktops.html' : './desktop-login.html', import.meta.url); mime = 'text/html; charset=utf-8'; }
+      if (isPage) { resource = new URL(this.sessions.authorized(req) && url.searchParams.get('connect') !== '1' ? './desktops.html' : './desktop-login.html', import.meta.url); mime = 'text/html; charset=utf-8'; }
       else if (name === '/desktops/assets/login.js') resource = new URL('./desktop-login.js', import.meta.url);
       else if (name === '/desktops/assets/app.js') resource = new URL('./desktops.js', import.meta.url);
       else if (name === '/desktops/assets/activity.js') resource = new URL('./desktop-activity.js', import.meta.url);

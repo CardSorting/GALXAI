@@ -3,7 +3,7 @@ import { readShardRegistry, decryptRegistryShard, encryptRegistryShard, replaceR
 import { CapabilityDiscoveryError, discoverOpenAIModels } from './capability-discovery.js';
 
 export interface CredentialRefreshResult { outcome: 'updated' | 'current' }
-export type RefreshDesktopCredential = (shardId: string, candidate: DesktopCredential, current: () => boolean) => Promise<CredentialRefreshResult>;
+export type RefreshDesktopCredential = (shardId: string, candidate: DesktopCredential, current: () => boolean | Promise<boolean>, checkOnly?: boolean) => Promise<CredentialRefreshResult>;
 interface Dependencies {
   read: typeof readShardRegistry;
   decrypt: typeof decryptRegistryShard;
@@ -15,7 +15,7 @@ interface Dependencies {
 export function createDesktopCredentialRefresh(overrides: Partial<Dependencies> = {}): RefreshDesktopCredential {
   const deps: Dependencies = { read: readShardRegistry, decrypt: decryptRegistryShard, encrypt: encryptRegistryShard,
     replace: replaceRegistryCredential, validate: candidate => discoverOpenAIModels({ id: 'credential-check', ...candidate }, AbortSignal.timeout(10000)), ...overrides };
-  return async (shardId, candidate, current) => {
+  return async (shardId, candidate, current, checkOnly = false) => {
     let row: Record<string, any> | undefined;
     try { row = (await deps.read()).find(r => r.id === shardId); }
     catch { throw new DesktopCredentialError('credential_registry_unavailable'); }
@@ -25,11 +25,13 @@ export function createDesktopCredentialRefresh(overrides: Partial<Dependencies> 
     if (previous.accountId !== candidate.accountId) throw new DesktopCredentialError('credential_account_mismatch');
     const oldToken = previous.accessToken || previous.apiKey;
     if (oldToken === candidate.accessToken && (!candidate.refreshToken || previous.refreshToken === candidate.refreshToken)) return { outcome: 'current' };
+    // A previously applied file can confirm authority, but cannot restore an old token family.
+    if (checkOnly) throw new DesktopCredentialError('credential_superseded');
     const oldIssued = credentialClaims(oldToken || '').iat;
     if (typeof oldIssued === 'number' && candidate.issuedAtMs < oldIssued * 1000) throw new DesktopCredentialError('credential_older');
     try { await deps.validate(candidate); }
     catch (error) { throw new DesktopCredentialError(error instanceof CapabilityDiscoveryError && error.code === 'invalid_credential' ? 'credential_rejected' : 'credential_check_unavailable'); }
-    if (!current()) throw new DesktopCredentialError('credential_conflict');
+    if (!await current()) throw new DesktopCredentialError('credential_conflict');
     try {
       const encrypted = deps.encrypt(row, { accessToken: candidate.accessToken, accountId: candidate.accountId,
         ...(candidate.refreshToken ? { refreshToken: candidate.refreshToken } : {}), expiresAtMs: candidate.expiresAtMs,

@@ -9,7 +9,7 @@ export interface DesktopCredential {
 export class DesktopCredentialError extends Error {
   constructor(readonly code: 'credential_missing' | 'credential_invalid' | 'credential_expired' | 'credential_account_mismatch'
     | 'credential_older' | 'credential_rejected' | 'credential_check_unavailable' | 'credential_registry_unavailable'
-    | 'credential_conflict' | 'credential_not_allowed') { super(code); }
+    | 'credential_conflict' | 'credential_not_allowed' | 'credential_superseded' | 'credential_checkpoint_unavailable') { super(code); }
 }
 const object = (value: unknown): Record<string, any> => value && typeof value === 'object' && !Array.isArray(value) ? value : {};
 const text = (value: unknown, max: number) => typeof value === 'string' && value.length > 0 && value.length <= max && !/[\s\u0000-\u001f]/.test(value) ? value : undefined;
