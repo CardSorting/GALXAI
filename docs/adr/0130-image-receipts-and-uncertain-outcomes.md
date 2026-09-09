@@ -23,4 +23,6 @@ Status polling does not itself reconcile lost upstream results. Durable cross-re
 
 ## Pattern references
 
+The follow-up DreamBees audit also coalesces overlapping status reads and prevents periodic refresh from cancelling slower reads. Receipt writes invalidate older reads. Account and balance response bodies use byte limits and full-body deadlines; customer errors do not expose parsing diagnostics. This is browser resilience, not a substitute for server authorization or durable reconciliation. See DreamBees `docs/studio-data-model.md` for the implementation record.
+
 The request-token contract follows [AWS guidance on safe retries](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/). Separating creation from status retrieval follows the [asynchronous request-reply pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/asynchronous-request-reply); this implementation does not claim a fully asynchronous worker lifecycle. Status announcements follow [WCAG status-message guidance](https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html).
