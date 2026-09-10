@@ -126,7 +126,7 @@ test('credential encryption uses the existing tenant envelope and the update tou
   const oldSeed = process.env.GALX_VAULT_KEY_V1, oldVersion = process.env.GALX_VAULT_ACTIVE_KEY_VERSION;
   process.env.GALX_VAULT_KEY_V1 = 'fixture-vault-key'; process.env.GALX_VAULT_ACTIVE_KEY_VERSION = 'v1';
   t.after(() => { if (oldSeed === undefined) delete process.env.GALX_VAULT_KEY_V1; else process.env.GALX_VAULT_KEY_V1 = oldSeed; if (oldVersion === undefined) delete process.env.GALX_VAULT_ACTIVE_KEY_VERSION; else process.env.GALX_VAULT_ACTIVE_KEY_VERSION = oldVersion; });
-  const row = { id: 'shard-1', user_id: 'owner-1', provider: 'openai', encrypted_iv: 'old-iv', encrypted_tag: 'old-tag', key_version: 'v1' };
+  const row = { id: 'shard-1', user_id: 'owner-1', provider: 'openai', status: 'healthy', encrypted_iv: 'old-iv', encrypted_tag: 'old-tag', key_version: 'v1' };
   const secret = { accessToken: 'PRIVATE_ACCESS', refreshToken: 'PRIVATE_REFRESH', accountId: 'account-1' }, encrypted = encryptRegistryShard(row, secret);
   assert(!JSON.stringify(encrypted).includes('PRIVATE_')); assert.deepEqual(decryptRegistryShard({ ...row, ...encrypted }), secret);
   assert.equal(decryptRegistryShard({ ...row, ...encrypted, user_id: 'other-owner' }), null);
@@ -145,17 +145,22 @@ test('admin API fallback retains the same compare-and-swap after an uncertain SQ
   const previousFetch = globalThis.fetch;
   t.after(() => { globalThis.fetch = previousFetch; for (const name of names) { if (saved[name] === undefined) delete process.env[name]; else process.env[name] = saved[name]; } });
   process.env.SUPABASE_URL = 'https://fixture.supabase.test'; process.env.SUPABASE_SECRET_KEY = 'PRIVATE_ADMIN_KEY';
-  const row = { id: 'shard-1', user_id: 'owner-1', provider: 'openai', encrypted_iv: 'old-iv', encrypted_tag: 'old-tag', key_version: null };
+  const row = { id: 'shard-1', user_id: 'owner-1', provider: 'openai', status: 'healthy', encrypted_iv: 'old-iv', encrypted_tag: 'old-tag', key_version: null };
   const encrypted = { encrypted_ciphertext: 'cipher', encrypted_iv: 'iv', encrypted_tag: 'tag', key_version: 'v1' };
   let calls = 0;
   globalThis.fetch = (async (input, init) => {
     calls++; const url = new URL(String(input)); assert.equal(url.hostname, 'fixture.supabase.test');
     assert.equal(url.searchParams.get('encrypted_tag'), 'eq.old-tag'); assert.equal(url.searchParams.get('key_version'), 'is.null');
     assert.equal(url.searchParams.get('permission_retracted'), 'eq.false'); assert.equal(url.searchParams.get('user_id'), 'eq.owner-1');
+    assert.equal(url.searchParams.get('status'), 'eq.healthy');
     assert.equal(url.searchParams.get('select'), 'id'); assert.equal(init?.redirect, 'error');
     assert.deepEqual(Object.keys(JSON.parse(init!.body as string)).sort(), ['credential_expires_at_ms','encrypted_ciphertext','encrypted_iv','encrypted_tag','key_version','updated_at']);
     return Response.json([]); // The SQL write may already have changed the envelope.
   }) as typeof fetch;
   const database: any = { query: async () => { throw Error('PRIVATE_DATABASE_FAILURE'); } };
   assert.equal(await replaceRegistryCredential(row, encrypted, now, database), false); assert.equal(calls, 1);
+  for (const changed of [{ status: 'revoked' }, { status: 'dead' }, { status: 'quarantined' }, { status: undefined }, { permission_retracted: true }]) {
+    assert.equal(await replaceRegistryCredential({ ...row, ...changed }, encrypted, now, database), false);
+  }
+  assert.equal(calls, 1, 'Ineligible rows must never reach the fallback');
 });

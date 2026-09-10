@@ -54,6 +54,8 @@ The journal and registry are separate stores. This protocol is recoverable, not 
 
 Saved-file checks are normally spaced by ten seconds; current-authority checks use a one-minute interval. Transient failures back off with jitter. Manual sync provides an explicit retry; persisted state remains authoritative.
 
+If a valid, matching login still shows `credential_registry_unavailable` and the registry retains its old expiry, investigate the host-side persistence failure. Repeating provider sign-in does not repair a database write error. Restore registry access or query/schema compatibility, then let automatic sync retry or choose **Check now**. Confirm that the saved credential and expiry match the guest file, the worker has applied that revision, and the inspector shows **Ready for work**. Refresh predicates support older status enums without weakening revocation or ownership checks; see [ADR 0132](../adr/0132-recoverable-desktop-credential-handoff.md).
+
 ## Rejected revisions and contamination
 
 A 401 is persisted by credential revision to suppress repeated container starts. A 403, 502 or timeout alone does not permanently reject a credential. Historical rejection journals do not retain the original HTTP exchange; do not infer its exact status from a rejected state.
