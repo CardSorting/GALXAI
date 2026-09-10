@@ -120,7 +120,7 @@ test('desktop HTML, modules, mutations and diagnostic DTOs require a separate lo
     assert(!/PRIVATE_|shard|Docker|containerId|relay-link/.test(await r.text()));
   }
   const monitor = await login('monitor');
-  for (const route of ['/api/desktops/state', '/desktops/assets/app.js', '/desktops/assets/activity.js', '/desktops/assets/novnc/core/rfb.js']) {
+  for (const route of ['/api/desktops/state', '/desktops/assets/app.js', '/desktops/assets/activity.js', '/desktops/assets/organizer.js', '/desktops/assets/organizer.css', '/desktops/assets/novnc/core/rfb.js']) {
     for (const headers of [{}, { Authorization: 'Bearer ordinary-user' }, { cookie: monitor }, { Authorization: 'Bearer PRIVATE_ADMIN_CANARY' }]) {
       const r = await fetch(base + route, { headers }); assert.equal(r.status, 401); assert(!/PRIVATE_|containerId|5910/.test(await r.text()));
     }
@@ -128,7 +128,7 @@ test('desktop HTML, modules, mutations and diagnostic DTOs require a separate lo
   assert.equal((await fetch(base + '/api/desktops/access', { method: 'POST', headers: { Authorization: 'Bearer ordinary-user' } })).status, 401);
   const cookie = await login(), state = await fetch(base + '/api/desktops/state', { headers: { cookie } });
   assert.equal(state.status, 200); const raw = await state.text(); assert(raw.includes('PRIVATE_WORKSPACE_CANARY')); assert(!/PRIVATE_ADMIN_CANARY|containerId|5910/.test(raw));
-  for (const route of ['/desktops', '/desktops/assets/app.js', '/desktops/assets/activity.js', '/desktops/assets/novnc/core/rfb.js', '/desktops/assets/novnc/vendor/pako/lib/zlib/inflate.js']) assert.equal((await fetch(base + route, { headers: { cookie } })).status, 200);
+  for (const route of ['/desktops', '/desktops/assets/app.js', '/desktops/assets/activity.js', '/desktops/assets/organizer.js', '/desktops/assets/organizer.css', '/desktops/assets/novnc/core/rfb.js', '/desktops/assets/novnc/vendor/pako/lib/zlib/inflate.js']) assert.equal((await fetch(base + route, { headers: { cookie } })).status, 200);
   assert.equal((await fetch(base + '/desktops/assets/novnc/core/%2e%2e%2f%2e%2e%2fpackage.json', { headers: { cookie } })).status, 404);
   for (const extra of [{ Origin: 'https://evil.example' }, { 'x-forwarded-for': '127.0.0.1' }, { Forwarded: 'for=127.0.0.1' }, { 'cf-connecting-ip': '127.0.0.1' }, { 'sec-fetch-site': 'cross-site' }]) {
     assert.equal((await fetch(base + '/api/desktops/state', { headers: { cookie, ...extra } })).status, 403);
@@ -229,6 +229,22 @@ test('an unlinked desktop can find and explicitly link an expired registered acc
   assert.equal((await post('link', { shardId: 'fixture-shard', expectedShardId: null })).status, 200);
   assert.equal(manager.linkedShard(id), 'fixture-shard'); assert.equal(lifecycle.monitorState().desiredCount, 0); assert.equal(lifecycle.capabilities.select('A'), undefined);
   assert.equal((await post('traffic', { shardId: 'fixture-shard', paused: false, generation: null })).status, 404);
+});
+
+test('workspace organization requires desktop administrator scope and never changes links, credentials or desktop processes', async t => {
+  const { base, login, manager, driver, file } = await httpFixture(t, true), id = randomUUID(), groupId = randomUUID();
+  await manager.create({ id, name: 'Private workspace', relayId: 'fixture-shard' });
+  const cookie = await login(), monitor = await login('monitor'), before = fs.readFileSync(file, 'utf8'), calls = [...driver.calls];
+  const post = (body: object, headers: Record<string, string> = { cookie, Origin: base }) => fetch(base + '/api/desktops/organization', { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body) });
+  const state = () => manager.snapshot().organization;
+  const body = { action: 'create', groupId, name: 'PRIVATE_GROUP_CANARY', expectedRevision: state().revision };
+  for (const headers of [{}, { Authorization: 'Bearer ordinary-user' }, { cookie: monitor }, { Authorization: 'Bearer PRIVATE_ADMIN_CANARY' }]) assert.equal((await post(body, headers)).status, 401);
+  assert.equal((await post(body, { cookie, Origin: 'https://evil.example' })).status, 403);
+  assert.equal((await post(body)).status, 200); assert.equal((await post(body)).status, 409);
+  assert.equal((await post({ action: 'move', desktopId: id, groupId, beforeId: null, expectedRevision: state().revision })).status, 200);
+  assert.equal((await post({ action: 'rename', groupId, name: 'Invalid', accessToken: 'PRIVATE_TOKEN', expectedRevision: state().revision })).status, 400);
+  assert.equal((await post({ action: 'remove', groupId, expectedRevision: state().revision })).status, 200);
+  assert.deepEqual(state().ungrouped, [id]); assert.equal(manager.linkedShard(id), 'fixture-shard'); assert.deepEqual(driver.calls, calls); assert.equal(fs.readFileSync(file, 'utf8'), before);
 });
 
 test('shard linking and traffic control enforce desktop administrator scope, origin, link identity and generation', async t => {

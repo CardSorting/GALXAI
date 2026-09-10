@@ -1,4 +1,5 @@
 import { DesktopActivityView } from '/desktops/assets/activity.js';
+import { DesktopOrganizer } from '/desktops/assets/organizer.js';
 import RFB from '/desktops/assets/novnc/core/rfb.js';
 import keysyms from '/desktops/assets/novnc/core/input/keysymdef.js';
 const $ = id => document.getElementById(id);
@@ -15,6 +16,7 @@ if (location.hash.includes('login=')) history.replaceState(null, '', location.pa
 window.addEventListener('hashchange', () => {
   if (location.hash.includes('login=')) { history.replaceState(null, '', location.pathname); return; }
   const fragment = new URLSearchParams(location.hash.slice(1)), id = fragment.get('desktop'), shard = fragment.get('shard');
+  if (fragment.get('view') === 'workspaces') { organizer.open(fragment.get('tab') || 'health'); return; }
   if (/^[a-f0-9-]{36}$/.test(id || '')) { if (snapshot) choose(id); else selected = id; }
   else if (/^[\w.:-]{1,128}$/.test(shard || '')) { initialShard = shard; void refresh(); }
 });
@@ -38,11 +40,12 @@ function disconnect() {
   $('clipboard-text').value = ''; $('clipboard-panel').hidden = true; $('clipboard').setAttribute('aria-expanded', 'false');
 }
 function choose(id) {
+  if (organizer.isOpen) organizer.close(false);
   if (selected !== id) { disconnect(); retries = 0; suspended = false; }
   dismissedNotice = ''; selectionEpoch++; selected = id; history.replaceState(null, '', location.pathname + '#desktop=' + id);
   document.body.classList.remove('sidebar-open'); $('sidebar-toggle').setAttribute('aria-expanded', 'false'); render();
 }
-function showCreate() { document.body.classList.remove('zen'); $('zen').setAttribute('aria-pressed', 'false'); $('zen').textContent = 'Zen view'; $('create-panel').hidden = false; $('desktop-name').focus(); document.body.classList.remove('sidebar-open'); $('sidebar-toggle').setAttribute('aria-expanded', 'false'); }
+function showCreate() { if (organizer.isOpen) organizer.close(false); document.body.classList.remove('zen'); $('zen').setAttribute('aria-pressed', 'false'); $('zen').textContent = 'Zen view'; $('create-panel').hidden = false; $('desktop-name').focus(); document.body.classList.remove('sidebar-open'); $('sidebar-toggle').setAttribute('aria-expanded', 'false'); }
 function status(message) { $('connection').textContent = message; }
 function connect() {
   const desktop = current(); if (!desktop?.canConnect || suspended || rfb || retryTimer) return;
@@ -66,10 +69,11 @@ function connect() {
   } catch { rfb = undefined; displayId = undefined; suspended = true; failure = 'The display could not start. Use Reconnect to try again.'; render(); }
 }
 function renderLibrary() {
-  const signature = JSON.stringify([snapshot.desktops.map(d => [d.id, d.name, d.relayId, d.state, d.credentialSync?.state === 'error']), [...pendingActions.keys()], snapshot.runningCount, snapshot.reservedCount, selected, $('search').value, snapshot.relays.map(r => [r.id, r.name, r.health, r.paused])]);
+  const signature = JSON.stringify([snapshot.desktops.map(d => [d.id, d.name, d.relayId, d.state, d.credentialSync?.state === 'error']), [...pendingActions.keys()], snapshot.runningCount, snapshot.reservedCount, snapshot.organization?.revision, selected, $('search').value, snapshot.relays.map(r => [r.id, r.name, r.health, r.paused])]);
   if (signature === librarySignature) return; librarySignature = signature;
   const query = $('search').value.toLowerCase().trim(), focused = document.activeElement?.dataset.desktop;
-  const items = snapshot.desktops.filter(d => [d.name, d.relayId || ''].some(v => v.toLowerCase().includes(query)));
+  const order = [...(snapshot.organization?.groups || []).flatMap(g => g.desktopIds), ...(snapshot.organization?.ungrouped || [])];
+  const items = snapshot.desktops.filter(d => [d.name, d.relayId || ''].some(v => v.toLowerCase().includes(query))).sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
   $('workspace-list').replaceChildren(...items.map(d => {
     const b = n('button', undefined, 'workspace-item'); b.type = 'button'; b.dataset.desktop = d.id; b.setAttribute('aria-pressed', String(d.id === selected));
     const icon = n('span', undefined, 'icon'); icon.setAttribute('aria-hidden', 'true');
@@ -104,6 +108,7 @@ function renderControls() {
 }
 function render() {
   if (!snapshot) return;
+  organizer.update(snapshot, failure);
   renderLibrary(); const d = current(); renderControls(); renderActivity(); renderRelationship();
   $('zen-workspace').textContent = d?.name || 'Relay Desktops';
   const issues = [failure, workspaceErrors.get(selected)];
@@ -112,6 +117,7 @@ function render() {
   if (!snapshot.inventoryFresh) issues.push('Docker status is unconfirmed. Retained workspace names do not prove the desktops are running.');
   if (d?.error && !workspaceErrors.has(selected)) issues.push('The last operation did not finish. The workspace record is retained; refresh and retry.');
   notice(issues.filter(Boolean).join(' '));
+  if (organizer.isOpen) return;
   if (d) {
     $('desktop-title').textContent = d.name; $('desktop-subtitle').textContent = 'Independent setup environment · persistent files and Chrome profile';
     $('desktop-state').textContent = labels[d.state] || d.state; $('desktop-state').className = `badge ${d.state}`;
@@ -283,6 +289,7 @@ function commandItems() {
     ...(snapshot?.desktops || []).map(item => ({ label: item.name, detail: labels[item.state] || item.state, run: () => choose(item.id) })),
     { label: 'New desktop', detail: 'Workspace', run: showCreate, disabled: creating },
     { label: 'Inspect linked shard', detail: 'Health & traffic', run: () => toggleRelationship(true), disabled: !d },
+    { label: 'Manage workspaces', detail: 'Health & custom tabs', run: () => organizer.open() },
     { label: 'Open Terminal', detail: 'App', run: () => $('launch-terminal').click(), disabled: !ready || busy },
     { label: 'Open Chrome', detail: 'App', run: () => $('launch-chrome').click(), disabled: !ready || busy },
     { label: 'Open this workspace in a new tab', detail: 'Workspace', run: () => window.open('/desktops#desktop=' + selected, '_blank', 'noopener'), disabled: !d },
@@ -490,3 +497,5 @@ async function matchSavedAccount() {
 $('credential-match').onclick = matchSavedAccount;
 $('find-shard').onclick = matchSavedAccount;
 $('credential-done').onclick = () => { toggleRelationship(false); $('relationship-toggle').focus(); tell('Setup closed. Desktop apps and shard traffic are unchanged.'); };
+const organizer = new DesktopOrganizer({ api, refresh, openDesktop: choose, createDesktop: showCreate, currentId: () => selected,
+  releaseInput: () => { hideKeyboard(); rfb?.blur(); } });

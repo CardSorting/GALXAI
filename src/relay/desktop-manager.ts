@@ -9,6 +9,7 @@ import { DesktopCredentialError, parseDesktopCredential, type DesktopCredentialF
 import type { RefreshDesktopCredential, MatchDesktopCredential } from './desktop-credential-refresh.js';
 import { saveDesktopJournal } from './desktop-journal.js';
 import { desktopLoginState, type DesktopLoginState } from './desktop-login-state.js';
+import { DesktopOrganization } from './desktop-organization.js';
 
 interface DesktopActivity {
   id: string; sequence: number; desktopId: string; name: string; action: string;
@@ -154,6 +155,7 @@ export class DockerDesktopDriver implements DesktopDriver {
 
 /** Explicit manual lifecycle: browser disconnects and host restarts never create or delete environments. */
 export class DesktopManager {
+  private readonly organization: DesktopOrganization;
   private records = new Map<string, DesktopRecord>();
   private containers = new Map<string, DesktopContainer>();
   private operations = new Map<string, { activity: DesktopActivity; key: string; action: string; phase: 'queued' | 'running'; enqueuedAt: number; startedAt?: number; run: () => Promise<unknown>; promise: Promise<unknown>; resolve: (value: unknown) => void; reject: (error: unknown) => void }>();
@@ -195,6 +197,12 @@ export class DesktopManager {
         this.records = new Map(rows.map(r => [r.id, { id: r.id, name: r.name, relayId: typeof r.relayId === 'string' ? r.relayId : undefined, credentialSync: r.credentialSync !== false, syncedFingerprint: r.syncedFingerprint, credentialIntent: r.credentialIntent, desired: r.desired, createdAt: r.createdAt, updatedAt: r.updatedAt, error: r.error ? 'desktop_operation_failed' : undefined }]));
       }
     } catch { this.corrupt = true; }
+    this.organization = new DesktopOrganization(file + '.organization.json', () => [...this.records.keys()]);
+  }
+  organize(body: Record<string, unknown>) {
+    this.accepting();
+    if (this.corrupt) throw new RequestError(503, 'desktop_journal_unavailable', 'Workspace records are unavailable. Restore them before organizing.');
+    return this.organization.change(body);
   }
   private save() { saveDesktopJournal(this.file, [...this.records.values()]); }
   refresh(force = false): Promise<void> {
@@ -216,7 +224,7 @@ export class DesktopManager {
   }
   snapshot(applied: (shardId: string, revision: string) => boolean = () => false) {
     return { available: this.ready && !this.corrupt && !this.inventoryError, imageReady: this.ready, inventoryFresh: !this.inventoryError && this.refreshedAt > 0 && this.now() - this.refreshedAt < 15000,
-      journalHealthy: !this.corrupt, capturedAt: this.refreshedAt, maxRunning: this.maxRunning, maxDesktops: this.maxDesktops,
+      journalHealthy: !this.corrupt, organization: this.organization.snapshot(), capturedAt: this.refreshedAt, maxRunning: this.maxRunning, maxDesktops: this.maxDesktops,
       runningCount: [...this.containers.values()].filter(c => c.running).length,
       reservedCount: [...this.reserved].filter(id => !this.containers.get(id)?.running).length,
       activeOperations: this.active + this.credentialJobs.size, queuedOperations: this.operations.size - this.active, maxOperations: this.maxOperations,

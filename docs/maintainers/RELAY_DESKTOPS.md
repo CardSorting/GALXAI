@@ -13,6 +13,16 @@ Sessions last at most 12 hours, live in the controller process and are separate 
 
 Build changed guest code with `npm run relay:desktops:build`. `RELAY_DESKTOP_IMAGE` defaults to `galxai-relay-desktop:v1`. Building an image does not update existing workspace containers.
 
+## Organize workspaces
+
+Choose **Manage workspaces** under **Your workspaces**. **By health** automatically separates attention, healthy capacity, holds/cooldowns, setup and unconfirmed evidence. A stopped repair desktop can accompany a healthy serving shard; each row reports desktop state separately. Health categories cannot be changed by dragging.
+
+**New tab** creates a custom group, such as a provider or project name. **All groups** displays columns; a named tab isolates one group. Drag a workspace by its grip to another column or named tab, or between rows to reorder it. **Move** provides destination and position controls for keyboard and touch. **Edit tab** renames or reorders tabs and can remove a tab after confirming that its workspaces return to **Ungrouped**. No desktop is stopped or deleted by organization changes.
+
+Names, membership and order are shared by administrator sessions on that controller and saved in the private `<desktop-journal>.organization.json` file with mode `0600`. A revision precondition prevents stale windows from overwriting newer edits. New desktops enter Ungrouped, and deleted desktop IDs are omitted. Organization storage is independent of the credential/lifecycle journal: failures disable organization writes without stopping desktops or credential synchronization. Up to 12 custom tabs are supported, each with a unique name of 1–40 characters.
+
+The organizer preserves an existing display connection, and **Back to desktop** returns to it. Direct links use `/desktops#view=workspaces&tab=health`; the same administrator session requirements apply. New organization assets and `/api/desktops/organization` are private and reject ordinary inference keys, monitor sessions, foreign origins and unknown mutation fields.
+
 ## Understand the three objects
 
 | Object | Meaning |

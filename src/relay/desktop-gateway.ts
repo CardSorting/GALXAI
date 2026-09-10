@@ -47,6 +47,8 @@ export class DesktopGateway {
       else if (name === '/desktops/assets/login.js') resource = new URL('./desktop-login.js', import.meta.url);
       else if (name === '/desktops/assets/app.js') resource = new URL('./desktops.js', import.meta.url);
       else if (name === '/desktops/assets/activity.js') resource = new URL('./desktop-activity.js', import.meta.url);
+      else if (name === '/desktops/assets/organizer.js') resource = new URL('./desktop-organizer.js', import.meta.url);
+      else if (name === '/desktops/assets/organizer.css') { resource = new URL('./desktop-organizer.css', import.meta.url); mime = 'text/css; charset=utf-8'; }
       else if (name.startsWith('/desktops/assets/novnc/')) {
         const relative = name.slice('/desktops/assets/novnc/'.length);
         if (!/^(core|vendor)\/[a-zA-Z0-9_./-]+\.js$/.test(relative) || relative.split('/').some(p => p === '.' || p === '..')) throw new RequestError(404, 'not_found', 'Resource not found.');
@@ -72,6 +74,7 @@ export class DesktopGateway {
     if (req.method !== 'POST') throw new RequestError(405, 'method_not_allowed', 'Use POST for desktop actions.');
     if (req.headers.origin !== this.sessions.origin(req)) throw new RequestError(403, 'origin_not_allowed', 'Use the desktop page for this action.');
     const body = await readJsonBody(req, /\/clipboard$/.test(name) ? 400000 : 2048, 3000);
+    if (name === '/api/desktops/organization') { this.json(res, manager.organize(body)); return true; }
     if (name === '/api/desktops/create') {
       if (body.relayId !== undefined && !this.relays().some(r => r.id === body.relayId)) throw new RequestError(400, 'invalid_relay', 'Select an existing relay or create an unlinked desktop.');
       const id = await manager.create({ id: body.id, name: body.name, relayId: body.relayId }); this.json(res, { id }, 201); return true;

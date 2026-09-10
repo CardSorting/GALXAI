@@ -37,6 +37,7 @@ These routes are loopback-only and enforce host, origin and forwarding-header re
 | `GET /desktops` | Authorized workspace view; anonymous response is a generic connection page |
 | `GET /desktops/assets/*` | Desktop session, except generic login script |
 | `GET /api/desktops/state` | Desktop session; refreshed workspace and linked shard state |
+| `POST /api/desktops/organization` | Desktop session plus same origin; revision-checked custom tabs, membership and ordering |
 | `POST /api/desktops/create` | Desktop session plus same origin; bounded creation with caller-generated workspace ID |
 | `POST /api/desktops/:id/start`, `stop`, `delete` | Desktop session; delete requires the exact workspace name as confirmation |
 | `POST /api/desktops/:id/launch` | Allowlisted Terminal or Chrome |
@@ -49,6 +50,18 @@ These routes are loopback-only and enforce host, origin and forwarding-header re
 | WebSocket `/api/desktops/:id/display` | Same-origin desktop session, bounded connections and backpressure |
 
 Monitor and desktop sessions are independent, process-local grants. Renewing a session invalidates its previous cookie. Session expiry/revocation closes display access. The page removes ticket fragments; admin keys and provider credentials do not enter browser storage. See [desktop operations](maintainers/RELAY_DESKTOPS.md).
+
+The private state response includes `organization: { available, revision, maxGroups, groups, ungrouped }`. Each group has `id`, `name` and ordered `desktopIds`; `ungrouped` is an ordered desktop-ID array. Organization mutations return that same allowlisted shape and require `expectedRevision` from the latest snapshot. Each action accepts only these additional fields:
+
+| Action | Fields |
+| --- | --- |
+| `create` | `groupId` (new UUID), `name` |
+| `rename` | `groupId`, `name` |
+| `remove` | `groupId`; members return to Ungrouped |
+| `reorder` | `groupId`, `beforeGroupId` (current group UUID or null for end) |
+| `move` | `desktopId`, `groupId` (null for Ungrouped), `beforeId` (destination desktop UUID or null for end) |
+
+Names are normalized, unique and limited to 1–40 characters; built-in tab names are reserved and at most 12 custom tabs are allowed. Stale revisions return `409 organization_changed`; refresh and review before retrying. Invalid fields return `400`, missing targets return `404`, and unavailable or unconfirmed storage returns `503`. These metadata actions do not change links, credentials, traffic or desktop lifecycle. The organizer's JavaScript and stylesheet are served only under the protected desktop asset routes.
 
 ## Request identity and bounds
 
