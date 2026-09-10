@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
-import { DEFAULT_POST_AUTH_PATH } from '@/lib/auth/redirects';
+import { DEFAULT_POST_AUTH_PATH, safeAuthRedirect } from '@/lib/auth/redirects';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -16,16 +16,15 @@ export async function GET(request: Request) {
   const code = searchParams.get('code');
   const rawNext = searchParams.get('next') || searchParams.get('redirect') || searchParams.get('returnUrl') || DEFAULT_POST_AUTH_PATH;
   const errorParam = searchParams.get('error');
-  const errorDesc = searchParams.get('error_description');
 
   // Sanitize next destination: prevent open redirects or protocol injection
-  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : DEFAULT_POST_AUTH_PATH;
+  const next = safeAuthRedirect(rawNext);
 
   // Handle upstream OAuth provider denial or cancellation
   if (errorParam) {
     const errorQuery = new URLSearchParams({
-      error: errorParam,
-      ...(errorDesc ? { error_description: errorDesc } : {})
+      error: 'auth_cancelled',
+      next,
     }).toString();
     return NextResponse.redirect(`${origin}/auth/signin?${errorQuery}`);
   }
@@ -33,7 +32,8 @@ export async function GET(request: Request) {
   if (code) {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+      .catch(() => ({ data: null, error: new Error('Session exchange unavailable') }));
 
     if (!error && data?.session) {
       // Sync local fast-path session cookies for Edge middleware compatibility
@@ -42,7 +42,7 @@ export async function GET(request: Request) {
       const userRole = data.user?.user_metadata?.role || 'developer';
 
       try {
-        cookieStore.set('galx_session', data.session.access_token || data.user?.id || 'active', {
+        cookieStore.set('galx_session', data.session.access_token, {
           path: '/',
           maxAge,
           sameSite: 'lax',
@@ -60,28 +60,19 @@ export async function GET(request: Request) {
         // Fallback if cookieStore write encounters a restricted context
       }
 
-      const isLocalEnv = process.env.NODE_ENV === 'development';
-      const forwardedHost = request.headers.get('x-forwarded-host');
-
-      if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${next}`);
-      } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`);
-      } else {
-        return NextResponse.redirect(`${origin}${next}`);
-      }
+      return NextResponse.redirect(`${origin}${next}`);
     }
 
     if (error) {
       console.error('[OAuth Callback] Code exchange error:', error.message);
       const errParams = new URLSearchParams({
         error: 'auth_exchange_failed',
-        error_description: error.message
+        next
       });
       return NextResponse.redirect(`${origin}/auth/signin?${errParams.toString()}`);
     }
   }
 
   // Return the user to the sign in page with an exchange failure notice
-  return NextResponse.redirect(`${origin}/auth/signin?error=no_auth_code_provided`);
+  return NextResponse.redirect(`${origin}/auth/signin?error=no_auth_code_provided&next=${encodeURIComponent(next)}`);
 }

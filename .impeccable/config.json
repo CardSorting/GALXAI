@@ -38,9 +38,74 @@
       {
         "rule": "design-system-color",
         "value": "#4338ca",
+        "files": [
+          "src/relay/desktops.html"
+        ],
         "createdAt": "2026-09-09T22:30:24.772Z",
-        "files": ["src/relay/desktops.html"],
         "reason": "Retains the existing sign-in hover shade established by the setup contrast fix; this pass preserves that tested control treatment."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#c7d2fe",
+        "files": [
+          "src/components/images/studio.css"
+        ],
+        "createdAt": "2026-09-10T06:39:23.749Z",
+        "reason": "Codex review: readable indigo foreground for selected controls and notices on dark studio panels; all eight browser states pass WCAG AA contrast checks."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#a5b4fc",
+        "files": [
+          "src/components/images/studio.css"
+        ],
+        "createdAt": "2026-09-10T06:39:23.805Z",
+        "reason": "Codex review: lighter indigo focus and current-view indicator within the established indigo palette, verified in desktop and mobile captures."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#818cf8",
+        "files": [
+          "src/components/images/studio.css"
+        ],
+        "createdAt": "2026-09-10T06:39:23.860Z",
+        "reason": "Codex review: visible selected-control border against dark panels; deliberate indigo tonal step for non-text contrast."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#4338ca",
+        "files": [
+          "src/components/images/studio.css"
+        ],
+        "createdAt": "2026-09-10T06:39:23.914Z",
+        "reason": "Codex review: darker primary hover and text-selection background maintain white-text WCAG AA contrast."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#1b2137",
+        "files": [
+          "src/components/images/studio.css"
+        ],
+        "createdAt": "2026-09-10T06:39:41.260Z",
+        "reason": "Codex review: restrained hover step for the established navy surface; maintains readable foreground contrast."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#291c16",
+        "files": [
+          "src/components/images/studio.css"
+        ],
+        "createdAt": "2026-09-10T06:39:41.313Z",
+        "reason": "Codex review: dark amber background reserved for actionable image-generation errors."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#fbd5b4",
+        "files": [
+          "src/components/images/studio.css"
+        ],
+        "createdAt": "2026-09-10T06:39:41.368Z",
+        "reason": "Codex review: light amber error foreground paired with the dark amber error surface for high contrast."
       }
     ]
   },

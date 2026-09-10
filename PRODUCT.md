@@ -24,7 +24,7 @@ The relay supplies inference transport with credential eligibility checks, bound
 
 ## Constraints & Invariants
 
-- The hosted product centers on models, API configuration, billing, telemetry, and governance. Destination chat and image studios belong to downstream applications.
+- The hosted product centers on models, API configuration, billing, telemetry, and governance. The image studio at `/images` also lets users generate images and manage their personal image library (explicitly restored at user request on 2026-09-10). Destination chat applications remain downstream.
 - Successful authentication defaults to `/models`; explicit protected-route return destinations remain intact.
 - Retiring hosted creation UI must preserve inference APIs and SDK capabilities.
 - Model interpretation does not grant permission to execute on the relay host. Isolation is an operating-system/container boundary, not a prompt instruction or blanket prohibition of tool-call content.

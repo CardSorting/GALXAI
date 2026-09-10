@@ -30,7 +30,7 @@ import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 
 const NAV_LINKS = [
   { name: 'Models', href: '/models', icon: Cpu },
-  { name: 'Images', href: '/library', icon: ImageIcon },
+  { name: 'Images', href: '/images', icon: ImageIcon },
   { name: 'Docs', href: '/docs', icon: BookOpen },
   { name: 'Pricing', href: '/pricing', icon: DollarSign },
   { name: 'API Keys', href: '/keys', icon: Key },

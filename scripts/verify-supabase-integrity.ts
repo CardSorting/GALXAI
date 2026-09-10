@@ -217,20 +217,20 @@ class SupabaseParanoiaLinter {
 
       for (let i = 1; i < functionBlocks.length; i++) {
         const block = functionBlocks[i];
-        const funcNameMatch = block.match(/^\s*([a-zA-Z0-9_]+)\s*\(/);
+        const funcNameMatch = block.match(/^\s*((?:[a-zA-Z0-9_]+\.)?[a-zA-Z0-9_]+)\s*\(/);
         const funcName = funcNameMatch ? funcNameMatch[1] : `unknown_func_${i}`;
 
         if (/SECURITY\s+DEFINER/i.test(block)) {
           const hasSearchPath = /SET\s+search_path\s*=\s*['"]?public(?:\s*,\s*pg_temp)?['"]?/i.test(block) ||
-                                /search_path\s*=\s*public/i.test(block);
+                                /search_path\s*=\s*public/i.test(block) || /SET\s+search_path\s*=\s*''/i.test(block);
 
           if (!hasSearchPath) {
             this.violations.push({
               level: 'WARNING',
               category: 'SECURITY_DEFINER_SEARCH_PATH',
               file: fileName,
-              message: `Function "${funcName}" has SECURITY DEFINER without explicit "SET search_path = public, pg_temp;".`,
-              remediation: 'Add "SET search_path = public, pg_temp" before the function body AS $$ block.'
+              message: `Function "${funcName}" has SECURITY DEFINER without an explicit, fixed search_path.`,
+              remediation: 'Set an empty search_path with qualified object names, or an explicit trusted schema path before AS $$.'
             });
           }
         }
@@ -293,15 +293,17 @@ class SupabaseParanoiaLinter {
       .join('\n');
 
     // Extract all created tables
-    const tableMatches = allSql.matchAll(/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:public\.)?([a-zA-Z0-9_]+)/gi);
+    const tableMatches = allSql.matchAll(/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:([a-zA-Z0-9_]+)\.)?([a-zA-Z0-9_]+)/gi);
     const tableNames = new Set<string>();
 
     for (const match of tableMatches) {
-      tableNames.add(match[1].toLowerCase());
+      tableNames.add(`${match[1] || 'public'}.${match[2]}`.toLowerCase());
     }
 
     for (const table of tableNames) {
-      const rlsRegex = new RegExp(`ALTER\\s+TABLE\\s+(?:public\\.)?${table}\\s+ENABLE\\s+ROW\\s+LEVEL\\s+SECURITY`, 'i');
+      const [schema, name] = table.split('.');
+      const qualified = schema === 'public' ? `(?:public\\.)?${name}` : `${schema}\\.${name}`;
+      const rlsRegex = new RegExp(`ALTER\\s+TABLE\\s+${qualified}\\s+ENABLE\\s+ROW\\s+LEVEL\\s+SECURITY`, 'i');
       const hasRLS = rlsRegex.test(allSql);
 
       if (!hasRLS) {

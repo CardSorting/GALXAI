@@ -16,7 +16,7 @@ function BaseFooter() {
   const [slaStatus, setSlaStatus] = useState<SlaProbeResult | null>(null);
   const usesFocusedAppShell =
     !pathname ||
-    pathname === '/' ||
+    pathname === '/' || pathname === '/images' || pathname === '/auth/signup' ||
     pathname.startsWith('/settings') || pathname === '/keys/top-up' || pathname === '/billing' || pathname === '/pricing' || pathname === '/docs' || pathname.startsWith('/docs/');
 
   useEffect(() => {

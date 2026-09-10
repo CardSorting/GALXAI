@@ -594,15 +594,18 @@ export class ApiKeyRepository {
     key: DeveloperGatewayKey,
     options: { requireRemote?: boolean } = {}
   ): Promise<void> {
-    // 1. Immediately guarantee in-memory hot cache presence and invalidate queries
-    this.keyTable.put(key.id, key);
-    this.keyCacheTimestamps.set(key.id, Date.now());
-    this.setFastCache(key);
-    this.negativeHashCache.delete(key.keyHash);
-    this.keyCoalescer.invalidate(`id:${key.id}`);
-    this.keyCoalescer.invalidate(`hash:${key.keyHash}`);
-    this.keyDataLoader.clear(key.keyHash);
-    this.invalidateUserCache(key.userId);
+    // Strict writes become visible to authentication only after durable storage.
+    const publishToCache = () => {
+      this.keyTable.put(key.id, key);
+      this.keyCacheTimestamps.set(key.id, Date.now());
+      this.setFastCache(key);
+      this.negativeHashCache.delete(key.keyHash);
+      this.keyCoalescer.invalidate(`id:${key.id}`);
+      this.keyCoalescer.invalidate(`hash:${key.keyHash}`);
+      this.keyDataLoader.clear(key.keyHash);
+      this.invalidateUserCache(key.userId);
+    };
+    if (!options.requireRemote) publishToCache();
 
     let saved = false;
 
@@ -666,8 +669,9 @@ export class ApiKeyRepository {
     }
 
     if (!saved && options.requireRemote) {
-      throw new Error('Authoritative API-key storage was unreachable. Key is retained in local cache.');
+      throw new Error('Authoritative API-key storage was unreachable.');
     }
+    if (options.requireRemote) publishToCache();
   }
 
   /**

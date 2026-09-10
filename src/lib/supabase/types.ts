@@ -51,6 +51,26 @@ export type GalxEnvironmentType = 'production' | 'staging' | 'development';
 export type GalxIdempotencyState = 'IN_FLIGHT' | 'COMMITTED' | 'FAILED';
 
 export interface Database {
+  private: {
+    Tables: {
+      galx_signup_credit_policy: {
+        Row: { singleton: boolean; enabled: boolean; amount_usd: number; updated_at: string };
+        Insert: { singleton?: boolean; enabled?: boolean; amount_usd?: number; updated_at?: string };
+        Update: { enabled?: boolean; amount_usd?: number; updated_at?: string };
+        Relationships: [];
+      };
+      galx_signup_credit_grants: {
+        Row: { user_id: string; amount_usd: number; status: 'pending' | 'granted' | 'duplicate'; identity_hash: string | null; transaction_id: string | null; enrolled_at: string; granted_at: string | null };
+        Insert: { user_id: string; amount_usd: number; status?: 'pending'; enrolled_at?: string };
+        Update: { status?: 'granted' | 'duplicate'; identity_hash?: string; transaction_id?: string; granted_at?: string };
+        Relationships: [];
+      };
+    };
+    Views: { [_ in never]: never };
+    Functions: { [_ in never]: never };
+    Enums: { [_ in never]: never };
+    CompositeTypes: { [_ in never]: never };
+  };
   public: {
     Tables: {
       galx_workspaces: {

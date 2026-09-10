@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
-import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
+import { AccountIdentityError, requireAccountIdentity } from '@/lib/auth/accountIdentity';
+import { getPostgresPool } from '@/lib/db/postgres';
+import { ensureWallet } from '@/lib/billing/wallet';
 import { ApiKeyRepository } from '@/lib/supabase/repositories/ApiKeyRepository';
 import type { DeveloperGatewayKey } from '@/core/contracts/GalxContracts';
 
@@ -20,7 +22,16 @@ export async function OPTIONS() {
   });
 }
 
-const MINIMUM_INITIAL_DEPOSIT_USD = 10.00;
+async function accountIsPaid(userId: string) {
+  const pool = getPostgresPool();
+  if (!pool) throw new Error('Wallet storage unavailable');
+  const wallet = await ensureWallet(pool, userId);
+  return wallet.proof_of_deposit_verified && Number(wallet.deposited_total_usd) > 0;
+}
+function keyFailure(error: unknown) {
+  return NextResponse.json({ error: error instanceof AccountIdentityError ? 'Sign in with a verified account to manage API keys.' : 'API keys are unavailable. Please try again.' },
+    { status: error instanceof AccountIdentityError ? 401 : 503, headers: { 'Cache-Control': 'private, no-store' } });
+}
 const MAX_KEYS_PER_USER = 50;
 
 /**
@@ -75,22 +86,11 @@ export async function GET(req: NextRequest) {
     const requestedUserId = searchParams.get('userId') || undefined;
     const environmentFilter = searchParams.get('environment') as 'live' | 'test' | null;
 
-    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-    const targetUserId = auth.authenticated ? auth.userId : requestedUserId;
+    const actor = await requireAccountIdentity(req);
+    const targetUserId = actor.id;
 
-    if (!targetUserId) {
-      return NextResponse.json(
-        { error: 'Unauthorized: Authentication or userId parameter required' },
-        { status: 401 }
-      );
-    }
-
-    // Prevent accessing keys belonging to other users
-    if (requestedUserId && auth.authenticated && requestedUserId !== auth.userId && !auth.claims?.scopes?.includes('admin:*')) {
-      return NextResponse.json(
-        { error: 'Forbidden: Cannot inspect keys belonging to another user' },
-        { status: 403 }
-      );
+    if (requestedUserId && requestedUserId !== actor.id) {
+      return NextResponse.json({ error: 'Cannot inspect keys belonging to another account.' }, { status: 403 });
     }
 
     // ETag & HTTP 304 Not Modified validation for zero-egress delta syncing
@@ -152,8 +152,8 @@ export async function GET(req: NextRequest) {
         'Cache-Control': 'private, no-cache'
       }
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
+  } catch (error) {
+    return keyFailure(error);
   }
 }
 
@@ -170,21 +170,13 @@ export async function POST(req: NextRequest) {
       rateLimitPerMinute,
       scopes,
       expiresInDays,
-      depositedAmount = 0,
-      hasVerifiedDeposit = false,
       defaultCompactionMode = 'raw',
     } = body;
 
-    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-    const userId = (auth.authenticated && auth.userId && auth.userId !== 'anonymous_developer')
-      ? auth.userId
-      : body.userId;
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized: Sign-in or userId is required to mint developer API keys' },
-        { status: 401 }
-      );
+    const actor = await requireAccountIdentity(req);
+    const userId = actor.id;
+    if (body.userId && body.userId !== userId) {
+      return NextResponse.json({ error: 'Cannot create keys for another account.' }, { status: 403 });
     }
 
     const cleanName = sanitizeKeyName(name);
@@ -214,8 +206,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Free Tier Compute Grant ($30.00/mo) & Compute Pool Routing
-    const isPaid = Boolean(hasVerifiedDeposit || Number(depositedAmount) > 0);
+    // Welcome credit is spendable balance, never proof of a paid deposit.
+    const isPaid = await accountIsPaid(userId);
     const computePool: 'shared_community' | 'priority_dedicated' = isPaid ? 'priority_dedicated' : 'shared_community';
     const effectiveRpm = isPaid ? cleanRpm : Math.min(cleanRpm, 60);
 
@@ -245,8 +237,8 @@ export async function POST(req: NextRequest) {
 
     // Save to authoritative database and memory cache
     await keyRepo.saveGatewayKey(newKey, {
-      requireRemote: false
-    }).catch(() => {});
+      requireRemote: true
+    });
     persistence.apiKeyTable.put(newKey.id, newKey);
 
     persistence.logAudit(
@@ -258,8 +250,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      freeGrantUsd: 30.00,
-      computePool: newKey.computePool,
       key: {
         id: newKey.id,
         name: newKey.name,
@@ -267,14 +257,12 @@ export async function POST(req: NextRequest) {
         environment: newKey.environment,
         scopes: newKey.scopes,
         rateLimitPerMinute: newKey.rateLimitPerMinute,
-        computePool: newKey.computePool,
-        freeMonthlyGrantUsd: 30.00,
         expiresAt: newKey.expiresAtMs,
         apiKey // Full raw token returned once upon creation!
       }
-    });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Internal error' }, { status: 500 });
+    }, { headers: { 'Cache-Control': 'private, no-store' } });
+  } catch (error) {
+    return keyFailure(error);
   }
 }
 
@@ -291,10 +279,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Missing key ID parameter' }, { status: 400 });
     }
 
-    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-    if (!auth.authenticated || !auth.userId) {
-      return NextResponse.json({ error: 'Unauthorized: Authentication required' }, { status: 401 });
-    }
+    const actor = await requireAccountIdentity(req);
 
     const persistence = GalxPersistence.getInstance();
     const keyRepo = ApiKeyRepository.getInstance();
@@ -305,21 +290,21 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Key not found' }, { status: 404 });
     }
 
-    if (existing.userId !== auth.userId && !auth.claims?.scopes?.includes('admin:*')) {
+    if (existing.userId !== actor.id) {
       return NextResponse.json({ error: 'Forbidden: Cannot modify an API key belonging to another user' }, { status: 403 });
     }
 
     const updatedKey: DeveloperGatewayKey = {
       ...existing,
       name: name !== undefined ? sanitizeKeyName(name) : existing.name,
-      rateLimitPerMinute: rateLimitPerMinute !== undefined ? sanitizeRateLimit(rateLimitPerMinute) : existing.rateLimitPerMinute,
+      rateLimitPerMinute: rateLimitPerMinute !== undefined ? Math.min(sanitizeRateLimit(rateLimitPerMinute), await accountIsPaid(actor.id) ? 10000 : 60) : existing.rateLimitPerMinute,
       scopes: scopes !== undefined ? sanitizeScopes(scopes) : existing.scopes,
       defaultCompactionMode: defaultCompactionMode !== undefined ? (defaultCompactionMode === 'raw' ? 'raw' : 'auto') : existing.defaultCompactionMode,
     };
 
-    await keyRepo.saveGatewayKey(updatedKey).catch(() => {});
+    await keyRepo.saveGatewayKey(updatedKey, { requireRemote: true });
     persistence.saveGatewayKey(updatedKey);
-    persistence.logAudit('GATEWAY_KEY_UPDATED', { keyId, updates: { name, rateLimitPerMinute, scopes } }, keyId, auth.userId);
+    persistence.logAudit('GATEWAY_KEY_UPDATED', { keyId, updates: { name, rateLimitPerMinute, scopes } }, keyId, actor.id);
 
     return NextResponse.json({
       success: true,
@@ -334,8 +319,8 @@ export async function PATCH(req: NextRequest) {
         defaultCompactionMode: updatedKey.defaultCompactionMode,
       }
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to update key' }, { status: 500 });
+  } catch (error) {
+    return keyFailure(error);
   }
 }
 
@@ -349,15 +334,8 @@ export async function DELETE(req: NextRequest) {
     const keyId = searchParams.get('id');
     if (!keyId) return NextResponse.json({ error: 'Missing key id' }, { status: 400 });
 
-    const requestedUserId = searchParams.get('userId') || undefined;
-    const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
-    const userId = (auth.authenticated && auth.userId && auth.userId !== 'anonymous_developer')
-      ? auth.userId
-      : requestedUserId;
-
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized: Authentication required to revoke keys' }, { status: 401 });
-    }
+    const actor = await requireAccountIdentity(req);
+    const userId = actor.id;
 
     const persistence = GalxPersistence.getInstance();
     const keyRepo = ApiKeyRepository.getInstance();
@@ -369,7 +347,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Key not found' }, { status: 404 });
     }
 
-    if (found.userId !== userId && !auth.claims?.scopes?.includes('admin:*')) {
+    if (found.userId !== userId) {
       return NextResponse.json({ error: 'Forbidden: Cannot revoke a key belonging to another user' }, { status: 403 });
     }
 
@@ -378,7 +356,7 @@ export async function DELETE(req: NextRequest) {
     persistence.logAudit('GATEWAY_KEY_REVOKED', { keyId }, keyId, found.userId);
 
     return NextResponse.json({ success: true, message: `Key ${keyId} revoked successfully` });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to revoke key' }, { status: 500 });
+  } catch (error) {
+    return keyFailure(error);
   }
 }

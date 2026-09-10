@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { SafeStorage } from '@/lib/resilience/SafeStorage';
 import type { Session, User, Provider } from '@supabase/supabase-js';
+import { registerAccount, type SignupCredentials } from '@/lib/auth/signup';
 
 export interface AuthUser {
   id: string;
@@ -31,7 +32,7 @@ interface AuthContextType {
   isLoading: boolean;
   signInWithOAuth: (provider: Provider, options?: { redirectTo?: string; queryParams?: Record<string, string>; scopes?: string }) => Promise<void>;
   signInWithPassword: (credentials: { email: string; password: string }) => Promise<{ error: Error | null; data?: any }>;
-  signUp: (credentials: { email: string; password: string; name?: string }) => Promise<{ error: Error | null; data?: any }>;
+  signUp: (credentials: SignupCredentials) => ReturnType<typeof registerAccount>;
   signInWithOtp: (credentials: { email: string; options?: { emailRedirectTo?: string } }) => Promise<{ error: Error | null }>;
   signInWithDemo: (params?: DemoUserParams) => void;
   signInWithProviderKey: (params: { apiKey: string; provider?: string }) => Promise<{ success: boolean; error?: string }>;
@@ -93,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // 1. Check for custom session in SafeStorage (purge legacy demo_sandbox sessions)
     const savedCustom = SafeStorage.getJSON<AuthUser | null>(CUSTOM_AUTH_KEY, null);
     if (savedCustom) {
-      if (savedCustom.provider === 'demo_sandbox' || savedCustom.id?.startsWith('dev_demo_')) {
+      if (savedCustom.provider === 'demo_sandbox' || savedCustom.id?.startsWith('dev_demo_') || savedCustom.id?.startsWith('usr_') || savedCustom.token?.startsWith('session_')) {
         SafeStorage.removeItem(CUSTOM_AUTH_KEY);
         persistCustomSession(null);
       } else {
@@ -110,6 +111,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const mapped = mapSupabaseUser(session.user, session);
         setCustomUser(mapped);
         persistCustomSession(mapped);
+      } else if (savedCustom && ['email', 'google', 'github'].includes(savedCustom.provider || '')) {
+        setCustomUser(null);
+        persistCustomSession(null);
       }
       setIsLoading(false);
     }).catch(() => {
@@ -124,6 +128,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const mapped = mapSupabaseUser(session.user, session);
         setCustomUser(mapped);
         persistCustomSession(mapped);
+      } else if (_event === 'SIGNED_OUT') {
+        setCustomUser(null);
+        persistCustomSession(null);
       }
       setIsLoading(false);
     });
@@ -183,52 +190,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async ({ email, password, name }: { email: string; password: string; name?: string }) => {
+  const signUp = async (credentials: SignupCredentials) => {
     setIsLoading(true);
     try {
       const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${origin}/auth/callback`,
-          data: {
-            full_name: name || email.split('@')[0],
-            name: name || email.split('@')[0]
-          }
-        },
-      });
-
-      // Establish immediate local session so user is not blocked by email confirmation
-      const displayName = name || email.split('@')[0];
-      const authUser: AuthUser = {
-        id: data?.user?.id || `usr_${Date.now()}`,
-        email: email,
-        name: displayName,
-        provider: 'email',
-        token: data?.session?.access_token || `session_${Date.now()}`,
-        role: 'developer',
-        company: 'Personal Sandbox'
-      };
-      setCustomUser(authUser);
-      persistCustomSession(authUser);
-
-      return { error: null, data: { user: authUser, session: data?.session } };
-    } catch (err: any) {
-      // Resilient fallback: establish local developer session
-      const displayName = name || email.split('@')[0];
-      const authUser: AuthUser = {
-        id: `usr_${Date.now()}`,
-        email: email,
-        name: displayName,
-        provider: 'email',
-        token: `session_${Date.now()}`,
-        role: 'developer',
-        company: 'Personal Sandbox'
-      };
-      setCustomUser(authUser);
-      persistCustomSession(authUser);
-      return { error: null, data: { user: authUser } };
+      const result = await registerAccount(supabase.auth, credentials, origin);
+      if (!result.error && result.data?.session) {
+        const authUser = mapSupabaseUser(result.data.user, result.data.session);
+        setSession(result.data.session);
+        setSupabaseUser(result.data.user);
+        setCustomUser(authUser);
+        persistCustomSession(authUser);
+      }
+      return result;
     } finally {
       setIsLoading(false);
     }

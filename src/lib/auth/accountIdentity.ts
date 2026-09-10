@@ -19,6 +19,6 @@ export async function requireAccountIdentity(req: NextRequest) {
   }
   const client = createClient(await cookies());
   const { data, error } = await client.auth.getUser(token || undefined);
-  if (error || !data.user?.email || !data.user.email_confirmed_at) throw new AccountIdentityError('Sign in with a verified email to view your account.');
+  if (error || !data.user?.email || !data.user.email_confirmed_at || data.user.is_anonymous) throw new AccountIdentityError('Sign in with a verified email to view your account.');
   return { id: data.user.id, email: data.user.email.toLowerCase(), name: data.user.user_metadata?.name || data.user.user_metadata?.full_name || data.user.email };
 }
