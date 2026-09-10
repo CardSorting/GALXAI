@@ -41,6 +41,8 @@ export class RelayFederationLifecycle {
   private reconciliation?: Promise<void>;
   private authorityRead?: Promise<void>;
   private desired = new Map<string, DesiredShard>();
+  // Expired credentials remain discoverable for administrator repair, never admission.
+  private registered = new Map<string, DesiredShard>();
   private readonly retry = new Map<string, { revision: string; attempts: number; at: number }>();
   private registryReadAt = 0;
   private inventoryReadAt = 0;
@@ -70,6 +72,7 @@ export class RelayFederationLifecycle {
   private async refreshAuthority(): Promise<void> {
     const rows = await this.readShards();
     if (new Set(rows.map(s => s.id)).size !== rows.length) throw new Error('Duplicate shard ownership in registry');
+    this.registered = new Map(rows.map(s => [s.id, s]));
     this.desired = new Map(rows.filter(s => !s.expiresAtMs || s.expiresAtMs > this.now()).map(s => [s.id, s]));
     this.registryReadAt = this.now();
     const removedHolds = [...this.maintenance.keys()].filter(id => !this.desired.has(id));
@@ -237,16 +240,17 @@ export class RelayFederationLifecycle {
   workspaceShards() {
     const now = this.now(), availability = this.snapshot(), inventoryFresh = this.inventoryReadAt > 0 && now - this.inventoryReadAt < this.registryTtlMs;
     const events = this.activity.snapshot().events;
-    return [...this.desired.values()].map(s => {
+    return [...this.registered.values()].map(s => {
       const h = this.relays.get(s.id), c = this.capabilities.get(s.id), paused = this.maintenance.has(s.id);
-      const fresh = this.routable() && !!c && c.heartbeatExpiresAtMs > now;
+      const expired = !!s.expiresAtMs && s.expiresAtMs <= now;
+      const fresh = !expired && this.routable() && !!c && c.heartbeatExpiresAtMs > now;
       const rejected = this.invalid.get(s.id) === s.credentialRevision, cooldown = (s.cooldownUntilMs ?? 0) > now;
-      const eligible = availability.models.filter(m => m.shardIds.includes(s.id));
-      const health = !this.routable() ? 'stale' : rejected ? 'rejected' : cooldown ? 'cooldown' : !h ? 'offline' : !fresh ? 'stale' : c.health;
+      const eligible = expired ? [] : availability.models.filter(m => m.shardIds.includes(s.id));
+      const health = !this.routable() ? 'stale' : expired ? 'expired' : rejected ? 'rejected' : cooldown ? 'cooldown' : !h ? 'offline' : !fresh ? 'stale' : c.health;
       return { id: s.id, name: s.id, relayId: h?.id ?? null, generation: h?.generation ?? null,
         workerState: !inventoryFresh ? 'unknown' : this.draining.has(s.id) ? 'retiring' : h ? h.running === false ? 'stopped' : 'running' : 'missing',
         registryFresh: this.routable(), health, healthObservedAt: c?.heartbeatObservedAtMs ?? null,
-        paused, pausedAt: this.maintenance.get(s.id) ?? null, canManage: this.routable() && !this.draining.has(s.id),
+        paused, pausedAt: this.maintenance.get(s.id) ?? null, canManage: !expired && this.routable() && !this.draining.has(s.id),
         activeStreams: fresh ? c.activeStreams : null, queueDepth: fresh ? c.queueDepth : null, capacity: fresh ? c.capacity : null,
         eligibleModels: eligible.length, uncoveredModels: eligible.filter(m => m.eligibleShardCount === 1).length,
         retryAt: this.retry.get(s.id)?.at ?? null, cooldownUntil: cooldown ? s.cooldownUntilMs! : null,

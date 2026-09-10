@@ -21,6 +21,25 @@ function fixture() {
   return { driver, calls, workers, records, read, now: () => now, advance: () => { now += 16000; }, reject: () => { rejected = true; }, heal: () => { rejected = false; }, registryFail: () => { failRegistry = true; }, rotate: () => { desired = desired.map(s => s.id === 'a' ? { ...s, credentialRevision: 'rotated' } : s); }, removeShard: () => { desired = desired.filter(s => s.id !== 'a'); } };
 }
 
+test('expired accounts remain repairable without allocating or admitting workers, then recover on credential refresh', async () => {
+  const f = fixture(); let expired = true, removed = false;
+  const lifecycle = new RelayFederationLifecycle(async () => (await f.read()).filter(s => !removed || s.id !== 'a').map(s => s.id === 'a' ? { ...s, expiresAtMs: expired ? f.now() - 1 : f.now() + 60000, credentialRevision: expired ? 'old' : 'refreshed' } : s), f.driver, f.now);
+  try {
+    for (let i = 0; i < 3; i++) await lifecycle.reconcile();
+    const repair = lifecycle.workspaceShards().find(s => s.id === 'a')!;
+    assert.equal(repair.health, 'expired'); assert.equal(repair.canManage, false); assert.equal(repair.registryFresh, true);
+    assert.equal(repair.eligibleModels, 0); assert.equal(repair.activeStreams, null); assert.equal(repair.workerState, 'missing');
+    assert.equal(lifecycle.monitorState().desiredCount, 1); assert(!f.calls.includes('start:a')); assert.equal(lifecycle.capabilities.select('A'), undefined);
+    assert(!/PRIVATE_|credentialRevision|accessToken|accountId|adminKey|inferenceKey|endpoint/.test(JSON.stringify(repair)));
+    assert.throws(() => lifecycle.setMaintenance('a', false, null), /no longer registered/);
+    expired = false; await lifecycle.reconcile(); await lifecycle.reconcile();
+    assert.equal(f.calls.filter(c => c === 'start:a').length, 1); assert(lifecycle.capabilities.select('A'));
+    assert.equal(lifecycle.workspaceShards().find(s => s.id === 'a')!.health, 'healthy');
+    removed = true; await lifecycle.reconcile();
+    assert(!lifecycle.workspaceShards().some(s => s.id === 'a')); assert.equal(lifecycle.capabilities.select('A'), undefined);
+  } finally { await lifecycle.stop(); }
+});
+
 test('manual hold keeps a worker and its health evidence, blocks new routing, persists across restart, and resumes explicitly', async () => {
   const f = fixture(), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'maintenance-')), store = new FileShardMaintenanceStore(path.join(dir, 'holds.json'));
   let lifecycle = new RelayFederationLifecycle(f.read, f.driver, f.now, 15000, undefined, store);

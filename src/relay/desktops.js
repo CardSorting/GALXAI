@@ -311,7 +311,7 @@ document.addEventListener('keydown', e => {
   if (!inGuest && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openCommands(); }
 });
 
-const healthLabels = { healthy: 'Healthy', degraded: 'Degraded', unavailable: 'Unavailable', rejected: 'Credential rejected', cooldown: 'Cooling down', stale: 'Health unconfirmed', offline: 'Worker offline' };
+const healthLabels = { healthy: 'Healthy', degraded: 'Degraded', unavailable: 'Unavailable', expired: 'Sign-in expired', rejected: 'Credential rejected', cooldown: 'Cooling down', stale: 'Health unconfirmed', offline: 'Worker offline' };
 const shardEventLabels = { manual_work_paused: 'New work paused by an administrator', manual_work_resumed: 'Manual hold released', credential_rejected: 'Credential rejected', credential_rotated: 'Credential changed', worker_adopted: 'Existing worker connected', worker_started: 'Worker started', worker_starting: 'Worker startup requested', worker_models_changed: 'Available models changed', worker_retry_scheduled: 'Health check failed; retry scheduled', worker_recovered: 'Health check recovered', worker_health_healthy: 'Worker health recovered', worker_health_degraded: 'Worker health degraded', worker_health_unavailable: 'Worker reported unavailable', worker_removed: 'Worker removed', worker_disappeared: 'Worker no longer found' };
 const linkPending = new Set(), trafficPending = new Set(), linkMessages = new Map();
 let linkSelection, shardEventSignature = '', trafficIntent;
@@ -337,7 +337,9 @@ function renderRelationship() {
     select.replaceChildren(...options.map(o => { const el = n('option', o.label); el.value = o.id; return el; })); select.dataset.options = signature;
     select.value = changed ? d.relayId || '' : options.some(o => o.id === previous) ? previous : d.relayId || '';
   }
-  $('save-link').disabled = linkPending.has(d.id) || !!d.operation || !!d.credentialSync?.busy || !snapshot.journalHealthy || select.value === (d.relayId || '');
+  $('save-link').disabled = linkPending.has(d.id) || credentialPending.has(d.id) || !!failure || !!d.operation || !!d.credentialSync?.busy || !snapshot.journalHealthy || select.value === (d.relayId || '');
+  $('find-shard').disabled = !d.credentialSync?.canMatch || !d.canConnect || !snapshot.inventoryFresh || !!failure || !!d.operation || !!d.credentialSync?.busy || credentialPending.has(d.id) || linkPending.has(d.id);
+  $('find-shard').textContent = credentialPending.get(d.id) === 'match' ? 'Finding match…' : 'Find matching shard';
   $('link-feedback').textContent = linkMessages.get(d.id) || '';
   $('shard-details').hidden = !r; renderCredentialSync(d, r); if (!r) return;
   $('relation-desktop').textContent = d.name; $('relation-desktop-state').textContent = `${labels[d.state]} · independent environment`;
@@ -348,7 +350,7 @@ function renderRelationship() {
   $('traffic-reason').textContent = r.paused ? `Manual hold since ${new Date(r.pausedAt).toLocaleString()}. ${r.workerState === 'running' ? 'Worker retained; accepted jobs can finish.' : 'No replacement worker will start during this hold.'}` : r.eligibleModels && !stale ? 'Health and model evidence determine which requests this worker can accept.' : 'Fresh health, credentials and model evidence are required before new work can be assigned.';
   $('shard-load').textContent = !stale && r.activeStreams !== null ? `${r.activeStreams} active · ${r.queueDepth} queued · ${r.capacity} concurrent slots` : 'Current workload is unconfirmed; missing data does not mean idle.';
   $('change-traffic').textContent = trafficPending.has(r.id) ? 'Saving…' : r.paused ? 'Resume new work' : 'Pause new work'; $('change-traffic').disabled = trafficPending.has(r.id) || stale || !r.canManage;
-  $('shard-guidance').textContent = r.health === 'rejected' ? 'Sign in to the linked account in Terminal. Automatic sync verifies and saves the refreshed credential; health updates after the worker reloads.' : r.health === 'cooldown' ? `Quota cooldown ends ${new Date(r.cooldownUntil).toLocaleString()}. Keep the desktop open while it recovers.` : r.retryAt ? `The next automatic worker check is scheduled for ${new Date(r.retryAt).toLocaleTimeString()}. You can continue working here.` : r.paused ? 'Use this workspace for manual investigation. Resume releases the hold; fresh eligibility checks still apply. Credential rotation or removal can retire an old worker.' : 'Pause new work before maintenance to keep the current worker available. Closing this viewer leaves both environments running.';
+  $('shard-guidance').textContent = r.health === 'expired' ? 'The registered sign-in expired. If you have signed in again in this desktop, choose Check now to verify and save it. New work stays blocked until fresh credentials and worker health are confirmed.' : r.health === 'rejected' ? 'Sign in to the linked account in Terminal. Automatic sync verifies and saves the refreshed credential; health updates after the worker reloads.' : r.health === 'cooldown' ? `Quota cooldown ends ${new Date(r.cooldownUntil).toLocaleString()}. Keep the desktop open while it recovers.` : r.retryAt ? `The next automatic worker check is scheduled for ${new Date(r.retryAt).toLocaleTimeString()}. You can continue working here.` : r.paused ? 'Use this workspace for manual investigation. Resume releases the hold; fresh eligibility checks still apply. Credential rotation or removal can retire an old worker.' : 'Pause new work before maintenance to keep the current worker available. Closing this viewer leaves both environments running.';
   $('shard-monitor').href = '/federation#shard=' + encodeURIComponent(r.id);
   $('shard-observed').textContent = r.healthObservedAt ? `Health observed ${eventTime(r.healthObservedAt)}${r.health === 'stale' || stale ? ' · stale' : ''}` : 'No worker health sample';
   const eventSignature = JSON.stringify([r.id, r.events]); if (eventSignature === shardEventSignature) return; shardEventSignature = eventSignature;
@@ -470,16 +472,21 @@ $('device-cancel').onclick = async () => {
   try { await api(`${d.id}/signin-cancel`, { shardId: d.relayId }); tell('Cancellation requested.'); await refresh(); }
   catch (error) { workspaceErrors.set(d.id, error.message); render(); }
 };
-$('credential-match').onclick = async () => {
-  const d = current(); if (!d || credentialPending.has(d.id)) return;
-  credentialPending.set(d.id, 'match'); renderRelationship();
+async function matchSavedAccount() {
+  const d = current(); if (!d || credentialPending.has(d.id) || linkPending.has(d.id) || failure) return;
+  credentialPending.set(d.id, 'match'); workspaceErrors.delete(d.id); linkMessages.delete(d.id); renderRelationship();
   try {
     const result = await api(`${d.id}/credential-match`, { shardId: d.relayId || null });
+    await refresh();
     if (selected !== d.id) return;
+    if (failure || !snapshot.relays.some(s => s.id === result.shardId && s.registryFresh)) throw Error('The matching account is not available in the current registry. Refresh and find the match again.');
+    if (current()?.relayId !== d.relayId) throw Error('The desktop link changed during this check. Review the current link and try again.');
     $('link-editor').open = true; $('shard-link').value = result.shardId;
     linkMessages.set(d.id, 'Matching shard selected. Review it, then choose Save link. The current link has not changed.');
     renderRelationship(); $('shard-link').focus();
   } catch (error) { workspaceErrors.set(d.id, credentialMessages[error.code] || error.message); }
   finally { credentialPending.delete(d.id); render(); }
-};
+}
+$('credential-match').onclick = matchSavedAccount;
+$('find-shard').onclick = matchSavedAccount;
 $('credential-done').onclick = () => { toggleRelationship(false); $('relationship-toggle').focus(); tell('Setup closed. Desktop apps and shard traffic are unchanged.'); };

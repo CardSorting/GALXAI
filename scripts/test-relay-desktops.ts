@@ -94,8 +94,8 @@ test('Docker driver confines resources and never treats failed ownership inspect
   await assert.rejects(driver.create(id), /ownership mismatch/);
 });
 
-async function httpFixture(t: any, withShard = false, refresh?: RefreshDesktopCredential) {
-  const shard = { id: 'fixture-shard', provider: 'openai', accountId: 'PRIVATE_ACCOUNT', accessToken: 'PRIVATE_TOKEN', credentialRevision: 'PRIVATE_REVISION' };
+async function httpFixture(t: any, withShard = false, refresh?: RefreshDesktopCredential, expired = false) {
+  const shard = { id: 'fixture-shard', provider: 'openai', accountId: 'PRIVATE_ACCOUNT', accessToken: 'PRIVATE_TOKEN', credentialRevision: 'PRIVATE_REVISION', ...(expired ? { expiresAtMs: Date.now() - 60000 } : {}) };
   const handle = { id: 'fixture-relay', shardId: shard.id, generation: 'fixture-generation', credentialRevision: shard.credentialRevision, endpoint: 'http://127.0.0.1:1', adminKey: 'PRIVATE_WORKER_ADMIN', inferenceKey: 'PRIVATE_WORKER_KEY', running: true };
   const records = new CapabilityRegistry(); records.register(shard.id, handle.id, handle.generation, 'openai'); records.publishInventory(records.beginRefresh(shard.id)!, ['A']);
   const f = fixture(t, refresh), lifecycle = new RelayFederationLifecycle(async () => withShard ? [shard] : [], { list: async () => withShard ? [handle] : [], start: async () => { throw Error('No serving worker'); }, inspect: async () => { records.heartbeat(shard.id, {}); return { record: records.get(shard.id) }; }, remove: async () => {} });
@@ -213,6 +213,22 @@ test('parallel operation count is bounded and queued desktops explain their wait
   assert.equal(manager.snapshot().runningCount, 0);
   driver.items.get(ids[0])!.running = true; driver.items.get(ids[0])!.unhealthy = true;
   await manager.refresh(true); assert.equal(manager.snapshot().desktops.find(d => d.id === ids[0])!.state, 'unhealthy');
+});
+
+test('an unlinked desktop can find and explicitly link an expired registered account without admitting it', async t => {
+  const { base, login, manager, lifecycle, driver } = await httpFixture(t, true, undefined, true), id = randomUUID();
+  await manager.create({ id, name: 'Already signed in' }); driver.credentialFiles = savedLogin();
+  (manager as any).matchCredential = async () => 'fixture-shard';
+  const cookie = await login();
+  const post = (action: string, body: object) => fetch(`${base}/api/desktops/${id}/${action}`, { method: 'POST', headers: { cookie, Origin: base, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const state = await (await fetch(base + '/api/desktops/state', { headers: { cookie } })).json();
+  assert.equal(state.relays[0].health, 'expired'); assert.equal(state.relays[0].canManage, false); assert.equal(state.relays[0].eligibleModels, 0);
+  assert(!/PRIVATE_(ACCOUNT|TOKEN|REVISION)|accessToken|credentialRevision/.test(JSON.stringify(state)));
+  const match = await post('credential-match', { shardId: null }); assert.equal(match.status, 200); assert.deepEqual(await match.json(), { shardId: 'fixture-shard' });
+  assert.equal(manager.linkedShard(id), undefined, 'finding an account must not save its link');
+  assert.equal((await post('link', { shardId: 'fixture-shard', expectedShardId: null })).status, 200);
+  assert.equal(manager.linkedShard(id), 'fixture-shard'); assert.equal(lifecycle.monitorState().desiredCount, 0); assert.equal(lifecycle.capabilities.select('A'), undefined);
+  assert.equal((await post('traffic', { shardId: 'fixture-shard', paused: false, generation: null })).status, 404);
 });
 
 test('shard linking and traffic control enforce desktop administrator scope, origin, link identity and generation', async t => {

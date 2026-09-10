@@ -17,6 +17,8 @@ Custom homes inside the guest home are supported through `galx-relay use-login`.
 
 Check token/account consistency, expiry, current registry eligibility and upstream inventory acceptance. The linked account must match. A saved unrelated login can be matched to one existing eligible account for review and explicit Save link; matching never enrolls, changes ownership or reactivates revoked authority.
 
+Unlinked desktops expose the same read-only matching action in the link editor. Keep registered repair targets separate from unexpired serving authority: an expired account remains selectable with explicit expiry status, zero eligible models and disabled traffic controls. It does not allocate a worker until a validated credential refresh restores serving authority. Registry removal or revocation removes the repair target. Refresh the selector after matching and reject stale or changed-link results before presenting a selection; Save link remains explicit.
+
 Before mutation, durably flush an intent containing candidate fingerprint and expected encrypted-registry revision. Replace the credential using compare-and-swap. Finish the private checkpoint only after success. Recovery confirms an already-applied result or retries unchanged original authority; an external newer revision wins. Previously applied unchanged files cannot restore old credential families.
 
 Polling is coalesced, bounded and backed off on transient failures; operators have a manual retry. It watches completed CLI sign-in rather than independently exchanging refresh tokens. UI states separate sign-in, validation, registry save, worker application and traffic readiness.
@@ -43,5 +45,7 @@ Administrator DTOs exclude raw tokens and private checkpoint internals. This is 
 ## Evidence and remaining acceptance
 
 Tests exercised custom paths, symlinks, concurrent updates, interrupted checkpoints, account matching, real guest Unicode input and synthetic completion. The installed provider CLI initialized a real device challenge and cancellation; no live credential was imported. Identity approval/MFA remains with the account holder. Pixel-stream accessibility and physical mobile acceptance remain separate.
+
+The subsequent expired-account repair check verified an operator-completed live login against provider inventory and selected its existing account in the authorized desktop browser. This read-only check left the link and registry credential unchanged; it did not dispatch inference. Regression fixtures verify that expired accounts remain linkable without allocation or admission, recover after credential refresh, and disappear after registry removal. Browser fixtures cover explicit Save link, readiness, stale matches, failures and responsive layouts.
 
 See [enrollment and recovery](../maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) and [dated verification](../maintainers/RELAY_SESSION_VERIFICATION_20260909.md).

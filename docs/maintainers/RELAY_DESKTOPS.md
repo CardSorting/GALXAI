@@ -27,12 +27,18 @@ Viewer connection is independent of shard health. Creating a desktop does not en
 
 ## Repair flow
 
+For an already signed-in, unlinked desktop, open **Link shard → Find matching shard**. Matching reads the saved guest login and selects one existing registered account for review; the desktop name is only a label. Choose **Save link**, then **Check now** to validate and synchronize that account. Automatic sync also checks linked, running desktops when enabled. A missing match requires separate administrator enrollment; creating another desktop does not enroll it.
+
+Expired registered accounts remain in the private link selector as **Sign-in expired**. They cannot allocate workers until fresh credentials pass validation; traffic also requires confirmed serving health. Removed, revoked or otherwise ineligible registry rows are not repair targets. Matching alone never saves the link or changes credentials.
+
 1. Open the shard's linked desktop.
 2. Inspect capabilities, worker generation, traffic state and the latest structured activity reason.
 3. Pause new work if intervention requires a maintenance hold.
 4. Complete sign-in in Terminal, Chrome or the native device-code panel.
 5. Inspect validation and the saved registry revision. A held shard cannot start a replacement worker after rotation.
 6. Once the saved authority is reviewed, resume explicitly when replacement is needed, then verify the new worker and capabilities. Admission stays gated by fresh evidence. For an unchanged worker, inspect its health before resuming.
+
+Test each stage separately: an accepted provider inventory proves authentication and model discovery; **Ready for work** confirms saved credentials and current worker eligibility. Finally, send a small request through the normal authenticated API and verify its completed result. Neither a successful browser login nor inventory acceptance proves that inference completed.
 
 A durable hold blocks admissions and replacement starts while preserving an existing worker, including after credential rejection. Accepted work can finish. A hold cannot override removed, revoked, expired or changed registry authority. Resume removes only the hold.
 
