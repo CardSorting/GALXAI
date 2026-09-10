@@ -5,7 +5,7 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { test } from 'node:test';
 import { DesktopOrganization } from '../src/relay/desktop-organization.js';
-import { workspaceHealth } from '../src/relay/desktop-organizer.js';
+import { workspaceHealth, matchesWorkspaceStatus } from '../src/relay/desktop-organizer.js';
 
 function fixture(t: any) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'desktop-organization-')), file = path.join(dir, 'organization.json');
@@ -71,4 +71,20 @@ test('health groups distinguish serving health, stopped desktops, holds, setup a
   assert.equal(workspaceHealth(d, { ...relay, eligibleModels: 0 }).bucket, 'setup'); assert.equal(workspaceHealth(d, undefined).bucket, 'attention');
   for (const health of ['expired', 'rejected', 'degraded', 'unavailable', 'offline']) assert.equal(workspaceHealth(d, { ...relay, health }).bucket, 'attention');
   assert.equal(workspaceHealth({ ...d, credentialSync: { state: 'error' } }, relay).bucket, 'attention');
+});
+
+test('quick status filters combine selections and distinguish intentional deactivation from failure or stale evidence', () => {
+  const desktop = { state: 'running', relayId: 'a' }, relay = { registryFresh: true, health: 'healthy', workerState: 'running', eligibleModels: 2 };
+  const healthy = { healthy: true, deactivated: false }, deactivated = { healthy: false, deactivated: true }, both = { healthy: true, deactivated: true };
+  assert(matchesWorkspaceStatus(desktop, relay, healthy)); assert(!matchesWorkspaceStatus(desktop, relay, deactivated));
+  assert(matchesWorkspaceStatus({ ...desktop, state: 'stopped' }, relay, deactivated));
+  assert(matchesWorkspaceStatus({ ...desktop, state: 'stopped' }, relay, healthy));
+  assert(matchesWorkspaceStatus(desktop, { ...relay, paused: true }, deactivated));
+  assert(matchesWorkspaceStatus(desktop, { ...relay, health: 'expired', paused: true }, deactivated));
+  assert(!matchesWorkspaceStatus(desktop, { ...relay, health: 'expired' }, deactivated));
+  assert(!matchesWorkspaceStatus(desktop, { ...relay, health: 'cooldown' }, deactivated));
+  assert(matchesWorkspaceStatus(desktop, relay, both)); assert(matchesWorkspaceStatus(desktop, { ...relay, paused: true }, both));
+  assert(!matchesWorkspaceStatus(desktop, relay, both, false));
+  assert(!matchesWorkspaceStatus(desktop, { ...relay, paused: true, registryFresh: false }, both));
+  assert(matchesWorkspaceStatus(desktop, undefined, { healthy: false, deactivated: false }, false));
 });

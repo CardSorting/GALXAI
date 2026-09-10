@@ -17,6 +17,13 @@ export function workspaceHealth(desktop, relay, fresh = true) {
   return { bucket: 'setup', label: 'Waiting for serving capacity' };
 }
 
+export function matchesWorkspaceStatus(desktop, relay, filters, fresh = true) {
+  if (!filters.healthy && !filters.deactivated) return true;
+  const healthy = workspaceHealth(desktop, relay, fresh).bucket === 'ready';
+  const deactivated = fresh && desktop.state !== 'unknown' && (desktop.state === 'stopped' || relay?.registryFresh && relay.paused === true);
+  return !!(filters.healthy && healthy || filters.deactivated && deactivated);
+}
+
 export class DesktopOrganizer {
   constructor({ api, refresh, openDesktop, createDesktop, currentId, releaseInput }) {
     Object.assign(this, { api, refresh, openDesktop, createDesktop, currentId, releaseInput });
@@ -26,6 +33,8 @@ export class DesktopOrganizer {
     $('organizer-new-desktop').onclick = () => { this.close(); createDesktop(); };
     $('organizer-add-tab').onclick = () => this.editGroup();
     $('organizer-search').oninput = () => this.render();
+    for (const status of ['healthy', 'deactivated']) $('organizer-' + status).onchange = () => this.render();
+    $('organizer-clear-filters').onclick = () => { $('organizer-healthy').checked = false; $('organizer-deactivated').checked = false; this.render(); $('organizer-healthy').focus(); };
     $('organizer-tabs').onkeydown = event => this.tabKeys(event);
     $('group-form').onsubmit = event => { event.preventDefault(); void this.saveGroup(); };
     $('group-cancel').onclick = () => $('group-dialog').close();
@@ -48,8 +57,11 @@ export class DesktopOrganizer {
   }
   get isOpen() { return !$('organizer').hidden; }
   get canEdit() { return !this.busy && !this.failed && this.snapshot?.journalHealthy && this.snapshot?.organization?.available; }
+  get filters() { return { healthy: $('organizer-healthy').checked, deactivated: $('organizer-deactivated').checked }; }
   groups() { return [{ id: 'ungrouped', name: 'Ungrouped', desktopIds: this.snapshot?.organization?.ungrouped || [] }, ...(this.snapshot?.organization?.groups || [])]; }
   open(tab = this.tab, focus = true) {
+    const fragment = new URLSearchParams(location.hash.slice(1));
+    if (fragment.get('view') === 'workspaces') for (const status of ['healthy', 'deactivated']) $('organizer-' + status).checked = (fragment.get('status') || '').split(',').includes(status);
     this.releaseInput(); this.tab = tab; $('organizer').hidden = false; document.body.classList.add('organizing'); document.body.classList.remove('zen', 'sidebar-open');
     $('sidebar-toggle').setAttribute('aria-expanded', 'false'); $('zen').setAttribute('aria-pressed', 'false'); $('zen').textContent = 'Zen view';
     this.render(); this.url(); if (focus) $('organizer-title').focus();
@@ -59,7 +71,7 @@ export class DesktopOrganizer {
     const id = this.currentId(); history.replaceState(null, '', location.pathname + (id ? '#desktop=' + id : ''));
     if (focus) { $('open-organizer').focus(); void this.refresh(); }
   }
-  url() { if (!this.isOpen) return; const hash = new URLSearchParams({ view: 'workspaces', tab: this.tab }); const id = this.currentId(); if (id) hash.set('desktop', id); history.replaceState(null, '', location.pathname + '#' + hash); }
+  url() { if (!this.isOpen) return; const hash = new URLSearchParams({ view: 'workspaces', tab: this.tab }); const id = this.currentId(); if (id) hash.set('desktop', id); const statuses = Object.keys(this.filters).filter(status => this.filters[status]); if (statuses.length) hash.set('status', statuses.join(',')); history.replaceState(null, '', location.pathname + '#' + hash); }
   update(snapshot, failed) { this.snapshot = snapshot; this.failed = !!failed; this.render(); }
   status(text = this.message) { $('organizer-status').textContent = this.failed ? 'Status delayed. Refresh before changing organization.' : this.snapshot?.organization?.available === false ? 'Saved organization is unavailable. Ask the host administrator to restore it.' : this.busy ? 'Saving organization…' : text; }
   async mutate(body, message) {
@@ -80,19 +92,23 @@ export class DesktopOrganizer {
     const groups = this.groups(), tabs = [{ id: 'health', name: 'By health' }, { id: 'groups', name: 'All groups' }, ...groups];
     if (!tabs.some(t => t.id === this.tab)) this.tab = 'health';
     const query = $('organizer-search').value.trim().toLowerCase(), relays = new Map(this.snapshot.relays.map(r => [r.id, r]));
-    const desktops = this.snapshot.desktops.map(d => ({ ...d, health: workspaceHealth(d, relays.get(d.relayId), this.snapshot.inventoryFresh && !this.failed) }));
-    const matching = desktops.filter(d => [d.name, d.relayId || '', d.health.label].some(value => value.toLowerCase().includes(query))), map = new Map(matching.map(d => [d.id, d]));
-    this.status(); $('organizer-count').textContent = query ? `${matching.length} of ${desktops.length} workspaces` : `${desktops.length} workspaces · organization saved on this controller`;
+    const fresh = this.snapshot.inventoryFresh && !this.failed, filters = this.filters, filtered = filters.healthy || filters.deactivated;
+    const desktops = this.snapshot.desktops.map(d => ({ ...d, health: workspaceHealth(d, relays.get(d.relayId), fresh) }));
+    const matching = desktops.filter(d => matchesWorkspaceStatus(d, relays.get(d.relayId), filters, fresh) && [d.name, d.relayId || '', d.health.label].some(value => value.toLowerCase().includes(query))), map = new Map(matching.map(d => [d.id, d]));
+    const scope = groups.find(g => g.id === this.tab)?.desktopIds || desktops.map(d => d.id), visible = scope.filter(id => map.has(id)).length;
+    const countText = query || filtered || !['health', 'groups'].includes(this.tab) ? `${visible} of ${scope.length} workspaces` : `${desktops.length} workspaces · organization saved on this controller`;
+    this.status(); if ($('organizer-count').textContent !== countText) $('organizer-count').textContent = countText;
+    $('organizer-clear-filters').hidden = !filtered;
     $('organizer-add-tab').disabled = !this.canEdit || this.snapshot.organization.groups.length >= this.snapshot.organization.maxGroups;
     $('organizer-new-desktop').disabled = !this.snapshot.available;
     for (const id of ['group-save', 'group-confirm-remove', 'move-save', 'group-left', 'group-right', 'group-remove']) $(id).disabled = !this.canEdit;
     if (this.editingId) { const index = this.snapshot.organization.groups.findIndex(g => g.id === this.editingId); $('group-left').disabled ||= index <= 0; $('group-right').disabled ||= index < 0 || index === this.snapshot.organization.groups.length - 1; }
     if (this.drag) return;
-    const signature = JSON.stringify([this.tab, groups, desktops.map(d => [d.id, d.name, d.state, d.health, d.operation?.action]), query, this.canEdit]);
+    const signature = JSON.stringify([this.tab, groups, desktops.map(d => [d.id, d.name, d.state, d.health, d.operation?.action]), query, filters, matching.map(d => d.id), this.canEdit]);
     if (signature === this.signature) return; this.signature = signature;
     const focused = document.activeElement?.dataset.orgFocus;
     $('organizer-tabs').replaceChildren(...tabs.map(t => {
-      const count = t.desktopIds?.length ?? desktops.length, node = button(t.name, () => this.select(t.id));
+      const count = t.desktopIds ? t.desktopIds.filter(id => map.has(id)).length : matching.length, node = button(t.name, () => this.select(t.id));
       node.append(el('span', String(count), 'org-tab-count')); node.id = 'org-tab-' + t.id; node.dataset.orgFocus = 'tab-' + t.id; node.dataset.tab = t.id;
       node.setAttribute('role', 'tab'); node.setAttribute('aria-selected', String(t.id === this.tab)); node.setAttribute('aria-controls', 'organizer-board'); node.tabIndex = t.id === this.tab ? 0 : -1;
       if (t.desktopIds) this.dropTarget(node, t.id, () => null);
@@ -109,7 +125,7 @@ export class DesktopOrganizer {
       if (this.tab !== 'health' && c.id !== 'ungrouped') { const edit = button('Edit tab', () => this.editGroup(c.id), 'Edit ' + c.name + ' tab'); edit.dataset.orgFocus = 'edit-' + c.id; edit.disabled = !this.canEdit; heading.append(edit); }
       lane.append(heading); const list = el('ol', undefined, 'org-workspaces'); list.setAttribute('aria-label', c.name + ' workspaces');
       for (const id of c.desktopIds) if (map.has(id)) list.append(this.card(map.get(id), this.tab === 'health' ? undefined : c.id));
-      if (!list.children.length) list.append(el('li', query ? 'No matching workspaces.' : this.tab === 'health' ? c.id === 'attention' ? 'No workspaces need attention.' : 'Healthy workspaces appear here automatically.' : 'Drop a workspace here, or use its Move button.', 'org-empty'));
+      if (!list.children.length) list.append(el('li', query || filtered ? 'No matching workspaces. Clear filters or change your search.' : this.tab === 'health' ? c.id === 'attention' ? 'No workspaces need attention.' : 'Healthy workspaces appear here automatically.' : 'Drop a workspace here, or use its Move button.', 'org-empty'));
       lane.append(list);
       if (this.tab !== 'health') this.dropTarget(lane, c.id, () => null);
       return lane;
