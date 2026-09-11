@@ -39,6 +39,9 @@ text drafts and recovery by operation ID. It uses an account session bearer at
 `/api/sites/content`. The guide covers fixed pricing, allowances, repairs and
 settlement; availability depends on account eligibility.
 
+Eligible Site workflows can receive a stable [Site address](docs/SITE_ADDRESSES.md)
+such as `my-product.alice.galx.ai`, with readiness reported separately from content generation.
+
 ## Documentation
 
 - [API documentation](https://galx.ai/docs)

@@ -149,3 +149,4 @@ Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) f
 | 0134 | [ADR 0134: Fixed-price Sites generation with opaque provider quotas](0134-fixed-price-sites-generation-with-opaque-provider-quotas.md) | Implemented locally; provisional tariff and account allowance |
 | 0135 | [ADR 0135: Durable Sites receipts and local admission](0135-durable-sites-receipts-and-local-admission.md) | Durable text receipts, local limits and bounded recovery |
 | 0136 | [ADR 0136: Customer-owned Sites delivery](0136-customer-owned-sites-delivery.md) | Bounded companion; native-host delivery and separate publication evidence |
+| 0137 | [ADR 0137: Account-owned Sites subdomains](0137-account-owned-sites-subdomains.md) | Stable app/username addresses, native attachment and private DNS recovery |

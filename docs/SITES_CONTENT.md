@@ -7,6 +7,8 @@ This contract is for eligible accounts when Site content generation is available
 Your current quote determines the accepted price. Save and publish the resulting
 content through your site workflow.
 
+Eligible Site workflows also provide an [address under your username](SITE_ADDRESSES.md). Address setup and readiness are separate from the accepted content-generation charge.
+
 ## Endpoint and authentication
 
 Use `https://galx.ai/api/sites/content`. Authenticate every request with

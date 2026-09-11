@@ -53,6 +53,21 @@ export type GalxIdempotencyState = 'IN_FLIGHT' | 'COMMITTED' | 'FAILED';
 export interface Database {
   private: {
     Tables: {
+      galx_site_namespaces: {
+        Row: { user_id: string; username: string; created_at: string };
+        Insert: { user_id: string; username: string; created_at?: string };
+        Update: { username?: never };
+        Relationships: [];
+      };
+      galx_site_domains: {
+        Row: { id: string; user_id: string; username: string; project_id: string; app_slug: string; hostname: string;
+          status: 'reserved' | 'pending' | 'active'; attach_started: boolean; plan: Json | null; lease_id: string | null;
+          lease_until: string | null; next_check_at: string | null; last_error: string | null; created_at: string; updated_at: string };
+        Insert: { user_id: string; username: string; project_id: string; app_slug: string };
+        Update: { status?: 'reserved' | 'pending' | 'active'; attach_started?: boolean; plan?: Json; lease_id?: string | null;
+          lease_until?: string | null; next_check_at?: string | null; last_error?: string | null; updated_at?: string };
+        Relationships: [];
+      };
       galx_signup_credit_policy: {
         Row: { singleton: boolean; enabled: boolean; amount_usd: number; updated_at: string };
         Insert: { singleton?: boolean; enabled?: boolean; amount_usd?: number; updated_at?: string };

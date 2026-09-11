@@ -1,0 +1,32 @@
+{
+  "checkedAt": "2026-09-11 16:04:48 UTC",
+  "projectId": "appgprj_6aa38dfbd9ac81919938c46f2a121cef",
+  "domainId": "appgdom_6aa41e8dd9188191a859f70960393dde",
+  "hostname": "studio-delivery-preview.goldeneggie.galx.ai",
+  "status": "active",
+  "providerStatus": "active",
+  "sslStatus": "active",
+  "nativeAccessPolicyUnchanged": true,
+  "ownerPrivate": true,
+  "externalVisitors": 0,
+  "managedDnsRecords": 3,
+  "registryStatus": "active",
+  "migration": "20260911153205",
+  "applicationDeployment": "dpl_HXEnCXxzKm27od6pqDK9vECwwM3J",
+  "rollbackApplicationDeployment": "dpl_CsffXEUDD25CFNDiKhB2hpfre1Nn",
+  "domainCohortAccounts": 1,
+  "contentGenerationEnabled": false,
+  "paidGenerations": 0,
+  "newSitePublications": 0,
+  "authenticatedCustomerRoundTrip": false,
+  "sourceBaseCommit": "83082278c7ee4339d02cddbc098e1a3c0ee6dccb",
+  "sourceSha256": {
+    "src/app/api/sites/domains/route.ts": "d4fc29c399491883461dacb520e1b3bb8b66f9ea2a3d56d03f5554de7fe423bd",
+    "src/lib/sites/domains.ts": "09369018c336dfeee4c8d0580fe9d17da3f4a09e926af66da33c6497be999b30",
+    "src/lib/sites/domain-registry.ts": "5812f9c5cc73144435236a52dec87aa2ebd3bbee4841ed7cb7461a3f5544c9a3",
+    "src/lib/sites/domain-route.ts": "f9fdec6a675830a9f38d589a13237d8bf8b20480de4fe2b44b01ac357cb1cfea",
+    "src/lib/sites/cloudflare-dns.ts": "1e0582909ef64e771082ae40e1b2a51e8b78c869a12a39d219858da2eea13ead",
+    "src/lib/supabase/types.ts": "c67deec140d5a49897e04fb5c571526a8b978b4029f3d0c52b52c6db4352a35b",
+    "supabase/migrations/20260911153205_sites_custom_domains.sql": "1e93fcae727c86629a12e03145719f6e29cef814bc69ad54e986d7b1c0e58bc5"
+  }
+}

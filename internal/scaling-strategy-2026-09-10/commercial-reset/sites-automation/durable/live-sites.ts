@@ -7,7 +7,8 @@ import { JobStore } from './storage';
 import { ArtifactStore } from './artifacts';
 import path from 'node:path';
 
-export type SitesTool = 'sites.list_sites' | 'sites.get_site' | 'sites.get_site_version' | 'sites.save_site_version' | 'sites.deploy_private_site_version' | 'sites.get_deployment_status';
+export type SitesTool = 'sites.list_sites' | 'sites.get_site' | 'sites.get_site_version' | 'sites.save_site_version' | 'sites.deploy_private_site_version' | 'sites.get_deployment_status' |
+  'sites.list_custom_domains' | 'sites.add_custom_domain' | 'sites.refresh_custom_domain_status';
 export type SitesCall = (tool: SitesTool, args: Record<string, string | number>, signal: AbortSignal) => Promise<Record<string, any>>;
 
 export const nativeSitesCall: SitesCall = (tool, args, signal) => new Promise((resolve, reject) => {
@@ -50,6 +51,7 @@ export class LiveSitesAdapter implements PublishAdapter {
       if (p[key] !== undefined) requireThat(Array.isArray(p[key]) && p[key].every((u: any) =>
         u && u.account_user_id === this.accountUserId && u.is_external !== true), 'site_owner_access_required');
     }
+    return { title: site.title as string };
   }
   private async version(intent: PublishIntent, signal: AbortSignal) {
     const v = await this.call('sites.get_site_version', { project_id: intent.projectId, version_id: intent.versionId }, signal);

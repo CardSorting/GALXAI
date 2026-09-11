@@ -6,6 +6,8 @@ Private current guide, reconciled September 11, 2026. [ADRs 0134–0136](../../.
 
 The fixed-price server/relay path is implemented and locally verified, not deployed by that pass. Historical native-host save and owner-private update succeeded. Direct CLI archive save is unqualified. The preceding production release deployed a metered precursor with generation disabled; it does not establish a live billed workflow for the new mode.
 
+The later [address rollout](../../../../../docs/maintainers/SITES_DOMAINS.md#september-11-live-rollout) deployed the current application with domain setup enabled for one verified account and generation still disabled. It activated the existing preview's custom hostname without a new Site publication or paid generation. This does not qualify the separate live billing or direct CLI upload paths.
+
 The relay remains the sole model supplier. The companion requests bounded content from the authenticated GALX API, validates it and packages a deterministic template. Its Sites tool host executes scoped operations without a model turn. The companion has neither database access nor relay inference/administrator keys. GALX account authentication and Sites account ownership are independent.
 
 ## Billing contract
@@ -26,6 +28,7 @@ Use the qualified companion runtime from [README](README.md#runtime-and-state), 
 | `GALX_SITES_ACCOUNT_LIMIT_MICRO_USD` | Finite local account budget, independent of server funding/allowance |
 | `GALX_SITES_CONNECTION_ID` | Stable label for this customer's Sites connection |
 | `GALX_SITES_ACCOUNT_USER_ID` | Independently selected Sites account subject, checked against live access policy |
+| `GALX_SITES_USERNAME` | Available GALX username chosen by the customer; reserved to their verified GALX account |
 | `GALX_CODEX_BINARY` | Optional absolute path to the verified installed tool-host executable; otherwise PATH resolution |
 
 Server flags, the exact rate-card schema and administrator readiness belong in [Sites operations](../../../../../docs/maintainers/SITES_OPERATIONS.md#server-configuration). Fixed mode does not require `GALX_SITES_ACTIVATION_EVIDENCE` or output-ceiling forwarding. The selected delivery mode never authorizes a silent transport switch.
@@ -46,7 +49,8 @@ For the remaining commands, prefix `node --import tsx internal/scaling-strategy-
 | Arguments | Action |
 | --- | --- |
 | `create STATE_DIRECTORY REQUEST_KEY REQUEST_JSON` | Create a local job and retain its returned job ID |
-| `bind STATE_DIRECTORY JOB_ID PROJECT_ID` | Verify current ownership and bind the selected Site before packaging |
+| `bind STATE_DIRECTORY JOB_ID PROJECT_ID` | Verify current ownership, bind the Site and automatically connect its GALX address |
+| `connect-domain STATE_DIRECTORY JOB_ID` | Resume address setup for the existing bound Site |
 | `generate STATE_DIRECTORY JOB_ID` | Obtain/accept the quote and submit one bounded generation |
 | `prepare STATE_DIRECTORY JOB_ID` | Prepare a dedicated static source workspace from persisted validated content |
 | `accept-package STATE_DIRECTORY JOB_ID ARCHIVE_PATH` | Verify/canonicalize the packaged files and retain the immutable artifact |
@@ -68,6 +72,8 @@ For the remaining commands, prefix `node --import tsx internal/scaling-strategy-
 5. Create a publication intent binding `connectionId`, `projectId`, `commitSha`, `versionId`, `artifactHash` and `audience: "owner"`. Copy opaque IDs verbatim, including compound version IDs. Run `publish-saved` only for that acknowledged saved artifact and inspect the recorded terminal result.
 
 Sites can normalize the archive; retain local gzip and remote archive hashes separately. The public deployment audience is not changed by this companion. Existing authorization covers its intended actions, while unresolved tool-runtime approval requests remain a stop condition for that tool operation. No automatic approval, generic tool executor, fallback publication or publish-on-push behavior is introduced.
+
+[ADR 0137](../../../../../docs/adr/0137-account-owned-sites-subdomains.md) adds `APP.USERNAME.galx.ai` handoff. Binding starts native attachment and server-mediated DNS setup. `publish-saved` reconnects after publication; a DNS failure preserves that completed publication. Use `connect-domain` to recover, then `status` for the active GALX URL. Original hosting URLs remain private, and pending validation never authorizes another deployment. Server configuration and conflict handling are in [address operations](../../../../../docs/maintainers/SITES_DOMAINS.md).
 
 ## Failure and restart recovery
 

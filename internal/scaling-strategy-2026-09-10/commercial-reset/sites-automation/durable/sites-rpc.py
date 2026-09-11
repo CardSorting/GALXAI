@@ -25,6 +25,9 @@ FIELDS = {
     'sites.deploy_private_site_version': {'project_id', 'version_id'},
     'sites.create_source_repository_write_credential': {'project_id'},
     'sites.save_site_version': {'project_id', 'commit_sha', 'archive'},
+    'sites.list_custom_domains': {'project_id'},
+    'sites.add_custom_domain': {'project_id', 'hostname'},
+    'sites.refresh_custom_domain_status': {'project_id', 'custom_domain_id'},
 }
 
 def validate_command(command):
@@ -37,13 +40,14 @@ def validate_command(command):
         if args != {'limit': 1, 'role': 'owner'}:
             raise RuntimeError('invalid_command')
     elif tool == 'sites.save_site_version':
-        import re
         if not isinstance(args['project_id'], str) or not re.fullmatch(r'[a-zA-Z0-9_.:~-]{1,120}', args['project_id']) or not isinstance(args['commit_sha'], str) or not re.fullmatch(r'[a-f0-9]{40}', args['commit_sha']):
             raise RuntimeError('invalid_command')
         p = args['archive']
         if not isinstance(p, str) or len(p) > 4096 or any(ord(c) < 32 for c in p) or not Path(p).is_absolute() or Path(p).is_symlink() or not Path(p).is_file() or Path(p).stat().st_size > 128000:
             raise RuntimeError('invalid_command')
     elif any(not isinstance(v, str) or not 1 <= len(v) <= 120 or any(ord(c) < 32 for c in v) for v in args.values()):
+        raise RuntimeError('invalid_command')
+    if tool == 'sites.add_custom_domain' and not re.fullmatch(r'[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?\.[a-z][a-z0-9-]{1,18}[a-z0-9]\.galx\.ai', args['hostname']):
         raise RuntimeError('invalid_command')
     return command
 
@@ -105,13 +109,25 @@ def unwrap(result):
     raise RuntimeError('sites_result_invalid')
 
 def project(tool, value):
+    if tool in ('sites.list_custom_domains', 'sites.add_custom_domain', 'sites.refresh_custom_domain_status'):
+        def domain(row):
+            fields = ('id', 'project_id', 'hostname', 'status', 'provider_status', 'ssl_status', 'cname_target')
+            output = {key: row.get(key) for key in fields}
+            output['validation_records'] = [{key: r.get(key) for key in ('name', 'record_type', 'value')}
+                                            for r in row.get('validation_records', [])]
+            return output
+        if tool == 'sites.list_custom_domains':
+            if not isinstance(value.get('items'), list) or len(value['items']) > 100:
+                raise RuntimeError('sites_result_invalid')
+            return {'items': [domain(row) for row in value['items']]}
+        return domain(value)
     if tool == 'sites.create_source_repository_write_credential':
         return {'credential_available': isinstance(value.get('token'), str) and bool(value['token'])}
     if tool == 'sites.list_sites':
         if not isinstance(value.get('items'), list):
             raise RuntimeError('sites_result_invalid')
         return {'owned_site_count_on_page': len(value['items']), 'has_more': bool(value.get('cursor'))}
-    fields = ({'id', 'status', 'current_user_role', 'access_policy'} if tool == 'sites.get_site'
+    fields = ({'id', 'title', 'status', 'current_user_role', 'access_policy'} if tool == 'sites.get_site'
               else {'id', 'project_id', 'source', 'archive_storage', 'deployment_id'} if tool in ('sites.get_site_version', 'sites.save_site_version')
               else {'id', 'project_id', 'version_id', 'status', 'type', 'url'})
     output = {k: value[k] for k in fields if k in value}

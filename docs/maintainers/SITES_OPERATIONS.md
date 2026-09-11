@@ -6,11 +6,13 @@ Private maintainer guide, reconciled September 11, 2026. [ADR 0134](../adr/0134-
 
 ## Current status
 
-The fixed-price implementation is locally verified in the dirty working tree based on `4587642`. This documentation update does not deploy it. The preceding [September 11 release](../../internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/RELEASE_20260911.md) deployed a metered precursor with generation disabled and no rate card or activation evidence. Do not mistake that historical deployment for fixed-price availability.
+The fixed-price implementation was committed as `8308227` and passed local verification. Its deployment and the later domain rollout are separate from enabling paid generation. The preceding [September 11 release](../../internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/RELEASE_20260911.md) records the metered precursor. [Sites address operations](SITES_DOMAINS.md) records the subsequent application candidate, private registry and example-domain verification. Domain configuration does not enable content generation or establish a live paid acceptance test.
 
 Use conservative product defaults without requiring complete supplier quota or pricing information. Missing supplier facts remain unknown. Operational capability, health, capacity, account authorization and durable completion still come from observed state.
 
 ## Server configuration
+
+Site address allocation is a separate feature described in [Sites address operations](SITES_DOMAINS.md) and [ADR 0137](../adr/0137-account-owned-sites-subdomains.md). It adds a private registry and DNS configuration without changing the generation tariff or requiring supplier quota transparency.
 
 | Setting | Current behavior |
 | --- | --- |

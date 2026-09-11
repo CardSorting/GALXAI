@@ -10,6 +10,17 @@ rpc = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rpc)
 
 class SitesRpcTests(unittest.TestCase):
+    def test_custom_domains_are_scoped_and_projected_without_worker_diagnostics(self):
+        command = {'tool': 'sites.add_custom_domain', 'arguments': {'project_id': 'p', 'hostname': 'my-app.alice.galx.ai'}}
+        self.assertEqual(rpc.validate_command(command), command)
+        for hostname in ('galx.ai', '*.galx.ai', 'app.alice.galx.ai.evil.test', 'https://app.alice.galx.ai'):
+            with self.assertRaises(RuntimeError):
+                rpc.validate_command({**command, 'arguments': {'project_id': 'p', 'hostname': hostname}})
+        result = rpc.project('sites.list_custom_domains', {'items': [{'id': 'd', 'hostname': 'app.alice.galx.ai',
+            'worker_name': 'private-worker', 'last_error': 'private-token', 'validation_records': []}]})
+        self.assertEqual(result['items'][0]['id'], 'd')
+        self.assertNotIn('private', str(result))
+
     def test_only_exact_scoped_operations(self):
         for tool in ('sites.create_site', 'sites.update_site_access', 'sites.deploy_site_version', 'shell', 'turn/start'):
             with self.assertRaises(RuntimeError):

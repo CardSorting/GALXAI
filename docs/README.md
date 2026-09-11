@@ -24,6 +24,8 @@ The [federation contract](FEDERATION_STRATEGY.md) defines automatic worker lifec
 
 [ADRs 0134–0136](adr/README.md) record fixed-price generation with opaque supplier quotas, durable text completion evidence and customer-owned delivery. Use [Sites operations](maintainers/SITES_OPERATIONS.md) for configuration, rollout, reconciliation and current verification. [Site content generation](SITES_CONTENT.md) is the customer-facing API contract. The new mode is implemented locally; historical precursor deployments do not establish its activation.
 
+[ADR 0137](adr/0137-account-owned-sites-subdomains.md) extends delivery with account-owned subdomains. [Site addresses](SITE_ADDRESSES.md) describes the customer contract; [address operations](maintainers/SITES_DOMAINS.md) covers the private registry, native attachment, DNS and recovery.
+
 ## Reading scope
 
 The [complete catalog](CATALOG.md) indexes all Markdown guides, references, decisions, research, commercial drafts and operational evidence. Domain specifications apply to their components, not every relay path. Research targets and historical benchmarks are not runtime guarantees.

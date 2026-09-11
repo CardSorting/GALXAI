@@ -24,6 +24,8 @@ Before publication, recheck server-authoritative billing receipts, current Site 
 
 Existing authorization governs permitted actions. Runtime approval requests remain authoritative; the scoped CLI adapter stops when an approval request cannot be resolved rather than granting it silently. There is no arbitrary MCP executor, public-audience fallback, hidden publish-on-push setting or cross-account authority supplied by generated content.
 
+[ADR 0137](0137-account-owned-sites-subdomains.md) extends delivery with a stable `APP.USERNAME.galx.ai` address. Binding initiates address setup; publication recovery retains the original deployment while DNS/TLS validation proceeds independently. Customer output includes the GALX URL only when the publication is confirmed and the address is active. Original hosting URLs remain private operational records.
+
 ## Independent gates
 
 Fixed-price content admission needs the configured account cohort and fresh local receipt/limit readiness, not an upload attestation or supplier cost proof. Delivery still needs the customer's working connection, a valid artifact, confirmed save and verified owner-private publication. Selecting a delivery mode is not evidence that the upload mechanism works.

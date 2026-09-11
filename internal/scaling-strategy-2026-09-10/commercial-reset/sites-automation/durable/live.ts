@@ -9,6 +9,7 @@ import { DraftRunner, messages, withDeadline } from './runner';
 import { JobStore } from './storage';
 import { LiveBillingAdapter } from './live-billing';
 import { LiveSitesAdapter, nativeSitesCall } from './live-sites';
+import { LiveSiteDomains } from './live-domains';
 
 function jsonFile(filename: string) {
   const fd = fs.openSync(filename, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW);
@@ -17,7 +18,7 @@ function jsonFile(filename: string) {
 }
 async function main() {
   const [command, directory, id, extra] = process.argv.slice(2);
-  requireThat(['check-connection', 'quote', 'create', 'bind', 'generate', 'prepare', 'accept-package', 'save-version', 'request-hosted-save', 'accept-hosted-save', 'publish-saved', 'reconcile-billing', 'reconcile-publish', 'status', 'cancel', 'recover'].includes(command), 'invalid_arguments');
+  requireThat(['check-connection', 'quote', 'create', 'bind', 'connect-domain', 'generate', 'prepare', 'accept-package', 'save-version', 'request-hosted-save', 'accept-hosted-save', 'publish-saved', 'reconcile-billing', 'reconcile-publish', 'status', 'cancel', 'recover'].includes(command), 'invalid_arguments');
   const controller = new AbortController();
   process.once('SIGINT', () => controller.abort()); process.once('SIGTERM', () => controller.abort());
   const signal = controller.signal;
@@ -32,18 +33,33 @@ async function main() {
     accountLimit: Number(process.env.GALX_SITES_ACCOUNT_LIMIT_MICRO_USD) });
   const store = new JobStore(directory, 'local-session', settings);
   const artifacts = new ArtifactStore(path.join(store.root, 'artifacts'));
-  const result = () => { const job = store.get(id); return { ...publicJob(job),
-    ...(job.phase === 'published' && job.publication?.url ? { url: job.publication.url } : {}) }; };
+  const domains = () => new LiveSiteDomains(process.env.GALX_SITES_BILLING_ORIGIN!, process.env.GALX_SITES_SESSION!, process.env.GALX_SITES_USERNAME!);
+  const result = async () => {
+    const job = store.get(id);
+    if (!job.target) return publicJob(job);
+    try {
+      const domain = await domains().get(job.target.projectId, signal);
+      return { ...publicJob(job), domain, ...(job.phase === 'published' && domain.url ? { url: domain.url } : {}) };
+    } catch { return { ...publicJob(job), domain: { status: 'unavailable' } }; }
+  };
   const sites = () => new LiveSitesAdapter(store, id, process.env.GALX_SITES_CONNECTION_ID!, process.env.GALX_SITES_ACCOUNT_USER_ID!);
   try {
     if (command === 'create') { console.log(JSON.stringify(publicJob(store.create(id, parseRequest(jsonFile(extra)))))); return; }
     if (command === 'status' || command === 'cancel' || command === 'recover') {
       if (command === 'cancel') store.cancel(id); else if (command === 'recover') store.recover(id);
-      console.log(JSON.stringify(result())); return;
+      console.log(JSON.stringify(await result())); return;
     }
     if (command === 'bind') {
-      await sites().verifyOwner(extra, signal);
-      console.log(JSON.stringify(publicJob(store.bindTarget(id, process.env.GALX_SITES_CONNECTION_ID!, extra)))); return;
+      const site = await sites().verifyOwner(extra, signal);
+      store.bindTarget(id, process.env.GALX_SITES_CONNECTION_ID!, extra);
+      await domains().connect(extra, site.title, () => sites().verifyOwner(extra, signal), signal);
+      console.log(JSON.stringify(await result())); return;
+    }
+    if (command === 'connect-domain') {
+      const projectId = store.get(id).target?.projectId; requireThat(projectId, 'site_target_required');
+      const site = await sites().verifyOwner(projectId, signal);
+      await domains().connect(projectId, site.title, () => sites().verifyOwner(projectId, signal), signal);
+      console.log(JSON.stringify(await result())); return;
     }
     if (command === 'generate') {
       const client = billing(), quote = await client.quote(signal);
@@ -91,14 +107,17 @@ async function main() {
       }
       if (command === 'reconcile-publish') {
         await withDeadline(abort => adapter.reconcile(abort), signal, 240000);
-        console.log(JSON.stringify(result())); return;
+        console.log(JSON.stringify(await result())); return;
       }
       const runner = new DraftRunner(store, artifacts, {
         generate: async () => { throw new JobError('use_generate_command'); },
         package: async () => { throw new JobError('use_official_packager'); },
       }, 240000);
       await runner.publishSaved(id, parseIntent(jsonFile(extra)), adapter, signal);
-      console.log(JSON.stringify(result())); return;
+      const projectId = store.get(id).target!.projectId;
+      const site = await adapter.verifyOwner(projectId, signal);
+      await domains().connect(projectId, site.title, () => adapter.verifyOwner(projectId, signal), signal);
+      console.log(JSON.stringify(await result())); return;
     }
     const lease = store.acquire(id, randomUUID());
     try {
