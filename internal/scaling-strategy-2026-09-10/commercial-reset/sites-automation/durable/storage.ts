@@ -15,7 +15,7 @@ interface Statement {
   all(...args: Binding[]): Array<Record<string, unknown>>;
   run(...args: Binding[]): { changes: number | bigint };
 }
-interface Database { exec(sql: string): void; prepare(sql: string): Statement; close(): void; }
+export interface Database { exec(sql: string): void; prepare(sql: string): Statement; close(): void; }
 const { DatabaseSync } = createRequire(import.meta.url)('node:sqlite') as {
   DatabaseSync: new (filename: string, options: { allowExtension: boolean }) => Database;
 };
@@ -43,7 +43,7 @@ export function privateDirectory(directory: string): string {
     (process.getuid === undefined || stat.uid === process.getuid()), 'unsafe_state_directory');
   return fs.realpathSync(absolute);
 }
-function privateFile(filename: string) {
+export function privateFile(filename: string) {
   try { fs.closeSync(fs.openSync(filename, 'wx', 0o600)); }
   catch (error) { if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error; }
   const stat = fs.lstatSync(filename);

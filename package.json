@@ -300,8 +300,12 @@
     "test:sites": "node --import tsx --test scripts/test-sites-content-route.ts scripts/test-sites-activation.ts scripts/test-sites-fixed-price.ts scripts/test-sites-relay-preflight.ts scripts/test-relay-completion-usage.ts scripts/test-relay-durable-receipts.ts scripts/test-relay-receipt-transport.ts scripts/test-federation-admission.ts scripts/test-relay-federation-http.ts",
     "test:sites:db": "node --import tsx scripts/test-sites-billing-db.ts",
     "test:sites:domains": "node --import tsx --test scripts/test-sites-domains.ts internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/live-domains.test.ts",
-    "test:sites:domains:db": "node --import tsx scripts/test-sites-domains-db.ts",
-    "signup-credit": "node --env-file-if-exists=.env.local --import tsx scripts/manage-signup-credit.ts"
+    "test:sites:domains:db": "node --import tsx scripts/run-supabase-integration.ts --domains",
+    "signup-credit": "node --env-file-if-exists=.env.local --import tsx scripts/manage-signup-credit.ts",
+    "test:sites:worker": "node --import tsx --test scripts/test-sites-domain-worker.ts internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/domain-discovery.test.ts",
+    "sites:addresses": "node --import tsx internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/address-worker.ts",
+    "worker:sites:build": "wrangler deploy --dry-run --config workers/sites-domains/wrangler.jsonc",
+    "worker:sites:deploy": "wrangler deploy --config workers/sites-domains/wrangler.jsonc"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3",

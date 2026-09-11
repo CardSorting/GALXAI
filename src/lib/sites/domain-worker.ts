@@ -1,0 +1,65 @@
+import { timingSafeEqual } from 'node:crypto';
+import { requireSitesCohort } from '../billing/sites-activation';
+import { SiteDomainRegistry } from './domain-registry';
+import { SiteDomainError, type DomainPlan } from './domains';
+
+export interface DomainWorkerDependencies {
+  token(): string | undefined;
+  enabled(): boolean;
+  accounts(): string | undefined;
+  registry(): SiteDomainRegistry;
+  dns(): { ensure(plan: DomainPlan, reservationId: string, signal: AbortSignal): Promise<void> };
+  verifyHttps(hostname: string, signal: AbortSignal): Promise<boolean>;
+}
+const headers = { 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' };
+async function emptyBody(request: Request): Promise<boolean> {
+  if (!request.body) return true;
+  const reader = request.body.getReader();
+  const signal = AbortSignal.any([request.signal, AbortSignal.timeout(3000)]);
+  const cancel = () => { void reader.cancel().catch(() => {}); };
+  signal.addEventListener('abort', cancel, { once: true });
+  try {
+    signal.throwIfAborted();
+    while (true) {
+      const part = await reader.read(); signal.throwIfAborted();
+      if (part.done) return true;
+      if (part.value.byteLength) { await reader.cancel(); return false; }
+    }
+  } catch { return false; }
+  finally { signal.removeEventListener('abort', cancel); reader.releaseLock(); }
+}
+/** Dedicated machine authority, never a cookie, customer JWT or claimed admin role. */
+export function domainWorkerRoute(deps: DomainWorkerDependencies) {
+  return async (request: Request): Promise<Response> => {
+    const fail = (status: number, code: string) => Response.json({ error: { code } }, { status, headers });
+    const token = deps.token(), supplied = request.headers.get('authorization') || '';
+    if (!token || !/^[a-f0-9]{64}$/.test(token) || !/^Bearer [a-f0-9]{64}$/.test(supplied) ||
+        !timingSafeEqual(Buffer.from(supplied.slice(7)), Buffer.from(token))) return fail(401, 'sign_in_required');
+    if (request.method !== 'POST') return fail(405, 'method_not_allowed');
+    // No submitted account, plan, target, callback or batch-size authority.
+    if (new URL(request.url).search || !await emptyBody(request)) return fail(400, 'invalid_request');
+    if (!deps.enabled()) return fail(503, 'domain_unavailable');
+    try {
+      const raw = deps.accounts();
+      if (!raw || raw.length > 16384) throw new Error();
+      const accounts: unknown = JSON.parse(raw);
+      if (!Array.isArray(accounts) || typeof accounts[0] !== 'string') throw new Error();
+      requireSitesCohort(raw, accounts[0]); // Validate entire cohort before claiming anything.
+      const registry = deps.registry();
+      const rows = await registry.claimDue(accounts, 4);
+      const signal = AbortSignal.any([request.signal, AbortSignal.timeout(60000)]);
+      const completed = await Promise.allSettled(rows.map(async row => {
+        let active = false, diagnostic: string | null = null;
+        try {
+          signal.throwIfAborted();
+          await deps.dns().ensure(row.plan!, row.id, signal);
+          active = await deps.verifyHttps(row.hostname, signal);
+          if (!active) diagnostic = 'https_pending';
+        } catch (error) { diagnostic = error instanceof SiteDomainError ? error.code : 'domain_unavailable'; }
+        await registry.finish(row, active, diagnostic);
+      }));
+      if (completed.some(result => result.status === 'rejected')) throw new Error();
+      return new Response(null, { status: 204, headers });
+    } catch { return fail(503, 'domain_unavailable'); }
+  };
+}

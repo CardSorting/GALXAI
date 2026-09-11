@@ -1,0 +1,104 @@
+{
+  "checkedAt": "2026-09-11T17:12:48.169Z",
+  "origin": "https://galx.ai",
+  "pages": [
+    {
+      "path": "/",
+      "status": 200
+    },
+    {
+      "path": "/pricing",
+      "status": 200
+    },
+    {
+      "path": "/docs",
+      "status": 200
+    },
+    {
+      "path": "/auth/signin",
+      "status": 200
+    }
+  ],
+  "assets": [
+    "/_next/static/css/cf8a94d8f0136ff9.css",
+    "/_next/static/css/1649316a4ef7aadf.css",
+    "/_next/static/chunks/webpack-445252889eb98947.js",
+    "/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+    "/_next/static/chunks/1255-306db9f231b54263.js",
+    "/_next/static/chunks/main-app-0ee650784ad95c4e.js",
+    "/_next/static/chunks/app/global-error-6c4bdd755108c191.js",
+    "/_next/static/chunks/44530001-a26648c04669f22e.js",
+    "/_next/static/chunks/2619-04bc32f026a0d946.js",
+    "/_next/static/chunks/3736-2c9f00820338eff4.js",
+    "/_next/static/chunks/4533-7fee8afce0037d1c.js",
+    "/_next/static/chunks/5380-33bac102ca144352.js",
+    "/_next/static/chunks/4489-9b79ea828188cc3e.js",
+    "/_next/static/chunks/9515-d5cafae925d12a02.js",
+    "/_next/static/chunks/8505-0714be3ae76f43b5.js",
+    "/_next/static/chunks/app/layout-2400c2f25b9554b0.js",
+    "/_next/static/chunks/app/error-825a8d777a6fbbb7.js",
+    "/_next/static/chunks/2512-0e6ebd490dbf01f6.js",
+    "/_next/static/chunks/2330-cd406e51068c8203.js",
+    "/_next/static/chunks/app/not-found-cebe4ba9434ebfac.js",
+    "/_next/static/chunks/app/page-a801f4ab17b822f6.js",
+    "/_next/static/chunks/polyfills-42372ed130431b0a.js",
+    "/_next/static/chunks/app/pricing/page-5494eaefd938fbe9.js",
+    "/_next/static/chunks/app/pricing/error-db23bb2c98f22a22.js",
+    "/_next/static/chunks/7450-f762570af5613f04.js",
+    "/_next/static/chunks/app/docs/layout-bc885bf30b4b0b2b.js",
+    "/_next/static/chunks/app/docs/page-b17edc2d732f184d.js",
+    "/_next/static/chunks/app/docs/error-f48b637b3bb7e4d9.js",
+    "/_next/static/chunks/app/auth/signin/page-ada4cc963273aa33.js"
+  ],
+  "authorization": [
+    {
+      "variant": "missing",
+      "status": 401
+    },
+    {
+      "variant": "invalid",
+      "status": 401
+    },
+    {
+      "variant": "cookie-only",
+      "status": 401
+    },
+    {
+      "variant": "post",
+      "status": 401
+    },
+    {
+      "endpoint": "worker",
+      "variant": "anonymous",
+      "status": 401
+    },
+    {
+      "endpoint": "worker",
+      "variant": "customer-token",
+      "status": 401
+    },
+    {
+      "endpoint": "worker",
+      "variant": "admin-cookie",
+      "status": 401
+    },
+    {
+      "endpoint": "worker",
+      "variant": "crawler",
+      "status": 401
+    },
+    {
+      "endpoint": "worker",
+      "variant": "wrong-machine",
+      "status": 401
+    }
+  ],
+  "markers": 15,
+  "hits": [],
+  "authenticatedCustomerRoundTrip": false,
+  "example": {
+    "hostname": "studio-delivery-preview.goldeneggie.galx.ai",
+    "verifiedTls": true,
+    "anonymousStatus": 401
+  }
+}

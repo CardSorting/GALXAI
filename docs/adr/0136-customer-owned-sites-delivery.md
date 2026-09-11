@@ -26,6 +26,8 @@ Existing authorization governs permitted actions. Runtime approval requests rema
 
 [ADR 0137](0137-account-owned-sites-subdomains.md) extends delivery with a stable `APP.USERNAME.galx.ai` address. Binding initiates address setup; publication recovery retains the original deployment while DNS/TLS validation proceeds independently. Customer output includes the GALX URL only when the publication is confirmed and the address is active. Original hosting URLs remain private operational records.
 
+[ADR 0138](0138-automatic-sites-domain-provisioning.md) adds a customer discovery companion and scheduled server worker. After enrollment, new Sites automatically enter address setup without a per-Site bind. Existing publication commands retain their explicit artifact and audience authority; discovery never republishes content.
+
 ## Independent gates
 
 Fixed-price content admission needs the configured account cohort and fresh local receipt/limit readiness, not an upload attestation or supplier cost proof. Delivery still needs the customer's working connection, a valid artifact, confirmed save and verified owner-private publication. Selecting a delivery mode is not evidence that the upload mechanism works.

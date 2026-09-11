@@ -5,6 +5,8 @@
 Date: 2026-09-11. Status: accepted; implementation and verification are recorded in the linked runbook.
 Audience: private maintainers. Extends [customer-owned delivery](0136-customer-owned-sites-delivery.md).
 
+[ADR 0138](0138-automatic-sites-domain-provisioning.md) extends this decision with automatic customer inventory discovery and scheduled server reconciliation. The registry row now serves as the outbox; request handlers enqueue work, and pending checks back off to 15 minutes. The ownership and public-response contracts below remain authoritative.
+
 ## Decision
 
 Deliver created Sites at `https://APP.USERNAME.galx.ai`. Reserve one explicitly chosen GALX username per verified GALX account and one stable address per account/project. Normalize the Site title into an ASCII app label; allocate a numeric suffix for title collisions. A title change does not rename a published address. This first version does not support username changes, address transfers, deletion or recycling.

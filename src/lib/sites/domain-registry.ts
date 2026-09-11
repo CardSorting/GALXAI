@@ -52,10 +52,38 @@ export class SiteDomainRegistry {
       return false;
     });
   }
+  /** The committed registry row is the outbox. No network effect in this transaction. */
+  async enqueue(userId: string, projectId: string, plan?: DomainPlan): Promise<DomainRow> {
+    return this.transaction(async client => {
+      const row = (await client.query<DomainRow>('SELECT * FROM private.galx_site_domains WHERE user_id=$1 AND project_id=$2 FOR UPDATE', [userId, projectId])).rows[0];
+      requireDomain(row, 'domain_not_found', 404);
+      requireDomain(row.plan || plan, 'domain_attachment_required', 409);
+      requireDomain(!plan || plan.hostname === row.hostname, 'invalid_domain_records');
+      if (row.plan) {
+        if (plan) requireDomain((await client.query('SELECT $1::jsonb = $2::jsonb AS same', [row.plan, plan])).rows[0].same, 'domain_conflict', 409);
+        return row; // Duplicates cannot reset backoff, steal leases or clear a conflict.
+      }
+      return (await client.query<DomainRow>(`UPDATE private.galx_site_domains SET plan=$3::jsonb,
+        status='pending',next_check_at=now(),updated_at=now() WHERE user_id=$1 AND project_id=$2 RETURNING *`,
+      [userId, projectId, plan])).rows[0];
+    });
+  }
+  async claimDue(accountIds: string[], limit = 4): Promise<DomainRow[]> {
+    requireDomain(accountIds.length > 0 && accountIds.length <= 50 && Number.isInteger(limit) && limit >= 1 && limit <= 4);
+    accountIds.forEach(siteProjectId);
+    return this.transaction(async client => (await client.query<DomainRow>(`WITH due AS (
+      SELECT id FROM private.galx_site_domains WHERE status='pending' AND plan IS NOT NULL AND NOT automation_stopped
+        AND user_id=ANY($1::text[]) AND (next_check_at IS NULL OR next_check_at <= now())
+        AND (lease_until IS NULL OR lease_until <= now())
+      ORDER BY next_check_at NULLS FIRST,id LIMIT $2 FOR UPDATE SKIP LOCKED
+    ) UPDATE private.galx_site_domains d SET lease_id=gen_random_uuid(),lease_until=now()+interval '2 minutes',
+      retry_count=LEAST(d.retry_count+1,30),updated_at=now() FROM due WHERE d.id=due.id RETURNING d.*`, [accountIds, limit])).rows);
+  }
   async claim(userId: string, projectId: string, plan?: DomainPlan): Promise<DomainRow> {
     return this.transaction(async client => {
       const row = (await client.query<DomainRow>('SELECT *,clock_timestamp() AS db_now FROM private.galx_site_domains WHERE user_id=$1 AND project_id=$2 FOR UPDATE', [userId, projectId])).rows[0];
       requireDomain(row, 'domain_not_found', 404);
+      requireDomain(!row.automation_stopped, 'domain_conflict', 409);
       const now = (row as DomainRow & { db_now: Date }).db_now.getTime();
       requireDomain(!row.lease_until || row.lease_until.getTime() <= now, 'domain_pending', 409);
       requireDomain(!row.next_check_at || row.next_check_at.getTime() <= now, 'check_later', 429);
@@ -64,15 +92,19 @@ export class SiteDomainRegistry {
       // JSONB key ordering differs from JS ordering: compare at the database.
       if (row.plan && plan) requireDomain((await client.query('SELECT $1::jsonb = $2::jsonb AS same', [row.plan, plan])).rows[0].same, 'domain_conflict', 409);
       return (await client.query<DomainRow>(`UPDATE private.galx_site_domains SET plan=COALESCE(plan,$3::jsonb),
-        status='pending',lease_id=$4,lease_until=now()+interval '2 minutes',updated_at=now()
+        status='pending',lease_id=$4,lease_until=now()+interval '2 minutes',retry_count=LEAST(retry_count+1,30),updated_at=now()
         WHERE user_id=$1 AND project_id=$2 RETURNING *`, [userId, projectId, plan || null, randomUUID()])).rows[0];
     });
   }
   async finish(row: DomainRow, active: boolean, error: string | null): Promise<DomainRow> {
     return this.transaction(async client => {
+      const diagnostic = error && ['dns_conflict', 'dns_unavailable', 'domain_unavailable', 'https_pending'].includes(error) ? error : error ? 'domain_unavailable' : null;
       const result = await client.query<DomainRow>(`UPDATE private.galx_site_domains SET status=$4,last_error=$5,
-        lease_id=null,lease_until=null,next_check_at=now()+interval '30 seconds',updated_at=now()
-        WHERE id=$1 AND user_id=$2 AND lease_id=$3 RETURNING *`, [row.id, row.user_id, row.lease_id, active ? 'active' : 'pending', error]);
+        lease_id=null,lease_until=null,automation_stopped=($5::text IS NOT DISTINCT FROM 'dns_conflict'),
+        next_check_at=CASE WHEN $4='active' THEN NULL ELSE now()+make_interval(secs => LEAST(900,30*power(2,LEAST(GREATEST(retry_count-1,0),5)))::integer) END,
+        retry_count=CASE WHEN $4='active' THEN 0 ELSE retry_count END,updated_at=now()
+        WHERE id=$1 AND user_id=$2 AND lease_id=$3 AND lease_until>clock_timestamp() RETURNING *`,
+      [row.id, row.user_id, row.lease_id, active ? 'active' : 'pending', diagnostic]);
       requireDomain(result.rows[0], 'domain_pending', 409); return result.rows[0];
     });
   }

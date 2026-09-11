@@ -1,13 +1,11 @@
 import { SiteDomainRegistry } from './domain-registry';
 import { boundedDomainJson } from './cloudflare-dns';
-import { SiteDomainError, domainPlan, domainView, exactDomainFields, requireDomain, siteProjectId, type DomainPlan } from './domains';
+import { SiteDomainError, domainPlan, domainView, exactDomainFields, requireDomain, siteProjectId } from './domains';
 
 export interface SiteDomainDependencies {
   authenticate(request: Request): Promise<{ id: string }>;
   registry(): SiteDomainRegistry;
   authorizeMutation(accountId: string): void;
-  dns(): { ensure(plan: DomainPlan, reservationId: string, signal: AbortSignal): Promise<void> };
-  verifyHttps(hostname: string, signal: AbortSignal): Promise<boolean>;
 }
 const headers = { 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' };
 export function sitesDomainRoute(deps: SiteDomainDependencies) {
@@ -42,14 +40,7 @@ export function sitesDomainRoute(deps: SiteDomainDependencies) {
       exactDomainFields(body, body.action === 'configure' ? ['action', 'projectId', 'registration'] : ['action', 'projectId']);
       const original = await registry.get(account.id, body.projectId);
       const plan = body.action === 'configure' ? domainPlan(body.registration, original.hostname) : undefined;
-      const row = await registry.claim(account.id, body.projectId, plan);
-      let active = false, error: string | null = null;
-      try {
-        const signal = AbortSignal.any([request.signal, AbortSignal.timeout(60000)]);
-        await deps.dns().ensure(row.plan!, row.id, signal);
-        active = await deps.verifyHttps(row.hostname, signal);
-      } catch (caught) { error = caught instanceof SiteDomainError ? caught.code : 'domain_unavailable'; }
-      return Response.json(domainView(await registry.finish(row, active, error)), { headers });
+      return Response.json(domainView(await registry.enqueue(account.id, body.projectId, plan)), { headers });
     } catch (error) {
       const allowed = new Set(['invalid_request', 'invalid_username', 'invalid_app_name', 'username_unavailable', 'username_conflict',
         'address_unavailable', 'domain_limit_reached', 'domain_not_found', 'domain_pending', 'check_later', 'domain_attachment_required', 'domain_conflict', 'invalid_domain_records']);

@@ -37,6 +37,7 @@ export interface DomainRow {
   id: string; user_id: string; username: string; project_id: string; app_slug: string; hostname: string;
   status: 'reserved' | 'pending' | 'active'; attach_started: boolean; plan: DomainPlan | null;
   lease_id: string | null; lease_until: Date | null; next_check_at: Date | null; last_error: string | null;
+  retry_count: number; automation_stopped: boolean;
 }
 export function domainView(row: DomainRow) {
   return { hostname: row.hostname, status: row.status, url: row.status === 'active' ? `https://${row.hostname}` : null };

@@ -1,0 +1,13 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "galx-sites-domains",
+  "main": "index.ts",
+  "compatibility_date": "2026-09-11",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "account_id": "33f8b2564698c222880cbad3e42decad",
+  "workers_dev": false,
+  "preview_urls": false,
+  "triggers": { "crons": ["* * * * *"] },
+  "observability": { "enabled": true, "head_sampling_rate": 1 },
+  "secrets": { "required": ["GALX_SITES_WORKER_TOKEN"] }
+}

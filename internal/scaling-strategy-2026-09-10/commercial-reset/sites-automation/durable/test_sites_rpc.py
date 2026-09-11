@@ -53,9 +53,15 @@ class SitesRpcTests(unittest.TestCase):
         self.assertNotIn('secret', str(result))
         self.assertNotIn('private', str(result))
 
-    def test_inventory_probe_discards_site_records(self):
-        self.assertEqual(rpc.project('sites.list_sites', {'items': [{'id': 'private-site'}], 'cursor': None}),
-                         {'owned_site_count_on_page': 1, 'has_more': False})
+    def test_inventory_returns_only_discovery_fields_and_preserves_opaque_cursor(self):
+        self.assertEqual(rpc.project('sites.list_sites', {'items': [{'id': 'opaque-site', 'title': 'App',
+            'source_repository_credential': {'token': 'secret'}, 'current_live_url': 'private-url'}], 'cursor': 'opaque~cursor'}),
+                         {'items': [{'id': 'opaque-site', 'title': 'App'}], 'cursor': 'opaque~cursor'})
+        command = {'tool': 'sites.list_sites', 'arguments': {'limit': 50, 'role': 'owner', 'cursor': 'opaque~cursor'}}
+        self.assertEqual(rpc.validate_command(command), command)
+        for extra in ({'role': 'editor'}, {'limit': True}, {'limit': 1000}, {'cursor': ''}, {'cursor': 'x'*4097}, {'cursor': 'bad\n'}):
+            with self.assertRaises(RuntimeError):
+                rpc.validate_command({**command, 'arguments': {**command['arguments'], **extra}})
 
     def test_credential_reply_never_emits_token(self):
         self.assertEqual(rpc.project('sites.create_source_repository_write_credential', {'token': 'secret'}), {'credential_available': True})

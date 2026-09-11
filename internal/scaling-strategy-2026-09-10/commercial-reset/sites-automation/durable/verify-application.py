@@ -8,6 +8,7 @@ import secrets
 import shutil
 import subprocess
 import tempfile
+import sys
 
 repo = Path(__file__).resolve().parents[5]
 node = Path('/private/tmp/galx-audit-node22/node-v22.21.1-darwin-arm64/bin/node')
@@ -15,7 +16,7 @@ if not node.is_file():
     raise SystemExit('Previously verified Node 22 runtime is unavailable; configure an equivalent local runtime before verification.')
 workspace = Path(tempfile.mkdtemp(prefix='galx-sites-application-check-'))
 tracked = subprocess.check_output(['git', 'ls-files', '--cached', '--others', '--exclude-standard', '-z'], cwd=repo).decode().split('\0')
-allowed_directories = {'src', 'public', 'scripts'}
+allowed_directories = {'src', 'public', 'scripts', 'workers'}
 allowed_root_files = {'package.json', 'package-lock.json', 'tsconfig.json', 'next.config.ts',
                       'next-env.d.ts', 'postcss.config.mjs', 'eslint.config.mjs', 'tailwind.config.ts', '.vercelignore', 'README.md',
                       'docs/API_REFERENCE.md', 'docs/API_BASE_URL.md', 'docs/QUICKSTART.md'}
@@ -48,6 +49,7 @@ tests = [
     'scripts/test-sites-relay-preflight.ts',
     'scripts/test-sites-fixed-price.ts',
     'scripts/test-sites-domains.ts',
+    'scripts/test-sites-domain-worker.ts',
 ]
 print(json.dumps({'workspace': str(workspace), 'runtime': str(node), 'real_credentials': False}), flush=True)
 result = {'scope': 'isolated validation only; never deploy this output', 'workspace': str(workspace),
@@ -82,7 +84,8 @@ if result.get('build', {}).get('exit_code') == 0:
                b'GALX_SITES_RELAY_ADMIN_KEY', b'/api/sites/contract', b'outputLimitForwarded',
                b'sites-local-v1', b'fixed_completion', b'fixedChargeMicroUsd', b'maxDailyGenerations',
                b'GALX_SITES_COHORT_ACCOUNT_IDS', b'galx_site_namespaces', b'galx_site_domains',
-               b'GALX_SITES_DNS_API_TOKEN', b'galx-sites-domain-v1', b'_openai-site-verification']
+               b'GALX_SITES_DNS_API_TOKEN', b'galx-sites-domain-v1', b'_openai-site-verification',
+               b'GALX_SITES_WORKER_TOKEN', b'galx_site_domains_due_idx', b'site-addresses.sqlite', b'GALX_SITES_DOMAINS_WORKER_ENABLED']
     files = [p for p in (workspace / '.next/static').rglob('*') if p.is_file()]
     files += list((workspace / '.next/server/app').rglob('*.html'))
     hits = []
@@ -91,7 +94,10 @@ if result.get('build', {}).get('exit_code') == 0:
         if any(marker in content for marker in markers): hits.append(str(file.relative_to(workspace)))
     result['private_implementation_asset_scan'] = {'files': len(files), 'markers': len(markers), 'hits': hits,
                                                    'live_site_scanned': False}
-result_path = Path(__file__).resolve().parent / 'application-verification.json'
+evidence_name = sys.argv[1] if len(sys.argv) == 2 else 'application-verification.json'
+if not re.fullmatch(r'[a-z0-9-]+\.json', evidence_name):
+    raise SystemExit('Invalid evidence filename')
+result_path = Path(__file__).resolve().parent / evidence_name
 result_path.write_text(json.dumps(result, indent=2) + '\n')
 print(json.dumps({'evidence': str(result_path)}), flush=True)
 if result.get('regressions', {}).get('exit_code') or result.get('build', {}).get('exit_code', 1):

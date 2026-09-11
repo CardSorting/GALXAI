@@ -1,18 +1,18 @@
-/** Real transaction/concurrency tests in a newly created localhost database. No dotenv. */
+/** Real concurrency tests in the guarded disposable PostgreSQL fixture. No dotenv. */
+import './lib/require-isolated-integration-env';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { Pool } from 'pg';
 import { SiteDomainRegistry } from '../src/lib/sites/domain-registry';
 import { domainPlan } from '../src/lib/sites/domains';
-const local = { host: '127.0.0.1', port: 55439, user: 'seats_test', connectionTimeoutMillis: 2000 };
-const admin = new Pool({ ...local, database: 'postgres' });
-const database = `sites_domains_${Date.now()}`;
-await admin.query(`CREATE DATABASE ${database}`);
-const pool = new Pool({ ...local, database, max: 12 }); let checks = 0;
+const pool = new Pool({ connectionString: process.env.GALX_INTEGRATION_DATABASE_URL, connectionTimeoutMillis: 2000, max: 12 }); let checks = 0;
+const sql = (filename: string) => readFileSync(new URL('../supabase/' + filename, import.meta.url), 'utf8');
 try {
-  const migration = readFileSync('supabase/migrations/20260911153205_sites_custom_domains.sql', 'utf8');
+  const migration = sql('migrations/20260911153205_sites_custom_domains.sql');
   await pool.query(`BEGIN; ${migration} COMMIT;`); await pool.query(`BEGIN; ${migration} COMMIT;`); checks++;
+  const automation = sql('migrations/20260911163542_sites_domain_automation.sql');
+  await pool.query(`BEGIN; ${automation} COMMIT;`); await pool.query(`BEGIN; ${automation} COMMIT;`); checks++;
   for (const role of ['anon', 'authenticated', 'service_role']) {
     const c = await pool.connect(); try { await c.query('BEGIN'); await c.query(`SET LOCAL ROLE ${role}`);
       await assert.rejects(c.query('SELECT * FROM private.galx_site_domains'), e => (e as any).code === '42501');
@@ -54,9 +54,50 @@ try {
   }});
   const uncertainOwner=randomUUID(); await assert.rejects(uncertain.reserve(uncertainOwner,'uncertain','carol','App'),/domain_unavailable/);
   assert.equal((await registry.get(uncertainOwner,'uncertain')).hostname,'app.carol.galx.ai'); checks++;
-  const rollback=readFileSync('supabase/rollbacks/20260911153205_sites_custom_domains.down.sql','utf8');
+  // Automatic outbox: committed intent survives a lost caller acknowledgement.
+  const queuedOwner = randomUUID(); const queued = await registry.reserve(queuedOwner, 'queued', 'doris', 'Queued');
+  const queuedPlan = domainPlan({ ...{domainId:'queued-domain', hostname:queued.hostname,cnameTarget:'custom-domains.chatgpt.site'},
+    validationRecords:[{name:`_openai-site-verification.${queued.hostname}`,record_type:'TXT',value:'openai-site-verification='+'b'.repeat(40)}]},queued.hostname);
+  lose = true; await assert.rejects(uncertain.enqueue(queuedOwner,'queued',queuedPlan),/domain_unavailable/);
+  assert.deepEqual((await registry.get(queuedOwner,'queued')).plan,queuedPlan); checks++;
+  await assert.rejects(registry.enqueue(randomUUID(),'queued',queuedPlan),/domain_not_found/); checks++;
+  await assert.rejects(registry.enqueue(queuedOwner,'queued',{...queuedPlan,domainId:'other'}),/domain_conflict/); checks++;
+  assert.deepEqual(await registry.claimDue([owner]),[]); checks++;
+  const batches=await Promise.all(Array.from({length:8},()=>registry.claimDue([queuedOwner])));
+  assert.equal(batches.flat().length,1); const first=batches.flat()[0]; checks++;
+  // Repeated delivery cannot reset a lease or backoff.
+  assert.equal((await registry.enqueue(queuedOwner,'queued',queuedPlan)).lease_id,first.lease_id); checks++;
+  const pending=await registry.finish(first,false,'https_pending'); assert.equal(pending.retry_count,1);
+  const replay=await registry.enqueue(queuedOwner,'queued',queuedPlan);
+  assert.equal(replay.next_check_at?.getTime(),pending.next_check_at?.getTime()); assert.deepEqual(await registry.claimDue([queuedOwner]),[]); checks++;
+  await pool.query('UPDATE private.galx_site_domains SET next_check_at=now() WHERE id=$1',[queued.id]);
+  const lost=(await registry.claimDue([queuedOwner]))[0];
+  await pool.query("UPDATE private.galx_site_domains SET lease_until=now()-interval '1 second' WHERE id=$1",[queued.id]);
+  await assert.rejects(registry.finish(lost,true,null),/domain_pending/); checks++;
+  const recovered=(await registry.claimDue([queuedOwner]))[0]; assert.notEqual(lost.lease_id,recovered.lease_id); checks++;
+  await registry.finish(recovered,false,'dns_conflict');
+  const stopped=await registry.enqueue(queuedOwner,'queued',queuedPlan); assert.equal(stopped.automation_stopped,true);
+  await pool.query('UPDATE private.galx_site_domains SET next_check_at=now() WHERE id=$1',[queued.id]);
+  assert.deepEqual(await registry.claimDue([queuedOwner]),[]); await assert.rejects(registry.claim(queuedOwner,'queued'),/domain_conflict/); checks++;
+  // Independent jobs progress while a row is locked, and completed rows leave the queue.
+  const more = [];
+  for (let i=0;i<5;i++) {
+    const r=await registry.reserve(queuedOwner,`queued-${i}`,'doris','Queued');
+    const p={...queuedPlan,hostname:r.hostname,records:queuedPlan.records.map(record=>({...record,name:record.name.replace(queued.hostname,r.hostname)}))};
+    await registry.enqueue(queuedOwner,r.project_id,p); more.push(r);
+  }
+  const blocker=await pool.connect(); await blocker.query('BEGIN');
+  await blocker.query('SELECT id FROM private.galx_site_domains WHERE id=$1 FOR UPDATE',[more[0].id]);
+  try { const batch=await registry.claimDue([queuedOwner]); assert.equal(batch.length,4); assert(!batch.some(r=>r.id===more[0].id));
+    for (const r of batch) await registry.finish(r,true,null);
+  } finally { await blocker.query('ROLLBACK'); blocker.release(); } checks++;
+  const last=(await registry.claimDue([queuedOwner]))[0]; assert.equal(last.id,more[0].id);
+  await registry.finish(last,true,null); assert.deepEqual(await registry.claimDue([queuedOwner]),[]); checks++;
+  await pool.query(`BEGIN; ${sql('rollbacks/20260911163542_sites_domain_automation.down.sql')} COMMIT;`);
+  assert.equal((await registry.get(queuedOwner,'queued')).automation_stopped,true); checks++;
+  const rollback=sql('rollbacks/20260911153205_sites_custom_domains.down.sql');
   await pool.query(`BEGIN; ${rollback} COMMIT;`); assert.equal((await registry.get(owner,'project-1')).id,original.id); checks++;
   console.log(JSON.stringify({checks,failed:0,scope:'disposable localhost only'}));
 } finally {
-  await pool.end(); await admin.query(`DROP DATABASE ${database} WITH (FORCE)`); await admin.end();
+  await pool.end();
 }

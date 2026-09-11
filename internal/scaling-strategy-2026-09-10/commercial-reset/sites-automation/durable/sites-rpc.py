@@ -34,10 +34,15 @@ def validate_command(command):
     if not isinstance(command, dict) or set(command) != {'tool', 'arguments'}:
         raise RuntimeError('invalid_command')
     tool, args = command['tool'], command['arguments']
-    if tool not in FIELDS or not isinstance(args, dict) or set(args) != FIELDS[tool]:
+    allowed = FIELDS.get(tool)
+    if not allowed or not isinstance(args, dict) or (set(args) != allowed and
+            not (tool == 'sites.list_sites' and set(args) == allowed | {'cursor'})):
         raise RuntimeError('invalid_command')
     if tool == 'sites.list_sites':
-        if args != {'limit': 1, 'role': 'owner'}:
+        if type(args['limit']) is not int or args['limit'] not in (1, 50) or args['role'] != 'owner':
+            raise RuntimeError('invalid_command')
+        if 'cursor' in args and (not isinstance(args['cursor'], str) or not 1 <= len(args['cursor']) <= 4096 or
+                any(ord(c) < 32 for c in args['cursor'])):
             raise RuntimeError('invalid_command')
     elif tool == 'sites.save_site_version':
         if not isinstance(args['project_id'], str) or not re.fullmatch(r'[a-zA-Z0-9_.:~-]{1,120}', args['project_id']) or not isinstance(args['commit_sha'], str) or not re.fullmatch(r'[a-f0-9]{40}', args['commit_sha']):
@@ -124,9 +129,11 @@ def project(tool, value):
     if tool == 'sites.create_source_repository_write_credential':
         return {'credential_available': isinstance(value.get('token'), str) and bool(value['token'])}
     if tool == 'sites.list_sites':
-        if not isinstance(value.get('items'), list):
+        if not isinstance(value.get('items'), list) or len(value['items']) > 50:
             raise RuntimeError('sites_result_invalid')
-        return {'owned_site_count_on_page': len(value['items']), 'has_more': bool(value.get('cursor'))}
+        # Private discovery input only; callers must project customer-facing output.
+        return {'items': [{key: row.get(key) for key in ('id', 'title')} for row in value['items']],
+                'cursor': value.get('cursor')}
     fields = ({'id', 'title', 'status', 'current_user_role', 'access_policy'} if tool == 'sites.get_site'
               else {'id', 'project_id', 'source', 'archive_storage', 'deployment_id'} if tool in ('sites.get_site_version', 'sites.save_site_version')
               else {'id', 'project_id', 'version_id', 'status', 'type', 'url'})

@@ -37,6 +37,7 @@ export class LiveSiteDomains {
   async connect(projectId: string, appName: string, verifyOwner: () => Promise<unknown>, signal: AbortSignal): Promise<SiteAddress> {
     await verifyOwner();
     const address = (await this.request(projectId, signal, { action: 'reserve', username: this.username, appName })).address;
+    if (address.status === 'active') return address;
     const listing = await this.call('sites.list_custom_domains', { project_id: projectId }, signal);
     requireThat(Array.isArray(listing.items) && listing.items.length <= 100, 'domain_result_invalid');
     const matching = listing.items.filter((item: any) => item?.hostname === address.hostname);
@@ -59,7 +60,7 @@ export class LiveSiteDomains {
       if (error instanceof JobError && error.code === 'domain_check_later') return this.get(projectId, signal);
       throw error;
     }
-    // Native status is operational evidence, never a client-supplied active flag to GALX.
+    // The DNS plan is durable even if this native observation fails or disconnects.
     const refreshed = await this.call('sites.refresh_custom_domain_status', { project_id: projectId, custom_domain_id: domain.id }, signal);
     requireThat(refreshed.id === domain.id && refreshed.project_id === projectId && refreshed.hostname === address.hostname, 'domain_result_invalid');
     await verifyOwner();

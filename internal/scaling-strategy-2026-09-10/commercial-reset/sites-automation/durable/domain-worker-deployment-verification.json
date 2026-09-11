@@ -1,0 +1,84 @@
+{
+  "checkedAt": "2026-09-11T17:34:08.980399+00:00",
+  "backendDeployment": "dpl_3STetMGz9UezziiJMigwnqkBwcUe",
+  "backendUrl": "https://galxai-9c6l8mk1w-cardsortings-projects.vercel.app",
+  "promotedOrigin": "https://galx.ai",
+  "rollbackBackendUrl": "https://galxai-k5ioois64-cardsortings-projects.vercel.app",
+  "worker": "galx-sites-domains",
+  "workerVersion": "97b6a9aa-d6d6-4e7a-9df0-3a15686e3002",
+  "schedule": "* * * * *",
+  "workersDev": false,
+  "previewUrls": false,
+  "migrationApplied": "20260911163542",
+  "privateRegistryState": {
+    "active": 1,
+    "stopped": 0
+  },
+  "nativeInventory": {
+    "verified": true,
+    "pageLimit": 50,
+    "observedItems": 1,
+    "hasMore": false,
+    "fields": [
+      "id",
+      "title"
+    ],
+    "mutations": 0
+  },
+  "machineEndpoint": {
+    "checkedAt": "2026-09-11T17:11:11.707Z",
+    "status": 204,
+    "empty": true,
+    "cache": "private, no-store"
+  },
+  "scheduledRun": {
+    "checkedAt": "2026-09-11T17:33:32.415Z",
+    "outcome": "ok",
+    "cron": "* * * * *",
+    "scheduledTime": 1789148010000,
+    "diagnostics": []
+  },
+  "tests": {
+    "workerAndDiscovery": 13,
+    "domainAndCompanion": 15,
+    "domainPostgres": 36,
+    "legacyDatabase": 94,
+    "existingDelivery": 68,
+    "nativeBridge": 14,
+    "enrollmentIsolation": 9,
+    "pairedMigrations": 94,
+    "postgresLinterWarnings": 0,
+    "postgresLinterFatal": 0
+  },
+  "customerCompanionsEnrolledByThisChange": 0,
+  "liveCustomerCreationRoundTrip": false,
+  "syntheticCreationThroughActivation": true,
+  "paidGenerationEnabledByThisChange": false,
+  "sourceSha256": {
+    "src/lib/sites/cloudflare-dns.ts": "1e0582909ef64e771082ae40e1b2a51e8b78c869a12a39d219858da2eea13ead",
+    "src/lib/sites/domain-registry.ts": "b49ee0f8500e669984d57112c7641271633af15c44f2734c1f8c602355b39470",
+    "src/lib/sites/domain-route.ts": "a3455347a549aa1f3b26572178f2d1e0154bd26d4890a782f09b82d7921c70af",
+    "src/lib/sites/domain-worker.ts": "6b6047504bb3d714cf616084c13ff76fe7fce6ddb763ab82c15f96cd660a9de6",
+    "src/lib/sites/domains.ts": "c28e0e014c904e3f4ed0ce9dcb3a2d4cfb4a0f4c8dcd244fcae253649bb618b9",
+    "src/app/api/sites/domains/route.ts": "04a78970e61861898a5066b36cd760ed9224a368adf33562bf6bb2a0762ab2c7",
+    "src/app/api/internal/sites/domains/process/route.ts": "dca14b13a2ff4e9625fc5a63ef19c514b01b8aad9b052222aa1117c276770233",
+    "src/middleware.ts": "4a329b929ec533adafd367bc9b3151412ebed5a028a554929e75f057ce052306",
+    "workers/sites-domains/index.ts": "3f41a04cb75e4a4c004de4d4bfd1c79de87e0c69e36f417dc01faf06f66d5cc5",
+    "workers/sites-domains/wrangler.jsonc": "1766b11f80f974cb45161e390eb01f67ab5d98aa3309d0f0857d241d5e35b474",
+    "supabase/migrations/20260911163542_sites_domain_automation.sql": "0427826dbcd7a4d02237cf774537bf7d22a248537a1a304aa7ae8f7812c94b5f",
+    "internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/address-worker.ts": "6b4c87bb838959ce45530f2971e52e6c53bab97f9fe4a3ccd0efdfefce02f3a3",
+    "internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/domain-discovery.ts": "41352c6287472bba6d3f5af69ccc40634eba35422278ab49681bad30680422b1",
+    "internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/domain-discovery-store.ts": "aaeb056a86bdc54c7985b9c21331abb6cadf6705ff13956e48e004ffa18cdbcd",
+    "internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/sites-rpc.py": "98e4e2f2e93faffb27e22fa9b700c58df99de38166c324ecf9ae6fe85656a060",
+    "internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/live-domains.ts": "87a61312913bcadab2f59e047638c177a4ecfa4efdd675f615dd156023d21e97",
+    "internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/live-sites.ts": "cd54ba66d220805c3e7e62ce27dd903abf7007e3b3b54fd8a36b5b00eafba7b1"
+  },
+  "previousSuccessfulScheduledRun": {
+    "checkedAt": "2026-09-11T17:31:31.992Z",
+    "outcome": "ok",
+    "cron": "* * * * *",
+    "scheduledTime": 1789147890000,
+    "diagnostics": []
+  },
+  "scheduledRunScope": "Authenticated scheduled invocation against the deployed backend; no new customer Site created during this live check."
+}

@@ -4,7 +4,6 @@ import { getPostgresPool } from '@/lib/db/postgres';
 import { requireSitesCohort } from '@/lib/billing/sites-activation';
 import { SiteDomainRegistry } from '@/lib/sites/domain-registry';
 import { sitesDomainRoute } from '@/lib/sites/domain-route';
-import { SitesCloudflareDns, verifySitesHttps } from '@/lib/sites/cloudflare-dns';
 import { SiteDomainError } from '@/lib/sites/domains';
 
 export const runtime = 'nodejs';
@@ -21,8 +20,6 @@ const handle = sitesDomainRoute({
     if (process.env.GALX_SITES_DOMAINS_ENABLED !== '1') throw new SiteDomainError('domain_unavailable');
     requireSitesCohort(process.env.GALX_SITES_COHORT_ACCOUNT_IDS, accountId);
   },
-  dns: () => new SitesCloudflareDns(process.env.GALX_SITES_DNS_ZONE_ID || '', process.env.GALX_SITES_DNS_API_TOKEN || ''),
-  verifyHttps: verifySitesHttps,
 });
 export const GET = handle;
 export const POST = handle;

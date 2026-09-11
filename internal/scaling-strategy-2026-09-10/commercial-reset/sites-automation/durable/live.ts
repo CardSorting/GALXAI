@@ -23,7 +23,8 @@ async function main() {
   process.once('SIGINT', () => controller.abort()); process.once('SIGTERM', () => controller.abort());
   const signal = controller.signal;
   if (command === 'check-connection') {
-    console.log(JSON.stringify({ connected: true, ...await nativeSitesCall('sites.list_sites', { limit: 1, role: 'owner' }, signal) })); return;
+    const page = await nativeSitesCall('sites.list_sites', { limit: 1, role: 'owner' }, signal);
+    console.log(JSON.stringify({ connected: true, owned_site_count_on_page: page.items.length, has_more: Boolean(page.cursor) })); return;
   }
   const billing = () => new LiveBillingAdapter(process.env.GALX_SITES_BILLING_ORIGIN!, process.env.GALX_SITES_SESSION!);
   if (command === 'quote') { console.log(JSON.stringify(await billing().quote(signal))); return; }

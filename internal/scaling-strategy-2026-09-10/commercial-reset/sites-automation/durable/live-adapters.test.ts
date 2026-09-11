@@ -21,7 +21,7 @@ async function setup(t: any, saved = true) {
   await runner.draft(job.id);
   const ready = store.get(job.id);
   const intent: PublishIntent = { connectionId: 'connection', projectId: 'project', versionId: 'project~version', commitSha: 'a'.repeat(40), artifactHash: ready.artifact!.hash, audience: 'owner' };
-  const site = { id: 'project', status: 'active', current_user_role: 'owner', access_policy: {
+  const site = { id: 'project', title: 'Test product', status: 'active', current_user_role: 'owner', access_policy: {
     project_id: 'project', access_mode: 'custom', allowed_account_user_ids: ['account'], external_visitor_count: 0,
     allowed_workspace_group_ids: [], allowed_tenant_group_ids: [], allowed_groups: [] } };
   const version = { id: 'project~version', project_id: 'project', source: { commit_sha: intent.commitSha }, archive_storage: { content_hash: 'sha256:'+'c'.repeat(64), archive_format: 'tar', size_bytes: 10240 }, deployment_id: null as string | null };

@@ -4,6 +4,9 @@ import { SITE_CONFIG } from "@/lib/seo/siteConfig";
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  // This endpoint authenticates its machine credential in the handler. Keep its
+  // response allowlist intact for every caller, including crawlers and cookies.
+  if (pathname === '/api/internal/sites/domains/process') return NextResponse.next();
 
   // 1. Universal Google Search Console HTML verification file handler (/google[token].html)
   if (pathname.startsWith('/google') && pathname.endsWith('.html')) {
@@ -98,4 +101,3 @@ export const config = {
     "/((?!_next/static|_next/image|favicon\\.ico|favicon\\.svg|robots\\.txt|sitemap\\.xml|feed\\.xml|manifest\\.webmanifest|opensearch\\.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|eot|css|js|map)$).*)",
   ],
 };
-

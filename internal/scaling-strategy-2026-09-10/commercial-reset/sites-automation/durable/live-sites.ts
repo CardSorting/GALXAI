@@ -30,6 +30,25 @@ export const nativeSitesCall: SitesCall = (tool, args, signal) => new Promise((r
   child.stdin?.end(JSON.stringify({ tool, arguments: args }));
 });
 
+/** Rechecked in the customer's native connection before every domain mutation. */
+export async function verifySiteOwner(projectId: string, accountUserId: string, signal: AbortSignal, call: SitesCall = nativeSitesCall) {
+  identifier(projectId); identifier(accountUserId);
+  const site = await call('sites.get_site', { project_id: projectId }, signal);
+  const p = site.access_policy;
+  requireThat(site.id === projectId && site.status === 'active' && site.current_user_role === 'owner' &&
+    p?.project_id === projectId && p.access_mode === 'custom' &&
+    Array.isArray(p.allowed_account_user_ids) && p.allowed_account_user_ids.length === 1 && p.allowed_account_user_ids[0] === accountUserId &&
+    p.external_visitor_count === 0 && Array.isArray(p.allowed_workspace_group_ids) && p.allowed_workspace_group_ids.length === 0 &&
+    Array.isArray(p.allowed_tenant_group_ids) && p.allowed_tenant_group_ids.length === 0 &&
+    Array.isArray(p.allowed_groups) && p.allowed_groups.length === 0, 'site_owner_access_required');
+  for (const key of ['allowed_users', 'allowed_editors']) {
+    if (p[key] !== undefined) requireThat(Array.isArray(p[key]) && p[key].every((u: any) =>
+      u && u.account_user_id === accountUserId && u.is_external !== true), 'site_owner_access_required');
+  }
+  requireThat(typeof site.title === 'string' && site.title.trim().length > 0 && site.title.length <= 120, 'sites_result_invalid');
+  return { title: site.title as string };
+}
+
 export class LiveSitesAdapter implements PublishAdapter {
   constructor(private readonly store: JobStore, private readonly jobId: string,
     readonly connectionId: string, private readonly accountUserId: string,
@@ -38,20 +57,7 @@ export class LiveSitesAdapter implements PublishAdapter {
     requireThat(Number.isSafeInteger(pollMs) && pollMs >= 0 && pollMs <= 5000, 'invalid_deadline');
   }
   async verifyOwner(projectId: string, signal: AbortSignal) {
-    identifier(projectId);
-    const site = await this.call('sites.get_site', { project_id: projectId }, signal);
-    const p = site.access_policy;
-    requireThat(site.id === projectId && site.status === 'active' && site.current_user_role === 'owner' &&
-      p?.project_id === projectId && p.access_mode === 'custom' &&
-      Array.isArray(p.allowed_account_user_ids) && p.allowed_account_user_ids.length === 1 && p.allowed_account_user_ids[0] === this.accountUserId &&
-      p.external_visitor_count === 0 && Array.isArray(p.allowed_workspace_group_ids) && p.allowed_workspace_group_ids.length === 0 &&
-      Array.isArray(p.allowed_tenant_group_ids) && p.allowed_tenant_group_ids.length === 0 &&
-      Array.isArray(p.allowed_groups) && p.allowed_groups.length === 0, 'site_owner_access_required');
-    for (const key of ['allowed_users', 'allowed_editors']) {
-      if (p[key] !== undefined) requireThat(Array.isArray(p[key]) && p[key].every((u: any) =>
-        u && u.account_user_id === this.accountUserId && u.is_external !== true), 'site_owner_access_required');
-    }
-    return { title: site.title as string };
+    return verifySiteOwner(projectId, this.accountUserId, signal, this.call);
   }
   private async version(intent: PublishIntent, signal: AbortSignal) {
     const v = await this.call('sites.get_site_version', { project_id: intent.projectId, version_id: intent.versionId }, signal);

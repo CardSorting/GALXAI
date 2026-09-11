@@ -6,7 +6,9 @@ const origin = 'https://galx.ai';
 const markers = ['galx_site_namespaces', 'galx_site_domains', 'GALX_SITES_DNS_API_TOKEN',
   'galx-sites-domain-v1', '_openai-site-verification', 'custom-domains.chatgpt.site',
   'sites-automation/durable', 'GALX_SITES_RELAY_ADMIN_KEY', 'workflow.sqlite',
-  'publication_outcome_unknown', 'GALX_SITES_COHORT_ACCOUNT_IDS', 'sites-local-v1'];
+  'publication_outcome_unknown', 'GALX_SITES_COHORT_ACCOUNT_IDS', 'sites-local-v1',
+  'GALX_SITES_WORKER_TOKEN', 'GALX_SITES_DOMAINS_WORKER_ENABLED', 'site-addresses.sqlite'];
+const workerMode = process.argv.includes('--worker');
 const evidence = { checkedAt: new Date().toISOString(), origin, pages: [], assets: [], authorization: [],
   markers: markers.length, hits: [], authenticatedCustomerRoundTrip: false };
 const assets = new Set();
@@ -43,11 +45,23 @@ for (const variant of ['missing', 'invalid', 'cookie-only', 'post']) {
   evidence.authorization.push({ variant, status: response.status });
 }
 const hostname = 'studio-delivery-preview.goldeneggie.galx.ai';
+if (workerMode) {
+  for (const variant of ['anonymous', 'customer-token', 'admin-cookie', 'crawler', 'wrong-machine']) {
+    const headers = variant === 'customer-token' ? { Authorization: 'Bearer invalid-customer-session' }
+      : variant === 'admin-cookie' ? { Cookie: 'admin=true; galx_session=invalid-session' }
+      : variant === 'crawler' ? { 'User-Agent': 'Googlebot' }
+      : variant === 'wrong-machine' ? { Authorization: 'Bearer ' + '0'.repeat(64) } : {};
+    const { response, text } = await get(origin + '/api/internal/sites/domains/process', { method: 'POST', headers });
+    assert.equal(response.status, 401); assert.deepEqual(JSON.parse(text), { error: { code: 'sign_in_required' } });
+    assert.equal(response.headers.get('cache-control'), 'private, no-store');
+    evidence.authorization.push({ endpoint: 'worker', variant, status: response.status });
+  }
+}
 const site = await fetch(`https://${hostname}/`, { method: 'HEAD', redirect: 'manual', signal: AbortSignal.timeout(15000) });
 await site.body?.cancel();
 assert.equal(site.status, 401); // Existing owner-private audience, no credential or bypass token.
 evidence.example = { hostname, verifiedTls: true, anonymousStatus: site.status };
 assert.equal(evidence.hits.length, 0);
-writeFileSync(new URL('./domains-live-verification.json', import.meta.url), JSON.stringify(evidence, null, 2) + '\n');
+writeFileSync(new URL(workerMode ? './domain-worker-live-verification.json' : './domains-live-verification.json', import.meta.url), JSON.stringify(evidence, null, 2) + '\n');
 console.log(JSON.stringify({ pages: evidence.pages.length, assets: evidence.assets.length,
   authorization: evidence.authorization.length, privateMarkerHits: evidence.hits.length, example: evidence.example }));

@@ -249,6 +249,7 @@ The validator checks complete coverage, scope markers, local links and ADR ident
 | [ADR 0135: Durable Sites receipts and local admission](adr/0135-durable-sites-receipts-and-local-admission.md) | `adr/0135-durable-sites-receipts-and-local-admission.md` |
 | [ADR 0136: Customer-owned Sites delivery](adr/0136-customer-owned-sites-delivery.md) | `adr/0136-customer-owned-sites-delivery.md` |
 | [ADR 0137: Account-owned Sites subdomains](adr/0137-account-owned-sites-subdomains.md) | `adr/0137-account-owned-sites-subdomains.md` |
+| [ADR 0138: Automatic Sites domain provisioning](adr/0138-automatic-sites-domain-provisioning.md) | `adr/0138-automatic-sites-domain-provisioning.md` |
 
 ## Operational records
 

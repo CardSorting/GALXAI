@@ -62,10 +62,12 @@ export interface Database {
       galx_site_domains: {
         Row: { id: string; user_id: string; username: string; project_id: string; app_slug: string; hostname: string;
           status: 'reserved' | 'pending' | 'active'; attach_started: boolean; plan: Json | null; lease_id: string | null;
-          lease_until: string | null; next_check_at: string | null; last_error: string | null; created_at: string; updated_at: string };
+          lease_until: string | null; next_check_at: string | null; last_error: string | null; retry_count: number;
+          automation_stopped: boolean; created_at: string; updated_at: string };
         Insert: { user_id: string; username: string; project_id: string; app_slug: string };
         Update: { status?: 'reserved' | 'pending' | 'active'; attach_started?: boolean; plan?: Json; lease_id?: string | null;
-          lease_until?: string | null; next_check_at?: string | null; last_error?: string | null; updated_at?: string };
+          lease_until?: string | null; next_check_at?: string | null; last_error?: string | null; retry_count?: number;
+          automation_stopped?: boolean; updated_at?: string };
         Relationships: [];
       };
       galx_signup_credit_policy: {

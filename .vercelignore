@@ -13,6 +13,7 @@ wrangler.secrets*
 /.wrangler/
 /wrangler.toml
 /worker-configuration.d.ts
+/workers/
 
 # Agents, Brain, and IDE Local Files (Root Only)
 /.agents/

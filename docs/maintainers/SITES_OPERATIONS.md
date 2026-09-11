@@ -12,7 +12,7 @@ Use conservative product defaults without requiring complete supplier quota or p
 
 ## Server configuration
 
-Site address allocation is a separate feature described in [Sites address operations](SITES_DOMAINS.md) and [ADR 0137](../adr/0137-account-owned-sites-subdomains.md). It adds a private registry and DNS configuration without changing the generation tariff or requiring supplier quota transparency.
+Site address allocation is a separate feature described in [Sites address operations](SITES_DOMAINS.md), [ADR 0137](../adr/0137-account-owned-sites-subdomains.md) and [ADR 0138](../adr/0138-automatic-sites-domain-provisioning.md). It adds a private registry and DNS configuration without changing the generation tariff or requiring supplier quota transparency.
 
 | Setting | Current behavior |
 | --- | --- |

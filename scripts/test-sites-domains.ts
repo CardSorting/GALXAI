@@ -105,7 +105,7 @@ test('HTTPS readiness permits private authentication without forwarding credenti
 test('anonymous, cookie-only and invalid sessions cannot reach the registry or DNS', async () => {
   let touched = 0;
   const handle = sitesDomainRoute({ authenticate: async () => { throw new Error('private auth detail'); }, registry: () => { touched++; throw new Error(); },
-    authorizeMutation() { touched++; }, dns() { touched++; throw new Error(); }, verifyHttps: async () => { touched++; return true; } });
+    authorizeMutation() { touched++; } });
   for (const auth of ['', 'Basic session', 'Bearer bad']) {
     const response = await handle(request({ action: 'reserve' }, auth));
     assert.equal(response.status, 401); assert.deepEqual(await response.json(), { error: { code: 'sign_in_required' } });
@@ -113,27 +113,25 @@ test('anonymous, cookie-only and invalid sessions cannot reach the registry or D
   }
   assert.equal(touched, 0);
 });
-test('route binds all operations to verified identity and ignores client claims of readiness', async () => {
-  let dnsCalls = 0, httpsCalls = 0; let current = { ...row };
+test('route durably enqueues only the verified account plan and ignores client readiness claims', async () => {
+  let queued = 0; let current = { ...row };
   const registry = {
     get: async (owner: string, id: string) => { assert.equal(owner, row.user_id); assert.equal(id, row.project_id); return current; },
-    claim: async (owner: string, id: string, plan: any) => { assert.equal(owner, row.user_id); current = { ...current, plan }; return current; },
-    finish: async (_row: any, active: boolean) => current = { ...current, status: active ? 'active' : 'pending' },
+    enqueue: async (owner: string, id: string, plan: any) => { assert.equal(owner, row.user_id); assert.equal(id, row.project_id); queued++; current = { ...current, plan, status: 'pending' }; return current; },
   };
-  const handle = sitesDomainRoute({ authenticate: async () => ({ id: row.user_id }), registry: () => registry as any, authorizeMutation() {},
-    dns: () => ({ ensure: async () => { dnsCalls++; } }), verifyHttps: async () => { httpsCalls++; return false; } });
+  const handle = sitesDomainRoute({ authenticate: async () => ({ id: row.user_id }), registry: () => registry as any, authorizeMutation() {} });
   for (const extra of [{ userId: 'other' }, { status: 'active' }, { registration: { ...registration, status: 'active' } }]) {
     const response = await handle(request({ action: 'configure', projectId: row.project_id, registration, ...extra }));
     assert.equal(response.status, 400);
   }
-  assert.equal(dnsCalls, 0);
+  assert.equal(queued, 0);
   const response = await handle(request({ action: 'configure', projectId: row.project_id, registration }));
   assert.equal(response.status, 200); assert.deepEqual(await response.json(), { hostname, status: 'pending', url: null });
-  assert.equal(dnsCalls, 1); assert.equal(httpsCalls, 1);
+  assert.equal(queued, 1);
 });
 test('paused admission still permits owner status reads without DNS configuration', async () => {
   const handle = sitesDomainRoute({ authenticate: async () => ({ id: row.user_id }), registry: () => ({ get: async () => row }) as any,
-    authorizeMutation() { throw new Error('disabled'); }, dns() { throw new Error('secret'); }, verifyHttps: async () => false });
+    authorizeMutation() { throw new Error('disabled'); } });
   const get = await handle(new Request(`https://galx.ai/api/sites/domains?projectId=${row.project_id}`, { headers: { Authorization: 'Bearer session' } }));
   assert.deepEqual(await get.json(), domainView(row));
   const post = await handle(request({ action: 'reserve', projectId: row.project_id, username: 'alice', appName: 'App' }));
