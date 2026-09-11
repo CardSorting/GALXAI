@@ -1,0 +1,38 @@
+{
+  "checkedAt": "2026-09-11T05:36:27.552Z",
+  "scope": "Native hosted-session publication of a synthetic static page; not the paid companion path",
+  "projectId": "appgprj_6aa38dfbd9ac81919938c46f2a121cef",
+  "commitSha": "d8b4ab1e90ab0546ea9b5e34f4e17f077ba2cf9f",
+  "versionId": "appgprj_6aa38dfbd9ac81919938c46f2a121cef~appgver_359981da7fc88191a6afa379038fee20",
+  "deploymentId": "appgdep_6aa390a3e1748191b2645f5c2a1d7d62",
+  "url": "https://galx-studio-delivery-check-bq97iip8.goldeneggie.chatgpt.site",
+  "status": "succeeded",
+  "localArchive": {
+    "sha256": "c4e4adce615dbe98b1d63cb4a4996278265c6c7d601d766bdbd01c6f464b07a6",
+    "bytes": 794,
+    "uncompressedTarSha256": "f99936bb30535b4a05db33906fa2a82dbb45cb0b93d0ae8e48edfd2aad24b3fc"
+  },
+  "remoteArchive": {
+    "hash": "sha256:904d0dc22aad6046fc7f294c65c4a3478aca8a6042e98817c65b4d9191dd3fad",
+    "bytes": 10240,
+    "format": "tar"
+  },
+  "created": true,
+  "sourcePushed": true,
+  "versionSaved": true,
+  "ownerPrivateAfterPublish": true,
+  "unauthenticatedHttpStatus": 403,
+  "sitesModelTurnsStarted": 0,
+  "productionWalletCharged": false,
+  "productionApplicationDeployed": false,
+  "productionRelayChanged": false,
+  "cli": {
+    "versionsChecked": [
+      "0.154.0",
+      "0.153.4"
+    ],
+    "sitesSkillAvailable": false,
+    "repairCommand": "codex plugin add sites@openai-bundled --json",
+    "repairError": "plugin sites was not found in marketplace openai-bundled"
+  }
+}

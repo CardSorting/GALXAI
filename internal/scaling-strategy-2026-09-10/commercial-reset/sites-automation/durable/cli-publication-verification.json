@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-09-11T05:59:07Z",
+  "projectId": "appgprj_6aa38dfbd9ac81919938c46f2a121cef",
+  "commitSha": "c69b186f89623b795575062c10f63663e0a9aa56",
+  "localArchiveHash": "1ab1ae82c88b33aece797a1eb2d5e510feff6736ecec7f0663f211b6d485a9e0",
+  "modelTurns": 0,
+  "walletWrites": false,
+  "phase": "published",
+  "archiveUpload": "hosted_native",
+  "cliArchiveSaveFailed": true,
+  "versionId": "appgprj_6aa38dfbd9ac81919938c46f2a121cef~appgver_571988df4258819184b3f6c51bac3826",
+  "remoteArchive": {
+    "archive_format": "tar",
+    "content_hash": "sha256:aa947195bca049214836eb9c14dd43ea977ea70a073234367ea540d0a08e0f7f",
+    "size_bytes": 10240,
+    "file_count": 2
+  },
+  "deploymentId": "appgdep_6aa399b3e3748191ab51c408a3a04d6e",
+  "deploymentStatus": "succeeded",
+  "url": "https://galx-studio-delivery-check-bq97iip8.goldeneggie.chatgpt.site",
+  "ownerPrivateVerified": true,
+  "nativeMutationAndPollCalls": 5
+}

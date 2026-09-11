@@ -28,6 +28,48 @@ export interface RelayChatOptions {
   ttftTimeoutMs: number;
   idleTimeoutMs?: number;
   wallTimeoutMs?: number;
+  /** Persist the accepted job before reading its stream. Failure stops retrieval. */
+  onAccepted?: (jobId: string) => Promise<void>;
+  /** Trusted server-owned reference only. Retrieves existing work; never POSTs. */
+  resumeJobId?: string;
+}
+
+export interface RelayReceipt {
+  id: string; status: 'pending' | 'unknown' | 'not_started' | 'completed'; output: string | null;
+  usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number } | null;
+  retainedUntil: number | null;
+}
+
+/** A bounded, authenticated read of committed evidence. Never starts work or
+ * follows redirects, and never treats a missing receipt as proof of zero usage. */
+export async function readRelayReceipt(options: { url: string; key: string; jobId: string; signal: AbortSignal }): Promise<RelayReceipt> {
+  const origin = new URL(options.url);
+  if (!options.key?.trim() || !/^[a-zA-Z0-9_.:-]{1,4096}$/.test(options.jobId) || origin.username || origin.password ||
+      origin.pathname !== '/' || origin.search || origin.hash ||
+      !(origin.protocol === 'https:' || (origin.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(origin.hostname)))) throw new RelayDispatchError('invalid_receipt_reference');
+  let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+  try {
+    const response = await fetch(new URL(`/v1/jobs/${encodeURIComponent(options.jobId)}/receipt`, origin), {
+      headers: { Authorization: `Bearer ${options.key}` }, redirect: 'error',
+      signal: AbortSignal.any([options.signal, AbortSignal.timeout(10000)]) });
+    if (!response.ok || !response.headers.get('content-type')?.includes('application/json') || !response.body) throw new Error('Receipt unavailable');
+    reader = response.body.getReader(); const chunks: Uint8Array[] = []; let bytes = 0;
+    while (true) {
+      const { value, done } = await reader.read(); if (done) break;
+      bytes += value.byteLength; if (bytes > 96000) throw new Error('Receipt too large'); chunks.push(value);
+    }
+    const result = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    const u = result.usage;
+    const validUsage = u && [u.prompt_tokens, u.completion_tokens, u.total_tokens].every(n => Number.isSafeInteger(n) && n >= 0 && n <= 1_000_000_000) &&
+      u.total_tokens > 0 && u.total_tokens === u.prompt_tokens + u.completion_tokens;
+    if (result.id !== options.jobId || !['pending', 'unknown', 'not_started', 'completed'].includes(result.status) ||
+        !(result.output === null || (typeof result.output === 'string' && Buffer.byteLength(result.output) <= 12000)) ||
+        !(result.retainedUntil === null || (Number.isSafeInteger(result.retainedUntil) && result.retainedUntil > Date.now())) ||
+        !(u === null || validUsage) || (result.status !== 'completed' && (u !== null || result.output !== null))) throw new Error('Invalid receipt');
+    return { id: result.id, status: result.status, output: result.output, retainedUntil: result.retainedUntil,
+      usage: u === null ? null : { prompt_tokens: u.prompt_tokens, completion_tokens: u.completion_tokens, total_tokens: u.total_tokens } };
+  } catch { throw new RelayDispatchError('receipt_unavailable', { executionState: 'accepted', shouldRetry: false }); }
+  finally { await reader?.cancel().catch(() => {}); }
 }
 
 
@@ -82,13 +124,20 @@ export async function executeRelayChat(options: RelayChatOptions) {
   };
   let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
   try {
-    const admitted = await request(new URL('/v1/chat/completions', origin), { method: 'POST', body: JSON.stringify(options.payload) });
-    if (admitted.status !== 202) throw new RelayDispatchError('expected_async_job');
-    const job = await admitted.json();
+    let job: { id: string; streamUrl: string };
+    if (options.resumeJobId !== undefined) {
+      if (!/^[a-zA-Z0-9_.:-]{1,4096}$/.test(options.resumeJobId)) throw new RelayDispatchError('invalid_job_reference');
+      job = { id: options.resumeJobId, streamUrl: `/v1/jobs/${encodeURIComponent(options.resumeJobId)}/stream` };
+    } else {
+      const admitted = await request(new URL('/v1/chat/completions', origin), { method: 'POST', body: JSON.stringify(options.payload) });
+      if (admitted.status !== 202) throw new RelayDispatchError('expected_async_job');
+      job = await admitted.json();
+    }
     const streamUrl = new URL(job.streamUrl, origin);
-    if (typeof job.id !== 'string' || streamUrl.origin !== origin.origin || streamUrl.pathname !== `/v1/jobs/${encodeURIComponent(job.id)}/stream` || streamUrl.search || streamUrl.hash || streamUrl.username || streamUrl.password) {
+    if (typeof job.id !== 'string' || !/^[a-zA-Z0-9_.:-]{1,4096}$/.test(job.id) || streamUrl.origin !== origin.origin || streamUrl.pathname !== `/v1/jobs/${encodeURIComponent(job.id)}/stream` || streamUrl.search || streamUrl.hash || streamUrl.username || streamUrl.password) {
       throw new RelayDispatchError('invalid_job_stream');
     }
+    if (options.resumeJobId === undefined) await options.onAccepted?.(job.id);
     const response = await request(streamUrl);
     if (!response.body || !response.headers.get('content-type')?.includes('text/event-stream')) throw new RelayDispatchError('invalid_stream_type');
     reader = response.body.getReader();

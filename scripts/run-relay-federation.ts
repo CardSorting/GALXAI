@@ -53,7 +53,8 @@ try {
     }
     return shards;
   };
-  lifecycle = new RelayFederationLifecycle(read, new DockerShardDriver({ namespace, secret, codexImageToolAlias: process.env.RELAY_CODEX_IMAGE_TOOL_ALIAS === 'true', image: process.env.RELAY_FEDERATION_IMAGE || 'galxai-relay:vnext' }),
+  lifecycle = new RelayFederationLifecycle(read, new DockerShardDriver({ namespace, secret, codexImageToolAlias: process.env.RELAY_CODEX_IMAGE_TOOL_ALIAS === 'true',
+    sitesOutputLimitForwarding: process.env.RELAY_SITES_OUTPUT_LIMIT_FORWARDING === 'true', image: process.env.RELAY_FEDERATION_IMAGE || 'galxai-relay:vnext' }),
     Date.now, 15000, new FileInvalidCredentialStore(path.join(directory, 'invalid-credentials.json')), new FileShardMaintenanceStore(path.join(directory, 'maintenance.json')));
   server = new RelayFederationServer(lifecycle, { secret, apiKeys: (process.env.RELAY_API_KEYS || '').split(',').filter(Boolean),
     adminKeys: (process.env.RELAY_ADMIN_API_KEYS || '').split(',').filter(Boolean), port: Number(process.env.RELAY_FEDERATION_PORT || 3301),

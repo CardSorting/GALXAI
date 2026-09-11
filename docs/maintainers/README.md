@@ -39,3 +39,5 @@ Public-facing guidance follows [ADR 0129](../adr/0129-public-image-artifacts-and
 - [🏛️ Subsystem Ownership & Maintainer Matrix](SUBSYSTEM_MAINTAINER_MATRIX.md)
 - [📈 Maintainer Guide: Telemetry, Observability & Prometheus Metrics](TELEMETRY_AND_METRICS_OBSERVABILITY.md)
 - [Upstream outage response](UPSTREAM_PROVIDER_OUTAGE_AND_DEGRADATION.md)
+
+- [Sites generation and delivery operations](SITES_OPERATIONS.md)

@@ -8,8 +8,64 @@ import { WebSocketServer, type WebSocket } from 'ws';
 import { GalxaiRelayServer } from '../src/relay/relay-server.js';
 import { RelayFederationLifecycle, type DesiredShard, type RelayDriver, type RelayHandle } from '../src/relay/federation-lifecycle.js';
 import { RelayFederationServer } from '../src/relay/federation-server.js';
+import { executeRelayChat, readRelayReceipt } from '../src/core/router/adapters/RelayChatTransport';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+test('durable receipts survive worker and front-door replacement without weakening stream or tenant ownership', async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'galx-federation-receipt-'));
+  const upstream = http.createServer(); const ws = new WebSocketServer({ server: upstream }); let attempts = 0;
+  ws.on('connection', socket => socket.on('message', () => {
+    attempts++;
+    socket.send(JSON.stringify({ type: 'response.output_text.delta', delta: 'retained' }));
+    socket.send(JSON.stringify({ type: 'response.completed', response: { status: 'completed', usage: {
+      input_tokens: 10, output_tokens: 5, total_tokens: 15, secret: 'must-not-escape' } } }));
+  }));
+  await new Promise<void>(r => upstream.listen(0, '127.0.0.1', r));
+  let revision = 'v1'; let worker: GalxaiRelayServer | undefined; let handle: RelayHandle | undefined;
+  const driver: RelayDriver = {
+    async list() { return handle ? [handle] : []; },
+    async start(s) {
+      worker = new GalxaiRelayServer({ port: 0, host: '127.0.0.1', assignedShard: s, assignedShardId: s.id, relayId: 'worker', generation: s.credentialRevision,
+        apiKeys: ['internal'], adminApiKeys: ['admin'], registryEnabled: false, discoverHostCredentials: false,
+        stateSnapshotPath: path.join(directory, 'state.json'), shardsJsonPath: path.join(directory, 'absent'), drainTimeoutMs: 20,
+        capabilityDiscovery: async () => ['test-model'], wsEndpoint: `ws://127.0.0.1:${(upstream.address() as any).port}` });
+      await worker.start();
+      handle = { id: 'worker', shardId: s.id, generation: s.credentialRevision, credentialRevision: s.credentialRevision,
+        endpoint: `http://127.0.0.1:${(worker as any).server.address().port}`, inferenceKey: 'internal', adminKey: 'admin' };
+      return handle;
+    },
+    async inspect() { return { record: (worker as any).capabilitySnapshot().shards[0] }; },
+    async remove() { await worker?.stop(); worker = undefined; handle = undefined; },
+  };
+  const lifecycle = new RelayFederationLifecycle(async () => [{ id: 'a', provider: 'openai', credentialRevision: revision, accessToken: 'fixture', accountId: 'a' }], driver);
+  const config = { apiKeys: ['one', 'two'], adminKeys: ['operator'], secret: 'receipt-test-secret-with-at-least-32-characters', port: 0 };
+  let front = new RelayFederationServer(lifecycle, config);
+  try {
+    await lifecycle.reconcile(); await front.start();
+    const base = `http://127.0.0.1:${(front.server.address() as any).port}`;
+    const result = await (await executeRelayChat({ url: base, key: 'one', payload: { model: 'test-model', messages: [{ role: 'user', content: 'test' }],
+      durable_receipt: true, stream: false }, ttftTimeoutMs: 5000 })).response.json();
+    const receipt = await readRelayReceipt({ url: base, key: 'one', jobId: result.id, signal: AbortSignal.timeout(5000) });
+    assert.equal(receipt.output, 'retained'); assert.equal(receipt.usage?.total_tokens, 15);
+    assert(!JSON.stringify(receipt).includes('must-not-escape'));
+    const affinity = JSON.parse(Buffer.from(result.id.split('.')[0], 'base64url').toString());
+    assert(affinity.expires - Date.now() > 29*86400000);
+    revision = 'v2'; await lifecycle.reconcile(); await until(() => handle === undefined);
+    await lifecycle.reconcile(); assert.equal(handle?.generation, 'v2');
+    await front.stop(); front = new RelayFederationServer(lifecycle, config); await front.start();
+    const restarted = `http://127.0.0.1:${(front.server.address() as any).port}`;
+    assert.deepEqual(await readRelayReceipt({ url: restarted, key: 'one', jobId: result.id, signal: AbortSignal.timeout(5000) }), receipt);
+    assert.equal((await fetch(`${restarted}/v1/jobs/${result.id}/stream`, { headers: { Authorization: 'Bearer one' } })).status, 410);
+    assert.equal((await fetch(`${restarted}/v1/jobs/${result.id}/receipt`, { headers: { Authorization: 'Bearer two', 'X-Galx-Tenant': affinity.tenant } })).status, 404);
+    assert.equal((await fetch(`${restarted}/v1/jobs/${result.id}/receipt`)).status, 401);
+    assert.equal(attempts, 1);
+  } finally {
+    await front.stop(); await lifecycle.stop(); await worker?.stop();
+    for (const socket of ws.clients) socket.terminate(); await new Promise<void>(r => ws.close(() => r())); await new Promise<void>(r => upstream.close(() => r()));
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
 async function until(fn: () => boolean) { for(let i=0;i<400;i++) { if(fn()) return; await delay(5); } throw new Error('State did not converge'); }
 test('real HTTP federation preserves exact models, tenant ownership and active stream affinity across capability loss', async () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(),'galx-federation-http-'));

@@ -1,7 +1,7 @@
 # Federation contract
 
 <!-- docs-scope: current-guide -->
-> Private maintainer contract, reconciled September 9, 2026. Public documentation follows [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md).
+> Private maintainer contract, reconciled September 11, 2026. Public documentation follows [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md).
 
 ## Ownership and capability are separate
 
@@ -53,11 +53,21 @@ Internal transport and administrator records preserve execution identifiers. Pub
 
 ## Parent and subagent execution
 
-Each logical operation gets an idempotency key, reused only for the same payload and principal. Task IDs correlate work; they do not grant authority. Accepted jobs return signed tenant- and generation-bound recovery URLs. Status, cancellation and stream recovery target the original worker even after capability removal; they cannot attach to a replacement.
+Each logical operation gets an idempotency key, reused only for the same payload and principal. Task IDs correlate work; they do not grant authority. Accepted jobs return signed tenant- and generation-bound recovery URLs. Status, cancellation and stream recovery target the original worker even after capability removal; streams and cancellation cannot attach to a replacement. Durable text receipt reads have the retained-volume exception below.
 
-Controller receipts are process-local: ten minutes, 1,000 keys, 32 MiB aggregate and 8 MiB per retained response. A full window rejects new keyed admissions rather than evicting live evidence. Preserve the returned scope; changed scope or unknown admission requires reconciliation, not blind replay. Images dispatch once. This is not durable exactly-once execution.
+Controller admission receipts are process-local: ten minutes, 1,000 keys, 32 MiB aggregate and 8 MiB per retained response. A full window rejects new keyed admissions rather than evicting live evidence. Preserve the returned scope; changed scope or unknown admission requires reconciliation, not blind replay. Images dispatch once. This is not durable exactly-once execution.
 
 See [request recovery](RELAY_API_REFERENCE.md#request-recovery) and [ADR 0130](adr/0130-image-receipts-and-uncertain-outcomes.md).
+
+## Sites content with opaque provider quotas
+
+[ADRs 0134–0136](adr/README.md) define the bounded content workflow. The application quotes a fixed customer price, reserves funds and enforces an account cohort and rolling allowance. Supplier quota/cost estimates are planning assumptions; missing token usage is not fabricated. A matching durable completion receipt permits the fixed charge, while uncertain completion retains the hold.
+
+The new local profile verifies byte, wall-time, attempt and receipt readiness through fresh administrator checks across eligible workers and again at dispatch. It omits the unsupported supplier output-ceiling field. General capability, health and capacity controls remain in force. The legacy metered profile keeps its own ceiling/usage requirements.
+
+Durable text receipts are separate from the process-local admission cache. A receipt can be read after replacement of its original worker using that shard's retained volume and the original tenant-bound signed reference. Streams and cancellation stay on the admitting generation. Missing references, expired signatures or lost volumes do not authorize replay or refunds. Current limits, retention behavior, rollout and pause procedures are in [Sites operations](maintainers/SITES_OPERATIONS.md).
+
+The customer-local companion validates text, renders/packages a fixed template and uses the customer's own Sites connection. Save and owner-private publication each need their own persisted acknowledgement. Fixed content activation does not establish direct CLI archive-upload support or turn the relay into a native Codex building provider.
 
 ## Operational visibility
 

@@ -5,6 +5,8 @@ import { CapabilityRegistry } from '../src/relay/capability-registry.js';
 import { RelayFederationLifecycle, type RelayHandle } from '../src/relay/federation-lifecycle.js';
 import { RelayFederationServer } from '../src/relay/federation-server.js';
 import { AdmissionReceipts } from '../src/relay/admission-receipts.js';
+import { sitesContractReply, sitesContractRequest } from '../src/relay/sites-contract.js';
+import { requireSitesRelayPreflight } from '../src/lib/billing/sites-relay-preflight';
 
 const pause = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 async function until(fn:()=>boolean) { for(let i=0;i<200;i++){if(fn())return;await pause(5);}throw Error('Timed out'); }
@@ -27,6 +29,66 @@ async function fixture(handler:(req:http.IncomingMessage,res:http.ServerResponse
   return{front,lifecycle,record,base,headers,submit,get handle(){return handle;},rotate:async()=>{record.remove('a');handle={...handle,generation:'two'};publish();await lifecycle.reconcile();},close:async()=>{await front.stop();await lifecycle.stop();worker.closeAllConnections();await new Promise<void>(r=>worker.close(()=>r()));}};
 }
 const answer=(res:http.ServerResponse,id='job-1')=>{res.writeHead(202,{'Content-Type':'application/json','Retry-After':'3','X-Galx-Trace-Id':'trace-1'});res.end(JSON.stringify({id,status:'queued',streamUrl:`/v1/jobs/${id}/stream`,statusUrl:`/v1/jobs/${id}`}));};
+
+for (const local of [false, true]) test(`failed Sites dispatch preflight releases capacity and leaves the same admission key retryable (local=${local})`, async () => {
+  let legacy = true, submitted = 0, checks = 0;
+  const f = await fixture((req, res) => {
+    if (req.url?.startsWith('/api/sites/contract?')) {
+      checks++; assert.equal(req.headers.authorization, 'Bearer admin');
+      res.writeHead(legacy ? 404 : 200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify(legacy ? { error: 'private diagnostics' } : sitesContractReply(sitesContractRequest(new URL(req.url, 'http://localhost').searchParams))));
+    } else { submitted++; answer(res); }
+  });
+  const body = { model: 'A', messages: [{ role: 'user', content: 'bounded' }], durable_receipt: true,
+    ...(local ? { sites_profile: 'local-v1' } : { max_tokens: 64, require_output_limit: true }) };
+  try {
+    const failed = await f.submit(body, { 'Idempotency-Key': 'contract-check' });
+    assert.equal(failed.status, 503); const value = await failed.json();
+    assert.equal(value.error.execution_state, 'not_accepted'); assert.equal(value.error.code, 'service_unavailable');
+    assert(!JSON.stringify(value).includes('private')); assert.equal(submitted, 0); assert.equal(checks, 1);
+    assert.equal((f.front as any).reservations.size, 0); assert.equal((f.front as any).holds.size, 0);
+    legacy = false;
+    const success = await f.submit(body, { 'Idempotency-Key': 'contract-check' });
+    assert.equal(success.status, 202); assert.equal(submitted, 1); assert.equal(checks, 2);
+    assert.equal((f.front as any).reservations.size, 0);
+  } finally { await f.close(); }
+});
+
+test('Sites qualification checks every eligible worker and denies ordinary inference credentials', async () => {
+  let legacy = true, calls = 0; const checked = new Set<string>();
+  const worker = http.createServer((req, res) => {
+    res.setHeader('content-type', 'application/json');
+    if (req.url === '/api/telemetry') { res.end(JSON.stringify({ capturedAt: Date.now(), traces: [] })); return; }
+    if (!req.url?.startsWith('/api/sites/contract?')) { calls++; res.writeHead(500); res.end('{}'); return; }
+    const key = String(req.headers.authorization); checked.add(key);
+    assert(['Bearer admin-a', 'Bearer admin-b'].includes(key));
+    if (legacy && key === 'Bearer admin-b') { res.writeHead(404); res.end('{}'); return; }
+    res.end(JSON.stringify(sitesContractReply(sitesContractRequest(new URL(req.url, 'http://localhost').searchParams))));
+  });
+  await new Promise<void>(resolve => worker.listen(0, '127.0.0.1', resolve));
+  const record = new CapabilityRegistry();
+  const handles = ['a', 'b'].map(id => {
+    record.register(id, 'relay-' + id, 'one', 'openai', 8);
+    record.publishInventory(record.beginRefresh(id)!, ['A']); record.heartbeat(id, {});
+    return { id: 'relay-' + id, shardId: id, generation: 'one', credentialRevision: 'v1',
+      endpoint: `http://127.0.0.1:${(worker.address() as any).port}`, inferenceKey: 'inference-' + id, adminKey: 'admin-' + id };
+  });
+  const lifecycle = new RelayFederationLifecycle(async () => handles.map(h => ({ id: h.shardId, provider: 'openai', credentialRevision: 'v1', accessToken: 'fixture' })), {
+    list: async () => handles, start: async s => handles.find(h => h.shardId === s.id)!, remove: async () => {},
+    inspect: async h => ({ record: record.get(h.shardId) }) });
+  const front = new RelayFederationServer(lifecycle, { apiKeys: ['client'], adminKeys: ['front-admin'], secret: 'signing-fixture-at-least-32-characters', port: 0 });
+  try {
+    await lifecycle.reconcile(); await front.start();
+    const options = { url: `http://127.0.0.1:${(front.server.address() as any).port}`, model: 'A', maxOutputTokens: 64, adminKey: 'front-admin' };
+    await assert.rejects(requireSitesRelayPreflight({ ...options, adminKey: 'client' })); assert.equal(checked.size, 0);
+    await assert.rejects(requireSitesRelayPreflight(options));
+    assert.deepEqual([...checked].sort(), ['Bearer admin-a', 'Bearer admin-b']);
+    legacy = false; checked.clear(); await requireSitesRelayPreflight(options);
+    assert.equal(checked.size, 2); assert.equal(calls, 0);
+    // This fresh check is required even after a previously successful result.
+    legacy = true; await assert.rejects(requireSitesRelayPreflight(options));
+  } finally { await front.stop(); await lifecycle.stop(); worker.closeAllConnections(); await new Promise<void>(r => worker.close(() => r())); }
+});
 
 test('egress diagnostics require administrator authorization before collecting counters', async () => {
   let reads = 0;

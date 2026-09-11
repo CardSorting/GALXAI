@@ -1,0 +1,212 @@
+{
+  "date": "2026-09-10",
+  "scope": "Authenticated Sites reads; launcher/plugin repair; native Codex model request against local synthetic relay failed; subsequent relay-only workflow used one live model request and packaged a local static draft without a Codex model turn; no publication; durable local hardening, fault/authorization tests, renewed Sites read, official packaging/canonicalization and isolated application checks; no new live inference or publication in hardening pass",
+  "exposed_tools": [
+    "mcp__codex_apps__sites_create_site",
+    "mcp__codex_apps__sites_deploy_private_site_version",
+    "mcp__codex_apps__sites_deploy_site_version",
+    "mcp__codex_apps__sites_get_deployment_status",
+    "mcp__codex_apps__sites_list_sites",
+    "mcp__codex_apps__sites_save_site_version"
+  ],
+  "read_probe": {
+    "tool": "mcp__codex_apps__sites_list_sites",
+    "parameters": {
+      "limit": 1,
+      "role": "owner"
+    },
+    "result": "succeeded",
+    "returned_site_metadata_retained": false
+  },
+  "cli": {
+    "launcher": "/Users/bozoegg/.bun/bin/codex",
+    "package_version": "0.154.0",
+    "version_probe": "passed: codex-cli 0.154.0",
+    "standalone_sites_access": "verified: bundled Sites installed/enabled and actual terminal sites.list_sites call succeeded",
+    "recheck": {
+      "working_binary": "/Applications/ChatGPT.app/Contents/Resources/codex",
+      "version": "0.153.4",
+      "login_status": "Logged in using ChatGPT",
+      "default_bun_launcher": "still fails ENOENT",
+      "homebrew_launcher": "fails ENOENT",
+      "catalog_fetch": "passed with approved network access",
+      "sites_plugin": {
+        "id": "sites@openai-curated-remote",
+        "version": "0.1.56",
+        "installed": false,
+        "enabled": false,
+        "install_policy": "INSTALLED_BY_DEFAULT"
+      },
+      "install_attempt": {
+        "approved": true,
+        "command": "codex plugin add sites@openai-curated-remote --json",
+        "exit_code": 1,
+        "http_status": 404,
+        "message": "Plugin not found",
+        "stage": "read remote plugin details before install"
+      },
+      "post_attempt_check": "Sites remains uninstalled and disabled",
+      "persistent_path_changed": false,
+      "scope": "Historical 0.153.4 investigation, before the repair below"
+    },
+    "repair": {
+      "date": "2026-09-10",
+      "stable_version_verified_in_registry": "0.154.0",
+      "package_command": "bun install -g @openai/codex@0.154.0",
+      "package_result": "success; 2 packages installed",
+      "global_manifest_dependency_changes": {
+        "@openai/codex": {
+          "before": "^0.125.0",
+          "after": "0.154.0"
+        }
+      },
+      "manifest_backup_directory": "/private/tmp/galx-codex-repair-backup-20260910",
+      "login_status": "Logged in using ChatGPT",
+      "shell_checks": [
+        {
+          "shell": "ordinary tool login shell",
+          "selected": "/Users/bozoegg/.bun/bin/codex",
+          "version": "0.154.0"
+        },
+        {
+          "shell": "fresh zsh -lic",
+          "selected": "/Users/bozoegg/.nvm/versions/node/v24.15.0/bin/codex",
+          "version": "0.154.0"
+        }
+      ],
+      "homebrew_launcher": "Previously observed broken; not selected by verified shells; not repaired",
+      "plugin_command": "codex plugin add sites@openai-bundled --json",
+      "plugin_result": "success",
+      "plugin": {
+        "id": "sites@openai-bundled",
+        "version": "0.1.66",
+        "installed": true,
+        "enabled": true,
+        "installed_path": "/Users/bozoegg/.codex/plugins/cache/openai-bundled/sites/0.1.66"
+      },
+      "enabled_skills": [
+        "sites:sites-building",
+        "sites:sites-hosting"
+      ],
+      "app_installed_runtime": {
+        "enabled": true,
+        "callable": true
+      },
+      "runtime_tools_verified": [
+        "sites.create_site",
+        "sites.save_site_version",
+        "sites.deploy_private_site_version",
+        "sites.deploy_site_version",
+        "sites.get_deployment_status",
+        "sites.list_sites"
+      ],
+      "terminal_read_probe": {
+        "transport": "Codex app-server stdio JSON-RPC",
+        "client_name": "galx_sites_diagnostic",
+        "binary": "/Users/bozoegg/.bun/bin/codex",
+        "cli_version": "0.154.0",
+        "ephemeral_thread": true,
+        "sandbox": "read-only",
+        "hooks_enabled": false,
+        "model_turn_started": false,
+        "method": "mcpServer/tool/call",
+        "server": "codex_apps",
+        "tool": "sites.list_sites",
+        "arguments": {
+          "limit": 1,
+          "role": "owner"
+        },
+        "rpc_success": true,
+        "isError": false,
+        "detected_errors": [],
+        "returned_item_count": 0,
+        "site_metadata_retained": false
+      },
+      "historic_remote_404_root_cause": "Not established; working bundled installation does not require the historical remote entry",
+      "persistent_path_changed": false,
+      "shell_startup_files_changed": false,
+      "credentials_changed": false,
+      "application_bundle_changed": false,
+      "next_session": "Start a new codex session to load installed Sites skills",
+      "publishing": "Not attempted; deployment and artifact compatibility remain unverified"
+    }
+  },
+  "repository": {
+    "hosting_config_exists": false,
+    "sites_project_binding": "not established"
+  },
+  "mutations": {
+    "site_created": false,
+    "source_pushed": false,
+    "version_saved": false,
+    "deployed": false,
+    "access_changed": false,
+    "global_package_changed": true,
+    "plugin_install_attempted": true,
+    "plugin_install_succeeded": true,
+    "plugin_configuration_changed": true
+  },
+  "documentation": {
+    "sites": "https://learn.chatgpt.com/docs/sites",
+    "plugins": "https://learn.chatgpt.com/docs/plugins",
+    "help": "https://help.openai.com/en/articles/20001339",
+    "payment_guidance": "Conflict: Help Center explicitly permits third-party payment processing; developer guide retains broader financial-transaction restriction.",
+    "app_server": "https://learn.chatgpt.com/docs/app-server"
+  },
+  "relay_compatibility": {
+    "evidence": "sites-relay/observations.json",
+    "reproduction": "sites-relay/README.md",
+    "scope": "Real application relay classes and installed Codex, synthetic model upstream; real read-only Sites account check",
+    "custom_provider_sites_skills_enabled": true,
+    "custom_provider_sites_read_succeeded": true,
+    "actual_cli_model_request_status": 404,
+    "actual_cli_model_request_path": "/v1/responses",
+    "model_transport_compatible": false,
+    "tools_accepted_but_not_forwarded": true,
+    "tool_result_role_status": 400,
+    "function_call_output_lost": true,
+    "live_inference_tested": false,
+    "hosted_sites_runtime_tested": false,
+    "site_created": false,
+    "deployed": false,
+    "production_application_changed": false,
+    "recommendation": "Native Codex support requires Responses and tool semantics. The separately demonstrated bounded Sites workflow uses existing relay text and a tool-only host; prefer it under the relay-only model-supply constraint."
+  },
+  "relay_only_automation": {
+    "evidence": "sites-automation/live-observations.json",
+    "strategy_and_reproduction": "sites-automation/README.md",
+    "model_supply": "configured_relay_only",
+    "direct_model_fallback": false,
+    "live_model_calls": 1,
+    "generation_ms": 7097,
+    "native_codex_model_turns": 0,
+    "authenticated_sites_read": "passed",
+    "installed_plugin_version": "0.1.66",
+    "static_generation": "passed",
+    "official_local_packaging": "passed",
+    "offline_guardrail_tests_passed": 9,
+    "archive_and_html_verification": "passed",
+    "usage_tokens": null,
+    "hard_generation_cost_limit": "not established",
+    "publication_tested": false,
+    "generic_skill_execution": false,
+    "production_application_changed": false,
+    "next_gate": "Customer-owned publication/update, durable side-effect recovery, tenant/account binding, trustworthy usage and cost bounds"
+  },
+  "durable_hardening": {
+    "assessment": "sites-automation/durable/HARDENING.md",
+    "implementation": "sites-automation/durable/README.md",
+    "verification": "sites-automation/durable/verification.json",
+    "workflow_and_connection_checks_passed": 61,
+    "application_checks_passed": 66,
+    "isolated_production_build": "passed",
+    "application_source_changed": false,
+    "durable_local_generation_and_packaging": "implemented and tested",
+    "publishing_adapter": "contract and fault tests only; live adapter not implemented",
+    "authoritative_billing": "not integrated",
+    "new_live_model_requests": 0,
+    "runtime": "Node 26.8.1 / SQLite 3.53.4",
+    "affected_sqlite_versions": "rejected before state creation",
+    "site_mutations": false
+  }
+}

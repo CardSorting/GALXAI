@@ -1,0 +1,132 @@
+{
+  "checked_at": "2026-09-10T19:01:42.109Z",
+  "scope": "Local production relay classes with synthetic upstream; not a live inference or hosted Sites test",
+  "checks": [
+    {
+      "name": "worker /v1/responses",
+      "observed": {
+        "status": 404
+      }
+    },
+    {
+      "name": "worker /mcp",
+      "observed": {
+        "status": 404
+      }
+    },
+    {
+      "name": "federation /v1/responses",
+      "observed": {
+        "status": 404
+      }
+    },
+    {
+      "name": "federation /mcp",
+      "observed": {
+        "status": 404
+      }
+    },
+    {
+      "name": "unauthorized inference / ordinary key admin access",
+      "observed": {
+        "statuses": [
+          401,
+          403
+        ]
+      }
+    },
+    {
+      "name": "existing text transport",
+      "observed": {
+        "completed": true,
+        "synthetic_provider": true
+      }
+    },
+    {
+      "name": "tool definitions and required choice",
+      "observed": {
+        "accepted_but_not_forwarded": true
+      }
+    },
+    {
+      "name": "tool-result continuation",
+      "observed": {
+        "status": 400,
+        "upstream_started": false
+      }
+    },
+    {
+      "name": "upstream function-call output",
+      "observed": {
+        "lost_in_text_adapter": true,
+        "empty_completion": true
+      }
+    },
+    {
+      "name": "synthetic provider credential excluded from text result",
+      "observed": true
+    }
+  ],
+  "codex": {
+    "provider": "galx_sites_probe",
+    "provider_transport": "loopback HTTP fixture",
+    "provider_key": "synthetic",
+    "live_model_requested": false,
+    "site_mutations": false,
+    "credentials_copied": false,
+    "global_config_changed": false,
+    "user_agent": "galx_relay_compatibility_probe/0.154.0 (Mac OS 26.5.1; arm64) vscode/1.107.0 (galx_relay_compatibility_probe; 1.0.0)",
+    "sites_skills": [
+      {
+        "name": "sites:sites-building",
+        "enabled": true
+      },
+      {
+        "name": "sites:sites-hosting",
+        "enabled": true
+      }
+    ],
+    "selected_provider": "galx_sites_probe",
+    "selected_model": "relay-sites-probe",
+    "sites_runtime": [
+      {
+        "runtimeName": "Sites",
+        "enabled": true,
+        "callable": true
+      }
+    ],
+    "sites_tool_present": true,
+    "sites_read": {
+      "rpc_success": true,
+      "isError": false,
+      "metadata_retained": false
+    },
+    "turn_start_rpc_success": true,
+    "turn_status": "failed",
+    "turn_error_mentions_404": true,
+    "turn_error_type": "other",
+    "provider_http_requests": [
+      {
+        "path": "/v1/models?client_version=0.154.0",
+        "method": "GET",
+        "status": 404,
+        "uses_fixture_key": true
+      },
+      {
+        "path": "/v1/responses",
+        "method": "POST",
+        "status": 404,
+        "uses_fixture_key": true
+      }
+    ]
+  },
+  "completed": true,
+  "source_sha256": {
+    "src/relay/relay-server.ts": "038d1b9387aa9b7730f3ca7b276236bcd365b2b8f0a1104a97f2c0bbaaaef792",
+    "src/relay/federation-server.ts": "9c5e6588573ec6b522debb345dd2ac423741f541791676ff2f868069e2d6c56b",
+    "src/relay/request-policy.ts": "6671c797c578a5841bcbcc88ba10d991a02bbcf37847e6365755b5629fb7c5fc",
+    "src/core/router/adapters/RelayChatTransport.ts": "c73ca9df07c63a6aa95cfa61bb6d3be232f23b52ad5d8dadb5232b45a9b76a97",
+    "src/core/router/adapters/OpenAIAdapter.ts": "f152dae6d8472b3a0873cb12cf1180688693784149aa846ec4375762b9456322",
+    "src/app/v1/chat/completions/route.ts": "f885d6093dd54d632fd930341dc0e05d3d4b943d84cf10283427365188650736"
+  }
+}

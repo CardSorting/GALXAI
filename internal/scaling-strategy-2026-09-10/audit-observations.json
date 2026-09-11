@@ -1,0 +1,47 @@
+{
+  "purpose": "Observed baseline behavior, not desired acceptance criteria",
+  "observed": {
+    "chat_qos_response": {
+      "status": 429,
+      "exposes_pool": true,
+      "exposes_headroom": true,
+      "exposes_congestion_header": true
+    },
+    "stream_single_chunk": {
+      "charged_draws": 1,
+      "accounted_completion_tokens": 32,
+      "forwards_unknown_field": true
+    },
+    "stream_byte_chunks": {
+      "charged_draws": 1,
+      "accounted_completion_tokens": 126,
+      "forwards_unknown_field": true
+    },
+    "stream_cancel_after_output": {
+      "charged_draws": 0,
+      "accounted_completion_tokens": null,
+      "forwards_unknown_field": false
+    },
+    "batch_failure": {
+      "pending_after_failure": 0,
+      "payload_entries": 1,
+      "combined_request_count": 2,
+      "retained_model": "model-a",
+      "retains_request_metadata": false
+    },
+    "catalog": {
+      "unknown_resolves_to": "gpt-5.6-sol",
+      "catalog_provider_count": 1,
+      "public_model_count": 4
+    },
+    "ten_dollar_offer": {
+      "calculated_credit_before_welcome_eligibility": 15,
+      "product_declared_credit": 20
+    },
+    "async_chat_contract": {
+      "retains_tool_calls": false,
+      "retains_usage": false,
+      "finish_reason": "tool_calls"
+    }
+  }
+}

@@ -28,6 +28,7 @@ wrangler.secrets*
 
 # Root Documentation & Metadata (Root Only - Never ignore src/app/docs or src/components/docs)
 /docs/
+/internal/
 /README.md
 /DESIGN.md
 /DESIGN_SCORECARD.md

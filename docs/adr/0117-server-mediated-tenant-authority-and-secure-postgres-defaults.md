@@ -71,3 +71,7 @@ The same audit accepts `--with-migration <path>` to execute the migration inside
 - Backend repositories retain access through pooled PostgreSQL or the service-role client.
 - New client-facing database projections require an explicit, reviewed grant and role-scoped RLS policy.
 - Rollback reopens the previous broad privilege posture and is therefore emergency-only; forward repair is preferred.
+
+## Sites billing extension — September 11
+
+[ADR 0134](0134-fixed-price-sites-generation-with-opaque-provider-quotas.md) uses the existing private wallet, hold and immutable transaction tables for fixed-price Sites operations. Verified account identity scopes admission and recovery; customers cannot write usage or settlement evidence. No new schema or browser database grant is introduced. [ADR 0135](0135-durable-sites-receipts-and-local-admission.md) supplies the durable completion evidence while preserving server-mediated financial authority.

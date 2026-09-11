@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "template": "sites-static-v2",
+  "brief": "Prepare a short synthetic onboarding portal for a fictional design studio. Explain kickoff, weekly review, and project handover. No real people, credentials, integrations, or customer data.",
+  "requestedModel": "gpt-5.6-luna"
+}

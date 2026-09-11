@@ -30,3 +30,7 @@ The production controller was reloaded with later source and the worker image wa
 The follow-up DreamBees audit also coalesces overlapping status reads and prevents periodic refresh from cancelling slower reads. Receipt writes invalidate older reads. Account and balance response bodies use byte limits and full-body deadlines; customer errors do not expose parsing diagnostics. This is browser resilience, not a substitute for server authorization or durable reconciliation. See DreamBees `docs/studio-data-model.md` for the implementation record.
 
 The request-token contract follows [AWS guidance on safe retries](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/). Separating creation from status retrieval follows the [asynchronous request-reply pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/asynchronous-request-reply); this implementation does not claim a fully asynchronous worker lifecycle. Status announcements follow [WCAG status-message guidance](https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html).
+
+## Related text workflow
+
+[ADR 0135](0135-durable-sites-receipts-and-local-admission.md) introduces separate durable receipts for opted-in Sites text jobs. It does not change this image admission cache, recover image artifacts after restart, or establish paid Hive completion. [ADR 0134](0134-fixed-price-sites-generation-with-opaque-provider-quotas.md) prices only the bounded Sites content operation.

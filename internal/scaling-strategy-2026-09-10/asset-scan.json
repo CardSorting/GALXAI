@@ -1,0 +1,15 @@
+{
+  "scope": "Isolated local production build on Node 22.21.1; selected literal markers only; no live-site certification",
+  "files_scanned": 616,
+  "markers": [
+    "qos_lumi_quota",
+    "reservedVipFloorPct",
+    "chatgpt.com/backend-api",
+    "GALX_VAULT_",
+    "Galx-Transport-Engine",
+    "x-galx-congestion-state",
+    "codex/responses",
+    "galx_shards"
+  ],
+  "matching_files": []
+}

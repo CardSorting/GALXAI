@@ -1,0 +1,107 @@
+{
+  "date": "2026-09-10",
+  "scope": "Live hosted-session publication and isolated metering; customer activation remains gated",
+  "native_sites_read": {
+    "connected": false,
+    "cli_versions": [
+      "0.154.0",
+      "0.153.4"
+    ],
+    "reason": "Sites skills absent from fresh CLI sessions; supported plugin installation returns plugin not found"
+  },
+  "postgres_http_integration": {
+    "passed": 36,
+    "failed": 0,
+    "server": "PostgreSQL 14.15",
+    "host": "disposable localhost database",
+    "command": "node --import tsx scripts/test-sites-billing-db.ts",
+    "production_writes": false
+  },
+  "workflow_api_tests": {
+    "passed": 70,
+    "failed": 0,
+    "runs": "61 core/adapter/API/relay + 9 workflow"
+  },
+  "final_url_handoff_regressions": {
+    "passed": 6,
+    "failed": 0,
+    "duration_ms": 1601.873375
+  },
+  "python_transport_tests": {
+    "original_readonly": 6,
+    "scoped_and_source": 10,
+    "failed": 0
+  },
+  "typescript": "passed",
+  "database_integrity": "passed: 92 migrations, zero warnings or violations",
+  "database_migration_status": "92 applied, zero pending, zero remote-only; read-only inspection",
+  "application_regressions": {
+    "exit_code": 0,
+    "log_sha256": "99c1f7168ba90c131b9d762d3cde04779ca08e8d05ca9a66a9d9bccf582e4fca",
+    "tests": 75,
+    "pass": 75,
+    "fail": 0,
+    "skipped": 0
+  },
+  "production_build": {
+    "exit_code": 0,
+    "log_sha256": "b18da87c27ba77655d1a0048f19010b38448384dda7e3c25d272e708de487992"
+  },
+  "asset_scan": {
+    "files": 633,
+    "markers": 10,
+    "hits": [],
+    "live_site_scanned": false
+  },
+  "application_source_sha256": {
+    "src/lib/billing/sites-generation.ts": "81fcb94613fa3b8e6126f97d69495b0530c429e429fe01230742232e4b8357c5",
+    "src/lib/billing/sites-content-route.ts": "77bb4add7bf476a2aa02587dc2bc5a9c3bc90d0a514a89346961416dcce0cafd",
+    "src/app/api/sites/content/route.ts": "dd07e4484173aa9186ad96b255d26e83c77176a6f573e2d1366ae9d39ca36cc3",
+    "src/core/router/adapters/RelayChatTransport.ts": "c99b49b3783b3e3130379a1b305d33d51f66f37c64726c75381638be9f94715a",
+    "src/relay/relay-server.ts": "0d4f934ea6c71137ada6d01ba165c0f7a3932a4b5fbc7ef7f2714ee29a396b63",
+    "src/relay/completion-usage.ts": "f66f22fcffdbcf9fce8ff8f78b0c8aed95f2e1c7f5b9676039be12a7b153c1a5",
+    "scripts/test-sites-billing-db.ts": "a63e5d7a8bc0de1470a283e6da6e1f1acaaed5d27b85e500aefc4e5f5cd66408",
+    "scripts/test-sites-content-route.ts": "08312e83991ab83519911c770e888ea5b31648b8480ef81e70c8adcd146faed8",
+    "scripts/test-relay-completion-usage.ts": "fadf90b73eddcd9577d261fef1b036e8c96da61e02d835b928f25f9457927778",
+    "scripts/qualify-sites-relay.ts": "099f5ccf162b881c3b31c2709209e6375947ceb9247eb369563927316f8bd351"
+  },
+  "final_application_source_matches_build_snapshot": true,
+  "site_created": true,
+  "source_pushed": true,
+  "version_saved": true,
+  "site_deployed": true,
+  "production_wallet_charged": false,
+  "billing_route_deployed": false,
+  "billing_route_default_enabled": false,
+  "remaining": [
+    "Restore and qualify customer CLI Sites availability",
+    "Qualify enforced output bounds",
+    "Durable relay receipt retention and unresolved-hold operations",
+    "Reviewed tariff, controlled cohort deployment and update qualification"
+  ],
+  "historical_native_sites_read": {
+    "connected": true,
+    "owned_site_count_on_page": 0,
+    "has_more": false,
+    "site_mutations": false,
+    "command": "node --import tsx internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/live.ts check-connection",
+    "model_turns": "none; no turn/start method is permitted",
+    "model_network_requests_instrumented": false
+  },
+  "native_hosted_publication": {
+    "succeeded": true,
+    "owner_private": true,
+    "evidence": "live-publication-verification.json"
+  },
+  "live_metering": {
+    "succeeded": true,
+    "usage": {
+      "prompt_tokens": 11,
+      "completion_tokens": 5,
+      "total_tokens": 16
+    },
+    "replay_matches": true,
+    "ceiling_qualified": false,
+    "evidence": "live-metering-verification.json"
+  }
+}

@@ -19,6 +19,12 @@ Product clients use `https://galx.ai/v1`. The server adapter chooses the explici
 
 The public image capability is `openai-gpt-image-latest`. Its internal compatibility semantics are [documented privately](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility); public aliases cannot promise unverified model identity.
 
+## Sites content and delivery
+
+The account-session endpoint `/api/sites/content` is separate from `/v1` inference credentials. Its server adapter owns quote validation, fixed-price reservations, a rolling account allowance and atomic settlement against durable relay completion. Missing supplier usage can coexist with a known fixed-price completion; missing completion evidence remains unresolved.
+
+A private customer-local companion validates generated text, builds a fixed static artifact and saves/publishes under the customer's Sites ownership. It receives no relay or database credentials. Native-host upload, source/version identity and owner-private publication are separate from content billing. [ADRs 0134–0136](adr/README.md) and [Sites operations](maintainers/SITES_OPERATIONS.md) define this added path.
+
 ## Reconciliation and recovery
 
 Explicit validated enrollment creates authority. Cold-start inventory validation precedes allocation. Workers maintain fresh capability evidence; empty evidence does not trigger deletion. A 401 suppresses that revision, while transient discovery failures back off.

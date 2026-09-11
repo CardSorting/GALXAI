@@ -1,5 +1,7 @@
 # Image studio review
 
+<!-- docs-scope: operational-record -->
+
 Private maintainer record, 2026-09-10. `/images` restores hosted image creation at the user's explicit request. `PRODUCT.md` records that decision. The studio retains GALX's existing dark/indigo identity; `DESIGN.md` and the global sidecar are unchanged, and API Request Inspector constraints remain specific to that inspector.
 
 ## Resulting behavior

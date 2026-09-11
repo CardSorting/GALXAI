@@ -16,6 +16,7 @@ const env: Record<string,string> = { NODE_ENV:'production', PATH:'/opt/homebrew/
   RELAY_FEDERATION_NAMESPACE:namespace, RELAY_FEDERATION_PORT:String(port),
   RELAY_FEDERATION_IMAGE:process.env.RELAY_FEDERATION_IMAGE || 'galxai-relay:vnext',
   RELAY_CODEX_IMAGE_TOOL_ALIAS:process.env.RELAY_CODEX_IMAGE_TOOL_ALIAS === 'true' ? 'true' : 'false' };
+env.RELAY_SITES_OUTPUT_LIMIT_FORWARDING = process.env.RELAY_SITES_OUTPUT_LIMIT_FORWARDING === 'true' ? 'true' : 'false';
 const plist = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>

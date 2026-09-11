@@ -1,0 +1,5 @@
+conversion_rate,trial_cogs_per_paying_customer,monthly_trial_cogs_cap,note
+0.02,250.0,100,"Excludes all sales labor, support, acquisition and referral costs"
+0.05,100.0,100,"Excludes all sales labor, support, acquisition and referral costs"
+0.1,50.0,100,"Excludes all sales labor, support, acquisition and referral costs"
+0.25,20.0,100,"Excludes all sales labor, support, acquisition and referral costs"

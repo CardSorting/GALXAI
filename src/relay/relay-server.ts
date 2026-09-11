@@ -31,6 +31,7 @@
  */
 
 import * as http from 'node:http';
+import { sitesContractRequest, sitesContractReply } from './sites-contract.js';
 import type { Socket } from 'node:net';
 import * as url from 'node:url';
 import * as fs from 'node:fs';
@@ -40,6 +41,9 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { monitorEventLoopDelay } from 'node:perf_hooks';
 import { readJsonBody, validateModelRequest, RequestError, RetryBudget } from './request-policy.js';
 import { AdmissionReceipts } from './admission-receipts.js';
+import { completionUsage, completionFrame, type CompletionUsage } from './completion-usage.js';
+import { DurableReceipts } from './durable-receipts.js';
+import { upstreamDiagnostic, type UpstreamDiagnostic } from './upstream-diagnostic.js';
 import { RelayTelemetry } from './telemetry.js';
 import { EventEmitter } from 'node:events';
 import WebSocket from 'ws';
@@ -100,6 +104,10 @@ export interface RelayConfig {
   jobMaxWallTimeMs: number;            // Layer 6: Absolute safety wall-clock cap (300s / 5 min)
   // Anti-Fragile Failover & Recovery
   maxUpstreamRetries: number;          // In-flight shard failovers before failing job (3)
+  /** Enable only after this upstream has qualified max_output_tokens support. */
+  forwardOutputTokenLimit?: boolean;
+  /** In-process operator observer only. Never accepts or returns raw error data. */
+  onUpstreamDiagnostic?: (diagnostic: UpstreamDiagnostic) => void;
   retryBaseDelayMs: number;            // Base backoff delay for retries (500ms)
   retryMaxDelayMs: number;             // Backoff ceiling for full jitter (5000ms)
   deDuplicationOverlapWindowChars: number; // Suffix window length for overlap reconciliation (128 chars)
@@ -131,6 +139,7 @@ const DEFAULT_CONFIG: RelayConfig = {
   capabilityRefreshMs: Number(process.env.CAPABILITY_REFRESH_INTERVAL_MS || 60000),
   capabilityTtlMs: Number(process.env.CAPABILITY_TTL_MS || 120000),
   codexImageToolAlias: process.env.RELAY_CODEX_IMAGE_TOOL_ALIAS === 'true',
+  forwardOutputTokenLimit: process.env.RELAY_SITES_OUTPUT_LIMIT_FORWARDING === 'true',
   port: parseInt(process.env.PORT || '3001', 10),
   maxConcurrentRequests: Number(process.env.RELAY_MAX_CONCURRENT_REQUESTS || 64),
   maxRssBytes: Number(process.env.RELAY_MAX_RSS_MB || 384) * 1024 * 1024,
@@ -198,6 +207,9 @@ export interface JobRecord extends Record<string, unknown> {
   isDetached: boolean;
   error?: string;
   estimatedTokens: number;
+  maxOutputTokens?: number;
+  usage?: CompletionUsage;
+  durableReceipt?: boolean;
   messagesJson: string;
   reasoningEffort?: string;
   retryCount?: number;
@@ -288,6 +300,7 @@ export interface ShardRecord extends Record<string, unknown> {
 
 interface TransientJobSession {
   abortController: AbortController;
+  receiptText?: string;
   graceTimer?: NodeJS.Timeout;
   upstreamWs?: any;
   connectTimer?: NodeJS.Timeout;
@@ -322,7 +335,7 @@ interface TransportAttempt {
 
 type JobBusEvent =
   | { type: 'job:transport_token'; jobId: string; attemptId: number; shardId: string; text: string; timestampMs: number }
-  | { type: 'job:transport_completed'; jobId: string; attemptId: number; shardId: string }
+  | { type: 'job:transport_completed'; jobId: string; attemptId: number; shardId: string; response?: unknown }
   | { type: 'job:token'; jobId: string; token: JobTokenRecord }
   | { type: 'job:reasoning'; jobId: string; text: string }
   | { type: 'job:keepalive'; jobId: string; text: string }
@@ -482,7 +495,8 @@ class JobEventBus extends EventEmitter {
       return;
     }
     if (event.type === 'job:done') {
-      this.fanOut(event.jobId, 'data: [DONE]\n\n', true);
+      const job = this.jobsTable.get(event.jobId);
+      this.fanOut(event.jobId, (job ? completionFrame(job) : '') + 'data: [DONE]\n\n', true);
       return;
     }
     if (event.type === 'job:error') {
@@ -652,8 +666,8 @@ class JobQueue {
     return this.jobsTable.put(jobId, { ...job, isDetached });
   }
 
-  public markComplete(jobId: string): boolean {
-    return this.transitionTerminal(jobId, 'completed', undefined);
+  public markComplete(jobId: string, response?: unknown): boolean {
+    return this.transitionTerminal(jobId, 'completed', undefined, response);
   }
 
   public markFailed(jobId: string, reason: string): boolean {
@@ -674,6 +688,7 @@ class JobQueue {
     jobId: string,
     status: Extract<JobRecord['status'], 'completed' | 'failed' | 'cancelled'>,
     reason?: string,
+    response?: unknown,
   ): boolean {
     const job = this.jobsTable.get(jobId);
     if (!job || this.isTerminal(job.status)) return false;
@@ -683,6 +698,7 @@ class JobQueue {
       status,
       error: reason,
       completedAtMs: Date.now(),
+      usage: status === 'completed' ? completionUsage(response, job.retryCount ?? 0, job.failoverCount ?? 0) : undefined,
     }, { ttlMs: this.retentionMs });
     if (status === 'completed') this.bus.publish({ type: 'job:done', jobId });
     if (status === 'failed') this.bus.publish({ type: 'job:error', jobId, reason: reason ?? 'unknown_failure' });
@@ -777,6 +793,10 @@ function decryptShardPayload(
 // ============================================================================
 
 export class GalxaiRelayServer extends EventEmitter {
+  private durableReceipts?: DurableReceipts;
+  private receiptStore(): DurableReceipts {
+    return this.durableReceipts ??= new DurableReceipts(this.config.stateSnapshotPath + '.receipts');
+  }
   private config: RelayConfig;
   private server: http.Server;
   private readonly telemetry = new RelayTelemetry();
@@ -959,6 +979,10 @@ export class GalxaiRelayServer extends EventEmitter {
     this.jobQueue = new JobQueue(this.jobsTable, this.jobBus, this.config.jobTokenRetentionMs);
     this.jobBus.onEvent('job:transport_token', (event) => this.handleTransportToken(event));
     this.jobBus.onEvent('job:transport_completed', (event) => this.handleTransportCompleted(event));
+    for (const type of ['job:error', 'job:cancelled'] as const) this.jobBus.onEvent(type, event => {
+      const job = this.jobsTable.get(event.jobId);
+      if (job?.durableReceipt) try { this.receiptStore().stop(job.id, job.tenantId); } catch { /* Never manufacture a terminal receipt. */ }
+    });
     this.jobBus.onEvent('job:transport_drop', (event) => this.handleTransportDrop(event));
 
     // Subscribe to BroccoliDB CDC Stream for Reactive Job Lifecycle Logging
@@ -1528,6 +1552,22 @@ export class GalxaiRelayServer extends EventEmitter {
       }
       return;
     }
+    if (pathname === '/api/sites/contract') {
+      try {
+        if (method !== 'GET' || !this.config.adminApiKeys?.length ||
+            !this.admissionState().accepting) throw new Error();
+        const request = sitesContractRequest(new URL(req.url!, 'http://localhost').searchParams);
+        if (request.profile !== 'sites-local-v1' && this.config.forwardOutputTokenLimit !== true) throw new Error();
+        this.updateCapabilityHealth();
+        if (!this.capabilities.eligible(request.model).length) throw new Error();
+        this.receiptStore().verifyReady();
+        res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(sitesContractReply(request)));
+      } catch {
+        res.writeHead(503, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: { code: 'service_unavailable', message: 'This request is temporarily unavailable.' } }));
+      }
+      return;
+    }
     if (pathname === '/api/capabilities' && method === 'GET') {
       res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
       res.end(JSON.stringify(this.capabilitySnapshot()));
@@ -1635,6 +1675,18 @@ export class GalxaiRelayServer extends EventEmitter {
       return;
     }
 
+    const receiptRoute = pathname.match(/^\/v1\/jobs\/([\w-]{1,128})\/receipt$/);
+    if (method === 'GET' && receiptRoute) {
+      try {
+        const receipt = this.receiptStore().lookup(receiptRoute[1], tenantId);
+        res.writeHead(receipt ? 200 : 404, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+        res.end(JSON.stringify(receipt ?? { error: { code: 'job_not_found' } }));
+      } catch {
+        res.writeHead(503, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: { code: 'receipt_unavailable' } }));
+      }
+      return;
+    }
     const ownedJobRoute = pathname.match(/^\/v1\/jobs\/([^/]+)(?:\/(?:stream|cancel))?$/);
     if (ownedJobRoute) {
       const job = this.jobsTable.get(ownedJobRoute[1]);
@@ -1678,6 +1730,15 @@ export class GalxaiRelayServer extends EventEmitter {
         const body = await readJsonBody(req, this.config.maxPayloadBytes, this.config.httpBodyTimeoutMs);
         if (this.isDraining) throw new RequestError(503, 'server_draining', 'Relay is restarting. Submit the request again after it is ready.');
         validateModelRequest(body, false);
+        if (body.durable_receipt !== undefined && typeof body.durable_receipt !== 'boolean') throw new RequestError(400, 'invalid_request', 'Invalid receipt request.');
+        if (body.require_output_limit !== undefined && typeof body.require_output_limit !== 'boolean') throw new RequestError(400, 'invalid_request', 'Invalid request.');
+        if (body.sites_profile !== undefined && (body.sites_profile !== 'local-v1' || body.durable_receipt !== true ||
+            body.require_output_limit === true || body.max_tokens !== undefined)) throw new RequestError(400, 'invalid_request', 'Invalid request.');
+        if (body.require_output_limit === true) {
+          if (body.durable_receipt !== true || body.max_tokens === undefined) throw new RequestError(400, 'invalid_request', 'Invalid request.');
+          if (this.config.forwardOutputTokenLimit !== true) throw new RequestError(503, 'service_unavailable', 'This request is temporarily unavailable.');
+        }
+        if (body.durable_receipt === true && Buffer.byteLength(JSON.stringify(body.messages)) > 12000) throw new RequestError(413, 'request_too_large', 'Request is too large.');
         const requestedModel = body.model || 'gpt-5.6-terra';
         const model = requestedModel;
         this.telemetry.model(this.requestTraces.get(req), requestedModel, model);
@@ -1686,7 +1747,13 @@ export class GalxaiRelayServer extends EventEmitter {
         const reasoningEffort = body.reasoning_effort || body.reasoningEffort || 'medium';
 
         // Atomic Idempotent Stream Attachment via BroccoliDB
-        const promptHash = crypto.createHash('sha256').update(JSON.stringify([tenantId, model, reasoningEffort, body.max_tokens ?? 3500, messages])).digest('hex');
+        const operationKey = req.headers['idempotency-key'];
+        if (operationKey !== undefined && (typeof operationKey !== 'string' || !/^[\x21-\x7e]{1,128}$/.test(operationKey))) throw new RequestError(400, 'invalid_request', 'Invalid request key.');
+        const identity = [tenantId, model, reasoningEffort, body.max_tokens ?? 3500, messages];
+        if (operationKey !== undefined || body.durable_receipt === true) identity.push(operationKey ?? null, body.durable_receipt === true);
+        if (body.require_output_limit === true) identity.push('bounded-output-v1');
+        if (body.sites_profile === 'local-v1') identity.push('sites-local-v1');
+        const promptHash = crypto.createHash('sha256').update(JSON.stringify(identity)).digest('hex');
         const existingIdempotency = this.idempotencyTable.get(promptHash);
 
         if (existingIdempotency) {
@@ -1746,10 +1813,16 @@ export class GalxaiRelayServer extends EventEmitter {
           seqCounter: 0,
           isDetached: false,
           estimatedTokens: body.max_tokens || 3500,
+          durableReceipt: body.durable_receipt === true,
+          ...(body.max_tokens !== undefined ? { maxOutputTokens: body.max_tokens } : {}),
         };
 
         const traceId = this.requestTraces.get(req);
         if (traceId) { jobRecord.traceId = traceId; this.telemetry.bind(traceId, jobId); this.telemetry.phase(traceId, 'Shard selection', 'relay'); }
+        if (jobRecord.durableReceipt) {
+          try { this.receiptStore().reserve(jobId, tenantId, promptHash); }
+          catch { throw new RequestError(503, 'receipt_unavailable', 'Durable result storage is unavailable.'); }
+        }
         this.jobQueue.enqueue(jobRecord);
         this.idempotencyTable.put(promptHash, { id: promptHash, jobId, createdAtMs: Date.now() }, { ttlMs: this.config.idempotencyTtlMs });
 
@@ -1777,7 +1850,7 @@ export class GalxaiRelayServer extends EventEmitter {
           if (session.currentShardId) {
             this.releaseShard(session.currentShardId);
           }
-        }, this.config.jobMaxWallTimeMs);
+        }, jobRecord.durableReceipt ? Math.min(30000, this.config.jobMaxWallTimeMs) : this.config.jobMaxWallTimeMs);
 
         this.sessions.set(jobId, session);
 
@@ -2240,7 +2313,7 @@ export class GalxaiRelayServer extends EventEmitter {
     this.jobBus.replay(jobId, res, lastSeqNo, () => this.metrics.totalTokensServedFromBuffer++);
 
     if (job.status === 'completed') {
-      this.jobBus.sendToSubscriber(jobId, res, 'data: [DONE]\n\n', true);
+      this.jobBus.sendToSubscriber(jobId, res, completionFrame(job) + 'data: [DONE]\n\n', true);
       return;
     }
     if (job.status === 'failed') {
@@ -2334,6 +2407,10 @@ export class GalxaiRelayServer extends EventEmitter {
     if (!job) {
       this.releaseShard(shard.id);
       return;
+    }
+    if (job.durableReceipt) {
+      try { this.receiptStore().dispatch(job.id, job.tenantId); }
+      catch { this.jobQueue.markFailed(job.id, 'receipt_dispatch_unavailable'); this.releaseShard(shard.id); session.currentShardId = undefined; return; }
     }
     const attempt: TransportAttempt = {
       id: ++session.activeAttemptId,
@@ -2567,7 +2644,10 @@ export class GalxaiRelayServer extends EventEmitter {
         stream: true,
       };
       if (instructions) createPayload.instructions = instructions;
-      if (job.reasoningEffort && job.reasoningEffort !== 'none') {
+      // Supplier compatibility is qualified separately for durable Site jobs.
+      // Opting that path in must not change ordinary chat payloads during rollout.
+      if (this.config.forwardOutputTokenLimit && job.durableReceipt && job.maxOutputTokens !== undefined) createPayload.max_output_tokens = job.maxOutputTokens;
+      if (job.reasoningEffort) {
         createPayload.reasoning = { effort: job.reasoningEffort };
       }
 
@@ -2728,12 +2808,14 @@ export class GalxaiRelayServer extends EventEmitter {
             jobId: job.id,
             attemptId: attempt.id,
             shardId: shard.id,
+            response: data.response,
           });
           return;
         }
 
         // Upstream Error Frame (429 Rate Limit / 5xx Overloaded)
         if (data.type === 'error' || data.type === 'response.failed' || data.response?.status === 'failed') {
+          try { this.config.onUpstreamDiagnostic?.(upstreamDiagnostic(data)); } catch { /* Observability cannot change retry/settlement policy. */ }
           const negative = classifyCapabilityFailure(data);
           if (negative && capabilityTicket) this.capabilities.observe(capabilityTicket, job.model, negative.state, negative.reason);
           const failure = classifyUpstreamError(data);
@@ -2781,6 +2863,17 @@ export class GalxaiRelayServer extends EventEmitter {
     if (!session || session.abortController.signal.aborted || session.activeAttemptId !== event.attemptId) return;
     const allocation = this.jobQueue.recordToken(event.jobId);
     if (!allocation) return;
+    if (this.jobsTable.get(event.jobId)?.durableReceipt) {
+      const text = (session.receiptText ?? '') + event.text;
+      if (Buffer.byteLength(text) > 12000) {
+        if (this.jobQueue.markFailed(event.jobId, 'output_limit_exceeded')) this.metrics.totalJobsFailed++;
+        session.abortController.abort(); this.safeCloseSocket(session.upstreamWs);
+        if (session.currentShardId) { this.releaseShard(session.currentShardId); session.currentShardId = undefined; }
+        return;
+      }
+      // Keep the receipt independent of the asynchronously fanned-out SSE ring.
+      session.receiptText = text;
+    }
     this.telemetry.output(event.jobId);
     const token: JobTokenRecord = {
       id: `${event.jobId}_${allocation.seqNo}`,
@@ -2797,7 +2890,21 @@ export class GalxaiRelayServer extends EventEmitter {
   private handleTransportCompleted(event: JobBusEventOf<'job:transport_completed'>): void {
     const session = this.sessions.get(event.jobId);
     if (!session || session.activeAttemptId !== event.attemptId) return;
-    if (this.jobQueue.markComplete(event.jobId)) {
+    const job = this.jobsTable.get(event.jobId);
+    if (!job || ['failed', 'cancelled', 'completed'].includes(job.status)) return;
+    if (job?.durableReceipt) {
+      try {
+        // Commit evidence before announcing completion to any subscriber.
+        this.receiptStore().complete(job.id, job.tenantId, session.receiptText ?? '',
+          completionUsage(event.response, job.retryCount ?? 0, job.failoverCount ?? 0));
+      } catch {
+        this.jobQueue.markFailed(job.id, 'receipt_commit_unavailable');
+        this.releaseShard(event.shardId); session.currentShardId = undefined;
+        this.safeCloseSocket(session.upstreamWs); session.upstreamWs = undefined;
+        return;
+      }
+    }
+    if (this.jobQueue.markComplete(event.jobId, event.response)) {
       this.metrics.totalJobsCompleted++;
       this.retryBudget.success();
       this.releaseShard(event.shardId, true);
@@ -2825,6 +2932,8 @@ export class GalxaiRelayServer extends EventEmitter {
     if (session.currentShardId !== event.shardId) return;
     session.currentShardId = undefined;
     this.telemetry.failedAttempt(event.jobId, event.reason);
+    // A metered request is one provider attempt. A retry would require another
+    // independently reserved operation and evidence for both attempts.
     if (event.retryable === false) {
       this.releaseShard(event.shardId);
       if (this.jobQueue.markFailed(event.jobId, event.reason)) this.metrics.totalJobsFailed++;
@@ -2835,6 +2944,12 @@ export class GalxaiRelayServer extends EventEmitter {
       this.recordQuotaFailure(event.shardId, event.retryAtMs);
     } else {
       this.recordShardFailure(event.shardId, event.unauthorized);
+    }
+
+    if (job.durableReceipt) {
+      // Preserve health/cooldown observations even though this job cannot retry.
+      if (this.jobQueue.markFailed(event.jobId, event.reason)) this.metrics.totalJobsFailed++;
+      return;
     }
 
     if (session.retryCount >= this.config.maxUpstreamRetries) {
@@ -3594,6 +3709,7 @@ export class GalxaiRelayServer extends EventEmitter {
       });
     } finally {
       clearTimeout(deadline);
+      this.durableReceipts?.close();
       console.log('[BroccoliDB Relay] HTTP listener closed cleanly.');
     }
   }

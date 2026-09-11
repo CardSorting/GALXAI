@@ -1,0 +1,202 @@
+# Sites as a GALX delivery capability
+
+## Latest release — deployed with paid activation disabled
+
+The worker, federation and application are deployed with retained worker state and the server-only administrator credential. Exact authoritative usage survived a production worker replacement and was then verified through the public relay origin. The long-output probe did not establish a supplier cost bound, and no production rate card is configured. Paid activation remains disabled in `native_host` mode; `cli` upload remains unqualified. No production wallet was charged. [Release results, evidence, incident record and remaining gates](sites-automation/durable/RELEASE_20260911.md).
+
+## Previous implementation — live contract before funds
+
+New quotes and generation now require a fresh administrator-authenticated check of the running relay before wallet admission. Mixed worker versions fail qualification, the selected worker is checked again at dispatch, and a rejected preflight releases capacity without creating an uncertain-generation hold. CLI upload errors were narrowed to an archive argument type mismatch; changing the path format or CLI version did not repair the tested direct-call route. Native-host delivery remains the qualified upload path. Paid activation still requires a supplier-enforced cost bound. [Current implementation and release sequence](sites-automation/durable/RELAY_CONTRACT_HARDENING.md).
+
+## Previous implementation — durable native-host handoff
+
+The previously manual native upload now has a one-use persisted handoff, authenticated receipt acceptance, restart recovery and idempotent private publication. The new path passed a live private update through fresh companion processes, with no model request or production wallet write. Activation distinguishes native-host delivery from unattended CLI delivery. Both still require a supplier output ceiling; the live diagnostic now identifies `max_output_tokens` as unsupported (HTTP 400). The relay preserves explicit no-reasoning requests and refuses bounded jobs when forwarding is disabled. Paid activation remains closed. [Implementation, evidence and release sequence](sites-automation/durable/NATIVE_HOST_DELIVERY.md).
+
+## Previous qualification — September 11, 2026, before production rollout
+
+Durable billing recovery is now implemented and live-tested through an isolated relay restart. Completion evidence is persisted before delivery; initial settlement and later reconciliation read that evidence, and customer operation keys isolate identical briefs. A positive never-dispatched receipt returns an unused reservation once; unknown usage remains reserved. New generation is gated before funds are reserved, while existing-operation reconciliation remains available during a pause.
+
+The CLI availability diagnosis is corrected: native Sites tools are callable, and later probes also listed the skills. CLI reads, source push and private publication succeeded with zero Codex model turns. Direct CLI archive saving failed; the current session's native uploader saved the package, which the CLI then published. The updated private Site is live, but unattended CLI upload and a supplier-enforced output ceiling remain unqualified. Forwarded output limits previously returned HTTP 400. No production wallet, tariff or activation flag was changed. [Current implementation, evidence and release conditions](sites-automation/durable/ACTIVATION_HARDENING.md).
+
+## Previous qualification — September 10, 2026
+
+The private publication test succeeded. A synthetic client page was created, pushed, saved and deployed through the current session’s native Sites connection, and its owner-only policy was verified afterward. The updated relay returned 11 input tokens and 5 output tokens in an isolated live run; read-only replay preserved those counts. Billing now persists accepted job references and can reconcile missing evidence without another generation.
+
+Live qualification corrected the saved-version contract: opaque IDs include `~`, and the backend’s normalized tar hash differs from the uploaded gzip digest. Save acknowledgements now bind the two identities durably. A lost acknowledgement blocks another upload.
+
+**Customer rollout remains gated:** fresh CLI sessions no longer expose Sites, the supported installation command returns “plugin not found,” and forwarding the requested output ceiling fails with HTTP 400. Production relay/application activation has not occurred. No production wallet was charged. [Qualification and next actions](sites-automation/durable/LIVE_QUALIFICATION.md) distinguish the successful native publication and live metering from these remaining limits.
+
+## Earlier assessment (historical findings below)
+
+
+**A bounded Sites workflow can use the relay as its only model provider.** A live relay request generated validated content; a deterministic renderer produced a static draft; the installed Sites helper packaged it. Codex separately provided authenticated Sites read access without starting a model turn. This is the preferred next implementation under the user's relay-only constraint. Publication and delivery economics remain unverified.
+
+The earlier finding still applies to the **native Codex agent loop**: the current relay lacks its Responses endpoint and complete tool round trip. That failure does not require abandoning Sites automation or adding another model provider. The [relay-only investigation](sites-automation/README.md) establishes feasibility; the new [durable implementation and hardening assessment](sites-automation/durable/HARDENING.md) adds recovery, reservations, artifact integrity and guarded publishing contracts.
+
+## Hardening update
+
+The private local workflow persists jobs, execution attempts, reservations, receipts and event records transactionally. Fenced leases coordinate processes. Interrupted packaging resumes from persisted content; uncertain generation/publication retains its reservation or Site lock and requires reconciliation. Publication intent is copied and bound to its Site, source, saved version, audience and artifact. The [live adapters](sites-automation/durable/LIVE_ADAPTERS.md) now implement authenticated PostgreSQL billing and deployment of an exact saved Site version. The `live.ts` companion includes publishing and reconciliation commands.
+
+The earlier 61 workflow/connection checks covered process-kill recovery, competing processes, authorization boundaries, unknown usage, cancellation, mutable-input races and malicious archives. New adapter, authenticated API and disposable PostgreSQL tests add actual reservation/settlement, lost database acknowledgements, tenant-scoped relay keys and deployment reconciliation. Current counts and build evidence are in the [verification record](sites-automation/durable/verification.json). Local asset scanning is not a live-site audit or resolution of unrelated earlier application findings.
+
+The real connection recheck succeeded after unrelated application/model environment variables were removed. The official packager exposed macOS extended attributes that the previous archive check missed; the new canonicalizer verifies exact files/content and removes metadata before retention. A further runtime audit found the available Node 22/SQLite combination affected by SQLite's documented WAL-reset defect, so the companion rejects it and uses the tested Node 26.8.1/SQLite 3.53.4 combination. See the [cited assessment](sites-automation/durable/HARDENING.md) and [verification record](sites-automation/durable/verification.json).
+
+The earlier local demonstration replayed a synthetic brief and reached a verified artifact without another live model request or Site mutation. Its local fixture units remain nonmonetary. The new billing path uses micro-USD and the existing server wallet; customer-local state cannot authorize spending. The live connection probe succeeded but returned no owned Sites, so actual publication remains untested. The server route is disabled until configured and deployed, and absent supplier usage still retains the reservation instead of inventing a charge.
+
+## Latest finding: a workflow around the existing relay
+
+Use `relay text → validated content schema → fixed template → installed Sites helpers → customer-owned Sites tools`. The runner controls actions and tool results; the model never needs to emit function calls or receive tool-result messages. This applies the Sites skill requirements to a specific delivery workflow, rather than implementing general autonomous skill execution.
+
+The [live evidence](sites-automation/live-observations.json) records one real relay request, 7,097 ms generation time, a 1,857-byte static draft and successful official packaging. The authenticated Sites tool host recorded zero model turns and zero unexpected model requests. Nine offline guardrail tests passed. No Site was created, no source was pushed, no version was saved and nothing was deployed. The local archive lacks a registered project, source commit and saved version, so packaging is not deployment proof.
+
+This machine's separate Sites connection is still required. A relay-only **model supply** is sufficient for the demonstrated path; a relay key by itself does not grant Sites account access. Start with a customer-local companion using that customer's installed plugin and connection. A hosted multi-customer publishing service would require an additional supported account-connection and ownership design that this experiment does not establish.
+
+The next functional gate is connecting the durable core to one isolated customer-owned publication and update. The next commercial gate is trustworthy usage and enforceable server-side spending limits: the successful request returned no usable token total, and the requested output limit is not verified as enforced by the relay. Sell a bounded, repeatable deliverable only after those costs and support effort are measured. Do not infer an unlimited allowance from this demonstration.
+
+## What was verified
+
+The current session exposes the following exact callable tools:
+
+| Tool | Capability | Verification |
+| --- | --- | --- |
+| `mcp__codex_apps__sites_list_sites` | Read the accessible Sites inventory | Called successfully with `limit: 1`, `role: owner`; no site details or credentials retained |
+| `mcp__codex_apps__sites_create_site` | Provision a Sites project | Tool schema available; not invoked |
+| `mcp__codex_apps__sites_save_site_version` | Save a source-linked deployable version | Tool schema available; not invoked |
+| `mcp__codex_apps__sites_deploy_private_site_version` | Publish an eligible owner-private saved version | Tool available; not invoked |
+| `mcp__codex_apps__sites_deploy_site_version` | Publish a saved version to its intended audience | Tool schema available; not invoked |
+| `mcp__codex_apps__sites_get_deployment_status` | Inspect a deployment result | Tool available; not invoked |
+
+This is stronger evidence than a model describing tools from memory: a real read operation succeeded. It establishes connected read access in this session. It does not prove creation/deployment authorization, artifact compatibility, successful publication, access in another session or unattended automation rights.
+
+### Terminal repair: resolved September 10, 2026
+
+Two separate problems were investigated. The first was an incomplete Bun installation of `@openai/codex` 0.125.0: the JavaScript launcher and platform package existed, but the native executable was missing. The second was the earlier remote Sites installation route: CLI 0.153.4 from `/Applications/ChatGPT.app/Contents/Resources/codex` listed Sites 0.1.56 as `sites@openai-curated-remote`, but its approved installation attempt received HTTP 404, “Plugin not found,” when requesting plugin details. That was a backend response, not a sandbox denial or approval rejection.
+
+The repair used the official stable package and the bundled plugin already available to the newer CLI:
+
+```sh
+bun install -g @openai/codex@0.154.0
+codex plugin add sites@openai-bundled --json
+```
+
+The registry's stable tag was verified before installation. The existing Bun global manifests were backed up, and the only top-level dependency change was `@openai/codex` from `^0.125.0` to `0.154.0`. The ordinary shell now selects `/Users/bozoegg/.bun/bin/codex` and reports **codex-cli 0.154.0**. A fresh interactive login shell selects the existing NVM installation and also reports **0.154.0**. The ChatGPT login remains valid. No PATH, shell startup file, credential or application bundle was edited. The separate, lower-priority Homebrew launcher was previously observed broken and was not repaired; neither verified shell selects it.
+
+Codex 0.154.0 exposes **Sites 0.1.66** as `sites@openai-bundled`. Installation succeeded, its cache exists, and a fresh `plugin list --available --json` reports `installed: true` and `enabled: true`. The configuration enables `sites@openai-bundled`. The earlier remote catalog identifier is unnecessary for this working route; the server-side reason for its historical 404 is not established.
+
+Verification went beyond the catalog. A fresh terminal app-server process, using the installed CLI and existing login, confirmed:
+
+| Check | Observed result |
+| --- | --- |
+| `plugin/installed` | Bundled Sites installed and enabled, local version 0.1.66 |
+| `skills/list` scoped to GALX | `sites:sites-building` and `sites:sites-hosting` present and enabled |
+| `app/installed` with runtime refresh | Sites `enabled: true`, `callable: true` |
+| `mcpServerStatus/list` | Actual Sites tools include create, save, private/public deployment and inventory reads |
+| `mcpServer/tool/call` | `sites.list_sites` with `limit: 1`, `role: owner` succeeded; `isError: false`, zero returned items |
+
+The read used an ephemeral thread with hooks disabled and a read-only sandbox. No AI turn was started. No returned Site metadata or credentials were retained. This establishes authenticated terminal tool execution on this machine/account, not just display metadata. The documented app-server distinguishes installed runtime state from display-only app tool summaries; the final check invoked the runtime tool itself.[^4]
+
+Start a new `codex` session to pick up the installed plugin. The terminal installation/access blocker is resolved. A deployment remains a separate, unperformed test of artifact compatibility, authorization and hosting behavior. No alternate credentials, backend reverse engineering or browser publication automation was used.
+
+The GALX checkout has no `.openai/hosting.json`. Its package uses a Next.js build and Node 22. The Sites save/deploy contract requires a compatible artifact tied to the exact pushed source commit and an actual saved version. Discovering a deployment tool therefore does not make this repository immediately deployable. These are findings from local source and exposed tool contracts, not a tested migration.
+
+## Can users use the Sites skill with the relay?
+
+**Yes for the demonstrated local workflow; not yet for a complete hosted delivery or the native Codex agent loop.** “Sites with the relay” contains several different product promises:
+
+| User workflow | Finding | Release status |
+| --- | --- | --- |
+| GALX workflow uses relay text to generate content and a separate authenticated Sites tool host to execute predetermined steps | Live relay generation, schema validation, static rendering, authenticated Sites read and official local packaging succeeded without a Codex model turn. | Preferred bounded implementation; publication, recovery and cost enforcement remain gates |
+| User runs Codex with their own Sites connection and selects GALX for model requests | Both Sites skills remain enabled; an actual Sites inventory read succeeds under a custom-provider configuration. The real CLI's model request receives 404 from the current relay. | Not ready as an end-to-end GALX workflow |
+| User builds/hosts a Site through their own Sites account, and the application's server calls GALX for inference | Existing relay text transport passed a local synthetic-provider test. A hosted Site calling the authenticated public GALX API has not been tested. | Candidate for a narrower runtime-inference pilot |
+| GALX centrally creates/publishes Sites for arbitrary customers using the relay's account | No Sites RPC surface, workspace executor, per-customer Sites authorization or ownership contract was established. | Not an available feature; not the recommended first implementation |
+
+The bounded workflow is the preferred first architecture under the relay-only constraint. Preserve publishing identity and Site ownership with the customer. Native Codex compatibility remains a separate investment if funded demand requires its broader agent behavior; it is no longer a prerequisite for a template-based Sites pilot. The relay need not become a general-purpose Sites execution service.
+
+The same-session probe used a distinct synthetic provider key with `requires_openai_auth: false`; it did not send a ChatGPT credential as the relay's API key. Codex continued using its existing login for its own Sites connector. This is evidence that selecting a custom provider need not remove Sites from this account's runtime. It is **not** evidence that a GALX API key grants Sites access, that API-key-only users receive Sites, or that every account and CLI distribution has the bundled plugin.
+
+### What the earlier native Codex experiment tested
+
+The reproducible [compatibility experiment](sites-relay/README.md) runs the repository's real relay worker and federation classes on loopback with synthetic credentials and a deterministic WebSocket upstream. The installed Codex CLI is configured temporarily against that fixture. Its sole connector operation is `sites.list_sites`; that experiment performs no live model, Site registration, source upload or deployment. Its [results](sites-relay/observations.json) distinguish real CLI/connector observations from synthetic model behavior. The subsequent [workflow proof](sites-automation/README.md) did perform one real relay model request using a different, text-only execution path.
+
+| Check | Result and implication |
+| --- | --- |
+| Codex selects custom provider | Confirmed by the thread response, not inferred from configuration text |
+| Sites skills and account access | Both skills enabled; Sites callable; inventory read returned `isError: false` |
+| Actual Codex model request | `POST /v1/responses` reached the relay with the synthetic relay key and received 404; the Codex turn failed |
+| Worker and federation protocol routes | `/v1/responses` and `/mcp` both returned 404 on each server |
+| Existing chat transport | Text completed through the real relay and existing adapter against the synthetic upstream |
+| Function definitions and required tool choice | Accepted by chat ingress but absent from the request sent upstream |
+| Tool-result continuation | A `role: tool` message returned 400 before upstream execution |
+| Structured function-call response | A synthetic upstream function call was lost; the text adapter returned an empty completion without tool calls |
+| Basic authorization controls | Missing inference authentication returned 401; an ordinary inference key received 403 on the worker's administrator capability route |
+
+The CLI also requested `/v1/models`, which the direct worker returned as 404. GALX's public application and federation separately implement `/v1/models`; the newer configured-relay preflight returned 200. The direct-worker observation must not be presented as a missing public model catalog. The inspected public application has no Responses route or rewrite to one. The earlier compatibility fixture did not call the deployed GALX service.
+
+The documented current Codex provider protocol is `responses`, including for custom providers.[^5] Changing the base URL to `/v1/chat/completions` or installing the Sites skill cannot repair the missing protocol. A path alias alone also cannot preserve function definitions, call IDs, arguments, results, streaming events and continuation semantics. The relay currently forwards text-oriented requests, and its model capability inventory is not a registry of executable Sites operations.
+
+Source evidence: `src/relay/relay-server.ts` dispatch and `createPayload`; `src/relay/request-policy.ts` message-role validation; `src/core/router/adapters/RelayChatTransport.ts` text aggregation; `src/relay/federation-server.ts` supported routes. The public chat route and `OpenAIAdapter` accept/forward tool fields toward the relay, making silent loss further downstream a material compatibility defect. A separate CLI completion helper explicitly prohibits skills and tools; it is not an existing Sites runner.
+
+### Native Codex compatibility: a separate workstream
+
+1. **Current native CLI limit:** the working Sites plugin and connection do not make the present relay compatible with Codex model turns. Since the relay is the only available model supply, implement the demonstrated bounded workflow first. Do not make switching providers a dependency of this plan.
+2. **Compatibility engineering:** reject unsupported tool requests explicitly instead of accepting them and silently losing semantics. Preserve existing supported text behavior. If native Codex support is funded, qualify a bounded Responses contract at the customer API and through the relay: tool definitions/choice, call IDs, argument streaming, `function_call_output`, continuation, terminal events, usage, cancellation and errors. Do not solve this by exposing a generic authenticated MCP proxy.
+3. **Acceptance before a customer pilot:** actual Codex completes a deterministic function-call/result round trip through GALX; adversarial public-response and cross-tenant tests pass; an interrupted request cannot replay a publishing action; a bounded live inference probe succeeds with measured usage and no credential leakage. Build and browser-asset checks apply before shipping application changes. The current fixture establishes none of those unperformed release gates.
+4. **Then run one customer-owned Sites pilot:** use synthetic data, a separate project, explicit spending limits and a small revision allowance. Verify build, saved version, requested audience, deployment and a subsequent update. Record who owns the Site, who can edit it, what happens when access is revoked, and how the source can be handed over. Do not migrate GALX's operational repository for this experiment.
+5. **Evaluate the narrower runtime path independently:** let a Site's authenticated server call the public GALX API with a bounded project credential kept in hosted secret storage. Verify a real hosted request, visitor authorization, rate/spend limits, cancellation and sanitized errors before documenting it as supported. Never place a relay administrator key or shared GALX credential in browser code. Sites documents hosted environment/secret configuration, but actual hosted connectivity remains to be tested.[^1]
+
+Agent-compatible model transport is a dependency of native Codex inference, not of the new bounded workflow. Further plugin discovery is unnecessary for the observed machine/account. Hosted runtime inference is another independent experiment; it should not be confused with automating a Site's creation and publication.
+
+## Correct the quoted argument
+
+The official Sites guide directs creation, saving, deployment and management to ChatGPT web or desktop, and describes no standalone CLI management view. It allows local CLI editing/testing. This does not prove that every terminal session lacks every Sites tool, but it does not document general headless publishing support either.[^1]
+
+The plugin guide documents a CLI `/plugins` browser and a new session after installation. A shared catalog is not a promise that every capability runs on every surface. Installing a package is also not equivalent to receiving authenticated backend access.[^2]
+
+Accordingly, replace “if Astra lists deploy, we are done” with “the session exposes a potential publishing operation; now verify connection, authorization, artifact compatibility and the intended audience.” Connection and a real read operation have now passed in both environments. No public standalone Sites deployment API or `codex sites deploy` command was established by the documentation checked. The working local route is Codex's authenticated Sites tools, accessed through the bundled plugin and runtime.
+
+## Commercial implications
+
+A stronger product hypothesis would be: **GALX delivers and maintains a specific client workflow, with reviewable releases and explicit operating limits.** Sites could reduce the work needed to deliver that product. Customers would pay for requirements, integration, verification, supported changes and continued usefulness. A publish button alone does not establish recurring willingness to pay.
+
+The relay experiment narrows the positioning further: **help teams operate customer-owned AI applications with project budgets, attributable usage and supported revisions.** OpenAI already supplies the Sites skills to this account; merely repackaging access is a weak differentiation hypothesis. GALX must earn its fee through a measured customer outcome or operational benefit. Keep customer Sites entitlements and hosting costs separate from GALX's fee and inference charges. Do not advertise a GALX subscription as including unlimited Sites hosting or access to someone else's Sites account.
+
+The scope distinction also affects cost. Customer-local workflow execution avoids hosting every development workspace and account connector, although companion maintenance, plugin compatibility, support and billing still cost money. A centralized publishing runner adds workspace lifecycle and identity isolation; both designs need durable jobs, artifact handling and side-effect recovery. Do not incur the larger hosted obligation merely because one account can list Sites. No maintenance saving, conversion gain or recurring willingness to pay has yet been measured.
+
+This potentially expands the agency thesis from financial operations into application delivery. That is a scope change to validate, not an automatic improvement. If each application needs different integrations and extensive maintenance, the result is a services business whose labor must be priced. If a small number of templates repeatedly satisfy the same paid job, a more repeatable product may emerge. Measure that difference before bundling unlimited revisions.
+
+The opportunity is to reduce delivery cost while keeping a price tied to buyer value. Using the existing model's hypothetical $75/hour labor cost, saving two hours on setup improves one-time contribution by $150 before additional tools, hosting, migration and maintenance expense. It does not add $150 to recurring monthly margin. Reducing recurring support by fifteen minutes would add $18.75/month, again before those extra costs. Neither saving has been measured.
+
+Use this incremental calculation:
+
+`net contribution improvement = measured labor avoided − extra platform costs − extra maintenance − allocated migration cost`
+
+Do not assume the ChatGPT subscription funds unlimited visitor inference or all application infrastructure. Account entitlements and application running costs require separate evidence. Building and hosting through the same vendor also does not create an independent model supplier; it leaves the original provider-concentration question unresolved.
+
+The Help Center describes beta allowances shared across an account, with limits capable of affecting public availability. No account-specific capacity or stable scaled price was established here. That makes unlimited hosted client applications an unsupported offer.[^3]
+
+## Material documentation conflict
+
+The Help Center article, marked updated five days before this September 10 review, expressly permits selling through a third-party payment processor. The Sites developer guide still lists enabling financial transactions among unsupported uses.[^1][^3] The newer, specific payment guidance argues against declaring all commerce prohibited. The inconsistency still needs resolution against current applicable terms before relocating GALX's payment-enabled application. A successful Sites tool call does not settle that issue.
+
+This finding is not a reason to block a read-only, synthetic client demonstration. Keep the first experiment independent of payments and sensitive data, and evaluate payment integration separately if the product requires it. The experiment should also verify the exact hosting/runtime requirements rather than assuming an existing Next.js deployment artifact is portable.
+
+## Recommended experiment and decision gates
+
+1. Select one repeated buyer job, such as a client project-status portal. Specify completion and ongoing support requirements before building.
+2. Prepare it in an isolated project with synthetic data and an explicit file allowlist. Exclude this private strategy, internal diagnostics and the GALX operational source. Do not assume `.vercelignore` controls a different hosting system's source push or artifact packaging.
+3. Measure local build, verification and maintenance effort against the current delivery path. A saved Sites version would be the next reviewable milestone if subsequently requested; creating/pushing/saving still requires the appropriate Sites workflow and access.
+4. Demonstrate a local revision and rebuild, then verify a separate deployment candidate when publication is requested. Preserve source portability and record the cost of moving hosts.
+5. Confirm account limits, client ownership/handover options, recurring costs and permitted use before selling a supported deployment. Terminal read execution and a live relay-only local draft have passed. Qualify the bounded workflow's publication, recovery and cost controls before promising delivery. Native Codex inference remains blocked by its separate transport contract.
+6. Charge for the bounded customer job only if it earns payment and renewal. Reject the hypothesis if customers can satisfy the same job themselves with acceptable effort or if maintenance consumes the fee.
+
+A promising demonstration does not warrant moving GALX's live inference, billing and operational systems. Treat Sites as one candidate delivery target and retain the separately funded compute and support constraints from the commercial reset.
+
+## Evidence and scope
+
+Checked September 10, 2026, including the launcher/plugin repair, native relay compatibility experiment, live relay-only feasibility proof and durable hardening pass. [Machine-readable observations](sites-capability-observations.json) preserve those stages; [native relay results](sites-relay/observations.json), [original live results](sites-automation/live-observations.json) and [hardening verification](sites-automation/durable/verification.json) distinguish their scopes. The original repair changed the Bun package and plugin configuration. The hardening pass changed private implementation/evidence files and temporary state, rechecked Sites read access and replayed the synthetic brief without a new live inference request. No Site was created, no source was pushed, no version was saved, and no deployment or Site audience change occurred. Application source and financial-model assumptions are unchanged.
+
+[^1]: OpenAI, [Sites developer guide](https://learn.chatgpt.com/docs/sites), accessed September 10, 2026.
+[^2]: OpenAI, [Plugins](https://learn.chatgpt.com/docs/plugins), accessed September 10, 2026.
+[^3]: OpenAI, [Creating and managing ChatGPT Sites](https://help.openai.com/en/articles/20001339), accessed September 10, 2026; page reports updated five days earlier.
+[^4]: OpenAI, [Codex App Server](https://learn.chatgpt.com/docs/app-server), accessed September 10, 2026; initialization, installed apps, app metadata and MCP tool calls. Method arguments were checked against schemas generated by the installed CLI.
+[^5]: OpenAI, [Configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference), accessed September 10, 2026; custom provider `base_url`, `env_key`, `requires_openai_auth` and `wire_api`.

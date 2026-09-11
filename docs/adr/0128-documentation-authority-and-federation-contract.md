@@ -15,7 +15,7 @@ The [federation contract](../FEDERATION_STRATEGY.md) defines current internal be
 
 Reconcile affected guides and ADR bodies in full when strategy changes. Update status, decision, consequences, examples, failure guidance and navigation together. Remove obsolete actionable instructions instead of leaving contradictory bodies beneath a successor note. Preserve original measurements and rollout facts in explicitly dated evidence sections or operational records; do not rewrite what was actually observed in the past.
 
-Record topic-specific precedence: ADRs 0123–0125 govern database health, 0126 federation ownership/capability, 0127 the explicit image alias, 0129 public boundaries, 0130 uncertain image outcomes, 0131 operator access/holds, 0132 credential handoff and 0133 enrollment/test isolation. Unrelated subsystem decisions retain their scope.
+Record topic-specific precedence: ADRs 0123–0125 govern database health, 0126 federation ownership/capability, 0127 the explicit image alias, 0129 public boundaries, 0130 uncertain image outcomes, 0131 operator access/holds, 0132 credential handoff 0133 enrollment/test isolation, 0134 fixed-price Sites admission, 0135 durable text receipt recovery and 0136 customer-owned Sites delivery. Unrelated subsystem decisions retain their scope.
 
 Every documentation Markdown file has one scope marker and a complete catalog entry. ADR IDs are contiguous and indexed. Acceptance, implementation, local verification, image build, process rollout and actual-client verification are distinct states. Avoid undated counts and blanket deployed/not-deployed statements spanning different components.
 

@@ -1,0 +1,85 @@
+{
+  "checkedAt": "2026-09-10T19:58:21.043Z",
+  "node": "v26.8.1",
+  "sqlite": "3.53.4",
+  "status": "ready",
+  "stateDirectory": "/private/tmp/galx-sites-durable-review-bb6a9p89",
+  "jobId": "9a91af1e-e93d-4a5c-a53f-550cce529f8c",
+  "evidenceMode": "recorded_fixture_replayed_across_separate_processes",
+  "newLiveModelRequests": 0,
+  "fixtureReplayDispatches": 1,
+  "officialPackaging": "Sites 0.1.66 package-site.mjs",
+  "normalization": "Verified exact files; removed macOS PAX attributes and canonicalized archive metadata",
+  "artifact": {
+    "hash": "68a9c6633349ca18e5fd9e8f40aba7f54f2ecd861ad458c4cb29eca96089d0a4",
+    "bytes": 1195,
+    "htmlHash": "f6ea0dd816b2fb90f340718ec3bdf3ee3afe8416a16a27a0caee4e0eec3cb01a",
+    "template": "sites-static-v2",
+    "retained": "artifacts/durable-static-draft.tar.gz"
+  },
+  "account": {
+    "limit": 2000,
+    "reserved": 1000,
+    "consumed": 0,
+    "unknown": 1
+  },
+  "budgetUnitMeaning": "Local fixture reservation units; not money or verified tokens",
+  "usageReconciled": false,
+  "publishingConfigured": false,
+  "siteCreated": false,
+  "deployed": false,
+  "events": [
+    {
+      "revision": 1,
+      "kind": "created"
+    },
+    {
+      "revision": 2,
+      "kind": "lease_acquired"
+    },
+    {
+      "revision": 3,
+      "kind": "generation_dispatched"
+    },
+    {
+      "revision": 4,
+      "kind": "content_validated"
+    },
+    {
+      "revision": 5,
+      "kind": "lease_released"
+    },
+    {
+      "revision": 6,
+      "kind": "lease_acquired"
+    },
+    {
+      "revision": 7,
+      "kind": "packaging_started"
+    },
+    {
+      "revision": 8,
+      "kind": "lease_released"
+    },
+    {
+      "revision": 9,
+      "kind": "lease_acquired"
+    },
+    {
+      "revision": 10,
+      "kind": "lease_released"
+    },
+    {
+      "revision": 11,
+      "kind": "lease_acquired"
+    },
+    {
+      "revision": 12,
+      "kind": "artifact_verified"
+    },
+    {
+      "revision": 13,
+      "kind": "lease_released"
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "runs": [
+    {
+      "checkedAt": "2026-09-11T05:24:10.472Z",
+      "productionChanged": false,
+      "walletWrites": false,
+      "modelRequests": 1,
+      "completed": false,
+      "failure": "job_error"
+    },
+    {
+      "checkedAt": "2026-09-11T05:26:46.456Z",
+      "productionChanged": false,
+      "walletWrites": false,
+      "modelRequests": 1,
+      "outputCeilingForwarded": false,
+      "completed": true,
+      "usage": {
+        "prompt_tokens": 11,
+        "completion_tokens": 5,
+        "total_tokens": 16
+      },
+      "outputMatches": true,
+      "replayMatches": true,
+      "usageWithinRequestedCeiling": true,
+      "ceilingEnforcementProven": false
+    },
+    {
+      "checkedAt": "2026-09-11T05:28:03.598Z",
+      "productionChanged": false,
+      "walletWrites": false,
+      "modelRequests": 1,
+      "outputCeilingForwarded": true,
+      "completed": false,
+      "failure": "job_error",
+      "jobErrors": [
+        "upstream_error_400"
+      ]
+    },
+    {
+      "checkedAt": "2026-09-11T06:00:41.618Z",
+      "productionChanged": false,
+      "walletWrites": false,
+      "modelRequests": 1,
+      "outputCeilingForwarded": false,
+      "completed": true,
+      "usage": {
+        "prompt_tokens": 11,
+        "completion_tokens": 5,
+        "total_tokens": 16
+      },
+      "outputMatches": true,
+      "replayMatches": true,
+      "usageWithinRequestedCeiling": true,
+      "ceilingEnforcementProven": false,
+      "receiptMatches": true,
+      "receiptSurvivedRestart": true
+    },
+    {
+      "checkedAt": "2026-09-11T06:30:14.396Z",
+      "productionChanged": false,
+      "walletWrites": false,
+      "modelRequests": 1,
+      "outputCeilingForwarded": true,
+      "upstreamDiagnostic": {
+        "status": 400,
+        "code": "unclassified",
+        "parameter": "unclassified",
+        "reason": "unsupported_parameter"
+      },
+      "completed": false,
+      "failure": "job_error",
+      "jobErrors": [
+        "upstream_error_400"
+      ]
+    },
+    {
+      "checkedAt": "2026-09-11T06:32:46.423Z",
+      "productionChanged": false,
+      "walletWrites": false,
+      "modelRequests": 1,
+      "outputCeilingForwarded": true,
+      "upstreamDiagnostic": {
+        "status": 400,
+        "code": "unclassified",
+        "parameter": "max_output_tokens",
+        "reason": "unsupported_parameter"
+      },
+      "completed": false,
+      "failure": "job_error",
+      "jobErrors": [
+        "upstream_error_400"
+      ]
+    },
+    {
+      "checkedAt": "2026-09-11T06:41:04.738Z",
+      "productionChanged": false,
+      "walletWrites": false,
+      "modelRequests": 1,
+      "outputCeilingForwarded": false,
+      "completed": true,
+      "usage": {
+        "prompt_tokens": 11,
+        "completion_tokens": 5,
+        "total_tokens": 16
+      },
+      "outputMatches": true,
+      "replayMatches": true,
+      "usageWithinRequestedCeiling": true,
+      "ceilingEnforcementProven": false,
+      "receiptMatches": true,
+      "receiptSurvivedRestart": true
+    }
+  ]
+}

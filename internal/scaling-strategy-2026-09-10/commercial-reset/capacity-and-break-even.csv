@@ -1,0 +1,16 @@
+support_hours_per_account,fixed_monthly_cost,contribution_per_account,accounts_for_break_even,support_hours_at_break_even,accounts_at_support_capacity,contribution_at_capacity,break_even_within_support_capacity
+0.25,6000,245.98,25,6.25,128,31485.44,True
+0.25,12000,245.98,49,12.25,128,31485.44,True
+0.25,20000,245.98,82,20.5,128,31485.44,True
+0.5,6000,227.23,27,13.5,64,14542.72,True
+0.5,12000,227.23,53,26.5,64,14542.72,True
+0.5,20000,227.23,89,44.5,64,14542.72,False
+1,6000,189.73,32,32,32,6071.36,True
+1,12000,189.73,64,64,32,6071.36,False
+1,20000,189.73,106,106,32,6071.36,False
+2,6000,114.73,53,106,16,1835.68,False
+2,12000,114.73,105,210,16,1835.68,False
+2,20000,114.73,175,350,16,1835.68,False
+4,6000,-35.27,,,8,-282.16,False
+4,12000,-35.27,,,8,-282.16,False
+4,20000,-35.27,,,8,-282.16,False

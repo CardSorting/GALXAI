@@ -31,7 +31,7 @@ The previous documentation mixed simulation behavior, adjacent repositories, and
 
 ## Consequences and limits
 
-- Registry ownership is durable; the original standalone scheduling/concurrency/retry state was local. Current federation rejection revisions and maintenance holds have private persistent journals under ADRs 0131–0133; receipts remain process-local. This relay does not use the platform's PostgreSQL lease RPCs for each selected shard. Do not scale replicas assuming a global concurrency limit or immediate shared revocation.
+- Registry ownership is durable; the original standalone scheduling/concurrency/retry state was local. Current federation rejection revisions and maintenance holds have private persistent journals under ADRs 0131–0133; admission receipts remain process-local. [ADR 0135](0135-durable-sites-receipts-and-local-admission.md) adds separate durable text completion receipts for opted-in jobs; streams remain generation-bound. This relay does not use the platform's PostgreSQL lease RPCs for each selected shard. Do not scale replicas assuming a global concurrency limit or immediate shared revocation.
 - Checkpoints exclude provider tokens but can contain unfinished request content. They need access controls and retention; they are not a zero-data-retention guarantee.
 - Provider WebSockets are opened per attempt, not a pool of permanently warm sessions. Mid-stream continuation may alter output and is not exactly-once generation.
 - Health/readiness is a process/admission signal, not proof of provider authentication or available shard capacity.

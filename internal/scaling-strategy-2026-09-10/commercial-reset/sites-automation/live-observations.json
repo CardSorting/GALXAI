@@ -1,0 +1,63 @@
+{
+  "checked_at": "2026-09-10T19:12:03.124Z",
+  "status": "local_draft_packaged",
+  "model_source": "configured_relay_only",
+  "direct_model_fallback": false,
+  "site_created": false,
+  "source_pushed": false,
+  "version_saved": false,
+  "deployed": false,
+  "sites_connection": {
+    "connected": true,
+    "model_turns_started": 0,
+    "site_mutations": false,
+    "site_metadata_retained": false,
+    "user_agent": "galx_sites_workflow_probe/0.154.0 (Mac OS 26.5.1; arm64) vscode/1.107.0 (galx_sites_workflow_probe; 1.0.0)",
+    "plugin_root": "/Users/bozoegg/.codex/plugins/cache/openai-bundled/sites/0.1.66",
+    "plugin_version": "0.1.66",
+    "skill_sha256": {
+      "sites:sites-building": "695d87862d416c21dc31d2fc658d0ccc4d04bca24f063b5a32bcbf6983c88253",
+      "sites:sites-hosting": "5b850d4ee17a0e4cbf8f13dcfac4d535c15fab1c399a2f20c59880667ee2add5"
+    },
+    "read_is_error": false,
+    "unexpected_model_requests": 0,
+    "rpc_methods": [
+      "initialize",
+      "skills/list",
+      "thread/start",
+      "mcpServerStatus/list",
+      "mcpServer/tool/call"
+    ]
+  },
+  "requested_model": "gpt-5.6-luna",
+  "live_model_calls": 1,
+  "generation_ms": 7097,
+  "usage_tokens": null,
+  "model_call_limit": 2,
+  "output_limit": "Requested 700 max_tokens; relay hard enforcement not established",
+  "plugin_root": "/Users/bozoegg/.codex/plugins/cache/openai-bundled/sites/0.1.66",
+  "local_project": "/var/folders/98/ss6g9t1x6_b1gppqp2d64ftr0000gn/T/galx-relay-sites-draft-Cip7IS",
+  "local_html_sha256": "f6ea0dd816b2fb90f340718ec3bdf3ee3afe8416a16a27a0caee4e0eec3cb01a",
+  "local_html_bytes": 1857,
+  "packaging": {
+    "official_helper": "Sites 0.1.66 scripts/package-site.mjs",
+    "succeeded": true,
+    "archive": "artifacts/static-draft.tar.gz",
+    "sha256": "8044cba235513a93480aca4a66c7efe1f1f853d5d2831171b6871cdf8ee6265f",
+    "entries": [
+      "dist",
+      "dist/index.html",
+      "dist/.openai",
+      "dist/.openai/hosting.json"
+    ],
+    "macos_metadata": "First archive contained AppleDouble entries. Repackaged with process-local COPYFILE_DISABLE=1; exact allowlist passed.",
+    "registered_project": false,
+    "deployment_compatible": "Not established; no project_id, source commit or saved version"
+  },
+  "total_ms": 9124,
+  "timing_scope": {
+    "generation_ms": "Live relay generation and response validation",
+    "total_ms": "Connection, generation and local rendering; excludes separately invoked packaging helper"
+  },
+  "usage_interpretation": "Unknown; null is not zero cost"
+}

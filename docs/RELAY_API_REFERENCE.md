@@ -21,6 +21,8 @@ This reference describes the controller front door at `https://relay.galx.ai`. P
 | `GET /v1/jobs/:id` | Owning principal | Existing signed job status |
 | `GET /v1/jobs/:id/stream` | Owning principal | Existing signed job stream |
 | `POST /v1/jobs/:id/cancel` | Owning principal | Cancel existing job |
+| `GET /v1/jobs/:id/receipt` | Owning principal | Read an opted-in durable text receipt; may use replacement worker on the original retained volume |
+| `GET /api/sites/contract` | Administrator | Fresh challenged readiness for the selected Sites profile; starts no inference |
 
 Use configured bearer inference/admin keys. Authentication, tenant delegation, and job ownership are enforced separately; task IDs and caller-supplied tenant headers do not grant authority. The controller is a server-to-server front door; browsers use an application backend. Invalid controller administrator authentication returns 401; worker privilege errors have their own contract.
 
@@ -67,7 +69,7 @@ Names are normalized, unique and limited to 1–40 characters; built-in tab name
 
 Every new inference request names the exact model. The controller bounds JSON intake to 2 MiB and ten seconds. Provide `Idempotency-Key` per logical operation and preserve it with the same payload when recovering an acknowledgement. `X-Galx-Task-Id` is correlation only. The controller assigns a fresh request ID.
 
-Receipts are tenant- and route-scoped, process-local, and retained for ten minutes from admission: at most 1,000 live keys, 32 MiB aggregate capture/response storage, and 8 MiB per response. Live keys are not evicted to admit new work. A large image can stream successfully without being retained for replay. Completed receipts can be retrieved after model capability loss.
+Admission replay receipts are tenant- and route-scoped, process-local, and retained for ten minutes from admission: at most 1,000 live keys, 32 MiB aggregate capture/response storage, and 8 MiB per response. Live keys are not evicted to admit new work. A large image can stream successfully without being retained for replay. Completed receipts can be retrieved after model capability loss.
 
 Preserve the response `X-Galx-Idempotency-Scope` and send it on retries. A changed scope rejects the request; absent this precondition, restart or receipt expiry can permit new execution with the same key. This is not durable exactly-once execution.
 
@@ -82,13 +84,25 @@ Preserve the response `X-Galx-Idempotency-Scope` and send it on retries. A chang
 | `409 idempotency_scope_changed` | Prior execution uncertain across scope change | Inspect original job/trace before new work |
 | `502 relay_admission_unknown` | Acknowledgement lost; execution uncertain | No blind replay; conservative capacity hold is bounded |
 | `502 job_transport_unavailable` | Job already accepted | Retry its existing URL using retry guidance |
-| `410 relay_generation_gone` | Original worker generation unavailable | Reconcile original execution; never attach to replacement worker |
+| `410 relay_generation_gone` | Original stream/cancel generation unavailable | Recover an opted-in durable text receipt on its original retained volume when available; never move execution |
 | `503 model_temporarily_unavailable` | No eligible shard for requested capability | Honor retry headers; inspect that model pool |
 | `503 model_capacity_exhausted` | Eligible pool saturated | Honor retry headers; unrelated capacity is irrelevant |
 
 Read `X-Should-Retry`, `Retry-After`, and execution state together. The adapters preserve status, safe upstream code, retry delay, execution state, request ID, and scope in `RelayDispatchError`; configured relay errors do not trigger automatic direct-provider fallback. A `5xx` alone does not establish safe replay.
 
 Signed job URLs bind tenant and worker generation. Capability loss does not terminate accepted streams. Reconnection uses bounded retained events; missing events, EOF, or provider failure are not successful completion. Cancellation does not itself establish billing/refund settlement.
+
+## Durable Sites text contract
+
+The application-facing customer contract is [Site content generation](SITES_CONTENT.md). The fields in this section are private transport fields and must not be forwarded into that public response.
+
+A fixed-price job uses `durable_receipt: true`, `sites_profile: "local-v1"`, explicit model/messages and no `max_tokens`. Combining this profile with a supplier ceiling, a different profile or a missing durable receipt flag is invalid. The local profile enforces byte/time/attempt bounds; it does not attest supplier quota or token-ceiling enforcement. The legacy metered path instead requests `require_output_limit: true` and `max_tokens` with durable receipts.
+
+The administrator readiness query has `model`, `maxOutputTokens` and a fresh `nonce`; fixed mode also sends `profile=sites-local-v1`. Version 2 replies bind those values and exactly report `maxOutputBytes`, `maxWallTimeMs`, `maxAttempts`, `durableReceiptVersion` and `receiptRetentionDays`. Version 1 is the legacy `sites-text-v1` forwarding contract. Readiness response validation rejects extra/mismatched fields. See [ADR 0135](adr/0135-durable-sites-receipts-and-local-admission.md) and [Sites operations](maintainers/SITES_OPERATIONS.md) for limits and dispatch checks.
+
+`GET /v1/jobs/:id/receipt` returns only `id`, `status`, `output`, `usage`, `retainedUntil`. Status is `pending`, `unknown`, `not_started` or `completed`. Output and usage can be null. A completed receipt with null usage supports fixed-price settlement, while metered settlement requires valid usage. A fenced `not_started` receipt supports a zero-cost close; missing/expired/unknown receipts do not.
+
+The signed reference remains tenant-bound and has a 30-day lifetime. Unlike streams/cancellation, a receipt read can reach a replacement worker on the original shard's retained volume. This endpoint does not restart inference or extend the process-local admission deduplication cache. Public account recovery supplies only the original operation ID; its server adapter resolves this private reference and saved price.
 
 ## Image compatibility
 

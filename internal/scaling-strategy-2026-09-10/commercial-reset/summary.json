@@ -1,0 +1,255 @@
+{
+  "assumptions_status": "Illustrative planning assumptions, not GALX actuals or published prices",
+  "base": {
+    "price": 299,
+    "support_hours": 0.5,
+    "requests": 100000,
+    "direct_infrastructure": 20.0,
+    "support_cost": 37.5,
+    "processing_cost": 9.27,
+    "risk_reserve": 5,
+    "contribution": 227.23000000000002,
+    "contribution_margin": 0.7599665551839465,
+    "target_price_floor": 285.4545454545455
+  },
+  "price_comparison": [
+    {
+      "price": 49,
+      "support_hours": 0.5,
+      "requests": 100000,
+      "direct_infrastructure": 20.0,
+      "support_cost": 37.5,
+      "processing_cost": 1.77,
+      "risk_reserve": 5,
+      "contribution": -15.27000000000001,
+      "contribution_margin": -0.3116326530612247,
+      "target_price_floor": 285.4545454545455
+    },
+    {
+      "price": 99,
+      "support_hours": 0.5,
+      "requests": 100000,
+      "direct_infrastructure": 20.0,
+      "support_cost": 37.5,
+      "processing_cost": 3.2699999999999996,
+      "risk_reserve": 5,
+      "contribution": 33.230000000000004,
+      "contribution_margin": 0.3356565656565657,
+      "target_price_floor": 285.4545454545455
+    },
+    {
+      "price": 199,
+      "support_hours": 0.5,
+      "requests": 100000,
+      "direct_infrastructure": 20.0,
+      "support_cost": 37.5,
+      "processing_cost": 6.27,
+      "risk_reserve": 5,
+      "contribution": 130.23000000000002,
+      "contribution_margin": 0.6544221105527639,
+      "target_price_floor": 285.4545454545455
+    },
+    {
+      "price": 299,
+      "support_hours": 0.5,
+      "requests": 100000,
+      "direct_infrastructure": 20.0,
+      "support_cost": 37.5,
+      "processing_cost": 9.27,
+      "risk_reserve": 5,
+      "contribution": 227.23000000000002,
+      "contribution_margin": 0.7599665551839465,
+      "target_price_floor": 285.4545454545455
+    },
+    {
+      "price": 499,
+      "support_hours": 0.5,
+      "requests": 100000,
+      "direct_infrastructure": 20.0,
+      "support_cost": 37.5,
+      "processing_cost": 15.27,
+      "risk_reserve": 5,
+      "contribution": 421.23,
+      "contribution_margin": 0.8441482965931865,
+      "target_price_floor": 285.4545454545455
+    }
+  ],
+  "capacity": [
+    {
+      "support_hours_per_account": 0.25,
+      "fixed_monthly_cost": 6000,
+      "contribution_per_account": 245.98000000000002,
+      "accounts_for_break_even": 25,
+      "support_hours_at_break_even": 6.25,
+      "accounts_at_support_capacity": 128,
+      "contribution_at_capacity": 31485.440000000002,
+      "break_even_within_support_capacity": true
+    },
+    {
+      "support_hours_per_account": 0.25,
+      "fixed_monthly_cost": 12000,
+      "contribution_per_account": 245.98000000000002,
+      "accounts_for_break_even": 49,
+      "support_hours_at_break_even": 12.25,
+      "accounts_at_support_capacity": 128,
+      "contribution_at_capacity": 31485.440000000002,
+      "break_even_within_support_capacity": true
+    },
+    {
+      "support_hours_per_account": 0.25,
+      "fixed_monthly_cost": 20000,
+      "contribution_per_account": 245.98000000000002,
+      "accounts_for_break_even": 82,
+      "support_hours_at_break_even": 20.5,
+      "accounts_at_support_capacity": 128,
+      "contribution_at_capacity": 31485.440000000002,
+      "break_even_within_support_capacity": true
+    },
+    {
+      "support_hours_per_account": 0.5,
+      "fixed_monthly_cost": 6000,
+      "contribution_per_account": 227.23000000000002,
+      "accounts_for_break_even": 27,
+      "support_hours_at_break_even": 13.5,
+      "accounts_at_support_capacity": 64,
+      "contribution_at_capacity": 14542.720000000001,
+      "break_even_within_support_capacity": true
+    },
+    {
+      "support_hours_per_account": 0.5,
+      "fixed_monthly_cost": 12000,
+      "contribution_per_account": 227.23000000000002,
+      "accounts_for_break_even": 53,
+      "support_hours_at_break_even": 26.5,
+      "accounts_at_support_capacity": 64,
+      "contribution_at_capacity": 14542.720000000001,
+      "break_even_within_support_capacity": true
+    },
+    {
+      "support_hours_per_account": 0.5,
+      "fixed_monthly_cost": 20000,
+      "contribution_per_account": 227.23000000000002,
+      "accounts_for_break_even": 89,
+      "support_hours_at_break_even": 44.5,
+      "accounts_at_support_capacity": 64,
+      "contribution_at_capacity": 14542.720000000001,
+      "break_even_within_support_capacity": false
+    },
+    {
+      "support_hours_per_account": 1,
+      "fixed_monthly_cost": 6000,
+      "contribution_per_account": 189.73000000000002,
+      "accounts_for_break_even": 32,
+      "support_hours_at_break_even": 32,
+      "accounts_at_support_capacity": 32,
+      "contribution_at_capacity": 6071.360000000001,
+      "break_even_within_support_capacity": true
+    },
+    {
+      "support_hours_per_account": 1,
+      "fixed_monthly_cost": 12000,
+      "contribution_per_account": 189.73000000000002,
+      "accounts_for_break_even": 64,
+      "support_hours_at_break_even": 64,
+      "accounts_at_support_capacity": 32,
+      "contribution_at_capacity": 6071.360000000001,
+      "break_even_within_support_capacity": false
+    },
+    {
+      "support_hours_per_account": 1,
+      "fixed_monthly_cost": 20000,
+      "contribution_per_account": 189.73000000000002,
+      "accounts_for_break_even": 106,
+      "support_hours_at_break_even": 106,
+      "accounts_at_support_capacity": 32,
+      "contribution_at_capacity": 6071.360000000001,
+      "break_even_within_support_capacity": false
+    },
+    {
+      "support_hours_per_account": 2,
+      "fixed_monthly_cost": 6000,
+      "contribution_per_account": 114.72999999999999,
+      "accounts_for_break_even": 53,
+      "support_hours_at_break_even": 106,
+      "accounts_at_support_capacity": 16,
+      "contribution_at_capacity": 1835.6799999999998,
+      "break_even_within_support_capacity": false
+    },
+    {
+      "support_hours_per_account": 2,
+      "fixed_monthly_cost": 12000,
+      "contribution_per_account": 114.72999999999999,
+      "accounts_for_break_even": 105,
+      "support_hours_at_break_even": 210,
+      "accounts_at_support_capacity": 16,
+      "contribution_at_capacity": 1835.6799999999998,
+      "break_even_within_support_capacity": false
+    },
+    {
+      "support_hours_per_account": 2,
+      "fixed_monthly_cost": 20000,
+      "contribution_per_account": 114.72999999999999,
+      "accounts_for_break_even": 175,
+      "support_hours_at_break_even": 350,
+      "accounts_at_support_capacity": 16,
+      "contribution_at_capacity": 1835.6799999999998,
+      "break_even_within_support_capacity": false
+    },
+    {
+      "support_hours_per_account": 4,
+      "fixed_monthly_cost": 6000,
+      "contribution_per_account": -35.26999999999998,
+      "accounts_for_break_even": null,
+      "support_hours_at_break_even": null,
+      "accounts_at_support_capacity": 8,
+      "contribution_at_capacity": -282.15999999999985,
+      "break_even_within_support_capacity": false
+    },
+    {
+      "support_hours_per_account": 4,
+      "fixed_monthly_cost": 12000,
+      "contribution_per_account": -35.26999999999998,
+      "accounts_for_break_even": null,
+      "support_hours_at_break_even": null,
+      "accounts_at_support_capacity": 8,
+      "contribution_at_capacity": -282.15999999999985,
+      "break_even_within_support_capacity": false
+    },
+    {
+      "support_hours_per_account": 4,
+      "fixed_monthly_cost": 20000,
+      "contribution_per_account": -35.26999999999998,
+      "accounts_for_break_even": null,
+      "support_hours_at_break_even": null,
+      "accounts_at_support_capacity": 8,
+      "contribution_at_capacity": -282.15999999999985,
+      "break_even_within_support_capacity": false
+    }
+  ],
+  "setup": [
+    {
+      "setup_price": 750,
+      "delivery_hours": 3,
+      "contribution_before_cac": 502.20000000000005
+    },
+    {
+      "setup_price": 750,
+      "delivery_hours": 5,
+      "contribution_before_cac": 352.20000000000005
+    },
+    {
+      "setup_price": 750,
+      "delivery_hours": 10,
+      "contribution_before_cac": -22.799999999999955
+    }
+  ],
+  "financial_invariants": "passed",
+  "scenario_counts": {
+    "platform": 75,
+    "capacity": 15,
+    "managed_compute": 72,
+    "acquisition": 9,
+    "trials": 4,
+    "setup": 3
+  }
+}

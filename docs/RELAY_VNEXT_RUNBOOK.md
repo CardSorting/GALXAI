@@ -74,6 +74,12 @@ For a first migration from a shared relay, drain and stop that process before as
 
 Rollback uses the saved compatible source/image/configuration and private state after stopping competing ownership. Inspect current holds and accepted work first. Do not blindly restart a historical shared container, clear rejection journals or run two topologies with the same credentials. Billing and entitlement changes remain separate from deployment.
 
+## Sites generation rollout and recovery
+
+[Sites operations](maintainers/SITES_OPERATIONS.md) owns the fixed-price card, cohort, fresh local-profile checks, retained receipt volumes and billing recovery. Opaque supplier quota is accepted in this mode; no supplier ceiling assertion is required. Build and replace compatible workers before enabling application admissions. The forwarding option remains relevant to explicitly selected legacy metered jobs.
+
+Preserve signing state and receipt volumes. The durable text receipt endpoint can survive worker replacement; stream and cancellation still target the admitting generation. Pause new content work before incompatible rollback, and retain application code capable of settling previously accepted fixed holds.
+
 ## Parent and subagent request contract
 
 Use one idempotency key per logical operation and preserve payload, principal and returned scope. Save signed job URLs after acceptance; poll, stream or cancel that job instead of submitting new inference. `X-Galx-Task-Id` correlates parent/child work without granting authority.

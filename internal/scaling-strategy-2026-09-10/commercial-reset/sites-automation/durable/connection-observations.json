@@ -1,0 +1,28 @@
+{
+  "checked_on": "2026-09-10",
+  "connected": true,
+  "model_turns_started": 0,
+  "unexpected_model_requests": 0,
+  "site_mutations": false,
+  "site_metadata_retained": false,
+  "cli_version": "0.154.0",
+  "plugin_version": "0.1.66",
+  "compatibility": "reviewed_contract_matched",
+  "read_is_error": false,
+  "rpc_methods": [
+    "initialize",
+    "skills/list",
+    "thread/start",
+    "mcpServerStatus/list",
+    "mcpServer/tool/call"
+  ],
+  "transport": {
+    "largest_frame_bytes": 536127,
+    "total_bytes": 563138,
+    "failure": null,
+    "frame_limit": 1048576,
+    "session_limit": 8388608
+  },
+  "environment_policy": "allowlisted; application/model credentials not inherited",
+  "first_hardened_attempt": "failed before inventory read with the initial 256000-byte frame limit; subsequent successful catalog response measured 536127 bytes"
+}

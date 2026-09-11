@@ -22,3 +22,9 @@ Verify application upload/persistence, user authorization and any billing transa
 Record date, source revision, deployed component/image IDs, request ID, status, elapsed time, byte count, format and artifact digest privately. Never record credentials or raw provider payloads. Separate local build, synthetic test, real provider challenge, completed sign-in, actual inference and production deployment.
 
 September 7 and 8 image observations are historical successes. September 9 verified enrollment cleanup/controller behavior and did not issue a new live image request. Use [ADR 0130](adr/0130-image-receipts-and-uncertain-outcomes.md) for uncertain-result boundaries.
+
+## Sites generation and delivery
+
+Use [Sites verification](maintainers/SITES_OPERATIONS.md#verification) for the fixed-price path. Exercise accepted quote, cohort/daily limits, durable completed and unknown receipts, concurrent settlement and recovery at the original price. Missing token usage is a valid fixed-mode case; it must remain null in private accounting instead of being estimated.
+
+Separately verify the customer's artifact save and exact owner-private publication. A content completion, a native-host save and a deployed application are distinct results. Preserve the historical native-host evidence and distinguish local fixture runs from any authorized live billed test.

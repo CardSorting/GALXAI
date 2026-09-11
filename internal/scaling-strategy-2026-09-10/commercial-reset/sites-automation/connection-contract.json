@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "plugin_version": "0.1.66",
+  "reviewed_on": "2026-09-10",
+  "file_sha256": {
+    ".codex-plugin/plugin.json": "41f80b862f4d9687b237592e1352c5f0d20400f6835e44fd36c4dff8922cfdf0",
+    "skills/sites-building/SKILL.md": "695d87862d416c21dc31d2fc658d0ccc4d04bca24f063b5a32bcbf6983c88253",
+    "skills/sites-hosting/SKILL.md": "5b850d4ee17a0e4cbf8f13dcfac4d535c15fab1c399a2f20c59880667ee2add5",
+    "scripts/package-site.mjs": "c478f3060d464edf075afb1f0cdb699979bfc7913a1e64114bfbd653a1352bcd",
+    "scripts/workflow-metrics.mjs": "fa95d30038a73f779dbac8a298ecc662804438be7ce86113454dc0a8d8298e98",
+    "skills/sites-hosting/scripts/package-site.sh": "01d8f7babd12e49316ccf1a24a77a3edcb47e814195542db19b40d06cd388e83",
+    "skills/sites-hosting/scripts/prepare-site-build.cjs": "32496143dcc6f7e7c5410444e319469e2525c1d2eda0d2ed7c65e7c67995dbe3"
+  }
+}

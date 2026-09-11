@@ -1,0 +1,14 @@
+{
+  "classification": "Illustrative planning assumptions; not GALX actuals or a price recommendation",
+  "scenario_count": 192,
+  "max_supplier_expense_at_target_margin": "6.600000",
+  "max_full_use_allowance_by_cost_ratio": {
+    "0.35": "18.857143",
+    "1.00": "6.600000"
+  },
+  "illustrative_availability_pct": {
+    "primary_only": "99.850050",
+    "qualified_backup": "99.913378",
+    "ideal_independent_backup": "99.949900"
+  }
+}

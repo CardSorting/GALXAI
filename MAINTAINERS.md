@@ -29,3 +29,7 @@ Follow [Git workflow](docs/maintainers/GIT_WORKFLOWS_AND_HOOKS.md), [deployment 
 Update affected guides and entire ADR bodies when strategy changes. Date evidence and reconcile status, examples and navigation. [ADRs 0131–0133](docs/adr/README.md) record operator access, credential recovery and enrollment. Run `python3 scripts/verify-docs.py` and semantic stale-guidance searches.
 
 The [complete catalog](docs/CATALOG.md) includes subsystem references, research and historical evidence. Those scopes do not establish fleet-wide SLAs. Use [the maintainer catalog](docs/maintainers/README.md) for component ownership, security incidents and database procedures.
+
+## Sites content work
+
+Follow [ADRs 0134–0136](docs/adr/README.md) and [Sites operations](docs/maintainers/SITES_OPERATIONS.md) for fixed-price admission, durable receipts and customer-owned delivery. Supplier quota can remain unknown; completion and authorization evidence cannot be guessed. Keep the new local implementation distinct from the historical disabled precursor deployment.

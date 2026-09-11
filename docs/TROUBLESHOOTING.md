@@ -22,7 +22,7 @@ Start with the component and execution state. Product gateway keys, controller k
 | Unexpected image dimensions/model | Inspect private administrator evidence; the public capability does not promise exact provider model/dimensions |
 | `relay_admission_unknown` | Work may have executed; reconcile instead of blindly replaying |
 | `job_transport_unavailable` | Retry the original job URL, not inference admission |
-| `relay_generation_gone` | Original worker is gone; never attach old work to a replacement |
+| `relay_generation_gone` | Stream/cancel generation is gone; use the original durable text receipt if present, never reattach execution |
 | Stale dashboard | Retained snapshot is not routing authority; restore authenticated refresh |
 | Controller admin 401 | Use the controller administrator credential; worker admin errors are separate |
 | Browser origin rejected | Operator pages require the host launcher and local origin; product clients use their application backend |
@@ -45,3 +45,11 @@ Database checkout saturation and query-specific errors must not become global co
 `docker-compose.relay.yml` and old shared-relay CLI commands are not the federation launcher. Use the supervised controller and [vNext runbook](RELAY_VNEXT_RUNBOOK.md). Confirm image and process generation after deployment; code on disk does not prove the running image changed.
 
 The September 7 DreamBees image verification succeeded as recorded in ADR 0127. Reproduce through the actual current client before claiming a new incident resolved. Billing, asset persistence, and tool execution require their own checks.
+
+## Sites content
+
+Use the [Sites recovery runbook](maintainers/SITES_OPERATIONS.md#pause-recovery-and-rollback). A generic `content_unavailable` can mean disabled generation, cohort denial, invalid server configuration, an incompatible worker, missing administrator authority or unavailable storage. Diagnose privately; do not return the internal cause to the account.
+
+`generation_limit_reached` pauses new work; it does not prevent existing-operation GET recovery. `operation_pending` or null cost requires the original operation's receipt. Missing usage alone does not block a fixed-price completed receipt, but it still blocks legacy metered settlement. A confirmed unused operation closes at zero; a missing receipt is not proof of non-dispatch.
+
+Do not resolve a fixed-mode readiness failure by inventing supplier evidence or enabling unsupported ceiling forwarding. Verify the local profile and compatible deployed components. Direct CLI archive-upload failure is a separate delivery issue; use the recorded native-host workflow without repeating an uncertain save.

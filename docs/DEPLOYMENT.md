@@ -18,3 +18,9 @@ Preserve rollback configuration, private state and accepted-operation evidence. 
 The shared-to-federation cutover occurred September 7. For any remaining legacy host, drain and stop shared ownership before federation assignment; `docker-compose.relay.yml` is not a federation launcher. Multi-host ownership needs a shared lease beyond the current single-host implementation.
 
 Run appropriate [hardening checks](maintainers/RELAY_HARDENING.md), production build, public-response tests and rendered/browser-asset scans. Separate canary cleanup from production workspaces. Validate actual downstream behavior for changed transport; paid entry and entitlement remain separate acceptance.
+
+## Sites strategy rollout
+
+The fixed-price working-tree changes have local verification only. The [earlier September 11 release](../internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/RELEASE_20260911.md) deployed a metered precursor with paid generation disabled; it is not fixed-price deployment evidence.
+
+Follow [Sites rollout](maintainers/SITES_OPERATIONS.md#rollout): upgrade compatible workers and federation with retained volumes/signing authority, then the application with generation paused, verify the exact environment and enable the intended cohort. Fixed mode does not require supplier ceiling attestations. Keep settlement/recovery code for accepted fixed-price holds during rollback. Customer-local upload/publication is independently verified and does not follow from an application deploy.

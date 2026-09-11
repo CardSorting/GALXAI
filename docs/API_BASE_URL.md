@@ -34,6 +34,13 @@ Errors contain only `error.code`, `error.message`, and `error.request_id`.
 Contact support with the request ID. A timeout can leave a request outcome
 uncertain; check an asynchronous request before submitting another generation.
 
+## Site content generation
+
+Eligible accounts can use the [Site content contract](SITES_CONTENT.md) for quoted, bounded
+text drafts and recovery by operation ID. It uses an account session bearer at
+`/api/sites/content`. The guide covers fixed pricing, allowances, repairs and
+settlement; availability depends on account eligibility.
+
 ## Documentation
 
 - [API documentation](https://galx.ai/docs)

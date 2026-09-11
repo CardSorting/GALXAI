@@ -1,0 +1,51 @@
+{
+  "checkedAt": "2026-09-11T07:07:31.966236+00:00",
+  "modelTurns": 0,
+  "walletWrites": false,
+  "commitSha": "615805b91542918355503ccd391b38004aa8a98c",
+  "cliVersions": [
+    "0.154.0",
+    "0.153.4"
+  ],
+  "attempts": [
+    {
+      "cli": "0.154.0",
+      "encoding": "absolute_path",
+      "cwd": "isolated",
+      "saved": false
+    },
+    {
+      "cli": "0.154.0",
+      "encoding": "file_uri",
+      "cwd": "isolated",
+      "saved": false
+    },
+    {
+      "cli": "0.154.0",
+      "encoding": "absolute_path",
+      "cwd": "archive_directory",
+      "saved": false
+    },
+    {
+      "cli": "0.153.4",
+      "encoding": "absolute_path",
+      "cwd": "archive_directory",
+      "saved": false
+    }
+  ],
+  "diagnosis": "argument type validation at schema path archive; expected type value was masked in retained diagnostic",
+  "fileObjectContractSource": "https://developers.openai.com/plugins/reference#define-file-inputs",
+  "inference": "The tested direct MCP path did not convert the local path to a valid uploaded-file argument",
+  "versionHistoryBeforeNativeSave": {
+    "checked": true,
+    "pages": 1,
+    "versions": 3,
+    "matchingCommitVersions": 0,
+    "hasMore": false
+  },
+  "automaticMutationRetries": false,
+  "experimentalPathRewriteRetained": false,
+  "diagnosticRetrySwitchRetained": false,
+  "followup": "Reviewed absence of a saved version, then used separate persisted native-host handoff; see hosted-save-verification.json",
+  "cliOnlyUploadQualified": false
+}

@@ -43,3 +43,9 @@ JWT identity is verified by the authentication service; decoded claims, bare UUI
 Sanitized telemetry is separate from job/checkpoint storage, which may contain unfinished request content. Bounded receipts may contain response bytes. Provider retention, application assets, and consuming agent storage are separate policies. Do not claim universal zero retention, zero knowledge, HIPAA compliance, or SOC 2 certification from these mechanisms.
 
 Keep credentials, raw runtime environments, prompts, and private operational identifiers out of logs and shared incident reports. For implementation scope and dated deployment evidence, use the [contract](FEDERATION_STRATEGY.md), [runbook](RELAY_VNEXT_RUNBOOK.md), and [ADR catalog](adr/README.md).
+
+## Sites content and receipts
+
+The Sites application API requires an explicit verified account session bearer. It scopes operation IDs to that account and accepts neither caller identity/model/rates nor token usage and relay references. New quotes/generation also need an exact cohort membership and a fresh server-only administrator contract check. Ordinary account or inference authentication never grants that operational access.
+
+Fixed pricing uses a matching durable completed receipt, never a customer claim or guessed usage. Database authority and wallet locks protect the reservation/settlement transaction. Public output contains only the content schema, operation identity, quote and opaque financial receipt; transport identities, origins, usage objects and configuration stay private. Customer-owned Site publication validates separate account ownership and exact saved artifacts. See [ADRs 0134–0136](adr/README.md).

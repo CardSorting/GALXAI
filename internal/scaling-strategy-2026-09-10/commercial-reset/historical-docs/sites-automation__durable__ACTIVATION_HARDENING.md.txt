@@ -1,0 +1,56 @@
+# Activation hardening — September 11, 2026
+
+This records the first hardening pass. The [durable native-host update](NATIVE_HOST_DELIVERY.md) supersedes its upload workflow and single-mode activation contract. Native-host delivery now has a verified handoff; unattended CLI upload remains unresolved. Both retain the supplier ceiling requirement.
+
+Private operational assessment. The relay remains the sole model provider. The code now recovers billing evidence across worker and front-door restarts, validates activation before reserving customer money, and qualifies Sites discovery separately from file upload and publication. Production application and relay rollout have not occurred. No production wallet was charged.
+
+## What is now working
+
+| Boundary | Implemented and tested behavior |
+| --- | --- |
+| CLI discovery | An authenticated `mcpServerStatus/list` exposes Sites tools even when `skills/list` omits Sites. Later probes listed both Sites skills as well. The companion requires the exact runtime tool and separately verifies pinned local helper hashes. A cached skill alone grants no tool authority. |
+| CLI operations | Live authenticated reads, source push, private publication of an existing saved version, deployment polling and owner-only verification succeeded with zero Codex model turns. No installation/cache edit or approval bypass was needed. |
+| Archive upload | The direct CLI archive save returned an error. The current session's native upload saved the identical validated package, after version history was checked. The CLI then published that saved version. This is a verified hybrid path, **not** successful unattended CLI upload. See [publication evidence](cli-publication-verification.json). |
+| Durable relay evidence | A per-worker SQLite journal commits output and allowlisted usage before completion is announced. It survives loss of the in-memory stream and replacement of both worker and front door. A live isolated request recovered the same 11 input / 5 output / 16 total tokens after restart, with one model request. See [live runs](live-metering-verification.json). |
+| Money | Initial settlement checks the durable receipt; streaming usage alone cannot authorize a charge. Recovery reads the recorded job at its original relay origin and uses the rate saved with the hold. Concurrent recovery creates one financial transaction. |
+| Unknown outcomes | Lost receipts, missing/inconsistent/excessive usage, failed output, ambiguous admission and expired references retain reservations. Only positive, fenced evidence that a job never left its queue permits a zero-cost close and return of the reservation. |
+| Request bounds | Durable jobs accept at most 12 KiB of serialized messages, retain at most 12 KiB of output, stop within a 30-second local deadline and make one provider attempt. A byte/deadline limit does **not** establish a supplier token ceiling or prove cancellation stopped supplier billing. |
+| Activation | The feature flag is insufficient by itself. New quotes and generation require fresh operator qualification of the exact origin, model, rate version, output ceiling, restart-safe receipts and full CLI upload/publication. Failure occurs before wallet admission. Existing-operation reconciliation remains available while generation is paused. |
+
+## Durability and isolation
+
+The journal lives at `<RELAY_STATE_SNAPSHOT_PATH>.receipts/receipts.sqlite`, within the worker's existing retained volume. Separate snapshot files use separate receipt stores. The store uses a rollback journal, full synchronization, restrictive filesystem permissions, an application/schema identity, content hashes and a bounded 10,000-record capacity. It deliberately avoids WAL mode; the companion's separate WAL database still requires its previously qualified SQLite runtime.
+
+A new writer replaces the persisted authority epoch. An older writer cannot dispatch or complete after it is fenced. Queued work becomes `not_started`; previously dispatched unfinished work becomes `unknown`. Known completed results remain available for 30 days. Unknown work and completed output without authoritative usage have no automatic storage expiry. Capacity exhaustion rejects new durable work before inference; unknown records are not silently evicted.
+
+The authenticated receipt endpoint returns only an explicit result DTO. The front door verifies its signed job reference and customer identity. Receipt reads may reach a replacement worker on the original shard's retained volume; streams and cancellation still require the admitting generation. A lost volume, removed shard, rotated signing authority or expired signed reference is not recoverable through this mechanism and never implies a refund. Signed durable job references last 30 days. Maintain the volume and signing authority and reconcile inside that period; this is local durable storage, not replicated disaster recovery.
+
+Different customer operation keys are now included in relay deduplication. Previously, identical text could attach two independently billed requests to the same worker job despite different forwarded keys. A regression test demonstrates distinct executions. Legacy requests without an operation key retain their existing prompt-based identity.
+
+The receiver keeps receipt output independently of the asynchronous SSE ring. This fixes a tested ordering race in which completion could arrive before token fan-out had persisted the final chunk. Simulated receipt-commit failure never produces successful completion. Oversized output and retryable supplier failure terminate the metered job without hidden retries.
+
+## Activation contract
+
+The private server setting `GALX_SITES_ACTIVATION_EVIDENCE` contains a JSON object validated by [the activation guard](../../../../../src/lib/billing/sites-activation.ts). Its required facts are:
+
+- `schemaVersion: 1`, `profile: "sites-text-v1"`, exact `relayOrigin`, `model`, `rateVersion` and `maxOutputTokens` matching the configured tariff.
+- Millisecond `checkedAt` and `expiresAt`, a validity interval no longer than 24 hours, and a lowercase SHA-256 `evidenceSha256` identifying the reviewed evidence artifact.
+- `outputLimitEnforced: true`, `durableReceiptVersion: 1`, `receiptSurvivedRestart: true`, integer `receiptRetentionDays >= 30`, `cliArchiveUploaded: true`, and `cliPrivatePublished: true`.
+
+This is trusted operator configuration validation, **not cryptographic verification of a provider claim**. An evidence hash is an audit reference; the guard does not download it or prove that the operator's assertions are true. Do not manufacture passing assertions. The live findings in this directory do not satisfy the output-enforcement or CLI-upload requirements, so no passing activation setting was installed. No tariff or supplier-margin assumptions were invented.
+
+The local byte/time bounds, an observed five-token answer, and forwarding `max_output_tokens` are insufficient evidence for `outputLimitEnforced`. The live upstream rejected the forwarded parameter with HTTP 400. Generation remains gated while that contract is unresolved. The private qualification script can exercise forwarding on an isolated worker without touching customer wallets, but it deliberately does not claim a short response proves enforcement.
+
+## Remaining actions
+
+1. Resolve and qualify direct CLI archive upload using a supported native file-upload path. Runtime metadata advertises `archive` as a local file parameter; the direct call failed while the hosted native upload succeeded. The exact cause is unconfirmed. Do not infer that Sites is absent, bypass runtime approvals, reverse-engineer account endpoints, or blindly repeat an uncertain save. Reuse the existing project and saved version.
+2. Obtain and stress-test a supported supplier output ceiling, including an intentionally overlong response and terminal usage. Until then, keep the paid generation guard closed. A different commercial/execution contract would need an explicit, defensible cost bound; a generous allowance is not a substitute.
+3. After both checks pass, roll out the tested worker/front-door source with retained volumes and stable signing authority, qualify the deployed origin, install the reviewed tariff/evidence and enable a small cohort. Reconcile frequently, monitor unresolved reservations and storage capacity, and refresh qualification within 24 hours.
+
+Lost POST acknowledgements without a persisted job ID, historical holds without an origin/reference, storage loss and unavailable provider usage still require operator investigation. The implementation does not guess a job, replay inference to recover a receipt, fabricate charges, or turn these cases into automatic refunds. There is no scheduled reconciliation worker in this change; the authenticated existing-operation GET performs recovery.
+
+## Validation
+
+Meaningful checks include process `SIGKILL`, competing writer fencing, expiry/capacity behavior, malformed and corrupted receipts, redirect/body/identity rejection, cross-account HTTP authorization, independent customer operations, output cancellation, no retry after provider failure, failure before completion acknowledgement, restart recovery across worker/front door, and real PostgreSQL atomic settlement and zero-cost closure. The isolated application suite also covers public information and authentication boundaries and builds the production application. The static scan applies to local rendered HTML and browser assets, not to the production GALX site.
+
+See [application build evidence](application-verification.json), [hardening verification](activation-verification.json), and the [live adapter runbook](LIVE_ADAPTERS.md). The earlier [qualification report](LIVE_QUALIFICATION.md) is retained as historical evidence; this document supersedes its three remaining-gate descriptions.

@@ -1,128 +1,38 @@
-# GALXAI Product Surface Strategy
+# GALX product surface strategy
 
 <!-- docs-scope: domain-reference -->
-> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-## Product thesis
+Private product reference, reconciled September 11, 2026. [ADR 0119](adr/0119-inference-first-product-surface-and-client-retirement.md) established the inference-first product and model-catalog landing. The explicit September 10 [image studio restoration](maintainers/image-studio-review.md) and [ADRs 0134–0136](adr/README.md) define the later image and Sites scopes. Public content follows [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md).
 
-GALXAI is an inference platform and governance control plane. It helps developers discover models, obtain credentials, route API traffic, understand cost and reliability, and operate production inference. It is not a destination where an end user conducts conversations or creates an image library.
+## Product thesis and surfaces
 
-This distinction is behavioral, not cosmetic. Renaming a chat composer to a playground, assistant, agent, console, or studio does not make it platform infrastructure.
+GALX provides model discovery, authenticated inference, billing and usage controls. `/models` remains the default authenticated destination; explicit protected return destinations remain intact. The restored `/images` studio lets users generate and manage their own images under its separate image/public-boundary contract. Destination chat/persona/social applications remain downstream.
 
-## Product layers
+The selected Sites strategy adds bounded text generation and a customer-local delivery workflow. The GALX server owns quotes, account funding, rolling allowances and settlement. Deterministic code validates generated content, renders a fixed template and packages an exact artifact. The customer owns their Sites connection, source, saved version and private publication. This implementation introduces no public hosted Sites builder UI or generic agent-execution surface.
 
-| Layer | GALXAI owns | GALXAI does not own |
-| --- | --- | --- |
-| Web control plane | Model catalog, model specifications, credentials, billing, usage, routing, telemetry, governance, documentation, and account settings | Conversation timelines, message composition, character/persona management, sharing, galleries, image history, and creative project state |
-| Inference plane | OpenAI-compatible and ecosystem-compatible request handling, streaming, routing, metering, retries, context limits, and explicit durable-session contracts | The downstream product's presentation, collaboration model, content lifecycle, or end-user workflow |
-| Integration plane | SDKs, protocol adapters, examples, request builders, and optional embeddable primitives | A GALXAI-branded destination chat or image-generation application |
+| Surface | Scope |
+| --- | --- |
+| Model and API integration | Capabilities, account keys, integration examples and current customer contracts |
+| Billing and usage | Allowed customer statements, balances, accepted prices and opaque receipts |
+| Image studio | Explicitly restored generation and personal image library under its existing scope |
+| Sites content API | Quote, bounded brief, generated text schema and existing-operation recovery |
+| Customer-local Sites companion | Validated static artifacts and exact owner-private save/publication using that customer's connection |
+| Private operator tools | Capability, health, enrollment, desktop and operational diagnostics under administrator authorization |
 
-## Primary authenticated journey
+## Price and allowance language
 
-```mermaid
-flowchart LR
-    Auth[Authenticate] --> Models[Browse /models]
-    Models --> Detail[Inspect model capabilities and economics]
-    Detail --> Keys[Create or select an API key]
-    Keys --> Integrate[Integrate through REST, SDK, IDE, or agent]
-    Integrate --> Operate[Observe usage, reliability, and spend]
-```
+The provisional Sites fixed price and rolling allowance are configurable product decisions, not claimed supplier costs or quotas. The API quote is the accepted customer contract. A known completed generation can be charged with missing token usage; an unknown completion retains its reservation. Repairs are separately quoted. The per-generation price does not include an agency subscription, setup work, hosting entitlement or unlimited revisions.
 
-`/models` is the default post-auth destination. An explicit return destination may resume a protected workflow, but no authentication path should default to a composer or generated-content surface.
+Public descriptions explain deliverables, prices, accepted limits, errors and recovery. Keep model selection, supplier authentication, topology, readiness fields and execution diagnostics private. Do not claim exact underlying model identity, guaranteed provider quota, universal savings, margins or live availability from a local implementation.
 
-## Surface classification
+## Roadmap and activation
 
-### First-class hosted surfaces
+The fixed Sites flow is locally implemented and verified. The prior deployed metered precursor remained disabled; the new mode requires its own compatible rollout and account activation. [Sites operations](maintainers/SITES_OPERATIONS.md) owns that procedure. Native-host private save/update has separate historical evidence; direct CLI archive upload is unqualified and does not gate content generation.
 
-GALXAI may host:
+The proposed agency operations fee and setup engagement remain commercial experiments in the private strategy package. They are not implemented subscription terms. Scope any expansion by customer job, configured budget, ownership, recovery behavior and a measurable result. Additional providers and a native Codex Responses/tool integration are independent future work, not prerequisites for this bounded workflow.
 
-* model discovery, comparison, capability, pricing, and routing pages;
-* API-key, provider-vault, team, billing, audit, queue, and telemetry controls;
-* documentation, integration recipes, schema builders, calculators, and diagnostics;
-* a bounded API request inspector that exposes request JSON, response envelopes, headers, latency, and generated SDK or cURL snippets.
+## Measures and invariants
 
-### Diagnostic sandbox boundary
+Measure successful integrations, completed and reconciled content operations, original-price settlements, customer-owned delivery, support effort and paid retention. Track unknown outcomes and actual expense where available independently from generated-text volume. A passing build or a private sample publication does not establish full live paid delivery.
 
-The legacy `/playground` route is classified as an API diagnostic surface, not a destination application. It must remain single-request oriented and should evolve toward the name **API Request Inspector**. It must not add:
-
-* a conversation timeline or multi-turn composer;
-* saved chats, chat search, titles, branches, sharing, or public links;
-* characters, personas, assistants, or role-play affordances;
-* image galleries, remix canvases, project libraries, or generation history;
-* synthetic output presented as successful live inference.
-
-Its purpose is to help a developer inspect the wire contract and copy an integration. The successful outcome is code running in the developer's environment, not continued use of the sandbox.
-
-### Known alignment debt
-
-The current `/playground` implementation still contains legacy **Model Playground**, **Visual Studio**, and simulated-response language. Those behaviors predate ADR 0119 and do not define the target product. The route is compliant only after it is reduced to honest request/response inspection with no synthetic-success fallback; if that narrow diagnostic cannot justify its maintenance cost, remove the route instead.
-
-This debt must not be used as precedent for adding new composer features. Until it is resolved, navigation and onboarding should send authenticated users to `/models`, not `/playground`.
-
-### Retired and prohibited hosted surfaces
-
-The following are outside the GALXAI product boundary:
-
-* hosted chat, agent-chat, or assistant destinations;
-* hosted image-generation studios and creative canvases;
-* shareable conversation pages;
-* character and persona creation;
-* client-generated content libraries or persistence tables whose only consumer is a retired hosted client.
-
-The retired routes are `/chat`, `/share`, `/characters`, and `/studio`. Their removal does not deprecate compatible inference endpoints.
-
-## Capability preservation
-
-Product-surface retirement must not remove:
-
-* `POST /v1/chat/completions`;
-* `POST /v1/images/generations`;
-* `GET /v1/models`;
-* compatible `/v1/messages`, Ollama, SDK, CLI, IDE, or agent integrations;
-* rolling context and owner-scoped persistence when a caller explicitly selects durable inference continuity.
-
-Protocol terms such as `chat`, `messages`, `conversation`, and `image generation` describe compatibility or inference semantics. They do not imply that GALXAI owns the consuming application.
-
-## Copy and navigation rules
-
-Product copy should lead with **models**, **inference**, **routing**, **API access**, **reliability**, **usage**, and **spend governance**.
-
-Use **chat** only when naming an API protocol, SDK namespace, test suite, or downstream use case. Use **studio**, **assistant**, and **workspace** only when their scope is unambiguous and not a hosted content destination. Prefer **API Request Inspector**, **request builder**, or **gateway diagnostic** over **AI playground**.
-
-Navigation must make the operating sequence legible:
-
-1. Models
-2. API keys and integrations
-3. Usage, queues, and telemetry
-4. Billing and governance
-5. Documentation and diagnostics
-
-Do not place a chat or generation call to action above model discovery or credential setup.
-
-## Roadmap decision test
-
-Before accepting a web feature, answer:
-
-1. Does it help a developer select, connect, route, meter, secure, or govern inference?
-2. Is its value primarily visible through an API integration outside GALXAI?
-3. Would conversation history, creative projects, sharing, or content-library state be required for the feature to feel complete?
-4. Does it introduce client-only persistence or a new public database authority surface?
-5. Could a user reasonably mistake GALXAI for the downstream application after seeing it?
-
-Questions 1–2 should usually be **yes**. Questions 3–5 should be **no**. A proposal that fails this test requires a new ADR that explicitly revisits ADR 0119; it must not enter through incremental UI expansion.
-
-## Success measures
-
-Product activation should be measured by platform outcomes:
-
-* model-detail views that progress to credential or integration setup;
-* time from authentication to first valid API request;
-* successful SDK, IDE, CLI, and REST integrations;
-* production inference volume and retained API consumers;
-* adoption of routing, observability, budget, and governance controls.
-
-Conversation length, generated-image count, gallery engagement, and time spent in a hosted composer are not GALXAI product success metrics.
-
-## Authority
-
-[ADR 0119](adr/0119-inference-first-product-surface-and-client-retirement.md) is the architectural source of truth. This document translates that decision into product, copy, navigation, and roadmap rules.
+Preserve inference APIs when changing presentation. Keep verified account identity and all financial writes server-side, public DTOs allowlisted, and uncertain side effects recoverable under their original identity. Do not introduce a public database authority surface or a repeated publication as a shortcut to recovery.

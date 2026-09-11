@@ -1,0 +1,24 @@
+{
+  "source_revision": "4587642a8671dfbf7b4df80b580811f9654093f8",
+  "evidence_date": "2026-09-10",
+  "runtime": "Node 22.21.1",
+  "runtime_distribution": "https://nodejs.org/dist/v22.21.1/node-v22.21.1-darwin-arm64.tar.xz",
+  "runtime_sha256": "39f53ffcf1604291e85974c8588bb290c14b358ac085e342920e703651d63c5e",
+  "regressions": {
+    "passed": 66,
+    "failed": 0
+  },
+  "production_build": "passed",
+  "source_of_truth": "Local isolated execution; no production claims",
+  "raw_log_sha256": {
+    "audit-regression-node22.log": "25a721bc157c204d46fdbd1e7d6ad05eef3f1b6533e0c33cb88966dcd4c0dd2d",
+    "audit-build-node22.log": "56a1d1aa9c279d53eea75c320179798969af3fa6548ced9e79da8bf74422b25a"
+  },
+  "documentation_validator": {
+    "existing_issues": 4,
+    "affected_files": [
+      "docs/maintainers/image-studio-review.md",
+      "docs/operations/signup-credit.md"
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+# Durable native-host delivery — September 11, 2026
+
+Updated by [live relay admission checks and the CLI argument-type investigation](RELAY_CONTRACT_HARDENING.md). The following records the preceding implementation pass; current activation also requires an administrator-authenticated live relay contract before funds.
+
+Private implementation and release assessment. The relay remains the only model provider. The previously manual native-upload/CLI-publication sequence is now a durable companion operation and passed a live private update. Paid generation remains disabled. No production wallet was charged.
+
+## Delivery workflow
+
+The customer's authenticated native Sites host uploads the archive; the scoped CLI verifies and privately publishes the saved version. `LiveSitesAdapter.requestHostedSave` verifies the bound owner and canonical artifact, then persists a one-use upload intent. The host receives exactly one `sites.save_site_version` call with the pushed commit and local archive path. It must execute that exact call and immediately preserve its reply.
+
+`acceptHostedSave` snapshots and validates the host acknowledgement, checks its operation and local artifact identity, retrieves the version through authenticated Sites reads, compares the source and normalized archive receipt, rechecks the owner, and commits the acknowledgement. A matching repeated acknowledgement is idempotent; a conflicting acknowledgement fails. The runner then publishes the known version and can reconcile an interrupted deployment through its existing publication journal.
+
+Private host commands, using the existing `live.ts` entry point:
+
+```text
+request-hosted-save STATE_DIRECTORY JOB_ID PUSHED_COMMIT_SHA
+accept-hosted-save STATE_DIRECTORY JOB_ID PRIVATE_RECEIPT_FILE
+publish-saved STATE_DIRECTORY JOB_ID PRIVATE_PUBLICATION_INTENT_FILE
+```
+
+These commands retain authoritative billing checks before saving and publishing. The receipt file has exactly `schemaVersion: 1`, `operationId` and `artifactHash` copied from the handoff, plus `version` containing only `id`, `project_id`, `source.commit_sha` and `archive_storage.{content_hash,size_bytes,archive_format}` copied from the native save reply. Never populate it from model output. Keep it in a private application directory and persist it before other work.
+
+The local authenticated host is a trusted boundary, like the local job store. It attests which local file it uploaded. Remote reads independently confirm the source and storage metadata; they do not independently prove the local-to-remote archive transformation. The service normalizes the tar, so neither the gzip hash nor a simple decompressed-tar hash is assumed to equal the remote hash.
+
+An interrupted upload does not emit another upload request, switch transports, or accept a guessed version. Recover the original native reply and verify it. If unavailable, leave the operation pending for investigation. This does not promise automatic recovery from a lost upload acknowledgement or unattended access to the hosted tool surface. Native runtime approvals remain authoritative; the scoped CLI never silently grants them.
+
+## Output bounds and activation
+
+The relay previously dropped explicit `reasoning_effort: "none"`. It now forwards it, and billed Site generation explicitly requests that setting. This avoids silently requesting the supplier default but is not a cost guarantee.
+
+Billed Site generation also sends `require_output_limit: true`. The updated worker rejects these requests before creating a job or dispatching inference when forwarding is disabled. Required bounds have a separate deduplication identity. There is no automatic retry without the bound. Roll out the updated worker before activation; older worker code is not covered by this check.
+
+Two isolated bounded requests used the existing relay assignment with no wallet calls or production configuration changes. The final diagnostic identified HTTP 400, `max_output_tokens`, and `unsupported_parameter`. No supplier-enforced ceiling was demonstrated. Private diagnostics contain fixed allowlisted classifications rather than raw provider messages, credentials or URLs. The official [Responses reference](https://developers.openai.com/api/reference/cli/resources/responses/methods/create) includes both visible and reasoning output in `max_output_tokens`; that API contract does not establish support on this relay's supplier connection.
+
+A third, short comparison request without the output-ceiling field succeeded with the explicit no-reasoning setting: 11 input / 5 output / 16 total tokens. Its exact receipt survived worker restart without another generation. That comparison verifies compatibility and receipt recovery, not a hard ceiling, and did not use the paid generation route.
+
+Activation now distinguishes explicitly configured delivery modes:
+
+| Private operator setting | Required delivery evidence |
+| --- | --- |
+| `GALX_SITES_DELIVERY_MODE=cli` (default) | CLI archive upload and CLI private publication |
+| `GALX_SITES_DELIVERY_MODE=native_host` | Matching `deliveryMode`, `nativeHostArchiveUploaded: true`, `hostedReceiptVerified: true`, and CLI private publication |
+
+Both retain exact origin/model/tariff, output-limit, receipt-retention, restart-recovery and freshness requirements. Native-host evidence cannot activate CLI mode or silently change modes. The `outputLimitEnforced` requirement remains unsatisfied. No passing assertion, feature flag or tariff was installed. Unknown usage continues to preserve reservations. The guard validates trusted operator configuration, not cryptographic supplier attestation.
+
+The official [app-server documentation](https://learn.chatgpt.com/docs/app-server) documents native MCP calls and runtime approval requests but does not establish an archive upload primitive for this raw-call path. The earlier direct CLI save failure remains unresolved; new diagnostics record safe error categories and denied runtime request types. No new direct CLI save was attempted for an already saved revision. Helper verification now respects an explicitly configured `CODEX_HOME`.
+
+## Live verification and next actions
+
+The live canary reused the existing owner-only Site, official packager, fixed synthetic content and an isolated fixture ledger. Fresh companion processes handled upload handoff, acknowledgement and publication. It made zero model requests and zero production wallet writes. The native host saved once; the companion independently verified that receipt and privately published the version. See [native-host evidence](hosted-save-verification.json), [supplier checks](live-metering-verification.json), and [current verification](activation-verification.json).
+
+Adversarial tests cover duplicate handoffs, restart between upload and acknowledgement, conflicting operation/source/archive/account fields, cancellation, caller mutation during authorization, duplicate acknowledgements, and one publication. Application checks cover mandatory forwarding, sanitized refusal before relay admission, independent activation modes, authentication and public response allowlists. The production build and local browser-asset scan are separate from a live GALX-site audit.
+
+Next: obtain a supported supplier ceiling or a separately reviewed contractual cost bound through the existing relay; qualify deliberately overlong output and authoritative terminal usage; roll out the updated relay and app with retained state; then qualify the deployed origin. Only then enable a small paid cohort in the qualified delivery mode. Direct CLI upload is an additional prerequisite for unattended CLI mode. Do not remove limits, infer zero cost from missing evidence, or fund unlimited revisions to force activation.

@@ -1,0 +1,137 @@
+# Durable Sites workflow assessment
+
+The relay-only approach now has a durable local execution core, a resumable command interface, strict artifact handling and an isolated Sites connection check. It preserves the original product boundary: a model produces bounded content, and trusted code controls the workflow. A local demonstration survived separate process invocations, used the official Sites packager and reached a verified artifact state without a new model request or any publication.
+
+The implementation now includes [live adapters and a deployment runbook](LIVE_ADAPTERS.md). PostgreSQL reservations/settlement and the authenticated billing API have executable adapters, as does owner-private deployment of a saved Sites version. It is not a released customer publishing service. Registration/source push/version saving still use the official Sites workflow; real publication and reliable supplier metering remain rollout gates.
+
+## Decision and implementation scope
+
+Continue with a small local companion and a template-based workflow. Keep the relay as the only model supplier. Use the customer's independently authorized Sites connection for hosting operations. Preserve fixed operation schemas, explicit phase transitions and a local export even when the connector is unavailable.
+
+The implemented core comprises [contracts](contracts.ts), [transactional storage](storage.ts), [runner](runner.ts), [artifact handling](artifacts.ts) and a [local command interface](local.ts). The [live entry point](live.ts) connects server billing and Sites publication. This adapter pass adds the authenticated `/api/sites/content` route and server billing modules; it adds no dependency or schema migration, and changes no deployed configuration or commercial entitlement. Application code does not import the private companion.
+
+The previous one-shot entry point was retired because it could overwrite the previous observation and artifact files. Its source is retained as [historical evidence](../historical/run-live.ts.txt). New work is identified by a durable job ID and a caller request key. Repeating a key with the same request returns the existing job; changing the brief, template or requested model under that key produces a conflict.
+
+The existing [GALX execution authority](../../../../../src/core/execution/DurableExecutionAuthority.ts) was inspected before selecting storage. It already models action authorization, leases, budgets and completion verification. Its storage kernel's [lock authority](../../../../../src/core/broccolidb/broccolidb-lock-authority.ts) is explicitly in-process. Reusing that as a multi-process companion store without another ownership mechanism would overstate its guarantee. The local implementation follows those concepts with SQLite transactions; it does not replace or change GALX's existing execution authority. A future hosted integration should use one authoritative service rather than independently writing both ledgers.
+
+## Established patterns applied
+
+| Reference pattern | Application here | Boundary |
+| --- | --- | --- |
+| AWS request identifiers and parameter matching | Owner-scoped request keys, canonical input fingerprints and conflicts for changed intent | Local deduplication does not make a remote operation idempotent |
+| Durable workflow activities | Persist intent before dispatch; record results separately; reconcile uncertain effects | No Temporal service or second model provider is introduced |
+| GitHub Actions deployment concurrency | Serialize publishing for each Site, including across different connection aliases | The local lock cannot stop a person or another application publishing independently |
+| SQLite transactions and durable writes | Job state, events, reservations and receipts commit together | One host and local filesystem; no network-filesystem or multi-host guarantee |
+| Immutable release inputs | Bind account connection, Site, commit, saved version, audience and artifact hash | A trusted live adapter must verify that these values match actual remote state |
+
+AWS describes request identifiers with retained input parameters to distinguish duplicates from changed intent. The core follows that pattern and commits its local consequences together.[^1] Temporal documents that activity timeouts and retries must be configured deliberately; a timeout alone does not reveal whether work occurred. The runner consequently preserves uncertainty instead of resubmitting a model request or publication automatically.[^2]
+
+GitHub documents concurrency groups that limit simultaneous deployment jobs. Here the lock key is the Site identity, independent of a particular job or connection alias. A publishing timeout retains that lock until an evidenced outcome is recorded.[^3] This is deliberately conservative about external effects; it may require operator intervention rather than maximize automatic throughput.
+
+## Findings and corrections
+
+| Finding | Consequence in the original proof | Implemented correction |
+| --- | --- | --- |
+| Evidence reused fixed output filenames | A later run could leave mismatched or overwritten evidence | Retired the entry point; durable job identities and hash-addressed artifacts |
+| No durable dispatch record | A crash could lose whether inference started | Transactionally record an attempt and reserve capacity before calling the model |
+| No coordinated process ownership | Multiple commands could operate on the same job | SQLite transactions, expiring leases and monotonically increasing fencing tokens |
+| Unknown usage | Missing data could be mistaken for no liability | Retain reservations, mark usage unknown, block new model admission until reconciled |
+| Blind retry after ambiguous failure | Duplicate inference or publishing could occur | Explicit reconciliation state; no automatic replay of uncertain operations |
+| Mutable publication input | Caller changes during authorization could change the eventual release | Canonical copy of intent before the asynchronous boundary |
+| Per-connection publishing scope | A second alias could bypass a Site's publishing lock | Serialize by Site identity across aliases |
+| Incomplete archive inspection | Links, extra files, hidden trailing bytes or metadata could pass basic packaging checks | Bounded decompression, exact file/type/content checks and canonical reconstruction |
+| Full environment inheritance | The tool host received unrelated application/model environment variables | Explicit environment allowlist; relay/API keys and runtime injection variables excluded |
+| Unbounded connector output | Large or malformed frames could consume memory or obscure failure | Frame/session/queue/deadline limits and strict response parsing |
+| Dependency version assumed safe | Functional crash tests missed a documented database-engine defect | Runtime SQLite qualification before opening workflow state |
+
+Two corrections came from testing real installed components. The Sites tool catalog measured 536,127 bytes, exceeding the first conservative frame cap. The connection transport now permits at most 1 MiB per frame, 8 MiB per session and 128 queued messages. It still fails closed on invalid frames, ambiguous response IDs, stream overflow or an expired deadline. The successful recheck retained no Site metadata and started no Codex model turn.
+
+The official macOS packaging path retained `LIBARCHIVE`/`SCHILY` extended attributes even with `COPYFILE_DISABLE=1`. The canonicalizer first verifies the exact allowed files and their expected content, then writes a fresh archive with controlled timestamps, permissions, ownership fields and gzip metadata. It never extracts the input archive. Source extended attributes are discarded; structural overrides, links, unexpected files and hidden trailing payloads are rejected. The retained publishing candidate is checked again after normalization.
+
+### SQLite runtime finding
+
+SQLite's current WAL documentation identifies a WAL-reset race that can corrupt a database during concurrent checkpoint/reset activity. It documents fixes in 3.51.3 and later and specific backports in 3.44.6 and 3.50.7.[^4] The available Node 22.21.1 binary bundles SQLite **3.50.4**. The available Node 26.8.1 binary bundles **3.53.4**.
+
+The core now refuses affected or unrecognized versions before creating workflow state. Earlier functional tests on Node 22 passed, but that does not qualify its affected database build. Node 26.8.1/SQLite 3.53.4 is the tested companion combination. The application itself was separately regression-tested and built on Node 22 without importing this private companion.
+
+Node's SQLite binding is currently documented as a release candidate; older Node releases treated it as experimental.[^5] Pin and requalify the companion runtime rather than assume every installed Node binary is acceptable. This implementation has no downloaded database dependency, but it still has a database-engine and runtime maintenance obligation.
+
+## State, recovery and external effects
+
+```mermaid
+stateDiagram-v2
+    [*] --> queued
+    queued --> generating: reserve and persist intent
+    generating --> generated: validated response
+    generating --> queued: one funded repair
+    generating --> needs_reconciliation: uncertain result
+    generated --> packaging
+    packaging --> generated: interrupted local work
+    packaging --> ready: canonical artifact verified
+    ready --> publishing: authorized saved release
+    publishing --> published: verified terminal receipt
+    publishing --> needs_reconciliation: timeout or cancellation
+    needs_reconciliation --> published: publication confirmed
+    needs_reconciliation --> generated: generation recovered
+```
+
+The diagram shows the principal paths; cancellation and terminal failure are additional states. A packaging failure is recoverable from persisted content. A crash after model dispatch is different: the restarted process retains the attempt and its reservation, marks the outcome unknown and cannot acquire another execution lease for that job until reconciliation resolves it.
+
+The store uses `BEGIN IMMEDIATE`, foreign keys, strict tables, application/schema identifiers and an append-only sequence of event records. WAL and full synchronous mode are checked after configuration. Full-sync settings are also enabled for the platform's stronger synchronization facilities.[^6] SQL write failures roll back the transaction; ambiguous storage failures poison that handle so it cannot continue issuing side effects on the assumption that state committed.
+
+Model reservations and concurrency are account-scoped within this store. A valid completion with unknown cost may proceed to a local artifact, but it cannot publish through the guarded runner and blocks further model admission for that local account. A billing receipt can settle only one operation. Repeated matching settlement is idempotent; conflicting settlement or reuse of the receipt is rejected. An actual cost above the reservation is recorded, and additional admission is closed rather than hiding the overrun.
+
+Publication records include the chosen connection, Site, full source commit, saved version, owner-only audience and archive hash. Inputs are copied before asynchronous authorization. The live adapter must verify those values and current access; the local store only enforces continuity against its trusted bindings. Shared/public audiences are outside this implementation's allowed contract.
+
+The publishing lock has no automatic timeout release. If a process disappears after dispatch, the lock persists until the result is reconciled. A local fencing token prevents stale state writes but cannot retract a remote request already sent. Cancellation therefore records uncertainty. If later evidence confirms that publication succeeded, the job records that fact even when cancellation had been requested; it does not falsely claim that no publication happened.
+
+The `publishSaved` interface now has a real [Sites adapter](live-sites.ts) and companion command. It verifies remote access/source/archive state, deploys privately, polls and reconciles a recorded deployment. Lost responses retain the target lock. Tests exercise the adapter with fixture responses; the real native connection has been read-tested. A later live pass added source push and a journaled save-version path and successfully published a private sample through the hosted native connection. It corrected compound IDs and normalized archive receipts. Fresh CLI availability and the supplier output ceiling remain blocked; see [live qualification](LIVE_QUALIFICATION.md).
+
+## Identity and information boundaries
+
+The local store receives its owner context from a trusted host. It is not an authentication server. Tests demonstrate that one host owner context cannot read, cancel, reconcile or claim the stored Site binding of another context. They do not establish browser authentication, cross-device identity or ownership of a real remote Site.
+
+For the local proof, the CLI uses one `local-session` owner. Before a customer release, a companion must bind this to a verified stable account and reject login changes, expired access and incompatible connection state. A browser must not supply an arbitrary owner, state directory, filesystem path, tool name or reconciliation receipt. If browser control is introduced, origin/session binding and replay protection require their own implementation and tests.
+
+The actual Sites bridge retains Codex's local login and permits reviewed reads plus one specifically scoped private deployment call. It explicitly refuses runtime approval requests. Its installed manifest, skill files and packaging helpers are pinned by [the connection contract](../connection-contract.json). An unexpected change stops the check for compatibility review. OpenAI documents separate MCP tool calls and approval requests for connector operations; installed metadata alone is not authorization.[^7]
+
+Public job projection contains only an opaque job ID and a small status vocabulary. The separate authenticated content API exposes a bounded content DTO and a customer billing receipt, with explicit field allowlists and sanitized errors. It does not return upstream identities, routing, credentials or diagnostics. The companion remains private; the server billing modules and API route live in application source. No browser interface was added.
+
+Files are stored in an owner-private directory with restrictive permissions. Archive reads reject symlinks, hard links and oversized objects; publishing rechecks the persisted artifact's digest and expected content. This protects normal workflow inputs and accidental corruption. It is not isolation from malicious code already running with the same operating-system identity, and it does not encrypt local customer content.
+
+## Verification and its limits
+
+The verification record separates four kinds of evidence: [workflow and fault tests](durable.test.ts), [connection observations](connection-observations.json), [local integration observations](local-observations.json) and [application regression/build evidence](application-verification.json). The original real relay request is retained separately in [the earlier observations](../live-observations.json).
+
+Fault tests cover process death before and after a synthetic dispatch, two competing operating-system processes, atomic rollback on a journal write failure, stale leases, unknown usage, conflicting receipts, cancellation, adapter deadlines, publication target contention and immutable intent. Artifact tests cover traversal, duplicate members, links, mismatched content/configuration, decompression bounds, hidden trailing payloads and metadata removal. The connection tests cover restricted methods, environment filtering, malformed/oversized frames, deadlines and refusal of approvals.
+
+The local integration demonstration replays the earlier synthetic brief, persists it, prepares a fresh workspace, invokes the installed official packager, validates and normalizes the result, and reopens the job in another process. It does not spend new model capacity. Its missing billing evidence remains unknown. It does not register a Site, obtain a source credential, push source, save a version or deploy.
+
+The application checks use an isolated source copy, no dotenv files and generated synthetic signing material. The production-mode build is a validation artifact that must not be deployed. Its asset scan checks selected implementation markers in locally built JavaScript and prerendered HTML. Neither that scan nor these tests establish that the live site is clean, that all provider diagnostics are sanitized, or that existing application audit findings are resolved.
+
+Power interruption, disk loss, backup restoration, a hostile local administrator, multi-host access and a sustained customer workload were not tested. Process-kill tests establish recovery from committed local state, not universal persistence under every hardware failure. The companion also needs bounded retention, tested migrations and a backup/restore procedure before holding real customer work over time.
+
+## Economics and release gates
+
+The original local counters remain fixture controls. The new server adapter enforces real wallet reservations and settles observed usage in integer micro-USD, independently of customer-local state. Missing, inconsistent or excessive usage retains the hold and blocks further generation. The current relay still lacks established usage reconciliation and verified hard output-cost enforcement for this workflow; the implementation must not be described as having resolved those supplier guarantees.
+
+Keep the commercial offer focused on repeated client deliverables, maintained releases and bounded revisions. Reducing model decisions, reusing validated content and avoiding duplicate side effects can reduce cost, but savings must be measured. The prototype does not validate a price, conversion rate, renewal rate or included compute allowance.
+
+The next work should proceed in this order:
+
+1. **Verify a real publication and update.** Use the implemented saved-version adapter with a customer-owned Site prepared through the official source/save workflow. Preserve source/archive identity and verify terminal deployment. This account currently has no owned Site to use for that check.
+2. **Activate and verify authoritative accounting.** Deploy the implemented billing route with a reviewed rate card after reliable supplier usage and output limits are available. Verify cancellation and recovery at the supplier; do not price unknown usage as free or infer it from content length.
+3. **Package the local companion.** Pin its runtime and plugin contract, implement secure account/session binding, signed update delivery, backup/restore, retention and migration tests. Keep arbitrary MCP operations and filesystem control out of the browser.
+4. **Run a bounded paid pilot.** Measure completion quality, failed and repaired attempts, per-release cost, support minutes and renewal. Set a maximum revision/support scope and stop criteria before expanding template count or offering recurring allowances.
+
+This sequence improves execution without expanding model-provider dependence. It also makes a rejection decision possible: if required Sites ownership operations or authoritative relay cost controls remain unavailable, retain local exports and do not promise an automated hosted delivery plan.
+
+## Sources
+
+[^1]: Malcolm Featonby, Amazon Builders' Library, [Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/), accessed September 10, 2026. Request identity, input matching and atomic local consequences.
+[^2]: Temporal, [Activity Execution](https://docs.temporal.io/activity-execution), accessed September 10, 2026. Timeout, retry and cancellation behavior; no claim of a Sites-specific guarantee.
+[^3]: GitHub, [Deploying with GitHub Actions](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/control-deployments), accessed September 10, 2026. Deployment concurrency and environment protection patterns.
+[^4]: SQLite, [Write-Ahead Logging](https://www.sqlite.org/wal.html), accessed September 10, 2026, including the WAL-reset bug and same-host limitations. Runtime version observations come from the installed binaries.
+[^5]: Node.js, [SQLite API](https://nodejs.org/api/sqlite.html), accessed September 10, 2026. Binding availability, `DatabaseSync` and current release-candidate status.
+[^6]: SQLite, [PRAGMA statements](https://www.sqlite.org/pragma.html), accessed September 10, 2026. `synchronous`, `fullfsync`, `checkpoint_fullfsync`, application IDs and validation of configured modes.
+[^7]: OpenAI, [Codex App Server](https://learn.chatgpt.com/docs/app-server), accessed September 10, 2026. MCP calls, runtime metadata and connector approvals. The actual read and installed skill/helper hashes are recorded in the private evidence package.

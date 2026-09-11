@@ -1,0 +1,428 @@
+{
+  "checkedAt": "2026-09-11T07:35:15.373865+00:00",
+  "assessment": "RELEASE_20260911.md",
+  "sourceRevision": "4587642a8671dfbf7b4df80b580811f9654093f8",
+  "sourceSha256": {
+    "src/relay/durable-receipts.ts": "4f6554ff380556c0dcfe44d47dc40e3e10aaba1d3183f5807d227b7e56693fed",
+    "src/relay/completion-usage.ts": "f66f22fcffdbcf9fce8ff8f78b0c8aed95f2e1c7f5b9676039be12a7b153c1a5",
+    "src/relay/relay-server.ts": "77f09ffd060a0dc3c57353faacf702db0b119deb489ab918b5af2c0f0a11fec1",
+    "src/relay/federation-server.ts": "7d9b65f1160112d3a9ab724c6a00d855c5ff72a2c886b13a627139ebac765605",
+    "src/core/router/adapters/RelayChatTransport.ts": "32fcac8c5316bc669990e52d76935671cc0bcf6d2b58769dc74614263722f22b",
+    "src/lib/billing/sites-generation.ts": "f147dd487a3da81c7664b2940ab8f470cf145e78410790d8caeb0a9f67ea2c1a",
+    "src/lib/billing/sites-content-route.ts": "5d4267a5938035a1e137a91100e233e1c5d932fbf1307d0a6256dba779e37729",
+    "src/lib/billing/sites-activation.ts": "e6f47b1dddbf7d1deafca5d94f5197e54ed0d6d86a985ea8660e5e45d4471444",
+    "src/app/api/sites/content/route.ts": "f6cfe2f072c6bf2ffe33c320330a3ea5a8b808ee323c240dae419a6f9a9b3b31",
+    "src/relay/upstream-diagnostic.ts": "a522c5c068a18846566ae94e2cc5d73df44a706aa2b4bb030c9b9452426e022d",
+    "src/relay/sites-contract.ts": "7aae5c6f8375e5709e11137c1fee9b6159f9e1ac6d8fa655c7162697c50863b3",
+    "src/lib/billing/sites-relay-preflight.ts": "d565f8212f62dcdf91cf03e5f18053d3146c81283d0ca425a6501ab5a2ac1e53",
+    "src/relay/docker-shard-driver.ts": "d4ce00994aeb297ca9ecacc3cea5de48bb56392cb648be471f67f7e4e9de2b7a",
+    "scripts/run-relay-federation.ts": "72532065e18f56bfbacbae55ad0b10179b62a5021e739ee9a914966c6fd1593d",
+    "scripts/install-federation-service.ts": "3cf877d95c7cd174a08b2c5bdcf898ea268751e3df279189e1bdef638b3ab18e",
+    "scripts/test-relay-completion-usage.ts": "20641ab45d9e19af658ebaef129c5b8f69b6bf5493ccd365bff2bbcc8b6088f4"
+  },
+  "sourceMatchesVerifiedBuild": true,
+  "buildSnapshotMatchedFiles": 1727,
+  "productionConfigurationChanged": true,
+  "productionWalletWrites": false,
+  "paidActivation": false,
+  "activationEligible": false,
+  "workerRollout": {
+    "verifiedAt": "2026-09-11T07:30:12.253Z",
+    "image": "galxai-relay:sites-release-20260911",
+    "imageId": "sha256:cc5eec01f149b8102c3989124bac1348c1339946d7b30dcd664facf6fc57fb22",
+    "healthyWorkers": 2,
+    "originalVolumesRetained": true,
+    "stoppedVolumeBackups": 2,
+    "backupSha256": [
+      "620420f50bd3702804bbfa17d5ff1c67a9fb134650bb0e082d01d6ac87134e96",
+      "e690c9f24743e13209ec16568b6af672bc28cfdffc6542596d2338cfc8d9b405"
+    ],
+    "relayForwardingContractPassed": true,
+    "supplierEnforcementProven": false,
+    "replicatedDisasterRecovery": false
+  },
+  "application": {
+    "deploymentId": "dpl_AQXmeJrjWmFg3rcVW9iBRhyULXUW",
+    "status": "READY",
+    "origin": "https://galx.ai",
+    "domainInspectionSha256": "35f03ed93ee6981565a587a556e6a86fedcb74e7cf7f6852d831956c1f59c958",
+    "previousDeploymentId": "dpl_5wQ9QKj7HEqee7fMkbRNgmMshrqq",
+    "paidActivationSetting": "0",
+    "deliveryMode": "native_host",
+    "administratorCredentialType": "sensitive",
+    "variablesCreatedBeforeDeployment": true,
+    "rateCardConfigured": false,
+    "activationEvidenceConfigured": false,
+    "cohortAllowlistImplemented": false
+  },
+  "qualification": {
+    "explicitGenerationRequests": 2,
+    "generationOrigin": "http://localhost:3001",
+    "model": "gpt-5.6-luna",
+    "bounded": {
+      "requestedMaxOutputTokens": 64,
+      "intentionallyLongPrompt": true,
+      "phase": "uncertain",
+      "failure": "job_error",
+      "matched": true,
+      "status": "unknown",
+      "usage": null,
+      "retainedUntil": null,
+      "sha256": "7893e21ae9dc9eb0bf84baec9c8b5eb7dfb5f4e079e3959a0d821692e3d6cb73",
+      "supplierCostBoundQualified": false
+    },
+    "metering": {
+      "outputMatches": true,
+      "requestedOutputCeiling": false,
+      "matched": true,
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 11,
+        "completion_tokens": 5,
+        "total_tokens": 16
+      },
+      "retainedUntil": 1791703248277,
+      "sha256": "328c1349cb22de0162a5724d20a0a5a370a8c69bd9616971636493dc520fef3e"
+    },
+    "workerReplacement": "verified",
+    "receiptSurvivedReplacement": true,
+    "publicOriginReadVerification": {
+      "checkedAt": "2026-09-11T07:31:35.220Z",
+      "origin": "https://relay.galx.ai",
+      "originalGenerationOrigin": "http://localhost:3001",
+      "model": "gpt-5.6-luna",
+      "modelRequests": 0,
+      "walletWrites": false,
+      "paidActivation": false,
+      "receipts": {
+        "bounded": {
+          "matched": true,
+          "status": "unknown",
+          "usage": null,
+          "retainedUntil": null,
+          "sha256": "7893e21ae9dc9eb0bf84baec9c8b5eb7dfb5f4e079e3959a0d821692e3d6cb73"
+        },
+        "receipt": {
+          "matched": true,
+          "status": "completed",
+          "usage": {
+            "prompt_tokens": 11,
+            "completion_tokens": 5,
+            "total_tokens": 16
+          },
+          "retainedUntil": 1791703248277,
+          "sha256": "328c1349cb22de0162a5724d20a0a5a370a8c69bd9616971636493dc520fef3e"
+        }
+      },
+      "administratorContractPassed": true,
+      "passed": true
+    },
+    "qualifiedWithProductionRateCard": false,
+    "thirtyDaysElapsedRetentionTest": false,
+    "backgroundServiceRequestsIncluded": false
+  },
+  "liveHttpVerification": {
+    "checkedAt": "2026-09-11T07:31:00.554Z",
+    "origin": "https://galx.ai",
+    "relayOrigin": "https://relay.galx.ai",
+    "deploymentId": "dpl_AQXmeJrjWmFg3rcVW9iBRhyULXUW",
+    "pages": [
+      {
+        "path": "/",
+        "status": 200,
+        "sha256": "188fdb946033291b0155582ff1c4e616590cf9dc570a3fba2107a9ff932f6356",
+        "bytes": 111382
+      },
+      {
+        "path": "/pricing",
+        "status": 200,
+        "sha256": "89d5cb4b64d524d00414b8f0a2e2ba016bdd130f92a58bc7c6eff67ba3685410",
+        "bytes": 79490
+      },
+      {
+        "path": "/docs",
+        "status": 200,
+        "sha256": "963dc2236fd42744ca9c99d3d1c53163be684b0c294d883471c90beb189e31d0",
+        "bytes": 75590
+      },
+      {
+        "path": "/auth/signin",
+        "status": 200,
+        "sha256": "726b3cf90bcfe0dd19e7f127866f4faea5a77f0ddb4c4771597f6dcf8cab488d",
+        "bytes": 67576
+      }
+    ],
+    "assets": [
+      {
+        "path": "/_next/static/chunks/1255-306db9f231b54263.js",
+        "status": 200,
+        "sha256": "6f76c08b6dfa66d96a35c60cd5dbcb886f607fce6171bdffe532222ad3238020",
+        "bytes": 174127
+      },
+      {
+        "path": "/_next/static/chunks/2330-cd406e51068c8203.js",
+        "status": 200,
+        "sha256": "cbabd3d87d8e6034592b1abb81982a0aa1788427332491e2cf59bde44eb2c7ca",
+        "bytes": 33635
+      },
+      {
+        "path": "/_next/static/chunks/2512-0e6ebd490dbf01f6.js",
+        "status": 200,
+        "sha256": "e0670eed36516fab5ec648a97e1f96feff49f8c42490f8be2b22ac722cfc51cf",
+        "bytes": 9228
+      },
+      {
+        "path": "/_next/static/chunks/2619-04bc32f026a0d946.js",
+        "status": 200,
+        "sha256": "a9b6c2213ea787a015c0169d198b4a90d7a44a0cc17abb0d132e8362d3016ced",
+        "bytes": 8564
+      },
+      {
+        "path": "/_next/static/chunks/3736-2c9f00820338eff4.js",
+        "status": 200,
+        "sha256": "17eeeffd82151dd6034df8317ee11e2dd4643864001490936a0559bb2ff1a54c",
+        "bytes": 193112
+      },
+      {
+        "path": "/_next/static/chunks/44530001-a26648c04669f22e.js",
+        "status": 200,
+        "sha256": "2ae36604e0ac1f9707036b30e5f3837e3c02a9ba300c16e36b479f614f512338",
+        "bytes": 63874
+      },
+      {
+        "path": "/_next/static/chunks/4489-9b79ea828188cc3e.js",
+        "status": 200,
+        "sha256": "b3c95a6ad8fedb73c53ba0ee41e594802c13fb15b0011edab5e146f05ba0b559",
+        "bytes": 22143
+      },
+      {
+        "path": "/_next/static/chunks/4533-7fee8afce0037d1c.js",
+        "status": 200,
+        "sha256": "ae31caf31f919503228206b0f12142202f45eeb1194c38c8a050981d3a2a814d",
+        "bytes": 8623
+      },
+      {
+        "path": "/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+        "status": 200,
+        "sha256": "5421e13a91a9389517b66179f3b4b5eaa0d95245438066d4d7b19ac30aeb809b",
+        "bytes": 173025
+      },
+      {
+        "path": "/_next/static/chunks/5380-33bac102ca144352.js",
+        "status": 200,
+        "sha256": "515b870ff0fe5064a70bfb0378c88cf7b346b75472286e0baadfe0566ddf8ee8",
+        "bytes": 10456
+      },
+      {
+        "path": "/_next/static/chunks/7450-f762570af5613f04.js",
+        "status": 200,
+        "sha256": "8d9d85c55091fa4b64fed7b3b6a892b9242fd6471df55d3e4b8f2499eb712a44",
+        "bytes": 4729
+      },
+      {
+        "path": "/_next/static/chunks/8505-0714be3ae76f43b5.js",
+        "status": 200,
+        "sha256": "2541a5e766dc2af195a79fc8cc2c3618d40a91cdce233a5c4b081754c7465687",
+        "bytes": 21158
+      },
+      {
+        "path": "/_next/static/chunks/9515-d5cafae925d12a02.js",
+        "status": 200,
+        "sha256": "8d552534f092f17df6faff2989585b2d6ddc4d6a1d5c77929f3c228c11a6c06e",
+        "bytes": 129010
+      },
+      {
+        "path": "/_next/static/chunks/app/auth/signin/page-ada4cc963273aa33.js",
+        "status": 200,
+        "sha256": "251bd33e655de6c14105f912b77d081eb1bf7538319eb290722b73e497eceee4",
+        "bytes": 18478
+      },
+      {
+        "path": "/_next/static/chunks/app/docs/error-f48b637b3bb7e4d9.js",
+        "status": 200,
+        "sha256": "04a76c000be0cc9ad99e07f4f52bf9d4a2f5789f7be61c5aa642dfef0494d09c",
+        "bytes": 891
+      },
+      {
+        "path": "/_next/static/chunks/app/docs/layout-bc885bf30b4b0b2b.js",
+        "status": 200,
+        "sha256": "614870d1b9396e6d1bb7b07b40687a8c172baa3cfe7c102118804be8ea9e5c18",
+        "bytes": 266
+      },
+      {
+        "path": "/_next/static/chunks/app/docs/page-b17edc2d732f184d.js",
+        "status": 200,
+        "sha256": "a09d5dd0a28569fc083c315e453362e50e25017dd3d4532ac0d4ca94e755d4c7",
+        "bytes": 3234
+      },
+      {
+        "path": "/_next/static/chunks/app/error-825a8d777a6fbbb7.js",
+        "status": 200,
+        "sha256": "d0f5399c2093330b9c913460c441939928a631a895026c8f67da8a26f388acc2",
+        "bytes": 11449
+      },
+      {
+        "path": "/_next/static/chunks/app/global-error-6c4bdd755108c191.js",
+        "status": 200,
+        "sha256": "61621a919f75f6929bb092129c243fdba925ab0286c09b2967ee8c853ceec49e",
+        "bytes": 4962
+      },
+      {
+        "path": "/_next/static/chunks/app/layout-2400c2f25b9554b0.js",
+        "status": 200,
+        "sha256": "eec9ed61cfffaa61d512b48d98f803fbcddf3c429ee60a4405aaf1d4aabfb49d",
+        "bytes": 44064
+      },
+      {
+        "path": "/_next/static/chunks/app/not-found-cebe4ba9434ebfac.js",
+        "status": 200,
+        "sha256": "e145c0a6a06da5bd00522c23cb7cd7ce6370c15786288c78702cd10af3fbe704",
+        "bytes": 3133
+      },
+      {
+        "path": "/_next/static/chunks/app/page-a801f4ab17b822f6.js",
+        "status": 200,
+        "sha256": "9fa1f59ddabb67f98b783d55881aa7cee32f6d94dfef4e344cdf857a9a529a34",
+        "bytes": 93336
+      },
+      {
+        "path": "/_next/static/chunks/app/pricing/error-db23bb2c98f22a22.js",
+        "status": 200,
+        "sha256": "73990c0236f41c2669b6ec8eac1d99e2ff3460eaf368af04f876a03816148f23",
+        "bytes": 9627
+      },
+      {
+        "path": "/_next/static/chunks/app/pricing/page-5494eaefd938fbe9.js",
+        "status": 200,
+        "sha256": "27706b5032f3e73d848743858816aa3af963227c401b61e3ade94832e3d10461",
+        "bytes": 5496
+      },
+      {
+        "path": "/_next/static/chunks/main-app-0ee650784ad95c4e.js",
+        "status": 200,
+        "sha256": "ce5455a5a26adc6b6247571008126c6e30f9ff72ec0f8921049a7e3141b6493b",
+        "bytes": 527
+      },
+      {
+        "path": "/_next/static/chunks/polyfills-42372ed130431b0a.js",
+        "status": 200,
+        "sha256": "0973c1d64c88adc8e3c950410cb58b288f72118d5965b78049438deb8f2f9683",
+        "bytes": 112594
+      },
+      {
+        "path": "/_next/static/chunks/webpack-445252889eb98947.js",
+        "status": 200,
+        "sha256": "fd09c6acbe26b2dd4ef5664fc29cb9f83151ed9211353a1d58c04226bfb67791",
+        "bytes": 3871
+      },
+      {
+        "path": "/_next/static/css/1649316a4ef7aadf.css",
+        "status": 200,
+        "sha256": "3bb1bcfcf856e34a81eafb357b454f150bf072fed880cf3f8ba0e23bc0acc27a",
+        "bytes": 128527
+      },
+      {
+        "path": "/_next/static/css/cf8a94d8f0136ff9.css",
+        "status": 200,
+        "sha256": "cd44c171d546c79e1e2d0690ec5c3d475a1b33b5b1b906504127cd0439daccfb",
+        "bytes": 4167
+      }
+    ],
+    "publicEndpoints": [
+      {
+        "name": "no_credentials",
+        "status": 401,
+        "exactPublicDto": true,
+        "sha256": "9aaee28c6eb2fce585307aafd5274c6d301e6755d209720b1a331c94e24331de"
+      },
+      {
+        "name": "invalid_bearer",
+        "status": 401,
+        "exactPublicDto": true,
+        "sha256": "9aaee28c6eb2fce585307aafd5274c6d301e6755d209720b1a331c94e24331de"
+      },
+      {
+        "name": "unauthenticated_post",
+        "status": 401,
+        "exactPublicDto": true,
+        "sha256": "9aaee28c6eb2fce585307aafd5274c6d301e6755d209720b1a331c94e24331de"
+      },
+      {
+        "name": "contract_unauthenticated",
+        "status": 401,
+        "exactPublicDto": true,
+        "sha256": "d3a70b9cf487599010b4d9f8f8c435bb25d3800d42a1b3b6f6ffdd054d0d250d"
+      },
+      {
+        "name": "contract_inference_credential",
+        "status": 401,
+        "exactPublicDto": true,
+        "sha256": "7adfa06c3612ae06428afd388b22dab2addede14b2bb8a6b42792ef5c3184079"
+      }
+    ],
+    "privateMarkersChecked": 21,
+    "secretValuesChecked": 2,
+    "hits": [],
+    "walletWrites": false,
+    "modelRequests": 0,
+    "scope": "Listed public pages, their directly referenced Next.js assets, and selected unauthenticated API responses; not an exhaustive live-site audit.",
+    "passed": true
+  },
+  "currentPassChecks": {
+    "applicationRegressions": {
+      "exit_code": 0,
+      "log_sha256": "1d77234bd1d23ed4e97dc72391c4b8ab57a483bbd510fb50575320c3066b316b",
+      "tests": 96,
+      "pass": 96,
+      "fail": 0,
+      "skipped": 0
+    },
+    "isolatedBuild": {
+      "exit_code": 0,
+      "log_sha256": "42db575e2d2339a54ac450c2d827ca14c84de0b660a5df3a768a467a6eb398bd"
+    },
+    "typescript": "passed",
+    "productionVercelBuild": "passed",
+    "releaseContainerSyntheticRestart": "passed with external network disabled"
+  },
+  "carriedForwardUnchangedChecks": {
+    "workflowAndAdapters": 68,
+    "pythonTransportAndSource": 22,
+    "disposablePostgresAndHttp": 42,
+    "rerunThisRollout": false
+  },
+  "countsOverlap": true,
+  "stagingIncident": {
+    "temporaryProject": "application-source",
+    "createdInError": true,
+    "removed": true,
+    "deploymentHttpAfterRemoval": 404,
+    "productionProjectChanged": false,
+    "credentialsCopied": false,
+    "publicAccessDuringExistenceTested": false,
+    "partialSourceDeployment": true,
+    "productionDomainsPointedToTemporaryProject": false
+  },
+  "remainingActivationWork": [
+    "Supplier-enforced cost ceiling remains unqualified; actual fixed prepaid/no-overage terms are unavailable",
+    "Production rate card and fresh qualification against the exact public origin/model/rate/ceiling are absent",
+    "A server-enforced account allowlist is required before a small paid cohort can be enabled",
+    "Refresh customer-owned native upload/receipt/private-update evidence before paid activation",
+    "CLI direct archive upload remains unqualified on tested versions 0.154.0 and 0.153.4"
+  ],
+  "operatorEvidenceSha256": {
+    "release.json": "656afc5cc571ce97636f368838058e29c1be684f6a4291113f7135a4d293dcdc",
+    "qualification.json": "e1081e816b791bafa8b0c6ddbfaa7e0c185238202a6b683d67af16334ea16bb3",
+    "public-relay-verification.json": "6aa2749fe93b2dad9f3c29d88dc32e2ed2c34749a275c49c5cecba47c5e6402d",
+    "live-http-verification.json": "7148c62abe4e4f080887f1750533531a75806319e67fbe950da02713a0eba317",
+    "vercel-stage-check.json": "b06984ebbbaf66f02d061cd63dc9857a76af19d8f11cf0080be2fcb2c0d1fb45",
+    "temporary-project-cleanup.json": "2d1166ab3994ca0ef503dc63035d1f7ca8c5e7e560835d179f0ece31364e7672"
+  },
+  "operatorScriptSha256": {
+    "sites-release-20260911.mjs": "c06cdc5c96abe881b7b0945e7ba98983c01ec1430db9d700473e850bad2bce4a",
+    "qualify-sites-deployed-20260911.mts": "9d258646af6d3b3a3bcd0c34d8de8b5fb7d83c64dde416aaf8284f70eba48540",
+    "verify-sites-public-relay-20260911.mts": "ffe07dc7d9dfdf7c438cd0b1d0b735f18416d6caf7d391fae83391ac14b7c3f5",
+    "verify-sites-release-http-20260911.mjs": "d09bd6bfa41dd172d39da66606f3ec246f19c3cdf49c6b531ffecbfd9e19692d",
+    "inspect-sites-stage-20260911.mjs": "1da000e5b02c1bec34c7f8c2e4955c9cedab1fcda0fecf07c1eaf91b5d07d8f0"
+  }
+}

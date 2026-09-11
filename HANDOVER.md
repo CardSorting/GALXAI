@@ -1,6 +1,6 @@
 # Federation handover
 
-Private handover, updated September 9, 2026. Implementation through `96ae392`; detailed evidence is in [the session record](docs/maintainers/RELAY_SESSION_VERIFICATION_20260909.md).
+Private handover, reconciled September 11, 2026. The September 9 enrollment implementation through `96ae392` is recorded below; newer Sites work has its own dated section. Enrollment evidence is in [the session record](docs/maintainers/RELAY_SESSION_VERIFICATION_20260909.md).
 
 ## Dated deployed state
 
@@ -28,3 +28,11 @@ Open `npm run relay:open` or `npm run relay:desktops` on the controller host. Fo
 The private journal/registry protocol supports conditional recovery, not a distributed atomic transaction. Custom guest homes are supported by explicit selection; keyring-only storage uses reauthentication. Unrelated accounts require reviewed links to existing eligible authority or separate enrollment.
 
 Physical phone input and guest semantic accessibility remain unverified. A device challenge is not completed account approval. Preserve these limits in future status reports.
+
+## Sites strategy handover — September 11
+
+The uncommitted working tree based on `4587642` now implements fixed-price Sites content through the existing relay. Provisional server defaults are $0.05 per durably completed generation and 20 admitted operations per account per rolling day, with explicit cohort, funding and local limits. Missing supplier quota/cost is accepted as unknown; missing completion is not guessed. Pending operations retain their original price and recover through authenticated reads.
+
+[ADRs 0134–0136](docs/adr/README.md), [Sites operations](docs/maintainers/SITES_OPERATIONS.md), and the [customer-local delivery runbook](internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/LIVE_ADAPTERS.md) are the current instructions. The fixed-mode implementation passed 103 application, 52 database and 68 companion checks, type checks, production build, packaged restart and the 633-asset local scan; counts overlap. [Evidence](internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/opaque-provider-verification.json) records their scope.
+
+The earlier [September 11 production release](internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/RELEASE_20260911.md) deployed a metered precursor with paid generation disabled. The fixed-mode pass did not deploy or enable it, issue live supplier requests or charge customers. Historical native-host save/private-update success remains separate from a full live billed workflow. Preserve volumes/signing authority and fixed-price settlement compatibility during rollout or rollback. Direct CLI archive save remains a separate unqualified path.

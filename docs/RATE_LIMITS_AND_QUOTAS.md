@@ -21,3 +21,9 @@ The controller rejects unavailable/saturated pools explicitly. Callers honor exe
 Image-alias probes consume quota and spare capacity. Successful image evidence has a bounded lifetime; failure backoff prevents probe storms. Disabling the alias requires configuration rollout, not a manual capability assertion.
 
 Worker status/control traffic has a separate tenant bucket from inference. Bounded polling, Docker inspection, reconciliation, and shutdown prevent one slow shard from becoming a fleet-wide blocker. Current numeric limits live in the runbook and source; synthetic concurrency checks are not production throughput guarantees.
+
+## Fixed-price Sites allowance
+
+[ADR 0134](adr/0134-fixed-price-sites-generation-with-opaque-provider-quotas.md) makes opaque provider quota compatible with a bounded product allowance. Fixed-price Sites admission counts the verified account's admitted operations in a rolling 24 hours under the wallet lock. The default is provisional and configurable; exact limits and configuration are in [Sites operations](maintainers/SITES_OPERATIONS.md#server-configuration).
+
+An unresolved Sites hold blocks new Sites work for that account. An accepted operation counts once even if subsequently unused or uncertain; completed replay and receipt reads do not count again. Daily exhaustion returns the public `generation_limit_reached` code. Fixed pricing neither predicts supplier remaining quota nor clears provider backoff. Local byte/time/attempt limits and durable receipt capacity independently constrain service.

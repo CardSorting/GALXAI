@@ -24,7 +24,9 @@ Generic route errors, throttling, and transport failures do not prove absent mod
 
 ## Capacity and fairness
 
-Reservations are generation-scoped. An unknown acknowledgement retains a conservative bounded reservation instead of replaying synthesis. Completed receipt retrieval precedes eligibility checks. Bounded per-worker job polling and independent control traffic protect unrelated pools from a busy shard.
+Reservations are generation-scoped. An unknown acknowledgement retains a conservative bounded reservation instead of replaying synthesis. Completed admission-receipt retrieval precedes eligibility checks. Durable Sites completion reads use their saved original-shard identity and retained receipt store; they do not select a new execution worker by model eligibility. Bounded per-worker job polling and independent control traffic protect unrelated pools from a busy shard.
+
+For fixed-price Sites, the federation checks the local receipt profile on all eligible workers during administrator readiness and on the selected worker after reserving capacity, before dispatch. A selected-worker failure releases that pre-dispatch reservation. The local profile permits one provider attempt and no automatic retry; general SDK retry policies cannot widen that contract. See [ADR 0135](adr/0135-durable-sites-receipts-and-local-admission.md).
 
 Application SDK `fallbackCascade` and `race` are explicit multi-model policies with separate execution/cost implications. They do not change this federation contract or make ambiguous retries safe.
 

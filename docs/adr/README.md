@@ -3,7 +3,7 @@
 <!-- docs-scope: current-guide -->
 > **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
 
-Public information authority is [ADR 0129](0129-public-image-artifacts-and-verified-identity.md). Internal relay authority is the [federation contract](../FEDERATION_STRATEGY.md): ADR 0126 establishes capability-aware ownership; 0127 the explicit image alias; 0128 documentation authority; 0130 uncertain image outcomes; 0131 operator sessions and holds; 0132 recoverable credential handoff; and 0133 explicit enrollment/test isolation. ADRs 0123–0125 govern database health separately.
+Public information authority is [ADR 0129](0129-public-image-artifacts-and-verified-identity.md). Internal relay authority is the [federation contract](../FEDERATION_STRATEGY.md): ADR 0126 establishes capability-aware ownership; 0127 the explicit image alias; 0128 documentation authority; 0130 uncertain image outcomes; 0131 operator sessions and holds; 0132 recoverable credential handoff; and 0133 explicit enrollment/test isolation. ADRs 0134–0136 govern fixed-price Sites content, durable text receipt recovery and customer-owned delivery. ADRs 0123–0125 govern database health separately.
 
 Status and operational guidance are reconciled when decisions change; original measurements and rollout facts remain explicitly dated. A proposed or accepted design is not deployment evidence. Partial supersession is topic-specific. A successor banner cannot make obsolete body instructions current.
 
@@ -146,3 +146,6 @@ Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) f
 | 0131 | [ADR 0131: Private operator desktops and maintenance holds](0131-private-operator-desktops-and-maintenance.md) | Private sessions, independent desktops and durable repair holds |
 | 0132 | [ADR 0132: Recoverable desktop credential handoff](0132-recoverable-desktop-credential-handoff.md) | Validated existing-account refresh with recoverable intent |
 | 0133 | [ADR 0133: Explicit validated enrollment and isolated integration fixtures](0133-explicit-validated-enrollment-and-test-isolation.md) | Retired bulk import, create-only enrollment and isolated fixtures |
+| 0134 | [ADR 0134: Fixed-price Sites generation with opaque provider quotas](0134-fixed-price-sites-generation-with-opaque-provider-quotas.md) | Implemented locally; provisional tariff and account allowance |
+| 0135 | [ADR 0135: Durable Sites receipts and local admission](0135-durable-sites-receipts-and-local-admission.md) | Durable text receipts, local limits and bounded recovery |
+| 0136 | [ADR 0136: Customer-owned Sites delivery](0136-customer-owned-sites-delivery.md) | Bounded companion; native-host delivery and separate publication evidence |

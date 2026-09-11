@@ -1,0 +1,137 @@
+{
+  "date": "2026-09-11",
+  "source_revision": "4587642a8671dfbf7b4df80b580811f9654093f8",
+  "scope": "Durable companion, native saved-version publishing adapter, authenticated billing API and PostgreSQL settlement",
+  "workflow_tests": {
+    "passed": 68,
+    "failed": 0,
+    "skipped": 0,
+    "runtime": "Node 26.8.1 / SQLite 3.53.4",
+    "runs": "46 durable + 13 live adapters + 9 workflow; application and Python counts are separate"
+  },
+  "connection_transport_tests": {
+    "passed": 22,
+    "failed": 0,
+    "runtime": "Python 3.14.7"
+  },
+  "workflow_and_connection_total": 90,
+  "private_typescript": "passed",
+  "runtime_rejection": {
+    "node": "22.21.1",
+    "sqlite": "3.50.4",
+    "rejected": true,
+    "state_created": false,
+    "reason": "sqlite_version_not_qualified",
+    "advisory": "https://www.sqlite.org/wal.html"
+  },
+  "historical_node22_functional_run": "50 tests passed before dependency qualification; this affected SQLite runtime is now deliberately rejected",
+  "real_sites_read": {
+    "historical_evidence": "connection-observations.json",
+    "latest_cli": "passed: authenticated runtime tool discovery and read; later skill listing also enabled",
+    "latest_native_hosted": "passed with owner-private publication"
+  },
+  "local_integration": {
+    "result": "passed across separate processes",
+    "evidence": "local-observations.json",
+    "official_packaging": "passed",
+    "canonical_archive_verification": "passed",
+    "new_live_model_requests": 0,
+    "evidence_mode": "recorded synthetic brief replay"
+  },
+  "application_regressions": {
+    "passed": 96,
+    "failed": 0,
+    "evidence": "application-verification.json"
+  },
+  "isolated_production_build": "passed with synthetic configuration; output must not be deployed",
+  "local_asset_scan": {
+    "files": 633,
+    "markers": 20,
+    "hits": [],
+    "live_site_scanned": false
+  },
+  "actual_publishing": "Native-host upload handoff, authenticated CLI receipt acceptance and private publication passed through fresh processes; see hosted-save-verification.json",
+  "authoritative_billing": "42 prior disposable PostgreSQL/HTTP checks; committed production relay receipt survived worker replacement and public HTTPS read. Production rate card absent and paid generation disabled.",
+  "application_source_changed": true,
+  "production_configuration_changed": true,
+  "financial_model_changed": false,
+  "site_created": true,
+  "source_pushed": true,
+  "version_saved": true,
+  "deployed": true,
+  "remaining_release_gates": [
+    "Supplier-enforced cost ceiling remains unqualified; actual fixed prepaid/no-overage terms are unavailable",
+    "Production rate card and fresh qualification against the exact public origin/model/rate/ceiling are absent",
+    "A server-enforced account allowlist is required before a small paid cohort can be enabled",
+    "Refresh customer-owned native upload/receipt/private-update evidence before paid activation",
+    "CLI direct archive upload remains unqualified on tested versions 0.154.0 and 0.153.4"
+  ],
+  "python_syntax": "passed",
+  "implementation_sha256": {
+    "connection_transport.py": "c0b8e6c690c5e7bae093970e3aade8888a24da8a99dde00feb76a20aaf89bb3e",
+    "durable/archive-check.py": "bcf020550fcb364bdfee0390fd85e917013c7e7b5eabb10dc64ab71cf06924af",
+    "durable/artifacts.ts": "db0b878fa35ebfc1b4fe747de739d1f22e0e2fcc62306df87ae2486b9a194148",
+    "durable/contracts.ts": "371f2b12433c9360cbac2ffd919e16ad528611eb58bf1fec9d34644df3f15d38",
+    "durable/crash-fixture.ts": "f5a3c959633ecf0b4db3009b4d0ba0304c245fb79d5f0d9fcbe497a5abfa326a",
+    "durable/durable.test.ts": "98e674c0e4150094b3d8c1f105d72d8c9ec8dd788621963f4828b4d538cc62dc",
+    "durable/live-adapters.test.ts": "db6cb42e85defdeba364aaa0e4cce93d3a967828d703ebf14a8e4b55a45d38a5",
+    "durable/live-billing.ts": "ec05c36e68fa9f11f9c6c955b05a0ee5d96eaa0b5d0481d5e39fc528f4f99d29",
+    "durable/live-sites.ts": "c59b9ca7a3577f19bc81048db1a4ec96f0ba282af5ad224a283b3103a71f55d4",
+    "durable/live.ts": "839b9d35ec15f0e86ab1188ad787c6fa65f1b273ac500586101663c6dccd849e",
+    "durable/local.ts": "c3e779f58e166dff24910a5f816fc6a7a8a6095e3a219e0ca6352873b3aac5aa",
+    "durable/push-source.py": "00624af5fecbfcdf910e88e3ff182783bf46d691d06fd6ee0677d9d25908ecbf",
+    "durable/runner.ts": "82d39d17e4caa682e647930155da4aa45a11206bf841a809c5dafe7d49c58aa9",
+    "durable/sites-rpc.py": "6b8a1a9e6a92cb8c2f0e0f530e532e0583704a8b3a68a453f734fd3ab7ab9aff",
+    "durable/storage.ts": "267fe33a3acf4eea3308284ab2553cda9fe46d149e7369d2c8843af67931ac79",
+    "durable/test-fixtures.ts": "c1d54cf166e4eef57d82e83704fe88341720b0d05ea4a47a584e2053b499e1b5",
+    "durable/test_push_source.py": "5b2b9feafc97670f6789a3fadfa524886fc8add2b47b7c1ca51c61ebfbca5528",
+    "durable/test_sites_rpc.py": "85fad194059a1a56c027e589a2f43bc9ad568fcb032804492ac793d3ca25fe28",
+    "durable/verify-application.py": "4fe3ac84e1ad546ea96015556ee717e1b687be60f2ec9ff50e12a88b9d428101",
+    "durable/verify-local.ts": "3f033f5da8c683d0234e0cd96a4a2a57a502f9f627c6280b90bfa6e2d385948d",
+    "relay-preflight.ts": "df6d588e2769651bd97d3142bc8e175dbffab55e269ab63e1795f6011baa31a0",
+    "run-live.ts": "016b43e3012c97ee9b843d58c2f902d238b8afcac0c73fde71e3bc5edbd286b7",
+    "sites-connection.py": "c89ecfdd8fae00a6407c3d16057cd29274ba0c20f68c03e7954c33538d645307",
+    "test_connection_transport.py": "e93a505324f3791dce0a10762a9752019e34cb124047a4fbb151f5bee0dd9be7",
+    "verify-artifacts.py": "dff18c20c4eb383a12165a9fce662296f31dba281ca6501807aad5dde67a0e34",
+    "workflow.test.ts": "652d36727bae7e89f7e5401aa57388eb3303e74ae677b0e951fabee03b993b27",
+    "workflow.ts": "25831ebcb225139efec84bb934b21cfd9385cbffc57af092f12931bba63a67ec"
+  },
+  "count_note": "68 companion/workflow + 22 Python checks; 96 application regressions and 42 disposable PostgreSQL/HTTP checks. Counts overlap.",
+  "live_adapter_evidence": "live-adapter-verification.json",
+  "current_evidence": "release-verification.json",
+  "current_assessment": "RELEASE_20260911.md",
+  "final_application_source_matches_build_snapshot": true,
+  "live_public_scan": {
+    "evidence": "release-verification.json",
+    "pages": 4,
+    "assets": 29,
+    "markers": 21,
+    "hits": [],
+    "scope": "Listed public pages, their directly referenced Next.js assets, and selected unauthenticated API responses; not an exhaustive live-site audit."
+  },
+  "check_recency": {
+    "currentRollout": {
+      "applicationRegressions": {
+        "exit_code": 0,
+        "log_sha256": "1d77234bd1d23ed4e97dc72391c4b8ab57a483bbd510fb50575320c3066b316b",
+        "tests": 96,
+        "pass": 96,
+        "fail": 0,
+        "skipped": 0
+      },
+      "isolatedBuild": {
+        "exit_code": 0,
+        "log_sha256": "42db575e2d2339a54ac450c2d827ca14c84de0b660a5df3a768a467a6eb398bd"
+      },
+      "typescript": "passed",
+      "productionVercelBuild": "passed",
+      "releaseContainerSyntheticRestart": "passed with external network disabled"
+    },
+    "carriedForward": {
+      "workflowAndAdapters": 68,
+      "pythonTransportAndSource": 22,
+      "disposablePostgresAndHttp": 42,
+      "rerunThisRollout": false
+    }
+  }
+}

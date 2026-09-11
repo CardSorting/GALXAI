@@ -1,0 +1,46 @@
+{
+  "scope": "isolated validation only; never deploy this output",
+  "workspace": "/var/folders/98/ss6g9t1x6_b1gppqp2d64ftr0000gn/T/galx-sites-application-check-7lq5plwo",
+  "runtime": "v22.21.1",
+  "production_credentials": false,
+  "dotenv_copied": false,
+  "source_changed": false,
+  "documentation_changed": true,
+  "regressions": {
+    "exit_code": 0,
+    "log_sha256": "e1f74ec2060d72e5a21ebf4aba154c0b87d0566cdf414ab3dc9665eb67382d7b",
+    "tests": 103,
+    "pass": 103,
+    "fail": 0,
+    "skipped": 0
+  },
+  "build": {
+    "exit_code": 0,
+    "log_sha256": "3f4fbf4dc8697e88a1e6b6f05b5eab35bd089b3be42332dd68636e3988ed7914"
+  },
+  "private_implementation_asset_scan": {
+    "files": 633,
+    "markers": 25,
+    "hits": [],
+    "live_site_scanned": false
+  },
+  "documentation_verification": {
+    "verified_at": "2026-09-11T15:04:03.926120+00:00",
+    "base_revision": "4587642a8671dfbf7b4df80b580811f9654093f8",
+    "docs_validator": "Documentation validation passed: 284 documents, 136 ADRs; scope, coverage, local targets, and current-guide anchors.",
+    "internal_markdown_files": 29,
+    "internal_relative_links": 240,
+    "public_json_examples_match_source": true,
+    "documented_default_rate_cards_match_source": true,
+    "public_entry_document_marker_scan": {
+      "files": 5,
+      "hits": []
+    },
+    "git_diff_check": "passed",
+    "verifier_sha256": "0c806f214ae7b8bb7ae933c48032d08f37a192174fb95070c7bd22fa74964f01",
+    "invocation_note": "Ran existing verifier in memory with a separate evidence filename and documentation/source-change flags; runtime tests and build unchanged.",
+    "initial_sandbox_attempt": "Localhost fixture listeners failed with EPERM; rerun with authorized localhost access passed.",
+    "runtime_source_modified_by_documentation_pass": false,
+    "deployed": false
+  }
+}

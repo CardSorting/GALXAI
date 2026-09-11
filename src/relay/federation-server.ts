@@ -4,6 +4,9 @@ import { createHash, createHmac, timingSafeEqual, randomUUID } from 'node:crypto
 import { pipeline } from 'node:stream/promises';
 import { Readable, Transform } from 'node:stream';
 import { AdmissionReceipts } from './admission-receipts.js';
+import { RECEIPT_RETENTION_MS } from './durable-receipts.js';
+import { sitesContractRequest, sitesContractQuery, sitesContractReply, verifySitesContractResponse, type SitesContractRequest } from './sites-contract.js';
+import { completionUsage } from './completion-usage.js';
 import { MonitorSessions } from './monitor-sessions.js';
 import { FederationTelemetry } from './federation-telemetry.js';
 import { safeLabel } from './telemetry.js';
@@ -83,6 +86,36 @@ export class RelayFederationServer {
   }
   private owner(relay: Pick<RelayHandle, 'shardId' | 'generation'>) { return JSON.stringify([relay.shardId, relay.generation]); }
   private request(url: string, init: RequestInit) { return (this.options.transport ?? fetch)(url, { ...init, signal: init.signal ? AbortSignal.any([init.signal, this.shutdown.signal]) : this.shutdown.signal }); }
+  private async verifySitesWorker(relay: RelayHandle, request: SitesContractRequest, signal: AbortSignal) {
+    const response = await this.request(`${relay.endpoint}/api/sites/contract?${sitesContractQuery(request)}`, {
+      headers: { Authorization: `Bearer ${relay.adminKey}` }, redirect: 'error', cache: 'no-store', signal });
+    await verifySitesContractResponse(response, request);
+    if (this.lifecycle.handle(relay.shardId)?.generation !== relay.generation) throw new Error('Contract unavailable');
+  }
+  private async sitesContract(query: URLSearchParams) {
+    const controller = new AbortController();
+    try {
+      if (this.draining || !this.lifecycle.routable()) throw new Error();
+      const request = sitesContractRequest(query);
+      const candidates = () => this.lifecycle.capabilities.eligibleLoad(request.model);
+      const selected = candidates();
+      if (!selected.length) throw new Error();
+      const identity = (rows: typeof selected) => rows.map(r => this.owner(r)).sort().join(',');
+      const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(4000)]); let index = 0;
+      // No cache: all currently eligible workers must support this exact profile.
+      await Promise.all(Array.from({ length: Math.min(8, selected.length) }, async () => {
+        while (index < selected.length) {
+          signal.throwIfAborted();
+          const candidate = selected[index++], relay = this.lifecycle.handle(candidate.shardId);
+          if (!relay || relay.generation !== candidate.generation) throw new Error();
+          await this.verifySitesWorker(relay, request, signal);
+        }
+      }));
+      if (this.draining || !this.lifecycle.routable() || identity(selected) !== identity(candidates())) throw new Error();
+      return sitesContractReply(request);
+    } catch { throw new RequestError(503, 'service_unavailable', 'This request is temporarily unavailable.'); }
+    finally { controller.abort(); }
+  }
   private reserve(shard: string) { this.reservations.set(shard, (this.reservations.get(shard) ?? 0) + 1); }
   private release(shard: string) { const n = (this.reservations.get(shard) ?? 1) - 1; if (n) this.reservations.set(shard, n); else this.reservations.delete(shard); }
   private async poll() {
@@ -127,6 +160,18 @@ export class RelayFederationServer {
       const upstream = await this.request(`${relay.endpoint}${path}`, { method: req.method, headers: { ...this.headers(relay, tenant), ...(typeof req.headers['last-event-id'] === 'string' ? { 'Last-Event-ID': req.headers['last-event-id'] } : {}) }, redirect: 'error', signal: controller.signal });
       if (!path.split('?')[0].endsWith('/stream')) {
         const result = await readRelayJson(upstream);
+        if (path.split('?')[0].endsWith('/receipt')) {
+          if (!upstream.ok) throw new Error('Receipt unavailable');
+          const jobId = path.split('/')[3];
+          const usage = result.usage && completionUsage({ status: 'completed', usage: {
+            input_tokens: result.usage.prompt_tokens, output_tokens: result.usage.completion_tokens, total_tokens: result.usage.total_tokens } });
+          if (result.id !== jobId || !['pending', 'unknown', 'not_started', 'completed'].includes(result.status) ||
+              !(result.output === null || (typeof result.output === 'string' && Buffer.byteLength(result.output) <= 12000)) ||
+              (result.usage !== null && !usage) || !(result.retainedUntil === null || Number.isSafeInteger(result.retainedUntil))) throw new Error('Invalid receipt');
+          // Never forward storage records, tenant identifiers or worker errors.
+          return this.json(res, 200, { id: publicId, status: result.status, output: result.output,
+            usage: usage ?? null, retainedUntil: result.retainedUntil });
+        }
         if (upstream.ok) {
           if (result.id !== undefined) result.id = publicId;
           if (result.jobId !== undefined) result.jobId = publicId;
@@ -184,6 +229,7 @@ export class RelayFederationServer {
     if (path.startsWith('/api/') || path === '/health/ready') {
       this.authenticate(req, true);
       if (req.method !== 'GET') throw new RequestError(405, 'method_not_allowed', 'Use GET.');
+      if (path === '/api/sites/contract') return this.json(res, 200, await this.sitesContract(url.searchParams));
       if (path === '/api/capabilities') return this.json(res, 200, this.lifecycle.snapshot());
       if (path === '/api/telemetry') return this.json(res, 200, this.monitorSnapshot());
       if (path === '/api/egress' && this.options.egressSnapshot) return this.json(res, 200, this.options.egressSnapshot());
@@ -194,12 +240,14 @@ export class RelayFederationServer {
       throw new RequestError(404, 'not_found', 'Route not found.');
     }
     const tenant = this.authenticate(req);
-    const match = path.match(/^\/v1\/jobs\/([^/]+)(\/(?:stream|cancel))?$/);
+    const match = path.match(/^\/v1\/jobs\/([^/]+)(\/(?:stream|cancel|receipt))?$/);
     if (match) {
       if (req.method !== (match[2] === '/cancel' ? 'POST' : 'GET')) throw new RequestError(405, 'method_not_allowed', 'Unsupported job method.');
       const affinity = this.verify(match[1], tenant);
       const relay = this.lifecycle.handle(affinity.shard);
-      if (!relay || relay.generation !== affinity.generation) throw new RequestError(410, 'relay_generation_gone', 'The relay that owns this job is no longer available.');
+      // Persisted receipts belong to the shard's retained volume. Streams and
+      // cancellation still belong exclusively to the admitting generation.
+      if (!relay || (match[2] !== '/receipt' && relay.generation !== affinity.generation)) throw new RequestError(410, 'relay_generation_gone', 'The relay that owns this job is no longer available.');
       return this.proxy(req, res, relay, tenant, `/v1/jobs/${affinity.job}${match[2] ?? ''}${url.search}`, match[1]);
     }
     if (req.method === 'GET' && path === '/v1/models') return this.json(res, 200, { object: 'list', data: this.lifecycle.routable() ? this.lifecycle.capabilities.snapshot().models.filter(m => m.eligibleShardCount && !m.model.startsWith('image:')).map(m => ({ id: m.model, object: 'model', owned_by: 'galx' })) : [] });
@@ -219,6 +267,8 @@ export class RelayFederationServer {
     res.once('finish', () => report(false)); res.once('close', () => report(!res.writableFinished));
     if (this.draining) throw new RequestError(503, 'server_draining', 'New work is paused while accepted requests finish.');
     const body = await readJsonBody(req, 2 * 1024 * 1024, 10000); validateModelRequest(body, image);
+    if (body.sites_profile !== undefined && (image || body.sites_profile !== 'local-v1' || body.durable_receipt !== true ||
+        body.require_output_limit === true || body.max_tokens !== undefined)) throw new RequestError(400, 'invalid_request', 'Invalid request.');
     observation.model = safeLabel(body.model);
     if (this.draining) throw new RequestError(503, 'server_draining', 'New work is paused while accepted requests finish.');
     if (!body.model) throw new RequestError(400, 'model_required', 'Specify the exact requested model.');
@@ -255,7 +305,19 @@ export class RelayFederationServer {
       this.reserve(owner);
       let retained = false;
       let acknowledged = false;
+      let dispatched = false;
       try {
+        if (!image && (body.require_output_limit === true || body.sites_profile === 'local-v1')) {
+          // Hold capacity across this await. Recheck the selected generation so
+          // an old worker cannot silently discard the required limit flag.
+          try {
+            if (body.durable_receipt !== true) throw new Error();
+            await this.verifySitesWorker(relay, { model: body.model, maxOutputTokens: body.sites_profile === 'local-v1' ? 2048 : body.max_tokens,
+              ...(body.sites_profile === 'local-v1' ? { profile: 'sites-local-v1' as const } : {}),
+              nonce: randomUUID() }, AbortSignal.timeout(4000));
+          } catch { throw new RequestError(503, 'service_unavailable', 'This request is temporarily unavailable.'); }
+        }
+        dispatched = true;
         const upstream = await this.request(`${relay.endpoint}${path}`, { method: 'POST', headers: { ...this.headers(relay, tenant), ...forwarded, 'x-request-id': this.requests.get(req)! }, body: JSON.stringify(body), redirect: 'error', signal: AbortSignal.timeout(image ? 360000 : this.options.admissionTimeoutMs ?? 15000) });
         if (image) {
           acknowledged = true; // Image headers are sent only after synthesis has settled.
@@ -280,7 +342,8 @@ export class RelayFederationServer {
           const key = `${relay.generation}:${job}`;
           if (!this.jobs.has(key)) { this.jobs.set(key, { relay, tenant, job, expires, nextPollAt: Date.now() + 2000, pollDelayMs: 2000 });
             this.acknowledgements.set(owner, [...(this.acknowledgements.get(owner) ?? []), Date.now()]); }
-          const id = this.sign({ shard: relay.shardId, generation: relay.generation, job, tenant, expires: Date.now() + 86400000 });
+          const id = this.sign({ shard: relay.shardId, generation: relay.generation, job, tenant,
+            expires: Date.now() + (body.durable_receipt === true ? RECEIPT_RETENTION_MS : 86400000) });
           const answer = { ...result, id, jobId: id, streamUrl: `/v1/jobs/${id}/stream`, statusUrl: `/v1/jobs/${id}` };
           const headers = { ...relayResponseHeaders(upstream.headers), 'Location': answer.streamUrl, 'Operation-Location': answer.statusUrl,
             'retry-after': upstream.headers.get('retry-after') || '2', 'Content-Type': 'application/json', 'Cache-Control': 'no-store' };
@@ -292,6 +355,7 @@ export class RelayFederationServer {
         if (upstream.status === 503) void this.lifecycle.reconcile();
         this.json(res, upstream.status, result, relayResponseHeaders(upstream.headers));
       } catch (error) {
+        if (!dispatched) throw error; // A failed read-only preflight admitted no work.
         // A lost acknowledgement may conceal admitted work. Never replay it or immediately return its slot.
         retained = !acknowledged && !this.shutdown.signal.aborted;
         if (replay) replay.receipt.state = 'unknown';

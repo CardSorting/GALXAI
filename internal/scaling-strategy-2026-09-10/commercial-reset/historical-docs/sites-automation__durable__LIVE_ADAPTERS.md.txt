@@ -1,0 +1,88 @@
+# Live adapter implementation — 2026-09-11
+
+Latest: the [production rollout](RELEASE_20260911.md) deployed the worker, federation and application with retained state and paid activation disabled. The [durable native-host handoff](NATIVE_HOST_DELIVERY.md) replaces manual journal editing with `request-hosted-save` and `accept-hosted-save`. The path passed a live private update. `GALX_SITES_DELIVERY_MODE=native_host` requires its own upload/receipt evidence; default CLI mode retains CLI-upload qualification. Both modes still require a supplier ceiling and durable billing evidence. No paid activation occurred.
+
+A private sample Site and its update have been published. The CLI can read Sites, push source and publish an existing saved version. Archive saving failed through the direct CLI call and succeeded through the native uploader. Both an isolated relay restart and a deployed production worker replacement preserved exact usage. The application billing route is deployed but paid generation remains disabled; no production wallet was charged. See the [release record](RELEASE_20260911.md) for the remaining pricing, cohort and delivery gates.
+
+## Implemented paths
+
+`Customer companion → authenticated GALX content API → PostgreSQL reservation → configured relay → observed usage → atomic wallet settlement → customer companion → exact saved Sites version → owner-private deployment → verified terminal status`.
+
+The relay remains the only model provider. Codex is a customer-authenticated Sites tool host; the adapter never starts a model turn. The companion receives neither the database connection nor the relay credential. The production application does not import this private directory.
+
+| Component | Implementation |
+| --- | --- |
+| Authoritative billing | [Server adapter](../../../../../src/lib/billing/sites-generation.ts) reserves existing wallet funds, records permanent holds and settles immutable transaction receipts in PostgreSQL |
+| Customer authentication and public contract | [Content handler](../../../../../src/lib/billing/sites-content-route.ts), exposed through `/api/sites/content`, requires a verified account session bearer and rejects caller-supplied identity, usage, model, rates and receipts |
+| Companion billing | [HTTP adapter](live-billing.ts) fetches a quote, submits bounded content input and reads receipts for its authenticated account |
+| Actual publishing | [Sites adapter](live-sites.ts) checks current account/owner-only access, exact saved version, source commit and archive hash before calling `sites.deploy_private_site_version` |
+| Tool execution | [Native transport](sites-rpc.py) invokes the installed, pinned Sites plugin through Codex app-server; permits only one explicitly scoped call per process and denies runtime approval requests |
+| Commands and recovery | [Companion entry point](live.ts) connects the adapters to the durable journal and rechecks every billing receipt at the server before publishing |
+
+## Billing guarantees and limits
+
+Money uses integer micro-USD: 1,000,000 units = USD 1. Rates are integer micro-USD per million input/output tokens. The charge is calculated with integer arithmetic and rounded upward once, to the next micro-USD. Cached input uses the configured input rate; no undocumented discount is invented. Rate-card versions and ceilings are operator configuration, with no default prices or promotional credits.
+
+The API exposes the quote version and maximum charge. The caller must accept that exact version and ceiling before dispatch. The server selects the model and builds the fixed content prompt. Publish the applicable customer tariff before activating this route; the configuration is not validation of commercial pricing or supplier margin.
+
+Reservations reduce the existing authoritative wallet balance. Wallet locking coordinates different processes. The operation record and debit commit in one transaction. One outstanding Sites reservation blocks another Sites generation for the same account. Holds use an infinite expiry: a scavenger must not refund an operation just because its response was lost. There is no local-memory financial fallback.
+
+Caller operation keys are scoped to the authenticated account both in PostgreSQL and at the relay. The same key cannot select different input, and the same relay key cannot merge work from different customers. A duplicate completed request returns its persisted result and receipt without another model request. Settlement, refund of the unused reservation, lifetime spend and the receipt commit together. A lost database acknowledgement never authorizes another model dispatch.
+
+Usage is taken only from the trusted relay response, never the generated text or a customer request. Missing, inconsistent or out-of-ceiling usage keeps the reservation open and blocks additional work. Previously missing usage can be reconciled by the trusted billing adapter only when it matches the same upstream receipt and content; there is no customer endpoint that submits such evidence. `GET ...?operationId=...` now retrieves the persisted, account-scoped relay job when a hold is unresolved. The accepted job ID and relay origin are recorded before streaming begins. Recovery uses authenticated GET only, pins the original relay origin, and applies the original persisted rate. It never resubmits generation, accepts customer usage, or treats a missing replay as proof of no execution.
+
+**Initial charges and recovery now read committed relay receipts.** The per-worker SQLite journal survives restart independently of the short-lived stream. The front door supports authenticated reads after replacement of the original worker, while preserving generation checks for streams and cancellation. Known results have 30-day retention; unknown usage has no automatic storage expiry. Only final, consistent usage from one attempt can settle. Metered jobs do not retry automatically. Positive fenced evidence of non-dispatch permits a single zero-cost close and reservation return. Missing/expired receipts do not. The production relay is now deployed with receipt retention; a production worker replacement preserved a committed receipt. The earlier supplier diagnostic for forwarding `max_output_tokens` returned HTTP 400; local byte/time limits and a maximum customer charge do not prove a supplier token ceiling.
+
+## Publishing guarantees and limits
+
+The live publishing operation deploys an **archive-backed version with a recorded save acknowledgement**. `save-version` journals the upload before calling Sites, then binds the returned remote archive receipt to the exact local artifact and source commit. `push-source.py` supports a dedicated two-file static checkout, with credentials confined to process memory. Registration still uses the installed native Sites workflow. Use a dedicated Site checkout containing only the validated generated page and Sites manifest; never upload the GALX repository or this directory. Keep the exact canonical archive unchanged when saving it.
+
+The command accepts an intent containing `connectionId`, `projectId`, `commitSha`, `versionId`, `audience: "owner"` and `artifactHash`. Project and version IDs must be copied verbatim from the selected Site/tool response. The project must already be bound to the local job before packaging. The adapter preserves compound version IDs verbatim, checks source and remote archive metadata against the trusted save acknowledgement, and checks current access against the configured Sites account user ID. Sites normalizes uploads: its prefixed tar hash differs from the local gzip digest. They are recorded separately and are never assumed equal. An arbitrary existing version with no upload acknowledgement fails closed. A lost save acknowledgement stays pending and is never blindly uploaded again.
+
+There is no generic MCP execution endpoint, public deployment fallback or access-policy mutation in the companion. Source credentials are scoped to the selected Site and do not opt into publishing on push. Runtime approval requests stop the call rather than being silently approved. An existing deployment for the version is observed instead of started again. Nonterminal status is polled with bounded waits; only a matching successful deployment becomes `published`. The observed deployment ID persists in the journal. Repeating the exact completed publication returns its existing result without deploying again.
+
+After a lost deployment response, `reconcile-publish` uses the persisted ID or the exact saved version's recorded deployment. An absent or failed result does not automatically release the Site lock or prove that nothing happened. It requires investigation. External actors can still deploy to the same Site: a local lock cannot coordinate independent tools or workstations.
+
+## Configuration and commands
+
+Server process configuration:
+
+- `GALX_SITES_CONTENT_ENABLED=1` requests activation of new quotes and generation; default is disabled. Existing-operation reconciliation remains available while this flag is off.
+- `GALX_SITES_RELAY_ADMIN_KEY` is a server-only administrator credential for the configured relay origin. New quotes/generation require its fresh contract check before funds; inference credentials and static evidence alone are insufficient. See [the contract runbook](RELAY_CONTRACT_HARDENING.md). Never send this key to the companion or browser.
+- `GALX_SITES_DELIVERY_MODE` is `cli` by default or explicitly `native_host`; it never switches automatically after an upload failure.
+- `GALX_SITES_ACTIVATION_EVIDENCE` must contain fresh operator qualification of the exact origin/model/tariff, enforced ceiling, durable receipt recovery and the selected upload/publication mode. The [current activation contract](NATIVE_HOST_DELIVERY.md#output-bounds-and-activation) describes mode-specific fields; the common fields remain in the [original contract](ACTIVATION_HARDENING.md#activation-contract). A flag or invented passing evidence is insufficient qualification.
+- `GALX_SITES_RATE_CARD` is an exact JSON object with `version`, `model`, `inputMicroUsdPerMillion`, `outputMicroUsdPerMillion`, `maxInputTokens`, `maxOutputTokens`.
+- Existing server database and relay configuration is reused. Keep those credentials on GALX.
+- `RELAY_SITES_OUTPUT_LIMIT_FORWARDING=true` on the federation supervisor explicitly enables forwarding for durable jobs in newly created workers. The installer and driver propagate the flag; ordinary chat keeps its existing payload. This setting does not establish supplier enforcement or enable application billing.
+- The activation flag is global. A server-enforced cohort allowlist must be implemented and tested before a limited paid cohort can be enabled.
+
+Companion process configuration:
+
+- `GALX_SITES_BILLING_ORIGIN`: trusted GALX HTTPS origin, with no path/query/credentials.
+- `GALX_SITES_SESSION`: the customer's verified GALX session bearer, supplied through the process environment. A relay key or a ChatGPT login is not a GALX session.
+- `GALX_SITES_MAX_CHARGE_MICRO_USD`: the accepted quote maximum; `GALX_SITES_ACCOUNT_LIMIT_MICRO_USD`: finite local account ceiling. The server independently enforces available wallet funds.
+- `GALX_SITES_CONNECTION_ID`: stable local connection label; `GALX_SITES_ACCOUNT_USER_ID`: the independently selected Sites account user identifier. The adapter compares it against the live access policy.
+- Optional `GALX_CODEX_BINARY`: absolute path to the verified Codex executable. Otherwise the installed executable is resolved through PATH.
+
+Use the qualified companion Node runtime described in [README](README.md). No command loads dotenv automatically. Commands are run from the GALX checkout:
+
+```text
+node --import tsx internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/live.ts check-connection
+node --import tsx internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/live.ts quote
+```
+
+The remaining commands take `STATE_DIRECTORY JOB_ID` except `create`, which takes `STATE_DIRECTORY REQUEST_KEY REQUEST_JSON`. `bind` additionally takes the selected project ID, `accept-package` the canonical archive path, `save-version` the full pushed commit SHA, and `publish-saved` an intent JSON path.
+
+Sequence: `create → bind → generate → prepare → official source commit/push → official Sites packaging → accept-package → save-version → publish-saved`. The source must be the exact validated project and its pushed commit must match the saved archive. Use the canonical archive from the artifact store for saving; the unnormalized packager output may contain macOS metadata. `prepare` prints only a private staging path. `status`, `cancel`, `recover`, `reconcile-billing` and `reconcile-publish` operate on existing jobs. Never delete state or invent a receipt to clear an uncertain operation.
+
+The old `local.ts` commands remain explicitly offline/diagnostic. Their fixture units are not monetary values and must not share a state directory with this live companion. Do not try to publish the earlier fixture job: it has no authoritative charge or bound saved Site.
+
+## Verification
+
+- 42 isolated PostgreSQL/HTTP checks cover concurrent admission, exact replay, tenant-scoped keys, rate persistence, insufficient funds, debt, unknown/excessive usage, trusted reconciliation, rollback, lost COMMIT acknowledgements, restricted database roles, real worker restart recovery, paused-generation recovery, zero-cost non-dispatch closure and cross-account receipt denial.
+- Workflow/adapter tests cover exact source/archive/access checks, existing deployment reuse, polling, lost response reconciliation, target locks, explicit response allowlists, rejected forged billing inputs and bounded bodies.
+- Native transport tests cover scoped operations, duplicate mutation refusal, credential redaction, malformed envelopes and inventory privacy.
+- CLI discovery now checks authenticated runtime tools separately from pinned local helpers. Live CLI reads, source push and private publication succeeded; direct CLI archive upload failed. The successful update used the hosted native uploader followed by CLI publication. No Codex model turns were started for Sites operations.
+- Application adversarial/authentication tests and an isolated production build are recorded in [application verification](application-verification.json). The [release verification](release-verification.json) separately records a scoped live page, asset and authorization scan.
+
+Source contracts were checked against the installed Sites 0.1.66 plugin, [Codex app-server documentation](https://learn.chatgpt.com/docs/app-server) and [Supabase access-control documentation](https://supabase.com/docs/guides/database/postgres/row-level-security). The existing 92 database migrations are applied; this change adds no migration or grant. The repository's static database integrity check passed. Broad production-mutating database suites were not used for this feature; its tests ran on a disposable local database.

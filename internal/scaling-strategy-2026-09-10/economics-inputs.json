@@ -1,0 +1,36 @@
+{
+  "classification": "Illustrative planning assumptions; not GALX actuals or a price recommendation",
+  "currency": "USD",
+  "monthly_price": "20",
+  "included_credit_units": "20",
+  "primary_cost_per_credit_cases": ["0.35", "1.00"],
+  "backup_cost_per_credit": "1.00",
+  "backup_fraction_cases": ["0", "0.05", "0.25", "1"],
+  "demand_multiple_cases": ["0.25", "0.60", "1", "2.5"],
+  "attempt_cost_multiplier_cases": ["1", "1.10"],
+  "overage_price_per_credit": "1.25",
+  "monthly_overage_cap_usd": "10",
+  "payment_fee_fraction": "0.03",
+  "fixed_payment_fee_per_month": "0.30",
+  "allocated_infrastructure_and_support": "2.00",
+  "refund_and_incident_reserve": "0.50",
+  "target_contribution_margin": "0.50",
+  "availability": {
+    "shared_availability": "0.9995",
+    "primary_failure_probability": "0.001",
+    "backup_eligibility": "0.80",
+    "switch_success": "0.99",
+    "backup_failure_given_primary_failure": "0.20",
+    "independent_backup_failure_example": "0.001"
+  },
+  "notes": [
+    "A credit unit is a public rate-card unit, not cash, a fixed number of tokens, or a supplier dollar.",
+    "0.35 is a hypothetical favorable cost ratio. No such GALX discount has been verified.",
+    "1.00 tests supplier cost equal to the credit valuation before fees and overhead.",
+    "Payment fee assumptions are placeholders, not quoted Stripe fees.",
+    "Backup fraction is a fraction of served credit consumption, not raw request count.",
+    "Attempt multiplier approximates unrecovered retry/cancellation cost; actual attempt events are required.",
+    "One payment fee per account-month is assumed. Frequent top-ups increase fixed payment costs.",
+    "Promotion examples are first-deposit configurations from src/lib/stripe/config.ts; welcome eligibility is separate."
+  ]
+}

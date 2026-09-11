@@ -12,3 +12,5 @@ Empty capability state retains a worker for rediscovery. Manual holds stop new a
 Provider cooldowns, local concurrency, model evidence and database-backed application lease limits are different controls. Do not clear counters or mark healthy to create capacity. Inspect active work and receipts before changing limits.
 
 The September 9 fixture cleanup left one healthy worker at that observation, not a target fleet size. Use the [monitor](../TELEMETRY_AND_OBSERVABILITY.md), [enrollment guide](RELAY_CREDENTIAL_ENROLLMENT.md) and [dated evidence](RELAY_SESSION_VERIFICATION_20260909.md).
+
+Fixed-price Sites adds a separate database-serialized account allowance, with provisional defaults of 20 admitted operations per rolling 24 hours and one unresolved hold per account. These are product admission limits, not inferred supplier quota. Fresh local-profile readiness verifies byte/time/attempt bounds and receipt support, while normal model eligibility and capacity checks still apply. Watch retained receipt capacity as well as active work; usage-less completed receipts can occupy storage after fixed settlement. See [Sites operations](SITES_OPERATIONS.md).

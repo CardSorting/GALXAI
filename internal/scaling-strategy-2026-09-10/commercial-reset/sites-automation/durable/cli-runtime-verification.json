@@ -1,0 +1,24 @@
+{
+  "observedDate": "2026-09-11",
+  "cliVersion": "0.154.0",
+  "authenticatedSitesRead": true,
+  "codexModelTurns": 0,
+  "runtimeToolsAvailable": true,
+  "skillsInitiallyOmitted": true,
+  "laterEnabledSkills": [
+    "sites:sites-building",
+    "sites:sites-hosting"
+  ],
+  "saveAdvertisesLocalArchiveParameter": true,
+  "archiveSaveOutcome": "error",
+  "archiveSaveCause": "unconfirmed",
+  "privatePublicationOutcome": "succeeded after hosted native upload",
+  "capabilityMethods": [
+    "initialize",
+    "skills/list",
+    "thread/start",
+    "mcpServerStatus/list",
+    "mcpServer/tool/call"
+  ],
+  "productionWalletWrites": false
+}

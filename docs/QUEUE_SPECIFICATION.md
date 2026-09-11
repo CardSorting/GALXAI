@@ -11,7 +11,9 @@ A chat `202` returns signed job identity, status, and stream URLs. Keep those UR
 
 Parent agents assign one key per logical operation and preserve the same payload when recovering acknowledgement. Children have independent operation keys and bounded concurrency; task IDs are correlation only. An unknown acknowledgement must not become another queued synthesis attempt.
 
-Receipts are bounded process-local acknowledgement recovery, not a durable distributed queue. A controller restart or expired receipt can remove deduplication evidence. See the [recovery table](RELAY_API_REFERENCE.md#request-recovery) for scope preconditions and accepted/unknown outcomes.
+Admission receipts provide bounded process-local acknowledgement recovery. A controller restart or expired admission receipt can remove deduplication evidence. Separately, opted-in Sites text jobs persist completion receipts on the original worker volume. Their signed receipt references can reach a replacement worker on that retained volume, while stream/status/cancel URLs retain generation binding. This does not create a distributed queue or permit another execution after uncertainty. See [ADR 0135](adr/0135-durable-sites-receipts-and-local-admission.md) and the [recovery table](RELAY_API_REFERENCE.md#request-recovery).
+
+Fixed-price Sites admission also requires fresh local-profile readiness and an account wallet reservation. Its rolling account allowance is serialized in PostgreSQL; it is independent of federation capacity reservations. Queue time is included in the worker's local wall-time bound. See [Sites operations](maintainers/SITES_OPERATIONS.md).
 
 ## Throughput isolation
 

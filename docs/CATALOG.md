@@ -32,6 +32,7 @@ The validator checks complete coverage, scope markers, local links and ADR ident
 | [Resilience and recovery](RESILIENCE_AND_DISASTER_RECOVERY.md) | `RESILIENCE_AND_DISASTER_RECOVERY.md` |
 | [Capability-first routing](ROUTING_ALGORITHMS.md) | `ROUTING_ALGORITHMS.md` |
 | [Security boundaries](SECURITY.md) | `SECURITY.md` |
+| [Site content generation](SITES_CONTENT.md) | `SITES_CONTENT.md` |
 | [System topology and maintainer onboarding](SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md) | `SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md` |
 | [Telemetry and observability](TELEMETRY_AND_OBSERVABILITY.md) | `TELEMETRY_AND_OBSERVABILITY.md` |
 | [Troubleshooting](TROUBLESHOOTING.md) | `TROUBLESHOOTING.md` |
@@ -45,6 +46,7 @@ The validator checks complete coverage, scope markers, local links and ADR ident
 | [Relay desktops and manual repair](maintainers/RELAY_DESKTOPS.md) | `maintainers/RELAY_DESKTOPS.md` |
 | [Federation hardening checks](maintainers/RELAY_HARDENING.md) | `maintainers/RELAY_HARDENING.md` |
 | [Federation fleet and quota](maintainers/RELAY_QUOTA_AND_FLEET.md) | `maintainers/RELAY_QUOTA_AND_FLEET.md` |
+| [Sites generation and delivery operations](maintainers/SITES_OPERATIONS.md) | `maintainers/SITES_OPERATIONS.md` |
 | [Federation request telemetry](maintainers/RELAY_TELEMETRY.md) | `maintainers/RELAY_TELEMETRY.md` |
 | [Capability and recovery UX](maintainers/RELAY_TELEMETRY_UX.md) | `maintainers/RELAY_TELEMETRY_UX.md` |
 | [Upstream outage response](maintainers/UPSTREAM_PROVIDER_OUTAGE_AND_DEGRADATION.md) | `maintainers/UPSTREAM_PROVIDER_OUTAGE_AND_DEGRADATION.md` |
@@ -59,6 +61,7 @@ The validator checks complete coverage, scope markers, local links and ADR ident
 | [Developer observation protocol](playbooks/08-unframed-developer-observation-protocol.md) | `playbooks/08-unframed-developer-observation-protocol.md` |
 | [Operational playbooks](playbooks/README.md) | `playbooks/README.md` |
 | [Relay access and containment](relay-security.md) | `relay-security.md` |
+| [Signup credit allowance](operations/signup-credit.md) | `operations/signup-credit.md` |
 
 ## Domain references
 
@@ -240,6 +243,9 @@ The validator checks complete coverage, scope markers, local links and ADR ident
 | [ADR 0131: Private operator desktops and maintenance holds](adr/0131-private-operator-desktops-and-maintenance.md) | `adr/0131-private-operator-desktops-and-maintenance.md` |
 | [ADR 0132: Recoverable desktop credential handoff](adr/0132-recoverable-desktop-credential-handoff.md) | `adr/0132-recoverable-desktop-credential-handoff.md` |
 | [ADR 0133: Explicit validated enrollment and isolated integration fixtures](adr/0133-explicit-validated-enrollment-and-test-isolation.md) | `adr/0133-explicit-validated-enrollment-and-test-isolation.md` |
+| [ADR 0134: Fixed-price Sites generation with opaque provider quotas](adr/0134-fixed-price-sites-generation-with-opaque-provider-quotas.md) | `adr/0134-fixed-price-sites-generation-with-opaque-provider-quotas.md` |
+| [ADR 0135: Durable Sites receipts and local admission](adr/0135-durable-sites-receipts-and-local-admission.md) | `adr/0135-durable-sites-receipts-and-local-admission.md` |
+| [ADR 0136: Customer-owned Sites delivery](adr/0136-customer-owned-sites-delivery.md) | `adr/0136-customer-owned-sites-delivery.md` |
 
 ## Operational records
 
@@ -250,6 +256,7 @@ The validator checks complete coverage, scope markers, local links and ADR ident
 | [Billing recovery release](operations/billing-release.md) | `operations/billing-release.md` |
 | [Production relay recovery — September 7, 2026](operations/relay-production-repair.md) | `operations/relay-production-repair.md` |
 | [Wallet lifecycle repair — September 7, 2026](operations/wallet-lifecycle.md) | `operations/wallet-lifecycle.md` |
+| [Image studio review — September 10](maintainers/image-studio-review.md) | `maintainers/image-studio-review.md` |
 
 ## Research references
 

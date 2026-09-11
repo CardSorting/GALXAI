@@ -1,0 +1,32 @@
+[
+  {
+    "route": "/pricing",
+    "source": "isolated prior production build; script/style excluded; not a live browser check",
+    "markers": {
+      "monthly compute credits": true,
+      "$100/mo pooled compute credits": false,
+      "99.99% SLA": false,
+      "SOC 2 Type II": false
+    }
+  },
+  {
+    "route": "/solutions/small-business",
+    "source": "isolated prior production build; script/style excluded; not a live browser check",
+    "markers": {
+      "monthly compute credits": false,
+      "$100/mo pooled compute credits": true,
+      "99.99% SLA": false,
+      "SOC 2 Type II": false
+    }
+  },
+  {
+    "route": "/solutions/enterprise",
+    "source": "isolated prior production build; script/style excluded; not a live browser check",
+    "markers": {
+      "monthly compute credits": false,
+      "$100/mo pooled compute credits": false,
+      "99.99% SLA": true,
+      "SOC 2 Type II": true
+    }
+  }
+]

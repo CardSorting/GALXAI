@@ -1,0 +1,159 @@
+{
+  "checkedAt": "2026-09-11T07:35:15.373865+00:00",
+  "applicationSourceMatchesBuild": true,
+  "sourceSha256": {
+    "src/relay/durable-receipts.ts": "4f6554ff380556c0dcfe44d47dc40e3e10aaba1d3183f5807d227b7e56693fed",
+    "src/relay/completion-usage.ts": "f66f22fcffdbcf9fce8ff8f78b0c8aed95f2e1c7f5b9676039be12a7b153c1a5",
+    "src/relay/relay-server.ts": "77f09ffd060a0dc3c57353faacf702db0b119deb489ab918b5af2c0f0a11fec1",
+    "src/relay/federation-server.ts": "7d9b65f1160112d3a9ab724c6a00d855c5ff72a2c886b13a627139ebac765605",
+    "src/core/router/adapters/RelayChatTransport.ts": "32fcac8c5316bc669990e52d76935671cc0bcf6d2b58769dc74614263722f22b",
+    "src/lib/billing/sites-generation.ts": "f147dd487a3da81c7664b2940ab8f470cf145e78410790d8caeb0a9f67ea2c1a",
+    "src/lib/billing/sites-content-route.ts": "5d4267a5938035a1e137a91100e233e1c5d932fbf1307d0a6256dba779e37729",
+    "src/lib/billing/sites-activation.ts": "e6f47b1dddbf7d1deafca5d94f5197e54ed0d6d86a985ea8660e5e45d4471444",
+    "src/app/api/sites/content/route.ts": "f6cfe2f072c6bf2ffe33c320330a3ea5a8b808ee323c240dae419a6f9a9b3b31",
+    "src/relay/upstream-diagnostic.ts": "a522c5c068a18846566ae94e2cc5d73df44a706aa2b4bb030c9b9452426e022d",
+    "src/relay/sites-contract.ts": "7aae5c6f8375e5709e11137c1fee9b6159f9e1ac6d8fa655c7162697c50863b3",
+    "src/lib/billing/sites-relay-preflight.ts": "d565f8212f62dcdf91cf03e5f18053d3146c81283d0ca425a6501ab5a2ac1e53",
+    "src/relay/docker-shard-driver.ts": "d4ce00994aeb297ca9ecacc3cea5de48bb56392cb648be471f67f7e4e9de2b7a",
+    "scripts/run-relay-federation.ts": "72532065e18f56bfbacbae55ad0b10179b62a5021e739ee9a914966c6fd1593d",
+    "scripts/install-federation-service.ts": "3cf877d95c7cd174a08b2c5bdcf898ea268751e3df279189e1bdef638b3ab18e",
+    "scripts/test-relay-completion-usage.ts": "20641ab45d9e19af658ebaef129c5b8f69b6bf5493ccd365bff2bbcc8b6088f4"
+  },
+  "checks": {
+    "applicationRegressions": 96,
+    "companionAndWorkflow": 68,
+    "pythonScopedTransportAndSource": 16,
+    "pythonReadOnlyTransport": 6,
+    "disposablePostgresAndHttp": 42,
+    "typescript": "passed",
+    "productionBuild": "passed"
+  },
+  "countsOverlap": true,
+  "localAssetScan": {
+    "files": 633,
+    "markers": 20,
+    "hits": [],
+    "live_site_scanned": false
+  },
+  "productionConfigurationChanged": true,
+  "productionWalletWrites": false,
+  "liveReceiptRestart": {
+    "evidence": "release-verification.json",
+    "matched": true,
+    "generationOrigin": "http://localhost:3001",
+    "publicReadOrigin": "https://relay.galx.ai",
+    "workerReplacement": true,
+    "modelRequests": 1,
+    "inputTokens": 11,
+    "outputTokens": 5,
+    "productionRateCardQualified": false
+  },
+  "livePrivateUpdate": {
+    "evidence": "hosted-save-verification.json",
+    "archiveUpload": "hosted_native",
+    "publication": "native_cli",
+    "durableHandoff": true,
+    "receiptVerifiedByCli": true,
+    "freshProcesses": true,
+    "codexModelTurns": 0,
+    "syntheticLedger": true,
+    "commitSha": "615805b91542918355503ccd391b38004aa8a98c",
+    "versionId": "appgprj_6aa38dfbd9ac81919938c46f2a121cef~appgver_be07c05241108191910a9c11e57096b6",
+    "ownerPrivateVerified": true
+  },
+  "activationEligible": false,
+  "remainingExternalGates": [
+    "Supplier-enforced cost ceiling remains unqualified; actual fixed prepaid/no-overage terms are unavailable",
+    "Production rate card and fresh qualification against the exact public origin/model/rate/ceiling are absent",
+    "A server-enforced account allowlist is required before a small paid cohort can be enabled",
+    "Refresh customer-owned native upload/receipt/private-update evidence before paid activation",
+    "CLI direct archive upload remains unqualified on tested versions 0.154.0 and 0.153.4"
+  ],
+  "operationalLimits": [
+    "Retained single-worker volume is not replicated disaster recovery",
+    "GET-based reconciliation; no scheduled reconciler",
+    "Lost admission without a stored job reference requires operator investigation",
+    "Qualification is trusted operator configuration, not provider attestation"
+  ],
+  "privateTypescript": "passed",
+  "productionImage": {
+    "verifiedAt": "2026-09-11T07:30:12.253Z",
+    "image": "galxai-relay:sites-release-20260911",
+    "imageId": "sha256:cc5eec01f149b8102c3989124bac1348c1339946d7b30dcd664facf6fc57fb22",
+    "healthyWorkers": 2,
+    "originalVolumesRetained": true,
+    "stoppedVolumeBackups": 2,
+    "backupSha256": [
+      "620420f50bd3702804bbfa17d5ff1c67a9fb134650bb0e082d01d6ac87134e96",
+      "e690c9f24743e13209ec16568b6af672bc28cfdffc6542596d2338cfc8d9b405"
+    ],
+    "relayForwardingContractPassed": true,
+    "supplierEnforcementProven": false,
+    "replicatedDisasterRecovery": false,
+    "build": "passed",
+    "smokeTest": "passed",
+    "node": "v22.23.2",
+    "sqlite": "3.51.3",
+    "journalMode": "delete",
+    "smokeTestExternalNetwork": false,
+    "smokeTestSyntheticProviderRequests": 1,
+    "smokeTestReceiptSurvivedRestart": true,
+    "walletWrites": false
+  },
+  "deliveryModes": {
+    "native_host": "live private upload, receipt verification and publication passed; supplier ceiling still unqualified",
+    "cli": "direct archive upload still unqualified"
+  },
+  "liveSupplierRequestsThisPass": 2,
+  "currentAssessment": "RELEASE_20260911.md",
+  "previousSupplierQualificationRequests": 3,
+  "liveRelayContract": {
+    "implemented": true,
+    "checkedBeforeWallet": true,
+    "administratorRequired": true,
+    "mixedFleetChecked": true,
+    "selectedWorkerRechecked": true,
+    "productionOriginQualified": false,
+    "supplierEnforcementProven": false,
+    "clientTimeoutMs": 6000,
+    "fleetTimeoutMs": 4000,
+    "maxResponseBytes": 4096,
+    "productionOriginContractVerified": true
+  },
+  "buildSnapshotMatchedFiles": 1727,
+  "releaseEvidence": "release-verification.json",
+  "liveSupplierRequestScope": "Explicit operator qualification requests only; excludes background service activity",
+  "liveAssetScan": {
+    "evidence": "release-verification.json",
+    "pages": 4,
+    "assets": 29,
+    "markers": 21,
+    "hits": [],
+    "scope": "Listed public pages, their directly referenced Next.js assets, and selected unauthenticated API responses; not an exhaustive live-site audit."
+  },
+  "checkRecency": {
+    "currentRollout": {
+      "applicationRegressions": {
+        "exit_code": 0,
+        "log_sha256": "1d77234bd1d23ed4e97dc72391c4b8ab57a483bbd510fb50575320c3066b316b",
+        "tests": 96,
+        "pass": 96,
+        "fail": 0,
+        "skipped": 0
+      },
+      "isolatedBuild": {
+        "exit_code": 0,
+        "log_sha256": "42db575e2d2339a54ac450c2d827ca14c84de0b660a5df3a768a467a6eb398bd"
+      },
+      "typescript": "passed",
+      "productionVercelBuild": "passed",
+      "releaseContainerSyntheticRestart": "passed with external network disabled"
+    },
+    "carriedForward": {
+      "workflowAndAdapters": 68,
+      "pythonTransportAndSource": 22,
+      "disposablePostgresAndHttp": 42,
+      "rerunThisRollout": false
+    }
+  }
+}

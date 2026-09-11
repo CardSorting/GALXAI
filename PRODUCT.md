@@ -36,3 +36,9 @@ The relay supplies inference transport with credential eligibility checks, bound
 ## Current strategy and evidence
 
 [Product Surface Strategy](docs/PRODUCT_SURFACE_STRATEGY.md) and [ADR 0119](docs/adr/0119-inference-first-product-surface-and-client-retirement.md) define the product boundary. The [federation contract](docs/FEDERATION_STRATEGY.md) defines current lifecycle, routing, explicit image compatibility, and bounded recovery. [Architecture](docs/ARCHITECTURE.md) describes the separate runtime paths; the [relay deployment runbook](docs/RELAY_VNEXT_RUNBOOK.md) records the dated deployment evidence and remaining limitations.
+
+## Bounded Sites strategy
+
+[ADRs 0134–0136](docs/adr/README.md) add fixed-price content generation and customer-owned delivery. The provisional $0.05 completion price and rolling account allowance are explicit product assumptions, configurable server-side. Unknown provider quota and expense remain unknown and do not block this mode; real completion and account authorization remain required. The narrow text API, deterministic template and customer-local Sites connection do not establish a native Codex model-provider integration or a hosted multi-customer builder.
+
+The fixed mode is implemented and locally verified, not deployed or activated by that implementation pass. Follow [Sites operations](docs/maintainers/SITES_OPERATIONS.md) for rollout and original-price recovery. Existing image studio, signup credit, general inference pricing and proposed agency-service fees retain their own contracts.

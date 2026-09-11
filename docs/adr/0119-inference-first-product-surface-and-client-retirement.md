@@ -7,7 +7,7 @@
 
 ## Metadata
 
-* **Status**: Accepted
+* **Status**: Accepted with later scoped extensions: the image studio was restored September 10, and Sites content/customer-local delivery is governed by ADRs 0134–0136
 * **Date**: 2026-09-04
 * **Subsystem**: product surface, authentication, model catalog, Supabase lifecycle
 * **Impact**: product positioning, frontend maintenance, post-auth activation, database surface area
@@ -25,7 +25,7 @@ The desired first authenticated action is therefore model selection, not content
 
 ### 2.1 Product boundary
 
-GALXAI will not ship or maintain a first-party browser chat application or image-generation studio. The following application routes and their supporting presentation components are retired:
+GALXAI keeps the destination browser chat/persona retirement. The original image-studio prohibition was superseded by the explicit September 10 restoration at `/images`, recorded in [the image review](../maintainers/image-studio-review.md). The original retirement affected these routes/components; this list is not an instruction to remove the restored studio:
 
 * `/chat`, `/share`, and `/characters`;
 * `/studio`;
@@ -69,30 +69,36 @@ The private empty tombstones satisfy the repository's staged expand/contract rul
 
 ## 3. Invariants
 
-1. GALXAI-hosted web pages may discover, configure, meter, govern, and document inference; they must not become destination chat or image-creation applications.
+1. The primary hosted journey discovers, configures and governs inference. The restored `/images` surface is an explicit supported exception; destination chat/persona features remain retired. Sites content and customer-local delivery follow ADRs 0134–0136 without adding a hosted builder.
 2. Removing a first-party client must not remove its compatible inference endpoint.
 3. Session persistence exists for explicit inference continuity, not to justify restoring a browser chat UI.
 4. The default post-auth destination is the canonical model catalog.
 5. A model card ends in specifications, API credentials, or integration guidance—not an embedded composer.
 6. Client-only persistence must not remain exposed through the public Supabase schema after its product surface is retired.
-7. Historical ADRs remain evidence of prior decisions, but this ADR governs the current product boundary.
+7. This ADR governs the retained inference-first/default-auth boundary. The September 10 image restoration and ADRs 0134–0136 govern their later scoped extensions.
 
 ## 4. Consequences
 
 ### Positive
 
 * The primary product reads as an inference and governance platform immediately after login.
-* Frontend maintenance no longer includes message composition, chat presentation, sharing, persona creation, studio generation state, or image-history UX.
+* Destination chat, sharing and persona presentation remain retired. The restored image studio again owns its explicitly supported generation/library UI.
 * Supabase loses two public client-only relations and the chat sync payload becomes smaller.
 * Chat and image inference remain compatible for SDK, REST, IDE, and downstream application consumers.
 
 ### Trade-offs
 
-* GALXAI no longer provides an in-browser destination for casually trying a conversation or generating an image.
+* Destination conversation UI remains downstream. Image generation is available through the separately restored studio; Sites content is delivered through its bounded API and customer-local workflow.
 * Activation now depends on model-card clarity and a strong path from model choice to API-key creation and documentation.
 * The private tombstones remain for one staged-retirement interval; a later contract decision may remove them under the database governance protocol.
 
-## 5. Verification
+## Sites extension — September 11
+
+[ADR 0134](0134-fixed-price-sites-generation-with-opaque-provider-quotas.md) adds fixed-price bounded content under verified account identity. [ADR 0135](0135-durable-sites-receipts-and-local-admission.md) defines durable settlement evidence, and [ADR 0136](0136-customer-owned-sites-delivery.md) keeps artifact save/publication under customer ownership. The flow uses the existing relay and makes no claim of native agent-provider compatibility or a hosted general-purpose builder. The `/models` default and private operational boundary remain intact.
+
+## 5. Original retirement verification
+
+These checks describe the original retirement scope. They are not a fresh verification of production database state or an instruction to remove the later restored image studio. Sites verification is recorded separately in ADRs 0134–0136.
 
 * `npm run build` proves the retired application routes are absent and `/models` remains generated.
 * `npx tsc --noEmit` validates authentication and model-catalog contracts.

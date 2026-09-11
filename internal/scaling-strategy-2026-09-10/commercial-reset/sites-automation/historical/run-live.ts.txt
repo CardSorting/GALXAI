@@ -1,0 +1,79 @@
+/** Real configured-relay inference + real read-only Sites connection + local files.
+ * Never calls a Codex model, executes model-authored code, or publishes a Site.
+ */
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { createHash } from 'node:crypto';
+import { generateBrief, renderBrief } from './workflow';
+import { executeRelayChat, RelayDispatchError } from '../../../../src/core/router/adapters/RelayChatTransport';
+
+async function main() {
+  const dir = path.dirname(fileURLToPath(import.meta.url));
+  const report: any = { checked_at: new Date().toISOString(), status: 'starting', model_source: 'configured_relay_only',
+    direct_model_fallback: false, site_created: false, source_pushed: false, version_saved: false, deployed: false };
+  const started = Date.now();
+  const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'galx-relay-sites-draft-'));
+  const run = promisify(execFile);
+  try {
+    const base = process.env.VM_RELAY_URL || process.env.GALXAI_RELAY_URL || process.env.RELAY_URL;
+    const key = process.env.VM_RELAY_API_KEY || process.env.RELAY_API_KEYS?.split(',')[0]?.trim();
+    assert(base && key, 'relay_not_configured');
+    const endpoint = new URL(base);
+    assert(!endpoint.username && !endpoint.password && !endpoint.search && !endpoint.hash);
+    assert(endpoint.protocol === 'https:' || (endpoint.protocol === 'http:' && ['127.0.0.1', 'localhost', '[::1]'].includes(endpoint.hostname)));
+    const connection = JSON.parse((await run('python3', [path.join(dir, 'sites-connection.py')], { timeout: 120000, maxBuffer: 128000 })).stdout);
+    report.sites_connection = connection;
+    assert(connection.connected && connection.unexpected_model_requests === 0, 'sites_connection_failed');
+    const model = process.env.GALX_SITES_PROBE_MODEL || 'gpt-5.6-luna';
+    const catalog = await fetch(new URL('/v1/models', endpoint), { redirect: 'error', signal: AbortSignal.timeout(10000), headers: { Authorization: `Bearer ${key}` } });
+    assert(catalog.ok && (await catalog.json()).data.some((item: any) => item.id === model), 'probe_model_not_in_catalog');
+    report.requested_model = model;
+    report.live_model_calls = 0;
+    const generationStart = Date.now();
+    const draft = await generateBrief(async messages => {
+      report.live_model_calls++;
+      // Only the existing text protocol. No tools, role:tool, response_format,
+      // or Responses endpoint is needed or advertised.
+      const result = await executeRelayChat({ url: base, key,
+        taskId: 'sites-static-draft-probe', payload: { model, stream: false, messages, reasoning_effort: 'low', max_tokens: 700 },
+        ttftTimeoutMs: 45000, wallTimeoutMs: 60000, idleTimeoutMs: 20000 });
+      const reply = await result.response.json();
+      if (typeof reply.choices?.[0]?.message?.content !== 'string') throw new Error('missing_text');
+      return { text: reply.choices[0].message.content, usage: reply.usage };
+    });
+    report.generation_ms = Date.now() - generationStart;
+    report.usage_tokens = draft.usage_tokens;
+    report.model_call_limit = 2;
+    report.output_limit = 'Requested 700 max_tokens; relay hard enforcement not established';
+    const html = renderBrief(draft.brief);
+    fs.mkdirSync(path.join(temporary, 'dist'));
+    fs.mkdirSync(path.join(temporary, '.openai'));
+    fs.writeFileSync(path.join(temporary, 'dist/index.html'), html);
+    fs.writeFileSync(path.join(temporary, '.openai/hosting.json'), JSON.stringify({ static: { directory: 'dist' } }) + '\n');
+    assert(!/<script|<iframe|<form|onerror=|onload=/i.test(html.replace(/&lt;[^<]*?&gt;/g, '')));
+    const retained = path.join(dir, 'artifacts'); fs.mkdirSync(retained, { recursive: true });
+    fs.writeFileSync(path.join(retained, 'index.html'), html);
+    fs.writeFileSync(path.join(retained, 'brief.json'), JSON.stringify(draft.brief, null, 2) + '\n');
+    report.plugin_root = connection.plugin_root;
+    report.local_project = temporary;
+    report.local_html_sha256 = createHash('sha256').update(html).digest('hex');
+    report.local_html_bytes = Buffer.byteLength(html);
+    report.status = 'local_draft_validated';
+    report.packaging = 'pending separate official helper invocation';
+  } catch (error) {
+    report.status = 'failed';
+    report.error_type = error instanceof RelayDispatchError ? 'RelayDispatchError' : error instanceof Error ? error.name : 'Unknown';
+    if (error instanceof RelayDispatchError) report.relay_error = { reason: error.reason, status: error.status, should_retry: error.shouldRetry, execution_state: error.executionState };
+    process.exitCode = 1;
+  } finally {
+    report.total_ms = Date.now() - started;
+    fs.writeFileSync(path.join(dir, 'live-observations.json'), JSON.stringify(report, null, 2) + '\n');
+    console.log(JSON.stringify(report, null, 2));
+  }
+}
+main().catch(() => { console.error('Relay-only workflow failed before evidence could be saved.'); process.exitCode = 1; });

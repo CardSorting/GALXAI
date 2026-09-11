@@ -1,0 +1,68 @@
+{
+  "checkedAt": "2026-09-11T07:56:31.005611+00:00",
+  "scope": "local implementation verification; no production deployment or customer billing",
+  "defaults": {
+    "fixedChargeMicroUsd": 50000,
+    "maxDailyGenerations": 20,
+    "supplierQuota": "unknown",
+    "supplierCosts": "unknown"
+  },
+  "application": {
+    "scope": "isolated validation only; never deploy this output",
+    "workspace": "/var/folders/98/ss6g9t1x6_b1gppqp2d64ftr0000gn/T/galx-sites-application-check-b2hcaic3",
+    "runtime": "v22.21.1",
+    "production_credentials": false,
+    "dotenv_copied": false,
+    "source_changed": true,
+    "regressions": {
+      "exit_code": 0,
+      "log_sha256": "94211c0f08099090daa54508d8c3f3e0190961cc9c822a775e3972ceaf814d6d",
+      "tests": 103,
+      "pass": 103,
+      "fail": 0,
+      "skipped": 0
+    },
+    "build": {
+      "exit_code": 0,
+      "log_sha256": "bd2c950e203608fd8d22bc903b5e14011117b87b5dae72a3669dcb96f4c25903"
+    },
+    "private_implementation_asset_scan": {
+      "files": 633,
+      "markers": 25,
+      "hits": [],
+      "live_site_scanned": false
+    }
+  },
+  "billing": {
+    "passed": 52,
+    "database": "disposable localhost PostgreSQL",
+    "production_writes": false
+  },
+  "focused": {
+    "passed": 35,
+    "failed": 0
+  },
+  "companion": {
+    "passed": 68,
+    "failed": 0
+  },
+  "container": {
+    "productionImage": "passed",
+    "node": "v22.23.2",
+    "sqlite": "3.51.3",
+    "syntheticProviderRequests": 1,
+    "receiptSurvivedRestart": true,
+    "externalNetwork": false,
+    "walletWrites": false
+  },
+  "logHashes": {
+    "focused": "9c73d9ea1eba257b710322c5e7f53d58ea2c82c5aa44be614ed218d44a5c9689",
+    "billing": "a1d37a820273c76265aa2f93a826993960223057d4ac755c0b97a8a124f2d242",
+    "companion": "e0af335fb7d5ca7b417c76a096bb6419da41a83a3b993167fea160462b4ff07d",
+    "container": "7c624840003d269086eabe52b5f5360f54b672c902c8c0f8f10a05acd67fd64e",
+    "container_build": "3cc92f09699c538eaf010567bc196811607f87cacf0a6ce63a9e41b136386087"
+  },
+  "countsOverlap": true,
+  "productionMutations": false,
+  "liveSupplierRequests": 0
+}

@@ -1,0 +1,44 @@
+# Relay contract and CLI upload investigation — September 11, 2026
+
+Historical implementation assessment, preceding the [production rollout](RELEASE_20260911.md). Statements below about deployment and live requests describe that earlier pass. The relay remains the only model provider. This pass fixes a billing admission gap: an older relay could silently ignore `require_output_limit`, so a static activation assertion alone could allow funds to be reserved for incompatible work. Customer activation remains disabled because the last live supplier check rejected `max_output_tokens`.
+
+## Implemented admission checks
+
+The application now awaits a fresh administrator-authenticated `/api/sites/contract` read before returning a new quote or admitting a generation. The request binds a random challenge, the configured model and the exact output ceiling. The response has an exact field contract; missing endpoints, incorrect versions, extra fields, cached challenges, wrong models or limits, false forwarding flags and inadequate receipt retention all fail closed. The client uses a six-second deadline, a 4 KiB response limit, no redirects and no cache. It permits HTTPS or loopback HTTP only and never sends model or wallet requests during this check.
+
+The worker verifies enabled forwarding, current model eligibility, admission readiness and its fenced durable receipt writer. Its response attests relay protocol behavior and 30-day retention. **It does not assert that the supplier enforces the ceiling.** The existing separately qualified `outputLimitEnforced` requirement still applies.
+
+The federation checks every currently eligible worker with bounded concurrency and a four-second deadline. It rejects changed membership/generations and mixed deployments containing an incompatible worker. Before forwarding a bounded inference request it checks the selected generation again, holding local capacity across the asynchronous check. A failed preflight releases that capacity and leaves the admission key retryable because no inference POST occurred. Once a POST is attempted, ambiguous admission still retains its conservative recovery behavior.
+
+The content route awaits asynchronous authorization before wallet access. Existing-operation GET reconciliation stays available during an activation pause and does not require the new preflight. Public errors remain `content_unavailable`; worker identities, keys, schema diagnostics and supplier messages are not returned by the content API. The new operational endpoint requires administrator authority; ordinary inference credentials cannot read it.
+
+## Private operator configuration
+
+`GALX_SITES_RELAY_ADMIN_KEY` is a new server-only prerequisite for new quotes and generation. It is distinct from the inference credential and must authorize the configured relay origin. Do not put it in a companion, browser bundle, public response or Site package. No key or production configuration was installed in this pass.
+
+The protocol currently qualifies the fixed text profile with a positive output ceiling up to 32,768 tokens. These are protocol admission limits, not proof of affordable supplier pricing or supported supplier output. Roll out the worker and federation changes before the application; qualify the actual deployed origin after rollout. An old or partially upgraded deployment remains unavailable to paid Sites admission.
+
+There is no positive cache or automatic fallback to an unbounded request. This adds control-plane reads to admission. Capacity or configuration may still change after a check; per-request checks and durable reconciliation remain necessary. The receipt store is local retained storage, not replicated disaster recovery. Static operator evidence remains an operator assertion, not cryptographic supplier attestation.
+
+## Corrected CLI diagnosis
+
+Direct archive saving was retested with CLI 0.154.0 and the desktop-bundled CLI 0.153.4, against one fresh synthetic pushed revision. Absolute paths, a file URI and an archive-directory working directory all failed. The useful diagnostic is an **argument type validation failure at schema path `archive`**, not evidence that the filesystem path is missing. Earlier keyword-only diagnostics obscured that distinction. The transport now records fixed type/category classifications without retaining provider text, filenames or credentials. The experimental path rewrite and manual diagnostic retry switch were removed.
+
+The official [file-input contract](https://developers.openai.com/plugins/reference#define-file-inputs) expects the host to supply an uploaded-file object. The [app-server reference](https://learn.chatgpt.com/docs/app-server) documents direct MCP calls but does not establish a standalone upload step for this raw-call route. Combined with the observed type error, this points to missing path-to-file conversion on the tested direct-call path. Changing path syntax did not supply that conversion. This is an implementation finding for these tested versions, not a claim that all CLI tool surfaces lack file upload support.
+
+Authenticated version-history reconciliation found no saved version for the failed CLI revision. After that explicit review, the canary continued through a separate persisted native-host handoff. Its actual upload acknowledgement was retained before verification, then accepted through a fresh CLI process. The native tool remains the upload authority; no private upload API, browser clicking, vendor patch or alternate model provider was introduced. An uncertain save still cannot automatically repeat or switch transport.
+
+## Verification and release decision
+
+The current checks passed: 96 application regressions, 68 companion/workflow checks, 22 Python transport/source checks, 42 disposable PostgreSQL/HTTP checks, application and companion TypeScript checks, the production application build, and rebuilt relay-container restart recovery. Counts overlap and should not be added into a release total. The local build scan checked 633 browser/rendered assets against 20 private markers with no matches; this is not a live GALX-site audit.
+
+Tests exercise administrator denial, old and mixed worker versions, fresh challenges, bounded response bodies, disabled forwarding, unavailable receipt stores, async authorization before funds, safe admission-key reuse after non-dispatch, and retained usage through restart. The live native-host update and its exact source/version/deployment identities are recorded in [hosted-save-verification.json](hosted-save-verification.json). The [current activation evidence](activation-verification.json) separates local checks, live delivery and supplier qualification.
+
+Next release steps:
+
+1. Establish an enforceable supplier cost bound through the existing relay. The most direct route is a supported output ceiling. A fixed prepaid supply arrangement without automatic overages would require a separately reviewed capacity and pricing contract; no such terms are assumed here.
+2. Roll out the tested worker, federation and application code with retained state, the server-only administrator credential and paid activation still disabled.
+3. Qualify intentionally long output, authoritative usage, receipt retention and restart recovery on that deployed origin and rate card. Retain evidence rather than setting passing flags by hand, then enable a small cohort in `native_host` mode when all gates pass.
+4. Enable `cli` mode only after a supported CLI upload path passes a fresh private save/update test. The installed direct-call route remains unqualified.
+
+No production wallets were charged, no new live model requests were made in this pass, and no production application or relay deployment was performed. Unknown usage still preserves reservations.

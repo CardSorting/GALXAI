@@ -12,8 +12,8 @@
 | Held worker needs repair | Preserve it and accepted work; pause new admissions/replacement |
 | Revoked, removed, expired or changed authority | Retire old worker even if held |
 | Lost acknowledgement | Reconcile same receipt/job; do not repeat synthesis blindly |
-| Controller restart | Browser sessions/receipts are process-local; preserve private durable state |
-| Worker generation gone | Old signed job cannot move to replacement |
+| Controller restart | Browser sessions/admission receipts are process-local; preserve durable text receipts and private signing/state |
+| Worker generation gone | Stream/cancel cannot move; opted-in receipt reads can use the original retained volume |
 | Credential checkpoint failure | Report explicit error; recover private intent without overwriting newer authority |
 | Desktop inventory failure | Retain record, report unavailable; do not infer deletion or recreate blindly |
 
@@ -31,6 +31,12 @@ Credential sync uses a durable intent and compare-and-swap: finalize an already 
 
 Closing a desktop viewer is safe for ongoing processes. Stop preserves home; deletion requires explicit confirmation and removes owned resources. Preview cleanup must not select production desktops by a broad name pattern.
 
+## Sites financial and delivery recovery
+
+Keep the original account operation ID, wallet hold, relay origin, accepted reference, worker receipt volume and federation signing authority. Customer GET recovery reads the original receipt and saved price. A durably completed fixed-price job settles without token counts; positive fenced non-dispatch closes at zero; unknown or missing evidence stays held. Pause/cohort removal stops new work while preserving authenticated existing-operation recovery with valid service configuration.
+
+The companion independently retains immutable archives, upload intent, saved-version acknowledgement and publication locks. Recovery must observe the original external effect. A missing upload/deployment acknowledgement cannot be repaired by publishing another version. See [Sites operations](maintainers/SITES_OPERATIONS.md#pause-recovery-and-rollback) for retained-state limits and compatible rollback.
+
 ## Limits
 
-Process-local receipts do not survive controller restart, expired receipt windows can permit new execution, and missing artifacts are not recovered merely by polling. Keep uncertain outcomes explicit. Physical phone input, guest semantic accessibility and live provider sign-in require their own verification. Use the [dated record](maintainers/RELAY_SESSION_VERIFICATION_20260909.md), not old test counts, to assess deployment.
+Process-local admission receipts do not survive controller restart, expired receipt windows can permit new execution, and missing artifacts are not recovered merely by polling. Keep uncertain outcomes explicit. Physical phone input, guest semantic accessibility and live provider sign-in require their own verification. Use the [dated record](maintainers/RELAY_SESSION_VERIFICATION_20260909.md), not old test counts, to assess deployment.

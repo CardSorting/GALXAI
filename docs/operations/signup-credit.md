@@ -1,5 +1,7 @@
 # Signup credit allowance
 
+<!-- docs-scope: current-guide -->
+
 New email and OAuth accounts receive **$5 in wallet credit after their email is confirmed**. The allowance is recorded as **Welcome credit** in billing and is spendable through the existing debit path. Email confirmation never requires a client credit claim or a payment card.
 
 This is a private operational document. Do not copy the implementation details below into public documentation or product copy.
