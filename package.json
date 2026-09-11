@@ -266,7 +266,7 @@
     "sim:unpredictable": "tsx simulations/high-concurrency-10k-fairness/simulate-unpredictable-inference.ts",
     "test:10k": "tsx simulations/high-concurrency-10k-fairness/index.test.ts",
     "db:verify": "tsx scripts/verify-supabase-integrity.ts",
-    "db:test": "node --env-file-if-exists=.env.local --import tsx scripts/test-supabase-integration.ts",
+    "db:test": "node --import tsx scripts/run-supabase-integration.ts",
     "test:wallet-lifecycle": "node --import tsx scripts/test-wallet-lifecycle.ts",
     "test:relay-chat": "node --import tsx --test scripts/test-relay-chat-transport.ts scripts/test-relay-client-auth.ts",
     "test:cooldown": "node --import tsx --test scripts/test-postgres-admission.ts scripts/test-shard-sync-backpressure.ts scripts/test-cooldown-false-positives.ts scripts/test-image-admission-errors.ts scripts/test-image-retry-contract.ts scripts/test-pool-health-evidence.ts scripts/test-relay-chat-transport.ts",

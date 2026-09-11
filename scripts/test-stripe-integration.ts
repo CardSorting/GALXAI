@@ -6,8 +6,11 @@ import { Pool } from 'pg';
 import Stripe from 'stripe';
 import { createAccountCheckout } from '../src/lib/billing/checkout';
 import { fulfillStripeEvent } from '../src/lib/billing/fulfillment';
+import { isolatedIntegrationEnvironment } from './lib/integration-test-environment';
 const schema = `payment_test_${Date.now()}`;
-const config = { host: '127.0.0.1', port: 55439, user: 'seats_test', database: 'postgres' };
+const config = process.env.GALX_INTEGRATION_DATABASE_URL
+  ? { connectionString: isolatedIntegrationEnvironment(process.env).DATABASE_URL }
+  : { host: '127.0.0.1', port: 55439, user: 'seats_test', database: 'postgres' };
 const admin = new Pool(config);
 const pool = new Pool({ ...config, options: `-c search_path=${schema}` });
 let checks = 0;
@@ -30,12 +33,12 @@ try {
   await admin.query(`CREATE SCHEMA ${schema}`);
   await pool.query(`CREATE TABLE galx_workspaces(id uuid PRIMARY KEY); CREATE TYPE galx_wallet_transaction_type AS ENUM ('deposit','auto_reload','usage_draw','match_grant','refund','adjustment')`);
   for (const [file,tables] of [['20260822000001_galxai_schema_core.sql',['galx_wallets','galx_wallet_transactions']],['20260822000013_galxai_stripe_billing_mesh.sql',['galx_stripe_customers','galx_stripe_checkout_sessions','galx_stripe_events','galx_stripe_invoices']]] as const) {
-    const sql = readFileSync(`supabase/migrations/${file}`,'utf8');
+    const sql = readFileSync(new URL(`../supabase/migrations/${file}`, import.meta.url),'utf8');
     for (const table of tables) { const start = sql.indexOf(`CREATE TABLE IF NOT EXISTS ${table} (`); await pool.query(sql.slice(start,sql.indexOf('\n);',start)+3)); }
   }
   await pool.query('ALTER TABLE galx_wallets ADD CONSTRAINT balance_nonnegative CHECK (balance_usd >= 0)');
-  const up = readFileSync('supabase/migrations/20260906000001_billing_payment_recovery.sql','utf8').replaceAll('public.',`${schema}.`);
-  const down = readFileSync('supabase/rollbacks/20260906000001_billing_payment_recovery.down.sql','utf8').replaceAll('public.',`${schema}.`);
+  const up = readFileSync(new URL('../supabase/migrations/20260906000001_billing_payment_recovery.sql', import.meta.url),'utf8').replaceAll('public.',`${schema}.`);
+  const down = readFileSync(new URL('../supabase/rollbacks/20260906000001_billing_payment_recovery.down.sql', import.meta.url),'utf8').replaceAll('public.',`${schema}.`);
   const migrationDb = await pool.connect();
   try { await migrationDb.query('BEGIN'); await migrationDb.query(up); await migrationDb.query(down); await migrationDb.query(up); await migrationDb.query('COMMIT'); } finally { migrationDb.release(); }
   checks++;

@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-11",
+  "scope": "Disposable local fixtures only; no production writes or deployment",
+  "migrationCount": 93,
+  "broadSuite": {
+    "passed": 94,
+    "exitCode": 0,
+    "logSha256": "a648cc92754d7f6b89d7ee5074d547c1c723b243d53ce434b932d6abad99fe71"
+  },
+  "billingOnly": {
+    "passed": 26,
+    "exitCode": 0,
+    "logSha256": "51e951544e733d088c45b16708770f0f201562df16b37066d2c8642ba0626389"
+  },
+  "enrollmentAndIsolation": {
+    "passed": 9,
+    "exitCode": 0
+  },
+  "migrationIntegrity": {
+    "fatal": 0,
+    "warnings": 0,
+    "pairedRollbacks": 93
+  },
+  "cancellation": {
+    "interruptedDuringSuite": true,
+    "exitCode": 1,
+    "ownedContainerRemoved": true,
+    "unrelatedContainersUnchanged": true
+  },
+  "productionDataCopied": false,
+  "dotenvLoadedByRunner": false,
+  "sourceSha256": {
+    "scripts/run-supabase-integration.ts": "539186a01d69d52c8705062d3a5888dff8fea4bc421351661a84bcf7395d4f43",
+    "scripts/fixtures/integration-bootstrap.sql": "e1771a3badbdbc9cc66f0d11ab2da5730643b8764df8a351845e6379e4138dde",
+    "scripts/lib/integration-test-environment.ts": "1bf3abc5867c0f7026430e5f8c2be5d8a6b4e9db100afee55a4c7920334838f3",
+    "scripts/lib/require-isolated-integration-env.ts": "3f11612158ec81bd07fe89c85e68193974c6c755eac1cda53f90319e50a43877",
+    "scripts/lib/integration-no-network.ts": "64e802e7eabfc318ac9d1c0eb0790a65097a47a48f44cefd6e947d4489f112de",
+    "scripts/test-relay-enrollment.ts": "2b8038a6ccad9c8a3560e61f24eac99cb38813e8aaaf21c675f65029662a2040",
+    "scripts/test-stripe-integration.ts": "316407d97e4de69eecd2cf1eb79426f9637f81792a600d37f3aeafaf68bc9d5b"
+  }
+}

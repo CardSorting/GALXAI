@@ -25,7 +25,9 @@ Model inventory acceptance does not establish inference/WebSocket compatibility 
 
 ## Fixture and cleanup boundary
 
-The broad mutating integration suite requires an explicit loopback PostgreSQL URL with a dedicated test database name before any repository import. It strips inherited Supabase Data API settings, uses unique test identities and cleans its own created shard. Production or missing configuration fails before mutation. Billing-only tests retain a separate disposable schema harness.
+The broad mutating integration process requires a guarded loopback PostgreSQL URL with a dedicated test database name before any repository import. It strips inherited credential authority, uses unique test identities and cleans its own created shard. Production URLs fail before mutation.
+
+The September 11 follow-up makes `npm run db:test` self-contained: its parent runner creates a pinned PostgreSQL 17/pgvector container, bootstraps test-only platform prerequisites, replays all migrations unchanged and supplies a fresh local connection and synthetic keys to the guarded child. It removes its owned container and temporary files on success, failure or handled cancellation. A caller may still explicitly choose an initialized loopback fixture, which is never reset or destroyed by the runner. Direct child invocation still requires the guarded URL. Billing-only tests retain their schema harness and use the runner's disposable database. See [the current test instructions](../maintainers/RELAY_CREDENTIAL_ENROLLMENT.md#isolated-integration-tests).
 
 A dry-run-first cleanup identifies only the exact legacy fixture family. Apply conditionally checks original encrypted revision, owner, status and zero in-flight work. It revokes matching records without deleting ciphertext, counters or history; changed/busy records are skipped. This does not authorize broad revocation of other rejected credentials.
 

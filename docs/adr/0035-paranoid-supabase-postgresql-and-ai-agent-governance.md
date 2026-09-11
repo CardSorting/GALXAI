@@ -29,7 +29,7 @@ We implement the **Paranoid Autonomous Database Governance Framework (PADGF)** a
    - AES-256-GCM envelope encryption with Authenticated Associated Data (AAD) for all shard credentials.
    - Monotonic fencing tokens for distributed concurrency leases and locks.
    - Non-technical Architect-Readable English Impact Statement for every proposed change.
-   - Automated continuous verification via `npm run db:verify` and `npm run db:test` (explicit disposable loopback `GALX_INTEGRATION_DATABASE_URL` required).
+   - Automated continuous verification via `npm run db:verify` and `npm run db:test` (automatic disposable Docker fixture; explicit overrides remain loopback-only).
 
 2. **Mechanical Containment Linter (`verify-supabase-integrity.ts`)**:
    - Programmatically audits all SQL files and migration history.

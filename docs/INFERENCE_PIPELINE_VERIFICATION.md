@@ -7,7 +7,7 @@
 
 Use explicitly enrolled authority; the inference verification script awaits registry initialization and no longer falls back to bulk seeding. Confirm intended environment, model entitlement and worker capability before live requests. Inventory acceptance is not a successful inference handshake.
 
-Run [targeted regressions](maintainers/RELAY_HARDENING.md) first. Mutating database integration requires an explicit isolated loopback test database; never inherit production configuration for synthetic account creation.
+Run [targeted regressions](maintainers/RELAY_HARDENING.md) first. `npm run db:test` creates a disposable Docker database and strips inherited credentials before synthetic account creation. Explicit database overrides remain restricted to initialized loopback fixtures.
 
 ## Client verification
 

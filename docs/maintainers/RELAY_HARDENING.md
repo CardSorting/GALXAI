@@ -24,7 +24,7 @@ npm run test:relay:docker
 node --import tsx scripts/test-relay-lifecycle-docker.ts
 ```
 
-The storage harness uses disposable PostgreSQL plus mocked REST tests. Read its prerequisites before running. The broad `npm run db:test` requires an explicit isolated loopback database and must fail under production configuration; see [test isolation](RELAY_CREDENTIAL_ENROLLMENT.md#isolated-integration-tests).
+The storage harness uses disposable PostgreSQL plus mocked REST tests. Read its prerequisites before running. The broad `npm run db:test` creates its own disposable Docker database and rejects production connection overrides; see [test isolation](RELAY_CREDENTIAL_ENROLLMENT.md#isolated-integration-tests).
 
 Docker canaries use synthetic inventories/credentials. The federation canary removes containers but retains checkpoint volumes under its existing driver behavior. The lifecycle canary removes its containers and checkpoint volumes. Desktop previews use a scoped test manifest for retryable cleanup. Never expand cleanup to normal production workspaces.
 

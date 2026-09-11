@@ -36,7 +36,7 @@ Use [hardening checks](RELAY_HARDENING.md) for enrollment, public-response, stor
 | Task | Command and constraint |
 | --- | --- |
 | Static integrity audit | `npm run db:verify` |
-| Broad integration suite | `npm run db:test`; requires explicit `GALX_INTEGRATION_DATABASE_URL` for a disposable initialized loopback database |
+| Broad integration suite | `npm run db:test`; automatically creates and removes a disposable Docker database |
 | Local authority boundary | `npm run shards:test-authority` |
 | Live authority verifier | `npm run shards:verify-authority`; inspect its target and behavior first |
 | Vault rewrap preview | `npm run shards:rotate-vault -- --from v1 --to v2`; apply is a separate explicit option |

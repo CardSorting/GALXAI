@@ -39,7 +39,7 @@ This guide covers the internal codebase structure, architectural layers, how to 
 │   ├── manage-migrations.ts          # Migration executor and status manager
 │   ├── push-migrations-direct.ts     # Direct Supabase migration push script (npm run db:push)
 │   ├── verify-supabase-integrity.ts  # Paranoid PostgreSQL linter (npm run db:verify)
-│   ├── test-supabase-integration.ts  # Isolated loopback integration suite (explicit GALX_INTEGRATION_DATABASE_URL)
+│   ├── run-supabase-integration.ts   # Automatic disposable Docker fixture for db:test
 │   ├── test-chat-context-hardening.ts # Chat normalization & context hardening test
 │   ├── verify-vercel-readiness.ts    # 8-Phase Pre-Flight Audit Engine
 │   ├── sync-vercel-env.ts            # Automated Vercel Secret Synchronizer

@@ -98,9 +98,26 @@ test('integration suite refuses production and strips inherited Data API authori
     assert.throws(()=>isolatedIntegrationEnvironment({GALX_INTEGRATION_DATABASE_URL:value}),/loopback database/);
   }
   const next=isolatedIntegrationEnvironment({GALX_INTEGRATION_DATABASE_URL:'postgres://127.0.0.1/galx_integration_test_run',DATABASE_URL:'production',
-    SUPABASE_SERVICE_ROLE_KEY:'private',NEXT_PUBLIC_SUPABASE_URL:'https://production.example'});
+    SUPABASE_SERVICE_ROLE_KEY:'private',NEXT_PUBLIC_SUPABASE_URL:'https://production.example',
+    R2_ACCESS_KEY_ID:'private',R2_SECRET_ACCESS_KEY:'private',STRIPE_SECRET_KEY:'private',VM_RELAY_API_KEY:'private',
+    GALX_VAULT_KEY_V1:'production-key',GALX_AUDIT_SIGNING_SECRET:'production-key',NODE_OPTIONS:'--require unsafe',PATH:'test-path'});
   assert.equal(next.DATABASE_URL,'postgres://127.0.0.1/galx_integration_test_run?sslmode=disable'); assert.equal(next.NODE_ENV,'test');
   assert(!next.SUPABASE_SERVICE_ROLE_KEY);assert(!next.NEXT_PUBLIC_SUPABASE_URL);
-  const result=spawnSync(process.execPath,['--import','tsx','scripts/test-supabase-integration.ts'],{encoding:'utf8',env:{PATH:process.env.PATH,DATABASE_URL:'production'}});
-  assert.equal(result.status,1);assert.match(result.stderr,/Integration tests require/);assert(!result.stdout.includes('TEST SUITE'));
+  for(const key of ['R2_ACCESS_KEY_ID','R2_SECRET_ACCESS_KEY','STRIPE_SECRET_KEY','VM_RELAY_API_KEY','NODE_OPTIONS']) assert(!next[key]);
+  assert.notEqual(next.GALX_VAULT_KEY_V1,'production-key');assert.notEqual(next.GALX_AUDIT_SIGNING_SECRET,'production-key');
+  assert.equal(next.PATH,'test-path');
+  for(const args of [[],['--billing']]) {
+    const result=spawnSync(process.execPath,['--import','tsx','scripts/test-supabase-integration.ts',...args],{encoding:'utf8',env:{PATH:process.env.PATH,DATABASE_URL:'production'}});
+    assert.equal(result.status,1);assert.match(result.stderr,/Integration tests require/);assert(!result.stdout.includes('TEST SUITE'));
+  }
+  const fixture=spawnSync(process.execPath,['--import','tsx','scripts/run-supabase-integration.ts'],{encoding:'utf8',env:{PATH:process.env.PATH,
+    GALX_INTEGRATION_DATABASE_URL:'postgres://user:private-password@production.example/galx_integration_test'}});
+  assert.equal(fixture.status,1);assert.match(fixture.stderr,/loopback database/);
+  assert(!fixture.stdout.includes('Starting disposable'));assert(!fixture.stderr.includes('private-password'));
+});
+
+test('the isolated integration process fails even when an unexpected HTTP attempt is caught', () => {
+  const result=spawnSync(process.execPath,['--import','tsx','--import','./scripts/lib/integration-no-network.ts',
+    '--input-type=module','-e','await fetch("https://must-not-be-contacted.invalid").catch(()=>{});'],{encoding:'utf8',env:{PATH:process.env.PATH}});
+  assert.equal(result.status,1);assert.match(result.stderr,/1 unexpected HTTP requests/);
 });

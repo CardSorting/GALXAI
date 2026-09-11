@@ -7,7 +7,7 @@
 
 Run the [hardening checks](maintainers/RELAY_HARDENING.md) appropriate to the change. Synthetic tests do not authenticate a real account, certify production capacity or authorize paid probes.
 
-The broad `npm run db:test` suite requires an explicitly isolated loopback test database. It must reject inherited production configuration before repository initialization. See [test isolation](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md#isolated-integration-tests).
+The broad `npm run db:test` suite creates its own disposable Docker database and rejects production connection overrides before repository initialization. See [test isolation](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md#isolated-integration-tests).
 
 ## Start the host controller
 

@@ -70,13 +70,21 @@ Review authority and counts before deliberately adding `--apply`. It conditional
 
 ## Isolated integration tests
 
-The broad mutating suite requires `GALX_INTEGRATION_DATABASE_URL`: PostgreSQL on literal `127.0.0.1` or `[::1]`, with database name `galx_integration_test` or a `galx_integration_test_` suffix. Caller query and fragment fields are rejected. The guard adds local-only TLS-disable configuration and strips inherited Supabase Data API variables before repository initialization.
+Run the broad suite with Docker running and dependencies installed:
 
 ```sh
-# Inject a URL for a disposable, initialized local test database first.
 npm run db:test
+npm run db:test -- --billing
 ```
 
-Missing or production configuration must fail before repository work. Random identities and finally cleanup supplement the guard. Billing-only mode retains its separate disposable schema harness. The enrollment storage regression also uses a disposable harness; neither authorizes pointing the broad suite at production.
+The [runner](../../scripts/run-supabase-integration.ts) creates a disposable PostgreSQL 17 container with pgvector 0.8.6, pinned by image digest. The first run downloads that image if necessary. It binds a random port exclusively to `127.0.0.1`, uses a random database password, and stores its database in temporary memory-backed storage. The [platform bootstrap](../../scripts/fixtures/integration-bootstrap.sql) supplies test-only Supabase roles, auth claim helpers and an empty auth-users table, with pgcrypto in `extensions`. All repository migrations are applied unchanged before the suite starts. No production dump, dotenv file or customer data is loaded.
+
+The child gets a fresh working directory and synthetic vault/audit keys. Its environment allowlist excludes inherited Supabase, R2, Stripe, relay and other credentials. Unexpected HTTP calls are blocked and fail the run even if a caller catches the error. Edge/webhook checks remain simulations and R2 writes use temporary local storage; this is not a live provider integration test. Billing-only mode runs its existing isolated schema checks inside the same disposable database.
+
+Success, test failures and handled cancellation clean up the owned container and temporary files. Migration queries and the suite have deadlines. Cleanup checks the unique ownership label before stopping a container. A force-killed parent or stopped Docker daemon can prevent cleanup; inspect only containers bearing the exact run label before removing a leftover. No existing database or unrelated container is dropped or reset.
+
+For an already initialized local fixture, explicitly set `GALX_INTEGRATION_DATABASE_URL`. This override must use literal `127.0.0.1` or `[::1]`, with database name `galx_integration_test` or a `galx_integration_test_` suffix. Caller query and fragment fields are rejected. The runner does not initialize or destroy an explicitly supplied database. It still strips inherited authority and supplies only the guarded local connection to the child. Directly invoking `test-supabase-integration.ts` without that guarded URL fails before repository initialization.
+
+September 11 verification: all 93 migrations loaded, all 94 broad-suite checks and 26 billing-only checks passed, and their containers were removed afterward. Nine enrollment/isolation checks passed. A controlled mid-suite SIGTERM returned nonzero and removed only its owned container. Static integrity verified 93 paired migrations with no violations. [Fixture evidence](../../internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/integration-fixture-verification.json) records these observations and source hashes. The [separate application build](../../internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/integration-fixture-application-verification.json) passed 114 regressions and found no matches for 30 private markers across 634 local browser/rendered assets; it was not deployed. The earlier missing-fixture limitation is resolved by this runner. [Official image instructions](https://github.com/pgvector/pgvector#docker) describe the PostgreSQL/pgvector distribution; the checked digest is retained in source.
 
 Related: [key rotation](MULTI_TENANT_SHARD_AND_KEY_ROTATION.md), [hardening](RELAY_HARDENING.md), [desktop operations](RELAY_DESKTOPS.md).
