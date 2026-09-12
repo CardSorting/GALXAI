@@ -1,0 +1,267 @@
+{
+  "checkedAt": "2026-09-12T04:45:31.838612+00:00",
+  "scope": "Production Pro launch and public acceptance. Actual paid access, cancellation and refunds qualified in the Stripe sandbox; no paid production generation was performed.",
+  "sourceCommit": "8d82351",
+  "deployment": {
+    "id": "dpl_3jWmR1bXyfLaxjUrrACZqFntvYTF",
+    "url": "https://galxai-pp2tx8rb6-cardsortings-projects.vercel.app",
+    "status": "ready",
+    "productionAlias": "https://galx.ai",
+    "gitPush": true
+  },
+  "activation": {
+    "mode": "enforce",
+    "revision": 2,
+    "configured": true,
+    "eligiblePrices": 1,
+    "policyFile": "pro-launch-policy.json",
+    "userDelegatedInitialStrategy": true,
+    "fixtureUsedAsProductionConfiguration": false
+  },
+  "catalog": {
+    "product": "galx_pro_v1",
+    "price": "price_1UEiUqIA2zQnWbn53vknJneV",
+    "lookupKey": "galx_pro_monthly_v1",
+    "monthlyUsd": 20,
+    "portal": "bpc_1UEiUrIA2zQnWbn5sjhduWpm",
+    "cancelAtPeriodEnd": true,
+    "webhookReady": true
+  },
+  "database": {
+    "migration": "20260912041351_sites_pro_subscription",
+    "appliedMigrations": 97,
+    "newPrivateTables": 2,
+    "newAdvisorFindings": 0,
+    "preExistingUnrelatedAuthWarningCount": 1
+  },
+  "verification": {
+    "planDatabaseTests": 15,
+    "privateRoleDenials": 24,
+    "workspaceDatabaseTests": 30,
+    "legacyBillingFixtureTests": 26,
+    "legacyDatabaseSuiteTests": 94,
+    "fairUsageTests": 7,
+    "domainWorkerTests": 9,
+    "applicationRegressionTests": 144,
+    "productionBuildPassed": true,
+    "typescriptPassed": true,
+    "lintPassed": true,
+    "docsPassed": true,
+    "migrationPairsPassed": true,
+    "billingPublicBoundaryTests": 2
+  },
+  "applicationEvidence": "pro-launch-application-verification.json",
+  "stripeSandboxEvidence": "pro-stripe-sandbox-verification.json",
+  "liveHttp": {
+    "checkedAt": "2026-09-12T04:44:59.428582+00:00",
+    "surface": "https://galx.ai/sites",
+    "sourceCommit": "8d82351",
+    "checks": {
+      "assets": {
+        "count": 34,
+        "privateMarkers": 53,
+        "privateMatches": [],
+        "oldSitesQuoteMatches": [],
+        "paths": [
+          "/_next/static/chunks/1255-306db9f231b54263.js",
+          "/_next/static/chunks/2330-465c0c8d89cdd29d.js",
+          "/_next/static/chunks/2619-04bc32f026a0d946.js",
+          "/_next/static/chunks/3736-2c9f00820338eff4.js",
+          "/_next/static/chunks/4129-588ced20906e0f7a.js",
+          "/_next/static/chunks/44530001-a26648c04669f22e.js",
+          "/_next/static/chunks/4489-9b79ea828188cc3e.js",
+          "/_next/static/chunks/4533-7fee8afce0037d1c.js",
+          "/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+          "/_next/static/chunks/5380-33bac102ca144352.js",
+          "/_next/static/chunks/5839-dabf51f862acbec6.js",
+          "/_next/static/chunks/8505-0714be3ae76f43b5.js",
+          "/_next/static/chunks/9515-d5cafae925d12a02.js",
+          "/_next/static/chunks/app/billing/error-120ecd05530c43b2.js",
+          "/_next/static/chunks/app/billing/page-6647b5fb53fece2e.js",
+          "/_next/static/chunks/app/error-825a8d777a6fbbb7.js",
+          "/_next/static/chunks/app/global-error-6c4bdd755108c191.js",
+          "/_next/static/chunks/app/layout-7002e81c062d908c.js",
+          "/_next/static/chunks/app/not-found-4667a4f0d47abb21.js",
+          "/_next/static/chunks/app/pricing/error-555530e925e77a6a.js",
+          "/_next/static/chunks/app/pricing/page-882861c930af1c8f.js",
+          "/_next/static/chunks/app/sites/page-ba01333876fbf293.js",
+          "/_next/static/chunks/main-app-0ee650784ad95c4e.js",
+          "/_next/static/chunks/polyfills-42372ed130431b0a.js",
+          "/_next/static/chunks/webpack-ba81720a2c8efefb.js",
+          "/_next/static/css/b69744f806b2c0e4.css",
+          "/_next/static/css/cf8a94d8f0136ff9.css",
+          "/_next/static/css/e76a45d481b92613.css",
+          "/_next/static/css/f2b5dec4d75dc203.css",
+          "/_next/static/media/bb3ef058b751a6ad-s.p.woff2",
+          "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+          "/billing",
+          "/pricing",
+          "/sites"
+        ]
+      },
+      "unauthorized": [
+        {
+          "path": "/api/sites/workspace",
+          "method": "GET",
+          "identity": "anonymous",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/sites/workspace",
+          "method": "GET",
+          "identity": "forged_bearer",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/sites/workspace",
+          "method": "POST",
+          "identity": "anonymous",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/sites/workspace",
+          "method": "POST",
+          "identity": "forged_bearer",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/sites/content",
+          "method": "GET",
+          "identity": "anonymous",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/sites/content",
+          "method": "GET",
+          "identity": "forged_bearer",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/sites/content",
+          "method": "POST",
+          "identity": "anonymous",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/sites/content",
+          "method": "POST",
+          "identity": "forged_bearer",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/billing/plan",
+          "method": "GET",
+          "identity": "anonymous",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/billing/plan",
+          "method": "GET",
+          "identity": "forged_bearer",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/billing/plan",
+          "method": "POST",
+          "identity": "anonymous",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/billing/plan",
+          "method": "POST",
+          "identity": "forged_bearer",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        }
+      ],
+      "missingPublished": {
+        "status": 404,
+        "genericBody": true,
+        "sandbox": true,
+        "privateHeadersAbsent": true
+      }
+    },
+    "scope": "Read-only public release acceptance and unauthorized requests; no paid work, generation, publishing, wallet charge, or DNS change."
+  },
+  "liveCheckout": {
+    "checkedAt": "2026-09-12T04:38:01.404Z",
+    "live": true,
+    "hostedCheckoutOpened": true,
+    "monthlyUsd": 20,
+    "currency": "usd",
+    "status": "expired",
+    "paymentStatus": "unpaid",
+    "subscriptionCreated": false,
+    "paymentCreated": false,
+    "cardDetailsSubmitted": false,
+    "signedExpiryWebhookRecorded": true
+  },
+  "renderedUi": {
+    "routes": [
+      "/billing",
+      "/pricing",
+      "/sites"
+    ],
+    "desktopWidth": 1311,
+    "mobileWidth": 390,
+    "mobileHeight": 844,
+    "unpaidAccount": {
+      "billingCheckoutAvailable": true,
+      "sitesViewPlansVisible": true,
+      "generationDisabled": true,
+      "publishDisabled": true,
+      "explicitNoActivePaidPlanVisible": true,
+      "proLabeledAsAvailableOffer": true
+    },
+    "screenshots": "Local ignored .impeccable/review/pro-{billing,pricing,sites}-{desktop,mobile}.png; private account data is not committed.",
+    "reviewStatus": "ship",
+    "privateLedgerNotesVisible": false,
+    "publicUsageDescriptionsVisible": true,
+    "reviewScope": "The reviewer scored its one material current-state clarity fix resolved after desktop/mobile recapture. This is a fix-list verdict, not a new whole-surface audit."
+  },
+  "managedPublishing": {
+    "workerClaimsAccountOwnedPublishedSnapshots": true,
+    "nativeCompanionCohortUnchanged": true,
+    "dnsFixtureTestsPassed": true,
+    "newProductionPublishPerformed": false
+  },
+  "implementationCommits": [
+    "8f72143",
+    "8d82351"
+  ]
+}

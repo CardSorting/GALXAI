@@ -1,0 +1,278 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-12T04:48:32.787Z",
+  "title": "Design System: GALX Billing — local Pro extension",
+  "extensions": {
+    "colorMeta": {
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Near-black canvas",
+        "tonalRamp": [
+          "#18181b",
+          "#27272a",
+          "#3f3f46",
+          "#52525b",
+          "#71717a",
+          "#a1a1aa",
+          "#d4d4d8",
+          "#fafafa"
+        ]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Bright neutral",
+        "tonalRamp": [
+          "#18181b",
+          "#27272a",
+          "#3f3f46",
+          "#52525b",
+          "#71717a",
+          "#a1a1aa",
+          "#d4d4d8",
+          "#fafafa"
+        ]
+      },
+      "body": {
+        "role": "neutral",
+        "displayName": "Soft neutral",
+        "tonalRamp": [
+          "#18181b",
+          "#27272a",
+          "#3f3f46",
+          "#52525b",
+          "#71717a",
+          "#a1a1aa",
+          "#d4d4d8",
+          "#fafafa"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted neutral",
+        "tonalRamp": [
+          "#18181b",
+          "#27272a",
+          "#3f3f46",
+          "#52525b",
+          "#71717a",
+          "#a1a1aa",
+          "#d4d4d8",
+          "#fafafa"
+        ]
+      },
+      "action-fill": {
+        "role": "primary",
+        "displayName": "Soft indigo wash",
+        "tonalRamp": [
+          "#1e1b4b",
+          "#312e81",
+          "#3730a3",
+          "#4338ca",
+          "#6366f1",
+          "#818cf8",
+          "#c7d2fe",
+          "#eef2ff"
+        ]
+      },
+      "action-text": {
+        "role": "primary",
+        "displayName": "Pale indigo text",
+        "tonalRamp": [
+          "#1e1b4b",
+          "#312e81",
+          "#3730a3",
+          "#4338ca",
+          "#6366f1",
+          "#818cf8",
+          "#c7d2fe",
+          "#eef2ff"
+        ]
+      },
+      "action-border": {
+        "role": "primary",
+        "displayName": "Indigo outline",
+        "tonalRamp": [
+          "#1e1b4b",
+          "#312e81",
+          "#3730a3",
+          "#4338ca",
+          "#6366f1",
+          "#818cf8",
+          "#c7d2fe",
+          "#eef2ff"
+        ]
+      },
+      "link": {
+        "role": "primary",
+        "displayName": "Quiet indigo",
+        "tonalRamp": [
+          "#1e1b4b",
+          "#312e81",
+          "#3730a3",
+          "#4338ca",
+          "#6366f1",
+          "#818cf8",
+          "#c7d2fe",
+          "#eef2ff"
+        ]
+      },
+      "divider": {
+        "role": "neutral",
+        "displayName": "Fine divider",
+        "tonalRamp": [
+          "#18181b",
+          "#27272a",
+          "#3f3f46",
+          "#52525b",
+          "#71717a",
+          "#a1a1aa",
+          "#d4d4d8",
+          "#fafafa"
+        ]
+      },
+      "control-border": {
+        "role": "neutral",
+        "displayName": "Control outline",
+        "tonalRamp": [
+          "#18181b",
+          "#27272a",
+          "#3f3f46",
+          "#52525b",
+          "#71717a",
+          "#a1a1aa",
+          "#d4d4d8",
+          "#fafafa"
+        ]
+      },
+      "control-hover": {
+        "role": "neutral",
+        "displayName": "Subtle hover wash",
+        "tonalRamp": [
+          "#18181b",
+          "#27272a",
+          "#3f3f46",
+          "#52525b",
+          "#71717a",
+          "#a1a1aa",
+          "#d4d4d8",
+          "#fafafa"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Page heading",
+        "purpose": "Billing and Pricing titles below the small breakpoint."
+      },
+      "headline-wide": {
+        "displayName": "Wide page heading",
+        "purpose": "Billing and Pricing titles from 640px."
+      },
+      "title": {
+        "displayName": "Section heading",
+        "purpose": "Your plan and adjacent Billing section titles."
+      },
+      "body": {
+        "displayName": "Plan body",
+        "purpose": "Plan terms and inclusion explanations."
+      },
+      "introduction": {
+        "displayName": "Page introduction",
+        "purpose": "Supporting line below the page title."
+      },
+      "control": {
+        "displayName": "Control label",
+        "purpose": "Plan actions and section links."
+      }
+    },
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ],
+    "shadows": [],
+    "motion": []
+  },
+  "components": [
+    {
+      "name": "Billing plan primary action",
+      "kind": "button",
+      "refersTo": "plan-primary",
+      "description": "Checkout uses this control before paid access is confirmed; Open Sites uses its visual treatment after confirmation.",
+      "html": "<button class=\"ds-plan-primary\" type=\"button\">Continue to secure checkout</button>",
+      "css": ".ds-plan-primary { font-family: var(--font-inter, Inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.875rem; line-height: 1.25rem; font-weight: 400; border-radius: 0.375rem; padding: 0.625rem 1rem; border: 1px solid rgba(129, 140, 248, 0.4); background: rgba(99, 102, 241, 0.2); color: #e0e7ff; } .ds-plan-primary:hover { background: rgba(255, 255, 255, 0.05); } .ds-plan-primary:focus-visible { outline-color: #a5b4fc; } .ds-plan-primary:disabled { opacity: 0.5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Billing plan secondary action",
+      "kind": "button",
+      "refersTo": "plan-secondary",
+      "description": "Shared by Refresh plan and Manage subscription; visibility and disabled state follow the component's account status.",
+      "html": "<button class=\"ds-plan-secondary\" type=\"button\">Manage subscription</button>",
+      "css": ".ds-plan-secondary { font-family: var(--font-inter, Inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.875rem; line-height: 1.25rem; font-weight: 400; border-radius: 0.375rem; padding: 0.625rem 1rem; color: #f4f4f5; background: transparent; border: 1px solid rgba(255, 255, 255, 0.15); } .ds-plan-secondary:hover { background: rgba(255, 255, 255, 0.05); } .ds-plan-secondary:focus-visible { outline-color: #a5b4fc; } .ds-plan-secondary:disabled { opacity: 0.5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Pricing Choose Pro action",
+      "kind": "button",
+      "refersTo": "pricing-primary",
+      "description": "The existing Pro row links to the Billing plan section, where account status determines the next action.",
+      "html": "<a class=\"ds-pricing-pro\" href=\"/billing#plan\">Choose Pro</a>",
+      "css": ".ds-pricing-pro { font-family: var(--font-inter, Inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.875rem; line-height: 1.25rem; font-weight: 400; border-radius: 0.375rem; padding: 0.625rem 1rem; border: 1px solid rgba(129, 140, 248, 0.4); background: rgba(99, 102, 241, 0.2); color: #e0e7ff; display: inline-block; width: fit-content; font-weight: 500; text-decoration: none; } .ds-pricing-pro:hover { background: rgba(99, 102, 241, 0.3); } .ds-pricing-pro:focus-visible { outline-color: #a5b4fc; }"
+    },
+    {
+      "name": "Billing section navigation",
+      "kind": "nav",
+      "refersTo": "section-link",
+      "description": "Underlined text anchors wrap in the same order as the Billing sections.",
+      "html": "<nav class=\"ds-billing-nav\" aria-label=\"Billing sections\"><a class=\"ds-billing-section-link\" href=\"#plan\">Your plan</a><a class=\"ds-billing-section-link\" href=\"#balance\">Balance</a><a class=\"ds-billing-section-link\" href=\"#history\">Transactions</a><a class=\"ds-billing-section-link\" href=\"#payments\">Invoices and payments</a></nav>",
+      "css": ".ds-billing-nav { display: flex; flex-wrap: wrap; gap: 1.25rem; font-family: var(--font-inter, Inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 0.875rem; line-height: 1.25rem; } .ds-billing-section-link { color: #a5b4fc; text-decoration: underline; text-underline-offset: 4px; }"
+    },
+    {
+      "name": "Available plan and current status",
+      "kind": "custom",
+      "description": "The flat section separates the public offer from the account's current access. This example contains no account data.",
+      "html": "<section class=\"ds-plan-section\" aria-labelledby=\"ds-plan-heading\"><h2 class=\"ds-plan-heading\" id=\"ds-plan-heading\">Your plan</h2><p class=\"ds-plan-offer\">Available plan: GALX Pro · $20/month for one account.</p><p class=\"ds-plan-inclusion\">Create and publish Sites with fair usage included. There is no per-update charge. API and image usage remain separate.</p><p class=\"ds-plan-terms\">Renews monthly. Cancel anytime in Manage subscription; access continues through your paid period.</p><p class=\"ds-plan-status\" role=\"status\">You do not have an active paid plan for Sites. Choose Pro to get started.</p></section>",
+      "css": ".ds-plan-section { font-family: var(--font-inter, Inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f4f4f5; background: #090b10; padding-bottom: 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); scroll-margin-top: 6rem; } .ds-plan-heading { margin: 0; font-size: 1.25rem; line-height: 1.75rem; font-weight: 600; } .ds-plan-offer, .ds-plan-terms { margin: 0.5rem 0 0; color: #a1a1aa; font-size: 0.875rem; line-height: 1.5rem; } .ds-plan-inclusion { margin: 1rem 0 0; max-width: 42rem; color: #d4d4d8; font-size: 0.875rem; line-height: 1.5rem; } .ds-plan-status { margin: 1rem 0 0; color: #d4d4d8; font-size: 0.875rem; line-height: 1.25rem; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Established Billing and Pricing",
+    "overview": "This is a local record for `PlanPanel.tsx`, its placement in `BillingClient.tsx`, and the Billing page shell. The related Pro row is rendered by `src/components/pricing/PricingClient.tsx` through `src/app/pricing/page.tsx`. It extends the existing dark, compact account interface with restrained indigo actions and flat divided sections. It establishes no new product identity or global design rules.\n\nThe plan section makes terms, current access, and the next action readable in that order. Pricing presents the offer; Billing establishes the account's current status. The surrounding wallet remains a separate section. Product terms remain authoritative in the root `PRODUCT.md` and existing public plan data; this record captures how the interface presents them.",
+    "keyCharacteristics": [
+      "Dark canvas, neutral text, and restrained indigo controls.",
+      "Flat sections and plan rows divided by fine rules.",
+      "Available offer and current paid status expressed separately.",
+      "Wrapping navigation and actions retain reading order on narrow screens."
+    ],
+    "rules": [
+      {
+        "name": "The Flat Sections Rule",
+        "body": "Keep this extension in the existing document flow, separated by rules rather than an elevated plan card.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Offer and Status Rule",
+        "body": "An available plan's name and price must not imply that the account already has paid access; show current status separately before the action.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "**Do** retain the shared Billing and Pricing canvas, type hierarchy, dividers, and restrained indigo controls.",
+      "**Do** distinguish the available Pro offer from confirmed paid status before presenting the next action.",
+      "**Do** keep renewal, cancellation, inclusion, and separate usage terms readable beside the plan controls.",
+      "**Do** let navigation and actions wrap while preserving their reading and keyboard order.",
+      "**Do** preserve subscription management after a status failure and base known management availability on the payment profile.",
+      "**Do** keep the wallet visually and conceptually separate from plan access."
+    ],
+    "donts": [
+      "**Don't** turn this local extension into a new global identity, card system, or Sites design rule.",
+      "**Don't** represent an available offer, wallet credit, or uncertain status as an active paid plan.",
+      "**Don't** replace explicit status and error text with color alone.",
+      "**Don't** copy account identifiers, actual balances, private ledger records, or review screenshots into design examples or public content."
+    ]
+  }
+}
