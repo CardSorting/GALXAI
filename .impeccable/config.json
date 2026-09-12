@@ -106,6 +106,15 @@
         ],
         "createdAt": "2026-09-10T06:39:41.368Z",
         "reason": "Codex review: light amber error foreground paired with the dark amber error surface for high contrast."
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "scripts/test-sites-workspace.ts"
+        ],
+        "createdAt": "2026-09-12T00:51:48.525Z",
+        "reason": "Codex reviewed: the literal img tag is hostile synthetic test input that must remain to verify HTML escaping; no image element is rendered by this test file."
       }
     ]
   },

@@ -34,6 +34,7 @@ The validator checks complete coverage, scope markers, local links and ADR ident
 | [Security boundaries](SECURITY.md) | `SECURITY.md` |
 | [Site content generation](SITES_CONTENT.md) | `SITES_CONTENT.md` |
 | [Site addresses](SITE_ADDRESSES.md) | `SITE_ADDRESSES.md` |
+| [Create and manage Sites](SITES_WORKSPACE.md) | `SITES_WORKSPACE.md` |
 | [System topology and maintainer onboarding](SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md) | `SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md` |
 | [Telemetry and observability](TELEMETRY_AND_OBSERVABILITY.md) | `TELEMETRY_AND_OBSERVABILITY.md` |
 | [Troubleshooting](TROUBLESHOOTING.md) | `TROUBLESHOOTING.md` |
@@ -49,6 +50,7 @@ The validator checks complete coverage, scope markers, local links and ADR ident
 | [Federation fleet and quota](maintainers/RELAY_QUOTA_AND_FLEET.md) | `maintainers/RELAY_QUOTA_AND_FLEET.md` |
 | [Sites generation and delivery operations](maintainers/SITES_OPERATIONS.md) | `maintainers/SITES_OPERATIONS.md` |
 | [Sites address operations](maintainers/SITES_DOMAINS.md) | `maintainers/SITES_DOMAINS.md` |
+| [Sites workspace operations](maintainers/SITES_WORKSPACE.md) | `maintainers/SITES_WORKSPACE.md` |
 | [Federation request telemetry](maintainers/RELAY_TELEMETRY.md) | `maintainers/RELAY_TELEMETRY.md` |
 | [Capability and recovery UX](maintainers/RELAY_TELEMETRY_UX.md) | `maintainers/RELAY_TELEMETRY_UX.md` |
 | [Upstream outage response](maintainers/UPSTREAM_PROVIDER_OUTAGE_AND_DEGRADATION.md) | `maintainers/UPSTREAM_PROVIDER_OUTAGE_AND_DEGRADATION.md` |
@@ -250,6 +252,7 @@ The validator checks complete coverage, scope markers, local links and ADR ident
 | [ADR 0136: Customer-owned Sites delivery](adr/0136-customer-owned-sites-delivery.md) | `adr/0136-customer-owned-sites-delivery.md` |
 | [ADR 0137: Account-owned Sites subdomains](adr/0137-account-owned-sites-subdomains.md) | `adr/0137-account-owned-sites-subdomains.md` |
 | [ADR 0138: Automatic Sites domain provisioning](adr/0138-automatic-sites-domain-provisioning.md) | `adr/0138-automatic-sites-domain-provisioning.md` |
+| [ADR 0139: Browser Sites workspace and managed publishing](adr/0139-browser-sites-workspace-and-managed-publishing.md) | `adr/0139-browser-sites-workspace-and-managed-publishing.md` |
 
 ## Operational records
 

@@ -23,6 +23,8 @@ Commit two-minute UUID leases before external effects. Process the bounded batch
 
 Keep the original exact-record preflight, ownership markers, create-only writes, narrow validation-record allowlist and HTTPS checks. Pending native validation is refreshed by the customer's companion on subsequent attempts; the server can continue its stored DNS plan while that connection is offline. These are separate authorities. A provider requiring another native status refresh can remain pending until the customer connection resumes.
 
+[ADR 0139](0139-browser-sites-workspace-and-managed-publishing.md) adds browser-created, GALX-managed Sites. Those do not require a customer companion; they reuse this scheduler with a separate managed-host plan. The native discovery path in this record remains supported.
+
 ## Boundaries and consequences
 
 One customer enrollment and a running, authenticated companion replace per-Site manual linking. The native host must manage connection/session renewal and supervise its companion; the Cloudflare scheduler cannot discover unconnected customer accounts. The first baseline does not silently attach historical Sites. Current admission remains the configured cohort, and the 20-address cap remains unchanged.

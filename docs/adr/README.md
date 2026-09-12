@@ -151,3 +151,4 @@ Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) f
 | 0136 | [ADR 0136: Customer-owned Sites delivery](0136-customer-owned-sites-delivery.md) | Bounded companion; native-host delivery and separate publication evidence |
 | 0137 | [ADR 0137: Account-owned Sites subdomains](0137-account-owned-sites-subdomains.md) | Stable app/username addresses, native attachment and private DNS recovery |
 | 0138 | [ADR 0138: Automatic Sites domain provisioning](0138-automatic-sites-domain-provisioning.md) | Customer discovery, durable DNS outbox and scheduled reconciliation |
+| 0139 | [ADR 0139: Browser Sites workspace and managed publishing](0139-browser-sites-workspace-and-managed-publishing.md) | Private authoring, explicit public snapshots and automated managed addresses |

@@ -24,7 +24,7 @@ The relay supplies inference transport with credential eligibility checks, bound
 
 ## Constraints & Invariants
 
-- The hosted product centers on models, API configuration, billing, telemetry, and governance. The image studio at `/images` also lets users generate images and manage their personal image library (explicitly restored at user request on 2026-09-10). Destination chat applications remain downstream.
+- The hosted product centers on models, API configuration, billing, telemetry, and governance. The image studio at `/images` also lets users generate images and manage their personal image library (explicitly restored at user request on 2026-09-10). Destination chat applications remain downstream. The Sites workspace at `/sites` also provides the expressly requested conversation-and-preview authoring surface for simple managed pages.
 - Successful authentication defaults to `/models`; explicit protected-route return destinations remain intact.
 - Retiring hosted creation UI must preserve inference APIs and SDK capabilities.
 - Model interpretation does not grant permission to execute on the relay host. Isolation is an operating-system/container boundary, not a prompt instruction or blanket prohibition of tool-call content.
@@ -39,6 +39,10 @@ The relay supplies inference transport with credential eligibility checks, bound
 
 ## Bounded Sites strategy
 
-[ADRs 0134–0136](docs/adr/README.md) add fixed-price content generation and customer-owned delivery. The provisional $0.05 completion price and rolling account allowance are explicit product assumptions, configurable server-side. Unknown provider quota and expense remain unknown and do not block this mode; real completion and account authorization remain required. The narrow text API, deterministic template and customer-local Sites connection do not establish a native Codex model-provider integration or a hosted multi-customer builder.
+[ADRs 0134–0136](docs/adr/README.md) add fixed-price content generation and customer-owned delivery. The provisional $0.05 completion price and rolling account allowance are explicit product assumptions, configurable server-side. Unknown provider quota and expense remain unknown and do not block this mode; real completion and account authorization remain required. The initial authoring contract creates bounded static information pages. ADR 0139 adds the managed browser workspace; the earlier customer-local connection remains optional. Neither path claims an unverified model-provider integration.
 
-The fixed mode is implemented and locally verified, not deployed or activated by that implementation pass. Follow [Sites operations](docs/maintainers/SITES_OPERATIONS.md) for rollout and original-price recovery. Existing image studio, signup credit, general inference pricing and proposed agency-service fees retain their own contracts.
+Generation and publication are independently controlled; application deployment does not itself activate paid generation or managed hosting. Follow [Sites operations](docs/maintainers/SITES_OPERATIONS.md) for rollout and original-price recovery. Existing image studio, signup credit, general inference pricing and proposed agency-service fees retain their own contracts.
+
+## Browser Sites workspace
+
+[ADR 0139](docs/adr/0139-browser-sites-workspace-and-managed-publishing.md) makes GALX sign-in the onboarding boundary for new managed Sites. `/sites` and `/sites/:id` provide private drafts, conversation edits, previews and management. Username selection occurs at first explicit public publication; the existing worker handles exact-host DNS and TLS. Customer-native delivery remains a separate optional integration. Generation and managed publishing retain independent rollout gates, and this initial authoring surface uses the bounded structured page contract rather than arbitrary application execution.

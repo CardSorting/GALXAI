@@ -94,7 +94,7 @@ npx tsc --noEmit -p internal/scaling-strategy-2026-09-10/commercial-reset/sites-
 python3 scripts/verify-docs.py
 ```
 
-The database harness uses disposable databases on the explicit localhost fixture, never inherited production configuration. Its current prerequisite is PostgreSQL on `127.0.0.1:55439`, test user `seats_test`, with fixture `anon`/`authenticated` roles. It tests concurrency, account denial, rollback/lost commits, daily limits, usage-less completion and original-price recovery.
+The database harness creates and removes its own disposable PostgreSQL fixture, never inheriting production configuration. The standalone legacy billing test can still use an explicitly supplied isolated fixture; `npm run db:test` and `npm run test:sites:workspace:db` require no separately prepared database. It tests concurrency, account denial, rollback/lost commits, daily limits, usage-less completion and original-price recovery.
 
 The [isolated application verifier](../../internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/verify-application.py) copies allowed source with synthetic credentials, runs adversarial/public authorization checks and a production build, then scans generated public assets. It expects the recorded local Node 22 runtime path. Its output is validation-only and must not be deployed. Build `Dockerfile.relay` and run [the container smoke harness](../../scripts/test-sites-relay-container.mjs) against that candidate with external networking disabled for packaged receipt recovery.
 

@@ -123,6 +123,12 @@ const nextConfig: NextConfig = {
         headers: securityHeaders.filter(header => header.key === 'Content-Security-Policy'),
       },
       {
+        source: "/sites/:path*",
+        headers: securityHeaders.filter(header => header.key === 'Content-Security-Policy').map(header => ({
+          ...header, value: header.value.replace('frame-src https://js.stripe.com', "frame-src 'self' https://js.stripe.com"),
+        })),
+      },
+      {
         source: "/_next/static/:path*",
         headers: [
           {

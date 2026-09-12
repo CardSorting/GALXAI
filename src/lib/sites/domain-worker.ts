@@ -10,6 +10,8 @@ export interface DomainWorkerDependencies {
   registry(): SiteDomainRegistry;
   dns(): { ensure(plan: DomainPlan, reservationId: string, signal: AbortSignal): Promise<void> };
   verifyHttps(hostname: string, signal: AbortSignal): Promise<boolean>;
+  prepareManagedHost?(plan: DomainPlan, signal: AbortSignal): Promise<void>;
+  verifyManagedHttps?(hostname: string, signal: AbortSignal): Promise<boolean>;
 }
 const headers = { 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' };
 async function emptyBody(request: Request): Promise<boolean> {
@@ -52,8 +54,12 @@ export function domainWorkerRoute(deps: DomainWorkerDependencies) {
         let active = false, diagnostic: string | null = null;
         try {
           signal.throwIfAborted();
+          if (row.plan?.kind === 'managed') {
+            if (!deps.prepareManagedHost || !deps.verifyManagedHttps) throw new Error();
+            await deps.prepareManagedHost(row.plan,signal);
+          }
           await deps.dns().ensure(row.plan!, row.id, signal);
-          active = await deps.verifyHttps(row.hostname, signal);
+          active = row.plan?.kind === 'managed' ? await deps.verifyManagedHttps!(row.hostname,signal) : await deps.verifyHttps(row.hostname, signal);
           if (!active) diagnostic = 'https_pending';
         } catch (error) { diagnostic = error instanceof SiteDomainError ? error.code : 'domain_unavailable'; }
         await registry.finish(row, active, diagnostic);

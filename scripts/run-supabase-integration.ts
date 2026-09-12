@@ -24,7 +24,7 @@ let ownedContainer = false, pool: Pool | undefined;
 const workspace = await mkdtemp(path.join(tmpdir(), 'galx-integration-'));
 try {
   const args = process.argv.slice(2);
-  if (args.length && (args.length !== 1 || !['--billing', '--domains'].includes(args[0]))) throw new Error('Supported options: --billing, --domains');
+  if (args.length && (args.length !== 1 || !['--billing', '--domains', '--workspace'].includes(args[0]))) throw new Error('Supported options: --billing, --domains, --workspace');
   let url = process.env.GALX_INTEGRATION_DATABASE_URL;
   if (url) isolatedIntegrationEnvironment({ GALX_INTEGRATION_DATABASE_URL: url });
   else {
@@ -75,8 +75,8 @@ try {
     let spawnError: Error | undefined;
     const child = spawn(process.execPath, ['--import', import.meta.resolve('tsx'),
       '--import', path.join(root, 'scripts/lib/integration-no-network.ts'),
-      path.join(root, args[0] === '--domains' ? 'scripts/test-sites-domains-db.ts' : 'scripts/test-supabase-integration.ts'),
-      ...(args[0] === '--domains' ? [] : args)],
+      path.join(root, args[0] === '--domains' ? 'scripts/test-sites-domains-db.ts' : args[0] === '--workspace' ? 'scripts/test-sites-workspace-db.ts' : 'scripts/test-supabase-integration.ts'),
+      ...(['--domains','--workspace'].includes(args[0]) ? [] : args)],
     { cwd: workspace, env, stdio: 'inherit', timeout: 180000, signal: controller.signal });
     child.on('error', error => { spawnError = error; });
     child.on('close', code => spawnError ? reject(spawnError) : resolve(code ?? 1));

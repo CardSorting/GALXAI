@@ -53,6 +53,15 @@ export type GalxIdempotencyState = 'IN_FLIGHT' | 'COMMITTED' | 'FAILED';
 export interface Database {
   private: {
     Tables: {
+      galx_site_workspaces: {
+        Row: { id: string; user_id: string; title: string; revision: number; document: Json | null; published_document: Json | null; published_revision: number | null; messages: Json;
+          archived: boolean; operation_id: string | null; operation_brief: string | null; operation_started_at: string | null;
+          created_at: string; updated_at: string };
+        Insert: { id: string; user_id: string; title: string };
+        Update: { title?: string; revision?: number; document?: Json | null; published_document?: Json | null; published_revision?: number | null; messages?: Json; archived?: boolean;
+          operation_id?: string | null; operation_brief?: string | null; operation_started_at?: string | null; updated_at?: string };
+        Relationships: [];
+      };
       galx_site_namespaces: {
         Row: { user_id: string; username: string; created_at: string };
         Insert: { user_id: string; username: string; created_at?: string };

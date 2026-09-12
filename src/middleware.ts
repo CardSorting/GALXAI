@@ -1,12 +1,19 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/utils/supabase/middleware";
 import { SITE_CONFIG } from "@/lib/seo/siteConfig";
+import { publishedSiteProxy } from '@/lib/sites/published-proxy';
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const host = (request.headers.get('host') || '').toLowerCase().split(':')[0];
+  if (/^[a-z0-9-]+\.[a-z0-9-]+\.galx\.ai$/.test(host)) {
+    if (!['GET','HEAD'].includes(request.method) || pathname !== '/') return new NextResponse('Site unavailable.',{status:404,headers:{'Cache-Control':'private, no-store'}});
+    return publishedSiteProxy(request,host);
+  }
   // This endpoint authenticates its machine credential in the handler. Keep its
   // response allowlist intact for every caller, including crawlers and cookies.
   if (pathname === '/api/internal/sites/domains/process') return NextResponse.next();
+  if (pathname.startsWith('/api/sites/workspace') || pathname.startsWith('/api/sites/published/')) return NextResponse.next();
 
   // 1. Universal Google Search Console HTML verification file handler (/google[token].html)
   if (pathname.startsWith('/google') && pathname.endsWith('.html')) {
@@ -90,6 +97,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    { source: '/:path*', has: [{ type: 'host', value: '[a-z0-9-]+\\.[a-z0-9-]+\\.galx\\.ai' }] },
     /*
      * Match all request paths except for the ones starting with:
      * - _next/static (static files)

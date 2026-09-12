@@ -305,7 +305,9 @@
     "test:sites:worker": "node --import tsx --test scripts/test-sites-domain-worker.ts internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/domain-discovery.test.ts",
     "sites:addresses": "node --import tsx internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/address-worker.ts",
     "worker:sites:build": "wrangler deploy --dry-run --config workers/sites-domains/wrangler.jsonc",
-    "worker:sites:deploy": "wrangler deploy --config workers/sites-domains/wrangler.jsonc"
+    "worker:sites:deploy": "wrangler deploy --config workers/sites-domains/wrangler.jsonc",
+    "test:sites:workspace": "node --import tsx --test scripts/test-sites-workspace.ts",
+    "test:sites:workspace:db": "node --import tsx scripts/run-supabase-integration.ts --workspace"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3",

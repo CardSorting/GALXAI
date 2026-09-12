@@ -1,0 +1,38 @@
+{
+  "scope": "live Sites guest page and its loaded assets only; no customer mutations",
+  "viewports": [
+    {
+      "width": 1440,
+      "rendered": true,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "rendered": true,
+      "overflow": false
+    }
+  ],
+  "assets": 23,
+  "markerMatches": [],
+  "authorization": [
+    {
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "status": 401
+    }
+  ],
+  "publishedMissing": {
+    "status": 404,
+    "routingHeaders": false
+  },
+  "scheduler": {
+    "checkedAt": "2026-09-12T01:15:14.508Z",
+    "outcome": "ok",
+    "cron": "* * * * *",
+    "scheduledTime": 1789175700000,
+    "diagnostics": []
+  }
+}

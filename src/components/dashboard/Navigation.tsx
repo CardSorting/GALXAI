@@ -17,6 +17,7 @@ import {
   ChevronDown,
   CreditCard,
   Settings,
+  PanelsTopLeft,
   Image as ImageIcon
 } from 'lucide-react';
 import { CommandMenu } from '@/components/common/CommandMenu';
@@ -31,6 +32,7 @@ import { withErrorBoundary } from '@/components/common/ErrorBoundary';
 const NAV_LINKS = [
   { name: 'Models', href: '/models', icon: Cpu },
   { name: 'Images', href: '/images', icon: ImageIcon },
+  { name: 'Sites', href: '/sites', icon: PanelsTopLeft },
   { name: 'Docs', href: '/docs', icon: BookOpen },
   { name: 'Pricing', href: '/pricing', icon: DollarSign },
   { name: 'API Keys', href: '/keys', icon: Key },

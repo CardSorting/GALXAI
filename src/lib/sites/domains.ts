@@ -32,7 +32,7 @@ export function siteHostname(value: unknown): asserts value is string {
   siteUsername(value.split('.')[1]);
 }
 export interface DomainRecord { type: 'CNAME' | 'TXT'; name: string; content: string; }
-export interface DomainPlan { domainId: string; hostname: string; records: DomainRecord[]; }
+export interface DomainPlan { domainId: string; hostname: string; records: DomainRecord[]; kind?: 'managed'; }
 export interface DomainRow {
   id: string; user_id: string; username: string; project_id: string; app_slug: string; hostname: string;
   status: 'reserved' | 'pending' | 'active'; attach_started: boolean; plan: DomainPlan | null;

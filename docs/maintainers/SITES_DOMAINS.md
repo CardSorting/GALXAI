@@ -4,6 +4,8 @@
 
 Private maintainer runbook. [ADR 0137](../adr/0137-account-owned-sites-subdomains.md) defines address ownership; [ADR 0138](../adr/0138-automatic-sites-domain-provisioning.md) defines automatic discovery and reconciliation. [Site addresses](../SITE_ADDRESSES.md) is the public capability contract. Never bundle this guide, native registrations or queue rows into product output.
 
+New browser-created Sites use [workspace-managed publishing](SITES_WORKSPACE.md), which needs no customer companion. The discovery lifecycle below remains the separate path for customer-native Sites.
+
 ## Automatic lifecycle
 
 A customer enrolls once with an available GALX username and their existing native Sites connection. The address companion observes new Sites in that account; no per-Site project binding or DNS entry is needed. It verifies current ownership and owner-private access, reserves a stable name from the title, attaches the native custom domain, and commits the narrow registration to GALX. Site creation and content population continue through the normal native workflow. Address automation never creates a second Site, regenerates content, saves versions, publishes or changes audience.

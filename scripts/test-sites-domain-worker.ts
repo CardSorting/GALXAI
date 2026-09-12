@@ -98,3 +98,15 @@ test('scheduler preserves the runtime fetch receiver', async t => {
   });
   await tick(token);
 });
+test('managed publishing prepares the host before DNS and requires its own exact-content readiness probe', async () => {
+  for (const mode of ['ready','pending','conflict','missing-adapter']) {
+    const actions:string[]=[],finishes:any[]=[];
+    const handle=domainWorkerRoute({token:()=>token,enabled:()=>true,accounts:()=>'["alice"]',
+      registry:()=>({claimDue:async()=>[{id:'managed',hostname:'app.alice.galx.ai',plan:{kind:'managed'}}],finish:async(_:unknown,active:boolean,error:string)=>finishes.push({active,error})}) as any,
+      dns:()=>({ensure:async()=>{actions.push('dns');}}),verifyHttps:async()=>{throw new Error('Native probe must not run');},
+      ...(mode==='missing-adapter'?{}:{prepareManagedHost:async()=>{actions.push('host');if(mode==='conflict')throw new SiteDomainError('dns_conflict');},verifyManagedHttps:async()=>{actions.push('content');return mode==='ready';}})});
+    const response=await handle(request());assert.equal(response.status,204);assert.equal(await response.text(),'');
+    assert.deepEqual(actions,mode==='missing-adapter'?[]:mode==='conflict'?['host']:['host','dns','content']);
+    assert.equal(finishes[0].active,mode==='ready');
+  }
+});

@@ -22,7 +22,7 @@ function BaseFloatingActionDock() {
   const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
-    if ((pathname === '/' || pathname === '/images' || pathname === '/auth/signup' || pathname === '/keys/top-up' || pathname === '/billing' || pathname === '/pricing' || pathname === '/docs' || pathname?.startsWith('/docs/'))) return;
+    if ((pathname === '/' || pathname === '/images' || pathname === '/sites' || pathname?.startsWith('/sites/') || pathname === '/auth/signup' || pathname === '/keys/top-up' || pathname === '/billing' || pathname === '/pricing' || pathname === '/docs' || pathname?.startsWith('/docs/'))) return;
 
     let ticking = false;
     const handleScroll = () => {
@@ -40,7 +40,7 @@ function BaseFloatingActionDock() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [pathname]);
 
-  if ((pathname === '/' || pathname === '/images' || pathname === '/auth/signup' || pathname === '/keys/top-up' || pathname === '/billing' || pathname === '/pricing' || pathname === '/docs' || pathname?.startsWith('/docs/'))) {
+  if ((pathname === '/' || pathname === '/images' || pathname === '/sites' || pathname?.startsWith('/sites/') || pathname === '/auth/signup' || pathname === '/keys/top-up' || pathname === '/billing' || pathname === '/pricing' || pathname === '/docs' || pathname?.startsWith('/docs/'))) {
     return null;
   }
 
