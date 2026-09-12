@@ -1,15 +1,18 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { readWorkspaceSite, workspaceError, type WorkspaceSite, type SitesAccess } from '@/lib/sites/workspace-contract';
+import { readWorkspaceSite, readSiteSummary, readSiteMessage, workspaceError, type WorkspaceSite, type SiteSummary, type SitesAccess, type SiteIntent, type SiteMessage, type SiteVersion, readSiteDocument } from '@/lib/sites/workspace-contract';
 
 class WorkspaceClientError extends Error {}
-
+const EMPTY_MESSAGES:SiteMessage[]=[];
+const newer=(a:{revision:number;updatedAt:string},b:{revision:number;updatedAt:string})=>a.revision>b.revision || (a.revision===b.revision && Date.parse(a.updatedAt)>=Date.parse(b.updatedAt));
 export function useSitesWorkspace(owner: string | null, token?: string, initialId?: string) {
-  const [sites,setSites] = useState<WorkspaceSite[]>([]), [site,setSite] = useState<WorkspaceSite | null>(null);
-  const [loading,setLoading] = useState(Boolean(owner)), [busy,setBusy] = useState(false), [error,setError] = useState('');
+  const [sites,setSites] = useState<SiteSummary[]>([]), [site,setSite] = useState<WorkspaceSite | null>(null);
+  const [loading,setLoading] = useState(Boolean(owner)), [busy,setBusy] = useState(false), [activity,setActivity]=useState(''),[error,setError] = useState('');
   const [access,setAccess] = useState<SitesAccess>('unavailable'), [setupLoading,setSetupLoading] = useState(Boolean(owner));
   const [publishing,setPublishing] = useState(false), [username,setUsername] = useState<string | null>(null);
-  const alive = useRef(true), lock = useRef(false), controllers = useRef(new Set<AbortController>()), selected = useRef(initialId);
+  const [older,setOlder]=useState<{id:string;messages:SiteMessage[];cursor:number|null}|null>(null),[historyBusy,setHistoryBusy]=useState(false);
+  const alive = useRef(true), lock = useRef(false), controllers = useRef(new Set<AbortController>()), selected = useRef(initialId),currentRef=useRef(site),loadEpoch=useRef(0);
+  currentRef.current=site;
   const call = useCallback(async (body?: Record<string,unknown>, query = '') => {
     const controller = new AbortController(); controllers.current.add(controller);
     const timer = setTimeout(() => controller.abort(),body?.action === 'generate' ? 95000 : 25000);
@@ -18,10 +21,11 @@ export function useSitesWorkspace(owner: string | null, token?: string, initialI
         headers:{ 'Accept':'application/json', ...(token ? {Authorization:`Bearer ${token}`} : {}), ...(body ? {'Content-Type':'application/json'} : {}) },
         ...(body ? {body:JSON.stringify(body)} : {}) });
       if (!response.ok) {
-        if(response.status===403){setAccess('paid_plan_required');setPublishing(false);}
+        if(response.status===403 && alive.current){setAccess('paid_plan_required');setPublishing(false);}
         let code: unknown; try { code = (await response.json())?.error?.code; } catch {}
         throw new WorkspaceClientError(code === 'invalid_username' ? 'Use 3–20 lowercase letters, numbers, or hyphens. Start with a letter and end with a letter or number.'
-          : code === 'username_unavailable' ? 'That username isn’t available. Choose another, or refresh to use your saved username.' : workspaceError(response.status));
+          : code === 'username_unavailable' ? 'That username isn’t available. Choose another, or refresh to use your saved username.'
+          : code === 'request_too_long' ? 'Shorten your message or project notes, then try again.' : workspaceError(response.status));
       }
       return await response.json();
     } finally { clearTimeout(timer); controllers.current.delete(controller); }
@@ -38,69 +42,97 @@ export function useSitesWorkspace(owner: string | null, token?: string, initialI
   const accept = useCallback((input: unknown) => {
     const next = readWorkspaceSite(input);
     if (!alive.current) return next;
-    setSites(current => [next,...current.filter(s => s.id !== next.id)]);
-    if (selected.current === next.id) setSite(next);
+    setSites(current => {const old=current.find(s=>s.id===next.id);return old && !newer(next,old)?current:[readSiteSummary(next),...current.filter(s=>s.id!==next.id)];});
+    if (selected.current === next.id) setSite(current=>current?.id===next.id && !newer(next,current)?current:next);
     return next;
   },[]);
+  const loadSite=useCallback(async(id:string)=>{const result=await call(undefined,`?id=${id}`);return accept(result.site);},[call,accept]);
   const refresh = useCallback(async (preserveError = false) => {
     if (!owner) return;
-    setLoading(true); if (!preserveError) setError('');
-    try { const data = await call(); if (!Array.isArray(data.sites) || data.sites.length>50) throw new Error();
-      const rows = data.sites.map(readWorkspaceSite); if (!alive.current) return; setSites(rows);
-      if (selected.current) { const current = rows.find((s: WorkspaceSite) => s.id === selected.current);
-        if (current) setSite(current); else { setSite(null); setError('This Site is unavailable. Choose another from My Sites.'); } }
-    } catch (e) { if (alive.current) setError(e instanceof Error && e.message.startsWith('Sign in') ? e.message : 'Your Sites couldn’t be loaded. Try refreshing.'); }
-    finally { if (alive.current) setLoading(false); }
-  },[call,owner]);
+    const epoch=++loadEpoch.current;setLoading(true);if(!preserveError)setError('');
+    try {await Promise.all([call(undefined,'?view=library').then(data=>{
+      if(!Array.isArray(data.sites)||data.sites.length>50)throw new Error();const rows:SiteSummary[]=data.sites.map(readSiteSummary);
+      if(alive.current && epoch===loadEpoch.current)setSites(current=>rows.map(row=>{const old=current.find(s=>s.id===row.id);return old && newer(old,row)?old:row;}));
+    }),selected.current?loadSite(selected.current):Promise.resolve()]);
+    } catch (e) { if (alive.current && epoch===loadEpoch.current)setError(e instanceof WorkspaceClientError?e.message:'Your Sites couldn’t be loaded. Try refreshing.'); }
+    finally { if (alive.current && epoch===loadEpoch.current)setLoading(false); }
+  },[call,owner,loadSite]);
   useEffect(() => {
     alive.current = true; void refresh(); void refreshAccess();
     return () => { alive.current = false; for (const controller of controllers.current) controller.abort(); };
-  },[call,owner,refresh,refreshAccess]);
+  },[owner,refresh,refreshAccess]);
+  const select=useCallback((next:SiteSummary|null,navigate=true)=>{
+    selected.current=next?.id;setSite(null);setOlder(null);setError('');
+    if(navigate)window.history.pushState(null,'',next?`/sites/${next.id}`:'/sites');
+    if(next && owner){const epoch=++loadEpoch.current;setLoading(true);void loadSite(next.id).catch(e=>{if(alive.current && selected.current===next.id)setError(e instanceof WorkspaceClientError?e.message:workspaceError(503));}).finally(()=>{if(alive.current && epoch===loadEpoch.current)setLoading(false);});}
+    else{++loadEpoch.current;setLoading(false);}
+  },[loadSite,owner]);
+  useEffect(()=>{const pop=()=>{const id=window.location.pathname.match(/^\/sites\/([a-f0-9-]{36})$/)?.[1];
+    if(id===selected.current)return;select(id?{id} as SiteSummary:null,false);};window.addEventListener('popstate',pop);return()=>window.removeEventListener('popstate',pop);},[select]);
   useEffect(() => {
-    if (!owner || !site?.generating) return;
-    const id = site.id; let cancelled = false; let timer: ReturnType<typeof setTimeout>;
+    if (!owner || !site || (!site.generating && site.address?.status!=='pending' && site.address?.status!=='reserved')) return;
+    const id = site.id; let cancelled = false,inFlight=false; let timer: ReturnType<typeof setTimeout>;
     const poll = async () => {
-      try { const result = await call({action:'recover',id}); if (!cancelled && alive.current) accept(result.site); }
-      catch { /* Keep the pending state and allow manual refresh/recovery. */ }
-      if (!cancelled) timer = setTimeout(() => void poll(),8000);
+      if(inFlight || cancelled)return;inFlight=true;
+      try { if(document.visibilityState==='visible') {const result = await call(site.generating?{action:'recover',id}:undefined,site.generating?'':`?id=${id}`); if (!cancelled && alive.current) accept(result.site);} }
+      catch { /* The saved pending turn stays recoverable. */ }
+      inFlight=false;if (!cancelled) timer = setTimeout(() => void poll(),8000);
     };
-    timer = setTimeout(() => void poll(),4000);
-    return () => { cancelled = true; clearTimeout(timer); };
-  },[site?.id,site?.generating,owner,call,accept]);
-  useEffect(() => {
-    if (!owner || !site?.address || site.address.status === 'active') return;
-    const id = site.id; let cancelled = false;
-    const timer = setInterval(() => { void call(undefined,`?id=${id}`).then(result => { if (!cancelled) accept(result.site); }).catch(() => {}); },10000);
-    return () => { cancelled = true; clearInterval(timer); };
-  },[site?.id,site?.address?.status,owner,call,accept]);
-  function select(next: WorkspaceSite | null) { selected.current = next?.id; setSite(next); setError(''); }
-  async function send(brief: string): Promise<WorkspaceSite | null> {
+    const visible=()=>{if(document.visibilityState==='visible'){clearTimeout(timer);timer=setTimeout(()=>void poll(),100);}};
+    timer = setTimeout(() => void poll(),4000);document.addEventListener('visibilitychange',visible);
+    return () => { cancelled = true; clearTimeout(timer);document.removeEventListener('visibilitychange',visible); };
+  },[site?.id,site?.generating,site?.address?.status,owner,call,accept]);
+  async function send(brief: string,intent:SiteIntent,onCreated?:(id:string)=>void): Promise<WorkspaceSite | null> {
     if (!owner || access!=='included' || loading || (selected.current && !site) || lock.current || site?.generating || site?.archived) return null;
-    lock.current = true; setBusy(true); setError('');
+    lock.current = true; setBusy(true);setActivity(intent==='discuss'?'Thinking through your question…':'Updating your draft…');setError('');
+    let operationKey='';
     try {
       let current = site;
       if (!current) {
-        // Retain the creation ID before the request so an interrupted create can be retried safely.
         const key = `galx-sites-create:${owner}`;
         let id: string | null = null; try { id = sessionStorage.getItem(key); } catch {}
         if (!id || !/^[a-f0-9-]{36}$/.test(id)) id = crypto.randomUUID();
         try { sessionStorage.setItem(key,id); } catch {}
         current = readWorkspaceSite((await call({action:'create',id,title:'Untitled Site'})).site);
         if (!alive.current) return null;
-        selected.current = current.id; accept(current); setSite(current);
+        onCreated?.(current.id);selected.current = current.id;accept(current);window.history.replaceState(null,'',`/sites/${current.id}`);
         try { sessionStorage.removeItem(key); } catch {}
       }
-      const result = await call({action:'generate',id:current.id,revision:current.revision,operationId:crypto.randomUUID(),brief:brief.trim().replace(/[\r\n\t]+/g,' ')});
+      operationKey=`galx-sites-turn:${owner}:${current.id}`;
+      let operationId=crypto.randomUUID() as string;
+      try{const saved=JSON.parse(sessionStorage.getItem(operationKey)||'null');if(saved?.brief===brief.trim() && saved?.intent===intent && /^[a-f0-9-]{36}$/.test(saved.id))operationId=saved.id;
+        sessionStorage.setItem(operationKey,JSON.stringify({id:operationId,brief:brief.trim(),intent}));}catch{}
+      const optimistic={...current,generating:true,messages:[...current.messages.slice(-79),{id:`${operationId}:user`,role:'user',text:brief.trim(),status:'pending'}]};
+      accept(optimistic);
+      const result = await call({action:'generate',id:current.id,revision:current.revision,operationId,brief:brief.trim(),intent});
+      try{sessionStorage.removeItem(operationKey);}catch{}
       return accept(result.site);
-    } catch (e) { if (alive.current) { setError(e instanceof WorkspaceClientError ? e.message : 'The update was interrupted. Refresh to check its progress before trying again.'); void refresh(true); } return null; }
-    finally { lock.current = false; if (alive.current) setBusy(false); }
+    } catch (e) {if(e instanceof WorkspaceClientError && operationKey)try{sessionStorage.removeItem(operationKey);}catch{}
+      if (alive.current) {setError(e instanceof WorkspaceClientError ? e.message : 'The reply was interrupted. Your saved turn will recover when you return. Refresh to check its progress.');void refresh(true);}return null;
+    } finally { lock.current = false; if (alive.current){setBusy(false);setActivity('');} }
   }
   async function change(body: Record<string,unknown>): Promise<boolean> {
-    if (!owner || !site || lock.current) return false;
-    lock.current = true; setBusy(true); setError('');
-    try { const result = await call({ ...body,id:site.id,revision:site.revision }); accept(result.site); return true; }
-    catch (e) { if (alive.current) setError(e instanceof WorkspaceClientError ? e.message : workspaceError(503)); return false; }
-    finally { lock.current = false; if (alive.current) setBusy(false); }
+    const current=currentRef.current;if (!owner || !current || lock.current) return false;
+    lock.current = true; setBusy(true);setActivity('Saving…');setError('');
+    try { const result = await call({ ...body,id:current.id,revision:current.revision }); accept(result.site); return true; }
+    catch (e) { if (alive.current){setError(e instanceof WorkspaceClientError ? e.message : workspaceError(503));void loadSite(current.id).catch(()=>{});}return false; }
+    finally { lock.current = false; if (alive.current){setBusy(false);setActivity('');} }
   }
-  return { sites,site,loading,openingSite:Boolean(owner && selected.current && !site),busy,error,setError,access,setupLoading,publishing,username,select,send,change,refresh:async(preserveError=false)=>{await Promise.all([refresh(preserveError),refreshAccess()]);} };
+  async function loadEarlier(){
+    if(!site || historyBusy)return;const id=site.id,cursor=older?.id===id?older.cursor:site.historyCursor;if(!cursor)return;
+    setHistoryBusy(true);try{const data=await call(undefined,`?id=${id}&view=history&before=${cursor}`);
+      if(!Array.isArray(data.messages)||data.messages.length>80 || (data.cursor!==null && (!Number.isSafeInteger(data.cursor)||data.cursor<1)))throw new Error();
+      const messages=data.messages.map(readSiteMessage);if(alive.current && selected.current===id)setOlder(current=>({id,messages:[...messages,...(current?.id===id?current.messages:[])].slice(0,160),cursor:data.cursor}));
+    }catch{if(alive.current)setError('Earlier messages couldn’t be loaded. Try again.');}finally{if(alive.current)setHistoryBusy(false);}
+  }
+  async function versions(id:string,before?:number):Promise<{versions:SiteVersion[];cursor:number|null}>{
+    const data=await call(undefined,`?id=${id}&view=versions${before?`&before=${before}`:''}`);
+    if(!Array.isArray(data.versions)||data.versions.length>20 || (data.cursor!==null && (!Number.isSafeInteger(data.cursor)||data.cursor<1)))throw new Error();
+    return {versions:data.versions.map((v:SiteVersion)=>{if(!Number.isSafeInteger(v.version)||v.version<1||typeof v.label!=='string'||v.label.length>200||!Number.isFinite(Date.parse(v.createdAt)))throw new Error();return{version:v.version,label:v.label,createdAt:v.createdAt};}),cursor:data.cursor};
+  }
+  async function version(id:string,number:number){const data=await call(undefined,`?id=${id}&version=${number}`),document=readSiteDocument(data.document);if(!document || data.version!==number)throw new Error();return {version:number,document};}
+  const earlier=older?.id===site?.id?older:null;
+  return { sites,site,selectedId:selected.current,loading,openingSite:Boolean(owner && selected.current && !site),busy,activity,error,setError,access,setupLoading,publishing,username,select,send,change,versions,version,
+    earlier:earlier?.messages || EMPTY_MESSAGES,historyCursor:earlier?earlier.cursor:site?.historyCursor,historyBusy,loadEarlier,resetHistory:()=>setOlder(null),
+    refresh:async(preserveError=false)=>{await Promise.all([refresh(preserveError),refreshAccess()]);} };
 }

@@ -51,6 +51,7 @@ The validator checks complete coverage, scope markers, local links and ADR ident
 | [Sites paid access and fair usage](maintainers/SITES_FAIR_USAGE.md) | `maintainers/SITES_FAIR_USAGE.md` |
 | [Sites generation and delivery operations](maintainers/SITES_OPERATIONS.md) | `maintainers/SITES_OPERATIONS.md` |
 | [Sites address operations](maintainers/SITES_DOMAINS.md) | `maintainers/SITES_DOMAINS.md` |
+| [Continuous Sites conversation operations](maintainers/SITES_CONVERSATIONS.md) | `maintainers/SITES_CONVERSATIONS.md` |
 | [Sites workspace operations](maintainers/SITES_WORKSPACE.md) | `maintainers/SITES_WORKSPACE.md` |
 | [Federation request telemetry](maintainers/RELAY_TELEMETRY.md) | `maintainers/RELAY_TELEMETRY.md` |
 | [Capability and recovery UX](maintainers/RELAY_TELEMETRY_UX.md) | `maintainers/RELAY_TELEMETRY_UX.md` |
@@ -256,6 +257,7 @@ The validator checks complete coverage, scope markers, local links and ADR ident
 | [ADR 0139: Browser Sites workspace and managed publishing](adr/0139-browser-sites-workspace-and-managed-publishing.md) | `adr/0139-browser-sites-workspace-and-managed-publishing.md` |
 | [ADR 0140: Paid Sites and shared fair usage](adr/0140-paid-sites-and-shared-fair-usage.md) | `adr/0140-paid-sites-and-shared-fair-usage.md` |
 | [ADR 0141: Sites Pro self-service launch](adr/0141-sites-pro-self-service-launch.md) | `adr/0141-sites-pro-self-service-launch.md` |
+| [ADR 0142: Continuous Sites conversations](adr/0142-continuous-sites-conversations.md) | `adr/0142-continuous-sites-conversations.md` |
 
 ## Operational records
 

@@ -1,6 +1,6 @@
 ---
 name: GALX Sites workspace
-description: A compact dark authoring workspace with a clearly bounded page preview.
+description: A compact dark workspace for continuing Site conversations, project context, and versioned page previews.
 colors:
   background: "#07080d"
   panel: "#0d101c"
@@ -24,6 +24,11 @@ typography:
     fontFamily: "var(--font-inter), sans-serif"
     fontSize: "20px"
     fontWeight: 600
+    letterSpacing: "-.02em"
+  panel-title:
+    fontFamily: "var(--font-inter), sans-serif"
+    fontSize: "20px"
+    fontWeight: 500
     letterSpacing: "-.02em"
   welcome:
     fontFamily: "var(--font-inter), sans-serif"
@@ -59,6 +64,7 @@ typography:
     fontSize: "15px"
     lineHeight: 1.8
 rounded:
+  compact: "5px"
   control: "6px"
   surface: "8px"
   composer: "10px"
@@ -98,6 +104,25 @@ components:
     textColor: "{colors.foreground}"
     rounded: "{rounded.surface}"
     padding: "13px 15px"
+  mode:
+    textColor: "{colors.foreground-muted}"
+    rounded: "{rounded.compact}"
+    padding: "7px 10px"
+  mode-selected:
+    backgroundColor: "{colors.surface-hover}"
+    textColor: "{colors.foreground}"
+  context-notes:
+    backgroundColor: "{colors.background}"
+    textColor: "{colors.foreground}"
+    rounded: "{rounded.control}"
+    padding: "12px"
+  version-row:
+    textColor: "{colors.foreground}"
+    rounded: "{rounded.control}"
+    padding: "16px 12px"
+  version-row-selected:
+    backgroundColor: "{colors.surface-hover}"
+    textColor: "{colors.foreground}"
   preview:
     backgroundColor: "{colors.preview-paper}"
     textColor: "{colors.preview-ink}"
@@ -118,6 +143,7 @@ The interface uses compact dark panels, clear text, restrained indigo actions an
 
 - Compact dark controls with visible indigo interaction states.
 - Conversation and authored page remain visually distinct.
+- Continuing conversations, project notes and version history share one quiet panel system.
 - Serif page headings sit inside the preview; workspace headings use Inter.
 - Loading, saved, unavailable and publication feedback remain readable in either mobile panel.
 
@@ -128,7 +154,7 @@ The workspace inherits GALX's obsidian and indigo family. The preview uses paper
 ### Primary
 
 - **Action indigo** and **deep action indigo** distinguish enabled primary actions and their hover state.
-- **Light indigo** provides focus rings, carets and the selected navigation underline. **Border indigo** marks the focused composer; **pale indigo** marks hovered starter prompts and in-progress text. These are intentional tonal variants of the incumbent accent, confined to interaction states.
+- **Light indigo** provides focus rings, carets and the selected navigation underline. **Border indigo** marks the focused composer; **pale indigo** marks hovered starter prompts, version links and in-progress text. These are intentional tonal variants of the incumbent accent, confined to interaction states.
 
 ### Secondary
 
@@ -155,9 +181,11 @@ The workspace inherits GALX's obsidian and indigo family. The preview uses paper
 ### Hierarchy
 
 - **Title:** The compact Sites heading anchors the workspace.
+- **Panel title:** Context and History use a lighter heading at the same size as the Sites title, preserving hierarchy without adding another display scale.
 - **Welcome:** Medium-weight introductory text uses a larger size on small screens (26px); it remains part of the conversation panel.
 - **Body and introduction:** Conversation messages use a relaxed line height at compact sizes. The introductory copy has a constrained measure (32ch on desktop, 38ch on mobile).
 - **Label:** Navigation and actions use the small label role. Primary actions increase weight to 600.
+- **Conversation detail:** Reply status, mode guidance, summary guidance and version metadata remain readable at 12px. Conversation and version lists use tabular numerals for stable dates and version numbers.
 - **Preview display and title:** The page uses fluid serif display type and repeated serif section titles. Long titles wrap; the display heading uses balanced wrapping and the recorded tracking floor.
 - **Preview body:** Repeated section paragraphs use the page's sans-serif body role. The lead paragraph is larger (18px, reducing to 16px below 500px).
 
@@ -169,7 +197,9 @@ The desktop surface places conversation on the left and preview on the right, un
 
 At widths up to 760px, Chat and Preview become explicit view switches above a single visible panel. The heading reduces to 58px. The same draft and conversation remain selected across both views. New Site returns to Chat and focuses the composer. Workspace feedback sits above both mobile panels so publication errors remain visible from Preview.
 
-The conversation scrolls independently above a bottom composer. Preview toolbars remain outside the page canvas. Repeated workspace insets follow the recorded spacing family, with tighter mobile padding. Desktop and phone preview controls inspect the same page; phone preview is capped at 390px. The device toggles are hidden on narrow screens.
+The conversation scrolls independently above a bottom composer. Context and History occupy the conversation column as independently scrolling panels with a shared inset (24px). Preview toolbars and historical-version feedback remain outside the page canvas. Repeated workspace insets follow the recorded spacing family, with tighter mobile padding. Desktop and phone preview controls inspect the same page; phone preview is capped at 390px. The device toggles are hidden on narrow screens.
+
+On mobile, core actions and mode controls have a minimum touch height (44px), with square send and icon controls at the same size. The composer respects the bottom safe area. Panel tabs retain a minimum height (48px), and their icons disappear to preserve readable labels. Historical-version feedback stacks its explanation and actions. On desktop viewports at most 740px high, the workspace reduces its minimum panel height (540px), composer insets (12px) and prompt minimum height (56px); the extra keyboard-hint line is hidden. Mobile retains a minimum panel height (560px), so short screens can scroll the page rather than collapse its contents.
 
 Within the authored page, content is centered with a maximum width (1100px), proportional horizontal padding (7%), and repeated two-column sections. At 500px and below, horizontal padding becomes 24px and each section stacks into one column. This page-template layout has no authority over other customer content or GALX routes.
 
@@ -183,7 +213,7 @@ The preview has a short opacity transition (0.2s, ease-out); in-progress feedbac
 
 ## Shapes
 
-Controls use gently curved corners; user messages and the preview share the surface radius. The composer has a slightly larger radius to form one continuous input region. Preview corners reduce to the control radius on mobile.
+Controls use gently curved corners; mode buttons, icon controls and conversation version links use the compact radius. User messages and the preview share the surface radius. The composer has a slightly larger radius to form one continuous input region. Preview corners reduce to the control radius on mobile.
 
 Lists, starter prompts and navigation use open rows with thin separators rather than individually raised cards. Lucide vectors share the normal workspace icon size (16px) and stroke weight (1.7); larger identity marks are local exceptions.
 
@@ -191,19 +221,41 @@ Lists, starter prompts and navigation use open rows with thin separators rather 
 
 ### Buttons
 
-Primary buttons pair white text with action indigo and deepen on hover. Secondary buttons use a panel fill and thin border, moving to the hover surface. Text actions begin muted and brighten on hover. Controls use visible keyboard focus (2px outline, 3px offset); disabled buttons reduce opacity and show a disabled cursor. Primary and secondary buttons have a minimum height of 36px.
+Primary buttons pair white text with action indigo and deepen on hover. Secondary buttons use a panel fill and thin border, moving to the hover surface. Text actions begin muted and brighten on hover. Controls use visible keyboard focus (2px outline, 3px offset); disabled buttons reduce opacity and show a disabled cursor. Primary and secondary buttons have a minimum desktop height of 36px, increasing with the mobile touch targets described in Layout.
 
 ### Navigation
 
-Chat and My Sites share a quiet row, with pale indigo underlining the current view. Mobile Chat and Preview switches use the same selected-state language. Desktop device buttons use a tonal selected surface and accessible pressed state. Navigation labels remain text with accompanying vector icons.
+Chat and My Sites share a quiet row; a selected Site adds Context and History. The available views distribute across the panel width, with light indigo underlining the current view. Icons accompany the labels on wide desktops and disappear at 1000px and below. Mobile Chat and Preview switches use the same selected-state language. Desktop device buttons use a tonal selected surface and accessible pressed state. The two mobile navigation rows distinguish the visible workspace panel from the conversation tools within Chat.
 
 ### Composer and fields
 
-The composer groups a multiline prompt and its action into one dark container. A stronger neutral border becomes indigo on focus within. Prompt text remains compact with generous line height; the send action has the accessible name “Send message” and shows no generation price. Below it, concise copy explains paid-plan inclusion and fair usage. Ineligible accounts get a View plans link; temporary unavailability preserves the draft and explains how to retry. Text fields for search, naming and publication use the same dark fill and foreground hierarchy.
+The composer groups a multiline prompt, Build/Discuss mode buttons and a send action into one dark container. A stronger neutral border becomes indigo on focus within. The selected mode uses a tonal fill and an accessible pressed state. Build applies the request to the current draft; Discuss explores ideas without changing it. The accompanying guidance and placeholder explain the selected mode. Enter sends, Shift + Enter adds a line, and text composition does not trigger a premature send. The send action has the accessible name “Send message” and shows no generation price.
+
+Each Site retains its unsent message and selected mode within the browser session. Starting a Site carries forward any next-message draft and mode already entered while the first reply is pending. A rejected first submission returns to the composer when it would not overwrite newer text. The prompt remains editable during a reply so the next message can be prepared; sending waits until the current reply is resolved. Historical previews show a return-to-current action before further chat can be sent.
+
+Below the composer, concise copy explains paid-plan inclusion and fair usage. Ineligible accounts get a View plans link; temporary unavailability preserves the draft and explains how to retry. Text fields for search, naming and publication use the same dark fill and foreground hierarchy.
 
 ### Conversation and library
 
-User messages use a tonal inset surface; assistant messages sit directly on the panel. Both identify their author in text and allow long words to wrap. Starter choices and saved Sites are separated rows. The library uses compact paper thumbnails, a readable title, written status and date; search and archived filtering remain distinct controls.
+User messages use a tonal inset surface; assistant messages sit directly on the panel and display the actual reply for that turn. Both identify their author in text and allow long words to wrap. Pending and incomplete replies carry written status; replies associated with saved content offer a version link. The conversation is a keyboard-focusable log with polite announcements.
+
+New replies follow the bottom only while the reader is already near it. Reading earlier content preserves the scroll position and reveals a Latest message action above the composer when new content arrives. Loading earlier messages preserves the reading position; a separate earlier-conversation view offers Return to latest. These controls keep continuing conversations usable without forcing the reader away from older text.
+
+Starter choices and saved Sites are separated rows. The library uses compact paper thumbnails, a readable title, written status and date; search and archived filtering remain distinct controls.
+
+### Context
+
+Context pairs an editable Project notes field with a separate Conversation summary below a thin divider. Notes use the established dark field, visible label and Save notes action. Privacy and persistence guidance sits directly below the field; text that is too long receives an adjacent explanation. Notes remain until edited. The rolling summary describes decisions and open questions, with guidance that it updates after each reply and can be corrected in chat or through the project notes. Long notes and summaries wrap within the panel.
+
+### History
+
+History presents saved versions as full-width, keyboard-focusable button rows separated by thin rules. Each row has a version number, written current/published/saved state, date and readable description. Hovered and selected rows use the incumbent tonal fill. Discussion alone does not create a version. Earlier versions have an explicit loading action and readable loading or empty feedback.
+
+Selecting a row or conversation version link previews that checkpoint and labels it above and below the canvas. Mobile switches to Preview to show the selection. Restore this version first changes the inline banner into a confirmation; Confirm restore saves the content as a new draft version and leaves the published page unchanged. Back to current draft exits the historical preview. Download exports the displayed checkpoint with a version-specific filename, so the selected preview and exported page agree.
+
+**The Draft Continuity Rule.** Preserve the selected Site's unsent message, mode and reading position when replies or view changes do not require replacing them.
+
+**The Version Clarity Rule.** Label historical previews explicitly, keep a visible path to the current draft, and confirm restoration as a new draft before applying it.
 
 ### Preview and feedback
 
@@ -218,16 +270,16 @@ Direct navigation to a saved Site shows loading or unavailable content in both c
 - **Do** preserve the existing GALX shell and indigo controls around the page canvas.
 - **Do** keep authored-page paper and green ink inside the preview and its related content representations.
 - **Do** preserve the left-conversation/right-preview arrangement on desktop and explicit panel switching on mobile.
+- **Do** retain per-Site drafts and modes, respect the reader's scroll position, and offer a visible return to the latest message.
+- **Do** distinguish editable project notes, the rolling conversation summary and saved page versions with clear labels.
+- **Do** match historical preview labels and downloads to the selected version, and explain that restore creates a new draft while publication stays unchanged.
 - **Do** pair statuses with text, keep feedback visible in both mobile views, and distinguish loading from example content.
-- **Do** preserve visible focus and reduced-motion behavior.
+- **Do** preserve visible focus, keyboard access to conversation and history, mobile touch targets and reduced-motion behavior.
 
 ### Don't:
 
 - **Don't** turn the page template's serif typography or light palette into global workspace defaults.
 - **Don't** treat a preview, saved draft or queued address as evidence that a page is publicly live.
+- **Don't** use a generic completion message in place of the actual turn reply or imply that Discuss changes the draft.
 - **Don't** add decorative kickers, glyph icons or hard block shadows to this workspace.
 - **Don't** generalize local palette differences into detector exclusions for unrelated files.
-
-## Preserved scoped details
-
-The palette/radius/font detector compares this surface to the root system. File-scoped exceptions retain its documented Georgia page voice and preview ink, the 10px composer, 5px icon controls, 3px thumbnail details and 26px mobile welcome heading. Existing preview chrome uses `#303446`, `#b9c0cf` and `#5c6373`; paper thumbnail rules use `#9ba99d`; scrollbar thumbs use `#343a50`. These are local details, not global additions. The paid-access pass changes copy, its spacing and initial scroll position without restyling this surface.

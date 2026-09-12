@@ -51,6 +51,7 @@ tests = [
     'scripts/test-sites-domains.ts',
     'scripts/test-sites-domain-worker.ts',
     'scripts/test-sites-workspace.ts',
+    'scripts/test-sites-conversation.ts',
     'scripts/test-sites-fair.ts',
     'scripts/test-billing-public-boundary.ts',
 ]
@@ -79,7 +80,7 @@ for name, command in [('regressions', [str(node), '--import', 'tsx', '--test', *
     if completed.returncode:
         break
 if result.get('build', {}).get('exit_code') == 0:
-    markers = [b'sites-static-v2', b'publication_outcome_unknown', b'workflow.sqlite',
+    markers = [b'galx_site_turns', b'galx_site_versions', b'context_start_turn', b'SITE_CONVERSATION_PROMPT', b'sites-static-v2', b'publication_outcome_unknown', b'workflow.sqlite',
                b'GALX_SITES_TEST_RELAY', b'sites-automation/durable', b'connection-contract.json',
                b'PostgresSitesBilling', b'sites-generation-v1', b'GALX_SITES_RATE_CARD', b'private-relay.example',
                b'GALX_SITES_ACTIVATION_EVIDENCE', b'receipt_writer_fenced', b'receipt_commit_unavailable', b'requireSitesActivation',

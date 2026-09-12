@@ -312,7 +312,8 @@
     "test:sites:fair:db": "node --import tsx scripts/run-supabase-integration.ts --fair",
     "sites:fair": "node --env-file-if-exists=.env.local --import tsx scripts/manage-sites-fair-usage.ts",
     "test:sites:workspace": "node --import tsx --test scripts/test-sites-workspace.ts",
-    "test:sites:workspace:db": "node --import tsx scripts/run-supabase-integration.ts --workspace"
+    "test:sites:workspace:db": "node --import tsx scripts/run-supabase-integration.ts --workspace",
+    "test:sites:conversation": "node --import tsx --test scripts/test-sites-conversation.ts"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3",

@@ -86,11 +86,22 @@ export interface Database {
       galx_site_workspaces: {
         Row: { id: string; user_id: string; title: string; revision: number; document: Json | null; published_document: Json | null; published_revision: number | null; messages: Json;
           archived: boolean; operation_id: string | null; operation_brief: string | null; operation_started_at: string | null; operation_mode: 'legacy' | 'included';
+          project_notes: string; context_summary: string; context_start_turn: number; turn_count: number; document_version: number; published_version: number | null; operation_intent: 'build' | 'discuss';
           created_at: string; updated_at: string };
         Insert: { id: string; user_id: string; title: string };
         Update: { title?: string; revision?: number; document?: Json | null; published_document?: Json | null; published_revision?: number | null; messages?: Json; archived?: boolean;
-          operation_id?: string | null; operation_brief?: string | null; operation_started_at?: string | null; operation_mode?: 'legacy' | 'included'; updated_at?: string };
+          operation_id?: string | null; operation_brief?: string | null; operation_started_at?: string | null; operation_mode?: 'legacy' | 'included'; project_notes?: string; context_summary?: string; context_start_turn?: number; turn_count?: number; document_version?: number; published_version?: number | null; operation_intent?: 'build' | 'discuss'; updated_at?: string };
         Relationships: [];
+      };
+      galx_site_turns: {
+        Row: { site_id: string; user_id: string; sequence: number; operation_id: string; intent: 'build' | 'discuss' | 'restore' | 'legacy'; user_text: string | null; assistant_text: string | null; state: 'pending' | 'completed' | 'failed'; document_version: number | null; created_at: string; completed_at: string | null };
+        Insert: { site_id: string; user_id: string; sequence: number; operation_id: string; intent: 'build' | 'discuss' | 'restore' | 'legacy'; user_text?: string | null; assistant_text?: string | null; state: 'pending' | 'completed' | 'failed'; document_version?: number | null; created_at?: string; completed_at?: string | null };
+        Update: { assistant_text?: string; state?: 'completed' | 'failed'; document_version?: number | null; completed_at?: string }; Relationships: [];
+      };
+      galx_site_versions: {
+        Row: { site_id: string; user_id: string; version: number; document: Json; context_summary: string; label: string; source: 'generation' | 'restore' | 'import'; created_at: string };
+        Insert: { site_id: string; user_id: string; version: number; document: Json; context_summary?: string; label: string; source: 'generation' | 'restore' | 'import'; created_at?: string };
+        Update: { version?: never }; Relationships: [];
       };
       galx_site_namespaces: {
         Row: { user_id: string; username: string; created_at: string };

@@ -1,7 +1,8 @@
 import { SitesBillingError, type SitesGenerationReply } from '../billing/sites-generation';
 import { boundedDomainJson } from './cloudflare-dns';
 import { SiteDomainError } from './domains';
-import { readSiteDocument, type SiteDocument, type SitesAccess } from './workspace-contract';
+import { type SiteDocument, type SitesAccess, type SiteIntent } from './workspace-contract';
+import { conversationMessages, readConversationResult, ConversationInputError, type ConversationContext } from './conversation-context';
 import { FairUsageError } from './fair-policy';
 import type { IncludedGenerationReply } from './included-generation';
 import { SitesWorkspaceRepository, WorkspaceError, workspaceView } from './workspace-repository';
@@ -10,13 +11,13 @@ export interface WorkspaceDependencies {
   authenticate(request: Request): Promise<{ id: string }>;
   repository(): SitesWorkspaceRepository;
   requireAccess(owner: string): Promise<void>;
-  prepare(owner: string, signal: AbortSignal): Promise<{ generate(operation: string, brief: string, document: SiteDocument | null): Promise<IncludedGenerationReply> }>;
+  prepare(owner: string, signal: AbortSignal): Promise<{ generate(operation: string, brief: string, document: SiteDocument | null, context?: ConversationContext): Promise<IncludedGenerationReply> }>;
   recover(owner: string, operation: string, signal: AbortSignal, mode: 'legacy' | 'included'): Promise<SitesGenerationReply | IncludedGenerationReply>;
   canPublish?(owner: string): boolean;
   publish?(owner: string, id: string, revision: number, username: string): Promise<Parameters<typeof workspaceView>[0]>;
 }
 const headers = { 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' };
-const fail = (status: number, publicCode?: 'invalid_username' | 'username_unavailable' | 'rate_limited', retry?:number) => Response.json({ error: { code: publicCode || ({401:'sign_in_required',403:'paid_plan_required',404:'site_not_found',409:'site_changed',429:'site_limit_reached'} as Record<number,string>)[status] || 'site_unavailable' } }, { status, headers:{...headers,...(retry?{'Retry-After':String(retry)}:{})} });
+const fail = (status: number, publicCode?: 'invalid_username' | 'username_unavailable' | 'rate_limited' | 'request_too_long', retry?:number) => Response.json({ error: { code: publicCode || ({401:'sign_in_required',403:'paid_plan_required',404:'site_not_found',409:'site_changed',429:'site_limit_reached'} as Record<number,string>)[status] || 'site_unavailable' } }, { status, headers:{...headers,...(retry?{'Retry-After':String(retry)}:{})} });
 const uuid = (v: unknown): v is string => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(v);
 const keys = (v: Record<string, unknown>, names: string) => Object.keys(v).sort().join(',') === names;
 const title = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0 && v.length <= 90 && !/[\u0000-\u001f\u007f]/.test(v);
@@ -28,8 +29,20 @@ export function sitesWorkspaceRoute(deps: WorkspaceDependencies) {
       const url = new URL(request.url), repo = deps.repository();
       const reply = (row: Parameters<typeof workspaceView>[0]) => Response.json({ site: workspaceView(row) }, { headers });
       if (request.method === 'GET') {
-        if (url.searchParams.size > 1) return fail(400);
-        if (url.searchParams.has('id')) { const id = url.searchParams.get('id'); if (!uuid(id)) return fail(400); return reply(await repo.get(owner,id)); }
+        const positive=(v:string|null)=>v!==null && /^[1-9][0-9]{0,8}$/.test(v)?Number(v):undefined;
+        if (url.searchParams.has('id')) {
+          const id=url.searchParams.get('id'); if(!uuid(id))return fail(400);
+          const names=[...url.searchParams.keys()].sort().join(','),view=url.searchParams.get('view');
+          if(names==='id')return reply(await repo.get(owner,id));
+          if(names==='id,version' && positive(url.searchParams.get('version')))return Response.json(await repo.version(owner,id,positive(url.searchParams.get('version'))!),{headers});
+          if((names==='id,view' || names==='before,id,view') && ['history','versions'].includes(view || '')){
+            const before=positive(url.searchParams.get('before'));if(url.searchParams.has('before') && !before)return fail(400);
+            return Response.json(view==='history'?await repo.history(owner,id,before):await repo.versions(owner,id,before),{headers});
+          }
+          return fail(400);
+        }
+        if(url.searchParams.size>1)return fail(400);
+        if(url.searchParams.get('view')==='library')return Response.json({sites:await repo.library(owner)},{headers});
         if (url.searchParams.get('view') === 'setup') {
           let access: SitesAccess = 'unavailable';
           try { await deps.prepare(owner,request.signal); access='included'; }
@@ -55,37 +68,50 @@ export function sitesWorkspaceRoute(deps: WorkspaceDependencies) {
         return reply(await deps.publish(owner,body.id,body.revision,body.username));
       }
       if(body.action === 'unpublish' && keys(body,'action,id,revision') && Number.isSafeInteger(body.revision))return reply(await repo.unpublish(owner,body.id,body.revision));
-      const finish = async (operation: string, result: SitesGenerationReply | IncludedGenerationReply) => {
+      if(body.action==='context' && keys(body,'action,id,notes,revision') && Number.isSafeInteger(body.revision) && typeof body.notes==='string' && Buffer.byteLength(body.notes)<=2000 && !/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(body.notes))
+        return reply(await repo.update(owner,body.id,body.revision,{notes:body.notes.trim()}));
+      if(body.action==='restore' && keys(body,'action,id,revision,version') && Number.isSafeInteger(body.revision) && Number.isSafeInteger(body.version) && body.version>0)
+        return reply(await repo.restore(owner,body.id,body.revision,body.version));
+      const finish = async (operation: string, result: SitesGenerationReply | IncludedGenerationReply, intent:SiteIntent='build') => {
         if ('completed' in result ? !result.completed : !result.cost) return reply(await repo.get(owner,body.id));
-        let document: SiteDocument | null = null;
-        try { document = readSiteDocument(JSON.parse(result.text)); } catch { /* Keep the last valid draft. */ }
-        return reply(await repo.finish(owner,body.id,operation,document,document ? 'Your draft is ready to preview. Tell me what you’d like to change.'
-          : 'This update could not produce a usable draft. Your previous draft is safe. You can try again.'));
+        const parsed=readConversationResult(result.text,intent);
+        return reply(await repo.finish(owner,body.id,operation,parsed?.document || null,parsed?.message ||
+          'This reply could not be saved. Your previous draft is safe. Please try again.',parsed?.memory ?? null,!parsed));
       };
       if (body.action === 'recover' && keys(body,'action,id')) {
         const row = await repo.get(owner,body.id); if (!row.operation_id) return reply(row);
-        try { return await finish(row.operation_id, await deps.recover(owner,`${body.id}:${row.operation_id}`,request.signal,row.operation_mode || 'legacy')); }
+        try { return await finish(row.operation_id, await deps.recover(owner,`${body.id}:${row.operation_id}`,request.signal,row.operation_mode || 'legacy'),row.operation_intent || 'build'); }
         catch (error) {
           if (((error instanceof SitesBillingError && error.code === 'billing_receipt_unavailable') || (error instanceof FairUsageError && error.reason==='invocation_missing')) && row.operation_started_at && Date.now()-row.operation_started_at.getTime()>120000)
-            return reply(await repo.finish(owner,body.id,row.operation_id,null,'This update did not start. You can try again.'));
+            return reply(await repo.finish(owner,body.id,row.operation_id,null,'This update did not start. You can try again.',null,true));
           return reply(row); // Never resubmit an uncertain generation.
         }
       }
-      if (body.action !== 'generate' || !keys(body,'action,brief,id,operationId,revision') || !uuid(body.operationId) ||
-        !Number.isSafeInteger(body.revision) || typeof body.brief !== 'string' || !body.brief.trim() || Buffer.byteLength(body.brief)>2000 || /[\u0000-\u001f\u007f]/.test(body.brief)) return fail(400);
-      await repo.get(owner,body.id); // Check ownership before any admission or inference.
+      if (body.action !== 'generate' || !(keys(body,'action,brief,id,operationId,revision') || keys(body,'action,brief,id,intent,operationId,revision')) || !uuid(body.operationId) ||
+        !Number.isSafeInteger(body.revision) || typeof body.brief !== 'string' || !body.brief.trim() || Buffer.byteLength(body.brief)>2000 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(body.brief) || (body.intent!==undefined && !['build','discuss'].includes(body.intent))) return fail(400);
+      const current=await repo.get(owner,body.id); // Ownership precedes admission and inference.
+      const intent:SiteIntent=body.intent || 'build',brief=body.brief.trim();
+      const previous=await repo.turn(owner,body.id,body.operationId);
+      if(previous){
+        if(previous.user_text!==brief || previous.intent!==intent) return fail(409);
+        return reply(current); // A repeated delivery never dispatches a second turn.
+      }
+      const context:ConversationContext={document:current.document,notes:current.project_notes || '',summary:current.context_summary || '',
+        messages:current.messages.filter(m=>(m.turn || 0)>(current.context_start_turn || 0)),intent};
+      conversationMessages(brief,context); // Validate the complete input before reserving this turn.
       const prepared = await deps.prepare(owner,request.signal);
-      const row = await repo.begin(owner,body.id,body.revision,body.operationId,body.brief.trim());
-      try { return await finish(body.operationId,await prepared.generate(`${body.id}:${body.operationId}`,body.brief.trim(),row.document)); }
+      const row = await repo.begin(owner,body.id,body.revision,body.operationId,brief,intent);
+      try { return await finish(body.operationId,await prepared.generate(`${body.id}:${body.operationId}`,brief,row.document,context),intent); }
       catch (error) {
         // Only proven pre-admission deferrals can clear the workspace operation.
         if (error instanceof FairUsageError && error.beforeAdmission) {
-          await repo.finish(owner,body.id,body.operationId,null,'This update did not start. Please try again later.');
+          await repo.finish(owner,body.id,body.operationId,null,'This update did not start. Please try again later.',null,true);
           return fail(error.status,error.status===429?'rate_limited':undefined,error.retryAfter);
         }
         return reply(await repo.get(owner,body.id));
       }
     } catch (error) {
+      if(error instanceof ConversationInputError)return fail(400,'request_too_long');
       if(error instanceof FairUsageError)return fail(error.status,error.status===429?'rate_limited':undefined,error.retryAfter);
       if (error instanceof SiteDomainError && error.code === 'invalid_username') return fail(400,'invalid_username');
       if (error instanceof SiteDomainError && ['username_unavailable','username_conflict','address_unavailable'].includes(error.code)) return fail(409,'username_unavailable');

@@ -54,7 +54,7 @@ test('Included content HTTP excludes costs, quota internals, headers and caller-
 test('Paid denial applies to create, generate and publish; saved Sites remain accessible',async()=>{
   let mutations=0;const id='e6581c35-7a8d-4c01-a630-a3c8e6f9531b';
   const denial=async()=>{throw new FairUsageError(403,'secret-plan-diagnostic');};
-  const handle=sitesWorkspaceRoute({authenticate:async()=>({id:'alice'}),requireAccess:denial,prepare:denial,recover:async()=>{throw Error();},canPublish:()=>true,publish:async()=>{mutations++;throw Error();},repository:()=>({list:async()=>[],username:async()=>null,get:async()=>({}),create:async()=>{mutations++;}} as any)});
+  const handle=sitesWorkspaceRoute({authenticate:async()=>({id:'alice'}),requireAccess:denial,prepare:denial,recover:async()=>{throw Error();},canPublish:()=>true,publish:async()=>{mutations++;throw Error();},repository:()=>({list:async()=>[],username:async()=>null,turn:async()=>null,get:async()=>({document:null,messages:[]}),create:async()=>{mutations++;}} as any)});
   for(const body of [{action:'create',id,title:'Test'},{action:'generate',id,revision:0,operationId:id,brief:'A page'},{action:'publish',id,revision:0,username:'alice',audience:'public'}]){
     const response=await handle(request(body));assert.equal(response.status,403);assert.deepEqual(await response.json(),{error:{code:'paid_plan_required'}});
   }

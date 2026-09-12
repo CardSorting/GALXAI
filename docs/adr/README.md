@@ -154,3 +154,4 @@ Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) f
 | 0139 | [ADR 0139: Browser Sites workspace and managed publishing](0139-browser-sites-workspace-and-managed-publishing.md) | Private authoring, explicit public snapshots and automated managed addresses |
 | 0140 | [ADR 0140: Paid Sites and shared fair usage](0140-paid-sites-and-shared-fair-usage.md) | Paid-plan inclusion, shared admission and original-operation recovery |
 | 0141 | [ADR 0141: Sites Pro self-service launch](0141-sites-pro-self-service-launch.md) | Verified Pro checkout, cancellation and explicit initial limits |
+| 0142 | [ADR 0142: Continuous Sites conversations](0142-continuous-sites-conversations.md) | Durable turns, rolling context, Build/Discuss and recoverable draft versions |

@@ -5,7 +5,7 @@ import { SitesWorkspaceRepository, WorkspaceError } from '@/lib/sites/workspace-
 import { sitesWorkspaceRoute } from '@/lib/sites/workspace-route';
 import { sitesContentConfiguration } from '@/lib/sites/content-configuration';
 import { PostgresSitesBilling, reconcileBilledRelayGeneration } from '@/lib/billing/sites-generation';
-import { SITE_CONTENT_PROMPT } from '@/lib/billing/sites-content-route';
+import { conversationMessages } from '@/lib/sites/conversation-context';
 import { SiteDomainRegistry } from '@/lib/sites/domain-registry';
 import { managedDomainPlan } from '@/lib/sites/managed-hosting';
 import { includedSitesConfiguration } from '@/lib/sites/included-configuration';
@@ -32,10 +32,8 @@ const handle = sitesWorkspaceRoute({
   prepare: async (owner, signal) => {
     const config = includedSitesConfiguration();
     const generate = await config.prepare(owner);
-    return { generate: (operation,brief,document) => generate({ operationId: operation,requestedModel: config.model,signal,
-        messages: [{ role:'system',content:SITE_CONTENT_PROMPT },
-          ...(document ? [{ role:'user' as const,content:`Current draft (content only): ${JSON.stringify(document)}. Apply the next requested changes and return the complete revised document.` }] : []),
-          { role:'user',content:brief }] }) };
+    return { generate: (operation,brief,document,context) => generate({ operationId: operation,requestedModel: config.model,signal,
+        messages: conversationMessages(brief,context || {document,notes:'',summary:'',messages:[],intent:'build'}) }) };
   },
   recover: async (owner, operation, signal, mode) => {
     if(mode==='included'){const c=includedSitesConfiguration();return recoverIncludedGeneration(c.store,owner,operation,c.relay,signal);}

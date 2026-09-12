@@ -42,6 +42,8 @@ settlement; availability depends on account eligibility.
 Eligible Site workflows can receive a stable [Site address](docs/SITE_ADDRESSES.md)
 such as `my-product.alice.galx.ai`, with readiness reported separately from content generation.
 
+Sites supports continuing conversations with Build and Discuss, persistent project notes, and draft version history. See the [Sites guide](docs/SITES_WORKSPACE.md).
+
 ## Documentation
 
 - [API documentation](https://galx.ai/docs)
