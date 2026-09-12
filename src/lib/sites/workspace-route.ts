@@ -100,6 +100,7 @@ export function sitesWorkspaceRoute(deps: WorkspaceDependencies) {
         messages:current.messages.filter(m=>(m.turn || 0)>(current.context_start_turn || 0)),intent};
       conversationMessages(brief,context); // Validate the complete input before reserving this turn.
       const prepared = await deps.prepare(owner,request.signal);
+      context.recalled=await repo.recall(owner,body.id,body.revision,brief);
       const row = await repo.begin(owner,body.id,body.revision,body.operationId,brief,intent);
       try { return await finish(body.operationId,await prepared.generate(`${body.id}:${body.operationId}`,brief,row.document,context),intent); }
       catch (error) {

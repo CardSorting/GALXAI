@@ -1,7 +1,7 @@
 /** Public Sites workspace contracts. No provider or operational fields belong here. */
 export interface SiteDocument { schema_version: 1; title: string; summary: string; sections: { heading: string; body: string }[]; }
 export type SiteIntent = 'build' | 'discuss';
-export interface SiteMessage { id: string; role: 'user' | 'assistant'; text: string; turn?: number; status?: 'pending' | 'completed' | 'failed'; version?: number | null; createdAt?: string; }
+export interface SiteMessage { id: string; role: 'user' | 'assistant'; text: string; turn?: number; status?: 'pending' | 'completed' | 'failed'; version?: number | null; createdAt?: string; intent?:SiteIntent; }
 export interface WorkspaceSite {
   id: string; title: string; revision: number; updatedAt: string; document: SiteDocument | null;
   messages: SiteMessage[]; generating: boolean; archived: boolean; published: boolean;
@@ -49,10 +49,11 @@ export function readSiteMessage(m: any): SiteMessage {
   if (!m || typeof m.id !== 'string' || m.id.length > 100 || !['user','assistant'].includes(m.role) || typeof m.text !== 'string' || m.text.length > 2000 ||
     (m.turn !== undefined && (!Number.isSafeInteger(m.turn) || m.turn < 1)) ||
     (m.status !== undefined && !['pending','completed','failed'].includes(m.status)) ||
+    (m.intent !== undefined && !['build','discuss'].includes(m.intent)) ||
     (m.version !== undefined && m.version !== null && (!Number.isSafeInteger(m.version) || m.version < 1)) ||
     (m.createdAt !== undefined && (typeof m.createdAt !== 'string' || !Number.isFinite(Date.parse(m.createdAt))))) throw new Error('Invalid message');
   return { id:m.id,role:m.role,text:m.text,...(m.turn!==undefined?{turn:m.turn}:{}),...(m.status?{status:m.status}:{}),
-    ...(m.version!==undefined?{version:m.version}:{}),...(m.createdAt?{createdAt:m.createdAt}:{}) };
+    ...(m.version!==undefined?{version:m.version}:{}),...(m.createdAt?{createdAt:m.createdAt}:{}),...(m.intent?{intent:m.intent}:{}) };
 }
 export function readSiteSummary(input: unknown): SiteSummary {
   const {document: _document,messages: _messages,context: _context,historyCursor: _cursor,...summary} = readWorkspaceSite({...(input as object),document:null,messages:[],context:{notes:'',summary:''},historyCursor:null});

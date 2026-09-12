@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { Pool } from 'pg';
 import { SitesWorkspaceRepository } from '../src/lib/sites/workspace-repository';
+import { SitesContextCache } from '../src/lib/sites/hybrid-context';
 import { SiteDomainRegistry } from '../src/lib/sites/domain-registry';
 import { managedDomainPlan } from '../src/lib/sites/managed-hosting';
 const pool=new Pool({connectionString:process.env.GALX_INTEGRATION_DATABASE_URL,max:12,connectionTimeoutMillis:2000});
@@ -61,11 +62,30 @@ try{
   checks++;assert.equal(long.turn_count,105);assert.equal(long.messages.length,80);assert.equal(long.history_cursor,66);assert.equal(long.context_summary,'Rolling decision 105');assert.equal(long.project_notes,'Audience: neighborhood families.');checks++;
   const all=[];let cursor:number|undefined;do{const page=await repo.history(owner,longId,cursor);all.unshift(...page.messages);cursor=page.cursor || undefined;}while(cursor);
   assert.equal(all.length,210);assert.equal(all[0].text,'Request 1');assert.equal(all.at(-1)?.text,'Reply 105');assert.equal(new Set(all.map(m=>m.id)).size,210);checks++;
-  await assert.rejects(repo.begin(owner,longId,long.revision,firstOp,'Replayed after truncation'));assert.equal((await repo.turn(owner,longId,firstOp))?.user_text,'Request 1');checks++;
+  const hybridMigration=readFileSync(new URL('../supabase/migrations/20260912071633_sites_hybrid_context_search.sql',import.meta.url),'utf8');
+  await pool.query(hybridMigration);await pool.query(hybridMigration);checks++;
+  await pool.query("UPDATE private.galx_site_turns SET user_text='Cedar launch budget is 100. Keep this decision.' WHERE user_id=$1 AND site_id=$2 AND sequence=1",[owner,longId]);
+  const recalled=await repo.recall(owner,longId,long.revision,'What was the Cedar budget?');assert.equal(recalled[0].turn,1);assert.equal(recalled.length,2);checks++;
+  await assert.rejects(repo.recall(other,longId,long.revision,'Cedar'));await assert.rejects(repo.recall(owner,longId,long.revision-1,'Cedar'));checks++;
+  const copied=await repo.recall(owner,longId,long.revision,'Cedar');copied[0].text='Poisoned';assert.match((await repo.recall(owner,longId,long.revision,'Cedar'))[0].text,/Cedar launch/);checks++;
+  // Warm reads still verify ownership in SQL; only the committed history page is cached.
+  let historyReads=0;const countingPool={connect:async()=>{const db=await pool.connect();return new Proxy(db,{get(target,key){if(key==='query')return async(...args:any[])=>{
+    if(typeof args[0]==='string'&&args[0].includes('ORDER BY sequence DESC LIMIT 41'))historyReads++;
+    return (target.query as any)(...args);};const value=(target as any)[key];return typeof value==='function'?value.bind(target):value;}});}};
+  const cached=new SitesWorkspaceRepository(countingPool,new SitesContextCache());const cold=await cached.get(owner,longId);const reads=historyReads;
+  assert.deepEqual(await cached.get(owner,longId),cold);assert.equal(historyReads,reads);await assert.rejects(cached.get(other,longId));checks++;
+  const unavailableCache=new SitesContextCache();unavailableCache.get=()=>{throw new Error('L1 unavailable');};unavailableCache.put=()=>{throw new Error('L1 unavailable');};
+  assert.deepEqual((await new SitesWorkspaceRepository(pool,unavailableCache).get(owner,longId)).messages,long.messages);checks++;
+  const pendingRecall=randomUUID();await repo.begin(owner,longId,long.revision,pendingRecall,'Cedar pending proposal','discuss');await assert.rejects(repo.recall(owner,longId,long.revision,'Cedar'));checks++;
+  long=await repo.finish(owner,longId,pendingRecall,null,'Cedar failed proposal',null,true);assert(!(await repo.recall(owner,longId,long.revision,'Cedar')).some(m=>m.text.includes('failed proposal')));checks++;
+  // Keep the original long-session counts for the established restoration assertions below.
+  const restoreTurnCount=long.turn_count || 0;
+  await assert.rejects(repo.begin(owner,longId,long.revision,firstOp,'Replayed after truncation'));assert.equal((await repo.turn(owner,longId,firstOp))?.user_text,'Cedar launch budget is 100. Keep this decision.');checks++;
   const versions=await repo.versions(owner,longId);assert.equal(versions.versions.length,20);assert(versions.cursor);assert.equal(versions.versions[0].version,53);checks++;
   const domain=await domains.reserve(owner,longId,'workspace-test','Long conversation');const domainPlan=managedDomainPlan(domain.hostname,longId,'example.vercel-dns-017.com');
   long=await repo.publish(owner,longId,long.revision,domainPlan);const live=await repo.published(domain.hostname);assert.equal(long.published_version,53);checks++;
-  long=await repo.restore(owner,longId,long.revision,1);assert.equal(long.document_version,54);assert.equal(long.document?.summary,'Revision 1');assert.equal(long.context_summary,'Rolling decision 1');assert.equal(long.context_start_turn,106);assert.equal(long.turn_count,106);assert.equal(long.published_version,53);assert.deepEqual(await repo.published(domain.hostname),live);assert.equal(long.project_notes,'Audience: neighborhood families.');checks++;
+  long=await repo.restore(owner,longId,long.revision,1);assert.equal(long.document_version,54);assert.equal(long.document?.summary,'Revision 1');assert.equal(long.context_summary,'Rolling decision 1');assert.equal(long.context_start_turn,restoreTurnCount+1);assert.equal(long.turn_count,restoreTurnCount+1);assert.equal(long.published_version,53);assert.deepEqual(await repo.published(domain.hostname),live);assert.equal(long.project_notes,'Audience: neighborhood families.');checks++;
+  assert.deepEqual(await repo.recall(owner,longId,long.revision,'Cedar'),[]);assert.equal((await cached.get(owner,longId)).context_start_turn,long.context_start_turn);checks++;
   const restored=await repo.version(owner,longId,54);assert.deepEqual(restored.document,(await repo.version(owner,longId,1)).document);checks++;
   const discuss=randomUUID();await repo.begin(owner,longId,long.revision,discuss,'Explain the restored decision','discuss');
   await assert.rejects(repo.restore(owner,longId,long.revision,2));await assert.rejects(repo.update(owner,longId,long.revision,{notes:'While pending'}));checks++;
@@ -81,5 +101,7 @@ try{
   await pool.query(sessions);assert.equal((await repo.get(owner,longId)).document_version,54);assert.equal((await repo.get(owner,longId)).context_summary,'Same context');checks++;
   const down=readFileSync(new URL('../supabase/rollbacks/20260912060747_sites_conversation_sessions.down.sql',import.meta.url),'utf8');await pool.query(down);
   assert.deepEqual((await repo.get(owner,longId)).document,long.document);assert.equal((await repo.versions(owner,longId)).versions[0].version,54);checks++;
+  await pool.query(readFileSync(new URL('../supabase/rollbacks/20260912071633_sites_hybrid_context_search.down.sql',import.meta.url),'utf8'));
+  assert.equal((await repo.get(owner,longId)).document_version,54);assert.deepEqual(await repo.recall(owner,longId,long.revision,'Cedar'),[]);checks++;
   console.log(JSON.stringify({checks,failed:0,scope:'disposable PostgreSQL only'}));
 }finally{await pool.end();}

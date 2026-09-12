@@ -258,6 +258,7 @@ The validator checks complete coverage, scope markers, local links and ADR ident
 | [ADR 0140: Paid Sites and shared fair usage](adr/0140-paid-sites-and-shared-fair-usage.md) | `adr/0140-paid-sites-and-shared-fair-usage.md` |
 | [ADR 0141: Sites Pro self-service launch](adr/0141-sites-pro-self-service-launch.md) | `adr/0141-sites-pro-self-service-launch.md` |
 | [ADR 0142: Continuous Sites conversations](adr/0142-continuous-sites-conversations.md) | `adr/0142-continuous-sites-conversations.md` |
+| [ADR 0143: Hybrid Sites memory and full-page review](adr/0143-hybrid-sites-memory-and-review.md) | `adr/0143-hybrid-sites-memory-and-review.md` |
 
 ## Operational records
 

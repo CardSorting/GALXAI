@@ -155,3 +155,4 @@ Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) f
 | 0140 | [ADR 0140: Paid Sites and shared fair usage](0140-paid-sites-and-shared-fair-usage.md) | Paid-plan inclusion, shared admission and original-operation recovery |
 | 0141 | [ADR 0141: Sites Pro self-service launch](0141-sites-pro-self-service-launch.md) | Verified Pro checkout, cancellation and explicit initial limits |
 | 0142 | [ADR 0142: Continuous Sites conversations](0142-continuous-sites-conversations.md) | Durable turns, rolling context, Build/Discuss and recoverable draft versions |
+| 0143 | [ADR 0143: Hybrid Sites memory and full-page review](0143-hybrid-sites-memory-and-review.md) | Authoritative hybrid recall, complete turns, resilient drafts and content comparison |

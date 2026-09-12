@@ -1,6 +1,7 @@
 import type { Pool, PoolClient } from 'pg';
 import { readSiteDocument, readSiteMessage, type SiteDocument, type SiteMessage, type SiteIntent, type WorkspaceSite, type SiteSummary } from './workspace-contract';
 import { type DomainPlan, siteHostname } from './domains';
+import { recallQuery, sitesContextCache, type SitesContextCache } from './hybrid-context';
 export class WorkspaceError extends Error { constructor(readonly status = 503) { super('site_unavailable'); } }
 export interface WorkspaceRow { id: string; user_id: string; title: string; revision: number; document: SiteDocument | null; messages: SiteMessage[];
   published_document?: SiteDocument | null; published_revision?: number | null;
@@ -22,7 +23,7 @@ export function workspaceSummary(row: WorkspaceRow): SiteSummary {
 const joined = `SELECT w.*,d.hostname,d.status AS domain_status FROM private.galx_site_workspaces w
   LEFT JOIN private.galx_site_domains d ON d.user_id=w.user_id AND d.project_id=w.id::text`;
 export class SitesWorkspaceRepository {
-  constructor(private readonly pool: Pick<Pool,'connect'>) {}
+  constructor(private readonly pool: Pick<Pool,'connect'>,private readonly cache:SitesContextCache=sitesContextCache) {}
   private async tx<T>(run: (db: PoolClient) => Promise<T>): Promise<T> {
     const db = await this.pool.connect(); let broken = false;
     try { await db.query('BEGIN'); await db.query("SET LOCAL statement_timeout='5s'; SET LOCAL lock_timeout='3s'");
@@ -40,7 +41,7 @@ export class SitesWorkspaceRepository {
       WHERE user_id=$1 AND site_id=$2 AND ($3::int IS NULL OR sequence<$3) ORDER BY sequence DESC LIMIT 41`,[owner,id,before ?? null])).rows;
     const page=rows.slice(0,40).reverse(),messages:SiteMessage[]=[];
     for(const t of page){
-      const common={turn:t.sequence,status:t.state,createdAt:t.created_at.toISOString()};
+      const common={turn:t.sequence,status:t.state,createdAt:t.created_at.toISOString(),...(['build','discuss'].includes(t.intent)?{intent:t.intent as SiteIntent}:{})};
       if(t.user_text!==null)messages.push({id:`${t.operation_id}:user`,role:'user',text:t.user_text,...common});
       if(t.assistant_text!==null)messages.push({id:`${t.operation_id}:assistant`,role:'assistant',text:t.assistant_text,...common,version:t.document_version});
     }
@@ -95,7 +96,44 @@ export class SitesWorkspaceRepository {
       WHERE d.hostname=$1 AND d.plan->>'kind'='managed' AND w.published_document IS NOT NULL`,[hostname])).rows[0]?.published_document));
   }
   async get(owner: string, id: string) {
-    return this.tx(async db => this.hydrate(db,await this.locked(db,owner,id)));
+    const result=await this.tx(async db => {
+      const row=await this.locked(db,owner,id),key=this.cache.key(row,'recent');
+      let page:{messages:SiteMessage[];cursor:number|null}|undefined;
+      try{page=this.cache.get(key);}catch{/* Cache failure falls through to the durable record. */}
+      page ||= await this.historyPage(db,owner,id);
+      return {key,page,row:{...row,messages:page.messages,history_cursor:page.cursor}};
+    });
+    // Publish only after COMMIT. A rolled-back or uncertain transaction never enters L1.
+    try{this.cache.put(result.key,result.page);}catch{/* The committed database result remains usable. */}
+    return result.row;
+  }
+  async recall(owner:string,id:string,revision:number,brief:string):Promise<SiteMessage[]> {
+    const result=await this.tx(async db=>{
+      const row=await this.locked(db,owner,id);
+      if(row.revision!==revision || row.operation_id || row.archived)throw new WorkspaceError(409);
+      const query=recallQuery(brief),key=this.cache.key(row,'recall',query);
+      let messages:SiteMessage[]|undefined;
+      try{messages=this.cache.get(key);}catch{}
+      if(!messages){
+        messages=[];
+        if(query && (row.turn_count || 0)>(row.context_start_turn || 0)+6){
+          const rows=(await db.query<TurnRow>(`SELECT sequence,operation_id,intent,user_text,assistant_text,state,document_version,created_at
+            FROM private.galx_site_turns WHERE user_id=$1 AND site_id=$2 AND sequence>$3 AND sequence<=$4
+            AND state='completed' AND user_text IS NOT NULL AND assistant_text IS NOT NULL
+            AND to_tsvector('simple',coalesce(user_text,'') || ' ' || coalesce(assistant_text,'')) @@ websearch_to_tsquery('simple',$5)
+            ORDER BY ts_rank_cd(to_tsvector('simple',coalesce(user_text,'') || ' ' || coalesce(assistant_text,'')),websearch_to_tsquery('simple',$5)) DESC,sequence DESC LIMIT 8`,
+          [owner,id,row.context_start_turn || 0,(row.turn_count || 0)-6,query])).rows;
+          for(const turn of rows){
+            const common={turn:turn.sequence,status:'completed' as const};
+            messages.push({id:`${turn.operation_id}:user`,role:'user',text:turn.user_text!,...common},
+              {id:`${turn.operation_id}:assistant`,role:'assistant',text:turn.assistant_text!,...common});
+          }
+        }
+      }
+      return {key,messages};
+    });
+    try{this.cache.put(result.key,result.messages);}catch{}
+    return result.messages;
   }
   async create(owner: string, id: string, title: string) {
     return this.tx(async db => {

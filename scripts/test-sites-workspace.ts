@@ -15,7 +15,7 @@ const row=():WorkspaceRow=>({id,user_id:'alice',title:'Daylight',revision:0,docu
 function fixture(){
   let current=row(),dispatches=0,reads=0,mode='ok';
   const repo={get:async(owner:string,site:string)=>{reads++;if(owner!==current.user_id||site!==id)throw new WorkspaceError(404);return current;},
-    turn:async()=>null,list:async(owner:string)=>owner===current.user_id?[current]:[],username:async()=>null,
+    recall:async()=>[],turn:async()=>null,list:async(owner:string)=>owner===current.user_id?[current]:[],username:async()=>null,
     begin:async(owner:string,site:string,revision:number,op:string,brief:string)=>{await repo.get(owner,site);if(current.operation_id||revision!==current.revision)throw new WorkspaceError(409);current={...current,operation_id:op,operation_brief:brief,operation_started_at:new Date()};return current;},
     finish:async(_owner:string,_id:string,op:string,doc:any,message:string)=>{if(current.operation_id===op)current={...current,document:doc||current.document,operation_id:null,operation_brief:null,operation_started_at:null,revision:current.revision+1,messages:[{id:op,role:'assistant',text:message}]};return current;},
     create:async()=>current,update:async()=>current};
@@ -61,4 +61,10 @@ test('public hostname delivery strips caller authority and routing headers, and 
   for(const bad of [()=>new Response('private failure',{status:500}),()=>new Response('x'.repeat(65537),{headers:{'Content-Type':'text/html; charset=utf-8'}}),()=>new Response('private',{headers:{'Content-Type':'application/json'}})]){
     const denied=await publishedSiteProxy(request,'app.alice.galx.ai',async()=>bad());assert.equal(denied.status,404);assert.equal(await denied.text(),'Site unavailable.');
   }
+});
+
+test('section navigation remains within the sandboxed preview and within downloaded pages',()=>{
+  const embedded=renderSitePreview(document,true),standalone=renderSitePreview(document);
+  assert(embedded.includes('href="about:srcdoc#site-section-1"'));assert(standalone.includes('href="#site-section-1"'));
+  assert(!standalone.includes('about:srcdoc'));assert(!embedded.includes('<script'));assert(embedded.includes("base-uri 'none'"));
 });
