@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -56,7 +57,7 @@ function sanitizeScopes(rawScopes: unknown): string[] {
  * GET /api/keys/[id]
  * Retrieves full metadata for an individual API key
  */
-export async function GET(
+async function previewGET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -120,7 +121,7 @@ export async function GET(
  * PATCH /api/keys/[id]
  * Updates an individual key's settings (label, rate limits, scopes, IP whitelist, expiration)
  */
-export async function PATCH(
+async function previewPATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -199,7 +200,7 @@ export async function PATCH(
  * DELETE /api/keys/[id]
  * Revokes an individual key immediately
  */
-export async function DELETE(
+async function previewDELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -242,3 +243,7 @@ export async function DELETE(
     return NextResponse.json({ error: err.message || 'Failed to revoke key' }, { status: 500 });
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);
+export const PATCH = withDeveloperAccess(previewPATCH);
+export const DELETE = withDeveloperAccess(previewDELETE);

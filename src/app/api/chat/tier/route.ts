@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxSeatTierEngine } from '@/core/subscription/GalxSeatTierEngine';
@@ -21,7 +22,7 @@ export async function OPTIONS() {
  * GET /api/chat/tier
  * Returns caller's active seat tier entitlement, allowed models, remaining compute credits, and spend cap status.
  */
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
@@ -88,3 +89,5 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);

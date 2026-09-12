@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   ChatRepository,
@@ -30,7 +31,7 @@ function routeError(error: unknown, fallback: string): NextResponse {
  * GET /api/chat/sessions
  * Fetch all chat sessions for the authenticated user
  */
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
@@ -51,7 +52,7 @@ export async function GET(req: NextRequest) {
  * POST /api/chat/sessions
  * Create, update, pin, or rename a chat session
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
@@ -110,7 +111,7 @@ export async function POST(req: NextRequest) {
  * DELETE /api/chat/sessions?id=session_123&hardDelete=true
  * Delete or archive (which deletes) a chat conversation
  */
-export async function DELETE(req: NextRequest) {
+async function previewDELETE(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
@@ -134,3 +135,7 @@ export async function DELETE(req: NextRequest) {
     return routeError(error, 'Failed to delete session.');
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);
+export const POST = withDeveloperAccess(previewPOST);
+export const DELETE = withDeveloperAccess(previewDELETE);

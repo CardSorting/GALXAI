@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxOAuthManager } from '@/core/auth/GalxOAuthManager';
 import { GalxModelRouter } from '@/core/router/GalxModelRouter';
@@ -21,7 +22,7 @@ export async function OPTIONS() {
  * Standard RFC 8628 OAuth 2.0 Device Token Polling Endpoint.
  * Resolves authorization_pending, slow_down, expired_token, access_denied, or issued credentials.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     let deviceCode = '';
     let grantType = '';
@@ -83,3 +84,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 /**
  * GALXAI Enterprise Forensic Audit Batch Ingestion Endpoint
  * 
@@ -31,7 +32,7 @@ export interface IngestedTraceItem {
   status?: number;
 }
 
-export async function GET() {
+async function previewGET() {
   return NextResponse.json({
     status: 'healthy',
     service: 'galxai-forensic-ingest-engine',
@@ -42,7 +43,7 @@ export async function GET() {
   });
 }
 
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const authHeader = req.headers.get('authorization') || req.headers.get('x-api-key') || '';
     if (!authHeader && process.env.NODE_ENV === 'production') {
@@ -218,3 +219,6 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);
+export const POST = withDeveloperAccess(previewPOST);

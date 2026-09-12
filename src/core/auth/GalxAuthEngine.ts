@@ -837,7 +837,8 @@ export class GalxAuthEngine {
    */
   async resolveAuthIdentity(
     req: Request | { headers?: Headers | Record<string, string | null | undefined>; url?: string; nextUrl?: { searchParams?: URLSearchParams } },
-    requiredScope?: string
+    requiredScope?: string,
+    options: { countRequest?: boolean } = {}
   ): Promise<AuthIdentityResult> {
     let rawAuth = '';
 
@@ -989,7 +990,8 @@ export class GalxAuthEngine {
 
       const validation = await this.persistence.apiKeyRepo.validateGatewayKey(token, {
         requiredScope,
-        clientIp
+        clientIp,
+        countRequest: options.countRequest,
       });
 
       if (validation.valid && validation.key) {

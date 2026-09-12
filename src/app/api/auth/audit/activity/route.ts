@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
@@ -21,7 +22,7 @@ export async function OPTIONS() {
  * GET /api/auth/audit/activity
  * Returns humanized user authentication and security activity history.
  */
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const auth = await authEngine.resolveAuthIdentity(req);
@@ -85,3 +86,5 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);

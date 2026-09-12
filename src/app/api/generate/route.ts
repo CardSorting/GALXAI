@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -23,7 +24,7 @@ export async function OPTIONS() {
  * Native Ollama-Compatible POST /api/generate Endpoint.
  * Allows OpenWebUI, Continue.dev, Ollama CLI, and Aider to connect directly to GALXAI.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
@@ -188,7 +189,7 @@ export async function POST(req: NextRequest) {
  * Universal GET /api/generate Endpoint.
  * Allows instant browser address bar queries: /api/generate?prompt=Hello&model=sol
  */
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   const url = new URL(req.url);
   const prompt = url.searchParams.get('prompt') || url.searchParams.get('q') || url.searchParams.get('input') || 'Hello';
   const model = url.searchParams.get('model') || 'gpt-5.6-sol';
@@ -200,5 +201,8 @@ export async function GET(req: NextRequest) {
     body: JSON.stringify({ model, prompt, stream })
   });
 
-  return POST(syntheticReq);
+  return previewPOST(syntheticReq);
 }
+
+export const POST = withDeveloperAccess(previewPOST);
+export const GET = withDeveloperAccess(previewGET);

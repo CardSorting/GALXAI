@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { EmbeddingsRepository } from '@/lib/supabase/repositories/EmbeddingsRepository';
@@ -21,7 +22,7 @@ export async function OPTIONS() {
 /**
  * Universal OpenAI-Compatible POST /v1/embeddings Endpoint.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
@@ -72,3 +73,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { POST as generateImage } from '@/app/v1/images/generations/route';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxTaskQueueEngine } from '@/core/queue/GalxTaskQueueEngine';
@@ -26,7 +27,7 @@ export async function OPTIONS() {
  * POST /api/run
  * Body: { prompt: string, model?: string, type?: 'chat' | 'image' | 'workflow', background?: boolean }
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const body = await req.clone().json().catch(() => ({}));
     if (body.type === 'image') {
@@ -127,3 +128,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: safeError }, { status: 500 });
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

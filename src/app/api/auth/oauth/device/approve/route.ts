@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxOAuthManager } from '@/core/auth/GalxOAuthManager';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -21,7 +22,7 @@ export async function OPTIONS() {
 /**
  * Endpoint to approve an RFC 8628 Device Authorization code from the browser.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     const userCode = (body.userCode || body.user_code || '').trim();
@@ -84,3 +85,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

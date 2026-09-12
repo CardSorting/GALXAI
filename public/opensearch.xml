@@ -1,9 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
-  <ShortName>GALXAI</ShortName>
-  <Description>Search GALXAI AI Model Catalog, Pricing and Specs</Description>
-  <InputEncoding>UTF-8</InputEncoding>
-  <Image width="32" height="32" type="image/png">https://galx.ai/icon.png</Image>
-  <Url type="text/html" template="https://galx.ai/models?q={searchTerms}"/>
-  <Url type="application/x-suggestions+json" template="https://galx.ai/api/models/suggestions?q={searchTerms}"/>
-</OpenSearchDescription>
+<?xml version="1.0" encoding="UTF-8"?><OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/"><ShortName>GALX</ShortName><Description>Create images and build sites with GALX</Description><Url type="text/html" template="https://galx.ai/images?q={searchTerms}" /></OpenSearchDescription>

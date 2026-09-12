@@ -1,3 +1,5 @@
+> **Developer API private preview:** Sign up and request access at [galx.ai/developers](https://galx.ai/developers). Developer endpoints require individual approval, including for existing keys. Images and Sites remain available without preview approval.
+
 # GALXAI
 
 <!-- docs-scope: current-guide -->

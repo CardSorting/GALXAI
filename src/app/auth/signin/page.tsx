@@ -133,7 +133,7 @@ function SignInContent() {
               href={DEFAULT_POST_AUTH_PATH}
               className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-colors"
             >
-              Browse Models
+              Create images
             </Link>
           </div>
         </div>
@@ -176,17 +176,17 @@ function SignInContent() {
                     href={DEFAULT_POST_AUTH_PATH}
                     className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-cyan-400 via-indigo-400 to-cyan-500 hover:from-cyan-300 hover:to-indigo-300 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2 group cursor-pointer"
                   >
-                    <span>Browse Available Models</span>
+                    <span>Create images</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                   </Link>
                 )}
 
                 <div className="grid grid-cols-2 gap-2 text-xs font-semibold font-mono">
                   <Link
-                    href="/teams/seats"
+                    href="/sites"
                     className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-amber-300 transition-all text-center"
                   >
-                    Teams &amp; Seats
+                    Sites
                   </Link>
                   <Link
                     href="/billing"
@@ -195,16 +195,16 @@ function SignInContent() {
                     Compute Wallet
                   </Link>
                   <Link
-                    href="/keys"
+                    href="/developers"
                     className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-300 transition-all text-center"
                   >
-                    API Keys
+                    Developer preview
                   </Link>
                   <Link
-                    href="/keys"
+                    href="/developers"
                     className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-cyan-300 transition-all text-center"
                   >
-                    Telemetry
+                    Access status
                   </Link>
                 </div>
 
@@ -230,7 +230,7 @@ function SignInContent() {
                   Welcome to GALX AI
                 </h1>
                 <p className="text-xs text-zinc-400">
-                  Sign in to manage API keys, billing, telemetry, and image workloads.
+                  Sign in to create images, build sites, or check your developer preview request.
                 </p>
               </div>
 

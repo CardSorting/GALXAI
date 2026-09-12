@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxOAuthManager } from '@/core/auth/GalxOAuthManager';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -53,7 +54,7 @@ function sanitizeRedirectUrl(returnTo: string | null, baseReqUrl: string): URL {
  * atomically consumes authorization requests to eliminate replays, exchanges tokens, vaults credentials,
  * sets HTTP-only session cookie, and redirects to destination.
  */
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const code = searchParams.get('code');
@@ -178,7 +179,7 @@ export async function GET(req: NextRequest) {
  * vaults tokens in hardware-grade AES-256-GCM envelope, links identity in BroccoliDB/Supabase,
  * provisions an isolated credential partition, and returns a signed JWE-grade session bearer token.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     let {
@@ -292,3 +293,6 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);
+export const POST = withDeveloperAccess(previewPOST);

@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 
@@ -20,7 +21,7 @@ export async function OPTIONS() {
  * GET /api/auth/security/posture
  * Returns the comprehensive user security posture, overall health grade, risk metrics, and recommendations.
  */
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const auth = await authEngine.resolveAuthIdentity(req);
@@ -47,3 +48,5 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);

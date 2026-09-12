@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { galxSOC2 } from '@/core/compliance/GalxSOC2AuditEngine';
 
@@ -5,7 +6,7 @@ export const runtime = 'nodejs';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   try {
     const oscal = galxSOC2.generateOSCALAssessmentReport();
     return NextResponse.json(oscal, {
@@ -23,3 +24,5 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);

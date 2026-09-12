@@ -1,0 +1,448 @@
+{
+  "checkedAt": "2026-09-12T23:15:52.309Z",
+  "site": "https://galxai-8fo2lo59t-cardsortings-projects.vercel.app",
+  "checkGateway": false,
+  "migrations": [
+    "20260912215724",
+    "20260912222003"
+  ],
+  "tables": [
+    {
+      "relname": "developer_access_requests",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true,
+      "anon_access": false,
+      "browser_access": false
+    },
+    {
+      "relname": "developer_preview_feedback",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true,
+      "anon_access": false,
+      "browser_access": false
+    },
+    {
+      "relname": "preview_admin_audit",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true,
+      "anon_access": false,
+      "browser_access": false
+    },
+    {
+      "relname": "preview_admin_members",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true,
+      "anon_access": false,
+      "browser_access": false
+    }
+  ],
+  "roster": {
+    "owners": 0,
+    "activeOwners": 0
+  },
+  "scriptsScanned": 27,
+  "results": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/developers",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/images",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/sites",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/pricing",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/auth/signin?next=%2Fadmin",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/auth/signup?next=%2Fdevelopers",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/1255-306db9f231b54263.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/main-app-0ee650784ad95c4e.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/44530001-a26648c04669f22e.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/2619-04bc32f026a0d946.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/9711-b33ff40726bb9ab2.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/5380-ad2e13b1db7680e9.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/6152-44eaa1baa2fecf7e.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/2601-6da062d7e82ee955.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/layout-e1a9bd23a7125442.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/647-392e8768d2516830.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/error-a76085031cfc9735.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/page-c79077b6a224ad64.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/global-error-6c4bdd755108c191.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/not-found-38bfd095ee4bd26a.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/polyfills-42372ed130431b0a.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/webpack-97d3e85edd1b31dc.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/developers/page-50d93a58515675af.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/5145-e6c299a6c8917041.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/images/page-c970ff799a6e4703.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/5755-ad22c3cd2c0a9f91.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/4129-2ebc6ce12504b716.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/sites/page-d6b42719740cea0a.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/pricing/page-c79077b6a224ad64.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/pricing/error-8048920cedb3102d.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/auth/signin/page-79a297d4cc539883.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/app/auth/signup/page-a45260a5129179ca.js",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/chat/completions",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/messages",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/messages",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/embeddings",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/embeddings",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/models",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/models",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/models/model.png",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/models/model.png",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chat",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/api/run",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "POST",
+      "path": "/api/run",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/api/keys",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "POST",
+      "path": "/api/keys",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/api/new-endpoint",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "POST",
+      "path": "/api/new-endpoint",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/preview?view=requests",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/preview?view=requests",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/preview?view=staff",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/preview?view=staff",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/api/developer-access",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "POST",
+      "path": "/api/developer-access",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "POST",
+      "path": "/api/developer-access/check",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/admin",
+      "status": 307,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/models",
+      "status": 307,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/docs",
+      "status": 307,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/keys",
+      "status": 307,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/llms-full.txt",
+      "status": 307,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/api/openapi.json",
+      "status": 200,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/images/generations",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    },
+    {
+      "method": "GET",
+      "path": "/api/sites/workspace",
+      "status": 401,
+      "host": "galxai-8fo2lo59t-cardsortings-projects.vercel.app"
+    }
+  ]
+}

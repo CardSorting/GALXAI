@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
@@ -29,7 +30,7 @@ export async function OPTIONS() {
  * 2. Optionally sets a grace period on the previous key (e.g. 24 hours) or revokes it immediately.
  * 3. Returns the new secret token exactly once.
  */
-export async function POST(
+async function previewPOST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -143,3 +144,5 @@ export async function POST(
     return NextResponse.json({ error: err.message || 'Failed to roll API key' }, { status: 500 });
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

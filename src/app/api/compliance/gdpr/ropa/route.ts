@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { galxPrivacy } from '@/core/privacy/GalxPrivacyComplianceEngine';
 
@@ -5,7 +6,7 @@ export const runtime = 'nodejs';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   try {
     const ropa = galxPrivacy.generateRoPAReport();
     return NextResponse.json(ropa, {
@@ -23,3 +24,5 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);

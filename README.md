@@ -1,3 +1,5 @@
+> **Developer API private preview:** Sign up and request access at [galx.ai/developers](https://galx.ai/developers). Developer endpoints require individual approval, including for existing keys. Images and Sites remain available without preview approval.
+
 # GALXAI
 
 GALX provides text and image generation APIs, model discovery, API keys, and usage controls.

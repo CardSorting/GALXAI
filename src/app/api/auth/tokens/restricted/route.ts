@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 
@@ -20,7 +21,7 @@ export async function OPTIONS() {
  * POST /api/auth/tokens/restricted
  * Mints an Ephemeral Scoped Sub-Token (Stripe / AWS STS Pattern) for subagents or microservices.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const authHeader = req.headers.get('authorization') || '';
     const token = authHeader.replace(/^Bearer\s+/i, '').trim();
@@ -71,3 +72,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextResponse } from 'next/server';
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 
@@ -7,7 +8,7 @@ export const dynamic = 'force-dynamic';
  * IndexNow Search Engine Indexation Dispatcher
  * Submits updated URLs to the IndexNow protocol (supported by Bing, Yandex, Seznam, Naver).
  */
-export async function POST(req: Request) {
+async function previewPOST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
     const urls: string[] = body.urls || [SITE_CONFIG.url];
@@ -49,7 +50,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET() {
+async function previewGET() {
   return NextResponse.json({
     protocol: 'IndexNow & Search Console Dispatcher',
     host: new URL(SITE_CONFIG.url).hostname,
@@ -57,3 +58,6 @@ export async function GET() {
     status: 'active',
   });
 }
+
+export const POST = withDeveloperAccess(previewPOST);
+export const GET = withDeveloperAccess(previewGET);

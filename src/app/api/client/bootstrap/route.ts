@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextResponse } from 'next/server';
 import {
   GALX_AGENT_PROTOCOL_VERSION,
@@ -7,7 +8,7 @@ import {
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export async function GET() {
+async function previewGET() {
   const deploymentId = process.env.VERCEL_DEPLOYMENT_ID || process.env.VERCEL_GIT_COMMIT_SHA;
   const payload: GalxAgentBootstrap = {
     protocolVersion: GALX_AGENT_PROTOCOL_VERSION,
@@ -36,3 +37,5 @@ export async function GET() {
     },
   });
 }
+
+export const GET = withDeveloperAccess(previewGET);

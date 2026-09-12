@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { OAuthRepository } from '@/lib/supabase/repositories/OAuthRepository';
@@ -22,7 +23,7 @@ export async function OPTIONS() {
  * GET /api/auth/identities
  * Returns all active OAuth provider identities linked to the authenticated user.
  */
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const identity = await authEngine.resolveAuthIdentity(req);
@@ -69,7 +70,7 @@ export async function GET(req: NextRequest) {
  * DELETE /api/auth/identities?provider=openai
  * Unlinks / disconnects an OAuth provider identity from the authenticated user.
  */
-export async function DELETE(req: NextRequest) {
+async function previewDELETE(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const identity = await authEngine.resolveAuthIdentity(req);
@@ -107,3 +108,6 @@ export async function DELETE(req: NextRequest) {
     );
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);
+export const DELETE = withDeveloperAccess(previewDELETE);

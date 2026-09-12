@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { galxPrivacy } from '@/core/privacy/GalxPrivacyComplianceEngine';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -21,7 +22,7 @@ export async function OPTIONS() {
  * GDPR Article 17: Right to Erasure ("Right to be Forgotten").
  * Permanently and cryptographically wipes all user sessions, API keys, credentials, and anonymizes audit logs.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
@@ -58,3 +59,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

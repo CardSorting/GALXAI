@@ -33,7 +33,7 @@ test('signup errors and exceptions never become fabricated users or leaked diagn
 });
 test('auth destinations reject external, encoded, backslash, control-character and malformed redirects',()=>{
   for (const value of ['https://evil.test','//evil.test','/\\evil.test','/%5cevil.test','/%2fevil.test','/%252fevil.test','/%25252fevil.test','/%25255cevil.test','/\nevil.test','/%0aevil.test','javascript:alert(1)','/%ZZ']) {
-    assert.equal(safeAuthRedirect(value),'/models',value);
+    assert.equal(safeAuthRedirect(value),'/images',value);
   }
   assert.equal(safeAuthRedirect('/images?draft=1'),'/images?draft=1');
 });

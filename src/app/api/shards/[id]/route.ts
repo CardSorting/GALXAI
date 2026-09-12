@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -15,7 +16,7 @@ export async function OPTIONS() {
   });
 }
 
-export async function PATCH() {
+async function previewPATCH() {
   return NextResponse.json(
     {
       error: 'Direct partition mutation is deprecated. Infrastructure routing is sovereign and managed at the gateway layer.',
@@ -25,7 +26,7 @@ export async function PATCH() {
   );
 }
 
-export async function DELETE() {
+async function previewDELETE() {
   return NextResponse.json(
     {
       error: 'Direct partition deletion is deprecated. Infrastructure routing is sovereign and managed at the gateway layer.',
@@ -34,3 +35,6 @@ export async function DELETE() {
     { status: 410, headers: { 'Access-Control-Allow-Origin': '*' } }
   );
 }
+
+export const PATCH = withDeveloperAccess(previewPATCH);
+export const DELETE = withDeveloperAccess(previewDELETE);

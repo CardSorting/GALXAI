@@ -2,6 +2,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/utils/supabase/middleware";
 import { SITE_CONFIG } from "@/lib/seo/siteConfig";
 import { publishedSiteProxy } from '@/lib/sites/published-proxy';
+import { previewMiddleware } from '@/lib/security/preview-middleware';
+import { isPublicProductPath } from '@/lib/security/preview-policy';
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -9,6 +11,18 @@ export async function middleware(request: NextRequest) {
   if (/^[a-z0-9-]+\.[a-z0-9-]+\.galx\.ai$/.test(host)) {
     if (!['GET','HEAD'].includes(request.method) || pathname !== '/') return new NextResponse('Site unavailable.',{status:404,headers:{'Cache-Control':'private, no-store'}});
     return publishedSiteProxy(request,host);
+  }
+  const previewDenied = await previewMiddleware(request);
+  if (previewDenied) return previewDenied;
+  // The broad matcher protects private page assets too. Public static assets
+  // must not refresh a signed-in user's session once per font/image/script.
+  if (pathname.startsWith('/_next/') || /\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|eot|css|js|map)$/.test(pathname)) {
+    const response = NextResponse.next();
+    if (/^\/_next\/static\/chunks\/app\/admin\//.test(pathname)) {
+      response.headers.set('Cache-Control', 'private, no-store');
+      response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    }
+    return response;
   }
   // This endpoint authenticates its machine credential in the handler. Keep its
   // response allowlist intact for every caller, including crawlers and cookies.
@@ -76,8 +90,7 @@ export async function middleware(request: NextRequest) {
     if (isGoogleCrawler) {
       return new NextResponse(
         JSON.stringify({
-          error: 'Access Denied. Search engine and data crawlers are strictly quarantined from internal training substrates.',
-          status: 'crawler_quarantine_active',
+          error: { code: 'access_denied', message: 'Access denied.' },
         }),
         {
           status: 403,
@@ -92,20 +105,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return await updateSession(request);
+  const response = await updateSession(request);
+  if (!isPublicProductPath(pathname)) {
+    response.headers.set('Cache-Control', 'private, no-store');
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  }
+  return response;
 }
 
-export const config = {
-  matcher: [
-    { source: '/:path*', has: [{ type: 'host', value: '[a-z0-9-]+\\.[a-z0-9-]+\\.galx\\.ai' }] },
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico, favicon.svg (favicon files)
-     * - robots.txt, sitemap.xml, feed.xml, manifest.webmanifest, opensearch.xml
-     * - public assets & static font/image extensions
-     */
-    "/((?!_next/static|_next/image|favicon\\.ico|favicon\\.svg|robots\\.txt|sitemap\\.xml|feed\\.xml|manifest\\.webmanifest|opensearch\\.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|eot|css|js|map)$).*)",
-  ],
-};
+export const config = { runtime: 'nodejs', matcher: ['/:path*'] };

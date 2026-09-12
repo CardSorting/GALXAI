@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-09-12T23:28:05.847598Z",
+  "environment": "production",
+  "userId": "a58fa68f-3545-4235-9825-807431813081",
+  "role": "owner",
+  "revision": 1,
+  "verifiedAccountBound": true,
+  "staffCount": 1,
+  "activeOwnerCount": 1,
+  "provisionedAt": "2026-09-12T23:27:57.803888Z",
+  "auditId": "3c96e623-90ca-4f60-84c8-13e28fdf2ebc",
+  "auditAction": "bootstrap",
+  "auditedRole": "owner",
+  "authorization": "Founder supplied the exact account ID for admin access.",
+  "verification": "Read back the committed membership joined to the verified eligible Auth account and bootstrap audit event.",
+  "ownerBrowserSignInTested": false
+}

@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxModelRouter } from '@/core/router/GalxModelRouter';
@@ -21,7 +22,7 @@ export async function OPTIONS() {
  * 1-Click OpenAI SSO / PKCE & Vault Registration ("Provider IS Auth").
  * Issues HMAC-SHA256 signed bearer session tokens and synchronizes session state with Supabase PostgreSQL.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     const {
@@ -83,3 +84,5 @@ export async function POST(req: NextRequest) {
   }
 }
 
+
+export const POST = withDeveloperAccess(previewPOST);

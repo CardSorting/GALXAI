@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import * as crypto from 'node:crypto';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -122,7 +123,7 @@ export async function OPTIONS() {
  * - Substrate Credential Partition Provisioning in Hybrid BroccoliDB and Supabase.
  * - JWE Encrypted Bearer Session Token Issuance.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   const startTime = performance.now();
   const correlationId = req.headers.get('x-correlation-id') || `corr_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`;
 
@@ -512,3 +513,5 @@ export async function POST(req: NextRequest) {
     inFlightIngestions--;
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

@@ -6,7 +6,6 @@
 
 import { BroccoliResilienceSubstrate } from './BroccoliResilienceSubstrate';
 import { BroccoliOutboxEngine } from './BroccoliOutboxEngine';
-import { BroccoliOmniSearch } from './BroccoliOmniSearch';
 import { SafeStorage } from './SafeStorage';
 
 export interface SnapshotHeader {
@@ -102,7 +101,13 @@ class BroccoliSnapshotEngineImpl {
       const circuits = [...substrate.circuitTable.getAll()];
       const incidents = [...substrate.incidentTable.getAll()];
       const outbox = [...BroccoliOutboxEngine.getPendingMutations()];
-      const recentNav = [...BroccoliOmniSearch.getRecentVisits(20)];
+      // Snapshot stored navigation without bundling the private developer search
+      // catalogue into every public product page.
+      let recentNav: unknown[] = [];
+      try {
+        const saved = JSON.parse(SafeStorage.getItem('galx_recent_nav_v1') || '[]');
+        if (Array.isArray(saved)) recentNav = saved.slice(0, 20);
+      } catch { /* Navigation history is optional; preserve the remaining snapshot. */ }
 
       const tablesData = {
         cache,

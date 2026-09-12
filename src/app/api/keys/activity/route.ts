@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { AccountIdentityError, requireAccountIdentity } from '@/lib/auth/accountIdentity';
 import { getPostgresPool } from '@/lib/db/postgres';
@@ -6,7 +7,7 @@ import { KeyActivityError, readKeyActivity } from '@/lib/keys/activity';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   let db;
   try {
     const actor = await requireAccountIdentity(req);
@@ -25,3 +26,5 @@ export async function GET(req: NextRequest) {
       { status: expected ? error.status : 503, headers: { 'Cache-Control': 'private, no-store' } });
   } finally { db?.release(); }
 }
+
+export const GET = withDeveloperAccess(previewGET);

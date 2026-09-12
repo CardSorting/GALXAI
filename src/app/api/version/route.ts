@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -16,7 +17,7 @@ export async function OPTIONS() {
 /**
  * Native Ollama-Compatible GET /api/version Endpoint.
  */
-export async function GET() {
+async function previewGET() {
   return NextResponse.json(
     { version: '0.5.12-galxai-gateway' },
     {
@@ -26,3 +27,5 @@ export async function GET() {
     }
   );
 }
+
+export const GET = withDeveloperAccess(previewGET);

@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
@@ -66,10 +67,13 @@ async function handleVerify(req: NextRequest) {
   });
 }
 
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   return handleVerify(req);
 }
 
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   return handleVerify(req);
 }
+
+export const GET = withDeveloperAccess(previewGET);
+export const POST = withDeveloperAccess(previewPOST);

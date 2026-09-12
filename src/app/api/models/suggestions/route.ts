@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextResponse } from 'next/server';
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
@@ -27,7 +28,7 @@ interface SuggestionItem {
  * Supports both OpenSearch JSON array specification: [query, [titles], [descriptions], [urls]]
  * and modern developer JSON schema: { query, total, suggestions: [...] }
  */
-export async function GET(req: Request) {
+async function previewGET(req: Request) {
   const { searchParams } = new URL(req.url);
   const rawQuery = searchParams.get('q') || searchParams.get('query') || '';
   const query = rawQuery.trim().toLowerCase();
@@ -262,3 +263,5 @@ export async function GET(req: Request) {
     },
   });
 }
+
+export const GET = withDeveloperAccess(previewGET);

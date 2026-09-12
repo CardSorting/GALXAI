@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
@@ -49,7 +50,7 @@ export async function OPTIONS() {
  * Native Ollama & Universal Chat POST /api/chat Endpoint.
  * Ingests Ollama messages format and streaming NDJSON chunks, governed by Seat Tier.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   let acquiredRequest: {
     userId: string;
     requestId: string;
@@ -645,3 +646,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

@@ -4,13 +4,20 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Search, ArrowRight, Sparkles } from 'lucide-react';
-import { BroccoliOmniSearch, OmniSearchItem } from '@/lib/resilience/BroccoliOmniSearch';
+import { recordRecentVisit } from '@/lib/resilience/recent-navigation';
+
+const publicPages = [
+  { id: 'images', title: 'Images', href: '/images', category: 'Product', description: 'Create images from a prompt.' },
+  { id: 'sites', title: 'Sites', href: '/sites', category: 'Product', description: 'Build and publish a website.' },
+  { id: 'developers', title: 'Developer preview', href: '/developers', category: 'Access', description: 'Request API access and check your waitlist status.' },
+  { id: 'billing', title: 'Account and billing', href: '/billing', category: 'Account', description: 'Your credits, plan and payments.' },
+];
 
 export function NotFoundSearchHelper() {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const results: OmniSearchItem[] = useMemo(() => (query.trim() ? BroccoliOmniSearch.search(query, 4) : []), [query]);
+  const results = useMemo(() => query.trim() ? publicPages.filter(item => `${item.title} ${item.description}`.toLowerCase().includes(query.trim().toLowerCase())) : [], [query]);
 
   useEffect(() => {
     setSelectedIndex(0);
@@ -21,7 +28,6 @@ export function NotFoundSearchHelper() {
     if (results.length > 0 && results[selectedIndex]) {
       try {
         router.prefetch(results[selectedIndex].href);
-        BroccoliOmniSearch.prefetchRoute(results[selectedIndex].href);
       } catch {}
     }
   }, [selectedIndex, results, router]);
@@ -39,7 +45,7 @@ export function NotFoundSearchHelper() {
       e.preventDefault();
       const selected = results[selectedIndex];
       if (selected) {
-        BroccoliOmniSearch.recordVisit(selected.title, selected.href, selected.category);
+        recordRecentVisit(selected.title, selected.href, selected.category);
         router.push(selected.href);
       }
     }
@@ -54,9 +60,9 @@ export function NotFoundSearchHelper() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Type what you're looking for (e.g. 'api keys', 'pricing', 'deposit')..."
+          placeholder="Find Images, Sites, or developer access…"
           className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-black/60 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all font-sans"
-          aria-label="404 Smart Search Recovery"
+          aria-label="Find a page"
         />
       </div>
 
@@ -65,7 +71,7 @@ export function NotFoundSearchHelper() {
           <div className="px-2 py-1 text-[10px] font-mono text-cyan-400 flex items-center justify-between font-bold">
             <div className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              <span>INSTANT SMART MATCHES</span>
+              <span>PAGES</span>
             </div>
             <span className="text-[10px] text-zinc-500 font-normal">Use ↑ ↓ ↵</span>
           </div>
@@ -78,9 +84,8 @@ export function NotFoundSearchHelper() {
                 onMouseEnter={() => {
                   setSelectedIndex(index);
                   router.prefetch(item.href);
-                  BroccoliOmniSearch.prefetchRoute(item.href);
                 }}
-                onClick={() => BroccoliOmniSearch.recordVisit(item.title, item.href, item.category)}
+                onClick={() => recordRecentVisit(item.title, item.href, item.category)}
                 className={`flex items-center justify-between p-2 rounded-xl text-xs transition-all group border ${
                   isSelected
                     ? 'bg-white/15 border-cyan-500/40 text-white shadow-sm'

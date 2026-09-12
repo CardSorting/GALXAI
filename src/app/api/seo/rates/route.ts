@@ -1,13 +1,13 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextResponse } from 'next/server';
 import { FRONTEND_VISIBLE_MODELS } from '@/core/router/ModelCatalog';
 import { SITE_CONFIG } from '@/lib/seo/siteConfig';
 
 export const runtime = 'nodejs';
 
-export const dynamic = 'force-static';
-export const revalidate = 3600; // 1 hour
+export const dynamic = 'force-dynamic';
 
-export async function GET() {
+async function previewGET() {
   const modelRates = FRONTEND_VISIBLE_MODELS.map((m) => {
     const contextK = Math.round(m.contextWindowTokens / 1000);
     const cachedInput = m.cachedInputPricePer1M ?? m.inputPricePer1M * 0.25;
@@ -56,3 +56,5 @@ export async function GET() {
     }
   );
 }
+
+export const GET = withDeveloperAccess(previewGET);

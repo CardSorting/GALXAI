@@ -31,6 +31,8 @@ interface UserWatermark {
 export interface KeyValidationContext {
   requiredScope?: string;
   clientIp?: string;
+  /** Server-only authorization probes must not consume a billable request or rate slot. */
+  countRequest?: boolean;
 }
 
 export interface KeyValidationResult {
@@ -286,7 +288,9 @@ export class ApiKeyRepository {
     }
 
     // 5. In-Memory Rolling Rate Limit check
-    const rateCheck = this.checkRateLimit(key);
+    const rateCheck = context.countRequest === false
+      ? { allowed: true, remaining: undefined, resetMs: undefined }
+      : this.checkRateLimit(key);
     if (!rateCheck.allowed) {
       return {
         valid: false,
@@ -311,7 +315,7 @@ export class ApiKeyRepository {
     }
 
     // Increment usage asynchronously via coalesced write-behind
-    this.incrementUsage(key.id, 1, 0, 0).catch(() => {});
+    if (context.countRequest !== false) this.incrementUsage(key.id, 1, 0, 0).catch(() => {});
 
     return {
       valid: true,

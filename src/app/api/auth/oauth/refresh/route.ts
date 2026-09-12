@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxModelRouter } from '@/core/router/GalxModelRouter';
@@ -24,7 +25,7 @@ export async function OPTIONS() {
  * POST /api/auth/oauth/refresh
  * Triggers single-flight token refresh for the specified or current user's provider connection.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const auth = await authEngine.resolveAuthIdentity(req);
@@ -103,3 +104,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

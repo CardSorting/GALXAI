@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest } from 'next/server';
 import {
   GET as compactGet,
@@ -13,13 +14,16 @@ export async function OPTIONS() {
   return compactOptions();
 }
 
-export async function GET() {
-  return compactGet();
+async function previewGET(req: NextRequest) {
+  return compactGet(req);
 }
 
 /**
  * Top-Level Gateway Alias for BroccoliDB Compaction (/api/broccolidb/compact -> /api/audit/broccolidb/compact)
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   return compactPost(req);
 }
+
+export const GET = withDeveloperAccess(previewGET);
+export const POST = withDeveloperAccess(previewPOST);

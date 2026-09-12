@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
 
@@ -18,7 +19,7 @@ export async function OPTIONS() {
 /**
  * Native Ollama-Compatible POST /api/show Endpoint.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const body = (await req.json().catch(() => ({}))) as any;
     const modelName = body.name || body.model || 'gpt-5.6-sol';
@@ -53,3 +54,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err.message || 'Error showing model' }, { status: 500 });
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

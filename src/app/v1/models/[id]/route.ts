@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
 
@@ -21,7 +22,7 @@ export async function OPTIONS() {
  * Universal OpenAI-Compatible GET /v1/models/[id] Endpoint.
  * Ingests canonical model IDs or fuzzy aliases.
  */
-export async function GET(
+async function previewGET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -70,3 +71,5 @@ export async function GET(
     }
   });
 }
+
+export const GET = withDeveloperAccess(previewGET);

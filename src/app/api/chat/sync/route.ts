@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   ChatRepository,
@@ -35,7 +36,7 @@ function routeError(error: unknown, fallback: string): NextResponse {
  * World-Class Keyset Delta Sync with ETag Caching (HTTP 304 Fast-Path)
  * Returns 304 Not Modified with 0-byte body if client state is fresh, or single-hop delta payload.
  */
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
@@ -95,7 +96,7 @@ export async function GET(req: NextRequest) {
  * 1-Hop Atomic Bundle Sync:
  * Batches session updates, message streams, or deletions into a single network & database roundtrip.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
@@ -149,3 +150,6 @@ export async function POST(req: NextRequest) {
     return routeError(error, 'Failed to synchronize chat bundle.');
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);
+export const POST = withDeveloperAccess(previewPOST);

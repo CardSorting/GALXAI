@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxOAuthManager } from '@/core/auth/GalxOAuthManager';
 import type { ProviderType } from '@/core/contracts/GalxContracts';
@@ -21,7 +22,7 @@ export async function OPTIONS() {
  * GET /api/auth/oauth/url
  * Generates RFC 7636 PKCE Authorization URL with S256 Code Challenge for 1-Click Provider Login.
  */
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const provider = (searchParams.get('provider') as ProviderType) || 'openai';
@@ -65,3 +66,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);

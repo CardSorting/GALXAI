@@ -5,10 +5,13 @@ import { GET, POST, PATCH, DELETE } from '../src/app/api/keys/route';
 import { GalxAuthEngine } from '../src/core/auth/GalxAuthEngine';
 import { ApiKeyRepository } from '../src/lib/supabase/repositories/ApiKeyRepository';
 import { GalxPersistence } from '../src/lib/storage/GalxPersistence';
+import { DeveloperAccessRepository } from '../src/lib/supabase/repositories/DeveloperAccessRepository';
 import { randomUUID } from 'node:crypto';
 
 test('keys cannot impersonate another account, invent paid status, mint credits, or leak private failures',async()=>{
   const original = [GalxAuthEngine.getInstance,ApiKeyRepository.getInstance,GalxPersistence.getInstance];
+  const originalPreviewGet = DeveloperAccessRepository.prototype.isApproved;
+  DeveloperAccessRepository.prototype.isApproved = async () => true;
   const previousUrl = process.env.DATABASE_URL, previousPool = globalThis.__galx_pg_pool;
   const sentinel = 'private-diagnostic-sentinel';
   let authenticated = false, failure = false, paid = false, owner = 'other', saves = 0, cacheWrites = 0;
@@ -18,7 +21,7 @@ test('keys cannot impersonate another account, invent paid status, mint credits,
   });
   process.env.DATABASE_URL='postgresql://unused-local-fixture';
   globalThis.__galx_pg_pool={query:async()=>({rows:[{id:'00000000-0000-4000-8000-000000000001',user_id:'owner',balance_usd:5,proof_of_deposit_verified:paid,deposited_total_usd:paid?25:0}]})} as any;
-  GalxAuthEngine.getInstance=()=>({verifySession:async()=>({valid:authenticated,claims:{sub:'owner',email:'owner@example.test',scopes:['admin:*']}})}) as any;
+  GalxAuthEngine.getInstance=()=>({resolveAuthIdentity:async()=>({authenticated,userId:'owner'}),verifySession:async()=>({valid:authenticated,claims:{sub:'owner',email:'owner@example.test',scopes:['admin:*']}})}) as any;
   ApiKeyRepository.getInstance=()=>({getUserKeysETag:async()=> 'etag',getGatewayKeys:async()=>[key],getGatewayKeyById:async()=>({...key,userId:owner}),
     saveGatewayKey:async(value: any,options: any)=>{assert.equal(options.requireRemote,true); if(failure) throw new Error(sentinel); assert.equal(value.userId,'owner'); if(!paid) assert.equal(value.rateLimitPerMinute,60); saves++;},
     revokeKey:async()=>{saves++;},
@@ -53,6 +56,7 @@ test('keys cannot impersonate another account, invent paid status, mint credits,
     assert.equal((await POST(req('POST',{name:'Paid',rateLimitPerMinute:120}))).status,200);
     assert.equal((await DELETE(req('DELETE',undefined,'?id=key-fixture'))).status,200);
   } finally {
+    DeveloperAccessRepository.prototype.isApproved = originalPreviewGet;
     [GalxAuthEngine.getInstance,ApiKeyRepository.getInstance,GalxPersistence.getInstance]=original as any;
     globalThis.__galx_pg_pool=previousPool;
     if(previousUrl===undefined) delete process.env.DATABASE_URL; else process.env.DATABASE_URL=previousUrl;

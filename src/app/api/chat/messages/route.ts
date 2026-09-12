@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   ChatRepository,
@@ -29,7 +30,7 @@ function routeError(error: unknown, fallback: string): NextResponse {
  * GET /api/chat/messages?sessionId=session_123
  * Retrieve messages for a given chat session
  */
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
@@ -60,7 +61,7 @@ export async function GET(req: NextRequest) {
  * POST /api/chat/messages
  * Batch save/sync messages for a given chat session
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
@@ -84,3 +85,6 @@ export async function POST(req: NextRequest) {
     return routeError(error, 'Failed to save messages.');
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);
+export const POST = withDeveloperAccess(previewPOST);

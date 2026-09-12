@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { galxPrivacy } from '@/core/privacy/GalxPrivacyComplianceEngine';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -21,7 +22,7 @@ export async function OPTIONS() {
  * GDPR Article 15 (Right of Access) & CCPA § 1798.110 DSAR Data Export.
  * Compiles all non-ephemeral records for authenticated tenant or requested userId.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
@@ -60,3 +61,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

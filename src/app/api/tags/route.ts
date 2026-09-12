@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextResponse } from 'next/server';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
 
@@ -20,7 +21,7 @@ export async function OPTIONS() {
  * Native Ollama-Compatible GET /api/tags Endpoint.
  * Returns supported models formatted as Ollama tags.
  */
-export async function GET() {
+async function previewGET() {
   const models = ModelCatalog.getSupportedModels().map(m => ({
     name: `${m.id}:latest`,
     model: `${m.id}:latest`,
@@ -46,3 +47,5 @@ export async function GET() {
     }
   );
 }
+
+export const GET = withDeveloperAccess(previewGET);

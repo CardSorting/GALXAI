@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxTrainingStreamEngine } from '@/core/training/GalxTrainingStreamEngine';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -5,7 +6,7 @@ import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
@@ -92,3 +93,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 import { GalxCryptoVault } from '@/core/vault/GalxCryptoVault';
@@ -80,7 +81,7 @@ function sanitizeScopes(rawScopes: unknown): string[] {
  * GET /api/keys
  * Lists all active and historical developer API keys for the authenticated user
  */
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const requestedUserId = searchParams.get('userId') || undefined;
@@ -161,7 +162,7 @@ export async function GET(req: NextRequest) {
  * POST /api/keys
  * Mints a new developer gateway key with SHA-256 hash and embedded checksum
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     const {
@@ -270,7 +271,7 @@ export async function POST(req: NextRequest) {
  * PATCH /api/keys
  * Updates key metadata (name, rate limits, scopes, IP whitelisting)
  */
-export async function PATCH(req: NextRequest) {
+async function previewPATCH(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     const { id: keyId, name, rateLimitPerMinute, scopes, defaultCompactionMode } = body;
@@ -328,7 +329,7 @@ export async function PATCH(req: NextRequest) {
  * DELETE /api/keys
  * Instantly revokes a developer API key
  */
-export async function DELETE(req: NextRequest) {
+async function previewDELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const keyId = searchParams.get('id');
@@ -360,3 +361,8 @@ export async function DELETE(req: NextRequest) {
     return keyFailure(error);
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);
+export const POST = withDeveloperAccess(previewPOST);
+export const PATCH = withDeveloperAccess(previewPATCH);
+export const DELETE = withDeveloperAccess(previewDELETE);

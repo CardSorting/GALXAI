@@ -53,6 +53,23 @@ export type GalxIdempotencyState = 'IN_FLIGHT' | 'COMMITTED' | 'FAILED';
 export interface Database {
   private: {
     Tables: {
+      developer_access_requests: {
+        Row: { user_id: string; email: string; use_case: string; expected_traffic: string; status: 'pending' | 'approved' | 'revoked' | 'declined'; revision: number; expires_at: string | null; requested_at: string; reviewed_at: string | null; reviewed_by: string | null; last_feedback_at: string | null };
+        Insert: { user_id: string; email: string; use_case: string; expected_traffic: string };
+        Update: { status?: 'pending' | 'approved' | 'revoked' | 'declined'; revision?: number; expires_at?: string | null; reviewed_at?: string; reviewed_by?: string; last_feedback_at?: string }; Relationships: [];
+      };
+      developer_preview_feedback: {
+        Row: { id: string; user_id: string; message: string; created_at: string; resolved_at: string | null; resolved_by: string | null; revision: number };
+        Insert: { user_id: string; message: string }; Update: { resolved_at?: string | null; resolved_by?: string | null; revision?: number }; Relationships: [];
+      };
+      preview_admin_members: {
+        Row: { email: string; user_id: string | null; role: 'owner' | 'reviewer' | 'viewer'; revision: number; created_at: string; updated_at: string };
+        Insert: { email: string; role: 'owner' | 'reviewer' | 'viewer' }; Update: { user_id?: string; role?: 'owner' | 'reviewer' | 'viewer'; revision?: number; updated_at?: string }; Relationships: [];
+      };
+      preview_admin_audit: {
+        Row: { id: string; actor_id: string; actor_email: string; action: 'bootstrap' | 'staff_added' | 'staff_changed' | 'staff_removed' | 'staff_activated' | 'request_reviewed' | 'feedback_resolved' | 'feedback_reopened'; subject: string; previous_state: string | null; next_state: string | null; reason: string; expires_at: string | null; created_at: string };
+        Insert: { actor_id: string; actor_email: string; action: string; subject: string; previous_state?: string | null; next_state?: string | null; reason?: string; expires_at?: string | null }; Update: never; Relationships: [];
+      };
       galx_plan_checkouts: {
         Row: { user_id:string; request_id:string; price_id:string; customer_id:string|null; session_id:string|null; checkout_url:string|null; lease_token:string|null; lease_until:string|null; state:'pending'|'open'|'complete'|'expired'; created_at:string; expires_at:string };
         Insert: { user_id:string; request_id:string; price_id:string }; Update: { customer_id?:string; session_id?:string; checkout_url?:string; lease_token?:string|null; lease_until?:string|null; state?:'pending'|'open'|'complete'|'expired' }; Relationships: [];

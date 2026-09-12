@@ -1,3 +1,4 @@
+import { enforceDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
@@ -24,6 +25,8 @@ async function identity(req: NextRequest): Promise<SeatIdentity> {
 }
 
 async function handle(req: NextRequest, write: boolean) {
+  const denied = await enforceDeveloperAccess(req);
+  if (denied) return denied;
   let db;
   try {
     if (write && req.headers.get('origin') && req.headers.get('origin') !== req.nextUrl.origin) throw new SeatsError('Request origin is not allowed.', 403);

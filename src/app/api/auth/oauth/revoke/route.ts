@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 
@@ -21,7 +22,7 @@ export async function OPTIONS() {
  * Revokes active access tokens or refresh tokens and invalidates downstream caches.
  * According to RFC 7009 § 2.2, returns HTTP 200 even if the token was already invalid or revoked.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     let token = '';
 
@@ -65,3 +66,5 @@ export async function POST(req: NextRequest) {
     });
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

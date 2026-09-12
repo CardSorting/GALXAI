@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest } from 'next/server';
 import { POST as authIngestPost, OPTIONS as authIngestOptions } from '@/app/api/auth/ingest/route';
 
@@ -11,6 +12,8 @@ export async function OPTIONS() {
 /**
  * Top-Level Ingestion Gateway Alias (/api/ingest -> /api/auth/ingest).
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   return authIngestPost(req);
 }
+
+export const POST = withDeveloperAccess(previewPOST);

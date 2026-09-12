@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
@@ -58,7 +59,7 @@ export async function OPTIONS() {
  * Universal OpenAI-Compatible POST /v1/chat/completions Endpoint.
  * Governed seamlessly by sovereign Seat Subscription Tiers with zero frontend key leakage.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   let acquiredRequest: {
     userId: string;
     requestId: string;
@@ -957,7 +958,7 @@ export async function POST(req: NextRequest) {
  * Allows effortless testing in browser address bar or terminal cURL query params:
  * e.g. /v1/chat/completions?prompt=Hello&model=sol
  */
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   const url = new URL(req.url);
   const prompt = url.searchParams.get('prompt') || url.searchParams.get('q') || url.searchParams.get('message') || url.searchParams.get('input') || 'Hello GALXAI';
   const model = url.searchParams.get('model') || 'gpt-5.6-sol';
@@ -973,5 +974,8 @@ export async function GET(req: NextRequest) {
     })
   });
 
-  return POST(syntheticReq);
+  return previewPOST(syntheticReq);
 }
+
+export const POST = withDeveloperAccess(previewPOST);
+export const GET = withDeveloperAccess(previewGET);

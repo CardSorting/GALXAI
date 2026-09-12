@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -15,7 +16,7 @@ export async function OPTIONS() {
   });
 }
 
-export async function POST() {
+async function previewPOST() {
   return NextResponse.json(
     {
       error: 'Direct partition retraction is deprecated. Infrastructure routing is sovereign and managed at the gateway layer.',
@@ -24,3 +25,5 @@ export async function POST() {
     { status: 410, headers: { 'Access-Control-Allow-Origin': '*' } }
   );
 }
+
+export const POST = withDeveloperAccess(previewPOST);

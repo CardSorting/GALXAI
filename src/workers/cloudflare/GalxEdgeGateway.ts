@@ -160,6 +160,23 @@ export class GalxEdgeGateway {
       return this.errorResponse(authResult.status, authResult.code, authResult.message);
     }
 
+    // Check the same approval authority on every request, including cached keys.
+    // Image requests returned above retain their existing public-product contract.
+    try {
+      const access = await fetch('https://galx.ai/api/developer-access/check', {
+        method: 'POST', headers: { Authorization: `Bearer ${rawKey}` },
+        // Workers accepts manual/follow; manual keeps credentials on this exact destination.
+        redirect: 'manual', signal: AbortSignal.timeout(5000), cache: 'no-store',
+      });
+      if (!access.ok) {
+        await access.body?.cancel();
+        const status = access.status === 401 ? 401 : access.status === 403 ? 403 : 503;
+        return this.previewDenied(status);
+      }
+      const value = await access.json() as { approved?: unknown };
+      if (value.approved !== true) return this.previewDenied(503);
+    } catch { return this.previewDenied(503); }
+
     // 4. Rate Limiting Check via KV (Sliding Window)
     const isAllowed = await this.checkRateLimit(
       authResult.key.keyHash,
@@ -239,6 +256,16 @@ export class GalxEdgeGateway {
         }
       }
     );
+  }
+
+  private previewDenied(status: number): Response {
+    return new Response(JSON.stringify({ error: {
+      code: status === 403 ? 'developer_preview_required' : status === 401 ? 'authentication_required' : 'access_check_unavailable',
+      message: status === 403 ? 'The developer API is in private preview. Request access to join.' : status === 401 ? 'Use an approved account’s API key.' : 'We couldn’t check your access. Please try again.',
+    }, request_access_url: 'https://galx.ai/developers' }), { status, headers: {
+      'Content-Type': 'application/json', 'Cache-Control': 'private, no-store',
+      'Access-Control-Allow-Origin': '*', 'X-Robots-Tag': 'noindex, nofollow',
+    } });
   }
 
   private handleSingleModel(modelId: string): Response {
@@ -1045,8 +1072,10 @@ export class GalxEdgeGateway {
       const inputUrl = new URL(request.url);
       const path = inputUrl.pathname === '/images/generations' ? '/v1/images/generations' : inputUrl.pathname;
       const response = await fetch(`https://galx.ai${path}${inputUrl.search}`, {
-        method: request.method, headers, ...(request.method === 'POST' ? { body: await request.text() } : {}), redirect: 'error', signal: request.signal,
+        method: request.method, headers, ...(request.method === 'POST' ? { body: await request.text() } : {}), redirect: 'manual', signal: request.signal,
       });
+      // Do not follow or publish redirects: credentials and image data stay on the trusted site.
+      if (response.status >= 300 && response.status < 400) { await response.body?.cancel(); throw new Error('Image redirect rejected'); }
       if (!['image/png', 'image/jpeg', 'image/webp', 'application/json', 'text/event-stream'].includes(response.headers.get('content-type')?.split(';')[0] || '')) throw new Error('Invalid response');
       const publicHeaders = new Headers();
       for (const key of ['content-type', 'cache-control', 'x-content-type-options', 'x-request-id', 'retry-after', 'location', 'x-should-retry', 'access-control-allow-origin', 'access-control-expose-headers']) {

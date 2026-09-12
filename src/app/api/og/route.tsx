@@ -7,13 +7,13 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
 
-    const title = searchParams.get('title') || 'GALXAI — Universal AI Gateway';
+    const title = searchParams.get('title') || 'GALX — Images and Sites';
     const subtitle =
       searchParams.get('subtitle') ||
-      'Direct Wholesale Rates on OpenAI GPT-5.6 with 75% Prompt Caching.';
-    const badge = searchParams.get('badge') || '25%–40% WHOLESALE PASS';
+      'Create images and build sites. Developer API access is in private preview.';
+    const badge = searchParams.get('badge') || 'IMAGES & SITES';
     const price = searchParams.get('price');
-    const category = searchParams.get('category') || 'ENTERPRISE AI INFRASTRUCTURE';
+    const category = searchParams.get('category') || 'GALX';
 
     return new ImageResponse(
       (

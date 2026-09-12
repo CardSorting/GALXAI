@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { PRIMARY_KEY_VERSION } from '@/core/vault/GalxCryptoVault';
@@ -22,7 +23,7 @@ export async function OPTIONS() {
  * Administrative zero-downtime KMS key re-wrapping pipeline for stored credentials.
  * Requires active Step-Up SUDO mode.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const auth = await authEngine.resolveAuthIdentity(req, 'admin:sudo');
@@ -62,3 +63,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

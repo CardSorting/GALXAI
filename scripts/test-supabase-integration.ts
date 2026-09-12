@@ -503,9 +503,22 @@ async function runTests() {
       })
     });
 
-    const streamResp = await edgeGateway.handleRequest(streamReq);
+    // The synthetic transport fixture still crosses the real preview check. Supply
+    // only that boundary here; dedicated preview tests exercise denials and outages.
+    const originalFetch = globalThis.fetch;
+    let previewChecks = 0;
+    let streamResp: Response;
+    try {
+      globalThis.fetch = async (input, init) => {
+        const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+        if (url !== 'https://galx.ai/api/developer-access/check' || init?.method !== 'POST') return originalFetch(input, init);
+        previewChecks++;
+        return new Response('{"approved":true}', { headers: { 'content-type': 'application/json' } });
+      };
+      streamResp = await edgeGateway.handleRequest(streamReq);
+    } finally { globalThis.fetch = originalFetch; }
     assert(
-      streamResp.status === 200 && streamResp.headers.get('content-type')?.includes('text/event-stream') === true,
+      previewChecks === 1 && streamResp.status === 200 && streamResp.headers.get('content-type')?.includes('text/event-stream') === true,
       'Cloudflare Edge Gateway: Dispatches zero-egress SSE stream directly from global edge PoP'
     );
 

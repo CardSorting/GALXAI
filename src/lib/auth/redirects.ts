@@ -1,4 +1,4 @@
-export const DEFAULT_POST_AUTH_PATH = '/models';
+export const DEFAULT_POST_AUTH_PATH = '/images';
 
 /** Only accept a path within this application, including after URL decoding. */
 export function safeAuthRedirect(value: string | null | undefined): string {

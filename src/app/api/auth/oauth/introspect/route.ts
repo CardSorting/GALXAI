@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxOAuthManager } from '@/core/auth/GalxOAuthManager';
 import { GalxModelRouter } from '@/core/router/GalxModelRouter';
@@ -21,7 +22,7 @@ export async function OPTIONS() {
  * Standard RFC 7662 OAuth 2.0 Token Introspection Endpoint.
  * Resolves token validity, claims, scopes, and expiration in sub-milliseconds.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     let token = '';
 
@@ -70,3 +71,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

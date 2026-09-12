@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 import { galxZDR } from '@/core/privacy/GalxZDRProtocol';
@@ -20,7 +21,7 @@ export async function OPTIONS() {
  * GET /api/compliance/privacy/verify
  * Cryptographically verifies the unbroken SHA-256 chain of custody for all system audit logs.
  */
-export async function GET() {
+async function previewGET() {
   try {
     const persistence = GalxPersistence.getInstance();
     const verification = persistence.auditRepo.verifyAuditChainIntegrity();
@@ -46,7 +47,7 @@ export async function GET() {
  * POST /api/compliance/privacy/verify
  * Validates a client-provided ZDR session attestation proof.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const body = await req.json();
     const isValid = galxZDR.verifyZDRProof(body);
@@ -65,3 +66,6 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);
+export const POST = withDeveloperAccess(previewPOST);

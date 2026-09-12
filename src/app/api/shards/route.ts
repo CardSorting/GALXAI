@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -15,7 +16,7 @@ export async function OPTIONS() {
   });
 }
 
-export async function GET() {
+async function previewGET() {
   return NextResponse.json(
     {
       error: 'Direct partition inspection is deprecated. Infrastructure routing is sovereign and managed at the gateway layer.',
@@ -25,7 +26,7 @@ export async function GET() {
   );
 }
 
-export async function POST() {
+async function previewPOST() {
   return NextResponse.json(
     {
       error: 'Direct partition creation is deprecated. Infrastructure routing is sovereign and managed at the gateway layer.',
@@ -34,3 +35,6 @@ export async function POST() {
     { status: 410, headers: { 'Access-Control-Allow-Origin': '*' } }
   );
 }
+
+export const GET = withDeveloperAccess(previewGET);
+export const POST = withDeveloperAccess(previewPOST);

@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 /**
  * GALXAI BroccoliDB Authenticated Compaction API Endpoint
  * 
@@ -32,7 +33,7 @@ export async function OPTIONS() {
   });
 }
 
-export async function GET() {
+async function previewGET() {
   try {
     const metrics = BroccoliCompactionFacade.getMetrics();
     return NextResponse.json({
@@ -57,7 +58,7 @@ export async function GET() {
   }
 }
 
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     // 1. Authentication Check
     const authEngine = GalxAuthEngine.getInstance();
@@ -162,3 +163,6 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);
+export const POST = withDeveloperAccess(previewPOST);

@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxCommunityPoolGovernor } from '@/core/governor/GalxCommunityPoolGovernor';
@@ -22,7 +23,7 @@ export async function OPTIONS() {
  * GET /api/compute/pool
  * Returns real-time health metrics of the shared community compute pool and the user's monthly $30 free compute grant.
  */
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   try {
     const auth = await GalxAuthEngine.getInstance().resolveAuthIdentity(req);
     if (!auth.authenticated) return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: { 'Cache-Control': 'no-store' } });
@@ -47,3 +48,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Service unavailable' }, { status: 500 });
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);

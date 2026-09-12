@@ -9,11 +9,9 @@ import { SkipToContent } from "@/components/common/SkipToContent";
 import { AccessibilityAnnouncer } from "@/components/common/AccessibilityAnnouncer";
 import { Footer } from "@/components/dashboard/Footer";
 import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
-import { FloatingActionDock } from "@/components/common/FloatingActionDock";
-import { KeyboardShortcutsModal } from "@/components/common/KeyboardShortcutsModal";
 import { ClientResilienceProvider } from "@/components/common/ClientResilienceProvider";
 import { SITE_CONFIG } from "@/lib/seo/siteConfig";
-import { JsonLd, createOrganizationSchema, createWebSiteSchema } from "@/lib/seo/jsonld";
+import { JsonLd } from "@/lib/seo/jsonld";
 
 const fontSans = Inter({
   subsets: ["latin"],
@@ -87,14 +85,14 @@ export const metadata: Metadata = {
         url: `${SITE_CONFIG.url}${SITE_CONFIG.ogImage}`,
         width: 1200,
         height: 630,
-        alt: `${SITE_CONFIG.name} Universal AI Gateway`,
+        alt: `${SITE_CONFIG.name} Images and Sites`,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}`,
-    description: "One unified API for OpenAI GPT-5.6 models with automated failover and 25%–40% wholesale savings.",
+    description: "Create images and build sites with GALX. Developer API access is in private preview.",
     creator: SITE_CONFIG.twitterHandle,
     site: SITE_CONFIG.twitterHandle,
     images: [`${SITE_CONFIG.url}${SITE_CONFIG.ogImage}`],
@@ -124,13 +122,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const rootGraphSchema = {
-    "@context": "https://schema.org",
-    "@graph": [
-      createOrganizationSchema(),
-      createWebSiteSchema(),
-    ],
-  };
+  const rootGraphSchema = { '@context': 'https://schema.org', '@type': 'WebSite', name: 'GALX', url: SITE_CONFIG.url, description: SITE_CONFIG.description };
 
   return (
     <html lang="en" className={`dark ${fontSans.variable} ${fontMono.variable}`}>
@@ -139,14 +131,14 @@ export default function RootLayout({
         <link
           rel="search"
           type="application/opensearchdescription+xml"
-          title="GALXAI Model Search"
+          title="GALX"
           href="/opensearch.xml"
         />
         {/* RSS / Atom Feed Auto-Discovery */}
         <link
           rel="alternate"
           type="application/rss+xml"
-          title="GALXAI Model & Engine Updates"
+          title="GALX updates"
           href="/feed.xml"
         />
         {/* Network Resource Hints for Zero-Hesitation Connection Warm-Up */}
@@ -176,9 +168,7 @@ export default function RootLayout({
                     {children}
                     <Footer />
                   </div>
-                  <FloatingActionDock />
                   <MobileBottomNav />
-                  <KeyboardShortcutsModal />
                 </PersonaProvider>
               </AuthProvider>
             </LanguageProvider>

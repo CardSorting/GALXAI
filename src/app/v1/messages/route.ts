@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRouter, GalxModelRouter } from '@/core/router/GalxModelRouter';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -27,7 +28,7 @@ export async function OPTIONS() {
  * Allows Anthropic SDK, Claude Code, Windsurf, and Cursor to point directly to GALXAI.
  * Supports tool calling (input_schema <-> JSON Schema), thinking blocks, and SSE streaming.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
@@ -363,7 +364,7 @@ export async function POST(req: NextRequest) {
  * Allows instant testing of Anthropic-compatible endpoint via browser or URL query parameters:
  * e.g. /v1/messages?prompt=Hello&model=claude-3-7-sonnet
  */
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   const url = new URL(req.url);
   const prompt = url.searchParams.get('prompt') || url.searchParams.get('q') || url.searchParams.get('message') || url.searchParams.get('input') || 'Hello Claude';
   const model = url.searchParams.get('model') || 'claude-3-7-sonnet';
@@ -379,5 +380,8 @@ export async function GET(req: NextRequest) {
     })
   });
 
-  return POST(syntheticReq);
+  return previewPOST(syntheticReq);
 }
+
+export const POST = withDeveloperAccess(previewPOST);
+export const GET = withDeveloperAccess(previewGET);

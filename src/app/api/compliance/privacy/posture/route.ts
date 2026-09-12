@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { galxPrivacy } from '@/core/privacy/GalxPrivacyComplianceEngine';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -20,7 +21,7 @@ export async function OPTIONS() {
  * GET /api/compliance/privacy/posture
  * Returns real-time compliance posture, HIPAA BAA status, GDPR DPA state, ZDR verifications, and audit integrity status.
  */
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const authResult = await authEngine.resolveAuthIdentity(req);
@@ -46,3 +47,5 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);

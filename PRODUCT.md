@@ -24,6 +24,9 @@ The relay supplies inference transport with credential eligibility checks, bound
 
 ## Constraints & Invariants
 
+- Early-preview access policy (2026-09-12): Images and Sites are the public products. Other developer APIs and tools require verified signup, an individual waitlist request and manual approval. An existing API key or payment never grants preview approval. Admit participants gradually, collect private feedback and prioritize a trustworthy first experience.
+- Preview administration lives at `/admin` behind independent staff authorization. Owners manage staff; owners and reviewers manage participant access; viewers are read-only. Staff membership never follows from customer approval or editable account metadata. Use familiar inbox, role-management and activity-history patterns within the existing visual system. See [the private admin runbook](docs/operations/preview-admin.md).
+
 - The hosted product centers on models, API configuration, billing, telemetry, and governance. The image studio at `/images` also lets users generate images and manage their personal image library (explicitly restored at user request on 2026-09-10). Destination chat applications remain downstream. The Sites workspace at `/sites` also provides the expressly requested conversation-and-preview authoring surface for simple managed pages.
 - Successful authentication defaults to `/models`; explicit protected-route return destinations remain intact.
 - Retiring hosted creation UI must preserve inference APIs and SDK capabilities.

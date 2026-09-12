@@ -313,7 +313,13 @@
     "sites:fair": "node --env-file-if-exists=.env.local --import tsx scripts/manage-sites-fair-usage.ts",
     "test:sites:workspace": "node --import tsx --test scripts/test-sites-workspace.ts",
     "test:sites:workspace:db": "node --import tsx scripts/run-supabase-integration.ts --workspace",
-    "test:sites:conversation": "node --import tsx --test scripts/test-sites-conversation.ts scripts/test-sites-hybrid-context.ts"
+    "test:sites:conversation": "node --import tsx --test scripts/test-sites-conversation.ts scripts/test-sites-hybrid-context.ts",
+    "developer-preview": "node --env-file-if-exists=.env.local --import tsx scripts/manage-developer-preview.ts",
+    "test:developer-preview": "node --import tsx --test scripts/test-developer-preview.ts",
+    "test:preview-admin": "node --import tsx --test scripts/test-preview-admin.ts",
+    "test:preview-admin:ui": "node --import tsx scripts/run-supabase-integration.ts --admin-ui",
+    "test:preview-admin:db": "node --import tsx scripts/run-supabase-integration.ts --admin",
+    "test:developer-preview:db": "node --import tsx scripts/run-supabase-integration.ts --preview"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3",

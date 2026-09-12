@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 /**
  * GALXAI BroccoliDB Live Telemetry & Merkle Checkpoint API Endpoint
  * 
@@ -21,7 +22,7 @@ import { SpendAnomalyDetector } from '@/core/governance/SpendAnomalyDetector';
 
 export const runtime = 'nodejs';
 
-export async function GET() {
+async function previewGET() {
   try {
     const casStats = BroccoliPromptCASVault.getStorageSavingsStats();
     const cacheStats = SemanticEdgeCache.getStats();
@@ -79,7 +80,7 @@ export async function GET() {
   }
 }
 
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     const label = body.label || `checkpoint_${Date.now()}`;
@@ -107,3 +108,6 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);
+export const POST = withDeveloperAccess(previewPOST);

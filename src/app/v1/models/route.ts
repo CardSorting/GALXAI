@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { ModelCatalog } from '@/core/router/ModelCatalog';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
@@ -22,7 +23,7 @@ export async function OPTIONS() {
  * Universal OpenAI-Compatible GET /v1/models Endpoint.
  * Resolves caller Seat Tier to annotate tier model allowances and spend caps.
  */
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   const authEngine = GalxAuthEngine.getInstance();
   const authResult = await authEngine.resolveAuthIdentity(req);
 
@@ -105,3 +106,5 @@ export async function GET(req: NextRequest) {
     }
   );
 }
+
+export const GET = withDeveloperAccess(previewGET);

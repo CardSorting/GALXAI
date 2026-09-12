@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 
@@ -20,7 +21,7 @@ export async function OPTIONS() {
  * DELETE /api/auth/sessions/[id]
  * Revokes a specific remote session by session ID.
  */
-export async function DELETE(
+async function previewDELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -62,3 +63,5 @@ export async function DELETE(
     );
   }
 }
+
+export const DELETE = withDeveloperAccess(previewDELETE);

@@ -1,20 +1,7 @@
-import { PricingClient } from '@/components/pricing/PricingClient';
-import { PRICING_FAQS } from '@/lib/data/pricingSummary';
+import Link from 'next/link';
+import { Navigation } from '@/components/dashboard/Navigation';
 import { constructMetadata } from '@/lib/seo/metadata';
-import { JsonLd, createBreadcrumbSchema, createFAQPageSchema } from '@/lib/seo/jsonld';
-
-export const metadata = constructMetadata({
-  title: 'Pricing and plans',
-  description: 'Compare Solo, Team, and Enterprise plans. See model token rates, included seats, and how usage billing works.',
-  canonicalPath: '/pricing',
-});
-
+export const metadata = constructMetadata({ title: 'Products and access', description: 'Explore Images and Sites, or request access to the developer API private preview.', canonicalPath: '/pricing' });
 export default function PricingPage() {
-  return <>
-    <JsonLd data={{ '@context': 'https://schema.org', '@graph': [
-      createFAQPageSchema(PRICING_FAQS),
-      createBreadcrumbSchema([{ name: 'Home', url: '/models' }, { name: 'Pricing', url: '/pricing' }]),
-    ] }} />
-    <PricingClient />
-  </>;
+ return <><Navigation /><main className="mx-auto w-full max-w-4xl px-5 py-16"><h1 className="text-4xl font-semibold">Choose what you want to create.</h1><p className="mt-5 text-lg text-zinc-300">Images and Sites are open to explore. Sign in to see the available options and your account balance.</p><div className="mt-10 space-y-8"><section><h2 className="text-2xl font-semibold">Images</h2><p className="mt-2 text-zinc-300">Generate images from your prompts and keep your work in your library.</p><Link href="/images" className="mt-3 inline-flex min-h-11 items-center underline underline-offset-4">Open Images →</Link></section><section><h2 className="text-2xl font-semibold">Sites</h2><p className="mt-2 text-zinc-300">Describe your idea, refine your page, and publish when you’re ready. View available plans from your account.</p><Link href="/sites" className="mt-3 inline-flex min-h-11 items-center underline underline-offset-4">Open Sites →</Link></section><section className="border-t border-white/15 pt-8"><h2 className="text-2xl font-semibold">Developer API · Private preview</h2><p className="mt-2 text-zinc-300">Access is reviewed individually. Creating an account or purchasing credits does not grant developer API access.</p><Link href="/developers" className="mt-3 inline-flex min-h-11 items-center underline underline-offset-4">Request developer access →</Link></section></div></main></>;
 }

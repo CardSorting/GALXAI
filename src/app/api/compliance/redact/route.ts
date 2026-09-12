@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { galxRedactor } from '@/core/privacy/GalxPIIRedactor';
 
@@ -19,7 +20,7 @@ export async function OPTIONS() {
  * POST /api/compliance/redact
  * Real-time testing & validation utility for HIPAA Safe Harbor 18 PHI and GDPR PII de-identification.
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     const body = await req.json();
     const text = body.text || '';
@@ -51,3 +52,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronRight, Home, Sparkles } from 'lucide-react';
-import { BroccoliOmniSearch } from '@/lib/resilience/BroccoliOmniSearch';
+import { recordRecentVisit } from '@/lib/resilience/recent-navigation';
 
 export interface BreadcrumbItem {
   label: string;
@@ -33,7 +33,7 @@ export function Breadcrumbs({ items, workspaceContext, includeJsonLd = false }: 
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: `${baseUrl}/models`
+        item: `${baseUrl}/`
       },
       ...items.map((item, idx) => ({
         '@type': 'ListItem',
@@ -48,7 +48,7 @@ export function Breadcrumbs({ items, workspaceContext, includeJsonLd = false }: 
     if (typeof window === 'undefined' || items.length === 0) return;
     const current = items[items.length - 1];
     if (current?.label) {
-      BroccoliOmniSearch.recordVisit(
+      recordRecentVisit(
         current.label,
         current.href || window.location.pathname,
         'Navigation'
@@ -82,7 +82,7 @@ export function Breadcrumbs({ items, workspaceContext, includeJsonLd = false }: 
         )}
 
         <Link
-          href="/models"
+          href="/"
           className="flex items-center gap-1 px-2 py-1 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-all shrink-0 font-mono"
         >
           <Home className="w-3.5 h-3.5 text-zinc-400" />

@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxOAuthManager } from '@/core/auth/GalxOAuthManager';
 import { GalxModelRouter } from '@/core/router/GalxModelRouter';
@@ -23,7 +24,7 @@ export async function OPTIONS() {
  * Ingests authorization parameters via direct POST, eliminating URL query leakage.
  * Returns request_uri and expires_in (90s).
  */
-export async function POST(req: NextRequest) {
+async function previewPOST(req: NextRequest) {
   try {
     let clientId = '';
     let redirectUri = '';
@@ -92,3 +93,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withDeveloperAccess(previewPOST);

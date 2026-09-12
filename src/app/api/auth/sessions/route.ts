@@ -1,3 +1,4 @@
+import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 
@@ -20,7 +21,7 @@ export async function OPTIONS() {
  * GET /api/auth/sessions
  * Lists all active logged-in devices and sessions for the authenticated user.
  */
-export async function GET(req: NextRequest) {
+async function previewGET(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const auth = await authEngine.resolveAuthIdentity(req);
@@ -54,7 +55,7 @@ export async function GET(req: NextRequest) {
  * DELETE /api/auth/sessions
  * Revokes all active sessions for the current user EXCEPT the current session (Remote Logout).
  */
-export async function DELETE(req: NextRequest) {
+async function previewDELETE(req: NextRequest) {
   try {
     const authEngine = GalxAuthEngine.getInstance();
     const auth = await authEngine.resolveAuthIdentity(req);
@@ -86,3 +87,6 @@ export async function DELETE(req: NextRequest) {
     );
   }
 }
+
+export const GET = withDeveloperAccess(previewGET);
+export const DELETE = withDeveloperAccess(previewDELETE);
