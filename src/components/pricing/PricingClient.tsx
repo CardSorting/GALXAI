@@ -20,7 +20,7 @@ export function PricingClient() {
         <header className="border-b border-white/10 pb-6">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Pricing</h1>
           <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-400">
-            Start with pay-as-you-go API usage. Add a team plan when you need more seats.
+            Start with pay-as-you-go API usage. Choose Pro to create and publish Sites, or ask about a plan for your team.
           </p>
           <nav aria-label="Pricing sections" className="mt-5 flex flex-wrap gap-5 text-sm">
             <a href="#plans" className={linkStyle}>Plans</a>
@@ -42,10 +42,13 @@ export function PricingClient() {
                 </div>
                 <ul className="space-y-2 text-sm leading-6 text-zinc-300">
                   <li>{plan.includedSeats} {plan.includedSeats === 1 ? 'seat' : 'seats'} included{plan.extraSeatPrice > 0 && ` · $${plan.extraSeatPrice} per extra seat / month`}</li>
-                  <li>{plan.computeCredit === null ? 'Pay for model usage as you go' : `$${plan.computeCredit} in monthly compute credits`}</li>
+                  {plan.id==='pro'&&<li>Sites creation and publishing included · fair usage applies</li>}
+                  <li>{plan.computeCredit === null ? 'API and image usage billed separately' : `$${plan.computeCredit} in monthly compute credits`}</li>
                 </ul>
                 {plan.id === 'developer' ? (
                   <Link href="/keys" className="w-fit sm:justify-self-end rounded-md border border-indigo-400/40 bg-indigo-500/20 px-4 py-2.5 text-sm font-medium text-indigo-100 hover:bg-indigo-500/30 focus-visible:outline-indigo-300">Create API key</Link>
+                ) : plan.id==='pro' ? (
+                  <Link href="/billing#plan" className="w-fit sm:justify-self-end rounded-md border border-indigo-400/40 bg-indigo-500/20 px-4 py-2.5 text-sm font-medium text-indigo-100 hover:bg-indigo-500/30 focus-visible:outline-indigo-300">Choose Pro</Link>
                 ) : (
                   <a href={`${supportHref}%20-%20${plan.name}`} className="w-fit sm:justify-self-end rounded-md border border-white/15 px-4 py-2.5 text-sm text-zinc-200 hover:bg-white/5 focus-visible:outline-indigo-300">Ask about {plan.name}</a>
                 )}

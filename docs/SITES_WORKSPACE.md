@@ -4,9 +4,11 @@
 
 Open [Sites](https://galx.ai/sites) to create a simple website through conversation. Your chat appears on the left and your page preview on the right. On a phone, use the Chat and Preview tabs to switch between them.
 
+Activate GALX Pro in [Billing](https://galx.ai/billing#plan). After payment is confirmed, return to Sites. You can manage or cancel the subscription from Billing; cancellation takes effect at the end of the paid period. API and image usage remain separate.
+
 ## Start with an idea
 
-Sign in, describe the page you want, and send your request. You can start with a product launch, a portfolio or an event page. Creating, updating and publishing Sites is included with eligible active paid plans, subject to fair usage. There is no separate charge for each Site update. The workspace shows whether your account has access.
+Sign in, describe the page you want, and send your request. You can start with a product launch, a portfolio or an event page. Creating, updating and publishing Sites is included with GALX Pro, subject to fair usage. There is no separate charge for each Site update. The workspace shows whether your account has access.
 
 Review the draft, then describe what you want to change. The current version is included when making an update. This release creates simple information pages; it does not create accounts, working checkout forms or custom application behavior for your visitors.
 

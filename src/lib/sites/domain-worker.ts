@@ -7,6 +7,7 @@ export interface DomainWorkerDependencies {
   token(): string | undefined;
   enabled(): boolean;
   accounts(): string | undefined;
+  includeManaged?(): boolean;
   registry(): SiteDomainRegistry;
   dns(): { ensure(plan: DomainPlan, reservationId: string, signal: AbortSignal): Promise<void> };
   verifyHttps(hostname: string, signal: AbortSignal): Promise<boolean>;
@@ -42,13 +43,16 @@ export function domainWorkerRoute(deps: DomainWorkerDependencies) {
     if (new URL(request.url).search || !await emptyBody(request)) return fail(400, 'invalid_request');
     if (!deps.enabled()) return fail(503, 'domain_unavailable');
     try {
-      const raw = deps.accounts();
-      if (!raw || raw.length > 16384) throw new Error();
-      const accounts: unknown = JSON.parse(raw);
-      if (!Array.isArray(accounts) || typeof accounts[0] !== 'string') throw new Error();
-      requireSitesCohort(raw, accounts[0]); // Validate entire cohort before claiming anything.
+      const raw = deps.accounts(), includeManaged = deps.includeManaged?.() === true;
+      if ((raw && raw.length > 16384) || (!raw && !includeManaged)) throw new Error();
+      const accounts: unknown = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(accounts)) throw new Error();
+      if (accounts.length) {
+        if(typeof accounts[0] !== 'string')throw new Error();
+        requireSitesCohort(raw, accounts[0]); // Native companion scope remains explicit.
+      } else if (!includeManaged) throw new Error();
       const registry = deps.registry();
-      const rows = await registry.claimDue(accounts, 4);
+      const rows = await registry.claimDue(accounts, 4, includeManaged);
       const signal = AbortSignal.any([request.signal, AbortSignal.timeout(60000)]);
       const completed = await Promise.allSettled(rows.map(async row => {
         let active = false, diagnostic: string | null = null;

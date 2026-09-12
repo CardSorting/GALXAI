@@ -90,7 +90,7 @@ if result.get('build', {}).get('exit_code') == 0:
                b'GALX_SITES_WORKER_TOKEN', b'galx_site_domains_due_idx', b'site-addresses.sqlite', b'GALX_SITES_DOMAINS_WORKER_ENABLED', b'galx_site_workspaces', b'GALX_SITES_HOSTING_TOKEN',
                b'GALX_SITES_HOSTING_PROJECT', b'GALX_SITES_MANAGED_PUBLISH_ENABLED', b'ManagedSitesHosting',
                b'SitesFairStore', b'galx_sites_fair_', b'baseline_message_threshold', b'baseline_protected_slots',
-               b'paid_price_ids', b'shared-local-admission', b'accountContinuationOutstanding', b'sites-included-v1']
+               b'paid_price_ids', b'shared-local-admission', b'accountContinuationOutstanding', b'sites-included-v1', b'galx_plan_checkouts', b'galx_plan_subscriptions', b'galx_pro_monthly_v1', b'fulfillPlanStripeEvent', b'isProPaymentAdjustment', b'pro-customer:']
     files = [p for p in (workspace / '.next/static').rglob('*') if p.is_file()]
     files += list((workspace / '.next/server/app').rglob('*.html'))
     hits = []

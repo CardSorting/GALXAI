@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-09-12T04:29:49.724Z",
+  "scope": "Stripe sandbox only; no production DB or real payments",
+  "productionWrites": false,
+  "hostedCheckoutVerifiedAndExpired": true,
+  "paidAccessVerified": true,
+  "membershipMs": 289.63337500000034,
+  "cancelAtPeriodEndRetainsAccess": true,
+  "refundRevokesAccess": true,
+  "refundClassifiedWithoutWallet": true
+}

@@ -4,6 +4,7 @@ import { StripeEngine } from '@/lib/stripe/stripe';
 import { getStripeConfig } from '@/lib/stripe/config';
 import { getPostgresPool } from '@/lib/db/postgres';
 import { fulfillStripeEvent } from '@/lib/billing/fulfillment';
+import { isProPaymentAdjustment } from '@/lib/billing/plan-subscription';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
     }
     const pool = getPostgresPool();
     if (!pool) throw new Error('Storage unavailable');
-    const result = await fulfillStripeEvent(pool, event, rawBody);
+    const result = await fulfillStripeEvent(pool, event, rawBody, {planAdjustment:await isProPaymentAdjustment(pool,stripe,event)});
     if (result.changedUser) {
       const { WalletRepository } = await import('@/lib/supabase/repositories/WalletRepository');
       WalletRepository.getInstance().invalidateAccount(result.changedUser);

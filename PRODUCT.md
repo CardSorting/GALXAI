@@ -46,3 +46,5 @@ Verified subscription ownership, an eligible recurring price and current paid co
 ## Browser Sites workspace
 
 [ADR 0139](docs/adr/0139-browser-sites-workspace-and-managed-publishing.md) makes GALX sign-in the onboarding boundary for new managed Sites. `/sites` and `/sites/:id` provide private drafts, conversation edits, previews and management. Username selection occurs at first explicit public publication; the existing worker handles exact-host DNS and TLS. Customer-native delivery remains a separate optional integration. Generation and managed publishing retain independent rollout gates, and this initial authoring surface uses the bounded structured page contract rather than arbitrary application execution.
+
+[ADR 0141](docs/adr/0141-sites-pro-self-service-launch.md) launches GALX Pro at $20/month for one account, with Sites included under fair usage. Billing provides verified subscription checkout and period-end cancellation. API/image usage and prepaid compute credits remain separate. Managed publication discovery uses owned published snapshots, so new paid accounts need no manual DNS enrollment.

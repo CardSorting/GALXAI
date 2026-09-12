@@ -28,6 +28,22 @@ export async function requirePaidSitesAccess(pool: Pick<Pool,'connect'>, stripe:
           line.amount>0&&line.period.start*1000<=now&&line.period.end*1000>now;
       });
       if(!paidLine)continue;
+      // A paid invoice can remain 'paid' after a refund or dispute. Verify its
+      // settled payment as well; never convert returned money into entitlement.
+      const payments=await stripe.invoicePayments.list({invoice:invoice.id,status:'paid',limit:100,
+        expand:['data.payment.payment_intent.latest_charge','data.payment.charge']},{timeout:4000,maxNetworkRetries:0});
+      if(payments.has_more)throw new FairUsageError(503,'membership_incomplete');
+      let settled=0;
+      for(const payment of payments.data){
+        const intent=payment.payment.payment_intent;
+        const charge=payment.payment.type==='charge'?payment.payment.charge:
+          intent&&typeof intent!=='string'?intent.latest_charge:null;
+        if(!charge||typeof charge==='string')throw new FairUsageError(503,'membership_payment_evidence');
+        const chargeCustomer=typeof charge.customer==='string'?charge.customer:charge.customer?.id;
+        if(chargeCustomer!==customer||!charge.paid||!charge.captured||charge.disputed||charge.refunded||charge.amount_refunded>0)continue;
+        settled+=Math.min(payment.amount_paid||0,charge.amount);
+      }
+      if(settled<invoice.amount_paid)continue;
       const end=item.current_period_end*1000;
       if(item.current_period_start*1000<=now&&end>now) return {accountId:account,validUntil:Math.min(end,now+15000),policyRevision:policy.revision};
     }

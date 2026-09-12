@@ -13,6 +13,7 @@ const handle = domainWorkerRoute({
   token: () => process.env.GALX_SITES_WORKER_TOKEN,
   enabled: () => process.env.GALX_SITES_DOMAINS_ENABLED === '1' && process.env.GALX_SITES_DOMAINS_WORKER_ENABLED === '1',
   accounts: () => process.env.GALX_SITES_COHORT_ACCOUNT_IDS,
+  includeManaged: () => process.env.GALX_SITES_MANAGED_PUBLISH_ENABLED === '1',
   registry: () => {
     const pool = getPostgresPool();
     if (!pool || pool.waitingCount >= 25) throw new SiteDomainError('domain_unavailable');

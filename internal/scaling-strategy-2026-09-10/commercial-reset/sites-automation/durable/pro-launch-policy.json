@@ -1,0 +1,26 @@
+{
+  "mode": "enforce",
+  "pool_id": "sites-shared-delivery",
+  "paid_price_ids": [
+    "price_1UEiUqIA2zQnWbn53vknJneV"
+  ],
+  "limits": {
+    "baseline_message_threshold": 20,
+    "allowance_window_seconds": 86400,
+    "pool_max_outstanding": 2,
+    "baseline_protected_slots": 1,
+    "account_max_outstanding": 1,
+    "account_max_continuation_outstanding": 1,
+    "flow_window_seconds": 60,
+    "pool_max_attempts_per_flow_window": 6,
+    "continuation_max_attempts_per_flow_window": 3,
+    "account_max_attempts_per_flow_window": 2,
+    "active_continuation_demand_ttl_seconds": 120,
+    "snapshot_ttl_seconds": 5,
+    "refresh_timeout_milliseconds": 2000,
+    "admission_deadline_milliseconds": 4000,
+    "dispatch_grant_expiry_milliseconds": 3000,
+    "provider_max_attempts_per_logical_invocation": 1,
+    "request_deadline_seconds": 45
+  }
+}

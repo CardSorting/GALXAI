@@ -3,6 +3,7 @@
 <!-- docs-scope: decision-record -->
 
 Date: 2026-09-12. Status: accepted. Audience: private maintainers.
+Launch follow-up: [ADR 0141](0141-sites-pro-self-service-launch.md) supplies Pro checkout, subscription lifecycle handling and the owner-delegated initial limits; the original disabled migration remains historical.
 Supersedes new Sites pricing/admission in [ADR 0134](0134-fixed-price-sites-generation-with-opaque-provider-quotas.md) and the price-acceptance flow in [ADR 0139](0139-browser-sites-workspace-and-managed-publishing.md). Retains their historical receipts and publication boundaries.
 
 ## Decision

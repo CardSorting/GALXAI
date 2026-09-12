@@ -5,6 +5,13 @@ import { SiteDomainError } from '../src/lib/sites/domains';
 import { tick } from '../workers/sites-domains';
 
 const token = 'a'.repeat(64), url = 'https://galx.ai/api/internal/sites/domains/process';
+test('managed publication discovery needs no native account enrollment',async()=>{
+  let claimed=false;
+  const handle=domainWorkerRoute({token:()=>token,enabled:()=>true,accounts:()=>undefined,includeManaged:()=>true,
+    registry:()=>({claimDue:async(accounts:string[],limit:number,managed:boolean)=>{assert.deepEqual(accounts,[]);assert.equal(limit,4);assert.equal(managed,true);claimed=true;return[];}}) as any,
+    dns:()=>({ensure:async()=>{}}),verifyHttps:async()=>false});
+  const response=await handle(new Request(url,{method:'POST',headers:{Authorization:`Bearer ${token}`}}));assert.equal(response.status,204);assert(claimed);
+});
 const request = (authorization = `Bearer ${token}`, extra: RequestInit = {}, suffix = '') => new Request(url + suffix, {
   method: 'POST', ...extra, headers: { authorization, cookie: 'admin=true; session=customer', ...extra.headers },
 });

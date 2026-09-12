@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { TopUpForm } from './TopUpForm';
+import { PlanPanel } from './PlanPanel';
 import { CheckoutStatus } from './CheckoutStatus';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -73,6 +74,7 @@ function AccountBilling({ token, email, accountId }: { token?: string; email: st
     const anchor = document.createElement('a'); anchor.href = url; anchor.download = 'galxai-transactions.csv'; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   return <div className="space-y-8 pt-6">
+    <PlanPanel key={accountId} accountId={accountId} token={token} />
     <div className="flex flex-wrap items-center justify-between gap-3"><p className="break-all text-sm text-zinc-400">{email}</p><button type="button" className={button} disabled={loading || loadingMore} onClick={() => { void load(); window.dispatchEvent(new Event('galx_wallet_update')); }}>Refresh</button></div>
     <CheckoutStatus accountId={accountId} token={token} onConfirmed={() => { void load(); }} onPending={setPaymentPending} />
     {error && <p role="alert" className="text-sm text-red-300">{error}</p>}

@@ -307,6 +307,8 @@
     "worker:sites:build": "wrangler deploy --dry-run --config workers/sites-domains/wrangler.jsonc",
     "worker:sites:deploy": "wrangler deploy --config workers/sites-domains/wrangler.jsonc",
     "test:sites:fair": "node --import tsx --test scripts/test-sites-fair.ts",
+    "test:sites:plans:db": "node --import tsx scripts/run-supabase-integration.ts --plans",
+    "sites:provision": "node --env-file-if-exists=.env.local --import tsx scripts/provision-sites-pro.ts",
     "test:sites:fair:db": "node --import tsx scripts/run-supabase-integration.ts --fair",
     "sites:fair": "node --env-file-if-exists=.env.local --import tsx scripts/manage-sites-fair-usage.ts",
     "test:sites:workspace": "node --import tsx --test scripts/test-sites-workspace.ts",

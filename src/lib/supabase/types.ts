@@ -53,6 +53,14 @@ export type GalxIdempotencyState = 'IN_FLIGHT' | 'COMMITTED' | 'FAILED';
 export interface Database {
   private: {
     Tables: {
+      galx_plan_checkouts: {
+        Row: { user_id:string; request_id:string; price_id:string; customer_id:string|null; session_id:string|null; checkout_url:string|null; lease_token:string|null; lease_until:string|null; state:'pending'|'open'|'complete'|'expired'; created_at:string; expires_at:string };
+        Insert: { user_id:string; request_id:string; price_id:string }; Update: { customer_id?:string; session_id?:string; checkout_url?:string; lease_token?:string|null; lease_until?:string|null; state?:'pending'|'open'|'complete'|'expired' }; Relationships: [];
+      };
+      galx_plan_subscriptions: {
+        Row: { subscription_id:string; user_id:string; customer_id:string; price_id:string; status:string; cancel_at_period_end:boolean; period_end:string|null; event_created:number; updated_at:string };
+        Insert: { subscription_id:string; user_id:string; customer_id:string; price_id:string; status:string; event_created:number }; Update: { status?:string; cancel_at_period_end?:boolean; period_end?:string|null; event_created?:number; updated_at?:string }; Relationships: [];
+      };
       galx_sites_fair_policy: {
         Row: { singleton: boolean; mode: 'disabled' | 'shadow' | 'enforce'; pool_id: string; revision: number; limits: Json | null; paid_price_ids: string[]; updated_at: string };
         Insert: { singleton?: boolean; pool_id: string; mode?: 'disabled' | 'shadow' | 'enforce'; limits?: Json; paid_price_ids?: string[] };

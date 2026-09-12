@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import type { Pool, PoolClient } from 'pg';
 import type Stripe from 'stripe';
+import { fulfillPlanStripeEvent } from './plan-subscription';
 
 type Session = { session_id: string; user_id: string; customer_id: string | null; amount_usd: string; total_credited_usd: string; payment_intent_id: string | null; metadata: Record<string, any> };
 const id = (value: unknown): string | undefined => typeof value === 'string' ? value : value && typeof value === 'object' && 'id' in value ? String(value.id) : undefined;
@@ -29,7 +30,7 @@ async function sessionForPayment(db: PoolClient, payment: string): Promise<Sessi
 
 /** All financial effects and the event receipt commit together. Throwing requests
  * a Stripe retry; a database outage must never fall back to process-local money. */
-export async function fulfillStripeEvent(pool: Pool, event: Stripe.Event, rawBody: string) {
+export async function fulfillStripeEvent(pool: Pool, event: Stripe.Event, rawBody: string, context: { planAdjustment?: boolean } = {}) {
   const db = await pool.connect();
   let changedUser: string | undefined;
   let handled = false;
@@ -43,7 +44,8 @@ export async function fulfillStripeEvent(pool: Pool, event: Stripe.Event, rawBod
       await db.query('COMMIT'); return { duplicate: true };
     }
     const object = event.data.object as any;
-    if (event.type.startsWith('checkout.session.')) {
+    handled = context.planAdjustment === true || await fulfillPlanStripeEvent(db,event);
+    if (!handled && event.type.startsWith('checkout.session.')) {
       const payment = id(object.payment_intent);
       if (payment) await db.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [`payment:${payment}`]);
       const session: Session | undefined = (await db.query('SELECT * FROM galx_stripe_checkout_sessions WHERE session_id=$1 FOR UPDATE', [object.id])).rows[0];
@@ -88,7 +90,7 @@ export async function fulfillStripeEvent(pool: Pool, event: Stripe.Event, rawBod
           [randomUUID(), owner.user_id, object.id, (object.amount_due || 0)/100, (object.amount_paid || 0)/100, object.status || 'open', object.hosted_invoice_url, object.invoice_pdf,
             object.period_start || null, object.period_end || null, JSON.stringify({ eventCreated: event.created }), event.created]);
       }
-    } else if (event.type === 'charge.refunded' || ['charge.dispute.funds_withdrawn','charge.dispute.funds_reinstated'].includes(event.type)) {
+    } else if (!handled && (event.type === 'charge.refunded' || ['charge.dispute.funds_withdrawn','charge.dispute.funds_reinstated'].includes(event.type))) {
       const payment = id(object.payment_intent);
       if (!payment) throw new Error('Adjustment missing payment intent');
       const session = await sessionForPayment(db, payment);

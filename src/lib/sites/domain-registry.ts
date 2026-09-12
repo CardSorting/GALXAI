@@ -68,16 +68,17 @@ export class SiteDomainRegistry {
       [userId, projectId, plan])).rows[0];
     });
   }
-  async claimDue(accountIds: string[], limit = 4): Promise<DomainRow[]> {
-    requireDomain(accountIds.length > 0 && accountIds.length <= 50 && Number.isInteger(limit) && limit >= 1 && limit <= 4);
+  async claimDue(accountIds: string[], limit = 4, includeManaged = false): Promise<DomainRow[]> {
+    requireDomain((accountIds.length > 0 || includeManaged) && accountIds.length <= 50 && Number.isInteger(limit) && limit >= 1 && limit <= 4);
     accountIds.forEach(siteProjectId);
     return this.transaction(async client => (await client.query<DomainRow>(`WITH due AS (
-      SELECT id FROM private.galx_site_domains WHERE status='pending' AND plan IS NOT NULL AND NOT automation_stopped
-        AND user_id=ANY($1::text[]) AND (next_check_at IS NULL OR next_check_at <= now())
-        AND (lease_until IS NULL OR lease_until <= now())
-      ORDER BY next_check_at NULLS FIRST,id LIMIT $2 FOR UPDATE SKIP LOCKED
+      SELECT d.id FROM private.galx_site_domains d WHERE d.status='pending' AND d.plan IS NOT NULL AND NOT d.automation_stopped
+        AND (d.user_id=ANY($1::text[]) OR ($3 AND d.plan->>'kind'='managed' AND EXISTS (
+          SELECT 1 FROM private.galx_site_workspaces w WHERE w.id::text=d.project_id AND w.user_id=d.user_id AND w.published_document IS NOT NULL)))
+        AND (d.next_check_at IS NULL OR d.next_check_at <= now()) AND (d.lease_until IS NULL OR d.lease_until <= now())
+      ORDER BY d.next_check_at NULLS FIRST,d.id LIMIT $2 FOR UPDATE OF d SKIP LOCKED
     ) UPDATE private.galx_site_domains d SET lease_id=gen_random_uuid(),lease_until=now()+interval '2 minutes',
-      retry_count=LEAST(d.retry_count+1,30),updated_at=now() FROM due WHERE d.id=due.id RETURNING d.*`, [accountIds, limit])).rows);
+      retry_count=LEAST(d.retry_count+1,30),updated_at=now() FROM due WHERE d.id=due.id RETURNING d.*`, [accountIds, limit, includeManaged])).rows);
   }
   async claim(userId: string, projectId: string, plan?: DomainPlan): Promise<DomainRow> {
     return this.transaction(async client => {

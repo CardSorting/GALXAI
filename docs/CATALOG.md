@@ -255,6 +255,7 @@ The validator checks complete coverage, scope markers, local links and ADR ident
 | [ADR 0138: Automatic Sites domain provisioning](adr/0138-automatic-sites-domain-provisioning.md) | `adr/0138-automatic-sites-domain-provisioning.md` |
 | [ADR 0139: Browser Sites workspace and managed publishing](adr/0139-browser-sites-workspace-and-managed-publishing.md) | `adr/0139-browser-sites-workspace-and-managed-publishing.md` |
 | [ADR 0140: Paid Sites and shared fair usage](adr/0140-paid-sites-and-shared-fair-usage.md) | `adr/0140-paid-sites-and-shared-fair-usage.md` |
+| [ADR 0141: Sites Pro self-service launch](adr/0141-sites-pro-self-service-launch.md) | `adr/0141-sites-pro-self-service-launch.md` |
 
 ## Operational records
 
