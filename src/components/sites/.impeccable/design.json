@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-12T06:46:36.428705Z",
+  "generatedAt": "2026-09-12T07:00:52.040905Z",
   "title": "Design System: GALX Sites workspace",
   "extensions": {
     "colorMeta": {
@@ -437,7 +437,7 @@
       },
       {
         "name": "The Draft Continuity Rule",
-        "body": "Preserve the selected Site's unsent message, mode and reading position when replies or view changes do not require replacing them.",
+        "body": "Preserve the selected Site's unsent message, mode and reading position when replies or view changes do not require replacing them. First visits and empty Sites show the welcome at the top; New Site resets that orientation and clears stale unread indicators and earlier-history scroll anchors. Only an existing conversation or pending reply follows the bottom, subject to the reader's position.",
         "section": "components"
       },
       {
@@ -451,6 +451,7 @@
       "**Do** keep authored-page paper and green ink inside the preview and its related content representations.",
       "**Do** preserve the left-conversation/right-preview arrangement on desktop and explicit panel switching on mobile.",
       "**Do** retain per-Site drafts and modes, respect the reader's scroll position, and offer a visible return to the latest message.",
+      "**Do** start empty Sites at the top with the welcome visible and reset that orientation on New Site, keeping the composer below the conversation.",
       "**Do** distinguish editable project notes, the rolling conversation summary and saved page versions with clear labels.",
       "**Do** match historical preview labels and downloads to the selected version, and explain that restore creates a new draft while publication stays unchanged.",
       "**Do** pair statuses with text, keep feedback visible in both mobile views, and distinguish loading from example content.",

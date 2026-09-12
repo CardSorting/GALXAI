@@ -1,13 +1,13 @@
 {
   "scope": "isolated validation only; never deploy this output",
-  "workspace": "/var/folders/98/ss6g9t1x6_b1gppqp2d64ftr0000gn/T/galx-sites-application-check-7tw7vx9p",
+  "workspace": "/var/folders/98/ss6g9t1x6_b1gppqp2d64ftr0000gn/T/galx-sites-application-check-zp8zxfi2",
   "runtime": "v22.21.1",
   "production_credentials": false,
   "dotenv_copied": false,
   "source_changed": true,
   "regressions": {
     "exit_code": 0,
-    "log_sha256": "0213616bb74022bed7f02266ab82dc3f340184a1bf5baba66982ea6317af243a",
+    "log_sha256": "3863a99a570613837082b70fc24f61e97a68fe7e24ad223e23bbedd973229085",
     "tests": 154,
     "pass": 154,
     "fail": 0,
@@ -15,7 +15,7 @@
   },
   "build": {
     "exit_code": 0,
-    "log_sha256": "24b2a9000992d1b4d6fffe16d4c40e4eb9fb7ddd5da936dd099b05026c0a17db"
+    "log_sha256": "7360204eec44153364eea5987c3d7b9e44045f081a02239a42794f24f745caf4"
   },
   "private_implementation_asset_scan": {
     "files": 643,
@@ -24,8 +24,8 @@
     "live_site_scanned": false
   },
   "verified_source": {
-    "files": 1293,
-    "sha256": "0bfa210b8906e3bb648f73e4b3a5fe9d06ebf31f628ac7a5bb70de769923bd32",
+    "files": 1796,
+    "sha256": "5c694d7350c57ecc1156dbb1a664e161e700897087855fd03a82e752f38e22fa",
     "matches_build_copy": true,
     "excluded": "scoped design documentation and sidecars"
   }

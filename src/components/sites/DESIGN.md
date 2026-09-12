@@ -239,7 +239,9 @@ Below the composer, concise copy explains paid-plan inclusion and fair usage. In
 
 User messages use a tonal inset surface; assistant messages sit directly on the panel and display the actual reply for that turn. Both identify their author in text and allow long words to wrap. Pending and incomplete replies carry written status; replies associated with saved content offer a version link. The conversation is a keyboard-focusable log with polite announcements.
 
-New replies follow the bottom only while the reader is already near it. Reading earlier content preserves the scroll position and reveals a Latest message action above the composer when new content arrives. Loading earlier messages preserves the reading position; a separate earlier-conversation view offers Return to latest. These controls keep continuing conversations usable without forcing the reader away from older text.
+First visits and empty Sites start at the top with the welcome visible. New Site resets this orientation and clears stale unread indicators and earlier-history scroll anchors. The composer stays fixed below the independently scrolling conversation.
+
+Bottom-following applies only to an existing conversation or pending reply. New replies follow the bottom only while the reader is already near it. Reading earlier content preserves the scroll position and reveals a Latest message action above the composer when new content arrives. Loading earlier messages preserves the reading position; a separate earlier-conversation view offers Return to latest. These controls keep continuing conversations usable without forcing the reader away from older text.
 
 Starter choices and saved Sites are separated rows. The library uses compact paper thumbnails, a readable title, written status and date; search and archived filtering remain distinct controls.
 
@@ -253,7 +255,7 @@ History presents saved versions as full-width, keyboard-focusable button rows se
 
 Selecting a row or conversation version link previews that checkpoint and labels it above and below the canvas. Mobile switches to Preview to show the selection. Restore this version first changes the inline banner into a confirmation; Confirm restore saves the content as a new draft version and leaves the published page unchanged. Back to current draft exits the historical preview. Download exports the displayed checkpoint with a version-specific filename, so the selected preview and exported page agree.
 
-**The Draft Continuity Rule.** Preserve the selected Site's unsent message, mode and reading position when replies or view changes do not require replacing them.
+**The Draft Continuity Rule.** Preserve the selected Site's unsent message, mode and reading position when replies or view changes do not require replacing them. First visits and empty Sites show the welcome at the top; New Site resets that orientation and clears stale unread indicators and earlier-history scroll anchors. Only an existing conversation or pending reply follows the bottom, subject to the reader's position.
 
 **The Version Clarity Rule.** Label historical previews explicitly, keep a visible path to the current draft, and confirm restoration as a new draft before applying it.
 
@@ -271,6 +273,7 @@ Direct navigation to a saved Site shows loading or unavailable content in both c
 - **Do** keep authored-page paper and green ink inside the preview and its related content representations.
 - **Do** preserve the left-conversation/right-preview arrangement on desktop and explicit panel switching on mobile.
 - **Do** retain per-Site drafts and modes, respect the reader's scroll position, and offer a visible return to the latest message.
+- **Do** start empty Sites at the top with the welcome visible and reset that orientation on New Site, keeping the composer below the conversation.
 - **Do** distinguish editable project notes, the rolling conversation summary and saved page versions with clear labels.
 - **Do** match historical preview labels and downloads to the selected version, and explain that restore creates a new draft while publication stays unchanged.
 - **Do** pair statuses with text, keep feedback visible in both mobile views, and distinguish loading from example content.

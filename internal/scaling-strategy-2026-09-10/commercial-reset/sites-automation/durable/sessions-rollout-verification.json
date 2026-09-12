@@ -1,0 +1,23 @@
+{
+  "phase": "resumed",
+  "original_mode": "enforce",
+  "original_revision": 2,
+  "paused_revision": 3,
+  "policy_signature": "3d159c3f985ed4e3142bc9744334c5f6fb22e949692fbddb135954eb27f203af",
+  "pending_at_pause": 0,
+  "prepared_at": "2026-09-12T06:47:57.914Z",
+  "resumed_revision": 4,
+  "resumed_at": "2026-09-12T06:53:55.139Z",
+  "application_commit": "8284ad0",
+  "deployment_id": "dpl_EcPt3qMR1ZH1pEACDhz7LmRKQVch",
+  "deployment_url": "https://galxai-jv7lgfblr-cardsortings-projects.vercel.app",
+  "production_alias": "https://galx.ai",
+  "migration_version": "20260912060747",
+  "migration_applied": true,
+  "migration_count": 98,
+  "pending_migrations": 0,
+  "remote_only_migrations": 0,
+  "old_request_drain_seconds_at_least": 95,
+  "policy_verified_after_resume": true,
+  "live_paid_generation_performed": false
+}

@@ -39,12 +39,14 @@ function Workspace({owner,token,authLoading,initialId}: {owner:string|null;token
   useEffect(()=>{setCheckpoint(null);setRestoreOpen(false);setVersions([]);setVersionCursor(null);setVersionBusy(false);setNotes(site?.context.notes || '');stick.current=true;setUnread(false);studio.resetHistory();++versionRequest.current;},[site?.id]); // Each Site owns its draft and context.
   useEffect(()=>{setNotes(site?.context.notes || '');},[site?.context.notes]);
   const tail=site?.messages.at(-1);
+  const hasConversation=Boolean(site?.messages.length || studio.earlier.length || site?.generating || busy);
   useEffect(() => {
     const node=messagesRef.current;if(!node)return;
+    if(!hasConversation){node.scrollTop=0;scrollAnchor.current=null;setUnread(false);return;}
     if(scrollAnchor.current){node.scrollTop=scrollAnchor.current.top+node.scrollHeight-scrollAnchor.current.height;scrollAnchor.current=null;return;}
     if(stick.current){node.scrollTo({top:node.scrollHeight,behavior:'instant'});setUnread(false);}else setUnread(true);
-  },[tail?.id,tail?.text,tail?.status,site?.messages.length,site?.generating,studio.earlier,tab]);
-  useEffect(()=>{const node=messagesRef.current;if(!node)return;const observer=new ResizeObserver(()=>{if(stick.current)node.scrollTop=node.scrollHeight;});observer.observe(node);return()=>observer.disconnect();},[tab,site?.id]);
+  },[tail?.id,tail?.text,tail?.status,site?.messages.length,site?.generating,studio.earlier,tab,hasConversation]);
+  useEffect(()=>{const node=messagesRef.current;if(!node)return;const observer=new ResizeObserver(()=>{if(!hasConversation)node.scrollTop=0;else if(stick.current)node.scrollTop=node.scrollHeight;});observer.observe(node);return()=>observer.disconnect();},[tab,site?.id,hasConversation]);
   useEffect(() => { if (studio.username) setUsername(studio.username); },[studio.username]);
   function remember(value:string,mode:SiteIntent=intent) {setPrompt(value);draftValue.current=value;setIntent(mode);try{sessionStorage.setItem(draftKey,JSON.stringify({text:value,intent:mode}));}catch{}}
   function choose(next: SiteSummary | null) {
