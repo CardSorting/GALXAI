@@ -90,6 +90,8 @@ Runtime `shadow` is a closed rollout state; it does not submit work or consume l
 
 The local verification record is [fair-usage application verification](../../internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/fair-usage-application-verification.json). Its production build and private-marker scan are not live-site acceptance. Record deployed revision and live rendered/browser-asset inspection separately before claiming the deployed UI is clean.
 
+The [production release verification](../../internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/fair-usage-release-verification.json) records the deployed implementation (`9986ab2`) and live desktop/mobile acceptance. The live Sites page and twenty-seven referenced browser assets passed the forty-seven-marker scan; eight anonymous/forged-authority HTTP checks rejected access. The migration is applied with policy disabled and no production limits or eligible prices. This is deployed interface and access-control acceptance, not paid-generation qualification or an enabled production cohort.
+
 ## Rollback
 
 Run `npm run sites:fair -- --disable` first. It stops new included admission while keeping receipts, completed documents and unknown reservations intact. The paired migration rollback does the same. Leave recovery and publication readers deployed, retain the DNS worker and original wallet reconciliation paths, and keep snapshots private. Never re-enable the former charged POST to roll this change back. Resume only with a compatible controller and deliberately configured policy revision.

@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-09-12T03:33:02.556938+00:00",
+  "checkedAt": "2026-09-12T03:42:54.808849+00:00",
   "scope": "Sites paid-plan/fair-use replacement; production eligibility not activated",
   "sourceInputs": {
     "GALX_Fair_Usage_Agent_Handoff.md": "fdaf1aeeec2f287d773ad9971ce072cb1bfa8edc7ff250af6ff9474684a237ec",
@@ -59,8 +59,157 @@
     "paidBrowserGenerationSubmitted": false
   },
   "rollout": {
-    "productionApplication": "pending",
+    "productionApplication": "deployed",
     "onlineShadowTrafficEnabled": false,
-    "controlledPaidCohortEnabled": false
+    "controlledPaidCohortEnabled": false,
+    "deployment": {
+      "id": "dpl_Hudt29xgXaG8vTLjTYff3mj9qgnU",
+      "url": "https://galxai-pttbwdmde-cardsortings-projects.vercel.app",
+      "alias": "https://galx.ai",
+      "status": "READY",
+      "trigger": "Git push of implementation commit"
+    }
+  },
+  "sourceCommit": "9986ab2301d15bc00ebcea7e05c5d70808cdcaf4",
+  "livePublicVerification": {
+    "checkedAt": "2026-09-12T03:42:08.780452+00:00",
+    "surface": "https://galx.ai/sites",
+    "sourceCommit": "9986ab2",
+    "checks": {
+      "assets": {
+        "count": 28,
+        "privateMarkers": 47,
+        "privateMatches": [],
+        "oldSitesQuoteMatches": [],
+        "paths": [
+          "/_next/static/chunks/1255-306db9f231b54263.js",
+          "/_next/static/chunks/2330-465c0c8d89cdd29d.js",
+          "/_next/static/chunks/2619-04bc32f026a0d946.js",
+          "/_next/static/chunks/3736-2c9f00820338eff4.js",
+          "/_next/static/chunks/4129-588ced20906e0f7a.js",
+          "/_next/static/chunks/44530001-a26648c04669f22e.js",
+          "/_next/static/chunks/4489-9b79ea828188cc3e.js",
+          "/_next/static/chunks/4533-7fee8afce0037d1c.js",
+          "/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+          "/_next/static/chunks/5380-33bac102ca144352.js",
+          "/_next/static/chunks/5839-dabf51f862acbec6.js",
+          "/_next/static/chunks/8505-0714be3ae76f43b5.js",
+          "/_next/static/chunks/9515-d5cafae925d12a02.js",
+          "/_next/static/chunks/app/error-825a8d777a6fbbb7.js",
+          "/_next/static/chunks/app/global-error-6c4bdd755108c191.js",
+          "/_next/static/chunks/app/layout-7002e81c062d908c.js",
+          "/_next/static/chunks/app/not-found-4667a4f0d47abb21.js",
+          "/_next/static/chunks/app/sites/page-ba01333876fbf293.js",
+          "/_next/static/chunks/main-app-0ee650784ad95c4e.js",
+          "/_next/static/chunks/polyfills-42372ed130431b0a.js",
+          "/_next/static/chunks/webpack-ba81720a2c8efefb.js",
+          "/_next/static/css/b69744f806b2c0e4.css",
+          "/_next/static/css/cf8a94d8f0136ff9.css",
+          "/_next/static/css/e76a45d481b92613.css",
+          "/_next/static/css/f2b5dec4d75dc203.css",
+          "/_next/static/media/bb3ef058b751a6ad-s.p.woff2",
+          "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+          "/sites"
+        ]
+      },
+      "unauthorized": [
+        {
+          "path": "/api/sites/workspace",
+          "method": "GET",
+          "identity": "anonymous",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/sites/workspace",
+          "method": "GET",
+          "identity": "forged_bearer",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/sites/workspace",
+          "method": "POST",
+          "identity": "anonymous",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/sites/workspace",
+          "method": "POST",
+          "identity": "forged_bearer",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/sites/content",
+          "method": "GET",
+          "identity": "anonymous",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/sites/content",
+          "method": "GET",
+          "identity": "forged_bearer",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/sites/content",
+          "method": "POST",
+          "identity": "anonymous",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        },
+        {
+          "path": "/api/sites/content",
+          "method": "POST",
+          "identity": "forged_bearer",
+          "status": 401,
+          "allowlistedBody": true,
+          "privateNoStore": true,
+          "privateHeadersAbsent": true
+        }
+      ],
+      "missingPublished": {
+        "status": 404,
+        "genericBody": true,
+        "sandbox": true,
+        "privateHeadersAbsent": true
+      }
+    },
+    "scope": "Read-only public release acceptance and unauthorized requests; no paid work, generation, publishing, wallet charge, or DNS change."
+  },
+  "liveBrowser": {
+    "url": "https://galx.ai/sites",
+    "widths": [
+      390,
+      1311
+    ],
+    "sitesQuoteVisible": false,
+    "priceBearingSendLabel": false,
+    "horizontalOverflow": false,
+    "fairUseCopyVisible": true,
+    "pausedUpdateNoticeVisible": true,
+    "savedSitesViewLoaded": true,
+    "savedSitesViewWasEmpty": true,
+    "existingSiteDocumentOpened": false,
+    "generationSubmitted": false,
+    "publicationSubmitted": false
   }
 }
