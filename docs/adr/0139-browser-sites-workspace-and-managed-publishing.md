@@ -38,3 +38,5 @@ Migration `20260912003002_sites_workspace.sql` creates the private workspace tab
 The implementation, verification commands, onboarding flow and operational configuration are in [Sites workspace operations](../maintainers/SITES_WORKSPACE.md). Public documentation describes only [the user workflow](../SITES_WORKSPACE.md).
 
 The exact-host middleware uses a bounded, credential-free read of the fixed public artifact endpoint and reconstructs its headers. Framework URL rewrites were rejected after raw HTTP testing exposed an internal rewrite address. This adds one origin request per published page view; no browser request inherits that routing information.
+
+The [September 12 platform activation record](../../internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/ACTIVATION_20260912.md) tracks implementation of these gates on the existing infrastructure. The hosting credential is restricted to the selected project/team and has an explicit expiry. Administrative credential creation, rotation and deployment remain platform operations; no customer hosting enrollment is introduced.

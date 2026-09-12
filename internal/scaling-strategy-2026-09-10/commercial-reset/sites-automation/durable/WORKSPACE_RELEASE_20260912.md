@@ -2,6 +2,8 @@
 
 Private operational record. Public workflow is `docs/SITES_WORKSPACE.md`; architecture is ADR 0139.
 
+This record describes the initial workspace deployment. [The later platform activation](ACTIVATION_20260912.md) resolves its hosting setup and fixed-profile service rollout without rewriting the initial observations below.
+
 ## Implemented scope
 
 New GALX-managed authoring at `/sites` and `/sites/:id` removes customer companion enrollment from this path. Draft/history ownership, accepted generation prices, interrupted-operation recovery, immutable publication snapshots, explicit public consent, management and exact-host automation are implemented. The initial document contract renders static information pages. Existing native delivery and discovery remain separate.

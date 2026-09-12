@@ -1,0 +1,127 @@
+{
+  "sourceRevision": "2b72afd53caf354f947f2adc8bd8e544d54fb25e",
+  "image": "galxai-relay:sites-fixed-20260912-2b72afd",
+  "imageId": "sha256:39f0361c2c4492158362ce603c6fdaddfad40c99f120afb4760ea0e1ed51bbbf",
+  "serviceVerifiedAt": "2026-09-12T01:27:45.749Z",
+  "workerCount": 2,
+  "receiptVolumesPreserved": true,
+  "signingAuthorityPreserved": true,
+  "containerTest": {
+    "passed": true,
+    "externalNetwork": false,
+    "syntheticProviderRequests": 1,
+    "receiptSurvivedRestart": true,
+    "node": "v22.23.2"
+  },
+  "readiness": {
+    "checkedAt": "2026-09-12T01:27:53.069Z",
+    "origin": "https://relay.galx.ai",
+    "tariff": "sites-fixed-005-v1",
+    "profile": "sites-local-v1",
+    "modelRequests": 0,
+    "walletWrites": false,
+    "configurationSource": "existing operator authority and recorded production origin; not a production environment readback",
+    "fixedContractPassed": true,
+    "contractHttpStatus": 200,
+    "unauthenticatedContractStatus": 401,
+    "inferenceContractStatus": 401,
+    "fleet": {
+      "runningCount": 2,
+      "maintenanceCount": 0,
+      "pending": 0,
+      "trackedJobs": 0,
+      "eligibleShardCount": 2
+    }
+  },
+  "hosting": {
+    "installedAt": "2026-09-12T01:34:22.555Z",
+    "installed": true,
+    "projectAccessVerified": true,
+    "tokenMetadataId": "kysYaq34JZBKdDoKUkLc7a3uHBnY7iorZaAedlFrN6LGLYUn",
+    "tokenName": "GALX Sites project-only runtime",
+    "projectId": "prj_NmtiUenK2cf924eREKuCgiDS0uC4",
+    "teamId": "team_mlJF16byaaURWNNfkpk72mVy",
+    "expiresAt": 1796952770276,
+    "configuration": "Production sensitive GALX_SITES_HOSTING_TOKEN",
+    "originalSuppliedTokenRevoked": false
+  },
+  "activation": {
+    "configuredAt": "2026-09-12T01:29:41.414Z",
+    "project": "prj_NmtiUenK2cf924eREKuCgiDS0uC4",
+    "flags": {
+      "GALX_SITES_CONTENT_ENABLED": "1",
+      "GALX_SITES_MANAGED_PUBLISH_ENABLED": "1"
+    },
+    "previous": {
+      "GALX_SITES_CONTENT_ENABLED": "0",
+      "GALX_SITES_MANAGED_PUBLISH_ENABLED": "0"
+    },
+    "cohortChanged": false,
+    "tariffChanged": false,
+    "readinessCheckedAt": "2026-09-12T01:27:53.069Z",
+    "deploymentRequired": true
+  },
+  "receiptRecovery": {
+    "checkedAt": "2026-09-12T01:27:53.068Z",
+    "completedMatched": true,
+    "unresolvedMatched": true,
+    "modelRequests": 0,
+    "walletWrites": false
+  },
+  "customerAcceptance": {
+    "paidGeneration": false,
+    "publication": false,
+    "newDomainDnsTlsVerification": false,
+    "unpublish": false,
+    "status": "Optional $0.05 customer acceptance test was requested but no spending authorization was received; no request submitted."
+  },
+  "application": {
+    "deployment": "dpl_2Mh1KYwBUAn595bFzxeqrvoYhEiP",
+    "url": "https://galxai-egwfhf2gj-cardsortings-projects.vercel.app",
+    "productionOrigin": "https://galx.ai",
+    "productionBuildPassed": true,
+    "promoted": true,
+    "previousProduction": "dpl_6PUQNnBnHLV7SvUex3BsrLVNjg7X",
+    "supersededUnpromotedCandidate": "dpl_B9fdiDRP7ZYJues6D3DrEZNP6VRF"
+  },
+  "liveHttp": {
+    "checkedAt": "2026-09-12T02:53:52.910Z",
+    "origin": "https://galx.ai",
+    "deployment": "dpl_2Mh1KYwBUAn595bFzxeqrvoYhEiP",
+    "assets": 24,
+    "markerCount": 39,
+    "markerMatches": [],
+    "credentialPatterns": 0,
+    "authorization": [
+      {
+        "method": "GET",
+        "status": 401
+      },
+      {
+        "method": "POST",
+        "status": 401
+      }
+    ],
+    "customerMutations": false,
+    "guestHtmlPassed": true,
+    "missingArtifactPassed": true
+  },
+  "scheduler": {
+    "checkedAt": "2026-09-12T01:39:06.544Z",
+    "outcome": "ok",
+    "cron": "* * * * *",
+    "scheduledTime": 1789177140000,
+    "diagnostics": []
+  },
+  "signedInBrowser": {
+    "url": "https://galx.ai/sites",
+    "observedQuoteUsd": "0.05",
+    "composerEnabledWithUnsentPrompt": true,
+    "generationUnavailableMessage": false,
+    "renderedMarkerMatches": [],
+    "viewportWidth": 1311,
+    "horizontalOverflow": false,
+    "temporaryPromptCleared": true,
+    "paidSubmission": false
+  }
+}
