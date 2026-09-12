@@ -52,6 +52,7 @@ tests = [
     'scripts/test-sites-domain-worker.ts',
     'scripts/test-sites-workspace.ts',
     'scripts/test-sites-fair.ts',
+    'scripts/test-billing-public-boundary.ts',
 ]
 print(json.dumps({'workspace': str(workspace), 'runtime': str(node), 'real_credentials': False}), flush=True)
 result = {'scope': 'isolated validation only; never deploy this output', 'workspace': str(workspace),

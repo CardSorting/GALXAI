@@ -45,15 +45,15 @@ export function PlanPanel({token,accountId}:{token?:string;accountId:string}) {
   }
   return <section id="plan" className="scroll-mt-24 border-b border-white/10 pb-8" aria-labelledby="plan-heading">
     <div className="flex flex-wrap items-start justify-between gap-4">
-      <div><h2 id="plan-heading" className="text-xl font-semibold">Your plan</h2><p className="mt-2 text-sm leading-6 text-zinc-400">{PRO_PLAN.name} · ${PRO_PLAN.monthlyPriceUsd}/month for one account.</p></div>
+      <div><h2 id="plan-heading" className="text-xl font-semibold">Your plan</h2><p className="mt-2 text-sm leading-6 text-zinc-400">{status?.access==='included'?'': 'Available plan: '}{PRO_PLAN.name} · ${PRO_PLAN.monthlyPriceUsd}/month for one account.</p></div>
       <button type="button" className={control} disabled={loading||busy} onClick={()=>void load()}>Refresh plan</button>
     </div>
     <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-300">Create and publish Sites with fair usage included. There is no per-update charge. API and image usage remain separate.</p>
     <p className="mt-2 text-sm leading-6 text-zinc-400">Renews monthly. Cancel anytime in Manage subscription; access continues through your paid period.</p>
-    {loading?<p role="status" className="mt-4 text-sm text-zinc-400">Checking your plan…</p>:status?.access==='included'?<p role="status" className="mt-4 text-sm text-emerald-300">Your paid plan is active. Sites is included.</p>:status?.access==='unavailable'?<p role="status" className="mt-4 text-sm text-zinc-400">Your plan could not be confirmed. Refresh before starting an update.</p>:null}
+    {loading?<p role="status" className="mt-4 text-sm text-zinc-400">Checking your plan…</p>:status?.access==='included'?<p role="status" className="mt-4 text-sm text-emerald-300">Your paid plan is active. Sites is included.</p>:status?.access==='paid_plan_required'?<p role="status" className="mt-4 text-sm text-zinc-300">You do not have an active paid plan for Sites. Choose Pro to get started.</p>:status?.access==='unavailable'?<p role="status" className="mt-4 text-sm text-zinc-400">Your plan could not be confirmed. Refresh before starting an update.</p>:null}
     <div className="mt-5 flex flex-wrap items-center gap-3">
       {status?.access==='included'?<Link href="/sites" className={`${control} border-indigo-400/40 bg-indigo-500/20 text-indigo-100`}>Open Sites</Link>:<button type="button" className={`${control} border-indigo-400/40 bg-indigo-500/20 text-indigo-100`} disabled={busy||loading||!status?.checkoutAvailable} onClick={()=>void action('checkout')}>{busy?'Opening…':'Continue to secure checkout'}</button>}
-      <button type="button" className={control} disabled={busy} onClick={()=>void action('portal')}>Manage subscription</button>
+      {(status?.hasPaymentProfile||!status)&&<button type="button" className={control} disabled={busy||loading} onClick={()=>void action('portal')}>Manage subscription</button>}
     </div>
     {error&&<p role="alert" className="mt-4 max-w-2xl text-sm leading-6 text-red-300">{error}</p>}
   </section>;

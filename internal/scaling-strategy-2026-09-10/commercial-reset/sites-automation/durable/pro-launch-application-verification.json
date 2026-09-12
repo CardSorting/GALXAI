@@ -1,27 +1,26 @@
 {
   "scope": "isolated validation only; never deploy this output",
-  "workspace": "/var/folders/98/ss6g9t1x6_b1gppqp2d64ftr0000gn/T/galx-sites-application-check-vfbnynfo",
+  "workspace": "/var/folders/98/ss6g9t1x6_b1gppqp2d64ftr0000gn/T/galx-sites-application-check-uqvr49im",
   "runtime": "v22.21.1",
   "production_credentials": false,
   "dotenv_copied": false,
   "source_changed": true,
   "regressions": {
     "exit_code": 0,
-    "log_sha256": "a6d29e510ed4a2e1a101453b07bdebacbb6af3ff3ea1be5cff3bbb2883e5fad1",
-    "tests": 142,
-    "pass": 142,
+    "log_sha256": "15f97c7bdafcbf0429fb7d33a84e22b8c0003b1420c170848175e4850fcca4b1",
+    "tests": 144,
+    "pass": 144,
     "fail": 0,
     "skipped": 0
   },
   "build": {
     "exit_code": 0,
-    "log_sha256": "bb4057029251f703b6cbb94608ccdcdc4e995798a3b9c5f12112803f01a5380e"
+    "log_sha256": "49728baad4da281018ea27342baaf36d3cfb3a35f577861c534b10eae25afd27"
   },
   "private_implementation_asset_scan": {
     "files": 643,
     "markers": 53,
     "hits": [],
-    "live_site_scanned": false,
-    "correction": "The broad pro-checkout substring matched the public browser retry-storage key. Replaced it with exact server-only function markers and rescanned the same build."
+    "live_site_scanned": false
   }
 }

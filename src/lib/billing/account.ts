@@ -7,6 +7,12 @@ export interface BillingInvoice { id: string; amountDueUsd: number; amountPaidUs
 export interface BillingSummary { balanceUsd: number; paymentDebtUsd: number; depositedTotalUsd: number; lifetimeSpentUsd: number; currentMonthSpendUsd: number; proofOfDepositVerified: boolean; autoReloadEnabled: boolean }
 export interface BillingData { summary: BillingSummary; transactions: BillingTransaction[]; nextCursor: string | null; invoices: BillingInvoice[]; hasCustomer: boolean; paymentsAvailable: boolean }
 
+const publicTransactionDescriptions: Record<string, string> = {
+  deposit: 'Account credit added.', auto_reload: 'Automatic account top-up.',
+  usage_draw: 'Compute usage.', match_grant: 'Promotional credit.',
+  refund: 'Payment refund.', adjustment: 'Account balance adjustment.',
+};
+
 export async function readBillingSummary(db: Db, userId: string): Promise<BillingSummary> {
   const { rows } = await db.query(`SELECT w.balance_usd, w.payment_debt_usd, w.deposited_total_usd, w.lifetime_spent_usd, w.proof_of_deposit_verified, w.auto_reload_enabled,
     (SELECT coalesce(-sum(t.amount_usd), 0) FROM galx_wallet_transactions t
@@ -40,7 +46,13 @@ export async function readBillingTransactions(db: Db, userId: string, params: UR
       OR ($2 = 'refund' AND t.transaction_type = 'refund'))
     AND ($3::timestamptz IS NULL OR (t.created_at, t.id) < ($3::timestamptz, $4::uuid))
     ORDER BY t.created_at DESC, t.id DESC LIMIT 51`, [userId, filter, cursor?.time || null, cursor?.id || null]);
-  const transactions: BillingTransaction[] = rows.slice(0, 50).map(row => ({ ...row, amountUsd: Number(row.amountUsd), balanceAfterUsd: Number(row.balanceAfterUsd) }));
+  // Ledger notes remain private operational records, including for the account owner.
+  const transactions: BillingTransaction[] = rows.slice(0, 50).map(row => {
+    const known = Object.hasOwn(publicTransactionDescriptions, row.type);
+    return { id: row.id, type: known ? row.type : 'adjustment',
+      description: known ? publicTransactionDescriptions[row.type] : 'Account activity.',
+      amountUsd: Number(row.amountUsd), balanceAfterUsd: Number(row.balanceAfterUsd), createdAt: row.createdAt };
+  });
   const last = transactions.at(-1);
   return { transactions, nextCursor: rows.length > 50 && last ? Buffer.from(JSON.stringify({ time: last.createdAt, id: last.id })).toString('base64url') : null };
 }
@@ -55,7 +67,10 @@ export async function readBilling(db: Db, userId: string, params: URLSearchParam
   const history = await readBillingTransactions(db, userId, params);
   const { rows } = await db.query(`SELECT stripe_invoice_id AS id, amount_due_usd AS "amountDueUsd", amount_paid_usd AS "amountPaidUsd", status, hosted_invoice_url AS url, created_at AS "createdAt"
     FROM galx_stripe_invoices WHERE user_id = $1 ORDER BY created_at DESC, id DESC LIMIT 20`, [userId]);
-  const invoices: BillingInvoice[] = rows.map(row => ({ ...row, amountDueUsd: Number(row.amountDueUsd), amountPaidUsd: Number(row.amountPaidUsd), url: stripeInvoiceUrl(row.url), createdAt: new Date(row.createdAt).toISOString() }));
+  const invoices: BillingInvoice[] = rows.map(row => ({ id: row.id,
+    amountDueUsd: Number(row.amountDueUsd), amountPaidUsd: Number(row.amountPaidUsd),
+    status: ['draft','open','paid','uncollectible','void'].includes(row.status) ? row.status : 'unknown',
+    url: stripeInvoiceUrl(row.url), createdAt: new Date(row.createdAt).toISOString() }));
   const { rows: customers } = await db.query('SELECT stripe_customer_id FROM galx_stripe_customers WHERE user_id = $1', [userId]);
   return { summary, ...history, invoices, hasCustomer: Boolean(customers[0]?.stripe_customer_id?.startsWith('cus_') && !customers[0].stripe_customer_id.startsWith('cus_mock_')) };
 }
