@@ -4,7 +4,7 @@ import { type DomainPlan, siteHostname } from './domains';
 export class WorkspaceError extends Error { constructor(readonly status = 503) { super('site_unavailable'); } }
 export interface WorkspaceRow { id: string; user_id: string; title: string; revision: number; document: SiteDocument | null; messages: SiteMessage[];
   published_document?: SiteDocument | null; published_revision?: number | null;
-  archived: boolean; updated_at: Date; operation_id: string | null; operation_brief: string | null; operation_started_at: Date | null;
+  archived: boolean; updated_at: Date; operation_id: string | null; operation_brief: string | null; operation_started_at: Date | null; operation_mode?: 'legacy' | 'included';
   hostname?: string | null; domain_status?: 'reserved' | 'pending' | 'active' | null; }
 export function workspaceView(row: WorkspaceRow): WorkspaceSite {
   return { id: row.id, title: row.title, revision: row.revision, updatedAt: row.updated_at.toISOString(), document: readSiteDocument(row.document),
@@ -85,14 +85,14 @@ export class SitesWorkspaceRepository {
   }
   async begin(owner: string, id: string, revision: number, operation: string, brief: string) {
     return this.tx(async db => { const row = await this.locked(db,owner,id);
-      if (row.operation_id || row.archived || row.revision !== revision || row.messages.length >= 80 || row.messages.some(m => m.id === `${operation}:user`)) throw new WorkspaceError(409);
+      if (row.operation_id || row.archived || row.revision !== revision || row.messages.some(m => m.id === `${operation}:user`)) throw new WorkspaceError(409);
       return (await db.query<WorkspaceRow>(`UPDATE private.galx_site_workspaces SET operation_id=$3,operation_brief=$4,
-        operation_started_at=now(),updated_at=now() WHERE user_id=$1 AND id=$2 RETURNING *`,[owner,id,operation,brief])).rows[0]; });
+        operation_started_at=now(),operation_mode='included',updated_at=now() WHERE user_id=$1 AND id=$2 RETURNING *`,[owner,id,operation,brief])).rows[0]; });
   }
   async finish(owner: string, id: string, operation: string, document: SiteDocument | null, message: string) {
     return this.tx(async db => { const row = await this.locked(db,owner,id);
       if (row.operation_id !== operation) return row; // Late/replayed results never overwrite a newer draft.
-      const messages = [...row.messages, { id: `${operation}:user`, role: 'user', text: row.operation_brief! },
+      const messages = [...row.messages.slice(-78), { id: `${operation}:user`, role: 'user', text: row.operation_brief! },
         { id: `${operation}:assistant`, role: 'assistant', text: message }];
       return {...row,...(await db.query<WorkspaceRow>(`UPDATE private.galx_site_workspaces SET document=$3,messages=$4::jsonb,
         title=$5,revision=revision+1,operation_id=NULL,operation_brief=NULL,operation_started_at=NULL,updated_at=now()

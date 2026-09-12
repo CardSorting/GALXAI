@@ -25,6 +25,6 @@ September 7 and 8 image observations are historical successes. September 9 verif
 
 ## Sites generation and delivery
 
-Use [Sites verification](maintainers/SITES_OPERATIONS.md#verification) for the fixed-price path. Exercise accepted quote, cohort/daily limits, durable completed and unknown receipts, concurrent settlement and recovery at the original price. Missing token usage is a valid fixed-mode case; it must remain null in private accounting instead of being estimated.
+Use [Sites verification](maintainers/SITES_FAIR_USAGE.md#verification-and-rollout) for paid eligibility, T01–T26 shared admission, no new wallet charge, public DTOs and recovery. Historical fixed/metered receipt tests remain regressions for existing operations. Missing supplier usage remains unknown; do not estimate a token balance from message counts.
 
 Separately verify the customer's artifact save and exact owner-private publication. A content completion, a native-host save and a deployed application are distinct results. Preserve the historical native-host evidence and distinguish local fixture runs from any authorized live billed test.

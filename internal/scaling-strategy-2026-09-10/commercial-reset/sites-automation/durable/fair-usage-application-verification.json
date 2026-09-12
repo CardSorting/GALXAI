@@ -1,0 +1,26 @@
+{
+  "scope": "isolated validation only; never deploy this output",
+  "workspace": "/var/folders/98/ss6g9t1x6_b1gppqp2d64ftr0000gn/T/galx-sites-application-check-fswvqll8",
+  "runtime": "v22.21.1",
+  "production_credentials": false,
+  "dotenv_copied": false,
+  "source_changed": true,
+  "regressions": {
+    "exit_code": 0,
+    "log_sha256": "f111ab6ac6989ce1b3b8006e8817ee4b3eabe35a6691465eedc6929dd3947f55",
+    "tests": 141,
+    "pass": 141,
+    "fail": 0,
+    "skipped": 0
+  },
+  "build": {
+    "exit_code": 0,
+    "log_sha256": "3c1ab08cf7f05fe735afc3d547deb2db082a6e281655b8ed8f33c038cfa06974"
+  },
+  "private_implementation_asset_scan": {
+    "files": 642,
+    "markers": 47,
+    "hits": [],
+    "live_site_scanned": false
+  }
+}

@@ -33,9 +33,9 @@ Closing a desktop viewer is safe for ongoing processes. Stop preserves home; del
 
 ## Sites financial and delivery recovery
 
-Keep the original account operation ID, wallet hold, relay origin, accepted reference, worker receipt volume and federation signing authority. Customer GET recovery reads the original receipt and saved price. A durably completed fixed-price job settles without token counts; positive fenced non-dispatch closes at zero; unknown or missing evidence stays held. Pause/cohort removal stops new work while preserving authenticated existing-operation recovery with valid service configuration.
+Keep original invocation identity, grant, relay origin/reference, receipt volume and federation signing authority. Included Sites recovery reads the original outcome without payment or repeat generation. Confirmed non-dispatch can release a grant once; unknown or missing evidence retains occupancy. Historical wallet holds retain their accepted pricing/reconciliation records. Disabling new admission or losing paid entitlement must not disable existing-operation recovery.
 
-The companion independently retains immutable archives, upload intent, saved-version acknowledgement and publication locks. Recovery must observe the original external effect. A missing upload/deployment acknowledgement cannot be repaired by publishing another version. See [Sites operations](maintainers/SITES_OPERATIONS.md#pause-recovery-and-rollback) for retained-state limits and compatible rollback.
+The companion independently retains immutable archives, upload intent, saved-version acknowledgement and publication locks. Recovery must observe the original external effect. A missing upload/deployment acknowledgement cannot be repaired by publishing another version. See [Sites operations](maintainers/SITES_FAIR_USAGE.md#rollback) for retained-state limits and compatible rollback.
 
 ## Limits
 

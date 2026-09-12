@@ -4,21 +4,21 @@ import { getPostgresPool } from '@/lib/db/postgres';
 import { SitesWorkspaceRepository, WorkspaceError } from '@/lib/sites/workspace-repository';
 import { sitesWorkspaceRoute } from '@/lib/sites/workspace-route';
 import { sitesContentConfiguration } from '@/lib/sites/content-configuration';
-import { PostgresSitesBilling, createBilledRelayGenerator, reconcileBilledRelayGeneration } from '@/lib/billing/sites-generation';
+import { PostgresSitesBilling, reconcileBilledRelayGeneration } from '@/lib/billing/sites-generation';
 import { SITE_CONTENT_PROMPT } from '@/lib/billing/sites-content-route';
 import { SiteDomainRegistry } from '@/lib/sites/domain-registry';
 import { managedDomainPlan } from '@/lib/sites/managed-hosting';
-import { requireSitesCohort } from '@/lib/billing/sites-activation';
+import { includedSitesConfiguration } from '@/lib/sites/included-configuration';
+import { recoverIncludedGeneration } from '@/lib/sites/included-generation';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 90;
 const handle = sitesWorkspaceRoute({
+  requireAccess: async owner => { await includedSitesConfiguration().membership(owner); },
   canPublish: owner => {
-    try { requireSitesCohort(process.env.GALX_SITES_COHORT_ACCOUNT_IDS,owner);
       return process.env.GALX_SITES_MANAGED_PUBLISH_ENABLED==='1' && process.env.GALX_SITES_DOMAINS_ENABLED==='1' &&
         Boolean(process.env.GALX_SITES_HOSTING_PROJECT && process.env.GALX_SITES_HOSTING_TEAM && process.env.GALX_SITES_HOSTING_TOKEN && process.env.GALX_SITES_HOSTING_CNAME);
-    } catch { return false; }
   },
   publish: async (owner,id,revision,username) => {
     const pool=getPostgresPool();if(!pool)throw new WorkspaceError();
@@ -30,16 +30,16 @@ const handle = sitesWorkspaceRoute({
   authenticate: request => requireAccountIdentity(request as NextRequest),
   repository: () => { const pool = getPostgresPool(); if (!pool || pool.waitingCount >= 25) throw new WorkspaceError(); return new SitesWorkspaceRepository(pool); },
   prepare: async (owner, signal) => {
-    const config = sitesContentConfiguration();
-    await config.authorizeGeneration(signal,owner);
-    const billing = new PostgresSitesBilling(config.pool,owner,config.rate);
-    return { quote: { quoteVersion: billing.rate.version, maxChargeMicroUsd: billing.reservation },
-      generate: (operation,brief,document) => createBilledRelayGenerator(billing,config.relay)({ operationId: operation,requestedModel: billing.rate.model,signal,
+    const config = includedSitesConfiguration();
+    const generate = await config.prepare(owner);
+    return { generate: (operation,brief,document) => generate({ operationId: operation,requestedModel: config.model,signal,
         messages: [{ role:'system',content:SITE_CONTENT_PROMPT },
           ...(document ? [{ role:'user' as const,content:`Current draft (content only): ${JSON.stringify(document)}. Apply the next requested changes and return the complete revised document.` }] : []),
           { role:'user',content:brief }] }) };
   },
-  recover: async (owner, operation, signal) => { const config = sitesContentConfiguration();
+  recover: async (owner, operation, signal, mode) => {
+    if(mode==='included'){const c=includedSitesConfiguration();return recoverIncludedGeneration(c.store,owner,operation,c.relay,signal);}
+    const config = sitesContentConfiguration();
     return reconcileBilledRelayGeneration(new PostgresSitesBilling(config.pool,owner,config.rate),operation,config.relay,signal); },
 });
 export const GET = handle;

@@ -52,6 +52,15 @@ function adapters(overrides: Partial<DraftAdapters> = {}): DraftAdapters {
 }
 const code = (expected: string) => (error: unknown) => error instanceof JobError && error.code === expected;
 
+test('included generation retains durable identity without a monetary reservation', t => {
+  const f=fixture(t,{...DEFAULT_POLICY,accountLimit:0,reservationPerCall:0});
+  const job=f.store.create('included',request),lease=f.store.acquire(job.id,'worker');
+  const attempt=f.store.beginGeneration(job.id,lease);
+  f.store.completeGeneration(job.id,lease,attempt,brief,{units:0,receipt:attempt});
+  assert.equal(f.store.account().reserved,0);assert.equal(f.store.account().consumed,0);
+  assert.equal(f.store.get(job.id).attempts.length,1);
+});
+
 test('request identity persists and changed intent conflicts', t => {
   const f = fixture(t); const job = f.store.create('same-key', request);
   f.store.close(); const reopened = f.open();

@@ -1,13 +1,13 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { readWorkspaceSite, workspaceError, type WorkspaceSite, type SiteQuote } from '@/lib/sites/workspace-contract';
+import { readWorkspaceSite, workspaceError, type WorkspaceSite, type SitesAccess } from '@/lib/sites/workspace-contract';
 
 class WorkspaceClientError extends Error {}
 
 export function useSitesWorkspace(owner: string | null, token?: string, initialId?: string) {
   const [sites,setSites] = useState<WorkspaceSite[]>([]), [site,setSite] = useState<WorkspaceSite | null>(null);
   const [loading,setLoading] = useState(Boolean(owner)), [busy,setBusy] = useState(false), [error,setError] = useState('');
-  const [quote,setQuote] = useState<SiteQuote | null>(null), [setupLoading,setSetupLoading] = useState(Boolean(owner));
+  const [access,setAccess] = useState<SitesAccess>('unavailable'), [setupLoading,setSetupLoading] = useState(Boolean(owner));
   const [publishing,setPublishing] = useState(false), [username,setUsername] = useState<string | null>(null);
   const alive = useRef(true), lock = useRef(false), controllers = useRef(new Set<AbortController>()), selected = useRef(initialId);
   const call = useCallback(async (body?: Record<string,unknown>, query = '') => {
@@ -18,6 +18,7 @@ export function useSitesWorkspace(owner: string | null, token?: string, initialI
         headers:{ 'Accept':'application/json', ...(token ? {Authorization:`Bearer ${token}`} : {}), ...(body ? {'Content-Type':'application/json'} : {}) },
         ...(body ? {body:JSON.stringify(body)} : {}) });
       if (!response.ok) {
+        if(response.status===403){setAccess('paid_plan_required');setPublishing(false);}
         let code: unknown; try { code = (await response.json())?.error?.code; } catch {}
         throw new WorkspaceClientError(code === 'invalid_username' ? 'Use 3–20 lowercase letters, numbers, or hyphens. Start with a letter and end with a letter or number.'
           : code === 'username_unavailable' ? 'That username isn’t available. Choose another, or refresh to use your saved username.' : workspaceError(response.status));
@@ -25,6 +26,15 @@ export function useSitesWorkspace(owner: string | null, token?: string, initialI
       return await response.json();
     } finally { clearTimeout(timer); controllers.current.delete(controller); }
   },[token]);
+  const refreshAccess=useCallback(async()=>{
+    if(!owner)return;setSetupLoading(true);
+    try{
+      const data=await call(undefined,'?view=setup');if(!alive.current)return;
+      setAccess(data.access==='included'?'included':data.access==='paid_plan_required'?'paid_plan_required':'unavailable');
+      setPublishing(data.publishing==='available');setUsername(typeof data.username==='string'?data.username:null);
+    }catch{if(alive.current){setAccess('unavailable');setPublishing(false);}}
+    finally{if(alive.current)setSetupLoading(false);}
+  },[call,owner]);
   const accept = useCallback((input: unknown) => {
     const next = readWorkspaceSite(input);
     if (!alive.current) return next;
@@ -43,15 +53,9 @@ export function useSitesWorkspace(owner: string | null, token?: string, initialI
     finally { if (alive.current) setLoading(false); }
   },[call,owner]);
   useEffect(() => {
-    alive.current = true; void refresh();
-    if (owner) void call(undefined,'?view=setup').then(data => {
-      if (!alive.current) return;
-      if (data.quote && typeof data.quote.quoteVersion === 'string' && Number.isSafeInteger(data.quote.maxChargeMicroUsd) && data.quote.maxChargeMicroUsd>0)
-        setQuote({quoteVersion:data.quote.quoteVersion,maxChargeMicroUsd:data.quote.maxChargeMicroUsd});
-      setPublishing(data.publishing === 'available'); setUsername(typeof data.username === 'string' ? data.username : null);
-    }).catch(() => {}).finally(() => { if (alive.current) setSetupLoading(false); });
+    alive.current = true; void refresh(); void refreshAccess();
     return () => { alive.current = false; for (const controller of controllers.current) controller.abort(); };
-  },[call,owner,refresh]);
+  },[call,owner,refresh,refreshAccess]);
   useEffect(() => {
     if (!owner || !site?.generating) return;
     const id = site.id; let cancelled = false; let timer: ReturnType<typeof setTimeout>;
@@ -71,7 +75,7 @@ export function useSitesWorkspace(owner: string | null, token?: string, initialI
   },[site?.id,site?.address?.status,owner,call,accept]);
   function select(next: WorkspaceSite | null) { selected.current = next?.id; setSite(next); setError(''); }
   async function send(brief: string): Promise<WorkspaceSite | null> {
-    if (!owner || !quote || loading || (selected.current && !site) || lock.current || site?.generating || site?.archived) return null;
+    if (!owner || access!=='included' || loading || (selected.current && !site) || lock.current || site?.generating || site?.archived) return null;
     lock.current = true; setBusy(true); setError('');
     try {
       let current = site;
@@ -86,7 +90,7 @@ export function useSitesWorkspace(owner: string | null, token?: string, initialI
         selected.current = current.id; accept(current); setSite(current);
         try { sessionStorage.removeItem(key); } catch {}
       }
-      const result = await call({action:'generate',id:current.id,revision:current.revision,operationId:crypto.randomUUID(),brief:brief.trim().replace(/[\r\n\t]+/g,' '),...quote});
+      const result = await call({action:'generate',id:current.id,revision:current.revision,operationId:crypto.randomUUID(),brief:brief.trim().replace(/[\r\n\t]+/g,' ')});
       return accept(result.site);
     } catch (e) { if (alive.current) { setError(e instanceof WorkspaceClientError ? e.message : 'The update was interrupted. Refresh to check its progress before trying again.'); void refresh(true); } return null; }
     finally { lock.current = false; if (alive.current) setBusy(false); }
@@ -98,5 +102,5 @@ export function useSitesWorkspace(owner: string | null, token?: string, initialI
     catch (e) { if (alive.current) setError(e instanceof WorkspaceClientError ? e.message : workspaceError(503)); return false; }
     finally { lock.current = false; if (alive.current) setBusy(false); }
   }
-  return { sites,site,loading,openingSite:Boolean(owner && selected.current && !site),busy,error,setError,quote,setupLoading,publishing,username,select,send,change,refresh };
+  return { sites,site,loading,openingSite:Boolean(owner && selected.current && !site),busy,error,setError,access,setupLoading,publishing,username,select,send,change,refresh:async(preserveError=false)=>{await Promise.all([refresh(preserveError),refreshAccess()]);} };
 }

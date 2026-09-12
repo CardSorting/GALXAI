@@ -112,7 +112,7 @@ export const DEFAULT_POLICY: Policy = {
 export function policy(input: Policy): Policy {
   exact(input, ['accountLimit', 'reservationPerCall', 'maxCalls', 'maxConcurrentGenerations', 'leaseMs']);
   for (const value of Object.values(input)) amount(value);
-  requireThat(input.accountLimit > 0 && input.reservationPerCall > 0 &&
+  requireThat(input.accountLimit >= 0 && input.reservationPerCall >= 0 &&
     [1, 2].includes(input.maxCalls) && input.maxConcurrentGenerations >= 1 &&
     input.maxConcurrentGenerations <= 8 && input.leaseMs >= 1000 && input.leaseMs <= 300_000, 'invalid_policy');
   return { accountLimit: input.accountLimit, reservationPerCall: input.reservationPerCall,

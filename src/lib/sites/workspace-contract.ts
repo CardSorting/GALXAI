@@ -6,7 +6,7 @@ export interface WorkspaceSite {
   messages: SiteMessage[]; generating: boolean; archived: boolean; published: boolean;
   address: { hostname: string; status: 'reserved' | 'pending' | 'active'; url: string | null } | null;
 }
-export interface SiteQuote { quoteVersion: string; maxChargeMicroUsd: number; }
+export type SitesAccess = 'included' | 'paid_plan_required' | 'unavailable';
 export function readSiteDocument(input: unknown): SiteDocument | null {
   const v = input as Record<string, unknown> | null;
   const fields = (x: any, keys: string) => x && typeof x === 'object' && !Array.isArray(x) && Object.keys(x).sort().join(',') === keys;
@@ -38,9 +38,9 @@ export function readWorkspaceSite(input: any): WorkspaceSite {
 }
 export function workspaceError(status: number): string {
   if (status === 401) return 'Sign in again to continue. Your saved Sites will be here.';
-  if (status === 402) return 'Add credit to your account, then try again.';
+  if (status === 403) return 'Sites is included with eligible paid plans. Check your plan to continue.';
   if (status === 404) return 'This Site is unavailable. Return to My Sites to choose another.';
   if (status === 409) return 'This Site has changed or is still updating. Refresh it before continuing.';
-  if (status === 429) return 'You’ve reached the current limit. Try again later.';
+  if (status === 429) return 'Please wait before sending another update. Your saved work is safe.';
   return 'This couldn’t finish. Your saved work is safe. Try again in a moment.';
 }

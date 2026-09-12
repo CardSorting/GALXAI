@@ -22,8 +22,8 @@ Image-alias probes consume quota and spare capacity. Successful image evidence h
 
 Worker status/control traffic has a separate tenant bucket from inference. Bounded polling, Docker inspection, reconciliation, and shutdown prevent one slow shard from becoming a fleet-wide blocker. Current numeric limits live in the runbook and source; synthetic concurrency checks are not production throughput guarantees.
 
-## Fixed-price Sites allowance
+## Sites fair usage
 
-[ADR 0134](adr/0134-fixed-price-sites-generation-with-opaque-provider-quotas.md) makes opaque provider quota compatible with a bounded product allowance. Fixed-price Sites admission counts the verified account's admitted operations in a rolling 24 hours under the wallet lock. The default is provisional and configurable; exact limits and configuration are in [Sites operations](maintainers/SITES_OPERATIONS.md#server-configuration).
+[ADR 0140](adr/0140-paid-sites-and-shared-fair-usage.md) replaces new Sites wallet pricing and the daily cutoff with paid-plan inclusion and shared admission. Each accepted logical Sites update counts once. Below-threshold traffic remains subject to physical and flow safety; above-threshold traffic can continue when shared capacity and fair-use checks permit. Deferral does not impose a lockout until reset. Account/window counters and outstanding work are shared across workers; completed work still counts toward rolling attempt limits.
 
-An unresolved Sites hold blocks new Sites work for that account. An accepted operation counts once even if subsequently unused or uncertain; completed replay and receipt reads do not count again. Daily exhaustion returns the public `generation_limit_reached` code. Fixed pricing neither predicts supplier remaining quota nor clears provider backoff. Local byte/time/attempt limits and durable receipt capacity independently constrain service.
+Production values remain unset until deliberately configured. The supplied fixture is synthetic. See [the private configuration contract](maintainers/SITES_FAIR_USAGE.md#paid-plans-and-production-configuration). Existing general inference limits retain their own contracts.

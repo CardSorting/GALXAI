@@ -5,6 +5,8 @@
 Date: 2026-09-11. Status: accepted. Audience: private maintainers.
 Extends [automatic addresses](0138-automatic-sites-domain-provisioning.md) and [customer-owned delivery](0136-customer-owned-sites-delivery.md).
 
+New Sites pricing and admission are superseded by [ADR 0140](0140-paid-sites-and-shared-fair-usage.md). The original text below preserves the decision at the time; existing operation recovery remains applicable.
+
 ## Decision
 
 Make `/sites` the authoring and management entry point for new GALX Sites, with a conversation column on the left and a sandboxed page preview on the right. `/sites/:id` resumes an account-owned workspace. GALX sign-in is sufficient for authoring; choosing a username is deferred until the first publication. A new GALX workspace does not require installing or supervising a customer companion, supplying a provider credential, or connecting a separate hosting account.

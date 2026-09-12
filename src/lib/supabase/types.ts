@@ -53,13 +53,35 @@ export type GalxIdempotencyState = 'IN_FLIGHT' | 'COMMITTED' | 'FAILED';
 export interface Database {
   private: {
     Tables: {
+      galx_sites_fair_policy: {
+        Row: { singleton: boolean; mode: 'disabled' | 'shadow' | 'enforce'; pool_id: string; revision: number; limits: Json | null; paid_price_ids: string[]; updated_at: string };
+        Insert: { singleton?: boolean; pool_id: string; mode?: 'disabled' | 'shadow' | 'enforce'; limits?: Json; paid_price_ids?: string[] };
+        Update: { mode?: 'disabled' | 'shadow' | 'enforce'; pool_id?: string; revision?: number; limits?: Json; paid_price_ids?: string[]; updated_at?: string };
+        Relationships: [];
+      };
+      galx_sites_fair_pools: {
+        Row: { pool_id: string; revision: number; snapshot: Json | null; refresh_token: string | null; refresh_until: string | null; cooldown_until: string | null };
+        Insert: { pool_id: string }; Update: { revision?: number; snapshot?: Json | null; refresh_token?: string | null; refresh_until?: string | null; cooldown_until?: string | null }; Relationships: [];
+      };
+      galx_sites_fair_invocations: {
+        Row: { account_id: string; invocation_id: string; pool_id: string; digest: string; allowance_window: number; policy_revision: number; snapshot_revision: number; lane: 'BASELINE' | 'CONTINUATION'; counted: boolean;
+          state: 'reserved' | 'dispatching' | 'completed' | 'not_started' | 'failed' | 'unknown'; admitted_at: string; grant_id: string; grant_expires_at: string; job_id: string | null; origin: string | null; output: string | null; non_dispatch_evidence: Json | null };
+        Insert: { account_id: string; invocation_id: string; pool_id: string; digest: string; allowance_window: number; policy_revision: number; snapshot_revision: number; lane: 'BASELINE' | 'CONTINUATION'; state: 'reserved'; admitted_at: string; grant_id: string; grant_expires_at: string };
+        Update: { counted?: boolean; state?: 'dispatching' | 'completed' | 'not_started' | 'failed' | 'unknown'; job_id?: string; origin?: string; output?: string | null }; Relationships: [];
+      };
+      galx_sites_fair_demand: {
+        Row: { pool_id: string; account_id: string; expires_at: string }; Insert: { pool_id: string; account_id: string; expires_at: string }; Update: { expires_at?: string }; Relationships: [];
+      };
+      galx_sites_fair_cooldowns: {
+        Row: { account_id: string; until_at: string }; Insert: { account_id: string; until_at: string }; Update: { until_at?: string }; Relationships: [];
+      };
       galx_site_workspaces: {
         Row: { id: string; user_id: string; title: string; revision: number; document: Json | null; published_document: Json | null; published_revision: number | null; messages: Json;
-          archived: boolean; operation_id: string | null; operation_brief: string | null; operation_started_at: string | null;
+          archived: boolean; operation_id: string | null; operation_brief: string | null; operation_started_at: string | null; operation_mode: 'legacy' | 'included';
           created_at: string; updated_at: string };
         Insert: { id: string; user_id: string; title: string };
         Update: { title?: string; revision?: number; document?: Json | null; published_document?: Json | null; published_revision?: number | null; messages?: Json; archived?: boolean;
-          operation_id?: string | null; operation_brief?: string | null; operation_started_at?: string | null; updated_at?: string };
+          operation_id?: string | null; operation_brief?: string | null; operation_started_at?: string | null; operation_mode?: 'legacy' | 'included'; updated_at?: string };
         Relationships: [];
       };
       galx_site_namespaces: {

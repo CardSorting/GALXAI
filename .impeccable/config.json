@@ -115,6 +115,159 @@
         ],
         "createdAt": "2026-09-12T00:51:48.525Z",
         "reason": "Codex reviewed: the literal img tag is hostile synthetic test input that must remain to verify HTML escaping; no image element is rendered by this test file."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#a5b4fc",
+        "files": [
+          "src/components/sites/sites.css"
+        ],
+        "createdAt": "2026-09-12T03:25:11.442Z",
+        "reason": "Existing Sites palette and readable focus/scrollbar colors, preserved in the scoped Sites DESIGN.md; this paid-access copy change introduces no new colors."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#343a50",
+        "files": [
+          "src/components/sites/sites.css"
+        ],
+        "createdAt": "2026-09-12T03:25:11.499Z",
+        "reason": "Existing Sites palette and readable focus/scrollbar colors, preserved in the scoped Sites DESIGN.md; this paid-access copy change introduces no new colors."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#4338ca",
+        "files": [
+          "src/components/sites/sites.css"
+        ],
+        "createdAt": "2026-09-12T03:25:11.553Z",
+        "reason": "Existing Sites palette and readable focus/scrollbar colors, preserved in the scoped Sites DESIGN.md; this paid-access copy change introduces no new colors."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#c7d2fe",
+        "files": [
+          "src/components/sites/sites.css"
+        ],
+        "createdAt": "2026-09-12T03:25:11.614Z",
+        "reason": "Existing Sites palette and readable focus/scrollbar colors, preserved in the scoped Sites DESIGN.md; this paid-access copy change introduces no new colors."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#818cf8",
+        "files": [
+          "src/components/sites/sites.css"
+        ],
+        "createdAt": "2026-09-12T03:25:11.672Z",
+        "reason": "Existing Sites palette and readable focus/scrollbar colors, preserved in the scoped Sites DESIGN.md; this paid-access copy change introduces no new colors."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#6ee7b7",
+        "files": [
+          "src/components/sites/sites.css"
+        ],
+        "createdAt": "2026-09-12T03:28:21.803Z",
+        "reason": "Existing scoped Sites treatment: page-preview ink/paper, thumbnail details, compact controls and mobile welcome type are preserved. See src/components/sites/DESIGN.md. No global design-system exception."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#303446",
+        "files": [
+          "src/components/sites/sites.css"
+        ],
+        "createdAt": "2026-09-12T03:28:21.858Z",
+        "reason": "Existing scoped Sites treatment: page-preview ink/paper, thumbnail details, compact controls and mobile welcome type are preserved. See src/components/sites/DESIGN.md. No global design-system exception."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#b9c0cf",
+        "files": [
+          "src/components/sites/sites.css"
+        ],
+        "createdAt": "2026-09-12T03:28:21.912Z",
+        "reason": "Existing scoped Sites treatment: page-preview ink/paper, thumbnail details, compact controls and mobile welcome type are preserved. See src/components/sites/DESIGN.md. No global design-system exception."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#5c6373",
+        "files": [
+          "src/components/sites/sites.css"
+        ],
+        "createdAt": "2026-09-12T03:28:21.968Z",
+        "reason": "Existing scoped Sites treatment: page-preview ink/paper, thumbnail details, compact controls and mobile welcome type are preserved. See src/components/sites/DESIGN.md. No global design-system exception."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#41574c",
+        "files": [
+          "src/components/sites/sites.css"
+        ],
+        "createdAt": "2026-09-12T03:28:22.024Z",
+        "reason": "Existing scoped Sites treatment: page-preview ink/paper, thumbnail details, compact controls and mobile welcome type are preserved. See src/components/sites/DESIGN.md. No global design-system exception."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#182923",
+        "files": [
+          "src/components/sites/sites.css"
+        ],
+        "createdAt": "2026-09-12T03:28:22.078Z",
+        "reason": "Existing scoped Sites treatment: page-preview ink/paper, thumbnail details, compact controls and mobile welcome type are preserved. See src/components/sites/DESIGN.md. No global design-system exception."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#9ba99d",
+        "files": [
+          "src/components/sites/sites.css"
+        ],
+        "createdAt": "2026-09-12T03:28:22.132Z",
+        "reason": "Existing scoped Sites treatment: page-preview ink/paper, thumbnail details, compact controls and mobile welcome type are preserved. See src/components/sites/DESIGN.md. No global design-system exception."
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "5px",
+        "files": [
+          "src/components/sites/sites.css"
+        ],
+        "createdAt": "2026-09-12T03:28:22.187Z",
+        "reason": "Existing scoped Sites treatment: page-preview ink/paper, thumbnail details, compact controls and mobile welcome type are preserved. See src/components/sites/DESIGN.md. No global design-system exception."
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "10px",
+        "files": [
+          "src/components/sites/sites.css"
+        ],
+        "createdAt": "2026-09-12T03:28:22.243Z",
+        "reason": "Existing scoped Sites treatment: page-preview ink/paper, thumbnail details, compact controls and mobile welcome type are preserved. See src/components/sites/DESIGN.md. No global design-system exception."
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "3px",
+        "files": [
+          "src/components/sites/sites.css"
+        ],
+        "createdAt": "2026-09-12T03:28:22.298Z",
+        "reason": "Existing scoped Sites treatment: page-preview ink/paper, thumbnail details, compact controls and mobile welcome type are preserved. See src/components/sites/DESIGN.md. No global design-system exception."
+      },
+      {
+        "rule": "design-system-font",
+        "value": "georgia",
+        "files": [
+          "src/components/sites/sites.css"
+        ],
+        "createdAt": "2026-09-12T03:28:22.354Z",
+        "reason": "Existing scoped Sites treatment: page-preview ink/paper, thumbnail details, compact controls and mobile welcome type are preserved. See src/components/sites/DESIGN.md. No global design-system exception."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "26px",
+        "files": [
+          "src/components/sites/sites.css"
+        ],
+        "createdAt": "2026-09-12T03:28:22.408Z",
+        "reason": "Existing scoped Sites treatment: page-preview ink/paper, thumbnail details, compact controls and mobile welcome type are preserved. See src/components/sites/DESIGN.md. No global design-system exception."
       }
     ]
   },

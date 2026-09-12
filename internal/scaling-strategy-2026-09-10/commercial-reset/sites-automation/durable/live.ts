@@ -27,11 +27,11 @@ async function main() {
     console.log(JSON.stringify({ connected: true, owned_site_count_on_page: page.items.length, has_more: Boolean(page.cursor) })); return;
   }
   const billing = () => new LiveBillingAdapter(process.env.GALX_SITES_BILLING_ORIGIN!, process.env.GALX_SITES_SESSION!);
-  if (command === 'quote') { console.log(JSON.stringify(await billing().quote(signal))); return; }
+  if (command === 'quote') { await billing().quote(signal); console.log(JSON.stringify({access:'included'})); return; }
   requireThat(directory && id, 'invalid_arguments');
   const settings = policy({ ...DEFAULT_POLICY,
-    reservationPerCall: Number(process.env.GALX_SITES_MAX_CHARGE_MICRO_USD),
-    accountLimit: Number(process.env.GALX_SITES_ACCOUNT_LIMIT_MICRO_USD) });
+    reservationPerCall: Number(process.env.GALX_SITES_MAX_CHARGE_MICRO_USD || 0),
+    accountLimit: Number(process.env.GALX_SITES_ACCOUNT_LIMIT_MICRO_USD || 0) });
   const store = new JobStore(directory, 'local-session', settings);
   const artifacts = new ArtifactStore(path.join(store.root, 'artifacts'));
   const domains = () => new LiveSiteDomains(process.env.GALX_SITES_BILLING_ORIGIN!, process.env.GALX_SITES_SESSION!, process.env.GALX_SITES_USERNAME!);

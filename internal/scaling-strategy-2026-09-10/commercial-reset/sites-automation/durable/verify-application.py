@@ -19,7 +19,7 @@ tracked = subprocess.check_output(['git', 'ls-files', '--cached', '--others', '-
 allowed_directories = {'src', 'public', 'scripts', 'workers'}
 allowed_root_files = {'package.json', 'package-lock.json', 'tsconfig.json', 'next.config.ts',
                       'next-env.d.ts', 'postcss.config.mjs', 'eslint.config.mjs', 'tailwind.config.ts', '.vercelignore', 'README.md',
-                      'docs/API_REFERENCE.md', 'docs/API_BASE_URL.md', 'docs/QUICKSTART.md'}
+                      'docs/API_REFERENCE.md', 'docs/API_BASE_URL.md', 'docs/QUICKSTART.md', 'GALX_Fair_Usage_Test_Fixture.json'}
 for relative in tracked:
     if not relative:
         continue
@@ -51,6 +51,7 @@ tests = [
     'scripts/test-sites-domains.ts',
     'scripts/test-sites-domain-worker.ts',
     'scripts/test-sites-workspace.ts',
+    'scripts/test-sites-fair.ts',
 ]
 print(json.dumps({'workspace': str(workspace), 'runtime': str(node), 'real_credentials': False}), flush=True)
 result = {'scope': 'isolated validation only; never deploy this output', 'workspace': str(workspace),
@@ -87,7 +88,9 @@ if result.get('build', {}).get('exit_code') == 0:
                b'GALX_SITES_COHORT_ACCOUNT_IDS', b'galx_site_namespaces', b'galx_site_domains',
                b'GALX_SITES_DNS_API_TOKEN', b'galx-sites-domain-v1', b'_openai-site-verification',
                b'GALX_SITES_WORKER_TOKEN', b'galx_site_domains_due_idx', b'site-addresses.sqlite', b'GALX_SITES_DOMAINS_WORKER_ENABLED', b'galx_site_workspaces', b'GALX_SITES_HOSTING_TOKEN',
-               b'GALX_SITES_HOSTING_PROJECT', b'GALX_SITES_MANAGED_PUBLISH_ENABLED', b'ManagedSitesHosting']
+               b'GALX_SITES_HOSTING_PROJECT', b'GALX_SITES_MANAGED_PUBLISH_ENABLED', b'ManagedSitesHosting',
+               b'SitesFairStore', b'galx_sites_fair_', b'baseline_message_threshold', b'baseline_protected_slots',
+               b'paid_price_ids', b'shared-local-admission', b'accountContinuationOutstanding', b'sites-included-v1']
     files = [p for p in (workspace / '.next/static').rglob('*') if p.is_file()]
     files += list((workspace / '.next/server/app').rglob('*.html'))
     hits = []

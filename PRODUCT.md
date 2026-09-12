@@ -39,9 +39,9 @@ The relay supplies inference transport with credential eligibility checks, bound
 
 ## Bounded Sites strategy
 
-[ADRs 0134–0136](docs/adr/README.md) add fixed-price content generation and customer-owned delivery. The provisional $0.05 completion price and rolling account allowance are explicit product assumptions, configurable server-side. Unknown provider quota and expense remain unknown and do not block this mode; real completion and account authorization remain required. The initial authoring contract creates bounded static information pages. ADR 0139 adds the managed browser workspace; the earlier customer-local connection remains optional. Neither path claims an unverified model-provider integration.
+[ADR 0140](docs/adr/0140-paid-sites-and-shared-fair-usage.md) replaces per-generation Sites wallet pricing with eligible paid-plan inclusion. Each admitted logical Sites update counts once. The baseline threshold changes eligibility to capacity-aware continuation; it is not an absolute message ceiling. Shared account and pool governance uses honest locally governed capacity, without inventing supplier token balances. The supplied fair-use handoff and JSON are private specification/test inputs, never production limits.
 
-Generation and publication are independently controlled; application deployment does not itself activate paid generation or managed hosting. Follow [Sites operations](docs/maintainers/SITES_OPERATIONS.md) for rollout and original-price recovery. Existing image studio, signup credit, general inference pricing and proposed agency-service fees retain their own contracts.
+Verified subscription ownership, an eligible recurring price and current paid coverage grant access; wallet balances, API-key metadata and editable organization tiers do not. Production limits and eligible paid price IDs must be explicitly configured. Generation and publication retain independent feature gates. Existing billed operations keep their original recovery path. Existing image studio, signup credit, general inference pricing and proposed agency-service fees retain their own contracts.
 
 ## Browser Sites workspace
 

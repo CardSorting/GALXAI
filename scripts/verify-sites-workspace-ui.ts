@@ -18,7 +18,7 @@ async function setup(width:number,authenticated:boolean){
     if(url.pathname==='/api/sites/workspace'){
       assert.equal(req.headers().authorization,'Bearer sites-fixture-token');
       if(req.method()==='GET'){
-        if(url.searchParams.get('view')==='setup')return json({quote:{quoteVersion:'fixture-v1',maxChargeMicroUsd:50000},publishing:'available',username:null,internal:'private-sentinel'});
+        if(url.searchParams.get('view')==='setup')return json({access:'included',publishing:'available',username:null,internal:'private-sentinel'});
         if(url.searchParams.has('id'))return json({site:state.sites.find(s=>s.id===url.searchParams.get('id'))});
         if(state.listDelay)await new Promise(resolve=>setTimeout(resolve,state.listDelay));
         return json({sites:state.sites});
@@ -28,7 +28,7 @@ async function setup(width:number,authenticated:boolean){
       let site=state.sites.find(s=>s.id===body.id);
       if(body.action==='create'){site={id:body.id,title:'Untitled Site',revision:0,updatedAt:new Date().toISOString(),document:null,messages:[],generating:false,archived:false,published:false,address:null};state.sites.push(site);}
       if(body.action==='generate'){
-        assert.equal(body.maxChargeMicroUsd,50000);assert.equal(body.quoteVersion,'fixture-v1');assert(body.operationId);site.generating=!state.complete;
+        assert.equal(body.maxChargeMicroUsd,undefined);assert.equal(body.quoteVersion,undefined);assert(body.operationId);site.generating=!state.complete;
         site.messages.push({id:'user-'+site.revision,role:'user',text:body.brief});
         if(state.complete){site.document={schema_version:1,title:'Daylight. A calmer week.',summary:'A thoughtful planner for small teams who want more space for meaningful work.',sections:[{heading:'Plan with intention',body:'Bring tasks, priorities, and people into one considered weekly plan.'},{heading:'Make room for focus',body:'A little structure helps your team spend less time coordinating and more time doing the work that matters.'}]};site.title=site.document.title;site.revision++;site.messages.push({id:'reply-'+site.revision,role:'assistant',text:'Your draft is ready to preview. Tell me what you’d like to change.'});}
       }
@@ -69,7 +69,7 @@ try{
   }
   for(const width of [1440,390]){
     const {context,page,state,errors}=await setup(width,true);await page.goto(base+'/sites',{waitUntil:'domcontentloaded'});
-    await page.getByRole('button',{name:'A product launch',exact:true}).click();await page.getByRole('button',{name:'Send message, maximum $0.05',exact:true}).click();
+    await page.getByRole('button',{name:'A product launch',exact:true}).click();await page.getByRole('button',{name:'Send message',exact:true}).click();
     await page.getByText('Your draft is ready to preview.',{exact:false}).waitFor();
     assert.equal(state.posts.filter(p=>p.action==='generate').length,1);assert.equal(state.posts.filter(p=>p.action==='create').length,1);
     if(width<760)await page.getByRole('button',{name:'Preview',exact:true}).click();

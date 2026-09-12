@@ -12,6 +12,8 @@ The initial Sites tariff required trustworthy input/output token counts and proo
 
 The operating decision is to proceed with explicit, conservative assumptions. Unknown supplier quota and cost remain unknown. The customer price is a product decision and does not purport to reimburse a precisely measured supplier bill.
 
+New Sites pricing and admission are superseded by [ADR 0140](0140-paid-sites-and-shared-fair-usage.md). The original text below preserves the decision at the time; existing operation recovery remains applicable.
+
 ## Decision
 
 Use a versioned flat price for each durably confirmed completed generation. The provisional default is **50,000 micro-USD ($0.05)**, with **20 admitted Sites operations per verified account in a rolling 24 hours**. Both are server-configurable. The cohort is explicitly allowlisted and limited to 50 account IDs; the feature remains off unless enabled. These implementation limits do not establish supplier entitlements, profitability, general availability or an unlimited subscription.

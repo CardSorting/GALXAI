@@ -1,0 +1,110 @@
+{
+  "purpose": "Synthetic acceptance-test fixture only. Not production configuration.",
+  "spec_version": "0.1",
+  "policy": {
+    "baseline_message_threshold": 3,
+    "allowance_window_seconds": 60,
+    "pool_max_outstanding": 8,
+    "baseline_protected_slots": 2,
+    "account_max_outstanding": 4,
+    "account_max_continuation_outstanding": 1,
+    "flow_window_seconds": 10,
+    "pool_max_attempts_per_flow_window": 12,
+    "continuation_max_attempts_per_flow_window": 4,
+    "account_max_attempts_per_flow_window": 8,
+    "active_continuation_demand_ttl_seconds": 20,
+    "snapshot_ttl_seconds": 2,
+    "refresh_timeout_milliseconds": 100,
+    "admission_deadline_milliseconds": 200,
+    "dispatch_grant_expiry_milliseconds": 200,
+    "provider_max_attempts_per_logical_invocation": 1,
+    "request_deadline_seconds": 30
+  },
+  "initial_snapshot": {
+    "pool_id": "test-pool-shared-quota-1",
+    "revision": 1,
+    "observed_at_unix_seconds": 1000,
+    "valid_until_unix_seconds": 1002,
+    "readiness": "READY",
+    "signal_basis": "Fake pool authority in locally governed capacity mode",
+    "local_concurrency_limit": 8,
+    "cooldown_until_unix_seconds": null,
+    "upstream_remaining_token_allocation": null
+  },
+  "boundary_examples": [
+    {
+      "name": "last_baseline_message",
+      "account_message_count": 2,
+      "expected_lane": "BASELINE"
+    },
+    {
+      "name": "first_continuation_message",
+      "account_message_count": 3,
+      "expected_lane": "CONTINUATION"
+    },
+    {
+      "name": "single_active_account_share",
+      "active_accounts": 1,
+      "expected_share": 4
+    },
+    {
+      "name": "two_active_accounts_share",
+      "active_accounts": 2,
+      "expected_share_each": 2
+    },
+    {
+      "name": "four_active_accounts_share",
+      "active_accounts": 4,
+      "expected_share_each": 1
+    },
+    {
+      "name": "last_continuation_slot_race",
+      "pool_outstanding": 5,
+      "pool_continuation_outstanding": 5,
+      "distinct_eligible_accounts": 2,
+      "expected_admissions": 1
+    },
+    {
+      "name": "protected_room",
+      "pool_outstanding": 6,
+      "pool_continuation_outstanding": 6,
+      "expected_next_continuation": "DEFER",
+      "expected_eligible_baseline": "ADMIT"
+    }
+  ],
+  "acceptance_case_ids": [
+    "T01",
+    "T02",
+    "T03",
+    "T04",
+    "T05",
+    "T06",
+    "T07",
+    "T08",
+    "T09",
+    "T10",
+    "T11",
+    "T12",
+    "T13",
+    "T14",
+    "T15",
+    "T16",
+    "T17",
+    "T18",
+    "T19",
+    "T20",
+    "T21",
+    "T22",
+    "T23",
+    "T24",
+    "T25",
+    "T26"
+  ],
+  "notes": [
+    "Fixture values are intentionally small to exercise thresholds quickly.",
+    "Use fake time. Start a fresh fixture for each independent test.",
+    "Do not equate an admission grant with a known remaining token balance.",
+    "No integrated implementation tests have been executed by preparing this fixture.",
+    "Release running reservations only on authoritative completion or documented safe recovery, not merely on dispatch-grant expiry."
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "checkedAt": "2026-09-12T03:33:02.556938+00:00",
+  "scope": "Sites paid-plan/fair-use replacement; production eligibility not activated",
+  "sourceInputs": {
+    "GALX_Fair_Usage_Agent_Handoff.md": "fdaf1aeeec2f287d773ad9971ce072cb1bfa8edc7ff250af6ff9474684a237ec",
+    "GALX_Fair_Usage_Test_Fixture.json": "ac26150739b6061fe95c628cfe8aeb1b90b987b6519a523e0d2573e2a44f9ca5"
+  },
+  "database": {
+    "migration": "20260912030611",
+    "applied": true,
+    "newPolicyMode": "disabled",
+    "productionLimitsConfigured": false,
+    "paidPricesConfigured": false
+  },
+  "checks": {
+    "fairUsageAcceptanceCases": 26,
+    "privateRoleReadWriteDenials": 60,
+    "legacyDatabase": 94,
+    "workspaceDatabase": 30,
+    "companionRegressions": 59,
+    "includedCompanionRegression": 1,
+    "applicationRegressions": 141,
+    "productionBuild": true,
+    "publicArtifactsScanned": 642,
+    "privateMarkersChecked": 47,
+    "markerMatches": 0,
+    "documentationDocuments": 293,
+    "adrs": 140,
+    "lint": true
+  },
+  "syntheticOverload": {
+    "requests": 72,
+    "admissions": 8,
+    "deferrals": 64,
+    "activeAccounts": 12,
+    "gateMs": {
+      "p50": 6.10675,
+      "p95": 7.16425,
+      "p99": 7.638459
+    },
+    "requestIncludingTerminalMs": {
+      "p50": 6.165917,
+      "p95": 19.253625,
+      "p99": 21.425416
+    },
+    "limitation": "Fixed arrival order left eight accounts unserved in this short trace. No starvation-free scheduling guarantee. These are synthetic local measurements, not production SLOs."
+  },
+  "browser": {
+    "surface": "isolated production build",
+    "widths": [
+      390,
+      1311
+    ],
+    "horizontalOverflow": false,
+    "priceVisible": false,
+    "priceBearingAriaLabel": false,
+    "initialWelcomeScroll": 0,
+    "noteMarginTopPx": 10,
+    "paidBrowserGenerationSubmitted": false
+  },
+  "rollout": {
+    "productionApplication": "pending",
+    "onlineShadowTrafficEnabled": false,
+    "controlledPaidCohortEnabled": false
+  }
+}

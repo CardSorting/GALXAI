@@ -34,6 +34,8 @@ wrangler.secrets*
 /DESIGN.md
 /DESIGN_SCORECARD.md
 /PRODUCT.md
+/GALX_Fair_Usage_Agent_Handoff.md
+/GALX_Fair_Usage_Test_Fixture.json
 
 # Standalone Scripts & Migrations (Root Only - Never ignore src/lib/supabase or src/utils/supabase)
 /scripts/

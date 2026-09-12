@@ -48,6 +48,7 @@ The validator checks complete coverage, scope markers, local links and ADR ident
 | [Relay desktops and manual repair](maintainers/RELAY_DESKTOPS.md) | `maintainers/RELAY_DESKTOPS.md` |
 | [Federation hardening checks](maintainers/RELAY_HARDENING.md) | `maintainers/RELAY_HARDENING.md` |
 | [Federation fleet and quota](maintainers/RELAY_QUOTA_AND_FLEET.md) | `maintainers/RELAY_QUOTA_AND_FLEET.md` |
+| [Sites paid access and fair usage](maintainers/SITES_FAIR_USAGE.md) | `maintainers/SITES_FAIR_USAGE.md` |
 | [Sites generation and delivery operations](maintainers/SITES_OPERATIONS.md) | `maintainers/SITES_OPERATIONS.md` |
 | [Sites address operations](maintainers/SITES_DOMAINS.md) | `maintainers/SITES_DOMAINS.md` |
 | [Sites workspace operations](maintainers/SITES_WORKSPACE.md) | `maintainers/SITES_WORKSPACE.md` |
@@ -253,6 +254,7 @@ The validator checks complete coverage, scope markers, local links and ADR ident
 | [ADR 0137: Account-owned Sites subdomains](adr/0137-account-owned-sites-subdomains.md) | `adr/0137-account-owned-sites-subdomains.md` |
 | [ADR 0138: Automatic Sites domain provisioning](adr/0138-automatic-sites-domain-provisioning.md) | `adr/0138-automatic-sites-domain-provisioning.md` |
 | [ADR 0139: Browser Sites workspace and managed publishing](adr/0139-browser-sites-workspace-and-managed-publishing.md) | `adr/0139-browser-sites-workspace-and-managed-publishing.md` |
+| [ADR 0140: Paid Sites and shared fair usage](adr/0140-paid-sites-and-shared-fair-usage.md) | `adr/0140-paid-sites-and-shared-fair-usage.md` |
 
 ## Operational records
 

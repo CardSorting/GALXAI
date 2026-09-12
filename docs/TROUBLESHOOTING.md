@@ -48,8 +48,6 @@ The September 7 DreamBees image verification succeeded as recorded in ADR 0127. 
 
 ## Sites content
 
-Use the [Sites recovery runbook](maintainers/SITES_OPERATIONS.md#pause-recovery-and-rollback). A generic `content_unavailable` can mean disabled generation, cohort denial, invalid server configuration, an incompatible worker, missing administrator authority or unavailable storage. Diagnose privately; do not return the internal cause to the account.
+Use the [Sites recovery runbook](maintainers/SITES_FAIR_USAGE.md#admission-flow-and-recovery). Diagnose disabled policy, paid-plan mapping, stale readiness and unavailable authority privately. Customers receive only paid-plan, retry or temporary-unavailability guidance.
 
-`generation_limit_reached` pauses new work; it does not prevent existing-operation GET recovery. `operation_pending` or null cost requires the original operation's receipt. Missing usage alone does not block a fixed-price completed receipt, but it still blocks legacy metered settlement. A confirmed unused operation closes at zero; a missing receipt is not proof of non-dispatch.
-
-Do not resolve a fixed-mode readiness failure by inventing supplier evidence or enabling unsupported ceiling forwarding. Verify the local profile and compatible deployed components. Direct CLI archive-upload failure is a separate delivery issue; use the recorded native-host workflow without repeating an uncertain save.
+New `rate_limited` responses do not consume a message or disable existing-operation GET recovery. Pending operations recover their original receipt without submitting again. Historical wallet receipts retain their accepted contract; unknown execution is never proof of non-dispatch. Do not resolve a readiness failure by inventing supplier quota or repeatedly regenerating content.

@@ -146,9 +146,10 @@ Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) f
 | 0131 | [ADR 0131: Private operator desktops and maintenance holds](0131-private-operator-desktops-and-maintenance.md) | Private sessions, independent desktops and durable repair holds |
 | 0132 | [ADR 0132: Recoverable desktop credential handoff](0132-recoverable-desktop-credential-handoff.md) | Validated existing-account refresh with recoverable intent |
 | 0133 | [ADR 0133: Explicit validated enrollment and isolated integration fixtures](0133-explicit-validated-enrollment-and-test-isolation.md) | Retired bulk import, create-only enrollment and isolated fixtures |
-| 0134 | [ADR 0134: Fixed-price Sites generation with opaque provider quotas](0134-fixed-price-sites-generation-with-opaque-provider-quotas.md) | Implemented locally; provisional tariff and account allowance |
+| 0134 | [ADR 0134: Fixed-price Sites generation with opaque provider quotas](0134-fixed-price-sites-generation-with-opaque-provider-quotas.md) | Historical tariff; new admission superseded by 0140 |
 | 0135 | [ADR 0135: Durable Sites receipts and local admission](0135-durable-sites-receipts-and-local-admission.md) | Durable text receipts, local limits and bounded recovery |
 | 0136 | [ADR 0136: Customer-owned Sites delivery](0136-customer-owned-sites-delivery.md) | Bounded companion; native-host delivery and separate publication evidence |
 | 0137 | [ADR 0137: Account-owned Sites subdomains](0137-account-owned-sites-subdomains.md) | Stable app/username addresses, native attachment and private DNS recovery |
 | 0138 | [ADR 0138: Automatic Sites domain provisioning](0138-automatic-sites-domain-provisioning.md) | Customer discovery, durable DNS outbox and scheduled reconciliation |
 | 0139 | [ADR 0139: Browser Sites workspace and managed publishing](0139-browser-sites-workspace-and-managed-publishing.md) | Private authoring, explicit public snapshots and automated managed addresses |
+| 0140 | [ADR 0140: Paid Sites and shared fair usage](0140-paid-sites-and-shared-fair-usage.md) | Paid-plan inclusion, shared admission and original-operation recovery |

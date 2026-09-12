@@ -32,4 +32,4 @@ Send `GET https://galx.ai/api/sites/domains?projectId=YOUR_SITE_ID` with `Author
 
 For `reserved` or `pending`, `url` is null. Responses are private and must not be cached. An address belonging to another account is unavailable to this request. Authentication failures return `401`; an unknown address returns `404`. Temporary unavailability returns a generic error. A successful status check describes the last verified state; it is not an uptime guarantee.
 
-Content generation and its accepted price are described in [Site content generation](SITES_CONTENT.md). Address setup does not submit another content generation.
+Content generation and paid-plan access are described in [Site content generation](SITES_CONTENT.md). Address setup does not submit another content generation.

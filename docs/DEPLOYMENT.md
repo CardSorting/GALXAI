@@ -21,6 +21,6 @@ Run appropriate [hardening checks](maintainers/RELAY_HARDENING.md), production b
 
 ## Sites strategy rollout
 
-The fixed-price working-tree changes have local verification only. The [earlier September 11 release](../internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/RELEASE_20260911.md) deployed a metered precursor with paid generation disabled; it is not fixed-price deployment evidence.
+The paid Sites policy in ADR 0140 is a separate cutover from earlier fixed/metered deployments. Follow [Sites rollout](maintainers/SITES_FAIR_USAGE.md#verification-and-rollout): apply the additive private migration, deploy the included generation path with admission disabled, verify current paid-plan mapping and operator-approved limits, then qualify a controlled rollout. Preserve receipt volumes, signing authority and original-operation readers.
 
-Follow [Sites rollout](maintainers/SITES_OPERATIONS.md#rollout): upgrade compatible workers and federation with retained volumes/signing authority, then the application with generation paused, verify the exact environment and enable the intended cohort. Fixed mode does not require supplier ceiling attestations. Keep settlement/recovery code for accepted fixed-price holds during rollback. Customer-local upload/publication is independently verified and does not follow from an application deploy.
+Earlier feature flags do not enable the replacement policy. Keep historical wallet reconciliation and current included recovery available during rollback. [Managed publication](maintainers/SITES_WORKSPACE.md) and native delivery retain their separate hosting and verification requirements.

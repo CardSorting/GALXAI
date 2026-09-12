@@ -26,12 +26,16 @@ export class LiveBillingAdapter {
   }
   async quote(signal: AbortSignal) {
     const value = await this.request('GET', signal);
-    exact(value, ['currency', 'unit', 'quoteVersion', 'maxChargeMicroUsd']);
-    identifier(value.quoteVersion); amount(value.maxChargeMicroUsd);
-    requireThat(value.currency === 'USD' && value.unit === 'micro_usd' && value.maxChargeMicroUsd > 0, 'billing_quote_invalid');
-    return { version: value.quoteVersion, maximum: value.maxChargeMicroUsd };
+    exact(value, ['access']);requireThat(value.access==='included','sites_access_required');
+    // Legacy local budget shape only; no customer quote or wallet transaction.
+    return { version:'included', maximum:0 };
   }
   private reply(value: any, operationId: string): GenerationReply {
+    if(value && Object.hasOwn(value,'status')){
+      exact(value,['operationId','text','status']);
+      requireThat(value.operationId===operationId&&typeof value.text==='string'&&Buffer.byteLength(value.text)<=12000&&['pending','completed'].includes(value.status),'billing_receipt_mismatch');
+      return {text:value.text,cost:value.status==='completed'?{units:0,receipt:operationId}:null};
+    }
     exact(value, ['operationId', 'text', 'cost']);
     requireThat(value.operationId === operationId && typeof value.text === 'string' && Buffer.byteLength(value.text) <= 12000, 'billing_receipt_mismatch');
     if (value.cost !== null) {
@@ -41,10 +45,11 @@ export class LiveBillingAdapter {
     return { text: value.text, cost: null };
   }
   async generate(input: GenerationInput, quote: { version: string; maximum: number }) {
+    requireThat(quote.version==='included'&&quote.maximum===0,'sites_access_required');
     identifier(input.operationId);
     const user = input.messages.filter(m => m.role === 'user'); requireThat(user.length > 0, 'invalid_brief');
     return this.reply(await this.request('POST', input.signal, { operationId: input.operationId, brief: user[0].content,
-      repair: user.length > 1, quoteVersion: quote.version, maxChargeMicroUsd: quote.maximum }), input.operationId);
+      repair: user.length > 1 }), input.operationId);
   }
   async reconcile(operationId: string, signal: AbortSignal) {
     identifier(operationId);

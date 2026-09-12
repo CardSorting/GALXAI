@@ -27,10 +27,9 @@ function Workspace({owner,token,authLoading,initialId}: {owner:string|null;token
   const {site,busy} = studio;
   const openingSite = studio.openingSite || Boolean(initialId && authLoading);
   const preview = useMemo(() => renderSitePreview(site?.document || EXAMPLE),[site?.document]);
-  const dollars = studio.quote ? new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:4}).format(studio.quote.maxChargeMicroUsd/1000000) : null;
   const draftKey = `galx-sites-unsent:${owner || 'guest'}`;
   useEffect(() => { try { const saved = sessionStorage.getItem(draftKey) || (owner ? sessionStorage.getItem('galx-sites-unsent:guest') : null); if (saved) setPrompt(saved.slice(0,1800)); if (owner) sessionStorage.removeItem('galx-sites-unsent:guest'); } catch {} },[draftKey,owner]);
-  useEffect(() => { messagesRef.current?.scrollTo({top:messagesRef.current.scrollHeight,behavior:'instant'}); },[site?.messages.length,site?.generating,busy]);
+  useEffect(() => { messagesRef.current?.scrollTo({top:site?.messages.length||site?.generating||busy?messagesRef.current.scrollHeight:0,behavior:'instant'}); },[site?.messages.length,site?.generating,busy]);
   useEffect(() => { if (studio.username) setUsername(studio.username); },[studio.username]);
   function remember(value:string) { setPrompt(value); try { sessionStorage.setItem(draftKey,value); } catch {} }
   function choose(next: WorkspaceSite | null) {
@@ -72,13 +71,14 @@ function Workspace({owner,token,authLoading,initialId}: {owner:string|null;token
             {(busy || site?.generating) && <div className="sites-working" role="status"><LoaderCircle aria-hidden="true" /><span>{site?.generating?'Updating your draft…':'Working on your Site…'}</span><p>You can return to this Site to check its progress.</p></div>}
           </div>
           <div className="sites-compose-area">
-            {owner && !studio.setupLoading && !studio.quote && <p className="sites-help" role="status">Generation isn’t available for this account right now. You can still view and manage saved Sites.</p>}
+            {owner && !studio.setupLoading && studio.access==='paid_plan_required' && <p className="sites-help" role="status">Create and update Sites with an eligible paid plan. <Link href="/pricing">View plans<ArrowUpRight aria-hidden="true" size={14}/></Link></p>}
+            {owner && !studio.setupLoading && studio.access==='unavailable' && <p className="sites-help" role="status">Site updates are unavailable right now. Your saved Sites are still here. Try again shortly.</p>}
             {site?.archived ? <div className="sites-archived"><p>This Site is archived.</p><button className="sites-button" onClick={()=>void studio.change({action:'archive',archived:false})}>Restore Site</button></div> : <form className="sites-composer" onSubmit={e=>{e.preventDefault();void submit();}}>
               <label className="sr-only" htmlFor="site-prompt">Describe your Site or ask for a change</label>
               <textarea id="site-prompt" ref={promptRef} value={prompt} maxLength={1800} rows={3} placeholder={site?.document?'What would you like to change?':'Tell us about your Site…'} onChange={e=>remember(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();if(owner)void submit();}}}/>
-              <div className="sites-composer-actions"><span>{site?.document?'Describe a change':'Your idea, in your words'}</span>{owner?<button className="sites-send" type="submit" disabled={authLoading||studio.loading||openingSite||busy||site?.generating||!studio.quote||!prompt.trim()||new TextEncoder().encode(prompt).length>2000} aria-label={dollars?`Send message, maximum ${dollars}`:'Send message'}>{dollars && <span>{dollars}</span>}<ArrowUp aria-hidden="true" /></button>:<Link className="sites-primary" href="/auth/login?redirect=%2Fsites">Sign in to create<ArrowUpRight aria-hidden="true" /></Link>}</div>
+              <div className="sites-composer-actions"><span>{site?.document?'Describe a change':'Your idea, in your words'}</span>{owner?<button className="sites-send" type="submit" disabled={authLoading||studio.loading||openingSite||busy||site?.generating||studio.access!=='included'||!prompt.trim()||new TextEncoder().encode(prompt).length>2000} aria-label="Send message"><ArrowUp aria-hidden="true" /></button>:<Link className="sites-primary" href="/auth/login?redirect=%2Fsites">Sign in to create<ArrowUpRight aria-hidden="true" /></Link>}</div>
             </form>}
-            {owner && dollars && <p className="sites-price">Up to {dollars} per completed update. Review your draft before publishing.</p>}
+            <p className="sites-help sites-plan-note">{studio.access==='included'?'Included with your plan.':'Available with eligible paid plans.'} Fair usage applies; you may need to pause between updates.</p>
           </div>
         </>}
       </section>

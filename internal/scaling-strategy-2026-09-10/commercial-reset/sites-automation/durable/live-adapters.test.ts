@@ -82,13 +82,14 @@ test('billing companion uses authenticated fixed endpoint, never redirects, and 
   const requests: any[] = [];
   const client = new LiveBillingAdapter('https://galx.example', 'session', async (url, init) => {
     requests.push([String(url), init]);
-    if (init?.method === 'GET') return Response.json({ currency: 'USD', unit: 'micro_usd', quoteVersion: 'v1', maxChargeMicroUsd: 100 });
-    return Response.json({ operationId: 'op', text: JSON.stringify(brief), cost: { units: 10, receipt: 'receipt' } });
+    if (init?.method === 'GET') return Response.json({ access:'included' });
+    return Response.json({ operationId: 'op', text: JSON.stringify(brief), status:'completed' });
   });
   const signal = new AbortController().signal;
   const quote = await client.quote(signal);
   const result = await client.generate({ operationId: 'op', requestedModel: 'private-choice', messages: [{ role: 'user', content: 'brief' }], signal }, quote);
-  assert.equal(result.cost?.units, 10);
+  assert.equal(result.cost?.units, 0);
+  assert(!requests[1][1].body.includes('maxChargeMicroUsd'));
   assert(requests.every(([url, init]) => url === 'https://galx.example/api/sites/content' && init.redirect === 'error' && init.credentials === 'omit'));
   assert(!requests[1][1].body.includes('private-choice'));
   const wrong = new LiveBillingAdapter('https://galx.example', 'session', async () => Response.json({ operationId: 'another', text: '', cost: null }));

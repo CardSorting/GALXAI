@@ -6,7 +6,7 @@ Open [Sites](https://galx.ai/sites) to create a simple website through conversat
 
 ## Start with an idea
 
-Sign in, describe the page you want, and send your request. You can start with a product launch, a portfolio or an event page. The price shown beside Send is the maximum charge for that update. Generation must be available for your account, and your account needs enough credit.
+Sign in, describe the page you want, and send your request. You can start with a product launch, a portfolio or an event page. Creating, updating and publishing Sites is included with eligible active paid plans, subject to fair usage. There is no separate charge for each Site update. The workspace shows whether your account has access.
 
 Review the draft, then describe what you want to change. The current version is included when making an update. This release creates simple information pages; it does not create accounts, working checkout forms or custom application behavior for your visitors.
 
@@ -22,8 +22,10 @@ Address setup continues automatically. Wait for the Site to become Live before s
 
 ## Resume interrupted work
 
-If an update is interrupted, reopen the Site to check its progress. Avoid submitting the same change again while it is still updating. A completed request that produces an unusable draft can still be charged; your previous draft stays saved.
+If an update is interrupted, reopen the Site to check its progress. Avoid submitting the same change again while it is still updating. If an update cannot produce a usable draft, your previous draft stays saved.
 
 Generation and publishing may be unavailable for an account during rollout. The workspace shows their availability separately. Existing Sites created through another connected workflow retain their original access settings and setup requirements; they are not automatically imported into My Sites.
 
-See [Site addresses](SITE_ADDRESSES.md) and [Site content generation](SITES_CONTENT.md) for their capability and pricing contracts.
+Fair usage helps keep Sites available across accounts. You may be asked to pause before another update. Access can become available again without waiting for a new billing period. Your saved work stays available while updates are paused.
+
+See [Site addresses](SITE_ADDRESSES.md) and [Site content generation](SITES_CONTENT.md) for their capability and access contracts.

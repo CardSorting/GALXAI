@@ -199,7 +199,7 @@ Chat and My Sites share a quiet row, with pale indigo underlining the current vi
 
 ### Composer and fields
 
-The composer groups a multiline prompt and its action into one dark container. A stronger neutral border becomes indigo on focus within. Prompt text remains compact with generous line height; the send action contains the current price when available. Text fields for search, naming and publication use the same dark fill and foreground hierarchy.
+The composer groups a multiline prompt and its action into one dark container. A stronger neutral border becomes indigo on focus within. Prompt text remains compact with generous line height; the send action has the accessible name “Send message” and shows no generation price. Below it, concise copy explains paid-plan inclusion and fair usage. Ineligible accounts get a View plans link; temporary unavailability preserves the draft and explains how to retry. Text fields for search, naming and publication use the same dark fill and foreground hierarchy.
 
 ### Conversation and library
 
@@ -227,3 +227,7 @@ Direct navigation to a saved Site shows loading or unavailable content in both c
 - **Don't** treat a preview, saved draft or queued address as evidence that a page is publicly live.
 - **Don't** add decorative kickers, glyph icons or hard block shadows to this workspace.
 - **Don't** generalize local palette differences into detector exclusions for unrelated files.
+
+## Preserved scoped details
+
+The palette/radius/font detector compares this surface to the root system. File-scoped exceptions retain its documented Georgia page voice and preview ink, the 10px composer, 5px icon controls, 3px thumbnail details and 26px mobile welcome heading. Existing preview chrome uses `#303446`, `#b9c0cf` and `#5c6373`; paper thumbnail rules use `#9ba99d`; scrollbar thumbs use `#343a50`. These are local details, not global additions. The paid-access pass changes copy, its spacing and initial scroll position without restyling this surface.
