@@ -1,0 +1,99 @@
+{
+  "observed_at": "2026-09-13T18:35:20.982016Z",
+  "revision": "c40440d6d393f4aabb56b2679cd46e91c910ff3d",
+  "branch": "main",
+  "source_tree_clean_when_pushed": true,
+  "change": "Richer galaxy formations, automatic meteors, constellations and smooth once-only story entrances with immediate interaction and reduced-motion support.",
+  "local_evidence": [
+    "docs/knowledge/audits/2026-09-13-homepage-cinematic-formation.json",
+    "docs/knowledge/audits/2026-09-13-homepage-reading-flow.json"
+  ],
+  "deployment": {
+    "id": "dpl_B4Df6X49zV5EC6912WZnfu4MGUpY",
+    "target": "production",
+    "status": "Ready",
+    "url": "https://galxai-fv3rsnaf4-cardsortings-projects.vercel.app",
+    "aliases": [
+      "galx.ai",
+      "www.galx.ai"
+    ],
+    "trigger": "Git push to main",
+    "revision_correlation": {
+      "state": "success",
+      "statuses": [
+        {
+          "context": "Vercel",
+          "description": "Deployment has completed",
+          "state": "success",
+          "target_url": "https://vercel.com/cardsortings-projects/galxai/B4Df6X49zV5EC6912WZnfu4MGUpY"
+        }
+      ]
+    },
+    "previous_serving_deployment": "dpl_GY9dJU4RDjtc3Hjz4FYvYmqeiMuM",
+    "rollback_note": "Previous application deployment preserved. No migration, configuration, gateway, controller or worker changes."
+  },
+  "application_ci": {
+    "conclusion": "success",
+    "headSha": "c40440d6d393f4aabb56b2679cd46e91c910ff3d",
+    "status": "completed",
+    "url": "https://github.com/CardSorting/GALXAI/actions/runs/34774818473"
+  },
+  "documentation_ci": {
+    "conclusion": "success",
+    "headSha": "c40440d6d393f4aabb56b2679cd46e91c910ff3d",
+    "status": "completed",
+    "url": "https://github.com/CardSorting/GALXAI/actions/runs/34774818479"
+  },
+  "live_homepage_acceptance": {
+    "observed_at": "2026-09-13T18:33:51.861Z",
+    "origin": "https://galx.ai",
+    "read_only": true,
+    "results": [
+      {
+        "width": 1440,
+        "status": 200,
+        "storyArrivals": 15,
+        "starCount": 360,
+        "canvasPaintAndOffscreenStop": "passed",
+        "keyboardOrTouchStar": "passed",
+        "motionControls": "passed",
+        "persistedPause": "passed",
+        "reducedMotion": "passed",
+        "nativeNavigation": "passed",
+        "revisions": "passed",
+        "publicCopy": "passed",
+        "axeViolations": 0,
+        "pageErrors": 0,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "status": 200,
+        "storyArrivals": 15,
+        "starCount": 220,
+        "canvasPaintAndOffscreenStop": "passed",
+        "keyboardOrTouchStar": "passed",
+        "motionControls": "passed",
+        "persistedPause": "passed",
+        "reducedMotion": "passed",
+        "nativeNavigation": "passed",
+        "revisions": "passed",
+        "publicCopy": "passed",
+        "axeViolations": 0,
+        "pageErrors": 0,
+        "overflow": false
+      }
+    ],
+    "browserAssetsScanned": 23,
+    "limitations": [
+      "Bounded anonymous desktop/mobile acceptance; no generation, checkout, publication, signed-in flows or load test.",
+      "Privacy scans cover homepage rendered content, response and associated JavaScript/CSS assets; this is not a whole-site certification."
+    ]
+  },
+  "verification_harness_sha256": "ba77d00f44b5a4103e46db9e53d64608636d1bfc286a6032b028d1225bc53656",
+  "limitations": [
+    "Anonymous read-only desktop/mobile acceptance. No generation, checkout, publication, signed-in flow or load test.",
+    "Live acceptance verifies active canvas painting, star count and offscreen suspension, all 15 once-only story arrivals, motion preferences and native navigation. Full constellation-cycle and interruption edge cases retain separate local evidence.",
+    "The follow-up documentation commit records this verified feature revision without changing its application source or the observation."
+  ]
+}
