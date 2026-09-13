@@ -1,0 +1,265 @@
+{
+  "observed_at": "2026-09-13T21:19:41.357636+00:00",
+  "scope": "Final local production browser/HTTP checks for public reading pages; no deployment or real account/payment actions.",
+  "command": "node scripts/verify-public-reading-ui.mjs",
+  "exit_code": 0,
+  "browser_report": {
+    "http": [
+      {
+        "route": "/pricing",
+        "status": 200,
+        "title": "Pricing \u2014 GALX Pro for Sites | GALXAI",
+        "rsc": 200
+      },
+      {
+        "route": "/faq",
+        "status": 200,
+        "title": "Frequently asked questions | GALXAI",
+        "rsc": 200
+      },
+      {
+        "route": "/knowledge-base",
+        "status": 200,
+        "title": "Knowledge base \u2014 Sites guides and help | GALXAI",
+        "rsc": 200
+      },
+      {
+        "route": "/pricing/galx-pro",
+        "status": 200,
+        "title": "What\u2019s included in GALX Pro | GALXAI",
+        "rsc": 200
+      },
+      {
+        "route": "/pricing/fair-use",
+        "status": 200,
+        "title": "Revisions and fair use | GALXAI",
+        "rsc": 200
+      },
+      {
+        "route": "/pricing/billing-and-cancellation",
+        "status": 200,
+        "title": "Billing and cancellation | GALXAI",
+        "rsc": 200
+      },
+      {
+        "route": "/knowledge-base/getting-started",
+        "status": 200,
+        "title": "Create your first Site | GALXAI",
+        "rsc": 200
+      },
+      {
+        "route": "/knowledge-base/revising-your-site",
+        "status": 200,
+        "title": "Revise and revisit your Site | GALXAI",
+        "rsc": 200
+      },
+      {
+        "route": "/knowledge-base/publishing-your-site",
+        "status": 200,
+        "title": "Publish and share your Site | GALXAI",
+        "rsc": 200
+      },
+      {
+        "route": "/knowledge-base/public-beta",
+        "status": 200,
+        "title": "What to expect in the public beta | GALXAI",
+        "rsc": 200
+      },
+      {
+        "route": "/knowledge-base/images-and-developer-access",
+        "status": 200,
+        "title": "Sites, Images, and developer access | GALXAI",
+        "rsc": 200
+      }
+    ],
+    "layouts": [
+      {
+        "route": "/pricing",
+        "width": 1440,
+        "overflow": false
+      },
+      {
+        "route": "/faq",
+        "width": 1440,
+        "overflow": false
+      },
+      {
+        "route": "/knowledge-base",
+        "width": 1440,
+        "overflow": false
+      },
+      {
+        "route": "/pricing/galx-pro",
+        "width": 1440,
+        "overflow": false
+      },
+      {
+        "route": "/knowledge-base/getting-started",
+        "width": 1440,
+        "overflow": false
+      },
+      {
+        "route": "/pricing",
+        "width": 390,
+        "overflow": false
+      },
+      {
+        "route": "/faq",
+        "width": 390,
+        "overflow": false
+      },
+      {
+        "route": "/knowledge-base",
+        "width": 390,
+        "overflow": false
+      },
+      {
+        "route": "/pricing/galx-pro",
+        "width": 390,
+        "overflow": false
+      },
+      {
+        "route": "/knowledge-base/getting-started",
+        "width": 390,
+        "overflow": false
+      },
+      {
+        "route": "/pricing",
+        "width": 320,
+        "overflow": false
+      },
+      {
+        "route": "/faq",
+        "width": 320,
+        "overflow": false
+      },
+      {
+        "route": "/knowledge-base",
+        "width": 320,
+        "overflow": false
+      },
+      {
+        "route": "/pricing/galx-pro",
+        "width": 320,
+        "overflow": false
+      },
+      {
+        "route": "/knowledge-base/getting-started",
+        "width": 320,
+        "overflow": false
+      },
+      {
+        "route": "/pricing",
+        "width": 900,
+        "overflow": false
+      },
+      {
+        "route": "/faq",
+        "width": 900,
+        "overflow": false
+      },
+      {
+        "route": "/knowledge-base",
+        "width": 900,
+        "overflow": false
+      },
+      {
+        "route": "/pricing/galx-pro",
+        "width": 900,
+        "overflow": false
+      },
+      {
+        "route": "/knowledge-base/getting-started",
+        "width": 900,
+        "overflow": false
+      },
+      {
+        "route": "/pricing",
+        "width": 768,
+        "overflow": false
+      },
+      {
+        "route": "/faq",
+        "width": 768,
+        "overflow": false
+      },
+      {
+        "route": "/knowledge-base",
+        "width": 768,
+        "overflow": false
+      },
+      {
+        "route": "/pricing/galx-pro",
+        "width": 768,
+        "overflow": false
+      },
+      {
+        "route": "/knowledge-base/getting-started",
+        "width": 768,
+        "overflow": false
+      }
+    ],
+    "checks": [
+      "raw HTML, RSC/prefetch, private-path denial, administrator denial, canonical/social metadata, sitemap and breadcrumbs",
+      "search, category filtering, empty recovery/focus, hostile search, Escape, keyboard disclosure, anchor navigation, persistent header, back/forward, sign-in continuation, homepage legacy anchors",
+      "server-rendered guide links and native FAQ with client bundles blocked (inline framework completion allowed)"
+    ],
+    "scriptCount": 29
+  },
+  "automated_accessibility": {
+    "engine": "Axe WCAG A/AA/2.1 AA tags",
+    "widths": [
+      1440,
+      390
+    ],
+    "page_families": 5,
+    "violations": 0
+  },
+  "build_boundary_scan": {
+    "command": "npm run docs:check:build",
+    "assets_checked": 654,
+    "exit_code": 0
+  },
+  "screenshots": {
+    ".impeccable/review/public-reading/faq-1440-viewport.png": "38d0e807d6ca0055a836f4f1ae98b56e14af4126fe82b6527158e2f854f277bd",
+    ".impeccable/review/public-reading/faq-1440.png": "4bffd68e8c2d1bee773af1fcc19c16dde0efb6883cbe37b8c10ab83c5c67d872",
+    ".impeccable/review/public-reading/faq-390-viewport.png": "fee7a8db3ed9de1156f5def2aaca40fd9b2ce5b778eec737e5cc1d1985f13e96",
+    ".impeccable/review/public-reading/faq-390.png": "007bf50edf1ca55206052771479a0809daaf4de15551a2190f2dbe482de476fa",
+    ".impeccable/review/public-reading/knowledge-base-1440-viewport.png": "bcfa94d217ead122ddb2c46f43706644e2db9620f8e1cf48783240aa885d082c",
+    ".impeccable/review/public-reading/knowledge-base-1440.png": "9f355af70b5516169c9e2748ba89819a324d61d782c0fb3781720b986675b650",
+    ".impeccable/review/public-reading/knowledge-base-390-viewport.png": "e84862faea7b1dbc9cbf15a1a1cfbebfffd77dfb93a95c6000fecce8730cc3a4",
+    ".impeccable/review/public-reading/knowledge-base-390.png": "aa5fd38515de7c735f54bfc4a3afb3a551c9ee130a0541f4a14eb423bbc9a249",
+    ".impeccable/review/public-reading/knowledge-base-getting-started-1440-viewport.png": "c1ce9dad89d8876b21c0897e9a3d6ea45fe767de147c6e875092b78f2e2ccaf9",
+    ".impeccable/review/public-reading/knowledge-base-getting-started-1440.png": "96dd099bc2ffba34ede0d1827ba7c2fde970f7f9f7c75e337c796ddb03d25e52",
+    ".impeccable/review/public-reading/knowledge-base-getting-started-390-viewport.png": "6ac3ed54ad7cd33922d5b0876c8eb7dad8bfc7a7d3c85782e50bc6cdd70ecd0f",
+    ".impeccable/review/public-reading/knowledge-base-getting-started-390.png": "ff331cb6a27dd890d386b9c1ec19599b0d53644cba3e0b55cc0684feee68412e",
+    ".impeccable/review/public-reading/pricing-1440-viewport.png": "883689b983b2f95dc5db034107ba37540b9bb28c7ef97103f2997f574fec1bed",
+    ".impeccable/review/public-reading/pricing-1440.png": "c5c34b930c037209268360ff747f8488c0fbd27a374863b9dc094696b68eafec",
+    ".impeccable/review/public-reading/pricing-390-viewport.png": "b8a2c31cd203dfbe4e5c4dce27625113f5967829318667ca73a7c23f8e2f1208",
+    ".impeccable/review/public-reading/pricing-390.png": "c06ddc48c68ac27b32bf3f68c0012d9fb2f09ff2284d18f84902aacf2598b533",
+    ".impeccable/review/public-reading/pricing-galx-pro-1440-viewport.png": "66835d87d37e64716ba3cd3d68f11b14d7b66ab154a808f01d00be6fc99fad55",
+    ".impeccable/review/public-reading/pricing-galx-pro-1440.png": "8518d38ce65927b597098dd1d5a502e7f4e8dda72f93d72d850d6ad3ed3efae2",
+    ".impeccable/review/public-reading/pricing-galx-pro-390-viewport.png": "a17c5e8830d3f5f273b8c05c79eb015c4037e305ac8bcb02359af2fb5eb94cd3",
+    ".impeccable/review/public-reading/pricing-galx-pro-390.png": "8bcd89a4cad0ac5fec969e163c21fc5a6fe49436f2c702cb2e18f15618cdb9fb",
+    ".impeccable/review/public-reading/search-empty.png": "8efcc8eb3e62741d0de7e8956e77a831ea6ba07f937f01daa8eb9503db9253f8"
+  },
+  "independent_review": {
+    "disposition": "ship",
+    "required_material_fixes": [],
+    "scope": "20 desktop/phone captures plus sampled source, incumbent-world extension; no comp or QUALITY BAR artifact claimed.",
+    "optional_findings": [
+      {
+        "severity": "P3",
+        "finding": "Active Knowledge base label is partially clipped on direct mobile entry; horizontal scrolling and keyboard focus reveal remain usable.",
+        "future_refinement": "Automatically reveal the active global menu item on route changes."
+      }
+    ]
+  },
+  "limits": [
+    "Browser fixture starts from fresh synthetic startup keys and blocks external browser requests. No production credentials are inherited by the server.",
+    "No signed-in billing/payment action, signup, image generation, Site creation/publication or deployment.",
+    "No search engine indexing/ranking, field Core Web Vitals, continuous availability or comprehensive assistive-technology certification.",
+    "Blocked client bundles retain inline framework stream completion; complete JavaScript-disabled behavior is not claimed.",
+    "Known optional mobile active-link reveal remains; no required design fix was left open."
+  ]
+}

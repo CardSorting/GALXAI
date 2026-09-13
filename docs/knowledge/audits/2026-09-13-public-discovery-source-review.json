@@ -1,0 +1,89 @@
+{
+  "observed_at": "2026-09-13T21:15:18.458430+00:00",
+  "base_revision": "9214261acf641563ef30b6410f65c41a269b40a8",
+  "scope": "Local public navigation, pricing, FAQ, knowledge-base implementation and source/guide review; no deployment or real account/payment/generation/publication acceptance.",
+  "inspected_source_and_guide_sha256": {
+    "src/lib/security/preview-policy.ts": "2b9c47cb14be8d6f36a528758cbdbc4ed68a8c8b5c37cfbb808435838125ab39",
+    "src/lib/security/preview-middleware.ts": "bbb6395b98bcb44b93ef7ae56b1c309dd00734c081148c11c77890abbca937d7",
+    "src/lib/public-content/routes.ts": "4fc0e78c5faa3d9e6005416d03e03232744536ade21452338aff44caf8582bd3",
+    "src/lib/public-content/content.ts": "724038fce7f18ba4b612bec955eaf5ea6ac48e71af3af5dd635a4309e2848266",
+    "src/lib/seo/metadata.ts": "cacce49c9f6890b89abeb545f0fda395fc8c4afa29900f2aa5753cc225951fd0",
+    "src/lib/seo/siteConfig.ts": "1cdd6d0284271362577ee17fab2d7ad88d14950b593a0d57ea36e22dc46cb105",
+    "src/app/sitemap.ts": "da050325f22e7d981225552679f47794c6f1478726125e18295e1889c1b188c7",
+    "src/components/dashboard/Navigation.tsx": "0e580174052cbe0db3465de99ee4e9c406d0af5759fde105d7b3d9c2c7b05a54",
+    "src/components/dashboard/navigation.module.css": "2340ad6e9b8344a1957eef5a65c2ec2b207fe7d5c1c9e828472cec147ae43bdb",
+    "src/components/dashboard/Footer.tsx": "84c9be865082d1349b0053cc51c02379f88ab96cab686fb26c53e91cdc855b5d",
+    "src/components/dashboard/MobileBottomNav.tsx": "1e42d83f0291d934c1165be13346ae10f3f2c5fcd1a3a9b30ba3ec1e60e11830",
+    "src/components/home/PublicHome.tsx": "aefca9cd83a56c62c87c551d7b352fe455f3c3fa060a814821ee40b3df7d347a",
+    "src/components/home/PlanAction.tsx": "d2d0e6405008a4561ecda90cd220ad7c6f38921012bbcda4a6b5c2a5ed77553e",
+    "src/components/public-content/ReadingPage.tsx": "962dac46e108bbf1a4666eddc62f296735d38fdc1b53de5e4dec302094a0d515",
+    "src/components/public-content/KnowledgeSearch.tsx": "485027842c5ca930fed7b440387676f04891ee8efe6d9d2d822073256b43a04d",
+    "src/components/public-content/public-content.module.css": "c1c6a99a77563ae5afcca6f46b34216afd7f16c3fdb671139f01109e88bc48a6",
+    "src/components/common/IntentLink.tsx": "c866bc13acbbc81829c9f4ec1be5736bfb064c7a039c3d43ab5c524dd5d6e201",
+    "src/app/layout.tsx": "d2e6515d18cee2a76bd20484b96ab8e186c3fbce7a04caf3044013f1cea15b76",
+    "docs/PRODUCT_SURFACE_STRATEGY.md": "6ae65c17910c19a8f564d9b62d33c9ae9ad6acd4127147929c44fabddececb14",
+    "docs/operations/developer-preview.md": "5a0c12b0badd17203fe22d81353cc64f7e3a3ee6227aca662048f1d2dbff5e04",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "403a221ace78e2eeef87dda609a0d16671d1278ac1cea6a0f8b992d50b9afb2a",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "c865cec8709e8999de646463066e1be6d8e71adf3d33fc5f306cdaeba93472f3",
+    "docs/maintainers/PUBLIC_DISCOVERY.md": "79ddc8de016203a66d036144f5847ffa91f72dc6e9ff38d5a681f3ccf95b3df1",
+    "docs/knowledge/registry.json": "acb5bbd3b30dad76dfdf804ec7c0af8d529791b29b7762b63cd87b6edf4e6dbd",
+    "docs/DOCUMENTATION_POLICY.md": "ab2030f9d15010634b9a2d9cf2bc680fdf4ae961c2ee3f9f7ad567e99d49d40c",
+    "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
+    "docs/reference/knowledge-commands.md": "3ae9092ea941ebc459a2895b8c2eebb4c1c8d59659d718a2c353a1a6be6e8379",
+    "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
+    "docs/runbooks/knowledge-maintenance.md": "8ec7e6e7940202e38b8aa16cba88e1e5d9040cbb1769bd0ec456b04c77e26b08"
+  },
+  "semantic_review": [
+    "Public disclosure boundary: reviewed exact authored paths against preview-policy and preview-middleware; no broad prefix, staff bypass, data API, workspace-session or developer-approval change. Static guides explain only supplied customer capabilities. The old FAQ technical claims and schema imports are removed before exposing the route.",
+    "Full product-scope and developer-preview guides reconciled with the eleven public reading routes and separate product/account requirements. The three critical source/guide changes were explicitly reviewed before any attestation; previous unchanged operational records are not re-certified as live observations.",
+    "Reviewed navigation, metadata, public-content source and complete navigation/quota-efficiency guides. Fixed main/footer paths, inherited active navigation, optional PlanAction styling, exact static article links, shared homepage answers, plan terms, local body-text search, reset/focus, visible breadcrumbs and stable canonical origin. Existing homepage anchors remain local and usable.",
+    "All new source paths mapped to client-efficiency, including SEO config and static route files. Registry-only knowledge change reviewed against documentation policy, knowledge operations, change workflow, command reference and maintenance runbook. No new owner, decision acceptance, delivery status, CI workflow or review policy. Fingerprint inventories are drift detectors, not exhaustive module audits.",
+    "Unmapped product-strategy guide and surface briefs inspected: they describe intended page scope and visual composition, not hosted evidence. Historical source/evidence remains dated. No public imports of private Markdown or incident records."
+  ],
+  "completed_checks": [
+    {
+      "command": "node --import tsx --test scripts/test-public-reading.ts scripts/test-public-information-boundary.ts scripts/test-developer-preview.ts scripts/test-workspace-auth.ts scripts/test-auth-entry.ts",
+      "passed": 27,
+      "failed": 0
+    },
+    {
+      "command": "npm run test:image:security",
+      "passed": 38,
+      "failed": 0,
+      "note": "Executed outside sandbox for isolated localhost HTTP listeners after EPERM inside sandbox."
+    },
+    {
+      "command": "npm run test:egress:transport",
+      "passed": 40,
+      "failed": 0
+    },
+    {
+      "command": "npm run test:docs",
+      "passed": 37,
+      "failed": 0
+    },
+    {
+      "command": "npm run build",
+      "exit_code": 0,
+      "note": "Includes TypeScript. Next loaded the existing local build environment. Browser server uses only fresh synthetic fixture keys; application credentials are not inherited."
+    },
+    {
+      "command": "Scoped ESLint on changed application modules",
+      "exit_code": 0,
+      "note": "Final PlanAction/reading/pricing ESLint also passed; scripts are outside the repository lint target."
+    }
+  ],
+  "findings_and_corrections": [
+    "Global links used homepage fragments; now actual canonical page destinations.",
+    "Legacy FAQ had obsolete technical public copy; replaced with shared homepage capability guidance.",
+    "Root title template duplicated an already branded metadata title; absolute titles prevent duplication.",
+    "Local app URL entered canonicals/social metadata; the SEO origin is now the permanent public domain.",
+    "Reused PlanAction relied on homepage CSS variables; reading surfaces now supply explicit action and container classes.",
+    "Off-ramp 15px text changed to the existing 16px step. Seven intentional color values are narrowly excepted for the reading stylesheet; no rule/file-wide suppression."
+  ],
+  "limits": [
+    "Final browser verification and independent finish review are separate evidence; this source record does not claim their completion.",
+    "No deployment, paid transaction, real signed-in session, image generation or Sites publication. No search-engine indexing, ranking or field Core Web Vitals claim.",
+    "Initial browser fixture needed fresh synthetic vault/audit keys and accurate preview-gate status expectations; a later stalled fixture was stopped and instrumented. These are isolated harness observations, not production incidents."
+  ]
+}

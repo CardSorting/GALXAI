@@ -2791,6 +2791,18 @@
       "decision": null
     },
     {
+      "path": "docs/maintainers/PUBLIC_DISCOVERY.md",
+      "title": "Public navigation, pricing and knowledge base",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "client-efficiency"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
       "path": "docs/maintainers/README.md",
       "title": "Maintainer guides",
       "scope": "current-guide",

@@ -1671,6 +1671,12 @@
       "title": "PostgreSQL migration and recovery operations"
     },
     {
+      "path": "docs/maintainers/PUBLIC_DISCOVERY.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Public navigation, pricing and knowledge base"
+    },
+    {
       "path": "docs/maintainers/README.md",
       "scope": "current-guide",
       "category": "docs",
@@ -2563,6 +2569,12 @@
       "scope": "supporting-reference-unreviewed",
       "category": "src",
       "title": "Design System: GALX public homepage"
+    },
+    {
+      "path": "src/components/public-content/DESIGN.md",
+      "scope": "supporting-reference-unreviewed",
+      "category": "src",
+      "title": "Design System: GALX public reading surfaces"
     },
     {
       "path": "src/components/sites/DESIGN.md",

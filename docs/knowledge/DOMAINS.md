@@ -123,5 +123,6 @@ Owner role: **Product/performance maintainer**. Domain: `client-efficiency`.
 
 - [Vercel quota efficiency](../../docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md)
 - [Navigation and request intent](../../docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md)
+- [Public navigation, pricing and knowledge base](../../docs/maintainers/PUBLIC_DISCOVERY.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:egress:transport`, `npm run test:image:security`, `npm run build`.

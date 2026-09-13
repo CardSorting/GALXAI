@@ -1,39 +1,18 @@
-import type { Metadata } from 'next';
-import { FaqClient } from '@/components/faq/FaqClient';
-import { FAQS } from '@/lib/data/faqData';
+import { IntentLink as Link } from '@/components/common/IntentLink';
+import { ArrowRight, Plus } from 'lucide-react';
 import { constructMetadata } from '@/lib/seo/metadata';
-import { JsonLd, createFAQPageSchema, createBreadcrumbSchema } from '@/lib/seo/jsonld';
+import { FAQS, FAQ_GROUPS } from '@/lib/public-content/content';
+import { Breadcrumbs, SupportLink } from '@/components/public-content/ReadingPage';
+import styles from '@/components/public-content/public-content.module.css';
 
-export const metadata: Metadata = constructMetadata({
-  title: 'Frequently Asked Questions & Developer Knowledge Base',
-  description: 'Everything you need to know about GALXAI wholesale pricing, 75% prompt caching, 1-line OpenAI SDK drop-in integration, and enterprise zero data retention.',
-  canonicalPath: '/faq',
-  keywords: [
-    'AI Gateway FAQ',
-    'Wholesale AI Tokens FAQ',
-    'Prompt Caching Explained',
-    'OpenAI Drop-in Compatibility',
-    'Zero Data Retention AI',
-    'Cursor API Base URL Setup',
-  ],
-});
+export const metadata = constructMetadata({ title: 'Frequently asked questions', description: 'Answers about GALX Sites, Pro pricing, revisions, publishing, private drafts, and the early public beta.', canonicalPath: '/faq' });
 
-export default function FaqPage() {
-  const pageSchema = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      createFAQPageSchema(FAQS),
-      createBreadcrumbSchema([
-        { name: 'Home', url: '/' },
-        { name: 'FAQ', url: '/faq' },
-      ]),
-    ],
-  };
-
-  return (
-    <>
-      <JsonLd data={pageSchema} />
-      <FaqClient />
-    </>
-  );
+export default function FAQPage() {
+  return <main className={styles.page}>
+    <Breadcrumbs items={[{ name: 'Home', url: '/' }, { name: 'FAQ' }]} />
+    <header className={styles.intro}><h1>A little clarity.<br />Then, your first Site.</h1><p>Answers to the questions that come up before you create, subscribe, or share.</p></header>
+    <div className={styles.readingLayout}><nav className={styles.sidebar} aria-label="FAQ topics"><p>Jump to a topic</p>{FAQ_GROUPS.map(group => <a key={group.id} href={`#${group.id}`}>{group.title}</a>)}<Link href="/knowledge-base" className={styles.backLink}>Explore the knowledge base</Link></nav>
+      <div>{FAQ_GROUPS.map(group => <section key={group.id} id={group.id} className={styles.faqSection} aria-labelledby={`${group.id}-title`}><h2 id={`${group.id}-title`}>{group.title}</h2>{FAQS.filter(faq => faq.group === group.id).map(faq => <details className={styles.disclosure} key={faq.id}><summary>{faq.question}<Plus aria-hidden="true" /></summary><div className={styles.answer}><p>{faq.answer}</p><Link className={styles.textLink} href={faq.guide}>Read the guide <ArrowRight size={16} aria-hidden="true" /></Link></div></details>)}</section>)}<Link className={styles.textLink} href="/knowledge-base">Find step-by-step guidance <ArrowRight size={16} aria-hidden="true" /></Link></div>
+    </div><SupportLink />
+  </main>;
 }

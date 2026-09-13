@@ -1,0 +1,388 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-13T21:22:16.155Z",
+  "title": "Design System: GALX public reading surfaces",
+  "extensions": {
+    "colorMeta": {
+      "page-ground": {
+        "role": "neutral",
+        "displayName": "Dark page ground",
+        "tonalRamp": [
+          "oklch(15.00% 0.01175 265.76)",
+          "oklch(26.43% 0.01175 265.76)",
+          "oklch(37.86% 0.01175 265.76)",
+          "oklch(49.29% 0.01175 265.76)",
+          "oklch(60.71% 0.01175 265.76)",
+          "oklch(72.14% 0.01175 265.76)",
+          "oklch(83.57% 0.01175 265.76)",
+          "oklch(95.00% 0.01175 265.76)"
+        ]
+      },
+      "header-ground": {
+        "role": "neutral",
+        "displayName": "Shared header ground",
+        "tonalRamp": [
+          "oklch(15.00% 0.01153 274.62)",
+          "oklch(26.43% 0.01153 274.62)",
+          "oklch(37.86% 0.01153 274.62)",
+          "oklch(49.29% 0.01153 274.62)",
+          "oklch(60.71% 0.01153 274.62)",
+          "oklch(72.14% 0.01153 274.62)",
+          "oklch(83.57% 0.01153 274.62)",
+          "oklch(95.00% 0.01153 274.62)"
+        ]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Light reading foreground",
+        "tonalRamp": [
+          "oklch(15.00% 0.00287 264.54)",
+          "oklch(26.43% 0.00287 264.54)",
+          "oklch(37.86% 0.00287 264.54)",
+          "oklch(49.29% 0.00287 264.54)",
+          "oklch(60.71% 0.00287 264.54)",
+          "oklch(72.14% 0.00287 264.54)",
+          "oklch(83.57% 0.00287 264.54)",
+          "oklch(95.00% 0.00287 264.54)"
+        ]
+      },
+      "reading-muted": {
+        "role": "neutral",
+        "displayName": "Muted reading ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.02056 270.16)",
+          "oklch(26.43% 0.02056 270.16)",
+          "oklch(37.86% 0.02056 270.16)",
+          "oklch(49.29% 0.02056 270.16)",
+          "oklch(60.71% 0.02056 270.16)",
+          "oklch(72.14% 0.02056 270.16)",
+          "oklch(83.57% 0.02056 270.16)",
+          "oklch(95.00% 0.02056 270.16)"
+        ]
+      },
+      "reading-line": {
+        "role": "neutral",
+        "displayName": "Subtle reading divider",
+        "tonalRamp": [
+          "oklch(15.00% 0.00000 89.88 / 0.14)",
+          "oklch(26.43% 0.00000 89.88 / 0.14)",
+          "oklch(37.86% 0.00000 89.88 / 0.14)",
+          "oklch(49.29% 0.00000 89.88 / 0.14)",
+          "oklch(60.71% 0.00000 89.88 / 0.14)",
+          "oklch(72.14% 0.00000 89.88 / 0.14)",
+          "oklch(83.57% 0.00000 89.88 / 0.14)",
+          "oklch(95.00% 0.00000 89.88 / 0.14)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Dark inset surface",
+        "tonalRamp": [
+          "oklch(15.00% 0.02538 272.81)",
+          "oklch(26.43% 0.02538 272.81)",
+          "oklch(37.86% 0.02538 272.81)",
+          "oklch(49.29% 0.02538 272.81)",
+          "oklch(60.71% 0.02538 272.81)",
+          "oklch(72.14% 0.02538 272.81)",
+          "oklch(83.57% 0.02538 272.81)",
+          "oklch(95.00% 0.02538 272.81)"
+        ]
+      },
+      "primary": {
+        "role": "primary",
+        "displayName": "Indigo action",
+        "tonalRamp": [
+          "oklch(15.00% 0.23005 276.97)",
+          "oklch(26.43% 0.23005 276.97)",
+          "oklch(37.86% 0.23005 276.97)",
+          "oklch(49.29% 0.23005 276.97)",
+          "oklch(60.71% 0.23005 276.97)",
+          "oklch(72.14% 0.23005 276.97)",
+          "oklch(83.57% 0.23005 276.97)",
+          "oklch(95.00% 0.23005 276.97)"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Deep indigo action",
+        "tonalRamp": [
+          "oklch(15.00% 0.21458 277.02)",
+          "oklch(26.43% 0.21458 277.02)",
+          "oklch(37.86% 0.21458 277.02)",
+          "oklch(49.29% 0.21458 277.02)",
+          "oklch(60.71% 0.21458 277.02)",
+          "oklch(72.14% 0.21458 277.02)",
+          "oklch(83.57% 0.21458 277.02)",
+          "oklch(95.00% 0.21458 277.02)"
+        ]
+      },
+      "action-foreground": {
+        "role": "neutral",
+        "displayName": "White action ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.00000 89.88)",
+          "oklch(26.43% 0.00000 89.88)",
+          "oklch(37.86% 0.00000 89.88)",
+          "oklch(49.29% 0.00000 89.88)",
+          "oklch(60.71% 0.00000 89.88)",
+          "oklch(72.14% 0.00000 89.88)",
+          "oklch(83.57% 0.00000 89.88)",
+          "oklch(95.00% 0.00000 89.88)"
+        ]
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "Pale indigo focus",
+        "tonalRamp": [
+          "oklch(15.00% 0.10413 274.71)",
+          "oklch(26.43% 0.10413 274.71)",
+          "oklch(37.86% 0.10413 274.71)",
+          "oklch(49.29% 0.10413 274.71)",
+          "oklch(60.71% 0.10413 274.71)",
+          "oklch(72.14% 0.10413 274.71)",
+          "oklch(83.57% 0.10413 274.71)",
+          "oklch(95.00% 0.10413 274.71)"
+        ]
+      },
+      "link-hover": {
+        "role": "primary",
+        "displayName": "Pale indigo link",
+        "tonalRamp": [
+          "oklch(15.00% 0.06222 274.04)",
+          "oklch(26.43% 0.06222 274.04)",
+          "oklch(37.86% 0.06222 274.04)",
+          "oklch(49.29% 0.06222 274.04)",
+          "oklch(60.71% 0.06222 274.04)",
+          "oklch(72.14% 0.06222 274.04)",
+          "oklch(83.57% 0.06222 274.04)",
+          "oklch(95.00% 0.06222 274.04)"
+        ]
+      },
+      "field-border": {
+        "role": "neutral",
+        "displayName": "Visible field boundary",
+        "tonalRamp": [
+          "oklch(15.00% 0.03120 269.34)",
+          "oklch(26.43% 0.03120 269.34)",
+          "oklch(37.86% 0.03120 269.34)",
+          "oklch(49.29% 0.03120 269.34)",
+          "oklch(60.71% 0.03120 269.34)",
+          "oklch(72.14% 0.03120 269.34)",
+          "oklch(83.57% 0.03120 269.34)",
+          "oklch(95.00% 0.03120 269.34)"
+        ]
+      },
+      "filter-hover": {
+        "role": "neutral",
+        "displayName": "Inset topic hover",
+        "tonalRamp": [
+          "oklch(15.00% 0.04000 272.10)",
+          "oklch(26.43% 0.04000 272.10)",
+          "oklch(37.86% 0.04000 272.10)",
+          "oklch(49.29% 0.04000 272.10)",
+          "oklch(60.71% 0.04000 272.10)",
+          "oklch(72.14% 0.04000 272.10)",
+          "oklch(83.57% 0.04000 272.10)",
+          "oklch(95.00% 0.04000 272.10)"
+        ]
+      },
+      "filter-selected": {
+        "role": "primary",
+        "displayName": "Selected topic field",
+        "tonalRamp": [
+          "oklch(15.00% 0.06500 283.85)",
+          "oklch(26.43% 0.06500 283.85)",
+          "oklch(37.86% 0.06500 283.85)",
+          "oklch(49.29% 0.06500 283.85)",
+          "oklch(60.71% 0.06500 283.85)",
+          "oklch(72.14% 0.06500 283.85)",
+          "oklch(83.57% 0.06500 283.85)",
+          "oklch(95.00% 0.06500 283.85)"
+        ]
+      },
+      "filter-selected-border": {
+        "role": "primary",
+        "displayName": "Selected topic outline",
+        "tonalRamp": [
+          "oklch(15.00% 0.15830 276.93)",
+          "oklch(26.43% 0.15830 276.93)",
+          "oklch(37.86% 0.15830 276.93)",
+          "oklch(49.29% 0.15830 276.93)",
+          "oklch(60.71% 0.15830 276.93)",
+          "oklch(72.14% 0.15830 276.93)",
+          "oklch(83.57% 0.15830 276.93)",
+          "oklch(95.00% 0.15830 276.93)"
+        ]
+      },
+      "filter-selected-text": {
+        "role": "primary",
+        "displayName": "Selected topic ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.03343 272.79)",
+          "oklch(26.43% 0.03343 272.79)",
+          "oklch(37.86% 0.03343 272.79)",
+          "oklch(49.29% 0.03343 272.79)",
+          "oklch(60.71% 0.03343 272.79)",
+          "oklch(72.14% 0.03343 272.79)",
+          "oklch(83.57% 0.03343 272.79)",
+          "oklch(95.00% 0.03343 272.79)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Page heading",
+        "purpose": "Responsive h1 on public reading pages."
+      },
+      "headline": {
+        "displayName": "Section heading",
+        "purpose": "Article chapters and major list sections."
+      },
+      "title": {
+        "displayName": "Guide title",
+        "purpose": "Guide names and smaller headings."
+      },
+      "body": {
+        "displayName": "Reading text",
+        "purpose": "Articles, ordered steps, examples, and FAQ answers."
+      },
+      "label": {
+        "displayName": "Control label",
+        "purpose": "Search labels, topics, and chapter navigation."
+      },
+      "action": {
+        "displayName": "Primary action",
+        "purpose": "Sites entry, plan review, and recovery."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "local-state",
+        "value": "160ms ease",
+        "purpose": "Primary background, guide arrow movement, and disclosure icon rotation; transitions are removed with reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "reading-columns-tighten",
+        "value": "900px"
+      },
+      {
+        "name": "reading-stack",
+        "value": "680px"
+      },
+      {
+        "name": "shared-header-single-row",
+        "value": "1100px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Indigo action used for Sites entry, plan review, and search recovery; this preview links to Sites.",
+      "html": "<a class=\"ds-primary\" href=\"/sites\">Open Sites<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14m-7-7 7 7-7 7\"/></svg></a>",
+      "css": ".ds-primary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; border: 0; border-radius: 8px; padding: 12px 20px; color: #fff; background: #4f46e5; font-size: 1rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: background-color 160ms ease; } .ds-primary:hover { background: #4338ca; } .ds-primary { font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; } .ds-primary:focus-visible { outline: 2px solid #a5b4fc; outline-offset: 4px; border-radius: 4px; } @media (prefers-reduced-motion: reduce) { .ds-primary { transition: none; } }"
+    },
+    {
+      "name": "Underlined text link",
+      "kind": "button",
+      "refersTo": "text-link",
+      "description": "Secondary reading or support destination with a generous touch target.",
+      "html": "<a class=\"ds-text-link\" href=\"/faq\">Browse frequently asked questions<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14m-7-7 7 7-7 7\"/></svg></a>",
+      "css": ".ds-text-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: #f3f4f6; font-size: 1rem; text-decoration: underline; text-underline-offset: 5px; } .ds-text-link:hover { color: #c7d2fe; } .ds-text-link { font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; } .ds-text-link:focus-visible { outline: 2px solid #a5b4fc; outline-offset: 4px; border-radius: 4px; }"
+    },
+    {
+      "name": "Labeled guide search",
+      "kind": "input",
+      "refersTo": "search-field",
+      "description": "Field and focus treatment. This isolated preview is an editable input; the application owns filtering, clear controls, and result announcements.",
+      "html": "<div class=\"ds-search\"><label class=\"ds-search-label\" for=\"ds-guide-search\">Search the knowledge base</label><div class=\"ds-search-field\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><input id=\"ds-guide-search\" type=\"search\" maxlength=\"160\" autocomplete=\"off\" placeholder=\"Try publishing, revisions, or billing\" /></div></div>",
+      "css": ".ds-search { font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f3f4f6; max-width: 720px; } .ds-search-label { display: block; font-size: .875rem; margin-bottom: 10px; } .ds-search-field { display: flex; align-items: center; gap: 14px; padding: 6px 16px; border: 1px solid #62697c; border-radius: 8px; background: #0d101c; } .ds-search-field:focus-within { outline: 2px solid #a5b4fc; outline-offset: 3px; } .ds-search-field svg { flex-shrink: 0; color: #b4b9c7; } .ds-search-field input { min-width: 0; width: 100%; height: 44px; border: 0; background: transparent; color: #f3f4f6; font: inherit; caret-color: #a5b4fc; } .ds-search-field input:focus-visible { outline: 0; } .ds-search-field input::placeholder { color: #b4b9c7; opacity: 1; } .ds-search-field input::-webkit-search-cancel-button { display: none; }"
+    },
+    {
+      "name": "Topic filters",
+      "kind": "chip",
+      "refersTo": "topic-filter",
+      "description": "Default, hover, focus, and pressed topic styles. The preview fixes the selected state; the application owns category changes.",
+      "html": "<div class=\"ds-filters\" role=\"group\" aria-label=\"Filter guides by topic\"><button type=\"button\" aria-pressed=\"true\">All topics</button><button type=\"button\" aria-pressed=\"false\">Getting started</button><button type=\"button\" aria-pressed=\"false\">Creating and publishing</button><button type=\"button\" aria-pressed=\"false\">Plans and billing</button></div>",
+      "css": ".ds-filters { display: flex; flex-wrap: wrap; gap: 8px; } .ds-filters button { min-height: 44px; border: 1px solid rgba(255,255,255,.14); border-radius: 8px; padding: 8px 14px; font-size: .875rem; color: #b4b9c7; text-align: left; background: transparent; cursor: pointer; } .ds-filters button:hover { background: #14192d; color: #fff; } .ds-filters button[aria-pressed=\"true\"] { background: #252347; border-color: #818cf8; color: #e0e7ff; } .ds-filters button { font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; } .ds-filters button:focus-visible { outline: 2px solid #a5b4fc; outline-offset: 4px; border-radius: 4px; }"
+    },
+    {
+      "name": "Guide row",
+      "kind": "custom",
+      "refersTo": "guide-row",
+      "description": "A linked guide title, description, category, and responsive trailing arrow on the continuous page ground.",
+      "html": "<ul class=\"ds-guide-list\"><li><a class=\"ds-guide-row\" href=\"/knowledge-base/getting-started\"><div><h3>Create your first Site</h3><p>Turn a small idea into a first version you can preview, revise, and share.</p><span>Getting started</span></div><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14m-7-7 7 7-7 7\"/></svg></a></li></ul>",
+      "css": ".ds-guide-list { list-style: none; padding: 0; margin: 0; border-top: 1px solid rgba(255,255,255,.14); } .ds-guide-row { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 24px 0; border-bottom: 1px solid rgba(255,255,255,.14); text-decoration: none; color: #f3f4f6; } .ds-guide-row h3 { margin: 0; font-size: 1.125rem; line-height: 1.5; font-weight: 600; } .ds-guide-row p { color: #b4b9c7; font-size: 1rem; line-height: 1.65; max-width: 70ch; margin: 6px 0 0; } .ds-guide-row span { display: block; color: #b4b9c7; font-size: .75rem; margin-top: 12px; } .ds-guide-row > svg { flex-shrink: 0; color: #b4b9c7; transition: transform 160ms ease; } .ds-guide-row:hover > svg { transform: translateX(4px); color: #fff; } .ds-guide-row:hover h3 { color: #c7d2fe; } .ds-guide-row { font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; } .ds-guide-row:focus-visible { outline: 2px solid #a5b4fc; outline-offset: 4px; border-radius: 4px; } @media (max-width: 680px) { .ds-guide-row { gap: 16px; } .ds-guide-row p { font-size: .875rem; } } @media (prefers-reduced-motion: reduce) { .ds-guide-row > svg { transition: none; } }"
+    },
+    {
+      "name": "Chapter navigation",
+      "kind": "nav",
+      "refersTo": "chapter-navigation",
+      "description": "Native anchor navigation; the page grid supplies its desktop column and mobile stacking.",
+      "html": "<nav class=\"ds-chapters\" aria-label=\"On this page\"><p>In this guide</p><a href=\"#the-plan\">One monthly plan for Sites</a><a href=\"#before-subscribing\">Explore before you subscribe</a><a class=\"ds-chapters-back\" href=\"/pricing\">All pricing guides</a></nav>",
+      "css": ".ds-chapters { position: sticky; top: 28px; font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f3f4f6; } .ds-chapters > p { margin: 0 0 12px; color: #b4b9c7; font-size: .8125rem; } .ds-chapters a { display: flex; align-items: center; min-height: 44px; padding-block: 10px; color: inherit; font-size: .875rem; line-height: 1.6; text-decoration: none; } .ds-chapters a:hover { color: #c7d2fe; text-decoration: underline; text-underline-offset: 5px; } .ds-chapters .ds-chapters-back { border-top: 1px solid rgba(255,255,255,.14); margin-top: 20px; padding-top: 20px; } .ds-chapters a { font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; } .ds-chapters a:focus-visible { outline: 2px solid #a5b4fc; outline-offset: 4px; border-radius: 4px; } @media (max-width: 680px) { .ds-chapters { position: static; border-bottom: 1px solid rgba(255,255,255,.14); padding-bottom: 20px; } .ds-chapters .ds-chapters-back { display: none; } }"
+    },
+    {
+      "name": "Native FAQ disclosure",
+      "kind": "custom",
+      "refersTo": "faq-disclosure",
+      "description": "Independent native disclosure with a rotating plus and comfortably spaced answer.",
+      "html": "<details class=\"ds-faq\"><summary>Can I cancel my subscription?<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><path d=\"M12 5v14m-7-7h14\"/></svg></summary><div class=\"ds-answer\"><p>Yes. You can cancel anytime. Access continues through the period you have already paid for. Sign in and open your account to review your plan.</p><a class=\"ds-faq-link\" href=\"/pricing/billing-and-cancellation\">Read the guide<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14m-7-7 7 7-7 7\"/></svg></a></div></details>",
+      "css": ".ds-faq { color: #f3f4f6; font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-block: 1px solid rgba(255,255,255,.14); } .ds-faq summary { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 22px 0; list-style: none; cursor: pointer; font-weight: 500; font-size: 1rem; line-height: 1.6; } .ds-faq summary::-webkit-details-marker { display: none; } .ds-faq summary svg { flex-shrink: 0; width: 18px; transition: transform 160ms ease; } .ds-faq[open] summary svg { transform: rotate(45deg); } .ds-faq summary:hover { color: #c7d2fe; } .ds-answer { padding: 0 32px 24px 0; } .ds-answer p { margin: 0; color: #b4b9c7; line-height: 1.85; } .ds-faq-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-top: 12px; color: #f3f4f6; font-size: 1rem; text-decoration: underline; text-underline-offset: 5px; } .ds-faq-link:hover { color: #c7d2fe; } .ds-faq summary { font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; } .ds-faq summary:focus-visible { outline: 2px solid #a5b4fc; outline-offset: 4px; border-radius: 4px; } .ds-faq-link { font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; } .ds-faq-link:focus-visible { outline: 2px solid #a5b4fc; outline-offset: 4px; border-radius: 4px; } @media (max-width: 680px) { .ds-answer { padding-right: 0; } } @media (prefers-reduced-motion: reduce) { .ds-faq summary svg { transition: none; } }"
+    },
+    {
+      "name": "Plan container",
+      "kind": "card",
+      "refersTo": "plan-card",
+      "description": "Inset offer container and local tabular price treatment. This static preview does not provide account acceptance or a checkout action.",
+      "html": "<section class=\"ds-plan\" aria-label=\"GALX Pro\"><h2>GALX Pro</h2><p>Sites included · one account</p><div class=\"ds-price\"><strong>$20</strong><span>USD / month</span></div></section>",
+      "css": ".ds-plan { border: 1px solid rgba(255,255,255,.14); border-radius: 12px; background: #0d101c; color: #f3f4f6; padding: 32px; font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; } .ds-plan h2 { font-size: 1.5rem; line-height: 1.25; letter-spacing: -.02em; font-weight: 600; margin: 0; } .ds-plan > p { margin: 8px 0 0; color: #b4b9c7; font-size: .875rem; } .ds-price { display: flex; align-items: baseline; gap: 10px; margin-block: 28px; } .ds-price strong { font-size: 3.75rem; line-height: 1; font-weight: 600; letter-spacing: -.04em; font-variant-numeric: tabular-nums; } .ds-price span { color: #b4b9c7; font-size: .875rem; } @media (max-width: 900px) { .ds-plan { padding: 24px; } } @media (max-width: 680px) { .ds-plan { padding: 24px 20px; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The established GALX dark world",
+    "overview": "This scoped maintainer record describes the implemented Pricing, FAQ, knowledge-base index, and eight guides that use [ReadingPage.tsx](ReadingPage.tsx), [KnowledgeSearch.tsx](KnowledgeSearch.tsx), and [public-content.module.css](public-content.module.css). It extends the [shared design authority](../../../DESIGN.md) and the [homepage's incumbent visual language](../home/DESIGN.md). The [surface brief](../../../.impeccable/surfaces/src-app-knowledge-base-page-tsx.md) owns the page strategy. This record and its adjacent [sidecar](DESIGN.json) are private design artifacts, never runtime content.\n\nThe dark ground and Inter voice remain familiar while generous leading, visible labels, thin rules, and quiet chapter navigation make sustained reading comfortable. Indigo identifies actions and interaction states. The shared ambient background remains behind the content; the component family adds no imagery or decorative animation.",
+    "keyCharacteristics": [
+      "Dark continuous surfaces with brighter muted reading text.",
+      "Inter headings, measured article widths, and generous body leading.",
+      "Indigo actions and explicit focus, selection, and recovery states.",
+      "Divided guide rows, native disclosures, and a chapter rail that stacks on mobile."
+    ],
+    "rules": [
+      {
+        "name": "The Indigo Interaction Rule",
+        "body": "Keep these reading surfaces' indigo primary actions and focus treatments scoped to this component family; the homepage's light actions and amber details retain their own authority.",
+        "section": "colors"
+      },
+      {
+        "name": "The Reading Measure Rule",
+        "body": "Preserve the 72ch article maximum and generous paragraph leading when adding guides to this family.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Reading Rule",
+        "body": "Use the existing inset fill and thin dividers for local depth; keep guide rows and FAQ sections directly on the page ground.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do preserve Inter, the dark page ground, brighter muted reading text, and scoped indigo interaction states.",
+      "Do reuse the 72ch article measure, thin guide dividers, and mobile chapter-list stacking.",
+      "Do retain native links, disclosures, ordered steps, visible labels, and keyboard focus.",
+      "Do keep query clearing distinct from clearing both search and topic filters, with focus restored to the search field.",
+      "Do derive plan copy and guide content from the explicit public sources while keeping this maintainer record private."
+    ],
+    "donts": [
+      "Don't import the homepage's illustrative serif headings or amber action treatment into these reading components.",
+      "Don't turn guide rows and FAQ sections into additional raised cards.",
+      "Don't replace pressed-topic semantics, result announcements, or empty-state recovery with appearance alone.",
+      "Don't hide the mobile chapter links or replace normal page scrolling with a workspace navigation pattern.",
+      "Don't treat source presence or review captures as evidence of deployment, indexing, field performance, or real-account acceptance."
+    ]
+  }
+}

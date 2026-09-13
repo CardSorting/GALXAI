@@ -311,11 +311,22 @@
         "src/components/home/**/*",
         "scripts/verify-homepage-ui.mjs",
         "src/lib/resilience/ResilientClient.ts",
-        "src/contexts/AuthContext.tsx"
+        "src/contexts/AuthContext.tsx",
+        "src/app/pricing/**/*.tsx",
+        "src/app/faq/**/*.tsx",
+        "src/app/knowledge-base/**/*.tsx",
+        "src/components/public-content/**/*",
+        "src/lib/public-content/**/*.ts",
+        "src/lib/seo/metadata.ts",
+        "src/app/sitemap.ts",
+        "scripts/test-public-reading.ts",
+        "scripts/verify-public-reading-ui.mjs",
+        "src/lib/seo/siteConfig.ts"
       ],
       "guides": [
         "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
-        "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md"
+        "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
+        "docs/maintainers/PUBLIC_DISCOVERY.md"
       ],
       "checks": [
         "npm run test:egress:transport",

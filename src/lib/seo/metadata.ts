@@ -38,7 +38,7 @@ export function constructMetadata({
   const mergedKeywords = Array.from(new Set([...keywords, ...SITE_CONFIG.keywords]));
 
   return {
-    title: fullTitle,
+    title: { absolute: fullTitle },
     description,
     keywords: mergedKeywords,
     authors: authors ? authors.map(name => ({ name })) : SITE_CONFIG.authors,

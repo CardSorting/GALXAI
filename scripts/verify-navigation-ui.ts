@@ -10,7 +10,7 @@ const browser = await chromium.launch({ headless: true, executablePath: '/Applic
 const output = path.resolve('.impeccable/review/navigation');
 await fs.mkdir(output, { recursive: true });
 const results: unknown[] = [];
-const expected = ['Sites', 'Images', 'Pricing', 'FAQ', 'Developer preview'];
+const expected = ['Sites', 'Images', 'Pricing', 'FAQ', 'Knowledge base', 'Developer preview'];
 const guestGeometry = new Map<number, unknown>();
 
 async function setup(width: number, signedIn: boolean, reduce = true) {
@@ -91,17 +91,16 @@ try {
     await page.goForward(); await page.waitForURL(base + '/sites');
     sameGeometry(await geometry(page), initial);
     if (width === 1440 && !signedIn) {
-      await nav.locator('[href="/#pricing"]').click();
-      await page.waitForURL(base + '/#pricing');
-      await page.waitForFunction(() => scrollY > 0);
-      assert.equal(await nav.locator('[href="/#pricing"]').getAttribute('aria-current'), 'location');
-      await nav.locator('[href="/#faq"]').click();
-      await page.waitForURL(base + '/#faq');
-      assert.equal(await nav.locator('[href="/#faq"]').getAttribute('aria-current'), 'location');
+      await nav.locator('[href="/pricing"]').click();
+      await page.waitForURL(base + '/pricing');
+      assert.equal(await nav.locator('[href="/pricing"]').getAttribute('aria-current'), 'page');
+      await nav.locator('[href="/faq"]').click();
+      await page.waitForURL(base + '/faq');
+      assert.equal(await nav.locator('[href="/faq"]').getAttribute('aria-current'), 'page');
     }
     if (!signedIn && new URL(page.url()).pathname === '/sites') assert.equal(await header.getByRole('link', { name: 'Sign in', exact: true }).getAttribute('href'), '/auth/signin?next=%2Fsites');
-    if (width < 900) {
-      await nav.locator('[href="/#faq"]').focus();
+    if (width < 1100) {
+      await nav.locator('[href="/knowledge-base"]').focus();
       await page.keyboard.press('Tab');
       assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('href')), '/developers');
       await page.waitForFunction(() => {

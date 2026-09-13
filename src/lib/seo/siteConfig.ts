@@ -10,7 +10,9 @@ export const SITE_CONFIG = {
   tagline: 'Your idea, ready to share',
   description:
     'Turn an idea into a website with GALX Sites. Make a first version, keep refining it, and publish at your own public GALX address. Explore our very early public beta.',
-  url: process.env.NEXT_PUBLIC_APP_URL || 'https://galx.ai',
+  // Discovery always identifies the public origin, including local/preview builds.
+  // Runtime callback and request origins have their own configuration.
+  url: 'https://galx.ai',
   apiUrl: 'https://galx.ai/v1',
   ogImage: '/brand/galaxy-hero-banner.jpg',
   twitterHandle: '@galxai',

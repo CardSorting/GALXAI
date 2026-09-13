@@ -9,6 +9,7 @@ Private product authority, reconciled September 13, 2026. [PRODUCT.md](../PRODUC
 | Surface | Current scope |
 | --- | --- |
 | Homepage | Sites-first idea, prototype, revision and public-address pitch; pricing followed by FAQ; extremely early public beta expectations |
+| Public guidance | Dedicated `/pricing`, `/faq`, `/knowledge-base` and eight authored guides, with capability-only copy and no workspace access grant |
 | Sites | Public product with authenticated owned drafts, continuing conversations, preview/version history and explicit managed publication; paid-plan and fair-use requirements remain |
 | Images | Public product with existing account/usage requirements, creation, durable async receipts, owned library, Favorites and sanitized download |
 | Developer preview | Signup, project introduction, GitHub/LinkedIn profiles and cohort interest; individual approval before private API/tool access |

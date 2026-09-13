@@ -286,6 +286,69 @@
         ],
         "createdAt": "2026-09-13T01:56:09.672Z",
         "reason": "Georgia is the existing Sites paper-preview heading style, documented in src/components/home/DESIGN.md. The exception is limited to the illustrative homepage preview."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#252347",
+        "files": [
+          "src/components/public-content/public-content.module.css"
+        ],
+        "createdAt": "2026-09-13T21:12:11.636Z",
+        "reason": "Codex: deliberate indigo tonal states and neutral input boundary for the scoped public reading surface; retains GALX dark identity. Desktop Pricing, FAQ, knowledge-base and guide Axe checks passed. Limited to this stylesheet."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#4338ca",
+        "files": [
+          "src/components/public-content/public-content.module.css"
+        ],
+        "createdAt": "2026-09-13T21:12:11.692Z",
+        "reason": "Codex: deliberate indigo tonal states and neutral input boundary for the scoped public reading surface; retains GALX dark identity. Desktop Pricing, FAQ, knowledge-base and guide Axe checks passed. Limited to this stylesheet."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#62697c",
+        "files": [
+          "src/components/public-content/public-content.module.css"
+        ],
+        "createdAt": "2026-09-13T21:12:11.745Z",
+        "reason": "Codex: deliberate indigo tonal states and neutral input boundary for the scoped public reading surface; retains GALX dark identity. Desktop Pricing, FAQ, knowledge-base and guide Axe checks passed. Limited to this stylesheet."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#818cf8",
+        "files": [
+          "src/components/public-content/public-content.module.css"
+        ],
+        "createdAt": "2026-09-13T21:12:11.800Z",
+        "reason": "Codex: deliberate indigo tonal states and neutral input boundary for the scoped public reading surface; retains GALX dark identity. Desktop Pricing, FAQ, knowledge-base and guide Axe checks passed. Limited to this stylesheet."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#a5b4fc",
+        "files": [
+          "src/components/public-content/public-content.module.css"
+        ],
+        "createdAt": "2026-09-13T21:12:11.855Z",
+        "reason": "Codex: deliberate indigo tonal states and neutral input boundary for the scoped public reading surface; retains GALX dark identity. Desktop Pricing, FAQ, knowledge-base and guide Axe checks passed. Limited to this stylesheet."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#c7d2fe",
+        "files": [
+          "src/components/public-content/public-content.module.css"
+        ],
+        "createdAt": "2026-09-13T21:12:11.910Z",
+        "reason": "Codex: deliberate indigo tonal states and neutral input boundary for the scoped public reading surface; retains GALX dark identity. Desktop Pricing, FAQ, knowledge-base and guide Axe checks passed. Limited to this stylesheet."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#e0e7ff",
+        "files": [
+          "src/components/public-content/public-content.module.css"
+        ],
+        "createdAt": "2026-09-13T21:12:11.965Z",
+        "reason": "Codex: deliberate indigo tonal states and neutral input boundary for the scoped public reading surface; retains GALX dark identity. Desktop Pricing, FAQ, knowledge-base and guide Axe checks passed. Limited to this stylesheet."
       }
     ]
   },

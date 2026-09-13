@@ -4,6 +4,7 @@
 
 Images and Sites are available without developer-preview approval, but their account workspaces require authentication before entry. `/images`, `/sites`, their workspace descendants and `/library` are checked before middleware asset exemptions; the Images and Sites server pages independently verify the session before rendering. Cookie presence or decoded claims never grant entry. Invalid/missing sessions redirect to sign-in for GET/HEAD and receive 401 for other methods. Verification outages return a generic 503, never workspace content. Authenticated responses and denials are private and uncached. Billing and API ownership requirements remain separate.
 The [workspace authentication runbook](workspace-auth.md) owns sign-in methods, safe return destinations, 401 expiry recovery and outage handling.
+The authored Pricing, FAQ, knowledge-base and eight guide routes are public reading pages. `src/lib/public-content/routes.ts` lists each exact path; it does not expose `/docs`, private guide prefixes, account data or arbitrary descendants. Their static page chunks follow the existing exact-path public-page rule.
 Other API routes and developer pages require an individually approved account. Signup, payment, a pre-existing key, account metadata, and a pending request do not grant preview access.
 
 ## Rollout
