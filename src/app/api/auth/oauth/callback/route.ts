@@ -1,8 +1,10 @@
+import { providerConnectionDTO } from '@/lib/auth/provider-connection-route';
+import { requireAccountIdentity } from '@/lib/auth/accountIdentity';
+import { requireSessionMutation, sessionResponse, sessionFailure } from '@/lib/auth/session-http';
 import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxOAuthManager } from '@/core/auth/GalxOAuthManager';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
-import { GalxModelRouter } from '@/core/router/GalxModelRouter';
 import { OAuthRepository } from '@/lib/supabase/repositories/OAuthRepository';
 import type { ProviderType, ShardIsolationMode } from '@/core/contracts/GalxContracts';
 
@@ -55,17 +57,22 @@ function sanitizeRedirectUrl(returnTo: string | null, baseReqUrl: string): URL {
  * sets HTTP-only session cookie, and redirects to destination.
  */
 async function previewGET(req: NextRequest) {
+  let account;
+  try { account = await requireAccountIdentity(req); } catch (error) { return sessionFailure(error); }
   try {
     const { searchParams } = new URL(req.url);
     const code = searchParams.get('code');
     const state = searchParams.get('state');
     const errorParam = searchParams.get('error');
-    const errorDesc = searchParams.get('error_description');
     const returnTo = searchParams.get('returnTo');
+    let browserProof;
+    try { browserProof = JSON.parse(req.cookies.get('galx_pkce_verifier')?.value || '{}'); } catch { browserProof = {}; }
+    if (!state || browserProof.state !== state || browserProof.userId !== account.id || typeof browserProof.codeVerifier !== 'string') {
+      return NextResponse.redirect(new URL('/auth/connect?error=Connection%20authorization%20expired.%20Try%20again.', req.url));
+    }
 
     if (errorParam) {
-      const rawMsg = errorDesc || errorParam || 'OAuth authorization denied';
-      const msg = GalxModelRouter.sanitizeUpstreamError(rawMsg);
+      const msg = 'Connection authorization was cancelled.';
       return NextResponse.redirect(new URL(`/auth/connect?error=${encodeURIComponent(msg)}`, req.url));
     }
 
@@ -84,7 +91,7 @@ async function previewGET(req: NextRequest) {
     if (state) {
       const stateCheck = oauthManager.verifySignedState(state);
       if (!stateCheck.valid) {
-        return NextResponse.redirect(new URL(`/auth/connect?error=${encodeURIComponent(`Invalid state: ${stateCheck.reason}`)}`, req.url));
+        return NextResponse.redirect(new URL(`/auth/connect?error=${encodeURIComponent('Connection authorization expired. Try again.')}`, req.url));
       }
       if (stateCheck.provider) provider = stateCheck.provider;
 
@@ -140,21 +147,12 @@ async function previewGET(req: NextRequest) {
       mode,
       ipAddress,
       userAgent
-    });
+    }, account);
 
     const destinationUrl = sanitizeRedirectUrl(returnTo, req.url);
     const response = NextResponse.redirect(destinationUrl);
 
-    // Set secure HTTP-only session cookie
-    if (result.user?.token) {
-      response.cookies.set('galx_session', result.user.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 30 * 24 * 60 * 60 // 30 days
-      });
-    }
+
 
     // Clear PKCE verifier cookie
     response.cookies.set('galx_pkce_verifier', '', {
@@ -167,7 +165,7 @@ async function previewGET(req: NextRequest) {
 
     return response;
   } catch (err: any) {
-    const safeError = GalxModelRouter.sanitizeUpstreamError(err.message || 'OAuth exchange failed');
+    const safeError = 'The connection could not be completed. Try again.';
     return NextResponse.redirect(new URL(`/auth/connect?error=${encodeURIComponent(safeError)}`, req.url));
   }
 }
@@ -180,6 +178,8 @@ async function previewGET(req: NextRequest) {
  * provisions an isolated credential partition, and returns a signed JWE-grade session bearer token.
  */
 async function previewPOST(req: NextRequest) {
+  let account;
+  try { requireSessionMutation(req); account = await requireAccountIdentity(req); } catch (error) { return sessionFailure(error); }
   try {
     const body = await req.json().catch(() => ({}));
     let {
@@ -204,7 +204,7 @@ async function previewPOST(req: NextRequest) {
     if (state && typeof state === 'string') {
       const stateCheck = oauthManager.verifySignedState(state, effectiveProvider);
       if (!stateCheck.valid) {
-        return NextResponse.json({ error: `State verification failed: ${stateCheck.reason}` }, { status: 400 });
+        return NextResponse.json({ error: 'Connection authorization expired. Try again.' }, { status: 400 });
       }
       if (stateCheck.provider) effectiveProvider = stateCheck.provider;
 
@@ -258,22 +258,11 @@ async function previewPOST(req: NextRequest) {
       workspaceId,
       ipAddress,
       userAgent
-    });
+    }, account);
 
-    const response = NextResponse.json(result, {
+    const response = NextResponse.json(providerConnectionDTO(result), {
       headers: { 'Access-Control-Allow-Origin': '*' }
     });
-
-    // Set secure HTTP-only session cookie for Next.js SSR hydration
-    if (result.user?.token) {
-      response.cookies.set('galx_session', result.user.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 30 * 24 * 60 * 60 // 30 days
-      });
-    }
 
     // Clear PKCE verifier cookie
     response.cookies.set('galx_pkce_verifier', '', {
@@ -286,7 +275,7 @@ async function previewPOST(req: NextRequest) {
 
     return response;
   } catch (err: any) {
-    const sanitized = GalxModelRouter.sanitizeUpstreamError(err?.message || 'OAuth exchange failed');
+    const sanitized = 'The connection could not be completed. Try again.';
     return NextResponse.json(
       { success: false, error: sanitized },
       { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }

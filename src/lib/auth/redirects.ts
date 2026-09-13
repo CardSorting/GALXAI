@@ -13,6 +13,9 @@ export function safeAuthRedirect(value: string | null | undefined): string {
       decoded = next;
     }
     const url = new URL(value, 'https://galx.invalid');
+    const decodedUrl = new URL(decoded, 'https://galx.invalid');
+    // An auth page cannot be its own post-login destination (including encoded paths).
+    if (/^\/auth(?:\/|$)/.test(decodedUrl.pathname)) return DEFAULT_POST_AUTH_PATH;
     return url.origin === 'https://galx.invalid' ? `${url.pathname}${url.search}${url.hash}` : DEFAULT_POST_AUTH_PATH;
   } catch { return DEFAULT_POST_AUTH_PATH; }
 }

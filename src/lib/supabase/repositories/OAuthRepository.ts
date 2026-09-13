@@ -451,89 +451,12 @@ export class OAuthRepository {
   /**
    * Polls device code status atomically using Supabase stored procedure fn_poll_device_code or memory fallback.
    */
-  async pollDeviceCode(deviceCode: string): Promise<{
-    success: boolean;
-    data?: any;
-    error?: string;
-    error_description?: string;
-    interval?: number;
-  }> {
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        const { data, error } = await (supabase.rpc as any)('fn_poll_device_code', {
-          p_device_code: deviceCode,
-          p_now_ms: Date.now()
-        });
-
-        if (!error && data) {
-          const res = data as any;
-          if (res.success) {
-            return {
-              success: true,
-              data: {
-                access_token: res.access_token,
-                token_type: res.token_type || 'Bearer',
-                expires_in: res.expires_in || 2592000,
-                user: res.token_record
-              }
-            };
-          }
-          if (res.error && res.error !== 'invalid_grant') {
-            return {
-              success: false,
-              error: res.error,
-              error_description: res.error_description,
-              interval: res.interval
-            };
-          }
-        }
-      } catch {}
-    }
-
-    // Hot memory fallback
-    const candidates = this.deviceCodesTable.query({
-      where: { deviceCode: { $eq: deviceCode } }
-    });
-    const record = candidates[0];
-    if (!record) {
-      return { success: false, error: 'invalid_grant', error_description: 'Device code not found or invalid' };
-    }
-
-    const now = Date.now();
-    if (now >= record.expiresAtMs) {
-      this.deviceCodesTable.delete(record.id);
-      return { success: false, error: 'expired_token', error_description: 'The device authorization code has expired.' };
-    }
-
-    if (record.lastPolledAtMs && now - record.lastPolledAtMs < record.pollingIntervalSec * 1000 - 500) {
-      const slowInterval = record.pollingIntervalSec + 5;
-      this.deviceCodesTable.put(record.id, { ...record, pollingIntervalSec: slowInterval, lastPolledAtMs: now });
-      return { success: false, error: 'slow_down', error_description: `Polling too rapidly. Increase interval to ${slowInterval}s.`, interval: slowInterval };
-    }
-
-    this.deviceCodesTable.put(record.id, { ...record, lastPolledAtMs: now });
-
-    if (record.status === 'pending') {
-      return { success: false, error: 'authorization_pending', error_description: 'The user has not yet authorized the request.', interval: record.pollingIntervalSec };
-    }
-    if (record.status === 'denied') {
-      this.deviceCodesTable.delete(record.id);
-      return { success: false, error: 'access_denied', error_description: 'The user denied the authorization request.' };
-    }
-    if (record.status === 'approved') {
-      this.deviceCodesTable.delete(record.id);
-      return {
-        success: true,
-        data: {
-          access_token: record.sessionToken || record.tokenRecord?.accessToken,
-          token_type: 'Bearer',
-          expires_in: 30 * 24 * 3600,
-          user: record.tokenRecord || { provider: record.provider }
-        }
-      };
-    }
-    return { success: false, error: 'invalid_grant', error_description: 'Unexpected authorization status' };
+  async pollDeviceCode(deviceCode: string): Promise<{ success: boolean; data?: any; error?: string; error_description?: string; interval?: number }> {
+    if (!isSupabaseConfigured()) throw new Error('DEVICE_AUTHORITY_UNAVAILABLE');
+    const { data, error } = await (getSupabaseAdmin().rpc as any)('fn_poll_device_code', { p_device_code: deviceCode, p_now_ms: Date.now() });
+    if (error || !data) throw new Error('DEVICE_POLL_UNAVAILABLE');
+    if (data.success) return { success: true, data: { access_token: data.access_token } };
+    return { success: false, error: data.error || 'invalid_grant', interval: data.interval };
   }
 
   /**
@@ -542,35 +465,13 @@ export class OAuthRepository {
   async approveDeviceCode(userCode: string, sessionToken: string, tokenRecord?: any, userId?: string): Promise<boolean> {
     const cleanCode = userCode.toUpperCase().replace(/\s+/g, '');
     const normalizedCode = cleanCode.includes('-') ? cleanCode : `${cleanCode.substring(0, 4)}-${cleanCode.substring(4, 8)}`;
-
-    // Sync memory state immediately
-    const candidates = this.deviceCodesTable.query({ where: { userCode: { $eq: normalizedCode } } });
-    const memoryRecord = candidates[0];
-    if (memoryRecord && memoryRecord.status === 'pending' && Date.now() < memoryRecord.expiresAtMs) {
-      this.deviceCodesTable.put(memoryRecord.id, {
-        ...memoryRecord,
-        status: 'approved',
-        sessionToken,
-        tokenRecord
-      });
-    }
-
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        const { data, error } = await (supabase.rpc as any)('fn_approve_device_code', {
-          p_user_code: normalizedCode,
-          p_session_token: sessionToken,
-          p_token_record: tokenRecord || null,
-          p_user_id: userId || null
-        });
-        if (!error && typeof data === 'boolean') {
-          return data;
-        }
-      } catch {}
-    }
-
-    return !!memoryRecord;
+    if (!isSupabaseConfigured()) throw new Error('DEVICE_AUTHORITY_UNAVAILABLE');
+    const { data, error } = await (getSupabaseAdmin().rpc as any)('fn_approve_device_code', {
+      p_user_code: normalizedCode, p_session_token: sessionToken,
+      p_token_record: tokenRecord || null, p_user_id: userId || null,
+    });
+    if (error || typeof data !== 'boolean') throw new Error('DEVICE_APPROVAL_UNAVAILABLE');
+    return data;
   }
 
   /**

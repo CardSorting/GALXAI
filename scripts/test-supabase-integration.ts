@@ -788,8 +788,8 @@ async function runTests() {
     // 43. Step-Up SUDO Mode Elevation
     const sudoElevation = await sessionRepo.elevateSessionSudo(rotSessionId, 'usr_rot_user_456', 900000);
     assert(
-      sudoElevation.success === true && sudoElevation.sudoActive === true && sudoElevation.sudoElevatedUntilMs > nowMs,
-      'SessionRepo: Elevates active session to privileged SUDO mode for 15-minute window'
+      sudoElevation.success === false && sudoElevation.sudoActive === false && sudoElevation.error === 'FRESH_PROOF_REQUIRED',
+      'SessionRepo: Rejects elevation without independently verified fresh proof'
     );
 
     // 44. Behavioral Risk Telemetry Ingestion

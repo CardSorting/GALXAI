@@ -270,14 +270,8 @@ async function executeResilientFetch<T = any>(
       if (!headers.has('Accept')) {
         headers.set('Accept', 'application/json, text/plain, */*');
       }
-      if (!headers.has('Authorization')) {
-        const customUser = SafeStorage.getJSON<any>('galx_custom_auth_user', null);
-        if (customUser?.token) {
-          headers.set('Authorization', `Bearer ${customUser.token}`);
-        } else if (customUser?.id) {
-          headers.set('x-galx-session', customUser.id);
-        }
-      }
+      // Same-origin account requests use the server-verified session cookie.
+      // Explicit caller credentials remain explicit; local storage is never auth authority.
 
       // Queue only before any dispatch, when the browser is actually offline.
       // Never convert permanent/ambiguous online failures into a fresh retry budget.

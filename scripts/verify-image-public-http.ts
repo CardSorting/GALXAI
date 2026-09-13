@@ -42,7 +42,14 @@ for (const path of ['/models/openai-gpt-image-latest','/models/gpt-5.6-sol','/ll
   assert.equal(new URL(denied.headers.get('location')!, base).pathname, '/developers');
 }
 const browserAssets = new Set<string>();
-for (const path of ['/', '/images', '/api/openapi.json']) {
+for (const path of ['/images', '/sites', '/sites/00000000-0000-4000-8000-000000000000']) {
+  const page = await fetch(`${base}${path}`, { redirect: 'manual' });
+  assert.equal(page.status, 307, path);
+  assert.equal(new URL(page.headers.get('location')!, base).pathname, '/auth/signin');
+  assert.equal(page.headers.get('cache-control'), 'private, no-store');
+  assert.doesNotMatch(await page.text(), forbidden, path);
+}
+for (const path of ['/', '/auth/signin', '/api/openapi.json']) {
   const page = await fetch(`${base}${path}`); assert.equal(page.status, 200, path);
   const html = await page.text();
   assert.doesNotMatch(html, forbidden, path);

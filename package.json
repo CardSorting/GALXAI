@@ -266,6 +266,7 @@
     "sim:unpredictable": "tsx simulations/high-concurrency-10k-fairness/simulate-unpredictable-inference.ts",
     "test:10k": "tsx simulations/high-concurrency-10k-fairness/index.test.ts",
     "db:verify": "tsx scripts/verify-supabase-integrity.ts",
+    "test:auth:db": "node --import tsx scripts/run-supabase-integration.ts --auth-sessions",
     "db:test": "node --import tsx scripts/run-supabase-integration.ts",
     "test:wallet-lifecycle": "node --import tsx scripts/test-wallet-lifecycle.ts",
     "test:relay-chat": "node --import tsx --test scripts/test-relay-chat-transport.ts scripts/test-relay-client-auth.ts",
@@ -292,7 +293,7 @@
     "relay:federation": "node --env-file-if-exists=.env.local --import tsx scripts/run-relay-federation.ts",
     "test:relay:capabilities": "node --import tsx --test scripts/test-federation-admission.ts scripts/test-relay-capabilities.ts scripts/test-relay-lifecycle-recovery.ts scripts/test-relay-desktops.ts scripts/test-desktop-organization.ts scripts/test-desktop-credentials.ts scripts/test-shard-maintenance.ts scripts/test-relay-monitor.ts scripts/test-federation-telemetry.ts scripts/test-relay-federation-http.ts scripts/test-relay-hardening.ts scripts/test-relay-adaptive-quota.ts scripts/test-relay-telemetry.ts",
     "test:relay:docker": "node --import tsx scripts/test-relay-federation-docker.ts",
-    "test:image:security": "node --import tsx --test scripts/test-image-public-http.ts scripts/test-image-library-http.ts scripts/test-public-information-boundary.ts scripts/test-image-retry-contract.ts scripts/test-auth-identity-boundary.ts",
+    "test:image:security": "node --import tsx --test scripts/test-image-public-http.ts scripts/test-image-library-http.ts scripts/test-public-information-boundary.ts scripts/test-image-retry-contract.ts scripts/test-auth-identity-boundary.ts scripts/test-workspace-auth.ts scripts/test-auth-entry.ts",
     "test:yaml:security": "node --test scripts/test-yaml-security.mjs",
     "test:egress:transport": "node --import tsx --test scripts/test-registry-api-egress.ts scripts/test-ci-build.mjs scripts/test-request-efficiency.ts scripts/test-sites-workspace.ts",
     "test:signup-credit": "node --import tsx --test scripts/test-signup-credit.ts scripts/test-signup-key-security.ts",
@@ -331,7 +332,8 @@
     "docs:find": "python3 scripts/docs-kb.py find",
     "docs:impact": "python3 scripts/docs-kb.py impact",
     "docs:status": "python3 scripts/docs-kb.py status",
-    "docs:audit": "npm run docs:check && python3 scripts/docs-kb.py status --fail-on-due --fail-on-unreviewed"
+    "docs:audit": "npm run docs:check && python3 scripts/docs-kb.py status --fail-on-due --fail-on-unreviewed",
+    "test:auth:sessions": "node --import tsx --test scripts/test-session-lifecycle.ts scripts/test-workspace-auth.ts scripts/test-auth-entry.ts scripts/test-auth-identity-boundary.ts"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3",

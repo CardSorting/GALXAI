@@ -1,4 +1,4 @@
-/** Public product/support routes are explicit. Everything else is private preview. */
+/** Products exempt from developer approval; account/session gates still apply. */
 const publicPages = new Set(['/', '/home', '/images', '/library', '/sites', '/developers', '/pricing',
   '/auth/signin', '/auth/signup', '/auth/callback', '/terms', '/privacy', '/status', '/checkout', '/checkout/success']);
 const publicApis = new Set(['/api/health', '/api/openapi.json', '/api/auth/signup-offer', '/api/auth/session',

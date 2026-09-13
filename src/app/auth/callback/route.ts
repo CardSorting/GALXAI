@@ -36,25 +36,23 @@ export async function GET(request: Request) {
       .catch(() => ({ data: null, error: new Error('Session exchange unavailable') }));
 
     if (!error && data?.session) {
-      // Sync local fast-path session cookies for Edge middleware compatibility
+      // Supabase SSR cookies are canonical. Retire legacy token and role aliases.
       const isHttps = origin.startsWith('https:');
-      const maxAge = 2592000; // 30 days
-      const userRole = data.user?.user_metadata?.role || 'developer';
 
       try {
-        cookieStore.set('galx_session', data.session.access_token, {
+        cookieStore.set('galx_session', '', {
           path: '/',
-          maxAge,
+          maxAge: 0,
           sameSite: 'lax',
           secure: isHttps,
-          httpOnly: false,
+          httpOnly: true,
         });
-        cookieStore.set('galx_user_role', userRole, {
+        cookieStore.set('galx_user_role', '', {
           path: '/',
-          maxAge,
+          maxAge: 0,
           sameSite: 'lax',
           secure: isHttps,
-          httpOnly: false,
+          httpOnly: true,
         });
       } catch {
         // Fallback if cookieStore write encounters a restricted context

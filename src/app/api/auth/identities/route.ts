@@ -1,23 +1,12 @@
 import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
-import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
+import { requireAccountIdentity } from '@/lib/auth/accountIdentity';
+import { requireSessionMutation, sessionFailure } from '@/lib/auth/session-http';
 import { OAuthRepository } from '@/lib/supabase/repositories/OAuthRepository';
 import type { ProviderType } from '@/core/contracts/GalxContracts';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-      'Access-Control-Max-Age': '86400'
-    }
-  });
-}
 
 /**
  * GET /api/auth/identities
@@ -25,18 +14,10 @@ export async function OPTIONS() {
  */
 async function previewGET(req: NextRequest) {
   try {
-    const authEngine = GalxAuthEngine.getInstance();
-    const identity = await authEngine.resolveAuthIdentity(req);
-
-    if (!identity.authenticated || !identity.userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
-      );
-    }
+    const identity = await requireAccountIdentity(req);
 
     const oauthRepo = OAuthRepository.getInstance();
-    const identities = await oauthRepo.findIdentitiesByUserId(identity.userId);
+    const identities = await oauthRepo.findIdentitiesByUserId(identity.id);
 
     // Sanitize secrets before returning to client
     const sanitized = identities.map((id) => ({
@@ -53,17 +34,12 @@ async function previewGET(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      userId: identity.userId,
+      userId: identity.id,
       identities: sanitized
     }, {
       headers: { 'Access-Control-Allow-Origin': '*' }
     });
-  } catch (err: any) {
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
-    );
-  }
+  } catch (err) { return sessionFailure(err); }
 }
 
 /**
@@ -72,20 +48,13 @@ async function previewGET(req: NextRequest) {
  */
 async function previewDELETE(req: NextRequest) {
   try {
-    const authEngine = GalxAuthEngine.getInstance();
-    const identity = await authEngine.resolveAuthIdentity(req);
-
-    if (!identity.authenticated || !identity.userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
-      );
-    }
+    requireSessionMutation(req);
+    const identity = await requireAccountIdentity(req);
 
     const { searchParams } = new URL(req.url);
     const provider = searchParams.get('provider') as ProviderType;
 
-    if (!provider) {
+    if (!provider || provider.length > 40 || !/^[a-z0-9_-]+$/.test(provider)) {
       return NextResponse.json(
         { error: 'Provider query parameter is required' },
         { status: 400, headers: { 'Access-Control-Allow-Origin': '*' } }
@@ -93,20 +62,15 @@ async function previewDELETE(req: NextRequest) {
     }
 
     const oauthRepo = OAuthRepository.getInstance();
-    const unlinked = await oauthRepo.unlinkOAuthIdentity(identity.userId, provider);
+    const unlinked = await oauthRepo.unlinkOAuthIdentity(identity.id, provider);
 
     return NextResponse.json({
       success: unlinked,
-      message: unlinked ? `Successfully unlinked provider '${provider}'` : `No active identity found for provider '${provider}'`
+      message: unlinked ? 'Connection removed.' : 'Connection not found.'
     }, {
       headers: { 'Access-Control-Allow-Origin': '*' }
     });
-  } catch (err: any) {
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
-    );
-  }
+  } catch (err) { return sessionFailure(err); }
 }
 
 export const GET = withDeveloperAccess(previewGET);

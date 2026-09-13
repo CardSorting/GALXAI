@@ -1,22 +1,12 @@
 import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
+import { hasInternalAccess } from '@/lib/security/internal-access';
+import { sessionFailure, sessionResponse } from '@/lib/auth/session-http';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { GalxPersistence } from '@/lib/storage/GalxPersistence';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-      'Access-Control-Max-Age': '86400'
-    }
-  });
-}
 
 /**
  * GET /api/auth/audit/activity
@@ -24,6 +14,7 @@ export async function OPTIONS() {
  */
 async function previewGET(req: NextRequest) {
   try {
+    if (!hasInternalAccess(req.headers)) return sessionResponse({ error: 'Administrator authorization is required.' }, 403);
     const authEngine = GalxAuthEngine.getInstance();
     const auth = await authEngine.resolveAuthIdentity(req);
 
@@ -79,11 +70,8 @@ async function previewGET(req: NextRequest) {
     }, {
       headers: { 'Access-Control-Allow-Origin': '*' }
     });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error?.message || 'Failed to retrieve activity history' },
-      { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
-    );
+  } catch (error) {
+    return sessionFailure(error);
   }
 }
 

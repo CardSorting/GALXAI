@@ -629,30 +629,8 @@ export class GalxOAuthManager {
   /**
    * Approves a pending RFC 8628 Device Authorization code upon successful browser authorization.
    */
-  approveDeviceCode(userCode: string, sessionToken: string, tokenRecord?: OAuthTokenRecord): boolean {
-    const cleanCode = userCode.toUpperCase().replace(/\s+/g, '');
-    const normalizedCode = cleanCode.includes('-') ? cleanCode : `${cleanCode.substring(0, 4)}-${cleanCode.substring(4, 8)}`;
-
-    const candidates = this.deviceCodeTable.query({
-      where: { userCode: { $eq: normalizedCode } }
-    });
-
-    const record = candidates[0];
-    if (!record || record.status !== 'pending' || Date.now() >= record.expiresAtMs) {
-      // Still trigger repository approval in case it's in Supabase
-      OAuthRepository.getInstance().approveDeviceCode(normalizedCode, sessionToken, tokenRecord).catch(() => {});
-      return true;
-    }
-
-    this.deviceCodeTable.put(record.id, {
-      ...record,
-      status: 'approved',
-      sessionToken,
-      tokenRecord
-    });
-
-    OAuthRepository.getInstance().approveDeviceCode(normalizedCode, sessionToken, tokenRecord).catch(() => {});
-    return true;
+  async approveDeviceCode(userCode: string, sessionToken: string, tokenRecord?: OAuthTokenRecord, userId?: string): Promise<boolean> {
+    return OAuthRepository.getInstance().approveDeviceCode(userCode, sessionToken, tokenRecord, userId);
   }
 
   /**

@@ -1,4 +1,5 @@
 'use client';
+import { workspaceFetch } from '@/lib/auth/workspace-client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { startActivityPolling, recoveryDelay } from '@/lib/resilience/activity-polling';
 import { readWorkspaceSite, readSiteSummary, readSiteMessage, workspaceError, type WorkspaceSite, type SiteSummary, type SitesAccess, type SiteIntent, type SiteMessage, type SiteVersion, readSiteDocument } from '@/lib/sites/workspace-contract';
@@ -23,7 +24,7 @@ export function useSitesWorkspace(owner: string | null, token?: string, initialI
     const controller = new AbortController(); controllers.current.add(controller);
     const timer = setTimeout(() => controller.abort(),body?.action === 'generate' ? 95000 : 25000);
     try {
-      const response = await fetch('/api/sites/workspace'+query,{ method:body ? 'POST':'GET', cache:'no-store', signal:signal ? AbortSignal.any([signal,controller.signal]) : controller.signal,
+      const response = await workspaceFetch(owner, '/api/sites/workspace'+query,{ method:body ? 'POST':'GET', cache:'no-store', signal:signal ? AbortSignal.any([signal,controller.signal]) : controller.signal,
         headers:{ 'Accept':'application/json', ...(token ? {Authorization:`Bearer ${token}`} : {}), ...(body ? {'Content-Type':'application/json'} : {}) },
         ...(body ? {body:JSON.stringify(body)} : {}) });
       if (!response.ok) {
@@ -38,7 +39,7 @@ export function useSitesWorkspace(owner: string | null, token?: string, initialI
       if(alive.current && !signal?.aborted && !(error instanceof WorkspaceClientError))setConnection(navigator.onLine?'reconnecting':'offline');
       throw error;
     } finally { clearTimeout(timer); controllers.current.delete(controller); }
-  },[token]);
+  },[owner,token]);
   const accept = useCallback((input: unknown) => {
     const next = readWorkspaceSite(input);
     if (!alive.current) return next;

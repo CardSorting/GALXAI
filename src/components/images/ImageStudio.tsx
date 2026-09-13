@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowDownToLine, ArrowLeft, ArrowRight, Check, ChevronDown, Copy, ImageIcon, LoaderCircle, Plus, RefreshCw, Search, SlidersHorizontal, Sparkles, Star, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { WorkspaceSessionBoundary } from '@/components/auth/WorkspaceSessionBoundary';
 import { safeCopyToClipboard } from '@/lib/resilience/safeClipboard';
 import { DEFAULT_SETTINGS, IMAGE_MODEL, MAX_PROMPT, RATIOS, readSettings, type StudioImage, type StudioSettings } from './studio-contract';
 import { useImageStudio } from './use-image-studio';
@@ -13,7 +14,7 @@ import './studio.css';
 
 export function ImageStudio() {
   const { user, isLoading } = useAuth();
-  return <StudioWorkspace key={user?.id || 'guest'} owner={user?.id || null} token={user?.token} authLoading={isLoading} />;
+  return <WorkspaceSessionBoundary><StudioWorkspace key={user?.id || 'guest'} owner={user?.id || null} token={user?.token} authLoading={isLoading} /></WorkspaceSessionBoundary>;
 }
 
 function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; token?: string; authLoading: boolean }) {
@@ -99,8 +100,15 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
     }
   }, [composerOpen]);
 
+  function changeView(next: 'create' | 'library') {
+    setView(next);
+    const url = new URL(window.location.href);
+    if (next === 'library') url.searchParams.set('view', 'library');
+    else url.searchParams.delete('view');
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+  }
   function focusPrompt() {
-    setView('create'); setComposerOpen(true);
+    changeView('create'); setComposerOpen(true);
     requestAnimationFrame(() => { promptRef.current?.focus(); promptRef.current?.scrollIntoView({ behavior: 'instant', block: 'center' }); });
   }
   function applyPrompt(prompt: string, ratio: string, quality: string = 'standard') {
@@ -118,7 +126,7 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
     } catch { if (!controller.signal.aborted) studio.setNotice('The prompt couldn’t be loaded. Try again.'); }
     finally { if (!controller.signal.aborted) setReusing(null); }
   }
-  function showLibrary(favorites = false) { setView('library'); studio.setFavorites(favorites); }
+  function showLibrary(favorites = false) { changeView('library'); studio.setFavorites(favorites); }
   function openImage(image: StudioImage, source: 'create' | 'library') {
     setActiveCollection(source === 'create' ? studio.creations : studio.images);
     setActiveSource(source); setActive(image); setCopied(false);
@@ -181,14 +189,14 @@ function StudioWorkspace({ owner, token, authLoading }: { owner: string | null; 
     </div>
     <div className="studio-workspace">
         <nav className="studio-view-nav" aria-label="Studio views">
-          <div><button aria-current={view === 'create' ? 'page' : undefined} onClick={() => setView('create')}><Sparkles aria-hidden="true" />Create</button>
+          <div><button aria-current={view === 'create' ? 'page' : undefined} onClick={() => changeView('create')}><Sparkles aria-hidden="true" />Create</button>
             <button aria-current={view === 'library' && !studio.favorites ? 'page' : undefined} onClick={() => showLibrary()}><ImageIcon aria-hidden="true" />My images</button>
             <button aria-current={view === 'library' && studio.favorites ? 'page' : undefined} onClick={() => showLibrary(true)}><Star aria-hidden="true" />Favorites</button></div>
           <button className="studio-icon-button" aria-label="New prompt" onClick={() => { setPrevious(settings); setSettings(DEFAULT_SETTINGS); focusPrompt(); }}><Plus aria-hidden="true" /></button>
         </nav>
       <aside className={`studio-composer ${view === 'library' ? 'studio-composer-library' : ''} ${!composerOpen ? 'studio-composer-collapsed' : ''}`} aria-label="Image creation settings">
         <div className="studio-composer-summary"><div><p>{settings.prompt || 'Your next image'}</p><span>{settings.ratio} · {settings.count} {settings.count === 1 ? 'image' : 'images'}</span></div><button type="button" className="studio-secondary" aria-expanded={composerOpen} aria-controls="studio-create-form" onClick={focusPrompt}>Edit prompt</button></div>
-        <form id="studio-create-form" ref={formRef} onSubmit={event => { event.preventDefault(); setView('create'); void studio.generate(); }} onKeyDown={event => {
+        <form id="studio-create-form" ref={formRef} onSubmit={event => { event.preventDefault(); changeView('create'); void studio.generate(); }} onKeyDown={event => {
           if ((event.metaKey || event.ctrlKey) && event.key === 'Enter' && !event.nativeEvent.isComposing) { event.preventDefault(); formRef.current?.requestSubmit(); }
         }}>
           <div className="studio-composer-heading"><h2>Create an image</h2><SlidersHorizontal aria-hidden="true" />{studio.creations.length > 0 && <button type="button" className="studio-text-button studio-return-results" onClick={() => { setComposerOpen(false); canvasRef.current?.focus({ preventScroll: true }); canvasRef.current?.scrollIntoView({ block: 'start' }); }}>Back to images<ArrowRight aria-hidden="true" /></button>}</div>

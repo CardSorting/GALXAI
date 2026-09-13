@@ -6,6 +6,8 @@
 
 import { getSupabaseAdmin, isSupabaseConfigured } from '../client';
 import type { Database } from '../types';
+import { getSupabaseConfig } from '../config';
+import { executePostgresQuery } from '@/lib/db/postgres';
 import { GalxCryptoVault, PRIMARY_KEY_VERSION } from '../../../core/vault/GalxCryptoVault';
 import type {
   GalxUserSession,
@@ -50,277 +52,74 @@ export class SessionRepository {
     this.sessionTable.delete(sessionId);
   }
 
+  private async authorityQuery(sql: string, values: unknown[] = []) {
+    const result = await executePostgresQuery(sql, values);
+    if (!result) throw new Error('SESSION_STORAGE_UNAVAILABLE');
+    return result;
+  }
+
   async createSession(session: GalxUserSession): Promise<void> {
-    this.saveSessionInMemory(session);
-
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        const { data, error } = await supabase.rpc('fn_create_user_session', {
-          p_id: session.id,
-          p_user_id: session.userId,
-          p_provider: session.provider,
-          p_shard_id: (session.shardId || null) as any,
-          p_token_hash: session.tokenHash,
-          p_refresh_token_hash: (session.refreshTokenHash || null) as any,
-          p_ip_address: (session.ipAddress || null) as any,
-          p_user_agent: (session.userAgent || null) as any,
-          p_issued_at_ms: session.issuedAtMs,
-          p_expires_at_ms: session.expiresAtMs,
-          p_workspace_id: (session.workspaceId || null) as any
-        });
-
-        if (error) {
-          const row = this.mapSessionToRow(session);
-          await supabase.from('galx_user_sessions').upsert(row, { onConflict: 'id' });
-        }
-      } catch {
-        // Fallback to in-memory
-      }
+    // Create-only persistence includes scopes/family metadata. Never issue from a
+    // cache-only success or replace an existing session through an upsert fallback.
+    const row = this.mapSessionToRow(session);
+    if (getSupabaseConfig().databaseUrl) {
+      // Column identifiers come only from the fixed mapper, never request fields.
+      const columns = Object.keys(row);
+      await this.authorityQuery(`INSERT INTO public.galx_user_sessions (${columns.join(',')}) VALUES (${columns.map((_, i) => '$' + (i + 1)).join(',')})`, Object.values(row));
+    } else {
+      const { error } = await getSupabaseAdmin().from('galx_user_sessions').insert(row);
+      if (error) throw new Error('SESSION_CREATION_UNAVAILABLE');
     }
+    this.saveSessionInMemory(session);
   }
 
   async findSessionByTokenHash(tokenHash: string, includeRevoked: boolean = true): Promise<GalxUserSession | null> {
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        let query = supabase
-          .from('galx_user_sessions')
-          .select('*')
-          .or(`token_hash.eq.${tokenHash},previous_token_hash.eq.${tokenHash}`);
-
-        if (!includeRevoked) {
-          query = query.eq('is_revoked', false);
-        }
-
-        const { data, error } = await query.single();
-
-        if (!error && data) {
-          const mapped = this.mapRowToSession(data);
-          this.inMemoryCache.set(mapped.id, mapped);
-          this.sessionTable.put(mapped.id, mapped);
-          return mapped;
-        }
-      } catch {
-        // Fallback to in-memory
-      }
+    if (!/^[a-f0-9]{64}$/.test(tokenHash)) return null;
+    if (getSupabaseConfig().databaseUrl) {
+      const result = await this.authorityQuery('SELECT * FROM public.galx_user_sessions WHERE (token_hash=$1 OR previous_token_hash=$1) AND ($2 OR NOT is_revoked) LIMIT 2', [tokenHash, includeRevoked]);
+      if (result.rows.length > 1) throw new Error('SESSION_VERIFICATION_UNAVAILABLE');
+      return result.rows[0] ? this.mapRowToSession(result.rows[0]) : null;
     }
-
-    const now = Date.now();
-    const primaryMatches = this.sessionTable.query({
-      where: {
-        tokenHash: { $eq: tokenHash },
-        ...(includeRevoked ? {} : { isRevoked: { $eq: false } }),
-        expiresAtMs: { $gt: now }
-      }
-    }) as GalxUserSession[];
-    if (primaryMatches.length > 0) {
-      return primaryMatches[0];
-    }
-
-    const prevMatches = this.sessionTable.query({
-      where: {
-        previousTokenHash: { $eq: tokenHash },
-        ...(includeRevoked ? {} : { isRevoked: { $eq: false } })
-      }
-    }) as GalxUserSession[];
-    for (const session of prevMatches) {
-      if (now <= (session.gracePeriodUntilMs || 0)) {
-        return session;
-      }
-    }
-    return null;
+    let query = getSupabaseAdmin().from('galx_user_sessions').select('*')
+      .or(`token_hash.eq.${tokenHash},previous_token_hash.eq.${tokenHash}`);
+    if (!includeRevoked) query = query.eq('is_revoked', false);
+    const { data, error } = await query.maybeSingle();
+    if (error) throw new Error('SESSION_VERIFICATION_UNAVAILABLE');
+    return data ? this.mapRowToSession(data) : null;
   }
 
   async findSessionById(id: string): Promise<GalxUserSession | null> {
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        const { data, error } = await supabase
-          .from('galx_user_sessions')
-          .select('*')
-          .eq('id', id)
-          .single();
-
-        if (!error && data) {
-          const mapped = this.mapRowToSession(data);
-          this.inMemoryCache.set(mapped.id, mapped);
-          return mapped;
-        }
-      } catch {
-        // Fallback
-      }
+    if (getSupabaseConfig().databaseUrl) {
+      const result = await this.authorityQuery('SELECT * FROM public.galx_user_sessions WHERE id=$1', [id]);
+      return result.rows[0] ? this.mapRowToSession(result.rows[0]) : null;
     }
-
-    return this.inMemoryCache.get(id) || null;
+    const { data, error } = await getSupabaseAdmin().from('galx_user_sessions').select('*').eq('id', id).maybeSingle();
+    if (error) throw new Error('SESSION_VERIFICATION_UNAVAILABLE');
+    return data ? this.mapRowToSession(data) : null;
   }
 
   /**
    * Atomic Token Rotation with Reuse Attack Detection (RFC 6819).
    */
-  async rotateSessionTokenAtomic(
-    oldTokenHash: string,
-    newTokenHash: string,
-    newExpiresAtMs: number,
-    newFingerprint?: string,
-    graceWindowMs: number = 30000
-  ): Promise<SessionRotationResult> {
-    const now = Date.now();
-
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        const { data, error } = await supabase.rpc('fn_rotate_session_token_atomic', {
-          p_old_token_hash: oldTokenHash,
-          p_new_token_hash: newTokenHash,
-          p_new_expires_at_ms: newExpiresAtMs,
-          p_new_fingerprint: newFingerprint || undefined,
-          p_grace_window_ms: graceWindowMs,
-          p_now_ms: now
-        });
-
-        if (!error && data) {
-          const res = data as any;
-          if (res.success) {
-            for (const session of this.inMemoryCache.values()) {
-              if (session.id === res.session_id) {
-                this.saveSessionInMemory({
-                  ...session,
-                  previousTokenHash: oldTokenHash,
-                  tokenHash: newTokenHash,
-                  sequenceNumber: res.sequence_number,
-                  expiresAtMs: newExpiresAtMs,
-                  gracePeriodUntilMs: now + graceWindowMs,
-                  lastActiveAtMs: now
-                });
-                break;
-              }
-            }
-            return {
-              success: true,
-              expiresAtMs: newExpiresAtMs,
-              reuseDetected: false
-            };
-          }
-
-          if (res.reuse_detected) {
-            if (res.family_id) {
-              for (const [id, s] of this.inMemoryCache.entries()) {
-                if (s.sessionFamilyId === res.family_id || s.id === res.session_id) {
-                  this.saveSessionInMemory({ ...s, isRevoked: true, revokedReason: 'TOKEN_REUSE_ATTACK_DETECTED' });
-                }
-              }
-            }
-            return {
-              success: false,
-              reuseDetected: true,
-              error: 'TOKEN_REUSE_ATTACK_DETECTED'
-            };
-          }
-          // If RPC returned not found or failed, fall through to in-memory fallback
-        }
-      } catch {
-        // Fallback
-      }
-    }
-
-    // In-Memory Fast-Path Fallback
-    for (const session of this.inMemoryCache.values()) {
-      if (session.tokenHash === oldTokenHash) {
-        if (session.isRevoked) {
-          return { success: false, reuseDetected: false, error: 'SESSION_REVOKED' };
-        }
-        if (session.expiresAtMs <= now) {
-          return { success: false, reuseDetected: false, error: 'SESSION_EXPIRED' };
-        }
-
-        const updated: GalxUserSession = {
-          ...session,
-          previousTokenHash: oldTokenHash,
-          tokenHash: newTokenHash,
-          sequenceNumber: (session.sequenceNumber || 1) + 1,
-          fingerprintHash: newFingerprint || session.fingerprintHash,
-          expiresAtMs: newExpiresAtMs,
-          gracePeriodUntilMs: now + graceWindowMs,
-          lastActiveAtMs: now,
-          updatedAt: new Date(now).toISOString()
-        };
-        this.saveSessionInMemory(updated);
-        return { success: true, expiresAtMs: newExpiresAtMs, reuseDetected: false };
-      }
-    }
-
-    for (const session of this.inMemoryCache.values()) {
-      if (session.previousTokenHash === oldTokenHash) {
-        if (now <= (session.gracePeriodUntilMs || 0)) {
-          return { success: true, expiresAtMs: session.expiresAtMs, reuseDetected: false };
-        }
-
-        const familyId = session.sessionFamilyId;
-        for (const [id, s] of this.inMemoryCache.entries()) {
-          if ((familyId && s.sessionFamilyId === familyId) || s.id === session.id) {
-            this.saveSessionInMemory({ ...s, isRevoked: true, revokedReason: 'TOKEN_REUSE_ATTACK_DETECTED' });
-          }
-        }
-        return { success: false, reuseDetected: true, error: 'TOKEN_REUSE_ATTACK_DETECTED' };
-      }
-    }
-
-    return { success: false, reuseDetected: false, error: 'SESSION_NOT_FOUND' };
+  async rotateSessionTokenAtomic(oldTokenHash: string, newTokenHash: string, newExpiresAtMs: number, newFingerprint?: string, graceWindowMs = 30000): Promise<SessionRotationResult> {
+    const { data, error } = getSupabaseConfig().databaseUrl
+      ? { data: (await this.authorityQuery('SELECT public.fn_rotate_session_token_atomic($1,$2,$3,$4,$5,$6) AS result', [oldTokenHash,newTokenHash,newExpiresAtMs,newFingerprint || null,graceWindowMs,Date.now()])).rows[0]?.result, error: null }
+      : await getSupabaseAdmin().rpc('fn_rotate_session_token_atomic', {
+      p_old_token_hash: oldTokenHash, p_new_token_hash: newTokenHash, p_new_expires_at_ms: newExpiresAtMs,
+      p_new_fingerprint: newFingerprint || undefined, p_grace_window_ms: graceWindowMs, p_now_ms: Date.now(),
+    });
+    if (error || !data) throw new Error('SESSION_ROTATION_UNAVAILABLE');
+    const result = data as { success?: boolean; reuse_detected?: boolean };
+    if (result.success) return { success: true, expiresAtMs: newExpiresAtMs, reuseDetected: false };
+    return { success: false, reuseDetected: result.reuse_detected === true, error: result.reuse_detected ? 'TOKEN_REUSE_ATTACK_DETECTED' : 'SESSION_ROTATION_DENIED' };
   }
 
   /**
    * Step-Up SUDO Mode Session Elevation (15-Minute Privileged Window).
    */
-  async elevateSessionSudo(
-    sessionId: string,
-    userId: string,
-    durationMs: number = 900000
-  ): Promise<SudoElevationResult> {
-    const now = Date.now();
-    const elevatedUntil = now + durationMs;
-
-    const existing = this.inMemoryCache.get(sessionId);
-    if (existing) {
-      if (existing.userId !== userId || existing.isRevoked) {
-        return { success: false, sudoActive: false, sudoElevatedUntilMs: 0, expiresInMs: 0, error: 'SESSION_NOT_FOUND_OR_REVOKED' };
-      }
-      this.saveSessionInMemory({
-        ...existing,
-        sudoElevatedUntilMs: elevatedUntil,
-        updatedAt: new Date(now).toISOString()
-      });
-    }
-
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        const { data, error } = await supabase.rpc('fn_elevate_session_sudo', {
-          p_session_id: sessionId,
-          p_user_id: userId,
-          p_duration_ms: durationMs,
-          p_now_ms: now
-        });
-
-        if (!error && data && (data as any).success) {
-          return {
-            success: true,
-            sudoActive: true,
-            sudoElevatedUntilMs: elevatedUntil,
-            expiresInMs: durationMs
-          };
-        }
-      } catch {
-        // Fallback
-      }
-    }
-
-    return {
-      success: true,
-      sudoActive: true,
-      sudoElevatedUntilMs: elevatedUntil,
-      expiresInMs: durationMs
-    };
+  async elevateSessionSudo(_sessionId: string, _userId: string, _durationMs = 900000): Promise<SudoElevationResult> {
+    // No fresh-proof contract exists yet; no caller-provided duration can elevate.
+    return { success: false, sudoActive: false, sudoElevatedUntilMs: 0, expiresInMs: 0, error: 'FRESH_PROOF_REQUIRED' };
   }
 
   /**
@@ -373,6 +172,10 @@ export class SessionRepository {
   }
 
   async touchSession(sessionId: string, nowMs: number = Date.now()): Promise<void> {
+    if (getSupabaseConfig().databaseUrl) {
+      await this.authorityQuery('UPDATE public.galx_user_sessions SET last_active_at_ms=$2::bigint, updated_at=to_timestamp(($2::bigint)::double precision/1000) WHERE id=$1 AND NOT is_revoked', [sessionId, nowMs]);
+      return;
+    }
     const existing = this.inMemoryCache.get(sessionId);
     if (existing) {
       this.saveSessionInMemory({
@@ -440,27 +243,13 @@ export class SessionRepository {
   }
 
   async getUserSessions(userId: string): Promise<GalxUserSession[]> {
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        const { data, error } = await supabase
-          .from('galx_user_sessions')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('is_revoked', false)
-          .order('last_active_at_ms', { ascending: false });
-
-        if (!error && data && data.length > 0) {
-          const mapped = data.map(this.mapRowToSession);
-          for (const s of mapped) this.saveSessionInMemory(s);
-          return mapped;
-        }
-      } catch {
-        // Fallback
-      }
+    if (getSupabaseConfig().databaseUrl) {
+      return (await this.authorityQuery('SELECT * FROM public.galx_user_sessions WHERE user_id=$1 AND NOT is_revoked ORDER BY last_active_at_ms DESC', [userId])).rows.map(row => this.mapRowToSession(row));
     }
-
-    return Array.from(this.inMemoryCache.values()).filter(s => s.userId === userId && !s.isRevoked);
+    const { data, error } = await getSupabaseAdmin().from('galx_user_sessions').select('*')
+      .eq('user_id', userId).eq('is_revoked', false).order('last_active_at_ms', { ascending: false });
+    if (error || !data) throw new Error('SESSION_LIST_UNAVAILABLE');
+    return data.map(row => this.mapRowToSession(row));
   }
 
   /**
@@ -560,140 +349,48 @@ export class SessionRepository {
     };
   }
 
-  async revokeSession(sessionId: string, reason: string = 'User requested logout'): Promise<void> {
-    const existing = this.inMemoryCache.get(sessionId);
-    const nowIso = new Date().toISOString();
-    if (existing) {
-      this.saveSessionInMemory({
-        ...existing,
-        isRevoked: true,
-        revokedAt: nowIso,
-        revokedReason: reason,
-        updatedAt: nowIso
-      });
+  async revokeSession(sessionId: string, reason = 'User requested logout'): Promise<void> {
+    const now = new Date().toISOString();
+    if (getSupabaseConfig().databaseUrl) {
+      await this.authorityQuery('UPDATE public.galx_user_sessions SET is_revoked=true,revoked_at=$2,revoked_reason=$3,updated_at=$2 WHERE id=$1', [sessionId, now, reason]);
+    } else {
+      const { error } = await getSupabaseAdmin().from('galx_user_sessions')
+        .update({ is_revoked: true, revoked_at: now, revoked_reason: reason, updated_at: now }).eq('id', sessionId);
+      if (error) throw new Error('SESSION_REVOCATION_UNAVAILABLE');
     }
-
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        await supabase
-          .from('galx_user_sessions')
-          .update({
-            is_revoked: true,
-            revoked_at: nowIso,
-            revoked_reason: reason,
-            updated_at: nowIso
-          })
-          .eq('id', sessionId);
-      } catch {
-        // Fallback
-      }
-    }
+    this.deleteSessionInMemory(sessionId);
   }
 
-  async revokeOtherSessions(userId: string, currentSessionId: string, reason: string = 'Remote logout of other devices'): Promise<number> {
-    let count = 0;
-    const nowIso = new Date().toISOString();
-    for (const [id, session] of this.inMemoryCache.entries()) {
-      if (session.userId === userId && id !== currentSessionId && !session.isRevoked) {
-        this.saveSessionInMemory({
-          ...session,
-          isRevoked: true,
-          revokedAt: nowIso,
-          revokedReason: reason,
-          updatedAt: nowIso
-        });
-        count++;
-      }
-    }
-
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        const { data, error } = await supabase.rpc('fn_revoke_other_user_sessions', {
-          p_user_id: userId,
-          p_current_session_id: currentSessionId,
-          p_reason: reason,
-          p_now_ms: Date.now()
-        });
-        if (!error && data && typeof (data as any).revoked_count === 'number' && (data as any).revoked_count > 0) {
-          return (data as any).revoked_count;
-        }
-      } catch {
-        // Fallback
-      }
-    }
-
-    return count;
+  async revokeOtherSessions(userId: string, currentSessionId: string, reason = 'Remote logout of other devices'): Promise<number> {
+    const { data, error } = getSupabaseConfig().databaseUrl
+      ? { data: (await this.authorityQuery('SELECT public.fn_revoke_other_user_sessions($1,$2,$3,$4) AS result', [userId,currentSessionId,reason,Date.now()])).rows[0]?.result, error: null }
+      : await getSupabaseAdmin().rpc('fn_revoke_other_user_sessions', {
+      p_user_id: userId, p_current_session_id: currentSessionId, p_reason: reason, p_now_ms: Date.now(),
+    });
+    return this.revokedCount(data, error);
   }
 
-  async revokeSessionFamily(familyId: string, reason: string = 'Session family revocation'): Promise<number> {
-    let count = 0;
-    const nowIso = new Date().toISOString();
-    for (const [id, session] of this.inMemoryCache.entries()) {
-      if (session.sessionFamilyId === familyId && !session.isRevoked) {
-        this.saveSessionInMemory({
-          ...session,
-          isRevoked: true,
-          revokedAt: nowIso,
-          revokedReason: reason,
-          updatedAt: nowIso
-        });
-        count++;
-      }
-    }
-
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        const { data, error } = await supabase.rpc('fn_revoke_session_family', {
-          p_family_id: familyId,
-          p_reason: reason,
-          p_now_ms: Date.now()
-        });
-        if (!error && data && typeof (data as any).revoked_count === 'number') {
-          return (data as any).revoked_count;
-        }
-      } catch {
-        // Fallback
-      }
-    }
-
-    return count;
+  async revokeSessionFamily(familyId: string, reason = 'Session family revocation'): Promise<number> {
+    const { data, error } = getSupabaseConfig().databaseUrl
+      ? { data: (await this.authorityQuery('SELECT public.fn_revoke_session_family($1,$2,$3) AS result', [familyId,reason,Date.now()])).rows[0]?.result, error: null }
+      : await getSupabaseAdmin().rpc('fn_revoke_session_family', {
+      p_family_id: familyId, p_reason: reason, p_now_ms: Date.now(),
+    });
+    return this.revokedCount(data, error);
   }
 
-  async revokeAllUserSessions(userId: string, reason: string = 'Global logout from all devices'): Promise<number> {
-    let count = 0;
-    const nowIso = new Date().toISOString();
-    for (const [id, session] of this.inMemoryCache.entries()) {
-      if (session.userId === userId && !session.isRevoked) {
-        this.saveSessionInMemory({
-          ...session,
-          isRevoked: true,
-          revokedAt: nowIso,
-          revokedReason: reason,
-          updatedAt: nowIso
-        });
-        count++;
-      }
-    }
+  async revokeAllUserSessions(userId: string, reason = 'Global logout from all devices'): Promise<number> {
+    const { data, error } = getSupabaseConfig().databaseUrl
+      ? { data: (await this.authorityQuery('SELECT public.fn_revoke_all_user_sessions($1,$2,$3) AS result', [userId,reason,Date.now()])).rows[0]?.result, error: null }
+      : await getSupabaseAdmin().rpc('fn_revoke_all_user_sessions', {
+      p_user_id: userId, p_reason: reason, p_now_ms: Date.now(),
+    });
+    return this.revokedCount(data, error);
+  }
 
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = getSupabaseAdmin();
-        const { data, error } = await supabase.rpc('fn_revoke_all_user_sessions', {
-          p_user_id: userId,
-          p_reason: reason,
-          p_now_ms: Date.now()
-        });
-        if (!error && data && typeof (data as any).revoked_count === 'number') {
-          return (data as any).revoked_count;
-        }
-      } catch {
-        // Fallback
-      }
-    }
-
+  private revokedCount(data: unknown, error: unknown): number {
+    const count = (data as { revoked_count?: unknown } | null)?.revoked_count;
+    if (error || typeof count !== 'number' || !Number.isSafeInteger(count) || count < 0) throw new Error('SESSION_REVOCATION_UNAVAILABLE');
     return count;
   }
 
@@ -731,7 +428,7 @@ export class SessionRepository {
       shardId: data.shard_id || undefined,
       sessionFamilyId: data.session_family_id || undefined,
       sequenceNumber: data.sequence_number || 1,
-      scopes: data.scopes || ['*'],
+      scopes: data.scopes || [],
       sudoElevatedUntilMs: data.sudo_elevated_until_ms ? Number(data.sudo_elevated_until_ms) : undefined,
       riskScore: data.risk_score || 0,
       tokenHash: data.token_hash,
@@ -762,7 +459,7 @@ export class SessionRepository {
       shard_id: session.shardId || null,
       session_family_id: session.sessionFamilyId || null,
       sequence_number: session.sequenceNumber || 1,
-      scopes: session.scopes || ['*'],
+      scopes: session.scopes || [],
       sudo_elevated_until_ms: session.sudoElevatedUntilMs || null,
       risk_score: session.riskScore || 0,
       token_hash: session.tokenHash,

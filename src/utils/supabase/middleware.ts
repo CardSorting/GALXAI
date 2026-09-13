@@ -1,6 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { BroccoliAuthoritativeGovernor } from "@/core/broccolidb/BroccoliAuthoritativeGovernor";
+import { verifyWorkspaceSession } from '@/lib/auth/workspace-session';
+import { isWorkspacePath, workspaceSignInPath } from '@/lib/security/workspace-policy';
+import { workspaceUnavailableResponse } from '@/lib/security/workspace-unavailable';
 
 const defaultUrl = 'https://mazhcjisettrzbqhorvp.supabase.co';
 const defaultKey = 'sb_publishable_9eyEPgM-hF00Va7TLE90yA_LV4iGcoE';
@@ -76,8 +79,7 @@ function applySecurityHeaders(response: NextResponse, pathname: string): NextRes
 
   // Route security classification & zero-cache enforcement for private workspace surfaces
   const isProtectedPath = 
-    pathname === '/library' ||
-    pathname.startsWith('/library/') ||
+    isWorkspacePath(pathname) || pathname.startsWith('/auth/') ||
     pathname.startsWith('/teams') ||
     pathname.startsWith('/billing') ||
     pathname.startsWith('/keys') ||
@@ -104,7 +106,32 @@ function applySecurityHeaders(response: NextResponse, pathname: string): NextRes
 export const updateSession = async (request: NextRequest) => {
   const method = request.method;
   const pathname = request.nextUrl.pathname;
-  const isLibraryPath = pathname === '/library' || pathname.startsWith('/library/');
+
+  if (isWorkspacePath(pathname)) {
+    let response = NextResponse.next({ request });
+    const state = await verifyWorkspaceSession({
+      getAll: () => request.cookies.getAll(),
+      setAll: values => {
+        values.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        values.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+      },
+    });
+    let result = response;
+    if (state === 'unavailable') {
+      result = workspaceUnavailableResponse(request);
+    } else if (state !== 'authenticated') {
+      result = ['GET', 'HEAD'].includes(method)
+        ? NextResponse.redirect(new URL(workspaceSignInPath(pathname, request.nextUrl.searchParams), request.url))
+        : new NextResponse('Authentication required.', { status: 401 });
+    }
+    // Keep refreshed/cleared cookies on redirects and failures as well as success.
+    if (result !== response) response.cookies.getAll().forEach(cookie => result.cookies.set(cookie));
+    applySecurityHeaders(result, pathname);
+    result.headers.set('Cache-Control', 'private, no-store');
+    result.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    return result;
+  }
 
   // Public API-key endpoints may be called cross-origin. First-party /api routes
   // remain same-origin and reach their route-specific policy instead of inheriting
@@ -133,14 +160,6 @@ export const updateSession = async (request: NextRequest) => {
   const hasAuthCookie = allCookies.some(c => (c.name.startsWith('sb-') || c.name === 'galx_session') && c.value);
 
   if (!hasAuthCookie) {
-    if (isLibraryPath) {
-      const signInUrl = request.nextUrl.clone();
-      signInUrl.pathname = '/auth/signin';
-      signInUrl.search = '';
-      signInUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`);
-      return applySecurityHeaders(NextResponse.redirect(signInUrl), pathname);
-    }
-
     const unauthResponse = NextResponse.next({ request });
     return applySecurityHeaders(unauthResponse, pathname);
   }

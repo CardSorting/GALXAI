@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowUp, ArrowUpRight, Plus, Globe2, Monitor, Smartphone, RefreshCw, Check, ChevronDown, MessageSquare, PanelsTopLeft, Search, Download, X, Archive, Pencil, LoaderCircle, LockKeyhole, History, NotebookPen, ArrowDown, RotateCcw, Copy, List, WifiOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { WorkspaceSessionBoundary } from '@/components/auth/WorkspaceSessionBoundary';
 import { renderSitePreview } from '@/lib/sites/site-preview';
 import { type SiteDocument, type SiteSummary, type SiteIntent, type SiteVersion } from '@/lib/sites/workspace-contract';
 import { SITE_STARTERS, type SiteStarterSelection } from '@/lib/sites/starters';
@@ -16,7 +17,7 @@ const EXAMPLE: SiteDocument = { schema_version:1,title:'Good ideas deserve a pla
 const stateLabel = (s: SiteSummary) => s.archived ? 'Archived' : s.generating ? 'Replying' : s.published && s.address?.status === 'active' ? 'Live' : s.published && s.address ? 'Address pending' : 'Draft';
 export function SitesWorkspace({initialId,initialStarter}: {initialId?:string;initialStarter?:SiteStarterSelection}) {
   const {user,isLoading} = useAuth();
-  return <Workspace key={user?.id || 'guest'} owner={user?.id || null} token={user?.token} authLoading={isLoading} initialId={initialId} initialStarter={initialStarter} />;
+  return <WorkspaceSessionBoundary><Workspace key={user?.id || 'guest'} owner={user?.id || null} token={user?.token} authLoading={isLoading} initialId={initialId} initialStarter={initialStarter} /></WorkspaceSessionBoundary>;
 }
 function Workspace({owner,token,authLoading,initialId,initialStarter}: {owner:string|null;token?:string;authLoading:boolean;initialId?:string;initialStarter?:SiteStarterSelection}) {
   const studio = useSitesWorkspace(owner,token,initialId);

@@ -4,6 +4,7 @@ import { SITE_CONFIG } from "@/lib/seo/siteConfig";
 import { publishedSiteProxy } from '@/lib/sites/published-proxy';
 import { previewMiddleware } from '@/lib/security/preview-middleware';
 import { isPublicProductPath } from '@/lib/security/preview-policy';
+import { isWorkspacePath } from '@/lib/security/workspace-policy';
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -12,6 +13,8 @@ export async function middleware(request: NextRequest) {
     if (!['GET','HEAD'].includes(request.method) || pathname !== '/') return new NextResponse('Site unavailable.',{status:404,headers:{'Cache-Control':'private, no-store'}});
     return publishedSiteProxy(request,host);
   }
+  // Account workspaces require a session before any preview or asset exemption.
+  if (isWorkspacePath(pathname)) return updateSession(request);
   const previewDenied = await previewMiddleware(request);
   if (previewDenied) return previewDenied;
   // The broad matcher protects private page assets too. Public static assets

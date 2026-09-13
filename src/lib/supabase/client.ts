@@ -20,7 +20,7 @@ export function getSupabaseAuthClient(): SupabaseClient<Database> {
   if (!config.hasDataApiCredential) throw new Error('Auth service is not configured');
   authClientInstance = createClient<Database>(config.supabaseUrl, config.supabaseAnonKey, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
-    global: { fetch: (input, init) => fetch(input, { ...init,
+    global: { fetch: (input, init) => fetch(input, { ...init, cache: 'no-store',
       signal: init?.signal ? AbortSignal.any([init.signal, AbortSignal.timeout(8000)]) : AbortSignal.timeout(8000),
     }) },
   });

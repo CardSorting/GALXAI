@@ -1,92 +1,29 @@
 import { withDeveloperAccess } from '@/lib/security/developer-access';
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
+import { requireNativeSession } from '@/lib/auth/request-session';
+import { requireSessionMutation, sessionFailure, sessionResponse } from '@/lib/auth/session-http';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-      'Access-Control-Max-Age': '86400'
-    }
-  });
-}
-
-/**
- * GET /api/auth/sessions
- * Lists all active logged-in devices and sessions for the authenticated user.
- */
 async function previewGET(req: NextRequest) {
   try {
-    const authEngine = GalxAuthEngine.getInstance();
-    const auth = await authEngine.resolveAuthIdentity(req);
-
-    if (!auth.authenticated || !auth.session) {
-      return NextResponse.json(
-        { error: 'Unauthorized: Valid session bearer token is required' },
-        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
-      );
-    }
-
-    const sessions = await authEngine.getUserActiveSessions(auth.userId, auth.session.id);
-
-    return NextResponse.json({
-      success: true,
-      sessions,
-      total: sessions.length,
-      currentSessionId: auth.session.id
-    }, {
-      headers: { 'Access-Control-Allow-Origin': '*' }
-    });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error?.message || 'Failed to retrieve active sessions' },
-      { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
-    );
-  }
+    const actor = await requireNativeSession(req);
+    const devices = await GalxAuthEngine.getInstance().getUserActiveSessions(actor.user.id, actor.session.id);
+    const sessions = devices.map(device => ({ id: device.id, browser: device.browser, os: device.os,
+      isCurrent: device.id === actor.session.id, lastActiveAtMs: device.lastActiveAtMs,
+      expiresAtMs: device.expiresAtMs, createdAt: device.createdAt }));
+    return sessionResponse({ success: true, sessions, total: sessions.length, currentSessionId: actor.session.id });
+  } catch (error) { return sessionFailure(error); }
 }
-
-/**
- * DELETE /api/auth/sessions
- * Revokes all active sessions for the current user EXCEPT the current session (Remote Logout).
- */
 async function previewDELETE(req: NextRequest) {
   try {
-    const authEngine = GalxAuthEngine.getInstance();
-    const auth = await authEngine.resolveAuthIdentity(req);
-
-    if (!auth.authenticated || !auth.session) {
-      return NextResponse.json(
-        { error: 'Unauthorized: Valid session bearer token is required' },
-        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
-      );
-    }
-
-    const revokedCount = await authEngine.revokeOtherSessions(
-      auth.userId,
-      auth.session.id,
-      'User initiated logout of all other devices'
-    );
-
-    return NextResponse.json({
-      success: true,
-      message: `Successfully terminated ${revokedCount} remote session(s).`,
-      revokedCount
-    }, {
-      headers: { 'Access-Control-Allow-Origin': '*' }
-    });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error?.message || 'Failed to revoke remote sessions' },
-      { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
-    );
-  }
+    requireSessionMutation(req);
+    const actor = await requireNativeSession(req);
+    const revokedCount = await GalxAuthEngine.getInstance().revokeOtherSessions(actor.user.id, actor.session.id);
+    return sessionResponse({ success: true, revokedCount, message: 'Other device sessions have been signed out.' });
+  } catch (error) { return sessionFailure(error); }
 }
-
 export const GET = withDeveloperAccess(previewGET);
 export const DELETE = withDeveloperAccess(previewDELETE);

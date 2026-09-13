@@ -419,6 +419,7 @@ export class GalxCryptoVault {
   static generateEncryptedSessionToken(
     params: {
       userId: string;
+      accountVerified?: boolean;
       provider: ProviderType;
       shardId?: string;
       shardMode?: 'pooled' | 'private';
@@ -450,6 +451,7 @@ export class GalxCryptoVault {
 
     const claims: AuthSessionClaims = {
       sub: params.userId,
+      accountVerified: params.accountVerified === true,
       email: params.email,
       name: params.displayName,
       provider: params.provider,
@@ -880,4 +882,3 @@ export class GalxCryptoVault {
     }
   }
 }
-

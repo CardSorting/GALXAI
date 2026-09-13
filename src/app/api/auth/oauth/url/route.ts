@@ -1,3 +1,5 @@
+import { requireAccountIdentity } from '@/lib/auth/accountIdentity';
+import { sessionFailure } from '@/lib/auth/session-http';
 import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
 import { GalxOAuthManager } from '@/core/auth/GalxOAuthManager';
@@ -24,6 +26,7 @@ export async function OPTIONS() {
  */
 async function previewGET(req: NextRequest) {
   try {
+    const account = await requireAccountIdentity(req);
     const { searchParams } = new URL(req.url);
     const provider = (searchParams.get('provider') as ProviderType) || 'openai';
     const redirectUri = searchParams.get('redirectUri') || undefined;
@@ -52,6 +55,7 @@ async function previewGET(req: NextRequest) {
     response.cookies.set('galx_pkce_verifier', JSON.stringify({
       codeVerifier: details.codeVerifier,
       state: details.state,
+      userId: account.id,
       provider
     }), {
       httpOnly: true,
@@ -63,7 +67,7 @@ async function previewGET(req: NextRequest) {
 
     return response;
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return sessionFailure(err);
   }
 }
 

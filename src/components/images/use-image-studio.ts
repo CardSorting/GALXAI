@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { workspaceFetch } from '@/lib/auth/workspace-client';
 import { startActivityPolling, imageStatusDelay } from '@/lib/resilience/activity-polling';
 import { DEFAULT_SETTINGS, appendCreations, generationBody, readGeneration, readLibrary, readImageDetail, readPending, readSettings, studioError,
   type PendingGeneration, type StudioImage, type StudioSettings } from './studio-contract';
@@ -93,7 +94,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     let failureMessage = 'Your library couldn’t be loaded. Try refreshing it.';
     let accessDenied = false;
     try {
-      const response = await fetch(`/api/images/library?${params}`, { headers: headers(), signal: controller.signal, cache: 'no-store' });
+      const response = await workspaceFetch(owner, `/api/images/library?${params}`, { headers: headers(), signal: controller.signal, cache: 'no-store' });
       if (!response.ok) {
         if ([401,403].includes(response.status) && alive.current && sequence === librarySequence.current) {
           accessDenied = true;
@@ -134,7 +135,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     setError(''); setProgress('Checking your generation…');
     const stop = startActivityPolling(async signal => {
       try {
-        const response = await fetch(`/v1/images/requests/${encodeURIComponent(pending.id)}`, {
+        const response = await workspaceFetch(owner, `/v1/images/requests/${encodeURIComponent(pending.id)}`, {
           headers: headers(), signal: AbortSignal.any([signal, AbortSignal.timeout(25_000)]), cache: 'no-store',
         });
         if (signal.aborted || !active || !alive.current) return null;
@@ -169,7 +170,7 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
     const id = crypto.randomUUID();
     save(`${key}:unconfirmed`, true);
     try {
-      const response = await fetch('/v1/images/generations', { method: 'POST', headers: { ...headers(), 'Content-Type': 'application/json', Prefer: 'respond-async', 'Idempotency-Key': id },
+      const response = await workspaceFetch(owner, '/v1/images/generations', { method: 'POST', headers: { ...headers(), 'Content-Type': 'application/json', Prefer: 'respond-async', 'Idempotency-Key': id },
         body: JSON.stringify(generationBody(snapshot)), signal: controller.signal });
       if (!alive.current) return;
       if (!response.ok) {
@@ -201,16 +202,16 @@ export function useImageStudio(owner: string | null, token?: string, libraryActi
 
   const getDetails = useCallback(async (image: StudioImage, signal: AbortSignal) => {
     if (image.detailsLoaded !== false) return image;
-    const response = await fetch(`/api/images/library/${encodeURIComponent(image.id)}`, { headers: headers(), signal: AbortSignal.any([signal, AbortSignal.timeout(20_000)]), cache: 'no-store' });
+    const response = await workspaceFetch(owner, `/api/images/library/${encodeURIComponent(image.id)}`, { headers: headers(), signal: AbortSignal.any([signal, AbortSignal.timeout(20_000)]), cache: 'no-store' });
     if (!response.ok) throw new Error('Image details could not be loaded. Try again.');
     return readImageDetail(await response.json(), image.id);
-  }, [headers]);
+  }, [headers, owner]);
 
   async function toggleFavorite(image: StudioImage) {
     if (!owner || !image.saved || assetLock.current) return;
     assetLock.current = true; setBusyAsset(image.id);
     try {
-      const response = await fetch(`/api/images/library/${encodeURIComponent(image.id)}`, { method: 'PATCH', headers: { ...headers(), 'Content-Type': 'application/json' },
+      const response = await workspaceFetch(owner, `/api/images/library/${encodeURIComponent(image.id)}`, { method: 'PATCH', headers: { ...headers(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ isFavorite: !image.favorite }), signal: AbortSignal.timeout(20_000) });
       if (!response.ok || (await response.json()).success !== true) throw new Error('Favorite could not be saved. Try again.');
       if (!alive.current) return;

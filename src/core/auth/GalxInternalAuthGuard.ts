@@ -4,7 +4,7 @@
  * Enforces defense-in-depth protection for internal training pipelines,
  * dataset curation jobs, and sensitive ML substrate endpoints:
  * 1. Constant-Time Timing-Safe Secret Verification (prevents side-channel timing attacks)
- * 2. Supabase JWT Session Claim RBAC Verification (maintainer/admin role gating)
+ * 2. Explicit server administrator credential; account metadata is never authority
  * 3. Cache-Control: no-store, no-cache, must-revalidate enforcement
  * 4. X-Robots-Tag: noindex, nofollow search engine exclusion
  * 5. Full security audit logging for unauthenticated intrusion attempts
@@ -12,7 +12,7 @@
 
 import crypto from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
+import { hasInternalAccess } from '@/lib/security/internal-access';
 
 export interface InternalAuthResult {
   authorized: boolean;
@@ -25,7 +25,6 @@ export interface InternalAuthResult {
 
 export class GalxInternalAuthGuard {
   private static instance: GalxInternalAuthGuard;
-  private readonly defaultInternalAdminSecret = 'galxai-internal-training-admin-secret-key-32b';
 
   private constructor() {}
 
@@ -77,67 +76,7 @@ export class GalxInternalAuthGuard {
       };
     }
 
-    const internalKeyHeader = req.headers.get('x-galx-internal-key');
-    const authHeader = req.headers.get('authorization');
-    const expectedSecret = process.env.GALX_INTERNAL_ADMIN_KEY || process.env.GALX_VAULT_MASTER_SECRET || this.defaultInternalAdminSecret;
-
-    // 1. Direct x-galx-internal-key Header Check (Constant-Time)
-    if (internalKeyHeader) {
-      if (this.timingSafeEqualString(internalKeyHeader.trim(), expectedSecret.trim())) {
-        return {
-          authorized: true,
-          identityType: 'admin_secret',
-          role: 'system_admin',
-        };
-      }
-    }
-
-    // 2. Bearer Token Internal Secret Check (Constant-Time)
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.slice(7).trim();
-      if (this.timingSafeEqualString(token, expectedSecret.trim())) {
-        return {
-          authorized: true,
-          identityType: 'admin_secret',
-          role: 'system_admin',
-        };
-      }
-    }
-
-    // 3. Supabase Maintainer / Admin Session Token Check
-    try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
-      if (supabaseUrl && supabaseKey) {
-        const supabase = createServerClient(supabaseUrl, supabaseKey, {
-          cookies: {
-            getAll() {
-              return req.cookies.getAll();
-            },
-            setAll() {},
-          },
-        });
-
-        const { data: { user }, error } = await supabase.auth.getUser();
-
-        if (user && !error) {
-          const role = user.role || user.user_metadata?.role || user.app_metadata?.role;
-          const isAdmin = user.app_metadata?.is_admin === true || user.user_metadata?.is_admin === true;
-
-          if (role === 'maintainer' || role === 'admin' || role === 'service_role' || isAdmin) {
-            return {
-              authorized: true,
-              identityType: 'maintainer_session',
-              userId: user.id,
-              role: role || 'admin',
-            };
-          }
-        }
-      }
-    } catch {
-      // Fall through to unauthorized
-    }
+    if (hasInternalAccess(req.headers)) return { authorized: true, identityType: 'admin_secret', role: 'system_admin' };
 
     // 4. Unauthorized rejection
     return {
@@ -153,9 +92,7 @@ export class GalxInternalAuthGuard {
   public createUnauthorizedResponse(result: InternalAuthResult): NextResponse {
     return NextResponse.json(
       {
-        error: result.error || 'Unauthorized. Valid internal administrative credentials required.',
-        status: result.statusCode === 403 ? 'crawler_forbidden' : 'access_denied',
-        documentation: 'https://galx.ai/docs/training/06_OPERATIONAL_EXECUTION_RUNBOOK',
+        error: 'Access denied.',
       },
       {
         status: result.statusCode || 401,
@@ -180,7 +117,6 @@ export class GalxInternalAuthGuard {
     res.headers.set('Googlebot', 'noindex, nofollow, noarchive');
     res.headers.set('Google-Extended', 'noindex, nofollow, noarchive');
     res.headers.set('X-Content-Type-Options', 'nosniff');
-    res.headers.set('X-GALX-Internal-Security', 'verified_constant_time');
     return res;
   }
 }

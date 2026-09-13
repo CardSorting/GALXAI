@@ -1,76 +1,22 @@
 import { withDeveloperAccess } from '@/lib/security/developer-access';
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
+import { requireNativeSession } from '@/lib/auth/request-session';
+import { requireSessionMutation, sessionFailure, sessionResponse, readSessionBody } from '@/lib/auth/session-http';
 
-export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-      'Access-Control-Max-Age': '86400'
-    }
-  });
-}
-
-/**
- * POST /api/auth/tokens/restricted
- * Mints an Ephemeral Scoped Sub-Token (Stripe / AWS STS Pattern) for subagents or microservices.
- */
 async function previewPOST(req: NextRequest) {
   try {
-    const authHeader = req.headers.get('authorization') || '';
-    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized: Master session bearer token is required' },
-        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
-      );
-    }
-
-    const body = await req.json().catch(() => ({}));
-    const { scopes, ttlMs, name } = body;
-
-    if (!scopes || !Array.isArray(scopes) || scopes.length === 0) {
-      return NextResponse.json(
-        { error: 'Invalid parameter: "scopes" array is required (e.g. ["chat:*"])' },
-        { status: 400, headers: { 'Access-Control-Allow-Origin': '*' } }
-      );
-    }
-
-    const authEngine = GalxAuthEngine.getInstance();
-    const result = await authEngine.createRestrictedToken(token, {
-      scopes,
-      ttlMs: ttlMs ? Number(ttlMs) : undefined,
-      name
-    });
-
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error || 'Failed to mint restricted token' },
-        { status: 403, headers: { 'Access-Control-Allow-Origin': '*' } }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      token: result.token,
-      scopes: result.scopes,
-      expiresAtMs: result.expiresAtMs
-    }, {
-      headers: { 'Access-Control-Allow-Origin': '*' }
-    });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error?.message || 'Internal server error minting restricted token' },
-      { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
-    );
-  }
+    requireSessionMutation(req);
+    const actor = await requireNativeSession(req), body = await readSessionBody(req);
+    if (!Array.isArray(body.scopes) || !body.scopes.length || body.scopes.length > 32 || body.scopes.some(scope => typeof scope !== 'string' || !/^[a-zA-Z0-9:*_.-]{1,100}$/.test(scope))
+      || (body.ttlMs !== undefined && (typeof body.ttlMs !== 'number' || !Number.isSafeInteger(body.ttlMs) || body.ttlMs < 1000 || body.ttlMs > 86400000))
+      || (body.name !== undefined && (typeof body.name !== 'string' || body.name.length > 100))) return sessionResponse({ error: 'Check the requested permissions and token lifetime.' }, 400);
+    const result = await GalxAuthEngine.getInstance().createRestrictedToken(actor.token, { scopes: body.scopes as string[], ttlMs: body.ttlMs as number | undefined, name: body.name as string | undefined });
+    if (!result.success) return sessionResponse({ error: 'The requested token could not be issued.' }, 403);
+    return sessionResponse({ success: true, token: result.token, scopes: result.scopes, expiresAtMs: result.expiresAtMs });
+  } catch (error) { return sessionFailure(error); }
 }
-
 export const POST = withDeveloperAccess(previewPOST);

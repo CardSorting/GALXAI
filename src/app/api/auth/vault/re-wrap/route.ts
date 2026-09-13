@@ -1,22 +1,12 @@
 import { withDeveloperAccess } from '@/lib/security/developer-access';
 import { NextRequest, NextResponse } from 'next/server';
+import { hasInternalAccess } from '@/lib/security/internal-access';
+import { sessionFailure, sessionResponse } from '@/lib/auth/session-http';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
 import { PRIMARY_KEY_VERSION } from '@/core/vault/GalxCryptoVault';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-      'Access-Control-Max-Age': '86400'
-    }
-  });
-}
 
 /**
  * POST /api/auth/vault/re-wrap
@@ -25,6 +15,7 @@ export async function OPTIONS() {
  */
 async function previewPOST(req: NextRequest) {
   try {
+    if (!hasInternalAccess(req.headers)) return sessionResponse({ error: 'Administrator authorization is required.' }, 403);
     const authEngine = GalxAuthEngine.getInstance();
     const auth = await authEngine.resolveAuthIdentity(req, 'admin:sudo');
 
@@ -39,7 +30,7 @@ async function previewPOST(req: NextRequest) {
     const sudoCheck = authEngine.requireSudoElevation(auth);
     if (!sudoCheck.elevated) {
       return NextResponse.json(
-        { error: sudoCheck.error, elevationRequired: true },
+        { error: 'Additional verification is required.', elevationRequired: true },
         { status: 403 }
       );
     }
@@ -56,11 +47,8 @@ async function previewPOST(req: NextRequest) {
       credentialsReencrypted: result.reencrypted,
       message: `Successfully re-wrapped ${result.reencrypted} credentials to KMS key version '${targetKeyVersion}'.`
     });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error?.message || 'Failed to re-wrap vault keys' },
-      { status: 500 }
-    );
+  } catch (error) {
+    return sessionFailure(error);
   }
 }
 

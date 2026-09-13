@@ -1,88 +1,24 @@
 import { withDeveloperAccess } from '@/lib/security/developer-access';
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { GalxOAuthManager } from '@/core/auth/GalxOAuthManager';
-import { GalxModelRouter } from '@/core/router/GalxModelRouter';
-
+import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
+import { readSessionBody, sessionFailure, sessionResponse } from '@/lib/auth/session-http';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-      'Access-Control-Max-Age': '86400'
-    }
-  });
-}
-
-/**
- * Standard RFC 8628 OAuth 2.0 Device Token Polling Endpoint.
- * Resolves authorization_pending, slow_down, expired_token, access_denied, or issued credentials.
- */
 async function previewPOST(req: NextRequest) {
   try {
-    let deviceCode = '';
-    let grantType = '';
-
-    const contentType = req.headers.get('content-type') || '';
-    if (contentType.includes('application/x-www-form-urlencoded')) {
-      const formData = await req.formData();
-      deviceCode = (formData.get('device_code') as string) || '';
-      grantType = (formData.get('grant_type') as string) || '';
-    } else {
-      const body = await req.json().catch(() => ({}));
-      deviceCode = body.device_code || body.deviceCode || '';
-      grantType = body.grant_type || body.grantType || '';
+    const body = await readSessionBody(req), code = body.device_code || body.deviceCode;
+    if (typeof code !== 'string' || code.length > 1024 || !code) return sessionResponse({ error: 'invalid_request' }, 400);
+    const result = await GalxOAuthManager.getInstance().pollDeviceToken(code);
+    if (result.success) {
+      const token = result.data?.access_token;
+      if (typeof token !== 'string' || !token.startsWith('galx_sess_')) return sessionResponse({ error: 'invalid_grant' }, 400);
+      const verified = await GalxAuthEngine.getInstance().verifySession(token, false);
+      if (!verified.valid || !verified.session) return sessionResponse({ error: 'invalid_grant' }, 400);
+      return sessionResponse({ access_token: token, token_type: 'Bearer', expires_in: Math.max(0, Math.floor((verified.session.expiresAtMs - Date.now()) / 1000)) });
     }
-
-    if (!deviceCode) {
-      return NextResponse.json(
-        { error: 'invalid_request', error_description: 'Missing device_code' },
-        { status: 400, headers: { 'Access-Control-Allow-Origin': '*' } }
-      );
-    }
-
-    const oauthManager = GalxOAuthManager.getInstance();
-    const result = await oauthManager.pollDeviceToken(deviceCode);
-
-    if (result.success && result.data) {
-      return NextResponse.json(result.data, {
-        status: 200,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 'no-store',
-          'Pragma': 'no-cache'
-        }
-      });
-    }
-
-    const errorStatus = result.error === 'authorization_pending' || result.error === 'slow_down' ? 400 : 400;
-
-    return NextResponse.json(
-      {
-        error: result.error || 'invalid_grant',
-        error_description: result.error_description || 'Device authorization pending',
-        interval: result.interval
-      },
-      {
-        status: errorStatus,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 'no-store',
-          'Pragma': 'no-cache'
-        }
-      }
-    );
-  } catch (err: any) {
-    const sanitized = GalxModelRouter.sanitizeUpstreamError(err?.message || 'Polling error');
-    return NextResponse.json(
-      { error: 'server_error', error_description: sanitized },
-      { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
-    );
-  }
+    const allowed = ['authorization_pending', 'slow_down', 'expired_token', 'access_denied'];
+    return sessionResponse({ error: allowed.includes(result.error || '') ? result.error : 'invalid_grant', ...(Number.isSafeInteger(result.interval) && result.interval! > 0 ? { interval: result.interval } : {}) }, 400);
+  } catch (error) { return sessionFailure(error); }
 }
-
 export const POST = withDeveloperAccess(previewPOST);

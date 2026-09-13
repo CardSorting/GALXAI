@@ -29,3 +29,10 @@ ALTER TABLE auth.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE auth.users FORCE ROW LEVEL SECURITY;
 REVOKE ALL ON auth.users FROM PUBLIC, anon, authenticated, service_role;
 GRANT USAGE ON SCHEMA auth TO anon, authenticated, service_role;
+
+-- Auth maintains this private relation; the fixture models only columns read by our guard.
+CREATE TABLE auth.sessions (
+  id uuid PRIMARY KEY, user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  not_after timestamptz
+);
+REVOKE ALL ON auth.sessions FROM PUBLIC, anon, authenticated, service_role;

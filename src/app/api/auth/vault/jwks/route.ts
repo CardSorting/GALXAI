@@ -1,57 +1,6 @@
 import { withDeveloperAccess } from '@/lib/security/developer-access';
-import { NextRequest, NextResponse } from 'next/server';
-import * as crypto from 'node:crypto';
-import { PRIMARY_KEY_VERSION } from '@/core/vault/GalxCryptoVault';
-
+import { sessionResponse } from '@/lib/auth/session-http';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-      'Access-Control-Max-Age': '86400'
-    }
-  });
-}
-
-/**
- * Standard RFC 7517 JSON Web Key Set (JWKS) Endpoint.
- * Publishes active cryptographic public keys for edge verification and microservice JWT validation.
- */
-async function previewGET(req: NextRequest) {
-  // Deterministic public key presentation for active vault key version
-  const kid = `galx_kms_${PRIMARY_KEY_VERSION}`;
-
-  // Deterministic public thumbprint
-  const thumbprint = crypto
-    .createHash('sha256')
-    .update(`galx_signing_root_2026_${PRIMARY_KEY_VERSION}`)
-    .digest('base64url');
-
-  const jwks = {
-    keys: [
-      {
-        kty: 'oct',
-        use: 'sig',
-        alg: 'HS256',
-        kid,
-        k: thumbprint
-      }
-    ]
-  };
-
-  return NextResponse.json(jwks, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
-      'Content-Type': 'application/json'
-    }
-  });
-}
-
-export const GET = withDeveloperAccess(previewGET);
+// Native credentials use server verification; no asymmetric public signing keys are published.
+export const GET = withDeveloperAccess(async () => sessionResponse({ keys: [] }));

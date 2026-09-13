@@ -52,6 +52,12 @@ jobs:
       - name: Verify public image, identity and ownership boundaries
         run: npm run test:image:security
 
+      - name: Verify account session lifecycle and immediate revocation
+        run: npm run test:auth:sessions
+
+      - name: Verify active-session authority in isolated PostgreSQL
+        run: npm run test:auth:db
+
       - name: Verify durable image requests and Favorites in isolated PostgreSQL
         run: npm run test:image:db
 

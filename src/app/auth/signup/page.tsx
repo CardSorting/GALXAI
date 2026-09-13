@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/utils/supabase/client';
 import { signupErrorMessage } from '@/lib/auth/signup';
 import { parseSignupCreditOffer, type SignupCreditOffer } from '@/lib/billing/signup-offer';
 import { DEFAULT_POST_AUTH_PATH, safeAuthRedirect } from '@/lib/auth/redirects';
+import { authDestinationLabel } from '@/lib/auth/signin';
 import {
   CheckCircle2,
   ArrowRight,
@@ -25,7 +26,6 @@ import {
 
 function SignUpContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const { user, signUp, signInWithOAuth, logout } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -114,7 +114,7 @@ function SignUpContent() {
       if (signUpError) throw signUpError;
 
       if (data?.session) {
-        router.replace(returnUrl);
+        window.location.replace(returnUrl);
       } else {
         setConfirmationEmail(emailInput.trim());
         setPasswordInput('');
@@ -211,7 +211,7 @@ function SignUpContent() {
                     href={returnUrl}
                     className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 group cursor-pointer font-mono"
                   >
-                    <span>Continue to Destination ({returnUrl})</span>
+                    <span>Continue to {authDestinationLabel(returnUrl)}</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                   </Link>
                 ) : (
@@ -524,23 +524,7 @@ function SignUpContent() {
             </div>
           )}
 
-          {/* Enterprise Trust Row */}
-          <div className="pt-2 flex items-center justify-center gap-4 text-[11px] text-zinc-400 font-mono">
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span>SOC 2 Type II</span>
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-              <span>256-Bit TLS</span>
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-              <span>Zero PHI</span>
-            </span>
-          </div>
+
         </div>
       </main>
     </div>

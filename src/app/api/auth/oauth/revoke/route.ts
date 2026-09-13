@@ -1,70 +1,27 @@
 import { withDeveloperAccess } from '@/lib/security/developer-access';
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { GalxAuthEngine } from '@/core/auth/GalxAuthEngine';
+import { requireNativeSession } from '@/lib/auth/request-session';
+import { requireSessionMutation, sessionFailure, sessionResponse, readSessionBody } from '@/lib/auth/session-http';
 
-export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-      'Access-Control-Max-Age': '86400'
-    }
-  });
-}
-
-/**
- * Standard RFC 7009 OAuth 2.0 Token Revocation Endpoint.
- * Revokes active access tokens or refresh tokens and invalidates downstream caches.
- * According to RFC 7009 § 2.2, returns HTTP 200 even if the token was already invalid or revoked.
- */
 async function previewPOST(req: NextRequest) {
   try {
-    let token = '';
-
-    const contentType = req.headers.get('content-type') || '';
-    if (contentType.includes('application/x-www-form-urlencoded')) {
-      const formData = await req.formData();
-      token = (formData.get('token') as string) || '';
-    } else {
-      const body = await req.json().catch(() => ({}));
-      token = body.token || '';
-    }
-
-    if (!token) {
-      return NextResponse.json(
-        { error: 'invalid_request', error_description: 'Missing token parameter' },
-        { status: 400, headers: { 'Access-Control-Allow-Origin': '*' } }
-      );
-    }
-
-    const authEngine = GalxAuthEngine.getInstance();
-    await authEngine.revokeSession(token, 'RFC 7009 OAuth token revocation');
-
-    return new NextResponse(null, {
-      status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'no-store',
-        'Pragma': 'no-cache'
+    requireSessionMutation(req);
+    const actor = await requireNativeSession(req);
+    const { token } = await readSessionBody(req);
+    if (typeof token !== 'string' || !token || token.length > 16384) return sessionResponse({ error: 'Invalid token parameter.' }, 400);
+    const engine = GalxAuthEngine.getInstance();
+    if (token.startsWith('galx_sess_')) {
+      const target = await engine.verifySession(token, false);
+      if (target.valid && target.session && target.claims?.sub === actor.user.id && target.session.userId === actor.user.id) {
+        await engine.revokeSessionById(target.session.id, actor.user.id);
       }
-    });
-  } catch {
-    // RFC 7009 § 2.2: The authorization server responds with HTTP status code 200
-    // if the token has been revoked successfully or if the client submitted an invalid token.
-    return new NextResponse(null, {
-      status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'no-store',
-        'Pragma': 'no-cache'
-      }
-    });
-  }
+    }
+    // Invalid or foreign targets disclose nothing; operational failure is still an error.
+    return sessionResponse({ success: true });
+  } catch (error) { return sessionFailure(error); }
 }
-
 export const POST = withDeveloperAccess(previewPOST);

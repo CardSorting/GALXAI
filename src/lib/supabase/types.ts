@@ -3489,6 +3489,7 @@ export interface Database {
       [_ in never]: never;
     };
     Functions: {
+      fn_account_session_active: { Args: Record<string, never>; Returns: boolean };
       fn_batch_upsert_image_library: {
         Args: { p_records: Json };
         Returns: number;

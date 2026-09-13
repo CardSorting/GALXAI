@@ -1,35 +1,19 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import type { Provider, Session, User } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
-import { SafeStorage } from '@/lib/resilience/SafeStorage';
-import type { Session, User, Provider } from '@supabase/supabase-js';
 import { registerAccount, type SignupCredentials } from '@/lib/auth/signup';
+import { safeAuthRedirect } from '@/lib/auth/redirects';
+import { LOGOUT_STATE_KEY, SessionRequestFence, logoutState, markLogout, readSessionProfile, rememberOwner } from '@/lib/auth/browser-session';
+import { AuthEntryShell } from '@/components/auth/AuthEntryShell';
+import styles from '@/components/auth/auth-entry.module.css';
 
-export interface AuthUser {
-  id: string;
-  email?: string;
-  name?: string;
-  avatarUrl?: string;
-  provider?: string;
-  token?: string;
-  role?: string;
-  company?: string;
-}
-
-export interface DemoUserParams {
-  role?: 'dev' | 'lead' | 'enterprise';
-  email?: string;
-  name?: string;
-}
-
+export interface AuthUser { id: string; email?: string; name?: string; avatarUrl?: string; provider?: string; token?: string; role?: string; company?: string; }
+export interface DemoUserParams { role?: 'dev' | 'lead' | 'enterprise'; email?: string; name?: string; }
+type Status = 'loading' | 'ready' | 'unavailable' | 'signing_out' | 'signout_failed';
 interface AuthContextType {
-  user: AuthUser | null;
-  session: Session | null;
-  supabaseUser: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
+  user: AuthUser | null; session: Session | null; supabaseUser: User | null; isAuthenticated: boolean; isLoading: boolean;
   signInWithOAuth: (provider: Provider, options?: { redirectTo?: string; queryParams?: Record<string, string>; scopes?: string }) => Promise<void>;
   signInWithPassword: (credentials: { email: string; password: string }) => Promise<{ error: Error | null; data?: any }>;
   signUp: (credentials: SignupCredentials) => ReturnType<typeof registerAccount>;
@@ -37,349 +21,130 @@ interface AuthContextType {
   signInWithDemo: (params?: DemoUserParams) => void;
   signInWithProviderKey: (params: { apiKey: string; provider?: string }) => Promise<{ success: boolean; error?: string }>;
   signInWithSSO: (params: { domain: string }) => Promise<{ success: boolean; error?: string }>;
-  signOut: () => Promise<void>;
-  // Backwards-compatible ergonomics
-  loginWithOAuth: (provider: string) => Promise<void>;
-  logout: () => Promise<void>;
+  signOut: () => Promise<void>; loginWithOAuth: (provider: string) => Promise<void>; logout: () => Promise<void>;
 }
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const CUSTOM_AUTH_KEY = 'galx_custom_auth_user';
-
-function mapSupabaseUser(user: User | null, session?: Session | null): AuthUser | null {
-  if (!user) return null;
-  const metadata = user.user_metadata || {};
-  return {
-    id: user.id,
-    email: user.email,
-    name: metadata.full_name || metadata.name || user.email?.split('@')[0] || 'Developer',
-    avatarUrl: metadata.avatar_url || metadata.picture,
-    provider: user.app_metadata?.provider || 'supabase',
-    token: session?.access_token,
-    role: metadata.role || 'developer',
-    company: metadata.company || 'Personal Sandbox'
-  };
-}
-
-function persistCustomSession(user: AuthUser | null) {
-  if (typeof window === 'undefined') return;
-  if (user) {
-    SafeStorage.setJSON(CUSTOM_AUTH_KEY, user);
-    try {
-      const isHttps = window.location.protocol === 'https:';
-      const maxAge = 2592000; // 30 days
-      const secureFlag = isHttps ? '; Secure' : '';
-      document.cookie = `galx_session=${encodeURIComponent(user.token || user.id)}; path=/; max-age=${maxAge}; SameSite=Lax${secureFlag}`;
-      document.cookie = `galx_user_role=${encodeURIComponent(user.role || 'developer')}; path=/; max-age=${maxAge}; SameSite=Lax${secureFlag}`;
-    } catch {}
-  } else {
-    SafeStorage.removeItem(CUSTOM_AUTH_KEY);
-    try {
-      document.cookie = 'galx_session=; path=/; max-age=0; SameSite=Lax';
-      document.cookie = 'galx_user_role=; path=/; max-age=0; SameSite=Lax';
-    } catch {}
-  }
-}
+const returnPath = () => safeAuthRedirect(location.pathname + location.search);
+const signInPath = () => `/auth/signin?${new URLSearchParams({ next: returnPath(), error: 'signed_out' })}`;
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [supabaseUser, setSupabaseUser] = useState<User | null>(null);
+  const [supabase] = useState(createClient);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [customUser, setCustomUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
-  const supabase = createClient();
+  const [status, setStatus] = useState<Status>('loading');
+  const candidate = useRef<Session | null>(null), currentUser = useRef<AuthUser | null>(null);
+  const fence = useRef(new SessionRequestFence()), alive = useRef(false), logoutLock = useRef(false);
+  const lastVerified = useRef(0);
+  const verifying = useRef(false);
+  const initialization = useRef(0);
+  const recoveryHeading = useRef<HTMLHeadingElement>(null);
+  const clearUser = useCallback(() => { currentUser.current = null; setUser(null); setSession(null); rememberOwner(null); }, []);
+
+  const verify = useCallback(async (next: Session | null) => {
+    if (logoutState()) return;
+    candidate.current = next;
+    const request = fence.current.begin();
+    verifying.current = true;
+    if (currentUser.current && next?.user.id && currentUser.current.id !== next.user.id) clearUser();
+    try {
+      const response = await fetch('/api/auth/session', { credentials: 'same-origin', cache: 'no-store', signal: AbortSignal.any([request.signal, AbortSignal.timeout(10_000)]), headers: next?.access_token ? { Authorization: `Bearer ${next.access_token}` } : undefined });
+      if (!alive.current || !request.current() || logoutState()) return;
+      if (response.status === 401) { clearUser(); setStatus('ready'); return; }
+      if (!response.ok) throw new Error('Session unavailable');
+      const profile = readSessionProfile(await response.json());
+      if (!profile) throw new Error('Invalid session response');
+      if (!alive.current || !request.current() || logoutState()) return;
+      const matching = next?.user.id === profile.user.id ? next : null;
+      const mapped: AuthUser = { ...profile.user, provider: 'account', ...(matching ? { token: matching.access_token } : {}) };
+      currentUser.current = mapped; setUser(mapped); setSession(matching); rememberOwner(profile.user);
+      lastVerified.current = Date.now(); setStatus('ready');
+    } catch {
+      if (alive.current && request.current() && !logoutState()) {
+        // An outage cannot create a session or overwrite an already verified same-account view.
+        if (!currentUser.current) setStatus('unavailable');
+      }
+    } finally { if (request.current()) verifying.current = false; }
+  }, [clearUser]);
 
   useEffect(() => {
-    // 1. Check for custom session in SafeStorage (purge legacy demo_sandbox sessions)
-    const savedCustom = SafeStorage.getJSON<AuthUser | null>(CUSTOM_AUTH_KEY, null);
-    if (savedCustom) {
-      if (savedCustom.provider === 'demo_sandbox' || savedCustom.id?.startsWith('dev_demo_') || savedCustom.id?.startsWith('usr_') || savedCustom.token?.startsWith('session_')) {
-        SafeStorage.removeItem(CUSTOM_AUTH_KEY);
-        persistCustomSession(null);
-      } else {
-        setCustomUser(savedCustom);
-        persistCustomSession(savedCustom);
-      }
-    }
-
-    // 2. Initial user & session load from Supabase client
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setSupabaseUser(session?.user ?? null);
-      if (session?.user) {
-        const mapped = mapSupabaseUser(session.user, session);
-        setCustomUser(mapped);
-        persistCustomSession(mapped);
-      } else if (savedCustom && ['email', 'google', 'github'].includes(savedCustom.provider || '')) {
-        setCustomUser(null);
-        persistCustomSession(null);
-      }
-      setIsLoading(false);
-    }).catch(() => {
-      setIsLoading(false);
+    alive.current = true;
+    const requestFence = fence.current;
+    const generation = ++initialization.current;
+    const active = () => alive.current && initialization.current === generation;
+    rememberOwner(null); // Discard old token/role-bearing local-storage mirrors before hydration.
+    const marker = logoutState();
+    if (marker) { clearUser(); setStatus(marker === 'pending' ? 'signout_failed' : 'ready'); }
+    let scheduled: ReturnType<typeof setTimeout> | undefined;
+    let authEventReceived = false;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, next) => {
+      if (!active()) return;
+      authEventReceived = true;
+      candidate.current = next;
+      if (event === 'SIGNED_OUT') { clearTimeout(scheduled); requestFence.invalidate(); verifying.current = false; clearUser(); if (!logoutLock.current) setStatus('ready'); return; }
+      if (logoutState()) return;
+      // Never await another SDK call inside its locked auth-state callback.
+      clearTimeout(scheduled); scheduled = setTimeout(() => { void verify(next); }, 0);
     });
-
-    // 3. Reactive Auth State Listener for cross-tab synchrony
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setSupabaseUser(session?.user ?? null);
-      if (session?.user) {
-        const mapped = mapSupabaseUser(session.user, session);
-        setCustomUser(mapped);
-        persistCustomSession(mapped);
-      } else if (_event === 'SIGNED_OUT') {
-        setCustomUser(null);
-        persistCustomSession(null);
-      }
-      setIsLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
+    void supabase.auth.getSession().then(({ data }) => {
+      if (!active() || authEventReceived) return;
+      candidate.current = data.session;
+      if (!logoutState()) void verify(data.session);
+    }).catch(() => { if (active() && !authEventReceived && !logoutState()) setStatus('unavailable'); });
+    const storage = (event: StorageEvent) => {
+      if (event.key !== LOGOUT_STATE_KEY || !event.newValue) return;
+      requestFence.invalidate(); clearUser(); void supabase.auth.stopAutoRefresh();
+      if (event.newValue === 'complete') window.location.replace(signInPath());
+      else setStatus('signout_failed');
     };
-  }, [supabase]);
+    const resume = () => { if (!verifying.current && document.visibilityState === 'visible' && navigator.onLine && Date.now() - lastVerified.current >= 30_000 && !logoutState()) void verify(candidate.current); };
+    window.addEventListener('storage', storage); window.addEventListener('online', resume); window.addEventListener('focus', resume); document.addEventListener('visibilitychange', resume);
+    return () => { alive.current = false; requestFence.invalidate(); clearTimeout(scheduled); subscription.unsubscribe(); window.removeEventListener('storage', storage); window.removeEventListener('online', resume); window.removeEventListener('focus', resume); document.removeEventListener('visibilitychange', resume); };
+  }, [supabase, verify, clearUser]);
+  useEffect(() => { if (status === 'signout_failed' || status === 'unavailable') recoveryHeading.current?.focus(); }, [status]);
 
-  const signInWithOAuth = async (
-    provider: Provider,
-    options?: { redirectTo?: string; queryParams?: Record<string, string>; scopes?: string }
-  ) => {
-    setIsLoading(true);
+  const beginSignIn = () => { markLogout(null); fence.current.invalidate(); };
+  const signInWithOAuth: AuthContextType['signInWithOAuth'] = async (provider, options) => {
+    beginSignIn();
+    const { error } = await supabase.auth.signInWithOAuth({ provider, options: { ...options, redirectTo: options?.redirectTo || `${location.origin}/auth/callback` } });
+    if (error) throw error;
+  };
+  const signInWithPassword: AuthContextType['signInWithPassword'] = async credentials => {
+    beginSignIn();
+    try { const result = await supabase.auth.signInWithPassword(credentials); return result; }
+    catch (error) { return { error: error instanceof Error ? error : new Error('Sign-in unavailable') }; }
+  };
+  const signUp: AuthContextType['signUp'] = async credentials => { beginSignIn(); return registerAccount(supabase.auth, credentials, location.origin); };
+  const signInWithOtp: AuthContextType['signInWithOtp'] = async ({ email, options }) => {
+    beginSignIn(); return supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: options?.emailRedirectTo || `${location.origin}/auth/callback`, shouldCreateUser: false } });
+  };
+  const signInWithSSO: AuthContextType['signInWithSSO'] = async ({ domain }) => {
+    const cleanDomain = domain.trim().replace(/^@/, '').toLowerCase();
+    if (!/^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/.test(cleanDomain)) return { success: false, error: 'Enter your organization’s email domain.' };
+    beginSignIn();
     try {
-      const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      const redirectTo = options?.redirectTo || `${origin}/auth/callback`;
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo,
-          queryParams: options?.queryParams,
-          scopes: options?.scopes,
-        },
-      });
-      if (error) throw error;
-    } finally {
-      setIsLoading(false);
-    }
+      const { data, error } = await supabase.auth.signInWithSSO({ domain: cleanDomain, options: { redirectTo: `${location.origin}/auth/callback?${new URLSearchParams({ next: returnPath() })}` } });
+      if (error || !data?.url || new URL(data.url).protocol !== 'https:') throw new Error('SSO unavailable');
+      location.assign(data.url); return { success: true };
+    } catch { return { success: false, error: 'Organization sign-in could not be started. Try another sign-in method.' }; }
   };
-
-  const signInWithPassword = async ({ email, password }: { email: string; password: string }) => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        return { error };
-      }
-      if (data?.user) {
-        const authUser: AuthUser = {
-          id: data.user.id,
-          email: data.user.email,
-          name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Developer',
-          provider: 'email',
-          token: data.session?.access_token,
-          role: 'developer',
-          company: 'Personal Sandbox'
-        };
-        setCustomUser(authUser);
-        persistCustomSession(authUser);
-      }
-      return { error: null, data };
-    } catch (err: any) {
-      return { error: err };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signUp = async (credentials: SignupCredentials) => {
-    setIsLoading(true);
-    try {
-      const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      const result = await registerAccount(supabase.auth, credentials, origin);
-      if (!result.error && result.data?.session) {
-        const authUser = mapSupabaseUser(result.data.user, result.data.session);
-        setSession(result.data.session);
-        setSupabaseUser(result.data.user);
-        setCustomUser(authUser);
-        persistCustomSession(authUser);
-      }
-      return result;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signInWithOtp = async ({ email, options }: { email: string; options?: { emailRedirectTo?: string } }) => {
-    setIsLoading(true);
-    try {
-      const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      const emailRedirectTo = options?.emailRedirectTo || `${origin}/auth/callback`;
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo,
-        },
-      });
-      return { error };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signInWithDemo = () => {
-    router.push('/auth/signin');
-  };
-
-  const signInWithProviderKey = async ({ apiKey, provider = 'openai' }: { apiKey: string; provider?: string }) => {
-    setIsLoading(true);
-    try {
-      const trimmed = apiKey.trim();
-      if (!trimmed) {
-        return { success: false, error: 'Please enter a valid API key or access token' };
-      }
-
-      const res = await fetch('/api/auth/openai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          apiKey: trimmed,
-          authType: 'api_key',
-          mode: 'pooled'
-        })
-      });
-
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json.success) {
-        if (trimmed.startsWith('sk-') || trimmed.startsWith('galx_') || trimmed.length >= 20) {
-          const providerUser: AuthUser = {
-            id: `key_${Date.now().toString(36)}`,
-            email: `developer@${provider}.internal`,
-            name: `${provider.toUpperCase()} Developer Key`,
-            provider: provider,
-            token: trimmed,
-            company: 'Developer Sandbox',
-            role: 'developer'
-          };
-          setCustomUser(providerUser);
-          persistCustomSession(providerUser);
-          return { success: true };
-        }
-        return { success: false, error: json.error || 'Failed to authenticate provider key' };
-      }
-
-      if (json.user) {
-        const authUser: AuthUser = {
-          id: json.user.id || json.user.sessionId || `user_${Date.now()}`,
-          email: json.user.email || `developer@${provider}.internal`,
-          name: json.user.name || `${provider.toUpperCase()} Developer`,
-          provider: provider,
-          token: json.user.token || trimmed,
-          company: 'Acme AI Corp',
-          role: 'developer'
-        };
-        setCustomUser(authUser);
-        persistCustomSession(authUser);
-      }
-      return { success: true };
-    } catch (err: any) {
-      if (apiKey.trim().startsWith('sk-') || apiKey.trim().startsWith('galx_') || apiKey.trim().length >= 20) {
-        const providerUser: AuthUser = {
-          id: `key_${Date.now().toString(36)}`,
-          email: `developer@${provider}.internal`,
-          name: `${provider.toUpperCase()} Developer Key`,
-          provider: provider,
-          token: apiKey.trim(),
-          company: 'Developer Sandbox',
-          role: 'developer'
-        };
-        setCustomUser(providerUser);
-        persistCustomSession(providerUser);
-        return { success: true };
-      }
-      return { success: false, error: err.message || 'Key authentication error' };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signInWithSSO = async ({ domain }: { domain: string }) => {
-    setIsLoading(true);
-    try {
-      const cleanDomain = domain.replace(/^@/, '').toLowerCase().trim();
-      if (!cleanDomain || !cleanDomain.includes('.')) {
-        return { success: false, error: 'Please enter a valid corporate email domain (e.g. acme.com)' };
-      }
-
-      const companyName = cleanDomain.split('.')[0].toUpperCase();
-      const ssoUser: AuthUser = {
-        id: `sso_${cleanDomain.replace(/[^a-z0-9]/g, '_')}_${Date.now()}`,
-        email: `sso.user@${cleanDomain}`,
-        name: `${companyName} Corporate Member`,
-        provider: 'saml_sso',
-        company: `${companyName} Enterprise`,
-        role: 'enterprise',
-        token: `sso_saml_bearer_${Date.now()}`
-      };
-
-      setCustomUser(ssoUser);
-      persistCustomSession(ssoUser);
-      return { success: true };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const signOut = async () => {
-    setIsLoading(true);
+    if (logoutLock.current) return;
+    logoutLock.current = true; markLogout('pending'); fence.current.invalidate(); clearUser(); setStatus('signing_out');
+    void supabase.auth.stopAutoRefresh();
     try {
-      setCustomUser(null);
-      persistCustomSession(null);
-      await supabase.auth.signOut();
-      setSession(null);
-      setSupabaseUser(null);
-      router.push('/auth/signin');
-    } finally {
-      setIsLoading(false);
-    }
+      const response = await fetch('/api/auth/session', { method: 'DELETE', credentials: 'same-origin', cache: 'no-store', signal: AbortSignal.timeout(10_000) });
+      if (!response.ok && response.status !== 401) throw new Error('Sign-out incomplete');
+      // Server clears HttpOnly aliases and SDK cookies. A new document drops SDK in-memory credentials.
+      rememberOwner(null); markLogout('complete'); window.location.replace(signInPath());
+    } catch { if (alive.current) setStatus('signout_failed'); }
+    finally { logoutLock.current = false; }
   };
-
-  // Backwards-compatible aliases
-  const loginWithOAuth = async (provider: string) => {
-    return signInWithOAuth(provider as Provider);
-  };
-
-  const logout = signOut;
-
-  const mappedUser = customUser || mapSupabaseUser(supabaseUser, session);
-
-  return (
-    <AuthContext.Provider
-      value={{
-        user: mappedUser,
-        session,
-        supabaseUser,
-        isAuthenticated: !!mappedUser,
-        isLoading,
-        signInWithOAuth,
-        signInWithPassword,
-        signUp,
-        signInWithOtp,
-        signInWithDemo,
-        signInWithProviderKey,
-        signInWithSSO,
-        signOut,
-        loginWithOAuth,
-        logout,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  const value: AuthContextType = { user, session, supabaseUser: session?.user ?? null, isAuthenticated: Boolean(user), isLoading: status === 'loading' || status === 'signing_out', signInWithOAuth, signInWithPassword, signUp, signInWithOtp, signInWithSSO, signOut, logout: signOut, loginWithOAuth: provider => signInWithOAuth(provider as Provider), signInWithDemo: () => location.assign('/auth/signin'), signInWithProviderKey: async () => ({ success: false, error: 'Sign in to your GALX account to manage connections.' }) };
+  const blocked = status === 'signing_out' || status === 'signout_failed' || status === 'unavailable';
+  return <AuthContext.Provider value={value}>{blocked ? <AuthEntryShell>
+    <div className={styles.intro}><h1 ref={recoveryHeading} tabIndex={-1}>{status === 'unavailable' ? 'We couldn’t check your session' : status === 'signing_out' ? 'Signing out…' : 'Finish signing out'}</h1>
+      <p role={status === 'signing_out' ? 'status' : undefined}>{status === 'unavailable' ? 'Check your connection and try again.' : status === 'signing_out' ? 'Your workspace is hidden while we end this browser’s session.' : 'Your workspace is hidden. We couldn’t finish signing out. Try again to secure this browser.'}</p></div>
+    {status !== 'signing_out' && <button className={`${styles.button} ${styles.primary}`} onClick={() => status === 'unavailable' ? void verify(candidate.current) : void signOut()}>{status === 'unavailable' ? 'Try again' : 'Retry sign-out'}</button>}
+  </AuthEntryShell> : children}</AuthContext.Provider>;
 }
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
+export function useAuth() { const context = useContext(AuthContext); if (!context) throw new Error('useAuth must be used within an AuthProvider'); return context; }

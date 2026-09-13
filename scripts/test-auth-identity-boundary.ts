@@ -20,7 +20,8 @@ test('identity requires verified credentials and never trusts client elevation c
   // Use the actual resolver without constructing unrelated persistence services.
   const engine = Object.create(GalxAuthEngine.prototype) as GalxAuthEngine;
   const auth = getSupabaseAuthClient().auth;
-  const original = auth.getUser;
+  const original = auth.getUser, originalFetch = globalThis.fetch;
+  globalThis.fetch = async input => { assert(String(input).endsWith('/fn_account_session_active')); return Response.json(true); };
   try {
     auth.getUser = async () => ({ data: { user: null }, error: new Error('private authentication diagnostic') }) as any;
     for (const token of [forged, '00000000-0000-4000-8000-000000000000', 'usr_test', 'user_test', 'session_test', 'dev_test', 'openai_test', 'github_test']) {
@@ -51,13 +52,14 @@ test('identity requires verified credentials and never trusts client elevation c
       assert.equal(session.userId, 'verified-user');
       assert.equal(session.isSudoElevated, false);
     }
-  } finally { auth.getUser = original; }
+  } finally { auth.getUser = original; globalThis.fetch = originalFetch; }
 });
 
 test('image library and favorites verify sessions without administrator credentials', async t => {
   const engine = Object.create(GalxAuthEngine.prototype) as GalxAuthEngine;
   const originalEngine = GalxAuthEngine.getInstance;
-  const originalRepo = ImageLibraryRepository.getInstance;
+  const originalRepo = ImageLibraryRepository.getInstance, originalFetch = globalThis.fetch;
+  globalThis.fetch = async input => { assert(String(input).endsWith('/fn_account_session_active')); return Response.json(true); };
   const reads: Array<{ userId: string; favorite: boolean | undefined }> = [];
   const writes: string[] = [];
   const secret = 'PRIVATE_IMAGE_AUTH_DIAGNOSTIC';
@@ -139,6 +141,7 @@ test('image library and favorites verify sessions without administrator credenti
   } finally {
     GalxAuthEngine.getInstance = originalEngine;
     ImageLibraryRepository.getInstance = originalRepo;
+    globalThis.fetch = originalFetch;
     resetSupabaseClients();
   }
 });
@@ -152,12 +155,13 @@ test('database throttling cannot reject valid sessions; authentication outages a
   let authStatus=200, requests=0;
   globalThis.fetch=async (input,init)=>{
     requests++;
+    if (String(input).endsWith('/fn_account_session_active')) return Response.json(true);
     assert(String(input).includes('/auth/v1/user')); assert(init?.signal);
     return new Response(JSON.stringify(authStatus===200?{id:'verified-user',aud:'authenticated',role:'authenticated'}:{code:'test_error',msg:'PRIVATE_AUTH_OUTAGE'}),{status:authStatus,headers:{'Content-Type':'application/json'}});
   };
   resetSupabaseClients();
   try {
-    assert.equal((await engine.resolveAuthIdentity(request(forged))).userId,'verified-user'); assert.equal(requests,1);
+    assert.equal((await engine.resolveAuthIdentity(request(forged))).userId,'verified-user'); assert.equal(requests,2);
     for(const status of [503,429]) {
       authStatus=status;
       const identity=await engine.resolveAuthIdentity(request(forged));

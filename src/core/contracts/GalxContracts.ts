@@ -726,6 +726,7 @@ export type SessionStatus = 'active' | 'expired' | 'revoked';
 
 export interface AuthSessionClaims {
   readonly sub: string; // User ID
+  readonly accountVerified?: boolean; // Signed provenance from verified account authentication.
   readonly email?: string;
   readonly name?: string;
   readonly provider: ProviderType;

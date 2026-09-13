@@ -8,6 +8,7 @@
 
 import * as crypto from 'node:crypto';
 import { getSupabaseAuthClient } from '../../lib/supabase/client';
+import { isAccountSessionActive } from '../../lib/auth/active-account-session';
 import { GalxCryptoVault, PRIMARY_KEY_VERSION } from '../vault/GalxCryptoVault';
 import { galxRouter } from '../router/GalxModelRouter';
 import { GalxPersistence } from '../../lib/storage/GalxPersistence';
@@ -73,8 +74,10 @@ export class GalxAuthEngine {
    */
   async authenticateProviderUser(
     provider: ProviderType,
-    params: ProviderAuthParams = {}
+    params: ProviderAuthParams = {},
+    account?: { id: string; email: string; name: string }
   ): Promise<ProviderAuthResult> {
+    if (!account?.id || !account.email) throw new Error('VERIFIED_ACCOUNT_REQUIRED');
     const {
       apiKey,
       accessToken,
@@ -91,7 +94,7 @@ export class GalxAuthEngine {
     } = params;
 
     const effectiveProvider: ProviderType = 'openai';
-    const uid = `openai_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`;
+    const uid = account.id;
     const familyId = `fam_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
     const fingerprint = GalxCryptoVault.generateClientFingerprint(ipAddress, userAgent);
     const oauthManager = GalxOAuthManager.getInstance();
@@ -103,8 +106,8 @@ export class GalxAuthEngine {
     let authType: 'oauth' | 'api_key' = (explicitAuthType === 'oauth' || explicitAuthType === 'api_key')
       ? explicitAuthType
       : (accessToken ? 'oauth' : 'api_key');
-    let email = params.email;
-    let displayName = params.displayName;
+    let email = account.email;
+    let displayName = account.name;
     let accountId = explicitAccountId;
     let expiresAtMs = explicitExpiresAtMs;
 
@@ -145,18 +148,7 @@ export class GalxAuthEngine {
         displayName = 'OpenAI Creator';
       }
     } else {
-      // Check server environment root fallback key (for dev/local infrastructure without placeholder generation)
-      const envKey = process.env.OPENAI_API_KEY;
-      if (envKey && envKey.trim().length > 15) {
-        authType = 'api_key';
-        rawTokenSecret = envKey.trim();
-        if (!email) email = 'creator@openai.user';
-        if (!displayName) displayName = 'OpenAI Creator';
-      } else {
-        throw new Error(
-          `MISSING_PROVIDER_CREDENTIALS: An OAuth access token or valid API key is required to authenticate with ${effectiveProvider}.`
-        );
-      }
+      throw new Error('MISSING_PROVIDER_CREDENTIALS');
     }
 
     // =========================================================================
@@ -175,7 +167,7 @@ export class GalxAuthEngine {
     const shardIdentity = accountId || rawTokenSecret!;
     const shardId = `codex_sh_${crypto
       .createHmac('sha256', shardIdSecret)
-      .update(`${effectiveProvider}:${shardIdentity}`)
+      .update(`${uid}:${effectiveProvider}:${shardIdentity}`)
       .digest('hex')
       .slice(0, 24)}`;
     const encrypted = GalxCryptoVault.encryptSecret(
@@ -257,12 +249,12 @@ export class GalxAuthEngine {
       } catch {}
     }
 
-    // 6. Generate JWE Encrypted Bearer Session Token with default 15-minute SUDO grant on initial login
+    // 6. Provider connection never grants administrative or step-up authority.
     const sessionId = `sess_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
-    const initialSudoUntil = Date.now() + 15 * 60 * 1000;
 
     const tokenResult = GalxCryptoVault.generateEncryptedSessionToken({
       userId: uid,
+      accountVerified: true,
       provider: effectiveProvider,
       shardId,
       shardMode: shard.shardMode,
@@ -271,7 +263,6 @@ export class GalxAuthEngine {
       workspaceId,
       role: 'developer',
       scopes,
-      sudoUntilMs: initialSudoUntil,
       familyId,
       sequenceNumber: 1,
       fingerprint,
@@ -286,7 +277,6 @@ export class GalxAuthEngine {
       sessionFamilyId: familyId,
       sequenceNumber: 1,
       scopes,
-      sudoElevatedUntilMs: initialSudoUntil,
       riskScore: 0,
       tokenHash: tokenResult.tokenHash,
       fingerprintHash: fingerprint,
@@ -437,7 +427,7 @@ export class GalxAuthEngine {
 
     // 1. Cryptographic HMAC/GCM Signature Verification & Claims Expiry Check
     const cryptoVerify = GalxCryptoVault.verifySessionToken(token);
-    if (!cryptoVerify.valid || !cryptoVerify.claims) {
+    if (!cryptoVerify.valid || !cryptoVerify.claims || cryptoVerify.claims.accountVerified !== true) {
       return { valid: false, error: cryptoVerify.error || 'INVALID_SIGNATURE_OR_EXPIRED' };
     }
 
@@ -453,7 +443,15 @@ export class GalxAuthEngine {
       return { valid: false, claims: cryptoVerify.claims, error: 'SESSION_REVOKED' };
     }
 
-    if (session.expiresAtMs <= Date.now()) {
+    if (session.userId !== cryptoVerify.claims.sub) {
+      return { valid: false, error: 'SESSION_OWNER_MISMATCH' };
+    }
+
+    if (session.tokenHash !== tokenHash && !(session.previousTokenHash === tokenHash && Number.isFinite(session.gracePeriodUntilMs) && session.gracePeriodUntilMs! > Date.now())) {
+      return { valid: false, error: 'SESSION_TOKEN_REPLACED' };
+    }
+
+    if (!Number.isFinite(session.expiresAtMs) || session.expiresAtMs <= Date.now()) {
       return { valid: false, claims: cryptoVerify.claims, error: 'SESSION_EXPIRED' };
     }
 
@@ -504,7 +502,7 @@ export class GalxAuthEngine {
     if (!isElevated) {
       return {
         elevated: false,
-        error: 'SUDO_MODE_REQUIRED: Elevated verification required for high-risk operations. Call POST /api/auth/sudo/elevate.'
+        error: 'SUDO_MODE_REQUIRED: Fresh account verification is required.'
       };
     }
 
@@ -524,8 +522,12 @@ export class GalxAuthEngine {
     }
 
     const parentClaims = verified.claims;
-    const ttlMs = params.ttlMs || 3600000; // 1 hour default
-    const expiresAtMs = Date.now() + ttlMs;
+    if (!Array.isArray(params.scopes) || !params.scopes.length || params.scopes.length > 32 || params.scopes.some(scope => typeof scope !== 'string' || !/^[a-zA-Z0-9:*_.-]{1,100}$/.test(scope))) return { success: false, error: 'INVALID_SCOPES' };
+    const requestedTtl = params.ttlMs ?? 3600000;
+    if (!Number.isSafeInteger(requestedTtl) || requestedTtl < 1000 || requestedTtl > 86400000) return { success: false, error: 'INVALID_TOKEN_LIFETIME' };
+    const ttlMs = Math.min(requestedTtl, verified.session.expiresAtMs - Date.now(), parentClaims.exp - Date.now());
+    if (ttlMs < 1000) return { success: false, error: 'PARENT_SESSION_EXPIRED' };
+    const expiresAtMs = Math.min(Date.now() + ttlMs, verified.session.expiresAtMs, parentClaims.exp);
 
     // Validate that requested scopes are a subset of parent scopes
     const parentScopes = parentClaims.scopes || ['*'];
@@ -537,6 +539,7 @@ export class GalxAuthEngine {
 
     const subTokenResult = GalxCryptoVault.generateEncryptedSessionToken({
       userId: parentClaims.sub,
+      accountVerified: parentClaims.accountVerified,
       provider: parentClaims.provider,
       shardId: parentClaims.shardId,
       shardMode: parentClaims.shardMode,
@@ -716,6 +719,7 @@ export class GalxAuthEngine {
     // Generate fresh JWE Encrypted Token maintaining lineage
     const newTokenResult = GalxCryptoVault.generateEncryptedSessionToken({
       userId: claims.sub,
+      accountVerified: claims.accountVerified,
       provider: claims.provider,
       shardId: claims.shardId,
       shardMode: claims.shardMode,
@@ -728,7 +732,7 @@ export class GalxAuthEngine {
       familyId: session.sessionFamilyId || claims.familyId,
       sequenceNumber: nextSeq,
       fingerprint,
-      ttlMs: 30 * 24 * 60 * 60 * 1000
+      ttlMs: session.id.startsWith('sess_sub_') ? Math.max(1, Math.min(claims.exp, session.expiresAtMs) - Date.now()) : 30 * 24 * 60 * 60 * 1000
     });
 
     const oldTokenHash = GalxCryptoVault.hashSessionToken(currentToken);
@@ -772,23 +776,13 @@ export class GalxAuthEngine {
   }
 
   /**
-   * Instantly revokes a session in Supabase PostgreSQL with zero residual footprint.
+   * Revoke a verified credential. IDs must use the separate owner-checked method.
    */
-  async revokeSession(tokenOrSessionId: string, reason: string = 'User requested logout'): Promise<boolean> {
-    if (tokenOrSessionId.startsWith('galx_sess_')) {
-      const tokenHash = GalxCryptoVault.hashSessionToken(tokenOrSessionId);
-      const session = await this.sessionRepo.findSessionByTokenHash(tokenHash, true);
-      if (session) {
-        await this.sessionRepo.revokeSession(session.id, reason);
-        this.persistence.logAudit('SESSION_REVOKED', { sessionId: session.id, reason }, session.shardId, session.userId);
-        return true;
-      }
-    } else {
-      await this.sessionRepo.revokeSession(tokenOrSessionId, reason);
-      this.persistence.logAudit('SESSION_REVOKED', { sessionId: tokenOrSessionId, reason });
-      return true;
-    }
-    return false;
+  async revokeSession(token: string, reason: string = 'User requested logout'): Promise<boolean> {
+    if (!token?.startsWith('galx_sess_')) return false;
+    const verified = await this.verifySession(token, false);
+    if (!verified.valid || !verified.session || !verified.claims) return false;
+    return this.revokeSessionById(verified.session.id, verified.claims.sub, reason);
   }
 
   /**
@@ -873,27 +867,7 @@ export class GalxAuthEngine {
       }
     }
 
-    // 2. URL Search Parameters Fallback (for rapid curl / sandbox / browser debugging)
-    if (!rawAuth) {
-      try {
-        if ('nextUrl' in req && req.nextUrl?.searchParams) {
-          rawAuth =
-            req.nextUrl.searchParams.get('api_key') ||
-            req.nextUrl.searchParams.get('apiKey') ||
-            req.nextUrl.searchParams.get('key') ||
-            req.nextUrl.searchParams.get('token') ||
-            '';
-        } else if ('url' in req && typeof req.url === 'string') {
-          const parsedUrl = new URL(req.url, 'https://galx.ai');
-          rawAuth =
-            parsedUrl.searchParams.get('api_key') ||
-            parsedUrl.searchParams.get('apiKey') ||
-            parsedUrl.searchParams.get('key') ||
-            parsedUrl.searchParams.get('token') ||
-            '';
-        }
-      } catch {}
-    }
+    // Credentials belong in headers or session cookies, never URLs, logs or referrers.
 
     // 3. Cookie Fallback (for seamless browser console & dashboard playground requests)
     if (!rawAuth && req && 'headers' in req && req.headers) {
@@ -910,6 +884,7 @@ export class GalxAuthEngine {
             const separator = cookie.indexOf('=');
             return [cookie.slice(0, separator).trim(), cookie.slice(separator + 1).trim()];
           }));
+          const hasCanonicalSession = [...cookies.keys()].some(name => /^sb-.+-auth-token(?:\.\d+)?$/.test(name));
           const sessionName = [...cookies.keys()].find(name => /^sb-.+-auth-token(?:\.0)?$/.test(name));
           if (sessionName) {
             const baseName = sessionName.replace(/\.0$/, '');
@@ -941,7 +916,7 @@ export class GalxAuthEngine {
           }
 
           // 3b. Check standard custom session cookies with exact cookie name boundaries
-          if (!rawAuth) {
+          if (!rawAuth && !hasCanonicalSession) {
             const match = cookieHeader.match(/(?:^|;\s*)(?:galx_session|galx_key|galx_token)=([^;]+)/);
             if (match) {
               rawAuth = decodeURIComponent(match[1].trim());
@@ -1021,7 +996,9 @@ export class GalxAuthEngine {
 
     // 6. Hardened JWE Encrypted or Signed Session Bearer Token (`galx_sess_...` or `galx_sess_v2...`)
     if (token.startsWith('galx_sess_')) {
-      const verifyResult = await this.verifySession(token, true);
+      let verifyResult;
+      try { verifyResult = await this.verifySession(token, true); }
+      catch { return { authenticated: false, userId: 'anonymous_developer', authType: 'session_token', isPriorityUser: false, error: 'AUTH_UNAVAILABLE' }; }
       if (verifyResult.valid && verifyResult.claims) {
         const claims = verifyResult.claims;
         const grantedScopes = claims.scopes || ['*'];
@@ -1044,7 +1021,7 @@ export class GalxAuthEngine {
           authenticated: true,
           userId: claims.sub,
           authType: 'session_token',
-          isPriorityUser: claims.shardMode === 'private',
+          isPriorityUser: false,
           isSudoElevated,
           scopes: grantedScopes,
           claims,
@@ -1070,7 +1047,8 @@ export class GalxAuthEngine {
         // User-token verification needs only the public Auth client. Requiring a
         // service-role credential here incorrectly rejects valid browser sessions.
         const { data, error } = await getSupabaseAuthClient().auth.getUser(token);
-        if (!error && data.user?.id) {
+        if (!error && data.user?.id && !data.user.is_anonymous) {
+          if (!await isAccountSessionActive(token)) return { authenticated: false, userId: 'anonymous_developer', authType: 'session_token', isPriorityUser: false, error: 'INVALID_SESSION_TOKEN' };
           return {
             authenticated: true,
             userId: data.user.id,
