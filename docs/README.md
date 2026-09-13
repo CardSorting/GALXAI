@@ -1,35 +1,40 @@
-# GALX documentation
+# GALX maintainer knowledge base
 
 <!-- docs-scope: current-guide -->
-> Private maintainer navigation. Public documentation describes capabilities and customer contracts under [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md).
+<!-- GALX_PRIVATE_KNOWLEDGE_CONTENT -->
 
-The [federation contract](FEDERATION_STRATEGY.md) defines automatic worker lifecycle with explicit validated enrollment. Credential authority, serving workers and repair desktops have separate states. Read [the handover](../HANDOVER.md) and [dated verification](maintainers/RELAY_SESSION_VERIFICATION_20260909.md) for implementation/deployment evidence.
+Find the next action, its owner and the evidence needed to finish it. This repository knowledge base is private. Images and Sites are public products; developer APIs require individual preview approval. Customer-facing documentation lives in the application and follows the public information boundary.
 
-## Find the next action
+## Start with your task
 
-| Task | Guide |
-| --- | --- |
-| Understand architecture | [Architecture](ARCHITECTURE.md), [contract](FEDERATION_STRATEGY.md) |
-| Enroll or refresh an account | [Enrollment and recovery](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md) |
-| Open a desktop and repair a shard | [Desktop operations](maintainers/RELAY_DESKTOPS.md) |
-| Inspect activity and health | [Observability](TELEMETRY_AND_OBSERVABILITY.md), [fleet](maintainers/RELAY_QUOTA_AND_FLEET.md) |
-| Recover an uncertain request | [API recovery](RELAY_API_REFERENCE.md#request-recovery), [troubleshooting](TROUBLESHOOTING.md) |
-| Integrate a client | [Quickstart](QUICKSTART.md), [API boundaries](API_BASE_URL.md), [model catalog](MODEL_CATALOG.md) |
-| Deploy or roll back | [Runbook](RELAY_VNEXT_RUNBOOK.md), [deployment boundaries](DEPLOYMENT.md) |
-| Verify a change | [Hardening](maintainers/RELAY_HARDENING.md), [inference verification](INFERENCE_PIPELINE_VERIFICATION.md) |
-| Review authority | [Security](SECURITY.md), [ADR catalog](adr/README.md) |
-| Coordinate authorized agent work | [Execution guide](maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md) |
+| I need to… | Start here | Done when… |
+| --- | --- | --- |
+| Investigate a production failure | [Triage](../post-mortem/runbooks/triage.md) → [known failures](../post-mortem/failure-modes/README.md) | Recovery has dated acceptance evidence; remaining prevention work has an owner |
+| Fix generation, image history or Favorites | [Image recovery](../post-mortem/runbooks/image-generation.md) | The original operation, owned asset and persisted state are verified |
+| Make my first change | [First safe change](tutorials/first-change.md) | A reviewable local diff has appropriate checks and updated guidance |
+| Change a feature or contract | [Maintain knowledge with a change](how-to/change-with-documentation.md) | Source, guides, decisions and evidence agree |
+| Make an architectural decision | [ADR lifecycle](maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) | A bounded decision names alternatives, consequences and confirmation |
+| Deploy or roll back | [Release runbook](runbooks/release-readiness.md) | The intended component/revision has separate deployment and acceptance evidence |
+| Clear stale guidance | [Knowledge maintenance](runbooks/knowledge-maintenance.md) | Contradictory instructions are reconciled and review status is explicit |
+| Find responsibility | [Domain map](knowledge/DOMAINS.md) | The owning source and canonical guide are identified |
+| Check what is actually live | [Current operating state](../post-mortem/CURRENT_STATE.md) | The dated target and limits match the question being asked |
 
-## Sites strategy
+## Browse by need
 
-[ADR 0140](adr/0140-paid-sites-and-shared-fair-usage.md) includes Sites in eligible paid plans with shared fair usage. [Sites operations](maintainers/SITES_OPERATIONS.md) and [the fair-use runbook](maintainers/SITES_FAIR_USAGE.md) define configuration, rollout and original-operation recovery. [Site content generation](SITES_CONTENT.md) is the customer API contract. Earlier fixed/metered requests retain historical receipts. [ADR 0141](adr/0141-sites-pro-self-service-launch.md) adds Pro checkout, cancellation and the explicit initial operating policy.
+| Learn | Do | Look up | Understand |
+| --- | --- | --- | --- |
+| [Tutorials](tutorials/README.md) | [How-to guides](how-to/README.md), [runbooks](runbooks/README.md) | [Reference](reference/README.md), [complete catalog](CATALOG.md) | [Explanations](explanations/README.md), [ADRs](adr/README.md) |
 
-[ADR 0137](adr/0137-account-owned-sites-subdomains.md) extends delivery with account-owned subdomains. [Site addresses](SITE_ADDRESSES.md) describes the customer contract; [address operations](maintainers/SITES_DOMAINS.md) covers the private registry, native attachment, DNS and recovery.
+Search locally with `npm run docs:find -- "image"` or `npm run docs:find -- "favorites"`. Default results favor active guides; `--history` includes older references, proposals and dated evidence. Search is offline and makes no model or database request. Read a result's scope before acting on it.
 
-## Reading scope
+[Knowledge operations](knowledge/README.md) explains ownership, review queues and automation. [Documentation policy](DOCUMENTATION_POLICY.md) defines authority. Navigation is generated; semantic review remains explicit.
 
-The [complete catalog](CATALOG.md) indexes all Markdown guides, references, decisions, research, commercial drafts and operational evidence. Domain specifications apply to their components, not every relay path. Research targets and historical benchmarks are not runtime guarantees.
+## Product and operations entry points
 
-ADRs state topic-specific precedence and retain dated evidence. Reconcile affected bodies in full when decisions change; do not leave obsolete setup commands beneath a disclaimer. Update scope/navigation and run `python3 scripts/verify-docs.py`. Keep repeated defaults in the runbook/source.
+- **Sites:** [workspace](maintainers/SITES_WORKSPACE.md), [paid access and fair usage](maintainers/SITES_FAIR_USAGE.md), [addresses](maintainers/SITES_DOMAINS.md). Earlier tariffs apply only to historical operations.
+- **Images and identity:** [image boundary](maintainers/image-public-boundary.md), [durable image decision](adr/0144-durable-images-and-incident-documentation.md), [incident runbook](../post-mortem/runbooks/image-generation.md).
+- **Private developer preview:** [access policy](operations/developer-preview.md), [admin approvals](operations/preview-admin.md), [activation](operations/preview-activation.md), [hybrid synchronization](operations/preview-hybrid-sync.md).
+- **Relay:** [architecture](ARCHITECTURE.md), [federation contract](FEDERATION_STRATEGY.md), [operator runbook](RELAY_VNEXT_RUNBOOK.md), [telemetry](TELEMETRY_AND_OBSERVABILITY.md).
+- **Follow-up work:** [rolling incident log](../post-mortem/ROLLING_LOG.md), [open prevention items](../post-mortem/OPEN_ITEMS.md).
 
-Repository operational documents are not public website content. Do not copy topology, credentials, execution mechanics or private diagnostics into customer documentation or browser bundles.
+Existing file paths and ADR numbers remain stable. The catalog includes historical material for traceability; inclusion does not certify that it describes current behavior.

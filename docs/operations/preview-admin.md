@@ -1,5 +1,7 @@
 # Private preview administration
 
+<!-- docs-scope: current-guide -->
+
 The admin workspace is `/admin`. Images and Sites stay public; preview approvals apply to the developer API and tools. Staff membership is a separate permission and does not itself grant developer access.
 
 ## First-time setup

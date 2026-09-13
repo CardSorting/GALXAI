@@ -1,0 +1,91 @@
+{
+  "observed_at": "2026-09-13T04:21:29.527153Z",
+  "status": "passed-local",
+  "scope": "Private knowledge tooling, documentation and existing application boundary regressions in the uncommitted working tree. No production mutation, deployment or hosted CI run.",
+  "base_revision": "022a37638ac01f1b021c93ca0e48ea7a1f20c7d7",
+  "working_tree": "Includes pre-existing image repair and incident documentation changes; this pass extends the knowledge system.",
+  "inventory": {
+    "docs_markdown": 323,
+    "incident_markdown": 29,
+    "adrs": 145,
+    "knowledge_catalog_documents": 352,
+    "workspace_authored_markdown": 416,
+    "domains": 8,
+    "new_domain_reviews_completed": [
+      "knowledge"
+    ],
+    "domains_not_attested": [
+      "images",
+      "access",
+      "sites",
+      "relay",
+      "database",
+      "delivery",
+      "broccolidb"
+    ]
+  },
+  "checks": [
+    {
+      "command": "npm run docs:check",
+      "result": "passed"
+    },
+    {
+      "command": "npm run test:docs",
+      "result": "passed",
+      "incident_guard_tests": 20,
+      "knowledge_guard_tests": 13
+    },
+    {
+      "command": "npm run test:image:security",
+      "result": "passed",
+      "tests": 23
+    },
+    {
+      "command": "npm run test:developer-preview",
+      "result": "passed",
+      "tests": 14
+    },
+    {
+      "command": "npm run build",
+      "result": "passed",
+      "next_version": "15.5.25",
+      "generated_pages": 277
+    },
+    {
+      "command": "npm run docs:check:build",
+      "result": "passed",
+      "browser_and_rendered_assets": 640,
+      "selected_private_marker_matches": 0,
+      "private_document_runtime_traces": 0
+    },
+    {
+      "command": "python3 scripts/docs-kb.py status --fail-on-due",
+      "result": "passed",
+      "note": "Knowledge review due 2026-09-20; unreviewed domains reported separately."
+    },
+    {
+      "command": "Workflow YAML parse using installed ESLint js-yaml dependency",
+      "result": "passed",
+      "files": [
+        ".github/workflows/documentation.yml",
+        ".github/workflows/vercel-preflight.yml"
+      ]
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    }
+  ],
+  "execution_notes": [
+    "The first image HTTP fixture run was blocked from binding loopback in the sandbox; the permitted rerun passed all 23 checks.",
+    "An initial YAML parser lookup used an unavailable top-level package; parsing with the existing consumer-resolved js-yaml package passed.",
+    "The second audit extended journal checks to use the PR/push base commit, with full history fetched; its regression fixture passed."
+  ],
+  "limits": [
+    "No claim of live public asset cleanliness from this local build scan.",
+    "Scheduled CI begins only after the workflow reaches the default branch and runs; no push or hosted execution performed.",
+    "No new image DB test run in this docs extension; earlier isolated DB evidence remains in the preceding documentation incident.",
+    "No automatic remediation, capacity increase, access approval, secret rotation or deployment performed.",
+    "Catalog coverage and fingerprints do not certify every historical or research claim; unreviewed source domains remain explicit."
+  ]
+}

@@ -7,6 +7,8 @@ These playbooks follow the [current federation contract](../FEDERATION_STRATEGY.
 
 Select the affected lifecycle stage and identify model, tenant, generation, and execution state. Preserve current authority during recovery. No response-time or resolution SLA is established by this index.
 
+Start incidents in [post-mortem](../../post-mortem/README.md). Use its [current state](../../post-mortem/CURRENT_STATE.md), [rolling log](../../post-mortem/ROLLING_LOG.md) and [known failure modes](../../post-mortem/failure-modes/README.md). Historical component verification remains dated evidence.
+
 ## Guide catalog
 
 - [Provisioning and preflight](01-provisioning-and-preflight.md)

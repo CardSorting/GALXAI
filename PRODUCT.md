@@ -8,47 +8,33 @@ web
 
 ## Overview
 
-GALXAI is an inference platform and governance control plane for model discovery, API access, routing, metering, reliability, and spend operations. Developers build and own the end-user applications and agent runtimes that consume its APIs.
+GALX helps builders turn an early idea into a site they can revise, preview and share at a public GALX address. Sites leads the homepage. Image generation remains an accessible public product. The developer API is a private preview with individual approval and small cohorts.
 
 ## Primary Users & Jobs to Be Done
 
-- Developers integrate inference into their applications and agents using API keys, compatible endpoints, and SDKs.
-- Engineering operators diagnose rejected credentials, exhausted capacity, slow requests, and provider failures without guessing from an aggregate health indicator.
-- Finance and operations teams inspect usage and billing through the platform's accounting surfaces. Provider pricing, discounts, and caching savings depend on the actual model, request, and commercial configuration.
+- Builders move from an idea to an early site without arranging development, prototyping and publication separately.
+- Creators generate images, download them and maintain their own image library and Favorites.
+- Approved developers try integrations, report private feedback and help validate reliability before broader access.
+- Authorized staff review cohort applications, manage time-bounded access and inspect private operational evidence.
 
 ## Core Capabilities
 
-The repository contains the Next.js application, SDK integrations, model routing and credential registry, billing and governance modules, Cloudflare Worker implementation, and a capability-aware relay federation. These have separate deployment and authorization boundaries; the presence of a module is not evidence that it is enabled in production.
+The Sites workspace supports conversations, draft versions, previews and explicit managed publication. GALX Pro includes Sites under fair usage; revisions and conversation turns follow that policy. Images and API usage retain separate account/billing contracts. Follow [Sites operations](docs/maintainers/SITES_OPERATIONS.md) and the customer [Sites guide](docs/SITES_WORKSPACE.md) for the implemented scope. Do not imply arbitrary application execution beyond the actual product contract.
 
-The relay supplies inference transport with credential eligibility checks, bounded retries, cancellation, request telemetry, and an operator dashboard. Each active shard owns an isolated Docker worker, managed by a supervised host controller. Fresh model capability precedes load selection. It does not execute user tools on the operator's device. Tool use remains a downstream agent capability; compatibility must be evaluated against the implemented request and response contract.
+The image studio supports creation, owned library retrieval, Favorites and downloads. Accepted async image requests have durable owner-scoped receipts, while execution remains bounded and uncertain attempts are not automatically repeated.
 
 ## Constraints & Invariants
 
-- Primary homepage positioning (2026-09-12): Sites leads the public product pitch. Focus on removing the effort of development, prototyping, revision and publication for early ideas. Present the existing GALX Pro price, unlimited revisions and conversation turns under fair use, included public GALX addresses, and the extremely early public beta's purpose. Keep provider/model names and implementation explanations out of the homepage, its metadata and FAQ. Images remains accessible as a secondary public product; developer access remains private.
-- Early-preview access policy (2026-09-12): Images and Sites are the public products. Other developer APIs and tools require verified signup, an individual waitlist request and manual approval. An existing API key or payment never grants preview approval. Admit participants gradually, collect private feedback and prioritize a trustworthy first experience.
-- Preview administration lives at `/admin` behind independent staff authorization. Owners manage staff; owners and reviewers manage participant access; viewers are read-only. Staff membership never follows from customer approval or editable account metadata. Use familiar inbox, role-management and activity-history patterns within the existing visual system. See [the private admin runbook](docs/operations/preview-admin.md).
+- Public positioning explains the idea-to-site experience, revisions, included public address, pricing and the purpose of an extremely early public beta. Homepage copy, metadata and FAQ omit provider/model names and implementation details.
+- Images and Sites remain public products with their existing account, entitlement and ownership requirements. Other developer APIs require verified signup and individual approval; signup, payment and existing keys are not grants.
+- Small cohorts support controlled demand, better performance and private feedback. Participant-reported savings are observations, not guaranteed savings or a promise of uniform outcomes.
+- `/admin` uses independent staff authorization: owners manage staff; owners/reviewers manage access; viewers are read-only. Customer approval and editable metadata never grant administration.
+- Preserve explicit return destinations during authentication. Do not infer product priority from a legacy default redirect.
+- Authorization and persistence are server-enforced. Caches optimize reads and batches; they do not grant access, fabricate successful saves or make accepted work durable by themselves.
+- Public responses use explicit allowlists and sanitized artifacts. Keep credential sources, topology, routing and diagnostics private.
+- Recovery preserves original operation identity. Acceptance is not completion, a timeout is not proof of non-dispatch, and cancellation does not promise a refund.
+- Do not claim guaranteed availability, exact supplier quotas, unverified model identity, universal savings or compliance certification.
 
-- The hosted product centers on models, API configuration, billing, telemetry, and governance. The image studio at `/images` also lets users generate images and manage their personal image library (explicitly restored at user request on 2026-09-10). Destination chat applications remain downstream. The Sites workspace at `/sites` also provides the expressly requested conversation-and-preview authoring surface for simple managed pages.
-- Successful authentication defaults to `/models`; explicit protected-route return destinations remain intact.
-- Retiring hosted creation UI must preserve inference APIs and SDK capabilities.
-- Model interpretation does not grant permission to execute on the relay host. Isolation is an operating-system/container boundary, not a prompt instruction or blanket prohibition of tool-call content.
-- Provider rejection, credential expiry, quota cooldown, transport uncertainty, and local saturation must have distinct operator explanations. Unknown provider quota must remain unknown.
-- Recovery is bounded. Acceptance is not completion; reconnection is not an exactly-once execution guarantee. Cancellation does not imply a relay-managed refund.
-- Do not present unmeasured latency, fixed provider quotas, universal savings, compliance certification, or whole-stack containment as implemented guarantees.
-- Use a readable, compact dark operator interface with clear hierarchy, accessible status labels, and useful empty and failure states.
+## Current Strategy and Evidence
 
-## Current strategy and evidence
-
-[Product Surface Strategy](docs/PRODUCT_SURFACE_STRATEGY.md) and [ADR 0119](docs/adr/0119-inference-first-product-surface-and-client-retirement.md) define the product boundary. The [federation contract](docs/FEDERATION_STRATEGY.md) defines current lifecycle, routing, explicit image compatibility, and bounded recovery. [Architecture](docs/ARCHITECTURE.md) describes the separate runtime paths; the [relay deployment runbook](docs/RELAY_VNEXT_RUNBOOK.md) records the dated deployment evidence and remaining limitations.
-
-## Bounded Sites strategy
-
-[ADR 0140](docs/adr/0140-paid-sites-and-shared-fair-usage.md) replaces per-generation Sites wallet pricing with eligible paid-plan inclusion. Each admitted logical Sites update counts once. The baseline threshold changes eligibility to capacity-aware continuation; it is not an absolute message ceiling. Shared account and pool governance uses honest locally governed capacity, without inventing supplier token balances. The supplied fair-use handoff and JSON are private specification/test inputs, never production limits.
-
-Verified subscription ownership, an eligible recurring price and current paid coverage grant access; wallet balances, API-key metadata and editable organization tiers do not. Production limits and eligible paid price IDs must be explicitly configured. Generation and publication retain independent feature gates. Existing billed operations keep their original recovery path. Existing image studio, signup credit, general inference pricing and proposed agency-service fees retain their own contracts.
-
-## Browser Sites workspace
-
-[ADR 0139](docs/adr/0139-browser-sites-workspace-and-managed-publishing.md) makes GALX sign-in the onboarding boundary for new managed Sites. `/sites` and `/sites/:id` provide private drafts, conversation edits, previews and management. Username selection occurs at first explicit public publication; the existing worker handles exact-host DNS and TLS. Customer-native delivery remains a separate optional integration. Generation and managed publishing retain independent rollout gates, and this initial authoring surface uses the bounded structured page contract rather than arbitrary application execution.
-
-[ADR 0141](docs/adr/0141-sites-pro-self-service-launch.md) launches GALX Pro at $20/month for one account, with Sites included under fair usage. Billing provides verified subscription checkout and period-end cancellation. API/image usage and prepaid compute credits remain separate. Managed publication discovery uses owned published snapshots, so new paid accounts need no manual DNS enrollment.
+[Product surface strategy](docs/PRODUCT_SURFACE_STRATEGY.md) is the maintained scope. [Current operating state](post-mortem/CURRENT_STATE.md) records dated activation and acceptance evidence. ADRs retain topic-specific history; the original inference-first retirement in ADR 0119 does not override later restored Images, public Sites or the developer waitlist.

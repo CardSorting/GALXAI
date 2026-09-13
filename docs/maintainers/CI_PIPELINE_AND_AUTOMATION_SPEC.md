@@ -1,46 +1,31 @@
-# 🤖 Maintainer Specification: CI Pipeline, Automation & Invariant Gates
+# CI and documentation automation
 
-<!-- docs-scope: domain-reference -->
-> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+<!-- docs-scope: current-guide -->
 
-> **Target Audience**: DevOps Engineers, Release Managers, and Core Maintainers.  
-> **Mission**: Formal specification of the Continuous Integration (CI) and Deployment automation pipelines defending GALXAI.
+This page describes the checked-in workflows. Their presence does not prove they are enabled, required by branch protection, or successful on a remote revision. Inspect the actual hosted run for release evidence.
 
----
+## Application preflight
 
-## 1. Top-Level CI Pipeline Topology
+[vercel-preflight.yml](../../.github/workflows/vercel-preflight.yml) triggers on pushes and pull requests targeting `main` or `staging`. It uses Node.js 22, `npm ci`, fixture public configuration, read-only contents permission and a fifteen-minute job timeout. New runs cancel older runs in the same configured concurrency group.
 
-Every Pull Request and commit to `main` executes the 5-Stage Invariant Pipeline:
+The workflow runs documentation/incident validation and guard tests; image/identity security and isolated image database checks; YAML security and production dependency audit; offline Vercel preflight; browser-agent, session and cooldown checks; isolated egress checks; controller capability tests; lint/type checks; an isolated Next.js production build; and the compiled private-content check. The YAML and [package scripts](../../package.json) are authoritative for the exact commands and order.
 
-```mermaid
-flowchart LR
-    Commit[Git Push / PR] --> Stage1[1. Static Analysis & Typecheck<br>tsc --noEmit]
-    Stage1 --> Stage2[2. Compaction Facade Suite<br>19 Modes, 7/7 Pass]
-    Stage2 --> Stage3[3. Hardening & Factual Grounding<br>Fail-Closed Regressions]
-    Stage3 --> Stage4[4. Empirical Inference Boundary<br>Blinded A/B Benchmark]
-    Stage4 --> Stage5[5. Edge Mesh Verification<br>46-Point Worker Tests]
-    Stage5 --> MergeReady[✅ PR Merged to main]
-```
+It does not run every repository test, a paid inference benchmark, or automatically merge a PR. Select additional component tests from the [domain map](../knowledge/DOMAINS.md). Record real inference acceptance separately when authorized and relevant.
 
----
+## Documentation workflow
 
-## 2. The 5 CI Gates & Exit Criteria
+[documentation.yml](../../.github/workflows/documentation.yml) runs the offline docs guards on pushes, PRs, manual dispatch and Mondays at 09:17 UTC. Every event requires a review for each registered domain, retained evidence with matching hashes, matching source/guide fingerprints and a current review date. It exercises 35 incident/knowledge guard fixtures. A readable owner/deadline table and status artifact are produced even on failure; artifact retention is 14 days. The workflow needs no application dependencies, service credentials or model access.
 
-| Gate | Command | Execution Scope | Failure Condition |
-| :--- | :--- | :--- | :--- |
-| **Gate 1: TypeScript Strictness** | `npx tsc --noEmit` | Strict compilation across all `.ts` and `.tsx` files. | Exit code $\ne 0$ or any type errors. |
-| **Gate 2: Compaction Facade API** | `npm run test:broccolidb:api` | Verifies barrel isolation and 19 compaction modes. | Any test assertion failure. |
-| **Gate 3: Fail-Closed Safety** | `npm run test:broccolidb:hardening` | Factual provenance regressions & tampering checks. | Any ungrounded entity leak. |
-| **Gate 4: Inference Boundary** | `npm run bench:inference-boundary` | Measures token compression & cost delta across OpenAI models. | Quality score $< 100\%$ or negative savings. |
-| **Gate 5: Edge Mesh Tests** | `npm run worker:test` | 46 edge isolate unit & integration tests. | Any Cloudflare worker failure. |
+PR and push runs fetch history and compare the incident journal against the event baseline, so committing a rewritten journal does not bypass the append-only check. Scheduled/manual runs compare the current committed prefix; they do not reconstruct changes outside that baseline.
 
----
+Regeneration is a local authoring step. CI does not rewrite docs, refresh review fingerprints, create issues, send messages, approve ADRs or deploy. Unreviewed registered domains fail; unreviewed historical documents remain classified separately. The schedule requires an enabled workflow on the default branch and can be delayed by GitHub. Use the [weekly audit runbook](../runbooks/weekly-knowledge-audit.md) to inspect activation, dispatch a bounded verification and triage missed or failed runs. A manual success proves the same audit job, not that a future cron event has already fired.
 
-## 3. GitHub Actions Workflow Files
+## Gateway workflow
 
-1. `.github/workflows/deploy-cloudflare.yml`: Deploys Cloudflare Workers edge gateway on release tag.
-2. `.github/workflows/vercel-preflight.yml`: Runs the 8-phase Vercel pre-flight readiness engine.
+[deploy-cloudflare.yml](../../.github/workflows/deploy-cloudflare.yml) triggers on `main` pushes matching `src/workers/cloudflare/**`, `wrangler.toml` or its own workflow file. It installs dependencies, tests worker components and performs a Wrangler dry run. Its deployment step is conditional on the configured token. It is not a release-tag workflow, and it does not prove the application or database was deployed with the gateway.
 
----
+## Failure handling and release evidence
 
-*Automation protects system invariants at scale.* 🥦🤖🛡️
+Read the failed step and its actual output. Correct source failures before rerunning; do not refresh review attestations to bypass a stale-guide failure. Dependency advisories, missing fixtures and source regressions have different remedies. Use [knowledge maintenance](../runbooks/knowledge-maintenance.md) for docs failures and [release readiness](../runbooks/release-readiness.md) before rollout.
+
+Local passing results, remote CI, deployment and actual-client acceptance are separate evidence. Required status checks, reviewer team availability and remote workflow settings are external configuration and have not been certified by this document.

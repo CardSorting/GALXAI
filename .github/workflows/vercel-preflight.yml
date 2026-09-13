@@ -23,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
+      DOCS_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
       NEXT_PUBLIC_APP_URL: https://galx.invalid
       NEXT_PUBLIC_SUPABASE_URL: https://supabase.invalid
       NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_ci_fixture
@@ -30,6 +31,8 @@ jobs:
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js 22
         uses: actions/setup-node@v4
@@ -39,6 +42,18 @@ jobs:
 
       - name: Install Dependencies
         run: npm ci
+
+      - name: Verify documentation and incident prevention records
+        run: npm run docs:check
+
+      - name: Verify incident guard rejects unsafe and stale records
+        run: npm run test:docs
+
+      - name: Verify public image, identity and ownership boundaries
+        run: npm run test:image:security
+
+      - name: Verify durable image requests and Favorites in isolated PostgreSQL
+        run: npm run test:image:db
 
       - name: Verify YAML security patch
         run: npm run test:yaml:security
@@ -78,3 +93,6 @@ jobs:
 
       - name: Next.js Production Build
         run: node scripts/build-ci.mjs
+
+      - name: Verify incident records stay outside compiled public assets
+        run: npm run docs:check:build

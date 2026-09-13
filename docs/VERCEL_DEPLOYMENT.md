@@ -1,28 +1,33 @@
-# Application deployment and relay connectivity
+# Application deployment and configuration
 
-<!-- docs-scope: domain-reference -->
-> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
+<!-- docs-scope: current-guide -->
 
-The Next.js application, Cloudflare Worker, and Node relay are separate deployments. This guide covers application setup. ADR 0127 records the September 7 gateway promotion and actual DreamBees image verification; recheck the target release before making a current deployment claim.
+Private application release guide. The application, gateway, controller, workers and database are separate components. [Current state](../post-mortem/CURRENT_STATE.md) contains the latest dated observations; a prior release record is not proof of the current target.
 
-## Application configuration
+## Configuration preflight
 
-Use [package.json](../package.json), [.env.example](../.env.example), and the deployment project configuration as the source for build scripts and environment names. Configure application identity, database access, vault secrets, and any enabled provider/storage integrations in the target environment. Keep privileged keys server-side. Do not generate or rotate vault roots merely to deploy an application that must read existing credentials.
+Use [package.json](../package.json), [.env.example](../.env.example) and the existing deployment project for runtime/build settings. Inspect the target environment's required configuration names, presence and credential types without printing values. Local configuration does not prove production configuration. Sensitive values omitted by an API response are not automatically missing.
 
-Use the application's existing preview/deployment workflow. Inspect the relevant package script before executing it: inference benchmarks can call paid providers, environment synchronization mutates remote configuration, and vault population is not a read-only check. Validate the build and the endpoints changed by the release; record results with the deployed version.
+Public Auth verification needs its configured Auth URL and public credential; administrator clients still require privileged credentials and fail closed otherwise. Image persistence needs the configured database and the private image migration, plus `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` and `R2_ASSETS_BUCKET_NAME` on the server. Required values remain encrypted/server-only; no public key is elevated into administration.
 
-## Relay connection
+`VM_RELAY_URL` must be reachable from the deployment with an inference credential accepted by that service. Keep application inference and controller administration keys separate. Do not copy localhost or an expired development tunnel into production. Never rotate vault/signing roots just to make a build pass.
 
-Set `VM_RELAY_URL` to an origin reachable from the deployed application and `VM_RELAY_API_KEY` to an inference key accepted by that relay. These are server-side settings. Do not use a provider credential or relay administrator key as the application's inference key. The adapter falls back to the first `RELAY_API_KEYS` entry when `VM_RELAY_API_KEY` is absent, but an explicit dedicated key avoids configuration ambiguity.
+The generic [Dockerfile](../Dockerfile) uses Node.js 22 for both build and runtime, consistent with the repository engine requirement and CI. Docker configuration review is separate from building and running that image; Vercel acceptance does not certify the Docker path.
 
-The supervised federation controller listens on `127.0.0.1:3001` and manages at most one Docker worker per eligible shard. The shared Compose layout is legacy. A remote application cannot reach it by setting its own relay URL to `localhost`. Public ingress requires a separately configured and tested tunnel or proxy, suitable authentication, TLS, and streaming behavior. An ephemeral development URL is not a stable production dependency.
+## Build and deploy
 
-The adapter submits chat work, receives HTTP 202, and attaches to the job stream. Moving upstream work to the relay does not remove the application's own execution or streaming limits. Inspect the actual deployment's limits and validate a representative long-running request. Direct-provider/SDK/CLI paths are separate configurations. A configured relay error does not authorize automatic fallback or replay; inspect execution metadata and correlated traces.
+Run the documentation guard, relevant security/authorization tests and production build. For image persistence changes also run the isolated image database suite. Inspect scripts before using environment sync or deployment commands: they perform remote mutations.
 
-## Verification and rollback
+Review pending migrations with the [database runbook](maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) and apply only the intended set before code requires them. Confirm target environment and preserve a compatible rollback release. Deploy the application and record its immutable ID, source identity and dirty-tree status. Configuration changes must be present in the resulting deployment.
 
-Check the application's authentication and product API contract, then verify a request with correlated relay telemetry. Confirm that an invalid relay key fails, cancellation terminates appropriately, and terminal failures are surfaced without endless client retries. Test from the deployed application's network, not only the operator's laptop.
+`after` work remains bounded by route execution; it is not unlimited background processing. Image acceptance must already be durable. Use [image recovery](../post-mortem/runbooks/image-generation.md) to validate a representative request from the deployed frontend.
 
-[ADR 0127](adr/0127-codex-image-tool-alias-production-cutover.md) records the later September 7 production gateway/tunnel cutover and successful actual-client DreamBees image verification. Application asset persistence remains a separate verification boundary. Keep application rollback separate from relay image rollback and database migration strategy.
+## Storage pressure and rollback
 
-See [deployment overview](DEPLOYMENT.md), [relay setup and rollback](RELAY_VNEXT_RUNBOOK.md), [API base URLs](API_BASE_URL.md), and [Cloudflare strategy](CLOUDFLARE_STRATEGY.md).
+Follow [storage containment](../post-mortem/runbooks/deployment-storage.md) before deleting anything. Preserve current aliases and a compatible recovery release. Deployment-count reduction and displayed historical storage-accounting recovery require separate evidence.
+
+Rollback must keep developer approval enforced at both application and gateway, preserve accepted-operation readers and retain populated receipts/signing state. A pre-gate “green” release is not safe by default. Application rollback does not roll back controller/worker state or undo migrations.
+
+## Acceptance
+
+Verify identity, owner boundaries, affected creation/retrieval/download behavior and persistence after reload. Scan public responses, rendered pages and associated browser assets for the changed boundary. Record untested paid settlement, Sites publication and load scenarios explicitly. Ready status and a 200 homepage are availability signals, not complete functional acceptance.

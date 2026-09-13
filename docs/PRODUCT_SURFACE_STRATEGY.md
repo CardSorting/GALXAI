@@ -1,38 +1,32 @@
 # GALX product surface strategy
 
-<!-- docs-scope: domain-reference -->
+<!-- docs-scope: current-guide -->
 
-Private product reference, reconciled September 11, 2026. [ADR 0119](adr/0119-inference-first-product-surface-and-client-retirement.md) established the inference-first product and model-catalog landing. The explicit September 10 [image studio restoration](maintainers/image-studio-review.md) and [ADRs 0134–0136](adr/README.md) define the later image and Sites scopes. Public content follows [ADR 0129](adr/0129-public-image-artifacts-and-verified-identity.md).
+Private product authority, reconciled September 13, 2026. [PRODUCT.md](../PRODUCT.md) summarizes the experience; [current state](../post-mortem/CURRENT_STATE.md) records deployment evidence. Earlier inference-first and customer-local-only strategies are historical, superseded for the public Images/Sites surfaces.
 
-## Product thesis and surfaces
+## Product and access boundaries
 
-GALX provides model discovery, authenticated inference, billing and usage controls. `/models` remains the default authenticated destination; explicit protected return destinations remain intact. The restored `/images` studio lets users generate and manage their own images under its separate image/public-boundary contract. Destination chat/persona/social applications remain downstream.
-
-The selected Sites strategy adds bounded text generation and a customer-local delivery workflow. The GALX server owns quotes, account funding, rolling allowances and settlement. Deterministic code validates generated content, renders a fixed template and packages an exact artifact. The customer owns their Sites connection, source, saved version and private publication. This implementation introduces no public hosted Sites builder UI or generic agent-execution surface.
-
-| Surface | Scope |
+| Surface | Current scope |
 | --- | --- |
-| Model and API integration | Capabilities, account keys, integration examples and current customer contracts |
-| Billing and usage | Allowed customer statements, balances, accepted prices and opaque receipts |
-| Image studio | Explicitly restored generation and personal image library under its existing scope |
-| Sites content API | Quote, bounded brief, generated text schema and existing-operation recovery |
-| Customer-local Sites companion | Validated static artifacts and exact owner-private save/publication using that customer's connection |
-| Private operator tools | Capability, health, enrollment, desktop and operational diagnostics under administrator authorization |
+| Homepage | Sites-first idea, prototype, revision and public-address pitch; pricing followed by FAQ; extremely early public beta expectations |
+| Sites | Public product with authenticated owned drafts, continuing conversations, preview/version history and explicit managed publication; paid-plan and fair-use requirements remain |
+| Images | Public product with existing account/usage requirements, creation, durable async receipts, owned library, Favorites and sanitized download |
+| Developer preview | Signup, project introduction, GitHub/LinkedIn profiles and cohort interest; individual approval before private API/tool access |
+| Staff administration | Independent owner/reviewer/viewer membership, approval inbox, activity history and private feedback |
+| Destination chat and arbitrary execution | Not introduced by the image studio or bounded Sites workspace; downstream and other proposals retain their own scope |
 
-## Price and allowance language
+Public means users can discover and engage with Images and Sites without developer-preview approval. It does not mean anonymous generation, free unlimited compute, public drafts or unrestricted data access. Preserve ownership and entitlement checks.
 
-The provisional Sites fixed price and rolling allowance are configurable product decisions, not claimed supplier costs or quotas. The API quote is the accepted customer contract. A known completed generation can be charged with missing token usage; an unknown completion retains its reservation. Repairs are separately quoted. The per-generation price does not include an agency subscription, setup work, hosting entitlement or unlimited revisions.
+## Positioning and commercial contract
 
-Public descriptions explain deliverables, prices, accepted limits, errors and recovery. Keep model selection, supplier authentication, topology, readiness fields and execution diagnostics private. Do not claim exact underlying model identity, guaranteed provider quota, universal savings, margins or live availability from a local implementation.
+Explain the pain removed: arranging development, producing an early prototype, revising it and publishing a shareable version. Explain user outcomes and the early beta's purpose, not implementation. Homepage content and metadata omit provider/model names. “Unlimited revisions and turns” must retain the established fair-use meaning, without promising unlimited concurrent capacity or abuse tolerance.
 
-## Roadmap and activation
+Current Pro pricing and eligible plan mappings come from the maintained billing/product configuration and [Sites fair usage](maintainers/SITES_FAIR_USAGE.md), not historical fixed-price draft documents. Images/API usage and prepaid credits retain separate terms. Existing per-generation Sites receipts retain their originally accepted contract and recovery path; do not reprice history.
 
-The fixed Sites flow is locally implemented and verified. The prior deployed metered precursor remained disabled; the new mode requires its own compatible rollout and account activation. [Sites operations](maintainers/SITES_OPERATIONS.md) owns that procedure. Native-host private save/update has separate historical evidence; direct CLI archive upload is unqualified and does not gate content generation.
+Small developer cohorts support controlled demand and a trustworthy first experience. Participant savings reports are observations requiring attribution and bounded claims, not guaranteed inference discounts. Signup/payment never substitutes for approval.
 
-The proposed agency operations fee and setup engagement remain commercial experiments in the private strategy package. They are not implemented subscription terms. Scope any expansion by customer job, configured budget, ownership, recovery behavior and a measurable result. Additional providers and a native Codex Responses/tool integration are independent future work, not prerequisites for this bounded workflow.
+## Execution and evidence
 
-## Measures and invariants
+Public documentation uses capability contracts and explicit response fields. Operational topology, credential sources, readiness mechanics and diagnostics stay private under [AGENTS.md](../AGENTS.md). Keep server-verified identity, independent staff authority, durable ownership and uncertain-operation recovery intact.
 
-Measure successful integrations, completed and reconciled content operations, original-price settlements, customer-owned delivery, support effort and paid retention. Track unknown outcomes and actual expense where available independently from generated-text volume. A passing build or a private sample publication does not establish full live paid delivery.
-
-Preserve inference APIs when changing presentation. Keep verified account identity and all financial writes server-side, public DTOs allowlisted, and uncertain side effects recoverable under their original identity. Do not introduce a public database authority surface or a repeated publication as a shortcut to recovery.
+Measure completed user journeys, durable revisions/images, publication readiness, feedback and repeat use. Distinguish implementation, local tests, component deployment and real customer acceptance. [Incident records](../post-mortem/INCIDENTS.md) retain failed attempts and verification limits; a successful image test does not qualify checkout or Sites publication.

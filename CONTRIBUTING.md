@@ -1,167 +1,27 @@
-# 🤝 Contributing to GALXAI
+# Contributing to GALXAI
 
-> Current relay authority: [federation contract](docs/FEDERATION_STRATEGY.md), [runbook](docs/RELAY_VNEXT_RUNBOOK.md), and [ADR catalog](docs/adr/README.md). An eligible shard owns at most one active managed worker; enrollment is explicit and validated, repair desktops are separate, model capability precedes load, and retries preserve execution authority. Use [parent/subagent guidance](docs/maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md) and `python3 scripts/verify-docs.py` for documentation changes. Older subsystem targets below are not federation SLAs.
+Read [AGENTS.md](AGENTS.md), [product scope](PRODUCT.md), [current state](post-mortem/CURRENT_STATE.md) and [the developer guide](docs/DEVELOPER_GUIDE.md) before changing behavior. Images and Sites are public products; the developer API is a private preview. Existing account, payment and ownership checks remain separate from preview approval and staff authorization.
 
-Thank you for your interest in contributing to GALXAI! We welcome contributions from developers, researchers, and distributed systems engineers worldwide.
+## Local development
 
-This guide outlines our development workflow, pull request expectations, coding standards, and testing conventions.
+Use Node 22 as declared in [package.json](package.json) and the checked-in npm lockfile. Install with `npm ci`; configure only the local settings needed for the task from [.env.example](.env.example), keeping credentials outside Git. Run `npm run dev` for the application. Starting the application is not permission to start another controller against production resources.
 
----
+Inspect a script before running it. Inference benchmarks can spend money, environment sync writes remote configuration, and vault population is a mutation. Do not include those actions in routine diagnosis or documentation verification.
 
-## 📑 Table of Contents
+## Implementation and review
 
-1. [Code of Conduct](#1-code-of-conduct)
-2. [Development Environment Setup](#2-development-environment-setup)
-3. [Subsystem Architecture & Guidelines](#3-subsystem-architecture--guidelines)
-4. [Pull Request & Contribution Workflow](#4-pull-request--contribution-workflow)
-5. [Commit Message Conventions](#5-commit-message-conventions)
-6. [Architecture Decision Records (ADRs)](#6-architecture-decision-records-adrs)
-7. [Testing & Quality Verification](#7-testing--quality-verification)
+Preserve server-verified identity, current access decisions, explicit public DTOs, owner-scoped persistence and original operation identity. Image responses use sanitized artifacts; public errors do not expose internal exceptions. Use durable storage before acknowledging an accepted operation or mutation. BroccoliDB caches and batching must not become permission or persistence authority.
 
----
+Keep changes focused and retain unrelated work. Describe the problem, resulting behavior, verification and meaningful limits in the PR. Add or reconcile a topic-specific ADR when changing architecture, authorization, persistence or public contracts; older decisions retain only their stated scope. Use conventional commit titles.
 
-## 1. Code of Conduct
+## Verification
 
-We are committed to providing a welcoming, inclusive, and harassment-free experience for everyone. We expect all contributors and maintainers to adhere to standard professional open-source standards.
+Run tests appropriate to the changed boundary, plus required authorization/adversarial checks and the production build. Image/auth/storage changes require `npm run test:image:security`; durable image/Favorites changes also require `npm run test:image:db`, which provisions an isolated disposable database. Preview changes require `npm run test:developer-preview` and the relevant admin/database suite. Never point integration fixtures at production.
 
----
+Documentation changes require `npm run docs:sync` and `npm run docs:check`. If source-bound guides change, complete the [review workflow](post-mortem/runbooks/documentation.md). For a recovered incident, record actual-client verification separately from local tests and deployment status.
 
-## 2. Development Environment Setup
+Before claiming the live public surface is clean, scan its rendered pages and associated browser assets. No passing check certifies unrelated routes, future availability or production load capacity.
 
-### Prerequisites
-- **Node.js**: `v20.0.0` or higher (LTS recommended)
-- **npm**: `v10.0.0` or higher (or `pnpm`)
-- **Git**: `v2.40+`
+## Release and follow-through
 
-### Quickstart
-```bash
-# 1. Clone the repository
-git clone https://github.com/CardSorting/GALXAI.git
-cd GALXAI
-
-# 2. Install dependencies
-npm install
-
-# 3. Setup environment variables
-cp .env.example .env.local
-
-# 4. Start the development server
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) to view the application.
-
----
-
-## 3. Subsystem Architecture & Guidelines
-
-### Layer 1: Core Substrate (`src/core/`)
-- **Pure TypeScript**: Zero React, zero DOM, and zero browser-specific APIs.
-- **Zero GC in Hot Paths**: Avoid allocating temporary arrays or objects inside token/byte streaming loops.
-- **Fail-Closed Safety**: Any representation transformation must be guarded by `BroccoliCompactionSafety`.
-
-### Layer 2: API & Gateway Layer (`src/app/api/` & `src/app/v1/`)
-- **OpenAI & Anthropic Compatibility**: All public endpoints must conform to standard provider schemas (`RFC 8895` SSE streaming).
-- **Sub-15ms Wire Latency**: Use zero-copy binary streaming and unbuffered headers (`X-Accel-Buffering: no`).
-
-### Layer 3: Developer SDK & Integrations (`src/sdk/`)
-- **Downstream Ownership**: SDK primitives, server actions, and middleware help developers build their own applications while keeping provider credentials server-side.
-- **No Destination Client**: Do not add a GALXAI-hosted chat, persona, sharing, image-studio, or generated-content library through the SDK or web application.
-
-### Layer 4: Web Control Plane (`src/app/` & `src/components/`)
-- **Model-First Activation**: Successful authentication defaults to `/models`; model selection should lead to specifications, credentials, or integration guidance.
-- **Platform Scope**: Hosted UI is limited to discovery, configuration, billing, telemetry, routing, governance, documentation, and bounded API diagnostics.
-- **Decision Test**: Apply [Product Surface Strategy](docs/PRODUCT_SURFACE_STRATEGY.md) before proposing a web feature.
-
----
-
-## 4. Pull Request & Contribution Workflow
-
-1. **Fork & Branch**:
-   ```bash
-   git checkout -b feat/your-feature-name
-   # or: git checkout -b fix/your-bugfix
-   ```
-
-2. **Develop & Test Locally**:
-   Ensure all tests and strict typechecking pass:
-   ```bash
-   npm run test:broccolidb:api
-   npm run test:broccolidb:hardening
-   npm run bench:inference-boundary
-   npx tsc --noEmit
-   ```
-
-3. **Open a Pull Request**:
-   - Title your PR using [Conventional Commits](#5-commit-message-conventions).
-   - Describe the problem solved, architectural implications, and verification commands executed.
-   - Link any related issues or ADRs.
-   - For web-product changes, state how the proposal passes the Product Surface Strategy decision test.
-
----
-
-## 5. Commit Message Conventions
-
-We follow the [Conventional Commits specification](https://www.conventionalcommits.org/):
-
-```text
-<type>(<scope>): <short summary>
-
-[optional body]
-
-[optional footer(s)]
-```
-
-### Common Types:
-- `feat`: A new feature or compactor mode.
-- `fix`: A bug fix or regression patch.
-- `docs`: Documentation updates.
-- `refactor`: Code change that neither fixes a bug nor adds a feature.
-- `perf`: A code change that improves execution speed or memory efficiency.
-- `test`: Adding missing tests or correcting existing tests.
-- `chore`: Build process or tooling changes.
-
-### Examples:
-```text
-feat(broccolidb): add DICOM medical imaging stream compactor
-fix(router): resolve P-AHT race condition during parallel bursts
-docs(playbooks): add Stage 8 unframed observation protocol
-```
-
----
-
-## 6. Architecture Decision Records (ADRs)
-
-If your contribution introduces a new architectural subsystem, alters public API contracts, changes routing/compaction invariants, or revisits the hosted-product boundary, **you must author an Architecture Decision Record (ADR)** in `docs/adr/`. A proposal for conversation history, creative projects, sharing, or client-only persistence must explicitly revisit ADR 0119.
-
-Follow the template in [`docs/adr/README.md`](docs/adr/README.md).
-
----
-
-## 7. Testing & Quality Verification
-
-Every PR must pass the authoritative verification suite:
-
-```bash
-# 1. Complete Pre-Deployment Quality Pipeline
-npm run deploy:check
-
-# 2. Empirical Boundary Benchmark (OpenAI Models)
-npm run bench:inference-boundary
-
-# 3. Compaction Gateway & Facade API Suite
-npm run test:broccolidb:api
-
-# 4. Production Hardening & Safety Regressions
-npm run test:broccolidb:hardening
-
-# 5. Master 180-Domain Compactor Cluster Suite
-node --import tsx scripts/test-broccolidb-150-domain-suite.ts
-
-# 6. Strict TypeScript Typecheck
-npx tsc --noEmit
-```
-
----
-
-*For maintainer governance and emergency runbooks, see [MAINTAINERS.md](MAINTAINERS.md).* 🥦🚀
+Follow [deployment boundaries](docs/DEPLOYMENT.md), preserve a compatible rollback and record the exact deployed component. Do not revert developer gating or drop populated operation receipts. Update complete affected documents and [post-mortem](post-mortem/README.md) in the same change; retain historical observations without leaving obsolete instructions active.

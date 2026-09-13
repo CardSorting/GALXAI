@@ -40,8 +40,10 @@ Scan rendered public pages and browser assets for selected private markers and i
 
 Fixtures do not prove provider approval, current upstream compatibility, physical phone input, guest semantic accessibility or paid application completion. Real inference can incur usage and needs its own bounded verification. Record exact deployments separately from local tests; see [the session record](RELAY_SESSION_VERIFICATION_20260909.md).
 
-## Sites fixed-price boundary
+## Historical Sites fixed-price boundary
 
-Run `npm run test:sites` and `npm run test:sites:db` for this path, plus the application/companion type checks and packaged worker verification in [Sites operations](SITES_FAIR_USAGE.md#verification-and-rollout). Test missing usage with confirmed completion, unknown completion, duplicate settlement, changed tariffs, account isolation, concurrent daily admission, pause/recovery, old-worker rejection and restart with retained receipts.
+Run `npm run test:sites` and `npm run test:sites:db` for original fixed/metered operation recovery, plus the application/companion type checks and packaged worker verification in [Sites operations](SITES_FAIR_USAGE.md#verification-and-rollout). Test missing usage with confirmed completion, unknown completion, duplicate settlement, changed tariffs, account isolation, concurrent daily admission, pause/recovery, old-worker rejection and restart with retained receipts.
 
 Fixed-mode tests do not need actual supplier quota figures or an enforced supplier token ceiling. They must not fabricate completion, usage or deployment evidence. The [September 11 record](../../internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/durable/opaque-provider-verification.json) dates the completed local checks.
+
+New included Sites generation, conversations and managed publication use the checks in [Sites operations](SITES_OPERATIONS.md) and [fair usage](SITES_FAIR_USAGE.md). Historical billing checks alone do not verify the active product path.

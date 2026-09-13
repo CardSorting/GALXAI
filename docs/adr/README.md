@@ -7,7 +7,11 @@ Public information authority is [ADR 0129](0129-public-image-artifacts-and-verif
 
 Status and operational guidance are reconciled when decisions change; original measurements and rollout facts remain explicitly dated. A proposed or accepted design is not deployment evidence. Partial supersession is topic-specific. A successor banner cannot make obsolete body instructions current.
 
+[ADR 0144](0144-durable-images-and-incident-documentation.md) adds durable application image receipts and the maintained incident/documentation system. Later Sites decisions 0139–0143 define the public workspace, paid-plan inclusion and conversations; historical fixed tariffs retain only their existing-operation scope.
+
 Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) for new records and the [complete corpus catalog](../CATALOG.md) for guides, references, and research.
+
+[ADR 0145](0145-maintained-knowledge-and-decision-lifecycle.md) adds task discovery, domain source review and a separate [decision lifecycle register](../knowledge/DECISIONS.md). Legacy records are not automatically promoted to accepted or deployed.
 
 ## Complete decision catalog
 
@@ -156,3 +160,5 @@ Use the [authoring guide](../maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) f
 | 0141 | [ADR 0141: Sites Pro self-service launch](0141-sites-pro-self-service-launch.md) | Verified Pro checkout, cancellation and explicit initial limits |
 | 0142 | [ADR 0142: Continuous Sites conversations](0142-continuous-sites-conversations.md) | Durable turns, rolling context, Build/Discuss and recoverable draft versions |
 | 0143 | [ADR 0143: Hybrid Sites memory and full-page review](0143-hybrid-sites-memory-and-review.md) | Authoritative hybrid recall, complete turns, resilient drafts and content comparison |
+| 0144 | [Durable image requests and maintained incident operations](0144-durable-images-and-incident-documentation.md) | Durable application receipts, incident learning and source-bound documentation review |
+| 0145 | [ADR 0145: Maintain knowledge with source changes](0145-maintained-knowledge-and-decision-lifecycle.md) | Private knowledge workflow; delivery tracked separately |

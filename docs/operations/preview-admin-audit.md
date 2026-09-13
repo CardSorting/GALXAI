@@ -1,5 +1,7 @@
 # Preview admin implementation audit
 
+<!-- docs-scope: operational-record -->
+
 Scope: the private admin workspace, its HTTP handlers, staff authorization, waitlist decisions, access expiry, feedback management and the affected public entry points. Browser workflow evidence uses synthetic identities and a disposable database. Deployment evidence is recorded separately in the activation receipt; neither is a blanket live-site certification.
 
 ## Results

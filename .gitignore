@@ -146,3 +146,6 @@ Thumbs.db
 __pycache__/
 
 .vercel
+
+# Raw incident captures may contain private runtime or user data.
+/post-mortem/**/evidence/raw/

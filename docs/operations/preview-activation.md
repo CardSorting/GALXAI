@@ -1,5 +1,7 @@
 # Private preview activation — 2026-09-12
 
+<!-- docs-scope: operational-record -->
+
 The site and API gateway now enforce the private developer preview. Images and Sites retain their public product paths and existing account/billing requirements. Signup, payment and existing API keys do not grant developer approval. No participant was approved during deployment.
 
 ## Production changes

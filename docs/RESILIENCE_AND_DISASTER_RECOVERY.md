@@ -1,10 +1,13 @@
 # Resilience and recovery
 
 <!-- docs-scope: current-guide -->
-> Private recovery guidance. Use the [federation contract](FEDERATION_STRATEGY.md) and [runbook](RELAY_VNEXT_RUNBOOK.md).
+> Private recovery guidance. Use [incident operations](../post-mortem/README.md), [current state](../post-mortem/CURRENT_STATE.md), the [federation contract](FEDERATION_STRATEGY.md) and [runbook](RELAY_VNEXT_RUNBOOK.md).
 
 | Failure | Recovery boundary |
 | --- | --- |
+| Application async image process changes | Retrieve the durable owner-scoped PostgreSQL receipt; a queued unclaimed request can resume, a claimed uncertain attempt cannot redispatch |
+| Stopped controller with old lock | Follow [guarded ownership recovery](../post-mortem/runbooks/controller-lock.md); never remove a live/ambiguous lock |
+| Auth transport unavailable | Keep it distinct from invalid credentials; no cached identity grant or forced sign-out workaround |
 | Empty/stale model evidence | Remove admission eligibility; retain worker and rediscover |
 | Credential 401 | Persist revision rejection; repair authority before starting again |
 | Inventory timeout, 403 or 5xx | Back off; do not permanently reject from this evidence alone |
@@ -39,4 +42,4 @@ The companion independently retains immutable archives, upload intent, saved-ver
 
 ## Limits
 
-Process-local admission receipts do not survive controller restart, expired receipt windows can permit new execution, and missing artifacts are not recovered merely by polling. Keep uncertain outcomes explicit. Physical phone input, guest semantic accessibility and live provider sign-in require their own verification. Use the [dated record](maintainers/RELAY_SESSION_VERIFICATION_20260909.md), not old test counts, to assess deployment.
+Relay process-local admission receipts do not survive controller restart; their window and scope are separate from the application's durable image receipts. Never infer that losing relay acknowledgement permits another image dispatch. Missing artifacts are not recovered merely by polling. Keep uncertain outcomes explicit. Physical phone input, guest semantic accessibility and live provider sign-in require their own verification. Use [current state and linked dated records](../post-mortem/CURRENT_STATE.md), not old test counts, to assess deployment.

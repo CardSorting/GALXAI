@@ -1,0 +1,295 @@
+{
+  "version": 1,
+  "domains": {
+    "knowledge": {
+      "title": "Documentation and decisions",
+      "owner": "Documentation maintainer",
+      "sources": [
+        "scripts/docs-kb.py",
+        "scripts/test-docs-kb.py",
+        "scripts/verify-docs.py",
+        "scripts/verify-post-mortem.py",
+        "scripts/test-post-mortem.py",
+        "docs/knowledge/registry.json",
+        ".github/workflows/documentation.yml",
+        ".github/workflows/vercel-preflight.yml",
+        ".github/workflows/deploy-cloudflare.yml",
+        ".github/CODEOWNERS",
+        ".github/PULL_REQUEST_TEMPLATE.md",
+        "package.json"
+      ],
+      "guides": [
+        "docs/README.md",
+        "docs/AGENTS.md",
+        "docs/DOCUMENTATION_POLICY.md",
+        "docs/knowledge/README.md",
+        "docs/knowledge/DESIGN_RATIONALE.md",
+        "docs/tutorials/README.md",
+        "docs/tutorials/first-change.md",
+        "docs/how-to/README.md",
+        "docs/how-to/change-with-documentation.md",
+        "docs/runbooks/README.md",
+        "docs/runbooks/knowledge-maintenance.md",
+        "docs/runbooks/release-readiness.md",
+        "docs/reference/README.md",
+        "docs/reference/knowledge-commands.md",
+        "docs/explanations/README.md",
+        "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md",
+        "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md",
+        "docs/maintainers/SUBSYSTEM_MAINTAINER_MATRIX.md",
+        "docs/maintainers/DAY_1_TO_30_ONBOARDING_ROADMAP.md",
+        "docs/maintainers/MAINTAINER_ONBOARDING_ASSESSMENT.md",
+        "docs/knowledge/templates/adr.md",
+        "docs/knowledge/templates/runbook.md",
+        "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md",
+        "docs/runbooks/weekly-knowledge-audit.md"
+      ],
+      "checks": [
+        "npm run docs:audit",
+        "npm run test:docs"
+      ]
+    },
+    "images": {
+      "title": "Images, history and Favorites",
+      "owner": "Product/API maintainer",
+      "sources": [
+        "src/lib/images/**/*.ts",
+        "src/app/v1/images/**/*.ts",
+        "src/app/api/images/library/**/*.ts",
+        "src/lib/security/public-image-http.ts",
+        "src/core/broccolidb/BroccoliImageLibraryBuffer.ts",
+        "src/lib/supabase/repositories/ImageLibraryRepository.ts",
+        "src/workers/cloudflare/GalxR2AssetAdapter.ts",
+        "scripts/test-image-requests-db.ts",
+        "scripts/test-image-public-http.ts",
+        "supabase/migrations/20260913025900_durable_image_requests.sql",
+        "supabase/rollbacks/20260913025900_durable_image_requests.down.sql"
+      ],
+      "guides": [
+        "docs/QUEUE_SPECIFICATION.md",
+        "docs/maintainers/image-public-boundary.md",
+        "post-mortem/runbooks/image-generation.md"
+      ],
+      "checks": [
+        "npm run test:image:security",
+        "npm run test:image:db"
+      ]
+    },
+    "access": {
+      "title": "Identity and private developer preview",
+      "owner": "Security/access maintainer",
+      "sources": [
+        "src/core/auth/**/*.ts",
+        "src/lib/security/**/*.ts",
+        "src/lib/admin/**/*.ts",
+        "src/lib/supabase/client.ts",
+        "src/lib/supabase/repositories/DeveloperAccessRepository.ts",
+        "src/lib/supabase/repositories/PreviewAdminRepository.ts",
+        "src/lib/supabase/repositories/PreviewReadSync.ts",
+        "scripts/test-developer-preview.ts",
+        "scripts/test-preview-admin.ts",
+        "scripts/test-preview-read-sync.ts"
+      ],
+      "guides": [
+        "docs/operations/developer-preview.md",
+        "docs/operations/preview-admin.md",
+        "docs/operations/preview-activation.md",
+        "docs/operations/preview-hybrid-sync.md"
+      ],
+      "checks": [
+        "npm run test:preview-admin",
+        "npm run test:image:security"
+      ]
+    },
+    "sites": {
+      "title": "Sites workspace and publication",
+      "owner": "Sites maintainer",
+      "sources": [
+        "src/lib/sites/**/*.ts",
+        "src/app/api/sites/**/*.ts",
+        "src/lib/billing/sites-*.ts"
+      ],
+      "guides": [
+        "docs/maintainers/SITES_OPERATIONS.md",
+        "docs/maintainers/SITES_FAIR_USAGE.md",
+        "docs/maintainers/SITES_WORKSPACE.md",
+        "docs/maintainers/SITES_DOMAINS.md"
+      ],
+      "checks": [
+        "npm run test:sites:fair",
+        "npm run test:sites:workspace",
+        "npm run test:sites:conversation",
+        "npm run test:sites:fair:db",
+        "npm run test:sites:workspace:db"
+      ]
+    },
+    "relay": {
+      "title": "Relay lifecycle and operations",
+      "owner": "Relay operator",
+      "sources": [
+        "src/relay/**/*.ts",
+        "scripts/run-relay-federation.ts",
+        "src/app/api/internal/telemetry/route.ts",
+        "src/core/telemetry/**/*.ts"
+      ],
+      "guides": [
+        "docs/ARCHITECTURE.md",
+        "docs/FEDERATION_STRATEGY.md",
+        "docs/RELAY_VNEXT_RUNBOOK.md",
+        "docs/TELEMETRY_AND_OBSERVABILITY.md",
+        "docs/maintainers/TELEMETRY_AND_METRICS_OBSERVABILITY.md",
+        "docs/maintainers/RELAY_TELEMETRY.md",
+        "docs/maintainers/RELAY_HARDENING.md",
+        "post-mortem/runbooks/controller-lock.md"
+      ],
+      "checks": [
+        "npm run test:relay:capabilities",
+        "npm run test:relay:desktop-login"
+      ]
+    },
+    "database": {
+      "title": "Database authority and migrations",
+      "owner": "Database operator",
+      "sources": [
+        "supabase/migrations/*.sql",
+        "supabase/rollbacks/*.sql",
+        "src/lib/supabase/**/*.ts",
+        "src/lib/db/postgres.ts",
+        "scripts/run-supabase-integration.ts",
+        "scripts/verify-supabase-integrity.ts",
+        "scripts/manage-migrations.ts"
+      ],
+      "guides": [
+        "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+        "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md"
+      ],
+      "checks": [
+        "npm run db:verify",
+        "npm run db:test"
+      ]
+    },
+    "delivery": {
+      "title": "Release and deployment boundaries",
+      "owner": "Release operator",
+      "sources": [
+        ".vercelignore",
+        ".dockerignore",
+        "vercel.json",
+        "Dockerfile",
+        ".github/workflows/*.yml",
+        "src/workers/cloudflare/**/*.ts",
+        "workers/sites-domains/wrangler.jsonc",
+        "wrangler.toml",
+        "workers/sites-domains/index.ts"
+      ],
+      "guides": [
+        "docs/DEPLOYMENT.md",
+        "docs/VERCEL_DEPLOYMENT.md",
+        "docs/runbooks/release-readiness.md",
+        "post-mortem/runbooks/deployment-storage.md"
+      ],
+      "checks": [
+        "npm run docs:check",
+        "npm run build",
+        "npm run docs:check:build"
+      ]
+    },
+    "broccolidb": {
+      "title": "BroccoliDB and bounded synchronization",
+      "owner": "BroccoliDB maintainer",
+      "sources": [
+        "src/core/broccolidb/**/*.ts",
+        "src/core/governor/**/*.ts",
+        "src/lib/supabase/repositories/PreviewReadSync.ts",
+        "scripts/test-broccolidb-compaction-api-route.ts",
+        "scripts/test-broccolidb-production-hardening.ts",
+        "scripts/test-preview-read-sync.ts"
+      ],
+      "guides": [
+        "docs/operations/preview-hybrid-sync.md",
+        "docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md"
+      ],
+      "checks": [
+        "npm run test:broccolidb:api",
+        "npm run test:broccolidb:hardening",
+        "npm run test:egress:transport"
+      ]
+    }
+  },
+  "documents": {
+    "docs/ARCHITECTURE.md": {
+      "kind": "explanation",
+      "keywords": [
+        "architecture",
+        "authority"
+      ]
+    },
+    "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": {
+      "kind": "how-to",
+      "keywords": [
+        "adr",
+        "decision",
+        "supersede"
+      ]
+    },
+    "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md": {
+      "kind": "reference",
+      "keywords": [
+        "ci",
+        "workflow",
+        "build"
+      ]
+    },
+    "docs/knowledge/DESIGN_RATIONALE.md": {
+      "kind": "explanation",
+      "keywords": [
+        "diataxis",
+        "backstage",
+        "github",
+        "gitlab",
+        "sre"
+      ]
+    },
+    "post-mortem/runbooks/image-generation.md": {
+      "kind": "runbook",
+      "keywords": [
+        "favorites",
+        "images",
+        "generation",
+        "history",
+        "session expired",
+        "401"
+      ]
+    },
+    "docs/knowledge/audits/2026-09-13-domain-reviews.md": {
+      "kind": "evidence",
+      "keywords": [
+        "domain",
+        "review",
+        "activation",
+        "coverage"
+      ]
+    }
+  },
+  "runbooks": [
+    "docs/runbooks/knowledge-maintenance.md",
+    "docs/runbooks/release-readiness.md",
+    "docs/runbooks/weekly-knowledge-audit.md"
+  ],
+  "decisions": {
+    "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md": {
+      "status": "accepted",
+      "delivery": "local",
+      "domain": "knowledge",
+      "owner": "Documentation maintainer",
+      "date": "2026-09-13",
+      "evidence": [
+        "docs/knowledge/audits/2026-09-13-verification.json"
+      ],
+      "supersedes": []
+    }
+  },
+  "managed_adr_from": 145,
+  "require_domain_reviews": true,
+  "require_review_evidence": true
+}

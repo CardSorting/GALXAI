@@ -1,14 +1,9 @@
 # Incident response
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
 
-Assess user impact by affected model and operation, tenant scope, and execution state. Assign an incident owner and a measured update cadence appropriate to the impact; this guide does not establish contractual response SLAs.
+The canonical process is [post-mortem triage](../../post-mortem/runbooks/triage.md). It defines severity, incident states, evidence, containment and actual-client acceptance. Use [known failure modes](../../post-mortem/failure-modes/README.md) to select the affected component's runbook.
 
-Inspect controller reachability, authenticated capability state, worker generation, request/receipt scope, and upstream classification. Distinguish capability denial, saturation, cooldown, transport failure, and entitlement rejection.
+Create a dated incident and append observations/actions to the [rolling log](../../post-mortem/ROLLING_LOG.md). Preserve tenant authority, accepted work, signing/storage state and uncertain operation identity. Keep unaffected products serving. Do not infer access, quota or permission to retry from a stale dashboard.
 
-Open the host-launched monitor and linked desktop for structured activity and repair. Use an explicit hold to preserve inspection context; it blocks new work/replacements but cannot override revoked, expired or rotated authority. Review sign-in, registry sync and worker readiness independently.
-
-Keep unaffected pools serving. Reconcile accepted or uncertain work before retry. Never force healthy state from stale telemetry or increase retries to hide an unknown outcome. Record sanitized evidence, mitigation, and actual-client verification.
-
-Use the [current contract](../FEDERATION_STRATEGY.md), [operator runbook](../RELAY_VNEXT_RUNBOOK.md), [request recovery table](../RELAY_API_REFERENCE.md#request-recovery), and [maintainer execution guide](../maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md).
+Use [current state](../../post-mortem/CURRENT_STATE.md) for the latest recorded release evidence. Recovery and prevention have separate completion criteria; [open items](../../post-mortem/OPEN_ITEMS.md) remain visible after the service works again. Public updates describe user impact and recovery without internal diagnostics.

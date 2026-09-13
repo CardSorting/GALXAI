@@ -1,0 +1,55 @@
+name: Documentation knowledge audit
+
+on:
+  pull_request:
+  push:
+    branches: [main, staging]
+  workflow_dispatch:
+  schedule:
+    - cron: '17 9 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: documentation-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  knowledge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      DOCS_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate documentation and incident records
+        run: |
+          python3 scripts/verify-docs.py
+          python3 scripts/verify-post-mortem.py
+          python3 scripts/docs-kb.py check
+      - name: Exercise knowledge guards in disposable fixtures
+        run: |
+          python3 scripts/test-post-mortem.py
+          python3 scripts/test-docs-kb.py
+      - name: Capture review queue
+        if: always()
+        run: python3 scripts/docs-kb.py status > knowledge-review-status.json
+      - name: Explain review results
+        if: always()
+        run: python3 scripts/docs-kb.py status --markdown >> "$GITHUB_STEP_SUMMARY"
+      - name: Require complete and current reviews
+        if: always()
+        run: python3 scripts/docs-kb.py status --fail-on-due --fail-on-unreviewed
+      - name: Retain private maintainer audit status
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: knowledge-review-status
+          path: knowledge-review-status.json
+          retention-days: 14

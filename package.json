@@ -282,7 +282,7 @@
     "db:dry-run": "tsx scripts/manage-migrations.ts --dry-run",
     "vercel:verify": "node --import tsx scripts/verify-vercel-readiness.ts",
     "vault:populate": "tsx scripts/populate-vault-secrets.ts",
-    "deploy:check": "npm run vercel:verify && npm run design:health && npm run lint && npm run build",
+    "deploy:check": "npm run docs:check && npm run vercel:verify && npm run design:health && npm run lint && npm run build",
     "playbook": "tsx scripts/run-lifecycle-playbook.ts",
     "vercel:smoke": "node --import tsx scripts/verify-deployment-smoke.ts",
     "vercel:env:sync": "tsx scripts/sync-vercel-env.ts",
@@ -319,7 +319,17 @@
     "test:preview-admin": "node --import tsx --test scripts/test-preview-admin.ts",
     "test:preview-admin:ui": "node --import tsx scripts/run-supabase-integration.ts --admin-ui",
     "test:preview-admin:db": "node --import tsx scripts/run-supabase-integration.ts --admin",
-    "test:developer-preview:db": "node --import tsx scripts/run-supabase-integration.ts --preview"
+    "test:developer-preview:db": "node --import tsx scripts/run-supabase-integration.ts --preview",
+    "docs:sync": "python3 scripts/docs-kb.py sync && python3 scripts/verify-post-mortem.py --sync",
+    "docs:review": "python3 scripts/docs-kb.py review",
+    "docs:check": "python3 scripts/verify-docs.py && python3 scripts/verify-post-mortem.py && python3 scripts/docs-kb.py check",
+    "test:docs": "python3 scripts/test-post-mortem.py && python3 scripts/test-docs-kb.py",
+    "test:image:db": "node --import tsx scripts/run-supabase-integration.ts --images",
+    "docs:check:build": "python3 scripts/verify-post-mortem.py --build",
+    "docs:find": "python3 scripts/docs-kb.py find",
+    "docs:impact": "python3 scripts/docs-kb.py impact",
+    "docs:status": "python3 scripts/docs-kb.py status",
+    "docs:audit": "npm run docs:check && python3 scripts/docs-kb.py status --fail-on-due --fail-on-unreviewed"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3",

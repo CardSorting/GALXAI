@@ -19,7 +19,7 @@ npm run relay:federation
 
 The launcher defaults to namespace `vnext-canary`, loopback port 3301 and image `galxai-relay:vnext`. These defaults do not isolate registry credentials: never start a second controller against credentials already owned by production. Use synthetic fixtures for a disposable canary.
 
-The controller persists its signing secret, exclusive lock, rejection revisions, maintenance holds, desktop journal and egress state beneath `.relay/federation-<namespace>/`. Preserve this private directory across restarts. Recover a stale lock only after verifying the previous process stopped.
+The controller persists its signing secret, exclusive lock, rejection revisions, maintenance holds, desktop journal and egress state beneath `.relay/federation-<namespace>/`. Preserve this private directory across restarts. Use [guarded lock recovery](../post-mortem/runbooks/controller-lock.md): prove the previous process absent, listener unowned and lock unchanged before archiving that exact stale file. An inaccessible or live process is not stale. The September 13 manual repair did not add automatic stale-lock recovery.
 
 Use `npm run relay:open` and `npm run relay:desktops` on the host. The launcher delegates an authorized session; do not enter the admin key into a browser. `/health` is liveness only. `/health/ready`, `/api/capabilities` and controller `/api/telemetry` require admin authorization.
 
@@ -76,7 +76,7 @@ Rollback uses the saved compatible source/image/configuration and private state 
 
 ## Sites generation rollout and recovery
 
-[Sites operations](maintainers/SITES_OPERATIONS.md) owns the fixed-price card, cohort, fresh local-profile checks, retained receipt volumes and billing recovery. Opaque supplier quota is accepted in this mode; no supplier ceiling assertion is required. Build and replace compatible workers before enabling application admissions. The forwarding option remains relevant to explicitly selected legacy metered jobs.
+[Sites operations](maintainers/SITES_OPERATIONS.md) owns current included generation, paid eligibility, shared fair admission, fresh local-profile checks and retained receipt recovery. Original fixed/metered operations keep their historical settlement contract only. Opaque supplier quota is accepted in this mode; no supplier ceiling assertion is required. Build and replace compatible workers before enabling application admissions. The forwarding option remains relevant to explicitly selected legacy metered jobs.
 
 Preserve signing state and receipt volumes. The durable text receipt endpoint can survive worker replacement; stream and cancellation still target the admitting generation. Pause new content work before incompatible rollback, and retain application code capable of settling previously accepted fixed holds.
 

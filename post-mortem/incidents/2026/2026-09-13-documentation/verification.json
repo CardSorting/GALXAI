@@ -1,0 +1,63 @@
+{
+  "recorded_at": "2026-09-13T03:55:54.854352Z",
+  "scope": "local documentation/CI configuration and existing image-fix regressions; no new deployment or production mutation",
+  "documentation": {
+    "guides": 305,
+    "incident_documents": 29,
+    "adrs": 144,
+    "authored_markdown_inventory": 398,
+    "local_links_and_scopes": "passed"
+  },
+  "checks": [
+    {
+      "command": "npm run test:docs",
+      "passed": 17
+    },
+    {
+      "command": "npm run test:image:security",
+      "passed": 23
+    },
+    {
+      "command": "npm run test:image:db",
+      "passed": 37,
+      "database": "isolated disposable PostgreSQL; fixture removed"
+    },
+    {
+      "command": "npm run test:developer-preview",
+      "passed": 14
+    },
+    {
+      "command": "npm run build",
+      "result": "passed",
+      "next_version": "15.5.25",
+      "static_pages": 277
+    },
+    {
+      "command": "npm run docs:check:build",
+      "result": "passed",
+      "browser_rendered_assets": 640
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    }
+  ],
+  "privacy": {
+    "known_secret_pattern_scan": "no matches in non-raw post-mortem files",
+    "raw_evidence_git_ignored": true,
+    "vercel_exclusion": true,
+    "docker_context_exclusion": true,
+    "runtime_trace_incident_files": 0
+  },
+  "execution_notes": [
+    "First sandboxed HTTP suite could not bind loopback; rerun with local-server permission passed.",
+    "First sandboxed database suite could not access Docker; rerun with Docker permission passed and removed its fixture.",
+    "Docker exclusion is configuration/guard verification; no Docker application image was rebuilt."
+  ],
+  "limits": [
+    "Remote CI enforcement requires a push and observed workflow run.",
+    "No new live user generation, payment, site publication or production load test during this documentation task.",
+    "Open operational prevention actions remain open; documentation does not implement monitoring or automatic recovery.",
+    "Complete inventory and link validation do not certify every historical/research claim."
+  ]
+}

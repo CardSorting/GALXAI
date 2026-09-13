@@ -30,6 +30,12 @@ wrangler.secrets*
 # Root Documentation & Metadata (Root Only - Never ignore src/app/docs or src/components/docs)
 /docs/
 /internal/
+/post-mortem/
+/HANDOVER.md
+/context.md
+/AGENTS.md
+/MAINTAINERS.md
+/CONTRIBUTING.md
 /README.md
 /DESIGN.md
 /DESIGN_SCORECARD.md

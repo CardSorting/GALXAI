@@ -44,6 +44,8 @@ def anchors(text):
 def main():
     errors = []
     files = sorted(DOCS.rglob("*.md"))
+    incident_files = sorted(path for path in (ROOT / "post-mortem").rglob("*.md")
+                            if "/evidence/raw/" not in path.as_posix())
     catalog = DOCS / "CATALOG.md"
     indexed = {(catalog.parent / unquote(urlsplit(link).path)).resolve()
                for link in links(catalog.read_text()) if not urlsplit(link).scheme}
@@ -54,6 +56,10 @@ def main():
             errors.append(f"{path.relative_to(ROOT)}: requires one valid scope marker")
         if path.resolve() not in indexed:
             errors.append(f"{path.relative_to(ROOT)}: missing from complete catalog")
+    for path in incident_files:
+        markers = re.findall(r"<!-- docs-scope: ([\w-]+) -->", path.read_text())
+        if len(markers) != 1 or markers[0] not in SCOPES:
+            errors.append(f"{path.relative_to(ROOT)}: requires one valid scope marker")
 
     decisions = sorted((DOCS / "adr").glob("[0-9]*.md"))
     ids = [int(path.name.split("-", 1)[0]) for path in decisions]
@@ -66,9 +72,13 @@ def main():
 
     # Root entry points are part of the navigation contract too.
     roots = [ROOT / name for name in ("README.md", "context.md", "HANDOVER.md", "PRODUCT.md", "MAINTAINERS.md", "CONTRIBUTING.md")]
-    for path in files + roots:
+    for path in files + roots + incident_files:
         text = path.read_text()
         if "<!-- docs-scope: current-guide -->" in text:
+            if re.search(r"(?m)^\s*(?:echo|printenv)\s+.*(?:SECRET|TOKEN|PASSWORD|PRIVATE_KEY)", text):
+                errors.append(f"{path.relative_to(ROOT)}: current guide contains a secret-printing command")
+            if re.search(r"(?m)^\s*(?:npx\s+tsx|node\s+[^\n]*)\s+scripts/populate-vault-secrets", text):
+                errors.append(f"{path.relative_to(ROOT)}: current guide uses vault population as an executable recipe")
             if re.search(r"process\.env\.NEXT_PUBLIC_\w*(?:KEY|TOKEN|SECRET)", text):
                 errors.append(f"{path.relative_to(ROOT)}: current guide exposes a credential in a browser environment variable")
             if re.search(r"ADR 0122.{0,50}(?:current|baseline)", prose(text)):
@@ -90,7 +100,7 @@ def main():
         print("\n".join(errors))
         print(f"Documentation validation failed: {len(errors)} issue(s).", file=sys.stderr)
         return 1
-    print(f"Documentation validation passed: {len(files)} documents, {len(decisions)} ADRs; scope, coverage, local targets, and current-guide anchors.")
+    print(f"Documentation validation passed: {len(files)} guides, {len(incident_files)} incident documents, {len(decisions)} ADRs; scope, coverage, local targets, and current-guide anchors.")
     return 0
 
 

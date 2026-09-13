@@ -1,31 +1,37 @@
-# ADR authoring and lifecycle
+# Write and maintain an architecture decision
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
 
-ADRs preserve decisions and their evidence. Current operator instructions live in guides, with the [federation contract](../FEDERATION_STRATEGY.md) as relay authority. The [complete catalog](../adr/README.md) indexes every record.
+Use an ADR when changing a consequential product contract, authority, ownership, persistence, retry/recovery rule, security boundary or architecture. A routine bug fix or wording change can explain its rationale in the PR. Keep records short enough to review alongside implementation.
 
-## When to write a decision
+## Create a decision
 
-Record changes to public behavior, ownership, routing, capability interpretation, credential/health authority, retries, persistence, security boundaries, or database schema. A small wording correction need not invent an architecture decision.
+1. Inspect the [complete ADR catalog](../adr/README.md) and owning domain to avoid duplicating an existing decision. Choose the next unused four-digit ID; never reuse or renumber one.
+2. Copy the [ADR template](../knowledge/templates/adr.md) into `docs/adr/NNNN-title.md` and use the `decision-record` scope marker. Explain the problem, viable options, chosen behavior, consequences, recovery and confirmation.
+3. Add the record to the ADR catalog and `decisions` in [registry.json](../knowledge/registry.json), with `status: proposed` and `delivery: not-started`. Name the responsible role, date and domain. Link current guides and related decisions.
+4. Obtain the review appropriate to the change and existing authorization. Record the actual acceptance basis; do not invent reviewers or assume a GitHub team exists. Update decision status explicitly.
+5. Reconcile affected active guides and runbooks in full. Validate with `npm run docs:sync`, `npm run docs:check`, `npm run test:docs` and the relevant implementation checks.
 
-Use the next unused four-digit ID. Distinguish proposed, accepted, implemented, verified, deployed, rejected, and superseded: acceptance does not prove implementation, and passing tests does not prove deployment. Describe partial supersession by topic; unrelated parts of a record can remain applicable.
+## Keep two separate states
 
-## Record structure
+| Decision state | Meaning |
+| --- | --- |
+| proposed | A choice is being evaluated |
+| accepted | The choice is authorized for its stated scope |
+| rejected | The proposed choice was declined; rationale is retained |
+| deprecated | The choice is being retired; explain the remaining scope |
+| superseded | Another registered decision fully replaces it |
 
-- Title, date, component, and decision status.
-- Concrete problem and trigger, including observed failure where available.
-- Chosen behavior, alternatives considered, and tradeoffs.
-- Authority, freshness, resource bounds, and failure/recovery semantics.
-- Relevant source and validation evidence with revision/environment/date.
-- Deployment scope, known limits, rollback, and predecessor/successor links.
+Delivery is independently `not-started`, `local`, `deployed` or `verified`. Every state beyond not-started requires evidence. Deployed/verified also requires target, revision and observation timestamp. Verified means the linked acceptance scope was exercised, not universal reliability. Mixed component delivery belongs in separate evidence records; choose the state supported for the whole registered scope.
 
-Prefer a short reviewable decision over a ceremonial template. Do not require invented performance numbers, universal guarantees, or a fixed test count. Use exact model/operation semantics and explicitly document compatibility aliases.
+The [lifecycle register](../knowledge/DECISIONS.md) covers explicitly curated metadata. Older ADRs remain searchable and retain their original scope; their status is not inferred from age, numbering or prose. Register a legacy record when its topic is reviewed, without silently promoting unrelated records.
 
-## Keep current guidance current
+## Supersession and corrections
 
-Update affected API, deployment, security, troubleshooting, and developer guides in the same change. Link shared defaults to the runbook/source instead of copying them throughout the corpus. Update catalogs and documentation scope metadata. Reconcile the entire affected ADR body: status, decision, consequences, procedures and successor links. A banner cannot make an obsolete command safe. Preserve historical measurements and rollout facts in explicitly dated evidence sections; do not rewrite past observations as new verification.
+For a new choice, create a successor and preserve the original decision rationale and dated evidence. Full supersession uses reciprocal `supersedes` and `superseded_by` links; the guard rejects missing links and cycles. Partial replacement is described by topic in both records and does not mark the whole predecessor superseded.
 
-ADRs 0123–0125 govern database cooldown and observation authority. ADR 0126 establishes 1:1 capability-aware federation. ADR 0127 adds the explicit verified image alias and dated production cutover. ADR 0129 governs public information, ADR 0130 uncertain image results, ADR 0131 operator sessions/maintenance, ADR 0132 recoverable credential handoff ADR 0133 enrollment/test isolation, and ADRs 0134–0136 fixed-price Sites admission, durable text receipts and customer-owned delivery. Older shared-relay, fuzzy-routing or simulation decisions do not override those contracts.
+Current instructions belong in guides. Remove obsolete executable recipes from active guides and point historical procedural sections to the current owner. Correct factual errors in a decision with a dated correction, identifying what changed; do not rewrite old acceptance or measurements as new facts. A banner above contradictory active instructions is insufficient.
 
-Run `python3 scripts/verify-docs.py` and `git diff --check` for documentation changes. Validate relative targets and catalog coverage. Document source behavior separately from proposals and commercial claims; historical benchmarks do not establish production SLOs.
+## Confirmation
+
+Link relevant source, tests, runbook, incident/failure mode when applicable, and dated delivery evidence. Record limitations, rollback compatibility and remaining work. Use [ADR 0145](../adr/0145-maintained-knowledge-and-decision-lifecycle.md) for this knowledge workflow and the owning topic's decisions for product behavior; no single highest ADR number overrides every subsystem.

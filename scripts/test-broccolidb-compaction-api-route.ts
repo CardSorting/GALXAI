@@ -23,8 +23,22 @@ import {
   ArrowDictionaryStreamCompactionResult,
 } from '../src/core/broccolidb/BroccoliCompactionFacade';
 import * as BroccoliDbBarrel from '../src/core/broccolidb/index';
-import { GET as auditCompactGet, POST as auditCompactPost, OPTIONS as auditCompactOptions } from '../src/app/api/audit/broccolidb/compact/route';
-import { GET as broccolidbCompactGet, POST as broccolidbCompactPost } from '../src/app/api/broccolidb/compact/route';
+import { GET as rawAuditGet, POST as rawAuditPost, OPTIONS as auditCompactOptions } from '../src/app/api/audit/broccolidb/compact/route';
+import { GET as rawAliasGet, POST as rawAliasPost } from '../src/app/api/broccolidb/compact/route';
+
+import { GalxAuthEngine } from '../src/core/auth/GalxAuthEngine';
+import { DeveloperAccessRepository } from '../src/lib/supabase/repositories/DeveloperAccessRepository';
+
+const fixtureToken = 'Bearer galx-test-preview-approved';
+const fixtureOwner = '00000000-0000-4000-8000-000000000001';
+function approvedRequest(req = new NextRequest('http://localhost/api/audit/broccolidb/compact')) {
+  req.headers.set('authorization', fixtureToken);
+  return req;
+}
+const auditCompactGet = () => rawAuditGet(approvedRequest());
+const broccolidbCompactGet = () => rawAliasGet(approvedRequest());
+const auditCompactPost = (req: NextRequest) => rawAuditPost(approvedRequest(req));
+const broccolidbCompactPost = (req: NextRequest) => rawAliasPost(approvedRequest(req));
 
 async function testBarrelIsolation(): Promise<void> {
   console.log('  [1/7] Testing barrel isolation and supported public boundaries...');
@@ -736,8 +750,14 @@ async function testProductionAuthRejection(): Promise<void> {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ mode: 'domain', text: 'test' }),
     });
-    const unauthRes = await auditCompactPost(unauthReq);
+    const unauthRes = await rawAuditPost(unauthReq);
     assert.equal(unauthRes.status, 401, 'Unauthenticated requests must be rejected with 401 in production');
+    const denied = new NextRequest('http://localhost/api/broccolidb/compact', {
+      headers: { authorization: 'Bearer galx-test-preview-pending' },
+    });
+    assert.equal((await rawAliasGet(denied)).status, 403, 'Verified but unapproved accounts remain gated');
+    assert.equal((await rawAuditGet(new NextRequest('http://localhost/api/audit/broccolidb/compact'))).status, 401);
+
 
   } finally {
     (process.env as any).NODE_ENV = originalEnv;
@@ -751,6 +771,19 @@ async function run(): Promise<void> {
   console.log('  TESTING BROCCOLIDB PRODUCTION COMPACTION FACADE & API GATEWAY');
   console.log('======================================================================\n');
 
+  // Replace external identity/approval reads only; real route guards remain active.
+  // No dotenv, real account, database or upstream call is needed for this suite.
+  const auth = GalxAuthEngine.getInstance();
+  const originalIdentity = auth.resolveAuthIdentity;
+  const originalApproval = DeveloperAccessRepository.prototype.isApproved;
+  auth.resolveAuthIdentity = async (req: Request) => {
+    const token = req.headers.get('authorization');
+    if (token === fixtureToken) return { authenticated: true, userId: fixtureOwner };
+    if (token === 'Bearer galx-test-preview-pending') return { authenticated: true, userId: 'pending-fixture' };
+    return { authenticated: false };
+  };
+  DeveloperAccessRepository.prototype.isApproved = async owner => owner === fixtureOwner;
+  try {
   await testBarrelIsolation();
   await testFacadeUnitWorkflows();
   await testApiRouteGetAndOptions();
@@ -758,6 +791,10 @@ async function run(): Promise<void> {
   await testApiRouteBatchAndIncidentAndDocument();
   await testApiValidationAndErrorHandling();
   await testProductionAuthRejection();
+  } finally {
+    auth.resolveAuthIdentity = originalIdentity;
+    DeveloperAccessRepository.prototype.isApproved = originalApproval;
+  }
 
   console.log('\n======================================================================');
   console.log('   ALL BROCCOLIDB COMPACTION FACADE & API TESTS PASSED (100%)');

@@ -1,0 +1,154 @@
+{
+  "checkedAt": "2026-09-13T02:40:37.750Z",
+  "pages": [
+    {
+      "pathname": "/images",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "pathname": "/sites",
+      "status": 200,
+      "privateMarkers": false
+    }
+  ],
+  "scripts": [
+    {
+      "path": "/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/1255-306db9f231b54263.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/main-app-0ee650784ad95c4e.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/44530001-a26648c04669f22e.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/2619-04bc32f026a0d946.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/9711-b33ff40726bb9ab2.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/5380-ad2e13b1db7680e9.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/6152-44eaa1baa2fecf7e.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/2601-6da062d7e82ee955.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-20c64359527c6676.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/647-392e8768d2516830.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/app/error-a76085031cfc9735.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/9543-2a24747056c972b1.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/5460-36fb595da383b584.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/app/images/page-ba84217830411319.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/app/global-error-6c4bdd755108c191.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/app/not-found-7d58cf8e9eb07a3e.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/app/page-43adc266b63a811c.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/polyfills-42372ed130431b0a.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/webpack-b54cce279dcdd705.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/5755-ad22c3cd2c0a9f91.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/4129-14f0ddf064a05f5b.js",
+      "status": 200,
+      "privateMarkers": false
+    },
+    {
+      "path": "/_next/static/chunks/app/sites/page-d6b42719740cea0a.js",
+      "status": 200,
+      "privateMarkers": false
+    }
+  ],
+  "unauthorized": [
+    {
+      "favorites": false,
+      "credential": "none",
+      "status": 401
+    },
+    {
+      "favorites": false,
+      "credential": "forged",
+      "status": 401
+    },
+    {
+      "favorites": true,
+      "credential": "none",
+      "status": 401
+    },
+    {
+      "favorites": true,
+      "credential": "forged",
+      "status": 401
+    }
+  ]
+}

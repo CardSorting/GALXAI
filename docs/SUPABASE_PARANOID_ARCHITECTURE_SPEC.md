@@ -1,221 +1,25 @@
-# 🛡️ GALXAI: Paranoid Supabase PostgreSQL Architecture & AI Agent Governance Specification
+# Supabase authority and operational boundaries
 
 <!-- docs-scope: domain-reference -->
-> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-This specification formalizes the authoritative database architecture, threat model, paranoid containment invariants, and the **AI Agent Database Operating Protocol (AOP-DB)** for GALXAI.
+Private component reference, reconciled September 13, 2026. Use [the database runbook](maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md) for current procedures and the actual migrations for object-specific privileges. This reference does not substitute generic policies for reviewed schema.
 
-It is specifically engineered for an operational reality where a **Senior System Architect (who does not write SQL)** relies on **AI Autonomous Assistants** as the sole database operators to maintain, evolve, optimize, and secure the Supabase PostgreSQL substrate long term without human SQL review.
+## Identity and authorization
 
----
+Application identity is verified server-side. Public Auth credentials can verify a bearer token without constructing an administrator client; a publishable key never grants admin authority. Temporary verification failure must remain distinct from a rejected credential. User IDs and editable metadata are not proof of authorization.
 
-## 🏛️ 1. Executive Summary & The Paranoid Philosophy
+Developer approval, staff membership and resource ownership remain independent current checks. BroccoliDB snapshots and batching optimize payloads, not grants. An unavailable authoritative read cannot become cached permission or a fabricated successful write.
 
-In traditional engineering organizations, database schemas are maintained by DBAs and senior backend engineers with deep PostgreSQL internals knowledge. In GALXAI, the system is designed with **Paranoid Autonomous Containment**:
+## Database ownership
 
-1. **The Human Maintainer**: A Senior Distributed Systems Architect who understands data structures, state machines, latency boundaries, and business logic, but **does not know or inspect SQL syntax**.
-2. **The Database Operator**: An **AI Agent** (such as Antigravity / Gemini) tasked with drafting migrations, maintaining indexes, writing RPC functions, and optimizing performance.
-3. **The Core Danger**: AI agents without deterministic boundaries can cause catastrophic failures (e.g., table-locking DDL during peak hours, silent RLS bypasses, search path hijacking, unindexed foreign key cascades, or double-entry ledger corruptions).
-4. **The Paranoid Solution**: Zero trust in raw AI code generation. Every database change must strictly pass through a **4-layer mechanical containment harness** (Linter, Bi-directional Rollback, Dry-Run Simulator, and English Architectural Impact Translation) before it can be applied to production.
+Use explicit privileges and owner/tenant predicates with RLS appropriate to each table's exposure. Private receipts and staff/preview records are not browser-queryable storage. Do not infer direct access from ordinary authentication or a server role name. Definer functions need an actual justified privilege boundary, fixed trusted search paths, restricted callers and adversarial tests.
 
-```mermaid
-flowchart TD
-    Architect[Senior Architect / Maintainer] -->|Business Intent & Constraints| Agent[AI Agent Operator]
-    
-    subgraph Agent Operating Protocol (AOP-DB)
-        Agent --> Discover[Phase 1: Forensic Discovery & Blast-Radius Assessment]
-        Discover --> ImpactDoc[Phase 2: Generate Architect English Impact Statement]
-        ImpactDoc --> Migrations[Phase 3: Generate Idempotent UP & DOWN SQL Migrations]
-        Migrations --> Linter[Phase 4: Run Automated Paranoia Linter & Test Suite]
-    end
-    
-    subgraph Mechanical Containment Harness
-        Linter -->|Check 1| DDLCheck[Zero Destructive DDL & Expand-Contract Linter]
-        Linter -->|Check 2| RLSCheck[100% RLS Enforcement & Deny-by-Default Audit]
-        Linter -->|Check 3| SearchPathCheck[SECURITY DEFINER search_path Lockdown]
-        Linter -->|Check 4| LockCheck[Zero-Lock Concurrent DDL & Foreign Key Indexes]
-        Linter -->|Check 5| LedgerCheck[Double-Entry Financial Immutability Verification]
-        Linter -->|Check 6| RollbackCheck[Bi-directional Rollback Parity Validation]
-        Linter -->|Check 7| TypeSync[TypeScript Database Interface Lockstep Sync]
-    end
-    
-    DDLCheck & RLSCheck & SearchPathCheck & LockCheck & LedgerCheck & RollbackCheck & TypeSync --> Pass{All Guardrails Pass?}
-    
-    Pass -->|YES (Deterministic Green)| Ready[Architect Reviews English Impact & Approves]
-    Pass -->|NO (Violation Detected)| AgentSelfHeal[Agent Self-Heals Migration & Fixes Flaws]
-    AgentSelfHeal --> Linter
-    
-    Ready --> Deploy[Transaction-Wrapped Automated Migration Execution]
-    Deploy --> Supabase[(Authoritative Supabase PostgreSQL Substrate)]
-```
+Financial, audit and accepted-operation state must commit atomically at their defined boundary. Image receipts commit before async acknowledgement, claims arbitrate dispatch, and success requires owned committed assets. Favorites commit before acknowledgement. Keep record identity across uncertainty rather than manufacturing success from local memory.
 
----
+## Migrations, tests and evidence
 
-## 📜 2. The 10 Invariant Commandments of Paranoid PostgreSQL Maintenance
+Migration and rollback files are reviewed together. Additive schema may be retained during application rollback; populated records can make destructive rollback intentionally unavailable. Read current CLI help, verify the intended target/pending list, preserve vault configuration and apply only the reviewed set.
 
-Any database change generated by an AI Agent MUST satisfy all 10 commandments without exception:
+`db:status` is inventory; `db:verify` is static verification; `db:test` creates an isolated fixture. The legacy `db:migrate` apply path is disabled. Direct mutation scripts are not automatic release or diagnosis steps. Exact current commands and safeguards live in [the runbook](maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md).
 
-### Invariant 1: Zero Destructive DDL without 3-Phase Expand/Contract Protocol
-- **Forbidden**: `DROP TABLE`, `DROP COLUMN`, `RENAME COLUMN`, `ALTER TABLE ... DROP CONSTRAINT`, `TRUNCATE`.
-- **Protocol**: Breaking schema changes must follow the **Expand/Contract Pattern** across 3 distinct releases:
-  1. *Phase 1 (Expand)*: Add new columns/tables in parallel; backfill data asynchronously; write to both old and new.
-  2. *Phase 2 (Migrate)*: Switch reads to the new column/table; verify zero traffic on legacy columns.
-  3. *Phase 3 (Contract)*: Deprecate legacy column by marking it unused; drop legacy artifact only after a 30-day grace period.
-
-### Invariant 2: Default-Deny Row Level Security (RLS) on 100% of Tables
-- Every single table created in `public` must immediately execute:
-  ```sql
-  ALTER TABLE public.table_name ENABLE ROW LEVEL SECURITY;
-  ALTER TABLE public.table_name FORCE ROW LEVEL SECURITY;
-  ```
-- By default, zero permissions are granted. Explicit policies must be defined for `service_role`, `authenticated`, and `anon` with least-privilege scoping.
-
-### Invariant 3: `SECURITY DEFINER` Search Path Sanitization
-- PostgreSQL `SECURITY DEFINER` functions run with the privileges of the creating user (typically superuser or database owner). If `search_path` is not explicitly pinned, an attacker can hijack the execution context by creating a malicious object in `public`.
-- **Mandatory Requirement**: Every `SECURITY DEFINER` function MUST specify:
-  ```sql
-  SET search_path = public, pg_temp;
-  ```
-
-### Invariant 4: Double-Entry Financial Immutability
-- Financial balances in `galx_wallets` can **NEVER** be updated via raw ad-hoc `UPDATE` queries.
-- All balance adjustments must occur through verified atomic stored procedures (`fn_verify_deposit_and_match`, `fn_batch_draw_wallet_tokens_cf`) that simultaneously insert an immutable record into `galx_wallet_transactions`.
-- Running balance must always mathematically equal the initial grant plus the sum of all transaction deltas:
-  $$\text{Balance}_{\text{current}} = \text{Balance}_{\text{initial}} + \sum \Delta \text{Transactions}$$
-
-### Invariant 5: Zero-Lock Concurrent Index & DDL Execution
-- PostgreSQL table locks (`ACCESS EXCLUSIVE`) during index creation can freeze production read/write traffic.
-- All indexes must be created with `IF NOT EXISTS` and non-blocking semantics:
-  ```sql
-  CREATE INDEX IF NOT EXISTS idx_name ON table_name (column_name);
-  ```
-- Adding a `NOT NULL` column to an existing populated table must always provide a safe default value or be done via a nullable column followed by backfill and check constraint validation.
-
-### Invariant 6: Mandatory Bi-directional Rollback Parity (`.down.sql`)
-- No migration is ever merged or executed in isolation.
-- Every migration file `NNN_feature_name.sql` MUST be paired with an identical timestamped rollback file in `supabase/migrations/rollbacks/NNN_feature_name.down.sql`.
-- The rollback script must restore the database to the exact pre-migration state without data corruption.
-
-### Invariant 7: Cryptographic Vault & AAD Tenant Binding
-- Upstream provider credentials (OpenAI, xAI API keys) stored in `galx_shard_accounts` MUST remain encrypted using AES-256-GCM envelope encryption with Authenticated Associated Data (AAD):
-  $$\text{AAD} = \text{tenantUid} : \text{shardId} : \text{provider}$$
-- Raw plaintext keys are never stored, logged, or emitted in database replication streams.
-
-### Invariant 8: Monotonic Fencing Tokens for Distributed Concurrency
-- Distributed locks, task execution leases, and credential leases must maintain an incremental integer `fencing_token`.
-- Workers must pass the fencing token with every state commit. If a worker times out and a second worker acquires the lease, the first worker's commit is atomically rejected, preventing split-brain corruption.
-
-### Invariant 9: Non-Technical Architect-Readable English Impact Statement
-- For every database pull request or modification, the AI Agent must generate a standardized English Impact Assessment containing:
-  - **Risk Grade** (Low / Medium / High / Critical)
-  - **Blast Radius** (Which tables, API routes, or edge workers are touched)
-  - **Locking Impact** (Estimated lock level and blocking duration)
-  - **Data Mutation Footprint** (New columns, backfills, row count impact)
-  - **Rollback Guarantee** (How rollback is tested and executed)
-
-### Invariant 10: Automated Continuous Verification & Zero-Drift Sync
-- Every pull request and local build must run:
-  ```bash
-  npm run db:verify
-  # Start Docker; the test runner creates and removes its own disposable database.
-  npm run db:test
-  ```
-- If the Paranoia Linter detects any violation of Invariants 1–9, the build immediately fails and the agent is blocked from applying changes.
-
----
-
-## 🤖 3. AI Agent Database Operating Protocol (AOP-DB)
-
-When an AI Agent is asked to add a feature, create a table, modify a query, or optimize performance, it must follow this 4-phase protocol:
-
-```
-[Phase 1: Forensic Discovery] ➡️ [Phase 2: English Impact Statement] ➡️ [Phase 3: UP/DOWN SQL Generation] ➡️ [Phase 4: Mechanical Verification]
-```
-
-### Phase 1: Forensic Discovery & Blast-Radius Assessment
-1. View existing migration history in `supabase/migrations/` and `src/lib/supabase/types.ts`.
-2. Inspect dependent TypeScript repositories in `src/lib/supabase/repositories/`.
-3. Check existing RLS policies, foreign keys, and indexes on affected tables.
-4. Calculate potential lock contention and edge mesh buffer interactions.
-
-### Phase 2: Architect-Readable English Impact Statement
-The agent MUST output the impact statement in the following format before writing production code:
-
-```markdown
-### 📋 Architect Database Impact Statement
-- **Objective**: [Plain English summary of what this change achieves]
-- **Risk Level**: [LOW | MEDIUM | HIGH | CRITICAL]
-- **Tables Affected**: [List of tables]
-- **Lock Contention**: [None (Concurrent / Non-blocking) | Minimal (<10ms) | Significant]
-- **RLS & Security Posture**: [How tenant isolation is enforced]
-- **Rollback Feasibility**: [Deterministic 1-click rollback via NNN_name.down.sql]
-- **TypeScript Sync**: [Updated types in src/lib/supabase/types.ts]
-```
-
-### Phase 3: Idempotent UP and DOWN SQL Generation
-- Create `supabase/migrations/YYYYMMDDHHMMSS_name.sql`.
-- Create `supabase/migrations/rollbacks/YYYYMMDDHHMMSS_name.down.sql`.
-- Wrap DDL in idempotent constructs (`IF NOT EXISTS`, `CREATE OR REPLACE`, `DO $$ BEGIN ... END $$;`).
-- Add comments explaining business logic on every table and column.
-
-### Phase 4: Mechanical Verification & TypeScript Alignment
-1. Update `src/lib/supabase/types.ts` with new table definitions.
-2. Update corresponding repository classes in `src/lib/supabase/repositories/`.
-3. Run the automated paranoia test harness:
-   ```bash
-   npm run db:verify
-   # Requires Docker; creates its own disposable database without production credentials.
-   npm run db:test
-   ```
-4. Only when all tests pass with code 0 may the agent report completion to the Senior Architect.
-
----
-
-## 🔐 4. Threat Model & AI Hallucination Failure Modes
-
-| Hallucination / AI Risk Vector | Attack / Failure Scenario | Paranoid Countermeasure & Guardrail |
-| :--- | :--- | :--- |
-| **Silent RLS Bypass** | Agent forgets `ENABLE ROW LEVEL SECURITY` or writes `USING (true)`, leaking multi-tenant data. | Paranoia Linter (`verify-supabase-integrity.ts`) statically audits 100% of tables and rejects any table without RLS or with permissive `USING (true)` for public roles. |
-| **Search Path Trojan** | Agent creates `SECURITY DEFINER` function without explicit `search_path`, allowing malicious functions to execute as superuser. | Linter enforces regex check for `SET search_path = public, pg_temp;` on every `SECURITY DEFINER` function. |
-| **Destructive Drop** | Agent attempts to fix a column mismatch by running `DROP COLUMN` or `DROP TABLE`. | Linter flags all `DROP`, `TRUNCATE`, and `CASCADE` keywords as fatal errors. Requires 3-phase expand/contract lifecycle. |
-| **Lock Catastrophe** | Agent adds a foreign key or index on a high-throughput table without checking lock contention. | Linter enforces unindexed foreign key detection and safe default constraints. |
-| **Ledger Corruption** | Agent writes an ad-hoc `UPDATE galx_wallets SET balance_usd = balance_usd - X`. | Direct DML on `galx_wallets` is locked down via RLS and strict TypeScript repository abstractions. Only atomic RPC functions are allowed. |
-| **Schema Drift** | Agent modifies database in Supabase Studio UI or creates migrations out of order. | Cryptographic SHA-256 migration checksum tracking in `_galx_migrations_audit` verifies sequential integrity. |
-| **Stale Fencing Race** | A timed-out worker finishes late and overwrites fresh state. | Monotonic fencing token verification in `galx_task_attempts`, `galx_distributed_locks`, and `galx_shard_leases`. |
-
----
-
-## 🛠️ 5. Operational Tooling & Commands Summary
-
-| Command | Purpose |
-| :--- | :--- |
-| `npm run db:verify` | Runs the Paranoid SQL Linter across all 53 migrations, RLS audit, search_path verification, rollback pairing check, and TypeScript type alignment test. |
-| `npm run db:push` | Pushes pending migrations to Supabase live database pooler with transaction wrapping and validation. |
-| `npm run db:test` | Creates a disposable Docker database, replays migrations and runs the broad suite; explicit connection overrides remain loopback-only and inherited credentials are stripped. |
-| `npm run db:status` | Displays migration audit history, applied versions, SHA-256 checksums, and pending migrations. |
-| `npm run db:migrate` | Safely applies pending migrations in atomic transaction blocks. |
-| `npm run db:rollback` | Safely rolls back the last applied migration using its `.down.sql` definition. |
-| `npm run worker:test` | Runs the 46-point Cloudflare Edge Mesh verification suite (KV, DO, R2, SWR cache). |
-
----
-
-## 🔗 6. Related Architecture Decision Records (ADRs)
-
-- **[Wallet lifecycle procedure](operations/wallet-lifecycle.md)**
-- **[ADR 0035: Paranoid Supabase PostgreSQL Architecture](adr/0035-paranoid-supabase-postgresql-and-ai-agent-governance.md)**
-- **[ADR 0037: Zero-Egress Cloudflare Edge Gateway, R2 CDN & Custom Domain Substrate](adr/0037-zero-egress-cloudflare-edge-gateway-and-r2-cdn-substrate.md)**
-- **[ADR 0038: Distributed Edge KV Rate Governance & Stale-While-Revalidate Model Catalog Caching](adr/0038-distributed-edge-kv-rate-governance-and-swr-catalog-caching.md)**
-- **[ADR 0039: Edge-Native Vector Embeddings & Durable Object Swarm State Synchronization](adr/0039-edge-native-vector-embeddings-and-durable-object-swarm-sync.md)**
-- **[ADR 0051: Enterprise OAuth 2.0 / 2.1, FAPI Standards, Token Lifecycle & Identity Mesh](adr/0051-enterprise-oauth2-fapi-token-lifecycle-and-identity-mesh.md)**
-- **[ADR 0052: Enterprise OAuth 2.1 Refresh Token Rotation (RTR), Token Family Theft Containment, OIDC Back-Channel Logout & Substrate Vacuum Mesh](adr/0052-enterprise-oauth21-rtr-fapi-backchannel-and-vacuum-mesh.md)**
-- **[ADR 0068: Dual Rolling Window Seat Quotas & Distributed Request Leases](adr/0068-dual-rolling-window-seat-quotas-and-distributed-request-leases.md)**
-- **[ADR 0069: Hybrid BroccoliDB-PostgreSQL Rolling Context & 5-Level Pyramid](adr/0069-hybrid-broccolidb-postgres-rolling-context-and-5-level-pyramid.md)**
-- **[ADR 0070: Elastic Dynamic Context Governor & Atomic Turn-Pair Integrity](adr/0070-elastic-dynamic-context-governor-and-atomic-turn-pair-integrity.md)**
-- **[ADR 0071: Cross-Session Universal Workspace Anchors & Hardware Cache Topology](adr/0071-cross-session-universal-workspace-anchors-and-hardware-cache-topology.md)**
-- **[ADR 0072: Exact-Owner Chat Persistence & Delta Sync Mesh](adr/0072-exact-owner-chat-persistence-and-delta-sync-mesh.md)**
-
----
-
-## 🎯 7. Conclusion & Guarantee
-
-By decoupling high-level architectural intent from low-level SQL mechanics through **strict mechanical guardrails**, the Senior Architect can fearlessly steer the platform while AI agents safely manage the database with zero risk of catastrophic downtime, privilege escalation, or data loss.
+Record source, migration application, deployment and actual-client results separately in [post-mortem](../post-mortem/README.md). Keep secrets, dumps, topology and operational diagnostics out of public documentation and browser artifacts.

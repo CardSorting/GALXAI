@@ -1,10 +1,12 @@
 # Developer preview reads and hybrid sync
 
+<!-- docs-scope: domain-reference -->
+
 Private operational notes. Do not copy implementation details into public documentation, UI, responses, headers, or browser bundles.
 
 ## Scope and database impact
 
-The preview application, approval checks, and admin workspace use fewer roundtrips and transfer less repeated application data. Existing PostgreSQL tables, RLS, grants, migrations, approval expiry, audit history, and identity verification are unchanged. No new infrastructure or migration is required. Reverting the application changes is sufficient to roll back.
+The preview application, approval checks, and admin workspace use fewer roundtrips and transfer less repeated application data. Existing PostgreSQL tables, RLS, grants, migrations, approval expiry, audit history, and identity verification are unchanged. No new infrastructure or migration is required. Reverting only the hybrid-read optimization is sufficient for its rollback; preserve the current developer gate, staff authorization, durable image readers and other later application contracts. A pre-gate application is not a compatible rollback.
 
 Reads touch `private.developer_access_requests`, `private.developer_preview_feedback`, `private.preview_admin_members`, and `private.preview_admin_audit`. Risk is moderate because access decisions must remain fresh. Admin reads retain a staff membership share lock for the duration of one statement; writes retain transaction-scoped authorization locks and atomic audit records. Read timeouts use the existing pool's six-second ceiling.
 
@@ -49,7 +51,7 @@ The production build, targeted lint, 14 preview/sync tests, six admin authorizat
 
 This change requires a site deployment only. No new migration, owner setup, API gateway deployment, or environment variable is needed. Browser code and API list responses must be deployed together because the new browser consumes the actor from the list response. Previously loaded browsers continue to work with the additive response fields.
 
-Status at verification: implemented and tested locally; not deployed.
+September 12 verification was local-only at the time recorded above. The later September 13 site deployment contains the sync source; see [current state](../../post-mortem/CURRENT_STATE.md). The image recovery acceptance did not retest all staff workflows or establish production egress savings. Preserve the original local measurements as dated fixture evidence.
 
 ## References
 

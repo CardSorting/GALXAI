@@ -1,7 +1,7 @@
 # Deployment boundaries
 
 <!-- docs-scope: current-guide -->
-> Private release guide. Use [the runbook](RELAY_VNEXT_RUNBOOK.md) for controller operations and [the dated verification matrix](maintainers/RELAY_SESSION_VERIFICATION_20260909.md#component-deployment-boundary) for observed rollout.
+> Private release guide. Use [current state](../post-mortem/CURRENT_STATE.md) for latest recorded component evidence and [the runbook](RELAY_VNEXT_RUNBOOK.md) for controller operations. Earlier matrices remain dated history.
 
 | Component | Deployment action |
 | --- | --- |
@@ -17,7 +17,15 @@ Preserve rollback configuration, private state and accepted-operation evidence. 
 
 The shared-to-federation cutover occurred September 7. For any remaining legacy host, drain and stop shared ownership before federation assignment; `docker-compose.relay.yml` is not a federation launcher. Multi-host ownership needs a shared lease beyond the current single-host implementation.
 
-Run appropriate [hardening checks](maintainers/RELAY_HARDENING.md), production build, public-response tests and rendered/browser-asset scans. Separate canary cleanup from production workspaces. Validate actual downstream behavior for changed transport; paid entry and entitlement remain separate acceptance.
+Run `npm run docs:check`, appropriate [hardening checks](maintainers/RELAY_HARDENING.md), production build, public-response tests and rendered/browser-asset scans. Separate canary cleanup from production workspaces. Validate actual downstream behavior for changed transport; paid entry and entitlement remain separate acceptance.
+
+## Image and access release boundaries
+
+The image request migration must be applied before the application relies on durable async receipts. Configure Auth, database, server-only storage and reachable generation dependencies in the target environment; local credentials and a Ready deployment do not verify those dependencies. Follow [application configuration](VERCEL_DEPLOYMENT.md) and [image acceptance](../post-mortem/runbooks/image-generation.md).
+
+Preserve owner-scoped receipts and committed artifacts through rollback. The populated image table is intentionally protected from destructive rollback. Keep developer-preview checks enforced at both the application and gateway; a pre-gate successful release is not a safe rollback. Staff authority remains independent. Record recovery in [the incident system](../post-mortem/README.md).
+
+For storage pressure, use [bounded deployment cleanup](../post-mortem/runbooks/deployment-storage.md). Preserve aliases and a compatible rollback; verify storage-accounting totals separately from removed-deployment counts.
 
 ## Sites strategy rollout
 

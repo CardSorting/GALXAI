@@ -59,15 +59,15 @@ Controller admission receipts are process-local: ten minutes, 1,000 keys, 32 MiB
 
 See [request recovery](RELAY_API_REFERENCE.md#request-recovery) and [ADR 0130](adr/0130-image-receipts-and-uncertain-outcomes.md).
 
-## Sites content with opaque provider quotas
+## Sites content and durable recovery
 
-[ADRs 0134–0136](adr/README.md) define the bounded content workflow. The application quotes a fixed customer price, reserves funds and enforces an account cohort and rolling allowance. Supplier quota/cost estimates are planning assumptions; missing token usage is not fabricated. A matching durable completion receipt permits the fixed charge, while uncertain completion retains the hold.
+Current application Sites work uses eligible paid-plan inclusion and shared fair admission under [ADR 0140](adr/0140-paid-sites-and-shared-fair-usage.md). The application does not quote or debit new per-generation wallet charges. The local execution profile verifies byte, wall-time, attempt and receipt readiness across eligible workers and again at dispatch; it does not invent supplier quota or token-usage evidence.
 
-The new local profile verifies byte, wall-time, attempt and receipt readiness through fresh administrator checks across eligible workers and again at dispatch. It omits the unsupported supplier output-ceiling field. General capability, health and capacity controls remain in force. The legacy metered profile keeps its own ceiling/usage requirements.
+Durable text receipts are separate from the process-local admission cache. A receipt can be read after replacement of its original worker using that shard's retained volume and the original tenant-bound signed reference. Streams and cancellation stay on the admitting generation. Missing references, expired signatures or lost volumes do not authorize replay or release uncertain occupancy. [Sites operations](maintainers/SITES_OPERATIONS.md) and [fair usage](maintainers/SITES_FAIR_USAGE.md) own current admission, retention, rollout and recovery.
 
-Durable text receipts are separate from the process-local admission cache. A receipt can be read after replacement of its original worker using that shard's retained volume and the original tenant-bound signed reference. Streams and cancellation stay on the admitting generation. Missing references, expired signatures or lost volumes do not authorize replay or refunds. Current limits, retention behavior, rollout and pause procedures are in [Sites operations](maintainers/SITES_OPERATIONS.md).
+Earlier fixed/metered operations retain their accepted tariff, hold and settlement semantics. Confirmed durable completion can settle an original fixed charge without fabricating token usage; uncertain completion retains the hold. Those contracts do not apply to new included work. The legacy metered profile retains its own ceiling/usage requirements.
 
-The customer-local companion validates text, renders/packages a fixed template and uses the customer's own Sites connection. Save and owner-private publication each need their own persisted acknowledgement. Fixed content activation does not establish direct CLI archive-upload support or turn the relay into a native Codex building provider.
+The public browser workspace owns private drafts and versioned managed publication. The optional native companion remains a distinct workflow; neither application admission nor a relay receipt proves native-host publication, direct CLI upload support or a completed customer billing interaction. See [workspace operations](maintainers/SITES_WORKSPACE.md).
 
 ## Operational visibility
 

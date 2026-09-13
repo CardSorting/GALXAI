@@ -17,7 +17,9 @@ Reconcile affected guides and ADR bodies in full when strategy changes. Update s
 
 Record topic-specific precedence: ADRs 0123–0125 govern database health, 0126 federation ownership/capability, 0127 the explicit image alias, 0129 public boundaries, 0130 uncertain image outcomes, 0131 operator access/holds, 0132 credential handoff 0133 enrollment/test isolation, 0134 fixed-price Sites admission, 0135 durable text receipt recovery and 0136 customer-owned Sites delivery. Unrelated subsystem decisions retain their scope.
 
-Every documentation Markdown file has one scope marker and a complete catalog entry. ADR IDs are contiguous and indexed. Acceptance, implementation, local verification, image build, process rollout and actual-client verification are distinct states. Avoid undated counts and blanket deployed/not-deployed statements spanning different components.
+Every Markdown file under `docs/` and `post-mortem/` has one scope marker. The generated docs catalog and authored-workspace inventory preserve complete discovery. ADR IDs are contiguous and indexed. Acceptance, implementation, local verification, image build, process rollout and actual-client verification are distinct states. Avoid undated counts and blanket deployed/not-deployed statements spanning different components.
+
+[ADR 0144](0144-durable-images-and-incident-documentation.md) extends this policy with a single private incident directory, current-state record, append-only journal, follow-up criteria and source-bound review. [Documentation policy](../DOCUMENTATION_POLICY.md) is the maintained procedure; root handover/context files reference current state rather than duplicating it. Historical fixed-price Sites records do not override later public workspace and paid-plan decisions.
 
 ## Alternatives and consequences
 
@@ -25,6 +27,6 @@ Deleting history would lose rationale; leaving old procedures active would creat
 
 ## Validation
 
-Run `python3 scripts/verify-docs.py`, semantic searches for retired guidance and `git diff --check`. Review command existence and linked source. The validator checks coverage/navigation, not every runtime claim. Public response/auth tests, production build and scoped rendered-page/browser-asset scans establish the relevant public boundary; none proves live deployment of every origin.
+Run `npm run docs:sync`, `npm run docs:check`, semantic searches for retired guidance and `git diff --check`. Review command existence and linked source. The validators check coverage/navigation, incident lifecycle and monitored source drift, not every runtime claim. Explicit semantic review precedes a fingerprint refresh. Public response/auth tests, production build and scoped rendered-page/browser-asset scans establish the relevant public boundary; none proves live deployment of every origin.
 
 Documentation publication alone changes no registry authority, worker ownership, account login, paid entitlement or production service.

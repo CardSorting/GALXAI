@@ -1,0 +1,11 @@
+{
+  "id": "EVT-YYYYMMDD-unique-suffix",
+  "incident": "INC-YYYYMMDD-CATEGORY",
+  "observed_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "kind": "observation",
+  "observation": "What was directly observed; label hypotheses explicitly.",
+  "action": "The exact bounded action, or none.",
+  "result": "Observed outcome, including uncertainty.",
+  "next_step": "Next decision or verification.",
+  "evidence": ["post-mortem/incidents/YYYY/YYYY-MM-DD-short-name/README.md"]
+}

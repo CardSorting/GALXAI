@@ -1,12 +1,11 @@
-# Recovery and postmortems
+# Recovery and post-mortem records
 
 <!-- docs-scope: current-guide -->
-> **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
 
-Recover under the authority that owns the failed state. Preserve controller signing material and worker checkpoint volumes, but do not treat either as a durable exactly-once execution log.
+Use [post-mortem](../../post-mortem/README.md) as the single incident system. [Triage](../../post-mortem/runbooks/triage.md) owns containment and recovery; [documentation workflow](../../post-mortem/runbooks/documentation.md) owns the rolling log, follow-ups and source-bound review.
 
-For topology rollback, pause admissions, drain and stop the active workers, confirm credentials are no longer in use, and restore the saved image/ingress. Never run legacy and vNext workers for the same shard simultaneously. Verify the actual client after restoration.
+Recover under the component's actual authority. Preserve controller signing state, worker checkpoints, database/financial history and accepted-operation records. These stores do not jointly guarantee exactly-once execution. Reconcile an uncertain original side effect before admitting another.
 
-Record impact by model, timeline, revisions, execution uncertainty, root cause, recovery evidence, and a bounded regression that would detect recurrence. Database restoration, application assets, and financial settlement require their own runbooks.
+Follow [release rollback](../maintainers/RELEASE_ENGINEERING_AND_VERSIONING.md) and [database operations](../maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md), rather than blindly restoring a previous build or dropping the latest migration. Require actual affected-client acceptance after restoration.
 
-Use the [current contract](../FEDERATION_STRATEGY.md), [operator runbook](../RELAY_VNEXT_RUNBOOK.md), [request recovery table](../RELAY_API_REFERENCE.md#request-recovery), and [maintainer execution guide](../maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md).
+Every record includes impact, dated observations, cause/evidence, containment, recovery, verification limits and concrete prevention actions. A `recovered` incident can still have open work; `closed` requires completed or explicitly accepted follow-ups. Historical incidents remain preserved in [the incident index](../../post-mortem/INCIDENTS.md).

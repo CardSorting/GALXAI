@@ -19,11 +19,17 @@ Product clients use `https://galx.ai/v1`. The server adapter chooses the explici
 
 The public image capability is `openai-gpt-image-latest`. Its internal compatibility semantics are [documented privately](FEDERATION_STRATEGY.md#explicit-codex-image-tool-compatibility); public aliases cannot promise unverified model identity.
 
+## Product identity and durable images
+
+Account-facing routes verify the session and owned resource. Developer inference access additionally follows the private preview policy; staff administration requires its separate server-side authority. Images and Sites remain public products subject to their own account and entitlement contracts.
+
+Application async image requests commit an owner-scoped durable receipt before acknowledgement and claim a single dispatch. Unknown outcomes retain original identity; a timeout is not permission to synthesize again. Completion depends on owned stored artifacts. History and Favorites acknowledge durable persistence, and public image responses follow the sanitized artifact/DTO boundary. See [ADR 0144](adr/0144-durable-images-and-incident-documentation.md) and [image recovery](../post-mortem/runbooks/image-generation.md).
+
 ## Sites content and delivery
 
-The account-session endpoint `/api/sites/content` is separate from `/v1` inference credentials. Its server adapter owns quote validation, fixed-price reservations, a rolling account allowance and atomic settlement against durable relay completion. Missing supplier usage can coexist with a known fixed-price completion; missing completion evidence remains unresolved.
+The account-session workspace and `/api/sites/content` use included generation for eligible paid plans with shared fair usage. New work does not quote or debit per-generation wallet charges. Private drafts, conversation state, versioned publication snapshots and managed hosting preserve account ownership. Publication and addresses have their own durable recovery paths.
 
-A private customer-local companion validates generated text, builds a fixed static artifact and saves/publishes under the customer's Sites ownership. It receives no relay or database credentials. Native-host upload, source/version identity and owner-private publication are separate from content billing. [ADRs 0134–0136](adr/README.md) and [Sites operations](maintainers/SITES_OPERATIONS.md) define this added path.
+Original fixed/metered operations retain their historical receipt and settlement contract; they are not the entry point for new work. The optional native companion remains a separate workflow. [Sites operations](maintainers/SITES_OPERATIONS.md), [workspace](maintainers/SITES_WORKSPACE.md) and [fair usage](maintainers/SITES_FAIR_USAGE.md) own current procedures; ADRs 0139–0143 describe the later product decisions.
 
 ## Reconciliation and recovery
 

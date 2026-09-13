@@ -13,7 +13,15 @@ Parent agents assign one key per logical operation and preserve the same payload
 
 Admission receipts provide bounded process-local acknowledgement recovery. A controller restart or expired admission receipt can remove deduplication evidence. Separately, opted-in Sites text jobs persist completion receipts on the original worker volume. Their signed receipt references can reach a replacement worker on that retained volume, while stream/status/cancel URLs retain generation binding. This does not create a distributed queue or permit another execution after uncertainty. See [ADR 0135](adr/0135-durable-sites-receipts-and-local-admission.md) and the [recovery table](RELAY_API_REFERENCE.md#request-recovery).
 
-Fixed-price Sites admission also requires fresh local-profile readiness and an account wallet reservation. Its rolling account allowance is serialized in PostgreSQL; it is independent of federation capacity reservations. Queue time is included in the worker's local wall-time bound. See [Sites operations](maintainers/SITES_OPERATIONS.md).
+Current Sites admission follows eligible paid-plan inclusion and shared fair usage. Historical fixed/metered receipts retain their original contract and reconciliation; wallet reservation is not the requirement for every new Sites operation. Account admission is independent of federation execution capacity. Queue time is included in the worker's local wall-time bound. See [Sites operations](maintainers/SITES_OPERATIONS.md).
+
+## Application image requests
+
+Public async images use [durable PostgreSQL receipts](../src/lib/images/request-repository.ts), not the generic process-local task table. The application commits before 202, scopes reads and transitions to the verified owner, fingerprints idempotency keys and claims dispatch atomically. Completion requires all owned image assets to be durably cataloged.
+
+[The service](../src/lib/images/request-service.ts) tracks bounded work with Next.js `after`. Status reads can schedule an unclaimed queued request; claimed attempts are never leased for redispatch. Timeout/failed status is not proof of no side effect. A late authoritative completion can be recorded. Cancellation only succeeds before dispatch; keep original identity and check the library before another submission.
+
+The application's receipt persistence does not make upstream execution exactly once or transfer its guarantee to generic queues, relay jobs or SDK retries. Follow [image recovery](../post-mortem/runbooks/image-generation.md) and [ADR 0144](adr/0144-durable-images-and-incident-documentation.md).
 
 ## Throughput isolation
 

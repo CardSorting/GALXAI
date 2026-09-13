@@ -1,0 +1,322 @@
+{
+  "observed_at": "2026-09-13T04:40:33Z",
+  "status": "reviewed-local",
+  "base_revision": "022a37638ac01f1b021c93ca0e48ea7a1f20c7d7",
+  "reviewer": "Codex maintainer review",
+  "scope": "Canonical-guide/source-contract alignment for all eight domains, supported by listed checks. The broader fingerprint inventory detects changes and does not assert exhaustive semantic or security review of every module or historical reference.",
+  "environment": "Local macOS workspace with Node 26; isolated PostgreSQL 17/pgvector fixtures. Hosted knowledge job uses Python 3.12; application CI and Docker target Node 22.",
+  "domains": {
+    "knowledge": {
+      "scope": "Review automation, private boundaries and full authoring/CI procedures.",
+      "canonical_guides": [
+        "docs/README.md",
+        "docs/AGENTS.md",
+        "docs/DOCUMENTATION_POLICY.md",
+        "docs/knowledge/README.md",
+        "docs/knowledge/DESIGN_RATIONALE.md",
+        "docs/tutorials/README.md",
+        "docs/tutorials/first-change.md",
+        "docs/how-to/README.md",
+        "docs/how-to/change-with-documentation.md",
+        "docs/runbooks/README.md",
+        "docs/runbooks/knowledge-maintenance.md",
+        "docs/runbooks/release-readiness.md",
+        "docs/reference/README.md",
+        "docs/reference/knowledge-commands.md",
+        "docs/explanations/README.md",
+        "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md",
+        "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md",
+        "docs/maintainers/SUBSYSTEM_MAINTAINER_MATRIX.md",
+        "docs/maintainers/DAY_1_TO_30_ONBOARDING_ROADMAP.md",
+        "docs/maintainers/MAINTAINER_ONBOARDING_ASSESSMENT.md",
+        "docs/knowledge/templates/adr.md",
+        "docs/knowledge/templates/runbook.md",
+        "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md",
+        "docs/runbooks/weekly-knowledge-audit.md"
+      ],
+      "inspected_source_contracts": [
+        "scripts/docs-kb.py",
+        "scripts/test-docs-kb.py",
+        "scripts/verify-docs.py",
+        "scripts/verify-post-mortem.py",
+        "scripts/test-post-mortem.py",
+        ".github/workflows/documentation.yml",
+        ".github/workflows/vercel-preflight.yml",
+        "docs/knowledge/registry.json"
+      ],
+      "changes_or_findings": "Require complete reviews with hashed evidence on every event; add owner/deadline summaries and activation runbook.",
+      "checks": [
+        {
+          "command": "npm run test:docs",
+          "result": "passed",
+          "detail": "20 incident and 15 knowledge tests; includes missing reviews, evidence tampering, stale/due reviews and committed journal rewrites."
+        }
+      ],
+      "limits": [
+        "No automatic attestation, production action or branch protection claim."
+      ]
+    },
+    "images": {
+      "scope": "Durable receipt ownership, acknowledgement ordering, single claim, ambiguous outcomes, cancellation, asset completion and rollback preservation.",
+      "canonical_guides": [
+        "docs/QUEUE_SPECIFICATION.md",
+        "docs/maintainers/image-public-boundary.md",
+        "post-mortem/runbooks/image-generation.md"
+      ],
+      "inspected_source_contracts": [
+        "src/lib/images/request-service.ts",
+        "src/lib/images/request-repository.ts",
+        "scripts/test-image-public-http.ts",
+        "scripts/test-image-requests-db.ts",
+        "supabase/migrations/20260913025900_durable_image_requests.sql",
+        "supabase/rollbacks/20260913025900_durable_image_requests.down.sql"
+      ],
+      "changes_or_findings": "Existing repairs match the reviewed image contracts; retain their separate deployed acceptance evidence.",
+      "checks": [
+        {
+          "command": "npm run test:image:security",
+          "result": "passed",
+          "detail": "23 tests."
+        },
+        {
+          "command": "node --import tsx scripts/run-supabase-integration.ts --images",
+          "result": "passed",
+          "detail": "37 isolated PostgreSQL checks."
+        }
+      ],
+      "limits": [
+        "Synthetic HTTP/database fixtures and prior dated frontend evidence; no new paid generation or load test."
+      ]
+    },
+    "access": {
+      "scope": "Public product allowlist, current approval and staff authority, last-owner locking, atomic audit, versioned reads and cache boundaries.",
+      "canonical_guides": [
+        "docs/operations/developer-preview.md",
+        "docs/operations/preview-admin.md",
+        "docs/operations/preview-activation.md",
+        "docs/operations/preview-hybrid-sync.md"
+      ],
+      "inspected_source_contracts": [
+        "src/lib/security/developer-access.ts",
+        "src/lib/security/preview-policy.ts",
+        "src/lib/security/preview-middleware.ts",
+        "src/lib/security/internal-access.ts",
+        "src/lib/supabase/repositories/DeveloperAccessRepository.ts",
+        "src/lib/supabase/repositories/PreviewAdminRepository.ts",
+        "src/lib/supabase/repositories/PreviewReadSync.ts"
+      ],
+      "changes_or_findings": "Correct hybrid-sync rollback to preserve approval gates and durable image readers.",
+      "checks": [
+        {
+          "command": "npm run test:developer-preview",
+          "result": "passed",
+          "detail": "14 tests."
+        },
+        {
+          "command": "npm run test:preview-admin",
+          "result": "passed",
+          "detail": "6 tests."
+        },
+        {
+          "command": "node --import tsx scripts/run-supabase-integration.ts --admin",
+          "result": "passed",
+          "detail": "Staff isolation, current grants, last-owner races, atomic audit, pagination, RLS and rollback."
+        },
+        {
+          "command": "node --import tsx scripts/run-supabase-integration.ts --preview",
+          "result": "passed",
+          "detail": "Persistence, idempotency, revocation, concurrent feedback, browser-role denial and version validation; 64 same-turn checks used one SQL roundtrip in the fixture."
+        }
+      ],
+      "limits": [
+        "No new access grants or administrator credential repair."
+      ]
+    },
+    "sites": {
+      "scope": "Paid-plan authority, bounded lookup, fair-usage admission, durable recovery identity, workspace claims and domain reconciliation.",
+      "canonical_guides": [
+        "docs/maintainers/SITES_OPERATIONS.md",
+        "docs/maintainers/SITES_FAIR_USAGE.md",
+        "docs/maintainers/SITES_WORKSPACE.md",
+        "docs/maintainers/SITES_DOMAINS.md"
+      ],
+      "inspected_source_contracts": [
+        "src/lib/sites/included-generation.ts",
+        "src/lib/sites/included-configuration.ts",
+        "src/lib/sites/paid-access.ts",
+        "src/lib/sites/workspace-route.ts",
+        "src/lib/sites/domain-worker.ts",
+        "workers/sites-domains/index.ts"
+      ],
+      "changes_or_findings": "Reconcile relay-facing Sites guidance with current included-plan policy and separate historical settlement paths.",
+      "checks": [
+        {
+          "command": "npm run test:sites:fair",
+          "result": "passed",
+          "detail": "7 tests."
+        },
+        {
+          "command": "npm run test:sites:workspace",
+          "result": "passed",
+          "detail": "13 tests."
+        },
+        {
+          "command": "npm run test:sites:conversation",
+          "result": "passed",
+          "detail": "15 tests."
+        },
+        {
+          "command": "node --import tsx scripts/run-supabase-integration.ts --fair",
+          "result": "passed",
+          "detail": "26 acceptance cases and 60 role denials."
+        },
+        {
+          "command": "node --import tsx scripts/run-supabase-integration.ts --workspace",
+          "result": "passed",
+          "detail": "86 isolated PostgreSQL checks."
+        }
+      ],
+      "limits": [
+        "No new checkout, publishing, custom-domain or inference acceptance; fixture results are not a scheduling fairness guarantee."
+      ]
+    },
+    "relay": {
+      "scope": "Canonical lifecycle, containment and telemetry guidance against launcher and capability/ownership regression contracts.",
+      "canonical_guides": [
+        "docs/ARCHITECTURE.md",
+        "docs/FEDERATION_STRATEGY.md",
+        "docs/RELAY_VNEXT_RUNBOOK.md",
+        "docs/TELEMETRY_AND_OBSERVABILITY.md",
+        "docs/maintainers/TELEMETRY_AND_METRICS_OBSERVABILITY.md",
+        "docs/maintainers/RELAY_TELEMETRY.md",
+        "docs/maintainers/RELAY_HARDENING.md",
+        "post-mortem/runbooks/controller-lock.md"
+      ],
+      "inspected_source_contracts": [
+        "scripts/run-relay-federation.ts",
+        "scripts/test-relay-capabilities.ts",
+        "scripts/test-desktop-login.py"
+      ],
+      "changes_or_findings": "Remove stale managed-Sites wallet-settlement instructions while retaining protocol and state authority.",
+      "checks": [
+        {
+          "command": "npm run test:relay:capabilities",
+          "result": "passed",
+          "detail": "152 tests."
+        },
+        {
+          "command": "npm run test:relay:desktop-login",
+          "result": "passed",
+          "detail": "3 tests."
+        }
+      ],
+      "limits": [
+        "Contract review and 152 tests are not an exhaustive module audit; no live controller mutation, alert or automatic lock reclamation."
+      ]
+    },
+    "database": {
+      "scope": "Authority, pooling and migration workflow guidance; all-pair static coverage and isolated authorization/concurrency fixtures.",
+      "canonical_guides": [
+        "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+        "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md"
+      ],
+      "inspected_source_contracts": [
+        "src/lib/db/postgres.ts",
+        "scripts/run-supabase-integration.ts",
+        "scripts/manage-migrations.ts",
+        "supabase/migrations/20260913025900_durable_image_requests.sql",
+        "supabase/rollbacks/20260913025900_durable_image_requests.down.sql"
+      ],
+      "changes_or_findings": "Replace inaccurate pool comment promising automatic fallback and zero loss with its actual bounded connection contract.",
+      "checks": [
+        {
+          "command": "npm run db:verify",
+          "result": "passed",
+          "detail": "103 migration/rollback pairs; zero violations and warnings."
+        },
+        {
+          "command": "npm run db:test",
+          "result": "passed",
+          "detail": "94 tests; 103 migrations applied to disposable fixture."
+        }
+      ],
+      "limits": [
+        "Historical SQL inventory is not line-by-line certification; no production database mutation."
+      ]
+    },
+    "delivery": {
+      "scope": "Build exclusions, CI triggers, Node versions, rollback guidance, domain scheduler and gateway public/private entrypoint contracts.",
+      "canonical_guides": [
+        "docs/DEPLOYMENT.md",
+        "docs/VERCEL_DEPLOYMENT.md",
+        "docs/runbooks/release-readiness.md",
+        "post-mortem/runbooks/deployment-storage.md"
+      ],
+      "inspected_source_contracts": [
+        "Dockerfile",
+        "vercel.json",
+        ".vercelignore",
+        ".dockerignore",
+        ".github/workflows/documentation.yml",
+        ".github/workflows/vercel-preflight.yml",
+        ".github/workflows/deploy-cloudflare.yml",
+        "workers/sites-domains/index.ts",
+        "workers/sites-domains/wrangler.jsonc",
+        "wrangler.toml",
+        "src/workers/cloudflare/GalxEdgeGateway.ts"
+      ],
+      "changes_or_findings": "Align Docker base with declared Node 22 runtime and correct guide verification scope.",
+      "checks": [
+        {
+          "command": "npm run build",
+          "result": "passed",
+          "detail": "Next.js 15.5.25; 277 generated pages."
+        }
+      ],
+      "limits": [
+        "Docker application image not rebuilt; local build does not prove live public cleanliness. Hosted CI recorded separately."
+      ]
+    },
+    "broccolidb": {
+      "scope": "Facade safety and hybrid read/version contracts against the canonical QA guide and regression suites.",
+      "canonical_guides": [
+        "docs/operations/preview-hybrid-sync.md",
+        "docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md"
+      ],
+      "inspected_source_contracts": [
+        "src/core/broccolidb/BroccoliCompactionSafety.ts",
+        "src/lib/supabase/repositories/PreviewReadSync.ts",
+        "scripts/test-broccolidb-compaction-api-route.ts",
+        "scripts/test-broccolidb-production-hardening.ts",
+        "scripts/test-preview-read-sync.ts"
+      ],
+      "changes_or_findings": "Fix API fixture that assumed a public endpoint; cover synthetic approved, unauthenticated and pending identities through real guards. Remove unsupported resilience and latency promises.",
+      "checks": [
+        {
+          "command": "npm run test:broccolidb:api",
+          "result": "passed",
+          "detail": "7 groups including approved, unauthenticated and pending preview identities."
+        },
+        {
+          "command": "npm run test:broccolidb:hardening",
+          "result": "passed",
+          "detail": "Hardening suite."
+        },
+        {
+          "command": "npm run test:egress:transport",
+          "result": "passed",
+          "detail": "13 tests."
+        }
+      ],
+      "limits": [
+        "Broad generated-module fingerprints detect change, not exhaustive compactor semantics. Logical fixture bytes/roundtrips are not billed production egress."
+      ]
+    }
+  },
+  "execution_notes": [
+    "Initial BroccoliDB route fixture failed 503 versus expected 200 because it assumed public access; corrected fixture and denial coverage passed.",
+    "Loopback/tsx IPC and Docker fixture operations initially encountered sandbox restrictions; authorized reruns passed.",
+    "Integration runners removed their disposable database fixtures. No production database mutation or new inference acceptance in this review.",
+    "Hosted execution and final local documentation/private-build checks are recorded separately; this evidence does not assert activation."
+  ]
+}

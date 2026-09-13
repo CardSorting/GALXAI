@@ -1,85 +1,30 @@
-# 🧪 Maintainer Guide: Compactor Fuzzing, Edge Cases & QA Matrix
+# BroccoliDB compaction and synchronization checks
 
-<!-- docs-scope: domain-reference -->
-> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+<!-- docs-scope: current-guide -->
 
-> **Target Audience**: Compactor Authors, QA Engineers, and Core Maintainers.  
-> **Goal**: Ensure 100% resilience against adversarial payloads, nested structures, zero-width attacks, and ReDoS vulnerabilities.
+Private maintainer guide. This review covers the canonical compaction facade, provenance checks and current preview synchronization contract. It does not certify every generated domain module, prove semantic equivalence or establish a latency/SLO guarantee.
 
----
+## Choose the boundary
 
-## 1. The 5 Compactor Fuzzing Vectors
+| Change | Source and checks | What success establishes |
+| --- | --- | --- |
+| Facade modes, validation or API contract | [Facade](../../src/core/broccolidb/BroccoliCompactionFacade.ts), `npm run test:broccolidb:api` | Supported dispatch, bounded inputs, response/error cases and private-preview authorization in fixtures |
+| Provenance and adversarial input | [Safety guard](../../src/core/broccolidb/BroccoliCompactionSafety.ts), `npm run test:broccolidb:hardening` | The tested high-risk evidence and fallback invariants; not complete semantic fidelity |
+| Preview read caching or batching | [Read coordinator](../../src/lib/supabase/repositories/PreviewReadSync.ts), [sync contract](../operations/preview-hybrid-sync.md), `npm run test:developer-preview` | Current authorization despite warm snapshots, pool/account isolation, eviction, bounded batches and failure handling |
+| Database read/write effects | `npm run test:developer-preview:db`, `npm run test:preview-admin:db`, `npm run db:test` | The tested SQL, transaction, role, concurrency and durability cases in disposable fixtures |
+| Image persistence | [Image recovery](../../post-mortem/runbooks/image-generation.md), `npm run test:image:db` | Receipt ownership, single dispatch and durable Favorites behavior in the fixture |
+| Transport and build isolation | `npm run test:egress:transport` | Physical request budgets and isolated build configuration for the tested paths |
 
-Every domain compactor and streaming pipeline must withstand the following adversarial inputs without throwing uncaught exceptions or suffering regex catastrophic backtracking:
+## Maintain meaningful fixtures
 
-```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          THE 5 COMPACTOR FUZZING VECTORS                    │
-├──────────────────────┬──────────────────────────────────────────────────────┤
-│ 1. ReDoS Attacks     │ Pathological strings designed to trigger exponential │
-│                      │ backtracking (e.g. 1000 repeating characters + mismatch)│
-│ 2. Unicode Anomalies │ Zero-width spaces, RTL overrides, emoji bursts       │
-│ 3. Deep Nesting      │ 500+ levels of unbalanced JSON/XML/AST brackets      │
-│ 4. Entity Tampering  │ Altered high-risk numbers to test fail-closed gates  │
-│ 5. Truncated Streams │ Incomplete chunks, severed TCP frames, missing EOF   │
-└──────────────────────┴──────────────────────────────────────────────────────┘
-```
+Derive size boundaries from the owning source constants and check both allowed and rejected inputs. Exercise missing fields, unsupported modes, malformed/truncated input, Unicode and adversarial numeric evidence when the changed path handles them. Test deterministic fallback and preservation of original content where required. A fixed runtime such as five milliseconds is not a portable correctness assertion.
 
----
+The compaction API is private preview. The facade API suite supplies synthetic verified identities and approval reads while retaining the real route guards. It tests unauthenticated and verified-but-unapproved denial. Do not restore anonymous access or use real credentials to make the suite pass. Public Images and Sites keep their separate product policy.
 
-## 2. Standard Compactor QA Verification Recipe
+BroccoliDB snapshots optimize response payloads; they do not authorize a caller, commit a mutation or replace durable PostgreSQL records. Re-check current grants before reusing payloads and preserve uncertainty on failed writes. Reuse the existing read coordinator and its bounded per-pool scheduling instead of adding another permission cache.
 
-When authoring or updating a compactor in `src/core/broccolidb/`:
+## Evidence and limits
 
-```typescript
-import { BroccoliCompactionFacade } from '../src/core/broccolidb/BroccoliCompactionFacade';
-import { BroccoliCompactionSafety } from '../src/core/broccolidb/BroccoliCompactionSafety';
+Run the relevant checks and record actual results, environment and source scope in the domain review. Benchmarks and generated-domain evaluations are separate research; inspect their runtime, network and cost prerequisites before running them. Do not infer production egress savings from serialized fixture row sizes or turn historical test totals into permanent requirements.
 
-describe('MyCompactor Adversarial Fuzzing', () => {
-  // 1. Test Empty & Oversized Payload Bounds
-  it('rejects payloads exceeding MAX_TEXT_LENGTH gracefully', () => {
-    const hugePayload = 'A'.repeat(3_000_000);
-    expect(() => BroccoliCompactionFacade.compactDomain(hugePayload)).toThrow(RangeError);
-  });
-
-  // 2. Test Pathological ReDoS Input (Must finish in < 5ms)
-  it('executes in < 5ms under pathological repeating patterns', () => {
-    const pathological = ('OBJECTION '.repeat(500) + '!').repeat(10);
-    const start = performance.now();
-    BroccoliCompactionFacade.compactDomain(pathological, 'Interrogatory');
-    const elapsed = performance.now() - start;
-    expect(elapsed).toBeLessThan(5.0);
-  });
-
-  // 3. Test Fail-Closed Safety Provenance Gate
-  it('fails closed when an extracted number is tampered', () => {
-    const check = BroccoliCompactionSafety.verify(
-      'Target total is $5,000.00',
-      'Target total is $9,999.00'
-    );
-    expect(check.status).toBe('fallback');
-    expect(check.unsupportedFacts).toContain('$9,999.00');
-  });
-});
-```
-
----
-
-## 3. Automated Regression Suites
-
-Run the complete regression and fuzzing harness across all 180 enterprise domains:
-
-```bash
-# 1. 180-Domain Master Test Suite
-npm run bench:180-domains
-
-# 2. Production Hardening & Safety Suite
-npm run test:broccolidb:hardening
-
-# 3. 19-Mode API Gateway Test Suite
-npm run test:broccolidb:api
-```
-
----
-
-*Fuzz aggressively. Prove invariants deterministically.* 🥦🧪🛡️
+The prior guide's universal resilience claim, fixed timing target and blanket benchmark recipe were removed during the September 13 domain review. Use [knowledge reviews](../knowledge/README.md) for current review state and dated evidence.

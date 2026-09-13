@@ -2,7 +2,7 @@
 
 # GALXAI
 
-GALX provides text and image generation APIs, model discovery, API keys, and usage controls.
+GALX helps you turn an early idea into a site you can revise, preview, and share at a public GALX address. Explore [Sites](https://galx.ai/sites), or create and save images in the [Image studio](https://galx.ai/images). Both are public products with their existing account and plan requirements. Other developer APIs are available through individual private-preview approval.
 
 Use `https://galx.ai/v1` as the API base URL. Authenticate with
 `Authorization: Bearer YOUR_GALX_API_KEY`.

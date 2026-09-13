@@ -81,7 +81,7 @@ Google Cloud. [Provisioned Throughput](https://docs.cloud.google.com/gemini-ente
 ## Internal evidence
 
 - Repository revision `4587642`, inspected September 10, 2026. File and line references are in [AUDIT.md](AUDIT.md). Source inspection proves the checked code paths, not deployment identity.
-- [September 9 egress and recovery audit](../../docs/internal/EGRESS_RECOVERY_AUDIT_2026-09-09.md). Dated operational evidence; earlier fixes and remaining reconciliation boundaries are not independently re-certified here.
+- [September 9 egress and recovery audit](../../post-mortem/incidents/2026/2026-09-09-egress/README.md). Dated operational evidence; earlier fixes and remaining reconciliation boundaries are not independently re-certified here.
 - [September 9 session verification](../../docs/maintainers/RELAY_SESSION_VERIFICATION_20260909.md). Dated component/deployment boundaries. Historical fleet counts are not used as current inventory.
 - [Diagnostic observations](audit-observations.json), [probe source](audit-probes.mjs), and [asset scan](asset-scan.json). Synthetic local evidence; see [VERIFICATION.md](VERIFICATION.md).
 - Stripe Directory searches for AI inference/provider capabilities returned Hugging Face among the candidates. The CLI reported unauthenticated, non-account-scoped results. Directory descriptions were discovery leads only; official documentation supports the comparison. No purchase, terms acceptance, external message or account provisioning occurred.

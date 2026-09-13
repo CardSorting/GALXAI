@@ -1,0 +1,327 @@
+{
+  "checkedAt": "2026-09-13T02:25:33.338Z",
+  "teamId": "team_mlJF16byaaURWNNfkpk72mVy",
+  "project": {
+    "id": "prj_NmtiUenK2cf924eREKuCgiDS0uC4",
+    "name": "galxai",
+    "deploymentExpiration": {
+      "expirationDays": 7,
+      "expirationDaysProduction": 1,
+      "expirationDaysCanceled": 1,
+      "expirationDaysErrored": 1,
+      "deploymentsToKeep": 10
+    },
+    "resourceConfig": {
+      "fluid": true,
+      "functionDefaultRegions": [
+        "iad1"
+      ],
+      "buildMachineType": "basic",
+      "buildMachineSelection": "fixed"
+    },
+    "targets": {
+      "production": {
+        "id": "dpl_DqEAMRCsAG6zxbPAcjeFcPeL6APP",
+        "url": "galxai-h1t85w9no-cardsortings-projects.vercel.app",
+        "createdAt": 1789265433403,
+        "readyState": "READY",
+        "target": "production",
+        "alias": [
+          "galx.ai",
+          "galxai.vercel.app",
+          "www.galx.ai",
+          "galxai-cardsortings-projects.vercel.app",
+          "galxai-git-main-cardsortings-projects.vercel.app"
+        ],
+        "gitSha": "022a37638ac01f1b021c93ca0e48ea7a1f20c7d7"
+      },
+      "preview": {
+        "id": "dpl_78yjBA8CzpTkYTmnKBaw2tJAXPWh",
+        "url": "galxai-kbiowafti-cardsortings-projects.vercel.app",
+        "createdAt": 1788826110315,
+        "readyState": "ERROR",
+        "target": null,
+        "alias": [
+          "galxai-git-snapshots-last-known-wo-48f6ea-cardsortings-projects.vercel.app"
+        ],
+        "gitSha": "6105c7b36d68730fa57acba839f06169283d719b"
+      }
+    },
+    "latestDeployments": [
+      {
+        "id": "dpl_DqEAMRCsAG6zxbPAcjeFcPeL6APP",
+        "url": "galxai-h1t85w9no-cardsortings-projects.vercel.app",
+        "createdAt": 1789265433403,
+        "readyState": "READY",
+        "target": "production",
+        "alias": [
+          "galx.ai",
+          "galxai.vercel.app",
+          "www.galx.ai",
+          "galxai-cardsortings-projects.vercel.app",
+          "galxai-git-main-cardsortings-projects.vercel.app"
+        ],
+        "gitSha": "022a37638ac01f1b021c93ca0e48ea7a1f20c7d7"
+      },
+      {
+        "id": "dpl_GtQSfMmnBpm46CU7KseWuUpxTg1J",
+        "url": "galxai-cky2qb9l2-cardsortings-projects.vercel.app",
+        "createdAt": 1789259893859,
+        "readyState": "READY",
+        "target": "production",
+        "alias": [
+          "galx.ai",
+          "galxai.vercel.app",
+          "www.galx.ai",
+          "galxai-cardsortings-projects.vercel.app",
+          "galxai-git-main-cardsortings-projects.vercel.app"
+        ],
+        "gitSha": "abdca805a1fb5fb8fcbb145476e6b0220205b005"
+      }
+    ]
+  },
+  "deployments": [
+    {
+      "id": "dpl_DqEAMRCsAG6zxbPAcjeFcPeL6APP",
+      "url": "galxai-h1t85w9no-cardsortings-projects.vercel.app",
+      "created": 1789265433403,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "022a37638ac01f1b021c93ca0e48ea7a1f20c7d7",
+      "gitBranch": "main",
+      "source": "git"
+    },
+    {
+      "id": "dpl_GtQSfMmnBpm46CU7KseWuUpxTg1J",
+      "url": "galxai-cky2qb9l2-cardsortings-projects.vercel.app",
+      "created": 1789259893859,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "abdca805a1fb5fb8fcbb145476e6b0220205b005",
+      "gitBranch": "main",
+      "source": "git"
+    },
+    {
+      "id": "dpl_5uNDZdz5PicwEf4a6PNzaJPNBcAu",
+      "url": "galxai-95i1gh4wy-cardsortings-projects.vercel.app",
+      "created": 1789258340044,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "e6f4aed527024d6fc8c1c70f2185faace6731036",
+      "gitBranch": "main",
+      "source": "git"
+    },
+    {
+      "id": "dpl_9b3yHoVb6CFR2VSMSrZo7dsajWCB",
+      "url": "galxai-aujwi84uq-cardsortings-projects.vercel.app",
+      "created": 1789257370031,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "a71148f86efd53ca6fd33a79e237bcc9d631ca7f",
+      "gitBranch": "main",
+      "source": "cli"
+    },
+    {
+      "id": "dpl_GCc9Myu37eySFVLBR4wn3Yd6MED6",
+      "url": "galxai-p5vlygzad-cardsortings-projects.vercel.app",
+      "created": 1789255864986,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "a71148f86efd53ca6fd33a79e237bcc9d631ca7f",
+      "gitBranch": "main",
+      "source": "git"
+    },
+    {
+      "id": "dpl_HCagLG9v1KmEEGkxSF4ev8ZAnLJD",
+      "url": "galxai-8fo2lo59t-cardsortings-projects.vercel.app",
+      "created": 1789254395744,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "1cfe2e4abb4ea9b2876803bba8afbcada8848210",
+      "gitBranch": "main",
+      "source": "cli"
+    },
+    {
+      "id": "dpl_E6Kc6bqUZ1a5u2i4ZW1Vuv14HzEg",
+      "url": "galxai-qozmg9r3o-cardsortings-projects.vercel.app",
+      "created": 1789198966282,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "1cfe2e4abb4ea9b2876803bba8afbcada8848210",
+      "gitBranch": "main",
+      "source": "git"
+    },
+    {
+      "id": "dpl_81ECoDrppFz1LMuZphFyHdCG53jr",
+      "url": "galxai-lq7a316wr-cardsortings-projects.vercel.app",
+      "created": 1789196495968,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "e0cb857ad6c45c14d2794f45e6e44009701d8d45",
+      "gitBranch": "main",
+      "source": "git"
+    },
+    {
+      "id": "dpl_EcPt3qMR1ZH1pEACDhz7LmRKQVch",
+      "url": "galxai-jv7lgfblr-cardsortings-projects.vercel.app",
+      "created": 1789195800146,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "8284ad0bc610f0bdb56a45ca3913629499285df0",
+      "gitBranch": "main",
+      "source": "git"
+    },
+    {
+      "id": "dpl_HF2Q1NFGNyxLnPt3ZyBVj5fzxpU4",
+      "url": "galxai-l2r5x486a-cardsortings-projects.vercel.app",
+      "created": 1789188566477,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "c21a4b72cf51bad41306a5cf19203dc0bdfdbede",
+      "gitBranch": "main",
+      "source": "git"
+    },
+    {
+      "id": "dpl_3jWmR1bXyfLaxjUrrACZqFntvYTF",
+      "url": "galxai-pp2tx8rb6-cardsortings-projects.vercel.app",
+      "created": 1789188082719,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "8d8235151b12d7144a48ecc07b398f230e7fe73e",
+      "gitBranch": "main",
+      "source": "git"
+    },
+    {
+      "id": "dpl_8w5LqxBqfizJ7quz7F9GoKNuNKyR",
+      "url": "galxai-o6d914m26-cardsortings-projects.vercel.app",
+      "created": 1789187515162,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "8f721436c448382be4dfeb73ef2e9a308c9a77cd",
+      "gitBranch": "main",
+      "source": "git"
+    },
+    {
+      "id": "dpl_8kQyL8zyk6JNma6YbskhGLztDtey",
+      "url": "galxai-chc378owr-cardsortings-projects.vercel.app",
+      "created": 1789184746060,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "28879b3a0877bee461027ff84d7a013c73351539",
+      "gitBranch": "main",
+      "source": "git"
+    },
+    {
+      "id": "dpl_5f31CF7BMQbqTZDcVsseLm9ZUVNc",
+      "url": "galxai-cbrb03ful-cardsortings-projects.vercel.app",
+      "created": 1789184190147,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "9986ab2301d15bc00ebcea7e05c5d70808cdcaf4",
+      "gitBranch": "main",
+      "source": "cli"
+    },
+    {
+      "id": "dpl_Hudt29xgXaG8vTLjTYff3mj9qgnU",
+      "url": "galxai-pttbwdmde-cardsortings-projects.vercel.app",
+      "created": 1789184184118,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "9986ab2301d15bc00ebcea7e05c5d70808cdcaf4",
+      "gitBranch": "main",
+      "source": "git"
+    },
+    {
+      "id": "dpl_2SMGNDes3EqCYmmLg8vACTqfgqk1",
+      "url": "galxai-l1fgejf8q-cardsortings-projects.vercel.app",
+      "created": 1789181755118,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "446bd5d440810092818799fffa2e20972829055b",
+      "gitBranch": "main",
+      "source": "git"
+    },
+    {
+      "id": "dpl_2Mh1KYwBUAn595bFzxeqrvoYhEiP",
+      "url": "galxai-egwfhf2gj-cardsortings-projects.vercel.app",
+      "created": 1789176873210,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "2b72afd53caf354f947f2adc8bd8e544d54fb25e",
+      "gitBranch": "main",
+      "source": "cli"
+    },
+    {
+      "id": "dpl_B9fdiDRP7ZYJues6D3DrEZNP6VRF",
+      "url": "galxai-3z031smh6-cardsortings-projects.vercel.app",
+      "created": 1789176591923,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "2b72afd53caf354f947f2adc8bd8e544d54fb25e",
+      "gitBranch": "main",
+      "source": "cli"
+    },
+    {
+      "id": "dpl_5YZSgT9qc76M2fw9Kfqq1gaGbhpJ",
+      "url": "galxai-f2moed1rw-cardsortings-projects.vercel.app",
+      "created": 1789175776063,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "2b72afd53caf354f947f2adc8bd8e544d54fb25e",
+      "gitBranch": "main",
+      "source": "git"
+    },
+    {
+      "id": "dpl_6PUQNnBnHLV7SvUex3BsrLVNjg7X",
+      "url": "galxai-3d6w2hhhm-cardsortings-projects.vercel.app",
+      "created": 1789175353527,
+      "state": "READY",
+      "target": "production",
+      "gitSha": "04aad76042df09a18368072494a546cc158585d2",
+      "gitBranch": "main",
+      "source": "cli"
+    },
+    {
+      "id": "dpl_78yjBA8CzpTkYTmnKBaw2tJAXPWh",
+      "url": "galxai-kbiowafti-cardsortings-projects.vercel.app",
+      "created": 1788826110315,
+      "state": "ERROR",
+      "target": null,
+      "gitSha": "6105c7b36d68730fa57acba839f06169283d719b",
+      "gitBranch": "snapshots/last-known-working-20260908T000749Z",
+      "source": "git"
+    }
+  ],
+  "aliases": [
+    {
+      "alias": "galxai-git-snapshots-last-known-wo-48f6ea-cardsortings-projects.vercel.app",
+      "deploymentId": "dpl_78yjBA8CzpTkYTmnKBaw2tJAXPWh",
+      "projectId": "prj_NmtiUenK2cf924eREKuCgiDS0uC4"
+    },
+    {
+      "alias": "www.galx.ai",
+      "deploymentId": "dpl_DqEAMRCsAG6zxbPAcjeFcPeL6APP",
+      "projectId": "prj_NmtiUenK2cf924eREKuCgiDS0uC4"
+    },
+    {
+      "alias": "galx.ai",
+      "deploymentId": "dpl_DqEAMRCsAG6zxbPAcjeFcPeL6APP",
+      "projectId": "prj_NmtiUenK2cf924eREKuCgiDS0uC4"
+    },
+    {
+      "alias": "galxai.vercel.app",
+      "deploymentId": "dpl_DqEAMRCsAG6zxbPAcjeFcPeL6APP",
+      "projectId": "prj_NmtiUenK2cf924eREKuCgiDS0uC4"
+    },
+    {
+      "alias": "galxai-git-main-cardsortings-projects.vercel.app",
+      "deploymentId": "dpl_DqEAMRCsAG6zxbPAcjeFcPeL6APP",
+      "projectId": "prj_NmtiUenK2cf924eREKuCgiDS0uC4"
+    },
+    {
+      "alias": "galxai-cardsortings-projects.vercel.app",
+      "deploymentId": "dpl_DqEAMRCsAG6zxbPAcjeFcPeL6APP",
+      "projectId": "prj_NmtiUenK2cf924eREKuCgiDS0uC4"
+    }
+  ]
+}

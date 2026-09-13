@@ -15,7 +15,8 @@
 /src/core/router/ @CardSorting/router-sre-maintainers
 
 # Edge Worker & Cloudflare Mesh
-/cloudflare-edge/ @CardSorting/edge-sre-maintainers
+/src/workers/cloudflare/ @CardSorting/edge-sre-maintainers
+/workers/ @CardSorting/edge-sre-maintainers
 /src/app/api/ @CardSorting/api-gateway-maintainers
 /src/app/v1/ @CardSorting/api-gateway-maintainers
 

@@ -1,0 +1,19 @@
+{
+  "verifiedAt": "2026-09-13T02:29:25.877380+00:00",
+  "beforeCount": 21,
+  "afterCount": 3,
+  "removedCount": 18,
+  "cumulativeRemovedCount": 133,
+  "allPlannedRemovalsAbsent": true,
+  "allRetainedDeploymentsPresent": true,
+  "aliasesUnchanged": true,
+  "projectTargetsUnchanged": true,
+  "retentionUnchanged": true,
+  "resourceConfigUnchanged": true,
+  "httpAvailabilityChecks": {
+    "https://galx.ai/": 200,
+    "https://galx.ai/sites": 200,
+    "https://galx.ai/images": 200
+  },
+  "quotaBelowLimitVerified": false
+}

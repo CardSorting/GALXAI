@@ -1,5 +1,7 @@
 # Developer private preview
 
+<!-- docs-scope: current-guide -->
+
 Images and Sites remain public products with their existing authentication and billing requirements.
 Other API routes and developer pages require an individually approved account. Signup, payment, a pre-existing key, account metadata, and a pending request do not grant preview access.
 

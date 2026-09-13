@@ -1,7 +1,7 @@
 # System topology and maintainer onboarding
 
 <!-- docs-scope: current-guide -->
-> Private onboarding. Begin with [architecture](ARCHITECTURE.md), [the contract](FEDERATION_STRATEGY.md) and [current handover](../HANDOVER.md).
+> Private onboarding. Begin with [architecture](ARCHITECTURE.md), [the contract](FEDERATION_STRATEGY.md), [current state](../post-mortem/CURRENT_STATE.md) and [incident operations](../post-mortem/README.md).
 
 Follow a request from product authentication and entitlement through the server adapter, model-specific controller admission, assigned worker and signed recovery URLs. Product responses expose only allowed customer fields. Internal topology and execution evidence remain private.
 

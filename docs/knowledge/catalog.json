@@ -1,0 +1,3684 @@
+{
+  "version": 1,
+  "documents": [
+    {
+      "path": "docs/AGENTS.md",
+      "title": "Knowledge maintenance instructions",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/API_BASE_URL.md",
+      "title": "GALXAI",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/API_REFERENCE.md",
+      "title": "GALXAI",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "title": "GALX architecture",
+      "scope": "current-guide",
+      "kind": "explanation",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "architecture",
+        "authority"
+      ],
+      "decision": null
+    },
+    {
+      "path": "docs/BENCHMARKS.md",
+      "title": "📊 GALXAI Performance Benchmarks & Stress Analysis",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/BROCCOLIDB_COMPACTION_ONBOARDING_GUIDE.md",
+      "title": "🥦 BroccoliDB Compaction Engine: Engineer Onboarding & Architecture Guide",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/BROCCOLIDB_DEDUPLICATION_ENGINE_SPECIFICATION.md",
+      "title": "BroccoliDB Algorithmic DeDuplication & High-Velocity Compaction Engine Specification",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/CATALOG.md",
+      "title": "Complete documentation catalog",
+      "scope": "current-guide",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/CLOUDFLARE_STRATEGY.md",
+      "title": "Cloudflare implementation and deployment boundaries",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/DEPLOYMENT.md",
+      "title": "Deployment boundaries",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "delivery"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/DEVELOPER_CLIENT_SDK.md",
+      "title": "🌌 GALXAI Universal Developer Client SDK",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/DEVELOPER_GATEWAY_KEY_ARCHITECTURE.md",
+      "title": "GALXAI Developer Gateway Key Architecture & Zero-Egress Substrate",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/DEVELOPER_GUIDE.md",
+      "title": "Developer and contributor guide",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/DOCUMENTATION_POLICY.md",
+      "title": "Documentation authority and maintenance",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/ENTERPRISE_PRIVATE_AI_COPY.md",
+      "title": "GALXAI: Private & Secure AI Workflows for Frontier GPT Models",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/FAQS.md",
+      "title": "Frequently asked questions",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/FEDERATION_STRATEGY.md",
+      "title": "Federation contract",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/FORENSIC_PAYLOAD_DISSECTION_AND_CAUSAL_ANALYSIS.md",
+      "title": "🔬 Forensic Payload Dissection: Representation Transformation before Inference",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/GOVERNANCE_CONTROL_PLANE_REVIEW.md",
+      "title": "GALXAI Governance Control Plane Review",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/GTM_STRATEGY.md",
+      "title": "🚀 GALXAI: Go-To-Market (GTM) & Positioning Strategy",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/INFERENCE_PIPELINE_VERIFICATION.md",
+      "title": "Inference verification",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/LANDING_PAGE_COPY.md",
+      "title": "GALXAI Landing Page Copy — High-Signal & Zero Technical Jargon",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/LUMI.md",
+      "title": "Agent clients and the GALXAI relay",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/MIGRATION_GUIDE.md",
+      "title": "Migrating to capability-aware GALX",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/MODEL_CATALOG.md",
+      "title": "Model catalog and live availability",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
+      "title": "GALXAI Natural Navigation, OmniSearch & Low-Latency Substrate Guide",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md",
+      "title": "OAuth and token lifecycle boundaries",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/PRICING_AND_DISCOUNT_STRATEGY.md",
+      "title": "💰 GALXAI Pricing & Multi-Tiered Discount Strategy",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/PRODUCT_SURFACE_STRATEGY.md",
+      "title": "GALX product surface strategy",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/PROVIDER_AS_AUTH_SPECIFICATION.md",
+      "title": "Provider credentials and application identity",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/PSEO_AND_AEO_STRATEGY.md",
+      "title": "🌐 GALXAI: Programmatic SEO (pSEO), Answer Engine (AEO) & Generative Optimization (GEO) Strategy",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/QUEUE_SPECIFICATION.md",
+      "title": "Application queues and relay jobs",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "images"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/QUICKSTART.md",
+      "title": "GALXAI",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/RATE_LIMITS_AND_QUOTAS.md",
+      "title": "Rate limits, concurrency, and quota",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/README.md",
+      "title": "GALX maintainer knowledge base",
+      "scope": "current-guide",
+      "kind": "navigation",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/REASONING_MODELS_GUIDE.md",
+      "title": "🧠 Frontier Reasoning Models Developer Guide",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/RELAY_API_REFERENCE.md",
+      "title": "Federation relay API",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/RELAY_VNEXT_RUNBOOK.md",
+      "title": "Capability-aware relay vNext",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/RESILIENCE_AND_DISASTER_RECOVERY.md",
+      "title": "Resilience and recovery",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/ROUTING_ALGORITHMS.md",
+      "title": "Capability-first routing",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/SDK_CHEATSHEET.md",
+      "title": "💻 GALXAI Multi-Ecosystem SDK & CLI Cheatsheet",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/SDK_SPECIFICATION.md",
+      "title": "⚡ GALXAI Universal Developer SDK: Specification & Architecture Reference",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/SECURITY.md",
+      "title": "Security boundaries",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md",
+      "title": "GALXAI: Security Posture & Threat Model",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/SENIOR_ENGINEERING_REVIEW_CHAT_AND_ROLLING_CONTEXT.md",
+      "title": "GALXAI SENIOR ENGINEERING REVIEW: Sovereign Seat Quotas, Dynamic Elastic Context, and Hybrid Rolling Memory Mesh",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/SITES_CONTENT.md",
+      "title": "Site content generation",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/SITES_WORKSPACE.md",
+      "title": "Create and manage Sites",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/SITE_ADDRESSES.md",
+      "title": "Site addresses",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md",
+      "title": "Authentication and credential ingestion boundaries",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/STREAMING_AND_SSE_PROTOCOL.md",
+      "title": "⚡ Universal Streaming & SSE Protocols",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/STRUCTURED_OUTPUTS_AND_TOOLS.md",
+      "title": "⚙️ Structured Outputs, Tool Calling & Agent Runtimes",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+      "title": "Supabase authority and operational boundaries",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [
+        "database"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/SYSTEM_TOPOLOGY_AND_MAINTENANCE_ONBOARDING.md",
+      "title": "System topology and maintainer onboarding",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/TELEMETRY_AND_OBSERVABILITY.md",
+      "title": "Telemetry and observability",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/TRAINING_ROADMAP_AND_EXECUTION_PLAN.md",
+      "title": "🚀 GALX-Flash-8B: Training Roadmap, Strategy & Execution Plan",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/TROUBLESHOOTING.md",
+      "title": "Troubleshooting",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/VERCEL_DEPLOYMENT.md",
+      "title": "Application deployment and configuration",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "delivery"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/VM_RELAY_DEPLOYMENT_AND_WEBSOCKET_TIMEOUT_STRATEGY.md",
+      "title": "Relay deployment: vNext migration and legacy reference",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/WALLET_AND_BILLING_STRATEGY.md",
+      "title": "💳 GALXAI Developer Compute Wallet & Micro-Billing Architecture",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0001-unified-pooled-quota-cycling-substrate.md",
+      "title": "ADR 0001: Unified Pooled Quota Cycling Substrate",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0002-two-phase-token-reservation-and-rate-governance.md",
+      "title": "ADR 0002: 2-Phase Token Reservation & Continuous Calculus Rate Governance",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0003-aes-256-gcm-envelope-encryption-with-aad-binding.md",
+      "title": "ADR 0003: AES-256-GCM Envelope Encryption with AAD Binding & Heap Scrubbing",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0004-four-state-circuit-breaker-and-failover-topology.md",
+      "title": "ADR 0004: 4-State Circuit Breaker & Half-Open Canary Traffic Warming",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0005-circular-buffer-telemetry-and-ewma-latency-scoring.md",
+      "title": "ADR 0005: Zero-Allocation Circular Ring Buffer Telemetry & EWMA Latency",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0006-intelligent-multi-tiered-discount-strategy.md",
+      "title": "ADR 0006: Intelligent Multi-Tiered Discount & Prompt-Caching Strategy",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0007-proof-of-deposit-and-50pct-match-paywall-gate.md",
+      "title": "ADR 0007: Proof-of-Deposit Security Gate & 50% Match Paywall Architecture",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0008-tenant-affinity-shard-dispersion-and-post-allocation-leveling.md",
+      "title": "ADR 0008: Tenant-Affinity Shard Dispersion (TASD) & Post-Allocation Headroom Leveling",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0009-half-open-canary-traffic-warming-and-lease-scavenger.md",
+      "title": "ADR 0009: 4-Phase Half-Open Canary Traffic Warming & Background Lease Scavenger",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0010-cloudtasks-cloudrun-asynchronous-queue-substrate.md",
+      "title": "ADR 0010: CloudTasks & CloudRun Inspired Asynchronous Queue Substrate",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0011-directed-acyclic-graph-workflows-and-realtime-event-streaming.md",
+      "title": "ADR 0011: Directed Acyclic Graph (DAG) Workflows & Real-Time Event Streaming",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0012-universal-developer-sdk-and-ergonomics-substrate.md",
+      "title": "ADR 0012: Universal Developer SDK & Developer Experience (DX) Substrate",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0013-fluent-builders-structured-outputs-and-dx-ergonomics.md",
+      "title": "ADR 0013: Fluent Builders, Structured Outputs & DX Ergonomics Substrate",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0014-apex-agent-runtime-middleware-and-resilience-substrate.md",
+      "title": "ADR 0014: Apex Agent Runtime, Middleware & Resilience Substrate",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0015-zero-egress-cloudflare-workers-edge-compute-mesh.md",
+      "title": "ADR 0015: Zero-Egress Cloudflare Workers Edge Compute Mesh",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0016-authoritative-supabase-postgresql-substrate.md",
+      "title": "ADR 0016: Authoritative Supabase PostgreSQL Substrate",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0017-high-throughput-binary-wire-and-rpc-micro-batching.md",
+      "title": "ADR 0017: High-Throughput Binary Wire Protocol & RPC Micro-Batching",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0018-edge-speculative-streaming-and-keepalive-connection-pools.md",
+      "title": "ADR 0018: Edge Speculative Streaming & Pre-Warmed Keep-Alive Connection Pools",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0019-autonomous-shard-health-probes-and-budget-governance.md",
+      "title": "ADR 0019: Autonomous Shard Health Probes & Multi-Tenant Budget Governance",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0020-provider-as-auth-zero-friction-session-substrate.md",
+      "title": "ADR 0020: Provider-as-Auth Paradigm & Zero-Friction Shard Vaulting",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0021-jwe-compact-session-encryption-and-dpop-fingerprinting.md",
+      "title": "ADR 0021: JWE Compact Session Encryption & DPoP Client Fingerprinting",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0022-oauth-token-rotation-with-reuse-attack-detection-cascades.md",
+      "title": "ADR 0022: OAuth 2.0 Token Rotation with Reuse Attack Detection Cascades (RFC 6819)",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0023-step-up-sudo-elevation-and-fine-grained-token-scoping.md",
+      "title": "ADR 0023: Step-Up SUDO Session Elevation & Fine-Grained Token Scoping",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0024-adaptive-behavioral-risk-scoring-and-zero-downtime-kms-rewrapping.md",
+      "title": "ADR 0024: Adaptive Behavioral Risk Scoring & Zero-Downtime KMS Key Re-Wrapping",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0025-broccolidb-l1-reactive-in-memory-table-and-secondary-indexing.md",
+      "title": "ADR 0025: BroccoliDB L1 Reactive In-Memory Table & Multi-Dimensional Secondary Indexing",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0026-broccolidb-natural-language-query-ast-parser-and-wal-persistence.md",
+      "title": "ADR 0026: BroccoliDB Natural Query AST Parser & Cryptographic WAL Persistence",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0027-enterprise-privacy-safe-harbor-18-gdpr-and-zdr-v10-memory-zeroization.md",
+      "title": "ADR 0027: Enterprise Privacy Substrate (Safe Harbor 18, GDPR, Global Privacy & ZDR v10.0 Memory Zeroization)",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0028-soc2-type-ii-compliance-engine-drift-detector-and-merkle-audit-ledger.md",
+      "title": "ADR 0028: SOC 2 Type II Compliance Engine, Drift Detector & Merkle Audit Ledger",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0029-sliding-window-streaming-transformer-and-cross-chunk-split-pii.md",
+      "title": "ADR 0029: Sliding-Window Streaming Transformer & Cross-Chunk Boundary PII Redaction",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0030-ephemeral-session-enclave-and-zero-knowledge-attestation-tickets.md",
+      "title": "ADR 0030: Ephemeral Session Enclaves & Zero-Knowledge Attestation Tickets (ZKAT)",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0031-dynamic-security-probe-and-automated-drift-healing.md",
+      "title": "ADR 0031: Dynamic Security Pen-Test Probe & Autonomous Drift Remediation",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0032-ultra-flat-effortless-sdk-strategy-and-callable-tagged-templates.md",
+      "title": "ADR 0032: Ultra-Flat Effortless Developer SDK Strategy & Tagged Template Invocation",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0033-universal-api-strategy-anthropic-messages-embeddings-and-health.md",
+      "title": "ADR 0033: Universal API Strategy: Anthropic Messages, Embeddings & Discovery",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0034-autonomous-agent-1-click-context-and-auto-copy-substrate.md",
+      "title": "ADR 0034: Autonomous Agent 1-Click Context & Zero-Friction Event Pipeline",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0035-paranoid-supabase-postgresql-and-ai-agent-governance.md",
+      "title": "ADR 0035: Paranoid Supabase PostgreSQL Architecture & AI Agent Long-Term Governance Substrate",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0036-universal-developer-authentication-gating-and-zero-abuse-workspace-perimeter.md",
+      "title": "ADR 0036: Universal Developer Authentication Gating & Zero-Abuse Workspace Perimeter",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0037-zero-egress-cloudflare-edge-gateway-and-r2-cdn-substrate.md",
+      "title": "ADR 0037: Zero-Egress Cloudflare Edge Gateway, R2 CDN & Custom Domain Substrate",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0038-distributed-edge-kv-rate-governance-and-swr-catalog-caching.md",
+      "title": "ADR 0038: Distributed Edge KV Rate Governance & Stale-While-Revalidate Model Catalog Caching",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0039-edge-native-vector-embeddings-and-durable-object-swarm-sync.md",
+      "title": "ADR 0039: Edge-Native Vector Embeddings & Durable Object Swarm State Synchronization",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0040-enterprise-vercel-pre-deployment-gate-and-multi-region-topology.md",
+      "title": "ADR 0040: Enterprise Vercel Pre-Deployment Gate, Next.js 15 Optimization & Multi-Region Topology",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0041-zero-collision-typescript-ambient-isolation-and-dual-runtime-mesh.md",
+      "title": "ADR 0041: Zero-Collision TypeScript Ambient Isolation & Dual-Engine Runtime Mesh",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0042-universal-zero-hesitation-developer-ergonomics-and-mental-model-absorption.md",
+      "title": "ADR 0042: Universal Zero-Hesitation Developer Ergonomics & Mental Model Absorption Substrate",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0043-broccolidb-hybrid-resilience-outbox-disaster-recovery-and-sla-uptime.md",
+      "title": "ADR 0043: BroccoliDB Hybrid Resilience Substrate, Zero-Loss Outbox & Dual-Slot Disaster Recovery (RPO = 0, RTO < 5ms)",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0044-non-technical-natural-omnisearch-and-approachable-error-recovery.md",
+      "title": "ADR 0044: Non-Technical Natural OmniSearch & Approachable Self-Healing Error Recovery",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0045-single-flight-request-coalescing-soundex-phonetic-and-sub-15ms-ttft.md",
+      "title": "ADR 0045: Single-Flight Request Coalescing, Soundex Phonetic Typo Absorption & Sub-15ms TTFT Streaming Substrate",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0046-sub-microsecond-l1-storage-zero-copy-streaming-and-socket-prewarming.md",
+      "title": "ADR 0046: Sub-Microsecond L1 In-Memory Storage Mirroring, Zero-Copy Direct Buffer Streaming & Persistent Upstream Socket Pre-Warming",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0047-programmatic-seo-geo-aeo-and-structured-jsonld-saturation.md",
+      "title": "ADR 0047: Programmatic SEO (pSEO), Generative Engine Optimization (GEO), Answer Engine Optimization (AEO) & Structured JSON-LD Saturation",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0048-interactive-developer-studio-tools-and-edge-simulators.md",
+      "title": "ADR 0048: Interactive Developer Studio Tools, Client-Side Simulators & Memory-Isolated Utilities",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0049-enterprise-governance-security-patterns-and-compliance-matrix.md",
+      "title": "ADR 0049: Enterprise Governance, AI Red-Teaming Patterns, Industry Verticals & Compliance Matrix",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0050-incident-postmortems-resilience-engineering-and-sla-failover.md",
+      "title": "ADR 0050: AI Incident Postmortems, Resilience Engineering & Multi-Origin SLA Failover",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0051-enterprise-oauth2-fapi-token-lifecycle-and-identity-mesh.md",
+      "title": "51. Enterprise OAuth 2.0 / 2.1, FAPI Standards, Token Lifecycle & Identity Mesh",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0052-enterprise-oauth21-rtr-fapi-backchannel-and-vacuum-mesh.md",
+      "title": "52. Enterprise OAuth 2.1 Refresh Token Rotation (RTR), Token Family Theft Containment, OIDC Back-Channel Logout & Substrate Vacuum Mesh",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0053-siloed-supabase-oauth-and-isolated-backend-sharding-mesh.md",
+      "title": "0053. Siloed Supabase OAuth Platform Authentication & Isolated Backend Substrate Sharding Mesh",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0054-apex-transport-hardening-rfc9530-rfc9421-idempotency-and-anti-replay.md",
+      "title": "0054. Apex Transport Layer Hardening: RFC 9530 Digests, RFC 9421 Signatures, IETF Idempotency, and Anti-Replay Nonces",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0055-ambient-declarative-ai-substrate-zero-route-and-auto-patcher.md",
+      "title": "ADR 0055: Ambient Declarative AI Substrate, Zero-Route Direct Actions & Runtime Auto-Patcher",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0056-broccolidb-85-buffer-deduplication-and-streaming-pipeline-substrate.md",
+      "title": "ADR 0056: BroccoliDB 85-Buffer Algorithmic DeDuplication & High-Velocity Streaming Substrate",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0057-broccolidb-mega-incident-cascader-and-pyramid-compaction-substrate.md",
+      "title": "ADR 0057: Mega-Incident Stream Cascading & Mega-Document Hierarchical Pyramid Compactor",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0058-broccolidb-180-domain-industry-cluster-compactor-substrate.md",
+      "title": "ADR 0058: BroccoliDB 180-Domain Enterprise Industry Cluster Compaction Substrate",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0059-broccolidb-safe-compaction-facade-barrel-hardening-and-api-gateway.md",
+      "title": "ADR 0059: BroccoliDB Safe Compaction Facade, Barrel Hardening, and Production API Gateway",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0060-broccolidb-high-velocity-domain-expansion-and-stream-compaction.md",
+      "title": "ADR 0060: BroccoliDB High-Velocity Domain Expansion, Drain Log Clustering, Distributed Trace Slicing, and Telemetry Stream Compaction",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0061-broccolidb-network-orderbook-and-sliding-window-stream-compaction.md",
+      "title": "ADR 0061: BroccoliDB NetFlow Security, L2 Order Book Depth, and Continuous Sliding-Window Stream Compaction",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0062-broccolidb-industrial-iot-clickstream-genomics-and-hybrid-stream-multiplexing.md",
+      "title": "ADR 0062: BroccoliDB Industrial IoT Sensors, Clickstream RUM, Genomic Sequencing & Hybrid Stream Multiplexing",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0063-broccolidb-ebpf-k8s-geospatial-and-arrow-dictionary-stream-compaction.md",
+      "title": "ADR 0063: BroccoliDB Kernel eBPF Runtime Security, Kubernetes Watch Deltas, Geospatial ADS-B/AIS & Apache Arrow Dictionary Stream Compaction",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0064-broccolidb-openai-inference-boundary-measurement-and-task-suite.md",
+      "title": "ADR 0064: BroccoliDB OpenAI Inference Boundary Empirical Measurement & Task Suite",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0065-broccolidb-blinded-evaluator-protocol-and-out-of-sample-validation.md",
+      "title": "ADR 0065: BroccoliDB Randomized Branch-Blinded A/B Evaluation Protocol & Out-of-Sample Validation",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0066-institutional-entropy-resistance-and-epistemic-compression.md",
+      "title": "ADR 0066: Institutional Entropy Resistance & Epistemic Representation Compression",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0067-representation-selection-and-adaptive-density-bypass.md",
+      "title": "ADR 0067: Adaptive Representation Selection & Density Bypass Substrate",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0068-dual-rolling-window-seat-quotas-and-distributed-request-leases.md",
+      "title": "ADR 0068: Dual Rolling Window Seat Quotas and Distributed Request Leases",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0069-hybrid-broccolidb-postgres-rolling-context-and-5-level-pyramid.md",
+      "title": "ADR 0069: Hybrid BroccoliDB-PostgreSQL Rolling Context and 5-Level Multi-Resolution Pyramid",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0070-elastic-dynamic-context-governor-and-atomic-turn-pair-integrity.md",
+      "title": "ADR 0070: Elastic Dynamic Context Governor and Atomic Turn-Pair Integrity",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0071-cross-session-universal-workspace-anchors-and-hardware-cache-topology.md",
+      "title": "ADR 0071: Cross-Session Universal Workspace Anchors and Hardware Cache Topology",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0072-exact-owner-chat-persistence-and-delta-sync-mesh.md",
+      "title": "ADR 0072: Exact-Owner Chat Persistence and Delta Sync Mesh",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0073-zero-dependency-post-training-cognitive-labeling-and-4-stage-substrate.md",
+      "title": "ADR 0073: Zero-Dependency Post-Training Cognitive Labeling & 4-Stage Substrate",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0074-deepseek-v3-r1-mla-compression-latent-kv-dequantization-and-dualpipe.md",
+      "title": "ADR 0074: DeepSeek-V3/R1 Multi-Head Latent Attention (MLA), KV Dequantization & DualPipe Parallelism",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0075-speculative-verification-trees-eagle2-medusa-and-head-entropy-pruning.md",
+      "title": "ADR 0075: Speculative Verification Trees, EAGLE-2, Medusa & Head Entropy Pruning",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0076-dynamic-sequence-packing-mask-slicing-dpo-length-debiasing-and-gradient-shield.md",
+      "title": "ADR 0076: Dynamic Sequence Packing Mask Slicing, Online DPO Length Debiasing & Loss-Truncated Gradient Shielding",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0077-autonomous-cloudflare-r2-sync-and-cryptographic-merkle-manifest-catalog.md",
+      "title": "ADR 0077: Autonomous Cloudflare R2 Sync & Cryptographic Merkle Manifest Catalog",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0078-glm-53-flash-indexshare-sparse-attention-and-slime-async-rl.md",
+      "title": "ADR 0078: GLM-5.3 Flash IndexShare Sparse Attention, Slime Asynchronous RL & Hybrid Thinking Modes",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0079-lumi-and-community-qos-multi-tier-pool-mesh.md",
+      "title": "ADR 0079: LUMI & Community QoS Multi-Tier Pool Mesh and IETF RateLimit Generation",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0080-zero-roundtrip-preflight-and-vectorized-batch-sync.md",
+      "title": "ADR 0080: Zero-Roundtrip Preflight and Vectorized Batch Sync Engine",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0081-monotonic-stream-deltas-and-zero-copy-pump.md",
+      "title": "ADR 0081: Monotonic Stream Deltas and Zero-Copy Stream Pump",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0082-prompt-compaction-predictive-routing-and-quality-sentinels.md",
+      "title": "ADR 0082: Deterministic Prompt Compaction, Strict Model Fidelity & Quality Sentinels",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0083-context-window-preservation-and-ast-skeletons.md",
+      "title": "ADR 0083: Context Window Preservation and Semantic AST Skeletons",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0084-context-salience-and-zen-flow-buffer-pool.md",
+      "title": "ADR 0084: Context Salience Scoring and High-Throughput Zen Flow Buffer Pool",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0085-zero-egress-keyset-sync-and-xfetch-bloom-shield.md",
+      "title": "ADR 0085: Zero-Egress Keyset Sync, XFetch Early Recomputation & Bloom Origin Shield",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0086-authoritative-merkle-governor-and-circuit-breaker.md",
+      "title": "ADR 0086: BroccoliDB Authoritative Merkle Governor & Workspace-Wide Circuit Breaker",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0087-dual-window-hybrid-rate-governance-and-sliding-window-log.md",
+      "title": "ADR 0087: Dual-Window Hybrid Rate Governance, Sliding Request Logs & Zero-Trust Resynchronization",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0088-enterprise-six-state-circuit-breaker-single-canary-and-quadratic-warmup.md",
+      "title": "ADR 0088: Enterprise 6-State Circuit Breaker, Strict Single-Canary Slotting & Slow-Start Quadratic Warmup",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0089-anti-stampede-bounded-admission-queue-and-aimd-concurrency-limiter.md",
+      "title": "ADR 0089: Anti-Stampede Bounded Admission Queue & AIMD Adaptive Concurrency Limiter",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0090-zero-egress-write-behind-micro-batch-sync-buffer.md",
+      "title": "ADR 0090: Zero-Egress Write-Behind Micro-Batch Synchronization Buffer",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0091-developer-gateway-key-governance-and-enterprise-rotation-ergonomics.md",
+      "title": "ADR 0091: Developer Gateway Key Governance & Enterprise Rotation Ergonomics",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0092-broccolidb-l0-nanosecond-pointer-cache-and-negative-caching-defense.md",
+      "title": "ADR 0092: BroccoliDB L0 Nanosecond Pointer Cache & Negative Caching Defense",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0093-postgresql-connection-pool-circuit-breaker-and-atomic-coalesced-write-behind.md",
+      "title": "ADR 0093: PostgreSQL Connection Pool Circuit Breaker & Atomic Coalesced Write-Behind",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0094-workspace-wide-direct-connection-pooling-and-queue-saturation-governance.md",
+      "title": "ADR 0094: Workspace-Wide Direct Connection Pooling & Queue Saturation Governance",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0095-zero-cycle-dispatcher-token-hash-memoization-and-in-place-l0-mutation.md",
+      "title": "ADR 0095: Zero-Cycle Dispatcher, Token Hash Memoization & In-Place L0 Mutation",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0096-connection-pool-security-isolation-and-tenant-guardrails.md",
+      "title": "ADR 0096: Connection Pool Security Isolation & Tenant Guardrails",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0097-transaction-scoped-tenant-rls-over-direct-connection-pooling.md",
+      "title": "ADR 0097: Transaction-Scoped Tenant RLS Over Direct Connection Pooling",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0098-pg-socket-destroy-on-error-and-jwt-claims-json-injection.md",
+      "title": "ADR 0098: PostgreSQL Socket Destruction on Error & Complete JWT Claims JSON Injection",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0099-forced-rls-and-declarative-session-context-procedures.md",
+      "title": "ADR 0099: Forced RLS & Declarative Session Context Procedures",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0100-audit-immutability-and-kernel-tenant-binding-triggers.md",
+      "title": "ADR 0100: Audit Immutability Triggers & Kernel Tenant-Binding Enforcement",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0101-persona-image-forced-rls-and-ownership-reassignment-defense.md",
+      "title": "ADR 0101: Persona & Image Forced RLS with Ownership Reassignment Armor",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0102-chat-messages-access-validation-and-tasks-crud-rls.md",
+      "title": "ADR 0102: Chat Messages Access Validation & Tasks CRUD RLS Armor",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0103-chat-memory-and-billing-forced-rls-and-ownership-armor.md",
+      "title": "ADR 0103: Chat Memory & Billing Forced RLS with Ownership Armor",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0104-least-privilege-dac-grants-for-authenticated-tenant-role.md",
+      "title": "ADR 0104: Least-Privilege DAC Table Grants for Authenticated Tenant Role",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0105-tenant-id-constraints-and-leakproof-rls-armor.md",
+      "title": "ADR 0105: Tenant ID CHECK Constraints & LEAKPROOF RLS Optimization",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0106-wallet-balance-tamper-proofing-and-billing-ledger-immutability.md",
+      "title": "ADR 0106: Wallet Balance Tamper-Proofing & Financial Ledger Immutability",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0107-api-credit-handling-and-quota-pool-armor.md",
+      "title": "ADR 0107: API Credit Handling & Quota Pool Armor",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0108-workspaces-and-team-billing-spend-armor.md",
+      "title": "ADR 0108: Workspaces & Team Billing Spend Armor",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0109-sovereign-backend-inference-pipeline-and-native-flagship-pool.md",
+      "title": "ADR 0109: Sovereign Backend Inference Pipeline & Native Flagship Pool",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0110-e2e-inference-verification-suite-and-artifact-telemetry.md",
+      "title": "ADR 0110: End-to-End Inference Verification Suite & Artifact Telemetry",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0111-cloudflare-edge-swrr-fleet-session-sticky-prompt-caching-and-codex-concurrency-isolation.md",
+      "title": "ADR 0111: Separate edge and Node inference transports",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0112-galxai-authoritative-shard-fleet-pool-native-codex-websocket-wire-and-sliding-window-failover.md",
+      "title": "ADR 0112: Registry-backed provider routing and relay transport",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0113-unpredictable-2-3-minute-inference-mlfq-itl-watchdog-and-resumable-streams.md",
+      "title": "ADR 0113: Long-running inference experiments and relay recovery scope",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0114-uncertain-execution-authority-kernel-and-transactional-journal.md",
+      "title": "ADR 0114: Uncertain Execution Authority Kernel and Transactional Journal",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0115-postgresql-authoritative-shard-registry-and-secret-free-projections.md",
+      "title": "ADR 0115: PostgreSQL-Authoritative Shard Registry and Secret-Free Projections",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0116-logical-agent-session-identity-and-client-multiplexing.md",
+      "title": "ADR 0116: Logical Agent Session Identity and Client Multiplexing",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0117-server-mediated-tenant-authority-and-secure-postgres-defaults.md",
+      "title": "ADR 0117: Server-Mediated Tenant Authority & Secure PostgreSQL Defaults",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0118-versioned-same-origin-agent-client-deployment.md",
+      "title": "ADR 0118: Versioned Same-Origin Agent Client Deployment",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0119-inference-first-product-surface-and-client-retirement.md",
+      "title": "ADR 0119: Inference-First Product Surface and First-Party Client Retirement",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0120-zero-cost-host-mac-cloudflare-tunnel-relay-ingress-and-protocol-hardening.md",
+      "title": "ADR 0120: Host relay ingress and deployment boundary",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0121-user-and-session-r2-partitioning-manifest-lifecycle-and-relay-image-synthesis.md",
+      "title": "ADR 0121: Provider image synthesis and user/session asset persistence",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0122-isolated-authenticated-relay-and-bounded-recovery.md",
+      "title": "ADR 0122: Isolated authenticated relay and bounded recovery",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0123-image-request-cooldown-recovery.md",
+      "title": "Image requests recover after an expired account cooldown",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0124-cooldown-evidence-and-stale-result-protection.md",
+      "title": "Cooldowns require attributable evidence and current lease authority",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0125-observation-authority-and-bounded-database-recovery.md",
+      "title": "Keep observations separate from health authority and bound recovery work",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0126-capability-aware-shard-relay-federation.md",
+      "title": "ADR 0126: Capability-aware 1:1 shard relay federation",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0127-codex-image-tool-alias-production-cutover.md",
+      "title": "ADR 0127: Explicit Codex image-tool alias and production federation cutover",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0128-documentation-authority-and-federation-contract.md",
+      "title": "ADR 0128: Documentation authority and federation contract",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0129-public-image-artifacts-and-verified-identity.md",
+      "title": "ADR 0129: Public image artifacts and verified identity",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0130-image-receipts-and-uncertain-outcomes.md",
+      "title": "ADR 0130: Image receipts and uncertain outcomes",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0131-private-operator-desktops-and-maintenance.md",
+      "title": "ADR 0131: Private operator desktops and maintenance holds",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0132-recoverable-desktop-credential-handoff.md",
+      "title": "ADR 0132: Recoverable desktop credential handoff",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0133-explicit-validated-enrollment-and-test-isolation.md",
+      "title": "ADR 0133: Explicit validated enrollment and isolated integration fixtures",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0134-fixed-price-sites-generation-with-opaque-provider-quotas.md",
+      "title": "ADR 0134: Fixed-price Sites generation with opaque provider quotas",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0135-durable-sites-receipts-and-local-admission.md",
+      "title": "ADR 0135: Durable Sites receipts and local admission",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0136-customer-owned-sites-delivery.md",
+      "title": "ADR 0136: Customer-owned Sites delivery",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0137-account-owned-sites-subdomains.md",
+      "title": "ADR 0137: Account-owned Sites subdomains",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0138-automatic-sites-domain-provisioning.md",
+      "title": "ADR 0138: Automatic Sites domain provisioning",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0139-browser-sites-workspace-and-managed-publishing.md",
+      "title": "ADR 0139: Browser Sites workspace and managed publishing",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0140-paid-sites-and-shared-fair-usage.md",
+      "title": "ADR 0140: Paid Sites and shared fair usage",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0141-sites-pro-self-service-launch.md",
+      "title": "ADR 0141: Sites Pro self-service launch",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0142-continuous-sites-conversations.md",
+      "title": "ADR 0142: Continuous Sites conversations",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0143-hybrid-sites-memory-and-review.md",
+      "title": "ADR 0143: Hybrid Sites memory and full-page review",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0144-durable-images-and-incident-documentation.md",
+      "title": "ADR 0144: Durable image requests and maintained incident operations",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md",
+      "title": "ADR 0145: Maintain knowledge with source changes",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": {
+        "status": "accepted",
+        "delivery": "local",
+        "domain": "knowledge",
+        "owner": "Documentation maintainer",
+        "date": "2026-09-13",
+        "evidence": [
+          "docs/knowledge/audits/2026-09-13-verification.json"
+        ],
+        "supersedes": []
+      }
+    },
+    {
+      "path": "docs/adr/README.md",
+      "title": "Architecture decision records",
+      "scope": "current-guide",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/broccolidb/01_PHILOSOPHY_THE_AGGRESSIVE_VEGETABLE.md",
+      "title": "🥦 The Philosophy of BroccoliDB",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/broccolidb/02_WHITEPAPER_REPRESENTATION_SELECTION.md",
+      "title": "🥦 Task-Conditioned Representation Selection Under Epistemic and Information-Theoretic Constraints",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/broccolidb/03_STAKEHOLDER_AND_ONBOARDING_BRIEF.md",
+      "title": "🥦 BroccoliDB Stakeholder Brief & Maintainer Onboarding",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/broccolidb/04_FORMAL_MATHEMATICAL_PROOF.md",
+      "title": "🥦 A Formal Theory of Task-Conditioned Representation Selection, Invariant Preservation, and Bounded Action Degradation",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/broccolidb/05_FORMAL_TLA_STATE_MACHINE_SPECIFICATION.md",
+      "title": "🥦 Formal TLA+ & State-Machine Specification of the BroccoliDB Substrate",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/broccolidb/06_ARCHITECTURAL_AUDIT_AND_EMPIRICAL_EVALUATION.md",
+      "title": "🥦 BroccoliDB Architectural Audit & Empirical Evaluation Report",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/broccolidb/07_LEAN4_FORMAL_VERIFICATION_BLUEPRINT.md",
+      "title": "🥦 Lean 4 Formal Verification Blueprint for BroccoliDB",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/broccolidb/08_COMPILER_IR_LOWERING_AND_PROGRAM_SLICING.md",
+      "title": "🥦 Compiler IR Lowering & Program Slicing Architecture",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/broccolidb/09_RFC_BROCCOLIDB_0001_TASK_CONDITIONED_REPRESENTATION_SELECTION_PROTOCOL.md",
+      "title": "RFC-BROCCOLIDB-0001: Task-Conditioned Representation Selection Protocol (TCRSP/1.0)",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/broccolidb/10_FRONTIER_POST_TRAINING_COGNITIVE_LABELING_SUBSTRATE.md",
+      "title": "🥦 BroccoliDB Document 10: Frontier Post-Training Cognitive Labeling & 4-Stage Substrate",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/broccolidb/README.md",
+      "title": "🥦 BroccoliDB Core Documentation & Research Suite",
+      "scope": "research-reference",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/events-and-devrel/01-ai-coding-agent-bounties.md",
+      "title": "🏆 Playbook: AI Coding Agent Community Bounties & DevRel Growth",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/explanations/README.md",
+      "title": "Explanations",
+      "scope": "current-guide",
+      "kind": "navigation",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/first-10-customers/01-high-spend-startup-onboarding.md",
+      "title": "🎯 Playbook: Onboarding the First 10 High-Spend AI Startups",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/first-10-customers/04-enterprise-poc-and-volume-discounts.md",
+      "title": "🤝 Enterprise Proof-of-Concept & Wholesale Volume Discount Schedule",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/how-to/README.md",
+      "title": "How-to guides",
+      "scope": "current-guide",
+      "kind": "navigation",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/how-to/change-with-documentation.md",
+      "title": "Maintain knowledge with a change",
+      "scope": "current-guide",
+      "kind": "how-to",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/internal/EGRESS_RECOVERY_AUDIT_2026-09-09.md",
+      "title": "Historical egress and recovery audit",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/investor_recap.md",
+      "title": "investor_recap",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/investors/00_10_MINUTE_INVESTOR_MEETING_PLAYBOOK.md",
+      "title": "⏱️ The 10-Minute Executive Pitch Playbook",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/investors/00_ONE_PAGER_EXECUTIVE_TEASER.md",
+      "title": "📄 GALXAI: Executive Fact Sheet",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/investors/01_EXECUTIVE_SUMMARY_AND_MEMO.md",
+      "title": "📑 GALXAI Executive Memorandum & Product Brief",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/investors/02_PITCH_DECK_SLIDE_BY_SLIDE.md",
+      "title": "📊 GALXAI Pitch Deck: 8-Slide Crisis & Traction Specification",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/investors/03_MARKET_SIZING_TAM_SAM_SOM.md",
+      "title": "📈 GALXAI Market Sizing: TAM, SAM & SOM Analysis",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/investors/04_UNIT_ECONOMICS_CAC_LTV_PAYBACK.md",
+      "title": "💰 GALXAI Unit Economics: CAC, LTV, Margins & Payback Analysis",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/investors/05_COMPETITIVE_LANDSCAPE_AND_MOATS.md",
+      "title": "🛡️ GALXAI Competitive Landscape & Strategic Defensibility",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/investors/06_FINANCIAL_PROJECTIONS_AND_MODEL.md",
+      "title": "📊 GALXAI 5-Year Financial Projections & Operating Model",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/investors/07_TECHNICAL_DILIGENCE_AND_PATENTS.md",
+      "title": "Technical diligence: implementation and evidence",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/investors/08_COMMERCIAL_THESIS_AND_DISCOVERY_PLAYBOOK.md",
+      "title": "🎯 GALXAI Commercial Thesis & Customer Discovery Playbook",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/investors/09_ENTERPRISE_SPEND_GOVERNANCE_AND_CONTROL_PLANE.md",
+      "title": "09. Enterprise Spend Governance & Control Plane",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/investors/10_ENTERPRISE_PILOT_PROPOSAL_AND_AGREEMENT.md",
+      "title": "10. Enterprise 30-Day Zero-Risk Pilot Agreement & Commercial Terms",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/investors/README.md",
+      "title": "🏛️ GALXAI Institutional & Strategic Diligence Room",
+      "scope": "commercial-draft",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/knowledge/DECISIONS.md",
+      "title": "Decision lifecycle register",
+      "scope": "current-guide",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/knowledge/DESIGN_RATIONALE.md",
+      "title": "Knowledge system audit and design rationale",
+      "scope": "operational-record",
+      "kind": "explanation",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "diataxis",
+        "backstage",
+        "github",
+        "gitlab",
+        "sre"
+      ],
+      "decision": null
+    },
+    {
+      "path": "docs/knowledge/DOMAINS.md",
+      "title": "Knowledge domains",
+      "scope": "current-guide",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/knowledge/README.md",
+      "title": "Knowledge operations",
+      "scope": "current-guide",
+      "kind": "navigation",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-13-domain-reviews.md",
+      "title": "Complete the domain review queue",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [
+        "domain",
+        "review",
+        "activation",
+        "coverage"
+      ],
+      "decision": null
+    },
+    {
+      "path": "docs/knowledge/templates/adr.md",
+      "title": "ADR template",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/knowledge/templates/runbook.md",
+      "title": "Runbook template",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/landingpage.md",
+      "title": "landingpage",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md",
+      "title": "Write and maintain an architecture decision",
+      "scope": "current-guide",
+      "kind": "how-to",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "adr",
+        "decision",
+        "supersede"
+      ],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/AI_AGENT_PAIR_PROGRAMMING_AND_GOVERNANCE.md",
+      "title": "Parent and subagent execution guide",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md",
+      "title": "CI and documentation automation",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "ci",
+        "workflow",
+        "build"
+      ],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/CLOUDFLARE_EDGE_MESH_MAINTAINER_RUNBOOK.md",
+      "title": "Cloudflare maintainer runbook",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md",
+      "title": "BroccoliDB compaction and synchronization checks",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "broccolidb"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/DAY_1_TO_30_ONBOARDING_ROADMAP.md",
+      "title": "Maintainer learning path",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/DEBUGGING_AND_DIAGNOSTIC_RUNBOOKS.md",
+      "title": "Maintainer debugging and diagnostics",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/FLAKY_TESTS_AND_CI_TRIAGE.md",
+      "title": "🛠️ Maintainer Guide: Flaky Tests, CI Traps & Deterministic Triage",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/GIT_WORKFLOWS_AND_HOOKS.md",
+      "title": "🪝 Maintainer Guide: Git Workflows, Hooks & Conventional Commits",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/MAINTAINER_CLI_CHEATSHEET.md",
+      "title": "Maintainer CLI reference",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/MAINTAINER_GLOSSARY_AND_LEXICON.md",
+      "title": "📖 Maintainer Glossary & Architectural Lexicon",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/MAINTAINER_ONBOARDING_ASSESSMENT.md",
+      "title": "Assess maintainer readiness",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/MULTI_TENANT_SHARD_AND_KEY_ROTATION.md",
+      "title": "Maintainer Runbook: Shard Authority and Key Rotation",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/PERFORMANCE_BENCHMARKING_AND_SLOS.md",
+      "title": "📊 Maintainer Guide: Performance Benchmarking & Service Level Objectives (SLOs)",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+      "title": "PostgreSQL migration and recovery operations",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "database"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/README.md",
+      "title": "Maintainer guides",
+      "scope": "current-guide",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/RELAY_CREDENTIAL_ENROLLMENT.md",
+      "title": "Relay credential enrollment and recovery",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/RELAY_DESKTOPS.md",
+      "title": "Relay desktops and manual repair",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/RELAY_HARDENING.md",
+      "title": "Federation hardening checks",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/RELAY_QUOTA_AND_FLEET.md",
+      "title": "Federation fleet and quota",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/RELAY_SESSION_VERIFICATION_20260909.md",
+      "title": "Relay session verification — September 9, 2026",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/RELAY_TELEMETRY.md",
+      "title": "Federation request telemetry",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/RELAY_TELEMETRY_UX.md",
+      "title": "Capability and recovery UX",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/RELEASE_ENGINEERING_AND_VERSIONING.md",
+      "title": "Release engineering and rollback",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/SECURITY_INCIDENT_AND_CVE_PLAYBOOK.md",
+      "title": "🚨 Maintainer Playbook: Security Incidents, Key Compromise & CVE Governance",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/SITES_CONVERSATIONS.md",
+      "title": "Continuous Sites conversation operations",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/SITES_DOMAINS.md",
+      "title": "Sites address operations",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "sites"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/SITES_FAIR_USAGE.md",
+      "title": "Sites paid access and fair usage",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "sites"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/SITES_OPERATIONS.md",
+      "title": "Sites generation and delivery operations",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "sites"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/SITES_WORKSPACE.md",
+      "title": "Sites workspace operations",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "sites"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/SUBSYSTEM_INTERNALS_AND_DEPENDENCY_GRAPH.md",
+      "title": "🏛️ Subsystem Internals & Dependency DAG",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/SUBSYSTEM_MAINTAINER_MATRIX.md",
+      "title": "Subsystem responsibility and reviewers",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/TELEMETRY_AND_METRICS_OBSERVABILITY.md",
+      "title": "Telemetry sources and interpretation",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/UPSTREAM_PROVIDER_OUTAGE_AND_DEGRADATION.md",
+      "title": "Upstream outage response",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/image-public-boundary.md",
+      "title": "Image public boundary verification",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "images"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/image-studio-review.md",
+      "title": "Image studio review",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/manifesto/PRODUCT_VISION_AND_NORTH_STAR.md",
+      "title": "🌟 PRODUCT VISION & THE NORTH STAR",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/manifesto/README.md",
+      "title": "🛡️ GALXAI Manifesto & Product Vision",
+      "scope": "commercial-draft",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/manifesto/THE_FOUNDER_MANIFESTO.md",
+      "title": "🛡️ THE FOUNDER MANIFESTO",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/operations/billing-release.md",
+      "title": "Historical billing recovery release",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/operations/developer-cohort-application.md",
+      "title": "Developer cohort application — 2026-09-12",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/operations/developer-preview.md",
+      "title": "Developer private preview",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "access"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/operations/preview-activation.md",
+      "title": "Private preview activation — 2026-09-12",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [
+        "access"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/operations/preview-admin-audit.md",
+      "title": "Preview admin implementation audit",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/operations/preview-admin.md",
+      "title": "Private preview administration",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "access"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/operations/preview-hybrid-sync.md",
+      "title": "Developer preview reads and hybrid sync",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [
+        "access",
+        "broccolidb"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/operations/relay-production-repair.md",
+      "title": "Historical relay production repair",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/operations/signup-credit.md",
+      "title": "Signup credit allowance",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/operations/wallet-lifecycle.md",
+      "title": "Historical wallet lifecycle repair",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/playbooks/01-provisioning-and-preflight.md",
+      "title": "Provisioning and preflight",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/playbooks/02-deployment-and-release.md",
+      "title": "Deployment and release",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/playbooks/03-live-traffic-and-fleet-scaling.md",
+      "title": "Traffic and model-specific scaling",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/playbooks/04-incident-response-and-sev-triage.md",
+      "title": "Incident response",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/playbooks/05-security-key-rotation-and-compliance.md",
+      "title": "Security and key rotation",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/playbooks/06-disaster-recovery-and-postmortems.md",
+      "title": "Recovery and post-mortem records",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/playbooks/07-zero-hesitation-developer-ergonomics-and-api-governance.md",
+      "title": "Developer ergonomics and execution authority",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/playbooks/08-unframed-developer-observation-protocol.md",
+      "title": "Developer observation protocol",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/playbooks/09-continuous-learning-and-training-runbook.md",
+      "title": "🛠️ Playbook 09: Continuous Learning & Model Post-Training Runbook",
+      "scope": "domain-reference",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/playbooks/README.md",
+      "title": "Operational playbooks",
+      "scope": "current-guide",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/prospecting/01-github-repository-audit-playbook.md",
+      "title": "🔍 Playbook: GitHub Repository Audit & Non-Spam Migration Outreach",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/prospecting/02-multi-channel-lead-scraping-engine.md",
+      "title": "📡 High-Velocity Multi-Channel Lead Scraping Engine",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/prospecting/03-high-converting-cold-outreach-cadences.md",
+      "title": "✉️ High-Converting Outbound Sales Cadences (45%+ Open, 20%+ Reply)",
+      "scope": "commercial-draft",
+      "kind": "draft",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/reference/README.md",
+      "title": "Reference",
+      "scope": "current-guide",
+      "kind": "navigation",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/reference/knowledge-commands.md",
+      "title": "Knowledge commands and metadata",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/relay-security.md",
+      "title": "Relay access and containment",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/runbooks/README.md",
+      "title": "Runbook catalog",
+      "scope": "current-guide",
+      "kind": "navigation",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/runbooks/knowledge-maintenance.md",
+      "title": "Reconcile stale knowledge",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/runbooks/release-readiness.md",
+      "title": "Prepare and verify a release",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "knowledge",
+        "delivery"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/runbooks/weekly-knowledge-audit.md",
+      "title": "Operate the weekly knowledge audit",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/training/00_APEX_SYNTHETIC_CURATION_AND_STRATEGY_OVERVIEW.md",
+      "title": "🛸 GALXAI Apex Synthetic Curation & Training Strategy Substrate",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/training/01_STRATEGY_AND_TARGET_GOAL.md",
+      "title": "🎯 Document 01: Strategy & Target Goal",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/training/02_TIMEFRAME_AND_SPRINT_MILESTONES.md",
+      "title": "📅 Document 02: Timeframe & Sprint Milestones",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/training/03_DATASET_AND_CURRICULUM_SPECIFICATION.md",
+      "title": "📊 Document 03: Dataset & Curriculum Specification",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/training/04_HARDWARE_AND_INFRASTRUCTURE_SETUP.md",
+      "title": "🖥️ Document 04: Hardware & Infrastructure Setup",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/training/05_TRAINING_RECIPES_AND_HYPERPARAMETERS.md",
+      "title": "🧪 Document 05: Training Recipes & Hyperparameters",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/training/06_OPERATIONAL_EXECUTION_RUNBOOK.md",
+      "title": "🛠️ Document 06: Operational Execution Runbook",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/training/07_EVALUATION_AND_DEPLOYMENT_GATE.md",
+      "title": "🏆 Document 07: Evaluation & Deployment Gate",
+      "scope": "research-reference",
+      "kind": "research",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/training/README.md",
+      "title": "🚀 GALXAI Foundation Model Training Suite: Master Directory",
+      "scope": "research-reference",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/tutorials/README.md",
+      "title": "Tutorials",
+      "scope": "current-guide",
+      "kind": "navigation",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/tutorials/first-change.md",
+      "title": "Make your first safe change",
+      "scope": "current-guide",
+      "kind": "tutorial",
+      "domains": [
+        "knowledge"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/CURRENT_STATE.md",
+      "title": "Latest verified operating state",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/INCIDENTS.md",
+      "title": "Incident index",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/OPEN_ITEMS.md",
+      "title": "Prevention and follow-up actions",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/README.md",
+      "title": "Incident operations and learning",
+      "scope": "current-guide",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/ROLLING_LOG.md",
+      "title": "Rolling troubleshooting and containment log",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/archive/2026-09-11/HANDOVER.md",
+      "title": "Federation handover",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/archive/2026-09-11/README.md",
+      "title": "Superseded September 11 handovers",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/archive/2026-09-11/context.md",
+      "title": "Current implementation context",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/failure-modes/README.md",
+      "title": "Known failure modes",
+      "scope": "current-guide",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/failure-modes/access-and-documentation.md",
+      "title": "Access and documentation failures",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/failure-modes/controller.md",
+      "title": "Controller availability failures",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/failure-modes/deployment.md",
+      "title": "Deployment failures",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/failure-modes/identity.md",
+      "title": "Identity failures",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/failure-modes/images.md",
+      "title": "Image persistence and execution failures",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-07-billing/README.md",
+      "title": "Billing recovery release",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-07-relay/README.md",
+      "title": "Production relay recovery — September 7, 2026",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-07-wallet/README.md",
+      "title": "Wallet lifecycle repair — September 7, 2026",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-09-egress/README.md",
+      "title": "Private engineering audit: egress and recovery",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-12-image-library-auth/README.md",
+      "title": "Image library session verification — September 12, 2026",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-12-image-library-auth/frontend-generation-test.md",
+      "title": "Live frontend image-generation test",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-12-vercel-storage/README.md",
+      "title": "Vercel storage cleanup — September 12, 2026",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-13-documentation/README.md",
+      "title": "Incident documentation reconciliation — September 13, 2026",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-13-image-generation/README.md",
+      "title": "Image generation recovery — 2026-09-13",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/runbooks/controller-lock.md",
+      "title": "Controller ownership and stale-lock recovery",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "relay"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/runbooks/deployment-storage.md",
+      "title": "Deployment storage containment",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "delivery"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/runbooks/documentation.md",
+      "title": "Keep incident records and guides current",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/runbooks/image-generation.md",
+      "title": "Image generation and library recovery",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "images"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "favorites",
+        "images",
+        "generation",
+        "history",
+        "session expired",
+        "401"
+      ],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/runbooks/triage.md",
+      "title": "Incident triage and containment",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/templates/incident.md",
+      "title": "Incident title",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    }
+  ]
+}

@@ -3,13 +3,15 @@
 <!-- docs-scope: decision-record -->
 
 Date: 2026-09-08. Audience: internal maintainers; do not publish as site content.
-Status: implemented and locally verified on September 8; deployment evidence reconciled September 9 by component below.
+Status: single-dispatch and uncertain-outcome rules remain current. September 8–9 evidence is retained below. [ADR 0144](0144-durable-images-and-incident-documentation.md) supersedes process-local application receipt storage for public async images; relay admission-cache limits remain separate.
 
 ## Decision
 
-Treat image synthesis as a non-idempotent operation. Dispatch once; neither the relay nor the application task queue automatically repeats image synthesis after an error. A lost response cannot establish that generation did not happen. Keep health observations independent from permission to replay work.
+Treat image synthesis as a non-idempotent operation. Dispatch once; neither the relay nor the application image service automatically repeats image synthesis after an error. A lost response cannot establish that generation did not happen. Keep health observations independent from permission to replay work.
 
-Tenant-scoped image idempotency receipts fingerprint the request, reject conflicting reuse even while pending, replay retained successful responses, and preserve uncertain outcomes. Use the existing bounded admission receipt implementation: ten-minute process-local window, 1,000 keys, 32 MiB aggregate response storage and 8 MiB per retained response. Do not evict a live key to admit a new write. These are bounded retry protections, not durable exactly-once execution across restarts.
+The relay’s tenant-scoped image admission receipts fingerprint the request, reject conflicting reuse even while pending, replay retained successful responses, and preserve uncertain outcomes. The relay admission cache retains its bounded implementation: ten-minute process-local window, 1,000 keys, 32 MiB aggregate response storage and 8 MiB per retained response. Do not evict a live key to admit a new write. These are bounded retry protections, not durable exactly-once execution across restarts.
+
+The public application now separately commits owner-scoped PostgreSQL image receipts before 202, claims dispatch atomically and ties completion to committed owned assets. Do not return public async status reads to a process-local task table. This does not make upstream execution exactly once. Follow [image recovery](../../post-mortem/runbooks/image-generation.md).
 
 DreamBees sends its durable generation UUID as the idempotency key, requests the canonical public image capability with explicit PNG/base64 output, and disables SDK retries. Customer receipt responses use a field allowlist; reads explicitly filter by the verified user. Unknown results remain unknown even if recording the error fails. The client separates status checks from creation, retains the pending attempt in memory if browser storage fails, blocks offline submission, and exposes accessible status and a copyable request identifier.
 
@@ -19,7 +21,7 @@ Image response frames have a separate bounded 32 MiB limit from the 2 MiB reques
 
 September 8 local verification: 75 relay tests; 19 public-boundary tests plus the image queue no-retry harness; 52 DreamBees desktop/mobile browser tests; nine studio unit tests; GALX production build and compiled HTTP authorization/public-surface verification. See the DreamBees build result and workspace audit record for its production build status.
 
-Status polling does not itself reconcile lost upstream results. Durable cross-restart deduplication, artifact recovery and a complete paid-entry transaction remain separate work. Browser memory cannot survive a reload when persistent storage is unavailable. Do not enable paid entry based on a mocked browser test.
+Status polling does not itself reconcile lost upstream results. The September 8 pass did not establish durable cross-restart application receipts, artifact recovery or a complete paid-entry transaction. ADR 0144 later added durable application receipt retrieval; it does not reconstruct lost upstream results or qualify paid entry. Browser memory cannot survive a reload when persistent storage is unavailable. Do not enable paid entry based on a mocked browser test.
 
 ## Deployment reconciliation — September 9
 
@@ -33,4 +35,4 @@ The request-token contract follows [AWS guidance on safe retries](https://aws.am
 
 ## Related text workflow
 
-[ADR 0135](0135-durable-sites-receipts-and-local-admission.md) introduces separate durable receipts for opted-in Sites text jobs. It does not change this image admission cache, recover image artifacts after restart, or establish paid Hive completion. [ADR 0134](0134-fixed-price-sites-generation-with-opaque-provider-quotas.md) prices only the bounded Sites content operation.
+[ADR 0135](0135-durable-sites-receipts-and-local-admission.md) introduces separate durable receipts for opted-in Sites text jobs. It does not change this image admission cache, recover image artifacts after restart, or establish paid Hive completion. Historical fixed-price Sites receipts retain [ADR 0134](0134-fixed-price-sites-generation-with-opaque-provider-quotas.md); new included Sites admission follows ADR 0140. Application image persistence follows ADR 0144 independently.

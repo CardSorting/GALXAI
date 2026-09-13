@@ -1,14 +1,10 @@
 /**
- * GALXAI: Direct PostgreSQL Connection Pool Substrate + Autonomous Circuit Breaker
- * Authoritative superuser / connection-pooled gateway for enterprise operations.
- * Connects directly via DATABASE_URL to guarantee zero-loss persistence and bypass client-side RLS filtering.
- *
- * Resilience Protocols:
- * 1. Autonomous Circuit Breaker: Fails fast to BroccoliDB hot-cache upon 3 consecutive DB timeouts/errors, preventing gateway request stalling.
- * 2. Transaction Pooler Compatibility: Configured for PgBouncer transaction-mode port 6543.
- * 3. Idle Client Recovery: Automatic non-fatal error isolation and self-healing.
- * 4. Statement Timeouts: 6,000ms hard ceiling to prevent connection exhaustion.
- * 5. Keep-Alive: 10,000ms TCP heartbeat to eliminate silent dead-socket hangs on AWS RDS.
+ * Server-side PostgreSQL pool and bounded execution permits.
+ * Callers select explicit privileged or tenant-scoped operations and retain
+ * their own ownership checks. Pool failure is not a successful cached write.
+ * Availability failures open a bounded circuit; recovery is fenced by the
+ * issued permit. SQL is executed once because uncertain writes cannot be
+ * replayed safely without operation-specific idempotency.
  */
 
 import { Pool, PoolClient, PoolConfig, QueryResult, QueryResultRow } from 'pg';

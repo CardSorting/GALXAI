@@ -1,84 +1,31 @@
-# 📈 Maintainer Guide: Telemetry, Observability & Prometheus Metrics
+# Telemetry sources and interpretation
 
-<!-- docs-scope: domain-reference -->
-> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+<!-- docs-scope: current-guide -->
 
-> **Target Audience**: Observability Engineers, SREs, and Platform Maintainers.  
-> **Subsystem**: OpenTelemetry (OTel), Prometheus metrics exporter, and Structured JSON loggers.
+Private maintainer reference, source-reviewed September 13, 2026. Begin an incident with the [telemetry overview](../TELEMETRY_AND_OBSERVABILITY.md) and [request investigation](RELAY_TELEMETRY.md). Liveness, eligibility, request acceptance, durable completion and customer-visible success are different observations.
 
----
+## Implemented surfaces
 
-## 1. Core Prometheus Metrics Exported by GALXAI
+| Surface | Owning source | Scope |
+| --- | --- | --- |
+| Controller aggregate telemetry and monitor state | [federation telemetry](../../src/relay/federation-telemetry.ts), [controller](../../src/relay/federation-server.ts) | Private server-side administration or delegated read-only monitor sessions, according to the route |
+| Worker `/metrics` | [relay server](../../src/relay/relay-server.ts) | Administrator-authorized worker metrics; not a universal public application endpoint |
+| Application internal telemetry | [internal telemetry route](../../src/app/api/internal/telemetry/route.ts), [telemetry engine](../../src/core/telemetry/BroccoliTelemetryEngine.ts) | Internal authorization, JSON snapshots or text exposition of retained in-process data |
 
-GALXAI exposes a standard Prometheus `/metrics` endpoint with zero-overhead atomic counters and histograms:
+Worker names include `galxai_relay_jobs_in_flight`, `galxai_relay_jobs_submitted_total` and `galxai_relay_jobs_completed_total`. Read the current exporter for the full set and actual units. Some labels refer to transport chunks as tokens; do not treat those as tokenizer usage or billing proof.
 
-| Metric Name | Type | Labels | Description |
-| :--- | :--- | :--- | :--- |
-| `galx_http_requests_total` | Counter | `method`, `route`, `status` | Total incoming HTTP/REST requests. |
-| `galx_compaction_input_tokens_total` | Counter | `mode`, `domain` | Total uncompressed raw input tokens. |
-| `galx_compaction_output_tokens_total` | Counter | `mode`, `domain` | Total compacted task-relevant tokens. |
-| `galx_compaction_tokens_saved_total` | Counter | `mode`, `domain` | Cumulative token savings delivered by BroccoliDB. |
-| `galx_compaction_fidelity_status_total` | Counter | `mode`, `status` | Count of `verified` vs `fallback` compaction results. |
-| `galx_vault_decryption_failures_total` | Counter | `tenant_uid`, `reason` | AAD mismatch or decryption failure alarms. |
-| `galx_paht_shard_headroom_ratio` | Gauge | `shard_id`, `provider` | Real-time hydraulic headroom ratio ($0.0 - 1.0$). |
-| `galx_circuit_breaker_state` | Gauge | `shard_id` | State enum ($0=\text{CLOSED}, 1=\text{DEGRADED}, 2=\text{OPEN}, 3=\text{HALF-OPEN}$). |
-| `galx_seat_5h_limit_remaining_pct` | Gauge | `user_id`, `tier` | User's 5-hour sliding window capacity remaining ($0-100\%$). |
-| `galx_seat_weekly_limit_remaining_pct` | Gauge | `user_id`, `tier` | User's weekly sliding window capacity remaining ($0-100\%$). |
-| `galx_seat_active_leases_total` | Gauge | `user_id` | Number of active concurrent stream leases in `galx_seat_request_leases`. |
-| `galx_chat_rolling_memory_hits_total` | Counter | `source` (`l1_broccolidb`, `l2_postgres`) | In-memory RAM vs durable database rolling memory lookups. |
-| `galx_chat_prompt_cache_hits_total` | Counter | `model_id` | Count of upstream prompt cache hits verified via stable prefix hashing. |
+The application engine derives metric names from retained observations and emits summaries/buckets plus `galx_telemetry_retained_points_total`. An empty process buffer is not proof that fleet activity was zero. Source support for exposition does not establish that a production collector, dashboard or alert is configured.
 
----
+The previous guide's fixed catalog of HTTP, savings, fidelity, vault and seat metrics was not supported by matching source implementations during this review. Its illustrative Grafana rules and claimed universal JSON schema have been removed. This page does not promise zero overhead, sub-millisecond timing or a deployed Prometheus/Grafana service.
 
-## 2. Structured JSON Log Fields
+## Diagnose with bounded evidence
 
-All serverless and edge logs are emitted in high-density structured JSON format:
+Correlate an opaque operation ID, time window, component/revision, phase and safe outcome code. Check observation freshness and missing workers before interpreting counts. Keep prompts, generated output, credentials, authorization headers, raw provider errors and unnecessary user identifiers out of shared evidence. Administrator access is distinct from ordinary sign-in.
 
-```json
-{
-  "timestamp": "2026-08-28T10:53:00.000Z",
-  "level": "info",
-  "service": "galx-router",
-  "traceId": "0af7651916cd43dd8448eb211c80319c",
-  "tenantUid": "usr_9482_enterprise",
-  "modelRequested": "gpt-4o",
-  "shardSelected": "shard_openai_tier5_01",
-  "compactionMode": "domain",
-  "domainHint": "legal-interrogatory",
-  "rawTokens": 1479,
-  "compactedTokens": 322,
-  "savingsPercentage": 78.23,
-  "fidelityStatus": "verified",
-  "latencyMs": 235,
-  "billedDollarsSaved": 0.002892
-}
-```
+For images, reconcile the original durable receipt and owned asset before calling the request complete. For new Sites work, distinguish included admission, durable outcome, published snapshot and paid entitlement. Historical wallet settlement applies only to original fixed/metered operations. See [Sites operations](SITES_OPERATIONS.md).
 
----
+## Alerts and verification
 
-## 3. High-Priority Alert Rules (Grafana / Alertmanager)
+Define each new alert from a real source signal, measured units, ownership and an actionable runbook. Confirm exporter behavior and collector configuration in the intended environment before describing it as active. The controller availability alert remains [open prevention work](../../post-mortem/OPEN_ITEMS.md); a runbook is not an installed monitor.
 
-```yaml
-groups:
-  - name: galxai_critical_alerts
-    rules:
-      - alert: CompactionFidelityFallbackSpike
-        expr: rate(galx_compaction_fidelity_status_total{status="fallback"}[5m]) > 0.05
-        for: 2m
-        labels:
-          severity: warning
-        annotations:
-          summary: "BroccoliDB Compaction Safety fallback rate exceeds 5%."
-
-      - alert: ShardFleetHeadroomExhausted
-        expr: min(galx_paht_shard_headroom_ratio) < 0.10
-        for: 1m
-        labels:
-          severity: critical
-        annotations:
-          summary: "Hydraulic headroom is below 10% on all Tier-5 shards."
-```
-
----
-
-*Observe everything with sub-millisecond precision.* 🥦📈⚡
+Record dated observations and missing coverage. Use the owning tests and private route authorization checks for source changes. Do not expose operational diagnostics to customers to make troubleshooting easier.

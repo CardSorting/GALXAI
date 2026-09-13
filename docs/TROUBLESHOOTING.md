@@ -3,11 +3,11 @@
 <!-- docs-scope: current-guide -->
 > **Reading scope:** Current guidance. The federation contract governs relay behavior; source and dated verification define implementation evidence. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-Start with the component and execution state. Product gateway keys, controller keys, worker administration, database authority, and provider credentials are separate. See [API boundaries](API_BASE_URL.md).
+Start with [incident triage](../post-mortem/runbooks/triage.md), [current state](../post-mortem/CURRENT_STATE.md) and the component/execution state. Record observations and containment in [the rolling log](../post-mortem/ROLLING_LOG.md). Product gateway keys, controller keys, worker administration, database authority, and provider credentials are separate. See [API boundaries](API_BASE_URL.md).
 
 ## Diagnostic order
 
-1. Check controller `/health` for reachability.
+1. Identify the affected route, existing operation, deployment and identity/access result. Use [image recovery](../post-mortem/runbooks/image-generation.md) for Images/Favorites; do not replace a valid session or resubmit an uncertain generation. Check controller `/health` for reachability only when that dependency is relevant.
 2. Open `npm run relay:open` on the controller host, or use server admin authorization for `/api/capabilities`, and inspect the requested model's eligible pool, evidence freshness, cooldown, and worker generation.
 3. Distinguish unavailable capability from saturated capacity. Idle unrelated models do not resolve either condition.
 4. Find the request ID, execution state, receipt scope, and any signed job URLs.
@@ -15,6 +15,11 @@ Start with the component and execution state. Product gateway keys, controller k
 
 | Symptom | Interpretation and action |
 | --- | --- |
+| Images/Favorites report expired session | Separate rejected credentials from Auth unavailability and administrator misconfiguration; [identity failure modes](../post-mortem/failure-modes/identity.md) |
+| Async image accepted then missing | Verify durable owner-scoped receipt and migration/deployment; [image recovery](../post-mortem/runbooks/image-generation.md) |
+| Favorite disappears after reload | Verify durable mutation acknowledgement, not just optimistic UI; [image persistence](../post-mortem/failure-modes/images.md) |
+| Controller supervisor cannot acquire its lock | Prove process/listener/file ownership before a bounded archive; [lock recovery](../post-mortem/runbooks/controller-lock.md) |
+| Deployment storage quota blocks release | Inventory aliases and compatible rollback, then [storage containment](../post-mortem/runbooks/deployment-storage.md) |
 | `model_temporarily_unavailable` | Inspect that operation's capability evidence, credential state, and refresh failures |
 | `model_capacity_exhausted` | Honor retry guidance for the eligible pool; inspect active streams/reservations |
 | `route`, generic 403/404, or timeout | Insufficient evidence of model permission loss; inspect sanitized upstream classification |
@@ -44,7 +49,7 @@ Database checkout saturation and query-specific errors must not become global co
 
 `docker-compose.relay.yml` and old shared-relay CLI commands are not the federation launcher. Use the supervised controller and [vNext runbook](RELAY_VNEXT_RUNBOOK.md). Confirm image and process generation after deployment; code on disk does not prove the running image changed.
 
-The September 7 DreamBees image verification succeeded as recorded in ADR 0127. Reproduce through the actual current client before claiming a new incident resolved. Billing, asset persistence, and tool execution require their own checks.
+Use [dated incident evidence](../post-mortem/INCIDENTS.md), including the September 13 existing-session image recovery, rather than treating an older client success as current acceptance. Reproduce through the actual affected client before claiming a new incident resolved. Billing, asset persistence, and tool execution require their own checks.
 
 ## Sites content
 

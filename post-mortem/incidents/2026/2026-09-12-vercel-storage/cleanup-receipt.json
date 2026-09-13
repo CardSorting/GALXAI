@@ -1,0 +1,206 @@
+{
+  "startedAt": "2026-09-13T02:18:47.430Z",
+  "projectId": "prj_NmtiUenK2cf924eREKuCgiDS0uC4",
+  "batches": [
+    {
+      "ids": [
+        "dpl_4Vf6XERzZ392teGxKpLT7S6u4DNm",
+        "dpl_9NKhSh1iB1WiRd7VzC8QMHz1TdnP",
+        "dpl_3STetMGz9UezziiJMigwnqkBwcUe",
+        "dpl_A3DmWN8t1JNhH7SU8ueWewJ9tS8S",
+        "dpl_4T2Z5Xhcoc8ZruHEmgYwJ8mZbmrU",
+        "dpl_H1tBPsGgcGNHrFS8sBjBrBnWZAPg",
+        "dpl_HXEnCXxzKm27od6pqDK9vECwwM3J",
+        "dpl_CsffXEUDD25CFNDiKhB2hpfre1Nn",
+        "dpl_AQXmeJrjWmFg3rcVW9iBRhyULXUW",
+        "dpl_5wQ9QKj7HEqee7fMkbRNgmMshrqq"
+      ],
+      "exitCode": 0,
+      "output": "(node:66947) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\nVercel CLI 48.5.0\nFetching deployment(s) \"dpl_4Vf6XERzZ392teGxKpLT7S6u4DNm\" \"dpl_9NKhSh1iB1WiRd7VzC8QMHz1TdnP\" \"dpl_3STetMGz9UezziiJMigwnqkBwcUe\" \"dpl_A3DmWN8t1JNhH7SU8ueWewJ9tS8S\" \"dpl_4T2Z5Xhcoc8ZruHEmgYwJ8mZbmrU\" \"dpl_H1tBPsGgcGNHrFS8sBjBrBnWZAPg\" \"dpl_HXEnCXxzKm27od6pqDK9vECwwM3J\" \"dpl_CsffXEUDD25CFNDiKhB2hpfre1Nn\" \"dpl_AQXmeJrjWmFg3rcVW9iBRhyULXUW\" \"dpl_5wQ9QKj7HEqee7fMkbRNgmMshrqq\" in cardsortings-projects\n> Found 10 deployments for removal in cardsortings-projects [1s]\n> Success! Removed 10 deployments [922ms]\n- galxai-loh4htmxk-cardsortings-projects.vercel.app\n- galxai-qqehcgv4i-cardsortings-projects.vercel.app\n- galxai-9c6l8mk1w-cardsortings-projects.vercel.app\n- galxai-8a66eagaf-cardsortings-projects.vercel.app\n- galxai-k5ioois64-cardsortings-projects.vercel.app\n- galxai-mb7as0o26-cardsortings-projects.vercel.app\n- galxai-pplajvxhe-cardsortings-projects.vercel.app\n- galxai-gyd26wvuq-cardsortings-projects.vercel.app\n- galxai-8lxpvj3da-cardsortings-projects.vercel.app\n- galxai-lz0joqvw4-cardsortings-projects.vercel.app\n",
+      "completedAt": "2026-09-13T02:18:50.558Z"
+    },
+    {
+      "ids": [
+        "dpl_CirCMv3ZmK5wq5JKkT8o17AqfjQU",
+        "dpl_Ag7Gyb56VHEH4A3PbeXyUJQ583ax",
+        "dpl_6TmKqqabQSgFqzRzANfLUR3LCjhc",
+        "dpl_7pjCdtZVpqVyGcMLPhxN6iuuwTgm",
+        "dpl_EANHe2m2bnKxSWSXgpDKxmWViBkm",
+        "dpl_CSMSDbRQdPJKT4FFpRyFbjJpefVu",
+        "dpl_FvyztPtDwYVzESU9Ee4aTtr2uT2u",
+        "dpl_DLazupDR1n9ZiYW5jRQDHS7xFrwS",
+        "dpl_EhaxRW9u8ujLBPFW1RM8uwC2wxGx",
+        "dpl_8j5u4BvrCq5TRHJKHsJm2VhKMyXA"
+      ],
+      "exitCode": 0,
+      "output": "(node:66960) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\nVercel CLI 48.5.0\nFetching deployment(s) \"dpl_CirCMv3ZmK5wq5JKkT8o17AqfjQU\" \"dpl_Ag7Gyb56VHEH4A3PbeXyUJQ583ax\" \"dpl_6TmKqqabQSgFqzRzANfLUR3LCjhc\" \"dpl_7pjCdtZVpqVyGcMLPhxN6iuuwTgm\" \"dpl_EANHe2m2bnKxSWSXgpDKxmWViBkm\" \"dpl_CSMSDbRQdPJKT4FFpRyFbjJpefVu\" \"dpl_FvyztPtDwYVzESU9Ee4aTtr2uT2u\" \"dpl_DLazupDR1n9ZiYW5jRQDHS7xFrwS\" \"dpl_EhaxRW9u8ujLBPFW1RM8uwC2wxGx\" \"dpl_8j5u4BvrCq5TRHJKHsJm2VhKMyXA\" in cardsortings-projects\n> Found 10 deployments for removal in cardsortings-projects [1s]\n> Success! Removed 10 deployments [868ms]\n- galxai-3o64x912i-cardsortings-projects.vercel.app\n- galxai-c7uvdgz1s-cardsortings-projects.vercel.app\n- galxai-5jkbnu1hn-cardsortings-projects.vercel.app\n- galxai-r94b8c5c8-cardsortings-projects.vercel.app\n- galxai-lnr6de3ih-cardsortings-projects.vercel.app\n- galxai-5gjc6x3zr-cardsortings-projects.vercel.app\n- galxai-r9n8mxchf-cardsortings-projects.vercel.app\n- galxai-qlcu419xi-cardsortings-projects.vercel.app\n- galxai-3wbtybbow-cardsortings-projects.vercel.app\n- galxai-5qhgqfcs1-cardsortings-projects.vercel.app\n",
+      "completedAt": "2026-09-13T02:18:53.410Z"
+    },
+    {
+      "ids": [
+        "dpl_F3XrtiB52PnrKef4W5oL5MUqKMWp",
+        "dpl_8XVrkaow4DMmXC5o5Mh1vjiNxQ6S",
+        "dpl_4utQNwoaAmmFnpsbg8dGXJ8VV4pe",
+        "dpl_9vNTtMT8Fcwi1UuCyHLBYsP2gsR3",
+        "dpl_NwK6QpJiFJW3PGnitWT7qfKAgJ9j",
+        "dpl_2PDCK4TVhS1QCr45sKmXPCCWpxQD",
+        "dpl_GzofiUijXzzAyjkSGdAjVEpkpWY6",
+        "dpl_D11CMwT6rgUx9i2VSprL9cC62dmh",
+        "dpl_9Xh3u5HDWArwP9d4ymfLgnizkfRD",
+        "dpl_EJgtgKkXJ7hWqoWBTvaWvCZu9rf8"
+      ],
+      "exitCode": 0,
+      "output": "(node:66969) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\nVercel CLI 48.5.0\nFetching deployment(s) \"dpl_F3XrtiB52PnrKef4W5oL5MUqKMWp\" \"dpl_8XVrkaow4DMmXC5o5Mh1vjiNxQ6S\" \"dpl_4utQNwoaAmmFnpsbg8dGXJ8VV4pe\" \"dpl_9vNTtMT8Fcwi1UuCyHLBYsP2gsR3\" \"dpl_NwK6QpJiFJW3PGnitWT7qfKAgJ9j\" \"dpl_2PDCK4TVhS1QCr45sKmXPCCWpxQD\" \"dpl_GzofiUijXzzAyjkSGdAjVEpkpWY6\" \"dpl_D11CMwT6rgUx9i2VSprL9cC62dmh\" \"dpl_9Xh3u5HDWArwP9d4ymfLgnizkfRD\" \"dpl_EJgtgKkXJ7hWqoWBTvaWvCZu9rf8\" in cardsortings-projects\n> Found 10 deployments for removal in cardsortings-projects [990ms]\n> Success! Removed 10 deployments [941ms]\n- galxai-joc52mn4s-cardsortings-projects.vercel.app\n- galxai-l0ueui95x-cardsortings-projects.vercel.app\n- galxai-ku8g5wgcs-cardsortings-projects.vercel.app\n- galxai-9378xpmu4-cardsortings-projects.vercel.app\n- galxai-86ao1wj5r-cardsortings-projects.vercel.app\n- galxai-ol9pw93h3-cardsortings-projects.vercel.app\n- galxai-lbr3m42vl-cardsortings-projects.vercel.app\n- galxai-j87x3052m-cardsortings-projects.vercel.app\n- galxai-oq5y3p836-cardsortings-projects.vercel.app\n- galxai-1ovz0w5bz-cardsortings-projects.vercel.app\n",
+      "completedAt": "2026-09-13T02:18:56.133Z"
+    },
+    {
+      "ids": [
+        "dpl_BvDWa8APYymD4PT1kETW5z5oq2qV",
+        "dpl_EzVpn2wJwWs8Cc6n9xkhKLqouopg",
+        "dpl_5N7swNbThBzdfuyreEyFQvoypGVr",
+        "dpl_BfSTqfrzVqkT8TURHB9ZcWmmfRxw",
+        "dpl_2wfk12TsXuNP3Y8SRZDThCkxYnLP",
+        "dpl_9powMsA7QqEz5xsumhT5ybjXLN52",
+        "dpl_FGBuhvnPpshwxNN31GepxvFKjSHC",
+        "dpl_7DtqHni7yi1b5vvQXpLQkiBr3H33",
+        "dpl_8w7Xa5dirb8YNUFom65LdRUPYPuT",
+        "dpl_8pLRhF3c4qFVG7exp2bSdZ8eynXV"
+      ],
+      "exitCode": 0,
+      "output": "(node:66977) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\nVercel CLI 48.5.0\nFetching deployment(s) \"dpl_BvDWa8APYymD4PT1kETW5z5oq2qV\" \"dpl_EzVpn2wJwWs8Cc6n9xkhKLqouopg\" \"dpl_5N7swNbThBzdfuyreEyFQvoypGVr\" \"dpl_BfSTqfrzVqkT8TURHB9ZcWmmfRxw\" \"dpl_2wfk12TsXuNP3Y8SRZDThCkxYnLP\" \"dpl_9powMsA7QqEz5xsumhT5ybjXLN52\" \"dpl_FGBuhvnPpshwxNN31GepxvFKjSHC\" \"dpl_7DtqHni7yi1b5vvQXpLQkiBr3H33\" \"dpl_8w7Xa5dirb8YNUFom65LdRUPYPuT\" \"dpl_8pLRhF3c4qFVG7exp2bSdZ8eynXV\" in cardsortings-projects\n> Found 10 deployments for removal in cardsortings-projects [1s]\n> Success! Removed 10 deployments [1s]\n- galxai-p92na1xx8-cardsortings-projects.vercel.app\n- galxai-d3d29x6h7-cardsortings-projects.vercel.app\n- galxai-mfmmoft4u-cardsortings-projects.vercel.app\n- galxai-73ckbp6sg-cardsortings-projects.vercel.app\n- galxai-76zesc7u6-cardsortings-projects.vercel.app\n- galxai-33kpfiyry-cardsortings-projects.vercel.app\n- galxai-4dk3mp8uq-cardsortings-projects.vercel.app\n- galxai-m6jswaz83-cardsortings-projects.vercel.app\n- galxai-cyxzj22dh-cardsortings-projects.vercel.app\n- galxai-5pat9ca2m-cardsortings-projects.vercel.app\n",
+      "completedAt": "2026-09-13T02:18:59.365Z"
+    },
+    {
+      "ids": [
+        "dpl_73EZF1DEzTmQQgzVhnj1mQeRoAaV",
+        "dpl_41K3YiegFYRWzT9CNRJF67mLgt8X",
+        "dpl_DYb6tUikKkPPVoh54uWHz5xb8nJW",
+        "dpl_HZfSHmk5LbYEo2rYoVYg8EbJP8Ro",
+        "dpl_CZYjRt73sLbGZRH1Mhfaq5jrRshA",
+        "dpl_51ZgPPPTz1adSonhL84NFHAt9Amm",
+        "dpl_jAvEmPuAwtTkBrDy9ed6kuZXHdc3",
+        "dpl_4bLdkEwfRg51rD5Dwig7YuAbxvYS",
+        "dpl_3yGgrQP83hhPmjchZ3F8f1Abns6p",
+        "dpl_4w541yc41gbkQHL7kBfd3d1vPEAq"
+      ],
+      "exitCode": 0,
+      "output": "(node:66986) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\nVercel CLI 48.5.0\nFetching deployment(s) \"dpl_73EZF1DEzTmQQgzVhnj1mQeRoAaV\" \"dpl_41K3YiegFYRWzT9CNRJF67mLgt8X\" \"dpl_DYb6tUikKkPPVoh54uWHz5xb8nJW\" \"dpl_HZfSHmk5LbYEo2rYoVYg8EbJP8Ro\" \"dpl_CZYjRt73sLbGZRH1Mhfaq5jrRshA\" \"dpl_51ZgPPPTz1adSonhL84NFHAt9Amm\" \"dpl_jAvEmPuAwtTkBrDy9ed6kuZXHdc3\" \"dpl_4bLdkEwfRg51rD5Dwig7YuAbxvYS\" \"dpl_3yGgrQP83hhPmjchZ3F8f1Abns6p\" \"dpl_4w541yc41gbkQHL7kBfd3d1vPEAq\" in cardsortings-projects\n> Found 10 deployments for removal in cardsortings-projects [686ms]\n> Success! Removed 10 deployments [746ms]\n- galxai-fwk3e8750-cardsortings-projects.vercel.app\n- galxai-1f8p8u3ea-cardsortings-projects.vercel.app\n- galxai-r7klhbxtw-cardsortings-projects.vercel.app\n- galxai-v7tv8uuq8-cardsortings-projects.vercel.app\n- galxai-hhxbfnwl7-cardsortings-projects.vercel.app\n- galxai-jwjoytn6u-cardsortings-projects.vercel.app\n- galxai-j178sovfn-cardsortings-projects.vercel.app\n- galxai-8r713mthe-cardsortings-projects.vercel.app\n- galxai-2g6pz58z6-cardsortings-projects.vercel.app\n- galxai-84c1l5sl1-cardsortings-projects.vercel.app\n",
+      "completedAt": "2026-09-13T02:19:01.550Z"
+    },
+    {
+      "ids": [
+        "dpl_HRWKZFWFMi3JeZn2pTAQR7feSbR9",
+        "dpl_2UtDWfKC3mzv8y6tnqLnmK2k965M",
+        "dpl_3wofsEy466Swq6BoV3E2VrArQ5Gc",
+        "dpl_GF4Y5GrF2WgswAiWeWN1CsGQTRHE",
+        "dpl_6hXVfedVAMur8M4PpTKAhecSvbVh",
+        "dpl_DX5NNRcALssk1AuuqNh4ET9mWB3f",
+        "dpl_8i9BKrMfAPcUUXA7UQVhgTTNBzcy",
+        "dpl_4bHqB3zbwdCkUYAVn7FaeQCJnPUM",
+        "dpl_2CnER8vgwZYT5hfKZsjVXV7Ji5CM",
+        "dpl_E11jfCJKFYaicHzzmJftRfZNK8Q9"
+      ],
+      "exitCode": 0,
+      "output": "(node:66995) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\nVercel CLI 48.5.0\nFetching deployment(s) \"dpl_HRWKZFWFMi3JeZn2pTAQR7feSbR9\" \"dpl_2UtDWfKC3mzv8y6tnqLnmK2k965M\" \"dpl_3wofsEy466Swq6BoV3E2VrArQ5Gc\" \"dpl_GF4Y5GrF2WgswAiWeWN1CsGQTRHE\" \"dpl_6hXVfedVAMur8M4PpTKAhecSvbVh\" \"dpl_DX5NNRcALssk1AuuqNh4ET9mWB3f\" \"dpl_8i9BKrMfAPcUUXA7UQVhgTTNBzcy\" \"dpl_4bHqB3zbwdCkUYAVn7FaeQCJnPUM\" \"dpl_2CnER8vgwZYT5hfKZsjVXV7Ji5CM\" \"dpl_E11jfCJKFYaicHzzmJftRfZNK8Q9\" in cardsortings-projects\n> Found 10 deployments for removal in cardsortings-projects [909ms]\n> Success! Removed 10 deployments [2s]\n- galxai-2xn0n44a8-cardsortings-projects.vercel.app\n- galxai-7eg8ic457-cardsortings-projects.vercel.app\n- galxai-r5ecrglrr-cardsortings-projects.vercel.app\n- galxai-ooivbvk35-cardsortings-projects.vercel.app\n- galxai-obrop9aaw-cardsortings-projects.vercel.app\n- galxai-2rahqyxx5-cardsortings-projects.vercel.app\n- galxai-i44p0ksku-cardsortings-projects.vercel.app\n- galxai-lsbc1ucoz-cardsortings-projects.vercel.app\n- galxai-7ii5mhhda-cardsortings-projects.vercel.app\n- galxai-heeskrxlx-cardsortings-projects.vercel.app\n",
+      "completedAt": "2026-09-13T02:19:04.949Z"
+    },
+    {
+      "ids": [
+        "dpl_HLHcufDreyk8rE8cQfKt57qCi3wm",
+        "dpl_9KbT4PTn1z7ZJzwyS7mw1QHsVsYy",
+        "dpl_97xVMmkjkfwZHWTWXdfhE1J86VqG",
+        "dpl_B5XxvEsMaEEoFYgLyve65odyRAyD",
+        "dpl_2yZ7EfSNkcfnyCcewXkHUbobgVFr",
+        "dpl_5MUHHcjn2Hq7ASMYhCZA3DdVsuu5",
+        "dpl_CdJwsrDD9CwnhxkDUiRhNhXRbXca",
+        "dpl_HJQkZ5iL4VjNGsMzLsiL6yUtMozy",
+        "dpl_8fvymiNJvFZ1PXR4g9KqGT1uNg5h",
+        "dpl_ENts3sn39wU5PnC5Laezx9fnFQwC"
+      ],
+      "exitCode": 0,
+      "output": "(node:67006) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\nVercel CLI 48.5.0\nFetching deployment(s) \"dpl_HLHcufDreyk8rE8cQfKt57qCi3wm\" \"dpl_9KbT4PTn1z7ZJzwyS7mw1QHsVsYy\" \"dpl_97xVMmkjkfwZHWTWXdfhE1J86VqG\" \"dpl_B5XxvEsMaEEoFYgLyve65odyRAyD\" \"dpl_2yZ7EfSNkcfnyCcewXkHUbobgVFr\" \"dpl_5MUHHcjn2Hq7ASMYhCZA3DdVsuu5\" \"dpl_CdJwsrDD9CwnhxkDUiRhNhXRbXca\" \"dpl_HJQkZ5iL4VjNGsMzLsiL6yUtMozy\" \"dpl_8fvymiNJvFZ1PXR4g9KqGT1uNg5h\" \"dpl_ENts3sn39wU5PnC5Laezx9fnFQwC\" in cardsortings-projects\n> Found 10 deployments for removal in cardsortings-projects [1s]\n> Success! Removed 10 deployments [778ms]\n- galxai-pim7l5v2d-cardsortings-projects.vercel.app\n- galxai-hnpqhpqai-cardsortings-projects.vercel.app\n- galxai-ip6dc58et-cardsortings-projects.vercel.app\n- galxai-88ux8a6r8-cardsortings-projects.vercel.app\n- galxai-9vlxyjt9j-cardsortings-projects.vercel.app\n- galxai-2laysgun6-cardsortings-projects.vercel.app\n- galxai-pntw756s5-cardsortings-projects.vercel.app\n- galxai-ofux7cksi-cardsortings-projects.vercel.app\n- galxai-4wi4i7wsm-cardsortings-projects.vercel.app\n- galxai-4dl8ll60e-cardsortings-projects.vercel.app\n",
+      "completedAt": "2026-09-13T02:19:07.665Z"
+    },
+    {
+      "ids": [
+        "dpl_9fkKpAQ4vfxF34puwqTbaT1oCUey",
+        "dpl_44JzCUiFxFsokLuQXkXwfpm7QQYk",
+        "dpl_DVRuZxdhThwgLJ7AZHKNR4HqHS89",
+        "dpl_HNq2tbYaLPhvtfRTsyZBs5srisu4",
+        "dpl_5bwK3edd2TrErUizR8L8Ja3w7NmL",
+        "dpl_EpcimW3jTBR6kX5U6wFahZ5873ao",
+        "dpl_4pP6XWt4ZYinAGogbuWzsFApVyos",
+        "dpl_CeCkhP39o1mNiEa2ycUdhoFHici2",
+        "dpl_DJ7fPFaGdkBpjxJbwtr8LAscSnC5",
+        "dpl_ELcPN9vtxQ4vn1cmwG6AEyu7T3ft"
+      ],
+      "exitCode": 0,
+      "output": "(node:67009) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\nVercel CLI 48.5.0\nFetching deployment(s) \"dpl_9fkKpAQ4vfxF34puwqTbaT1oCUey\" \"dpl_44JzCUiFxFsokLuQXkXwfpm7QQYk\" \"dpl_DVRuZxdhThwgLJ7AZHKNR4HqHS89\" \"dpl_HNq2tbYaLPhvtfRTsyZBs5srisu4\" \"dpl_5bwK3edd2TrErUizR8L8Ja3w7NmL\" \"dpl_EpcimW3jTBR6kX5U6wFahZ5873ao\" \"dpl_4pP6XWt4ZYinAGogbuWzsFApVyos\" \"dpl_CeCkhP39o1mNiEa2ycUdhoFHici2\" \"dpl_DJ7fPFaGdkBpjxJbwtr8LAscSnC5\" \"dpl_ELcPN9vtxQ4vn1cmwG6AEyu7T3ft\" in cardsortings-projects\n> Found 10 deployments for removal in cardsortings-projects [979ms]\n> Success! Removed 10 deployments [818ms]\n- galxai-of6ckcwks-cardsortings-projects.vercel.app\n- galxai-235mf645u-cardsortings-projects.vercel.app\n- galxai-ml763h70i-cardsortings-projects.vercel.app\n- galxai-edpm1hin0-cardsortings-projects.vercel.app\n- galxai-ngy7iwxv7-cardsortings-projects.vercel.app\n- galxai-hizikt016-cardsortings-projects.vercel.app\n- galxai-9av4b8yzl-cardsortings-projects.vercel.app\n- galxai-pntht5b16-cardsortings-projects.vercel.app\n- galxai-4t8s84hvm-cardsortings-projects.vercel.app\n- galxai-g15o56uqn-cardsortings-projects.vercel.app\n",
+      "completedAt": "2026-09-13T02:19:10.360Z"
+    },
+    {
+      "ids": [
+        "dpl_HMPbXEpoFe7CZFopg82oNcFzB3Ld",
+        "dpl_8qMZyaAtY28bSbND5XMPFdB3Sa5T",
+        "dpl_GG17qdj3XgktZbURE8UfzSbCtX6E",
+        "dpl_43YntTDor3EWQPd5EvAWAF6r85xV",
+        "dpl_9vsBiiMuFFUaU8akCGHyu7guyMYN",
+        "dpl_8X47fSuQgQm9YLpfBu7nxTC5Sk9q",
+        "dpl_H1PXBPhrCsz2YrWz1bJXZAmXPV1Q",
+        "dpl_9y7TEL6NMaoyakrvTGLstnemjMeL",
+        "dpl_7y3yaivStgXvHJRj1Bm8FDw2Pq1B",
+        "dpl_D9q1p7L8iBXsRfgMd8mCyp5oEL39"
+      ],
+      "exitCode": 0,
+      "output": "(node:67020) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\nVercel CLI 48.5.0\nFetching deployment(s) \"dpl_HMPbXEpoFe7CZFopg82oNcFzB3Ld\" \"dpl_8qMZyaAtY28bSbND5XMPFdB3Sa5T\" \"dpl_GG17qdj3XgktZbURE8UfzSbCtX6E\" \"dpl_43YntTDor3EWQPd5EvAWAF6r85xV\" \"dpl_9vsBiiMuFFUaU8akCGHyu7guyMYN\" \"dpl_8X47fSuQgQm9YLpfBu7nxTC5Sk9q\" \"dpl_H1PXBPhrCsz2YrWz1bJXZAmXPV1Q\" \"dpl_9y7TEL6NMaoyakrvTGLstnemjMeL\" \"dpl_7y3yaivStgXvHJRj1Bm8FDw2Pq1B\" \"dpl_D9q1p7L8iBXsRfgMd8mCyp5oEL39\" in cardsortings-projects\n> Found 10 deployments for removal in cardsortings-projects [839ms]\n> Success! Removed 10 deployments [1s]\n- galxai-e3ftbiqa3-cardsortings-projects.vercel.app\n- galxai-djnf5x6fh-cardsortings-projects.vercel.app\n- galxai-dbm5mew96-cardsortings-projects.vercel.app\n- galxai-on0257jzp-cardsortings-projects.vercel.app\n- galxai-nsvplu0dy-cardsortings-projects.vercel.app\n- galxai-luj0l0ny0-cardsortings-projects.vercel.app\n- galxai-k0thy6zwt-cardsortings-projects.vercel.app\n- galxai-19hp1fcba-cardsortings-projects.vercel.app\n- galxai-3quzodkc3-cardsortings-projects.vercel.app\n- galxai-q0huzgh8m-cardsortings-projects.vercel.app\n",
+      "completedAt": "2026-09-13T02:19:13.496Z"
+    },
+    {
+      "ids": [
+        "dpl_28VGonDtYa4QjmJqWkZp4YzZpj72",
+        "dpl_77PAeJEAFWFv8cPTFHu2GCZjowku",
+        "dpl_CFrC4uSpQNvf5FGXQeqjPyWvz2sD",
+        "dpl_5wucwhUiH4GtVaqMdpH2QS1kXL5r",
+        "dpl_HW4m3Lb3xvW8aFM9if64Bt3iS71H",
+        "dpl_BERysA3F1SBontCmz1piqKzNhTVh",
+        "dpl_3XeAm3cRcGuPBDXm4NuXZ6zAiBAt",
+        "dpl_4yrn5Wn895jzL3vhcZEwRNoP49FP",
+        "dpl_ACE8aqBpFK8gJTYK398uBUrcNK5u",
+        "dpl_3mpjfyR2SFmZTTnd69xRF6QJM5SN"
+      ],
+      "exitCode": 0,
+      "output": "(node:67029) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\nVercel CLI 48.5.0\nFetching deployment(s) \"dpl_28VGonDtYa4QjmJqWkZp4YzZpj72\" \"dpl_77PAeJEAFWFv8cPTFHu2GCZjowku\" \"dpl_CFrC4uSpQNvf5FGXQeqjPyWvz2sD\" \"dpl_5wucwhUiH4GtVaqMdpH2QS1kXL5r\" \"dpl_HW4m3Lb3xvW8aFM9if64Bt3iS71H\" \"dpl_BERysA3F1SBontCmz1piqKzNhTVh\" \"dpl_3XeAm3cRcGuPBDXm4NuXZ6zAiBAt\" \"dpl_4yrn5Wn895jzL3vhcZEwRNoP49FP\" \"dpl_ACE8aqBpFK8gJTYK398uBUrcNK5u\" \"dpl_3mpjfyR2SFmZTTnd69xRF6QJM5SN\" in cardsortings-projects\n> Found 10 deployments for removal in cardsortings-projects [1s]\n> Success! Removed 10 deployments [938ms]\n- galxai-rieyxhfp6-cardsortings-projects.vercel.app\n- galxai-2ouatjv5o-cardsortings-projects.vercel.app\n- galxai-jujvvsrtf-cardsortings-projects.vercel.app\n- galxai-3fp33cde6-cardsortings-projects.vercel.app\n- galxai-m2x4ek9hk-cardsortings-projects.vercel.app\n- galxai-6xajbpw03-cardsortings-projects.vercel.app\n- galxai-r89ndqwz4-cardsortings-projects.vercel.app\n- galxai-1qyuj1r3t-cardsortings-projects.vercel.app\n- galxai-gs2xp5q5w-cardsortings-projects.vercel.app\n- galxai-3nn1t5qhp-cardsortings-projects.vercel.app\n",
+      "completedAt": "2026-09-13T02:19:16.445Z"
+    },
+    {
+      "ids": [
+        "dpl_5iyJBqjtPNJegzG1SRjev2RC3hGq",
+        "dpl_Dag9Bm4VsgsUrmTXW2LpEREsUMU5",
+        "dpl_4srYaDAsB2wNGisvEDdafrvKxtbJ",
+        "dpl_GF96JteaxMSc5jiPbDbCTFtZwJNe",
+        "dpl_GEbi2Zc1W4hvjatd2ojAi1UnMyUJ",
+        "dpl_CUUxBpyQtjGme8xcuhb5PAZiGvzh",
+        "dpl_2BGCAyc9WhCck656upFBKGxW2h9s",
+        "dpl_65B4Rncn7pLZrVgwBYJowuVHxUUX",
+        "dpl_Hi6BGJTrm6mqhsMwYzC4tDmhrAmB",
+        "dpl_8Cw1P9ipoxCJ4butjDEnooLdWmvJ"
+      ],
+      "exitCode": 0,
+      "output": "(node:67037) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\nVercel CLI 48.5.0\nFetching deployment(s) \"dpl_5iyJBqjtPNJegzG1SRjev2RC3hGq\" \"dpl_Dag9Bm4VsgsUrmTXW2LpEREsUMU5\" \"dpl_4srYaDAsB2wNGisvEDdafrvKxtbJ\" \"dpl_GF96JteaxMSc5jiPbDbCTFtZwJNe\" \"dpl_GEbi2Zc1W4hvjatd2ojAi1UnMyUJ\" \"dpl_CUUxBpyQtjGme8xcuhb5PAZiGvzh\" \"dpl_2BGCAyc9WhCck656upFBKGxW2h9s\" \"dpl_65B4Rncn7pLZrVgwBYJowuVHxUUX\" \"dpl_Hi6BGJTrm6mqhsMwYzC4tDmhrAmB\" \"dpl_8Cw1P9ipoxCJ4butjDEnooLdWmvJ\" in cardsortings-projects\n> Found 10 deployments for removal in cardsortings-projects [781ms]\n> Success! Removed 10 deployments [1s]\n- galxai-ev761y2pw-cardsortings-projects.vercel.app\n- galxai-htvnw46ay-cardsortings-projects.vercel.app\n- galxai-gbrf4i1p5-cardsortings-projects.vercel.app\n- galxai-cf3x7tpj7-cardsortings-projects.vercel.app\n- galxai-5as5orbyt-cardsortings-projects.vercel.app\n- galxai-h0dzp22jf-cardsortings-projects.vercel.app\n- galxai-5js1yu72p-cardsortings-projects.vercel.app\n- galxai-4jw9n7zyl-cardsortings-projects.vercel.app\n- galxai-bvp4nbc72-cardsortings-projects.vercel.app\n- galxai-i10rbzym3-cardsortings-projects.vercel.app\n",
+      "completedAt": "2026-09-13T02:19:19.101Z"
+    },
+    {
+      "ids": [
+        "dpl_13wNqWCXmAee5czsf1HfQH79rm3C",
+        "dpl_FJf9uguRagry5WiA4afAt1cyXxoZ",
+        "dpl_4hhPw2npVowrbHEx4sKVD27xNeEY",
+        "dpl_Fb3v1TFsZP9DxvMqAFyBDqNJXCZh",
+        "dpl_Bk4MdXiprm2MwfWQpVwTncnVsicJ"
+      ],
+      "exitCode": 0,
+      "output": "(node:67050) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.\n(Use `node --trace-warnings ...` to show where the warning was created)\nVercel CLI 48.5.0\nFetching deployment(s) \"dpl_13wNqWCXmAee5czsf1HfQH79rm3C\" \"dpl_FJf9uguRagry5WiA4afAt1cyXxoZ\" \"dpl_4hhPw2npVowrbHEx4sKVD27xNeEY\" \"dpl_Fb3v1TFsZP9DxvMqAFyBDqNJXCZh\" \"dpl_Bk4MdXiprm2MwfWQpVwTncnVsicJ\" in cardsortings-projects\n> Found 5 deployments for removal in cardsortings-projects [920ms]\n> Success! Removed 5 deployments [353ms]\n- galxai-mhffpioi2-cardsortings-projects.vercel.app\n- galxai-dbpdkh04u-cardsortings-projects.vercel.app\n- galxai-8gy4n7kxq-cardsortings-projects.vercel.app\n- galxai-qb7kxqlrz-cardsortings-projects.vercel.app\n- galxai-ne3iur08j-cardsortings-projects.vercel.app\n",
+      "completedAt": "2026-09-13T02:19:21.192Z"
+    }
+  ],
+  "completedAt": "2026-09-13T02:19:21.192Z"
+}

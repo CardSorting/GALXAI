@@ -1,0 +1,29 @@
+# Private records and host state must never enter a Docker build context.
+/post-mortem/
+/internal/
+/docs/
+/*.md
+/.git/
+/.relay/
+/.broccolidb/
+/.data/
+/.codex/
+/.agents/
+/.impeccable/
+/.vercel/
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+*.secret
+*.secrets
+*.key
+*.pem
+
+# Use declared source/dependencies, not the host's generated output.
+/node_modules/
+/.next/
+/out/
+/dist/
+*.tsbuildinfo
+*.log

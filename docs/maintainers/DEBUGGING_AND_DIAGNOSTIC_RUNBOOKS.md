@@ -1,149 +1,27 @@
-# 🔧 Maintainer Debugging & Diagnostic Runbooks
+# Maintainer debugging and diagnostics
 
-<!-- docs-scope: domain-reference -->
-> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](../FEDERATION_STRATEGY.md) and [complete catalog](../CATALOG.md).
+<!-- docs-scope: current-guide -->
 
-> **Target Audience**: SRE On-Call Engineers, Core Maintainers, and Incident Responders.  
-> **Purpose**: Fast-triage decision trees, log analysis recipes, and emergency remediation runbooks for platform maintainers.
+Private incident entry point. Follow [triage](../../post-mortem/runbooks/triage.md), [known failure modes](../../post-mortem/failure-modes/README.md) and the [rolling log](../../post-mortem/ROLLING_LOG.md). Identify the component and operation state before changing anything.
 
----
+| Symptom | Diagnostic boundary | Procedure |
+| --- | --- | --- |
+| Images/Favorites say session expired | Verified Auth rejection vs transport/configuration failure | [Identity failures](../../post-mortem/failure-modes/identity.md) |
+| Accepted image disappears or fails | Durable receipt, claim, storage and serving generation path | [Image recovery](../../post-mortem/runbooks/image-generation.md) |
+| Controller will not start | Supervisor, exact process identity, listener and exclusive lock | [Controller ownership](../../post-mortem/runbooks/controller-lock.md) |
+| Deployment storage exhausted | Complete deployment inventory, aliases and accounting window | [Storage containment](../../post-mortem/runbooks/deployment-storage.md) |
+| Database saturation | Owning pool, bounded concurrency, query/error classification | [Database operations](POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md), [egress evidence](../../post-mortem/incidents/2026/2026-09-09-egress/README.md) |
+| Credential/capability unavailable | Current authority revision and fresh attributable evidence | [Enrollment](RELAY_CREDENTIAL_ENROLLMENT.md), [fleet](RELAY_QUOTA_AND_FLEET.md) |
+| Sites pending or publication unavailable | Original operation, entitlement, receipt and publication state separately | [Sites operations](SITES_OPERATIONS.md) |
 
-## 📑 Diagnostic Scenarios
+## Diagnostic safety
 
-1. [Diagnostic 1: Cryptographic Decryption Failure (HTTP 500)](#diagnostic-1-cryptographic-decryption-failure-http-500)
-2. [Diagnostic 2: Compaction Fidelity Warning or Fallback](#diagnostic-2-compaction-fidelity-warning-or-fallback)
-3. [Diagnostic 3: Upstream Rate Limit Spike (HTTP 429)](#diagnostic-3-upstream-rate-limit-spike-http-429)
-4. [Diagnostic 4: PostgreSQL Connection Pool Thrashing](#diagnostic-4-postgresql-connection-pool-thrashing)
-5. [Diagnostic 5: Edge KV Rate Limit Desynchronization](#diagnostic-5-edge-kv-rate-limit-desynchronization)
+Inspect credential presence/type and private error classification without printing secrets. Do not run vault-population, environment-sync, seed or migration scripts as read-only tests. Preserve existing encrypted state; changing the vault root is not a decryption repair.
 
----
+A timeout or database checkout error is not proof of credential rejection, exhausted supplier quota or non-dispatch. Observe lease/receipt authority before release or retry. Do not force a healthy state from telemetry, clear cooldowns without attributable evidence, or replay an uncertain operation.
 
-## Diagnostic 1: Cryptographic Decryption Failure (HTTP 500)
+Do not switch database connection modes, remove leases or restart workers based only on a generic symptom. Confirm the owning code and current configuration; historical port/default examples are not production authority. Use isolated fixtures to test suspected changes.
 
-### 🚨 Symptoms
-- Client receives `500 Internal Server Error` with code `VAULT_DECRYPTION_FAILED`.
-- Server logs show `GalxVaultDecryptionError: Authenticated data mismatch`.
+## Completion
 
-### 🔍 Cause
-The Authenticated Associated Data (AAD) tuple `${tenantUid}:${shardId}:${provider}` or the master encryption seed does not match the parameters used during encryption.
-
-### 🛠️ Remediation Steps
-1. **Check Environment Master Secret**:
-   ```bash
-   echo $GALX_VAULT_MASTER_SECRET
-   ```
-   Ensure the seed matches between Vercel serverless containers and Cloudflare Edge workers.
-2. **Verify AAD Registration in PostgreSQL**:
-   Inspect the row in `galx_provider_shards`:
-   ```sql
-   SELECT id, tenant_uid, provider, key_version FROM galx_provider_shards WHERE id = 'shard_123';
-   ```
-3. **Execute Local Crypto Test**:
-   ```bash
-   npx tsx scripts/populate-vault-secrets.ts
-   ```
-
----
-
-## Diagnostic 2: Compaction Fidelity Warning or Fallback
-
-### 🚨 Symptoms
-- Compaction endpoint returns `fidelityStatus: "fallback"` with non-empty `unsupportedFacts`.
-- Client response is uncompressed raw source text instead of compacted output.
-
-### 🔍 Cause
-`BroccoliCompactionSafety` detected an extracted fact (e.g. a dollar amount, percentage, date, or identifier) that was present in the output digest but could not be grounded in the input text.
-
-### 🛠️ Remediation Steps
-1. **Run Payload Dissection Tool**:
-   ```bash
-   npx tsx scripts/dissect-payloads-and-causal-analysis.ts
-   ```
-2. **Inspect Domain Regex/Parser**:
-   Open the corresponding domain compactor in `src/core/broccolidb/` and verify that the regex accurately hoists the specific field.
-3. **Verify Safety Gate**:
-   ```bash
-   npm run test:broccolidb:hardening
-   ```
-
----
-
-## Diagnostic 3: Upstream Rate Limit Spike (HTTP 429)
-
-### 🚨 Symptoms
-- High rate of HTTP 429 errors from upstream providers (`openai` or `xai`).
-- Latency spikes on active streaming connections.
-
-### 🔍 Cause
-A tenant's request volume exceeded the available soft reservation capacity in the `GalxCredentialPool` or an upstream foundation model shard reached its Tier-5 TPM ceiling.
-
-### 🛠️ Remediation Steps
-1. **Inspect Shard Fleet Health**:
-   ```bash
-   npm run playbook -- --stage=traffic
-   ```
-2. **Verify Circuit Breaker Auto-Failover**:
-   Inspect the owning circuit breaker and attributable cooldown evidence. In federation routing, only healthy shards with the same fresh requested capability are eligible; a relay error does not authorize model substitution or replay of uncertain work.
-3. **Enable Aggressive Input Compaction**:
-   Ensure incoming client requests set the header `x-galx-compact: true` to compress input prompt volume by up to $85.93\%$, preserving $3.3\times$ TPM headroom.
-
----
-
-## Diagnostic 4: PostgreSQL Connection Pool Thrashing
-
-### 🚨 Symptoms
-- Serverless API routes return `ETIMEDOUT` or `remaining connection slots are reserved`.
-
-### 🛠️ Remediation Steps
-1. **Verify PgBouncer Port 6543**:
-   Ensure `DATABASE_URL` specifies port `6543` with `?pgbouncer=true` rather than direct port `5432`.
-2. **Verify Edge Micro-Metering**:
-   Ensure Cloudflare Edge Workers aggregate token deductions using `fn_batch_draw_wallet_tokens_cf` rather than single-row writes.
-3. **Run Supabase Schema Verifier**:
-   ```bash
-   npm run db:verify
-   ```
-
----
-
-## Diagnostic 5: Seat Request Lease Contention & Orphaned Stream Leases
-
-### 🚨 Symptoms
-- Client receives `HTTP 429 concurrency_limit_exceeded` or `seat_lease_timeout` despite low active stream counts.
-
-### 🔍 Cause
-An unhandled client disconnect or network interruption terminated a stream without completing `fn_settle_seat_stream_completion_composite_v2`, leaving an active reservation in `galx_seat_request_leases`.
-
-### 🛠️ Remediation Steps
-1. **Automatic TTL Resolution**:
-   Leases expire automatically after their TTL (`180s`). Active streams are freed automatically.
-2. **Execute Manual Lease Release**:
-   ```sql
-   SELECT fn_release_seat_request_lease('lease_uuid_here');
-   ```
-3. **Verify Concurrency Semaphore in Test Suite**:
-   ```bash
-   npx tsx scripts/test-chat-context-hardening.ts
-   ```
-
----
-
-## Diagnostic 6: Tool Turn-Pair Compaction Boundary Invariant Failures
-
-### 🚨 Symptoms
-- Upstream provider rejects chat completion with HTTP 400 (`orphaned_tool_message` or `tool_use_id without matching tool_result`).
-
-### 🔍 Cause
-A client or custom compaction strategy severed an `assistant` message containing `tool_calls` from its subsequent `tool` execution response across sliding window boundaries.
-
-### 🛠️ Remediation Steps
-1. **Verify `ensureAtomicTurnPairs`**:
-   Ensure `GalxRollingContextEngine.buildOptimalRollingContext` executes `ensureAtomicTurnPairs` to shift compaction boundaries leftward to enclose assistant triggers.
-2. **Run Request Normalizer Verification**:
-   ```bash
-   npx tsx scripts/test-chat-context-hardening.ts
-   ```
-
----
-
-*For full operational playbooks, see [../playbooks/README.md](../playbooks/README.md).* 🥦🔧🚀
+Record evidence and each bounded intervention. Require actual affected-client acceptance and persistence verification before calling service recovered. Add a regression check and any remaining prevention action. Update affected guides in full and run `npm run docs:check`; keep operational details out of customer responses.

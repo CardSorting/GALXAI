@@ -1,0 +1,248 @@
+{
+  "version": 1,
+  "classification": "private",
+  "notes": "Severity assigned retrospectively where the original record had no incident label. Recovered historical records retain their original verification scope; no fresh live test is implied.",
+  "incidents": [
+    {
+      "id": "INC-20260907-RELAY",
+      "category": "relay",
+      "severity": "SEV-1",
+      "status": "recovered",
+      "title": "Relay transport and production ingress",
+      "owner": "maintainer",
+      "record": "post-mortem/incidents/2026/2026-09-07-relay/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-07-relay/README.md"
+      ],
+      "failure_modes": [
+        "FM-DEPLOY-002"
+      ],
+      "recovery_evidence": [
+        "post-mortem/incidents/2026/2026-09-07-relay/README.md"
+      ]
+    },
+    {
+      "id": "INC-20260907-WALLET",
+      "category": "persistence",
+      "severity": "SEV-2",
+      "status": "recovered",
+      "title": "Wallet lifecycle and authority",
+      "owner": "maintainer",
+      "record": "post-mortem/incidents/2026/2026-09-07-wallet/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-07-wallet/README.md"
+      ],
+      "failure_modes": [],
+      "recovery_evidence": [
+        "post-mortem/incidents/2026/2026-09-07-wallet/README.md"
+      ]
+    },
+    {
+      "id": "INC-20260907-BILLING",
+      "category": "billing",
+      "severity": "SEV-1",
+      "status": "recovered",
+      "title": "Billing recovery and webhook credential containment",
+      "owner": "maintainer",
+      "record": "post-mortem/incidents/2026/2026-09-07-billing/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-07-billing/README.md"
+      ],
+      "failure_modes": [],
+      "recovery_evidence": [
+        "post-mortem/incidents/2026/2026-09-07-billing/README.md"
+      ]
+    },
+    {
+      "id": "INC-20260909-EGRESS",
+      "category": "database",
+      "severity": "SEV-2",
+      "status": "recovered",
+      "title": "Database egress and bounded recovery",
+      "owner": "maintainer",
+      "record": "post-mortem/incidents/2026/2026-09-09-egress/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-09-egress/README.md"
+      ],
+      "failure_modes": [],
+      "recovery_evidence": [
+        "post-mortem/incidents/2026/2026-09-09-egress/README.md"
+      ]
+    },
+    {
+      "id": "INC-20260912-STORAGE",
+      "category": "deployment",
+      "severity": "SEV-2",
+      "status": "contained",
+      "title": "Deployment storage pressure",
+      "owner": "maintainer",
+      "record": "post-mortem/incidents/2026/2026-09-12-vercel-storage/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-12-vercel-storage/README.md"
+      ],
+      "failure_modes": [
+        "FM-DEPLOY-001"
+      ],
+      "recovery_evidence": []
+    },
+    {
+      "id": "INC-20260912-AUTH",
+      "category": "identity",
+      "severity": "SEV-1",
+      "status": "recovered",
+      "title": "Image library and Favorites false session expiry",
+      "owner": "maintainer",
+      "record": "post-mortem/incidents/2026/2026-09-12-image-library-auth/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-12-image-library-auth/README.md"
+      ],
+      "failure_modes": [
+        "FM-AUTH-001",
+        "FM-AUTH-002"
+      ],
+      "recovery_evidence": [
+        "post-mortem/incidents/2026/2026-09-13-image-generation/README.md"
+      ]
+    },
+    {
+      "id": "INC-20260913-IMAGES",
+      "category": "images",
+      "severity": "SEV-1",
+      "status": "recovered",
+      "title": "Durable generation, storage and controller recovery",
+      "owner": "maintainer",
+      "record": "post-mortem/incidents/2026/2026-09-13-image-generation/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-13-image-generation/README.md"
+      ],
+      "failure_modes": [
+        "FM-IMG-001",
+        "FM-IMG-002",
+        "FM-IMG-003",
+        "FM-CTRL-001",
+        "FM-DEPLOY-002"
+      ],
+      "recovery_evidence": [
+        "post-mortem/incidents/2026/2026-09-13-image-generation/README.md"
+      ]
+    },
+    {
+      "id": "INC-20260913-DOCS",
+      "category": "documentation",
+      "severity": "SEV-3",
+      "status": "recovered",
+      "title": "Incident consolidation and stale operational guidance",
+      "owner": "maintainer",
+      "record": "post-mortem/incidents/2026/2026-09-13-documentation/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-13-documentation/README.md"
+      ],
+      "failure_modes": [
+        "FM-DOCS-001",
+        "FM-ACCESS-001"
+      ],
+      "recovery_evidence": [
+        "post-mortem/incidents/2026/2026-09-13-documentation/verification.json"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "ACT-001",
+      "incident": "INC-20260912-STORAGE",
+      "owner": "deployment maintainer",
+      "review_by": "2026-09-14",
+      "status": "open",
+      "next_step": "Recheck both storage metrics and current deployment inventory in the same team/date range.",
+      "closure": "Record actual totals and whether deployment capacity is available; retain compatible rollback and active aliases."
+    },
+    {
+      "id": "ACT-002",
+      "incident": "INC-20260913-IMAGES",
+      "owner": "relay maintainer",
+      "review_by": "2026-09-20",
+      "status": "open",
+      "next_step": "Implement bounded private detection for a supervised controller that cannot start because of a stale lock.",
+      "closure": "A controlled stopped-controller fixture triggers an actionable alert without deleting a lock or repeatedly invoking inference."
+    },
+    {
+      "id": "ACT-003",
+      "incident": "INC-20260913-IMAGES",
+      "owner": "relay maintainer",
+      "review_by": "2026-09-20",
+      "status": "open",
+      "next_step": "Rehearse crash/restart and guarded lock recovery using disposable controller state.",
+      "closure": "Prove one owner, live-lock refusal, preserved workers/state and no duplicate dispatch; record recovery timing."
+    },
+    {
+      "id": "ACT-004",
+      "incident": "INC-20260913-IMAGES",
+      "owner": "release maintainer",
+      "review_by": "2026-09-14",
+      "status": "open",
+      "next_step": "Review and commit the deployed generation fix plus this documentation change, then verify the pushed CI run when authorized.",
+      "closure": "Record commit SHA, push and CI result separately; reconcile deployed dirty-tree source with Git."
+    },
+    {
+      "id": "ACT-005",
+      "incident": "INC-20260913-IMAGES",
+      "owner": "image maintainer",
+      "review_by": "2026-09-20",
+      "status": "open",
+      "next_step": "Define bounded retention for queued/failed image payloads and expired operation receipts without enabling replay.",
+      "closure": "Review privacy/storage needs and idempotency retention; test cleanup against accepted and ambiguous operations before activation."
+    },
+    {
+      "id": "ACT-006",
+      "incident": "INC-20260912-AUTH",
+      "owner": "identity maintainer",
+      "review_by": "2026-09-20",
+      "status": "open",
+      "next_step": "Audit any remaining administrator credential dependencies independently of public Auth verification.",
+      "closure": "Affected admin paths use valid least-privilege authority or remain explicitly unavailable; no publishable key is elevated."
+    },
+    {
+      "id": "ACT-007",
+      "incident": "INC-20260913-DOCS",
+      "owner": "release maintainer",
+      "review_by": "2026-09-14",
+      "status": "open",
+      "next_step": "Verify the documentation guard and image regression gates run on the remote branch after the workflow is pushed.",
+      "closure": "Link a successful remote CI run; local checks alone do not establish remote enforcement."
+    },
+    {
+      "id": "ACT-008",
+      "incident": "INC-20260913-DOCS",
+      "owner": "documentation maintainer",
+      "review_by": "2026-09-20",
+      "status": "open",
+      "next_step": "Review open actions and source-bound guides weekly and on relevant releases.",
+      "closure": "Append dated reviews, correct stale statements and reset review deadlines only with evidence; this is an ongoing responsibility."
+    },
+    {
+      "id": "ACT-009",
+      "incident": "INC-20260913-IMAGES",
+      "owner": "image maintainer",
+      "review_by": "2026-09-13",
+      "status": "completed",
+      "next_step": "Restore generation and verify the existing-session frontend, artifact download and persisted Favorites.",
+      "closure": "Actual frontend generation succeeded and image/Favorites survived reload; downloaded PNG decoded without retained metadata.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-13-image-generation/README.md",
+        "post-mortem/incidents/2026/2026-09-13-image-generation/download-verification.json"
+      ]
+    },
+    {
+      "id": "ACT-010",
+      "incident": "INC-20260913-DOCS",
+      "owner": "documentation maintainer",
+      "review_by": "2026-09-13",
+      "status": "completed",
+      "next_step": "Consolidate incidents, replace unsafe/outdated guides and validate catalog, source review and public boundary guards.",
+      "closure": "Local documentation checks, adversarial guard tests, image/auth regressions and production build pass; record scope.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-13-documentation/verification.json"
+      ]
+    }
+  ]
+}

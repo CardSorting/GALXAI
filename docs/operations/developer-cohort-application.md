@@ -1,5 +1,7 @@
 # Developer cohort application — 2026-09-12
 
+<!-- docs-scope: operational-record -->
+
 ## Result and product direction
 
 The application asks who the builder is, where to find their work, what they want to build, and whether they want to participate in the next private cohort. Images and Sites retain their public paths. The primary message explains that small groups help GALX manage costs, improve performance and give each builder an attentive first experience.
