@@ -2,7 +2,7 @@
 version: 1
 slug: "src-app-developers-page-tsx"
 primary_target: "src/app/developers/page.tsx"
-related_targets: ["src/components/developers/DeveloperPreview.tsx", "src/components/home/PublicHome.tsx", "src/components/dashboard/Navigation.tsx", "route:/developers"]
+related_targets: ["src/components/developers/DeveloperPreview.tsx", "src/components/dashboard/Navigation.tsx", "route:/developers"]
 ---
 
 # Developer private preview

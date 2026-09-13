@@ -24,6 +24,7 @@ The relay supplies inference transport with credential eligibility checks, bound
 
 ## Constraints & Invariants
 
+- Primary homepage positioning (2026-09-12): Sites leads the public product pitch. Focus on removing the effort of development, prototyping, revision and publication for early ideas. Present the existing GALX Pro price, unlimited revisions and conversation turns under fair use, included public GALX addresses, and the extremely early public beta's purpose. Keep provider/model names and implementation explanations out of the homepage, its metadata and FAQ. Images remains accessible as a secondary public product; developer access remains private.
 - Early-preview access policy (2026-09-12): Images and Sites are the public products. Other developer APIs and tools require verified signup, an individual waitlist request and manual approval. An existing API key or payment never grants preview approval. Admit participants gradually, collect private feedback and prioritize a trustworthy first experience.
 - Preview administration lives at `/admin` behind independent staff authorization. Owners manage staff; owners and reviewers manage participant access; viewers are read-only. Staff membership never follows from customer approval or editable account metadata. Use familiar inbox, role-management and activity-history patterns within the existing visual system. See [the private admin runbook](docs/operations/preview-admin.md).
 

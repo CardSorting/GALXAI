@@ -5,21 +5,20 @@ import { ArrowUp, ArrowUpRight, Plus, Globe2, Monitor, Smartphone, RefreshCw, Ch
 import { useAuth } from '@/contexts/AuthContext';
 import { renderSitePreview } from '@/lib/sites/site-preview';
 import { type SiteDocument, type SiteSummary, type SiteIntent, type SiteVersion } from '@/lib/sites/workspace-contract';
+import { SITE_STARTERS, type SiteStarterSelection } from '@/lib/sites/starters';
+import { PRO_PLAN } from '@/lib/billing/pro-plan';
 import { useSitesWorkspace } from './use-sites-workspace';
 import { SiteNotesEditor } from './SiteNotesEditor';
 import { SiteContentPanel } from './SiteContentPanel';
 import './sites.css';
 
 const EXAMPLE: SiteDocument = { schema_version:1,title:'Good ideas deserve a place to grow.',summary:'Introduce your next project with a considered, simple website. Start with an idea. Make it your own, one conversation at a time.',sections:[{heading:'A little about you',body:'Your story, your work, and the details that make this yours. A clear introduction gives people a reason to stay.'},{heading:'Something worth sharing',body:'Bring your offering into focus. Tell visitors what they can discover, and what you want them to do next.'}] };
-const STARTERS = [ {name:'A product launch',brief:'Create a launch page for a thoughtfully designed task planner called Daylight. Explain how it helps small teams plan a calmer week.'},
-  {name:'My portfolio',brief:'Create a portfolio for an independent brand designer. Keep it warm and confident, with sections for selected work, approach, and getting in touch.'},
-  {name:'An event page',brief:'Create a page for a neighborhood makers market. Include an introduction, what visitors can expect, and practical event information with clearly marked details to fill in.'} ];
 const stateLabel = (s: SiteSummary) => s.archived ? 'Archived' : s.generating ? 'Replying' : s.published && s.address?.status === 'active' ? 'Live' : s.published && s.address ? 'Address pending' : 'Draft';
-export function SitesWorkspace({initialId}: {initialId?:string}) {
+export function SitesWorkspace({initialId,initialStarter}: {initialId?:string;initialStarter?:SiteStarterSelection}) {
   const {user,isLoading} = useAuth();
-  return <Workspace key={user?.id || 'guest'} owner={user?.id || null} token={user?.token} authLoading={isLoading} initialId={initialId} />;
+  return <Workspace key={user?.id || 'guest'} owner={user?.id || null} token={user?.token} authLoading={isLoading} initialId={initialId} initialStarter={initialStarter} />;
 }
-function Workspace({owner,token,authLoading,initialId}: {owner:string|null;token?:string;authLoading:boolean;initialId?:string}) {
+function Workspace({owner,token,authLoading,initialId,initialStarter}: {owner:string|null;token?:string;authLoading:boolean;initialId?:string;initialStarter?:SiteStarterSelection}) {
   const studio = useSitesWorkspace(owner,token,initialId);
   const [prompt,setPrompt] = useState(''), [tab,setTab] = useState<'chat'|'sites'|'context'|'history'>('chat'), [mobile,setMobile] = useState<'chat'|'preview'>('chat');
   const [device,setDevice] = useState<'desktop'|'mobile'>('desktop'), [search,setSearch] = useState(''), [archived,setArchived] = useState(false);
@@ -29,6 +28,7 @@ function Workspace({owner,token,authLoading,initialId}: {owner:string|null;token
   const [checkpoint,setCheckpoint]=useState<{version:number;document:SiteDocument}|null>(null),[restoreOpen,setRestoreOpen]=useState(false),[unread,setUnread]=useState(false);
   const stick=useRef(true),scrollAnchor=useRef<{height:number;top:number}|null>(null),draftValue=useRef(''),activeDraftKey=useRef(''),versionRequest=useRef(0),draftTransfer=useRef<{key:string;text:string;intent:SiteIntent}|null>(null),submitting=useRef(false);
   const promptRef = useRef<HTMLTextAreaElement>(null), messagesRef = useRef<HTMLDivElement>(null);
+  const appliedStarter = useRef<string | null>(null);
   const {site,busy} = studio;
   const openingSite = studio.openingSite || Boolean(initialId && authLoading);
   const preview = useMemo(() => renderSitePreview(checkpoint?.document || site?.document || EXAMPLE,true),[checkpoint?.document,site?.document]);
@@ -37,7 +37,12 @@ function Workspace({owner,token,authLoading,initialId}: {owner:string|null;token
   useEffect(() => {let value='',mode:SiteIntent='build';try{let saved=JSON.parse(sessionStorage.getItem(draftKey)||'null');if(!saved && owner && !studio.selectedId){saved=JSON.parse(sessionStorage.getItem('galx-sites-draft:guest:new')||'null');if(saved){sessionStorage.setItem(draftKey,JSON.stringify(saved));sessionStorage.removeItem('galx-sites-draft:guest:new');}}value=typeof saved?.text==='string'?saved.text.slice(0,1800):'';mode=saved?.intent==='discuss'?'discuss':'build';}catch{}
     if(draftTransfer.current?.key===draftKey){value=draftTransfer.current.text;mode=draftTransfer.current.intent;draftTransfer.current=null;}
     else if(!submitting.current && !value){try{const pending=JSON.parse(sessionStorage.getItem(draftKey+':submitted') || 'null');if(typeof pending?.text==='string'){value=pending.text.slice(0,1800);mode=pending.intent==='discuss'?'discuss':'build';}}catch{}}
-    setPrompt(value);draftValue.current=value;setIntent(mode);},[draftKey]);
+    if(!initialId && !studio.selectedId && initialStarter && appliedStarter.current!==initialStarter.href){
+      appliedStarter.current=initialStarter.href;
+      if(!value.trim()) {value=initialStarter.brief;mode='build';try{sessionStorage.setItem(draftKey,JSON.stringify({text:value,intent:mode}));}catch{}}
+      else if(value!==initialStarter.brief) setNotice(`Your unsent draft is still here. Send or clear it before choosing “${initialStarter.name}” below.`);
+    }
+    setPrompt(value);draftValue.current=value;setIntent(mode);},[draftKey,initialId,initialStarter,studio.selectedId,owner]);
   useEffect(()=>{setCheckpoint(null);setRestoreOpen(false);setVersions([]);setVersionCursor(null);setVersionBusy(false);setCanvas('preview');stick.current=true;setUnread(false);studio.resetHistory();++versionRequest.current;},[site?.id]); // Each Site owns its draft and context.
   const tail=site?.messages.at(-1);
   const hasConversation=Boolean(site?.messages.length || studio.earlier.length || site?.generating || busy);
@@ -122,7 +127,7 @@ function Workspace({owner,token,authLoading,initialId}: {owner:string|null;token
             {studio.historyCursor && <button className="sites-text-button sites-earlier" disabled={studio.historyBusy} onClick={()=>{const node=messagesRef.current;if(node)scrollAnchor.current={height:node.scrollHeight,top:node.scrollTop};void studio.loadEarlier();}}>{studio.historyBusy?'Loading earlier messages…':'Load earlier messages'}</button>}
             {historicalWindow && <p className="sites-help">Viewing earlier conversation. <button className="sites-text-button" onClick={()=>{studio.resetHistory();stick.current=true;}}>Return to latest</button></p>}
             {openingSite && <div className="sites-welcome" role="status"><h2>{studio.loading || authLoading?'Loading your Site…':'This Site is unavailable.'}</h2><p>{studio.loading || authLoading?'Your saved conversation and preview will appear here.':'Choose a saved Site from My Sites, or start a new one.'}</p></div>}
-            {!openingSite && (!site || !site.messages.length) && <div className="sites-welcome"><div className="sites-assistant-mark" aria-hidden="true"><PanelsTopLeft /></div><h2>What are we making?</h2><p>Describe your idea. We’ll shape a page together, with your preview right beside you.</p><div className="sites-starters">{STARTERS.map(starter=><button key={starter.name} onClick={()=>{remember(starter.brief);promptRef.current?.focus();}}>{starter.name}<ArrowUpRight aria-hidden="true" /></button>)}</div><p className="sites-note">Start with a landing page, portfolio, or simple information site. Your draft stays private until you publish.</p></div>}
+            {!openingSite && (!site || !site.messages.length) && <div className="sites-welcome"><div className="sites-assistant-mark" aria-hidden="true"><PanelsTopLeft /></div><h2>What are we making?</h2><p>Describe your idea. We’ll shape a page together, with your preview right beside you.</p><div className="sites-starters">{SITE_STARTERS.map(starter=><button key={starter.name} onClick={()=>prepareRequest(starter.brief)}>{starter.name}<ArrowUpRight aria-hidden="true" /></button>)}</div><p className="sites-note">Start with a landing page, portfolio, or simple information site. Your draft stays private until you publish.</p></div>}
             {messages.map(message=><div key={message.id} className={`sites-message sites-message-${message.role}`}><span>{message.role==='user'?'You':'GALX'}{message.intent==='discuss'?' · Discuss':''}</span><p>{message.text}</p>{message.status==='pending' && <small>Reply pending</small>}{message.status==='failed' && message.role==='user' && <small>Reply incomplete</small>}
               <div className="sites-message-actions">{message.version && <button className="sites-version-link" onClick={()=>void previewVersion(message.version!)} disabled={busy||versionBusy}>Version {message.version}<History aria-hidden="true"/></button>}
                 {message.status!=='pending' && <button className="sites-text-button" onClick={()=>void copyMessage(message.text)} aria-label={`Copy ${message.role==='user'?'your message':'reply'}`}><Copy aria-hidden="true"/>Copy</button>}
@@ -133,15 +138,15 @@ function Workspace({owner,token,authLoading,initialId}: {owner:string|null;token
           <div className="sites-compose-area">
             {unread && !historicalWindow && <button className="sites-jump sites-button" onClick={()=>{stick.current=true;messagesRef.current?.scrollTo({top:messagesRef.current.scrollHeight,behavior:'instant'});setUnread(false);}}>Latest message<ArrowDown aria-hidden="true"/></button>}
             {checkpoint && <p className="sites-help">You’re previewing version {checkpoint.version}. <button className="sites-text-button" onClick={()=>setCheckpoint(null)}>Return to current draft to chat</button></p>}
-            {owner && !studio.setupLoading && studio.access==='paid_plan_required' && <p className="sites-help" role="status">Create and update Sites with an eligible paid plan. <Link href="/pricing">View plans<ArrowUpRight aria-hidden="true" size={14}/></Link></p>}
+            {owner && !studio.setupLoading && studio.access==='paid_plan_required' && <p className="sites-help" role="status">Create and update Sites with {PRO_PLAN.name}. <Link href="/billing#plan">View your plan<ArrowUpRight aria-hidden="true" size={14}/></Link></p>}
             {owner && !studio.setupLoading && studio.access==='unavailable' && <p className="sites-help" role="status">Site updates are unavailable right now. Your saved Sites are still here. Try again shortly.</p>}
             {site?.archived ? <div className="sites-archived"><p>This Site is archived.</p><button className="sites-button" onClick={()=>void studio.change({action:'archive',archived:false})}>Restore Site</button></div> : <form className="sites-composer" onSubmit={e=>{e.preventDefault();void submit();}}>
               <label className="sr-only" htmlFor="site-prompt">Describe your Site or ask for a change</label>
               <textarea id="site-prompt" ref={promptRef} value={prompt} maxLength={1800} rows={3} placeholder={site?.generating?'Draft your next message while we work…':intent==='discuss'?'Ask a question or explore an idea…':site?.document?'What would you like to change?':'Tell us about your Site…'} onChange={e=>remember(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();if(owner)void submit();}}}/>
-              <div className="sites-composer-actions"><div className="sites-modes" aria-label="Message mode"><button type="button" aria-pressed={intent==='build'} onClick={()=>remember(prompt,'build')}>Build</button><button type="button" aria-pressed={intent==='discuss'} onClick={()=>remember(prompt,'discuss')}>Discuss</button></div>{owner?<button className="sites-send" type="submit" disabled={studio.connection==='offline'||authLoading||studio.loading||openingSite||busy||Boolean(checkpoint)||site?.generating||studio.access!=='included'||!prompt.trim()||new TextEncoder().encode(prompt).length>2000} aria-label="Send message"><ArrowUp aria-hidden="true" /></button>:<Link className="sites-primary" href="/auth/login?redirect=%2Fsites">Sign in to create<ArrowUpRight aria-hidden="true" /></Link>}</div>
+              <div className="sites-composer-actions"><div className="sites-modes" aria-label="Message mode"><button type="button" aria-pressed={intent==='build'} onClick={()=>remember(prompt,'build')}>Build</button><button type="button" aria-pressed={intent==='discuss'} onClick={()=>remember(prompt,'discuss')}>Discuss</button></div>{owner?<button className="sites-send" type="submit" disabled={studio.connection==='offline'||authLoading||studio.loading||openingSite||busy||Boolean(checkpoint)||site?.generating||studio.access!=='included'||!prompt.trim()||new TextEncoder().encode(prompt).length>2000} aria-label="Send message"><ArrowUp aria-hidden="true" /></button>:<Link className="sites-primary" href={`/auth/signin?next=${encodeURIComponent(initialStarter?.href || "/sites")}`}>Sign in to create<ArrowUpRight aria-hidden="true" /></Link>}</div>
             </form>}
             <p className="sites-composer-hint">{new TextEncoder().encode(prompt).length>2000?'Shorten your message to send it.':intent==='discuss'?'Explore ideas without changing your draft.':'Build applies your request to the current draft.'} <span>Shift + Enter for a new line.</span></p>
-            <p className="sites-help sites-plan-note">{studio.access==='included'?'Included with your plan.':'Available with eligible paid plans.'} Fair usage applies; you may need to pause between updates.</p>
+            <p className="sites-help sites-plan-note">{studio.access==='included'?'Included with your plan.':`Create with ${PRO_PLAN.name} for $${PRO_PLAN.monthlyPriceUsd}/month.`} Fair use applies; you may need to pause between updates.</p>
           </div>
         </>}
       </section>

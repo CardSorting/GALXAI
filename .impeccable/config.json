@@ -277,6 +277,15 @@
         ],
         "createdAt": "2026-09-12T04:24:57.679Z",
         "reason": "Preserves the existing billing indigo navigation and established dark palette; this change only adds a plan link and updates copy."
+      },
+      {
+        "rule": "design-system-font",
+        "value": "georgia",
+        "files": [
+          "src/components/home/public-home.module.css"
+        ],
+        "createdAt": "2026-09-13T01:56:09.672Z",
+        "reason": "Georgia is the existing Sites paper-preview heading style, documented in src/components/home/DESIGN.md. The exception is limited to the illustrative homepage preview."
       }
     ]
   },

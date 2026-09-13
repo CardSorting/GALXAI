@@ -7,9 +7,9 @@ export const SITE_CONFIG = {
   name: 'GALXAI',
   legalName: 'GALXAI Technologies Inc.',
   alternateName: ['GALX AI'],
-  tagline: 'Create images and build sites',
+  tagline: 'Your idea, ready to share',
   description:
-    'Create images and build sites with GALX. Images and Sites are open; developer API access is in private preview.',
+    'Turn an idea into a website with GALX Sites. Make a first version, keep refining it, and publish at your own public GALX address. Explore our very early public beta.',
   url: process.env.NEXT_PUBLIC_APP_URL || 'https://galx.ai',
   apiUrl: 'https://galx.ai/v1',
   ogImage: '/brand/galaxy-hero-banner.jpg',
@@ -62,7 +62,7 @@ export const SITE_CONFIG = {
       status: 'Verified Zero PHI Storage',
     },
   ],
-  keywords: ['GALX', 'AI image generation', 'website builder', 'developer private preview'],
+  keywords: ['GALX', 'GALX Sites', 'website builder', 'prototyping', 'public beta'],
   authors: [
     {
       name: 'GALXAI Systems & AI Security Architecture Group',
@@ -87,4 +87,3 @@ export const SITE_CONFIG = {
     availableLanguage: ['English'],
   },
 };
-
