@@ -7,7 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const output = path.join(root, '.impeccable/review/sites-home-refinement');
+const output = path.join(root, '.impeccable/review', process.argv.includes('--motion-only') ? 'galaxy-home-playful-diagnostic' : 'galaxy-home-playful');
 await mkdir(output, { recursive: true });
 const workspace = await mkdtemp(path.join(tmpdir(), 'galx-home-ui-'));
 for (const name of ['.next', 'public', 'node_modules']) await symlink(path.join(root, name), path.join(workspace, name));
@@ -31,7 +31,7 @@ try {
   const { chromium } = await import(process.env.GALX_BROWSER_MODULE || '/private/tmp/galx-preview-browser/node_modules/playwright/index.mjs');
   const { default: AxeBuilder } = await import(process.env.GALX_AXE_MODULE || '/private/tmp/galx-preview-browser/node_modules/@axe-core/playwright/dist/index.mjs');
   browser = await chromium.launch({ headless: true, executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' });
-  for (const width of [1440, 768, 390, 320]) {
+  for (const width of process.argv.includes('--motion-only') ? [] : [1440, 768, 390, 320]) {
     const context = await browser.newContext({ viewport: { width, height: 1000 }, reducedMotion: 'reduce' });
     await context.route('**/*', route => new URL(route.request().url()).origin === base ? route.continue() : route.abort());
     const page = await context.newPage(), errors = [];
@@ -138,6 +138,147 @@ try {
     }
     await context.close(); console.log(`PASS: homepage at ${width}px, pricing, example revisions, FAQ, keyboard, accessibility, public copy and navigation.`);
   }
+  for (const width of [1440, 390]) {
+    const context = await browser.newContext({ viewport: { width, height: 1000 }, reducedMotion: 'no-preference', isMobile: width === 390, hasTouch: width === 390 });
+    await context.route('**/*', route => new URL(route.request().url()).origin === base ? route.continue() : route.abort());
+    await context.addInitScript(() => {
+      window.homeMetrics = { cls: 0, lcp: 0, longTasks: [], shifts: [] };
+      new PerformanceObserver(list => list.getEntries().forEach(entry => {
+        if (!entry.hadRecentInput) {
+          window.homeMetrics.cls += entry.value;
+          window.homeMetrics.shifts.push({ at: entry.startTime, value: entry.value, sources: entry.sources.map(source => ({ element: source.node?.tagName, id: source.node?.id, className: source.node?.getAttribute?.('class'), previous: source.previousRect, current: source.currentRect })) });
+        }
+      })).observe({ type: 'layout-shift', buffered: true });
+      new PerformanceObserver(list => list.getEntries().forEach(entry => { window.homeMetrics.lcp = entry.startTime; })).observe({ type: 'largest-contentful-paint', buffered: true });
+      new PerformanceObserver(list => list.getEntries().forEach(entry => { window.homeMetrics.longTasks.push(entry.duration); })).observe({ type: 'longtask', buffered: true });
+    });
+    const page = await context.newPage(), errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.goto(base, { waitUntil: 'networkidle' });
+    await page.waitForFunction(() => document.querySelector('main')?.dataset.motion === 'on');
+    const main = page.locator('main');
+    assert.equal(await main.getAttribute('data-sky-active'), 'true');
+    assert(await main.evaluate(node => node.getAnimations({ subtree: true }).some(animation => animation.effect.getTiming().iterations === Infinity && animation.playState === 'running')));
+    const galaxyControls = page.getByRole('group', { name: 'Galaxy controls' });
+    const starButton = galaxyControls.getByRole('button', { name: 'Send a shooting star', exact: true });
+    const star = page.locator('[data-home-comet]');
+    const parallax = page.locator('[data-home-parallax]');
+    if (width === 1440) {
+      const hero = await page.locator('[data-home-hero]').boundingBox();
+      const action = main.getByRole('link', { name: 'Start with Sites', exact: true }).first();
+      const before = await action.boundingBox();
+      await page.mouse.move(hero.x + hero.width * .2, hero.y + hero.height * .1);
+      await page.waitForFunction(() => parseFloat(document.querySelector('[data-home-parallax]').style.getPropertyValue('--pointer-x')) < 0);
+      await page.mouse.move(hero.x + hero.width * .8, hero.y + hero.height * .1);
+      await page.waitForFunction(() => parseFloat(document.querySelector('[data-home-parallax]').style.getPropertyValue('--pointer-x')) > 0);
+      assert.deepEqual(await action.boundingBox(), before, 'Pointer depth must not move a control');
+      await page.mouse.move(0, 0);
+      await page.waitForFunction(() => document.querySelector('[data-home-parallax]').style.getPropertyValue('--pointer-x') === '0px');
+      await page.locator('[data-home-hero]').dispatchEvent('pointermove', { pointerType: 'touch', clientX: hero.x + hero.width, clientY: hero.y });
+      assert.equal(await parallax.evaluate(node => node.style.getPropertyValue('--pointer-x')), '0px');
+      await starButton.focus();
+      await page.keyboard.press('Enter');
+    } else {
+      assert.equal(await page.evaluate(() => matchMedia('(hover: hover) and (pointer: fine)').matches), false);
+      await starButton.tap();
+    }
+    await page.waitForFunction(() => document.querySelector('[data-home-comet]').getAnimations().length === 1);
+    // Freeze one finite effect only for its visual capture; normal playback resumes immediately.
+    await star.evaluate(node => { const animation = node.getAnimations()[0]; animation.pause(); animation.currentTime = 500; });
+    await page.locator('[data-home-hero]').screenshot({ path: path.join(output, `shooting-star-${width}.png`), animations: 'allow' });
+    await star.evaluate(node => node.getAnimations().forEach(animation => animation.play()));
+    await starButton.focus();
+    for (let repeat = 0; repeat < 4; repeat++) await page.keyboard.press('Enter');
+    assert.equal(await star.evaluate(node => node.getAnimations().length), 1, 'Repeated star actions replace the active effect');
+    await page.getByRole('button', { name: 'Portfolio', exact: true }).click();
+    await page.getByRole('button', { name: 'See a revision', exact: true }).click();
+    await page.getByRole('button', { name: 'Event page', exact: true }).click();
+    await page.getByRole('button', { name: 'See a revision', exact: true }).click();
+    assert.match(await page.getByRole('figure').getByRole('heading', { level: 2 }).innerText(), /Bring the family/);
+    assert.equal(await page.getByRole('link', { name: 'Use this idea' }).getAttribute('href'), '/sites?starter=event&refine=1');
+    // Bounded, real scrolling samples; report timing without claiming field CWV.
+    const frames = await page.evaluate(async () => {
+      const intervals = []; let previous = performance.now();
+      for (let frame = 0; frame < 60; frame++) {
+        await new Promise(requestAnimationFrame);
+        const now = performance.now(); intervals.push(now - previous); previous = now;
+        window.scrollBy({ top: 18, behavior: 'instant' });
+      }
+      return intervals.sort((a, b) => a - b);
+    });
+    const chapters = page.getByRole('navigation', { name: 'On this page' });
+    for (const [name, id] of [['Possibilities', 'possibilities'], ['Pricing', 'pricing'], ['Questions', 'faq']]) {
+      await chapters.getByRole('link', { name, exact: true }).click();
+      await page.waitForFunction(section => {
+        const target = document.getElementById(section);
+        return target && Math.abs(target.getBoundingClientRect().top - 84) < 2;
+      }, id);
+      assert.equal(await chapters.getByRole('link', { name, exact: true }).getAttribute('aria-current'), 'location');
+      assert.equal(new URL(page.url()).hash, `#${id}`);
+    }
+    assert.equal(await main.getAttribute('data-sky-active'), 'false');
+    assert.equal(await star.evaluate(node => node.getAnimations().length), 0);
+    assert(await main.evaluate(node => node.getAnimations({ subtree: true }).filter(animation => animation.effect.getTiming().iterations === Infinity).every(animation => animation.playState === 'paused')));
+    const metrics = await page.evaluate(() => window.homeMetrics);
+    assert(metrics.cls < 0.01, `Homepage shifted during loading/scrolling at ${width}px: ${JSON.stringify(metrics.shifts)}`);
+    const stickyPosition = await page.evaluate(() => scrollY);
+    const stickyBounds = await chapters.getByRole('button', { name: 'Pause page motion', exact: true }).boundingBox();
+    await chapters.getByRole('button', { name: 'Pause page motion', exact: true }).click();
+    assert.equal(await main.getAttribute('data-motion'), 'off');
+    const afterPausePosition = await page.evaluate(() => scrollY);
+    assert(Math.abs(afterPausePosition - stickyPosition) < 2, `Pausing from the sticky bar must preserve reading position: ${JSON.stringify({ before: stickyPosition, after: afterPausePosition, button: stickyBounds })}`);
+    assert.equal(await starButton.isDisabled(), true);
+    await chapters.getByRole('button', { name: 'Enable page motion', exact: true }).click();
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await page.waitForFunction(() => document.querySelector('main')?.dataset.skyActive === 'true');
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    assert.equal(await main.getAttribute('data-sky-active'), 'false');
+    await page.evaluate(() => {
+      delete document.hidden;
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await page.waitForFunction(() => document.querySelector('main')?.dataset.skyActive === 'true');
+    await starButton.focus(); await page.keyboard.press('Enter');
+    await galaxyControls.getByRole('button', { name: 'Pause page motion', exact: true }).click();
+    assert.equal(await main.getAttribute('data-motion'), 'off');
+    assert.equal(await main.evaluate(node => node.getAnimations({ subtree: true }).filter(animation => animation.playState === 'running').length), 0);
+    assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior), 'auto');
+    await page.reload({ waitUntil: 'networkidle' });
+    await galaxyControls.getByRole('button', { name: 'Enable page motion', exact: true }).waitFor();
+    assert.equal(await main.getAttribute('data-motion'), 'off');
+    await galaxyControls.getByRole('button', { name: 'Enable page motion', exact: true }).click();
+    assert.equal(await main.getAttribute('data-motion'), 'on');
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.waitForFunction(() => document.querySelector('main')?.dataset.motion === 'off');
+    assert.equal(await galaxyControls.getByRole('button', { name: 'Motion reduced by your device settings' }).isDisabled(), true);
+    assert.equal(await starButton.isDisabled(), true);
+    assert.equal(await main.evaluate(node => node.getAnimations({ subtree: true }).filter(animation => animation.playState === 'running').length), 0);
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.waitForFunction(() => document.querySelector('main')?.dataset.motion === 'on');
+    const violations = (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations;
+    assert.deepEqual(violations.map(item => item.id), []);
+    assert.deepEqual(errors, []);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    checks.push({ width, motion: 'passed', pointerDepth: width === 1440 ? 'bounded, reset, controls stationary, touch ignored' : 'touch scrolling preserved', shootingStar: 'keyboard/touch, replaceable, stopped when paused/offscreen', stickyMotionControl: 'reading position preserved', pausePersistence: 'passed', liveReducedMotion: 'passed', hiddenAndOffscreen: 'passed', chapterAnchors: 'passed', rapidSwitching: 'passed', metrics, scrollFrameP95Ms: frames[Math.floor(frames.length * .95)] });
+    await page.screenshot({ path: path.join(output, `motion-${width}.png`), fullPage: true });
+    await context.close();
+    console.log(`PASS: motion, pause, live reduced motion, native anchors, rapid changes and accessibility at ${width}px.`);
+  }
+  // Next's inline stream completion still runs; the client bundles all fail to load.
+  const noHydration = await browser.newContext({ viewport: { width: 390, height: 1000 } });
+  await noHydration.route('**/*', route => new URL(route.request().url()).origin === base && route.request().resourceType() !== 'script' ? route.continue() : route.abort());
+  const fallback = await noHydration.newPage();
+  await fallback.goto(base, { waitUntil: 'networkidle' });
+  for (const id of ['sites-title', 'possibilities-title', 'pricing-title', 'faq-title', 'start-title']) assert.equal(await fallback.locator(`#${id}`).isVisible(), true, `Content hidden without hydration: ${id}`);
+  await fallback.locator('#faq summary').first().click();
+  assert.equal(await fallback.locator('#faq details').first().evaluate(node => node.open), true);
+  assert.equal(await fallback.getByRole('navigation', { name: 'On this page' }).getByRole('link').count(), 3);
+  assert.equal(await fallback.locator('main').getAttribute('data-motion'), 'off');
+  checks.push({ clientBundlesBlocked: 'content, links and native disclosures passed; inline framework stream completion required' });
+  await noHydration.close();
   for (const src of scripts) { const response = await fetch(base + src); assert(response.ok); assert.doesNotMatch(await response.text(), forbiddenAssets, src); }
   console.log(`PASS: ${scripts.size} homepage browser scripts scanned; no internal identifiers found.`);
   for (const route of ['opengraph-image', 'twitter-image']) {

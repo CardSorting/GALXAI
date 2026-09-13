@@ -1,0 +1,213 @@
+{
+  "observed_at": "2026-09-13T17:46:56.140771+00:00",
+  "base_revision": "9c21d21dd982a414bb1d11e68d4daf50744f7d6a",
+  "scope": "Local homepage galaxy motion, interaction feedback, native section navigation and loading-shell layout stability. No deployment.",
+  "source_and_guide_sha256": {
+    "src/components/home/PublicHome.tsx": "9dde67ffe1218a111cb5465ee6e00190f9ba1147bbd85c8e64d44ef88d882ec8",
+    "src/components/home/HomeMotion.tsx": "e584881e232d91ef1d53bc5beccde2c788e431958a0a5967f70b722bfe04bcce",
+    "src/components/home/GalaxyScene.tsx": "6b87d699793f5f86b39a00c391ce11759f5e60d69e9aa413fca37899252cb973",
+    "src/components/home/SitesExample.tsx": "e922bf53f2ea95c9f4a40d5f493a469081f86da690a571e500743d1efef0fa51",
+    "src/components/home/PlanAction.tsx": "6a075827d0c89b2a7b36cd36a3cf7fcfda177a2caec7a43454ebff29f71ba4bc",
+    "src/components/home/public-home.module.css": "1fb9513ff4d6777e7a3da9b77304e225bcfbdcafbfcae9e4132457ac9d4c3813",
+    "src/components/home/DESIGN.md": "d9aed4c6c96690a1e95798dcd03e9164b02c169182109ba0aedbcd0f86091df9",
+    "src/app/page.tsx": "641047273293be3c7b898469311b93ca48d6c53eeb7a04e101ce17af38fb4fc6",
+    "src/app/layout.tsx": "d2e6515d18cee2a76bd20484b96ab8e186c3fbce7a04caf3044013f1cea15b76",
+    "src/app/loading.tsx": "79d916c532377cf08b9af7452e710fd3422a7a9bc7a03f2082bc197b53b0f006",
+    "src/app/globals.css": "654220cbc1d5cfe0427f65a61cb6c5a71cd6865a0773e1915f239632edc800c7",
+    "src/components/dashboard/Navigation.tsx": "35d5a28048721be2cc0747608a166974945709ace3ba8900f9d3392d2950c5d5",
+    "src/components/dashboard/navigation.module.css": "9043e70641391d3acd89c47f5c8ebb8f6b45b3dabc21771b2ad5ba9057d5a2a1",
+    "src/lib/sites/starters.ts": "ef6a6f61eb2177b23f4f3281c1b5f4ada18d9a5137aad733ae09286b25ba6a2d",
+    "scripts/verify-homepage-ui.mjs": "8d1f87684fc7f5ab91a4ed5d051f60e8c49d2c41ce7e221b19bcdb2222f4e63e",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "bf41546e23d4ae10a73442b81d7d8ffc8d97f5a8ded4ddade6806c71beeb692b",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "b2e72c438d5263712e5344c2eb01f563f3d64dcf29214e9017223ce59aa120f1",
+    "docs/knowledge/registry.json": "92d80cc477bb4a01a94a3c7d0c3929116158d66d0ebc8aac626589566e948e55",
+    ".impeccable/surfaces/src-app-page-tsx.md": "d7e483aab71513d188e4e3abb0ebd71c3a65495b0834723d66418031c292a662"
+  },
+  "semantic_review": [
+    "Reviewed the complete scoped homepage design and surface brief against PublicHome, HomeMotion, GalaxyScene, SitesExample, PlanAction and their CSS. Preserved factual product copy, paid plan policy, semantic controls, authored example labels, public names and destinations. Geometry is decorative; no diagnostics or internal objects enter the public UI.",
+    "Reviewed the complete navigation and quota-efficiency guides, root layout/loading/global CSS, shared navigation, and starter allowlist. Reconciled motion timing, static fallback, native anchors, pause storage, live reduced motion, hidden/offscreen suspension, cleanup, verification and rollback. No request budget, access, billing, generation or publication contract changes.",
+    "Reviewed the registry addition against documentation policy, knowledge operations, knowledge command reference, maintenance/change/release runbooks, README, tutorial and ADR lifecycle guidance. The existing client-efficiency domain now watches the previously unmapped homepage family and browser fixture. No new domain, owner, workflow, decision status or attestation policy is introduced.",
+    "Inspected the remaining unmapped surface brief: it is private design strategy, reconciled with the scoped source and guide. The broader domain fingerprint inventory is drift detection, not an exhaustive new audit of unrelated modules.",
+    "Visual inspection of desktop and mobile hero screenshots and the complete desktop composition confirmed readable hierarchy, distinct paper preview, restrained orbital lines, fitting native controls and section rhythm. The installed design skill reported legacy configuration keys; no unrelated skill-configuration repair was made."
+  ],
+  "primary_references": [
+    "https://webkit.org/blog/7551/responsive-design-for-motion/",
+    "https://m1.material.io/motion/duration-easing.html",
+    "https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html",
+    "https://developer.mozilla.org/en-US/docs/Web/API/Element/animate",
+    "https://linear.app/"
+  ],
+  "validation": {
+    "production_build": {
+      "command": "npm run build",
+      "exit_code": 0,
+      "home_route_kb": 5.71,
+      "home_first_load_js_kb": 188,
+      "scope": "Final source, including loading min-height; TypeScript included. Next loaded existing .env.local; fixture server did not inherit it."
+    },
+    "source_lint": {
+      "exit_code": 0,
+      "scope": "Changed homepage TSX and src/app/loading.tsx; node --check on browser fixture. CSS compiled by production build."
+    },
+    "image_security": {
+      "command": "npm run test:image:security",
+      "passed": 29,
+      "failed": 0
+    },
+    "request_efficiency": {
+      "command": "npm run test:egress:transport",
+      "passed": 40,
+      "failed": 0
+    },
+    "documentation_fixtures": {
+      "command": "npm run test:docs",
+      "passed": 37,
+      "failed": 0
+    },
+    "compiled_boundary": {
+      "command": "npm run docs:check:build",
+      "exit_code": 0,
+      "browser_and_rendered_assets": 640
+    },
+    "homepage_browser": {
+      "command": "node scripts/verify-homepage-ui.mjs",
+      "exit_code": 0,
+      "target": "http://127.0.0.1:3424",
+      "results": {
+        "checkedAt": "2026-09-13T17:46:17.076Z",
+        "checks": [
+          {
+            "width": 1440,
+            "overflow": false,
+            "axeViolations": 0,
+            "pageErrors": 0,
+            "versions": "passed",
+            "keyboard": "passed",
+            "copy": "passed",
+            "pricing": "passed",
+            "skipLink": "passed",
+            "exampleHeights": [
+              676.59375,
+              676.59375,
+              676.59375,
+              676.59375,
+              676.59375,
+              676.59375
+            ]
+          },
+          {
+            "width": 768,
+            "overflow": false,
+            "axeViolations": 0,
+            "pageErrors": 0,
+            "versions": "passed",
+            "keyboard": "passed",
+            "copy": "passed",
+            "pricing": "passed",
+            "skipLink": "passed",
+            "exampleHeights": [
+              755.8125,
+              755.8125,
+              755.8125,
+              755.8125,
+              755.8125,
+              755.8125
+            ]
+          },
+          {
+            "width": 390,
+            "overflow": false,
+            "axeViolations": 0,
+            "pageErrors": 0,
+            "versions": "passed",
+            "keyboard": "passed",
+            "copy": "passed",
+            "pricing": "passed",
+            "skipLink": "passed",
+            "exampleHeights": [
+              754.3125,
+              754.3125,
+              754.3125,
+              754.3125,
+              754.3125,
+              754.3125
+            ]
+          },
+          {
+            "width": 320,
+            "overflow": false,
+            "axeViolations": 0,
+            "pageErrors": 0,
+            "versions": "passed",
+            "keyboard": "passed",
+            "copy": "passed",
+            "pricing": "passed",
+            "skipLink": "passed",
+            "exampleHeights": [
+              837.390625,
+              837.390625,
+              837.390625,
+              837.390625,
+              837.390625,
+              837.390625
+            ]
+          },
+          {
+            "width": 1440,
+            "motion": "passed",
+            "pausePersistence": "passed",
+            "liveReducedMotion": "passed",
+            "hiddenAndOffscreen": "passed",
+            "chapterAnchors": "passed",
+            "rapidSwitching": "passed",
+            "metrics": {
+              "cls": 0,
+              "lcp": 80,
+              "longTasks": [],
+              "shifts": []
+            },
+            "scrollFrameP95Ms": 17.700000002980232
+          },
+          {
+            "width": 390,
+            "motion": "passed",
+            "pausePersistence": "passed",
+            "liveReducedMotion": "passed",
+            "hiddenAndOffscreen": "passed",
+            "chapterAnchors": "passed",
+            "rapidSwitching": "passed",
+            "metrics": {
+              "cls": 0,
+              "lcp": 108,
+              "longTasks": [],
+              "shifts": []
+            },
+            "scrollFrameP95Ms": 17.5
+          },
+          {
+            "clientBundlesBlocked": "content, links and native disclosures passed; inline framework stream completion required"
+          }
+        ],
+        "scriptsScanned": 10,
+        "socialImages": [
+          "opengraph-image",
+          "twitter-image"
+        ]
+      }
+    },
+    "corrections": [
+      "Build caught a pure-selector restriction in CSS modules. Paused smooth scrolling now uses a scoped effect that restores the previous document style on unmount; final build passed.",
+      "Fully disabled JavaScript left the pre-existing framework stream loading shell visible. The fallback fixture now accurately blocks external client bundles while permitting the inline framework stream completion. The full-JavaScript-disabled limitation is retained explicitly.",
+      "Performance captures found an intermittent loading layout shift (0.253 mobile in one pass; 0.113 desktop in a targeted pass). Layout-shift source rectangles identified the temporarily visible footer, not example motion. The root loading placeholder now reserves 100svh. Final normal-motion desktop and mobile samples recorded zero layout shifts and zero long tasks, with 95th-percentile scroll frame intervals of approximately 17.7ms and 17.5ms.",
+      "Local fixture loopback and Chrome execution required approved execution outside the process sandbox. All browser external requests were blocked."
+    ],
+    "documentation_lifecycle": "Explicit knowledge/client-efficiency attestations and final docs:sync/docs:check follow this immutable evidence; command outcomes are reported separately to avoid self-referential hashes."
+  },
+  "limits": [
+    "No deployment, real generation, payment, publication, production traffic or authenticated live-account acceptance.",
+    "Chrome localhost samples are not field Core Web Vitals, physical-device benchmarks, Safari/Firefox coverage or comprehensive screen-reader certification. Reported cls is the sum of qualifying entries over this bounded fixture, not a field session-window metric.",
+    "Fully disabling all JavaScript remains limited by the existing framework streaming shell. Native content works when external client bundles fail but inline stream completion can run.",
+    "Public marker scans cover tested rendered content, metadata, scripts and compiled artifacts; no claim that every live route is clean.",
+    "No new animation dependency or generated bitmap; the existing galaxy asset was retained. Pausing survives same-tab reload where storage is available, not a promised cross-device preference."
+  ]
+}

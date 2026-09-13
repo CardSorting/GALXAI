@@ -262,7 +262,9 @@
         "scripts/verify-sites-workspace-ui.ts",
         "scripts/verify-image-studio-ui.ts",
         "scripts/verify-navigation-ui.ts",
-        "scripts/verify-image-library-scale-ui.ts"
+        "scripts/verify-image-library-scale-ui.ts",
+        "src/components/home/**/*",
+        "scripts/verify-homepage-ui.mjs"
       ],
       "guides": [
         "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",

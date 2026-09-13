@@ -1,9 +1,10 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowUpRight, Check, Plus } from 'lucide-react';
 import { PRO_PLAN } from '@/lib/billing/pro-plan';
 import { SitesExample } from './SitesExample';
 import { PlanAction } from './PlanAction';
+import { HomeMotion } from './HomeMotion';
+import { GalaxyScene, GalaxyStory } from './GalaxyScene';
 import styles from './public-home.module.css';
 
 // Homepage extension: Sites owns the pitch; preserve GALX's dark visual identity.
@@ -25,9 +26,8 @@ const questions = [
   { question: 'What does “extremely early public beta” mean?', answer: 'We’re sharing Sites early because we believe a real first version teaches you more than an idea left in your notes. Expect rough edges and a product that is still taking shape. Try a small idea, tell us where you get stuck, and help us understand what is worth building next.' },
 ];
 export function PublicHome() {
-  return <><main id="homepage-content" tabIndex={-1} className={styles.page}>
-    <section className={styles.hero} aria-labelledby="sites-title">
-      <div className={styles.sky} aria-hidden="true"><Image src="/brand/galaxy-hero-banner.jpg" alt="" fill priority sizes="(max-width: 800px) 100vw, 1280px" /></div>
+  return <HomeMotion hero={<section className={styles.hero} aria-labelledby="sites-title" data-home-hero>
+      <GalaxyScene />
       <div className={styles.heroCopy}>
         <h1 id="sites-title">Your idea,<br />ready to share.</h1>
         <p className={styles.lede}>Turn that “what if” into a website with <strong>GALX Sites.</strong> A first version, room to keep refining, and a public address to share.</p>
@@ -37,11 +37,13 @@ export function PublicHome() {
         <p className={styles.betaNote}><span aria-hidden="true" />Very early public beta. Bring a small idea.</p>
       </div>
       <SitesExample />
-    </section>
+    </section>}>
 
-    <section className={styles.benefits} aria-labelledby="possibilities-title">
-      <div className={styles.sectionIntro}><h2 id="possibilities-title">Less getting set up.<br />More getting somewhere.</h2><p>Give a small idea a first version. Let real feedback help you find the next one.</p></div>
-      <div className={styles.benefitRows}>
+    <div className={styles.story} data-home-story>
+    <GalaxyStory />
+    <section id="possibilities" className={styles.benefits} aria-labelledby="possibilities-title">
+      <div className={styles.sectionIntro} data-home-reveal="intro"><h2 id="possibilities-title">Less getting set up.<br />More getting somewhere.</h2><p>Give a small idea a first version. Let real feedback help you find the next one.</p></div>
+      <div className={styles.benefitRows} data-home-journey>
         <article><h3>Get past the blank page.</h3><p>Describe your idea in your own words, or make a starting idea your own. No development project to set up.</p></article>
         <article><h3>Find the version that feels right.</h3><p>Ask for a change, explore another direction, or return to an earlier version. Keep refining without paying for each turn.</p></article>
         <article><h3>Share when you’re ready.</h3><p>Your draft stays private until you publish. Then send your public GALX link to the people whose feedback matters.</p></article>
@@ -49,8 +51,8 @@ export function PublicHome() {
     </section>
 
     <section id="pricing" className={styles.pricing} aria-labelledby="pricing-title">
-      <div className={styles.sectionIntro}><h2 id="pricing-title">One plan.<br />Room to keep going.</h2><p>A first version rarely stays the first version. Your plan gives you room to keep shaping it.</p></div>
-      <div className={styles.plan}>
+      <div className={styles.sectionIntro} data-home-reveal="intro"><h2 id="pricing-title">One plan.<br />Room to keep going.</h2><p>A first version rarely stays the first version. Your plan gives you room to keep shaping it.</p></div>
+      <div className={styles.plan} data-home-reveal="plan">
         <div className={styles.planHeading}><div><h3>{PRO_PLAN.name}</h3><p>Sites included · one account</p></div><p className={styles.price}><strong>${PRO_PLAN.monthlyPriceUsd}</strong><span>USD / month</span></p></div>
         <table className={styles.priceTable}><caption className="sr-only">What is included in GALX Pro for Sites</caption><thead><tr><th scope="col">Your Sites plan</th><th scope="col">Included</th></tr></thead><tbody>{inclusions.map(([label, value]) => <tr key={label}><th scope="row">{label}</th><td><Check size={16} aria-hidden="true" /><span>{value}</span></td></tr>)}</tbody></table>
         <PlanAction />
@@ -59,10 +61,11 @@ export function PublicHome() {
     </section>
 
     <section id="faq" className={styles.faq} aria-labelledby="faq-title">
-      <div className={styles.sectionIntro}><h2 id="faq-title">Questions,<br />answered.</h2><p>A little clarity before your first Site.</p><a href="mailto:support@galx.ai" className={styles.textLink}>Share your feedback <ArrowUpRight size={16} aria-hidden="true" /></a></div>
+      <div className={styles.sectionIntro} data-home-reveal="intro"><h2 id="faq-title">Questions,<br />answered.</h2><p>A little clarity before your first Site.</p><a href="mailto:support@galx.ai" className={styles.textLink}>Share your feedback <ArrowUpRight size={16} aria-hidden="true" /></a></div>
       <div className={styles.questions}>{questions.map(item => <details key={item.question}><summary>{item.question}<Plus size={18} aria-hidden="true" /></summary><p>{item.answer}</p></details>)}</div>
     </section>
 
-    <section className={styles.close} aria-labelledby="start-title"><div><h2 id="start-title">Make the first version.</h2><p>It doesn’t have to be your final idea to be worth trying.</p></div><Link className={styles.primary} href="/sites">Start with Sites <ArrowUpRight size={19} aria-hidden="true" /></Link></section>
-  </main></>;
+    <section className={styles.close} aria-labelledby="start-title" data-home-ending><div className={styles.endingOrbit} aria-hidden="true"><span /><span /><span /></div><div data-home-reveal="close"><h2 id="start-title">Make the first version.</h2><p>It doesn’t have to be your final idea to be worth trying.</p></div><Link className={styles.primary} href="/sites">Start with Sites <ArrowUpRight size={19} aria-hidden="true" /></Link></section>
+    </div>
+  </HomeMotion>;
 }

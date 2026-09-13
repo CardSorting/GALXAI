@@ -1,11 +1,11 @@
 {
   "knowledge": {
-    "reviewer": "Codex release maintainer",
-    "note": "Reviewed CI workflow bodies, new fixture ownership mapping and canonical CI guidance against the actual tests and conditional deployment; preserved decision lifecycle.",
+    "reviewer": "Codex",
+    "note": "Reviewed the bounded homepage source-pattern additions against complete knowledge policy, canonical maintenance and lifecycle guidance; domain ownership, decisions and review semantics are unchanged.",
     "reviewed_at": "2026-09-13",
     "review_by": "2026-09-20",
     "evidence": {
-      "post-mortem/releases/2026-09-13-followup-repairs-local.json": "4ba99c316aed49a25c6d28891afc7d8e37604a79904a0e8957009bd9e048c443"
+      "docs/knowledge/audits/2026-09-13-homepage-galaxy-motion.json": "02c8c7c7f8d74b548a1cddceb51d127fa3645a4d7fe4ce5a5f0741fbf29c28de"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -22,7 +22,7 @@
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/registry.json": "ddd71bd0f95cbd680c94eeee871125b1faa32826d6ce16f9ed2a0b0781c54a3a",
+      "docs/knowledge/registry.json": "92d80cc477bb4a01a94a3c7d0c3929116158d66d0ebc8aac626589566e948e55",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
@@ -1002,25 +1002,26 @@
     }
   },
   "client-efficiency": {
-    "reviewer": "Codex maintainer review",
-    "note": "Reviewed bounded saved pages/recent results, deferred library fetch, lazy full prompts/thumbnails, cancellation, exact retry and UI paging against full quota/navigation/scale guides. Prior shared-navigation source is preserved and backed by its separate evidence.",
+    "reviewer": "Codex",
+    "note": "Reviewed full homepage design, navigation and quota guides against bounded pointer/star lifecycle, directional drafts, sticky motion controls and final desktop/touch browser evidence; previous dated evidence is preserved.",
     "reviewed_at": "2026-09-13",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-13-image-library-scale.json": "f51afa787ae8bb8f87f2c481e9086c20c6df4e2c555903f83a4c46d3275418e8"
+      "docs/knowledge/audits/2026-09-13-homepage-playful-motion.json": "5b61d74bc7248f2055b35e0b9d8c9b5c625c44166b2755a6e0532dbf32b88fc4"
     },
     "files": {
-      "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "622a1d4dea293e4f7b8345296ac56ec6b14f99c2a6f09e8339d56541ce887bec",
-      "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "4a89fa638e27f6f4b99006a6ffba54630f8fd7f3508c2f4a9c2919382f494cba",
+      "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "b14773f9e5578e930aaa4f2d0f96dc93aa404f822141e5685b7748c7ca076522",
+      "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "e0471046ffb91f53a7f7854072a902b79f77380be0e2a3fd7a59931cc32baea2",
       "scripts/test-request-efficiency.ts": "2a004bc34569fb72e40b2dde1e9567674bea10365fe7134459bfa275eb56a591",
       "scripts/test-sites-workspace.ts": "cfd5ced896fb0ae0c9608abd7a9befeeb9e97c1742ca102a654ed6d70fca45db",
+      "scripts/verify-homepage-ui.mjs": "fa95806981c9f785f8165f3ddb1b362aa71da7264a2c3ef1f4409c3efac38a47",
       "scripts/verify-image-library-scale-ui.ts": "c3ae469b3316dd5e21065e53ea63d3fb57e39275be975ff7459f423fc54aa341",
       "scripts/verify-image-studio-ui.ts": "2ef688e1fd94c024f4b2b5ae93ecd2941353407dc7094c8202db2a36ec77b265",
       "scripts/verify-navigation-ui.ts": "df76b8139492cae2b92e50b7bbdac7d24b1c2991e3e25e06d8a2c244f6c5b5c7",
       "scripts/verify-sites-workspace-ui.ts": "b1821725236e252e3a774fbbe06cfdd6ef34183ab67edf230c94c99e8099271c",
       "src/app/globals.css": "654220cbc1d5cfe0427f65a61cb6c5a71cd6865a0773e1915f239632edc800c7",
       "src/app/layout.tsx": "d2e6515d18cee2a76bd20484b96ab8e186c3fbce7a04caf3044013f1cea15b76",
-      "src/app/loading.tsx": "f207ad9a82d0313283cb6b7ec9e29ef27e5be7d3e60bff9409e79a4e42e2c5e7",
+      "src/app/loading.tsx": "79d916c532377cf08b9af7452e710fd3422a7a9bc7a03f2082bc197b53b0f006",
       "src/app/not-found.tsx": "97bce16b76ab7b5cc9510270452b574e30eb8e127106629b6a16e3c26b53627f",
       "src/components/common/CommandMenu.tsx": "6aefcaef61f99be58961b9c5caa1954692ed1aa746666fe6fc6ffb59aeb8adb3",
       "src/components/common/IntentLink.tsx": "c866bc13acbbc81829c9f4ec1be5736bfb064c7a039c3d43ab5c524dd5d6e201",
@@ -1029,6 +1030,17 @@
       "src/components/dashboard/MobileBottomNav.tsx": "35e50ba3e6a286bd2f2fe9d44f49e4a68cb0869f7d2398aa9c14c214dc2e9493",
       "src/components/dashboard/Navigation.tsx": "35d5a28048721be2cc0747608a166974945709ace3ba8900f9d3392d2950c5d5",
       "src/components/dashboard/navigation.module.css": "9043e70641391d3acd89c47f5c8ebb8f6b45b3dabc21771b2ad5ba9057d5a2a1",
+      "src/components/home/ArtisanalSignalSection.tsx": "9182206d5e7eaa63fef4eddf6f4e174e4df5235094da752d7ae7448f08aa13ee",
+      "src/components/home/DESIGN.md": "e16d8734bff52990503386c36e1fab4df5e66b5d2317b8f0ff88bbfe61b68a29",
+      "src/components/home/GalaxyScene.tsx": "3d3286d4979b128e9ce4cfaa684b13606afb9c90aeef06490841a44637e5148c",
+      "src/components/home/GalxScenicHero.tsx": "8c177b12c00f284941d47c9b8e4b6842dd7df5826498ddb8f60c71d1b64e40de",
+      "src/components/home/HomeClient.tsx": "0a14d774e3f73d72614d102e903d9cf0e928de16395bf52bd525e4dce4336a6c",
+      "src/components/home/HomeMotion.tsx": "59eeab88ea1ee569cb0c862f37d4c1d5d3b2fe3fa43def56bdd892e5be71f9d8",
+      "src/components/home/PlanAction.tsx": "6a075827d0c89b2a7b36cd36a3cf7fcfda177a2caec7a43454ebff29f71ba4bc",
+      "src/components/home/PublicHome.tsx": "a018c72892f2804fecb37431b66ad9a8294a58fc8d6f70b326b2368f8b2aa8fc",
+      "src/components/home/SitesExample.tsx": "4fe7f9f61198aacc2f88486a4d19ad061da308c73df7f5f4549f6559af1bad5b",
+      "src/components/home/public-home.module.css": "63accb0bc2a1720c09063e7cc58550cb91946fb22fbfdcf4d7a41d5a210ae046",
+      "src/components/home/use-galaxy-interactions.ts": "0a654c3abd4d7f562172df5d79afd94ee3b1c86509693dbc69d993920497d348",
       "src/components/images/ImageStudio.tsx": "b63d6280c7629fae543d052c5882e21575fec9703e3ebaaf1349fa210e1cd6ac",
       "src/components/images/use-image-studio.ts": "229e0d11f8229da62e7c898c56fa8ab473ef9c74d32c032561788edb5cd1835d",
       "src/components/sites/use-sites-workspace.ts": "876c4ef5a44a49870897967d5b2de5f13f54b4ce7bde8f1e09a2edfdfb289a1e",

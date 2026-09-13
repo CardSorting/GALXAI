@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { ArrowUpRight, Globe2, RotateCcw } from 'lucide-react';
 import { SITE_STARTERS, siteStarterHref } from '@/lib/sites/starters';
 import styles from './public-home.module.css';
@@ -44,17 +44,19 @@ function ExampleContent({ brand, version }: { brand: string; version: (typeof ex
 export function SitesExample() {
   const [selected, setSelected] = useState(0);
   const [revised, setRevised] = useState(false);
+  const [direction, setDirection] = useState(1);
   const starter = SITE_STARTERS[selected];
   const example = examples[starter.id];
   const version = example.versions[revised ? 1 : 0];
 
-  return <figure className={styles.example} aria-label="Explore starting ideas for your Site">
+  return <figure className={styles.example} aria-label="Explore starting ideas for your Site" style={{ '--draft-direction': direction } as CSSProperties}>
     <figcaption className={styles.exampleLabel}><span>A starting point for your idea.</span><span>Illustrative examples</span></figcaption>
-    <div className={styles.starterPicker} role="group" aria-label="Choose an example">
-      {SITE_STARTERS.map((item, index) => <button type="button" key={item.id} aria-pressed={selected === index} onClick={() => { setSelected(index); setRevised(false); }}>{item.label}</button>)}
+    <div className={styles.starterPicker} role="group" aria-label="Choose an example" style={{ '--starter-index': selected } as CSSProperties}>
+      <span className={styles.starterIndicator} aria-hidden="true" />
+      {SITE_STARTERS.map((item, index) => <button type="button" key={item.id} aria-pressed={selected === index} onClick={() => { setDirection(index >= selected ? 1 : -1); setSelected(index); setRevised(false); }}>{item.label}</button>)}
     </div>
     <p className={styles.exampleRequest}><span>{revised ? 'A change to try' : 'The starting idea'}</span>“{revised ? example.change : example.request}”</p>
-    <div className={styles.exampleSheet}>
+    <div className={styles.exampleSheet} data-revised={revised}>
       <div className={styles.exampleAddress}><Globe2 size={15} aria-hidden="true" /><span>{example.slug}.yourname.galx.ai</span><span className={styles.exampleVersion}>{revised ? 'Revised' : 'First draft'}</span></div>
       <div className={styles.exampleCanvas}>
         {/* Intrinsic sizing keeps the actions in place as text wraps at each width. */}
@@ -64,12 +66,12 @@ export function SitesExample() {
           </div>
         ))}
         <div className={styles.examplePaper} aria-live="polite" aria-atomic="true">
-          <ExampleContent brand={example.brand} version={version} />
+          <div key={`${starter.id}-${revised}`} className={styles.exampleResult}><ExampleContent brand={example.brand} version={version} /></div>
         </div>
       </div>
     </div>
     <div className={styles.exampleActions}>
-      <button type="button" className={styles.revisionAction} onClick={() => setRevised(value => !value)} aria-pressed={revised}><RotateCcw size={15} aria-hidden="true" />{revised ? 'Back to first draft' : 'See a revision'}</button>
+      <button type="button" className={styles.revisionAction} onClick={() => { setDirection(revised ? -1 : 1); setRevised(value => !value); }} aria-pressed={revised}><RotateCcw size={15} aria-hidden="true" />{revised ? 'Back to first draft' : 'See a revision'}</button>
       <Link className={styles.exampleStart} href={siteStarterHref(starter.id, revised)}>Use this idea <ArrowUpRight size={16} aria-hidden="true" /></Link>
     </div>
     <p className={styles.exampleNote}>Opens an editable starting idea in Sites. Make it your own.</p>

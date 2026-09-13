@@ -1,0 +1,240 @@
+{
+  "observed_at": "2026-09-13T17:58:50.005760+00:00",
+  "base_revision": "9c21d21dd982a414bb1d11e68d4daf50744f7d6a",
+  "scope": "Second local homepage pass: playful galaxy interactions, continued orbital reading flow, directional examples and persistent motion control. Earlier local changes remain in the working tree. No deployment.",
+  "previous_evidence": "docs/knowledge/audits/2026-09-13-homepage-galaxy-motion.json",
+  "source_and_guide_sha256": {
+    "src/components/home/HomeMotion.tsx": "59eeab88ea1ee569cb0c862f37d4c1d5d3b2fe3fa43def56bdd892e5be71f9d8",
+    "src/components/home/GalaxyScene.tsx": "3d3286d4979b128e9ce4cfaa684b13606afb9c90aeef06490841a44637e5148c",
+    "src/components/home/use-galaxy-interactions.ts": "0a654c3abd4d7f562172df5d79afd94ee3b1c86509693dbc69d993920497d348",
+    "src/components/home/PublicHome.tsx": "a018c72892f2804fecb37431b66ad9a8294a58fc8d6f70b326b2368f8b2aa8fc",
+    "src/components/home/SitesExample.tsx": "4fe7f9f61198aacc2f88486a4d19ad061da308c73df7f5f4549f6559af1bad5b",
+    "src/components/home/public-home.module.css": "63accb0bc2a1720c09063e7cc58550cb91946fb22fbfdcf4d7a41d5a210ae046",
+    "src/components/home/DESIGN.md": "e16d8734bff52990503386c36e1fab4df5e66b5d2317b8f0ff88bbfe61b68a29",
+    "scripts/verify-homepage-ui.mjs": "fa95806981c9f785f8165f3ddb1b362aa71da7264a2c3ef1f4409c3efac38a47",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "b14773f9e5578e930aaa4f2d0f96dc93aa404f822141e5685b7748c7ca076522",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "e0471046ffb91f53a7f7854072a902b79f77380be0e2a3fd7a59931cc32baea2",
+    ".impeccable/surfaces/src-app-page-tsx.md": "180b3ab5781b3491fe0bc9cd75a392f13d5a13372fe5b06d8253653ed5f2b3e1"
+  },
+  "semantic_review": [
+    "Reviewed HomeMotion, GalaxyScene/GalaxyStory, useGalaxyInteractions, PublicHome, SitesExample and scoped CSS against the full homepage design record and surface brief. Product copy, authored example identity, public price/access terms and native destinations remain intact. Decoration is separate from real product work.",
+    "Reconciled complete navigation and quota-efficiency guides: pointer limits, touch exclusion, optional finite star, replacement/cancellation, lifecycle cleanup, scroll scale, continued reading artwork, directional examples, sticky controls, focus margins, fallback, tests and rollback.",
+    "Pointer input schedules at most one pending frame; coordinates are bounded and the layers reset on leave, blur and preference changes. One animation reference bounds shooting stars; pause, unmount, hidden document and offscreen hero cancel the active effect. Existing reduced-motion authority and per-tab storage fallback are retained.",
+    "No new registry edit was needed in this second pass: the previously reviewed homepage glob includes the new hook. Reviewed unmapped paths as private surface strategy, dated evidence and generated explicit review state. Broader domain fingerprints do not imply new exhaustive audits of unrelated modules.",
+    "Inspected desktop/mobile hero and full desktop screenshots in one batched visual pass, then desktop and touch shooting-star captures after the bounded correction. The paper preview stays legible, galaxy artwork continues between sections, controls fit at narrow widths, and the star remains behind content."
+  ],
+  "pattern_references": [
+    {
+      "url": "https://vercel.com/blog/designing-and-building-the-vercel-ship-conference-platform",
+      "adaptation": "Input-responsive depth and continuous scroll storytelling, using existing art and browser APIs."
+    },
+    {
+      "url": "https://linear.app/now/behind-the-latest-design-refresh",
+      "adaptation": "Predictable action placement: persistent motion control and a desktop Sites destination."
+    },
+    {
+      "url": "https://vercel.com/design/guidelines",
+      "adaptation": "Interruptible motion, touch/keyboard parity, fixed hit targets and SVG group transform origins."
+    },
+    {
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pointerType",
+      "adaptation": "Fine-mouse parallax ignores touch input."
+    }
+  ],
+  "audit_findings": [
+    {
+      "finding": "The sky did not respond directly to exploration.",
+      "result": "Added bounded fine-mouse depth and an optional 1.1-second shooting-star button with touch and keyboard parity."
+    },
+    {
+      "finding": "Galaxy identity stopped at the hero.",
+      "result": "Added lightweight continuous star-map paths and scroll-responsive closing rings without another bitmap."
+    },
+    {
+      "finding": "Motion control was only available at the top of the page.",
+      "result": "Added a synchronized sticky pause/resume control and retained native reading position."
+    },
+    {
+      "finding": "All draft changes used the same entrance direction.",
+      "result": "Selection and revision direction now determine an 18px horizontal arrival; explicit revised text remains alongside the amber accent."
+    },
+    {
+      "finding": "The first browser run found a sticky-pause scroll jump.",
+      "result": "Content focus margins had also applied inside the sticky bar. Zero margins on its own controls corrected the jump; final desktop and touch fixtures preserve reading position."
+    }
+  ],
+  "validation": {
+    "build": {
+      "command": "npm run build",
+      "exit_code": 0,
+      "home_route_kb": 6.98,
+      "first_load_js_kb": 190,
+      "scope": "Final TSX/CSS, including the sticky focus-margin correction; TypeScript included. Existing .env.local was loaded by Next, but not inherited by the isolated browser fixture server."
+    },
+    "lint": {
+      "exit_code": 0,
+      "scope": "Changed homepage TypeScript; node --check for the browser fixture; CSS validated by build."
+    },
+    "security": {
+      "command": "npm run test:image:security",
+      "passed": 29,
+      "failed": 0
+    },
+    "request_efficiency": {
+      "command": "npm run test:egress:transport",
+      "passed": 40,
+      "failed": 0
+    },
+    "documentation_fixtures": {
+      "command": "npm run test:docs",
+      "passed": 37,
+      "failed": 0
+    },
+    "compiled_boundary": {
+      "command": "npm run docs:check:build",
+      "exit_code": 0,
+      "assets_checked": 640
+    },
+    "browser": {
+      "command": "node scripts/verify-homepage-ui.mjs",
+      "exit_code": 0,
+      "target": "http://127.0.0.1:3424",
+      "results": {
+        "checkedAt": "2026-09-13T17:57:48.803Z",
+        "checks": [
+          {
+            "width": 1440,
+            "overflow": false,
+            "axeViolations": 0,
+            "pageErrors": 0,
+            "versions": "passed",
+            "keyboard": "passed",
+            "copy": "passed",
+            "pricing": "passed",
+            "skipLink": "passed",
+            "exampleHeights": [
+              676.59375,
+              676.59375,
+              676.59375,
+              676.59375,
+              676.59375,
+              676.59375
+            ]
+          },
+          {
+            "width": 768,
+            "overflow": false,
+            "axeViolations": 0,
+            "pageErrors": 0,
+            "versions": "passed",
+            "keyboard": "passed",
+            "copy": "passed",
+            "pricing": "passed",
+            "skipLink": "passed",
+            "exampleHeights": [
+              755.8125,
+              755.8125,
+              755.8125,
+              755.8125,
+              755.8125,
+              755.8125
+            ]
+          },
+          {
+            "width": 390,
+            "overflow": false,
+            "axeViolations": 0,
+            "pageErrors": 0,
+            "versions": "passed",
+            "keyboard": "passed",
+            "copy": "passed",
+            "pricing": "passed",
+            "skipLink": "passed",
+            "exampleHeights": [
+              754.3125,
+              754.3125,
+              754.3125,
+              754.3125,
+              754.3125,
+              754.3125
+            ]
+          },
+          {
+            "width": 320,
+            "overflow": false,
+            "axeViolations": 0,
+            "pageErrors": 0,
+            "versions": "passed",
+            "keyboard": "passed",
+            "copy": "passed",
+            "pricing": "passed",
+            "skipLink": "passed",
+            "exampleHeights": [
+              837.390625,
+              837.390625,
+              837.390625,
+              837.390625,
+              837.390625,
+              837.390625
+            ]
+          },
+          {
+            "width": 1440,
+            "motion": "passed",
+            "pointerDepth": "bounded, reset, controls stationary, touch ignored",
+            "shootingStar": "keyboard/touch, replaceable, stopped when paused/offscreen",
+            "stickyMotionControl": "reading position preserved",
+            "pausePersistence": "passed",
+            "liveReducedMotion": "passed",
+            "hiddenAndOffscreen": "passed",
+            "chapterAnchors": "passed",
+            "rapidSwitching": "passed",
+            "metrics": {
+              "cls": 0,
+              "lcp": 80,
+              "longTasks": [],
+              "shifts": []
+            },
+            "scrollFrameP95Ms": 17.5
+          },
+          {
+            "width": 390,
+            "motion": "passed",
+            "pointerDepth": "touch scrolling preserved",
+            "shootingStar": "keyboard/touch, replaceable, stopped when paused/offscreen",
+            "stickyMotionControl": "reading position preserved",
+            "pausePersistence": "passed",
+            "liveReducedMotion": "passed",
+            "hiddenAndOffscreen": "passed",
+            "chapterAnchors": "passed",
+            "rapidSwitching": "passed",
+            "metrics": {
+              "cls": 0,
+              "lcp": 88,
+              "longTasks": [],
+              "shifts": []
+            },
+            "scrollFrameP95Ms": 17.400000005960464
+          },
+          {
+            "clientBundlesBlocked": "content, links and native disclosures passed; inline framework stream completion required"
+          }
+        ],
+        "scriptsScanned": 11,
+        "socialImages": [
+          "opengraph-image",
+          "twitter-image"
+        ]
+      }
+    },
+    "documentation_lifecycle": "Explicit client-efficiency review and docs:sync/docs:check follow this immutable record. Final validation is reported separately to avoid self-referential evidence hashes."
+  },
+  "limits": [
+    "Local Chrome with desktop mouse and mobile touch emulation; no physical-device, Safari/Firefox or comprehensive screen-reader certification.",
+    "No deployment, live account, paid generation, publication, checkout or production traffic acceptance.",
+    "Layout shifts and long tasks are bounded local samples. The recorded cls is the sum of qualifying entries, not a field session-window metric; no industry-wide performance score or field CWV guarantee.",
+    "Fully disabling all JavaScript still leaves the existing framework streaming shell. Blocking external client bundles preserves content and native disclosures after inline stream completion.",
+    "The new UI reuses the existing galaxy asset with no additional animation dependency, bitmap or rendering context. Bundle size is recorded rather than claimed cost-free.",
+    "Public copy, metadata, scripts, social artifacts and selected compiled markers were checked locally; this does not establish that every live page is clean."
+  ]
+}

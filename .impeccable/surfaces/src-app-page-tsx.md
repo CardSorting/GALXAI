@@ -2,7 +2,7 @@
 version: 1
 slug: "src-app-page-tsx"
 primary_target: "src/app/page.tsx"
-related_targets: ["src/components/home/PublicHome.tsx","src/components/home/SitesExample.tsx","src/components/home/PlanAction.tsx","src/components/home/public-home.module.css","route:/"]
+related_targets: ["src/components/home/PublicHome.tsx","src/components/home/HomeMotion.tsx","src/components/home/GalaxyScene.tsx","src/components/home/use-galaxy-interactions.ts","src/components/home/SitesExample.tsx","src/components/home/PlanAction.tsx","src/components/home/public-home.module.css","route:/"]
 ---
 
 # Sites homepage
@@ -20,3 +20,7 @@ Entry continuity: preserve the selected idea through the canonical sign-in route
 No new visual world or concept-selection round: the user specified the product emphasis and section sequence for this existing homepage. No providers, model names, implementation explanation, invented free tier, production-ready app promise, custom-domain purchase claim, or service guarantee. State that this is an extremely early public beta; fair-use and availability copy describes customer expectations only.
 
 Quality target: accessible keyboard interactions, stable example layout, 44px controls, responsive table and no overflow at 320/390/768/1440px. Changes remain local until separately deployed.
+
+Galaxy motion refinement, September 13: strengthen the existing artwork with fine orbital geometry and gentle scroll depth. Keep the idea-to-draft example as the focal interaction: a sliding pressed-button selection and short result transitions, without auto-rotation. Native section navigation, a connected benefit track, brief introductions and FAQ feedback support reading. Preserve a readable static fallback, live device reduced-motion support, and a visible per-tab pause control. Decorative motion stops when hidden or offscreen. No product claims, new generated imagery, animation dependency, or shared-shell redesign is part of this pass.
+
+Playful refinement, September 13: the galaxy now responds to fine mouse movement while controls stay stationary. An optional Send a star action is equally available by touch and keyboard. Continuous orbital artwork carries the reading flow into the closing invitation, and draft transitions respect selection direction. Keep synchronized pause/resume available in the sticky chapter bar and show the Sites action there on desktop. Use lightweight geometry and finite, interruptible feedback. No touch scrolling interception, auto-rotating examples, mandatory toy interaction, sound or accumulating particles.
