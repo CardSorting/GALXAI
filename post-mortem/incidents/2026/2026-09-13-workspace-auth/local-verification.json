@@ -1,0 +1,112 @@
+{
+  "observed_at": "2026-09-13T18:52:51.733555Z",
+  "base_revision": "e0e5be199e1c64b8873f029a3445facdbc29ac90",
+  "scope": "Uncommitted working-tree fix; isolated production build and synthetic Auth HTTP acceptance; not deployed",
+  "review": {
+    "reviewer": "Codex",
+    "sources": [
+      "src/middleware.ts",
+      "src/utils/supabase/middleware.ts",
+      "src/lib/auth/workspace-session.ts",
+      "src/lib/auth/require-workspace-session.ts",
+      "src/lib/security/workspace-policy.ts",
+      "src/lib/security/preview-policy.ts",
+      "src/app/images/page.tsx",
+      "src/app/sites/page.tsx",
+      "src/app/sites/[id]/page.tsx",
+      "scripts/test-workspace-auth.ts",
+      "scripts/verify-image-public-http.ts",
+      "package.json"
+    ],
+    "canonical_guides_and_contracts": [
+      "PRODUCT.md",
+      "docs/PRODUCT_SURFACE_STRATEGY.md",
+      "docs/SITES_WORKSPACE.md",
+      "docs/maintainers/SITES_WORKSPACE.md",
+      "docs/maintainers/SITES_OPERATIONS.md",
+      "docs/maintainers/image-public-boundary.md",
+      "docs/operations/developer-preview.md",
+      "docs/DOCUMENTATION_POLICY.md",
+      "docs/how-to/change-with-documentation.md",
+      "docs/reference/knowledge-commands.md",
+      "docs/knowledge/README.md",
+      "docs/runbooks/release-readiness.md",
+      "post-mortem/failure-modes/access-and-documentation.md",
+      "post-mortem/CURRENT_STATE.md"
+    ],
+    "corrections": [
+      "Public-product preview exemption no longer grants anonymous workspace entry.",
+      "Dynamic page guards independently enforce verified account sessions.",
+      "Private uncached redirects/failures preserve Auth refresh cookies.",
+      "Reconciled Sites onboarding, product/access policy, image boundary and failure-mode guidance; mapped middleware, auth helpers, tests and Sites server pages to owning domains."
+    ],
+    "limits": "Bounded changed-contract and affected-guide review; expanded fingerprint inventories do not certify every module. ADR intent and delivery status unchanged."
+  },
+  "checks": {
+    "image_security": {
+      "passed": 34
+    },
+    "developer_preview": {
+      "passed": 14
+    },
+    "sites_workspace": {
+      "passed": 16
+    },
+    "preview_admin": {
+      "passed": 6
+    },
+    "typescript": "passed",
+    "lint": {
+      "errors": 0,
+      "existing_warnings": 8
+    },
+    "production_build": {
+      "exit_code": 0,
+      "node": "26.8.1",
+      "dotenv_loaded": false,
+      "real_credentials": false,
+      "log_sha256": "3f186a2a5d5f39efcc6293ef4ce33ba119b8590f03b4c44d8f91319c36712049"
+    },
+    "compiled_http": {
+      "checks": 83,
+      "assets": 28,
+      "scope": "Isolated compiled Next.js HTTP; synthetic Auth service; no live credentials or data; no generation or publishing"
+    },
+    "compiled_private_boundary": {
+      "browser_and_rendered_files": 639,
+      "hits": 0,
+      "runtime_trace_check": "passed"
+    },
+    "documentation_adversarial_tests": "passed"
+  },
+  "initial_environment_failures": [
+    "Sandbox blocked loopback fixtures and Google Fonts download; rerun with approved permissions passed.",
+    "Previously used temporary Node 22 missing; Homebrew Node 22 cannot start due to missing simdjson library. Build passed with working Node 26.8.1."
+  ],
+  "source_sha256": {
+    "src/middleware.ts": "c4f2fd32d026f54dce9a6d4362412b2715a5632bf0a5dbb38680e6e85b59306d",
+    "src/utils/supabase/middleware.ts": "f09f4578ccfd310f55c7e9f6139c552ed8ec0ed21a01c0782f9309c03d9f5554",
+    "src/lib/auth/workspace-session.ts": "4282aaf4a97f7cde3a15295f530949b6c445a58f7afd856d2d2ad61bb288b477",
+    "src/lib/auth/require-workspace-session.ts": "06486b796b2330a19f1ffb9e8acaf9f3ded699c5127defc44af562386d54fe76",
+    "src/lib/security/workspace-policy.ts": "4b7e0d355a612460052c76bdb32063b11507ba1d5631ece9fd4c969d4eea5530",
+    "src/lib/security/preview-policy.ts": "57a41665d4f07bb05aa927bb454693ef07f24fe6878ad1d3dddbec8f8b641ec5",
+    "src/app/images/page.tsx": "c52ab7e1183d69c5fa881d1bd0c5a5fd82945e6a3c265bd43612eb4bfd1c2a37",
+    "src/app/sites/page.tsx": "e18025a8902c784a084535fd625463be10ec2f82292f7563663c98fad9fcbd33",
+    "src/app/sites/[id]/page.tsx": "7c1a705c7662c1121cf9c1ea7ea663997a856946db356a39309aeca72abc91f1",
+    "scripts/test-workspace-auth.ts": "a97561f1cc8274420ab6442fe6355c3f0abcd4c2a50f8e4bafbf6e577ca5188c",
+    "scripts/verify-image-public-http.ts": "e18638280ad8492f847c7f29fe926e8d15cb96120e9f925d9e1373cd0e62e49c",
+    "package.json": "0b863a6e2a9353662c7311007ee721231f277d9b208388879e7107b6da71bf89"
+  },
+  "production": {
+    "deployment_performed": false,
+    "anonymous_before": {
+      "/images": 200,
+      "/sites": 200
+    },
+    "signed_in_live_acceptance": false
+  },
+  "remaining": [
+    "Deploy reviewed source and verify anonymous/invalid-session denial and existing-account entry on production.",
+    "No generation, billing, publication, migration or data mutation was exercised."
+  ]
+}

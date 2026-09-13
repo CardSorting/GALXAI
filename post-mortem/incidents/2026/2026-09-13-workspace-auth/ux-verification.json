@@ -1,0 +1,266 @@
+{
+  "observed_at": "2026-09-13T19:20:01.381756Z",
+  "base_revision": "e0e5be199e1c64b8873f029a3445facdbc29ac90",
+  "scope": "Local uncommitted second-pass workspace-auth and sign-in recovery refinement; isolated compiled server and synthetic Auth/browser fixtures; not deployed",
+  "review": {
+    "reviewer": "Codex",
+    "sources": [
+      "package.json",
+      "scripts/test-auth-entry.ts",
+      "scripts/test-workspace-auth.ts",
+      "scripts/verify-auth-entry-server.cjs",
+      "scripts/verify-auth-entry-ui.ts",
+      "scripts/verify-image-public-http.ts",
+      "scripts/verify-workspace-auth-http.mjs",
+      "src/app/auth/signin/page.tsx",
+      "src/app/auth/signup/page.tsx",
+      "src/app/images/page.tsx",
+      "src/app/sites/[id]/page.tsx",
+      "src/app/sites/page.tsx",
+      "src/components/auth/AuthEntryShell.tsx",
+      "src/components/auth/SignInForm.tsx",
+      "src/components/auth/WorkspaceSessionBoundary.tsx",
+      "src/components/auth/auth-entry.module.css",
+      "src/components/dashboard/Footer.tsx",
+      "src/components/images/ImageStudio.tsx",
+      "src/components/images/use-image-studio.ts",
+      "src/components/sites/SitesWorkspace.tsx",
+      "src/components/sites/use-sites-workspace.ts",
+      "src/lib/auth/redirects.ts",
+      "src/lib/auth/require-workspace-session.ts",
+      "src/lib/auth/signin.ts",
+      "src/lib/auth/workspace-client.ts",
+      "src/lib/auth/workspace-session.ts",
+      "src/lib/security/preview-policy.ts",
+      "src/lib/security/workspace-policy.ts",
+      "src/lib/security/workspace-unavailable.ts",
+      "src/middleware.ts",
+      "src/utils/supabase/middleware.ts"
+    ],
+    "canonical_guides_and_contracts": [
+      "PRODUCT.md",
+      "docs/DOCUMENTATION_POLICY.md",
+      "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
+      "docs/PRODUCT_SURFACE_STRATEGY.md",
+      "docs/SITES_WORKSPACE.md",
+      "docs/how-to/change-with-documentation.md",
+      "docs/knowledge/README.md",
+      "docs/knowledge/audits/2026-09-13-workspace-auth-ux.md",
+      "docs/maintainers/SITES_OPERATIONS.md",
+      "docs/maintainers/SITES_WORKSPACE.md",
+      "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
+      "docs/maintainers/image-library-scale.md",
+      "docs/maintainers/image-public-boundary.md",
+      "docs/maintainers/image-studio-review.md",
+      "docs/operations/developer-preview.md",
+      "docs/operations/workspace-auth.md",
+      "docs/reference/knowledge-commands.md",
+      "post-mortem/CURRENT_STATE.md",
+      "post-mortem/failure-modes/README.md",
+      "post-mortem/failure-modes/access-and-documentation.md"
+    ],
+    "corrections": [
+      "Server-aware sign-in and safe finite destination/error handling.",
+      "Existing-account email link, accessible errors/focus and duplicate submission lock.",
+      "Owner-scoped 401 unmount, draft/context retention, 403 distinction and explicit outage retry.",
+      "Existing palette, contrast and reflow corrections; no design suppressions.",
+      "Reconciled current access, image, Sites, navigation and incident guidance; registered auth sources, reproducible fixtures and runbook."
+    ],
+    "limits": "Bounded changed-contract/full affected-guide review, not exhaustive certification of all files included in domain fingerprints. ADR statuses and production evidence unchanged."
+  },
+  "checks": {
+    "security": {
+      "passed": 38,
+      "log_sha256": "ececc8fd11d6e36a4dafdb979102686a2651c9f7ec8c28262a2519a93a63b327"
+    },
+    "preview": {
+      "passed": 14,
+      "log_sha256": "ab7e3569d790577b61178c74595c79c37fa52f7688e8356d40ba34e394dc0bb5"
+    },
+    "admin": {
+      "passed": 6,
+      "log_sha256": "82651288305da0df3bde57ad5511a0921c58c56cc7053dcf28469b8e4632c0b4"
+    },
+    "egress": {
+      "passed": 40,
+      "log_sha256": "6388cec2e183f26f2de166ef03ce2e63e86ad240d5327ab03fb1ac026a53a626"
+    },
+    "scale": {
+      "passed": 15,
+      "log_sha256": "37257ce08b13b381510a5c2f736a504d0a2ec63db1162a3b671598646da02610"
+    },
+    "sites": {
+      "passed": 16,
+      "log_sha256": "1d351b1b06fb522f7739bd7e74aa6031e4141cfbb3da02e6fbae01cbecea241b"
+    },
+    "signup": {
+      "passed": 6,
+      "log_sha256": "2f49e8a15e8ebb6d47e2c90a64a842f64e35558fc4c3f96f025e147b5715290d"
+    },
+    "typescript": "passed",
+    "lint": {
+      "errors": 0,
+      "preexisting_warnings": 8
+    },
+    "production_build": {
+      "exit_code": 0,
+      "node": "26.8.1",
+      "dotenv_loaded": false,
+      "real_credentials": false,
+      "log_sha256": "34acd96bd664b5b28e7d7dee4891aa9d637f64de50670851533c9df60d3e6485"
+    },
+    "compiled_http": {
+      "checks": 88,
+      "assets": 29,
+      "scope": "Isolated compiled Next.js HTTP; synthetic Auth service; no live credentials or data; no generation or publishing"
+    },
+    "browser": {
+      "passed": true,
+      "visual_states": [
+        {
+          "label": "signin-1440",
+          "violations": []
+        },
+        {
+          "label": "password-error-1440",
+          "violations": []
+        },
+        {
+          "label": "email-link-1440",
+          "violations": []
+        },
+        {
+          "label": "signin-390",
+          "violations": []
+        },
+        {
+          "label": "password-error-390",
+          "violations": []
+        },
+        {
+          "label": "email-link-390",
+          "violations": []
+        },
+        {
+          "label": "expired-1440",
+          "violations": []
+        },
+        {
+          "label": "unavailable-1440",
+          "violations": []
+        },
+        {
+          "label": "expired-390",
+          "violations": []
+        },
+        {
+          "label": "unavailable-390",
+          "violations": []
+        },
+        {
+          "label": "signin-reflow-320",
+          "violations": []
+        }
+      ],
+      "cross_tab_signout": "passed",
+      "private_editor_unmount_and_draft_retention": "passed",
+      "csp_bypassed_for_synthetic_host": true,
+      "results_sha256": "de7c614ea09c6b869ac66f4dd9d611f68059a33b98e428980d5be9f71812dbd4",
+      "screenshots": {
+        "email-link-1440.png": "17f13e4f064d31a326ca9c2b45e3da69b903c8bd8afd5ebe9a704394c493dc8e",
+        "email-link-390.png": "358e27d281acf41107a856e6e9ff01b1709fb6234c78e8842042eaf82a12595a",
+        "expired-1440.png": "fbc0bbca8153b572743d873f6b7ba93d8f1f7b2d35e300723feca41a05783010",
+        "expired-390.png": "95d62deeee3cff5fa0052a8481dd5927e93209d8afb0fdc1efc358d664695aa9",
+        "password-error-1440.png": "a8f5e3dde59f26dae0fb8eb506a14c1cd1355c5f4775ff54b05485b1a4602691",
+        "password-error-390.png": "c6f23d202841d5d6f1ebd496e6cca544ab4366b96d184e2bef996aba047a29bb",
+        "signin-1440.png": "52be6cabf645865d8ab17f1d5005c5a5974e80ff99da7f788677fcec6d1552ce",
+        "signin-390.png": "0929c4bbdde9a1733cf058f5ddff03814c3f1462cbdb3322015201f687eb86ea",
+        "signin-reflow-320.png": "acd6d2b67a6ad7639329090775b1f3b237b5096e8c2fc1a6edcaeae32acb31e1",
+        "unavailable-1440.png": "ae0c8242b1a6d54d637e9ab0c46e2e9021ffc829242c6940422e76bba274961f",
+        "unavailable-390.png": "f62bf3c1326602610a44bf2fc36441291b64640a2fb9c2759eb811dc061e466e"
+      }
+    },
+    "compiled_private_boundary": {
+      "browser_and_rendered_files": 638,
+      "hits": 0,
+      "runtime_trace_check": "passed"
+    },
+    "documentation_adversarial_tests": {
+      "passed": 37
+    }
+  },
+  "source_sha256": {
+    "package.json": "31258d42c2a8c5b66900bb29bad8e8fc7f8be042c9b127fd05fb2bb60d5d00cc",
+    "scripts/test-auth-entry.ts": "b3ab55b095b59451ae235f76d6425759a0827a7f2e4c14eb5c2523d45df340ca",
+    "scripts/test-workspace-auth.ts": "05624d9daf788494beaf3a5fa6502e4328acdc30dd9e98caadcfabc9793736ef",
+    "scripts/verify-auth-entry-server.cjs": "b039e9fd98711035d2d16cc17d909aa8567db2497abc4eccaf4857983d1a6983",
+    "scripts/verify-auth-entry-ui.ts": "c3cea86e2c5e0be838e57b33f705e2f329b19c86fccda2b22477cd55f7942af5",
+    "scripts/verify-image-public-http.ts": "e18638280ad8492f847c7f29fe926e8d15cb96120e9f925d9e1373cd0e62e49c",
+    "scripts/verify-workspace-auth-http.mjs": "890405e1a8722da33d7353715498e34681747592779f4e3089690d2a135d53bc",
+    "src/app/auth/signin/page.tsx": "488cef044253ab91415dbf4c4406a501f0d89ab01763da59ed318a7363490629",
+    "src/app/auth/signup/page.tsx": "5b8aeafaa13004a3caaf100a5f982da81559a9e754aa76605179dfc63a0f8fc4",
+    "src/app/images/page.tsx": "c52ab7e1183d69c5fa881d1bd0c5a5fd82945e6a3c265bd43612eb4bfd1c2a37",
+    "src/app/sites/[id]/page.tsx": "7c1a705c7662c1121cf9c1ea7ea663997a856946db356a39309aeca72abc91f1",
+    "src/app/sites/page.tsx": "e18025a8902c784a084535fd625463be10ec2f82292f7563663c98fad9fcbd33",
+    "src/components/auth/AuthEntryShell.tsx": "9f9d85196eb207718069f38a7825db0730339001dd0f3fa0cf1f8a81b9d85390",
+    "src/components/auth/SignInForm.tsx": "3acd20b40560b2da0a332117f120d367f169506a2bb32c8a3aa70c94af52ac94",
+    "src/components/auth/WorkspaceSessionBoundary.tsx": "a2c840b9b6ac5d9e2c94d4eeafc0be610eb5532888e580ca360edf249e4391f7",
+    "src/components/auth/auth-entry.module.css": "59c940ad7abce4f5618c5cf256de50ce0c184949aa53d535fc903f9072ce0d84",
+    "src/components/dashboard/Footer.tsx": "6b82c45ff3419d51a0c42031ac0ebe8fca4ec03270dab0778dd8ddb3d25ae296",
+    "src/components/images/ImageStudio.tsx": "557951de66cc55535cd158cd55f64fa3de6c2ef50b00f690cb5987eb9d11d193",
+    "src/components/images/use-image-studio.ts": "1a95bcf3d2f57e04b8ae8b6fb1cb5982ec0b13b20a94ee5761c6c28eaf9d2012",
+    "src/components/sites/SitesWorkspace.tsx": "91fd18484a8f43653569d98781a8a9dd48d8ed6419ed982963d1396b1fb223d2",
+    "src/components/sites/use-sites-workspace.ts": "9066d56b4b1dca6023af035f0e6fee399047f4ad1ee2b0e60de71b5db1d4bac8",
+    "src/lib/auth/redirects.ts": "0bbd4e0d6b9c138b9018e5db7cc88c24c141f815bff7597a0c9919763a26fc3b",
+    "src/lib/auth/require-workspace-session.ts": "06486b796b2330a19f1ffb9e8acaf9f3ded699c5127defc44af562386d54fe76",
+    "src/lib/auth/signin.ts": "796993e003803f8d8f89f5d607cfc57d85e997261362a612a11ee2a5e76cbcb9",
+    "src/lib/auth/workspace-client.ts": "f8a54c450e7116d3165b8e91dc55438a7d9962960200466246b2f6007c0ae797",
+    "src/lib/auth/workspace-session.ts": "4282aaf4a97f7cde3a15295f530949b6c445a58f7afd856d2d2ad61bb288b477",
+    "src/lib/security/preview-policy.ts": "57a41665d4f07bb05aa927bb454693ef07f24fe6878ad1d3dddbec8f8b641ec5",
+    "src/lib/security/workspace-policy.ts": "5cfd106347feadf13fba4b19b015041b8220e4b19daf283f46374e16da58a631",
+    "src/lib/security/workspace-unavailable.ts": "1f661a43c9106c59063588dc7047fe15cdae4e74a22b74a82ef64cb66ce2a6f9",
+    "src/middleware.ts": "c4f2fd32d026f54dce9a6d4362412b2715a5632bf0a5dbb38680e6e85b59306d",
+    "src/utils/supabase/middleware.ts": "4cf388ff0dda9d48bdd52eca179134cf1e431e4fad79bef0c091e611281ab874"
+  },
+  "guide_sha256": {
+    "PRODUCT.md": "a7bfb7d90bfdeb89474a777210a3fd0c4bd44c4255373b3f9bb80e1dfbd01d68",
+    "docs/DOCUMENTATION_POLICY.md": "ab2030f9d15010634b9a2d9cf2bc680fdf4ae961c2ee3f9f7ad567e99d49d40c",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "6a86a5fad79a558d0149d706dbe96c277bafe17a6b6cfe8038fc7ef5c97257f2",
+    "docs/PRODUCT_SURFACE_STRATEGY.md": "7e010b5e23025d0cccc511437cecf337eb7230b35e4d68567e61c7b7f9eceb07",
+    "docs/SITES_WORKSPACE.md": "f6c6d2dc5172d64dbc2de309860b0cbbc2b1e4d9521c38bc24517488114f46a4",
+    "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
+    "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
+    "docs/knowledge/audits/2026-09-13-workspace-auth-ux.md": "418a2be5bd6aa7e81f327ebb97149d0eb4d20ba9f24e7daddcb7067cec7d0528",
+    "docs/maintainers/SITES_OPERATIONS.md": "50e36e5689d37f78beb0a40011b92de6a940203663549049ebe6d15b4af32550",
+    "docs/maintainers/SITES_WORKSPACE.md": "6ca671eb5417ae2da79873572d1c87d24014669484d0773d7f461c6455211e39",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "50ee01adf664e9b580356615569af020b3cf98ebae89c3ed437635873eb2e0f2",
+    "docs/maintainers/image-library-scale.md": "dfbfb97affe366b6cff2eda068eded2c0e13aeb1beb03c4f7e775a1d8cdfb5a9",
+    "docs/maintainers/image-public-boundary.md": "917078b0399d197572eea57052d33add3a6f38a140bb98ea9edb1de0d8bc42c3",
+    "docs/maintainers/image-studio-review.md": "baf239d12706a1d64a1284679133668850d4935925a3881b34c6995273f47755",
+    "docs/operations/developer-preview.md": "2d2f35795e001343f1113b6809a5f01f16bd8b4f9641dacc0f554913e2118c98",
+    "docs/operations/workspace-auth.md": "c537ff07a45f760e06159a9f947825d2db8bf7bc08b3d2e19ece2bc1c837b9f8",
+    "docs/reference/knowledge-commands.md": "3ae9092ea941ebc459a2895b8c2eebb4c1c8d59659d718a2c353a1a6be6e8379",
+    "post-mortem/CURRENT_STATE.md": "2fab7fbbd474f5aadd9940c08ed17c9dd133ffb7a26d1ced0aef4ef04f0b86fa",
+    "post-mortem/failure-modes/README.md": "ef1dd8e8f7f0b5677e9258958927a6e6cd26fc00075e81c49548d62a61a147b8",
+    "post-mortem/failure-modes/access-and-documentation.md": "4b91099eb781b63cbb369c3950c215ff01ac3729db87380e2b81610362e106ca"
+  },
+  "initial_failures_and_corrections": [
+    "Localhost origin mismatch made initial browser styles fail; invalid captures rejected and fixture origin corrected.",
+    "Synthetic Auth error fixture needed API-version and CORS exposure headers; corrected to match SDK contract.",
+    "Primary contrast and enlarged-text header overflow were corrected; final scoped checks passed.",
+    "Fixture focus assertions now await effects and exclude the framework route announcer; raw sign-in acceptance recognizes framework streamed redirects.",
+    "Lint identified missing owner dependency in the new fetch wrapper; corrected. Node 22 environment remains unavailable; build used working Node 26.8.1."
+  ],
+  "production": {
+    "deployment_performed": false,
+    "live_session_acceptance": false,
+    "emails_sent": false,
+    "generation_billing_publication_or_database_mutations": false
+  },
+  "remaining": [
+    "Deploy reviewed source and verify anonymous/invalid denial and existing-account entry on production.",
+    "Verify real OAuth/email callbacks, session refresh and cross-tab behavior on the deployed revision.",
+    "Physical-device and complete assistive-technology acceptance remain separate.",
+    "Legacy browser-only workspace fixtures require verified server-session adaptation; current auth harness does not replace their full generation/publishing coverage."
+  ]
+}

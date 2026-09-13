@@ -144,6 +144,25 @@
       "recovery_evidence": [
         "post-mortem/incidents/2026/2026-09-13-documentation/verification.json"
       ]
+    },
+    {
+      "id": "INC-20260913-WORKSPACE",
+      "category": "authorization",
+      "severity": "SEV-1",
+      "status": "recovered",
+      "title": "Unauthenticated Sites and Images workspace access",
+      "owner": "Codex (active responder)",
+      "record": "post-mortem/incidents/2026/2026-09-13-workspace-auth/README.md",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-13-workspace-auth/README.md",
+        "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-revocation-release.json"
+      ],
+      "failure_modes": [
+        "FM-ACCESS-002"
+      ],
+      "recovery_evidence": [
+        "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-revocation-release.json"
+      ]
     }
   ],
   "actions": [
@@ -276,6 +295,48 @@
       "evidence": [
         "post-mortem/releases/2026-09-13-image-library-scale.json",
         "post-mortem/releases/2026-09-13-followup-repairs-local.json"
+      ]
+    },
+    {
+      "id": "ACT-013",
+      "incident": "INC-20260913-WORKSPACE",
+      "owner": "security/release maintainer",
+      "review_by": "2026-09-14",
+      "status": "completed",
+      "next_step": "Migration applied, reviewed working tree deployed and live account/cache acceptance passed. Preserve the gates and repeat canonical-host cache acceptance after application/CDN changes.",
+      "closure": "Production routes deny anonymous and invalid sessions before workspace content; authenticated owner access and API boundaries remain valid; record deployed revision and checks.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-13-workspace-auth/local-verification.json",
+        "post-mortem/incidents/2026/2026-09-13-workspace-auth/ux-verification.json",
+        "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-lifecycle-verification.json",
+        "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-revocation-verification.json",
+        "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-revocation-release.json"
+      ]
+    },
+    {
+      "id": "ACT-014",
+      "incident": "INC-20260913-WORKSPACE",
+      "owner": "security/account maintainer",
+      "review_by": "2026-09-20",
+      "status": "open",
+      "next_step": "Keep legacy elevation closed until account-bound expiring single-use fresh proof is implemented and tested. Active-session policy is deployed and verified; verify device approval/poll RPC ownership and one-time consumption separately. Track the existing breached-password protection advisor warning without treating it as a session-migration failure.",
+      "closure": "No unverified elevation path is enabled; sensitive-action proof/revocation guarantees are explicit and tested, and durable device-grant behavior has retained database acceptance evidence.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-lifecycle-verification.json",
+        "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-revocation-verification.json",
+        "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-revocation-release.json"
+      ]
+    },
+    {
+      "id": "ACT-015",
+      "incident": "INC-20260913-WORKSPACE",
+      "owner": "security/account maintainer",
+      "review_by": "2026-09-14",
+      "status": "open",
+      "next_step": "Follow the nonreproduced refreshed-profile availability observation. If it recurs, retain allowlisted HTTP status/timing and correlate private Auth/lookup diagnostics; distinguish temporary verification failure from invalid credentials. Do not infer a cause from the original status-only assertion.",
+      "closure": "The failure is diagnosed and corrected with a reproducing check, or the maintainer explicitly records an evidence-backed nonrecurrence/monitoring disposition; no cached authorization fallback is introduced.",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-revocation-release.json"
       ]
     }
   ]

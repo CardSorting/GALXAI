@@ -107,17 +107,55 @@
         "scripts/test-developer-preview.ts",
         "scripts/test-preview-admin.ts",
         "scripts/test-preview-read-sync.ts",
-        "scripts/test-auth-identity-boundary.ts"
+        "scripts/test-auth-identity-boundary.ts",
+        "src/middleware.ts",
+        "src/utils/supabase/middleware.ts",
+        "src/lib/auth/workspace-session.ts",
+        "src/lib/auth/require-workspace-session.ts",
+        "scripts/test-workspace-auth.ts",
+        "src/lib/auth/redirects.ts",
+        "src/lib/auth/signin.ts",
+        "src/lib/auth/workspace-client.ts",
+        "src/components/auth/AuthEntryShell.tsx",
+        "src/components/auth/SignInForm.tsx",
+        "src/components/auth/WorkspaceSessionBoundary.tsx",
+        "src/components/auth/auth-entry.module.css",
+        "src/app/auth/signin/page.tsx",
+        "src/app/auth/signup/page.tsx",
+        "scripts/test-auth-entry.ts",
+        "scripts/verify-auth-entry-ui.ts",
+        "scripts/verify-auth-entry-server.cjs",
+        "scripts/verify-workspace-auth-http.mjs",
+        "src/components/dashboard/Footer.tsx",
+        "src/lib/auth/**/*.ts",
+        "src/app/api/auth/**/*.ts",
+        "src/app/api/ingest/route.ts",
+        "src/app/auth/callback/route.ts",
+        "src/contexts/AuthContext.tsx",
+        "src/components/auth/AuthRequiredGate.tsx",
+        "src/components/auth/TeamsAuthGuard.tsx",
+        "src/core/vault/GalxCryptoVault.ts",
+        "src/lib/supabase/repositories/OAuthRepository.ts",
+        "scripts/test-session-lifecycle.ts",
+        "src/lib/supabase/repositories/SessionRepository.ts",
+        "src/app/api/teams/seats/route.ts",
+        "src/app/library/page.tsx",
+        "scripts/verify-workspace-cache-http.mjs"
       ],
       "guides": [
         "docs/operations/developer-preview.md",
         "docs/operations/preview-admin.md",
         "docs/operations/preview-activation.md",
-        "docs/operations/preview-hybrid-sync.md"
+        "docs/operations/preview-hybrid-sync.md",
+        "docs/operations/workspace-auth.md",
+        "docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md",
+        "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md",
+        "docs/adr/0147-verified-account-and-session-authority.md"
       ],
       "checks": [
         "npm run test:preview-admin",
-        "npm run test:image:security"
+        "npm run test:image:security",
+        "npm run test:auth:sessions"
       ]
     },
     "sites": {
@@ -126,7 +164,10 @@
       "sources": [
         "src/lib/sites/**/*.ts",
         "src/app/api/sites/**/*.ts",
-        "src/lib/billing/sites-*.ts"
+        "src/lib/billing/sites-*.ts",
+        "src/app/sites/**/*.tsx",
+        "src/components/sites/SitesWorkspace.tsx",
+        "src/components/sites/use-sites-workspace.ts"
       ],
       "guides": [
         "docs/maintainers/SITES_OPERATIONS.md",
@@ -176,7 +217,10 @@
         "src/lib/db/postgres.ts",
         "scripts/run-supabase-integration.ts",
         "scripts/verify-supabase-integrity.ts",
-        "scripts/manage-migrations.ts"
+        "scripts/manage-migrations.ts",
+        "scripts/fixtures/integration-bootstrap.sql",
+        "scripts/test-account-session-db.ts",
+        "scripts/test-supabase-integration.ts"
       ],
       "guides": [
         "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
@@ -201,7 +245,8 @@
         "wrangler.toml",
         "workers/sites-domains/index.ts",
         "scripts/test-cloudflare-workers.ts",
-        "scripts/lib/require-isolated-worker-env.ts"
+        "scripts/lib/require-isolated-worker-env.ts",
+        "scripts/verify-workspace-cache-http.mjs"
       ],
       "guides": [
         "docs/DEPLOYMENT.md",
@@ -264,7 +309,9 @@
         "scripts/verify-navigation-ui.ts",
         "scripts/verify-image-library-scale-ui.ts",
         "src/components/home/**/*",
-        "scripts/verify-homepage-ui.mjs"
+        "scripts/verify-homepage-ui.mjs",
+        "src/lib/resilience/ResilientClient.ts",
+        "src/contexts/AuthContext.tsx"
       ],
       "guides": [
         "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
@@ -341,12 +388,33 @@
         "prefetch",
         "polling"
       ]
+    },
+    "docs/operations/workspace-auth.md": {
+      "kind": "runbook",
+      "keywords": [
+        "signin",
+        "authentication",
+        "sites",
+        "images",
+        "401",
+        "session expiry"
+      ]
+    },
+    "docs/knowledge/audits/2026-09-13-workspace-auth-ux.md": {
+      "kind": "evidence",
+      "keywords": [
+        "auth",
+        "sign-in",
+        "ux",
+        "audit"
+      ]
     }
   },
   "runbooks": [
     "docs/runbooks/knowledge-maintenance.md",
     "docs/runbooks/release-readiness.md",
-    "docs/runbooks/weekly-knowledge-audit.md"
+    "docs/runbooks/weekly-knowledge-audit.md",
+    "docs/operations/workspace-auth.md"
   ],
   "decisions": {
     "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md": {
@@ -379,6 +447,22 @@
       "target": "galx.ai site application and linked production image-library database",
       "revision": "c9c9121b2419cbdc3bee938ced96c44c12eb4e80",
       "observed_at": "2026-09-13T08:17:38.840411Z"
+    },
+    "docs/adr/0147-verified-account-and-session-authority.md": {
+      "status": "proposed",
+      "delivery": "deployed",
+      "domain": "access",
+      "owner": "Security/account maintainer",
+      "date": "2026-09-13",
+      "evidence": [
+        "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-lifecycle-verification.json",
+        "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-revocation-migration.json",
+        "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-revocation-release.json"
+      ],
+      "supersedes": [],
+      "target": "galx.ai application, linked account database and zone browser-cache policy",
+      "revision": "e0e5be199e1c64b8873f029a3445facdbc29ac90 + reviewed working tree (dpl_HRid6XFt1G4ZaHiRj7izmucgs9yZ)",
+      "observed_at": "2026-09-13T20:37:20.230Z"
     }
   },
   "managed_adr_from": 145,

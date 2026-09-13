@@ -336,7 +336,7 @@
       "path": "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md",
       "scope": "domain-reference",
       "category": "docs",
-      "title": "GALXAI: Security Posture & Threat Model"
+      "title": "Authentication security posture and threat model"
     },
     {
       "path": "docs/SENIOR_ENGINEERING_REVIEW_CHAT_AND_ROLLING_CONTEXT.md",
@@ -1305,6 +1305,12 @@
       "title": "ADR 0146: Bounded image library browsing and preview delivery"
     },
     {
+      "path": "docs/adr/0147-verified-account-and-session-authority.md",
+      "scope": "decision-record",
+      "category": "docs",
+      "title": "ADR 0147: Verified account and session authority"
+    },
+    {
       "path": "docs/adr/README.md",
       "scope": "current-guide",
       "category": "docs",
@@ -1531,6 +1537,30 @@
       "scope": "operational-record",
       "category": "docs",
       "title": "Complete the domain review queue"
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-13-security-posture-legacy.md",
+      "scope": "operational-record",
+      "category": "docs",
+      "title": "Historical security posture reference"
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-13-session-lifecycle.md",
+      "scope": "operational-record",
+      "category": "docs",
+      "title": "Account and session audit — September 13, 2026"
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-13-session-revocation.md",
+      "scope": "operational-record",
+      "category": "docs",
+      "title": "Session replacement and immediate revocation audit"
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-13-workspace-auth-ux.md",
+      "scope": "operational-record",
+      "category": "docs",
+      "title": "Workspace authentication: second-pass audit"
     },
     {
       "path": "docs/knowledge/templates/adr.md",
@@ -1861,6 +1891,12 @@
       "scope": "operational-record",
       "category": "docs",
       "title": "Historical wallet lifecycle repair"
+    },
+    {
+      "path": "docs/operations/workspace-auth.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Workspace authentication and recovery"
     },
     {
       "path": "docs/playbooks/01-provisioning-and-preflight.md",
@@ -2437,6 +2473,12 @@
       "scope": "operational-record",
       "category": "post-mortem",
       "title": "Image generation recovery — 2026-09-13"
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-13-workspace-auth/README.md",
+      "scope": "operational-record",
+      "category": "post-mortem",
+      "title": "Unauthenticated workspace page access"
     },
     {
       "path": "post-mortem/runbooks/controller-lock.md",

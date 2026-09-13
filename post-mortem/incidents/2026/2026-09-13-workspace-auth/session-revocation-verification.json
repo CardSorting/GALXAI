@@ -1,0 +1,216 @@
+{
+  "incident": "INC-20260913-WORKSPACE",
+  "status": "local_verified",
+  "observed_at": "2026-09-13T20:24:01.199103Z",
+  "base_revision": "e0e5be199e1c64b8873f029a3445facdbc29ac90",
+  "scope": "Working-tree verification before production migration/release; synthetic localhost Auth and disposable PostgreSQL only",
+  "regressions": [
+    {
+      "command": "npm run test:auth:sessions",
+      "passed": 32,
+      "failed": 0,
+      "log_sha256": "0577968faa2eaa5ca39ee50633841e2dfe0cbe07d0326aa451661946492603a6"
+    },
+    {
+      "command": "npm run test:image:security",
+      "passed": 38,
+      "failed": 0,
+      "log_sha256": "9b0ab4972af0e8e3d367914fbbac5ff643d76b478c42ede2e0ef9cd03e1fe45d"
+    },
+    {
+      "command": "npm run test:preview-admin",
+      "passed": 6,
+      "failed": 0,
+      "log_sha256": "e064ec08f51c6f4be18044b081aa085893276242d5455728023b1cdf324f3a62"
+    },
+    {
+      "command": "npm run test:developer-preview",
+      "passed": 14,
+      "failed": 0,
+      "log_sha256": "5b6328923dd9973a9c32f64fd3640fa94414e758e117f0da9784dbbbde560d6b"
+    },
+    {
+      "command": "npm run test:egress:transport",
+      "passed": 40,
+      "failed": 0,
+      "log_sha256": "8bde7199a7410a5da030be755ef97f99583d74328e33af663b459b68bdb65870"
+    },
+    {
+      "command": "npm run test:sites:workspace",
+      "passed": 16,
+      "failed": 0,
+      "log_sha256": "4424643884fbae818460a36c76fc4e26528409cfc566acfbfb1d57217550a2c9"
+    },
+    {
+      "command": "npm run test:image:scale",
+      "passed": 15,
+      "failed": 0,
+      "log_sha256": "134710858836fe46beb8652008c5d1ba3587eaad1390f5ad91178c4e83f24e02"
+    },
+    {
+      "command": "npm run test:auth:db",
+      "passed": 29,
+      "failed": 0,
+      "log_sha256": "d2196530bffd0eacf330fda0a336bdcca998eabacff9fd935dcdbe714a48b066"
+    },
+    {
+      "command": "npm run db:test",
+      "passed": 94,
+      "failed": 0,
+      "log_sha256": "de2c976dd4a1285e851d1cc52368903d39d9bac4175ff8ad191e57b89e58d716"
+    }
+  ],
+  "test_executions": 284,
+  "shared_cases": "Counts include shared cases across commands, not unique scenarios",
+  "build": {
+    "result": "passed",
+    "node": "26.8.1",
+    "build_id": "4oiVZ1-OnK7900FE8FGM8",
+    "source_tree_sha256": "c18e317528eb4953155426edc3205dc4ee3cd5f9d8c561744bcda2bf9d6de788",
+    "runtime_source_files": 1393,
+    "source_mismatches": [],
+    "excluded": "Ignored Python __pycache__ bytecode is not source and was intentionally not copied",
+    "log_sha256": "5eee1d040efe015eca9c9243256332c612b71068b69451a9bdb7a5001a8d9e5e"
+  },
+  "checks": {
+    "typescript": "passed",
+    "lint": "passed; eight pre-existing warnings",
+    "http": {
+      "checks": 104,
+      "linked_assets": 27,
+      "log_sha256": "98a28d922c7ef6583309fe4743c0e4651722ccaeb838d778a1b7b5163ea81405"
+    },
+    "compiled_scan": {
+      "files": 637,
+      "errors": []
+    },
+    "browser": {
+      "states": 15,
+      "scoped_axe_violations": 0,
+      "overflow": false,
+      "replacement_signin": "desktop/phone password flow returns to requested Site and clears old alias",
+      "late_response_after_logout": "passed",
+      "log_sha256": "f9cb657f99d6c9b0408f3ae942454c4b75c71f645f49d0e17d5cedbdf6102565",
+      "capture_results_sha256": "c365f36f747657a1e571d55a2aa551e08f732be421861072356cd130e9aa39a9",
+      "review": "Two bounded batches; captured desktop/phone replacement pages inspected"
+    },
+    "database_static": "passed",
+    "remote_read_only": {
+      "migration_history": "104 applied; zero pending before new migration",
+      "dry_run": "only 20260913201023_account_session_liveness.sql",
+      "advisor": "one pre-existing breached-password protection warning; no database findings"
+    }
+  },
+  "failed_attempts": [
+    "Sandbox denied database hostname, Docker/IPC/local HTTP sockets and font network; approved reruns passed.",
+    "Full isolated DB run exposed missing configured-PostgreSQL support in native SessionRepository; implemented authoritative transport, fixed heartbeat parameter cast, reran.",
+    "Full DB suite still expected unconditional sudo elevation; corrected to assert FRESH_PROOF_REQUIRED rejection.",
+    "First browser replacement case retained deliberate passwordStatus=400 fixture; corrected fixture and final full 15-state batch passed."
+  ],
+  "semantic_review": {
+    "inspected_changed_sources_and_guides": {
+      "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md": "2c050f41a588b151074df09c676e4baca927f0f0c2de7fba407a90e35d1d5d8a",
+      "docs/maintainers/SITES_WORKSPACE.md": "6ca671eb5417ae2da79873572d1c87d24014669484d0773d7f461c6455211e39",
+      "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "80d13a6ceeee947b1068946d2a23942c34c1b61c7f91c542290f44f276d37ab3",
+      "docs/maintainers/image-library-scale.md": "dfbfb97affe366b6cff2eda068eded2c0e13aeb1beb03c4f7e775a1d8cdfb5a9",
+      "docs/maintainers/image-public-boundary.md": "917078b0399d197572eea57052d33add3a6f38a140bb98ea9edb1de0d8bc42c3",
+      "docs/maintainers/image-studio-review.md": "baf239d12706a1d64a1284679133668850d4935925a3881b34c6995273f47755",
+      "docs/operations/developer-preview.md": "8a01d76343ed28f53da47ff1dd50228f8f282adbf6de98b8ee1610c16a8a4831",
+      "docs/operations/preview-admin.md": "d7e854fdd3ff3d1aadbee97d0163c1a38cf3a7626a2907c540093003f5064b40",
+      "docs/operations/workspace-auth.md": "3053df6d8496d4ee3f0242d28b7706c6282b992cab42342dafc4b53af09c26c8",
+      "scripts/fixtures/integration-bootstrap.sql": "36d0ef086e82dccb3b9fd4514b428f83993799baa606302f1d52bb1651eb2562",
+      "scripts/run-supabase-integration.ts": "7c7aa01dbfe2cc90ffc82d8faff358c95b996aa8fe2e26c8c778f24edd810f23",
+      "scripts/test-account-session-db.ts": "436c1540c1fd23b5ca4feb11f826d6c2a69d89698843eb3b1b9066d86b4dcab3",
+      "scripts/test-auth-entry.ts": "b3ab55b095b59451ae235f76d6425759a0827a7f2e4c14eb5c2523d45df340ca",
+      "scripts/test-auth-identity-boundary.ts": "7a4c8de24a4c82869d1adeb4c57567a574d206116b16df37681e8569bffefe93",
+      "scripts/test-session-lifecycle.ts": "882cf785c11746e80589258f8fc3bec5c6f899bbe8491335b4bcdba1a2514591",
+      "scripts/test-supabase-integration.ts": "a6ef348fda3dbf648d2a0b9c242609cf26f13dcea27b0986aaef99574f331f0b",
+      "scripts/test-workspace-auth.ts": "662c41a7540643a535218393104610d1594840c1f493a0716c682e9e34baf9fd",
+      "scripts/verify-auth-entry-server.cjs": "ea319d29d03b3ec8cd87209f147cfcb93b1bba9958f94a90e6ee88881817c677",
+      "scripts/verify-auth-entry-ui.ts": "81fa497457a215b861f92708bba101af30117d5bf98d08e09eac1a70e3ae61f5",
+      "scripts/verify-image-public-http.ts": "e18638280ad8492f847c7f29fe926e8d15cb96120e9f925d9e1373cd0e62e49c",
+      "scripts/verify-workspace-auth-http.mjs": "72bf52cde7f356428faed3fbd0f4ed39e6e903f59c23e47c3ac7aaab469df3b6",
+      "src/app/api/auth/audit/activity/route.ts": "2b493ca246e82550835918807b373980419bf354514a783a55a1a9072568e19c",
+      "src/app/api/auth/identities/route.ts": "ed7bfb783b01fa283b42a9a0505d86146a13c17f547d8fc8db263bd64eedad77",
+      "src/app/api/auth/ingest/route.ts": "f041c265b650e697fc6f01289d504ff079a2cd85bb601103c4d93458465951d0",
+      "src/app/api/auth/oauth/callback/route.ts": "2d43cac274b3a4fe46db4fdd9fae25711008f6c92c4743ce45c392fe916ccb30",
+      "src/app/api/auth/oauth/device/approve/route.ts": "f096626c7927e852ad17b1812dfc43a0909f2f2599a23966332b4aac450a4c93",
+      "src/app/api/auth/oauth/device/token/route.ts": "954f7bffcfea80846e1a479e2a31d9d64330a1fdbb5eef03ed0544f7f0d71f1c",
+      "src/app/api/auth/oauth/introspect/route.ts": "793d0bc76eedd2d7a9457f67cf7c71e302ec58a0dd58a982486b2f40450374db",
+      "src/app/api/auth/oauth/refresh/route.ts": "94bfed0e027cc249b2ff601086418dd4a90aa02f639a8e8d077db77191e26554",
+      "src/app/api/auth/oauth/revoke/route.ts": "39aae16e42d1b6885cf9cad54d0557ce99bcf862f43163f29c14b590989435b2",
+      "src/app/api/auth/oauth/url/route.ts": "69b60c02b01a2e094ff274429cfa8092823f32e2d4ba0ce253b9f6c0942f7a57",
+      "src/app/api/auth/openai/route.ts": "16f23b67f5d82989607603c3bad23f161e7ad68d956da542d4b9890eecac25cf",
+      "src/app/api/auth/security/posture/route.ts": "0ee73feaef6f9e42dc715ec088953959390196faba77970b28e0f1ef5c93db9e",
+      "src/app/api/auth/session/route.ts": "5062c24b71e23763a5861b0dbc18dc6bc4daf65da33f2db3a595788ca4243ea2",
+      "src/app/api/auth/sessions/[id]/route.ts": "9f9f9263487ea973a3004f4224034e3ed1891a9e5f9c29f1ea48dee0a92ef14e",
+      "src/app/api/auth/sessions/route.ts": "7a1899f9e01e6016445adb59e8a822c4b754b2bbe9c2ac96234ba5ee2ae93d6b",
+      "src/app/api/auth/sudo/elevate/route.ts": "65a7d8963bd306b35c64d2dbb3c6e879492bb391cea47306d391866b88165ba1",
+      "src/app/api/auth/tokens/restricted/route.ts": "68ed1ea6509b12f1ddad405fe38c138c8e559ae51c0c7162e4b149f4b7824825",
+      "src/app/api/auth/vault/jwks/route.ts": "2ec14301264c6fbe7940b2dc38c49f0945e8eb78257d5780a9d80ec53ffb31b6",
+      "src/app/api/auth/vault/re-wrap/route.ts": "433136c4633cf6e5c57a81ebcdac5be289acfb8dcc7879f21b1186b107cddbd0",
+      "src/app/api/teams/seats/route.ts": "882d049fabea6bbf0dfd1e9340e37e376e58951fb5b8f2882985a91f276b624c",
+      "src/app/auth/callback/route.ts": "bc141fcd61c63fb1a3fc1fd537bfc46271b539f73def1c91930d18cd524f2122",
+      "src/app/auth/signin/page.tsx": "552d5109eaab1a36a51966d406dcf9510bafdc101145d9bfb598bcf9bd85713e",
+      "src/app/auth/signup/page.tsx": "5b8aeafaa13004a3caaf100a5f982da81559a9e754aa76605179dfc63a0f8fc4",
+      "src/app/images/page.tsx": "c52ab7e1183d69c5fa881d1bd0c5a5fd82945e6a3c265bd43612eb4bfd1c2a37",
+      "src/app/library/page.tsx": "64ca4788eb774a7d69d98ec6adabffbb04c9f7514da3252a78bb6bdd51411a17",
+      "src/app/sites/[id]/page.tsx": "7c1a705c7662c1121cf9c1ea7ea663997a856946db356a39309aeca72abc91f1",
+      "src/app/sites/page.tsx": "e18025a8902c784a084535fd625463be10ec2f82292f7563663c98fad9fcbd33",
+      "src/components/auth/AuthEntryShell.tsx": "9f9d85196eb207718069f38a7825db0730339001dd0f3fa0cf1f8a81b9d85390",
+      "src/components/auth/AuthRequiredGate.tsx": "408390b67212ea93c669ac4ba8418e8febe15c762e4d988268249b75d5a743cf",
+      "src/components/auth/SignInForm.tsx": "27e587236b587f58a922e24ec0f0abf0e8037a5364182ddede40f702a6a77303",
+      "src/components/auth/TeamsAuthGuard.tsx": "59b58eb2832779b8061231167446b923638db3f541ad3e8a0ac84e4e9c00bab3",
+      "src/components/auth/WorkspaceSessionBoundary.tsx": "a2c840b9b6ac5d9e2c94d4eeafc0be610eb5532888e580ca360edf249e4391f7",
+      "src/components/auth/auth-entry.module.css": "59c940ad7abce4f5618c5cf256de50ce0c184949aa53d535fc903f9072ce0d84",
+      "src/components/dashboard/Footer.tsx": "6b82c45ff3419d51a0c42031ac0ebe8fca4ec03270dab0778dd8ddb3d25ae296",
+      "src/components/images/ImageStudio.tsx": "557951de66cc55535cd158cd55f64fa3de6c2ef50b00f690cb5987eb9d11d193",
+      "src/components/images/use-image-studio.ts": "1a95bcf3d2f57e04b8ae8b6fb1cb5982ec0b13b20a94ee5761c6c28eaf9d2012",
+      "src/components/sites/SitesWorkspace.tsx": "91fd18484a8f43653569d98781a8a9dd48d8ed6419ed982963d1396b1fb223d2",
+      "src/components/sites/use-sites-workspace.ts": "9066d56b4b1dca6023af035f0e6fee399047f4ad1ee2b0e60de71b5db1d4bac8",
+      "src/contexts/AuthContext.tsx": "88c06d3198318ff6a450e9959740fdf74c0cdaf752c2958e1f2c27717efb6987",
+      "src/core/auth/GalxAuthEngine.ts": "39f2efd27fbc93b606c195a355b668140367901408d15eb739a44673dd33a607",
+      "src/core/auth/GalxInternalAuthGuard.ts": "bab583d3b2159f10f5f7b1e860e50b245a84bc44fec32e450d0e3056f0ae0df3",
+      "src/core/auth/GalxOAuthManager.ts": "3ae8436b71e02c1689d8b721e4d4f39e6e385e39e23653dc18e7a54edec8eb85",
+      "src/core/contracts/GalxContracts.ts": "8f38c428f004a323d0f90b679f3fd0bf5737118ea724154edd6ffe84d001907f",
+      "src/core/vault/GalxCryptoVault.ts": "9bab32d66bdf7bcefb1f90470de0c8220df9cf88ff71a6690ec245e7c5c2408a",
+      "src/lib/auth/accountIdentity.ts": "50d6d29940052e60c3edccf723bb641fdd194d9b7246a78d0667a9a04d1d3275",
+      "src/lib/auth/active-account-session.ts": "94de4efc8ac82b983ac35ef030258879668ec3f3dd3a612deb53aaedc9cee5d9",
+      "src/lib/auth/browser-session.ts": "97c4fcc2f795964a188d8ca3c64beb66f5737004add1a5a08e1fc34b39807cb2",
+      "src/lib/auth/provider-connection-route.ts": "26145dfe970b5f6d9f6b5ffedb6333dbf8bbe5ac8131cf7db60edca6b3c92e0a",
+      "src/lib/auth/redirects.ts": "0bbd4e0d6b9c138b9018e5db7cc88c24c141f815bff7597a0c9919763a26fc3b",
+      "src/lib/auth/request-session.ts": "d89acf5a781e81a508ecad3cbca398caa43f8742b0319d2778785e0065f671e9",
+      "src/lib/auth/require-workspace-session.ts": "06486b796b2330a19f1ffb9e8acaf9f3ded699c5127defc44af562386d54fe76",
+      "src/lib/auth/session-http.ts": "db5cffd0074c72605005e9956a05f0c129ec3cc36f01b378db77fd3bdc6d7268",
+      "src/lib/auth/session-profile.ts": "76f08b5ee4b6f15f690a0020ca96214119bc635a1bd5c6f0f1df430b1a2bfba5",
+      "src/lib/auth/signin.ts": "92e82db3d1871d751bbc3fb957a1c2b7cf1913283c50625150a6cf2fda4de4d7",
+      "src/lib/auth/workspace-client.ts": "f8a54c450e7116d3165b8e91dc55438a7d9962960200466246b2f6007c0ae797",
+      "src/lib/auth/workspace-session.ts": "ee9d3c483a447e2d04b4ff649333b587a0c33d6ebb31819e26a860077aa89ecf",
+      "src/lib/resilience/ResilientClient.ts": "e223d69fbcc370ea4fa1bbd19897060e6be1e992f6e6f9a62599d9c603f50d6a",
+      "src/lib/security/preview-policy.ts": "57a41665d4f07bb05aa927bb454693ef07f24fe6878ad1d3dddbec8f8b641ec5",
+      "src/lib/security/workspace-policy.ts": "5cfd106347feadf13fba4b19b015041b8220e4b19daf283f46374e16da58a631",
+      "src/lib/security/workspace-unavailable.ts": "1f661a43c9106c59063588dc7047fe15cdae4e74a22b74a82ef64cb66ce2a6f9",
+      "src/lib/supabase/client.ts": "db451b92ca18d9d4b3aa1b5803008e61b4672591b6f236882177572b149afc40",
+      "src/lib/supabase/repositories/OAuthRepository.ts": "b9498af6147ef8230ddc32a918780ccdf1d2f29649fca79a2215b9efeca8036e",
+      "src/lib/supabase/repositories/SessionRepository.ts": "d1b96ce2aed9fe7370e8330e4750892f88b99c6306d008ae2f154b0b3722f62d",
+      "src/lib/supabase/types.ts": "36ee2cff660253ed974d38d3184856ffd2bc02a5a20a9cb04308a2e4e11bc81f",
+      "src/middleware.ts": "c4f2fd32d026f54dce9a6d4362412b2715a5632bf0a5dbb38680e6e85b59306d",
+      "src/utils/supabase/middleware.ts": "4cf388ff0dda9d48bdd52eca179134cf1e431e4fad79bef0c091e611281ab874",
+      "supabase/migrations/20260913201023_account_session_liveness.sql": "d714a141e754e3ad2249154be6bf8ca52c183deaa326a4e2d03e808e8010b9dc",
+      "supabase/rollbacks/20260913201023_account_session_liveness.down.sql": "10878615f02ec29326a31e122f526c979406a4095c55a29b5ccc22ad7a2d8710"
+    },
+    "focus": [
+      "Same-token live-session owner binding and fail-closed unavailable behavior",
+      "Native SQL commit-before-acknowledgement, no recreate/upsert and no fallback after transport failure",
+      "Canonical cookie precedence, team account identity and internal admin credential",
+      "Browser recovery, finite copy, original destination, cross-tab logout and stale-response fences",
+      "Additive migration privileges, rollback, CI and deployment sequencing"
+    ],
+    "limits": [
+      "No production mutation or hosted acceptance in this record",
+      "No MFA/fresh-proof ceremony, Supabase device inventory or external-provider connection capability certification",
+      "Device grant RPC semantics retain separate acceptance work",
+      "In-flight authorized work, delivered bytes and unrelated JWT consumers are outside immediate revocation guarantee"
+    ]
+  }
+}

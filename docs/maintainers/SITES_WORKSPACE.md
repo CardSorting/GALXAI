@@ -6,12 +6,14 @@ Private maintainer runbook. [ADR 0139](../adr/0139-browser-sites-workspace-and-m
 
 ## End-to-end flow
 
-1. A visitor opens `/sites`, sees a labeled example and describes a Site. Sign-in retains the unsent prompt and returns to the workspace. The account can access its own drafts without a hosting connection.
+1. Opening `/sites` or any `/sites/...` workspace requires a verified account session before authoring content is rendered. Anonymous and invalid sessions redirect to sign-in; successful sign-in returns to the requested workspace and preserves supported starter choices. Middleware and each server page enforce the check independently. Auth verification outages fail closed with a generic unavailable response. The signed-in account sees the labeled example and can access its own drafts without a hosting connection.
 2. One `GET ?view=bootstrap` reads allowlisted setup and library summaries; an optional `id` adds the selected Site. It authenticates once and still enforces ownership on each repository read. The separate setup/library/detail reads remain compatible. Creation, generation and publication check verified subscription access server-side. New updates use shared fair-use admission and never touch wallet holds. See ADR 0140 and the fair-use runbook.
 3. Creation has a retained client UUID for uncertain acknowledgements. Each draft update has a separate operation identity, persisted before inference, and an owner/workspace-scoped invocation identity. One pending operation blocks conflicting edits. Build and Discuss share fair admission; Discuss cannot replace the document.
 4. Generation returns a bounded conversation envelope with a document or discussion answer and rolling summary. The server persists validated content and the actual reply; the browser renders an escaped, opaque-origin preview. Recovery reads the original operation and does not dispatch another generation. The last valid document survives invalid output.
 5. Publish publicly accepts only the selected username, exact workspace and current revision. Domain reservation precedes a transaction that stores the public snapshot and managed DNS intent together. The worker registers the exact host, creates/read-backs managed DNS and verifies the exact published page over TLS. It needs no customer native connection.
 6. My Sites resumes account-owned drafts and conversations. Rename changes the workspace title, not its reserved address. Archive retains publication. Unpublish clears only the public snapshot; a new publish must use the current revision. Neither action releases the hostname.
+
+An active account receiving a workspace API 401 unmounts the editor and focuses a sign-in recovery prompt; 403 plan/access errors retain their separate handling. Same-tab unsent drafts and original operation identities remain account scoped. See [workspace authentication](../operations/workspace-auth.md) for safe return context, verified server/browser fixtures and gate-preserving rollback.
 
 The separate native companion continues handling externally created Sites under ADRs 0136–0138. No browser flow assumes a native OAuth endpoint, public MCP executor, cross-account operator identity, authenticated iframe or automatic migration of historical native content.
 
@@ -55,6 +57,7 @@ Pause managed publication before rollback, keep recovery and public readers avai
 
 ```sh
 npm run test:sites:workspace
+npm run test:image:security
 npm run test:sites:workspace:db
 npm run test:sites:worker
 npm run db:test
@@ -67,6 +70,8 @@ python3 internal/scaling-strategy-2026-09-10/commercial-reset/sites-automation/d
 The database suites create disposable PostgreSQL fixtures and never inherit production credentials. Workspace checks cover ownership, concurrent operations, stale revisions, operation reuse, immutable publication, lost commits, rollback and all Data API role denials. Adapter tests cover public DTOs, billing uncertainty, hostile generated text, domain readback and exact-content TLS checks.
 
 `scripts/verify-sites-workspace-ui.ts` runs only against localhost with intercepted synthetic account, generation and publishing responses. Supply `GALX_BROWSER_MODULE` and `GALX_AXE_MODULE` when browser tooling is outside the repository. It checks desktop/mobile layouts, iframe isolation, creation, included access, publishing consent, visible mobile feedback, rename, archive/restore, search, direct-route loading/admission and reload. `scripts/verify-sites-published-http.mjs` additionally checks actual Host-header routing and response boundaries against the local production build. Its fixtures are not a live paid generation or domain provisioning test.
+
+The workspace entry regression suite runs with `test:image:security`. It covers anonymous, forged, expired, refreshed and native sessions; prefetch/RSC requests; misleading extensions; independent server-page denial; and private response headers. Existing browser fixtures that only mock browser Auth/API calls need a verified server session too. Never disable the page guard to run those fixtures. Published Site root pages keep their separate public snapshot contract. Rollback must preserve account entry checks as well as API ownership checks.
 
 Production activation and live customer acceptance must be recorded separately from these checks. Applying the migration or deploying the workspace does not itself enable generation, expand the cohort or verify a new customer publication.
 

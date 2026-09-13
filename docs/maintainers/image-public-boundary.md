@@ -22,9 +22,16 @@ public projection. Logs omit arbitrary provider message payloads, which may quot
 user secrets, while keeping categories, status and call sites. Existing operational
 metrics retain capacity, model, attempt and timing information privately.
 
+## Workspace entry
+
+`/images` requires a verified account session before the studio is rendered. Middleware checks workspace paths before asset exemptions; the server page repeats verification and is dynamically rendered. `/library` also remains session protected. Missing, malformed, forged or expired-without-refresh sessions cannot render the workspace. Anonymous Supabase users are denied. Refresh uses the Auth service and retains response cookies; temporary verification failures return a generic 503. Pages and denials use private, no-store headers and noindex. This account gate is independent from developer-preview approval, API ownership and expiring artifact capabilities; published artifacts and the three studio example images keep their existing delivery contracts.
+
 ## Verification
 
 Run `npm run test:image:security`, `npx tsc --noEmit`, and `npm run build`.
+The [workspace authentication runbook](../operations/workspace-auth.md) owns the sign-in flow and server-backed browser fixture. A current-owner API 401 unmounts the studio and focuses recovery; 403, rate limits and outages do not become sign-in loops. Create/My images switches preserve the supported library view in the URL; same-tab drafts remain account scoped and no generation is replayed.
+
+The workspace entry suite tests middleware variants, independent server-page denial, Auth outages, valid and revoked native sessions, and expired-session refresh. Existing browser-only account fixtures must provide a verified server session before opening the studio; do not bypass the gate. The compiled HTTP verifier expects sign-in redirects from Images and Sites, scans the public sign-in/home pages and their assets, and preserves capability/JSON/binary checks.
 The HTTP suite opens a loopback server around the actual route handlers and merges
 middleware headers. It tests binary success, explicit JSON, format conversions,
 metadata removal, malformed input, auth failures, rate limits, unavailable models,

@@ -10,6 +10,8 @@ Status: Accepted; post-auth destination clarified by ADR 0119
 
 > **Current scope:** The identity separation remains authoritative. ADR 0119 changes the successful authentication default to the `/models` catalog and prohibits a hosted chat or image-generation destination.
 
+> September 13, 2026 delivery correction: account/session behavior is governed by [workspace authentication](../operations/workspace-auth.md). Provider credentials do not establish account identity; implicit sudo, credential IDs as authentication and process-local connection replay guarantees are retired. The proposed topic-specific successor is [ADR 0147](0147-verified-account-and-session-authority.md). This dated precedence note preserves the original decision status and does not claim production delivery.
+
 ## Context
 GALXAI previously merged provider credential ingestion with frontend user authentication, creating unnecessary cognitive load and architectural coupling between frontend end-users and the underlying Substrate sharding engine. Frontend users signing in to manage workspace settings, telemetry, and API keys were exposed to complex sharding concepts (`shardMode`, `pooled vs private`, raw tokens).
 

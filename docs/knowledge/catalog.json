@@ -454,11 +454,13 @@
     },
     {
       "path": "docs/SECURITY_POSTURE_AND_THREAT_MODEL.md",
-      "title": "GALXAI: Security Posture & Threat Model",
+      "title": "Authentication security posture and threat model",
       "scope": "domain-reference",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "access"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -507,8 +509,10 @@
       "title": "Authentication and credential ingestion boundaries",
       "scope": "domain-reference",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "access"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -2110,6 +2114,33 @@
       }
     },
     {
+      "path": "docs/adr/0147-verified-account-and-session-authority.md",
+      "title": "ADR 0147: Verified account and session authority",
+      "scope": "decision-record",
+      "kind": "decision",
+      "domains": [
+        "access"
+      ],
+      "curation": "assigned",
+      "keywords": [],
+      "decision": {
+        "status": "proposed",
+        "delivery": "deployed",
+        "domain": "access",
+        "owner": "Security/account maintainer",
+        "date": "2026-09-13",
+        "evidence": [
+          "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-lifecycle-verification.json",
+          "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-revocation-migration.json",
+          "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-revocation-release.json"
+        ],
+        "supersedes": [],
+        "target": "galx.ai application, linked account database and zone browser-cache policy",
+        "revision": "e0e5be199e1c64b8873f029a3445facdbc29ac90 + reviewed working tree (dpl_HRid6XFt1G4ZaHiRj7izmucgs9yZ)",
+        "observed_at": "2026-09-13T20:37:20.230Z"
+      }
+    },
+    {
       "path": "docs/adr/README.md",
       "title": "Architecture decision records",
       "scope": "current-guide",
@@ -2507,6 +2538,51 @@
         "review",
         "activation",
         "coverage"
+      ],
+      "decision": null
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-13-security-posture-legacy.md",
+      "title": "Historical security posture reference",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-13-session-lifecycle.md",
+      "title": "Account and session audit — September 13, 2026",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-13-session-revocation.md",
+      "title": "Session replacement and immediate revocation audit",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/knowledge/audits/2026-09-13-workspace-auth-ux.md",
+      "title": "Workspace authentication: second-pass audit",
+      "scope": "operational-record",
+      "kind": "evidence",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [
+        "auth",
+        "sign-in",
+        "ux",
+        "audit"
       ],
       "decision": null
     },
@@ -3124,6 +3200,25 @@
       "decision": null
     },
     {
+      "path": "docs/operations/workspace-auth.md",
+      "title": "Workspace authentication and recovery",
+      "scope": "current-guide",
+      "kind": "runbook",
+      "domains": [
+        "access"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "signin",
+        "authentication",
+        "sites",
+        "images",
+        "401",
+        "session expiry"
+      ],
+      "decision": null
+    },
+    {
       "path": "docs/playbooks/01-provisioning-and-preflight.md",
       "title": "Provisioning and preflight",
       "scope": "current-guide",
@@ -3673,6 +3768,16 @@
     {
       "path": "post-mortem/incidents/2026/2026-09-13-image-generation/README.md",
       "title": "Image generation recovery — 2026-09-13",
+      "scope": "operational-record",
+      "kind": "navigation",
+      "domains": [],
+      "curation": "unreviewed",
+      "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "post-mortem/incidents/2026/2026-09-13-workspace-auth/README.md",
+      "title": "Unauthenticated workspace page access",
       "scope": "operational-record",
       "kind": "navigation",
       "domains": [],

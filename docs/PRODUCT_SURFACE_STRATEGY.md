@@ -15,7 +15,7 @@ Private product authority, reconciled September 13, 2026. [PRODUCT.md](../PRODUC
 | Staff administration | Independent owner/reviewer/viewer membership, approval inbox, activity history and private feedback |
 | Destination chat and arbitrary execution | Not introduced by the image studio or bounded Sites workspace; downstream and other proposals retain their own scope |
 
-Public means users can discover and engage with Images and Sites without developer-preview approval. It does not mean anonymous generation, free unlimited compute, public drafts or unrestricted data access. Preserve ownership and entitlement checks.
+Public means users can discover and engage with Images and Sites without developer-preview approval. Sign-in is required before opening the Images or Sites workspaces, including saved-Site routes. It does not mean anonymous workspace access or generation, free unlimited compute, public drafts or unrestricted data access. Preserve ownership and entitlement checks.
 
 ## Positioning and commercial contract
 

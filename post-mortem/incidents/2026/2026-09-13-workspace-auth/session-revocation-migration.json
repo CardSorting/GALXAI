@@ -1,0 +1,31 @@
+{
+  "incident": "INC-20260913-WORKSPACE",
+  "status": "migration_applied_and_verified",
+  "observed_at": "2026-09-13T20:27:16.691954Z",
+  "migration": "20260913201023_account_session_liveness.sql",
+  "sha256": "d714a141e754e3ad2249154be6bf8ca52c183deaa326a4e2d03e808e8010b9dc",
+  "target": "existing linked production Supabase project",
+  "previous_history": 104,
+  "applied_count": 1,
+  "vault_configuration": "preserved with --skip-vault",
+  "dry_run": "only intended additive lookup migration",
+  "acceptance": {
+    "mode": "database",
+    "started_at": "2026-09-13T20:26:31.987Z",
+    "checks": [
+      "two independent sessions",
+      "active lookup HTTP 200",
+      "first active",
+      "active lookup HTTP 200",
+      "second active",
+      "active lookup HTTP 200",
+      "same copied JWT rejected by active lookup",
+      "active lookup HTTP 200",
+      "independent session stays active"
+    ],
+    "cleanup": true,
+    "result": "passed",
+    "completed_at": "2026-09-13T20:26:34.368Z"
+  },
+  "scope": "Temporary owned Auth account only; real two-session sign-in and local revocation. Account and all its sessions removed; no email, generation, billing or publication. Application deployment acceptance is separate."
+}

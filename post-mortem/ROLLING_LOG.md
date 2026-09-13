@@ -369,3 +369,129 @@ Incident: `INC-20260913-DOCS`. Kind: `verification`.
 **Next step:** Retain evidence and continue ordinary release monitoring; application/documentation queued runs are separate from the completed gateway and artifact repairs.
 
 Evidence: [2026-09-13-followup-repairs-verified.json](releases/2026-09-13-followup-repairs-verified.json).
+
+## EVT-20260913-WORKSPACE-AUTH-CONFIRMED — 2026-09-13T18:44:14.786633Z
+
+Incident: `INC-20260913-WORKSPACE`. Kind: `observation`.
+
+**Observation:** User reported unauthenticated workspace entry; anonymous live GET /sites and /images both returned 200.
+
+**Action:** Inspected current state, access runbook, middleware, server pages and existing API identity checks.
+
+**Result:** Confirmed missing server page gates and ignored middleware verification result; no data access or generation impact established.
+
+**Next step:** Add verified session enforcement before page rendering and static bypass; test forged/expired sessions, failures and legitimate access.
+
+Evidence: [README.md](incidents/2026/2026-09-13-workspace-auth/README.md).
+
+## EVT-20260913-WORKSPACE-AUTH-LOCAL-VERIFIED — 2026-09-13T18:52:51.733555Z
+
+Incident: `INC-20260913-WORKSPACE`. Kind: `verification`.
+
+**Observation:** Local source now requires verified account sessions before Sites and Images workspace entry.
+
+**Action:** Ran identity/ownership/preview/workspace regressions, isolated production build, compiled anonymous/forged/valid-session HTTP checks, linked-asset scans and documentation guard tests.
+
+**Result:** 70 regressions and 83 HTTP/asset checks passed; 639 compiled files and runtime traces passed private-boundary scan. Production still requires deployment and acceptance.
+
+**Next step:** Complete source/guide attestations and final documentation checks; deploy reviewed source under release authorization and verify live access.
+
+Evidence: [local-verification.json](incidents/2026/2026-09-13-workspace-auth/local-verification.json).
+
+## EVT-20260913-WORKSPACE-AUTH-UX-VERIFIED — 2026-09-13T19:20:01.381756Z
+
+Incident: `INC-20260913-WORKSPACE`. Kind: `verification`.
+
+**Observation:** User requested deeper workspace-auth UX and lifecycle review after the local entry fix.
+
+**Action:** Implemented server-aware destination-preserving sign-in, finite error copy, accessible password/email-link flows, owner-scoped 401 recovery and retained local server/browser fixtures.
+
+**Result:** Seven regression commands passed (135 test executions); 88 compiled HTTP/asset checks and 11 browser states passed. Production build, TypeScript and lint passed with eight existing warnings; 638-file private-content/runtime scan and 37 documentation tests passed. No deployment or real account activity.
+
+**Next step:** Complete final source/guide attestations and documentation checks; ACT-013 remains open for deployed denial, valid-session entry, callback/refresh and cross-tab acceptance.
+
+Evidence: [ux-verification.json](incidents/2026/2026-09-13-workspace-auth/ux-verification.json), [2026-09-13-workspace-auth-ux.md](../docs/knowledge/audits/2026-09-13-workspace-auth-ux.md).
+
+## EVT-20260913-SESSION-AUTHORITY-AUDIT — 2026-09-13T19:43:59.248370Z
+
+Incident: `INC-20260913-WORKSPACE`. Kind: `observation`.
+
+**Observation:** Third-pass source audit found fabricated browser identities, unauthenticated ID revocation, unverified elevation, provider credentials mixed with account authority, unrestricted connection identifiers and session diagnostics exposed to ordinary authenticated users.
+
+**Action:** Removed fabricated identities and token mirrors; separated verified account authority from provider connection input; added owner/provenance/scope checks, same-origin mutations, local sign-out recovery, administrative diagnostic gates and durable device-grant acknowledgement.
+
+**Result:** Local containment and focused authorization tests are in progress. No production deployment, account activity or database mutation.
+
+**Next step:** Complete adversarial regressions, isolated production build, browser lifecycle checks and current-guide reconciliation; retain immutable final evidence before review.
+
+Evidence: [README.md](incidents/2026/2026-09-13-workspace-auth/README.md).
+
+## EVT-20260913-SESSION-LIFECYCLE-LOCAL-VERIFIED — 2026-09-13T20:03:54.350155Z
+
+Incident: `INC-20260913-WORKSPACE`. Kind: `verification`.
+
+**Observation:** Third-pass source and repository audit found additional identity, revocation, cache-authority and token-grace gaps beyond workspace page entry.
+
+**Action:** Implemented verified account/native provenance, owner-bound durable session actions, no cached grant/write acknowledgement after failure, account-owned connections, DTO/admin boundaries and browser-local sign-out recovery.
+
+**Result:** 159 regression executions passed across seven commands; 92 compiled HTTP/asset checks, 13 browser states and a focused late-response scenario passed. Production build, TypeScript, lint (eight existing warnings), 637-file compiled scan, static database check and 37 documentation tests passed. No deployment or real data activity.
+
+**Next step:** Record explicit semantic reviews and final documentation checks. ACT-013/ACT-014 remain open for release compatibility, fresh-proof policy and deployed database/session acceptance.
+
+Evidence: [session-lifecycle-verification.json](incidents/2026/2026-09-13-workspace-auth/session-lifecycle-verification.json), [2026-09-13-session-lifecycle.md](../docs/knowledge/audits/2026-09-13-session-lifecycle.md).
+
+## EVT-20260913-ACTIVE-SESSION-AUDIT — 2026-09-13T20:17:14.950769Z
+
+Incident: `INC-20260913-WORKSPACE`. Kind: `observation`.
+
+**Observation:** Follow-up identified the remaining copied-JWT revocation window, legacy replacement recovery, a built-in internal-admin fallback and direct native session storage compatibility gap. Read-only deployed history matched all 104 existing migrations.
+
+**Action:** Added owner-bound active-session lookup, logout postcondition, normal sign-in replacement notice, canonical-cookie precedence, explicit internal administration and authoritative PostgreSQL native-session persistence. Prepared additive migration and isolated checks.
+
+**Result:** 32 auth tests, 38 image security tests and 29 isolated session database checks passed so far. Full database suite exposed outdated unconditional-elevation expectation; updated to assert rejection without fresh proof. Production build initially blocked by sandbox font network access; retry pending. No production mutation yet.
+
+**Next step:** Complete full regression and compiled browser checks, reconcile guides, then apply the reviewed migration and release with isolated live session acceptance.
+
+Evidence: [README.md](incidents/2026/2026-09-13-workspace-auth/README.md).
+
+## EVT-20260913-ACTIVE-SESSION-MIGRATION — 2026-09-13T20:27:16.691954Z
+
+Incident: `INC-20260913-WORKSPACE`. Kind: `verification`.
+
+**Observation:** Local release checks and additive migration dry run passed; copied access JWT revocation required live-session authority.
+
+**Action:** Applied only 20260913201023_account_session_liveness.sql to linked production with vault settings preserved. Created a temporary owned Auth account, signed in twice, locally signed out one session and replayed its exact JWT against the lookup.
+
+**Result:** Nine checks passed: copied JWT became inactive immediately and the independent session remained active. All temporary-account sessions were ended and the account removed. No email or product mutation.
+
+**Next step:** Deploy the reviewed application and verify complete hosted account replacement and revocation before incident recovery.
+
+Evidence: [session-revocation-migration.json](incidents/2026/2026-09-13-workspace-auth/session-revocation-migration.json).
+
+## EVT-20260913-AUTH-CACHE-RECOVERY — 2026-09-13T20:36:51.317Z
+
+Incident: `INC-20260913-WORKSPACE`. Kind: `containment`.
+
+**Observation:** Initial hosted acceptance stopped on a correct /sites/nested.js auth redirect with public four-hour browser caching. Origin fixture headers were private; zone Browser Cache TTL was 14400. No private-body disclosure was established.
+
+**Action:** Reviewed accessible cache settings/rulesets and changed only Browser Cache TTL to respect origin headers (0), preserving edge cache level. Page Rules inventory was unavailable to the account-owned token.
+
+**Result:** Saved setting verified. Subsequent canonical-host GET/HEAD and legacy-prefetch checks retain private/no-store, while versioned public assets remain immutable.
+
+**Next step:** Retain the failed canary and run the read-only cache checker after relevant releases/configuration changes.
+
+Evidence: [session-revocation-release.json](incidents/2026/2026-09-13-workspace-auth/session-revocation-release.json).
+
+## EVT-20260913-AUTH-RELEASE-ACCEPTED — 2026-09-13T20:45:56.263617Z
+
+Incident: `INC-20260913-WORKSPACE`. Kind: `recovery`.
+
+**Observation:** The active-session migration preceded the reviewed auth deployment; an isolated real account was available for bounded acceptance.
+
+**Action:** Deployed the reviewed dirty working tree as dpl_HRid6XFt1G4ZaHiRj7izmucgs9yZ and confirmed the production alias. Tested entry, old-credential replacement, logout, copied JWT/cookie denial, independent refresh, private cache policy, rendered pages and associated assets.
+
+**Result:** 65 application checks and 26 linked asset scans passed; 26 cache checks, four alias chains and five focused refresh cycles passed. All owned temporary accounts/sessions were removed. One expanded-run refreshed-profile failure did not recur; original response details were not retained and no cause is inferred.
+
+**Next step:** Mark ACT-013 complete and the incident recovered. Retain ACT-014 for separate proof/device prevention and ACT-015 for the nonreproduced availability observation; reconcile/attest documentation. No Git commit, push, new hosted CI, generation, billing or publication is implied.
+
+Evidence: [session-revocation-release.json](incidents/2026/2026-09-13-workspace-auth/session-revocation-release.json), [session-revocation-migration.json](incidents/2026/2026-09-13-workspace-auth/session-revocation-migration.json).

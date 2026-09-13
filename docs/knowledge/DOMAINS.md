@@ -54,8 +54,12 @@ Owner role: **Security/access maintainer**. Domain: `access`.
 - [Private preview administration](../../docs/operations/preview-admin.md)
 - [Private preview activation — 2026-09-12](../../docs/operations/preview-activation.md)
 - [Developer preview reads and hybrid sync](../../docs/operations/preview-hybrid-sync.md)
+- [Workspace authentication and recovery](../../docs/operations/workspace-auth.md)
+- [Authentication and credential ingestion boundaries](../../docs/STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md)
+- [Authentication security posture and threat model](../../docs/SECURITY_POSTURE_AND_THREAT_MODEL.md)
+- [ADR 0147: Verified account and session authority](../../docs/adr/0147-verified-account-and-session-authority.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run test:preview-admin`, `npm run test:image:security`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run test:preview-admin`, `npm run test:image:security`, `npm run test:auth:sessions`.
 
 ## Sites workspace and publication
 

@@ -2,13 +2,13 @@
 
 <!-- docs-scope: current-guide -->
 
-Open [Sites](https://galx.ai/sites) to create a simple website through conversation. Your chat appears on the left and your page preview on the right. On a phone, use the Chat and Preview tabs to switch between them.
+Sign in to open [Sites](https://galx.ai/sites) and create a simple website through conversation. Sign-in is required before accessing the workspace or a saved Site. Your chat appears on the left and your page preview on the right. On a phone, use the Chat and Preview tabs to switch between them.
 
 Activate GALX Pro in [Billing](https://galx.ai/billing#plan). After payment is confirmed, return to Sites. You can manage or cancel the subscription from Billing; cancellation takes effect at the end of the paid period. API and image usage remain separate.
 
 ## Start with an idea
 
-Sign in, describe the page you want, and send your request. You can start with a product launch, a portfolio or an event page. Creating, updating and publishing Sites is included with GALX Pro, subject to fair usage. There is no separate charge for each Site update. The workspace shows whether your account has access.
+Describe the page you want and send your request. You can start with a product launch, a portfolio or an event page. Creating, updating and publishing Sites is included with GALX Pro, subject to fair usage. There is no separate charge for each Site update. The workspace shows whether your account has access.
 
 Review the draft, then describe what you want to change. Each turn builds on your current draft, project notes and a summary of earlier decisions, with relevant earlier exchanges when available. This release creates simple information pages; it does not create accounts, working checkout forms or custom application behavior for your visitors.
 
@@ -41,6 +41,8 @@ When publishing is available, choose Publish and review the sharing notice. Publ
 Address setup continues automatically. Wait for the Site to become Live before sharing its link. Later edits are saved as drafts, and the published page changes only when you publish again. Unpublish removes the public page while keeping your draft and reserved address.
 
 ## Resume interrupted work
+
+If your session ends, sign in again to return to your Site. Unsent work remains in the same browser tab for your account. If sign-in is temporarily unavailable, use Try again once the connection recovers.
 
 If you go offline, you can keep drafting; reconnect before sending. Returning to the window or receiving a change from another tab refreshes the saved Site. If an update is interrupted, reopen the Site to check its progress. Avoid submitting the same change again while it is still updating. If an update cannot produce a usable draft, your previous draft stays saved.
 

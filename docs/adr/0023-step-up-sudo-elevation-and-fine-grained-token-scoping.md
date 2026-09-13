@@ -5,6 +5,8 @@
 
 > Decision scope: Historical decision record. Its original status and measurements describe its own scope. For current relay ownership, capability routing, retry authority, and deployment, ADRs [0126](0126-capability-aware-shard-relay-federation.md) and [0127](0127-codex-image-tool-alias-production-cutover.md) take precedence. Shared-relay selection, implicit model fallback, and simulation performance do not define the current federation. Unrelated subsystem decisions are not superseded by this note.
 
+> September 13, 2026 delivery correction: account/session behavior is governed by [workspace authentication](../operations/workspace-auth.md). Provider credentials do not establish account identity; implicit sudo, credential IDs as authentication and process-local connection replay guarantees are retired. The proposed topic-specific successor is [ADR 0147](0147-verified-account-and-session-authority.md). This dated precedence note preserves the original decision status and does not claim production delivery.
+
 ## Status
 **Accepted & Implemented**
 

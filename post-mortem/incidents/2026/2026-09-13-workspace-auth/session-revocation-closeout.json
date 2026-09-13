@@ -1,0 +1,36 @@
+{
+  "observed_at": "2026-09-13T20:46:38.303413Z",
+  "scope": "Final semantic review of deployed auth and cache contract, current-state recovery, failure preservation and open prevention; prior source/build evidence remains unchanged.",
+  "inspected_changed_guides_and_sources": {
+    "docs/operations/workspace-auth.md": "85b9e1b062c2213649fef034b17491198e4d10b50452a8811ded6ef3864d0010",
+    "docs/VERCEL_DEPLOYMENT.md": "d98e473712f487806fbf23a43dde22c04665ab1264b19d2da5e50e8bcb431682",
+    "docs/adr/0147-verified-account-and-session-authority.md": "5c97eaabc0faa667f329c44ed0366125c96cb0cbd4625f7cf84649b882e57a96",
+    "docs/knowledge/registry.json": "146d32a8f778888f4263c0b29b38cab7804a1c8dc388556c390aa852ff2f9885",
+    "docs/knowledge/audits/2026-09-13-session-revocation.md": "22d75a24783c3c496c38fd268c230805e91c7ad263be7e0a380fe6d29af36b93",
+    "post-mortem/CURRENT_STATE.md": "734667aad024445ef0bec5ea3bb6a1619561fb6d57a60e86ad7d482fa3548102",
+    "post-mortem/failure-modes/access-and-documentation.md": "3370ac35bb931f6a691071076decbdca69f8de79a137ae178395c9bd34e466fe",
+    "post-mortem/incidents/2026/2026-09-13-workspace-auth/README.md": "6c5c535db1e5b2d06c2ef1cca888487097bef97a51b14f7a0a7407735fa43ca8",
+    "post-mortem/register.json": "393d7069df11eee9c4cf3983b3a11a63d13fa51d80dd82173f8279abbfd22b3d",
+    "scripts/verify-workspace-cache-http.mjs": "5c62a19277e0b364fea7a7048d17fe5a70dd9a8e2b28ab4f5c79b728baafd6c5"
+  },
+  "findings": [
+    "Production migration and dirty-tree release are distinct from Git commit/hosted CI.",
+    "Browser TTL respects origin; protected static-looking routes stay private and immutable public assets keep caching.",
+    "ACT-013 completed on live acceptance; incident recovered, with ACT-014 and ACT-015 explicitly open.",
+    "ADR 0147 stays proposed; delivery is deployed with bounded evidence, not automatically accepted.",
+    "The nonreproduced refresh assertion failure retains uncertainty; original status was unavailable, no cause or fix is fabricated.",
+    "New read-only cache checker mapped to access/delivery; no unmapped runtime paths remain."
+  ],
+  "checks": {
+    "documentation_guard_tests": "passed",
+    "documentation_test_log_sha256": "1e88bcf21aabac16d036f3483709c5591c38557e4b9c1729440d90f3f2af4b6e",
+    "cache_script_syntax": "passed",
+    "diff_whitespace": "passed",
+    "temporary_secret_copy_and_owner_manifest": "removed after all owned account cleanup verified"
+  },
+  "limits": [
+    "No new runtime source since the verified/deployed build. Only private evidence/guides and read-only cache verification script changed during release closeout.",
+    "No new hosted CI or broader provider/device/grant certification.",
+    "Documentation sync/check follow explicit attestations; this record does not pre-claim them."
+  ]
+}

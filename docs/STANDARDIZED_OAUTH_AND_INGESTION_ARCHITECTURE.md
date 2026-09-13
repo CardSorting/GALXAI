@@ -1,7 +1,7 @@
 # Authentication and credential ingestion boundaries
 
 <!-- docs-scope: domain-reference -->
-> Private source reference, reconciled September 9, 2026. Relay operations use [explicit enrollment](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md); this reference distinguishes other existing application paths.
+> Private source reference, reconciled September 13, 2026. Relay operations use [explicit enrollment](maintainers/RELAY_CREDENTIAL_ENROLLMENT.md); this reference distinguishes other existing application paths.
 
 ## Separate authorities
 
@@ -11,7 +11,7 @@
 | Relay operator access | Host-held admin authorization and delegated local monitor/desktop sessions |
 | New relay account | Explicit validated create-only operator enrollment |
 | Existing relay account refresh | Linked guest file validation and conditional encrypted-registry update |
-| Legacy application ingestion | Existing HTTP handler and auth engine; separate implementation and acceptance scope |
+| Legacy application ingestion | Verified account plus developer approval; credentials create a connection, not an account |
 
 Product login is not provider enrollment and does not grant operational administration. A desktop is neither a user identity provider nor a serving worker.
 
@@ -27,9 +27,9 @@ See [ADR 0132](adr/0132-recoverable-desktop-credential-handoff.md) and [ADR 0133
 
 [POST /api/auth/ingest](../src/app/api/auth/ingest/route.ts) and its [alias](../src/app/api/ingest/route.ts) remain in source. They call [GalxAuthEngine](../src/core/auth/GalxAuthEngine.ts); the handler currently selects the OpenAI provider. They were not replaced by the operator CLI or the desktop bridge during this session.
 
-The handler has its own process-local rate, nonce and idempotency caches, optional digest/signature/timestamp processing and response shaping. Those mechanisms must not be described as the operator path's admin gate, create-only conflict policy, inventory validation or durable deduplication. A supplied digest alone is not authorization. Do not claim multi-provider acceptance from historical examples.
+The account-bound handler requires same-origin browser intent or an explicit bearer credential, confirmed account email and existing developer approval. It bounds and validates inputs, binds credential ownership to that account, does not inherit submitted identity/workspace claims, never falls back to an environment key, and projects an explicit public result. It does not overwrite the signed-in account cookie. Native token issuance carries signed account provenance and no initial elevation; old native tokens without that provenance are rejected.
 
-This route's authorization, optional transport checks, response-field projection and replay behavior require their own source-level review before relying on them for a new enrollment integration. Its continued presence does not justify re-enabling bulk import. This documentation reconciliation does not change the route.
+The previous process-local nonce/idempotency/optional-signature wrapper has been removed from this connection path. It was not durable authorization or cross-process replay protection. Connections remain separate from the operator enrollment workflow; no bulk import, automatic account creation, verified upstream capability or standards certification is implied. The current [workspace auth runbook](operations/workspace-auth.md) owns account/session behavior and deployment limits. Callback proof is account-bound; refresh selects an owned identity instead of accepting an internal record ID. Browser and JSON callbacks retain finite public failures and explicit output fields.
 
 ## Custody and evidence
 

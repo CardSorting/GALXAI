@@ -2,7 +2,8 @@
 
 <!-- docs-scope: current-guide -->
 
-Images and Sites remain public products with their existing authentication and billing requirements.
+Images and Sites are available without developer-preview approval, but their account workspaces require authentication before entry. `/images`, `/sites`, their workspace descendants and `/library` are checked before middleware asset exemptions; the Images and Sites server pages independently verify the session before rendering. Cookie presence or decoded claims never grant entry. Invalid/missing sessions redirect to sign-in for GET/HEAD and receive 401 for other methods. Verification outages return a generic 503, never workspace content. Authenticated responses and denials are private and uncached. Billing and API ownership requirements remain separate.
+The [workspace authentication runbook](workspace-auth.md) owns sign-in methods, safe return destinations, 401 expiry recovery and outage handling.
 Other API routes and developer pages require an individually approved account. Signup, payment, a pre-existing key, account metadata, and a pending request do not grant preview access.
 
 ## Rollout
@@ -22,9 +23,13 @@ npm run developer-preview -- revoke ACCOUNT_ID REVIEWER_NAME
 
 The CLI requires the server database credential. Read the request and confirm the account before approval. Approve a small group at a time; use expected traffic and feedback to decide when to expand it. API keys are available at `/keys` after approval. Participants send private feedback from `/developers`; feedback is limited to one submission per minute per account. Retain only feedback needed for preview support and honor account deletion requests.
 
-The private `/admin` workspace has owner, reviewer and viewer roles, with separate session and database membership checks. Use it for normal review, access periods, internal notes, private feedback and staff management. Signup cannot grant administration. Administrative routes retain their separate server-side administrator check. Machine callbacks and public-product supporting routes retain their existing authorization. `preview-policy.ts` is the explicit public route allowlist; new routes default to private. Original image capabilities and their exact `/thumbnail` child are public-product paths; arbitrary deeper asset paths remain private. Each image route still validates the opaque capability and current owned asset before delivery. Private route handlers have a second guard for direct handler calls. Keep both checks when adding routes.
+The private `/admin` workspace has owner, reviewer and viewer roles, with separate session and database membership checks. Use it for normal review, access periods, internal notes, private feedback and staff management. Signup cannot grant administration. Administrative routes retain their separate server-side administrator check. Machine callbacks and public-product supporting routes retain their existing authorization. `preview-policy.ts` is the explicit exemption from developer approval, not a session bypass; `workspace-policy.ts` and the server session verifier enforce account entry. The three allowlisted studio example images and published Site snapshots remain publicly retrievable. The preview list is explicit; new routes default to private. Original image capabilities and their exact `/thumbnail` child are public-product paths; arbitrary deeper asset paths remain private. Each image route still validates the opaque capability and current owned asset before delivery. Private route handlers have a second guard for direct handler calls. Keep both checks when adding routes.
 
 The paired down migration deletes preview requests and feedback, so export those records privately first. Reverting only the application would reopen legacy developer routes: do not use that as a rollback while the API is meant to stay private.
+
+Account/profile hydration, browser-local logout, native provenance and provider-connection separation are defined by the [workspace auth runbook](workspace-auth.md). API keys cannot replace a verified account for connection or staff operations. Native credentials issued before account provenance must be replaced after sign-in.
+
+Current regression commands include `npm run test:auth:sessions`, `npm run test:image:security` (workspace entry plus image/API boundaries), `npm run test:developer-preview` and `npm run test:preview-admin`. Verify raw anonymous/invalid-session requests, RSC/prefetch variants, sign-in return destinations, refresh cookies and a valid account after deployment. Gate-preserving rollback is required.
 
 ## Verification for the original preview gate
 

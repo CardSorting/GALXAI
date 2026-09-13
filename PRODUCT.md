@@ -26,7 +26,7 @@ The image studio supports creation, owned library retrieval, Favorites and downl
 ## Constraints & Invariants
 
 - Public positioning explains the idea-to-site experience, revisions, included public address, pricing and the purpose of an extremely early public beta. Homepage copy, metadata and FAQ omit provider/model names and implementation details.
-- Images and Sites remain public products with their existing account, entitlement and ownership requirements. Other developer APIs require verified signup and individual approval; signup, payment and existing keys are not grants.
+- Images and Sites remain public products with sign-in required before workspace entry and their existing entitlement and ownership requirements. Other developer APIs require verified signup and individual approval; signup, payment and existing keys are not grants.
 - Small cohorts support controlled demand, better performance and private feedback. Participant-reported savings are observations, not guaranteed savings or a promise of uniform outcomes.
 - `/admin` uses independent staff authorization: owners manage staff; owners/reviewers manage access; viewers are read-only. Customer approval and editable metadata never grant administration.
 - Preserve explicit return destinations during authentication. Do not infer product priority from a legacy default redirect.

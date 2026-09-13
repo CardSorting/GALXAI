@@ -8,6 +8,8 @@
 Date: 2026-08-24
 Status: Accepted
 
+> September 13, 2026 delivery correction: account/session behavior is governed by [workspace authentication](../operations/workspace-auth.md). Provider credentials do not establish account identity; implicit sudo, credential IDs as authentication and process-local connection replay guarantees are retired. The proposed topic-specific successor is [ADR 0147](0147-verified-account-and-session-authority.md). This dated precedence note preserves the original decision status and does not claim production delivery.
+
 ## Context
 High-concurrency token ingestion routes (`/api/auth/ingest` and `/api/auth/openai`) process sensitive OAuth refresh tokens, API keys, and session parameters across untrusted networks, proxies, and edge CDNs. Without rigorous transport layer defenses, token ingestion gateways are vulnerable to:
 1. **In-Transit Payload Tampering**: Man-in-the-middle or misconfigured proxy modification.

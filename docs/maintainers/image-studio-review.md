@@ -4,6 +4,8 @@
 
 Private maintainer record, 2026-09-10. `/images` restores hosted image creation at the user's explicit request. `PRODUCT.md` records that decision. The studio retains GALX's existing dark/indigo identity; `DESIGN.md` and the global sidecar are unchanged, and API Request Inspector constraints remain specific to that inspector.
 
+Current entry requires authentication; the earlier guest interactions below are historical evidence. Use [workspace authentication](../operations/workspace-auth.md) for current entry/recovery validation. The legacy browser fixture commands below require a verified server session, not only a browser-local user.
+
 Current large-library behavior is maintained in [image library scale](image-library-scale.md), with [dated local evidence](../knowledge/audits/2026-09-13-image-library-scale.json). The behavior and measurements below preserve the earlier studio checkpoints.
 
 ## Historical behavior through the ergonomics refinement

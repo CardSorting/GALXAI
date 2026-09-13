@@ -1,0 +1,527 @@
+{
+  "incident": "INC-20260913-WORKSPACE",
+  "status": "deployed_and_verified",
+  "observed_at": "2026-09-13T20:45:15.647459Z",
+  "deployment": {
+    "id": "dpl_HRid6XFt1G4ZaHiRj7izmucgs9yZ",
+    "target": "https://galx.ai",
+    "candidate": "https://galxai-jy6fp3poz-cardsortings-projects.vercel.app",
+    "status": "Ready",
+    "created_at": "2026-09-13T20:27:20Z",
+    "deployed_at": "2026-09-13T20:31:27Z",
+    "method": "vercel deploy --prod --yes from reviewed working tree; hosted production build",
+    "base_revision": "e0e5be199e1c64b8873f029a3445facdbc29ac90",
+    "dirty_working_tree": true,
+    "reviewed_runtime_tree_sha256": "c18e317528eb4953155426edc3205dc4ee3cd5f9d8c561744bcda2bf9d6de788",
+    "reviewed_runtime_source_changes_since_local_build": [],
+    "git_commit_or_push": false,
+    "hosted_github_ci_run": false,
+    "synthetic_local_build_deployed": false,
+    "latest_alias_inspection_sha256": "434806242476f52fc4c9b35c16735e2306c06be8ec4d0fbf987e7346d570c177",
+    "deployment_log_sha256": "5035ce85edd8aba505d0fea735705b20292ad3fc6ad601b53dff1ca0ab8708ee",
+    "hosted_build_log_sha256": "7ccd791cb75c29daa19f7bb06cecce1501f78a9ce8f870079edbeee9b492378a"
+  },
+  "local_verification": {
+    "path": "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-revocation-verification.json",
+    "sha256": "b9cd6e7ca98a4d787f4097513fcc5efb7b0843a079c02cd6b5d55687acdaca19",
+    "executions": 284,
+    "unique_scenarios": false,
+    "compiled_http_checks": 104,
+    "browser_states": 15,
+    "compiled_assets_scanned": 637,
+    "build": "passed",
+    "typescript": "passed",
+    "lint": "passed with eight existing warnings"
+  },
+  "migration": {
+    "path": "post-mortem/incidents/2026/2026-09-13-workspace-auth/session-revocation-migration.json",
+    "sha256": "41742c5cd8368ebd78c4f2f21ccbfaef98e5740983ded980793f852299a4d5f8",
+    "applied_before_deployment": true,
+    "live_checks": 9,
+    "temporary_account_removed": true
+  },
+  "production_application": {
+    "mode": "application",
+    "started_at": "2026-09-13T20:43:00.891Z",
+    "checks": [
+      "two independent sessions",
+      "active lookup HTTP 200",
+      "first active",
+      "active lookup HTTP 200",
+      "second active",
+      "anonymous /images",
+      "private cache /images",
+      "anonymous /sites",
+      "private cache /sites",
+      "anonymous /sites/nested.js",
+      "private cache /sites/nested.js",
+      "anonymous /library",
+      "private cache /library",
+      "valid entry /images",
+      "signed-in private cache /images",
+      "rendered boundary /images",
+      "valid entry /sites",
+      "signed-in private cache /sites",
+      "rendered boundary /sites",
+      "profile active",
+      "profile DTO",
+      "local logout success",
+      "copied token denied /api/auth/session",
+      "denial boundary /api/auth/session",
+      "copied token denied /api/images/library",
+      "denial boundary /api/images/library",
+      "active lookup HTTP 200",
+      "copied session inactive",
+      "copied cookie denied /images",
+      "copied cookie response uncached /images",
+      "copied cookie denied /sites",
+      "copied cookie response uncached /sites",
+      "copied cookie denied /library",
+      "copied cookie response uncached /library",
+      "other browser still authorized",
+      "refreshed account stays authorized",
+      "revoked refresh denied",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "browser asset boundary",
+      "live replacement sign-in returns to library",
+      "legacy cookie retired"
+    ],
+    "cleanup": true,
+    "refresh_probe": {
+      "status": 200,
+      "elapsed_ms": 548
+    },
+    "assets": 26,
+    "result": "passed",
+    "completed_at": "2026-09-13T20:43:14.992Z"
+  },
+  "focused_refresh": {
+    "mode": "refresh",
+    "started_at": "2026-09-13T20:44:26.216Z",
+    "checks": [
+      "two independent sessions",
+      "active lookup HTTP 200",
+      "first active",
+      "active lookup HTTP 200",
+      "second active",
+      "refreshed session profile 1",
+      "refreshed session profile 2",
+      "refreshed session profile 3",
+      "refreshed session profile 4",
+      "refreshed session profile 5"
+    ],
+    "cleanup": true,
+    "probes": [
+      {
+        "cycle": 1,
+        "status": 200,
+        "elapsed_ms": 804
+      },
+      {
+        "cycle": 2,
+        "status": 200,
+        "elapsed_ms": 533
+      },
+      {
+        "cycle": 3,
+        "status": 200,
+        "elapsed_ms": 680
+      },
+      {
+        "cycle": 4,
+        "status": 200,
+        "elapsed_ms": 501
+      },
+      {
+        "cycle": 5,
+        "status": 200,
+        "elapsed_ms": 564
+      }
+    ],
+    "result": "passed",
+    "completed_at": "2026-09-13T20:44:31.606Z"
+  },
+  "cache": {
+    "observed_at": "2026-09-13T20:39:56.982Z",
+    "origin": "https://galx.ai",
+    "checks": [
+      {
+        "path": "/images",
+        "method": "GET",
+        "legacy_prefetch": false,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/images",
+        "method": "GET",
+        "legacy_prefetch": true,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/images",
+        "method": "HEAD",
+        "legacy_prefetch": false,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/images",
+        "method": "HEAD",
+        "legacy_prefetch": true,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/sites",
+        "method": "GET",
+        "legacy_prefetch": false,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/sites",
+        "method": "GET",
+        "legacy_prefetch": true,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/sites",
+        "method": "HEAD",
+        "legacy_prefetch": false,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/sites",
+        "method": "HEAD",
+        "legacy_prefetch": true,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/library",
+        "method": "GET",
+        "legacy_prefetch": false,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/library",
+        "method": "GET",
+        "legacy_prefetch": true,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/library",
+        "method": "HEAD",
+        "legacy_prefetch": false,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/library",
+        "method": "HEAD",
+        "legacy_prefetch": true,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/images/private.css",
+        "method": "GET",
+        "legacy_prefetch": false,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/images/private.css",
+        "method": "GET",
+        "legacy_prefetch": true,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/images/private.css",
+        "method": "HEAD",
+        "legacy_prefetch": false,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/images/private.css",
+        "method": "HEAD",
+        "legacy_prefetch": true,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/sites/private.js",
+        "method": "GET",
+        "legacy_prefetch": false,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/sites/private.js",
+        "method": "GET",
+        "legacy_prefetch": true,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/sites/private.js",
+        "method": "HEAD",
+        "legacy_prefetch": false,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/sites/private.js",
+        "method": "HEAD",
+        "legacy_prefetch": true,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/library/private.png",
+        "method": "GET",
+        "legacy_prefetch": false,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/library/private.png",
+        "method": "GET",
+        "legacy_prefetch": true,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/library/private.png",
+        "method": "HEAD",
+        "legacy_prefetch": false,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/library/private.png",
+        "method": "HEAD",
+        "legacy_prefetch": true,
+        "status": 307,
+        "cache": "private, no-store"
+      },
+      {
+        "path": "/auth/signin",
+        "status": 200,
+        "cache": "private, no-cache, no-store, max-age=0, must-revalidate"
+      },
+      {
+        "path": "versioned browser asset",
+        "status": 200,
+        "cache": "public,max-age=31536000,immutable"
+      }
+    ],
+    "result": "passed"
+  },
+  "canonical_aliases": {
+    "observed_at": "2026-09-13T20:41:27.482Z",
+    "result": "passed",
+    "checks": [
+      {
+        "path": "/images",
+        "alias_status": 308,
+        "canonical_status": 307,
+        "private_cache": true
+      },
+      {
+        "path": "/sites",
+        "alias_status": 308,
+        "canonical_status": 307,
+        "private_cache": true
+      },
+      {
+        "path": "/library",
+        "alias_status": 308,
+        "canonical_status": 307,
+        "private_cache": true
+      },
+      {
+        "path": "/sites/private.js",
+        "alias_status": 308,
+        "canonical_status": 307,
+        "private_cache": true
+      }
+    ]
+  },
+  "cache_configuration": {
+    "completed_at": "2026-09-13T20:36:51.317Z",
+    "host": "galx.ai",
+    "setting": "browser_cache_ttl",
+    "before": 14400,
+    "after": 0,
+    "cache_level_unchanged": true,
+    "result": "passed"
+  },
+  "failed_attempts": [
+    {
+      "type": "initial_live_cache_acceptance",
+      "receipt": {
+        "mode": "application",
+        "started_at": "2026-09-13T20:32:30.025Z",
+        "checks": [
+          "two independent sessions",
+          "active lookup HTTP 200",
+          "first active",
+          "active lookup HTTP 200",
+          "second active",
+          "anonymous /images",
+          "private cache /images",
+          "anonymous /sites",
+          "private cache /sites",
+          "anonymous /sites/nested.js"
+        ],
+        "cleanup": true,
+        "result": "failed",
+        "failure": "private cache /sites/nested.js",
+        "completed_at": "2026-09-13T20:32:32.773Z"
+      },
+      "finding": "Correct auth redirect on /sites/nested.js had cache-control public, max-age=14400; Cloudflare Browser Cache TTL overrode origin policy. Changed to respect existing headers; final checks passed. No private-body disclosure established."
+    },
+    {
+      "type": "expanded_refresh_acceptance",
+      "receipt": {
+        "mode": "application",
+        "started_at": "2026-09-13T20:41:52.638Z",
+        "checks": [
+          "two independent sessions",
+          "active lookup HTTP 200",
+          "first active",
+          "active lookup HTTP 200",
+          "second active",
+          "anonymous /images",
+          "private cache /images",
+          "anonymous /sites",
+          "private cache /sites",
+          "anonymous /sites/nested.js",
+          "private cache /sites/nested.js",
+          "anonymous /library",
+          "private cache /library",
+          "valid entry /images",
+          "signed-in private cache /images",
+          "rendered boundary /images",
+          "valid entry /sites",
+          "signed-in private cache /sites",
+          "rendered boundary /sites",
+          "profile active",
+          "profile DTO",
+          "local logout success",
+          "copied token denied /api/auth/session",
+          "denial boundary /api/auth/session",
+          "copied token denied /api/images/library",
+          "denial boundary /api/images/library",
+          "active lookup HTTP 200",
+          "copied session inactive",
+          "copied cookie denied /images",
+          "copied cookie response uncached /images",
+          "copied cookie denied /sites",
+          "copied cookie response uncached /sites",
+          "copied cookie denied /library",
+          "copied cookie response uncached /library",
+          "other browser still authorized"
+        ],
+        "cleanup": true,
+        "result": "failed",
+        "failure": "refreshed account stays authorized",
+        "completed_at": "2026-09-13T20:42:06.383Z"
+      },
+      "finding": "One refreshed profile request returned non-200; original assertion did not retain status/timing, so no cause is inferred. Full rerun returned 200 in 548 ms and five focused refresh cycles passed. Record nonrecurrence, not proof of resolution; ACT-015 retains availability follow-up."
+    },
+    {
+      "type": "alias_checker_scope",
+      "finding": "Canonical-host checker expected 307 on www.galx.ai but observed legitimate 308 to galx.ai; separate four-path redirect-chain check passed. No configuration change."
+    },
+    {
+      "type": "read_permissions",
+      "finding": "Page Rules inventory returned code 1011: endpoint does not support account-owned tokens. Accessible settings/rulesets were reviewed; live response checks are not a complete legacy Page Rules inventory."
+    }
+  ],
+  "scans": {
+    "rendered_pages": [
+      "/images",
+      "/sites"
+    ],
+    "browser_assets": 26,
+    "result": "passed selected private marker and DTO boundaries",
+    "scope": "Fetched live HTML and linked JS/CSS; no claim about every page, every browser bundle, third-party data or all headers/artifacts"
+  },
+  "cleanup": {
+    "all_owned_canaries_removed": true,
+    "test_sessions_ended": true,
+    "real_user_sessions_used": false,
+    "email_sent": false,
+    "generation_billing_publication": false
+  },
+  "recovery": {
+    "incident": "recovered with open prevention",
+    "ACT-013": "completed",
+    "ACT-014": "fresh proof, device-grant database acceptance and existing breached-password warning remain separate",
+    "ACT-015": "nonreproduced refresh availability observation; original HTTP detail unavailable",
+    "unsafe_previous_deployment": "dpl_CK7u3xcD4sqfUERCPKLbcimvzu8C predates corrected auth boundary; do not roll back blindly",
+    "preserve": "Active-session migration, verified server entry and origin-respecting private cache policy"
+  },
+  "semantic_review": {
+    "inspected_sources_and_complete_guides": {
+      "scripts/verify-workspace-cache-http.mjs": "5c62a19277e0b364fea7a7048d17fe5a70dd9a8e2b28ab4f5c79b728baafd6c5",
+      "src/lib/auth/request-session.ts": "d89acf5a781e81a508ecad3cbca398caa43f8742b0319d2778785e0065f671e9",
+      "src/lib/auth/active-account-session.ts": "94de4efc8ac82b983ac35ef030258879668ec3f3dd3a612deb53aaedc9cee5d9",
+      "src/lib/auth/require-workspace-session.ts": "06486b796b2330a19f1ffb9e8acaf9f3ded699c5127defc44af562386d54fe76",
+      "src/app/api/auth/session/route.ts": "5062c24b71e23763a5861b0dbc18dc6bc4daf65da33f2db3a595788ca4243ea2",
+      "src/app/images/page.tsx": "c52ab7e1183d69c5fa881d1bd0c5a5fd82945e6a3c265bd43612eb4bfd1c2a37",
+      "src/app/sites/page.tsx": "e18025a8902c784a084535fd625463be10ec2f82292f7563663c98fad9fcbd33",
+      "docs/operations/workspace-auth.md": "85b9e1b062c2213649fef034b17491198e4d10b50452a8811ded6ef3864d0010",
+      "docs/VERCEL_DEPLOYMENT.md": "d98e473712f487806fbf23a43dde22c04665ab1264b19d2da5e50e8bcb431682",
+      "docs/adr/0147-verified-account-and-session-authority.md": "5c97eaabc0faa667f329c44ed0366125c96cb0cbd4625f7cf84649b882e57a96",
+      "docs/knowledge/registry.json": "146d32a8f778888f4263c0b29b38cab7804a1c8dc388556c390aa852ff2f9885",
+      "docs/DOCUMENTATION_POLICY.md": "ab2030f9d15010634b9a2d9cf2bc680fdf4ae961c2ee3f9f7ad567e99d49d40c",
+      "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
+      "post-mortem/CURRENT_STATE.md": "9ffc7a3eeb5478b51009e7fb7fe9658e821ad34926c290d37b664d03a9d4ac11",
+      "post-mortem/failure-modes/access-and-documentation.md": "3370ac35bb931f6a691071076decbdca69f8de79a137ae178395c9bd34e466fe"
+    },
+    "scope": "Live delivery, private CDN policy, additive migration, replacement, copied-token/cookie rejection, scoped assets and explicit failure/remaining-work recording. Prior unchanged source review remains in local verification."
+  },
+  "limits": [
+    "No new Git commit/push or hosted GitHub CI; deployed working-tree identity retained.",
+    "No real external-provider OAuth/email delivery, MFA or fresh-proof certification.",
+    "Device approval/poll RPC one-time consumption remains separate acceptance.",
+    "No cancellation of already authorized in-flight work, retrieval of delivered bytes, erasure of existing browser copies, or revocation for unrelated JWT consumers.",
+    "No load, generation, billing, publication or physical-device screen-reader test.",
+    "One profile availability failure did not recur; original response details unavailable."
+  ]
+}

@@ -1,114 +1,33 @@
-# GALXAI: Security Posture & Threat Model
+# Authentication security posture and threat model
 
 <!-- docs-scope: domain-reference -->
-> **Reading scope:** Subsystem reference retained for its own domain; not re-certified by the federation documentation refactor. Older routing, deployment, compatibility, or performance descriptions do not override the current relay contract. See the [current contract](FEDERATION_STRATEGY.md) and [complete catalog](CATALOG.md).
 
-## 1. Threat Modeling Overview
+Private source reference reconciled September 13, 2026. The [workspace auth runbook](operations/workspace-auth.md) owns current session operations. [Current state](../post-mortem/CURRENT_STATE.md) owns deployment facts. This local source audit is not a production security certification.
 
-GALXAI serves as a high-performance compute pooling gateway and execution substrate for distributed AI workloads. This document details the threat vectors analyzed, mitigation architectures implemented, and the forensic posture grading rubric.
+## Reviewed threats and controls
 
----
+| Threat | Current source control | Verification limit |
+| --- | --- | --- |
+| Anonymous workspace entry | Middleware and independent server-page verification, including descendants and RSC requests | Compiled local fixtures; deployment acceptance remains open |
+| Forged browser identity or metadata role | Server-verified profile; no local-storage/key/SSO fabrication; verified email and staff membership required separately | Real identity-provider configuration was not changed |
+| Session ID used as a logout credential | Verified credential and owner-bound revocation; strict header syntax; cross-site cookie mutations denied | Active-session check rejects copied JWTs after completed sign-out; in-flight authorized requests are outside this guarantee |
+| Stale requests restore a previous owner | Abort/revision fencing and account clearing before switch; cross-tab pending/completed sign-out | Previously delivered data cannot be recalled |
+| Connection credentials acquire account privileges | Existing verified account required; owner-bound records; no environment fallback, profile-claim authority or initial sudo | Provider capability still needs real upstream acceptance |
+| Session grants unverified elevation | Legacy elevation returns 403; operational diagnostics/vault calls require administrator authorization | A genuine fresh-proof ceremony is not implemented |
+| Sub-token scope/lifetime escalation | Requested scopes are bounded by parent and expiry; sub-tokens cannot manage account sessions | Native credentials are a separate contract from Supabase browser sessions |
+| Auth or database outage becomes authorization | Generic unavailable response; authoritative native creation/lookup/rotation/revocation and device-grant results; no cache grant after denial/outage | Active-session and native persistence have isolated database tests; device-grant RPC routes still use mocks |
+| Internal data enters a customer response | Explicit profile/device/token DTOs; finite failures; no fake public JWKS key | Scoped tests and compiled scans do not certify every module |
 
-## 2. Threat Vector Matrix & Mitigations
+## Authority and custody
 
-| Threat Vector | Description | Severity | Implemented Mitigation |
-| :--- | :--- | :--- | :--- |
-| **Cross-Tenant Shard Transplantation** | Attacker transfers encrypted secret ciphertext from Tenant A's row to Tenant B's row in PostgreSQL. | **Critical** | **AAD Binding**: AES-256-GCM includes `${tenantUid}:${shardId}:${provider}` as AAD. Decryption fails unconditionally on row movement. |
-| **Token Replay / Theft Exfiltration** | Leaked bearer token is replayed by malicious actor from external network. | **High** | **OAuth 2.0 Token Rotation (RFC 6819)** with single-use tokens, 30s grace window, and automatic session family lineage killswitch. |
-| **Upstream Account Revocation Desynchronization** | Upstream account owner revokes access or terminates password at provider, but downstream gateway sessions remain active. | **High** | **OpenID Connect Back-Channel Logout 1.0 (RFC 7009 / OIDC)**: Ingests server-to-server logout tokens and cascades immediate revocation across linked identities and active sessions. |
-| **Plaintext Claims Metadata Leakage** | Intermediate proxies or extensions read user email/shard ID from standard JWTs. | **Medium** | **Compact JWE Encryption (`galx_sess_v2...`)**: Zero metadata is visible in plaintext over the wire. |
-| **Heap Memory Forensics** | Process crash dump or heap inspection exposes plaintext API keys. | **High** | **Active Heap Zeroization (`ScopedMemorySanitizer`)**: 2-pass deterministic overwrite (`0xAA` -> `0x00`) in `finally` blocks. |
-| **Unattended Session Privilege Abuse** | Co-worker or attacker uses an open laptop to export keys or change billing. | **High** | **Step-Up SUDO Mode**: Privileged mutations require elevation active within 15 minutes (`POST /api/auth/sudo/elevate`). |
-| **Over-Privileged Subagents** | Background agent worker uses full root tokens, risking accidental billing or shard mutations. | **Medium** | **Fine-Grained Scoped Sub-Tokens**: Ephemeral child tokens limited to `chat:*` or `images:*` with short TTLs. |
-| **Network & Device Hijacking (Bot Swarm)** | Token is used across rapidly shifting IP subnets or distinct user agents. | **Medium** | **Adaptive Behavioral Risk Scoring**: Telemetry engine computes 0-100 risk score in BroccoliDB `riskEvaluationTable`. |
-| **PHI / PII Leakage to Upstream LLMs** | User prompts contain sensitive patient health records or European PII. | **Critical** | **Safe Harbor 18 & GDPR Redactor**: Tokenizes 18 Safe Harbor PHI categories and European identifiers before transit. |
-| **Upstream Model Data Retention** | Upstream LLM providers retain user prompts for model training. | **Critical** | **Zero Data Retention (ZDR v10.0)**: Enforces `store: false` parameter, strips tracking cookies, and applies strict `no-store` cache headers. |
-| **Audit Ledger Manipulation** | Rogue admin or compromised service deletes or alters compliance audit records. | **High** | **Merkle Tree SHA-256 Ledger**: Chains micro-batch Merkle roots with cryptographic tamper-evident signatures. |
-| **Silent Security Configuration Drift** | Shard encryption or rate limiting accidentally disabled during updates. | **High** | **Autonomous SOC 2 Drift Engine**: Evaluates 28 controls in real-time and triggers automatic self-healing routines. |
-| **Volumetric Edge Ingress Flooding** | Bot swarms attempt to exhaust origin servers with HTTP request storms. | **High** | **Cloudflare Anycast WAF & Fast-Path Prefix Filter**: Drops invalid keys and floods in $<1\text{ms}$ at the 300+ Edge PoPs. |
-| **Edge Rate Limit Query Storms** | Million-request bursts hammer PostgreSQL connection pools with rate checks. | **High** | **Distributed Edge KV Sliding-Window Limiter (`RATE_LIMIT_KV`)**: Evaluates token buckets in V8 isolates without DB IOPS. |
-| **Ungrounded Compaction Hallucination** | Regex or semantic compaction mutates a financial dollar figure, account number, or date. | **Critical** | **`BroccoliCompactionSafety`**: Deterministic fact-checking gate verifying all numbers, dates, percentages, and entities; fails closed to unmodified raw source text upon any discrepancy. |
-| **Institutional Context Poisoning & Superseded Guidance** | Stale corporate documentation and superseded historical ADRs (e.g. deprecated `HS256` schemes) misguide reasoning models into violating active security rules. | **Critical** | **`BroccoliArchitectureInvariantCompactor` (ADR 0066/0067)**: Epistemic invariant filtering isolates active cryptographic, memory (`zeroizeBuffer`), and runtime (`edge`) invariants while pruning historical minutes and deprecated RFCs (`npm run bench:entropy`). |
+Auth-service verification plus a live owner-bound session check proves current application account authority. Developer approval, resource ownership, subscription entitlement and staff membership are independent checks. A public API key or editable user metadata cannot confer staff rights. Browser cookies and in-memory SDK sessions remain credentials/candidates to verify; they are not trusted merely because they exist. Native credential verification checks cryptography, signed account provenance, expiry, revocation and database ownership.
 
+Provider credentials belong to a connection owned by an already verified account. Relay operator enrollment remains a separate administrative workflow under [the ingestion reference](STANDARDIZED_OAUTH_AND_INGESTION_ARCHITECTURE.md). Stored operational records retain their protocol identifiers privately. No user-facing security grade, certification badge, universal deletion guarantee, hardware isolation guarantee or verified model identity is inferred from internal class names.
 
+## Residual risks and acceptance
 
----
+Default browser sign-out targets the current session and confirms that the session record is no longer active before success. Account entry, profile, team seats and shared API identity all require the same uncached check. A copied JWT is denied on subsequent GALX account requests even while its signature/expiry remain valid. Other sessions stay active; no lifetime setting or global revocation is changed. A future sensitive-action ceremony still needs account-bound fresh proof, expiry and replay rejection. Old native credentials require regular account sign-in for browser recovery and an authenticated flow for new connection credentials, never a silent email-based ownership transfer. Remote native-session APIs do not represent all Supabase devices. Internal administration uses only the explicit configured server credential; built-in defaults and user metadata no longer grant it.
 
-## 3. Behavioral Risk Scoring Rubric
+Device grants now require durable RPC acknowledgement and cannot use memory after denial. Deployed database function semantics and cross-process acceptance remain separate from mocked route/repository tests. Provider callbacks, real session refresh, cross-tab sign-out and sign-out failure recovery need hosted acceptance after a reviewed release. Read the incident before operational changes; do not use old process IDs or deployment receipts as current authority.
 
-The `GalxAuthEngine.evaluateSessionRisk` algorithm evaluates every incoming request against the established session baseline:
-
-```
-Baseline Session Vectors: (Fingerprint Hash, IP Subnet /24, Normal UA)
-                                  │
-                                  ▼
-           ┌──────────────────────────────────────────────┐
-           │              Incoming Request                │
-           └──────────────────────┬───────────────────────┘
-                                  │
-         ┌────────────────────────┴────────────────────────┐
-         │                                                 │
-         ▼                                                 ▼
-[IP Subnet Shift (/24)]                           [Device OS Shift]
-  • Δ Subnet = True                                 • macOS -> Linux
-  • +25 Risk Points                                 • +35 Risk Points
-         │                                                 │
-         └────────────────────────┬────────────────────────┘
-                                  │
-                                  ▼
-                      [Composite Score Calculation]
-               Risk Score = min(100, Sum(Risk Factors))
-                                  │
-                 ┌────────────────┼────────────────┐
-                 │                │                │
-                 ▼                ▼                ▼
-              0 - 24            25 - 49          50 - 100
-              Grade A+          Grade A          Grade B / C
-              (Normal)       (Subnet Drift)   (High Risk / Flag)
-```
-
----
-
-## 4. Cryptographic Key Lifecycle Governance
-
-- **Key Derivation**: HKDF-SHA256 with static master secret, high-entropy salt, and contextual info parameters.
-- **Key Storage**: Environment-injected master secret (`GALX_VAULT_MASTER_SECRET`) with support for external KMS HSM storage.
-- **Key Re-Wrapping**: Non-blocking in-memory and PostgreSQL batch re-encryption (`fn_reencrypt_vault_shard_record`).
-- **Forward Secrecy Key Ratchet**: Ephemeral session keys ratchet every 1000 tokens during long-running streams.
-
----
-
-## 5. Security Posture API Schema (`/api/auth/security/posture`)
-
-```json
-{
-  "success": true,
-  "posture": {
-    "overallGrade": "A+",
-    "riskScore": 0,
-    "riskLevel": "low",
-    "activeSessionsCount": 1,
-    "sudoActive": true,
-    "sudoExpiresInMs": 845000,
-    "primaryKeyringVersion": "v1",
-    "recommendations": [
-      "Single active device session with tamper-evident DPoP fingerprinting.",
-      "SUDO elevated mode active (expires in 14m).",
-      "Vault credentials protected with AES-256-GCM under key version 'v1'."
-    ],
-    "lastAuditedAt": "2026-08-22T18:25:00.000Z"
-  }
-}
-```
-
----
-
-## 6. AICPA SOC 2 Type II 5-Pillar Control Matrix
-
-| Category | Controls Covered | Core Verification Mechanism |
-| :--- | :--- | :--- |
-| **Security (CC6.1 - CC9.1)** | CC6.1, CC6.2, CC6.3, CC6.6, CC6.7, CC7.1, CC7.2, CC7.3, CC8.1, CC9.1 | JWE session encryption, DPoP fingerprinting, Step-Up SUDO elevation, envelope encryption. |
-| **Availability (A1.1 - A1.4)** | A1.1, A1.2, A1.3, A1.4 | 4-state circuit breaker, zero-allocation ring buffers, continuous token bucket rate limits. |
-| **Confidentiality (C1.1 - C1.3)** | C1.1, C1.2, C1.3 | ZDR v10.0 memory zeroization, Zero-Knowledge Attestation Tickets (ZKAT), KMS key re-wrapping. |
-| **Processing Integrity (PI1.1 - PI1.3)** | PI1.1, PI1.2, PI1.3 | JSON schema validation, Stripe-grade request deduplication, monotonic fencing tokens. |
-| **Privacy (P1.1 - P8.1)** | P1.1, P2.1, P3.1, P4.1, P5.1, P6.1, P7.1, P8.1 | Safe Harbor 18 de-identification, GDPR DSAR exports, Article 30 RoPA registers. |
+The [historical posture reference](knowledge/audits/2026-09-13-security-posture-legacy.md) preserves the former unverified matrix, timing, certification and diagnostic-grade claims as dated history. They are not current guarantees. Follow the [public information boundary](SECURITY.md); public documentation describes capability, not implementation.

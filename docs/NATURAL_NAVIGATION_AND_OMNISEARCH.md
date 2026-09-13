@@ -14,6 +14,8 @@ Pending links use Next.js `useLinkStatus` for a small, dimension-free hint after
 
 `Navigation`, `MobileBottomNav` and `Footer` use `IntentLink`. Links preserve their native href, keyboard focus, open-in-new-tab behavior and Next.js navigation. Rendering a link in the viewport does not prefetch it. A 120 ms hover or focus dwell requests just that destination; leaving or unmounting cancels the timer. Touch navigation works normally without speculative pointer-down work.
 
+Sign-in has its own focused header and legal footer; the shared product footer is omitted there. Workspace links reach a server-verified entry gate. Successful password sign-in uses a fresh document request to avoid stale prefetched anonymous redirects. The supported Images library view and Site/starter destination survive that return; [workspace authentication](operations/workspace-auth.md) owns the contract.
+
 The shared `prefetchOnIntent` helper skips the current route, external URLs, auth/admin/API destinations, hidden/offline pages and browsers reporting Data Saver or 2G. A per-tab budget admits at most three unique destinations in any rolling ten seconds and deduplicates them for thirty seconds. It counts recent admissions directly, so crossing a fixed time-window boundary cannot admit a second burst. These are bounded opportunistic warmups, never guaranteed instant navigation. Authorization remains in middleware and handlers, including private page chunks; there is no middleware exemption for prefetch headers.
 
 ## Homepage motion and section navigation

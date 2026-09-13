@@ -42,7 +42,7 @@ Participants see their current status and any access expiry on `/developers`. Th
 
 Only owners can add, change or remove staff. Pending owner invitations do not count toward the last-active-owner safeguard. Concurrent owner changes are serialized; they cannot remove all active owners. Each request rechecks database membership. Writes hold the actor's membership until commit, so staff removal and in-flight decisions have a defined order.
 
-Staff access requires a verified account session. API keys, customer approval, payment, editable profile metadata and internal service headers cannot authorize administration. The page, its JavaScript entry chunk, middleware and route handlers are protected. Responses are private/no-store and use explicit DTOs. The private tables deny `anon` and `authenticated` access and force RLS. The application service role can append audit records but cannot edit or delete them.
+Staff access requires an Auth-verified account with confirmed email. A native provider token or its email claim is not staff identity proof; use the canonical account sign-in. API keys, customer approval, payment, editable profile metadata and internal service headers cannot authorize administration. The page, its JavaScript entry chunk, middleware and route handlers are protected. Responses are private/no-store and use explicit DTOs. The private tables deny `anon` and `authenticated` access and force RLS. The application service role can append audit records but cannot edit or delete them.
 
 ## Conflict and recovery behavior
 
