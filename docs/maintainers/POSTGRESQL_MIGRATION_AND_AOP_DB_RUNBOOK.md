@@ -12,6 +12,7 @@ Private database guide. Read the applicable repository Supabase skills before da
 | `npm run db:verify` | Static integrity checks; not proof a remote schema is applied |
 | `npm run db:test` | Full suite against an isolated disposable PostgreSQL fixture |
 | `npm run test:image:library-db` | Large-library pagination, role, old-asset and rollback checks against 50,000 owned fixture images |
+| `npm run test:relay:image` | Historical command name for isolated object/catalog consistency, decoding and ownership checks; no live relay or generation |
 | `npm run test:image:db` | Image receipts/Favorites suite against that isolated fixture |
 | `npm run db:migrate` | Legacy manager apply action is intentionally disabled; not the production migration workflow |
 | `npm run db:push` | Direct migration mutation script; not a harmless preflight and not the default workflow below |

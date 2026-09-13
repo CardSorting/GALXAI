@@ -6,6 +6,10 @@ on:
       - main
     paths:
       - 'src/workers/cloudflare/**'
+      - 'scripts/test-cloudflare-workers.ts'
+      - 'scripts/lib/require-isolated-worker-env.ts'
+      - 'package.json'
+      - 'package-lock.json'
       - 'wrangler.toml'
       - '.github/workflows/deploy-cloudflare.yml'
 

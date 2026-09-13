@@ -27,6 +27,8 @@ The [bounded-library migration](maintainers/image-library-scale.md#validation-ro
 
 Preserve owner-scoped receipts and committed artifacts through rollback. The populated image table is intentionally protected from destructive rollback. Keep developer-preview checks enforced at both the application and gateway; a pre-gate successful release is not a safe rollback. Staff authority remains independent. Record recovery in [the incident system](../post-mortem/README.md).
 
+Gateway component verification uses isolated transports and a dry-run bundle; its workflow also triggers on fixture and dependency changes. Verify the actual hosted test and bundle steps separately from the token-conditional deployment step. A skipped deployment is not a new gateway release.
+
 For storage pressure, use [bounded deployment cleanup](../post-mortem/runbooks/deployment-storage.md). Preserve aliases and a compatible rollback; verify storage-accounting totals separately from removed-deployment counts.
 
 ## Sites strategy rollout

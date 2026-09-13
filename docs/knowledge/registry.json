@@ -76,7 +76,8 @@
         "scripts/verify-image-library-scale-ui.ts",
         "supabase/migrations/20260913071757_image_library_bounded_pages.sql",
         "supabase/rollbacks/20260913071757_image_library_bounded_pages.down.sql",
-        "scripts/verify-image-public-http.ts"
+        "scripts/verify-image-public-http.ts",
+        "scripts/test-relay-image-generation.ts"
       ],
       "guides": [
         "docs/QUEUE_SPECIFICATION.md",
@@ -88,7 +89,8 @@
         "npm run test:image:security",
         "npm run test:image:db",
         "npm run test:image:scale",
-        "npm run test:image:library-db"
+        "npm run test:image:library-db",
+        "npm run test:relay:image"
       ]
     },
     "access": {
@@ -197,7 +199,9 @@
         "src/workers/cloudflare/**/*.ts",
         "workers/sites-domains/wrangler.jsonc",
         "wrangler.toml",
-        "workers/sites-domains/index.ts"
+        "workers/sites-domains/index.ts",
+        "scripts/test-cloudflare-workers.ts",
+        "scripts/lib/require-isolated-worker-env.ts"
       ],
       "guides": [
         "docs/DEPLOYMENT.md",

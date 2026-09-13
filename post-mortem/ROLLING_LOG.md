@@ -327,3 +327,31 @@ Incident: `INC-20260913-DOCS`. Kind: `follow-up`.
 **Next step:** Record the explicit review and validate synchronized documentation before pushing the release receipt.
 
 Evidence: [2026-09-13-deployment-lifecycle.json](../docs/knowledge/audits/2026-09-13-deployment-lifecycle.json).
+
+## EVT-20260913-HISTORICAL-ARTIFACT-PROVENANCE — 2026-09-13T09:01:51.150072Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `observation`.
+
+**Observation:** The missing completed record matches the legacy relay image test by fixture owner/session shape, prompt and exact 70-byte SHA-256. The original fixture fully decodes.
+
+**Action:** Reviewed the original test: it loaded application credentials and deleted session objects without removing the durable catalog record. Replaced it with a disposable database and local object contract test; 10 checks passed after 104 fixture migrations.
+
+**Result:** Exact-byte restoration is possible without regeneration, catalog changes or deleting user history.
+
+**Next step:** Restore only the verified missing object using conditional creation, verify the unchanged catalog and sanitized live retrieval, then retain closure evidence.
+
+Evidence: [2026-09-13-image-library-scale.json](releases/2026-09-13-image-library-scale.json).
+
+## EVT-20260913-HISTORICAL-ARTIFACT-RESTORED — 2026-09-13T09:05:04.590929Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** The identified historical test artifact was missing; exact original fixture bytes matched its catalog SHA-256 and size.
+
+**Action:** Conditionally restored only the missing object and verified uncached readback, unchanged catalog, sanitized live original/thumbnail and invalid-capability denial. Replaced the unsafe fixture with isolated database/local-storage coverage in CI.
+
+**Result:** ACT-012 completed. No image generation, catalog mutation or user-history deletion occurred during restoration. Local gateway tests and bundle also pass; hosted gateway verification remains the final ACT-011 step.
+
+**Next step:** Push the fixture changes and record hosted gateway verification separately.
+
+Evidence: [2026-09-13-followup-repairs-local.json](releases/2026-09-13-followup-repairs-local.json).

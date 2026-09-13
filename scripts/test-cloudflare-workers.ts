@@ -13,6 +13,9 @@
  * 10. GalxEdgeQueueWorker (Distributed Task Queue Batch Execution)
  */
 
+import './lib/require-isolated-worker-env';
+import { WalletRepository } from '../src/lib/supabase/repositories/WalletRepository';
+import { TelemetryRepository } from '../src/lib/supabase/repositories/TelemetryRepository';
 import { GalxEdgeGateway } from '../src/workers/cloudflare/GalxEdgeGateway';
 import { GalxEdgeRouter } from '../src/workers/cloudflare/GalxEdgeRouter';
 import { GalxEdgeConnectionPool } from '../src/workers/cloudflare/GalxEdgeConnectionPool';
@@ -32,6 +35,40 @@ const mockEnv = {
   ALLOW_SYNTHETIC_RESPONSES: 'true',
   GOVERNANCE_MODE: 'observe'
 };
+
+// Explicit transport fixtures. Unexpected requests fail the suite even if a
+// component catches the transport error; no production HTTP is possible.
+let approvalResponse = () => Response.json({ approved: true });
+let imageResponse = () => new Response();
+let approvalCalls = 0;
+let imageCalls = 0;
+let queueCalls = 0;
+let unexpectedRequests = 0;
+globalThis.fetch = async (input, init) => {
+  const request = new Request(input, init);
+  if (request.url === 'https://galx.ai/api/developer-access/check' && request.method === 'POST') {
+    approvalCalls++;
+    assert(request.redirect === 'manual', 'Approval requests never follow redirects');
+    assert(request.headers.get('authorization') === 'Bearer galx_live_test_key_123', 'Approval checks receive the presented key');
+    return approvalResponse();
+  }
+  if (new URL(request.url).origin === 'https://galx.ai' && new URL(request.url).pathname.startsWith('/v1/images/')) {
+    imageCalls++;
+    assert(request.redirect === 'manual', 'Image forwarding never follows redirects');
+    return imageResponse();
+  }
+  if (request.url === 'https://test-project.supabase.co/rest/v1/rpc/fn_lease_queue_tasks_batch_cf' && request.method === 'POST') {
+    queueCalls++;
+    const body = await request.json();
+    assert(body.p_max_tasks === 10 && body.p_queue_name === 'default', 'Queue lease uses the requested bounded batch');
+    return Response.json([]);
+  }
+  unexpectedRequests++;
+  throw new Error('Unexpected HTTP request in worker fixture');
+};
+process.on('exit', () => {
+  if (unexpectedRequests) { console.error(`Unexpected fixture HTTP requests: ${unexpectedRequests}`); process.exitCode = 1; }
+});
 
 let testsPassed = 0;
 let testsFailed = 0;
@@ -65,7 +102,9 @@ async function runAllTests() {
   assert(healthResp.status === 200, 'Health endpoint returns HTTP 200');
   const healthJson = await healthResp.json() as any;
   assert(healthJson.status === 'healthy', 'Health payload status is "healthy"');
-  assert(healthJson.edgePoP === '8f123456789-IAD', 'Health payload reflects CF-Ray edge PoP header');
+  assert(JSON.stringify(Object.keys(healthJson).sort()) === JSON.stringify(['status', 'timestamp']), 'Health response uses the public field allowlist');
+  assert(typeof healthJson.timestamp === 'number', 'Health timestamp is numeric');
+  assert(!JSON.stringify(healthJson).includes('8f123456789-IAD'), 'Health never reflects private ingress diagnostics');
 
   // 1.2 Auth Guard: Rejection of invalid / missing keys
   const unauthReq = new Request('https://api.galx.ai/v1/models', {
@@ -100,6 +139,28 @@ async function runAllTests() {
   assert(Array.isArray(modelsJson.data) && modelsJson.data.length > 0, 'Models payload contains non-empty array');
   assert(modelsJson.data.some((m: any) => m.id === 'gpt-5.6-sol'), 'Model catalog contains "gpt-5.6-sol"');
   assert(modelsJson.data.every((m: any) => m.pricing_tier === 'provider_public'), 'Model catalog does not invent a wholesale pricing tier');
+
+  // Approval must be checked again after a successful request; cached key
+  // validity must not grant a revoked or unavailable preview entitlement.
+  for (const fixture of [
+    { name: 'pending', status: 403, body: { error: 'private-canary' }, expected: 403 },
+    { name: 'revoked', status: 401, body: { error: 'private-canary' }, expected: 401 },
+    { name: 'unavailable', status: 500, body: { error: 'private-canary' }, expected: 503 },
+    { name: 'unapproved success', status: 200, body: { approved: false }, expected: 503 },
+    { name: 'malformed approval', status: 200, body: { approved: 'true' }, expected: 503 },
+  ]) {
+    approvalResponse = () => Response.json(fixture.body, { status: fixture.status });
+    const before = approvalCalls;
+    const denied = await gateway.handleRequest(modelsReq.clone());
+    assert(denied.status === fixture.expected, `${fixture.name} preview access fails closed`);
+    assert(approvalCalls === before + 1, 'Every developer request rechecks preview approval');
+    assert(!(await denied.text()).includes('private-canary'), 'Preview denial hides backend details');
+  }
+  approvalResponse = () => { throw new Error('private-canary'); };
+  const approvalOutage = await gateway.handleRequest(modelsReq.clone());
+  assert(approvalOutage.status === 503, 'Approval transport failure fails closed');
+  assert(!(await approvalOutage.text()).includes('private-canary'), 'Approval transport errors remain private');
+  approvalResponse = () => Response.json({ approved: true });
 
   // 1.4 Non-Streaming Chat Completion
   const nonStreamReq = new Request('https://api.galx.ai/v1/chat/completions', {
@@ -249,24 +310,46 @@ async function runAllTests() {
   assert(Array.isArray(embJson.data) && embJson.data.length === 2, 'Embeddings returned 2 vector objects');
   assert(embJson.data[0].embedding.length === 1536, 'Embedding vector has 1536 dimensions');
 
-  // 1.7 OpenAI-Compatible Image Generations
-  const imgReq = new Request('https://api.galx.ai/v1/images/generations', {
-    method: 'POST',
-    headers: {
-      Authorization: 'Bearer galx_live_test_key_123',
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify({
-      prompt: 'A futuristic cybernetic garden',
-      model: 'openai-gpt-image-latest',
-      n: 2
-    })
+  // Public image delivery is handled by the site's owner authorization, without
+  // developer-preview gating. Default output is binary; JSON is explicit.
+  const imageRequest = (path = '/v1/images/generations', method = 'POST', accept = 'image/png') => new Request(`https://api.galx.ai${path}`, {
+    method, headers: { authorization: 'Bearer image-fixture', 'content-type': 'application/json', accept },
+    ...(method === 'POST' ? { body: JSON.stringify({ prompt: 'Fixture', model: 'image' }) } : {}),
   });
-  const imgResp = await gateway.handleRequest(imgReq);
-  assert(imgResp.status === 200, 'Images generations returns HTTP 200');
-  const imgJson = (await imgResp.json()) as any;
-  assert(Array.isArray(imgJson.data) && imgJson.data.length === 2, 'Image generations returned 2 image objects');
-  assert(imgJson.data[0].url.includes('/generations/'), 'Image URL points to R2 generations path');
+  const approvalBeforeImages = approvalCalls;
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+  imageResponse = () => new Response(png, { headers: { 'content-type': 'image/png', 'x-galx-shard': 'private-canary' } });
+  const binary = await gateway.handleRequest(imageRequest());
+  assert(binary.status === 200 && binary.headers.get('content-type') === 'image/png', 'Default image response is binary');
+  assert(Buffer.from(await binary.arrayBuffer()).equals(png), 'Trusted site image bytes survive forwarding');
+  assert(binary.headers.get('x-galx-shard') === null, 'Image forwarding strips private headers');
+  imageResponse = () => Response.json({ created: 1, data: [{ b64_json: png.toString('base64'), shard: 'private-canary' }], diagnostics: 'private-canary' });
+  const jsonImage = await gateway.handleRequest(imageRequest('/v1/images/generations', 'POST', 'application/json'));
+  const jsonImageBody = await jsonImage.json() as any;
+  assert(JSON.stringify(Object.keys(jsonImageBody).sort()) === JSON.stringify(['created','data']), 'Image JSON uses an explicit field allowlist');
+  assert(JSON.stringify(Object.keys(jsonImageBody.data[0])) === JSON.stringify(['b64_json']), 'Image item JSON strips internal fields');
+  imageResponse = () => Response.json({ id: 'fixture', status: 'queued', task_url: '/v1/images/tasks/fixture', diagnostics: 'private-canary' }, { status: 202 });
+  const acceptedImage = await gateway.handleRequest(imageRequest('/v1/images/generations', 'POST', 'application/json'));
+  assert(acceptedImage.status === 202, 'Async image submission preserves accepted status');
+  assert(!JSON.stringify(await acceptedImage.json()).includes('private-canary'), 'Async image acknowledgement strips diagnostics');
+  imageResponse = () => Response.json({ task: { id: 'fixture', status: 'completed', diagnostics: 'private-canary',
+    result: { data: { created: 1, data: [{ b64_json: png.toString('base64'), diagnostics: 'private-canary' }] } } } });
+  const completedImage = await gateway.handleRequest(imageRequest('/v1/images/tasks/fixture', 'GET', 'application/json'));
+  const completedBody = await completedImage.json() as any;
+  assert(completedBody.task.status === 'completed' && completedBody.task.result.data.data[0].b64_json === png.toString('base64'), 'Async retrieval preserves the completed artifact');
+  assert(!JSON.stringify(completedBody).includes('private-canary'), 'Async retrieval uses nested public allowlists');
+  for (const path of ['/v1/images/tasks/fixture', '/v1/images/assets/fixture/thumbnail']) {
+    imageResponse = () => Response.json({ error: { message: 'private-canary' } }, { status: 404 });
+    const missing = await gateway.handleRequest(imageRequest(path, 'GET'));
+    assert(missing.status === 404 && !(await missing.text()).includes('private-canary'), 'Image retrieval preserves owner denial without forwarding details');
+  }
+  imageResponse = () => new Response(null, { status: 307, headers: { location: 'https://untrusted.example/private-canary' } });
+  const redirected = await gateway.handleRequest(imageRequest());
+  assert(redirected.status === 503 && redirected.headers.get('location') === null, 'Image redirects fail closed');
+  imageResponse = () => new Response('<html>private-canary</html>', { status: 502, headers: { 'content-type': 'text/html' } });
+  const failedImage = await gateway.handleRequest(imageRequest());
+  assert(failedImage.status === 503 && !(await failedImage.text()).includes('private-canary'), 'Image upstream failure is sanitized');
+  assert(approvalCalls === approvalBeforeImages && imageCalls === 8, 'Public image routes are independent of developer approval');
 
   // --- 2. GalxEdgeRouter Tests ---
   console.log('\n--- Phase 2: GalxEdgeRouter In-Flight Provider Failover ---');
@@ -293,9 +376,9 @@ async function runAllTests() {
   // --- 3. GalxEdgeConnectionPool Tests ---
   console.log('\n--- Phase 3: GalxEdgeConnectionPool Pre-Warming ---');
   const connPool = GalxEdgeConnectionPool.getInstance();
-  assert(connPool.isEndpointWarm('openai'), 'OpenAI endpoint pre-warmed on edge initialization');
+  assert(connPool.isEndpointWarm('openai'), 'Connection metadata initializes its warm flag');
   const warmHeaders = connPool.getWarmHeaders('openai');
-  assert(warmHeaders['Connection'] === 'keep-alive', 'Connection pool injects TCP Keep-Alive header');
+  assert(warmHeaders['Connection'] === 'keep-alive', 'Connection metadata supplies a keep-alive header');
 
   // --- 4. GalxEdgeCache Tests ---
   console.log('\n--- Phase 4: GalxEdgeCache Stale-While-Revalidate ---');
@@ -339,7 +422,14 @@ async function runAllTests() {
   // --- 6. GalxEdgeBatchBuffer Tests ---
   console.log('\n--- Phase 6: GalxEdgeBatchBuffer Micro-Batching ---');
   const batchBuffer = GalxEdgeBatchBuffer.getInstance();
-  batchBuffer.enqueueTokenDraw({
+  let persistedDraws = 0;
+  let persistedTelemetry = 0;
+  WalletRepository.getInstance().drawTokensCoalescedBatch = async (items) => {
+    persistedDraws += items.length;
+    return { results: items.map(item => ({ userId: item.userId, success: true, newBalance: 1 })) } as any;
+  };
+  TelemetryRepository.getInstance().recordTelemetryBatch = async (items) => { persistedTelemetry += items.length; return items.length; };
+  const draw = batchBuffer.enqueueTokenDrawAsync({
     userId: 'user_test_edge',
     costUsd: 0.0015,
     description: 'Micro draw test'
@@ -351,6 +441,7 @@ async function runAllTests() {
     latencyMs: 124
   });
   const flushResult = await batchBuffer.flushAll();
+  assert((await draw).success && persistedDraws === 1 && persistedTelemetry === 1, 'Batch entries reach isolated repository fixtures');
   assert(flushResult.draws >= 1, 'Batch buffer successfully flushed token draws');
   assert(flushResult.telemetry >= 1, 'Batch buffer successfully flushed telemetry samples');
 
@@ -391,7 +482,7 @@ async function runAllTests() {
     secret: webhookSecret,
     eventType: 'task.completed'
   });
-  assert(dispatchResult.isSuccess === true, 'Webhook dispatch completed successfully');
+  assert(dispatchResult.isSuccess === true, 'Webhook dispatch simulation completes (no delivery attempted)');
   assert(dispatchResult.signature.startsWith('sha256='), 'Webhook payload includes HMAC-SHA256 signature');
 
   // --- 9. GalxEdgeWire Tests ---
@@ -407,7 +498,8 @@ async function runAllTests() {
   console.log('\n--- Phase 10: GalxEdgeQueueWorker Cron Task Fleet ---');
   const queueWorker = new GalxEdgeQueueWorker(mockEnv);
   const batchProc = await queueWorker.processBatch('default', 10);
-  assert(typeof batchProc.processed === 'number' && typeof batchProc.errors === 'number', 'Queue worker successfully executed batch loop pass');
+  assert(queueCalls === 1 && batchProc.processed === 0 && batchProc.errors === 0, 'Empty queue fixture is leased once and processes no tasks');
+  assert(unexpectedRequests === 0, 'No unmocked network requests occurred');
 
   console.log('\n======================================================================');
   console.log(`   ALL ${testsPassed} CLOUDFLARE EDGE VERIFICATION TESTS PASSED (0 FAILS)!`);

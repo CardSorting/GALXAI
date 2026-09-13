@@ -31,3 +31,9 @@ Run `npm run test:image:security`, `npm run test:image:db`, `npm run test:develo
 5. Check anonymous/forged and cross-owner denial with controlled fixtures, plus public responses, rendered pages and associated browser assets. Keep diagnostics private.
 
 Record any untested paths: multiple images, paid settlement, interrupted in-flight recovery, sustained load and unrelated Sites flows require separate evidence. A single successful generation cannot certify all of them.
+
+## Missing historical artifacts and test isolation
+
+A completed catalog row with a missing object is a storage consistency issue. Establish the exact owner, operation and object identity from private records before repair. A test-like name alone does not authorize deletion. If retained original bytes match both the catalog SHA-256 and size and fully decode, restore only that missing object with a conditional create (`If-None-Match: *`). Stop on an existing object or fingerprint mismatch. Verify uncached storage readback, unchanged catalog/receipts, and sanitized live original/thumbnail delivery with expired and foreign-owner denial. Do not regenerate or substitute a visually similar image.
+
+The historical `npm run test:relay:image` name now runs a disposable PostgreSQL/local-object contract fixture through the isolated runner. It does not load application dotenv files, call the relay, or generate paid images. Cleanup removes only this run's owned fixture rows before its local objects; the runner tears down its owned container and temporary directory. Direct invocation without an explicitly allowed loopback test database fails before application imports. Never use object-only session deletion as cleanup for durable production image records. Keep separately authorized live acceptance outside automated fixtures.

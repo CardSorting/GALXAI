@@ -1,0 +1,143 @@
+{
+  "observed_at": "2026-09-13T09:05:04.590929Z",
+  "scope": "Working-tree follow-up repair over c662084; local checks and one bounded production artifact restore. Hosted CI recorded separately.",
+  "source_changes": [
+    "scripts/test-cloudflare-workers.ts",
+    "scripts/lib/require-isolated-worker-env.ts",
+    "scripts/test-relay-image-generation.ts",
+    "scripts/run-supabase-integration.ts",
+    ".github/workflows/deploy-cloudflare.yml",
+    ".github/workflows/vercel-preflight.yml",
+    "package.json"
+  ],
+  "canonical_guides_reviewed": [
+    "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md",
+    "docs/DEPLOYMENT.md",
+    "docs/VERCEL_DEPLOYMENT.md",
+    "docs/runbooks/release-readiness.md",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+    "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md",
+    "post-mortem/runbooks/image-generation.md",
+    "post-mortem/runbooks/deployment-storage.md"
+  ],
+  "checks": {
+    "worker:test": {
+      "result": "passed",
+      "assertions": 127,
+      "unmocked_http_requests": 0
+    },
+    "wrangler_deploy_dry_run": {
+      "result": "passed",
+      "version": "4.125.0",
+      "upload_kib": 178.27,
+      "gzip_kib": 38.17,
+      "deployed": false
+    },
+    "test:relay:image": {
+      "result": "passed",
+      "checks": 10,
+      "fixture_migrations": 104,
+      "database": "disposable local PostgreSQL 17 / pgvector",
+      "objects": "owned temporary local directory",
+      "cleanup": "owned catalog rows before local objects; runner removed container and directory"
+    },
+    "direct_image_test_without_fixture": {
+      "result": "refused before application imports",
+      "expected_exit_code": 1
+    },
+    "test:image:security": {
+      "result": "passed",
+      "tests": 29
+    },
+    "typescript": {
+      "result": "passed"
+    },
+    "production_build": {
+      "result": "passed"
+    },
+    "compiled_boundary_scan": {
+      "assets": 640,
+      "private_marker_failures": 0,
+      "qualification": "Documentation freshness/attestation completed after scan; full check rerun before commit."
+    },
+    "lint": {
+      "result": "passed"
+    },
+    "live_public_http_scan": {
+      "result": "passed",
+      "origin": "https://galx.ai",
+      "browser_assets": 25,
+      "scope": "unauthorized/forged image requests, protected diagnostics, invalid artifact capabilities, rendered pages and public schema"
+    }
+  },
+  "artifact_restore": {
+    "observed_at": "2026-09-13T09:01:59.296Z",
+    "asset_id": "img_1788645735193_13d777bb",
+    "source_revision": "c6620843ea6662e0a2bfdaa6969f42ff8267d904",
+    "source_fixture": "scripts/test-relay-image-generation.ts",
+    "sha256": "6b7fa434f92a8b80aab02d9bf1a12e49ffcae424e4013a1c4f68b67e3d2bbcd0",
+    "bytes": 70,
+    "precondition": "exact catalog fingerprint and missing object; conditional PUT If-None-Match=*",
+    "restored": true,
+    "readback_hash_matches": true,
+    "catalog_unchanged": true,
+    "records_deleted": 0,
+    "images_generated": 0
+  },
+  "live_artifact_acceptance": {
+    "observed_at": "2026-09-13T09:02:32.562Z",
+    "origin": "https://galx.ai",
+    "read_only": true,
+    "results": [
+      {
+        "kind": "original",
+        "status": 200,
+        "format": "png",
+        "width": 1,
+        "height": 1,
+        "bytes": 91,
+        "metadataRemoved": true
+      },
+      {
+        "kind": "thumbnail",
+        "status": 200,
+        "format": "webp",
+        "width": 1,
+        "height": 1,
+        "bytes": 98,
+        "metadataRemoved": true
+      },
+      {
+        "kind": "thumbnail-warm",
+        "status": 200,
+        "format": "webp",
+        "width": 1,
+        "height": 1,
+        "bytes": 98,
+        "metadataRemoved": true
+      },
+      {
+        "kind": "expired",
+        "status": 404
+      },
+      {
+        "kind": "foreign-owner",
+        "status": 404
+      },
+      {
+        "kind": "missing-asset",
+        "status": 404
+      }
+    ]
+  },
+  "limitations": [
+    "No generation, billing settlement or production load test.",
+    "No application or gateway runtime source changed; no schema or credential changes.",
+    "Worker fixtures are component contracts, not live inference, socket, webhook or queue execution proof.",
+    "Hosted CI still pending at this dated local checkpoint."
+  ],
+  "references": [
+    "https://developers.cloudflare.com/r2/api/s3/api/",
+    "https://developers.cloudflare.com/workers/wrangler/commands/"
+  ]
+}

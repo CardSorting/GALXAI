@@ -55,6 +55,9 @@ jobs:
       - name: Verify durable image requests and Favorites in isolated PostgreSQL
         run: npm run test:image:db
 
+      - name: Verify isolated historical image artifact fixture
+        run: npm run test:relay:image
+
       - name: Verify YAML security patch
         run: npm run test:yaml:security
 

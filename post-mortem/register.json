@@ -256,11 +256,12 @@
       "owner": "release maintainer",
       "review_by": "2026-09-14",
       "status": "open",
-      "next_step": "Reconcile the complete gateway fixture with current private-preview authorization and public DTO allowlists, preserve positive and denied-user coverage, then verify worker tests and dry-run independently.",
+      "next_step": "Local gateway suite passes 127 assertions with explicit approval/image/queue transports; bundle dry-run passes. Push the fixture/workflow correction and verify the hosted gateway test and bundle steps.",
       "closure": "Record passing gateway fixture and bundle checks against the current preview gate and sanitized public responses; never reopen public diagnostics to satisfy an obsolete assertion.",
       "evidence": [
         "docs/knowledge/audits/2026-09-13-gateway-ci-observation.json",
-        "post-mortem/releases/2026-09-13-image-library-scale.json"
+        "post-mortem/releases/2026-09-13-image-library-scale.json",
+        "post-mortem/releases/2026-09-13-followup-repairs-local.json"
       ]
     },
     {
@@ -268,11 +269,12 @@
       "incident": "INC-20260913-IMAGES",
       "owner": "image maintainer",
       "review_by": "2026-09-20",
-      "status": "open",
-      "next_step": "Reconcile the old fixture-named completed image record whose object returned storage 404 during the September 13 release probe. Establish ownership and test provenance before proposing any cleanup; preserve legitimate images and operation receipts.",
-      "closure": "Record a scoped consistency review and authorized resolution without regenerating uncertain operations or deleting user history as a test repair.",
+      "status": "completed",
+      "next_step": "Preserve the exact restored historical fixture and run isolated catalog/object tests in application CI.",
+      "closure": "Exact original 70-byte fixture restored with a conditional create after catalog/hash/size/provenance checks. Uncached readback matches; catalog unchanged; live original/thumbnail succeed and invalid capabilities are denied. Unsafe live test replaced by isolated fixture; no generation or history deletion.",
       "evidence": [
-        "post-mortem/releases/2026-09-13-image-library-scale.json"
+        "post-mortem/releases/2026-09-13-image-library-scale.json",
+        "post-mortem/releases/2026-09-13-followup-repairs-local.json"
       ]
     }
   ]

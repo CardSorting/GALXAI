@@ -1,20 +1,18 @@
 {
   "knowledge": {
-    "reviewer": "release maintainer",
-    "note": "Reviewed release evidence and the affected canonical guides against unchanged application source. Reconciled actual deployment separately from ADR approval. The offline lifecycle correction retains release evidence requirements and passed 37 guard tests; existing operational follow-ups remain open.",
+    "reviewer": "Codex release maintainer",
+    "note": "Reviewed CI workflow bodies, new fixture ownership mapping and canonical CI guidance against the actual tests and conditional deployment; preserved decision lifecycle.",
     "reviewed_at": "2026-09-13",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-13-image-library-scale.json": "f51afa787ae8bb8f87f2c481e9086c20c6df4e2c555903f83a4c46d3275418e8",
-      "post-mortem/releases/2026-09-13-image-library-scale.json": "2e88cede8b57a383ea3bbf62a4906b399b7ff663b239928925bf6160304a94ab",
-      "docs/knowledge/audits/2026-09-13-deployment-lifecycle.json": "155390b1d45fd87c3123ae1704fad186e35e4984d82baa5eaa63ddab744ecfd5"
+      "post-mortem/releases/2026-09-13-followup-repairs-local.json": "4ba99c316aed49a25c6d28891afc7d8e37604a79904a0e8957009bd9e048c443"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
       ".github/PULL_REQUEST_TEMPLATE.md": "3c2167417f717108954f797e3a3561d4ea92b70338a0cdd6f05fa8eb2f03c1cd",
-      ".github/workflows/deploy-cloudflare.yml": "0f950136d57ff1be478da93bee15f10de8ee5fefd68d17332813b97f2fdf853f",
+      ".github/workflows/deploy-cloudflare.yml": "85bf52af1949398b2a6f62fe6e86b289c24639649653783643e24dffaff91edb",
       ".github/workflows/documentation.yml": "957c4159e35ec3d160953fa2d6fd6183ec6b8b198b1049839437b4bb87424f7e",
-      ".github/workflows/vercel-preflight.yml": "7f07dc34445f2f79962b120c7492642251d9855a9c3d49502034abe99e9ad79e",
+      ".github/workflows/vercel-preflight.yml": "2e5a12356d723559a42336502fc6a0e8f86319ee508441a126ae0319d3dcc576",
       "docs/AGENTS.md": "0a1e687ab43a1e6c2266720e175de60cd6f10958cdf3456690c1f743c4784044",
       "docs/DOCUMENTATION_POLICY.md": "ab2030f9d15010634b9a2d9cf2bc680fdf4ae961c2ee3f9f7ad567e99d49d40c",
       "docs/README.md": "73f93e70c84e35954686e786ce4b2fe72f87b4d2522ccd26a6e52b50b0da77dd",
@@ -24,11 +22,11 @@
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/registry.json": "a381c184444b3a5470b54c12c70ccec409397be0c2f5b5e5bf431b672b72216e",
+      "docs/knowledge/registry.json": "ddd71bd0f95cbd680c94eeee871125b1faa32826d6ce16f9ed2a0b0781c54a3a",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
-      "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md": "818fc95eec428e907e9ce031da9640e764c33ae43da9244a94fd6abb84b2e8ee",
+      "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md": "3e322a599168c5810cac5f8155ac2d602eb8fda5f25cc0f66a036fb670d25d4d",
       "docs/maintainers/DAY_1_TO_30_ONBOARDING_ROADMAP.md": "e9295b186cf9d5f9bc0c6a943f54af40ff52122aa5f8d880d5263c00d2dd7fd4",
       "docs/maintainers/MAINTAINER_ONBOARDING_ASSESSMENT.md": "619331130e6bd5559c36059c617449712178a0fb16b8ef6487a00402bd8bd525",
       "docs/maintainers/SUBSYSTEM_MAINTAINER_MATRIX.md": "9d0dad1aa9c7ce7790428d7ae587c8e4acb456538380062d0a65de8859791b57",
@@ -40,7 +38,7 @@
       "docs/runbooks/weekly-knowledge-audit.md": "ade4fc2133306e1b544d8783f647bc4c5b8a85e3a89ce769d36f586a91c36169",
       "docs/tutorials/README.md": "7cc84f00412108e1c8ec84ef127b15027b606bd16c2dc290f6efc607b9ca5268",
       "docs/tutorials/first-change.md": "06b7c9501cfe62893978e1da6556d6d4fc0d88f4e36b484d05dad4ad72d9fd60",
-      "package.json": "70e82077c8f5133eacc5c91f0aaaea0f6b01f61677917b960fe590ae0ad6348a",
+      "package.json": "93e36feb800a3066b2f28391a16cb67ceb062c2387424fff0eedc071d1249d22",
       "scripts/docs-kb.py": "57642bcce6edcdec6b14dc285e973c1c7ba43d9b8908903826befcba6e992d88",
       "scripts/test-docs-kb.py": "83aa914e66cc04d866fd4c77554760748f8e1d07378326c49ac1738f12851856",
       "scripts/test-post-mortem.py": "fba33221df8a4d167f0e0662cfe1543f76628adcc52b70e0d6f2528f72b8ef4a",
@@ -49,20 +47,18 @@
     }
   },
   "images": {
-    "reviewer": "release maintainer",
-    "note": "Reviewed release evidence and the affected canonical guides against unchanged application source. Reconciled actual deployment separately from ADR approval. The offline lifecycle correction retains release evidence requirements and passed 37 guard tests; existing operational follow-ups remain open.",
+    "reviewer": "Codex image maintainer",
+    "note": "Reviewed historical fixture replacement, object/catalog write and cleanup ordering, exact restoration provenance and full image recovery guide; live sanitation and owner denial verified.",
     "reviewed_at": "2026-09-13",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-13-image-library-scale.json": "f51afa787ae8bb8f87f2c481e9086c20c6df4e2c555903f83a4c46d3275418e8",
-      "post-mortem/releases/2026-09-13-image-library-scale.json": "2e88cede8b57a383ea3bbf62a4906b399b7ff663b239928925bf6160304a94ab",
-      "docs/knowledge/audits/2026-09-13-deployment-lifecycle.json": "155390b1d45fd87c3123ae1704fad186e35e4984d82baa5eaa63ddab744ecfd5"
+      "post-mortem/releases/2026-09-13-followup-repairs-local.json": "4ba99c316aed49a25c6d28891afc7d8e37604a79904a0e8957009bd9e048c443"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "fa7b78efd6cce520136479e32e821faeb8a1fb7366d0d0a01a6be26ecd6f81a4",
       "docs/maintainers/image-library-scale.md": "8dd2967fb9480e975bcfa50c86ddbe73dc228c82ca235182faf0ac278002a29b",
       "docs/maintainers/image-public-boundary.md": "79cb97916d4d9257931a30667e2a346e4fb8316e2659c5ccd3f086d60b84fbad",
-      "post-mortem/runbooks/image-generation.md": "bb7bd5459d463c6e70cc9b9aef8ad4fb33f4e2b0d2463fa3060eefbb1ff40c23",
+      "post-mortem/runbooks/image-generation.md": "9650b8b106795a564d5931807d1840104ce736b17a741802213603f46a0080b0",
       "scripts/test-image-library-api.ts": "e29b96a2542534a2aad54fc5ecb6481829a238fdf78b55f900dc17824e9e479c",
       "scripts/test-image-library-http.ts": "f889bc632c6ccd33aa5f1f40f321ce75bd2167e7758fdde602db230f5d524f84",
       "scripts/test-image-library-scale-db.ts": "131e2decca645d22522ffbd90170a3e47f81b6db068d93f6429d3c5d30ee02b7",
@@ -70,6 +66,7 @@
       "scripts/test-image-public-http.ts": "f343e35cb44e78f9685749c94b28b584b416ba79b8de137ee155f60e1894343c",
       "scripts/test-image-requests-db.ts": "04c727c232bd555757381eb6ebfd6a4ff3e6ff381e63890e7f16ce309a6bd516",
       "scripts/test-image-studio.ts": "2a30138c6f7acc9cdc0065a6730720d97db12b258a68e202d61461b3213cf4cb",
+      "scripts/test-relay-image-generation.ts": "d66f497b893ed0026806fbc928dbafff65be90b2e505e86c7da32b4df9d67140",
       "scripts/verify-image-library-scale-ui.ts": "c3ae469b3316dd5e21065e53ea63d3fb57e39275be975ff7459f423fc54aa341",
       "scripts/verify-image-public-http.ts": "c400b2a8fa2c79a5459ddb8eb24ae06d98048e086fc61f025618c3202b20be1d",
       "src/app/api/images/library/[assetId]/route.ts": "841b0e38f6bdbc67ecde213e8cc25179d208f23648439b46d592bbbb772345df",
@@ -253,18 +250,18 @@
     }
   },
   "database": {
-    "reviewer": "Codex maintainer review",
-    "note": "Reviewed additive page RPC and indexes, paired rollback, generated type contract and existing pool/owner predicates against complete database authority and operations guidance. Disposable 50,000-image and rollback tests passed; no production apply.",
+    "reviewer": "Codex database maintainer",
+    "note": "Reviewed isolated runner mode and image fixture guard, local database authority and cleanup; reconciled full database runbook and authority reference. No production schema mutation.",
     "reviewed_at": "2026-09-13",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-13-image-library-scale.json": "f51afa787ae8bb8f87f2c481e9086c20c6df4e2c555903f83a4c46d3275418e8"
+      "post-mortem/releases/2026-09-13-followup-repairs-local.json": "4ba99c316aed49a25c6d28891afc7d8e37604a79904a0e8957009bd9e048c443"
     },
     "files": {
       "docs/SUPABASE_PARANOID_ARCHITECTURE_SPEC.md": "ffc02d3307b97fe8e270bfc3fbf50f5b446a4690cd83e9238fb692863b39646e",
-      "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "c4853cb699faf0903db09c9e88505795354dc75b40a54af1b9db40730254fab1",
+      "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "d8e5e423980a7125dee184f8149ed46865129f582f743fb7dfcf6c7c54ccac7e",
       "scripts/manage-migrations.ts": "16b43fd34f4e1cf642da920dadd614997ff960b8297ef98202b1f5398fadf3fc",
-      "scripts/run-supabase-integration.ts": "4ac4663b0e5af3245973fea0ae65777c97a9bbc1ca13d774ca422dde6cb0597b",
+      "scripts/run-supabase-integration.ts": "c2ffe371623f2f56898296618676a680c4e214a404eae9f68e22f85d920e4bf6",
       "scripts/verify-supabase-integrity.ts": "15983812988c1aa89d1f6365540046874a3cce86377f241e7e1eab7cdc9c45e8",
       "src/lib/db/postgres.ts": "b9a7dee4e29afadc8e291e20dd8d2c02f0bdd0904110f83c213873dc5783e59f",
       "src/lib/supabase/GalxSupabaseClient.ts": "c5930d2b74a954d24b444f4cc0658fe4d70a3282d4caf5e1b7d0583d9c7a16eb",
@@ -513,24 +510,26 @@
     }
   },
   "delivery": {
-    "reviewer": "Codex maintainer review",
-    "note": "Reviewed image storage streaming limits, thumbnail route integration, migration-before-application ordering and rollback against deployment/configuration/release/storage guides. No deployment or infrastructure mutation.",
+    "reviewer": "Codex release maintainer",
+    "note": "Reviewed gateway transport isolation, workflow trigger coverage, application fixture step and full release/deployment guides; local build and live artifact evidence retained separately from pending hosted CI.",
     "reviewed_at": "2026-09-13",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-13-image-library-scale.json": "f51afa787ae8bb8f87f2c481e9086c20c6df4e2c555903f83a4c46d3275418e8"
+      "post-mortem/releases/2026-09-13-followup-repairs-local.json": "4ba99c316aed49a25c6d28891afc7d8e37604a79904a0e8957009bd9e048c443"
     },
     "files": {
       ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
-      ".github/workflows/deploy-cloudflare.yml": "0f950136d57ff1be478da93bee15f10de8ee5fefd68d17332813b97f2fdf853f",
+      ".github/workflows/deploy-cloudflare.yml": "85bf52af1949398b2a6f62fe6e86b289c24639649653783643e24dffaff91edb",
       ".github/workflows/documentation.yml": "957c4159e35ec3d160953fa2d6fd6183ec6b8b198b1049839437b4bb87424f7e",
-      ".github/workflows/vercel-preflight.yml": "7f07dc34445f2f79962b120c7492642251d9855a9c3d49502034abe99e9ad79e",
+      ".github/workflows/vercel-preflight.yml": "2e5a12356d723559a42336502fc6a0e8f86319ee508441a126ae0319d3dcc576",
       ".vercelignore": "214191596019d67bf5054427ba4d059446ccc34f02578494be7e1819abdc351d",
       "Dockerfile": "29d2a98ee3575fad57064b78b5e3a383a0ab6f2bef203d9e8f10901f8440a603",
-      "docs/DEPLOYMENT.md": "28c5be7ada567d6f10142427d58a05cced562bfeabb2c73b36c0a5447c880ef0",
+      "docs/DEPLOYMENT.md": "c87dfa19a397fb66e34c969ce50410595e24609abc93038cd9ccb0c200472af6",
       "docs/VERCEL_DEPLOYMENT.md": "f44b21bf51236e7e5d612f7f0be55233d3a7bc1e4b942479b7cc32d339d1f5d1",
       "docs/runbooks/release-readiness.md": "47a3842f9f185da0aacd551bfc753d8f11a992e6682bf792cd239e07a2a53635",
       "post-mortem/runbooks/deployment-storage.md": "056e84c5fa65ddbaeae5cbe9a09bf64a0f04cf6548fc30abe519de60028fdd3f",
+      "scripts/lib/require-isolated-worker-env.ts": "0d53a207db93e611839175b68520824b8f97753607cf05d8f0bf25929c362127",
+      "scripts/test-cloudflare-workers.ts": "f3828c542d4c8010f65da62c2293da4348f6535bd4eb327d166907bb8c913e84",
       "src/workers/cloudflare/GalxEdgeBatchBuffer.ts": "f7cb56bf5ad809150e4e7c84749a17c4aee59790d60375201bcff3d2b3016cfd",
       "src/workers/cloudflare/GalxEdgeCache.ts": "1f2e0128247a60dd8462c043abe52ba0986b36f1ab423d69ea211f3f977e1baa",
       "src/workers/cloudflare/GalxEdgeConnectionPool.ts": "24f5748052b40364d55272e42c0edce726a5d305b6a7fa2a73909ac1f89a02b1",

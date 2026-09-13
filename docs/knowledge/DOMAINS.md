@@ -44,7 +44,7 @@ Owner role: **Product/API maintainer**. Domain: `images`.
 - [Image generation and library recovery](../../post-mortem/runbooks/image-generation.md)
 - [Large image libraries](../../docs/maintainers/image-library-scale.md)
 
-Relevant checks (select for the change; impact discovery never executes these): `npm run test:image:security`, `npm run test:image:db`, `npm run test:image:scale`, `npm run test:image:library-db`.
+Relevant checks (select for the change; impact discovery never executes these): `npm run test:image:security`, `npm run test:image:db`, `npm run test:image:scale`, `npm run test:image:library-db`, `npm run test:relay:image`.
 
 ## Identity and private developer preview
 
