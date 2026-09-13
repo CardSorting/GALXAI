@@ -3,6 +3,7 @@
 
 from pathlib import Path
 import re
+import subprocess
 import sys
 from urllib.parse import unquote, urlsplit
 
@@ -41,8 +42,21 @@ def anchors(text):
     return result
 
 
+def ignored_targets(root, names):
+    """Reject local-only evidence while allowing new, non-ignored authoring files."""
+    if not names:
+        return set()
+    result = subprocess.run(['git', 'check-ignore', '--stdin', '-z'], cwd=root,
+                            input='\0'.join(sorted(names)) + '\0',
+                            capture_output=True, text=True)
+    if result.returncode not in (0, 1):
+        raise RuntimeError('Cannot validate repository portability with git check-ignore')
+    return set(result.stdout.rstrip('\0').split('\0')) if result.stdout else set()
+
+
 def main():
     errors = []
+    local_targets = {}
     files = sorted(DOCS.rglob("*.md"))
     incident_files = sorted(path for path in (ROOT / "post-mortem").rglob("*.md")
                             if "/evidence/raw/" not in path.as_posix())
@@ -88,6 +102,8 @@ def main():
             if parsed.scheme or parsed.netloc or link.startswith("/"):
                 continue
             target = (path.parent / unquote(parsed.path)).resolve() if parsed.path else path
+            if target.is_relative_to(ROOT):
+                local_targets.setdefault(str(target.relative_to(ROOT)), set()).add(str(path.relative_to(ROOT)))
             if not target.exists():
                 errors.append(f"{path.relative_to(ROOT)}: missing target {link}")
             # Check anchors in current guides; retained historical heading conventions vary.
@@ -95,6 +111,10 @@ def main():
                 target_text = target.read_text()
                 if "<!-- docs-scope: current-guide -->" in target_text and unquote(parsed.fragment) not in anchors(target_text):
                     errors.append(f"{path.relative_to(ROOT)}: missing current-guide anchor {link}")
+
+    for target in sorted(ignored_targets(ROOT, local_targets)):
+        for origin in sorted(local_targets[target]):
+            errors.append(f'{origin}: Git-ignored target unavailable in clean checkout: {target}')
 
     if errors:
         print("\n".join(errors))

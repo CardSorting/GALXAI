@@ -12,6 +12,9 @@ import unittest
 spec = importlib.util.spec_from_file_location('knowledge', Path(__file__).with_name('docs-kb.py'))
 kb = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(kb)
+docs_spec = importlib.util.spec_from_file_location('docs_navigation', Path(__file__).with_name('verify-docs.py'))
+docs = importlib.util.module_from_spec(docs_spec)
+docs_spec.loader.exec_module(docs)
 
 
 class KnowledgeGuardTests(unittest.TestCase):
@@ -166,6 +169,16 @@ class KnowledgeGuardTests(unittest.TestCase):
         self.assertEqual(kb.changed_files(self.root), ['src/space name.ts', 'src/untracked.ts'])
         with self.assertRaises(subprocess.CalledProcessError):
             kb.changed_files(self.root, '--help')
+
+    def test_navigation_rejects_ignored_evidence_but_allows_tracked_and_new_files(self):
+        subprocess.run(['git', 'init', '-q'], cwd=self.root, check=True)
+        self.write('.gitignore', '.local-evidence/\n')
+        self.write('.local-evidence/result with spaces.json', '{}')
+        self.write('evidence/new.json', '{}')
+        names = {'.local-evidence/result with spaces.json', 'evidence/new.json'}
+        self.assertEqual(docs.ignored_targets(self.root, names), {'.local-evidence/result with spaces.json'})
+        subprocess.run(['git', 'add', '-f', '.local-evidence/result with spaces.json'], cwd=self.root, check=True)
+        self.assertEqual(docs.ignored_targets(self.root, names), set())
 
 
 if __name__ == '__main__':

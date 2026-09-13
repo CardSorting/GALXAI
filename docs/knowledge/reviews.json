@@ -1,11 +1,12 @@
 {
   "knowledge": {
     "reviewer": "Codex maintainer review",
-    "note": "Review automation, private boundaries and full authoring/CI procedures. Require complete reviews with hashed evidence on every event; add owner/deadline summaries and activation runbook. Limits: No automatic attestation, production action or branch protection claim.",
+    "note": "Reviewed clean-checkout failure, preserved historical evidence and updated ignored-target guard, regression fixture and full CI/runbook instructions.",
     "reviewed_at": "2026-09-13",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-13-domain-reviews.json": "a443998d6c6de0ea06fb379fd907ad1c564566013c7bfdd285002dfe1a39700a"
+      "docs/knowledge/audits/2026-09-13-domain-reviews.json": "a443998d6c6de0ea06fb379fd907ad1c564566013c7bfdd285002dfe1a39700a",
+      "docs/knowledge/audits/2026-09-13-ci-portability.json": "bf85fdcb35f6a336dd764f4e8e4135c9332729d56d69909670076324b1dee7b1"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -26,7 +27,7 @@
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "d2cd40a5684ce13365e5be75f5324963d2f4e0770d4a003d55d4b29b0e85a0e4",
-      "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md": "9af56bafce4fba7332a8cf610ed5c4b66a7f4d5363637f1abf0166c4018a9257",
+      "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md": "a00031f7da97a35afadb2a2ba78c719705e9aab53f5837b25daa817f0fced67e",
       "docs/maintainers/DAY_1_TO_30_ONBOARDING_ROADMAP.md": "e9295b186cf9d5f9bc0c6a943f54af40ff52122aa5f8d880d5263c00d2dd7fd4",
       "docs/maintainers/MAINTAINER_ONBOARDING_ASSESSMENT.md": "619331130e6bd5559c36059c617449712178a0fb16b8ef6487a00402bd8bd525",
       "docs/maintainers/SUBSYSTEM_MAINTAINER_MATRIX.md": "9d0dad1aa9c7ce7790428d7ae587c8e4acb456538380062d0a65de8859791b57",
@@ -35,14 +36,14 @@
       "docs/runbooks/README.md": "b6fdecd2f34f10965655ad2bd5c020e7f1651eb8470c4e2954b2edc0bdca47a5",
       "docs/runbooks/knowledge-maintenance.md": "8ec7e6e7940202e38b8aa16cba88e1e5d9040cbb1769bd0ec456b04c77e26b08",
       "docs/runbooks/release-readiness.md": "47a3842f9f185da0aacd551bfc753d8f11a992e6682bf792cd239e07a2a53635",
-      "docs/runbooks/weekly-knowledge-audit.md": "b30e8718af3819c4c85b55e4d58ebec418e9a84405da6f23e6666ac9af18ecfe",
+      "docs/runbooks/weekly-knowledge-audit.md": "ade4fc2133306e1b544d8783f647bc4c5b8a85e3a89ce769d36f586a91c36169",
       "docs/tutorials/README.md": "7cc84f00412108e1c8ec84ef127b15027b606bd16c2dc290f6efc607b9ca5268",
       "docs/tutorials/first-change.md": "06b7c9501cfe62893978e1da6556d6d4fc0d88f4e36b484d05dad4ad72d9fd60",
       "package.json": "fca32d051d0d1adcec38b9a377d11c0dcf558c43a0cde607876f2988f74802e4",
       "scripts/docs-kb.py": "7f424c1120a2de2cb36f7d6313785fbe35244d91351891e023e4121ba39b0ce2",
-      "scripts/test-docs-kb.py": "7da738793f87508e7f3ddbd383154d18ff71fd7ce696678b2e7b5e8a2d401ec7",
+      "scripts/test-docs-kb.py": "74f954909e6fe4086596794d6cfa5655bed722c35c960db51a87abd447dbad71",
       "scripts/test-post-mortem.py": "fba33221df8a4d167f0e0662cfe1543f76628adcc52b70e0d6f2528f72b8ef4a",
-      "scripts/verify-docs.py": "a3e8c3a2759970ffc996ca690eb75fccf57b28c411cb5bf043386adb252abca1",
+      "scripts/verify-docs.py": "083c3dc63302861d5d754c67e8db11d837097f0660681951c65c7649e9540ae0",
       "scripts/verify-post-mortem.py": "ef6c8fb7c1d986b7690efe5a69307143ba23c1c8d85e4b503377c7239a298d6f"
     }
   },

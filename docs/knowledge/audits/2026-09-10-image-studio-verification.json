@@ -1,0 +1,42 @@
+[
+  {
+    "label": "guest-1440",
+    "overflow": false,
+    "accessibility": []
+  },
+  {
+    "label": "guest-390",
+    "overflow": false,
+    "accessibility": []
+  },
+  {
+    "label": "pending-1440",
+    "overflow": false,
+    "accessibility": []
+  },
+  {
+    "label": "inspector-1440",
+    "overflow": false,
+    "accessibility": []
+  },
+  {
+    "label": "library-1440",
+    "overflow": false,
+    "accessibility": []
+  },
+  {
+    "label": "library-390",
+    "overflow": false,
+    "accessibility": []
+  },
+  {
+    "label": "inspector-390",
+    "overflow": false,
+    "accessibility": []
+  },
+  {
+    "label": "library-error-390",
+    "overflow": false,
+    "accessibility": []
+  }
+]

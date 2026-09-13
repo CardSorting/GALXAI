@@ -1,8 +1,8 @@
 {
   "version": 1,
   "reviewer": "Codex maintainer review",
-  "reviewed_at": "2026-09-13T04:41:15.405851Z",
-  "note": "Reviewed critical image/auth/receipt/private-access recovery contracts and complete affected incident guides; new domain review evidence documents tests, corrected guidance and pending hosted execution. No new production acceptance is implied.",
+  "reviewed_at": "2026-09-13T04:44:04.009219Z",
+  "note": "Re-reviewed navigation portability guard and affected CI guidance after first hosted failure; retained dated image studio evidence and added ignored-target regression coverage. Other critical contracts unchanged.",
   "files": {
     ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
     ".github/workflows/vercel-preflight.yml": "7f07dc34445f2f79962b120c7492642251d9855a9c3d49502034abe99e9ad79e",
@@ -58,7 +58,7 @@
     "scripts/test-image-public-http.ts": "c196e6361b7a470fff0211e1f1482d16536b34b2504556e7421fe88088d34c96",
     "scripts/test-image-requests-db.ts": "04c727c232bd555757381eb6ebfd6a4ff3e6ff381e63890e7f16ce309a6bd516",
     "scripts/test-post-mortem.py": "fba33221df8a4d167f0e0662cfe1543f76628adcc52b70e0d6f2528f72b8ef4a",
-    "scripts/verify-docs.py": "a3e8c3a2759970ffc996ca690eb75fccf57b28c411cb5bf043386adb252abca1",
+    "scripts/verify-docs.py": "083c3dc63302861d5d754c67e8db11d837097f0660681951c65c7649e9540ae0",
     "scripts/verify-post-mortem.py": "ef6c8fb7c1d986b7690efe5a69307143ba23c1c8d85e4b503377c7239a298d6f",
     "src/app/api/images/library/[assetId]/route.ts": "841b0e38f6bdbc67ecde213e8cc25179d208f23648439b46d592bbbb772345df",
     "src/app/api/images/library/batch/route.ts": "33a5248bf381fc7af7301e1a2e058f01f437f6e8d0aa8d24563703b9e1de35e3",

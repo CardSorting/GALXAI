@@ -1,0 +1,28 @@
+{
+  "observed_at": "2026-09-13T04:44:03.121544Z",
+  "status": "corrected-local",
+  "failed_run": "https://github.com/CardSorting/GALXAI/actions/runs/34738523204",
+  "failed_revision": "93bdc3d7e2f0c6fa97426fcaae02c5a1e2d77eac",
+  "cause": "Two image studio evidence links pointed at Git-ignored local JSON. Existing local files hid their absence from a clean hosted checkout.",
+  "correction": "Preserve the reviewed September 10 summaries under private tracked docs and update their dated links. Batch-check local navigation targets with git check-ignore; keep ignored raw evidence excluded.",
+  "reviewed_sources": [
+    "scripts/verify-docs.py",
+    "scripts/test-docs-kb.py",
+    "docs/maintainers/image-studio-review.md",
+    "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md",
+    "docs/runbooks/weekly-knowledge-audit.md"
+  ],
+  "checks": [
+    {
+      "command": "npm run test:docs",
+      "result": "passed",
+      "incident_tests": 20,
+      "knowledge_tests": 16,
+      "new_regression": "Ignored evidence with spaces is rejected; tracked files and new non-ignored authoring files remain allowed."
+    }
+  ],
+  "limits": [
+    "No new browser verification: relocated JSON retains September 10 scope.",
+    "Hosted rerun and clean committed checkout verification are recorded separately after this correction."
+  ]
+}

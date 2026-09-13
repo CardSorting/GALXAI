@@ -215,3 +215,17 @@ Incident: `INC-20260913-DOCS`. Kind: `follow-up`.
 **Next step:** Record explicit source fingerprints, validate final documentation and build boundaries, push the authorized changes and observe hosted CI. Existing operational follow-ups remain open.
 
 Evidence: [2026-09-13-domain-reviews.json](../docs/knowledge/audits/2026-09-13-domain-reviews.json), [2026-09-13-domain-reviews.md](../docs/knowledge/audits/2026-09-13-domain-reviews.md).
+
+## EVT-20260913-CI-PORTABILITY — 2026-09-13T04:44:03.121544Z
+
+Incident: `INC-20260913-DOCS`. Kind: `follow-up`.
+
+**Observation:** The first hosted documentation validation failed on two Git-ignored image studio evidence links missing from a clean checkout.
+
+**Action:** Retained the existing sanitized dated summaries in private tracked docs, corrected links and added a Git-ignored target regression guard.
+
+**Result:** Twenty incident and sixteen knowledge guard tests passed locally. Initial hosted run remains recorded as failed.
+
+**Next step:** Verify a clean committed checkout, push the correction and rerun hosted CI.
+
+Evidence: [2026-09-13-ci-portability.json](../docs/knowledge/audits/2026-09-13-ci-portability.json).

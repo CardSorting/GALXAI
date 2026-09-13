@@ -14,7 +14,7 @@ It does not run every repository test, a paid inference benchmark, or automatica
 
 ## Documentation workflow
 
-[documentation.yml](../../.github/workflows/documentation.yml) runs the offline docs guards on pushes, PRs, manual dispatch and Mondays at 09:17 UTC. Every event requires a review for each registered domain, retained evidence with matching hashes, matching source/guide fingerprints and a current review date. It exercises 35 incident/knowledge guard fixtures. A readable owner/deadline table and status artifact are produced even on failure; artifact retention is 14 days. The workflow needs no application dependencies, service credentials or model access.
+[documentation.yml](../../.github/workflows/documentation.yml) runs the offline docs guards on pushes, PRs, manual dispatch and Mondays at 09:17 UTC. Every event requires a review for each registered domain, retained evidence with matching hashes, matching source/guide fingerprints and a current review date. It exercises 36 incident/knowledge guard fixtures, including rejection of Git-ignored navigation/evidence targets that cannot survive a clean checkout. A readable owner/deadline table and status artifact are produced even on failure; artifact retention is 14 days. The workflow needs no application dependencies, service credentials or model access.
 
 PR and push runs fetch history and compare the incident journal against the event baseline, so committing a rewritten journal does not bypass the append-only check. Scheduled/manual runs compare the current committed prefix; they do not reconstruct changes outside that baseline.
 

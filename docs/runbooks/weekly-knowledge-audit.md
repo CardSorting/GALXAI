@@ -12,7 +12,7 @@ Use the private `CardSorting/GALXAI` repository and its current default branch. 
 
 ## Procedure
 
-1. Run `npm run docs:audit` and `npm run test:docs`. Resolve source/guide conflicts and review gaps before pushing. Preserve earlier evidence; never mass-refresh attestations to obtain a green run.
+1. Run `npm run docs:audit` and `npm run test:docs`. Resolve source/guide conflicts, review gaps and ignored evidence links before pushing. Retain sanitized evidence in the private tracked corpus; do not force-add raw captures. For activation or portability changes, validate a clean local checkout as well. Preserve earlier evidence; never mass-refresh attestations to obtain a green run.
 2. Inspect `gh repo view --json nameWithOwner,isPrivate,defaultBranchRef` and `gh workflow list --all`. Confirm `.github/workflows/documentation.yml` is on the default branch and the **Documentation knowledge audit** workflow is active. If authorized and disabled, use `gh workflow enable documentation.yml` after reviewing the workflow.
 3. After an authorized push, dispatch `gh workflow run documentation.yml --ref main` when `main` is still the confirmed default branch. Inspect `gh run list --workflow documentation.yml --limit 10` and `gh run view RUN_ID --json event,headSha,status,conclusion,url,jobs`. Match event and revision; do not use an older green run as proof for a changed revision.
 4. Require a successful final conclusion. Inspect the job summary and `knowledge-review-status` artifact: all registered domains must be reviewed and current. The validation step also verifies retained evidence and the journal baseline. Record run URL, event, revision, observed time and scope in dated private evidence.

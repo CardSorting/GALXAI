@@ -1,0 +1,14 @@
+{
+  "renderedPageFindings": [],
+  "chunksScanned": 21,
+  "findings": [
+    {
+      "chunk": "/_next/static/chunks/9515-d5cafae925d12a02.js",
+      "matches": [
+        "openai_api_key"
+      ]
+    }
+  ],
+  "review": "Single shared-chunk hit is an existing cookbook parameter with the literal galx_live_your_gateway_key placeholder. No credential value. This keyword scan is scoped to the local production route, not a whole-site or live-site guarantee.",
+  "publicArtwork": "Three decoded WebP artifacts have no EXIF, XMP, or ICC metadata."
+}
