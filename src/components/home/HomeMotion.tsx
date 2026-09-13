@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowUpRight, Pause, Play, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useGalaxyInteractions } from './use-galaxy-interactions';
+import { useStoryEntrance } from './use-story-entrance';
 import styles from './public-home.module.css';
 
 const chapters = [
@@ -16,13 +17,13 @@ const preferenceKey = 'galx-home-motion-paused';
 /** The story stays server-rendered; this island only coordinates its motion. */
 export function HomeMotion({ hero, children }: { hero: ReactNode; children: ReactNode }) {
   const root = useRef<HTMLElement>(null);
-  const revealed = useRef(new WeakSet<Element>());
   const [ready, setReady] = useState(false);
   const [reduced, setReduced] = useState(false);
   const [paused, setPaused] = useState(false);
   const [active, setActive] = useState('');
   const enabled = ready && !reduced && !paused;
   const sendStar = useGalaxyInteractions(root, enabled);
+  useStoryEntrance(root, enabled);
 
   useEffect(() => {
     const preference = matchMedia('(prefers-reduced-motion: reduce)');
@@ -94,37 +95,6 @@ export function HomeMotion({ hero, children }: { hero: ReactNode; children: Reac
       window.removeEventListener('scroll', schedule);
       window.removeEventListener('resize', schedule);
       document.removeEventListener('visibilitychange', visibility);
-    };
-  }, [enabled]);
-
-  useEffect(() => {
-    const page = root.current;
-    if (!page || !enabled || typeof IntersectionObserver === 'undefined') return;
-    const animations = new Set<Animation>();
-    const observer = new IntersectionObserver(entries => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting || revealed.current.has(entry.target)) continue;
-        revealed.current.add(entry.target);
-        observer.unobserve(entry.target);
-        // A hash jump or keyboard focus must never make the destination wait to appear.
-        if (entry.target.contains(document.activeElement) || window.location.hash === `#${entry.target.closest('section')?.id}`) continue;
-        if (typeof entry.target.animate !== 'function') continue;
-        const kind = (entry.target as HTMLElement).dataset.homeReveal;
-        const animation = entry.target.animate([
-          { opacity: 0.55, transform: kind === 'intro' ? 'translateX(-12px)' : 'translateY(16px)' },
-          { opacity: 1, transform: 'none' },
-        ], { duration: kind === 'plan' ? 500 : 420, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' });
-        animations.add(animation);
-        animation.onfinish = () => animations.delete(animation);
-      }
-    }, { threshold: 0.12 });
-    page.querySelectorAll('[data-home-reveal]').forEach(element => observer.observe(element));
-    const finish = () => { if (document.hidden) animations.forEach(animation => animation.finish()); };
-    document.addEventListener('visibilitychange', finish);
-    return () => {
-      observer.disconnect();
-      animations.forEach(animation => animation.cancel());
-      document.removeEventListener('visibilitychange', finish);
     };
   }, [enabled]);
 

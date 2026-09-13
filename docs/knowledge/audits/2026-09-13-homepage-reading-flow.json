@@ -1,0 +1,237 @@
+{
+  "observed_at": "2026-09-13T18:28:52.595952Z",
+  "base_revision": "452d9b699f13375cc36049f3c0ebfa4285c4ec52",
+  "scope": "Local uncommitted homepage reading-flow refinement, preserving the prior local cinematic scene; no deployment performed.",
+  "reviewer": "Codex",
+  "semantic_review": {
+    "domain": "client-efficiency",
+    "guides": [
+      "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
+      "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md"
+    ],
+    "scope": "Reviewed the complete current navigation/efficiency guides and scoped homepage design; reconciled arrival timing, interaction priority, visibility lifecycle, observer cleanup, fallback, verification and rollback. Product copy, pricing, account transitions and request budgets remain unchanged.",
+    "unmapped": "Private surface brief and dated evidence are intentional unmapped records; the hook is covered by the home source-family mapping."
+  },
+  "implementation": {
+    "story": "Fifteen groups across benefits, the complete plan, FAQs and closing invitation use six arrival roles with one upward direction.",
+    "timing": "520\u2013760ms, 8\u201318px (25% less on mobile), opacity 0.76\u20130.86, cubic-bezier(0.22,1,0.36,1), 45/65ms overlapping sibling spacing capped at 160ms.",
+    "lifecycle": "One observer; starts within 48px below the viewport; initial/restored visible content stays settled. Once per element; anchor, focus, pointer/click, hidden/offscreen, pause and cleanup settle active arrivals. No additional rendering loop.",
+    "continuity": "Reading paths and benefit track interpolate scroll changes for 240ms; ending rings for 300ms. Pause/reduced motion removes those transitions."
+  },
+  "validation": {
+    "production_build": {
+      "command": "npm run build",
+      "result": "passed",
+      "homepage_route_kb": 9.17,
+      "homepage_first_load_kb": 192
+    },
+    "lint_types": {
+      "commands": [
+        "npx eslint src/components/home/HomeMotion.tsx src/components/home/PublicHome.tsx src/components/home/use-story-entrance.ts",
+        "npx tsc --noEmit",
+        "node --check scripts/verify-homepage-ui.mjs",
+        "git diff --check"
+      ],
+      "result": "passed"
+    },
+    "image_security": {
+      "command": "npm run test:image:security",
+      "passed": 29
+    },
+    "transport": {
+      "command": "npm run test:egress:transport",
+      "passed": 40
+    },
+    "documentation_guards": {
+      "command": "npm run test:docs",
+      "passed": 37
+    },
+    "compiled_boundary": {
+      "command": "npm run docs:check:build",
+      "assets_scanned": 640,
+      "result": "passed"
+    },
+    "browser": {
+      "checkedAt": "2026-09-13T18:27:54.753Z",
+      "checks": [
+        {
+          "width": 1440,
+          "overflow": false,
+          "axeViolations": 0,
+          "pageErrors": 0,
+          "versions": "passed",
+          "keyboard": "passed",
+          "copy": "passed",
+          "pricing": "passed",
+          "skipLink": "passed",
+          "exampleHeights": [
+            676.59375,
+            676.59375,
+            676.59375,
+            676.59375,
+            676.59375,
+            676.59375
+          ]
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "axeViolations": 0,
+          "pageErrors": 0,
+          "versions": "passed",
+          "keyboard": "passed",
+          "copy": "passed",
+          "pricing": "passed",
+          "skipLink": "passed",
+          "exampleHeights": [
+            755.8125,
+            755.8125,
+            755.8125,
+            755.8125,
+            755.8125,
+            755.8125
+          ]
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "axeViolations": 0,
+          "pageErrors": 0,
+          "versions": "passed",
+          "keyboard": "passed",
+          "copy": "passed",
+          "pricing": "passed",
+          "skipLink": "passed",
+          "exampleHeights": [
+            754.3125,
+            754.3125,
+            754.3125,
+            754.3125,
+            754.3125,
+            754.3125
+          ]
+        },
+        {
+          "width": 320,
+          "overflow": false,
+          "axeViolations": 0,
+          "pageErrors": 0,
+          "versions": "passed",
+          "keyboard": "passed",
+          "copy": "passed",
+          "pricing": "passed",
+          "skipLink": "passed",
+          "exampleHeights": [
+            837.390625,
+            837.390625,
+            837.390625,
+            837.390625,
+            837.390625,
+            837.390625
+          ]
+        },
+        {
+          "width": 1440,
+          "motion": "passed",
+          "pointerDepth": "bounded, reset, controls stationary, touch ignored",
+          "shootingStar": "keyboard/touch, replaceable, stopped when paused/offscreen",
+          "stickyMotionControl": "reading position preserved",
+          "pausePersistence": "passed",
+          "liveReducedMotion": "passed",
+          "hiddenAndOffscreen": "passed",
+          "chapterAnchors": "passed",
+          "rapidSwitching": "passed",
+          "metrics": {
+            "cls": 0,
+            "lcp": 84,
+            "longTasks": [],
+            "shifts": []
+          },
+          "scrollFrameP95Ms": 17.19999998807907
+        },
+        {
+          "width": 390,
+          "motion": "passed",
+          "pointerDepth": "touch scrolling preserved",
+          "shootingStar": "keyboard/touch, replaceable, stopped when paused/offscreen",
+          "stickyMotionControl": "reading position preserved",
+          "pausePersistence": "passed",
+          "liveReducedMotion": "passed",
+          "hiddenAndOffscreen": "passed",
+          "chapterAnchors": "passed",
+          "rapidSwitching": "passed",
+          "metrics": {
+            "cls": 0,
+            "lcp": 96,
+            "longTasks": [],
+            "shifts": []
+          },
+          "scrollFrameP95Ms": 17.099999994039536
+        },
+        {
+          "width": 1440,
+          "storyFlow": "all six arrival roles, once-only reading order, focus interruption, live reduced-motion interruption and direct hash entry passed",
+          "arrivals": 15,
+          "longestDelayMs": 130
+        },
+        {
+          "width": 390,
+          "storyFlow": "all six arrival roles, once-only reading order, focus interruption, live reduced-motion interruption and direct hash entry passed",
+          "arrivals": 15,
+          "longestDelayMs": 45
+        },
+        {
+          "width": 1440,
+          "formation": "spiral, six constellation traces, release and repeat verified with a fixture clock",
+          "stars": 360,
+          "canvasLifecycle": "paint budget, pause, offscreen, hidden and reduced motion verified"
+        },
+        {
+          "width": 390,
+          "formation": "spiral, six constellation traces, release and repeat verified with a fixture clock",
+          "stars": 220,
+          "canvasLifecycle": "paint budget, pause, offscreen, hidden and reduced motion verified"
+        },
+        {
+          "canvasUnavailable": "server-rendered artwork and content remain visible without errors"
+        },
+        {
+          "clientBundlesBlocked": "content, links and native disclosures passed; inline framework stream completion required"
+        }
+      ],
+      "scriptsScanned": 10,
+      "socialImages": [
+        "opengraph-image",
+        "twitter-image"
+      ]
+    },
+    "visual_review": {
+      "rounds": 1,
+      "result": "Desktop/mobile read-through recordings and extracted frames preserve the reading hierarchy, native chapter bar and stationary pricing layout; no visual correction required.",
+      "artifacts": [
+        ".impeccable/review/galaxy-home-flow/story-flow-1440.webm",
+        ".impeccable/review/galaxy-home-flow/story-flow-390.webm",
+        ".impeccable/review/galaxy-home-flow/story-frame-1440.png",
+        ".impeccable/review/galaxy-home-flow/story-frame-390.png"
+      ],
+      "hook": "No new token or rule exceptions. Existing session hint limit emitted; scoped lint, build, browser accessibility, overflow and visual checks passed."
+    }
+  },
+  "sha256": {
+    "src/components/home/use-story-entrance.ts": "8e3d8a6634a4b67456cff4d17ef76e2d450b136a4b844b86c21b4ec6b6b24a67",
+    "src/components/home/HomeMotion.tsx": "7df83b8ceece3f1d9a0385a6b46550e813ec8ad5ad2a18d94355688d762754da",
+    "src/components/home/PublicHome.tsx": "ab7c8645afbd3f1fd597d55c7c2ccc572e3ff0fda24675f0a7db08da44b5eebb",
+    "src/components/home/public-home.module.css": "e7e697b7e6dcbe2b393e179901eb9f4f365f7e6fb75fd6e114b67e0ea44868a1",
+    "scripts/verify-homepage-ui.mjs": "ee7e9808f6d2e35bfbc0669308934292db1322afee93d91cf52e77fc8bfdb39f",
+    "src/components/home/DESIGN.md": "5be99a2196feff3d2f4466eb67da8ff4ed3dc64268aea27bc222d20faf69fad4",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "0bd74fa127d077277872c6aef5ac767340e5d6dd480eacd5ddfe602beb7737c6",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "cc79f9352f3c9686c038c4f5c88de975f76a879d88783858cf849ea905db87c1",
+    ".impeccable/surfaces/src-app-page-tsx.md": "db0869214d99b989381bdd0bf73814b057a79ee714ff9d0bf6db285de27e0324"
+  },
+  "limitations": [
+    "Local Chromium desktop/mobile emulation is not physical-device or field performance; layout-shift totals and frame samples are local observations.",
+    "No production deployment, generation, payment, publication or signed-in acceptance performed.",
+    "Fallback with external client bundles blocked still requires Next inline stream completion; fully disabled JavaScript retains the existing loading shell.",
+    "Automated accessibility and keyboard checks do not establish a complete manual assistive-technology review."
+  ]
+}

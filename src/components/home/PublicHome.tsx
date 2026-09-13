@@ -44,9 +44,9 @@ export function PublicHome() {
     <section id="possibilities" className={styles.benefits} aria-labelledby="possibilities-title">
       <div className={styles.sectionIntro} data-home-reveal="intro"><h2 id="possibilities-title">Less getting set up.<br />More getting somewhere.</h2><p>Give a small idea a first version. Let real feedback help you find the next one.</p></div>
       <div className={styles.benefitRows} data-home-journey>
-        <article><h3>Get past the blank page.</h3><p>Describe your idea in your own words, or make a starting idea your own. No development project to set up.</p></article>
-        <article><h3>Find the version that feels right.</h3><p>Ask for a change, explore another direction, or return to an earlier version. Keep refining without paying for each turn.</p></article>
-        <article><h3>Share when you’re ready.</h3><p>Your draft stays private until you publish. Then send your public GALX link to the people whose feedback matters.</p></article>
+        <article data-home-reveal="step"><h3>Get past the blank page.</h3><p>Describe your idea in your own words, or make a starting idea your own. No development project to set up.</p></article>
+        <article data-home-reveal="step"><h3>Find the version that feels right.</h3><p>Ask for a change, explore another direction, or return to an earlier version. Keep refining without paying for each turn.</p></article>
+        <article data-home-reveal="step"><h3>Share when you’re ready.</h3><p>Your draft stays private until you publish. Then send your public GALX link to the people whose feedback matters.</p></article>
       </div>
     </section>
 
@@ -62,10 +62,10 @@ export function PublicHome() {
 
     <section id="faq" className={styles.faq} aria-labelledby="faq-title">
       <div className={styles.sectionIntro} data-home-reveal="intro"><h2 id="faq-title">Questions,<br />answered.</h2><p>A little clarity before your first Site.</p><a href="mailto:support@galx.ai" className={styles.textLink}>Share your feedback <ArrowUpRight size={16} aria-hidden="true" /></a></div>
-      <div className={styles.questions}>{questions.map(item => <details key={item.question}><summary>{item.question}<Plus size={18} aria-hidden="true" /></summary><p>{item.answer}</p></details>)}</div>
+      <div className={styles.questions}>{questions.map(item => <details key={item.question} data-home-reveal="question"><summary>{item.question}<Plus size={18} aria-hidden="true" /></summary><p>{item.answer}</p></details>)}</div>
     </section>
 
-    <section className={styles.close} aria-labelledby="start-title" data-home-ending><div className={styles.endingOrbit} aria-hidden="true"><span /><span /><span /></div><div data-home-reveal="close"><h2 id="start-title">Make the first version.</h2><p>It doesn’t have to be your final idea to be worth trying.</p></div><Link className={styles.primary} href="/sites">Start with Sites <ArrowUpRight size={19} aria-hidden="true" /></Link></section>
+    <section className={styles.close} aria-labelledby="start-title" data-home-ending><div className={styles.endingOrbit} aria-hidden="true"><span /><span /><span /></div><div data-home-reveal="close"><h2 id="start-title">Make the first version.</h2><p>It doesn’t have to be your final idea to be worth trying.</p></div><Link className={styles.primary} href="/sites" data-home-reveal="action">Start with Sites <ArrowUpRight size={19} aria-hidden="true" /></Link></section>
     </div>
   </HomeMotion>;
 }

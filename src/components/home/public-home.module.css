@@ -21,8 +21,9 @@
 .sky { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; mask-image: linear-gradient(to bottom, transparent, black 12%, black 80%, transparent); }
 .skyDepth { position: absolute; inset: -80px -40px; transform: translateY(var(--sky-shift, 0px)) scale(var(--sky-scale, 1)); }
 .skyParallax { position: absolute; inset: 0; transform: translate3d(var(--pointer-x, 0px), var(--pointer-y, 0px), 0); transition: transform .3s var(--home-ease); }
-.sky img { object-fit: cover; object-position: 65% 40%; opacity: .42; }
-.sky::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, var(--home-bg) 0%, rgba(7, 8, 13, .7) 25%, rgba(7, 8, 13, .15) 80%); }
+.sky img { object-fit: cover; object-position: 65% 40%; opacity: .5; }
+.sky::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(7, 8, 13, .7) 0%, rgba(7, 8, 13, .56) 25%, rgba(7, 8, 13, .08) 80%); }
+.galaxyFormation { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .95; }
 .orbits { position: absolute; width: 100%; height: 100%; inset: 0; overflow: visible; transform: translate3d(calc(var(--pointer-x, 0px) * -.6), calc(var(--pointer-y, 0px) * -.6), 0); transition: transform .4s var(--home-ease); }
 .orbitPlane { stroke: #d4d4d8; stroke-width: .85; opacity: .3; transform-box: fill-box; transform-origin: center; }
 .orbitHighlight { stroke: var(--home-accent); stroke-width: 1.6; stroke-dasharray: 10 90; }
@@ -119,9 +120,12 @@
 .storySky circle { fill: var(--home-fg); opacity: .3; }
 .storyOrbit { stroke: var(--home-fg); stroke-width: .6; opacity: .08; }
 .storyFlight { stroke: var(--home-accent); stroke-width: 1; opacity: .24; stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--story-progress, 1)); }
+.storyConstellation path { stroke: #d4d4d8; stroke-width: .75; opacity: .25; stroke-dasharray: 1; stroke-dashoffset: clamp(0, calc(1 - (var(--story-progress, 1) - var(--constellation-step)) * 4), 1); }
+.storyConstellation circle { fill: #f3f4f6; opacity: .5; }
+.storyFlight, .storyConstellation path { transition: stroke-dashoffset .24s linear; }
 .benefitRows { position: relative; padding-left: 32px; }
 .benefitRows::before, .benefitRows::after { content: ''; position: absolute; left: 4px; top: 12px; bottom: 12px; width: 1px; background: var(--home-line); }
-.benefitRows::after { background: var(--home-accent); transform: scaleY(var(--journey-progress, 1)); transform-origin: top; }
+.benefitRows::after { background: var(--home-accent); transform: scaleY(var(--journey-progress, 1)); transform-origin: top; transition: transform .24s linear; }
 .benefitRows article { position: relative; }
 .benefitRows article::before { content: ''; position: absolute; left: -32px; top: 10px; width: 9px; height: 9px; border: 1px solid var(--home-accent); border-radius: 50%; background: var(--home-bg); z-index: 1; }
 .benefitRows article + article::before { top: 40px; }
@@ -164,6 +168,7 @@
 .close { position: relative; overflow: hidden; isolation: isolate; display: flex; align-items: center; justify-content: space-between; gap: 32px; border-top: 1px solid var(--home-line); padding-top: 64px; padding-bottom: 76px; }
 .endingOrbit { position: absolute; z-index: -1; width: 620px; height: 280px; right: -50px; top: 36%; pointer-events: none; transform: rotate(calc(-36deg + var(--ending-arrival, 1) * 16deg)) scale(calc(.85 + var(--ending-arrival, 1) * .15)); }
 .endingOrbit span { position: absolute; inset: 0; border: 1px solid var(--home-line); border-radius: 50%; }
+.endingOrbit { transition: transform .3s cubic-bezier(0.22, 1, 0.36, 1); }
 .endingOrbit span:nth-child(2) { inset: 30px 45px; border-color: rgba(251, 191, 36, .2); }
 .endingOrbit span:nth-child(3) { inset: 60px 90px; }
 .endingOrbit::after { content: ''; position: absolute; top: 20%; right: 10%; width: 5px; height: 5px; border-radius: 50%; background: var(--home-accent); }
@@ -183,7 +188,7 @@
   .hero, .benefits, .pricing, .faq { grid-template-columns: minmax(0, 1fr); }
   .hero { gap: 44px; padding-top: 68px; padding-bottom: 48px; }
   .sky::after { background: linear-gradient(to bottom, rgba(7, 8, 13, .55), rgba(7, 8, 13, .1)); }
-  .sky img { opacity: .32; object-position: 65% 60%; }
+  .sky img { opacity: .38; object-position: 65% 60%; }
   .orbitPlane { opacity: .18; }
   .chapters { gap: 12px; }
   .chapterLinks { flex: 1; justify-content: space-between; gap: 16px; }

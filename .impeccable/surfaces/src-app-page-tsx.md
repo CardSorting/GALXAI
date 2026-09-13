@@ -2,7 +2,7 @@
 version: 1
 slug: "src-app-page-tsx"
 primary_target: "src/app/page.tsx"
-related_targets: ["src/components/home/PublicHome.tsx","src/components/home/HomeMotion.tsx","src/components/home/GalaxyScene.tsx","src/components/home/use-galaxy-interactions.ts","src/components/home/SitesExample.tsx","src/components/home/PlanAction.tsx","src/components/home/public-home.module.css","route:/"]
+related_targets: ["src/components/home/PublicHome.tsx","src/components/home/HomeMotion.tsx","src/components/home/use-story-entrance.ts","src/components/home/GalaxyScene.tsx","src/components/home/GalaxyFormation.tsx","src/components/home/use-galaxy-interactions.ts","src/components/home/SitesExample.tsx","src/components/home/PlanAction.tsx","src/components/home/public-home.module.css","route:/"]
 ---
 
 # Sites homepage
@@ -24,3 +24,7 @@ Quality target: accessible keyboard interactions, stable example layout, 44px co
 Galaxy motion refinement, September 13: strengthen the existing artwork with fine orbital geometry and gentle scroll depth. Keep the idea-to-draft example as the focal interaction: a sliding pressed-button selection and short result transitions, without auto-rotation. Native section navigation, a connected benefit track, brief introductions and FAQ feedback support reading. Preserve a readable static fallback, live device reduced-motion support, and a visible per-tab pause control. Decorative motion stops when hidden or offscreen. No product claims, new generated imagery, animation dependency, or shared-shell redesign is part of this pass.
 
 Playful refinement, September 13: the galaxy now responds to fine mouse movement while controls stay stationary. An optional Send a star action is equally available by touch and keyboard. Continuous orbital artwork carries the reading flow into the closing invitation, and draft transitions respect selection direction. Keep synchronized pause/resume available in the sticky chapter bar and show the Sites action there on desktop. Use lightweight geometry and finite, interruptible feedback. No touch scrolling interception, auto-rotating examples, mandatory toy interaction, sound or accumulating particles.
+
+Cinematic refinement, September 13: a single bounded star scene cycles through a three-arm spiral, six traced constellations and dispersal. Increase distant stars in the hero and reading sections; add six scroll-traced constellations to the story. Keep the text pocket calm, colors within the established palette and the illustration legible. Use fewer stars and paints on mobile, pause all work when hidden/offscreen, freeze on user pause and retain a static image/SVG fallback. Automatic meteors share the scene clock; no accumulated particle systems, new dependencies, audio or product progress claims.
+
+Reading-flow refinement, September 13: connect the benefits, complete plan, FAQ rows and closing action with one gentle upward entrance language. Use soft deceleration, short overlapping delays and smaller mobile travel. Keep default content fully visible; skip already-visible or revisited content, and settle entire sections immediately for focus, pointer interaction and native anchors. Ease the existing constellation paths and benefit track between scroll samples without intercepting scrolling or delaying actions. Preserve all copy and public pricing.

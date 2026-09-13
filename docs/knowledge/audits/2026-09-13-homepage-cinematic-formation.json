@@ -1,0 +1,230 @@
+{
+  "observed_at": "2026-09-13T18:21:26.121859Z",
+  "base_revision": "452d9b699f13375cc36049f3c0ebfa4285c4ec52",
+  "scope": "Uncommitted local homepage cinematic-formation refinement; no deployment performed.",
+  "reviewer": "Codex",
+  "semantic_review": {
+    "domain": "client-efficiency",
+    "guides": [
+      "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
+      "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md"
+    ],
+    "scope": "Reconciled the homepage presentation/lifecycle, fallback, local browser verification and rollback guidance with the complete current navigation and efficiency guides. Broader product navigation and request budgets remain unchanged. Reviewed the scoped design and surface brief, and preserved earlier dated evidence.",
+    "unmapped_review": "The private surface brief is design context; the dated JSON is evidence. New home source is already covered by the existing home-family mapping."
+  },
+  "implementation": {
+    "scene": "Three-arm spiral, six constellation traces, release and repeat over 36 seconds; a single automatic meteor every 20 seconds.",
+    "density": {
+      "large": 360,
+      "small": 220,
+      "static_hero_stars": 72,
+      "static_story_stars": 72,
+      "story_constellations": 6
+    },
+    "bounds": "One cancellable frame callback; at most 30/24 paints per second, device scale <=1.5 and approximately 1.6 million canvas pixels. No new packages, images, APIs or WebGL.",
+    "accessibility": "Existing motion controls and reduced-motion preference stop drawing; hidden/offscreen scenes stop work. Static SVG/image and a missing-context fallback remain readable."
+  },
+  "validation": {
+    "production_build": {
+      "command": "npm run build",
+      "result": "passed",
+      "home_route_kb": 8.64,
+      "home_first_load_kb": 191
+    },
+    "lint_typecheck": {
+      "commands": [
+        "npx eslint src/components/home/GalaxyFormation.tsx src/components/home/GalaxyScene.tsx",
+        "npx tsc --noEmit",
+        "node --check scripts/verify-homepage-ui.mjs",
+        "git diff --check"
+      ],
+      "result": "passed"
+    },
+    "image_security": {
+      "command": "npm run test:image:security",
+      "passed": 29
+    },
+    "transport": {
+      "command": "npm run test:egress:transport",
+      "passed": 40
+    },
+    "documentation_guards": {
+      "command": "npm run test:docs",
+      "passed": 37
+    },
+    "compiled_boundary": {
+      "command": "npm run docs:check:build",
+      "assets_scanned": 640,
+      "result": "passed"
+    },
+    "browser": {
+      "checkedAt": "2026-09-13T18:19:52.533Z",
+      "checks": [
+        {
+          "width": 1440,
+          "overflow": false,
+          "axeViolations": 0,
+          "pageErrors": 0,
+          "versions": "passed",
+          "keyboard": "passed",
+          "copy": "passed",
+          "pricing": "passed",
+          "skipLink": "passed",
+          "exampleHeights": [
+            676.59375,
+            676.59375,
+            676.59375,
+            676.59375,
+            676.59375,
+            676.59375
+          ]
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "axeViolations": 0,
+          "pageErrors": 0,
+          "versions": "passed",
+          "keyboard": "passed",
+          "copy": "passed",
+          "pricing": "passed",
+          "skipLink": "passed",
+          "exampleHeights": [
+            755.8125,
+            755.8125,
+            755.8125,
+            755.8125,
+            755.8125,
+            755.8125
+          ]
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "axeViolations": 0,
+          "pageErrors": 0,
+          "versions": "passed",
+          "keyboard": "passed",
+          "copy": "passed",
+          "pricing": "passed",
+          "skipLink": "passed",
+          "exampleHeights": [
+            754.3125,
+            754.3125,
+            754.3125,
+            754.3125,
+            754.3125,
+            754.3125
+          ]
+        },
+        {
+          "width": 320,
+          "overflow": false,
+          "axeViolations": 0,
+          "pageErrors": 0,
+          "versions": "passed",
+          "keyboard": "passed",
+          "copy": "passed",
+          "pricing": "passed",
+          "skipLink": "passed",
+          "exampleHeights": [
+            837.390625,
+            837.390625,
+            837.390625,
+            837.390625,
+            837.390625,
+            837.390625
+          ]
+        },
+        {
+          "width": 1440,
+          "motion": "passed",
+          "pointerDepth": "bounded, reset, controls stationary, touch ignored",
+          "shootingStar": "keyboard/touch, replaceable, stopped when paused/offscreen",
+          "stickyMotionControl": "reading position preserved",
+          "pausePersistence": "passed",
+          "liveReducedMotion": "passed",
+          "hiddenAndOffscreen": "passed",
+          "chapterAnchors": "passed",
+          "rapidSwitching": "passed",
+          "metrics": {
+            "cls": 0,
+            "lcp": 104,
+            "longTasks": [],
+            "shifts": []
+          },
+          "scrollFrameP95Ms": 17.099999994039536
+        },
+        {
+          "width": 390,
+          "motion": "passed",
+          "pointerDepth": "touch scrolling preserved",
+          "shootingStar": "keyboard/touch, replaceable, stopped when paused/offscreen",
+          "stickyMotionControl": "reading position preserved",
+          "pausePersistence": "passed",
+          "liveReducedMotion": "passed",
+          "hiddenAndOffscreen": "passed",
+          "chapterAnchors": "passed",
+          "rapidSwitching": "passed",
+          "metrics": {
+            "cls": 0,
+            "lcp": 108,
+            "longTasks": [],
+            "shifts": []
+          },
+          "scrollFrameP95Ms": 17.400000005960464
+        },
+        {
+          "width": 1440,
+          "formation": "spiral, six constellation traces, release and repeat verified with a fixture clock",
+          "stars": 360,
+          "canvasLifecycle": "paint budget, pause, offscreen, hidden and reduced motion verified"
+        },
+        {
+          "width": 390,
+          "formation": "spiral, six constellation traces, release and repeat verified with a fixture clock",
+          "stars": 220,
+          "canvasLifecycle": "paint budget, pause, offscreen, hidden and reduced motion verified"
+        },
+        {
+          "canvasUnavailable": "server-rendered artwork and content remain visible without errors"
+        },
+        {
+          "clientBundlesBlocked": "content, links and native disclosures passed; inline framework stream completion required"
+        }
+      ],
+      "scriptsScanned": 9,
+      "socialImages": [
+        "opengraph-image",
+        "twitter-image"
+      ]
+    },
+    "visual_review": {
+      "rounds": 1,
+      "inspected": [
+        "galaxy-spiral-1440.png",
+        "galaxy-constellations-1440.png",
+        "galaxy-constellations-390.png",
+        "full-1440.png"
+      ],
+      "result": "Dense galaxy and perimeter constellations preserve reading hierarchy, stable action placement and existing product illustration. No visual correction required.",
+      "hook": "Reused the existing light neutral for new star colors; no rule suppression or unresolved hook finding."
+    }
+  },
+  "sha256": {
+    "src/components/home/GalaxyFormation.tsx": "7613b6a3316b3688a868581d6461afdffdbad9fceb367e36c6bb4d7bbd2f066a",
+    "src/components/home/GalaxyScene.tsx": "b28c5df148385d2699cae46534b21426c0be8fbaa02533670298a6f3dfdfae35",
+    "src/components/home/public-home.module.css": "a56610e248c2d335e621c03c7b79557382cdc81f416a7d314c04b10889a14c7e",
+    "src/components/home/DESIGN.md": "28520277b140c62dc086ebad006afb6dd9cad51bbfd3bde13cc1ac492b014901",
+    "scripts/verify-homepage-ui.mjs": "b71ff5f6e321597efd060b62caa24f3fac7c26af08ff63ad4130bd460c2cf0b0",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "859ecb508197966a4fd9fdccff9d9f2f7fa7d79f20b8270da67b7389c4d62320",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "11f35e857e04328a52922b83b9f40ead688633372f6f6ffdf52358debfbe9d4f",
+    ".impeccable/surfaces/src-app-page-tsx.md": "566495231ce97826827bc17701b75c1bfc710623d4cbd9b8d6e79526d7776066"
+  },
+  "limitations": [
+    "Local Chromium desktop and touch emulation are not physical-device field performance. No production or live application acceptance was performed for this change.",
+    "Reported layout-shift totals, LCP and frame samples are bounded localhost observations, not field Core Web Vitals.",
+    "Client-bundle failure fallback still relies on Next inline stream completion; fully disabled JavaScript retains the existing loading-shell limitation.",
+    "No generation, payment, publication, signed-in acceptance, load benchmark or complete manual assistive-technology review."
+  ]
+}
