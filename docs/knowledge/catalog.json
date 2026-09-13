@@ -2095,14 +2095,18 @@
       "keywords": [],
       "decision": {
         "status": "proposed",
-        "delivery": "local",
+        "delivery": "deployed",
         "domain": "images",
         "owner": "Product/API maintainer",
         "date": "2026-09-13",
         "evidence": [
-          "docs/knowledge/audits/2026-09-13-image-library-scale.json"
+          "docs/knowledge/audits/2026-09-13-image-library-scale.json",
+          "post-mortem/releases/2026-09-13-image-library-scale.json"
         ],
-        "supersedes": []
+        "supersedes": [],
+        "target": "galx.ai site application and linked production image-library database",
+        "revision": "c9c9121b2419cbdc3bee938ced96c44c12eb4e80",
+        "observed_at": "2026-09-13T08:17:38.840411Z"
       }
     },
     {

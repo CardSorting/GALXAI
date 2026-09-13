@@ -1,0 +1,40 @@
+{
+  "observed_at": "2026-09-13T08:20:03.829167Z",
+  "base_revision": "c9c9121b2419cbdc3bee938ced96c44c12eb4e80",
+  "scope": "Offline documentation lifecycle correction found while recording the authorized production release; no application runtime or deployment configuration changed.",
+  "finding": "The validator rejected proposed/rejected decisions with deployed/verified evidence even when target, revision, timestamp and retained evidence were supplied. This contradicted the explicit separation of ADR decision status and delivery observations and pressured a false acceptance transition.",
+  "correction": "Removed only the decision-status coupling. Evidence, target/revision/time, source-review, publication and lifecycle-link checks remain. Canonical lifecycle guidance explains that an observation neither approves a decision nor authorizes future deployment.",
+  "semantic_review": {
+    "paths": [
+      "scripts/docs-kb.py",
+      "scripts/test-docs-kb.py",
+      "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md",
+      "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md",
+      "docs/DOCUMENTATION_POLICY.md",
+      "docs/reference/knowledge-commands.md"
+    ],
+    "result": "Compared the complete decision validation and generation paths with the accepted knowledge ADR and canonical lifecycle guidance. Confirmed no automatic status mutation and retained independent evidence requirements."
+  },
+  "checks": [
+    {
+      "command": "npm run test:docs",
+      "result": "passed",
+      "incident_tests": 20,
+      "knowledge_tests": 17,
+      "new_coverage": [
+        "Proposed/rejected deployment and verification records keep their status through validation and index generation",
+        "Unaccepted decisions still cannot claim deployment without release evidence and target/revision/time"
+      ]
+    }
+  ],
+  "source_and_guide_sha256": {
+    "scripts/docs-kb.py": "57642bcce6edcdec6b14dc285e973c1c7ba43d9b8908903826befcba6e992d88",
+    "scripts/test-docs-kb.py": "83aa914e66cc04d866fd4c77554760748f8e1d07378326c49ac1738f12851856",
+    "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
+    "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md": "6fae04f9767dc698da73123151fdc6aa4f61f40786f176a9e5f9db336188d47a",
+    "docs/DOCUMENTATION_POLICY.md": "ab2030f9d15010634b9a2d9cf2bc680fdf4ae961c2ee3f9f7ad567e99d49d40c",
+    "docs/reference/knowledge-commands.md": "3ae9092ea941ebc459a2895b8c2eebb4c1c8d59659d718a2c353a1a6be6e8379"
+  },
+  "release_evidence": "post-mortem/releases/2026-09-13-image-library-scale.json",
+  "limitations": "Structural validation does not independently authenticate deployment evidence. No new production load, generation or exhaustive module audit is implied."
+}

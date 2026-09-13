@@ -2,7 +2,7 @@
 
 <!-- docs-scope: decision-record -->
 
-Date: 2026-09-13. Owner: Product/API maintainer. Decision status: proposed for maintainer review. Delivery: local implementation; no migration deployment or live acceptance. The user's requested large-library work authorizes implementation, not automatic architecture acceptance.
+Date: 2026-09-13. Owner: Product/API maintainer. Decision status: proposed for maintainer review. Delivery: deployed to `galx.ai` at `c9c9121` on September 13 after migration `20260913071757`; bounded read-only acceptance is recorded separately. The user's explicit commit, push and deploy request authorized this release, not automatic architecture acceptance.
 
 ## Context and decision drivers
 
@@ -28,7 +28,7 @@ Apply the additive migration before the application. Review index lock impact on
 
 ## Confirmation and delivery
 
-[Dated local evidence](../knowledge/audits/2026-09-13-image-library-scale.json) separates source review, disposable SQL tests, HTTP/adversarial checks, browser fixtures and compiled scans. Live throughput, production query timings, actual-device usability and deployment require separate acceptance. Do not promote this decision's status during generated documentation synchronization.
+[Dated local evidence](../knowledge/audits/2026-09-13-image-library-scale.json) separates source review, disposable SQL tests, HTTP/adversarial checks, browser fixtures and compiled scans. The [September 13 release](../../post-mortem/releases/2026-09-13-image-library-scale.json) records migration privileges/indexes, hosted application CI, production aliases, signed-in library/lightbox/navigation and sanitized original/thumbnail retrieval. One old fixture-named row points to a missing object and remains a private reconciliation follow-up. The separate gateway workflow still fails its previously recorded obsolete diagnostic assertion and did not deploy. Live throughput, production query timings, physical-device usability, new generation and billing settlement were not tested in this release. Do not promote this decision's status during generated documentation synchronization.
 
 ## Relationships
 

@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "reviewer": "Codex maintainer review",
-  "reviewed_at": "2026-09-13T07:52:40.989932Z",
-  "note": "Reviewed the critical watched image/library/policy/storage-adapter changes, fixture commands and full affected queue, deployment, database, preview and recovery guidance; reconciled bounded reads, sanitized thumbnails, role enforcement, migration sequencing and rollback. Local evidence is docs/knowledge/audits/2026-09-13-image-library-scale.json; prior incidents and production state are unchanged.",
+  "reviewer": "release maintainer",
+  "reviewed_at": "2026-09-13T08:20:07.045740Z",
+  "note": "Reviewed actual deployed revision, verified additive migration, bounded live acceptance, unchanged application contracts and preserved incident follow-ups. Canonical lifecycle guidance and its offline validator now keep observed delivery independent from approval; all release claims retain dated evidence.",
   "files": {
     ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
     ".github/workflows/vercel-preflight.yml": "7f07dc34445f2f79962b120c7492642251d9855a9c3d49502034abe99e9ad79e",
@@ -39,7 +39,7 @@
     "docs/operations/signup-credit.md": "6e0462a35d8042512bc6e5d1ea890a330e7bd3cc015d4b9938e7febf5c9fa135",
     "docs/operations/wallet-lifecycle.md": "ddc86ed1d3347f5fff19a07581bc040c52eee7a115c279a2ba28bceae92303db",
     "package.json": "70e82077c8f5133eacc5c91f0aaaea0f6b01f61677917b960fe590ae0ad6348a",
-    "post-mortem/CURRENT_STATE.md": "e6e6a4242f8e3ec5bcadbfc76937b2553431533d053c84c4639f84f3d77b1189",
+    "post-mortem/CURRENT_STATE.md": "813ddac1fee3e188f7827f6aa16c36bbf615d10a65d153a54d637adb3d8ee64f",
     "post-mortem/README.md": "d28cbc9427aaa4aba99057517831e49f79244a686e1ce35640c4f566abbae8b8",
     "post-mortem/failure-modes/README.md": "9b393988df34fcc31a9f7e8eb573120280ddcc14497cc76cd1cd90a5d99ebb90",
     "post-mortem/failure-modes/access-and-documentation.md": "6fbd494cfd46c8dc5aed9361cb8f0813aabcb1538b4bea134cc5c913269325ce",

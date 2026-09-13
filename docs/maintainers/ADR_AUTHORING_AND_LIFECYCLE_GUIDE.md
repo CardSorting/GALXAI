@@ -24,6 +24,8 @@ Use an ADR when changing a consequential product contract, authority, ownership,
 
 Delivery is independently `not-started`, `local`, `deployed` or `verified`. Every state beyond not-started requires evidence. Deployed/verified also requires target, revision and observation timestamp. Verified means the linked acceptance scope was exercised, not universal reliability. Mixed component delivery belongs in separate evidence records; choose the state supported for the whole registered scope.
 
+An observed deployment can be recorded while a decision remains proposed, or after a choice is rejected. Preserve both facts and explain their scope; do not change approval status merely to record what is running. Validation and generated views never accept a decision. A delivery record is evidence of an observation, not permission for a future deployment.
+
 The [lifecycle register](../knowledge/DECISIONS.md) covers explicitly curated metadata. Older ADRs remain searchable and retain their original scope; their status is not inferred from age, numbering or prose. Register a legacy record when its topic is reviewed, without silently promoting unrelated records.
 
 ## Supersession and corrections

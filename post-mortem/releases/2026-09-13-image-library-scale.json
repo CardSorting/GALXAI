@@ -1,0 +1,213 @@
+{
+  "observed_at": "2026-09-13T08:17:38.840411Z",
+  "classification": "private",
+  "scope": "Authorized commit, push, additive database migration and site deployment; read-only live acceptance. No new generation, image mutation, gateway deployment or broad capacity certification.",
+  "authorization": "User request: write git commits and push, and deploy",
+  "commits": [
+    {
+      "revision": "bec3197",
+      "purpose": "Stable product navigation through route changes"
+    },
+    {
+      "revision": "c9c9121b2419cbdc3bee938ced96c44c12eb4e80",
+      "purpose": "Bounded image browsing, sanitized previews, BroccoliDB admission and additive database page queries"
+    }
+  ],
+  "deployment": {
+    "provider": "Vercel",
+    "id": "dpl_DV3riRMTmcniaTnNuBQhDEMdfWgg",
+    "source_revision": "c9c9121b2419cbdc3bee938ced96c44c12eb4e80",
+    "status": "Ready",
+    "url": "https://galxai-q5mj9edy5-cardsortings-projects.vercel.app",
+    "aliases_verified": [
+      "https://galx.ai",
+      "https://www.galx.ai"
+    ],
+    "trigger": "Git integration after authorized non-force push to origin/main",
+    "source_status_url": "https://vercel.com/cardsortings-projects/galxai/DV3riRMTmcniaTnNuBQhDEMdfWgg",
+    "rollback_retained": "dpl_At1n1cdyeQJCmPqpk9VAb4CXdzKL",
+    "rollback_note": "Compatible previous application can retain the additive SQL; no rollback or deletion performed."
+  },
+  "database": {
+    "preflight": {
+      "observed_at": "2026-09-13T08:02:34.794Z",
+      "total_rows": 8,
+      "table_bytes": "24576",
+      "total_bytes": "155648",
+      "write_locks": 0,
+      "active_other_sessions": 0,
+      "existing_new_indexes": 0
+    },
+    "dry_run_command": "supabase db push --linked --skip-vault --dry-run",
+    "dry_run_pending": [
+      "20260913071757_image_library_bounded_pages.sql"
+    ],
+    "apply_command": "supabase db push --linked --skip-vault --yes",
+    "apply_result": "success; only the reviewed migration applied, before push/application rollout; no seeds or roles applied",
+    "acceptance": {
+      "observed_at": "2026-09-13T08:05:04.938Z",
+      "migration": "20260913071757",
+      "migration_count": 104,
+      "total_rows": 8,
+      "indexes_valid": 2,
+      "invoker_and_role_grants_verified": true,
+      "page_query_verified": true
+    }
+  },
+  "hosted_ci": [
+    {
+      "name": "Vercel Pre-Deployment & Integrity Check",
+      "revision": "c9c9121b2419cbdc3bee938ced96c44c12eb4e80",
+      "conclusion": "success",
+      "updated_at": "2026-09-13T08:09:07Z",
+      "url": "https://github.com/CardSorting/GALXAI/actions/runs/34746806541"
+    },
+    {
+      "name": "Documentation knowledge audit",
+      "revision": "c9c9121b2419cbdc3bee938ced96c44c12eb4e80",
+      "conclusion": "success",
+      "url": "https://github.com/CardSorting/GALXAI/actions/runs/34746806542"
+    },
+    {
+      "name": "Deploy Cloudflare Edge Gateway",
+      "revision": "c9c9121b2419cbdc3bee938ced96c44c12eb4e80",
+      "conclusion": "failure",
+      "deployment": "skipped",
+      "failure": "Unchanged fixture expects the removed public health edge-PoP diagnostic; same existing ACT-011 issue.",
+      "url": "https://github.com/CardSorting/GALXAI/actions/runs/34746806544"
+    }
+  ],
+  "public_http": {
+    "command": "GALX_VERIFY_ORIGIN=https://galx.ai npx tsx scripts/verify-image-public-http.ts",
+    "result": "passed",
+    "linked_browser_assets_scanned": 25,
+    "checks": [
+      "Anonymous and forged identities denied",
+      "Protected diagnostics remain gated",
+      "Invalid original/thumbnail capabilities reach sanitized 404",
+      "Private model/llms routes redirect to developer preview",
+      "Home, Images, public schema and linked browser assets scanned for selected private markers"
+    ],
+    "limitations": "Selected marker scan and route sampling, not an exhaustive live-site security audit."
+  },
+  "artifact_http": {
+    "observed_at": "2026-09-13T08:14:51.761Z",
+    "origin": "https://galx.ai",
+    "read_only": true,
+    "results": [
+      {
+        "kind": "original",
+        "status": 200,
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "bytes": 3191052,
+        "metadataRemoved": true
+      },
+      {
+        "kind": "thumbnail",
+        "status": 200,
+        "format": "webp",
+        "width": 512,
+        "height": 512,
+        "bytes": 28214,
+        "metadataRemoved": true
+      },
+      {
+        "kind": "thumbnail-warm",
+        "status": 200,
+        "format": "webp",
+        "width": 512,
+        "height": 512,
+        "bytes": 28214,
+        "metadataRemoved": true
+      },
+      {
+        "kind": "expired",
+        "status": 404
+      },
+      {
+        "kind": "foreign-owner",
+        "status": 404
+      },
+      {
+        "kind": "missing-asset",
+        "status": 404
+      }
+    ]
+  },
+  "browser": {
+    "environment": "Existing signed-in Chrome session, desktop viewport observed at 1305 by 642",
+    "result": "passed",
+    "checks": [
+      "Create starts with a blank result collection; no Quality or Model generation selectors",
+      "My images loads the existing owned image in the compact thumbnail card with page controls",
+      "Lightbox displays the original and loads the complete prompt; copy/reuse enable after loading",
+      "Closing lightbox restores focus to the originating card",
+      "Images to Sites and back retains the visible navigation order and positions",
+      "Existing Favorites loads the saved image"
+    ],
+    "visual_inspection": "Thumbnail grid, original-image lightbox and Sites navigation screenshots inspected in the browser tool; user-image screenshots and content are not copied into this record.",
+    "limitations": "No new generation, Favorites mutation, physical-phone test, live multi-page library or full assistive-technology acceptance."
+  },
+  "historical_probe": {
+    "first_probe": "The earliest completed row returned sanitized public 503.",
+    "diagnosis": {
+      "observed_at": "2026-09-13T08:14:48.906Z",
+      "created_at": "2026-09-05T22:02:15.562Z",
+      "fixture_named_identity": true,
+      "bounded_read": {
+        "ok": false,
+        "category": "Error",
+        "missing": true,
+        "message": "Cloudflare R2 GET failed (404 Not Found)"
+      },
+      "legacy_read": {
+        "ok": false,
+        "category": "Error",
+        "missing": true,
+        "message": "Cloudflare R2 GET failed (404 Not Found)"
+      }
+    },
+    "resolution": "Retained the observation and ACT-012; no data rewritten or removed. Acceptance was repeated using the known valid frontend-generated image named in the private prior recovery record. Both bounded and legacy reads of the old fixture-named object return storage 404."
+  },
+  "local_evidence": [
+    "docs/knowledge/audits/2026-09-13-navigation-continuity.json",
+    "docs/knowledge/audits/2026-09-13-image-library-scale.json"
+  ],
+  "semantic_review": {
+    "inspected": [
+      "docs/maintainers/image-library-scale.md",
+      "docs/adr/0146-bounded-image-libraries.md",
+      "docs/knowledge/registry.json",
+      "post-mortem/CURRENT_STATE.md",
+      "post-mortem/runbooks/image-generation.md",
+      "docs/runbooks/release-readiness.md",
+      "docs/VERCEL_DEPLOYMENT.md",
+      "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md",
+      "docs/DOCUMENTATION_POLICY.md",
+      "docs/how-to/change-with-documentation.md",
+      "docs/reference/knowledge-commands.md"
+    ],
+    "result": "Reconciled implementation, deployed revision, migration and bounded live acceptance separately. Kept ADR proposed, original local evidence immutable and unrelated prevention actions open. Reviewed current source contracts against the frozen local evidence; all 59 hashes matched before release. No application source changed after c9c9121.",
+    "limitations": "This release delta review is not an exhaustive new audit of every file in the broader domain fingerprint inventories."
+  },
+  "remaining_limits": [
+    "Local 50,000-row fixtures are not production latency or sustained multi-instance load evidence.",
+    "No new image generation, billing settlement or Sites creation/publication was attempted.",
+    "ACT-011 gateway fixture and ACT-012 old missing test artifact remain open; no public diagnostics were restored."
+  ],
+  "reviewed_guide_sha256": {
+    "docs/maintainers/image-library-scale.md": "8dd2967fb9480e975bcfa50c86ddbe73dc228c82ca235182faf0ac278002a29b",
+    "docs/adr/0146-bounded-image-libraries.md": "3ec36c2249bdf983dfe259f4a6c6435bc0059cb8ec5643f7e1bab4ff69c9923c",
+    "docs/knowledge/registry.json": "a381c184444b3a5470b54c12c70ccec409397be0c2f5b5e5bf431b672b72216e",
+    "post-mortem/CURRENT_STATE.md": "813ddac1fee3e188f7827f6aa16c36bbf615d10a65d153a54d637adb3d8ee64f",
+    "post-mortem/runbooks/image-generation.md": "bb7bd5459d463c6e70cc9b9aef8ad4fb33f4e2b0d2463fa3060eefbb1ff40c23",
+    "docs/runbooks/release-readiness.md": "47a3842f9f185da0aacd551bfc753d8f11a992e6682bf792cd239e07a2a53635",
+    "docs/VERCEL_DEPLOYMENT.md": "f44b21bf51236e7e5d612f7f0be55233d3a7bc1e4b942479b7cc32d339d1f5d1",
+    "docs/maintainers/POSTGRESQL_MIGRATION_AND_AOP_DB_RUNBOOK.md": "c4853cb699faf0903db09c9e88505795354dc75b40a54af1b9db40730254fab1",
+    "docs/DOCUMENTATION_POLICY.md": "ab2030f9d15010634b9a2d9cf2bc680fdf4ae961c2ee3f9f7ad567e99d49d40c",
+    "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
+    "docs/reference/knowledge-commands.md": "3ae9092ea941ebc459a2895b8c2eebb4c1c8d59659d718a2c353a1a6be6e8379"
+  }
+}

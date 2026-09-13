@@ -2,7 +2,7 @@
 
 <!-- docs-scope: current-guide -->
 
-Private maintainer guide for the `/images` library. This is local implementation guidance, not a production capacity promise. [ADR 0146](../adr/0146-bounded-image-libraries.md) records the tradeoffs; [dated evidence](../knowledge/audits/2026-09-13-image-library-scale.json) records tests. Generation receipts remain governed by [ADR 0144](../adr/0144-durable-images-and-incident-documentation.md).
+Private maintainer guide for the `/images` library. The implementation was deployed to `galx.ai` on September 13 at `c9c9121`, after its additive migration. The [release record](../../post-mortem/releases/2026-09-13-image-library-scale.json) separates live read-only acceptance from local scale fixtures; it is not a production capacity promise. [ADR 0146](../adr/0146-bounded-image-libraries.md) records the tradeoffs; [dated local evidence](../knowledge/audits/2026-09-13-image-library-scale.json) records tests. Generation receipts remain governed by [ADR 0144](../adr/0144-durable-images-and-incident-documentation.md).
 
 ## User experience
 

@@ -55,9 +55,22 @@ class KnowledgeGuardTests(unittest.TestCase):
         self.record['evidence'] = []
         self.assertTrue(any('requires evidence' in e for e in kb.validate(self.root, self.config, {})))
 
-    def test_proposed_decision_cannot_assert_deployment(self):
-        self.record.update(status='proposed', delivery='deployed', target='fixture', revision='fixture', observed_at='2026-09-13T00:00:00Z')
-        self.assertTrue(any('unaccepted' in e for e in kb.validate(self.root, self.config, {})))
+    def test_delivery_evidence_does_not_accept_a_decision(self):
+        for status in ('proposed', 'rejected'):
+            for delivery in ('deployed', 'verified'):
+                with self.subTest(status=status, delivery=delivery):
+                    self.record.update(status=status, delivery=delivery, target='fixture',
+                                       revision='fixture', observed_at='2026-09-13T00:00:00Z')
+                    before = copy.deepcopy(self.config)
+                    self.assertEqual(kb.validate(self.root, self.config, {}), [])
+                    kb.generated(self.root, self.config)
+                    self.assertEqual(self.config, before)
+
+    def test_unaccepted_delivery_still_requires_evidence_and_target(self):
+        self.record.update(status='proposed', delivery='deployed', evidence=[])
+        errors = kb.validate(self.root, self.config, {})
+        self.assertTrue(any('requires evidence' in e for e in errors))
+        self.assertTrue(any('target, revision' in e for e in errors))
 
     def test_new_decision_cannot_skip_metadata(self):
         self.write('docs/adr/0146-next.md', '# Next decision\n')

@@ -1,11 +1,13 @@
 {
   "knowledge": {
-    "reviewer": "Codex maintainer review",
-    "note": "Reviewed new image source/guide/check mappings and ADR 0146 metadata against documentation policy, change workflow, knowledge operations and command reference. ADR remains proposed/local; historical evidence is preserved.",
+    "reviewer": "release maintainer",
+    "note": "Reviewed release evidence and the affected canonical guides against unchanged application source. Reconciled actual deployment separately from ADR approval. The offline lifecycle correction retains release evidence requirements and passed 37 guard tests; existing operational follow-ups remain open.",
     "reviewed_at": "2026-09-13",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-13-image-library-scale.json": "f51afa787ae8bb8f87f2c481e9086c20c6df4e2c555903f83a4c46d3275418e8"
+      "docs/knowledge/audits/2026-09-13-image-library-scale.json": "f51afa787ae8bb8f87f2c481e9086c20c6df4e2c555903f83a4c46d3275418e8",
+      "post-mortem/releases/2026-09-13-image-library-scale.json": "2e88cede8b57a383ea3bbf62a4906b399b7ff663b239928925bf6160304a94ab",
+      "docs/knowledge/audits/2026-09-13-deployment-lifecycle.json": "155390b1d45fd87c3123ae1704fad186e35e4984d82baa5eaa63ddab744ecfd5"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -22,10 +24,10 @@
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/registry.json": "588bd0430d48561ada1be7644f89d641b029d87bc0f0b32a052683d932d12c79",
+      "docs/knowledge/registry.json": "a381c184444b3a5470b54c12c70ccec409397be0c2f5b5e5bf431b672b72216e",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
-      "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "d2cd40a5684ce13365e5be75f5324963d2f4e0770d4a003d55d4b29b0e85a0e4",
+      "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "b7df75535611c14aabe599764a6f6c2a4f0f1461d068929602c68e39d8ce850d",
       "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md": "818fc95eec428e907e9ce031da9640e764c33ae43da9244a94fd6abb84b2e8ee",
       "docs/maintainers/DAY_1_TO_30_ONBOARDING_ROADMAP.md": "e9295b186cf9d5f9bc0c6a943f54af40ff52122aa5f8d880d5263c00d2dd7fd4",
       "docs/maintainers/MAINTAINER_ONBOARDING_ASSESSMENT.md": "619331130e6bd5559c36059c617449712178a0fb16b8ef6487a00402bd8bd525",
@@ -39,24 +41,26 @@
       "docs/tutorials/README.md": "7cc84f00412108e1c8ec84ef127b15027b606bd16c2dc290f6efc607b9ca5268",
       "docs/tutorials/first-change.md": "06b7c9501cfe62893978e1da6556d6d4fc0d88f4e36b484d05dad4ad72d9fd60",
       "package.json": "70e82077c8f5133eacc5c91f0aaaea0f6b01f61677917b960fe590ae0ad6348a",
-      "scripts/docs-kb.py": "7f424c1120a2de2cb36f7d6313785fbe35244d91351891e023e4121ba39b0ce2",
-      "scripts/test-docs-kb.py": "74f954909e6fe4086596794d6cfa5655bed722c35c960db51a87abd447dbad71",
+      "scripts/docs-kb.py": "57642bcce6edcdec6b14dc285e973c1c7ba43d9b8908903826befcba6e992d88",
+      "scripts/test-docs-kb.py": "83aa914e66cc04d866fd4c77554760748f8e1d07378326c49ac1738f12851856",
       "scripts/test-post-mortem.py": "fba33221df8a4d167f0e0662cfe1543f76628adcc52b70e0d6f2528f72b8ef4a",
       "scripts/verify-docs.py": "083c3dc63302861d5d754c67e8db11d837097f0660681951c65c7649e9540ae0",
       "scripts/verify-post-mortem.py": "ef6c8fb7c1d986b7690efe5a69307143ba23c1c8d85e4b503377c7239a298d6f"
     }
   },
   "images": {
-    "reviewer": "Codex maintainer review",
-    "note": "Reviewed bounded studio paging/details, owner-scoped SQL and cursor contracts, BroccoliDB admission, sanitized original/thumbnail delivery, exact public route policy and complete image/queue/recovery guidance. Local fixture evidence and rollout limits are retained.",
+    "reviewer": "release maintainer",
+    "note": "Reviewed release evidence and the affected canonical guides against unchanged application source. Reconciled actual deployment separately from ADR approval. The offline lifecycle correction retains release evidence requirements and passed 37 guard tests; existing operational follow-ups remain open.",
     "reviewed_at": "2026-09-13",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-13-image-library-scale.json": "f51afa787ae8bb8f87f2c481e9086c20c6df4e2c555903f83a4c46d3275418e8"
+      "docs/knowledge/audits/2026-09-13-image-library-scale.json": "f51afa787ae8bb8f87f2c481e9086c20c6df4e2c555903f83a4c46d3275418e8",
+      "post-mortem/releases/2026-09-13-image-library-scale.json": "2e88cede8b57a383ea3bbf62a4906b399b7ff663b239928925bf6160304a94ab",
+      "docs/knowledge/audits/2026-09-13-deployment-lifecycle.json": "155390b1d45fd87c3123ae1704fad186e35e4984d82baa5eaa63ddab744ecfd5"
     },
     "files": {
       "docs/QUEUE_SPECIFICATION.md": "fa7b78efd6cce520136479e32e821faeb8a1fb7366d0d0a01a6be26ecd6f81a4",
-      "docs/maintainers/image-library-scale.md": "761e20e45ef289fa99c1add605bff237a96c2eb2debf475fa71de248e5bca7e1",
+      "docs/maintainers/image-library-scale.md": "8dd2967fb9480e975bcfa50c86ddbe73dc228c82ca235182faf0ac278002a29b",
       "docs/maintainers/image-public-boundary.md": "79cb97916d4d9257931a30667e2a346e4fb8316e2659c5ccd3f086d60b84fbad",
       "post-mortem/runbooks/image-generation.md": "bb7bd5459d463c6e70cc9b9aef8ad4fb33f4e2b0d2463fa3060eefbb1ff40c23",
       "scripts/test-image-library-api.ts": "e29b96a2542534a2aad54fc5ecb6481829a238fdf78b55f900dc17824e9e479c",
@@ -546,16 +550,18 @@
     }
   },
   "broccolidb": {
-    "reviewer": "Codex maintainer review",
-    "note": "Reviewed bounded cache/coordinator, write admission, metadata eviction and read authority against the complete compaction/sync and image-scale guides. Preview permission caching remains unchanged; focused scale and existing regressions passed.",
+    "reviewer": "release maintainer",
+    "note": "Reviewed release evidence and the affected canonical guides against unchanged application source. Reconciled actual deployment separately from ADR approval. The offline lifecycle correction retains release evidence requirements and passed 37 guard tests; existing operational follow-ups remain open.",
     "reviewed_at": "2026-09-13",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-13-image-library-scale.json": "f51afa787ae8bb8f87f2c481e9086c20c6df4e2c555903f83a4c46d3275418e8"
+      "docs/knowledge/audits/2026-09-13-image-library-scale.json": "f51afa787ae8bb8f87f2c481e9086c20c6df4e2c555903f83a4c46d3275418e8",
+      "post-mortem/releases/2026-09-13-image-library-scale.json": "2e88cede8b57a383ea3bbf62a4906b399b7ff663b239928925bf6160304a94ab",
+      "docs/knowledge/audits/2026-09-13-deployment-lifecycle.json": "155390b1d45fd87c3123ae1704fad186e35e4984d82baa5eaa63ddab744ecfd5"
     },
     "files": {
       "docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md": "72325ecd8087214538910b8ee29bc739c20146b7491eb0947ed417b39229a87a",
-      "docs/maintainers/image-library-scale.md": "761e20e45ef289fa99c1add605bff237a96c2eb2debf475fa71de248e5bca7e1",
+      "docs/maintainers/image-library-scale.md": "8dd2967fb9480e975bcfa50c86ddbe73dc228c82ca235182faf0ac278002a29b",
       "docs/operations/preview-hybrid-sync.md": "1ac7ce76537660cfc507a595c942d4da2324060b8a3f15ddf9ab96d993ff38e9",
       "scripts/test-broccolidb-compaction-api-route.ts": "7572d2e9b785d7dbd42828f04090fc5d6a2a189dcf8f649e7e0b355fac9496bd",
       "scripts/test-broccolidb-production-hardening.ts": "faafec0e952a4bc3ea7c45093735de5d99772f08d434d47a33cb29db86373070",

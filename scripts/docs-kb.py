@@ -149,8 +149,8 @@ def validate(root, config, reviews, require_complete=True):
             errors.append(f'{name}: delivery state requires evidence')
         if record['delivery'] in {'deployed', 'verified'} and not all(record.get(k) for k in ('target', 'revision', 'observed_at')):
             errors.append(f'{name}: deployed/verified requires target, revision and observed_at')
-        if record['delivery'] in {'deployed', 'verified'} and record['status'] in {'proposed', 'rejected'}:
-            errors.append(f'{name}: unaccepted decision cannot claim deployment')
+        # Delivery records observations independently from decision approval.
+        # Retain evidence requirements without forcing an acceptance transition.
         if record.get('observed_at'):
             observed = datetime.fromisoformat(record['observed_at'].replace('Z', '+00:00'))
             if observed.tzinfo is None or observed > datetime.now(timezone.utc):

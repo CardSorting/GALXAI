@@ -285,3 +285,45 @@ Incident: `INC-20260913-DOCS`. Kind: `verification`.
 **Next step:** Maintain weekly evidence-backed reviews and existing operational follow-ups; reconcile the separate pre-existing gateway fixture under ACT-011.
 
 Evidence: [2026-09-13-final-ci-verification.json](../docs/knowledge/audits/2026-09-13-final-ci-verification.json).
+
+## EVT-20260913-IMAGE-LIBRARY-RELEASE — 2026-09-13T08:17:38.840411Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `verification`.
+
+**Observation:** The user authorized commit, push and deployment of navigation continuity and bounded image-library work.
+
+**Action:** Created and pushed focused commits; applied the reviewed additive migration before rollout; verified hosted application CI, production aliases, signed-in browsing and sanitized image/thumbnail HTTP contracts.
+
+**Result:** Site deployment dpl_DV3riRMTmcniaTnNuBQhDEMdfWgg serves c9c9121. Application and documentation CI passed; no new generation or load test was performed.
+
+**Next step:** Monitor actual production library and preview costs; preserve prior incident prevention work and compatible rollback.
+
+Evidence: [2026-09-13-image-library-scale.json](releases/2026-09-13-image-library-scale.json).
+
+## EVT-20260913-IMAGE-LIBRARY-RELEASE-FOLLOWUPS — 2026-09-13T08:17:38.840411Z
+
+Incident: `INC-20260913-IMAGES`. Kind: `follow-up`.
+
+**Observation:** An earliest-row artifact probe found an old fixture-named completed record with a missing stored object; the separately triggered gateway workflow repeated its existing obsolete diagnostic assertion.
+
+**Action:** Compared bounded and legacy reads of the same object, both storage 404; verified the known valid frontend-generated image instead. Retained ACT-011 and opened ACT-012 without changing production data.
+
+**Result:** Known valid original, thumbnail, repeated thumbnail and denied capabilities passed. Missing-object consistency remains unresolved; gateway deployment was skipped.
+
+**Next step:** Reconcile the old record with explicit provenance and authorized cleanup; address the existing gateway fixture independently without exposing diagnostics.
+
+Evidence: [2026-09-13-image-library-scale.json](releases/2026-09-13-image-library-scale.json).
+
+## EVT-20260913-DELIVERY-LIFECYCLE-CORRECTION — 2026-09-13T08:20:03.829167Z
+
+Incident: `INC-20260913-DOCS`. Kind: `follow-up`.
+
+**Observation:** Recording the authorized image-library deployment revealed a validator rule coupling ADR acceptance with observed delivery.
+
+**Action:** Aligned the offline validator and canonical guidance with independent decision/delivery states; retained evidence requirements and added adversarial coverage against automatic acceptance and unsupported deployment claims.
+
+**Result:** Twenty incident and seventeen knowledge guard tests passed. The image-library ADR remains proposed while the actual deployment is recorded.
+
+**Next step:** Record the explicit review and validate synchronized documentation before pushing the release receipt.
+
+Evidence: [2026-09-13-deployment-lifecycle.json](../docs/knowledge/audits/2026-09-13-deployment-lifecycle.json).
