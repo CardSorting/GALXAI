@@ -214,6 +214,36 @@
         "npm run test:broccolidb:hardening",
         "npm run test:egress:transport"
       ]
+    },
+    "client-efficiency": {
+      "title": "Client request efficiency and navigation",
+      "owner": "Product/performance maintainer",
+      "sources": [
+        "src/lib/resilience/activity-polling.ts",
+        "src/lib/resilience/intent-prefetch.ts",
+        "src/components/common/IntentLink.tsx",
+        "src/components/common/CommandMenu.tsx",
+        "src/components/common/NotFoundSearchHelper.tsx",
+        "src/components/dashboard/Navigation.tsx",
+        "src/components/dashboard/MobileBottomNav.tsx",
+        "src/components/dashboard/Footer.tsx",
+        "src/components/images/use-image-studio.ts",
+        "src/components/images/ImageStudio.tsx",
+        "src/components/sites/use-sites-workspace.ts",
+        "scripts/test-request-efficiency.ts",
+        "scripts/test-sites-workspace.ts",
+        "scripts/verify-sites-workspace-ui.ts",
+        "scripts/verify-image-studio-ui.ts"
+      ],
+      "guides": [
+        "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
+        "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md"
+      ],
+      "checks": [
+        "npm run test:egress:transport",
+        "npm run test:image:security",
+        "npm run build"
+      ]
     }
   },
   "documents": {
@@ -268,6 +298,17 @@
         "review",
         "activation",
         "coverage"
+      ]
+    },
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": {
+      "kind": "reference",
+      "keywords": [
+        "vercel",
+        "quota",
+        "cpu",
+        "requests",
+        "prefetch",
+        "polling"
       ]
     }
   },

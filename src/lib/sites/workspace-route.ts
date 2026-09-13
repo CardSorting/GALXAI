@@ -1,7 +1,7 @@
 import { SitesBillingError, type SitesGenerationReply } from '../billing/sites-generation';
 import { boundedDomainJson } from './cloudflare-dns';
 import { SiteDomainError } from './domains';
-import { type SiteDocument, type SitesAccess, type SiteIntent } from './workspace-contract';
+import { readSiteSummary, type SiteDocument, type SitesAccess, type SiteIntent } from './workspace-contract';
 import { conversationMessages, readConversationResult, ConversationInputError, type ConversationContext } from './conversation-context';
 import { FairUsageError } from './fair-policy';
 import type { IncludedGenerationReply } from './included-generation';
@@ -30,6 +30,21 @@ export function sitesWorkspaceRoute(deps: WorkspaceDependencies) {
       const reply = (row: Parameters<typeof workspaceView>[0]) => Response.json({ site: workspaceView(row) }, { headers });
       if (request.method === 'GET') {
         const positive=(v:string|null)=>v!==null && /^[1-9][0-9]{0,8}$/.test(v)?Number(v):undefined;
+        const setup = async () => {
+          let access: SitesAccess = 'unavailable';
+          try { await deps.prepare(owner,request.signal); access='included'; }
+          catch(error) { if(error instanceof FairUsageError && error.status===403)access='paid_plan_required'; }
+          return { access, publishing: access==='included' && deps.canPublish?.(owner) ? 'available' : 'unavailable', username:await repo.username(owner) };
+        };
+        if (url.searchParams.get('view') === 'bootstrap') {
+          const names = [...url.searchParams.keys()].sort().join(',');
+          const id = url.searchParams.get('id');
+          if (!(names === 'view' || (names === 'id,view' && uuid(id)))) return fail(400);
+          const [sites, state, row] = await Promise.all([
+            repo.library(owner), setup(), id ? repo.get(owner,id) : Promise.resolve(null),
+          ]);
+          return Response.json({ sites: sites.map(readSiteSummary), setup: state, site: row ? workspaceView(row) : null }, { headers });
+        }
         if (url.searchParams.has('id')) {
           const id=url.searchParams.get('id'); if(!uuid(id))return fail(400);
           const names=[...url.searchParams.keys()].sort().join(','),view=url.searchParams.get('view');
@@ -44,10 +59,7 @@ export function sitesWorkspaceRoute(deps: WorkspaceDependencies) {
         if(url.searchParams.size>1)return fail(400);
         if(url.searchParams.get('view')==='library')return Response.json({sites:await repo.library(owner)},{headers});
         if (url.searchParams.get('view') === 'setup') {
-          let access: SitesAccess = 'unavailable';
-          try { await deps.prepare(owner,request.signal); access='included'; }
-          catch(error) { if(error instanceof FairUsageError && error.status===403)access='paid_plan_required'; }
-          return Response.json({ access, publishing: access==='included' && deps.canPublish?.(owner) ? 'available' : 'unavailable',username:await repo.username(owner) }, { headers });
+          return Response.json(await setup(), { headers });
         }
         if (url.search) return fail(400);
         return Response.json({ sites: (await repo.list(owner)).map(workspaceView) }, { headers });

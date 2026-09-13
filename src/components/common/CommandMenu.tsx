@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { prefetchOnIntent } from '@/lib/resilience/intent-prefetch';
 import {
   Search,
   Zap,
@@ -365,29 +366,13 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
     setSelectedIndex(0);
   }, [query]);
 
-  // Predictive prefetch the highlighted item and top 3 results to eliminate route transition latency
+  // Warm one stable selection only while the palette is actually open.
   useEffect(() => {
-    if (selectableItems.length > 0) {
-      const activeItem = selectableItems[selectedIndex];
-      if (activeItem) {
-        try {
-          router.prefetch(activeItem.href);
-          BroccoliOmniSearch.prefetchRoute(activeItem.href);
-        } catch {}
-      }
-
-      // Speculatively prefetch top 3 results in background
-      const topItems = selectableItems.slice(0, 3);
-      for (const item of topItems) {
-        if (item.href !== activeItem?.href) {
-          try {
-            router.prefetch(item.href);
-            BroccoliOmniSearch.prefetchRoute(item.href);
-          } catch {}
-        }
-      }
-    }
-  }, [selectedIndex, selectableItems, router]);
+    const item = selectableItems[selectedIndex];
+    if (!isOpen || !item || item.actionType) return;
+    const timer = setTimeout(() => prefetchOnIntent(router, item.href), 120);
+    return () => clearTimeout(timer);
+  }, [isOpen, selectedIndex, selectableItems, router]);
 
   const navigateTo = useCallback(async (
     href: string,
@@ -666,8 +651,6 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
                       onClick={() => navigateTo(r.href, r.title, r.category)}
                       onMouseEnter={() => {
                         setSelectedIndex(itemIndex);
-                        router.prefetch(r.href);
-                        BroccoliOmniSearch.prefetchRoute(r.href);
                       }}
                       className={`w-full px-3.5 py-2.5 rounded-xl flex items-center justify-between group transition-all text-left cursor-pointer border ${
                         isSelected
@@ -711,8 +694,6 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
                   onClick={() => navigateTo(`/models/${resolvedFromQuery.id}`, resolvedFromQuery.name, 'Models & Engines')}
                   onMouseEnter={() => {
                     setSelectedIndex(itemIndex);
-                    router.prefetch(`/models/${resolvedFromQuery.id}`);
-                    BroccoliOmniSearch.prefetchRoute(`/models/${resolvedFromQuery.id}`);
                   }}
                   className={`w-full flex items-center justify-between p-2 rounded-xl transition-all text-left cursor-pointer border ${
                     isSelected ? 'bg-black/90 border-amber-400 ring-1 ring-amber-400/40' : 'bg-black/60 hover:bg-black/80 border-white/5'
@@ -748,8 +729,6 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
                       onClick={() => navigateTo(item.href, item.title, item.category, item.actionType, item.actionData)}
                       onMouseEnter={() => {
                         setSelectedIndex(itemIndex);
-                        router.prefetch(item.href);
-                        BroccoliOmniSearch.prefetchRoute(item.href);
                       }}
                       className={`w-full px-3.5 py-2.5 rounded-xl flex items-center justify-between group transition-all text-left cursor-pointer border ${
                         isSelected
@@ -818,8 +797,6 @@ function BaseCommandMenu({ isOpen, onClose }: CommandMenuProps) {
                       onClick={() => navigateTo(routeHref, m.name, 'Models & Engines')}
                       onMouseEnter={() => {
                         setSelectedIndex(itemIndex);
-                        router.prefetch(routeHref);
-                        BroccoliOmniSearch.prefetchRoute(routeHref);
                       }}
                       className={`w-full px-3.5 py-2.5 rounded-xl flex items-center justify-between group transition-all text-left cursor-pointer border ${
                         isSelected

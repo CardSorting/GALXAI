@@ -1,0 +1,167 @@
+{
+  "observed_at": "2026-09-13T05:39:48.593842Z",
+  "scope": "Working-tree implementation and isolated local validation only. No production deployment, paid generation, live quota measurement or account-setting changes.",
+  "base_revision": "a8906261cc2f13eb167d9f71f1efd613542151b8",
+  "source_sha256": {
+    "src/lib/resilience/activity-polling.ts": "e67d71fcf3a45d90f3432f89b788d5c8bf87274af461df4fa48d806806b03f05",
+    "src/lib/resilience/intent-prefetch.ts": "4e6bb27186204c26df379c4604ebf854e0f395a6057d1e0bbf53a6497611e89e",
+    "src/components/common/IntentLink.tsx": "c866bc13acbbc81829c9f4ec1be5736bfb064c7a039c3d43ab5c524dd5d6e201",
+    "src/components/common/CommandMenu.tsx": "6aefcaef61f99be58961b9c5caa1954692ed1aa746666fe6fc6ffb59aeb8adb3",
+    "src/components/common/NotFoundSearchHelper.tsx": "b9d03011aaaf08c6a0228d894a017f4497d96239c224c32b7173f306ecdf3a8e",
+    "src/components/dashboard/Navigation.tsx": "5a8d113f7afa1031873740e353866fbf895c7864c34087f924768fda8f3d2628",
+    "src/components/dashboard/MobileBottomNav.tsx": "35e50ba3e6a286bd2f2fe9d44f49e4a68cb0869f7d2398aa9c14c214dc2e9493",
+    "src/components/dashboard/Footer.tsx": "b2f9edcdb3a685a260e592ded25eee6c590ce5403c577599d1911c6d743a80d9",
+    "src/components/images/use-image-studio.ts": "44b5d594d56ed14be3b803792339b0ec583fa483e150a471996ba934f1d7ac38",
+    "src/components/sites/use-sites-workspace.ts": "a5aede3120615041ebe318e6b0f96403e7ea2c5018a9a8483e24df5f902882df",
+    "scripts/test-request-efficiency.ts": "38f451a59b89db25a742086018a9a1ab9869685db11130cd0316c167493f590d",
+    "scripts/test-sites-workspace.ts": "cfd5ced896fb0ae0c9608abd7a9befeeb9e97c1742ca102a654ed6d70fca45db",
+    "scripts/verify-sites-workspace-ui.ts": "ab8966ef8e5ada5a9fbf697b466c121b25803b229fd9cca76ab317aef5958a4c",
+    "scripts/verify-image-studio-ui.ts": "bd7fee97d3d85622281de5b36d2b3b5c175382e7d6083c67387ef1fda30226c6",
+    "src/lib/sites/workspace-route.ts": "64e3890f3e494efb3d89ab842cf680a4062ba2697db4df56e4d47af1ca0d51e7",
+    "package.json": "f0d29d5346d6d7fd614cc747fbc14ab3cd67fddff5657a6ebdca6e576db131e2",
+    "docs/knowledge/registry.json": "450d512217d2783f6ad993948b704916f7a604c803c26e4ee575a34dff929053"
+  },
+  "semantic_review": {
+    "client-efficiency": "Reviewed all mapped client source changes, deterministic budgets, actual browser fixtures, and complete navigation/quota guides. Preserved native navigation, owner-bound private responses, original generation identity and explicit manual recovery.",
+    "sites": "Reviewed complete workspace guide and related operations, fair-use and domain guides against bootstrap route, existing owner-filtered repository reads, DTOs and client. Admission, database schema, publication and historical recovery remain unchanged. Fingerprint inventory is broader than this additive read-boundary review.",
+    "knowledge": "Reviewed registry additions, exact package script change, existing preflight invocation, complete touched README/CI guide and documentation policy/workflow/review instructions. Generated navigation is not a semantic approval; prior untouched domain content retains its earlier scope.",
+    "critical_review": "package.json only changes test:egress:transport to include request-efficiency and workspace boundary tests. Reviewed script bodies; runtime scripts, dependencies and production authority are unchanged."
+  },
+  "checks": {
+    "isolated_node22_regressions": {
+      "tests": 62,
+      "pass": 62,
+      "fail": 0,
+      "skipped": 0
+    },
+    "production_build": {
+      "exit_code": 0,
+      "runtime": "Node 22.22.2",
+      "dotenv_copied": false,
+      "real_credentials": false
+    },
+    "request_gate": {
+      "command": "npm run test:egress:transport",
+      "tests": 35,
+      "pass": 35
+    },
+    "types": {
+      "command": "npx tsc --noEmit --incremental false",
+      "exit_code": 0
+    },
+    "lint": {
+      "command": "npm run lint",
+      "exit_code": 0,
+      "warnings": 8,
+      "note": "Existing warnings; no errors."
+    },
+    "documentation_guard_fixtures": {
+      "command": "npm run test:docs",
+      "pass": 36
+    },
+    "sites_browser": {
+      "scope": "isolated browser fixtures; no live inference or publication",
+      "results": [
+        {
+          "label": "guest-1440",
+          "violations": []
+        },
+        {
+          "label": "guest-390",
+          "violations": []
+        },
+        {
+          "label": "guest-preview-390",
+          "violations": []
+        },
+        {
+          "label": "draft-1440",
+          "violations": []
+        },
+        {
+          "label": "draft-390",
+          "violations": []
+        },
+        {
+          "label": "publish-error-390",
+          "violations": []
+        }
+      ]
+    },
+    "images_browser": [
+      {
+        "label": "guest-1440",
+        "overflow": false,
+        "accessibility": []
+      },
+      {
+        "label": "guest-390",
+        "overflow": false,
+        "accessibility": []
+      },
+      {
+        "label": "pending-1440",
+        "overflow": false,
+        "accessibility": []
+      },
+      {
+        "label": "inspector-1440",
+        "overflow": false,
+        "accessibility": []
+      },
+      {
+        "label": "library-1440",
+        "overflow": false,
+        "accessibility": []
+      },
+      {
+        "label": "library-390",
+        "overflow": false,
+        "accessibility": []
+      },
+      {
+        "label": "inspector-390",
+        "overflow": false,
+        "accessibility": []
+      },
+      {
+        "label": "library-error-390",
+        "overflow": false,
+        "accessibility": []
+      }
+    ],
+    "compiled_scan": {
+      "scope": "isolated production build, not live site",
+      "files": 660,
+      "markers": 61,
+      "hits": [],
+      "incident_trace_errors": [],
+      "build_log_sha256": "3050dcd87ef2aa8df6ddfb028afc6d86f1f9f195ac1d6ba55f43b3bf9c3d8cc2",
+      "tests_log_sha256": "1f8ab0e5b99dfd99561bb2ef4f6b1f15c225ac757c91264d3aa9568a62797eee"
+    }
+  },
+  "fixture_request_counts": {
+    "sites_bootstrap_before": {
+      "library": 2,
+      "selected_site": 3
+    },
+    "sites_bootstrap_after": 1,
+    "focus_event_burst_additional_requests": 0,
+    "pending_image_five_minutes_before": 120,
+    "pending_image_five_minutes_after": 35,
+    "hidden_or_offline_polls": 0
+  },
+  "verification_corrections": [
+    "Homebrew Node 22 had a missing shared library; used the installed standalone Node 22.22.2 runtime.",
+    "Sandbox blocked a localhost test listener; the same isolated security suite and build passed with approved local execution.",
+    "A synchronous focus assertion raced requestAnimationFrame; the final fixture waits for the actual textarea ID to gain focus. An intermediate assertion mistakenly checked an aria-label instead of its associated HTML label and was corrected.",
+    "Image retention validation now holds the response behind a controlled promise instead of racing a timed delay; final Sites and Images scripts pass."
+  ],
+  "limits": [
+    "Savings are request-count fixtures, not measured CPU or billed Vercel savings.",
+    "No live Core Web Vitals trace, production traffic attribution, alert installation, hosted CI run or deployment in this task.",
+    "No database schema or query changes; existing owner filters inspected, database integration suites not rerun.",
+    "The public-Site sanitized extra origin hop and existing middleware authorization remain intact.",
+    "Private-marker scan covers 61 selected implementation markers plus the incident/build-trace guard, not an exhaustive live-site audit."
+  ]
+}

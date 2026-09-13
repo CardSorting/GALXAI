@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { startActivityPolling, imageStatusDelay } from '@/lib/resilience/activity-polling';
 import { DEFAULT_SETTINGS, generationBody, readGeneration, readLibrary, readPending, readSettings, studioError,
   type PendingGeneration, type StudioImage, type StudioSettings } from './studio-contract';
 
@@ -41,6 +42,8 @@ export function useImageStudio(owner: string | null, token?: string) {
   const submitController = useRef<AbortController | null>(null);
   const libraryController = useRef<AbortController | null>(null);
   const librarySequence = useRef(0);
+  const libraryView = useRef('');
+  const libraryRetryCursor = useRef<string | undefined>(undefined);
   const assetLock = useRef(false);
   const headers = useCallback((): Record<string, string> => ({ Accept: 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }), [token]);
 
@@ -75,21 +78,34 @@ export function useImageStudio(owner: string | null, token?: string) {
     const controller = new AbortController(); libraryController.current = controller;
     const timeout = window.setTimeout(() => controller.abort(), 20_000);
     setLibraryLoading(true); setLibraryError('');
-    if (!after) { setImages([]); setCursor(null); }
+    const view = JSON.stringify([owner, filter, favorites, sort]);
+    if (!after && libraryView.current !== view) { setImages([]); setCursor(null); }
+    libraryView.current = view;
     const params = new URLSearchParams({ limit: '36', sort });
     if (filter) params.set('search', filter);
     if (favorites) params.set('isFavorite', 'true');
     if (after) params.set('cursor', after);
     let failureMessage = 'Your library couldn’t be loaded. Try refreshing it.';
+    let accessDenied = false;
     try {
       const response = await fetch(`/api/images/library?${params}`, { headers: headers(), signal: controller.signal, cache: 'no-store' });
-      if (!response.ok) { if (response.status === 401) failureMessage = studioError(401); throw new Error('Library unavailable'); }
+      if (!response.ok) {
+        if ([401,403].includes(response.status) && alive.current && sequence === librarySequence.current) {
+          accessDenied = true;
+          setImages([]); setCursor(null); setTotal(0);
+          failureMessage = studioError(response.status);
+        }
+        throw new Error('Library unavailable');
+      }
       const result = readLibrary(await response.json());
       if (!alive.current || sequence !== librarySequence.current) return;
       setImages(current => after ? [...current, ...result.images.filter(image => !current.some(item => item.id === image.id))] : result.images);
       setCursor(result.cursor); setTotal(result.total);
     } catch {
-      if (alive.current && sequence === librarySequence.current) setLibraryError(controller.signal.aborted ? 'Your library took too long to load. Try refreshing it.' : failureMessage);
+      if (alive.current && sequence === librarySequence.current) {
+        libraryRetryCursor.current = accessDenied ? undefined : after;
+        setLibraryError(controller.signal.aborted ? 'Your library took too long to load. Try again.' : failureMessage);
+      }
     } finally {
       clearTimeout(timeout);
       if (alive.current && sequence === librarySequence.current) setLibraryLoading(false);
@@ -99,34 +115,33 @@ export function useImageStudio(owner: string | null, token?: string) {
 
   useEffect(() => {
     if (!pending || !polling || !owner) return;
-    const controller = new AbortController();
-    let timer: ReturnType<typeof setTimeout>;
-    let active = true;
+    let active = true, attempt = 0;
     const deadline = Date.now() + 300_000;
     setError(''); setProgress('Checking your generation…');
-    const poll = async () => {
-      const timeout = window.setTimeout(() => controller.abort(), 25_000);
+    const stop = startActivityPolling(async signal => {
       try {
-        const response = await fetch(`/v1/images/requests/${encodeURIComponent(pending.id)}`, { headers: headers(), signal: controller.signal, cache: 'no-store' });
-        if (controller.signal.aborted || !active || !alive.current) return;
-        if (!response.ok) { setError(studioError(response.status)); setPolling(false); return; }
+        const response = await fetch(`/v1/images/requests/${encodeURIComponent(pending.id)}`, {
+          headers: headers(), signal: AbortSignal.any([signal, AbortSignal.timeout(25_000)]), cache: 'no-store',
+        });
+        if (signal.aborted || !active || !alive.current) return null;
+        if (!response.ok) { setError(studioError(response.status)); setPolling(false); return null; }
         const payload = await response.json();
-        if (controller.signal.aborted || !active || !alive.current) return;
+        if (signal.aborted || !active || !alive.current) return null;
         if (response.status === 202) {
           setProgress(payload.status === 'queued' ? 'Waiting to start…' : 'Creating your images…');
-          if (Date.now() >= deadline) { setPolling(false); setNotice('Still waiting. You can check the status again or look in your library.'); return; }
-          timer = setTimeout(() => void poll(), 2500); return;
+          if (Date.now() >= deadline) { setPolling(false); setNotice('Still waiting. You can check the status again or look in your library.'); return null; }
+          return imageStatusDelay(attempt++, response.headers.get('Retry-After'));
         }
         setLatest(readGeneration(payload, pending.settings, pending.id));
         setNotice('Your images are ready. Download them or reuse the prompt.');
         save(`${key}:pending`, null); save(`${key}:unconfirmed`, null); setPending(null); setPolling(false); refresh();
       } catch {
-        if (!active || !alive.current) return;
+        if (!active || !alive.current) return null;
         setPolling(false); setError('The status check was interrupted. Check again to resume this generation.');
-      } finally { clearTimeout(timeout); }
-    };
-    void poll();
-    return () => { active = false; clearTimeout(timer); controller.abort(); };
+      }
+      return null;
+    });
+    return () => { active = false; stop(); };
   }, [headers, key, owner, pending, polling, refresh]);
 
   async function generate() {
@@ -187,5 +202,6 @@ export function useImageStudio(owner: string | null, token?: string) {
   return { settings, setSettings, ready, pending, polling, setPolling, submitting, uncertain, progress, error, notice, setNotice,
     retryIn: Math.max(0, Math.ceil((retryAt - now) / 1000)), elapsed: pending ? Math.max(0, Math.floor((now - pending.startedAt) / 1000)) : 0,
     latest, images, total, cursor, libraryLoading, libraryError, search, setSearch, favorites, setFavorites, sort, setSort,
-    generate, refresh, loadMore: () => { if (cursor && !libraryLoading) void fetchLibrary(cursor); }, toggleFavorite, busyAsset, clearPending };
+    generate, refresh, retryLibrary: () => { if (!libraryLoading) void fetchLibrary(libraryRetryCursor.current); },
+    loadMore: () => { if (cursor && !libraryLoading) void fetchLibrary(cursor); }, toggleFavorite, busyAsset, clearPending };
 }

@@ -1,5 +1,5 @@
 'use client';
-import Link from 'next/link';
+import { IntentLink as Link } from '@/components/common/IntentLink';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { GalxGalaxyLogo } from '@/components/brand/GalxGalaxyLogo';

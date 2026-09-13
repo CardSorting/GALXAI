@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { IntentLink as Link } from './IntentLink';
+import { prefetchOnIntent } from '@/lib/resilience/intent-prefetch';
 import { Search, ArrowRight, Sparkles } from 'lucide-react';
 import { recordRecentVisit } from '@/lib/resilience/recent-navigation';
 
@@ -23,13 +24,11 @@ export function NotFoundSearchHelper() {
     setSelectedIndex(0);
   }, [query]);
 
-  // Predictive prefetch the highlighted search match
   useEffect(() => {
-    if (results.length > 0 && results[selectedIndex]) {
-      try {
-        router.prefetch(results[selectedIndex].href);
-      } catch {}
-    }
+    const item = results[selectedIndex];
+    if (!item) return;
+    const timer = setTimeout(() => prefetchOnIntent(router, item.href), 120);
+    return () => clearTimeout(timer);
   }, [selectedIndex, results, router]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -83,7 +82,6 @@ export function NotFoundSearchHelper() {
                 href={item.href}
                 onMouseEnter={() => {
                   setSelectedIndex(index);
-                  router.prefetch(item.href);
                 }}
                 onClick={() => recordRecentVisit(item.title, item.href, item.category)}
                 className={`flex items-center justify-between p-2 rounded-xl text-xs transition-all group border ${

@@ -226,9 +226,9 @@
     },
     {
       "path": "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
-      "scope": "domain-reference",
+      "scope": "current-guide",
       "category": "docs",
-      "title": "GALXAI Natural Navigation, OmniSearch & Low-Latency Substrate Guide"
+      "title": "Navigation and request intent"
     },
     {
       "path": "docs/OAUTH_AND_TOKEN_LIFECYCLE_SPECIFICATION.md",
@@ -1747,6 +1747,12 @@
       "scope": "current-guide",
       "category": "docs",
       "title": "Upstream outage response"
+    },
+    {
+      "path": "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
+      "scope": "current-guide",
+      "category": "docs",
+      "title": "Vercel quota efficiency"
     },
     {
       "path": "docs/maintainers/image-public-boundary.md",

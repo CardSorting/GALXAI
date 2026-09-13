@@ -15,7 +15,8 @@ const row=():WorkspaceRow=>({id,user_id:'alice',title:'Daylight',revision:0,docu
 function fixture(){
   let current=row(),dispatches=0,reads=0,mode='ok';
   const repo={get:async(owner:string,site:string)=>{reads++;if(owner!==current.user_id||site!==id)throw new WorkspaceError(404);return current;},
-    recall:async()=>[],turn:async()=>null,list:async(owner:string)=>owner===current.user_id?[current]:[],username:async()=>null,
+    recall:async()=>[],turn:async()=>null,list:async(owner:string)=>owner===current.user_id?[current]:[],
+    library:async(owner:string)=>owner===current.user_id?[{...workspaceView(current),private_secret:'sentinel'}]:[],username:async()=>null,
     begin:async(owner:string,site:string,revision:number,op:string,brief:string)=>{await repo.get(owner,site);if(current.operation_id||revision!==current.revision)throw new WorkspaceError(409);current={...current,operation_id:op,operation_brief:brief,operation_started_at:new Date()};return current;},
     finish:async(_owner:string,_id:string,op:string,doc:any,message:string)=>{if(current.operation_id===op)current={...current,document:doc||current.document,operation_id:null,operation_brief:null,operation_started_at:null,revision:current.revision+1,messages:[{id:op,role:'assistant',text:message}]};return current;},
     create:async()=>current,update:async()=>current};
@@ -67,4 +68,37 @@ test('section navigation remains within the sandboxed preview and within downloa
   const embedded=renderSitePreview(document,true),standalone=renderSitePreview(document);
   assert(embedded.includes('href="about:srcdoc#site-section-1"'));assert(standalone.includes('href="#site-section-1"'));
   assert(!standalone.includes('about:srcdoc'));assert(!embedded.includes('<script'));assert(embedded.includes("base-uri 'none'"));
+});
+
+test('bootstrap consolidates owner-scoped setup/library/detail with an explicit no-store DTO',async()=>{
+  const f=fixture();
+  const response=await f.handle(request(undefined,'Bearer alice',`?view=bootstrap&id=${id}`));
+  assert.equal(response.status,200);assert.equal(response.headers.get('cache-control'),'private, no-store');
+  assert.equal(response.headers.get('set-cookie'),null);
+  const raw=await response.text();assert.doesNotMatch(raw,/sentinel|private_secret|user_id|operation_id/);
+  const data=JSON.parse(raw);assert.deepEqual(Object.keys(data).sort(),['setup','site','sites']);
+  assert.deepEqual(data.setup,{access:'included',publishing:'unavailable',username:null});
+  assert.equal(data.site.id,id);assert.equal(data.sites.length,1);assert.equal(data.sites[0].document,undefined);
+  assert.equal(f.dispatches(),0);
+});
+test('bootstrap rejects forged identity, foreign selection, duplicate and unexpected query fields',async()=>{
+  const f=fixture();
+  assert.equal((await f.handle(request(undefined,'',`?view=bootstrap&id=${id}`))).status,401);
+  const foreign=await f.handle(request(undefined,'Bearer bob',`?view=bootstrap&id=${id}`));
+  assert.equal(foreign.status,404);assert.deepEqual(await foreign.json(),{error:{code:'site_not_found'}});
+  assert.deepEqual((await (await f.handle(request(undefined,'Bearer bob','?view=bootstrap'))).json()).sites,[]);
+  for(const query of [`?view=bootstrap&id=${id}&id=${id}`,'?view=bootstrap&view=bootstrap','?view=bootstrap&owner=alice','?view=bootstrap&id=../../admin']){
+    assert.equal((await f.handle(request(undefined,'Bearer alice',query))).status,400,query);
+  }
+  assert.equal(f.dispatches(),0);
+});
+test('bootstrap keeps access unavailable on preparation failure and sanitizes repository failures',async()=>{
+  const f=fixture();
+  const handler=(repository:any)=>sitesWorkspaceRoute({authenticate:async()=>({id:'alice'}),repository:()=>repository,
+    requireAccess:async()=>{},prepare:async()=>{throw new Error('private upstream credentials');},recover:async()=>{throw new Error();},canPublish:()=>true});
+  const response=await handler(f.repo)(request(undefined,'Bearer alice','?view=bootstrap'));
+  assert.deepEqual((await response.json()).setup,{access:'unavailable',publishing:'unavailable',username:null});
+  const failed=await handler({...f.repo,library:async()=>{throw new Error('private database password');}})(request(undefined,'Bearer alice','?view=bootstrap'));
+  assert.equal(failed.status,503);assert.equal(failed.headers.get('cache-control'),'private, no-store');
+  assert.deepEqual(await failed.json(),{error:{code:'site_unavailable'}});
 });

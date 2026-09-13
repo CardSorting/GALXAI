@@ -16,7 +16,7 @@ const sentinel = 'private-diagnostic-sentinel';
 
 async function setup(width: number, authenticated: boolean) {
   const context = await browser.newContext({ viewport: { width, height: 1000 }, reducedMotion: 'reduce' });
-  const state = { posts: 0, polls: 0, patches: 0, complete: false, mode: 'success', libraryMode: 'success', payload: null as any,
+  const state = { posts: 0, polls: 0, patches: 0, complete: false, mode: 'success', libraryMode: 'success', libraryHold: null as Promise<void> | null, payload: null as any,
     images: [] as any[], favorites: new Set<string>(), libraryQueries: [] as string[] };
   if (authenticated) await context.addInitScript(() => {
     localStorage.setItem('galx_custom_auth_user', JSON.stringify({ id: 'studio-test-user', token: 'studio-fixture-token', name: 'Studio Tester', provider: 'fixture' }));
@@ -46,6 +46,7 @@ async function setup(width: number, authenticated: boolean) {
     if (url.pathname.startsWith('/v1/images/assets/')) return route.fulfill({ status: 200, contentType: 'image/webp', body: picture });
     if (url.pathname === '/api/images/library') {
       state.libraryQueries.push(url.search);
+      if (state.libraryHold) await state.libraryHold;
       if (state.libraryMode === 'error') return json({ error: sentinel }, 503);
       if (state.libraryMode === 'unauthorized') return json({ error: sentinel }, 401);
       let records = state.images.map(image => ({ ...image, isFavorite: state.favorites.has(image.id) }));
@@ -110,6 +111,12 @@ try {
   await page.getByLabel('Prompt', { exact: true }).press('Control+Enter');
   await page.getByRole('heading', { name: 'Waiting to start…' }).waitFor();
   assert.equal(state.posts, 1);
+  const beforeHidden = state.polls;
+  await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' }); document.dispatchEvent(new Event('visibilitychange')); });
+  await page.waitForTimeout(3000);
+  assert.equal(state.polls, beforeHidden, 'hidden page stops status requests');
+  await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' }); document.dispatchEvent(new Event('visibilitychange')); });
+  await page.waitForFunction(() => document.visibilityState === 'visible');
   assert.deepEqual(state.payload, { model: 'openai-gpt-image-latest', prompt: 'A cinematic blue desert lake', n: 2, size: '1536x1024', quality: 'standard', response_format: 'url' });
   await page.getByRole('button', { name: 'Pause status checks' }).click();
   await page.getByRole('button', { name: 'Check status', exact: true }).waitFor();
@@ -143,9 +150,26 @@ try {
   await page.getByRole('heading', { name: 'No images match your search' }).waitFor();
   await page.getByRole('button', { name: 'Clear search' }).click();
   await page.getByRole('button', { name: 'Open image: A cinematic blue desert lake' }).waitFor();
+  let releaseLibrary!: () => void;
+  state.libraryHold = new Promise(resolve => { releaseLibrary = resolve; });
+  await page.getByRole('button', { name: 'Refresh library' }).click();
+  try {
+    await page.waitForFunction(() => document.querySelector<HTMLButtonElement>('button[aria-label="Refresh library"]')?.disabled);
+    assert(await page.getByRole('button', { name: 'Open image: A cinematic blue desert lake' }).isVisible(), 'refresh retains the visible image while its response is pending');
+  } finally { state.libraryHold = null; releaseLibrary(); }
+  await page.waitForFunction(() => !document.querySelector<HTMLButtonElement>('button[aria-label="Refresh library"]')?.disabled);
   state.libraryMode = 'pages'; await page.getByRole('button', { name: 'Refresh library' }).click();
+  await page.getByRole('button', { name: 'Load more images' }).waitFor();
+  state.libraryMode = 'error';
   await page.getByRole('button', { name: 'Load more images' }).click();
+  await page.getByRole('alert').filter({ hasText: 'Couldn’t update your library' }).waitFor();
+  assert(await page.getByRole('button', { name: 'Open image: A cinematic blue desert lake' }).isVisible(), 'failed pagination keeps existing images');
+  const failedPage = state.libraryQueries.at(-1);
+  assert.equal(new URLSearchParams(failedPage).get('cursor'), 'page-two');
+  state.libraryMode = 'pages';
+  await page.getByRole('button', { name: 'Try again', exact: true }).click();
   await page.getByRole('button', { name: 'Open image: Another beautiful landscape' }).waitFor();
+  assert.equal(state.libraryQueries.at(-1), failedPage, 'retry loads the failed page instead of discarding the loaded pages');
   await inspect(page, 'library-1440');
   await page.setViewportSize({ width: 390, height: 844 });
   await inspect(page, 'library-390');
@@ -153,10 +177,13 @@ try {
   await inspect(page, 'inspector-390');
   await page.keyboard.press('Escape');
   state.libraryMode = 'error'; await page.getByRole('button', { name: 'Refresh library' }).click();
-  await page.getByRole('heading', { name: 'Your images couldn’t be loaded' }).waitFor();
+  await page.getByRole('alert').filter({ hasText: 'Couldn’t update your library' }).waitFor();
+  assert(await page.getByRole('button', { name: 'Open image: A cinematic blue desert lake' }).isVisible(), 'failed refresh keeps the library usable');
+  assert(await page.getByRole('button', { name: 'Open image: Another beautiful landscape' }).isVisible(), 'failed refresh preserves every loaded page');
   await inspect(page, 'library-error-390');
   state.libraryMode = 'unauthorized'; await page.getByRole('button', { name: 'Refresh library' }).click();
   await page.getByRole('link', { name: 'Sign in again', exact: true }).waitFor();
+  assert.equal(await page.getByRole('button', { name: /^Open image:/ }).count(), 0, 'authorization failure clears the library');
   assert.equal(await page.getByRole('link', { name: 'Sign in again', exact: true }).getAttribute('href'), '/auth/signin?next=%2Fimages');
   await page.getByRole('button', { name: 'Create', exact: true }).click();
   state.mode = 'limited';

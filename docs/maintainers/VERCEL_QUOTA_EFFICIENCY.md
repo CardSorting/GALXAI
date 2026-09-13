@@ -1,0 +1,76 @@
+# Vercel quota efficiency
+
+<!-- docs-scope: current-guide -->
+
+Private maintainer guide for request efficiency. Never import this document, platform quota figures or implementation diagnostics into product content. [Current operating state](../../post-mortem/CURRENT_STATE.md) owns deployment evidence; this implementation is not evidence of a live cost reduction.
+
+## Baseline and priorities
+
+The user supplied this usage snapshot on September 12, 2026. The billing-period start/end and project/environment attribution were not supplied. Percentages below use the first displayed allowance; the additional comparison figures do not establish the active plan or available credits.
+
+| Resource | Supplied use / allowance | Used |
+| --- | --- | --- |
+| Fluid Active CPU | 56m 10s / 4h | 23.4% |
+| Fast Origin Transfer | 1.08 GB / 10 GB | 10.8% |
+| ISR Reads | 105K / 1M | 10.5% |
+| Edge Requests | 72K / 1M | 7.2% |
+| Function Invocations | 63K / 1M | 6.3% |
+| Fast Data Transfer | 2.18 GB / 100 GB | 2.2% |
+| Fluid Provisioned Memory | 4.6 GB-Hrs / 360 GB-Hrs | 1.3% |
+| Edge Request CPU Duration | 21s / 1h | 0.6% |
+
+Prioritize avoidable request/CPU work, then origin bytes and speculative reads. Do not increase memory, change regions or replace the existing infrastructure from aggregate totals. A counter's share of quota is not a measured attribution of which endpoint caused it. There is no exhaustion date without an observation window and traffic trend.
+
+[Vercel's Fluid pricing](https://vercel.com/docs/functions/usage-and-pricing) distinguishes active CPU, provisioned memory and invocations. Network waiting does not have the same CPU cost as executing code. [CDN usage](https://vercel.com/docs/manage-cdn-usage) separately counts visitor transfer and origin transfer; middleware can add another origin hop. Reducing calls avoids request overhead, but does not imply proportional CPU or money savings for an entire project.
+
+## Implemented request budgets
+
+| Interaction | Previous behavior | Implemented behavior |
+| --- | --- | --- |
+| Sites startup / refresh | Setup + summaries + optional selected detail: 2–3 HTTP calls | One authenticated bootstrap, summaries plus optional selected detail; no shared response cache |
+| Repeated Sites focus | Refresh burst could schedule another full refresh after one second | Thirty-second freshness window, one in-flight bootstrap per selection; reconnect/manual/change events remain responsive |
+| Image status | A check every 2.5 seconds, even hidden | One active request; 2.5s, then 5s, then 10s spacing, honoring longer Retry-After; no hidden/offline polling |
+| Sites recovery / pending address | Recovery could overlap the original generation; fixed failure cadence and visibility-triggered checks | Wait for local mutations; one cancellable check after a four-second grace period, eight seconds between successful pending reads; failures back off with jitter and Retry-After |
+| Shared header/footer/mobile links | Next.js viewport prefetch | Hover/focus dwell, three unique destinations in any rolling ten seconds, thirty-second deduplication |
+| Search selection | Highlight plus top three candidates and secondary router path | Stable selected destination only while open, sharing the same budget |
+| Image-library refresh | Clear all cards before loading; failure hides the collection | Retain loaded cards during same-view refresh and transient failures; inline retry, separate updating feedback, exact-page pagination retry; authorization failures clear the library |
+
+The deterministic pending-image fixture makes 35 reads before five minutes versus 120 at the previous interval (70.8% fewer). The initial request at time zero is included; network latency is modeled as zero, and completion/server hints change real counts. Hidden/offline fixtures issue zero checks. These numbers describe retrieval requests only, not generation attempts, measured CPU, invoices or guaranteed savings. Long-running completion discovery can now take up to ten seconds plus network latency, or longer when the server requests it. Fast jobs keep the initial short interval. The existing five-minute observation bound and explicit Check status recovery remain.
+
+Sites bootstrap authenticates once, rejects extra/duplicate parameters, uses owner-scoped reads and projects explicit DTOs. It retains the existing repository limits and underlying reads. Setup failure remains unavailable, not a cached entitlement grant. It is not a transactionally consistent snapshot. A slow setup check delays the combined result: monitor time to usable workspace and split an independently slow optional read only if measured evidence warrants it. Focus freshness never relaxes server-side mutation checks.
+
+The browser preserves original generation identities. Pausing observation never cancels accepted work or resubmits a generation. No new status stream, persistent server connection, queue, vendor, database schema or authorization cache is introduced.
+
+Sites recovery runs only while the selected Site needs generation/address observation, the browser is visible and online, and no local mutation is active. Its first check waits four seconds; visibility events cannot shorten that grace period or a scheduled retry. A bootstrap already in flight defers the next recovery check. Selection changes, mutations and unmount cancel the recovery fetch and suppress its stale result. Cancellation does not prove server-side work stopped. Responses with 400/401/403/404 stop automatic recovery and show the existing public error. Other failures wait 8–9.6s, 16–19.2s, 32–38.4s, then 50–60s, or the server's longer Retry-After. Successful pending checks reset failures and use eight-second spacing. This slows observation during failures; manual workspace refresh remains available.
+
+The second-pass deterministic failure fixture makes at most eight recovery checks in five minutes, using zero network latency and the shortest jitter delay; the former four-second start/eight-second loop made 37. Browser fixtures also hold generation open beyond four seconds and verify zero parallel recovery calls, then verify a resumed pending operation recovers without a second generation. These are local request bounds, not observed production savings. Multiple visible tabs still have independent pollers; account-scoped change notifications do not implement cross-tab leadership.
+
+Image-library refresh errors leave every already-loaded page usable and show a retry banner. A failed Load more retries its original cursor, instead of reloading page one. The library clears after 401/403, on owner remount, or when filters change; retained content never establishes current server permission. Refresh and load-more controls share the loading state, and an accessible updating indicator distinguishes background work from an initial empty load. Explicit refresh still replaces the collection from page one after success.
+
+## Familiar patterns and deliberate limits
+
+Slack documented reducing initial work through [lazy loading](https://slack.engineering/making-slack-faster-by-being-lazy/) and a [single boot request](https://slack.engineering/getting-to-slack-faster-with-incremental-boot/). GALX applies those principles to bounded library summaries and selected detail, without fetching every conversation. This is an adaptation of the pattern, not a claim of Slack's current architecture or performance.
+
+[SWR's revalidation defaults](https://swr.vercel.app/docs/api) pause hidden/offline refreshes and support focus revalidation. The existing GALX hooks now follow that lifecycle pattern without adding a data-fetching dependency. [Next.js documents intent-based prefetch](https://nextjs.org/docs/app/guides/prefetching); GALX budgets warmups across shared navigation and search. [Navigation details](../NATURAL_NAVIGATION_AND_OMNISEARCH.md) own keyboard and failure behavior.
+
+[Amazon's retry guidance](https://d1.awsstatic.com/builderslibrary/pdfs/timeouts-retries-and-backoff-with-jitter.pdf) describes timeouts, backoff and jitter to avoid amplifying failures. GALX applies this to observing existing work, preserving original-operation recovery instead of replaying generation. [TanStack's background-fetching pattern](https://tanstack.com/query/latest/docs/framework/react/guides/background-fetching-indicators) separates initial loading from background updates. GALX follows that distinction in the existing image library without installing another cache or fetching framework.
+
+Keep static public assets cacheable and private data `private, no-store`. Avoid blanket ISR, public s-maxage on account APIs, or middleware exclusions based on spoofable prefetch headers. Public Site delivery currently has an intentional sanitized second origin hop; see [workspace operations](SITES_WORKSPACE.md). Eliminating it needs an equivalent header/body isolation design and raw-host regression evidence. Unpublishing must remain prompt. It was not changed in this pass.
+
+Long-lived streams can exchange invocation count for provisioned-memory duration; do not substitute them for bounded polling solely to make one counter smaller. Likewise, caching can trade regeneration CPU for ISR reads. Consolidation is not a reason to cache credentials or weaken access checks. Existing preview cleanup addresses deployment storage, which is separate from these runtime quotas.
+
+## Measurement and operating procedure
+
+1. Record the exact Vercel billing interval, active allowances, project and production/preview split. Keep only aggregate evidence. Compare function CPU/invocations, origin bytes, ISR reads and middleware work by route using [Observability Insights](https://vercel.com/docs/observability/insights). Separate real sessions, crawlers, API traffic and previews where the available filters support it.
+2. Use the same time span and task mix before/after a deployment. Compare bootstrap calls per Sites open, status calls per completed image, CPU per 1,000 useful actions and origin bytes per action. Also compare time to usable workspace, completion-discovery delay, error rates and user-triggered retries. Aggregate counters alone cannot validate the change.
+3. Review the largest CPU and transfer routes first. Retain existing connection reuse and bounded queries. Investigate repeated membership/readiness calls only with service-level measurements; never lengthen entitlement proofs on quota pressure alone. Compare compressed response sizes and cache statuses for public pages before changing ISR or asset TTLs.
+4. Configure available usage notifications and [Vercel anomaly alerts](https://vercel.com/docs/alerts) in the existing project after confirming the plan and notification destination. This pass does not enable a paid observability tier, change account notifications or impose an automatic production pause. Suggested operator review thresholds are 50%, 75% and 90% of the verified allowance, with burn rate considered against days remaining; they are policy suggestions, not installed alerts or provider defaults.
+5. Protect previews with the existing deployment-access controls and retain a compatible rollback. Investigate unsolicited traffic before changing firewall rules; preserve normal customers and status/recovery paths. Do not disable Git builds or delete deployment aliases to reduce a runtime counter.
+
+## Verification and rollback
+
+`npm run test:egress:transport` now includes deterministic request budgets and adversarial Sites bootstrap tests in the existing preflight gate. It verifies hidden/offline suspension, resume deduplication, no overlap, abort cleanup, Retry-After, prefetch limits, invalid query fields, account isolation and sanitized errors. Existing image/public-information/auth tests remain required.
+
+Run a production build with isolated synthetic configuration; never copy production dotenv into a fixture. Run `scripts/verify-sites-workspace-ui.ts` and `scripts/verify-image-studio-ui.ts` against that localhost build with external requests intercepted. They cover desktop/mobile accessibility, focus bursts, creation/recovery, publishing consent, hidden polling, mutation/recovery overlap, visible-image retention through failures, correct-page retry, access-denied clearing and downloads. Scan rendered pages and compiled browser assets for private markers. Local fixtures do not certify paid production generation or live publishing.
+
+For an isolated regression, revert the affected client scheduler/link change while keeping server authorization and original-operation recovery. The additive bootstrap endpoint can coexist with the previous client. Deploy server/client together for normal rollout. No database rollback is required. A rollback must not restore legacy billing or remove private response protections. Record hosted acceptance and quota comparisons separately before announcing live savings.

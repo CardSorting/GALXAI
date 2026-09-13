@@ -14,6 +14,7 @@ Find the next action, its owner and the evidence needed to finish it. This repos
 | Make my first change | [First safe change](tutorials/first-change.md) | A reviewable local diff has appropriate checks and updated guidance |
 | Change a feature or contract | [Maintain knowledge with a change](how-to/change-with-documentation.md) | Source, guides, decisions and evidence agree |
 | Make an architectural decision | [ADR lifecycle](maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md) | A bounded decision names alternatives, consequences and confirmation |
+| Reduce runtime quota use | [Request efficiency](maintainers/VERCEL_QUOTA_EFFICIENCY.md) | Request budgets pass and hosted savings are measured separately |
 | Deploy or roll back | [Release runbook](runbooks/release-readiness.md) | The intended component/revision has separate deployment and acceptance evidence |
 | Clear stale guidance | [Knowledge maintenance](runbooks/knowledge-maintenance.md) | Contradictory instructions are reconciled and review status is explicit |
 | Find responsibility | [Domain map](knowledge/DOMAINS.md) | The owning source and canonical guide are identified |

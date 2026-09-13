@@ -1,0 +1,170 @@
+{
+  "observed_at": "2026-09-13T05:50:02.222385+00:00",
+  "scope": "Second-pass working-tree hardening and isolated local validation. No production deployment, live quota measurement or account-setting changes.",
+  "base_revision": "a8906261cc2f13eb167d9f71f1efd613542151b8",
+  "prior_evidence": "docs/knowledge/audits/2026-09-13-request-efficiency.json",
+  "source_and_guide_sha256": {
+    "src/lib/resilience/activity-polling.ts": "8018eef80ba6c49a401721f3607aef14aaa773bac1c1f108bc55f99f4b0fac7a",
+    "src/lib/resilience/intent-prefetch.ts": "16ba381ee0376e1afde4261a0be688eae977bcbaaf3fe07e3387d0dd8b051c24",
+    "src/components/common/IntentLink.tsx": "c866bc13acbbc81829c9f4ec1be5736bfb064c7a039c3d43ab5c524dd5d6e201",
+    "src/components/common/CommandMenu.tsx": "6aefcaef61f99be58961b9c5caa1954692ed1aa746666fe6fc6ffb59aeb8adb3",
+    "src/components/common/NotFoundSearchHelper.tsx": "b9d03011aaaf08c6a0228d894a017f4497d96239c224c32b7173f306ecdf3a8e",
+    "src/components/dashboard/Navigation.tsx": "5a8d113f7afa1031873740e353866fbf895c7864c34087f924768fda8f3d2628",
+    "src/components/dashboard/MobileBottomNav.tsx": "35e50ba3e6a286bd2f2fe9d44f49e4a68cb0869f7d2398aa9c14c214dc2e9493",
+    "src/components/dashboard/Footer.tsx": "b2f9edcdb3a685a260e592ded25eee6c590ce5403c577599d1911c6d743a80d9",
+    "src/components/images/use-image-studio.ts": "66a82856110e375f877e5381576e3675cc81506da21753b691a4a57e69113374",
+    "src/components/images/ImageStudio.tsx": "3a38b2d10e03a9a99387c9891f6fd19f4bb67e49aef9dc1803cb6aac2dea7b52",
+    "src/components/sites/use-sites-workspace.ts": "876c4ef5a44a49870897967d5b2de5f13f54b4ce7bde8f1e09a2edfdfb289a1e",
+    "scripts/test-request-efficiency.ts": "2a004bc34569fb72e40b2dde1e9567674bea10365fe7134459bfa275eb56a591",
+    "scripts/test-sites-workspace.ts": "cfd5ced896fb0ae0c9608abd7a9befeeb9e97c1742ca102a654ed6d70fca45db",
+    "scripts/verify-sites-workspace-ui.ts": "b1821725236e252e3a774fbbe06cfdd6ef34183ab67edf230c94c99e8099271c",
+    "scripts/verify-image-studio-ui.ts": "4c349bdc95665d69819c4dc5262b10722963500147f5b3f621c1694e53a9b1a6",
+    "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "ef39d6fa3f62d2e09aa28da6eb47246380bcc55d3cc6d77071db654087ef7cc2",
+    "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "148217dea5612e5c07bdae488c2190f9f66308aaa06e57a2bbfddbf2c5d7512f",
+    "src/lib/sites/workspace-route.ts": "64e3890f3e494efb3d89ab842cf680a4062ba2697db4df56e4d47af1ca0d51e7",
+    "docs/maintainers/SITES_WORKSPACE.md": "c84a2ed942f6ad2afe766cefec93e3b88225d22dbcef64302bff1dfca7d62ab0",
+    "docs/knowledge/registry.json": "a5c3032a321f63cb5a71ac7658b9d99ff67d4f86464ba2ced0f01125e1272b60"
+  },
+  "findings_addressed": [
+    "Sites recovery overlapped the original in-flight generation. It now waits for local mutations and cancels stale recovery observations.",
+    "Sites recovery failures and visibility events bypassed prudent request pacing. Shared activity scheduling now honors deadlines, jittered failure backoff and longer Retry-After.",
+    "An image-library refresh failure hid already loaded images. Transient failures now retain all pages with inline retry and background-update feedback; authorization failures clear the library.",
+    "Failed pagination had only full-library refresh recovery. Retry now repeats the failed cursor; access-denied recovery starts from page one.",
+    "The fixed prefetch window admitted excess requests around a boundary. Admissions now enforce a rolling ten-second limit."
+  ],
+  "semantic_review": {
+    "client-efficiency": "Reviewed mapped client changes and complete quota/navigation guides. Verified active mutation exclusion, abort fencing for recovery, terminal HTTP statuses, retry hints, retained-content error states, exact-page retry, private owner remount boundaries and rolling prefetch admission. Existing server authorization and generation identity remain authoritative.",
+    "sites": "Reviewed full workspace guide against current client, bootstrap and original-operation recovery contracts. This pass changes observation scheduling only; repository, schema, admission and server recovery behavior remain unchanged. Other Sites canonical guides retain the first-pass review scope.",
+    "knowledge": "Reviewed the additional exact ImageStudio.tsx domain mapping and generated navigation against policy, impact output and existing workflow. Unmapped paths are generated records and dated evidence. No decision status or incident closure was changed."
+  },
+  "checks": {
+    "isolated_node22_regressions": {
+      "tests": 67,
+      "pass": 67,
+      "fail": 0,
+      "skipped": 0
+    },
+    "production_build": {
+      "exit_code": 0,
+      "runtime": "Node 22.22.2",
+      "real_credentials": false,
+      "dotenv_copied": false
+    },
+    "request_gate": {
+      "command": "npm run test:egress:transport",
+      "pass": 40,
+      "fail": 0
+    },
+    "types": {
+      "command": "npx tsc --noEmit --incremental false",
+      "exit_code": 0,
+      "note": "Final build also typechecks the final access-denied retry correction."
+    },
+    "lint": {
+      "command": "npm run lint",
+      "exit_code": 0,
+      "warnings": 7,
+      "note": "Existing unrelated warnings; previous Sites polling dependency warning removed."
+    },
+    "documentation_guard_fixtures": {
+      "command": "npm run test:docs",
+      "pass": 36
+    },
+    "sites_browser": {
+      "scope": "isolated browser fixtures; no live inference or publication",
+      "results": [
+        {
+          "label": "guest-1440",
+          "violations": []
+        },
+        {
+          "label": "guest-390",
+          "violations": []
+        },
+        {
+          "label": "guest-preview-390",
+          "violations": []
+        },
+        {
+          "label": "draft-1440",
+          "violations": []
+        },
+        {
+          "label": "draft-390",
+          "violations": []
+        },
+        {
+          "label": "publish-error-390",
+          "violations": []
+        }
+      ]
+    },
+    "images_browser": [
+      {
+        "label": "guest-1440",
+        "overflow": false,
+        "accessibility": []
+      },
+      {
+        "label": "guest-390",
+        "overflow": false,
+        "accessibility": []
+      },
+      {
+        "label": "pending-1440",
+        "overflow": false,
+        "accessibility": []
+      },
+      {
+        "label": "inspector-1440",
+        "overflow": false,
+        "accessibility": []
+      },
+      {
+        "label": "library-1440",
+        "overflow": false,
+        "accessibility": []
+      },
+      {
+        "label": "library-390",
+        "overflow": false,
+        "accessibility": []
+      },
+      {
+        "label": "inspector-390",
+        "overflow": false,
+        "accessibility": []
+      },
+      {
+        "label": "library-error-390",
+        "overflow": false,
+        "accessibility": []
+      }
+    ],
+    "compiled_scan": {
+      "scope": "isolated production build, not live site",
+      "files": 660,
+      "markers": 61,
+      "hits": [],
+      "incident_trace_errors": [],
+      "build_log_sha256": "5e72a03ae4e2b5e2afa913b7956fd7768b41c451b71ef4209af027196bbbe53c",
+      "tests_log_sha256": "e5aa62364eaebc01aedec0f4ac729972632e78848d1e4b721df47bce8f0f9482"
+    }
+  },
+  "fixture_request_counts": {
+    "failed_recovery_five_minutes_before": 37,
+    "failed_recovery_five_minutes_after_max": 8,
+    "in_flight_generation_parallel_recovery": 0,
+    "resumed_pending_operation_generation_posts": 1,
+    "hidden_recovery_checks": 0,
+    "prefetch_destinations_any_ten_seconds_max": 3
+  },
+  "limits": [
+    "Counts are zero-latency fixtures, not production CPU or billed savings. Failure backoff trades faster observation for fewer failed requests.",
+    "Multiple visible tabs still poll independently. This pass does not add cross-tab leadership or share authenticated responses.",
+    "Manual workspace refresh remains available. The failure backoff applies to automatic recovery/address checks, not all reads or user-triggered actions.",
+    "No live Core Web Vitals, production traffic attribution, hosted deployment or alert changes.",
+    "No database/schema changes; database integration tests were not rerun.",
+    "Marker scan covers selected markers, rendered build output and private runtime trace paths, not an exhaustive live-site audit."
+  ]
+}

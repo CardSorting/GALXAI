@@ -110,3 +110,12 @@ Owner role: **BroccoliDB maintainer**. Domain: `broccolidb`.
 - [BroccoliDB compaction and synchronization checks](../../docs/maintainers/COMPACTOR_FUZZING_AND_QA_MATRIX.md)
 
 Relevant checks (select for the change; impact discovery never executes these): `npm run test:broccolidb:api`, `npm run test:broccolidb:hardening`, `npm run test:egress:transport`.
+
+## Client request efficiency and navigation
+
+Owner role: **Product/performance maintainer**. Domain: `client-efficiency`.
+
+- [Vercel quota efficiency](../../docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md)
+- [Navigation and request intent](../../docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md)
+
+Relevant checks (select for the change; impact discovery never executes these): `npm run test:egress:transport`, `npm run test:image:security`, `npm run build`.

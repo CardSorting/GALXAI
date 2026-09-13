@@ -294,7 +294,7 @@
     "test:relay:docker": "node --import tsx scripts/test-relay-federation-docker.ts",
     "test:image:security": "node --import tsx --test scripts/test-image-public-http.ts scripts/test-public-information-boundary.ts scripts/test-image-retry-contract.ts scripts/test-auth-identity-boundary.ts",
     "test:yaml:security": "node --test scripts/test-yaml-security.mjs",
-    "test:egress:transport": "node --import tsx --test scripts/test-registry-api-egress.ts scripts/test-ci-build.mjs",
+    "test:egress:transport": "node --import tsx --test scripts/test-registry-api-egress.ts scripts/test-ci-build.mjs scripts/test-request-efficiency.ts scripts/test-sites-workspace.ts",
     "test:signup-credit": "node --import tsx --test scripts/test-signup-credit.ts scripts/test-signup-key-security.ts",
     "test:signup-credit:db": "node --import tsx scripts/test-signup-credit-db.ts",
     "test:sites": "node --import tsx --test scripts/test-sites-content-route.ts scripts/test-sites-activation.ts scripts/test-sites-fixed-price.ts scripts/test-sites-relay-preflight.ts scripts/test-relay-completion-usage.ts scripts/test-relay-durable-receipts.ts scripts/test-relay-receipt-transport.ts scripts/test-federation-admission.ts scripts/test-relay-federation-http.ts",

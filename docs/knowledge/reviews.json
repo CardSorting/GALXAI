@@ -1,13 +1,11 @@
 {
   "knowledge": {
-    "reviewer": "Codex maintainer review",
-    "note": "Reviewed hosted manual/push success, downloaded all-eight-domain artifact, failed clean-checkout attempt and corrected navigation regression; reconciled complete CI, ADR and knowledge guides with verified activation scope.",
+    "reviewer": "Codex documentation maintainer",
+    "note": "Reviewed exact ImageStudio source mapping, updated canonical guide relationships, preserved first-pass evidence and current documentation workflow. Generated views do not alter decision or incident status.",
     "reviewed_at": "2026-09-13",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-13-domain-reviews.json": "a443998d6c6de0ea06fb379fd907ad1c564566013c7bfdd285002dfe1a39700a",
-      "docs/knowledge/audits/2026-09-13-ci-portability.json": "bf85fdcb35f6a336dd764f4e8e4135c9332729d56d69909670076324b1dee7b1",
-      "docs/knowledge/audits/2026-09-13-ci-activation.json": "a2055ec65dbc44003caf40c94148a14625ffbcc9314bd7dd46fce6410b3ded64"
+      "docs/knowledge/audits/2026-09-13-request-efficiency-hardening.json": "1e5d1dc3e7c86ecb581ecbb25cccd812db9d3fa3afc1c28a9d0bf89d198151a2"
     },
     "files": {
       ".github/CODEOWNERS": "ef2f416d15f027dc8f197ad844289c9a44c8e843d3214d1590a3a380e939d13f",
@@ -17,18 +15,18 @@
       ".github/workflows/vercel-preflight.yml": "7f07dc34445f2f79962b120c7492642251d9855a9c3d49502034abe99e9ad79e",
       "docs/AGENTS.md": "0a1e687ab43a1e6c2266720e175de60cd6f10958cdf3456690c1f743c4784044",
       "docs/DOCUMENTATION_POLICY.md": "ab2030f9d15010634b9a2d9cf2bc680fdf4ae961c2ee3f9f7ad567e99d49d40c",
-      "docs/README.md": "c37661656ca1bf29ca98ad96d7ee69547eba3c1b4a301b303e81e01ca39e130e",
+      "docs/README.md": "73f93e70c84e35954686e786ce4b2fe72f87b4d2522ccd26a6e52b50b0da77dd",
       "docs/adr/0145-maintained-knowledge-and-decision-lifecycle.md": "6fae04f9767dc698da73123151fdc6aa4f61f40786f176a9e5f9db336188d47a",
       "docs/explanations/README.md": "da413b402cb2a1ca0543e7f04f3bf51dbe77b7d23461d02303f77a40b19e0928",
       "docs/how-to/README.md": "918eab39cc2b083bf8267825904aa8c153e1ccb6ea82ba7d01eba5b929c13d14",
       "docs/how-to/change-with-documentation.md": "abcf6bfb2f0aadcf8cfc2fdae18ac8f3f84565f127c34f7453d50e7283006e40",
       "docs/knowledge/DESIGN_RATIONALE.md": "edd3cf9b49ed794fbe8bf14448fd0c56cb4d8df832bab81cdf07e9ea2e2204a1",
       "docs/knowledge/README.md": "5ad219aeee44a9c065db2ca69e5a6498966fed42e2d8c74773dbc055d0220931",
-      "docs/knowledge/registry.json": "9626afc580d108164491f7f91b24ace89384eab45f872ae1083caca97418bd97",
+      "docs/knowledge/registry.json": "a5c3032a321f63cb5a71ac7658b9d99ff67d4f86464ba2ced0f01125e1272b60",
       "docs/knowledge/templates/adr.md": "28773b3cbdb53ad34f08d0362e87b6dba24b6fd76ddb6c85db8ad63d99ad1331",
       "docs/knowledge/templates/runbook.md": "19679a7eb8c1a3aafd87852fa93817e7bf9ef4696772c8deb1617366c290abc1",
       "docs/maintainers/ADR_AUTHORING_AND_LIFECYCLE_GUIDE.md": "d2cd40a5684ce13365e5be75f5324963d2f4e0770d4a003d55d4b29b0e85a0e4",
-      "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md": "3e1f44c0ca217beac08ab940ff035ac462685cb738005ef05ca78a5dfe253ec7",
+      "docs/maintainers/CI_PIPELINE_AND_AUTOMATION_SPEC.md": "818fc95eec428e907e9ce031da9640e764c33ae43da9244a94fd6abb84b2e8ee",
       "docs/maintainers/DAY_1_TO_30_ONBOARDING_ROADMAP.md": "e9295b186cf9d5f9bc0c6a943f54af40ff52122aa5f8d880d5263c00d2dd7fd4",
       "docs/maintainers/MAINTAINER_ONBOARDING_ASSESSMENT.md": "619331130e6bd5559c36059c617449712178a0fb16b8ef6487a00402bd8bd525",
       "docs/maintainers/SUBSYSTEM_MAINTAINER_MATRIX.md": "9d0dad1aa9c7ce7790428d7ae587c8e4acb456538380062d0a65de8859791b57",
@@ -40,7 +38,7 @@
       "docs/runbooks/weekly-knowledge-audit.md": "ade4fc2133306e1b544d8783f647bc4c5b8a85e3a89ce769d36f586a91c36169",
       "docs/tutorials/README.md": "7cc84f00412108e1c8ec84ef127b15027b606bd16c2dc290f6efc607b9ca5268",
       "docs/tutorials/first-change.md": "06b7c9501cfe62893978e1da6556d6d4fc0d88f4e36b484d05dad4ad72d9fd60",
-      "package.json": "fca32d051d0d1adcec38b9a377d11c0dcf558c43a0cde607876f2988f74802e4",
+      "package.json": "f0d29d5346d6d7fd614cc747fbc14ab3cd67fddff5657a6ebdca6e576db131e2",
       "scripts/docs-kb.py": "7f424c1120a2de2cb36f7d6313785fbe35244d91351891e023e4121ba39b0ce2",
       "scripts/test-docs-kb.py": "74f954909e6fe4086596794d6cfa5655bed722c35c960db51a87abd447dbad71",
       "scripts/test-post-mortem.py": "fba33221df8a4d167f0e0662cfe1543f76628adcc52b70e0d6f2528f72b8ef4a",
@@ -122,18 +120,18 @@
     }
   },
   "sites": {
-    "reviewer": "Codex maintainer review",
-    "note": "Paid-plan authority, bounded lookup, fair-usage admission, durable recovery identity, workspace claims and domain reconciliation. Reconcile relay-facing Sites guidance with current included-plan policy and separate historical settlement paths. Limits: No new checkout, publishing, custom-domain or inference acceptance; fixture results are not a scheduling fairness guarantee.",
+    "reviewer": "Codex Sites maintainer",
+    "note": "Reviewed workspace guide and original-operation recovery contract with the second-pass client scheduler; server admission, ownership, persistence and publication behavior remain unchanged. Local evidence and limits are retained.",
     "reviewed_at": "2026-09-13",
     "review_by": "2026-09-20",
     "evidence": {
-      "docs/knowledge/audits/2026-09-13-domain-reviews.json": "a443998d6c6de0ea06fb379fd907ad1c564566013c7bfdd285002dfe1a39700a"
+      "docs/knowledge/audits/2026-09-13-request-efficiency-hardening.json": "1e5d1dc3e7c86ecb581ecbb25cccd812db9d3fa3afc1c28a9d0bf89d198151a2"
     },
     "files": {
       "docs/maintainers/SITES_DOMAINS.md": "f52a50eb38cda71d7ff08ad09bf0a13d5b60ee661eec5cf36e08734580c6c3e2",
       "docs/maintainers/SITES_FAIR_USAGE.md": "edbd5785a1d41b3a7c55bd1aea505f825a41dd7581311f84a7e170ee6f6845df",
       "docs/maintainers/SITES_OPERATIONS.md": "50e36e5689d37f78beb0a40011b92de6a940203663549049ebe6d15b4af32550",
-      "docs/maintainers/SITES_WORKSPACE.md": "561f0081a050d288b36970b77b78e7ff2e7f767c7fccc9ed9f4d588f41db75ac",
+      "docs/maintainers/SITES_WORKSPACE.md": "c84a2ed942f6ad2afe766cefec93e3b88225d22dbcef64302bff1dfca7d62ab0",
       "src/app/api/sites/content/route.ts": "b99c87335b9f2772b9ef423bb8e577b71357d89d3b2c0e3b5b0a8a95bc05aae4",
       "src/app/api/sites/domains/route.ts": "04a78970e61861898a5066b36cd760ed9224a368adf33562bf6bb2a0762ab2c7",
       "src/app/api/sites/published/[hostname]/route.ts": "d652aa4a54dc2e80070068d08462ccc331c545385ff80dad3baf050bd2a536dc",
@@ -163,7 +161,7 @@
       "src/lib/sites/starters.ts": "ef6a6f61eb2177b23f4f3281c1b5f4ada18d9a5137aad733ae09286b25ba6a2d",
       "src/lib/sites/workspace-contract.ts": "e1ab700cbb6b8b9199a31e66c074c9bf503b0f40ac0346dde78fb22712f2937e",
       "src/lib/sites/workspace-repository.ts": "99b38f17023aa48eda3105dbb2ab929e775ebc69d5215224d38596c0e7c3adaa",
-      "src/lib/sites/workspace-route.ts": "1950283b1b7aec380d744d1d726c0047b769603e0d5283ac13ec8d97c73f4968"
+      "src/lib/sites/workspace-route.ts": "64e3890f3e494efb3d89ab842cf680a4062ba2697db4df56e4d47af1ca0d51e7"
     }
   },
   "relay": {
@@ -969,6 +967,34 @@
       "src/core/governor/GalxLumiQoSPoolGovernor.ts": "2a197e7cf9c2f7dde4a8344ac61e714ef6a36f34c6fba1b1cb5bac70842d3ee4",
       "src/core/governor/LockFreeShardGovernor.ts": "60c1d47b6ef778f65eba692cb743173c1d1b89f1d8756425f8783ecdf1c7bd52",
       "src/lib/supabase/repositories/PreviewReadSync.ts": "047a84574819537875bd41828adff7f0ac354200a5d2f9239d978375e3931db9"
+    }
+  },
+  "client-efficiency": {
+    "reviewer": "Codex performance maintainer",
+    "note": "Reviewed second-pass recovery pacing and cancellation, rolling navigation budgets, retained library error states, exact-page retry and access-denied clearing against complete current guides and isolated browser/security evidence.",
+    "reviewed_at": "2026-09-13",
+    "review_by": "2026-09-20",
+    "evidence": {
+      "docs/knowledge/audits/2026-09-13-request-efficiency-hardening.json": "1e5d1dc3e7c86ecb581ecbb25cccd812db9d3fa3afc1c28a9d0bf89d198151a2"
+    },
+    "files": {
+      "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md": "148217dea5612e5c07bdae488c2190f9f66308aaa06e57a2bbfddbf2c5d7512f",
+      "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md": "ef39d6fa3f62d2e09aa28da6eb47246380bcc55d3cc6d77071db654087ef7cc2",
+      "scripts/test-request-efficiency.ts": "2a004bc34569fb72e40b2dde1e9567674bea10365fe7134459bfa275eb56a591",
+      "scripts/test-sites-workspace.ts": "cfd5ced896fb0ae0c9608abd7a9befeeb9e97c1742ca102a654ed6d70fca45db",
+      "scripts/verify-image-studio-ui.ts": "4c349bdc95665d69819c4dc5262b10722963500147f5b3f621c1694e53a9b1a6",
+      "scripts/verify-sites-workspace-ui.ts": "b1821725236e252e3a774fbbe06cfdd6ef34183ab67edf230c94c99e8099271c",
+      "src/components/common/CommandMenu.tsx": "6aefcaef61f99be58961b9c5caa1954692ed1aa746666fe6fc6ffb59aeb8adb3",
+      "src/components/common/IntentLink.tsx": "c866bc13acbbc81829c9f4ec1be5736bfb064c7a039c3d43ab5c524dd5d6e201",
+      "src/components/common/NotFoundSearchHelper.tsx": "b9d03011aaaf08c6a0228d894a017f4497d96239c224c32b7173f306ecdf3a8e",
+      "src/components/dashboard/Footer.tsx": "b2f9edcdb3a685a260e592ded25eee6c590ce5403c577599d1911c6d743a80d9",
+      "src/components/dashboard/MobileBottomNav.tsx": "35e50ba3e6a286bd2f2fe9d44f49e4a68cb0869f7d2398aa9c14c214dc2e9493",
+      "src/components/dashboard/Navigation.tsx": "5a8d113f7afa1031873740e353866fbf895c7864c34087f924768fda8f3d2628",
+      "src/components/images/ImageStudio.tsx": "3a38b2d10e03a9a99387c9891f6fd19f4bb67e49aef9dc1803cb6aac2dea7b52",
+      "src/components/images/use-image-studio.ts": "66a82856110e375f877e5381576e3675cc81506da21753b691a4a57e69113374",
+      "src/components/sites/use-sites-workspace.ts": "876c4ef5a44a49870897967d5b2de5f13f54b4ce7bde8f1e09a2edfdfb289a1e",
+      "src/lib/resilience/activity-polling.ts": "8018eef80ba6c49a401721f3607aef14aaa773bac1c1f108bc55f99f4b0fac7a",
+      "src/lib/resilience/intent-prefetch.ts": "16ba381ee0376e1afde4261a0be688eae977bcbaaf3fe07e3387d0dd8b051c24"
     }
   }
 }

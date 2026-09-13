@@ -266,11 +266,13 @@
     },
     {
       "path": "docs/NATURAL_NAVIGATION_AND_OMNISEARCH.md",
-      "title": "GALXAI Natural Navigation, OmniSearch & Low-Latency Substrate Guide",
-      "scope": "domain-reference",
+      "title": "Navigation and request intent",
+      "scope": "current-guide",
       "kind": "reference",
-      "domains": [],
-      "curation": "unreviewed",
+      "domains": [
+        "client-efficiency"
+      ],
+      "curation": "assigned",
       "keywords": [],
       "decision": null
     },
@@ -2892,6 +2894,25 @@
       "domains": [],
       "curation": "unreviewed",
       "keywords": [],
+      "decision": null
+    },
+    {
+      "path": "docs/maintainers/VERCEL_QUOTA_EFFICIENCY.md",
+      "title": "Vercel quota efficiency",
+      "scope": "current-guide",
+      "kind": "reference",
+      "domains": [
+        "client-efficiency"
+      ],
+      "curation": "assigned",
+      "keywords": [
+        "vercel",
+        "quota",
+        "cpu",
+        "requests",
+        "prefetch",
+        "polling"
+      ],
       "decision": null
     },
     {

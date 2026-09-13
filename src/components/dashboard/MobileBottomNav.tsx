@@ -1,5 +1,5 @@
 'use client';
-import Link from 'next/link';
+import { IntentLink as Link } from '@/components/common/IntentLink';
 import { usePathname } from 'next/navigation';
 export function MobileBottomNav() {
   const pathname = usePathname();

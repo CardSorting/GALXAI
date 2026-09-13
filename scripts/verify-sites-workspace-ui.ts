@@ -11,13 +11,19 @@ const results:unknown[]=[];
 async function setup(width:number,authenticated:boolean){
   const context=await browser.newContext({viewport:{width,height:940},reducedMotion:'reduce'});
   if(authenticated)await context.addInitScript(()=>{if(window.top===window)localStorage.setItem('galx_custom_auth_user',JSON.stringify({id:'sites-fixture-user',token:'sites-fixture-token',name:'Site Tester',provider:'fixture'}));});
-  const state={sites:[] as any[],posts:[] as any[],complete:true,mode:'ok',listDelay:0};
+  const state={sites:[] as any[],posts:[] as any[],gets:[] as string[],complete:true,mode:'ok',listDelay:0,generationHold:null as Promise<void>|null};
   await context.route('**/*',async(route:any)=>{
     const req=route.request(),url=new URL(req.url());if(url.protocol==='about:')return route.continue();if(url.origin!==new URL(base).origin)return route.abort();
     const json=(data:unknown,status=200)=>route.fulfill({status,contentType:'application/json',body:JSON.stringify(data)});
     if(url.pathname==='/api/sites/workspace'){
       assert.equal(req.headers().authorization,'Bearer sites-fixture-token');
       if(req.method()==='GET'){
+        state.gets.push(url.search);
+        if(url.searchParams.get('view')==='bootstrap'){
+          if(state.listDelay)await new Promise(resolve=>setTimeout(resolve,state.listDelay));
+          return json({sites:state.sites,site:state.sites.find(s=>s.id===url.searchParams.get('id')) || null,
+            setup:{access:'included',publishing:'available',username:null,internal:'private-sentinel'}});
+        }
         if(url.searchParams.get('view')==='setup')return json({access:'included',publishing:'available',username:null,internal:'private-sentinel'});
         if(url.searchParams.has('id'))return json({site:state.sites.find(s=>s.id===url.searchParams.get('id'))});
         if(state.listDelay)await new Promise(resolve=>setTimeout(resolve,state.listDelay));
@@ -28,6 +34,7 @@ async function setup(width:number,authenticated:boolean){
       let site=state.sites.find(s=>s.id===body.id);
       if(body.action==='create'){site={id:body.id,title:'Untitled Site',revision:0,updatedAt:new Date().toISOString(),document:null,messages:[],generating:false,archived:false,published:false,address:null};state.sites.push(site);}
       if(body.action==='generate'){
+        if(state.generationHold)await state.generationHold;
         assert.equal(body.maxChargeMicroUsd,undefined);assert.equal(body.quoteVersion,undefined);assert(body.operationId);site.generating=!state.complete;
         site.messages.push({id:'user-'+site.revision,role:'user',text:body.brief});
         if(state.complete){site.document={schema_version:1,title:'Daylight. A calmer week.',summary:'A thoughtful planner for small teams who want more space for meaningful work.',sections:[{heading:'Plan with intention',body:'Bring tasks, priorities, and people into one considered weekly plan.'},{heading:'Make room for focus',body:'A little structure helps your team spend less time coordinating and more time doing the work that matters.'}]};site.title=site.document.title;site.revision++;site.messages.push({id:'reply-'+site.revision,role:'assistant',text:'Your draft is ready to preview. Tell me what you’d like to change.'});}
@@ -69,7 +76,20 @@ try{
   }
   for(const width of [1440,390]){
     const {context,page,state,errors}=await setup(width,true);await page.goto(base+'/sites',{waitUntil:'domcontentloaded'});
+    await page.getByRole('button',{name:'Send message',exact:true}).waitFor();
+    await page.waitForFunction(()=>!document.body.innerText.includes('Checking your plan'));
+    await page.evaluate(() => { window.dispatchEvent(new Event('focus')); document.dispatchEvent(new Event('visibilitychange')); window.dispatchEvent(new Event('focus')); });
+    await page.waitForTimeout(1400);
+    assert.deepEqual(state.gets,['?view=bootstrap'],'one request for startup and a burst of focus events');
+    let releaseGeneration!:()=>void;
+    state.generationHold=new Promise(resolve=>{releaseGeneration=resolve;});
     await page.getByRole('button',{name:'A product launch',exact:true}).click();await page.getByRole('button',{name:'Send message',exact:true}).click();
+    try {
+      await page.getByText('Updating your draft…',{exact:true}).waitFor();
+      await page.waitForTimeout(4500);
+      assert.equal(state.posts.filter(p=>p.action==='recover').length,0,'no recovery while the original generation is in flight');
+      assert.deepEqual(state.gets,['?view=bootstrap'],'no extra reads during generation');
+    } finally {state.generationHold=null;releaseGeneration();}
     await page.getByText('Your draft is ready to preview.',{exact:false}).waitFor();
     assert.equal(state.posts.filter(p=>p.action==='generate').length,1);assert.equal(state.posts.filter(p=>p.action==='create').length,1);
     if(width<760)await page.getByRole('button',{name:'Preview',exact:true}).click();
@@ -91,12 +111,31 @@ try{
       await page.getByLabel('Your username',{exact:true}).fill('alice');await page.getByRole('button',{name:'Publish publicly',exact:true}).click();
       await page.getByRole('alert').waitFor();assert(await page.getByRole('alert').isVisible());await inspect(page,'publish-error-390');state.mode='ok';
       await page.getByRole('button',{name:'New Site',exact:true}).click();await page.getByLabel('Describe your Site or ask for a change').waitFor({state:'visible'});
-      assert(await page.getByLabel('Describe your Site or ask for a change').evaluate((el:any)=>el===document.activeElement));
+      // Focus is intentionally applied in requestAnimationFrame after the new composer mounts.
+      await page.waitForFunction(() => document.activeElement === document.getElementById('site-prompt'), undefined, { timeout: 2000 });
       state.listDelay=1800;await page.goto(base+'/sites/'+state.sites[0].id,{waitUntil:'domcontentloaded'});
       await page.getByRole('heading',{name:'Loading your Site…',exact:true}).waitFor();assert(await page.getByRole('button',{name:/Send message/}).isDisabled());
       assert.equal(await page.locator('iframe').count(),0);await page.screenshot({path:path.join(output,'loading-390.png'),fullPage:true});
       await page.getByText('Your draft is ready to preview.',{exact:false}).waitFor();
     }
+    assert.deepEqual(errors,[]);await context.close();
+  }
+  // A resumed operation still recovers, but visibility changes cannot bypass its deadline.
+  {
+    const {context,page,state,errors}=await setup(1440,true);state.complete=false;
+    await page.goto(base+'/sites',{waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>!document.body.innerText.includes('Checking your plan'));
+    await page.evaluate(()=>{Object.defineProperty(document,'visibilityState',{configurable:true,value:'hidden'});document.dispatchEvent(new Event('visibilitychange'));});
+    await page.getByRole('button',{name:'A product launch',exact:true}).click();
+    await page.getByRole('button',{name:'Send message',exact:true}).click();
+    await page.getByText('Preparing your reply…',{exact:true}).waitFor();
+    await page.waitForTimeout(4500);assert.equal(state.posts.filter(p=>p.action==='recover').length,0);
+    const recovery=page.waitForRequest((request:any)=>request.url().includes('/api/sites/workspace')&&request.method()==='POST'&&request.postDataJSON()?.action==='recover');
+    await page.evaluate(()=>{Object.defineProperty(document,'visibilityState',{configurable:true,value:'visible'});document.dispatchEvent(new Event('visibilitychange'));});
+    await recovery;
+    await page.evaluate(()=>{for(let i=0;i<5;i++){document.dispatchEvent(new Event('visibilitychange'));window.dispatchEvent(new Event('focus'));}});
+    await page.waitForTimeout(1200);assert.equal(state.posts.filter(p=>p.action==='recover').length,1,'resume events do not accelerate the next recovery');
+    assert.equal(state.posts.filter(p=>p.action==='generate').length,1,'recovery never resubmits generation');
     assert.deepEqual(errors,[]);await context.close();
   }
   await fs.writeFile(path.join(output,'verification.json'),JSON.stringify({scope:'isolated browser fixtures; no live inference or publication',results},null,2)+'\n');
