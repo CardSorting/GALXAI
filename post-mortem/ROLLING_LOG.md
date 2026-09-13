@@ -355,3 +355,17 @@ Incident: `INC-20260913-IMAGES`. Kind: `verification`.
 **Next step:** Push the fixture changes and record hosted gateway verification separately.
 
 Evidence: [2026-09-13-followup-repairs-local.json](releases/2026-09-13-followup-repairs-local.json).
+
+## EVT-20260913-FOLLOWUP-REPAIRS-VERIFIED — 2026-09-13T09:14:30.501212Z
+
+Incident: `INC-20260913-DOCS`. Kind: `verification`.
+
+**Observation:** The corrected gateway fixture and bundle validation passed on GitHub at the pushed repair revision.
+
+**Action:** Verified successful attempt 2 after an initial GitHub internal startup failure, inspected the Ready site deployment and repeated restored-artifact/public-boundary acceptance.
+
+**Result:** ACT-011 completed; ACT-012 remains completed with exact-byte restoration and isolated-test prevention. Gateway deploy step was skipped; no gateway runtime release is claimed.
+
+**Next step:** Retain evidence and continue ordinary release monitoring; application/documentation queued runs are separate from the completed gateway and artifact repairs.
+
+Evidence: [2026-09-13-followup-repairs-verified.json](releases/2026-09-13-followup-repairs-verified.json).

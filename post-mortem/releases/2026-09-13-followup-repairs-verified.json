@@ -1,0 +1,186 @@
+{
+  "observed_at": "2026-09-13T09:14:30.501212Z",
+  "revision": "031b3e6dab097db297d253dce6173fc13c49450b",
+  "local_evidence": "post-mortem/releases/2026-09-13-followup-repairs-local.json",
+  "gateway_ci": {
+    "conclusion": "success",
+    "headSha": "031b3e6dab097db297d253dce6173fc13c49450b",
+    "jobs": [
+      {
+        "completedAt": "2026-09-13T09:11:37Z",
+        "conclusion": "success",
+        "databaseId": 103702165990,
+        "name": "Test & Deploy Edge Mesh",
+        "startedAt": "2026-09-13T09:11:06Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-09-13T09:11:08Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-09-13T09:11:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-13T09:11:11Z",
+            "conclusion": "success",
+            "name": "Checkout Repository",
+            "number": 2,
+            "startedAt": "2026-09-13T09:11:08Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-13T09:11:15Z",
+            "conclusion": "success",
+            "name": "Setup Node.js",
+            "number": 3,
+            "startedAt": "2026-09-13T09:11:11Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-13T09:11:31Z",
+            "conclusion": "success",
+            "name": "Install Dependencies",
+            "number": 4,
+            "startedAt": "2026-09-13T09:11:15Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-13T09:11:32Z",
+            "conclusion": "success",
+            "name": "Verify Cloudflare Worker Components",
+            "number": 5,
+            "startedAt": "2026-09-13T09:11:31Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-13T09:11:34Z",
+            "conclusion": "success",
+            "name": "Dry Run Bundle Validation",
+            "number": 6,
+            "startedAt": "2026-09-13T09:11:32Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-13T09:11:34Z",
+            "conclusion": "skipped",
+            "name": "Deploy to Cloudflare Workers",
+            "number": 7,
+            "startedAt": "2026-09-13T09:11:34Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-13T09:11:35Z",
+            "conclusion": "success",
+            "name": "Post Setup Node.js",
+            "number": 13,
+            "startedAt": "2026-09-13T09:11:34Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-13T09:11:35Z",
+            "conclusion": "success",
+            "name": "Post Checkout Repository",
+            "number": 14,
+            "startedAt": "2026-09-13T09:11:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-13T09:11:35Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 15,
+            "startedAt": "2026-09-13T09:11:35Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/CardSorting/GALXAI/actions/runs/34749034422/job/103702165990"
+      }
+    ],
+    "status": "completed",
+    "url": "https://github.com/CardSorting/GALXAI/actions/runs/34749034422"
+  },
+  "gateway_attempt": 2,
+  "gateway_runtime_deployed": false,
+  "gateway_deployment_note": "Configured workflow deployment step skipped; runtime source is unchanged. Component verification and bundle validation both succeeded on GitHub.",
+  "transient_hosted_failure": "Initial workflow startup failed before any job; GitHub reported an unexpected internal error. Two API audit dispatches returned 502/500 and browser dispatch returned 500. The gateway rerun succeeded.",
+  "site_deployment": {
+    "id": "dpl_2h5KQMnNi189UUChGcjwAPNvJJoZ",
+    "status": "Ready",
+    "target": "production",
+    "url": "https://galxai-ddxc9b484-cardsortings-projects.vercel.app",
+    "aliases": [
+      "galx.ai",
+      "www.galx.ai"
+    ],
+    "revision_correlation": "GitHub status on 031b3e6 points to this exact deployment; Vercel inspect confirms Ready and production aliases."
+  },
+  "live_artifact_acceptance": {
+    "observed_at": "2026-09-13T09:09:59.859Z",
+    "origin": "https://galx.ai",
+    "read_only": true,
+    "results": [
+      {
+        "kind": "original",
+        "status": 200,
+        "format": "png",
+        "width": 1,
+        "height": 1,
+        "bytes": 91,
+        "metadataRemoved": true
+      },
+      {
+        "kind": "thumbnail",
+        "status": 200,
+        "format": "webp",
+        "width": 1,
+        "height": 1,
+        "bytes": 98,
+        "metadataRemoved": true
+      },
+      {
+        "kind": "thumbnail-warm",
+        "status": 200,
+        "format": "webp",
+        "width": 1,
+        "height": 1,
+        "bytes": 98,
+        "metadataRemoved": true
+      },
+      {
+        "kind": "expired",
+        "status": 404
+      },
+      {
+        "kind": "foreign-owner",
+        "status": 404
+      },
+      {
+        "kind": "missing-asset",
+        "status": 404
+      }
+    ]
+  },
+  "live_public_scan": {
+    "result": "passed",
+    "browser_assets": 25,
+    "scope": "public responses, protected diagnostics, rendered pages and public schema on the new serving site"
+  },
+  "additional_isolation_check": {
+    "inherited_canary_credentials": "database, Data API, R2, provider and relay settings stripped before imports",
+    "worker_assertions": 127,
+    "result": "passed"
+  },
+  "documentation_checks": {
+    "docs_check": "passed",
+    "docs_guards": 37,
+    "compiled_boundary_assets": 640,
+    "domains_reviewed": 9
+  },
+  "limitations": [
+    "Application and documentation push runs were queued at this checkpoint; their outcome is separate from verified gateway repair.",
+    "No new generation, history deletion, schema change or credential change.",
+    "No runtime worker changes or new gateway deployment."
+  ]
+}

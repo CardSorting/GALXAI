@@ -1,8 +1,8 @@
 {
   "version": 1,
   "reviewer": "Codex release maintainer",
-  "reviewed_at": "2026-09-13T09:05:19.619407Z",
-  "note": "Reviewed the changed fixture runner, CI triggers, package entry point, full affected deployment/database/image runbooks and bounded historical restoration evidence; preserved existing runtime and authorization contracts.",
+  "reviewed_at": "2026-09-13T09:14:31.198385Z",
+  "note": "Reviewed exact hosted gateway attempt and steps, Ready deployment correlation, live artifact/public scans and incident closure against the complete current-state record. Source/domain attestations remain unchanged.",
   "files": {
     ".dockerignore": "fb4dc7ef84e7f36c5bfed0f267187a022bbb61e66dd26060295b133e08fa74c5",
     ".github/workflows/vercel-preflight.yml": "2e5a12356d723559a42336502fc6a0e8f86319ee508441a126ae0319d3dcc576",
@@ -39,7 +39,7 @@
     "docs/operations/signup-credit.md": "6e0462a35d8042512bc6e5d1ea890a330e7bd3cc015d4b9938e7febf5c9fa135",
     "docs/operations/wallet-lifecycle.md": "ddc86ed1d3347f5fff19a07581bc040c52eee7a115c279a2ba28bceae92303db",
     "package.json": "93e36feb800a3066b2f28391a16cb67ceb062c2387424fff0eedc071d1249d22",
-    "post-mortem/CURRENT_STATE.md": "66819d90c11ab33d6f70064c504f755b9c982715e484707a82e1db3452f16229",
+    "post-mortem/CURRENT_STATE.md": "a65ee2242e1be79430f94ae39648a353d8b7052fe836aacd21cbaefe54fa68d2",
     "post-mortem/README.md": "d28cbc9427aaa4aba99057517831e49f79244a686e1ce35640c4f566abbae8b8",
     "post-mortem/failure-modes/README.md": "9b393988df34fcc31a9f7e8eb573120280ddcc14497cc76cd1cd90a5d99ebb90",
     "post-mortem/failure-modes/access-and-documentation.md": "6fbd494cfd46c8dc5aed9361cb8f0813aabcb1538b4bea134cc5c913269325ce",

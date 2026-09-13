@@ -255,13 +255,14 @@
       "incident": "INC-20260913-DOCS",
       "owner": "release maintainer",
       "review_by": "2026-09-14",
-      "status": "open",
-      "next_step": "Local gateway suite passes 127 assertions with explicit approval/image/queue transports; bundle dry-run passes. Push the fixture/workflow correction and verify the hosted gateway test and bundle steps.",
-      "closure": "Record passing gateway fixture and bundle checks against the current preview gate and sanitized public responses; never reopen public diagnostics to satisfy an obsolete assertion.",
+      "status": "completed",
+      "next_step": "Retain isolated gateway verification and rerun component/bundle checks for future worker or fixture changes.",
+      "closure": "Gateway workflow 34749034422 passed at 031b3e6 on attempt 2 after a transient GitHub startup failure. All 127 component assertions and the Wrangler bundle check passed; public diagnostics were not restored. The configured deployment step skipped and no runtime worker source changed.",
       "evidence": [
         "docs/knowledge/audits/2026-09-13-gateway-ci-observation.json",
         "post-mortem/releases/2026-09-13-image-library-scale.json",
-        "post-mortem/releases/2026-09-13-followup-repairs-local.json"
+        "post-mortem/releases/2026-09-13-followup-repairs-local.json",
+        "post-mortem/releases/2026-09-13-followup-repairs-verified.json"
       ]
     },
     {
